@@ -172,6 +172,55 @@
     };
 
     //-------------------------------------------------------------------------
+    // The selection marker (user request 2026-09-18): four iron corners around the selected unit's feet,
+    // drawn just above its stance square and below the unit. Generated (UF_GenSelect) until AR-031 delivers art.
+
+    const SELECT_NAME = "UF_GenSelect";
+    const SELECT_LEG = 13, SELECT_THICK = 3;
+    const IRON = [139, 144, 153], IRON_DARK = [43, 46, 52], IRON_LIGHT = [208, 212, 218];
+    let selectBitmap = null;
+    Stance.selectBitmap = function() {
+        if (selectBitmap) return selectBitmap;
+        const b = new Bitmap(SIZE, SIZE);
+        const leg = SELECT_LEG, t = SELECT_THICK;
+        // Each corner: an L of two legs. Dark outline first (1 px around), then the iron fill, then a light edge.
+        const corners = [
+            { x: 0, y: 0, dx: 1, dy: 1 }, { x: SIZE - 1, y: 0, dx: -1, dy: 1 },
+            { x: 0, y: SIZE - 1, dx: 1, dy: -1 }, { x: SIZE - 1, y: SIZE - 1, dx: -1, dy: -1 }
+        ];
+        const rect = (x0, y0, w, h, c) => b.fillRect(Math.min(x0, x0 + w), Math.min(y0, y0 + h), Math.abs(w), Math.abs(h), rgba(c, 1));
+        for (const k of corners) {
+            const ox = k.dx > 0 ? k.x : k.x + 1, oy = k.dy > 0 ? k.y : k.y + 1; // origin at the corner pixel's outer edge
+            rect(ox, oy, k.dx * (leg + 1), k.dy * (t + 2), IRON_DARK);          // horizontal leg outline
+            rect(ox, oy, k.dx * (t + 2), k.dy * (leg + 1), IRON_DARK);          // vertical leg outline
+            rect(ox + k.dx, oy + k.dy, k.dx * (leg - 1), k.dy * t, IRON);        // horizontal leg
+            rect(ox + k.dx, oy + k.dy, k.dx * t, k.dy * (leg - 1), IRON);        // vertical leg
+            rect(ox + k.dx, oy + k.dy, k.dx * (leg - 1), k.dy * 1, IRON_LIGHT);  // light edge along the outside
+            rect(ox + k.dx, oy + k.dy, k.dx * 1, k.dy * (leg - 1), IRON_LIGHT);
+        }
+        b._ufName = SELECT_NAME;
+        selectBitmap = b;
+        return b;
+    };
+    Stance.SELECT_NAME = SELECT_NAME;
+
+    let explicitSelection = null; // Game_CharacterBase set through setSelected; null = follow the Overseer's selection
+    /** Mark a unit (record, id or Game_Event) as the targeted one; null clears it. The Overseer's selection is used when nothing is set. */
+    Stance.setSelected = function(x) {
+        if (x === null || x === undefined) { explicitSelection = null; return; }
+        if (x instanceof Game_CharacterBase) explicitSelection = x;
+        else if (typeof x === "number") explicitSelection = window.UF.World ? UF.World.eventOf(x) : null;
+        else if (typeof x === "object" && typeof x.id === "number") explicitSelection = window.UF.World ? UF.World.eventOf(x.id) : null;
+    };
+    /** The character the corners follow: an explicit selection, else the Overseer's selected colonist's event. */
+    Stance.selectedCharacter = function() {
+        if (explicitSelection) return explicitSelection;
+        const cm = window.$colonyManager;
+        const sel = cm && cm.selectedColonist;
+        return sel && sel.event instanceof Game_CharacterBase ? sel.event : null;
+    };
+
+    //-------------------------------------------------------------------------
     // Marker sprites, pooled, inside the tilemap
 
     /** Bottom of the character's cell in tilemap pixels: the feet, ignoring shiftY and jumps. */
@@ -252,9 +301,36 @@
                 }
             }
             for (const m of this._pool) if (m.visible && m._ufFrame !== frame) this.release(m);
+            this.syncSelected(characterSprites);
             this.stats.frames++;
             this.stats.ms += performance.now() - t0;
             this.stats.shown = shown;
+        }
+
+        /** The iron corners around the selected unit: one sprite, shown while the unit is drawn on this map. */
+        syncSelected(characterSprites) {
+            const ch = Stance.enabled ? Stance.selectedCharacter() : null;
+            const sprite = ch ? characterSprites.find(s => s._character === ch) : null;
+            if (!this._select) {
+                this._select = new Sprite_UFStanceMarker();
+                this._select.bitmap = Stance.selectBitmap();
+                this._select._ufStance = "selected";
+                this._tilemap.addChild(this._select);
+            }
+            const s = this._select;
+            if (!sprite || !sprite.visible || ch.isTransparent() || !this.inView(ch)) {
+                s.visible = false;
+                s._ufCharacter = null;
+                return;
+            }
+            s._ufCharacter = ch;
+            s.follow(ch);
+            s.z += 1; // just above the stance square, still below the unit
+            s.visible = true;
+        }
+
+        selectionMarker() {
+            return this._select && this._select.visible ? this._select : null;
         }
 
         acquire() {
@@ -301,6 +377,8 @@
     };
     /** Per-frame cost of the marker sync on the current map: { frames, ms, shown }. */
     Stance.stats = () => (layer() ? layer().stats : null);
+    /** The iron-corner sprite while a unit is selected and drawn, else null. */
+    Stance.selectionMarker = () => (layer() ? layer().selectionMarker() : null);
 
     const _Spriteset_Map_createCharacters = Spriteset_Map.prototype.createCharacters;
     Spriteset_Map.prototype.createCharacters = function() {
@@ -415,6 +493,25 @@
                 m ? `monster marker in the tilemap at (${m.x},${m.y}) vs feet (${mev ? mev.screenX() : "?"},${mev ? footY(mev) : "?"}), z ${m.z} vs character z ${cs ? cs.z : "?"} (child order ${order}); ` +
                     `bitmap ${bmp ? bmp._ufName : "none"} center ${center} alpha ${centerA} (want ${want} / ${wantA}), outline alpha ${edgeA}`
                     : `no marker for the monster unit (${Stance.markers().length} markers visible)`);
+            // The targeted unit: four iron corners around its feet, above its square, below the sprite.
+            const cev = W.eventOf(units.colonist.id);
+            Stance.setSelected(units.colonist.id);
+            await t.waitFrames(3);
+            const sel = Stance.selectionMarker();
+            const selCs = charSpriteOf(cev);
+            const selBmp = sel && sel.bitmap;
+            const cornerPx = selBmp ? selBmp.getPixel(2, 2) : "none", midA = selBmp ? selBmp.getAlphaPixel(24, 24) : -1, edgeAlpha = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
+            const square = Stance.markerOf(units.colonist.id);
+            const ironOk = selBmp && colorDist(cornerPx, "#8b9099") <= 6 && midA === 0 && edgeAlpha === 255;
+            t.check("selection_corners", !!sel && sel.visible && sel.parent === tilemap && sel.x === cev.screenX() && sel.y === footY(cev) && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z && ironOk,
+                sel ? `corners at (${sel.x},${sel.y}) vs feet (${cev.screenX()},${footY(cev)}); z ${sel.z} vs square ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}; bitmap ${selBmp ? selBmp._ufName : "none"}: corner pixel ${cornerPx} (want iron #8b9099), middle alpha ${midA} (want 0), edge alpha ${edgeAlpha} (want 255)`
+                    : "no selection marker drawn");
+            await t.waitFrames(2);
+            t.screenshot("selection_corners");
+            Stance.setSelected(null);
+            await t.waitFrames(2);
+            t.check("selection_clears", !Stance.selectionMarker(), `after setSelected(null): marker ${Stance.selectionMarker() ? "still visible" : "hidden"}`);
+
             const stances = Stance.markers().map(s => s.stance);
             const count = s => stances.filter(v => v === s).length;
             t.check("markers_per_unit", Object.values(units).every(u => Stance.markerOf(u)) && count("friendly") >= 2 + pairEvents.length && count("hostile") >= 2 && count("indifferent") >= 2,

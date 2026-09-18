@@ -58,7 +58,7 @@ Every object or character image comes with a JSON sidecar of the same name (`UF_
 | AR-022 | Boulder, 2 variants | World generator, stone gathering | Medium | DELIVERED (stand-in `!$GraniteBoulder.png` shape 342, `!$IronstoneDeposit.png` shape 341, collision-aligned anchors, 3× integer) |
 | AR-023 | Bush, 2 variants | World generator | Medium | DELIVERED (stand-in `!$BerryBush.png` shape 672, collision-aligned anchor, 3× integer) |
 | AR-030 | Look cursor | Cursor (Slice 0, deliverable 7) | High | DELIVERED (`game/img/system/U7_Cursor.png`, 48×48 2-frame pulse gold bracket) |
-| AR-031 | Unit selection marker | Unit selection | Medium | DELIVERED (`game/img/system/U7_Select.png`, 48×48 diamond cyan corner brackets) |
+| AR-031 | Unit selection marker: **four iron corner brackets around the selected unit's feet** (48×48, open middle; user spec 2026-09-18) | Unit selection (`UF_Stance` draws it between the stance square and the sprite) | Medium | BACK TO IN PROGRESS: the cyan `U7_Select.png` isn't the iron look; the engine draws a code-generated `UF_GenSelect` until an iron version arrives |
 | AR-032 | Look panel frame | Look panel (deliverable 7) | Medium | REQUESTED |
 | AR-033 | UI window skin (replaces RMMZ `img/system/Window.png`) | Colonist card, look panel, all windows | Medium | DELIVERED (`game/img/system/Window.png`, `U7_Window.png`, carved oak, aged parchment, gold trim) |
 | AR-034 | Stance squares: a flat 48×48 marker under a unit's feet in three colors (green friendly, yellow indifferent, red hostile), readable at 1× | V32, `UF_Stance` | Medium | REQUESTED (code-drawn `UF_GenStance_*` in use) |
