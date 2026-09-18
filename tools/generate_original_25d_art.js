@@ -354,6 +354,54 @@ function generateBerryBush(outPath) {
     cvs.toRMMZSheet(outPath);
 }
 
+// 6. Generate 2.5D Campfire Hearth (!$Campfire.png)
+// Native 16x16 -> 48x48 frame, 144x192 sheet
+function generateCampfire(outPath) {
+    const cvs = new NativeCanvas(16, 16);
+
+    // Stone ring around hearth base
+    const stonePositions = [
+        { x: 4, y: 13 }, { x: 7, y: 14 }, { x: 10, y: 14 }, { x: 13, y: 13 },
+        { x: 3, y: 11 }, { x: 14, y: 11 }, { x: 4, y: 9 }, { x: 13, y: 9 },
+        { x: 6, y: 8 }, { x: 10, y: 8 }
+    ];
+    for (const s of stonePositions) {
+        cvs.setPixel(s.x, s.y, 140, 140, 145);
+        cvs.setPixel(s.x, s.y + 1, 80, 80, 85);
+    }
+
+    // Firewood logs leaning 45° up-left
+    for (let i = 0; i <= 6; i++) {
+        cvs.setPixel(5 + i, 12 - Math.floor(i * 0.5), 90, 55, 30);
+        cvs.setPixel(12 - i, 12 - Math.floor(i * 0.5), 70, 40, 20);
+    }
+
+    // Glowing hot coals / embers
+    for (let y = 10; y <= 12; y++) {
+        for (let x = 6; x <= 10; x++) {
+            cvs.setPixel(x, y, 240, 90, 20);
+        }
+    }
+    cvs.setPixel(8, 11, 255, 220, 80); // White-hot center
+
+    // Dancing flame tongue rising 45° up-left (4px up, 4px left)
+    const flamePixels = [
+        { x: 8, y: 9, r: 255, g: 180, b: 30 },
+        { x: 7, y: 8, r: 255, g: 160, b: 20 },
+        { x: 8, y: 8, r: 255, g: 210, b: 50 },
+        { x: 6, y: 7, r: 255, g: 140, b: 20 },
+        { x: 7, y: 7, r: 255, g: 200, b: 40 },
+        { x: 5, y: 6, r: 230, g: 80, b: 10 },
+        { x: 6, y: 6, r: 255, g: 170, b: 30 },
+        { x: 5, y: 5, r: 240, g: 110, b: 15 }
+    ];
+    for (const fp of flamePixels) {
+        cvs.setPixel(fp.x, fp.y, fp.r, fp.g, fp.b);
+    }
+
+    cvs.toRMMZSheet(outPath);
+}
+
 // Execute Generation
 const charDir = path.join(__dirname, '..', 'game', 'img', 'characters');
 generateTimberOak(path.join(charDir, '!$TimberOak.png'));
@@ -361,5 +409,6 @@ generatePineTree(path.join(charDir, '!$PineTree.png'));
 generateGraniteBoulder(path.join(charDir, '!$GraniteBoulder.png'));
 generateIronstoneDeposit(path.join(charDir, '!$IronstoneDeposit.png'));
 generateBerryBush(path.join(charDir, '!$BerryBush.png'));
+generateCampfire(path.join(charDir, '!$Campfire.png'));
 
 console.log('All original 2.5D graphics generated successfully!');

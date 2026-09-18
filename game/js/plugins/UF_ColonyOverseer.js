@@ -33,6 +33,11 @@
     const edgePanSpeed = parseInt(params["EdgePanSpeed"] || 6, 10);
     let activeColonyWindow = null;
 
+    // Ensure UF_Factions is loaded
+    if (!window.$factionManager && typeof PluginManager !== "undefined") {
+        PluginManager.loadScript("UF_Factions.js");
+    }
+
     //-----------------------------------------------------------------------------
     // Colonist Data Model & Verbatim Dwarf Fortress Agent AI
     //-----------------------------------------------------------------------------
@@ -192,7 +197,112 @@
                 return;
             }
 
-            // 4. Social Bonding & Conversation with Partner
+            // 4. Autonomous Society-Building Projects (Building Civilization)
+            const prog = $colonyManager ? $colonyManager.societyProgress : null;
+            if (prog) {
+                // Phase A: Establish Campfire & Hearth at (127, 128)
+                if (!prog.hearthBuilt) {
+                    if (prog.wood < 3 && this.id === 1) { // Adam gathers firewood
+                        this.currentJob = "Gathering Firewood";
+                        this.assignMoveTo(122, 125, () => {
+                            if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                window.$ufVisuals.addBark(ev, "Gathers dry fallen oak branches.");
+                            }
+                            setTimeout(() => {
+                                this.currentJob = "Hauling Timber";
+                                this.assignMoveTo(127, 127, () => {
+                                    prog.wood++;
+                                    this.addThought("Felt purposeful gathering firewood for our hearth.", 10);
+                                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                        window.$ufVisuals.addBark(ev, `Placed firewood at hearth (${prog.wood}/3).`);
+                                    }
+                                    this.currentJob = "Idle";
+                                });
+                            }, 1200);
+                        });
+                        return;
+                    } else if (prog.stone < 3 && this.id === 2) { // Eve gathers hearthstones
+                        this.currentJob = "Gathering Hearthstones";
+                        this.assignMoveTo(134, 128, () => {
+                            if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                window.$ufVisuals.addBark(ev, "Collects smooth riverbed stones.");
+                            }
+                            setTimeout(() => {
+                                this.currentJob = "Hauling Stones";
+                                this.assignMoveTo(127, 127, () => {
+                                    prog.stone++;
+                                    this.addThought("Felt content arranging stones for the hearth.", 10);
+                                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                        window.$ufVisuals.addBark(ev, `Placed hearthstone ring (${prog.stone}/3).`);
+                                    }
+                                    this.currentJob = "Idle";
+                                });
+                            }, 1200);
+                        });
+                        return;
+                    } else if (prog.wood >= 3 && prog.stone >= 3) {
+                        this.currentJob = "Kindling the Hearth";
+                        this.assignMoveTo(127, 127, () => {
+                            prog.hearthBuilt = true;
+                            this.addThought("Felt triumphant kindling our first communal campfire!", 25);
+                            if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                window.$ufVisuals.addBark(ev, "Strikes flint... The hearth fire roars to life!");
+                            }
+                            this.currentJob = "Idle";
+                        });
+                        return;
+                    }
+                }
+                // Phase B: Construct Lean-To Shelter at (125, 126)
+                else if (!prog.shelterBuilt) {
+                    if (prog.wood < 6 && this.id === 1) {
+                        this.currentJob = "Felling Shelter Poles";
+                        this.assignMoveTo(122, 124, () => {
+                            setTimeout(() => {
+                                this.currentJob = "Hauling Shelter Timber";
+                                this.assignMoveTo(125, 126, () => {
+                                    prog.wood++;
+                                    this.addThought("Crafted sturdy timber poles for our shelter frame.", 12);
+                                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                        window.$ufVisuals.addBark(ev, `Framed shelter poles (${prog.wood - 3}/3).`);
+                                    }
+                                    this.currentJob = "Idle";
+                                });
+                            }, 1200);
+                        });
+                        return;
+                    } else if (prog.thatch < 3 && this.id === 2) {
+                        this.currentJob = "Gathering Reed Thatch";
+                        this.assignMoveTo(134, 126, () => {
+                            setTimeout(() => {
+                                this.currentJob = "Hauling Thatch";
+                                this.assignMoveTo(125, 126, () => {
+                                    prog.thatch++;
+                                    this.addThought("Gathered soft river reeds for thatch roofing.", 10);
+                                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                        window.$ufVisuals.addBark(ev, `Wove thatch roof layer (${prog.thatch}/3).`);
+                                    }
+                                    this.currentJob = "Idle";
+                                });
+                            }, 1200);
+                        });
+                        return;
+                    } else if (prog.wood >= 6 && prog.thatch >= 3) {
+                        this.currentJob = "Assembling Shelter";
+                        this.assignMoveTo(125, 126, () => {
+                            prog.shelterBuilt = true;
+                            this.addThought("Felt secure completing our first sturdy shelter.", 30);
+                            if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                                window.$ufVisuals.addBark(ev, "The shelter is complete! We have a home.");
+                            }
+                            this.currentJob = "Idle";
+                        });
+                        return;
+                    }
+                }
+            }
+
+            // 5. Social Bonding & Conversation with Partner
             if (this.social >= 40 && $colonyManager.colonists.length > 1) {
                 const partner = $colonyManager.colonists.find(c => c.id !== this.id);
                 if (partner && partner.event && partner.currentJob === "Idle") {
@@ -214,7 +324,8 @@
                         const dialogues = [
                             [`The morning air is sweet, ${partner.name}.`, `It is good to be here with you, ${this.name}.`],
                             [`Listen to the water, ${partner.name}. The river runs clear.`, `A peaceful place for our people to begin.`],
-                            [`Look at the blossoms above us, ${partner.name}.`, `The world is vast and full of wonder.`]
+                            [`Look at the blossoms above us, ${partner.name}.`, `The world is vast and full of wonder.`],
+                            [`We shall build a strong home here, ${partner.name}.`, `Together we will thrive and create a great tribe.`]
                         ];
                         const pair = dialogues[Math.floor(Math.random() * dialogues.length)];
 
@@ -236,11 +347,11 @@
                 }
             }
 
-            // 5. Nature Contemplation
+            // 6. Nature Contemplation by the River
             if (this.communeNature >= 35 && Math.random() < 0.35) {
                 this.currentJob = "Contemplating";
-                const spotX = 14 + Math.floor(Math.random() * 5);
-                const spotY = 13 + Math.floor(Math.random() * 4);
+                const spotX = 133 + Math.floor(Math.random() * 2);
+                const spotY = 127 + Math.floor(Math.random() * 3);
                 this.assignMoveTo(spotX, spotY, () => {
                     this.communeNature = Math.max(0, this.communeNature - 40);
                     this.addThought("Felt tranquil contemplating the pristine wilderness.", 8);
@@ -252,11 +363,11 @@
                 return;
             }
 
-            // 6. Idle Wilderness Stroll (Expands Fog of War!)
+            // 7. Idle Wilderness Stroll (Expands Fog of War!)
             if (Math.random() < 0.25) {
-                const wanderX = Math.max(5, Math.min(25, ev.x + Math.floor(Math.random() * 7) - 3));
-                const wanderY = Math.max(5, Math.min(25, ev.y + Math.floor(Math.random() * 7) - 3));
-                if (!(wanderX === 15 && wanderY === 14) && !(wanderX >= 20 && wanderX <= 22)) {
+                const wanderX = Math.max(10, Math.min(245, ev.x + Math.floor(Math.random() * 9) - 4));
+                const wanderY = Math.max(10, Math.min(245, ev.y + Math.floor(Math.random() * 9) - 4));
+                if (!(wanderX >= 135 && wanderX <= 137)) { // Don't wander into river water
                     this.currentJob = "Strolling";
                     this.assignMoveTo(wanderX, wanderY, () => {
                         this.currentJob = "Idle";
@@ -299,19 +410,19 @@
 
         findNearestWater() {
             const ev = this.event;
-            const bankY = Math.max(8, Math.min(22, ev ? ev.y : 15));
-            return { x: 19, y: bankY };
+            const bankY = Math.max(10, Math.min(245, ev ? ev.y : 128));
+            return { x: 134, y: bankY };
         }
 
         findFruitTree() {
             if ($gameMap) {
                 for (const ev of $gameMap.events()) {
-                    if (ev && ev.event() && ev.event().note.includes("<tree>")) {
+                    if (ev && ev.event() && ev.event().note.includes("<tree>") && ev.event().note.includes("<fruit>")) {
                         return { x: ev.x, y: ev.y };
                     }
                 }
             }
-            return { x: 15, y: 14 };
+            return { x: 127, y: 126 };
         }
     }
 
@@ -324,6 +435,13 @@
             this.selectedColonist = null;
             this.cameraFollowUnit = null;
             this.isOverseerMode = true;
+            this.societyProgress = {
+                wood: 0,
+                stone: 0,
+                thatch: 0,
+                hearthBuilt: false,
+                shelterBuilt: false
+            };
         }
 
         initGladeColonists() {
@@ -331,6 +449,13 @@
                 new Colonist(1, "Adam", "Male", 1),
                 new Colonist(2, "Eve", "Female", 2)
             ];
+            this.societyProgress = {
+                wood: 0,
+                stone: 0,
+                thatch: 0,
+                hearthBuilt: false,
+                shelterBuilt: false
+            };
             console.log("[UF Colony] Colonists initialized: Adam & Eve in the Glade.");
         }
 
@@ -388,6 +513,13 @@
     };
     Scene_Map.prototype.processMapTouch = function() {};
 
+    // Ensure new game transfers start at map 2, (128, 128)
+    const _DataManager_setupNewGame = DataManager.setupNewGame;
+    DataManager.setupNewGame = function() {
+        _DataManager_setupNewGame.call(this);
+        $gamePlayer.reserveTransfer(2, 128, 128, 2, 0);
+    };
+
     // Hook into Scene_Map.start to initialize Overseer camera & colonists
     const _Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function() {
@@ -395,6 +527,10 @@
         if ($gamePlayer) {
             $gamePlayer.setTransparent(true);
             $gamePlayer.setThrough(true);
+            // Center camera in the middle of the 256x256 map at (128, 128)
+            if ($gameMap && $gameMap.width() >= 100) {
+                $gameMap.setDisplayPos(128 - 8, 128 - 6);
+            }
         }
         if ($colonyManager && $colonyManager.colonists.length === 0) {
             $colonyManager.initGladeColonists();
@@ -474,7 +610,7 @@
 
     Window_UFColonistCard.prototype.initialize = function() {
         const w = 380;
-        const h = 230;
+        const h = 265;
         const x = 16;
         const y = Graphics.boxHeight - h - 16;
         Window_Base.prototype.initialize.call(this, new Rectangle(x, y, w, h));
@@ -515,6 +651,20 @@
             this.changeTextColor("#dddddd");
             const tText = `"${c.thoughts[0].text}"`;
             this.drawText(tText, 72, 162, 270, "left");
+        }
+
+        // Line 5: Colony Society Progress & Factions Shortcut
+        const prog = $colonyManager ? $colonyManager.societyProgress : null;
+        if (prog) {
+            this.contents.fontSize = 13;
+            this.changeTextColor("#f59e0b");
+            const hearthStatus = prog.hearthBuilt ? "Built (Warm)" : `${prog.wood}/3 Wood, ${prog.stone}/3 Stone`;
+            const shelterStatus = prog.shelterBuilt ? "Built" : (prog.hearthBuilt ? `${prog.wood - 3}/3 Poles, ${prog.thatch}/3 Thatch` : "Pending");
+            this.drawText(`Hearth: ${hearthStatus} | Shelter: ${shelterStatus}`, 0, 190, 350, "left");
+
+            this.changeTextColor("#38bdf8");
+            this.drawText("[F] View World Factions & Diplomacy", 0, 212, 350, "left");
+            this.contents.fontSize = $gameSystem.mainFontSize ? $gameSystem.mainFontSize() : 26;
         }
     };
 

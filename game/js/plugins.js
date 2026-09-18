@@ -15,5 +15,6 @@ var $plugins =
 {"name":"UF_Perspective25D","status":true,"description":"[UF Perspective25D] Ultima VII 2.5D axonometric projection, Z-elevation, dynamic depth sorting, canopy occlusion, and cast shadows.","parameters":{"TileHeightStep":"36","EnableShadows":"true","OcclusionOpacity":"120"}},
 {"name":"UF_ColonyOverseer","status":true,"description":"[UF ColonyOverseer] DF-style free overseer camera, tactile unit selection, colonist status card, and autonomous biological needs.","parameters":{"EdgePanSpeed":"6"}},
 {"name":"UF_Construction","status":true,"description":"[UF Construction] Dwarf Fortress grid-based blueprint construction, natural resource gathering, and hauling jobs.","parameters":{}},
-{"name":"UF_ProcGen","status":true,"description":"[UF ProcGen] Standardized Edenic Glade embark (Fruit tree, Stream, Adam & Eve) and procedural DF wilderness generation.","parameters":{"GladeRadius":"12"}}
+{"name":"UF_ProcGen","status":true,"description":"[UF ProcGen] Standardized Edenic Glade embark (Fruit tree, Stream, Adam & Eve) and procedural DF wilderness generation.","parameters":{"GladeRadius":"12"}},
+{"name":"UF_Factions","status":true,"description":"[UF Factions] Procedural world factions with dynamic alignments and diplomacy ledger.","parameters":{}}
 ];
