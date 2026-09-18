@@ -22,7 +22,8 @@
  * @param ShowClock
  * @text Show clock
  * @type boolean
- * @default true
+ * @default false
+ * @desc Show day and time on screen. Off by default (user, 2026-09-18); a ">> xN" badge still shows while time is sped up.
  *
  * @help
  * Time comes from UF_Core ($ufTime: 1 game minute per TimeSpeed real
@@ -140,12 +141,17 @@
 
         update() {
             super.update();
-            this.visible = SHOW_CLOCK && DayNight.onWorldMap() && !!window.$ufTime;
+            const multiplier = window.UF.Time ? UF.Time.multiplier() : 1;
+            // No day/time display unless ShowClock is on (user, 2026-09-18); the speed badge shows while sped up.
+            this.visible = DayNight.onWorldMap() && !!window.$ufTime && (SHOW_CLOCK || multiplier > 1);
             if (!this.visible) return;
-            const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
-            const where = DayNight.layer() > 0 ? "Underground" : DayNight.phase().replace(/^./, c => c.toUpperCase());
-            const speed = window.UF.Time && UF.Time.multiplier() > 1 ? `  >> x${UF.Time.multiplier()}` : "";
-            const text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}${speed}`;
+            const speed = multiplier > 1 ? `>> x${multiplier}` : "";
+            let text = speed;
+            if (SHOW_CLOCK) {
+                const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
+                const where = DayNight.layer() > 0 ? "Underground" : DayNight.phase().replace(/^./, c => c.toUpperCase());
+                text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}${speed ? "  " + speed : ""}`;
+            }
             if (text === this._text) return;
             this._text = text;
             const b = this.bitmap;
@@ -209,7 +215,9 @@
                 `screen tone at 12:00 ${JSON.stringify(dayTone)}, at 23:30 ${JSON.stringify(nightTone)}`);
             if (dayRadius !== null) t.check("fog_sight_shrinks_at_night", nightRadius < dayRadius, `colonist sight ${dayRadius} cells at noon, ${nightRadius} at 23:30`);
             const clock = SceneManager._scene._ufClock;
-            t.check("clock_shown", !!clock && clock.visible && clock._text.includes("23:30"), clock ? `clock reads "${clock._text}"` : "no clock sprite");
+            const normalSpeed = !window.UF.Time || UF.Time.multiplier() === 1;
+            if (SHOW_CLOCK) t.check("clock_shown", !!clock && clock.visible && clock._text.includes("23:30"), clock ? `clock reads "${clock._text}"` : "no clock sprite");
+            else t.check("no_time_display", !!clock && (!clock.visible || !normalSpeed), `clock ${clock && clock.visible ? "visible" : "hidden"} at x${window.UF.Time ? UF.Time.multiplier() : 1} (ShowClock off)`);
             if (UF.Fog) UF.Fog.refresh();
             await t.waitFrames(8);
             t.screenshot("night");

@@ -45,8 +45,17 @@ Each feature ships with a handoff report for Gemini in `docs/handoffs/`.
 
 ## Stand-ins (U7-derived, dev only; replace before release; AGENTS rule 8)
 Format: `- <file> | source | used for`
-- `game/img/characters/$Adam.png`, `$Eve.png` | SHAPES.VGA shapes 458 / 452, 3×, transposed east/west (Gemini) | Adam, Eve. Should be renamed with the `U7_` prefix.
-- `game/img/characters/!$FruitTree.png` | SHAPES.VGA shape 670, 3× (Gemini) | Fruit tree. Red, noisy canopy: palette to be checked.
+- `game/img/characters/$U7_Adam_T0.png`, `$U7_Eve_T0.png`, `$Adam.png`, `$Eve.png` | SHAPES.VGA shapes 458 / 452, 3×, transposed E/W, unclad | Adam and Eve Tier 0 Naked start
+- `game/img/characters/$U7_Adam_T1.png`, `$U7_Eve_T1.png` | SHAPES.VGA shapes 458 / 452, 3×, transposed E/W, woven fiber/grass wraps | Tier 1 Primitive Attire
+- `game/img/characters/$U7_Adam_T2.png`, `$U7_Eve_T2.png` | SHAPES.VGA shapes 458 / 452, 3×, transposed E/W | Tier 2 Peasant/fur attire
+- `game/img/characters/$U7_Adam_T3.png`, `$U7_Eve_T3.png` | SHAPES.VGA shapes 462 / 463, 3×, transposed E/W | Tier 3 Fighter/tailored armor
+- `game/img/characters/!$TimberOak.png` | SHAPES.VGA shape 181, 3×, collision-aligned anchor | Broadleaf timber oak
+- `game/img/characters/!$PineTree.png` | SHAPES.VGA shape 306, 3×, collision-aligned anchor | Conifer pine tree
+- `game/img/characters/!$FruitTree.png` | SHAPES.VGA shape 328, 3×, collision-aligned anchor | Ancient fruit tree
+- `game/img/characters/!$GraniteBoulder.png` | SHAPES.VGA shape 342, 3×, collision-aligned anchor | Granite boulder
+- `game/img/characters/!$IronstoneDeposit.png` | SHAPES.VGA shape 341, 3×, collision-aligned anchor | Ironstone outcrop
+- `game/img/characters/!$BerryBush.png` | SHAPES.VGA shape 672, 3×, collision-aligned anchor | Berry bush
+- `game/img/characters/!$Campfire.png` | SHAPES.VGA shape 739, 3×, collision-aligned anchor | Campfire hearth
 - `game/img/characters/$U7_*.png`, `actor_*.png`, `monster_*.png`, `test_shape*.png`, `game/img/system/u7_gumps/`, `u7_gump_*.png`, `gump_*.png`, `paperdoll_*.png`, `game/img/faces/face_*.png`, `U7_Faces.png`, `game/img/tilesets/U7_Fortress_B.png` | earlier extraction, sources not recorded | unused or unknown
 
 ## Environment

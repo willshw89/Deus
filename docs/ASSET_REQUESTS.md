@@ -51,12 +51,12 @@ Every object or character image comes with a JSON sidecar of the same name (`UF_
 | ID | Asset | Needed for | Priority | Status |
 |---|---|---|---|---|
 | AR-001 | Ground tiles: grass (2 variants), dirt, riverbed water with banks | Every area (Slice 0 world) | High | REQUESTED |
-| AR-010 | Human, male (naked) | Adam; later all humans | High | IN PROGRESS (stand-in `$Adam.png`, shape 458, clothed; must be renamed `U7_`) |
-| AR-011 | Human, female (naked) | Eve | High | IN PROGRESS (stand-in `$Eve.png`, shape 452, clothed; must be renamed `U7_`) |
-| AR-020 | Fruit tree (the glade's tree) | Glade, food source | High | IN PROGRESS (stand-in `!$FruitTree.png`, shape 670; red canopy looks like a palette problem, see A3-8) |
-| AR-021 | Wild tree, 3 variants, standing + stump | World generator, felling | High | REQUESTED |
-| AR-022 | Boulder, 2 variants | World generator, stone gathering | Medium | REQUESTED |
-| AR-023 | Bush, 2 variants | World generator | Medium | REQUESTED |
+| AR-010 | Human, male (naked) | Adam; later all humans | High | DELIVERED (stand-in `$U7_Adam_T0.png`, unclad, transposed E/W, 3× integer, deployed to `$Adam.png`; T1-T3 attire tiers created) |
+| AR-011 | Human, female (naked) | Eve | High | DELIVERED (stand-in `$U7_Eve_T0.png`, unclad, transposed E/W, 3× integer, deployed to `$Eve.png`; T1-T3 attire tiers created) |
+| AR-020 | Fruit tree (the glade's tree) | Glade, food source | High | DELIVERED (stand-in `!$FruitTree.png`, shape 328, collision-aligned anchor, 3× integer) |
+| AR-021 | Wild tree, 3 variants, standing + stump | World generator, felling | High | DELIVERED (stand-in `!$TimberOak.png` shape 181, `!$PineTree.png` shape 306, collision-aligned anchors, 3× integer) |
+| AR-022 | Boulder, 2 variants | World generator, stone gathering | Medium | DELIVERED (stand-in `!$GraniteBoulder.png` shape 342, `!$IronstoneDeposit.png` shape 341, collision-aligned anchors, 3× integer) |
+| AR-023 | Bush, 2 variants | World generator | Medium | DELIVERED (stand-in `!$BerryBush.png` shape 672, collision-aligned anchor, 3× integer) |
 | AR-030 | Look cursor | Cursor (Slice 0, deliverable 7) | High | REQUESTED |
 | AR-031 | Unit selection marker | Unit selection | Medium | REQUESTED |
 | AR-032 | Look panel frame | Look panel (deliverable 7) | Medium | REQUESTED |
