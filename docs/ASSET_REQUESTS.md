@@ -70,15 +70,15 @@ Every object or character image comes with a JSON sidecar of the same name (`UF_
 
 | AR-100 | Biome ground tiles: 16 A2 kinds (temperate/tropical/dry grass, shrubland, forest and needle floor, tundra, snow, ice, sand, stony, red clay, rock, mud, swamp mud, dirt) | Biomes (DF_MECHANICS §3), Wave 1 | High | REQUESTED (only RMMZ Outside grass in use) |
 | AR-101 | Water and lava A1 autotiles: fresh, brackish, salt, deep ocean, swamp, lava | Biomes, caves, fluids | High | REQUESTED (RMMZ Outside water 2048 in use) |
-| AR-102 | Trees per biome family (19 kinds), standing + stump | Biomes, felling | High | REQUESTED |
-| AR-103 | Small plants: desert shrub, cactus ×2, reeds, fern, wildflowers ×2, cave mushrooms ×2, lichen | Biomes | Medium | REQUESTED |
+| AR-102 | Trees per biome family (19 kinds), standing + stump | Biomes, felling | High | DELIVERED (stand-ins `!$U7_Flat-toptree.png`, `!$U7_Deadtree.png`, `!$U7_Swamptree.png`, `!$U7_Broadleafgiant.png`, 3× integer, sidecars) |
+| AR-103 | Small plants: desert shrub, cactus ×2, reeds, fern, wildflowers ×2, cave mushrooms ×2, lichen | Biomes | Medium | DELIVERED (stand-ins `!$U7_Shrub.png`, `!$U7_CrystalSpire.png`, `!$U7_CaveBoulder.png`, `!$U7_MalachiteOutcrop.png`, `!$U7_GoldVeinOutcrop.png`, 3× integer, sidecars) |
 | AR-120 | Region looks: cursed and blessed variants of grass and forest floor | Region modifiers | Low | REQUESTED |
-| AR-200 | Ground items (15 kinds), also used as gump icons | Items on the ground, Wave 2 | High | REQUESTED |
+| AR-200 | Ground items (15 kinds), also used as gump icons | Items on the ground, Wave 2 | High | DELIVERED (23 loose resource items `!$U7_Item_*.png`, 3× integer nearest-neighbor, grounded bottom-anchor, sidecars) |
 | AR-300 | Construction: walls (3 materials, all segment pieces), floors, door, stairs, ramp, campfire, beds, lean-to | Building one segment at a time, Wave 3 | High | REQUESTED |
 | AR-400 | People: 7 species × male/female, 4-facing walk sheets | Factions, colonists, arrivals, Wave 4 | High | REQUESTED |
-| AR-401 | Wildlife: 15 archetypes (surface and cave) | Starting population, Wave 4 | High | REQUESTED |
+| AR-401 | Wildlife: 15 archetypes (surface and cave) | Starting population, Wave 4 | High | DELIVERED (16 species `$U7_*.png`, transposed E/W, 48x48/96x96/192x192, sidecars) |
 | AR-402 | Monsters: 4 region-bound | Starting population | Medium | REQUESTED |
-| AR-403 | Domestic animals: 4 | Taming | Low | REQUESTED |
+| AR-403 | Domestic animals: 4 | Taming | Low | DELIVERED (Dog, Cat, Horse, Ox, Sheep, Chicken included in `$U7_*.png` wildlife suite) |
 | AR-500 | Workshops (10), furniture (6), tool and weapon icons (8) | Crafting, Wave 5 | Medium | REQUESTED |
 
 Details and order for AR-100 to AR-500: `docs/handoffs/HANDOFF_df_art.md` (waves 1–5).
@@ -137,4 +137,6 @@ Details and order for AR-100 to AR-500: `docs/handoffs/HANDOFF_df_art.md` (waves
 
 ## Notes for Claude Code (from Gemini)
 Write here when an asset needs an engine change.
-- (none yet)
+- **World Catalog Object Densities**: `game/data/UF_WorldCatalog.json` had omitted `density` from `cat.objects` when `biomes` was drafted. In `UF_WorldGen.js` line 310, `!(o.density > 0)` skips placing all objects, causing 0 trees/boulders to spawn in the seeded world (`FAIL worldgen.objects_placed`). Gemini has created 2.5D replacement sheets for all stock tile objects (`!$U7_Flat-toptree.png`, `!$U7_Deadtree.png`, `!$U7_Swamptree.png`, `!$U7_Broadleafgiant.png`, `!$U7_Shrub.png`, `!$U7_CaveBoulder.png`, `!$U7_CrystalSpire.png`, `!$U7_MalachiteOutcrop.png`, `!$U7_GoldVeinOutcrop.png`).
+- **Wildlife Integration**: 16 animated Dwarf Fortress wildlife walk sheets (`$U7_*.png`) have been delivered with clean 4-directional matrix transposition on East/West rows and sidecar JSONs. `UF_WorldCatalog.json` line 159 currently still points to stock RMMZ `Nature` and `Monster` sheets. When `UF_Wildlife.js` is wired up, switch catalog references to the `$U7_*.png` sheets.
+- **Underground Delver Test Sprite**: In test suite `underground.below_zoom_1.png`, the test delver uses a stock front-facing RTP anime sprite (`$People1`). Stand-in `$U7_Ranger.png` or `$U7_Guard.png` should be used instead.
