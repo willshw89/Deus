@@ -11,7 +11,8 @@ Format: `- <agent> | <task> | <files/folders> | since <date>`
 - (none)
 
 ## Verified working (checks run on the real game folder, 2026-09-18)
-`run_tests.bat` → 50+ checks PASS. Suites: smoke, world, worldgen, fog, camera.
+`run_tests.bat` → 64 of 65 checks PASS on a snapshot of the game (2026-09-18). Suites: smoke, world, underground, worldgen, fog, camera. The one FAIL is K7.
+- **Underground layer** (V20): under every 256×256 area there's a cave layer with the same cells: rock plus caverns and tunnels (about 40% open). There are 4 random cave mouths per area plus one about 16 cells from the fruit tree, each with a chamber below. Units walk through them. The view switches layers with `,` (up) and `.` (down) at the same cell, and each layer has its own fog of war. Rock blocks movement (region 250). Tiles are RMMZ Dungeon stand-ins (AR-040 to AR-043).
 - **New Game starts a fresh seeded world** (a new random seed each game, `UF_World`). The start area is 256×256 (area (3,3) of a 6×6 grid).
 - **Adam and Eve are in the middle** with the fruit tree: tree (128,128), Adam (126,129), Eve (130,129), inside a clearing of radius 8 (`UF_WorldGen` + `data/UF_WorldCatalog.json` → `start`).
 - **Generated world:** one river north to south, 5 cells east of the clearing and continuous across areas, with water edges computed to match the editor. Trees, bushes, and rocks come from the catalog in seeded patches (800-object cap per area).
@@ -32,6 +33,8 @@ Format: `- <agent> | <task> | <files/folders> | since <date>`
 - **K10** `Map002.json` is Gemini's baked 256×256 world. Nothing uses it any more; the seeded world replaced it (user decision 2026-09-18).
 - **K11** `UF_Factions.js` (Gemini's draft) is registered and loads without errors. Not reviewed. It will be reviewed and adopted or replaced when factions are built (V18).
 - Art quality issues are tracked in `docs/ASSET_REQUESTS.md` and `docs/handoffs/HANDOFF_world_generation.md` (red fruit tree canopy, broken pine, boulders drawn as slabs).
+- **K12** Gemini is replacing the object images (`!$TimberOak`, `!$PineTree`, …) with U7 stand-ins under their existing names (not yet committed). Stand-ins should use the `U7_` prefix (AGENTS rule 8), which also keeps them out of git, and the catalog entries switch to the new names.
+- Fixed 2026-09-18: `UF_ColonyOverseer` snapped the camera to (120,122) on every map load, which broke layer and area changes. Colonists also matched another area's event 1 as "Adam".
 
 ## Engine queue (Claude Code, in order)
 1. **Colonists as world units** (K7), then **autonomous goals** (V17): Adam and Eve survive, then gather and build shelter without input, and the colony state saves.

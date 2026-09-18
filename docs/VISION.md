@@ -26,6 +26,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V17 | **Colonists act on their own.** Adam and Eve pursue goals without player input: survive first, then gather, build shelter, and grow into a society. Player orders change priorities; they're never required. |
 | V18 | **Factions are generated with the world**, with relations from allied to hostile between them. |
 | V19 | **Entities can arrive along the edges of the 256×256 map at any time** (migrants, traders, raiders, wildlife), depending on the factions. |
+| V20 | **An underground layer** under the whole world. Each 256×256 underground area corresponds cell for cell to the surface area above it. They connect at random spots (cave mouths), and the underground has its own fog of war. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -71,3 +72,4 @@ Append only, newest at the bottom.
 - 2026-09-18: The user set the core goal (V16), autonomous colonists building a society (V17), and generated factions with relations (V18).
 - 2026-09-18: The user resolved Q9: a **fresh seeded 256×256 world** each game, Adam and Eve in the middle, and fog of war explored by them and faction members. Gemini's baked Map002 world is retired. Q10: under the division of labor, factions are Claude Code's; Gemini's `UF_Factions.js` draft gets reviewed first.
 - 2026-09-18: The user added V19: arrivals along the map edges at any time.
+- 2026-09-18: The user added V20: an underground layer connected to the surface at random spots, same grid, with its own fog of war. Also: every stock RMMZ asset the engine uses gets a replacement request for Gemini.

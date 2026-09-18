@@ -64,6 +64,16 @@ How units move:
 | `transferView(ax, ay, x, y, dir?)` | Moves the view (the RMMZ player) to a cell in any area, with no fade |
 | (automatic) | When the player moves off an area edge through `moveStraight` or `moveDiagonally`, it transfers to the neighboring area at the matching cell. The cursor (Slice 0 deliverable 7) gets this for free as long as it moves the player with those functions. |
 
+### Layers (added 2026-09-18, VISION V20)
+- An area is `{ x, y, z }`. **`z` is the layer: 0 = surface, 1 = underground** (plugin parameter `UndergroundLayers`, default 1). A missing `z` means 0, so older saves and code keep working.
+- Every layer has an area under every surface area, **same size, same cell coordinates**: cell (x, y) of `(ax, ay, 0)` sits directly above cell (x, y) of `(ax, ay, 1)`.
+- Map IDs: `MapIdBase + z × (areasX × areasY) + ay × areasX + ax`. Surface IDs didn't change (start area = 1021, the one below it = 1057).
+- Functions that take an area accept `z` as an extra, optional argument: `inWorld(ax, ay, az)`, `areaMapId(ax, ay, az)`, `buildArea(ax, ay, az)`, `unitsInArea(ax, ay, az)`, `setTile(ax, ay, x, y, layer, tileId, az)`, `getTile(ax, ay, x, y, layer, az)`. `areaOfMapId` and `currentArea` return `z`. Generators get `ctx.areaZ`.
+- **Connections:** `connectionsFor(ax, ay)` returns the cells `[{ x, y }]` that link layer z to z + 1 in that area (from `UF_WorldGen`'s provider, `setConnectionProvider(fn)`).
+- **Units:** `sendUnit(id, { area: { x, y, z }, x, y })` works across layers. The unit walks to the nearest connection in its area, changes layer there (on or off screen), then continues.
+- **View:** `changeViewLayer(+1 | -1)` shows the layer below or above at the same cell. Keys: `.` = down, `,` = up. `transferView(ax, ay, x, y, dir, az)`.
+- **Regions with meaning on area maps:** `ROCK_REGION` 250 = never passable; `CONNECTION_REGION` 251 = always passable, whatever the tiles' own passage flags say.
+
 ## 3. Events (through `UF.Events`, when UF_Core has loaded)
 | Event | Payload |
 |---|---|
