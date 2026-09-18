@@ -35,7 +35,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V27 | **Biomes with distinct features:** every DF world-block starting state (all biome types, region character, water bodies, caves) exists, each with its own look, plants, and creatures. |
 | V28 | **DF's core gameplay mechanics are adopted as mechanics** (not DF's text or data). The plan is `docs/design/DF_MECHANICS.md`. |
 | V29 | **Combat works like Ultima VII's:** real time, combat mode, per-character attack modes, click targeting, stats and equipment decide hits (DF_MECHANICS §8). |
-| V20 | **An underground layer** under the whole world. Each 256×256 underground area corresponds cell for cell to the surface area above it. They connect at random spots (cave mouths), and the underground has its own fog of war. |
+| ~~V20~~ | *Retired 2026-09-18 by user.* ~~**An underground layer** under the whole world. Each 256×256 underground area corresponds cell for cell to the surface area above it. They connect at random spots (cave mouths), and the underground has its own fog of war.~~ Surface only. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -86,3 +86,4 @@ Append only, newest at the bottom.
 - 2026-09-18: The user added V20: an underground layer connected to the surface at random spots, same grid, with its own fog of war. Also: every stock RMMZ asset the engine uses gets a replacement request for Gemini.
 - 2026-09-18: The user revised V4: **no fixed tree**; the only fixed part of a new game is a man and a woman, with names generated each game. Factions, surface, and caves are all random per New Game. Time: 1 game hour per real minute, with no clock on screen; speed-up allowed, never backward.
 - 2026-09-18: The user added V21–V29 (physical results of actions, DF-style water, complex personality-driven AI, populated world at start, everything interactive, children, distinct biomes, DF mechanics as the model, U7-style combat).
+- 2026-09-18: The user did away with the subterranean level (V20 retired). The world is single-layer (surface only); all cave/underground layer generation, underground layer switching, and underground layers are removed.

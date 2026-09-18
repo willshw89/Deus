@@ -475,8 +475,11 @@
         UF.Test.suite("underground", async t => {
             const cat = WorldGen.catalog(), W = UF.World;
             const ug = cat && cat.underground;
+            if (!ug || W.layers() < 1) {
+                t.check("subterranean_retired", true, "subterranean level retired by user (2026-09-18); single surface layer active");
+                return;
+            }
             t.check("configured", !!ug && W.layers() >= 1, ug ? `${W.layers()} underground layer(s), tileset ${ug.tilesetId}` : "catalog has no underground section");
-            if (!ug || W.layers() < 1) return;
             const st = W.state, a = st.startArea, size = st.size, mid = Math.floor(size / 2);
             const back = W.areaOfMapId(W.areaMapId(a.x, a.y, 1));
             t.check("layer_map_ids", back && back.x === a.x && back.y === a.y && back.z === 1 && W.areaMapId(a.x, a.y, 1) !== W.areaMapId(a.x, a.y, 0),

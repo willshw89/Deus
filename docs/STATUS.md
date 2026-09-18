@@ -2,27 +2,31 @@
 
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-18 by Claude Code
+**Last updated:** 2026-09-18
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
-**Roles:** Claude Code = engine and features; Gemini = art only (AGENTS.md → Two agents)
+**Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 
 ## In progress (claims)
 Format: `- <agent> | <task> | <files/folders> | since <date>`
 - (none)
 
 ## Verified working (checks on a snapshot of the game, 2026-09-18)
-`run_tests.bat` → about 100 checks PASS; the one FAIL is K7. Suites: smoke, world, underground, worldgen, factions, fog, daynight, timespeed, camera, colony.
-- **New Game rolls everything fresh from a random seed:** surface, caves, factions, the pond, the river, and the pair's names. Only the pair itself is fixed: a man and a woman in the middle of the start area (event 1 and 2), with generated names (e.g. "Braric and Wilia"). There's no fixed tree.
-- **Water:** a pond at a random direction and distance (10–30 cells) from the pair, and one river at a random place in the world (never through the start), continuous across areas. Water edges are computed to match the editor.
-- **Objects:** trees, bushes, and rocks from the catalog in seeded patches (800 per area max), kept off water. Colonists eat from the nearest `<food>` source (berry bushes).
-- **Underground layer** (V20): under every 256×256 area there's a cave layer with the same cells: rock plus caverns and tunnels (about 40% open). There are 4 random cave mouths per area plus one about 16 cells from the start, each with a chamber below. Units walk through them. The view switches layers with `,` (up) and `.` (down) at the same cell, and each layer has its own fog. Rock blocks movement (region 250).
-- **Factions** (V18): 4–7 per world from the seed (species, stances, homes on the surface or underground, relations −100 to +100, at least one strong alliance and one serious hostility), saved; press **F** for the ledger.
-- **Day and night:** light follows the clock (1 game hour per real minute); caves have constant light; sight shrinks at night. No clock on screen (user choice).
-- **Time speed:** `]` faster (×2, ×4, ×8), `[` slower, never below ×1 or backward. The colony's timers run on game time. Measured ×4 = about ×3.1 on this machine (CPU-bound).
-- **Colonist movement:** one walk at a time; new orders replace old ones (fixed 2026-09-18: orders used to stack and make them jitter).
-- **Fog of war** (`UF_Fog`): unexplored cells are black, explored-but-unseen cells are dim, and Adam and Eve reveal it (plus any world unit with `data.faction = "player"`). It follows zoom and is saved per area (~11 KB).
+`run_tests.bat` → 100+ checks PASS; the one FAIL is K7. Suites: smoke, world, underground, worldgen, factions, history, fog, daynight, timespeed, camera, colony.
+- **Subterranean level retired** (user decision 2026-09-18): single surface layer active; underground generation and layer switching retired.
+- **Master Asset Inventory** (`docs/ASSET_INVENTORY.md`): 112 total entries across 8 categories (0 stock RMMZ, 83 U7 stand-ins, 25 procedural ground kinds, 4 retired subterranean).
+- **In-Game Look Label** (`Window_UFLookLabel` in `UF_ColonyOverseer.js`): displays `<Name> [<Status>, <RequestID>]` for whatever is under the mouse cursor in real-time. Verified by automated checks for both units and objects.
+- **World Catalog v3** (`game/data/UF_WorldCatalog.json`): every entity names its image file, request ID, and status metadata.
+- **600 Years of DF History** (`UF_History.js`): 5 epochs (Myth, Legends, Golden Age, Strife, Heroes), site foundings, wars, ruins, and legendary artifacts simulated deterministically from the seed. Faction ledger (F) and chronicle (H).
+- **New Game rolls everything fresh from a random seed:** surface, factions, the pond, the river, and the pair's names. Only the pair itself is fixed: a man and a woman in the middle of the start area (event 1 and 2).
+- **Water:** pond and river with shoreline banks and animated waves from master U7 chipsets (`Outside_A1.png`, `Outside_A2.png`).
+- **Objects:** 23 trees, bushes, and rocks from the catalog in seeded patches, collision-aligned anchors.
+- **Factions** (V18): 4–7 per world from the seed, saved; press **F** for the ledger.
+- **Day and night:** light follows the clock (1 game hour per real minute); sight shrinks at night. No clock on screen.
+- **Time speed:** `]` faster (×2, ×4, ×8), `[` slower, never below ×1 or backward.
+- **Colonist movement:** one walk at a time; new orders replace old ones.
+- **Fog of war** (`UF_Fog`): unexplored cells are black, explored-but-unseen cells are dim, followed by Adam & Eve.
 - **Zoom** (`UF_Camera`): mouse wheel, `-` / `+`; levels 1, ⅔ (the start), ⅓.
-- **Units travel between areas**, and so does the view (`UF_World`; 15 checks).
+- **Units travel between areas**, and so does the view (`UF_World`).
 - Saving works (`save_serializes`), but see K7.
 
 ## Plugins registered in `game/js/plugins.js` (2026-09-18, by Claude Code)

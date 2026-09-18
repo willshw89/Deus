@@ -1,27 +1,984 @@
 {
-  "version": 1,
-  "about": "World generation catalog read by UF_WorldGen. Art is added here without touching code. How: docs/handoffs/HANDOFF_world_generation.md",
+  "version": 3,
+  "about": "Master world catalog. Declares every terrain, object, item, wildlife species, faction, and UI element with exact image filenames, AR-xxx request IDs, and asset statuses. Read by UF_WorldGen, UF_Tiles, UF_Factions, UF_Wildlife, UF_ColonyOverseer.",
   "terrain": {
-    "grass": { "tileId": 2863, "autotile": false, "about": "RMMZ Outside A2 grass (stand-in until AR-001)" },
-    "water": { "tileId": 2048, "autotile": true, "about": "RMMZ Outside A1 water; edges are computed (stand-in until AR-001)" }
+    "grass": {
+      "name": "Meadow grass",
+      "tileId": 2816,
+      "image": "U7_Outside_A2.png",
+      "requestId": "AR-001",
+      "status": "U7 stand-in",
+      "autotile": false,
+      "about": "Seamless U7 meadow grass (Outside A2 autotile kind 0)"
+    },
+    "water": {
+      "name": "River water",
+      "tileId": 2048,
+      "image": "Outside_A1.png",
+      "requestId": "AR-001",
+      "status": "U7 stand-in",
+      "autotile": true,
+      "about": "Fresh water with bank autotiles (Outside A1 kind 0)"
+    }
+  },
+  "tilesets": {
+    "about": "Master U7 2.5D surface tilesets.",
+    "surface": {
+      "A1": "Outside_A1",
+      "A2": "Outside_A2",
+      "B": "Outside_B",
+      "C": "Outside_C"
+    }
+  },
+  "groundKinds": [
+    {
+      "id": "meadow",
+      "name": "Meadow",
+      "pattern": "grass",
+      "colors": [
+        "#5a9a3c",
+        "#467a2e",
+        "#74b54c",
+        "#c8d86a"
+      ],
+      "edge": "#3b6326",
+      "image": "U7_Outside_A2.png",
+      "requestId": "AR-001",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tropical_grass",
+      "name": "Lush grass",
+      "pattern": "grass",
+      "colors": [
+        "#3f9a4a",
+        "#2f7a3a",
+        "#58b862",
+        "#e0e070"
+      ],
+      "edge": "#28602e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "dry_grass",
+      "name": "Dry grass",
+      "pattern": "grass",
+      "colors": [
+        "#b8a24a",
+        "#9a8638",
+        "#d2bd62",
+        "#7a9a3a"
+      ],
+      "edge": "#7a6a2a",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "shrub_soil",
+      "name": "Scrub soil",
+      "pattern": "dots",
+      "colors": [
+        "#8a7a4a",
+        "#6e6038",
+        "#a6955e",
+        "#5a7a3a"
+      ],
+      "edge": "#5a4e2e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "forest_floor",
+      "name": "Leaf litter",
+      "pattern": "litter",
+      "colors": [
+        "#5a4a2a",
+        "#463a20",
+        "#6e5c36",
+        "#a8602a"
+      ],
+      "edge": "#3a2e18",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "needle_floor",
+      "name": "Needle floor",
+      "pattern": "needles",
+      "colors": [
+        "#4a4a2a",
+        "#3a3a20",
+        "#5e5e36",
+        "#6a3a1a"
+      ],
+      "edge": "#2e2e18",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "jungle_floor",
+      "name": "Jungle floor",
+      "pattern": "litter",
+      "colors": [
+        "#3a5a2a",
+        "#2a4620",
+        "#4e7236",
+        "#7a4a2a"
+      ],
+      "edge": "#223a18",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "tundra",
+      "name": "Tundra",
+      "pattern": "dots",
+      "colors": [
+        "#8a9a7a",
+        "#6e7e60",
+        "#a6b494",
+        "#b8c0b0"
+      ],
+      "edge": "#5a6a4e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "snow",
+      "name": "Snow",
+      "pattern": "snow",
+      "colors": [
+        "#e8eef4",
+        "#c8d4e0",
+        "#ffffff",
+        "#a8b8cc"
+      ],
+      "edge": "#8898ac",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "ice",
+      "name": "Ice",
+      "pattern": "ice",
+      "colors": [
+        "#a8d4e8",
+        "#88b8d0",
+        "#d0ecf8",
+        "#ffffff"
+      ],
+      "edge": "#6898b0",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "sand",
+      "name": "Sand",
+      "pattern": "dots",
+      "colors": [
+        "#dcc88a",
+        "#c4ae70",
+        "#eedca2",
+        "#a89058"
+      ],
+      "edge": "#a8905a",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "stony",
+      "name": "Stony ground",
+      "pattern": "cracks",
+      "colors": [
+        "#9a9284",
+        "#7e776a",
+        "#b4ad9e",
+        "#5e584e"
+      ],
+      "edge": "#5e584e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "red_clay",
+      "name": "Red clay",
+      "pattern": "stria",
+      "colors": [
+        "#b8663a",
+        "#9a4e2a",
+        "#d2804e",
+        "#7a3a1e"
+      ],
+      "edge": "#7a3a1e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "rock",
+      "name": "Bare rock",
+      "pattern": "cracks",
+      "colors": [
+        "#7a7874",
+        "#5e5c58",
+        "#969490",
+        "#4a4844"
+      ],
+      "edge": "#3a3834",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "peak_rock",
+      "name": "Rock face",
+      "pattern": "cracks",
+      "colors": [
+        "#56544f",
+        "#3e3c38",
+        "#6e6c68",
+        "#2e2c28"
+      ],
+      "edge": "#1e1c18",
+      "passable": false,
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "mud",
+      "name": "Mud",
+      "pattern": "mud",
+      "colors": [
+        "#6a5a3a",
+        "#52462c",
+        "#82704a",
+        "#3a5a2a"
+      ],
+      "edge": "#42381f",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "swamp_mud",
+      "name": "Swamp mud",
+      "pattern": "mud",
+      "colors": [
+        "#3e3a26",
+        "#2e2a1a",
+        "#4e4a32",
+        "#2a4a2a"
+      ],
+      "edge": "#1e1c10",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "dirt",
+      "name": "Dirt",
+      "pattern": "dots",
+      "colors": [
+        "#8a6a44",
+        "#6e5236",
+        "#a28058",
+        "#5a4428"
+      ],
+      "edge": "#4e3a24",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "cursed_grass",
+      "name": "Blighted grass",
+      "pattern": "grass",
+      "colors": [
+        "#6a6a4a",
+        "#52523a",
+        "#7e7a5a",
+        "#5a3a5a"
+      ],
+      "edge": "#3e3e2a",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "blessed_grass",
+      "name": "Flowering grass",
+      "pattern": "grass",
+      "colors": [
+        "#62b24a",
+        "#4e9a3a",
+        "#82ca62",
+        "#f0e8a0"
+      ],
+      "edge": "#3e7a2e",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "ash",
+      "name": "Ash",
+      "pattern": "dots",
+      "colors": [
+        "#5a5654",
+        "#444240",
+        "#6e6a66",
+        "#8a3a2a"
+      ],
+      "edge": "#2e2c2a",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "cave_floor",
+      "name": "Cave floor",
+      "pattern": "cracks",
+      "colors": [
+        "#6e665a",
+        "#5a5448",
+        "#827a6c",
+        "#4a443a"
+      ],
+      "edge": "#3a352c",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "cave_rock",
+      "name": "Solid rock",
+      "pattern": "cracks",
+      "colors": [
+        "#3e3a36",
+        "#2e2b28",
+        "#4e4a45",
+        "#222020"
+      ],
+      "edge": "#141210",
+      "passable": false,
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "fungal_floor",
+      "name": "Fungal floor",
+      "pattern": "mud",
+      "colors": [
+        "#4a4a5e",
+        "#3a3a4c",
+        "#5e5a76",
+        "#8a6aa8"
+      ],
+      "edge": "#2a2a3a",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "crystal_floor",
+      "name": "Crystal floor",
+      "pattern": "ice",
+      "colors": [
+        "#5e6a7a",
+        "#4a5462",
+        "#7a8ea4",
+        "#b0e0ff"
+      ],
+      "edge": "#343c48",
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    },
+    {
+      "id": "chasm",
+      "name": "Chasm",
+      "pattern": "dots",
+      "colors": [
+        "#0c0c10",
+        "#060608",
+        "#14141a",
+        "#1e1e28"
+      ],
+      "edge": "#2a2a36",
+      "passable": false,
+      "image": "UF_Tiles_Procedural",
+      "requestId": "AR-100",
+      "status": "code-drawn placeholder"
+    }
+  ],
+  "water": {
+    "about": "Water kinds by tile ID (A1 autotiles; edges computed). Surface IDs are in Outside_A1.",
+    "surface": {
+      "fresh": {
+        "id": "fresh",
+        "name": "Fresh water",
+        "tileId": 2048,
+        "image": "Outside_A1.png",
+        "requestId": "AR-001",
+        "status": "U7 stand-in"
+      },
+      "pond": {
+        "id": "pond",
+        "name": "Pond water",
+        "tileId": 2096,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "marsh": {
+        "id": "marsh",
+        "name": "Marsh water",
+        "tileId": 2144,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "swamp": {
+        "id": "swamp",
+        "name": "Swamp water",
+        "tileId": 2192,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "icy": {
+        "id": "icy",
+        "name": "Icy water",
+        "tileId": 2240,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "brackish": {
+        "id": "brackish",
+        "name": "Brackish water",
+        "tileId": 2432,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "salt": {
+        "id": "salt",
+        "name": "Salt water",
+        "tileId": 2528,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "deep": {
+        "id": "deep",
+        "name": "Deep ocean",
+        "tileId": 2624,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      },
+      "blighted": {
+        "id": "blighted",
+        "name": "Blighted water",
+        "tileId": 2720,
+        "image": "Outside_A1.png",
+        "requestId": "AR-101",
+        "status": "U7 stand-in"
+      }
+    }
+  },
+  "climate": {
+    "about": "World fields (0-1) from the seed: elevation, rainfall, temperature (north is colder), drainage, savagery, alignment. Thresholds below turn them into biomes, like DF's world map.",
+    "scale": {
+      "elevation": 420,
+      "rainfall": 360,
+      "temperature": 520,
+      "drainage": 240,
+      "savagery": 300,
+      "alignment": 340,
+      "detail": 48
+    },
+    "seaLevel": 0.3,
+    "mountainLevel": 0.74,
+    "peakLevel": 0.86,
+    "lakeChance": 0.82,
+    "startHabitableRadius": [
+      28,
+      110
+    ],
+    "startClimate": {
+      "elevation": 0.5,
+      "rainfall": 0.4,
+      "temperature": 0.48,
+      "drainage": 0.55,
+      "savagery": 0.2,
+      "alignment": 0.5
+    }
+  },
+  "biomes": {
+    "glacier": {
+      "name": "Glacier",
+      "ground": "ice",
+      "water": "icy",
+      "plants": {
+        "granite_boulder": 0.002
+      }
+    },
+    "tundra": {
+      "name": "Tundra",
+      "ground": "tundra",
+      "water": "icy",
+      "plants": {
+        "grass_tuft": 0.03,
+        "rocks_small": 0.01,
+        "granite_boulder": 0.003,
+        "berry_bush": 0.002
+      }
+    },
+    "taiga": {
+      "name": "Taiga",
+      "ground": "needle_floor",
+      "water": "icy",
+      "plants": {
+        "pine": 0.07,
+        "rocks_small": 0.004,
+        "berry_bush": 0.003
+      }
+    },
+    "forest_temperate_conifer": {
+      "name": "Conifer forest",
+      "ground": "needle_floor",
+      "water": "fresh",
+      "plants": {
+        "pine": 0.09,
+        "berry_bush": 0.004,
+        "rocks_small": 0.003
+      }
+    },
+    "forest_temperate_broadleaf": {
+      "name": "Broadleaf forest",
+      "ground": "forest_floor",
+      "water": "fresh",
+      "plants": {
+        "oak": 0.08,
+        "berry_bush": 0.008,
+        "fruit_tree": 0.003,
+        "grass_tuft": 0.01
+      }
+    },
+    "forest_tropical_conifer": {
+      "name": "Tropical conifer forest",
+      "ground": "needle_floor",
+      "water": "fresh",
+      "plants": {
+        "pine": 0.07,
+        "tree_tropical": 0.02,
+        "berry_bush": 0.004
+      }
+    },
+    "forest_tropical_dry_broadleaf": {
+      "name": "Dry tropical forest",
+      "ground": "forest_floor",
+      "water": "fresh",
+      "plants": {
+        "tree_savanna": 0.05,
+        "oak": 0.02,
+        "bush": 0.01,
+        "fruit_tree": 0.004
+      }
+    },
+    "forest_tropical_moist_broadleaf": {
+      "name": "Rainforest",
+      "ground": "jungle_floor",
+      "water": "fresh",
+      "plants": {
+        "tree_tropical": 0.1,
+        "fruit_tree": 0.008,
+        "berry_bush": 0.01,
+        "grass_tuft": 0.02
+      }
+    },
+    "grassland_temperate": {
+      "name": "Grassland",
+      "ground": "meadow",
+      "water": "fresh",
+      "plants": {
+        "grass_tuft": 0.05,
+        "flowers": 0.02,
+        "berry_bush": 0.006,
+        "oak": 0.004
+      }
+    },
+    "grassland_tropical": {
+      "name": "Tropical grassland",
+      "ground": "tropical_grass",
+      "water": "fresh",
+      "plants": {
+        "grass_tuft": 0.06,
+        "flowers": 0.015,
+        "tree_savanna": 0.004,
+        "fruit_tree": 0.002
+      }
+    },
+    "savanna_temperate": {
+      "name": "Savanna",
+      "ground": "dry_grass",
+      "water": "fresh",
+      "plants": {
+        "tree_savanna": 0.012,
+        "grass_tuft": 0.05,
+        "bush": 0.006
+      }
+    },
+    "savanna_tropical": {
+      "name": "Tropical savanna",
+      "ground": "dry_grass",
+      "water": "fresh",
+      "plants": {
+        "tree_savanna": 0.015,
+        "grass_tuft": 0.06,
+        "bush": 0.004
+      }
+    },
+    "shrubland_temperate": {
+      "name": "Shrubland",
+      "ground": "shrub_soil",
+      "water": "fresh",
+      "plants": {
+        "bush": 0.05,
+        "berry_bush": 0.012,
+        "rocks_small": 0.008
+      }
+    },
+    "shrubland_tropical": {
+      "name": "Tropical shrubland",
+      "ground": "shrub_soil",
+      "water": "fresh",
+      "plants": {
+        "bush": 0.06,
+        "berry_bush": 0.008,
+        "grass_tuft": 0.02
+      }
+    },
+    "desert_sand": {
+      "name": "Sand desert",
+      "ground": "sand",
+      "water": "salt",
+      "plants": {
+        "rocks_small": 0.004,
+        "bush": 0.002
+      }
+    },
+    "desert_rock": {
+      "name": "Rock desert",
+      "ground": "stony",
+      "water": "brackish",
+      "plants": {
+        "granite_boulder": 0.015,
+        "rocks_small": 0.02,
+        "ironstone": 0.003
+      }
+    },
+    "desert_badland": {
+      "name": "Badlands",
+      "ground": "red_clay",
+      "water": "brackish",
+      "plants": {
+        "dead_tree": 0.006,
+        "rocks_small": 0.012,
+        "granite_boulder": 0.006,
+        "ironstone": 0.004
+      }
+    },
+    "mountain": {
+      "name": "Mountains",
+      "ground": "rock",
+      "water": "icy",
+      "plants": {
+        "granite_boulder": 0.04,
+        "ironstone": 0.015,
+        "pine": 0.01,
+        "rocks_small": 0.02
+      }
+    },
+    "marsh_temperate_fresh": {
+      "name": "Marsh",
+      "ground": "mud",
+      "water": "marsh",
+      "plants": {
+        "reeds": 0.08,
+        "grass_tuft": 0.03
+      }
+    },
+    "marsh_temperate_salt": {
+      "name": "Salt marsh",
+      "ground": "mud",
+      "water": "swamp",
+      "plants": {
+        "reeds": 0.06
+      }
+    },
+    "marsh_tropical_fresh": {
+      "name": "Tropical marsh",
+      "ground": "mud",
+      "water": "marsh",
+      "plants": {
+        "reeds": 0.09,
+        "tree_tropical": 0.004
+      }
+    },
+    "marsh_tropical_salt": {
+      "name": "Tropical salt marsh",
+      "ground": "mud",
+      "water": "swamp",
+      "plants": {
+        "reeds": 0.07
+      }
+    },
+    "swamp_temperate_fresh": {
+      "name": "Swamp",
+      "ground": "swamp_mud",
+      "water": "swamp",
+      "plants": {
+        "tree_swamp": 0.06,
+        "reeds": 0.04
+      }
+    },
+    "swamp_temperate_salt": {
+      "name": "Salt swamp",
+      "ground": "swamp_mud",
+      "water": "swamp",
+      "plants": {
+        "tree_swamp": 0.04,
+        "reeds": 0.03
+      }
+    },
+    "swamp_tropical_fresh": {
+      "name": "Tropical swamp",
+      "ground": "swamp_mud",
+      "water": "swamp",
+      "plants": {
+        "tree_swamp": 0.05,
+        "tree_tropical": 0.03,
+        "reeds": 0.03
+      }
+    },
+    "swamp_tropical_salt": {
+      "name": "Tropical salt swamp",
+      "ground": "swamp_mud",
+      "water": "swamp",
+      "plants": {
+        "tree_swamp": 0.04,
+        "reeds": 0.03
+      }
+    },
+    "swamp_mangrove": {
+      "name": "Mangrove",
+      "ground": "swamp_mud",
+      "water": "salt",
+      "plants": {
+        "tree_swamp": 0.08
+      }
+    },
+    "ocean_arctic": {
+      "name": "Arctic ocean",
+      "ground": "ice",
+      "water": "icy",
+      "plants": {}
+    },
+    "ocean_temperate": {
+      "name": "Ocean",
+      "ground": "sand",
+      "water": "deep",
+      "plants": {}
+    },
+    "ocean_tropical": {
+      "name": "Tropical ocean",
+      "ground": "sand",
+      "water": "deep",
+      "plants": {}
+    },
+    "lake_fresh": {
+      "name": "Lake",
+      "ground": "mud",
+      "water": "pond",
+      "plants": {}
+    },
+    "lake_brackish": {
+      "name": "Brackish lake",
+      "ground": "mud",
+      "water": "brackish",
+      "plants": {}
+    },
+    "lake_salt": {
+      "name": "Salt lake",
+      "ground": "sand",
+      "water": "salt",
+      "plants": {}
+    }
+  },
+  "regions": {
+    "about": "Region character from the savagery and alignment fields (DF's savagery and good/evil). Cursed and blessed swap the ground and change plants; savagery changes wildlife numbers (UF_Wildlife).",
+    "savagery": [
+      {
+        "id": "tame",
+        "name": "Tame",
+        "below": 0.33
+      },
+      {
+        "id": "wild",
+        "name": "Wild",
+        "below": 0.66
+      },
+      {
+        "id": "primeval",
+        "name": "Primeval",
+        "below": 1.01
+      }
+    ],
+    "alignment": [
+      {
+        "id": "cursed",
+        "name": "Cursed",
+        "below": 0.18
+      },
+      {
+        "id": "neutral",
+        "name": "Neutral",
+        "below": 0.82
+      },
+      {
+        "id": "blessed",
+        "name": "Blessed",
+        "below": 1.01
+      }
+    ],
+    "cursedGround": {
+      "meadow": "cursed_grass",
+      "tropical_grass": "cursed_grass",
+      "dry_grass": "cursed_grass",
+      "forest_floor": "ash",
+      "jungle_floor": "cursed_grass"
+    },
+    "blessedGround": {
+      "meadow": "blessed_grass",
+      "tropical_grass": "blessed_grass"
+    },
+    "cursedPlants": {
+      "dead_tree": 0.02
+    },
+    "blessedPlants": {
+      "flowers": 0.03,
+      "fruit_tree": 0.004
+    }
   },
   "start": {
     "about": "The only fixed part of a new game (VISION V4, revised 2026-09-18): a man and a woman in the middle of the start area, with names generated from the seed. Event IDs follow this order; UF_ColonyOverseer needs the man = 1 and the woman = 2. {male} and {female} are replaced by the generated names.",
     "note": "<glade>",
     "clearRadius": 3,
     "events": [
-      { "name": "{male}", "dx": -1, "dy": 0, "image": { "characterName": "$Adam", "direction": 6 }, "note": "<colonist: {male}> <gender: Male>" },
-      { "name": "{female}", "dx": 1, "dy": 0, "image": { "characterName": "$Eve", "direction": 4 }, "note": "<colonist: {female}> <gender: Female>" }
+      {
+        "name": "{male}",
+        "dx": -1,
+        "dy": 0,
+        "image": {
+          "characterName": "$Adam",
+          "direction": 6
+        },
+        "note": "<colonist: {male}> <gender: Male>",
+        "requestId": "AR-010",
+        "status": "U7 stand-in"
+      },
+      {
+        "name": "{female}",
+        "dx": 1,
+        "dy": 0,
+        "image": {
+          "characterName": "$Eve",
+          "direction": 4
+        },
+        "note": "<colonist: {female}> <gender: Female>",
+        "requestId": "AR-011",
+        "status": "U7 stand-in"
+      }
     ],
     "names": {
-      "start": ["al", "bra", "cae", "dor", "el", "fen", "gar", "hel", "is", "jor", "ka", "lia", "mer", "na", "or", "per", "ro", "sa", "tam", "ul", "ver", "wil", "yve", "zor"],
-      "male": ["an", "ar", "en", "ic", "on", "or", "ric", "us", "ald", "em"],
-      "female": ["a", "ia", "ina", "elle", "ra", "wen", "ys", "ette", "ah", "ine"]
+      "start": [
+        "al",
+        "bra",
+        "cae",
+        "dor",
+        "el",
+        "fen",
+        "gar",
+        "hel",
+        "is",
+        "jor",
+        "ka",
+        "lia",
+        "mer",
+        "na",
+        "or",
+        "per",
+        "ro",
+        "sa",
+        "tam",
+        "ul",
+        "ver",
+        "wil",
+        "yve",
+        "zor"
+      ],
+      "male": [
+        "an",
+        "ar",
+        "en",
+        "ic",
+        "on",
+        "or",
+        "ric",
+        "us",
+        "ald",
+        "em"
+      ],
+      "female": [
+        "a",
+        "ia",
+        "ina",
+        "elle",
+        "ra",
+        "wen",
+        "ys",
+        "ette",
+        "ah",
+        "ine"
+      ]
     },
     "pond": {
       "about": "A pond at a random direction and distance from the start, so the pair can drink. Its size varies too.",
-      "distance": [10, 30],
-      "radius": [2, 5]
+      "distance": [
+        10,
+        30
+      ],
+      "radius": [
+        2,
+        5
+      ]
     }
   },
   "river": {
@@ -37,139 +994,1000 @@
       "id": "oak",
       "name": "Oak",
       "image": "!$TimberOak",
-      "characterIndex": 0,
-      "note": "<tree> <harvestable>",
-      "density": 0.05,
-      "clump": 0.85,
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.025,
+      "clump": 0.7,
       "clumpScale": 18,
-      "avoidWater": 2,
-      "maxPerArea": 300
+      "avoidWater": 1,
+      "maxPerArea": 60,
+      "requestId": "AR-021",
+      "status": "U7 stand-in"
     },
     {
       "id": "pine",
       "name": "Pine",
       "image": "!$PineTree",
-      "characterIndex": 0,
-      "note": "<tree> <harvestable>",
-      "density": 0.04,
-      "clump": 0.9,
-      "clumpScale": 26,
-      "avoidWater": 3,
-      "maxPerArea": 250
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.025,
+      "clump": 0.7,
+      "clumpScale": 20,
+      "avoidWater": 1,
+      "maxPerArea": 60,
+      "requestId": "AR-021",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "fruit_tree",
+      "name": "Fruit tree",
+      "image": "!$FruitTree",
+      "note": "<tree> <fruit> <food> <harvestable> <resource: wood>",
+      "density": 0.012,
+      "clump": 0.5,
+      "clumpScale": 12,
+      "avoidWater": 1,
+      "maxPerArea": 25,
+      "requestId": "AR-020",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tree_savanna",
+      "name": "Flat-top tree",
+      "image": "!$U7_Flat-toptree",
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.015,
+      "clump": 0.5,
+      "clumpScale": 16,
+      "avoidWater": 1,
+      "maxPerArea": 40,
+      "requestId": "AR-102",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tree_swamp",
+      "name": "Swamp tree",
+      "image": "!$U7_Swamptree",
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.015,
+      "clump": 0.6,
+      "clumpScale": 14,
+      "avoidWater": 0,
+      "maxPerArea": 40,
+      "requestId": "AR-102",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tree_tropical",
+      "name": "Broadleaf giant",
+      "image": "!$U7_Broadleafgiant",
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.015,
+      "clump": 0.6,
+      "clumpScale": 16,
+      "avoidWater": 1,
+      "maxPerArea": 40,
+      "requestId": "AR-102",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "dead_tree",
+      "name": "Dead tree",
+      "image": "!$U7_Deadtree",
+      "note": "<tree> <harvestable> <resource: wood>",
+      "density": 0.012,
+      "clump": 0.5,
+      "clumpScale": 12,
+      "avoidWater": 1,
+      "maxPerArea": 30,
+      "requestId": "AR-102",
+      "status": "U7 stand-in"
     },
     {
       "id": "berry_bush",
       "name": "Berry bush",
       "image": "!$BerryBush",
-      "characterIndex": 0,
       "note": "<harvestable> <food>",
-      "density": 0.01,
-      "clump": 0.6,
+      "density": 0.025,
+      "clump": 0.5,
       "clumpScale": 10,
       "avoidWater": 1,
-      "maxPerArea": 120
+      "maxPerArea": 50,
+      "requestId": "AR-023",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "bush",
+      "name": "Shrub",
+      "image": "!$U7_Shrub",
+      "note": "<harvestable> <resource: fiber>",
+      "density": 0.025,
+      "clump": 0.5,
+      "clumpScale": 10,
+      "avoidWater": 1,
+      "maxPerArea": 50,
+      "requestId": "AR-023",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "grass_tuft",
+      "name": "Tall grass",
+      "image": "!$U7_TallGrass",
+      "note": "<harvestable> <resource: fiber>",
+      "priority": "below",
+      "through": true,
+      "density": 0.035,
+      "clump": 0.5,
+      "clumpScale": 8,
+      "avoidWater": 0,
+      "maxPerArea": 60,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "reeds",
+      "name": "Reeds",
+      "image": "!$U7_Reeds",
+      "note": "<harvestable> <resource: fiber>",
+      "priority": "below",
+      "through": true,
+      "density": 0.025,
+      "clump": 0.6,
+      "clumpScale": 8,
+      "avoidWater": 0,
+      "maxPerArea": 50,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "flowers",
+      "name": "Wildflowers",
+      "image": "!$U7_Wildflowers",
+      "note": "<harvestable>",
+      "priority": "below",
+      "through": true,
+      "density": 0.025,
+      "clump": 0.6,
+      "clumpScale": 8,
+      "avoidWater": 0,
+      "maxPerArea": 50,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "rocks_small",
+      "name": "Loose stones",
+      "image": "!$U7_LooseStones",
+      "note": "<resource: stone>",
+      "priority": "below",
+      "through": true,
+      "density": 0.02,
+      "clump": 0.5,
+      "clumpScale": 10,
+      "avoidWater": 0,
+      "maxPerArea": 40,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
     },
     {
       "id": "granite_boulder",
       "name": "Granite boulder",
       "image": "!$GraniteBoulder",
-      "characterIndex": 0,
       "note": "<resource: stone>",
-      "density": 0.012,
-      "clump": 0.7,
-      "clumpScale": 14,
+      "density": 0.015,
+      "clump": 0.6,
+      "clumpScale": 12,
       "avoidWater": 1,
-      "maxPerArea": 100
+      "maxPerArea": 35,
+      "requestId": "AR-022",
+      "status": "U7 stand-in"
     },
     {
       "id": "ironstone",
       "name": "Ironstone outcrop",
       "image": "!$IronstoneDeposit",
-      "characterIndex": 0,
       "note": "<resource: mineral>",
+      "density": 0.012,
+      "clump": 0.6,
+      "clumpScale": 14,
+      "avoidWater": 1,
+      "maxPerArea": 25,
+      "requestId": "AR-022",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "cave_ironstone",
+      "name": "Ore vein",
+      "image": "!$IronOreVein",
+      "note": "<resource: mineral>",
+      "density": 0.012,
+      "clump": 0.5,
+      "clumpScale": 12,
+      "maxPerArea": 25,
+      "requestId": "AR-044",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "cave_boulder",
+      "name": "Boulder",
+      "image": "!$U7_CaveBoulder",
+      "note": "<resource: stone>",
+      "density": 0.015,
+      "clump": 0.5,
+      "clumpScale": 10,
+      "maxPerArea": 30,
+      "requestId": "AR-044",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "crystal",
+      "name": "Crystal cluster",
+      "image": "!$U7_CrystalSpire",
+      "note": "<resource: gem>",
+      "density": 0.012,
+      "clump": 0.5,
+      "clumpScale": 10,
+      "maxPerArea": 25,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "crystal_small",
+      "name": "Small crystals",
+      "image": "!$U7_SmallCrystals",
+      "note": "<resource: gem>",
+      "priority": "below",
+      "through": true,
+      "density": 0.015,
+      "clump": 0.5,
+      "clumpScale": 8,
+      "maxPerArea": 30,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "gravel",
+      "name": "Gravel",
+      "image": "!$U7_Gravel",
+      "note": "<resource: stone>",
+      "priority": "below",
+      "through": true,
+      "density": 0.015,
+      "clump": 0.5,
+      "clumpScale": 8,
+      "maxPerArea": 30,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "bones",
+      "name": "Old bones",
+      "image": "!$U7_OldBones",
+      "note": "<remains>",
+      "priority": "below",
+      "through": true,
       "density": 0.01,
-      "clump": 0.95,
-      "clumpScale": 30,
-      "avoidWater": 2,
-      "maxPerArea": 30
+      "clump": 0.4,
+      "clumpScale": 10,
+      "maxPerArea": 20,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tree_stump",
+      "name": "Felled tree stump",
+      "image": "!$TreeStump",
+      "note": "<harvestable> <resource: wood>",
+      "density": 0,
+      "avoidWater": 1,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "campfire",
+      "name": "Campfire hearth",
+      "image": "!$Campfire",
+      "note": "<fire> <light: 5> <warmth>",
+      "density": 0,
+      "avoidWater": 1,
+      "requestId": "AR-103",
+      "status": "U7 stand-in"
     }
   ],
-  "maxObjectsPerArea": 800,
+  "maxObjectsPerArea": 1400,
+  "wildlife": {
+    "about": "Wildlife and creatures placed with the map on New Game (UF_Wildlife). All use authentic 2.5D U7 stand-ins.",
+    "species": [
+      {
+        "id": "wolf",
+        "name": "Wolf",
+        "image": "$U7_Wolf",
+        "herd": [
+          2,
+          4
+        ],
+        "wander": 14,
+        "note": "<creature> <predator>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "taiga": 3,
+          "tundra": 2,
+          "forest_temperate_conifer": 2,
+          "forest_temperate_broadleaf": 1,
+          "mountain": 1,
+          "grassland_temperate": 0.5
+        }
+      },
+      {
+        "id": "wildcat",
+        "name": "Wildcat",
+        "image": "$U7_Cat",
+        "herd": [
+          1,
+          1
+        ],
+        "wander": 10,
+        "note": "<creature> <predator>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "forest_temperate_broadleaf": 2,
+          "forest_tropical_moist_broadleaf": 3,
+          "shrubland_temperate": 2,
+          "shrubland_tropical": 2,
+          "forest_tropical_dry_broadleaf": 2
+        }
+      },
+      {
+        "id": "boar",
+        "name": "Boar",
+        "image": "$U7_Ox",
+        "herd": [
+          2,
+          5
+        ],
+        "wander": 12,
+        "note": "<creature> <grazer> <meat>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "forest_temperate_broadleaf": 3,
+          "grassland_temperate": 2,
+          "forest_tropical_dry_broadleaf": 2,
+          "savanna_temperate": 2,
+          "swamp_temperate_fresh": 1
+        }
+      },
+      {
+        "id": "fowl",
+        "name": "Wild fowl",
+        "image": "$U7_Chicken",
+        "herd": [
+          3,
+          6
+        ],
+        "wander": 8,
+        "note": "<creature> <grazer> <meat> <eggs>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "grassland_temperate": 3,
+          "grassland_tropical": 3,
+          "savanna_tropical": 2,
+          "marsh_temperate_fresh": 3,
+          "marsh_tropical_fresh": 3,
+          "shrubland_temperate": 1
+        }
+      },
+      {
+        "id": "hare",
+        "name": "Hare",
+        "image": "$U7_Hare",
+        "herd": [
+          2,
+          6
+        ],
+        "wander": 8,
+        "note": "<creature> <grazer> <small>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "grassland_temperate": 4,
+          "shrubland_temperate": 3,
+          "tundra": 2
+        }
+      },
+      {
+        "id": "fox",
+        "name": "Fox",
+        "image": "$U7_Fox",
+        "herd": [
+          1,
+          2
+        ],
+        "wander": 12,
+        "note": "<creature> <predator>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "forest_temperate_broadleaf": 2,
+          "taiga": 2,
+          "grassland_temperate": 1
+        }
+      },
+      {
+        "id": "dog",
+        "name": "Hound",
+        "image": "$U7_Dog",
+        "herd": [
+          1,
+          3
+        ],
+        "wander": 10,
+        "note": "<creature> <domestic>",
+        "requestId": "AR-403",
+        "status": "U7 stand-in",
+        "biomes": {
+          "grassland_temperate": 1
+        }
+      },
+      {
+        "id": "hawk",
+        "name": "Hawk",
+        "image": "$U7_Hawk",
+        "herd": [
+          1,
+          1
+        ],
+        "wander": 16,
+        "note": "<creature> <bird>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "mountain": 3,
+          "grassland_temperate": 2
+        }
+      },
+      {
+        "id": "deer",
+        "name": "Deer",
+        "image": "$U7_Deer",
+        "herd": [
+          3,
+          7
+        ],
+        "wander": 14,
+        "note": "<creature> <grazer> <large>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "forest_temperate_broadleaf": 4,
+          "forest_temperate_conifer": 3
+        }
+      },
+      {
+        "id": "horse",
+        "name": "Wild horse",
+        "image": "$U7_Horse",
+        "herd": [
+          2,
+          5
+        ],
+        "wander": 16,
+        "note": "<creature> <grazer> <draft>",
+        "requestId": "AR-403",
+        "status": "U7 stand-in",
+        "biomes": {
+          "grassland_temperate": 3,
+          "savanna_temperate": 2
+        }
+      },
+      {
+        "id": "sheep",
+        "name": "Wild sheep",
+        "image": "$U7_Sheep",
+        "herd": [
+          3,
+          8
+        ],
+        "wander": 10,
+        "note": "<creature> <grazer> <wool>",
+        "requestId": "AR-403",
+        "status": "U7 stand-in",
+        "biomes": {
+          "mountain": 4,
+          "grassland_temperate": 2
+        }
+      },
+      {
+        "id": "rat",
+        "name": "Rat",
+        "image": "$U7_Rat",
+        "herd": [
+          2,
+          6
+        ],
+        "wander": 6,
+        "note": "<creature> <pest>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "swamp_temperate_fresh": 2,
+          "marsh_temperate_fresh": 2
+        }
+      },
+      {
+        "id": "bog_horror",
+        "name": "Bog horror",
+        "image": "$U7_BogHorror",
+        "herd": [
+          1,
+          1
+        ],
+        "wander": 8,
+        "note": "<creature> <monster>",
+        "requestId": "AR-402",
+        "status": "U7 stand-in",
+        "minSavagery": "primeval",
+        "biomes": {
+          "swamp_temperate_fresh": 1,
+          "swamp_tropical_fresh": 1,
+          "marsh_temperate_salt": 0.5
+        }
+      },
+      {
+        "id": "serpent",
+        "name": "Giant serpent",
+        "image": "$U7_Serpent",
+        "herd": [
+          1,
+          2
+        ],
+        "wander": 10,
+        "note": "<creature> <predator>",
+        "requestId": "AR-401",
+        "status": "U7 stand-in",
+        "biomes": {
+          "swamp_temperate_fresh": 2,
+          "swamp_tropical_fresh": 2
+        }
+      }
+    ],
+    "savageryScale": {
+      "tame": 0.6,
+      "wild": 1,
+      "primeval": 1.8
+    },
+    "startSafeRadius": 24
+  },
   "factions": {
     "about": "Factions are rolled from the world seed on every New Game (UF_Factions). Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied).",
-    "count": [4, 7],
-    "playerFaction": { "id": "player", "name": "Your colony", "species": "human" },
+    "count": [
+      4,
+      7
+    ],
+    "playerFaction": {
+      "id": "player",
+      "name": "Your colony",
+      "species": "human"
+    },
     "species": [
-      { "id": "human", "name": "Humans", "home": "surface", "weight": 3, "groups": ["League", "Freehold", "Company", "Kingdom"] },
-      { "id": "elf", "name": "Elves", "home": "surface", "weight": 2, "groups": ["Circle", "Grove", "Court"] },
-      { "id": "dwarf", "name": "Dwarves", "home": "underground", "weight": 2, "groups": ["Hold", "Deep", "Clan"] },
-      { "id": "goblin", "name": "Goblins", "home": "underground", "weight": 2, "groups": ["Warren", "Pack", "Rabble"] },
-      { "id": "orc", "name": "Orcs", "home": "surface", "weight": 2, "groups": ["Horde", "Band", "Warclan"] },
-      { "id": "gnome", "name": "Gnomes", "home": "underground", "weight": 1, "groups": ["Guild", "Burrow", "Workshop"] },
-      { "id": "automaton", "name": "Automata", "home": "underground", "weight": 1, "groups": ["Collective", "Array", "Foundry"], "about": "science-fiction element (VISION V8)" }
+      {
+        "id": "human",
+        "name": "Humans",
+        "home": "surface",
+        "weight": 3,
+        "groups": [
+          "League",
+          "Freehold",
+          "Company",
+          "Kingdom"
+        ],
+        "image": "$U7_Townsman",
+        "requestId": "AR-050",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "elf",
+        "name": "Elves",
+        "home": "surface",
+        "weight": 2,
+        "groups": [
+          "Circle",
+          "Grove",
+          "Court"
+        ],
+        "image": "$U7_Ranger",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "dwarf",
+        "name": "Dwarves",
+        "home": "surface",
+        "weight": 2,
+        "groups": [
+          "Hold",
+          "Deep",
+          "Clan"
+        ],
+        "image": "$U7_DwarfGuard",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "goblin",
+        "name": "Goblins",
+        "home": "surface",
+        "weight": 2,
+        "groups": [
+          "Warren",
+          "Pack",
+          "Rabble"
+        ],
+        "image": "$U7_Goblin",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "orc",
+        "name": "Orcs",
+        "home": "surface",
+        "weight": 2,
+        "groups": [
+          "Horde",
+          "Band",
+          "Warclan"
+        ],
+        "image": "$U7_Orc",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "gnome",
+        "name": "Gnomes",
+        "home": "surface",
+        "weight": 1,
+        "groups": [
+          "Guild",
+          "Burrow",
+          "Workshop"
+        ],
+        "image": "$U7_Gnome",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      },
+      {
+        "id": "automaton",
+        "name": "Automata",
+        "home": "surface",
+        "weight": 1,
+        "groups": [
+          "Collective",
+          "Array",
+          "Foundry"
+        ],
+        "about": "science-fiction element (VISION V8)",
+        "image": "$U7_Automaton",
+        "requestId": "AR-400",
+        "status": "U7 stand-in"
+      }
     ],
     "speciesAffinity": {
-      "human|elf": 10, "human|dwarf": 10, "human|gnome": 10, "human|goblin": -25, "human|orc": -25,
-      "elf|dwarf": -10, "elf|orc": -35, "elf|goblin": -30,
-      "dwarf|goblin": -40, "dwarf|orc": -20, "dwarf|gnome": 20,
-      "goblin|orc": 15, "gnome|goblin": -25, "automaton|goblin": -15
+      "human|elf": 10,
+      "human|dwarf": 10,
+      "human|gnome": 10,
+      "human|goblin": -25,
+      "human|orc": -25,
+      "elf|dwarf": -10,
+      "elf|orc": -35,
+      "elf|goblin": -30,
+      "dwarf|goblin": -40,
+      "dwarf|orc": -20,
+      "dwarf|gnome": 20,
+      "goblin|orc": 15,
+      "gnome|goblin": -25,
+      "automaton|goblin": -15
     },
     "ethos": [
-      { "id": "traders", "name": "Traders", "toAll": 10, "toSame": 5 },
-      { "id": "warlike", "name": "Warlike", "toAll": -20, "toSame": -10 },
-      { "id": "reclusive", "name": "Reclusive", "toAll": -8, "toSame": 0 },
-      { "id": "expansionist", "name": "Expansionist", "toAll": -5, "toSame": -20 },
-      { "id": "pious", "name": "Pious", "toAll": 0, "toSame": 15 },
-      { "id": "scholarly", "name": "Scholarly", "toAll": 5, "toSame": 10 },
-      { "id": "nomadic", "name": "Nomadic", "toAll": 0, "toSame": 5 },
-      { "id": "industrious", "name": "Industrious", "toAll": 3, "toSame": 5 }
+      {
+        "id": "traders",
+        "name": "Traders",
+        "toAll": 10,
+        "toSame": 5
+      },
+      {
+        "id": "warlike",
+        "name": "Warlike",
+        "toAll": -20,
+        "toSame": -10
+      },
+      {
+        "id": "reclusive",
+        "name": "Reclusive",
+        "toAll": -8,
+        "toSame": 0
+      },
+      {
+        "id": "expansionist",
+        "name": "Expansionist",
+        "toAll": -5,
+        "toSame": -20
+      },
+      {
+        "id": "pious",
+        "name": "Pious",
+        "toAll": 0,
+        "toSame": 15
+      },
+      {
+        "id": "scholarly",
+        "name": "Scholarly",
+        "toAll": 5,
+        "toSame": 10
+      },
+      {
+        "id": "nomadic",
+        "name": "Nomadic",
+        "toAll": 0,
+        "toSame": 5
+      },
+      {
+        "id": "industrious",
+        "name": "Industrious",
+        "toAll": 3,
+        "toSame": 5
+      }
     ],
     "sameSpecies": 10,
     "randomSpread": 30,
     "names": {
-      "start": ["ar", "bel", "cor", "dun", "eth", "fal", "gor", "hal", "ir", "jas", "kel", "lor", "mar", "nor", "ost", "pel", "quin", "ras", "sol", "tor", "ul", "vas", "wen", "yor", "zan"],
-      "end": ["a", "en", "is", "or", "um", "eth", "ar", "ic", "ok", "wyn", "ath", "esh"]
+      "start": [
+        "ar",
+        "bel",
+        "cor",
+        "dun",
+        "eth",
+        "fal",
+        "gor",
+        "hal",
+        "ir",
+        "jas",
+        "kel",
+        "lor",
+        "mar",
+        "nor",
+        "ost",
+        "pel",
+        "quin",
+        "ras",
+        "sol",
+        "tor",
+        "ul",
+        "vas",
+        "wen",
+        "yor",
+        "zan"
+      ],
+      "end": [
+        "a",
+        "en",
+        "is",
+        "or",
+        "um",
+        "eth",
+        "ar",
+        "ic",
+        "ok",
+        "wyn",
+        "ath",
+        "esh"
+      ]
     }
   },
-  "underground": {
-    "about": "The layer(s) below the surface. Same 256x256 cells as the area above; cave mouths link cell (x, y) on the surface to (x, y) below. Tiles are RMMZ Dungeon-tileset stand-ins until ASSET_REQUESTS AR-040..AR-043.",
-    "tilesetId": 4,
-    "floor": { "tileId": 3200, "autotile": true, "about": "Dungeon A2 'Ground C (Rock Cave)'" },
-    "rock": { "tileId": 5936, "autotile": true, "about": "Dungeon A4 'Wall B (Rock Cave)' top; made impassable by region 250" },
-    "connectionTileId": 1549,
-    "connectionTileAbout": "Dungeon A5 'Stairs A (Rock)': the way up, under each cave mouth",
-    "surfaceConnectionTileId": 42,
-    "surfaceConnectionTileAbout": "Outside B 'Hole B (Wood Ladder)': the cave mouth on the surface",
-    "connectionsPerArea": 4,
-    "guaranteeNearStart": 16,
-    "chamberRadius": 3,
-    "caveScale": 28,
-    "caveThreshold": 0.58,
-    "tunnelWidth": 0.035,
-    "maxObjectsPerArea": 400,
-    "objects": [
-      {
-        "id": "cave_ironstone",
-        "name": "Ironstone vein",
-        "image": "!$IronstoneDeposit",
-        "characterIndex": 0,
-        "note": "<resource: mineral>",
-        "density": 0.02,
-        "clump": 0.9,
-        "clumpScale": 20,
-        "maxPerArea": 150
-      },
-      {
-        "id": "cave_boulder",
-        "name": "Boulder",
-        "image": "!$GraniteBoulder",
-        "characterIndex": 0,
-        "note": "<resource: stone>",
-        "density": 0.02,
-        "clump": 0.6,
-        "clumpScale": 12,
-        "maxPerArea": 150
-      }
-    ]
+  "items": [
+    {
+      "id": "wood_log",
+      "name": "Wood log",
+      "image": "!$U7_Item_WoodLog",
+      "category": "wood",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "firewood",
+      "name": "Firewood",
+      "image": "!$U7_Item_Firewood",
+      "category": "fuel",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "rough_stone",
+      "name": "Rough stone",
+      "image": "!$U7_Item_RoughStone",
+      "category": "stone",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "iron_ore",
+      "name": "Iron ore",
+      "image": "!$U7_Item_IronOre",
+      "category": "ore",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "lead_ore",
+      "name": "Lead ore",
+      "image": "!$U7_Item_LeadOre",
+      "category": "ore",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "blackrock",
+      "name": "Blackrock",
+      "image": "!$U7_Item_Blackrock",
+      "category": "special",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "gold_nugget",
+      "name": "Gold nugget",
+      "image": "!$U7_Item_GoldNugget",
+      "category": "metal",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "metal_bar",
+      "name": "Metal bar",
+      "image": "!$U7_Item_MetalBar",
+      "category": "refined",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "rough_gem",
+      "name": "Rough gem",
+      "image": "!$U7_Item_RoughGem",
+      "category": "gem",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "cut_gem",
+      "name": "Cut gem",
+      "image": "!$U7_Item_CutGem",
+      "category": "gem",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "plant_fiber",
+      "name": "Plant fiber",
+      "image": "!$U7_Item_PlantFiber",
+      "category": "fiber",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "wool_fleece",
+      "name": "Wool fleece",
+      "image": "!$U7_Item_WoolFleece",
+      "category": "fiber",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "straw_bundle",
+      "name": "Straw bundle",
+      "image": "!$U7_Item_StrawBundle",
+      "category": "fiber",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "seed_pouch",
+      "name": "Seed pouch",
+      "image": "!$U7_Item_SeedPouch",
+      "category": "agriculture",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "wild_berries",
+      "name": "Wild berries",
+      "image": "!$U7_Item_WildBerries",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "tree_fruit",
+      "name": "Tree fruit",
+      "image": "!$U7_Item_TreeFruit",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "cave_mushroom",
+      "name": "Mushroom",
+      "image": "!$U7_Item_CaveMushroom",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "root_vegetable",
+      "name": "Root vegetable",
+      "image": "!$U7_Item_RootVegetable",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "raw_meat",
+      "name": "Raw meat",
+      "image": "!$U7_Item_RawMeat",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "haunch_meat",
+      "name": "Haunch meat",
+      "image": "!$U7_Item_HaunchMeat",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "river_fish",
+      "name": "River fish",
+      "image": "!$U7_Item_RiverFish",
+      "category": "food",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "animal_bone",
+      "name": "Animal bone",
+      "image": "!$U7_Item_AnimalBone",
+      "category": "bone",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    },
+    {
+      "id": "leather_hide",
+      "name": "Leather hide",
+      "image": "!$U7_Item_LeatherHide",
+      "category": "leather",
+      "requestId": "AR-200",
+      "status": "U7 stand-in"
+    }
+  ],
+  "ui": {
+    "lookCursor": {
+      "name": "Look cursor",
+      "image": "U7_Cursor.png",
+      "requestId": "AR-030",
+      "status": "U7 stand-in"
+    },
+    "selectionMarker": {
+      "name": "Unit selection marker",
+      "image": "U7_Select.png",
+      "requestId": "AR-031",
+      "status": "U7 stand-in"
+    },
+    "windowSkin": {
+      "name": "UI Window skin",
+      "image": "Window.png",
+      "requestId": "AR-033",
+      "status": "U7 stand-in"
+    }
   }
 }

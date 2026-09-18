@@ -106,7 +106,7 @@
         startInWorld: (P.StartInWorld || "true") === "true",
         seed: num("Seed", 0),
         unitStepFrames: Math.max(1, num("UnitStepFrames", 16)),
-        layers: Math.max(0, Math.min(9, num("UndergroundLayers", 1)))
+        layers: Math.max(0, Math.min(9, num("UndergroundLayers", 0)))
     });
     // Region IDs with engine meaning on area maps (layer 5 of the map data).
     const ROCK_REGION = 250;       // solid rock: never passable
@@ -126,6 +126,15 @@
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
     const areaKey = (ax, ay, az = 0) => (az ? `${ax},${ay},${az}` : `${ax},${ay}`);
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    // 4-way movement (UF_Movement8D FourWay, VISION V3 revised 2026-09-18): units step along one axis at a time.
+    const fourWay = () => !window.UF_Dir8 || UF_Dir8.fourWay !== false;
+    // One step toward (ax, ay) remaining: both axes in 8-way, the longer axis in 4-way.
+    const stepToward = (ax, ay) => {
+        const dx = Math.sign(ax), dy = Math.sign(ay);
+        if (!fourWay() || dx === 0 || dy === 0) return { dx, dy };
+        return Math.abs(ax) >= Math.abs(ay) ? { dx, dy: 0 } : { dx: 0, dy };
+    };
 
     // Facing for 8-way movement with 4 facings (GUIDE_25D §3.5): NE→E, SE→S, SW→W, NW→N.
     const facing = (dx, dy) => {
@@ -215,7 +224,7 @@
     World.newWorld = function(seed) {
         const s = seed || CONFIG.seed || Math.floor(Math.random() * 0x7ffffffe) + 1;
         this.state = {
-            version: 1,
+            version: 2,
             seed: s,
             areasX: CONFIG.areasX,
             areasY: CONFIG.areasY,
@@ -224,8 +233,10 @@
             startArea: { x: Math.floor(CONFIG.areasX / 2), y: Math.floor(CONFIG.areasY / 2) },
             units: {},
             nextUnitId: 1,
-            diffs: {}
+            diffs: {},
+            objectDiffs: {}
         };
+        buildCache.clear();
         this._convertTemplateUnits();
         emit("world:created", this.state);
         return this.state;
@@ -310,7 +321,8 @@
      * Register an area generator. fn(ctx) runs for every area build, in order (low first).
      * ctx: { areaX, areaY, width, height, seed, rng, isStart, templateRect,
      *        setTile(x, y, layer, tileId), getTile(x, y, layer), index(x, y, layer),
-     *        addEvent({ name, x, y, image, note, priorityType, through, directionFix, walkAnime }) -> event id }
+     *        addEvent({ name, x, y, image, note, priorityType, through, directionFix, walkAnime }) -> event id,
+     *        objects (Uint16Array), setObject(x, y, type), getObject(x, y) }  (object types: UF_Objects)
      * Generators must be deterministic: use ctx.rng / UF.World.rngFor only, never Math.random.
      */
     World.registerGenerator = function(name, fn, order = 100) {
@@ -361,6 +373,8 @@
         const off = this.templateOffset();
         const templateRect = tpl ? { x: off.x, y: off.y, width: tpl.width, height: tpl.height } : null;
         const events = [null];
+        // Map objects (plants, stones, buildings): one type number per cell, drawn and simulated by UF_Objects, not events.
+        const objects = new Uint16Array(cells);
         let nextEventId = tpl ? tpl.events.length : 1; // keep template event IDs unchanged (UF_ColonyOverseer relies on them)
 
         const map = {
@@ -370,7 +384,7 @@
             width: size, height: size, note: "",
             parallaxLoopX: false, parallaxLoopY: false, parallaxName: "", parallaxShow: false, parallaxSx: 0, parallaxSy: 0,
             scrollType: 0, specifyBattleback: false, tilesetId: CONFIG.tilesetId,
-            data, events, ufArea: { x: ax, y: ay, z: az }
+            data, events, ufArea: { x: ax, y: ay, z: az }, ufObjects: objects
         };
 
         const ctx = {
@@ -384,6 +398,12 @@
                 if (x >= 0 && y >= 0 && x < size && y < size && layer >= 0 && layer < 6) data[index(x, y, layer)] = tileId;
             },
             getTile: (x, y, layer) => data[index(x, y, layer)],
+            /** Object layer (UF_Objects): type number per cell, 0 = nothing. */
+            objects,
+            setObject(x, y, type) {
+                if (x >= 0 && y >= 0 && x < size && y < size) objects[y * size + x] = type;
+            },
+            getObject: (x, y) => (x >= 0 && y >= 0 && x < size && y < size ? objects[y * size + x] : 0),
             addEvent(spec) {
                 if (nextEventId >= EVENT_BASE) throw new Error(`UF_World: area (${ax},${ay}) has too many generated events (limit ${EVENT_BASE - 1})`);
                 const id = nextEventId++;
@@ -426,6 +446,8 @@
 
         const diff = st.diffs[areaKey(ax, ay, az)];
         if (diff) for (const i in diff) data[Number(i)] = diff[i];
+        const odiff = st.objectDiffs && st.objectDiffs[areaKey(ax, ay, az)];
+        if (odiff) for (const i in odiff) objects[Number(i)] = odiff[i];
 
         for (const u of this.unitsInArea(ax, ay, az)) events[EVENT_BASE + u.id] = unitEventData(u);
         return map;
@@ -443,6 +465,8 @@
             const scene = SceneManager._scene;
             if (scene instanceof Scene_Map && scene._spriteset) scene._spriteset._tilemap.refresh();
         }
+        const cached = buildCache.get(cacheKey(ax, ay, az));
+        if (cached) cached.data[i] = tileId;
         emit("world:tileChanged", { x: ax, y: ay, z: az }, x, y, layer, tileId);
         return true;
     };
@@ -454,8 +478,49 @@
         if (sameArea({ x: ax, y: ay, z: az }, this.currentArea()) && $dataMap && $dataMap.data) return $dataMap.data[i];
         const diff = this.state.diffs[areaKey(ax, ay, az)];
         if (diff && diff[i] !== undefined) return diff[i];
-        return this.buildArea(ax, ay, az).data[i];
+        return this.peekArea(ax, ay, az).data[i];
     };
+
+    /** Change the object on a cell anywhere in the world (type number from UF_Objects, 0 = nothing). Recorded like tiles. */
+    World.setObject = function(ax, ay, x, y, type, az = 0) {
+        const size = this.state.size;
+        if (!this.inWorld(ax, ay, az) || x < 0 || y < 0 || x >= size || y >= size) return false;
+        const i = y * size + x;
+        const key = areaKey(ax, ay, az);
+        const diffs = (this.state.objectDiffs = this.state.objectDiffs || {});
+        (diffs[key] = diffs[key] || {})[i] = type | 0;
+        if (sameArea({ x: ax, y: ay, z: az }, this.currentArea()) && $dataMap && $dataMap.ufObjects) $dataMap.ufObjects[i] = type | 0;
+        const cached = buildCache.get(cacheKey(ax, ay, az));
+        if (cached) cached.ufObjects[i] = type | 0;
+        emit("world:objectChanged", { x: ax, y: ay, z: az }, x, y, type | 0);
+        return true;
+    };
+    /** Object type number on a cell (0 = nothing). Off-screen areas come from the peek cache. */
+    World.getObject = function(ax, ay, x, y, az = 0) {
+        const size = this.state.size;
+        if (x < 0 || y < 0 || x >= size || y >= size) return 0;
+        const i = y * size + x;
+        if (sameArea({ x: ax, y: ay, z: az }, this.currentArea()) && $dataMap && $dataMap.ufObjects) return $dataMap.ufObjects[i];
+        return this.peekArea(ax, ay, az).ufObjects[i];
+    };
+
+    // Built areas kept for reading off-screen cells (AI, jobs, spawning) without rebuilding 256x256 every call.
+    // setTile/setObject patch the cached copy. Its events are a snapshot from build time: don't read them.
+    const buildCache = new Map();
+    const PEEK_CACHE = 6;
+    const cacheKey = (ax, ay, az) => (World.state ? `${World.state.seed}:${areaKey(ax, ay, az)}` : "");
+    /** A cached build of an area (tiles and objects). Same object on repeated calls until it's evicted. */
+    World.peekArea = function(ax, ay, az = 0) {
+        const key = cacheKey(ax, ay, az);
+        let map = buildCache.get(key);
+        if (!map) {
+            map = this.buildArea(ax, ay, az);
+            buildCache.set(key, map);
+            while (buildCache.size > PEEK_CACHE) buildCache.delete(buildCache.keys().next().value);
+        }
+        return map;
+    };
+    World.clearPeekCache = () => buildCache.clear();
 
     //-------------------------------------------------------------------------
     // Units
@@ -584,7 +649,8 @@
         const size = World.state.size;
         const gx = u.goal.area.x * size + u.goal.x, gy = u.goal.area.y * size + u.goal.y;
         const cx = u.area.x * size + u.x, cy = u.area.y * size + u.y;
-        return { dx: Math.sign(gx - cx), dy: Math.sign(gy - cy), dist: Math.max(Math.abs(gx - cx), Math.abs(gy - cy)) };
+        const step = stepToward(gx - cx, gy - cy);
+        return { dx: step.dx, dy: step.dy, dist: Math.max(Math.abs(gx - cx), Math.abs(gy - cy)) };
     }
 
     function arrive(u) {
@@ -612,7 +678,7 @@
         const lt = layerTarget(u);
         if (lt) {
             if (u.x === lt.x && u.y === lt.y) return moveUnitToArea(u, u.area.x, u.area.y, u.x, u.y, zOf(u.area) + lt.dz);
-            const dx = Math.sign(lt.x - u.x), dy = Math.sign(lt.y - u.y);
+            const { dx, dy } = stepToward(lt.x - u.x, lt.y - u.y);
             u.dir = facing(dx, dy);
             u.x += dx;
             u.y += dy;
@@ -646,7 +712,7 @@
             }
             tx = lt.x;
             ty = lt.y;
-            g = { dx: Math.sign(tx - ev.x), dy: Math.sign(ty - ev.y) };
+            g = stepToward(tx - ev.x, ty - ev.y);
         } else {
             g = goalDelta(u);
             if (g.dist === 0) return arrive(u); // other layer but no connection here: give up
@@ -800,6 +866,7 @@
     DataManager.createGameObjects = function() {
         _DataManager_createGameObjects.call(this);
         World.state = null;
+        buildCache.clear();
     };
 
     const _Game_Player_setupForNewGame = Game_Player.prototype.setupForNewGame;
@@ -831,6 +898,8 @@
     DataManager.extractSaveContents = function(contents) {
         _DataManager_extractSaveContents.call(this, contents);
         World.state = contents.ufWorld || null;
+        if (World.state && !World.state.objectDiffs) World.state.objectDiffs = {};
+        buildCache.clear();
     };
 
     const _Game_Map_update = Game_Map.prototype.update;

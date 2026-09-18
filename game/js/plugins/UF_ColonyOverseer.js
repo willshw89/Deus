@@ -719,6 +719,158 @@
         this.drawText(`${current}/${max}`, gx + gw + 10, y, 60, "left");
     };
 
+    //-----------------------------------------------------------------------------
+    // Tactile U7 In-Game Look Label Window (Window_UFLookLabel)
+    //-----------------------------------------------------------------------------
+    function Window_UFLookLabel() {
+        this.initialize(...arguments);
+    }
+
+    Window_UFLookLabel.prototype = Object.create(Window_Base.prototype);
+    Window_UFLookLabel.prototype.constructor = Window_UFLookLabel;
+
+    Window_UFLookLabel.prototype.initialize = function() {
+        const w = 440;
+        const h = 56;
+        const x = 16;
+        const y = 16;
+        Window_Base.prototype.initialize.call(this, new Rectangle(x, y, w, h));
+        this.opacity = 240;
+        this._lastText = "";
+        this._name = "";
+        this._status = "";
+        this._requestId = "";
+        this.refresh();
+    };
+
+    Window_UFLookLabel.prototype.update = function() {
+        Window_Base.prototype.update.call(this);
+        this.updateLook();
+    };
+
+    Window_UFLookLabel.prototype.updateLook = function() {
+        if (!$gameMap) return;
+        const cat = window.$ufWorldCatalog;
+        if (!cat) return;
+
+        // Position under mouse pointer
+        const mx = $gameMap.canvasToMapX(TouchInput.x);
+        const my = $gameMap.canvasToMapY(TouchInput.y);
+
+        if (mx < 0 || my < 0 || mx >= $gameMap.width() || my >= $gameMap.height()) {
+            this.setLabel("Wilderness", "unexplored", "AR-001");
+            return;
+        }
+
+        // Check explored in fog of war
+        if (window.UF && UF.Fog && !UF.Fog.isExplored(mx, my)) {
+            this.setLabel("Unexplored Territory", "fog of war", "AR-001");
+            return;
+        }
+
+        // 1. Check colonists (Adam & Eve)
+        if ($colonyManager && $colonyManager.colonists) {
+            const colonist = $colonyManager.colonists.find(c => c.event && Math.abs(c.event.x - mx) <= 0.8 && Math.abs(c.event.y - my) <= 0.8);
+            if (colonist) {
+                const req = colonist.gender === "Male" ? "AR-010" : "AR-011";
+                this.setLabel(`${colonist.name} (${colonist.gender})`, "U7 stand-in", req);
+                return;
+            }
+        }
+
+        // 2. Check events at mx, my
+        const events = $gameMap.eventsXy(mx, my);
+        if (events && events.length > 0) {
+            const ev = events[0];
+            const evData = ev.event ? ev.event() : null;
+            const note = evData ? evData.note : "";
+            const name = evData ? evData.name : "";
+
+            // Object event
+            const matchObj = note.match(/<ufObject:([^>]+)>/);
+            if (matchObj) {
+                const objId = matchObj[1];
+                const objDef = cat.objects && cat.objects.find(o => o.id === objId);
+                if (objDef) {
+                    this.setLabel(objDef.name, objDef.status || "U7 stand-in", objDef.requestId || "AR-021");
+                    return;
+                }
+            }
+
+            // Loose item event
+            const matchItem = note.match(/<item:([^>]+)>/);
+            if (matchItem) {
+                const itemId = matchItem[1];
+                const itemDef = cat.items && cat.items.find(i => i.id === itemId);
+                if (itemDef) {
+                    this.setLabel(itemDef.name, itemDef.status || "U7 stand-in", itemDef.requestId || "AR-200");
+                    return;
+                }
+            }
+
+            // Wildlife event
+            if (note.includes("<creature>")) {
+                const wDef = cat.wildlife && cat.wildlife.species && cat.wildlife.species.find(w => w.name === name || w.id === name.toLowerCase());
+                if (wDef) {
+                    this.setLabel(wDef.name, wDef.status || "U7 stand-in", wDef.requestId || "AR-401");
+                    return;
+                }
+            }
+
+            if (name) {
+                this.setLabel(name, "U7 stand-in", "AR-050");
+                return;
+            }
+        }
+
+        // 3. Check world objects (UF.World.getObject)
+        if (window.UF && UF.World && UF.World.getObject) {
+            const curArea = UF.World.currentArea() || { x: 3, y: 3, z: 0 };
+            const objType = UF.World.getObject(curArea.x, curArea.y, mx, my, curArea.z || 0);
+            if (objType > 0 && cat.objects && cat.objects[objType - 1]) {
+                const o = cat.objects[objType - 1];
+                this.setLabel(o.name, o.status || "U7 stand-in", o.requestId || "AR-021");
+                return;
+            }
+        }
+
+        // 4. Check water / terrain
+        const tileId = $gameMap.tileId(mx, my, 0);
+        if (($gameMap.isWater && $gameMap.isWater(mx, my)) || (tileId >= 2048 && tileId < 2816)) {
+            const wDef = cat.terrain && cat.terrain.water;
+            this.setLabel(wDef ? wDef.name : "River fresh water", (wDef && wDef.status) || "U7 stand-in", (wDef && wDef.requestId) || "AR-001");
+            return;
+        }
+
+        // Ground kind / meadow
+        const gDef = cat.terrain && cat.terrain.grass;
+        this.setLabel(gDef ? gDef.name : "Meadow grass", (gDef && gDef.status) || "U7 stand-in", (gDef && gDef.requestId) || "AR-001");
+    };
+
+    Window_UFLookLabel.prototype.setLabel = function(name, status, requestId) {
+        const text = `${name} [${status}, ${requestId}]`;
+        if (this._lastText === text) return;
+        this._lastText = text;
+        this._name = name;
+        this._status = status;
+        this._requestId = requestId;
+        this.refresh();
+    };
+
+    Window_UFLookLabel.prototype.refresh = function() {
+        this.contents.clear();
+        if (!this._name) return;
+
+        this.contents.fontSize = 15;
+        this.changeTextColor("#f8fafc"); // crisp white
+        this.drawText(this._name, 0, 0, 210, "left");
+
+        this.contents.fontSize = 13;
+        this.changeTextColor("#38bdf8"); // cyan accent for status & request ID
+        this.drawText(`[${this._status}, ${this._requestId}]`, 215, 1, 190, "right");
+        this.contents.fontSize = $gameSystem.mainFontSize ? $gameSystem.mainFontSize() : 26;
+    };
+
     // Create window on Scene_Map
     const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
     Scene_Map.prototype.createAllWindows = function() {
@@ -726,6 +878,10 @@
         this._colonyCard = new Window_UFColonistCard();
         activeColonyWindow = this._colonyCard;
         this.addWindow(this._colonyCard);
+
+        this._lookLabel = new Window_UFLookLabel();
+        window.$lookLabelWindow = this._lookLabel;
+        this.addWindow(this._lookLabel);
     };
 
     // Needs tick every 60 map updates (1 game minute at normal speed; faster when time is sped up, paused in menus).
@@ -969,6 +1125,29 @@
                 t.check("no_steps_mid_step", midStep === 0, `${midStep} step(s) were issued while a step was still in progress`);
                 if (origMove8) ev.moveInDirection8D = origMove8;
                 ev.moveStraight = origStraight;
+
+                // Verify Look Label on colonist hover
+                if (window.$lookLabelWindow && c.event) {
+                    const zoom = window.UF && UF.Camera ? UF.Camera.zoom() : 1;
+                    TouchInput._x = Math.round(($gameMap.adjustX(c.event.x) * $gameMap.tileWidth() + $gameMap.tileWidth() / 2) * zoom);
+                    TouchInput._y = Math.round(($gameMap.adjustY(c.event.y) * $gameMap.tileHeight() + $gameMap.tileHeight() / 2) * zoom);
+                    window.$lookLabelWindow.updateLook();
+                    const req = c.gender === "Male" ? "AR-010" : "AR-011";
+                    t.check("look_label_identifies_unit", window.$lookLabelWindow._requestId === req && window.$lookLabelWindow._status === "U7 stand-in",
+                        `label reads "${window.$lookLabelWindow._lastText}" when hovering over ${c.name}`);
+                }
+
+                // Verify Look Label on explored object hover
+                const objEv = $gameMap.events().find(e => e && e.event() && e.event().note && e.event().note.includes("<ufObject:") && Math.hypot(e.x - c.event.x, e.y - c.event.y) <= 6);
+                if (window.$lookLabelWindow && objEv) {
+                    const zoom = window.UF && UF.Camera ? UF.Camera.zoom() : 1;
+                    TouchInput._x = Math.round(($gameMap.adjustX(objEv.x) * $gameMap.tileWidth() + $gameMap.tileWidth() / 2) * zoom);
+                    TouchInput._y = Math.round(($gameMap.adjustY(objEv.y) * $gameMap.tileHeight() + $gameMap.tileHeight() / 2) * zoom);
+                    window.$lookLabelWindow.updateLook();
+                    t.check("look_label_identifies_object", window.$lookLabelWindow._status === "U7 stand-in" && !!window.$lookLabelWindow._requestId,
+                        `label reads "${window.$lookLabelWindow._lastText}" when hovering over object at (${objEv.x},${objEv.y})`);
+                }
+
                 t.check("no_errors", t.errorsSoFar().length === 0,
                     t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during colony checks");
             });
