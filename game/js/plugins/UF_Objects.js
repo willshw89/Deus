@@ -334,10 +334,13 @@
         if (!bmp || !bmp.isReady() || bmp.width === 0) return null;
         if (type.tile) {
             // Same rectangle as Tilemap._addNormalTile: id 0-255 = B sheet, 256-511 = C sheet, 16 columns of 48 px.
+            // tile.w / tile.h (cells, default 1) take a block of adjacent tiles (id = top-left; the stock 2x2 trees):
+            // the block must stay inside one 8-column half of the sheet, which is how the editor lays them out.
             const local = (type.tile.id | 0) % 256;
+            const w = Math.max(1, type.tile.w | 0 || 1), h = Math.max(1, type.tile.h | 0 || 1);
             const sx = ((Math.floor(local / 128) % 2) * 8 + (local % 8)) * TILE;
             const sy = (Math.floor((local % 128) / 8) % 16) * TILE;
-            return { sx, sy, w: TILE, h: TILE, ax: 0.5, ay: 1 };
+            return { sx, sy, w: w * TILE, h: h * TILE, ax: 0.5, ay: 1 };
         }
         if (type.gen) return { sx: 0, sy: 0, w: bmp.width, h: bmp.height, ax: 0.5, ay: 1 };
         const sc = Sidecars.get(type.image);
