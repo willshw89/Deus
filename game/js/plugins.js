@@ -17,4 +17,3 @@ var $plugins =
 {"name":"UF_Construction","status":true,"description":"[UF Construction] Dwarf Fortress grid-based blueprint construction, natural resource gathering, and hauling jobs.","parameters":{}},
 {"name":"UF_ProcGen","status":true,"description":"[UF ProcGen] Standardized Edenic Glade embark (Fruit tree, Stream, Adam & Eve) and procedural DF wilderness generation.","parameters":{"GladeRadius":"12"}}
 ];
-
