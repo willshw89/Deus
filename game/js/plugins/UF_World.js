@@ -811,6 +811,11 @@
             x = $dataSystem.startX + off.x;
             y = $dataSystem.startY + off.y;
         }
+        // A generator (UF_History) may set where the view starts: the player's home site (user decision 2026-09-18).
+        if (World.state.viewStart) {
+            x = World.state.viewStart.x | 0;
+            y = World.state.viewStart.y | 0;
+        }
         this.reserveTransfer(World.areaMapId(start.x, start.y), x, y, 2, 0);
     };
 

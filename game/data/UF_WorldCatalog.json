@@ -91,9 +91,9 @@
     "blessedPlants": { "flowers": 0.03, "flowers_white": 0.01, "fruit_tree": 0.005 }
   },
   "start": {
-    "about": "The only fixed part of a new game (VISION V4, revised 2026-09-18): a man and a woman in the middle of the start area, names generated from the seed ({male}/{female}). UF_Colonists creates them as world units; until it is installed, UF_WorldGen makes them events 1 and 2. tiers = walk sheets by clothing tier (0 naked, 1 fiber wraps, 2 hides, 3 tailored). The start is always habitable (climate.startClimate) and gets the kit below within reach.",
+    "about": "The start (VISION V4, revised again 2026-09-18): the player's faction's home site stands at the map centre (UF_History), and its people there are the colonists (UF_Colonists); there is no fixed pair any more. 'pair' is kept for reference only (its tiers are the human clothing-tier walk sheets: 0 naked, 1 fiber wraps, 2 hides, 3 tailored, used for human colonists by gender). 'names' are the syllables for people's names. The centre is always habitable (climate.startClimate) and gets the kit below within reach.",
     "note": "<glade>",
-    "clearRadius": 3,
+    "clearRadius": 0,
     "pair": [
       { "gender": "male", "name": "{male}", "image": "$Adam", "tiers": ["$Adam", "$U7_Adam_T1", "$U7_Adam_T2", "$U7_Adam_T3"], "dx": -1, "dy": 0, "dir": 6, "note": "<colonist: {male}> <gender: Male>" },
       { "gender": "female", "name": "{female}", "image": "$Eve", "tiers": ["$Eve", "$U7_Eve_T1", "$U7_Eve_T2", "$U7_Eve_T3"], "dx": 1, "dy": 0, "dir": 4, "note": "<colonist: {female}> <gender: Female>" }
@@ -287,17 +287,16 @@
     "automaton": { "images": ["$U7_Skeleton"], "tint": "#c8c8e8" }
   },
   "factions": {
-    "about": "Factions are rolled from the world seed on every New Game (UF_Factions) and all exist from year 0 of the history (user decision 2026-09-18). Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied). Homes are placed by UF_History (sites.preferredBiomes).",
+    "about": "Factions are rolled from the world seed on every New Game (UF_Factions) and all exist from year 0 of the history (user decision 2026-09-18). One of them, of a species with playable != false, is the player's (factions.playerId): its home site sits at the map centre and its people there are the colonists. Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied). Homes are placed by UF_History (sites.preferredBiomes).",
     "count": [4, 7],
-    "playerFaction": { "id": "player", "name": "Your colony", "species": "human" },
     "species": [
-      { "id": "human", "name": "Humans", "weight": 3, "groups": ["League", "Freehold", "Company", "Kingdom"] },
-      { "id": "elf", "name": "Elves", "weight": 2, "groups": ["Circle", "Grove", "Court"] },
-      { "id": "dwarf", "name": "Dwarves", "weight": 2, "groups": ["Hold", "Deep", "Clan"] },
-      { "id": "goblin", "name": "Goblins", "weight": 2, "groups": ["Warren", "Pack", "Rabble"] },
-      { "id": "orc", "name": "Orcs", "weight": 2, "groups": ["Horde", "Band", "Warclan"] },
-      { "id": "gnome", "name": "Gnomes", "weight": 1, "groups": ["Guild", "Burrow", "Workshop"] },
-      { "id": "automaton", "name": "Automata", "weight": 1, "groups": ["Collective", "Array", "Foundry"], "about": "science-fiction element (VISION V8)" }
+      { "id": "human", "name": "Humans", "weight": 3, "playable": true, "groups": ["League", "Freehold", "Company", "Kingdom"] },
+      { "id": "elf", "name": "Elves", "weight": 2, "playable": true, "groups": ["Circle", "Grove", "Court"] },
+      { "id": "dwarf", "name": "Dwarves", "weight": 2, "playable": true, "groups": ["Hold", "Deep", "Clan"] },
+      { "id": "goblin", "name": "Goblins", "weight": 2, "playable": false, "groups": ["Warren", "Pack", "Rabble"] },
+      { "id": "orc", "name": "Orcs", "weight": 2, "playable": false, "groups": ["Horde", "Band", "Warclan"] },
+      { "id": "gnome", "name": "Gnomes", "weight": 1, "playable": true, "groups": ["Guild", "Burrow", "Workshop"] },
+      { "id": "automaton", "name": "Automata", "weight": 1, "playable": false, "groups": ["Collective", "Array", "Foundry"], "about": "science-fiction element (VISION V8)" }
     ],
     "speciesAffinity": {
       "human|elf": 10, "human|dwarf": 10, "human|gnome": 10, "human|goblin": -25, "human|orc": -25,
@@ -365,7 +364,57 @@
       { "id": "cloaks", "craft": "hide_cloak", "each": 1, "equip": true },
       { "id": "pick", "craft": "stone_pick", "count": 1 },
       { "id": "workstone", "build": "workbench", "cells": [[-3, 0]] }
-    ]
+    ],
+    "plans": {
+      "about": "Plan variants by culture (cultures.<species>.plan names one; 'default' = colony.plan). Cells are relative to the home site's centre; a cell that already holds the same object counts as done, a cell holding another site piece is skipped.",
+      "forest": [
+        { "id": "hearth", "build": "campfire", "cells": [[0, -3]] },
+        { "id": "knives", "craft": "stone_knife", "each": 1 },
+        { "id": "clothes", "craft": "fiber_wrap", "each": 1, "equip": true },
+        { "id": "larder", "build": "stockpile", "cells": [[3, -3]], "stores": ["food"] },
+        { "id": "food", "stock": ["food"], "count": 8, "hunt": true },
+        { "id": "beds", "build": "floor_straw", "cells": [[-1, 4], [1, 4], [0, 5]] },
+        { "id": "cloaks", "craft": "hide_cloak", "each": 1, "equip": true },
+        { "id": "woodpile", "build": "stockpile", "cells": [[-3, -3]], "stores": ["wood", "stone"] },
+        { "id": "shelter", "build": "wall_wood", "cells": [[-2, 2], [2, 2], [-2, 3], [2, 3], [-2, 5], [2, 5], [-1, 6], [1, 6]] }
+      ],
+      "stone": [
+        { "id": "hearth", "build": "campfire", "cells": [[0, -3]] },
+        { "id": "knives", "craft": "stone_knife", "each": 1 },
+        { "id": "pick", "craft": "stone_pick", "count": 1 },
+        { "id": "woodpile", "build": "stockpile", "cells": [[-3, -3]], "stores": ["wood", "stone"] },
+        { "id": "larder", "build": "stockpile", "cells": [[3, -3]], "stores": ["food"] },
+        { "id": "clothes", "craft": "fiber_wrap", "each": 1, "equip": true },
+        { "id": "food", "stock": ["food"], "count": 6, "hunt": true },
+        { "id": "shelter", "build": "wall_stone", "cells": [[-2, 2], [-1, 2], [0, 2], [1, 2], [2, 2], [-2, 3], [2, 3], [-2, 4], [2, 4], [-2, 5], [-1, 5], [1, 5], [2, 5]] },
+        { "id": "beds", "build": "floor_straw", "cells": [[-1, 4], [1, 4]] },
+        { "id": "workstone", "build": "workbench", "cells": [[-3, 0]] },
+        { "id": "axe", "craft": "stone_axe", "count": 1 }
+      ],
+      "workshop": [
+        { "id": "hearth", "build": "campfire", "cells": [[0, -3]] },
+        { "id": "workstone", "build": "workbench", "cells": [[-3, 0]] },
+        { "id": "knives", "craft": "stone_knife", "each": 1 },
+        { "id": "axe", "craft": "stone_axe", "count": 1 },
+        { "id": "pick", "craft": "stone_pick", "count": 1 },
+        { "id": "clothes", "craft": "fiber_wrap", "each": 1, "equip": true },
+        { "id": "larder", "build": "stockpile", "cells": [[3, -3]], "stores": ["food"] },
+        { "id": "food", "stock": ["food"], "count": 6, "hunt": false },
+        { "id": "woodpile", "build": "stockpile", "cells": [[-3, -3]], "stores": ["wood", "stone"] },
+        { "id": "shelter", "build": "wall_wood", "cells": [[-2, 2], [-1, 2], [0, 2], [1, 2], [2, 2], [-2, 3], [2, 3], [-2, 4], [2, 4], [-2, 5], [-1, 5], [1, 5], [2, 5]] },
+        { "id": "beds", "build": "floor_straw", "cells": [[-1, 4], [1, 4]] }
+      ]
+    }
+  },
+  "cultures": {
+    "about": "Per-species culture (user decision 2026-09-18): each faction's build style, people and priorities. wall/ring = the pieces its sites and colonists build with (sites.bySpecies gives the site kinds); priorities = multipliers the colonists' planner applies when choosing work (job types); facetBias = added to seeded personality facets; plan = which colony plan variant (colony.plans key, or 'default'); tint = the people sheet tint (people.<species>). Culture names are generic; no invented lore.",
+    "human": { "name": "Settlers", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "build": 1.3, "gather": 1.1, "chop": 1.1, "hunt": 0.9, "craft": 1.0 }, "facetBias": { "industriousness": 10, "sociability": 5 }, "plan": "default" },
+    "elf": { "name": "Grove-keepers", "wall": "wall_wood", "laterWall": "wall_wood", "priorities": { "gather": 1.4, "hunt": 1.3, "chop": 0.5, "craft": 1.1, "build": 0.8 }, "facetBias": { "natureAffinity": 25, "patience": 10, "industriousness": -5 }, "plan": "forest" },
+    "dwarf": { "name": "Stone-holders", "wall": "wall_stone", "laterWall": "wall_stone", "priorities": { "quarry": 1.5, "mine": 1.5, "pick": 1.3, "build": 1.2, "craft": 1.1, "hunt": 0.7 }, "facetBias": { "industriousness": 20, "discipline": 10, "natureAffinity": -10 }, "plan": "stone" },
+    "gnome": { "name": "Tinkers", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "craft": 1.6, "pick": 1.2, "gather": 1.1, "hunt": 0.6 }, "facetBias": { "curiosity": 20, "ambition": 5 }, "plan": "workshop" },
+    "goblin": { "name": "Scavengers", "wall": "rubble_pillar", "laterWall": "wall_wood", "priorities": { "hunt": 1.4, "pick": 1.3, "gather": 1.0 }, "facetBias": { "bravery": 10, "tidiness": -20 }, "plan": "default" },
+    "orc": { "name": "War-bands", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "hunt": 1.6, "chop": 1.2, "build": 0.9 }, "facetBias": { "bravery": 25, "patience": -10 }, "plan": "default" },
+    "automaton": { "name": "Foundry-minds", "wall": "wall_stone", "laterWall": "wall_stone", "priorities": { "mine": 1.6, "craft": 1.4, "hunt": 0.2 }, "facetBias": { "discipline": 30, "sociability": -20, "cheerfulness": -10 }, "plan": "workshop" }
   },
   "stance": {
     "about": "Colored squares under units' feet (UF_Stance; user request 2026-09-18): green = friendly (your colony and allied factions), yellow = indifferent (wildlife, neutral factions), red = hostile (monsters, factions at war).",

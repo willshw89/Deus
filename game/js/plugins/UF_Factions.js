@@ -106,18 +106,8 @@
             return `The ${sp.name} of ${usedNames.size}`;
         };
 
-        const mid = Math.floor(size / 2);
-        const list = [{
-            id: "player",
-            name: cfg.playerFaction.name,
-            species: cfg.playerFaction.species,
-            ethos: [],
-            home: { area: { x: state.startArea.x, y: state.startArea.y }, x: mid, y: mid },
-            color: "#4ade80",
-            isPlayer: true,
-            met: true,
-            population: 2
-        }];
+        // Every faction is a generated one; the player's is picked from them below (user decision 2026-09-18).
+        const list = [];
         const usedHomes = new Set([`${state.startArea.x},${state.startArea.y}`]);
         for (let i = 0; i < count; i++) {
             const sp = weighted(cfg.species);
@@ -179,7 +169,19 @@
                 relations[worst] = -60;
             }
         }
-        state.factions = { version: 1, list, relations, log: [] };
+        // The player's faction: one of the generated ones, of a playable species when there is one (user decision
+        // 2026-09-18). UF_History puts its home site at the map centre and keeps it alive; UF_Colonists turns its
+        // people there into the colonists.
+        const playable = list.filter(f => {
+            const sp = cfg.species.find(s => s.id === f.species);
+            return !sp || sp.playable !== false;
+        });
+        const pool = playable.length ? playable : list;
+        const player = pool[Math.floor(rand() * pool.length)];
+        for (const f of list) f.isPlayer = f === player;
+        player.met = true;
+        player.color = "#4ade80";
+        state.factions = { version: 2, list, relations, log: [], playerId: player.id };
         emit("factions:generated", state.factions);
         return state.factions;
     };
@@ -195,9 +197,14 @@
     };
     Factions.state = data;
     Factions.all = () => (data() ? data().list : []);
-    Factions.get = id => Factions.all().find(f => f.id === id) || null;
+    /** The player's faction id ("player" is accepted everywhere as an alias for it). */
+    Factions.playerId = () => (data() ? data().playerId : null);
+    const resolve = id => (id === "player" ? Factions.playerId() : id);
+    Factions.get = id => Factions.all().find(f => f.id === resolve(id)) || null;
     Factions.player = () => Factions.get("player");
     Factions.relation = (a, b) => {
+        a = resolve(a);
+        b = resolve(b);
         if (a === b) return 100;
         const d = data();
         return d && d.relations[pairKey(a, b)] !== undefined ? d.relations[pairKey(a, b)] : 0;
@@ -206,6 +213,8 @@
     Factions.tierBetween = (a, b) => Factions.tierOf(Factions.relation(a, b));
     Factions.setRelation = function(a, b, value, reason = "") {
         const d = data();
+        a = resolve(a);
+        b = resolve(b);
         if (!d || a === b) return;
         const before = this.relation(a, b);
         const after = clamp(Math.round(value), -100, 100);
@@ -217,8 +226,8 @@
     Factions.adjust = function(a, b, delta, reason = "") {
         this.setRelation(a, b, this.relation(a, b) + delta, reason);
     };
-    Factions.alliesOf = id => Factions.all().filter(f => f.id !== id && Factions.relation(id, f.id) >= 15);
-    Factions.enemiesOf = id => Factions.all().filter(f => f.id !== id && Factions.relation(id, f.id) <= -15);
+    Factions.alliesOf = id => Factions.all().filter(f => f.id !== resolve(id) && Factions.relation(id, f.id) >= 15);
+    Factions.enemiesOf = id => Factions.all().filter(f => f.id !== resolve(id) && Factions.relation(id, f.id) <= -15);
     Factions.meet = id => {
         const f = Factions.get(id);
         if (f && !f.met) {
@@ -236,8 +245,45 @@
         return f.ethos.map(id => (cfg.ethos.find(e => e.id === id) || { name: id }).name);
     };
 
+    /** Factions the ledger shows: the player's and the ones met so far (user decision 2026-09-18). */
+    Factions.listed = () => Factions.all().filter(f => f.isPlayer || f.met);
+
     // New Game rolls new factions together with the new world.
     if (window.UF.Events && UF.Events.on) UF.Events.on("world:created", state => Factions.generate(state));
+
+    //-------------------------------------------------------------------------
+    // Contact: an unmet faction is met when one of its units comes within CONTACT_CELLS of one of ours.
+
+    const CONTACT_CELLS = 12;
+    const CONTACT_EVERY = 120; // frames (2 s at x1)
+    let contactFrame = 0;
+    Factions.checkContact = function() {
+        const d = data();
+        const W = window.UF && UF.World;
+        if (!d || !W || !W.state) return [];
+        const unmet = d.list.filter(f => !f.isPlayer && !f.met);
+        if (!unmet.length) return [];
+        const pid = d.playerId;
+        const units = W.units();
+        const ours = units.filter(u => u.data && u.data.faction === pid);
+        if (!ours.length) return [];
+        const met = [];
+        for (const f of unmet) {
+            const theirs = units.filter(u => u.data && u.data.faction === f.id);
+            const near = theirs.some(t => ours.some(o => o.area.x === t.area.x && o.area.y === t.area.y && Math.abs(o.x - t.x) <= CONTACT_CELLS && Math.abs(o.y - t.y) <= CONTACT_CELLS));
+            if (near) {
+                Factions.meet(f.id);
+                met.push(f);
+                d.log.push({ a: pid, b: f.id, before: null, after: null, reason: "met", day: window.$ufTime ? $ufTime.dateString : "" });
+            }
+        }
+        return met;
+    };
+    const _Game_Map_update = Game_Map.prototype.update;
+    Game_Map.prototype.update = function(sceneActive) {
+        _Game_Map_update.call(this, sceneActive);
+        if (++contactFrame % CONTACT_EVERY === 0) Factions.checkContact();
+    };
 
     //-------------------------------------------------------------------------
     // Compatibility with the earlier draft's $factionManager (standing = relation with the player's colony)
@@ -272,11 +318,12 @@
         refresh() {
             this.contents.clear();
             const w = this.innerWidth;
-            const list = Factions.all();
+            const list = Factions.listed(); // only factions your people have met (user decision 2026-09-18)
+            const unmet = Factions.all().length - list.length;
             let y = 4;
             this.contents.fontSize = 20;
             this.changeTextColor("#f59e0b");
-            this.drawText("Factions of this world", 0, y, w, "center");
+            this.drawText(unmet ? `Factions you know (${unmet} not yet met)` : "Factions you know", 0, y, w, "center");
             y += 32;
             this.contents.fontSize = 13;
             for (const f of list) {
@@ -288,7 +335,7 @@
                 this.changeTextColor("#94a3b8");
                 const home = f.home.area;
                 const where = `area ${home.x},${home.y}`;
-                const about = f.isPlayer ? `${Factions.speciesName(f.species)} · home: the glade` : `${Factions.speciesName(f.species)} · ${Factions.stanceNames(f).join(", ")} · ${f.population} people · ${where}`;
+                const about = `${Factions.speciesName(f.species)} · ${Factions.stanceNames(f).join(", ")} · ${f.population} people · ${where}${f.isPlayer ? " · yours" : ""}`;
                 this.drawText(about, 12, y + 22, w - 220, "left");
                 if (!f.isPlayer) {
                     const rel = Factions.relation("player", f.id);
@@ -296,7 +343,7 @@
                     this.contents.fontSize = 15;
                     this.changeTextColor(tier.color);
                     this.drawText(`${tier.label} (${rel > 0 ? "+" : ""}${rel})`, w - 200, y + 2, 188, "right");
-                    const others = list.filter(o => o.id !== f.id && o.id !== "player");
+                    const others = list.filter(o => o.id !== f.id && !o.isPlayer);
                     const friend = others.reduce((best, o) => (!best || Factions.relation(f.id, o.id) > Factions.relation(f.id, best.id) ? o : best), null);
                     const foe = others.reduce((best, o) => (!best || Factions.relation(f.id, o.id) < Factions.relation(f.id, best.id) ? o : best), null);
                     this.contents.fontSize = 11;
@@ -349,10 +396,11 @@
             t.check("generated_with_world", !!cfg && !!d && Array.isArray(d.list), d ? `${d.list.length - 1} factions + your colony, seed ${st.seed}` : "no factions in the world state");
             if (!d) return;
             const others = d.list.filter(f => !f.isPlayer);
-            t.check("count_in_range", others.length >= cfg.count[0] && others.length <= cfg.count[1], `${others.length} (allowed ${cfg.count[0]}-${cfg.count[1]})`);
+            t.check("count_in_range", d.list.length >= cfg.count[0] && d.list.length <= cfg.count[1], `${d.list.length} factions (allowed ${cfg.count[0]}-${cfg.count[1]}), ${others.length} besides the player's`);
             const player = Factions.player();
-            t.check("player_colony", !!player && player.home.area.x === st.startArea.x && player.home.area.y === st.startArea.y && player.species === cfg.playerFaction.species,
-                player ? `${player.name}, ${player.species}, home area (${player.home.area.x},${player.home.area.y})` : "missing");
+            const playerSpecies = player && cfg.species.find(s => s.id === player.species);
+            t.check("player_faction", !!player && player.id === d.playerId && d.list.includes(player) && player.isPlayer && others.length === d.list.length - 1 && (!playerSpecies || playerSpecies.playable !== false) && Factions.relation("player", player.id) === 100,
+                player ? `the player's faction is ${player.name} (${player.species}, id ${player.id}); "player" resolves to it` : "no player faction");
             const names = d.list.map(f => f.name);
             t.check("names_unique", new Set(names).size === names.length, names.join(" | "));
 
@@ -364,20 +412,45 @@
             t.check("aligned_and_disaligned", allied.length > 0 && hostile.length > 0, `${allied.length} strong alliance(s), ${hostile.length} serious hostility(ies)`);
             t.check("relation_symmetric", others.length > 1 && Factions.relation(others[0].id, others[1].id) === Factions.relation(others[1].id, others[0].id), "relation(a, b) = relation(b, a)");
 
+            // Homes: inside the world; in a world of several areas, other factions don't share the start area.
+            const oneArea = st.areasX === 1 && st.areasY === 1;
+            const mid = Math.floor(st.size / 2);
             const badHomes = others.filter(f => {
                 const a = f.home.area;
-                return !W.inWorld(a.x, a.y) || (a.x === st.startArea.x && a.y === st.startArea.y);
+                if (!W.inWorld(a.x, a.y)) return true;
+                if (oneArea) return Math.hypot(f.home.x - mid, f.home.y - mid) < 24; // not on top of the player's home
+                return a.x === st.startArea.x && a.y === st.startArea.y;
             });
-            t.check("homes_valid", badHomes.length === 0, badHomes.length ? `wrong homes: ${badHomes.map(f => f.name).join(", ")}` : `${others.length} homes in the world, none in the start area`);
+            t.check("homes_valid", badHomes.length === 0, badHomes.length ? `wrong homes: ${badHomes.map(f => `${f.name} (${f.home.x},${f.home.y})`).join(", ")}` : `${others.length} homes in the world${oneArea ? ", none within 24 cells of the map centre" : ", none in the start area"}`);
 
-            const again = Factions.generate({ seed: st.seed, size: st.size, layers: st.layers, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });
-            const other = Factions.generate({ seed: st.seed + 1, size: st.size, layers: st.layers, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });
-            const sig = f => JSON.stringify({ list: f.list, relations: f.relations });
-            t.check("same_seed_same_factions", sig(again) === sig(d), "regenerated from the same seed: identical");
+            // Determinism of generation itself (the live state is changed afterwards by UF_History: homes, populations, relations).
+            const fresh = () => ({ seed: st.seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });
+            const again = Factions.generate(fresh()), again2 = Factions.generate(fresh());
+            const other = Factions.generate(Object.assign(fresh(), { seed: st.seed + 1 }));
+            const sig = f => JSON.stringify({ list: f.list, relations: f.relations, playerId: f.playerId });
+            t.check("same_seed_same_factions", sig(again) === sig(again2) && again.list.map(f => f.name).join("|") === d.list.map(f => f.name).join("|") && again.playerId === d.playerId,
+                `generated twice from seed ${st.seed}: identical; same names and player (${again.playerId}) as the live world`);
             t.check("new_seed_new_factions", sig(other) !== sig(d), `another seed gives: ${other.list.filter(f => !f.isPlayer).map(f => f.name).join(", ")}`);
 
             const saved = JsonEx.parse(JsonEx.stringify(st));
             t.check("saved_with_world", !!saved.factions && sig(saved.factions) === sig(d), "factions round-trip through the save format");
+
+            // Contact (user decision 2026-09-18): a faction appears in the ledger only once your people have met it.
+            const unmetBefore = Factions.all().filter(f => !f.met);
+            const listedBefore = Factions.listed().map(f => f.id);
+            t.check("unmet_not_listed", listedBefore.every(id => Factions.get(id).met) && !listedBefore.some(id => unmetBefore.some(f => f.id === id)),
+                `ledger lists ${listedBefore.length} met faction(s) (${listedBefore.join(", ") || "none"}); ${unmetBefore.length} unmet and hidden`);
+            if (unmetBefore.length) {
+                const target = unmetBefore[0];
+                const px = $gamePlayer.x, py = $gamePlayer.y;
+                const mine = W.addUnit({ name: "TEST_scout", image: { characterName: "$U7_Ranger", characterIndex: 0 }, area: W.currentArea(), x: px, y: py, data: { kind: "test", faction: Factions.playerId() } });
+                const theirs = W.addUnit({ name: "TEST_stranger", image: { characterName: "$U7_Townsman", characterIndex: 0 }, area: W.currentArea(), x: px + 3, y: py, data: { kind: "person", faction: target.id } });
+                await t.waitUntil(() => target.met, 6000, `${target.name} to be met`).catch(() => {});
+                t.check("contact_reveals_faction", target.met && Factions.listed().some(f => f.id === target.id),
+                    `${target.name}: met ${target.met} after a scout of ours stood 3 cells from one of theirs; listed ${Factions.listed().some(f => f.id === target.id)}`);
+                W.removeUnit(mine.id);
+                W.removeUnit(theirs.id);
+            }
 
             $factionManager.toggleLedger();
             await t.waitFrames(10);
