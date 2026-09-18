@@ -1,0 +1,89 @@
+# SLICES: roadmap and approval gates
+
+## How a slice works
+1. The acceptance criteria are finalized **with the user before the slice starts**. Only the user changes them.
+2. Status goes to `IN PROGRESS`. Only one slice is in progress at a time.
+3. The agent builds the slice, meets the Definition of Done (`AGENTS.md`), and sends the report in the required format.
+4. Status goes to `AWAITING REVIEW`. The user tests in the RMMZ editor's Playtest.
+5. The user says **approved** or **rejected**. The agent records the result, the date, and the user's feedback below.
+6. With git set up: commit and tag `slice-N-approved`.
+
+Statuses: `NOT STARTED` · `IN PROGRESS` · `AWAITING REVIEW` · `APPROVED` · `REJECTED`
+
+Slices 0 and 1 have been discussed with the user. **Slices 2 and later are a draft**: their order and content are open to change, and their criteria get finalized when each one starts.
+
+---
+
+## Slice 0: Foundations and the 2.5D standard
+**Status:** NOT STARTED (waiting for the user's go-ahead)
+**Goal:** lock the look and an honest test process before building gameplay on top of them.
+
+Deliverables:
+1. Tooling: Node.js LTS installed; git repo with a `.gitignore` (`ENGINE_RULES.md` §7).
+2. A real test harness (`ENGINE_RULES.md` §6) replacing the autotest block in `UF_Core.js`. This also fixes the "crash" (STATUS K1).
+3. U7 reference measurements: facts F1–F7, human height, and lifts per story in `ART_STANDARD.md`, measured and tagged, with screenshots in `reference/u7/`.
+4. User decisions Q5 (facings) and Q6 (scale), recorded in `VISION.md`.
+5. The graybox tool (`ART_STANDARD.md` §6).
+6. Test map "Projection Yard": flat grass; graybox boxes 1, 2, 4, and 8 lifts tall; a 5-cell wall; a 2×2 tree; two human grayboxes walking around.
+
+Done when:
+- [ ] Everything with height leans the same way at the same angle (screenshot + user)
+- [ ] A walking figure is hidden behind a box when it's north or west of it and in front when it's south or east, with no popping while it moves between (check + user)
+- [ ] Movement works in all 8 directions, and nothing cuts diagonally through a wall corner (check)
+- [ ] The figure's facing mark matches its movement direction (check + user)
+- [ ] The test output lists PASS/FAIL per check, and the report shows at least one check failing when it should
+- [ ] Playtest from the RMMZ editor runs for 5+ minutes without closing or erroring (user)
+
+**Review log:**
+
+---
+
+## Slice 1: The glade
+**Status:** REJECTED (2026-09-18). Redo after Slice 0.
+Why the earlier attempt was rejected: Adam and Eve weren't in the 2.5D projection. Broken extractions showed up in their place (wall slabs, a red creature). Areas rendered as a black void, and the tiles looked like "gibberish". In the last screenshot Adam and Eve weren't visible at all, and Playtest closed after a few seconds.
+
+Deliverables: the fixed starting glade (size TBD, around 30×30) with a stream, the fruit tree, and the man and woman as grayboxes. No player character on screen; the view is a camera. Camera pan, unit selection with an info card, and click-to-move with 8-direction pathfinding.
+
+Done when:
+- [ ] New Game opens the glade directly
+- [ ] The man, woman, and tree are visible, all in the projection (screenshot + user)
+- [ ] No player character is visible; WASD/arrow keys and screen-edge panning move the camera
+- [ ] Clicking a unit selects it (visible outline) and opens its info card
+- [ ] Clicking the ground with a unit selected makes it walk there, diagonals included
+- [ ] A unit behind the tree is handled by the cutaway rule decided in this slice (user)
+- [ ] Save, then load: units come back in the same places (check)
+
+**Review log:**
+- 2026-09-18: rejected by the user. Wrong perspective, broken sprites, unreadable tiles.
+
+---
+
+## Slice 2 (draft): Needs, food, time
+Hunger, thirst, and sleep. Eating from the fruit tree, drinking from the stream, sleeping on the ground. Clock and day/night. Pause and speed controls (Q1).
+Draft done-when: left running for several in-game days, the units eat, drink, and sleep on their own, and the info card shows their needs changing. With the tree removed through a debug command, the units starve.
+
+## Slice 3 (draft): Items and U7-style handling
+Items exist as world objects. Pick up, drop, and drag. Container and inventory windows (gumps). Double-click to use. Units carry items. Stockpile zones.
+
+## Slice 4 (draft): Designations, jobs, gathering
+Designate trees to cut, stones to gather, ground to dig. A job queue. Units pick jobs by skill and distance. Hauling to stockpiles.
+
+## Slice 5 (draft): Construction and crafting
+Blueprints (wall, floor, door, bed). Units haul materials and build. Workshops and recipes. Skills improve with use.
+
+## Slice 6 (draft): World generation
+A seeded world around the glade: terrain, elevation in lifts, water, plants, stone layers and ores, caves. A world bigger than one map, with only the active area simulated in full. Wildlife.
+
+## Slice 7 (draft): Creatures and combat
+Animals and hostiles. Body-part wounds, bleeding, death, corpses. Drafting units and giving combat orders.
+
+## Slice 8 (draft): Population and peoples
+Population growth (Q2), relationships, moods, other races and settlements (V7).
+
+**Playable demo (graybox) = Slices 0–7 approved.**
+
+---
+
+## Art phase (after the engine slices are approved)
+- **Art A: style lock.** Four anchor assets (human, tree, wall piece, ground tile) made through the `ART_STANDARD.md` §7 pipeline. The user locks the style.
+- **Art B: production.** Batches of briefs → generate → clean → check → review page → user approval → export. Graybox assets get replaced one approved asset at a time.

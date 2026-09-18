@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="viewport" content="user-scalable=no">
+        <link rel="icon" href="icon/icon.png" type="image/png">
+        <link rel="apple-touch-icon" href="icon/icon.png">
+        <link rel="stylesheet" type="text/css" href="css/game.css">
+        <title></title>
+    </head>
+    <body style="background-color: black">
+        <script>
+            if (typeof require !== 'undefined') {
+                const fs = require('fs');
+                const log = (msg) => fs.appendFileSync('game_runtime.log', `${new Date().toISOString()} ${msg}\n`);
+                fs.writeFileSync('game_runtime.log', `[INIT] Game booting at ${new Date().toISOString()}\n`);
+
+                window.onerror = function(msg, url, line, col, error) {
+                    log(`[WINDOW ERROR] ${msg} at ${url}:${line}:${col}\n${error ? error.stack : ''}`);
+                };
+                window.addEventListener('unhandledrejection', function(event) {
+                    log(`[PROMISE REJECTION] ${event.reason}`);
+                });
+
+                if (typeof process !== 'undefined') {
+                    process.on('uncaughtException', (err) => {
+                        log(`[PROCESS UNCAUGHT EXCEPTION] ${err ? err.stack : err}`);
+                    });
+                    process.on('exit', (code) => {
+                        log(`[PROCESS EXIT] Code: ${code}`);
+                    });
+                }
+            }
+        </script>
+        <script type="text/javascript" src="js/main.js"></script>
+    </body>
+</html>
