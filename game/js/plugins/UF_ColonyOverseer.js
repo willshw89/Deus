@@ -378,34 +378,42 @@
             }
         }
 
+        // Walk to (gx, gy), then call onArrival. Only one walk at a time: a newer order replaces this one (its step loop
+        // stops itself), each step waits for the previous one to finish, and a blocked walk gives up after ~20 tries.
+        // (Before 2026-09-18 every order started another loop and older loops kept steering, so units jittered.)
         assignMoveTo(gx, gy, onArrival) {
-            const ev = this.event;
-            if (!ev) return;
+            if (!this.event) return;
+            const token = (this._walkToken = (this._walkToken || 0) + 1);
             this.targetX = gx;
             this.targetY = gy;
-
-            const checkStep = () => {
-                if (!this.event) return;
-                if (ev.x === gx && ev.y === gy) {
-                    this.targetX = null;
-                    this.targetY = null;
+            let stuck = 0;
+            const finish = arrived => {
+                if (token !== this._walkToken) return;
+                this.targetX = null;
+                this.targetY = null;
+                if (arrived) {
                     if (onArrival) onArrival();
+                } else {
+                    this.currentJob = "Idle";
+                }
+            };
+            const checkStep = () => {
+                if (token !== this._walkToken) return; // replaced by a newer walk
+                const ev = this.event;
+                if (!ev) return; // not on the map on screen
+                if (ev.isMoving()) {
+                    later(checkStep, 50); // let the current step finish (~3 frames)
                     return;
                 }
+                if (ev.x === gx && ev.y === gy) return finish(true);
                 const dir = ev.findDirection8DTo ? ev.findDirection8DTo(gx, gy) : ev.findDirectionTo(gx, gy);
-                if (dir > 0) {
-                    if (ev.moveInDirection8D) ev.moveInDirection8D(dir);
-                    else ev.moveStraight(dir);
-                    later(checkStep, 250);
-                } else {
-                    if (Math.abs(ev.x - gx) <= 1 && Math.abs(ev.y - gy) <= 1) {
-                        this.targetX = null;
-                        this.targetY = null;
-                        if (onArrival) onArrival();
-                    } else {
-                        this.currentJob = "Idle";
-                    }
-                }
+                if (dir <= 0) return finish(Math.abs(ev.x - gx) <= 1 && Math.abs(ev.y - gy) <= 1);
+                const before = `${ev.x},${ev.y}`;
+                if (ev.moveInDirection8D) ev.moveInDirection8D(dir);
+                else ev.moveStraight(dir);
+                stuck = `${ev.x},${ev.y}` === before ? stuck + 1 : 0;
+                if (stuck > 20) return finish(Math.abs(ev.x - gx) <= 1 && Math.abs(ev.y - gy) <= 1);
+                later(checkStep, 50);
             };
             checkStep();
         }
@@ -919,6 +927,51 @@
             if (!explored) {
                 this.visible = false;
             }
+        }
+    };
+
+    //-----------------------------------------------------------------------------
+    // Checks (UF_Test suite "colony"), registered at boot after all plugins load
+    //-----------------------------------------------------------------------------
+    const _Scene_Boot_start_colonyChecks = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _Scene_Boot_start_colonyChecks.call(this);
+        if (window.UF && UF.Test && UF.Test.active) {
+            UF.Test.suite("colony", async t => {
+                const cs = $colonyManager.colonists;
+                t.check("colonists_named", cs.length === 2 && cs.every(c => c.event && c.event.event().name === c.name),
+                    cs.map(c => `${c.name} (event ${c.eventId}${c.event ? "" : ", not on map"})`).join(", "));
+                const c = cs[0];
+                if (!c || !c.event) return;
+                // Watch for steps issued while the previous step is still animating.
+                let midStep = 0;
+                const ev = c.event;
+                const origMove8 = ev.moveInDirection8D, origStraight = ev.moveStraight;
+                if (origMove8) ev.moveInDirection8D = function(d) { if (this.isMoving()) midStep++; return origMove8.call(this, d); };
+                ev.moveStraight = function(d) { if (this.isMoving()) midStep++; return origStraight.call(this, d); };
+
+                const x0 = ev.x, y0 = ev.y;
+                const first = { x: x0, y: y0 - 2 }, second = { x: x0 - 1, y: y0 + 2 };
+                c.currentJob = "Moving";
+                c.assignMoveTo(first.x, first.y, () => { c.currentJob = "Idle"; });
+                await t.waitFrames(10);
+                const yAtSecondOrder = ev.y;
+                let minYAfter = ev.y, arrived = false;
+                c.currentJob = "Moving";
+                c.assignMoveTo(second.x, second.y, () => { c.currentJob = "Idle"; arrived = true; });
+                await t.waitUntil(() => {
+                    minYAfter = Math.min(minYAfter, ev.y);
+                    return arrived;
+                }, 20000, "the colonist to reach the second target").catch(() => {});
+                t.check("new_order_replaces_old", minYAfter >= yAtSecondOrder,
+                    `after the second order the colonist's y never went below ${yAtSecondOrder} (lowest ${minYAfter}); the first order pointed north to y ${first.y}`);
+                t.check("arrives_at_new_target", arrived && ev.x === second.x && ev.y === second.y, `at (${ev.x},${ev.y}), target (${second.x},${second.y}), arrived: ${arrived}`);
+                t.check("no_steps_mid_step", midStep === 0, `${midStep} step(s) were issued while a step was still in progress`);
+                if (origMove8) ev.moveInDirection8D = origMove8;
+                ev.moveStraight = origStraight;
+                t.check("no_errors", t.errorsSoFar().length === 0,
+                    t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during colony checks");
+            });
         }
     };
 
