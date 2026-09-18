@@ -16,5 +16,10 @@ var $plugins =
 {"name":"UF_ColonyOverseer","status":true,"description":"[UF ColonyOverseer] DF-style free overseer camera, tactile unit selection, colonist status card, and autonomous biological needs.","parameters":{"EdgePanSpeed":"6"}},
 {"name":"UF_Construction","status":true,"description":"[UF Construction] Dwarf Fortress grid-based blueprint construction, natural resource gathering, and hauling jobs.","parameters":{}},
 {"name":"UF_ProcGen","status":true,"description":"[UF ProcGen] Standardized Edenic Glade embark (Fruit tree, Stream, Adam & Eve) and procedural DF wilderness generation.","parameters":{"GladeRadius":"12"}},
-{"name":"UF_Factions","status":true,"description":"[UF Factions] Procedural world factions with dynamic alignments and diplomacy ledger.","parameters":{}}
+{"name":"UF_Factions","status":true,"description":"[UF Factions] Procedural world factions with dynamic alignments and diplomacy ledger.","parameters":{}},
+{"name":"UF_World","status":true,"description":"[UF_World]","parameters":{}},
+{"name":"UF_WorldGen","status":true,"description":"[UF_WorldGen]","parameters":{}},
+{"name":"UF_Fog","status":true,"description":"[UF_Fog]","parameters":{}},
+{"name":"UF_Camera","status":true,"description":"[UF_Camera]","parameters":{}},
+{"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

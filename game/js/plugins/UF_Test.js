@@ -240,10 +240,14 @@
         for (const ev of $gameMap.events()) {
             if (!ev.characterName()) continue;
             const name = ev.event().name.replace(/\s+/g, "_");
-            const group = groups.get(name) || { onScreen: 0, elsewhere: 0, problems: [], at: null };
+            const group = groups.get(name) || { onScreen: 0, elsewhere: 0, fogged: 0, problems: [], at: null };
             groups.set(name, group);
             if (!inView(ev)) {
                 group.elsewhere++;
+                continue;
+            }
+            if (window.UF.Fog && !UF.Fog.isExplored(ev.x, ev.y)) {
+                group.fogged++; // hidden by the fog of war on purpose
                 continue;
             }
             group.onScreen++;
@@ -264,7 +268,7 @@
         }
         for (const [name, group] of groups) {
             if (group.onScreen === 0) continue;
-            const elsewhere = group.elsewhere ? `; ${group.elsewhere} more elsewhere in the area` : "";
+            const elsewhere = (group.elsewhere ? `; ${group.elsewhere} more elsewhere in the area` : "") + (group.fogged ? `; ${group.fogged} in view but unexplored (hidden by fog)` : "");
             t.check(`event_drawn.${name}`, group.problems.length === 0,
                 group.problems.length ? `${group.problems.length} of ${group.onScreen} in view not drawn; first: ${group.problems[0]}`
                     : `${group.onScreen} in view drawn${group.onScreen === 1 ? ` at screen ${group.at}` : ""}${elsewhere}`);

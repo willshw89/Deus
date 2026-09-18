@@ -86,7 +86,7 @@ Who touches what:
 | Path | Owner |
 |---|---|
 | `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Claude Code |
-| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` status column and Notes | Gemini |
+| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` status column and Notes, the `objects` list in `game/data/UF_WorldCatalog.json` (per `docs/handoffs/HANDOFF_world_generation.md`) | Gemini |
 | `docs/ASSET_REQUESTS.md` requests and specs, other `docs/` | Claude Code (either agent may add Notes) |
 
 Rules:
