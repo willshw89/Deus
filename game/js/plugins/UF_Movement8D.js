@@ -19,6 +19,12 @@
  * @default true
  * @desc Prevent moving diagonally through pinched corners where either orthogonal tile is impassable.
  *
+ * @param FourWay
+ * @text 4-way movement
+ * @type boolean
+ * @default true
+ * @desc Units, the view and pathfinding move in 4 directions only (user decision 2026-09-18). false = 8 directions.
+ *
  * @param DiagonalSlide
  * @text Smart Diagonal Slide
  * @type boolean
@@ -36,6 +42,11 @@
  * - Strict corner-cutting collision prevention
  * - Velocity normalization (1/sqrt(2)) for identical screen speed
  * - Zero modification to vanilla RMMZ core files
+ *
+ * FourWay (default true, VISION V3 as revised 2026-09-18): no diagonal steps
+ * anywhere. Pathfinding uses the 4 orthogonal neighbors, diagonal requests
+ * become a straight step, and the view moves with the arrow keys in 4
+ * directions. UF_World and UF_Jobs read UF_Dir8.fourWay.
  */
 
 (() => {
@@ -46,6 +57,7 @@
     const normalizeSpeed = (params["NormalizeSpeed"] || "true") === "true";
     const strictCornerCutting = (params["StrictCornerCutting"] || "true") === "true";
     const diagonalSlide = (params["DiagonalSlide"] || "true") === "true";
+    const fourWay = (params["FourWay"] || "true") === "true";
 
     const SQRT2_INV = 1.0 / Math.SQRT2; // ~0.70710678
 
@@ -53,6 +65,7 @@
     // Helper: Direction Conversions
     //-----------------------------------------------------------------------------
     const UF_Dir8 = {
+        fourWay,
         SW: 1, S: 2, SE: 3,
         W:  4, C: 5, E:  6,
         NW: 7, N: 8, NE: 9,
@@ -146,6 +159,7 @@
 
     // Strict Corner-Cutting Passability
     Game_CharacterBase.prototype.canPassDiagonally = function(x, y, horz, vert) {
+        if (fourWay) return false;
         const x2 = $gameMap.roundXWithDirection(x, horz);
         const y2 = $gameMap.roundYWithDirection(y, vert);
 
@@ -199,6 +213,12 @@
 
     // 8-Directional Move by Direction Code (1-9)
     Game_CharacterBase.prototype.moveInDirection8D = function(d) {
+        if (fourWay && UF_Dir8.isDiagonal(d)) {
+            // 4-way: take the horizontal part if it's open, otherwise the vertical part.
+            const split = UF_Dir8.splitDiagonal(d);
+            this.moveStraight(this.canPass(this._x, this._y, split.horz) ? split.horz : split.vert);
+            return;
+        }
         if (UF_Dir8.isDiagonal(d)) {
             const split = UF_Dir8.splitDiagonal(d);
             this.moveDiagonally(split.horz, split.vert);
@@ -219,14 +239,26 @@
     // Game_Player 8-Directional Input & Execution
     //-----------------------------------------------------------------------------
     Game_Player.prototype.getInputDirection = function() {
-        return Input.dir8;
+        return fourWay ? Input.dir4 : Input.dir8;
     };
 
     Game_Player.prototype.executeMove = function(direction) {
         this.moveInDirection8D(direction);
     };
 
-    // Enhanced findDirectionTo with 8-Directional Octile A* Pathfinding
+    const NEIGHBORS_8 = [
+        { d: 1, horz: 4, vert: 2, cost: 14 },
+        { d: 2, horz: 0, vert: 2, cost: 10 },
+        { d: 3, horz: 6, vert: 2, cost: 14 },
+        { d: 4, horz: 4, vert: 0, cost: 10 },
+        { d: 6, horz: 6, vert: 0, cost: 10 },
+        { d: 7, horz: 4, vert: 8, cost: 14 },
+        { d: 8, horz: 0, vert: 8, cost: 10 },
+        { d: 9, horz: 6, vert: 8, cost: 14 }
+    ];
+    const NEIGHBORS_4 = NEIGHBORS_8.filter(n => !UF_Dir8.isDiagonal(n.d));
+
+    // Enhanced findDirectionTo with 8-Directional Octile A* Pathfinding (4 neighbors when FourWay)
     Game_Character.prototype.findDirection8DTo = function(goalX, goalY) {
         const startX = this.x;
         const startY = this.y;
@@ -236,7 +268,7 @@
         // Fast direct line test if distance is 1 tile
         const dx = $gameMap.deltaX(goalX, startX);
         const dy = $gameMap.deltaY(goalY, startY);
-        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && !(fourWay && dx !== 0 && dy !== 0)) {
             const directDir = UF_Dir8.combine(dx < 0 ? 4 : dx > 0 ? 6 : 0, dy < 0 ? 8 : dy > 0 ? 2 : 0);
             if (UF_Dir8.isDiagonal(directDir)) {
                 const split = UF_Dir8.splitDiagonal(directDir);
@@ -257,7 +289,7 @@
         const octileDist = (x1, y1, x2, y2) => {
             const adx = Math.abs($gameMap.deltaX(x2, x1));
             const ady = Math.abs($gameMap.deltaY(y2, y1));
-            return 10 * (adx + ady) + (14 - 20) * Math.min(adx, ady);
+            return fourWay ? 10 * (adx + ady) : 10 * (adx + ady) + (14 - 20) * Math.min(adx, ady);
         };
 
         const startNode = {
@@ -273,16 +305,7 @@
         openList.push(startNode);
         nodeMap.set(encode(startX, startY), startNode);
 
-        const neighbors = [
-            { d: 1, horz: 4, vert: 2, cost: 14 },
-            { d: 2, horz: 0, vert: 2, cost: 10 },
-            { d: 3, horz: 6, vert: 2, cost: 14 },
-            { d: 4, horz: 4, vert: 0, cost: 10 },
-            { d: 6, horz: 6, vert: 0, cost: 10 },
-            { d: 7, horz: 4, vert: 8, cost: 14 },
-            { d: 8, horz: 0, vert: 8, cost: 10 },
-            { d: 9, horz: 6, vert: 8, cost: 14 }
-        ];
+        const neighbors = (fourWay ? NEIGHBORS_4 : NEIGHBORS_8);
 
         let bestNode = startNode;
         let bestH = startNode.h;

@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Factions] Factions generated from the world seed each New Game: species, stances, homes (surface or underground), relations from allied to at war. F = ledger.
+ * @plugindesc [UF Factions] Factions generated from the world seed each New Game: species, stances, homes, relations from allied to at war. F = ledger.
  * @author UF project
  * @base UF_World
  * @orderAfter UF_WorldGen
@@ -90,7 +90,7 @@
             }
             return items[items.length - 1];
         };
-        const size = state.size, layers = state.layers || 0;
+        const size = state.size;
         const [cmin, cmax] = cfg.count || [4, 7];
         const count = cmin + Math.floor(rand() * (cmax - cmin + 1));
         const usedNames = new Set();
@@ -112,13 +112,13 @@
             name: cfg.playerFaction.name,
             species: cfg.playerFaction.species,
             ethos: [],
-            home: { area: { x: state.startArea.x, y: state.startArea.y, z: 0 }, x: mid, y: mid },
+            home: { area: { x: state.startArea.x, y: state.startArea.y }, x: mid, y: mid },
             color: "#4ade80",
             isPlayer: true,
             met: true,
             population: 2
         }];
-        const usedHomes = new Set([`${state.startArea.x},${state.startArea.y},0`]);
+        const usedHomes = new Set([`${state.startArea.x},${state.startArea.y}`]);
         for (let i = 0; i < count; i++) {
             const sp = weighted(cfg.species);
             const ethos = [pick(cfg.ethos).id];
@@ -126,16 +126,16 @@
                 const second = pick(cfg.ethos).id;
                 if (!ethos.includes(second)) ethos.push(second);
             }
-            const z = sp.home === "underground" && layers >= 1 ? 1 : 0;
+            // A provisional home area (UF_History moves the home to the faction's first site).
             let area = null;
             for (let t = 0; t < 100 && !area; t++) {
                 const ax = Math.floor(rand() * state.areasX), ay = Math.floor(rand() * state.areasY);
-                const key = `${ax},${ay},${z}`;
+                const key = `${ax},${ay}`;
                 if (usedHomes.has(key) || (ax === state.startArea.x && ay === state.startArea.y)) continue;
                 usedHomes.add(key);
-                area = { x: ax, y: ay, z };
+                area = { x: ax, y: ay };
             }
-            if (!area) area = { x: (state.startArea.x + 1 + i) % state.areasX, y: (state.startArea.y + 1) % state.areasY, z };
+            if (!area) area = { x: (state.startArea.x + 1 + i) % state.areasX, y: (state.startArea.y + 1) % state.areasY };
             list.push({
                 id: `f${i + 1}`,
                 name: makeName(sp),
@@ -287,7 +287,7 @@
                 this.contents.fontSize = 12;
                 this.changeTextColor("#94a3b8");
                 const home = f.home.area;
-                const where = `${home.z ? "underground" : "surface"}, area ${home.x},${home.y}`;
+                const where = `area ${home.x},${home.y}`;
                 const about = f.isPlayer ? `${Factions.speciesName(f.species)} · home: the glade` : `${Factions.speciesName(f.species)} · ${Factions.stanceNames(f).join(", ")} · ${f.population} people · ${where}`;
                 this.drawText(about, 12, y + 22, w - 220, "left");
                 if (!f.isPlayer) {
@@ -366,12 +366,9 @@
 
             const badHomes = others.filter(f => {
                 const a = f.home.area;
-                const sp = cfg.species.find(s => s.id === f.species);
-                const wantZ = sp && sp.home === "underground" && (st.layers || 0) >= 1 ? 1 : 0;
-                return !W.inWorld(a.x, a.y, a.z) || (a.x === st.startArea.x && a.y === st.startArea.y) || a.z !== wantZ;
+                return !W.inWorld(a.x, a.y) || (a.x === st.startArea.x && a.y === st.startArea.y);
             });
-            const under = others.filter(f => f.home.area.z === 1).length;
-            t.check("homes_valid", badHomes.length === 0, badHomes.length ? `wrong homes: ${badHomes.map(f => f.name).join(", ")}` : `${others.length - under} on the surface, ${under} underground, none in the start area`);
+            t.check("homes_valid", badHomes.length === 0, badHomes.length ? `wrong homes: ${badHomes.map(f => f.name).join(", ")}` : `${others.length} homes in the world, none in the start area`);
 
             const again = Factions.generate({ seed: st.seed, size: st.size, layers: st.layers, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });
             const other = Factions.generate({ seed: st.seed + 1, size: st.size, layers: st.layers, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });

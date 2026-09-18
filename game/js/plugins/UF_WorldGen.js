@@ -208,11 +208,11 @@
     function generate(ctx) {
         const cat = WorldGen.catalog();
         if (!cat || !window.UF.World || !UF.World.state) return;
-        if (ctx.areaZ > 0) return generateUnderground(ctx, cat);
         const state = UF.World.state;
         const size = ctx.width;
         const gx0 = ctx.areaX * size, gy0 = ctx.areaY * size;
-        const terrain = cat.terrain || {};
+        // Catalog v3 has no 'terrain': ground comes from UF_Tiles ground kinds (biome rewrite), water kinds from cat.water.
+        const terrain = cat.terrain || { water: { tileId: (cat.water && cat.water.surface && cat.water.surface.fresh) || 2048, autotile: true } };
 
         // 1. Ground
         if (terrain.grass) {
@@ -269,25 +269,20 @@
             if (start.displayName) ctx.map.displayName = start.displayName;
             const names = WorldGen.startNames(state.seed);
             const fill = s => String(s || "").replace(/\{male\}/g, names.male).replace(/\{female\}/g, names.female);
-            for (const e of start.events || []) {
+            // The pair as events 1 and 2, only until UF_Colonists exists (it creates them as world units instead).
+            const pair = window.UF.Colonists ? [] : (start.pair || start.events || []);
+            for (const e of pair) {
                 const x = ctx.center.x + (e.dx || 0), y = ctx.center.y + (e.dy || 0);
+                const img = typeof e.image === "string" ? { characterName: e.image } : (e.image || {});
                 ctx.addEvent({
                     name: fill(e.name), x, y, note: fill(e.note),
-                    image: { characterName: e.image.characterName, characterIndex: e.image.characterIndex || 0, direction: e.image.direction || 2, pattern: 1 },
+                    image: { characterName: img.characterName, characterIndex: img.characterIndex || 0, direction: e.dir || img.direction || 2, pattern: 1 },
                     priorityType: 1, through: false, directionFix: !!e.directionFix, walkAnime: e.walkAnime !== false
                 });
                 occupied[y * size + x] = 1;
             }
         }
         const inClearing = (x, y) => clearRadius > 0 && (x - ctx.center.x) ** 2 + (y - ctx.center.y) ** 2 <= clearRadius * clearRadius;
-
-        // 4. Cave mouths: ways down to the layer below (same cells underground)
-        const ug = cat.underground;
-        for (const c of UF.World.connectionsFor(ctx.areaX, ctx.areaY)) {
-            if (ug && ug.surfaceConnectionTileId) ctx.setTile(c.x, c.y, 2, ug.surfaceConnectionTileId);
-            ctx.setTile(c.x, c.y, 5, UF.World.CONNECTION_REGION);
-            occupied[c.y * size + c.x] = 1;
-        }
 
         // 5. Objects, in catalog order; one per cell
         placeObjects(ctx, cat.objects || [], cat.maxObjectsPerArea, occupied, (x, y, gx, gy, o) => {
@@ -357,109 +352,9 @@
         WorldGen.stats[`${ctx.areaX},${ctx.areaY},${ctx.areaZ || 0}`] = counts;
     }
 
-    //-------------------------------------------------------------------------
-    // Connections between layers: seeded cells per area, on dry land, away from the start clearing
-
-    function connectionsFor(ax, ay) {
-        const cat = WorldGen.catalog();
-        const ug = cat && cat.underground;
-        const W = UF.World;
-        if (!ug || !W.state || W.layers() < 1) return [];
-        const st = W.state, size = st.size, mid = Math.floor(size / 2);
-        const water = WorldGen.waterModel(st);
-        const nearWater = (gx, gy) => {
-            for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (water.isWater(gx + dx, gy + dy)) return true;
-            return false;
-        };
-        const isStart = W.isStartArea(ax, ay, 0);
-        const clear = isStart && cat.start ? (cat.start.clearRadius || 0) : 0;
-        const margin = Math.max(6, (ug.chamberRadius || 3) + 2);
-        const ok = (x, y) => {
-            if (x < margin || y < margin || x >= size - margin || y >= size - margin) return false;
-            const gx = ax * size + x, gy = ay * size + y;
-            if (nearWater(gx, gy)) return false;
-            if (clear && (x - mid) ** 2 + (y - mid) ** 2 <= (clear + 2) ** 2) return false;
-            return !(isStart && W.templatePaints(x, y));
-        };
-        const list = [];
-        if (isStart && ug.guaranteeNearStart > 0) {
-            for (let i = 0; i < 64 && list.length === 0; i++) {
-                const angle = unit(st.seed, 0x5eed, ax, ay, i) * Math.PI * 2;
-                const x = Math.round(mid + Math.cos(angle) * ug.guaranteeNearStart);
-                const y = Math.round(mid + Math.sin(angle) * ug.guaranteeNearStart);
-                if (ok(x, y)) list.push({ x, y });
-            }
-        }
-        const want = list.length + (ug.connectionsPerArea || 0);
-        for (let i = 0; list.length < want && i < want * 60; i++) {
-            const x = Math.floor(unit(st.seed, 0xca4e, ax, ay, i) * size);
-            const y = Math.floor(unit(st.seed, 0xca4f, ax, ay, i) * size);
-            if (ok(x, y) && list.every(c => Math.abs(c.x - x) + Math.abs(c.y - y) > 24)) list.push({ x, y });
-        }
-        return list;
-    }
-    WorldGen.connectionsFor = connectionsFor;
-
-    //-------------------------------------------------------------------------
-    // Underground layers: rock with caverns and winding tunnels, a chamber under every cave mouth
-
-    WorldGen.caveOpenAt = function(gx, gy, z) {
-        const ug = this.catalog().underground;
-        const seed = UF.World.state.seed;
-        const salt = 0xc0fe + z * 7919;
-        const scale = ug.caveScale || 28;
-        const blob = valueNoise(seed, salt, gx, gy, scale) * 0.7 + valueNoise(seed, salt + 1, gx, gy, scale / 3) * 0.3;
-        const tunnel = Math.abs(valueNoise(seed, salt + 2, gx, gy, scale * 1.6) - 0.5) < (ug.tunnelWidth || 0.03);
-        return blob > (ug.caveThreshold || 0.6) || tunnel;
-    };
-
-    function generateUnderground(ctx, cat) {
-        const ug = cat.underground;
-        if (!ug) return;
-        const size = ctx.width, z = ctx.areaZ;
-        const gx0 = ctx.areaX * size, gy0 = ctx.areaY * size;
-        ctx.map.tilesetId = ug.tilesetId;
-        ctx.map.displayName = "";
-        ctx.map.note = `<underground:${z}>`;
-
-        const open = new Uint8Array(size * size);
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) open[y * size + x] = WorldGen.caveOpenAt(gx0 + x, gy0 + y, z) ? 1 : 0;
-        }
-        const conns = UF.World.connectionsFor(ctx.areaX, ctx.areaY);
-        const r = ug.chamberRadius || 3;
-        for (const c of conns) {
-            for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
-                if (dx * dx + dy * dy <= r * r) open[(c.y + dy) * size + (c.x + dx)] = 1;
-            }
-        }
-        const isOpen = (x, y) => (x >= 0 && y >= 0 && x < size && y < size) ? open[y * size + x] === 1 : WorldGen.caveOpenAt(gx0 + x, gy0 + y, z);
-
-        const floorBase = ug.floor.autotile ? autotileBase(ug.floor.tileId) : null;
-        const rockBase = ug.rock.autotile ? autotileBase(ug.rock.tileId) : null;
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                if (open[y * size + x]) {
-                    ctx.setTile(x, y, 0, floorBase !== null ? floorBase + autotileShape((dx, dy) => isOpen(x + dx, y + dy)) : ug.floor.tileId);
-                } else {
-                    ctx.setTile(x, y, 0, rockBase !== null ? rockBase + autotileShape((dx, dy) => !isOpen(x + dx, y + dy)) : ug.rock.tileId);
-                    ctx.setTile(x, y, 5, UF.World.ROCK_REGION);
-                }
-            }
-        }
-        const occupied = new Uint8Array(size * size);
-        for (const c of conns) {
-            if (ug.connectionTileId) ctx.setTile(c.x, c.y, 0, ug.connectionTileId);
-            ctx.setTile(c.x, c.y, 5, UF.World.CONNECTION_REGION);
-            occupied[c.y * size + c.x] = 1;
-        }
-        placeObjects(ctx, ug.objects || [], ug.maxObjectsPerArea, occupied, (x, y) => open[y * size + x] === 1);
-    }
-
     if (window.UF.World) {
         UF.World.unregisterGenerator("df_wilderness_generator"); // superseded (UF_ProcGen, commit a09d3fd)
         UF.World.registerGenerator("uf_worldgen", generate, 10);
-        UF.World.setConnectionProvider(connectionsFor);
     }
 
     //-------------------------------------------------------------------------
@@ -472,95 +367,9 @@
     };
 
     function registerChecks() {
-        UF.Test.suite("underground", async t => {
-            const cat = WorldGen.catalog(), W = UF.World;
-            const ug = cat && cat.underground;
-            if (!ug || W.layers() < 1) {
-                t.check("subterranean_retired", true, "subterranean level retired by user (2026-09-18); single surface layer active");
-                return;
-            }
-            t.check("configured", !!ug && W.layers() >= 1, ug ? `${W.layers()} underground layer(s), tileset ${ug.tilesetId}` : "catalog has no underground section");
-            const st = W.state, a = st.startArea, size = st.size, mid = Math.floor(size / 2);
-            const back = W.areaOfMapId(W.areaMapId(a.x, a.y, 1));
-            t.check("layer_map_ids", back && back.x === a.x && back.y === a.y && back.z === 1 && W.areaMapId(a.x, a.y, 1) !== W.areaMapId(a.x, a.y, 0),
-                `surface map ${W.areaMapId(a.x, a.y, 0)}, below it map ${W.areaMapId(a.x, a.y, 1)}`);
-
-            const under = W.buildArea(a.x, a.y, 1);
-            const region = (map, x, y) => map.data[(5 * size + y) * size + x];
-            let rock = 0;
-            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (region(under, x, y) === W.ROCK_REGION) rock++;
-            const openShare = 1 - rock / (size * size);
-            t.check("caves_generated", under.tilesetId === ug.tilesetId && openShare > 0.12 && openShare < 0.75,
-                `${Math.round(openShare * 100)}% open cave, ${Math.round((1 - openShare) * 100)}% rock; tileset ${under.tilesetId}`);
-            const sig = map => { let h = 0; for (let i = 0; i < map.data.length; i++) h = (Math.imul(h, 31) + (map.data[i] | 0)) | 0; return h; };
-            t.check("caves_deterministic", sig(W.buildArea(a.x, a.y, 1)) === sig(under), "same caves when rebuilt");
-
-            const surface = W.buildArea(a.x, a.y, 0);
-            const conns = W.connectionsFor(a.x, a.y);
-            const waterBase = autotileBase(cat.terrain.water.tileId);
-            const bad = conns.filter(c => {
-                const top = surface.data[c.y * size + c.x];
-                const chamberOpen = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].every(([dx, dy]) => region(under, c.x + dx, c.y + dy) !== W.ROCK_REGION);
-                return region(surface, c.x, c.y) !== W.CONNECTION_REGION || isKind(top, waterBase) || region(under, c.x, c.y) !== W.CONNECTION_REGION || !chamberOpen;
-            });
-            t.check("connections", conns.length >= (ug.connectionsPerArea || 1) && bad.length === 0,
-                `${conns.length} cave mouths: ${conns.map(c => `(${c.x},${c.y})`).join(" ")}${bad.length ? `; wrong: ${bad.map(c => `(${c.x},${c.y})`).join(" ")}` : "; each on dry land with an open chamber below"}`);
-            const nearest = Math.min(...conns.map(c => Math.hypot(c.x - mid, c.y - mid)));
-            t.check("mouth_near_start", nearest <= (ug.guaranteeNearStart || 16) + 1.5, `nearest cave mouth ${nearest.toFixed(1)} cells from the fruit tree`);
-            if (!conns.length) return;
-
-            // Go down: the view keeps its cell and changes layer.
-            const c = conns.reduce((best, k) => (Math.hypot(k.x - mid, k.y - mid) < Math.hypot(best.x - mid, best.y - mid) ? k : best));
-            const settle = what => t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && !$gamePlayer.isTransferring() && what(), 10000, "the map to settle").catch(() => {});
-            $gamePlayer.locate(c.x, c.y);
-            await t.waitFrames(5);
-            const surfaceExplored = UF.Fog ? UF.Fog.exploredCount() : 0;
-            t.check("view_goes_down", W.changeViewLayer(1), "changeViewLayer(+1) accepted");
-            await settle(() => (W.currentArea() || {}).z === 1);
-            const here = W.currentArea() || {};
-            t.check("view_same_cell_below", here.z === 1 && here.x === a.x && here.y === a.y && $gamePlayer.x === c.x && $gamePlayer.y === c.y,
-                `now area (${here.x},${here.y}) layer ${here.z}, view at (${$gamePlayer.x},${$gamePlayer.y})`);
-            if (UF.Fog) {
-                t.check("fog_per_layer", !UF.Fog.isExplored(c.x, c.y) && surfaceExplored > 0,
-                    `surface had ${surfaceExplored} explored cells; below, the cave mouth cell starts unexplored`);
-            }
-
-            // Rock blocks, connections don't.
-            let rockCell = null;
-            for (let r = 1; r < 40 && !rockCell; r++) for (let dx = -r; dx <= r && !rockCell; dx++) {
-                const x = c.x + dx, y = c.y + r;
-                if (x >= 0 && y < size && $gameMap.regionId(x, y) === W.ROCK_REGION) rockCell = { x, y };
-            }
-            t.check("rock_blocks", !!rockCell && !$gameMap.isPassable(rockCell.x, rockCell.y, 2) && $gameMap.isPassable(c.x, c.y, 2),
-                rockCell ? `rock at (${rockCell.x},${rockCell.y}) passable: ${$gameMap.isPassable(rockCell.x, rockCell.y, 2)}; cave mouth passable: ${$gameMap.isPassable(c.x, c.y, 2)}` : "no rock found near the chamber");
-
-            // A unit on the surface walks through the cave mouth and appears down here.
-            const walker = W.addUnit({ name: "TEST_delver", image: { characterName: "People1", characterIndex: 1 }, area: { x: a.x, y: a.y, z: 0 }, x: c.x + 1, y: c.y, dir: 4 });
-            W.sendUnit(walker.id, { area: { x: a.x, y: a.y, z: 1 }, x: c.x, y: c.y + 1 });
-            await t.waitUntil(() => !walker.goal, 12000, "TEST_delver to reach the cave").catch(() => {});
-            t.check("unit_goes_down", (walker.area.z || 0) === 1 && !walker.goal && !!W.eventOf(walker.id),
-                `TEST_delver on layer ${walker.area.z || 0} at (${walker.x},${walker.y}), goal ${walker.goal ? "not reached" : "reached"}, ${W.eventOf(walker.id) ? "drawn here" : "not drawn"}`);
-
-            if (UF.Fog) UF.Fog.reveal(c.x, c.y, 18);
-            if (UF.Camera) UF.Camera.setLevel(0);
-            await t.waitFrames(20);
-            t.screenshot("below_zoom_1");
-            if (UF.Camera) UF.Camera.setLevel(UF.Camera.levels.length - 1);
-            await t.waitFrames(20);
-            t.screenshot("below_zoom_farthest");
-            if (UF.Camera) UF.Camera.setLevel(1);
-            W.removeUnit(walker.id);
-
-            t.check("view_goes_up", W.changeViewLayer(-1), "changeViewLayer(-1) accepted");
-            await settle(() => (W.currentArea() || {}).z === 0);
-            t.check("view_back_on_surface", (W.currentArea() || {}).z === 0 && $gamePlayer.x === c.x, `layer ${(W.currentArea() || {}).z}, view at (${$gamePlayer.x},${$gamePlayer.y})`);
-            t.check("no_errors", t.errorsSoFar().length === 0,
-                t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during underground checks");
-        });
-
         UF.Test.suite("worldgen", async t => {
             const cat = WorldGen.catalog();
-            t.check("catalog_loaded", !!cat && Array.isArray(cat.objects) && !!cat.terrain,
+            t.check("catalog_loaded", !!cat && Array.isArray(cat.objects) && !!(cat.terrain || cat.water),
                 cat ? `${cat.objects.length} object types` : "data/UF_WorldCatalog.json missing or invalid");
             if (!cat || !UF.World || !UF.World.state) return;
 
@@ -575,7 +384,7 @@
                 `${WorldGen.autotileShapeCount()} shapes derived; a 3-wide vertical strip gives ${strip.join(",")} (the editor painted 16,0,24)`);
 
             const W = UF.World, st = W.state, a = st.startArea, size = st.size;
-            const waterBase = autotileBase(cat.terrain.water.tileId);
+            const waterBase = autotileBase(cat.terrain && cat.terrain.water ? cat.terrain.water.tileId : cat.water.surface.fresh);
             const waterCols = (map, row) => {
                 const cols = [];
                 for (let x = 0; x < size; x++) if (isKind(map.data[row * size + x], waterBase)) cols.push(x);
@@ -587,7 +396,7 @@
             const river = WorldGen.riverModel(st);
             const edgeGy = a.y * size + size - 1;
             const riverAreaX = Math.floor(Math.round(river.center(edgeGy)) / size);
-            if (W.inWorld(riverAreaX, a.y + 1)) {
+            if (W.inWorld(riverAreaX, a.y + 1) && riverAreaX !== a.x) {
                 const above = W.buildArea(riverAreaX, a.y), below = W.buildArea(riverAreaX, a.y + 1);
                 const lastRow = waterCols(above, size - 1), firstRow = waterCols(below, 0);
                 t.check("river_continuous_between_areas", lastRow.length > 0 && lastRow.some(x => firstRow.includes(x)),
@@ -599,7 +408,7 @@
             if (cat.start && !W.template()) {
                 const names = WorldGen.startNames(st.seed);
                 const fill = s => s.replace(/\{male\}/g, names.male).replace(/\{female\}/g, names.female);
-                const expected = (cat.start.events || []).map((e, i) => ({ id: i + 1, name: fill(e.name), x: mid + (e.dx || 0), y: mid + (e.dy || 0) }));
+                const expected = window.UF.Colonists ? [] : (cat.start.pair || cat.start.events || []).map((e, i) => ({ id: i + 1, name: fill(e.name), x: mid + (e.dx || 0), y: mid + (e.dy || 0) }));
                 const wrong = expected.filter(e => !here.events[e.id] || here.events[e.id].name !== e.name || here.events[e.id].x !== e.x || here.events[e.id].y !== e.y);
                 t.check("start_in_middle", wrong.length === 0 && here.note.includes("<glade>") && !here.events.some(e => e && /<fruit>/.test(e.note) && !/<ufObject:/.test(e.note)),
                     wrong.length ? `not as expected: ${wrong.map(e => `${e.name} (event ${e.id} at ${e.x},${e.y})`).join(", ")}` : `${expected.map(e => `${e.name} = event ${e.id} at (${e.x},${e.y})`).join("; ")}; no fixed tree`);

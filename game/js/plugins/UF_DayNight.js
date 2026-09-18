@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF DayNight] Day/night cycle on world maps: smooth light from UF_Core's clock, shorter sight at night, constant cave light underground, on-screen clock.
+ * @plugindesc [UF DayNight] Day/night cycle on world maps: smooth light from UF_Core's clock, shorter sight at night, speed/pause badge.
  * @author UF project
  * @base UF_Core
  * @orderAfter UF_World
@@ -59,16 +59,14 @@
         { h: 21.5, tone: [-80, -75, -15, 60] },  // night
         { h: 24, tone: [-80, -75, -15, 60] }
     ];
-    const CAVE_TONE = [-45, -45, -25, 35];
 
     const lerp = (a, b, t) => a + (b - a) * t;
 
     const DayNight = {
         /** Hours as a decimal 0 <= h < 24. */
         hours: () => (window.$ufTime ? $ufTime.hour + $ufTime.minute / 60 : 12),
-        /** Tone for an hour; layer z > 0 is underground (constant cave light). */
-        toneFor(h, z = 0) {
-            if (z > 0) return CAVE_TONE.slice();
+        /** Tone for an hour. */
+        toneFor(h) {
             h = ((h % 24) + 24) % 24;
             for (let i = 0; i < KEYS.length - 1; i++) {
                 const a = KEYS[i], b = KEYS[i + 1];
@@ -81,7 +79,7 @@
         },
         /** 0 = full night, 1 = full day. */
         daylight(h = DayNight.hours()) {
-            const tone = DayNight.toneFor(h, 0);
+            const tone = DayNight.toneFor(h);
             return Math.max(0, Math.min(1, 1 + (tone[0] + tone[1]) / 155));
         },
         phase(h = DayNight.hours()) {
@@ -91,14 +89,9 @@
             return "night";
         },
         isNight: (h = DayNight.hours()) => DayNight.phase(h) === "night",
-        /** Multiplier for sight radius: 1 by day, NightVision at night; caves are always dim but constant. */
-        visionFactor(h = DayNight.hours(), z = DayNight.layer()) {
-            if (z > 0) return 0.75;
+        /** Multiplier for sight radius: 1 by day, NightVision at night. */
+        visionFactor(h = DayNight.hours()) {
             return NIGHT_VISION + (1 - NIGHT_VISION) * DayNight.daylight(h);
-        },
-        layer: () => {
-            const a = window.UF && UF.World && UF.World.currentArea ? UF.World.currentArea() : null;
-            return a ? a.z || 0 : 0;
         },
         onWorldMap: () => !!(window.UF && UF.World && UF.World.currentArea && UF.World.currentArea())
     };
@@ -112,7 +105,7 @@
     Game_Screen.prototype.update = function() {
         _Game_Screen_update.call(this);
         if (!DayNight.onWorldMap() || !(SceneManager._scene instanceof Scene_Map)) return;
-        this._tone = DayNight.toneFor(DayNight.hours(), DayNight.layer());
+        this._tone = DayNight.toneFor(DayNight.hours());
         this._toneTarget = this._tone.slice();
         this._toneDuration = 0;
     };
@@ -149,7 +142,7 @@
             let text = speed;
             if (SHOW_CLOCK) {
                 const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
-                const where = DayNight.layer() > 0 ? "Underground" : DayNight.phase().replace(/^./, c => c.toUpperCase());
+                const where = DayNight.phase().replace(/^./, c => c.toUpperCase());
                 text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}${speed ? "  " + speed : ""}`;
             }
             if (text === this._text) return;
@@ -194,7 +187,6 @@
                 maxStep = Math.max(maxStep, ...a.map((v, k) => Math.abs(v - b[k])));
             }
             t.check("smooth_over_the_day", maxStep <= 5, `largest tone change between 5-minute steps: ${maxStep}`);
-            t.check("caves_ignore_the_sun", JSON.stringify(DayNight.toneFor(0, 1)) === JSON.stringify(DayNight.toneFor(12, 1)), `cave tone ${JSON.stringify(DayNight.toneFor(12, 1))} at any hour`);
             t.check("phases", DayNight.phase(12) === "day" && DayNight.phase(19) === "dusk" && DayNight.phase(2) === "night" && DayNight.phase(6) === "dawn", "12 day, 19 dusk, 2 night, 6 dawn");
             t.check("night_vision_shorter", DayNight.visionFactor(0, 0) < DayNight.visionFactor(12, 0) && Math.abs(DayNight.visionFactor(12, 0) - 1) < 1e-9,
                 `sight x${DayNight.visionFactor(12, 0).toFixed(2)} at noon, x${DayNight.visionFactor(0, 0).toFixed(2)} at midnight`);

@@ -4,10 +4,16 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Fog] Fog of war: unexplored cells are black, explored cells nobody sees are dimmed. Your faction's members reveal it.
+ * @plugindesc [UF Fog] Fog of war: unexplored cells are black; once your faction's members have seen a cell it stays clear for good.
  * @author UF project
  * @orderAfter UF_World
  * @orderAfter UF_ColonyOverseer
+ *
+ * @param Enabled
+ * @text Fog enabled
+ * @type boolean
+ * @default false
+ * @desc false (user decision 2026-09-18, for development): no fog at all, the whole map is visible. true: fog of war.
  *
  * @param SightRadius
  * @text Sight radius (cells)
@@ -21,8 +27,8 @@
  * @type number
  * @min 0
  * @max 255
- * @default 150
- * @desc Darkness over explored cells nobody currently sees (0 = none, 255 = black).
+ * @default 0
+ * @desc Darkness over explored cells nobody currently sees. 0 (user decision 2026-09-18): once discovered, a cell stays clear for good.
  *
  * @help
  * Who explores: the colonists (UF_ColonyOverseer: Adam and Eve), UF_World
@@ -41,8 +47,9 @@
     "use strict";
 
     const P = PluginManager.parameters("UF_Fog");
+    const ENABLED = (P.Enabled || "false") === "true";
     const SIGHT = Math.max(1, Number(P.SightRadius || 8));
-    const DIM = Math.max(0, Math.min(255, P.ExploredDim !== undefined && P.ExploredDim !== "" ? Number(P.ExploredDim) : 150));
+    const DIM = Math.max(0, Math.min(255, P.ExploredDim !== undefined && P.ExploredDim !== "" ? Number(P.ExploredDim) : 0));
     const UPDATE_FRAMES = 6;
     const FOG_RGB = [4, 8, 12];
 
@@ -61,7 +68,7 @@
     const keyFor = mapId => {
         const area = window.UF && UF.World && UF.World.state ? UF.World.areaOfMapId(mapId) : null;
         if (!area) return `map:${mapId}`;
-        return area.z ? `area:${area.x},${area.y},${area.z}` : `area:${area.x},${area.y}`; // each layer explored separately
+        return `area:${area.x},${area.y}`;
     };
     const store = () => {
         if (window.UF && UF.World && UF.World.state) return (UF.World.state.fog = UF.World.state.fog || {});
@@ -185,6 +192,15 @@
     };
     window.UF = window.UF || {};
     window.UF.Fog = Fog;
+    Fog.enabled = ENABLED;
+    if (!ENABLED) {
+        // Development: no fog. Everything counts as explored and visible; reveal/refresh do nothing.
+        Fog.isExplored = () => true;
+        Fog.isVisible = () => true;
+        Fog.reveal = () => {};
+        Fog.refresh = () => {};
+        Fog.exploredCount = () => (window.$gameMap ? $gameMap.width() * $gameMap.height() : 0);
+    }
 
     //-------------------------------------------------------------------------
     // Drawing: one pixel per cell, scaled up inside the tilemap (so it follows scrolling and zoom)
@@ -235,6 +251,7 @@
     const _Spriteset_Map_createCharacters = Spriteset_Map.prototype.createCharacters;
     Spriteset_Map.prototype.createCharacters = function() {
         _Spriteset_Map_createCharacters.call(this);
+        if (!ENABLED) return;
         this._ufFog = new Sprite_UFFog();
         this._tilemap.addChild(this._ufFog);
     };
@@ -279,6 +296,12 @@
 
     function registerChecks() {
         UF.Test.suite("fog", async t => {
+            if (!ENABLED) {
+                const sprite = SceneManager._scene._spriteset && SceneManager._scene._spriteset._ufFog;
+                t.check("disabled_whole_map_visible", !sprite && Fog.isExplored(2, 2) && Fog.isVisible(250, 250) && Fog.exploredCount() === $gameMap.width() * $gameMap.height(),
+                    `Enabled=false: ${sprite ? "a fog sprite exists" : "no fog sprite"}, corner explored ${Fog.isExplored(2, 2)}, ${Fog.exploredCount()} of ${$gameMap.width() * $gameMap.height()} cells explored`);
+                return;
+            }
             // Look at the start, where the colonists are.
             const obs = Fog.observers();
             if (obs.length) $gamePlayer.locate(obs[0].x, obs[0].y);

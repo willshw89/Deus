@@ -1,1993 +1,375 @@
 {
   "version": 3,
-  "about": "Master world catalog. Declares every terrain, object, item, wildlife species, faction, and UI element with exact image filenames, AR-xxx request IDs, and asset statuses. Read by UF_WorldGen, UF_Tiles, UF_Factions, UF_Wildlife, UF_ColonyOverseer.",
-  "terrain": {
-    "grass": {
-      "name": "Meadow grass",
-      "tileId": 2816,
-      "image": "U7_Outside_A2.png",
-      "requestId": "AR-001",
-      "status": "U7 stand-in",
-      "autotile": false,
-      "about": "Seamless U7 meadow grass (Outside A2 autotile kind 0)"
-    },
-    "water": {
-      "name": "River water",
-      "tileId": 2048,
-      "image": "Outside_A1.png",
-      "requestId": "AR-001",
-      "status": "U7 stand-in",
-      "autotile": true,
-      "about": "Fresh water with bank autotiles (Outside A1 kind 0)"
-    }
-  },
+  "about": "World generation and world content catalog. Read by UF_WorldGen, UF_Tiles, UF_Objects, UF_Items, UF_Jobs, UF_Wildlife, UF_History, UF_Colonists, UF_Factions, UF_Stance, UF_Look. Art and content are added here without touching code: docs/design/WORLD_ARCHITECTURE.md (schema), docs/handoffs/HANDOFF_world_generation.md (how to add an object), docs/ASSET_INVENTORY.md (every asset in use and its status). The world is one surface layer (the underground layer was removed 2026-09-18). Owner: Claude Code; Gemini may edit objects, items.types, wildlife.species and people only.",
   "tilesets": {
-    "about": "Master U7 2.5D surface tilesets.",
-    "surface": {
-      "A1": "Outside_A1",
-      "A2": "Outside_A2",
-      "B": "Outside_B",
-      "C": "Outside_C"
-    }
+    "about": "Runtime tileset built by UF_Tiles (ID 91). A2 = ground kinds drawn in code (UF_GenGround_A2, same order as groundKinds). Flags are copied from the 'base' editor tileset. Replace a name here when art arrives (AR-100/AR-101).",
+    "surface": { "base": 2, "A1": "Outside_A1", "A2": "UF_GenGround_A2", "A5": "Outside_A5", "B": "Outside_B", "C": "Outside_C" }
   },
   "groundKinds": [
-    {
-      "id": "meadow",
-      "name": "Meadow",
-      "pattern": "grass",
-      "colors": [
-        "#5a9a3c",
-        "#467a2e",
-        "#74b54c",
-        "#c8d86a"
-      ],
-      "edge": "#3b6326",
-      "image": "U7_Outside_A2.png",
-      "requestId": "AR-001",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tropical_grass",
-      "name": "Lush grass",
-      "pattern": "grass",
-      "colors": [
-        "#3f9a4a",
-        "#2f7a3a",
-        "#58b862",
-        "#e0e070"
-      ],
-      "edge": "#28602e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "dry_grass",
-      "name": "Dry grass",
-      "pattern": "grass",
-      "colors": [
-        "#b8a24a",
-        "#9a8638",
-        "#d2bd62",
-        "#7a9a3a"
-      ],
-      "edge": "#7a6a2a",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "shrub_soil",
-      "name": "Scrub soil",
-      "pattern": "dots",
-      "colors": [
-        "#8a7a4a",
-        "#6e6038",
-        "#a6955e",
-        "#5a7a3a"
-      ],
-      "edge": "#5a4e2e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "forest_floor",
-      "name": "Leaf litter",
-      "pattern": "litter",
-      "colors": [
-        "#5a4a2a",
-        "#463a20",
-        "#6e5c36",
-        "#a8602a"
-      ],
-      "edge": "#3a2e18",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "needle_floor",
-      "name": "Needle floor",
-      "pattern": "needles",
-      "colors": [
-        "#4a4a2a",
-        "#3a3a20",
-        "#5e5e36",
-        "#6a3a1a"
-      ],
-      "edge": "#2e2e18",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "jungle_floor",
-      "name": "Jungle floor",
-      "pattern": "litter",
-      "colors": [
-        "#3a5a2a",
-        "#2a4620",
-        "#4e7236",
-        "#7a4a2a"
-      ],
-      "edge": "#223a18",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "tundra",
-      "name": "Tundra",
-      "pattern": "dots",
-      "colors": [
-        "#8a9a7a",
-        "#6e7e60",
-        "#a6b494",
-        "#b8c0b0"
-      ],
-      "edge": "#5a6a4e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "snow",
-      "name": "Snow",
-      "pattern": "snow",
-      "colors": [
-        "#e8eef4",
-        "#c8d4e0",
-        "#ffffff",
-        "#a8b8cc"
-      ],
-      "edge": "#8898ac",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "ice",
-      "name": "Ice",
-      "pattern": "ice",
-      "colors": [
-        "#a8d4e8",
-        "#88b8d0",
-        "#d0ecf8",
-        "#ffffff"
-      ],
-      "edge": "#6898b0",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "sand",
-      "name": "Sand",
-      "pattern": "dots",
-      "colors": [
-        "#dcc88a",
-        "#c4ae70",
-        "#eedca2",
-        "#a89058"
-      ],
-      "edge": "#a8905a",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "stony",
-      "name": "Stony ground",
-      "pattern": "cracks",
-      "colors": [
-        "#9a9284",
-        "#7e776a",
-        "#b4ad9e",
-        "#5e584e"
-      ],
-      "edge": "#5e584e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "red_clay",
-      "name": "Red clay",
-      "pattern": "stria",
-      "colors": [
-        "#b8663a",
-        "#9a4e2a",
-        "#d2804e",
-        "#7a3a1e"
-      ],
-      "edge": "#7a3a1e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "rock",
-      "name": "Bare rock",
-      "pattern": "cracks",
-      "colors": [
-        "#7a7874",
-        "#5e5c58",
-        "#969490",
-        "#4a4844"
-      ],
-      "edge": "#3a3834",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "peak_rock",
-      "name": "Rock face",
-      "pattern": "cracks",
-      "colors": [
-        "#56544f",
-        "#3e3c38",
-        "#6e6c68",
-        "#2e2c28"
-      ],
-      "edge": "#1e1c18",
-      "passable": false,
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "mud",
-      "name": "Mud",
-      "pattern": "mud",
-      "colors": [
-        "#6a5a3a",
-        "#52462c",
-        "#82704a",
-        "#3a5a2a"
-      ],
-      "edge": "#42381f",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "swamp_mud",
-      "name": "Swamp mud",
-      "pattern": "mud",
-      "colors": [
-        "#3e3a26",
-        "#2e2a1a",
-        "#4e4a32",
-        "#2a4a2a"
-      ],
-      "edge": "#1e1c10",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "dirt",
-      "name": "Dirt",
-      "pattern": "dots",
-      "colors": [
-        "#8a6a44",
-        "#6e5236",
-        "#a28058",
-        "#5a4428"
-      ],
-      "edge": "#4e3a24",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "cursed_grass",
-      "name": "Blighted grass",
-      "pattern": "grass",
-      "colors": [
-        "#6a6a4a",
-        "#52523a",
-        "#7e7a5a",
-        "#5a3a5a"
-      ],
-      "edge": "#3e3e2a",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "blessed_grass",
-      "name": "Flowering grass",
-      "pattern": "grass",
-      "colors": [
-        "#62b24a",
-        "#4e9a3a",
-        "#82ca62",
-        "#f0e8a0"
-      ],
-      "edge": "#3e7a2e",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "ash",
-      "name": "Ash",
-      "pattern": "dots",
-      "colors": [
-        "#5a5654",
-        "#444240",
-        "#6e6a66",
-        "#8a3a2a"
-      ],
-      "edge": "#2e2c2a",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "cave_floor",
-      "name": "Cave floor",
-      "pattern": "cracks",
-      "colors": [
-        "#6e665a",
-        "#5a5448",
-        "#827a6c",
-        "#4a443a"
-      ],
-      "edge": "#3a352c",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "cave_rock",
-      "name": "Solid rock",
-      "pattern": "cracks",
-      "colors": [
-        "#3e3a36",
-        "#2e2b28",
-        "#4e4a45",
-        "#222020"
-      ],
-      "edge": "#141210",
-      "passable": false,
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "fungal_floor",
-      "name": "Fungal floor",
-      "pattern": "mud",
-      "colors": [
-        "#4a4a5e",
-        "#3a3a4c",
-        "#5e5a76",
-        "#8a6aa8"
-      ],
-      "edge": "#2a2a3a",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "crystal_floor",
-      "name": "Crystal floor",
-      "pattern": "ice",
-      "colors": [
-        "#5e6a7a",
-        "#4a5462",
-        "#7a8ea4",
-        "#b0e0ff"
-      ],
-      "edge": "#343c48",
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    },
-    {
-      "id": "chasm",
-      "name": "Chasm",
-      "pattern": "dots",
-      "colors": [
-        "#0c0c10",
-        "#060608",
-        "#14141a",
-        "#1e1e28"
-      ],
-      "edge": "#2a2a36",
-      "passable": false,
-      "image": "UF_Tiles_Procedural",
-      "requestId": "AR-100",
-      "status": "code-drawn placeholder"
-    }
+    { "id": "meadow", "name": "Meadow", "pattern": "grass", "colors": ["#5a9a3c", "#467a2e", "#74b54c", "#c8d86a"], "edge": "#3b6326" },
+    { "id": "tropical_grass", "name": "Lush grass", "pattern": "grass", "colors": ["#3f9a4a", "#2f7a3a", "#58b862", "#e0e070"], "edge": "#28602e" },
+    { "id": "dry_grass", "name": "Dry grass", "pattern": "grass", "colors": ["#b8a24a", "#9a8638", "#d2bd62", "#7a9a3a"], "edge": "#7a6a2a" },
+    { "id": "shrub_soil", "name": "Scrub soil", "pattern": "dots", "colors": ["#8a7a4a", "#6e6038", "#a6955e", "#5a7a3a"], "edge": "#5a4e2e" },
+    { "id": "forest_floor", "name": "Leaf litter", "pattern": "litter", "colors": ["#5a4a2a", "#463a20", "#6e5c36", "#a8602a"], "edge": "#3a2e18" },
+    { "id": "needle_floor", "name": "Needle floor", "pattern": "needles", "colors": ["#4a4a2a", "#3a3a20", "#5e5e36", "#6a3a1a"], "edge": "#2e2e18" },
+    { "id": "jungle_floor", "name": "Jungle floor", "pattern": "litter", "colors": ["#3a5a2a", "#2a4620", "#4e7236", "#7a4a2a"], "edge": "#223a18" },
+    { "id": "tundra", "name": "Tundra", "pattern": "dots", "colors": ["#8a9a7a", "#6e7e60", "#a6b494", "#b8c0b0"], "edge": "#5a6a4e" },
+    { "id": "snow", "name": "Snow", "pattern": "snow", "colors": ["#e8eef4", "#c8d4e0", "#ffffff", "#a8b8cc"], "edge": "#8898ac" },
+    { "id": "ice", "name": "Ice", "pattern": "ice", "colors": ["#a8d4e8", "#88b8d0", "#d0ecf8", "#ffffff"], "edge": "#6898b0" },
+    { "id": "sand", "name": "Sand", "pattern": "dots", "colors": ["#dcc88a", "#c4ae70", "#eedca2", "#a89058"], "edge": "#a8905a" },
+    { "id": "stony", "name": "Stony ground", "pattern": "cracks", "colors": ["#9a9284", "#7e776a", "#b4ad9e", "#5e584e"], "edge": "#5e584e" },
+    { "id": "red_clay", "name": "Red clay", "pattern": "stria", "colors": ["#b8663a", "#9a4e2a", "#d2804e", "#7a3a1e"], "edge": "#7a3a1e" },
+    { "id": "rock", "name": "Bare rock", "pattern": "cracks", "colors": ["#7a7874", "#5e5c58", "#969490", "#4a4844"], "edge": "#3a3834" },
+    { "id": "peak_rock", "name": "Rock face", "pattern": "cracks", "colors": ["#56544f", "#3e3c38", "#6e6c68", "#2e2c28"], "edge": "#1e1c18", "passable": false },
+    { "id": "mud", "name": "Mud", "pattern": "mud", "colors": ["#6a5a3a", "#52462c", "#82704a", "#3a5a2a"], "edge": "#42381f" },
+    { "id": "swamp_mud", "name": "Swamp mud", "pattern": "mud", "colors": ["#3e3a26", "#2e2a1a", "#4e4a32", "#2a4a2a"], "edge": "#1e1c10" },
+    { "id": "dirt", "name": "Dirt", "pattern": "dots", "colors": ["#8a6a44", "#6e5236", "#a28058", "#5a4428"], "edge": "#4e3a24" },
+    { "id": "cursed_grass", "name": "Blighted grass", "pattern": "grass", "colors": ["#6a6a4a", "#52523a", "#7e7a5a", "#5a3a5a"], "edge": "#3e3e2a" },
+    { "id": "blessed_grass", "name": "Flowering grass", "pattern": "grass", "colors": ["#62b24a", "#4e9a3a", "#82ca62", "#f0e8a0"], "edge": "#3e7a2e" },
+    { "id": "ash", "name": "Ash", "pattern": "dots", "colors": ["#5a5654", "#444240", "#6e6a66", "#8a3a2a"], "edge": "#2e2c2a" },
+    { "id": "scree", "name": "Scree", "pattern": "cracks", "colors": ["#6e665a", "#5a5448", "#827a6c", "#4a443a"], "edge": "#3a352c" }
   ],
   "water": {
-    "about": "Water kinds by tile ID (A1 autotiles; edges computed). Surface IDs are in Outside_A1.",
-    "surface": {
-      "fresh": {
-        "id": "fresh",
-        "name": "Fresh water",
-        "tileId": 2048,
-        "image": "Outside_A1.png",
-        "requestId": "AR-001",
-        "status": "U7 stand-in"
-      },
-      "pond": {
-        "id": "pond",
-        "name": "Pond water",
-        "tileId": 2096,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "marsh": {
-        "id": "marsh",
-        "name": "Marsh water",
-        "tileId": 2144,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "swamp": {
-        "id": "swamp",
-        "name": "Swamp water",
-        "tileId": 2192,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "icy": {
-        "id": "icy",
-        "name": "Icy water",
-        "tileId": 2240,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "brackish": {
-        "id": "brackish",
-        "name": "Brackish water",
-        "tileId": 2432,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "salt": {
-        "id": "salt",
-        "name": "Salt water",
-        "tileId": 2528,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "deep": {
-        "id": "deep",
-        "name": "Deep ocean",
-        "tileId": 2624,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      },
-      "blighted": {
-        "id": "blighted",
-        "name": "Blighted water",
-        "tileId": 2720,
-        "image": "Outside_A1.png",
-        "requestId": "AR-101",
-        "status": "U7 stand-in"
-      }
-    }
+    "about": "Water kinds by A1 autotile ID (edges computed by the engine) in tilesets.surface.A1. Stock RMMZ sheet until AR-101.",
+    "surface": { "fresh": 2048, "pond": 2096, "marsh": 2144, "swamp": 2192, "icy": 2240, "brackish": 2432, "salt": 2528, "deep": 2624, "blighted": 2720 }
   },
   "climate": {
-    "about": "World fields (0-1) from the seed: elevation, rainfall, temperature (north is colder), drainage, savagery, alignment. Thresholds below turn them into biomes, like DF's world map.",
-    "scale": {
-      "elevation": 420,
-      "rainfall": 360,
-      "temperature": 520,
-      "drainage": 240,
-      "savagery": 300,
-      "alignment": 340,
-      "detail": 48
-    },
+    "about": "World fields in 0-1 from the seed, like DF's world map with its standard settings: elevation (with an ocean rim around the world), rainfall, temperature (north is colder, high ground is colder), drainage, volcanism, savagery, alignment. docs/design/WORLD_ARCHITECTURE.md section 3 turns them into biomes.",
+    "scale": { "elevation": 150, "rainfall": 130, "temperature": 190, "drainage": 90, "volcanism": 110, "savagery": 110, "alignment": 120, "detail": 24 },
+    "continentRim": 0.06,
     "seaLevel": 0.3,
     "mountainLevel": 0.74,
     "peakLevel": 0.86,
-    "lakeChance": 0.82,
-    "startHabitableRadius": [
-      28,
-      110
-    ],
-    "startClimate": {
-      "elevation": 0.5,
-      "rainfall": 0.4,
-      "temperature": 0.48,
-      "drainage": 0.55,
-      "savagery": 0.2,
-      "alignment": 0.5
-    }
+    "lakes": { "scale": 70, "threshold": 0.72, "maxDrainage": 0.4, "minRainfall": 0.45 },
+    "startHabitableRadius": [28, 110],
+    "startClimate": { "elevation": 0.5, "rainfall": 0.42, "temperature": 0.5, "drainage": 0.55, "volcanism": 0.2, "savagery": 0.2, "alignment": 0.5 }
   },
   "biomes": {
-    "glacier": {
-      "name": "Glacier",
-      "ground": "ice",
-      "water": "icy",
-      "plants": {
-        "granite_boulder": 0.002
-      }
-    },
-    "tundra": {
-      "name": "Tundra",
-      "ground": "tundra",
-      "water": "icy",
-      "plants": {
-        "grass_tuft": 0.03,
-        "rocks_small": 0.01,
-        "granite_boulder": 0.003,
-        "berry_bush": 0.002
-      }
-    },
-    "taiga": {
-      "name": "Taiga",
-      "ground": "needle_floor",
-      "water": "icy",
-      "plants": {
-        "pine": 0.07,
-        "rocks_small": 0.004,
-        "berry_bush": 0.003
-      }
-    },
-    "forest_temperate_conifer": {
-      "name": "Conifer forest",
-      "ground": "needle_floor",
-      "water": "fresh",
-      "plants": {
-        "pine": 0.09,
-        "berry_bush": 0.004,
-        "rocks_small": 0.003
-      }
-    },
-    "forest_temperate_broadleaf": {
-      "name": "Broadleaf forest",
-      "ground": "forest_floor",
-      "water": "fresh",
-      "plants": {
-        "oak": 0.08,
-        "berry_bush": 0.008,
-        "fruit_tree": 0.003,
-        "grass_tuft": 0.01
-      }
-    },
-    "forest_tropical_conifer": {
-      "name": "Tropical conifer forest",
-      "ground": "needle_floor",
-      "water": "fresh",
-      "plants": {
-        "pine": 0.07,
-        "tree_tropical": 0.02,
-        "berry_bush": 0.004
-      }
-    },
-    "forest_tropical_dry_broadleaf": {
-      "name": "Dry tropical forest",
-      "ground": "forest_floor",
-      "water": "fresh",
-      "plants": {
-        "tree_savanna": 0.05,
-        "oak": 0.02,
-        "bush": 0.01,
-        "fruit_tree": 0.004
-      }
-    },
-    "forest_tropical_moist_broadleaf": {
-      "name": "Rainforest",
-      "ground": "jungle_floor",
-      "water": "fresh",
-      "plants": {
-        "tree_tropical": 0.1,
-        "fruit_tree": 0.008,
-        "berry_bush": 0.01,
-        "grass_tuft": 0.02
-      }
-    },
-    "grassland_temperate": {
-      "name": "Grassland",
-      "ground": "meadow",
-      "water": "fresh",
-      "plants": {
-        "grass_tuft": 0.05,
-        "flowers": 0.02,
-        "berry_bush": 0.006,
-        "oak": 0.004
-      }
-    },
-    "grassland_tropical": {
-      "name": "Tropical grassland",
-      "ground": "tropical_grass",
-      "water": "fresh",
-      "plants": {
-        "grass_tuft": 0.06,
-        "flowers": 0.015,
-        "tree_savanna": 0.004,
-        "fruit_tree": 0.002
-      }
-    },
-    "savanna_temperate": {
-      "name": "Savanna",
-      "ground": "dry_grass",
-      "water": "fresh",
-      "plants": {
-        "tree_savanna": 0.012,
-        "grass_tuft": 0.05,
-        "bush": 0.006
-      }
-    },
-    "savanna_tropical": {
-      "name": "Tropical savanna",
-      "ground": "dry_grass",
-      "water": "fresh",
-      "plants": {
-        "tree_savanna": 0.015,
-        "grass_tuft": 0.06,
-        "bush": 0.004
-      }
-    },
-    "shrubland_temperate": {
-      "name": "Shrubland",
-      "ground": "shrub_soil",
-      "water": "fresh",
-      "plants": {
-        "bush": 0.05,
-        "berry_bush": 0.012,
-        "rocks_small": 0.008
-      }
-    },
-    "shrubland_tropical": {
-      "name": "Tropical shrubland",
-      "ground": "shrub_soil",
-      "water": "fresh",
-      "plants": {
-        "bush": 0.06,
-        "berry_bush": 0.008,
-        "grass_tuft": 0.02
-      }
-    },
-    "desert_sand": {
-      "name": "Sand desert",
-      "ground": "sand",
-      "water": "salt",
-      "plants": {
-        "rocks_small": 0.004,
-        "bush": 0.002
-      }
-    },
-    "desert_rock": {
-      "name": "Rock desert",
-      "ground": "stony",
-      "water": "brackish",
-      "plants": {
-        "granite_boulder": 0.015,
-        "rocks_small": 0.02,
-        "ironstone": 0.003
-      }
-    },
-    "desert_badland": {
-      "name": "Badlands",
-      "ground": "red_clay",
-      "water": "brackish",
-      "plants": {
-        "dead_tree": 0.006,
-        "rocks_small": 0.012,
-        "granite_boulder": 0.006,
-        "ironstone": 0.004
-      }
-    },
-    "mountain": {
-      "name": "Mountains",
-      "ground": "rock",
-      "water": "icy",
-      "plants": {
-        "granite_boulder": 0.04,
-        "ironstone": 0.015,
-        "pine": 0.01,
-        "rocks_small": 0.02
-      }
-    },
-    "marsh_temperate_fresh": {
-      "name": "Marsh",
-      "ground": "mud",
-      "water": "marsh",
-      "plants": {
-        "reeds": 0.08,
-        "grass_tuft": 0.03
-      }
-    },
-    "marsh_temperate_salt": {
-      "name": "Salt marsh",
-      "ground": "mud",
-      "water": "swamp",
-      "plants": {
-        "reeds": 0.06
-      }
-    },
-    "marsh_tropical_fresh": {
-      "name": "Tropical marsh",
-      "ground": "mud",
-      "water": "marsh",
-      "plants": {
-        "reeds": 0.09,
-        "tree_tropical": 0.004
-      }
-    },
-    "marsh_tropical_salt": {
-      "name": "Tropical salt marsh",
-      "ground": "mud",
-      "water": "swamp",
-      "plants": {
-        "reeds": 0.07
-      }
-    },
-    "swamp_temperate_fresh": {
-      "name": "Swamp",
-      "ground": "swamp_mud",
-      "water": "swamp",
-      "plants": {
-        "tree_swamp": 0.06,
-        "reeds": 0.04
-      }
-    },
-    "swamp_temperate_salt": {
-      "name": "Salt swamp",
-      "ground": "swamp_mud",
-      "water": "swamp",
-      "plants": {
-        "tree_swamp": 0.04,
-        "reeds": 0.03
-      }
-    },
-    "swamp_tropical_fresh": {
-      "name": "Tropical swamp",
-      "ground": "swamp_mud",
-      "water": "swamp",
-      "plants": {
-        "tree_swamp": 0.05,
-        "tree_tropical": 0.03,
-        "reeds": 0.03
-      }
-    },
-    "swamp_tropical_salt": {
-      "name": "Tropical salt swamp",
-      "ground": "swamp_mud",
-      "water": "swamp",
-      "plants": {
-        "tree_swamp": 0.04,
-        "reeds": 0.03
-      }
-    },
-    "swamp_mangrove": {
-      "name": "Mangrove",
-      "ground": "swamp_mud",
-      "water": "salt",
-      "plants": {
-        "tree_swamp": 0.08
-      }
-    },
-    "ocean_arctic": {
-      "name": "Arctic ocean",
-      "ground": "ice",
-      "water": "icy",
-      "plants": {}
-    },
-    "ocean_temperate": {
-      "name": "Ocean",
-      "ground": "sand",
-      "water": "deep",
-      "plants": {}
-    },
-    "ocean_tropical": {
-      "name": "Tropical ocean",
-      "ground": "sand",
-      "water": "deep",
-      "plants": {}
-    },
-    "lake_fresh": {
-      "name": "Lake",
-      "ground": "mud",
-      "water": "pond",
-      "plants": {}
-    },
-    "lake_brackish": {
-      "name": "Brackish lake",
-      "ground": "mud",
-      "water": "brackish",
-      "plants": {}
-    },
-    "lake_salt": {
-      "name": "Salt lake",
-      "ground": "sand",
-      "water": "salt",
-      "plants": {}
-    }
+    "about": "Every DF surface biome. ground = groundKinds id; water = key in water.surface; plants = object id -> chance per cell (0-1). Wildlife per biome is in wildlife.species[].biomes.",
+    "glacier": { "name": "Glacier", "ground": "ice", "water": "icy", "plants": { "granite_boulder": 0.003, "rocks_small": 0.004 } },
+    "tundra": { "name": "Tundra", "ground": "tundra", "water": "icy", "plants": { "lichen": 0.05, "grass_tuft": 0.02, "rocks_small": 0.015, "granite_boulder": 0.004, "snow_bush": 0.01, "berry_bush": 0.003 } },
+    "taiga": { "name": "Taiga", "ground": "needle_floor", "water": "icy", "plants": { "fir_snow": 0.07, "pine": 0.04, "rocks_small": 0.006, "berry_bush": 0.004, "lichen": 0.02, "fern": 0.01 } },
+    "forest_temperate_conifer": { "name": "Conifer forest", "ground": "needle_floor", "water": "fresh", "plants": { "pine": 0.1, "berry_bush": 0.006, "rocks_small": 0.005, "fern": 0.02, "bush": 0.006 } },
+    "forest_temperate_broadleaf": { "name": "Broadleaf forest", "ground": "forest_floor", "water": "fresh", "plants": { "oak": 0.08, "birch": 0.035, "berry_bush": 0.012, "fruit_tree": 0.004, "grass_tuft": 0.015, "fern": 0.02, "flowers": 0.006, "rocks_small": 0.004, "bush": 0.008 } },
+    "forest_tropical_conifer": { "name": "Tropical conifer forest", "ground": "needle_floor", "water": "fresh", "plants": { "pine": 0.08, "tree_tropical": 0.02, "berry_bush": 0.005, "fern": 0.03 } },
+    "forest_tropical_dry_broadleaf": { "name": "Dry tropical forest", "ground": "forest_floor", "water": "fresh", "plants": { "tree_savanna": 0.05, "oak": 0.02, "bush": 0.015, "fruit_tree": 0.005, "grass_tuft": 0.02, "palm": 0.01 } },
+    "forest_tropical_moist_broadleaf": { "name": "Rainforest", "ground": "jungle_floor", "water": "fresh", "plants": { "tree_tropical": 0.1, "palm": 0.02, "fruit_tree": 0.01, "berry_bush": 0.012, "fern": 0.05, "grass_tuft": 0.02, "flowers_purple": 0.008 } },
+    "grassland_temperate": { "name": "Grassland", "ground": "meadow", "water": "fresh", "plants": { "grass_tuft": 0.06, "flowers": 0.02, "flowers_blue": 0.008, "berry_bush": 0.008, "oak": 0.005, "wild_grain": 0.01, "rocks_small": 0.006 } },
+    "grassland_tropical": { "name": "Tropical grassland", "ground": "tropical_grass", "water": "fresh", "plants": { "grass_tuft": 0.07, "flowers_purple": 0.015, "tree_savanna": 0.005, "fruit_tree": 0.003, "wheat_wild": 0.01, "bush": 0.004 } },
+    "savanna_temperate": { "name": "Savanna", "ground": "dry_grass", "water": "fresh", "plants": { "tree_savanna": 0.014, "grass_tuft": 0.06, "bush": 0.008, "wild_grain": 0.01, "rocks_small": 0.006 } },
+    "savanna_tropical": { "name": "Tropical savanna", "ground": "dry_grass", "water": "fresh", "plants": { "tree_savanna": 0.018, "grass_tuft": 0.07, "bush": 0.006, "wheat_wild": 0.008, "rocks_small": 0.006 } },
+    "shrubland_temperate": { "name": "Shrubland", "ground": "shrub_soil", "water": "fresh", "plants": { "bush": 0.06, "berry_bush": 0.015, "rocks_small": 0.012, "grass_tuft": 0.02, "granite_boulder": 0.003 } },
+    "shrubland_tropical": { "name": "Tropical shrubland", "ground": "shrub_soil", "water": "fresh", "plants": { "bush": 0.06, "desert_shrub": 0.02, "berry_bush": 0.01, "grass_tuft": 0.02, "cactus": 0.004 } },
+    "desert_sand": { "name": "Sand desert", "ground": "sand", "water": "salt", "plants": { "rocks_small": 0.004, "desert_shrub": 0.004, "cactus": 0.004, "cactus_tall": 0.002, "bones_pile": 0.0005 } },
+    "desert_rock": { "name": "Rock desert", "ground": "stony", "water": "brackish", "plants": { "granite_boulder": 0.02, "rocks_small": 0.03, "ironstone": 0.004, "copper_outcrop": 0.002, "cactus": 0.003, "desert_shrub": 0.006 } },
+    "desert_badland": { "name": "Badlands", "ground": "red_clay", "water": "brackish", "plants": { "dead_tree": 0.008, "rocks_small": 0.015, "granite_boulder": 0.008, "ironstone": 0.005, "gold_outcrop": 0.0015, "cactus_tall": 0.003, "crystal": 0.001 } },
+    "mountain": { "name": "Mountains", "ground": "rock", "water": "icy", "plants": { "granite_boulder": 0.05, "ironstone": 0.02, "copper_outcrop": 0.006, "gold_outcrop": 0.002, "crystal": 0.003, "crystal_small": 0.006, "pine": 0.012, "rocks_small": 0.03, "lichen": 0.02, "gravel": 0.02 } },
+    "marsh_temperate_fresh": { "name": "Marsh", "ground": "mud", "water": "marsh", "plants": { "reeds": 0.1, "grass_tuft": 0.03, "flowers_white": 0.01, "lily_pad": 0.2 } },
+    "marsh_temperate_salt": { "name": "Salt marsh", "ground": "mud", "water": "swamp", "plants": { "reeds": 0.08, "grass_tuft": 0.02 } },
+    "marsh_tropical_fresh": { "name": "Tropical marsh", "ground": "mud", "water": "marsh", "plants": { "reeds": 0.11, "tree_tropical": 0.004, "fern": 0.02, "lily_pad": 0.2 } },
+    "marsh_tropical_salt": { "name": "Tropical salt marsh", "ground": "mud", "water": "swamp", "plants": { "reeds": 0.09, "mangrove": 0.006 } },
+    "swamp_temperate_fresh": { "name": "Swamp", "ground": "swamp_mud", "water": "swamp", "plants": { "tree_swamp": 0.07, "reeds": 0.05, "fern": 0.02, "lily_pad": 0.15 } },
+    "swamp_temperate_salt": { "name": "Salt swamp", "ground": "swamp_mud", "water": "swamp", "plants": { "tree_swamp": 0.05, "reeds": 0.04 } },
+    "swamp_tropical_fresh": { "name": "Tropical swamp", "ground": "swamp_mud", "water": "swamp", "plants": { "tree_swamp": 0.06, "tree_tropical": 0.03, "reeds": 0.04, "fern": 0.03, "lily_pad": 0.15 } },
+    "swamp_tropical_salt": { "name": "Tropical salt swamp", "ground": "swamp_mud", "water": "swamp", "plants": { "tree_swamp": 0.05, "mangrove": 0.02, "reeds": 0.04 } },
+    "swamp_mangrove": { "name": "Mangrove", "ground": "swamp_mud", "water": "salt", "plants": { "mangrove": 0.1, "reeds": 0.02 } },
+    "ocean_arctic": { "name": "Arctic ocean", "ground": "ice", "water": "icy", "plants": {} },
+    "ocean_temperate": { "name": "Ocean", "ground": "sand", "water": "deep", "plants": {} },
+    "ocean_tropical": { "name": "Tropical ocean", "ground": "sand", "water": "deep", "plants": {} },
+    "lake_fresh": { "name": "Lake", "ground": "mud", "water": "pond", "plants": { "lily_pad": 0.05 } },
+    "lake_brackish": { "name": "Brackish lake", "ground": "mud", "water": "brackish", "plants": {} },
+    "lake_salt": { "name": "Salt lake", "ground": "sand", "water": "salt", "plants": {} }
   },
   "regions": {
-    "about": "Region character from the savagery and alignment fields (DF's savagery and good/evil). Cursed and blessed swap the ground and change plants; savagery changes wildlife numbers (UF_Wildlife).",
-    "savagery": [
-      {
-        "id": "tame",
-        "name": "Tame",
-        "below": 0.33
-      },
-      {
-        "id": "wild",
-        "name": "Wild",
-        "below": 0.66
-      },
-      {
-        "id": "primeval",
-        "name": "Primeval",
-        "below": 1.01
-      }
-    ],
-    "alignment": [
-      {
-        "id": "cursed",
-        "name": "Cursed",
-        "below": 0.18
-      },
-      {
-        "id": "neutral",
-        "name": "Neutral",
-        "below": 0.82
-      },
-      {
-        "id": "blessed",
-        "name": "Blessed",
-        "below": 1.01
-      }
-    ],
-    "cursedGround": {
-      "meadow": "cursed_grass",
-      "tropical_grass": "cursed_grass",
-      "dry_grass": "cursed_grass",
-      "forest_floor": "ash",
-      "jungle_floor": "cursed_grass"
-    },
-    "blessedGround": {
-      "meadow": "blessed_grass",
-      "tropical_grass": "blessed_grass"
-    },
-    "cursedPlants": {
-      "dead_tree": 0.02
-    },
-    "blessedPlants": {
-      "flowers": 0.03,
-      "fruit_tree": 0.004
-    }
+    "about": "Region character from the savagery and alignment fields (DF's savagery and good/evil). Cursed and blessed swap ground kinds and add plants; savagery scales wildlife and monsters (wildlife.savageryScale).",
+    "savagery": [{ "id": "tame", "name": "Tame", "below": 0.33 }, { "id": "wild", "name": "Wild", "below": 0.66 }, { "id": "primeval", "name": "Primeval", "below": 1.01 }],
+    "alignment": [{ "id": "cursed", "name": "Cursed", "below": 0.18 }, { "id": "neutral", "name": "Neutral", "below": 0.82 }, { "id": "blessed", "name": "Blessed", "below": 1.01 }],
+    "cursedGround": { "meadow": "cursed_grass", "tropical_grass": "cursed_grass", "dry_grass": "cursed_grass", "forest_floor": "ash", "jungle_floor": "cursed_grass", "needle_floor": "ash" },
+    "blessedGround": { "meadow": "blessed_grass", "tropical_grass": "blessed_grass", "dry_grass": "blessed_grass" },
+    "cursedPlants": { "tree_cursed": 0.02, "bones_pile": 0.003 },
+    "cursedRemove": ["flowers", "flowers_blue", "flowers_purple", "flowers_white", "fruit_tree"],
+    "blessedPlants": { "flowers": 0.03, "flowers_white": 0.01, "fruit_tree": 0.005 }
   },
   "start": {
-    "about": "The only fixed part of a new game (VISION V4, revised 2026-09-18): a man and a woman in the middle of the start area, with names generated from the seed. Event IDs follow this order; UF_ColonyOverseer needs the man = 1 and the woman = 2. {male} and {female} are replaced by the generated names.",
+    "about": "The only fixed part of a new game (VISION V4, revised 2026-09-18): a man and a woman in the middle of the start area, names generated from the seed ({male}/{female}). UF_Colonists creates them as world units; until it is installed, UF_WorldGen makes them events 1 and 2. tiers = walk sheets by clothing tier (0 naked, 1 fiber wraps, 2 hides, 3 tailored). The start is always habitable (climate.startClimate) and gets the kit below within reach.",
     "note": "<glade>",
     "clearRadius": 3,
-    "events": [
-      {
-        "name": "{male}",
-        "dx": -1,
-        "dy": 0,
-        "image": {
-          "characterName": "$Adam",
-          "direction": 6
-        },
-        "note": "<colonist: {male}> <gender: Male>",
-        "requestId": "AR-010",
-        "status": "U7 stand-in"
-      },
-      {
-        "name": "{female}",
-        "dx": 1,
-        "dy": 0,
-        "image": {
-          "characterName": "$Eve",
-          "direction": 4
-        },
-        "note": "<colonist: {female}> <gender: Female>",
-        "requestId": "AR-011",
-        "status": "U7 stand-in"
-      }
+    "pair": [
+      { "gender": "male", "name": "{male}", "image": "$Adam", "tiers": ["$Adam", "$U7_Adam_T1", "$U7_Adam_T2", "$U7_Adam_T3"], "dx": -1, "dy": 0, "dir": 6, "note": "<colonist: {male}> <gender: Male>" },
+      { "gender": "female", "name": "{female}", "image": "$Eve", "tiers": ["$Eve", "$U7_Eve_T1", "$U7_Eve_T2", "$U7_Eve_T3"], "dx": 1, "dy": 0, "dir": 4, "note": "<colonist: {female}> <gender: Female>" }
     ],
     "names": {
-      "start": [
-        "al",
-        "bra",
-        "cae",
-        "dor",
-        "el",
-        "fen",
-        "gar",
-        "hel",
-        "is",
-        "jor",
-        "ka",
-        "lia",
-        "mer",
-        "na",
-        "or",
-        "per",
-        "ro",
-        "sa",
-        "tam",
-        "ul",
-        "ver",
-        "wil",
-        "yve",
-        "zor"
-      ],
-      "male": [
-        "an",
-        "ar",
-        "en",
-        "ic",
-        "on",
-        "or",
-        "ric",
-        "us",
-        "ald",
-        "em"
-      ],
-      "female": [
-        "a",
-        "ia",
-        "ina",
-        "elle",
-        "ra",
-        "wen",
-        "ys",
-        "ette",
-        "ah",
-        "ine"
-      ]
+      "start": ["al", "bra", "cae", "dor", "el", "fen", "gar", "hel", "is", "jor", "ka", "lia", "mer", "na", "or", "per", "ro", "sa", "tam", "ul", "ver", "wil", "yve", "zor"],
+      "male": ["an", "ar", "en", "ic", "on", "or", "ric", "us", "ald", "em"],
+      "female": ["a", "ia", "ina", "elle", "ra", "wen", "ys", "ette", "ah", "ine"]
     },
-    "pond": {
-      "about": "A pond at a random direction and distance from the start, so the pair can drink. Its size varies too.",
-      "distance": [
-        10,
-        30
-      ],
-      "radius": [
-        2,
-        5
-      ]
+    "pond": { "about": "A pond at a random direction and distance from the start, so the pair can drink.", "distance": [8, 22], "radius": [2, 5] },
+    "kit": {
+      "about": "Minimum resources placed within this ring of the start whatever the biome rolled, so work starts at once (user request 2026-09-18).",
+      "radius": [5, 20],
+      "objects": { "berry_bush": 6, "oak": 8, "rocks_small": 10, "grass_tuft": 8, "reeds": 4, "granite_boulder": 2, "fruit_tree": 1 },
+      "wildlife": { "about": "A prey herd within this distance of the start so the pair can hunt from day one.", "species": ["hare", "deer", "fowl"], "distance": [24, 40] }
     }
   },
-  "river": {
-    "enabled": true,
-    "halfWidth": 1,
+  "rivers": {
+    "about": "Rivers run north-south through the whole world at random places each game, never through the start, and stop where the ocean begins.",
+    "count": [1, 2],
+    "halfWidth": [1, 2],
     "meanderCells": 18,
     "meanderPeriodCells": 97,
-    "keepAwayFromStart": 14,
-    "about": "One river running north-south through the whole world, at a random place each game (never through the start)."
+    "keepAwayFromStart": 14
   },
   "objects": [
-    {
-      "id": "oak",
-      "name": "Oak",
-      "image": "!$TimberOak",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.025,
-      "clump": 0.7,
-      "clumpScale": 18,
-      "avoidWater": 1,
-      "maxPerArea": 60,
-      "requestId": "AR-021",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "pine",
-      "name": "Pine",
-      "image": "!$PineTree",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.025,
-      "clump": 0.7,
-      "clumpScale": 20,
-      "avoidWater": 1,
-      "maxPerArea": 60,
-      "requestId": "AR-021",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "fruit_tree",
-      "name": "Fruit tree",
-      "image": "!$FruitTree",
-      "note": "<tree> <fruit> <food> <harvestable> <resource: wood>",
-      "density": 0.012,
-      "clump": 0.5,
-      "clumpScale": 12,
-      "avoidWater": 1,
-      "maxPerArea": 25,
-      "requestId": "AR-020",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tree_savanna",
-      "name": "Flat-top tree",
-      "image": "!$U7_Flat-toptree",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.015,
-      "clump": 0.5,
-      "clumpScale": 16,
-      "avoidWater": 1,
-      "maxPerArea": 40,
-      "requestId": "AR-102",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tree_swamp",
-      "name": "Swamp tree",
-      "image": "!$U7_Swamptree",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.015,
-      "clump": 0.6,
-      "clumpScale": 14,
-      "avoidWater": 0,
-      "maxPerArea": 40,
-      "requestId": "AR-102",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tree_tropical",
-      "name": "Broadleaf giant",
-      "image": "!$U7_Broadleafgiant",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.015,
-      "clump": 0.6,
-      "clumpScale": 16,
-      "avoidWater": 1,
-      "maxPerArea": 40,
-      "requestId": "AR-102",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "dead_tree",
-      "name": "Dead tree",
-      "image": "!$U7_Deadtree",
-      "note": "<tree> <harvestable> <resource: wood>",
-      "density": 0.012,
-      "clump": 0.5,
-      "clumpScale": 12,
-      "avoidWater": 1,
-      "maxPerArea": 30,
-      "requestId": "AR-102",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "berry_bush",
-      "name": "Berry bush",
-      "image": "!$BerryBush",
-      "note": "<harvestable> <food>",
-      "density": 0.025,
-      "clump": 0.5,
-      "clumpScale": 10,
-      "avoidWater": 1,
-      "maxPerArea": 50,
-      "requestId": "AR-023",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "bush",
-      "name": "Shrub",
-      "image": "!$U7_Shrub",
-      "note": "<harvestable> <resource: fiber>",
-      "density": 0.025,
-      "clump": 0.5,
-      "clumpScale": 10,
-      "avoidWater": 1,
-      "maxPerArea": 50,
-      "requestId": "AR-023",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "grass_tuft",
-      "name": "Tall grass",
-      "image": "!$U7_TallGrass",
-      "note": "<harvestable> <resource: fiber>",
-      "priority": "below",
-      "through": true,
-      "density": 0.035,
-      "clump": 0.5,
-      "clumpScale": 8,
-      "avoidWater": 0,
-      "maxPerArea": 60,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "reeds",
-      "name": "Reeds",
-      "image": "!$U7_Reeds",
-      "note": "<harvestable> <resource: fiber>",
-      "priority": "below",
-      "through": true,
-      "density": 0.025,
-      "clump": 0.6,
-      "clumpScale": 8,
-      "avoidWater": 0,
-      "maxPerArea": 50,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "flowers",
-      "name": "Wildflowers",
-      "image": "!$U7_Wildflowers",
-      "note": "<harvestable>",
-      "priority": "below",
-      "through": true,
-      "density": 0.025,
-      "clump": 0.6,
-      "clumpScale": 8,
-      "avoidWater": 0,
-      "maxPerArea": 50,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "rocks_small",
-      "name": "Loose stones",
-      "image": "!$U7_LooseStones",
-      "note": "<resource: stone>",
-      "priority": "below",
-      "through": true,
-      "density": 0.02,
-      "clump": 0.5,
-      "clumpScale": 10,
-      "avoidWater": 0,
-      "maxPerArea": 40,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "granite_boulder",
-      "name": "Granite boulder",
-      "image": "!$GraniteBoulder",
-      "note": "<resource: stone>",
-      "density": 0.015,
-      "clump": 0.6,
-      "clumpScale": 12,
-      "avoidWater": 1,
-      "maxPerArea": 35,
-      "requestId": "AR-022",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "ironstone",
-      "name": "Ironstone outcrop",
-      "image": "!$IronstoneDeposit",
-      "note": "<resource: mineral>",
-      "density": 0.012,
-      "clump": 0.6,
-      "clumpScale": 14,
-      "avoidWater": 1,
-      "maxPerArea": 25,
-      "requestId": "AR-022",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "cave_ironstone",
-      "name": "Ore vein",
-      "image": "!$IronOreVein",
-      "note": "<resource: mineral>",
-      "density": 0.012,
-      "clump": 0.5,
-      "clumpScale": 12,
-      "maxPerArea": 25,
-      "requestId": "AR-044",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "cave_boulder",
-      "name": "Boulder",
-      "image": "!$U7_CaveBoulder",
-      "note": "<resource: stone>",
-      "density": 0.015,
-      "clump": 0.5,
-      "clumpScale": 10,
-      "maxPerArea": 30,
-      "requestId": "AR-044",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "crystal",
-      "name": "Crystal cluster",
-      "image": "!$U7_CrystalSpire",
-      "note": "<resource: gem>",
-      "density": 0.012,
-      "clump": 0.5,
-      "clumpScale": 10,
-      "maxPerArea": 25,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "crystal_small",
-      "name": "Small crystals",
-      "image": "!$U7_SmallCrystals",
-      "note": "<resource: gem>",
-      "priority": "below",
-      "through": true,
-      "density": 0.015,
-      "clump": 0.5,
-      "clumpScale": 8,
-      "maxPerArea": 30,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "gravel",
-      "name": "Gravel",
-      "image": "!$U7_Gravel",
-      "note": "<resource: stone>",
-      "priority": "below",
-      "through": true,
-      "density": 0.015,
-      "clump": 0.5,
-      "clumpScale": 8,
-      "maxPerArea": 30,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "bones",
-      "name": "Old bones",
-      "image": "!$U7_OldBones",
-      "note": "<remains>",
-      "priority": "below",
-      "through": true,
-      "density": 0.01,
-      "clump": 0.4,
-      "clumpScale": 10,
-      "maxPerArea": 20,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tree_stump",
-      "name": "Felled tree stump",
-      "image": "!$TreeStump",
-      "note": "<harvestable> <resource: wood>",
-      "density": 0,
-      "avoidWater": 1,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "campfire",
-      "name": "Campfire hearth",
-      "image": "!$Campfire",
-      "note": "<fire> <light: 5> <warmth>",
-      "density": 0,
-      "avoidWater": 1,
-      "requestId": "AR-103",
-      "status": "U7 stand-in"
-    }
+    { "id": "oak", "name": "Oak", "image": "!$TimberOak", "tags": ["tree", "wood"], "actions": { "chop": { "work": 240, "yields": { "log": 3 }, "becomes": "stump" } }, "clump": 0.85, "clumpScale": 18, "avoidWater": 1 },
+    { "id": "birch", "name": "Birch", "image": "!$TimberOak", "tint": "#e6f0e0", "tags": ["tree", "wood"], "actions": { "chop": { "work": 200, "yields": { "log": 2 }, "becomes": "stump" } }, "clump": 0.7, "clumpScale": 14, "avoidWater": 1 },
+    { "id": "pine", "name": "Pine", "image": "!$PineTree", "tags": ["tree", "wood"], "actions": { "chop": { "work": 240, "yields": { "log": 3 }, "becomes": "stump" } }, "clump": 0.9, "clumpScale": 24, "avoidWater": 1 },
+    { "id": "fir_snow", "name": "Snow fir", "image": "!$PineTree", "tint": "#d0e0ff", "tags": ["tree", "wood"], "actions": { "chop": { "work": 240, "yields": { "log": 3 }, "becomes": "stump" } }, "clump": 0.9, "clumpScale": 24, "avoidWater": 1 },
+    { "id": "fruit_tree", "name": "Fruit tree", "image": "!$FruitTree", "tags": ["tree", "wood", "fruit", "food"], "actions": { "gather": { "work": 60, "yields": { "fruit": 3 }, "becomes": "fruit_tree_bare" }, "chop": { "work": 300, "yields": { "log": 3 }, "becomes": "stump" } }, "clump": 0.5, "clumpScale": 12, "avoidWater": 1 },
+    { "id": "fruit_tree_bare", "name": "Fruit tree (picked)", "image": "!$FruitTree", "tint": "#c8d8c0", "tags": ["tree", "wood"], "regrow": { "to": "fruit_tree", "hours": 72 }, "actions": { "chop": { "work": 300, "yields": { "log": 3 }, "becomes": "stump" } } },
+    { "id": "tree_savanna", "name": "Flat-top tree", "image": "!$U7_Flat-toptree", "tags": ["tree", "wood"], "actions": { "chop": { "work": 200, "yields": { "log": 2 }, "becomes": "stump" } }, "clump": 0.4, "clumpScale": 20, "avoidWater": 1 },
+    { "id": "tree_swamp", "name": "Swamp tree", "image": "!$U7_Swamptree", "tags": ["tree", "wood"], "actions": { "chop": { "work": 220, "yields": { "log": 2 }, "becomes": "stump" } }, "clump": 0.7, "clumpScale": 14, "avoidWater": 0 },
+    { "id": "mangrove", "name": "Mangrove", "image": "!$U7_Swamptree", "tint": "#a8c8a0", "tags": ["tree", "wood"], "actions": { "chop": { "work": 220, "yields": { "log": 2 }, "becomes": "stump" } }, "clump": 0.8, "clumpScale": 12, "avoidWater": 0 },
+    { "id": "tree_tropical", "name": "Broadleaf giant", "image": "!$U7_Broadleafgiant", "tags": ["tree", "wood"], "actions": { "chop": { "work": 320, "yields": { "log": 4 }, "becomes": "stump" } }, "clump": 0.8, "clumpScale": 16, "avoidWater": 1 },
+    { "id": "palm", "name": "Palm", "tile": { "sheet": "Outside_B", "id": 237 }, "tags": ["tree", "wood"], "actions": { "chop": { "work": 160, "yields": { "log": 1 }, "becomes": "stump" } }, "clump": 0.5, "clumpScale": 12, "avoidWater": 0 },
+    { "id": "dead_tree", "name": "Dead tree", "image": "!$U7_Deadtree", "tags": ["tree", "wood"], "actions": { "chop": { "work": 120, "yields": { "log": 1, "firewood": 2 }, "becomes": "stump" } }, "clump": 0.6, "clumpScale": 14, "avoidWater": 1 },
+    { "id": "tree_cursed", "name": "Blighted tree", "image": "!$U7_Deadtree", "tint": "#c0a0e0", "tags": ["tree", "wood", "cursed"], "actions": { "chop": { "work": 140, "yields": { "log": 1 }, "becomes": "stump" } }, "clump": 0.7, "clumpScale": 16, "avoidWater": 1 },
+    { "id": "stump", "name": "Stump", "image": "!$U7_TreeStump", "passable": true, "tags": ["stump", "wood"], "actions": { "chop": { "work": 100, "yields": { "log": 1 }, "becomes": null } } },
+    { "id": "berry_bush", "name": "Berry bush", "image": "!$BerryBush", "tags": ["bush", "food"], "actions": { "gather": { "work": 40, "yields": { "berries": 2 }, "becomes": "berry_bush_bare" } }, "clump": 0.6, "clumpScale": 10, "avoidWater": 1 },
+    { "id": "berry_bush_bare", "name": "Berry bush (picked)", "image": "!$BerryBush", "tint": "#a8b898", "tags": ["bush"], "regrow": { "to": "berry_bush", "hours": 48 } },
+    { "id": "bush", "name": "Shrub", "image": "!$U7_Shrub", "tags": ["bush", "fiber"], "actions": { "gather": { "work": 40, "yields": { "fiber": 2 }, "becomes": null } }, "clump": 0.6, "clumpScale": 10, "avoidWater": 1 },
+    { "id": "desert_shrub", "name": "Desert shrub", "image": "!$U7_Shrub", "tint": "#d8c898", "tags": ["bush", "fiber"], "actions": { "gather": { "work": 40, "yields": { "fiber": 1 }, "becomes": null } }, "clump": 0.4, "clumpScale": 12, "avoidWater": 1 },
+    { "id": "snow_bush", "name": "Snow bush", "tile": { "sheet": "Outside_B", "id": 232 }, "tags": ["bush", "fiber"], "actions": { "gather": { "work": 40, "yields": { "fiber": 1 }, "becomes": null } }, "clump": 0.5, "clumpScale": 10, "avoidWater": 1 },
+    { "id": "cactus", "name": "Cactus", "tile": { "sheet": "Outside_B", "id": 238 }, "tags": ["plant", "food"], "actions": { "gather": { "work": 50, "yields": { "fruit": 1 }, "becomes": null } }, "clump": 0.3, "clumpScale": 10, "avoidWater": 2 },
+    { "id": "cactus_tall", "name": "Tall cactus", "tile": { "sheet": "Outside_B", "id": 174 }, "tags": ["plant"], "actions": { "chop": { "work": 80, "yields": { "fiber": 2 }, "becomes": null } }, "clump": 0.3, "clumpScale": 10, "avoidWater": 2 },
+    { "id": "grass_tuft", "name": "Tall grass", "image": "!$U7_TallGrass", "under": true, "passable": true, "tags": ["plant", "fiber"], "actions": { "gather": { "work": 20, "yields": { "fiber": 1 }, "becomes": null } }, "clump": 0.5, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "reeds", "name": "Reeds", "image": "!$U7_Reeds", "under": true, "passable": true, "tags": ["plant", "fiber", "straw"], "actions": { "gather": { "work": 30, "yields": { "straw": 2 }, "becomes": null } }, "clump": 0.7, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "flowers", "name": "Wildflowers", "image": "!$U7_Wildflowers", "under": true, "passable": true, "tags": ["plant", "flower"], "clump": 0.7, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "flowers_purple", "name": "Purple flowers", "image": "!$U7_Wildflowers", "tint": "#d0a0ff", "under": true, "passable": true, "tags": ["plant", "flower"], "clump": 0.7, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "flowers_blue", "name": "Blue flowers", "image": "!$U7_Wildflowers", "tint": "#a0c0ff", "under": true, "passable": true, "tags": ["plant", "flower"], "clump": 0.7, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "flowers_white", "name": "White flowers", "image": "!$U7_Wildflowers", "tint": "#f0f0f0", "under": true, "passable": true, "tags": ["plant", "flower"], "clump": 0.7, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "fern", "name": "Fern", "tile": { "sheet": "Outside_B", "id": 246 }, "under": true, "passable": true, "tags": ["plant", "fiber"], "actions": { "gather": { "work": 20, "yields": { "fiber": 1 }, "becomes": null } }, "clump": 0.6, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "lichen", "name": "Lichen", "tile": { "sheet": "Outside_B", "id": 251 }, "tint": "#c8d8c8", "under": true, "passable": true, "tags": ["plant"], "clump": 0.5, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "wild_grain", "name": "Wild grain", "tile": { "sheet": "Outside_B", "id": 172 }, "under": true, "passable": true, "tags": ["plant", "food"], "actions": { "gather": { "work": 30, "yields": { "seeds": 1, "straw": 1 }, "becomes": null } }, "clump": 0.8, "clumpScale": 10, "avoidWater": 0 },
+    { "id": "wheat_wild", "name": "Wild wheat", "tile": { "sheet": "Outside_B", "id": 173 }, "under": true, "passable": true, "tags": ["plant", "food"], "actions": { "gather": { "work": 30, "yields": { "seeds": 1, "straw": 1 }, "becomes": null } }, "clump": 0.8, "clumpScale": 10, "avoidWater": 0 },
+    { "id": "lily_pad", "name": "Lily pads", "tile": { "sheet": "Outside_B", "id": 253 }, "under": true, "passable": true, "onWater": true, "tags": ["plant", "water"], "clump": 0.6, "clumpScale": 6 },
+    { "id": "rocks_small", "name": "Loose stones", "image": "!$U7_LooseStones", "under": true, "passable": true, "tags": ["stone"], "actions": { "pick": { "work": 20, "yields": { "stone": 2 }, "becomes": null } }, "clump": 0.5, "clumpScale": 10, "avoidWater": 0 },
+    { "id": "gravel", "name": "Gravel", "image": "!$U7_Gravel", "under": true, "passable": true, "tags": ["stone"], "actions": { "pick": { "work": 20, "yields": { "stone": 1 }, "becomes": null } }, "clump": 0.5, "clumpScale": 8, "avoidWater": 0 },
+    { "id": "granite_boulder", "name": "Granite boulder", "image": "!$GraniteBoulder", "tags": ["stone", "boulder"], "actions": { "quarry": { "work": 200, "yields": { "stone": 4 }, "becomes": "rocks_small" } }, "clump": 0.7, "clumpScale": 14, "avoidWater": 1 },
+    { "id": "ironstone", "name": "Ironstone outcrop", "image": "!$IronstoneDeposit", "tags": ["ore", "mineral"], "actions": { "mine": { "work": 300, "yields": { "ore_iron": 2, "stone": 1 }, "becomes": "rocks_small" } }, "clump": 0.9, "clumpScale": 24, "avoidWater": 1 },
+    { "id": "copper_outcrop", "name": "Copper outcrop", "image": "!$U7_MalachiteOutcrop", "tags": ["ore", "mineral"], "actions": { "mine": { "work": 280, "yields": { "ore_copper": 2, "stone": 1 }, "becomes": "rocks_small" } }, "clump": 0.9, "clumpScale": 24, "avoidWater": 1 },
+    { "id": "gold_outcrop", "name": "Gold outcrop", "image": "!$U7_GoldVeinOutcrop", "tags": ["ore", "mineral", "precious"], "actions": { "mine": { "work": 360, "yields": { "gold": 1, "stone": 1 }, "becomes": "rocks_small" } }, "clump": 0.9, "clumpScale": 30, "avoidWater": 1 },
+    { "id": "crystal", "name": "Crystal cluster", "image": "!$U7_CrystalSpire", "tags": ["gem", "mineral"], "actions": { "mine": { "work": 240, "yields": { "gem_rough": 2 }, "becomes": "crystal_small" } }, "clump": 0.8, "clumpScale": 10, "avoidWater": 1 },
+    { "id": "crystal_small", "name": "Small crystals", "image": "!$U7_SmallCrystals", "under": true, "passable": true, "tags": ["gem", "mineral"], "actions": { "pick": { "work": 40, "yields": { "gem_rough": 1 }, "becomes": null } }, "clump": 0.7, "clumpScale": 10, "avoidWater": 0 },
+    { "id": "bones_pile", "name": "Old bones", "image": "!$U7_OldBones", "under": true, "passable": true, "tags": ["remains"], "actions": { "pick": { "work": 20, "yields": { "bone": 2 }, "becomes": null } }, "clump": 0.4, "clumpScale": 10, "avoidWater": 0 },
+    { "id": "rubble", "name": "Rubble", "tile": { "sheet": "Outside_C", "id": 282 }, "under": true, "passable": true, "tags": ["ruin", "stone"], "actions": { "pick": { "work": 40, "yields": { "stone": 2 }, "becomes": null } } },
+    { "id": "rubble_pillar", "name": "Fallen pillar", "tile": { "sheet": "Outside_C", "id": 286 }, "tags": ["ruin", "stone"], "actions": { "quarry": { "work": 160, "yields": { "stone": 3 }, "becomes": null } } },
+    { "id": "campfire", "name": "Campfire", "image": "!$Campfire", "tags": ["building", "fire", "light", "heat", "workplace"], "build": { "items": { "log": 3, "stone": 3 }, "work": 120 }, "ruin": "bones_pile" },
+    { "id": "wall_wood", "name": "Wooden wall", "tile": { "sheet": "Outside_B", "id": 80 }, "tags": ["building", "wall", "wood"], "build": { "items": { "log": 1 }, "work": 90 }, "ruin": "rubble" },
+    { "id": "wall_stone", "name": "Stone wall", "tile": { "sheet": "Outside_C", "id": 277 }, "tags": ["building", "wall", "stone"], "build": { "items": { "stone": 2 }, "work": 150 }, "ruin": "rubble" },
+    { "id": "floor_straw", "name": "Straw bed", "tile": { "sheet": "Outside_B", "id": 248 }, "under": true, "passable": true, "tags": ["building", "bed"], "build": { "items": { "straw": 2 }, "work": 60 } },
+    { "id": "stockpile", "name": "Stockpile", "gen": "stockpile", "under": true, "passable": true, "tags": ["building", "stockpile"], "build": { "items": {}, "work": 20 } },
+    { "id": "workbench", "name": "Work stone", "tile": { "sheet": "Outside_C", "id": 285 }, "tags": ["building", "workplace"], "build": { "items": { "stone": 2, "log": 1 }, "work": 80 }, "ruin": "rubble" }
   ],
-  "maxObjectsPerArea": 1400,
-  "wildlife": {
-    "about": "Wildlife and creatures placed with the map on New Game (UF_Wildlife). All use authentic 2.5D U7 stand-ins.",
-    "species": [
-      {
-        "id": "wolf",
-        "name": "Wolf",
-        "image": "$U7_Wolf",
-        "herd": [
-          2,
-          4
-        ],
-        "wander": 14,
-        "note": "<creature> <predator>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "taiga": 3,
-          "tundra": 2,
-          "forest_temperate_conifer": 2,
-          "forest_temperate_broadleaf": 1,
-          "mountain": 1,
-          "grassland_temperate": 0.5
-        }
-      },
-      {
-        "id": "wildcat",
-        "name": "Wildcat",
-        "image": "$U7_Cat",
-        "herd": [
-          1,
-          1
-        ],
-        "wander": 10,
-        "note": "<creature> <predator>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "forest_temperate_broadleaf": 2,
-          "forest_tropical_moist_broadleaf": 3,
-          "shrubland_temperate": 2,
-          "shrubland_tropical": 2,
-          "forest_tropical_dry_broadleaf": 2
-        }
-      },
-      {
-        "id": "boar",
-        "name": "Boar",
-        "image": "$U7_Ox",
-        "herd": [
-          2,
-          5
-        ],
-        "wander": 12,
-        "note": "<creature> <grazer> <meat>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "forest_temperate_broadleaf": 3,
-          "grassland_temperate": 2,
-          "forest_tropical_dry_broadleaf": 2,
-          "savanna_temperate": 2,
-          "swamp_temperate_fresh": 1
-        }
-      },
-      {
-        "id": "fowl",
-        "name": "Wild fowl",
-        "image": "$U7_Chicken",
-        "herd": [
-          3,
-          6
-        ],
-        "wander": 8,
-        "note": "<creature> <grazer> <meat> <eggs>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "grassland_temperate": 3,
-          "grassland_tropical": 3,
-          "savanna_tropical": 2,
-          "marsh_temperate_fresh": 3,
-          "marsh_tropical_fresh": 3,
-          "shrubland_temperate": 1
-        }
-      },
-      {
-        "id": "hare",
-        "name": "Hare",
-        "image": "$U7_Hare",
-        "herd": [
-          2,
-          6
-        ],
-        "wander": 8,
-        "note": "<creature> <grazer> <small>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "grassland_temperate": 4,
-          "shrubland_temperate": 3,
-          "tundra": 2
-        }
-      },
-      {
-        "id": "fox",
-        "name": "Fox",
-        "image": "$U7_Fox",
-        "herd": [
-          1,
-          2
-        ],
-        "wander": 12,
-        "note": "<creature> <predator>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "forest_temperate_broadleaf": 2,
-          "taiga": 2,
-          "grassland_temperate": 1
-        }
-      },
-      {
-        "id": "dog",
-        "name": "Hound",
-        "image": "$U7_Dog",
-        "herd": [
-          1,
-          3
-        ],
-        "wander": 10,
-        "note": "<creature> <domestic>",
-        "requestId": "AR-403",
-        "status": "U7 stand-in",
-        "biomes": {
-          "grassland_temperate": 1
-        }
-      },
-      {
-        "id": "hawk",
-        "name": "Hawk",
-        "image": "$U7_Hawk",
-        "herd": [
-          1,
-          1
-        ],
-        "wander": 16,
-        "note": "<creature> <bird>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "mountain": 3,
-          "grassland_temperate": 2
-        }
-      },
-      {
-        "id": "deer",
-        "name": "Deer",
-        "image": "$U7_Deer",
-        "herd": [
-          3,
-          7
-        ],
-        "wander": 14,
-        "note": "<creature> <grazer> <large>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "forest_temperate_broadleaf": 4,
-          "forest_temperate_conifer": 3
-        }
-      },
-      {
-        "id": "horse",
-        "name": "Wild horse",
-        "image": "$U7_Horse",
-        "herd": [
-          2,
-          5
-        ],
-        "wander": 16,
-        "note": "<creature> <grazer> <draft>",
-        "requestId": "AR-403",
-        "status": "U7 stand-in",
-        "biomes": {
-          "grassland_temperate": 3,
-          "savanna_temperate": 2
-        }
-      },
-      {
-        "id": "sheep",
-        "name": "Wild sheep",
-        "image": "$U7_Sheep",
-        "herd": [
-          3,
-          8
-        ],
-        "wander": 10,
-        "note": "<creature> <grazer> <wool>",
-        "requestId": "AR-403",
-        "status": "U7 stand-in",
-        "biomes": {
-          "mountain": 4,
-          "grassland_temperate": 2
-        }
-      },
-      {
-        "id": "rat",
-        "name": "Rat",
-        "image": "$U7_Rat",
-        "herd": [
-          2,
-          6
-        ],
-        "wander": 6,
-        "note": "<creature> <pest>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "swamp_temperate_fresh": 2,
-          "marsh_temperate_fresh": 2
-        }
-      },
-      {
-        "id": "bog_horror",
-        "name": "Bog horror",
-        "image": "$U7_BogHorror",
-        "herd": [
-          1,
-          1
-        ],
-        "wander": 8,
-        "note": "<creature> <monster>",
-        "requestId": "AR-402",
-        "status": "U7 stand-in",
-        "minSavagery": "primeval",
-        "biomes": {
-          "swamp_temperate_fresh": 1,
-          "swamp_tropical_fresh": 1,
-          "marsh_temperate_salt": 0.5
-        }
-      },
-      {
-        "id": "serpent",
-        "name": "Giant serpent",
-        "image": "$U7_Serpent",
-        "herd": [
-          1,
-          2
-        ],
-        "wander": 10,
-        "note": "<creature> <predator>",
-        "requestId": "AR-401",
-        "status": "U7 stand-in",
-        "biomes": {
-          "swamp_temperate_fresh": 2,
-          "swamp_tropical_fresh": 2
-        }
-      }
-    ],
-    "savageryScale": {
-      "tame": 0.6,
-      "wild": 1,
-      "primeval": 1.8
+  "items": {
+    "about": "Things that lie on the ground, get carried and stored (UF_Items). image = character sheet drawn at the cell (stand-ins !$U7_Item_* until AR-200 originals). food.hunger = hunger removed when eaten. tool = what jobs it speeds up (skill multiplier); wear = clothing tier it gives when equipped.",
+    "types": [
+      { "id": "log", "name": "Log", "image": "!$U7_Item_WoodLog", "tags": ["wood", "fuel", "material"], "stack": 5 },
+      { "id": "firewood", "name": "Firewood", "image": "!$U7_Item_Firewood", "tags": ["wood", "fuel"], "stack": 10 },
+      { "id": "stone", "name": "Stone", "image": "!$U7_Item_RoughStone", "tags": ["stone", "material"], "stack": 10 },
+      { "id": "ore_iron", "name": "Iron ore", "image": "!$U7_Item_IronOre", "tags": ["ore", "material"], "stack": 10 },
+      { "id": "ore_copper", "name": "Copper ore", "image": "!$U7_Item_LeadOre", "tint": "#80e0a0", "tags": ["ore", "material"], "stack": 10 },
+      { "id": "gold", "name": "Gold nugget", "image": "!$U7_Item_GoldNugget", "tags": ["precious"], "stack": 10 },
+      { "id": "gem_rough", "name": "Rough gem", "image": "!$U7_Item_RoughGem", "tags": ["gem"], "stack": 10 },
+      { "id": "gem_cut", "name": "Cut gem", "image": "!$U7_Item_CutGem", "tags": ["gem", "precious"], "stack": 10 },
+      { "id": "bar_iron", "name": "Iron bar", "image": "!$U7_Item_MetalBar", "tags": ["metal", "material"], "stack": 10 },
+      { "id": "berries", "name": "Berries", "image": "!$U7_Item_WildBerries", "tags": ["food", "plant"], "stack": 10, "food": { "hunger": 25 } },
+      { "id": "fruit", "name": "Fruit", "image": "!$U7_Item_TreeFruit", "tags": ["food", "plant"], "stack": 10, "food": { "hunger": 30, "thirst": 10 } },
+      { "id": "mushroom", "name": "Mushrooms", "image": "!$U7_Item_CaveMushroom", "tags": ["food", "plant"], "stack": 10, "food": { "hunger": 20 } },
+      { "id": "root", "name": "Root vegetable", "image": "!$U7_Item_RootVegetable", "tags": ["food", "plant"], "stack": 10, "food": { "hunger": 25 } },
+      { "id": "seeds", "name": "Seeds", "image": "!$U7_Item_SeedPouch", "tags": ["seed"], "stack": 20 },
+      { "id": "fiber", "name": "Plant fiber", "image": "!$U7_Item_PlantFiber", "tags": ["fiber", "material"], "stack": 10 },
+      { "id": "straw", "name": "Straw", "image": "!$U7_Item_StrawBundle", "tags": ["straw", "material", "bedding"], "stack": 10 },
+      { "id": "meat_raw", "name": "Raw meat", "image": "!$U7_Item_RawMeat", "tags": ["food", "meat", "raw"], "stack": 5, "food": { "hunger": 20 } },
+      { "id": "meat_cooked", "name": "Cooked meat", "image": "!$U7_Item_HaunchMeat", "tags": ["food", "meat"], "stack": 5, "food": { "hunger": 50 } },
+      { "id": "fish", "name": "Fish", "image": "!$U7_Item_RiverFish", "tags": ["food", "meat", "raw"], "stack": 5, "food": { "hunger": 25 } },
+      { "id": "hide", "name": "Hide", "image": "!$U7_Item_LeatherHide", "tags": ["hide", "material"], "stack": 5 },
+      { "id": "bone", "name": "Bone", "image": "!$U7_Item_AnimalBone", "tags": ["bone", "material"], "stack": 10 },
+      { "id": "wool", "name": "Wool", "image": "!$U7_Item_WoolFleece", "tags": ["wool", "material"], "stack": 5 },
+      { "id": "stone_axe", "name": "Stone axe", "image": "!$U7_Item_RoughStone", "tint": "#a8b8c8", "tags": ["tool", "axe"], "stack": 1, "tool": { "chop": 2 } },
+      { "id": "stone_knife", "name": "Stone knife", "image": "!$U7_Item_RoughStone", "tint": "#d0d8e0", "tags": ["tool", "knife"], "stack": 1, "tool": { "hunt": 2, "gather": 1.5, "craft": 1.5 } },
+      { "id": "stone_pick", "name": "Stone pick", "image": "!$U7_Item_RoughStone", "tint": "#b8a890", "tags": ["tool", "pick"], "stack": 1, "tool": { "quarry": 2, "mine": 2, "pick": 1.5 } },
+      { "id": "fiber_wrap", "name": "Woven wrap", "image": "!$U7_Item_PlantFiber", "tint": "#e0d0a0", "tags": ["clothing"], "stack": 1, "wear": { "tier": 1 } },
+      { "id": "hide_cloak", "name": "Hide cloak", "image": "!$U7_Item_LeatherHide", "tint": "#c8a880", "tags": ["clothing"], "stack": 1, "wear": { "tier": 2 } }
+    ]
+  },
+  "recipes": {
+    "about": "Things colonists make by hand (UF_Jobs 'craft'): inputs from the crafter's inventory, outputs given to the crafter. at = an object tag the crafter must stand next to (null = anywhere). tool = a tool tag that speeds it up (never required). User request 2026-09-18: clothes, tools, cooking from day one.",
+    "list": [
+      { "id": "stone_knife", "name": "Knap a stone knife", "inputs": { "stone": 1, "fiber": 1 }, "outputs": { "stone_knife": 1 }, "work": 90, "at": null, "skill": "stonework" },
+      { "id": "stone_axe", "name": "Haft a stone axe", "inputs": { "stone": 2, "log": 1, "fiber": 1 }, "outputs": { "stone_axe": 1 }, "work": 120, "at": null, "skill": "stonework" },
+      { "id": "stone_pick", "name": "Haft a stone pick", "inputs": { "stone": 2, "log": 1, "fiber": 1 }, "outputs": { "stone_pick": 1 }, "work": 120, "at": null, "skill": "stonework" },
+      { "id": "fiber_wrap", "name": "Weave a fiber wrap", "inputs": { "fiber": 6 }, "outputs": { "fiber_wrap": 1 }, "work": 180, "at": null, "skill": "crafting" },
+      { "id": "hide_cloak", "name": "Sew a hide cloak", "inputs": { "hide": 2, "fiber": 2 }, "outputs": { "hide_cloak": 1 }, "work": 240, "at": null, "tool": "knife", "skill": "crafting" },
+      { "id": "cook_meat", "name": "Roast meat", "inputs": { "meat_raw": 1 }, "outputs": { "meat_cooked": 1 }, "work": 90, "at": "fire", "skill": "cooking" },
+      { "id": "cook_fish", "name": "Roast fish", "inputs": { "fish": 1 }, "outputs": { "meat_cooked": 1 }, "work": 90, "at": "fire", "skill": "cooking" },
+      { "id": "split_firewood", "name": "Split firewood", "inputs": { "log": 1 }, "outputs": { "firewood": 3 }, "work": 60, "at": null, "tool": "axe", "skill": "woodcutting" }
+    ]
+  },
+  "sites": {
+    "about": "Layouts of faction sites and ruins that UF_History places (object ids from 'objects'). ring = object around the site at 'radius' with 'gaps' openings; center = object in the middle; inside = objects scattered inside. kinds by species: index by how big the site grew (population thresholds in 'growth').",
+    "kinds": {
+      "camp": { "radius": 4, "ring": "wall_wood", "gaps": 2, "center": "campfire", "inside": { "floor_straw": 3 } },
+      "village": { "radius": 7, "ring": "wall_wood", "gaps": 2, "center": "campfire", "inside": { "floor_straw": 6, "wall_wood": 8, "stockpile": 2 } },
+      "town": { "radius": 9, "ring": "wall_stone", "gaps": 2, "center": "campfire", "inside": { "wall_stone": 14, "floor_straw": 8, "stockpile": 3 } },
+      "hold": { "radius": 6, "ring": "wall_stone", "gaps": 2, "center": "campfire", "inside": { "floor_straw": 5, "stockpile": 2, "wall_stone": 6 } },
+      "warren": { "radius": 5, "ring": "rubble_pillar", "gaps": 3, "center": "campfire", "inside": { "bones_pile": 4, "floor_straw": 3, "wall_wood": 3 } },
+      "ruin": { "radius": 5, "ring": "rubble", "gaps": 6, "center": "bones_pile", "inside": { "rubble": 6, "rubble_pillar": 2 } },
+      "lair": { "radius": 3, "ring": null, "gaps": 0, "center": "bones_pile", "inside": { "bones_pile": 3 } }
     },
-    "startSafeRadius": 24
+    "bySpecies": {
+      "human": ["camp", "village", "town"], "elf": ["camp", "camp", "village"], "orc": ["camp", "camp", "village"],
+      "dwarf": ["hold", "hold", "hold"], "goblin": ["warren", "warren", "warren"], "gnome": ["hold", "hold", "hold"], "automaton": ["hold", "hold", "hold"]
+    },
+    "preferredBiomes": {
+      "about": "History looks for a site cell in one of these biomes first (any walkable land if none is found in the home area).",
+      "human": ["grassland_temperate", "forest_temperate_broadleaf", "savanna_temperate", "shrubland_temperate"],
+      "elf": ["forest_temperate_broadleaf", "forest_tropical_moist_broadleaf", "forest_temperate_conifer", "taiga"],
+      "orc": ["savanna_tropical", "shrubland_tropical", "desert_rock", "desert_badland"],
+      "dwarf": ["mountain", "desert_rock", "taiga"],
+      "goblin": ["swamp_temperate_fresh", "desert_badland", "shrubland_temperate", "marsh_temperate_salt"],
+      "gnome": ["forest_temperate_conifer", "mountain", "shrubland_temperate"],
+      "automaton": ["desert_rock", "desert_badland", "mountain"]
+    },
+    "growth": [0, 30, 120],
+    "minDistanceFromStart": 48,
+    "peoplePerSite": [3, 10]
+  },
+  "wildlife": {
+    "about": "Creatures placed with the map on New Game (UF_Wildlife), as world units that live on and off screen. herds per area per species = weight in 'biomes' x savageryScale x (herd count roll). Stand-in images are U7 sheets (AR-401) with a tint for variants; minSavagery/alignment restrict monsters to wild or cursed regions. kind: grazer/vermin/flier = prey (hunt yields 'yields'), predator/monster = dangerous (hunted only with a knife and bravery, UF_Colonists).",
+    "herdsPerArea": [14, 24],
+    "savageryScale": { "tame": 0.6, "wild": 1, "primeval": 1.8 },
+    "startSafeRadius": 20,
+    "predatorFreeRadius": 60,
+    "species": [
+      { "id": "deer", "name": "Deer", "image": "$U7_Deer", "kind": "grazer", "herd": [2, 5], "wander": 14, "hunt": { "work": 120, "flees": true }, "yields": { "meat_raw": 3, "hide": 1, "bone": 2 }, "biomes": { "forest_temperate_broadleaf": 3, "forest_temperate_conifer": 2, "grassland_temperate": 2, "taiga": 1, "forest_tropical_dry_broadleaf": 1 } },
+      { "id": "boar", "name": "Boar", "image": "$U7_Dog", "tint": "#7a5a40", "kind": "grazer", "herd": [2, 4], "wander": 12, "hunt": { "work": 150, "flees": false }, "yields": { "meat_raw": 3, "hide": 1 }, "biomes": { "forest_temperate_broadleaf": 2, "forest_tropical_dry_broadleaf": 2, "swamp_temperate_fresh": 1, "shrubland_temperate": 1 } },
+      { "id": "aurochs", "name": "Aurochs", "image": "$U7_Ox", "tint": "#6a4a30", "kind": "grazer", "herd": [3, 6], "wander": 16, "hunt": { "work": 240, "flees": false }, "yields": { "meat_raw": 6, "hide": 2, "bone": 3 }, "biomes": { "grassland_temperate": 2, "savanna_temperate": 2, "savanna_tropical": 2, "grassland_tropical": 1 } },
+      { "id": "wild_horse", "name": "Wild horse", "image": "$U7_Horse", "kind": "grazer", "herd": [3, 6], "wander": 20, "hunt": { "work": 180, "flees": true }, "yields": { "meat_raw": 4, "hide": 1 }, "biomes": { "grassland_temperate": 2, "savanna_temperate": 1, "shrubland_temperate": 1 } },
+      { "id": "wild_sheep", "name": "Wild sheep", "image": "$U7_Sheep", "kind": "grazer", "herd": [3, 6], "wander": 10, "hunt": { "work": 100, "flees": true }, "yields": { "meat_raw": 2, "wool": 1 }, "biomes": { "mountain": 3, "shrubland_temperate": 2, "tundra": 1, "grassland_temperate": 1 } },
+      { "id": "hare", "name": "Hare", "image": "$U7_Hare", "kind": "grazer", "herd": [2, 4], "wander": 8, "hunt": { "work": 60, "flees": true }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "grassland_temperate": 3, "tundra": 2, "shrubland_temperate": 2, "savanna_temperate": 2, "forest_temperate_broadleaf": 1 } },
+      { "id": "fowl", "name": "Wild fowl", "image": "$U7_Chicken", "tint": "#c0a080", "kind": "grazer", "herd": [3, 6], "wander": 8, "hunt": { "work": 60, "flees": true }, "yields": { "meat_raw": 1 }, "biomes": { "grassland_temperate": 2, "grassland_tropical": 3, "marsh_temperate_fresh": 3, "marsh_tropical_fresh": 3, "savanna_tropical": 2 } },
+      { "id": "rat", "name": "Rat", "image": "$U7_Rat", "kind": "vermin", "herd": [2, 5], "wander": 6, "hunt": { "work": 40, "flees": true }, "yields": { "meat_raw": 1 }, "biomes": { "swamp_temperate_fresh": 2, "marsh_temperate_fresh": 1, "marsh_temperate_salt": 1, "swamp_tropical_fresh": 1 } },
+      { "id": "wolf", "name": "Wolf", "image": "$U7_Wolf", "kind": "predator", "herd": [2, 4], "wander": 16, "hunt": { "work": 200, "flees": false }, "yields": { "meat_raw": 2, "hide": 1 }, "biomes": { "taiga": 3, "tundra": 2, "forest_temperate_conifer": 2, "forest_temperate_broadleaf": 1, "mountain": 1 } },
+      { "id": "jackal", "name": "Jackal", "image": "$U7_Dog", "tint": "#d0b080", "kind": "predator", "herd": [2, 3], "wander": 14, "hunt": { "work": 150, "flees": true }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "desert_rock": 2, "desert_sand": 1, "savanna_tropical": 2, "desert_badland": 1, "shrubland_tropical": 1 } },
+      { "id": "fox", "name": "Fox", "image": "$U7_Fox", "kind": "predator", "herd": [1, 2], "wander": 12, "hunt": { "work": 100, "flees": true }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "forest_temperate_broadleaf": 2, "forest_temperate_conifer": 2, "grassland_temperate": 1, "taiga": 1 } },
+      { "id": "arctic_fox", "name": "Arctic fox", "image": "$U7_Fox", "tint": "#e8f0ff", "kind": "predator", "herd": [1, 2], "wander": 12, "hunt": { "work": 100, "flees": true }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "tundra": 2, "glacier": 1 } },
+      { "id": "wildcat", "name": "Wildcat", "image": "$U7_Cat", "tint": "#b09070", "kind": "predator", "herd": [1, 1], "wander": 10, "hunt": { "work": 120, "flees": true }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "forest_temperate_broadleaf": 2, "forest_tropical_moist_broadleaf": 3, "shrubland_temperate": 2, "shrubland_tropical": 2, "forest_tropical_dry_broadleaf": 2 } },
+      { "id": "serpent", "name": "Serpent", "image": "$U7_Serpent", "kind": "predator", "herd": [1, 1], "wander": 8, "hunt": { "work": 90, "flees": false }, "yields": { "meat_raw": 1, "hide": 1 }, "biomes": { "swamp_temperate_fresh": 2, "swamp_tropical_fresh": 3, "marsh_tropical_fresh": 2, "desert_sand": 1, "desert_rock": 1, "forest_tropical_moist_broadleaf": 2 } },
+      { "id": "hawk", "name": "Hawk", "image": "$U7_Hawk", "kind": "flier", "herd": [1, 2], "wander": 24, "hunt": { "work": 150, "flees": true }, "yields": { "meat_raw": 1 }, "biomes": { "mountain": 2, "grassland_temperate": 1, "savanna_temperate": 2, "savanna_tropical": 1, "desert_rock": 1 } },
+      { "id": "songbird", "name": "Songbird", "image": "$U7_WildBird", "kind": "flier", "herd": [2, 5], "wander": 12, "hunt": { "work": 90, "flees": true }, "yields": { "meat_raw": 1 }, "biomes": { "forest_temperate_broadleaf": 3, "forest_tropical_moist_broadleaf": 3, "grassland_temperate": 1, "forest_temperate_conifer": 1, "swamp_temperate_fresh": 1 } },
+      { "id": "bat", "name": "Bat", "image": "$U7_CaveBat", "kind": "flier", "herd": [3, 6], "wander": 14, "hunt": { "work": 90, "flees": true }, "biomes": { "forest_temperate_broadleaf": 1, "swamp_temperate_fresh": 2, "mountain": 2, "desert_badland": 1 } },
+      { "id": "giant_spider", "name": "Giant spider", "image": "$U7_CaveSpider", "kind": "predator", "herd": [1, 2], "wander": 10, "hunt": { "work": 160, "flees": false }, "yields": { "meat_raw": 1 }, "minSavagery": "wild", "biomes": { "forest_tropical_moist_broadleaf": 2, "swamp_tropical_fresh": 2, "mountain": 1, "forest_temperate_conifer": 1 } },
+      { "id": "troll", "name": "Troll", "image": "$U7_Troll", "kind": "monster", "herd": [1, 1], "wander": 12, "minSavagery": "wild", "hunt": { "work": 400, "flees": false }, "yields": { "meat_raw": 4, "hide": 2 }, "biomes": { "mountain": 2, "taiga": 1, "desert_badland": 1, "forest_temperate_conifer": 1 } },
+      { "id": "bog_horror", "name": "Bog horror", "image": "$U7_Troll", "tint": "#70b070", "kind": "monster", "herd": [1, 1], "wander": 8, "minSavagery": "primeval", "hunt": { "work": 400, "flees": false }, "biomes": { "swamp_temperate_fresh": 2, "swamp_tropical_fresh": 2, "marsh_temperate_salt": 1, "swamp_mangrove": 1 } },
+      { "id": "sand_stalker", "name": "Sand stalker", "image": "$U7_CaveSpider", "tint": "#e8d090", "kind": "monster", "herd": [1, 2], "wander": 10, "minSavagery": "wild", "hunt": { "work": 200, "flees": false }, "biomes": { "desert_sand": 2, "desert_rock": 1 } },
+      { "id": "restless_dead", "name": "Restless dead", "image": "$U7_Skeleton", "kind": "monster", "herd": [2, 4], "wander": 8, "alignment": "cursed", "hunt": { "work": 200, "flees": false }, "yields": { "bone": 3 }, "biomes": { "grassland_temperate": 1, "forest_temperate_broadleaf": 1, "shrubland_temperate": 1, "desert_badland": 1, "swamp_temperate_fresh": 1, "mountain": 1 } },
+      { "id": "ice_wraith", "name": "Ice wraith", "image": "$U7_Skeleton", "tint": "#a0d8ff", "kind": "monster", "herd": [1, 2], "wander": 10, "alignment": "cursed", "hunt": { "work": 300, "flees": false }, "biomes": { "glacier": 2, "tundra": 2 } }
+    ]
+  },
+  "people": {
+    "about": "Walk sheets for faction members by species (UF_History spawns them at sites; UF_Wildlife's wander AI moves them). U7 stand-ins until AR-400; tints tell species apart on shared sheets.",
+    "human": { "images": ["$U7_Townsman", "$U7_Ranger", "$U7_Guard"] },
+    "elf": { "images": ["$U7_Ranger"], "tint": "#c8ffc8" },
+    "dwarf": { "images": ["$U7_Guard"], "tint": "#ffd0a0" },
+    "goblin": { "images": ["$U7_Goblin"], "tint": "#a8e888" },
+    "orc": { "images": ["$U7_Guard"], "tint": "#a8c890" },
+    "gnome": { "images": ["$U7_Townsman"], "tint": "#ffe0ff" },
+    "automaton": { "images": ["$U7_Skeleton"], "tint": "#c8c8e8" }
   },
   "factions": {
-    "about": "Factions are rolled from the world seed on every New Game (UF_Factions). Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied).",
-    "count": [
-      4,
-      7
-    ],
-    "playerFaction": {
-      "id": "player",
-      "name": "Your colony",
-      "species": "human"
-    },
+    "about": "Factions are rolled from the world seed on every New Game (UF_Factions) and all exist from year 0 of the history (user decision 2026-09-18). Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied). Homes are placed by UF_History (sites.preferredBiomes).",
+    "count": [4, 7],
+    "playerFaction": { "id": "player", "name": "Your colony", "species": "human" },
     "species": [
-      {
-        "id": "human",
-        "name": "Humans",
-        "home": "surface",
-        "weight": 3,
-        "groups": [
-          "League",
-          "Freehold",
-          "Company",
-          "Kingdom"
-        ],
-        "image": "$U7_Townsman",
-        "requestId": "AR-050",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "elf",
-        "name": "Elves",
-        "home": "surface",
-        "weight": 2,
-        "groups": [
-          "Circle",
-          "Grove",
-          "Court"
-        ],
-        "image": "$U7_Ranger",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "dwarf",
-        "name": "Dwarves",
-        "home": "surface",
-        "weight": 2,
-        "groups": [
-          "Hold",
-          "Deep",
-          "Clan"
-        ],
-        "image": "$U7_DwarfGuard",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "goblin",
-        "name": "Goblins",
-        "home": "surface",
-        "weight": 2,
-        "groups": [
-          "Warren",
-          "Pack",
-          "Rabble"
-        ],
-        "image": "$U7_Goblin",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "orc",
-        "name": "Orcs",
-        "home": "surface",
-        "weight": 2,
-        "groups": [
-          "Horde",
-          "Band",
-          "Warclan"
-        ],
-        "image": "$U7_Orc",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "gnome",
-        "name": "Gnomes",
-        "home": "surface",
-        "weight": 1,
-        "groups": [
-          "Guild",
-          "Burrow",
-          "Workshop"
-        ],
-        "image": "$U7_Gnome",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      },
-      {
-        "id": "automaton",
-        "name": "Automata",
-        "home": "surface",
-        "weight": 1,
-        "groups": [
-          "Collective",
-          "Array",
-          "Foundry"
-        ],
-        "about": "science-fiction element (VISION V8)",
-        "image": "$U7_Automaton",
-        "requestId": "AR-400",
-        "status": "U7 stand-in"
-      }
+      { "id": "human", "name": "Humans", "weight": 3, "groups": ["League", "Freehold", "Company", "Kingdom"] },
+      { "id": "elf", "name": "Elves", "weight": 2, "groups": ["Circle", "Grove", "Court"] },
+      { "id": "dwarf", "name": "Dwarves", "weight": 2, "groups": ["Hold", "Deep", "Clan"] },
+      { "id": "goblin", "name": "Goblins", "weight": 2, "groups": ["Warren", "Pack", "Rabble"] },
+      { "id": "orc", "name": "Orcs", "weight": 2, "groups": ["Horde", "Band", "Warclan"] },
+      { "id": "gnome", "name": "Gnomes", "weight": 1, "groups": ["Guild", "Burrow", "Workshop"] },
+      { "id": "automaton", "name": "Automata", "weight": 1, "groups": ["Collective", "Array", "Foundry"], "about": "science-fiction element (VISION V8)" }
     ],
     "speciesAffinity": {
-      "human|elf": 10,
-      "human|dwarf": 10,
-      "human|gnome": 10,
-      "human|goblin": -25,
-      "human|orc": -25,
-      "elf|dwarf": -10,
-      "elf|orc": -35,
-      "elf|goblin": -30,
-      "dwarf|goblin": -40,
-      "dwarf|orc": -20,
-      "dwarf|gnome": 20,
-      "goblin|orc": 15,
-      "gnome|goblin": -25,
-      "automaton|goblin": -15
+      "human|elf": 10, "human|dwarf": 10, "human|gnome": 10, "human|goblin": -25, "human|orc": -25,
+      "elf|dwarf": -10, "elf|orc": -35, "elf|goblin": -30,
+      "dwarf|goblin": -40, "dwarf|orc": -20, "dwarf|gnome": 20,
+      "goblin|orc": 15, "gnome|goblin": -25, "automaton|goblin": -15
     },
     "ethos": [
-      {
-        "id": "traders",
-        "name": "Traders",
-        "toAll": 10,
-        "toSame": 5
-      },
-      {
-        "id": "warlike",
-        "name": "Warlike",
-        "toAll": -20,
-        "toSame": -10
-      },
-      {
-        "id": "reclusive",
-        "name": "Reclusive",
-        "toAll": -8,
-        "toSame": 0
-      },
-      {
-        "id": "expansionist",
-        "name": "Expansionist",
-        "toAll": -5,
-        "toSame": -20
-      },
-      {
-        "id": "pious",
-        "name": "Pious",
-        "toAll": 0,
-        "toSame": 15
-      },
-      {
-        "id": "scholarly",
-        "name": "Scholarly",
-        "toAll": 5,
-        "toSame": 10
-      },
-      {
-        "id": "nomadic",
-        "name": "Nomadic",
-        "toAll": 0,
-        "toSame": 5
-      },
-      {
-        "id": "industrious",
-        "name": "Industrious",
-        "toAll": 3,
-        "toSame": 5
-      }
+      { "id": "traders", "name": "Traders", "toAll": 10, "toSame": 5 },
+      { "id": "warlike", "name": "Warlike", "toAll": -20, "toSame": -10 },
+      { "id": "reclusive", "name": "Reclusive", "toAll": -8, "toSame": 0 },
+      { "id": "expansionist", "name": "Expansionist", "toAll": -5, "toSame": -20 },
+      { "id": "pious", "name": "Pious", "toAll": 0, "toSame": 15 },
+      { "id": "scholarly", "name": "Scholarly", "toAll": 5, "toSame": 10 },
+      { "id": "nomadic", "name": "Nomadic", "toAll": 0, "toSame": 5 },
+      { "id": "industrious", "name": "Industrious", "toAll": 3, "toSame": 5 }
     ],
     "sameSpecies": 10,
     "randomSpread": 30,
     "names": {
-      "start": [
-        "ar",
-        "bel",
-        "cor",
-        "dun",
-        "eth",
-        "fal",
-        "gor",
-        "hal",
-        "ir",
-        "jas",
-        "kel",
-        "lor",
-        "mar",
-        "nor",
-        "ost",
-        "pel",
-        "quin",
-        "ras",
-        "sol",
-        "tor",
-        "ul",
-        "vas",
-        "wen",
-        "yor",
-        "zan"
-      ],
-      "end": [
-        "a",
-        "en",
-        "is",
-        "or",
-        "um",
-        "eth",
-        "ar",
-        "ic",
-        "ok",
-        "wyn",
-        "ath",
-        "esh"
-      ]
+      "start": ["ar", "bel", "cor", "dun", "eth", "fal", "gor", "hal", "ir", "jas", "kel", "lor", "mar", "nor", "ost", "pel", "quin", "ras", "sol", "tor", "ul", "vas", "wen", "yor", "zan"],
+      "end": ["a", "en", "is", "or", "um", "eth", "ar", "ic", "ok", "wyn", "ath", "esh"]
     }
   },
-  "items": [
-    {
-      "id": "wood_log",
-      "name": "Wood log",
-      "image": "!$U7_Item_WoodLog",
-      "category": "wood",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "firewood",
-      "name": "Firewood",
-      "image": "!$U7_Item_Firewood",
-      "category": "fuel",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "rough_stone",
-      "name": "Rough stone",
-      "image": "!$U7_Item_RoughStone",
-      "category": "stone",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "iron_ore",
-      "name": "Iron ore",
-      "image": "!$U7_Item_IronOre",
-      "category": "ore",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "lead_ore",
-      "name": "Lead ore",
-      "image": "!$U7_Item_LeadOre",
-      "category": "ore",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "blackrock",
-      "name": "Blackrock",
-      "image": "!$U7_Item_Blackrock",
-      "category": "special",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "gold_nugget",
-      "name": "Gold nugget",
-      "image": "!$U7_Item_GoldNugget",
-      "category": "metal",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "metal_bar",
-      "name": "Metal bar",
-      "image": "!$U7_Item_MetalBar",
-      "category": "refined",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "rough_gem",
-      "name": "Rough gem",
-      "image": "!$U7_Item_RoughGem",
-      "category": "gem",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "cut_gem",
-      "name": "Cut gem",
-      "image": "!$U7_Item_CutGem",
-      "category": "gem",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "plant_fiber",
-      "name": "Plant fiber",
-      "image": "!$U7_Item_PlantFiber",
-      "category": "fiber",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "wool_fleece",
-      "name": "Wool fleece",
-      "image": "!$U7_Item_WoolFleece",
-      "category": "fiber",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "straw_bundle",
-      "name": "Straw bundle",
-      "image": "!$U7_Item_StrawBundle",
-      "category": "fiber",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "seed_pouch",
-      "name": "Seed pouch",
-      "image": "!$U7_Item_SeedPouch",
-      "category": "agriculture",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "wild_berries",
-      "name": "Wild berries",
-      "image": "!$U7_Item_WildBerries",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "tree_fruit",
-      "name": "Tree fruit",
-      "image": "!$U7_Item_TreeFruit",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "cave_mushroom",
-      "name": "Mushroom",
-      "image": "!$U7_Item_CaveMushroom",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "root_vegetable",
-      "name": "Root vegetable",
-      "image": "!$U7_Item_RootVegetable",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "raw_meat",
-      "name": "Raw meat",
-      "image": "!$U7_Item_RawMeat",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "haunch_meat",
-      "name": "Haunch meat",
-      "image": "!$U7_Item_HaunchMeat",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "river_fish",
-      "name": "River fish",
-      "image": "!$U7_Item_RiverFish",
-      "category": "food",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "animal_bone",
-      "name": "Animal bone",
-      "image": "!$U7_Item_AnimalBone",
-      "category": "bone",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    },
-    {
-      "id": "leather_hide",
-      "name": "Leather hide",
-      "image": "!$U7_Item_LeatherHide",
-      "category": "leather",
-      "requestId": "AR-200",
-      "status": "U7 stand-in"
-    }
-  ],
-  "ui": {
-    "lookCursor": {
-      "name": "Look cursor",
-      "image": "U7_Cursor.png",
-      "requestId": "AR-030",
-      "status": "U7 stand-in"
-    },
-    "selectionMarker": {
-      "name": "Unit selection marker",
-      "image": "U7_Select.png",
-      "requestId": "AR-031",
-      "status": "U7 stand-in"
-    },
-    "windowSkin": {
-      "name": "UI Window skin",
-      "image": "Window.png",
-      "requestId": "AR-033",
-      "status": "U7 stand-in"
-    }
+  "history": {
+    "about": "Years of history simulated at New Game before the pair arrives (UF_History; user decision 2026-09-18: every faction exists from year 0, then a random 500-600 years like DF's world history with its standard settings). Factions found sites, grow, fight, make peace, lose sites to ruin, and get rulers; the result is what the world looks like on day one.",
+    "years": [500, 600],
+    "startingPopulation": [20, 60],
+    "growthPerYear": 0.012,
+    "populationCap": 400,
+    "siteFoundEvery": [60, 120],
+    "maxSitesPerFaction": 3,
+    "warChancePerYear": 0.02,
+    "warLength": [3, 12],
+    "sackChance": 0.35,
+    "peaceChancePerYear": 0.08,
+    "allianceChancePerYear": 0.01,
+    "tradeChancePerYear": 0.03,
+    "plagueChancePerYear": 0.004,
+    "beastChancePerYear": 0.008,
+    "rulerReign": [8, 45],
+    "relationDrift": { "war": -25, "peace": 10, "alliance": 30, "trade": 4, "sack": -15 },
+    "eventsKept": 400,
+    "titles": ["Chief", "Elder", "Warden", "Speaker", "Reeve", "Thane", "Matriarch", "Patriarch", "Overseer"]
+  },
+  "colony": {
+    "about": "UF_Colonists: needs per game minute, thresholds that trigger need jobs, sleeping hours, personality facets, and the society plan the pair follows without orders (built and made one piece at a time near the start, VISION V17/V21). plan steps: build = an object on cells relative to the start; craft = a recipe until each colonist has (equip) or the colony holds (count) the item; stock = keep this many food items in the larder (hunting or gathering).",
+    "needs": { "hunger": 0.18, "thirst": 0.24, "sleep": 0.1, "social": 0.15, "nature": 0.12 },
+    "thresholds": { "thirst": 55, "hunger": 55, "sleep": 75, "social": 40, "nature": 35 },
+    "sleepHours": [22, 6],
+    "mealHours": [8, 13, 19],
+    "facets": ["curiosity", "industriousness", "patience", "bravery", "sociability", "natureAffinity", "tidiness", "ambition", "cheerfulness", "discipline"],
+    "skills": ["woodcutting", "gathering", "stonework", "building", "hauling", "foraging", "hunting", "crafting", "cooking"],
+    "huntRadius": 45,
+    "plan": [
+      { "id": "hearth", "build": "campfire", "cells": [[0, -3]] },
+      { "id": "larder", "build": "stockpile", "cells": [[3, -3]], "stores": ["food"] },
+      { "id": "knives", "craft": "stone_knife", "each": 1 },
+      { "id": "clothes", "craft": "fiber_wrap", "each": 1, "equip": true },
+      { "id": "axe", "craft": "stone_axe", "count": 1 },
+      { "id": "food", "stock": ["food"], "count": 6, "hunt": true },
+      { "id": "woodpile", "build": "stockpile", "cells": [[-3, -3]], "stores": ["wood", "stone"] },
+      { "id": "shelter", "build": "wall_wood", "cells": [[-2, 2], [-1, 2], [0, 2], [1, 2], [2, 2], [-2, 3], [2, 3], [-2, 4], [2, 4], [-2, 5], [-1, 5], [1, 5], [2, 5]] },
+      { "id": "beds", "build": "floor_straw", "cells": [[-1, 4], [1, 4]] },
+      { "id": "cloaks", "craft": "hide_cloak", "each": 1, "equip": true },
+      { "id": "pick", "craft": "stone_pick", "count": 1 },
+      { "id": "workstone", "build": "workbench", "cells": [[-3, 0]] }
+    ]
+  },
+  "stance": {
+    "about": "Colored squares under units' feet (UF_Stance; user request 2026-09-18): green = friendly (your colony and allied factions), yellow = indifferent (wildlife, neutral factions), red = hostile (monsters, factions at war).",
+    "colors": { "friendly": "#22c55e", "indifferent": "#eab308", "hostile": "#ef4444" },
+    "alpha": 0.45
   }
 }
