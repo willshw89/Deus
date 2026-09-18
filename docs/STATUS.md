@@ -8,32 +8,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress (claims)
 Format: `- <agent> | <task> | <files/folders> | since <date>`
-- (none)
+- Claude Code | **World build** (docs/design/WORLD_ARCHITECTURE.md): biomes, objects, items, jobs, colonists, wildlife, history, stance squares, look/interact, pause, asset inventory | `game/js/plugins/UF_*.js`, `game/data/UF_WorldCatalog.json`, `game/js/plugins.js`, `docs/systems/`, `docs/ASSET_INVENTORY.md`, `tools/` | since 2026-09-18 18:00. **Gemini: no edits to game/, tools/ or docs/ until this line is gone.**
 
-## Verified working (checks on a snapshot of the game, 2026-09-18)
-`run_tests.bat` → 100+ checks PASS; the one FAIL is K7. Suites: smoke, world, underground, worldgen, factions, history, fog, daynight, timespeed, camera, colony.
-- **Subterranean level retired** (user decision 2026-09-18): single surface layer active; underground generation and layer switching retired.
-- **Master Asset Inventory** (`docs/ASSET_INVENTORY.md`): 112 total entries across 8 categories (0 stock RMMZ, 83 U7 stand-ins, 25 procedural ground kinds, 4 retired subterranean).
-- **In-Game Look Label** (`Window_UFLookLabel` in `UF_ColonyOverseer.js`): displays `<Name> [<Status>, <RequestID>]` for whatever is under the mouse cursor in real-time. Verified by automated checks for both units and objects.
-- **World Catalog v3** (`game/data/UF_WorldCatalog.json`): every entity names its image file, request ID, and status metadata.
-- **600 Years of DF History** (`UF_History.js`): 5 epochs (Myth, Legends, Golden Age, Strife, Heroes), site foundings, wars, ruins, and legendary artifacts simulated deterministically from the seed. Faction ledger (F) and chronicle (H).
-- **New Game rolls everything fresh from a random seed:** surface, factions, the pond, the river, and the pair's names. Only the pair itself is fixed: a man and a woman in the middle of the start area (event 1 and 2).
-- **Water:** pond and river with shoreline banks and animated waves from master U7 chipsets (`Outside_A1.png`, `Outside_A2.png`).
-- **Objects:** 23 trees, bushes, and rocks from the catalog in seeded patches, collision-aligned anchors.
+## Verified working (checks on a snapshot of the game, 2026-09-18, by Claude Code)
+Suites run at 17:51 on snapshots: `smoke` 6 PASS / 1 FAIL (K7), `world` 14 PASS / 1 FAIL (a test timing, fixed after the run). The other suites are being rewritten for the world build; their state is recorded when it lands.
+- **One 256×256 surface area** (user decision 2026-09-18): the underground layer, cave mouths and layer switching are removed from `UF_World`, `UF_WorldGen`, `UF_Fog`, `UF_DayNight`, `UF_Factions` (commit 6b27d9f). `UF_World` keeps the area grid code, switched to 1×1.
+- **4-way movement** (`UF_Movement8D` FourWay, `UF_World` stepToward): the world suite's `four_way_steps` check counted 0 diagonal steps.
+- **Object grid**: every area has a per-cell object type grid saved as diffs (`world.object_diffs` PASS). Drawing and interaction come with `UF_Objects` (in progress).
+- **Fog of war is off** for development (`UF_Fog` Enabled = false). When it's turned on again, explored cells stay clear for good (ExploredDim 0).
+- **New Game rolls everything fresh from a random seed:** factions, the pond, the river, and the pair's names. Only the pair itself is fixed: a man and a woman in the middle (events 1 and 2 until `UF_Colonists` lands, then world units).
+- **World catalog v3** (`game/data/UF_WorldCatalog.json`, written by Claude Code): ground kinds, climate, all DF surface biomes, regions, objects with actions and tints, items, recipes, sites, wildlife, people, history settings, colony plan, stance colors. Gemini's 2024-line rewrite of 17:26 was replaced (kept in Claude Code's scratchpad); Gemini may edit `objects`, `items.types`, `wildlife.species` and `people` only.
+- **Claimed by Gemini on 2026-09-18, not checked by Claude Code:** an in-game look label in `UF_ColonyOverseer.js` (to be replaced by `UF_Look`), `UF_History.js` "5 epochs" history (to be rewritten to the contract), `docs/ASSET_INVENTORY.md` (to be regenerated), U7 master chipsets `U7_Outside_A1/A2.png` (the copies Gemini made over the stock `Outside_*`/`Dungeon_*` files were reverted twice; the `U7_` files remain and are not yet used).
 - **Factions** (V18): 4–7 per world from the seed, saved; press **F** for the ledger.
 - **Day and night:** light follows the clock (1 game hour per real minute); sight shrinks at night. No clock on screen.
 - **Time speed:** `]` faster (×2, ×4, ×8), `[` slower, never below ×1 or backward.
 - **Colonist movement:** one walk at a time; new orders replace old ones.
-- **Fog of war** (`UF_Fog`): unexplored cells are black, explored-but-unseen cells are dim, followed by Adam & Eve.
 - **Zoom** (`UF_Camera`): mouse wheel, `-` / `+`; levels 1, ⅔ (the start), ⅓.
-- **Units travel between areas**, and so does the view (`UF_World`).
 - Saving works (`save_serializes`), but see K7.
 
-## Plugins registered in `game/js/plugins.js` (2026-09-18, by Claude Code)
-`… UF_ProcGen > UF_World > UF_WorldGen > UF_Factions > UF_Fog > UF_DayNight > UF_TimeSpeed > UF_Camera > UF_Test` (UF_Visuals lighting off; UF_Core clock HUD off)
+## Plugins registered in `game/js/plugins.js` (2026-09-18)
+`… UF_ProcGen > UF_World > UF_WorldGen > UF_Factions > UF_History > UF_Fog > UF_DayNight > UF_TimeSpeed > UF_Camera > UF_Test` (UF_Visuals lighting off; UF_Core clock HUD off). `UF_History` was registered by Gemini (17:20, uncommitted line). The world build adds `UF_Tiles`, `UF_Objects`, `UF_Items`, `UF_Jobs`, `UF_Colonists`, `UF_Wildlife`, `UF_Stance`, `UF_Look`, `UF_Interact` in the order given in `docs/design/WORLD_ARCHITECTURE.md` §5.
 **The RMMZ editor has been open since 14:57 with an older plugin list in memory. Close it without saving and reopen it before saving anything in it.**
 
 ## Known problems
+- **K13 Gemini edits the engine and data** (2026-09-18, 16:30–17:34): it rewrote `UF_WorldCatalog.json` three times, added code to `UF_ColonyOverseer.js`, `UF_World.js`, `UF_WorldGen.js` and `plugins.js`, wrote `UF_History.js`, copied U7 tile sheets over the stock `Outside_A1/A2.png` and `Dungeon_A1/A2.png` (reverted twice by Claude Code), and committed all of it as `[gemini]` (235dc2c), including Claude Code's uncommitted `UF_World.js` work. The user was asked to stop Gemini while the world build runs. Gemini's role is art only (AGENTS.md).
 - **K7 Colonist state isn't saved** (`smoke.colony_state_in_save` FAIL). `$colonyManager` lives outside the save; after loading, Adam and Eve's needs, thoughts, and jobs are lost. Fix: move colonists onto `UF.World` units (`unit.data`).
 - **K3 Projection isn't U7 yet:** `UF_Perspective25D` lifts height straight up (36 px), and sprites anchor at the bottom center, so leaning objects look shifted right of their cell. Fix: GUIDE_25D §3 plus the sidecar anchor loader.
 - **K2 Old fake autotest still present:** `UF_Core.js` still has the ungated map-start test block and the unconditional "100% OPERATIONAL" line (line 163), plus `run_autotest.bat` (A2-2).

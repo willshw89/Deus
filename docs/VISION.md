@@ -12,7 +12,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 |---|---|
 | V1 | Engine: RPG Maker MZ v1.10.0. Behavior comes from plugins; RMMZ core files are never modified. The project must stay openable and playtestable in the RMMZ editor. |
 | V2 | The look is Ultima VII's 2.5D view, and **everything** on screen follows the same projection: people, trees, walls, items. Spec: `ART_STANDARD.md`. |
-| V3 | 8-directional movement on a square grid. |
+| V3 | **4-directional movement** on a square grid, as in DF (revised 2026-09-18 from 8-directional). |
 | V4 | No protagonist. The game starts with one naked man and one naked woman in the middle of the start area, with names generated each game. Everything else, including the start's surroundings, is randomly generated. (Revised 2026-09-18: the fixed fruit tree was removed.) |
 | V5 | The player commands units the way DF does (designations, jobs, orders). |
 | V6 | DF's systems are all in: randomness and world generation, gathering, construction, needs, combat. Implemented originally, not copied. |
@@ -20,7 +20,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V8 | Fantasy plus science-fiction elements are allowed. |
 | V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. Ultima VII art may be used as examples and temporary stand-ins during development (`U7_` prefix, replaced before release). |
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
-| V14 | The world is made of **areas at RMMZ's maximum size (256×256 cells each)**. World characters **and** the player's view move between areas. Characters keep living and traveling when their area isn't on screen. The glade sits in the middle of the starting area. |
+| V14 | The world is **one area at RMMZ's maximum size (256×256 cells)** with the pair in the middle (revised 2026-09-18 from a grid of areas; the engine still supports a grid, switched off). |
 | V15 | The camera zooms out to show more of the world (mouse wheel, − / +). Zoom steps keep pixel art exact. |
 | V16 | **Emergence and replayability are the core goal.** Every new game is a different world, and stories come out of the simulation rather than scripts, so people want to play again and again. |
 | V17 | **Colonists act on their own.** Adam and Eve pursue goals without player input: survive first, then gather, build shelter, and grow into a society. Player orders change priorities; they're never required. |
@@ -36,6 +36,14 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V28 | **DF's core gameplay mechanics are adopted as mechanics** (not DF's text or data). The plan is `docs/design/DF_MECHANICS.md`. |
 | V29 | **Combat works like Ultima VII's:** real time, combat mode, per-character attack modes, click targeting, stats and equipment decide hits (DF_MECHANICS §8). |
 | ~~V20~~ | *Retired 2026-09-18 by user.* ~~**An underground layer** under the whole world. Each 256×256 underground area corresponds cell for cell to the surface area above it. They connect at random spots (cave mouths), and the underground has its own fog of war.~~ Surface only. |
+| V30 | **World generation copies DF's model with DF's standard settings, under the hood**: no generation options in the game. Fields (elevation, rainfall, temperature, drainage, volcanism, savagery, good/evil) → every DF biome, rivers, lakes, coast, region character. |
+| V31 | **History:** every faction exists at map generation, then a random **500–600 years** of history run (sites, wars, ruins, rulers) before the pair arrives. |
+| V32 | **Stance squares:** a green square under friendly units (the pair, allies), yellow under indifferent ones (wildlife, neutral factions), red under hostile ones (monsters, enemies). |
+| V33 | **Space pauses** the game (the view still moves). |
+| V34 | **Everything is clickable with interaction options** (right-click a tree: chop; a bush: gather; a creature: hunt; ground: build here…), which become jobs the colonists take. |
+| V35 | **Every colonist job is a physical interaction with the world**, and the world starts dense with resources so work begins at once. The first thing to see: the pair hunting, making tools and clothes, cooking, building. |
+| V36 | **Art is designed with its interaction states in mind** (standing/stump, full/picked, unlit/lit, intact/ruined, alive/dead, clothing tiers). `docs/ASSET_INVENTORY.md` lists the states each asset needs. |
+| V37 | **Fog of war is off during development** (the whole map is visible). When it returns, a cell once seen stays clear for good. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -86,4 +94,5 @@ Append only, newest at the bottom.
 - 2026-09-18: The user added V20: an underground layer connected to the surface at random spots, same grid, with its own fog of war. Also: every stock RMMZ asset the engine uses gets a replacement request for Gemini.
 - 2026-09-18: The user revised V4: **no fixed tree**; the only fixed part of a new game is a man and a woman, with names generated each game. Factions, surface, and caves are all random per New Game. Time: 1 game hour per real minute, with no clock on screen; speed-up allowed, never backward.
 - 2026-09-18: The user added V21–V29 (physical results of actions, DF-style water, complex personality-driven AI, populated world at start, everything interactive, children, distinct biomes, DF mechanics as the model, U7-style combat).
+- 2026-09-18 (later): The user removed the underground layer (V20 retired; V22 now means one layer), reduced the world to **one 256×256 area** (V14 revised), switched to **4-way movement** (V3 revised), and added V30–V37: DF map generation with standard settings and no options, all factions from year 0 plus 500–600 years of history, stance squares, pause on Space, everything clickable with options, physical jobs and a dense start (hunting, tools, clothes, cooking first), assets designed with interaction states, fog off for development (permanent reveal when it returns). Also: Gemini may be driven by Claude Code for art if a way to call it exists (none installed yet); the "large variety with duplicate placeholders" approach (tints on shared images) is approved.
 - 2026-09-18: The user did away with the subterranean level (V20 retired). The world is single-layer (surface only); all cave/underground layer generation, underground layer switching, and underground layers are removed.
