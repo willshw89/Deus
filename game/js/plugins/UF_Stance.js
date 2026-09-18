@@ -22,7 +22,7 @@
  * Markers are 48x48 squares drawn in code (UF_GenStance_friendly,
  * UF_GenStance_indifferent, UF_GenStance_hostile: a filled square at the
  * catalog's alpha with a 2 px darker outline), placed inside the map's
- * tilemap at z 5 (above the ground layers, under every character), one per
+ * tilemap at z = foot row - 50 (above the ground and the grass on the cell, under the character), one per
  * unit event in view, following the character every frame. A marker goes
  * away when its unit leaves the view or the map, or is transparent. The
  * pair's start events (note contains "<colonist", before UF_Colonists) get a
@@ -41,9 +41,13 @@
     "use strict";
 
     const SIZE = 48;
-    // WORLD_ARCHITECTURE §4: ground layers z 0 and 4, stance markers z 5, designations z 6,
-    // characters z = foot pixel row (UF_Perspective25D), which is >= 48 for anything in view.
-    const Z = 5;
+    // WORLD_ARCHITECTURE §4 (revised 2026-09-18): characters draw at z = their foot pixel row (UF_Perspective25D),
+    // flat "under" objects (grass, stones) at foot row - 100 (UF_Objects), so a square sits at foot row - 50: above
+    // the grass on its cell, behind the person standing on it. Never below the ground layers (z 0 and 4).
+    const Z_BELOW_FEET = 50;
+    const Z_MIN = 5;
+    const markerZ = foot => Math.max(Z_MIN, foot - Z_BELOW_FEET);
+    const Z = Z_MIN; // kept for API compatibility: the lowest z a marker uses
     const STANCES = ["friendly", "indifferent", "hostile"];
     const BITMAP_NAMES = { friendly: "UF_GenStance_friendly", indifferent: "UF_GenStance_indifferent", hostile: "UF_GenStance_hostile" };
     const LABELS = { friendly: "Friendly", indifferent: "Indifferent", hostile: "Hostile" };
@@ -194,6 +198,7 @@
         follow(ch) {
             this.x = ch.screenX();
             this.y = footY(ch);
+            this.z = markerZ(this.y);
         }
 
         get stance() {
@@ -403,7 +408,8 @@
             const center = bmp ? bmp.getPixel(24, 24) : "none", centerA = bmp ? bmp.getAlphaPixel(24, 24) : -1;
             const edgeA = bmp ? bmp.getAlphaPixel(0, 24) : -1;
             const order = m && cs ? `${tilemap.children.indexOf(m)} < ${tilemap.children.indexOf(cs)}` : "n/a";
-            const under = !!m && !!cs && m.z === Z && m.z < cs.z && tilemap.children.indexOf(m) < tilemap.children.indexOf(cs);
+            // Under the character, above flat objects on its cell (grass at foot row - 100): foot row - 50.
+            const under = !!m && !!cs && m.z === markerZ(footY(mev)) && m.z < cs.z && m.z > footY(mev) - 100 && tilemap.children.indexOf(m) < tilemap.children.indexOf(cs);
             const atFeet = !!m && !!mev && m.x === mev.screenX() && m.y === footY(mev);
             t.check("marker_drawn", !!m && m.visible && m.parent === tilemap && under && atFeet && colorDist(center, want) <= 8 && Math.abs(centerA - wantA) <= 4 && edgeA > centerA,
                 m ? `monster marker in the tilemap at (${m.x},${m.y}) vs feet (${mev ? mev.screenX() : "?"},${mev ? footY(mev) : "?"}), z ${m.z} vs character z ${cs ? cs.z : "?"} (child order ${order}); ` +
