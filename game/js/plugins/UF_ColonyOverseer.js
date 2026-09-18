@@ -558,19 +558,185 @@
         }
     }, 1000);
 
-    // Ensure Fog of War is active
-    if (typeof Sprite_FogOfWar === "undefined" && typeof require === "function") {
-        try {
-            const fs = require("fs");
-            const path = require("path");
-            const fowPath = path.join(path.dirname(process.mainModule.filename), "js", "plugins", "UF_FogOfWar.js");
-            if (fs.existsSync(fowPath)) {
-                require(fowPath);
-            }
-        } catch (e) {
-            console.warn("[UF] UF_FogOfWar auto-load note:", e.message);
+    //-----------------------------------------------------------------------------
+    // Faction Dynamic Line-of-Sight Fog of War Layer
+    //-----------------------------------------------------------------------------
+    Game_System.prototype.getExploredGrid = function(mapId) {
+        this._ufExploredMaps = this._ufExploredMaps || {};
+        if (!this._ufExploredMaps[mapId]) {
+            this._ufExploredMaps[mapId] = {};
         }
+        return this._ufExploredMaps[mapId];
+    };
+
+    Game_System.prototype.isTileExplored = function(mapId, x, y) {
+        const grid = this.getExploredGrid(mapId);
+        return !!grid[`${x},${y}`];
+    };
+
+    Game_System.prototype.exploreTile = function(mapId, x, y) {
+        const grid = this.getExploredGrid(mapId);
+        grid[`${x},${y}`] = true;
+    };
+
+    function Sprite_FogOfWar() {
+        this.initialize(...arguments);
     }
+    Sprite_FogOfWar.prototype = Object.create(Sprite.prototype);
+    Sprite_FogOfWar.prototype.constructor = Sprite_FogOfWar;
+
+    Sprite_FogOfWar.prototype.initialize = function() {
+        Sprite.prototype.initialize.call(this);
+        const w = Graphics.width || 816;
+        const h = Graphics.height || 624;
+        this.bitmap = new Bitmap(w, h);
+        this.z = 8;
+        this._updateThrottle = 0;
+    };
+
+    Sprite_FogOfWar.prototype.update = function() {
+        Sprite.prototype.update.call(this);
+        if (!$gameMap || !this.bitmap) return;
+        this._updateThrottle++;
+        if (this._updateThrottle === 1 || this._updateThrottle % 2 === 0) {
+            this.renderFog();
+        }
+    };
+
+    Sprite_FogOfWar.prototype.renderFog = function() {
+        const bmp = this.bitmap;
+        if (!bmp || !bmp.context) return;
+        const ctx = bmp.context;
+        const mapId = $gameMap.mapId();
+        const tw = $gameMap.tileWidth();
+        const th = $gameMap.tileHeight();
+        const defaultSightRadius = 6.5; // ~6.5 tiles vision radius
+        const exploredAlpha = 0.65;     // 65% ambient darkness for explored terrain outside active LOS
+
+        // Collect active faction observers (Adam & Eve)
+        const observers = [];
+        if (window.$colonyManager && window.$colonyManager.colonists) {
+            for (const c of $colonyManager.colonists) {
+                if (c.event && !c.event.isTransparent()) {
+                    observers.push({
+                        x: Math.round(c.event._realX),
+                        y: Math.round(c.event._realY),
+                        screenX: Math.round($gameMap.adjustX(c.event._realX) * tw + tw / 2),
+                        screenY: Math.round($gameMap.adjustY(c.event._realY) * th + th / 2),
+                        radius: (c.visionRadius || defaultSightRadius) * tw
+                    });
+                }
+            }
+        }
+
+        // Fallback: If no colonists registered, use player position
+        if (observers.length === 0 && $gamePlayer) {
+            observers.push({
+                x: Math.round($gamePlayer._realX),
+                y: Math.round($gamePlayer._realY),
+                screenX: Math.round($gameMap.adjustX($gamePlayer._realX) * tw + tw / 2),
+                screenY: Math.round($gameMap.adjustY($gamePlayer._realY) * th + th / 2),
+                radius: defaultSightRadius * tw
+            });
+        }
+
+        // 1. Mark tiles explored around observers
+        for (const obs of observers) {
+            const tileRadius = Math.ceil(obs.radius / tw);
+            for (let dx = -tileRadius; dx <= tileRadius; dx++) {
+                for (let dy = -tileRadius; dy <= tileRadius; dy++) {
+                    if (dx * dx + dy * dy <= tileRadius * tileRadius) {
+                        $gameSystem.exploreTile(mapId, obs.x + dx, obs.y + dy);
+                    }
+                }
+            }
+        }
+
+        // 2. Clear fog canvas
+        ctx.clearRect(0, 0, bmp.width, bmp.height);
+
+        // 3. Draw ambient fog over entire visible canvas
+        ctx.fillStyle = `rgba(6, 12, 18, ${exploredAlpha})`;
+        ctx.fillRect(0, 0, bmp.width, bmp.height);
+
+        // 4. Fill pitch black for unexplored tiles
+        const startX = Math.floor($gameMap.displayX()) - 1;
+        const startY = Math.floor($gameMap.displayY()) - 1;
+        const tilesX = Math.ceil(bmp.width / tw) + 3;
+        const tilesY = Math.ceil(bmp.height / th) + 3;
+
+        ctx.fillStyle = "rgba(4, 8, 12, 1.0)";
+        for (let ty = 0; ty < tilesY; ty++) {
+            for (let tx = 0; tx < tilesX; tx++) {
+                const gx = startX + tx;
+                const gy = startY + ty;
+                const explored = $gameSystem.isTileExplored(mapId, gx, gy);
+                if (!explored) {
+                    const screenTileX = Math.round($gameMap.adjustX(gx) * tw);
+                    const screenTileY = Math.round($gameMap.adjustY(gy) * th);
+                    const nextTileX = Math.round($gameMap.adjustX(gx + 1) * tw);
+                    const nextTileY = Math.round($gameMap.adjustY(gy + 1) * th);
+                    ctx.fillRect(screenTileX, screenTileY, nextTileX - screenTileX, nextTileY - screenTileY);
+                }
+            }
+        }
+
+        // 4. Cut out active line-of-sight around faction observers with soft radial feathering
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+
+        for (const obs of observers) {
+            const innerRadius = obs.radius * 0.45;
+            const grad = ctx.createRadialGradient(
+                obs.screenX, obs.screenY, innerRadius,
+                obs.screenX, obs.screenY, obs.radius
+            );
+            grad.addColorStop(0, "rgba(0, 0, 0, 1.0)");
+            grad.addColorStop(0.70, "rgba(0, 0, 0, 0.75)");
+            grad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(obs.screenX, obs.screenY, obs.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+        if (bmp.baseTexture) {
+            bmp.baseTexture.update();
+        }
+    };
+
+    const _Spriteset_Map_createLowerLayer = Spriteset_Map.prototype.createLowerLayer;
+    Spriteset_Map.prototype.createLowerLayer = function() {
+        _Spriteset_Map_createLowerLayer.call(this);
+        this._fogOfWar = new Sprite_FogOfWar();
+        this.addChild(this._fogOfWar);
+    };
+
+    // Dim or hide non-faction events outside line-of-sight
+    const _Sprite_Character_update = Sprite_Character.prototype.update;
+    Sprite_Character.prototype.update = function() {
+        _Sprite_Character_update.call(this);
+        if (!this._character || this._character === $gamePlayer) return;
+        
+        // Always show colonists (Adam & Eve) and prominent terrain features (fruit tree)
+        if ($colonyManager && $colonyManager.colonists) {
+            if ($colonyManager.colonists.some(c => c.event === this._character)) return;
+        }
+        const ev = this._character.event ? this._character.event() : null;
+        if (ev && (ev.note.includes("<tree>") || ev.note.includes("<canopy>") || ev.note.includes("<terrain>"))) {
+            return;
+        }
+
+        // Check if tile is explored
+        if ($gameSystem && $gameMap) {
+            const explored = $gameSystem.isTileExplored($gameMap.mapId(), this._character.x, this._character.y);
+            if (!explored) {
+                this.visible = false;
+            }
+        }
+    };
 
     console.log("[UF] UF_ColonyOverseer initialized: Free camera, unit selection, tactile colonist card, and autonomous need loop active.");
 })();

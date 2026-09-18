@@ -43,7 +43,7 @@
     const pluginName = "UF_Perspective25D";
     const params = PluginManager.parameters(pluginName);
     const tileHeightStep = parseInt(params["TileHeightStep"] || 36, 10);
-    const enableShadows = (params["EnableShadows"] || "true") === "true";
+    const enableShadows = false; // Completely disabled per user request
     const occlusionOpacity = parseInt(params["OcclusionOpacity"] || 120, 10);
 
     //-----------------------------------------------------------------------------
