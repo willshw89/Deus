@@ -7,10 +7,11 @@
 |---|---|
 | F1 | **Flat 3/4 top-down JRPG view** on a square grid, the same view RPG Maker draws by default: ground is seen from above, walls and objects show their front face, nothing leans, no isometric diamonds. |
 | F2 | **Tiles:** 16×16 native pixels, shown at exactly **3× = 48×48** (RMMZ's tile size). Ground and water are RMMZ autotiles (A1/A2 layouts). Tall things (trees, walls, furniture) are objects drawn as sprites over the ground, sorted by their bottom row so people walk in front of and behind them. |
-| F3 | **Characters:** upright, 4 facings (S, W, E, N), **16×24 native = 48×72 exported** for people (adults; children smaller), animals sized to fit 1 cell. Feet on the bottom row of the cell, anchor at the bottom-centre of the cell. E and W may be mirrors of each other (there is no lean to break). |
+| F3 | **Characters:** upright, 4 facings (S, W, E, N), **16×24 native = 48×72 exported** for people (adults; children smaller). **Every creature and monster is one cell too, in the same 48×48 or 48×72 frame, whatever its real size (Shining Force rule, VISION V44):** a hare, a wolf, a horse and a troll are all "one map sprite tall"; bulk shows in the portrait and description. Feet on the bottom row of the cell, anchor at the bottom-centre. E and W may be mirrors of each other (there is no lean to break). |
 | F4 | **Depth:** the engine sorts by foot row; a sprite may overhang the cells above it (tree canopies, tall walls) but never the cells below. |
 | F5 | **Palette:** 16-bit look: 16–32 colors per sheet, one project palette (`art/palette/uf.hex`) once locked, no gradients, no anti-aliasing, no blur, pixels fully opaque or fully transparent. Outlines dark and selective (as FF6 does), not pure black everywhere. |
-| F6 | **Scale reference:** an adult is 1 cell wide and 1½ cells tall; a door is 1 cell; a hut is 3×3 cells; a large tree is 2 cells wide and 3 tall. |
+| F6 | **Scale reference:** an adult is 1 cell wide and 1½ cells tall; a door is 1 cell; a hut is 3×3 cells; a large tree is 2 cells wide and 3 tall. Creatures never exceed the character frame (F3). |
+| F7 | **Combat is on the map** (VISION V45): attacks, casts and hits are frames of the character's own sheet (AR-600 `attack`, `cast`) plus small effect sprites; there is no battle screen and no separate battler art. |
 
 ## 2. Placeholders
 - **Stock RPG Maker MZ art is the placeholder set** (it is this style, and licensed for RPG Maker games): `Outside_*` tiles for ground, water, trees, bushes, rocks and buildings; `People1–4`, `Actor1–3`, `Nature`, `Monster`, `Evil` character sheets. The catalog names them; `docs/ASSET_INVENTORY.md` lists every one in use with its request ID.
