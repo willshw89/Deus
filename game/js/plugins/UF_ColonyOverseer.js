@@ -350,8 +350,9 @@
             // 6. Nature Contemplation by the River
             if (this.communeNature >= 35 && Math.random() < 0.35) {
                 this.currentJob = "Contemplating";
-                const spotX = 133 + Math.floor(Math.random() * 2);
-                const spotY = 127 + Math.floor(Math.random() * 3);
+                const spot = this.findNearestWater() || { x: ev.x, y: ev.y };
+                const spotX = spot.x;
+                const spotY = spot.y;
                 this.assignMoveTo(spotX, spotY, () => {
                     this.communeNature = Math.max(0, this.communeNature - 40);
                     this.addThought("Felt tranquil contemplating the pristine wilderness.", 8);
@@ -367,7 +368,7 @@
             if (Math.random() < 0.25) {
                 const wanderX = Math.max(10, Math.min(245, ev.x + Math.floor(Math.random() * 9) - 4));
                 const wanderY = Math.max(10, Math.min(245, ev.y + Math.floor(Math.random() * 9) - 4));
-                if (!(wanderX >= 135 && wanderX <= 137)) { // Don't wander into river water
+                if (!Tilemap.isWaterTile($gameMap.tileId(wanderX, wanderY, 0))) { // Don't wander into water
                     this.currentJob = "Strolling";
                     this.assignMoveTo(wanderX, wanderY, () => {
                         this.currentJob = "Idle";
@@ -408,10 +409,24 @@
             checkStep();
         }
 
+        // Nearest walkable cell next to real water on this map (the world is seeded, so nothing is hard-coded).
         findNearestWater() {
             const ev = this.event;
-            const bankY = Math.max(10, Math.min(245, ev ? ev.y : 128));
-            return { x: 134, y: bankY };
+            if (!ev || !$gameMap) return null;
+            const isWater = (x, y) => $gameMap.isValid(x, y) && Tilemap.isWaterTile($gameMap.tileId(x, y, 0));
+            for (let r = 1; r <= 60; r++) {
+                for (let dy = -r; dy <= r; dy++) {
+                    for (let dx = -r; dx <= r; dx++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                        const x = ev.x + dx, y = ev.y + dy;
+                        if (!isWater(x, y)) continue;
+                        for (const [bx, by] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
+                            if ($gameMap.isValid(bx, by) && !isWater(bx, by) && $gameMap.isPassable(bx, by, 2)) return { x: bx, y: by };
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         findFruitTree() {
@@ -514,11 +529,7 @@
     Scene_Map.prototype.processMapTouch = function() {};
 
     // Ensure new game transfers start at map 2, (128, 128)
-    const _DataManager_setupNewGame = DataManager.setupNewGame;
-    DataManager.setupNewGame = function() {
-        _DataManager_setupNewGame.call(this);
-        $gamePlayer.reserveTransfer(2, 128, 128, 2, 0);
-    };
+    // New Game start position is set by UF_World (a fresh seeded area, colonists in the middle).
 
     // Hook into Scene_Map.start to initialize Overseer camera & colonists
     const _Scene_Map_start = Scene_Map.prototype.start;
@@ -719,12 +730,15 @@
         return this._ufExploredMaps[mapId];
     };
 
+    // Exploration now lives in UF_Fog (compact, saved per area). These wrappers keep old callers working.
     Game_System.prototype.isTileExplored = function(mapId, x, y) {
+        if (window.UF && UF.Fog && mapId === $gameMap.mapId()) return UF.Fog.isExplored(x, y);
         const grid = this.getExploredGrid(mapId);
         return !!grid[`${x},${y}`];
     };
 
     Game_System.prototype.exploreTile = function(mapId, x, y) {
+        if (window.UF && UF.Fog && mapId === $gameMap.mapId()) return UF.Fog.reveal(x, y, 0);
         const grid = this.getExploredGrid(mapId);
         grid[`${x},${y}`] = true;
     };
@@ -857,9 +871,12 @@
         }
     };
 
+    // The screen-space fog layer is replaced by UF_Fog (follows camera zoom, saved compactly).
+    // Only created when UF_Fog isn't installed.
     const _Spriteset_Map_createLowerLayer = Spriteset_Map.prototype.createLowerLayer;
     Spriteset_Map.prototype.createLowerLayer = function() {
         _Spriteset_Map_createLowerLayer.call(this);
+        if (window.UF && UF.Fog) return;
         this._fogOfWar = new Sprite_FogOfWar();
         this.addChild(this._fogOfWar);
     };
