@@ -46,3 +46,9 @@
 /game/img/characters/$Eve.png
 # U7-derived stand-in committed by mistake in 1a6fff5 (AUDIT_LOG A3-4); untracked 2026-09-18. Purge from history before any public push.
 /game/img/characters/!$FruitTree.png
+# U7-derived copies under non-prefixed names, made by tools/generate_all_u7_assets.js (2026-09-18). The U7_ copies are what the game uses.
+/game/img/characters/!$CaveMouth.png
+/game/img/characters/!$CaveLadder.png
+/game/img/characters/!$IronOreVein.png
+/game/img/characters/!$TreeStump.png
+/game/img/characters/$People1.png
