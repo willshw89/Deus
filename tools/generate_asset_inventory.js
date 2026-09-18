@@ -260,3 +260,4 @@ for (const catName of categories) {
 
 fs.writeFileSync(inventoryFile, md, "utf8");
 console.log(`Generated ${inventoryFile} with ${entries.length} assets!`);
+

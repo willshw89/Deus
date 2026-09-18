@@ -1,0 +1,20 @@
+{
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "columns": 3,
+  "rows": 4,
+  "anchor": [
+    72,
+    140
+  ],
+  "facings": [
+    "south",
+    "west",
+    "east",
+    "north"
+  ],
+  "scale": 4,
+  "palette": "Ultima VII Daylight (Record 0)",
+  "tier": 0,
+  "gender": "female"
+}
