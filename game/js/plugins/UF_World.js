@@ -896,10 +896,15 @@
             const west = multi ? { x: area.x - 1, y: area.y } : area;
             const row = 128;
             $gamePlayer.locate(8, row);
-            const u = W.addUnit({ name: "TEST_walker", image: { characterName: "People1", characterIndex: 0 }, area: west, x: multi ? size - 4 : 18, y: row, dir: 6 });
+            // The goal and the start must be walkable land (the world's rim is ocean): search the row from the middle outward.
+            const walkable = (x, y) => $gameMap.isPassable(x, y, 2) && !Tilemap.isWaterTile($gameMap.tileId(x, y, 0)) && !(window.UF.Objects && UF.Objects.blocks && UF.Objects.blocks(x, y));
+            const findWalkable = (fromX, toX) => { for (let x = fromX; toX > fromX ? x <= toX : x >= toX; x += toX > fromX ? 1 : -1) if (walkable(x, row)) return x; return null; };
+            const goalX = multi ? 3 : findWalkable(size / 2 - 40, 3);
+            const startX = multi ? size - 4 : findWalkable(goalX + 15, size / 2);
+            const u = W.addUnit({ name: "TEST_walker", image: { characterName: "People1", characterIndex: 0 }, area: west, x: startX, y: row, dir: 6 });
             if (multi) t.check("unit_starts_offscreen", !W.eventOf(u.id), `unit ${u.id} in area (${u.area.x},${u.area.y}) at (${u.x},${u.y})`);
-            else t.check("single_area_world", st.areasX === 1 && st.areasY === 1 && $gameMap.mapId() === W.areaMapId(0, 0), `${st.areasX}x${st.areasY} areas, map ${$gameMap.mapId()}`);
-            W.sendUnit(u.id, { area, x: 3, y: row });
+            else t.check("single_area_world", st.areasX === 1 && st.areasY === 1 && $gameMap.mapId() === W.areaMapId(0, 0) && goalX !== null && startX !== null, `${st.areasX}x${st.areasY} areas, map ${$gameMap.mapId()}; walk from x ${startX} to x ${goalX} on row ${row}`);
+            W.sendUnit(u.id, { area, x: goalX, y: row });
             await t.waitUntil(() => !!W.eventOf(u.id), 8000, "TEST_walker to be on the area on screen").catch(() => {});
             const ev = W.eventOf(u.id);
             const sprite = ev && SceneManager._scene._spriteset._characterSprites.find(s => s._character === ev);
@@ -911,8 +916,8 @@
             if (ev) ev.moveDiagonally = function(h, v) { diagonal++; return origDiag.call(this, h, v); };
             await t.waitUntil(() => !u.goal, 14000, "TEST_walker to reach its goal").catch(() => {});
             if (ev) ev.moveDiagonally = origDiag;
-            t.check("unit_walks_to_goal", !u.goal && sameArea(u.area, area) && u.x === 3 && u.y === row,
-                `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal ${u.goal ? "still set" : "reached"}`);
+            t.check("unit_walks_to_goal", !u.goal && sameArea(u.area, area) && u.x === goalX && u.y === row,
+                `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal (${goalX},${row}) ${u.goal ? "still set" : "reached"}`);
             t.check("four_way_steps", diagonal === 0, `${diagonal} diagonal step(s) on screen (FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"})`);
             await t.waitFrames(10);
             t.screenshot("unit_in_view");
