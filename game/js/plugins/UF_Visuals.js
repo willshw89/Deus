@@ -64,7 +64,7 @@
             this.maxDuration = duration;
             this.anchor.x = 0.5;
             this.anchor.y = 1.0;
-            this.z = 9; // Render above characters
+            this.z = 900000; // Above characters and objects (their z is the foot pixel row, up to ~12000) and below the fog (1e6). Was 9, which hid every bark (found 2026-09-18).
             this.bitmap = new Bitmap(260, 48);
             this.drawBark(text);
             this.updatePosition();

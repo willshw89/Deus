@@ -684,13 +684,20 @@
             ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
         }
         const h = g.dx > 0 ? 6 : 4, v = g.dy > 0 ? 2 : 8;
+        let tried = false;
         if (g.dx !== 0 && g.dy !== 0 && tx !== ev.x && ty !== ev.y && ev.canPassDiagonally(ev.x, ev.y, h, v)) {
             ev.moveDiagonally(h, v);
+            tried = true;
         } else {
             const d = ev.findDirectionTo(tx, ty);
-            if (d > 0) ev.moveStraight(d);
+            if (d > 0) {
+                ev.moveStraight(d);
+                tried = true;
+            }
         }
-        if (ev.isMovementSucceeded()) {
+        // No direction at all (fully enclosed) counts as a failed step too, so the goal is dropped and
+        // world:unitBlocked fires instead of the unit waiting forever (found by the jobs suite, 2026-09-18).
+        if (tried && ev.isMovementSucceeded()) {
             ev.setDirection(facing(g.dx, g.dy));
             u.stuckFrames = 0;
         } else if (++u.stuckFrames > STUCK_LIMIT) {
