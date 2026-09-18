@@ -87,6 +87,42 @@
     }
   ],
   "maxObjectsPerArea": 800,
+  "factions": {
+    "about": "Factions are rolled from the world seed on every New Game (UF_Factions). Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied).",
+    "count": [4, 7],
+    "playerFaction": { "id": "player", "name": "Your colony", "species": "human" },
+    "species": [
+      { "id": "human", "name": "Humans", "home": "surface", "weight": 3, "groups": ["League", "Freehold", "Company", "Kingdom"] },
+      { "id": "elf", "name": "Elves", "home": "surface", "weight": 2, "groups": ["Circle", "Grove", "Court"] },
+      { "id": "dwarf", "name": "Dwarves", "home": "underground", "weight": 2, "groups": ["Hold", "Deep", "Clan"] },
+      { "id": "goblin", "name": "Goblins", "home": "underground", "weight": 2, "groups": ["Warren", "Pack", "Rabble"] },
+      { "id": "orc", "name": "Orcs", "home": "surface", "weight": 2, "groups": ["Horde", "Band", "Warclan"] },
+      { "id": "gnome", "name": "Gnomes", "home": "underground", "weight": 1, "groups": ["Guild", "Burrow", "Workshop"] },
+      { "id": "automaton", "name": "Automata", "home": "underground", "weight": 1, "groups": ["Collective", "Array", "Foundry"], "about": "science-fiction element (VISION V8)" }
+    ],
+    "speciesAffinity": {
+      "human|elf": 10, "human|dwarf": 10, "human|gnome": 10, "human|goblin": -25, "human|orc": -25,
+      "elf|dwarf": -10, "elf|orc": -35, "elf|goblin": -30,
+      "dwarf|goblin": -40, "dwarf|orc": -20, "dwarf|gnome": 20,
+      "goblin|orc": 15, "gnome|goblin": -25, "automaton|goblin": -15
+    },
+    "ethos": [
+      { "id": "traders", "name": "Traders", "toAll": 10, "toSame": 5 },
+      { "id": "warlike", "name": "Warlike", "toAll": -20, "toSame": -10 },
+      { "id": "reclusive", "name": "Reclusive", "toAll": -8, "toSame": 0 },
+      { "id": "expansionist", "name": "Expansionist", "toAll": -5, "toSame": -20 },
+      { "id": "pious", "name": "Pious", "toAll": 0, "toSame": 15 },
+      { "id": "scholarly", "name": "Scholarly", "toAll": 5, "toSame": 10 },
+      { "id": "nomadic", "name": "Nomadic", "toAll": 0, "toSame": 5 },
+      { "id": "industrious", "name": "Industrious", "toAll": 3, "toSame": 5 }
+    ],
+    "sameSpecies": 10,
+    "randomSpread": 30,
+    "names": {
+      "start": ["ar", "bel", "cor", "dun", "eth", "fal", "gor", "hal", "ir", "jas", "kel", "lor", "mar", "nor", "ost", "pel", "quin", "ras", "sol", "tor", "ul", "vas", "wen", "yor", "zan"],
+      "end": ["a", "en", "is", "or", "um", "eth", "ar", "ic", "ok", "wyn", "ath", "esh"]
+    }
+  },
   "underground": {
     "about": "The layer(s) below the surface. Same 256x256 cells as the area above; cave mouths link cell (x, y) on the surface to (x, y) below. Tiles are RMMZ Dungeon-tileset stand-ins until ASSET_REQUESTS AR-040..AR-043.",
     "tilesetId": 4,
