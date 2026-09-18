@@ -33,11 +33,6 @@
     const edgePanSpeed = parseInt(params["EdgePanSpeed"] || 6, 10);
     let activeColonyWindow = null;
 
-    // Ensure UF_Factions is loaded
-    if (!window.$factionManager && typeof PluginManager !== "undefined") {
-        PluginManager.loadScript("UF_Factions.js");
-    }
-
     //-----------------------------------------------------------------------------
     // Colonist Data Model & Verbatim Dwarf Fortress Agent AI
     //-----------------------------------------------------------------------------

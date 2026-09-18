@@ -136,6 +136,12 @@
                 anchorY = start.y * size + off.y + (minY + maxY) / 2;
             }
         }
+        if (anchorX === null && cat.start) {
+            // No glade map: run the river just east of the start clearing.
+            const mid = Math.floor(size / 2);
+            anchorX = start.x * size + mid + (cat.start.clearRadius || 0) + (r.offsetFromGlade || 0) + (r.halfWidth || 0);
+            anchorY = start.y * size + mid;
+        }
         if (anchorX === null) {
             anchorX = start.x * size + size / 2;
             anchorY = start.y * size + size / 2;
@@ -190,8 +196,27 @@
             }
         }
 
-        // 3. Objects, in catalog order; one per cell
+        // 3. The start (VISION V4): a clearing in the middle of the start area with the fruit tree and the colonists.
+        //    Placed first, so its events get IDs 1, 2, 3... in catalog order (UF_ColonyOverseer uses Adam = 1, Eve = 2).
         const occupied = new Uint8Array(size * size);
+        const start = ctx.isStart && !ctx.templateRect ? cat.start : null;
+        const clearRadius = start ? (start.clearRadius || 0) : 0;
+        if (start) {
+            if (start.note) ctx.map.note = start.note;
+            if (start.displayName) ctx.map.displayName = start.displayName;
+            for (const e of start.events || []) {
+                const x = ctx.center.x + (e.dx || 0), y = ctx.center.y + (e.dy || 0);
+                ctx.addEvent({
+                    name: e.name, x, y, note: e.note || "",
+                    image: { characterName: e.image.characterName, characterIndex: e.image.characterIndex || 0, direction: e.image.direction || 2, pattern: 1 },
+                    priorityType: 1, through: false, directionFix: !!e.directionFix, walkAnime: e.walkAnime !== false
+                });
+                occupied[y * size + x] = 1;
+            }
+        }
+        const inClearing = (x, y) => clearRadius > 0 && (x - ctx.center.x) ** 2 + (y - ctx.center.y) ** 2 <= clearRadius * clearRadius;
+
+        // 4. Objects, in catalog order; one per cell
         const placed = [];
         (cat.objects || []).forEach((o, oi) => {
             if (!o || !o.image || !(o.density > 0)) return;
@@ -204,7 +229,7 @@
                 const gy = gy0 + y;
                 const riverX = river ? Math.round(river.center(gy)) : null;
                 for (let x = 0; x < size; x++) {
-                    if (occupied[y * size + x] || ctx.isTemplateCell(x, y)) continue;
+                    if (occupied[y * size + x] || ctx.isTemplateCell(x, y) || (ctx.isStart && inClearing(x, y))) continue;
                     const gx = gx0 + x;
                     if (river && Math.abs(gx - riverX) <= river.halfWidth + avoid) continue;
                     const patch = (1 - clump) + clump * smoothstep(0.5, 0.8, valueNoise(state.seed, salt, gx, gy, scale));
@@ -291,10 +316,24 @@
             t.check("river_continuous_between_areas", lastRow.length > 0 && lastRow.some(x => firstRow.includes(x)),
                 `bottom row of area (${a.x},${a.y}): ${span(lastRow)}; top row of area (${a.x},${a.y + 1}): ${span(firstRow)}`);
 
-            // The river runs beside the glade so the colonists can drink.
+            // The start: fruit tree, Adam and Eve in the middle of the start area, with the right event IDs.
+            const mid = Math.floor(size / 2);
+            if (cat.start && !W.template()) {
+                const expected = (cat.start.events || []).map((e, i) => ({ id: i + 1, name: e.name, x: mid + (e.dx || 0), y: mid + (e.dy || 0) }));
+                const wrong = expected.filter(e => !here.events[e.id] || here.events[e.id].name !== e.name || here.events[e.id].x !== e.x || here.events[e.id].y !== e.y);
+                t.check("start_in_middle", wrong.length === 0 && here.note.includes("<glade>"),
+                    wrong.length ? `not as expected: ${wrong.map(e => `${e.name} (event ${e.id} at ${e.x},${e.y})`).join(", ")}` : expected.map(e => `${e.name} = event ${e.id} at (${e.x},${e.y})`).join("; "));
+            }
+
+            // The river runs beside the start so the colonists can drink.
             let gRight = -1, gTop = Infinity, gBottom = -1, gLeft = Infinity;
-            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (W.templatePaints(x, y)) {
-                gRight = Math.max(gRight, x); gLeft = Math.min(gLeft, x); gTop = Math.min(gTop, y); gBottom = Math.max(gBottom, y);
+            if (W.template()) {
+                for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (W.templatePaints(x, y)) {
+                    gRight = Math.max(gRight, x); gLeft = Math.min(gLeft, x); gTop = Math.min(gTop, y); gBottom = Math.max(gBottom, y);
+                }
+            } else if (cat.start) {
+                const r = cat.start.clearRadius || 0;
+                gLeft = mid - r; gRight = mid + r; gTop = mid - r; gBottom = mid + r;
             }
             const midRow = Math.round((gTop + gBottom) / 2);
             const cols = waterCols(here, midRow);
@@ -312,8 +351,9 @@
             const absent = cat.objects.filter(o => o.density > 0 && !counts[o.id]).map(o => o.id);
             t.check("objects_placed", absent.length === 0 && objects.length > 0 && objects.length <= (cat.maxObjectsPerArea || 800),
                 `${objects.length} objects in the start area: ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(", ")}${absent.length ? `; none placed for: ${absent.join(", ")}` : ""}`);
-            const onGlade = objects.filter(e => W.templatePaints(e.x, e.y));
-            t.check("glade_clear", onGlade.length === 0, onGlade.length ? `${onGlade.length} generated objects on glade cells` : "no generated objects on the glade");
+            const clearR = cat.start && !W.template() ? (cat.start.clearRadius || 0) : 0;
+            const onGlade = objects.filter(e => W.templatePaints(e.x, e.y) || (clearR > 0 && (e.x - mid) ** 2 + (e.y - mid) ** 2 <= clearR * clearR));
+            t.check("glade_clear", onGlade.length === 0, onGlade.length ? `${onGlade.length} generated objects inside the start clearing` : `no generated objects inside the start clearing`);
             const inWater = objects.filter(e => isKind(here.data[e.y * size + e.x], waterBase));
             t.check("no_objects_in_water", inWater.length === 0, inWater.length ? `${inWater.length} objects placed in the river` : "none in the river");
             const signature = map => map.events.filter(e => e && /<ufObject:/.test(e.note)).map(e => `${e.x},${e.y},${e.note}`).join("|");

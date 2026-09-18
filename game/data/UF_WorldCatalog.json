@@ -5,6 +5,16 @@
     "grass": { "tileId": 2863, "autotile": false, "about": "RMMZ Outside A2 grass (stand-in until AR-001)" },
     "water": { "tileId": 2048, "autotile": true, "about": "RMMZ Outside A1 water; edges are computed (stand-in until AR-001)" }
   },
+  "start": {
+    "about": "The fixed start (VISION V4): a clearing in the middle of the start area with the fruit tree, Adam and Eve. Events get IDs in this order; UF_ColonyOverseer needs Adam = 1 and Eve = 2.",
+    "note": "<glade>",
+    "clearRadius": 8,
+    "events": [
+      { "name": "Adam", "dx": -2, "dy": 1, "image": { "characterName": "$Adam", "direction": 6 }, "note": "<colonist: Adam> <gender: Male>" },
+      { "name": "Eve", "dx": 2, "dy": 1, "image": { "characterName": "$Eve", "direction": 4 }, "note": "<colonist: Eve> <gender: Female>" },
+      { "name": "Ancient Fruit Tree", "dx": 0, "dy": 0, "image": { "characterName": "!$FruitTree", "direction": 2 }, "note": "<tree> <fruit> <canopy> <harvestable>", "directionFix": true, "walkAnime": false }
+    ]
+  },
   "river": {
     "enabled": true,
     "halfWidth": 1,

@@ -22,6 +22,9 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
 | V14 | The world is made of **areas at RMMZ's maximum size (256×256 cells each)**. World characters **and** the player's view move between areas. Characters keep living and traveling when their area isn't on screen. The glade sits in the middle of the starting area. |
 | V15 | The camera zooms out to show more of the world (mouse wheel, − / +). Zoom steps keep pixel art exact. |
+| V16 | **Emergence and replayability are the core goal.** Every new game is a different world, and stories come out of the simulation rather than scripts, so people want to play again and again. |
+| V17 | **Colonists act on their own.** Adam and Eve pursue goals without player input: survive first, then gather, build shelter, and grow into a society. Player orders change priorities; they're never required. |
+| V18 | **Factions are generated with the world**, with relations from allied to hostile between them. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -52,6 +55,8 @@ Don't guess these. If a task depends on one, ask.
 - **Q5 Facings:** do sprites have 4 facings (like U7) or 8? This roughly doubles the art. See `ART_STANDARD.md` §4.
 - **Q6 Scale:** pixel scale and screen size. See `ART_STANDARD.md` §2.
 - **Q7 World size in areas:** how many areas across and down? The default is 6×6, which at the proposed scale is about Ultima VII's world size (U7 was 3072×3072 of its own tiles = 1536×1536 of our cells). It's a plugin parameter, so it's easy to change.
+- **Q9 One world system:** there are two competing implementations. (a) Claude Code's seeded world of 256×256 areas, generated fresh every game (`UF_World` + `UF_WorldGen`). (b) Gemini's single 256×256 world baked into Map002 by `tools/setup_256_middle_start.js`, identical every game, with New Game forced onto it (`UF_ColonyOverseer.js`). V4 and V16 point to (a). The user decides.
+- **Q10 Who builds colonist AI and factions?** Under the current split it's Claude Code, but Gemini has started `UF_Factions.js`.
 - **Q8 Area edges:** crossing an edge currently switches the screen to the next area (DF-style). A seamless, U7-style continuous scroll is possible later, but it's harder in RMMZ. Keep switching for now?
 
 ## Decision log
@@ -62,3 +67,4 @@ Append only, newest at the bottom.
 - 2026-09-18: The user set V14: areas at maximum size (256×256), and both world characters and the player move between areas.
 - 2026-09-18: Division of labor revised by the user. Claude Code owns the engine and features, plus asset specs in `docs/ASSET_REQUESTS.md`. Gemini owns art only.
 - 2026-09-18: The user asked for the camera to zoom out to show more of the world. Added V15.
+- 2026-09-18: The user set the core goal (V16), autonomous colonists building a society (V17), and generated factions with relations (V18).

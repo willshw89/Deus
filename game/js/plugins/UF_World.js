@@ -47,8 +47,8 @@
  * @param StartTemplateMapId
  * @text Start template map ID
  * @type number
- * @default 2
- * @desc Editor map stamped into the middle of the start area (the glade). 0 = none.
+ * @default 0
+ * @desc Optional editor map overlaid on the middle of the start area. 0 = none: the start (fruit tree, Adam, Eve) comes from the world catalog.
  *
  * @param StartInWorld
  * @type boolean
@@ -94,7 +94,7 @@
         mapIdBase: num("MapIdBase", 1000),
         tilesetId: num("TilesetId", 2),
         groundTileId: num("GroundTileId", 2863),
-        templateMapId: num("StartTemplateMapId", 2),
+        templateMapId: num("StartTemplateMapId", 0),
         startInWorld: (P.StartInWorld || "true") === "true",
         seed: num("Seed", 0),
         unitStepFrames: Math.max(1, num("UnitStepFrames", 16))
@@ -337,7 +337,9 @@
 
         const ctx = {
             areaX: ax, areaY: ay, width: size, height: size, seed: st.seed,
-            rng: this.rngFor(ax, ay, 0), isStart: !!tpl, templateRect, index,
+            rng: this.rngFor(ax, ay, 0), isStart: this.isStartArea(ax, ay), templateRect, index,
+            map, // the $dataMap being built: generators may set map.note / map.displayName
+            center: { x: Math.floor(size / 2), y: Math.floor(size / 2) },
             /** True where the glade map paints this cell (start area only). Generators should leave these alone. */
             isTemplateCell: (x, y) => !!tpl && World.templatePaints(x, y),
             setTile(x, y, layer, tileId) {
