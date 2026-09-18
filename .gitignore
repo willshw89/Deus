@@ -44,3 +44,5 @@
 # Rebuilt from U7 SHAPES.VGA by Gemini on 2026-09-18 (AUDIT_LOG A1-1). Remove these lines once replaced with original art.
 /game/img/characters/$Adam.png
 /game/img/characters/$Eve.png
+# U7-derived stand-in committed by mistake in 1a6fff5 (AUDIT_LOG A3-4); untracked 2026-09-18. Purge from history before any public push.
+/game/img/characters/!$FruitTree.png

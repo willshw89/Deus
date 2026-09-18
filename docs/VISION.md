@@ -21,6 +21,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. Ultima VII art may be used as examples and temporary stand-ins during development (`U7_` prefix, replaced before release). |
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
 | V14 | The world is made of **areas at RMMZ's maximum size (256×256 cells each)**. World characters **and** the player's view move between areas. Characters keep living and traveling when their area isn't on screen. The glade sits in the middle of the starting area. |
+| V15 | The camera zooms out to show more of the world (mouse wheel, − / +). Zoom steps keep pixel art exact. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -59,3 +60,5 @@ Append only, newest at the bottom.
 - 2026-09-18: The user approved the guardrail docs, git setup, the Node install, the K1 fix, and the start of Slice 0. Roles set: Gemini builds features and art; Claude Code owns the guardrails, audits Gemini, fixes mistakes, and builds documented U7/DF mechanics when audits are clean.
 - 2026-09-18: The user allowed Ultima VII assets as examples and stand-ins (V9 amended). Added V13 (a cursor is how you look around) and V14 (a larger world).
 - 2026-09-18: The user set V14: areas at maximum size (256×256), and both world characters and the player move between areas.
+- 2026-09-18: Division of labor revised by the user. Claude Code owns the engine and features, plus asset specs in `docs/ASSET_REQUESTS.md`. Gemini owns art only.
+- 2026-09-18: The user asked for the camera to zoom out to show more of the world. Added V15.

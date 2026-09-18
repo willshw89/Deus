@@ -34,7 +34,8 @@ Deliverables:
    - Build hint (no engine change): the invisible `$gamePlayer` *is* the cursor. Give it `through`, move it in 8 directions, and draw the outline at its cell. RMMZ already scrolls the camera to follow the player.
 8. **A world of areas** (set by the user 2026-09-18, VISION V14). Split between the two agents:
    - **8a, core (Claude Code): `UF_World`.** The world is a grid of 256×256 areas, generated at runtime from a seed plus saved changes, with no map files. It keeps a world-level unit registry: units in the area on screen are drawn as events, and units elsewhere keep moving in a simplified simulation. Units and the view cross area edges. Save/load included. API: `docs/systems/UF_World.md`.
-   - **8b, content (Gemini).** A seeded placeholder generator registered through `UF.World.registerGenerator` (grass variety, tree clusters, rocks, the river continuing across areas) until real world generation in Slice 6. Also convert Adam and Eve from glade events into `UF.World` units so they survive leaving the start area.
+   - **8b, content (Claude Code since the 2026-09-18 role change; Gemini started a `df_wilderness_generator`).** A seeded placeholder generator registered through `UF.World.registerGenerator` (grass variety, tree clusters, rocks, the river continuing across areas) until real world generation in Slice 6. Also convert Adam and Eve from glade events into `UF.World` units so they survive leaving the start area.
+9. **Camera zoom** (added by the user 2026-09-18, VISION V15). `UF_Camera`: zoom levels 1, ⅔, ⅓ (3×, 2×, 1× native pixels, all exact) with the mouse wheel and the − / + keys. Starts at ⅔. The view stays centered while zooming, and mouse clicks map to the right cell at every level. Built, 10 checks pass (`docs/systems/UF_Camera.md`).
 
 Done when:
 - [ ] Everything with height leans the same way at the same angle (screenshot + user)
@@ -53,6 +54,7 @@ Done when:
 - [ ] A unit on screen walks out of the area, disappears from the screen, and keeps existing in the neighbor area (check `world.unit_leaves_view`)
 - [ ] The view crosses an area edge and lands on the matching cell of the neighbor area (check `world.view_crosses_edge`)
 - [ ] A tile changed in an area is still changed after leaving and coming back, and after save/load (checks `world.diff_persists`, `world.save_roundtrip`)
+- [ ] Zooming out shows more cells at each level, the view stays centered, and a click maps to the cell under the pointer at every level (checks `camera.*`, plus the user)
 - [ ] Moving the cursor by keyboard and by mouse both feel responsive (user)
 
 **Review log:**

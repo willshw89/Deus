@@ -23,7 +23,9 @@
  * API and rules: docs/systems/UF_Test.md
  *
  * Replaced core methods (test mode only): Scene_Boot.startNormalGame,
- * so the run skips the title screen and starts a new game.
+ * so the run skips the title screen and starts a new game; and
+ * SceneManager.isGameActive, so the game keeps running when its window
+ * loses focus (RMMZ normally pauses then).
  */
 
 (() => {
@@ -156,6 +158,12 @@
         setTimeout(() => process.exit(code), 200);
     }
 
+    // RMMZ pauses the whole game while its window doesn't have focus. Test windows lose focus whenever
+    // anyone uses the machine, which froze scenes mid-check. In test mode, always keep running.
+    SceneManager.isGameActive = function() {
+        return true;
+    };
+
     // Skip the title screen: go straight into a new game.
     Scene_Boot.prototype.startNormalGame = function() {
         this.checkPlayerLocation();
@@ -222,22 +230,44 @@
         const playerShown = ps && ps.visible && ps.opacity > 0 && !$gamePlayer.isTransparent() && visiblePixels(ps) > 0;
         t.check("player_not_visible", !playerShown, playerShown ? `player drawn at (${ps.x},${ps.y}) with "${$gamePlayer.characterName()}"` : "");
 
-        // Every event that has an image must actually be drawn, on screen, with pixels.
+        // Every event with an image whose cell is in view must actually be drawn there, with pixels.
+        // One check per event name; events elsewhere in a big area are counted, not checked.
+        const inView = ev => {
+            const x = $gameMap.adjustX(ev._realX), y = $gameMap.adjustY(ev._realY);
+            return x >= 0 && y >= 0 && x < $gameMap.screenTileX() && y < $gameMap.screenTileY();
+        };
+        const groups = new Map();
         for (const ev of $gameMap.events()) {
             if (!ev.characterName()) continue;
-            const label = `event_drawn.${ev.event().name.replace(/\s+/g, "_")}`;
+            const name = ev.event().name.replace(/\s+/g, "_");
+            const group = groups.get(name) || { onScreen: 0, elsewhere: 0, problems: [], at: null };
+            groups.set(name, group);
+            if (!inView(ev)) {
+                group.elsewhere++;
+                continue;
+            }
+            group.onScreen++;
             const sp = spriteOf(ev);
             const problems = [];
             if (!sp) problems.push("no sprite");
             else {
+                const g = sp.getGlobalPosition(); // real screen pixels (the map may be zoomed)
+                group.at = group.at || `(${Math.round(g.x)},${Math.round(g.y)})`;
                 if (!sp.bitmap || sp.bitmap.isError()) problems.push(`image "${ev.characterName()}" failed to load`);
                 if (!sp.visible) problems.push("sprite.visible=false");
                 if (sp.opacity === 0) problems.push("opacity 0");
                 if (ev.isTransparent()) problems.push("event transparent");
-                if (sp.x < 0 || sp.x > Graphics.width || sp.y < 0 || sp.y > Graphics.height + 200) problems.push(`off screen at (${Math.round(sp.x)},${Math.round(sp.y)})`);
+                if (g.x < 0 || g.x > Graphics.width || g.y < 0 || g.y > Graphics.height + 200) problems.push(`drawn off screen at (${Math.round(g.x)},${Math.round(g.y)})`);
                 if (visiblePixels(sp) === 0) problems.push("frame has no opaque pixels");
             }
-            t.check(label, problems.length === 0, problems.length ? problems.join("; ") : `at screen (${Math.round(sp.x)},${Math.round(sp.y)})`);
+            if (problems.length) group.problems.push(`event ${ev.eventId()} at (${ev.x},${ev.y}): ${problems.join("; ")}`);
+        }
+        for (const [name, group] of groups) {
+            if (group.onScreen === 0) continue;
+            const elsewhere = group.elsewhere ? `; ${group.elsewhere} more elsewhere in the area` : "";
+            t.check(`event_drawn.${name}`, group.problems.length === 0,
+                group.problems.length ? `${group.problems.length} of ${group.onScreen} in view not drawn; first: ${group.problems[0]}`
+                    : `${group.onScreen} in view drawn${group.onScreen === 1 ? ` at screen ${group.at}` : ""}${elsewhere}`);
         }
 
         // ENGINE_RULES §2: simulation state must be in the save file.

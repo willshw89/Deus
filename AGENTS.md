@@ -12,6 +12,7 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 6. `docs/ENGINE_RULES.md`: before touching code or data
 7. `docs/ART_STANDARD.md`: before touching any image
 8. `docs/systems/`: the documented API of any system you build on
+9. `docs/ASSET_REQUESTS.md`: the art the engine needs, with specs (Gemini's work queue)
 
 ## The ten rules
 1. **One slice at a time.** Work only on the slice marked `IN PROGRESS` in `docs/SLICES.md`. No bonus features, nothing extra "while I was in there". Ideas go to `docs/STATUS.md` → Backlog.
@@ -77,21 +78,28 @@ If "Not done / known problems" is empty, reread your evidence. It's almost never
 Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, "strange mood", "fey mood", …). It also never uses D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki, …). Generic fantasy is fine: elves, dwarves, goblins, trolls, dragons. If any text comes from the D&D SRD 5.1, it's CC-BY-4.0 and needs attribution in the game credits.
 
 ## Two agents, one project
-Roles (set by the user 2026-09-18):
-- **Gemini** builds slice features and generates art, following these docs.
-- **Claude Code** owns the guardrails (`AGENTS.md`, `docs/`), **audits Gemini's work**, and fixes mistakes. When an audit comes back clean, Claude Code builds U7/DF mechanics as documented systems (`docs/systems/`) that Gemini can build on without reading the code.
+Roles (set by the user 2026-09-18, revised the same day; this replaces the earlier split):
+- **Claude Code: engine and features.** All code (`game/js/plugins/`, `tools/`, tests), the RMMZ data files, the guardrail docs, and **`docs/ASSET_REQUESTS.md`**: every piece of art the engine needs, with an exact spec. Claude Code checks each delivered asset against its spec before integrating it.
+- **Gemini: art.** Makes the assets in `docs/ASSET_REQUESTS.md` to spec, following `docs/ART_STANDARD.md` and `docs/GUIDE_25D.md`, including U7 stand-ins. **Gemini doesn't edit code, tools, or `game/data/`.** If an asset needs an engine change, Gemini writes it under "Notes for Claude Code" in `docs/ASSET_REQUESTS.md`.
+
+Who touches what:
+| Path | Owner |
+|---|---|
+| `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Claude Code |
+| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` status column and Notes | Gemini |
+| `docs/ASSET_REQUESTS.md` requests and specs, other `docs/` | Claude Code (either agent may add Notes) |
 
 Rules:
 - **Claim before you start.** Add a line under "In progress" in `docs/STATUS.md`: agent, task, files/folders you'll touch.
-- Don't edit files another agent has claimed. If you have to, ask the user first.
-- **Commit at the end of every task** (the project is a git repo). Start the message with your agent name, e.g. `[gemini] Slice 1: glade map grayboxes`. One task per commit, so an audit can diff exactly what changed.
+- Don't edit files another agent owns or has claimed. If you have to, ask the user first.
+- **Commit at the end of every task** (the project is a git repo). Start the message with your agent name, e.g. `[gemini] AR-021 wild tree stand-ins`. One task per commit, so a review can diff exactly what changed.
+- **Stage only your own files:** `git add <paths>`. Never `git add -A`, `git add .`, or `git commit -a`, which sweep the other agent's unfinished work into your commit.
 - Remove your claim when you report.
 
-## Audits
-- Claude Code audits every Gemini commit and report. Results go in `docs/AUDIT_LOG.md`: numbered findings graded **BLOCKER / MAJOR / MINOR**, and a verdict of **PASS** or **FAIL**.
-- If an audit FAILs, the work isn't shown to the user as done. Gemini fixes the findings, then it's audited again.
-- Findings cite evidence: a file and line, a screenshot the auditor opened, or a command's output. "Looks wrong" isn't a finding.
-- Before starting, read the latest audit entry. Its open findings come before new work.
+## Reviews and audits
+- Claude Code checks every asset delivery against its request and ART_STANDARD §8, and records the result in the request's status (`CHECKED`, or back to `IN PROGRESS` with the reason). Bigger problems go in `docs/AUDIT_LOG.md`: numbered findings graded **BLOCKER / MAJOR / MINOR**.
+- Findings cite evidence: a file and line, a screenshot the reviewer opened, or a command's output. "Looks wrong" isn't a finding.
+- Before starting, read the latest audit entry. Open findings in your area come before new work.
 
 ## RMMZ editor safety
 The RMMZ editor keeps the database and plugin list in memory and overwrites the files when it saves.
