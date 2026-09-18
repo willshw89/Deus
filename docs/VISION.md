@@ -18,7 +18,9 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V6 | DF's systems are all in: randomness and world generation, gathering, construction, needs, combat. Implemented originally, not copied. |
 | V7 | Many races. Not dwarf-centric. |
 | V8 | Fantasy plus science-fiction elements are allowed. |
-| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. |
+| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. Ultima VII art may be used as examples and temporary stand-ins during development (`U7_` prefix, replaced before release). |
+| V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
+| V14 | The world is larger than one screen-sized glade. The glade sits inside a much bigger map. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -28,7 +30,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 - A fixed protagonist (the "Delver")
 - The pre-built dwarf fortress scenario (Deepdelve, the mountainhall, the King's hall, the tavern, etc.)
 - A game centered on hand-written named NPCs with hand-written dialogue trees
-- Ripped Ultima VII sprites used as game art
+- Ripped Ultima VII sprites as **final** game art. As labeled stand-ins they're allowed (V9).
 - Isometric diamond grids (that's Ultima VIII, not VII)
 - Upright JRPG-style character sprites (they don't match the U7 projection; see `ART_STANDARD.md` F4)
 
@@ -52,3 +54,5 @@ Don't guess these. If a task depends on one, ask.
 ## Decision log
 Append only, newest at the bottom.
 - 2026-09-18: V1–V12 recorded from the user's instructions during the first planning session. The rejected directions were rejected by the user in the same session.
+- 2026-09-18: The user approved the guardrail docs, git setup, the Node install, the K1 fix, and the start of Slice 0. Roles set: Gemini builds features and art; Claude Code owns the guardrails, audits Gemini, fixes mistakes, and builds documented U7/DF mechanics when audits are clean.
+- 2026-09-18: The user allowed Ultima VII assets as examples and stand-ins (V9 amended). Added V13 (a cursor is how you look around) and V14 (a larger world).

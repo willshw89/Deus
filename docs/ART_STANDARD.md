@@ -2,6 +2,9 @@
 
 This applies to every image in the game, placeholders included. An image that breaks a rule here doesn't go into `game/img/`, however good it looks.
 
+**How-to guide:** `docs/GUIDE_25D.md` explains the projection, how to decode and use U7 stand-ins correctly, and how to build it in RMMZ.
+**Stand-ins:** Ultima VII art may stand in for final art during development (AGENTS rule 8). Stand-ins must still follow every geometry and scale rule here.
+
 Tags: **[LOCKED]** approved by the user · **[PROPOSED]** waiting on the user · **[MEASURE]** must be checked against the real Ultima VII before anyone relies on it. When a fact is measured, replace the tag with `[MEASURED 2026-xx-xx: how]`.
 
 ## 1. What Ultima VII's view actually is

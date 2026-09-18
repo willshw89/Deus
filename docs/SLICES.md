@@ -15,7 +15,7 @@ Slices 0 and 1 have been discussed with the user. **Slices 2 and later are a dra
 ---
 
 ## Slice 0: Foundations and the 2.5D standard
-**Status:** NOT STARTED (waiting for the user's go-ahead)
+**Status:** IN PROGRESS (user go-ahead 2026-09-18)
 **Goal:** lock the look and an honest test process before building gameplay on top of them.
 
 Deliverables:
@@ -25,6 +25,14 @@ Deliverables:
 4. User decisions Q5 (facings) and Q6 (scale), recorded in `VISION.md`.
 5. The graybox tool (`ART_STANDARD.md` §6).
 6. Test map "Projection Yard": flat grass; graybox boxes 1, 2, 4, and 8 lifts tall; a 5-cell wall; a 2×2 tree; two human grayboxes walking around.
+7. **The look cursor** (added by the user 2026-09-18, VISION V13). The cursor is how the player looks around, like DF's look mode:
+   - A cell cursor drawn on the ground as an outline of the cell (bright yellow for now), always visible.
+   - It moves with the arrow keys and numpad in **8 directions**, repeating while a key is held. It also follows the mouse (hover moves it to the cell under the pointer); holding the pointer at a screen edge keeps it moving that way.
+   - **The camera follows the cursor.** No separate free-pan camera; the old WASD/edge-pan code is removed or routed through the cursor.
+   - It moves freely over everything (walls, water, units) and stops at the map edges.
+   - A small **look panel** names what's under it: terrain, plus any object or unit (e.g. "Grass. Fruit tree." or "Grass. Adam: idle, hungry").
+   - Build hint (no engine change): the invisible `$gamePlayer` *is* the cursor. Give it `through`, move it in 8 directions, and draw the outline at its cell. RMMZ already scrolls the camera to follow the player.
+8. **A larger world** (added by the user 2026-09-18, VISION V14). The starting map is at least **128×128** (RMMZ allows up to 256×256; the user picks the final size). The glade sits in the middle, and the rest is filled by a simple **seeded** placeholder generator (grass, tree clusters, rocks, the river continuing) until real world generation in Slice 6.
 
 Done when:
 - [ ] Everything with height leans the same way at the same angle (screenshot + user)
@@ -33,6 +41,13 @@ Done when:
 - [ ] The figure's facing mark matches its movement direction (check + user)
 - [ ] The test output lists PASS/FAIL per check, and the report shows at least one check failing when it should
 - [ ] Playtest from the RMMZ editor runs for 5+ minutes without closing or erroring (user)
+- [ ] Cursor visible on its cell at start (check `cursor.visible`)
+- [ ] Cursor moves one cell for each of the 8 directions (check `cursor.moves_8_dirs`, using simulated input)
+- [ ] After moving the cursor 40 cells east, it's still on screen and the camera has scrolled (check `cursor.camera_follows`)
+- [ ] The cursor can reach all four map corners and passes over the tree and the river (check `cursor.reaches_corners`)
+- [ ] With the cursor on the fruit tree, the look panel names it (check `cursor.look_names_tree`)
+- [ ] Map is at least 128×128; the same seed gives the same map twice (checks `world.size`, `world.seeded`)
+- [ ] Moving the cursor by keyboard and by mouse both feel responsive (user)
 
 **Review log:**
 

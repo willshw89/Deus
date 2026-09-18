@@ -4,7 +4,7 @@
 - RPG Maker MZ **v1.10.0** is at `C:\Program Files (x86)\Steam\steamapps\common\RPG Maker MZ\` (`RPGMZ.exe`, `nwjs-win\nw.exe`).
 - Project file: `game/game.rmmzproject`.
 - Shells: Windows PowerShell 5.1 and Git Bash.
-- Git is installed, but the project isn't a repo yet.
+- Git: the project root is a repo (created 2026-09-18) with a whitelist `.gitignore`.
 - Node.js is **not installed.** Python is **not installed** (`python` is only the Microsoft Store stub).
 - The folder is inside **OneDrive**. Fast file changes can produce OneDrive "-conflict" copies, so pause sync during heavy work.
 - The project root is also the Dwarf Fortress install. The two U7 installs are subfolders.
@@ -17,6 +17,15 @@
 - All simulation state saves and loads through RMMZ's save system. Every slice's checks include save, load, and confirming the state is identical.
 - Node APIs (`require('fs')` and the like) are allowed only in test and debug code, behind `Utils.isNwjs()`.
 - Any change to `game/index.html` or `game/package.json` gets a line in `docs/STATUS.md` explaining why.
+
+### System docs
+Every UF system has a doc at `docs/systems/<plugin name>.md` so the other agent can use it without reading the code. Update the doc in the same commit as the code. Sections:
+1. **Purpose**: one paragraph.
+2. **Public API**: every function, event, and data structure other code may use, with arguments and return values. Anything not listed here is internal and may change without notice.
+3. **Events** emitted and listened to (name, payload).
+4. **Save data**: what goes into the save file, and under which key.
+5. **Checks**: the names of its `UF.Test` checks and what each one proves.
+6. **Status**: what works (with evidence), what's missing, known bugs.
 
 ## 3. The RMMZ editor overwrites files
 The editor keeps the database and plugin list in memory and writes them out when it saves.
@@ -51,7 +60,7 @@ The current `run_autotest.bat` and the autotest block in `UF_Core.js` break thes
 - A performance number needs a method: average and worst frame time over at least 30 seconds, how many units were on screen, and on which machine.
 - The final test is always the user running Playtest in the RMMZ editor.
 
-## 7. Git (once it's set up)
-- `.gitignore` covers the U7 installs, the DF files at the root, `reference/`, and `test_output/`.
+## 7. Git
+- `.gitignore` is a whitelist. Only `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/`, `game/`, `tools/`, `art/`, and the three launcher `.bat` files are tracked. U7/DF-derived files inside `game/` are listed explicitly so they're never committed. When you add a new top-level folder that belongs to the project, add it to the whitelist.
 - Commit after each approved slice and tag it `slice-N-approved`.
 - Commit before risky changes, so a bad attempt can be thrown away cleanly.
