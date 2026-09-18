@@ -1,0 +1,24 @@
+{
+  "id": "cave_ladder",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    96
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 3,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "ladder": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 705 frame 0"
+}

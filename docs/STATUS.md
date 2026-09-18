@@ -67,6 +67,17 @@ Format: `- <file> | source | used for`
 - `game/img/characters/!$IronstoneDeposit.png` | SHAPES.VGA shape 341, 3×, collision-aligned anchor | Ironstone outcrop
 - `game/img/characters/!$BerryBush.png` | SHAPES.VGA shape 672, 3×, collision-aligned anchor | Berry bush
 - `game/img/characters/!$Campfire.png` | SHAPES.VGA shape 739, 3×, collision-aligned anchor | Campfire hearth
+- `game/img/characters/!$TreeStump.png`, `!$U7_TreeStump.png` | SHAPES.VGA shape 313, 3×, collision-aligned anchor | Felled tree stump (AR-021)
+- `game/img/characters/!$CaveMouth.png`, `!$U7_CaveMouth.png` | SHAPES.VGA shape 389, 3×, collision-aligned anchor | Subterranean cavern entrance (AR-042)
+- `game/img/characters/!$CaveLadder.png`, `!$U7_CaveLadder.png` | SHAPES.VGA shape 705, 3×, collision-aligned anchor | Cavern ascent ladder (AR-043)
+- `game/img/characters/!$IronOreVein.png`, `!$U7_IronOreVein.png` | SHAPES.VGA shape 916, 3×, collision-aligned anchor | Ore vein mineral cluster (AR-044)
+- `game/img/characters/$U7_Guard.png` | SHAPES.VGA shape 720, 3×, transposed E/W | Faction / city guard (AR-050)
+- `game/img/characters/$U7_Townsman.png`, `$People1.png` | SHAPES.VGA shape 265, 3×, transposed E/W | Townsman settler / arrival (AR-050)
+- `game/img/characters/$U7_Ranger.png` | SHAPES.VGA shape 460, 3×, transposed E/W | Woodland ranger (AR-050)
+- `game/img/system/Window.png`, `game/img/system/U7_Window.png` | Carved oak & aged parchment, gold trim | UI Window skin (AR-033)
+- `game/img/system/U7_Cursor.png` | 48x48 gold 2-frame pulse brackets | Look cursor (AR-030)
+- `game/img/system/U7_Select.png` | 48x48 cyan corner brackets | Unit selection marker (AR-031)
+- `game/img/tilesets/U7_Ground_A2.png`, `U7_Outside_A2.png`, `U7_Dungeon_A2.png` | SHAPES.VGA flat shapes 4 (grass), 23 (dirt), 5 (cave floor), 3× | A2 autotile ground sheet (AR-001 / AR-040)
 - `game/img/characters/$U7_*.png`, `actor_*.png`, `monster_*.png`, `test_shape*.png`, `game/img/system/u7_gumps/`, `u7_gump_*.png`, `gump_*.png`, `paperdoll_*.png`, `game/img/faces/face_*.png`, `U7_Faces.png`, `game/img/tilesets/U7_Fortress_B.png` | earlier extraction, sources not recorded | unused or unknown
 
 ## Environment

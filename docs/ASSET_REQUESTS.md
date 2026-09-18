@@ -50,23 +50,23 @@ Every object or character image comes with a JSON sidecar of the same name (`UF_
 
 | ID | Asset | Needed for | Priority | Status |
 |---|---|---|---|---|
-| AR-001 | Ground tiles: grass (2 variants), dirt, riverbed water with banks | Every area (Slice 0 world) | High | REQUESTED |
+| AR-001 | Ground tiles: grass (2 variants), dirt, riverbed water with banks | Every area (Slice 0 world) | High | DELIVERED (stand-in `U7_Ground_A2.png`, `U7_Outside_A2.png`, 8×4 autotile layout, shapes 4, 23, 5, 3× integer) |
 | AR-010 | Human, male (naked) | Adam; later all humans | High | DELIVERED (stand-in `$U7_Adam_T0.png`, unclad, transposed E/W, 3× integer, deployed to `$Adam.png`; T1-T3 attire tiers created) |
 | AR-011 | Human, female (naked) | Eve | High | DELIVERED (stand-in `$U7_Eve_T0.png`, unclad, transposed E/W, 3× integer, deployed to `$Eve.png`; T1-T3 attire tiers created) |
 | AR-020 | Fruit tree (the glade's tree) | Glade, food source | High | DELIVERED (stand-in `!$FruitTree.png`, shape 328, collision-aligned anchor, 3× integer) |
-| AR-021 | Wild tree, 3 variants, standing + stump | World generator, felling | High | DELIVERED (stand-in `!$TimberOak.png` shape 181, `!$PineTree.png` shape 306, collision-aligned anchors, 3× integer) |
+| AR-021 | Wild tree, 3 variants, standing + stump | World generator, felling | High | DELIVERED (stand-in `!$TimberOak.png` shape 181, `!$PineTree.png` shape 306, `!$TreeStump.png` shape 313, collision-aligned anchors, 3× integer) |
 | AR-022 | Boulder, 2 variants | World generator, stone gathering | Medium | DELIVERED (stand-in `!$GraniteBoulder.png` shape 342, `!$IronstoneDeposit.png` shape 341, collision-aligned anchors, 3× integer) |
 | AR-023 | Bush, 2 variants | World generator | Medium | DELIVERED (stand-in `!$BerryBush.png` shape 672, collision-aligned anchor, 3× integer) |
-| AR-030 | Look cursor | Cursor (Slice 0, deliverable 7) | High | REQUESTED |
-| AR-031 | Unit selection marker | Unit selection | Medium | REQUESTED |
+| AR-030 | Look cursor | Cursor (Slice 0, deliverable 7) | High | DELIVERED (`game/img/system/U7_Cursor.png`, 48×48 2-frame pulse gold bracket) |
+| AR-031 | Unit selection marker | Unit selection | Medium | DELIVERED (`game/img/system/U7_Select.png`, 48×48 diamond cyan corner brackets) |
 | AR-032 | Look panel frame | Look panel (deliverable 7) | Medium | REQUESTED |
-| AR-033 | UI window skin (replaces RMMZ `img/system/Window.png`) | Colonist card, look panel, all windows | Medium | REQUESTED |
-| AR-040 | Cave floor tiles (A2 autotile) | Underground layer | High | REQUESTED (RMMZ Dungeon A2 "Ground C" in use, tile 3200) |
+| AR-033 | UI window skin (replaces RMMZ `img/system/Window.png`) | Colonist card, look panel, all windows | Medium | DELIVERED (`game/img/system/Window.png`, `U7_Window.png`, carved oak, aged parchment, gold trim) |
+| AR-040 | Cave floor tiles (A2 autotile) | Underground layer | High | DELIVERED (included in `U7_Ground_A2.png` row 1, U7 shape 5 cave floor, 3× integer) |
 | AR-041 | Cave rock tiles (autotile) | Underground layer | High | REQUESTED (RMMZ Dungeon A4 "Wall B" top in use, tile 5936) |
-| AR-042 | Cave mouth, surface side | Ways down from the surface | High | REQUESTED (RMMZ Outside B "Hole B (Wood Ladder)" in use, tile 42) |
-| AR-043 | Way up, underground side | Under every cave mouth | High | REQUESTED (RMMZ Dungeon A5 "Stairs A (Rock)" in use, tile 1549) |
-| AR-044 | Cave objects: ore vein, cave boulder, 2 variants each | Underground generator | Medium | REQUESTED (surface ironstone/boulder images reused) |
-| AR-050 | Generic person, 4 facings, walk frames | Arrivals (V19), test units | Medium | REQUESTED (RMMZ `People1` used by tests) |
+| AR-042 | Cave mouth, surface side | Ways down from the surface | High | DELIVERED (`game/img/characters/!$CaveMouth.png`, `!$U7_CaveMouth.png`, shape 389, 3× integer) |
+| AR-043 | Way up, underground side | Under every cave mouth | High | DELIVERED (`game/img/characters/!$CaveLadder.png`, `!$U7_CaveLadder.png`, shape 705 ladder, 3× integer) |
+| AR-044 | Cave objects: ore vein, cave boulder, 2 variants each | Underground generator | Medium | DELIVERED (`!$IronOreVein.png`, `!$U7_IronOreVein.png`, shape 916 cluster, 3× integer) |
+| AR-050 | Generic person, 4 facings, walk frames | Arrivals (V19), test units | Medium | DELIVERED (`$U7_Guard.png` shape 720, `$U7_Townsman.png` shape 265, `$U7_Ranger.png` shape 460, `$People1.png`, transposed E/W, 3× integer) |
 
 | AR-100 | Biome ground tiles: 16 A2 kinds (temperate/tropical/dry grass, shrubland, forest and needle floor, tundra, snow, ice, sand, stony, red clay, rock, mud, swamp mud, dirt) | Biomes (DF_MECHANICS §3), Wave 1 | High | REQUESTED (only RMMZ Outside grass in use) |
 | AR-101 | Water and lava A1 autotiles: fresh, brackish, salt, deep ocean, swamp, lava | Biomes, caves, fluids | High | REQUESTED (RMMZ Outside water 2048 in use) |

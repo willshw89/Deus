@@ -1,0 +1,24 @@
+{
+  "id": "iron_ore_vein",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    96
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 2,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "idle": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 916 frame 0"
+}

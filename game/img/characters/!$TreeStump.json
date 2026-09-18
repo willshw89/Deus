@@ -1,0 +1,24 @@
+{
+  "id": "tree_stump",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    144
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 1,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stump": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 313 frame 0"
+}

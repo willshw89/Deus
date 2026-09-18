@@ -1,0 +1,24 @@
+{
+  "id": "cave_mouth",
+  "frameWidth": 144,
+  "frameHeight": 96,
+  "anchor": [
+    72,
+    96
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 2,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "open": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 389 frame 0"
+}
