@@ -2,7 +2,7 @@
 
 **Claude Code** (engine) adds a request here whenever a feature needs art. **Gemini** (art) makes the assets to these specs. Claude Code checks each delivery against its spec and integrates it, and **the user approves** every asset before it counts as final (VISION V11).
 
-Every rule in `docs/ART_STANDARD.md` applies. How to draw the U7 look: `docs/GUIDE_25D.md`. If a spec here seems wrong or impossible, write it under the request's **Notes** and tell the user. Don't silently change the asset or the spec.
+Every rule in `docs/ART_STANDARD.md` applies. **The look is 2D in the style of Final Fantasy VI (user decision 2026-09-18, evening)**: flat 3/4 top-down, 16×16 tiles at 3×, upright 4-facing sprites; the earlier Ultima VII 2.5D specs in the rows below (lean, transposed facings, U7 shapes as stand-ins) are superseded, and RPG Maker's stock art is the placeholder set until each original arrives. If a spec here seems wrong or impossible, write it under the request's **Notes** and tell the user. Don't silently change the asset or the spec.
 
 ## Status flow
 `REQUESTED` → `IN PROGRESS` (Gemini) → `DELIVERED` (files in place, sidecar written) → `CHECKED` (Claude Code: ART_STANDARD §8 checks pass and it works in the engine) → `APPROVED` (user) → `INTEGRATED`
@@ -11,19 +11,18 @@ A delivery that fails its check goes back to `IN PROGRESS`, with the reason in N
 ## Shared spec (applies to every request unless it says otherwise)
 Values marked *provisional* depend on the user's open decisions Q5 (facings) and Q6 (scale) in `docs/VISION.md`. Use them until those are locked.
 
-| Item | Spec |
+| Item | Spec (revised 2026-09-18 evening: FF6-style 2D) |
 |---|---|
-| Native pixel size | Draw at **1× native**; export at exactly **3×**, nearest-neighbor (*provisional*, Q6) |
-| Grid cell | 16×16 native = 48×48 exported (*provisional*, Q6) |
-| Height unit (lift) | 4 native px, drawn **up and left** (ART_STANDARD F2) |
-| Projection | Ground is flat top-down. Anything with height leans **up-left at 45°** (GUIDE_25D §1). |
-| Frame box | An object with a w×d cell footprint and h lifts of height fits a **(16w + 4h) × (16d + 4h)** native box, with its footprint in the bottom-right corner (ART_STANDARD §3) |
-| Facings | **4** (S, W, E, N). E and W are **transposes** of S and N, never mirrors (*provisional*, Q5) |
-| Palette | The project palette once it's locked. Until then, stand-ins use U7's palette as decoded. |
+| Native pixel size | Draw at **1× native**; export at exactly **3×**, nearest-neighbor |
+| Grid cell | 16×16 native = 48×48 exported |
+| View | **Flat 3/4 top-down JRPG view** (RPG Maker's own): no lean, no isometric. Ground tiles seen from above; objects and people show their front, feet on the bottom row of their cell |
+| Frame box | People: 16×24 native = **48×72** exported (adults; children smaller); small animals 48×48; large animals and 2-cell trees 96×96; objects: their footprint width × their height, anchor at the bottom-centre of the footprint |
+| Facings | **4** (S, W, E, N), RPG Maker row order (down, left, right, up). E and W may mirror each other |
+| Palette | 16-bit look: 16–32 colors per sheet; the project palette once locked. Stock RPG Maker placeholders are what they are |
 | Alpha | 0 or 255 only; no baked shadows (the engine draws shadows) |
 | Background for generation | Flat magenta `#FF00FF` |
-| Stand-ins | Allowed now (AGENTS rule 8). File name starts with `U7_`, exactly 3×, listed in STATUS → Stand-ins. |
-| Original art | Goes through the ART_STANDARD §7 pipeline (`art/briefs` → `art/raw` → `art/masters` → review → `art/APPROVALS.md`) |
+| Placeholders | Stock RPG Maker MZ art (licensed for RPG Maker games). U7 art is no longer used; existing `U7_` files are replaced one by one and never committed |
+| Original art | Goes through the ART_STANDARD §5 pipeline (`art/briefs` → `art/raw` → `art/masters` → review → `art/APPROVALS.md`) |
 
 ### Sprite sheet + sidecar format (what the engine reads)
 Every object or character image comes with a JSON sidecar of the same name (`UF_Human_Male.png` + `UF_Human_Male.json`). Sheets are a grid: **one row per facing, one column per frame**, all frames the same size, in exported (3×) pixels.
@@ -148,7 +147,7 @@ Details and order for AR-100 to AR-500: `docs/handoffs/HANDOFF_df_art.md` (waves
 ### AR-600 Character sheet standard v2 (layers and animations)
 The goal (user, 2026-09-18): every person and creature can be shown mining, chopping, carrying, fighting with a weapon and shield, casting, sleeping, in any clothing tier and at any age, without a new sheet for each combination. The engine composes the layers at runtime, so **every layer of one species must share one frame grid and one anchor**.
 
-- **Grid:** one PNG per layer, rows = facings S, W, E, N (E and W are transposes, never mirrors), columns = the animation frames in this fixed order: `stand` (1), `walk` (3: step, stand, step), `work` (3: a swing cycle used for mine/chop/gather/build), `carry` (3: walk with the arms forward/up), `attack` (3: wind-up, strike, recover), `cast` (2), `sleep` (1). 16 columns. Frame size per species: humans 96×96 exported (32×32 native), large creatures 192×192, small creatures 48×48. The anchor (feet on the bottom-right of the 1×1 footprint) is the same pixel in every frame of every layer.
+- **Grid (FF6-style, revised 2026-09-18 evening):** one PNG per layer, rows = facings in RPG Maker order (S, W, E, N), columns = the animation frames in this fixed order: `stand` (1), `walk` (3: step, stand, step), `work` (3: a swing cycle used for mine/chop/gather/build), `carry` (3: walk with the arms forward/up), `attack` (3: wind-up, strike, recover), `cast` (2), `sleep` (1). 16 columns. Frame size per species: people **48×72** exported (16×24 native), large creatures 96×96, small creatures 48×48. The anchor (feet at the bottom-centre of the 1×1 footprint) is the same pixel in every frame of every layer.
 - **Layers, by file name:** `$UF_<species>_<gender>_<stage>_body.png` (stage: baby, child, teen, adult, elder), `$UF_<species>_<gender>_clothes_T<n>.png`, `$UF_held_<item>.png` (stone_axe, stone_knife, stone_pick, spear, bow, torch…: the item as held, positioned per frame; the same file works for every species of the same frame size), `$UF_shield_<kind>.png`, `$UF_fx_<effect>.png` (cast glow, hit flash). Layer order when composing: body, clothes, shield (back-hand side), held, fx. Transparent where a layer has nothing.
 - **Sidecar v2:** `frameWidth`, `frameHeight`, `anchor`, `facings`, `animations: { stand: [0], walk: [1, 2, 3, 2], work: [4, 5, 6], carry: [7, 8, 9], attack: [10, 11, 12], cast: [13, 14], sleep: [15] }`, `layer: "body" | "clothes" | "held" | "shield" | "fx"`, `species`, `stage`, `standInSource`.
 - **Stand-ins:** U7 shapes only cover stand/walk for most figures; deliver those frames and leave the other columns empty (transparent) rather than inventing them; the engine falls back to `stand` for missing animations.

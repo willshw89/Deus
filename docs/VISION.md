@@ -11,14 +11,14 @@ These came from the user. Only the user can change them. When they do, edit the 
 | # | Decision |
 |---|---|
 | V1 | Engine: RPG Maker MZ v1.10.0. Behavior comes from plugins; RMMZ core files are never modified. The project must stay openable and playtestable in the RMMZ editor. |
-| V2 | The look is Ultima VII's 2.5D view, and **everything** on screen follows the same projection: people, trees, walls, items. Spec: `ART_STANDARD.md`. |
+| V2 | **The look is 2D in the style of Final Fantasy VI** (16-bit JRPG, flat 3/4 top-down, 16×16 tiles at 3×, upright 4-facing sprites), the view RPG Maker draws natively. Spec: `ART_STANDARD.md`. (Revised 2026-09-18, evening; before that: Ultima VII's 2.5D projection, now dropped together with `GUIDE_25D.md` and the projection fix K3.) |
 | V3 | **4-directional movement** on a square grid, as in DF (revised 2026-09-18 from 8-directional). |
 | V4 | No protagonist. **The player is given one of the generated factions**, established during the world's history: its home site at the centre of the map, and the people at that site are the colonists (revised 2026-09-18, evening; before that: a naked man and woman with generated names, and before that a fixed fruit tree). Everything is randomly generated. |
 | V5 | The player commands units the way DF does (designations, jobs, orders). |
 | V6 | DF's systems are all in: randomness and world generation, gathering, construction, needs, combat. Implemented originally, not copied. |
 | V7 | Many races. Not dwarf-centric. |
 | V8 | Fantasy plus science-fiction elements are allowed. |
-| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. Ultima VII art may be used as examples and temporary stand-ins during development (`U7_` prefix, replaced before release). |
+| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. **Placeholders are RPG Maker's stock art** (licensed for RPG Maker games, and already in the FF6-like style); Ultima VII art is no longer used as a stand-in (revised 2026-09-18, evening; the `U7_` files on disk are replaced entry by entry and never committed). |
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
 | V14 | The world is **one area at RMMZ's maximum size (256×256 cells)** with the pair in the middle (revised 2026-09-18 from a grid of areas; the engine still supports a grid, switched off). |
 | V15 | The camera zooms out to show more of the world (mouse wheel, − / +). Zoom steps keep pixel art exact. |
@@ -59,9 +59,9 @@ These came from the user. Only the user can change them. When they do, edit the 
 - A fixed protagonist (the "Delver")
 - The pre-built dwarf fortress scenario (Deepdelve, the mountainhall, the King's hall, the tavern, etc.)
 - A game centered on hand-written named NPCs with hand-written dialogue trees
-- Ripped Ultima VII sprites as **final** game art. As labeled stand-ins they're allowed (V9).
-- Isometric diamond grids (that's Ultima VIII, not VII)
-- Upright JRPG-style character sprites (they don't match the U7 projection; see `ART_STANDARD.md` F4)
+- Ripped Ultima VII sprites, as final art or (since 2026-09-18 evening) as stand-ins: they lean, the game is flat 2D now.
+- Isometric diamond grids
+- The Ultima VII 2.5D projection (dropped 2026-09-18 evening for the FF6-style 2D look, V2)
 
 ## Proposed but not approved
 An earlier agent session invented these. The user hasn't approved them. Don't build on them and don't delete them; the user decides.
@@ -104,4 +104,5 @@ Append only, newest at the bottom.
 - 2026-09-18 (later): The user removed the underground layer (V20 retired; V22 now means one layer), reduced the world to **one 256×256 area** (V14 revised), switched to **4-way movement** (V3 revised), and added V30–V37: DF map generation with standard settings and no options, all factions from year 0 plus 500–600 years of history, stance squares, pause on Space, everything clickable with options, physical jobs and a dense start (hunting, tools, clothes, cooking first), assets designed with interaction states, fog off for development (permanent reveal when it returns). Also: Gemini may be driven by Claude Code for art if a way to call it exists (none installed yet); the "large variety with duplicate placeholders" approach (tints on shared images) is approved.
 - 2026-09-18 (evening, during the world build): V4 revised again by the user: **no starting pair; the player gets an established faction** from the history, with its home site at the map centre and its people as colonists. V38 (every tile interactive with several options) and V39 (faction cultures) added. Also: factions appear in the ledger only after contact.
 - 2026-09-18 (later): V40 (life from birth: founders, births, ages and stages, aging in play), V41 (a standard layered, animated character sheet) and V42 (people drift off and found new factions) added by the user; V29 reaffirmed: combat follows Ultima VII (AR-600's attack/cast frames are its art). All are the next build after the world build lands (`docs/design/WORLD_ARCHITECTURE.md` §2.10, `docs/ASSET_REQUESTS.md` AR-600/AR-601). V43 (all DF labors, walls with gates, guards and squads) added at the same time; the labor list goes into the catalog as `labors` and the planner assigns by labor.
+- 2026-09-18 (evening): **The look changes to 2D in the style of Final Fantasy VI** (user). V2 and V9 revised; the 2.5D guide, the U7 stand-in pipeline and K3 are dropped; RPG Maker's stock art becomes the placeholder set; Q5 (4 facings) and Q6 (48 px cells) are settled by the style. The engine is unaffected (cells, objects, sprites at the feet); the catalog's images switch from U7 rips to stock sheets and tiles.
 - 2026-09-18: The user did away with the subterranean level (V20 retired). The world is single-layer (surface only); all cave/underground layer generation, underground layer switching, and underground layers are removed.

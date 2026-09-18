@@ -1,5 +1,7 @@
 # GUIDE: how to make UF look like Ultima VII
 
+> **OBSOLETE (2026-09-18, evening).** The user changed the look to **2D in the style of Final Fantasy VI** (VISION V2). Nothing in this guide applies any more: no lean, no lifts, no transposed facings, no U7 shape extraction. The current rules are in `docs/ART_STANDARD.md`. This file is kept as history only.
+
 Written for Gemini (and any agent) doing the 2.5D work. `ART_STANDARD.md` holds the rules; this is the how-to. Items tagged [MEASURE] are believed true but must be confirmed before building on them (ART_STANDARD §1).
 
 ## 1. The one idea
