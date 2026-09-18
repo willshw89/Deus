@@ -157,41 +157,61 @@
     //-------------------------------------------------------------------------
     // The runtime tileset
 
+    const groundKinds = () => ((catalog() && catalog().groundKinds) || []).slice(0, 32);
+
     const Tiles = {
         TILESET_ID,
         GEN_A2,
-        /** Tile ID of ground kind `id` (catalog groundKinds), autotile base (shape 0). */
+        /** The catalog's ground kinds in sheet order (index = A2 kind). */
+        kinds: () => groundKinds().slice(),
+        /** Tile ID of ground kind `id` (catalog groundKinds), autotile base (shape 0); null if unknown. */
         groundBase(id) {
-            const kinds = (catalog() && catalog().groundKinds) || [];
-            const k = kinds.findIndex(g => g.id === id);
+            const k = groundKinds().findIndex(g => g.id === id);
             return k < 0 ? null : Tilemap.TILE_ID_A2 + k * 48;
         },
+        /** The ground kind entry a tile ID belongs to (any of its 48 shapes), or null for non-ground tiles. */
         kindOfTile(tileId) {
-            const kinds = (catalog() && catalog().groundKinds) || [];
             if (!Tilemap.isTileA2(tileId)) return null;
-            return kinds[Math.floor((tileId - Tilemap.TILE_ID_A2) / 48)] || null;
+            return groundKinds()[Math.floor((tileId - Tilemap.TILE_ID_A2) / 48)] || null;
         },
-        generatedBitmap: () => generatedGround()
+        /** Water kind key (catalog water.surface) of an A1 tile ID, or null. */
+        waterKindOfTile(tileId) {
+            const surface = (catalog() && catalog().water && catalog().water.surface) || {};
+            if (!Tilemap.isTileA1(tileId)) return null;
+            const base = tileId - ((tileId - Tilemap.TILE_ID_A1) % 48);
+            return Object.keys(surface).find(k => surface[k] === base) || null;
+        },
+        generatedBitmap: () => generatedGround(),
+        /** The runtime tileset record ($dataTilesets[TILESET_ID]) once registered. */
+        tileset: () => (window.$dataTilesets && $dataTilesets[TILESET_ID]) || null
     };
     window.UF = window.UF || {};
     window.UF.Tiles = Tiles;
 
+    // Tileset 91 in memory: names from the catalog, flags from the editor's base tileset, except the A2 ground
+    // kinds (from groundKinds[].passable) and the catalog's water kinds (always impassable: the stock sheet
+    // leaves some A1 kinds walkable, and units must stand next to water to drink, never in it).
     function registerTileset() {
         const cat = catalog();
         if (!cat || !window.$dataTilesets) return;
-        const base = $dataTilesets[2]; // RMMZ "Outside": A1 water, B/C objects and their flags
         const names = (cat.tilesets && cat.tilesets.surface) || {};
+        const base = $dataTilesets[names.base || 2];
         const flags = base ? base.flags.slice() : new Array(8192).fill(0);
-        (cat.groundKinds || []).slice(0, 32).forEach((kind, k) => {
+        while (flags.length < 8192) flags.push(0);
+        groundKinds().forEach((kind, k) => {
             const blocked = kind.passable === false;
             for (let s = 0; s < 48; s++) flags[Tilemap.TILE_ID_A2 + k * 48 + s] = blocked ? 0x0f : 0;
         });
+        for (const tileId of Object.values((cat.water && cat.water.surface) || {})) {
+            const start = tileId - ((tileId - Tilemap.TILE_ID_A1) % 48);
+            for (let s = 0; s < 48; s++) flags[start + s] = (flags[start + s] & ~0x0f) | 0x0f;
+        }
         $dataTilesets[TILESET_ID] = {
             id: TILESET_ID,
             mode: 1,
             name: "UF World (runtime)",
             note: "",
-            tilesetNames: [names.A1 || "Outside_A1", names.A2 || GEN_A2, "", "", "", names.B || "Outside_B", names.C || "Outside_C", "", ""],
+            tilesetNames: [names.A1 || "Outside_A1", names.A2 || GEN_A2, "", "", names.A5 || "", names.B || "Outside_B", names.C || "Outside_C", "", ""],
             flags
         };
     }
@@ -230,6 +250,26 @@
                 if (px(49 + x, 49 + y) !== c || px(50 + x, 50 + y) !== c) clean = false;
             }
             t.check("pixel_grid_3x", clean, clean ? "every sampled 3x3 block is a single color" : "mixed pixels inside a 3x3 block");
+            // Sheet names as the catalog lists them; A2 is the generated sheet.
+            const names = (catalog() && catalog().tilesets && catalog().tilesets.surface) || {};
+            const slots = ts ? { A1: ts.tilesetNames[0], A2: ts.tilesetNames[1], A5: ts.tilesetNames[4], B: ts.tilesetNames[5], C: ts.tilesetNames[6] } : {};
+            const wrongNames = ["A1", "A5", "B", "C"].filter(k => (names[k] || "") !== (slots[k] || ""));
+            t.check("tileset_names", !!ts && wrongNames.length === 0 && slots.A2 === (names.A2 || GEN_A2) && ts.tilesetNames[1] === GEN_A2,
+                ts ? `A1 ${slots.A1}, A2 ${slots.A2}, A5 ${slots.A5}, B ${slots.B}, C ${slots.C}${wrongNames.length ? `; differ from the catalog: ${wrongNames.join(", ")}` : ""}` : "no tileset");
+            const peak = Tiles.groundBase("peak_rock"), meadow = Tiles.groundBase("meadow");
+            const peakFlags = peak !== null && ts ? [ts.flags[peak], ts.flags[peak + 46]] : [], meadowFlags = meadow !== null && ts ? [ts.flags[meadow], ts.flags[meadow + 46]] : [];
+            t.check("flags", peakFlags.every(f => f === 0x0f) && meadowFlags.every(f => f === 0) && peakFlags.length === 2 && meadowFlags.length === 2,
+                `peak_rock flags ${peakFlags.map(f => "0x" + f.toString(16)).join("/")} (want 0xf), meadow ${meadowFlags.map(f => "0x" + f.toString(16)).join("/")} (want 0x0)`);
+            const surface = (catalog() && catalog().water && catalog().water.surface) || {};
+            const walkable = Object.entries(surface).filter(([, id]) => !ts || (ts.flags[id] & 0x0f) !== 0x0f || (ts.flags[id + 46] & 0x0f) !== 0x0f).map(([k]) => k);
+            t.check("water_impassable", ts && Object.keys(surface).length > 0 && walkable.length === 0,
+                `${Object.keys(surface).length} water kinds; walkable: ${walkable.join(", ") || "none"}`);
+            // The kind of a tile round-trips through groundBase/kindOfTile, and the area on screen uses the runtime tileset.
+            const kind = Tiles.kindOfTile(Tiles.groundBase("forest_floor") + 17);
+            t.check("kind_of_tile", !!kind && kind.id === "forest_floor" && Tiles.kindOfTile(Tilemap.TILE_ID_A1) === null, kind ? `forest_floor shape 17 -> ${kind.id}; an A1 tile -> ${Tiles.kindOfTile(Tilemap.TILE_ID_A1)}` : "kindOfTile returned null for a ground tile");
+            const onArea = window.UF.World && UF.World.currentArea();
+            t.check("area_uses_tileset", !!onArea && $gameMap.tilesetId() === TILESET_ID && $gameMap.tileset() === ts,
+                onArea ? `area (${onArea.x},${onArea.y}) on screen has tilesetId ${$gameMap.tilesetId()} (want ${TILESET_ID})` : "not on an area map");
             t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().length ? t.errorsSoFar()[0] : "none");
         });
     }

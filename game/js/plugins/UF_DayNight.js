@@ -23,7 +23,7 @@
  * @text Show clock
  * @type boolean
  * @default false
- * @desc Show day and time on screen. Off by default (user, 2026-09-18); a ">> xN" badge still shows while time is sped up.
+ * @desc Show day and time on screen. Off by default (user, 2026-09-18); a badge still shows ">> xN" while time is sped up and "PAUSED" while it is paused (UF_TimeSpeed).
  *
  * @help
  * Time comes from UF_Core ($ufTime: 1 game minute per TimeSpeed real
@@ -135,10 +135,18 @@
         update() {
             super.update();
             const multiplier = window.UF.Time ? UF.Time.multiplier() : 1;
-            // No day/time display unless ShowClock is on (user, 2026-09-18); the speed badge shows while sped up.
-            this.visible = DayNight.onWorldMap() && !!window.$ufTime && (SHOW_CLOCK || multiplier > 1);
-            if (!this.visible) return;
-            const speed = multiplier > 1 ? `>> x${multiplier}` : "";
+            const paused = !!(window.UF.Time && UF.Time.paused);
+            // No day/time display unless ShowClock is on (user, 2026-09-18); the badge shows while sped up or paused.
+            this.visible = DayNight.onWorldMap() && !!window.$ufTime && (SHOW_CLOCK || multiplier > 1 || paused);
+            if (!this.visible) {
+                // Hidden = shows nothing: forget the old text, so _text always says what's drawn.
+                if (this._text !== "") {
+                    this._text = "";
+                    this.bitmap.clear();
+                }
+                return;
+            }
+            const speed = paused ? "PAUSED" : multiplier > 1 ? `>> x${multiplier}` : "";
             let text = speed;
             if (SHOW_CLOCK) {
                 const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
@@ -151,7 +159,7 @@
             b.clear();
             b.fillRect(0, 0, b.width, b.height, "rgba(10, 14, 20, 0.6)");
             b.fontSize = 18;
-            b.textColor = DayNight.phase() === "night" ? "#9fb4ff" : "#ffe9a8";
+            b.textColor = paused ? "#ffb4b4" : DayNight.phase() === "night" ? "#9fb4ff" : "#ffe9a8";
             b.drawText(text, 8, 0, b.width - 16, b.height, "right");
         }
     }
