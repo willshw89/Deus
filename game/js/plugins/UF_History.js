@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF History] Simulates 500-600 years of the factions' history from the world seed: sites founded, grown and sacked, rulers, wars, peace, plagues, beasts. Stamps sites into the world. H = chronicle.
+ * @plugindesc [UF History] Simulates 500-600 years of the factions' history from the world seed: sites founded, grown and sacked, rulers, wars, peace, plagues, beasts. The player's home site at the map centre. H = chronicle.
  * @author UF project
  * @base UF_World
  * @orderAfter UF_Factions
@@ -17,6 +17,10 @@
  *   - every faction exists from year 0 with one site on a walkable cell of a
  *     biome its species prefers (sites.preferredBiomes), at least
  *     sites.minDistanceFromStart cells from the start and 24 from other sites;
+ *   - the player's faction (state.factions.playerId, chosen by UF_Factions)
+ *     founds its first site at the map centre instead; that site is its home:
+ *     it is never sacked or abandoned, and the view starts on it
+ *     (state.viewStart);
  *   - population grows, new sites are founded, sites grow from camp to village
  *     to town (sites.bySpecies), rulers succeed one another;
  *   - hostile pairs go to war; a lost war can turn the loser's newest site
@@ -29,7 +33,8 @@
  * UF_WorldGen asks UF.History.sitesIn(ax, ay) while building an area and
  * stamps each site's pieces (a ring wall with openings, a center, things
  * scattered inside; layouts in the catalog "sites.kinds").
- * People (units of kind "person") are spawned at every living site.
+ * People (units of kind "person") are spawned at every living site; the
+ * home site gets at least 4 (UF_Colonists makes them the colonists).
  *
  * Press H on the map for the chronicle window.
  *
@@ -78,6 +83,8 @@
     const MIN_SITE_GAP = 24;     // cells between site centers
     const NEW_SITE_REACH = 60;   // a new site lies within this of an existing one of the faction
     const SITE_TRIES = 200;      // placement attempts with the preferred biomes, then as many without
+    const HOME_REACH = 6;        // the player's home site lies within this of the map centre (contract 2.7)
+    const HOME_MIN_PEOPLE = 4;   // the home site always has at least this many people (contract 5.8)
 
     //-------------------------------------------------------------------------
     // Public object
@@ -193,6 +200,42 @@
         return null;
     }
 
+    /**
+     * The player's home site: the map centre (the habitable start, contract 2.7). The walkable cell nearest to
+     * (mid, mid) within HOME_REACH whose whole disc at the largest radius the site can grow to is walkable;
+     * failing that, one whose small disc is walkable (the pond or a river may touch the centre); failing that,
+     * any walkable cell there. No random numbers: the answer is a pure function of the terrain.
+     */
+    function placeHome(state, area, radius) {
+        const size = state.size;
+        const mid = Math.floor(size / 2);
+        const gx0 = area.x * size, gy0 = area.y * size;
+        const walkable = (x, y) => {
+            const info = cellInfo(gx0 + x, gy0 + y);
+            return !info || info.walkable;
+        };
+        const discWalkable = (x, y, r) => {
+            for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (!walkable(x + dx, y + dy)) return false;
+            return true;
+        };
+        const cells = [];
+        for (let dy = -HOME_REACH; dy <= HOME_REACH; dy++) {
+            for (let dx = -HOME_REACH; dx <= HOME_REACH; dx++) {
+                const d = Math.hypot(dx, dy);
+                if (d <= HOME_REACH) cells.push({ x: mid + dx, y: mid + dy, d });
+            }
+        }
+        cells.sort((a, b) => a.d - b.d || a.y - b.y || a.x - b.x);
+        for (const r of [radius + 1, Math.min(radius + 1, 2), 0]) {
+            const c = cells.find(c => discWalkable(c.x, c.y, r));
+            if (c) {
+                const info = cellInfo(gx0 + c.x, gy0 + c.y);
+                return { x: c.x, y: c.y, biomeId: info ? info.biomeId : null, clearRadius: r };
+            }
+        }
+        return null;
+    }
+
     //-------------------------------------------------------------------------
     // Generation
 
@@ -235,25 +278,30 @@
             events.push({ year, type, text, factions: factionIds.filter(Boolean), site: siteId === undefined ? null : siteId });
         };
 
-        // Working records per faction (the saved faction objects get the results at the end).
-        const fx = F.list.filter(f => !f.isPlayer).map(f => ({
+        // Working records per faction (the saved faction objects get the results at the end). Every faction is a
+        // generated one; the player's (F.playerId, picked by UF_Factions) gets its home at the map centre.
+        const playerId = F.playerId || (F.list.find(f => f.isPlayer) || {}).id || null;
+        const fx = F.list.map(f => ({
             f, id: f.id, species: f.species, name: f.name, pop: range(cfg.startingPopulation || [20, 60]),
-            sites: [], foundTimer: range(cfg.siteFoundEvery || [60, 120]), warCount: 0
+            sites: [], foundTimer: range(cfg.siteFoundEvery || [60, 120]), warCount: 0, isPlayer: f.id === playerId
         }));
-        const byId = new Map(fx.map(x => [x.id, x]));
         const livingSites = x => x.sites.filter(s => !s.ruined);
         const levelFor = pop => Math.max(0, growth.filter(g => pop >= g).length - 1);
         const kindFor = (x, level) => {
             const kinds = kindsFor(x.species);
             return kinds[Math.min(level, kinds.length - 1)];
         };
-        const areaFor = x => (oneArea ? { x: startArea.x, y: startArea.y } : { x: x.f.home.area.x, y: x.f.home.area.y });
+        const areaFor = x => (oneArea || x.isPlayer ? { x: startArea.x, y: startArea.y } : { x: x.f.home.area.x, y: x.f.home.area.y });
         const startIn = area => (sameArea(area, startArea) ? startCell : null);
-        const foundSite = (x, year, near, pop) => {
+        /** Found a site for faction x. `home` = the player's home: at the map centre, protected for the whole history. */
+        const foundSite = (x, year, near, pop, home = false) => {
             const area = near ? near.area : areaFor(x);
-            const cell = placeSite(rand, state, sites, { area, species: x.species, near: near ? { x: near.x, y: near.y } : null, radius: maxRadiusOf(kindsFor(x.species)), start: startIn(area) });
+            const radius = maxRadiusOf(kindsFor(x.species));
+            let cell = home ? placeHome(state, area, radius) : null;
+            if (!cell) cell = placeSite(rand, state, sites, { area, species: x.species, near: near ? { x: near.x, y: near.y } : null, radius, start: home ? null : startIn(area) });
             if (!cell) return null;
             const site = { id: nextSiteId++, faction: x.id, kind: kindFor(x, 0), level: 0, area: { x: area.x, y: area.y }, x: cell.x, y: cell.y, founded: year, pop, ruined: null, name: newName() };
+            if (home) site.protected = true;
             sites.push(site);
             x.sites.push(site);
             return site;
@@ -266,13 +314,16 @@
         const rulerOf = x => { const list = rulers[x.id]; return list ? list[list.length - 1] : null; };
         const titled = r => `${r.title} ${r.name}`;
 
-        // Year 0: every faction exists, with one site and a ruler.
-        for (const x of fx) {
-            const site = foundSite(x, 0, null, x.pop);
+        // Year 0: every faction exists, with one site and a ruler. The player's faction settles first, at the map
+        // centre, so every other site keeps its distance from it (MIN_SITE_GAP) and from the start.
+        const firstToSettle = fx.slice().sort((a, b) => (b.isPlayer ? 1 : 0) - (a.isPlayer ? 1 : 0));
+        for (const x of firstToSettle) {
+            const site = foundSite(x, 0, null, x.pop, x.isPlayer);
             const r = newRuler(x, 0);
             if (site) record(0, "founding", `${x.name} founded ${site.name} under ${titled(r)}.`, [x.id], site.id);
             else record(0, "founding", `${x.name} gathered under ${titled(r)}, but found no ground to settle.`, [x.id], null);
         }
+        const homeSite = sites.find(s => s.protected) || null;
 
         const hostilePairs = () => {
             const out = [];
@@ -344,8 +395,10 @@
                         w.to = year;
                         const weak = a.pop <= b.pop ? a : b, strong = weak === a ? b : a;
                         if (rand() < (cfg.sackChance || 0)) {
-                            const living = livingSites(weak).sort((p, q) => q.founded - p.founded);
-                            const target = living[0];
+                            // The weaker side's newest living site falls; the player's home never does (contract 2.7),
+                            // so a war against the player's faction with only its home standing is won with nothing.
+                            const living = livingSites(weak);
+                            const target = living.filter(s => !s.protected).sort((p, q) => q.founded - p.founded)[0] || null;
                             let replacement = null;
                             if (target && living.length === 1) replacement = foundSite(weak, year, target, 0);
                             if (target && (living.length > 1 || replacement)) {
@@ -398,14 +451,16 @@
             events.splice(i, 1);
         }
 
-        // Results into the factions.
+        // Results into the factions. The player's home is its protected site; the view starts there (UF_World reads
+        // state.viewStart in Game_Player.setupForNewGame).
         for (const x of fx) {
             x.f.population = Math.round(x.pop);
-            const home = livingSites(x)[0] || x.sites[0];
+            const home = x.sites.find(s => s.protected) || livingSites(x)[0] || x.sites[0];
             if (home) x.f.home = { area: { x: home.area.x, y: home.area.y }, x: home.x, y: home.y };
         }
         for (const s of sites) delete s.level;
-        state.history = { version: 1, years, events, sites, rulers, wars };
+        if (homeSite) state.viewStart = { x: homeSite.x, y: homeSite.y };
+        state.history = { version: 2, years, events, sites, rulers, wars, homeSiteId: homeSite ? homeSite.id : null };
         History.lastRun = { ms: (typeof performance !== "undefined" ? performance.now() : Date.now()) - started, years, factions: fx.length, sites: sites.length, events: events.length };
         emit("history:generated", state.history);
         return state.history;
@@ -438,7 +493,9 @@
             const taken = new Set(piecesFor(state, site).map(p => `${p.dx},${p.dy}`));
             const free = [];
             for (let dy = -(radius - 1); dy <= radius - 1; dy++) for (let dx = -(radius - 1); dx <= radius - 1; dx++) if (!taken.has(`${dx},${dy}`)) free.push({ dx, dy });
-            const n = Math.min(range(perSiteRange()), free.length);
+            // The home site always has at least HOME_MIN_PEOPLE (they become the colonists).
+            const rolled = range(perSiteRange());
+            const n = Math.min(site.protected ? Math.max(rolled, HOME_MIN_PEOPLE) : rolled, free.length);
             for (let i = 0; i < n; i++) {
                 const j = Math.floor(rand() * free.length);
                 const cell = free.splice(j, 1)[0];
@@ -522,21 +579,23 @@
             && (filter.site === undefined || e.site === filter.site) && (filter.since === undefined || e.year >= filter.since));
     };
     History.siteById = id => (History.current() ? History.current().sites.find(s => s.id === id) || null : null);
+    /** The player's home site (protected, at the map centre), or null. */
+    History.homeSite = () => (History.current() ? History.current().sites.find(s => s.protected) || null : null);
     History.factionName = id => {
         const F = window.UF && UF.Factions ? UF.Factions.get(id) : null;
         return F ? F.name : id;
     };
-    /** Per faction: sites, wars, the current ruler. */
+    /** Per faction (the player's first): sites, wars, the current ruler. */
     History.summary = function() {
         const h = History.current();
         if (!h) return [];
-        const factions = window.UF && UF.Factions ? UF.Factions.all().filter(f => !f.isPlayer) : [];
+        const factions = window.UF && UF.Factions ? UF.Factions.all().slice().sort((a, b) => (b.isPlayer ? 1 : 0) - (a.isPlayer ? 1 : 0)) : [];
         return factions.map(f => {
             const sites = h.sites.filter(s => s.faction === f.id);
             const list = h.rulers[f.id] || [];
             const ruler = list[list.length - 1] || null;
             return {
-                id: f.id, name: f.name, species: f.species, population: f.population,
+                id: f.id, name: f.name, species: f.species, population: f.population, isPlayer: !!f.isPlayer,
                 sites: sites.filter(s => !s.ruined).map(s => ({ id: s.id, name: s.name, kind: s.kind })),
                 ruins: sites.filter(s => s.ruined).map(s => ({ id: s.id, name: s.name, year: s.ruined })),
                 wars: (h.wars || []).filter(w => w.a === f.id || w.b === f.id).length,
@@ -558,6 +617,7 @@
         if (!s) return null;
         if (s.kind === "lair") return `${s.name} (a beast's lair, year ${s.founded})`;
         if (s.ruined) return `Ruins of ${s.name}, once of ${History.factionName(s.faction)} (sacked in year ${s.ruined})`;
+        if (s.protected) return `${s.name}, your home ${s.kind} of ${History.factionName(s.faction)} (founded year ${s.founded})`;
         return `${s.name}, a ${s.kind} of ${History.factionName(s.faction)} (founded year ${s.founded})`;
     };
 
@@ -607,7 +667,7 @@
                 const sites = f.sites.map(s => s.name).join(", ") || "no living site";
                 const ruins = f.ruins.length ? ` · ${f.ruins.length} ruin${f.ruins.length > 1 ? "s" : ""}` : "";
                 const ruler = f.ruler ? ` · ${f.ruler.title} ${f.ruler.name}` : "";
-                this.drawText(`${sites}${ruins} · ${f.wars} war${f.wars === 1 ? "" : "s"}${ruler}`, 246, y + 1, w - 258, "left");
+                this.drawText(`${f.isPlayer ? "yours · " : ""}${sites}${ruins} · ${f.wars} war${f.wars === 1 ? "" : "s"}${ruler}`, 246, y + 1, w - 258, "left");
                 y += lineH + 4;
             }
             y += 4;
@@ -687,12 +747,41 @@
             t.check("generated_with_world", !!cfg && !!sc && !!h && Array.isArray(h.events) && Array.isArray(h.sites),
                 h ? `${h.years} years, ${h.events.length} events, ${h.sites.length} sites, seed ${st.seed} (${History.lastRun ? History.lastRun.ms.toFixed(0) + " ms" : "time unknown"})` : "no history in the world state");
             if (!h) return;
-            const factions = UF.Factions.all().filter(f => !f.isPlayer);
+            const factions = UF.Factions.all(); // every faction is a generated one, the player's included
             const size = st.size, mid = Math.floor(size / 2);
+            const homeOf = s2 => (s2.history && s2.history.sites.find(s => s.protected && s.faction === s2.factions.playerId)) || null;
+            const otherState = regenerate(st, st.seed + 1), thirdState = regenerate(st, st.seed + 2);
+            const other = otherState.history;
+
+            // The view starts on the home site; a look at it before anything moves the view.
+            t.screenshot("home_site");
+
+            // player_faction: the player's faction is a generated one; its home site is alive at the map centre, never
+            // sacked over three seeds; the view started on it (state.viewStart and the RMMZ player).
+            const pid = st.factions.playerId;
+            const player = UF.Factions.player();
+            const home = homeOf(st);
+            const homeDist = home ? Math.hypot(home.x - mid, home.y - mid) : Infinity;
+            const homeAlive = !!home && !home.ruined && home.kind !== "ruin" && sameArea(home.area, st.startArea);
+            const sackedHome = home ? h.events.filter(e => e.type === "sack" && e.site === home.id).length : 0;
+            const runs3 = [{ seed: st.seed, s: st }, { seed: st.seed + 1, s: otherState }, { seed: st.seed + 2, s: thirdState }];
+            const badRuns = runs3.filter(r => {
+                const hs = homeOf(r.s);
+                return !hs || hs.ruined || hs.kind === "ruin" || Math.hypot(hs.x - mid, hs.y - mid) > HOME_REACH
+                    || r.s.history.events.some(e => e.type === "sack" && e.site === hs.id) || !r.s.viewStart || r.s.viewStart.x !== hs.x || r.s.viewStart.y !== hs.y;
+            });
+            const vs = st.viewStart;
+            const viewOnHome = !!vs && !!home && vs.x === home.x && vs.y === home.y;
+            const playerNear = !!home && sameArea(W.currentArea(), home.area) && Math.hypot($gamePlayer.x - home.x, $gamePlayer.y - home.y) <= 6;
+            const homeIsFactionHome = !!home && !!player && player.home && player.home.x === home.x && player.home.y === home.y;
+            t.check("player_faction", !!player && player.id === pid && player.isPlayer && factions.includes(player) && homeAlive && homeDist <= HOME_REACH
+                && sackedHome === 0 && badRuns.length === 0 && viewOnHome && playerNear && homeIsFactionHome && h.homeSiteId === home.id,
+                `playerId ${pid} = ${player ? `${player.name} (${player.species}, isPlayer ${player.isPlayer})` : "NO FACTION"}; home site ${home ? `${home.name} (${home.kind}, id ${home.id}) at (${home.x},${home.y}), ${homeDist.toFixed(1)} cells from the centre (want <= ${HOME_REACH}), ${home.ruined ? `RUINED in ${home.ruined}` : "alive"}, ${sackedHome} sack events` : "NONE"}; `
+                + `faction.home on it: ${homeIsFactionHome}; viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} ${viewOnHome ? "matches" : "DOES NOT match"}; the view (${$gamePlayer.x},${$gamePlayer.y}) ${playerNear ? "is on" : "is NOT on"} the home; `
+                + `seeds ${runs3.map(r => r.seed).join("/")}: ${badRuns.length ? `home not alive at the centre for seed ${badRuns.map(r => r.seed).join(", ")}` : "home alive at the centre and unsacked in all three"}`);
 
             // simulated: years in range and differing by seed, enough events, clean text, a year-0 founding per faction.
             const [ymin, ymax] = cfg.years;
-            const other = regenerate(st, st.seed + 1).history;
             const dirty = h.events.filter(e => BANNED.test(e.text)).concat(h.sites.filter(s => BANNED.test(s.name)).map(s => ({ text: s.name })));
             const noFounding = factions.filter(f => !h.events.some(e => e.year === 0 && e.type === "founding" && e.factions.includes(f.id)));
             const differs = sig(other) !== sig(h);
@@ -704,18 +793,21 @@
             // sites_placed
             const without = factions.filter(f => !h.sites.some(s => s.faction === f.id));
             const notWalkable = h.sites.filter(s => { const c = UF.WorldGen.cellInfoLocal(s.area.x, s.area.y, s.x, s.y); return c && !c.walkable; });
-            const tooNear = h.sites.filter(s => W.isStartArea(s.area.x, s.area.y) && Math.hypot(s.x - mid, s.y - mid) < sc.minDistanceFromStart);
+            // Every site but the player's home keeps minDistanceFromStart; every site keeps 24 cells from the others.
+            const others = h.sites.filter(s => !s.protected);
+            const tooNear = others.filter(s => W.isStartArea(s.area.x, s.area.y) && Math.hypot(s.x - mid, s.y - mid) < sc.minDistanceFromStart);
+            const crowded = h.sites.filter(s => h.sites.some(o => o !== s && sameArea(o.area, s.area) && Math.hypot(o.x - s.x, o.y - s.y) < MIN_SITE_GAP));
             const badHome = factions.filter(f => !h.sites.some(s => s.faction === f.id && !s.ruined && s.x === f.home.x && s.y === f.home.y && sameArea(s.area, f.home.area)));
-            const nearest = h.sites.reduce((m, s) => Math.min(m, W.isStartArea(s.area.x, s.area.y) ? Math.hypot(s.x - mid, s.y - mid) : Infinity), Infinity);
+            const nearest = others.reduce((m, s) => Math.min(m, W.isStartArea(s.area.x, s.area.y) ? Math.hypot(s.x - mid, s.y - mid) : Infinity), Infinity);
             const kinds = {};
             for (const s of h.sites) kinds[s.kind] = (kinds[s.kind] || 0) + 1;
-            t.check("sites_placed", without.length === 0 && notWalkable.length === 0 && tooNear.length === 0 && badHome.length === 0,
-                `${h.sites.length} sites (${Object.entries(kinds).map(([k, v]) => `${v} ${k}`).join(", ")}); factions without a site: ${without.map(f => f.name).join(", ") || "none"}; `
-                + `on unwalkable cells: ${notWalkable.length}; within ${sc.minDistanceFromStart} of the start: ${tooNear.length} (nearest ${nearest === Infinity ? "n/a" : nearest.toFixed(1)}); `
-                + `homes not on a living site: ${badHome.map(f => f.name).join(", ") || "none"}`);
+            t.check("sites_placed", without.length === 0 && notWalkable.length === 0 && tooNear.length === 0 && crowded.length === 0 && badHome.length === 0 && others.length === h.sites.length - 1,
+                `${h.sites.length} sites (${Object.entries(kinds).map(([k, v]) => `${v} ${k}`).join(", ")}), ${h.sites.length - others.length} protected (want 1); factions without a site: ${without.map(f => f.name).join(", ") || "none"}; `
+                + `on unwalkable cells: ${notWalkable.length}; other sites within ${sc.minDistanceFromStart} of the start: ${tooNear.length} (nearest ${nearest === Infinity ? "n/a" : nearest.toFixed(1)}); `
+                + `sites closer than ${MIN_SITE_GAP} to another: ${crowded.length}; homes not on a living site: ${badHome.map(f => f.name).join(", ") || "none"}`);
 
             // wars_and_ruins over three seeds
-            const runs = [h, other, regenerate(st, st.seed + 2).history];
+            const runs = [h, other, thirdState.history];
             const warsIn = x => (x.wars || []).length, ruinsIn = x => x.sites.filter(s => s.ruined).length;
             const totalWars = runs.reduce((n, x) => n + warsIn(x), 0), totalRuins = runs.reduce((n, x) => n + ruinsIn(x), 0);
             t.check("wars_and_ruins", totalWars >= 1 && totalRuins >= 1,
@@ -730,8 +822,9 @@
             const saved = JsonEx.parse(JsonEx.stringify(st));
             t.check("saved", !!saved.history && sig(saved.history) === sig(h), `history round-trips through the save format (${JsonEx.stringify(h).length} bytes)`);
 
-            // stamped_in_world: the ring of the first non-lair site is in the built area's object grid.
-            const site = h.sites.find(s => s.kind !== "lair") || h.sites[0];
+            // stamped_in_world: the ring of the first non-lair site that isn't the home (the home is checked on
+            // screen below) is in the built area's object grid.
+            const site = h.sites.find(s => s.kind !== "lair" && !s.protected) || h.sites.find(s => s.kind !== "lair") || h.sites[0];
             if (site) {
                 const layout = History.sitesIn(site.area.x, site.area.y).find(s => s.id === site.id);
                 const map = W.buildArea(site.area.x, site.area.y);
@@ -760,17 +853,20 @@
             const empty = living.filter((s, i) => perSite[i] < minPeople);
             const badFaction = people.filter(u => !factions.some(f => f.id === u.data.faction));
             const noImage = people.filter(u => !u.image.characterName);
-            t.check("people_at_sites", living.length > 0 && people.length > 0 && empty.length === 0 && badFaction.length === 0 && noImage.length === 0,
+            // The home site has at least max(peoplePerSite[0], 4) people of the player's faction (the colonists to be).
+            const homeMin = Math.max(minPeople, HOME_MIN_PEOPLE);
+            const atHome = home ? people.filter(u => u.data.faction === pid && sameArea(u.area, home.area) && Math.max(Math.abs(u.x - home.x), Math.abs(u.y - home.y)) <= kindConfig(home.kind).radius + 2).length : 0;
+            t.check("people_at_sites", living.length > 0 && people.length > 0 && empty.length === 0 && badFaction.length === 0 && noImage.length === 0 && atHome >= homeMin,
                 `${people.length} person units at ${living.length} living sites (${perSite.join("/")} each, want >= ${minPeople}); sites short: ${empty.map(s => s.name).join(", ") || "none"}; `
-                + `with an unknown faction: ${badFaction.length}; without an image: ${noImage.length}`);
+                + `with an unknown faction: ${badFaction.length}; without an image: ${noImage.length}; ${atHome} people of ${pid} at the home site (want >= ${homeMin})`);
 
-            // A look at a site on screen (evidence for the report), then the view goes back to the start.
-            const shown = h.sites.find(s => s.kind !== "lair" && !s.ruined && sameArea(s.area, W.currentArea())) || site;
+            // A look at another site on screen (evidence for the report), then the view goes back to the home.
+            const shown = h.sites.find(s => s.kind !== "lair" && !s.ruined && !s.protected && sameArea(s.area, W.currentArea())) || site;
             if (shown && sameArea(shown.area, W.currentArea())) {
                 $gamePlayer.locate(shown.x, shown.y);
                 await t.waitFrames(30);
                 t.screenshot("site_in_view");
-                $gamePlayer.locate(mid, mid);
+                $gamePlayer.locate(home ? home.x : mid, home ? home.y : mid);
                 await t.waitFrames(5);
             }
 
@@ -789,10 +885,14 @@
             const closed = !!win && !win.visible;
             t.check("chronicle_opens", opened && closed, `H (Input.keyMapper[72] = "${Input.keyMapper[72]}") opened the chronicle: ${opened}; a second H closed it: ${closed}`);
 
-            // describe_site: the look label text for a site cell and for the start.
+            // describe_site: the look label text for a site cell, for the map centre (the home), and for a cell with no site.
             const d = site ? History.describeSite(site.x, site.y, site.area) : null;
-            t.check("describe_site", !!site && !!d && d.includes(site.name) && History.describeSite(mid, mid, st.startArea) === null,
-                site ? `"${d}" for (${site.x},${site.y}); start cell: ${JSON.stringify(History.describeSite(mid, mid, st.startArea))}` : "no site");
+            const dHome = History.describeSite(mid, mid, st.startArea);
+            let freeCell = null;
+            for (let x = 0; x < size && !freeCell; x++) if (History.siteAt(x, mid, st.startArea) === null) freeCell = { x, y: mid };
+            const dFree = freeCell ? History.describeSite(freeCell.x, freeCell.y, st.startArea) : "no free cell on row " + mid;
+            t.check("describe_site", !!site && !!d && d.includes(site.name) && !!home && !!dHome && dHome.includes(home.name) && dHome.includes("your home") && !!freeCell && dFree === null,
+                `${site ? `"${d}" for (${site.x},${site.y})` : "no site"}; centre (${mid},${mid}): ${JSON.stringify(dHome)}; ${freeCell ? `free cell (${freeCell.x},${freeCell.y}): ${JSON.stringify(dFree)}` : dFree}`);
 
             t.check("no_errors", t.errorsSoFar().length === 0,
                 t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during history checks");
