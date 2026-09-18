@@ -330,7 +330,7 @@
     "populationCap": 400,
     "siteFoundEvery": [60, 120],
     "maxSitesPerFaction": 3,
-    "warChancePerYear": 0.02,
+    "warChancePerYear": 0.008,
     "warLength": [3, 12],
     "sackChance": 0.35,
     "peaceChancePerYear": 0.08,
@@ -339,7 +339,7 @@
     "plagueChancePerYear": 0.004,
     "beastChancePerYear": 0.008,
     "rulerReign": [8, 45],
-    "relationDrift": { "war": -25, "peace": 10, "alliance": 30, "trade": 4, "sack": -15 },
+    "relationDrift": { "war": -12, "peace": 12, "alliance": 30, "trade": 4, "sack": -10 },
     "eventsKept": 400,
     "titles": ["Chief", "Elder", "Warden", "Speaker", "Reeve", "Thane", "Matriarch", "Patriarch", "Overseer"]
   },
