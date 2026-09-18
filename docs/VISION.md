@@ -78,6 +78,7 @@ Don't guess these. If a task depends on one, ask.
 - **Q12 Injuries:** with U7-style combat, also keep DF-style injuries (bleeding, broken or lost limbs, infections), or pure hit points?
 - ~~Q9 One world system~~: resolved 2026-09-18, a fresh seeded world (see the Decision log).
 - ~~Q10 Who builds colonist AI and factions~~: resolved 2026-09-18, Claude Code (engine).
+- **Q13 Height (asked 2026-09-18):** build up in the U7 way (an elevation per cell, walls and stairs with height, up to about three storeys, hills and cliffs with ramps) after the world build lands, with no digging down (the underground layer is retired)? Claude Code's recommendation: yes. This is construction step 4 plus the projection fix K3.
 - **Q8 Area edges:** crossing an edge currently switches the screen to the next area (DF-style). A seamless, U7-style continuous scroll is possible later, but it's harder in RMMZ. Keep switching for now?
 
 ## Decision log
