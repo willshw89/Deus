@@ -34,7 +34,7 @@
     let activeColonyWindow = null;
 
     //-----------------------------------------------------------------------------
-    // Colonist Data Model & Needs State
+    // Colonist Data Model & Verbatim Dwarf Fortress Agent AI
     //-----------------------------------------------------------------------------
     class Colonist {
         constructor(id, name, gender, eventId) {
@@ -44,10 +44,43 @@
             this.eventId = eventId;
             this.hp = 100;
             this.maxHp = 100;
-            this.hunger = 10;   // 0-100 (100 = starving)
-            this.thirst = 15;   // 0-100 (100 = dehydrated)
-            this.fatigue = 5;   // 0-100 (100 = exhausted)
-            this.mood = 80;     // 0-100 (100 = ecstatic)
+            this.visionRadius = 8; // Faction Fog of War sight radius
+
+            // DF Biological & Psychological Needs (0-100, 100 = critical)
+            this.hunger = 12;
+            this.thirst = 18;
+            this.fatigue = 8;
+            this.social = 20;
+            this.communeNature = 15;
+
+            // DF Personality Facets (The Soul)
+            if (gender === "Male") {
+                this.facets = {
+                    curiosity: 85,
+                    industriousness: 75,
+                    patience: 80,
+                    bravery: 70,
+                    loveAffection: 90,
+                    natureAffinity: 85
+                };
+            } else {
+                this.facets = {
+                    curiosity: 75,
+                    industriousness: 90,
+                    patience: 85,
+                    bravery: 70,
+                    loveAffection: 95,
+                    natureAffinity: 80
+                };
+            }
+
+            // DF Thought Journal & Mood System
+            this.thoughts = [
+                { text: "Awoke peacefully in the virgin glade.", strength: 12, time: Date.now() }
+            ];
+            this.moodScore = 30; // Aggregate emotional balance
+            this.mood = "Content";
+
             this.drafted = false;
             this.currentJob = "Idle";
             this.targetX = null;
@@ -56,29 +89,63 @@
         }
 
         get event() {
-            return $gameMap.event(this.eventId);
+            return $gameMap ? $gameMap.event(this.eventId) : null;
+        }
+
+        addThought(text, strength) {
+            this.thoughts.unshift({ text, strength, time: Date.now() });
+            if (this.thoughts.length > 8) this.thoughts.pop();
+            this.moodScore = Math.max(-100, Math.min(100, this.moodScore + strength));
+            this.updateMood();
+        }
+
+        updateMood() {
+            if (this.moodScore >= 50) this.mood = "Ecstatic";
+            else if (this.moodScore >= 25) this.mood = "Happy";
+            else if (this.moodScore >= 10) this.mood = "Content";
+            else if (this.moodScore >= -10) this.mood = "Fine";
+            else if (this.moodScore >= -25) this.mood = "Unhappy";
+            else if (this.moodScore >= -50) this.mood = "Stressed";
+            else this.mood = "Miserable";
         }
 
         tickNeeds() {
             if (this.drafted) return;
 
-            // Needs rate per tick
-            this.hunger = Math.min(100, this.hunger + 0.15);
-            this.thirst = Math.min(100, this.thirst + 0.20);
-            this.fatigue = Math.min(100, this.fatigue + 0.08);
+            // Metabolic & Psychological Need accumulation per tick
+            this.hunger = Math.min(100, this.hunger + 0.18);
+            this.thirst = Math.min(100, this.thirst + 0.24);
+            this.fatigue = Math.min(100, this.fatigue + 0.10);
+            this.social = Math.min(100, this.social + 0.15);
+            this.communeNature = Math.min(100, this.communeNature + 0.12);
 
-            // Autonomous Behavior Decision Tree
+            // Negative DF thoughts when needs are neglected
+            if (this.hunger > 75 && Math.random() < 0.05) {
+                this.addThought("Was annoyed by persistent hunger.", -5);
+            }
+            if (this.thirst > 75 && Math.random() < 0.05) {
+                this.addThought("Felt uncomfortably parched.", -6);
+            }
+            if (this.fatigue > 85 && Math.random() < 0.05) {
+                this.addThought("Felt exhausted from lack of sleep.", -7);
+            }
+            if (this.social > 80 && Math.random() < 0.04) {
+                this.addThought("Felt lonely and desired companionship.", -5);
+            }
+
             const ev = this.event;
-            if (!ev || ev.isMoving()) return;
+            if (!ev || ev.isMoving() || this.currentJob !== "Idle") return;
 
-            // 1. Thirst Resolution (Walk to stream bank at x=19)
-            if (this.thirst >= 60 && this.currentJob === "Idle") {
+            // DF Verbatim Priority Utility Decision Tree:
+            // 1. Critical Thirst -> Drink at freshwater stream
+            if (this.thirst >= 55) {
                 const streamTile = this.findNearestWater();
                 if (streamTile) {
                     this.currentJob = "Seeking Water";
                     this.assignMoveTo(streamTile.x, streamTile.y, () => {
-                        ev.setDirection(6); // Face East towards the stream
-                        this.thirst = 0;
+                        ev.setDirection(6); // Face stream
+                        this.thirst = Math.max(0, this.thirst - 65);
+                        this.addThought("Felt relieved drinking cool, clear stream water.", 12);
                         this.currentJob = "Idle";
                         if (window.$ufVisuals && window.$ufVisuals.addBark) {
                             window.$ufVisuals.addBark(ev, "Drinks sweet stream water.");
@@ -88,88 +155,111 @@
                 }
             }
 
-            // 2. Hunger Resolution (Walk to fruit tree at 15,14)
-            if (this.hunger >= 60 && this.currentJob === "Idle") {
-                const fruitIdx = this.inventory.findIndex(i => i.name === "Eden-Fruit");
-                if (fruitIdx >= 0) {
-                    this.inventory.splice(fruitIdx, 1);
-                    this.hunger = 0;
-                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                        window.$ufVisuals.addBark(ev, "Eats ripe fruit.");
-                    }
-                    return;
-                }
-
-                // Path to Fruit Tree
+            // 2. Critical Hunger -> Forage from ancient fruit tree
+            if (this.hunger >= 55) {
                 const tree = this.findFruitTree();
                 if (tree) {
                     this.currentJob = "Foraging Fruit";
-                    const targetX = this.id === 1 ? tree.x - 1 : tree.x + 1; // Adam approaches left, Eve approaches right
+                    const targetX = this.id === 1 ? tree.x - 1 : tree.x + 1;
                     this.assignMoveTo(targetX, tree.y + 1, () => {
                         ev.setDirection(8); // Face North toward tree canopy
-                        this.hunger = 0;
-                        this.inventory.push({ name: "Eden-Fruit", icon: "fruit" });
+                        this.hunger = Math.max(0, this.hunger - 70);
+                        this.addThought("Felt content after eating sweet, ripe fruit.", 14);
                         this.currentJob = "Idle";
                         if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                            window.$ufVisuals.addBark(ev, "Plucks and eats fresh fruit.");
+                            window.$ufVisuals.addBark(ev, "Plucks and savors ripe fruit.");
                         }
                     });
                     return;
                 }
             }
 
-            // 3. Fatigue Resolution (Rest under tree)
-            if (this.fatigue >= 80 && this.currentJob === "Idle") {
+            // 3. Severe Fatigue -> Rest under tree shade
+            if (this.fatigue >= 75) {
+                const tree = this.findFruitTree();
                 this.currentJob = "Sleeping";
-                if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                    window.$ufVisuals.addBark(ev, "Zzz... (Resting in the shade)");
-                }
-                setTimeout(() => {
-                    this.fatigue = 10;
-                    this.currentJob = "Idle";
-                }, 4000);
+                const targetX = this.id === 1 ? tree.x - 1 : tree.x + 1;
+                this.assignMoveTo(targetX, tree.y + 1, () => {
+                    this.addThought("Felt peaceful resting under the ancient tree boughs.", 10);
+                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                        window.$ufVisuals.addBark(ev, "Zzz... (Sleeping in shade)");
+                    }
+                    setTimeout(() => {
+                        this.fatigue = 5;
+                        this.currentJob = "Idle";
+                    }, 4000);
+                });
                 return;
             }
 
-            // 4. Social Affinity / Conversational Barks
-            if (this.currentJob === "Idle") {
-                const other = $colonyManager.colonists.find(c => c.id !== this.id);
-                if (other && other.event && Math.abs(ev.x - other.event.x) <= 3 && Math.abs(ev.y - other.event.y) <= 3) {
-                    if (Math.random() < 0.25) {
-                        const barks = [
-                            "The morning breeze is sweet.",
-                            "Look at the blossoms on the water.",
-                            "The earth here is rich and quiet.",
-                            "Listen... the river flows clear.",
-                            "The sun warms the glade.",
-                            "The wilderness stretches far beyond..."
+            // 4. Social Bonding & Conversation with Partner
+            if (this.social >= 40 && $colonyManager.colonists.length > 1) {
+                const partner = $colonyManager.colonists.find(c => c.id !== this.id);
+                if (partner && partner.event && partner.currentJob === "Idle") {
+                    this.currentJob = `Talking to ${partner.name}`;
+                    partner.currentJob = `Talking to ${this.name}`;
+
+                    const targetX = partner.event.x + (this.id === 1 ? -1 : 1);
+                    const targetY = partner.event.y;
+                    this.assignMoveTo(targetX, targetY, () => {
+                        ev.setDirection(this.id === 1 ? 6 : 4);
+                        if (partner.event) partner.event.setDirection(this.id === 1 ? 4 : 6);
+
+                        this.social = Math.max(0, this.social - 55);
+                        partner.social = Math.max(0, partner.social - 55);
+
+                        this.addThought(`Felt profound warmth conversing with ${partner.name}.`, 15);
+                        partner.addThought(`Felt profound warmth conversing with ${this.name}.`, 15);
+
+                        const dialogues = [
+                            [`The morning air is sweet, ${partner.name}.`, `It is good to be here with you, ${this.name}.`],
+                            [`Listen to the water, ${partner.name}. The river runs clear.`, `A peaceful place for our people to begin.`],
+                            [`Look at the blossoms above us, ${partner.name}.`, `The world is vast and full of wonder.`]
                         ];
-                        const chosen = barks[Math.floor(Math.random() * barks.length)];
+                        const pair = dialogues[Math.floor(Math.random() * dialogues.length)];
+
                         if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                            window.$ufVisuals.addBark(ev, chosen);
+                            window.$ufVisuals.addBark(ev, pair[0]);
+                            setTimeout(() => {
+                                if (partner.event && window.$ufVisuals) {
+                                    window.$ufVisuals.addBark(partner.event, pair[1]);
+                                }
+                            }, 1200);
                         }
-                    }
+
+                        setTimeout(() => {
+                            this.currentJob = "Idle";
+                            partner.currentJob = "Idle";
+                        }, 3000);
+                    });
+                    return;
                 }
             }
 
-            // 5. Autonomous Glade Strolling & Flora Exploration
-            if (this.currentJob === "Idle" && Math.random() < 0.20) {
-                const wanderX = 12 + Math.floor(Math.random() * 7); // 12 to 18
-                const wanderY = 13 + Math.floor(Math.random() * 5); // 13 to 17
-                if (!(wanderX === 15 && wanderY === 14)) { // Don't walk onto tree trunk
+            // 5. Nature Contemplation
+            if (this.communeNature >= 35 && Math.random() < 0.35) {
+                this.currentJob = "Contemplating";
+                const spotX = 14 + Math.floor(Math.random() * 5);
+                const spotY = 13 + Math.floor(Math.random() * 4);
+                this.assignMoveTo(spotX, spotY, () => {
+                    this.communeNature = Math.max(0, this.communeNature - 40);
+                    this.addThought("Felt tranquil contemplating the pristine wilderness.", 8);
+                    this.currentJob = "Idle";
+                    if (window.$ufVisuals && window.$ufVisuals.addBark) {
+                        window.$ufVisuals.addBark(ev, "Watches the gentle river ripples.");
+                    }
+                });
+                return;
+            }
+
+            // 6. Idle Wilderness Stroll (Expands Fog of War!)
+            if (Math.random() < 0.25) {
+                const wanderX = Math.max(5, Math.min(25, ev.x + Math.floor(Math.random() * 7) - 3));
+                const wanderY = Math.max(5, Math.min(25, ev.y + Math.floor(Math.random() * 7) - 3));
+                if (!(wanderX === 15 && wanderY === 14) && !(wanderX >= 20 && wanderX <= 22)) {
                     this.currentJob = "Strolling";
                     this.assignMoveTo(wanderX, wanderY, () => {
                         this.currentJob = "Idle";
-                        if (Math.random() < 0.3) {
-                            const thoughts = [
-                                "The air smells of pine and water.",
-                                "Soft green moss underfoot.",
-                                "The ancient tree watches over us."
-                            ];
-                            if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                                window.$ufVisuals.addBark(ev, thoughts[Math.floor(Math.random() * thoughts.length)]);
-                            }
-                        }
                     });
                 }
             }
@@ -189,12 +279,12 @@
                     if (onArrival) onArrival();
                     return;
                 }
-                const dir = ev.findDirection8DTo(gx, gy);
+                const dir = ev.findDirection8DTo ? ev.findDirection8DTo(gx, gy) : ev.findDirectionTo(gx, gy);
                 if (dir > 0) {
-                    ev.moveInDirection8D(dir);
+                    if (ev.moveInDirection8D) ev.moveInDirection8D(dir);
+                    else ev.moveStraight(dir);
                     setTimeout(checkStep, 250);
                 } else {
-                    // Reached adjacent or blocked
                     if (Math.abs(ev.x - gx) <= 1 && Math.abs(ev.y - gy) <= 1) {
                         this.targetX = null;
                         this.targetY = null;
@@ -208,19 +298,20 @@
         }
 
         findNearestWater() {
-            // The stream runs along columns 20-22. Bank is column 19.
             const ev = this.event;
-            const bankY = Math.max(10, Math.min(20, ev.y));
+            const bankY = Math.max(8, Math.min(22, ev ? ev.y : 15));
             return { x: 19, y: bankY };
         }
 
         findFruitTree() {
-            for (const ev of $gameMap.events()) {
-                if (ev && ev.event() && ev.event().note.includes("<tree>")) {
-                    return { x: ev.x, y: ev.y };
+            if ($gameMap) {
+                for (const ev of $gameMap.events()) {
+                    if (ev && ev.event() && ev.event().note.includes("<tree>")) {
+                        return { x: ev.x, y: ev.y };
+                    }
                 }
             }
-            return { x: 15, y: 14 }; // Ancient Fruit Tree center coordinate
+            return { x: 15, y: 14 };
         }
     }
 
@@ -288,8 +379,7 @@
     Scene_Map.prototype.isMenuEnabled = function() { return false; };
     Scene_Map.prototype.callMenu = function() {};
 
-    // Suppress map name banner window ("The Glade of Genesis")
-    Scene_Map.prototype.createMapNameWindow = function() {};
+    // Suppress the map name banner. The window must still be created: Scene_Map.stop/start/launchBattle call it.
     Window_MapName.prototype.open = function() {};
 
     // Suppress click destination pulse animation on the ground
@@ -383,8 +473,8 @@
     Window_UFColonistCard.prototype.constructor = Window_UFColonistCard;
 
     Window_UFColonistCard.prototype.initialize = function() {
-        const w = 340;
-        const h = 180;
+        const w = 380;
+        const h = 230;
         const x = 16;
         const y = Graphics.boxHeight - h - 16;
         Window_Base.prototype.initialize.call(this, new Rectangle(x, y, w, h));
@@ -397,39 +487,52 @@
         const c = $colonyManager.selectedColonist;
         if (!c) return;
 
+        // Line 0: Name, Gender, and DF Mood
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(`${c.name} (${c.gender})`, 0, 0, 200, "left");
+        this.drawText(`${c.name} (${c.gender})`, 0, 0, 180, "left");
 
-        // Draft Button Indicator
-        const draftText = c.drafted ? "[DRAFTED]" : "[UNDRAFTED]";
-        this.changeTextColor(c.drafted ? "#ff5555" : "#55ff55");
-        this.drawText(draftText, 200, 0, 100, "right");
+        let moodColor = "#ffff55";
+        if (c.mood === "Ecstatic" || c.mood === "Happy") moodColor = "#55ff55";
+        else if (c.mood === "Unhappy" || c.mood === "Stressed" || c.mood === "Miserable") moodColor = "#ff5555";
+        this.changeTextColor(moodColor);
+        this.drawText(`[${c.mood}]`, 180, 0, 160, "right");
 
+        // Line 1: Activity
         this.resetTextColor();
-        this.drawText(`Activity: ${c.currentJob}`, 0, 26, 300, "left");
+        this.drawText(`Job: ${c.currentJob}`, 0, 24, 340, "left");
 
         // Need Gauges
-        this.drawNeedGauge("Health", c.hp, c.maxHp, "#44cc44", 56);
-        this.drawNeedGauge("Hunger", Math.round(c.hunger), 100, "#ffaa44", 82, true);
-        this.drawNeedGauge("Thirst", Math.round(c.thirst), 100, "#44aaff", 108, true);
-        this.drawNeedGauge("Fatigue", Math.round(c.fatigue), 100, "#cc66ff", 134, true);
+        this.drawNeedGauge("Health", c.hp, c.maxHp, "#44cc44", 50);
+        this.drawNeedGauge("Hunger", Math.round(c.hunger), 100, "#ffaa44", 72, true);
+        this.drawNeedGauge("Thirst", Math.round(c.thirst), 100, "#44aaff", 94, true);
+        this.drawNeedGauge("Fatigue", Math.round(c.fatigue), 100, "#cc66ff", 116, true);
+        this.drawNeedGauge("Social", Math.round(100 - c.social), 100, "#ff66aa", 138);
+
+        // Recent DF Thought
+        if (c.thoughts && c.thoughts.length > 0) {
+            this.changeTextColor(ColorManager.systemColor());
+            this.drawText("Thought:", 0, 162, 70, "left");
+            this.changeTextColor("#dddddd");
+            const tText = `"${c.thoughts[0].text}"`;
+            this.drawText(tText, 72, 162, 270, "left");
+        }
     };
 
     Window_UFColonistCard.prototype.drawNeedGauge = function(label, current, max, color, y, reverse = false) {
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(label, 0, y, 70, "left");
+        this.drawText(label, 0, y, 65, "left");
 
-        const gx = 75;
+        const gx = 70;
         const gw = 180;
         const gh = 12;
 
         // Background
-        this.contents.fillRect(gx, y + 8, gw, gh, "rgba(20, 20, 25, 0.8)");
+        this.contents.fillRect(gx, y + 6, gw, gh, "rgba(20, 20, 25, 0.8)");
 
         // Rate
         const rate = Math.min(1.0, Math.max(0.0, current / max));
         const fillW = Math.round(gw * rate);
-        this.contents.fillRect(gx, y + 8, fillW, gh, color);
+        this.contents.fillRect(gx, y + 6, fillW, gh, color);
 
         // Value
         this.resetTextColor();
@@ -454,6 +557,20 @@
             }
         }
     }, 1000);
+
+    // Ensure Fog of War is active
+    if (typeof Sprite_FogOfWar === "undefined" && typeof require === "function") {
+        try {
+            const fs = require("fs");
+            const path = require("path");
+            const fowPath = path.join(path.dirname(process.mainModule.filename), "js", "plugins", "UF_FogOfWar.js");
+            if (fs.existsSync(fowPath)) {
+                require(fowPath);
+            }
+        } catch (e) {
+            console.warn("[UF] UF_FogOfWar auto-load note:", e.message);
+        }
+    }
 
     console.log("[UF] UF_ColonyOverseer initialized: Free camera, unit selection, tactile colonist card, and autonomous need loop active.");
 })();
