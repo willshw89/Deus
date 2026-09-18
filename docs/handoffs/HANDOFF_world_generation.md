@@ -1,69 +1,74 @@
-# HANDOFF: art for world generation
+# HANDOFF: art for the world (catalog v3)
 
-**From:** Claude Code (engine) · **To:** Gemini (art) · **Date:** 2026-09-18 · **Feature:** `UF_WorldGen` (commit b9151c8)
+**From:** Claude Code (engine) · **To:** Gemini (art) · **Date:** 2026-09-18 (rewritten for catalog v3; the first version of 2026-09-18 covered catalog v1) · **Feature:** the world build (`docs/design/WORLD_ARCHITECTURE.md`)
 
-## What the feature does
-Each 256×256 area of the world is generated when it's visited, from the world seed. It lays down ground, runs one river north-to-south through the whole world (passing just east of the glade), and scatters objects such as trees, bushes, and rocks in natural-looking patches. Everything it places comes from one data file, **`game/data/UF_WorldCatalog.json`**. **You add art to the world by adding an image and a catalog entry. No code.**
+## What the world is now
+One 256×256 area, generated from the seed like a DF world with DF's standard settings: climate fields → every DF biome, region character (tame/wild/primeval, cursed/neutral/blessed), rivers, lakes, a coast. Plants, stones and ore are placed by biome, thousands per map, as **objects on cells** (not events). Items lie on cells. Creatures and people are world units. Everything comes from **`game/data/UF_WorldCatalog.json`**. **You add art by adding an image (plus its sidecar) and a catalog entry. No code.**
 
-## 1. Making an object asset
-Follow `docs/ART_STANDARD.md` and `docs/GUIDE_25D.md`. For world objects specifically:
-- **Projection:** the object stands on one cell and leans up-left at 45°. Its base sits at the **bottom-right** of its footprint.
-- **File:** `game/img/characters/!$<Name>.png`. The `!$` prefix means one object per file, with no RMMZ 6-pixel lift. U7 stand-ins use `!$U7_<Name>.png`.
-- **Layout for now:** a standard RMMZ 3-column × 4-row sheet. The engine uses the **middle frame of the top row** (`pattern 1`, facing down). Put the object there. For now the other 11 frames can be copies of it.
-- **Size:** any frame size that fits the object's projected box (ART_STANDARD §3), at exactly 3×. Current examples: `!$TimberOak` 192×192 frames, `!$BerryBush` 48×48.
-- **Readability:** the player can zoom out to 1× (`UF_Camera`). Check the object is still recognizable at ⅓ size, and don't make common objects the brightest thing on screen; there can be hundreds per area.
-- **Known engine limit:** until the sidecar anchor loader exists (Claude Code, next), RMMZ anchors sprites at the **bottom-center** of the frame, so an object whose base is at the bottom-right will look shifted right. Draw to the standard anyway. The engine will catch up; don't compensate in the art.
+**Assets are designed with their interaction states in mind (user rule 2026-09-18).** A tree exists standing and as a stump; a bush full and picked; a campfire unlit and lit; a wall intact and ruined; prey alive and (soon) dead; the pair in clothing tiers. `docs/ASSET_INVENTORY.md` lists, for every asset in use, the states the engine needs. Draw each state as its own frame/column or its own file (see §2).
 
-## 2. Putting it into the world: a catalog entry
-Add an object to the `"objects"` list in `game/data/UF_WorldCatalog.json`:
+## How to find what needs art
+1. Run `"C:\Program Files\nodejs\node.exe" tools\generate_asset_inventory.js` (Claude Code owns the tool; you run it). It writes `docs/ASSET_INVENTORY.md`: every asset the engine uses, what uses it, the interaction states it needs, and its status: **missing**, **stock RMMZ** (must be replaced), **U7 stand-in** (must be replaced before release), **generated** (code-drawn placeholder; replace when a request says so), **original**. The "Needs a request" section lists assets with no `AR-` row yet; tell Claude Code, don't invent request IDs.
+2. In Playtest, the look label (top-left) names whatever is under the mouse and, on its last line, the art file and its status, e.g. `$U7_Wolf.png — U7 stand-in (AR-401)`.
+3. The test screenshots in `game/test_output/` (or a snapshot's `test_output/`) show the start at three zoom levels and a far corner; anything that looks wrong there is worth a note.
 
+## 1. Making an asset
+Follow `docs/ART_STANDARD.md` and `docs/GUIDE_25D.md`. For world things:
+- **Projection:** stands on one cell, leans up-left at 45°, base at the **bottom-right** of its footprint. The engine now reads sidecar anchors (`anchor: [x, y]` in exported pixels = the pixel that sits on the bottom-right corner of the footprint); without a sidecar it anchors bottom-center.
+- **Files:** objects and items `game/img/characters/!$U7_<Name>.png` (U7 stand-ins) or `!$<Name>.png` (originals), creatures and people `$U7_<Name>.png` / `$<Name>.png`. Always a sidecar `<same name>.json` (format: `docs/ASSET_REQUESTS.md` → Sprite sheet + sidecar format).
+- **Layout:** a standard RMMZ 3-column × 4-row sheet. Objects and items use one frame: the sidecar's `animations.stand[0]`, else the middle frame of the top row. Creatures and people use the four rows as facings S, W, E, N (E and W transposed, never mirrored) and the three columns as walk frames.
+- **States as separate catalog entries:** a picked bush is `berry_bush_bare`, a felled tree is `stump`. Each state is its own object entry with its own `image` (or the same image with a `tint`). So "standing + stump" means two entries pointing at two images (or one image and a tint until the stump art exists).
+- **Readability at 1×** (the farthest zoom): thousands of these are on screen; keep them quiet and recognizable.
+
+## 2. Catalog entries (what the engine reads)
+Only these four lists are yours to edit: `objects`, `items.types`, `wildlife.species`, `people`. Everything else in the file is engine data (Claude Code). The catalog is JSON; check it before saving:
+`"C:\Program Files\nodejs\node.exe" -e "JSON.parse(require('fs').readFileSync('game/data/UF_WorldCatalog.json','utf8'))"`
+
+### 2.1 An object (plant, stone, ore, building piece)
 ```json
-{
-  "id": "birch",
-  "name": "Birch",
-  "image": "!$Birch",
-  "characterIndex": 0,
-  "note": "<tree> <harvestable>",
-  "density": 0.03,
-  "clump": 0.8,
-  "clumpScale": 20,
-  "avoidWater": 2,
-  "maxPerArea": 200
-}
+{ "id": "birch", "name": "Birch", "image": "!$U7_Birch", "tint": "#e6f0e0",
+  "tags": ["tree", "wood"],
+  "actions": { "chop": { "work": 200, "yields": { "log": 2 }, "becomes": "stump" } },
+  "clump": 0.7, "clumpScale": 14, "avoidWater": 1 }
 ```
-
 | Field | Meaning |
 |---|---|
-| `id` | Unique, lowercase, no spaces. It also seeds the object's own patch pattern, so **changing it moves every placement**. |
-| `name` | What the look panel shows. Generic, descriptive names only (AGENTS rule 7: no invented lore). |
-| `image` | File name in `img/characters/`, without `.png` |
-| `characterIndex` | 0 for `!$`/`$` single-object files |
-| `note` | Tags other systems read: `<tree>` (can be felled), `<harvestable>`, `<food>`, `<resource: stone>`, `<resource: mineral>`. Ask Claude Code before inventing a new tag. |
-| `density` | Chance per cell at the **center of a patch** (0–1). 0.01 = sparse, 0.05 = thick forest. |
-| `clump` | 0 = evenly scattered everywhere; 1 = only in patches |
-| `clumpScale` | Patch size in cells (about 10 = small groves, 30 = large forests) |
-| `avoidWater` | Keep this many cells clear of the river |
-| `maxPerArea` | Hard cap per area. All objects together are capped by `maxObjectsPerArea` (800) to keep the game fast. |
+| `id`, `name` | Unique id; the name the look label shows (generic, descriptive; no invented lore) |
+| `image` | File in `img/characters/` without `.png` (a `$`-style 3×4 sheet). Or `tile: { "sheet": "Outside_B", "id": 157 }` for a 48×48 tile from a tileset image, or `gen: "stockpile"` for a code-drawn placeholder |
+| `tint` | Optional `#rrggbb` multiplied over the image: one image, many kinds (birch = tinted oak) |
+| `passable`, `under` | `passable: true` = units walk through it; `under: true` = drawn under units (grass, stones, beds) |
+| `tags` | What other systems look for: `tree`, `bush`, `plant`, `stone`, `ore`, `gem`, `food`, `fiber`, `straw`, `remains`, `ruin`, `building`, `wall`, `bed`, `stockpile`, `fire`, `workplace`, `cursed`. Ask before inventing a tag. |
+| `actions` | The interactions: `chop`, `gather`, `pick`, `quarry`, `mine`, each with `work` (frames), `yields` (item id → count) and `becomes` (object id after, or `null` = gone). **These define the states the art needs.** |
+| `regrow` | `{ "to": "berry_bush", "hours": 48 }`: the picked state grows back |
+| `build` | For buildings: `{ "items": { "log": 1 }, "work": 90 }` (unbuilt/built states); `ruin`: what it becomes when a site is sacked |
+| `clump`, `clumpScale`, `avoidWater` | Placement pattern (patches) and distance from water; **where** an object appears is decided by the biome tables (`biomes.*.plants`), which are Claude Code's |
 
-Rules:
-- **Order matters:** earlier entries claim cells first. Put rare or important objects before common ones.
-- Everything is deterministic: the same seed gives the same world. Don't try to make it random; the seed does that.
-- The catalog is JSON. One missing comma stops the whole game from booting. Check it (`node -e "JSON.parse(require('fs').readFileSync('game/data/UF_WorldCatalog.json','utf8'))"`) before saving.
-- **Don't** place objects by editing `Map002.json` or by writing scripts that bake maps. That bypasses the seeded world (VISION V4/V16).
+Existing entries and their images are the list in the catalog itself (about 55 objects). Every `!$U7_*` image is a stand-in to replace; `tile:` entries use stock RMMZ tiles to replace (AR-102/AR-103/AR-300).
 
-## 3. Ground and water tiles
-`"terrain"` in the catalog chooses the ground (`grass`) and river (`water`) tiles by RMMZ tile ID. Water is an **autotile**: the engine computes its edges and banks, so a new water tileset must follow RMMZ's A1 autotile layout (ASSET_REQUESTS AR-001). When AR-001 lands, Claude Code switches the tileset and tile IDs.
+### 2.2 An item (lies on the ground, gets carried and stored)
+```json
+{ "id": "stone_axe", "name": "Stone axe", "image": "!$U7_Item_StoneAxe", "tags": ["tool", "axe"], "stack": 1, "tool": { "chop": 2 } }
+```
+`food: { "hunger": 25 }` for food, `tool: { jobType: multiplier }` for tools, `wear: { "tier": 1 }` for clothing (which walk sheet tier the pair switches to). Items are drawn at the cell with the middle frame of the top row; 48×48 or 96×96 frames both work.
+
+### 2.3 A creature
+```json
+{ "id": "deer", "name": "Deer", "image": "$U7_Deer", "kind": "grazer", "herd": [2, 5], "wander": 14,
+  "hunt": { "work": 120, "flees": true }, "yields": { "meat_raw": 3, "hide": 1, "bone": 2 },
+  "biomes": { "forest_temperate_broadleaf": 3, "grassland_temperate": 2 } }
+```
+`kind` grazer/vermin/flier (prey), predator, monster. `tint` for variants (jackal = tinted dog). `minSavagery: "wild"` / `alignment: "cursed"` restrict where monsters appear. **Art states:** 4 facings × stand/walk now; a dead/carcass frame is the next request (the engine drops the yields as items for now).
+
+### 2.4 People (faction members at sites)
+`people.<species> = { "images": ["$U7_Townsman", "$U7_Ranger"], "tint": "#c8ffc8" }`: walk sheets round-robin per species, tinted to tell species apart until AR-400 originals exist.
+
+### 2.5 The pair's clothing tiers
+`start.pair[].tiers` = walk sheets by tier: 0 naked (`$Adam`/`$Eve`), 1 woven wraps (`$U7_Adam_T1`/`$U7_Eve_T1`), 2 hides (`_T2`), 3 tailored (`_T3`). The pair switches sheet when they equip clothing they made.
+
+## 3. Ground and water
+Ground kinds are drawn in code (`UF_Tiles`, `UF_GenGround_A2`, 22 kinds) until AR-100 delivers an A2 sheet in RMMZ's autotile layout with the kinds in the catalog's `groundKinds` order. Water uses the stock `Outside_A1` kinds until AR-101 delivers an A1 sheet with the nine kinds in `water.surface` (fresh, pond, marsh, swamp, icy, brackish, salt, deep, blighted) — every kind, every autotile piece filled. **Don't copy over the stock sheets**; deliver `U7_Outside_A1.png`/`U7_Outside_A2.png` and a kind map in Notes, and Claude Code switches `tilesets.surface` in the catalog.
 
 ## 4. Checking your work
-1. Run `run_tests.bat worldgen` (it needs `UF_Test`, `UF_World`, and `UF_WorldGen` registered). `worldgen.catalog_images_exist` fails if an `image` doesn't match a file, and `worldgen.objects_placed` fails if an object with `density > 0` never gets placed.
-2. In game, zoom out with the mouse wheel (`UF_Camera`) and walk the view out of the glade to see the patches.
-3. Update the request in `docs/ASSET_REQUESTS.md` to `DELIVERED` and note what you checked.
-
-## Current catalog entries and their art status
-| id | image | Review notes (Claude Code, 2026-09-18) |
-|---|---|---|
-| oak | `!$TimberOak` | Leans up-left correctly; crude but usable as a placeholder |
-| pine | `!$PineTree` | Broken into disconnected triangle fragments. Needs a redraw (AR-021) |
-| berry_bush | `!$BerryBush` | Very small at 3×; hard to read at 1× |
-| granite_boulder | `!$GraniteBoulder` | Reads as a thin diagonal slab, not a boulder. Only the leaning face is drawn, with no top or body (AR-022) |
-| ironstone | `!$IronstoneDeposit` | Same slab problem as the boulder |
+1. Run `run_tests.bat worldgen` and `run_tests.bat objects` (or `node tools/test_snapshot.js --suite objects`): `objects.images_exist` fails if an `image` or `tile.sheet` doesn't match a file; `objects.catalog_types` fails if a `becomes`/`regrow.to`/`ruin` id or a yielded item id doesn't exist.
+2. Playtest: zoom out (mouse wheel), hover things (look label), right-click things (the interaction menu shows the actions your entry declares).
+3. Update the request in `docs/ASSET_REQUESTS.md` (`DELIVERED`, with what you checked) and, for a U7 stand-in, the Stand-ins list in `docs/STATUS.md`.
