@@ -136,30 +136,70 @@
                 anchorY = start.y * size + off.y + (minY + maxY) / 2;
             }
         }
-        if (anchorX === null && cat.start) {
-            // No glade map: run the river just east of the start clearing.
-            const mid = Math.floor(size / 2);
-            anchorX = start.x * size + mid + (cat.start.clearRadius || 0) + (r.offsetFromGlade || 0) + (r.halfWidth || 0);
-            anchorY = start.y * size + mid;
-        }
-        if (anchorX === null) {
-            anchorX = start.x * size + size / 2;
-            anchorY = start.y * size + size / 2;
-        }
         const hw = r.halfWidth || 0;
         const period = r.meanderPeriodCells || 97;
         const amp = r.meanderCells || 0;
-        const straight = r.straightNearGladeCells || 0;
-        const phase = ((state.seed % 1000) / 1000) * Math.PI * 2;
-        const center = gy => {
-            const d = gy - anchorY;
-            const env = clamp01((Math.abs(d) - straight) / 32);
-            return anchorX + amp * env * (0.7 * Math.sin((2 * Math.PI * d) / period + phase) + 0.3 * Math.sin((2 * Math.PI * d) / (period * 0.43) + 2 * phase));
+        const phase = unit(state.seed, 0x7e11) * Math.PI * 2;
+        const mid = Math.floor(size / 2);
+        const startGX = start.x * size + mid, startGY = start.y * size + mid;
+        const make = (ax, ay, straight) => {
+            const center = gy => {
+                const d = gy - ay;
+                const env = straight > 0 ? clamp01((Math.abs(d) - straight) / 32) : 1;
+                return ax + amp * env * (0.7 * Math.sin((2 * Math.PI * d) / period + phase) + 0.3 * Math.sin((2 * Math.PI * d) / (period * 0.43) + 2 * phase));
+            };
+            return { anchorX: ax, anchorY: ay, halfWidth: hw, center, isWater: (gx, gy) => Math.abs(gx - Math.round(center(gy))) <= hw };
         };
+        // An editor template with water: the river joins it and runs straight through it.
+        if (anchorX !== null) return make(anchorX, anchorY, 24);
+        // Otherwise a random place in the world each game, never through the start.
+        const keep = r.keepAwayFromStart || 14;
+        const worldWidth = state.areasX * size;
+        for (let i = 0; i < 60; i++) {
+            const m = make(Math.floor(unit(state.seed, 0x21e5, i) * worldWidth), startGY, 0);
+            let clear = true;
+            for (let dy = -keep; dy <= keep && clear; dy += 2) {
+                if (Math.abs(Math.round(m.center(startGY + dy)) - startGX) <= keep + hw) clear = false;
+            }
+            if (clear) return m;
+        }
+        return make(startGX + keep * 3, startGY, 0);
+    };
+
+    /** A pond at a random direction and distance from the start (catalog start.pond), so the pair can drink. */
+    WorldGen.pondModel = function(state) {
+        const cat = this.catalog();
+        const p = cat && cat.start && cat.start.pond;
+        if (!p) return null;
+        const size = state.size, mid = Math.floor(size / 2), start = state.startArea;
+        const [dmin, dmax] = p.distance || [10, 30];
+        const [rmin, rmax] = p.radius || [2, 5];
+        const angle = unit(state.seed, 0x90ed, 0) * Math.PI * 2;
+        const dist = dmin + unit(state.seed, 0x90ed, 1) * (dmax - dmin);
+        const rx = rmin + unit(state.seed, 0x90ed, 2) * (rmax - rmin), ry = rmin + unit(state.seed, 0x90ed, 3) * (rmax - rmin);
+        const cx = start.x * size + mid + Math.cos(angle) * dist, cy = start.y * size + mid + Math.sin(angle) * dist;
+        return { cx, cy, rx, ry, isWater: (gx, gy) => ((gx - cx) / rx) ** 2 + ((gy - cy) / ry) ** 2 <= 1 };
+    };
+
+    /** Surface water at a world cell (river or start pond). */
+    WorldGen.waterModel = function(state) {
+        const river = this.riverModel(state), pond = this.pondModel(state);
         return {
-            anchorX, anchorY, halfWidth: hw, center,
-            isWater: (gx, gy) => Math.abs(gx - Math.round(center(gy))) <= hw
+            river, pond,
+            isWater: (gx, gy) => (!!river && river.isWater(gx, gy)) || (!!pond && pond.isWater(gx, gy))
         };
+    };
+
+    /** The pair's names for this seed: { male, female }. */
+    WorldGen.startNames = function(seed) {
+        const n = (this.catalog().start || {}).names;
+        if (!n) return { male: "Adam", female: "Eve" };
+        const pick = (list, k) => list[Math.floor(unit(seed, 0x4e41, k) * list.length)];
+        const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+        const male = cap(pick(n.start, 0) + pick(n.male, 1));
+        let female = cap(pick(n.start, 2) + pick(n.female, 3));
+        if (female === male) female = cap(pick(n.start, 4) + pick(n.female, 5));
+        return { male, female };
     };
 
     //-------------------------------------------------------------------------
@@ -179,36 +219,60 @@
             for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) ctx.setTile(x, y, 0, terrain.grass.tileId);
         }
 
-        // 2. River
-        const river = WorldGen.riverModel(state);
-        if (river && terrain.water) {
+        // 2. Water: the world's river and the start pond, edges computed from both together
+        const waterModel = WorldGen.waterModel(state);
+        const river = waterModel.river;
+        const isWaterAt = waterModel.isWater;
+        const waterMask = new Uint8Array(size * size);
+        if (terrain.water) {
             const base = autotileBase(terrain.water.tileId);
-            for (let y = 0; y < size; y++) {
-                const gy = gy0 + y;
-                const c = Math.round(river.center(gy));
-                for (let gx = c - river.halfWidth; gx <= c + river.halfWidth; gx++) {
-                    const x = gx - gx0;
-                    if (x < 0 || x >= size) continue;
-                    const id = terrain.water.autotile
-                        ? base + autotileShape((dx, dy) => river.isWater(gx + dx, gy + dy))
-                        : terrain.water.tileId;
-                    ctx.setTile(x, y, 0, id);
+            const paint = (x, y) => {
+                if (x < 0 || y < 0 || x >= size || y >= size || waterMask[y * size + x]) return;
+                const gx = gx0 + x, gy = gy0 + y;
+                if (!isWaterAt(gx, gy)) return;
+                waterMask[y * size + x] = 1;
+                ctx.setTile(x, y, 0, terrain.water.autotile ? base + autotileShape((dx, dy) => isWaterAt(gx + dx, gy + dy)) : terrain.water.tileId);
+            };
+            if (river) {
+                for (let y = 0; y < size; y++) {
+                    const c = Math.round(river.center(gy0 + y)) - gx0;
+                    for (let x = c - river.halfWidth; x <= c + river.halfWidth; x++) paint(x, y);
+                }
+            }
+            const pond = waterModel.pond;
+            if (pond) {
+                for (let y = Math.floor(pond.cy - pond.ry) - gy0; y <= Math.ceil(pond.cy + pond.ry) - gy0; y++) {
+                    for (let x = Math.floor(pond.cx - pond.rx) - gx0; x <= Math.ceil(pond.cx + pond.rx) - gx0; x++) paint(x, y);
+                }
+            }
+        }
+        // Distance to water (0 = water, up to 4), for keeping objects off the banks.
+        const waterDist = new Uint8Array(size * size).fill(9);
+        for (let i = 0; i < waterMask.length; i++) if (waterMask[i]) waterDist[i] = 0;
+        for (let pass = 1; pass <= 4; pass++) {
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+                if (waterDist[y * size + x] !== pass - 1) continue;
+                for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && ny >= 0 && nx < size && ny < size && waterDist[ny * size + nx] > pass) waterDist[ny * size + nx] = pass;
                 }
             }
         }
 
-        // 3. The start (VISION V4): a clearing in the middle of the start area with the fruit tree and the colonists.
-        //    Placed first, so its events get IDs 1, 2, 3... in catalog order (UF_ColonyOverseer uses Adam = 1, Eve = 2).
+        // 3. The start (VISION V4, revised 2026-09-18): a man and a woman with names from the seed, in the middle.
+        //    Placed first, so their events get IDs 1 and 2 (UF_ColonyOverseer uses them).
         const occupied = new Uint8Array(size * size);
         const start = ctx.isStart && !ctx.templateRect ? cat.start : null;
         const clearRadius = start ? (start.clearRadius || 0) : 0;
         if (start) {
             if (start.note) ctx.map.note = start.note;
             if (start.displayName) ctx.map.displayName = start.displayName;
+            const names = WorldGen.startNames(state.seed);
+            const fill = s => String(s || "").replace(/\{male\}/g, names.male).replace(/\{female\}/g, names.female);
             for (const e of start.events || []) {
                 const x = ctx.center.x + (e.dx || 0), y = ctx.center.y + (e.dy || 0);
                 ctx.addEvent({
-                    name: e.name, x, y, note: e.note || "",
+                    name: fill(e.name), x, y, note: fill(e.note),
                     image: { characterName: e.image.characterName, characterIndex: e.image.characterIndex || 0, direction: e.image.direction || 2, pattern: 1 },
                     priorityType: 1, through: false, directionFix: !!e.directionFix, walkAnime: e.walkAnime !== false
                 });
@@ -228,7 +292,7 @@
         // 5. Objects, in catalog order; one per cell
         placeObjects(ctx, cat.objects || [], cat.maxObjectsPerArea, occupied, (x, y, gx, gy, o) => {
             if (ctx.isTemplateCell(x, y) || (ctx.isStart && inClearing(x, y))) return false;
-            return !river || Math.abs(gx - Math.round(river.center(gy))) > river.halfWidth + (o.avoidWater || 0);
+            return waterDist[y * size + x] > (o.avoidWater || 0);
         });
     }
 
@@ -302,14 +366,18 @@
         const W = UF.World;
         if (!ug || !W.state || W.layers() < 1) return [];
         const st = W.state, size = st.size, mid = Math.floor(size / 2);
-        const river = WorldGen.riverModel(st);
+        const water = WorldGen.waterModel(st);
+        const nearWater = (gx, gy) => {
+            for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (water.isWater(gx + dx, gy + dy)) return true;
+            return false;
+        };
         const isStart = W.isStartArea(ax, ay, 0);
         const clear = isStart && cat.start ? (cat.start.clearRadius || 0) : 0;
         const margin = Math.max(6, (ug.chamberRadius || 3) + 2);
         const ok = (x, y) => {
             if (x < margin || y < margin || x >= size - margin || y >= size - margin) return false;
             const gx = ax * size + x, gy = ay * size + y;
-            if (river && Math.abs(gx - Math.round(river.center(gy))) <= river.halfWidth + 2) return false;
+            if (nearWater(gx, gy)) return false;
             if (clear && (x - mid) ** 2 + (y - mid) ** 2 <= (clear + 2) ** 2) return false;
             return !(isStart && W.templatePaints(x, y));
         };
@@ -512,36 +580,42 @@
             };
             const span = cols => (cols.length ? `x ${cols[0]}-${cols[cols.length - 1]}` : "none");
             const here = W.buildArea(a.x, a.y);
-            const south = W.buildArea(a.x, a.y + 1);
-            const lastRow = waterCols(here, size - 1), firstRow = waterCols(south, 0);
-            t.check("river_continuous_between_areas", lastRow.length > 0 && lastRow.some(x => firstRow.includes(x)),
-                `bottom row of area (${a.x},${a.y}): ${span(lastRow)}; top row of area (${a.x},${a.y + 1}): ${span(firstRow)}`);
+            // The river is wherever the seed put it: check continuity in the area column it actually runs through.
+            const river = WorldGen.riverModel(st);
+            const edgeGy = a.y * size + size - 1;
+            const riverAreaX = Math.floor(Math.round(river.center(edgeGy)) / size);
+            if (W.inWorld(riverAreaX, a.y + 1)) {
+                const above = W.buildArea(riverAreaX, a.y), below = W.buildArea(riverAreaX, a.y + 1);
+                const lastRow = waterCols(above, size - 1), firstRow = waterCols(below, 0);
+                t.check("river_continuous_between_areas", lastRow.length > 0 && lastRow.some(x => firstRow.includes(x)),
+                    `bottom row of area (${riverAreaX},${a.y}): ${span(lastRow)}; top row of area (${riverAreaX},${a.y + 1}): ${span(firstRow)}`);
+            }
 
-            // The start: fruit tree, Adam and Eve in the middle of the start area, with the right event IDs.
+            // The start: a man and a woman with seed-generated names, in the middle, as events 1 and 2.
             const mid = Math.floor(size / 2);
             if (cat.start && !W.template()) {
-                const expected = (cat.start.events || []).map((e, i) => ({ id: i + 1, name: e.name, x: mid + (e.dx || 0), y: mid + (e.dy || 0) }));
+                const names = WorldGen.startNames(st.seed);
+                const fill = s => s.replace(/\{male\}/g, names.male).replace(/\{female\}/g, names.female);
+                const expected = (cat.start.events || []).map((e, i) => ({ id: i + 1, name: fill(e.name), x: mid + (e.dx || 0), y: mid + (e.dy || 0) }));
                 const wrong = expected.filter(e => !here.events[e.id] || here.events[e.id].name !== e.name || here.events[e.id].x !== e.x || here.events[e.id].y !== e.y);
-                t.check("start_in_middle", wrong.length === 0 && here.note.includes("<glade>"),
-                    wrong.length ? `not as expected: ${wrong.map(e => `${e.name} (event ${e.id} at ${e.x},${e.y})`).join(", ")}` : expected.map(e => `${e.name} = event ${e.id} at (${e.x},${e.y})`).join("; "));
+                t.check("start_in_middle", wrong.length === 0 && here.note.includes("<glade>") && !here.events.some(e => e && /<fruit>/.test(e.note) && !/<ufObject:/.test(e.note)),
+                    wrong.length ? `not as expected: ${wrong.map(e => `${e.name} (event ${e.id} at ${e.x},${e.y})`).join(", ")}` : `${expected.map(e => `${e.name} = event ${e.id} at (${e.x},${e.y})`).join("; ")}; no fixed tree`);
+                const other = WorldGen.startNames(st.seed + 1);
+                t.check("names_vary_by_seed", other.male !== names.male || other.female !== names.female, `this world: ${names.male} and ${names.female}; next seed: ${other.male} and ${other.female}`);
             }
 
-            // The river runs beside the start so the colonists can drink.
-            let gRight = -1, gTop = Infinity, gBottom = -1, gLeft = Infinity;
-            if (W.template()) {
-                for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (W.templatePaints(x, y)) {
-                    gRight = Math.max(gRight, x); gLeft = Math.min(gLeft, x); gTop = Math.min(gTop, y); gBottom = Math.max(gBottom, y);
+            // Water within reach of the start (the pond), and the river never through the start.
+            const pond = cat.start && cat.start.pond;
+            const reach = pond ? pond.distance[1] + pond.radius[1] + 2 : 40;
+            let nearest = Infinity;
+            for (let y = Math.max(0, mid - reach); y <= Math.min(size - 1, mid + reach); y++) {
+                for (let x = Math.max(0, mid - reach); x <= Math.min(size - 1, mid + reach); x++) {
+                    if (isKind(here.data[y * size + x], waterBase)) nearest = Math.min(nearest, Math.hypot(x - mid, y - mid));
                 }
-            } else if (cat.start) {
-                const r = cat.start.clearRadius || 0;
-                gLeft = mid - r; gRight = mid + r; gTop = mid - r; gBottom = mid + r;
             }
-            const midRow = Math.round((gTop + gBottom) / 2);
-            const cols = waterCols(here, midRow);
-            const gap = cols.length ? cols[0] - gRight - 1 : Infinity;
-            const allowed = (cat.river.offsetFromGlade || 0) + 1;
-            t.check("river_by_glade", cols.length > 0 && gap <= allowed,
-                `glade x ${gLeft}-${gRight}; water on its middle row (${midRow}) at ${span(cols)}; gap ${gap} cells (allowed ${allowed})`);
+            t.check("water_near_start", nearest <= reach, `nearest water ${nearest === Infinity ? "none" : nearest.toFixed(1) + " cells"} from the pair (reach ${reach})`);
+            const riverGap = Math.abs(Math.round(river.center(a.y * size + mid)) - (a.x * size + mid));
+            t.check("river_not_through_start", riverGap > (cat.river.keepAwayFromStart || 14), `the river passes ${riverGap} cells from the start`);
 
             const objects = here.events.filter(e => e && /<ufObject:/.test(e.note));
             const counts = {};
@@ -560,9 +634,9 @@
             const signature = map => map.events.filter(e => e && /<ufObject:/.test(e.note)).map(e => `${e.x},${e.y},${e.note}`).join("|");
             t.check("deterministic", signature(W.buildArea(a.x, a.y)) === signature(here), `${objects.length} objects identical on rebuild`);
 
-            // Look at the glade's south side from the farthest zoom: river and forest should continue past the glade.
+            // Look at the start from the farthest zoom.
             if (UF.Camera) UF.Camera.setLevel(UF.Camera.levels.length - 1);
-            $gamePlayer.locate(Math.round((gLeft + gRight) / 2), Math.min(size - 1, gBottom + 12));
+            $gamePlayer.locate(mid, mid);
             await t.waitFrames(30);
             t.screenshot("zoomed_out_glade");
             if (UF.Camera) UF.Camera.setLevel(1);

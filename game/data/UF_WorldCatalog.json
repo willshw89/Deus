@@ -6,23 +6,31 @@
     "water": { "tileId": 2048, "autotile": true, "about": "RMMZ Outside A1 water; edges are computed (stand-in until AR-001)" }
   },
   "start": {
-    "about": "The fixed start (VISION V4): a clearing in the middle of the start area with the fruit tree, Adam and Eve. Events get IDs in this order; UF_ColonyOverseer needs Adam = 1 and Eve = 2.",
+    "about": "The only fixed part of a new game (VISION V4, revised 2026-09-18): a man and a woman in the middle of the start area, with names generated from the seed. Event IDs follow this order; UF_ColonyOverseer needs the man = 1 and the woman = 2. {male} and {female} are replaced by the generated names.",
     "note": "<glade>",
-    "clearRadius": 8,
+    "clearRadius": 3,
     "events": [
-      { "name": "Adam", "dx": -2, "dy": 1, "image": { "characterName": "$Adam", "direction": 6 }, "note": "<colonist: Adam> <gender: Male>" },
-      { "name": "Eve", "dx": 2, "dy": 1, "image": { "characterName": "$Eve", "direction": 4 }, "note": "<colonist: Eve> <gender: Female>" },
-      { "name": "Ancient Fruit Tree", "dx": 0, "dy": 0, "image": { "characterName": "!$FruitTree", "direction": 2 }, "note": "<tree> <fruit> <canopy> <harvestable>", "directionFix": true, "walkAnime": false }
-    ]
+      { "name": "{male}", "dx": -1, "dy": 0, "image": { "characterName": "$Adam", "direction": 6 }, "note": "<colonist: {male}> <gender: Male>" },
+      { "name": "{female}", "dx": 1, "dy": 0, "image": { "characterName": "$Eve", "direction": 4 }, "note": "<colonist: {female}> <gender: Female>" }
+    ],
+    "names": {
+      "start": ["al", "bra", "cae", "dor", "el", "fen", "gar", "hel", "is", "jor", "ka", "lia", "mer", "na", "or", "per", "ro", "sa", "tam", "ul", "ver", "wil", "yve", "zor"],
+      "male": ["an", "ar", "en", "ic", "on", "or", "ric", "us", "ald", "em"],
+      "female": ["a", "ia", "ina", "elle", "ra", "wen", "ys", "ette", "ah", "ine"]
+    },
+    "pond": {
+      "about": "A pond at a random direction and distance from the start, so the pair can drink. Its size varies too.",
+      "distance": [10, 30],
+      "radius": [2, 5]
+    }
   },
   "river": {
     "enabled": true,
     "halfWidth": 1,
     "meanderCells": 18,
     "meanderPeriodCells": 97,
-    "straightNearGladeCells": 24,
-    "offsetFromGlade": 6,
-    "about": "One river running north-south through the whole world. It connects to water painted in the glade map, or passes offsetFromGlade cells east of the glade if the glade has none."
+    "keepAwayFromStart": 14,
+    "about": "One river running north-south through the whole world, at a random place each game (never through the start)."
   },
   "objects": [
     {

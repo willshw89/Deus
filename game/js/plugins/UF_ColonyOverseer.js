@@ -180,13 +180,13 @@
                 }
             }
 
-            // 3. Severe Fatigue -> Rest under tree shade
+            // 3. Severe Fatigue -> Rest (by the nearest food source if there is one, otherwise right here)
             if (this.fatigue >= 75) {
-                const tree = this.findFruitTree();
+                const spot = this.findFruitTree() || { x: ev.x + (this.id === 1 ? 1 : -1), y: ev.y - 1 };
                 this.currentJob = "Sleeping";
-                const targetX = this.id === 1 ? tree.x - 1 : tree.x + 1;
-                this.assignMoveTo(targetX, tree.y + 1, () => {
-                    this.addThought("Felt peaceful resting under the ancient tree boughs.", 10);
+                const targetX = this.id === 1 ? spot.x - 1 : spot.x + 1;
+                this.assignMoveTo(targetX, spot.y + 1, () => {
+                    this.addThought("Felt rested after sleeping on the open ground.", 10);
                     if (window.$ufVisuals && window.$ufVisuals.addBark) {
                         window.$ufVisuals.addBark(ev, "Zzz... (Sleeping in shade)");
                     }
@@ -430,15 +430,21 @@
             return null;
         }
 
+        // Nearest food source on this map: anything tagged <food> or <fruit> (berry bushes, fruit trees). null if none.
         findFruitTree() {
-            if ($gameMap) {
-                for (const ev of $gameMap.events()) {
-                    if (ev && ev.event() && ev.event().note.includes("<tree>") && ev.event().note.includes("<fruit>")) {
-                        return { x: ev.x, y: ev.y };
-                    }
+            const ev = this.event;
+            if (!$gameMap || !ev) return null;
+            let best = null, bestD = Infinity;
+            for (const other of $gameMap.events()) {
+                const note = other && other.event() ? other.event().note : "";
+                if (!/<food>|<fruit>/.test(note)) continue;
+                const d = Math.abs(other.x - ev.x) + Math.abs(other.y - ev.y);
+                if (d < bestD) {
+                    best = { x: other.x, y: other.y };
+                    bestD = d;
                 }
             }
-            return { x: 127, y: 126 };
+            return best;
         }
     }
 
@@ -461,9 +467,14 @@
         }
 
         initGladeColonists() {
+            // Names come from the start events (generated from the world seed by UF_WorldGen).
+            const nameOf = (id, fallback) => {
+                const ev = $gameMap && $gameMap.event(id);
+                return ev && ev.event() && ev.event().note.includes("<colonist") ? ev.event().name : fallback;
+            };
             this.colonists = [
-                new Colonist(1, "Adam", "Male", 1),
-                new Colonist(2, "Eve", "Female", 2)
+                new Colonist(1, nameOf(1, "Adam"), "Male", 1),
+                new Colonist(2, nameOf(2, "Eve"), "Female", 2)
             ];
             this.societyProgress = {
                 wood: 0,
