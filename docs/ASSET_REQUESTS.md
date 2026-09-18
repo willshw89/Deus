@@ -68,6 +68,21 @@ Every object or character image comes with a JSON sidecar of the same name (`UF_
 | AR-044 | Cave objects: ore vein, cave boulder, 2 variants each | Underground generator | Medium | REQUESTED (surface ironstone/boulder images reused) |
 | AR-050 | Generic person, 4 facings, walk frames | Arrivals (V19), test units | Medium | REQUESTED (RMMZ `People1` used by tests) |
 
+| AR-100 | Biome ground tiles: 16 A2 kinds (temperate/tropical/dry grass, shrubland, forest and needle floor, tundra, snow, ice, sand, stony, red clay, rock, mud, swamp mud, dirt) | Biomes (DF_MECHANICS §3), Wave 1 | High | REQUESTED (only RMMZ Outside grass in use) |
+| AR-101 | Water and lava A1 autotiles: fresh, brackish, salt, deep ocean, swamp, lava | Biomes, caves, fluids | High | REQUESTED (RMMZ Outside water 2048 in use) |
+| AR-102 | Trees per biome family (19 kinds), standing + stump | Biomes, felling | High | REQUESTED |
+| AR-103 | Small plants: desert shrub, cactus ×2, reeds, fern, wildflowers ×2, cave mushrooms ×2, lichen | Biomes | Medium | REQUESTED |
+| AR-120 | Region looks: cursed and blessed variants of grass and forest floor | Region modifiers | Low | REQUESTED |
+| AR-200 | Ground items (15 kinds), also used as gump icons | Items on the ground, Wave 2 | High | REQUESTED |
+| AR-300 | Construction: walls (3 materials, all segment pieces), floors, door, stairs, ramp, campfire, beds, lean-to | Building one segment at a time, Wave 3 | High | REQUESTED |
+| AR-400 | People: 7 species × male/female, 4-facing walk sheets | Factions, colonists, arrivals, Wave 4 | High | REQUESTED |
+| AR-401 | Wildlife: 15 archetypes (surface and cave) | Starting population, Wave 4 | High | REQUESTED |
+| AR-402 | Monsters: 4 region-bound | Starting population | Medium | REQUESTED |
+| AR-403 | Domestic animals: 4 | Taming | Low | REQUESTED |
+| AR-500 | Workshops (10), furniture (6), tool and weapon icons (8) | Crafting, Wave 5 | Medium | REQUESTED |
+
+Details and order for AR-100 to AR-500: `docs/handoffs/HANDOFF_df_art.md` (waves 1–5).
+
 **RMMZ stand-in rule (user, 2026-09-18):** whenever the engine uses a stock RMMZ asset (tiles, characters, UI), it gets a request here for Gemini to make an original replacement. The "Status" column names the stock asset in use.
 
 ### AR-001 Ground tiles

@@ -13,7 +13,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V1 | Engine: RPG Maker MZ v1.10.0. Behavior comes from plugins; RMMZ core files are never modified. The project must stay openable and playtestable in the RMMZ editor. |
 | V2 | The look is Ultima VII's 2.5D view, and **everything** on screen follows the same projection: people, trees, walls, items. Spec: `ART_STANDARD.md`. |
 | V3 | 8-directional movement on a square grid. |
-| V4 | No protagonist. The game starts in a fixed small area with one fruit tree, one naked man, and one naked woman (working names Adam and Eve). Everything beyond that area is randomly generated. |
+| V4 | No protagonist. The game starts with one naked man and one naked woman in the middle of the start area, with names generated each game. Everything else, including the start's surroundings, is randomly generated. (Revised 2026-09-18: the fixed fruit tree was removed.) |
 | V5 | The player commands units the way DF does (designations, jobs, orders). |
 | V6 | DF's systems are all in: randomness and world generation, gathering, construction, needs, combat. Implemented originally, not copied. |
 | V7 | Many races. Not dwarf-centric. |
@@ -26,6 +26,15 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V17 | **Colonists act on their own.** Adam and Eve pursue goals without player input: survive first, then gather, build shelter, and grow into a society. Player orders change priorities; they're never required. |
 | V18 | **Factions are generated with the world**, with relations from allied to hostile between them. |
 | V19 | **Entities can arrive along the edges of the 256×256 map at any time** (migrants, traders, raiders, wildlife), depending on the factions. |
+| V21 | **What people do shows up physically.** A fire is a fire object, a house is built one wall segment at a time, dropped items lie on the ground as objects. |
+| V22 | **Water can be changed like in DF:** it flows, can be dug, dammed, and channeled, and pours between layers. |
+| V23 | **People have complex AI:** a daily pattern of life, plus productive work chosen by their personality traits and skills, without player input. |
+| V24 | **The world is populated at the start:** wildlife, monsters, and faction members, generated with the world. |
+| V25 | **Everything in the world is interactive,** like in DF (trees, rocks, water, items, buildings, creatures). |
+| V26 | **People have children** (relationships, pregnancy, growing up, aging). |
+| V27 | **Biomes with distinct features:** every DF world-block starting state (all biome types, region character, water bodies, caves) exists, each with its own look, plants, and creatures. |
+| V28 | **DF's core gameplay mechanics are adopted as mechanics** (not DF's text or data). The plan is `docs/design/DF_MECHANICS.md`. |
+| V29 | **Combat works like Ultima VII's:** real time, combat mode, per-character attack modes, click targeting, stats and equipment decide hits (DF_MECHANICS §8). |
 | V20 | **An underground layer** under the whole world. Each 256×256 underground area corresponds cell for cell to the surface area above it. They connect at random spots (cave mouths), and the underground has its own fog of war. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
@@ -57,6 +66,8 @@ Don't guess these. If a task depends on one, ask.
 - **Q5 Facings:** do sprites have 4 facings (like U7) or 8? This roughly doubles the art. See `ART_STANDARD.md` §4.
 - **Q6 Scale:** pixel scale and screen size. See `ART_STANDARD.md` §2.
 - **Q7 World size in areas:** how many areas across and down? The default is 6×6, which at the proposed scale is about Ultima VII's world size (U7 was 3072×3072 of its own tiles = 1536×1536 of our cells). It's a plugin parameter, so it's easy to change.
+- **Q11 Life timescale:** at 1 game hour per real minute, a DF-length year would take over 100 real hours. How long should a year, a pregnancy, and a childhood be in real play time?
+- **Q12 Injuries:** with U7-style combat, also keep DF-style injuries (bleeding, broken or lost limbs, infections), or pure hit points?
 - ~~Q9 One world system~~: resolved 2026-09-18, a fresh seeded world (see the Decision log).
 - ~~Q10 Who builds colonist AI and factions~~: resolved 2026-09-18, Claude Code (engine).
 - **Q8 Area edges:** crossing an edge currently switches the screen to the next area (DF-style). A seamless, U7-style continuous scroll is possible later, but it's harder in RMMZ. Keep switching for now?
@@ -73,3 +84,5 @@ Append only, newest at the bottom.
 - 2026-09-18: The user resolved Q9: a **fresh seeded 256×256 world** each game, Adam and Eve in the middle, and fog of war explored by them and faction members. Gemini's baked Map002 world is retired. Q10: under the division of labor, factions are Claude Code's; Gemini's `UF_Factions.js` draft gets reviewed first.
 - 2026-09-18: The user added V19: arrivals along the map edges at any time.
 - 2026-09-18: The user added V20: an underground layer connected to the surface at random spots, same grid, with its own fog of war. Also: every stock RMMZ asset the engine uses gets a replacement request for Gemini.
+- 2026-09-18: The user revised V4: **no fixed tree**; the only fixed part of a new game is a man and a woman, with names generated each game. Factions, surface, and caves are all random per New Game. Time: 1 game hour per real minute, with no clock on screen; speed-up allowed, never backward.
+- 2026-09-18: The user added V21–V29 (physical results of actions, DF-style water, complex personality-driven AI, populated world at start, everything interactive, children, distinct biomes, DF mechanics as the model, U7-style combat).
