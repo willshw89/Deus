@@ -282,6 +282,33 @@
         generators.sort((a, b) => a.order - b.order);
     };
     World.generators = () => generators.map(g => g.name);
+    World.unregisterGenerator = function(name) {
+        const i = generators.findIndex(g => g.name === name);
+        if (i >= 0) generators.splice(i, 1);
+        return i >= 0;
+    };
+
+    /** True where the start template (the glade map) paints something: any tile on layers 0-3, or an event. */
+    World.templatePaints = function(x, y) {
+        const tpl = this.template();
+        if (!tpl) return false;
+        if (!this._templateMask || this._templateMask.source !== tpl) {
+            const mask = new Uint8Array(tpl.width * tpl.height);
+            for (let ty = 0; ty < tpl.height; ty++) {
+                for (let tx = 0; tx < tpl.width; tx++) {
+                    for (let layer = 0; layer < 4; layer++) {
+                        if (tpl.data[(layer * tpl.height + ty) * tpl.width + tx]) mask[ty * tpl.width + tx] = 1;
+                    }
+                }
+            }
+            for (const e of tpl.events) if (e) mask[e.y * tpl.width + e.x] = 1;
+            this._templateMask = { source: tpl, mask };
+        }
+        const off = this.templateOffset();
+        const tx = x - off.x, ty = y - off.y;
+        if (tx < 0 || ty < 0 || tx >= tpl.width || ty >= tpl.height) return false;
+        return this._templateMask.mask[ty * tpl.width + tx] === 1;
+    };
 
     /** Build an area's $dataMap object in memory. Pure: doesn't touch the current map. */
     World.buildArea = function(ax, ay) {
@@ -311,6 +338,8 @@
         const ctx = {
             areaX: ax, areaY: ay, width: size, height: size, seed: st.seed,
             rng: this.rngFor(ax, ay, 0), isStart: !!tpl, templateRect, index,
+            /** True where the glade map paints this cell (start area only). Generators should leave these alone. */
+            isTemplateCell: (x, y) => !!tpl && World.templatePaints(x, y),
             setTile(x, y, layer, tileId) {
                 if (x >= 0 && y >= 0 && x < size && y < size && layer >= 0 && layer < 6) data[index(x, y, layer)] = tileId;
             },
@@ -325,16 +354,23 @@
         for (const g of generators) g.fn(ctx);
 
         if (tpl) {
-            for (let layer = 0; layer < 6; layer++) {
-                for (let y = 0; y < tpl.height; y++) {
-                    for (let x = 0; x < tpl.width; x++) {
+            // The template is an overlay: only cells it paints (any tile on layers 0-3) replace the generated
+            // ground, so a template map bigger than the glade (Map002 is 256x256) leaves the rest generated.
+            for (let y = 0; y < tpl.height; y++) {
+                for (let x = 0; x < tpl.width; x++) {
+                    let painted = false;
+                    for (let layer = 0; layer < 4; layer++) {
+                        if (tpl.data[(layer * tpl.height + y) * tpl.width + x]) painted = true;
+                    }
+                    if (!painted) continue;
+                    for (let layer = 0; layer < 6; layer++) {
                         data[index(x + off.x, y + off.y, layer)] = tpl.data[(layer * tpl.height + y) * tpl.width + x];
                     }
                 }
             }
             for (let i = 1; i < events.length; i++) {
                 const e = events[i];
-                if (e && e.x >= off.x && e.x < off.x + tpl.width && e.y >= off.y && e.y < off.y + tpl.height) events[i] = null;
+                if (e && this.templatePaints(e.x, e.y)) events[i] = null;
             }
             for (const e of tpl.events) {
                 if (!e || (e.meta && e.meta.ufUnit)) continue;

@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "about": "World generation catalog read by UF_WorldGen. Art is added here without touching code. How: docs/handoffs/HANDOFF_world_generation.md",
+  "terrain": {
+    "grass": { "tileId": 2863, "autotile": false, "about": "RMMZ Outside A2 grass (stand-in until AR-001)" },
+    "water": { "tileId": 2048, "autotile": true, "about": "RMMZ Outside A1 water; edges are computed (stand-in until AR-001)" }
+  },
+  "river": {
+    "enabled": true,
+    "halfWidth": 1,
+    "meanderCells": 18,
+    "meanderPeriodCells": 97,
+    "straightNearGladeCells": 24,
+    "offsetFromGlade": 6,
+    "about": "One river running north-south through the whole world. It connects to water painted in the glade map, or passes offsetFromGlade cells east of the glade if the glade has none."
+  },
+  "objects": [
+    {
+      "id": "oak",
+      "name": "Oak",
+      "image": "!$TimberOak",
+      "characterIndex": 0,
+      "note": "<tree> <harvestable>",
+      "density": 0.05,
+      "clump": 0.85,
+      "clumpScale": 18,
+      "avoidWater": 2,
+      "maxPerArea": 300
+    },
+    {
+      "id": "pine",
+      "name": "Pine",
+      "image": "!$PineTree",
+      "characterIndex": 0,
+      "note": "<tree> <harvestable>",
+      "density": 0.04,
+      "clump": 0.9,
+      "clumpScale": 26,
+      "avoidWater": 3,
+      "maxPerArea": 250
+    },
+    {
+      "id": "berry_bush",
+      "name": "Berry bush",
+      "image": "!$BerryBush",
+      "characterIndex": 0,
+      "note": "<harvestable> <food>",
+      "density": 0.01,
+      "clump": 0.6,
+      "clumpScale": 10,
+      "avoidWater": 1,
+      "maxPerArea": 120
+    },
+    {
+      "id": "granite_boulder",
+      "name": "Granite boulder",
+      "image": "!$GraniteBoulder",
+      "characterIndex": 0,
+      "note": "<resource: stone>",
+      "density": 0.012,
+      "clump": 0.7,
+      "clumpScale": 14,
+      "avoidWater": 1,
+      "maxPerArea": 100
+    },
+    {
+      "id": "ironstone",
+      "name": "Ironstone outcrop",
+      "image": "!$IronstoneDeposit",
+      "characterIndex": 0,
+      "note": "<resource: mineral>",
+      "density": 0.01,
+      "clump": 0.95,
+      "clumpScale": 30,
+      "avoidWater": 2,
+      "maxPerArea": 30
+    }
+  ],
+  "maxObjectsPerArea": 800
+}
