@@ -86,5 +86,46 @@
       "maxPerArea": 30
     }
   ],
-  "maxObjectsPerArea": 800
+  "maxObjectsPerArea": 800,
+  "underground": {
+    "about": "The layer(s) below the surface. Same 256x256 cells as the area above; cave mouths link cell (x, y) on the surface to (x, y) below. Tiles are RMMZ Dungeon-tileset stand-ins until ASSET_REQUESTS AR-040..AR-043.",
+    "tilesetId": 4,
+    "floor": { "tileId": 3200, "autotile": true, "about": "Dungeon A2 'Ground C (Rock Cave)'" },
+    "rock": { "tileId": 5936, "autotile": true, "about": "Dungeon A4 'Wall B (Rock Cave)' top; made impassable by region 250" },
+    "connectionTileId": 1549,
+    "connectionTileAbout": "Dungeon A5 'Stairs A (Rock)': the way up, under each cave mouth",
+    "surfaceConnectionTileId": 42,
+    "surfaceConnectionTileAbout": "Outside B 'Hole B (Wood Ladder)': the cave mouth on the surface",
+    "connectionsPerArea": 4,
+    "guaranteeNearStart": 16,
+    "chamberRadius": 3,
+    "caveScale": 28,
+    "caveThreshold": 0.58,
+    "tunnelWidth": 0.035,
+    "maxObjectsPerArea": 400,
+    "objects": [
+      {
+        "id": "cave_ironstone",
+        "name": "Ironstone vein",
+        "image": "!$IronstoneDeposit",
+        "characterIndex": 0,
+        "note": "<resource: mineral>",
+        "density": 0.02,
+        "clump": 0.9,
+        "clumpScale": 20,
+        "maxPerArea": 150
+      },
+      {
+        "id": "cave_boulder",
+        "name": "Boulder",
+        "image": "!$GraniteBoulder",
+        "characterIndex": 0,
+        "note": "<resource: stone>",
+        "density": 0.02,
+        "clump": 0.6,
+        "clumpScale": 12,
+        "maxPerArea": 150
+      }
+    ]
+  }
 }

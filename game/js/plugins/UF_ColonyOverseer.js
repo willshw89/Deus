@@ -88,8 +88,10 @@
             this.inventory = [];
         }
 
+        // Only the colonist's own event: in other areas and layers, the same event ID is some other object.
         get event() {
-            return $gameMap ? $gameMap.event(this.eventId) : null;
+            const ev = $gameMap ? $gameMap.event(this.eventId) : null;
+            return ev && ev.event() && ev.event().note.includes("<colonist") ? ev : null;
         }
 
         addThought(text, strength) {
@@ -533,10 +535,8 @@
         if ($gamePlayer) {
             $gamePlayer.setTransparent(true);
             $gamePlayer.setThrough(true);
-            // Center camera in the middle of the 256x256 map at (128, 128)
-            if ($gameMap && $gameMap.width() >= 100) {
-                $gameMap.setDisplayPos(128 - 8, 128 - 6);
-            }
+            // The camera stays where the view (player) was placed: UF_World starts New Game in the middle, and layer or
+            // area changes keep the same cell. (A fixed snap to (128,128) here broke both.)
         }
         if ($colonyManager && $colonyManager.colonists.length === 0) {
             $colonyManager.initGladeColonists();

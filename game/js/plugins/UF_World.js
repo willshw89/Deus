@@ -67,6 +67,14 @@
  * @default 16
  * @desc Frames per cell for units in areas that aren't on screen (16 = RMMZ move speed 4).
  *
+ * @param UndergroundLayers
+ * @text Underground layers
+ * @type number
+ * @min 0
+ * @max 9
+ * @default 1
+ * @desc Layers below the surface. Each has an area under every surface area, same size and same cell coordinates.
+ *
  * @help
  * The world is a grid of areas. Areas have no map files: each one is built
  * in memory when visited, from the world seed, the registered generators,
@@ -97,8 +105,12 @@
         templateMapId: num("StartTemplateMapId", 0),
         startInWorld: (P.StartInWorld || "true") === "true",
         seed: num("Seed", 0),
-        unitStepFrames: Math.max(1, num("UnitStepFrames", 16))
+        unitStepFrames: Math.max(1, num("UnitStepFrames", 16)),
+        layers: Math.max(0, Math.min(9, num("UndergroundLayers", 1)))
     });
+    // Region IDs with engine meaning on area maps (layer 5 of the map data).
+    const ROCK_REGION = 250;       // solid rock: never passable
+    const CONNECTION_REGION = 251; // a way between layers: always passable
     const EVENT_BASE = 1000;
     const TEMPLATE_VAR = "$ufWorldTemplate";
     const STUCK_LIMIT = 300; // frames a unit on screen may fail to move before its goal is dropped
@@ -109,8 +121,10 @@
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
-    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
-    const areaKey = (ax, ay) => `${ax},${ay}`;
+    // Areas are { x, y, z }. z is the layer: 0 = surface, 1 = first underground layer. Missing z means 0.
+    const zOf = a => (a && a.z) || 0;
+    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
+    const areaKey = (ax, ay, az = 0) => (az ? `${ax},${ay},${az}` : `${ax},${ay}`);
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
     // Facing for 8-way movement with 4 facings (GUIDE_25D §3.5): NE→E, SE→S, SW→W, NW→N.
@@ -205,6 +219,7 @@
             seed: s,
             areasX: CONFIG.areasX,
             areasY: CONFIG.areasY,
+            layers: CONFIG.layers,
             size: CONFIG.size,
             startArea: { x: Math.floor(CONFIG.areasX / 2), y: Math.floor(CONFIG.areasY / 2) },
             units: {},
@@ -250,18 +265,41 @@
     // Areas
 
     const worldDims = () => (World.state ? World.state : CONFIG);
+    const layerCount = () => (World.state && World.state.layers !== undefined ? World.state.layers : CONFIG.layers);
 
-    World.inWorld = (ax, ay) => ax >= 0 && ay >= 0 && ax < worldDims().areasX && ay < worldDims().areasY;
-    World.areaMapId = (ax, ay) => CONFIG.mapIdBase + ay * worldDims().areasX + ax;
+    World.layers = () => layerCount();
+    World.inWorld = (ax, ay, az = 0) =>
+        ax >= 0 && ay >= 0 && ax < worldDims().areasX && ay < worldDims().areasY && az >= 0 && az <= layerCount();
+    /** Map ID of an area: MapIdBase + z * (areas per layer) + ay * areasX + ax. Surface IDs are unchanged from before layers. */
+    World.areaMapId = (ax, ay, az = 0) => CONFIG.mapIdBase + az * worldDims().areasX * worldDims().areasY + ay * worldDims().areasX + ax;
     World.areaOfMapId = function(mapId) {
         const d = worldDims();
+        const perLayer = d.areasX * d.areasY;
         const i = mapId - CONFIG.mapIdBase;
-        if (!Number.isInteger(i) || i < 0 || i >= d.areasX * d.areasY) return null;
-        return { x: i % d.areasX, y: Math.floor(i / d.areasX) };
+        if (!Number.isInteger(i) || i < 0 || i >= perLayer * (layerCount() + 1)) return null;
+        const r = i % perLayer;
+        return { x: r % d.areasX, y: Math.floor(r / d.areasX), z: Math.floor(i / perLayer) };
     };
     World.isAreaMap = mapId => World.areaOfMapId(mapId) !== null;
     World.currentArea = () => (window.$gameMap && World.state ? World.areaOfMapId($gameMap.mapId()) : null);
-    World.isStartArea = (ax, ay) => !!World.state && World.state.startArea.x === ax && World.state.startArea.y === ay;
+    World.isStartArea = (ax, ay, az = 0) => !!World.state && az === 0 && World.state.startArea.x === ax && World.state.startArea.y === ay;
+    World.ROCK_REGION = ROCK_REGION;
+    World.CONNECTION_REGION = CONNECTION_REGION;
+
+    // Ways between layers. UF_WorldGen provides them: every connection links cell (x, y) of layer z to (x, y) of z + 1.
+    let connectionProvider = null;
+    const connectionCache = new Map();
+    World.setConnectionProvider = function(fn) {
+        connectionProvider = fn;
+        connectionCache.clear();
+    };
+    /** [{ x, y }] cells in area (ax, ay) that lead between layers. */
+    World.connectionsFor = function(ax, ay) {
+        if (!connectionProvider || !this.state || layerCount() < 1) return [];
+        const key = `${this.state.seed}:${ax},${ay}`;
+        if (!connectionCache.has(key)) connectionCache.set(key, connectionProvider(ax, ay) || []);
+        return connectionCache.get(key);
+    };
 
     World.rngFor = function(ax, ay, salt = 0) {
         const s = typeof salt === "string" ? hashString(salt) : salt;
@@ -311,7 +349,7 @@
     };
 
     /** Build an area's $dataMap object in memory. Pure: doesn't touch the current map. */
-    World.buildArea = function(ax, ay) {
+    World.buildArea = function(ax, ay, az = 0) {
         const st = this.state;
         const size = st.size;
         const cells = size * size;
@@ -319,7 +357,7 @@
         const data = new Array(cells * 6).fill(0);
         for (let i = 0; i < cells; i++) data[i] = CONFIG.groundTileId;
 
-        const tpl = this.isStartArea(ax, ay) ? this.template() : null;
+        const tpl = this.isStartArea(ax, ay, az) ? this.template() : null;
         const off = this.templateOffset();
         const templateRect = tpl ? { x: off.x, y: off.y, width: tpl.width, height: tpl.height } : null;
         const events = [null];
@@ -332,13 +370,13 @@
             width: size, height: size, note: "",
             parallaxLoopX: false, parallaxLoopY: false, parallaxName: "", parallaxShow: false, parallaxSx: 0, parallaxSy: 0,
             scrollType: 0, specifyBattleback: false, tilesetId: CONFIG.tilesetId,
-            data, events, ufArea: { x: ax, y: ay }
+            data, events, ufArea: { x: ax, y: ay, z: az }
         };
 
         const ctx = {
-            areaX: ax, areaY: ay, width: size, height: size, seed: st.seed,
-            rng: this.rngFor(ax, ay, 0), isStart: this.isStartArea(ax, ay), templateRect, index,
-            map, // the $dataMap being built: generators may set map.note / map.displayName
+            areaX: ax, areaY: ay, areaZ: az, width: size, height: size, seed: st.seed,
+            rng: this.rngFor(ax, ay, az), isStart: this.isStartArea(ax, ay, az), templateRect, index,
+            map, // the $dataMap being built: generators may set map.note / map.displayName / map.tilesetId
             center: { x: Math.floor(size / 2), y: Math.floor(size / 2) },
             /** True where the glade map paints this cell (start area only). Generators should leave these alone. */
             isTemplateCell: (x, y) => !!tpl && World.templatePaints(x, y),
@@ -386,37 +424,37 @@
             for (const k of ["autoplayBgm", "autoplayBgs", "bgm", "bgs"]) map[k] = JSON.parse(JSON.stringify(tpl[k]));
         }
 
-        const diff = st.diffs[areaKey(ax, ay)];
+        const diff = st.diffs[areaKey(ax, ay, az)];
         if (diff) for (const i in diff) data[Number(i)] = diff[i];
 
-        for (const u of this.unitsInArea(ax, ay)) events[EVENT_BASE + u.id] = unitEventData(u);
+        for (const u of this.unitsInArea(ax, ay, az)) events[EVENT_BASE + u.id] = unitEventData(u);
         return map;
     };
 
-    /** Change a tile anywhere in the world. Recorded, so it survives leaving the area and saving. */
-    World.setTile = function(ax, ay, x, y, layer, tileId) {
+    /** Change a tile anywhere in the world (az = layer, 0 = surface). Recorded, so it survives leaving the area and saving. */
+    World.setTile = function(ax, ay, x, y, layer, tileId, az = 0) {
         const size = this.state.size;
-        if (!this.inWorld(ax, ay) || x < 0 || y < 0 || x >= size || y >= size || layer < 0 || layer > 5) return false;
+        if (!this.inWorld(ax, ay, az) || x < 0 || y < 0 || x >= size || y >= size || layer < 0 || layer > 5) return false;
         const i = (layer * size + y) * size + x;
-        const key = areaKey(ax, ay);
+        const key = areaKey(ax, ay, az);
         (this.state.diffs[key] = this.state.diffs[key] || {})[i] = tileId;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.data) {
+        if (sameArea({ x: ax, y: ay, z: az }, this.currentArea()) && $dataMap && $dataMap.data) {
             $dataMap.data[i] = tileId;
             const scene = SceneManager._scene;
             if (scene instanceof Scene_Map && scene._spriteset) scene._spriteset._tilemap.refresh();
         }
-        emit("world:tileChanged", { x: ax, y: ay }, x, y, layer, tileId);
+        emit("world:tileChanged", { x: ax, y: ay, z: az }, x, y, layer, tileId);
         return true;
     };
 
     /** Read a tile. For areas not on screen this builds the area, which is slow; don't call it every frame. */
-    World.getTile = function(ax, ay, x, y, layer) {
+    World.getTile = function(ax, ay, x, y, layer, az = 0) {
         const size = this.state.size;
         const i = (layer * size + y) * size + x;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.data) return $dataMap.data[i];
-        const diff = this.state.diffs[areaKey(ax, ay)];
+        if (sameArea({ x: ax, y: ay, z: az }, this.currentArea()) && $dataMap && $dataMap.data) return $dataMap.data[i];
+        const diff = this.state.diffs[areaKey(ax, ay, az)];
         if (diff && diff[i] !== undefined) return diff[i];
-        return this.buildArea(ax, ay).data[i];
+        return this.buildArea(ax, ay, az).data[i];
     };
 
     //-------------------------------------------------------------------------
@@ -467,7 +505,7 @@
         if ($dataMap && $dataMap.events) $dataMap.events[eid] = null;
     }
 
-    /** Add a unit. spec: { name, image: { characterName, characterIndex }, area: { x, y }, x, y, dir, data } */
+    /** Add a unit. spec: { name, image: { characterName, characterIndex }, area: { x, y, z }, x, y, dir, data } (z: 0 = surface) */
     World.addUnit = function(spec) {
         const st = this.state;
         const id = st.nextUnitId++;
@@ -476,7 +514,7 @@
             id,
             name: spec.name || `TEST_unit_${id}`,
             image: { characterName: image.characterName || "", characterIndex: image.characterIndex || 0 },
-            area: { x: spec.area.x, y: spec.area.y },
+            area: { x: spec.area.x, y: spec.area.y, z: zOf(spec.area) },
             x: spec.x | 0,
             y: spec.y | 0,
             dir: spec.dir || 2,
@@ -491,7 +529,7 @@
     };
     World.unit = id => (World.state && World.state.units[id]) || null;
     World.units = () => (World.state ? Object.values(World.state.units) : []);
-    World.unitsInArea = (ax, ay) => World.units().filter(u => u.area.x === ax && u.area.y === ay);
+    World.unitsInArea = (ax, ay, az = 0) => World.units().filter(u => u.area.x === ax && u.area.y === ay && zOf(u.area) === az);
     World.unitByName = name => World.units().find(u => u.name === name) || null;
     World.removeUnit = function(id) {
         const u = this.unit(id);
@@ -501,11 +539,11 @@
         emit("world:unitRemoved", u);
         return true;
     };
-    /** Send a unit toward { area: { x, y }, x, y }. It walks there, across areas, on or off screen. */
+    /** Send a unit toward { area: { x, y, z }, x, y }. It walks there across areas and layers, on or off screen. */
     World.sendUnit = function(id, goal) {
         const u = this.unit(id);
-        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y)) return false;
-        u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0 };
+        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, zOf(goal.area))) return false;
+        u.goal = { area: { x: goal.area.x, y: goal.area.y, z: zOf(goal.area) }, x: goal.x | 0, y: goal.y | 0 };
         u.stuckFrames = 0;
         return true;
     };
@@ -527,7 +565,19 @@
         let x = pos.x + dx, y = pos.y + dy, ax = pos.area.x, ay = pos.area.y;
         if (x < 0) { ax--; x += size; } else if (x >= size) { ax++; x -= size; }
         if (y < 0) { ay--; y += size; } else if (y >= size) { ay++; y -= size; }
-        return { ax, ay, x, y, crossed: ax !== pos.area.x || ay !== pos.area.y };
+        return { ax, ay, az: zOf(pos.area), x, y, crossed: ax !== pos.area.x || ay !== pos.area.y };
+    }
+
+    // When a unit's goal is on another layer: the nearest connection in its area, and which way to go (dz = +1 down, -1 up).
+    function layerTarget(u) {
+        const dz = Math.sign(zOf(u.goal.area) - zOf(u.area));
+        if (dz === 0) return null;
+        let best = null, bestD = Infinity;
+        for (const c of World.connectionsFor(u.area.x, u.area.y)) {
+            const d = Math.max(Math.abs(c.x - u.x), Math.abs(c.y - u.y));
+            if (d < bestD) { best = c; bestD = d; }
+        }
+        return best ? { x: best.x, y: best.y, dz } : null;
     }
 
     function goalDelta(u) {
@@ -543,48 +593,76 @@
         emit("world:unitArrived", u);
     }
 
-    function moveUnitToArea(u, ax, ay, x, y) {
-        const from = { x: u.area.x, y: u.area.y };
+    function moveUnitToArea(u, ax, ay, x, y, az = zOf(u.area)) {
+        const from = { x: u.area.x, y: u.area.y, z: zOf(u.area) };
         if (World.isDisplayed(u)) despawnUnitEvent(u);
-        u.area = { x: ax, y: ay };
+        u.area = { x: ax, y: ay, z: az };
         u.x = x;
         u.y = y;
         if (World.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
-        emit("world:unitAreaChanged", u, from, { x: ax, y: ay });
+        emit("world:unitAreaChanged", u, from, { x: ax, y: ay, z: az });
     }
 
-    // Off screen: one cell per UnitStepFrames, straight toward the goal. Terrain isn't checked yet (see system doc).
+    const goalReached = u => goalDelta(u).dist === 0 && zOf(u.goal.area) === zOf(u.area);
+
+    // Off screen: one cell per UnitStepFrames, straight toward the goal (or first toward a connection when the goal
+    // is on another layer). Terrain isn't checked off screen yet (see system doc).
     function stepOffscreen(u) {
+        if (goalReached(u)) return arrive(u);
+        const lt = layerTarget(u);
+        if (lt) {
+            if (u.x === lt.x && u.y === lt.y) return moveUnitToArea(u, u.area.x, u.area.y, u.x, u.y, zOf(u.area) + lt.dz);
+            const dx = Math.sign(lt.x - u.x), dy = Math.sign(lt.y - u.y);
+            u.dir = facing(dx, dy);
+            u.x += dx;
+            u.y += dy;
+            return;
+        }
         const g = goalDelta(u);
-        if (g.dist === 0) return arrive(u);
+        if (g.dist === 0) return arrive(u); // other layer but no connection here: give up
         const w = wrapStep(u, g.dx, g.dy);
-        if (!World.inWorld(w.ax, w.ay)) return arrive(u);
+        if (!World.inWorld(w.ax, w.ay, w.az)) return arrive(u);
         u.dir = facing(g.dx, g.dy);
-        if (w.crossed) moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
+        if (w.crossed) moveUnitToArea(u, w.ax, w.ay, w.x, w.y, w.az);
         else {
             u.x = w.x;
             u.y = w.y;
         }
-        if (u.goal && goalDelta(u).dist === 0) arrive(u);
+        if (u.goal && goalReached(u)) arrive(u);
     }
 
-    // On screen: the unit's event walks with RMMZ movement and pathfinding; at an edge it steps into the next area.
+    // On screen: the unit's event walks with RMMZ movement and pathfinding; at an area edge it steps into the next area,
+    // and on a connection it goes up or down a layer when its goal is there.
     function stepOnscreen(u, ev) {
         if (ev.isMoving()) return;
-        const g = goalDelta(u);
-        if (g.dist === 0) return arrive(u);
-        const w = wrapStep(u, g.dx, g.dy);
-        if (w.crossed) {
-            if (!World.inWorld(w.ax, w.ay)) return arrive(u);
-            u.dir = facing(g.dx, g.dy);
-            moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
-            return;
-        }
+        if (goalReached(u)) return arrive(u);
         const size = World.state.size;
-        let tx = u.goal.x, ty = u.goal.y;
-        if (!sameArea(u.goal.area, u.area)) {
-            tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
-            ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
+        const lt = layerTarget(u);
+        let tx, ty, g;
+        if (lt) {
+            if (ev.x === lt.x && ev.y === lt.y) {
+                moveUnitToArea(u, u.area.x, u.area.y, u.x, u.y, zOf(u.area) + lt.dz);
+                return;
+            }
+            tx = lt.x;
+            ty = lt.y;
+            g = { dx: Math.sign(tx - ev.x), dy: Math.sign(ty - ev.y) };
+        } else {
+            g = goalDelta(u);
+            if (g.dist === 0) return arrive(u); // other layer but no connection here: give up
+            const w = wrapStep(u, g.dx, g.dy);
+            if (w.crossed) {
+                if (!World.inWorld(w.ax, w.ay, w.az)) return arrive(u);
+                u.dir = facing(g.dx, g.dy);
+                moveUnitToArea(u, w.ax, w.ay, w.x, w.y, w.az);
+                return;
+            }
+            tx = u.goal.x;
+            ty = u.goal.y;
+            if (u.goal.area.x !== u.area.x || u.goal.area.y !== u.area.y) {
+                tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
+                ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
+            }
         }
         const h = g.dx > 0 ? 6 : 4, v = g.dy > 0 ? 2 : 8;
         if (g.dx !== 0 && g.dy !== 0 && tx !== ev.x && ty !== ev.y && ev.canPassDiagonally(ev.x, ev.y, h, v)) {
@@ -625,10 +703,21 @@
     //-------------------------------------------------------------------------
     // The view (the RMMZ player is the view/cursor)
 
-    World.transferView = function(ax, ay, x, y, dir) {
-        if (!this.state || !this.inWorld(ax, ay)) return false;
-        $gamePlayer.reserveTransfer(this.areaMapId(ax, ay), x, y, dir || $gamePlayer.direction(), 2);
+    /** Move the view to a cell of any area and layer (az defaults to the current layer). */
+    World.transferView = function(ax, ay, x, y, dir, az) {
+        const z = az === undefined ? zOf(this.currentArea()) : az;
+        if (!this.state || !this.inWorld(ax, ay, z)) return false;
+        $gamePlayer.reserveTransfer(this.areaMapId(ax, ay, z), x, y, dir || $gamePlayer.direction(), 2);
         return true;
+    };
+
+    /** Show the layer above (dz = -1) or below (dz = +1), at the same cell. Returns false if there's no such layer. */
+    World.changeViewLayer = function(dz) {
+        const a = this.currentArea();
+        if (!a || $gamePlayer.isTransferring()) return false;
+        const z = zOf(a) + dz;
+        if (!this.inWorld(a.x, a.y, z)) return false;
+        return this.transferView(a.x, a.y, $gamePlayer.x, $gamePlayer.y, $gamePlayer.direction(), z);
     };
 
     // Returns true when the move was turned into an area transfer.
@@ -639,9 +728,32 @@
         const nx = player.x + dx, ny = player.y + dy;
         if (nx >= 0 && ny >= 0 && nx < size && ny < size) return false;
         const w = wrapStep({ area, x: player.x, y: player.y }, dx, dy);
-        if (!World.inWorld(w.ax, w.ay)) return false;
-        return World.transferView(w.ax, w.ay, w.x, w.y);
+        if (!World.inWorld(w.ax, w.ay, w.az)) return false;
+        return World.transferView(w.ax, w.ay, w.x, w.y, undefined, w.az);
     }
+
+    // Layer keys: "," = up a layer, "." = down (DF uses < and >, which are Shift + these keys).
+    Input.keyMapper[188] = "ufLayerUp";
+    Input.keyMapper[190] = "ufLayerDown";
+    const _Scene_Map_update = Scene_Map.prototype.update;
+    Scene_Map.prototype.update = function() {
+        _Scene_Map_update.call(this);
+        if (this.isActive() && !$gameMessage.isBusy() && World.currentArea()) {
+            if (Input.isTriggered("ufLayerDown")) World.changeViewLayer(1);
+            else if (Input.isTriggered("ufLayerUp")) World.changeViewLayer(-1);
+        }
+    };
+
+    // Rock blocks movement and connections never do, whatever the tiles' own passage flags say.
+    const _Game_Map_isPassable = Game_Map.prototype.isPassable;
+    Game_Map.prototype.isPassable = function(x, y, d) {
+        if (World.state && World.isAreaMap(this.mapId())) {
+            const region = this.regionId(x, y);
+            if (region === ROCK_REGION) return false;
+            if (region === CONNECTION_REGION) return true;
+        }
+        return _Game_Map_isPassable.call(this, x, y, d);
+    };
 
     const _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
     Game_Player.prototype.moveStraight = function(d) {
@@ -675,7 +787,7 @@
         const area = World.state ? World.areaOfMapId(mapId) : null;
         if (area) {
             window.$dataMap = null;
-            const map = World.buildArea(area.x, area.y);
+            const map = World.buildArea(area.x, area.y, area.z);
             this.onLoad(map);
             window.$dataMap = map;
             emit("world:areaBuilt", area);

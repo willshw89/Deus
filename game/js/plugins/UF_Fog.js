@@ -60,7 +60,8 @@
 
     const keyFor = mapId => {
         const area = window.UF && UF.World && UF.World.state ? UF.World.areaOfMapId(mapId) : null;
-        return area ? `area:${area.x},${area.y}` : `map:${mapId}`;
+        if (!area) return `map:${mapId}`;
+        return area.z ? `area:${area.x},${area.y},${area.z}` : `area:${area.x},${area.y}`; // each layer explored separately
     };
     const store = () => {
         if (window.UF && UF.World && UF.World.state) return (UF.World.state.fog = UF.World.state.fog || {});
