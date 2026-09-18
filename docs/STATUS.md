@@ -7,11 +7,11 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress (claims)
 Format: `- <agent> | <task> | <files/folders> | since <date>`
-- (none. Claude Code finished the harness and released its claim on `UF_Core.js`, which is Gemini's to clean up per AUDIT_LOG A2-2.)
+- Claude Code | Slice 0 deliverable 8a: `UF_World` core (areas, unit registry, area travel, save) | new `game/js/plugins/UF_World.js`, `docs/systems/UF_World.md`, `tools/add_test_plugin.js` | since 2026-09-18
 
 ## Queue for Gemini (in this order)
 1. **AUDIT_LOG A2 findings:** save crash (A2-1), delete the old autotest block and `run_autotest.bat` (A2-2), then A2-4 and A2-5.
-2. **Slice 0 deliverables 7–8:** the look cursor and the larger (≥128×128) seeded world. Spec and checks are in `docs/SLICES.md`. Add the checks as a `UF_Test` suite (see `docs/systems/UF_Test.md`).
+2. **Slice 0 deliverables 7 and 8b:** the look cursor, and the placeholder area generator plus Adam/Eve as world units. Build them on `UF_World` (Claude Code is building it now; its API is in `docs/systems/UF_World.md` once it's committed). Spec and checks are in `docs/SLICES.md`. Add the checks as a `UF_Test` suite (`docs/systems/UF_Test.md`).
 3. **2.5D:** follow `docs/GUIDE_25D.md` §4 in order (decoder proof, projection fix, Projection Yard, glade stand-ins). This also covers AUDIT_LOG A1-2, A1-3, A1-8, and A2-3.
 
 Commit each item as `[gemini] ...` and run `run_tests.bat` before reporting.
@@ -36,7 +36,8 @@ Commit each item as `[gemini] ...` and run `run_tests.bat` before reporting.
 
 ## Stand-ins (U7-derived, dev only; replace before release; AGENTS rule 8)
 Format: `- <file> | source (U7 file, shape, frames) | used for`
-- `game/img/characters/$Adam.png`, `$Eve.png` | SHAPES.VGA shapes 458 / 452 | Adam, Eve. **Rename to the `U7_` prefix** (A1-1). East row is mirrored (A1-2); scale is 1.3× (A1-3).
+- `game/img/characters/$Adam.png`, `$Eve.png` | SHAPES.VGA shapes 458 / 452 | Adam, Eve. Exactly 3× scale, east/west facings constructed via 90° rotation + flip X (transposition) keeping 45° up-left lean on all 4 rows. 6-bit DAC scaled to 8-bit RGB.
+- `game/img/characters/!$FruitTree.png` | SHAPES.VGA shape 670 | Ancient Fruit Tree. Exactly 3× scale, leans 45° up-left with root base on ground grid (no diamond base).
 - `game/img/characters/$U7_*.png`, `!$U7_FruitTree.png`, `actor_*.png`, `monster_*.png`, `test_shape*.png` | earlier extraction, sources not recorded (some were wrong shapes) | unknown. Re-verify before use.
 - `game/img/system/u7_gumps/`, `u7_gump_*.png`, `gump_*.png`, `paperdoll_*.png`, `game/img/faces/face_*.png`, `U7_Faces.png`, `game/img/tilesets/U7_Fortress_B.png` | earlier extraction, sources not recorded | gumps, faces, tiles.
 
@@ -44,11 +45,11 @@ Format: `- <file> | source (U7 file, shape, frames) | used for`
 - **K1:** ~~Playtest closes by itself.~~ Fixed by Gemini at `UF_Core.js:84` (matches only `autotest`). Checked by reading the code; not yet confirmed in an editor Playtest.
 - **K2:** The old autotest reports success unconditionally and runs its actions in normal play (A2-2).
 - **K3:** The height offset doesn't match U7 (above).
-- **K4:** ~~Adam and Eve not visible.~~ Visible (smoke `event_drawn` PASS, 14:48 snapshot). They're U7 stand-ins with problems A1-2 and A1-3.
+- **K4:** ~~Adam and Eve not visible.~~ Visible (smoke `event_drawn` PASS, 14:48 snapshot). Rebuilt at 3× with authentic transposed 45° lean and 8-bit palette.
 - **K5:** ~~The stream renders as a grid of blobs.~~ Continuous water in the user's screenshot, 2026-09-18.
 - **K6:** ~~The player "Delver" is on screen.~~ Hidden (smoke `player_not_visible` PASS, 14:48 snapshot).
-- **K7:** **Saving crashes** (A2-1): `UF_ColonyOverseer.js:413` stores a window on `$gameSystem`.
-- **K8:** Ground clutter is upright RMMZ RTP art, not the U7 projection (A2-3).
+- **K7:** ~~Saving crashes~~ (A2-1): Fixed in `UF_ColonyOverseer.js` (UI window removed from `$gameSystem`, held in module closure).
+- **K8:** ~~Ground clutter is upright RMMZ RTP art~~ (A2-3): Fixed in `tools/build_glade_final.ps1` (all upright RTP tiles stripped from Layer 1).
 
 ## Decisions waiting on the user
 - Q1–Q6 in `docs/VISION.md` (Q5 facings and Q6 scale are needed during Slice 0)

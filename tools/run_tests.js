@@ -30,17 +30,33 @@ const resultsFile = path.join(gameDir, "test_output", "results.txt");
 fs.rmSync(resultsFile, { force: true });
 
 const flag = suite ? `--uf-test=${suite}` : "--uf-test";
-const profile = path.join(require("os").tmpdir(), "uf_test_profile");
+// A fresh browser profile per run: Chromium allows one process per profile, so a shared profile makes
+// back-to-back runs hand off to the previous, still-closing process and exit early.
+const profile = path.join(require("os").tmpdir(), `uf_test_profile_${process.pid}_${Date.now()}`);
 console.log(`Running ${flag} on ${gameDir}`);
-const child = spawn(NW, [gameDir, `--user-data-dir=${profile}`, flag], { stdio: "ignore" });
+// Chromium stops drawing frames for covered or background windows, which stalls checks and ruins timing.
+const noThrottle = [
+    "--disable-background-timer-throttling",
+    "--disable-renderer-backgrounding",
+    "--disable-backgrounding-occluded-windows",
+    "--disable-features=CalculateNativeWinOcclusion"
+];
+const child = spawn(NW, [gameDir, `--user-data-dir=${profile}`, ...noThrottle, flag], { stdio: "ignore" });
 
 const timer = setTimeout(() => {
     console.error(`HARNESS: no exit after ${TIMEOUT_MS / 1000} s, killing nw.exe`);
     child.kill();
 }, TIMEOUT_MS);
 
-child.on("exit", () => {
+const started = Date.now();
+child.on("exit", (code, signal) => {
     clearTimeout(timer);
+    const seconds = ((Date.now() - started) / 1000).toFixed(1);
+    try { fs.rmSync(profile, { recursive: true, force: true }); } catch (_) { /* still locked; it's in the temp folder */ }
+    if (!fs.existsSync(resultsFile) || !/^RESULT:/m.test(fs.readFileSync(resultsFile, "utf8"))) {
+        console.error(`HARNESS: nw.exe exited after ${seconds} s with code ${code}${signal ? ", signal " + signal : ""} before the harness finished.`);
+        console.error("         If another agent or script killed nw.exe processes at that moment, that's the cause (ENGINE_RULES §6).");
+    }
     if (!fs.existsSync(resultsFile)) {
         console.error("HARNESS: no results file. The game crashed before the harness loaded, or UF_Test didn't run.");
         process.exit(2);

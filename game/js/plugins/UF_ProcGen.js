@@ -93,7 +93,7 @@
     };
 
     Scene_Map.prototype.initializeGladeScenario = function() {
-        if (!$dataMap || $gameMap.mapId() !== 1) return;
+        if (!$dataMap || (!$dataMap.note.includes("<glade>") && $gameMap.mapId() !== 2)) return;
 
         console.log("[UF ProcGen] Initializing Standard Glade & Procedural Wilderness...");
 

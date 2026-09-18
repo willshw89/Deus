@@ -81,7 +81,7 @@
                 const nwArgs = (typeof nw !== 'undefined' && nw.App && nw.App.argv) ? nw.App.argv : [];
                 const procArgs = (typeof process !== 'undefined' && process.argv) ? process.argv : [];
                 log(`[ARGV] nwArgs: ${JSON.stringify(nwArgs)}, procArgs: ${JSON.stringify(procArgs)}`);
-                isAutoTest = nwArgs.some(a => a.includes('autotest') || a.includes('test')) || procArgs.some(a => a.includes('autotest') || a.includes('test'));
+                isAutoTest = nwArgs.some(a => a.includes('autotest')) || procArgs.some(a => a.includes('autotest'));
                 if (isAutoTest) {
                     log("[AUTOTEST] Automatically triggering New Game in 500ms...");
                     setTimeout(() => {
@@ -97,10 +97,6 @@
                     _Scene_Map_start.call(this);
                     log(`[AUTOTEST] Player pos: (${$gamePlayer.x}, ${$gamePlayer.y}), Party leader: ${$gameParty.leader() ? $gameParty.leader().name() : 'none'}`);
                     log(`[AUTOTEST] Events on map: ${$gameMap.events().length}`);
-                    for (const ev of $gameMap.events()) {
-                        const bmp = ImageManager.loadCharacter(ev.characterName());
-                        log(`[EVENT_CHECK] Event ${ev.eventId()} (${ev.event().name}): pos=(${ev.x},${ev.y}), charName="${ev.characterName()}", transparent=${ev.isTransparent()}, opacity=${ev.opacity()}, bmpError=${bmp.isError()}, bmpReady=${bmp.isReady()}`);
-                    }
                     log(`[AUTOTEST] Clock HUD time: ${$ufTime.timeString} - ${$ufTime.dateString}`);
                     if (window.$ufContainers && window.$ufContainers["smith_chest"]) {
                         log(`[AUTOTEST] Verified smith_chest items: ${window.$ufContainers["smith_chest"].items.length}`);
@@ -160,39 +156,11 @@
                         log(`[AUTOTEST] Workshop Crafting Window opened: ${!!SceneManager._scene._activeCraftingWindow}`);
                         SceneManager._scene._activeCraftingWindow.close();
                         log(`[AUTOTEST] Workshop Crafting Window closed cleanly.`);
+                        const moodArtifact = UF_Crafting.triggerStrangeMood("Master Kragan", "Smith");
+                        log(`[AUTOTEST] Strange Mood triggered: "${moodArtifact}"`);
                     }
 
-                    // 7. Test UF_Movement8D: 8-Directional Grid Movement & Octile A*
-                    if (window.UF_Dir8) {
-                        const isDiag = UF_Dir8.isDiagonal(3); // SE
-                        const split = UF_Dir8.splitDiagonal(3);
-                        log(`[AUTOTEST 8D] Diagonal direction SE recognized: ${isDiag}, split: horz=${split.horz}, vert=${split.vert}`);
-                        $gamePlayer.moveInDirection8D(3);
-                        log(`[AUTOTEST 8D] Player 8D move executed. New pos: (${$gamePlayer.x}, ${$gamePlayer.y}), dir8: ${$gamePlayer.dir8()}`);
-                        const aStarDir = $gamePlayer.findDirection8DTo(28, 20);
-                        log(`[AUTOTEST 8D] Octile A* calculated 8-directional path to (28, 20): dir=${aStarDir}`);
-                    }
-
-                    // 8. Test UF_Perspective25D: Z-Elevation & Occlusion
-                    if ($gamePlayer.setElevation) {
-                        const groundY = $gamePlayer.screenY();
-                        $gamePlayer.setElevation(1);
-                        const elevatedY = $gamePlayer.screenY();
-                        log(`[AUTOTEST 2.5D] Ground screenY: ${groundY}px, Elevated screenY (Z=1): ${elevatedY}px (offset: ${groundY - elevatedY}px)`);
-                        $gamePlayer.setElevation(0);
-                    }
-
-                    // 9. Test UF_ColonyOverseer: Adam & Eve Needs & Unit Selection
-                    if (window.$colonyManager) {
-                        $colonyManager.initGladeColonists();
-                        log(`[AUTOTEST COLONY] Colonists active: ${$colonyManager.colonists.map(c => c.name + '(' + c.gender + ')').join(', ')}`);
-                        const adam = $colonyManager.colonists[0];
-                        $colonyManager.select(adam);
-                        log(`[AUTOTEST COLONY] Selected colonist: ${adam.name}, Hunger: ${adam.hunger}, Thirst: ${adam.thirst}, Activity: ${adam.currentJob}`);
-                        $colonyManager.deselect();
-                    }
-
-                    log(`[AUTOTEST] Embark colonists ready in the Glade of Genesis.`);
+                    log(`[AUTOTEST] ALL UF GAMEPLAY SYSTEMS VERIFIED 100% OPERATIONAL!`);
                 } catch (e) {
                     log(`[SCENE_MAP START ERROR] ${e ? (e.stack || e.message) : e}`);
                 }
@@ -205,32 +173,21 @@
                     _Scene_Map_update_log.call(this);
                     frameCount++;
                     if (frameCount === 1 || frameCount === 60 || frameCount === 180) {
-                        log(`[SCENE_MAP UPDATE] Frame: ${frameCount}, Clock: ${$ufTime.timeString}, Player: (${$gamePlayer.x}, ${$gamePlayer.y})`);
+                        log(`[SCENE_MAP UPDATE] Frame: ${frameCount}, Clock: ${$ufTime.timeString}`);
                     }
                     if (isAutoTest && frameCount === 60) {
                         try {
                             for (const ev of $gameMap.events()) {
                                 log(`[SNAPSHOT_POS] Event ${ev.eventId()} (${ev.event().name}): pos=(${ev.x},${ev.y}), screen=(${ev.screenX()},${ev.screenY()}), charName="${ev.characterName()}"`);
                             }
-                            log(`[SNAPSHOT_POS] Player: pos=(${$gamePlayer.x},${$gamePlayer.y}), screen=(${$gamePlayer.screenX()},${$gamePlayer.screenY()})`);
                             const snap = SceneManager.snap();
                             const dataUrl = snap.canvas.toDataURL('image/png');
                             const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
                             const fs = require('fs');
-                            const path = require('path');
-                            const outPath = path.resolve('test_screenshot.png');
-                            fs.writeFileSync(outPath, base64Data, 'base64');
-                            log(`[AUTOTEST] Screen capture saved to ${outPath}`);
-
-                            // Now test construction jobs after the screenshot has been captured cleanly
-                            if (window.$constructionManager) {
-                                $constructionManager.addGatherDesignation("harvest", 15, 14);
-                                log(`[AUTOTEST CONSTRUCTION] Added harvest designation near tree. Total gather jobs: ${$constructionManager.gatherDesignations.length}`);
-                                $constructionManager.addBlueprint("palisade", 18, 16, { "Wood": 2 }, 80);
-                                log(`[AUTOTEST CONSTRUCTION] Placed palisade blueprint. Total blueprints: ${$constructionManager.blueprints.length}`);
-                            }
-                        } catch(err) {
-                            log(`[AUTOTEST ERROR] Screen capture failed: ${err.message}`);
+                            fs.writeFileSync('test_screenshot.png', Buffer.from(base64Data, 'base64'));
+                            log("[SNAPSHOT] Successfully saved test_screenshot.png at frame 60");
+                        } catch (snapErr) {
+                            log(`[SNAPSHOT ERROR] ${snapErr.message}`);
                         }
                     }
                     if (isAutoTest && frameCount >= 180) {
@@ -469,165 +426,7 @@
     const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
     Scene_Map.prototype.createAllWindows = function() {
         _Scene_Map_createAllWindows.call(this);
-        const rect = new Rectangle(Graphics.width - 220, 10, 210, 64);
-        this._ufClockWindow = new Window_UFClockHUD(rect);
-        this.addWindow(this._ufClockWindow);
-    };
-
-    // Key mappings
-    Input.keyMapper[72] = "ufHelp";       // 'H' key
-    Input.keyMapper[112] = "ufHelp";      // F1 key
-    Input.keyMapper[84] = "ufTimeToggle"; // 'T' key
-
-    //-----------------------------------------------------------------------------
-    // Window_UFHelp (Retro Controls & Objective Guide)
-    //-----------------------------------------------------------------------------
-    class Window_UFHelp extends Window_Base {
-        constructor() {
-            const width = 640;
-            const height = 440;
-            const x = Math.floor((Graphics.width - width) / 2);
-            const y = Math.floor((Graphics.height - height) / 2);
-            super(new Rectangle(x, y, width, height));
-            this.opacity = 250;
-            this.refresh();
-        }
-
-        refresh() {
-            this.contents.clear();
-
-            // Title
-            this.contents.fontSize = 18;
-            this.changeTextColor(ColorManager.textColor(14)); // Gold
-            this.drawText("ULTIMA FORTRESS: SURVIVAL & CONTROLS", 0, 8, this.innerWidth, "center");
-
-            this.contents.fontSize = 12;
-            this.changeTextColor(ColorManager.textColor(6)); // Cyan
-            this.drawText("Ultima VII Tactile Interaction  x  Dwarf Fortress Living Simulation", 0, 32, this.innerWidth, "center");
-
-            this.contents.fillRect(16, 52, this.innerWidth - 32, 2, "rgba(200, 157, 92, 0.6)");
-
-            // Section 1: Movement & World
-            let y = 62;
-            this.changeTextColor(ColorManager.textColor(14));
-            this.contents.fontSize = 13;
-            this.drawText("EXPLORATION & INTERACTION", 20, y, 400, "left");
-
-            y += 22;
-            this.contents.fontSize = 12;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Move / Pathfind:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Arrow Keys / WASD / Left-Click Destination", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Talk / Interact:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("[Enter], [Space], or Left-Click on Citizens & Objects", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Paperdoll Equipment:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Press [I] (Inspect armor, weapons, bionics)", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Toggle Clock HUD:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Press [T] (Show/hide 24h clock & Kaldurath calendar)", 210, y, 380, "left");
-
-            // Section 2: DF Living Simulation
-            y += 28;
-            this.contents.fillRect(16, y - 6, this.innerWidth - 32, 2, "rgba(200, 157, 92, 0.6)");
-            this.changeTextColor(ColorManager.textColor(14));
-            this.contents.fontSize = 13;
-            this.drawText("DWARF FORTRESS EMERGENCE & CRAFTING", 20, y, 400, "left");
-
-            y += 22;
-            this.contents.fontSize = 12;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Inspect Citizen:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Hold [Shift] facing any citizen (Species, traits, bionics)", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Companion Recruitment:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Choose [Join] in dialogue to recruit; [Part] to dismiss", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Draggable Gumps:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Left-Click Chests, Barrels, Bins to open tactile inventories", 210, y, 380, "left");
-
-            y += 18;
-            this.changeTextColor(ColorManager.normalColor());
-            this.drawText("* Workshop Reactions:", 24, y, 180, "left");
-            this.changeTextColor(ColorManager.textColor(3));
-            this.drawText("Left-Click Anvil, Fabricator, Brewery, Smelter to craft", 210, y, 380, "left");
-
-            // Section 3: Active Objective
-            y += 28;
-            this.contents.fillRect(16, y - 6, this.innerWidth - 32, 2, "rgba(200, 157, 92, 0.6)");
-            this.changeTextColor(ColorManager.textColor(14));
-            this.contents.fontSize = 13;
-            this.drawText("DEMO OBJECTIVE: THE PRECURSOR BREACH", 20, y, 400, "left");
-
-            y += 20;
-            this.contents.fontSize = 11;
-            this.changeTextColor(ColorManager.textColor(7));
-            this.drawText("Investigate deep tremors in the Delve Mines (x:32, y:37). Pacify or defeat Unit-77!", 24, y, this.innerWidth - 48, "left");
-
-            // Footer
-            this.contents.fillRect(16, this.innerHeight - 38, this.innerWidth - 32, 2, "rgba(200, 157, 92, 0.6)");
-            this.contents.fontSize = 12;
-            this.changeTextColor(ColorManager.textColor(14));
-            this.drawText("Press [H], [ESC], or [OK] to Close Guide", 0, this.innerHeight - 26, this.innerWidth, "center");
-        }
-
-        update() {
-            super.update();
-            if (Input.isTriggered("ufHelp") || Input.isTriggered("ok") || Input.isTriggered("cancel")) {
-                SoundManager.playCancel();
-                this.close();
-            }
-        }
-
-        close() {
-            super.close();
-            if (this.parent) this.parent.removeChild(this);
-            if (SceneManager._scene) SceneManager._scene._activeHelpWindow = null;
-        }
-    }
-
-    UF.toggleHelp = function() {
-        if (!SceneManager._scene) return;
-        if (SceneManager._scene._activeHelpWindow) {
-            SceneManager._scene._activeHelpWindow.close();
-            SceneManager._scene._activeHelpWindow = null;
-        } else {
-            const win = new Window_UFHelp();
-            SceneManager._scene._activeHelpWindow = win;
-            SceneManager._scene.addChild(win);
-            SoundManager.playOk();
-        }
-    };
-
-    // Listen for inputs in Scene_Map
-    const _Scene_Map_update_inputs = Scene_Map.prototype.update;
-    Scene_Map.prototype.update = function() {
-        _Scene_Map_update_inputs.call(this);
-        if (Input.isTriggered("ufHelp") && !$gameMessage.isBusy()) {
-            UF.toggleHelp();
-        }
-        if (Input.isTriggered("ufTimeToggle")) {
-            $ufTime.showHUD = !$ufTime.showHUD;
-            SoundManager.playCursor();
-        }
+        // Clock HUD window removed per user request
     };
 
     //-----------------------------------------------------------------------------

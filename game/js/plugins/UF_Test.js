@@ -275,9 +275,14 @@
         }, seconds * 1000 + 10000, "perf sample window");
         times.shift();
         const avg = times.reduce((a, b) => a + b, 0) / times.length;
-        const worst = Math.max(...times);
+        const sorted = times.slice().sort((a, b) => a - b);
+        const pct = p => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))].toFixed(1);
+        const worst = sorted[sorted.length - 1];
+        const slow = times.filter(ms => ms > 50).length;
         const units = $gameMap.events().filter(e => e.characterName()).length;
-        t.check("avg_frame_under_17ms", avg <= 17.0, `avg ${avg.toFixed(2)} ms, worst ${worst.toFixed(1)} ms, ${times.length} frames over ${seconds} s, ${units} drawn events`);
-        t.check("worst_frame_under_50ms", worst < 50, `worst ${worst.toFixed(1)} ms`);
+        const map = `${$gameMap.width()}x${$gameMap.height()} map`;
+        t.check("avg_frame_under_17ms", avg <= 17.0,
+            `avg ${avg.toFixed(2)} ms, p50 ${pct(0.5)}, p99 ${pct(0.99)}, worst ${worst.toFixed(1)} ms; ${times.length} frames over ${seconds} s; ${map}, ${units} drawn events`);
+        t.check("worst_frame_under_50ms", worst < 50, `worst ${worst.toFixed(1)} ms; ${slow} frame(s) over 50 ms`);
     }, { isDefault: false });
 })();

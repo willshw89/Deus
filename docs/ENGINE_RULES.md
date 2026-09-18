@@ -41,9 +41,11 @@ The editor keeps the database and plugin list in memory and writes them out when
 - Tile size is `$dataSystem.tileSize` (Database → System 2), default 48. The engine supports it (`rmmz_objects.js:6124`). Screen size is set in the same tab.
 - Character image names: a `$` prefix means one character per file (3×4 frames); no prefix means 8 characters per file; `!` marks an object (no 6 px upward shift). Rows are down, left, right, up. RMMZ itself only displays 4 facings.
 
-## 5. Runtime-generated world [PROPOSED: confirm in Slice 0]
-- The world is generated at runtime from a seed and stored in the save file, not baked into `MapXXX.json`. Map JSON is only for fixed places (the starting glade, test maps).
-- The RMMZ "player" becomes an invisible camera/cursor. Once there are more than a handful of units, they're UF entities rather than RMMZ events.
+## 5. Runtime-generated world (VISION V14; system doc `docs/systems/UF_World.md`)
+- The world is a grid of **areas**, each 256×256. An area has no map file: `UF_World` builds its `$dataMap` in memory when it's visited (map IDs from 1000 up), from the world seed, the registered generators, and the area's saved tile changes. Map JSON files are only templates for fixed places (the glade, Map002, is stamped into the middle of the starting area) and test maps.
+- **Units live in the world registry** (`UF.World.units`), not on maps. Units in the area on screen are drawn as ordinary RMMZ events with stable IDs (`1000 + unit id`); units anywhere else keep moving in a simplified simulation. Game systems (needs, jobs, AI) must work from unit records, not from event IDs on one map.
+- The RMMZ "player" is the view/cursor. When it moves off an area edge, it transfers to the neighboring area.
+- Anything that changes the world (construction, digging, felling) goes through `UF.World.setTile` / the unit API, so it's recorded and survives leaving the area and saving.
 - The simulation runs on a fixed tick, separate from rendering. Pathfinding work is spread across frames.
 
 ## 6. Testing: checks that can fail
@@ -59,6 +61,8 @@ The current `run_autotest.bat` and the autotest block in `UF_Core.js` break thes
 - Tests use a fixed seed so runs repeat exactly.
 - A performance number needs a method: average and worst frame time over at least 30 seconds, how many units were on screen, and on which machine.
 - The final test is always the user running Playtest in the RMMZ editor.
+- **Never kill `nw.exe` (or `Game.exe`) processes you didn't start.** Two agents and the user may each be running the game at once. `taskkill /IM nw.exe` or `Stop-Process -Name nw` ends everyone's runs and the user's Playtest. Stop only the process ID you launched.
+- Run tests on a snapshot copy when another agent is changing `game/` at the same time (see `docs/systems/UF_Test.md` → Running it). Otherwise your run mixes their half-finished files.
 
 ## 7. Git
 - `.gitignore` is a whitelist. Only `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/`, `game/`, `tools/`, `art/`, and the three launcher `.bat` files are tracked. U7/DF-derived files inside `game/` are listed explicitly so they're never committed. When you add a new top-level folder that belongs to the project, add it to the whitelist.

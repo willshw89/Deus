@@ -128,6 +128,10 @@
 
     Sprite_Character.prototype.update2DShadow = function() {
         if (!this._shadowSprite || !this._character) return;
+        if (this._character === $gamePlayer || !this._character.characterName()) {
+            this._shadowSprite.visible = false;
+            return;
+        }
         if (this._character.event && this._character.event() && 
             (this._character.event().note.includes("<tree>") || this._character.event().note.includes("<canopy>"))) {
             this._shadowSprite.visible = false;

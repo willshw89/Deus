@@ -1,4 +1,4 @@
-﻿{
+{
     "advanced":  {
                      "gameId":  10000000,
                      "screenWidth":  816,
@@ -169,11 +169,11 @@
     "optDrawTitle":  true,
     "optExtraExp":  false,
     "optFloorDeath":  false,
-    "optFollowers":  true,
+    "optFollowers":  false,
     "optKeyItemsNumber":  false,
     "optSideView":  false,
     "optSlipDeath":  false,
-    "optTransparent":  false,
+    "optTransparent":  true,
     "partyMembers":  [
                          1
                      ],

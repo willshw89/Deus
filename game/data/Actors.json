@@ -2,20 +2,20 @@
     null,
     {
         "id": 1,
-        "battlerName": "Actor1_1",
+        "battlerName": "",
         "characterIndex": 0,
-        "characterName": "$U7_Avatar",
+        "characterName": "",
         "classId": 1,
-        "equips": [2, 3, 2, 1, 4],
+        "equips": [0, 0, 0, 0, 0],
         "faceIndex": 0,
-        "faceName": "U7_Faces",
+        "faceName": "",
         "traits": [],
         "initialLevel": 1,
         "maxLevel": 99,
-        "name": "Delver",
-        "nickname": "Solitary Survivor",
+        "name": "Overseer",
+        "nickname": "",
         "note": "",
-        "profile": "A solitary wanderer who awoke at the gates of the mountain fastness. Guided only by grit and survival instincts."
+        "profile": ""
     },
     {
         "id": 2,

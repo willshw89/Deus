@@ -32,7 +32,9 @@ Deliverables:
    - It moves freely over everything (walls, water, units) and stops at the map edges.
    - A small **look panel** names what's under it: terrain, plus any object or unit (e.g. "Grass. Fruit tree." or "Grass. Adam: idle, hungry").
    - Build hint (no engine change): the invisible `$gamePlayer` *is* the cursor. Give it `through`, move it in 8 directions, and draw the outline at its cell. RMMZ already scrolls the camera to follow the player.
-8. **A larger world** (added by the user 2026-09-18, VISION V14). The starting map is at least **128×128** (RMMZ allows up to 256×256; the user picks the final size). The glade sits in the middle, and the rest is filled by a simple **seeded** placeholder generator (grass, tree clusters, rocks, the river continuing) until real world generation in Slice 6.
+8. **A world of areas** (set by the user 2026-09-18, VISION V14). Split between the two agents:
+   - **8a, core (Claude Code): `UF_World`.** The world is a grid of 256×256 areas, generated at runtime from a seed plus saved changes, with no map files. It keeps a world-level unit registry: units in the area on screen are drawn as events, and units elsewhere keep moving in a simplified simulation. Units and the view cross area edges. Save/load included. API: `docs/systems/UF_World.md`.
+   - **8b, content (Gemini).** A seeded placeholder generator registered through `UF.World.registerGenerator` (grass variety, tree clusters, rocks, the river continuing across areas) until real world generation in Slice 6. Also convert Adam and Eve from glade events into `UF.World` units so they survive leaving the start area.
 
 Done when:
 - [ ] Everything with height leans the same way at the same angle (screenshot + user)
@@ -46,7 +48,11 @@ Done when:
 - [ ] After moving the cursor 40 cells east, it's still on screen and the camera has scrolled (check `cursor.camera_follows`)
 - [ ] The cursor can reach all four map corners and passes over the tree and the river (check `cursor.reaches_corners`)
 - [ ] With the cursor on the fruit tree, the look panel names it (check `cursor.look_names_tree`)
-- [ ] Map is at least 128×128; the same seed gives the same map twice (checks `world.size`, `world.seeded`)
+- [ ] Each area is 256×256, and the same seed gives the same area twice (checks `world.area_size`, `world.seeded`)
+- [ ] A unit walking in another area crosses into the area on screen and appears (check `world.unit_enters_view`)
+- [ ] A unit on screen walks out of the area, disappears from the screen, and keeps existing in the neighbor area (check `world.unit_leaves_view`)
+- [ ] The view crosses an area edge and lands on the matching cell of the neighbor area (check `world.view_crosses_edge`)
+- [ ] A tile changed in an area is still changed after leaving and coming back, and after save/load (checks `world.diff_persists`, `world.save_roundtrip`)
 - [ ] Moving the cursor by keyboard and by mouse both feel responsive (user)
 
 **Review log:**

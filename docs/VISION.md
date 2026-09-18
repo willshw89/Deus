@@ -20,7 +20,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V8 | Fantasy plus science-fiction elements are allowed. |
 | V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. Ultima VII art may be used as examples and temporary stand-ins during development (`U7_` prefix, replaced before release). |
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
-| V14 | The world is larger than one screen-sized glade. The glade sits inside a much bigger map. |
+| V14 | The world is made of **areas at RMMZ's maximum size (256×256 cells each)**. World characters **and** the player's view move between areas. Characters keep living and traveling when their area isn't on screen. The glade sits in the middle of the starting area. |
 | V10 | Engine first. All the U7 and DF functionality works (with graybox placeholder art) before any unique art is generated. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
@@ -50,9 +50,12 @@ Don't guess these. If a task depends on one, ask.
 - **Q4 Control:** does the player ever steer one unit directly (U7-style), or only give orders (DF-style)?
 - **Q5 Facings:** do sprites have 4 facings (like U7) or 8? This roughly doubles the art. See `ART_STANDARD.md` §4.
 - **Q6 Scale:** pixel scale and screen size. See `ART_STANDARD.md` §2.
+- **Q7 World size in areas:** how many areas across and down? The default is 6×6, which at the proposed scale is about Ultima VII's world size (U7 was 3072×3072 of its own tiles = 1536×1536 of our cells). It's a plugin parameter, so it's easy to change.
+- **Q8 Area edges:** crossing an edge currently switches the screen to the next area (DF-style). A seamless, U7-style continuous scroll is possible later, but it's harder in RMMZ. Keep switching for now?
 
 ## Decision log
 Append only, newest at the bottom.
 - 2026-09-18: V1–V12 recorded from the user's instructions during the first planning session. The rejected directions were rejected by the user in the same session.
 - 2026-09-18: The user approved the guardrail docs, git setup, the Node install, the K1 fix, and the start of Slice 0. Roles set: Gemini builds features and art; Claude Code owns the guardrails, audits Gemini, fixes mistakes, and builds documented U7/DF mechanics when audits are clean.
 - 2026-09-18: The user allowed Ultima VII assets as examples and stand-ins (V9 amended). Added V13 (a cursor is how you look around) and V14 (a larger world).
+- 2026-09-18: The user set V14: areas at maximum size (256×256), and both world characters and the player move between areas.
