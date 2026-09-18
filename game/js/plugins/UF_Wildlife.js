@@ -16,12 +16,13 @@
  * (after UF_Factions and UF_History have run) it places herds of creatures as
  * world units (UF.World.addUnit) in every area:
  *
- *   - the area is sampled on an 8x8 grid (UF.WorldGen.cellInfo): biome shares
- *     and the dominant savagery / alignment tiers;
+ *   - the area is sampled on an 8x8 grid (UF.WorldGen.cellInfo): biome and
+ *     region tier of each of the 64 points (the dominant tiers are reported);
  *   - per species: expected = sum(weight[biome] x share) x savageryScale,
- *     0 when minSavagery isn't met or the alignment doesn't match; herds =
- *     floor(expected x K + seeded roll), K scaled so a typical area totals
- *     wildlife.herdsPerArea herds;
+ *     summed point by point with each point's own savagery tier and only at
+ *     points whose region the species allows (minSavagery, alignment);
+ *     herds = floor(expected x K + seeded roll), K scaled so a typical area
+ *     totals wildlife.herdsPerArea herds;
  *   - each herd: a seeded center on walkable land where the species has
  *     weight and its region rule holds, not on a blocking object, at least
  *     startSafeRadius (predators and monsters: predatorFreeRadius) from the
@@ -186,6 +187,7 @@
         const WG = WorldGen();
         const size = st.size;
         const shares = {}, sav = {}, al = {};
+        const points = [];
         const n = SAMPLE_GRID;
         for (let j = 0; j < n; j++) {
             for (let i = 0; i < n; i++) {
@@ -195,22 +197,39 @@
                 shares[c.biomeId] = (shares[c.biomeId] || 0) + 1 / (n * n);
                 sav[c.region.savagery] = (sav[c.region.savagery] || 0) + 1;
                 al[c.region.alignment] = (al[c.region.alignment] || 0) + 1;
+                points.push({ biomeId: c.biomeId, savagery: c.region.savagery, alignment: c.region.alignment });
             }
         }
         const dominant = counts => {
             const e = Object.entries(counts).sort((p, q) => (q[1] - p[1]) || (p[0] < q[0] ? -1 : 1));
             return e.length ? e[0][0] : null;
         };
-        return { shares, savagery: dominant(sav), alignment: dominant(al) };
+        const toShares = counts => {
+            const out = {};
+            for (const k of Object.keys(counts)) out[k] = counts[k] / Math.max(1, points.length);
+            return out;
+        };
+        return { shares, savagery: dominant(sav), alignment: dominant(al), savageryShares: toShares(sav), alignmentShares: toShares(al), points };
     }
 
-    /** Expected herds of a species in an area (before scaling): sum(weight x share) x savageryScale, 0 when restricted. */
+    /**
+     * Expected herds of a species in an area (before scaling): sum(weight[biome] x share) x savageryScale, evaluated
+     * per sample point, so each point counts with its own tier and only where the species' region rule holds.
+     * A tame start with wild outskirts keeps its outskirts' wildlife (and its monsters) instead of taking the
+     * dominant tier for the whole area, which measured 8 % of seeds below 60 creatures (2026-09-18 seed sweep).
+     */
     function expectedHerds(sp, sample) {
-        if (!allowedInRegion(sp, sample)) return 0;
+        const pts = sample.points || [];
+        if (!pts.length) return 0;
+        const scales = wildlifeConfig().savageryScale || {};
         let e = 0;
-        for (const b of Object.keys(sample.shares)) e += (sp.biomes[b] || 0) * sample.shares[b];
-        const scale = (wildlifeConfig().savageryScale || {})[sample.savagery];
-        return e * (scale === undefined ? 1 : scale);
+        for (const p of pts) {
+            const w = sp.biomes[p.biomeId] || 0;
+            if (!w || !allowedInRegion(sp, p)) continue;
+            const s = scales[p.savagery];
+            e += w * (s === undefined ? 1 : s);
+        }
+        return e / pts.length;
     }
 
     const minDistFor = sp => ((sp.dangerous ? wildlifeConfig().predatorFreeRadius : wildlifeConfig().startSafeRadius) || 0);
@@ -264,7 +283,7 @@
                 herds.push(makeHerd(st, ax, ay, sp, h, center, minDist, { origin: "biome" }));
             }
         }
-        report.samples[`${ax},${ay}`] = { savagery: sample.savagery, alignment: sample.alignment, shares: sample.shares, expectedHerds: perSpecies, K };
+        report.samples[`${ax},${ay}`] = { savagery: sample.savagery, alignment: sample.alignment, savageryShares: sample.savageryShares, alignmentShares: sample.alignmentShares, shares: sample.shares, expectedHerds: perSpecies, K };
         return herds;
     }
 
@@ -912,5 +931,42 @@
             t.check("no_errors", t.errorsSoFar().length === 0,
                 t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during wildlife checks");
         });
+
+        // Diagnostic (on request: --suite wildlife_seeds): the planned population over many seeds, so a marginal
+        // herd count shows up as numbers rather than as a random failure of spawned_with_world on some other day.
+        UF.Test.suite("wildlife_seeds", async t => {
+            const W = World(), st = W && W.state;
+            if (!st) {
+                t.check("world_ready", false, "no world state");
+                return;
+            }
+            const synthetic = seed => ({ seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} });
+            const K = herdScale();
+            const rows = [];
+            const t0 = now();
+            for (let i = 0; i < 24; i++) {
+                const seed = (1000003 * (i + 1) + 7) >>> 0;
+                const s2 = synthetic(seed);
+                const saved = W.state;
+                W.state = s2; // UF.WorldGen.cellInfo reads UF.World.state (the same swap UF_History's checks use)
+                let plan;
+                try {
+                    plan = planWorld(s2);
+                } finally {
+                    W.state = saved;
+                }
+                const sample = Object.values(plan.samples)[0] || {};
+                const tame = sample.savageryShares ? Math.round((sample.savageryShares.tame || 0) * 100) : NaN;
+                const creatures = plan.herds.reduce((n, h) => n + h.cells.length, 0);
+                const monsters = plan.herds.filter(h => (speciesById(h.species) || {}).kind === "monster").length;
+                rows.push({ seed, tier: `${sample.savagery}/${sample.alignment}`, tame, herds: plan.herds.length, creatures, monsters, dropped: plan.dropped });
+            }
+            const counts = rows.map(r => r.creatures);
+            const min = Math.min(...counts), max = Math.max(...counts), mean = counts.reduce((a, b) => a + b, 0) / counts.length;
+            const below = rows.filter(r => r.creatures < 60);
+            t.check("population_over_seeds", below.length === 0,
+                `${rows.length} seeds planned in ${(now() - t0).toFixed(0)} ms (K ${K.toFixed(2)}, per-point savagery): creatures min ${min}, mean ${mean.toFixed(1)}, max ${max}; ${below.length} seed(s) below 60 [${below.map(r => `${r.seed} ${r.tier} ${r.herds}h/${r.creatures}c`).join(", ")}]; `
+                + `rows: ${rows.map(r => `${r.tier} (${r.tame}% tame) ${r.herds}h/${r.creatures}c, ${r.monsters} monster herd(s), ${r.dropped} dropped`).join("; ")}`);
+        }, { isDefault: false });
     }
 })();
