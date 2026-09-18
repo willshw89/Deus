@@ -4,7 +4,7 @@ var $plugins =
 [
 {"name":"UF_BootstrapData","status":true,"description":"Bootstrap container inventories","parameters":{}},
 {"name":"UF_Core","status":true,"description":"[UF Core] 24-hour clockwork time simulation, calendar, and world state for Ultima Fortress.","parameters":{"TimeSpeed":"1.0","StartHour":"8","StartMinute":"0","ShowClockHUD":"true"}},
-{"name":"UF_Visuals","status":true,"description":"[UF Visuals] Roof cutaways, overhead floating speech barks, and 24-hour day/night atmospheric lighting.","parameters":{"EnableRoofs":"true","EnableBarks":"true","EnableLighting":"true"}},
+{"name":"UF_Visuals","status":true,"description":"[UF Visuals] Roof cutaways, overhead floating speech barks, and 24-hour day/night atmospheric lighting.","parameters":{"EnableRoofs":"true","EnableBarks":"true","EnableLighting":"false"}},
 {"name":"UF_Gumps","status":true,"description":"[UF Gumps] Draggable container gumps (chests, barrels, sacks) and classic U7 paperdoll equipment interface.","parameters":{"EnableGumps":"true","EnablePaperdoll":"true"}},
 {"name":"UF_NPCSchedules","status":true,"description":"[UF Schedules] 24-hour autonomous routines for fortress NPCs (workshops, tavern, dining hall, sleeping in beds).","parameters":{}},
 {"name":"UF_Dialogue","status":true,"description":"[UF Dialogue] Classic Ultima VII keyword conversation trees with character portraits and party interjections.","parameters":{}},
@@ -20,6 +20,7 @@ var $plugins =
 {"name":"UF_WorldGen","status":true,"description":"[UF_WorldGen]","parameters":{}},
 {"name":"UF_Factions","status":true,"description":"[UF Factions] Factions generated from the world seed each New Game: species, stances, homes (surface or underground), relations from allied to at war. F = ledger.","parameters":{}},
 {"name":"UF_Fog","status":true,"description":"[UF_Fog]","parameters":{}},
+{"name":"UF_DayNight","status":true,"description":"[UF DayNight] Day/night cycle on world maps: smooth light from the clock, shorter sight at night, constant cave light, on-screen clock.","parameters":{"NightVision":"0.55","ShowClock":"true"}},
 {"name":"UF_Camera","status":true,"description":"[UF_Camera]","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];
