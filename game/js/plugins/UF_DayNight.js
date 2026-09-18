@@ -132,8 +132,8 @@
 
     class Sprite_UFClock extends Sprite {
         constructor() {
-            super(new Bitmap(230, 30));
-            this.x = Graphics.width - 238;
+            super(new Bitmap(300, 30));
+            this.x = Graphics.width - 308;
             this.y = 6;
             this._text = "";
         }
@@ -144,7 +144,8 @@
             if (!this.visible) return;
             const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
             const where = DayNight.layer() > 0 ? "Underground" : DayNight.phase().replace(/^./, c => c.toUpperCase());
-            const text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}`;
+            const speed = window.UF.Time && UF.Time.multiplier() > 1 ? `  >> x${UF.Time.multiplier()}` : "";
+            const text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}${speed}`;
             if (text === this._text) return;
             this._text = text;
             const b = this.bitmap;

@@ -21,6 +21,7 @@ var $plugins =
 {"name":"UF_Factions","status":true,"description":"[UF Factions] Factions generated from the world seed each New Game: species, stances, homes (surface or underground), relations from allied to at war. F = ledger.","parameters":{}},
 {"name":"UF_Fog","status":true,"description":"[UF_Fog]","parameters":{}},
 {"name":"UF_DayNight","status":true,"description":"[UF DayNight] Day/night cycle on world maps: smooth light from the clock, shorter sight at night, constant cave light, on-screen clock.","parameters":{"NightVision":"0.55","ShowClock":"true"}},
+{"name":"UF_TimeSpeed","status":true,"description":"[UF TimeSpeed] Run the world faster: 1x, 2x, 4x, 8x (] faster, [ slower, never below 1x, no rewind). Game-time timers for AI.","parameters":{"Speeds":"1, 2, 4, 8"}},
 {"name":"UF_Camera","status":true,"description":"[UF_Camera]","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

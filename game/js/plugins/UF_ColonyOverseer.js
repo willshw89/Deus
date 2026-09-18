@@ -33,6 +33,10 @@
     const edgePanSpeed = parseInt(params["EdgePanSpeed"] || 6, 10);
     let activeColonyWindow = null;
 
+    // Delays run on game time (UF_TimeSpeed), so the colony keeps pace when time is sped up and pauses with the
+    // map. 1000 ms = 60 map updates. Falls back to real time if UF_TimeSpeed isn't installed.
+    const later = (fn, ms) => (window.UF && UF.Time ? UF.Time.after(Math.max(1, Math.round(ms * 0.06)), fn) : setTimeout(fn, ms));
+
     //-----------------------------------------------------------------------------
     // Colonist Data Model & Verbatim Dwarf Fortress Agent AI
     //-----------------------------------------------------------------------------
@@ -186,7 +190,7 @@
                     if (window.$ufVisuals && window.$ufVisuals.addBark) {
                         window.$ufVisuals.addBark(ev, "Zzz... (Sleeping in shade)");
                     }
-                    setTimeout(() => {
+                    later(() => {
                         this.fatigue = 5;
                         this.currentJob = "Idle";
                     }, 4000);
@@ -205,7 +209,7 @@
                             if (window.$ufVisuals && window.$ufVisuals.addBark) {
                                 window.$ufVisuals.addBark(ev, "Gathers dry fallen oak branches.");
                             }
-                            setTimeout(() => {
+                            later(() => {
                                 this.currentJob = "Hauling Timber";
                                 this.assignMoveTo(127, 127, () => {
                                     prog.wood++;
@@ -224,7 +228,7 @@
                             if (window.$ufVisuals && window.$ufVisuals.addBark) {
                                 window.$ufVisuals.addBark(ev, "Collects smooth riverbed stones.");
                             }
-                            setTimeout(() => {
+                            later(() => {
                                 this.currentJob = "Hauling Stones";
                                 this.assignMoveTo(127, 127, () => {
                                     prog.stone++;
@@ -255,7 +259,7 @@
                     if (prog.wood < 6 && this.id === 1) {
                         this.currentJob = "Felling Shelter Poles";
                         this.assignMoveTo(122, 124, () => {
-                            setTimeout(() => {
+                            later(() => {
                                 this.currentJob = "Hauling Shelter Timber";
                                 this.assignMoveTo(125, 126, () => {
                                     prog.wood++;
@@ -271,7 +275,7 @@
                     } else if (prog.thatch < 3 && this.id === 2) {
                         this.currentJob = "Gathering Reed Thatch";
                         this.assignMoveTo(134, 126, () => {
-                            setTimeout(() => {
+                            later(() => {
                                 this.currentJob = "Hauling Thatch";
                                 this.assignMoveTo(125, 126, () => {
                                     prog.thatch++;
@@ -328,14 +332,14 @@
 
                         if (window.$ufVisuals && window.$ufVisuals.addBark) {
                             window.$ufVisuals.addBark(ev, pair[0]);
-                            setTimeout(() => {
+                            later(() => {
                                 if (partner.event && window.$ufVisuals) {
                                     window.$ufVisuals.addBark(partner.event, pair[1]);
                                 }
                             }, 1200);
                         }
 
-                        setTimeout(() => {
+                        later(() => {
                             this.currentJob = "Idle";
                             partner.currentJob = "Idle";
                         }, 3000);
@@ -392,7 +396,7 @@
                 if (dir > 0) {
                     if (ev.moveInDirection8D) ev.moveInDirection8D(dir);
                     else ev.moveStraight(dir);
-                    setTimeout(checkStep, 250);
+                    later(checkStep, 250);
                 } else {
                     if (Math.abs(ev.x - gx) <= 1 && Math.abs(ev.y - gy) <= 1) {
                         this.targetX = null;
@@ -541,6 +545,7 @@
         if ($colonyManager && $colonyManager.colonists.length === 0) {
             $colonyManager.initGladeColonists();
         }
+        startColonyTicker();
     };
 
     // Free camera update loop
@@ -704,15 +709,21 @@
         this.addWindow(this._colonyCard);
     };
 
-    // Auto-tick needs with game time
-    setInterval(() => {
+    // Needs tick every 60 map updates (1 game minute at normal speed; faster when time is sped up, paused in menus).
+    // Started with the first map, once UF_TimeSpeed has loaded; falls back to a real-time interval without it.
+    const tickColony = () => {
         if ($gameMap && $colonyManager) {
             $colonyManager.tickAll();
             if (activeColonyWindow && activeColonyWindow.visible) {
                 activeColonyWindow.refresh();
             }
         }
-    }, 1000);
+    };
+    let colonyTicker = null;
+    const startColonyTicker = () => {
+        if (colonyTicker !== null) return;
+        colonyTicker = window.UF && UF.Time ? UF.Time.every(60, tickColony) : setInterval(tickColony, 1000);
+    };
 
     //-----------------------------------------------------------------------------
     // Faction Dynamic Line-of-Sight Fog of War Layer
