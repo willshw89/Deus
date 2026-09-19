@@ -89,7 +89,8 @@
   "request": "AR-900",
   "requests": [
    "AR-900",
-   "AR-201"
+   "AR-201",
+   "AR-512"
   ],
   "usedBy": [
    "item stone_knife \"Stone knife\" (tint #c8b8a0)",
@@ -129,8 +130,9 @@
  },
  "!$UF_Icon_129": {
   "status": "stock RMMZ",
-  "request": "AR-901",
+  "request": "AR-512",
   "requests": [
+   "AR-512",
    "AR-901"
   ],
   "usedBy": [
@@ -304,10 +306,11 @@
  },
  "!$UF_Icon_167": {
   "status": "stock RMMZ",
-  "request": "AR-904",
+  "request": "AR-200",
   "requests": [
-   "AR-904",
-   "AR-511"
+   "AR-200",
+   "AR-511",
+   "AR-904"
   ],
   "usedBy": [
    "item charcoal \"Charcoal\""
@@ -328,7 +331,10 @@
   "request": "AR-200",
   "requests": [
    "AR-200",
-   "AR-044"
+   "AR-1216",
+   "AR-044",
+   "AR-030",
+   "AR-033"
   ],
   "usedBy": [
    "item gold \"Gold nugget\""
@@ -346,7 +352,8 @@
   "status": "stock RMMZ",
   "request": "AR-201",
   "requests": [
-   "AR-201"
+   "AR-201",
+   "AR-512"
   ],
   "usedBy": [
    "item stone_pick \"Stone pick\""
@@ -364,10 +371,10 @@
  },
  "!$UF_Icon_225": {
   "status": "stock RMMZ",
-  "request": "AR-904",
+  "request": "AR-511",
   "requests": [
-   "AR-904",
-   "AR-511"
+   "AR-511",
+   "AR-904"
   ],
   "usedBy": [
    "item arrows \"Arrows\""
@@ -444,7 +451,9 @@
   "status": "stock RMMZ",
   "request": "AR-200",
   "requests": [
-   "AR-200"
+   "AR-200",
+   "AR-020",
+   "AR-102"
   ],
   "usedBy": [
    "item fruit \"Fruit\""
@@ -519,11 +528,12 @@
   "request": "AR-200",
   "requests": [
    "AR-200",
-   "AR-904",
    "AR-511",
    "AR-201",
    "AR-903",
-   "AR-902"
+   "AR-904",
+   "AR-902",
+   "AR-905"
   ],
   "usedBy": [
    "item hide \"Hide\"",
@@ -563,10 +573,11 @@
  },
  "!$UF_Icon_297": {
   "status": "stock RMMZ",
-  "request": "AR-904",
+  "request": "AR-200",
   "requests": [
-   "AR-904",
-   "AR-511"
+   "AR-200",
+   "AR-511",
+   "AR-904"
   ],
   "usedBy": [
    "item feathers \"Feathers\""
@@ -724,7 +735,8 @@
   "request": "AR-900",
   "requests": [
    "AR-900",
-   "AR-201"
+   "AR-201",
+   "AR-512"
   ],
   "usedBy": [
    "item stone_axe \"Stone axe\" (tint #c8b8a0)",
@@ -774,6 +786,8 @@
    "plugin UF_Anim.js (test suite)",
    "plugin UF_Colonists.js",
    "plugin UF_Combat.js (test suite)",
+   "plugin UF_Ecology.js (test suite)",
+   "plugin UF_Ownership.js (test suite)",
    "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
   ],
   "states": [
@@ -806,10 +820,8 @@
  },
  "$UF_Stock_Actor1_0": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair male: clothing tier 3 (UF_Colonists.setTier)"
   ],
@@ -825,10 +837,8 @@
  },
  "$UF_Stock_Actor1_1": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair female: clothing tier 3 (UF_Colonists.setTier)"
   ],
@@ -977,10 +987,8 @@
  },
  "$UF_Stock_Actor3_0": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair male: clothing tier 2 (UF_Colonists.setTier)"
   ],
@@ -996,10 +1004,8 @@
  },
  "$UF_Stock_Actor3_1": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair female: clothing tier 2 (UF_Colonists.setTier)"
   ],
@@ -1347,10 +1353,8 @@
  },
  "$UF_Stock_People1_2": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair male: clothing tier 1 (UF_Colonists.setTier)"
   ],
@@ -1366,10 +1370,8 @@
  },
  "$UF_Stock_People1_3": {
   "status": "stock RMMZ",
-  "request": "AR-501",
-  "requests": [
-   "AR-501"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "start.pair female: clothing tier 1 (UF_Colonists.setTier)"
   ],
@@ -1848,14 +1850,11 @@
   "request": "AR-800",
   "requests": [
    "AR-800",
-   "AR-200",
    "AR-201",
    "AR-511",
    "AR-900",
-   "AR-901",
    "AR-902",
-   "AR-903",
-   "AR-904"
+   "AR-903"
   ],
   "usedBy": [
    "RMMZ core: icons"
@@ -2129,10 +2128,8 @@
  },
  "Outside_B": {
   "status": "stock RMMZ",
-  "request": "AR-044",
+  "request": "AR-510",
   "requests": [
-   "AR-044",
-   "AR-103",
    "AR-510",
    "AR-020",
    "AR-021",
@@ -2296,10 +2293,8 @@
  },
  "Outside_B#160": {
   "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object flowers_white \"White flowers\""
   ],
@@ -2315,10 +2310,8 @@
  },
  "Outside_B#161": {
   "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object flowers_purple \"Purple flowers\""
   ],
@@ -2334,10 +2327,8 @@
  },
  "Outside_B#162": {
   "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object flowers_blue \"Blue flowers\""
   ],
@@ -2372,9 +2363,8 @@
  },
  "Outside_B#167": {
   "status": "stock RMMZ",
-  "request": "AR-044",
+  "request": "AR-022",
   "requests": [
-   "AR-044",
    "AR-022"
   ],
   "usedBy": [
@@ -2392,8 +2382,11 @@
  },
  "Outside_B#171": {
   "status": "stock RMMZ",
-  "request": "AR-044",
+  "request": "AR-1214",
   "requests": [
+   "AR-1214",
+   "AR-1215",
+   "AR-1216",
    "AR-044"
   ],
   "usedBy": [
@@ -2581,10 +2574,8 @@
  },
  "Outside_B#232": {
   "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object dead_tree \"Dead tree\"",
    "object tree_cursed \"Blighted tree\" (tint #c0a0e0)"
@@ -2681,11 +2672,8 @@
  },
  "Outside_C": {
   "status": "stock RMMZ",
-  "request": "AR-044",
-  "requests": [
-   "AR-044",
-   "AR-104"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "tile 282 (objects)",
    "tile 285 (objects)",
@@ -2841,10 +2829,8 @@
  },
  "!$Campfire": {
   "status": "U7 stand-in",
-  "request": "AR-105",
-  "requests": [
-   "AR-105"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
   ],
@@ -3166,10 +3152,8 @@
  },
  "img/faces/U7_Faces.png": {
   "status": "U7 stand-in",
-  "request": "AR-800",
-  "requests": [
-   "AR-800"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Dialogue.js",
    "plugin UF_Gumps.js",
@@ -3240,10 +3224,8 @@
  },
  "UF_GenDesignation_*": {
   "status": "generated",
-  "request": "AR-035",
-  "requests": [
-   "AR-035"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Interact.js",
    "variants named in its tests: chop, build"
@@ -3501,7 +3483,8 @@
   "requests": [
    "AR-100",
    "AR-102",
-   "AR-103"
+   "AR-103",
+   "AR-1206"
   ],
   "usedBy": [
    "ground kind snow \"Snow\""
@@ -3605,8 +3588,16 @@
   "request": "AR-100",
   "requests": [
    "AR-100",
-   "AR-044",
-   "AR-041 (withdrawn)"
+   "AR-1203",
+   "AR-1214",
+   "AR-1215",
+   "AR-1216",
+   "AR-1200",
+   "AR-1202",
+   "AR-1217",
+   "AR-1218",
+   "AR-041 (withdrawn)",
+   "AR-044"
   ],
   "usedBy": [
    "ground kind rock \"Bare rock\"",
@@ -3687,6 +3678,13 @@
   "request": "AR-100",
   "requests": [
    "AR-100",
+   "AR-1201",
+   "AR-1203",
+   "AR-1214",
+   "AR-1215",
+   "AR-1216",
+   "AR-1211",
+   "AR-1212",
    "AR-001"
   ],
   "usedBy": [
@@ -3785,8 +3783,10 @@
  },
  "UF_GenGround_A2#3872": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-1201",
+  "requests": [
+   "AR-1201"
+  ],
   "usedBy": [
    "ground kind road \"Packed earth\""
   ],
@@ -3802,8 +3802,10 @@
  },
  "UF_GenGround_A2#3920": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-1204",
+  "requests": [
+   "AR-1204"
+  ],
   "usedBy": [
    "ground kind floor_wood \"Plank floor\""
   ],
@@ -3819,8 +3821,10 @@
  },
  "UF_GenGround_A2#3968": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-1205",
+  "requests": [
+   "AR-1205"
+  ],
   "usedBy": [
    "ground kind floor_stone \"Flagstone floor\""
   ],
@@ -3980,10 +3984,10 @@
  },
  "!$UF_BerryBush": {
   "status": "original",
-  "request": "AR-103",
+  "request": "AR-023",
   "requests": [
-   "AR-103",
-   "AR-023"
+   "AR-023",
+   "AR-103"
   ],
   "usedBy": [
    "object berry_bush \"Berry bush\""
@@ -4001,10 +4005,10 @@
  },
  "!$UF_BerryBush_Bare": {
   "status": "original",
-  "request": "AR-103",
+  "request": "AR-023",
   "requests": [
-   "AR-103",
-   "AR-023"
+   "AR-023",
+   "AR-103"
   ],
   "usedBy": [
    "object berry_bush_bare \"Berry bush (picked)\""
@@ -4042,8 +4046,9 @@
  },
  "!$UF_Campfire": {
   "status": "original",
-  "request": "AR-105",
+  "request": "AR-300",
   "requests": [
+   "AR-300",
    "AR-105"
   ],
   "usedBy": [
@@ -4179,10 +4184,8 @@
  },
  "!$UF_Item_Log": {
   "status": "original",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "item log \"Log\""
   ],
@@ -4242,9 +4245,16 @@
   "requests": [
    "AR-200",
    "AR-201",
-   "AR-044",
    "AR-104",
-   "AR-906"
+   "AR-906",
+   "AR-022",
+   "AR-1200",
+   "AR-1203",
+   "AR-1205",
+   "AR-1207",
+   "AR-1210",
+   "AR-044",
+   "AR-105"
   ],
   "usedBy": [
    "item stone \"Stone\""
@@ -4282,8 +4292,7 @@
   "status": "original",
   "request": "AR-104",
   "requests": [
-   "AR-104",
-   "AR-044"
+   "AR-104"
   ],
   "usedBy": [
    "object rubble \"Rubble\""
@@ -4344,7 +4353,8 @@
   "status": "original",
   "request": "AR-104",
   "requests": [
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object floor_straw \"Straw bed\""
@@ -4383,7 +4393,8 @@
   "status": "original",
   "request": "AR-104",
   "requests": [
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object wall_stone \"Stone wall\""
@@ -4404,7 +4415,8 @@
   "status": "original",
   "request": "AR-104",
   "requests": [
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object wall_wood \"Wooden wall\""
