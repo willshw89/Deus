@@ -52,3 +52,5 @@
 /game/img/characters/!$IronOreVein.png
 /game/img/characters/!$TreeStump.png
 /game/img/characters/$People1.png
+# Backups of the U7-derived originals kept beside their stock replacements ($Adam.u7bak.png, $Eve.u7bak.png; stock-swap run 2026-09-19). AGENTS rule 8: never commit.
+*.u7bak.png
