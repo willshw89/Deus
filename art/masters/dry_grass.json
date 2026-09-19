@@ -1,0 +1,10 @@
+{
+  "id": "dry_grass",
+  "layer": "ground",
+  "slot": 2,
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": null,
+  "facings": [],
+  "animations": {}
+}

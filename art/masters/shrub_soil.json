@@ -1,0 +1,10 @@
+{
+  "id": "shrub_soil",
+  "layer": "ground",
+  "slot": 3,
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": null,
+  "facings": [],
+  "animations": {}
+}

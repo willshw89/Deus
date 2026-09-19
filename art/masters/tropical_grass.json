@@ -1,0 +1,10 @@
+{
+  "id": "tropical_grass",
+  "layer": "ground",
+  "slot": 1,
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": null,
+  "facings": [],
+  "animations": {}
+}
