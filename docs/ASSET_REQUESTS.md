@@ -251,6 +251,20 @@ The art for the five-level world: solid rock and soil, natural, dug and built fl
 - **Spec:** the Shared spec above; ART_STANDARD §2 (micro scale, V81) and §5; `art/palette/uf.hex`, 8 colours or fewer, alpha 0/255; `tools/art_check.js --native` and `tools/originality_check.js` pass.
 - **Integration:** the catalog object `sapling` exists (tile placeholder); on approval its `tile` and `tint` give way to `"image": "!$UF_Sapling"` (Gemini may edit `objects`). One object serves every tree kind: what it grows into lives in the cell's growth timer. Details: `docs/handoffs/HANDOFF_df_mechanics.md` → Ecology.
 
+### AR-1901 to AR-1908 Underground Nature & Cavern Flora (V106, 2026-09-19)
+The subterranean flora and natural formations for the underground depth gradient ($z = -1$ Upper Caves down to $z = -2$ Deep Bioluminescent Caverns). All assets follow ART_STANDARD §1 (flat 3/4 top-down view, HD FF6 pixel art, 1 art pixel = 1 screen pixel, palette `art/palette/uf.hex`, dark ink outlines, alpha 0/255) and include complete interaction states (standing/harvested, lit/unlit, intact/stump).
+
+| ID | Asset | Needed for | Priority | Status |
+|---|---|---|---|---|
+| AR-1901 | **Cave Moss & Lichen Patches (`!$UF_CaveMoss.png`)** | Upper Caves ($z=-1$): floor patch spread over stone/gravel. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 47]`, footprint `[1, 1]`, passable/under. 3 visual variants. | High | REQUESTED |
+| AR-1902 | **Cave Mushrooms & Small Spore Clusters (`!$UF_CaveMushrooms.png`)** | Upper Caves ($z=-1$): edible subterranean forage plant. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 47]`, footprint `[1, 1]`. Interaction states: standing (full with spore caps) and harvested (bare stalks). | High | REQUESTED |
+| AR-1903 | **Stalagmite & Stalactite Formations (`!$UF_Stalagmites.png`)** | Upper/Deep Caves ($z=-1, -2$): natural mineral limestone spires. 144×192 `!$` sheet, 48×48 & 48×96 frames, anchor `[24, 47]`, footprint `[1, 1]` & `[1, 2]`, impassable. Intact and rubble/quarried states. | Medium | REQUESTED |
+| AR-1904 | **Hanging Roots & Vine Ceilings (`!$UF_HangingRoots.png`)** | Upper Caves ($z=-1$): surface tree roots penetrating cavern ceiling. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 24]`, footprint `[1, 1]`, overhead pass-under. | Medium | REQUESTED |
+| AR-1905 | **Giant Tower-Cap Mushroom (`!$UF_TowerCap.png`)** | Deep Caverns ($z=-2$): massive subterranean tree mushroom providing underground wood/timber. 288×384 `!$` sheet (96×96 frames), anchor `[48, 95]`, footprint `[2, 2]`, blocking. States: standing live tree, felled stump (`!$UF_TowerCap_stump.png`), and sapling. | High | REQUESTED |
+| AR-1906 | **Bioluminescent Glow-Caps (`!$UF_GlowCaps.png`)** | Deep Caverns ($z=-2$): azure and cyan glowing spore mushrooms providing natural subterranean illumination. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 47]`, footprint `[1, 1]`. States: unlit and lit with soft cyan ambient aura. | High | REQUESTED |
+| AR-1907 | **Spore Reeds & Cavern Wetland Shrub (`!$UF_SporeReeds.png`)** | Deep Caverns ($z=-2$): subterranean wetland plants bordering underground lakes and pools. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 47]`, footprint `[1, 1]`, passable. | Medium | REQUESTED |
+| AR-1908 | **Subterranean Crystal Spire (`!$UF_CrystalSpire.png`)** | Deep Caverns ($z=-2$): luminous violet/amethyst and deep sapphire crystal clusters growing from bedrock. 144×192 `!$` sheet, 48×96 frame, anchor `[24, 95]`, footprint `[1, 2]`, impassable. Gem mining interaction state. | Medium | REQUESTED |
+
 ## Notes for Claude Code (from Gemini)
 - **Elf Faction Character Sets & Racial Weapons (V103, V104, AR-400, AR-900..903)**: Delivered complete Elf Sylvan Woodland Folk character suites with dark ink outlines (V104) and three racial weapon types with attack animations (V103).
   - People sheets: `$UF_Elf_Male.png`, `$UF_Elf_Female.png`, `$UF_Elf.png`, `$UF_Elf_8D.png` with sidecars. For `catalog.people.elf`: `"images": ["$UF_Elf_Male", "$UF_Elf_Female"]`.

@@ -458,6 +458,15 @@
             } else if (bio.ground === "shrub_soil") {
                 if (f.r > 0.28) ground = "dry_grass";
                 else if (f.d > 0.75) ground = "dirt";
+            } else if (bio.ground === "dirt") {
+                if (f.r > 0.34) ground = "shrub_soil";
+                else if (f.d > 0.72) ground = "red_clay";
+            } else if (bio.ground === "red_clay") {
+                if (f.r > 0.30) ground = "dirt";
+                else if (f.r < 0.14) ground = "sand";
+            } else if (bio.ground === "sand") {
+                if (f.r > 0.22 && f.d < 0.62) ground = "shrub_soil";
+                else if (f.d > 0.70) ground = "red_clay";
             } else if (bio.ground === "forest_floor") {
                 if (f.r < 0.52 && f.d < 0.45) ground = "meadow";
                 else if (f.t < 0.36) ground = "needle_floor";
@@ -465,6 +474,22 @@
             } else if (bio.ground === "needle_floor") {
                 if (f.t > 0.50 && f.r > 0.48) ground = "forest_floor";
                 else if (f.t < 0.20) ground = "tundra";
+            } else if (bio.ground === "tundra") {
+                if (f.t > 0.28) ground = "needle_floor";
+                else if (f.t < 0.16) ground = "snow";
+            } else if (bio.ground === "snow") {
+                if (f.t > 0.22) ground = "tundra";
+                else if (f.t < 0.10 && f.d > 0.60) ground = "ice";
+            } else if (bio.ground === "ice") {
+                if (f.t > 0.15) ground = "snow";
+            } else if (bio.ground === "mud") {
+                if (f.r < 0.38 || f.d > 0.55) ground = "dirt";
+                else if (f.r > 0.65) ground = "swamp_mud";
+            } else if (bio.ground === "swamp_mud") {
+                if (f.r < 0.50) ground = "mud";
+            } else if (bio.ground === "ash") {
+                if (f.e > (cl.mountainLevel || 0.6) - 0.05) ground = "scree";
+                else if (f.d > 0.65) ground = "rock";
             }
         }
         if (alignId === "cursed") {

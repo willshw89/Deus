@@ -645,22 +645,36 @@
 
                 // Check 4 orthogonal neighbors for a blending family pair
                 let borderFam = null, pairKey = null, isFamA = true;
-                const checkFam = (nx, ny) => {
-                    if (nx < 0 || ny < 0 || nx >= size || ny >= size) return null;
-                    const nt = map.data[ny * size + nx];
-                    const nIdx = Math.floor((nt - 2816) / 48);
-                    const nInfo = (nt >= 2816 && nt < 4352) ? kindCache[nIdx] : null;
-                    return (nInfo && nInfo.famName !== famName) ? nInfo.famName : null;
-                };
+                const ntN = y > 0 ? map.data[(y - 1) * size + x] : 0;
+                const ntS = y < size - 1 ? map.data[(y + 1) * size + x] : 0;
+                const ntW = x > 0 ? map.data[y * size + (x - 1)] : 0;
+                const ntE = x < size - 1 ? map.data[y * size + (x + 1)] : 0;
 
-                const fN = checkFam(x, y - 1), fS = checkFam(x, y + 1), fW = checkFam(x - 1, y), fE = checkFam(x + 1, y);
-                const candFams = [fN, fS, fW, fE].filter(Boolean);
-                for (const cf of candFams) {
-                    if (pairsCfg[`${famName}|${cf}`]) {
-                        borderFam = cf; pairKey = `${famName}|${cf}`; isFamA = true; break;
-                    } else if (pairsCfg[`${cf}|${famName}`]) {
-                        borderFam = cf; pairKey = `${cf}|${famName}`; isFamA = false; break;
-                    }
+                const infoN = (ntN >= 2816 && ntN < 4352) ? kindCache[(ntN - 2816) / 48 | 0] : null;
+                const infoS = (ntS >= 2816 && ntS < 4352) ? kindCache[(ntS - 2816) / 48 | 0] : null;
+                const infoW = (ntW >= 2816 && ntW < 4352) ? kindCache[(ntW - 2816) / 48 | 0] : null;
+                const infoE = (ntE >= 2816 && ntE < 4352) ? kindCache[(ntE - 2816) / 48 | 0] : null;
+
+                const fN = infoN && infoN.famName !== famName ? infoN.famName : null;
+                const fS = infoS && infoS.famName !== famName ? infoS.famName : null;
+                const fW = infoW && infoW.famName !== famName ? infoW.famName : null;
+                const fE = infoE && infoE.famName !== famName ? infoE.famName : null;
+
+                if (fN) {
+                    if (pairsCfg[`${famName}|${fN}`]) { borderFam = fN; pairKey = `${famName}|${fN}`; isFamA = true; }
+                    else if (pairsCfg[`${fN}|${famName}`]) { borderFam = fN; pairKey = `${fN}|${famName}`; isFamA = false; }
+                }
+                if (!borderFam && fS) {
+                    if (pairsCfg[`${famName}|${fS}`]) { borderFam = fS; pairKey = `${famName}|${fS}`; isFamA = true; }
+                    else if (pairsCfg[`${fS}|${famName}`]) { borderFam = fS; pairKey = `${fS}|${famName}`; isFamA = false; }
+                }
+                if (!borderFam && fW) {
+                    if (pairsCfg[`${famName}|${fW}`]) { borderFam = fW; pairKey = `${famName}|${fW}`; isFamA = true; }
+                    else if (pairsCfg[`${fW}|${famName}`]) { borderFam = fW; pairKey = `${fW}|${famName}`; isFamA = false; }
+                }
+                if (!borderFam && fE) {
+                    if (pairsCfg[`${famName}|${fE}`]) { borderFam = fE; pairKey = `${famName}|${fE}`; isFamA = true; }
+                    else if (pairsCfg[`${fE}|${famName}`]) { borderFam = fE; pairKey = `${fE}|${famName}`; isFamA = false; }
                 }
 
                 if (borderFam && pairKey) {

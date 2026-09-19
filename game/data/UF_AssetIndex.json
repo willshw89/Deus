@@ -1,8 +1,10 @@
 {
  "!$UF_Icon_102": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-512",
    "AR-900"
   ],
   "usedBy": [
@@ -22,11 +24,11 @@
  },
  "!$UF_Icon_107": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
-   "AR-900",
    "AR-511",
-   "AR-512"
+   "AR-512",
+   "AR-900"
   ],
   "usedBy": [
    "item spear \"Spear\""
@@ -43,11 +45,11 @@
  },
  "!$UF_Icon_110": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
-   "AR-900",
    "AR-511",
-   "AR-512"
+   "AR-512",
+   "AR-900"
   ],
   "usedBy": [
    "item club \"Club\""
@@ -64,11 +66,11 @@
  },
  "!$UF_Icon_114": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
-   "AR-900",
    "AR-511",
    "AR-512",
+   "AR-900",
    "AR-906"
   ],
   "usedBy": [
@@ -86,9 +88,8 @@
  },
  "!$UF_Icon_120": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-201",
   "requests": [
-   "AR-900",
    "AR-201",
    "AR-512"
   ],
@@ -432,7 +433,8 @@
   "status": "stock RMMZ",
   "request": "AR-200",
   "requests": [
-   "AR-200"
+   "AR-200",
+   "AR-1905"
   ],
   "usedBy": [
    "item mushroom \"Mushrooms\""
@@ -673,8 +675,10 @@
  },
  "!$UF_Icon_96": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-512",
    "AR-900"
   ],
   "usedBy": [
@@ -692,8 +696,10 @@
  },
  "!$UF_Icon_97": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-512",
    "AR-900"
   ],
   "usedBy": [
@@ -711,11 +717,11 @@
  },
  "!$UF_Icon_98": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-511",
   "requests": [
-   "AR-900",
    "AR-511",
-   "AR-512"
+   "AR-512",
+   "AR-900"
   ],
   "usedBy": [
    "item mace \"Copper mace\""
@@ -732,9 +738,8 @@
  },
  "!$UF_Icon_99": {
   "status": "stock RMMZ",
-  "request": "AR-900",
+  "request": "AR-201",
   "requests": [
-   "AR-900",
    "AR-201",
    "AR-512"
   ],
@@ -823,7 +828,8 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "start.pair male: clothing tier 3 (UF_Colonists.setTier)"
+   "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
+   "plugin UF_Fire.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1046,7 +1052,8 @@
    "AR-401"
   ],
   "usedBy": [
-   "creature bog_horror \"Bog horror\" (monster)"
+   "creature bog_horror \"Bog horror\" (monster)",
+   "plugin UF_Stance.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1193,7 +1200,8 @@
   ],
   "usedBy": [
    "creature wolf \"Wolf\" (predator)",
-   "plugin UF_Doors.js (test suite)"
+   "plugin UF_Doors.js (test suite)",
+   "plugin UF_Stance.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1320,7 +1328,8 @@
    "AR-400"
   ],
   "usedBy": [
-   "people goblin (tint #a8e888)"
+   "people goblin (tint #a8e888)",
+   "plugin UF_Factions.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1392,7 +1401,8 @@
    "AR-010"
   ],
   "usedBy": [
-   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)"
+   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
+   "plugin UF_Fire.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1809,6 +1819,23 @@
   "sidecar": false,
   "statusWhy": "character 4 of stock characters/Vehicle.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
+ "img/faces/People1.png": {
+  "status": "stock RMMZ",
+  "request": "AR-010",
+  "requests": [
+   "AR-010",
+   "AR-011"
+  ],
+  "usedBy": [
+   "plugin UF_Dialogue.js (test suite)"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/People1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
  "img/system/Balloon.png": {
   "status": "stock RMMZ",
   "request": "AR-800",
@@ -1852,7 +1879,6 @@
    "AR-800",
    "AR-201",
    "AR-511",
-   "AR-900",
    "AR-902",
    "AR-903"
   ],
@@ -2090,7 +2116,12 @@
   "status": "stock RMMZ",
   "request": "AR-101",
   "requests": [
-   "AR-101"
+   "AR-101",
+   "AR-1903",
+   "AR-1905",
+   "AR-1906",
+   "AR-1907",
+   "AR-1908"
   ],
   "usedBy": [
    "water kind deep",
@@ -2134,7 +2165,8 @@
    "AR-020",
    "AR-021",
    "AR-022",
-   "AR-023"
+   "AR-023",
+   "AR-1600"
   ],
   "usedBy": [
    "tile 176 (objects)",
@@ -2233,7 +2265,8 @@
   "request": "AR-021",
   "requests": [
    "AR-021",
-   "AR-102"
+   "AR-102",
+   "AR-1600"
   ],
   "usedBy": [
    "object stump \"Stump\""
@@ -2382,8 +2415,9 @@
  },
  "Outside_B#171": {
   "status": "stock RMMZ",
-  "request": "AR-1214",
+  "request": "AR-1901",
   "requests": [
+   "AR-1901",
    "AR-1214",
    "AR-1215",
    "AR-1216",
@@ -2535,8 +2569,9 @@
  },
  "Outside_B#192": {
   "status": "stock RMMZ",
-  "request": "AR-102",
+  "request": "AR-1600",
   "requests": [
+   "AR-1600",
    "AR-102"
   ],
   "usedBy": [
@@ -2633,7 +2668,9 @@
   "status": "stock RMMZ",
   "request": "AR-103",
   "requests": [
-   "AR-103"
+   "AR-103",
+   "AR-1901",
+   "AR-1907"
   ],
   "usedBy": [
    "object reeds \"Reeds\"",
@@ -2768,8 +2805,9 @@
  },
  "Outside_C#287": {
   "status": "stock RMMZ",
-  "request": "AR-044",
+  "request": "AR-1908",
   "requests": [
+   "AR-1908",
    "AR-044"
   ],
   "usedBy": [
@@ -2934,6 +2972,22 @@
   "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
+ "!$U7_Flat-toptree": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Look.js (test suite)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$U7_Flat-toptree.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "name starts with U7_"
+ },
  "!$U7_Shrub": {
   "status": "U7 stand-in",
   "request": "none yet",
@@ -3032,6 +3086,7 @@
    "AR-050"
   ],
   "usedBy": [
+   "plugin UF_Select.js (test suite)",
    "plugin UF_Stance.js (test suite)"
   ],
   "states": [
@@ -3063,6 +3118,22 @@
   "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
+ "$U7_Hawk": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Select.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$U7_Hawk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "name starts with U7_"
+ },
  "$U7_Miner": {
   "status": "U7 stand-in",
   "request": "AR-050",
@@ -3090,7 +3161,6 @@
   ],
   "usedBy": [
    "plugin UF_Factions.js (test suite)",
-   "plugin UF_Fire.js (test suite)",
    "plugin UF_Jobs.js (test suite)",
    "plugin UF_Look.js (test suite)",
    "plugin UF_Stance.js (test suite)",
@@ -3113,7 +3183,6 @@
   ],
   "usedBy": [
    "plugin UF_Factions.js (test suite)",
-   "plugin UF_Fire.js (test suite)",
    "plugin UF_Interact.js (test suite)",
    "plugin UF_Items.js (test suite)",
    "plugin UF_Jobs.js (test suite)",
@@ -3155,69 +3224,13 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "plugin UF_Dialogue.js",
-   "plugin UF_Gumps.js",
    "RMMZ data Actors.json (face ×8)"
   ],
-  "states": [],
+  "states": [
+   "face sheet: 4 × 2 faces of 144×144"
+  ],
   "category": "ui",
   "file": "img/faces/U7_Faces.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "name starts with U7_"
- },
- "img/system/u7_gump_backpack.png": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Gumps.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/u7_gump_backpack.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "name starts with U7_"
- },
- "img/system/u7_gump_barrel.png": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Gumps.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/u7_gump_barrel.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "name starts with U7_"
- },
- "img/system/u7_gump_chest.png": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Gumps.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/u7_gump_chest.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "name starts with U7_"
- },
- "img/system/u7_gump_sack.png": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Gumps.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/u7_gump_sack.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "name starts with U7_"
@@ -3297,6 +3310,20 @@
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
+ "UF_GenFrame": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Factions.js (test suite)"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
  "UF_GenGround_A2": {
   "status": "generated",
   "request": "AR-100",
@@ -3329,7 +3356,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"grass\", colors #5a9a3c #467a2e #74b54c #c8d86a"
+   "placeholder pattern \"grass\", colors #5D7139 #4D5D28 #71864D #8A9A61"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 0)",
@@ -3349,7 +3376,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"grass\", colors #3f9a4a #2f7a3a #58b862 #e0e070"
+   "placeholder pattern \"grass\", colors #189218 #006D00 #45B645 #86D200"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 1)",
@@ -3369,7 +3396,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"grass\", colors #b8a24a #9a8638 #d2bd62 #7a9a3a"
+   "placeholder pattern \"grass\", colors #C69618 #B28210 #DBAE20 #F3DF79"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 2)",
@@ -3389,7 +3416,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #8a7a4a #6e6038 #a6955e #5a7a3a"
+   "placeholder pattern \"dots\", colors #AA8659 #9A7141 #BA9A71 #5D7139"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 3)",
@@ -3409,7 +3436,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"litter\", colors #5a4a2a #463a20 #6e5c36 #a8602a"
+   "placeholder pattern \"litter\", colors #6D4D3D #553D31 #825D4D #9E5124"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 4)",
@@ -3429,7 +3456,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"needles\", colors #4a4a2a #3a3a20 #5e5e36 #6a3a1a"
+   "placeholder pattern \"needles\", colors #39451C #283114 #4D5D28 #6D3D0C"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 5)",
@@ -3449,7 +3476,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"litter\", colors #3a5a2a #2a4620 #4e7236 #7a4a2a"
+   "placeholder pattern \"litter\", colors #4D5D28 #39451C #71864D #8A5D2D"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 6)",
@@ -3469,7 +3496,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #8a9a7a #6e7e60 #a6b494 #b8c0b0"
+   "placeholder pattern \"dots\", colors #9EAE7D #8A9A61 #B6C29A #CEC6BE"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 7)",
@@ -3491,7 +3518,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"snow\", colors #e8eef4 #c8d4e0 #ffffff #a8b8cc"
+   "placeholder pattern \"snow\", colors #EFEFEF #DBDBFF #FFFFFF #CECECE"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 8)",
@@ -3513,7 +3540,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"ice\", colors #a8d4e8 #88b8d0 #d0ecf8 #ffffff"
+   "placeholder pattern \"ice\", colors #B2D7F3 #71AEE7 #F3F3FF #6DB2E7"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 9)",
@@ -3535,7 +3562,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #dcc88a #c4ae70 #eedca2 #a89058"
+   "placeholder pattern \"dots\", colors #CAB292 #BA9A71 #DBCAB2 #F7E7A6"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 10)",
@@ -3555,7 +3582,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"cracks\", colors #9a9284 #7e776a #b4ad9e #5e584e"
+   "placeholder pattern \"cracks\", colors #9E928A #7D7169 #AEA29A #615551"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 11)",
@@ -3575,7 +3602,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"stria\", colors #b8663a #9a4e2a #d2804e #7a3a1e"
+   "placeholder pattern \"stria\", colors #AE653D #9E5124 #BE825D #7D2D00"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 12)",
@@ -3605,7 +3632,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"cracks\", colors #7a7874 #5e5c58 #969490 #4a4844"
+   "placeholder pattern \"cracks\", colors #7D7D7D #616161 #8E8E8E #514945"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 13)",
@@ -3625,7 +3652,7 @@
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
    "impassable (rock faces on peaks, region 250)",
-   "placeholder pattern \"cracks\", colors #56544f #3e3c38 #6e6c68 #2e2c28"
+   "placeholder pattern \"cracks\", colors #515151 #453D39 #6D6D6D #35312D"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 14)",
@@ -3645,7 +3672,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"mud\", colors #6a5a3a #52462c #82704a #3a5a2a"
+   "placeholder pattern \"mud\", colors #6D4D3D #553D31 #7D6559 #415120"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 15)",
@@ -3665,7 +3692,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"mud\", colors #3e3a26 #2e2a1a #4e4a32 #2a4a2a"
+   "placeholder pattern \"mud\", colors #45352D #352D24 #514139 #39451C"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 16)",
@@ -3693,7 +3720,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #8a6a44 #6e5236 #a28058 #5a4428"
+   "placeholder pattern \"dots\", colors #8A5D2D #6D3D0C #9A7141 #5D350C"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 17)",
@@ -3713,7 +3740,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"grass\", colors #6a6a4a #52523a #7e7a5a #5a3a5a"
+   "placeholder pattern \"grass\", colors #7D7169 #615551 #8E8279 #6D006D"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 18)",
@@ -3733,7 +3760,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"grass\", colors #62b24a #4e9a3a #82ca62 #f0e8a0"
+   "placeholder pattern \"grass\", colors #45B645 #189218 #7DDF7D #F7E7A6"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 19)",
@@ -3754,7 +3781,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #5a5654 #444240 #6e6a66 #8a3a2a"
+   "placeholder pattern \"dots\", colors #515151 #454545 #616161 #6D2400"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 20)",
@@ -3773,7 +3800,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"cracks\", colors #6e665a #5a5448 #827a6c #4a443a"
+   "placeholder pattern \"cracks\", colors #6D615D #615551 #7D7169 #514945"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 21)",
@@ -3792,7 +3819,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"dots\", colors #a8906a #8a7452 #c0aa84 #6e5a40"
+   "placeholder pattern \"dots\", colors #BA9A71 #8E7565 #CAB292 #6D4D3D"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 22)",
@@ -3811,7 +3838,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"planks\", colors #9b6a3c #724826 #bc8650 #50311d"
+   "placeholder pattern \"planks\", colors #9A7141 #653D10 #BE825D #3D240C"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 23)",
@@ -3830,7 +3857,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"cracks\", colors #8e8e88 #696965 #aaa9a2 #4b4b48"
+   "placeholder pattern \"cracks\", colors #8E8E8E #6D6D6D #AEAEAE #454545"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 24)",
@@ -3847,7 +3874,7 @@
   ],
   "states": [
    "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
-   "placeholder pattern \"needles\", colors #b49a58 #806d3d #d1b96f #5f512d"
+   "placeholder pattern \"needles\", colors #AA8659 #9A7141 #F7E7A6 #6D4D3D"
   ],
   "category": "tiles",
   "file": "(drawn in code: UF_GenGround_A2, kind 25)",
@@ -3885,14 +3912,31 @@
  },
  "UF_GenSelect": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-031",
+  "requests": [
+   "AR-031"
+  ],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
   "states": [
-   "four corner brackets around the selected unit's feet (AR-031 look)"
+   "bright iron ring around the selected unit's stance ring, 44×22 per square of footprint, open middle, 3 pulse frames (AR-031)"
   ],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenShade_E": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Tiles.js",
+   "plugin UF_Tiles.js (test suite)"
+  ],
+  "states": [],
   "category": "generated",
   "file": "(drawn in code)",
   "exists": true,
@@ -3901,13 +3945,15 @@
  },
  "UF_GenStance_friendly": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-034",
+  "requests": [
+   "AR-034"
+  ],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
   "states": [
-   "48×48 square under a unit's feet, color #22c55e at alpha 0.45"
+   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #22c55e at alpha 0.45 inside a darker rim"
   ],
   "category": "generated",
   "file": "(drawn in code)",
@@ -3917,13 +3963,15 @@
  },
  "UF_GenStance_hostile": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-034",
+  "requests": [
+   "AR-034"
+  ],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
   "states": [
-   "48×48 square under a unit's feet, color #ef4444 at alpha 0.45"
+   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #ef4444 at alpha 0.45 inside a darker rim"
   ],
   "category": "generated",
   "file": "(drawn in code)",
@@ -3933,13 +3981,15 @@
  },
  "UF_GenStance_indifferent": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-034",
+  "requests": [
+   "AR-034"
+  ],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
   "states": [
-   "48×48 square under a unit's feet, color #eab308 at alpha 0.45"
+   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #eab308 at alpha 0.45 inside a darker rim"
   ],
   "category": "generated",
   "file": "(drawn in code)",
@@ -4087,8 +4137,9 @@
  },
  "!$UF_Fern": {
   "status": "original",
-  "request": "AR-103",
+  "request": "AR-1600",
   "requests": [
+   "AR-1600",
    "AR-103"
   ],
   "usedBy": [
@@ -4253,6 +4304,7 @@
    "AR-1205",
    "AR-1207",
    "AR-1210",
+   "AR-1901",
    "AR-044",
    "AR-105"
   ],
@@ -4518,11 +4570,67 @@
   "sidecar": false,
   "statusWhy": "not in 8e5fdc1"
  },
+ "$UF_Human_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400"
+  ],
+  "usedBy": [
+   "plugin UF_Select.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400"
+  ],
+  "usedBy": [
+   "plugin UF_Outposts.js (test suite)",
+   "plugin UF_Select.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Wolf": {
+  "status": "original",
+  "request": "AR-401",
+  "requests": [
+   "AR-401"
+  ],
+  "usedBy": [
+   "plugin UF_Select.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Wolf.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "img/system/Window.png": {
   "status": "original",
   "request": "none yet",
   "requests": [],
   "usedBy": [
+   "plugin UF_Factions.js (test suite)",
    "RMMZ core: skin of every window"
   ],
   "states": [
