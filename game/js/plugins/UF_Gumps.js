@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Gumps] Draggable container gumps (chests, barrels, sacks) and classic U7 paperdoll equipment interface.
+ * @plugindesc [UF Gumps] Container windows (chests, barrels, sacks) and paperdoll equipment interface.
  * @author Deepdelve Architect
  *
  * @param EnableGumps
@@ -24,7 +24,7 @@
  * Features:
  * 1. Container Gumps:
  *    - Events tagged with <container: chest|barrel|sack|crate> or activated
- *      via Plugin Command will open an authentic draggable Ultima container.
+ *      via Plugin Command will open a plain code-drawn container window.
  *    - Store and take items with interactive tactile clicking.
  *
  * 2. Paperdoll Inventory (Press 'I'):
@@ -34,6 +34,11 @@
  * Plugin Commands:
  * - OpenContainer [containerId] [type]
  * - OpenPaperdoll
+ *
+ * Portrait placeholder: stock People1, face 0 (AR-700).
+ * Container placeholder: code-drawn panel (AR-800). No container image loads.
+ * Replaced core methods: none. Container background rendering is overridden
+ * only on this plugin's Window_Selectable subclass.
  */
 
 (() => {
@@ -43,6 +48,7 @@
     const params = PluginManager.parameters(pluginName);
     const enableGumps = (params["EnableGumps"] || "true") === "true";
     const enablePaperdoll = (params["EnablePaperdoll"] || "true") === "true";
+    const PAPERDOLL_FACE = "People1";
 
     window.UF_Gumps = {};
 
@@ -89,23 +95,36 @@
             this.containerId = containerId;
             this.containerType = type;
             this.opacity = 250;
+            this.backOpacity = 255;
+            this.frameVisible = false;
             this._dragging = false;
             this._dragOffsetX = 0;
             this._dragOffsetY = 0;
 
-            this.loadGumpBackground();
             this.refresh();
             this.activate();
             this.select(0);
         }
 
         loadGumpBackground() {
-            // Load authentic U7 container image
-            let imgName = "u7_gump_chest";
-            if (this.containerType === "barrel") imgName = "u7_gump_barrel";
-            if (this.containerType === "backpack") imgName = "u7_gump_backpack";
-            if (this.containerType === "sack") imgName = "u7_gump_sack";
-            this._bgBitmap = ImageManager.loadSystem(imgName);
+            // The back sprite owns the visible plain panel; no asset is loaded.
+            const width = Math.max(1, this.width);
+            const height = Math.max(1, this.height);
+            if (!this._bgBitmap) this._bgBitmap = new Bitmap(width, height);
+            if (this._bgBitmap.width !== width || this._bgBitmap.height !== height) {
+                this._bgBitmap.resize(width, height);
+            }
+            this._bgBitmap.fillAll("#89775c");
+            this._bgBitmap.fillRect(2, 2, width - 4, height - 4, "#292b30");
+            this._backSprite.bitmap = this._bgBitmap;
+            this._backSprite.setFrame(0, 0, width, height);
+            this._backSprite.move(0, 0);
+            this._backSprite.scale.set(1, 1);
+            for (const child of this._backSprite.children) child.visible = false;
+        }
+
+        _refreshBack() {
+            this.loadGumpBackground();
         }
 
         maxItems() {
@@ -198,6 +217,10 @@
             const y = Math.floor((Graphics.height - height) / 2);
             super(new Rectangle(x, y, width, height));
             this.opacity = 245;
+            this._faceBitmap = ImageManager.loadFace(PAPERDOLL_FACE);
+            this._faceBitmap.addLoadListener(() => {
+                if (!this._destroyed) this.refresh();
+            });
             this.refresh();
         }
 
@@ -209,10 +232,10 @@
             // Title
             this.contents.fontSize = 18;
             this.changeTextColor(ColorManager.textColor(14));
-            this.drawText(`DWARF FORTRESS PAPERDOLL: ${actor.name()}`, 0, 4, this.innerWidth, "center");
+            this.drawText(`EQUIPMENT: ${actor.name()}`, 0, 4, this.innerWidth, "center");
 
             // Character Figure / Face
-            this.drawFace("U7_Faces", 0, 16, 40, 100, 100);
+            this.drawFace(PAPERDOLL_FACE, 0, 16, 40, 100, 100);
 
             // DF Attributes
             this.contents.fontSize = 14;
@@ -376,5 +399,94 @@
     PluginManager.registerCommand(pluginName, "OpenPaperdoll", () => {
         UF_Gumps.openPaperdoll();
     });
+
+    const _Scene_Boot_start = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _Scene_Boot_start.call(this);
+        if (window.UF && UF.Test && UF.Test.active) registerChecks();
+    };
+
+    function registerChecks() {
+        UF.Test.suite("gumps", async t => {
+            const scene = SceneManager._scene;
+            const id = "TEST_gumps_stock";
+            const previous = $ufContainers[id];
+            const loadSystem = ImageManager.loadSystem;
+            const loadFace = ImageManager.loadFace;
+            const requests = [];
+            ImageManager.loadSystem = function(name) {
+                requests.push(`system:${name}`);
+                return loadSystem.call(this, name);
+            };
+            ImageManager.loadFace = function(name) {
+                requests.push(`face:${name}`);
+                return loadFace.call(this, name);
+            };
+            const dbItem = $dataItems.find(item => item && item.name);
+            const originalCount = dbItem ? $gameParty.numItems(dbItem) : 0;
+            const errorsBefore = t.errorsSoFar().length;
+            try {
+                t.check("enabled", enableGumps && enablePaperdoll, "both plugin parameters must be true for this suite");
+                for (const type of ["chest", "barrel", "backpack", "sack", "crate"]) {
+                    $ufContainers[id] = { type, items: dbItem ? [{ id: dbItem.id, amount: 2 }] : [] };
+                    UF_Gumps.openContainer(id, type);
+                    const win = scene._activeContainerGump;
+                    await t.waitFrames(2);
+                    const bg = win && win._backSprite.bitmap;
+                    t.check(`plain_${type}`, !!win && win.parent === scene && win.visible && win.isOpen() &&
+                        win.opacity > 0 && win.backOpacity > 0 && !win.frameVisible &&
+                        win.x >= 0 && win.y >= 0 && win.x + win.width <= Graphics.width && win.y + win.height <= Graphics.height &&
+                        bg === win._bgBitmap && !bg.url && bg.width === 360 && bg.height === 240 &&
+                        bg.getPixel(0, 0) === "#89775c" && bg.getPixel(20, 20) === "#292b30" &&
+                        bg.getAlphaPixel(20, 20) === 255,
+                        `visible ${type} panel with code-drawn border and opaque interior`);
+                    if (type === "chest" && win) {
+                        t.screenshot("plain_container");
+                        if (dbItem) {
+                            win.select(0);
+                            win.processOk();
+                        }
+                        t.check("take_item", !!dbItem && $gameParty.numItems(dbItem) === originalCount + 1 &&
+                            $ufContainers[id].items[0].amount === 1, "one item transferred, one left in container");
+                        const saved = JsonEx.parse(JsonEx.stringify(DataManager.makeSaveContents()));
+                        t.check("save_roundtrip", saved.ufContainers && saved.ufContainers[id].type === "chest" &&
+                            saved.ufContainers[id].items[0].amount === 1, "container type and remaining amount survive save serialization");
+                    }
+                    if (win) {
+                        win.select(win.maxItems() - 1);
+                        win.processOk();
+                        t.check(`close_${type}`, !scene._activeContainerGump && !win.parent, "close entry detaches the window");
+                    }
+                }
+                if (scene._activePaperdoll) scene._activePaperdoll.close();
+                UF_Gumps.openPaperdoll();
+                const pd = scene._activePaperdoll;
+                await t.waitUntil(() => pd && pd._faceBitmap.isReady(), 5000, "stock paperdoll face");
+                await t.waitFrames(2);
+                const facePixels = pd.contents.context.getImageData(16, 40, 100, 100).data;
+                let opaque = 0;
+                for (let i = 3; i < facePixels.length; i += 4) if (facePixels[i]) opaque++;
+                t.check("stock_face_drawn", pd.parent === scene && pd.visible && pd.isOpen() && pd.opacity > 0 &&
+                    pd._faceBitmap.url.endsWith("/People1.png") && opaque > 1000,
+                    `People1 portrait has ${opaque} painted pixels in its destination rectangle`);
+                t.screenshot("stock_paperdoll");
+                t.check("runtime_no_standins", requests.some(name => name === "face:People1") &&
+                    !requests.some(name => /u7_/i.test(name)), `image requests: ${requests.join(", ")}`);
+                t.check("no_container_images", !requests.some(name => /^system:.*gump/i.test(name)),
+                    "container backgrounds use Bitmap drawing, with no gump image request");
+                UF_Gumps.openPaperdoll();
+                t.check("paperdoll_toggle", !scene._activePaperdoll && !pd.parent, "second open toggles the paperdoll closed");
+                t.check("no_new_errors", t.errorsSoFar().length === errorsBefore, t.errorsSoFar().slice(errorsBefore).join("; ") || "none");
+            } finally {
+                ImageManager.loadSystem = loadSystem;
+                ImageManager.loadFace = loadFace;
+                if (scene._activeContainerGump) scene._activeContainerGump.close();
+                if (scene._activePaperdoll) scene._activePaperdoll.close();
+                if (previous === undefined) delete $ufContainers[id];
+                else $ufContainers[id] = previous;
+                if (dbItem) $gameParty.gainItem(dbItem, originalCount - $gameParty.numItems(dbItem));
+            }
+        }, { isDefault: false });
+    }
 
 })();

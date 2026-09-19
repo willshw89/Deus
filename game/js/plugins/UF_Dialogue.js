@@ -33,7 +33,9 @@
     "use strict";
 
     const pluginName = "UF_Dialogue";
+    const PORTRAIT_FACE = "People1";
     window.UF_Dialogue = {};
+    UF_Dialogue.faceSheet = () => PORTRAIT_FACE;
 
     // 100% Unique Kaldurath Citizen Dialogue Database
     const DIALOGUE_DATABASE = {
@@ -230,9 +232,19 @@
             this.conversationLog = [
                 { speaker: this.data.name, text: this.data.greeting }
             ];
+            this._portraitReady = false;
+            this._dialogueClosed = false;
 
             this.rebuildKeywords();
             this.refresh();
+            // drawFace blits synchronously. Repaint once the stock face sheet is ready so the
+            // first dialogue opened from a cold image cache does not keep a blank portrait.
+            const portrait = ImageManager.loadFace(PORTRAIT_FACE);
+            if (portrait.isReady()) this._portraitReady = true;
+            else portrait.addLoadListener(() => {
+                this._portraitReady = true;
+                if (!this._dialogueClosed && this.contents) this.refresh();
+            });
         }
 
         rebuildKeywords() {
@@ -267,8 +279,8 @@
             this.contents.clear();
             this.keywordRects = [];
 
-            // Draw Portrait with stone frame
-            this.drawFace("U7_Faces", this.data.faceIndex, 16, 16, 120, 120);
+            // Stock portrait placeholder; original faction portraits replace this after approval.
+            this.drawFace(PORTRAIT_FACE, this.data.faceIndex, 16, 16, 120, 120);
 
             // Framed border for portrait
             this.contents.strokeRect(14, 14, 124, 124, "rgba(200, 157, 92, 0.8)");
@@ -463,6 +475,7 @@
         }
 
         close() {
+            this._dialogueClosed = true;
             super.close();
             if (this.parent) {
                 this.parent.removeChild(this);
@@ -496,5 +509,50 @@
         }
         _Game_Event_start.call(this);
     };
+
+    const _Scene_Boot_start = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _Scene_Boot_start.call(this);
+        if (window.UF && UF.Test && UF.Test.active) registerChecks();
+    };
+
+    function registerChecks() {
+        UF.Test.suite("dialogue", async t => {
+            const errors0 = t.errorsSoFar().length;
+            let win = null;
+            try {
+                const indices = Object.values(DIALOGUE_DATABASE).map(d => d.faceIndex);
+                t.check("stock_face_contract", PORTRAIT_FACE === "People1" && indices.every(n => Number.isInteger(n) && n >= 0 && n < 8),
+                    `face sheet ${PORTRAIT_FACE}; ${indices.length} dialogue records; indices ${Math.min(...indices)}..${Math.max(...indices)} (want People1 and 0..7)`);
+
+                UF_Dialogue.start("Thorgar_Brewer");
+                win = SceneManager._scene && SceneManager._scene._activeDialogueWindow;
+                const face = ImageManager.loadFace("People1");
+                await t.waitUntil(() => !!win && face.isReady() && win._portraitReady, 5000, "stock dialogue portrait loaded").catch(() => {});
+                await t.waitFrames(2);
+
+                t.check("stock_face_loaded", !!win && face.isReady() && face.width === 576 && face.height === 288,
+                    `${win ? "dialogue open" : "dialogue missing"}; People1 bitmap ${face.width}x${face.height}, ready=${face.isReady()}`);
+                let painted = 0;
+                if (win && win.contents) {
+                    const px = win.contents.context.getImageData(20, 20, 108, 108).data;
+                    for (let i = 3; i < px.length; i += 4) if (px[i]) painted++;
+                }
+                t.check("portrait_drawn", painted >= 8000,
+                    `${painted}/11664 opaque pixels strictly inside the portrait region (want >= 8000)`);
+                t.check("dialogue_visible", !!win && win.parent === SceneManager._scene && win.visible && win.openness > 0
+                    && win.x >= 0 && win.y >= 0 && win.x + win.width <= Graphics.width && win.y + win.height <= Graphics.height,
+                    win ? `attached=${win.parent === SceneManager._scene}; visible=${win.visible}; openness=${win.openness}; bounds ${win.x},${win.y},${win.width},${win.height} in ${Graphics.width}x${Graphics.height}` : "dialogue window missing");
+                t.screenshot("stock_portrait");
+            } finally {
+                if (win) win.close();
+            }
+            await t.waitFrames(2);
+            t.check("closed", !SceneManager._scene._activeDialogueWindow && (!win || !win.parent),
+                `active=${!!SceneManager._scene._activeDialogueWindow}; attached=${!!(win && win.parent)}`);
+            const errors = t.errorsSoFar().slice(errors0);
+            t.check("no_errors", errors.length === 0, errors.length ? errors.join(" | ") : "no uncaught errors during dialogue check");
+        }, { isDefault: false });
+    }
 
 })();
