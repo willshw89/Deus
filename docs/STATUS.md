@@ -4,6 +4,13 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
+## Natural passage checkpoint — 2026-09-19 (Codex / Astra)
+
+- New `UF_NaturalConnections` selects saved, dry paired Ground / -1 / -2 passages after founding, with actual walk-then-traverse jobs. F6 descends; Shift+F6 ascends for the selected player colonist. Unsupported/occupied landings refuse without teleporting or dropping carried inventory. Existing stair art is a placeholder.
+- Source checks: 22/22, including household annex reservations; deliberate guard mutations failed. Fixed-seed 20260919 NW.js snapshot `codex_connections_20260919_f6_b` passed 12/12, including actual key input, pause/resume, offscreen deep travel, item z and save serialization. The initial 10/2 control run exposed synthetic simultaneous-key ordering in the fixture; holding Shift before F6 corrected the test, not traversal logic.
+- The author opened all three PNGs in that snapshot's `test_output`: dry Ground stair mouth by a lake, underground traveler with carried stone, and a paused traversal order with readable feedback. No F5/F8 editor acceptance is claimed.
+- **Not live-registered:** RPGMZ process 51012 was observed open again on 2026-09-19. Registration waits for renewed closure confirmation. No all-seed passage guarantee, auto-excavation, every-pocket/camp connection, generic AI cross-z routing, built stairs/ladders or upper-level access is claimed. A seed without a safe natural column saves an explicit blocked reason.
+
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 ## FF5 Proportions, Dynamic Footsteps & Complete 8D Suites: Human, Dwarf & Elf (AR-010..012, AR-400, AR-600) — 2026-09-19 (Gemini)
 
