@@ -26,45 +26,55 @@ const rampLines = RAMPS.map(([name, idx]) => `  ${name}: ${idx.map(i => pal[i]).
 
 const STYLE = `STYLE AND RULES (the same for every image in this project)
 
-You are making original game art for a living fantasy world seen from above: a colony simulation in which people forage, build, farm, fight and raise families. The look is HIGH-RESOLUTION 2.5D PIXEL ART in the manner of an early-1990s VGA top-down role-playing game, described by the art director as "fantasy realism on a small scale".
+You are making original game art for a living fantasy world seen from above: a colony simulation in which people forage, build, farm, fight and raise families. The target look is the style of the 1992 VGA role-playing game ULTIMA VII (attached reference sprites show it), made at HIGHER DEFINITION than that game: the same projection, light, palette feel and rendering, with more detail per object. The art director calls it "fantasy realism on a small scale".
 
-1. Projection (2.5D oblique, not isometric):
-   - The ground is a square grid seen from straight above. Grid cells are 48 x 48 screen pixels.
-   - Anything with height leans UP and to the LEFT at 45 degrees: each pixel of height moves the image 1 pixel up and 1 pixel left.
-   - So you always see the TOP, the SOUTH (front) face and the EAST (right) face of everything, never the north or west faces.
-   - A tall thing touches the ground at the bottom-right of its drawing; its top is up and to the left.
-   - Never draw an isometric diamond base, never a flat side-on or straight-front view.
-2. Light: from the upper left. Top faces lightest, south faces mid-tone, east faces darkest. Shading in fine 1-pixel steps with micro-dither between tones.
-3. Detail: one art pixel is one screen pixel. Draw at the final size at full detail. Never draw small and enlarge, never use 2x or 3x chunky pixels. Realistic proportions, materials and textures (bark, stone grain, fur, cloth folds, rust) in a fantasy world.
-4. Scale (one coherent world; a cell is about 2.5 to 3 metres). Draw everything to these heights at 1:1:
-   - Grown human 32 px tall (elf 34, orc 36, dwarf 26, gnome 22, goblin 24, automaton 34); children 16 to 24; people fit well inside one cell.
-   - Hare 10 px long, rat 8, songbird 8, fowl 12, bat 14 wingspan, hawk 18 wingspan.
-   - Fox 20 long, wildcat 18, jackal 22, wolf 28 long by 20 tall, boar 30 by 20, sheep 26 by 20, deer 34 long by 32 tall with antlers.
-   - Wild horse 50 long by 40 tall, aurochs 52 by 36 (a little more than a cell).
-   - Restless dead 32 (person size), giant spider 40 wide, ice wraith 44 tall, sand stalker 48 long, bog horror 56 tall, troll 64 tall.
-   - Oak 70 wide by 70 tall, pine 50 by 64, fruit tree 60 by 60, birch 44 by 66, palm 56 by 72, flat-top tree 80 by 48, stump 24 by 18.
-   - Bush 26 by 20, tall grass 18 by 14, reeds 14 by 26, flowers 12 by 8, cactus 14 by 28, tall cactus 20 by 44.
-   - Boulder 40 by 32, ore outcrop 40 by 34, loose stones 22 by 10, crystal cluster 20 by 28.
-   - Campfire ring 30 by 16 plus a flame 24 tall, straw bed 34 by 20, work stone 30 by 18, furnace 44 by 48, well 36 by 40.
-   - A wall piece fills its cell and rises 32 px, so its top face sits 32 px up and to the left of its base.
-   These sizes are the working scale the art director described ("humanoids smaller than one grid square, trees and large monsters slightly larger"). They are final once the director approves the scale lineup; if told otherwise, follow the new numbers.
-5. Frames: an asset that fits in one cell uses a 48 x 48 frame. A larger one uses a 96 x 96 frame (or 96 x 144 for very tall things) in which the cell it stands on is the BOTTOM-RIGHT 48 x 48 of the frame, and the rest leans up and left from it. Never crop a shape to make it fit a frame.
-6. Palette: only colours from the project palette (256 colours, a warm, earthy daylight palette). The main ramps, lightest first where it matters:
-${rampLines}
-   Use as few colours as the material needs (typically 20 to 40 per sheet). Outline: a dark selective line (#201408) only on the lower and right edges of a silhouette; the lit upper-left edges have no outline.
-7. Background: flat magenta #FF00FF. No anti-aliasing against it; every pixel is either fully drawn or background.
-8. Never: baked ground shadows (the game draws them), text, borders, grid lines, watermarks, logos, or names from other games.
-9. Animation: everything that can move is animated (the art director's rule). Frames of one asset sit side by side on one sheet as your group section says. Frame timing is 150 ms unless your section says otherwise.
-10. Facings: creatures have four facings, drawn separately in this row order: south (toward the viewer), west, east, north (back). Because of the up-left lean, west and east are NOT mirror images of each other.
-11. Equipment shows (the art director's rule): what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks the layers the character has equipped. Every work and attack frame is drawn so a held tool or weapon lines up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
-12. Originality: all art is original. Reference images you are given (an old game's sprites) show scale and projection only: never trace, copy, recolour or edit them.
+1. Copy the style, never the pictures. Study the attached reference sprites for the projection, the lean, the light, the colours and the rendering. Every image you deliver is your own new drawing: never trace, copy, recolour, crop, rearrange or paint over a reference. Every delivery is checked automatically against that game's sprites, and near-copies are rejected.
+2. The projection is a SHEAR, not a rotation. This is the most important rule:
+   - The ground is a square grid seen from straight above.
+   - Anything with height is drawn upright and then pushed: each row of pixels higher above the ground is shifted one pixel further to the LEFT. The vertical axis of every standing thing therefore runs diagonally up and to the left at 45 degrees.
+   - Horizontal lines stay horizontal: a person's shoulders, belt and feet stay level; a table top stays level; a wall's top edge stays level. The figure is standing, NOT tilted, NOT rotated, NOT lying down, NOT falling.
+   - You see the top, the south (front) face and the east (right) face of things, never the north or west faces. A tall thing touches the ground at the bottom right of its drawing; its top is up and to the left.
+   - It is not isometric: no diamond-shaped ground, no 30-degree angles.
+   - Check each drawing: cover it with a horizontal ruler at the shoulders and at the feet: both edges must be level. If they slope, it is rotated: redraw it.
+3. Light from the upper left. Top faces lightest, south faces mid-tone, east faces darkest. Fine 1-pixel shading with dithering between tones, as in the references, but more of it: finer folds, bark, fur, stone grain and metal glints.
+4. Scale against the RPG Maker grid square. The game's map is a grid of RPG Maker squares of 48 × 48 screen pixels (about 2.5–3 metres). Every sprite is drawn at its true size compared with that square, so the world is coherent:
+   | Thing | Final size | Share of one grid square |
+   | Grown human | 32 px tall | two thirds of a square tall |
+   | Elf / orc / automaton | 34 / 36 / 34 px | a little over two thirds |
+   | Dwarf / goblin / gnome | 26 / 24 / 22 px | about half |
+   | Child | 16–24 px | a third to a half |
+   | Hare, rat, songbird | 8–10 px long | a fifth |
+   | Fowl, bat, hawk | 12–18 px | a quarter to a third |
+   | Fox, wildcat, jackal | 18–22 px long | under half |
+   | Wolf | 28 px long, 20 tall | about half |
+   | Boar, sheep | 26–30 px long, 20 tall | about half |
+   | Deer | 34 px long, 32 tall with antlers | two thirds |
+   | Wild horse, aurochs | 50–52 px long, 36–40 tall | a little over one square |
+   | Restless dead, giant spider | 32 px tall, 40 px wide | two thirds to one square |
+   | Ice wraith, sand stalker, bog horror | 44–56 px | about one square |
+   | Troll | 64 px tall | one and a third squares |
+   | Oak | 70 × 70 px | one and a half squares |
+   | Pine, birch, palm | 44–56 wide, 64–72 tall | one and a half squares tall |
+   | Stump, bush | 24 × 18, 26 × 20 | half a square |
+   | Tall grass, reeds, flowers | 8–26 px | a fifth to half |
+   | Boulder, ore outcrop | 40 × 32 px | most of a square |
+   | Loose stones, items on the ground | 8–22 px | a fifth to half |
+   | Campfire | 30 wide, flame 24 tall | two thirds |
+   | Straw bed, work stone | 30–34 × 18–20 | two thirds wide |
+   | Furnace, well | 36–44 wide, 40–48 tall | about one square |
+   | Wall piece | fills its square and rises 32 px | one square plus its height |
+5. Canvas: work at 4× so the detail is clean: every final pixel is a 4 × 4 block on your canvas, so ONE GRID SQUARE IS 192 × 192 pixels on your canvas and a grown human is 128 px tall. Keep the blocks even and crisp (no blur, no soft edges, no half-blocks). The project's tool reduces your image by 4 and snaps it to the palette.
+6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final). A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) in which the square it stands on is the BOTTOM-RIGHT 192 × 192, and the rest leans up and left from it. Never crop a shape to make it fit.
+7. Colours: the earthy VGA daylight palette of the references (the tool snaps every colour to the project palette, so stay close to the reference colours). Outline: a dark selective line only on the lower and right edges of a silhouette; lit upper-left edges have no outline.
+8. Background: flat magenta #FF00FF, one subject per image, centred on its square. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
+9. Animation: everything that can move is animated. Frames of one asset sit side by side on one sheet as your group section says.
+10. Facings: creatures have four facings in this row order: south (toward the viewer), west, east, north (back). Draw each one; west and east are not mirror images, because the lean always goes up and to the left.
+11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
+12. If your drawings keep coming out tilted or rotated, switch: draw the thing flat and upright (the ordinary 3/4 top-down RPG view, nothing leaning) and say so; the project's tool then adds the lean mechanically.
 13. Delivery, for every asset:
-   - The PNG sheet, named <id>.png (the ids are listed in your section), saved by the art director to art/masters/.
-   - A JSON sidecar named <id>.json, for example:
-     { "id": "oak", "frameWidth": 96, "frameHeight": 96, "anchor": [72, 95], "footprint": [1, 1], "facings": ["S"], "animations": { "stand": [0], "sway": [0, 1, 2] }, "frameMs": 150 }
-     "anchor" is the pixel in the frame where the thing touches the ground: the bottom-centre of the cell it stands on. "footprint" is the cells it blocks (width, height).
-   - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
-   - For each asset, add one line on what you drew and which states and frames the sheet holds.`;
+   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with tools/make_25d.js and checks it.
+   - One line per asset: what you drew, the states and frames on the sheet, and whether it is drawn with the lean or flat (rule 12).
+   - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.`;
 
 const obj = id => cat.objects.find(o => o.id === id);
 const objLine = id => {
@@ -150,15 +160,15 @@ For every species (${Object.keys(cat.people).filter(k => k !== "about").join(", 
 Name files fx_<name>.png.` }
 ];
 
-let md = `# Generator prompts: one per asset group (written 2026-09-19 by Claude Code)
+let md = `# Generator prompts: one per asset group (rewritten 2026-09-19 midday by Claude Code)
 
-The user's decisions behind these prompts (docs/VISION.md): V2 high-resolution 2.5D in the manner of an early-1990s VGA RPG, "fantasy realism on a small scale", one pixel density (V2 detail, 2026-09-19); V44 one coherent world at proper scale, humanoids smaller than a cell and trees and large monsters larger (the numbers below are the working scale until the user approves the scale lineup); V41/V58/V60 every creature and everything that can move is animated.
+The user's decisions behind these prompts (docs/VISION.md, AGENTS.md rule 8): copy the style of the old game while making higher-quality sprites (V2: higher definition than the old game, fantasy realism on a small scale); every sprite at its true size against the RPG Maker grid square (V44: people smaller than a square, trees and large monsters larger); the old game's art may be used as style reference and training data, but everything that ships is original and passes the originality check; everything that can move is animated and shows its equipment (V58, V60, V61).
 
 ## How to use
 1. Start one generator with prompt 0 and get the four anchors approved before anything else.
 2. Then start one generator per group, 1 to 13 (group 7 waits for the first approved body from group 6). Each prompt is self-contained: paste the whole block.
-3. Attach to every generator: the four approved anchor images, the scale lineup image, and for groups 2, 4, 5, 6, 8 and 9 the reference squares in art/u7_reference_squares/ (for projection and size only).
-4. Save deliveries to art/masters/<id>.png and <id>.json. Claude Code checks each against its brief (docs/asset_briefs/) and the anchors, then wires it into the game.
+3. Attach to every generator 3–6 reference sprites from the old game at its native proportions: the U7_ stand-ins in game/img/characters (for example $U7_Townsman.png, $U7_Deer.png, $U7_Wolf.png, !$TimberOak.png, !$GraniteBoulder.png, !$Campfire.png; they are the old game's sprites at 3x, so their sizes relative to each other are right), and, once approved, the four anchors and the scale lineup (game/test_output/scale_A_lineup.png).
+4. Save each delivery as art/raw/<id>.png. Claude Code reduces it with tools/make_25d.js, checks it with tools/art_check.js and tools/originality_check.js, and wires it into the game after your approval.
 
 `;
 for (const g of GROUPS) {
