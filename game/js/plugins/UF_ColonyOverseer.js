@@ -21,8 +21,11 @@
  *   ground with a colonist selected orders it there (UF.Colonists.order, a
  *   "move" job); right-click deselects (unless UF_Interact opened its menu);
  * - the card shows name, gender, mood, faction and home site, the current
- *   job (UF.Jobs.describe), hunger / thirst / sleep / social, the tool and the
- *   clothes worn, the latest thought, and the society plan's progress.
+ *   job (UF.Jobs.describe), what it carries ("Carrying 3 logs to the
+ *   woodpile", from UF.Sheet.loadOf; VISION V89: loads are written in the
+ *   profile, never drawn on the sprite), hunger / thirst / sleep / social, the
+ *   tool and the clothes worn, the latest thought, and the society plan's
+ *   progress.
  *
  * The colonists themselves (needs, decisions, plan, thoughts) are UF_Colonists
  * (2026-09-18: the old Colonist class, needs ticker and glade setup were
@@ -44,7 +47,9 @@
     "use strict";
 
     const CAM_SPEED = 0.35;   // cells per frame while a pan key is held
-    const CARD_W = 380, CARD_H = 300;
+    const CARD_W = 380, CARD_H = 320;
+    const LOAD_Y = 60;        // the load line ("Carrying 3 logs to the woodpile"), under the job; blank when it carries nothing
+    const BELOW_LOAD = 22;    // everything under the load line moved down by this much (2026-09-19, V89)
     const CARD_REFRESH = 30;  // frames between card refreshes while it's open
 
     let activeColonyWindow = null;
@@ -245,6 +250,7 @@
 
     Window_UFColonistCard.prototype.refresh = function() {
         this.contents.clear();
+        this._ufLoadText = "";
         const sel = $colonyManager.selectedColonist;
         const C = Colonists();
         const d = sel && C ? C.describe(sel.id) : null;
@@ -274,27 +280,37 @@
         this.resetTextColor();
         this.drawText(`Job: ${d.job}`, 0, 40, w, "left");
 
+        // Line 3: what it carries (V89; UF_Sheet words it), nothing when it carries nothing
+        this.contents.fontSize = 14;
+        this.changeTextColor("#f0dca0");
+        const S = window.UF && UF.Sheet;
+        const load = S && typeof S.loadOf === "function" ? S.loadOf(sel.id) : null;
+        this._ufLoadText = load && typeof S.fittedLoadText === "function" ? S.fittedLoadText(load, w, text => this.textWidth(text)) : "";
+        if (this._ufLoadText) this.drawText(this._ufLoadText, 0, LOAD_Y, w, "left");
+        this.resetTextColor();
+        const dy = BELOW_LOAD;
+
         // Needs
         this.contents.fontSize = 15;
-        this.drawNeedGauge("Hunger", d.needs.hunger, 100, "#ffaa44", 62);
-        this.drawNeedGauge("Thirst", d.needs.thirst, 100, "#44aaff", 82);
-        this.drawNeedGauge("Sleep", d.needs.sleep, 100, "#cc66ff", 102);
-        this.drawNeedGauge("Social", d.needs.social, 100, "#ff66aa", 122);
+        this.drawNeedGauge("Hunger", d.needs.hunger, 100, "#ffaa44", 62 + dy);
+        this.drawNeedGauge("Thirst", d.needs.thirst, 100, "#44aaff", 82 + dy);
+        this.drawNeedGauge("Sleep", d.needs.sleep, 100, "#cc66ff", 102 + dy);
+        this.drawNeedGauge("Social", d.needs.social, 100, "#ff66aa", 122 + dy);
 
         // Tool and clothes
         this.contents.fontSize = 14;
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText("Tool:", 0, 146, 50, "left");
-        this.drawText("Wears:", 180, 146, 60, "left");
+        this.drawText("Tool:", 0, 146 + dy, 50, "left");
+        this.drawText("Wears:", 180, 146 + dy, 60, "left");
         this.resetTextColor();
-        this.drawText(d.tool || "none", 50, 146, 125, "left");
-        this.drawText(d.clothes ? `${d.clothes} (tier ${d.tier})` : (d.tier ? `tier ${d.tier}` : "nothing"), 240, 146, w - 240, "left");
+        this.drawText(d.tool || "none", 50, 146 + dy, 125, "left");
+        this.drawText(d.clothes ? `${d.clothes} (tier ${d.tier})` : (d.tier ? `tier ${d.tier}` : "nothing"), 240, 146 + dy, w - 240, "left");
 
         // The latest thought
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText("Thought:", 0, 168, 70, "left");
+        this.drawText("Thought:", 0, 168 + dy, 70, "left");
         this.changeTextColor("#dddddd");
-        this.drawText(d.thought ? `"${d.thought}"` : "", 72, 168, w - 72, "left");
+        this.drawText(d.thought ? `"${d.thought}"` : "", 72, 168 + dy, w - 72, "left");
 
         // Plan progress (two lines) and the faction shortcut
         this.contents.fontSize = 12;
@@ -310,9 +326,9 @@
             } else line = next;
         }
         if (line) lines.push(line);
-        lines.slice(0, 3).forEach((text, i) => this.drawText(text, 0, 190 + i * 15, w, "left"));
+        lines.slice(0, 3).forEach((text, i) => this.drawText(text, 0, 190 + dy + i * 15, w, "left"));
         this.changeTextColor("#38bdf8");
-        this.drawText("[F] factions · [H] chronicle", 0, 240, w, "left");
+        this.drawText("[F] factions · [H] chronicle", 0, 240 + dy, w, "left");
         this.contents.fontSize = base;
         this.resetTextColor();
     };
@@ -342,8 +358,12 @@
     window.UF = window.UF || {};
     window.UF.Overseer = {
         card: () => activeColonyWindow,
+        /** The card's load line as last drawn ("" when the colonist carries nothing or no card is shown). */
+        cardLoadText: () => (activeColonyWindow && activeColonyWindow.visible ? activeColonyWindow._ufLoadText || "" : ""),
+        /** The load line's band in the card's contents (for checks that read its pixels). */
+        loadRect: () => ({ x: 0, y: LOAD_Y + 13, w: activeColonyWindow ? activeColonyWindow.innerWidth : CARD_W - 24, h: 13 }),
         colonistAt,
-        CARD_W, CARD_H
+        CARD_W, CARD_H, LOAD_Y
     };
 
     //-----------------------------------------------------------------------------

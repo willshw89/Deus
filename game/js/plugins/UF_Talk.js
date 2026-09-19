@@ -59,6 +59,7 @@
     // Constants (layout and cadence; all wording lives in the catalog "talk" section)
 
     const FACE = 96;               // portrait frame (the stock face cells are 144x144, drawn scaled)
+    const SKIN_CORNER = 12;        // each side's window-skin frame around its portrait (VISION V99): corner px (the skin's are 24)
     const MARGIN = 16;             // from the screen edges
     const GAP = 14;                // portrait to text
     const WORDS_MAX_W = 384;       // the words column beside a portrait (px, including padding; clear of the clock and speed controls at the top right)
@@ -920,8 +921,10 @@
     }
 
     //-------------------------------------------------------------------------
-    // Portraits: data.face, then catalog.faces (AR-700, when it exists), then catalog.sheet.faces (the same pick as
-    // UF_Sheet's panel), then talk.portraits (stock placeholders), else a code-drawn silhouette (UF_GenFace).
+    // Portraits: data.face; then the culture's face sheets and its people's species sheets (catalog "faces", VISION
+    // V100, UF.Factions.cultureFace); then catalog.sheet.faces (the same pick as UF_Sheet's panel), then talk.portraits
+    // (stock placeholders), else a code-drawn silhouette (UF_GenFace). Until the culture's sheets exist the portrait is
+    // drawn in a code-drawn frame in the culture's colours (spec.frame, UF.Factions.drawPortrait).
 
     function faceList(list) {
         const out = [];
@@ -958,7 +961,16 @@
     const faceOk = f => !!f && fileExists(`img/faces/${f.sheet}.png`);
     function portraitOf(u) {
         const d = (u && u.data) || {};
-        if (d.face && d.face.sheet && faceOk(d.face)) return { kind: "face", sheet: String(d.face.sheet), index: d.face.index | 0, from: "data.face" };
+        if (d.face && d.face.sheet && faceOk(d.face)) return { kind: "face", sheet: String(d.face.sheet), index: d.face.index | 0, from: "data.face", frame: null };
+        const F = Factions();
+        const frameOf = () => (F && typeof F.faceFrameCulture === "function" ? F.faceFrameCulture(u) : null);
+        const cf = F && typeof F.cultureFace === "function" ? F.cultureFace(u) : null;
+        if (cf && faceOk(cf)) return { kind: "face", sheet: cf.sheet, index: cf.index, from: cf.from, culture: cf.culture, frame: cf.framed === false ? frameOf() : null };
+        return Object.assign(olderPortraitOf(u), { frame: frameOf() });
+    }
+    /** The portraits chosen before VISION V100 (catalog sheet.faces, talk.portraits, UF_GenFace). */
+    function olderPortraitOf(u) {
+        const d = (u && u.data) || {};
         const cat = catalog() || {};
         const g = d.gender === "female" ? "female" : "male";
         const stage = stageOf(u);
@@ -968,10 +980,6 @@
             const f = ok[hash32(seed(), u.id, SALT_FACE) % ok.length];
             return { kind: "face", sheet: f.sheet, index: f.index, from };
         };
-        if (cat.faces && d.species && cat.faces[d.species]) {
-            const p = pickHash(stagedFaces(cat.faces[d.species][g], stage), "catalog.faces");
-            if (p) return p;
-        }
         // UF_Sheet's rule (docs/systems/UF_Sheet.md, Face): <stage>_<gender>, <gender>, any; unit.id mod the list.
         const sf = cat.sheet && cat.sheet.faces && d.species ? cat.sheet.faces[d.species] : null;
         if (sf && typeof sf === "object") {
@@ -1172,26 +1180,39 @@
             const token = ++slot.token;
             b.clear();
             b.fillRect(0, 0, FACE, FACE, "#14110d");
-            const spec = u ? portraitOf(u) : { kind: "emblem", name: "UF_GenEmblem", from: "code (nobody of yours can speak)" };
-            let drawn = spec.kind === "emblem" ? "emblem" : "gen", pending = false;
+            const F = Factions();
+            const spec = u ? portraitOf(u) : { kind: "emblem", name: "UF_GenEmblem", from: "code (nobody of yours can speak)", frame: F && F.playerCulture ? F.playerCulture() : null };
+            let drawn = spec.kind === "emblem" ? "emblem" : "gen", pending = false, src = null;
             if (spec.kind === "face") {
-                const src = ImageManager.loadFace(spec.sheet);
-                if (src.isReady()) {
-                    const pw = ImageManager.faceWidth, ph = ImageManager.faceHeight;
-                    b.blt(src, (spec.index % 4) * pw, Math.floor(spec.index / 4) * ph, pw, ph, 2, 2, FACE - 4, FACE - 4);
-                    drawn = "face";
-                } else if (!(src.isError && src.isError())) {
+                src = ImageManager.loadFace(spec.sheet);
+                if (src.isReady()) drawn = "face";
+                else if (!(src.isError && src.isError())) {
                     pending = true;
                     src.addLoadListener(() => { if (slot.token === token && !(src.isError && src.isError())) this.drawFace(slot, u); });
                 }
             }
-            if (drawn === "emblem") {
-                const F = Factions();
-                const pf = F && F.player ? F.player() : null;
-                drawEmblem(b, pf && pf.color ? pf.color : null, 2, 2, FACE - 4);
-            } else if (drawn !== "face") drawGenFace(b, u, 2, 2, FACE - 4);
-            for (const [x, y, w, h] of [[0, 0, FACE, 2], [0, FACE - 2, FACE, 2], [0, 0, 2, FACE], [FACE - 2, 0, 2, FACE]]) b.fillRect(x, y, w, h, FRAME_COLOR);
-            slot.faceInfo = Object.assign({}, spec, { drawn, pending, unitId: u ? u.id : null });
+            // The portrait into a box of the bitmap: the face cell, your emblem, or the code-drawn silhouette.
+            const inner = (x, y, S) => {
+                if (drawn === "face") {
+                    const pw = ImageManager.faceWidth, ph = ImageManager.faceHeight;
+                    b.blt(src, (spec.index % 4) * pw, Math.floor(spec.index / 4) * ph, pw, ph, x, y, S, S);
+                } else if (drawn === "emblem") {
+                    const pf = F && F.player ? F.player() : null;
+                    drawEmblem(b, pf && pf.color ? pf.color : null, x, y, S);
+                } else drawGenFace(b, u, x, y, S);
+            };
+            // VISION V100: until the culture's face sheets exist, the portrait sits in a frame in the culture's colours.
+            if (spec.frame && F && typeof F.drawPortrait === "function") F.drawPortrait(b, 0, 0, FACE, spec.frame, inner);
+            else inner(2, 2, FACE - 4);
+            // VISION V99: each side of the talk in its own faction's skin: that skin's window frame around the portrait.
+            const owner = F && typeof F.skinOwner === "function" ? F.skinOwner(u) : null;
+            const skin = owner && typeof F.drawSkinFrame === "function" ? F.drawSkinFrame(b, 0, 0, FACE, FACE, owner, SKIN_CORNER) : null;
+            if (!skin || !skin.drawn) for (const [x, y, w, h] of [[0, 0, FACE, 2], [0, FACE - 2, FACE, 2], [0, 0, 2, FACE], [FACE - 2, 0, 2, FACE]]) b.fillRect(x, y, w, h, FRAME_COLOR);
+            if (skin && skin.pending) {
+                pending = true;
+                skin.skin.addLoadListener(() => { if (slot.token === token) this.drawFace(slot, u); });
+            }
+            slot.faceInfo = Object.assign({}, spec, { drawn, pending, unitId: u ? u.id : null, skin: owner && F.cultureOf ? F.cultureOf(owner) : null, skinDrawn: !!(skin && skin.drawn) });
             slot.face.visible = true;
         }
         /** Word-wrap text to a width (the measure bitmap carries the font). */

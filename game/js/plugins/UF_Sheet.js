@@ -20,7 +20,9 @@
  * the items on the cell, then the object. Bare ground opens nothing.
  * The panel sits on the right of the screen, below the clock:
  *   header     face (units) or picture (things), name, kind, species or
- *              object type, faction with its stance colour, what it's doing
+ *              object type, faction with its stance colour, what it's doing,
+ *              and what it carries ("Carrying 3 logs to the woodpile"; VISION
+ *              V89: carried loads are written here, never drawn on the sprite)
  *   units      equipment slots (head, weapon, shield, torso, legs; the old
  *              equipment.tool shows as weapon and equipment.clothes as
  *              torso), the six stats with their modifiers, needs and mood
@@ -61,6 +63,9 @@
     const PICTURE_ICON = 64;       // an item or object picture inside that box
     const CLOSE = 18;
     const HEADER_H = 74;
+    const LOAD_H = 18;             // the "Carrying ..." line under the header (units carrying something)
+    const LOAD_KINDS = 3;          // item kinds named in the load line before "and N more"
+    const MASS_WORDS = ["meat", "fiber", "straw", "wool", "charcoal", "leather", "firewood", "fish", "ore", "water"]; // no "a", no plural
     const TEXT_X = PICTURE + 8;
     const MAX_DROPS = 8;
     const MAX_STOCKPILE_CELLS = 64;
@@ -318,10 +323,17 @@
         return b;
     }
 
-    // { type: "face", sheet, index } from unit.data.face or the catalog, else { type: "gen", kind, color }.
+    // { type: "face", sheet, index, frame } from unit.data.face or the catalog, else { type: "gen", kind, color, frame }.
+    // frame: the culture whose code-drawn frame goes around the picture (UF.Factions.drawPortrait), or null.
     function faceSpecOf(u, species) {
         const d = u.data || {};
         if (d.face && d.face.sheet && fileExists(`img/faces/${d.face.sheet}.png`)) return { type: "face", sheet: String(d.face.sheet), index: d.face.index | 0 };
+        // VISION V100: the culture's face sheets, then its people's species sheets (catalog "faces"); else the older
+        // pick below, in a frame in the culture's colours until the culture's sheets exist.
+        const F = Factions();
+        const frame = F && typeof F.faceFrameCulture === "function" ? F.faceFrameCulture(u) : null;
+        const cf = F && typeof F.cultureFace === "function" ? F.cultureFace(u) : null;
+        if (cf && fileExists(`img/faces/${cf.sheet}.png`)) return { type: "face", sheet: cf.sheet, index: cf.index, from: cf.from, culture: cf.culture, frame: cf.framed === false ? frame : null };
         const entry = config().faces[d.species];
         if (entry && typeof entry === "object") {
             const g = lower(d.gender) || "any";
@@ -329,13 +341,13 @@
             const usable = Array.isArray(list) ? list.filter(p => Array.isArray(p) && p[0] && fileExists(`img/faces/${p[0]}.png`)) : [];
             if (usable.length) {
                 const pick = usable[Math.abs(u.id | 0) % usable.length]; // stable per unit, no randomness
-                return { type: "face", sheet: String(pick[0]), index: pick[1] | 0 };
+                return { type: "face", sheet: String(pick[0]), index: pick[1] | 0, frame };
             }
         }
         const beast = d.kind === "creature";
         const people = catalog() && catalog().people ? catalog().people[d.species] : null;
         const color = d.tint || (species && species.tint) || (people && people.tint) || (beast ? "#9a8a70" : "#8a8f98");
-        return { type: "gen", kind: beast ? "beast" : "person", color };
+        return { type: "gen", kind: beast ? "beast" : "person", color, frame };
     }
 
     //-------------------------------------------------------------------------
@@ -487,6 +499,113 @@
         return u.goal ? "Walking" : "Idle";
     }
 
+    //-------------------------------------------------------------------------
+    // The load: what a unit carries, in words (VISION V89, user 2026-09-19: "Whatever they are carrying can be documented
+    // in their profile as opposed to animated"). Loads are never drawn on the sprite (UF_Anim); the profile says them:
+    // this panel and the Overseer's colonist card.
+
+    const lastWord = name => lower(name).split(/\s+/).pop();
+    /** "log" -> "logs", "stone knife" -> "stone knives"; "berries" and "raw meat" stay as they are. */
+    function pluralName(name) {
+        const n = lower(name), w = lastWord(n);
+        if (MASS_WORDS.includes(w) || /s$/.test(w)) return n;
+        if (/knife$/.test(n)) return n.slice(0, -2) + "ves";
+        if (/(x|z|ch|sh)$/.test(n)) return n + "es";
+        if (/[^aeiou]y$/.test(n)) return n.slice(0, -1) + "ies";
+        return n + "s";
+    }
+    /** An item name with its count: "a log", "3 logs", "an iron axe", "raw meat", "2 raw meat", "berries", "5 berries". */
+    function countedName(name, count) {
+        const n = lower(name), w = lastWord(n);
+        const bare = MASS_WORDS.includes(w) || /s$/.test(w);
+        if (!(count > 1)) return bare ? n : `${/^[aeiou]/.test(n) ? "an" : "a"} ${n}`;
+        return `${count} ${bare ? n : pluralName(n)}`;
+    }
+    const isBuiltThing = t => ["building", "stockpile", "workplace"].some(tag => tagsOf(t).includes(tag));
+    /**
+     * Where a haul goes, in words: the colony plan step whose cells hold that cell ("the woodpile", "the larder", "the
+     * shelter"), else the building on it ("the stockpile", "the work stone"), else a building marked there ("the wooden
+     * wall being built"), else the cell ("(12, 8)").
+     */
+    function placeName(to) {
+        if (!to || !to.area) return "";
+        const W = World(), O = Objects(), J = Jobs();
+        const c = W && W.state ? W.state.colony : null;
+        if (c && Array.isArray(c.plan) && c.site && sameArea(c.area, to.area)) {
+            const dx = to.x - c.site.x, dy = to.y - c.site.y;
+            const step = c.plan.find(p => p && p.build && Array.isArray(p.cells) && p.cells.some(cl => Array.isArray(cl) && cl[0] === dx && cl[1] === dy));
+            if (step && step.id) return `the ${lower(String(step.id).replace(/_/g, " "))}`;
+        }
+        const t = O && typeof O.atIn === "function" ? O.atIn(to.area, to.x, to.y) : null;
+        if (t && t.name && isBuiltThing(t)) return `the ${lower(t.name)}`;
+        const marked = J && typeof J.list === "function" ? J.list(j => j.type === "build" && !!j.target && sameArea(j.target.area, to.area) && j.target.x === to.x && j.target.y === to.y && j.state !== "done" && j.state !== "failed" && j.state !== "cancelled") : [];
+        const bt = marked.length && marked[0].params && O ? O.type(marked[0].params.objectId) : null;
+        if (bt && bt.name) return `the ${lower(bt.name)} being built`;
+        return `(${to.x}, ${to.y})`;
+    }
+    // Item record ids the unit wears or wields (any key of data.equipment: head, weapon, tool, clothes, ...).
+    function equippedIds(u) {
+        const eq = (u.data && u.data.equipment) || {};
+        const out = new Set();
+        for (const k of Object.keys(eq)) {
+            const v = eq[k];
+            if (typeof v === "number") out.add(v);
+            else if (v && typeof v === "object" && typeof v.id === "number") out.add(v.id);
+        }
+        return out;
+    }
+    /**
+     * What a unit carries: { kind, items: [{ typeId, name, count }], to: { area, x, y, name } | null, jobId, text }, or
+     * null when it carries nothing. kind "haul": the item its haul or fetch job moves, in its hands (with where a haul
+     * takes it); "water": water for a fire (UF_Fire's douse job after filling up); "held": the stacks it holds but doesn't
+     * wear or wield, by item type in pick-up order.
+     */
+    function loadOf(unitOrId) {
+        const W = World(), I = Items(), J = Jobs();
+        const u = typeof unitOrId === "number" ? (W ? W.unit(unitOrId) : null) : unitOrId;
+        if (!u || !I) return null;
+        const job = J && typeof J.of === "function" ? J.of(u.id) : null;
+        let load = null;
+        if (job && (job.type === "haul" || job.type === "fetch") && job.params) {
+            const it = I.get(job.params.itemId);
+            if (it && it.holder === u.id) {
+                const to = job.type === "haul" && job.params.to && job.params.to.area ? job.params.to : null;
+                load = { kind: "haul", items: [{ typeId: it.type, name: itemName(it.type), count: it.count }],
+                    to: to ? { area: copyArea(to.area), x: to.x | 0, y: to.y | 0, name: placeName(to) } : null, jobId: job.id };
+            }
+        }
+        if (!load && job && job.type === "douse" && (job.phase | 0) >= 1) {
+            load = { kind: "water", items: [{ typeId: null, name: "water", count: 1 }], to: { area: null, x: 0, y: 0, name: "the fire" }, jobId: job.id };
+        }
+        if (!load) {
+            const worn = equippedIds(u), byType = new Map();
+            for (const it of I.inventoryOf(u.id)) {
+                if (worn.has(it.id)) continue;
+                const e = byType.get(it.type);
+                if (e) e.count += it.count;
+                else byType.set(it.type, { typeId: it.type, name: itemName(it.type), count: it.count });
+            }
+            if (byType.size) load = { kind: "held", items: Array.from(byType.values()), to: null, jobId: job ? job.id : null };
+        }
+        if (load) load.text = loadText(load);
+        return load;
+    }
+    /** The load in words, naming at most maxKinds item kinds: "Carrying 3 logs to the woodpile", "Carrying raw meat and a stone knife"; "" for none. */
+    function loadText(load, maxKinds) {
+        if (!load || !Array.isArray(load.items) || !load.items.length) return "";
+        const k = Math.max(1, (maxKinds | 0) || LOAD_KINDS);
+        const parts = load.items.slice(0, k).map(e => (e.typeId === null ? lower(e.name) : countedName(e.name, e.count)));
+        const more = load.items.length - parts.length;
+        const what = more > 0 ? `${parts.join(", ")} and ${more} more` : parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0];
+        return `Carrying ${what}${load.to && load.to.name ? ` to ${load.to.name}` : ""}`;
+    }
+    /** The load text that fits a width (fewer item kinds named until it does); widthOf(text) measures in the caller's font. */
+    function fittedLoadText(load, width, widthOf) {
+        let text = loadText(load);
+        for (let k = LOAD_KINDS - 1; k >= 1 && text && widthOf(text) > width; k--) text = loadText(load, k);
+        return text;
+    }
+
     function unitModel(u) {
         const I = Items(), cfg = config(), d = u.data || {};
         const kind = unitKind(u);
@@ -505,6 +624,7 @@
             subject: { kind: "unit", unitId: u.id }, kind, readOnly,
             title: u.name || "", subtitle: [KIND_LABELS[kind], speciesText, who].filter(Boolean).join(" · "),
             faction: fl.faction, stance: fl.stance, doing: doingOf(u),
+            load: loadOf(u),
             picture: faceSpecOf(u, species),
             equipment, stats: statsOf(d.stats), statsShown: true,
             needs: kind === "colonist" ? needsOf(d.needs) : null,
@@ -518,7 +638,7 @@
             hint: readOnly ? "Read-only: not one of your people." : "Click a stack, then Drop puts it at their feet.",
             here: here.map(it => it.id)
         };
-        m.sig = JSON.stringify([m.kind, m.title, m.subtitle, m.faction, m.stance && m.stance.id, m.doing, inv.map(it => `${it.id}:${it.type}:${it.count}`),
+        m.sig = JSON.stringify([m.kind, m.title, m.subtitle, m.faction, m.stance && m.stance.id, m.doing, m.load ? m.load.text : "", inv.map(it => `${it.id}:${it.type}:${it.count}`),
             equipment ? equipment.map(e => `${e.itemId}:${e.typeId}`) : null, m.stats ? m.stats.map(s => s.score) : null,
             m.needs ? m.needs.map(n => n.value) : null, m.mood, m.here, m.picture]);
         return m;
@@ -551,7 +671,7 @@
         const kind = type && (isContainer(type) || !items.length) ? objectKind(type) : "items";
         const m = {
             subject: { kind: "cell", area: copyArea(s.area), x: s.x, y: s.y }, kind, readOnly: true,
-            title: "", subtitle: "", faction: null, stance: null, doing: null, picture: null,
+            title: "", subtitle: "", faction: null, stance: null, doing: null, load: null, picture: null,
             equipment: null, stats: null, statsShown: false, needs: null, mood: null, drops: null,
             stateLines: null, actions: null, grid: null, buttons: [], hint: "Click a stack for its name, count and tags.", here: []
         };
@@ -624,6 +744,10 @@
         const s = cfg.slot;
         const L = { picture: { x: 0, y: 0, w: PICTURE, h: PICTURE }, close: { x: iw - CLOSE, y: 0, w: CLOSE, h: CLOSE } };
         let y = HEADER_H + 4;
+        if (m.load) {
+            L.load = { x: 0, y: HEADER_H, w: iw, h: LOAD_H - 2 };
+            y += LOAD_H;
+        }
         if (m.equipment) {
             const n = m.equipment.length;
             const gap = n > 1 ? Math.floor((iw - n * s) / (n - 1)) : 0;
@@ -898,7 +1022,7 @@
             if (equipped) this.text("E", r.x + 3, r.y + 1, 10, 12, 10, COLORS.equipped, "left");
         }
         drawPicture(m, L) {
-            const c = this.contents, r = L.picture;
+            const c = this.contents, r = L.picture, F = Factions();
             c.fillRect(r.x, r.y, r.w, r.h, COLORS.pictureBack);
             const p = m.picture;
             if (!p) return;
@@ -913,10 +1037,14 @@
                     return;
                 }
                 const fw = ImageManager.faceWidth, fh = ImageManager.faceHeight;
-                c.blt(bmp, (p.index % FACE_COLS) * fw, Math.floor(p.index / FACE_COLS) * fh, fw, fh, r.x, r.y, r.w, r.h);
+                const draw = (x, y, S) => c.blt(bmp, (p.index % FACE_COLS) * fw, Math.floor(p.index / FACE_COLS) * fh, fw, fh, x, y, S, S);
+                if (p.frame && F && typeof F.drawPortrait === "function") F.drawPortrait(c, r.x, r.y, r.w, p.frame, draw); // VISION V100
+                else draw(r.x, r.y, r.w);
             } else if (p.type === "gen") {
                 const b = genFace(p.kind, p.color);
-                c.blt(b, 0, 0, b.width, b.height, r.x, r.y, r.w, r.h);
+                const draw = (x, y, S) => c.blt(b, 0, 0, b.width, b.height, x, y, S, S);
+                if (p.frame && F && typeof F.drawPortrait === "function") F.drawPortrait(c, r.x, r.y, r.w, p.frame, draw);
+                else draw(r.x, r.y, r.w);
             } else if (p.type === "icon") {
                 const e = iconFor(p.spec, PICTURE_ICON);
                 if (e && e.state === "ready") c.blt(e.bitmap, 0, 0, PICTURE_ICON, PICTURE_ICON, r.x + (r.w - PICTURE_ICON) / 2, r.y + (r.h - PICTURE_ICON) / 2);
@@ -949,6 +1077,14 @@
                 this.text(`${m.faction}${m.stance ? ` · ${m.stance.label}` : ""}`, tx, 39, iw - tx, 16, 12, m.stance ? m.stance.color : COLORS.text);
             }
             if (m.doing !== null) this.text(`Doing: ${m.doing}`, TEXT_X, 56, iw - TEXT_X, 16, 12, COLORS.doing);
+            if (m.load && L.load) this.drawLoad(m, L);
+        }
+        // "Carrying 3 logs to the woodpile" (V89): the whole width under the picture; fewer item kinds named if it's too long.
+        drawLoad(m, L) {
+            const r = L.load, c = this.contents;
+            c.fontSize = 13;
+            this._loadText = fittedLoadText(m.load, r.w, text => c.measureTextWidth(text));
+            this.text(this._loadText, r.x, r.y, r.w, r.h, 13, COLORS.doing);
         }
         drawEquipment(m, L) {
             const sys = ColorManager.systemColor();
@@ -1045,6 +1181,7 @@
             this._pending = 0;
             this.resetFontSettings();
             this.contents.clear();
+            this._loadText = "";
             const L = this._layout = layoutFor(m, this.innerWidth, cfg);
             const h = Math.min(this._maxHeight, L.height + this.padding * 2);
             if (this.height !== h) this.height = h;
@@ -1094,6 +1231,17 @@
         layoutFor,
         itemIconSpec,
         objectIconSpec,
+        /** What a unit carries (V89): { kind, items, to, jobId, text } or null (it carries nothing). Also read by the Overseer's colonist card. */
+        loadOf,
+        loadText,
+        fittedLoadText,
+        countedName,
+        placeName,
+        /** The load line as last drawn on the open panel ("" when none). */
+        drawnLoadText: () => {
+            const w = sceneWindow();
+            return w && w.visible ? w._loadText || "" : "";
+        },
         /** The icon entry of an item type at a size ({ state, bitmap }); cached, built once. */
         itemIcon: (typeId, size) => iconFor(itemIconSpec(typeId), size || config().slot - 4),
         window: sceneWindow,
@@ -1753,5 +1901,124 @@
         t.check("perf", perfOk,
             `open (world running at x1, a need changed before every check so each check redraws; performance.now around the panel's update and the scene hook): ${pOpen.openFrames} frames, avg ${pOpen.openAvgMs.toFixed(4)} ms, ${pOpen.checks} signature checks, ${pOpen.redraws} redraws (want >= 4), ${pOpen.bitmapsMade} new bitmaps; ` +
             `closed: ${pClosed.closedFrames} frames, avg ${pClosed.closedAvgMs.toFixed(4)} ms, ${pClosed.checks} checks, ${pClosed.redraws} redraws, ${pClosed.bitmapsMade} new bitmaps; icon cache ${Sheet.iconCacheSize()} entries`);
+
+        // sheet.shows_load and sheet.card_shows_load (VISION V89, user 2026-09-19: "Whatever they are carrying can be documented
+        // in their profile as opposed to animated"): a real haul. A colonist of yours walks to 3 logs, picks them up and carries
+        // them 6 cells to a stockpile; while it holds them the panel and the Overseer's card say "Carrying 3 logs to <the place>",
+        // and once they are down neither says anything. Its sprite shows walk (and stand) frames, never a carry pose (UF_Anim).
+        Sheet.close();
+        cm.deselect();
+        const Anim = window.UF.Anim;
+        const hauler = W.addUnit({ name: "TEST_SheetHauler", image: { characterName: imageOf(pf ? pf.species : "human"), characterIndex: 0 }, area, x: x0 + 8, y: y0, dir: 4,
+            data: { kind: "colonist", faction: pid, species: pf ? pf.species : "human", gender: "female", ai: null, stats: colStats,
+                needs: { hunger: 30, thirst: 40, sleep: 20, social: 50, nature: 10 }, mood: "Content", moodScore: 20, inventory: [], equipment: { tool: null, clothes: null },
+                thoughts: [], facets: {}, skills: {}, tier: 0 } });
+        fx.units.push(hauler);
+        const src = { x: x0 + 6, y: y0 }, dest = { x: x0, y: y0 };
+        put(dest.x, dest.y, "stockpile");
+        const logs = I.drop(area, src.x, src.y, tLog, 3)[0] || null;
+        const atDest0 = I.count({ area, x: dest.x, y: dest.y }, tLog);
+        await t.waitFrames(2);
+        // The place, worked out here: a cell of the colony's plan is named by its step, else it is the stockpile put there.
+        const colony = W.state.colony;
+        const destStep = colony && Array.isArray(colony.plan) && colony.site && sameArea(colony.area, area)
+            ? colony.plan.find(p => p && p.build && Array.isArray(p.cells) && p.cells.some(c => c[0] === dest.x - colony.site.x && c[1] === dest.y - colony.site.y)) : null;
+        const wantPlace = destStep ? `the ${String(destStep.id).replace(/_/g, " ")}` : "the stockpile";
+        const wantLoad = `Carrying 3 ${lower(itemName(tLog))}s to ${wantPlace}`;
+        const loadBefore = Sheet.loadOf(hauler);
+        Sheet.open(hauler.id);
+        cm.select(hauler.id);
+        await t.waitFrames(2);
+        const cardBefore = UF.Overseer.cardLoadText();
+        const card = scene._colonyCard;
+        const cardPixels = () => {
+            const r = UF.Overseer.loadRect();
+            const data = card.contents.context.getImageData(r.x, r.y, r.w, r.h).data;
+            let n = 0;
+            for (let i = 3; i < data.length; i += 4) if (data[i] > 150) n++;
+            return n;
+        };
+        const cardPixels0 = cardPixels();
+        const haul = logs ? J.create({ type: "haul", target: { area: copyArea(area), x: src.x, y: src.y }, params: { itemId: logs.id, to: { area: copyArea(area), x: dest.x, y: dest.y } }, owner: hauler.id }) : null;
+        if (Time && typeof Time.setLevel === "function") Time.setLevel(0);
+        if (Time && Time.paused) Time.resume();
+        let heldFrames = 0, measured = false, panelPixels = 0, cardPx = 0, drawnAt = "", cardAt = "";
+        const panelTexts = new Set(), drawnTexts = new Set(), cardTexts = new Set(), animWants = new Set();
+        for (let f = 1; f <= 1500; f++) {
+            await t.waitFrames(1);
+            const it = logs ? I.get(logs.id) : null;
+            if (it && it.holder === hauler.id) {
+                heldFrames++;
+                const fo = Anim && typeof Anim.frameOf === "function" ? Anim.frameOf(hauler) : null;
+                if (fo) animWants.add(fo.want);
+                const m = Sheet.model();
+                if (m && m.load) panelTexts.add(m.load.text);
+                if (Sheet.drawnLoadText()) drawnTexts.add(Sheet.drawnLoadText());
+                if (UF.Overseer.cardLoadText()) cardTexts.add(UF.Overseer.cardLoadText());
+                const ev = W.eventOf(hauler.id);
+                if (!measured && Sheet.drawnLoadText() === wantLoad && UF.Overseer.cardLoadText() === wantLoad && ev && ev.isMoving()) {
+                    measured = true;
+                    const L = Sheet.layout();
+                    panelPixels = L && L.load ? Sheet.opaqueCount(L.load, 150) : 0;
+                    cardPx = cardPixels();
+                    drawnAt = Sheet.drawnLoadText();
+                    cardAt = UF.Overseer.cardLoadText();
+                    if (Time) Time.pause();
+                    await shot("shows_load"); // the hauler mid-walk with the logs (no load drawn on it), the panel and the card saying so
+                    if (Time) Time.resume();
+                }
+            }
+            if (!haul || haul.state === "done" || haul.state === "failed" || haul.state === "cancelled") break;
+        }
+        await t.waitFrames(CHECK_EVERY * 2 + 2); // the panel looks every 15 frames, the card every 30
+        if (Time && !Time.paused) Time.pause();
+        const arrived = I.count({ area, x: dest.x, y: dest.y }, tLog) - atDest0;
+        const mAfter = Sheet.model(), LAfter = Sheet.layout();
+        const drawnAfter = Sheet.drawnLoadText(), cardAfter = UF.Overseer.cardLoadText(), cardPixelsAfter = cardPixels();
+        const haulText = haul ? `haul #${haul.id} ${haul.state}` : "no haul (no logs)";
+        const animOk = !Anim || (animWants.has("walk") && !animWants.has("carry"));
+        t.check("shows_load",
+            !!haul && haul.state === "done" && arrived === 3 && heldFrames >= 30 && loadBefore === null && measured && panelTexts.size === 1 && panelTexts.has(wantLoad) &&
+            drawnTexts.size === 1 && drawnAt === wantLoad && panelPixels >= 60 && !!mAfter && mAfter.load === null && !!LAfter && !LAfter.load && drawnAfter === "" && animOk,
+            `${haulText}: 3 ${tLog} from (${src.x},${src.y}) to the stockpile put at (${dest.x},${dest.y})${destStep ? ` (a cell of the colony's plan step ${destStep.id})` : ""}, ${arrived} arrived; ` +
+            `before the haul (empty hands): load ${JSON.stringify(loadBefore)} (want null); while holding them (${heldFrames} frames): panel model ${Array.from(panelTexts).map(x => `"${x}"`).join(" / ") || "none"}, ` +
+            `drawn ${Array.from(drawnTexts).map(x => `"${x}"`).join(" / ") || "none"} (want only "${wantLoad}"), ${panelPixels} text pixels in its line (want >= 60); ` +
+            `after it put them down: panel load ${mAfter ? JSON.stringify(mAfter.load) : "panel closed"}, line in the layout ${LAfter && LAfter.load ? "YES" : "no"}, drawn "${drawnAfter}" (want null / no / ""); ` +
+            `the hauler's sprite states while carrying: ${Array.from(animWants).join("/") || "none"} (want walk, never carry${Anim ? "" : "; UF_Anim not loaded"})`);
+        t.check("card_shows_load",
+            measured && cardBefore === "" && cardPixels0 === 0 && cardTexts.size === 1 && cardAt === wantLoad && cardPx >= 40 && cardAfter === "" && cardPixelsAfter === 0 && card.visible,
+            `Overseer card on ${hauler.name} (card ${card.visible ? "shown" : "HIDDEN"}): before the haul "${cardBefore}" with ${cardPixels0} pixels in the load line (want "" / 0); ` +
+            `while carrying ${Array.from(cardTexts).map(x => `"${x}"`).join(" / ") || "none"} (want only "${wantLoad}"), ${cardPx} text pixels in the load line (want >= 40); ` +
+            `after: "${cardAfter}" with ${cardPixelsAfter} pixels (want "" / 0)`);
+
+        // sheet.load_words: counts and names in words; a cell of the colony's plan is named by its step; loose goods are the
+        // load, worn or wielded things are not; more than three kinds end in "and N more"; empty hands say nothing.
+        const words = [["Log", 1, "a log"], ["Log", 3, "3 logs"], ["Iron axe", 1, "an iron axe"], ["Raw meat", 2, "2 raw meat"], ["Berries", 1, "berries"], ["Stone knife", 2, "2 stone knives"], ["Leather leggings", 1, "leather leggings"]];
+        const wordsGot = words.map(([n, k]) => Sheet.countedName(n, k));
+        const wordsOk = words.every((w, i) => wordsGot[i] === w[2]);
+        const planStep = colony && Array.isArray(colony.plan) && colony.site ? colony.plan.find(p => p && p.build && Array.isArray(p.cells) && p.cells.length) : null;
+        const planCell = planStep ? { area: colony.area, x: colony.site.x + planStep.cells[0][0], y: colony.site.y + planStep.cells[0][1] } : null;
+        const planName = planCell ? Sheet.placeName(planCell) : null;
+        const planOk = !planStep || planName === `the ${String(planStep.id).replace(/_/g, " ")}`;
+        const tMeat = typeOr("meat_raw", "fish", "berries");
+        const meat = I.give(tMeat, 2, hauler.id)[0];
+        const axe2 = I.give(tAxe, 1, hauler.id)[0];
+        hauler.data.equipment = { tool: axe2 ? axe2.id : null, clothes: null };
+        const oneKind = Sheet.loadOf(hauler);
+        const extra = [typeOr("stone"), typeOr("berries", "fruit"), typeOr("fiber", "straw")].filter(Boolean);
+        for (const ty of extra) I.give(ty, 2, hauler.id);
+        const manyKinds = Sheet.loadOf(hauler);
+        for (const it of I.inventoryOf(hauler.id).slice()) if (!axe2 || it.id !== axe2.id) I.remove(it.id);
+        const wornOnly = Sheet.loadOf(hauler);
+        const wantOne = `Carrying ${Sheet.countedName(itemName(tMeat), 2)}`;
+        const looseOk = !!meat && !!oneKind && oneKind.kind === "held" && oneKind.text === wantOne && oneKind.items.length === 1 &&
+            !!manyKinds && manyKinds.items.length === 1 + extra.length && (extra.length < 3 || /and 1 more$/.test(manyKinds.text)) && wornOnly === null;
+        t.check("load_words", wordsOk && planOk && looseOk,
+            `words: ${words.map((w, i) => `${w[0]} x${w[1]} -> "${wordsGot[i]}"${wordsGot[i] === w[2] ? "" : ` (want "${w[2]}")`}`).join(", ")}; ` +
+            `the colony's plan step ${planStep ? `${planStep.id} at (${planCell.x},${planCell.y}) -> "${planName}"` : "none (not checked)"}; ` +
+            `2 ${tMeat} in the hands and an equipped ${tAxe} -> "${oneKind ? oneKind.text : "nothing"}" (want "${wantOne}"); with ${extra.join(", ")} too -> "${manyKinds ? manyKinds.text : "nothing"}"; ` +
+            `only the equipped axe left -> ${JSON.stringify(wornOnly)} (want null)`);
+        cm.deselect();
+        Sheet.close();
     }
 })();

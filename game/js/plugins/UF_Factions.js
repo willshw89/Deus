@@ -29,8 +29,13 @@
  *
  * Press F on the map for the faction ledger.
  *
+ * Window skins and portraits per culture (VISION V99, V100): every window of the
+ * player uses the player's culture's skin (catalog "skins"); portraits come from
+ * the culture's face sheets or sit in a frame in its colours (catalog "faces").
+ *
  * API and checks: docs/systems/UF_Factions.md
- * Replaced core methods: none (aliases only).
+ * Replaced core methods: none (aliases only; Window_Base.prototype.loadWindowskin
+ * is aliased for the skins).
  * Replaces the earlier draft (5 fixed factions, commit a09d3fd/3f687a0);
  * window.$factionManager is kept as a thin compatibility layer.
  */
@@ -738,5 +743,947 @@
             t.check("no_errors", t.errorsSoFar().length === 0,
                 t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during faction checks");
         });
+    }
+    //-------------------------------------------------------------------------
+    // Window skins and portrait styles per culture (VISION V99, V100; user 2026-09-19 14:42 "Every faction should have a
+    // different menu skin", 14:44 "Every faction should have it's own U7 faceset style"). Catalog keys "skins", "faces".
+    //
+    // Skins: every Window_Base loads the skin of the player's faction's culture: img/system/<file>.png when that file
+    // exists, else a stand-in built once from img/system/<base>.png with the culture's recipe (a gradient map by
+    // brightness; the text colour row is never changed, so ColorManager's colours stay as Window.png has them). A window
+    // may show another side's skin: Factions.setWindowSkin(window, factionOrUnitOrCulture). The player's skin follows a
+    // faction change or a loaded save: Scene_Map compares the player's skin key every frame and reloads every window's
+    // skin when it changes. UF_Talk has no windows: it draws each side's skin frame around that side's portrait
+    // (drawSkinFrame).
+    // Faces: the culture's sheets (faces.pattern) and then the species' sheets (faces.species) when the unit belongs to
+    // that culture's people; otherwise the portrait its caller chose before (UF_Talk portraitOf, UF_Sheet faceSpecOf)
+    // inside a code-drawn frame in the culture's colours (UF_GenFrame, faces.cultures.<id>.standIn).
+    // Docs: docs/systems/UF_Factions.md (Skins and portraits). Test-only sabotage: plugin parameter TestProvoke.
+
+    const SKIN_SALT = 0x5c1e;
+    const skinParams = PluginManager.parameters("UF_Factions") || {};
+    const skinProvokes = String(skinParams.TestProvoke || "").split(",").map(s => s.trim()).filter(Boolean);
+    /** Test-only sabotage (plugin parameter TestProvoke, never set in the real plugins.js): proves each skins check can FAIL. */
+    Factions.provoked = name => !!(window.UF && UF.Test && UF.Test.active) && (skinProvokes.includes("all") || skinProvokes.includes(name));
+    const provoked = Factions.provoked;
+
+    // Files are checked before ImageManager sees them (a failed load throws at the next scene change). Without a file
+    // system (a web build) no optional file is loaded: stand-ins and today's portraits are used.
+    let skinFs = null, skinPath = null, skinBaseDir = "";
+    try {
+        if (typeof require === "function") {
+            skinFs = require("fs");
+            skinPath = require("path");
+            skinBaseDir = (typeof nw !== "undefined" && nw.__dirname) || process.cwd();
+        }
+    } catch (e) {
+        skinFs = null;
+    }
+    const skinExists = new Map();
+    function assetExists(rel) {
+        if (!skinFs) return false;
+        if (skinExists.has(rel)) return skinExists.get(rel);
+        let ok = false;
+        try { ok = skinFs.existsSync(skinPath.join(skinBaseDir, rel)); } catch (e) { ok = false; }
+        skinExists.set(rel, ok);
+        return ok;
+    }
+    Factions.forgetFileChecks = () => skinExists.clear();
+
+    const skinsCfg = () => (catalogOf() && catalogOf().skins) || null;
+    const facesCfg = () => (catalogOf() && catalogOf().faces) || null;
+    /** The entry of a culture in a section's "cultures", following "like" (automaton -> starborn): { id, entry } or null. */
+    function cultureEntry(section, culture) {
+        const map = section && section.cultures;
+        let id = culture;
+        for (let hops = 0; map && id && hops < 4; hops++) {
+            const e = map[id];
+            if (!e || typeof e !== "object") return null;
+            if (!e.like) return { id, entry: e };
+            id = e.like;
+        }
+        return null;
+    }
+
+    // The faction list without generating it (Factions.player() generates factions for a state that has none).
+    const factionList = () => {
+        const W = window.UF && UF.World;
+        const st = W && W.state && W.state.factions;
+        return st && Array.isArray(st.list) ? st : null;
+    };
+    const playerFactionNow = () => {
+        const st = factionList();
+        return st ? st.list.find(f => f.id === st.playerId) || null : null;
+    };
+    const factionNow = id => {
+        const st = factionList();
+        if (!st || id === undefined || id === null) return null;
+        const fid = id === "player" ? st.playerId : id;
+        return st.list.find(f => f.id === fid) || null;
+    };
+    const cultureOfFaction = f => (f ? String(f.culture || f.species || "") || null : null);
+
+    /**
+     * The culture id of a faction, faction id ("player" too), unit or culture id: a faction's culture (faction.culture,
+     * else its species); a unit's data.culture, else its faction's, else (a colonist) the player's, else its species.
+     */
+    Factions.cultureOf = function(x) {
+        if (x === undefined || x === null) return null;
+        if (typeof x === "string") {
+            const f = factionNow(x);
+            return f ? cultureOfFaction(f) : x;
+        }
+        if (x.data && typeof x.data === "object") {
+            const d = x.data;
+            if (d.culture) return String(d.culture);
+            const f = factionNow(d.faction);
+            if (f) return cultureOfFaction(f);
+            if (d.kind === "colonist") {
+                const p = playerFactionNow();
+                if (p) return cultureOfFaction(p);
+            }
+            return d.species ? String(d.species) : null;
+        }
+        if (x.species !== undefined || x.culture !== undefined) return cultureOfFaction(x);
+        return null;
+    };
+    Factions.playerCulture = () => cultureOfFaction(playerFactionNow());
+
+    //-------------------------------------------------------------------------
+    // Skins
+
+    const hexRgb = hex => {
+        const n = parseInt(String(hex || "#000000").replace("#", ""), 16) || 0;
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    };
+    /**
+     * How a faction, unit or culture's windows look: { culture, id (the skins entry used, or "default"), base, file,
+     * recipe, source ("file": img/system/<file>.png; "stand-in": built from base with the recipe; "base": base as it
+     * is), key }.
+     */
+    function skinPlan(x) {
+        const culture = Factions.cultureOf(x);
+        const cfg = skinsCfg();
+        const base = cfg && cfg.base ? String(cfg.base) : "Window";
+        const hit = cfg ? cultureEntry(cfg, culture) : null;
+        const entry = hit ? hit.entry : (cfg && cfg.default) || null;
+        const id = hit ? hit.id : "default";
+        const file = entry && entry.file ? String(entry.file) : null;
+        const recipe = entry && entry.recipe && typeof entry.recipe === "object" ? entry.recipe : null;
+        const hasFile = !!file && assetExists(`img/system/${file}.png`);
+        const source = hasFile ? "file" : recipe ? "stand-in" : "base";
+        const key = source === "file" ? `file:${file}` : source === "stand-in" ? `standin:${id}:${JSON.stringify(recipe)}` : `base:${base}`;
+        return { culture, id, base, file, recipe, source, key };
+    }
+    Factions.skinInfo = function(x) {
+        const info = skinPlan(x);
+        if (provoked("fallback_default") && info.file && info.source !== "file") info.source = "file"; // test-only: a wrong report (nothing is loaded)
+        return info;
+    };
+
+    const skinCache = new Map(); // stand-in key -> Bitmap, each built once
+    let skinsBuilt = 0;
+    /** Build a stand-in skin: a copy of the base skin, every part but the text colours gradient-mapped by brightness. */
+    function buildStandIn(src, recipe) {
+        const w = src.width, h = src.height;
+        const b = new Bitmap(w, h);
+        b.blt(src, 0, 0, w, h, 0, 0);
+        const ctx = b.context;
+        const img = ctx.getImageData(0, 0, w, h);
+        const d = img.data;
+        const ramp = list => (Array.isArray(list) && list.length === 3 ? list.map(hexRgb) : null);
+        const back = provoked("text_readable") ? ramp(["#b8b8b0", "#dcdcd4", "#ffffff"]) : ramp(recipe.back);
+        const frame = ramp(recipe.frame);
+        const mix = clamp(Number(recipe.mix) || 0, 0, 1);
+        const same = provoked("cultures_differ"); // test-only: every stand-in stays the base skin
+        for (let y = 0; y < h && !same; y++) {
+            for (let x = 0; x < w; x++) {
+                if (x >= 96 && y >= 144) continue; // the text colours (ColorManager.textColor reads x 96-191, y 144-191)
+                const part = x < 96 ? back : frame;
+                if (!part) continue;
+                const i = (y * w + x) * 4;
+                if (d[i + 3] === 0) continue;
+                const t = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+                const lo = t < 0.5 ? part[0] : part[1], hi = t < 0.5 ? part[1] : part[2];
+                const k = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+                for (let j = 0; j < 3; j++) d[i + j] = Math.round((lo[j] + (hi[j] - lo[j]) * k) * (1 - mix) + d[i + j] * mix);
+            }
+        }
+        ctx.putImageData(img, 0, 0);
+        b._baseTexture.update();
+        skinsBuilt++;
+        return b;
+    }
+
+    /** The window skin Bitmap for a faction, faction id, unit or culture id (see skinInfo). Stand-ins are built once. */
+    Factions.skinFor = function(x) {
+        const info = skinPlan(x);
+        let bmp;
+        if (info.source === "file") bmp = ImageManager.loadSystem(info.file);
+        else {
+            const base = ImageManager.loadSystem(info.base);
+            if (info.source === "base") bmp = base;
+            else if (skinCache.has(info.key)) bmp = skinCache.get(info.key);
+            else if (!base.isReady()) {
+                // Window.png is still loading (never after boot): the base for now, the stand-in once it is in.
+                if (!base._ufSkinWaiting && !(base.isError && base.isError())) {
+                    base._ufSkinWaiting = true;
+                    base.addLoadListener(() => { base._ufSkinWaiting = false; appliedSkinKey = null; });
+                }
+                return base;
+            } else {
+                bmp = buildStandIn(base, info.recipe);
+                bmp._ufSkin = { id: info.id, source: "stand-in" };
+                skinCache.set(info.key, bmp);
+            }
+        }
+        return bmp;
+    };
+    Factions.skinStats = () => ({ built: skinsBuilt, cached: skinCache.size });
+
+    /** Make a window show another side's skin (a faction, faction id, unit or culture id); null = the player's again. */
+    Factions.setWindowSkin = function(win, who) {
+        if (!win) return;
+        win._ufSkinFor = who === undefined ? null : who;
+        win.loadWindowskin();
+    };
+    /** Whose skin a side of a conversation shows: that unit's, or the player's faction when nobody speaks for it. */
+    Factions.skinOwner = function(unit) {
+        if (provoked("stranger_in_talk")) return playerFactionNow(); // test-only: every side in the player's skin
+        return unit || playerFactionNow();
+    };
+
+    const _Window_Base_loadWindowskin = Window_Base.prototype.loadWindowskin;
+    Window_Base.prototype.loadWindowskin = function() {
+        _Window_Base_loadWindowskin.call(this);
+        if (provoked("player_skin")) return; // test-only: every window keeps Window.png
+        const who = this._ufSkinFor !== undefined && this._ufSkinFor !== null ? this._ufSkinFor : playerFactionNow();
+        if (!who) return; // no world yet (the title screen): Window.png
+        let skin = null;
+        try {
+            skin = Factions.skinFor(who);
+        } catch (e) {
+            console.error(e);
+        }
+        if (skin && skin !== this.windowskin) this.windowskin = skin;
+    };
+
+    /** Reload the skin of every window in a scene that shows the player's skin. Returns how many. */
+    Factions.refreshSkins = function(scene = SceneManager._scene) {
+        let n = 0;
+        const walk = node => {
+            if (node instanceof Window_Base && (node._ufSkinFor === undefined || node._ufSkinFor === null)) {
+                node.loadWindowskin();
+                n++;
+            }
+            if (node && node.children) for (const c of node.children) walk(c);
+        };
+        if (scene) walk(scene);
+        return n;
+    };
+    /** The key of the player's skin ("none" before a world exists). */
+    Factions.playerSkinKey = () => {
+        const p = playerFactionNow();
+        return p ? skinPlan(p).key : "none";
+    };
+    let appliedSkinKey = null;
+    /** Apply the player's skin when it changed (a faction change, a loaded save, a delivered file). True when it did. */
+    Factions.syncSkins = function(scene = SceneManager._scene) {
+        const key = Factions.playerSkinKey();
+        if (key === appliedSkinKey) return false;
+        const before = appliedSkinKey;
+        appliedSkinKey = key;
+        const n = Factions.refreshSkins(scene);
+        if (before !== null) emit("factions:skinChanged", Factions.playerCulture(), key, n);
+        return true;
+    };
+    const _Scene_Map_update_skins = Scene_Map.prototype.update;
+    Scene_Map.prototype.update = function() {
+        _Scene_Map_update_skins.call(this);
+        Factions.syncSkins(this);
+    };
+
+    /**
+     * Draw a skin's window frame (the 96 x 96 frame part at x 96, cut in nine like RMMZ's Window) around a rectangle of a
+     * bitmap, corners m px. { drawn, skin, pending }: not drawn while the skin file is still loading.
+     */
+    Factions.drawSkinFrame = function(bitmap, x, y, w, h, who, m = 12) {
+        const skin = Factions.skinFor(who);
+        if (!skin || !skin.isReady()) return { drawn: false, skin, pending: !!skin && !(skin.isError && skin.isError()) };
+        const M = 24, sx = 96, sy = 0, sw = 96;
+        const e = sw - M * 2;
+        bitmap.blt(skin, sx, sy, M, M, x, y, m, m);
+        bitmap.blt(skin, sx + sw - M, sy, M, M, x + w - m, y, m, m);
+        bitmap.blt(skin, sx, sy + sw - M, M, M, x, y + h - m, m, m);
+        bitmap.blt(skin, sx + sw - M, sy + sw - M, M, M, x + w - m, y + h - m, m, m);
+        bitmap.blt(skin, sx + M, sy, e, M, x + m, y, w - m * 2, m);
+        bitmap.blt(skin, sx + M, sy + sw - M, e, M, x + m, y + h - m, w - m * 2, m);
+        bitmap.blt(skin, sx, sy + M, M, e, x, y + m, m, h - m * 2);
+        bitmap.blt(skin, sx + sw - M, sy + M, M, e, x + w - m, y + m, m, h - m * 2);
+        return { drawn: true, skin, pending: false };
+    };
+
+    //-------------------------------------------------------------------------
+    // Portraits
+
+    const PERSON_KINDS = ["colonist", "person", "stranger"];
+    function isPerson(u) {
+        const d = (u && u.data) || {};
+        if (d.kind === "creature" || d.kind === "animal") return false;
+        const people = catalogOf() && catalogOf().people;
+        return PERSON_KINDS.includes(d.kind) || !!(people && d.species && people[d.species]);
+    }
+    function faceStageOf(u) {
+        const d = (u && u.data) || {};
+        if (typeof d.age === "number" && d.age < 2) return "baby";
+        if (d.stage) return String(d.stage).toLowerCase();
+        if (typeof d.age === "number") {
+            const H = window.UF && UF.History;
+            if (H && typeof H.stageOf === "function") return H.stageOf(d.age);
+            return d.age < 12 ? "child" : d.age < 18 ? "teen" : d.age >= 60 ? "elder" : "adult";
+        }
+        return "adult";
+    }
+    /** Does a unit belong to a culture's people (the culture's own sheets show its people)? */
+    function ofCulturePeople(u, hit) {
+        const d = (u && u.data) || {};
+        if (!hit || !d.species) return false;
+        const list = Array.isArray(hit.entry.species) && hit.entry.species.length ? hit.entry.species : [hit.id];
+        return list.includes(String(d.species));
+    }
+
+    /** The faces entry style of a culture merged over the default: { id, frame, background, ..., standIn }. */
+    Factions.faceStyle = function(culture) {
+        const cfg = facesCfg();
+        if (!cfg) return null;
+        const hit = cultureEntry(cfg, culture);
+        const def = (cfg.cultures && cfg.cultures.default) || {};
+        const e = hit ? hit.entry : def;
+        const sd = def.standIn || {}, se = e.standIn || {};
+        const standIn = Object.assign({ shape: "square", ornament: "none", thickness: 0.1 }, sd, se, { colors: Object.assign({ frame: "#5a4a36", light: "#a89272", dark: "#221a10", back: "#14110d" }, sd.colors || {}, se.colors || {}) });
+        return Object.assign({}, e, { id: hit ? hit.id : "default", standIn });
+    };
+
+    /**
+     * A portrait sheet for a person from the catalog "faces" key, or null: the culture's sheets (faces.pattern with
+     * {culture} and {n}), then the species' sheets (faces.species), each only when the unit belongs to its culture's
+     * people and the file exists. { sheet, index, from: "faces.culture" | "faces.species", culture, framed (the art has its own frame) }.
+     */
+    Factions.cultureFace = function(u) {
+        const cfg = facesCfg();
+        const d = (u && u.data) || {};
+        if (!cfg || !isPerson(u) || provoked("faces_fallback")) return null;
+        const stage = faceStageOf(u);
+        if (stage === "baby" || stage === "child") return null; // the sheets hold adults and elders
+        const culture = Factions.cultureOf(u);
+        const hit = cultureEntry(cfg, culture);
+        if (!hit || !ofCulturePeople(u, hit)) return null;
+        const gender = String(d.gender || "").toLowerCase() === "female" ? "female" : "male";
+        const age = stage === "elder" ? "elder" : "adult";
+        const content = Array.isArray(cfg.contentMoods) && cfg.contentMoods.includes(d.mood);
+        const h = hash32(u.id | 0, SKIN_SALT);
+        const layout = cfg.layout || {};
+        const slot = layout[`${age}_${gender}`];
+        if (cfg.pattern && Number.isInteger(slot)) {
+            const sheets = [];
+            const max = clamp((cfg.sheets | 0) || 4, 1, 16);
+            for (let n = 1; n <= max; n++) {
+                const name = String(cfg.pattern).replace("{culture}", hit.id).replace("{n}", String(n));
+                if (assetExists(`img/faces/${name}.png`)) sheets.push(name);
+            }
+            if (sheets.length) return { sheet: sheets[h % sheets.length], index: slot + (content ? 4 : 0), from: "faces.culture", culture: hit.id, framed: true };
+        }
+        const sp = cfg.species && d.species ? cfg.species[d.species] : null;
+        const byAge = sp && sp[gender];
+        const e = byAge && (byAge[age] || byAge.adult);
+        if (e && e.sheet && assetExists(`img/faces/${e.sheet}.png`)) {
+            const list = content && Array.isArray(e.content) && e.content.length ? e.content : Array.isArray(e.indices) && e.indices.length ? e.indices : [e.index | 0];
+            return { sheet: String(e.sheet), index: list[h % list.length] | 0, from: "faces.species", culture: hit.id, framed: e.framed !== false };
+        }
+        return null;
+    };
+    /** The culture whose code-drawn frame goes around a person's stand-in portrait ("default" when it has none), or null (not a person). */
+    Factions.faceFrameCulture = function(u) {
+        const cfg = facesCfg();
+        if (!cfg || !isPerson(u) || provoked("faces_fallback")) return null;
+        if (provoked("faces_by_culture")) return "default"; // test-only: one frame for everyone
+        const hit = cultureEntry(cfg, Factions.cultureOf(u));
+        return hit ? hit.id : "default";
+    };
+
+    // The opening of a frame: square, arch, pointed, round, notched (octagon), cave (rough), blob (rounded).
+    function openingPath(ctx, shape, x, y, w, h) {
+        const cx = x + w / 2;
+        switch (shape) {
+            case "arch": {
+                const a = h * 0.3;
+                ctx.moveTo(x, y + h);
+                ctx.lineTo(x, y + a);
+                ctx.ellipse(cx, y + a, w / 2, a, 0, Math.PI, 0);
+                ctx.lineTo(x + w, y + h);
+                ctx.closePath();
+                break;
+            }
+            case "pointed": {
+                const a = h * 0.38;
+                ctx.moveTo(x, y + h);
+                ctx.lineTo(x, y + a);
+                ctx.quadraticCurveTo(x, y + a * 0.2, cx, y);
+                ctx.quadraticCurveTo(x + w, y + a * 0.2, x + w, y + a);
+                ctx.lineTo(x + w, y + h);
+                ctx.closePath();
+                break;
+            }
+            case "round":
+                ctx.moveTo(x + w, y + h / 2);
+                ctx.ellipse(cx, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+                ctx.closePath();
+                break;
+            case "notched": {
+                const k = w * 0.2;
+                ctx.moveTo(x + k, y);
+                ctx.lineTo(x + w - k, y);
+                ctx.lineTo(x + w, y + k);
+                ctx.lineTo(x + w, y + h - k);
+                ctx.lineTo(x + w - k, y + h);
+                ctx.lineTo(x + k, y + h);
+                ctx.lineTo(x, y + h - k);
+                ctx.lineTo(x, y + k);
+                ctx.closePath();
+                break;
+            }
+            case "cave": { // a rough tunnel mouth
+                const pts = [[0, 1], [0, 0.36], [0.1, 0.16], [0.3, 0.05], [0.55, 0], [0.78, 0.07], [0.93, 0.2], [1, 0.38], [1, 1]];
+                pts.forEach(([px, py], i) => (i ? ctx.lineTo(x + px * w, y + py * h) : ctx.moveTo(x + px * w, y + py * h)));
+                ctx.closePath();
+                break;
+            }
+            case "blob": {
+                const r = w * 0.3;
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+                break;
+            }
+            default:
+                ctx.rect(x, y, w, h);
+        }
+    }
+    // Small code-drawn marks on the frame band (placeholders until the culture's face sheets arrive).
+    function frameOrnament(ctx, kind, x, y, S, t, col) {
+        const u = Math.max(1, S / 144);
+        const m = t / 2;
+        const dot = (cx, cy, r, fill, edge) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, Math.max(1, r), 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+            if (edge) { ctx.lineWidth = u; ctx.strokeStyle = edge; ctx.stroke(); }
+        };
+        const corners = [[x + m, y + m], [x + S - m, y + m], [x + m, y + S - m], [x + S - m, y + S - m]];
+        const mids = [[x + S / 2, y + m], [x + S / 2, y + S - m], [x + m, y + S / 2], [x + S - m, y + S / 2]];
+        ctx.lineWidth = u;
+        switch (kind) {
+            case "studs":
+                for (const [cx, cy] of corners) dot(cx, cy, t * 0.3, col.light, col.dark);
+                break;
+            case "knobs": // bone ends
+                for (const [cx, cy] of corners) { dot(cx - t * 0.2, cy - t * 0.1, t * 0.24, col.light, col.dark); dot(cx + t * 0.2, cy + t * 0.1, t * 0.24, col.light, col.dark); }
+                break;
+            case "diamonds":
+                for (const [cx, cy] of corners.concat(mids)) {
+                    const r = t * 0.34;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r * 0.7, cy); ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r * 0.7, cy);
+                    ctx.closePath();
+                    ctx.fillStyle = col.light;
+                    ctx.fill();
+                    ctx.strokeStyle = col.dark;
+                    ctx.stroke();
+                }
+                break;
+            case "leaves":
+                for (let i = 0; i <= 8; i++) {
+                    const p = i / 8;
+                    for (const [cx, cy, rot] of [[x + t + (S - 2 * t) * p, y + m, 0.6], [x + m, y + t + (S - 2 * t) * p, 1.2], [x + S - m, y + t + (S - 2 * t) * p, -1.2]]) {
+                        ctx.beginPath();
+                        ctx.ellipse(cx, cy, t * 0.42, t * 0.2, rot + (i % 2 ? 0.5 : -0.5), 0, Math.PI * 2);
+                        ctx.fillStyle = i % 2 ? col.light : col.dark;
+                        ctx.fill();
+                    }
+                }
+                break;
+            case "ticks": // cut runes
+                ctx.strokeStyle = col.dark;
+                ctx.lineWidth = Math.max(1, 1.5 * u);
+                for (let i = 1; i <= 5; i++) {
+                    const p = (S * i) / 6;
+                    for (const [ax, ay, bx, by] of [[x + p, y + t * 0.2, x + p + (i % 2 ? t * 0.3 : 0), y + t * 0.8], [x + p, y + S - t * 0.8, x + p - (i % 2 ? t * 0.3 : 0), y + S - t * 0.2],
+                        [x + t * 0.2, y + p, x + t * 0.8, y + p + (i % 2 ? 0 : t * 0.3)], [x + S - t * 0.8, y + p, x + S - t * 0.2, y + p - (i % 2 ? 0 : t * 0.3)]]) {
+                        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+                    }
+                }
+                break;
+            case "teeth": { // a gear ring around a round opening
+                const cx = x + S / 2, cy = y + S / 2, r = S / 2 - t * 0.55;
+                ctx.fillStyle = col.light;
+                for (let i = 0; i < 16; i++) {
+                    const a = (i / 16) * Math.PI * 2;
+                    ctx.save();
+                    ctx.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+                    ctx.rotate(a);
+                    ctx.fillRect(-t * 0.22, -t * 0.16, t * 0.44, t * 0.32);
+                    ctx.restore();
+                }
+                for (const [px, py] of corners) dot(px, py, t * 0.22, col.dark, null);
+                break;
+            }
+            case "stitches":
+                ctx.strokeStyle = col.light;
+                ctx.lineWidth = Math.max(1, 1.5 * u);
+                ctx.setLineDash([3 * u, 3 * u]);
+                ctx.strokeRect(x + m, y + m, S - t, S - t);
+                ctx.setLineDash([]);
+                for (const [cx, cy] of [corners[0], corners[3]]) { ctx.fillStyle = col.dark; ctx.fillRect(cx - t * 0.35, cy - t * 0.35, t * 0.7, t * 0.7); }
+                break;
+            case "veins":
+                ctx.strokeStyle = col.light;
+                ctx.lineWidth = Math.max(1, 1.5 * u);
+                for (let i = 0; i < 4; i++) {
+                    const p = (S * (i + 0.5)) / 4;
+                    ctx.beginPath(); ctx.moveTo(x + p - t, y + t * 0.2); ctx.quadraticCurveTo(x + p, y + t * 1.1, x + p + t, y + t * 0.3); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(x + p - t, y + S - t * 0.2); ctx.quadraticCurveTo(x + p, y + S - t * 1.1, x + p + t, y + S - t * 0.3); ctx.stroke();
+                }
+                for (const [cx, cy] of mids) dot(cx, cy, t * 0.2, col.dark, null);
+                break;
+            case "bars": // reeds, or the bars of a tomb niche
+                ctx.fillStyle = col.dark;
+                for (let i = 0; i < 3; i++) {
+                    const off = t * (0.2 + 0.28 * i);
+                    ctx.fillRect(x + off, y + t, Math.max(1, t * 0.12), S - 2 * t);
+                    ctx.fillRect(x + S - off - t * 0.12, y + t, Math.max(1, t * 0.12), S - 2 * t);
+                }
+                for (const [cx, cy] of corners) dot(cx, cy, t * 0.26, col.light, col.dark);
+                break;
+            case "beads": // trinkets strung along the top
+                for (let i = 0; i <= 6; i++) dot(x + t + ((S - 2 * t) * i) / 6, y + m, t * 0.22, i % 2 ? col.light : col.dark, col.dark);
+                for (const [cx, cy] of [corners[2], corners[3]]) dot(cx, cy, t * 0.28, col.light, col.dark);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Draw a portrait in a culture's code-drawn frame (UF_GenFrame) into bitmap at (x, y), S x S: the culture's background,
+     * then inner(ox, oy, os) draws the face into the opening's box, then the frame band over it (the opening's shape cut
+     * out) with its marks. culture: a culture id or a faces.cultures key ("default"). Returns the style id used.
+     */
+    Factions.drawPortrait = function(bitmap, x, y, S, culture, inner) {
+        const style = Factions.faceStyle(culture) || { id: "default", standIn: { shape: "square", ornament: "none", thickness: 0.1, colors: { frame: "#5a4a36", light: "#a89272", dark: "#221a10", back: "#14110d" } } };
+        const s = style.standIn, col = s.colors;
+        const ctx = bitmap.context;
+        const t = Math.max(3, Math.round(S * clamp(Number(s.thickness) || 0.1, 0.04, 0.2)));
+        const ox = x + t, oy = y + t, os = S - t * 2;
+        ctx.save();
+        ctx.fillStyle = col.back;
+        ctx.fillRect(x, y, S, S);
+        ctx.restore();
+        if (typeof inner === "function") inner(ox, oy, os);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, S, S);
+        openingPath(ctx, s.shape, ox, oy, os, os);
+        ctx.fillStyle = col.frame;
+        ctx.fill("evenodd");
+        const lw = Math.max(1, Math.round(S / 72));
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        openingPath(ctx, s.shape, ox, oy, os, os);
+        ctx.strokeStyle = col.dark;
+        ctx.stroke();
+        ctx.strokeStyle = col.light;
+        ctx.beginPath();
+        ctx.moveTo(x + lw / 2, y + S - lw);
+        ctx.lineTo(x + lw / 2, y + lw / 2);
+        ctx.lineTo(x + S - lw, y + lw / 2);
+        ctx.stroke();
+        ctx.strokeStyle = col.dark;
+        ctx.beginPath();
+        ctx.moveTo(x + S - lw / 2, y + lw);
+        ctx.lineTo(x + S - lw / 2, y + S - lw / 2);
+        ctx.lineTo(x + lw, y + S - lw / 2);
+        ctx.stroke();
+        frameOrnament(ctx, s.ornament, x, y, S, t, col);
+        ctx.restore();
+        if (bitmap._baseTexture && bitmap._baseTexture.update) bitmap._baseTexture.update();
+        return style.id;
+    };
+
+    //-------------------------------------------------------------------------
+    // Checks (UF_Test suite "skins", on request: run_tests.js skins)
+
+    const _Scene_Boot_start_skins = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _Scene_Boot_start_skins.call(this);
+        if (window.UF.Test && UF.Test.active) UF.Test.suite("skins", skinChecks, { isDefault: false });
+    };
+
+    async function skinChecks(t) {
+        const W = UF.World, Talk = UF.Talk, Sheet = UF.Sheet, Tm = UF.Time;
+        const scene = SceneManager._scene;
+        const pf = W && W.state ? Factions.player() : null;
+        const cfg = skinsCfg(), fcfg = facesCfg();
+        const ready = !!(pf && cfg && fcfg && scene instanceof Scene_Map && W.currentArea());
+        const NAMES = ["player_skin", "cultures_differ", "stranger_in_talk", "fallback_default", "text_readable", "by_culture", "fallback", "no_errors"];
+        const check = (n, ok, detail) => (n === "by_culture" || n === "fallback" ? t.check(`faces.${n}`, ok, detail) : t.check(n, ok, detail));
+        if (!ready) {
+            for (const n of NAMES) check(n, false, `not ready: player faction ${!!pf}, catalog skins ${!!cfg}, faces ${!!fcfg}, map scene ${scene instanceof Scene_Map}`);
+            return;
+        }
+        const errors0 = t.errorsSoFar().length;
+        const fx = { culture: [pf, Object.prototype.hasOwnProperty.call(pf, "culture"), pf.culture], units: [], relations: [], patches: [], paused: !!(Tm && Tm.paused), sel: null };
+        const setCulture = (f, c) => {
+            if (!fx.cultureOf) fx.cultureOf = new Map();
+            if (!fx.cultureOf.has(f)) fx.cultureOf.set(f, [Object.prototype.hasOwnProperty.call(f, "culture"), f.culture]);
+            if (c === null) delete f.culture;
+            else f.culture = c;
+        };
+        const patch = (obj, key, value) => {
+            fx.patches.push([obj, key, Object.prototype.hasOwnProperty.call(obj, key), obj[key]]);
+            obj[key] = value;
+        };
+        const baseSkin = ImageManager.loadSystem(cfg.base || "Window");
+        const px = (b, x, y) => {
+            const d = b.context ? b.context.getImageData(x, y, 1, 1).data : null;
+            return d ? [d[0], d[1], d[2], d[3]] : [0, 0, 0, 0];
+        };
+        const canvasOf = b => b; // skins are ready here (stand-ins are canvases; Window.png loaded at boot)
+        // Mean colour of the opaque pixels of a rect (r, g, b, count).
+        const mean = (b, x, y, w, h) => {
+            const d = b.context.getImageData(x, y, w, h).data;
+            let r = 0, g = 0, bl = 0, n = 0;
+            for (let i = 0; i < d.length; i += 4) if (d[i + 3] >= 128) { r += d[i]; g += d[i + 1]; bl += d[i + 2]; n++; }
+            return n ? [r / n, g / n, bl / n, n] : [0, 0, 0, 0];
+        };
+        const dist = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+        const hex = c => `#${c.slice(0, 3).map(v => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
+        const cultures = Object.keys(cfg.cultures || {});
+        const playable = (Factions.config().species || []).filter(s => s.playable !== false).map(s => s.id);
+        const others = c => cultures.filter(x => x !== c && !(cfg.cultures[x] && cfg.cultures[x].like));
+
+        try {
+            if (Tm && !Tm.paused) Tm.pause();
+            if (window.$colonyManager && $colonyManager.deselect) $colonyManager.deselect();
+            const area = W.currentArea();
+            const cols = W.units().filter(u => u.area && u.area.x === area.x && u.area.y === area.y && u.data && u.data.kind === "colonist" && W.eventOf(u.id));
+            const col = cols[0] || null;
+
+            // skins.player_skin: the player's windows use the player's culture's skin, and follow a faction change and a
+            // loaded save. Also the three screenshots of the character sheet under three player cultures.
+            {
+                const why = [], seen = [];
+                const sheetWin = Sheet && Sheet.window ? Sheet.window() : null;
+                if (col && Sheet) Sheet.open(col.id);
+                await t.waitFrames(3);
+                const own = Factions.cultureOf(pf);
+                const shots = [own].concat(playable.filter(c => c !== own)).slice(0, 3);
+                for (const c of shots) {
+                    setCulture(pf, c);
+                    await t.waitFrames(3); // Scene_Map.update compares the player's skin every frame
+                    const want = Factions.skinFor(pf);
+                    const probe = new Window_Base(new Rectangle(0, 0, 120, 60));
+                    const info = Factions.skinInfo(c);
+                    const ok = !!sheetWin && sheetWin.windowskin === want && probe.windowskin === want && want === Factions.skinFor(c) && (info.source === "base" || want !== baseSkin);
+                    seen.push(`${c}: skin ${info.id}/${info.source}, panel ${sheetWin && sheetWin.windowskin === want ? "yes" : "NO"}, new window ${probe.windowskin === want ? "yes" : "NO"}`);
+                    probe.destroy();
+                    if (!ok) why.push(`${c}: the windows do not show its skin`);
+                    await t.waitFrames(20); // the panel redraws its face on its next check (every 15 frames)
+                    if (Sheet && col) {
+                        await t.waitUntil(() => Sheet.pending() === 0, 4000, "the panel's face").catch(() => {});
+                        await t.waitFrames(2);
+                    }
+                    t.screenshot(`sheet_${c}`);
+                }
+                // A faction change: the player becomes another faction of another culture (for one comparison).
+                const st = factionList();
+                const other = st.list.find(f => !f.isPlayer && cultureOfFaction(f) !== Factions.cultureOf(pf) && Factions.skinInfo(f).key !== Factions.skinInfo(pf).key);
+                let factionNote = "no other faction with another skin";
+                if (other) {
+                    // Switched and switched back within one frame (no other system sees it), then the comparison run by hand.
+                    const pid = st.playerId;
+                    st.playerId = other.id;
+                    let got = null, okF = false;
+                    try {
+                        Factions.syncSkins(scene);
+                        got = sheetWin ? sheetWin.windowskin : null;
+                        okF = !!got && got === Factions.skinFor(other);
+                    } finally {
+                        st.playerId = pid;
+                        Factions.syncSkins(scene);
+                    }
+                    factionNote = `player faction -> ${other.name} (${cultureOfFaction(other)}, skin ${Factions.skinInfo(other).id}): panel skin ${okF ? "followed" : "DID NOT follow"}`;
+                    if (!okF) why.push(factionNote);
+                }
+                // A loaded save replaces UF.World.state (UF_World's extractSaveContents); the next comparison applies its skin.
+                const st0 = W.state;
+                const copy = JsonEx.parse(JsonEx.stringify(st0));
+                const cf = copy.factions.list.find(f => f.id === copy.factions.playerId);
+                const loadCulture = playable.find(c => c !== Factions.cultureOf(pf) && Factions.skinInfo(c).key !== Factions.skinInfo(pf).key) || "dwarf";
+                cf.culture = loadCulture;
+                let loadNote;
+                W.state = copy;
+                try {
+                    Factions.syncSkins(scene);
+                    const got = sheetWin ? sheetWin.windowskin : null;
+                    const okL = !!got && got === Factions.skinFor(loadCulture);
+                    loadNote = `a loaded state (UF.World.state replaced) whose player is ${loadCulture}: panel skin ${okL ? "followed" : "DID NOT follow"}`;
+                    if (!okL) why.push(loadNote);
+                } finally {
+                    W.state = st0;
+                    Factions.syncSkins(scene);
+                }
+                check("player_skin", why.length === 0, `${why.length ? `PROBLEMS: ${why.join("; ")} | ` : ""}${seen.join("; ")}; ${factionNote}; ${loadNote}; colonist ${col ? col.name : "none"}`);
+                setCulture(pf, fx.culture[1] ? fx.culture[2] : null);
+                await t.waitFrames(2);
+            }
+
+            // Delivered skin files load asynchronously; reading a loading Bitmap's canvas would leave it empty.
+            await t.waitUntil(() => cultures.concat(["default"]).every(c => Factions.skinFor(c).isReady()), 8000, "every culture's skin").catch(() => {});
+            // skins.cultures_differ: every culture with a recipe or a file of its own has a frame unlike every other.
+            {
+                const rows = [];
+                for (const c of cultures) {
+                    const e = cfg.cultures[c];
+                    if (!e || e.like) continue;
+                    const b = canvasOf(Factions.skinFor(c));
+                    rows.push({ c, key: Factions.skinInfo(c).key, frame: mean(b, 96, 0, 96, 96), back: mean(b, 0, 0, 96, 96), cursor: mean(b, 96, 96, 48, 48) });
+                }
+                let min = Infinity, minPair = "";
+                const same = [];
+                for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
+                    const a = rows[i], b = rows[j];
+                    const dd = dist(a.frame, b.frame) + dist(a.back, b.back);
+                    if (dd < min) { min = dd; minPair = `${a.c}/${b.c}`; }
+                    if (dd < 30) same.push(`${a.c}=${b.c} (${dd.toFixed(0)})`);
+                }
+                check("cultures_differ", rows.length >= 2 && same.length === 0,
+                    `${rows.length} culture skins; closest pair ${minPair} differs by ${min.toFixed(0)} (frame + back mean RGB distance, want >= 30)${same.length ? `; TOO CLOSE: ${same.join(", ")}` : ""}; frames ${rows.map(r => `${r.c} ${hex(r.frame)}`).join(", ")}`);
+            }
+
+            // skins.text_readable: the text colour row untouched, and the normal and system text colours readable on each skin's back.
+            {
+                const baseC = canvasOf(baseSkin);
+                const lum = c => {
+                    const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+                    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+                };
+                const contrast = (a, b) => { const la = lum(a), lb = lum(b); return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05); };
+                const normal = hexRgb(ColorManager.normalColor()), system = hexRgb(ColorManager.systemColor());
+                const bad = [], lines = [];
+                for (const c of cultures.concat(["default"])) {
+                    const b = canvasOf(Factions.skinFor(c));
+                    let changed = 0;
+                    for (let n = 0; n < 32; n++) {
+                        const x = 96 + (n % 8) * 12 + 6, y = 144 + Math.floor(n / 8) * 12 + 6;
+                        if (dist(px(b, x, y), px(baseC, x, y)) > 0) changed++;
+                    }
+                    // What text sits on: the stretched back part, then the tiled part over it (RMMZ's Window._refreshBack).
+                    const back = mean(b, 0, 0, 96, 96), tile = b.context.getImageData(0, 96, 96, 96).data;
+                    let r = 0, g = 0, bl = 0, n = 0;
+                    for (let i = 0; i < tile.length; i += 4) {
+                        const a = tile[i + 3] / 255;
+                        r += tile[i] * a + back[0] * (1 - a); g += tile[i + 1] * a + back[1] * (1 - a); bl += tile[i + 2] * a + back[2] * (1 - a); n++;
+                    }
+                    const under = [r / n, g / n, bl / n];
+                    const cn = contrast(normal, under), cs = contrast(system, under);
+                    lines.push(`${c} ${hex(under)} ${cn.toFixed(1)}:1/${cs.toFixed(1)}:1`);
+                    if (changed || cn < 4.5 || cs < 3) bad.push(`${c}: ${changed} text colours changed, normal ${cn.toFixed(2)}:1 (want >= 4.5), system ${cs.toFixed(2)}:1 (want >= 3)`);
+                }
+                check("text_readable", bad.length === 0, `${bad.length ? `PROBLEMS: ${bad.join("; ")} | ` : ""}normal ${ColorManager.normalColor()}, system ${ColorManager.systemColor()} on each skin's back (mean under the text): ${lines.join(", ")}`);
+            }
+
+            // skins.fallback_default: no entry -> the default skin; an entry whose file is missing -> its stand-in, and the
+            // missing file is never loaded; an entry whose file exists -> the file.
+            {
+                const why = [];
+                const none = Factions.skinInfo("TEST_nobody");
+                const noneBmp = Factions.skinFor("TEST_nobody");
+                const defFile = cfg.default && cfg.default.file ? cfg.default.file : null;
+                const defOk = none.id === "default" && (defFile ? noneBmp === ImageManager.loadSystem(defFile) : noneBmp === baseSkin);
+                if (!defOk) why.push(`no entry: ${none.id}/${none.source}`);
+                const cands = cultures.filter(c => cfg.cultures[c] && !cfg.cultures[c].like && cfg.cultures[c].recipe && cfg.cultures[c].file);
+                const probe = cands.find(c => !assetExists(`img/system/${cfg.cultures[c].file}.png`)) || null;
+                let missNote = "every culture has its file", fileNote = "";
+                if (probe) {
+                    const info = Factions.skinInfo(probe);
+                    const loaded = Object.keys(ImageManager._cache || {}).some(k => k.includes(`${cfg.cultures[probe].file}.png`));
+                    missNote = `${probe} (file ${cfg.cultures[probe].file} missing): ${info.source}, loaded the missing file ${loaded}`;
+                    if (info.source !== "stand-in" || loaded) why.push(missNote);
+                    patch(cfg.cultures[probe], "file", cfg.base || "Window");
+                    const withFile = Factions.skinInfo(probe);
+                    const fb = Factions.skinFor(probe);
+                    fileNote = `; the same entry pointed at an existing file (${cfg.base || "Window"}): ${withFile.source}, the file's bitmap ${fb === ImageManager.loadSystem(cfg.base || "Window")}`;
+                    if (withFile.source !== "file" || fb !== ImageManager.loadSystem(cfg.base || "Window")) why.push(fileNote);
+                    const p = fx.patches.pop();
+                    if (p[2]) p[0][p[1]] = p[3]; else delete p[0][p[1]];
+                }
+                check("fallback_default", why.length === 0, `${why.length ? `PROBLEMS: ${why.join("; ")} | ` : ""}culture TEST_nobody: entry ${none.id}, ${none.source}; ${missNote}${fileNote}`);
+            }
+
+            // skins.stranger_in_talk: a talk with a stranger of another culture: each side's portrait in its own culture's
+            // skin frame and face frame.
+            {
+                const why = [];
+                let detail = "";
+                const st = factionList();
+                const own = Factions.cultureOf(pf);
+                let strangerF = st.list.find(f => !f.isPlayer && cultureOfFaction(f) !== own && Factions.skinInfo(f).key !== Factions.skinInfo(pf).key);
+                if (!strangerF) {
+                    strangerF = st.list.find(f => !f.isPlayer);
+                    setCulture(strangerF, others(own).find(c => Factions.skinInfo(c).key !== Factions.skinInfo(pf).key) || "dwarf");
+                }
+                fx.relations.push([strangerF.id, Factions.relation("player", strangerF.id)]);
+                Factions.setRelation("player", strangerF.id, 30);
+                const anchor = col || W.units().find(u => u.area && u.area.x === area.x && u.area.y === area.y && W.eventOf(u.id));
+                const peopleImage = sp => {
+                    const p = catalogOf().people && catalogOf().people[sp];
+                    return p && Array.isArray(p.images) && p.images[0] ? p.images[0] : "$UF_Stock_People1_0";
+                };
+                const stranger = W.addUnit({ name: "TEST_skinStranger", image: { characterName: peopleImage(strangerF.species), characterIndex: 0 }, area, x: anchor.x + 4, y: anchor.y + 2, dir: 2, snapToFree: 6,
+                    data: { kind: "person", faction: strangerF.id, species: strangerF.species, gender: "female", age: 34, ai: null } });
+                fx.units.push(stranger);
+                await t.waitUntil(() => !!W.eventOf(stranger.id), 3000, "the stranger's event").catch(() => {});
+                if (Talk && Talk.open(stranger.id)) {
+                    await t.waitUntil(() => { const l = Talk.layout(); return !!l && !!l.other.faceInfo && !l.other.faceInfo.pending && !!l.player.faceInfo && !l.player.faceInfo.pending; }, 5000, "the talk's portraits").catch(() => {});
+                    await t.waitFrames(4);
+                    const l = Talk.layout(), sc = Talk.screen();
+                    const o = l.other.faceInfo || {}, p = l.player.faceInfo || {};
+                    const wantO = Factions.cultureOf(stranger), wantP = Factions.cultureOf(pf);
+                    const edgeO = mean(sc.other.face.bitmap, 0, 0, Talk.FACE, 6), edgeP = mean(sc.player.face.bitmap, 0, 0, Talk.FACE, 6);
+                    const ringO = mean(sc.other.face.bitmap, 6, 14, 6, Talk.FACE - 28), ringP = mean(sc.player.face.bitmap, 6, 14, 6, Talk.FACE - 28);
+                    const dd = dist(edgeO, edgeP) + dist(ringO, ringP);
+                    if (o.skin !== wantO) why.push(`stranger's side in ${o.skin} skin, want ${wantO}`);
+                    if (p.skin !== wantP) why.push(`your side in ${p.skin} skin, want ${wantP}`);
+                    if (!o.skinDrawn || !p.skinDrawn) why.push(`skin frames drawn: stranger ${o.skinDrawn}, you ${p.skinDrawn}`);
+                    if (dd < 30) why.push(`the two sides' frames look alike (edge + band distance ${dd.toFixed(0)}, want >= 30)`);
+                    detail = `stranger ${stranger.name} of ${strangerF.name} (${wantO}): portrait ${o.drawn} ${o.sheet ? `${o.sheet}:${o.index}` : o.name || ""} (${o.from}), face frame ${o.frame}, skin ${o.skin}; `
+                        + `your side (#${l.player.unitId}, ${wantP}): ${p.drawn} (${p.from}), face frame ${p.frame}, skin ${p.skin}; edge ${hex(edgeO)} vs ${hex(edgeP)}, band ${hex(ringO)} vs ${hex(ringP)} (distance ${dd.toFixed(0)})`;
+                    t.screenshot("talk_stranger");
+                    Talk.closeNow();
+                    await t.waitFrames(2);
+                } else why.push(`the talk did not open (mode ${Talk ? Talk.modeOf(stranger) : "no UF_Talk"})`);
+                check("stranger_in_talk", why.length === 0, `${why.length ? `PROBLEMS: ${why.join("; ")} | ` : ""}${detail}`);
+            }
+
+            // faces.by_culture: two people of one species and two cultures get their cultures' portraits (sheets or frames),
+            // in the talk and in the panel alike.
+            {
+                const why = [];
+                const cs = playable.filter(c => cultureEntry(fcfg, c)).slice(0, 2);
+                const sp = (factionList().list.find(f => f.isPlayer) || {}).species || "human";
+                const mk = (c, i) => {
+                    const u = W.addUnit({ name: `TEST_face_${c}`, image: { characterName: "$UF_Stock_People1_0", characterIndex: 0 }, area, x: (col ? col.x : 10) - 3 - i, y: (col ? col.y : 10) + 3, dir: 2, snapToFree: 6,
+                        data: { kind: "person", culture: c, species: sp, gender: "male", age: 30, ai: null } });
+                    fx.units.push(u);
+                    return u;
+                };
+                const us = cs.map(mk);
+                const rows = us.map((u, i) => {
+                    const tp = Talk ? Talk.portraitOf(u) : null;
+                    const m = Sheet ? Sheet.buildModel({ kind: "unit", unitId: u.id }) : null;
+                    const sp2 = m ? m.picture : null;
+                    const expect = cultureEntry(fcfg, cs[i]).id;
+                    const viaSheet = p => String(p.from || "").indexOf("faces.") === 0;
+                    const talkOk = !!tp && (viaSheet(tp) ? tp.culture === expect : tp.frame === expect);
+                    const sheetOk = !!sp2 && (viaSheet(sp2) ? sp2.culture === expect : sp2.frame === expect);
+                    if (!talkOk) why.push(`talk portrait of the ${cs[i]} person: ${JSON.stringify(tp)}`);
+                    if (!sheetOk) why.push(`panel picture of the ${cs[i]} person: ${JSON.stringify(sp2)}`);
+                    return { c: cs[i], tp, sp2 };
+                });
+                // Drawn: the two frames differ in pixels.
+                const bmps = rows.map(r => {
+                    const b = new Bitmap(144, 144);
+                    Factions.drawPortrait(b, 0, 0, 144, r.tp && r.tp.frame ? r.tp.frame : r.c, null);
+                    return b;
+                });
+                const band = bmps.map(b => mean(b, 0, 0, 144, 12));
+                const ddf = band.length === 2 ? dist(band[0], band[1]) : 0;
+                bmps.forEach(b => b.destroy());
+                const differ = rows.length === 2 && (rows[0].tp && rows[1].tp) && (rows[0].tp.sheet !== rows[1].tp.sheet || rows[0].tp.frame !== rows[1].tp.frame) && ddf >= 30;
+                if (!differ) why.push(`the two portraits do not differ (frames ${rows.map(r => r.tp && r.tp.frame).join(" vs ")}, band distance ${ddf.toFixed(0)})`);
+                check("by_culture", cs.length === 2 && why.length === 0, `${why.length ? `PROBLEMS: ${why.join("; ")} | ` : ""}two ${sp} people of cultures ${cs.join(" and ")}: `
+                    + rows.map(r => `${r.c}: talk ${r.tp ? `${r.tp.sheet || r.tp.name}${r.tp.sheet ? `:${r.tp.index}` : ""} from ${r.tp.from}, frame ${r.tp.frame}` : "none"}; panel ${r.sp2 ? `${r.sp2.sheet || r.sp2.type} frame ${r.sp2.frame}` : "none"}`).join(" | ")
+                    + `; frame band mean distance ${ddf.toFixed(0)}`);
+            }
+
+            // faces.fallback: the chain culture sheet -> species sheet -> today's portrait in the culture's frame.
+            {
+                const why = [], notes = [];
+                const mk = (nm, data) => {
+                    const u = W.addUnit({ name: nm, image: { characterName: "$UF_Stock_People1_0", characterIndex: 0 }, area, x: (col ? col.x : 10) + 3, y: (col ? col.y : 10) - 3, dir: 2, snapToFree: 6, data: Object.assign({ kind: "person", gender: "male", age: 30, ai: null }, data) });
+                    fx.units.push(u);
+                    return u;
+                };
+                // (1) No sheets for the culture: today's portrait in the culture's frame.
+                const bare = cultures.find(c => cultureEntry(fcfg, c) && !Factions.cultureFace({ id: 1, data: { kind: "person", species: c, culture: c, age: 30 } })) || null;
+                if (bare) {
+                    const u = mk("TEST_face_bare", { species: bare, culture: bare });
+                    const tp = Talk.portraitOf(u);
+                    notes.push(`${bare} (no sheets): ${tp.sheet ? `${tp.sheet}:${tp.index}` : tp.name} from ${tp.from}, frame ${tp.frame}`);
+                    if (!(tp.frame === cultureEntry(fcfg, bare).id && String(tp.from || "").indexOf("faces.") !== 0)) why.push(`no-sheet ${bare}: ${JSON.stringify(tp)}`);
+                } else notes.push("every culture has sheets");
+                // (2) The species' sheets when the culture has none (catalog faces.species, when its file exists).
+                const spIds = Object.keys(fcfg.species || {}).filter(s => cultureEntry(fcfg, s));
+                const spWith = spIds.find(s => {
+                    const g = fcfg.species[s] && (fcfg.species[s].male || fcfg.species[s].female);
+                    const e = g && (g.adult || g.elder);
+                    return e && e.sheet && assetExists(`img/faces/${e.sheet}.png`);
+                });
+                if (spWith) {
+                    const gender = fcfg.species[spWith].male ? "male" : "female";
+                    const u = mk("TEST_face_species", { species: spWith, culture: spWith, gender });
+                    const tp = Talk.portraitOf(u);
+                    notes.push(`${spWith} (species sheets): ${tp.sheet}:${tp.index} from ${tp.from}, frame ${tp.frame}`);
+                    if (tp.from !== "faces.species" || tp.frame) why.push(`species ${spWith}: ${JSON.stringify(tp)}`);
+                } else notes.push("no species sheet on disk");
+                // (3) The culture's sheets win when they exist (the pattern pointed at existing sheets for the check).
+                const cc = cultures.find(c => cultureEntry(fcfg, c) && cultureEntry(fcfg, c).id === c) || "human";
+                patch(fcfg, "pattern", "People{n}");
+                const u3 = mk("TEST_face_culture", { species: cc, culture: cc, gender: "female" });
+                const tp3 = Talk.portraitOf(u3);
+                const slot = (fcfg.layout || {}).adult_female;
+                notes.push(`${cc} with culture sheets (pattern People{n} for the check): ${tp3.sheet}:${tp3.index} from ${tp3.from}, frame ${tp3.frame}`);
+                if (tp3.from !== "faces.culture" || !/^People[1-4]$/.test(tp3.sheet || "") || tp3.index !== slot || tp3.frame) why.push(`culture sheets for ${cc}: ${JSON.stringify(tp3)}`);
+                const p = fx.patches.pop();
+                if (p[2]) p[0][p[1]] = p[3]; else delete p[0][p[1]];
+                // (4) Not a person (a hare): no frame.
+                const hare = W.units().find(u => u.data && u.data.kind === "creature");
+                if (hare) {
+                    const tp = Talk.portraitOf(hare);
+                    notes.push(`${hare.data.species} (a creature): frame ${tp.frame || "none"}`);
+                    if (tp.frame) why.push(`creature framed: ${JSON.stringify(tp)}`);
+                }
+                check("fallback", why.length === 0, `${why.length ? `PROBLEMS: ${why.join("; ")} | ` : ""}${notes.join("; ")}`);
+            }
+        } catch (e) {
+            t.check("skins_completed", false, `threw: ${e && e.stack ? e.stack.split("\n").slice(0, 3).join(" / ") : e}`);
+        } finally {
+            if (Talk && Talk.isOpen && Talk.isOpen()) Talk.closeNow();
+            if (Sheet && Sheet.close) Sheet.close();
+            for (const u of fx.units) if (W.unit(u.id)) W.removeUnit(u.id);
+            for (const [id, v] of fx.relations) Factions.setRelation("player", id, v, "test over");
+            for (const p of fx.patches.reverse()) { if (p[2]) p[0][p[1]] = p[3]; else delete p[0][p[1]]; }
+            if (fx.cultureOf) for (const [f, [had, v]] of fx.cultureOf) { if (had) f.culture = v; else delete f.culture; }
+            if (Tm && !fx.paused && Tm.paused) Tm.resume();
+            await t.waitFrames(3);
+        }
+        // test-only: a recorded error, what the check must catch (a real uncaught error stops RMMZ's frame loop)
+        if (provoked("no_errors")) UF.Test.errors.push("window.error: TEST provoked error (UF_Factions TestProvoke)");
+        const errs = t.errorsSoFar().slice(errors0);
+        t.check("no_errors", errs.length === 0, errs.length ? `${errs.length} error(s), first: ${errs[0]}` : "none during the skins checks");
     }
 })();

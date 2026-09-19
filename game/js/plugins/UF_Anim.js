@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Anim] Plays the animation frames the art provides: creature states (idle, walk, work, carry, attack, cast, hurt, death and remains), object states (sway, idle, lit, open, work) and equipment layer sheets. Draws no motion of its own.
+ * @plugindesc [UF Anim] Plays the animation frames the art provides: creature states (idle, walk, work, attack, cast, hurt, death and remains; a unit carrying a load walks and stands as usual), object states (sway, idle, lit, open, work) and equipment layer sheets. Draws no motion of its own.
  * @author UF project
  * @base UF_World
  * @orderAfter UF_World
@@ -26,12 +26,24 @@
  * Units (world units on the map): the state is chosen each frame from
  *   hurt / attack (one-shots started by UF.Combat.playHitAnimation /
  *   playAttackAnimation, and by work strokes of hunters and predators next to
- *   their target), cast (data.casting), carry (a haul or fetch job whose item
- *   the unit holds), work (its job in the "work" state), walk (moving or
- *   stepping in place), idle (standing with no job), stand. Frames come from
+ *   their target), cast (data.casting), work (its job in the "work" state),
+ *   walk (moving or stepping in place), idle (standing with no job), stand.
+ *   A unit carrying the item of its haul or fetch job shows walk while it
+ *   moves and stand while it is still (VISION V89, user 2026-09-19: carried
+ *   loads are not drawn; the load is written in the unit's profile, UF_Sheet):
+ *   the sheet's carry column (AR-600 column 7) is never shown, and a sidecar's
+ *   "carry" list is ignored. Frames come from
  *   the sidecar's animations; walk and stand on a sheet with RPG Maker's
  *   3 x 4 geometry are left to RPG Maker. Timing: the sidecar's frameMs
  *   (default 150), counted in map updates, so everything stops while paused.
+ * Facing rows (VISION V3, 8-way): the row is the unit's 8-way facing
+ *   (UF_Movement8D dir8) as named in the sidecar's "facings" (an AR-600 sheet
+ *   lists S, SW, W, NW, N, NE, E, SE); a sheet without a diagonal row shows
+ *   the nearest of its four, the diagonal's horizontal side (NE and SE as E,
+ *   NW and SW as W), which is also what RPG Maker draws on 3 x 4 stock sheets.
+ *   A striking unit (UF.Combat.playAttackAnimation, work strokes) turns to its
+ *   target in 8 directions; a caster whose data.casting names a target
+ *   ({ targetId } or { x, y }) turns to it.
  * Death: a removal that is a death (UF.Combat.onUnitDeath, the hunt job's
  *   kill, data.dead, data.hp <= 0) plays the sheet's death frames in a pooled
  *   sprite and leaves the last frame on the ground as the remains for catalog
@@ -74,7 +86,12 @@
     const LAYER_PREFIX = "$UF_Layer_";
     const PHASE_SALT = 0x5a1e;
     const FACING = { 2: "S", 4: "W", 6: "E", 8: "N" };
-    const UNIT_ANIMS = ["stand", "walk", "work", "carry", "attack", "cast", "hurt", "death", "idle"];
+    const FACING8 = ["", "SW", "S", "SE", "W", "", "E", "NW", "N", "NE"]; // by numpad direction (UF_Movement8D dir8)
+    const valid8 = d => (d >= 1 && d <= 9 && d !== 5 ? d : 2);
+    const side4 = d => (d === 1 || d === 7 ? 4 : d === 3 || d === 9 ? 6 : validDir(d)); // a diagonal's horizontal side
+    const dir8Of = ch => valid8(ch && ch.dir8 ? ch.dir8() : ch ? ch.direction() : 2);
+    const UNIT_ANIMS = ["stand", "walk", "work", "attack", "cast", "hurt", "death", "idle"];
+    const IGNORED_ANIMS = ["carry"];  // VISION V89: loads are not drawn; AR-600 column 7 stays in the grid (the tools fill it with the stand frame) and is never shown
     const OBJECT_ANIMS = ["stand", "sway", "idle", "lit", "open", "work"];
     const SLOTS = ["legs", "torso", "head", "back", "shield", "weapon"];      // drawing order, bottom to top
     const SLOT_ALIAS = { torso: "clothes", weapon: "tool" };                 // the older key, read when the slot is empty
@@ -161,7 +178,8 @@
         if (sc && sc.animations && typeof sc.animations === "object") {
             const a = sc.animations, anims = {};
             let extra = false;
-            for (const k of Object.keys(a)) anims[k] = validCols(a[k]); // every list the sheet names (play() takes any)
+            for (const k of Object.keys(a)) anims[k] = validCols(a[k]); // every list the sheet names (play() takes any but the ignored)
+            for (const k of IGNORED_ANIMS) anims[k] = null;
             for (const k of UNIT_ANIMS) {
                 anims[k] = validCols(k === "death" ? a.death || a.dead : a[k]);
                 if (anims[k] && k !== "stand" && k !== "walk") extra = true;
@@ -179,6 +197,13 @@
                 const j = Array.isArray(sc.facings) ? sc.facings.indexOf(FACING[d]) : -1;
                 return j >= 0 ? j : i;
             });
+            // rows8[numpad direction]: the diagonal's own row when the sheet has it, else its horizontal side's row.
+            info.rows8 = FACING8.map((name, d) => {
+                if (!name) return info.rows[0];
+                const j = Array.isArray(sc.facings) ? sc.facings.indexOf(name) : -1;
+                return j >= 0 ? j : info.rows[(side4(d) - 2) >> 1];
+            });
+            info.diag = Array.isArray(sc.facings) && ["SW", "NW", "NE", "SE"].some(n => sc.facings.includes(n));
             info.frameTicks = frameTicksOf(sc);
             info.behind = Array.isArray(sc.behind) ? sc.behind.slice() : null;
         }
@@ -231,7 +256,7 @@
     function play(unitOrId, anim) {
         const W = World();
         const u = typeof unitOrId === "number" ? (W ? W.unit(unitOrId) : null) : unitOrId;
-        if (!u || !anim) return false;
+        if (!u || !anim || IGNORED_ANIMS.includes(String(anim))) return false; // V89: a carry pose is never played
         shots.set(u.id, { anim: String(anim), start: ticks });
         stats.oneShots++;
         const info = u.image ? unitInfo(u.image.characterName) : null;
@@ -287,7 +312,7 @@
         const moving = ch.isMoving(), stepping = ch.hasStepAnime();
         const job = jobOfUnit.get(u.id) || null;
         pk.job = job;
-        let want = "", cols = null, start = -1, loop = false, walkLike = false;
+        let want = "", cols = null, start = -1, loop = false, walkLike = false, hauling = false;
         const shot = shots.get(u.id);
         if (shot) {
             const c = info && Object.prototype.hasOwnProperty.call(info.anims, shot.anim) ? info.anims[shot.anim] : null;
@@ -301,15 +326,19 @@
             }
         }
         if (!want && u.data && u.data.casting) {
+            faceCastTarget(ch, u);
             want = "cast";
             cols = info ? info.anims.cast : null;
             loop = true;
         }
         if (!want && job) {
             if (carrying(u, job)) {
-                want = "carry";
-                cols = info ? info.anims.carry : null;
-                walkLike = true;
+                // V89: a unit carrying its job's item looks as it does without it: walk frames while it moves, the stand
+                // frame while it is still (not the put-down's work frames). The load is written in its profile (UF_Sheet).
+                hauling = true;
+                want = moving ? "walk" : "stand";
+                cols = info ? (moving ? info.anims.walk : info.anims.stand) : null;
+                walkLike = moving;
             } else if (job.state === "work") {
                 want = "work";
                 cols = info ? info.anims.work : null;
@@ -329,7 +358,7 @@
         if (!cols) {
             loop = false;
             start = -1;
-            if (moving || stepping) {
+            if (moving || (stepping && !hauling)) {
                 shown = "walk";
                 cols = info ? info.anims.walk : null;
                 walkLike = true;
@@ -352,7 +381,7 @@
         else if (loop) k = Math.floor((ticks + unitPhase(u.id)) / info.frameTicks) % n;
         else k = 0;
         const col = cols[k];
-        const row = info.rows[(validDir(ch.direction()) - 2) >> 1];
+        const row = info.rows8[dir8Of(ch)];
         const pw = g.pw, ph = g.ph;
         const fw = info.fw > 0 ? info.fw : pw, fh = info.fh > 0 ? info.fh : ph;
         const x = sp.characterBlockX() * pw + col * fw, y = sp.characterBlockY() * ph + row * fh;
@@ -367,6 +396,14 @@
         pk.w = fw;
         pk.h = fh;
         return pk;
+    }
+    // A caster turns to what it casts at: data.casting = { targetId } (a unit) or { x, y } (a cell); true names nothing.
+    function faceCastTarget(ch, u) {
+        const c = u.data.casting;
+        if (!c || typeof c !== "object" || !ch.faceToward8) return;
+        const W = World();
+        const t = Number.isInteger(c.targetId) && W ? W.unit(c.targetId) : Number.isInteger(c.x) && Number.isInteger(c.y) ? c : null;
+        if (t && (!t.area || !u.area || (t.area.x === u.area.x && t.area.y === u.area.y)) && (t.x !== ch.x || t.y !== ch.y)) ch.faceToward8(t.x - ch.x, t.y - ch.y);
     }
     // RPG Maker draws this frame itself; the pick only records it (for the layers and for readers).
     function rmmzPick(sp, pk, ch, g) {
@@ -529,7 +566,7 @@
             st = sp._ufLayers = { kids: [], over: null, sig: -1, unitId: pk.unitId };
             layerOwners.set(pk.unitId, sp);
         }
-        const dir = validDir(sp._character.direction());
+        const dir = validDir(sp._character.direction()), d8 = dir8Of(sp._character);
         while (st.kids.length > n) layer.releaseKid(st.kids.pop().sprite);
         while (st.kids.length < n) st.kids.push({ sprite: layer.acquireKid(), typeId: null, slot: "", behind: false });
         let anyBehind = false, sig = n;
@@ -542,7 +579,7 @@
             const fw = li && li.fw > 0 ? li.fw : pk.w, fh = li && li.fh > 0 ? li.fh : pk.h;
             const la = li ? li.anims[pk.anim] : null;
             const col = la ? la[pk.k % la.length] : pk.col;
-            const row = li ? li.rows[(dir - 2) >> 1] : pk.row;
+            const row = li ? li.rows8[d8] : pk.row;
             const x = col * fw, y = row * fh;
             if (x + fw <= e.w && y + fh <= e.h) {
                 s.setFrame(x, y, fw, fh);
@@ -551,7 +588,9 @@
                 s.visible = false; // the layer sheet lacks this frame
             }
             if (s.anchor.x !== sp.anchor.x || s.anchor.y !== sp.anchor.y) s.anchor.set(sp.anchor.x, sp.anchor.y);
-            const b = li && li.behind ? li.behind.includes(FACING[dir]) : !!BEHIND[kid.slot] && BEHIND[kid.slot].includes(dir);
+            // Behind the body: the sheet's own list (by its diagonal facing when it has diagonal rows), else the default
+            // by the 4-way side shown.
+            const b = li && li.behind ? li.behind.includes(li.diag ? FACING8[d8] : FACING[dir]) : !!BEHIND[kid.slot] && BEHIND[kid.slot].includes(dir);
             kid.behind = b;
             if (b) anyBehind = true;
             if (b) sig += 1 << (i + 8);
@@ -982,7 +1021,7 @@
         const rpw = bitmap.width / (big ? 3 : 12), rph = bitmap.height / (big ? 4 : 8);
         const pw = info && info.fw > 0 ? info.fw : rpw, ph = info && info.fh > 0 ? info.fh : rph;
         const bx = big ? 0 : (index % 4) * 3 * rpw, by = big ? 0 : Math.floor(index / 4) * 4 * rph;
-        const row = info ? info.rows[(validDir(dir) - 2) >> 1] : (validDir(dir) - 2) >> 1;
+        const row = info ? info.rows8[valid8(dir)] : (side4(dir) - 2) >> 1;
         const r = { x: bx + col * pw, y: by + row * ph, w: pw, h: ph };
         return r.x + r.w <= bitmap.width && r.y + r.h <= bitmap.height ? r : null;
     }
@@ -1094,7 +1133,7 @@
             image: name,
             index: u.image.characterIndex | 0,
             frame: cols[cols.length - 1],
-            dir: validDir(ev ? ev.direction() : u.dir),
+            dir: ev ? dir8Of(ev) : valid8(u.dir8 || u.dir),
             until: nowMinutes() + Math.round(remainsHours() * 60)
         };
         if (u.data && u.data.tint) entry.tint = u.data.tint;
@@ -1397,7 +1436,10 @@
         if (!ev) return false;
         const dx = target.x - u.x, dy = target.y - u.y;
         if (!dx && !dy) return false;
-        if (!ev.isDirectionFixed()) ev.setDirection(Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 6 : 4) : (dy > 0 ? 2 : 8));
+        if (!ev.isDirectionFixed()) {
+            if (ev.faceToward8) ev.faceToward8(dx, dy); // 8-way (VISION V3)
+            else ev.setDirection(Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 6 : 4) : (dy > 0 ? 2 : 8));
+        }
         play(u, "attack");
         stats.strokes++;
         return true;
@@ -1559,11 +1601,14 @@
 
         if (C && typeof C.playAttackAnimation === "function" && !isWrap(C.playAttackAnimation)) {
             const orig = C.playAttackAnimation;
-            C.playAttackAnimation = markWrap(function(attacker) {
+            C.playAttackAnimation = markWrap(function(attacker, target) {
                 const fx = Array.isArray(C.effects) ? C.effects.length : -1;
                 const r = orig.apply(this, arguments);
                 try {
                     stats.combatAttacks++;
+                    // UF_Combat turns the attacker in 4 directions; the attack frames face the target in 8 (VISION V3).
+                    const ev = eventOfUnit(attacker);
+                    if (ev && ev.faceToward8 && target && attacker && !ev.isDirectionFixed() && (target.x !== attacker.x || target.y !== attacker.y)) ev.faceToward8(target.x - attacker.x, target.y - attacker.y);
                     stopCombatMotion(eventOfUnit(attacker), COMBAT_ATTACK_TICKS);
                     // The strike mark it queued is a code-drawn slash or claw animation: dropped (V58: sprites only).
                     if (fx >= 0 && Array.isArray(C.effects) && C.effects.length > fx) {
@@ -1642,7 +1687,7 @@
         return typeof x === "number" ? W.unit(x) : x.id !== undefined ? W.unit(x.id) || null : null;
     };
     const Anim = {
-        FRAME_MS, TICK_MS, REMAINS_CAP, MAX_GHOSTS, POOL_KEEP, STROKE_TICKS, LAYER_PREFIX, SLOTS, BEHIND,
+        FRAME_MS, TICK_MS, REMAINS_CAP, MAX_GHOSTS, POOL_KEEP, STROKE_TICKS, LAYER_PREFIX, SLOTS, BEHIND, IGNORED_ANIMS,
         stats,
         perf,
         errors,
@@ -1660,7 +1705,7 @@
             else overrides.set(name, data);
             forgetInfos();
         },
-        /** The animations a unit or layer sheet names ({ stand, walk, work, carry, attack, cast, hurt, death, idle }: column lists or null), or null. */
+        /** The animations a unit or layer sheet names ({ stand, walk, work, attack, cast, hurt, death, idle }: column lists or null; carry always null, V89), or null. */
         animations(name) {
             const info = unitInfo(name);
             return info ? Object.assign({}, info.anims) : null;
@@ -1823,9 +1868,20 @@
         } catch (e) {
             fs = null;
         }
-        const onDisk = name => {
+        const onDisk = (name, minCols = 0) => {
             try {
-                return !!fs && fs.existsSync(pathMod.join(gameDir, "img", "characters", name + ".png"));
+                if (!fs) return false;
+                const file = pathMod.join(gameDir, "img", "characters", name + ".png");
+                if (!fs.existsSync(file)) return false;
+                if (minCols > 0) {
+                    const fd = fs.openSync(file, "r");
+                    const buf = Buffer.alloc(24);
+                    fs.readSync(fd, buf, 0, 24, 0);
+                    fs.closeSync(fd);
+                    const w = buf.readUInt32BE(16);
+                    if (w < minCols * FW) return false;
+                }
+                return true;
             } catch (e) {
                 return false;
             }
@@ -1846,7 +1902,7 @@
         const sources = {};
         const memNames = [];
         const fixture = (name, cols, rows, draw, sc) => {
-            if (onDisk(name)) {
+            if (onDisk(name, cols)) {
                 sources[name] = "file";
                 return;
             }
@@ -2064,23 +2120,20 @@
                 await t.waitFrames(2);
             }
 
-            // 3. state_frames: work, carry, attack, hurt, idle (and cast, and the pause) take their columns from the sidecar.
+            // 3. state_frames: work, attack, hurt, idle (and cast, and the pause) take their columns from the sidecar.
+            // (No carry: VISION V89. A hauler is checked by no_carry_pose.)
             {
                 const Wk = add("TEST_anim_worker", BODY, ax + 0, ay + 0, 2, {});
-                const Ca = add("TEST_anim_carrier", BODY, ax + 0, ay + 4, 6, { inventory: [] });
                 const A = add("TEST_anim_attacker", BODY, ax + 6, ay + 1, 6, { hp: 99, maxHp: 99 });
                 const B = add("TEST_anim_target", BODY, ax + 7, ay + 1, 4, { hp: 99, maxHp: 99 });
                 const Id = add("TEST_anim_idler", BODY, ax + 9, ay + 2, 2, {});
                 const Cs = add("TEST_anim_caster", BODY, ax + 9, ay + 0, 2, { casting: true });
-                const units = [Wk, Ca, A, B, Id, Cs];
+                const units = [Wk, A, B, Id, Cs];
                 await t.waitUntil(() => units.every(drawn), 8000, "the state units to be drawn");
                 const wj = workJob(Wk);
                 await t.waitUntil(() => !!wj && wj.state === "work", 3000, "the worker to work").catch(() => {});
-                const stone = I.give("stone", 1, Ca.id)[0];
-                const cj = stone ? J.create({ type: "haul", target: { area: { x: area.x, y: area.y }, x: Ca.x, y: Ca.y }, params: { itemId: stone.id, to: { area: { x: area.x, y: area.y }, x: Ca.x + 6, y: Ca.y } }, owner: Ca.id }) : null;
-                const seen = { work: [], carry: [], idle: [], cast: [], attack: [], hurt: [] };
-                const wants = { work: new Set(), carry: new Set(), idle: new Set(), cast: new Set() };
-                let carryMoving = 0;
+                const seen = { work: [], idle: [], cast: [], attack: [], hurt: [] };
+                const wants = { work: new Set(), idle: new Set(), cast: new Set() };
                 C.playAttackAnimation(A, B);
                 C.playHitAnimation(B, A);
                 let stShot = false;
@@ -2089,14 +2142,9 @@
                     seen.work.push(colOf(spriteOfUnit(Wk)));
                     seen.idle.push(colOf(spriteOfUnit(Id)));
                     seen.cast.push(colOf(spriteOfUnit(Cs)));
-                    const cs = spriteOfUnit(Ca), cev = W.eventOf(Ca.id);
-                    if (cj && (cj.state === "travel" || cj.state === "work") && cs) {
-                        seen.carry.push(colOf(cs));
-                        if (cev && cev.isMoving()) carryMoving++;
-                    }
                     seen.attack.push([colOf(spriteOfUnit(A)), rowOf(spriteOfUnit(A))]);
                     seen.hurt.push([colOf(spriteOfUnit(B)), rowOf(spriteOfUnit(B))]);
-                    for (const [k, u] of [["work", Wk], ["carry", Ca], ["idle", Id], ["cast", Cs]]) {
+                    for (const [k, u] of [["work", Wk], ["idle", Id], ["cast", Cs]]) {
                         const fo = Anim.frameOf(u);
                         if (fo) wants[k].add(fo.want);
                     }
@@ -2113,7 +2161,6 @@
                 const hurtRun = runsOf(seen.hurt.map(p => p[0]));
                 const hurtOk = hurtRun.length >= 2 && hurtRun[0][0] === 14 && hurtRun[0][1] >= 8 && hurtRun[0][1] <= 10 && seen.hurt[0][1] === 1 && seen.hurt.slice(hurtRun[0][1]).every(p => p[0] === 18 || p[0] === 19);
                 const workOk = within(seen.work, [4, 5, 6]) && [4, 5, 6].every(c => seen.work.includes(c)) && wants.work.has("work") && wants.work.size === 1;
-                const carryOk = seen.carry.length >= 10 && within(seen.carry, [7]) && carryMoving > 0 && wants.carry.has("carry");
                 const idleOk = within(seen.idle, [18, 19]) && seen.idle.includes(18) && seen.idle.includes(19) && wants.idle.has("idle");
                 const castOk = within(seen.cast, [11, 12, 13]) && [11, 12, 13].every(c => seen.cast.includes(c));
                 // Paused: the frames stand still with the game.
@@ -2130,13 +2177,77 @@
                     pauseOk = dedupe(pauseCols).length === 1 && c1 === c0;
                 }
                 if (wj) J.cancel(wj.id, "test over");
-                if (cj && (cj.state === "travel" || cj.state === "work")) J.cancel(cj.id, "test over");
                 t.check("state_frames",
-                    workOk && carryOk && attackOk && hurtOk && idleOk && castOk && pauseOk !== false,
-                    `work: ${dedupe(seen.work).slice(0, 12).join(",")} (want 4-6 cycling; state ${Array.from(wants.work).join("/")}); carry (haul #${cj ? cj.id : "?"} ${cj ? cj.state : "none"}): ${dedupe(seen.carry).join(",") || "none"} over ${seen.carry.length} frames, ${carryMoving} of them walking (want 7; state ${Array.from(wants.carry).join("/")}); ` +
+                    workOk && attackOk && hurtOk && idleOk && castOk && pauseOk !== false,
+                    `work: ${dedupe(seen.work).slice(0, 12).join(",")} (want 4-6 cycling; state ${Array.from(wants.work).join("/")}); ` +
                     `attack: ${atkRuns.map(([c, n]) => `${c}x${n}`).join(" ")} in row ${dedupe(seen.attack.slice(0, atkLen).map(p => p[1])).join(",")} (want 8, 9, 10 for 8-10 frames each in row 2, then idle 18/19); hurt: ${hurtRun.map(([c, n]) => `${c}x${n}`).join(" ")} (want 14 for 8-10 frames in row 1, then idle); ` +
                     `idle: ${dedupe(seen.idle).slice(0, 10).join(",")} (want 18/19); cast: ${dedupe(seen.cast).slice(0, 10).join(",")} (want 11-13); paused 30 frames: columns ${dedupe(pauseCols).join(",") || "n/a"}, clock ${pauseOk === null ? "no UF.Time" : pauseOk ? "stopped" : "MOVED"}`);
                 removeUnits(units);
+                await t.waitFrames(2);
+            }
+
+            // 3b. no_carry_pose (VISION V89, user 2026-09-19: carried loads are not drawn): a real haul job. The hauler walks to
+            // a stack of 3 logs, picks it up, carries it 6 cells east and puts it down. While it holds the logs it shows the walk
+            // columns 1-3 while it moves and the stand column 0 while it is still: never the carry column 7 (which the scratch
+            // sheet has and its sidecar names), never the state "carry". A carry one-shot plays nothing.
+            {
+                const Hl = add("TEST_anim_hauler", BODY, ax + 0, ay + 4, 6, { inventory: [] });
+                await t.waitUntil(() => drawn(Hl), 8000, "the hauler to be drawn");
+                const loadType = I.type("log") ? "log" : "stone";
+                const here = { x: area.x, y: area.y };
+                const from = { x: ax + 2, y: ay + 4 }, to = { x: ax + 8, y: ay + 4 };
+                const atTo0 = I.count({ area: here, x: to.x, y: to.y }, loadType);
+                const pile = I.drop(here, from.x, from.y, loadType, 3)[0] || null;
+                const hj = pile ? J.create({ type: "haul", target: { area: here, x: from.x, y: from.y }, params: { itemId: pile.id, to: { area: here, x: to.x, y: to.y } }, owner: Hl.id }) : null;
+                let heldFrames = 0, walkFrames = 0, standFrames = 0, movingFrames = 0, mismatch = 0, shotTaken = false;
+                const heldCols = new Set(), heldWants = new Set(), bad = [];
+                for (let f = 1; f <= 1500; f++) {
+                    await t.waitFrames(1);
+                    const it = pile ? I.get(pile.id) : null;
+                    const s = spriteOfUnit(Hl), ev = W.eventOf(Hl.id), fo = Anim.frameOf(Hl);
+                    if (it && it.holder === Hl.id && s && ev && fo) {
+                        heldFrames++;
+                        const c = colOf(s);
+                        heldCols.add(c);
+                        heldWants.add(fo.want);
+                        if (ev.isMoving()) movingFrames++;
+                        if (c !== fo.col) mismatch++;
+                        if (fo.want === "walk") {
+                            walkFrames++;
+                            if (c < 1 || c > 3) bad.push(`walk on column ${c}`);
+                        } else if (fo.want === "stand") {
+                            standFrames++;
+                            if (c !== 0) bad.push(`stand on column ${c}`);
+                        } else bad.push(`${fo.want} on column ${c}`);
+                        if (!shotTaken && fo.want === "walk" && walkFrames >= 12) {
+                            ensureView();
+                            t.screenshot("no_carry_pose"); // the hauler mid-walk with the logs: its walk frame, no load drawn
+                            shotTaken = true;
+                        }
+                    }
+                    if (!hj || hj.state === "done" || hj.state === "failed" || hj.state === "cancelled") break;
+                }
+                const arrived = I.count({ area: here, x: to.x, y: to.y }, loadType) - atTo0;
+                const playRet = Anim.play(Hl, "carry");
+                const afterCols = new Set(), afterWants = new Set();
+                for (let f = 0; f < 20; f++) {
+                    await t.waitFrames(1);
+                    const s = spriteOfUnit(Hl), fo = Anim.frameOf(Hl);
+                    if (s) afterCols.add(colOf(s));
+                    if (fo) afterWants.add(fo.want);
+                }
+                const sideCarry = (Anim.animations(BODY) || {}).carry;
+                const sorted = set => Array.from(set).sort((a, b) => a - b).join(",");
+                t.check("no_carry_pose",
+                    !!hj && hj.state === "done" && arrived === 3 && heldFrames >= 20 && walkFrames >= 10 && [1, 2, 3].every(c => heldCols.has(c)) && !heldCols.has(7) &&
+                    !heldWants.has("carry") && bad.length === 0 && mismatch === 0 && playRet === false && !afterCols.has(7) && !afterWants.has("carry") && sideCarry === null && shotTaken,
+                    `${BODY} (carry column 7 on the sheet, named in its sidecar) hauling 3 ${loadType} from (${from.x},${from.y}) to (${to.x},${to.y}): haul #${hj ? hj.id : "?"} ${hj ? hj.state : "not created"}, ${arrived} arrived (want 3); ` +
+                    `while holding them ${heldFrames} frames (${movingFrames} moving): states ${Array.from(heldWants).join("/") || "none"} (walk ${walkFrames}, stand ${standFrames}; want walk and stand only), columns ${sorted(heldCols) || "none"} (want 1-3 walking, 0 still, never 7); ` +
+                    `wrong frames ${bad.length}${bad.length ? ` [${bad.slice(0, 4).join("; ")}]` : ""}, sprite frame not the chosen column ${mismatch}; ` +
+                    `play(hauler, "carry") -> ${playRet} (want false), then columns ${sorted(afterCols)} and states ${Array.from(afterWants).join("/")} (want no 7, no carry); sidecar carry list read as ${JSON.stringify(sideCarry)} (want null)`);
+                if (hj && (hj.state === "open" || hj.state === "travel" || hj.state === "work")) J.cancel(hj.id, "test over");
+                removeUnits([Hl]);
+                for (const it of I.atIn(here, to.x, to.y).concat(I.atIn(here, from.x, from.y))) if (it.type === loadType) I.remove(it.id);
                 await t.waitFrames(2);
             }
 
@@ -2198,7 +2309,7 @@
                 const stateOk = states.work.has("work>walk") && states.attack.has("attack>stand") && states.hurt.has("hurt>stand");
                 t.check("missing_frames_plain",
                     plainOk && stateOk && rmmzN > 0 && rmmzOwn === 0 && rmmzBad === 0 && !!rmmzImg,
-                    `${PLAIN} (stand 0, walk 1-3 only): work ${dedupe(seen.work).join(",")} (${Array.from(states.work).join(" ")}), attack ${dedupe(seen.attack).join(",")} (${Array.from(states.attack).join(" ")}), hurt ${dedupe(seen.hurt).join(",")} (${Array.from(states.hurt).join(" ")}), idle ${dedupe(seen.idle).join(",")}, carry ${dedupe(seen.carry).join(",") || "none"} (${Array.from(states.carry).join(" ")}) (want only 0-3: stand or walk); ` +
+                    `${PLAIN} (stand 0, walk 1-3 only): work ${dedupe(seen.work).join(",")} (${Array.from(states.work).join(" ")}), attack ${dedupe(seen.attack).join(",")} (${Array.from(states.attack).join(" ")}), hurt ${dedupe(seen.hurt).join(",")} (${Array.from(states.hurt).join(" ")}), idle ${dedupe(seen.idle).join(",")}, hauling (item held) ${dedupe(seen.carry).join(",") || "none"} (${Array.from(states.carry).join(" ")}) (want only 0-3: stand or walk); ` +
                     `RPG Maker sheet ${rmmzImg || "NONE FOUND"} attacking and hurt: ${rmmzOwn} of ${rmmzN} frames set by UF_Anim (want 0), ${rmmzBad} frames off RPG Maker's own pattern frame (want 0)`);
                 removeUnits(units);
                 await t.waitFrames(2);

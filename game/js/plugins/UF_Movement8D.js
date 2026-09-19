@@ -22,8 +22,8 @@
  * @param FourWay
  * @text 4-way movement
  * @type boolean
- * @default true
- * @desc Units, the view and pathfinding move in 4 directions only (user decision 2026-09-18). false = 8 directions.
+ * @default false
+ * @desc true = units, the view and pathfinding move in 4 directions only (the 2026-09-18 rule). false = 8 directions (VISION V3, 2026-09-19).
  *
  * @param DiagonalSlide
  * @text Smart Diagonal Slide
@@ -43,10 +43,20 @@
  * - Velocity normalization (1/sqrt(2)) for identical screen speed
  * - Zero modification to vanilla RMMZ core files
  *
- * FourWay (default true, VISION V3 as revised 2026-09-18): no diagonal steps
- * anywhere. Pathfinding uses the 4 orthogonal neighbors, diagonal requests
- * become a straight step, and the view moves with the arrow keys in 4
- * directions. UF_World and UF_Jobs read UF_Dir8.fourWay.
+ * FourWay (default false since 2026-09-19, VISION V3: 8-way movement and
+ * 8-way facing). With false, units step diagonally when both orthogonal
+ * neighbours of the step are open (StrictCornerCutting: never across a
+ * blocked corner). With true (the 2026-09-18 rule): no diagonal steps
+ * anywhere, pathfinding uses the 4 orthogonal neighbours and diagonal
+ * requests become a straight step. UF_World, UF_Jobs and UF_Anim read
+ * UF_Dir8.fourWay.
+ *
+ * Facing: every character keeps an 8-way facing (dir8(): 1-9 on the numpad)
+ * next to RPG Maker's 4-way direction(). A diagonal facing shows as its
+ * horizontal part in direction() (SW, NW -> 4; SE, NE -> 6), so 4-row stock
+ * sheets show the nearest side view; 8-row sheets read dir8() (UF_Anim).
+ * setDirection(2/4/6/8) sets both; setDir8(d) and faceToward8(dx, dy) turn
+ * in 8 directions. API: docs/systems/UF_Movement8D.md
  */
 
 (() => {
@@ -57,7 +67,7 @@
     const normalizeSpeed = (params["NormalizeSpeed"] || "true") === "true";
     const strictCornerCutting = (params["StrictCornerCutting"] || "true") === "true";
     const diagonalSlide = (params["DiagonalSlide"] || "true") === "true";
-    const fourWay = (params["FourWay"] || "true") === "true";
+    const fourWay = (params["FourWay"] || "false") === "true";
 
     const SQRT2_INV = 1.0 / Math.SQRT2; // ~0.70710678
 
@@ -96,6 +106,26 @@
             return horz || vert || 0;
         },
 
+        /** The 4-way direction that shows a facing on a 4-row sheet: a diagonal shows its horizontal part. */
+        project4(d) {
+            return d === 1 || d === 7 ? 4 : d === 3 || d === 9 ? 6 : d === 2 || d === 4 || d === 6 || d === 8 ? d : 2;
+        },
+
+        /**
+         * The facing toward an offset (dx, dy): one of 8 by the octant of the angle (22.5 degrees either side of each
+         * direction; a cell diagonally next to the unit is a diagonal). With FourWay, the longer axis (ties horizontal).
+         * 0 for (0, 0).
+         */
+        toward(dx, dy) {
+            if (!dx && !dy) return 0;
+            const ax = Math.abs(dx), ay = Math.abs(dy);
+            const h = dx > 0 ? 6 : 4, v = dy > 0 ? 2 : 8;
+            if (fourWay) return ax >= ay ? h : v;
+            if (ay * 2.414213562 < ax) return h;
+            if (ax * 2.414213562 < ay) return v;
+            return UF_Dir8.combine(h, v);
+        },
+
         delta(d) {
             switch (d) {
                 case 1: return { x: -1, y:  1 };
@@ -127,15 +157,30 @@
         return this._dir8 || this._direction;
     };
 
-    Game_CharacterBase.prototype.setDir8 = function(d) {
-        this._dir8 = d;
-        const split = UF_Dir8.splitDiagonal(d);
-        if (split) {
-            // For 4-dir sprite representation, face horizontal for clear profile in 3/4 perspective
-            this.setDirection(split.horz);
-        } else if (UF_Dir8.isCardinal(d)) {
-            this.setDirection(d);
+    // A 4-way turn (RPG Maker's setDirection: events, move routes, UF plugins) is the 8-way facing too. A diagonal
+    // number passed here (1, 3, 7, 9) would break RPG Maker's sprite row, so it turns through setDir8 instead.
+    const _Game_CharacterBase_setDirection = Game_CharacterBase.prototype.setDirection;
+    Game_CharacterBase.prototype.setDirection = function(d) {
+        if (UF_Dir8.isDiagonal(d)) {
+            this.setDir8(d);
+            return;
         }
+        _Game_CharacterBase_setDirection.call(this, d);
+        if (d && !this.isDirectionFixed()) this._dir8 = d;
+    };
+
+    /** Face one of 8 directions (numpad 1-9): dir8() is d, direction() its 4-way part (a diagonal shows its horizontal side). */
+    Game_CharacterBase.prototype.setDir8 = function(d) {
+        if (!(d >= 1 && d <= 9) || d === 5 || this.isDirectionFixed()) return;
+        _Game_CharacterBase_setDirection.call(this, UF_Dir8.project4(d));
+        this._dir8 = d;
+    };
+
+    /** Turn toward an offset (dx, dy) in 8 directions (4 with FourWay); nothing for (0, 0). Returns the facing. */
+    Game_CharacterBase.prototype.faceToward8 = function(dx, dy) {
+        const d = UF_Dir8.toward(dx, dy);
+        if (d) this.setDir8(d);
+        return d;
     };
 
     // Velocity normalization during diagonal movement
@@ -192,12 +237,13 @@
 
     // Enhanced moveDiagonally with flag tracking and dir8
     const _Game_CharacterBase_moveDiagonally = Game_CharacterBase.prototype.moveDiagonally;
+    // A diagonal step faces its diagonal (dir8) and shows its horizontal side on 4-row sheets (direction()), whatever
+    // the unit faced before (RPG Maker keeps the old facing unless it was opposite).
     Game_CharacterBase.prototype.moveDiagonally = function(horz, vert) {
-        const successBefore = this.canPassDiagonally(this._x, this._y, horz, vert);
         _Game_CharacterBase_moveDiagonally.call(this, horz, vert);
         if (this.isMovementSucceeded()) {
             this._isDiagonalMoving = true;
-            this._dir8 = UF_Dir8.combine(horz, vert);
+            this.setDir8(UF_Dir8.combine(horz, vert));
         }
     };
 
@@ -207,7 +253,7 @@
         _Game_CharacterBase_moveStraight.call(this, d);
         if (this.isMovementSucceeded()) {
             this._isDiagonalMoving = false;
-            this._dir8 = d;
+            if (!this.isDirectionFixed()) this._dir8 = d;
         }
     };
 
@@ -404,6 +450,6 @@
         this.setMoveSpeed($gamePlayer.realMoveSpeed());
     };
 
-    console.log("[UF] UF_Movement8D initialized: 8-directional grid movement, octile A*, velocity normalization active.");
+    console.log(`[UF] UF_Movement8D: ${fourWay ? "4-way (FourWay on)" : "8-way"} grid movement, octile A*, strict corners ${strictCornerCutting}.`);
 })();
 

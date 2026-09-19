@@ -136,7 +136,8 @@
     const areaKey = (ax, ay) => `${ax},${ay}`;
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-    // 4-way movement (UF_Movement8D FourWay, VISION V3 revised 2026-09-18): units step along one axis at a time.
+    // 8-way movement (VISION V3, 2026-09-19): UF_Movement8D's FourWay is off by default; with it on (the 2026-09-18
+    // rule) units step along one axis at a time.
     const fourWay = () => !window.UF_Dir8 || UF_Dir8.fourWay !== false;
     // One step toward (ax, ay) remaining: both axes in 8-way, the longer axis in 4-way.
     const stepToward = (ax, ay) => {
@@ -145,11 +146,14 @@
         return Math.abs(ax) >= Math.abs(ay) ? { dx, dy: 0 } : { dx: 0, dy };
     };
 
-    // Facing with 4 facings (GUIDE_25D §3.5): NE→E, SE→S, SW→W, NW→N.
-    const facing = (dx, dy) => {
-        if (dx > 0) return dy > 0 ? 2 : 6;
-        if (dx < 0) return dy < 0 ? 8 : 4;
-        return dy > 0 ? 2 : 8;
+    // Facing (VISION V3): dir8 is one of 8 (numpad 1-9), dir its 4-way part for RPG Maker and 4-row sheets (a diagonal
+    // shows its horizontal side, as UF_Movement8D does on screen).
+    const dir8Of = (dx, dy) => (window.UF_Dir8 ? UF_Dir8.toward(dx, dy) : 0) ||
+        (Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 6 : dx < 0 ? 4 : 2) : (dy > 0 ? 2 : 8));
+    const project4 = d => (d === 1 || d === 7 ? 4 : d === 3 || d === 9 ? 6 : d === 2 || d === 4 || d === 6 || d === 8 ? d : 2);
+    const faceUnit = (u, d8) => {
+        u.dir8 = d8;
+        u.dir = project4(d8);
     };
 
     function hash32(...parts) {
@@ -578,7 +582,8 @@
         data.meta = { ufUnit: String(u.id) };
         $dataMap.events[eid] = data;
         const ev = new Game_Event($gameMap.mapId(), eid);
-        ev.setDirection(u.dir || 2);
+        if (u.dir8 && ev.setDir8) ev.setDir8(u.dir8);
+        else ev.setDirection(u.dir || 2);
         $gameMap._events[eid] = ev;
         const scene = SceneManager._scene;
         if (scene instanceof Scene_Map && scene._spriteset) {
@@ -822,7 +827,8 @@
             area: { x: spec.area.x, y: spec.area.y },
             x: sx,
             y: sy,
-            dir: spec.dir || 2,
+            dir: project4(spec.dir || 2),
+            dir8: spec.dir || 2,
             goal: null,
             stuckFrames: 0,
             data
@@ -927,7 +933,7 @@
         const g = goalDelta(u);
         const w = wrapStep(u, g.dx, g.dy);
         if (!World.inWorld(w.ax, w.ay)) return arrive(u);
-        u.dir = facing(g.dx, g.dy);
+        faceUnit(u, dir8Of(g.dx, g.dy));
         if (w.crossed) moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
         else {
             u.x = w.x;
@@ -946,16 +952,16 @@
         const w = wrapStep(u, g.dx, g.dy);
         if (w.crossed) {
             if (!World.inWorld(w.ax, w.ay)) return arrive(u);
-            u.dir = facing(g.dx, g.dy);
+            faceUnit(u, dir8Of(g.dx, g.dy));
             moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
             return;
         }
-        if (PATHS.enabled && fourWay() && !ev.isThrough()) return stepAlongPath(u, ev, false);
+        if (PATHS.enabled && !ev.isThrough()) return stepAlongPath(u, ev, false);
         stepDirect(u, ev, g);
     }
 
-    // The step used before paths (2026-09-18): RMMZ's findDirectionTo toward the goal; after STUCK_LIMIT frames
-    // without a step the goal is dropped and world:unitBlocked is emitted.
+    // The step used before paths (2026-09-18): RMMZ's findDirectionTo toward the goal (UF_Movement8D: 8-way, never across
+    // a blocked corner); after STUCK_LIMIT frames without a step the goal is dropped and world:unitBlocked is emitted.
     function stepDirect(u, ev, g) {
         const { tx, ty } = localTarget(u);
         const h = g.dx > 0 ? 6 : 4, v = g.dy > 0 ? 2 : 8;
@@ -966,7 +972,9 @@
         } else {
             const d = ev.findDirectionTo(tx, ty);
             if (d > 0) {
-                ev.moveStraight(d);
+                // findDirectionTo answers 1-9 in 8-way: a diagonal goes through moveInDirection8D, never moveStraight.
+                if (ev.moveInDirection8D) ev.moveInDirection8D(d);
+                else ev.moveStraight(d);
                 tried = true;
             }
         }
@@ -995,6 +1003,7 @@
                 u.x = ev.x;
                 u.y = ev.y;
                 u.dir = ev.direction();
+                u.dir8 = ev.dir8 ? ev.dir8() : u.dir;
                 if (u.goal) stepOnscreen(u, ev);
             } else if (u.goal && offscreenTick) {
                 stepOffscreen(u);
@@ -1005,7 +1014,10 @@
     //-------------------------------------------------------------------------
     // Paths (user 2026-09-19: "Paths should not go through walls")
     //
-    // A* over an area's whole grid, 4-way, binary heap, typed arrays allocated once and stamped per search.
+    // A* over an area's whole grid, 8-way (VISION V3; 4-way with UF_Movement8D's FourWay), octile costs (5 straight,
+    // 7 diagonal), binary heap, typed arrays allocated once and stamped per search. A diagonal step is planned only when
+    // both of its orthogonal neighbours are open to this unit and all four straight moves round that corner are
+    // allowed: never across a blocked corner (a wall, a tree, water, a shut door, the cell to walk round).
     // Passability is the on-screen stepping rule, per cell and per direction: the tiles' passage flags (RMMZ
     // checkPassage: top layer first, [*] tiles skipped), no water, no blocking object (the catalog's `passable`
     // flag, as UF_Objects blocks on screen; a door is open to the units UF_Doors lets through; a bridge is walkable
@@ -1026,7 +1038,8 @@
     const WATER_BIT = 16;
     const BIT_DOWN = 1, BIT_LEFT = 2, BIT_RIGHT = 4, BIT_UP = 8; // RMMZ passage bits of directions 2, 4, 6, 8
     const T_BLOCK = 1, T_DOOR = 2, T_BRIDGE = 4;                 // object type flags
-    const HEAP_TIE = 131072;                                     // heap key f * HEAP_TIE - g: on equal f, deeper first
+    const HEAP_TIE = 1048576;                                    // heap key f * HEAP_TIE - g: on equal f, deeper first
+    const STEP_COST = 5, DIAG_COST = 7;                          // octile step costs (7/5 = 1.4)
     const grids = new WeakMap();   // a built map ($dataMap or a peek-cache build) -> its walk grid
     let typeTable = null;          // { list, doors, roads, flags: Uint8Array by object type number }
     let typeEpoch = 0;             // bumped when the type table changes: every grid recomputes its cells
@@ -1252,18 +1265,28 @@
         const s = sy * size + sx, goalCell = gy * size + gx;
         const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
 
-        // The goal set: the goal cell, or (a tree, a wall site, water) its open 4-neighbours.
+        const eight = !fourWay();
+        // The goal set: the goal cell, or (a tree, a wall site, water) its open 4-neighbours, and in 8-way its open
+        // diagonal neighbours whose two cells between them and the goal are open too (never reaching across a corner).
         let goals, hOff = 0;
         if (enterable(goalCell)) goals = [goalCell];
         else {
             if (opts.resolveBlocked === false) return done("goal blocked");
-            hOff = 1;
+            hOff = eight ? DIAG_COST : STEP_COST;
             goals = [];
             if (gy + 1 < size) goals.push(goalCell + size);
             if (gy > 0) goals.push(goalCell - size);
             if (gx > 0) goals.push(goalCell - 1);
             if (gx + 1 < size) goals.push(goalCell + 1);
             goals = goals.filter(enterable);
+            if (eight) {
+                for (const [dx, dy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
+                    const x = gx + dx, y = gy + dy;
+                    if (x < 0 || y < 0 || x >= size || y >= size) continue;
+                    const c = y * size + x;
+                    if (enterable(c) && enterable(gy * size + x) && enterable(y * size + gx)) goals.push(c);
+                }
+            }
         }
         goals = goals.filter(c => c !== avoid);
         if (!goals.length) return done("goal walled in");
@@ -1282,8 +1305,12 @@
         const gen = searchArrays(n);
         const G = AS.g, P = AS.parent, seen = AS.seen, closed = AS.closed, goalMark = AS.goal, hc = AS.heapCell, hk = AS.heapKey;
         for (const c of goals) goalMark[c] = gen;
-        const hOf = i => {
-            const x = i % size, d = Math.abs(x - gx) + Math.abs((i - x) / size - gy) - hOff;
+        const hOf = eight ? i => {
+            const x = i % size, ax = Math.abs(x - gx), ay = Math.abs((i - x) / size - gy);
+            const d = STEP_COST * (ax + ay) - (2 * STEP_COST - DIAG_COST) * (ax < ay ? ax : ay) - hOff; // octile
+            return d > 0 ? d : 0;
+        } : i => {
+            const x = i % size, d = STEP_COST * (Math.abs(x - gx) + Math.abs((i - x) / size - gy)) - hOff;
             return d > 0 ? d : 0;
         };
         let hn = 0;
@@ -1328,6 +1355,15 @@
             P[j] = from;
             push(j, (gi + hOf(j)) * HEAP_TIE - gi);
         };
+        // A diagonal step from `from` to j past its vertical neighbour a and horizontal neighbour b: both ways round the
+        // corner open (from->a->j and from->b->j), a and b not shut doors and not the cell to walk round.
+        const relaxDiag = (j, a, b, outV, inV, outH, inH) => {
+            const e = eff[from], ea = eff[a], eb = eff[b], ej = eff[j];
+            if ((e & outV) === 0 || (e & outH) === 0 || (ea & inV) === 0 || (ea & outH) === 0 ||
+                (eb & inH) === 0 || (eb & outV) === 0 || (ej & inH) === 0 || (ej & inV) === 0) return;
+            if (a === avoid || b === avoid || (hasDoors && (doorShut(a) || doorShut(b)))) return;
+            relax(j, inH);
+        };
         G[s] = 0;
         P[s] = -1;
         seen[s] = gen;
@@ -1355,18 +1391,26 @@
             }
             const e = eff[i], x = i % size;
             from = i;
-            gi = G[i] + 1;
+            gi = G[i] + STEP_COST;
             if ((e & BIT_DOWN) && i + size < n) relax(i + size, BIT_UP);
             if ((e & BIT_UP) && i >= size) relax(i - size, BIT_DOWN);
             if ((e & BIT_LEFT) && x > 0) relax(i - 1, BIT_RIGHT);
             if ((e & BIT_RIGHT) && x < size - 1) relax(i + 1, BIT_LEFT);
+            if (eight) {
+                gi = G[i] + DIAG_COST;
+                const down = i + size < n, up = i >= size, left = x > 0, right = x < size - 1;
+                if (down && left) relaxDiag(i + size - 1, i + size, i - 1, BIT_DOWN, BIT_UP, BIT_LEFT, BIT_RIGHT);
+                if (down && right) relaxDiag(i + size + 1, i + size, i + 1, BIT_DOWN, BIT_UP, BIT_RIGHT, BIT_LEFT);
+                if (up && left) relaxDiag(i - size - 1, i - size, i - 1, BIT_UP, BIT_DOWN, BIT_LEFT, BIT_RIGHT);
+                if (up && right) relaxDiag(i - size + 1, i - size, i + 1, BIT_UP, BIT_DOWN, BIT_RIGHT, BIT_LEFT);
+            }
         }
         res.expanded = expanded;
         let end = found;
         if (end < 0) {
             if (!capped) return done("no path"); // same region, but a door shut to this unit or the cell to walk round closes it
             // A partial plan must bring the unit at least 2 cells closer, or it would step, search again and get nowhere.
-            if (!opts.allowPartial || hOf(s) - bestH < 2) return done("too far to plan");
+            if (!opts.allowPartial || hOf(s) - bestH < 2 * STEP_COST) return done("too far to plan");
             end = best;
             res.partial = true;
         }
@@ -1448,23 +1492,34 @@
         }
     }
 
+    // The direction (numpad 1-9) of a one-cell step, 0 when (nx, ny) isn't next to (x, y).
+    const DIR_OF = [7, 8, 9, 4, 0, 6, 1, 2, 3]; // by (dy + 1) * 3 + (dx + 1)
     const dirTo = (x, y, nx, ny) => {
-        if (nx === x) return ny === y + 1 ? 2 : ny === y - 1 ? 8 : 0;
-        if (ny === y) return nx === x + 1 ? 6 : nx === x - 1 ? 4 : 0;
-        return 0;
+        const dx = nx - x, dy = ny - y;
+        return dx < -1 || dx > 1 || dy < -1 || dy > 1 ? 0 : DIR_OF[(dy + 1) * 3 + dx + 1];
     };
+    const isDiag = d => d === 1 || d === 3 || d === 7 || d === 9;
     const BIT_OUT = { 2: BIT_DOWN, 4: BIT_LEFT, 6: BIT_RIGHT, 8: BIT_UP };
     const BIT_IN = { 2: BIT_UP, 4: BIT_RIGHT, 6: BIT_LEFT, 8: BIT_DOWN };
 
-    // Can the unit step from cell i to cell j (direction d) right now, by the grid (units aside)?
+    // Can the unit step from cell i to cell j (direction d) right now, by the grid (units aside)? A diagonal needs both
+    // ways round its corner open and neither corner cell a shut door (the planner's rule).
     function stepOpen(u, i, j, d) {
         const { map, flags } = areaMapOf(u.area.x, u.area.y);
         const g = gridOf(map, flags);
-        if ((g.eff[i] & BIT_OUT[d]) === 0 || (g.eff[j] & BIT_IN[d]) === 0) return false;
+        const size = g.size, eff = g.eff;
+        const cells = [i, j];
+        if (isDiag(d)) {
+            const h = d === 1 || d === 7 ? 4 : 6, v = d === 1 || d === 3 ? 2 : 8;
+            const a = i + (v === 2 ? size : -size), b = i + (h === 6 ? 1 : -1);
+            if ((eff[i] & BIT_OUT[v]) === 0 || (eff[a] & BIT_IN[v]) === 0 || (eff[a] & BIT_OUT[h]) === 0 || (eff[j] & BIT_IN[h]) === 0 ||
+                (eff[i] & BIT_OUT[h]) === 0 || (eff[b] & BIT_IN[h]) === 0 || (eff[b] & BIT_OUT[v]) === 0 || (eff[j] & BIT_IN[v]) === 0) return false;
+            cells.push(a, b);
+        } else if ((eff[i] & BIT_OUT[d]) === 0 || (eff[j] & BIT_IN[d]) === 0) return false;
         const D = typeTable.doors;
         if (D) {
-            const tf = typeTable.flags, size = g.size;
-            for (const c of [i, j]) {
+            const tf = typeTable.flags;
+            for (const c of cells) {
                 if ((tf[g.objects[c]] & T_DOOR) && !D.canUnitPass(u, D.at(u.area, c % size, (c - (c % size)) / size))) return false;
             }
         }
@@ -1510,22 +1565,35 @@
             if (!again) stepAlongPath(u, ev, true);
             return;
         }
-        if (ev.isCollidedWithCharacters(nx, ny)) {
-            // Someone stands in the way: wait for them, then walk round them (or give up when they stand on the goal).
-            ev.setDirection(d);
+        // Someone stands in the way (on the next cell, or on both corners of a diagonal step): wait for them, then walk
+        // round them (or give up when they stand on the goal). Someone on one corner of a diagonal: go round by the other
+        // corner (two straight steps; the path cell is the second).
+        const diag = isDiag(d);
+        let blockedAt = ev.isCollidedWithCharacters(nx, ny) ? next : -1, viaCorner = 0;
+        if (blockedAt < 0 && diag) {
+            const takenH = ev.isCollidedWithCharacters(nx, ev.y), takenV = ev.isCollidedWithCharacters(ev.x, ny);
+            if (takenH && takenV) blockedAt = ev.y * size + nx;
+            else if (takenH) viaCorner = ny > ev.y ? 2 : 8;
+            else if (takenV) viaCorner = nx > ev.x ? 6 : 4;
+        }
+        if (blockedAt >= 0) {
+            if (ev.setDir8) ev.setDir8(d);
+            else ev.setDirection(d);
             pathStats.waitFrames++;
             if (++p.wait <= PATHS.waitFrames) return;
             p.wait = 0;
-            if (!p.partial && p.i === p.cells.length - 1) return blockUnit(u, "goal occupied");
-            p.avoid = next;
+            if (blockedAt === next && !p.partial && p.i === p.cells.length - 1) return blockUnit(u, "goal occupied");
+            p.avoid = blockedAt;
             p.stale = true;
             pathStats.detours++;
             return;
         }
         p.wait = 0;
-        ev.moveStraight(d);
+        if (viaCorner) ev.moveStraight(viaCorner);
+        else if (diag) ev.moveDiagonally(nx > ev.x ? 6 : 4, ny > ev.y ? 2 : 8);
+        else ev.moveStraight(d);
         if (ev.isMovementSucceeded()) {
-            p.i++;
+            if (!viaCorner) p.i++;
             p.fails = 0;
             u.stuckFrames = 0;
         } else if (++p.fails >= PATHS.maxStepFails) {
@@ -1537,8 +1605,10 @@
     }
 
     /**
-     * A path in one area from (sx, sy) to (gx, gy): [{x, y}, ...] after the start, ending at the goal, or null.
-     * A goal cell nobody can stand on ends at its nearest reachable open 4-neighbour. [] when already there.
+     * A path in one area from (sx, sy) to (gx, gy): [{x, y}, ...] after the start, ending at the goal, or null. Steps are
+     * 8-way (diagonals never across a blocked corner; 4-way with UF_Movement8D's FourWay). A goal cell nobody can stand
+     * on ends at its nearest reachable open neighbour (4-neighbours; in 8-way also diagonal ones whose two cells between
+     * them and the goal are open). [] when already there.
      * opts: { unit (doors let their faction through), maxNodes (default 12000), avoid: {x, y} (a cell to walk
      * round), allowPartial (capped searches return the part toward the goal, marked path.partial) }.
      * World.lastPath says what the search did: { reason, ms, expanded, length, partial }.
@@ -1749,6 +1819,200 @@
         if (window.UF.Test && UF.Test.active) registerChecks();
     };
 
+    // 8-way (VISION V3, 2026-09-19): an 8-row scratch sheet (facings S, SW, W, NW, N, NE, E, SE; each frame a body with a
+    // white nose on the side it faces and the facing's name), made in memory like the anim suite's (never a file).
+    const FACINGS8 = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
+    const NAME8 = { 1: "SW", 2: "S", 3: "SE", 4: "W", 6: "E", 7: "NW", 8: "N", 9: "NE" };
+    const DIR8_SHEET = "$TEST_Dir8Body";
+    const dir8SheetUrl = () => "img/characters/" + Utils.encodeURI(DIR8_SHEET) + ".png";
+    function makeDir8Sheet() {
+        const A = window.UF && UF.Anim;
+        if (!A || typeof A.setSidecar !== "function") return false;
+        const FW = 48, b = new Bitmap(20 * FW, 8 * FW);
+        const vec = { S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1], N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1] };
+        const colour = c => (c === 0 || c >= 18 ? "#9aa0a6" : c <= 3 ? "#3f7fd0" : c <= 6 ? "#e08a1e" : c === 7 ? "#8a5a2b" : c <= 10 ? "#d23c3c" : c <= 13 ? "#8e44ad" : c === 14 ? "#ff7fbf" : "#6b1010");
+        b.fontSize = 12;
+        for (let r = 0; r < 8; r++) {
+            const [vx, vy] = vec[FACINGS8[r]];
+            for (let c = 0; c < 20; c++) {
+                const x = c * FW, y = r * FW;
+                b.fillRect(x + 16, y + 16, 16, 30, colour(c));
+                b.fillRect(x + 20 + vx * 12, y + 27 + vy * 12, 8, 8, "#ffffff");
+                b.drawText(FACINGS8[r], x, y, FW, 14, "center");
+            }
+        }
+        ImageManager._cache[dir8SheetUrl()] = b;
+        A.setSidecar(DIR8_SHEET, { frameWidth: FW, frameHeight: FW, facings: FACINGS8.slice(), frameMs: 150,
+            animations: { stand: [0], walk: [1, 2, 3], work: [4, 5, 6], carry: [7], attack: [8, 9, 10], cast: [11, 12, 13], hurt: [14], death: [15, 16, 17], idle: [18, 19] } });
+        return true;
+    }
+    function dropDir8Sheet() {
+        const A = window.UF && UF.Anim;
+        delete ImageManager._cache[dir8SheetUrl()];
+        if (A && typeof A.setSidecar === "function") A.setSidecar(DIR8_SHEET, null);
+    }
+
+    // On the cleared test site (27x27 cells round (cx, cy), all walkable ground):
+    // - TEST_diag8 (the 8-row sheet, starting facing S) walks 8 cells north-east and TEST_diag4 (stock People1, 4 rows,
+    //   starting facing N) 8 cells south-east over open ground: every step diagonal, each step faced (dir8), the row drawn
+    //   that facing's row on the 8-row sheet and the horizontal side (E) on the stock sheet.
+    // - TEST_rounder walks from just north of a line of 7 trees to just south of it: round an end, never a diagonal
+    //   step with a tree on a corner, and its plan has none either.
+    // - TEST_chopper (8-row) chops a tree from the south-west (the stand UF_Jobs picks for it): it faces NE and draws the
+    //   NE row of its work frames; TEST_striker attacks a unit to its south-west (UF.Combat.playAttackAnimation) and
+    //   faces SW on its attack frames; TEST_caster casts at a unit 3 east and 2 south of it (data.casting.targetId) and
+    //   faces SE on its cast frames.
+    async function eightWayChecks(t, W, area, cx, cy, blocksHere) {
+        const O = window.UF.Objects, J = window.UF.Jobs, A = window.UF.Anim, C = window.UF.Combat;
+        const treeType = O.typeId("oak") || O.typeId("pine");
+        const eightWay = !fourWay();
+        const sheet8 = makeDir8Sheet();
+        const img8 = sheet8 ? { characterName: DIR8_SHEET, characterIndex: 0 } : { characterName: "People1", characterIndex: 6 };
+        const size = W.state.size;
+        const out = { lineY: cy + 4, lineX0: cx - 1, lineX1: cx + 5, cuts: [], planCuts: 0, planDiagonals: 0, planLen: -1, rounderArrived: false, roundedEnd: false, rounderTrail: [], rounderDiag: 0 };
+        const placedTrees = [];
+        const putTree = (x, y) => { W.setObject(area.x, area.y, x, y, treeType); placedTrees.push({ x, y }); };
+        for (let x = out.lineX0; x <= out.lineX1; x++) putTree(x, out.lineY);
+        const tree = { x: cx + 9, y: cy + 5 };
+        putTree(tree.x, tree.y);
+        const added = [];
+        const add = (name, img, x, y, dir, data) => {
+            const u = W.addUnit({ name, image: img, area, x, y, dir, exact: true, data: Object.assign({ kind: "test", inventory: [], equipment: {} }, data || {}) });
+            added.push(u);
+            return u;
+        };
+        const d8 = add("TEST_diag8", img8, cx - 12, cy + 4, 2);
+        const d4 = add("TEST_diag4", { characterName: "People1", characterIndex: 0 }, cx + 2, cy - 8, 8);
+        const rounder = add("TEST_rounder", { characterName: "People1", characterIndex: 3 }, cx + 2, cy + 2, 2);
+        const chopper = add("TEST_chopper", img8, cx + 6, cy + 8, 2);
+        const striker = add("TEST_striker", img8, cx - 8, cy + 7, 2);
+        const struck = add("TEST_struck", { characterName: "People1", characterIndex: 5 }, cx - 9, cy + 8, 2);
+        const caster = add("TEST_caster", img8, cx - 6, cy + 5, 2);
+        const castAt = add("TEST_cast_target", { characterName: "People1", characterIndex: 4 }, cx - 3, cy + 7, 2);
+        await t.waitFrames(3);
+        const plan = W.findPath(area, rounder.x, rounder.y, cx + 2, cy + 6, { unit: rounder });
+        if (plan) {
+            out.planLen = plan.length;
+            let px = rounder.x, py = rounder.y;
+            for (const c of plan) {
+                if (c.x !== px && c.y !== py) {
+                    out.planDiagonals++;
+                    if (blocksHere(c.x, py) || blocksHere(px, c.y)) out.planCuts++;
+                }
+                px = c.x;
+                py = c.y;
+            }
+        }
+        const chop = J && J.create ? J.create({ type: "chop", target: { area, x: tree.x, y: tree.y }, owner: chopper.id }) : null;
+        const goals = new Map([[d8.id, { x: cx - 4, y: cy - 4 }], [d4.id, { x: cx + 10, y: cy }], [rounder.id, { x: cx + 2, y: cy + 6 }]]);
+        for (const [id, g] of goals) W.sendUnit(id, { area, x: g.x, y: g.y });
+        // Each frame: steps (diagonal or not, corner cells), the facing (dir8), and the row the sprite drew.
+        const walk = new Map([d8, d4, rounder, chopper].map(u => [u.id, { steps: 0, diag: 0, wrongStepFacing: 0, rowChecked: 0, rowWrong: [], last: { x: u.x, y: u.y }, lastDir8: 0, trail: [{ x: u.x, y: u.y }] }])); // from the start cell: the first step can begin in the frame the goal is set
+        const rowWant = (u, ev) => (u.image.characterName === DIR8_SHEET ? FACINGS8.indexOf(NAME8[ev.dir8()]) : ((window.UF_Dir8 ? UF_Dir8.project4(ev.dir8()) : ev.direction()) - 2) >> 1);
+        const sampleWalk = () => {
+            for (const u of [d8, d4, rounder, chopper]) {
+                const ev = W.eventOf(u.id), w = walk.get(u.id);
+                if (!ev) continue;
+                const here = { x: ev.x, y: ev.y };
+                if (w.last.x !== here.x || w.last.y !== here.y) {
+                    w.steps++;
+                    w.trail.push(here);
+                    const sdx = here.x - w.last.x, sdy = here.y - w.last.y;
+                    const want = window.UF_Dir8 ? UF_Dir8.combine(sdx > 0 ? 6 : sdx < 0 ? 4 : 0, sdy > 0 ? 2 : sdy < 0 ? 8 : 0) : 0;
+                    if (ev.dir8 && ev.dir8() !== want) w.wrongStepFacing++;
+                    if (sdx !== 0 && sdy !== 0) {
+                        w.diag++;
+                        if (blocksHere(here.x, w.last.y) || blocksHere(w.last.x, here.y)) out.cuts.push(`${u.name} ${w.last.x},${w.last.y} -> ${here.x},${here.y}`);
+                    }
+                }
+                w.last = here;
+                // The row drawn, once the facing has held for a frame (the sprite draws after the map update).
+                const fr = A && A.frameOf ? A.frameOf(u) : null;
+                const d = ev.dir8 ? ev.dir8() : ev.direction();
+                if (fr && d === w.lastDir8) {
+                    w.rowChecked++;
+                    const want = rowWant(u, ev);
+                    if (fr.row !== want && w.rowWrong.length < 6) w.rowWrong.push(`${NAME8[d]}: row ${fr.row} (want ${want})`);
+                }
+                w.lastDir8 = d;
+            }
+            // The chopper, once at work for 2 frames: its facing and the frame drawn (before any other turn).
+            if (chop && !chopSeen && chop.state === "work") {
+                const ev = W.eventOf(chopper.id), fr = A && A.frameOf ? A.frameOf(chopper) : null;
+                if (++chopFrames >= 2) chopSeen = { d8: ev ? ev.dir8() : 0, want: fr ? fr.want : "", row: fr ? fr.row : -1, stand: chop.stand ? `(${chop.stand.x},${chop.stand.y})` : "none" };
+            }
+        };
+        let shot = false, chopSeen = null, chopFrames = 0;
+        const f0 = Graphics.frameCount;
+        // The screenshot at zoom 2/3 (level 1): the whole fixture (23 x 18 cells) in view.
+        const zoomWas = UF.Camera ? UF.Camera.level() : null;
+        if (UF.Camera) UF.Camera.setLevel(1);
+        $gamePlayer.locate(cx - 1, cy + 1);
+        await t.waitUntil(() => {
+            sampleWalk();
+            if (!shot && Graphics.frameCount - f0 >= 75) {
+                t.screenshot("eight_way");
+                shot = true;
+            }
+            return [d8, d4, rounder].every(u => !u.goal) && (!chop || !!chopSeen || chop.state === "done" || chop.state === "failed") && Graphics.frameCount - f0 >= 80;
+        }, 30000, "the 8-way walkers to arrive and the chopper to work").catch(() => {});
+        const at = (u, g) => u.x === g.x && u.y === g.y;
+        const W8 = walk.get(d8.id), W4 = walk.get(d4.id), WR = walk.get(rounder.id), WC = walk.get(chopper.id);
+        out.rounderArrived = at(rounder, goals.get(rounder.id));
+        out.rounderTrail = WR.trail;
+        out.rounderDiag = WR.diag;
+        out.roundedEnd = WR.trail.some(c => c.x < out.lineX0 || c.x > out.lineX1);
+        out.rounderFrom = `(${cx + 2},${cy + 2})`;
+        out.rounderTo = `(${cx + 2},${cy + 6})`;
+        const ev8 = W.eventOf(d8.id), ev4 = W.eventOf(d4.id);
+        const walkText = (u, w, name) => `${name} ${at(u, goals.get(u.id)) ? "arrived" : `at (${u.x},${u.y}), not arrived`}: ${w.steps} steps, ${w.diag} diagonal`;
+        t.check("eight_way_steps", eightWay && at(d8, goals.get(d8.id)) && at(d4, goals.get(d4.id)) && W8.steps === 8 && W8.diag === 8 && W4.steps === 8 && W4.diag === 8,
+            `FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"}; open ground, 8 cells each way: ${walkText(d8, W8, "TEST_diag8 north-east")}; ${walkText(d4, W4, "TEST_diag4 south-east")} (want 8 of 8 diagonal each); TEST_rounder ${WR.diag} diagonal of ${WR.steps}`);
+
+        // Facing on the walk: every step faced (dir8), rows drawn; after the walk, NE on the 8-row sheet and E (the
+        // horizontal side of SE) on the stock sheet; RPG Maker alone would have turned it S (vertical) from N.
+        const end8 = ev8 ? { d8: ev8.dir8(), row: A && A.frameOf(d8) ? A.frameOf(d8).row : -1, own: A && A.frameOf(d8) ? A.frameOf(d8).own : false } : null;
+        const end4 = ev4 ? { d8: ev4.dir8(), dir: ev4.direction(), row: A && A.frameOf(d4) ? A.frameOf(d4).row : -1 } : null;
+        const stepFacing = W8.wrongStepFacing + W4.wrongStepFacing + WR.wrongStepFacing;
+        const rowsWrong = W8.rowWrong.length + W4.rowWrong.length + WR.rowWrong.length;
+        t.check("faces_eight_ways", sheet8 && !!end8 && !!end4 && stepFacing === 0 && rowsWrong === 0 && W8.rowChecked > 20 && W4.rowChecked > 20 &&
+            end8.d8 === 9 && end8.row === FACINGS8.indexOf("NE") && end8.own && end4.d8 === 3 && end4.dir === 6 && end4.row === 2,
+            `8-row scratch sheet ${sheet8 ? "made" : "NOT made (no UF.Anim)"}; steps not facing their direction ${stepFacing}; rows checked ${W8.rowChecked} (8-row) / ${W4.rowChecked} (stock) / ${WR.rowChecked} (rounder, stock), wrong ${rowsWrong}${rowsWrong ? ": " + [...W8.rowWrong, ...W4.rowWrong, ...WR.rowWrong].slice(0, 4).join(" | ") : ""}; ` +
+            `TEST_diag8 after walking NE: dir8 ${end8 ? `${end8.d8} (${NAME8[end8.d8]}), row ${end8.row} drawn by UF_Anim ${end8.own}` : "no event"} (want 9, row ${FACINGS8.indexOf("NE")}); ` +
+            `TEST_diag4 (stock) after walking SE from facing N: dir8 ${end4 ? `${end4.d8}, direction ${end4.dir}, row ${end4.row}` : "no event"} (want 3, 6, row 2)`);
+
+        // Facing targets: the chopper at work, a strike, a cast.
+        const chopState = chop ? chop.state : "no UF.Jobs";
+        const chopStand = chopSeen ? chopSeen.stand : chop && chop.stand ? `(${chop.stand.x},${chop.stand.y})` : "none";
+        const chopOk = !!chopSeen && chopSeen.d8 === 9 && chopSeen.want === "work" && chopSeen.row === FACINGS8.indexOf("NE") && chopSeen.stand === `(${tree.x - 1},${tree.y + 1})`;
+        if (!shot) t.screenshot("eight_way");
+        if (chop && J.cancel && (chop.state === "work" || chop.state === "travel")) J.cancel(chop.id, "test over");
+        let strikeOk = false, strikeText = "no UF.Combat";
+        const evS = W.eventOf(striker.id);
+        if (C && typeof C.playAttackAnimation === "function" && evS) {
+            C.playAttackAnimation(striker, struck);
+            await t.waitFrames(3);
+            const fr = A && A.frameOf ? A.frameOf(striker) : null;
+            strikeOk = evS.dir8() === 1 && !!fr && fr.want === "attack" && fr.row === FACINGS8.indexOf("SW");
+            strikeText = `dir8 ${evS.dir8()} (${NAME8[evS.dir8()]}), ${fr ? `${fr.want} row ${fr.row}` : "no frame"} (want 1, attack row ${FACINGS8.indexOf("SW")})`;
+        }
+        caster.data.casting = { targetId: castAt.id };
+        await t.waitFrames(3);
+        const evK = W.eventOf(caster.id);
+        const frK = A && A.frameOf ? A.frameOf(caster) : null;
+        const castOk = !!evK && evK.dir8() === 3 && !!frK && frK.want === "cast" && frK.row === FACINGS8.indexOf("SE");
+        t.check("faces_targets", eightWay && chopOk && strikeOk && castOk,
+            `TEST_chopper from (${cx + 6},${cy + 8}) to chop the tree at (${tree.x},${tree.y}): job now ${chopState}, stand ${chopStand} (want (${tree.x - 1},${tree.y + 1}), south-west), ` +
+            `at work: ${chopSeen ? `dir8 ${chopSeen.d8} (${NAME8[chopSeen.d8]}), ${chopSeen.want} row ${chopSeen.row}` : "never seen working"} (want 9, work row ${FACINGS8.indexOf("NE")}); ` +
+            `TEST_striker attacking the unit south-west of it: ${strikeText}; TEST_caster casting at a unit 3 east, 2 south: dir8 ${evK ? `${evK.dir8()} (${NAME8[evK.dir8()]})` : "no event"}, ${frK ? `${frK.want} row ${frK.row}` : "no frame"} (want 3, cast row ${FACINGS8.indexOf("SE")})`);
+
+        for (const u of added) W.removeUnit(u.id);
+        for (const p of placedTrees) W.setObject(area.x, area.y, p.x, p.y, 0);
+        dropDir8Sheet();
+        if (UF.Camera && zoomWas !== null) UF.Camera.setLevel(zoomWas);
+        return out;
+    }
+
     // Paths (2026-09-19): round a walled ring through its gap, a blocked goal cell, "no path" within 60 frames, a wall
     // going up on the path mid-walk, the planner's budget, and 60 s of play without a walker stepping onto a blocking
     // cell (with World.update's cost per map update over the same window).
@@ -1768,7 +2032,7 @@
         // Watch every unit on screen from here on (at least 60 s): its steps, and steps by walkers (units without
         // data.through) that end on a blocking cell (UF.Objects.blocks, or water that isn't a bridge). World.update is
         // timed over the same window.
-        const watch = { steps: 0, jumps: 0, bad: [], updates: 0, ms: 0, maxMs: 0, units: new Set(), t0: performance.now(), testMs: 0 };
+        const watch = { steps: 0, diagonal: 0, jumps: 0, bad: [], cornerCuts: [], updates: 0, ms: 0, maxMs: 0, units: new Set(), t0: performance.now(), testMs: 0 };
         const last = new Map();
         const realUpdate = W.update;
         W.update = function() {
@@ -1783,10 +2047,17 @@
                 if (!ev) continue;
                 const p = last.get(u.id);
                 if (p && (p.x !== ev.x || p.y !== ev.y)) {
-                    if (Math.abs(p.x - ev.x) + Math.abs(p.y - ev.y) === 1) {
+                    const adx = Math.abs(p.x - ev.x), ady = Math.abs(p.y - ev.y);
+                    if (adx <= 1 && ady <= 1) {
                         watch.steps++;
                         watch.units.add(u.id);
-                        if (!(u.data && u.data.through) && blocksHere(ev.x, ev.y)) watch.bad.push(`${u.name} (${kindOf(u)}) ${p.x},${p.y} -> ${ev.x},${ev.y}`);
+                        const walker = !(u.data && u.data.through);
+                        if (walker && blocksHere(ev.x, ev.y)) watch.bad.push(`${u.name} (${kindOf(u)}) ${p.x},${p.y} -> ${ev.x},${ev.y}`);
+                        if (adx === 1 && ady === 1) {
+                            // 8-way: a diagonal step past a blocking corner cell (a tree, a wall, water) cuts the corner.
+                            watch.diagonal++;
+                            if (walker && (blocksHere(ev.x, p.y) || blocksHere(p.x, ev.y))) watch.cornerCuts.push(`${u.name} (${kindOf(u)}) ${p.x},${p.y} -> ${ev.x},${ev.y}`);
+                        }
                     } else watch.jumps++;
                 }
                 last.set(u.id, { x: ev.x, y: ev.y });
@@ -2020,7 +2291,7 @@
         await t.waitFrames(2);
         const goalC = { x: cx + 7, y: cy };
         const replans0 = W.pathStats().replans;
-        const trailC = [];
+        const trailC = [cellOf(walker.x, walker.y)];
         let placed = null, aheadWhenPlaced = 0, onPlaced = 0;
         W.sendUnit(walker.id, { area, x: goalC.x, y: goalC.y });
         await t.waitUntil(() => {
@@ -2049,6 +2320,7 @@
             `steps onto the new wall: ${onPlaced}; re-plans counted (all units) ${replans}; gave up: ${gaveUp(walker.id)}`);
         if (placed) W.setObject(area.x, area.y, placed.x, placed.y, 0);
         W.removeUnit(walker.id);
+        const eight = await eightWayChecks(t, W, area, cx, cy, blocksHere);
         let restored = 0;
         for (const s of saved) {
             if (W.units().some(u => sameArea(u.area, area) && u.x === s.x && u.y === s.y)) continue;
@@ -2101,13 +2373,20 @@
             if (n) gaveUpAll[k] = n;
         }
         t.check("no_wall_steps", watch.steps > 0 && watch.bad.length === 0,
-            `${secs.toFixed(1)} s of play, ${watch.updates} map updates: ${watch.steps} one-cell steps by ${watch.units.size} units (${watch.jumps} moves of more than one cell), ` +
+            `${secs.toFixed(1)} s of play, ${watch.updates} map updates: ${watch.steps} one-cell steps (${watch.diagonal} diagonal) by ${watch.units.size} units (${watch.jumps} moves of more than one cell), ` +
             `${watch.bad.length} steps by walkers onto blocking cells${watch.bad.length ? ": " + watch.bad.slice(0, 6).join(" | ") : ""}; ` +
             `planner in this window: ${plans} plans (${ps.found - stats0.found} found, ${ps.partial - stats0.partial} partial, ${ps.none - stats0.none} none), ` +
             `${plans ? (planMs / plans).toFixed(3) : "0"} ms average, p95 ${ps.p95Ms.toFixed(3)} ms and max ${ps.maxMs.toFixed(2)} ms (last 512 / all plans), ` +
             `cells expanded ${plans ? (planExp / plans).toFixed(0) : 0} average, median ${ps.medianExpanded}; queue peak ${ps.queuePeak}, ${ps.queuedTotal - stats0.queuedTotal} queued; ` +
             `re-plans ${ps.replans - stats0.replans}, detours round units ${ps.detours - stats0.detours}; gave up: ${JSON.stringify(gaveUpAll)}; ` +
             `region map rebuilt ${ps.regionBuilds - stats0.regionBuilds}x (${ps.regionMsAvg.toFixed(2)} ms average); slowest plan so far ${JSON.stringify(ps.maxPlan)}; ${restored} of ${saved.length} test-site objects put back`);
+        // 8-way: no walker stepped diagonally past a blocking corner cell, in the tree-line fixture (its walk and its plan)
+        // or anywhere in the 60 s of play.
+        t.check("no_corner_cut", !!eight && eight.rounderArrived && eight.roundedEnd && eight.cuts.length === 0 && eight.planCuts === 0 && eight.planDiagonals > 0 && watch.cornerCuts.length === 0,
+            eight ? `tree line of 7 at row ${eight.lineY} (x ${eight.lineX0}-${eight.lineX1}); TEST_rounder ${eight.rounderFrom} -> ${eight.rounderTo}: ${eight.rounderArrived ? "arrived" : "NOT arrived"} in ${eight.rounderTrail.length - 1} steps (${eight.rounderDiag} diagonal), round an end of the line ${eight.roundedEnd}; ` +
+                `its plan ${eight.planLen} cells, ${eight.planDiagonals} diagonal, ${eight.planCuts} past a tree corner; diagonal steps past a blocking corner in the fixture ${eight.cuts.length}${eight.cuts.length ? ": " + eight.cuts.slice(0, 4).join(" | ") : ""}; ` +
+                `in ${secs.toFixed(1)} s of play ${watch.diagonal} diagonal steps, ${watch.cornerCuts.length} past a blocking corner by walkers${watch.cornerCuts.length ? ": " + watch.cornerCuts.slice(0, 6).join(" | ") : ""}`
+                : "the 8-way fixtures did not run");
         const falseNoPath = truth.filter(r => r.reached);
         t.check("no_path_is_true", truth.length > 0 && falseNoPath.length === 0,
             `${truth.length} "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): ${falseNoPath.length} could reach the goal after all; ` +
@@ -2554,19 +2833,18 @@
             const sprite = ev && SceneManager._scene._spriteset._characterSprites.find(s => s._character === ev);
             t.check("unit_enters_view", !!ev && !!sprite,
                 ev ? `event ${ev.eventId()} at (${ev.x},${ev.y}), sprite ${sprite ? "created" : "MISSING"}` : `still in area (${u.area.x},${u.area.y}) at (${u.x},${u.y})`);
-            // 4-way: the event never faces or steps diagonally. And it faces every step it takes.
+            // It faces every step it takes (a diagonal step: its diagonal, dir8). 8-way steps: eight_way_steps below.
             let diagonal = 0, facedSteps = 0, wrongFaced = 0;
             const origDiag = ev ? ev.moveDiagonally : null, origStraight = ev ? ev.moveStraight : null;
-            if (ev) ev.moveDiagonally = function(h, v) { diagonal++; return origDiag.call(this, h, v); };
+            if (ev) ev.moveDiagonally = function(h, v) { origDiag.call(this, h, v); if (this.isMovementSucceeded()) { facedSteps++; diagonal++; if (this.dir8() !== UF_Dir8.combine(h, v)) wrongFaced++; } };
             if (ev) ev.moveStraight = function(d) { origStraight.call(this, d); if (this.isMovementSucceeded()) { facedSteps++; if (this.direction() !== d) wrongFaced++; } };
             await t.waitUntil(() => !u.goal, 14000, "TEST_walker to reach its goal").catch(() => {});
             await t.waitFrames(2);
             if (ev) { ev.moveDiagonally = origDiag; ev.moveStraight = origStraight; }
             t.check("faces_its_steps", facedSteps > 0 && wrongFaced === 0 && (!ev || ev.direction() === 4),
-                `${facedSteps} step(s) taken, ${wrongFaced} not facing the step's direction; facing ${ev ? ev.direction() : "?"} after walking west (want 4)`);
+                `${facedSteps} step(s) taken (${diagonal} diagonal), ${wrongFaced} not facing the step's direction; facing ${ev ? ev.direction() : "?"} after walking west (want 4)`);
             t.check("unit_walks_to_goal", !u.goal && sameArea(u.area, area) && u.x === goalX && u.y === row,
                 `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal (${goalX},${row}) ${u.goal ? "still set" : u.x === goalX && u.y === row ? "reached" : "given up"}`);
-            t.check("four_way_steps", diagonal === 0, `${diagonal} diagonal step(s) on screen (FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"})`);
             await t.waitFrames(10);
             t.screenshot("unit_in_view");
 

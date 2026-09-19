@@ -1,32 +1,39 @@
 //=============================================================================
-// UF_Stance.js - A colored square under every unit's feet: friendly, indifferent, hostile
+// UF_Stance.js - A colored ring under every unit's feet: friendly, indifferent, hostile
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [UF Stance] A colored square under every unit in view: green = friendly, yellow = indifferent, red = hostile (colors from the world catalog).
+ * @plugindesc [UF Stance] A colored ring under every unit in view: green = friendly, yellow = indifferent, red = hostile (colors from the world catalog).
  * @author UF project
  * @base UF_World
  * @orderAfter UF_Factions
  * @orderAfter UF_ColonyOverseer
  *
  * @help
- * The stance of a unit toward your colony (user decision 2026-09-18: colored
- * squares under units by stance):
+ * The stance of a unit toward your colony (VISION V32; circles since the
+ * user's request of 2026-09-19 14:40, squares before):
  *   friendly     your colonists, anything of faction "player", and members
  *                of factions that are allied or friendly with your colony
  *   indifferent  wildlife, and members of neutral factions
  *   hostile      monsters, and members of factions that are hostile to or
  *                at war with your colony
  *
- * Markers are 48x48 squares drawn in code (UF_GenStance_friendly,
- * UF_GenStance_indifferent, UF_GenStance_hostile: a filled square at the
- * catalog's alpha with a 2 px darker outline), placed inside the map's
- * tilemap at z = foot row - 50 (above the ground and the grass on the cell, under the character), one per
- * unit event in view, following the character every frame. A marker goes
- * away when its unit leaves the view or the map, or is transparent. The
- * pair's start events (note contains "<colonist", before UF_Colonists) get a
- * friendly marker too.
+ * Markers are flattened pixel-art ellipses drawn in code pixel by pixel
+ * (UF_GenStance_friendly, UF_GenStance_indifferent, UF_GenStance_hostile):
+ * a filled disc at the catalog's alpha inside a darker rim, 40x20 under a
+ * one-square (48 px) creature and proportionally larger under bigger ones
+ * (80x40 under a 96 px creature). The feet stand in the middle of the ring.
+ * They sit inside the map's tilemap at z = foot row - 50 (above the ground
+ * and the grass on the cell, under the character), one per unit event in
+ * view, following the character every frame. A marker goes away when its
+ * unit leaves the view or the map, or is transparent. The pair's start
+ * events (note contains "<colonist", before UF_Colonists) get a friendly
+ * marker too.
+ *
+ * The selected unit gets a bright iron ring a little larger than its stance
+ * ring (UF_GenSelect, 44x22 per square of footprint, open in the middle),
+ * pulsing by swapping three pre-drawn frames (dim, bright, brightest).
  *
  * Nothing is saved: a stance is read from unit.data and the factions'
  * relations whenever it's asked for.
@@ -40,9 +47,9 @@
 (() => {
     "use strict";
 
-    const SIZE = 48;
+    const SIZE = 48; // one grid square
     // WORLD_ARCHITECTURE §4 (revised 2026-09-18): characters draw at z = their foot pixel row (UF_Perspective25D),
-    // flat "under" objects (grass, stones) at foot row - 100 (UF_Objects), so a square sits at foot row - 50: above
+    // flat "under" objects (grass, stones) at foot row - 100 (UF_Objects), so a marker sits at foot row - 50: above
     // the grass on its cell, behind the person standing on it. Never below the ground layers (z 0 and 4).
     const Z_BELOW_FEET = 50;
     const Z_MIN = 5;
@@ -52,10 +59,25 @@
     const BITMAP_NAMES = { friendly: "UF_GenStance_friendly", indifferent: "UF_GenStance_indifferent", hostile: "UF_GenStance_hostile" };
     const LABELS = { friendly: "Friendly", indifferent: "Indifferent", hostile: "Hostile" };
     const DEFAULTS = { colors: { friendly: "#22c55e", indifferent: "#eab308", hostile: "#ef4444" }, alpha: 0.45 };
-    const OUTLINE = 2;           // px
-    const OUTLINE_DARKEN = 0.55; // outline color = fill color x this
-    const OUTLINE_EXTRA_ALPHA = 0.4; // the outline is more opaque than the fill so the square reads at zoom 1/3
+    const OUTLINE_DARKEN = 0.55; // rim color = fill color x this
+    const OUTLINE_EXTRA_ALPHA = 0.4; // the rim is more opaque than the fill so the ring reads at zoom 1/3
     const VIEW_MARGIN = 1;       // cells beyond the screen edge that still get a marker
+
+    // Ring geometry (VISION V32, revised 2026-09-19 14:40), per square of the creature's footprint. A ring is a
+    // flattened ellipse, twice as wide as tall, as a circle on the ground looks in the flat 3/4 view. Its centre is
+    // CENTER_ABOVE px above the bottom of the cell per square: RPG Maker draws characters 6 px up (shiftY), so a
+    // one-square creature's feet land in the middle of its 40x20 ring, whose bottom row is the cell's last row.
+    const RING = { w: 40, h: 20 };        // stance ring
+    const SELECT_RING = { w: 44, h: 22 }; // selection ring: 2 px wider on each side, 1 px taller, same centre
+    const CENTER_ABOVE = 10;
+    const MAX_CELLS = 4;
+    const rimWidth = cells => 1 + cells;       // stance rim: 2 px at one square, 3 at two
+    const selectBandWidth = cells => 2 + cells; // bright band of the selection ring: 3 px at one square
+    const clampCells = c => Math.max(1, Math.min(MAX_CELLS, Math.round(Number(c) || 1)));
+    const ringSize = cells => ({ w: RING.w * clampCells(cells), h: RING.h * clampCells(cells) });
+    const selectRingSize = cells => ({ w: SELECT_RING.w * clampCells(cells), h: SELECT_RING.h * clampCells(cells) });
+    // anchor.y that puts the ring's centre CENTER_ABOVE px per square above the sprite's y (the foot row)
+    const ringAnchorY = (h, cells) => (CENTER_ABOVE * clampCells(cells) + h / 2) / h;
 
     //-------------------------------------------------------------------------
     // Catalog and colors
@@ -74,7 +96,6 @@
         const n = parseInt(String(hex).replace("#", ""), 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     };
-    const rgba = (rgb, a) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
     const darken = (rgb, f) => rgb.map(v => Math.round(v * f));
 
     //-------------------------------------------------------------------------
@@ -84,12 +105,16 @@
         STANCES,
         Z,
         SIZE,
+        RING,
+        SELECT_RING,
         bitmapNames: BITMAP_NAMES,
         /** false hides every marker (development toggle; not saved). */
         enabled: true
     };
     window.UF = window.UF || {};
     window.UF.Stance = Stance;
+    Stance.ringSize = ringSize;
+    Stance.selectRingSize = selectRingSize;
 
     //-------------------------------------------------------------------------
     // Rules (WORLD_ARCHITECTURE §5.9)
@@ -150,65 +175,150 @@
     };
 
     //-------------------------------------------------------------------------
-    // Generated bitmaps: UF_GenStance_<stance>, 48x48, rebuilt if the catalog colors change
+    // Footprint: how many squares wide the creature is drawn (V44: larger beings use bigger sheets)
 
-    const bitmaps = {};
-    Stance.bitmap = function(stance) {
+    /** Width in px of the frame the character sprite draws (0 while its sheet loads). */
+    function frameWidthOf(sprite) {
+        if (!sprite) return 0;
+        const f = sprite._frame;
+        if (f && f.width > 0) return f.width;
+        const ub = sprite._upperBody; // in a bush RPG Maker draws two half-bodies and gives the sprite a 0-wide frame
+        return ub && ub._frame && ub._frame.width > 0 ? ub._frame.width : 0;
+    }
+    /** Squares of footprint for a character sprite: its drawn frame width / 48, rounded, 1..4 (1 until the sheet loads). */
+    Stance.cellsOf = sprite => {
+        const w = frameWidthOf(sprite);
+        return w > 0 ? clampCells(w / SIZE) : 1;
+    };
+
+    //-------------------------------------------------------------------------
+    // Pixel-art ellipses, built pixel by pixel (no canvas paths, so no anti-aliasing)
+
+    // Depth of every pixel of a w x h ellipse: 0 outside, 1 on the edge (a 4-neighbour is outside), 2 one step in, ...
+    // A pixel is inside when its centre is inside the ellipse. Stepping in by 4-neighbours keeps diagonal runs of a
+    // band one pixel thin per step, the pixel-art way.
+    const depthCache = new Map();
+    function ellipseDepth(w, h) {
+        const key = w * 10000 + h;
+        const hit = depthCache.get(key);
+        if (hit) return hit;
+        const inside = new Uint8Array(w * h), depth = new Int16Array(w * h);
+        const a = w / 2, b = h / 2;
+        for (let y = 0; y < h; y++) {
+            const dy = (y + 0.5 - b) / b;
+            for (let x = 0; x < w; x++) {
+                const dx = (x + 0.5 - a) / a;
+                inside[y * w + x] = dx * dx + dy * dy <= 1 ? 1 : 0;
+            }
+        }
+        const queue = [];
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const i = y * w + x;
+                if (!inside[i]) continue;
+                if (x === 0 || y === 0 || x === w - 1 || y === h - 1 || !inside[i - 1] || !inside[i + 1] || !inside[i - w] || !inside[i + w]) {
+                    depth[i] = 1;
+                    queue.push(i);
+                }
+            }
+        }
+        for (let k = 0; k < queue.length; k++) {
+            const i = queue[k], x = i % w, y = (i - x) / w;
+            const next = [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, y > 0 ? i - w : -1, y < h - 1 ? i + w : -1];
+            for (const j of next) {
+                if (j >= 0 && inside[j] && !depth[j]) {
+                    depth[j] = depth[i] + 1;
+                    queue.push(j);
+                }
+            }
+        }
+        depthCache.set(key, depth);
+        return depth;
+    }
+
+    /** A w x h bitmap: each pixel of the ellipse gets colorAt(depth) = [r, g, b, a] or null (clear). Nearest-neighbour scaling. */
+    function paintEllipse(w, h, colorAt) {
+        const bmp = new Bitmap(w, h);
+        bmp.smooth = false; // stepped edges at zoom 2/3 and 1/3 too, like pixel art
+        const depth = ellipseDepth(w, h);
+        const img = bmp.context.createImageData(w, h);
+        for (let i = 0; i < depth.length; i++) {
+            if (!depth[i]) continue;
+            const c = colorAt(depth[i]);
+            if (c) img.data.set(c, i * 4);
+        }
+        bmp.context.putImageData(img, 0, 0);
+        bmp._baseTexture.update();
+        return bmp;
+    }
+
+    //-------------------------------------------------------------------------
+    // Stance rings: UF_GenStance_<stance>, 40x20 per square of footprint, rebuilt if the catalog colors change.
+    // A filled disc at the catalog alpha inside a rim of the same color x 0.55 at alpha + 0.4 (the square's rules).
+    // Filled rather than a bare ring: at zoom 1/3 a 40x20 ring is 13x7 screen pixels and a 2 px rim falls between
+    // the sampled pixels in places, so the tinted middle is what carries the color there; at zoom 1 the rim gives
+    // the ring its crisp edge and the 45% fill keeps the feet and the ground visible.
+
+    const bitmaps = {}; // bitmaps[stance][cells]
+    Stance.bitmap = function(stance, cells = 1) {
         if (!STANCES.includes(stance)) return null;
+        const c = clampCells(cells);
         const color = colorOf(stance), a = alphaOf();
-        const cached = bitmaps[stance];
+        const byCells = bitmaps[stance] || (bitmaps[stance] = []);
+        const cached = byCells[c];
         if (cached && cached._ufColor === color && cached._ufAlpha === a) return cached;
-        const rgb = hexToRgb(color);
-        const b = new Bitmap(SIZE, SIZE);
-        // Outline first, then a cleared inner square filled at the catalog alpha, so the two never blend.
-        b.fillRect(0, 0, SIZE, SIZE, rgba(darken(rgb, OUTLINE_DARKEN), Math.min(1, a + OUTLINE_EXTRA_ALPHA)));
-        b.clearRect(OUTLINE, OUTLINE, SIZE - 2 * OUTLINE, SIZE - 2 * OUTLINE);
-        b.fillRect(OUTLINE, OUTLINE, SIZE - 2 * OUTLINE, SIZE - 2 * OUTLINE, rgba(rgb, a));
+        const rgb = hexToRgb(color), rim = darken(rgb, OUTLINE_DARKEN);
+        const fill = [rgb[0], rgb[1], rgb[2], Math.round(a * 255)];
+        const edge = [rim[0], rim[1], rim[2], Math.round(Math.min(1, a + OUTLINE_EXTRA_ALPHA) * 255)];
+        const R = rimWidth(c), size = ringSize(c);
+        const b = paintEllipse(size.w, size.h, depth => (depth <= R ? edge : fill));
         b._ufName = BITMAP_NAMES[stance];
         b._ufColor = color;
         b._ufAlpha = a;
-        bitmaps[stance] = b;
+        b._ufCells = c;
+        b._ufRim = R;
+        byCells[c] = b;
         return b;
     };
 
     //-------------------------------------------------------------------------
-    // The selection marker (user request 2026-09-18): four iron corners around the selected unit's feet,
-    // drawn just above its stance square and below the unit. Generated (UF_GenSelect) until AR-031 delivers art.
+    // The selection ring (user 2026-09-18 Shining Force style; a circle since 2026-09-19 14:40): a bold iron ring,
+    // a little larger than the stance ring and on the same centre, open in the middle so the stance color shows.
+    // Bands from the outside: 1 px dark edge, a bright band (3 px at one square), 1 px dark edge. It pulses by
+    // swapping three pre-drawn frames (the band dim, bright, brightest; played 0 1 2 1), not by code-made opacity
+    // (ART_STANDARD F7: motion is frames). Colors from art/palette/uf.hex. Drawn at its unit's stance ring z + 1,
+    // under the sprite. Generated (UF_GenSelect) until AR-031 delivers ring art.
 
-    // Shining Force style (user, 2026-09-18): a bright square outline under the target's feet with heavier corners,
-    // pulsing. It sits on the stance square (z + 1) and under the sprite.
     const SELECT_NAME = "UF_GenSelect";
-    const SELECT_LINE = 2, SELECT_CORNER = 10, SELECT_CORNER_THICK = 4;
-    const IRON = [139, 144, 153], IRON_DARK = [43, 46, 52], IRON_LIGHT = [232, 236, 240];
-    const PULSE_MIN = 170, PULSE_MAX = 255, PULSE_FRAMES = 40;
-    let selectBitmap = null;
-    Stance.selectBitmap = function() {
-        if (selectBitmap) return selectBitmap;
-        const b = new Bitmap(SIZE, SIZE);
-        const fill = (x, y, w, h, c) => b.fillRect(x, y, w, h, rgba(c, 1));
-        // Outline square: a dark 1 px border, the light line inside it, the middle left clear.
-        fill(0, 0, SIZE, SIZE, IRON_DARK);
-        b.clearRect(1, 1, SIZE - 2, SIZE - 2);
-        fill(1, 1, SIZE - 2, SIZE - 2, IRON_LIGHT);
-        b.clearRect(1 + SELECT_LINE, 1 + SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE);
-        fill(1 + SELECT_LINE, 1 + SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, IRON_DARK);
-        b.clearRect(2 + SELECT_LINE, 2 + SELECT_LINE, SIZE - 4 - 2 * SELECT_LINE, SIZE - 4 - 2 * SELECT_LINE);
-        // Heavier iron corners over the line.
-        const L = SELECT_CORNER, T = SELECT_CORNER_THICK;
-        for (const [cx, cy, dx, dy] of [[0, 0, 1, 1], [SIZE, 0, -1, 1], [0, SIZE, 1, -1], [SIZE, SIZE, -1, -1]]) {
-            const x0 = dx > 0 ? cx : cx - L, y0 = dy > 0 ? cy : cy - T;
-            fill(x0, y0, L, T, IRON);                                     // horizontal arm
-            fill(dx > 0 ? cx : cx - T, dy > 0 ? cy : cy - L, T, L, IRON);  // vertical arm
-            fill(dx > 0 ? cx : cx - L, dy > 0 ? cy : cy - 1, L, 1, IRON_LIGHT); // light edge on the outside
-            fill(dx > 0 ? cx : cx - 1, dy > 0 ? cy : cy - L, 1, L, IRON_LIGHT);
-        }
+    const SELECT_EDGE = [53, 53, 53, 255]; // uf.hex #353535
+    const SELECT_BANDS = [[158, 158, 158, 255], [223, 223, 223, 255], [255, 255, 255, 255]]; // #9E9E9E, #DFDFDF, #FFFFFF
+    const SELECT_SEQUENCE = [0, 1, 2, 1];
+    const SELECT_STEP = 10; // frames per pulse step: a 40-frame cycle, like the old square's pulse
+    const PULSE_FRAMES = SELECT_SEQUENCE.length * SELECT_STEP;
+    const selectBitmaps = []; // selectBitmaps[cells][frame]
+
+    /** Index of the selection ring frame (0 dim, 1 bright, 2 brightest) at a frame count. */
+    Stance.selectFrame = frameCount => SELECT_SEQUENCE[Math.floor(Math.max(0, Number(frameCount) || 0) / SELECT_STEP) % SELECT_SEQUENCE.length];
+    Stance.SELECT_FRAMES = SELECT_BANDS.length;
+    Stance.SELECT_NAME = SELECT_NAME;
+    Stance.PULSE_FRAMES = PULSE_FRAMES;
+    /** The selection ring bitmap for a pulse frame (default: the current one) and a footprint in squares (default 1). */
+    Stance.selectBitmap = function(frame, cells = 1) {
+        const f = frame === undefined || frame === null ? Stance.selectFrame(Graphics.frameCount) : Math.max(0, Math.min(SELECT_BANDS.length - 1, frame | 0));
+        const c = clampCells(cells);
+        const byFrame = selectBitmaps[c] || (selectBitmaps[c] = []);
+        if (byFrame[f]) return byFrame[f];
+        const band = selectBandWidth(c), size = selectRingSize(c), B = SELECT_BANDS[f];
+        const b = paintEllipse(size.w, size.h, depth => (depth === 1 || depth === band + 2 ? SELECT_EDGE : depth <= band + 1 ? B : null));
         b._ufName = SELECT_NAME;
-        selectBitmap = b;
+        b._ufFrame = f;
+        b._ufCells = c;
+        b._ufBand = band;
+        byFrame[f] = b;
         return b;
     };
-    Stance.SELECT_NAME = SELECT_NAME;
-    /** Opacity of the target square at a frame count: a slow pulse between PULSE_MIN and PULSE_MAX. */
-    Stance.pulse = frame => Math.round(PULSE_MIN + (PULSE_MAX - PULSE_MIN) * (0.5 + 0.5 * Math.sin((frame / PULSE_FRAMES) * Math.PI * 2)));
+    /** Kept for callers of the old opacity pulse: the pulse is drawn in the frames now, so the opacity stays 255. */
+    Stance.pulse = () => 255;
 
     let explicitSelection = null; // Game_CharacterBase set through setSelected; null = follow the Overseer's selection
     /** Mark a unit (record, id or Game_Event) as the targeted one; null clears it. The Overseer's selection is used when nothing is set. */
@@ -218,7 +328,7 @@
         else if (typeof x === "number") explicitSelection = window.UF.World ? UF.World.eventOf(x) : null;
         else if (typeof x === "object" && typeof x.id === "number") explicitSelection = window.UF.World ? UF.World.eventOf(x.id) : null;
     };
-    /** The character the corners follow: an explicit selection, else the Overseer's selected colonist's event. */
+    /** The character the selection ring follows: an explicit selection, else the Overseer's selected colonist's event. */
     Stance.selectedCharacter = function() {
         if (explicitSelection) return explicitSelection;
         const cm = window.$colonyManager;
@@ -233,21 +343,43 @@
     const footY = ch => Math.round($gameMap.adjustY(ch._realY) * $gameMap.tileHeight() + $gameMap.tileHeight());
     Stance.footY = footY;
 
+    /**
+     * Dress and place a selection sprite for this frame: the ring for the character's footprint and the current
+     * pulse frame, at its feet (x = screenX, y = foot row), z = its stance ring's z + 1, opacity 255. Any plugin
+     * that marks selected units (UF_Select) calls this every frame so every selected unit looks the same.
+     */
+    Stance.placeSelection = function(sprite, ch, characterSprite) {
+        const cells = Stance.cellsOf(characterSprite);
+        const b = Stance.selectBitmap(Stance.selectFrame(Graphics.frameCount), cells);
+        if (sprite.bitmap !== b) sprite.bitmap = b;
+        const ay = ringAnchorY(b.height, cells);
+        if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== ay) sprite.anchor.set(0.5, ay);
+        sprite.x = ch.screenX();
+        sprite.y = footY(ch);
+        sprite.z = markerZ(sprite.y) + 1; // just above the stance ring, still below the unit
+        sprite.opacity = 255;
+        return sprite;
+    };
+
     class Sprite_UFStanceMarker extends Sprite {
         constructor() {
             super();
-            this.anchor.set(0.5, 1); // bottom-center, like characters (WORLD_ARCHITECTURE §4)
+            this.anchor.set(0.5, 1); // the ring's anchor is set with its bitmap (feet in the ring's middle)
             this.z = Z;
             this.visible = false;
             this._ufStance = null;
+            this._ufCells = 0;
             this._ufCharacter = null;
             this._ufFrame = -1;
         }
 
-        setStance(stance) {
-            if (this._ufStance === stance && this.bitmap) return;
+        setStance(stance, cells = 1) {
+            if (this._ufStance === stance && this._ufCells === cells && this.bitmap) return;
             this._ufStance = stance;
-            this.bitmap = Stance.bitmap(stance);
+            this._ufCells = cells;
+            const b = Stance.bitmap(stance, cells);
+            this.bitmap = b;
+            this.anchor.set(0.5, ringAnchorY(b.height, cells));
         }
 
         follow(ch) {
@@ -258,6 +390,10 @@
 
         get stance() {
             return this._ufStance;
+        }
+
+        get cells() {
+            return this._ufCells;
         }
 
         get character() {
@@ -299,7 +435,7 @@
                         m._ufCharacter = ch;
                         this._byCharacter.set(ch, m);
                     }
-                    m.setStance(stance);
+                    m.setStance(stance, Stance.cellsOf(sprite));
                     m.follow(ch);
                     m.visible = true;
                     m._ufFrame = frame;
@@ -313,13 +449,12 @@
             this.stats.shown = shown;
         }
 
-        /** The iron corners around the selected unit: one sprite, shown while the unit is drawn on this map. */
+        /** The selection ring around the selected unit: one sprite, shown while the unit is drawn on this map. */
         syncSelected(characterSprites) {
             const ch = Stance.enabled ? Stance.selectedCharacter() : null;
             const sprite = ch ? characterSprites.find(s => s._character === ch) : null;
             if (!this._select) {
                 this._select = new Sprite_UFStanceMarker();
-                this._select.bitmap = Stance.selectBitmap();
                 this._select._ufStance = "selected";
                 this._tilemap.addChild(this._select);
             }
@@ -330,9 +465,8 @@
                 return;
             }
             s._ufCharacter = ch;
-            s.follow(ch);
-            s.z += 1; // just above the stance square, still below the unit
-            s.opacity = Stance.pulse(Graphics.frameCount);
+            Stance.placeSelection(s, ch, sprite);
+            s._ufCells = s.bitmap ? s.bitmap._ufCells : 1;
             s.visible = true;
         }
 
@@ -384,7 +518,7 @@
     };
     /** Per-frame cost of the marker sync on the current map: { frames, ms, shown }. */
     Stance.stats = () => (layer() ? layer().stats : null);
-    /** The iron-corner sprite while a unit is selected and drawn, else null. */
+    /** The selection ring sprite while a unit is selected and drawn, else null. */
     Stance.selectionMarker = () => (layer() ? layer().selectionMarker() : null);
 
     const _Spriteset_Map_createCharacters = Spriteset_Map.prototype.createCharacters;
@@ -414,9 +548,58 @@
             const A = hexToRgb(a), B = hexToRgb(b);
             return Math.max(Math.abs(A[0] - B[0]), Math.abs(A[1] - B[1]), Math.abs(A[2] - B[2]));
         };
+        const rgbDist = (A, B) => Math.max(Math.abs(A[0] - B[0]), Math.abs(A[1] - B[1]), Math.abs(A[2] - B[2]));
         const euclid = (a, b) => {
             const A = hexToRgb(a), B = hexToRgb(b);
             return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
+        };
+
+        // Reads a marker bitmap and describes its shape without re-deriving the ellipse: the square's corners must
+        // be empty, the four extremes of an ellipse present, every row one symmetric run that widens toward the
+        // middle, and no alpha values but the allowed ones (no anti-aliasing).
+        function shapeOf(b, allowedAlphas) {
+            const w = b.width, h = b.height;
+            const d = b.context.getImageData(0, 0, w, h).data;
+            const A = (x, y) => d[(y * w + x) * 4 + 3];
+            const P = (x, y) => [d[(y * w + x) * 4], d[(y * w + x) * 4 + 1], d[(y * w + x) * 4 + 2], A(x, y)];
+            const problems = [];
+            let cornerPx = 0;
+            for (const [cx, cy] of [[0, 0], [w - 3, 0], [0, h - 3], [w - 3, h - 3]]) {
+                for (let y = cy; y < cy + 3; y++) for (let x = cx; x < cx + 3; x++) if (A(x, y) > 0) cornerPx++;
+            }
+            if (cornerPx) problems.push(`${cornerPx} opaque px in the square's corners`);
+            const hx = w >> 1, hy = h >> 1;
+            const missing = [[0, hy], [w - 1, hy], [hx, 0], [hx, h - 1]].filter(([x, y]) => !(A(x, y) > 0));
+            if (missing.length) problems.push(`ellipse extremes missing at ${missing.map(p => `(${p[0]},${p[1]})`).join(" ")}`);
+            const spans = [];
+            let badRows = 0;
+            for (let y = 0; y < h; y++) {
+                let x0 = -1, x1 = -1;
+                for (let x = 0; x < w; x++) if (A(x, y) > 0) { if (x0 < 0) x0 = x; x1 = x; }
+                spans.push(x0 < 0 ? 0 : x1 - x0 + 1);
+                if (x0 < 0 || x0 !== w - 1 - x1) badRows++;
+            }
+            if (badRows) problems.push(`${badRows} rows empty or not symmetric`);
+            let bulge = true;
+            for (let y = 1; y < hy; y++) if (spans[y] < spans[y - 1]) bulge = false;
+            for (let y = hy + 1; y < h; y++) if (spans[y] > spans[y - 1]) bulge = false;
+            if (!bulge) problems.push("row widths don't widen toward the middle");
+            if (!(spans[0] <= w / 2 && spans[h - 1] <= w / 2 && spans[hy] === w)) problems.push(`top/bottom rows ${spans[0]}/${spans[h - 1]} px of ${w} (a square's are full width), middle ${spans[hy]}`);
+            const alphas = new Set();
+            for (let i = 3; i < d.length; i += 4) alphas.add(d[i]);
+            const stray = [...alphas].filter(a => !allowedAlphas.includes(a));
+            if (stray.length) problems.push(`alpha values outside {${allowedAlphas.join(",")}}: ${stray.slice(0, 6).join(",")}`);
+            return { w, h, A, P, problems, spans, alphas: [...alphas].sort((a, b) => a - b) };
+        }
+        // Screen pixels that differ between two snaps inside a box [x, y, w, h] (clipped to the screen).
+        const changedIn = (on, off, box) => {
+            const xa = Math.max(0, box[0]), ya = Math.max(0, box[1]);
+            const xb = Math.min(on.width, box[0] + box[2]), yb = Math.min(on.height, box[1] + box[3]);
+            if (xb <= xa || yb <= ya) return { n: 0, of: 0 };
+            const a = on.context.getImageData(xa, ya, xb - xa, yb - ya).data, b = off.context.getImageData(xa, ya, xb - xa, yb - ya).data;
+            let n = 0;
+            for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++;
+            return { n, of: (xb - xa) * (yb - ya) };
         };
 
         UF.Test.suite("stance", async t => {
@@ -430,11 +613,66 @@
 
             t.check("catalog_colors", !!catalog() && STANCES.every(s => /^#[0-9a-f]{6}$/i.test(colorOf(s))) && alphaOf() > 0 && alphaOf() < 1,
                 `catalog.stance ${catalog() ? "present" : "MISSING (defaults in use)"}: ${STANCES.map(s => `${s} ${colorOf(s)}`).join(", ")}, alpha ${alphaOf()}`);
-            const bmpsOk = STANCES.every(s => {
-                const b = Stance.bitmap(s);
-                return b && b.width === SIZE && b.height === SIZE && b._ufName === BITMAP_NAMES[s] && Stance.bitmap(s) === b;
-            });
-            t.check("bitmaps_generated", bmpsOk, `${STANCES.map(s => `${BITMAP_NAMES[s]} ${Stance.bitmap(s).width}x${Stance.bitmap(s).height}`).join(", ")}; cached on repeat`);
+            const sizeLine = [];
+            let bmpsOk = true;
+            for (const c of [1, 2]) {
+                const want = ringSize(c), wantSel = selectRingSize(c);
+                const ok = STANCES.every(s => {
+                    const b = Stance.bitmap(s, c);
+                    return b && b.width === want.w && b.height === want.h && b._ufName === BITMAP_NAMES[s] && b._ufCells === c && b.smooth === false && Stance.bitmap(s, c) === b;
+                }) && [0, 1, 2].every(f => {
+                    const b = Stance.selectBitmap(f, c);
+                    return b && b.width === wantSel.w && b.height === wantSel.h && b._ufName === SELECT_NAME && b._ufFrame === f && b.smooth === false && Stance.selectBitmap(f, c) === b;
+                });
+                if (!ok) bmpsOk = false;
+                sizeLine.push(`${c} square${c > 1 ? "s" : ""}: stance ${STANCES.map(s => `${Stance.bitmap(s, c).width}x${Stance.bitmap(s, c).height}`).join("/")} (want ${want.w}x${want.h}), ` +
+                    `selection ${[0, 1, 2].map(f => `${Stance.selectBitmap(f, c).width}x${Stance.selectBitmap(f, c).height}`).join("/")} (want ${wantSel.w}x${wantSel.h})`);
+            }
+            t.check("bitmaps_generated", bmpsOk, `${sizeLine.join("; ")}; named ${BITMAP_NAMES.friendly}.. and ${SELECT_NAME}, nearest-neighbour scaling, cached on repeat`);
+
+            // The shapes: rings, not squares (VISION V32 revised 2026-09-19 14:40), sampled pixel by pixel.
+            const shapeLines = [];
+            let shapesOk = true;
+            const fillA = Math.round(alphaOf() * 255), rimA = Math.round(Math.min(1, alphaOf() + OUTLINE_EXTRA_ALPHA) * 255);
+            for (const c of [1, 2]) {
+                for (const s of STANCES) {
+                    const sh = shapeOf(Stance.bitmap(s, c), [0, fillA, rimA]);
+                    const fillRgb = hexToRgb(colorOf(s)), rimRgb = darken(fillRgb, OUTLINE_DARKEN);
+                    // Every opaque pixel touching the outside is rim; the middle is fill; colors within 8 per channel.
+                    let edgeBad = 0, colorBad = 0;
+                    for (let y = 0; y < sh.h; y++) {
+                        for (let x = 0; x < sh.w; x++) {
+                            const p = sh.P(x, y);
+                            if (!p[3]) continue;
+                            const out = x === 0 || y === 0 || x === sh.w - 1 || y === sh.h - 1 || !sh.A(x - 1, y) || !sh.A(x + 1, y) || !sh.A(x, y - 1) || !sh.A(x, y + 1);
+                            if (out && p[3] !== rimA) edgeBad++;
+                            if (rgbDist(p, p[3] === rimA ? rimRgb : fillRgb) > 8) colorBad++;
+                        }
+                    }
+                    const middle = sh.P(sh.w >> 1, sh.h >> 1);
+                    if (edgeBad) sh.problems.push(`${edgeBad} edge px not rim`);
+                    if (colorBad) sh.problems.push(`${colorBad} px off the catalog colors`);
+                    if (!(middle[3] === fillA && rgbDist(middle, fillRgb) <= 8)) sh.problems.push(`middle px alpha ${middle[3]} rgb ${middle.slice(0, 3)} (want fill ${fillA})`);
+                    if (sh.problems.length) shapesOk = false;
+                    if (s === "hostile" || sh.problems.length) shapeLines.push(`${s} ${sh.w}x${sh.h}: top row ${sh.spans[0]} px, middle row ${sh.spans[sh.h >> 1]} px, alphas ${sh.alphas.join("/")}${sh.problems.length ? ` PROBLEMS: ${sh.problems.join("; ")}` : ""}`);
+                }
+                const bands = [];
+                for (const f of [0, 1, 2]) {
+                    const sh = shapeOf(Stance.selectBitmap(f, c), [0, 255]);
+                    const midA = sh.A(sh.w >> 1, sh.h >> 1), edge = sh.P(sh.w >> 1, 0), band = sh.P(sh.w >> 1, 2);
+                    if (midA !== 0) sh.problems.push(`middle alpha ${midA} (want 0: open ring)`);
+                    if (!(edge[3] === 255 && edge[0] < 80)) sh.problems.push(`outer edge ${edge} (want dark)`);
+                    if (!(band[3] === 255 && band[0] >= 150)) sh.problems.push(`band ${band} (want bright)`);
+                    bands.push(band[0]);
+                    if (sh.problems.length) shapesOk = false;
+                    if (f === 1 || sh.problems.length) shapeLines.push(`selection frame ${f} ${sh.w}x${sh.h}: top row ${sh.spans[0]} px, middle row ${sh.spans[sh.h >> 1]} px, alphas ${sh.alphas.join("/")}${sh.problems.length ? ` PROBLEMS: ${sh.problems.join("; ")}` : ""}`);
+                }
+                if (!(bands[0] < bands[1] && bands[1] < bands[2])) {
+                    shapesOk = false;
+                    shapeLines.push(`selection frames at ${c} squares: band brightness ${bands.join(" -> ")} (want rising: dim, bright, brightest)`);
+                } else if (c === 1) shapeLines.push(`selection pulse bands ${bands.join(" -> ")}`);
+            }
+            t.check("ring_shape", shapesOk, shapeLines.join("; "));
 
             // Three factions with known relations: allied, neutral, at war.
             const others = F.all().filter(f => !f.isPlayer);
@@ -447,6 +685,8 @@
             F.setRelation("player", fc.id, -80, "stance check: at war");
 
             // Test units in the start clearing (radius 3 around the middle; the pair stand at mid±1 on the middle row).
+            // The wolf is a stock 48 px cut, the big one a stock 96 px monster sheet (troll-sized, V44), put in the
+            // clearing's corner so its tall sprite covers nobody whose ring is sampled below.
             const add = (name, image, x, y, data) => W.addUnit({ name, image: { characterName: image }, area, x, y, dir: 2, data });
             const units = {
                 colonist: add("TEST_colonist", "$U7_Ranger", mid, mid + 3, { kind: "colonist", faction: "player" }),
@@ -454,9 +694,11 @@
                 grazer: add("TEST_grazer", "$U7_Hare", mid + 1, mid + 2, { kind: "creature", species: "hare", tags: ["grazer"], faction: null }),
                 allied: add("TEST_allied", "$U7_Townsman", mid - 2, mid - 2, { kind: "person", faction: fa.id, species: fa.species }),
                 neutral: add("TEST_neutral", "$U7_Guard", mid - 2, mid + 2, { kind: "person", faction: fb.id, species: fb.species }),
-                war: add("TEST_war", "$U7_Goblin", mid + 2, mid + 2, { kind: "person", faction: fc.id, species: fc.species })
+                war: add("TEST_war", "$U7_Goblin", mid + 2, mid + 2, { kind: "person", faction: fc.id, species: fc.species }),
+                wolf: add("TEST_wolf", "$UF_Stock_Nature_0", mid + 1, mid + 3, { kind: "creature", species: "wolf", tags: [], faction: null }),
+                big: add("TEST_big", "$UF_Stock_BigMonster1_r1", mid + 3, mid + 3, { kind: "creature", species: "troll", tags: ["monster"], faction: null })
             };
-            const expect = { colonist: "friendly", monster: "hostile", grazer: "indifferent", allied: "friendly", neutral: "indifferent", war: "hostile" };
+            const expect = { colonist: "friendly", monster: "hostile", grazer: "indifferent", allied: "friendly", neutral: "indifferent", war: "hostile", wolf: "indifferent", big: "hostile" };
             const got = {};
             for (const k of Object.keys(units)) got[k] = Stance.of(units[k]);
             const wrong = Object.keys(expect).filter(k => got[k] !== expect[k]);
@@ -485,61 +727,112 @@
             await t.waitFrames(12);
 
             const charSpriteOf = ev => spriteset._characterSprites.find(s => s._character === ev);
+            // Sprite positions are set in Spriteset_Map.update, which RMMZ runs before $gameMap.update moves the
+            // characters, so between frames a marker is compared with the character's drawn sprite (same frame),
+            // not with the character object (a step further on when it walks). The old selection_square check
+            // compared with the character object and failed whenever the selected colonist was walking.
+            const drawnFeet = (e, s) => ({ x: s.x, y: s.y + e.shiftY() + e.jumpHeight() });
+            // The ring's pixel box in the tilemap (inclusive rows and columns), from its anchor and bitmap.
+            const boxOf = mk => {
+                const b = mk.bitmap, left = mk.x - mk.anchor.x * b.width, top = mk.y - mk.anchor.y * b.height;
+                return { left, top, right: left + b.width - 1, bottom: top + b.height - 1, cx: left + b.width / 2, cy: top + b.height / 2 };
+            };
             const mev = W.eventOf(units.monster.id);
             const m = Stance.markerOf(units.monster.id);
             const cs = charSpriteOf(mev);
             const bmp = m && m.bitmap;
             const want = colorOf("hostile"), wantA = Math.round(alphaOf() * 255);
-            const center = bmp ? bmp.getPixel(24, 24) : "none", centerA = bmp ? bmp.getAlphaPixel(24, 24) : -1;
-            const edgeA = bmp ? bmp.getAlphaPixel(0, 24) : -1;
+            const cx = bmp ? bmp.width >> 1 : 0, cy = bmp ? bmp.height >> 1 : 0;
+            const center = bmp ? bmp.getPixel(cx, cy) : "none", centerA = bmp ? bmp.getAlphaPixel(cx, cy) : -1;
+            const edgeA = bmp ? bmp.getAlphaPixel(0, cy) : -1;
             const order = m && cs ? `${tilemap.children.indexOf(m)} < ${tilemap.children.indexOf(cs)}` : "n/a";
+            const mFeet = mev && cs ? drawnFeet(mev, cs) : null;
             // Under the character, above flat objects on its cell (grass at foot row - 100): foot row - 50.
-            const under = !!m && !!cs && m.z === markerZ(footY(mev)) && m.z < cs.z && m.z > footY(mev) - 100 && tilemap.children.indexOf(m) < tilemap.children.indexOf(cs);
-            const atFeet = !!m && !!mev && m.x === mev.screenX() && m.y === footY(mev);
+            const under = !!m && !!cs && m.z === markerZ(m.y) && m.z < cs.z && m.z > m.y - 100 && tilemap.children.indexOf(m) < tilemap.children.indexOf(cs);
+            const atFeet = !!m && !!mFeet && m.x === mFeet.x && m.y === mFeet.y;
             t.check("marker_drawn", !!m && m.visible && m.parent === tilemap && under && atFeet && colorDist(center, want) <= 8 && Math.abs(centerA - wantA) <= 4 && edgeA > centerA,
-                m ? `monster marker in the tilemap at (${m.x},${m.y}) vs feet (${mev ? mev.screenX() : "?"},${mev ? footY(mev) : "?"}), z ${m.z} vs character z ${cs ? cs.z : "?"} (child order ${order}); ` +
-                    `bitmap ${bmp ? bmp._ufName : "none"} center ${center} alpha ${centerA} (want ${want} / ${wantA}), outline alpha ${edgeA}`
+                m ? `monster marker in the tilemap at (${m.x},${m.y}) vs drawn feet (${mFeet ? mFeet.x : "?"},${mFeet ? mFeet.y : "?"}), z ${m.z} vs character z ${cs ? cs.z : "?"} (child order ${order}); ` +
+                    `bitmap ${bmp ? `${bmp._ufName} ${bmp.width}x${bmp.height}` : "none"} middle ${center} alpha ${centerA} (want ${want} / ${wantA}), rim alpha ${edgeA}`
                     : `no marker for the monster unit (${Stance.markers().length} markers visible)`);
-            // The targeted unit: four iron corners around its feet, above its square, below the sprite.
+
+            // Sized to the footprint (V44): a 48 px creature's ring is 40x20, a 96 px one's 80x40; both with the bottom
+            // row on the cell's last row, centred on the feet. The selection ring is 4x2 px larger per square, same centre.
+            const bev = W.eventOf(units.big.id), bcs = bev && charSpriteOf(bev), bm = Stance.markerOf(units.big.id);
+            const sizeOk = (mk, cells) => {
+                if (!mk) return false;
+                const wantSize = ringSize(cells), box = boxOf(mk);
+                return mk.bitmap.width === wantSize.w && mk.bitmap.height === wantSize.h && mk.cells === cells && box.bottom === mk.y - 1 && box.cx === mk.x && box.cy === mk.y - CENTER_ABOVE * cells;
+            };
+            const boxLine = (label, mk) => {
+                if (!mk) return `${label}: no marker`;
+                const box = boxOf(mk);
+                return `${label} ${mk.bitmap.width}x${mk.bitmap.height} (${mk.cells} sq), rows ${box.top}..${box.bottom} vs foot row ${mk.y}, centre (${box.cx},${box.cy})`;
+            };
+            Stance.setSelected(units.big.id);
+            await t.waitFrames(2);
+            const bigSel = Stance.selectionMarker(), bm2 = Stance.markerOf(units.big.id);
+            const bigSelOk = !!bigSel && !!bm2 && bigSel.bitmap.width === selectRingSize(2).w && bigSel.bitmap.height === selectRingSize(2).h &&
+                boxOf(bigSel).cx === boxOf(bm2).cx && boxOf(bigSel).cy === boxOf(bm2).cy;
+            const bigSelLine = bigSel ? `${bigSel.bitmap.width}x${bigSel.bitmap.height}, centre (${boxOf(bigSel).cx},${boxOf(bigSel).cy}) vs its stance ring (${bm2 ? boxOf(bm2).cx : "?"},${bm2 ? boxOf(bm2).cy : "?"})` : "none";
+            Stance.setSelected(null);
+            t.check("ring_sizes", sizeOk(m, 1) && sizeOk(bm, 2) && bigSelOk && Stance.cellsOf(bcs) === 2 && Stance.cellsOf(cs) === 1,
+                `${boxLine("monster (48 px sheet)", m)}; ${boxLine("big (96 px sheet)", bm)}; big selected: ${bigSelLine}; ` +
+                `cellsOf: monster ${Stance.cellsOf(cs)}, big ${Stance.cellsOf(bcs)} (frame widths ${cs ? cs._frame.width : "?"} / ${bcs ? bcs._frame.width : "?"})`);
+
+            // The targeted unit: a bright ring at its feet, above its stance ring, below the sprite, open in the
+            // middle, pulsing through its three frames at full opacity.
             const cev = W.eventOf(units.colonist.id);
             Stance.setSelected(units.colonist.id);
             await t.waitFrames(3);
             const sel = Stance.selectionMarker();
             const selCs = charSpriteOf(cev);
             const selBmp = sel && sel.bitmap;
-            const cornerPx = selBmp ? selBmp.getPixel(3, 2) : "none", linePx = selBmp ? selBmp.getPixel(24, 2) : "none";
-            const midA = selBmp ? selBmp.getAlphaPixel(24, 24) : -1, edgeAlpha = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
+            const selFeet = cev && selCs ? drawnFeet(cev, selCs) : null;
             const square = Stance.markerOf(units.colonist.id);
-            const lookOk = selBmp && colorDist(cornerPx, "#8b9099") <= 6 && colorDist(linePx, "#e8ecf0") <= 6 && midA === 0 && edgeAlpha === 255;
-            const op1 = sel ? sel.opacity : -1;
-            await t.waitFrames(PULSE_FRAMES / 2);
-            const op2 = sel ? sel.opacity : -1;
-            t.check("selection_square", !!sel && sel.visible && sel.parent === tilemap && sel.x === cev.screenX() && sel.y === footY(cev) && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z && lookOk && op1 !== op2 && op1 >= PULSE_MIN && op2 >= PULSE_MIN,
-                sel ? `square at (${sel.x},${sel.y}) vs feet (${cev.screenX()},${footY(cev)}); z ${sel.z} vs stance square ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}; bitmap ${selBmp ? selBmp._ufName : "none"}: corner ${cornerPx} (want iron #8b9099), line ${linePx} (want light #e8ecf0), middle alpha ${midA} (want 0), edge alpha ${edgeAlpha} (want 255); pulse opacity ${op1} -> ${op2}`
+            const sw = selBmp ? selBmp.width : 0, shh = selBmp ? selBmp.height : 0;
+            const midA = selBmp ? selBmp.getAlphaPixel(sw >> 1, shh >> 1) : -1, cornerA = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
+            const bandPx = selBmp ? selBmp.getPixel(sw >> 1, 2) : "none", bandA = selBmp ? selBmp.getAlphaPixel(sw >> 1, 2) : -1;
+            const lookOk = !!selBmp && selBmp._ufName === SELECT_NAME && sw === SELECT_RING.w && shh === SELECT_RING.h && midA === 0 && cornerA === 0 && bandA === 255;
+            const concentric = !!sel && !!square && boxOf(sel).cx === boxOf(square).cx && boxOf(sel).cy === boxOf(square).cy;
+            const placedOk = !!sel && sel.visible && sel.parent === tilemap && !!selFeet && sel.x === selFeet.x && sel.y === selFeet.y && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z;
+            const placedLine = sel ? `ring at (${sel.x},${sel.y}) vs drawn feet (${selFeet ? selFeet.x : "?"},${selFeet ? selFeet.y : "?"}); z ${sel.z} vs stance ring ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}` : "";
+            const framesSeen = new Set(), opacities = new Set();
+            let placeBad = 0;
+            for (let i = 0; i < PULSE_FRAMES + 2; i++) {
+                const s = Stance.selectionMarker(), cs2 = charSpriteOf(cev);
+                if (s && s.bitmap) framesSeen.add(s.bitmap._ufFrame);
+                if (s) opacities.add(s.opacity);
+                const feet = cs2 ? drawnFeet(cev, cs2) : null;
+                if (!s || !feet || s.x !== feet.x || s.y !== feet.y) placeBad++;
+                await t.waitFrames(1);
+            }
+            t.check("selection_ring", placedOk && lookOk && concentric && framesSeen.size === SELECT_BANDS.length && opacities.size === 1 && opacities.has(255) && placeBad === 0,
+                sel ? `${placedLine}; bitmap ${selBmp ? `${selBmp._ufName} ${sw}x${shh}` : "none"} (want ${SELECT_RING.w}x${SELECT_RING.h}): middle alpha ${midA} (want 0), corner alpha ${cornerA} (want 0), band ${bandPx} alpha ${bandA} (want 255); ` +
+                    `${concentric ? "concentric with" : "NOT concentric with"} the stance ring; over ${PULSE_FRAMES + 2} frames: pulse frames shown {${[...framesSeen].sort().join(",")}} (want 0,1,2), opacity {${[...opacities].join(",")}} (want 255), ${placeBad} frames off the drawn feet`
                     : "no selection marker drawn");
             await t.waitFrames(2);
-            t.screenshot("selection_corners");
+            t.screenshot("selection_ring");
             Stance.setSelected(null);
             await t.waitFrames(2);
             t.check("selection_clears", !Stance.selectionMarker(), `after setSelected(null): marker ${Stance.selectionMarker() ? "still visible" : "hidden"}`);
 
             const stances = Stance.markers().map(s => s.stance);
             const count = s => stances.filter(v => v === s).length;
-            t.check("markers_per_unit", Object.values(units).every(u => Stance.markerOf(u)) && count("friendly") >= 2 + pairEvents.length && count("hostile") >= 2 && count("indifferent") >= 2,
-                `${Stance.markers().length} markers visible: ${count("friendly")} friendly, ${count("indifferent")} indifferent, ${count("hostile")} hostile (want >= ${2 + pairEvents.length} / 2 / 2)`);
+            t.check("markers_per_unit", Object.values(units).every(u => Stance.markerOf(u)) && count("friendly") >= 2 + pairEvents.length && count("hostile") >= 3 && count("indifferent") >= 3,
+                `${Stance.markers().length} markers visible: ${count("friendly")} friendly, ${count("indifferent")} indifferent, ${count("hostile")} hostile (want >= ${2 + pairEvents.length} / 3 / 3)`);
 
-            // Really rendered: a pixel inside the neutral person's square changes when markers are switched off,
-            // and moves toward the stance color when they're on. Four corners, because the character may cover some.
+            // Really rendered, and round: screen pixels inside the neutral person's ring (its left and right ends and
+            // its front) change when markers are switched off and move toward the stance color when they're on; the
+            // corners of the old 48x48 square (inset 4 px) are outside the ring and stay as they were.
             const nev = W.eventOf(units.neutral.id);
             const nm = Stance.markerOf(units.neutral.id);
             const zoom = UF.Camera ? UF.Camera.zoom() : 1;
             const wantN = colorOf("indifferent");
-            const corners = [];
             if (nm) {
                 const g = nm.getGlobalPosition();
-                const inset = 4 * zoom;
-                const pts = [[g.x - 24 * zoom + inset, g.y - 48 * zoom + inset], [g.x + 24 * zoom - inset, g.y - 48 * zoom + inset],
-                    [g.x - 24 * zoom + inset, g.y - inset], [g.x + 24 * zoom - inset, g.y - inset]].map(p => [Math.round(p[0]), Math.round(p[1])]);
+                const at = (dx, dy) => [Math.round(g.x + dx * zoom), Math.round(g.y + dy * zoom)];
+                const inRing = [at(-17, -10), at(16, -10), at(-11, -3), at(10, -3)];
+                const oldCorners = [at(-20, -44), at(19, -44), at(-20, -5), at(19, -5)];
                 const on = SceneManager.snap();
                 Stance.setEnabled(false);
                 await t.waitFrames(2);
@@ -547,25 +840,61 @@
                 const hiddenAll = Stance.markers().length === 0;
                 Stance.setEnabled(true);
                 await t.waitFrames(2);
-                for (const [x, y] of pts) {
+                const ringPts = inRing.map(([x, y]) => {
                     const p1 = on.getPixel(x, y), p2 = off.getPixel(x, y);
-                    corners.push({ x, y, p1, p2, ok: p1 !== p2 && euclid(p1, wantN) < euclid(p2, wantN) });
-                }
-                t.check("marker_rendered", hiddenAll && corners.some(c => c.ok),
-                    `screen pixels at the neutral marker's corners, markers on -> off: ${corners.map(c => `(${c.x},${c.y}) ${c.p1} -> ${c.p2}${c.ok ? " toward " + wantN : ""}`).join("; ")}; ` +
+                    return { x, y, p1, p2, ok: p1 !== p2 && euclid(p1, wantN) < euclid(p2, wantN) };
+                });
+                const cornerPts = oldCorners.map(([x, y]) => ({ x, y, p1: on.getPixel(x, y), p2: off.getPixel(x, y) }));
+                const cornersSame = cornerPts.filter(c => c.p1 === c.p2).length;
+                t.check("marker_rendered", hiddenAll && ringPts.filter(c => c.ok).length >= 2 && cornersSame >= 3,
+                    `inside the neutral ring, markers on -> off: ${ringPts.map(c => `(${c.x},${c.y}) ${c.p1} -> ${c.p2}${c.ok ? " toward " + wantN : ""}`).join("; ")} (want >= 2 toward); ` +
+                    `old square corners: ${cornerPts.map(c => `(${c.x},${c.y}) ${c.p1 === c.p2 ? "same" : `${c.p1} -> ${c.p2}`}`).join("; ")} (want >= 3 same); ` +
                     `${hiddenAll ? "all markers hidden while disabled" : "markers still visible while disabled"}; screen tone ${JSON.stringify($gameScreen.tone())}`);
             } else {
                 t.check("marker_rendered", false, "no marker for the neutral person to sample");
             }
             t.screenshot("stance_markers");
 
-            // Follows the character every frame, mid-step included. Sprites are positioned in Spriteset_Map.update,
-            // which RMMZ runs before $gameMap.update moves the characters, so the marker is compared with the
-            // character's drawn sprite (same frame), not with the character object (one step ahead).
+            // The rings at the three zoom levels with the colonist selected: colonists, the wolf and the 96 px monster.
+            // Rendered at every zoom: pixels in each ring's screen box change when markers are switched off.
+            if (UF.Camera) {
+                Stance.setSelected(units.colonist.id);
+                $gamePlayer.locate(mid, mid + 2);
+                const zoomLines = [];
+                let zoomOk = true;
+                const names = ["1", "23", "13"];
+                for (let i = 0; i < Math.min(3, UF.Camera.levels.length); i++) {
+                    UF.Camera.setLevel(i);
+                    await t.waitFrames(6);
+                    const z = UF.Camera.zoom();
+                    const boxes = [["colonist", units.colonist], ["wolf", units.wolf], ["big", units.big]].map(([label, u]) => {
+                        const mk = Stance.markerOf(u.id);
+                        if (!mk) return { label, box: null };
+                        const g = mk.getGlobalPosition(), b = mk.bitmap;
+                        return { label, box: [Math.floor(g.x - mk.anchor.x * b.width * z), Math.floor(g.y - mk.anchor.y * b.height * z), Math.ceil(b.width * z), Math.ceil(b.height * z)] };
+                    });
+                    const on = SceneManager.snap();
+                    t.screenshot(`rings_zoom_${names[i]}`);
+                    Stance.setEnabled(false);
+                    await t.waitFrames(2);
+                    const off = SceneManager.snap();
+                    Stance.setEnabled(true);
+                    await t.waitFrames(2);
+                    const counts = boxes.map(({ label, box }) => (box ? Object.assign({ label }, changedIn(on, off, box)) : { label, n: -1 }));
+                    if (!counts.every(c => c.n > 0)) zoomOk = false;
+                    zoomLines.push(`zoom ${z.toFixed(3)}: ${counts.map(c => (c.n < 0 ? `${c.label} no marker` : `${c.label} ${c.n}/${c.of} px changed`)).join(", ")}`);
+                }
+                UF.Camera.setLevel(0);
+                $gamePlayer.locate(mid, mid);
+                Stance.setSelected(null);
+                await t.waitFrames(4);
+                t.check("rendered_all_zooms", zoomOk, zoomLines.join("; "));
+            }
+
+            // Follows the character every frame, mid-step included (compared with the drawn sprite, see drawnFeet).
             const walker = units.allied;
             W.sendUnit(walker.id, { area, x: mid + 2, y: mid - 2 });
             let midSamples = 0, midMatches = 0, worstLag = 0;
-            const drawnFeet = (e, s) => ({ x: s.x, y: s.y + e.shiftY() + e.jumpHeight() });
             await t.waitUntil(() => {
                 const e = W.eventOf(walker.id), mk = Stance.markerOf(walker.id), s = e && charSpriteOf(e);
                 if (e && s && e.isMoving()) {

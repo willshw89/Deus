@@ -55,6 +55,9 @@
     const TALK_WORK = 180;
     const SLEEP_WORK = 600;      // default when params.frames is missing
     const NEIGHBORS = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // 4-way (contract section 1.6)
+    const DIAGONALS = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
+    // 8-way (VISION V3, UF_Movement8D's FourWay off): a unit may also work from a diagonal neighbour of its target.
+    const eightWay = () => !!window.UF_Dir8 && UF_Dir8.fourWay === false;
 
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
@@ -141,20 +144,31 @@
         return manhattan(unit.area.x * size + unit.x, unit.area.y * size + unit.y, area.x * size + x, area.y * size + y);
     }
 
+    // Walking distance in 8-way: diagonal steps count (octile, in cells).
+    function octileDistance(unit, area, x, y) {
+        const size = World().state.size;
+        const ax = Math.abs(unit.area.x * size + unit.x - (area.x * size + x)), ay = Math.abs(unit.area.y * size + unit.y - (area.y * size + y));
+        return Math.max(ax, ay) + 0.4 * Math.min(ax, ay);
+    }
+
     /**
      * The stand cell for a target: the target cell itself when it's standable (unless adjacentOnly), else the
-     * standable 4-neighbor nearest to the unit. Null when there is none (the target is walled in).
+     * standable 4-neighbor nearest to the unit; in 8-way also the diagonal neighbours whose two cells between them and
+     * the target are walkable (never reaching across a blocked corner), nearest by walking distance. Null when there is
+     * none (the target is walled in).
      */
     function standFor(target, unit, adjacentOnly) {
         const area = target.area;
         const onIt = unit.x === target.x && unit.y === target.y && sameArea(unit.area, area);
         if (!adjacentOnly && (onIt || standableIn(area, target.x, target.y, unit.id))) return { area: copyArea(area), x: target.x, y: target.y };
+        const W = World(), eight = eightWay();
         let best = null, bestDist = Infinity;
-        for (const [dx, dy] of NEIGHBORS) {
+        for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
             const x = target.x + dx, y = target.y + dy;
             const here = sameArea(unit.area, area) && unit.x === x && unit.y === y;
             if (!here && !standableIn(area, x, y, unit.id)) continue;
-            const dist = unitDistance(unit, area, x, y);
+            if (dx && dy && !(W.walkable(area.x, area.y, x, target.y, { unit }) && W.walkable(area.x, area.y, target.x, y, { unit }))) continue;
+            const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
             if (dist < bestDist) {
                 bestDist = dist;
                 best = { area: copyArea(area), x, y };
@@ -395,8 +409,14 @@
             const r = recipeOf(job.params.recipeId);
             for (const id of Object.keys(r.inputs || {})) I.consumeFrom(unit.id, id, r.inputs[id] | 0);
             const made = [];
-            for (const id of Object.keys(r.outputs || {})) for (const it of I.give(id, r.outputs[id] | 0, unit.id)) made.push(it.id);
-            job.result = { items: made };
+            const quality = (window.UF && UF.Skills && typeof UF.Skills.qualityRoll === "function") ? UF.Skills.qualityRoll(unit, r.id) : 0;
+            for (const id of Object.keys(r.outputs || {})) {
+                for (const it of I.give(id, r.outputs[id] | 0, unit.id)) {
+                    if (quality > 0) it.quality = quality;
+                    made.push(it.id);
+                }
+            }
+            job.result = { items: made, quality };
         },
         describe(job) {
             const r = recipeOf(job.params.recipeId);
@@ -768,7 +788,13 @@
         }
         return 1;
     }
-    const rateOf = (unit, job) => ((unit.data && unit.data.workRate > 0 ? unit.data.workRate : 1) * toolMultiplier(unit, job));
+    const skillMultiplier = (unit, job) => {
+        if (window.UF && UF.Skills && typeof UF.Skills.rate === "function") {
+            try { return UF.Skills.rate(unit, job.type, job); } catch (e) { return 1; }
+        }
+        return 1;
+    };
+    const rateOf = (unit, job) => ((unit.data && unit.data.workRate > 0 ? unit.data.workRate : 1) * toolMultiplier(unit, job) * skillMultiplier(unit, job));
     function workOf(job, unit) {
         const h = handlers[job.type];
         const w = typeof h.work === "function" ? h.work(job, unit) : h.work;
@@ -783,7 +809,11 @@
         const ev = unitEvent(unit);
         if (ev) {
             const dx = job.target.x - unit.x, dy = job.target.y - unit.y;
-            if ((dx || dy) && sameArea(job.target.area, unit.area)) ev.setDirection(facingTo(dx, dy));
+            // Face the target before the work frames play: 8 ways (VISION V3), 4 with FourWay.
+            if ((dx || dy) && sameArea(job.target.area, unit.area)) {
+                if (ev.faceToward8) ev.faceToward8(dx, dy);
+                else ev.setDirection(facingTo(dx, dy));
+            }
             ev.setStepAnime(true);
             // V92 (user 2026-09-19): no status text over heads; the job shows in the profile, not as a bark.
         }
@@ -970,6 +1000,9 @@
                 t.check("world_present", false, `area ${JSON.stringify(area)}, UF.Objects ${!!O}, UF.Items ${!!I}`);
                 return;
             }
+            const Col = window.UF && UF.Colonists;
+            const colonistsWere = Col && typeof Col.setEnabled === "function" ? Col.enabled !== false : null;
+            if (Col && Col.setEnabled) Col.setEnabled(false);
             const mid = Math.floor(W.state.size / 2);
             const errors0 = t.errorsSoFar().length;
             const ticks = () => now();
@@ -1088,15 +1121,17 @@
 
             // hunt: a test hare 5 cells away; the hunter stands next to it, the hare goes, meat and hide lie there.
             const hare = W.addUnit({ name: "Hare", image: { characterName: "$U7_Hare" }, area, x: worker.x + 5, y: worker.y, dir: 4,
-                data: { kind: "creature", species: "hare", tags: ["grazer"], faction: null } });
+                data: { kind: "test", species: "hare", tags: ["grazer"], faction: null } });
             const hareAt = { x: hare.x, y: hare.y };
             const hunt = create({ type: "hunt", target: { area, x: hare.x, y: hare.y }, params: { unitId: hare.id }, owner: worker.id });
             const huntText = describe(hunt);
-            let huntStand = null;
-            await t.waitUntil(() => { if (hunt.state === "work" && !huntStand) huntStand = { x: worker.x, y: worker.y }; return isFinished(hunt); }, 10000, "the hunt to finish").catch(() => {});
+            await waitJob(hunt, 10000);
+            const huntStand = { x: worker.x, y: worker.y };
+            const nextTo = (a, b) => (eightWay() ? chebyshev(a.x, a.y, b.x, b.y) : manhattan(a.x, a.y, b.x, b.y)) === 1;
             const hareGone = !W.unit(hare.id) && !W.eventOf(hare.id);
-            t.check("hunt", hunt.state === "done" && hareGone && !!huntStand && manhattan(huntStand.x, huntStand.y, hareAt.x, hareAt.y) === 1 && itemsOn(hareAt.x, hareAt.y, "meat_raw") === 1 && itemsOn(hareAt.x, hareAt.y, "hide") === 1 && events.kill === 1,
-                `${jobText(hunt)}; hunter worked from ${huntStand ? `(${huntStand.x},${huntStand.y})` : "nowhere"} next to the hare at (${hareAt.x},${hareAt.y}); hare unit gone ${hareGone}; on its cell: ${itemsOn(hareAt.x, hareAt.y, "meat_raw")} raw meat, ${itemsOn(hareAt.x, hareAt.y, "hide")} hide; jobs:kill fired ${events.kill}x`);
+            const deathAt = (hunt.result && hunt.result.at) || hareAt;
+            t.check("hunt", hunt.state === "done" && hareGone && !!huntStand && nextTo(huntStand, deathAt) && itemsOn(deathAt.x, deathAt.y, "meat_raw") === 1 && itemsOn(deathAt.x, deathAt.y, "hide") === 1 && events.kill === 1,
+                `${jobText(hunt)}; hunter worked from ${huntStand ? `(${huntStand.x},${huntStand.y})` : "nowhere"} next to the hare at (${deathAt.x},${deathAt.y}); hare unit gone ${hareGone}; on its cell: ${itemsOn(deathAt.x, deathAt.y, "meat_raw")} raw meat, ${itemsOn(deathAt.x, deathAt.y, "hide")} hide; jobs:kill fired ${events.kill}x`);
 
             // build: without items the job says "needs items"; with 3 logs + 3 stones on the cell a campfire appears.
             const bx = mid + 3, by = mid + 12;
@@ -1148,7 +1183,7 @@
             const berries = I.give("berries", 2, worker.id)[0];
             const eat = create({ type: "eat", params: { itemId: berries.id }, owner: worker.id });
             await waitJob(eat, 5000);
-            t.check("drink_and_eat", drink.state === "done" && worker.data.needs.thirst === 15 && manhattan(drankFrom.x, drankFrom.y, wx, wy) === 1 && eat.state === "done" && worker.data.needs.hunger === 35 && I.count(worker.id, "berries") === 1,
+            t.check("drink_and_eat", drink.state === "done" && worker.data.needs.thirst === 15 && nextTo(drankFrom, { x: wx, y: wy }) && eat.state === "done" && worker.data.needs.hunger === 35 && I.count(worker.id, "berries") === 1,
                 `${jobText(drink)} from (${drankFrom.x},${drankFrom.y}) next to water at (${wx},${wy}): thirst 80 -> ${worker.data.needs.thirst}; ${jobText(eat)}: hunger 60 -> ${worker.data.needs.hunger}, berries left ${I.count(worker.id, "berries")}`);
             W.setTile(area.x, area.y, wx, wy, 0, tileBefore);
 
@@ -1160,15 +1195,15 @@
             t.check("blocked_fails", blocked.state === "failed" && typeof blocked.reason === "string" && blocked.reason.length > 0 && Jobs.of(worker.id) === null,
                 `${jobText(blocked)}; of(worker) ${Jobs.of(worker.id) ? "still set" : "null"}`);
 
-            // stalled_fails: the helper is boxed in by oaks; walking out never progresses, so after two stalls the job fails.
+            // stalled_fails: the helper is boxed in by oaks; walking out never progresses, so after two stalls or unitBlocked checks the job fails.
             const hx = helper.x, hy = helper.y;
             for (const [dx, dy] of NEIGHBORS) put(hx + dx, hy + dy, "oak");
             const walk = create({ type: "move", target: { area, x: mid + 5, y: mid + 5 }, owner: helper.id });
             const s0 = ticks();
             await waitJob(walk, 15000);
             const stallTicks = ticks() - s0;
-            t.check("stalled_fails", walk.state === "failed" && /reach/.test(walk.reason || "") && helper.x === hx && helper.y === hy && stallTicks >= 2 * STALL_TICKS,
-                `${jobText(walk)} after ${stallTicks} ticks (2 stalls = ${2 * STALL_TICKS}); helper still at (${helper.x},${helper.y})`);
+            t.check("stalled_fails", walk.state === "failed" && /reach/.test(walk.reason || "") && helper.x === hx && helper.y === hy && (stallTicks >= 2 * STALL_TICKS || (walk.blocked >= BLOCKS_TO_FAIL && stallTicks >= 2)),
+                `${jobText(walk)} after ${stallTicks} ticks (blocked ${walk.blocked}/${BLOCKS_TO_FAIL}, stall limit ${2 * STALL_TICKS}); helper still at (${helper.x},${helper.y})`);
 
             // saved: jobs round-trip through JsonEx and are part of the save contents.
             const json = JsonEx.stringify(W.state);
@@ -1179,6 +1214,7 @@
                 `${W.state.jobs.list.length} jobs in state (nextId ${W.state.jobs.nextId}); chop #${chop.id} after round-trip: ${savedChop ? `${savedChop.type} ${savedChop.state}` : "missing"}; identical json ${JSON.stringify(copy.jobs) === JSON.stringify(W.state.jobs)}; in save contents ${!!(contents.ufWorld && contents.ufWorld.jobs)}`);
 
             // Clean up: units, items, objects, listeners, speed, zoom.
+            if (Col && Col.setEnabled && colonistsWere !== null) Col.setEnabled(colonistsWere);
             for (const k of Object.keys(listeners)) UF.Events.off(`jobs:${k}`, listeners[k]);
             delete handlers.test_noop;
             for (const u of W.units()) if (!unitsBefore.has(u.id)) W.removeUnit(u.id);
