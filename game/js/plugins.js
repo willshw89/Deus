@@ -30,11 +30,18 @@ var $plugins =
 {"name":"UF_Colonists","status":true,"description":"[UF Colonists] The player faction's people at its home site: needs, personality, the society plan, hunting, tools and clothes; every act is a UF_Jobs job.","parameters":{}},
 {"name":"UF_Wildlife","status":true,"description":"[UF Wildlife] Creatures spawned with the map by biome; wander and flee.","parameters":{}},
 {"name":"UF_Stance","status":true,"description":"[UF Stance] Green / yellow / red squares under units by stance toward the colony.","parameters":{}},
+{"name":"UF_Combat","status":true,"description":"[UF Combat] On-map d20 combat engine: attack rolls vs AC, damage dice, criticals, hostile AI aggro, floating damage popups, hit reactions, and death.","parameters":{}},
+{"name":"UF_Anim","status":true,"description":"[UF Anim] Attack, hurt and death animations for every person, animal and monster; the remains lie on the ground for a while.","parameters":{}},
 {"name":"UF_Fog","status":true,"description":"[UF_Fog]","parameters":{}},
 {"name":"UF_DayNight","status":true,"description":"[UF DayNight] Day/night cycle on world maps: smooth light from the clock, shorter sight at night, constant cave light, on-screen clock.","parameters":{"NightVision":"0.55","ShowClock":"false"}},
 {"name":"UF_TimeSpeed","status":true,"description":"[UF TimeSpeed] Run the world faster: 1x, 2x, 4x, 8x (] faster, [ slower, never below 1x, no rewind). Game-time timers for AI.","parameters":{"Speeds":"1, 2, 4, 8"}},
 {"name":"UF_Camera","status":true,"description":"[UF_Camera]","parameters":{}},
+{"name":"UF_Speech","status":true,"description":"[UF Speech] Remarks, barks, shouts, orders and thoughts float as plain text above the speaker's head (VISION V62).","parameters":{}},
+{"name":"UF_Skills","status":true,"description":"[UF Skills] Every person has skills (trades and the fighting skills) that level from 1 to 99 by doing them; higher levels work faster, yield more and make better things.","parameters":{}},
 {"name":"UF_Look","status":true,"description":"[UF Look] Look label under the mouse: what's there, biome, art file and its status.","parameters":{}},
 {"name":"UF_Interact","status":true,"description":"[UF Interact] Right-click anything for its interaction options; choices become jobs.","parameters":{}},
+{"name":"UF_Sheet","status":true,"description":"[UF Sheet] Left-click anything in the world: a panel shows its inventory grid, equipment, face and stats, or its contents and state.","parameters":{}},
+{"name":"UF_Talk","status":true,"description":"[UF Talk] Right-click a person and choose Talk: a portrait, their line and keywords to click. The world pauses while it is open.","parameters":{}},
+{"name":"UF_Fire","status":true,"description":"[UF Fire] Fire spreads cell to cell by catalog rules and burns out; it hurts units; colonists carry water to put it out.","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

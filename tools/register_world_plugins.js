@@ -1,31 +1,48 @@
 // Registers the world-build plugins in game/js/plugins.js in the order docs/design/WORLD_ARCHITECTURE.md §5 gives,
 // keeping every existing entry and its parameters. Run only with the RMMZ editor closed (ENGINE_RULES §3).
-// Usage: node tools/register_world_plugins.js [--dry]
+// Usage: node tools/register_world_plugins.js [--game <game folder>] [--dry]
 "use strict";
 const fs = require("fs");
 const path = require("path");
 
-const file = path.join(__dirname, "..", "game", "js", "plugins.js");
-const dry = process.argv.includes("--dry");
+const args = process.argv.slice(2);
+const gameIdx = args.indexOf("--game");
+const gameDir = path.resolve(gameIdx >= 0 ? args[gameIdx + 1] : path.join(__dirname, "..", "game"));
+const file = path.join(gameDir, "js", "plugins.js");
+const dry = args.includes("--dry");
 // The order after UF_ProcGen. Entries not yet on disk are skipped with a warning.
-const ORDER = ["UF_World", "UF_WorldGen", "UF_Tiles", "UF_Factions", "UF_History", "UF_Objects", "UF_Items", "UF_Jobs",
-    "UF_Colonists", "UF_Wildlife", "UF_Stance", "UF_Fog", "UF_DayNight", "UF_TimeSpeed", "UF_Camera", "UF_Look", "UF_Interact", "UF_Test"];
+const ORDER = ["UF_World", "UF_WorldGen", "UF_Tiles", "UF_Factions", "UF_History", "UF_Objects", "UF_Doors", "UF_Items", "UF_Jobs", "UF_Floors",
+    "UF_Colonists", "UF_Wildlife", "UF_Stance", "UF_Combat", "UF_Anim", "UF_Fog", "UF_DayNight", "UF_TimeSpeed", "UF_Camera", "UF_Speech", "UF_Skills", "UF_Look", "UF_Interact", "UF_Sheet", "UF_Talk", "UF_Fire", "UF_Test"];
+// UF_Combat is listed so the tool keeps it where it already sits in plugins.js (after UF_Stance); entries not in ORDER
+// are moved in front of UF_World. UF_Anim loads after UF_Combat (its @orderAfter); UF_Sheet after UF_Interact.
+// UF_Talk and UF_Fire load after UF_Interact (both wrap it at runtime); UF_Fire is also after UF_Objects, UF_Items, UF_Jobs.
+// UF_Speech loads after UF_Visuals (in front of UF_World) and UF_Camera (its @orderAfter), before UF_Look and UF_Talk.
+// UF_Skills loads after UF_Jobs, UF_Colonists, UF_Combat and UF_Speech (its @orderAfter), before UF_Look (VISION V63).
 const DESCRIPTIONS = {
     UF_Tiles: "[UF Tiles] Ground kinds drawn in code and the runtime world tileset (91).",
     UF_Objects: "[UF Objects] Per-cell world objects (plants, stones, buildings): drawing, passability, actions, regrowth.",
+    UF_Doors: "[UF Doors] Faction-aware site and house doors: passage, building, interaction, and damage.",
     UF_Items: "[UF Items] Items on the ground, in stacks and in inventories.",
     UF_Jobs: "[UF Jobs] DF-style jobs: walk to a target, work, change the world (gather, chop, haul, build, craft, hunt...).",
+    UF_Floors: "[UF Floors] Enclosed rooms, cultural floor jobs, ground autotiles, and room value.",
     UF_Colonists: "[UF Colonists] The pair as world units: needs, personality, daily pattern, the society plan.",
     UF_Wildlife: "[UF Wildlife] Creatures spawned with the map by biome; wander and flee.",
     UF_Stance: "[UF Stance] Green / yellow / red squares under units by stance toward the colony.",
+    UF_Combat: "[UF Combat] On-map d20 combat engine: attack rolls vs AC, damage dice, criticals, hostile AI aggro, floating damage popups, hit reactions, and death.",
+    UF_Anim: "[UF Anim] Attack, hurt and death animations for every person, animal and monster; the remains lie on the ground for a while.",
+    UF_Speech: "[UF Speech] Remarks, barks, shouts, orders and thoughts float as plain text above the speaker's head (VISION V62).",
+    UF_Skills: "[UF Skills] Every person has skills (trades and the fighting skills) that level from 1 to 99 by doing them; higher levels work faster, yield more and make better things.",
     UF_Look: "[UF Look] Look label under the mouse: what's there, biome, art file and its status.",
-    UF_Interact: "[UF Interact] Right-click anything for its interaction options; choices become jobs."
+    UF_Interact: "[UF Interact] Right-click anything for its interaction options; choices become jobs.",
+    UF_Sheet: "[UF Sheet] Left-click anything in the world: a panel shows its inventory grid, equipment, face and stats, or its contents and state.",
+    UF_Talk: "[UF Talk] Right-click a person and choose Talk: a portrait, their line and keywords to click. The world pauses while it is open.",
+    UF_Fire: "[UF Fire] Fire spreads cell to cell by catalog rules and burns out; it hurts units; colonists carry water to put it out."
 };
 
 const text = fs.readFileSync(file, "utf8").replace(/^﻿/, "");
 const list = JSON.parse(text.slice(text.indexOf("["), text.lastIndexOf("]") + 1));
 const byName = new Map(list.map(p => [p.name, p]));
-const pluginsDir = path.join(__dirname, "..", "game", "js", "plugins");
+const pluginsDir = path.join(gameDir, "js", "plugins");
 
 const before = list.filter(p => !ORDER.includes(p.name));
 const ordered = [];
