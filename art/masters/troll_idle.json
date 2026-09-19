@@ -1,0 +1,55 @@
+{
+  "id": "troll_idle",
+  "name": "Troll (Idle)",
+  "category": "wildlife",
+  "species": "troll",
+  "kind": "monster",
+  "action": "idle",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "idle": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 200,
+  "layer": "body",
+  "source": {
+    "file": "art/raw/troll_idle.png",
+    "format": "png",
+    "size": [
+      1152,
+      3072
+    ],
+    "sheet": [
+      3,
+      8
+    ],
+    "block": 4,
+    "background": "magenta #FF00FF"
+  },
+  "notes": "Troll hulking grey-green cave monster idle animation (Stand, Idle 1, Idle 2) in all 8 directions."
+}
