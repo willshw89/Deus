@@ -207,6 +207,9 @@
             const stance = S && typeof S.describe === "function" ? S.describe(hit.unit || hit.event) : "";
             const parts = [hit.name, stance];
             if (hit.colonist) parts.push(jobTextOf(hit));
+            const Env = window.UF && UF.Environment;
+            const cond = Env && typeof Env.conditionLabel === "function" ? Env.conditionLabel(hit.unit) : "";
+            if (cond) parts.push(`[${cond}]`);
             return { kind: "unit", text: parts.filter(Boolean).join(" · "), file: hit.image, hit };
         }
         const I = window.UF.Items;
@@ -279,6 +282,12 @@
         if (region) parts.push(`${tierName("savagery", region.savagery)}, ${tierName("alignment", region.alignment)}`);
         if (groundId) parts.push(kind ? kind.name : groundName(groundId));
         if (water) parts.push(`water: ${waterKey}`);
+        const Env = window.UF && UF.Environment;
+        if (Env && typeof Env.ambientTemperature === "function") {
+            const temp = Env.ambientTemperature(area, x, y, 0);
+            const w = typeof Env.weather === "function" ? Env.weather(area) : "";
+            parts.push(`${temp}°C${w ? ` (${cap(w)})` : ""}`);
+        }
         return {
             text: parts.join(" · "), biome: info ? biomeName(info) : "", biomeId: info ? info.biomeId : null, region, ground: groundId, water: waterKey,
             file: water ? (names[0] || "") : (kind ? (names[1] || "") : "")

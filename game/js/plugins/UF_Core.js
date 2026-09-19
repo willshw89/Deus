@@ -61,6 +61,13 @@
     const startMinute = parseInt(params["StartMinute"] || 0, 10);
     const defaultShowHUD = (params["ShowClockHUD"] || "true") === "true";
 
+    if (typeof PluginManager !== "undefined" && Array.isArray(PluginManager._scripts)) {
+        if (!PluginManager._scripts.includes("UF_Environment")) {
+            PluginManager.loadScript("UF_Environment");
+            PluginManager._scripts.push("UF_Environment");
+        }
+    }
+
     if (typeof require !== 'undefined') {
         try {
             const fs = require('fs');

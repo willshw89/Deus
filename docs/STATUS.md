@@ -6,6 +6,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 
+## Environmental Factors, Temperature, Weather, Hypothermia & Burning (UF_Environment) — 2026-09-19
+
+Delivered per user directive ("Add in environmental factors, temperature, hypothermia, burning, etc."):
+- **Ambient Cell Temperature Engine (`UF.Environment.ambientTemperature`):**
+  - WorldGen climate scaling: maps field `t` (0..1) to realistic Celsius scale (-25°C polar glacier to +45°C desert).
+  - Diurnal sinusoidal variation: surface nighttime drop (~8–12°C at 03:00) and peak afternoon warmth (~5–8°C at 14:00).
+  - Elevation & Caverns: `z=1` hills (-4°C), `z=2` mountain peaks (-10°C), `z=-1` upper caverns (stable insulated 13°C), `z=-2` deep caverns (16°C base).
+  - Shelter insulation: enclosed rooms (`UF.Floors.roomAt`) moderate outdoor extremes by 75% toward a comfortable 20°C.
+  - Radiant heat: campfires, hearths, furnaces radiate heat within radius 3 (+25°C, +15°C, +5°C); burning cells radiate intense heat within radius 3 (+45°C, +28°C, +14°C, +6°C).
+- **Weather Dynamics (`UF.Environment.weather`):**
+  - 8 distinct weather states: `clear`, `overcast`, `rain`, `downpour`, `snow`, `blizzard`, `heatwave`, `coldsnap`.
+  - Precipitation cools outdoor air and inflicts wetness on unroofed units; snow/blizzard triggers sub-zero temperatures.
+- **Unit Thermal Physics & Status Afflictions (`UF.Environment.stepUnitThermal`):**
+  - Normal body temperature: ~37.0°C.
+  - Clothing insulation from torso/clothes, headgear, and leggings reduces environmental heat loss.
+  - Wetness accumulation (from rain or water) accelerates heat loss rate by up to 3x in cold.
+  - Hypothermia: Chilled (35.0–36.4°C), Mild (32.0–34.9°C, shivering barks, 20% slow), Severe (28.0–31.9°C, 40% slow, periodic cold damage, ice-blue hitsplats, -15 mood), Critical (<28.0°C).
+  - Hyperthermia / Heatstroke: Overheated (38.0–39.0°C), Heatstroke (39.1–41.0°C, 3x thirst drain, thermal damage).
+  - Active Burning: units taking fire damage catch fire (`burning` condition), take 2–4 HP per beat with orange hitsplats, panic-flee toward water, and are immediately doused upon entering water tiles.
+- **Colony AI & Autonomous Reactions:**
+  - Urgent priority interrupts in `UF_Colonists.js` for units on fire or suffering from severe hypothermia (seeking water or warmth).
+  - Dwarf Fortress-style atmospheric thoughts: *"Shivered uncontrollably in the bitter frost"*, *"Basked in the comforting warmth of the campfire"*, *"Was soaked to the skin"*, *"Suffered from searing burns"*.
+- **UI Integration:**
+  - `UF_Look.js`: Line 1 appends active condition tags in brackets (`[Burning]`, `[Hypothermia]`, `[Shivering]`); Line 2 appends cell temperature and weather (e.g. `17.1°C (Overcast)`).
+  - `UF_Sheet.js`: Inspect sheet displays unit body temperature, thermal condition, and wetness in the header subtitle.
+- **Automated Verification:**
+  - `tools/run_tests.js environment`: 16/16 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0, 0 errors).
+  - `tools/run_tests.js wildlife`: 22/22 PASS (exit 0).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `game/test_output/environment.environment_overview.png`: Colony map showing settlers around the campfire, live look tooltip with biome and ground classification, and speed controls.
+
 ## Clean Two-Tile High Wall Chipsets: Wood and Stone 20-Piece Sets (AR-100, AR-101, VISION V73) — 2026-09-19 (Gemini)
 
 Delivered per user directives ("Let's clean up these wall chipsets", "These walls aint great, see?", "All wall are 2 tiles high."):

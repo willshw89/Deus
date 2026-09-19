@@ -564,7 +564,8 @@
         const households = World().state.households;
         for (const h of Object.values(households && households.byId || {})) {
             if (!h.home || !sameLevel(h, c)) continue;
-            for (const p of [...h.home.walls, ...h.home.doors, ...h.home.beds, h.home.hearth, h.home.storage]) if (p.x === x && p.y === y) return true;
+            const buildings = UF.Households && UF.Households.structures ? UF.Households.structures(h) : [h.home];
+            for (const b of buildings) for (const p of [...b.walls, ...b.doors, ...b.beds, b.hearth, b.storage].filter(Boolean)) if (p.x === x && p.y === y) return true;
         }
         return false;
     }
@@ -740,11 +741,33 @@
             if (n.sleep > 85 && roll(3) < 0.05) addThought(u, "Was worn out for lack of sleep.", -7);
             if (n.social > 80 && roll(4) < 0.04) addThought(u, "Felt lonely.", -5);
             if (n.nature > 80 && roll(5) < 0.03) addThought(u, "Longed for the open country.", -3);
+            const Env = window.UF && UF.Environment;
+            if (Env && typeof Env.unitThermal === "function") {
+                const thm = Env.unitThermal(u);
+                if (thm) {
+                    if (thm.stage === "hypothermia_severe" || thm.stage === "critical") {
+                        if (roll(6) < 0.08) addThought(u, "Shivered uncontrollably in the bitter frost.", -10);
+                    } else if (thm.stage === "hypothermia_mild" || thm.stage === "chilled") {
+                        if (roll(7) < 0.05) addThought(u, "Felt thoroughly chilled by the cold wind.", -4);
+                    } else if (thm.stage === "heatstroke") {
+                        if (roll(8) < 0.08) addThought(u, "Was dizzy with oppressive heatstroke.", -10);
+                    }
+                    if (thm.wetness > 60 && roll(9) < 0.06) {
+                        addThought(u, "Was soaked to the skin.", -4);
+                    }
+                }
+            }
         }
     }
 
     // Urgent needs interrupt other work (not a need job that's already running).
     function urgent(u) {
+        if (u.data && u.data.burning) return "burning";
+        const Env = window.UF && UF.Environment;
+        if (Env && typeof Env.unitThermal === "function") {
+            const thm = Env.unitThermal(u);
+            if (thm && (thm.stage === "hypothermia_severe" || thm.stage === "critical")) return "hypothermia";
+        }
         const n = u.data.needs, th = thresholds();
         if (!n) return null;
         if (n.thirst >= (th.thirst || 55) + URGENT_MARGIN) return "thirst";
@@ -1308,6 +1331,11 @@
             if (cell.state !== "todo") continue;
             const target = { x: cell.x, y: cell.y };
             const here = cell.here;
+            if (hasTag(t, "fire") && UF.FireSafety) {
+                const clearance = UF.FireSafety.hearthPreparation(u, { area: copyArea(c.area), z: zOf(c), ...target });
+                if (clearance.spec) return Object.assign({}, clearance.spec, { params: Object.assign({}, clearance.spec.params, { plan: step.id }) });
+                if (!clearance.safe) continue;
+            }
             // A tree or boulder on the cell is worked away first (its yields land on the cell).
             if (here && here.passable !== true && here.actions && Object.keys(here.actions).length) {
                 const action = Object.keys(here.actions)[0];
@@ -1461,7 +1489,7 @@
         const c = colonyState(u);
         if (!c || !sameLevel(u, c) || Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) return null;
         const h = UF.Households && UF.Households.of(u), p = h && h.home;
-        if (p && sameLevel(h, u) && u.x >= p.x - 2 && u.y >= p.y - 2 && u.x <= p.x + p.w + 2 && u.y <= p.y + p.h + 2) return null;
+        if (p && sameLevel(h, u) && (UF.Households.structures ? UF.Households.structures(h) : [p]).some(b => u.x >= b.x - 2 && u.y >= b.y - 2 && u.x <= b.x + b.w + 2 && u.y <= b.y + b.h + 2)) return null;
         const cell = freeCellNear(levelArea(c), c.site.x, c.site.y, 4);
         return cell ? give(u, { type: "move", target: cell, params: { via: "move", home: true } }) : null;
     }
@@ -1484,7 +1512,7 @@
         }
         // Lazy colonists take a breather now and then instead of the next piece of work (needs still come first).
         const lazy = unit01(seed(), SALT.roll, u.id, ticks()) < (100 - facet(u, "industriousness")) / 400;
-        return needJob(u) || homeJob(u) || designationJob(u) || (lazy ? null : planJob(u)) || idleJob(u);
+        return needJob(u) || (UF.FireSafety && (UF.FireSafety.respond(u) || UF.FireSafety.prevent(u))) || homeJob(u) || designationJob(u) || (lazy ? null : planJob(u)) || idleJob(u);
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
@@ -1504,6 +1532,7 @@
         }
         const t = ticks();
         for (const u of simulationUnits()) {
+            if (UF.FireSafety && UF.FireSafety.respond(u)) { decisionAt.set(u.id, t); continue; }
             const job = J.of(u.id);
             if (job) {
                 const need = urgent(u);
@@ -1539,6 +1568,8 @@
             case "mate": return job.result && job.result.familyInteraction ? "need" : null;
             case "drink": case "eat": case "sleep": case "talk": return u.data.needs ? "need" : null;
             case "move": case "wander": return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
+            case "natural_travel": return job.result && job.result.moved && job.result.to && sameLevel(u, job.result.to) && u.x === job.result.to.x && u.y === job.result.to.y ? "position" : null;
+            case "douse": return job.result && job.result.doused ? "fire" : null;
             default: return null;
         }
     }

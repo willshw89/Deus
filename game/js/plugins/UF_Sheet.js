@@ -617,12 +617,16 @@
         const speciesText = species ? `${species.name}${species.kind ? ` (${species.kind})` : ""}` : cap(d.species || "");
         const who = [d.gender ? lower(d.gender) : "", d.age !== undefined && kind !== "animal" ? `age ${d.age}` : ""].filter(Boolean).join(", ");
         const fl = factionLine(u);
+        const Env = window.UF && UF.Environment;
+        const th = Env && typeof Env.unitThermal === "function" ? Env.unitThermal(u) : null;
+        const cond = Env && typeof Env.conditionLabel === "function" ? Env.conditionLabel(u) : "";
+        const thermalText = th ? `${th.bodyTemp}°C${cond ? ` [${cond}]` : ""}` : "";
         const here = I && u.area ? I.atIn(u.area, u.x, u.y) : [];
         const grid = gridSlots(inv, cfg, equipped);
         const drops = kind === "animal" && species && species.yields ? Object.keys(species.yields).slice(0, MAX_DROPS).map(id => ({ typeId: id, count: species.yields[id] | 0 })) : (kind === "animal" ? [] : null);
         const m = {
             subject: { kind: "unit", unitId: u.id }, kind, readOnly,
-            title: u.name || "", subtitle: [KIND_LABELS[kind], speciesText, who].filter(Boolean).join(" · "),
+            title: u.name || "", subtitle: [KIND_LABELS[kind], speciesText, who, thermalText].filter(Boolean).join(" · "),
             faction: fl.faction, stance: fl.stance, doing: doingOf(u),
             load: loadOf(u),
             picture: faceSpecOf(u, species),
