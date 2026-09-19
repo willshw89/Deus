@@ -1,0 +1,38 @@
+{
+  "id": "human_male_stand",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [24, 47],
+  "footprint": [1, 1],
+  "facings": ["S", "SW", "W", "NW", "N", "NE", "E", "SE"],
+  "animations": {
+    "stand": [0]
+  },
+  "frameMs": 150,
+  "lean": {
+    "mode": "none",
+    "slope": 1,
+    "top": null,
+    "east": 0
+  },
+  "scale": {
+    "subjectHeight": 46,
+    "target": null,
+    "factor": 1
+  },
+  "source": {
+    "file": "art/raw/human_male_stand.png",
+    "format": "png",
+    "converted": null,
+    "size": [192, 1536],
+    "sheet": [1, 8],
+    "block": 4,
+    "phase": [0, 0],
+    "background": "magenta #FF00FF"
+  },
+  "made": {
+    "by": "tools/make_25d.js",
+    "at": "2026-09-19T16:22:12.444Z",
+    "options": ["art/raw/human_male_stand.png", "--sheet", "1x8", "--facings", "S,SW,W,NW,N,NE,E,SE", "--max-colors", "32", "--lean", "none", "--force"]
+  }
+}
