@@ -2,9 +2,9 @@
 
 Written 2026-09-18 (night) by Claude Code. User instruction: "Lets build combat. Including fletching, smithing, etc." (VISION V55). Contract paragraph: `docs/design/WORLD_ARCHITECTURE.md` §2.10 "Combat chains". This file is exact enough to implement phase 2 from without guessing; where a number here and the catalog disagree, the catalog is wrong and gets fixed to this file.
 
-**Status.** Phase 1 (this file, the catalog data, `tools/check_catalog.js`, `docs/CREDITS.md`) landed 2026-09-18 night. Phase 2 (code: ranged attacks, the five equipment slots, crafting quality and material on item records, arming through the society plan) starts when the UF_Combat core (attack modes, d20 to-hit, DF-style body-part injuries; another agent, same night) lands, and is built from §9.
+**Status.** Phase 1 (this file, the catalog data, `tools/check_catalog.js`, `docs/CREDITS.md`) landed 2026-09-18 night. **Converted to OSRS-model combat 2026-09-19** (user: "lets drop the d20 combat rule, and adopt OSRS combat"; VISION V64, V47 retired). The weapon, armour, shield and ammunition blocks now carry attack speeds, attack types, styles and equipment bonuses instead of SRD dice and AC (§2, §6). The UF_Combat core is rewritten to that model (`docs/systems/UF_Combat.md`). Phase 2 is still to build: the five equipment slots in UF_Items, crafting quality and material on item records, arming through the society plan (§9).
 
-**Sources.** Dice, weapon properties, armor class values and the attack rules come from the System Reference Document 5.1 (CC-BY-4.0; the attribution text is in `docs/CREDITS.md`), tables **"Weapons"** and **"Armor"** (Equipment) and the rules under **"Using Ability Scores"** and **"Combat → Making an Attack"**. The chain itself (ore → bar → blade, hide → leather → armor, log → bow, shaft + tip + feathers → arrow) is Dwarf Fortress's idea with our numbers; no DF or D&D name, term or data is used (AGENTS.md → Reference vs. shipped content; `tools/check_catalog.js` scans every string for the banned list).
+**Sources.** The combat rules follow the OSRS model (accuracy and defence rolls from effective levels and equipment bonuses, max hits from effective strength and strength bonus, attack speeds in ticks, combat styles), with our own numbers and words (VISION V64). No SRD dice, armor class or ability scores remain in this file or in the catalog's combat data. The chain itself (ore → bar → blade, hide → leather → armor, log → bow, shaft + tip + feathers → arrow) is Dwarf Fortress's idea with our numbers. No DF, D&D or OSRS name, term or data is used in anything the player reads (AGENTS.md → Reference vs. shipped content; `tools/check_catalog.js` scans every string for the banned list).
 
 **Where the data lives.** `game/data/UF_WorldCatalog.json`: `materials` (§1), `items.types` (§2), `combat` (§3, §6), `recipes.list` (§4), `objects` (§5), `labors` and `cultures.<species>.chainWeights/arms` (§7), `colony.plan` / `colony.plans.*` (§8), `wildlife.species[].yields` (feathers), `colony.skills`. Added by `tools/add_combat_chains.js` (idempotent; keeps every other entry byte for byte); validated by `tools/check_catalog.js` (18 checks, self-test 45 cases).
 
@@ -13,11 +13,12 @@ Written 2026-09-18 (night) by Claude Code. User instruction: "Lets build combat.
 |---|---|---|
 | D1 | **Bronze has no recipe.** The materials table keeps the `bronze` row (multipliers fixed) but there is no tin ore in the catalog, so nothing makes it. A tin ore later adds one recipe (`bar_copper` + tin → `bar_bronze`) and nothing else changes. | Inventing "copper + bone ash = bronze" would be fake chemistry in a game that follows DF's material logic. |
 | D2 | **Copper is used by the mace** (`mace` = 2 copper bars + 1 log at the smithy, material copper ×0.9). Everything else metal is iron. | Gives `ore_copper` / `bar_copper` a consumer; a cast copper head on a haft is the earliest real metal weapon. |
-| D3 | **Ranges are SRD feet ÷ 10, not ÷ 5** (1 cell = 5 ft, then halved): short bow 8/32 cells, long bow 15/60, sling 6/24, thrown spear and dagger 2/6. | Units see 8 cells (`data.sight`), the map is dense with objects, and at zoom 1 the screen is 17 × 13 cells; SRD's 64-cell long range for a short bow would be four screens. A shooter still needs to see its target (§6.5), so the normal ranges sit at or near sight. |
-| D4 | **Crossbows are not in phase 2.** Gnomes prefer the sling and the short bow instead (`cultures.gnome.arms`). | One ammunition type (arrows, plus stones for the sling) keeps the ranged code small; a light crossbow (1d8, 16/64 cells, loading) plus bolts is one item pair and one recipe later. |
-| D5 | **The iron axe is two-handed** (no shield), as is every bow; the SRD battleaxe is versatile, ours is simplified to two hands. | The task's rule; also what the AR-600 `held` layer can show. |
-| D6 | **The stone pick fights as a handaxe-class tool: 1d6, STR.** The SRD has no simple pick. | It is a tool first; giving it 1d8 (SRD war pick, martial) would make the miner the best fighter. |
-| D7 | **Head and leg pieces are +1 AC each and carry a `soak`** (damage taken off a hit that lands on that body part: leather 1, iron 2). The torso piece carries the SRD armor value (leather 11 → `ac 1`, hide 12 → `ac 2` with `dexMax 2`, chain mail 16 → `ac 6` with `dexMax 0`). | The SRD has no helmets or greaves; DF has body parts. Full leather = 13 + DEX, full iron = 18 (plate-level), which matches the SRD's spread. `soak` is data now and is applied when the combat core's injuries land (§6.4). |
+| D3 | **Ranges are short** (revised 2026-09-19): short bow 6 cells, long bow 8, sling 5, one range each (the longrange style adds 2). | Units see 8 cells (`data.sight`), the map is dense with objects, and at zoom 1 the screen is 17 × 13 cells, so the long bow's range sits at sight. |
+| D4 | **Crossbows are not in phase 2.** Gnomes prefer the sling and the short bow instead (`cultures.gnome.arms`). | One ammunition type (arrows, plus stones for the sling) keeps the ranged code small; a crossbow (a slow ranged weapon with high ranged attack) plus bolts is one item pair and one recipe later. |
+| D5 | **The iron axe is two-handed** (no shield), as is every bow. | The task's rule; also what the AR-600 `held` layer can show. |
+| D6 | **Stone tools are weak weapons** (revised 2026-09-19): the stone knife, axe and pick have small attack bonuses and a strength bonus of 1-3, and the axe and pick are slow (5 ticks). | They are tools first; the miner must not be the best fighter. |
+| D7 | **Armour is defence bonuses per attack type** (revised 2026-09-19; the d20 AC values and `soak` are gone). Metal gives more defence against slash and stab than against crush, and costs ranged and magic attack; leather is even, with a little magic defence. | Classic-model armour. DF-style injuries by body part stay an open question (VISION V64, Q12); a damage-reduction key comes back only if the user wants wounds on top of hitpoints. |
+| D13 | **Material tiers are in each item's own bonuses** (2026-09-19): iron beats bronze beats copper beats stone within a weapon class (iron dagger over stone knife, iron axe over stone axe, copper mace over wooden club). `materials.list[].damage` and `.armor` are no longer read by combat. | One place for each number; the `combat.equipment` check compares the classes. A bronze item, when tin exists, gets bonuses between the copper and the iron one. |
 | D8 | **Quality names:** crude, rough, plain, sound, fine, flawless (0–5). | Plain English; not DF's ladder. |
 | D9 | **Work is in beats** on every new recipe and workshop (craft 6–12, build 4–8; WORLD_ARCHITECTURE §1.7). The older recipes and objects are still in ticks until the beat integration (STATUS K16) rescales them; `recipes.about` says so. Until then a new craft finishes in 6–12 ticks under the tick engine. | The task's rule; mixing units is flagged in the file itself so the rescale skips these entries. |
 | D10 | **The work stone gained the tag `workbench`** so recipes can name it (`at: "workbench"`); its tags were `building, workplace` only. | `at` matches a tag; `workplace` is shared with the campfire. |
@@ -35,55 +36,72 @@ Written 2026-09-18 (night) by Claude Code. User instruction: "Lets build combat.
 | bronze | bronze | 8.3 | 6 | 5 | 1.0 | 1.0 | no recipe (D1) |
 | iron | iron | 7.9 | 7 | 6 | 1.1 | 1.1 | `bar_iron` ← `ore_iron` at the furnace |
 
-Rules: `damage` multiplies the rolled weapon dice (before the ability modifier; §6.4). For a **melee** hit it is the weapon's material; for a **ranged** hit it is the **ammunition's** material (the bow's wood does not matter; the arrow's tip does). `armor` multiplies an armor piece's `ac` bonus when the piece is made of another material than its type's default (phase 2 has no such recipe, so it is informational; `round half up`). `value` is for trade later. `density × volume` is not used yet; `weight` is stored per item type in kg instead (§2).
+Rules (revised 2026-09-19, D13): `damage` and `armor` are **no longer read by combat**. Each item type's bonuses already carry its material's tier (§2). The one place a material still changes a fight is arrows: `ammo.byMaterial` gives the ranged strength of stone, bone and iron tips (§2.3). The two columns stay as data for a later material-swap recipe. `value` is for trade later. `density × volume` is not used yet; `weight` is stored per item type in kg instead (§2).
 
 ## 2. Items (`catalog.items.types`)
 Every made item has `material` (its default; the recipe's `material` overrides it on the item record at craft, §3) and `weight` (kg). New records get `quality` (§3). Images are tinted reuses of existing `!$U7_Item_*` sheets until AR-511 (the inventory tool marks them as stand-ins).
 
 ### 2.1 Weapons (`weapon` block; slot `weapon`)
-`weapon = { damage, ability, hands, reach, skill, properties, versatile?, ranged? }`. `ability`: `str`, `dex`, or `finesse` (the better of STR and DEX). `hands: 2` = no shield (§6.2). `ranged = { range, long, ammo, thrown? }` in cells (§6.5). SRD row = the "Weapons" table entry the dice come from.
+Revised 2026-09-19 (OSRS model, VISION V64). The block is `weapon = { speed, types, styles, hands, reach, bonuses, ranged? }`:
+- `speed`: attack speed in ticks (1 tick = 36 map updates = 0.6 s at ×1).
+- `types`: the attack types it can use, the first being the default (`stab`, `slash`, `crush`, `ranged`, `magic`).
+- `styles`: the combat styles it offers (`accurate`, `aggressive`, `defensive`, `controlled`; ranged weapons `accurate`, `rapid`, `longrange`).
+- `hands`: 2 means no shield (§6.2).
+- `bonuses = { attack: { stab, slash, crush, ranged, magic }, defence?: {…}, strength?, rangedStrength?, magicStrength? }`: missing keys count 0.
+- `ranged = { range (cells), ammo (item type id), ammoStrength? (ranged strength when the ammunition type has no ammo block) }`.
 
-| id | Name | SRD row | Dice | Ability | Properties | Hands | Range (cells) | Material | kg | Recipe (inputs → at, labor, beats) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| stone_knife | Stone knife (existing tool) | dagger | 1d4 | finesse | finesse, light | 1 | – | stone | 0.3 | existing `stone_knife` |
-| stone_axe | Stone axe (existing tool) | handaxe | 1d6 | str | – | 1 | – | stone | 1.4 | existing `stone_axe` |
-| stone_pick | Stone pick (existing tool) | handaxe-class (D6) | 1d6 | str | – | 1 | – | stone | 1.8 | existing `stone_pick` |
-| club | Club | club | 1d4 | str | light | 1 | – | wood | 0.9 | 1 log → workbench, carpenter, 6 |
-| spear | Spear | spear | 1d6 (1d8 two-handed) | str | thrown, versatile | 1 | 2 / 6 thrown | stone (default) or iron | 1.4 | `spear_stone`: 1 log + 1 stone + 1 fiber → workbench, carpenter, 8 · `spear_iron`: 1 log + 1 bar_iron + 1 fiber → smithy, weaponsmith, 8 |
-| dagger_iron | Iron dagger | dagger | 1d4 | finesse | finesse, light, thrown | 1 | 2 / 6 thrown | iron | 0.5 | 1 bar_iron + 1 leather → smithy, weaponsmith, 8. Also a tool: `hunt 2.5, gather 1.5, craft 1.5` (a better knife; tag `knife`) |
-| sword_short | Short sword | shortsword | 1d6 | finesse | finesse, light | 1 | – | iron | 0.9 | 2 bar_iron + 1 leather → smithy, weaponsmith, 10 |
-| sword_long | Long sword | longsword | 1d8 (1d10 two-handed) | str | versatile | 1 | – | iron | 1.4 | 3 bar_iron + 1 leather → smithy, weaponsmith, 12 |
-| axe_iron | Iron axe | battleaxe (D5) | 1d8 | str | two-handed | 2 | – | iron | 1.8 | 2 bar_iron + 1 log → smithy, weaponsmith, 10. Also a tool: `chop 3` |
-| mace | Copper mace | mace | 1d6 | str | – | 1 | – | copper | 1.8 | 2 bar_copper + 1 log → smithy, weaponsmith, 8 |
-| bow_short | Short bow | shortbow | 1d6 | dex | ammunition, two-handed | 2 | 8 / 32, ammo `arrows` | wood | 0.9 | 1 log + 2 fiber → bowyer, bowyer, 10 |
-| bow_long | Long bow | longbow | 1d8 | dex | ammunition, heavy, two-handed | 2 | 15 / 60, ammo `arrows` | wood | 0.9 | 2 log + 2 fiber → bowyer, bowyer, 12 |
-| sling | Sling | sling | 1d4 | dex | ammunition | 1 | 6 / 24, ammo `stone` | leather | 0.1 | 3 fiber + 1 leather → workbench, leatherworker, 6 |
+The old `damage`, `ability`, `properties`, `versatile` and `skill` keys are gone. Which skill a fight trains comes from the style (UF_Skills).
 
-Not included from the task's SRD list: warhammer (no hammer item yet; a `hammer_iron` 1d8 str is one row + one recipe when wanted), light crossbow (D4). The `skill` of every melee weapon is `fighting`, of every ranged weapon `archery` (§6.3).
+| id | Name | Speed | Types | Styles | Attack stab / slash / crush / ranged / magic | Strength | Hands | Range | Material | kg | Recipe (inputs → at, labor, beats) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| stone_knife | Stone knife (existing tool) | 4 | stab, slash | acc, agg, def | 3 / 1 / −4 / 0 / 0 | 1 | 1 | – | stone | 0.3 | existing `stone_knife` |
+| stone_axe | Stone axe (existing tool) | 5 | slash, crush | acc, agg, def | −2 / 3 / 1 / 0 / 0 | 3 | 1 | – | stone | 1.4 | existing `stone_axe` |
+| stone_pick | Stone pick (existing tool) | 5 | stab, crush | acc, agg, def | 3 / −2 / 1 / 0 / 0 | 3 | 1 | – | stone | 1.8 | existing `stone_pick` |
+| club | Club | 4 | crush | acc, agg, def | −4 / −4 / 5 / 0 / 0 | 5 | 1 | – | wood | 0.9 | 1 log → workbench, carpenter, 6 |
+| spear | Spear | 5 | stab, crush | controlled, def | 6 / 3 / 3 / 0 / 0 | 8 | 1 | – | stone (default) or iron | 1.4 | `spear_stone`: 1 log + 1 stone + 1 fiber → workbench, carpenter, 8 · `spear_iron`: 1 log + 1 bar_iron + 1 fiber → smithy, weaponsmith, 8 |
+| dagger_iron | Iron dagger | 4 | stab, slash | acc, agg, def | 9 / 4 / −4 / 0 / 0 | 10 | 1 | – | iron | 0.5 | 1 bar_iron + 1 leather → smithy, weaponsmith, 8. Also a tool: `hunt 2.5, gather 1.5, craft 1.5` (a better knife; tag `knife`) |
+| sword_short | Short sword | 4 | stab, slash | acc, agg, def | 11 / 8 / −2 / 0 / 0 | 14 | 1 | – | iron | 0.9 | 2 bar_iron + 1 leather → smithy, weaponsmith, 10 |
+| sword_long | Long sword | 5 | slash, stab | acc, agg, controlled, def | 12 / 18 / −2 / 0 / 0 | 24 | 1 | – | iron | 1.4 | 3 bar_iron + 1 leather → smithy, weaponsmith, 12 |
+| axe_iron | Iron axe | 6 | slash, crush | acc, agg, def | −2 / 20 / 12 / 0 / 0 | 28 | 2 | – | iron | 1.8 | 2 bar_iron + 1 log → smithy, weaponsmith, 10. Also a tool: `chop 3` |
+| mace | Copper mace | 4 | crush, stab | acc, agg, controlled, def | 2 / −2 / 8 / 0 / 0 | 10 | 1 | – | copper | 1.8 | 2 bar_copper + 1 log → smithy, weaponsmith, 8 |
+| bow_short | Short bow | 4 (rapid 3) | ranged | acc, rapid, longrange | 0 / 0 / 0 / 10 / 0 | (arrows) | 2 | 6, ammo `arrows` | wood | 0.9 | 1 log + 2 fiber → bowyer, bowyer, 10 |
+| bow_long | Long bow | 6 (rapid 5) | ranged | acc, rapid, longrange | 0 / 0 / 0 / 15 / 0 | (arrows) | 2 | 8, ammo `arrows` | wood | 0.9 | 2 log + 2 fiber → bowyer, bowyer, 12 |
+| sling | Sling | 4 (rapid 3) | ranged | acc, rapid, longrange | 0 / 0 / 0 / 6 / 0 | ranged 4 (`ammoStrength`) | 1 | 5, ammo `stone` | leather | 0.1 | 3 fiber + 1 leather → workbench, leatherworker, 6 |
+
+**What the numbers do** (levels 40, accurate, against a wolf; the `combat.equipment` check prints them), in expected damage per tick:
+
+| Class | Weaker item | Stronger item |
+|---|---|---|
+| knives | stone knife 0.494 | iron dagger 0.606 |
+| swords | (stone knife 0.494) | iron short sword 0.610 |
+| axes | stone axe 0.395 | iron axe 0.486 |
+| crushing | wooden club 0.498 | copper mace 0.604 |
+
+The long sword and the iron axe trade speed for a bigger hit: they pull ahead at higher strength levels. Not included: a warhammer (no hammer item yet; one row and one recipe when wanted) and the crossbow (D4). Thrown spears and daggers are not in the combat model (the old `thrown` data is gone); they come back with a throwing rule.
 
 ### 2.2 Armor (`armor` block; slots `head`, `torso`, `legs`) and shields (`shield` block; slot `shield`)
-`armor = { slot, ac, dexMax (null = no cap), soak, minStr? }`; `shield = { ac }`.
+Revised 2026-09-19. `armor = { slot, bonuses }`; `shield = { bonuses }`. The bonuses have the same shape as a weapon's; armour mostly carries `defence`, and metal pieces carry negative `attack` bonuses for ranged and magic. The old `ac`, `dexMax`, `soak` and `minStr` are gone (D7).
 
-| id | Name | Slot | ac | dexMax | soak | SRD derivation | Material | kg | Recipe |
-|---|---|---|---|---|---|---|---|---|---|
-| fiber_wrap | Woven wrap (existing) | torso | 0 | – | 0 | clothing | – | 0.5 | existing |
-| hide_cloak | Hide cloak (existing) | torso | 2 | 2 | 1 | hide 12 + DEX (max 2) | leather | 5.4 | existing |
-| armor_leather | Leather armor | torso | 1 | – | 1 | leather 11 + DEX | leather | 4.5 | 4 leather + 2 fiber → workbench, leatherworker, 10; `wear.tier 3` |
-| mail_iron | Iron mail | torso | 6 | 0 | 2 | chain mail 16, STR 13 (`minStr`) | iron | 25 | 5 bar_iron + 1 leather → smithy, armorsmith, 12; `wear.tier 3` |
-| helmet_leather | Leather cap | head | 1 | – | 1 | D7 | leather | 0.5 | 2 leather → workbench, leatherworker, 6 |
-| helmet_iron | Iron helmet | head | 1 | – | 2 | D7 | iron | 1.4 | 2 bar_iron + 1 leather → smithy, armorsmith, 10 |
-| leggings_leather | Leather leggings | legs | 1 | – | 1 | D7 | leather | 0.9 | 2 leather + 1 fiber → workbench, leatherworker, 6 |
-| greaves_iron | Iron greaves | legs | 1 | – | 2 | D7 | iron | 2.7 | 2 bar_iron + 1 leather → smithy, armorsmith, 10 |
-| shield_wood | Wooden shield | shield | 2 | – | – | shield +2 | wood | 2.7 | 2 log + 1 leather → workbench, carpenter, 8 |
-| shield_iron | Iron shield | shield | 2 | – | – | shield +2 | iron | 5.0 | 2 bar_iron + 1 log → smithy, armorsmith, 10 |
+| id | Name | Slot | Defence stab / slash / crush / ranged / magic | Attack penalties | Material | kg | Recipe |
+|---|---|---|---|---|---|---|---|
+| fiber_wrap | Woven wrap (existing) | torso | 1 / 1 / 1 / 1 / 0 | – | – | 0.5 | existing |
+| hide_cloak | Hide cloak (existing) | torso | 4 / 5 / 5 / 5 / 1 | magic −1 | leather | 5.4 | existing |
+| armor_leather | Leather armor | torso | 8 / 9 / 10 / 9 / 3 | magic −2 | leather | 4.5 | 4 leather + 2 fiber → workbench, leatherworker, 10; `wear.tier 3` |
+| mail_iron | Iron mail | torso | 18 / 22 / 12 / 18 / −2 | ranged −4, magic −12 | iron | 25 | 5 bar_iron + 1 leather → smithy, armorsmith, 12; `wear.tier 3` |
+| helmet_leather | Leather cap | head | 2 / 3 / 3 / 2 / 1 | – | leather | 0.5 | 2 leather → workbench, leatherworker, 6 |
+| helmet_iron | Iron helmet | head | 6 / 7 / 5 / 6 / −1 | ranged −1, magic −4 | iron | 1.4 | 2 bar_iron + 1 leather → smithy, armorsmith, 10 |
+| leggings_leather | Leather leggings | legs | 3 / 4 / 4 / 4 / 1 | – | leather | 0.9 | 2 leather + 1 fiber → workbench, leatherworker, 6 |
+| greaves_iron | Iron greaves | legs | 9 / 10 / 7 / 9 / −2 | ranged −2, magic −6 | iron | 2.7 | 2 bar_iron + 1 leather → smithy, armorsmith, 10 |
+| shield_wood | Wooden shield | shield | 4 / 5 / 3 / 5 / 0 | magic −2 | wood | 2.7 | 2 log + 1 leather → workbench, carpenter, 8 |
+| shield_iron | Iron shield | shield | 10 / 12 / 8 / 11 / −2 | ranged −2, magic −6 | iron | 5.0 | 2 bar_iron + 1 log → smithy, armorsmith, 10 |
 
-The SRD's chain shirt (13 + DEX max 2), ring mail (14) and plate (18) are not items; they are the reference points D7 calibrates against (full iron = 18). `wear.tier 3` on the two torso armors switches a human colonist to the tier-3 ("tailored") walk sheet until the AR-600 armor layer exists.
+Full iron (mail, helmet, greaves, shield) adds +43 stab, +51 slash, +32 crush and +44 ranged defence. `wear.tier 3` on the two torso armors switches a human colonist to the tier-3 ("tailored") walk sheet until the AR-600 armor layer exists.
 
 ### 2.3 Ammunition and intermediates
 | id | Name | Tags | Stack | Material | kg | Block | Recipe |
 |---|---|---|---|---|---|---|---|
-| arrows | Arrows | ammo, arrow | 24 | stone (default), bone or iron by recipe | 0.05 | `ammo: { for: ["bow_short", "bow_long"] }`, quality | `arrows_stone`: 1 log + 3 feathers + 1 stone → 12 (fletcher, fletcher, 8) · `arrows_bone`: … + 1 bone → 12 (8) · `arrows_iron`: … + 1 bar_iron → 12 (10) |
-| (stone) | Stone (existing) | – | 10 | – | – | the sling's ammunition (`sling.weapon.ranged.ammo = "stone"`; no `ammo` block, the existing entry is untouched) | – |
+| arrows | Arrows | ammo, arrow | 24 | stone (default), bone or iron by recipe | 0.05 | `ammo: { for: ["bow_short", "bow_long"], rangedStrength: 7, byMaterial: { stone: 7, bone: 8, iron: 12 } }` (2026-09-19: the ranged strength the arrow adds to the shot's max hit; `byMaterial` once item records carry a material), quality | `arrows_stone`: 1 log + 3 feathers + 1 stone → 12 (fletcher, fletcher, 8) · `arrows_bone`: … + 1 bone → 12 (8) · `arrows_iron`: … + 1 bar_iron → 12 (10) |
+| (stone) | Stone (existing) | – | 10 | – | – | the sling's ammunition (`sling.weapon.ranged.ammo = "stone"`, ranged strength 4 from the sling's `ammoStrength`; no `ammo` block, the existing entry is untouched) | – |
 | charcoal | Charcoal | fuel, material, charcoal | 10 | – | 0.5 | – | 3 firewood → 2 (furnace, furnace_operator, 8) |
 | bar_iron | Iron bar (existing) | metal, material | 10 | – | – | – | 2 ore_iron + 1 charcoal → 1 (furnace, furnace_operator, 10) |
 | bar_copper | Copper bar | metal, material | 10 | copper | 2.0 | – | 2 ore_copper + 1 charcoal → 1 (furnace, furnace_operator, 8) |
@@ -93,15 +111,15 @@ The SRD's chain shirt (13 + DEX max 2), ring mail (14) and plate (18) are not it
 A quiver is a stack of arrows in the inventory (§6.5). Bars, charcoal and leather have no quality (`quality: false` on their recipes).
 
 ## 3. Quality (rolled at craft)
-- **Roll:** `d20 + floor(skill / 2) + abilityModifier(recipe.ability)`, with `skill` = the crafter's `data.skills[recipe.skill]` (0–20) and the ability from `data.stats` (V53; `finesse` never appears on recipes). Seeded: `mulberry32(hash32(seed, unitId, jobId, "quality"))`, never `Math.random` (WORLD_ARCHITECTURE §1.3).
-- **Quality** = the number of `combat.quality.thresholds` (`[5, 10, 15, 20, 25]`) the roll **exceeds**: roll ≤ 5 → 0, 6–10 → 1, 11–15 → 2, 16–20 → 3, 21–25 → 4, ≥ 26 → 5. A novice (skill 0, modifier 0) makes quality 0–3, mostly 1–2; a master (skill 20, +10) with +2 makes 2–5.
+Revised 2026-09-19 (V63 skills, V64 combat):
+- **Roll:** `UF.Skills.qualityRoll(crafter, recipeId)` → 0-5 from the crafter's skill level for the recipe (level 1 gives 0-2, 50 gives 1-4, 99 gives 3-5; seeded from the world seed, the unit and a saved counter; `docs/systems/UF_Skills.md` → Effects). The old d20 + ability roll and `combat.quality.thresholds` are gone.
 - **Names** (`combat.quality.names`): crude, rough, plain, sound, fine, flawless. Shown on the character sheet and the look label as "a fine iron dagger".
-- **Effects** (`combat.quality.toHit` / `.ac` / `.value`, indexed 0–5): to hit `[-1, 0, 0, 0, +1, +1]` for weapons; AC `[-1, 0, 0, 0, +1, +1]` for armor and shields (each worn piece adds its own modifier); value `[0.5, 0.8, 1, 1.2, 1.5, 2]` × the material's value, for trade later. Ammunition quality applies its to-hit modifier to the shot.
+- **Effects** (`combat.quality.bonus` / `.value`, indexed 0-5): `bonus` `[0.8, 0.9, 1, 1.1, 1.2, 1.3]` multiplies every bonus of the item (UF_Combat reads `record.quality`; arrows' ranged strength too); `value` `[0.5, 0.8, 1, 1.2, 1.5, 2]` × the material's value, for trade later.
 - **Storage:** the item record gains `material` (id) and `quality` (0–5) when the recipe has `quality: true`; `material` comes from `recipe.material`, else the type's `material`. One roll per craft job, applied to the whole output (a batch of 12 arrows shares one quality).
 - **Stacks:** `UF.Items.drop/putDown/give` merge only items whose `type`, `material` and `quality` all match (records without them merge as today). This is the one UF_Items behaviour change that touches existing items (they have neither field, so nothing changes for them).
 
 ## 4. The chain from the ground (`catalog.recipes.list`)
-Recipe fields: `id, name, inputs, outputs, work (beats), at (object tag), labor, skill, ability, material?, quality, tool?`. `at` is the tag of the workshop the crafter stands beside (UF_Jobs' craft handler already does this: nearest object with that tag within 40 cells, stand on a free neighbour, "needs a <tag>" when none). `labor` is the labor that may take the job (§7); `skill` grows by one per five jobs (UF_Colonists) and feeds the quality roll.
+Recipe fields: `id, name, inputs, outputs, work (beats), at (object tag), labor, skill, material?, quality, tool?`. `at` is the tag of the workshop the crafter stands beside (UF_Jobs' craft handler already does this: nearest object with that tag within 40 cells, stand on a free neighbour, "needs a <tag>" when none). `labor` is the labor that may take the job (§7); `skill` names the trade: since 2026-09-19 UF_Skills (V63) gives the crafter experience for the job and rolls the quality from their level (§3).
 
 ```
 trees ──chop──▶ log ──split_firewood (anywhere, axe)──▶ firewood ──charcoal (furnace)──▶ charcoal
@@ -131,31 +149,38 @@ All are impassable (crafters stand beside them; `workshops_one_cell` in the chec
 
 ## 6. Equipment and combat rules (`catalog.combat`)
 ### 6.1 Slots
-`unit.data.equipment = { head, weapon, shield, torso, legs }` (item ids or null). What each accepts: `head` ← `armor.slot === "head"`; `torso` ← `armor.slot === "torso"` (armor and clothing: every clothing item has an `armor` block with `ac 0` or more); `legs` ← `armor.slot === "legs"`; `weapon` ← anything with `weapon` or `tool`; `shield` ← `shield`. **Aliases** (`combat.aliases`): `equipment.tool` reads as `equipment.weapon`, `equipment.clothes` as `equipment.torso`, until every reader is moved; `UF.Items.equip` writes the new keys and mirrors them to the old ones for one build, so UF_Jobs' `toolMultiplier` (reads `equipment.tool`) and UF_Colonists (`equippedItem(u, "clothes")`, `tier`) keep working. `wear.tier` still sets `data.tier` and the walk sheet (UF_Colonists.setTier).
+`unit.data.equipment = { head, weapon, shield, torso, legs }` (item ids or null). What each accepts: `head` ← `armor.slot === "head"`; `torso` ← `armor.slot === "torso"` (armor and clothing: every clothing item has an `armor` block with its slot and defence bonuses); `legs` ← `armor.slot === "legs"`; `weapon` ← anything with `weapon` or `tool`; `shield` ← `shield`. **Aliases** (`combat.aliases`): `equipment.tool` reads as `equipment.weapon`, `equipment.clothes` as `equipment.torso`, until every reader is moved; `UF.Items.equip` writes the new keys and mirrors them to the old ones for one build, so UF_Jobs' `toolMultiplier` (reads `equipment.tool`) and UF_Colonists (`equippedItem(u, "clothes")`, `tier`) keep working. `wear.tier` still sets `data.tier` and the walk sheet (UF_Colonists.setTier).
 
-### 6.2 Hands, versatile, thrown
-- `weapon.hands === 2` (both bows, the iron axe): equipping it unequips the shield; equipping a shield while a two-handed weapon is held fails ("needs both hands").
-- `versatile` (spear 1d8, long sword 1d10): the two-handed dice are used when the `shield` slot is empty.
-- `thrown` (spear, iron dagger): a ranged attack with the weapon itself as ammunition; it leaves the `weapon` slot and lands on the target's cell (hit) or within 1 cell of it (miss), as a ground item that keeps its material and quality. STR is the ability (SRD: thrown melee weapons use the melee ability).
+### 6.2 Hands
+- `weapon.hands === 2` (both bows, the iron axe): equipping it unequips the shield; equipping a shield while a two-handed weapon is held fails ("needs both hands"). The d20 `versatile` dice and `thrown` attacks are gone (2026-09-19).
 
-### 6.3 Attack roll
-`d20 + abilityModifier + proficiency + qualityToHit(weapon) [+ qualityToHit(ammo)] vs AC`. `abilityModifier` = `floor((score − 10) / 2)` of `weapon.ability` (`finesse` = max of STR and DEX; unarmed and no-weapon tools use STR; ranged and thrown per the block). `proficiency = combat.proficiency.base + floor(skill / combat.proficiency.perSkill)` = 2 + floor(skill / 5) with `skill = data.skills[weapon.skill]` (`fighting` melee, `archery` ranged; the labor `soldier` trains `fighting`). Natural 20 (`combat.critical.hit`) hits and doubles the dice; natural 1 (`combat.critical.miss`) misses. Advantage/disadvantage: roll twice, take the better/worse (the combat core's rules for flanking, prone and unseen; long range adds disadvantage, §6.5).
+### 6.3 Accuracy (revised 2026-09-19, OSRS model; UF_Combat is the code, `docs/systems/UF_Combat.md` the full rules)
+- **Effective level** = level + style bonus + 8. The level is attack for stab, slash and crush, ranged for ranged, magic for magic. Levels come from UF_Skills (V63) for people and from `wildlife.species[].combat` for creatures.
+- **Style bonus:** accurate +3, controlled +1; aggressive, defensive, rapid and longrange add nothing to accuracy.
+- **A** (max attack roll) = effective level × (the attack bonus of everything worn and held for that attack type + 64).
+- **D** (max defence roll) = effective defence × (the defender's defence bonus for that type + 64). The effective defence counts the defender's style: defensive +3, controlled +1, longrange +3. Against magic, a person's effective defence blends 0.7 × magic and 0.3 × defence.
+- **The roll:** seeded integers 0..A and 0..D; a hit when the attack roll is higher. So hit chance = `1 − (D + 2) / (2(A + 1))` when A > D, else `A / (2(D + 1))`.
+- There are no critical hits.
 
-### 6.4 Damage and AC
-- Damage = `round(diceRoll × material.damage) + abilityModifier`, minimum 1 on a hit; the material is the weapon's for melee and the **ammunition's** for shots. Unarmed: `combat.unarmed.flat` (1) + STR modifier. Criticals double the dice before the multiplier.
-- `AC = combat.baseAC (10) + min(DEXmod, torso.armor.dexMax ?? +∞) + head.ac + torso.ac + legs.ac + shield.ac + Σ qualityAC(each worn piece)`. Unworn slots add 0. A torso piece with `minStr` worn by someone below it: −2 to hit and speed halved (SRD: heavy armor Strength). Examples: naked DEX 12 → 11; woven wrap → 11; hide cloak DEX 16 (+3, capped 2) → 14; leather armor + cap + leggings DEX 14 → 10 + 2 + 3 = 15; iron mail + helmet + greaves + iron shield → 10 + 0 + 6 + 1 + 1 + 2 = 20 (+1 per fine piece).
-- **`soak`** (D7): when the combat core lands a hit on a body part (head, torso, arms, legs, hands, feet), the piece covering it (head → head, torso and arms → torso, legs and feet → legs) takes `soak` off the damage before injuries are computed (not before HP loss). Hands and arms use the torso piece's soak.
+### 6.4 Damage (revised 2026-09-19)
+- **Max hit** = `floor(0.5 + effective strength × (strength bonus + 64) / 640)`. Effective strength = strength + (aggressive 3, controlled 1) + 8. Ranged uses the ranged level and the ranged strength (arrows' `ammo.rangedStrength`, the sling's `ammoStrength`). Creatures add `maxHitBonus`.
+- A hit deals a seeded uniform 0..max hit, capped at the target's hitpoints; a miss deals 0.
+- Hitpoints are a skill (the hitpoints level is the maximum).
+- **Attack speed:** each weapon's `speed` in ticks (unarmed 4); rapid is 1 tick faster.
+- **Armour** is defence bonuses (§2.2). There is no AC, dexterity cap, strength requirement or soak.
+- DF-style injuries by body part are an open question (VISION V64, Q12).
 
-### 6.5 Ranged attacks
-- **Range** in cells (D3): `ranged.range` normal, `ranged.long` with disadvantage (`combat.ranged.longRangeDisadvantage`). Distance = Chebyshev cells. A target beyond `long` cannot be shot. A shooter must **see** the target: distance ≤ `data.sight` (8 for colonists) or the target is already its combat target (the combat core's memory), so the long bow's 15 matters for return fire and for guards on walls with more sight, not for spotting.
-- **Line of sight:** Bresenham from the shooter's cell to the target's; every intermediate cell must hold no object that is impassable and not `under` (`combat.ranged.losBlockedBy`; trees and walls block, grass, beds and stockpiles do not); units in between do not block (they may be hit later; not in phase 2). No LoS → no shot ("no clear shot"); the attack mode then closes in.
-- **Rate:** one shot per beat (`combat.ranged.shotsPerBeat`), the `attack` animation frames of AR-600.
-- **Ammunition:** the weapon's `ranged.ammo` type must be in the shooter's inventory (any stack; the quiver is a stack). Each shot consumes 1 (`UF.Items.consumeFrom`). Out of ammunition → the unit switches to its melee weapon if it carries one, else unarmed, and its intent text says "out of arrows".
-- **Misses** drop the arrow (or sling stone) on a cell within `combat.ranged.missScatter` (1) of the target, seeded; hits destroy the arrow (stones are recovered on the target's cell). Dropped ammunition keeps its material and quality; hauling it back is an ordinary `fetch`.
-- Thrown weapons: §6.2.
+### 6.5 Ranged attacks (revised 2026-09-19)
+- **Range** in cells (D3): `ranged.range`, +2 in the longrange style; distance = Chebyshev cells. Out of range, the shooter walks closer.
+- **Ammunition:** the weapon's `ranged.ammo` type must be in the shooter's inventory (any stack; the quiver is a stack). Each shot uses 1 (`UF.Items.consume`). Out of ammunition → the unit fights with its fists (the `combat.equipment` check covers it); switching to a carried melee weapon comes with the phase-2 equipment code.
+- **Not built yet:** line of sight (trees and walls do not block shots yet), recovering arrows from the ground, thrown weapons.
 
 ### 6.6 What the character sheet shows (V49, later)
-Each slot's item with name, material and quality ("a fine iron dagger"), the computed AC with its parts, the weapon's dice and range, the ammunition count. Phase 2 only exposes the numbers through `UF.Items.acOf(unit)` and `UF.Combat.describe(unit)`; drawing is the sheet's build.
+- Each slot's item with name, material and quality ("a fine iron dagger").
+- The unit's fighting level, combat levels, hitpoints, style, attack type, weapon speed, max hit and range.
+- The bonuses of what it wears and holds, and the ammunition count.
+
+All of it is in `UF.Combat.describe(unit)` (2026-09-19); drawing it is the sheet's build.
 
 ## 7. Labors and cultures (`catalog.labors`, `catalog.cultures`)
 | Labor | Skill | Recipes it owns |
@@ -168,9 +193,9 @@ Each slot's item with name, material and quality ("a fine iron dagger"), the com
 | tanner | tanning | leather |
 | leatherworker | leatherwork | sling, helmet_leather, armor_leather, leggings_leather |
 | carpenter | carpentry | club, spear_stone, shield_wood |
-| soldier | fighting | (no recipe; jobs `attack`, `guard`; first to be armed) |
+| soldier | attack, strength, defence, ranged (V63/V64: the combat style decides which) | (no recipe; jobs `attack`, `guard`; first to be armed) |
 
-`colony.skills` gained `smelting, smithing, bowyery, fletching, tanning, leatherwork, carpentry, fighting, archery` (appended, so existing seeded skills keep their values: `skillsFor` is index-based).
+`colony.skills` gained `smelting, smithing, bowyery, fletching, tanning, leatherwork, carpentry, fighting, archery` (appended, so existing seeded skills keep their values: `skillsFor` is index-based). Since 2026-09-19 the skills are UF_Skills' (VISION V63, levels 1-99): the old names map onto the new skills there (fighting → attack, strength and defence; archery → ranged; `docs/systems/UF_Skills.md`).
 
 **Labor gating (phase 2, V43):** a colonist takes a chain recipe only when `data.labors` includes the recipe's `labor`, or when `data.labors` is absent (everyone may do everything until the labors build assigns them). The planner's weight for a chain job = `culture.priorities[labor.priority] × (culture.chainWeights[labor] ?? 1) × (1 + skill / 20)`.
 
@@ -211,7 +236,7 @@ Cells are relative to the site centre and collide with no existing step (the che
 Done conditions are the existing ones: `build` = every cell holds the object (or is skipped: another building, ruin or water there); `craft` with `count` = the colony holds that many (packs + ground within the site's radius + 2, `colonyCount`); counts that get consumed (`firewood`, `charcoal`, `bars`, `leather`) come back as undone when stock drops, which is what keeps the furnace running. Elves never smith in the plan (their chainWeights say why); dwarves never fletch.
 
 ### 8.2 The `arm` step (phase 2, UF_Colonists)
-`{ "id": "arm", "arm": [tags], "share": 0.5, "first": [labor ids] }`. **Done** when at least `ceil(share × adults)` adult colonists (stage `adult`/`elder`, or everyone while stages don't exist) are armed: for each tag in `arm`, the matching slot holds an item carrying that tag (`weapon` → `equipment.weapon` item has tag `weapon`; `armor` → `torso`; `shield` → `shield`). Stone tools carry `tool`, not `weapon`, so knives and axes do not count. **Behaviour** when undone: an unarmed colonist whose labors include one in `first` (else any unarmed colonist, soldiers first, then the highest `fighting` skill) takes the best free item: `culture.arms.prefer` order, then the highest quality; sources in order: its own pack, the weapon rack / stockpiles storing `weapon`, the ground within the site (radius + 2), each an `equip` job (rack and ground: `fetch` then `equip`). Scavenging (`arms.scavenge`) adds a roll before crafting: with that chance the colonist looks for a dropped weapon within 30 cells before the plan's craft steps are considered. Nothing here is per-creature behaviour; the faction menu (V49) later toggles `arm` on and off.
+`{ "id": "arm", "arm": [tags], "share": 0.5, "first": [labor ids] }`. **Done** when at least `ceil(share × adults)` adult colonists (stage `adult`/`elder`, or everyone while stages don't exist) are armed: for each tag in `arm`, the matching slot holds an item carrying that tag (`weapon` → `equipment.weapon` item has tag `weapon`; `armor` → `torso`; `shield` → `shield`). Stone tools carry `tool`, not `weapon`, so knives and axes do not count. **Behaviour** when undone: an unarmed colonist whose labors include one in `first` (else any unarmed colonist, soldiers first, then the highest fighting level, `UF.Combat.combatLevel`) takes the best free item: `culture.arms.prefer` order, then the highest quality; sources in order: its own pack, the weapon rack / stockpiles storing `weapon`, the ground within the site (radius + 2), each an `equip` job (rack and ground: `fetch` then `equip`). Scavenging (`arms.scavenge`) adds a roll before crafting: with that chance the colonist looks for a dropped weapon within 30 cells before the plan's craft steps are considered. Nothing here is per-creature behaviour; the faction menu (V49) later toggles `arm` on and off.
 
 ### 8.3 Input resolution (phase 2, UF_Colonists `craftStepJob`)
 When a craft step's input is missing and no ground item, object action or prey yields it, but a recipe outputs it, the colonist takes that recipe first (its inputs resolved the same way, depth ≤ 3, cycles cut). This is what lets `blades` run without an explicit `bars` step and what makes off-screen societies (V51) produce arms with the same plan. The explicit intermediate steps (D11) stay.
@@ -222,18 +247,15 @@ Crafted weapons, armor, shields and ammunition that a colonist does not equip ar
 ## 9. Phase-2 code checklist (build from this, add these checks)
 ### 9.1 UF_Items (`docs/systems/UF_Items.md`)
 - `slotFor(itemType) → "head" | "weapon" | "shield" | "torso" | "legs" | null` by §6.1.
-- `equip(unitId, itemId) → { ok, reason? }`: item carried; slot from `slotFor`; two-hands rule (§6.2); `minStr` allowed (penalty applies in combat); writes `equipment[slot]`, mirrors `tool`/`clothes` aliases; `wear.tier` → `data.tier` + `UF.Colonists.setTier`; emits `items:equipped(unit, item, slot)`. `unequip(unitId, slot)`; `equipped(unitId) → { slot: item | null }`.
-- `acOf(unitId) → { ac, parts: { base, dex, head, torso, legs, shield, quality } }` (§6.4).
+- `equip(unitId, itemId) → { ok, reason? }`: item carried; slot from `slotFor`; two-hands rule (§6.2); writes `equipment[slot]`, mirrors `tool`/`clothes` aliases; `wear.tier` → `data.tier` + `UF.Colonists.setTier`; emits `items:equipped(unit, item, slot)`. `unequip(unitId, slot)`; `equipped(unitId) → { slot: item | null }`.
+- (2026-09-19: no `acOf`. The fighting numbers of what a unit wears and holds are `UF.Combat.bonusesOf(unit)` and `UF.Combat.describe(unit)`, which already read the five slots and the `tool`/`clothes` aliases.)
 - Item records: `material?`, `quality?`; `create/give` accept them; `drop/putDown/give` merge only on equal type + material + quality (§3); `describe` says "12 × fine iron-tipped arrows" (quality name + material adjective + name; plain quality omits the name).
 - Migration: `equipment: { tool, clothes }` on old saves → `{ head: null, weapon: tool, shield: null, torso: clothes, legs: null, tool, clothes }` on load (`DataManager.extractSaveContents` alias, before UF_Jobs reads it).
-- Checks to add to suite `items`: `slot_for` (each of 5 slots + a null for berries), `equip_two_hands` (a long bow refuses a shield and drops it when equipped after), `ac_of` (the five worked examples of §6.4 give 11, 11, 14, 15, 20), `quality_stacks` (12 plain + 12 fine arrows stay two stacks; 12 + 12 plain merge to 24), `alias_mirror` (`equipment.tool === equipment.weapon` after `equip`), `save_migrates_equipment`.
+- Checks to add to suite `items`: `slot_for` (each of 5 slots + a null for berries), `equip_two_hands` (a long bow refuses a shield and drops it when equipped after), `quality_stacks` (12 plain + 12 fine arrows stay two stacks; 12 + 12 plain merge to 24), `alias_mirror` (`equipment.tool === equipment.weapon` after `equip`), `save_migrates_equipment`.
 
-### 9.2 UF_Combat (the core plus these)
-- `UF.Combat.attack(attacker, target)` reads `weapon.damage/versatile/ability/skill`, material (§1), quality (§3), `acOf` (§6.4), soak on the landed part (§6.4); unarmed from `combat.unarmed`.
-- `UF.Combat.rangedAttack(attacker, target)`: range, sight, LoS, one shot per beat, ammunition consumed, miss scatter, thrown weapons (§6.2, §6.5); `UF.Combat.lineOfSight(area, x0, y0, x1, y1) → bool` (Bresenham, `losBlockedBy`), `UF.Combat.inRange(attacker, target) → "normal" | "long" | false`.
-- Attack modes (U7, V29) pick ranged when the unit holds a ranged weapon with ammunition and the target is in range with LoS, else close to melee reach.
-- `UF.Combat.describe(unit)` → the sheet's numbers (§6.6).
-- Checks to add to suite `combat`: `weapon_dice_used` (a short sword hit on AC 0 deals 1–6 × 1.1 → 1–7 + mod over 200 seeded rolls, never 0), `material_multiplies` (stone vs iron spear means differ by ≈ 0.3 × 3.5 over 500 rolls), `quality_to_hit` (a crude weapon hits AC 15 less often than a fine one over 500 rolls, both within the binomial band), `ranged_range` (8 cells hits, 9 is long, 33 is refused for a short bow), `los_blocked_by_tree` (an oak on the line → no shot; tall grass → shot), `ammo_consumed` (12 arrows → 11 after a shot; 0 → "out of arrows" and a melee swing), `miss_drops_arrow` (with a forced miss an `arrows` item lies within 1 cell of the target), `thrown_spear_lands` (the spear leaves the slot and lies on the target's cell on a hit), `soak_applied` (an iron helmet turns a 2-damage head hit into 0 injury damage, HP still −2), `no_errors`.
+### 9.2 UF_Combat (rewritten 2026-09-19 to the OSRS model; `docs/systems/UF_Combat.md`)
+- **Done 2026-09-19:** the attack itself (accuracy and defence rolls from levels, styles and every slot's bonuses; max hit; attack speed in ticks; quality multiplies bonuses once item records carry it); ranged attacks by range with ammunition used per shot and a fall-back to fists; U7 attack modes with OSRS styles; retaliation; `describe(unit)` for the sheet (§6.6); checks `hit_chance`, `max_hit`, `attack_speed`, `styles`, `equipment` (the item tiers and the bow's arrows), `creatures` and ten more.
+- **Still to build:** line of sight (`UF.Combat.lineOfSight(area, x0, y0, x1, y1) → bool`: Bresenham over cells whose objects are impassable and not `under`; trees and walls block, grass, beds and stockpiles do not); switching to a carried melee weapon when out of ammunition (with UF_Items' `equip`); recovering arrows (a miss leaves the arrow within 1 cell of the target, seeded); thrown weapons (a throwing rule first). Checks to add then: `los_blocked_by_tree` (an oak on the line → no shot; tall grass → shot), `out_of_ammo_switches` (0 arrows and a sword in the pack → the sword is equipped and swung), `miss_drops_arrow`.
 
 ### 9.3 UF_Jobs (small)
 - `craft.apply`: when the recipe has `quality: true`, roll §3 once (seeded from `seed, unit.id, job.id`) and give the outputs with `material` (recipe's, else the type's) and `quality`; when `quality: false` give plain records. `equip.apply` → `UF.Items.equip` (the old direct write goes). `describe` for equip: "Taking up a fine iron dagger".
@@ -245,10 +267,11 @@ Crafted weapons, armor, shields and ammunition that a colonist does not equip ar
 - Checks to add to suite `colonists`: `arm_step_counts_weapons` (two colonists, one holding a club in `weapon`, one a stone axe: `planStatus` says 1/N), `arm_equips_from_rack` (a sword on the weapon rack cell and an unarmed colonist → an `equip` job finishes with the sword in `equipment.weapon`), `craft_resolves_inputs` (a `blades` step with no bars but ore and charcoal on the ground → a `bar_iron` craft precedes the sword), `plan_length_matches_template` (already `plan_reads_the_site`; the template now has 27 steps in the default plan).
 
 ### 9.5 Tools and docs
-- `tools/check_catalog.js` stays green (`RESULT PASS 18 checks`) and is added to `tools/run_all_suites.js`'s pre-flight.
+- `tools/check_catalog.js` stays green and is added to `tools/run_all_suites.js`'s pre-flight. On 2026-09-19 it moved to the OSRS-model blocks: `weapon_dice` became `weapon_blocks`, `armor_slots` and `combat_rules` check bonuses instead of AC, and `creature_combat` is new, for 19 checks. It reports one problem not caused by combat: `workshops_one_cell`, because `farm_plot` is passable. That problem also makes most self-tests fail (each self-test expects only its own check to fail); with `farm_plot` fixed in a scratch copy, 52 of the 53 self-tests pass.
 - `docs/systems/UF_Items.md`, `UF_Jobs.md`, `UF_Colonists.md`, `UF_Combat.md` gain the API lines above; `docs/STATUS.md` records the measured results; `docs/CREDITS.md` is shown in the game's credits before release.
 
-## 10. Known limits of phase 1 (not done)
+## 10. Known limits (phase 1, and after the 2026-09-19 conversion)
+- The weapon, armour and creature numbers are a first balance pass (the `combat.equipment` and `combat.creatures` checks print what they do); nothing between level 1 and level 40 has been tuned against play.
 - No code changed: nothing equips into five slots, shoots, or rolls quality yet. Today's engine already builds the six workshops and runs every recipe here through the generic `build` and `craft` handlers (the plan steps will make colonists do so once the earlier steps are done); the `arm` step is inert ("nothing to do"); `work` on the new entries is in beats while the engine still counts ticks (D9).
 - The workshop and item art is stock tiles and tinted stand-ins (AR-510, AR-511); the held-weapon and shield layers of AR-600 are requested as AR-512.
 - No warhammer, crossbow, bolts, bronze or per-item durability; `density` and `hardness` are unused numbers until then.
