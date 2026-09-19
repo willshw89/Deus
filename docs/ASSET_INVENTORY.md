@@ -1,189 +1,237 @@
-# ASSET INVENTORY: Ultima Fortress Art Manifest
+# ASSET INVENTORY: every image and tile the engine uses
 
-**Generated:** 2026-09-18  
-**Rules Reference:** `AGENTS.md`, `docs/ART_STANDARD.md`, `docs/ASSET_REQUESTS.md`  
-**Catalog Authority:** `game/data/UF_WorldCatalog.json` (Version 3)  
-**Palette:** Authentic Ultima VII 256-color daylight palette (`PALETTES.FLX` Record 0)  
-**Projection:** 2.5D axonometric (45° up-left lean for height; flat top-down for ground; transposed East/West facings, never mirrored; 3× integer nearest-neighbor scale).
+Generated 2026-09-18 by `tools/generate_asset_inventory.js` (do not edit by hand; run the tool). Inputs: `game/data/UF_WorldCatalog.json` (version 3), 33 plugins in `game/js/plugins/UF_*.js`, `game/img/**` (970 files), `docs/STATUS.md` → Stand-ins, the 37 rows of `docs/ASSET_REQUESTS.md`, git baseline `8e5fdc1`. The same data is in `game/data/UF_AssetIndex.json` for the look tooltip (UF_Look).
 
----
+## Summary
 
-## Summary of Asset Coverage
+| Status | Count | Meaning |
+|---|---|---|
+| missing | 0 | referenced by the catalog or a plugin, but no file: the game draws nothing there |
+| stock RMMZ | 32 | the file is in the project's first commit `8e5fdc1` and unchanged since; RPG Maker's placeholder, to be replaced by an original (every one needs a request) |
+| U7 stand-in | 81 | name starts with `U7_` or the file is listed under Stand-ins in `docs/STATUS.md`; dev only, replaced before any release |
+| generated | 29 | drawn in code (`UF_Gen*`); replaced when its request says so |
+| original | 0 | our own art (not stock, not a stand-in) |
+| **total** | **142** | 11 with no request row (see "Needs a request") |
 
-| Category | Total Entries | U7 Stand-in | Original | Code-Drawn | Stock RMMZ | Retired |
+| Category | missing | stock RMMZ | U7 stand-in | generated | original | total |
 |---|---|---|---|---|---|---|
-| Terrain & Water | 10 | 10 | 0 | 0 | 0 | 0 |
-| Ground Kinds (Biomes) | 26 | 1 | 0 | 25 | 0 | 0 |
-| Colonists | 2 | 2 | 0 | 0 | 0 | 0 |
-| World Objects & Flora | 23 | 23 | 0 | 0 | 0 | 0 |
-| Ground Resource Items | 23 | 23 | 0 | 0 | 0 | 0 |
-| Wildlife & Fauna | 14 | 14 | 0 | 0 | 0 | 0 |
-| Faction Civilized Species | 7 | 7 | 0 | 0 | 0 | 0 |
-| UI & System | 3 | 3 | 0 | 0 | 0 | 0 |
-| Retired Subterranean Assets (V20 Retired) | 4 | 0 | 0 | 0 | 0 | 4 |
-| **TOTAL** | **112** | **83** | **0** | **25** | **0** | **4** |
+| Ground and water tiles | 0 | 13 | 0 | 22 | 0 | 35 |
+| Objects (plants, stones, ore, buildings) | 0 | 15 | 23 | 0 | 0 | 38 |
+| Items | 0 | 0 | 22 | 0 | 0 | 22 |
+| Creatures | 0 | 0 | 18 | 0 | 0 | 18 |
+| People | 0 | 1 | 12 | 0 | 0 | 13 |
+| UI and system | 0 | 3 | 6 | 0 | 0 | 9 |
+| Generated placeholders (drawn in code) | 0 | 0 | 0 | 7 | 0 | 7 |
 
-> [!NOTE]
-> Every asset in the catalog names its exact image file, its request ID, and its status.
-> All visual entities in-game reflect this metadata when hovered by the mouse cursor.
-> Subterranean level was retired 2026-09-18 per user directive.
+## How to read the tables
 
----
+- **Key** is what the engine calls the asset: a character sheet name (`img/characters/<key>.png`; `$` = one character per sheet, `!` = no shadow offset), `<sheet>#<tile id>` for one 48×48 tile of a tileset (ids 0–255 = B, 256–511 = C, 2048+ = A1 water autotile base, 2816+ = A2 ground autotile base), the path `img/system/<name>.png` for system and face images, or a `UF_Gen*` bitmap drawn in code. `+json` after a file means a sidecar exists.
+- **Used by** names the catalog entries (objects, items, species, people, ground and water kinds, biomes) and plugins that reference it. "(test suite)" = only a test uses it.
+- **States the art needs** come from the catalog: `actions` (what it turns into and yields), `regrow`, `build` (unbuilt/built), `ruin`, the `fire` tag (unlit/lit), `hunt` (alive/dead), clothing `tiers`, and the sheet format. When several kinds share one image (tints), each kind's states are prefixed with its id.
+- **Format, unless a row says otherwise:** objects and items use one frame of a 3×4 sheet (sidecar `animations.stand[0]`, else column 1 row 0), anchored at the bottom-centre of their cell (or the sidecar's `anchor`); creatures and people use the 4 rows as facings S, W, E, N and the 3 columns as walk frames; tiles are 48×48. Specs: `docs/ART_STANDARD.md`, `docs/ASSET_REQUESTS.md` (AR-600 for the layered sheet standard).
+- **Request** is the `AR-` row in `docs/ASSET_REQUESTS.md` that mentions the file, the tile, the catalog id or the name (its status word in brackets); other matching rows follow in smaller type. "none yet" = no row: tell Claude Code, don't invent an ID.
 
-## Terrain & Water
+## Ground and water tiles
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `terrain_grass` | Meadow grass | `U7_Outside_A2.png` | `AR-001` | **U7 stand-in** | ✓ YES | — | Seamless U7 meadow grass A2 autotile (SHAPES 4, 23, 5, 3x integer) |
-| `terrain_water_fresh` | River fresh water | `Outside_A1.png` | `AR-001` | **U7 stand-in** | ✓ YES | — | A1 fresh water with shoreline banks, 3-frame flow animation |
-| `water_pond` | Pond water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (pond) |
-| `water_marsh` | Marsh water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (marsh) |
-| `water_swamp` | Swamp water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (swamp) |
-| `water_icy` | Icy water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (icy) |
-| `water_brackish` | Brackish water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (brackish) |
-| `water_salt` | Salt water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (salt) |
-| `water_deep` | Deep ocean | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (deep) |
-| `water_blighted` | Blighted water | `Outside_A1.png` | `AR-101` | **U7 stand-in** | ✓ YES | — | Surface water variant (blighted) |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `Outside_A1` | img/tilesets/Outside_A1.png | tileset 91 slot A1: the 9 water kinds |  | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2048` | img/tilesets/Outside_A1.png (A1 autotile 2048) | water kind fresh; biomes: forest_temperate_conifer, forest_temperate_broadleaf, forest_tropical_conifer, forest_tropical_dry_broadleaf, forest_tropical_moist_broadleaf, grassland_temperate, grassland_tropical, savanna_temperate … (+3); rivers and the start pond | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2096` | img/tilesets/Outside_A1.png (A1 autotile 2096) | water kind pond; biomes: lake_fresh; lakes by salinity | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2144` | img/tilesets/Outside_A1.png (A1 autotile 2144) | water kind marsh; biomes: marsh_temperate_fresh, marsh_tropical_fresh | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2192` | img/tilesets/Outside_A1.png (A1 autotile 2192) | water kind swamp; biomes: marsh_temperate_salt, marsh_tropical_salt, swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-100 (REQUESTED) <sub>AR-101, AR-102</sub> |
+| `Outside_A1#2240` | img/tilesets/Outside_A1.png (A1 autotile 2240) | water kind icy; biomes: glacier, tundra, taiga, mountain, ocean_arctic; rivers where it is cold | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2432` | img/tilesets/Outside_A1.png (A1 autotile 2432) | water kind brackish; biomes: desert_rock, desert_badland, lake_brackish; lakes by salinity | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2528` | img/tilesets/Outside_A1.png (A1 autotile 2528) | water kind salt; biomes: desert_sand, swamp_mangrove, lake_salt; lakes by salinity | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2624` | img/tilesets/Outside_A1.png (A1 autotile 2624) | water kind deep; biomes: ocean_temperate, ocean_tropical | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-101 (REQUESTED) |
+| `Outside_A1#2720` | img/tilesets/Outside_A1.png (A1 autotile 2720) | water kind blighted; water in cursed regions | animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds) | stock RMMZ | AR-100 (REQUESTED) <sub>AR-101, AR-102</sub> |
+| `Outside_A5` | img/tilesets/Outside_A5.png | tileset 91 slot A5 |  | stock RMMZ | **none yet** |
+| `Outside_B` | img/tilesets/Outside_B.png | tile 237 (objects); tile 232 (objects); tile 238 (objects); tile 174 (objects); tile 246 (objects); tile 251 (objects); tile 172 (objects); tile 173 (objects); tile 253 (objects); tile 80 (objects); tile 248 (objects); tileset 91 slot B |  | stock RMMZ | AR-102 (PARTLY DELIVERED) <sub>AR-103, AR-104</sub> |
+| `Outside_C` | img/tilesets/Outside_C.png | tile 282 (objects); tile 286 (objects); tile 277 (objects); tile 285 (objects); tileset 91 slot C |  | stock RMMZ | AR-104 (REQUESTED) |
+| `UF_GenGround_A2#2816` | (drawn in code: UF_GenGround_A2, kind 0) | ground kind meadow "Meadow"; biomes: grassland_temperate | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "grass", colors #5a9a3c #467a2e #74b54c #c8d86a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#2864` | (drawn in code: UF_GenGround_A2, kind 1) | ground kind tropical_grass "Lush grass"; biomes: grassland_tropical | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "grass", colors #3f9a4a #2f7a3a #58b862 #e0e070 | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#2912` | (drawn in code: UF_GenGround_A2, kind 2) | ground kind dry_grass "Dry grass"; biomes: savanna_temperate, savanna_tropical | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "grass", colors #b8a24a #9a8638 #d2bd62 #7a9a3a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#2960` | (drawn in code: UF_GenGround_A2, kind 3) | ground kind shrub_soil "Scrub soil"; biomes: shrubland_temperate, shrubland_tropical | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "dots", colors #8a7a4a #6e6038 #a6955e #5a7a3a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3008` | (drawn in code: UF_GenGround_A2, kind 4) | ground kind forest_floor "Leaf litter"; biomes: forest_temperate_broadleaf, forest_tropical_dry_broadleaf | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "litter", colors #5a4a2a #463a20 #6e5c36 #a8602a | generated | AR-120 (REQUESTED) |
+| `UF_GenGround_A2#3056` | (drawn in code: UF_GenGround_A2, kind 5) | ground kind needle_floor "Needle floor"; biomes: taiga, forest_temperate_conifer, forest_tropical_conifer | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "needles", colors #4a4a2a #3a3a20 #5e5e36 #6a3a1a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3104` | (drawn in code: UF_GenGround_A2, kind 6) | ground kind jungle_floor "Jungle floor"; biomes: forest_tropical_moist_broadleaf | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "litter", colors #3a5a2a #2a4620 #4e7236 #7a4a2a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3152` | (drawn in code: UF_GenGround_A2, kind 7) | ground kind tundra "Tundra"; biomes: tundra | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "dots", colors #8a9a7a #6e7e60 #a6b494 #b8c0b0 | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3200` | (drawn in code: UF_GenGround_A2, kind 8) | ground kind snow "Snow" | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "snow", colors #e8eef4 #c8d4e0 #ffffff #a8b8cc | generated | AR-100 (REQUESTED) <sub>AR-102, AR-103</sub> |
+| `UF_GenGround_A2#3248` | (drawn in code: UF_GenGround_A2, kind 9) | ground kind ice "Ice"; biomes: glacier, ocean_arctic | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "ice", colors #a8d4e8 #88b8d0 #d0ecf8 #ffffff | generated | AR-100 (REQUESTED) <sub>AR-401, AR-402</sub> |
+| `UF_GenGround_A2#3296` | (drawn in code: UF_GenGround_A2, kind 10) | ground kind sand "Sand"; biomes: desert_sand, ocean_temperate, ocean_tropical, lake_salt | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "dots", colors #dcc88a #c4ae70 #eedca2 #a89058 | generated | AR-100 (REQUESTED) <sub>AR-401, AR-402</sub> |
+| `UF_GenGround_A2#3344` | (drawn in code: UF_GenGround_A2, kind 11) | ground kind stony "Stony ground"; biomes: desert_rock | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "cracks", colors #9a9284 #7e776a #b4ad9e #5e584e | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3392` | (drawn in code: UF_GenGround_A2, kind 12) | ground kind red_clay "Red clay"; biomes: desert_badland | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "stria", colors #b8663a #9a4e2a #d2804e #7a3a1e | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3440` | (drawn in code: UF_GenGround_A2, kind 13) | ground kind rock "Bare rock"; biomes: mountain | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "cracks", colors #7a7874 #5e5c58 #969490 #4a4844 | generated | AR-100 (REQUESTED) <sub>AR-041 (withdrawn), AR-044</sub> |
+| `UF_GenGround_A2#3488` | (drawn in code: UF_GenGround_A2, kind 14) | ground kind peak_rock "Rock face" | autotile: 47 edge shapes against every neighbouring kind (biome borders show); impassable (rock faces on peaks, region 250); placeholder pattern "cracks", colors #56544f #3e3c38 #6e6c68 #2e2c28 | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3536` | (drawn in code: UF_GenGround_A2, kind 15) | ground kind mud "Mud"; biomes: marsh_temperate_fresh, marsh_temperate_salt, marsh_tropical_fresh, marsh_tropical_salt, lake_fresh, lake_brackish | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "mud", colors #6a5a3a #52462c #82704a #3a5a2a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3584` | (drawn in code: UF_GenGround_A2, kind 16) | ground kind swamp_mud "Swamp mud"; biomes: swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt, swamp_mangrove | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "mud", colors #3e3a26 #2e2a1a #4e4a32 #2a4a2a | generated | AR-100 (REQUESTED) |
+| `UF_GenGround_A2#3632` | (drawn in code: UF_GenGround_A2, kind 17) | ground kind dirt "Dirt"; dig job result (UF_Interact) | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "dots", colors #8a6a44 #6e5236 #a28058 #5a4428 | generated | AR-100 (REQUESTED) <sub>AR-001</sub> |
+| `UF_GenGround_A2#3680` | (drawn in code: UF_GenGround_A2, kind 18) | ground kind cursed_grass "Blighted grass"; cursed regions: replaces meadow, tropical_grass, dry_grass, jungle_floor | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "grass", colors #6a6a4a #52523a #7e7a5a #5a3a5a | generated | AR-120 (REQUESTED) |
+| `UF_GenGround_A2#3728` | (drawn in code: UF_GenGround_A2, kind 19) | ground kind blessed_grass "Flowering grass"; blessed regions: replaces meadow, tropical_grass, dry_grass | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "grass", colors #62b24a #4e9a3a #82ca62 #f0e8a0 | generated | AR-120 (REQUESTED) |
+| `UF_GenGround_A2#3776` | (drawn in code: UF_GenGround_A2, kind 20) | ground kind ash "Ash"; cursed regions: replaces forest_floor, needle_floor | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "dots", colors #5a5654 #444240 #6e6a66 #8a3a2a | generated | AR-100 (REQUESTED) <sub>AR-120</sub> |
+| `UF_GenGround_A2#3824` | (drawn in code: UF_GenGround_A2, kind 21) | ground kind scree "Scree" | autotile: 47 edge shapes against every neighbouring kind (biome borders show); placeholder pattern "cracks", colors #6e665a #5a5448 #827a6c #4a443a | generated | AR-100 (REQUESTED) |
 
-## Ground Kinds (Biomes)
+## Objects (plants, stones, ore, buildings)
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `ground_meadow` | Meadow | `U7_Outside_A2.png` | `AR-001` | **U7 stand-in** | ✓ YES | — | Procedural ground pattern: grass |
-| `ground_tropical_grass` | Lush grass | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: grass |
-| `ground_dry_grass` | Dry grass | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: grass |
-| `ground_shrub_soil` | Scrub soil | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
-| `ground_forest_floor` | Leaf litter | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: litter |
-| `ground_needle_floor` | Needle floor | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: needles |
-| `ground_jungle_floor` | Jungle floor | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: litter |
-| `ground_tundra` | Tundra | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
-| `ground_snow` | Snow | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: snow |
-| `ground_ice` | Ice | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: ice |
-| `ground_sand` | Sand | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
-| `ground_stony` | Stony ground | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: cracks |
-| `ground_red_clay` | Red clay | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: stria |
-| `ground_rock` | Bare rock | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: cracks |
-| `ground_peak_rock` | Rock face | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: cracks |
-| `ground_mud` | Mud | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: mud |
-| `ground_swamp_mud` | Swamp mud | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: mud |
-| `ground_dirt` | Dirt | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
-| `ground_cursed_grass` | Blighted grass | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: grass |
-| `ground_blessed_grass` | Flowering grass | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: grass |
-| `ground_ash` | Ash | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
-| `ground_cave_floor` | Cave floor | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: cracks |
-| `ground_cave_rock` | Solid rock | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: cracks |
-| `ground_fungal_floor` | Fungal floor | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: mud |
-| `ground_crystal_floor` | Crystal floor | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: ice |
-| `ground_chasm` | Chasm | `UF_Tiles_Procedural` | `AR-100` | **code-drawn placeholder** | ✗ MISSING | — | Procedural ground pattern: dots |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `Outside_B#172` | img/tilesets/Outside_B.png (tile 172) | object wild_grain "Wild grain" | gather: Wild grain → gone (yields 1 Seeds, 1 Straw); flat: drawn under units and items | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#173` | img/tilesets/Outside_B.png (tile 173) | object wheat_wild "Wild wheat" | gather: Wild wheat → gone (yields 1 Seeds, 1 Straw); flat: drawn under units and items | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#174` | img/tilesets/Outside_B.png (tile 174) | object cactus_tall "Tall cactus" | chop: Tall cactus → gone (yields 2 Plant fiber); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#232` | img/tilesets/Outside_B.png (tile 232) | object snow_bush "Snow bush" | gather: Snow bush → gone (yields 1 Plant fiber); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#237` | img/tilesets/Outside_B.png (tile 237) | object palm "Palm" | chop: Palm → Stump (yields 1 Log); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-102 (PARTLY DELIVERED) |
+| `Outside_B#238` | img/tilesets/Outside_B.png (tile 238) | object cactus "Cactus" | gather: Cactus → gone (yields 1 Fruit); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#246` | img/tilesets/Outside_B.png (tile 246) | object fern "Fern" | gather: Fern → gone (yields 1 Plant fiber); flat: drawn under units and items | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#248` | img/tilesets/Outside_B.png (tile 248) | object floor_straw "Straw bed" | building: unbuilt (needs 2 Straw on the cell) / built; flat: drawn under units and items | stock RMMZ | AR-104 (REQUESTED) |
+| `Outside_B#251` | img/tilesets/Outside_B.png (tile 251) | object lichen "Lichen" (tint #c8d8c8) | one state (nothing interacts with it yet); flat: drawn under units and items | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#253` | img/tilesets/Outside_B.png (tile 253) | object lily_pad "Lily pads" | one state (nothing interacts with it yet); sits on water cells; flat: drawn under units and items | stock RMMZ | AR-103 (PARTLY DELIVERED) |
+| `Outside_B#80` | img/tilesets/Outside_B.png (tile 80) | object wall_wood "Wooden wall" | building: unbuilt (needs 1 Log on the cell) / built; ruined → Rubble (when its site is sacked); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-104 (REQUESTED) |
+| `Outside_C#277` | img/tilesets/Outside_C.png (tile 277) | object wall_stone "Stone wall" | building: unbuilt (needs 2 Stone on the cell) / built; ruined → Rubble (when its site is sacked); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-104 (REQUESTED) |
+| `Outside_C#282` | img/tilesets/Outside_C.png (tile 282) | object rubble "Rubble" | pick: Rubble → gone (yields 2 Stone); is the ruin of Wooden wall, Stone wall, Work stone; flat: drawn under units and items | stock RMMZ | AR-104 (REQUESTED) |
+| `Outside_C#285` | img/tilesets/Outside_C.png (tile 285) | object workbench "Work stone" | building: unbuilt (needs 2 Stone, 1 Log on the cell) / built; ruined → Rubble (when its site is sacked); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-104 (REQUESTED) |
+| `Outside_C#286` | img/tilesets/Outside_C.png (tile 286) | object rubble_pillar "Fallen pillar" | quarry: Fallen pillar → gone (yields 3 Stone); blocks movement (units work from a neighbouring cell) | stock RMMZ | AR-104 (REQUESTED) |
+| `!$BerryBush` | img/characters/!$BerryBush.png | object berry_bush "Berry bush"; object berry_bush_bare "Berry bush (picked)" (tint #a8b898) | berry_bush: gather: Berry bush → Berry bush (picked) (yields 2 Berries); berry_bush: is the regrown state of Berry bush (picked); blocks movement (units work from a neighbouring cell); berry_bush_bare: regrows into Berry bush after 48 h; berry_bush_bare: is the after-state of Berry bush (gather) | U7 stand-in | AR-103 (PARTLY DELIVERED) <sub>AR-023</sub> |
+| `!$Campfire` | img/characters/!$Campfire.png | object campfire "Campfire" | building: unbuilt (needs 3 Log, 3 Stone on the cell) / built; ruined → Old bones (when its site is sacked); unlit / lit (a fire: cooking happens next to it); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-105 (REQUESTED) |
+| `!$FruitTree` | img/characters/!$FruitTree.png | object fruit_tree "Fruit tree"; object fruit_tree_bare "Fruit tree (picked)" (tint #c8d8c0) | fruit_tree: gather: Fruit tree → Fruit tree (picked) (yields 3 Fruit); fruit_tree: chop: Fruit tree → Stump (yields 3 Log); fruit_tree: is the regrown state of Fruit tree (picked); blocks movement (units work from a neighbouring cell); fruit_tree_bare: chop: Fruit tree (picked) → Stump (yields 3 Log); fruit_tree_bare: regrows into Fruit tree after 72 h; fruit_tree_bare: is the after-state of Fruit tree (gather) | U7 stand-in | AR-102 (PARTLY DELIVERED) <sub>AR-020</sub> |
+| `!$GraniteBoulder` | img/characters/!$GraniteBoulder.png | object granite_boulder "Granite boulder" | quarry: Granite boulder → Loose stones (yields 4 Stone); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-022 (DELIVERED) |
+| `!$IronstoneDeposit` | img/characters/!$IronstoneDeposit.png | object ironstone "Ironstone outcrop" | mine: Ironstone outcrop → Loose stones (yields 2 Iron ore, 1 Stone); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-022 (DELIVERED) <sub>AR-044</sub> |
+| `!$PineTree` | img/characters/!$PineTree.png | object pine "Pine"; object fir_snow "Snow fir" (tint #d0e0ff) | pine: chop: Pine → Stump (yields 3 Log); blocks movement (units work from a neighbouring cell); fir_snow: chop: Snow fir → Stump (yields 3 Log) | U7 stand-in | AR-102 (PARTLY DELIVERED) <sub>AR-021</sub> |
+| `!$TimberOak` | img/characters/!$TimberOak.png | object oak "Oak"; object birch "Birch" (tint #e6f0e0); plugin UF_Look.js (test suite) | oak: chop: Oak → Stump (yields 3 Log); blocks movement (units work from a neighbouring cell); birch: chop: Birch → Stump (yields 2 Log) | U7 stand-in | AR-102 (PARTLY DELIVERED) <sub>AR-021</sub> |
+| `!$U7_Broadleafgiant` | img/characters/!$U7_Broadleafgiant.png +json | object tree_tropical "Broadleaf giant" | chop: Broadleaf giant → Stump (yields 4 Log); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-102 (PARTLY DELIVERED) |
+| `!$U7_CrystalSpire` | img/characters/!$U7_CrystalSpire.png +json | object crystal "Crystal cluster" | mine: Crystal cluster → Small crystals (yields 2 Rough gem); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-044 (DELIVERED) |
+| `!$U7_Deadtree` | img/characters/!$U7_Deadtree.png +json | object dead_tree "Dead tree"; object tree_cursed "Blighted tree" (tint #c0a0e0) | dead_tree: chop: Dead tree → Stump (yields 1 Log, 2 Firewood); blocks movement (units work from a neighbouring cell); tree_cursed: chop: Blighted tree → Stump (yields 1 Log) | U7 stand-in | AR-102 (PARTLY DELIVERED) |
+| `!$U7_Flat-toptree` | img/characters/!$U7_Flat-toptree.png +json | object tree_savanna "Flat-top tree" | chop: Flat-top tree → Stump (yields 2 Log); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-102 (PARTLY DELIVERED) |
+| `!$U7_GoldVeinOutcrop` | img/characters/!$U7_GoldVeinOutcrop.png +json | object gold_outcrop "Gold outcrop" | mine: Gold outcrop → Loose stones (yields 1 Gold nugget, 1 Stone); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-044 (DELIVERED) |
+| `!$U7_Gravel` | img/characters/!$U7_Gravel.png +json | object gravel "Gravel" | pick: Gravel → gone (yields 1 Stone); flat: drawn under units and items | U7 stand-in | AR-104 (REQUESTED) |
+| `!$U7_LooseStones` | img/characters/!$U7_LooseStones.png +json | object rocks_small "Loose stones" | pick: Loose stones → gone (yields 2 Stone); is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine); flat: drawn under units and items | U7 stand-in | AR-104 (REQUESTED) |
+| `!$U7_MalachiteOutcrop` | img/characters/!$U7_MalachiteOutcrop.png +json | object copper_outcrop "Copper outcrop" | mine: Copper outcrop → Loose stones (yields 2 Copper ore, 1 Stone); blocks movement (units work from a neighbouring cell) | U7 stand-in | AR-044 (DELIVERED) |
+| `!$U7_OldBones` | img/characters/!$U7_OldBones.png +json | object bones_pile "Old bones" | pick: Old bones → gone (yields 2 Bone); is the ruin of Campfire; flat: drawn under units and items | U7 stand-in | AR-104 (REQUESTED) |
+| `!$U7_Reeds` | img/characters/!$U7_Reeds.png +json | object reeds "Reeds" | gather: Reeds → gone (yields 2 Straw); flat: drawn under units and items | U7 stand-in | AR-103 (PARTLY DELIVERED) |
+| `!$U7_Shrub` | img/characters/!$U7_Shrub.png +json | object bush "Shrub"; object desert_shrub "Desert shrub" (tint #d8c898); plugin UF_Look.js (test suite) | bush: gather: Shrub → gone (yields 2 Plant fiber); blocks movement (units work from a neighbouring cell); desert_shrub: gather: Desert shrub → gone (yields 1 Plant fiber) | U7 stand-in | AR-103 (PARTLY DELIVERED) <sub>AR-023</sub> |
+| `!$U7_SmallCrystals` | img/characters/!$U7_SmallCrystals.png +json | object crystal_small "Small crystals" | pick: Small crystals → gone (yields 1 Rough gem); is the after-state of Crystal cluster (mine); flat: drawn under units and items | U7 stand-in | AR-044 (DELIVERED) |
+| `!$U7_Swamptree` | img/characters/!$U7_Swamptree.png +json | object tree_swamp "Swamp tree"; object mangrove "Mangrove" (tint #a8c8a0) | tree_swamp: chop: Swamp tree → Stump (yields 2 Log); blocks movement (units work from a neighbouring cell); mangrove: chop: Mangrove → Stump (yields 2 Log) | U7 stand-in | AR-102 (PARTLY DELIVERED) |
+| `!$U7_TallGrass` | img/characters/!$U7_TallGrass.png +json | object grass_tuft "Tall grass" | gather: Tall grass → gone (yields 1 Plant fiber); flat: drawn under units and items | U7 stand-in | AR-103 (PARTLY DELIVERED) |
+| `!$U7_TreeStump` | img/characters/!$U7_TreeStump.png +json | object stump "Stump" | chop: Stump → gone (yields 1 Log); is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+7); walk-through | U7 stand-in | AR-102 (PARTLY DELIVERED) <sub>AR-021</sub> |
+| `!$U7_Wildflowers` | img/characters/!$U7_Wildflowers.png +json | object flowers "Wildflowers"; object flowers_purple "Purple flowers" (tint #d0a0ff); object flowers_blue "Blue flowers" (tint #a0c0ff); object flowers_white "White flowers" (tint #f0f0f0) | flowers: one state (nothing interacts with it yet); flat: drawn under units and items; flowers_purple: one state (nothing interacts with it yet); flowers_blue: one state (nothing interacts with it yet); flowers_white: one state (nothing interacts with it yet) | U7 stand-in | AR-103 (PARTLY DELIVERED) |
 
-## Colonists
+## Items
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `colonist_adam` | Adam (Naked Start) | `$Adam.png` | `AR-010` | **U7 stand-in** | ✓ YES | ✓ YES | U7 native 3x unclad figure, 4 facings (E/W transposed), 3-frame walk |
-| `colonist_eve` | Eve (Naked Start) | `$Eve.png` | `AR-011` | **U7 stand-in** | ✓ YES | ✓ YES | U7 native 3x unclad figure, 4 facings (E/W transposed), 3-frame walk |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `!$U7_Item_AnimalBone` | img/characters/!$U7_Item_AnimalBone.png +json | item bone "Bone" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_CaveMushroom` | img/characters/!$U7_Item_CaveMushroom.png +json | item mushroom "Mushrooms" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −20 hunger | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_CutGem` | img/characters/!$U7_Item_CutGem.png +json | item gem_cut "Cut gem" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_Firewood` | img/characters/!$U7_Item_Firewood.png +json | item firewood "Firewood" | lies on a cell as a stack (one frame; carried items are not drawn yet); made by: Split firewood | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_GoldNugget` | img/characters/!$U7_Item_GoldNugget.png +json | item gold "Gold nugget" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) <sub>AR-044</sub> |
+| `!$U7_Item_HaunchMeat` | img/characters/!$U7_Item_HaunchMeat.png +json | item meat_cooked "Cooked meat" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −50 hunger; made by: Roast meat, Roast fish | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_IronOre` | img/characters/!$U7_Item_IronOre.png +json | item ore_iron "Iron ore" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_LeadOre` | img/characters/!$U7_Item_LeadOre.png +json | item ore_copper "Copper ore" (tint #80e0a0) | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_LeatherHide` | img/characters/!$U7_Item_LeatherHide.png +json | item hide "Hide"; item hide_cloak "Hide cloak" (tint #c8a880) | lies on a cell as a stack (one frame; carried items are not drawn yet); hide: used in: Sew a hide cloak; hide_cloak: worn: clothing tier 2 (the wearer's sheet changes); hide_cloak: made by: Sew a hide cloak | U7 stand-in | AR-201 (REQUESTED) <sub>AR-200</sub> |
+| `!$U7_Item_MetalBar` | img/characters/!$U7_Item_MetalBar.png +json | item bar_iron "Iron bar" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_PlantFiber` | img/characters/!$U7_Item_PlantFiber.png +json | item fiber "Plant fiber"; item fiber_wrap "Woven wrap" (tint #e0d0a0) | lies on a cell as a stack (one frame; carried items are not drawn yet); fiber: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak; fiber_wrap: worn: clothing tier 1 (the wearer's sheet changes); fiber_wrap: made by: Weave a fiber wrap | U7 stand-in | AR-201 (REQUESTED) <sub>AR-200</sub> |
+| `!$U7_Item_RawMeat` | img/characters/!$U7_Item_RawMeat.png +json | item meat_raw "Raw meat" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −20 hunger; used in: Roast meat | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_RiverFish` | img/characters/!$U7_Item_RiverFish.png +json | item fish "Fish" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −25 hunger; used in: Roast fish | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_RootVegetable` | img/characters/!$U7_Item_RootVegetable.png +json | item root "Root vegetable" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −25 hunger | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_RoughGem` | img/characters/!$U7_Item_RoughGem.png +json | item gem_rough "Rough gem" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_RoughStone` | img/characters/!$U7_Item_RoughStone.png +json | item stone "Stone"; item stone_axe "Stone axe" (tint #a8b8c8); item stone_knife "Stone knife" (tint #d0d8e0); item stone_pick "Stone pick" (tint #b8a890) | lies on a cell as a stack (one frame; carried items are not drawn yet); stone: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick; stone_axe: held tool (chop ×2): shown in the hand on the held layer (AR-600); stone_axe: made by: Haft a stone axe; stone_knife: held tool (hunt ×2, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600); stone_knife: made by: Knap a stone knife; stone_pick: held tool (quarry ×2, mine ×2, pick ×1.5): shown in the hand on the held layer (AR-600); stone_pick: made by: Haft a stone pick | U7 stand-in | AR-201 (REQUESTED) <sub>AR-104, AR-200, AR-044</sub> |
+| `!$U7_Item_SeedPouch` | img/characters/!$U7_Item_SeedPouch.png +json | item seeds "Seeds" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_StrawBundle` | img/characters/!$U7_Item_StrawBundle.png +json | item straw "Straw" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-104 (REQUESTED) <sub>AR-200</sub> |
+| `!$U7_Item_TreeFruit` | img/characters/!$U7_Item_TreeFruit.png +json | item fruit "Fruit" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −30 hunger, −10 thirst | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_WildBerries` | img/characters/!$U7_Item_WildBerries.png +json | item berries "Berries" | lies on a cell as a stack (one frame; carried items are not drawn yet); eaten: −25 hunger | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_WoodLog` | img/characters/!$U7_Item_WoodLog.png +json | item log "Log" | lies on a cell as a stack (one frame; carried items are not drawn yet); used in: Haft a stone axe, Haft a stone pick, Split firewood | U7 stand-in | AR-200 (DELIVERED) |
+| `!$U7_Item_WoolFleece` | img/characters/!$U7_Item_WoolFleece.png +json | item wool "Wool" | lies on a cell as a stack (one frame; carried items are not drawn yet) | U7 stand-in | AR-200 (DELIVERED) |
 
-## World Objects & Flora
+## Creatures
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `oak` | Oak | `!$TimberOak.png` | `AR-021` | **U7 stand-in** | ✓ YES | — | Density: 0.025, Clump: 0.7, collision-aligned anchor |
-| `pine` | Pine | `!$PineTree.png` | `AR-021` | **U7 stand-in** | ✓ YES | — | Density: 0.025, Clump: 0.7, collision-aligned anchor |
-| `fruit_tree` | Fruit tree | `!$FruitTree.png` | `AR-020` | **U7 stand-in** | ✓ YES | — | Density: 0.012, Clump: 0.5, collision-aligned anchor |
-| `tree_savanna` | Flat-top tree | `!$U7_Flat-toptree.png` | `AR-102` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.5, collision-aligned anchor |
-| `tree_swamp` | Swamp tree | `!$U7_Swamptree.png` | `AR-102` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.6, collision-aligned anchor |
-| `tree_tropical` | Broadleaf giant | `!$U7_Broadleafgiant.png` | `AR-102` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.6, collision-aligned anchor |
-| `dead_tree` | Dead tree | `!$U7_Deadtree.png` | `AR-102` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.012, Clump: 0.5, collision-aligned anchor |
-| `berry_bush` | Berry bush | `!$BerryBush.png` | `AR-023` | **U7 stand-in** | ✓ YES | — | Density: 0.025, Clump: 0.5, collision-aligned anchor |
-| `bush` | Shrub | `!$U7_Shrub.png` | `AR-023` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.025, Clump: 0.5, collision-aligned anchor |
-| `grass_tuft` | Tall grass | `!$U7_TallGrass.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.035, Clump: 0.5, collision-aligned anchor |
-| `reeds` | Reeds | `!$U7_Reeds.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.025, Clump: 0.6, collision-aligned anchor |
-| `flowers` | Wildflowers | `!$U7_Wildflowers.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.025, Clump: 0.6, collision-aligned anchor |
-| `rocks_small` | Loose stones | `!$U7_LooseStones.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.02, Clump: 0.5, collision-aligned anchor |
-| `granite_boulder` | Granite boulder | `!$GraniteBoulder.png` | `AR-022` | **U7 stand-in** | ✓ YES | — | Density: 0.015, Clump: 0.6, collision-aligned anchor |
-| `ironstone` | Ironstone outcrop | `!$IronstoneDeposit.png` | `AR-022` | **U7 stand-in** | ✓ YES | — | Density: 0.012, Clump: 0.6, collision-aligned anchor |
-| `cave_ironstone` | Ore vein | `!$IronOreVein.png` | `AR-044` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.012, Clump: 0.5, collision-aligned anchor |
-| `cave_boulder` | Boulder | `!$U7_CaveBoulder.png` | `AR-044` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.5, collision-aligned anchor |
-| `crystal` | Crystal cluster | `!$U7_CrystalSpire.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.012, Clump: 0.5, collision-aligned anchor |
-| `crystal_small` | Small crystals | `!$U7_SmallCrystals.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.5, collision-aligned anchor |
-| `gravel` | Gravel | `!$U7_Gravel.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.015, Clump: 0.5, collision-aligned anchor |
-| `bones` | Old bones | `!$U7_OldBones.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0.01, Clump: 0.4, collision-aligned anchor |
-| `tree_stump` | Felled tree stump | `!$TreeStump.png` | `AR-103` | **U7 stand-in** | ✓ YES | ✓ YES | Density: 0, Clump: 0, collision-aligned anchor |
-| `campfire` | Campfire hearth | `!$Campfire.png` | `AR-103` | **U7 stand-in** | ✓ YES | — | Density: 0, Clump: 0, collision-aligned anchor |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `$U7_Cat` | img/characters/$U7_Cat.png +json | creature wildcat "Wildcat" (predator, tint #b09070) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 120, flees the hunter) → drops 1 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_CaveBat` | img/characters/$U7_CaveBat.png +json | creature bat "Bat" (flier) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 90, flees the hunter) → drops nothing; flies over objects | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_CaveSpider` | img/characters/$U7_CaveSpider.png +json | creature giant_spider "Giant spider" (predator); creature sand_stalker "Sand stalker" (monster, tint #e8d090) | 4 facings × stand/walk (3 columns × 4 rows); giant_spider: alive / dead: hunted (work 160) → drops 1 Raw meat; giant_spider: only in wild+ regions; sand_stalker: alive / dead: hunted (work 200) → drops nothing; sand_stalker: hostile to everyone (red stance square); sand_stalker: only in wild+ regions | U7 stand-in | AR-402 (PARTLY DELIVERED) <sub>AR-401</sub> |
+| `$U7_Chicken` | img/characters/$U7_Chicken.png +json | creature fowl "Wild fowl" (grazer, tint #c0a080) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Deer` | img/characters/$U7_Deer.png +json | creature deer "Deer" (grazer) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 120, flees the hunter) → drops 3 Raw meat, 1 Hide, 2 Bone | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Dog` | img/characters/$U7_Dog.png +json | creature boar "Boar" (grazer, tint #7a5a40); creature jackal "Jackal" (predator, tint #d0b080) | 4 facings × stand/walk (3 columns × 4 rows); boar: alive / dead: hunted (work 150) → drops 3 Raw meat, 1 Hide; jackal: alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Fox` | img/characters/$U7_Fox.png +json | creature fox "Fox" (predator); creature arctic_fox "Arctic fox" (predator, tint #e8f0ff) | 4 facings × stand/walk (3 columns × 4 rows); fox: alive / dead: hunted (work 100, flees the hunter) → drops 1 Raw meat, 1 Hide; arctic_fox: alive / dead: hunted (work 100, flees the hunter) → drops 1 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Hare` | img/characters/$U7_Hare.png +json | creature hare "Hare" (grazer); plugin UF_Colonists.js (test suite); plugin UF_Interact.js (test suite); plugin UF_Jobs.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Hawk` | img/characters/$U7_Hawk.png +json | creature hawk "Hawk" (flier) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat; flies over objects | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Horse` | img/characters/$U7_Horse.png +json | creature wild_horse "Wild horse" (grazer) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 180, flees the hunter) → drops 4 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Ox` | img/characters/$U7_Ox.png +json | creature aurochs "Aurochs" (grazer, tint #6a4a30) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 240) → drops 6 Raw meat, 2 Hide, 3 Bone | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Rat` | img/characters/$U7_Rat.png +json | creature rat "Rat" (vermin) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 40, flees the hunter) → drops 1 Raw meat | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Serpent` | img/characters/$U7_Serpent.png +json | creature serpent "Serpent" (predator) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 90) → drops 1 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Sheep` | img/characters/$U7_Sheep.png +json | creature wild_sheep "Wild sheep" (grazer) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 100, flees the hunter) → drops 2 Raw meat, 1 Wool | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Skeleton` | img/characters/$U7_Skeleton.png | creature restless_dead "Restless dead" (monster); creature ice_wraith "Ice wraith" (monster, tint #a0d8ff); people automaton (tint #c8c8e8) | 4 facings × stand/walk (3 columns × 4 rows); restless_dead: alive / dead: hunted (work 200) → drops 3 Bone; restless_dead: hostile to everyone (red stance square); restless_dead: only in cursed regions; ice_wraith: alive / dead: hunted (work 300) → drops nothing; ice_wraith: hostile to everyone (red stance square); ice_wraith: only in cursed regions; faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns) | U7 stand-in | AR-402 (PARTLY DELIVERED) <sub>AR-400, AR-401</sub> |
+| `$U7_Troll` | img/characters/$U7_Troll.png | creature troll "Troll" (monster); creature bog_horror "Bog horror" (monster, tint #70b070) | 4 facings × stand/walk (3 columns × 4 rows); troll: alive / dead: hunted (work 400) → drops 4 Raw meat, 2 Hide; troll: hostile to everyone (red stance square); troll: only in wild+ regions; bog_horror: alive / dead: hunted (work 400) → drops nothing; bog_horror: hostile to everyone (red stance square); bog_horror: only in primeval+ regions | U7 stand-in | AR-402 (PARTLY DELIVERED) <sub>AR-401</sub> |
+| `$U7_WildBird` | img/characters/$U7_WildBird.png +json | creature songbird "Songbird" (flier) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 90, flees the hunter) → drops 1 Raw meat; flies over objects | U7 stand-in | AR-401 (PARTLY DELIVERED) |
+| `$U7_Wolf` | img/characters/$U7_Wolf.png +json | creature wolf "Wolf" (predator) | 4 facings × stand/walk (3 columns × 4 rows); alive / dead: hunted (work 200) → drops 2 Raw meat, 1 Hide | U7 stand-in | AR-401 (PARTLY DELIVERED) |
 
-## Ground Resource Items
+## People
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `wood_log` | Wood log | `!$U7_Item_WoodLog.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: wood, 3x native pixel art, grounded bottom-anchor |
-| `firewood` | Firewood | `!$U7_Item_Firewood.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: fuel, 3x native pixel art, grounded bottom-anchor |
-| `rough_stone` | Rough stone | `!$U7_Item_RoughStone.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: stone, 3x native pixel art, grounded bottom-anchor |
-| `iron_ore` | Iron ore | `!$U7_Item_IronOre.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: ore, 3x native pixel art, grounded bottom-anchor |
-| `lead_ore` | Lead ore | `!$U7_Item_LeadOre.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: ore, 3x native pixel art, grounded bottom-anchor |
-| `blackrock` | Blackrock | `!$U7_Item_Blackrock.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: special, 3x native pixel art, grounded bottom-anchor |
-| `gold_nugget` | Gold nugget | `!$U7_Item_GoldNugget.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: metal, 3x native pixel art, grounded bottom-anchor |
-| `metal_bar` | Metal bar | `!$U7_Item_MetalBar.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: refined, 3x native pixel art, grounded bottom-anchor |
-| `rough_gem` | Rough gem | `!$U7_Item_RoughGem.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: gem, 3x native pixel art, grounded bottom-anchor |
-| `cut_gem` | Cut gem | `!$U7_Item_CutGem.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: gem, 3x native pixel art, grounded bottom-anchor |
-| `plant_fiber` | Plant fiber | `!$U7_Item_PlantFiber.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: fiber, 3x native pixel art, grounded bottom-anchor |
-| `wool_fleece` | Wool fleece | `!$U7_Item_WoolFleece.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: fiber, 3x native pixel art, grounded bottom-anchor |
-| `straw_bundle` | Straw bundle | `!$U7_Item_StrawBundle.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: fiber, 3x native pixel art, grounded bottom-anchor |
-| `seed_pouch` | Seed pouch | `!$U7_Item_SeedPouch.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: agriculture, 3x native pixel art, grounded bottom-anchor |
-| `wild_berries` | Wild berries | `!$U7_Item_WildBerries.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `tree_fruit` | Tree fruit | `!$U7_Item_TreeFruit.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `cave_mushroom` | Mushroom | `!$U7_Item_CaveMushroom.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `root_vegetable` | Root vegetable | `!$U7_Item_RootVegetable.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `raw_meat` | Raw meat | `!$U7_Item_RawMeat.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `haunch_meat` | Haunch meat | `!$U7_Item_HaunchMeat.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `river_fish` | River fish | `!$U7_Item_RiverFish.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: food, 3x native pixel art, grounded bottom-anchor |
-| `animal_bone` | Animal bone | `!$U7_Item_AnimalBone.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: bone, 3x native pixel art, grounded bottom-anchor |
-| `leather_hide` | Leather hide | `!$U7_Item_LeatherHide.png` | `AR-200` | **U7 stand-in** | ✓ YES | ✓ YES | Category: leather, 3x native pixel art, grounded bottom-anchor |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `People1` | img/characters/People1.png | plugin UF_World.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows) | stock RMMZ | **none yet** |
+| `$Adam` | img/characters/$Adam.png +json | start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists) | 4 facings × stand/walk (3 columns × 4 rows); clothing tier 0: unclad | U7 stand-in | AR-010 (DELIVERED) |
+| `$Eve` | img/characters/$Eve.png +json | start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists) | 4 facings × stand/walk (3 columns × 4 rows); clothing tier 0: unclad | U7 stand-in | AR-011 (DELIVERED) |
+| `$U7_Adam_T1` | img/characters/$U7_Adam_T1.png +json | start.pair male: clothing tier 1 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 1 = Woven wrap equipped | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Adam_T2` | img/characters/$U7_Adam_T2.png +json | start.pair male: clothing tier 2 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 2 = Hide cloak equipped | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Adam_T3` | img/characters/$U7_Adam_T3.png +json | start.pair male: clothing tier 3 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 3 (no item reaches this tier yet) | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Eve_T1` | img/characters/$U7_Eve_T1.png +json | start.pair female: clothing tier 1 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 1 = Woven wrap equipped | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Eve_T2` | img/characters/$U7_Eve_T2.png +json | start.pair female: clothing tier 2 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 2 = Hide cloak equipped | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Eve_T3` | img/characters/$U7_Eve_T3.png +json | start.pair female: clothing tier 3 (UF_Colonists.setTier) | 4 facings × stand/walk (3 columns × 4 rows); worn on the pair: clothing tier 3 (no item reaches this tier yet) | U7 stand-in | AR-501 (DELIVERED) |
+| `$U7_Goblin` | img/characters/$U7_Goblin.png +json | people goblin (tint #a8e888); plugin UF_Stance.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows); faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns) | U7 stand-in | AR-400 (REQUESTED) |
+| `$U7_Guard` | img/characters/$U7_Guard.png +json | people human; people dwarf (tint #ffd0a0); people orc (tint #a8c890); plugin UF_Stance.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows); faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns) | U7 stand-in | AR-400 (REQUESTED) <sub>AR-050, AR-010, AR-011</sub> |
+| `$U7_Ranger` | img/characters/$U7_Ranger.png +json | people human; people elf (tint #c8ffc8); plugin UF_Factions.js (test suite); plugin UF_Jobs.js (test suite); plugin UF_Look.js (test suite); plugin UF_World.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows); faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns) | U7 stand-in | AR-400 (REQUESTED) <sub>AR-050, AR-010, AR-011</sub> |
+| `$U7_Townsman` | img/characters/$U7_Townsman.png +json | people human; people gnome (tint #ffe0ff); plugin UF_Factions.js (test suite); plugin UF_Interact.js (test suite); plugin UF_Items.js (test suite); plugin UF_Jobs.js (test suite); plugin UF_Objects.js (test suite); plugin UF_Stance.js (test suite); plugin UF_TimeSpeed.js (test suite); plugin UF_Wildlife.js (test suite) | 4 facings × stand/walk (3 columns × 4 rows); faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns) | U7 stand-in | AR-400 (REQUESTED) <sub>AR-050, AR-010, AR-011</sub> |
 
-## Wildlife & Fauna
+## UI and system
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `wolf` | Wolf | `$U7_Wolf.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [2-4], 4 facings (E/W transposed) |
-| `wildcat` | Wildcat | `$U7_Cat.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-1], 4 facings (E/W transposed) |
-| `boar` | Boar | `$U7_Ox.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [2-5], 4 facings (E/W transposed) |
-| `fowl` | Wild fowl | `$U7_Chicken.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [3-6], 4 facings (E/W transposed) |
-| `hare` | Hare | `$U7_Hare.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [2-6], 4 facings (E/W transposed) |
-| `fox` | Fox | `$U7_Fox.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-2], 4 facings (E/W transposed) |
-| `dog` | Hound | `$U7_Dog.png` | `AR-403` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-3], 4 facings (E/W transposed) |
-| `hawk` | Hawk | `$U7_Hawk.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-1], 4 facings (E/W transposed) |
-| `deer` | Deer | `$U7_Deer.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [3-7], 4 facings (E/W transposed) |
-| `horse` | Wild horse | `$U7_Horse.png` | `AR-403` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [2-5], 4 facings (E/W transposed) |
-| `sheep` | Wild sheep | `$U7_Sheep.png` | `AR-403` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [3-8], 4 facings (E/W transposed) |
-| `rat` | Rat | `$U7_Rat.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [2-6], 4 facings (E/W transposed) |
-| `bog_horror` | Bog horror | `$U7_BogHorror.png` | `AR-402` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-1], 4 facings (E/W transposed) |
-| `serpent` | Giant serpent | `$U7_Serpent.png` | `AR-401` | **U7 stand-in** | ✓ YES | ✓ YES | Herd: [1-2], 4 facings (E/W transposed) |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `img/system/Balloon.png` | img/system/Balloon.png | RMMZ core: speech balloons | sheet of fixed-size pieces (RMMZ layout) | stock RMMZ | **none yet** |
+| `img/system/ButtonSet.png` | img/system/ButtonSet.png | RMMZ core: touch buttons | sheet of fixed-size pieces (RMMZ layout) | stock RMMZ | **none yet** |
+| `img/system/IconSet.png` | img/system/IconSet.png | RMMZ core: icons | sheet of fixed-size pieces (RMMZ layout) | stock RMMZ | **none yet** |
+| `img/faces/U7_Faces.png` | img/faces/U7_Faces.png | plugin UF_Dialogue.js; plugin UF_Gumps.js |  | U7 stand-in | **none yet** |
+| `img/system/u7_gump_backpack.png` | img/system/u7_gump_backpack.png | plugin UF_Gumps.js |  | U7 stand-in | **none yet** |
+| `img/system/u7_gump_barrel.png` | img/system/u7_gump_barrel.png | plugin UF_Gumps.js |  | U7 stand-in | **none yet** |
+| `img/system/u7_gump_chest.png` | img/system/u7_gump_chest.png | plugin UF_Gumps.js |  | U7 stand-in | **none yet** |
+| `img/system/u7_gump_sack.png` | img/system/u7_gump_sack.png | plugin UF_Gumps.js |  | U7 stand-in | **none yet** |
+| `img/system/Window.png` | img/system/Window.png | RMMZ core: skin of every window | 9-slice window skin, 192×192 (frame, background, cursor, arrows) | U7 stand-in | AR-033 (DELIVERED) |
 
-## Faction Civilized Species
+## Generated placeholders (drawn in code)
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `faction_human` | Humans Civilian/Warrior | `$U7_Townsman.png` | `AR-050` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_elf` | Elves Civilian/Warrior | `$U7_Ranger.png` | `AR-400` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_dwarf` | Dwarves Civilian/Warrior | `$U7_DwarfGuard.png` | `AR-400` | **U7 stand-in** | ✓ YES | — | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_goblin` | Goblins Civilian/Warrior | `$U7_Goblin.png` | `AR-400` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_orc` | Orcs Civilian/Warrior | `$U7_Orc.png` | `AR-400` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_gnome` | Gnomes Civilian/Warrior | `$U7_Gnome.png` | `AR-400` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
-| `faction_automaton` | Automata Civilian/Warrior | `$U7_Automaton.png` | `AR-400` | **U7 stand-in** | ✓ YES | ✓ YES | 4 facings (E/W transposed), 3-frame walk, U7 daylight palette |
+| Key | File | Used by | States the art needs | Status | Request |
+|---|---|---|---|---|---|
+| `UF_GenDesignation_*` | (drawn in code) | plugin UF_Interact.js; variants named in its tests: chop, build | 48×48 outline on a designated cell with a small glyph per job type (chop, gather, pick, quarry, mine, hunt, build, haul, dig, fish, dismantle); gone when the job finishes or is cancelled | generated | AR-035 (REQUESTED) |
+| `UF_GenGround_A2` | (drawn in code) | tileset 91 slot A2: all 22 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern); plugin UF_Tiles.js | 22 kinds × 47 autotile shapes on one 768×576 sheet | generated | AR-100 (REQUESTED) <sub>AR-120</sub> |
+| `UF_GenSelect` | (drawn in code) | plugin UF_Stance.js | four corner brackets around the selected unit's feet (AR-031 look) | generated | AR-031 (BACK TO IN PROGRESS) |
+| `UF_GenStance_friendly` | (drawn in code) | plugin UF_Stance.js | 48×48 square under a unit's feet, color #22c55e at alpha 0.45 | generated | AR-034 (REQUESTED) |
+| `UF_GenStance_hostile` | (drawn in code) | plugin UF_Stance.js | 48×48 square under a unit's feet, color #ef4444 at alpha 0.45 | generated | AR-034 (REQUESTED) |
+| `UF_GenStance_indifferent` | (drawn in code) | plugin UF_Stance.js | 48×48 square under a unit's feet, color #eab308 at alpha 0.45 | generated | AR-034 (REQUESTED) |
+| `UF_GenStockpile` | (drawn in code) | object stockpile "Stockpile"; plugin UF_Objects.js | building: unbuilt (no materials) / built; flat: drawn under units and items; flat dashed 48×48 square on the ground | generated | **none yet** |
 
-## UI & System
+## Needs a request
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `ui_lookCursor` | Look cursor | `U7_Cursor.png` | `AR-030` | **U7 stand-in** | ✓ YES | — | U7 styling (carved oak, gold trim, high-visibility) |
-| `ui_selectionMarker` | Unit selection marker | `U7_Select.png` | `AR-031` | **U7 stand-in** | ✓ YES | — | U7 styling (carved oak, gold trim, high-visibility) |
-| `ui_windowSkin` | UI Window skin | `Window.png` | `AR-033` | **U7 stand-in** | ✓ YES | — | U7 styling (carved oak, gold trim, high-visibility) |
+Assets with no `AR-` row in `docs/ASSET_REQUESTS.md` that mentions them. Claude Code writes the request; Gemini doesn't invent IDs. Stock RMMZ entries here break the rule that every stock asset in use has a replacement request.
 
-## Retired Subterranean Assets (V20 Retired)
+| Key | Category | Status | Used by |
+|---|---|---|---|
+| `img/system/Balloon.png` | ui | stock RMMZ | RMMZ core: speech balloons |
+| `img/system/ButtonSet.png` | ui | stock RMMZ | RMMZ core: touch buttons |
+| `img/system/IconSet.png` | ui | stock RMMZ | RMMZ core: icons |
+| `Outside_A5` | tiles | stock RMMZ | tileset 91 slot A5 |
+| `People1` | people | stock RMMZ | plugin UF_World.js (test suite) |
+| `img/faces/U7_Faces.png` | ui | U7 stand-in | plugin UF_Dialogue.js, plugin UF_Gumps.js |
+| `img/system/u7_gump_backpack.png` | ui | U7 stand-in | plugin UF_Gumps.js |
+| `img/system/u7_gump_barrel.png` | ui | U7 stand-in | plugin UF_Gumps.js |
+| `img/system/u7_gump_chest.png` | ui | U7 stand-in | plugin UF_Gumps.js |
+| `img/system/u7_gump_sack.png` | ui | U7 stand-in | plugin UF_Gumps.js |
+| `UF_GenStockpile` | generated | generated | object stockpile "Stockpile", plugin UF_Objects.js |
 
-| Catalog ID | Name | File Path | Request ID | Status | On Disk | Sidecar | Notes |
-|---|---|---|---|---|---|---|---|
-| `cave_floor` | Cave floor autotile | `U7_Dungeon_A2.png` | `AR-040` | **retired (stand-in retained on disk)** | ✓ YES | — | Subterranean level retired by user 2026-09-18 |
-| `cave_rock` | Cave solid rock autotile | `Dungeon_A4.png` | `AR-041` | **retired** | ✓ YES | — | Subterranean level retired by user 2026-09-18 |
-| `cave_mouth` | Cave mouth entrance | `!$U7_CaveMouth.png` | `AR-042` | **retired (stand-in retained on disk)** | ✓ YES | ✓ YES | Subterranean level retired by user 2026-09-18 |
-| `cave_ladder` | Cave ascent ladder | `!$U7_CaveLadder.png` | `AR-043` | **retired (stand-in retained on disk)** | ✓ YES | ✓ YES | Subterranean level retired by user 2026-09-18 |
+## Missing files
 
+(none: every referenced file exists)
+
+## Files on disk that nothing references
+
+Informational (`img/characters`, `img/tilesets`, `img/system`, `img/faces`): 251 files, of which 105 stock RMMZ, 146 U7 stand-in. Not counted above. The non-stock ones:
+
+`characters/!$CaveLadder.png`, `characters/!$CaveMouth.png`, `characters/!$IronOreVein.png`, `characters/!$TreeStump.png`, `characters/!$U7_CaveBoulder.png`, `characters/!$U7_CaveLadder.png`, `characters/!$U7_CaveMouth.png`, `characters/!$U7_FruitTree.png`, `characters/!$U7_IronOreVein.png`, `characters/!$U7_Item_Blackrock.png`, `characters/$People1.png`, `characters/$U7_Adam.png`, `characters/$U7_Adam_T0.png`, `characters/$U7_Automaton.png`, `characters/$U7_Avatar.png`, `characters/$U7_Blacksmith.png`, `characters/$U7_BogHorror.png`, `characters/$U7_CaveCrawler.png`, `characters/$U7_CaveLurker.png`, `characters/$U7_Dupre.png`, `characters/$U7_DwarfGuard.png`, `characters/$U7_Eve.png`, `characters/$U7_Eve_T0.png`, `characters/$U7_Gnome.png`, `characters/$U7_Iolo.png`, `characters/$U7_Miner.png`, `characters/$U7_Orc.png`, `characters/$U7_Shamino.png`, `characters/actor_445.png`, `characters/actor_450.png`, `characters/actor_460.png`, `characters/actor_500.png`, `characters/monster_491.png`, `characters/monster_492.png`, `characters/monster_493.png`, `characters/monster_494.png`, `characters/monster_495.png`, `characters/test_shape154.png`, `characters/test_shape161.png`, `faces/face_0.png`, `faces/face_1.png`, `faces/face_12.png`, `faces/face_16.png`, `faces/face_2.png`, `faces/face_3.png`, `faces/face_4.png`, `faces/face_8.png`, `faces/face_test.png`, `system/gump_42.png`, `system/gump_backpack.png`, `system/gump_barrel.png`, `system/gump_crate.png`, `system/gump_paperdoll_female.png`, `system/gump_paperdoll_male.png`, `system/gump_sack.png`, `system/gump_stats_paperdoll.png`, `system/gump_test.png`, `system/paperdoll_body.png`, `system/paperdoll_item0.png`, `system/U7_Cursor.png`, `system/u7_gump_bag.png`, `system/u7_gump_crate.png`, `system/u7_gump_paperdoll.png`, `system/u7_gump_stats.png`, `system/U7_HandPointer.png`, `system/U7_Pointer.png`, `system/U7_Select.png`, `system/U7_Window.png`, `tilesets/U7_Dungeon_A1.png`, `tilesets/U7_Dungeon_A2.png`, `tilesets/U7_Fortress_B.png`, `tilesets/U7_Glade_B.png`, `tilesets/U7_Ground_A1.png`, `tilesets/U7_Ground_A2.png`, `tilesets/U7_Outside_A1.png`, `tilesets/U7_Outside_A2.png`, `system/u7_gumps/` (70 files)
