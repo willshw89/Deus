@@ -23,7 +23,7 @@
                 const u=W.units().find(u=>u.data&&u.data.site===local.siteId&&u.z===local.z&&u.data.age>=18);
                 if(!u)continue;
                 H.planSteps(u);const h=H.of(u);
-                survey.push({site:local.siteId,z:local.z,home:!!(h&&h.home),reason:h&&h.reason});
+                survey.push({site:local.siteId,z:local.z,home:!!(h&&h.home),design:h&&h.home&&h.home.design,reason:h&&h.reason});
             }
             t.check("generated_home_search_is_bounded",survey.length>0&&survey.every(s=>s.home||/space|unavailable|settlement/.test(s.reason||"")),JSON.stringify({milliseconds:Math.round(performance.now()-surveyStart),survey}));
             if(UF.Ownership.setEnabled) UF.Ownership.setEnabled(false);
@@ -34,7 +34,7 @@
             for(const z of [-1,1]) {
                 const local={version:2,factionId:fid,siteId:9900+z,site:{x:96,y:96},area:{x:0,y:0},z,radius:8,plan:[],stockpiles:[],log:[],adopted:true};
                 c.settlements[local.siteId]=local; locals.push(local);
-                for(let y=75;y<=110;y++) for(let x=75;x<=110;x++) { L.setShape({area:{x:0,y:0},z,x,y},"floor"); O.setIn({x:0,y:0,z},x,y,null); }
+                for(let y=64;y<=126;y++) for(let x=64;x<=126;x++) { L.setShape({area:{x:0,y:0},z,x,y},"floor"); O.setIn({x:0,y:0,z},x,y,null); }
             }
             c.settlementsReady=true;
             const made=[];
@@ -49,7 +49,7 @@
             const h=H.formPair(a,b), underground=H.of(d);
             const steps=H.planSteps(a), deepSteps=H.planSteps(d);
             t.check("real_home_plans", !!h && !!h.home && !!underground.home && steps.length===5 && deepSteps.length===5 && h.z===1 && underground.z===-1,
-                JSON.stringify([h&&h.home&&{id:h.id,x:h.home.x,y:h.home.y,z:h.z},underground.home&&{id:underground.id,x:underground.home.x,y:underground.home.y,z:underground.z}]));
+                JSON.stringify([h&&h.home&&{id:h.id,x:h.home.x,y:h.home.y,z:h.z,design:h.home.design},underground.home&&{id:underground.id,x:underground.home.x,y:underground.home.y,z:underground.z,design:underground.home.design}]));
             if(!h || !h.home || !underground.home) return;
             // Exact real costs are staged on build cells. This isolates physical building, not resource abundance.
             let staged=0;
@@ -67,7 +67,7 @@
                 }
             }
             $ufTime.hour=12;
-            L.setView(1,{center:{x:h.home.x+3,y:h.home.y+3}});
+            L.setView(1,{center:{x:h.home.x+Math.floor(h.home.w/2),y:h.home.y+Math.floor(h.home.h/2)}});
             await t.waitUntil(()=>!L.switching()&&!$gamePlayer.isTransferring()&&W.viewLevel().z===1,20000,"view the household construction");
             if(UF.Fog.setEnabled) UF.Fog.setEnabled(false);
             UF.Time.setLevel(UF.Time.speeds.length-1);
@@ -91,7 +91,7 @@
             t.check("materials_consumed",staged>0&&[a,d].every(u=>H.planSteps(u).some(s=>s.cells.some(([dx,dy])=>Object.entries(O.type(s.build).build.items||{}).some(([id])=>I.count({area:u.area,z:u.z,x:C.state(u).site.x+dx,y:C.state(u).site.y+dy},id)===0)))),"real construction consumes staged items; no direct object stamping in the build phase");
             t.check("personal_tools_made",made.every(u=>G.describe(u).medium.some(g=>g.kind==="equipment"&&g.state==="achieved")),JSON.stringify(made.map(u=>({id:u.id,items:I.inventoryOf(u.id).map(i=>i.type),goals:G.describe(u).medium}))));
             const place=(u,p)=>{W.moveUnitToLevel(u,u.z,p.x,p.y);const e=W.eventOf(u.id);if(e)e.locate(p.x,p.y);u.goal=null;};
-            const spots=[{x:h.home.x+3,y:h.home.y+2},{x:h.home.x+4,y:h.home.y+2}];
+            const spots=h.home.spots||[{x:h.home.x+3,y:h.home.y+2},{x:h.home.x+4,y:h.home.y+2}];
             place(a,spots[0]);place(b,spots[1]);
             for(const p of h.home.doors) {const s=UF.Doors.stateAt({x:0,y:0,z:h.z},p.x,p.y);if(s){s.heldOpen=false;s.openUntil=0;}}
             const room=H.roomForPair(a,b);
@@ -104,11 +104,28 @@
             t.check("child_joins_and_adds_need",!!baby&&H.of(baby)===h&&H.describe(h).generation===1&&H.demands(h).beds===familyBefore+1&&baby.z===1,
                 JSON.stringify({baby:baby&&baby.id,household:baby&&H.of(baby)&&H.of(baby).id,demands:H.demands(h),generation:H.describe(h).generation}));
             if(baby) {
-                place(baby,{x:h.home.x+2,y:h.home.y+2});
+                place(baby,h.home.sleeping.find(p=>!spots.some(s=>s.x===p.x&&s.y===p.y)));
                 delete a.data.lastMatedDate;delete b.data.lastMatedDate;
                 t.check("child_blocks_privacy",H.roomForPair(a,b)===null&&C.onMated(a,b)===false,"a child in the sleeping room prevents adult intimacy");
                 const before=J.list().length;C.decide(baby);
                 t.check("infant_not_worker",J.list().length===before&&!J.of(baby.id),"newborn creates no industrial, hunting or relationship job");
+                const mainShape=JSON.stringify({x:h.home.x,y:h.home.y,walls:h.home.walls,doors:h.home.doors,beds:h.home.beds});
+                const growth=H.planSteps(a).filter(s=>!s.done || s.done!==true);
+                const annexes=H.structures(h).slice(1);
+                t.check("growth_requests_real_annex",annexes.length>0&&growth.some(s=>s.id.includes("annex"))&&H.demands(h).beds>0,
+                    JSON.stringify({annexes:annexes.map(a=>({w:a.w,h:a.h,design:a.design})),demands:H.demands(h)}));
+                for(const step of growth)for(const [dx,dy] of step.cells||[]){
+                    const x=C.state(a).site.x+dx,y=C.state(a).site.y+dy;
+                    if(O.atIn({...a.area,z:a.z},x,y)&&O.atIn({...a.area,z:a.z},x,y).id===step.build)continue;
+                    for(const [id,n]of Object.entries(O.type(step.build).build.items||{}))I.drop({...a.area,z:a.z},x,y,id,n);
+                }
+                C.setEnabled(true);UF.Time.resume();
+                await t.waitUntil(()=>H.describe(h).complete,45000,"material-built family growth annex").catch(()=>{});
+                C.setEnabled(false);
+                for(const u of made){const j=J.of(u.id);if(j)J.cancel(j.id,"fixture inspection");u.goal=null;}
+                t.check("annex_physically_built_without_resize",annexes.length>0&&H.describe(h).complete&&!!UF.Ownership.bedOf(baby)&&
+                    JSON.stringify({x:h.home.x,y:h.home.y,walls:h.home.walls,doors:h.home.doors,beds:h.home.beds})===mainShape,
+                    JSON.stringify({demands:H.demands(h),bed:UF.Ownership.bedOf(baby),builds:changes.length}));
             }
             const culture=UF.CultureGrowth.describeFaction(fid);
             t.check("learned_from_building",!!culture&&Object.keys(UF.CultureGrowth.ensureFaction(fid).knowledge).length>0,JSON.stringify(culture));
@@ -118,6 +135,11 @@
             if(UF.Sheet&&UF.Sheet.open)UF.Sheet.open(a.id);
             G.showSelected();await t.waitFrames(3);t.screenshot("household_goals");
             if(G.window())G.window().hide();if(UF.Sheet&&UF.Sheet.close)UF.Sheet.close();await t.waitFrames(3);t.screenshot("material_built_home");
+            const annex=H.structures(h)[1];
+            if(annex){$gamePlayer.locate(annex.x+Math.floor(annex.w/2),annex.y+Math.floor(annex.h/2));await t.waitFrames(3);t.screenshot("family_growth_annex");}
+            L.setView(-1,{center:{x:underground.home.x+Math.floor(underground.home.w/2),y:underground.home.y+Math.floor(underground.home.h/2)}});
+            await t.waitUntil(()=>!L.switching()&&!$gamePlayer.isTransferring()&&W.viewLevel().z===-1,20000,"view the other built design");
+            await t.waitFrames(3);t.screenshot("underground_home_design");
             t.check("no_errors",t.errorsSoFar().length===errors0,t.errorsSoFar().slice(errors0).join(" | ")||"none during society integration");
         },{isDefault:false});
     };

@@ -4,6 +4,9 @@ const fs = require("fs"), vm = require("vm"), path = require("path");
 let source = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_Households.js"), "utf8");
 if (process.argv.includes("--mutate-z")) source = source.replace("&& zOf(a) === zOf(b)", "");
 if (process.argv.includes("--mutate-enclosure")) source = source.replace("return !!p && p.walls.every", "return !!p || p.walls.every");
+if (process.argv.includes("--mutate-variety")) source = source.replace("const variant = roll % 100 < 25 + social / 2 ? 1 : 0;", "const variant = 0;");
+if (process.argv.includes("--mutate-size")) source = source.replace("designFor(h, members(h).length)", "designFor(h, 2)");
+if (process.argv.includes("--mutate-natural-reservations")) source = source.replace("const connections = W().state.naturalConnections;", "const connections = null;");
 let passed = 0, failed = 0;
 function check(name, condition, detail = "") {
     if (condition) { passed++; console.log(`PASS households.${name}${detail ? " - " + detail : ""}`); }
@@ -112,7 +115,7 @@ function fixture() {
     steps[0].done = [1]; steps[0].celebrated = true;
     const stable = f.H.planSteps(a);
     check("plan_progress_persists", stable[0] === steps[0] && stable[0].celebrated && stable[0].done[0] === 1);
-    check("two_rooms_exact_build_steps", steps.length === 5 && steps.every(s => s.exact && s.household === h.id) && home.doors.length === 2 && home.sleeping.length === 10);
+    check("two_rooms_exact_build_steps", steps.length === 5 && steps.every(s => s.exact && s.household === h.id) && home.doors.length === 2 && home.sleeping.length >= 8);
     check("planning_never_stamps", f.objects.size === 0 && f.H.demands(h).beds === 2 && !f.H.describe(h).complete);
     check("unfinished_privacy_refused", f.H.roomForPair(a, b) === null);
     f.complete(h, steps);
@@ -122,10 +125,10 @@ function fixture() {
     check("stable_beds_do_not_emit_assignments", f.assignments() === assignments);
     check("npc_door_faction", home.doors.every(p => f.doors.get(f.k({ ...h.area, z: h.z }, p.x, p.y)).faction === h.faction));
     const room = f.H.roomForPair(a, b);
-    check("actual_private_room", !!room && room.householdId === h.id && room.spots.length === 2 && Math.abs(room.spots[0].x - room.spots[1].x) === 1);
+    check("actual_private_room", !!room && room.householdId === h.id && room.spots.length === 2 && Math.abs(room.spots[0].x - room.spots[1].x) + Math.abs(room.spots[0].y - room.spots[1].y) === 1);
     const ds = f.doors.get(f.k({ ...h.area, z: h.z }, home.doors[1].x, home.doors[1].y)); ds.open = true;
     check("temporarily_open_door_delays_privacy", f.H.roomForPair(a, b) === null); ds.open = false;
-    const kid = f.add(3, { data: { age: 1, motherId: 1, fatherId: 2 } }); kid.x = home.x + 2; kid.y = home.y + 1;
+    const kid = f.add(3, { data: { age: 1, motherId: 1, fatherId: 2 } }); kid.x = home.sleeping[0].x; kid.y = home.sleeping[0].y;
     check("child_bystander_blocks_privacy", f.H.roomForPair(a, b) === null);
     kid.x = 65; kid.y = 65; f.H.reconcile();
     check("new_child_adds_bed_demand", f.H.demands(h).beds === 1 && !f.H.describe(h).complete);
@@ -133,7 +136,7 @@ function fixture() {
     const wall = home.walls[0]; f.objects.delete(f.k({ ...h.area, z: h.z }, wall.x, wall.y));
     check("missing_wall_reopens_demand", f.H.demands(h).bedrooms === 1 && f.H.roomForPair(a, b) === null);
     const one = f.add(4), singletonSteps = f.H.planSteps(one), other = f.H.of(one).home;
-    check("homes_do_not_overlap", singletonSteps.length > 0 && (other.x > home.x + 7 || other.x + 7 < home.x || other.y > home.y + 7 || other.y + 7 < home.y));
+    check("homes_do_not_overlap", singletonSteps.length > 0 && f.H.structures(h).every(p => other.x > p.x + p.w || other.x + other.w < p.x || other.y > p.y + p.h || other.y + other.h < p.y));
     for (const id of [5, 6]) f.add(id, { data: { age: 1, motherId: 1, fatherId: 2 } }); f.H.reconcile();
     check("overflow_explicit", f.H.demands(h).overflow === 1 && f.H.demands(h).beds >= 2 && !f.H.describe(h).complete);
 }
@@ -158,6 +161,138 @@ function fixture() {
     const g = fixture(), b = g.add(1, { data: { species: "goblin" } });
     g.sandbox.UF.Colonists.culture = () => ({ wall: "rubble_pillar", laterWall: "missing_wall", door: "door_wood" });
     check("missing_cultural_recipe_stays_blocked", g.H.planSteps(b).length === 0 && !g.H.of(b).home && /definitions unavailable/.test(g.H.of(b).reason));
+}
+{
+    // Place metadata-only passage cells on the exact plot selected by the real
+    // planner without reservations. No fake objects or terrain blocks make the
+    // rejection happen, and each case gets a fresh once-per-day search.
+    const control = fixture(), founder = control.add(1);
+    control.H.planSteps(founder);
+    const preferred = control.H.of(founder).home;
+    const location = (x, y, z = 0) => ({ area: { x: 0, y: 0 }, x, y, z });
+    const near = (home, p) => home && p.x >= home.x - 1 && p.x <= home.x + home.w &&
+        p.y >= home.y - 1 && p.y <= home.y + home.h;
+    const point = location(preferred.x + 3, preferred.y + 2);
+    for (const kind of ["endpoint", "landing"]) {
+        const f = fixture(), a = f.add(1);
+        f.st.naturalConnections = kind === "endpoint"
+            ? { links: [{ a: point, b: { ...point, z: -1 } }], chains: [] }
+            : { links: [], chains: [{ landings: [point] }] };
+        const steps = f.H.planSteps(a), home = f.H.of(a).home;
+        check(`natural_${kind}_changes_preferred_plot`, steps.length === 5 && !!home &&
+            (home.x !== preferred.x || home.y !== preferred.y) && !near(home, point) && f.objects.size === 0,
+            `preferred (${preferred.x},${preferred.y}); selected (${home && home.x},${home && home.y})`);
+    }
+    const f = fixture(), a = f.add(1), below = { ...point, z: -1 };
+    f.st.naturalConnections = { links: [{ a: below, b: { ...point, z: -2 } }], chains: [{ landings: [below] }] };
+    const steps = f.H.planSteps(a), home = f.H.of(a).home;
+    check("other_level_natural_access_does_not_reserve_plot", steps.length === 5 && !!home &&
+        home.x === preferred.x && home.y === preferred.y && f.objects.size === 0,
+        "identical coordinates on -1/-2 leave the Ground home plot available");
+}
+function familyFixture(count, seed) {
+    const f = fixture(); f.st.seed = seed;
+    const a = f.add(1), b = count >= 2 ? f.add(2) : null;
+    if (b) f.H.formPair(a, b); else f.H.reconcile();
+    for (let i = 3; i <= count; i++) f.add(i, { data: { age: 1, motherId: 1, fatherId: 2 } });
+    f.H.reconcile();
+    const steps = f.H.planSteps(a);
+    return Object.assign(f, { a, b, household: f.H.of(a), steps });
+}
+function geometricSafety(home) {
+    const kk = p => `${p.x},${p.y}`;
+    const blocked = new Set(home.walls.map(kk));
+    if (home.hearth) blocked.add(kk(home.hearth));
+    const reachable = new Set([kk(home.entrance)]), queue = [home.entrance];
+    while (queue.length) {
+        const p = queue.shift();
+        for (const [dx, dy] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+            const q = { x: p.x + dx, y: p.y + dy }, key = kk(q);
+            if (q.x < home.x - 1 || q.y < home.y - 1 || q.x > home.x + home.w || q.y > home.y + home.h || blocked.has(key) || reachable.has(key)) continue;
+            reachable.add(key); queue.push(q);
+        }
+    }
+    const all = [...home.walls, ...home.doors, ...home.beds, home.hearth, home.storage].filter(Boolean);
+    const unique = new Set(all.map(kk)).size === all.length;
+    const doors = home.doors.every(p => reachable.has(kk(p)));
+    const inside = new Set(home.sleeping.map(kk));
+    const spots = home.spots.every(p => inside.has(kk(p)) && reachable.has(kk(p))) &&
+        Math.abs(home.spots[0].x - home.spots[1].x) + Math.abs(home.spots[0].y - home.spots[1].y) === 1;
+    const hearth = !home.hearth || [...home.walls, ...home.doors, ...home.beds, home.storage].filter(Boolean).every(p =>
+        Math.abs(p.x - home.hearth.x) + Math.abs(p.y - home.hearth.y) >= 2);
+    return unique && doors && spots && hearth && home.beds.every(p => inside.has(kk(p)) && reachable.has(kk(p)));
+}
+{
+    const signatures = new Set(), areas = new Set(), rotations = new Set();
+    let safe = true, repeated = true, needSized = true, validPrivacy = true;
+    for (let seed = 1; seed <= 16; seed++) {
+        const f = familyFixture(4, seed), p = f.household.home;
+        const identical = familyFixture(4, seed).household.home;
+        repeated = repeated && JSON.stringify(p) === JSON.stringify(identical);
+        safe = safe && geometricSafety(p); areas.add(p.w * p.h); rotations.add(p.design.rotation);
+        signatures.add(JSON.stringify({ w: p.w, h: p.h, doors: p.doors.map(q => [q.x - p.x, q.y - p.y]) }));
+        f.complete(f.household, f.steps); validPrivacy = validPrivacy && !!f.H.roomForPair(f.a, f.b);
+        const sizes = [2, 4, 8, 12].map(n => familyFixture(n, seed).household.home);
+        needSized = needSized && sizes.every((home, i) => home.beds.length >= [2, 4, 8, 12][i]) &&
+            sizes.every((home, i) => i === 0 || home.w * home.h >= sizes[i - 1].w * sizes[i - 1].h);
+        safe = safe && sizes.every(geometricSafety);
+    }
+    check("saved_seeded_structural_variety", areas.size >= 2 && signatures.size >= 6 && rotations.size === 4,
+        `${areas.size} footprint areas, ${signatures.size} structural signatures, ${rotations.size} rotations`);
+    check("same_seed_same_design", repeated);
+    check("larger_new_families_get_capacity_and_area", needSized);
+    check("all_orientations_have_aisles_and_hearth_clearance", safe);
+    check("varied_built_rooms_preserve_privacy", validPrivacy);
+    const f = familyFixture(2, 18), h = f.household, p = h.home;
+    f.complete(h, f.steps);
+    const original = JSON.stringify({ x: p.x, y: p.y, w: p.w, h: p.h, walls: p.walls, doors: p.doors, design: p.design });
+    const countBefore = f.objects.size;
+    const child = f.add(3, { data: { age: 1, motherId: 1, fatherId: 2 } }); f.H.reconcile();
+    const extended = f.H.planSteps(f.a), annex = p.annexes && p.annexes[0];
+    check("growing_family_reserves_real_annex", !!annex && extended.length === 8 && f.objects.size === countBefore &&
+        f.H.demands(h).beds === 1 && !f.H.describe(h).complete && geometricSafety(annex));
+    check("expansion_preserves_built_main_geometry", original === JSON.stringify({ x: p.x, y: p.y, w: p.w, h: p.h, walls: p.walls, doors: p.doors, design: p.design }));
+    f.complete(h, extended);
+    const childBed = annex.beds.find(b => b.unitId === child.id);
+    check("built_annex_satisfies_child_bed", f.H.describe(h).complete && childBed && child.data.bed.x === childBed.x && child.data.bed.y === childBed.y);
+    child.x = childBed.x; child.y = childBed.y;
+    check("separate_annex_does_not_invade_parent_privacy", !!f.H.roomForPair(f.a, f.b));
+    f.st = f.World.state = JSON.parse(JSON.stringify(f.st));
+    f.World.unit = id => f.st.units[id] || null; f.World.units = () => Object.values(f.st.units);
+    f.H.reconcile();
+    const loaded = f.H.of(1).home;
+    check("design_and_annex_survive_save", loaded.design.size === "small" && loaded.annexes.length === 1 && JSON.stringify(loaded.design) === JSON.stringify(p.design));
+    const blocked = familyFixture(2, 18); blocked.complete(blocked.household, blocked.steps);
+    blocked.add(3, { data: { age: 1, motherId: 1, fatherId: 2 } }); blocked.H.reconcile();
+    blocked.World.walkable = () => false; blocked.H.planSteps(blocked.a);
+    check("growth_without_plot_reports_expansion_blocked", blocked.H.demands(blocked.household).expansionBlocked &&
+        blocked.H.demands(blocked.household).overflow === 1 && !(blocked.household.home.annexes || []).length && !blocked.H.describe(blocked.household).complete);
+}
+{
+    // Historical 7x7 version-1 geometry, deliberately without a design/spots
+    // record. Loading the new planner must not reconstruct or enlarge it.
+    const f = fixture(), a = f.add(1), b = f.add(2), h = f.H.formPair(a, b), x = 40, y = 40;
+    const doors = [{ x: x + 3, y: y + 6 }, { x: x + 3, y: y + 3 }], walls = [], sleeping = [];
+    for (let py = 0; py < 7; py++) for (let px = 0; px < 7; px++) {
+        if ((px === 0 || px === 6 || py === 0 || py === 6 || py === 3) && !doors.some(p => p.x === x + px && p.y === y + py)) walls.push({ x: x + px, y: y + py });
+        if (px > 0 && px < 6 && py > 0 && py < 3) sleeping.push({ x: x + px, y: y + py });
+    }
+    h.home = { x, y, w: 7, h: 7, wall: "wall_wood", door: "door_wood", walls, doors, sleeping,
+        beds: [[1, 1], [5, 1], [1, 2], [5, 2]].map(p => ({ x: x + p[0], y: y + p[1], unitId: null })),
+        hearth: { x: x + 1, y: y + 4 }, storage: { x: x + 5, y: y + 4 }, entrance: { x: x + 3, y: y + 7 }, steps: [] };
+    const steps = f.H.planSteps(a); f.complete(h, steps);
+    const before = JSON.stringify(h.home); f.st.seed = 777; a.data.facets = { sociability: 100 }; f.H.planSteps(a);
+    check("legacy_home_geometry_not_redesigned", JSON.stringify(h.home) === before && !h.home.design && !h.home.annexes);
+    const room = f.H.roomForPair(a, b);
+    check("legacy_private_spots_preserved", room && room.spots[0].x === x + 3 && room.spots[0].y === y + 2 && room.spots[1].x === x + 4);
+}
+{
+    const control = familyFixture(2, 19), home = control.household.home, buffer = home.hearthClearance[0];
+    const f = fixture(); f.st.seed = 19; const a = f.add(1), b = f.add(2); f.H.formPair(a, b);
+    f.objects.set(f.k({ x: 0, y: 0, z: 0 }, buffer.x, buffer.y), { id: "TEST_fuel_plant", tags: ["plant"], passable: true });
+    f.H.planSteps(a);
+    const changed = f.H.of(a).home;
+    check("hearth_buffer_rejects_existing_fuel_cover", changed && (changed.x !== home.x || changed.y !== home.y));
 }
 console.log(`RESULT: ${passed} passed, ${failed} failed`);
 process.exitCode = failed ? 1 : 0;
