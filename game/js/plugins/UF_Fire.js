@@ -713,7 +713,7 @@
         if (douseJobs().some(j => j.params && j.params.fireKey === key)) return null;
         if (!findWater(area, x, y, conf().douse.waterRadius, null)) return null;
         const F = window.UF && UF.Factions;
-        const faction = F && typeof F.playerId === "function" ? F.playerId() : null;
+        const faction = o.faction !== undefined ? o.faction : F && typeof F.playerId === "function" ? F.playerId() : null;
         return J.create({
             type: "douse", target: cellRef(area, x, y),
             params: { faction, fireKey: key, fire: cellRef(area, x, y), cause: o.cause || "player" },
