@@ -543,22 +543,25 @@
         // cell_lines: three lines for a tree, a water cell and a unit.
         const L1 = Look.describeCell(cells.oak.x, cells.oak.y), L2 = Look.describeCell(cells.water.x, cells.water.y), L3 = Look.describeCell(cells.unit.x, cells.unit.y);
         const info = cellAt(cells.oak.x, cells.oak.y);
-        const okTree = !!L1 && L1.length === 3 && L1[0] === "Oak — chop" && L1[1].includes(info.biome) && L1[1].includes(groundName(info.ground)) && L1[2].startsWith("!$TimberOak — ");
+        // The oak's picture comes from the catalog (a stock tile since the V9 stock swap, 2026-09-19), not a fixed name.
+        const oakFile = imageOfType(O.type("oak"));
+        const okTree = !!L1 && L1.length === 3 && L1[0] === "Oak — chop" && L1[1].includes(info.biome) && L1[1].includes(groundName(info.ground)) && !!oakFile && L1[2].startsWith(`${oakFile} — `);
         const okWater = !!L2 && L2[1].includes("water: fresh") && /^Outside_A1 — /.test(L2[2]);
         const okUnit = !!L3 && L3[0] === "TEST_looker · Friendly · Idle" && L3[2].startsWith("$U7_Ranger — U7 stand-in");
         t.check("cell_lines", okTree && okWater && okUnit,
-            `tree ${JSON.stringify(L1)}; water ${JSON.stringify(L2)}; unit ${JSON.stringify(L3)}`);
+            `tree ${JSON.stringify(L1)} (catalog image "${oakFile}"); water ${JSON.stringify(L2)}; unit ${JSON.stringify(L3)}`);
 
         // asset_line_names_status: by the name rules (the index, if one is loaded, is set aside for this check).
         const hadIndex = Assets.index();
         Assets.setIndex(null);
-        put(cells.bare.x + 3, cells.bare.y, "tree_savanna"); // !$U7_Flat-toptree
         put(cells.bare.x - 3, cells.bare.y, "palm");         // Outside_B tile
         const l3 = (x, y) => (Look.describeCell(x, y) || ["", "", ""])[2];
-        const a1 = l3(cells.bare.x + 3, cells.bare.y), a2 = l3(cells.bare.x, cells.bare.y), a3 = l3(cells.bare.x - 3, cells.bare.y);
+        // No catalog object draws U7 art since the V9 stock swap (2026-09-19), so the U7_ name rule is read from a name.
+        const u7 = Assets.describe("!$U7_Flat-toptree");
+        const a1 = u7 ? u7.text : "", a2 = l3(cells.bare.x, cells.bare.y), a3 = l3(cells.bare.x - 3, cells.bare.y);
         const groundFile = ($gameMap.tileset() && $gameMap.tileset().tilesetNames[1]) || "";
         t.check("asset_line_names_status", a1.startsWith("!$U7_Flat-toptree — U7 stand-in") && a2.startsWith(`${groundFile} — code-drawn placeholder`) && a3.startsWith("Outside_B#") && a3.includes("— stock RMMZ"),
-            `U7 object: "${a1}"; ground (${groundFile}): "${a2}"; stock tile: "${a3}"${hadIndex ? "; an asset index was loaded and set aside for this check" : "; no asset index file"}`);
+            `U7 name: "${a1}"; ground (${groundFile}): "${a2}"; stock tile: "${a3}"${hadIndex ? "; an asset index was loaded and set aside for this check" : "; no asset index file"}`);
         Assets.setIndex({ "!$TimberOak": { status: "original", request: "AR-021", usedBy: ["oak"] } });
         const viaIndex = Assets.describe("!$TimberOak");
         const notInIndex = Assets.describe("!$U7_Shrub");

@@ -44,14 +44,14 @@ Mouse move only: the tooltip follows the pointer (`TouchInput.x/y`). No keys.
 |---|---|---|
 | none drawn by this plugin | The tooltip is text on a code-drawn bitmap (`Sprite_UFLookTip`, not an image file) | — |
 | `data/UF_AssetIndex.json` | Statuses and request ids for line 3 (written by `tools/generate_asset_inventory.js`; optional) | data, not art |
-| `!$TimberOak`, `!$U7_Flat-toptree`, `Outside_B#237` (palm), `$U7_Ranger` | Fixtures of the `look` suite only | as listed in `docs/ASSET_INVENTORY.md` |
+| the oak's catalog picture (`Outside_B#176` since the V9 stock swap), `Outside_B#237` (palm), `$U7_Ranger` | Fixtures of the `look` suite only; `!$TimberOak`, `!$U7_Flat-toptree` and `!$U7_Shrub` are only names passed to `describe`, no file is loaded | as listed in `docs/ASSET_INVENTORY.md` |
 
 ## Checks (suite `look`, this plugin's part; the rest are in `docs/systems/UF_Interact.md`)
 | Check | What would make it FAIL |
 |---|---|
 | `look_ready` | Not on an area map, or `UF.Objects`, `UF.Items`, `UF.Tiles` or the tooltip sprite is missing |
-| `cell_lines` | With an oak, a fresh-water tile and a colonist-kind test unit placed in view: the oak's lines aren't `Oak — chop` / a line with its biome and ground kind names / `!$TimberOak — ...`; the water line 2 lacks `water: fresh` or line 3 doesn't start `Outside_A1 — `; the unit's line 1 isn't `TEST_looker · Friendly · Idle` or its line 3 doesn't start `$U7_Ranger — U7 stand-in` |
-| `asset_line_names_status` | With the index set aside: a `!$U7_` object doesn't say `U7 stand-in`, the ground (`UF_GenGround_A2`) doesn't say `code-drawn placeholder`, a stock B-sheet tile doesn't say `stock RMMZ` |
+| `cell_lines` | With an oak, a fresh-water tile and a colonist-kind test unit placed in view: the oak's lines aren't `Oak — chop` / a line with its biome and ground kind names / `<the oak's catalog image> — ...` (read with `UF.Objects.type("oak")` since 2026-09-19; it was a fixed `!$TimberOak` before the stock swap); the water line 2 lacks `water: fresh` or line 3 doesn't start `Outside_A1 — `; the unit's line 1 isn't `TEST_looker · Friendly · Idle` or its line 3 doesn't start `$U7_Ranger — U7 stand-in` |
+| `asset_line_names_status` | With the index set aside: `describe("!$U7_Flat-toptree")` doesn't say `U7 stand-in` (a name since 2026-09-19: no catalog object draws U7 art after the V9 stock swap), the ground (`UF_GenGround_A2`) doesn't say `code-drawn placeholder`, a stock B-sheet tile doesn't say `stock RMMZ` |
 | `asset_index_used` | With a test index `{ "!$TimberOak": { status, request } }`: `describe` doesn't return `!$TimberOak — original (AR-021)` from the index, a name not in it doesn't fall back to the name rules, or the real index isn't restored afterwards |
 | `window_follows_mouse` | With `TouchInput._x/_y` on the oak's cell then on the water cell (2 frames each): the tooltip isn't visible, its text doesn't change from `Oak — chop...` to a line with `water: fresh`, its corner isn't 14 px right/below the pointer (or 14 px left/above when flipped at the edge), or its font isn't 13 px |
 | `edges_and_ui` | At the bottom-right corner of the screen the tooltip leaves the screen or isn't flipped; with a 200×80 test window at (40,40) and the mouse at (60,60), `isOverUI` is false or the tooltip stays visible |
