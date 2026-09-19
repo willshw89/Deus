@@ -28,7 +28,10 @@
     { "id": "blessed_grass", "name": "Flowering grass", "pattern": "grass", "colors": ["#62b24a", "#4e9a3a", "#82ca62", "#f0e8a0"], "edge": "#3e7a2e" },
     { "id": "ash", "name": "Ash", "pattern": "dots", "colors": ["#5a5654", "#444240", "#6e6a66", "#8a3a2a"], "edge": "#2e2c2a" },
     { "id": "scree", "name": "Scree", "pattern": "cracks", "colors": ["#6e665a", "#5a5448", "#827a6c", "#4a443a"], "edge": "#3a352c" },
-    { "id": "road", "name": "Packed earth", "pattern": "dots", "colors": ["#a8906a", "#8a7452", "#c0aa84", "#6e5a40"], "edge": "#5e4a32" }
+    { "id": "road", "name": "Packed earth", "pattern": "dots", "colors": ["#a8906a", "#8a7452", "#c0aa84", "#6e5a40"], "edge": "#5e4a32" },
+    {"id":"floor_wood","name":"Plank floor","pattern":"planks","colors":["#9b6a3c","#724826","#bc8650","#50311d"],"edge":"#3a2416"},
+    {"id":"floor_stone","name":"Flagstone floor","pattern":"cracks","colors":["#8e8e88","#696965","#aaa9a2","#4b4b48"],"edge":"#393936"},
+    {"id":"floor_rushes","name":"Rush floor","pattern":"needles","colors":["#b49a58","#806d3d","#d1b96f","#5f512d"],"edge":"#493e24"}
   ],
   "water": {
     "about": "Water kinds by A1 autotile ID (edges computed by the engine) in tilesets.surface.A1. Stock RMMZ sheet until AR-101.",
@@ -106,13 +109,14 @@
     },
     "pond": { "about": "A pond at a random direction and distance from the start, so the pair can drink.", "distance": [8, 22], "radius": [2, 5] },
     "kit": {
-      "about": "Minimum resources placed within this ring of the start whatever the biome rolled, so work starts at once (user request 2026-09-18).",
+      "about": "Minimum resources placed within this ring of every faction's area centre (factions.areas) whatever the biome rolled, so every band's work starts at once (user request 2026-09-18; every area, not only the player's, since 2026-09-19). water: UF_Factions places each area where drinkable water (these kinds) lies within reach cells of its centre when the map has such a place. wildlife: UF_Wildlife's prey herd near the player's area only.",
       "radius": [5, 20],
       "objects": { "berry_bush": 6, "oak": 8, "rocks_small": 10, "grass_tuft": 8, "reeds": 4, "granite_boulder": 2, "fruit_tree": 1 },
+      "water": { "about": "Drinkable water within reach of every area centre (UF_Factions prefers such places; the worldgen kit_per_area check reports each area's nearest).", "reach": 30, "kinds": ["fresh", "pond", "icy", "marsh", "swamp"] },
       "wildlife": { "about": "A prey herd within this distance of the start so the pair can hunt from day one.", "species": ["hare", "deer", "fowl"], "distance": [24, 40] }
     },
     "mapKit": {
-      "about": "Whatever the seed rolled, the whole map holds what a colony needs (user rule 2026-09-18, like a DF site with all its layers). Minimum object counts over the map; a missing class gets small seeded patches (patchSize each) at least keepAway cells from the start, on the ground kinds listed first, else anywhere on land.",
+      "about": "Whatever the seed rolled, the whole map should hold what a colony needs (user rule 2026-09-18, like a DF site with all its layers). Minimum object counts over the map; a missing class gets small seeded patches (patchSize each) at least keepAway cells from the start, on the ground kinds listed first, else anywhere on land. Not placed by UF_WorldGen yet (2026-09-19: only start.kit is placed, around every faction area); UF_Roads reads these minimums so its roads never clear an object class below them.",
       "keepAway": 40,
       "patchSize": [4, 8],
       "objects": {
@@ -199,7 +203,9 @@
     { "id": "weapon_rack", "name": "Weapon rack", "tile": { "sheet": "Inside_C", "id": 400 }, "tags": ["building", "stockpile", "weapon_rack"], "build": { "items": { "log": 2 }, "work": 4 }, "ruin": "rubble" },
     { "id": "bridge", "name": "Plank bridge", "tile": { "sheet": "Outside_B", "id": 181 }, "under": true, "passable": true, "onWater": true, "tags": ["building", "bridge", "road", "wood"] },
     { "id": "farm_plot", "name": "Farm plot", "tile": { "sheet": "Outside_B", "id": 175 }, "under": true, "passable": true, "tags": ["building", "farm", "workplace", "plot"] },
-    { "id": "well", "name": "Well", "tile": { "sheet": "Outside_B", "id": 139 }, "tags": ["building", "workplace", "water", "well"] }
+    { "id": "well", "name": "Well", "tile": { "sheet": "Outside_B", "id": 139 }, "tags": ["building", "workplace", "water", "well"] },
+    { "id": "door_wood", "name": "Wooden door", "image": "!Door1", "characterIndex": 0, "passable": false, "tags": ["building", "door", "wood"], "build": { "items": { "log": 1 }, "work": 4 }, "door": { "material": "wood", "hp": 20 }, "ruin": "rubble" },
+    { "id": "door_stone", "name": "Stone door", "image": "!Door1", "characterIndex": 0, "tint": "#b8c0c8", "passable": false, "tags": ["building", "door", "stone"], "build": { "items": { "stone": 2 }, "work": 4 }, "door": { "material": "stone", "hp": 40 }, "ruin": "rubble" }
   ],
   "items": {
     "about": "Things that lie on the ground, get carried and stored (UF_Items). image = character sheet drawn at the cell (stand-ins !$U7_Item_* until AR-200 originals). food.hunger = hunger removed when eaten. tool = what jobs it speeds up (skill multiplier); wear = clothing tier it gives when equipped.",
@@ -322,7 +328,8 @@
     ]
   },
   "sites": {
-    "about": "Layouts of faction sites and ruins that UF_History places (object ids from 'objects'). ring = object around the site at 'radius' with 'gaps' openings; center = object in the middle; inside = objects scattered inside. kinds by species: index by how big the site grew (population thresholds in 'growth').",
+    "about": "Layouts of faction sites and ruins (object ids from 'objects'). ring = object around the site at 'radius' with 'gaps' openings; center = object in the middle; inside = objects scattered inside. kinds by species: index by how big the site grew (population thresholds in 'growth'). Since 2026-09-19 (VISION V31: no history) a New Game stamps none of them: each faction gets one bare record of kind founding.kind at its area centre (no pieces; UF_WorldGen only keeps its disc, radius + 1, free of plants), and whatever the bands build comes from play. The layouts are still used by the older history generator (history.simulate) and by saves made before 2026-09-19.",
+    "founding": { "about": "The record each faction's area gets at New Game (UF_History): a site of this kind with stamp false (nothing placed), used for its name, its radius (the clearing and the colony's plan cells) and the look label.", "kind": "camp", "stamp": false },
     "kinds": {
       "camp": { "radius": 4, "ring": "wall_wood", "gaps": 2, "center": "campfire", "inside": { "floor_straw": 3 } },
       "village": { "radius": 7, "ring": "wall_wood", "gaps": 2, "center": "campfire", "inside": { "floor_straw": 6, "wall_wood": 8, "stockpile": 2 } },
@@ -393,7 +400,7 @@
     "automaton": { "images": ["$U7_Skeleton"], "tint": "#c8c8e8", "stats": { "con": 2, "cha": -2 } }
   },
   "factions": {
-    "about": "Factions are rolled from the world seed on every New Game (UF_Factions) and all exist from year 0 of the history (user decision 2026-09-18). One of them, of a species with playable != false, is the player's (factions.playerId): its home site sits at the map centre and its people there are the colonists. Species are generic placeholders (VISION V7-V9); rename or replace them freely. Relations run from -100 (at war) to +100 (allied). Homes are placed by UF_History (sites.preferredBiomes).",
+    "about": "Factions are rolled from the world seed on every New Game (UF_Factions): 4-7 of them, species by weight, stances, relations from -100 (at war) to +100 (allied). One of them, of a species with playable != false, is the player's (factions.playerId). User decision 2026-09-19 (VISION V4, V31): no history; every faction gets its own area (areas) on habitable land and starts there as founders (founders) with nothing built. Species are generic placeholders (VISION V7-V9); rename or replace them freely.",
     "count": [4, 7],
     "species": [
       { "id": "human", "name": "Humans", "weight": 3, "playable": true, "groups": ["League", "Freehold", "Company", "Kingdom"] },
@@ -422,15 +429,18 @@
     ],
     "sameSpecies": 10,
     "randomSpread": 30,
+    "areas": { "about": "Where each faction's area centre goes (UF_Factions, seeded): on walkable land (no water, no peak rock, no cursed region unless the species is in cursedOk) whose disc of clearDisc cells is walkable too; the player's within playerReach cells of the map centre (the habitable start); every other at least minGap cells from every centre and edgeMargin cells from the map edge, in one of sites.preferredBiomes[species] with drinkable water within start.kit.water.reach when the map has such a place.", "minGap": 40, "edgeMargin": 12, "playerReach": 6, "clearDisc": 5, "cursedOk": [] },
+    "founders": { "about": "Every faction starts as this many men and women (VISION V4; six founders, user 2026-09-19), adults aged within age, on free cells within reach cells of its area centre (UF_History). One of them leads the band (rank 1, a title from titles); the others answer to the leader (VISION V52). Names from people[species].names when a species has its own table, else start.names; stats rolled per VISION V53.", "male": 3, "female": 3, "age": [18, 40], "reach": 3, "titles": ["Chief", "Warden", "Speaker", "Reeve"] },
     "names": {
       "start": ["ar", "bel", "cor", "dun", "eth", "fal", "gor", "hal", "ir", "jas", "kel", "lor", "mar", "nor", "ost", "pel", "quin", "ras", "sol", "tor", "ul", "vas", "wen", "yor", "zan"],
       "end": ["a", "en", "is", "or", "um", "eth", "ar", "ic", "ok", "wyn", "ath", "esh"]
     }
   },
   "history": {
-    "about": "Years of history simulated at New Game before the pair arrives (UF_History; user decision 2026-09-18: every faction exists from year 0, then a random 500-600 years like DF's world history with its standard settings). Factions found sites, grow, fight, make peace, lose sites to ruin, and get rulers; the result is what the world looks like on day one.",
+    "about": "The world's chronicle (UF_History). User decision 2026-09-19 (VISION V4, V31 revised, V54 retired): no history at New Game. Every faction starts in year 1 as four founders (factions.founders) in its own area (factions.areas), with nothing built; the chronicle opens with one Year 1 line per faction and then records what happens in play (UF.History.addEvent). simulate = false and settleYears = 0 switch off the older generator that UF_History keeps (500-600 simulated years of sites, wars and ruins, then the settling run on the built map); the keys after settleYears are that generator's tunables, unused while simulate is false. titles: the older generator's ruler titles.",
+    "simulate": false,
     "years": [500, 600],
-    "settleYears": 100,
+    "settleYears": 0,
     "settle": { "about": "The settling run (UF_History, VISION V54): the last settleYears of the history played out on the built map, site by site, before the people are spawned. Tunables (defaults in UF_History when missing): birthChancePerPair per adult pair per year, feverChancePerYear and feverLoss, peoplePerHouse / peoplePerBed / peoplePerStockpile / workbenchAt thresholds, secondWallAt (fraction of the site capacity), treesPerPersonYear / stonesPerPersonYear / bushesPerPerson and depleteFraction (at most this share of what stands within radius + reach), minPeople (fewer and a site is abandoned).", "birthChancePerPair": 0.11, "feverChancePerYear": 0.02, "peoplePerHouse": 5, "peoplePerBed": 2, "peoplePerStockpile": 12, "workbenchAt": 8, "secondWallAt": 0.5, "treesPerPersonYear": 0.06, "stonesPerPersonYear": 0.04, "bushesPerPerson": 0.3, "depleteFraction": 0.5, "reach": 6, "minPeople": 3 },
     "startingPopulation": [20, 60],
     "growthPerYear": 0.012,
@@ -580,13 +590,13 @@
   },
   "cultures": {
     "about": "Per-species culture (user decision 2026-09-18): each faction's build style, people and priorities. wall/ring = the pieces its sites and colonists build with (sites.bySpecies gives the site kinds); priorities = multipliers the colonists' planner applies when choosing work (job types); facetBias = added to seeded personality facets; plan = which colony plan variant (colony.plans key, or 'default'); tint = the people sheet tint (people.<species>). Culture names are generic; no invented lore.",
-    "human": { "name": "Settlers", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "build": 1.3, "gather": 1.1, "chop": 1.1, "hunt": 0.9, "craft": 1.0 }, "facetBias": { "industriousness": 10, "sociability": 5 }, "plan": "default", "chainWeights": {}, "arms": { "prefer": ["sword_short", "spear", "bow_short", "shield_wood"], "scavenge": 0.2 } },
-    "elf": { "name": "Grove-keepers", "wall": "wall_wood", "laterWall": "wall_wood", "priorities": { "gather": 1.4, "hunt": 1.3, "chop": 0.5, "craft": 1.1, "build": 0.8 }, "facetBias": { "natureAffinity": 25, "patience": 10, "industriousness": -5 }, "plan": "forest", "chainWeights": { "bowyer": 1.5, "fletcher": 1.5, "tanner": 1.2, "leatherworker": 1.2, "furnace_operator": 0.6, "weaponsmith": 0.6, "armorsmith": 0.6 }, "arms": { "prefer": ["bow_long", "spear", "dagger_iron"], "scavenge": 0.1 } },
-    "dwarf": { "name": "Stone-holders", "wall": "wall_stone", "laterWall": "wall_stone", "priorities": { "quarry": 1.5, "mine": 1.5, "pick": 1.3, "build": 1.2, "craft": 1.1, "hunt": 0.7 }, "facetBias": { "industriousness": 20, "discipline": 10, "natureAffinity": -10 }, "plan": "stone", "chainWeights": { "furnace_operator": 1.5, "weaponsmith": 1.5, "armorsmith": 1.5, "bowyer": 0.6, "fletcher": 0.6 }, "arms": { "prefer": ["axe_iron", "mace", "shield_iron", "helmet_iron", "mail_iron"], "scavenge": 0.1 } },
-    "gnome": { "name": "Tinkers", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "craft": 1.6, "pick": 1.2, "gather": 1.1, "hunt": 0.6 }, "facetBias": { "curiosity": 20, "ambition": 5 }, "plan": "workshop", "chainWeights": { "fletcher": 1.3, "weaponsmith": 1.2, "armorsmith": 1.2, "carpenter": 1.2 }, "arms": { "prefer": ["sling", "bow_short", "dagger_iron"], "scavenge": 0.3 } },
-    "goblin": { "name": "Scavengers", "wall": "rubble_pillar", "laterWall": "wall_wood", "priorities": { "hunt": 1.4, "pick": 1.3, "gather": 1.0 }, "facetBias": { "bravery": 10, "tidiness": -20 }, "plan": "default", "chainWeights": { "furnace_operator": 0.5, "weaponsmith": 0.5, "armorsmith": 0.5, "tanner": 1.2, "leatherworker": 1.2 }, "arms": { "prefer": ["club", "spear", "sling", "dagger_iron"], "scavenge": 1 } },
-    "orc": { "name": "War-bands", "wall": "wall_wood", "laterWall": "wall_stone", "priorities": { "hunt": 1.6, "chop": 1.2, "build": 0.9 }, "facetBias": { "bravery": 25, "patience": -10 }, "plan": "default", "chainWeights": { "weaponsmith": 1.3, "bowyer": 0.7, "fletcher": 0.7 }, "arms": { "prefer": ["axe_iron", "sword_long", "mace", "club"], "scavenge": 0.5 } },
-    "automaton": { "name": "Foundry-minds", "wall": "wall_stone", "laterWall": "wall_stone", "priorities": { "mine": 1.6, "craft": 1.4, "hunt": 0.2 }, "facetBias": { "discipline": 30, "sociability": -20, "cheerfulness": -10 }, "plan": "workshop", "chainWeights": { "furnace_operator": 1.4, "armorsmith": 1.4, "weaponsmith": 1.2, "tanner": 0.3, "leatherworker": 0.3, "bowyer": 0.5, "fletcher": 0.5 }, "arms": { "prefer": ["mace", "sword_long", "shield_iron", "helmet_iron"], "scavenge": 0 } }
+    "human": { "name": "Settlers", "wall": "wall_wood", "laterWall": "wall_stone", "door": "door_wood", "floor": {"kind":"floor_wood","item":"log","count":1}, "priorities": { "build": 1.3, "gather": 1.1, "chop": 1.1, "hunt": 0.9, "craft": 1.0 }, "facetBias": { "industriousness": 10, "sociability": 5 }, "plan": "default", "chainWeights": {}, "arms": { "prefer": ["sword_short", "spear", "bow_short", "shield_wood"], "scavenge": 0.2 } },
+    "elf": { "name": "Grove-keepers", "wall": "wall_wood", "laterWall": "wall_wood", "door": "door_wood", "floor": {"kind":"floor_wood","item":"log","count":1}, "priorities": { "gather": 1.4, "hunt": 1.3, "chop": 0.5, "craft": 1.1, "build": 0.8 }, "facetBias": { "natureAffinity": 25, "patience": 10, "industriousness": -5 }, "plan": "forest", "chainWeights": { "bowyer": 1.5, "fletcher": 1.5, "tanner": 1.2, "leatherworker": 1.2, "furnace_operator": 0.6, "weaponsmith": 0.6, "armorsmith": 0.6 }, "arms": { "prefer": ["bow_long", "spear", "dagger_iron"], "scavenge": 0.1 } },
+    "dwarf": { "name": "Stone-holders", "wall": "wall_stone", "laterWall": "wall_stone", "door": "door_stone", "floor": {"kind":"floor_stone","item":"stone","count":1}, "priorities": { "quarry": 1.5, "mine": 1.5, "pick": 1.3, "build": 1.2, "craft": 1.1, "hunt": 0.7 }, "facetBias": { "industriousness": 20, "discipline": 10, "natureAffinity": -10 }, "plan": "stone", "chainWeights": { "furnace_operator": 1.5, "weaponsmith": 1.5, "armorsmith": 1.5, "bowyer": 0.6, "fletcher": 0.6 }, "arms": { "prefer": ["axe_iron", "mace", "shield_iron", "helmet_iron", "mail_iron"], "scavenge": 0.1 } },
+    "gnome": { "name": "Tinkers", "wall": "wall_wood", "laterWall": "wall_stone", "door": "door_wood", "floor": {"kind":"floor_stone","item":"stone","count":1}, "priorities": { "craft": 1.6, "pick": 1.2, "gather": 1.1, "hunt": 0.6 }, "facetBias": { "curiosity": 20, "ambition": 5 }, "plan": "workshop", "chainWeights": { "fletcher": 1.3, "weaponsmith": 1.2, "armorsmith": 1.2, "carpenter": 1.2 }, "arms": { "prefer": ["sling", "bow_short", "dagger_iron"], "scavenge": 0.3 } },
+    "goblin": { "name": "Scavengers", "wall": "rubble_pillar", "laterWall": "wall_wood", "door": "door_stone", "floor": {"kind":"floor_rushes","item":"straw","count":2}, "priorities": { "hunt": 1.4, "pick": 1.3, "gather": 1.0 }, "facetBias": { "bravery": 10, "tidiness": -20 }, "plan": "default", "chainWeights": { "furnace_operator": 0.5, "weaponsmith": 0.5, "armorsmith": 0.5, "tanner": 1.2, "leatherworker": 1.2 }, "arms": { "prefer": ["club", "spear", "sling", "dagger_iron"], "scavenge": 1 } },
+    "orc": { "name": "War-bands", "wall": "wall_wood", "laterWall": "wall_stone", "door": "door_wood", "floor": {"kind":"floor_rushes","item":"straw","count":2}, "priorities": { "hunt": 1.6, "chop": 1.2, "build": 0.9 }, "facetBias": { "bravery": 25, "patience": -10 }, "plan": "default", "chainWeights": { "weaponsmith": 1.3, "bowyer": 0.7, "fletcher": 0.7 }, "arms": { "prefer": ["axe_iron", "sword_long", "mace", "club"], "scavenge": 0.5 } },
+    "automaton": { "name": "Foundry-minds", "wall": "wall_stone", "laterWall": "wall_stone", "door": "door_stone", "floor": {"kind":"floor_stone","item":"stone","count":1}, "priorities": { "mine": 1.6, "craft": 1.4, "hunt": 0.2 }, "facetBias": { "discipline": 30, "sociability": -20, "cheerfulness": -10 }, "plan": "workshop", "chainWeights": { "furnace_operator": 1.4, "armorsmith": 1.4, "weaponsmith": 1.2, "tanner": 0.3, "leatherworker": 0.3, "bowyer": 0.5, "fletcher": 0.5 }, "arms": { "prefer": ["mace", "sword_long", "shield_iron", "helmet_iron"], "scavenge": 0 } }
   },
   "stance": {
     "about": "Colored squares under units' feet (UF_Stance; user request 2026-09-18): green = friendly (your colony and allied factions), yellow = indifferent (wildlife, neutral factions), red = hostile (monsters, factions at war).",
@@ -651,6 +661,171 @@
       "goblin": [["bone", [3, 6]], ["hide", [2, 3]]],
       "orc": [["meat_raw", [3, 6]], ["hide", [2, 4]], ["bone", [2, 4]]],
       "automaton": [["bar_iron", [1, 3]], ["gold", [1, 2]], ["gem_rough", [1, 3]]]
+    }
+  },
+  "anim": {
+    "about": "Combat and death animations (UF_Anim, VISION V58). remainsHours: game hours a dead creature's remains lie on its cell (they fade over the last hour). Death, attack and hurt frames come from each sheet's sidecar (animations.dead, attack, hurt; ASSET_REQUESTS AR-600).",
+    "remainsHours": 12
+  },
+  "sheet": {
+    "about": "The selection panel (UF_Sheet; VISION V59, V49; user 2026-09-19). grid: the inventory grid, columns x rows of slot x slot px. slots: the equipment slots in order. slotAliases: older unit.data.equipment keys shown in a slot until every reader moves to the five slots (tool = weapon, clothes = torso). faces: placeholder portraits per species id (people and wildlife) and gender key (male, female, <stage>_<gender> such as elder_male, any) as [faceSheet, index] pairs from img/faces (stock RPG Maker sheets, 4 columns x 2 rows of 144x144) until AR-700; the pick is stable per unit (unit id modulo the list); a species with no usable entry gets the code-drawn UF_GenFace silhouette. unit.data.face { sheet, index } overrides. Owner: Claude Code.",
+    "grid": { "columns": 8, "rows": 4, "slot": 36 },
+    "slots": ["head", "weapon", "shield", "torso", "legs"],
+    "slotAliases": { "tool": "weapon", "clothes": "torso" },
+    "faces": {
+      "human": { "male": [["People1", 0], ["People1", 2], ["People1", 4]], "female": [["People1", 1], ["People1", 3], ["People1", 5]], "elder_male": [["People1", 6]], "elder_female": [["People1", 7]] },
+      "elf": { "male": [["Nature", 5]], "female": [["Nature", 6]] },
+      "dwarf": { "male": [["People2", 4], ["People3", 4]], "female": [["People2", 7]] },
+      "gnome": { "male": [["People4", 4]], "female": [["People4", 7]] },
+      "automaton": { "any": [["Evil", 6]] },
+      "wolf": { "any": [["Monster", 2]] },
+      "fox": { "any": [["Nature", 3]] },
+      "arctic_fox": { "any": [["Monster", 4]] },
+      "jackal": { "any": [["Nature", 0]] },
+      "boar": { "any": [["Nature", 2]] },
+      "wildcat": { "any": [["Nature", 1]] },
+      "restless_dead": { "any": [["Monster", 6]] }
+    }
+  },
+  "fire": {
+    "about": "UF_Fire (docs/systems/UF_Fire.md): fire is a cell state that spreads (VISION V21, V25). Times are beats (1 beat = beatFrames map updates, 60 = one per second at x1; UF.Beat when it exists). Every beat each burning cell rolls (seeded: world seed, beat, cell, direction) to ignite each of its 4 neighbours with the neighbour's `spread` chance and spends 1 beat of its `burn` fuel; when the fuel is gone the object becomes `becomes` (null = nothing), the ground kind becomes `ground` when given, and items on the cell are destroyed when `destroysItems`. Doused (water) objects become `dousedBecomes` when given. The first rule whose `ids` holds the object id, or whose `tags` are all on the object, decides; `never` = does not burn; objects no rule matches never burn. `source` objects (campfires) never burn: each beat each flammable 4-neighbour catches with `escapeChance`. `flame`: \"tall\" draws the taller flame sprite. startChance = chance per beat of an accidental start on a random cell of the area on screen (0 = off). damage = hit points lost per beat by a unit standing in fire. douse: fires within campRadius of the player's camp get open douse jobs (at most maxOpen at once) when water is within waterRadius of the fire; fillBeats at the water, beats at the fire; a doused cell can't catch for wetBeats.",
+    "beatFrames": 60,
+    "startChance": 0,
+    "damage": [1, 3],
+    "thought": { "text": "Was burned by fire.", "strength": -8, "everyBeats": 10 },
+    "douse": { "campRadius": 20, "waterRadius": 24, "fillBeats": 1, "beats": 3, "priority": 5, "maxOpen": 6, "wetBeats": 30 },
+    "rules": [
+      { "tags": ["fire"], "source": true, "escapeChance": 0.0005 },
+      { "ids": ["cactus", "cactus_tall", "lily_pad"], "never": true },
+      { "tags": ["stone"], "never": true },
+      { "tags": ["mineral"], "never": true },
+      { "tags": ["remains"], "never": true },
+      { "ids": ["dead_tree"], "spread": 0.08, "burn": 30, "becomes": "stump", "flame": "tall" },
+      { "tags": ["tree"], "spread": 0.05, "burn": 40, "becomes": "stump", "dousedBecomes": "dead_tree", "flame": "tall" },
+      { "tags": ["stump"], "spread": 0.04, "burn": 20, "becomes": null, "ground": "ash" },
+      { "tags": ["bush"], "spread": 0.25, "burn": 8, "becomes": null, "ground": "ash" },
+      { "tags": ["wall", "wood"], "spread": 0.06, "burn": 30, "becomes": "rubble", "flame": "tall" },
+      { "tags": ["door", "wood"], "spread": 0.08, "burn": 24, "becomes": "rubble", "flame": "tall" },
+      { "tags": ["bed"], "spread": 0.35, "burn": 6, "becomes": null, "destroysItems": true },
+      { "tags": ["stockpile"], "spread": 0.2, "burn": 10, "becomes": null, "destroysItems": true },
+      { "ids": ["bowyer_bench", "fletcher_bench", "tanning_rack"], "spread": 0.1, "burn": 20, "becomes": "rubble", "destroysItems": true },
+      { "tags": ["bridge"], "spread": 0.08, "burn": 24, "becomes": null },
+      { "tags": ["plant"], "spread": 0.4, "burn": 4, "becomes": null, "ground": "ash" }
+    ]
+  },
+  "talk": {
+    "about": "Conversations (UF_Talk, VISION V25; added 2026-09-19): keyword talks with any person, in the manner of the classic keyword conversations. Every line is a template below filled from the simulation: {slot} values are names and facts read from the world state, and a slot that names a person, faction or place adds that keyword to the talk. A section's variants are tried most specific first; a template whose slots are unknown is skipped. kinds = unit kinds that can talk. portraits = stock RPG Maker face placeholders by species > gender > stage (\"Sheet:index\"), used until the AR-700 face sets exist (catalog.faces or unit data.face win when present); species without an entry get a code-drawn UF_GenFace. Original generic wording only: no proper nouns.",
+    "kinds": ["colonist", "person"],
+    "optionLabel": "Talk to {name}",
+    "keywords": { "name": "name", "job": "job", "bye": "bye", "family": "family", "home": "home", "mood": "mood", "others": "others", "news": "news" },
+    "stanceLabels": { "own": "one of yours", "friendly": "friendly", "wary": "wary", "hostile": "hostile", "baby": "baby" },
+    "stages": { "baby": "baby", "child": "child", "teen": "youth", "adult": "adult", "elder": "elder" },
+    "moodBands": { "good": ["Ecstatic", "Happy"], "fine": ["Content", "Fine"], "bad": ["Unhappy", "Stressed", "Miserable"] },
+    "needAt": 60,
+    "directions": { "n": "north", "s": "south", "e": "east", "w": "west", "ne": "north-east", "nw": "north-west", "se": "south-east", "sw": "south-west" },
+    "words": { "and": "and", "here": "right here", "far": "far from here", "where": "about {dist} paces to the {dir}" },
+    "greet": {
+      "own_good": ["Good to see you! What do you need?", "Ah, it's you. Ask away.", "{name} grins. \"Yes? I'm listening.\""],
+      "own_fine": ["Yes? What is it?", "I'm listening.", "{name} looks up from the work. \"What do you need?\""],
+      "own_bad": ["Make it quick. I'm not at my best.", "What now?", "{name} sighs. \"Yes?\""],
+      "friendly": ["Well met, friend of {playerFaction}.", "Greetings. {playerFaction} are welcome here.", "Hello there. What brings you our way?"],
+      "wary": ["What do you want?", "Keep your distance. Speak, if you must.", "{name} eyes you carefully. \"Yes?\""]
+    },
+    "refuse": ["{name} glares and turns away.", "I have nothing to say to {playerFaction}.", "Leave, before this turns ugly."],
+    "baby": ["The baby gurgles and grabs at your finger.", "The little one only babbles."],
+    "name": {
+      "ruler": ["I am {name}, and I lead {faction}.", "{name}. {faction} follow my word."],
+      "leader": ["I am {name}. The others of {faction} look to me.", "{name}, of {faction}. I keep the others at their work."],
+      "child": ["I'm {name}! I live with {faction}.", "{name}. I belong to {faction}."],
+      "default": ["I am {name}, of {faction}.", "My name is {name}. I belong to {faction}.", "They call me {name}. I'm with {faction}."],
+      "nofaction": ["I am {name}.", "They call me {name}."]
+    },
+    "job": {
+      "busy": ["Right now I'm {job}.", "I'm {job} at the moment.", "Can't you see? I'm {job}."],
+      "idle": ["Nothing, just now. I'm waiting for something useful to do.", "I have no task at the moment.", "Resting a little, between tasks."],
+      "ruler": ["Beyond that, I lead {faction}."],
+      "leader": ["I also keep an eye on the others' work."],
+      "superior": ["{superior} tells me what needs doing.", "I answer to {superior}."]
+    },
+    "family": {
+      "partner": ["My partner is {partner}.", "I share my life with {partner}."],
+      "noPartner": ["I have no partner.", "No partner, not yet."],
+      "children": ["We have {count} children: {children}.", "Our children are {children}."],
+      "child": ["We have a child, {children}."],
+      "noChildren": ["No children yet."],
+      "mother": ["My mother is {mother}."],
+      "father": ["My father is {father}."],
+      "none": ["My family? There's only me."]
+    },
+    "home": {
+      "site": ["We live at {home}, {where}.", "{home} is our home. It lies {where}."],
+      "camp": ["Our camp is {where}.", "We sleep {where}, around our camp."],
+      "none": ["We have no home yet. We sleep where we can."]
+    },
+    "site": {
+      "default": ["{home} is a {kind} of {faction}, {where}.", "{home}? That's the {kind} of {faction}. It lies {where}."]
+    },
+    "mood": {
+      "good": ["I'm feeling {mood}.", "Life is good. I'm {mood}."],
+      "fine": ["I'm {mood}, I suppose.", "Well enough. You might say I'm {mood}."],
+      "bad": ["I'm {mood}. Things are hard.", "Honestly? I'm {mood}."],
+      "unknown": ["I'm well enough, thank you.", "Can't complain."],
+      "thought": ["What's on my mind? {thought}", "I keep thinking about this: {thought}"]
+    },
+    "needs": {
+      "hunger": ["I could do with a proper meal.", "My stomach won't stop growling."],
+      "thirst": ["My throat is dry. I need a drink.", "I'd give a lot for fresh water."],
+      "sleep": ["I can barely keep my eyes open.", "I need sleep, badly."],
+      "social": ["I've been lonely. It's good to talk.", "Nobody has talked to me in a while."],
+      "nature": ["I miss the open sky and the trees.", "I need a walk among the trees."]
+    },
+    "others": {
+      "list": ["I know of {factions}.", "Other folk? {factions}, for a start."],
+      "none": ["I don't know much about other folk.", "We keep to ourselves. I know no other folk."]
+    },
+    "news": {
+      "event": ["Have you heard? {event}", "Word is going around: {event}"],
+      "none": ["Nothing much has happened around here.", "No news. The days are quiet."]
+    },
+    "faction": {
+      "own": ["We are {faction}, {people}. {count} of us, all told.", "{faction}? That's us. {count} of us, all told."],
+      "leader": ["{leader} leads us.", "We follow {leader}."],
+      "leaderSelf": ["I lead us myself."],
+      "noLeader": ["Nobody leads us yet. We decide together."],
+      "allied": ["{faction}? Good friends of ours. We would stand with them.", "We are allied with {faction}."],
+      "friendly": ["{faction} treat us fairly.", "{faction}? Decent folk."],
+      "neutral": ["{faction}? We keep to ourselves where they are concerned.", "I have no quarrel with {faction}, and no love for them either."],
+      "hostile": ["I don't trust {faction}. Nobody here does.", "{faction}? Keep an eye on them."],
+      "war": ["{faction} are our enemies.", "We are at war with {faction}. Don't speak kindly of them here."]
+    },
+    "person": {
+      "self": ["That's me."],
+      "partner": ["{person} is my partner."],
+      "child": ["{person} is my child."],
+      "mother": ["{person} is my mother."],
+      "father": ["{person} is my father."],
+      "leader": ["{person} leads {faction}."],
+      "superior": ["{person} is the one I answer to."],
+      "kin": ["{person} is one of us."],
+      "other": ["{person}? I know the name."],
+      "busy": ["Last I saw, {person} was {personJob}.", "{person} is {personJob} right now."],
+      "idle": ["{person} isn't doing much just now."],
+      "gone": ["I haven't seen {person} in a while."]
+    },
+    "bye": {
+      "own": ["Back to work, then.", "Take care."],
+      "friendly": ["Safe roads to you.", "Farewell."],
+      "wary": ["Good. Go.", "Hmph."],
+      "hostile": ["Get out of my sight."],
+      "baby": ["The baby waves a tiny hand."]
+    },
+    "unknown": ["I don't know anything about that."],
+    "portraits": {
+      "about": "Stock RPG Maker face placeholders (img/faces, 4 x 2 cells of 144 x 144, index 0-7 row by row) until AR-700. Species > gender > stage; a missing stage falls back to adult (baby to child).",
+      "human": {
+        "male": { "child": ["People1:0"], "adult": ["People1:2", "People1:4", "People3:2", "People3:4", "People4:2", "People4:6"], "elder": ["People1:6", "People2:0", "People4:4"] },
+        "female": { "child": ["People1:1", "People4:7"], "adult": ["People1:3", "People1:5", "People2:3", "People4:3", "People4:5"], "elder": ["People1:7"] }
+      }
     }
   }
 }
