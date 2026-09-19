@@ -17,10 +17,10 @@
  },
  "$UF_Stock_BigMonster1_r1": {
   "status": "stock RMMZ",
-  "request": "AR-402",
+  "request": "AR-401",
   "requests": [
-   "AR-402",
-   "AR-401"
+   "AR-401",
+   "AR-402"
   ],
   "usedBy": [
    "creature bog_horror \"Bog horror\" (monster)",
@@ -40,10 +40,10 @@
  },
  "$UF_Stock_Monster_0": {
   "status": "stock RMMZ",
-  "request": "AR-401",
+  "request": "AR-403",
   "requests": [
-   "AR-401",
-   "AR-403"
+   "AR-403",
+   "AR-401"
   ],
   "usedBy": [
    "creature fowl \"Wild fowl\" (grazer, tint #f0dcb8)"
@@ -60,10 +60,10 @@
  },
  "$UF_Stock_Monster_1": {
   "status": "stock RMMZ",
-  "request": "AR-402",
+  "request": "AR-401",
   "requests": [
-   "AR-402",
-   "AR-401"
+   "AR-401",
+   "AR-402"
   ],
   "usedBy": [
    "creature troll \"Troll\" (monster, tint #c0c8b0)"
@@ -101,10 +101,10 @@
  },
  "$UF_Stock_Monster_5": {
   "status": "stock RMMZ",
-  "request": "AR-402",
+  "request": "AR-401",
   "requests": [
-   "AR-402",
-   "AR-401"
+   "AR-401",
+   "AR-402"
   ],
   "usedBy": [
    "creature ice_wraith \"Ice wraith\" (monster, tint #a0d8ff)"
@@ -123,10 +123,10 @@
  },
  "$UF_Stock_Monster_6": {
   "status": "stock RMMZ",
-  "request": "AR-402",
+  "request": "AR-401",
   "requests": [
-   "AR-402",
-   "AR-401"
+   "AR-401",
+   "AR-402"
   ],
   "usedBy": [
    "creature restless_dead \"Restless dead\" (monster)"
@@ -145,10 +145,10 @@
  },
  "$UF_Stock_Nature_0": {
   "status": "stock RMMZ",
-  "request": "AR-401",
+  "request": "AR-403",
   "requests": [
-   "AR-401",
-   "AR-403"
+   "AR-403",
+   "AR-401"
   ],
   "usedBy": [
    "creature wolf \"Wolf\" (predator)",
@@ -167,10 +167,10 @@
  },
  "$UF_Stock_Nature_1": {
   "status": "stock RMMZ",
-  "request": "AR-401",
+  "request": "AR-403",
   "requests": [
-   "AR-401",
-   "AR-403"
+   "AR-403",
+   "AR-401"
   ],
   "usedBy": [
    "creature wildcat \"Wildcat\" (predator)"
@@ -187,10 +187,10 @@
  },
  "$UF_Stock_Nature_2": {
   "status": "stock RMMZ",
-  "request": "AR-401",
+  "request": "AR-403",
   "requests": [
-   "AR-401",
-   "AR-403"
+   "AR-403",
+   "AR-401"
   ],
   "usedBy": [
    "creature boar \"Boar\" (grazer, tint #7a5a40)",
@@ -308,10 +308,10 @@
  },
  "$UF_Stock_SF_Monster_6": {
   "status": "stock RMMZ",
-  "request": "AR-402",
+  "request": "AR-401",
   "requests": [
-   "AR-402",
-   "AR-401"
+   "AR-401",
+   "AR-402"
   ],
   "usedBy": [
    "creature sand_stalker \"Sand stalker\" (monster, tint #e8d090)"
@@ -415,10 +415,10 @@
  },
  "$UF_Stock_Vehicle_4": {
   "status": "stock RMMZ",
-  "request": "AR-401",
+  "request": "AR-403",
   "requests": [
-   "AR-401",
-   "AR-403"
+   "AR-403",
+   "AR-401"
   ],
   "usedBy": [
    "creature aurochs \"Aurochs\" (grazer, tint #6a5040)",
@@ -693,7 +693,6 @@
    "AR-020",
    "AR-021",
    "AR-023",
-   "AR-510",
    "AR-1600"
   ],
   "usedBy": [
@@ -2026,7 +2025,8 @@
   "status": "original",
   "request": "AR-905",
   "requests": [
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object bowyer_bench \"Bowyer's bench\""
@@ -2044,8 +2044,10 @@
  },
  "!$UF_Bridge": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
   "usedBy": [
    "object bridge \"Plank bridge\""
   ],
@@ -2263,7 +2265,8 @@
   "status": "original",
   "request": "AR-300",
   "requests": [
-   "AR-300"
+   "AR-300",
+   "AR-104"
   ],
   "usedBy": [
    "object door_stone \"Stone door\""
@@ -2286,7 +2289,8 @@
   "status": "original",
   "request": "AR-300",
   "requests": [
-   "AR-300"
+   "AR-300",
+   "AR-104"
   ],
   "usedBy": [
    "object door_wood \"Wooden door\""
@@ -2326,8 +2330,10 @@
  },
  "!$UF_FarmPlot": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
   "usedBy": [
    "object farm_plot \"Farm plot\""
   ],
@@ -2384,7 +2390,8 @@
   "status": "original",
   "request": "AR-905",
   "requests": [
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object fletcher_bench \"Fletcher's bench\""
@@ -2503,10 +2510,10 @@
  },
  "!$UF_Furnace": {
   "status": "original",
-  "request": "AR-510",
+  "request": "AR-905",
   "requests": [
-   "AR-510",
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object furnace \"Furnace\""
@@ -3791,10 +3798,10 @@
  },
  "!$UF_Smithy": {
   "status": "original",
-  "request": "AR-510",
+  "request": "AR-905",
   "requests": [
-   "AR-510",
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object smithy \"Smithy\""
@@ -3935,10 +3942,10 @@
  },
  "!$UF_Tanning_Rack": {
   "status": "original",
-  "request": "AR-510",
+  "request": "AR-905",
   "requests": [
-   "AR-510",
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object tanning_rack \"Tanning rack\""
@@ -4071,10 +4078,10 @@
  },
  "!$UF_Weapon_Rack": {
   "status": "original",
-  "request": "AR-510",
+  "request": "AR-905",
   "requests": [
-   "AR-510",
-   "AR-905"
+   "AR-905",
+   "AR-510"
   ],
   "usedBy": [
    "object weapon_rack \"Weapon rack\""
@@ -4092,8 +4099,10 @@
  },
  "!$UF_Well": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
   "usedBy": [
    "object well \"Well\""
   ],
@@ -4265,7 +4274,7 @@
   "file": "img/characters/$Adam.png",
   "exists": true,
   "sidecar": true,
-  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but is not a 144x192 single-character sheet"
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
  },
  "$Baby": {
   "status": "original",
@@ -4345,7 +4354,7 @@
   "file": "img/characters/$Eve.png",
   "exists": true,
   "sidecar": true,
-  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but is not a 144x192 single-character sheet"
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
  },
  "$Teen_Boy": {
   "status": "original",

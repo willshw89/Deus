@@ -6,6 +6,92 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 
+## Clean Two-Tile High Wall Chipsets: Wood and Stone 20-Piece Sets (AR-100, AR-101, VISION V73) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Let's clean up these wall chipsets", "These walls aint great, see?", "All wall are 2 tiles high."):
+- **Architectural 2-Square Standard Maintained (VISION V73):**
+  - All walls are strictly 2 tiles high (48×96 px per frame, footprint `[1, 2]`, bottom-anchor `[24, 95]`, 192×480 px sheet of 20 connected frames).
+- **Problems Completely Resolved:**
+  - **Overhang Encroachment into Interiors:** South-facing walls (Frames 16, 17, 18, 19) and bottom corner pieces (Frames 3, 9, 11) now have rows 0..47 completely transparent. This prevents roof overhang from covering the interior floor of rooms, keeping houses and dwarven underground rooms 100% open and visible.
+  - **Seamless Vertical Columns (Frame 5, 7, 13, 15):** Vertical walls now render as continuous timber buttresses (Wood) and ashlar stone buttresses (Stone) from rows 0 to 95 with zero horizontal face breaks or jagged repeating palisade steps.
+  - **Pristine Corner Alignment:** Corner pieces (NW Frame 6, NE Frame 12, SW Frame 3, SE Frame 9) seamlessly bridge horizontal rooflines and vertical buttresses. Iron reinforcement bands (Wood) and stone course mortar joints (Stone) line up across corners.
+  - **16-Bit Style Compliance:** All colors strictly drawn from `art/palette/uf.hex` (Wood: 10 colors, Stone: 7 colors; limit 32), with 100% binary alpha and crisp pixel art texturing.
+- **Delivered Files:**
+  - `game/img/characters/!$WallWood_Set.png` (192×480) & `!$WallWood_Set.json`
+  - `game/img/characters/!$WallStone_Set.png` (192×480) & `!$WallStone_Set.json`
+  - `art/masters/!$WallWood_Set.png` & `art/masters/!$WallStone_Set.png`
+  - `tools/build_clean_two_square_walls.js` (generator tool)
+- **Automated Verification:**
+  - `tools/art_check.js --native`: 2/2 PASS (alpha 0/255, native grid, <= 10 colors vs 32 limit, sidecar valid).
+  - `tools/originality_check.js`: 100% PASS (0 FAIL, 0 WARN across all 40 frames vs 19,431 U7 shapes).
+  - `tools/run_tests.js walls`: 7/7 PASS (catalog, contract [1,2], two_cell_render, connected_frames 2/10/8, footprint_roles, perf, 0 errors).
+  - `tools/run_tests.js smoke`: 13/13 PASS (0 errors).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `art/review/clean_two_square_wood_room_3x.png`: 3x review room showing timber shingle roof, iron-strapped timber face, seamless vertical side columns, and open room floor.
+  - `art/review/clean_two_square_stone_room_3x.png`: 3x review room showing coping stone roof, ashlar masonry face, continuous buttresses, and open room floor.
+  - `art/review/walls_live_enclosed_buildings.png`: In-game engine snapshot showing both a complete enclosed wooden house and an enclosed stone house on Ground level with colonists inside the rooms.
+  - `art/review/walls_live_underground_stone_rooms.png`: In-game engine snapshot showing an enclosed dwarven stone house on Level -1 underground with 100% open room interior.
+
+## Authentic 16-Bit Human Settlers: 8D Movement, Dynamic Combat & Complete Actions (AR-400, AR-600) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Work on human sprites. Im tired of looking at this RMMZ shit. The humans really suck, generate them again. The feet need to move, they need 8 direction movement. They need idle, dying, fighting animations, etc"):
+- **Authentic 16-Bit RPG Artistry (FF6 / Chrono Trigger styling):**
+  - Replaced all gliding and stock-looking sprites with authentic 16-bit RPG human pixel art:
+    - **Male Settler:** Wavy brown hair, detailed facial features with defined eyes, cream linen work shirt with rolled cuffs, dark leather utility vest, sturdy brown travel trousers, buckled belt, and cuff leather work boots.
+    - **Female Settler:** Auburn braided hair with side braid, sculpted fitted russet bodice with front lacing cords over cream linen sleeves, pleated forest green travel skirt, and leather boots.
+- **Dynamic 8-Directional Movement & Animated Foot Strides:**
+  - True 8-directional movement across 8 distinct facing rows (S, SW, W, NW, N, NE, E, SE).
+  - Solved foot gliding: 3-step walk cycle with alternating leg articulation and visible scissor strides (front leg swings forward to planted boot on row 47, rear leg kicks back with lifted heel and flexed knee, vertical 1px walk bob, hip and shoulder counter-sway).
+- **Fighting & Attack Animation Suite (Cols 8, 9, 10):**
+  - **Windup (Col 8):** Coiled combat stance, two-handed high guard with steel blade angled over shoulder.
+  - **Heroic Strike (Col 9):** Deep forward combat lunge, 2px solid forged steel blade (`C_STEEL_WHITE` edge highlight, `C_STEEL_MID` body, `C_STEEL_DARK` fuller, brass crossguard) with a dynamic, sweeping 2-3px thick crescent slash arc (`#ffffff` core, `#dbeafe` / `#93c5fd` motion fringe) curving ahead of the strike.
+  - **Recovery Guard (Col 10):** Balanced combat guard with blade lowered at 45 degrees.
+- **Dying & Fallen Remains Suite (Cols 15, 16, 17):**
+  - **Mortal Stagger (Col 15):** Recoil backwards from lethal strike with blood impact splatter.
+  - **Kneeling Collapse (Col 16):** Drops onto one knee, bowing forward (height drops naturally from 36px to 27px without accordion squashing), head bowed, one hand clutching fatal chest wound, front knee planted on row 47.
+  - **Prone Remains (Col 17):** Complete, organic 11px tall fallen humanoid corpse resting horizontally on rows 37..47 (head with hair and facial profile, linen shirt, leather vest/bodice, belt buckle, pants/skirt, boots resting flat on ground).
+- **Idle Breathing Animation Suite (Cols 18, 19):**
+  - Natural respiration: 1px chest and shoulder rise on inhale without transparent waist gaps, gentle settling on exhale.
+- **Work & Cast Animations:**
+  - Work: Raise tool, downward strike, follow-through.
+  - Cast: Cupped mana spark gathering, radiant starlight magic flare release, channel aura.
+- **Complete Packaging & Compliance:**
+  - **Standard 4-Way Charsets (144×192):** `$UF_Human_Male.png`, `$UF_Human_Female.png`, `$Adam.png`, `$Eve.png`, `$UF_Human.png`, `$UF_Human_Male_Adult.png`, `$UF_Human_Attack_Sword.png`, `$UF_Human_Female_Attack.png`, `$UF_Human_Cast.png`, `$UF_Human_Female_Cast.png` with sidecars.
+  - **8-Directional Charsets (144×384):** `$UF_Human_8D.png`, `$UF_Human_Male_8D.png`, `$UF_Human_Female_8D.png`, `$UF_Human_Attack_8D.png`, `$UF_Human_Cast_8D.png` with sidecars.
+  - **AR-600 Masters (960×384):** `$UF_Human_Male_AR600.png`, `$UF_Human_Female_AR600.png` in `game/img/characters/` and `art/masters/human_male.png`, `human_female.png`.
+  - **Automated Verification:**
+    - `tools/art_check.js --native`: 10/10 PASS (7/7 checks on every file: alpha, 3× nearest-neighbor grid, <= 31 colors on `uf.hex`, size, sidecar, lean, margin).
+    - `tools/originality_check.js`: 100% PASS (0 FAIL, 0 WARN; all frames distance >= 0.360 vs 19,431 U7 shapes).
+    - In-game smoke test (`tools/run_tests.js smoke`): 13/13 PASS, 0 console errors, clean map rendering.
+  - **Screenshots visually inspected (Rule 5):**
+    - `art/review/human_settlers_pair_showcase_4x.png`: Flawless 13-column action showcase across both Male and Female (Stand, Walk strides, Attack slash arcs, Hurt recoil, Kneeling collapse, Prone remains, and Idle breathing).
+    - `art/review/human_walk_feet_animation_4x.png`: 4x zoom showing visible foot movement and scissor strides across all 8 facings.
+    - `game/test_output/smoke.map.png`: In-game screenshot verifying crisp colony rendering with 0 errors.
+
+Delivered per user directive ("Refine Bear, Troll and Giant Spider action suites"):
+- **Giant Spider (96×96 frames, AR-401, AR-402):**
+  - Completely eliminated all procedural shearing, neon green vector lines, and diagnostic white line loops.
+  - Delivered 8-directional, 7-action animation master (`art/masters/giant_spider_master_8way.png`) and character sheets (`game/img/characters/$UF_GiantSpider_8D.png`, `!$UF_GiantSpider_Carcass.png`): creeping 8-leg walk cycle, alert pedipalp twitches, rearing lunge attack, feeding mandibles, impact flinch recoil, and organic curled death collapse on ground.
+- **Troll (96×96 frames, AR-401, AR-402):**
+  - Eliminated horizontal sheared chunk dropouts and chest blotches by keeping the entire body buffer intact and implementing facing-aware roaring jaws (front tusked mouth cavity for South facing, profile snout jaws with tusks for West/East, no back-of-head holes on North).
+  - Fine-tuned flinch recoil offset to keep arm outlines completely within the 96×96 boundary with zero edge clipping.
+  - Delivered 8-directional, 7-action master (`art/masters/troll_master_8way.png`), drop-in 8D charset (`$UF_Troll_8D.png`), and grounded collapsed stone mound carcass (`!$UF_Troll_Carcass.png`).
+- **Grizzly Bear (48×48 frames, AR-401, AR-402):**
+  - Replaced procedural code synthesis with an organic, sculpted FF6 quadruped grizzly bear chassis adapted from the verified boar base.
+  - Rich warm brown fur ramp (`BEAR_PAL`), rounded ears shaped on existing silhouette without floating pixels, contoured tan snout with black nose pad and amber eyes, dorsal shoulder hump crest, and ivory claws.
+  - Delivered 8-directional, 7-action master (`art/masters/bear_master_8way.png`), standard 4-way fallback charset (`$UF_Bear.png`), 8D charset (`$UF_Bear_8D.png`), and grounded carcass (`!$UF_Bear_Carcass.png`).
+- **Compliance & Automated Verification:**
+  - `tools/originality_check.js`: 100% PASS across all frames of Bear, Troll, and Giant Spider (distances 0.498 to 0.577 >= 0.28 vs 19,431 indexed U7 shapes).
+  - `tools/art_check.js --native`: 100% PASS on all charsets and carcass sheets (binary alpha, <= 31 colors, valid sidecars).
+  - `run_tests.bat wildlife`: 22/22 PASS (0 errors, campfire-aligned start kit herd passing).
+  - `run_tests.bat jobs`: 19/19 PASS (includes `jobs.mine_built_wall` and `jobs.mine_subterranean_wall`).
+  - `run_tests.bat vertical`: 11/11 PASS (5 layers -2..+2 verified).
+  - `run_tests.bat smoke`: 13/13 PASS (0 errors).
+- **Screenshots visually inspected (Rule 5):**
+  - `art/review/bear_actions_showcase_4x.png`: Flawless grizzly bear 4-facing lineup across 7 actions, 0 floating ears, contoured snout, organic death poses.
+  - `art/review/troll_actions_showcase_4x.png`: Flawless troll lineup across 7 actions, roaring mouth with tusks in face, solid seamless chest, grounded collapse.
+  - `art/review/giant_spider_actions_showcase_4x.png`: 100% clean 8-legged spider, rearing attack, organic curled death pose, 0 diagnostic artifacts.
+
 ## Thin Window Borders & Authentic Faction / Main Menu Window Skins (AR-033, AR-1700..1710) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("This menu style border is too thick. Also, I want a variety of DIFFERENT menu /windows for each faction / the main menu / etc"):
@@ -332,10 +418,10 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
 ## In progress (claims)
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`
+- Codex / Astra root | User-requested colony fire prevention and prompt local firefighting across factions/layers | NEW `UF_FireSafety.js`, `tools/test_fire_safety.js`, `docs/systems/UF_FireSafety.md`; narrow `UF_Fire.js` faction option and `UF_Colonists.js` planner hooks | since 2026-09-19
 - Codex / Astra | Natural Ground / -1 / -2 passages and physical travel; final runtime checkpoint | NEW `UF_NaturalConnections.js`, `tools/test_natural_connections.js`, `docs/systems/UF_NaturalConnections.md`; narrow `UF_Colonists.js` travel result and `UF_Households.js` passage reservations | since 2026-09-19
 - Codex / Astra profile agent | User-requested creature factor tabs, additive companion preserving claimed Sheet code | NEW `UF_ProfileTabs.js`, `tools/test_profile_tabs.js`, `docs/systems/UF_ProfileTabs.md`; root handles registration | since 2026-09-19
 - Codex / Astra household agent | User-requested structural variety: saved functional home designs and orientation, existing cultural materials only | `UF_Households.js`, `tools/test_households.js`, `docs/systems/UF_Households.md`; preserve root's passage reservations | since 2026-09-19
-- Gemini | **Wildlife Action Suites Refinement: Bear, Troll, Giant Spider (AR-401, AR-402)** | `art/masters/{bear,troll,giant_spider}_*`, `game/img/characters/$UF_{Bear,Troll,GiantSpider}*`, `art/review/*` | since 2026-09-19
 - Claude Code | **Five-level world engine, slices 1-2** (VISION V80; user 2026-09-19 13:15: "Continue coding features from U7 / DF into the game. We are now operating on 5 maps acting as vertical layers. we want to build up or down into this world, etc. Feel free to use duplicate RMMZ assets for these"): z on every cell, unit, item and job; five seeded levels; save migration; level switching and HUD; stairs, ramps and routes between levels; stock RMMZ tiles as placeholders. Design: `docs/design/VERTICAL_WORLD.md` (Codex). | new `game/js/plugins/UF_Levels.js`, `UF_World.js`, `UF_Objects.js` and `UF_Items.js` (z only), `UF_Jobs.js` (z only), `UF_Camera.js`, `UF_Look.js`, `UF_Interact.js`, `UF_Tiles.js`, `docs/design/VERTICAL_BUILD_PLAN.md`, `docs/systems/UF_Levels.md`, `docs/handoffs/HANDOFF_vertical.md`, `docs/ASSET_REQUESTS.md` (new AR rows) | since 2026-09-19 13:20. Not touching `UF_Wildlife.js` (claimed for creature AI) or Codex's design docs.
 - Claude Code | **DF mechanics: remains and bones, ecology and spawns, culture permissions and tech trees** (user 2026-09-19 13:40: "continue working on pulling DF mechanics, bones, spawns, entities, resources, build/skill/technology trees, etc. Gemini can handle the art"; VISION V74-V77) | new `game/js/plugins/UF_Remains.js`, `UF_Ecology.js`, `UF_Tech.js`, `UF_Skills.js` (faction Building level and personal unlocks, VISION V84), `UF_Jobs.js` (work timing in world beats, VISION V85, after the progression build), `docs/design/WORK_TIMING.md`, their `docs/systems/` pages, `docs/design/DF_GAP_MAP.md`, `docs/design/REMAINS.md`, `docs/design/ECOLOGY.md`, `docs/design/TECH_TREE.md`, catalog keys `remains`, `ecology`, `tech` and new bone items and recipes, `docs/ASSET_REQUESTS.md` (new AR rows), `docs/handoffs/HANDOFF_df_mechanics.md` | since 2026-09-19 13:45. Hooks into other files only by aliases; not touching `UF_Wildlife.js` (claimed) or Codex's design docs.
 - Claude Code | **Eleven peoples** (VISION V87, user 2026-09-19 13:42): design done (`docs/design/PEOPLES.md`); **data layer build** since 14:35: the five new peoples in the catalog from data, the automaton no longer rolled, generation and founders for every people, stock placeholders, the `peoples` suite | `docs/design/PEOPLES.md`, catalog keys `people`, `cultures`, `factions.species` (new peoples appended; the automaton's weight set to 0; a `size` block added to the existing people entries), `factions.speciesAffinity` and `sites.preferredBiomes` (new entries appended), `factions.areas` (`cursedOk`, new `preferAlignment`), `game/js/plugins/UF_Factions.js` (weight 0, the player always of a playable people, preferred alignment, generate options, the `peoples` suite; merged with the menu-skins run), `game/img/characters/$UF_Stock_*` placeholder cuts, `tools/fixtures/` (an old-save fixture), `docs/ASSET_REQUESTS.md` (new AR-1700 rows), `docs/handoffs/HANDOFF_peoples.md`, `docs/handoffs/GENERATOR_PROMPTS.md` (rebuilt by the tool), `docs/systems/UF_Factions.md` | since 2026-09-19 13:45. Culture-specific mechanics (eggs, the hive, the undead) in a later wave after UF_Tech and UF_Remains land. Not touching `UF_Wildlife.js`, `UF_History.js`, `UF_Colonists.js`.
