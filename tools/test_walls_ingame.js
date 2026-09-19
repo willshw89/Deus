@@ -6,6 +6,9 @@ const os = require('os');
 const ROOT = path.resolve(__dirname, '..');
 const SNAPSHOT_DIR = path.join(os.tmpdir(), 'uf_snapshots', 'walls_live');
 
+if (fs.existsSync(SNAPSHOT_DIR)) {
+    fs.rmSync(SNAPSHOT_DIR, { recursive: true, force: true });
+}
 console.log(`Setting up in-game test snapshot at: ${SNAPSHOT_DIR}`);
 fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
 
@@ -30,12 +33,34 @@ const targetHook = 't.screenshot("two_square_wall");';
 const customShowcase = `
             // In-Game Live Buildings Showcase: Wooden House & Stone House
             const wx = center.x - 7, wy = center.y - 2;
+            const sx = center.x + 3, sy = center.y - 2;
+
+            // Clear center test wall pieces
+            O.setIn(area, center.x - 1, center.y, null);
+            O.setIn(area, center.x, center.y, null);
+            O.setIn(area, center.x + 1, center.y, null);
+
             // Clear ground under wood house
             for (let dy = -1; dy <= 5; dy++) {
                 for (let dx = -1; dx <= 6; dx++) {
                     O.setIn(area, wx + dx, wy + dy, null);
                 }
             }
+            // Clear ground under stone house
+            for (let dy = -1; dy <= 5; dy++) {
+                for (let dx = -1; dx <= 6; dx++) {
+                    O.setIn(area, sx + dx, sy + dy, null);
+                }
+            }
+
+            // Move any units away from building plots
+            const allUnits = (window.UF && UF.Colonists && UF.Colonists.list && UF.Colonists.list()) || [];
+            for (const u of allUnits) {
+                if (u.x >= wx - 2 && u.x <= sx + 8 && u.y >= wy - 2 && u.y <= sy + 8) {
+                    u.x = center.x; u.y = center.y + 6;
+                }
+            }
+
             // Wood House (5x4 outer walls, with door)
             for (let x = wx; x <= wx + 4; x++) O.setIn(area, x, wy, "wall_wood");
             for (let y = wy + 1; y <= wy + 3; y++) {
@@ -49,12 +74,6 @@ const customShowcase = `
             O.setIn(area, wx + 4, wy + 4, "wall_wood");
 
             // Stone House (5x4 outer walls, with door)
-            const sx = center.x + 3, sy = center.y - 2;
-            for (let dy = -1; dy <= 5; dy++) {
-                for (let dx = -1; dx <= 6; dx++) {
-                    O.setIn(area, sx + dx, sy + dy, null);
-                }
-            }
             for (let x = sx; x <= sx + 4; x++) O.setIn(area, x, sy, "wall_stone");
             for (let y = sy + 1; y <= sy + 3; y++) {
                 O.setIn(area, sx, y, "wall_stone");
