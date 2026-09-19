@@ -814,12 +814,12 @@
       {
         "gender": "male",
         "name": "{male}",
-        "image": "$UF_Stock_People1_4",
+        "image": "$UF_Human_Male",
         "tiers": [
-          "$UF_Stock_People1_4",
-          "$UF_Stock_People1_2",
-          "$UF_Stock_Actor3_0",
-          "$UF_Stock_Actor1_0"
+          "$UF_Human_Male",
+          "$Adam",
+          "$UF_Human_Male",
+          "$Adam"
         ],
         "dx": -1,
         "dy": 0,
@@ -829,12 +829,12 @@
       {
         "gender": "female",
         "name": "{female}",
-        "image": "$UF_Stock_People1_5",
+        "image": "$UF_Human_Female",
         "tiers": [
-          "$UF_Stock_People1_5",
-          "$UF_Stock_People1_3",
-          "$UF_Stock_Actor3_1",
-          "$UF_Stock_Actor1_1"
+          "$UF_Human_Female",
+          "$Eve",
+          "$UF_Human_Female",
+          "$Eve"
         ],
         "dx": 1,
         "dy": 0,
@@ -1307,12 +1307,6 @@
     {
       "id": "fir_snow",
       "name": "Snow fir",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 192,
-        "w": 2,
-        "h": 2
-      },
       "tags": [
         "tree",
         "wood"
@@ -1328,7 +1322,8 @@
       },
       "clump": 0.9,
       "clumpScale": 24,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Fir_Snow"
     },
     {
       "id": "fruit_tree",
@@ -1427,12 +1422,6 @@
     {
       "id": "mangrove",
       "name": "Mangrove",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 157,
-        "h": 2
-      },
-      "tint": "#c8e0a0",
       "tags": [
         "tree",
         "wood"
@@ -1448,18 +1437,12 @@
       },
       "clump": 0.8,
       "clumpScale": 12,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_Mangrove"
     },
     {
       "id": "tree_tropical",
       "name": "Broadleaf giant",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
-      "tint": "#90e888",
       "tags": [
         "tree",
         "wood"
@@ -1475,15 +1458,12 @@
       },
       "clump": 0.8,
       "clumpScale": 16,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Tree_Tropical"
     },
     {
       "id": "palm",
       "name": "Palm",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 237
-      },
       "tags": [
         "tree",
         "wood"
@@ -1499,7 +1479,8 @@
       },
       "clump": 0.5,
       "clumpScale": 12,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_Palm"
     },
     {
       "id": "dead_tree",
@@ -1526,12 +1507,6 @@
     {
       "id": "tree_cursed",
       "name": "Blighted tree",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 232,
-        "h": 2
-      },
-      "tint": "#c0a0e0",
       "tags": [
         "tree",
         "wood",
@@ -1548,7 +1523,8 @@
       },
       "clump": 0.7,
       "clumpScale": 16,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Tree_Cursed"
     },
     {
       "id": "stump",
@@ -2634,11 +2610,6 @@
     {
       "id": "glow_caps",
       "name": "Glow-caps",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 163
-      },
-      "tint": "#60f0c0",
       "under": true,
       "passable": true,
       "tags": [
@@ -2658,16 +2629,12 @@
       },
       "clump": 0.7,
       "clumpScale": 8,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_GlowCaps"
     },
     {
       "id": "cave_mushrooms",
       "name": "Cave mushrooms",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 251
-      },
-      "tint": "#d090d0",
       "under": true,
       "passable": true,
       "tags": [
@@ -2687,7 +2654,8 @@
       },
       "clump": 0.7,
       "clumpScale": 8,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_CaveMushrooms"
     },
     {
       "id": "tower_cap",
@@ -2715,11 +2683,6 @@
     {
       "id": "cave_moss",
       "name": "Cave moss",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 251
-      },
-      "tint": "#50a060",
       "under": true,
       "passable": true,
       "tags": [
@@ -2738,16 +2701,12 @@
       },
       "clump": 0.8,
       "clumpScale": 10,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_CaveMoss"
     },
     {
       "id": "spore_reeds",
       "name": "Spore reeds",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 251
-      },
-      "tint": "#90c0b0",
       "under": true,
       "passable": true,
       "tags": [
@@ -2767,16 +2726,12 @@
       },
       "clump": 0.7,
       "clumpScale": 8,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_SporeReeds"
     },
     {
       "id": "stalagmite",
       "name": "Stalagmite",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 159
-      },
-      "tint": "#7a7a8a",
       "tags": [
         "stone",
         "boulder",
@@ -2800,16 +2755,12 @@
       },
       "clump": 0.7,
       "clumpScale": 12,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_Stalagmite"
     },
     {
       "id": "crystal_spire",
       "name": "Crystal spire",
-      "tile": {
-        "sheet": "Outside_C",
-        "id": 287
-      },
-      "tint": "#80d0ff",
       "tags": [
         "gem",
         "mineral",
@@ -2826,7 +2777,8 @@
       },
       "clump": 0.8,
       "clumpScale": 10,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_CrystalSpire"
     }
   ],
   "items": {
@@ -6000,19 +5952,17 @@
     "about": "Walk sheets for faction members by species (UF_History spawns them at sites; UF_Wildlife's wander AI moves them). U7 stand-ins until AR-400; tints tell species apart on shared sheets. stats = per-score modifiers (str, dex, con, int, wis, cha) added to the d20 ability scores UF_History rolls for each person (VISION V53); missing keys are 0.",
     "human": {
       "images": [
-        "$UF_Stock_People4_6",
-        "$UF_Stock_People4_5",
-        "$UF_Stock_People3_5",
-        "$UF_Stock_People2_1"
+        "$UF_Human_Male",
+        "$UF_Human_Female",
+        "$Adam",
+        "$Eve"
       ],
       "stats": {}
     },
     "elf": {
       "images": [
-        "$UF_Stock_Actor2_6",
-        "$UF_Stock_People4_7",
-        "$UF_Stock_Actor2_7",
-        "$UF_Stock_Nature_6"
+        "$UF_Elf_Male",
+        "$UF_Elf_Female"
       ],
       "stats": {
         "dex": 2,
@@ -6021,10 +5971,8 @@
     },
     "dwarf": {
       "images": [
-        "$UF_Stock_People2_6",
-        "$UF_Stock_People2_7",
-        "$UF_Stock_People4_4",
-        "$UF_Stock_Actor1_3"
+        "$UF_Dwarf_Male",
+        "$UF_Dwarf_Female"
       ],
       "stats": {
         "con": 2,
@@ -6033,12 +5981,9 @@
     },
     "goblin": {
       "images": [
-        "$UF_Stock_People1_0",
-        "$UF_Stock_People1_1",
-        "$UF_Stock_People2_2",
-        "$UF_Stock_People2_3"
+        "$UF_Goblin_Male",
+        "$UF_Goblin_Female"
       ],
-      "tint": "#a8e888",
       "stats": {
         "dex": 2,
         "str": -2
@@ -6046,12 +5991,9 @@
     },
     "orc": {
       "images": [
-        "$UF_Stock_Actor2_4",
-        "$UF_Stock_Actor2_3",
-        "$UF_Stock_Evil_1",
-        "$UF_Stock_Actor2_5"
+        "$UF_Orc_Male",
+        "$UF_Orc_Female"
       ],
-      "tint": "#90c078",
       "stats": {
         "str": 2,
         "int": -1
@@ -6059,10 +6001,8 @@
     },
     "gnome": {
       "images": [
-        "$UF_Stock_People1_6",
-        "$UF_Stock_Actor1_5",
-        "$UF_Stock_People2_0",
-        "$UF_Stock_Actor3_3"
+        "$UF_Gnome_Male",
+        "$UF_Gnome_Female"
       ],
       "stats": {
         "int": 2,

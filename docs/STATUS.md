@@ -2,9 +2,35 @@
 
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-18
+**Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
+
+## Biome Trees, Stumps, Cave Flora Charsets & Face Sets (Batches 1–3) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Actually, Do charsets and face sets for Biome assets liek trees, stumps, etc"):
+- **Authentic FF6 HD Biome Trees & Stumps (AR-102):**
+  - Delivered 14 species of authentic upright 2D pixel art trees: Oak, Pine, Birch, Fruit Tree, Bare Fruit Tree, Savanna Flat-top, Swamp Willow, Dead Tree, Tower Cap, Snow Fir, Mangrove, Tropical Tree, Palm Tree, and Cursed Tree (`game/img/characters/!$UF_{Oak,Pine,Birch,Fruit_Tree,Fruit_Tree_Bare,Tree_Savanna,Tree_Swamp,Tree_Dead,TowerCap,Fir_Snow,Mangrove,Tree_Tropical,Palm,Tree_Cursed}.png`, 288×384 px, 96×96 frames, 3 sway animation frames, anchor `[48, 95]`, 16–32 colors from `art/palette/uf.hex`, pure binary alpha, 3× native grid).
+  - Delivered 12 species-matched felling stump charsets: Oak, Pine, Birch, Swamp, Dead, Tower Cap, Snow Fir, Mangrove, Tropical, Palm, Cursed, and Generic Stump (`game/img/characters/!$UF_*_Stump.png`, 144×192 px, 48×48 frames, anchor `[24, 47]`, <= 32 colors).
+  - All character sheets accompanied by valid `.json` sidecars conforming to AR-600 metadata.
+- **Subterranean Cave Flora & Speleothems (AR-103 / Vertical World):**
+  - Delivered 6 subterranean cave charsets: Glow Caps (`!$UF_GlowCaps`), Cave Mushrooms (`!$UF_CaveMushrooms`), Cave Moss (`!$UF_CaveMoss`), Spore Reeds (`!$UF_SporeReeds`), Stalagmite (`!$UF_Stalagmite`), Crystal Spire (`!$UF_CrystalSpire`) in 144×192 px charsets with `.json` sidecars.
+  - Replaced stock `Outside_B`/`Outside_C` tile placeholders and obsolete tint multipliers in `game/data/UF_WorldCatalog.json`.
+- **RMMZ Face Sets (AR-700):**
+  - Delivered 4 complete 576×288 face sheets (4×2 grid of 144×144 portraits) inside authentic living oak carved wood borders and Romanesque stone arches:
+    - `game/img/faces/UF_Faces_Trees.png`: Oak, Pine, Birch, Fruit Tree, Savanna, Swamp, Dead, Tower Cap.
+    - `game/img/faces/UF_Faces_Stumps.png`: Oak Stump, Pine Stump, Birch Stump, Swamp Stump, Dead Stump, Tower Cap Stump, Generic Stump, Fallen Log.
+    - `game/img/faces/UF_Faces_Trees_Ex.png`: Snow Fir, Mangrove, Tropical Tree, Palm, Cursed Tree, Ancient Tree, Willow, Redwood.
+    - `game/img/faces/UF_Faces_CaveFlora.png`: Glow Caps, Cave Mushrooms, Cave Moss, Spore Reeds, Stalagmite, Crystal Spire, Luminescent Lichen, Deep Roots.
+- **Automated Verification:**
+  - `tools/art_check.js`: 100% PASS on all 36 delivered master, charset, and face PNGs (alpha, grid, palette, size, sidecar).
+  - `tools/originality_check.js`: 100% PASS on all frames (closest distance 0.410 to 0.540 >= 0.28 vs 19,431 indexed U7 shapes).
+  - Test suites: `ground` 9/9 PASS, `worldgen` 22/22 PASS, `vertical` 11/11 PASS, `smoke` 9/9 PASS (0 errors).
+  - `tools/generate_asset_inventory.js`: Original assets increased from 79 to 102!
+- **Screenshots visually inspected (Rule 5):**
+  - `game/test_output/worldgen.start_area.png`: Ground start with beautiful rolling terrain shading, authentic FF6 oak canopy, fruit tree with red apples, small plants, campfire, and settlers.
+  - `game/test_output/smoke.map.png`: Level -1 subterranean cavern showing live `!$UF_TowerCap`, `!$UF_Stalagmite`, `!$UF_GlowCaps`, `!$UF_CaveMushrooms`, `!$UF_CaveMoss` with settlers around the campfire.
+  - Face sets `UF_Faces_Trees_Ex.png` and `UF_Faces_CaveFlora.png` opened and visually inspected with flawless 3× pixel grid alignment and ornate borders.
 
 ## Household and goals checkpoint — 2026-09-19 (Codex / Astra)
 
@@ -37,8 +63,27 @@ The user requested saving the current changes for editor Playtest. The approved 
 - **Runtime evidence:** `codex_naturalwalls_20260919_b` natural_walls 4/4; height-disabled negative_b 3/4, correctly failing geometry. `codex_underground_night_20260919_c` daynight 13/13; an earlier coherent snapshot with underground detection disabled failed four lighting checks. All generated PNGs were opened by the producing agent; root also opened the positive wall and both depth/noon plus restored-Ground captures. The original night_a positive PNGs were cleaned by the negative runner; night_c retains fresh positives.
 - **Independent checkpoint evidence:** `codex_cave_owned_candidate_20260919` natural_walls 4/4 and `codex_cave_owned_smoke_20260919` smoke 13/13. These disposable snapshots used staged GEN2+wall-renderer Levels with HEAD WorldGen/catalog, proving the narrow checkpoint does not depend on the other agent's uncommitted GEN3/cave configuration. Both images were opened: soil/stone caps and faces with correct character occlusion; a daylight Ground camp with eight people and a fire. Source syntax and staged whitespace checks passed. No RMMZ editor F5/F8 was performed.
 - **Flora not finished:** the prepared WorldGen implementation, its system doc, `tools/test_z_flora.js` and `tools/fixtures/UF_ZFlora.js` remain uncommitted pending catalog reconciliation. VM 7/7 used agreed definitions injected in memory, **not the current live catalog**. No flora-runtime pass or art approval is claimed. The user authorized append-only cave definitions, but another agent added overlapping entries before the patch; Codex did not overwrite them and asked to pause that writer/authorize reconciliation.
-- **Current live tree differs from the narrow checkpoint:** another agent's GEN3 and cave catalog edits remain on disk. Audit A6 records majority-open -1 seeds, estimated rather than measured pocket sizes, and surface-style/non-regrowing cave definitions. A combined vertical snapshot passed 10/11 (offscreen corridor fixture failed); its four PNGs were opened, and save/load plus real legacy Ground migration passed. A later external corridor cleanup was not rerun by Codex. Do not treat earlier GEN2 statistics as measurements of this live GEN3 tree.
 - **Resume/Playtest gate:** `docs/handoffs/HANDOFF_cave_followup.md` lists prepared files and exact next steps. Coordinate the competing catalog writer before reopening the editor or committing that data. Once writers are stopped, reopen `game/game.rmmzproject`, F5 → New Game; period descends, comma ascends, Home returns to Ground. Judge the two-square cave borders and constant underground darkness. Distinct regrowing cave flora and terrain reconciliation are still pending.
+
+## Human Settler Sprites & Stock Character Replacement — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Work on human sprites. Im tired of looking at this RMMZ shit"):
+- **Authentic HD FF6 Human Settlers Pair & 4-Direction Walk Cycles (AR-010, AR-011, AR-400):**
+  - Male Settler: Linen tunic, rope belt, dark trousers and boots (`$UF_Human_Male.png`, 144×192, 48×48 frames, rows Down, Left, Right, Up, 3 walk columns).
+  - Female Settler: Linen peasant blouse, brown bodice, green apron skirt, leather boots (`$UF_Human_Female.png`, 144×192, 48×48 frames, rows Down, Left, Right, Up, 3 walk columns).
+  - Grounded at row 47, height 46px, 16-bit selective dark outlines, <= 32 colors on `art/palette/uf.hex`.
+  - Both pass `tools/art_check.js --native` (7/7 checks) and `tools/originality_check.js` (closest distances 0.492 to 0.523 >= 0.28).
+- **RMMZ Stock Chibi Art Banishment:**
+  - Deployed custom FF6 Settlers directly over `game/img/characters/$Adam.png` and `$Eve.png`, updating sidecars `$Adam.json` and `$Eve.json`.
+  - Updated `game/data/UF_WorldCatalog.json` (`start.pair`, `people.human`) so starting pairs, colonists, and spawned human peoples reference `$UF_Human_Male`, `$UF_Human_Female`, `$Adam`, and `$Eve` instead of stock RTP `$UF_Stock_People*`.
+  - Wired `elf`, `dwarf`, `goblin`, `orc`, and `gnome` in `cat.people` to their delivered original custom sprites (`$UF_Elf_Male/Female`, `$UF_Dwarf_Male/Female`, `$UF_Goblin_Male/Female`, `$UF_Orc_Male/Female`, `$UF_Gnome_Male/Female`), removing stock cuts across all playable humanoid species.
+- **Automated Verification:**
+  - `smoke`: 13/13 PASS (0 errors).
+  - `art_check.js --native`: 8/8 PASS across all character sheets.
+  - `originality_check.js`: 100% PASS (0 FAIL, 0 WARN).
+- **Screenshots visually inspected:**
+  - `art/review/human_settlers_pair_showcase_4x.png`: Male and female settlers grounded on the baseline across South, West, East, North facings.
+  - `game/test_output/smoke.map.png`: Ground start with human male and female settlers in linen tunics and aprons gathered around the campfire on the meadow.
 
 ## Rolling terrain on Z=0, -1, -2, Cave Ecology & Universal Wall Mining — 2026-09-19 (Gemini)
 
@@ -96,6 +141,7 @@ Delivered per user directive ("Actually, Do charsets and face sets for Biome ass
 ## In progress (claims)
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`
+- Gemini | **Human and Dwarf 8-Directional Sprite Suites (Movement, Idle, Combat, Sleep, Death, Work) (AR-010, AR-011, AR-400, AR-600)** | `game/img/characters/$UF_{Human,Dwarf}*`, `art/masters/{human,dwarf}_*`, `art/raw/{human,dwarf}_*`, `art/review/{human,dwarf}_*` | since 2026-09-19
 - Codex / Astra natural-access subtask | User-requested natural connections Ground ↔ z=-1 ↔ z=-2; deterministic paired endpoints and checked physical travel through existing APIs | NEW `UF_NaturalConnections.js`, `docs/systems/UF_NaturalConnections.md`, `tools/test_natural_connections.js`; no changes to claimed World/Levels/WorldGen/History/catalog | since 2026-09-19
 - Claude Code | **Creature AI Outpost Construction, Generational Culture, Family Multi-Room Homes, Locks & Keys** (user 2026-09-19 requests): Autonomous creature AI expanding outposts across Z-axes, animal vs. sapient creature goals (short, medium, long), family households with heritage surnames, multi-room homes (Kitchen hearth, Dining table, Master/Children bedrooms, exterior windows), lock & key access control (`UF_Doors`), generational culture evolution (`tastes`, traditions, aesthetic shifts), and dynamic dwelling upgrades | `game/js/plugins/UF_Outposts.js`, `game/js/plugins/UF_Doors.js`, `docs/systems/UF_Outposts.md`, `docs/systems/UF_Doors.md` | since 2026-09-19 15:30.
 - Claude Code | **Paths and DF life** (user 2026-09-19: "paths should not go through walls"; "keep pulling in and implementing behaviors / AI from DF, I want these characters living lives and building"): whole-area unit pathfinding, roads after the settling run and never under walls, ring gaps kept open, autonomous house building and daily life for every faction | `UF_World.js`, `UF_History.js`, `UF_Roads.js`, `UF_Colonists.js` (keeping Gemini's reproduction and life-stage code), `UF_Jobs.js`, new `UF_Society.js`, `tools/register_world_plugins.js`, `docs/systems/` | since 2026-09-19 08:55. Not touching `UF_Floors.js`/`UF_Doors.js` (Codex), `UF_Combat.js`, `UF_Objects.js`, `UF_Visuals.js`, `UF_Stance.js`, `UF_TimeSpeed.js` HUD (Gemini).

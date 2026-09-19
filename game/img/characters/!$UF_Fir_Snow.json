@@ -1,0 +1,31 @@
+{
+  "id": "fir_snow",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "sway": [
+      0,
+      1,
+      2
+    ]
+  },
+  "passable": false,
+  "under": false
+}
