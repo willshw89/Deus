@@ -62,6 +62,7 @@ Registered 2026-09-18 20:10 by `tools/register_world_plugins.js` (commit b2ebbf2
 - Fixed 2026-09-18: `UF_ColonyOverseer` snapped the camera to (120,122) on every map load, which broke layer and area changes. Colonists also matched another area's event 1 as "Adam".
 
 ## Engine queue (Claude Code)
+**Queued 2026-09-19 afternoon, to start when the runs editing these files land:** (a) 8-way movement (V3): the movement plugin switched to eight directions, the path planner 8-way without corner cutting, 8-facing sprite rows in the animation player, wildlife stepping; (b) the OSRS hooks from the skills and combat run (work speed in UF_Jobs, the old skills record in UF_Colonists, a skills page in UF_Sheet); (c) crafting (V66) once the user approves the crafting and theme proposals; (d) the cleaning tool for 4× deliveries (tools/make_25d.js, partly written, to finish for the flat style and rename); (e) the U7 stand-ins clash with the flat HD FF6 look: the user decides whether to swap them for stock RPG Maker art now.
 The build order is `docs/design/DF_MECHANICS.md` §14:
 1. **Cell state + biomes** (all DF starting states, distinct features)
 2. Interaction layer (everything interactive, items on the ground, jobs)
