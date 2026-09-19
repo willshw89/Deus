@@ -1,13 +1,13 @@
 # Five-level vertical world
 
 **Date:** 2026-09-19  
-**Status:** approved design target from VISION V80-V83; not implemented
+**Status:** approved design target from VISION V80-V83 and V91; not implemented
 
 **Scope:** condense Dwarf Fortress's vertically dependent mechanics into one persistent 256x256 footprint with exactly five physical levels. This is a mechanics reference and architecture contract, not an import of DF raws, prose, names, creatures, or balance numbers.
 
 This document supersedes the surface-only clauses in `WORLD_ARCHITECTURE.md` and the obsolete V20 references in `DF_MECHANICS.md`. Those files remain descriptions of the current engine until the vertical build is implemented and tested.
 
-The complete biome, resource coverage, generation-density and mapwide spawn-rate contract is `RESOURCE_ATLAS.md`. Where this document gives only a category summary, the atlas is authoritative.
+The complete biome, resource coverage, generation-density and mapwide spawn-rate contract is `RESOURCE_ATLAS.md`. Where this document gives only a category summary, the atlas is authoritative. The surface-height algorithm, natural ramps, cliff rendering and raised-terrain resource rules are defined in `TERRAIN_LEVELS.md`; that document is authoritative for `z=0`, `+1` and `+2` under V91.
 
 ## 1. Fixed world stack
 
@@ -15,9 +15,9 @@ The world has 327,680 addressable cells: `5 x 256 x 256`. Every cell, object, it
 
 | z | Functional level | Generated state | Main play |
 |---:|---|---|---|
-| `+2` | Upper 2 | Mostly open air; the top of large trees and rare natural high points | Third storeys, tower tops, roofs, high bridges, battlements, flight, falls, projectiles |
-| `+1` | Upper 1 | Mostly open air; trunks, heavy branches, and occasional raised terrain | Second storeys, ramparts, bridges, raised machinery, climbing and canopy travel |
-| `0` | Ground | The complete surface biome map | Founding camps, roads, farms, surface water, ordinary wildlife and settlements |
+| `+2` | Upper 2 | Real summit terrain where `S(x,y)=2`, crags where the whole column remains solid, and open air only above lower ground; large-tree crowns may also occupy eligible air | Mountain resources, snowcaps, summit travel, third storeys where headroom remains, tower tops, roofs, high bridges, battlements, flight, falls, projectiles |
+| `+1` | Upper 1 | Real hilltops, terraces and mountain shoulders where `S(x,y)=1`; solid mass below `+2` terrain; open air only above ground-level terrain; trunks and canopy may occupy eligible cells | Hillside resources, slopes and cliffs, second storeys, ramparts, bridges, raised machinery, climbing and canopy travel |
+| `0` | Ground | The low surface biome map: plains, valleys, coasts, rivers and lakes; rock or soil mass wherever a hill or mountain rises through it | Founding camps, roads, farms, surface water, ordinary wildlife and settlements on usable low ground; mining exposed raised terrain |
 | `-1` | Subterranean 1 | Soil, roots, upper stone, aquifers, small caves and pockets | Cellars, wells, cisterns, early mines, underground farms, common stone and ore |
 | `-2` | Subterranean 2 | Deep stone plus large carved and natural domains | Deep mines, cavern ecosystems, rare minerals, underground lakes, magma, deepest threats |
 
@@ -27,7 +27,9 @@ These are functional labels, not setting lore. The UI may say `+2`, `+1`, `Groun
 
 DF can use many physical z-levels, multiple cavern depths, a magma sea, and further sealed depths. UF has five physical levels, so it preserves the decisions and interactions rather than the literal count:
 
-- Ground elevation is usually expressed inside `z=0` as terrain, slopes, cliffs, water depth, and blocking height. It does not consume all of the two buildable upper levels.
+- Natural surface height is one deterministic grid `S(x,y)` in `{0,1,2}` plus a crag flag. At a normal column, every surface level below `S` is natural solid, `S` is the walkable natural floor, and every surface level above `S` is open air. A crag stays solid through `+2`. This is a real stack: a `+2` summit has solid `z=0` and `+1` beneath it, and a `+1` hilltop has solid `z=0` beneath it.
+- Hills and mountains therefore consume upper-level space where they stand. The remaining open air and the walkable raised surfaces are still valid places for bridges, roofs and supported construction, but a `+2` summit has no higher storey inside this five-level model and a `+1` hilltop has only `+2` above it.
+- Natural slopes are ramps between adjacent surface floors. Other height boundaries are cliffs. Surface water and its protected banks remain on `z=0`; valleys carry rivers and lakes rather than lifting them into the upper levels.
 - The three broad DF cavern depths become gated `depthBand` regions inside `z=-2`, not three more maps.
 - Magma and the deepest sealed region are domains inside `z=-2`, separated by hard rock, hazards, and controlled connectors.
 - A depth band changes geology, ecology, danger, ambient light, and spawn tables. It does not change the physical `z` coordinate.
@@ -136,24 +138,26 @@ Plants, fixtures, furniture, buildings, loose items, and creatures remain entiti
 
 Generation uses the same seed for all five levels and derives every placement from stable salts. It never generates each level independently and hopes the connectors line up.
 
+For the three surface levels, generation first derives the shared V91 terrain grid from the climate elevation and local relief. The grid is thresholded, smoothed and repaired once, then every `z=0/+1/+2` shape is derived from that same result. Upper maps are not independent height maps and are not blanket-open-air baselines.
+
 ### 4.1 Order
 
-1. Derive the complete `z=0` climate fields, geological columns and water table from the world seed.
-2. Allocate all five 256x256 baselines, then materialize `z=0`, the earth-biome mosaic on `z=-1`, the deep-biome domains on `z=-2`, and the derived exposure/canopy zones on `z=+1/+2`.
-3. Place aligned surface water, aquifers, underground lakes, magma, caves, openings and connector opportunities.
-4. Place all natural resource sources required by `RESOURCE_ATLAS.md`, with legal geology/habitat and mapwide density rather than one clustered cache.
-5. Populate renewable flora, fauna, fish and enemy populations on every eligible level/biome bucket under local and global caps.
-6. Place settlement starts, roads and V67 starting-resource guarantees without overwriting blockers, hazards or units.
-7. Carve and validate at least two separated descent networks from ground to `-1`, and at least one reachable but gated route from `-1` into each required `-2` band.
-8. Audit resource/variant coverage, production-chain satisfiability, reachability, water containment, support and faction-start safety. Repair missing coverage deterministically and rerun affected audits.
-9. Checksum and commit all five levels as one atomic world transaction. Play cannot begin with a deferred or invalid level.
+1. Derive the complete climate fields, geological columns and water table from the world seed. From the same fields derive the surface grid `S`: local relief, forced-low water/start cells, per-world thresholds, the guaranteed massif, smoothing, crags, natural slopes and reachability repair (`TERRAIN_LEVELS.md` §2 and §4).
+2. Allocate all five 256x256 baselines. Materialize `z=0/+1/+2` as one stacked surface column (`solid` below `S`, `floor` or natural `ramp` at `S`, `open` above it), the earth-biome mosaic on `z=-1`, and the deep-biome domains on `z=-2`.
+3. Place aligned surface water on `z=0`, aquifers, underground lakes, magma, caves, openings and connector opportunities. Natural surface ramps join the same connector graph as stairs and constructed ramps; optional cave mouths may lead through raised masses into descent networks.
+4. Place all natural resource sources required by `RESOURCE_ATLAS.md`, with legal geology/habitat and mapwide density rather than one clustered cache. This includes materials and veins inside raised columns, finite face outcrops, and plants/loose resources on eligible `+1/+2` floors.
+5. Populate renewable flora, fauna, fish and enemy populations on every eligible `(z, biomeRegion)` bucket under local and global caps. Upper-level life uses the actual raised-floor or open-air habitat and never duplicates a ground node.
+6. Place settlement starts, roads and V67 starting-resource guarantees on reachable `z=0` ground without overwriting blockers, hazards, raised solid cells or units. The player start and every accepted faction camp keep a usable low disc and kit ring.
+7. Carve and validate at least two separated descent networks from usable ground to `-1`, and at least one reachable but gated route from `-1` into each required `-2` band.
+8. Audit stacked-column validity, slope/region reachability, resource/variant coverage, production-chain satisfiability, water containment, support and faction-start safety. Repair missing coverage deterministically and rerun affected audits.
+9. Checksum the shared terrain grid and all five level baselines, then commit them as one atomic world transaction. Play cannot begin with a deferred, misaligned or invalid level.
 
 ### 4.2 Resource compression
 
 - `z=0` supplies the full surface-biome range: woods, crops and wild plants, land and aquatic food, animal products, water, surface reagents and exposed earth/stone.
 - `z=-1` is a distinct earth-biome mosaic: rooted loam, clay, sand/gravel, peat, aquifer earth, chalk/karst, salt/evaporite, frozen earth, ash/tuff and shallow caves.
 - `z=-2` contains gated deep mine belts, crystal caverns, fungal forests, underground lakes, chasms, fossil/bone beds, salt caverns, magma chambers, frozen deep caverns and Hell.
-- `z=+1/+2` contain the real upper cells of multi-level trees plus suitable nests, products and flying creatures; they do not duplicate the ground resource node.
+- `z=+1/+2` contain real hill, terrace and summit floors where the V91 surface rises, solid rock/earth beneath higher floors, and open air only above lower ground. Raised floors receive altitude-legal plants, loose stone and mountain resources; cliff faces can expose finite outcrops. Eligible open cells also contain the upper cells of multi-level trees, suitable nests, products and flying creatures. None of these duplicates a ground resource node.
 - Every DF/U7/OSRS resource input maps through the canonical coverage manifest defined in `RESOURCE_ATLAS.md`; real variants remain variants while duplicated or proprietary names are normalized into original resources.
 
 Finite stone, ore, gems, and fuel obey V74 and do not respawn. Cave plants, fungi, fish, prey, and eligible monsters replenish through the ecology rules when habitat and caps allow.
@@ -162,14 +166,14 @@ The ecology director rotates fairly through every `(z, biomeRegion)` bucket. Ren
 
 ### 4.3 Trees across five levels
 
-A mature large tree is one entity with occupied cells, not duplicated objects:
+A mature large tree is one entity with occupied cells, not duplicated objects. Its occupied levels are relative to the level of its root cell:
 
-- roots: influence or block selected cells in `z=-1`;
-- base and lower trunk: `z=0`;
-- trunk and heavy branches: `z=+1`;
-- crown, light branches, and canopy: `z=+2`.
+- a tree rooted at `z=0` may influence roots in `z=-1`, place its base and lower trunk on `z=0`, its trunk and heavy branches on `+1`, and its crown on `+2`;
+- a tree rooted on a `+1` hilltop may use only `+1..+2`, so it must select a small or medium form and cannot place a root cell into the solid mass below;
+- a tree rooted on a `+2` summit must be a one-level form;
+- shrubs occupy only their root level, and water-bound plants remain on `z=0`.
 
-Small trees may use only `z=0..+1`; shrubs use only `z=0`. Felling the base invalidates support, routes, light, and occupied cells across the whole tree. Growth never overwrites units or blocking construction (V68).
+Tree habitat and maximum form are checked before growth. Felling the base invalidates support, routes, light, and occupied cells across the whole tree. Growth never overwrites units, solid terrain or blocking construction (V68).
 
 ## 5. Digging, building, support and falling
 
@@ -344,3 +348,64 @@ The installed DF copy was treated as read-only. The evidence below establishes t
 - Underground creatures use depth ranges and movement/destruction abilities throughout `data/vanilla/vanilla_creatures/objects/creature_subterranean.txt`, including representative depth, flight, climbing, web and building-destruction tags at `:16`, `:263`, `:420`, `:1014`, and `:1699`; further depth distributions appear throughout `creature_next_underground.txt` beginning at `:12`.
 
 The original tags demonstrate distribution and capability. UF implements original data tables, terminology, creatures, tuning and presentation under V9/V28.
+
+## 13. Review of VERTICAL_BUILD_PLAN (Codex, 2026-09-19)
+
+This is a design review of `VERTICAL_BUILD_PLAN.md` against V91 and `TERRAIN_LEVELS.md`. It does not edit or silently supersede the build plan. The implementation owner must reconcile these items on the current files. The required order is **V1 state and migration → V2 connectors and routes → V91 stacked surface terrain → V3 excavation and construction**. Putting V91 after V3 would make the V3 rules, material tables, previews and tests target blanket-open upper levels that no longer exist.
+
+### 13.1 Build-plan §0 decisions D1–D8
+
+| Decision | Review | Required reconciliation |
+|---|---|---|
+| **D1: records carry `z`; LevelArea carries `z` for APIs** | **No V91 conflict.** A single coordinate contract is required for raised floors, cliff-face objects and natural ramps. The plan's omitted-`z`-means-ground compatibility rule remains valid. | Ensure every terrain-owned object placed on a face records the level of its reachable stand, and expose a z-aware terrain query (`cellInfo`/`shapeAt`) rather than making callers infer height from tiles. |
+| **D2: fail-closed legacy API** | **Compatible as a migration seam, but not as a finished simulation.** Returning `null` from `currentArea()` on another viewed level prevents z-blind writes. The accompanying temporary pause of ground Combat/Wildlife conflicts with this document §1.2, §7.2 and §9: all levels must continue off screen. V91 makes upper-level viewing routine, so the pause cannot remain through vertical acceptance. | Keep legacy events ground-only, add/use the z-aware events, and land the §8 owner changes before claiming off-screen simulation. Do not weaken fail-closed behavior to make old plugins appear to work. |
+| **D3: shape is authoritative; tiles are derived** | **The principle is correct.** The conflicting implementation text is plan §2.3/§5.6, which defines ground as floor almost everywhere and both upper baselines as open. V91 instead derives all three surface shapes from `S(x,y)`. | Preserve the packed shape/diff model, but make the natural baseline `solid` below `S`, `floor`/`ramp` at `S`, `open` above it, with crag solid through `+2`. Tile derivation must implement tops, faces, hanging faces and shaded lower terrain from `TERRAIN_LEVELS.md` §7. |
+| **D4: one RMMZ map id per level; tileset 92 for levels** | **Map ids do not conflict. Tilesets do.** V91 requires tileset 91 for `z=0/+1/+2` so raised terrain shares the surface A2 kinds, plants, A4 cliffs, A5 slopes and D-sheet shade. Tileset 92 remains correct only for `-1/-2`. The plan's A5 ids 1536 and 1552 have different meanings on tileset 91. | Keep map ids 1000–1004. Select tileset by terrain family, not merely `z !== 0`, and store tile mappings per tileset. Use the V91 mappings rather than the plan's `+1/+2` graybox ids. |
+| **D5: units move between levels in connector legs** | **The leg model remains correct.** The plan assumes only tens to low hundreds of sparse connector ends, while V91 produces roughly hundreds of natural ramp cells. Registering every ramp cell in the original O(n²)-per-region graph would violate its own scale assumption. | Represent each contiguous natural ramp run with one graph end pair, group alternatives by low/high region pair, then choose the nearest valid run during the local leg. Built stairs and ramps keep the original representation. |
+| **D6: off-screen units follow planned paths** | **No conflict; V91 makes it mandatory.** Straight-line off-screen movement would walk through the solid mass under hills and mountains. | The off-screen planner must read the unit's level baseline and use natural ramp edges when a route crosses a surface height boundary. |
+| **D7: most work lives in `UF_Levels.js`** | **Responsibility conflict.** V91 is not only level bookkeeping. `UF_WorldGen` owns the shared terrain function, start/river repair, raised resources and the `+1/+2` natural generator; `UF_Tiles` owns the surface A4/A5/D sheets and flags; `UF_Levels` owns baseline shapes, view maps and connector registration. Keeping all natural generation or drawing in `UF_Levels` would split WorldGen's one seeded surface model. | Retain the small z seam and central `UF_Levels` API, but use the ownership split in `TERRAIN_LEVELS.md` §9.2 and §12.2. Reconcile on the current implementations rather than copying the plan's old file assumptions. |
+| **D8: old saves migrate in place** | **The no-move rule is correct; the generator migration is incomplete for V91.** An old save with no `state.terrain` must not receive new hills under an existing colony. Regenerating the four untouched maps from the newest generator without pinning the surface generation would reshuffle `z=0/+1/+2`. | During load migration, write `state.terrain.gen = 0` for pre-V91 saves and keep the three surface baselines flat/open exactly as before. A new world uses the current catalog generation. Store/compare the terrain checksum, and derive `levels[0..2].gen` consistently from `terrain.gen`. Any later opt-in terrain migration must be explicit. |
+
+### 13.2 Conflicts elsewhere in the build plan, by section
+
+| Build-plan section | Conflict introduced or exposed by V91 | Reconciliation |
+|---|---|---|
+| **§2.3 Shape codes and packed changes** | “Ground floor everywhere except `peak_rock`” is obsolete. `peak_rock` also cannot remain an impassable tile on a surface floor that the terrain reachability pass treats as walkable. | Use the V91 surface baseline. For new terrain generations, crag supplies the impassable peak and ordinary summit rim cells use passable scree/snow. Packed sparse changes remain valid. |
+| **§3.2–§3.3 Tilesets and graybox tiles** | All non-ground levels on tileset 92, no generated upper solid/floor, and A5 1536/1552 for upper air/floor contradict the V91 chipset survey. | `z=0/+1/+2` use extended tileset 91; `-1/-2` use 92. Add composed surface A4, surface A5 and generated D slots, their flags and per-tileset catalog mappings. |
+| **§3.4 Materialization** | The plan has `UF_Levels` paint every non-ground terrain map as tileset 92. It also treats the ground level pass as a sparse layer-2 connector stamp. | `UF_WorldGen` supplies the shared surface terrain and upper natural object passes; `UF_Levels` supplies shapes and changes; `UF_Tiles` derives the surface top/face/open-air layers. The three surface maps must all consult the same cached `S` grid. |
+| **§3.5 Live changes** | Repainting a generic shape tile is insufficient for a cliff: a change can alter an A4 top/rim, a face, a hanging face, shade depth and connector membership. | Keep `levels:shapeChanged`, but re-derive the affected cell and neighbors through the V91 surface draw rule and invalidate the relevant ramp-run/region graph entry. |
+| **§4 Work ownership** | “Everything else” in `UF_Levels` includes baseline generation and terrain painting that V91 assigns to WorldGen/Tiles. | Use the D7 split above. This is an ownership correction, not a second terrain implementation. |
+| **§5.5–§5.6 Migration and New Game baselines** | `+1/+2` blanket open, a ground lattice checksum, and four non-ground noise baselines do not prove a shared stacked surface. Waiting until a late `world:created` listener is also unsafe because faction placement reads `WorldGen.cellInfo` during that event. | Build/cache `S` on first terrain query from seed plus `terrain.gen`; derive all three surface baselines from it; generate and checksum every level before play; pin old saves to generation 0. Faction placement must see the final low/raised shape when it chooses camps and kit cells. |
+| **§5.7 Checks** | The V1 checks establish five arrays but do not prove column support, raised coverage, low water, natural slope reachability or resources on summits. | Run the `terrain` acceptance suite from `TERRAIN_LEVELS.md` §11 alongside the vertical suites. Upper-view fixtures must use real raised floors and open air, not assume a completely empty map. |
+| **§6.1 Movement profiles** | Natural slopes are now normal surface connectors, but creatures are categorically kept off connectors in V1–V3. | Walkers use natural slopes according to movement profile. Wildlife may remain ground-only until ecology enables raised habitats, but the connector API cannot encode “colonist only” as a property of the terrain. |
+| **§6.2 Descent networks** | A cell can be biome-ground yet be `solid` at `z=0` under a hill. The original candidate rule does not describe the V91 low-ground constraint or cave-mouth option. | Require an actual reachable `z=0` floor/ramp-free start cell and preserved V67 clearance. A descent may alternatively begin through the validated cave-mouth tunnel described in `TERRAIN_LEVELS.md` §7.5. |
+| **§6.3 Connector graph** | The claim that baselines contain no connectors is false once natural slopes are baseline ramps. Scanning only sparse changes misses them; registering all ramp cells makes the O(n²) graph too large. | Seed the graph from terrain ramp runs plus sparse constructed connectors, with one end pair per run and region-pair grouping. |
+| **§7.1 Excavation and construction** | `excavate` accepts natural solid only on `-1/-2`, so hills and mountains cannot be mined. Upper “air” is treated as the only build surface, while V91 supplies upper natural floors and solids. | Permit excavation of eligible natural solid at `z=0/+1/+2`, with its column material and safe reachable stand. Construction must distinguish open air, natural floor and solid, refuse layer-0 floor writes over a solid cliff, and enforce the reduced headroom on hills/summits. |
+| **§7.2 Catalog `levels`** | One tile table per level cannot safely reuse ids across tilesets; generic stone/wood alone cannot express raised soil, host rock and veins. | Key presentation by tileset/surface family, while materials remain catalog ids. V91 terrain data owns host material and passes its index into the existing packed shape format. |
+| **§7.3–§7.5 Support and UI** | Natural-support rules are compatible, but the UI labels every `+1/+2` target as air/floor and the ground as universally buildable. | Query shape and surface height for preview text and validity. Show hill/summit, slope, cliff/rock face and open-air states; never let a ground-floor tool paint a walkable tile over V91 solid. |
+| **§10 Art** | The plan's upper open-air and built-floor requests assume Dungeon tiles on all upper cells. V91 needs surface cliff tops/faces, four slope directions, shade-by-depth, cave mouths and face outcrops. | Re-scope the old upper-air request to subterranean holes/openings where applicable and use the AR-1400–AR-1406 specifications proposed in `TERRAIN_LEVELS.md` §14 after request ids are assigned. Stock tiles remain placeholders under V9. |
+| **§11 Budgets** | Four cave-array generation time omits the shared terrain field pass and two natural upper map builds. Upper-level view switching is no longer rare. | Measure the terrain grid including fields, each `+1/+2` build, atomic New Game additions and cold/warm switches using the budgets and method in `TERRAIN_LEVELS.md` §9.4/§11. |
+| **§12 D-4** | The plan leaves Codex to choose how old generation versions survive slice 4. V91 makes the choice necessary now. | Decision: keep old saves on `terrain.gen = 0` unless an explicit, user-approved migration is added. Never silently raise an existing colony. |
+| **§13 sequencing** | The plan puts all geology/ecology after V3, but V3 excavation and construction would be implemented against the obsolete flat/open upper baseline. | Insert the V91 terrain build after V2 and before V3. Full deep geology/ecology can remain slice 4; the raised-column materials and finite surface outcrops required to make V3 correct land with V91. |
+| **§14 public API** | The summary has no z-aware natural terrain query and exposes connectors as if they came only from level-cell changes. | Add a read-only `UF.Levels.cellInfo(gx,gy,z)` (or documented equivalent) returning shape, material, biome, walkability, water/open and depth band; expose terrain ramp runs to the connector builder. This also answers `ECOLOGY.md` §14 D9. |
+
+Plan §9 registration has no V91 conflict. Registration still waits for the editor to be closed and for the implementing owner to run the snapshot and RMMZ checks.
+
+### 13.3 Build-plan §8 owner-change audit
+
+| §8 owner row | V91 review | Required owner change before the affected feature is accepted |
+|---|---|---|
+| **`UF_Combat.js` tick and `sameArea`** | **Conflict if left at the interim guard.** Combat cannot pause whenever the player views a hill, and the later combat slice must allow legal attacks across open vertical cells rather than rejecting every cross-level pair. | Make same-level simulation independent of the viewed level now; later replace the blanket cross-level guard with V80 line-of-sight/range rules. Drawing remains view-filtered. |
+| **`UF_Wildlife.js`** | **Conflict.** V91 creates walkable, resource-bearing `+1/+2` habitats and natural routes. “Creatures never get a route between levels” is only a temporary V1/V2 limitation. | Tick every inhabited level off screen, use z-aware terrain/peek queries, spawn only on habitat-legal floors, and let capable walkers use natural slopes once raised ecology is enabled. |
+| **`UF_Anim.js`** | No V91 conflict in the proposed change. | Continue filtering visible action overlays and units by `viewLevel()` and target `z`; simulation state must not depend on visibility. |
+| **`UF_Speech.js`** | No V91 conflict. | Use `viewLevel()`/`isDisplayed`; V92 still limits overhead text to dialogue and remarks. |
+| **`UF_Stance.js`** | No V91 conflict. | Draw markers only for units on the viewed level and anchor them to the raised map's rendered cell. |
+| **`UF_Sheet.js`** | **Coverage gap.** Unit clicks remain viable, but “cell panels on levels come later” does not satisfy this document §8 once upper terrain is playable. | Pass z through every profile/cell query and show the selected cell plus immediate above/below summaries without making off-level entities interactable. |
+| **`UF_Doors.js`** | **Final-contract conflict, though not required for V1/V2.** Refusing doors above ground prevents enclosed upper rooms and V78 privacy. | Include z in registry keys, placement, save reconciliation and room enclosure before upper-storey rooms/ownership are accepted. |
+| **`UF_Floors.js`** | **Immediate V91 conflict at ground level.** Its layer-0 painting could make a solid hill/cliff cell passable. Ground-only behavior also cannot supply the final multi-level room contract. | Reject writes where `shapeAt` is natural solid/open-invalid; later make floor placement z-aware or route all upper construction through one documented shape API. |
+| **`UF_Ownership.js`** | **Final-contract conflict.** Ground-only records cannot own beds, rooms or buildings on a hilltop or constructed upper storey. | Carry z in claim targets, beds, rooms, reconciliation and privacy checks before `vertical.rooms_ownership` can pass. |
+| **`UF_Ecology.js`** | **Immediate V91 integration conflict.** Ground regrowth must not place plants inside `z=0` solid under a hill, and mapwide ecology must eventually service raised-floor buckets. | Skip `S>0` ground cells, index actual `(z, biomeRegion)` habitats, and add `+1/+2` only when their biome/species tables are enabled. Build ecology v2 in place so the existing save key/API migrate once rather than forking two ecology plugins. |
+| **`UF_Fire.js`** | **Final-contract conflict.** Ground-only fire/heat cannot burn a raised forest or continue while that level is off screen. | Key fire state by z, update it from the global scheduled simulation, and draw only the viewed level before raised combustible terrain is accepted. |
+| **`UF_Colonists.js` / `UF_Skills.js`** | No direct V91 conflict in the proposed skill mapping, but cross-level job selection must use the z-aware reachability and stand reservations already required by V2. | Keep `excavate/channel/carve → stonework` and `construct → building`; ensure cliff-face mining names the reachable stand level and never treats a face object as occupying the miner's floor cell. |
+
+The compatible rows still require their owners' tests; “no V91 conflict” means only that the proposed direction does not contradict stacked terrain. None of these rows is evidence that the implementation exists or runs.
