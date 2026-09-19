@@ -1,0 +1,23 @@
+{
+  "id": "UF_Icon_128",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ]
+  },
+  "layer": "item",
+  "source": "stock RPG Maker MZ img/system/IconSet.png icon 128 (32x32, unscaled, centred in each 48x48 frame); made by tools/extract_stock_icons.js"
+}

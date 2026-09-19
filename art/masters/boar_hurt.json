@@ -1,0 +1,34 @@
+{
+  "id": "boar_hurt",
+  "species": "boar",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "hurt": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "layer": "body",
+  "category": "wildlife"
+}

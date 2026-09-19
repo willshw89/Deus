@@ -1,0 +1,41 @@
+{
+  "id": "hare_action",
+  "species": "hare",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "action": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "work": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "frameMs": 150,
+  "layer": "body",
+  "category": "wildlife"
+}

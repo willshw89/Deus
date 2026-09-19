@@ -1,0 +1,38 @@
+{
+  "id": "hare_idle",
+  "species": "hare",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "idle": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "stand": [
+      1
+    ]
+  },
+  "frameMs": 200,
+  "layer": "body",
+  "category": "wildlife"
+}

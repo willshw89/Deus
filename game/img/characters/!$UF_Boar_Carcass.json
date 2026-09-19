@@ -1,0 +1,16 @@
+{
+  "id": "UF_Boar_Carcass",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "passable": true,
+  "layer": "under",
+  "category": "remains"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "item_ore_copper",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 0,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ]
+  }
+}

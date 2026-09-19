@@ -1,0 +1,82 @@
+{
+  "id": "boar_master_8way",
+  "species": "boar",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "walk": [
+      1,
+      2,
+      3,
+      2
+    ],
+    "action": [
+      4,
+      5,
+      6,
+      5
+    ],
+    "work": [
+      4,
+      5,
+      6,
+      5
+    ],
+    "carry": [
+      7
+    ],
+    "attack": [
+      8,
+      9,
+      10
+    ],
+    "graze": [
+      11,
+      12,
+      13,
+      12
+    ],
+    "eat": [
+      11,
+      12,
+      13,
+      12
+    ],
+    "hurt": [
+      14
+    ],
+    "death": [
+      15,
+      16,
+      17
+    ],
+    "idle": [
+      18,
+      19
+    ]
+  },
+  "frameMs": 150,
+  "layer": "body",
+  "category": "wildlife"
+}
