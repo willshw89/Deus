@@ -794,10 +794,7 @@
         const W = World();
         const ev1 = W ? W.eventOf(u1.id) : null;
         const ev2 = (W && u2) ? W.eventOf(u2.id) : null;
-        if (window.UF && UF.Visuals && UF.Visuals.bark) {
-            if (ev1) UF.Visuals.bark(ev1, "♥ *Embraces tenderly* ♥", 150);
-            if (ev2) UF.Visuals.bark(ev2, "♥ *Whispers sweet words* ♥", 150);
-        }
+        // V92: no action descriptions over heads (only speech).
 
         // Conception: opposite genders
         const female = (u1.data.gender === "female") ? u1 : (u2 && u2.data && u2.data.gender === "female") ? u2 : null;
@@ -816,10 +813,7 @@
                 delete female.data._forceConceive;
                 addThought(female, "Expecting a baby!", 12);
                 addThought(male, "Going to be a father!", 10);
-                const femEv = W ? W.eventOf(female.id) : null;
-                if (femEv && window.UF && UF.Visuals && UF.Visuals.bark) {
-                    UF.Visuals.bark(femEv, "*Feeling a gentle flutter in belly*", 180);
-                }
+                // V92: no status text over heads (the pregnancy shows in the profile).
                 emit("colonists:conceived", female, male);
             }
         }

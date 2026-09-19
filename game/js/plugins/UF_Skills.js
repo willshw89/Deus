@@ -485,7 +485,7 @@
     function onLevelUp(unit, id, from, to) {
         const c = cfg();
         if (id === "hitpoints" && typeof unit.data.hp === "number") unit.data.hp += to - from; // the new maximum comes with the level
-        const text = String(c.speech.text || "{skill} level {level}").replace("{skill}", skillName(id)).replace("{level}", String(to));
+        const text = String(c.speech.text || "I'm getting better at {skilllower}.").replace("{skilllower}", lower(skillName(id))).replace("{skill}", skillName(id)).replace("{level}", String(to));
         sayOverHead(unit, text);
         const who = c.chronicle.who === "player" ? (window.UF && UF.Factions && UF.Factions.player ? UF.Factions.player() : null) : null;
         if (c.chronicle.who !== "player" || (who && unit.data.faction === who.id)) {
@@ -863,7 +863,7 @@
                 seen = !tm ? null : ln && ln.via === "bark" ? tm.children.find(ch => ch && ch.character === ev && ch.constructor && ch.constructor.name === "Sprite_UFBark")
                     : ln && ln.via === "line" ? tm.children.find(ch => ch instanceof Sprite_UFSkillLine && ch._ufSkillUnit === col.id && ch._ufText === ln.text && ch.visible && ch.opacity > 0) : null;
                 const headOk = !!seen && (ln.via === "bark" || (Math.abs(seen.x - ev.screenX()) < 1 && seen.y < ev.screenY() - 40));
-                lineOk = !!ln && ln.unitId === col.id && ln.text === "Woodcutting level 10" && (ln.via === "speech" || headOk);
+                lineOk = !!ln && ln.unitId === col.id && ln.text === String(cfg().speech.text || "I'm getting better at {skilllower}.").replace("{skilllower}", "woodcutting").replace("{skill}", "Woodcutting").replace("{level}", "10") && (ln.via === "speech" || headOk);
                 const evs = UF.History && UF.History.current() ? UF.History.current().events : [];
                 const last = evs.length > events0 ? evs[evs.length - 1] : null;
                 chronOk = !!last && last.type === "skill_level" && last.text.includes(col.name) && last.text.includes("woodcutting level 10");

@@ -24,7 +24,7 @@
  *   reason ("needs items", "needs a fire", "can't reach it", ...);
  * - if the unit isn't on the stand cell it is sent there (UF.World.sendUnit);
  * - on arrival the unit faces the target, its event steps in place, it
- *   barks the verb once (UF_Visuals.bark when present), and progress grows
+ *   shows the job in the profile (no over-head verb, VISION V92), and progress grows
  *   by workRate x tool multiplier per tick until it reaches the job's work;
  * - then apply() changes the world (UF.Objects.apply, UF.Items, ...) and the
  *   job is done (jobs:done). A handler's apply may return "continue" to go
@@ -785,9 +785,7 @@
             const dx = job.target.x - unit.x, dy = job.target.y - unit.y;
             if ((dx || dy) && sameArea(job.target.area, unit.area)) ev.setDirection(facingTo(dx, dy));
             ev.setStepAnime(true);
-            if (!job.barked && window.UF_Visuals && typeof UF_Visuals.bark === "function") {
-                try { UF_Visuals.bark(ev, h.verb); } catch (e) { /* the bark is decoration; the job goes on */ }
-            }
+            // V92 (user 2026-09-19): no status text over heads; the job shows in the profile, not as a bark.
         }
         job.barked = true;
     }

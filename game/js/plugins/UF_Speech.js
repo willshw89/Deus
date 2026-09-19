@@ -251,6 +251,8 @@
      * Say something over a speaker's head. Returns the ids of the utterances it became (one per
      * maxLines rows), or null (no text, unknown speaker, speaker not on the map on screen, disabled).
      */
+    const heard = [];
+    const HEARD_MAX = 400;
     function say(speaker, text, opts) {
         const c = cfg();
         if (!c.enabled) return null;
@@ -260,6 +262,9 @@
         const clean = String(text === undefined || text === null ? "" : text).replace(/\s+/g, " ").trim();
         if (!clean) return null;
         const kind = c.kinds[opts.kind] ? opts.kind : "remark";
+        // The last lines asked for, whoever asked (V92's "overhead" check reads them).
+        heard.push({ text: clean, kind, speaker: ref.key });
+        if (heard.length > HEARD_MAX) heard.shift();
         const style = c.kinds[kind];
         const color = typeof opts.color === "string" && opts.color ? opts.color : style.color;
         let sp = speakers.get(ref.key);
@@ -666,6 +671,9 @@
             return null;
         },
         layer: () => Speech._layer,
+        /** The last lines asked for ({ text, kind, speaker }), oldest first; clearHeard() empties the list. */
+        heard: () => heard.slice(),
+        clearHeard() { heard.length = 0; },
         routeBarks,
         _layer: null,
         _debug: { active, speakers, cache },
@@ -1317,6 +1325,68 @@
                 for (const id of made) W && W.removeUnit(id);
                 if (C && colonistsOn !== null) C.setEnabled(colonistsOn);
                 if (cam) cam.setLevel(startLevel);
+                if (T && T.setLevel) T.setLevel(speedAtStart);
+                if (T && pausedAtStart && !T.paused) T.pause();
+                if (T && !pausedAtStart && T.paused) T.resume();
+            }
+            await t.waitFrames(5);
+            const errs = t.errorsSoFar().slice(errors0);
+            t.check("no_errors", errs.length === 0, errs.length ? errs.slice(0, 3).join(" | ") : "no uncaught errors during the suite");
+        }, { isDefault: false });
+
+        // V92 (user 2026-09-19): only speech over heads. Plays the colonists at work at the fastest speed and fails on
+        // any line that is a status label: a job verb or job description, a sleep mark, an asterisk action, a level number.
+        // UF_TEST_PROVOKE=overhead makes one colonist bark a job verb, so the check can be seen failing.
+        UF.Test.suite("overhead", async t => {
+            const W = World(), S = Speech;
+            const J = window.UF.Jobs || null, T = window.UF.Time || null, C = window.UF.Colonists || null;
+            const errors0 = t.errorsSoFar().length;
+            const pausedAtStart = T ? T.paused : false;
+            const speedAtStart = T && T.level ? T.level() : 0;
+            const colonistsOn = C ? C.isEnabled() : null;
+            const env = (typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || "";
+            try {
+                if (!W || !W.currentArea() || !J) {
+                    t.check("setup", false, !J ? "UF_Jobs is not loaded" : "no UF.World area on screen");
+                    return;
+                }
+                if (T && T.paused) T.resume();
+                if (C && !C.isEnabled()) C.setEnabled(true);
+                if (T && T.setLevel && T.speeds && T.speeds.length) T.setLevel(T.speeds.length - 1);
+                S.clearHeard();
+                const status = new Set();
+                for (const type of J.types()) {
+                    const h = J.handler(type);
+                    if (h && typeof h.verb === "string" && h.verb) status.add(h.verb.toLowerCase());
+                }
+                let frames = 0, provoked = false;
+                while (frames < 900) {
+                    await t.waitFrames(15);
+                    frames += 15;
+                    for (const job of (typeof J.list === "function" ? (J.list() || []) : [])) {
+                        try {
+                            const d = J.describe(job);
+                            if (d) status.add(String(d).toLowerCase());
+                        } catch (e) { /* a job can end between list and describe */ }
+                    }
+                    if (!provoked && /(^|,)overhead(,|$)/.test(env)) {
+                        const u = W.units().find(x => x.data && x.data.kind === "colonist" && W.eventOf(x.id));
+                        if (u && UF.Visuals && UF.Visuals.bark) { UF.Visuals.bark(W.eventOf(u.id), "Gathering"); provoked = true; }
+                    }
+                }
+                const lines = S.heard();
+                const bad = lines.filter(l => {
+                    const s = l.text.toLowerCase().replace(/[.!…]+$/, "").trim();
+                    return status.has(s) || /^\*.*\*$/.test(l.text.trim()) || /^z{2,}/i.test(s) || /\blevel \d+\b/i.test(l.text);
+                });
+                const speed = T && T.speeds && T.level ? `x${T.speeds[T.level()]}` : "x?";
+                t.check("only_speech", bad.length === 0,
+                    `${lines.length} over-head line(s) in ${frames} frames at ${speed}; ${status.size} job verbs and descriptions known; ` +
+                    (bad.length
+                        ? `STATUS TEXT OVER HEADS: ${bad.slice(0, 6).map(l => `"${l.text}" (${l.kind})`).join(", ")}`
+                        : `none is a status label; last lines: ${lines.slice(-5).map(l => `"${l.text}"`).join(", ") || "none"}`));
+            } finally {
+                if (C && colonistsOn !== null) C.setEnabled(colonistsOn);
                 if (T && T.setLevel) T.setLevel(speedAtStart);
                 if (T && pausedAtStart && !T.paused) T.pause();
                 if (T && !pausedAtStart && T.paused) T.resume();

@@ -83,9 +83,7 @@
             if (block.activity === "sleep") {
                 ev.setStepAnime(false);
                 ev.setDirection(8); // Face wall/pillow
-                if (window.UF_Visuals) {
-                    UF_Visuals.bark(ev, "Zzz...", 120);
-                }
+                // V92: no status text over heads (sleep shows in the profile).
             } else if (block.activity === "work") {
                 ev.setStepAnime(true);
                 ev.setMoveFrequency(4);
