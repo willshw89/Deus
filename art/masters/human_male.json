@@ -1,0 +1,25 @@
+{
+  "id": "human_male",
+  "name": "Human Male Settler",
+  "category": "people",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    27,
+    46
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "notes": "Adult human male settler south stand anchor frame, 32px tall, 48x48 frame, 2.5D oblique up-left lean."
+}
