@@ -109,6 +109,27 @@
       "radius": [5, 20],
       "objects": { "berry_bush": 6, "oak": 8, "rocks_small": 10, "grass_tuft": 8, "reeds": 4, "granite_boulder": 2, "fruit_tree": 1 },
       "wildlife": { "about": "A prey herd within this distance of the start so the pair can hunt from day one.", "species": ["hare", "deer", "fowl"], "distance": [24, 40] }
+    },
+    "mapKit": {
+      "about": "Whatever the seed rolled, the whole map holds what a colony needs (user rule 2026-09-18, like a DF site with all its layers). Minimum object counts over the map; a missing class gets small seeded patches (patchSize each) at least keepAway cells from the start, on the ground kinds listed first, else anywhere on land.",
+      "keepAway": 40,
+      "patchSize": [4, 8],
+      "objects": {
+        "oak": { "min": 60, "ground": ["forest_floor", "meadow"] },
+        "pine": { "min": 30, "ground": ["needle_floor", "rock"] },
+        "berry_bush": { "min": 40, "ground": ["meadow", "forest_floor", "shrub_soil"] },
+        "fruit_tree": { "min": 6, "ground": ["meadow", "forest_floor"] },
+        "reeds": { "min": 30, "ground": ["mud", "swamp_mud", "meadow"] },
+        "grass_tuft": { "min": 80, "ground": ["meadow", "dry_grass", "tropical_grass"] },
+        "rocks_small": { "min": 60, "ground": ["stony", "rock", "shrub_soil", "meadow"] },
+        "granite_boulder": { "min": 20, "ground": ["rock", "stony", "meadow"] },
+        "ironstone": { "min": 8, "ground": ["rock", "stony", "red_clay"] },
+        "copper_outcrop": { "min": 5, "ground": ["rock", "stony", "red_clay"] },
+        "gold_outcrop": { "min": 2, "ground": ["rock", "red_clay"] },
+        "crystal": { "min": 3, "ground": ["rock", "red_clay"] },
+        "wild_grain": { "min": 20, "ground": ["meadow", "dry_grass"] }
+      },
+      "water": { "about": "At least this many fresh-water cells on the map; the start pond and rivers normally provide them.", "minFresh": 40 }
     }
   },
   "rivers": {
