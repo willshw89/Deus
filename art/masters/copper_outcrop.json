@@ -1,0 +1,28 @@
+{
+  "id": "copper_outcrop",
+  "name": "Copper outcrop",
+  "category": "Geology",
+  "dimensions": "48x48",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "palette": "art/palette/uf.hex",
+  "colorCount": 12,
+  "updatedDate": "2026-09-19",
+  "passable": false
+}
