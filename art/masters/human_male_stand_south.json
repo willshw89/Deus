@@ -32,7 +32,7 @@
   },
   "made": {
     "by": "tools/make_25d.js",
-    "at": "2026-09-19T15:46:33.738Z",
-    "options": ["art/raw/human_male_stand_south.png", "--lean", "none", "--force"]
+    "at": "2026-09-19T16:07:58.885Z",
+    "options": ["art/raw/human_male_stand_south.png", "--max-colors", "32", "--lean", "none", "--force"]
   }
 }
