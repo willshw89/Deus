@@ -71,25 +71,24 @@ Row 15: . . . O L L l l . O L L l O . .  <- Boots touching bottom row 16
 
 ---
 
-## 4. Master Ultima VII Palette Swatches for Fable
+## 4. Master Ultima VII Palette Swatches (Verified Against art/palette/uf.hex)
 
-When Fable specifies colors, it must select from these verified U7 daylight ramps:
+All color ramps must strictly use verified indices from `art/palette/uf.hex`:
 
-| Material Ramps | Palette Indices & Hex Codes | Usage Rules |
+| Material Ramps | Verified Indices & Hex Codes | Usage Rules |
 | :--- | :--- | :--- |
-| **Deep Silhouette** | `#201408` (Idx 147), `#2D1C08` (Idx 146) | Perimeter silhouette lines, pupils, deep crevices. |
-| **Dark Brown Hair / Fur** | `#8A5D2D` (140), `#6D3D0C` (142), `#5D350C` (143) | Chestnut hair, boar hide, oak bark, leather straps. |
-| **Light Skin** | `#FFDFBA` (32), `#E3C2B2` (105), `#C68E75` (109) | Fair human skin, highlights, warm facial tones. |
-| **Dwarf / Ruddy Skin** | `#E3C2B2` (105), `#D2A692` (107), `#AE7D65` (110) | Weathered skin, sun-baked settlers, dwarf tones. |
-| **Undyed Homespun Linen** | `#EBE3D7` (134), `#CAB292` (136), `#AA8659` (138) | Settler tunics, straw beds, canvas sacks, sails. |
-| **Rope / Tan Leather** | `#BA9A71` (137), `#9A7141` (139), `#613100` (12) | Rope belts, tanned cowhide, packs, slings. |
-| **Dark Trousers / Slate** | `#553D31` (114), `#3D2D24` (115), `#281C14` (116) | Heavy work trousers, damp slate, shadow wool. |
-| **Boots / Dark Leather** | `#4D2D0C` (144), `#3D240C` (145), `#2D1C08` (146) | Work boots, iron fittings, hardened leather armor. |
-| **Foliage / Grass** | `#558231` (74), `#3D651C` (76), `#28450C` (78) | Meadow grass, oak leaves, mossy stone. |
-| **Pine Needle / Dark Green** | `#2D5524` (77), `#1C3D14` (79), `#102408` (81) | Evergreen pine boughs, swamp scum, deep forest. |
-| **Granite / Iron Ore** | `#A2A2A2` (120), `#757575` (123), `#454545` (126) | Exposed boulders, iron deposits, anvil stones. |
-| **Copper / Malachite** | `#459A7D` (86), `#2D6D55` (88), `#184535` (90) | Copper veins, verdigris, marsh lichen. |
-| **Gold Ore / Ember Fire** | `#FFD700` (22), `#E3A600` (24), `#B27500` (26) | Native gold flecks, campfire core, torch glow. |
+| **Deep Silhouette** | `147` `#201408`, `146` `#2D1C08` | Silhouette contours, dark pupil outlines, deep crevices. |
+| **Dark Brown Bark / Wood** | `142` `#6D3D0C`, `143` `#5D350C`, `144` `#4D2D0C`, `145` `#3D240C` | Tree trunks, kindling, log walls, dark fur/hide. |
+| **Light Wood / Cut Grain** | `134` `#EBE3D7`, `136` `#CAB292`, `137` `#BA9A71`, `139` `#9A7141` | Axe-hewn wood faces, growth rings, log wall binding bands. |
+| **Bright Fruit / Sun Apples** | `21` `#FF394D` (sun highlight), `23` `#DF1428` (body) | Ruby apples on fruit trees, warning points. |
+| **Foliage (Fruit Tree)** | `200` `#86D200` (sun), `241` `#45B645` (mid), `242` `#189218` (shadow), `243` `#006D00` (deep rim) | Round broadleaf fruit tree canopy. |
+| **Foliage (Oak)** | `201` `#86B200` (highlight), `242` `#189218` (mid), `243` `#006D00` (shadow), `70` `#005100` (deep under-line) | Broad lobed oak tree canopy. |
+| **Granite / Neutral Stone** | `120` `#CECECE` (top), `123` `#9E9E9E` (front), `126` `#6D6D6D` (right), `128` `#515151` (cracks), `129` `#454545` (shadow) | Granite boulders, loose rocks, cobbles. |
+| **Warm Ore Stone (Ironstone)** | `150` `#CEC6BE` (top edge), `158` `#514945` (lit), `159` `#453D39` (mid), `160` `#35312D` (shadow/ash) | Layered ironstone outcrop, hearth ash patch. |
+| **Metallic Iron & Rust** | `122` `#AEAEAE` (iron fleck), `183` `#9E5124` (rust stain), `184` `#8E3D0C` (rust vein) | Raw iron veins cutting through sedimentary stone. |
+| **River Cobbles (Campfire)** | `121` `#BEBEBE` (lit tops), `124` `#8E8E8E` (body), `126` `#6D6D6D` (shadow) | Elliptical hearth stones. |
+| **Campfire Flame & Core** | `250` `#FFD200` (core/spark), `251` `#FFAE00` (mid), `235` `#FF8E10` (outer), `236` `#FF5100` (tongues), `137` `#BA9A71` (glow) | Teardrop flame and heated stone inner glow. |
+| **Boar Hide & Features** | `141` `#7D4D18` (lit back), `142` `#6D3D0C` (mid), `143` `#5D350C` (shadow), `145` `#3D240C` (belly/legs), `111` `#9A6D59` (snout), `15` `#FFFFFF` (tusks) | Stocky wild boar front-facing anatomy. |
 
 ---
 
@@ -194,3 +193,4 @@ Fable is requested to begin generating the narration briefs for **Wave 1 Priorit
 4. `AR-105`: **Campfire** (Unlit stone ring vs. Lit roaring flame vs. Cold ash)
 5. `AR-401`: **Wild Boar** (Alive snuffling vs. Hunted carcass)
 6. `AR-104`: **Timber Palisade Wall** (Intact vertical log segment vs. Ruined splintered)
+

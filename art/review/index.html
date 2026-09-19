@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>UF Art Review — Style Anchors & Masters</title>
+<title>UF Art Review — Final Fantasy V Architecture & Ultima VII Palette</title>
 <style>
   body {
     background: #181824;
@@ -45,18 +45,6 @@
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
-  .grass-bg {
-    background-color: #4d7c0f;
-    background-image: 
-      linear-gradient(45deg, #3f6212 25%, transparent 25%), 
-      linear-gradient(-45deg, #3f6212 25%, transparent 25%), 
-      linear-gradient(45deg, transparent 75%, #3f6212 75%), 
-      linear-gradient(-45deg, transparent 75%, #3f6212 75%);
-    background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-    padding: 12px;
-    border-radius: 4px;
-  }
   .badge-approved {
     display: inline-block;
     background: #15803d;
@@ -70,10 +58,10 @@
 </style>
 </head>
 <body>
-  <h1>UF 2D Art Review (Final Fantasy V Style + Ultima VII Palette)</h1>
+  <h1>UF 2D Art Review (Final Fantasy V Style + Ultima VII Daylight Palette)</h1>
   <p>Gallery of 16×16 native style anchors, master frames, and 3× in-game exports per <code>docs/ART_STANDARD.md</code>.</p>
 
-  <h2>1. Style Anchors (Step 2)</h2>
+  <h2>1. Style Anchor (Approved)</h2>
   <div class="grid">
     <div class="card">
       <span class="badge-approved">APPROVED (2026-09-18)</span>
@@ -86,18 +74,309 @@
           <span>1× Native (16px)</span>
         </div>
         <div class="preview-col">
-          <img class="pixelated" src="../masters/settler_male_16x16.png" width="48" height="48" alt="3x">
+          <img class="pixelated" src="../settler_male_3x.png" width="48" height="48" alt="3x">
           <span>3× RMMZ (48px)</span>
         </div>
         <div class="preview-col">
           <img class="pixelated" src="../settler_male_16x.png" width="128" height="128" alt="8x">
-          <span>8× (128px)</span>
+          <span>Inspection (128px)</span>
         </div>
       </div>
 
-      <div class="card-meta" style="margin-bottom: 4px;"><strong>Color & Anatomy:</strong> 20 colors, upper-left lighting, head 1/3 height, big simple eyes, homespun pale-brown tunic, rope belt, dark trousers, dark boots.</div>
+      <div class="card-meta" style="margin-bottom: 4px;"><strong>Color & Anatomy:</strong> 20 colors, upper-left lighting, head ~40% height, 2x2 FF5 eyes, homespun linen tunic to mid-thigh, rope belt, dark trousers, dark boots.</div>
     </div>
+  </div>
+
+  <h2>2. Wave 1 Masters & Interaction States (Delivered to Spec)</h2>
+  <div class="grid">
+    
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Fruit Tree (AR-020)</div>
+      <div class="card-meta">Category: Flora | File: <code>art/masters/fruit_tree.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/fruit_tree.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/fruit_tree_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/fruit_tree_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Round canopy with sun-facing highlight and 7 ruby apples. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Fruit Tree (Picked) (AR-020)</div>
+      <div class="card-meta">Category: Flora | File: <code>art/masters/fruit_tree_bare.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/fruit_tree_bare.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/fruit_tree_bare_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/fruit_tree_bare_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Identical tree with apples removed and middle band darkened to 242. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Oak Tree (AR-021)</div>
+      <div class="card-meta">Category: Flora | File: <code>art/masters/oak.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/oak.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/oak_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/oak_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Broad lobed canopy with 201 yellow-green highlight and 4px trunk. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Tree Stump (AR-021)</div>
+      <div class="card-meta">Category: Flora | File: <code>art/masters/stump.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/stump.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/stump_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/stump_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Cut trunk with concentric growth rings 137, heart 144, and 2 woodchips. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Granite Boulder (AR-022)</div>
+      <div class="card-meta">Category: Geology | File: <code>art/masters/granite_boulder.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/granite_boulder.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/granite_boulder_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/granite_boulder_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Faceted angular stone with top facet 120, moss rim, and cracks. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Loose Stones (AR-022)</div>
+      <div class="card-meta">Category: Geology | File: <code>art/masters/rocks_small.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/rocks_small.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/rocks_small_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/rocks_small_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Five scattered loose stones with 120 tops and 4x3 center stone. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Ironstone Outcrop (AR-022)</div>
+      <div class="card-meta">Category: Geology | File: <code>art/masters/ironstone.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/ironstone.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/ironstone_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/ironstone_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Three stepped dark slabs shot through with metallic iron veins & rust. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Campfire (Unlit) (AR-105)</div>
+      <div class="card-meta">Category: Building | File: <code>art/masters/campfire.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/campfire.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/campfire_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/campfire_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Eight 2x2 river cobbles in an ellipse enclosing crossed kindling & ash. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Campfire (Lit) (AR-105)</div>
+      <div class="card-meta">Category: Building | File: <code>art/masters/campfire_lit.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/campfire_lit.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/campfire_lit_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/campfire_lit_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Cobble ring glowing with teardrop flame, 250 core and spark. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Wild Boar (AR-401)</div>
+      <div class="card-meta">Category: Wildlife | File: <code>art/masters/boar.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/boar.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/boar_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/boar_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Stocky front-facing boar with bristled back, white tusks, and hooves. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Wooden Wall (Palisade) (AR-104)</div>
+      <div class="card-meta">Category: Building | File: <code>art/masters/wall_wood.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/wall_wood.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/wall_wood_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/wall_wood_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Seamlessly tiling vertical log palisade with pointed tips & binding band. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
+
+    <div class="card">
+      <span class="badge-approved">DELIVERED (2026-09-18)</span>
+      <div class="card-title">Rubble (AR-104)</div>
+      <div class="card-meta">Category: Building | File: <code>art/masters/rubble.png</code></div>
+      
+      <div class="stage-row">
+        <div class="preview-col">
+          <img class="pixelated" src="../masters/rubble.png" width="16" height="16" alt="1x">
+          <span>1× Native (16px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/rubble_3x.png" width="48" height="48" alt="3x">
+          <span>3× RMMZ (48px)</span>
+        </div>
+        <div class="preview-col">
+          <img class="pixelated" src="../../game/test_output/rubble_16x.png" width="128" height="128" alt="16x">
+          <span>Inspection (128px)</span>
+        </div>
+      </div>
+
+      <div class="card-meta" style="margin-bottom: 4px;">Low pile of broken timber log ends showing cut faces mixed with stones. Verified against <code>art/palette/uf.hex</code>.</div>
+    </div>
+
   </div>
 </body>
 </html>
-

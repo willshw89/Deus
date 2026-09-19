@@ -1,0 +1,31 @@
+{
+  "id": "fruit_tree",
+  "name": "Fruit tree",
+  "category": "Flora",
+  "frameWidth": 16,
+  "frameHeight": 16,
+  "exportWidth": 48,
+  "exportHeight": 48,
+  "anchor": [
+    8,
+    15
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "harvest": [
+      0
+    ]
+  },
+  "palette": "Ultima VII Daylight Palette (PALETTES.FLX Record 0)",
+  "style": "Final Fantasy V 2D flat 3/4 top-down",
+  "approvedDate": "2026-09-18"
+}
