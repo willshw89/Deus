@@ -7438,6 +7438,12 @@
           "shield_wood"
         ],
         "scavenge": 0.2
+      },
+      "themeBgm": {
+        "name": "Town1",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "elf": {
@@ -7479,6 +7485,12 @@
           "dagger_iron"
         ],
         "scavenge": 0.1
+      },
+      "themeBgm": {
+        "name": "Theme2",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "dwarf": {
@@ -7521,6 +7533,12 @@
           "mail_iron"
         ],
         "scavenge": 0.1
+      },
+      "themeBgm": {
+        "name": "Town2",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "gnome": {
@@ -7557,6 +7575,12 @@
           "dagger_iron"
         ],
         "scavenge": 0.3
+      },
+      "themeBgm": {
+        "name": "Town3",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "goblin": {
@@ -7594,6 +7618,12 @@
           "dagger_iron"
         ],
         "scavenge": 1
+      },
+      "themeBgm": {
+        "name": "Dungeon2",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "orc": {
@@ -7629,6 +7659,12 @@
           "club"
         ],
         "scavenge": 0.5
+      },
+      "themeBgm": {
+        "name": "Battle3",
+        "pan": 0,
+        "pitch": 100,
+        "volume": 90
       }
     },
     "automaton": {
@@ -10032,7 +10068,13 @@
       "human": {
         "file": "Window_human",
         "material": "carved dark oak, aged parchment and brass fittings",
-        "recipe": null
+        "recipe": null,
+        "bgm": {
+          "name": "Town1",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
+        }
       },
       "elf": {
         "file": "Window_elf",
@@ -10049,6 +10091,12 @@
             "#f0e290"
           ],
           "mix": 0.08
+        },
+        "bgm": {
+          "name": "Theme2",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "dwarf": {
@@ -10066,6 +10114,12 @@
             "#dce4f0"
           ],
           "mix": 0.08
+        },
+        "bgm": {
+          "name": "Town2",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "gnome": {
@@ -10083,6 +10137,12 @@
             "#fff0a8"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Town3",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "goblin": {
@@ -10100,6 +10160,12 @@
             "#e0a060"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Dungeon2",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "orc": {
@@ -10117,6 +10183,12 @@
             "#f4ecd8"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Battle3",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "lizardfolk": {
@@ -10134,6 +10206,12 @@
             "#f0dcc8"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Town7",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "kobold": {
@@ -10151,6 +10229,12 @@
             "#f8c878"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Dungeon1",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "undead": {
@@ -10168,6 +10252,12 @@
             "#cad8b8"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Dungeon3",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "starborn": {
@@ -10185,6 +10275,12 @@
             "#e4e2ff"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Theme1",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "swarm": {
@@ -10202,6 +10298,12 @@
             "#b8d078"
           ],
           "mix": 0.05
+        },
+        "bgm": {
+          "name": "Dungeon6",
+          "pan": 0,
+          "pitch": 100,
+          "volume": 90
         }
       },
       "automaton": {

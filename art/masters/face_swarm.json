@@ -1,0 +1,24 @@
+{
+  "name": "face_swarm",
+  "about": "The Chitinous Swarm faceset in authentic Ultima VII ornate border style.",
+  "author": "Gemini (Google Nano Banana II)",
+  "date": "2026-09-19",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "sheetWidth": 576,
+  "sheetHeight": 288,
+  "cells": 8,
+  "layout": {
+    "adult_male": 0,
+    "adult_female": 1,
+    "elder_male": 2,
+    "elder_female": 3,
+    "content_adult_male": 4,
+    "content_adult_female": 5,
+    "content_elder_male": 6,
+    "content_elder_female": 7
+  },
+  "layer": "face",
+  "culture": "swarm",
+  "stage": "adult_and_elder"
+}

@@ -5,6 +5,37 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Authentic Google Nano Banana II Faction Face Sets with Ultima VII Borders & Menu Themes (AR-1700 to AR-1730, V99, V100) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Use Nano banana II to create all of the UF Face Sets we need, giving each faction a unique ultima 7 style border that corresponds with their faction theme. Additionally, generate a menu theme for each faciton as well"):
+- **Authentic Google Nano Banana II Generative Face Sets across All 11 Factions:**
+  - Raw generative outputs saved in `art/raw/face_<culture>_raw.png`.
+  - Delivered 11 complete 576×288 RMMZ faceset sheets to `game/img/faces/UF_Faces_<culture>_1.png` and `art/masters/face_<culture>.png` with AR-600 format `.json` sidecars (8 cells of 144×144 px: Adult Male, Adult Female, Elder Male, Elder Female in neutral/calm and content/smiling moods).
+  - Each 144×144 px portrait features an authentic, ornate **Ultima VII style border (10–16 px band)** uniquely matching that faction's cultural materials and theme:
+    - **Human (`human`):** Carved stone archway with oak rosettes on deep midnight navy.
+    - **Elf (`elf`):** Leafy bower of living branches and golden foliage on deep forest green.
+    - **Dwarf (`dwarf`):** Rune-cut granite stone niche with iron corner brackets on hearth-lit dark rock.
+    - **Gnome (`gnome`):** Polished brass-and-gear roundel bezel on dark teal enamel.
+    - **Goblin (`goblin`):** Patched hide, twisted wire, and rusted scrap iron with barbed spikes on smoky olive dusk.
+    - **Orc (`orc`):** Heavy black wrought iron and carved beast bone with curved boar tusk clamps on dark red-brown.
+    - **Lizardfolk (`lizardfolk`):** Bound river reeds and spiral nautilus shells with pearl gems on murky marsh teal.
+    - **Kobold (`kobold`):** Rough tunnel-rock niche hung with copper wire, dangling brass bells, and candle stubs on lamp-lit clay ochre.
+    - **Undead (`undead`):** Ancient mausoleum tomb slate stone niche with creeping grave moss and verdigris bronze on eerie grave grey-green.
+    - **Starborn (`starborn`):** Geometric crystal lattice with cut sapphire facets and gleaming silver nodes on cosmic starlight indigo void.
+    - **Swarm (`swarm`):** Ribbed chitin exoskeleton frame with glistening violet sinew nodes on wet dark chitin green.
+- **Authentic Faction Menu Themes (Window Skins):**
+  - Raw generative outputs archived in `art/raw/menu_*_raw.png`.
+  - Delivered 11 thin-bordered window skins to `game/img/system/Window_<culture>.png` and `art/masters/Window_<culture>.png` with `.json` sidecars: 192×192 px RMMZ window skin format, thin 6-px borders with cultural corner motifs, clean high-contrast wallpapers, custom directional cursors and scroll arrows, preserved standard 32 text color chips.
+  - Thematic Menu BGM assigned to all factions in `game/data/UF_WorldCatalog.json` (Human: Town1, Elf: Theme2, Dwarf: Town2, Gnome: Town3, Goblin: Dungeon2, Orc: Battle3, Lizardfolk: Town7, Kobold: Dungeon1, Undead: Dungeon3, Starborn: Theme1, Swarm: Dungeon6).
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --sidecar`: 100% PASS on all 22 master assets (≤ 32 colors on `art/palette/uf.hex`, binary alpha 0/255, exact dimensions, valid sidecars).
+  - `tools/originality_check.js`: 100% PASS across all 22 delivered assets (closest distances 0.442 to 0.508 ≥ 0.28 vs 19,431 indexed Ultima VII shapes).
+  - Live in-engine NW.js snapshot (`tools/test_factions_live.js`): 13/13 PASS (exit 0, 0 console errors).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `art/review/all_factions_facesets_showcase.png`: Inspected all 11 faction face sets in 4-column lineup showing authentic Ultima VII ornate frames, distinct species anatomy, and rich cultural palettes.
+  - `art/review/window_skins_all_factions_showcase.png`: Inspected all 12 window skins showing clean readable wallpapers, thin borders, and faction corner bosses.
+  - `art/review/faction_dialogue_UF_Faces_human_1.png`: Inspected live in-game message dialogue window with Human Settler bust in carved stone arch and clean windowskin.
+
 ## Google Nano Banana 2 Environment Chipsets: Animated Doors, Construction Floors, and Animated Water (AR-101, AR-300) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("Yes, use Nano banana II to create every chipset we need, and animate Anything in the chipset that makes sense if we can"):
