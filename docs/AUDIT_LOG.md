@@ -6,6 +6,20 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
 
 ---
 
+## A6: Concurrent underground follow-up (2026-09-19)
+
+**Audited by:** Codex / Astra. Scope: newly overlapping GEN3 terrain and cave catalog edits, not an art audit. These edits were preserved; no generator fix or catalog overwrite was attempted. Natural-wall rendering and permanent underground night are separate, narrowly tested changes.
+
+| # | Grade | Finding | Evidence | Status |
+|---|---|---|---|---|
+| A6-1 | MAJOR | GEN3 no longer reliably produces mostly solid earth with habitable pockets. It makes broad connected caves; -1 can be majority floor. The latest observed runtime assertion permits 40–65% solid, so a passing check does not establish the earlier mostly-earth requirement. | Actual production generator extracted into a VM: seeds 0 and 20260919, -1 solid 46.347% and 41.409%; largest connected floor region 38,349 cells. `UF_Levels.js`, `generateUnderground` GEN3 branch and `verticalSuite` geography assertion. Five seeds/two depths repeat deterministically; founding dry cores and some reachable water pass in all samples. | OPEN: terrain owner's reconciliation with the user's topology requirement needed. No permission to replace concurrent work inferred. |
+| A6-2 | MAJOR | GEN3 pocket `floorCells` is `bestScore * 10`, not a measured chamber area; sorting by it does not identify the largest actual chamber. | `UF_Levels.js` pocket descriptor in `generateUnderground`; all 260 sampled descriptors disagree with measured floor count inside their bounds. GEN2 seed 424242 retains its earlier measured 36/16 separate pockets and 144/64 water cells. | OPEN with the generator owner. |
+| A6-3 | MAJOR | The cave-flora catalog and generator are being edited concurrently under overlapping claims. The new external cave entries still use surface plant silhouettes; food/fiber plants are consumed rather than entering cave-specific regrowth states. Codex's prepared regrowth and distinct-art catalog patch was not applied. | Current catalog `cave_mushrooms` uses Outside_B 251; `tower_cap` uses Outside_B 176 (surface tree) and becomes `stump`; `cave_moss` / `spore_reeds` become null. Fresh DayNight `c` screenshots were opened and show the surface-style vegetation underground. | PAUSED: user authorized appending cave objects, then was asked to pause the competing catalog writer and authorize reconciliation of the overlapping new entries. No answer yet at this audit. |
+
+Additional regression evidence: snapshot `codex_cave_followup_vertical_20260919_a` passed 10/11, failing its offscreen L-corridor walker (goal dropped, zero steps). All four screenshots were opened. A later concurrent test edit clears generated objects from that corridor; that edit was not in this snapshot and has not been rerun by Codex. Save/load and the real pre-vertical Ground migration passed in this run. No editor F5/F8 was performed.
+
+---
+
 ## A5: Gemini commits ca87248, d8c7bca, c08b15a (2026-09-19): U7-derived images committed, code in tools/
 **Audited by:** Claude Code, 2026-09-19 (found by the commit run that landed Claude Code's work).
 **Verdict: FAIL** (two findings; the art itself was not reviewed here)

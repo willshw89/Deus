@@ -93,7 +93,18 @@ The catalog's `levels.look` (else the same placeholders built into the code) say
 
 Cell → tiles: layer 0 the biome's base look (autotiled against matching neighbours), layer 1 the hole edge over an underground `open` cell, layer 2 a stair or ramp. Passage flags: rock, soil, open air, hole edge and freshwater pools `0x0f`; dry floors and connectors 0; B tile 0 and veins `0x10`. Tileset 92's A1 slot is stock `Outside_A1`; generated A2/A4/B contracts stay intact. Ground keeps tileset 91 and draws nothing from here.
 
+## Natural cave walls (2026-09-19)
+
+Exposed `solid` stone/soil cells on -1 and -2 now draw like built walls: a 48x96 sprite has its lower wall face on the blocked base `(x,y,z)` and its upper cap at `(x,y-1,z)`. The cap is visual overhang only; there is no shape, object, collision entry, or geometry on another z. Dry floor north or south remains passable. Interior solid terrain keeps its existing A4 plateau tiles.
+
+The renderer assembles the existing runtime A4 stock cap and face quarters using native floor/wall autotile tables. Soil and stone retain their distinct source art/tints, and floor biomes are unchanged. No image assets or generated pixel art were added. Visible boundary sprites are pooled, their material/connection bitmaps cached, and they are direct tilemap children sorted by their base foot like UF_Objects: a unit north of a wall is behind its cap; a unit south appears in front. Rebuilds inspect only the viewport plus a small margin when scrolling, switching maps, or changing a shape. `Spriteset_Map.createCharacters` is aliased to add this visual layer; it stores no save state.
+
+Focused non-default suite `natural_walls`: `two_cell_render` checks both materials' 48x96 frames, opaque cap/face pixels, and same-level cap offset; `one_collision_cell` checks blocked base, passable north/south floor and no object duplication; `material_and_depth` checks distinct material bitmaps and north/wall/south sort order; `no_errors` checks harness errors. Screenshot `two_cell_natural_walls` includes connected soil and stone runs beside stock people. `UF_TEST_PROVOKE=vertical.natural_wall_height` reduces the drawn frame to 48px and must fail the geometry check.
+
+Observed 2026-09-19: `codex_naturalwalls_20260919_b` passed 4/4. Opened its sole PNG: separate dark soil and blue-gray stone runs each show a cap above a lower face; the person north of the soil wall is occluded, with people south and to the side visible. Both cap/face halves had 144/144 opaque samples; sprite depth was north 288, wall 336, south 384. `codex_naturalwalls_20260919_negative_b` produced 3 PASS / 1 FAIL with the height provocation: 48x48 frames, 144/0 cap/face samples; its opened sole PNG shows flat one-row strips and the north person visible. Both snapshots included concurrent external GEN3 and cave-flora changes; this evidence establishes the wall fixture, not approval of that generator/catalog work. An earlier `_a` snapshot stopped before the suite on missing underground flora configuration; its sole opened failure PNG showed the Ground camp, not walls. RMMZ editor F5/F8 remains unchecked.
+
 ## The view
+
 - **Keys:** `,` (also `<`) up, `.` (also `>`) down, Home the ground. A press in a frame when the map can't switch (a transfer finishing, an event running) is kept for 30 frames.
 - **Level plate:** top right, left of the speed buttons (UF_TimeSpeed): `▼  -1  ▲`; the arrows are buttons; drawn in code (AR-1312 will replace it). Only the labels `+2`, `+1`, `Ground`, `-1`, `-2` are shown.
 - A switch is an RMMZ transfer with no fade to the level's map; the cursor cell and the display position are put back; the zoom stays. It doesn't autosave and doesn't clear the image cache (it's a camera move, not a journey; VERTICAL_BUILD_PLAN §12 D-3).
@@ -141,6 +152,8 @@ Suite `vertical` (run on its own: `--uf-test=vertical`; UF_Test's 180 s watchdog
 | `no_errors` | No uncaught error during the suite | `vertical.no_errors`: throws once |
 
 World suite: `level_ids` (replaces `one_layer`): ids distinct and round-trip, ground id = MapIdBase, `areaOfMapId` of a level map is null, levels 3 and -3 don't exist. Provocation `world.level_ids` (the `-1` slot collides with `+1`).
+
+Isolated checkpoint checks (2026-09-19): `codex_cave_owned_candidate_20260919` passed natural_walls 4/4, and `codex_cave_owned_smoke_20260919` passed smoke 13/13. Snapshot Levels exactly matched the staged GEN2 plus renderer; WorldGen and catalog matched HEAD. This separates the renderer from concurrent GEN3/configuration edits. Both sole PNGs were opened: the two-square wall fixture with correct north/south occlusion, and a daylight camp with eight people around the fire. No editor F5/F8 acceptance is implied.
 
 ## Known problems
 - All five maps must simulate concurrently regardless of the view. Combat now groups living units by level; unit movement and jobs also advance off view. Remaining `currentArea()`-gated wildlife decisions are an integration gap, not an acceptable final view-based simulation pause. Speech bubbles, stance squares and action overlays may remain view-filtered because they only render.

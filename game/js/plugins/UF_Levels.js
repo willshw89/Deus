@@ -727,6 +727,7 @@
         return true;
     }
     function redrawAround(ax, ay, x, y, z) {
+        naturalWallRevision++;
         const W = World();
         const read = (cx, cy) => packedAt(ax, ay, cx, cy, z);
         const readBiome = biomeReader(baseline(z, ax, ay), W.state.size);
@@ -739,6 +740,85 @@
             }
         }
     }
+
+    // Natural walls have the same visual footprint as built walls: the blocked cell is the face, and its cap is
+    // one screen row north on this same level. Tile passage and the saved shape grid are never changed by drawing.
+    const naturalWallFrames = new Map();
+    let naturalWallRevision = 0;
+    function naturalWallBitmap(material, mask) {
+        const key = `${material}:${mask}:${provoked("natural_wall_height")}`;
+        if (naturalWallFrames.has(key)) return naturalWallFrames.get(key);
+        const source = composed.bitmaps.A4;
+        if (!source || !source.isReady()) return null;
+        const bitmap = new Bitmap(48, provoked("natural_wall_height") ? 48 : 96);
+        const x0 = material === SOIL ? 96 : 0;
+        const cap = Tilemap.FLOOR_AUTOTILE_TABLE[maskTable()[mask]];
+        const face = Tilemap.WALL_AUTOTILE_TABLE[10 + ((mask & 4) ? 0 : 1) + ((mask & 8) ? 0 : 4)];
+        for (let q = 0; q < 4; q++) {
+            const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
+            bitmap.blt(source, x0 + cap[q][0] * 24, cap[q][1] * 24, 24, 24, dx, dy);
+            if (bitmap.height === 96) bitmap.blt(source, x0 + face[q][0] * 24, 144 + face[q][1] * 24, 24, 24, dx, dy + 48);
+        }
+        naturalWallFrames.set(key, bitmap);
+        return bitmap;
+    }
+    class Sprite_UFNaturalWalls extends Sprite {
+        constructor() {
+            super(); this.z = 0; this._active = new Map(); this._pool = []; this._seen = "";
+        }
+        update() {
+            super.update();
+            const map = window.$dataMap, W = World(), view = W && W.viewLevel();
+            if (!this.parent || !map || !view || view.z >= 0 || map.tilesetId !== TILESET_ID) {
+                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+                this._active.clear(); this._seen = ""; return;
+            }
+            const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
+            const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
+            const stamp = `${$gameMap.mapId()}:${dx}:${dy}:${cols}:${rows}:${naturalWallRevision}`;
+            if (stamp !== this._seen || this._data !== map.data) {
+                const typeAt = (x, y) => {
+                    if (x < 0 || y < 0 || x >= map.width || y >= map.height) return -1;
+                    const id = map.data[y * map.width + x];
+                    if (id >= tileBase("rock") && id < tileBase("rock") + 48) return STONE;
+                    if (id >= tileBase("soil") && id < tileBase("soil") + 48) return SOIL;
+                    return -1;
+                };
+                const keep = new Set();
+                for (let y = Math.max(0, dy - 1); y <= Math.min(map.height - 1, dy + rows + 2); y++) {
+                    for (let x = Math.max(0, dx - 1); x <= Math.min(map.width - 1, dx + cols + 1); x++) {
+                        const material = typeAt(x, y);
+                        if (material < 0 || [[0,-1],[0,1],[-1,0],[1,0]].every(([a,b]) => typeAt(x+a,y+b) >= 0)) continue;
+                        let mask = 0;
+                        for (const [a,b,bit] of NB8) if (typeAt(x+a,y+b) === material) mask |= bit;
+                        const bitmap = naturalWallBitmap(material, mask);
+                        if (!bitmap) continue;
+                        const i = y * map.width + x; keep.add(i);
+                        let s = this._active.get(i);
+                        if (!s) {
+                            s = this._pool.pop() || new Sprite(); s.anchor.set(0.5, 1);
+                            if (!s.parent) this.parent.addChild(s);
+                            this._active.set(i, s);
+                        }
+                        s.bitmap = bitmap; s._ufX = x; s._ufY = y; s._ufMaterial = material; s._ufLevel = view.z; s.visible = true;
+                    }
+                }
+                for (const [i,s] of this._active) if (!keep.has(i)) { s.visible = false; this._pool.push(s); this._active.delete(i); }
+                this._seen = stamp; this._data = map.data;
+            }
+            for (const s of this._active.values()) {
+                s.x = Math.round(($gameMap.adjustX(s._ufX) + 0.5) * 48);
+                s.y = Math.round(($gameMap.adjustY(s._ufY) + 1) * 48);
+                s.z = Math.max(7, s.y); // same minimum as objects: above tile/stance/designation layers
+            }
+        }
+    }
+    const _Spriteset_Map_createCharacters_naturalWalls = Spriteset_Map.prototype.createCharacters;
+    Spriteset_Map.prototype.createCharacters = function() {
+        _Spriteset_Map_createCharacters_naturalWalls.call(this);
+        this._ufNaturalWalls = new Sprite_UFNaturalWalls();
+        this._tilemap.addChild(this._ufNaturalWalls);
+    };
 
     function describeCell(ref) {
         const r = refOf(ref);
@@ -1219,6 +1299,56 @@
 
     function registerChecks() {
         UF.Test.suite("vertical", verticalSuite, { isDefault: false });
+        UF.Test.suite("natural_walls", naturalWallsSuite, { isDefault: false });
+    }
+
+    async function naturalWallsSuite(t) {
+        const W = World(), O = UF.Objects, C = UF.Camera;
+        if (!W || !W.state || !O) { t.check("setup", false, "world/objects absent"); return; }
+        if (window.$colonyManager) $colonyManager.cameraFollowUnit = null;
+        const settled = () => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && !$gamePlayer.isTransferring() && !pending;
+        await t.waitUntil(settled, 20000, "initial map");
+        if (viewZ() !== -1) { setView(-1); await t.waitUntil(() => settled() && viewZ() === -1, 20000, "wall fixture level"); }
+        const area = W.viewLevel(), size = W.state.size;
+        let cx = 0, cy = 0;
+        find: for (let y = 20; y < size - 20; y += 12) for (let x = 20; x < size - 20; x += 16) {
+            if (!W.units().some(u => zOf(u) === -1 && u.area.x === area.x && u.area.y === area.y && Math.abs(u.x-x) < 9 && Math.abs(u.y-y) < 7)) { cx=x; cy=y; break find; }
+        }
+        if (!cx) { t.check("setup", false, "no empty unit-free fixture region"); return; }
+        const originals = [], units = [], oldZoom = C && C.level();
+        for (let y=cy-4;y<=cy+4;y++) for (let x=cx-7;x<=cx+7;x++) {
+            const ref={area,x,y,z:-1}; originals.push({ref,cell:Levels.cellAt(ref),object:W.getObject(area.x,area.y,x,y,-1)});
+            O.setIn(area,x,y,null); setShape(ref,"floor",{constructed:true,material:"stone"});
+        }
+        for (const [offset,material] of [[-4,"soil"],[0,"stone"]]) for(let i=0;i<3;i++) setShape({area,x:cx+offset+i,y:cy,z:-1},"solid",{material});
+        for(const [name,x,y] of [["TEST_north",cx-3,cy-1],["TEST_south",cx-3,cy+1],["TEST_scale",cx+4,cy]]) {
+            units.push(W.addUnit({name,image:{characterName:"People1",characterIndex:2},area:{x:area.x,y:area.y},x,y,z:-1,exact:true,data:{kind:"test"}}));
+        }
+        if(C) C.setLevel(0);
+        $gamePlayer.locate(cx,cy); $gamePlayer.center(cx,cy);
+        await t.waitFrames(20);
+        const layer=SceneManager._scene._spriteset._ufNaturalWalls;
+        const soil=layer && layer._active.get(cy*size+cx-3), stone=layer && layer._active.get(cy*size+cx+1);
+        const sprites=SceneManager._scene._spriteset._characterSprites;
+        const person=u=>sprites.find(s=>s._character===W.eventOf(u.id));
+        const north=person(units[0]), south=person(units[1]);
+        const opaque=(s,from,to)=> {
+            let n=0; if(!s || !s.bitmap || !s.bitmap.isReady()) return n;
+            for(let y=from;y<Math.min(to,s.bitmap.height);y+=4) for(let x=0;x<48;x+=4) if(s.bitmap.getAlphaPixel(x,y)>0) n++;
+            return n;
+        };
+        const heightOk=[soil,stone].every(s=>s && s.bitmap.width===48 && s.bitmap.height===96 && s.anchor.y===1 && s._ufLevel===-1 && s.y-96===Math.round($gameMap.adjustY(cy-1)*48) && opaque(s,0,48)>80 && opaque(s,48,96)>80);
+        t.check("two_cell_render",heightOk,`soil ${soil ? soil.bitmap.width+"x"+soil.bitmap.height : "missing"}, stone ${stone ? stone.bitmap.width+"x"+stone.bitmap.height : "missing"}; opaque cap/face samples soil ${opaque(soil,0,48)}/${opaque(soil,48,96)}, stone ${opaque(stone,0,48)}/${opaque(stone,48,96)}; cap y-1 on z=-1, lower face ends at wall-cell foot`);
+        const ref=(x,y)=>({area,x,y,z:-1});
+        t.check("one_collision_cell",Levels.shapeAt(ref(cx-3,cy))==="solid" && Levels.shapeAt(ref(cx-3,cy-1))==="floor" && Levels.shapeAt(ref(cx-3,cy+1))==="floor" &&
+            !$gameMap.isPassable(cx-3,cy,2) && $gameMap.isPassable(cx-3,cy-1,2) && $gameMap.isPassable(cx-3,cy+1,2) && !W.getObject(area.x,area.y,cx-3,cy,-1),"wall base blocked; north cap overhang and south floor remain passable; no duplicate object");
+        t.check("material_and_depth",!!soil && !!stone && soil.bitmap!==stone.bitmap && soil._ufMaterial===SOIL && stone._ufMaterial===STONE && !!north && !!south && north.z<soil.z && soil.z<south.z,
+            `separate material frames; depth north ${north && north.z} < wall ${soil && soil.z} < south ${south && south.z}`);
+        t.screenshot("two_cell_natural_walls");
+        for(const u of units) W.removeUnit(u.id);
+        for(const o of originals) { setShape(o.ref,o.cell.shape,{material:o.cell.material,constructed:o.cell.constructed}); O.setIn(area,o.ref.x,o.ref.y,o.object || null); }
+        if(C) C.setLevel(oldZoom);
+        t.check("no_errors",t.errorsSoFar().length===0,t.errorsSoFar().join(" | ") || "none");
     }
 
     async function verticalSuite(t) {
