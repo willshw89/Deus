@@ -1,0 +1,38 @@
+{
+  "id": "berry_bush_bare",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [24, 47],
+  "footprint": [1, 1],
+  "facings": ["S"],
+  "animations": {
+    "stand": [0]
+  },
+  "frameMs": 150,
+  "lean": {
+    "mode": "none",
+    "slope": 1,
+    "top": null,
+    "east": 0
+  },
+  "scale": {
+    "subjectHeight": 28,
+    "target": null,
+    "factor": 1
+  },
+  "source": {
+    "file": "art/raw/berry_bush_bare.png",
+    "format": "png",
+    "converted": null,
+    "size": [192, 192],
+    "sheet": [1, 1],
+    "block": 4,
+    "phase": [0, 0],
+    "background": "magenta #FF00FF"
+  },
+  "made": {
+    "by": "tools/make_25d.js",
+    "at": "2026-09-19T16:54:19.029Z",
+    "options": ["art/raw/berry_bush_bare.png", "--max-colors", "32", "--lean", "none", "--force"]
+  }
+}
