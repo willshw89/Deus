@@ -85,6 +85,19 @@
  * Every area also has an object grid (one type number per cell, drawn and
  * simulated by UF_Objects) that generators fill and that is saved as diffs.
  *
+ * Paths (2026-09-19): units on screen follow a path planned over the whole
+ * area (UF.World.findPath: A*, 4-way, round walls and through gaps; tile
+ * passage, water and blocking objects as on-screen stepping; units are
+ * ignored when planning and waited for, then walked round, when met). A
+ * goal nobody can reach is given up at once (world:unitBlocked with a
+ * reason). At most 4 new plans per map update; the rest wait in a queue.
+ *
+ * Spawning (2026-09-19, VISION V68): addUnit puts a unit only on a cell it
+ * can stand on (the nearest free cell when the one asked for holds a tree,
+ * a rock, a wall, water or another unit), except fliers and exact: true.
+ * setObject refuses a blocking object on a cell where a unit stands, and
+ * regrowth onto such a cell waits until the unit has left.
+ *
  * API, events, save data and checks: docs/systems/UF_World.md
  * Architecture: docs/design/WORLD_ARCHITECTURE.md
  *
@@ -234,8 +247,27 @@
             objectDiffs: {}
         };
         buildCache.clear();
-        this._convertTemplateUnits();
+        clearPaths(true);
+        spawnStats = newSpawnStats();
+        // Template units are placed before world:created, when generators' inputs (faction sites, history) aren't
+        // there yet: checking their cells now would build and cache the area too early. They're seated right after.
+        seatLater = [];
+        let early;
+        try {
+            this._convertTemplateUnits();
+        } finally {
+            early = seatLater;
+            seatLater = null;
+        }
         emit("world:created", this.state);
+        for (const id of early) {
+            const u = this.unit(id);
+            if (!u) continue;
+            const c = seatCell(u.area.x, u.area.y, u.x, u.y, 0, u.name, u.id);
+            spawnStats[c.how]++;
+            u.x = c.x;
+            u.y = c.y;
+        }
         return this.state;
     };
 
@@ -438,11 +470,15 @@
         (this.state.diffs[key] = this.state.diffs[key] || {})[i] = tileId;
         if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.data) {
             $dataMap.data[i] = tileId;
+            pathCellChanged($dataMap, x, y, true);
             const scene = SceneManager._scene;
             if (scene instanceof Scene_Map && scene._spriteset) scene._spriteset._tilemap.refresh();
         }
         const cached = buildCache.get(cacheKey(ax, ay));
-        if (cached) cached.data[i] = tileId;
+        if (cached) {
+            cached.data[i] = tileId;
+            pathCellChanged(cached, x, y, true);
+        }
         emit("world:tileChanged", { x: ax, y: ay }, x, y, layer, tileId);
         return true;
     };
@@ -457,17 +493,42 @@
         return this.peekArea(ax, ay).data[i];
     };
 
-    /** Change the object on a cell anywhere in the world (type number from UF_Objects, 0 = nothing). Recorded like tiles. */
+    /**
+     * Change the object on a cell anywhere in the world (type number from UF_Objects, 0 = nothing). Recorded like tiles.
+     * Every UF_Objects change (placing, building, harvesting, regrowth) comes through here. Refused (false) when the
+     * new type blocks movement and a unit that doesn't pass through everything stands on the cell (VISION V68);
+     * World.lastObjectRefusal says why. Generators write their own grid while an area is built: worldgen is unaffected.
+     */
     World.setObject = function(ax, ay, x, y, type) {
         const size = this.state.size;
         if (!this.inWorld(ax, ay) || x < 0 || y < 0 || x >= size || y >= size) return false;
+        const stander = type && !(guardOff && guardOff.objects) && typeBlocks(type | 0) ? standerAt(ax, ay, x, y) : null;
+        if (stander && this.getObject(ax, ay, x, y) !== (type | 0)) {
+            const O = window.UF.Objects;
+            const t = O && O.type ? O.type(type | 0) : null;
+            const r = {
+                area: { x: ax, y: ay }, x, y, type: type | 0, objectId: t ? t.id : null, unitId: stander.id, unitName: stander.name,
+                reason: `${t ? `"${t.id}"` : `object type ${type | 0}`} can't go on (${x},${y}) in area (${ax},${ay}): "${stander.name}" (unit ${stander.id}) stands there`
+            };
+            this.lastObjectRefusal = r;
+            spawnStats.objectRefusals++;
+            if (spawnStats.objectRefusals <= SPAWN.warnLimit) console.warn(`UF_World: ${r.reason}`);
+            emit("world:objectRefused", r);
+            return false;
+        }
         const i = y * size + x;
         const key = areaKey(ax, ay);
         const diffs = (this.state.objectDiffs = this.state.objectDiffs || {});
         (diffs[key] = diffs[key] || {})[i] = type | 0;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.ufObjects) $dataMap.ufObjects[i] = type | 0;
+        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.ufObjects) {
+            $dataMap.ufObjects[i] = type | 0;
+            pathCellChanged($dataMap, x, y, false);
+        }
         const cached = buildCache.get(cacheKey(ax, ay));
-        if (cached) cached.ufObjects[i] = type | 0;
+        if (cached) {
+            cached.ufObjects[i] = type | 0;
+            pathCellChanged(cached, x, y, false);
+        }
         emit("world:objectChanged", { x: ax, y: ay }, x, y, type | 0);
         return true;
     };
@@ -594,22 +655,169 @@
         return null;
     };
 
+    //-------------------------------------------------------------------------
+    // Spawning (VISION V68, user 2026-09-19): nothing appears on a cell it can't move through, and nothing that blocks
+    // movement appears on a cell where a unit stands.
+
+    const SPAWN = Object.freeze({ radius: 6, maxRadius: 24, warnLimit: 20 });
+    let spawnStats = newSpawnStats();
+    let seatLater = null; // unit ids added before world:created (template units), seated after it
+    // Test provocations (spawn suite, seen failing once): in a --uf-test run only, the environment variable
+    // UF_TEST_PROVOKE=spawn.guard / spawn.exact / spawn.objects switches that part of the guard off from boot, and
+    // spawn.misplace puts one unit on a blocked cell before each scan. Never set in a normal run.
+    const PROVOKE = (() => {
+        const argv = (typeof nw !== "undefined" && nw.App && nw.App.argv) || [];
+        if (!argv.some(a => a === "--uf-test" || String(a).startsWith("--uf-test="))) return [];
+        const env = (typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || "";
+        return env.split(",").map(s => s.trim()).filter(s => s.startsWith("spawn."));
+    })();
+    const provoked = name => PROVOKE.includes(`spawn.${name}`);
+    let guardOff = provoked("guard") || provoked("exact") || provoked("objects")
+        ? { units: provoked("guard"), exact: provoked("exact"), objects: provoked("objects") } : null;
+    function newSpawnStats() {
+        return { added: 0, asked: 0, moved: 0, widened: 0, shared: 0, stuck: 0, exact: 0, through: 0, maxMove: 0,
+            objectRefusals: 0, regrowWaits: 0, warnings: 0, last: [] };
+    }
+    function spawnWarn(text) {
+        spawnStats.warnings++;
+        spawnStats.last.push(text);
+        if (spawnStats.last.length > 10) spawnStats.last.shift();
+        if (spawnStats.warnings <= SPAWN.warnLimit) console.warn(`UF_World: ${text}`);
+    }
+    /**
+     * The cell a unit asked for (x, y) is put on: (x, y) when World.cellFree accepts it, else the nearest free cell
+     * within `radius` (6 by default), widening to SPAWN.maxRadius (24). With no free cell that far, the nearest cell
+     * that is at least walkable (World.walkable: tiles, water, objects) even if another unit stands there, with a
+     * warning; with none of those either, (x, y) itself, with a warning. Returns { x, y, how, dist }.
+     */
+    function seatCell(ax, ay, x, y, radius, name, ignoreId = 0) {
+        const W = World;
+        if (W.cellFree(ax, ay, x, y, ignoreId)) return { x, y, how: "asked", dist: 0 };
+        const r0 = Math.max(1, Math.min(SPAWN.maxRadius, radius > 0 ? radius | 0 : SPAWN.radius));
+        let c = W.nearestFreeCell(ax, ay, x, y, r0, ignoreId);
+        let how = "moved";
+        if (!c && r0 < SPAWN.maxRadius) {
+            c = W.nearestFreeCell(ax, ay, x, y, SPAWN.maxRadius, ignoreId);
+            how = "widened";
+        }
+        if (!c) {
+            // Nothing free within 24 cells: the nearest walkable cell, sharing it with a unit rather than standing in a
+            // tree, a wall or water.
+            let best = null, bestD = Infinity;
+            for (let dy = -SPAWN.maxRadius; dy <= SPAWN.maxRadius; dy++) {
+                for (let dx = -SPAWN.maxRadius; dx <= SPAWN.maxRadius; dx++) {
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD && W.walkable(ax, ay, x + dx, y + dy)) { best = { x: x + dx, y: y + dy }; bestD = d; }
+                }
+            }
+            if (best) {
+                const other = W.units().find(o => o.id !== ignoreId && o.area.x === ax && o.area.y === ay && o.x === best.x && o.y === best.y);
+                spawnWarn(`no free cell within ${SPAWN.maxRadius} of (${x},${y}) in area (${ax},${ay}) for "${name}": placed on walkable (${best.x},${best.y})${other ? ` where "${other.name}" (unit ${other.id}) stands` : ""}`);
+                c = best;
+                how = "shared";
+            } else {
+                spawnWarn(`no walkable cell within ${SPAWN.maxRadius} of (${x},${y}) in area (${ax},${ay}) for "${name}": left on the blocked cell it asked for`);
+                return { x, y, how: "stuck", dist: 0 };
+            }
+        }
+        return { x: c.x, y: c.y, how, dist: Math.max(Math.abs(c.x - x), Math.abs(c.y - y)) };
+    }
+    World.spawnCellFor = (ax, ay, x, y, radius = SPAWN.radius, name = "a unit") => seatCell(ax, ay, x | 0, y | 0, radius, name);
+    /** Counts since the world was created (or loaded): units added, how they were seated, object refusals, regrowth waits. */
+    World.spawnStats = () => JSON.parse(JSON.stringify(spawnStats));
+
+    // An object type that stops units (UF_Objects: not passable; a bridge never blocks).
+    function typeBlocks(type) {
+        const f = typeFlags()[type] | 0;
+        return (f & T_BLOCK) !== 0 && (f & T_BRIDGE) === 0;
+    }
+    // The first unit standing on a cell that doesn't pass through everything, or null.
+    function standerAt(ax, ay, x, y) {
+        const units = World.state ? World.state.units : null;
+        if (!units) return null;
+        for (const id in units) {
+            const u = units[id];
+            if (u.x === x && u.y === y && u.area.x === ax && u.area.y === ay && !(u.data && u.data.through)) return u;
+        }
+        return null;
+    }
+    World.standerAt = (ax, ay, x, y) => standerAt(ax, ay, x, y);
+
+    // Regrowth waits while a unit stands on the cell: every due entry of UF.Objects' regrow list whose new type blocks
+    // and whose cell holds a unit is put off by an hour, just before UF_Objects processes the list (on time:hour, and
+    // around UF.Objects.processRegrow). World.setObject would refuse it anyway; this keeps the entry instead of losing it.
+    function holdOccupiedRegrowth() {
+        const O = window.UF && UF.Objects;
+        if (!World.state || !O || !O.regrowList || !O.hourNow || (guardOff && guardOff.objects)) return 0;
+        const list = O.regrowList();
+        if (!list.length) return 0;
+        // Without UF_Core's clock UF_Objects counts hours itself and adds this hour just after this runs.
+        const now = O.hourNow() + (window.$ufTime ? 0 : 1);
+        let held = 0;
+        for (const e of list) {
+            if (!(e.due <= now) || !e.area || !typeBlocks(e.to)) continue;
+            if ((World.getObject(e.area.x, e.area.y, e.x, e.y) | 0) !== e.from) continue;
+            if (!standerAt(e.area.x, e.area.y, e.x, e.y)) continue;
+            e.due = now + 1;
+            held++;
+        }
+        spawnStats.regrowWaits += held;
+        return held;
+    }
+    World.holdOccupiedRegrowth = holdOccupiedRegrowth;
+    // Registered at load: UF_World loads before UF_Objects, so this runs before its regrowth on every time:hour.
+    if (window.UF.Events && UF.Events.on) UF.Events.on("time:hour", holdOccupiedRegrowth);
+    function wrapRegrowth() {
+        const O = window.UF && UF.Objects;
+        if (!O || typeof O.processRegrow !== "function" || O.processRegrow._ufHeldForUnits) return;
+        const _processRegrow = O.processRegrow;
+        O.processRegrow = function() {
+            holdOccupiedRegrowth();
+            return _processRegrow.apply(this, arguments);
+        };
+        O.processRegrow._ufHeldForUnits = true;
+        // Keep the hold first among time:hour listeners, whatever the plugin order.
+        const L = window.UF.Events && UF.Events._listeners && UF.Events._listeners["time:hour"];
+        const i = L ? L.indexOf(holdOccupiedRegrowth) : -1;
+        if (i > 0) {
+            L.splice(i, 1);
+            L.unshift(holdOccupiedRegrowth);
+        }
+    }
+
     /**
      * Add a unit. spec: { name, image: { characterName, characterIndex }, area: { x, y }, x, y, dir, data,
-     * snapToFree: true | number } — snapToFree moves the unit to the nearest free cell (radius 6, or the number given).
+     * snapToFree: true | number, exact: true }.
+     * The unit appears only on a cell it can stand on (World.cellFree: no tree, wall, boulder, shut door, water or other
+     * unit): the cell asked for when it's free, else the nearest free one (radius snapToFree when it's a number, else
+     * 6, widening to 24). See seatCell for the last resorts. Not moved: units with data.through (fliers pass through
+     * everything) and exact: true (test fixtures that must control the cell; that cell must be one the unit can stand
+     * on, and a warning names it when it isn't).
      */
     World.addUnit = function(spec) {
         const st = this.state;
         const id = st.nextUnitId++;
         const image = spec.image || {};
+        const data = spec.data || {};
+        const name = spec.name || `TEST_unit_${id}`;
         let sx = spec.x | 0, sy = spec.y | 0;
-        if (spec.snapToFree) {
-            const free = this.nearestFreeCell(spec.area.x, spec.area.y, sx, sy, typeof spec.snapToFree === "number" ? spec.snapToFree : 6);
-            if (free) { sx = free.x; sy = free.y; }
+        spawnStats.added++;
+        if (data.through) spawnStats.through++;
+        else if (spec.exact === true && !(guardOff && guardOff.exact)) {
+            spawnStats.exact++;
+            if (seatLater === null && !this.cellFree(spec.area.x, spec.area.y, sx, sy)) spawnWarn(`"${name}" placed with exact: true on (${sx},${sy}) in area (${spec.area.x},${spec.area.y}), a cell it can't stand on`);
+        } else if (seatLater !== null) {
+            seatLater.push(id);
+        } else if (!(guardOff && guardOff.units)) {
+            const c = seatCell(spec.area.x, spec.area.y, sx, sy, typeof spec.snapToFree === "number" ? spec.snapToFree : SPAWN.radius, name);
+            spawnStats[c.how]++;
+            if (c.dist > spawnStats.maxMove) spawnStats.maxMove = c.dist;
+            sx = c.x;
+            sy = c.y;
         }
         const u = {
             id,
-            name: spec.name || `TEST_unit_${id}`,
+            name,
             image: { characterName: image.characterName || "", characterIndex: image.characterIndex || 0 },
             area: { x: spec.area.x, y: spec.area.y },
             x: sx,
@@ -617,7 +825,7 @@
             dir: spec.dir || 2,
             goal: null,
             stuckFrames: 0,
-            data: spec.data || {}
+            data
         };
         st.units[id] = u;
         if (this.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
@@ -632,21 +840,28 @@
         const u = this.unit(id);
         if (!u) return false;
         despawnUnitEvent(u);
+        forgetPath(id);
         delete this.state.units[id];
         emit("world:unitRemoved", u);
         return true;
     };
-    /** Send a unit toward { area: { x, y }, x, y }. It walks there across areas, on or off screen. */
+    /**
+     * Send a unit toward { area: { x, y }, x, y }. It walks there across areas, on or off screen. On screen it follows
+     * a planned path; a goal cell it can't stand on (a tree, a wall site) ends at its nearest reachable open neighbour.
+     */
     World.sendUnit = function(id, goal) {
         const u = this.unit(id);
         if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y)) return false;
+        const same = !!u.goal && sameArea(u.goal.area, goal.area) && u.goal.x === (goal.x | 0) && u.goal.y === (goal.y | 0);
         u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0 };
         u.stuckFrames = 0;
+        if (!same) pathCache.delete(id);
         return true;
     };
     World.stopUnit = id => {
         const u = World.unit(id);
         if (u) u.goal = null;
+        pathCache.delete(id);
     };
     World.eventIdOf = id => EVENT_BASE + id;
     World.isDisplayed = u => sameArea(u.area, World.currentArea());
@@ -689,11 +904,13 @@
     function arrive(u) {
         u.goal = null;
         u.stuckFrames = 0;
+        pathCache.delete(u.id);
         emit("world:unitArrived", u);
     }
 
     function moveUnitToArea(u, ax, ay, x, y) {
         const from = { x: u.area.x, y: u.area.y };
+        pathCache.delete(u.id);
         if (World.isDisplayed(u)) despawnUnitEvent(u);
         u.area = { x: ax, y: ay };
         u.x = x;
@@ -719,11 +936,12 @@
         if (u.goal && goalReached(u)) arrive(u);
     }
 
-    // On screen: the unit's event walks with RMMZ movement and pathfinding; at an area edge it steps into the next area.
+    // On screen: the unit's event walks its planned path (stepAlongPath) with RMMZ movement; at an area edge it steps
+    // into the next area. Units that pass through everything (fliers), 8-way movement and paths switched off use the
+    // direct step below.
     function stepOnscreen(u, ev) {
         if (ev.isMoving()) return;
         if (goalReached(u)) return arrive(u);
-        const size = World.state.size;
         const g = goalDelta(u);
         const w = wrapStep(u, g.dx, g.dy);
         if (w.crossed) {
@@ -732,11 +950,14 @@
             moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
             return;
         }
-        let tx = u.goal.x, ty = u.goal.y;
-        if (u.goal.area.x !== u.area.x || u.goal.area.y !== u.area.y) {
-            tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
-            ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
-        }
+        if (PATHS.enabled && fourWay() && !ev.isThrough()) return stepAlongPath(u, ev, false);
+        stepDirect(u, ev, g);
+    }
+
+    // The step used before paths (2026-09-18): RMMZ's findDirectionTo toward the goal; after STUCK_LIMIT frames
+    // without a step the goal is dropped and world:unitBlocked is emitted.
+    function stepDirect(u, ev, g) {
+        const { tx, ty } = localTarget(u);
         const h = g.dx > 0 ? 6 : 4, v = g.dy > 0 ? 2 : 8;
         let tried = false;
         if (g.dx !== 0 && g.dy !== 0 && tx !== ev.x && ty !== ev.y && ev.canPassDiagonally(ev.x, ev.y, h, v)) {
@@ -756,15 +977,15 @@
             // tree faces where it walks, not the far goal (user rule 2026-09-18).
             u.stuckFrames = 0;
         } else if (++u.stuckFrames > STUCK_LIMIT) {
-            u.goal = null;
-            u.stuckFrames = 0;
-            emit("world:unitBlocked", u);
+            blockUnit(u, "stuck");
         }
     }
 
     World.update = function() {
         if (!this.state) return;
         this._frame++;
+        planBudget = PATHS.plansPerUpdate;
+        if (planQueue.length) servePlanQueue();
         const current = this.currentArea();
         const offscreenTick = this._frame % CONFIG.unitStepFrames === 0;
         for (const u of this.units()) {
@@ -780,6 +1001,612 @@
             }
         }
     };
+
+    //-------------------------------------------------------------------------
+    // Paths (user 2026-09-19: "Paths should not go through walls")
+    //
+    // A* over an area's whole grid, 4-way, binary heap, typed arrays allocated once and stamped per search.
+    // Passability is the on-screen stepping rule, per cell and per direction: the tiles' passage flags (RMMZ
+    // checkPassage: top layer first, [*] tiles skipped), no water, no blocking object (the catalog's `passable`
+    // flag, as UF_Objects blocks on screen; a door is open to the units UF_Doors lets through; a bridge is walkable
+    // whatever its water says, as UF_Roads makes it on screen). Other units are ignored when planning.
+    // A region map (cells joined by passable steps, doors open) answers "no path" without searching.
+    // Plans are runtime only: never saved; a loaded game plans again.
+
+    const PATHS = {
+        enabled: true,
+        maxNodes: 12000,     // cells expanded before a search gives up (then: a partial plan toward the goal)
+        plansPerUpdate: 4,   // new plans per map update; the rest wait in a queue, oldest first
+        waitFrames: 30,      // frames a unit waits for another unit in its way before it walks round it
+        maxStepFails: 3,     // steps the map refuses in a row (planner and map disagree) before the unit gives up
+        maxPartialLegs: 8,   // partial plans in a row toward one goal before the unit gives up
+        progressFrames: 600  // map updates without the path left getting shorter (walking round units that never move
+                             // aside, back and forth between two blocked gaps) before the unit gives up
+    };
+    const WATER_BIT = 16;
+    const BIT_DOWN = 1, BIT_LEFT = 2, BIT_RIGHT = 4, BIT_UP = 8; // RMMZ passage bits of directions 2, 4, 6, 8
+    const T_BLOCK = 1, T_DOOR = 2, T_BRIDGE = 4;                 // object type flags
+    const HEAP_TIE = 131072;                                     // heap key f * HEAP_TIE - g: on equal f, deeper first
+    const grids = new WeakMap();   // a built map ($dataMap or a peek-cache build) -> its walk grid
+    let typeTable = null;          // { list, doors, roads, flags: Uint8Array by object type number }
+    let typeEpoch = 0;             // bumped when the type table changes: every grid recomputes its cells
+    const pathCache = new Map();   // unit id -> { key, cells: Int32Array, i, end, partial, legs, wait, fails, avoid, stale }
+    const planQueue = [];          // unit ids waiting for a plan, oldest first
+    const planQueued = new Set();
+    let planBudget = PATHS.plansPerUpdate;
+    let pathStats = newPathStats();
+
+    function newPathStats() {
+        return {
+            plans: 0, found: 0, partial: 0, none: 0, ms: 0, maxMs: 0, expanded: 0, maxExpanded: 0,
+            recentMs: [], recentExpanded: [], queuedTotal: 0, queuePeak: 0, replans: 0, detours: 0, waitFrames: 0,
+            blocked: {}, regionBuilds: 0, regionMs: 0, gridBuilds: 0, gridMs: 0
+        };
+    }
+    function clearPaths(resetStats) {
+        pathCache.clear();
+        planQueue.length = 0;
+        planQueued.clear();
+        if (resetStats) pathStats = newPathStats();
+    }
+    function forgetPath(id) {
+        pathCache.delete(id);
+        planQueued.delete(id);
+    }
+
+    // Object type flags from UF_Objects' list (T_BLOCK = not passable), UF_Doors (T_DOOR) and UF_Roads (T_BRIDGE).
+    function typeFlags() {
+        const O = window.UF && UF.Objects, D = (window.UF && UF.Doors) || null, R = (window.UF && UF.Roads) || null;
+        const list = O && O.types ? O.types() : null;
+        if (typeTable && typeTable.list === list && typeTable.doors === D && typeTable.roads === R) return typeTable.flags;
+        const flags = new Uint8Array(65536);
+        const bridge = R && R.bridgeTypeId ? R.bridgeTypeId() : 0;
+        if (list) {
+            for (const t of list) {
+                let f = t.passable === true ? 0 : T_BLOCK;
+                if (D && D.isDoorType && D.isDoorType(t)) f |= T_DOOR;
+                if (bridge && t.typeId === bridge) f |= T_BRIDGE;
+                flags[t.typeId] = f;
+            }
+        }
+        typeTable = { list, doors: D, roads: R, flags };
+        typeEpoch++;
+        return flags;
+    }
+
+    // Passage bits of a cell from its tiles (bit set = RMMZ checkPassage passes that direction), plus WATER_BIT.
+    function tileBits(data, cells, i, flags) {
+        let bits = 0;
+        for (let b = 1; b <= 8; b <<= 1) {
+            for (let layer = 3; layer >= 0; layer--) {
+                const f = flags[data[layer * cells + i]] | 0;
+                if (f & 0x10) continue; // [*] no effect on passage
+                if ((f & b) === 0) bits |= b;
+                break;                  // the first other tile decides
+            }
+        }
+        if (Tilemap.isWaterTile(data[i])) bits |= WATER_BIT;
+        return bits;
+    }
+    // Directions a unit may leave and enter the cell by (0 = nobody stands here): tiles, water and objects together.
+    function effOf(g, tf, i) {
+        const f = tf[g.objects[i]];
+        if (f & T_BRIDGE) return 15;
+        if ((f & T_BLOCK) && !(f & T_DOOR)) return 0;
+        const p = g.pass[i];
+        return (p & WATER_BIT) ? 0 : (p & 15);
+    }
+
+    // The built map and tileset flags of an area: the map on screen, or the peek cache's build.
+    function areaMapOf(ax, ay) {
+        if (sameArea({ x: ax, y: ay }, World.currentArea()) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
+            return { map: $dataMap, flags: $gameMap.tilesetFlags() };
+        }
+        const map = World.peekArea(ax, ay);
+        const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+        return { map, flags: ts ? ts.flags : [] };
+    }
+
+    function gridOf(map, flags) {
+        const tf = typeFlags();
+        let g = grids.get(map);
+        if (g && g.flags === flags && g.objects === map.ufObjects) {
+            if (g.epoch !== typeEpoch) {
+                for (let i = 0; i < g.cells; i++) g.eff[i] = effOf(g, tf, i);
+                g.epoch = typeEpoch;
+                g.dirty = true;
+            }
+            return g;
+        }
+        const t0 = performance.now();
+        const size = map.width, cells = size * map.height;
+        g = { size, cells, flags, objects: map.ufObjects, pass: new Uint8Array(cells), eff: new Uint8Array(cells), region: null, regions: 0, dirty: true, epoch: typeEpoch };
+        for (let i = 0; i < cells; i++) g.pass[i] = tileBits(map.data, cells, i, flags);
+        for (let i = 0; i < cells; i++) g.eff[i] = effOf(g, tf, i);
+        grids.set(map, g);
+        pathStats.gridBuilds++;
+        pathStats.gridMs += performance.now() - t0;
+        return g;
+    }
+
+    // setTile / setObject changed a cell of a built map: update its walk grid (if it has one) and mark regions stale.
+    function pathCellChanged(map, x, y, tileChanged) {
+        const g = map ? grids.get(map) : null;
+        if (!g || x < 0 || y < 0 || x >= g.size || y >= g.size) return;
+        const i = y * g.size + x;
+        if (tileChanged) g.pass[i] = tileBits(map.data, g.cells, i, g.flags);
+        const e = effOf(g, typeFlags(), i);
+        if (e !== g.eff[i]) {
+            g.eff[i] = e;
+            g.dirty = true;
+        }
+    }
+
+    // Region labels (flood fill over passable steps, doors open), rebuilt only after a change.
+    let regionStack = null;
+    function regionsOf(g) {
+        if (!g.dirty && g.region) return g.region;
+        const t0 = performance.now();
+        const size = g.size, n = g.cells, eff = g.eff;
+        const region = g.region || new Int32Array(n);
+        region.fill(0);
+        if (!regionStack || regionStack.length < n) regionStack = new Int32Array(n);
+        const stack = regionStack;
+        let label = 0;
+        for (let s = 0; s < n; s++) {
+            if (region[s] !== 0 || eff[s] === 0) continue;
+            region[s] = ++label;
+            let top = 0;
+            stack[top++] = s;
+            while (top > 0) {
+                const i = stack[--top], e = eff[i], x = i % size;
+                let j = i + size;
+                if ((e & BIT_DOWN) && j < n && region[j] === 0 && (eff[j] & BIT_UP)) { region[j] = label; stack[top++] = j; }
+                j = i - size;
+                if ((e & BIT_UP) && j >= 0 && region[j] === 0 && (eff[j] & BIT_DOWN)) { region[j] = label; stack[top++] = j; }
+                j = i - 1;
+                if ((e & BIT_LEFT) && x > 0 && region[j] === 0 && (eff[j] & BIT_RIGHT)) { region[j] = label; stack[top++] = j; }
+                j = i + 1;
+                if ((e & BIT_RIGHT) && x < size - 1 && region[j] === 0 && (eff[j] & BIT_LEFT)) { region[j] = label; stack[top++] = j; }
+            }
+        }
+        g.region = region;
+        g.regions = label;
+        g.dirty = false;
+        pathStats.regionBuilds++;
+        pathStats.regionMs += performance.now() - t0;
+        return region;
+    }
+
+    // Search arrays, allocated once per grid size; a generation stamp marks what belongs to the current search.
+    const AS = { n: 0, gen: 0 };
+    function searchArrays(n) {
+        if (AS.n !== n) {
+            AS.n = n;
+            AS.gen = 0;
+            AS.g = new Int32Array(n);
+            AS.parent = new Int32Array(n);
+            AS.seen = new Uint32Array(n);
+            AS.closed = new Uint32Array(n);
+            AS.goal = new Uint32Array(n);
+            AS.heapCell = new Int32Array(4 * n + 8);
+            AS.heapKey = new Float64Array(4 * n + 8);
+            AS.trace = new Int32Array(n);
+        }
+        if (++AS.gen > 0xfffffff0) {
+            AS.seen.fill(0);
+            AS.closed.fill(0);
+            AS.goal.fill(0);
+            AS.gen = 1;
+        }
+        return AS.gen;
+    }
+
+    function recordPlan(res) {
+        const s = pathStats;
+        s.plans++;
+        if (!res.cells) s.none++;
+        else if (res.partial) s.partial++;
+        else s.found++;
+        s.ms += res.ms;
+        if (res.ms > s.maxMs) {
+            s.maxMs = res.ms;
+            s.maxPlan = { ms: res.ms, expanded: res.expanded, reason: res.reason, regionMs: res.regionMs, length: res.cells ? res.cells.length : -1 };
+        }
+        s.expanded += res.expanded;
+        if (res.expanded > s.maxExpanded) s.maxExpanded = res.expanded;
+        s.recentMs.push(res.ms);
+        s.recentExpanded.push(res.expanded);
+        if (s.recentMs.length > 512) {
+            s.recentMs.shift();
+            s.recentExpanded.shift();
+        }
+    }
+
+    /**
+     * Plan a path in one area. opts: { unit (record or id: doors), maxNodes, avoid (cell index to walk round),
+     * allowPartial, resolveBlocked (default true), record }. Returns { cells: Int32Array (cell indices after the
+     * start, ending at `end`) | null, end, partial, expanded, ms, reason }.
+     */
+    function planPath(area, sx, sy, gx, gy, opts) {
+        const t0 = performance.now();
+        const res = { cells: null, end: -1, partial: false, expanded: 0, ms: 0, regionMs: 0, reason: "" };
+        const done = reason => {
+            res.reason = reason;
+            res.ms = performance.now() - t0;
+            World.lastPath = { reason, ms: res.ms, expanded: res.expanded, length: res.cells ? res.cells.length : -1, partial: res.partial };
+            if (opts.record) recordPlan(res);
+            return res;
+        };
+        const st = World.state;
+        if (!st || !area || !World.inWorld(area.x, area.y)) return done("not in the world");
+        const size = st.size, n = size * size;
+        if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return done("outside the area");
+        const { map, flags } = areaMapOf(area.x, area.y);
+        const g = gridOf(map, flags);
+        const eff = g.eff, tf = typeFlags(), D = typeTable.doors;
+        const unit = opts.unit ? (typeof opts.unit === "object" ? opts.unit : World.unit(opts.unit)) : null;
+        const doorShut = i => !!D && (tf[g.objects[i]] & T_DOOR) !== 0 &&
+            !(unit && D.canUnitPass(unit, D.at(area, i % size, (i - (i % size)) / size)));
+        const enterable = i => eff[i] !== 0 && !doorShut(i);
+        const s = sy * size + sx, goalCell = gy * size + gx;
+        const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
+
+        // The goal set: the goal cell, or (a tree, a wall site, water) its open 4-neighbours.
+        let goals, hOff = 0;
+        if (enterable(goalCell)) goals = [goalCell];
+        else {
+            if (opts.resolveBlocked === false) return done("goal blocked");
+            hOff = 1;
+            goals = [];
+            if (gy + 1 < size) goals.push(goalCell + size);
+            if (gy > 0) goals.push(goalCell - size);
+            if (gx > 0) goals.push(goalCell - 1);
+            if (gx + 1 < size) goals.push(goalCell + 1);
+            goals = goals.filter(enterable);
+        }
+        goals = goals.filter(c => c !== avoid);
+        if (!goals.length) return done("goal walled in");
+        if (goals.includes(s)) {
+            res.cells = new Int32Array(0);
+            res.end = s;
+            return done("here");
+        }
+        if (eff[s] === 0 || doorShut(s)) return done("start walled in");
+        const r0 = performance.now(), wasDirty = g.dirty || !g.region;
+        const region = regionsOf(g);
+        if (wasDirty) res.regionMs = performance.now() - r0;
+        goals = goals.filter(c => region[c] === region[s]);
+        if (!goals.length) return done("no path");
+
+        const gen = searchArrays(n);
+        const G = AS.g, P = AS.parent, seen = AS.seen, closed = AS.closed, goalMark = AS.goal, hc = AS.heapCell, hk = AS.heapKey;
+        for (const c of goals) goalMark[c] = gen;
+        const hOf = i => {
+            const x = i % size, d = Math.abs(x - gx) + Math.abs((i - x) / size - gy) - hOff;
+            return d > 0 ? d : 0;
+        };
+        let hn = 0;
+        const push = (c, key) => {
+            let k = hn++;
+            while (k > 0) {
+                const p = (k - 1) >> 1;
+                if (hk[p] <= key) break;
+                hk[k] = hk[p];
+                hc[k] = hc[p];
+                k = p;
+            }
+            hk[k] = key;
+            hc[k] = c;
+        };
+        const pop = () => {
+            const top = hc[0], last = --hn;
+            if (last > 0) {
+                const key = hk[last], c = hc[last];
+                let k = 0;
+                for (;;) {
+                    let ch = 2 * k + 1;
+                    if (ch >= last) break;
+                    if (ch + 1 < last && hk[ch + 1] < hk[ch]) ch++;
+                    if (hk[ch] >= key) break;
+                    hk[k] = hk[ch];
+                    hc[k] = hc[ch];
+                    k = ch;
+                }
+                hk[k] = key;
+                hc[k] = c;
+            }
+            return top;
+        };
+        const hasDoors = !!D;
+        let from = s, gi = 0;
+        const relax = (j, bitIn) => {
+            if (closed[j] === gen || (eff[j] & bitIn) === 0 || j === avoid || (hasDoors && doorShut(j))) return;
+            if (seen[j] === gen && G[j] <= gi) return;
+            seen[j] = gen;
+            G[j] = gi;
+            P[j] = from;
+            push(j, (gi + hOf(j)) * HEAP_TIE - gi);
+        };
+        G[s] = 0;
+        P[s] = -1;
+        seen[s] = gen;
+        push(s, hOf(s) * HEAP_TIE);
+        const maxNodes = opts.maxNodes > 0 ? opts.maxNodes | 0 : PATHS.maxNodes;
+        const heapMax = hc.length - 4;
+        let found = -1, best = s, bestH = hOf(s), capped = false, expanded = 0;
+        while (hn > 0) {
+            const i = pop();
+            if (closed[i] === gen) continue;
+            closed[i] = gen;
+            if (goalMark[i] === gen) {
+                found = i;
+                break;
+            }
+            if (expanded >= maxNodes || hn >= heapMax) {
+                capped = true;
+                break;
+            }
+            expanded++;
+            const hi = hOf(i);
+            if (hi < bestH || (hi === bestH && G[i] < G[best])) {
+                best = i;
+                bestH = hi;
+            }
+            const e = eff[i], x = i % size;
+            from = i;
+            gi = G[i] + 1;
+            if ((e & BIT_DOWN) && i + size < n) relax(i + size, BIT_UP);
+            if ((e & BIT_UP) && i >= size) relax(i - size, BIT_DOWN);
+            if ((e & BIT_LEFT) && x > 0) relax(i - 1, BIT_RIGHT);
+            if ((e & BIT_RIGHT) && x < size - 1) relax(i + 1, BIT_LEFT);
+        }
+        res.expanded = expanded;
+        let end = found;
+        if (end < 0) {
+            if (!capped) return done("no path"); // same region, but a door shut to this unit or the cell to walk round closes it
+            // A partial plan must bring the unit at least 2 cells closer, or it would step, search again and get nowhere.
+            if (!opts.allowPartial || hOf(s) - bestH < 2) return done("too far to plan");
+            end = best;
+            res.partial = true;
+        }
+        let len = 0;
+        for (let c = end; c !== s; c = P[c]) AS.trace[len++] = c;
+        const cells = new Int32Array(len);
+        for (let k = 0; k < len; k++) cells[k] = AS.trace[len - 1 - k];
+        res.cells = cells;
+        res.end = end;
+        return done(res.partial ? "partial" : "found");
+    }
+
+    // The cell the unit walks toward in its own area: the goal, or (goal in another area) the nearest edge cell.
+    function localTarget(u) {
+        const size = World.state.size;
+        let tx = u.goal.x, ty = u.goal.y;
+        if (u.goal.area.x !== u.area.x || u.goal.area.y !== u.area.y) {
+            tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
+            ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
+        }
+        return { tx, ty, key: `${u.area.x},${u.area.y}:${tx},${ty}` };
+    }
+
+    // Give up the goal at once and say why: world:unitBlocked(unit, reason, goal given up).
+    function blockUnit(u, reason) {
+        const goal = u.goal;
+        u.goal = null;
+        u.stuckFrames = 0;
+        pathCache.delete(u.id);
+        pathStats.blocked[reason] = (pathStats.blocked[reason] || 0) + 1;
+        emit("world:unitBlocked", u, reason, goal);
+    }
+
+    function enqueuePlan(id) {
+        if (planQueued.has(id)) return;
+        planQueue.push(id);
+        planQueued.add(id);
+        pathStats.queuedTotal++;
+        if (planQueue.length > pathStats.queuePeak) pathStats.queuePeak = planQueue.length;
+    }
+
+    // Plan (or re-plan) a unit's path from its event's cell. Uses one of this update's plans.
+    function planFor(u, ev) {
+        const tgt = localTarget(u);
+        const old = pathCache.get(u.id);
+        const same = !!old && old.key === tgt.key;
+        const avoid = same ? old.avoid : -1;
+        planBudget--;
+        const res = planPath(u.area, ev.x, ev.y, tgt.tx, tgt.ty, { unit: u, avoid, allowPartial: true, record: true });
+        if (!res.cells) {
+            blockUnit(u, avoid >= 0 && res.reason === "no path" ? "no way past" : res.reason);
+            return null;
+        }
+        const legs = same && old.partial ? old.legs + 1 : 0;
+        if (res.partial && legs >= PATHS.maxPartialLegs) {
+            blockUnit(u, "too far to plan");
+            return null;
+        }
+        // Progress (the fewest cells left so far, and when) carries over re-plans toward the same goal; a new partial leg
+        // starts afresh.
+        const keep = same && !old.partial;
+        const p = {
+            key: tgt.key, cells: res.cells, i: 0, end: res.end, partial: res.partial, legs, wait: 0, fails: same ? old.fails : 0, avoid: -1, stale: false,
+            bestLeft: keep ? old.bestLeft : Infinity, bestAt: keep ? old.bestAt : World._frame
+        };
+        pathCache.set(u.id, p);
+        return p;
+    }
+
+    function servePlanQueue() {
+        while (planBudget > 0 && planQueue.length) {
+            const id = planQueue.shift();
+            planQueued.delete(id);
+            const u = World.unit(id);
+            if (!u || !u.goal || !World.isDisplayed(u) || !window.$gameMap) continue;
+            const ev = $gameMap._events[EVENT_BASE + u.id];
+            if (!ev || ev.isThrough()) continue;
+            planFor(u, ev);
+        }
+    }
+
+    const dirTo = (x, y, nx, ny) => {
+        if (nx === x) return ny === y + 1 ? 2 : ny === y - 1 ? 8 : 0;
+        if (ny === y) return nx === x + 1 ? 6 : nx === x - 1 ? 4 : 0;
+        return 0;
+    };
+    const BIT_OUT = { 2: BIT_DOWN, 4: BIT_LEFT, 6: BIT_RIGHT, 8: BIT_UP };
+    const BIT_IN = { 2: BIT_UP, 4: BIT_RIGHT, 6: BIT_LEFT, 8: BIT_DOWN };
+
+    // Can the unit step from cell i to cell j (direction d) right now, by the grid (units aside)?
+    function stepOpen(u, i, j, d) {
+        const { map, flags } = areaMapOf(u.area.x, u.area.y);
+        const g = gridOf(map, flags);
+        if ((g.eff[i] & BIT_OUT[d]) === 0 || (g.eff[j] & BIT_IN[d]) === 0) return false;
+        const D = typeTable.doors;
+        if (D) {
+            const tf = typeTable.flags, size = g.size;
+            for (const c of [i, j]) {
+                if ((tf[g.objects[c]] & T_DOOR) && !D.canUnitPass(u, D.at(u.area, c % size, (c - (c % size)) / size))) return false;
+            }
+        }
+        return true;
+    }
+
+    // One step along the unit's plan: plan first if needed (or queue), wait for units in the way, re-plan when the
+    // world changed under the path, arrive at the end.
+    function stepAlongPath(u, ev, again) {
+        const tgt = localTarget(u);
+        let p = pathCache.get(u.id);
+        if (!p || p.stale || p.key !== tgt.key) {
+            if (planQueued.has(u.id)) return; // waiting its turn
+            if (planBudget <= 0) {
+                enqueuePlan(u.id);
+                return;
+            }
+            p = planFor(u, ev);
+            if (!p) return;
+        }
+        const size = World.state.size;
+        const here = ev.y * size + ev.x;
+        const left = p.cells.length - p.i;
+        if (left < p.bestLeft) {
+            p.bestLeft = left;
+            p.bestAt = World._frame;
+        } else if (World._frame - p.bestAt > PATHS.progressFrames) {
+            return blockUnit(u, "no way past");
+        }
+        if (p.i >= p.cells.length) {
+            if (!p.partial && here === p.end) return arrive(u); // a blocked goal ends at its nearest reachable open neighbour
+            p.stale = true; // the end of a partial plan: plan the next leg
+            if (!again) stepAlongPath(u, ev, true);
+            return;
+        }
+        const next = p.cells[p.i];
+        const nx = next % size, ny = (next - nx) / size;
+        const d = dirTo(ev.x, ev.y, nx, ny);
+        if (!d || !stepOpen(u, here, next, d)) {
+            // Moved off its path by something else, or the world changed under it (a wall went up): plan again.
+            p.stale = true;
+            pathStats.replans++;
+            if (!again) stepAlongPath(u, ev, true);
+            return;
+        }
+        if (ev.isCollidedWithCharacters(nx, ny)) {
+            // Someone stands in the way: wait for them, then walk round them (or give up when they stand on the goal).
+            ev.setDirection(d);
+            pathStats.waitFrames++;
+            if (++p.wait <= PATHS.waitFrames) return;
+            p.wait = 0;
+            if (!p.partial && p.i === p.cells.length - 1) return blockUnit(u, "goal occupied");
+            p.avoid = next;
+            p.stale = true;
+            pathStats.detours++;
+            return;
+        }
+        p.wait = 0;
+        ev.moveStraight(d);
+        if (ev.isMovementSucceeded()) {
+            p.i++;
+            p.fails = 0;
+            u.stuckFrames = 0;
+        } else if (++p.fails >= PATHS.maxStepFails) {
+            blockUnit(u, "step refused");
+        } else {
+            p.stale = true;
+            pathStats.replans++;
+        }
+    }
+
+    /**
+     * A path in one area from (sx, sy) to (gx, gy): [{x, y}, ...] after the start, ending at the goal, or null.
+     * A goal cell nobody can stand on ends at its nearest reachable open 4-neighbour. [] when already there.
+     * opts: { unit (doors let their faction through), maxNodes (default 12000), avoid: {x, y} (a cell to walk
+     * round), allowPartial (capped searches return the part toward the goal, marked path.partial) }.
+     * World.lastPath says what the search did: { reason, ms, expanded, length, partial }.
+     */
+    World.findPath = function(area, sx, sy, gx, gy, opts = {}) {
+        const size = this.state ? this.state.size : 0;
+        const o = Object.assign({}, opts);
+        if (opts.avoid && typeof opts.avoid === "object") o.avoid = (opts.avoid.y | 0) * size + (opts.avoid.x | 0);
+        const res = planPath(area, sx, sy, gx, gy, o);
+        if (!res.cells) return null;
+        const out = Array.from(res.cells, c => ({ x: c % size, y: (c - (c % size)) / size }));
+        if (res.partial) out.partial = true;
+        return out;
+    };
+    /**
+     * Whether a unit could stand on the cell, by the same rule as paths (tiles, water, objects; doors shut unless
+     * opts.unit may pass). opts.ground: the ground alone (tiles and water) lets units walk every way, objects ignored.
+     */
+    World.walkable = function(ax, ay, x, y, opts = {}) {
+        const st = this.state;
+        if (!st || !this.inWorld(ax, ay) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
+        const { map, flags } = areaMapOf(ax, ay);
+        const g = gridOf(map, flags);
+        const i = y * g.size + x;
+        if (opts.ground) return (g.pass[i] & WATER_BIT) === 0 && (g.pass[i] & 15) === 15;
+        if (g.eff[i] === 0) return false;
+        const D = typeTable.doors;
+        if (D && (typeTable.flags[g.objects[i]] & T_DOOR)) return !!opts.unit && D.canUnitPass(opts.unit, D.at({ x: ax, y: ay }, x, y));
+        return true;
+    };
+    /** Whether (gx, gy) can be walked to from (sx, sy) in one area (region map: doors open, units ignored). */
+    World.reachable = function(area, sx, sy, gx, gy) {
+        const st = this.state;
+        if (!st || !area || !this.inWorld(area.x, area.y)) return false;
+        const size = st.size;
+        if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return false;
+        const { map, flags } = areaMapOf(area.x, area.y);
+        const g = gridOf(map, flags);
+        const region = regionsOf(g);
+        const s = sy * size + sx, t = gy * size + gx;
+        return g.eff[s] !== 0 && region[s] !== 0 && region[s] === region[t];
+    };
+    /** The cells still ahead on a unit's current plan ([{x, y}], the next step first), or null when it has none. */
+    World.pathOf = function(id) {
+        const p = pathCache.get(id);
+        if (!p || p.stale || !this.state) return null;
+        const size = this.state.size;
+        return Array.from(p.cells.subarray(p.i), c => ({ x: c % size, y: (c - (c % size)) / size }));
+    };
+    /** Planner numbers since the world was created: plans, ms (average, p95 of the last 512, max), cells expanded, queue, waits. */
+    World.pathStats = function() {
+        const s = pathStats;
+        const ms = s.recentMs.slice().sort((a, b) => a - b), ex = s.recentExpanded.slice().sort((a, b) => a - b);
+        const pick = (arr, q) => (arr.length ? arr[Math.min(arr.length - 1, Math.floor(arr.length * q))] : 0);
+        return {
+            plans: s.plans, found: s.found, partial: s.partial, none: s.none,
+            avgMs: s.plans ? s.ms / s.plans : 0, p95Ms: pick(ms, 0.95), maxMs: s.maxMs, maxPlan: s.maxPlan || null,
+            avgExpanded: s.plans ? s.expanded / s.plans : 0, medianExpanded: pick(ex, 0.5), maxExpanded: s.maxExpanded,
+            queuedTotal: s.queuedTotal, queuePeak: s.queuePeak, queueNow: planQueue.length,
+            replans: s.replans, detours: s.detours, waitFrames: s.waitFrames, blocked: Object.assign({}, s.blocked),
+            regionBuilds: s.regionBuilds, regionMsAvg: s.regionBuilds ? s.regionMs / s.regionBuilds : 0,
+            gridBuilds: s.gridBuilds, gridMsAvg: s.gridBuilds ? s.gridMs / s.gridBuilds : 0, cachedPlans: pathCache.size
+        };
+    };
+    World.resetPathStats = () => { pathStats = newPathStats(); };
+    /** Planner settings (read them; tests may change them): enabled, maxNodes, plansPerUpdate, waitFrames, maxStepFails, maxPartialLegs. */
+    World.pathConfig = PATHS;
+    World.lastPath = null;
 
     //-------------------------------------------------------------------------
     // The view (the RMMZ player is the view/cursor)
@@ -849,6 +1676,8 @@
         _DataManager_createGameObjects.call(this);
         World.state = null;
         buildCache.clear();
+        clearPaths(true);
+        spawnStats = newSpawnStats();
     };
 
     const _Game_Player_setupForNewGame = Game_Player.prototype.setupForNewGame;
@@ -886,7 +1715,22 @@
         _DataManager_extractSaveContents.call(this, contents);
         World.state = contents.ufWorld || null;
         if (World.state && !World.state.objectDiffs) World.state.objectDiffs = {};
+        spawnStats = newSpawnStats();
         buildCache.clear();
+        clearPaths(true); // plans are runtime only: a loaded game plans again
+    };
+
+    // The walk grid and region map of an area are built while its map loads, not on the first step (about 15-20 ms).
+    const _Game_Map_setup = Game_Map.prototype.setup;
+    Game_Map.prototype.setup = function(mapId) {
+        _Game_Map_setup.call(this, mapId);
+        if (World.state && World.isAreaMap(mapId) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
+            try {
+                regionsOf(gridOf($dataMap, this.tilesetFlags()));
+            } catch (e) {
+                console.error(e);
+            }
+        }
     };
 
     const _Game_Map_update = Game_Map.prototype.update;
@@ -901,8 +1745,727 @@
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() {
         _Scene_Boot_start.call(this);
+        wrapRegrowth();
         if (window.UF.Test && UF.Test.active) registerChecks();
     };
+
+    // Paths (2026-09-19): round a walled ring through its gap, a blocked goal cell, "no path" within 60 frames, a wall
+    // going up on the path mid-walk, the planner's budget, and 60 s of play without a walker stepping onto a blocking
+    // cell (with World.update's cost per map update over the same window).
+    async function pathChecks(t, W, area) {
+        const size = W.state.size;
+        const O = window.UF.Objects;
+        const wallType = O && O.typeId ? (O.typeId("wall_stone") || O.typeId("wall_wood")) : 0;
+        if (!O || !wallType || !window.UF.Events) {
+            t.check("path_setup", false, `UF.Objects ${!!O}, wall object type ${wallType}, UF.Events ${!!window.UF.Events}: the path checks need all three`);
+            return;
+        }
+        const cellOf = (x, y) => y * size + x;
+        const xyOf = c => ({ x: c % size, y: (c - (c % size)) / size });
+        const blocksHere = (x, y) => O.blocks(x, y) || (Tilemap.isWaterTile($gameMap.tileId(x, y, 0)) && !(window.UF.Roads && UF.Roads.bridgeAt && UF.Roads.bridgeAt(x, y)));
+        const kindOf = u => (u.data && u.data.kind ? u.data.kind + (u.data.species ? "/" + u.data.species : "") : "?");
+
+        // Watch every unit on screen from here on (at least 60 s): its steps, and steps by walkers (units without
+        // data.through) that end on a blocking cell (UF.Objects.blocks, or water that isn't a bridge). World.update is
+        // timed over the same window.
+        const watch = { steps: 0, jumps: 0, bad: [], updates: 0, ms: 0, maxMs: 0, units: new Set(), t0: performance.now(), testMs: 0 };
+        const last = new Map();
+        const realUpdate = W.update;
+        W.update = function() {
+            const t0 = performance.now(), test0 = watch.testMs;
+            realUpdate.call(this);
+            const ms = performance.now() - t0 - (watch.testMs - test0); // the checks' own flood fills (below) don't count
+            watch.updates++;
+            watch.ms += ms;
+            if (ms > watch.maxMs) watch.maxMs = ms;
+            for (const u of W.units()) {
+                const ev = W.eventOf(u.id);
+                if (!ev) continue;
+                const p = last.get(u.id);
+                if (p && (p.x !== ev.x || p.y !== ev.y)) {
+                    if (Math.abs(p.x - ev.x) + Math.abs(p.y - ev.y) === 1) {
+                        watch.steps++;
+                        watch.units.add(u.id);
+                        if (!(u.data && u.data.through) && blocksHere(ev.x, ev.y)) watch.bad.push(`${u.name} (${kindOf(u)}) ${p.x},${p.y} -> ${ev.x},${ev.y}`);
+                    } else watch.jumps++;
+                }
+                last.set(u.id, { x: ev.x, y: ev.y });
+            }
+        };
+        const stats0 = W.pathStats();
+        // "No path" must be true: the first 5 such give-ups (any unit) are re-tested at that moment with a flood fill
+        // over the map's own passability ($gameMap.isPassable out of the cell and into the next, no water unless a
+        // bridge), which knows nothing of the planner's grid or region map.
+        const mapStep = (x, y, d) => {
+            const x2 = x + (d === 6 ? 1 : d === 4 ? -1 : 0), y2 = y + (d === 2 ? 1 : d === 8 ? -1 : 0);
+            if (x2 < 0 || y2 < 0 || x2 >= size || y2 >= size) return -1;
+            if (!$gameMap.isPassable(x, y, d) || !$gameMap.isPassable(x2, y2, 10 - d)) return -1;
+            if (Tilemap.isWaterTile($gameMap.tileId(x2, y2, 0)) && !(window.UF.Roads && UF.Roads.bridgeAt && UF.Roads.bridgeAt(x2, y2))) return -1;
+            return cellOf(x2, y2);
+        };
+        const mapReach = (sx, sy, targets) => {
+            const seen = new Uint8Array(size * size), queue = new Int32Array(size * size);
+            let head = 0, tail = 0;
+            seen[cellOf(sx, sy)] = 1;
+            queue[tail++] = cellOf(sx, sy);
+            while (head < tail) {
+                const c = queue[head++];
+                if (targets.has(c)) return { reached: true, explored: tail };
+                const { x, y } = xyOf(c);
+                for (const d of [2, 4, 6, 8]) {
+                    const nb = mapStep(x, y, d);
+                    if (nb >= 0 && !seen[nb]) {
+                        seen[nb] = 1;
+                        queue[tail++] = nb;
+                    }
+                }
+            }
+            return { reached: false, explored: tail };
+        };
+        const truth = [];
+        const blockedLog = [];
+        const onBlocked = (u, reason, goal) => {
+            if (!u) return;
+            if (/^TEST_/.test(u.name)) blockedLog.push({ id: u.id, reason: reason || "?", at: `${u.x},${u.y}` });
+            if (reason !== "no path" || truth.length >= 5 || !goal || !sameArea(goal.area, area) || !sameArea(u.area, area)) return;
+            const t0 = performance.now();
+            const ev = W.eventOf(u.id);
+            const sx = ev ? ev.x : u.x, sy = ev ? ev.y : u.y, gc = cellOf(goal.x, goal.y);
+            // The goal itself when the map lets anyone step onto it, else its 4 neighbours (a tree, a wall site).
+            const around = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => ({ x: goal.x + dx, y: goal.y + dy })).filter(c => c.x >= 0 && c.y >= 0 && c.x < size && c.y < size);
+            const enterable = around.some(c => mapStep(c.x, c.y, c.x < goal.x ? 6 : c.x > goal.x ? 4 : c.y < goal.y ? 2 : 8) === gc);
+            const r = mapReach(sx, sy, new Set(enterable ? [gc] : around.map(c => cellOf(c.x, c.y))));
+            const ms = performance.now() - t0;
+            watch.testMs += ms;
+            truth.push({ name: u.name, kind: kindOf(u), from: `${sx},${sy}`, goal: `${goal.x},${goal.y}${enterable ? "" : " (blocked: its neighbours)"}`, reached: r.reached, explored: r.explored, ms });
+        };
+        UF.Events.on("world:unitBlocked", onBlocked);
+        const gaveUp = id => blockedLog.filter(b => b.id === id).map(b => b.reason).join(", ") || "never";
+        const finishWatch = () => {
+            W.update = realUpdate;
+            UF.Events.off("world:unitBlocked", onBlocked);
+        };
+
+        // A clear test site: 27x27 cells whose ground lets units walk every way, away from every unit. Objects on it
+        // are taken off for the test and put back afterwards.
+        const R = 13;
+        const ground = new Uint8Array(size * size);
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) ground[cellOf(x, y)] = W.walkable(area.x, area.y, x, y, { ground: true }) ? 1 : 0;
+        const here = W.units().filter(u => sameArea(u.area, area));
+        let site = null;
+        for (let cy = R + 6; cy < size - R - 6; cy += 3) {
+            for (let cx = R + 6; cx < size - R - 6; cx += 3) {
+                let ok = true, objects = 0;
+                for (let dy = -R; dy <= R && ok; dy++) {
+                    for (let dx = -R; dx <= R; dx++) {
+                        const c = cellOf(cx + dx, cy + dy);
+                        if (!ground[c]) { ok = false; break; }
+                        if ($dataMap.ufObjects[c]) objects++;
+                    }
+                }
+                if (!ok) continue;
+                let near = 99;
+                for (const u of here) near = Math.min(near, Math.max(Math.abs(u.x - cx), Math.abs(u.y - cy)));
+                if (near <= R + 2) continue;
+                const score = Math.min(near, 40) * 4 - objects;
+                if (!site || score > site.score) site = { cx, cy, score, objects, near };
+            }
+        }
+        if (!site) {
+            finishWatch();
+            t.check("path_setup", false, `no ${2 * R + 1}x${2 * R + 1} patch of walkable ground at least ${R + 3} cells from every unit in area (${area.x},${area.y})`);
+            return;
+        }
+        const { cx, cy } = site;
+        const saved = [];
+        for (let dy = -R; dy <= R; dy++) {
+            for (let dx = -R; dx <= R; dx++) {
+                const x = cx + dx, y = cy + dy, ty = W.getObject(area.x, area.y, x, y);
+                if (ty) {
+                    saved.push({ x, y, ty });
+                    W.setObject(area.x, area.y, x, y, 0);
+                }
+            }
+        }
+        const gap = { x: cx, y: cy - 4 };
+        const wallCells = new Set();
+        for (let dy = -4; dy <= 4; dy++) {
+            for (let dx = -4; dx <= 4; dx++) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) !== 4 || (cx + dx === gap.x && cy + dy === gap.y)) continue;
+                W.setObject(area.x, area.y, cx + dx, cy + dy, wallType);
+                wallCells.add(cellOf(cx + dx, cy + dy));
+            }
+        }
+        $gamePlayer.locate(cx, cy);
+        await t.waitFrames(5);
+
+        // 1. Inside the ring to the far side outside, 7 cells past the ring: out through the gap, round the ring, never
+        // onto a wall (33 steps; the old step, a 200-node search, pressed against the south wall here).
+        const pather = W.addUnit({ name: "TEST_pather", image: { characterName: "People1", characterIndex: 2 }, area, x: cx, y: cy + 2, dir: 8, data: { kind: "test" } });
+        await t.waitFrames(2);
+        const goalA = { x: cx, y: cy + 11 };
+        const trail = [];
+        let touches = 0, resends = 0, planLen = -1;
+        const arrivedA = () => !pather.goal && pather.x === goalA.x && pather.y === goalA.y;
+        const f0 = Graphics.frameCount; // measuring only
+        W.sendUnit(pather.id, { area, x: goalA.x, y: goalA.y });
+        await t.waitUntil(() => {
+            const ev = W.eventOf(pather.id);
+            if (ev) {
+                const c = cellOf(ev.x, ev.y);
+                if (trail[trail.length - 1] !== c) {
+                    trail.push(c);
+                    if (wallCells.has(c)) touches++;
+                }
+            }
+            if (planLen < 0) {
+                const ahead = W.pathOf(pather.id);
+                if (ahead) planLen = ahead.length;
+            }
+            if (!pather.goal && !arrivedA()) {
+                // It gave up. A job would ask again after a unit got in its way; the test does too (at most 3 times),
+                // but never after "no path".
+                const lastB = blockedLog.filter(b => b.id === pather.id).pop();
+                if (resends < 3 && lastB && lastB.reason !== "no path") {
+                    resends++;
+                    W.sendUnit(pather.id, { area, x: goalA.x, y: goalA.y });
+                } else return true;
+            }
+            return arrivedA();
+        }, 40000, "TEST_pather to walk out of the ring").catch(() => {});
+        const framesA = Graphics.frameCount - f0;
+        const viaGap = trail.includes(cellOf(gap.x, gap.y));
+        $gamePlayer.locate(cx, cy + 3); // the ring and the goal 11 rows below its centre both in view
+        await t.waitFrames(10);
+        t.screenshot("path_around_wall");
+        $gamePlayer.locate(cx, cy);
+        t.check("path_around_wall", arrivedA() && touches === 0 && viaGap,
+            `9x9 ring of ${wallCells.size} wall pieces round (${cx},${cy}), gap at (${gap.x},${gap.y}); TEST_pather from (${cx},${cy + 2}) inside to (${goalA.x},${goalA.y}) outside on the far side: ` +
+            `${arrivedA() ? "arrived" : `not arrived (at ${pather.x},${pather.y}, goal ${pather.goal ? "still set" : "dropped"})`} after ${framesA} frames and ${trail.length - 1} steps (first plan ${planLen} cells), ` +
+            `through the gap: ${viaGap}, wall cells stood on: ${touches}; gave up: ${gaveUp(pather.id)}; sent again ${resends}x; test site: ${site.objects} objects cleared, nearest unit ${site.near} cells away`);
+
+        // 2. A goal cell nobody can stand on (a wall piece) ends at its nearest reachable open neighbour.
+        const wallGoal = { x: cx, y: cy + 4 };
+        const endOf = p => (p && p.length ? p[p.length - 1] : null);
+        const onWall = p => (p || []).filter(c => wallCells.has(cellOf(c.x, c.y))).length;
+        const pIn = W.findPath(area, cx, cy + 2, wallGoal.x, wallGoal.y);
+        const rIn = W.lastPath ? W.lastPath.reason : "?";
+        const pOut = W.findPath(area, goalA.x, goalA.y, wallGoal.x, wallGoal.y);
+        const rOut = W.lastPath ? W.lastPath.reason : "?";
+        const eIn = endOf(pIn), eOut = endOf(pOut);
+        t.check("path_blocked_goal", !!eIn && eIn.x === cx && eIn.y === cy + 3 && !!eOut && eOut.x === cx && eOut.y === cy + 5 && onWall(pIn) + onWall(pOut) === 0,
+            `goal: the wall piece at (${wallGoal.x},${wallGoal.y}); from inside (${cx},${cy + 2}): ${eIn ? `${pIn.length} cell(s) ending at (${eIn.x},${eIn.y})` : `no path (${rIn})`} (want (${cx},${cy + 3})); ` +
+            `from outside (${goalA.x},${goalA.y}): ${eOut ? `${pOut.length} cell(s) ending at (${eOut.x},${eOut.y})` : `no path (${rOut})`} (want (${cx},${cy + 5})); wall cells on either path: ${onWall(pIn) + onWall(pOut)}`);
+
+        // 3. Close the gap: a goal inside the ring is given up within 60 frames, with no step onto a wall.
+        W.setObject(area.x, area.y, gap.x, gap.y, wallType);
+        wallCells.add(cellOf(gap.x, gap.y));
+        const b0 = blockedLog.length;
+        const startB = { x: pather.x, y: pather.y };
+        let framesB = -1, touchesB = 0;
+        W.sendUnit(pather.id, { area, x: cx, y: cy });
+        for (let f = 1; f <= 90; f++) {
+            await t.waitFrames(1);
+            const ev = W.eventOf(pather.id);
+            if (ev && wallCells.has(cellOf(ev.x, ev.y))) touchesB++;
+            if (blockedLog.slice(b0).some(b => b.id === pather.id)) {
+                framesB = f;
+                break;
+            }
+        }
+        const bB = blockedLog.slice(b0).find(b => b.id === pather.id);
+        t.check("path_blocked_fast", framesB > 0 && framesB <= 60 && touchesB === 0,
+            `goal (${cx},${cy}) inside the ring with its gap closed; TEST_pather outside at (${startB.x},${startB.y}): ` +
+            `${framesB > 0 ? `world:unitBlocked after ${framesB} frame(s), reason "${bB ? bB.reason : "?"}"` : "no world:unitBlocked within 90 frames"}; ` +
+            `now at (${pather.x},${pather.y}), goal ${pather.goal ? "still set" : "dropped"}; wall cells stood on: ${touchesB}`);
+
+        // 4. Two gaps (north and south), a unit standing still in each: sent inside, a unit goes from one gap to the other
+        // and gives up ("no way past") once its path left hasn't got shorter for pathConfig.progressFrames, instead of
+        // going back and forth for ever (seen 2026-09-19 with animals at a site's gate held by working colonists).
+        const gapS = { x: cx, y: cy + 4 };
+        for (const c of [gap, gapS]) {
+            W.setObject(area.x, area.y, c.x, c.y, 0);
+            wallCells.delete(cellOf(c.x, c.y));
+        }
+        const sitters = [gap, gapS].map((c, k) => W.addUnit({ name: `TEST_sitter${k + 1}`, image: { characterName: "People1", characterIndex: 4 + k }, area, x: c.x, y: c.y, dir: 2, data: { kind: "test" } }));
+        await t.waitFrames(2);
+        const b1 = blockedLog.length, startD = { x: pather.x, y: pather.y }, fD = Graphics.frameCount;
+        let insideD = 0, touchesD = 0, stepsD = 0, lastD = -1;
+        W.sendUnit(pather.id, { area, x: cx, y: cy });
+        await t.waitUntil(() => {
+            const ev = W.eventOf(pather.id);
+            if (ev) {
+                const c = cellOf(ev.x, ev.y);
+                if (c !== lastD) {
+                    if (lastD >= 0) stepsD++;
+                    lastD = c;
+                    if (wallCells.has(c)) touchesD++;
+                    if (Math.max(Math.abs(ev.x - cx), Math.abs(ev.y - cy)) < 4) insideD++;
+                }
+            }
+            return blockedLog.slice(b1).some(b => b.id === pather.id);
+        }, 20000, "TEST_pather to give up at the two held gaps").catch(() => {});
+        const framesD = Graphics.frameCount - fD;
+        const bD = blockedLog.slice(b1).find(b => b.id === pather.id);
+        t.check("path_gives_up_when_crowded", !!bD && bD.reason === "no way past" && insideD === 0 && touchesD === 0,
+            `gaps at (${gap.x},${gap.y}) and (${gapS.x},${gapS.y}), each held by a unit standing still; TEST_pather from (${startD.x},${startD.y}) sent to (${cx},${cy}) inside: ` +
+            `${bD ? `gave up after ${framesD} frames, reason "${bD.reason}"` : `no give-up within ${framesD} frames (goal ${pather.goal ? "still set" : "dropped"})`}, ${stepsD} steps, now at (${pather.x},${pather.y}); ` +
+            `cells inside the ring entered: ${insideD}, wall cells stood on: ${touchesD} (progress limit ${W.pathConfig.progressFrames} map updates)`);
+        for (const s of sitters) W.removeUnit(s.id);
+
+        // 5. The ring comes down; a unit walks a straight row; a wall goes up on its next path cell mid-walk.
+        for (const c of wallCells) W.setObject(area.x, area.y, xyOf(c).x, xyOf(c).y, 0);
+        W.removeUnit(pather.id);
+        const walker = W.addUnit({ name: "TEST_replanner", image: { characterName: "People1", characterIndex: 3 }, area, x: cx - 7, y: cy, dir: 6, data: { kind: "test" } });
+        await t.waitFrames(2);
+        const goalC = { x: cx + 7, y: cy };
+        const replans0 = W.pathStats().replans;
+        const trailC = [];
+        let placed = null, aheadWhenPlaced = 0, onPlaced = 0;
+        W.sendUnit(walker.id, { area, x: goalC.x, y: goalC.y });
+        await t.waitUntil(() => {
+            const ev = W.eventOf(walker.id);
+            if (ev) {
+                const c = cellOf(ev.x, ev.y);
+                if (trailC[trailC.length - 1] !== c) trailC.push(c);
+                if (placed && c === cellOf(placed.x, placed.y)) onPlaced++;
+                if (!placed && ev.x >= cx - 4) {
+                    const ahead = W.pathOf(walker.id);
+                    if (ahead && ahead.length) {
+                        placed = ahead[0];
+                        aheadWhenPlaced = ahead.length;
+                        W.setObject(area.x, area.y, placed.x, placed.y, wallType);
+                    }
+                }
+            }
+            return !walker.goal;
+        }, 20000, "TEST_replanner to arrive").catch(() => {});
+        const replans = W.pathStats().replans - replans0;
+        const arrivedC = !walker.goal && walker.x === goalC.x && walker.y === goalC.y;
+        const stepsC = trailC.length - 1;
+        t.check("path_replans", !!placed && arrivedC && onPlaced === 0 && stepsC > 14,
+            `TEST_replanner from (${cx - 7},${cy}) to (${goalC.x},${goalC.y}) (14 steps in a straight line); a wall went up on its next path cell ${placed ? `(${placed.x},${placed.y}) with ${aheadWhenPlaced} cells to go` : "(never placed)"}; ` +
+            `${arrivedC ? "arrived" : `not arrived (at ${walker.x},${walker.y}, goal ${walker.goal ? "still set" : "dropped"})`} after ${stepsC} steps (a detour round the wall makes it more than 14); ` +
+            `steps onto the new wall: ${onPlaced}; re-plans counted (all units) ${replans}; gave up: ${gaveUp(walker.id)}`);
+        if (placed) W.setObject(area.x, area.y, placed.x, placed.y, 0);
+        W.removeUnit(walker.id);
+        let restored = 0;
+        for (const s of saved) {
+            if (W.units().some(u => sameArea(u.area, area) && u.x === s.x && u.y === s.y)) continue;
+            W.setObject(area.x, area.y, s.x, s.y, s.ty);
+            restored++;
+        }
+
+        // 6. Budget: 100 plans of 40-80 cells on this map (seeded picks), each timed.
+        const rng = W.mulberry32(W.hash32(W.state.seed, 0x7a7b));
+        W.findPath(area, cx, cy, cx + 1, cy); // warm-up: the region map after the test's changes
+        const times = [], expandedList = [];
+        let tries = 0, capped = 0, outside = 0;
+        while (times.length < 100 && tries < 4000) {
+            tries++;
+            const sx = 4 + Math.floor(rng() * (size - 8)), sy = 4 + Math.floor(rng() * (size - 8));
+            const dist = 40 + Math.floor(rng() * 41), ax = Math.floor(rng() * (dist + 1));
+            const gx = sx + (rng() < 0.5 ? -ax : ax), gy = sy + (rng() < 0.5 ? ax - dist : dist - ax);
+            if (gx < 0 || gy < 0 || gx >= size || gy >= size) continue;
+            if (!W.walkable(area.x, area.y, sx, sy) || !W.walkable(area.x, area.y, gx, gy) || !W.reachable(area, sx, sy, gx, gy)) continue;
+            const t0 = performance.now();
+            const p = W.findPath(area, sx, sy, gx, gy);
+            const ms = performance.now() - t0;
+            const lp = W.lastPath;
+            if (!p || p.length < 40 || p.length > 80) {
+                outside++;
+                if (lp && lp.reason === "too far to plan") capped++;
+                continue;
+            }
+            times.push(ms);
+            expandedList.push(lp.expanded);
+        }
+        const q = (arr, f) => (arr.length ? arr[Math.min(arr.length - 1, Math.floor(arr.length * f))] : 0);
+        const msSorted = times.slice().sort((a, b) => a - b), exSorted = expandedList.slice().sort((a, b) => a - b);
+        const avg = times.reduce((a, b) => a + b, 0) / Math.max(1, times.length);
+        t.check("path_budget", times.length === 100 && avg <= 1.5,
+            `${times.length} plans of 40-80 cells (${tries} seeded picks; ${outside} planned paths outside 40-80 cells, ${capped} of them capped at ${W.pathConfig.maxNodes} cells): ` +
+            `average ${avg.toFixed(3)} ms, p95 ${q(msSorted, 0.95).toFixed(3)} ms, max ${q(msSorted, 1).toFixed(3)} ms; cells expanded median ${q(exSorted, 0.5)}, p95 ${q(exSorted, 0.95)}, max ${q(exSorted, 1)}`);
+
+        // 7. The rest of the 60 s: the colony and the animals go on; no walker may step onto a blocking cell.
+        await t.waitUntil(() => performance.now() - watch.t0 >= 60000, 80000, "60 s of play").catch(() => {});
+        finishWatch();
+        const secs = (performance.now() - watch.t0) / 1000;
+        const ps = W.pathStats();
+        const plans = ps.plans - stats0.plans;
+        const planMs = ps.avgMs * ps.plans - stats0.avgMs * stats0.plans;
+        const planExp = ps.avgExpanded * ps.plans - stats0.avgExpanded * stats0.plans;
+        const gaveUpAll = {};
+        for (const k of Object.keys(ps.blocked)) {
+            const n = ps.blocked[k] - (stats0.blocked[k] || 0);
+            if (n) gaveUpAll[k] = n;
+        }
+        t.check("no_wall_steps", watch.steps > 0 && watch.bad.length === 0,
+            `${secs.toFixed(1)} s of play, ${watch.updates} map updates: ${watch.steps} one-cell steps by ${watch.units.size} units (${watch.jumps} moves of more than one cell), ` +
+            `${watch.bad.length} steps by walkers onto blocking cells${watch.bad.length ? ": " + watch.bad.slice(0, 6).join(" | ") : ""}; ` +
+            `planner in this window: ${plans} plans (${ps.found - stats0.found} found, ${ps.partial - stats0.partial} partial, ${ps.none - stats0.none} none), ` +
+            `${plans ? (planMs / plans).toFixed(3) : "0"} ms average, p95 ${ps.p95Ms.toFixed(3)} ms and max ${ps.maxMs.toFixed(2)} ms (last 512 / all plans), ` +
+            `cells expanded ${plans ? (planExp / plans).toFixed(0) : 0} average, median ${ps.medianExpanded}; queue peak ${ps.queuePeak}, ${ps.queuedTotal - stats0.queuedTotal} queued; ` +
+            `re-plans ${ps.replans - stats0.replans}, detours round units ${ps.detours - stats0.detours}; gave up: ${JSON.stringify(gaveUpAll)}; ` +
+            `region map rebuilt ${ps.regionBuilds - stats0.regionBuilds}x (${ps.regionMsAvg.toFixed(2)} ms average); slowest plan so far ${JSON.stringify(ps.maxPlan)}; ${restored} of ${saved.length} test-site objects put back`);
+        const falseNoPath = truth.filter(r => r.reached);
+        t.check("no_path_is_true", truth.length > 0 && falseNoPath.length === 0,
+            `${truth.length} "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): ${falseNoPath.length} could reach the goal after all; ` +
+            truth.map(r => `${r.name} (${r.kind}) ${r.from} -> ${r.goal}: ${r.reached ? "REACHABLE" : "unreachable"} (${r.explored} cells flooded, ${r.ms.toFixed(0)} ms)`).join("; "));
+        const perUpdate = watch.updates ? watch.ms / watch.updates : 0;
+        t.check("frame_cost", watch.updates > 0 && perUpdate <= 1.0,
+            `UF.World.update ${perUpdate.toFixed(3)} ms average per map update over ${watch.updates} updates, worst ${watch.maxMs.toFixed(2)} ms; ${W.units().length} units; ` +
+            `includes planning (the path checks' own findPath calls are outside it)`);
+    }
+
+    //-------------------------------------------------------------------------
+    // Checks (UF_Test suite "spawn", VISION V68; not in the default run: it plays 60 s of game time). Every unit stands
+    // on a cell it could walk onto, after world creation and after play; addUnit moves units off blocked cells and keeps
+    // exact ones; nothing that blocks is built or regrows onto a unit.
+
+    async function spawnChecks(t) {
+        const W = World, st = W.state, area = W.currentArea();
+        if (!st || !area) {
+            t.check("in_area_map", false, `map ${$gameMap.mapId()} is not an area map`);
+            return;
+        }
+        const O = window.UF.Objects;
+        const size = st.size;
+        const note = PROVOKE.length ? ` [PROVOKED: ${PROVOKE.join(", ")}]` : "";
+        const kindOf = u => (u.data && u.data.kind) || "none";
+        const inMap = (x, y) => x >= 0 && y >= 0 && x < size && y < size;
+        const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+        const isWater = (x, y) => Tilemap.isWaterTile($gameMap.tileId(x, y, 0));
+        const free = (x, y, ignore = 0) => inMap(x, y) && W.cellFree(area.x, area.y, x, y, ignore);
+        const img = { characterName: "People1", characterIndex: 1 };
+        const testUnits = [];
+        const placed = [];   // objects this suite changed: put back at the end
+        const setObj = (x, y, typeId) => {
+            placed.push({ x, y, t: W.getObject(area.x, area.y, x, y) });
+            W.setObject(area.x, area.y, x, y, typeId);
+        };
+        // Why a unit's cell isn't one it can stand on (for the report only; the checks use World.cellFree).
+        const whyNot = u => {
+            const x = u.x, y = u.y;
+            if (!sameArea(u.area, area)) return `off screen in area (${u.area.x},${u.area.y})`;
+            const ob = O && O.atIn ? O.atIn(area, x, y) : null;
+            if (ob && O.blocks(x, y)) return `object "${ob.id}"`;
+            if (isWater(x, y)) return "water";
+            if (!$gameMap.isPassable(x, y, 2) && !$gameMap.isPassable(x, y, 8)) return `impassable tile ${$gameMap.tileId(x, y, 0)}`;
+            const other = W.units().find(o => o.id !== u.id && sameArea(o.area, u.area) && o.x === x && o.y === y);
+            if (other) return `shares the cell with "${other.name}" (${kindOf(other)})`;
+            return "World.cellFree says no (a shut door?)";
+        };
+        // A unit stands where it may: World.cellFree ignoring itself, or a cell it could walk onto whose only other
+        // occupants pass through everything (a walker under a flier: RMMZ lets it walk there too; cellFree itself stays
+        // strict, so nothing spawns under a bird).
+        let underFliers = 0;
+        const standsOk = u => {
+            if (W.cellFree(u.area.x, u.area.y, u.x, u.y, u.id)) return true;
+            const others = W.units().filter(o => o.id !== u.id && sameArea(o.area, u.area) && o.x === u.x && o.y === u.y);
+            if (others.length && others.every(o => o.data && o.data.through) && W.walkable(u.area.x, u.area.y, u.x, u.y, { unit: u })) {
+                underFliers++;
+                return true;
+            }
+            return false;
+        };
+        const scan = () => {
+            const kinds = {}, bad = [];
+            let checked = 0, through = 0;
+            underFliers = 0;
+            for (const u of W.units()) {
+                if (u.data && u.data.through) { through++; continue; }
+                checked++;
+                const k = kindOf(u);
+                const e = kinds[k] || (kinds[k] = { n: 0, bad: 0 });
+                e.n++;
+                if (!standsOk(u)) {
+                    e.bad++;
+                    bad.push(`"${u.name}" (${k}) at (${u.x},${u.y}): ${whyNot(u)}`);
+                }
+            }
+            const text = Object.keys(kinds).sort().map(k => `${k} ${kinds[k].n}${kinds[k].bad ? ` (${kinds[k].bad} BAD)` : ""}`).join(", ");
+            return { checked, through, bad, text: text + (underFliers ? `; ${underFliers} walker(s) under a flier (allowed)` : "") };
+        };
+        // spawn.misplace: one unit put on a tree cell just before a scan (and back after it).
+        const misplace = () => {
+            if (!provoked("misplace") || !O) return null;
+            const victim = W.units().find(u => !(u.data && u.data.through) && sameArea(u.area, area));
+            const tree = victim && O.findIn(area, { near: { x: victim.x, y: victim.y }, radius: 60, tags: ["tree"], limit: 1 })[0];
+            if (!tree) return null;
+            const was = { u: victim, x: victim.x, y: victim.y };
+            W.stopUnit(victim.id);
+            victim.x = tree.x;
+            victim.y = tree.y;
+            const ev = W.eventOf(victim.id);
+            if (ev) ev.locate(tree.x, tree.y);
+            return was;
+        };
+        const unmisplace = was => {
+            if (!was) return;
+            was.u.x = was.x;
+            was.u.y = was.y;
+            const ev = W.eventOf(was.u.id);
+            if (ev) ev.locate(was.x, was.y);
+        };
+        const cat = window.$ufWorldCatalog;
+        const species = (cat && cat.wildlife && cat.wildlife.species) || [];
+        const waterWords = /swim|aquatic|water|fish|marine/i;
+        const dwellers = species.filter(sp => waterWords.test(`${sp.kind || ""} ${(sp.tags || []).join(" ")} ${sp.habitat || ""}`)).map(sp => sp.id);
+
+        // 1. Right after world creation: the camp in view (the closest zoom showing every unit within 14 cells of where
+        // the view starts), then every unit's cell.
+        const home = { x: $gamePlayer.x, y: $gamePlayer.y };
+        const C = window.UF.Camera;
+        const level0 = C ? C.level() : 0;
+        const camp = W.units().filter(u => sameArea(u.area, area) && cheb(u, home) <= 14);
+        let bx0 = home.x, bx1 = home.x, by0 = home.y, by1 = home.y;
+        for (const u of camp) {
+            bx0 = Math.min(bx0, u.x); bx1 = Math.max(bx1, u.x);
+            by0 = Math.min(by0, u.y); by1 = Math.max(by1, u.y);
+        }
+        if (C) {
+            for (let i = 0; i < C.levels.length; i++) {
+                C.setLevel(i);
+                if ($gameMap.screenTileX() >= bx1 - bx0 + 3 && $gameMap.screenTileY() >= by1 - by0 + 3) break;
+            }
+        }
+        $gamePlayer.locate(Math.round((bx0 + bx1) / 2), Math.round((by0 + by1) / 2));
+        await t.waitFrames(10);
+        let was = misplace();
+        t.screenshot("camp_after_new_game");
+        const s1 = scan();
+        unmisplace(was);
+        const stats1 = W.spawnStats();
+        delete stats1.last;
+        const campNow = W.units().filter(u => sameArea(u.area, area) && cheb(u, home) <= 16);
+        t.check("all_units_on_standable_cells", s1.checked > 0 && s1.bad.length === 0,
+            `${s1.checked} units checked (${s1.through} passing through everything skipped): ${s1.text}; ${s1.bad.length} on a cell they can't stand on` +
+            `${s1.bad.length ? ": " + s1.bad.slice(0, 8).join(" | ") : ""}; seated since world creation: ${JSON.stringify(stats1)}; ` +
+            `water dwellers: ${dwellers.length ? dwellers.join(", ") + " (left to the land rule)" : "none (no wildlife species is tagged for water: every unit follows the land rule)"}; ` +
+            `camp shot at zoom ${C ? C.zoom().toFixed(3) : 1} centred on (${$gamePlayer.x},${$gamePlayer.y}): ${campNow.length} units within 16 cells of (${home.x},${home.y}): ` +
+            campNow.slice(0, 24).map(u => `${u.name || "?"}@${u.x},${u.y}${W.cellFree(area.x, area.y, u.x, u.y, u.id) || (u.data && u.data.through) ? "" : " BLOCKED"}`).join(", ") + note);
+        if (C) C.setLevel(level0);
+
+        // 2. Asked for a tree, a boulder, water and a cell another unit stands on: each lands on the nearest free cell.
+        const taken = () => new Set(W.units().filter(u => sameArea(u.area, area)).map(u => u.y * size + u.x));
+        let occ = taken();
+        const ring = function* (c, rmax) {
+            for (let r = 0; r <= rmax; r++) {
+                for (let dy = -r; dy <= r; dy++) {
+                    for (let dx = -r; dx <= r; dx++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) === r && inMap(c.x + dx, c.y + dy)) yield { x: c.x + dx, y: c.y + dy };
+                    }
+                }
+            }
+        };
+        const find = (pred, rmax) => {
+            for (const c of ring(home, rmax)) if (pred(c.x, c.y)) return c;
+            return null;
+        };
+        const freeBeside = (x, y) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => free(x + dx, y + dy));
+        const clearSpot = (away = 2) => find((x, y) => {
+            if (!free(x, y) || W.getObject(area.x, area.y, x, y) || !freeBeside(x, y)) return false;
+            for (let dy = -away; dy <= away; dy++) for (let dx = -away; dx <= away; dx++) if (occ.has((y + dy) * size + x + dx)) return false;
+            return true;
+        }, 80);
+        const blockingTagged = tag => (x, y) => {
+            const o = O.atIn(area, x, y);
+            return !!o && (o.tags || []).includes(tag) && O.blocks(x, y) && !occ.has(y * size + x) && freeBeside(x, y);
+        };
+        const cases = [];
+        const tryCase = (label, cell, add) => {
+            if (!cell) {
+                cases.push({ label, ok: false, text: `${label}: no such cell found` });
+                return null;
+            }
+            const blocked = !free(cell.x, cell.y);
+            const u = add ? add(cell) : W.addUnit({ name: `TEST_spawn_${label}`, image: img, area, x: cell.x, y: cell.y, dir: 2, data: { kind: "test" } });
+            if (!u) {
+                cases.push({ label, ok: false, text: `${label}: no unit was added` });
+                return null;
+            }
+            testUnits.push(u);
+            const d = cheb(u, cell);
+            const stands = sameArea(u.area, area) && free(u.x, u.y, u.id);
+            let closer = null;
+            for (let dy = -(d - 1); dy <= d - 1 && !closer; dy++) {
+                for (let dx = -(d - 1); dx <= d - 1; dx++) {
+                    if (free(cell.x + dx, cell.y + dy, u.id)) { closer = { x: cell.x + dx, y: cell.y + dy }; break; }
+                }
+            }
+            const ev = W.eventOf(u.id);
+            const ok = blocked && d > 0 && stands && !closer && !!ev && ev.x === u.x && ev.y === u.y;
+            cases.push({ label, ok, text: `${label} (${cell.x},${cell.y}) ${blocked ? "blocked" : "NOT blocked"} -> "${u.name}" at (${u.x},${u.y}), ${d} away, ` +
+                `${stands ? "free" : "NOT free: " + whyNot(u)}, closer free cell ${closer ? `(${closer.x},${closer.y}) EXISTS` : "none"}, event ${ev ? `at (${ev.x},${ev.y})` : "MISSING"}` });
+            return u;
+        };
+        let tree = O ? find(blockingTagged("tree"), 80) : null;
+        if (!tree && O) {
+            tree = clearSpot();
+            if (tree) setObj(tree.x, tree.y, O.typeId("oak"));
+        }
+        let boulder = O ? find(blockingTagged("boulder"), 80) : null;
+        if (!boulder && O) {
+            boulder = clearSpot();
+            if (boulder) setObj(boulder.x, boulder.y, O.typeId("granite_boulder"));
+        }
+        const water = find((x, y) => isWater(x, y) && freeBeside(x, y), 128);
+        tryCase("tree", tree);
+        tryCase("boulder", boulder);
+        tryCase("water", water);
+        const held = clearSpot();
+        const holder = held ? W.addUnit({ name: "TEST_spawn_holder", image: img, area, x: held.x, y: held.y, dir: 2, data: { kind: "test" } }) : null;
+        if (holder) testUnits.push(holder);
+        tryCase("occupied", holder && holder.x === held.x && holder.y === held.y ? held : null);
+        // A real spawner that never asked for a free cell (UF_Combat's hostile spawn) sent to the tree.
+        if (window.UF.Combat && typeof UF.Combat.spawnHostile === "function" && tree) {
+            tryCase("hostile_on_tree", tree, c => UF.Combat.spawnHostile("wolf", c.x, c.y));
+        }
+        t.check("addUnit_moves_off_blocked", cases.length >= 4 && cases.every(c => c.ok),
+            cases.map(c => `${c.ok ? "" : "BAD "}${c.text}`).join("; ") + note);
+        for (const u of testUnits.splice(0)) W.removeUnit(u.id);
+
+        // 3. exact: true keeps the cell asked for: a free cell, then the same cell again (exact wins even though the
+        // first unit now stands there; a warning names it), then the same cell without exact (moved).
+        occ = taken();
+        const spot = clearSpot();
+        if (!spot) {
+            t.check("exact_respected", false, "no clear cell near the camp for the fixture");
+        } else {
+            const wasFree = free(spot.x, spot.y);
+            const a = W.addUnit({ name: "TEST_exact_a", image: img, area, x: spot.x, y: spot.y, dir: 2, exact: true, data: { kind: "test" } });
+            const b = W.addUnit({ name: "TEST_exact_b", image: img, area, x: spot.x, y: spot.y, dir: 2, exact: true, data: { kind: "test" } });
+            const c = W.addUnit({ name: "TEST_exact_c", image: img, area, x: spot.x, y: spot.y, dir: 2, data: { kind: "test" } });
+            testUnits.push(a, b, c);
+            const at = u => u.x === spot.x && u.y === spot.y;
+            t.check("exact_respected", wasFree && at(a) && at(b) && !at(c),
+                `cell (${spot.x},${spot.y}) free before: ${wasFree}; exact on the free cell -> (${a.x},${a.y}) ${at(a) ? "kept" : "MOVED"}; ` +
+                `exact again on it while TEST_exact_a stands there -> (${b.x},${b.y}) ${at(b) ? "kept" : "MOVED"}; ` +
+                `the same without exact -> (${c.x},${c.y}) ${at(c) ? "NOT MOVED" : "moved"}; last warning: ${W.spawnStats().last.slice(-1)[0] || "none"}${note}`);
+            for (const u of testUnits.splice(0)) W.removeUnit(u.id);
+        }
+
+        // 4. Nothing that blocks goes onto a unit's cell: a forced regrowth (a regrow entry due now, empty cell -> berry
+        // bush) waits while the unit stands there and grows once it has left; a build (wall) is refused while a unit
+        // stands there and goes up once it has left. A plant that doesn't block may go under a unit.
+        occ = taken();
+        const bush = O ? O.typeId("berry_bush") : 0;
+        const rCell = O ? clearSpot() : null;
+        if (rCell) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) occ.add((rCell.y + dy) * size + rCell.x + dx);
+        const bCell = O ? clearSpot() : null;
+        if (!O || !bush || !rCell || !bCell || !O.regrowList || !O.hourNow) {
+            t.check("no_object_on_unit", false, `fixture: UF.Objects ${!!O}, berry_bush ${bush}, cells ${JSON.stringify(rCell)} ${JSON.stringify(bCell)}`);
+        } else {
+            const hour = () => {
+                if (window.$ufTime) $ufTime.advanceMinute(60); // time:hour, as the clock does
+                else O.processRegrow();
+            };
+            const entryAt = c => O.regrowList().find(e => e.x === c.x && e.y === c.y && sameArea(e.area, area));
+            const waits0 = W.spawnStats().regrowWaits;
+            const ru = W.addUnit({ name: "TEST_regrow_stander", image: img, area, x: rCell.x, y: rCell.y, dir: 2, data: { kind: "test" } });
+            const ruHere = ru.x === rCell.x && ru.y === rCell.y;
+            O.regrowList().push({ area: { x: area.x, y: area.y }, x: rCell.x, y: rCell.y, from: 0, to: bush, due: O.hourNow() });
+            hour();
+            const whileThere = W.getObject(area.x, area.y, rCell.x, rCell.y);
+            const pending = entryAt(rCell);
+            const waited = !!pending && pending.due > O.hourNow();
+            const pendingText = pending ? `due hour ${pending.due} (now ${O.hourNow()})` : "GONE";
+            W.removeUnit(ru.id);
+            hour();
+            const afterLeft = W.getObject(area.x, area.y, rCell.x, rCell.y);
+            const cleared = !entryAt(rCell);
+            O.setIn(area, rCell.x, rCell.y, null);
+
+            const bu = W.addUnit({ name: "TEST_build_stander", image: img, area, x: bCell.x, y: bCell.y, dir: 2, data: { kind: "test" } });
+            const buHere = bu.x === bCell.x && bu.y === bCell.y;
+            W.lastObjectRefusal = null;
+            const wallIn = O.setIn(area, bCell.x, bCell.y, "wall_stone");
+            const refusal = W.lastObjectRefusal;
+            const wallOn = O.set(bCell.x, bCell.y, "wall_wood");
+            const under = W.getObject(area.x, area.y, bCell.x, bCell.y);
+            const plant = O.setIn(area, bCell.x, bCell.y, "flowers");
+            O.setIn(area, bCell.x, bCell.y, null);
+            W.removeUnit(bu.id);
+            const wallAfter = O.setIn(area, bCell.x, bCell.y, "wall_stone");
+            const builtAfter = W.getObject(area.x, area.y, bCell.x, bCell.y) === O.typeId("wall_stone");
+            O.setIn(area, bCell.x, bCell.y, null);
+            const ok = ruHere && whileThere === 0 && waited && afterLeft === bush && cleared &&
+                buHere && wallIn === false && wallOn === false && under === 0 && !!refusal && refusal.unitId === bu.id && plant === true && wallAfter === true && builtAfter;
+            t.check("no_object_on_unit", ok,
+                `regrowth at (${rCell.x},${rCell.y}) (${window.$ufTime ? "clock hour" : "processRegrow"}): unit there ${ruHere}; after an hour the cell holds ${whileThere ? `type ${whileThere} (A BUSH ON THE UNIT)` : "nothing"}, ` +
+                `entry ${pendingText}; regrowth waits +${W.spawnStats().regrowWaits - waits0}; after the unit left and an hour: ${afterLeft === bush ? "berry bush" : `type ${afterLeft}`}, entry ${cleared ? "cleared" : "still there"}. ` +
+                `Build at (${bCell.x},${bCell.y}): unit there ${buHere}; setIn wall_stone -> ${wallIn}, set wall_wood -> ${wallOn}, cell holds ${under ? `type ${under} (A WALL ON THE UNIT)` : "nothing"}; ` +
+                `reason: ${refusal ? refusal.reason : "none recorded"}; flowers under the unit -> ${plant}; wall after it left -> ${wallAfter} (${builtAfter ? "built" : "NOT built"})${note}`);
+        }
+
+        // 5. 60 s of game time (3600 map updates) at the fastest speed with the colony, wildlife and regrowth running,
+        // plus a birth, a hostile spawn onto a tree and regrowth forced onto occupied cells a third of the way in. Every
+        // unit added is checked the moment it appears; every unit at the end.
+        const T = window.UF.Time, Col = window.UF.Colonists;
+        const ticks = () => (T ? T.ticks() : Graphics.frameCount);
+        const added = [];
+        const onAdded = u => {
+            const through = !!(u.data && u.data.through);
+            const ok = through || W.cellFree(u.area.x, u.area.y, u.x, u.y, u.id);
+            added.push({ name: u.name, kind: kindOf(u), at: `${u.x},${u.y}`, ok, why: ok ? "" : whyNot(u) });
+        };
+        UF.Events.on("world:unitAdded", onAdded);
+        if (T) {
+            if (T.paused) T.resume();
+            T.setLevel(T.speeds.length - 1);
+        }
+        const t0 = ticks(), real0 = performance.now(), waits1 = W.spawnStats().regrowWaits;
+        let forced = null;
+        await t.waitUntil(() => ticks() - t0 >= 1200, 45000, "a third of the play").catch(() => {});
+        {
+            const f = { birth: "no colonist", hostile: "no UF.Combat", regrow: 0 };
+            const mother = Col && Col.list ? (Col.list().find(u => u.data && u.data.gender === "female") || Col.list()[0]) : null;
+            if (mother && Col.giveBirth) {
+                const child = Col.giveBirth(mother);
+                f.birth = child ? `"${child.name}" born at (${child.x},${child.y}), mother at (${mother.x},${mother.y})` : "giveBirth returned nothing";
+            }
+            const treeNow = O ? O.findIn(area, { near: home, radius: 40, tags: ["tree"], limit: 1 })[0] : null;
+            if (window.UF.Combat && UF.Combat.spawnHostile && treeNow) {
+                const wolf = UF.Combat.spawnHostile("wolf", treeNow.x, treeNow.y);
+                f.hostile = wolf ? `wolf asked for the tree at (${treeNow.x},${treeNow.y}), at (${wolf.x},${wolf.y})` : "spawnHostile returned nothing";
+                if (wolf) W.removeUnit(wolf.id);
+            }
+            if (O && O.regrowList && bush) {
+                for (const u of W.units()) {
+                    if (f.regrow >= 3) break;
+                    if ((u.data && u.data.through) || !sameArea(u.area, area) || W.getObject(area.x, area.y, u.x, u.y)) continue;
+                    O.regrowList().push({ area: { x: area.x, y: area.y }, x: u.x, y: u.y, from: 0, to: bush, due: O.hourNow() });
+                    f.regrow++;
+                }
+                if (window.$ufTime) $ufTime.advanceMinute(60);
+            }
+            forced = f;
+        }
+        await t.waitUntil(() => ticks() - t0 >= 3600, 75000, "60 s of game time").catch(() => {});
+        UF.Events.off("world:unitAdded", onAdded);
+        const played = ticks() - t0, realS = (performance.now() - real0) / 1000;
+        if (T) T.setLevel(0);
+        was = misplace();
+        const s2 = scan();
+        unmisplace(was);
+        const addedBad = added.filter(a => !a.ok);
+        const addedKinds = {};
+        for (const a of added) addedKinds[a.kind] = (addedKinds[a.kind] || 0) + 1;
+        t.check("after_play", played >= 3600 && s2.checked > 0 && s2.bad.length === 0 && added.length > 0 && addedBad.length === 0,
+            `${played} map updates (${(played / 60).toFixed(0)} s of game time at x1) at speed x${T ? T.speeds[T.speeds.length - 1] : 1} in ${realS.toFixed(1)} s real time; ` +
+            `${s2.checked} units checked (${s2.through} passing through everything skipped): ${s2.text}; ${s2.bad.length} on a cell they can't stand on${s2.bad.length ? ": " + s2.bad.slice(0, 8).join(" | ") : ""}; ` +
+            `${added.length} units added during play (${Object.keys(addedKinds).map(k => `${k} ${addedKinds[k]}`).join(", ") || "none"}), ${addedBad.length} on a blocked cell when they appeared` +
+            `${addedBad.length ? ": " + addedBad.slice(0, 6).map(a => `"${a.name}" (${a.kind}) at (${a.at}): ${a.why}`).join(" | ") : ""}; ` +
+            `forced a third of the way in: birth ${forced ? forced.birth : "not reached"}; hostile ${forced ? forced.hostile : "-"}; regrowth due on ${forced ? forced.regrow : 0} occupied cells, regrowth waits +${W.spawnStats().regrowWaits - waits1}; ` +
+            `arrivals: no plugin in plugins.js adds arrivals yet${note}`);
+
+        for (const p of placed.reverse()) W.setObject(area.x, area.y, p.x, p.y, p.t);
+        $gamePlayer.locate(home.x, home.y);
+        await t.waitFrames(10);
+        t.check("no_errors", t.errorsSoFar().length === 0,
+            t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during the spawn checks");
+    }
 
     function registerChecks() {
         const settle = what => t => t.waitUntil(
@@ -961,13 +2524,27 @@
             // A unit walks to a goal (from the west area when there is one, else from the west edge of this area).
             const multi = W.inWorld(area.x - 1, area.y) && W.inWorld(area.x + 1, area.y);
             const west = multi ? { x: area.x - 1, y: area.y } : area;
-            const row = 128;
+            // One area: the start and the goal are 15 cells apart on a straight open row (the world's rim is ocean, and a
+            // faction's walls may cross row 128), so the walk is 15 steps west. Rows are searched outward from 128.
+            let row = 128, goalX = multi ? 3 : null, startX = multi ? size - 4 : null;
+            if (!multi) {
+                const taken = new Set(W.unitsInArea(area.x, area.y).map(o => o.y * size + o.x));
+                const open = (x, y) => W.walkable(area.x, area.y, x, y) && !taken.has(y * size + x);
+                search: for (let k = 0; k < 120; k++) {
+                    const r = 128 + (k % 2 ? -((k + 1) >> 1) : k >> 1);
+                    for (let x = size / 2 - 40; x >= 3; x--) {
+                        let ok = true;
+                        for (let i = 0; i <= 15 && ok; i++) ok = open(x + i, r);
+                        if (ok) {
+                            row = r;
+                            goalX = x;
+                            startX = x + 15;
+                            break search;
+                        }
+                    }
+                }
+            }
             $gamePlayer.locate(8, row);
-            // The goal and the start must be walkable land (the world's rim is ocean): search the row from the middle outward.
-            const walkable = (x, y) => $gameMap.isPassable(x, y, 2) && !Tilemap.isWaterTile($gameMap.tileId(x, y, 0)) && !(window.UF.Objects && UF.Objects.blocks && UF.Objects.blocks(x, y));
-            const findWalkable = (fromX, toX) => { for (let x = fromX; toX > fromX ? x <= toX : x >= toX; x += toX > fromX ? 1 : -1) if (walkable(x, row)) return x; return null; };
-            const goalX = multi ? 3 : findWalkable(size / 2 - 40, 3);
-            const startX = multi ? size - 4 : findWalkable(goalX + 15, size / 2);
             const u = W.addUnit({ name: "TEST_walker", image: { characterName: "People1", characterIndex: 0 }, area: west, x: startX, y: row, dir: 6 });
             if (multi) t.check("unit_starts_offscreen", !W.eventOf(u.id), `unit ${u.id} in area (${u.area.x},${u.area.y}) at (${u.x},${u.y})`);
             else t.check("single_area_world", st.areasX === 1 && st.areasY === 1 && $gameMap.mapId() === W.areaMapId(0, 0) && goalX !== null && startX !== null, `${st.areasX}x${st.areasY} areas, map ${$gameMap.mapId()}; walk from x ${startX} to x ${goalX} on row ${row}`);
@@ -988,7 +2565,7 @@
             t.check("faces_its_steps", facedSteps > 0 && wrongFaced === 0 && (!ev || ev.direction() === 4),
                 `${facedSteps} step(s) taken, ${wrongFaced} not facing the step's direction; facing ${ev ? ev.direction() : "?"} after walking west (want 4)`);
             t.check("unit_walks_to_goal", !u.goal && sameArea(u.area, area) && u.x === goalX && u.y === row,
-                `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal (${goalX},${row}) ${u.goal ? "still set" : "reached"}`);
+                `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal (${goalX},${row}) ${u.goal ? "still set" : u.x === goalX && u.y === row ? "reached" : "given up"}`);
             t.check("four_way_steps", diagonal === 0, `${diagonal} diagonal step(s) on screen (FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"})`);
             await t.waitFrames(10);
             t.screenshot("unit_in_view");
@@ -1049,9 +2626,11 @@
             W.setTile(area.x, area.y, tx, ty, 0, before);
             W.setObject(area.x, area.y, ox, oy, 0);
             W.removeUnit(u.id);
+            await pathChecks(t, W, area);
             await t.waitFrames(60);
             t.check("no_errors", t.errorsSoFar().length === 0,
                 t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during world checks");
         });
+        UF.Test.suite("spawn", spawnChecks, { isDefault: false });
     }
 })();
