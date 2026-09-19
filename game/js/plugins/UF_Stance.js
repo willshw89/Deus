@@ -175,34 +175,40 @@
     // The selection marker (user request 2026-09-18): four iron corners around the selected unit's feet,
     // drawn just above its stance square and below the unit. Generated (UF_GenSelect) until AR-031 delivers art.
 
+    // Shining Force style (user, 2026-09-18): a bright square outline under the target's feet with heavier corners,
+    // pulsing. It sits on the stance square (z + 1) and under the sprite.
     const SELECT_NAME = "UF_GenSelect";
-    const SELECT_LEG = 13, SELECT_THICK = 3;
-    const IRON = [139, 144, 153], IRON_DARK = [43, 46, 52], IRON_LIGHT = [208, 212, 218];
+    const SELECT_LINE = 2, SELECT_CORNER = 10, SELECT_CORNER_THICK = 4;
+    const IRON = [139, 144, 153], IRON_DARK = [43, 46, 52], IRON_LIGHT = [232, 236, 240];
+    const PULSE_MIN = 170, PULSE_MAX = 255, PULSE_FRAMES = 40;
     let selectBitmap = null;
     Stance.selectBitmap = function() {
         if (selectBitmap) return selectBitmap;
         const b = new Bitmap(SIZE, SIZE);
-        const leg = SELECT_LEG, t = SELECT_THICK;
-        // Each corner: an L of two legs. Dark outline first (1 px around), then the iron fill, then a light edge.
-        const corners = [
-            { x: 0, y: 0, dx: 1, dy: 1 }, { x: SIZE - 1, y: 0, dx: -1, dy: 1 },
-            { x: 0, y: SIZE - 1, dx: 1, dy: -1 }, { x: SIZE - 1, y: SIZE - 1, dx: -1, dy: -1 }
-        ];
-        const rect = (x0, y0, w, h, c) => b.fillRect(Math.min(x0, x0 + w), Math.min(y0, y0 + h), Math.abs(w), Math.abs(h), rgba(c, 1));
-        for (const k of corners) {
-            const ox = k.dx > 0 ? k.x : k.x + 1, oy = k.dy > 0 ? k.y : k.y + 1; // origin at the corner pixel's outer edge
-            rect(ox, oy, k.dx * (leg + 1), k.dy * (t + 2), IRON_DARK);          // horizontal leg outline
-            rect(ox, oy, k.dx * (t + 2), k.dy * (leg + 1), IRON_DARK);          // vertical leg outline
-            rect(ox + k.dx, oy + k.dy, k.dx * (leg - 1), k.dy * t, IRON);        // horizontal leg
-            rect(ox + k.dx, oy + k.dy, k.dx * t, k.dy * (leg - 1), IRON);        // vertical leg
-            rect(ox + k.dx, oy + k.dy, k.dx * (leg - 1), k.dy * 1, IRON_LIGHT);  // light edge along the outside
-            rect(ox + k.dx, oy + k.dy, k.dx * 1, k.dy * (leg - 1), IRON_LIGHT);
+        const fill = (x, y, w, h, c) => b.fillRect(x, y, w, h, rgba(c, 1));
+        // Outline square: a dark 1 px border, the light line inside it, the middle left clear.
+        fill(0, 0, SIZE, SIZE, IRON_DARK);
+        b.clearRect(1, 1, SIZE - 2, SIZE - 2);
+        fill(1, 1, SIZE - 2, SIZE - 2, IRON_LIGHT);
+        b.clearRect(1 + SELECT_LINE, 1 + SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE);
+        fill(1 + SELECT_LINE, 1 + SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, SIZE - 2 - 2 * SELECT_LINE, IRON_DARK);
+        b.clearRect(2 + SELECT_LINE, 2 + SELECT_LINE, SIZE - 4 - 2 * SELECT_LINE, SIZE - 4 - 2 * SELECT_LINE);
+        // Heavier iron corners over the line.
+        const L = SELECT_CORNER, T = SELECT_CORNER_THICK;
+        for (const [cx, cy, dx, dy] of [[0, 0, 1, 1], [SIZE, 0, -1, 1], [0, SIZE, 1, -1], [SIZE, SIZE, -1, -1]]) {
+            const x0 = dx > 0 ? cx : cx - L, y0 = dy > 0 ? cy : cy - T;
+            fill(x0, y0, L, T, IRON);                                     // horizontal arm
+            fill(dx > 0 ? cx : cx - T, dy > 0 ? cy : cy - L, T, L, IRON);  // vertical arm
+            fill(dx > 0 ? cx : cx - L, dy > 0 ? cy : cy - 1, L, 1, IRON_LIGHT); // light edge on the outside
+            fill(dx > 0 ? cx : cx - 1, dy > 0 ? cy : cy - L, 1, L, IRON_LIGHT);
         }
         b._ufName = SELECT_NAME;
         selectBitmap = b;
         return b;
     };
     Stance.SELECT_NAME = SELECT_NAME;
+    /** Opacity of the target square at a frame count: a slow pulse between PULSE_MIN and PULSE_MAX. */
+    Stance.pulse = frame => Math.round(PULSE_MIN + (PULSE_MAX - PULSE_MIN) * (0.5 + 0.5 * Math.sin((frame / PULSE_FRAMES) * Math.PI * 2)));
 
     let explicitSelection = null; // Game_CharacterBase set through setSelected; null = follow the Overseer's selection
     /** Mark a unit (record, id or Game_Event) as the targeted one; null clears it. The Overseer's selection is used when nothing is set. */
@@ -326,6 +332,7 @@
             s._ufCharacter = ch;
             s.follow(ch);
             s.z += 1; // just above the stance square, still below the unit
+            s.opacity = Stance.pulse(Graphics.frameCount);
             s.visible = true;
         }
 
@@ -500,11 +507,15 @@
             const sel = Stance.selectionMarker();
             const selCs = charSpriteOf(cev);
             const selBmp = sel && sel.bitmap;
-            const cornerPx = selBmp ? selBmp.getPixel(2, 2) : "none", midA = selBmp ? selBmp.getAlphaPixel(24, 24) : -1, edgeAlpha = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
+            const cornerPx = selBmp ? selBmp.getPixel(3, 2) : "none", linePx = selBmp ? selBmp.getPixel(24, 2) : "none";
+            const midA = selBmp ? selBmp.getAlphaPixel(24, 24) : -1, edgeAlpha = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
             const square = Stance.markerOf(units.colonist.id);
-            const ironOk = selBmp && colorDist(cornerPx, "#8b9099") <= 6 && midA === 0 && edgeAlpha === 255;
-            t.check("selection_corners", !!sel && sel.visible && sel.parent === tilemap && sel.x === cev.screenX() && sel.y === footY(cev) && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z && ironOk,
-                sel ? `corners at (${sel.x},${sel.y}) vs feet (${cev.screenX()},${footY(cev)}); z ${sel.z} vs square ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}; bitmap ${selBmp ? selBmp._ufName : "none"}: corner pixel ${cornerPx} (want iron #8b9099), middle alpha ${midA} (want 0), edge alpha ${edgeAlpha} (want 255)`
+            const lookOk = selBmp && colorDist(cornerPx, "#8b9099") <= 6 && colorDist(linePx, "#e8ecf0") <= 6 && midA === 0 && edgeAlpha === 255;
+            const op1 = sel ? sel.opacity : -1;
+            await t.waitFrames(PULSE_FRAMES / 2);
+            const op2 = sel ? sel.opacity : -1;
+            t.check("selection_square", !!sel && sel.visible && sel.parent === tilemap && sel.x === cev.screenX() && sel.y === footY(cev) && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z && lookOk && op1 !== op2 && op1 >= PULSE_MIN && op2 >= PULSE_MIN,
+                sel ? `square at (${sel.x},${sel.y}) vs feet (${cev.screenX()},${footY(cev)}); z ${sel.z} vs stance square ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}; bitmap ${selBmp ? selBmp._ufName : "none"}: corner ${cornerPx} (want iron #8b9099), line ${linePx} (want light #e8ecf0), middle alpha ${midA} (want 0), edge alpha ${edgeAlpha} (want 255); pulse opacity ${op1} -> ${op2}`
                     : "no selection marker drawn");
             await t.waitFrames(2);
             t.screenshot("selection_corners");
