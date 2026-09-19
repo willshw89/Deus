@@ -1,6 +1,6 @@
 # GUIDE: how to make UF look like Ultima VII
 
-> **OBSOLETE (2026-09-18, evening).** The user changed the look to **2D in the style of Final Fantasy VI** (VISION V2). Nothing in this guide applies any more: no lean, no lifts, no transposed facings, no U7 shape extraction. The current rules are in `docs/ART_STANDARD.md`. This file is kept as history only.
+> **CURRENT AGAIN (2026-09-18, night).** The user first replaced this look with a flat FF6 style (evening) and then brought it back the same night as **high-resolution 2.5D Ultima VII oblique, every asset inside one 48×48 square** (VISION V2, V9, V44). Everything in this guide about the lean, the lifts, the transposed facings and the U7 shape extraction applies; the one new rule is the square: nothing sprawls over its cell, large shapes are shrunk to fit (the reference squares in `art/u7_reference_squares/` show the result). `docs/ART_STANDARD.md` holds the binding rules; where the two disagree, ART_STANDARD wins. The evening banner is kept below as history only.
 
 Written for Gemini (and any agent) doing the 2.5D work. `ART_STANDARD.md` holds the rules; this is the how-to. Items tagged [MEASURE] are believed true but must be confirmed before building on them (ART_STANDARD §1).
 

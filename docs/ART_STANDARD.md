@@ -31,23 +31,23 @@
 | Step | Output | Who |
 |---|---|---|
 | 1. Brief | `art/briefs/<id>.md`: id, category, footprint, frame size, facings, animations, states, description | Claude Code drafts from the catalog; user approves |
-| 2. Style lock (once) | Four anchor assets: one person, one tree, one wall piece, one ground tile, in the FF6 manner | Gemini, then the user |
-| 3. Generate | `art/raw/<id>/`: one view per request, flat magenta `#FF00FF` background, the style anchors attached | Gemini |
-| 4. Clean | `art/masters/<id>.png`: downsample to 1×, snap to the palette, remove the background, place on the anchor | A tool |
+| 2. Style lock (once) | Four anchor assets: one person, one tree, one wall piece, one ground tile, in the U7 2.5D manner at 48×48 (the reference squares in `art/u7_reference_squares/` are the yardstick; the user approved the composite `art/review/u7_square_composite.png` on 2026-09-18) | Gemini, then the user |
+| 3. Generate | `art/raw/<id>/`: one view per request, flat magenta `#FF00FF` background, the reference square and the style anchors attached | Gemini |
+| 4. Clean | `art/masters/<id>.png`: **48×48 native** (1 art pixel = 1 screen pixel at zoom 1; no upscaling step), snap to the palette, remove the background, place on the anchor (bottom-centre of the cell, `[24, 47]`) | A tool |
 | 5. Check | §6 passes | Tool |
-| 6. Review | `art/review/index.html`: 1× and 3× next to the person reference, on grass | User |
+| 6. Review | `art/review/index.html`: 1× and 4× next to the person reference, on grass | User |
 | 7. Approve | `art/APPROVALS.md` | **User only** |
-| 8. Export | 3× to `game/img/` for approved ids | Tool |
+| 8. Export | copy to `game/img/` for approved ids (no scaling: masters are already at screen size) | Tool |
 
 ## 6. Asset checklist
-Automated: palette colors only; alpha 0 or 255; scaling the master 3× reproduces the export; frame size and anchor as the sidecar says; the sidecar exists with the right frame counts.
-By eye: upright, no lean; right size next to the person reference; same character in every frame; reads at 1× (farthest zoom) and at night; no stray pixels.
+Automated: palette colors only; alpha 0 or 255; the frame is 48×48 (or the sheet is a grid of 48×48 frames); frame size and anchor as the sidecar says; the sidecar exists with the right frame counts. (`tools/art_check.js` still applies the older 3×-grid rule; until it is updated, run it with `--type` where it matters and ignore the `grid` check for 48-native masters.)
+By eye: the 45° up-left lean reads (top, south and east faces visible); nothing clipped at the square's edges; right size next to the person reference; same character in every frame; reads at zoom ⅓ (farthest) and at night; no stray pixels.
 
 ## 7. How image models fail here, and the rule for each
 | Failure | Rule |
 |---|---|
 | Can't hit exact pixel sizes or sheet grids | Never trust the model's grid. The clean step rebuilds it. |
 | "Pixel art" with mixed pixel sizes and blur | Downsample and snap. If it falls apart at 1×, reject it. |
-| Drifts to isometric or to modern high-res | Attach the style anchors and a stock RPG Maker sprite as a size reference; reject anything that isn't flat 3/4 top-down. |
+| Drifts to isometric, to a flat JRPG view, or to painterly high-res | Attach the reference square for the same kind of thing and the style anchors; reject anything without the 45° up-left lean, anything with a diamond (isometric) base, and anything that does not fit the 48×48 square. |
 | The character changes between frames or facings | Approve one facing first, then use it as the reference for the others. |
 | Green fringes from green-screen | Magenta background only |

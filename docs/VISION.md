@@ -18,7 +18,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V6 | DF's systems are all in: randomness and world generation, gathering, construction, needs, combat. Implemented originally, not copied. |
 | V7 | Many races. Not dwarf-centric. |
 | V8 | Fantasy plus science-fiction elements are allowed. |
-| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. **Placeholders are RPG Maker's stock art** (licensed for RPG Maker games, and already in the FF6-like style); Ultima VII art is no longer used as a stand-in (revised 2026-09-18, evening; the `U7_` files on disk are replaced entry by entry and never committed). |
+| V9 | Setting, names, and terminology are original, not copied from Ultima or DF. Public-domain myth and generic SRD-style fantasy are fine. **Ultima VII shapes are the visual reference and the development stand-ins again** (revised 2026-09-18, night, with V2): decoded from `STATIC/SHAPES.VGA`, fitted into one 48×48 square, kept in `art/u7_reference_squares/` and as `U7_` files in `game/img/`, never committed, listed in STATUS → Stand-ins, and replaced by original art in the same manner before any release (AGENTS.md rule 8). Stock RPG Maker art is no longer the placeholder set (the 2026-09-18 evening decision is withdrawn). |
 | V13 | A cursor is how the player looks around (DF "look" style). The camera follows the cursor. |
 | V14 | The world is **one area at RMMZ's maximum size (256×256 cells)** with the pair in the middle (revised 2026-09-18 from a grid of areas; the engine still supports a grid, switched off). |
 | V15 | The camera zooms out to show more of the world (mouse wheel, − / +). Zoom steps keep pixel art exact. |
