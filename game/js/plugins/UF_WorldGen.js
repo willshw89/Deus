@@ -183,7 +183,9 @@
         },
         PEAK_REGION,
         stats: {},      // "ax,ay" -> { objectId: count } from the last build of each area
-        lastBuild: null // { area: {x, y}, ms, objects, biomes: { id: cells } } of the last build
+        lastBuild: null, // { area: {x, y}, ms, objects, biomes: { id: cells } } of the last build
+        fieldsFor: (seed, d, cl, gx, gy) => fieldsFor(seed, d, cl, gx, gy),
+        dims: st => dims(st)
     };
     window.UF = window.UF || {};
     window.UF.WorldGen = WorldGen;
@@ -437,6 +439,30 @@
                 flags |= FLAG_PEAK;
             } else if (f.t < 0.35) {
                 ground = "snow";
+            } else if (f.e < cl.mountainLevel + 0.04) {
+                ground = "stony";
+            } else if (f.e < cl.mountainLevel + 0.08) {
+                ground = "scree";
+            } else {
+                ground = "rock";
+            }
+        } else if (!water) {
+            // Continuous ecological ground gradient across moisture, temperature, and drainage
+            if (bio.ground === "meadow") {
+                if (f.r > 0.50 || f.d < 0.30) ground = "tropical_grass";
+                else if (f.r < 0.28 || f.d > 0.68) ground = "dry_grass";
+            } else if (bio.ground === "dry_grass") {
+                if (f.r > 0.38) ground = "meadow";
+                else if (f.r < 0.16 || f.d > 0.72) ground = "shrub_soil";
+            } else if (bio.ground === "shrub_soil") {
+                if (f.r > 0.28) ground = "dry_grass";
+                else if (f.d > 0.75) ground = "dirt";
+            } else if (bio.ground === "forest_floor") {
+                if (f.t < 0.36) ground = "needle_floor";
+                else if (f.r > 0.65 && f.t > 0.60) ground = "jungle_floor";
+            } else if (bio.ground === "needle_floor") {
+                if (f.t > 0.50 && f.r > 0.48) ground = "forest_floor";
+                else if (f.t < 0.20) ground = "tundra";
             }
         }
         if (alignId === "cursed") {
@@ -732,7 +758,11 @@
                     ctx.setTile(x, y, 0, waterBases[water[i] - 1] + shapes[mask]);
                 } else {
                     const g = ground[i];
-                    for (let k = 0; k < 8; k++) if (groundAt(x + NB[k][0], y + NB[k][1]) === g) mask |= NB[k][2];
+                    for (let k = 0; k < 8; k++) {
+                        const ng = groundAt(x + NB[k][0], y + NB[k][1]);
+                        const joins = ng === g || (window.UF && UF.Tiles && UF.Tiles.joins && UF.Tiles.joins(m.groundIds[ng], m.groundIds[g]));
+                        if (joins) mask |= NB[k][2];
+                    }
                     ctx.setTile(x, y, 0, groundBases[g] + shapes[mask]);
                     if (flags[i] & FLAG_PEAK) ctx.setTile(x, y, 5, PEAK_REGION);
                 }
@@ -1216,7 +1246,11 @@
                     let nearWater = false;
                     for (const [dx, dy] of NB) if (isWaterTile(here.data[(y + dy) * size + x + dx])) nearWater = true;
                     if (!wet && nearWater) continue;
-                    const want = autotileShape((dx, dy) => (wet ? isWaterTile(here.data[(y + dy) * size + x + dx]) : kindOf(here.data[(y + dy) * size + x + dx]) === kind));
+                    const want = autotileShape((dx, dy) => {
+                        if (wet) return isWaterTile(here.data[(y + dy) * size + x + dx]);
+                        const nk = kindOf(here.data[(y + dy) * size + x + dx]);
+                        return nk === kind || (window.UF && UF.Tiles && UF.Tiles.joins && UF.Tiles.joins(nk, kind));
+                    });
                     const got = (tile - Tilemap.TILE_ID_A1) % 48;
                     sampled++;
                     if (wet) waterSampled++;
