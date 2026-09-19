@@ -32,8 +32,14 @@ if (hare) {
     hare.tint = '#ffffff';
 }
 
+const wolf = catalog.wildlife.species.find(s => s.id === 'wolf');
+if (wolf) {
+    wolf.image = '$UF_Wolf';
+    wolf.tint = '#ffffff';
+}
+
 fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2) + '\n');
-console.log('Updated catalog in snapshot: boar -> $UF_Boar, hare -> $UF_Hare');
+console.log('Updated catalog in snapshot: boar -> $UF_Boar, hare -> $UF_Hare, wolf -> $UF_Wolf');
 
 // Add a high-visibility in-game showcase step to UF_Wildlife.js test in the snapshot
 const wildlifeJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Wildlife.js');
@@ -41,14 +47,20 @@ let wildlifeJs = fs.readFileSync(wildlifeJsPath, 'utf8');
 
 const targetHook = 't.screenshot("df_behaviors");';
 const customShowcase = `
-            // In-Game Live Creature Visual Showcase
+            // In-Game Live Creature Visual Showcase (Boar, Hare, Wolf)
             const showBoar = add("boar", px - 1, py, { ai: "wander", state: "idle" });
             const showHare = add("hare", px + 1, py, { ai: "wander", state: "idle" });
             const showBoarGraze = add("boar", px - 2, py + 1, { ai: "none", state: "graze" });
             const showHareHop = add("hare", px + 2, py + 1, { ai: "none", state: "walk" });
+            const showWolf = add("wolf", px, py - 2, { ai: "wander", state: "idle" });
+            const showWolfAttack = add("wolf", px - 2, py - 1, { ai: "none", state: "attack" });
+
+            if (UF.Camera) UF.Camera.setLevel(0);
+            $gamePlayer.locate(px, py);
+            await t.waitFrames(15);
+            t.screenshot("creatures_live_ingame_closeup");
 
             if (UF.Camera) UF.Camera.setLevel(1);
-            $gamePlayer.locate(px, py);
             await t.waitFrames(15);
             t.screenshot("creatures_live_ingame");
             ${targetHook}

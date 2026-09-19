@@ -1,0 +1,41 @@
+{
+  "id": "wolf_graze",
+  "species": "wolf",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "graze": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "eat": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "frameMs": 200,
+  "layer": "body",
+  "category": "wildlife"
+}

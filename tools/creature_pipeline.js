@@ -64,6 +64,8 @@ function isBgPixel(r, g, b) {
     if (r > 150 && g < 90 && b > 150) return true;
     if (r > 130 && g < 70 && b > 130) return true;
     if (r > 180 && g < 120 && b > 180) return true;
+    if (r > 20 && b > 20 && (r + b) > 2 * g + 20) return true;
+    if (r > 15 && b > 15 && r > g + 10 && b > g + 10) return true;
     return false;
 }
 
