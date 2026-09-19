@@ -1,0 +1,56 @@
+{
+  "id": "ui_dialogue",
+  "frameWidth": 272,
+  "frameHeight": 160,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "parts": {
+    "portrait_frame": [
+      0,
+      0,
+      152,
+      152
+    ],
+    "portrait_viewport": [
+      4,
+      4,
+      144,
+      144
+    ],
+    "button_normal": [
+      160,
+      0,
+      96,
+      24
+    ],
+    "button_hover": [
+      160,
+      32,
+      96,
+      24
+    ],
+    "button_pressed": [
+      160,
+      64,
+      96,
+      24
+    ],
+    "speech_tail": [
+      160,
+      96,
+      24,
+      16
+    ],
+    "buttonBorder": 6
+  }
+}

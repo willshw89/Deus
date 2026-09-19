@@ -1,0 +1,28 @@
+{
+  "id": "ui_window_skin",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "skin": {
+    "frameMargin": 24,
+    "cursorMargin": 4,
+    "swatches": [
+      96,
+      144,
+      12,
+      8,
+      4
+    ]
+  }
+}

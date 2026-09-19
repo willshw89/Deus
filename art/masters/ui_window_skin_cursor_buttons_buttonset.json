@@ -1,0 +1,58 @@
+{
+  "id": "ui_window_skin_cursor_buttons_buttonset",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "rest": [
+      0
+    ],
+    "pressed": [
+      1
+    ]
+  },
+  "buttons": {
+    "cancel": [
+      0,
+      2
+    ],
+    "pageup": [
+      2,
+      1
+    ],
+    "pagedown": [
+      3,
+      1
+    ],
+    "down": [
+      4,
+      1
+    ],
+    "up": [
+      5,
+      1
+    ],
+    "down2": [
+      6,
+      1
+    ],
+    "up2": [
+      7,
+      1
+    ],
+    "ok": [
+      8,
+      2
+    ],
+    "menu": [
+      10,
+      1
+    ]
+  }
+}

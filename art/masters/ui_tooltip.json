@@ -1,0 +1,20 @@
+{
+  "id": "ui_tooltip",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "slice": {
+    "border": 8
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "ui_stance_hostile",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  }
+}

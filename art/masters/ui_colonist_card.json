@@ -1,0 +1,56 @@
+{
+  "id": "ui_colonist_card",
+  "frameWidth": 96,
+  "frameHeight": 24,
+  "anchor": [
+    24,
+    23
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "parts": {
+    "trough": [
+      0,
+      0,
+      12,
+      12
+    ],
+    "troughBorder": 4,
+    "fill_hunger": [
+      16,
+      0,
+      8,
+      8
+    ],
+    "fill_thirst": [
+      24,
+      0,
+      8,
+      8
+    ],
+    "fill_sleep": [
+      32,
+      0,
+      8,
+      8
+    ],
+    "fill_social": [
+      40,
+      0,
+      8,
+      8
+    ],
+    "divider": [
+      0,
+      16,
+      64,
+      6
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "id": "ui_character_sheet",
+  "frameWidth": 288,
+  "frameHeight": 256,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "parts": {
+    "cell": [
+      0,
+      0,
+      48,
+      48
+    ],
+    "slot_head": [
+      48,
+      0,
+      48,
+      48
+    ],
+    "slot_weapon": [
+      96,
+      0,
+      48,
+      48
+    ],
+    "slot_shield": [
+      144,
+      0,
+      48,
+      48
+    ],
+    "slot_torso": [
+      192,
+      0,
+      48,
+      48
+    ],
+    "slot_legs": [
+      240,
+      0,
+      48,
+      48
+    ],
+    "tab_front": [
+      0,
+      48,
+      96,
+      28
+    ],
+    "tab_back": [
+      0,
+      76,
+      96,
+      28
+    ],
+    "face_bezel": [
+      0,
+      104,
+      152,
+      152
+    ]
+  }
+}

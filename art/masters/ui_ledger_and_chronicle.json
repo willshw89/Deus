@@ -1,0 +1,32 @@
+{
+  "id": "ui_ledger_and_chronicle",
+  "frameWidth": 64,
+  "frameHeight": 16,
+  "anchor": [
+    24,
+    15
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "parts": {
+    "row": [
+      0,
+      0,
+      16,
+      16
+    ],
+    "rowBorder": 4,
+    "flourish": [
+      16,
+      0,
+      48,
+      12
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "ui_designation_markers",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "chop": [
+      0
+    ],
+    "gather": [
+      1
+    ],
+    "pick": [
+      2
+    ],
+    "quarry": [
+      3
+    ],
+    "mine": [
+      4
+    ],
+    "dismantle": [
+      5
+    ],
+    "build": [
+      6
+    ],
+    "dig": [
+      7
+    ],
+    "fish": [
+      8
+    ],
+    "hunt": [
+      9
+    ],
+    "haul": [
+      10
+    ],
+    "eat": [
+      11
+    ],
+    "drink": [
+      12
+    ],
+    "move": [
+      13
+    ],
+    "default": [
+      14
+    ]
+  }
+}
