@@ -22,7 +22,7 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 5. **Look at every screenshot you produce.** Open the image, describe what's actually in it, and compare it to the acceptance criteria before the user sees anything. If it's wrong, fix it or report it as wrong.
 6. **The user approves every slice and every art asset.** Stop at the gate. Don't start the next slice without an explicit "approved".
 7. **Don't invent the game.** No new lore, place names, races, factions, or named characters unless they're approved in `docs/VISION.md`. Placeholder names start with `TEST_`.
-8. **Ultima VII art may be used as examples and stand-ins; nothing copied ships.** (User decision 2026-09-18.) Stand-in files in `game/` must start with `U7_` (`$U7_Man.png`), use exactly 3× scale, and be listed in `docs/STATUS.md` → Stand-ins. They all get replaced with original art before any release. See `docs/GUIDE_25D.md` §2 and "Reference vs. shipped content" below.
+8. **Ultima VII art may be used as examples, stand-ins, style references and training data for our art generators; everything that ships is our own original work.** (User decisions 2026-09-18 and 2026-09-19; the user accepted the risk of training on it.) No shipped asset may be a copy, trace, recolour, crop or near-copy of a U7 image: every delivered asset passes `tools/originality_check.js` against the U7 shape library before it goes into `game/`. Stand-in files in `game/` must start with `U7_` (`$U7_Man.png`), use exactly 3× scale, and be listed in `docs/STATUS.md` → Stand-ins. They all get replaced with original art before any release. See `docs/GUIDE_25D.md` §2 and "Reference vs. shipped content" below.
 9. **The engine core is read-only.** Never edit `game/js/rmmz_*.js`, `game/js/main.js`, or `game/js/libs/`. All behavior goes in `game/js/plugins/UF_*.js`.
 10. **Two failed fixes means stop.** If the same problem survives two attempts, stop patching. Write down what you know and what you've ruled out, then ask the user.
 
@@ -70,7 +70,7 @@ If "Not done / known problems" is empty, reread your evidence. It's almost never
 ## Reference vs. shipped content
 | Location | What it is | Rule |
 |---|---|---|
-| `Ultima VII - * [GOG.com]/` | The original games | Read-only reference, and a source of **stand-in** art (rule 8): `U7_`-prefixed, 3×, listed in STATUS, replaced before release. |
+| `Ultima VII - * [GOG.com]/` | The original games | Read-only reference; a source of **stand-in** art (rule 8: `U7_`-prefixed, 3×, listed in STATUS, replaced before release); and **style references and training data** for our art generators (2026-09-19). Exported training material lives in `reference/` only (local, never committed, never loaded by the game). |
 | Root `Dwarf Fortress.exe`, `data/`, DLLs | The original game | Read-only reference for mechanics. Raws and text never go into `game/`. |
 | `reference/` (create when needed) | Extracted frames, measurements, screenshots for study | Local only. Never loaded by the game. |
 | `game/` | The RMMZ project | Original or properly licensed content, plus `U7_` stand-ins during development. |
