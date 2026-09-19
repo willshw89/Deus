@@ -13,13 +13,55 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
+    ],
+    "walk": [
+      1,
+      2,
+      3
+    ],
+    "work": [
+      4,
+      5,
+      6
+    ],
+    "carry": [
+      7
+    ],
+    "attack": [
+      8,
+      9,
+      10
+    ],
+    "cast": [
+      11,
+      12,
+      13
+    ],
+    "hurt": [
+      14
+    ],
+    "death": [
+      15,
+      16,
+      17
+    ],
+    "idle": [
+      18,
+      19
     ]
   },
   "frameMs": 150,
-  "notes": "Adult human male settler south stand anchor frame, 32px tall, 48x48 frame, 2.5D oblique up-left lean."
+  "layer": "body",
+  "species": "human",
+  "stage": "adult",
+  "gender": "male",
+  "notes": "Full 20-column x 4-row (S, W, E, N) original master character sheet for adult human male settler on 48x48 grid."
 }
