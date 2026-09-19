@@ -1,0 +1,23 @@
+{
+  "id": "human_male",
+  "name": "Human Male Settler (South Stand)",
+  "category": "People",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  }
+}
