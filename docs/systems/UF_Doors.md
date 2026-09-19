@@ -19,6 +19,12 @@ Both have `tags: ["building", "door", <material>]`, `passable: false`, a `door` 
 
 ## Placement and movement
 
+Z compatibility safeguards added 2026-09-19: area handles may include `z`, with omission meaning Ground. Nonzero levels are accepted only when `UF.World` exposes both documented `viewLevel()` and `levelOfMapId()` methods; no function-arity detection is used. Every level must be an integer in `[-2,2]`. Invalid levels and nonzero requests on the legacy core are refused before reading or changing objects. This prepares Doors for the vertical core; it does not install that core or enable travel between levels.
+
+Registry keys, occupancy, faction passage, terrain reads, pending placements, object events and viewed sprites distinguish levels. Unit records use their separate `unit.z`; site records accept `site.z` or a level area. `cellFree` forwards its trailing `z` argument even when there is no door. On-screen character passage uses the viewed level and rejects a mover on a different level. Pending placements and open timers continue independently of which level is rendered.
+
+**Vertical integration requirement:** the recovered UF_Levels V1 snapshot installs a dispatcher that bypasses UF_Doors for nonzero `cellFree` calls. Its owner must remove that bypass when integrating this version of Doors; otherwise upper/underground doors will still be treated as ordinary impassable objects. World, Objects and site callers must all implement the documented level seam together before enabling nonzero door creation. The five 256-by-256 maps must simulate concurrently; only rendering is selected by the view.
+
 - `placeAll()` visits `UF.History.sites()` once per world. Ruined and factionless sites are skipped.
 - `placeSite(site)` gets the rich site record from `sitesIn`, finds every missing wall cell on its square perimeter, and reads `settled.houses[].door` for house entrances.
 - Under V31's no-history start there are no generated sites, walls, or houses, so normal automatic placement has nothing to modify. Doors enter play when the building/society systems create them; the focused suite builds and removes a synthetic walled-room fixture so it can still exercise the full contract.
@@ -33,7 +39,7 @@ Both have `tags: ["building", "door", <material>]`, `passable: false`, a `door` 
 | Member | Meaning |
 |---|---|
 | `OPEN_FRAMES`, `FRIENDLY_RELATION` | 90 and 15 |
-| `cellKey(area,x,y)` / `parseKey(key)` | Convert between a cell and `"ax,ay:x,y"` |
+| `cellKey(area,x,y)` / `parseKey(key)` | Ground stays `"ax,ay:x,y"`; a nonzero level uses `"ax,ay,z:x,y"`. Invalid levels return null. Parsing preserves a nonzero `area.z`. |
 | `store()` | Returns `UF.World.state.doors` |
 | `at(area,x,y)` / `stateAt(area,x,y)` | Door record or saved state at a cell |
 | `isDoorType(type)` / `isOpen(area,x,y)` | Type/state predicates |
@@ -57,7 +63,7 @@ Each `byCell[key]` is `{ objectId, faction, hp, maxHp, heldOpen, openUntil }`. `
 
 Emits `doors:placed(count)`, `doors:opened(stateOrDoor)`, `doors:closed(door)`, `doors:damaged(key,hp)`, and `doors:broken(key,ruin)`.
 
-Listens to `world:created`, `world:areaBuilt`, and `objects:changed`. It also registers `retryPending` with `UF.Time.every(30, ...)` when that API exists. On destruction it calls `UF.History.addEvent(...)` only when that optional API exists.
+Listens to `world:created`, `world:areaBuilt`, `world:levelBuilt`, `objects:changed`, and `objects:levelChanged`. It also registers `retryPending` with `UF.Time.every(30, ...)` when that API exists. On destruction it calls `UF.History.addEvent(...)` only when that optional API exists.
 
 When `UF_Test` selects a focused suite other than `doors`, automatic historical-door placement is suppressed so the new barriers cannot change another system's fixture geometry. Normal play is unaffected, and the `doors` suite explicitly runs full placement.
 
@@ -87,6 +93,9 @@ When `UF_Test` selects a focused suite other than `doors`, automatic historical-
 Observed in `live_doors_fix1` on 2026-09-19 against the no-history live tree: 12 passed, 0 failed; one synthetic opening checked, and 10,000 faction checks in 1.025 ms. The owning-faction unit crossed and the invisible player view's passage check also succeeded. The earlier deliberate no-catalog run failed `doors.catalog`, proving that check can fail. `doors.closed_animal_outside.png` shows the closed brown stock door in the synthetic room's north wall with the blocked yellow-marked test animal outside; its stock placeholder reads more like a small pink humanoid than a hare. `doors.open_colonist_passing.png` shows the door's gray open frame and the friendly passage fixture. Both images were opened and inspected.
 
 ## Assets and known limits
+
+- The standalone command `"C:\Program Files\nodejs\node.exe" tools/test_z_doors.js` exercises the real plugin in a Node VM with legacy and level-capable World/Objects stubs. It covers legacy refusal, invalid levels, independent keys and saved-world JSON round-trip, trailing z forwarding, occupancy, off-screen terrain, movement, level-specific events/damage/sprite frames, and off-screen pending placement/timer expiry. Normal 9/9; `--provoke` removes the actual trailing-z forwarding expression and produced 8 PASS / 1 FAIL. These contract checks do not prove RMMZ rendering, real level-core integration or concurrent simulation.
+- Ground runtime regression `codex_zcompat_20260919_doors_a` passed 12/12. Opened both captures: the closed brown door in a wooden room with the small pink test-animal placeholder outside, then the gray open frame. Friendly and allied units crossed; wildlife and strangers did not. F5/F8 has not been run.
 
 - Stock `!Door1` is visibly a temporary shutter/metal-door look. Consecutive perimeter gaps become consecutive one-cell doors, so a two-cell gate reads as a paired door.
 - The same stock art serves wood and tinted stone. Original one-cell wood and stone sheets are specified in `docs/handoffs/HANDOFF_floors_doors.md`.

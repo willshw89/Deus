@@ -40,11 +40,19 @@
     const Items = () => (window.UF && UF.Items) || null;
     const Jobs = () => (window.UF && UF.Jobs) || null;
     const Tiles = () => (window.UF && UF.Tiles) || null;
-    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
-    const copyArea = a => ({ x: a.x, y: a.y });
+    // Records store z beside area; API handles store it inside the area.
+    const zOf = ref => ref && ref.z !== undefined ? ref.z : ref && ref.area && ref.area.z !== undefined ? ref.area.z : 0;
+    const copyArea = ref => { const a = ref.area || ref; return { x: a.x, y: a.y, z: zOf(ref) }; };
+    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
+    function supportedArea(area) {
+        const W = World(), z = zOf(area);
+        return !!area && Number.isInteger(z) && z >= -2 && z <= 2 &&
+            (z === 0 || !!(W && typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function"));
+    }
+    const viewArea = () => { const W = World(); return W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea()); };
     const emit = (name, ...args) => { if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args); };
     const keyOf = (x, y) => `${x},${y}`;
-    const areaKey = a => `${a.x},${a.y}`;
+    const areaKey = a => zOf(a) === 0 ? `${a.x},${a.y}` : `${a.x},${a.y},${zOf(a)}`;
 
     function floorState() {
         const W = World();
@@ -53,20 +61,23 @@
     }
     const floorKind = id => FLOOR_IDS.includes(id);
     function kindAt(area, x, y) {
+        // UF_Tiles' A2 kinds describe tileset 91, not the levels' tileset 92.
+        if (!supportedArea(area) || zOf(area) !== 0) return null;
         const W = World(), T = Tiles();
-        return W && T ? T.kindOfTile(W.getTile(area.x, area.y, x, y, 0)) : null;
+        return W && T ? T.kindOfTile(W.getTile(area.x, area.y, x, y, 0, 0)) : null;
     }
     function isWater(area, x, y) {
         const J = Jobs();
         if (J && typeof J.isWaterAt === "function") return J.isWaterAt(area, x, y);
-        const W = World(), tile = W ? W.getTile(area.x, area.y, x, y, 0) : 0;
+        const W = World(), tile = W ? W.getTile(area.x, area.y, x, y, 0, zOf(area)) : 0;
         return !!tile && Tilemap.isTileA1(tile);
     }
     function inBounds(area, x, y) {
         const W = World();
-        return !!W && !!W.state && W.inWorld(area.x, area.y) && x >= 0 && y >= 0 && x < W.state.size && y < W.state.size;
+        return supportedArea(area) && !!W && !!W.state && W.inWorld(area.x, area.y, zOf(area)) && x >= 0 && y >= 0 && x < W.state.size && y < W.state.size;
     }
     function isBarrier(area, x, y) {
+        if (!inBounds(area, x, y)) return false;
         const O = Objects(), type = O && O.atIn(area, x, y);
         return !!type && Array.isArray(type.tags) && (type.tags.includes("wall") || type.tags.includes("door"));
     }
@@ -78,6 +89,10 @@
     function cellWalkableForRoom(area, x, y) {
         if (!inBounds(area, x, y) || isWater(area, x, y) || isBarrier(area, x, y)) return false;
         const k = kindAt(area, x, y), O = Objects(), o = O && O.atIn(area, x, y);
+        if (zOf(area) !== 0) {
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.standableShape !== "function" || !L.standableShape({ area, x, y, z: zOf(area) })) return false;
+        }
         if (k && k.passable === false) return false;
         return !o || o.passable === true;
     }
@@ -111,14 +126,14 @@
         }
         if (gaps.size > MAX_ROOM_GAPS) return failed(seen);
         cells.sort((a, b) => a.y - b.y || a.x - b.x);
-        const H = window.UF && UF.History, site = H && typeof H.siteAt === "function" ? H.siteAt(sx, sy, area) : null;
+        const H = window.UF && UF.History, site = zOf(area) === 0 && H && typeof H.siteAt === "function" ? H.siteAt(sx, sy, area) : null;
         return { seen, room: {
-            id: `room:${area.x},${area.y}:${cells[0].x},${cells[0].y}:${cells.length}`,
+            id: `room:${areaKey(area)}:${cells[0].x},${cells[0].y}:${cells.length}`,
             area: copyArea(area), cells, gaps: [...gaps.values()].sort((a, b) => a.y - b.y || a.x - b.x), siteId: site ? site.id : null
         } };
     }
     function roomAt(area, x, y) {
-        if (!area) return null;
+        if (!inBounds(area, x, y)) return null;
         const c = cacheFor(area), k = keyOf(x, y);
         if (c.byCell.has(k)) return c.byCell.get(k);
         if (c.misses.has(k)) return null;
@@ -138,7 +153,7 @@
             else return null;
         }
         if (!cells.length || gaps.length > MAX_ROOM_GAPS) return null;
-        const room = { id: `room:${area.x},${area.y}:${cells[0].x},${cells[0].y}:${cells.length}`,
+        const room = { id: `room:${areaKey(area)}:${cells[0].x},${cells[0].y}:${cells.length}`,
             area: copyArea(area), cells, gaps, siteId: siteId === undefined ? null : siteId };
         const c = cacheFor(area);
         for (const cell of cells) c.byCell.set(keyOf(cell.x, cell.y), room);
@@ -147,7 +162,12 @@
     function roomValue(room) {
         if (!room || !room.cells || !room.cells.length) return 0;
         let n = 0;
-        for (const c of room.cells) { const k = kindAt(room.area, c.x, c.y); if (k && floorKind(k.id)) n++; }
+        for (const c of room.cells) {
+            if (zOf(room.area) !== 0) {
+                const L = window.UF && UF.Levels, cell = L && typeof L.cellAt === "function" && L.cellAt({ area: room.area, x: c.x, y: c.y, z: zOf(room.area) });
+                if (cell && cell.constructed && cell.shape === "floor") n++;
+            } else { const k = kindAt(room.area, c.x, c.y); if (k && floorKind(k.id)) n++; }
+        }
         return n / room.cells.length;
     }
     const Rooms = { MAX_ROOM_CELLS, MAX_ROOM_GAPS, roomAt, value: roomValue, invalidate };
@@ -162,7 +182,7 @@
     }
     function reshapeAround(area, x, y) {
         const W = World(), T = Tiles();
-        if (!W || !T) return;
+        if (!W || !T || !supportedArea(area) || zOf(area) !== 0) return;
         for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
             const px = x + dx, py = y + dy;
             if (!inBounds(area, px, py)) continue;
@@ -172,10 +192,14 @@
         }
     }
     function setGround(area, x, y, kindId) {
+        // Non-ground construction needs Levels shape/material/support updates.
+        // Refuse before touching tiles until that construction adapter lands.
+        if (!supportedArea(area) || zOf(area) !== 0) return false;
         const W = World(), T = Tiles(), base = T && T.groundBase(kindId);
         if (!W || base === null || base === undefined || !inBounds(area, x, y)) return false;
         W.setTile(area.x, area.y, x, y, 0, base);
         reshapeAround(area, x, y);
+        invalidate(area);
         emit("floors:groundChanged", area, x, y, kindId);
         return true;
     }
@@ -193,6 +217,7 @@
         return true;
     }
     function canLay(area, x, y, force) {
+        if (!supportedArea(area) || zOf(area) !== 0) return { ok: false, reason: "level floor construction is not available" };
         if (!inBounds(area, x, y)) return { ok: false, reason: "off the map" };
         if (isWater(area, x, y)) return { ok: false, reason: "water" };
         const O = Objects(), o = O && O.atIn(area, x, y);
@@ -219,12 +244,14 @@
         J.define("floor", {
             verb: "Laying floor",
             plan(job, unit) {
-                const p = job.params || {}, area = job.target.area;
+                const p = job.params || {}, area = copyArea(job.target);
+                if (!sameArea(area, copyArea(unit))) return { ok: false, reason: "worker is on another level or area" };
+                if (!floorKind(p.kind)) return { ok: false, reason: "invalid floor kind" };
                 const valid = canLay(area, job.target.x, job.target.y, !!p.force);
                 if (!valid.ok) return { ok: false, reason: valid.reason };
                 const I = Items(), need = Math.max(1, p.count | 0);
                 if (!I || !I.type(p.item) || !Tiles().groundBase(p.kind)) return { ok: false, reason: "missing floor material" };
-                const onCell = I.count({ area, x: job.target.x, y: job.target.y }, p.item);
+                const onCell = I.count({ area, x: job.target.x, y: job.target.y, z: zOf(area) }, p.item);
                 const carried = I.count(unit.id, p.item);
                 if (onCell >= need || carried >= need) {
                     p.ready = true;
@@ -233,24 +260,31 @@
                     return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
                 }
                 p.ready = false;
-                const found = I.find({ near: { x: unit.x, y: unit.y }, radius: SEARCH_RADIUS, id: p.item, area: unit.area, limit: 1 })[0];
+                const found = I.find({ near: { x: unit.x, y: unit.y }, radius: SEARCH_RADIUS, id: p.item, area: copyArea(unit), z: zOf(unit), limit: 1 })[0];
                 if (!found) return { ok: false, reason: `needs ${p.item}` };
                 p.fetchItemId = found.item.id;
-                const stand = J.standFor({ area: found.item.area, x: found.x, y: found.y }, unit, false);
+                const stand = J.standFor({ area: copyArea(found.item), x: found.x, y: found.y, z: zOf(found.item) }, unit, false);
                 return stand ? { ok: true, stand } : { ok: false, reason: "can't reach the material" };
             },
             work: job => job.params && job.params.ready ? Math.max(1, job.params.work | 0 || FLOOR_WORK) : 0,
             apply(job, unit) {
                 const p = job.params || {}, I = Items(), need = Math.max(1, p.count | 0);
+                const area = copyArea(job.target), valid = canLay(area, job.target.x, job.target.y, !!p.force);
+                if (!valid.ok || !sameArea(area, copyArea(unit)) || !floorKind(p.kind)) {
+                    job.reason = !valid.ok ? valid.reason : "invalid floor or worker level";
+                    // Jobs.finish treats undefined as success. Replan so its
+                    // ordinary plan refusal fails this stale job, not jobs:done.
+                    return "continue";
+                }
                 if (!p.ready) {
                     if (!p.fetchItemId || !I || !I.pickUp(p.fetchItemId, unit.id)) { job.reason = "the material is gone"; return; }
                     delete p.fetchItemId;
                     return "continue";
                 }
-                const ground = consumeGround(job.target.area, job.target.x, job.target.y, p.item, need);
+                const ground = consumeGround(area, job.target.x, job.target.y, p.item, need);
                 const carried = ground < need && I ? I.consumeFrom(unit.id, p.item, need - ground) : 0;
                 if (ground + carried < need) { job.reason = `needs ${p.item}`; return; }
-                if (!setFloor(job.target.area, job.target.x, job.target.y, p.kind)) job.reason = "the floor could not be laid";
+                if (!setFloor(area, job.target.x, job.target.y, p.kind)) { job.reason = "the floor could not be laid"; return; }
                 job.result = { kind: p.kind, item: p.item, count: need };
             },
             describe(job) {
@@ -270,12 +304,14 @@
     function activeFloorAt(area, x, y) {
         const J = Jobs();
         return J && J.list().some(j => j.type === "floor" && (j.state === "open" || j.state === "travel" || j.state === "work") &&
-            sameArea(j.target.area, area) && j.target.x === x && j.target.y === y);
+            sameArea(copyArea(j.target), area) && j.target.x === x && j.target.y === y);
     }
     function roomsNearSite(site) {
         const rooms = new Map(), H = window.UF && UF.History;
         const full = H && site.id !== undefined && typeof H.siteById === "function" ? H.siteById(site.id) || site : site;
-        const area = full.area || site.area, cache = cacheFor(area);
+        const area = copyArea(full.area ? full : site);
+        if (!supportedArea(area) || zOf(area) !== 0) return [];
+        const cache = cacheFor(area);
         const scanKey = `${full.id === undefined ? "camp" : full.id}:${full.x},${full.y}:${full.radius || 4}`;
         if (cache.siteRooms.has(scanKey)) return cache.siteRooms.get(scanKey);
         const houses = (full.settled && full.settled.houses) || [];
@@ -326,7 +362,7 @@
                 if (!left) break;
                 const k = kindAt(room.area, cell.x, cell.y);
                 if (!k || floorKind(k.id) || !canLay(room.area, cell.x, cell.y, false).ok || activeFloorAt(room.area, cell.x, cell.y)) continue;
-                const job = J.create({ type: "floor", target: { area: copyArea(room.area), x: cell.x, y: cell.y },
+                const job = J.create({ type: "floor", target: { area: copyArea(room.area), x: cell.x, y: cell.y, z: zOf(room.area) },
                     params: { kind: spec.kind, item: spec.item, count: spec.count, force: false }, owner: null });
                 if (job) { made.push(job); left--; if (st) st.designationOrder.push(`${cell.x},${cell.y}`); }
             }
@@ -342,12 +378,14 @@
         let n = 0;
         for (const site of sites) {
             if (site.ruined || site.faction === (player && player.id) || !["town", "hold"].includes(site.kind)) continue;
+            const area = copyArea(site);
+            if (!supportedArea(area) || zOf(area) !== 0) continue;
             const f = F.get(site.faction), c = f && cat.cultures && cat.cultures[f.species], spec = c && c.floor;
             if (!spec || !Tiles().groundBase(spec.kind)) continue;
             for (const h of (site.settled && site.settled.houses) || []) {
                 for (let y = h.y + 1; y < h.y + h.h - 1; y++) for (let x = h.x + 1; x < h.x + h.w - 1; x++) {
-                    const k = kindAt(site.area, x, y);
-                    if (k && !floorKind(k.id) && setFloor(site.area, x, y, spec.kind)) n++;
+                    const k = kindAt(area, x, y);
+                    if (k && !floorKind(k.id) && setFloor(area, x, y, spec.kind)) n++;
                 }
             }
         }
@@ -356,8 +394,8 @@
 
     const floorWord = id => id === "floor_stone" ? "flagstones" : id === "floor_rushes" ? "rushes" : "planks";
     function augmentOptions(base, x, y) {
-        const list = Array.isArray(base) ? base.slice() : [], W = World(), area = W && W.currentArea();
-        if (!area || list.some(o => o.id === "floor:lay" || o.id === "floor:remove")) return list;
+        const list = Array.isArray(base) ? base.slice() : [], area = viewArea();
+        if (!supportedArea(area) || zOf(area) !== 0 || list.some(o => o.id === "floor:lay" || o.id === "floor:remove")) return list;
         const current = kindAt(area, x, y), spec = playerCultureFloor(), O = Objects(), object = O && O.at(x, y);
         let opt = null;
         if (current && floorKind(current.id)) {
@@ -397,7 +435,12 @@
         if (eventsHooked || !window.UF || !UF.Events) return;
         eventsHooked = true;
         UF.Events.on("objects:changed", area => invalidate(area));
+        UF.Events.on("objects:levelChanged", area => invalidate(area));
+        UF.Events.on("world:tileChanged", area => invalidate(area));
+        UF.Events.on("world:levelTileChanged", area => invalidate(area));
+        UF.Events.on("levels:shapeChanged", ref => invalidate(copyArea(ref)));
         UF.Events.on("world:created", () => {
+            invalidate();
             floorState();
             // Floor planning deliberately creates open jobs and changes house
             // ground.  Keep focused suites isolated; the floors suite itself
@@ -416,6 +459,15 @@
     window.UF.Floors = Floors;
     defineJobType();
     hookEvents();
+
+    if (typeof DataManager !== "undefined" && typeof DataManager.extractSaveContents === "function") {
+        const _extractSaveContents = DataManager.extractSaveContents;
+        DataManager.extractSaveContents = function(contents) {
+            const result = _extractSaveContents.call(this, contents);
+            invalidate();
+            return result;
+        };
+    }
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() {

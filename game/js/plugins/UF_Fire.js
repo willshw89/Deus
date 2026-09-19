@@ -66,10 +66,21 @@
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
-    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
-    const copyArea = a => ({ x: a.x, y: a.y });
-    const areaKey = a => `${a.x},${a.y}`;
-    const keyOf = (area, x, y) => `${area.x},${area.y}:${x},${y}`;
+    const zOf = ref => ref && ref.z !== undefined ? ref.z : (ref && ref.area && ref.area.z !== undefined ? ref.area.z : 0);
+    const levelArea = ref => { const a = ref && (ref.area || ref); return a ? { x: a.x, y: a.y, z: zOf(ref) } : null; };
+    const hasLevels = W => !!W && typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function" && typeof W.isLevel === "function";
+    // Capability comes from the documented World seam, never function arity.
+    const acceptsArea = a => {
+        const W = World(), z = zOf(a);
+        return !!a && !!W && Number.isInteger(z) && z >= -2 && z <= 2 &&
+            (z === 0 || (hasLevels(W) && W.isLevel(z))) && W.inWorld(a.x, a.y, z);
+    };
+    const viewArea = () => { const W = World(); const a = W ? (hasLevels(W) ? W.viewLevel() : W.currentArea()) : null; return acceptsArea(a) ? a : null; };
+    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
+    const copyArea = a => zOf(a) === 0 ? { x: a.x, y: a.y } : { x: a.x, y: a.y, z: zOf(a) };
+    const cellRef = (area, x, y) => ({ area: { x: area.x, y: area.y }, x, y, z: zOf(area) });
+    const areaKey = a => `${a.x},${a.y}${zOf(a) === 0 ? "" : `,${zOf(a)}`}`;
+    const keyOf = (area, x, y) => `${areaKey(area)}:${x},${y}`;
     const num = (v, fallback) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
     const errors = []; // errors caught inside the beat (the no_errors check reads them)
 
@@ -158,9 +169,11 @@
     function parseKey(key) {
         let p = parsedKeys.get(key);
         if (p) return p;
-        const m = /^(-?\d+),(-?\d+):(-?\d+),(-?\d+)$/.exec(key);
+        const m = /^(-?\d+),(-?\d+)(?:,(-?\d+))?:(-?\d+),(-?\d+)$/.exec(key);
         if (!m) return null;
-        p = { area: { x: Number(m[1]), y: Number(m[2]) }, x: Number(m[3]), y: Number(m[4]) };
+        const z = m[3] === undefined ? 0 : Number(m[3]);
+        if (z < -2 || z > 2) return null;
+        p = { area: copyArea({ x: Number(m[1]), y: Number(m[2]), z }), x: Number(m[4]), y: Number(m[5]), z };
         if (parsedKeys.size > 50000) parsedKeys.clear();
         parsedKeys.set(key, p);
         return p;
@@ -183,7 +196,7 @@
     }
     function indexAdd(key) {
         const p = parseKey(key);
-        if (!p) return;
+        if (!p || !acceptsArea(p.area)) return;
         const ak = areaKey(p.area);
         let set = idx.byArea.get(ak);
         if (!set) idx.byArea.set(ak, set = new Set());
@@ -198,6 +211,7 @@
         if (set && set.delete(i)) { idx.total--; idx.stamp++; }
     }
     function burningIn(area, x, y) {
+        if (!acceptsArea(area)) return false;
         const I = index();
         if (!I.total || !area) return false;
         const set = I.byArea.get(areaKey(area));
@@ -216,6 +230,7 @@
 
     /** Light a cell. opts: { cause, force (ignore a wet cell) }. True when the cell burns now (it wasn't burning, its object burns). */
     function ignite(area, x, y, opts) {
+        if (!acceptsArea(area)) return false;
         const o = opts || {};
         const W = World(), O = Objects(), f = fireState();
         if (!W || !O || !f || !area || !W.inWorld(area.x, area.y) || !inBounds(x, y)) return false;
@@ -249,6 +264,7 @@
      * or anything else ("out": nothing changes). Returns { from, to } (object ids) or null when the cell wasn't burning.
      */
     function extinguish(area, x, y, how, unit) {
+        if (!acceptsArea(area) || (unit && !sameArea(levelArea(unit), area))) return null;
         const f = fireState(), O = Objects();
         if (!f || !area) return null;
         index();
@@ -291,7 +307,7 @@
     // Ground kind of a cell becomes `kindId` (UF_Tiles A2), with the autotile shapes of it and its 8 neighbours redone.
     function groundKindAt(area, x, y) {
         const W = World(), T = window.UF && UF.Tiles;
-        if (!W || !T || !inBounds(x, y)) return null;
+        if (!W || !T || !acceptsArea(area) || zOf(area) !== 0 || !inBounds(x, y)) return null;
         return T.kindOfTile(W.getTile(area.x, area.y, x, y, 0));
     }
     function autotileShape(same) {
@@ -332,7 +348,7 @@
     const src = { grid: null, area: null, conf: null, cells: new Set() };
     function sourceCells() {
         const W = World(), map = window.$dataMap;
-        const area = W ? W.currentArea() : null;
+        const area = viewArea();
         if (!area || !map || !map.ufObjects) return null;
         if (src.grid !== map.ufObjects || src.conf !== conf() || !sameArea(src.area, area)) {
             src.grid = map.ufObjects;
@@ -375,6 +391,7 @@
         for (const key of keys) {
             const rec = f.burning[key], p = parseKey(key);
             if (!rec || !p) { delete f.burning[key]; continue; }
+            if (!acceptsArea(p.area)) continue; // Preserve level saves inertly under a legacy core.
             const type = O.atIn(p.area, p.x, p.y);
             const rule = ruleForType(type);
             if (!burns(rule)) {
@@ -415,10 +432,10 @@
             }
         }
         // Accidental starts (off unless fire.startChance > 0): one seeded cell of the area on screen.
-        if (c.startChance > 0 && W.currentArea() && hash01(seed, SALT.start, b) < c.startChance) {
+        if (c.startChance > 0 && viewArea() && hash01(seed, SALT.start, b) < c.startChance) {
             const size = W.state.size;
             const x = W.hash32(seed, SALT.startCell, b, 1) % size, y = W.hash32(seed, SALT.startCell, b, 2) % size;
-            const area = W.currentArea();
+            const area = viewArea();
             const nkey = keyOf(area, x, y);
             if (!f.burning[nkey] && !catches.has(nkey)) catches.set(nkey, { area, x, y, cause: "accident" });
         }
@@ -473,6 +490,8 @@
 
     function standableIn(area, x, y, unitId) {
         const J = Jobs(), W = World();
+        if (!acceptsArea(area)) return false;
+        if (zOf(area) !== 0) return typeof W.cellFree === "function" && W.cellFree(area.x, area.y, x, y, unitId || 0, zOf(area));
         if (J && typeof J.standable === "function") return J.standable(area, x, y, unitId || 0);
         return W && typeof W.cellFree === "function" ? W.cellFree(area.x, area.y, x, y, unitId || 0) : false;
     }
@@ -537,9 +556,10 @@
         const W = World(), J = Jobs();
         const job = J ? J.of(u.id) : null;
         if (job) J.cancel(job.id, "fled from the fire");
-        if (u.goal && sameArea(u.goal.area, u.area) && !burningIn(u.goal.area, u.goal.x, u.goal.y)) return; // already walking somewhere safe
-        const safe = safeCellNear(u.area, u.x, u.y, FLEE_RADIUS, u.id);
-        if (safe) W.sendUnit(u.id, { area: copyArea(u.area), x: safe.x, y: safe.y });
+        const area = levelArea(u);
+        if (u.goal && sameArea(levelArea(u.goal), area) && !burningIn(levelArea(u.goal), u.goal.x, u.goal.y)) return; // already walking somewhere safe
+        const safe = safeCellNear(area, u.x, u.y, FLEE_RADIUS, u.id);
+        if (safe) W.sendUnit(u.id, cellRef(area, safe.x, safe.y));
     }
     function hurtUnits(b) {
         const W = World(), I = index();
@@ -547,7 +567,9 @@
         const size = W.state.size;
         for (const u of W.units()) {
             if (!u || !u.area) continue;
-            const set = I.byArea.get(areaKey(u.area));
+            const area = levelArea(u);
+            if (!acceptsArea(area)) continue;
+            const set = I.byArea.get(areaKey(area));
             if (!set || !set.has(u.y * size + u.x)) continue;
             if (u.data && (u.data.through || u.data._isDying)) continue; // fliers pass over; the dying are already falling
             burnUnit(u, b);
@@ -564,7 +586,7 @@
         const u = W && W.unitOfEvent ? W.unitOfEvent(this) : null;
         if (!u || (u.data && u.data.through)) return true;
         const x2 = $gameMap.roundXWithDirection(x, d), y2 = $gameMap.roundYWithDirection(y, d);
-        return !burningIn(W.currentArea(), x2, y2);
+        return !burningIn(levelArea(u), x2, y2);
     };
 
     //-------------------------------------------------------------------------
@@ -575,24 +597,28 @@
         return J ? J.list(j => j.type === "douse" && (j.state === "open" || j.state === "travel" || j.state === "work")) : [];
     };
     const isWaterIn = (area, x, y) => {
+        if (!acceptsArea(area)) return false;
+        if (zOf(area) !== 0) return Tilemap.isWaterTile(World().getTile(area.x, area.y, x, y, 0, zOf(area)));
         const J = Jobs();
         return !!J && typeof J.isWaterAt === "function" && J.isWaterAt(area, x, y);
     };
     // A standable 4-neighbour of (x, y) that isn't burning, nearest to the unit (fixed order without a unit).
     function standBeside(area, x, y, unit) {
+        if (!acceptsArea(area) || (unit && !sameArea(levelArea(unit), area))) return null;
         let best = null, bestD = Infinity;
         for (const [dx, dy] of NEIGHBORS) {
             const nx = x + dx, ny = y + dy;
             if (!inBounds(nx, ny) || burningIn(area, nx, ny) || isWaterIn(area, nx, ny)) continue;
-            const here = unit && sameArea(unit.area, area) && unit.x === nx && unit.y === ny;
+            const here = unit && sameArea(levelArea(unit), area) && unit.x === nx && unit.y === ny;
             if (!here && !standableIn(area, nx, ny, unit ? unit.id : 0)) continue;
-            const dist = unit && sameArea(unit.area, area) ? Math.abs(unit.x - nx) + Math.abs(unit.y - ny) : 0;
-            if (dist < bestD) { best = { area: copyArea(area), x: nx, y: ny }; bestD = dist; }
+            const dist = unit && sameArea(levelArea(unit), area) ? Math.abs(unit.x - nx) + Math.abs(unit.y - ny) : 0;
+            if (dist < bestD) { best = cellRef(area, nx, ny); bestD = dist; }
         }
         return best;
     }
     /** The water cell nearest to (fx, fy) within `radius` (Chebyshev rings) that has a dry, standable, unburnt neighbour: { x, y, stand } or null. */
     function findWater(area, fx, fy, radius, unit) {
+        if (!acceptsArea(area) || (unit && !sameArea(levelArea(unit), area))) return null;
         for (let r = 1; r <= radius; r++) {
             let best = null, bestD = Infinity;
             for (let dy = -r; dy <= r; dy++) {
@@ -613,7 +639,9 @@
     function retarget(job) {
         const old = job.params && job.params.fire;
         const I = index();
-        const set = old ? I.byArea.get(areaKey(old.area)) : null;
+        const area = levelArea(old);
+        if (!acceptsArea(area)) return null;
+        const set = old ? I.byArea.get(areaKey(area)) : null;
         if (!set || !set.size) return null;
         const taken = new Set(douseJobs().filter(j => j.id !== job.id && j.params).map(j => j.params.fireKey));
         let best = null, bestD = Infinity;
@@ -621,15 +649,15 @@
             const x = i % I.size, y = (i / I.size) | 0;
             const d = Math.max(Math.abs(x - old.x), Math.abs(y - old.y));
             if (d > RETARGET_RADIUS) continue;
-            const key = keyOf(old.area, x, y);
+            const key = keyOf(area, x, y);
             if (taken.has(key)) continue;
             const dd = Math.hypot(x - old.x, y - old.y);
             if (dd < bestD || (dd === bestD && best && (y < best.y || (y === best.y && x < best.x)))) { best = { x, y, key }; bestD = dd; }
         }
         if (!best) return null;
-        job.params.fire = { area: copyArea(old.area), x: best.x, y: best.y };
+        job.params.fire = cellRef(area, best.x, best.y);
         job.params.fireKey = best.key;
-        job.target = { area: copyArea(old.area), x: best.x, y: best.y };
+        job.target = cellRef(area, best.x, best.y);
         return job.params.fire;
     }
     function defineDouse() {
@@ -640,26 +668,32 @@
             plan(job, unit) {
                 const p = job.params || (job.params = {});
                 let fire = p.fire;
-                if (!fire || !burningIn(fire.area, fire.x, fire.y)) fire = retarget(job);
+                if (!fire || !burningIn(levelArea(fire), fire.x, fire.y)) fire = retarget(job);
                 if (!fire) return { ok: false, reason: "the fire is out" };
+                const area = levelArea(fire);
+                if (!sameArea(levelArea(unit), area)) return { ok: false, reason: "the fire is on another level" };
                 if ((job.phase | 0) === 0) {
-                    const w = findWater(fire.area, fire.x, fire.y, conf().douse.waterRadius, unit);
+                    const w = findWater(area, fire.x, fire.y, conf().douse.waterRadius, unit);
                     if (!w) return { ok: false, reason: "no water within reach" };
-                    p.water = { area: copyArea(fire.area), x: w.x, y: w.y };
+                    p.water = cellRef(area, w.x, w.y);
                     return { ok: true, stand: w.stand };
                 }
-                const stand = standBeside(fire.area, fire.x, fire.y, unit);
+                const stand = standBeside(area, fire.x, fire.y, unit);
                 return stand ? { ok: true, stand } : { ok: false, reason: "can't reach the fire" };
             },
             work: job => Math.round(((job.phase | 0) === 0 ? conf().douse.fillBeats : conf().douse.beats) * beatFrames()),
             apply(job, unit) {
                 const p = job.params;
+                if (!p.fire || !sameArea(levelArea(unit), levelArea(p.fire))) {
+                    job.reason = "the fire is on another level";
+                    return "continue"; // Jobs.finish replans; the normal plan refusal reports this without a console error.
+                }
                 if ((job.phase | 0) === 0) {
-                    p.filled = { area: copyArea(unit.area), x: unit.x, y: unit.y, water: p.water || null };
+                    p.filled = Object.assign(cellRef(levelArea(unit), unit.x, unit.y), { water: p.water || null });
                     return "continue";
                 }
                 const fire = p.fire;
-                const r = fire ? extinguish(fire.area, fire.x, fire.y, "doused", unit) : null;
+                const r = fire ? extinguish(levelArea(fire), fire.x, fire.y, "doused", unit) : null;
                 job.result = { doused: !!r, fireKey: p.fireKey || null, from: r ? r.from : null, to: r ? r.to : null };
             },
             describe: job => ((job.phase | 0) === 0 ? "Fetching water for a fire" : "Putting out a fire")
@@ -670,6 +704,7 @@
 
     /** An open douse job (owner null unless opts.owner) of the player's faction for a burning cell; null when not burning, already covered, or no water within reach. */
     function douse(area, x, y, opts) {
+        if (!acceptsArea(area)) return null;
         const o = opts || {};
         const J = Jobs();
         if (!J || !J.handler("douse")) defineDouse();
@@ -680,8 +715,8 @@
         const F = window.UF && UF.Factions;
         const faction = F && typeof F.playerId === "function" ? F.playerId() : null;
         return J.create({
-            type: "douse", target: { area: copyArea(area), x, y },
-            params: { faction, fireKey: key, fire: { area: copyArea(area), x, y }, cause: o.cause || "player" },
+            type: "douse", target: cellRef(area, x, y),
+            params: { faction, fireKey: key, fire: cellRef(area, x, y), cause: o.cause || "player" },
             owner: o.owner || null, priority: typeof o.priority === "number" ? o.priority : conf().douse.priority
         });
     }
@@ -692,7 +727,7 @@
         let s = null;
         try { s = Col && typeof Col.site === "function" ? Col.site() : null; } catch (e) { s = null; }
         if (!s || !s.area || typeof s.x !== "number") return null;
-        return { area: copyArea(s.area), x: s.x, y: s.y, radius: Math.max(conf().douse.campRadius, (s.radius | 0) + 4) };
+        return { area: copyArea(levelArea(s)), x: s.x, y: s.y, z: zOf(s), radius: Math.max(conf().douse.campRadius, (s.radius | 0) + 4) };
     }
     const noWater = new Map(); // fire key -> beat it was last found without water in reach (a cache)
     /** Open douse jobs for burning cells within the camp radius (nearest first) up to douse.maxOpen active ones. onlyKey: just that cell. */
@@ -863,7 +898,7 @@
         }
         _updateFlames() {
             const W = World();
-            const area = W && W.state ? W.currentArea() : null;
+            const area = W && W.state ? viewArea() : null;
             if (!this.parent || !area || !window.$gameMap) { if (this._active.length) this._hideAll(); return; }
             const I = index();
             const set = I.byArea.get(areaKey(area));
@@ -984,7 +1019,7 @@
 
     function fireOptions(x, y) {
         const W = World(), O = Objects();
-        const area = W && W.state ? W.currentArea() : null;
+        const area = W && W.state ? viewArea() : null;
         if (!area || !O || !inBounds(x, y)) return [];
         if (burningIn(area, x, y)) {
             const key = keyOf(area, x, y);
@@ -1058,7 +1093,7 @@
         /** True when the object on the cell burns (not stone, not a contained source). */
         flammableAt(area, x, y) {
             const O = Objects();
-            return !!O && !!area && burns(ruleForType(O.atIn(area, x, y)));
+            return !!O && acceptsArea(area) && burns(ruleForType(O.atIn(area, x, y)));
         },
         state: fireState,
         beatNow: () => { const f = fireState(); return f ? f.beat : 0; },
@@ -1072,7 +1107,7 @@
         burningCells() {
             const f = fireState();
             if (!f) return [];
-            return Object.keys(f.burning).map(key => { const p = parseKey(key), r = f.burning[key]; return { key, area: copyArea(p.area), x: p.x, y: p.y, since: r.since, fuel: r.fuel, obj: r.obj }; });
+            return Object.keys(f.burning).flatMap(key => { const p = parseKey(key), r = f.burning[key]; return p ? [{ key, area: copyArea(p.area), x: p.x, y: p.y, z: p.z, since: r.since, fuel: r.fuel, obj: r.obj }] : []; });
         },
         count: () => index().total,
         /** Run n beats now (tests, tools); the live beat keeps running from the map update. */
@@ -1114,6 +1149,7 @@
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
         UF.Events.on("world:objectChanged", onObjectChanged);
+        UF.Events.on("world:levelObjectChanged", onObjectChanged);
     }
     hookEvents();
 
@@ -1327,8 +1363,8 @@
                     unitsMade.push(u.id);
                     return u;
                 };
-                const hurt = mk("TEST_burned", 20, 9, "$U7_Townsman");
-                const walker = mk("TEST_wary", 21, 12, "$U7_Ranger");
+                const hurt = mk("TEST_burned", 20, 9, "$UF_Stock_People1_4");
+                const walker = mk("TEST_wary", 21, 12, "$UF_Stock_Actor1_0");
                 await t.waitFrames(4);
                 const pending = J.create({ type: "move", target: { area: copyArea(area), x: ax + 20, y: ay + 13 }, owner: hurt.id });
                 if (pending) jobsMade.push(pending.id);
@@ -1419,7 +1455,7 @@
                 const waterCell = C(1, 12);
                 W.setTile(area.x, area.y, waterCell.x, waterCell.y, 0, Tilemap.TILE_ID_A1);
                 put(4, 12, "oak");
-                const worker = mk("TEST_douser", 7, 12, "$U7_Ranger");
+                const worker = mk("TEST_douser", 7, 12, "$UF_Stock_Actor1_0");
                 await t.waitFrames(4);
                 const treeLit = ignite(area, ax + 4, ay + 12, { cause: "test" });
                 const dj = douse(area, ax + 4, ay + 12, { cause: "test" });

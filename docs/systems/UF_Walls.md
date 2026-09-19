@@ -17,6 +17,8 @@ For a wall object stored at `(x,y)`:
 
 `UF.Walls.baseAt(area,x,y)` identifies both roles: a wall cell returns itself with `role:"wall"`; an otherwise-empty cell immediately north of a wall returns the wall below with `role:"roof"`.
 
+Compatibility addition (2026-09-19): `area` accepts `{x,y,z?}`; omitted z means Ground. Integer levels -2 through +2 are valid. An explicit non-ground lookup is refused with `null` until World exposes `viewLevel`, `levelKey`, and `levelOfMapId`; invalid levels are also refused before Objects is consulted. The roof remains `(x,y-1)` on the supplied z, never a cell on z+1. `baseAt` returns that same LevelArea. Connection masks use the supplied level's object grid; drawing uses the currently rendered map. Walls stores no world simulation/save state of its own.
+
 ## Connected wall frames
 
 The wall-set contract is 20 frames in a 4×5 grid. Each frame is 48×96 in the final set, so the full PNG is 192×480:
@@ -65,6 +67,12 @@ The plugin aliases `UF.Objects.Sprite_Layer._tryFrame` and `_rebuild`; it does n
 | `no_errors` | The harness records an uncaught error |
 
 Set `UF_TEST_PROVOKE=walls.two_cell_render` only in a focused test run to disable two-square expansion and prove the rendering check can fail.
+
+`node tools/test_z_walls.js` exercises legacy Ground lookups, rejection of unsupported/invalid levels, different walls at the same x/y on different levels, same-level roof resolution, independent connection masks, and serialization of the returned level reference. `--mutate-z` drops the LevelArea z before object lookup and must make the isolation/roof assertions fail with exit 1. These Node VM checks do not establish visual correctness or live five-level integration; RMMZ F5/F8 is not checked for this compatibility change.
+
+Ground runtime regression `codex_zcompat_20260919_walls_a` passed 7/7. Opened `walls.two_square_wall.png`: the connected wooden run has its top row above a lower face, with a separate narrow stone wall nearby. The frame check reported 48x96, connected frames 2/10/8, and same-map roof hit resolution.
+
+Observed on 2026-09-19 for this compatibility change: normal VM suite 7/7; source mutation 4 passed, 3 failed, exit 1 (level isolation, roof level, and serialized level identity). Node syntax checks passed for plugin and test.
 
 Observed on 2026-09-19: the normal suite passed 7/7. With `UF_TEST_PROVOKE=walls.two_cell_render`, it exited 1 with `two_cell_render` reporting a 48×48 frame whose roof and wall-cell tops were both 252.0, and `connected_frames` reporting three undefined wall-frame selections. The opened failure capture showed the wooden run and stone wall as one row with no lower faces. The opened passing capture showed a connected three-piece wooden run and an isolated stone wall, each spanning a roof row and a lower wall-face row. The post-registration run `live_walls_v73_commit` also passed 7/7; performance was 11.315 ms for 10,000 connection lookups (0.001132 ms per lookup, budget 0.005).
 

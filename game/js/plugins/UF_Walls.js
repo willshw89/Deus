@@ -141,8 +141,11 @@
     }
 
     function baseAt(area, x, y) {
-        const O = Objects();
+        const O = Objects(), W = World();
         if (!O || !area) return null;
+        const z = area.z === undefined ? 0 : area.z;
+        if (!Number.isInteger(z) || z < -2 || z > 2 || (z !== 0 && !(W &&
+            typeof W.viewLevel === "function" && typeof W.levelKey === "function" && typeof W.levelOfMapId === "function"))) return null;
         const same = O.atIn(area, x, y);
         if (isWallType(same)) return { area, x, y, type: same, role: "wall" };
         if (same) return null;

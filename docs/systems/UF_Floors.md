@@ -4,6 +4,8 @@ Room detection, cultural floors, and the VISION V56 floor job. Floors are A2 gro
 
 Status on 2026-09-19: implemented in `game/js/plugins/UF_Floors.js`; the live catalog and plugin list contain the floor entries and plugin registration. The exact live-tree no-history run passed 10/11: all behavior checks passed, but the uncached room scan took 2.520 ms against a 2 ms budget after two optimization attempts. Per AGENTS rule 10, further patches stopped pending a user decision. RMMZ editor F5 playtest and the F8 console are not checked.
 
+Z compatibility update (2026-09-19): rooms now isolate their caches and identities by level; floor jobs preserve record z and reject a worker on a different level. Non-ground floor **construction is deliberately refused** before pickup or material consumption, including direct job application. UF_Tiles' surface tile IDs are not valid substitutes for Levels shape/material/support changes. The vertical core is not installed in the live project; these changes do not enable vertical gameplay.
+
 **Owner:** Claude Code / engine · **Load order:** after `UF_Tiles`, `UF_Doors`, `UF_Items`, and `UF_Jobs`; before `UF_Test`.
 
 ## Catalog contract
@@ -35,6 +37,8 @@ Under V31's no-history start, generation records no houses. The fallback scanner
 | `invalidate(area?)` | Clear one area's cache or all caches |
 
 A room is `{ id, area, cells:[{x,y}], gaps:[{x,y}], siteId }`. The rooms-and-beds/sleeper-thought feature should use `UF.Rooms.value(UF.Rooms.roomAt(area, bedX, bedY))`; this plugin does not add the thought itself.
+
+Area handles may include `z` (-2 through +2, missing means Ground). Ground room IDs keep their existing spelling; non-ground IDs include z. Nonzero reads require the documented World seam (`viewLevel` and `levelOfMapId`) and `Levels.standableShape`; unsupported or invalid levels return no room instead of inspecting Ground. Non-ground room value counts constructed `floor` shapes through `Levels.cellAt`, never decodes the underground tileset with the surface kind table. `kindAt` returns `null` off Ground. Historical site names remain Ground-only.
 
 ## Floors (`UF.Floors`)
 
@@ -69,7 +73,7 @@ On `world:created`, other factions' recorded houses are floored immediately and 
 
 Emits `floors:groundChanged(area,x,y,kindId)`, `floors:laid(area,x,y,kindId)`, `floors:removed(area,x,y,oldKindId)`, and `floors:designated(jobs)`.
 
-Listens to `objects:changed` (invalidate room cache), `world:created`, and `time:day`.
+Listens to `objects:changed`, `objects:levelChanged`, `world:tileChanged`, `world:levelTileChanged`, and `levels:shapeChanged` to invalidate only the changed area's level cache. `world:created` and the aliased `DataManager.extractSaveContents` clear all cached rooms. Daily Ground planning still listens to `time:day`. Work on Ground does not require Ground to be the viewed map; all five levels must eventually share the continuously advancing simulation (V80/V102).
 
 When `UF_Test` selects a focused suite other than `floors`, automatic house flooring and floor-job creation are suppressed so unrelated job/ground fixtures remain isolated. Normal play is unaffected, and the `floors` suite exercises both planning paths.
 
@@ -97,6 +101,9 @@ Observed in `live_floors_fix2` on 2026-09-19 against the no-history live tree: 1
 
 ## Assets and known limits
 
+- Compatibility contract checks: `node tools/test_z_floors.js` passed 18/18 on 2026-09-19 using the actual plugin in Node VM stubs for the legacy and documented level APIs. They cover Ground behavior, invalid/unsupported level refusal, independent room identity/cache/shape events, save-load cache reset, no materials consumed by unsupported floor jobs, non-ground sites never flooring/designating Ground, stale-job replanning instead of false completion, and Ground work while viewing another level. `--mutate-room-key` removes z from the real cache-key code and produced 14 PASS / 4 FAIL, including `same_xy_rooms_are_distinct`. This is **not** evidence of a five-map RMMZ integration; World/Objects/Items/Jobs are test doubles.
+- Snapshot regression `codex_zcompat_20260919_floors_a` passed 11/11, including laying the correct wood floor, worker completion and material consumption. The measured fixture scan in this run was 1.145 ms and designation pass 0.115 ms. No room-scan optimization was attempted; the historical two-fix limit remains documented above. Both captures were opened: a worker inside the wooden-walled room with white designation boxes, then a partly brown-planked interior. The unrelated 24-line fixture-arena edit was present for this run and is not owned or staged by this task. F5/F8 remains unchecked.
+
 - All three floor kinds are code-drawn placeholders. Original A2 autotiles are specified in `docs/handoffs/HANDOFF_floors_doors.md`.
 - Automatic material supply is not created here. A floor job stays open with `needs <item>` until a matching stack exists.
 - Non-player houses are floored without simulating workers or consuming their stock; this is generation state, not a live job.
@@ -108,4 +115,4 @@ Observed in `live_floors_fix2` on 2026-09-19 against the no-history live tree: 1
 
 ## Replaced core methods
 
-None. Aliases only: `Scene_Boot.prototype.start` and the public UF_Interact functions after they exist.
+None. Aliases only: `Scene_Boot.prototype.start`, `DataManager.extractSaveContents`, and the public UF_Interact functions after they exist.

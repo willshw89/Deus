@@ -61,8 +61,29 @@
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
-    const copyArea = a => ({ x: a.x | 0, y: a.y | 0 });
-    const sameArea = (a, b) => !!a && !!b && (a.x | 0) === (b.x | 0) && (a.y | 0) === (b.y | 0);
+    // Records carry z beside area; API handles carry it inside the area.
+    // Ground retains its old saved shape and key spelling.
+    const zOf = ref => ref && ref.z !== undefined ? ref.z
+        : ref && ref.area && ref.area.z !== undefined ? ref.area.z : 0;
+    const copyArea = ref => {
+        const a = ref.area || ref, z = zOf(ref);
+        return Object.assign({ x: a.x | 0, y: a.y | 0 }, z === 0 ? {} : { z });
+    };
+    const areaKey = ref => {
+        const a = copyArea(ref), z = zOf(a);
+        return `${a.x},${a.y}${z === 0 ? "" : `,${z}`}`;
+    };
+    const supported = ref => {
+        if (!ref) return false;
+        const z = zOf(ref), W = World();
+        return Number.isInteger(z) && z >= -2 && z <= 2 && (z === 0 || !!(W &&
+            typeof W.viewLevel === "function" && typeof W.levelKey === "function" && typeof W.levelOfMapId === "function"));
+    };
+    const sameArea = (a, b) => !!a && !!b && areaKey(a) === areaKey(b);
+    const cellRecord = ref => {
+        const a = copyArea(ref), z = zOf(ref);
+        return Object.assign({ area: { x: a.x, y: a.y }, x: ref.x | 0, y: ref.y | 0 }, z === 0 ? {} : { z });
+    };
     const distance = (a, b) => Math.max(Math.abs((a.x | 0) - (b.x | 0)), Math.abs((a.y | 0) - (b.y | 0)));
     const isPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person"));
     const now = () => (window.UF && UF.Time && UF.Time.ticks ? UF.Time.ticks() : localTicks);
@@ -108,8 +129,8 @@
     function normalizeEntity(ref) {
         if (!ref || typeof ref !== "object") return null;
         const kind = String(ref.kind || "");
-        if (kind === "object" && ref.area && Number.isFinite(ref.x) && Number.isFinite(ref.y)) {
-            return { kind, area: copyArea(ref.area), x: ref.x | 0, y: ref.y | 0 };
+        if (kind === "object" && ref.area && Number.isFinite(ref.x) && Number.isFinite(ref.y) && supported(ref)) {
+            return Object.assign({ kind }, cellRecord(ref));
         }
         if ((kind === "item" || kind === "unit" || kind === "site") && ref.id !== undefined && ref.id !== null) {
             return { kind, id: ref.id };
@@ -129,10 +150,14 @@
     }
 
     function keyOf(ref) {
-        if (typeof ref === "string") return ref;
+        if (typeof ref === "string") {
+            if (!ref.startsWith("object:")) return ref;
+            const m = ref.match(/^object:(-?\d+),(-?\d+)(?:,(-?\d+))?:(-?\d+),(-?\d+)$/);
+            return m ? keyOf({ kind: "object", area: { x: +m[1], y: +m[2] }, z: m[3] === undefined ? 0 : +m[3], x: +m[4], y: +m[5] }) : null;
+        }
         const e = normalizeEntity(ref);
         if (!e) return null;
-        if (e.kind === "object") return `object:${e.area.x},${e.area.y}:${e.x},${e.y}`;
+        if (e.kind === "object") return `object:${areaKey(e)}:${e.x},${e.y}`;
         return `${e.kind}:${e.id}`;
     }
 
@@ -186,22 +211,22 @@
     //-------------------------------------------------------------------------
     // Beds
 
-    const objectRef = (area, x, y) => ({ kind: "object", area: copyArea(area), x: x | 0, y: y | 0 });
+    const objectRef = (area, x, y) => Object.assign({ kind: "object" }, cellRecord({ area: copyArea(area), x, y }));
     const isBedType = t => !!(t && Array.isArray(t.tags) && t.tags.includes(BED_TAG));
     const bedExists = bed => {
         const O = Objects();
-        return !!(O && bed && bed.area && isBedType(O.atIn(bed.area, bed.x | 0, bed.y | 0)));
+        return !!(O && bed && bed.area && supported(bed) && isBedType(O.atIn(copyArea(bed), bed.x | 0, bed.y | 0)));
     };
 
     function bedFromEntry(e) {
         const x = e && e.entity;
-        return x && x.kind === "object" ? { area: copyArea(x.area), x: x.x | 0, y: x.y | 0 } : null;
+        return x && x.kind === "object" ? cellRecord(x) : null;
     }
 
     function clearUnitBed(unit, expected) {
         if (!unit || !unit.data || !unit.data.bed) return;
         const b = unit.data.bed;
-        if (!expected || (sameArea(b.area, expected.area) && (b.x | 0) === (expected.x | 0) && (b.y | 0) === (expected.y | 0))) delete unit.data.bed;
+        if (!expected || (sameArea(b, expected) && (b.x | 0) === (expected.x | 0) && (b.y | 0) === (expected.y | 0))) delete unit.data.bed;
     }
 
     function bedOf(unitOrId) {
@@ -209,28 +234,28 @@
         const unit = typeof unitOrId === "object" ? unitOrId : (W ? W.unit(unitOrId) : null);
         if (!unit || !unit.data || !unit.data.bed) return null;
         const b = unit.data.bed;
-        const ref = objectRef(b.area, b.x, b.y);
+        const ref = objectRef(b, b.x, b.y);
         const owner = ownerOf(ref);
         if (!bedExists(b) || !sameOwner(owner, { kind: "unit", id: unit.id })) return null;
-        return { area: copyArea(b.area), x: b.x | 0, y: b.y | 0 };
+        return cellRecord(b);
     }
 
     function assignBed(unitOrId, bed, opts) {
         const W = World();
         const unit = typeof unitOrId === "object" ? unitOrId : (W ? W.unit(unitOrId) : null);
         const o = opts || {};
-        if (!isPerson(unit) || !bedExists(bed)) return null;
-        const ref = objectRef(bed.area, bed.x, bed.y);
+        if (!isPerson(unit) || !supported(unit) || !bedExists(bed) || !sameArea(unit, bed)) return null;
+        const ref = objectRef(bed, bed.x, bed.y);
         const oldEntry = entryOf(ref);
         if (oldEntry && oldEntry.owner.kind === "unit" && oldEntry.owner.id !== unit.id) {
             if (!o.force) return null;
             clearUnitBed(W && W.unit(oldEntry.owner.id), bed);
         }
         const oldBed = bedOf(unit);
-        if (oldBed && keyOf(objectRef(oldBed.area, oldBed.x, oldBed.y)) !== keyOf(ref)) release(objectRef(oldBed.area, oldBed.x, oldBed.y), unit);
+        if (oldBed && keyOf(objectRef(oldBed, oldBed.x, oldBed.y)) !== keyOf(ref)) release(objectRef(oldBed, oldBed.x, oldBed.y), unit);
         const got = claim(ref, unit, { force: !!o.force, reason: "assigned bed" });
         if (!got) return null;
-        unit.data.bed = { area: copyArea(bed.area), x: bed.x | 0, y: bed.y | 0 };
+        unit.data.bed = cellRecord(bed);
         emit("ownership:bedAssigned", unit, Object.assign({}, unit.data.bed));
         return Object.assign({}, unit.data.bed);
     }
@@ -244,7 +269,10 @@
                 delete st.claims[key]; removed++; continue;
             }
             if (e.entity.kind === "object") {
-                const object = Objects() && Objects().atIn(e.entity.area, e.entity.x, e.entity.y);
+                // A legacy core cannot inspect another level. Preserve its
+                // saved claims until a compatible core can validate them.
+                if (!supported(e.entity)) continue;
+                const object = Objects() && Objects().atIn(copyArea(e.entity), e.entity.x, e.entity.y);
                 const invalid = !object || (e.reason === "assigned bed" && !isBedType(object));
                 if (invalid) {
                     if (e.reason === "assigned bed" && e.owner.kind === "unit") clearUnitBed(W.unit(e.owner.id), bedFromEntry(e));
@@ -255,7 +283,7 @@
             }
         }
         for (const u of W.units()) {
-            if (!u.data || !u.data.bed) continue;
+            if (!u.data || !u.data.bed || !supported(u.data.bed)) continue;
             if (!bedOf(u)) delete u.data.bed;
         }
         return removed;
@@ -263,19 +291,20 @@
 
     function areaBeds(area) {
         const W = World(), O = Objects();
-        if (!W || !W.state || !O || !area) return [];
+        if (!W || !W.state || !O || !area || !supported(area)) return [];
         const mid = (W.state.size - 1) / 2;
         return O.findIn(area, { near: { x: mid, y: mid }, radius: W.state.size * 0.75, tags: [BED_TAG] })
-            .map(b => ({ area: copyArea(area), x: b.x | 0, y: b.y | 0 }));
+            .map(b => cellRecord({ area: copyArea(area), x: b.x, y: b.y }));
     }
 
     function reconcileArea(area) {
         const W = World();
-        if (!W || !W.state || !area) return { assigned: 0, people: 0, beds: 0 };
+        if (!W || !W.state || !area || !supported(area)) return { assigned: 0, people: 0, beds: 0 };
+        area = copyArea(area);
         cleanClaims();
-        const people = W.unitsInArea(area.x, area.y).filter(isPerson).sort((a, b) => a.id - b.id);
+        const people = W.unitsInArea(area.x, area.y, zOf(area)).filter(u => isPerson(u) && sameArea(u, area)).sort((a, b) => a.id - b.id);
         const unassigned = people.filter(u => !bedOf(u));
-        const free = areaBeds(area).filter(b => !entryOf(objectRef(b.area, b.x, b.y)));
+        const free = areaBeds(area).filter(b => !entryOf(objectRef(b, b.x, b.y)));
         let assigned = 0;
         while (unassigned.length && free.length) {
             let best = null;
@@ -299,7 +328,7 @@
         cleanClaims();
         if (area) return Object.assign({ areas: 1 }, reconcileArea(area));
         const seen = new Map();
-        for (const u of W.units().filter(isPerson)) seen.set(`${u.area.x},${u.area.y}`, copyArea(u.area));
+        for (const u of W.units().filter(isPerson)) if (supported(u)) seen.set(areaKey(u), copyArea(u));
         const total = { assigned: 0, people: 0, beds: 0, areas: seen.size };
         for (const a of seen.values()) {
             const r = reconcileArea(a);
@@ -343,7 +372,7 @@
         const h = J && J.handler("sleep");
         if (!h || typeof h.plan !== "function") return false;
         try {
-            const fake = { type: "sleep", target: { area: copyArea(bed.area), x: bed.x, y: bed.y }, params: { frames }, assigned: unit.id };
+            const fake = { type: "sleep", target: cellRecord(bed), params: { frames }, assigned: unit.id };
             const r = h.plan(fake, unit);
             return !!r && r.ok !== false;
         } catch (e) {
@@ -358,17 +387,21 @@
         const o = opts || {};
         if (!W || !J || !isPerson(unit) || (!o.force && priorityReason(unit) !== "sleep")) return null;
         const bed = bedOf(unit);
-        if (!bed) return null;
+        if (!bed || !supported(unit) || !sameArea(unit, bed)) return null;
         const current = J.of(unit.id);
-        if (current && current.type === "sleep" && sameArea(current.target.area, bed.area) && current.target.x === bed.x && current.target.y === bed.y) return current;
+        if (current && current.type === "sleep" && sameArea(current.target, bed) && current.target.x === bed.x && current.target.y === bed.y) return current;
         const frames = o.frames > 0 ? o.frames | 0 : sleepFrames();
         if (!preflightSleep(unit, bed, frames)) return null;
         let job;
-        if (C && typeof C.isColonist === "function" && C.isColonist(unit) && typeof C.order === "function") {
+        const colonist = C && typeof C.isColonist === "function" && C.isColonist(unit);
+        // The legacy Colonists.order copies only target area/x/y. Keep its
+        // Ground behavior, but submit level targets directly without losing z.
+        if (zOf(bed) === 0 && colonist && typeof C.order === "function") {
             job = C.order(unit.id, { type: "sleep", target: bed, params: { frames, ownedBed: true } });
         } else {
             if (current) J.cancel(current.id, "exhausted");
-            job = J.create({ type: "sleep", target: bed, params: { frames, ownedBed: true }, owner: unit.id });
+            const params = Object.assign({ frames, ownedBed: true }, colonist ? { ordered: true } : {});
+            job = J.create({ type: "sleep", target: bed, params, owner: unit.id });
         }
         if (!job || job.state === "failed") return null;
         if (unit.data && Array.isArray(unit.data.thoughts) && C && typeof C.addThought === "function") {
@@ -422,7 +455,7 @@
         if (!Array.isArray(lines)) return lines;
         const out = lines.slice();
         out[0] = stripOwnership(out[0]);
-        const W = World(), area = W && W.currentArea ? W.currentArea() : null;
+        const W = World(), area = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea ? W.currentArea() : null);
         const owner = area ? ownerOf(objectRef(area, x, y)) : null;
         if (owner) out[0] = `${out[0]}${owner.kind === "public" ? PUBLIC_MARK : LOOK_MARK + ownerName(owner)}`;
         return out;
@@ -476,16 +509,17 @@
         hooked = true;
         UF.Events.on("world:created", () => { state(); lastReconcile = -Infinity; });
         UF.Events.on("colonists:ready", () => { if (enabled) reconcile(); });
-        UF.Events.on("world:unitAdded", u => { if (enabled && isPerson(u)) reconcileArea(u.area); });
+        UF.Events.on("world:unitAdded", u => { if (enabled && isPerson(u)) reconcileArea(copyArea(u)); });
         UF.Events.on("world:unitRemoved", u => {
             try {
                 if (!u) return;
                 const b = u.data && u.data.bed;
-                if (b) release(objectRef(b.area, b.x, b.y), { kind: "unit", id: u.id });
+                if (b) release(objectRef(b, b.x, b.y), { kind: "unit", id: u.id });
                 cleanClaims();
             } catch (e) { report("unitRemoved", e); }
         });
         UF.Events.on("objects:changed", onObjectsChanged);
+        UF.Events.on("objects:levelChanged", onObjectsChanged);
     }
 
     const Ownership = {

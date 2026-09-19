@@ -33,8 +33,17 @@
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
     const Objects = () => (window.UF && UF.Objects) || null;
-    const copyArea = a => ({ x: a.x, y: a.y });
-    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
+    const zOf = a => a && a.z !== undefined ? a.z : 0;
+    const validZ = z => Number.isInteger(z) && z >= -2 && z <= 2;
+    const levelCore = () => !!World() && typeof World().viewLevel === "function" && typeof World().levelOfMapId === "function";
+    const supported = a => !!a && validZ(zOf(a)) && (zOf(a) === 0 || levelCore());
+    const copyArea = a => zOf(a) === 0 ? { x: a.x, y: a.y } : { x: a.x, y: a.y, z: zOf(a) };
+    const recordArea = r => r && r.area ? { x: r.area.x, y: r.area.y, z: r.z !== undefined ? r.z : zOf(r.area) } : null;
+    const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
+    const viewArea = () => {
+        const W = World(), area = W && (levelCore() ? W.viewLevel() : W.currentArea());
+        return supported(area) ? area : null;
+    };
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -50,17 +59,18 @@
         if (d && d.byCell) return d;
         return (W.state.doors = { version: 1, generated: false, byCell: {}, pending: [] });
     }
-    const cellKey = (area, x, y) => `${area.x},${area.y}:${x},${y}`;
+    const cellKey = (area, x, y) => area && validZ(zOf(area)) ? `${area.x},${area.y}${zOf(area) === 0 ? "" : `,${zOf(area)}`}:${x},${y}` : null;
     function parseKey(key) {
-        const m = String(key).match(/^(-?\d+),(-?\d+):(-?\d+),(-?\d+)$/);
-        return m ? { area: { x: Number(m[1]), y: Number(m[2]) }, x: Number(m[3]), y: Number(m[4]) } : null;
+        const m = String(key).match(/^(-?\d+),(-?\d+)(?:,(-?\d+))?:(-?\d+),(-?\d+)$/);
+        if (!m || !validZ(m[3] === undefined ? 0 : Number(m[3]))) return null;
+        return { area: copyArea({ x: Number(m[1]), y: Number(m[2]), z: m[3] === undefined ? 0 : Number(m[3]) }), x: Number(m[4]), y: Number(m[5]) };
     }
     function isDoorType(type) {
         return !!type && Array.isArray(type.tags) && type.tags.includes("door") && !!type.door;
     }
     function doorAt(area, x, y) {
         const O = Objects();
-        if (!O || !area) return null;
+        if (!O || !supported(area)) return null;
         const type = O.atIn(area, x, y);
         if (!isDoorType(type)) return null;
         const s = ensureDoor(area, x, y, type);
@@ -72,7 +82,7 @@
     }
     function ensureDoor(area, x, y, type, faction) {
         const ds = store();
-        if (!ds || !type || !isDoorType(type)) return null;
+        if (!ds || !supported(area) || !type || !isDoorType(type)) return null;
         const key = cellKey(area, x, y);
         let s = ds.byCell[key];
         if (!s) {
@@ -93,6 +103,7 @@
     const isOpenState = s => !!s && (!!s.heldOpen || (s.openUntil || 0) > now());
 
     function canUnitPass(unit, doorOrState) {
+        if (doorOrState && doorOrState.area && unit && unit.area && !sameArea(recordArea(unit), doorOrState.area)) return false;
         const s = doorOrState && doorOrState.state ? doorOrState.state : doorOrState;
         if (!s) return false;
         if (s.heldOpen) return true;
@@ -137,7 +148,7 @@
     // bypassing only UF_Objects' door-cell block and no terrain rule.
     const _Game_CharacterBase_isMapPassable = Game_CharacterBase.prototype.isMapPassable;
     Game_CharacterBase.prototype.isMapPassable = function(x, y, d) {
-        const W = World(), area = W && W.currentArea();
+        const W = World(), area = viewArea();
         if (!area || !window.$gameMap) return _Game_CharacterBase_isMapPassable.call(this, x, y, d);
         const x2 = $gameMap.roundXWithDirection(x, d), y2 = $gameMap.roundYWithDirection(y, d);
         const a = doorAt(area, x, y), b = doorAt(area, x2, y2);
@@ -146,7 +157,7 @@
         // UF_World uses Game_Player as the invisible view/cursor rather than a
         // saved world unit.  It still belongs to the player's faction, or the
         // camera would be trapped by every friendly settlement door.
-        if (!unit && this === $gamePlayer) unit = { data: { kind: "player", faction: playerFactionId() } };
+        if (!unit && this === $gamePlayer) unit = { area: copyArea(area), z: zOf(area), data: { kind: "player", faction: playerFactionId() } };
         if (!unit || (a && !canUnitPass(unit, a)) || (b && !canUnitPass(unit, b))) return false;
         if (!tilePasses(x, y, d) || !tilePasses(x2, y2, reverseDir(d))) return false;
         if (a) openDoor(a);
@@ -154,16 +165,19 @@
         return true;
     };
 
-    function groundFreeIgnoringDoor(ax, ay, x, y, ignoreUnitId) {
+    function groundFreeIgnoringDoor(ax, ay, x, y, ignoreUnitId, z) {
         const W = World(), st = W && W.state;
-        if (!st || !W.inWorld(ax, ay) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
-        const area = { x: ax, y: ay };
-        const onScreen = sameArea(area, W.currentArea()) && window.$gameMap && $gameMap.mapId() === W.areaMapId(ax, ay);
+        const area = { x: ax, y: ay, z };
+        if (!st || !supported(area) || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
+        const onScreen = sameArea(area, viewArea()) && window.$gameMap && $gameMap.mapId() === W.areaMapId(ax, ay, z);
         if (onScreen) {
             if (!($gameMap.checkPassage(x, y, 0x01) || $gameMap.checkPassage(x, y, 0x08))) return false;
             if (Tilemap.isWaterTile($gameMap.tileId(x, y, 0))) return false;
         } else {
-            const map = W.peekArea(ax, ay), ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+            const map = W.peekArea(ax, ay, z);
+            if (!map || !map.data) return false;
+            const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+            if (!ts || !ts.flags) return false;
             for (let layer = 3; layer >= 0; layer--) {
                 const tileId = map.data[(layer * st.size + y) * st.size + x];
                 if (!tileId) continue;
@@ -174,19 +188,20 @@
                 break;
             }
         }
-        for (const u of W.units()) if (u.id !== ignoreUnitId && sameArea(u.area, area) && u.x === x && u.y === y) return false;
+        for (const u of W.units()) if (u.id !== ignoreUnitId && sameArea(recordArea(u), area) && u.x === x && u.y === y) return false;
         return true;
     }
 
     const W0 = World();
     if (W0 && typeof W0.cellFree === "function" && !W0._ufDoorsCellFreeAliased) {
         const original = W0.cellFree;
-        W0.cellFree = function(ax, ay, x, y, ignoreUnitId = 0) {
-            const d = doorAt({ x: ax, y: ay }, x, y);
-            if (!d) return original.call(this, ax, ay, x, y, ignoreUnitId);
+        W0.cellFree = function(ax, ay, x, y, ignoreUnitId = 0, z = 0) {
+            if (!supported({ x: ax, y: ay, z })) return false;
+            const d = doorAt({ x: ax, y: ay, z }, x, y);
+            if (!d) return original.call(this, ax, ay, x, y, ignoreUnitId, z);
             const unit = ignoreUnitId ? this.unit(ignoreUnitId) : null;
             if (!unit || !canUnitPass(unit, d)) return false;
-            const ok = groundFreeIgnoringDoor(ax, ay, x, y, ignoreUnitId);
+            const ok = groundFreeIgnoringDoor(ax, ay, x, y, ignoreUnitId, z);
             if (ok) openDoor(d);
             return ok;
         };
@@ -194,13 +209,14 @@
     }
 
     function isWater(area, x, y) {
-        if (window.UF && UF.Jobs && typeof UF.Jobs.isWaterAt === "function") return UF.Jobs.isWaterAt(area, x, y);
-        const W = World(), tile = W ? W.getTile(area.x, area.y, x, y, 0) : 0;
+        if (!supported(area)) return true;
+        if (zOf(area) === 0 && window.UF && UF.Jobs && typeof UF.Jobs.isWaterAt === "function") return UF.Jobs.isWaterAt(area, x, y);
+        const W = World(), tile = W ? W.getTile(area.x, area.y, x, y, 0, zOf(area)) : 0;
         return !!tile && Tilemap.isTileA1(tile);
     }
     function unitAt(area, x, y) {
         const W = World();
-        return W ? W.units().find(u => sameArea(u.area, area) && u.x === x && u.y === y) || null : null;
+        return W ? W.units().find(u => sameArea(recordArea(u), area) && u.x === x && u.y === y) || null : null;
     }
     function cultureForFaction(id) {
         const F = window.UF && UF.Factions, cat = catalog();
@@ -220,12 +236,12 @@
         return out;
     }
     function placeAt(site, x, y, id) {
-        const O = Objects(), area = site.area;
-        if (!O || !O.type(id) || isWater(area, x, y)) return false;
+        const O = Objects(), area = recordArea(site);
+        if (!supported(area) || !O || !O.type(id) || isWater(area, x, y)) return false;
         const occupant = unitAt(area, x, y);
         if (occupant) {
             const W = World();
-            const free = W && W.nearestFreeCell(area.x, area.y, site.x, site.y, Math.max(2, site.radius || 3), occupant.id);
+            const free = W && W.nearestFreeCell(area.x, area.y, site.x, site.y, Math.max(2, site.radius || 3), occupant.id, zOf(area));
             if (free && (free.x !== x || free.y !== y)) {
                 // Generation may spawn a person on a planned entrance. Move
                 // that unit to a free cell inside the same site before play
@@ -249,7 +265,7 @@
             }
             // Ask the occupant to step into the settlement; the door is placed
             // by retryPending only after the cell is physically clear.
-            if (free && (free.x !== x || free.y !== y)) W.sendUnit(occupant.id, { area: copyArea(area), x: free.x, y: free.y });
+            if (free && (free.x !== x || free.y !== y)) W.sendUnit(occupant.id, { area: copyArea(area), x: free.x, y: free.y, z: zOf(area) });
             return false;
         }
         const current = O.atIn(area, x, y);
@@ -264,6 +280,7 @@
         let n = 0;
         for (let i = ds.pending.length - 1; i >= 0; i--) {
             const p = ds.pending[i];
+            if (!supported(p.area)) continue;
             if (unitAt(p.area, p.x, p.y) || isWater(p.area, p.x, p.y)) continue;
             if (placeAt({ id: p.siteId, area: p.area, x: p.x, y: p.y, radius: 1, faction: p.faction }, p.x, p.y, p.objectId)) {
                 ds.pending.splice(i, 1);
@@ -273,9 +290,9 @@
         return n;
     }
     function placeSite(site) {
-        if (!site || site.ruined || !site.faction) return 0;
+        if (!site || site.ruined || !site.faction || !supported(recordArea(site))) return 0;
         const H = window.UF && UF.History;
-        const rich = H && H.sitesIn ? H.sitesIn(site.area.x, site.area.y).find(s => s.id === site.id) : null;
+        const rich = H && H.sitesIn ? H.sitesIn(site.area.x, site.area.y, zOf(recordArea(site))).find(s => s.id === site.id && sameArea(recordArea(s), recordArea(site))) : null;
         if (!rich) return 0;
         const id = siteDoorId(rich), wallCells = new Set();
         for (const p of rich.pieces || []) {
@@ -308,7 +325,7 @@
 
     function damage(key, amount) {
         const ds = store(), at = parseKey(key);
-        if (!ds || !at || !ds.byCell[key]) return null;
+        if (!ds || !at || !supported(at.area) || !ds.byCell[key]) return null;
         const s = ds.byCell[key];
         s.hp = Math.max(0, s.hp - Math.max(0, Number(amount) || 0));
         if (s.hp > 0) { emit("doors:damaged", key, s.hp); return { broken: false, hp: s.hp }; }
@@ -331,13 +348,13 @@
         return { x: bx + (open ? OPEN_PATTERN : CLOSED_PATTERN) * pw, y: by, w: pw, h: ph };
     }
     function syncSprites() {
-        const O = Objects(), W = World(), ds = store(), area = W && W.currentArea();
+        const O = Objects(), ds = store(), area = viewArea();
         if (!O || !area || !ds) return 0;
         let n = 0;
         for (const [key, s] of Object.entries(ds.byCell)) {
             const at = parseKey(key);
             if (!at || !sameArea(at.area, area)) continue;
-            const type = O.at(at.x, at.y), sprite = O.spriteAt(at.x, at.y);
+            const type = O.atIn(area, at.x, at.y), sprite = O.spriteAt(at.x, at.y);
             if (!isDoorType(type) || !sprite || !sprite.bitmap) continue;
             const f = frameFor(type, isOpenState(s), sprite.bitmap);
             if (f) { sprite.setFrame(f.x, f.y, f.w, f.h); n++; }
@@ -352,7 +369,7 @@
     }
 
     function augmentOptions(base, x, y) {
-        const W = World(), area = W && W.currentArea(), list = Array.isArray(base) ? base.slice() : [];
+        const area = viewArea(), list = Array.isArray(base) ? base.slice() : [];
         const d = area && doorAt(area, x, y);
         if (!d || list.some(o => o.id === "door:toggle")) return list;
         const opts = [
@@ -397,12 +414,16 @@
             if (!testingAnotherSuite() && store() && !store().generated) placeAll(false);
             syncSprites();
         });
-        UF.Events.on("objects:changed", (area, x, y, from, to) => {
+        UF.Events.on("world:levelBuilt", syncSprites);
+        const objectChanged = (area, x, y, from, to) => {
+            if (!supported(area)) return;
             const O = Objects(), type = O && O.type(to), ds = store(), key = cellKey(area, x, y);
             if (!ds) return;
             if (isDoorType(type)) ensureDoor(area, x, y, type, playerFactionId());
             else if (ds.byCell[key] && from && O && isDoorType(O.type(from))) delete ds.byCell[key];
-        });
+        };
+        UF.Events.on("objects:changed", objectChanged);
+        UF.Events.on("objects:levelChanged", objectChanged);
         if (window.UF.Time && UF.Time.every) UF.Time.every(30, retryPending);
     }
 

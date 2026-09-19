@@ -4,6 +4,16 @@ Fire as a cell state that spreads, DF style (VISION V21, V25): a burning cell ro
 **Owner:** Claude Code · **File:** `game/js/plugins/UF_Fire.js` · **Catalog key:** `fire` in `game/data/UF_WorldCatalog.json` · **Load order:** after `UF_Objects`, `UF_Items`, `UF_Jobs` (and `UF_Interact`, `UF_Colonists`, `UF_Combat` when present), before `UF_Test`. It wraps `UF.Interact` again at `Scene_Boot.start`, so an earlier position still gets the right-click options. Registered in the real `game/js/plugins.js` (status true, after `UF_Talk`, before `UF_Test`; seen 2026-09-19).
 
 ## API (`UF.Fire`)
+### Level compatibility (2026-09-19)
+
+Area-taking Fire APIs accept a level handle `{ x, y, z }`; omitted `z` means ground. Records returned for burning cells, douse targets, water/stand cells, and filled buckets carry `z`; douse records use `{ area: { x, y }, x, y, z }`. Event area handles preserve nonzero `z`. Unit damage, fleeing, spread, wetness, retargeting, source indexing and visible flame selection distinguish levels. A douse worker moved to another level before application returns `"continue"` with `job.reason`, allowing `Jobs.finish` to request a fresh plan; the plan then refuses normally without an exception or console error.
+
+Nonzero levels are enabled only when the documented World seam exposes **all three** `viewLevel`, `levelOfMapId`, and `isLevel`. No function-arity detection is used. A legacy core refuses explicit nonzero or invalid levels before creating Fire state or changing ground objects. Accepted z values are integer numbers -2 through +2; strings, null, fractions and nonfinite values are refused. Previously saved nonzero fires remain inert when loaded under a legacy core, so they cannot damage surface units or overwrite surface cells.
+
+The existing ground save key remains `"ax,ay:x,y"`; nonzero keys are `"ax,ay,z:x,y"`. Both burning and wet maps use this spelling. Existing ground saves need no migration. Every stored supported level fire advances on each map-update beat, regardless of the displayed level; only the displayed level supplies flame sprites, contained-source escapes and random ignition candidates. Surface ash painting remains ground-only: upper/cave terrain tiles are derived from level shapes and must not be overwritten with the surface tileset's ash IDs.
+
+Standalone contract checks: `node tools/test_z_fire.js`. These execute the real plugin in a Node VM with legacy and documented-seam engine doubles. They cover rejection without ground mutation, independent damage/spread/wetness/events, all five levels advancing through real `Game_Map.update` beats while the view switches, burnout object/item isolation, JSON state round-trip, douse records/worker levels, source-change event isolation, and legacy loading of stored level fires. A deliberate mutation that drops unit z from the actual damage lookup is required to fail. These checks do not establish RMMZ rendering or F5 Playtest behavior.
+
 - `ignite(area: {x, y}, x, y, opts?: { cause?: string, force?: bool })` → bool. Lights the cell when its object burns (a rule with `burn` > 0, not `never`, not `source`), the cell isn't burning and isn't wet (`force` ignores wet). Record: `{ since: beat, fuel: rule.burn, obj: objectId }`. Emits `fire:ignited`. A cell inside the camp radius gets a douse job at once (`campDouse`).
 - `extinguish(area, x, y, how = "out", unit?)` → `{ from, to }` (object ids) or `null` when the cell wasn't burning. `how === "doused"`: the rule's `dousedBecomes` replaces the object (a tree → a dead tree) and the cell can't catch for `douse.wetBeats`. Open douse jobs for the cell are cancelled ("the fire is out"); assigned ones plan again.
 - `isBurning(area, x, y)` → bool; `blocksCell(area, x, y)` → bool (the same test, named for path planners); `flammableAt(area, x, y)` → bool.
@@ -66,7 +76,7 @@ Work stone, furnace, smithy, farm plot and well match no rule: they don't burn.
 
 ## Events (UF.Events)
 - Emits `fire:ignited(area, x, y, cause, objectId)` (causes: `player`, `spread`, `campfire`, `accident`, `test`, …), `fire:burnedOut(area, x, y, fromId, toId, itemsDestroyed)`, `fire:extinguished(area, x, y, how, unit | null, { from, to } | null)` (how: `doused`, `out`, `gone`), `fire:unitBurned(unit, damage, died)`.
-- Listens: `world:objectChanged` (keeps the source index).
+- Listens: `world:objectChanged`, `world:levelObjectChanged` (keep the source index for the corresponding displayed level).
 
 ## Keys and mouse
 Right-click (UF_Interact's menu, wrapped at runtime): **"Set on fire"** on a cell whose object burns (lights it at once, even a wet cell); **"Put out the fire"** on a burning cell with no douse job yet (opens a douse designation; greyed "Put out the fire (no water near)" without water in reach). Both are inserted before "Look". The wrap covers `UF.Interact.optionsFor`, the menu window's constructor and `setOptions` (the "Back" of the build submenu), because UF_Interact's `open` calls its own inner `optionsFor`.
@@ -77,7 +87,7 @@ Right-click (UF_Interact's menu, wrapped at runtime): **"Set on fire"** on a cel
 | `UF_GenFlame` | Flames on a burning cell (grass, bushes, beds, stockpiles, stumps): 3 frames of 64×64 side by side; the cell's ground square is the frame's bottom-right 48×48, anchor (40, 64) | code-drawn placeholder (`flamePixels("low")`): colours from `art/palette/uf.hex` (238 #9A2800, 237 #CA3900, 236 #FF5100, 235 #FF8E10, 234 #FFC228, 233 #FFEF41, 1 #FBF3CE), checker micro-dither between bands, one art pixel = one screen pixel at zoom 1, alpha 0 or 255, nearest-neighbour scaling |
 | `UF_GenFlame_Tall` | Flames on trees, wooden walls and doors: 3 frames of 112×112, ground square bottom-right, anchor (88, 112); extra tongues up to 40 px of height placed by the 45° projection | code-drawn placeholder (`flamePixels("tall")`) |
 | `ash` ground kind | Where grass, bushes and stumps burned out | UF_Tiles code-drawn ground (catalog `groundKinds`) |
-| `$U7_Townsman`, `$U7_Ranger` | Test units of the `fire` suite only | U7 stand-ins |
+| `$UF_Stock_People1_4`, `$UF_Stock_Actor1_0` | Stock character fixtures in the `fire` suite only | Stock RMMZ placeholders |
 
 The flames lean up-left at half the 45° slope (a judgement call: at the full slope they read as streaks, not flames; the user decides). No request for real flame art exists yet in `docs/ASSET_REQUESTS.md`.
 
@@ -107,8 +117,9 @@ After the M3 change (2026-09-19, snapshots of the working tree, with the catalog
 None, aliases only: `Game_Map.prototype.update`, `Game_CharacterBase.prototype.isMapPassable` (unit events only: refuses a step into a burning cell; leaving one is allowed), `Spriteset_Map.prototype.createCharacters`, `DataManager.createGameObjects`, `Scene_Boot.prototype.start`. Runtime wraps of another plugin's public API: `UF.Interact.optionsFor`, `UF.Interact.MenuWindow.prototype.initialize` and `.setOptions`.
 
 ## Known limits
+- Z-compatibility Ground regression `codex_zcompat_20260919_fire_b` passed 10/10 after the stale-worker replan adjustment. Opened both screenshots: grass burning along the left side of the fixture with gray ash, and a zoomed-out 10x10 flame grid. Save/load, physical dousing, unit damage, item destruction, stone barriers and sprite checks passed. The new three stock-character fixture substitutions are included. RMMZ editor F5/F8 and five-real-map concurrency remain unchecked.
 - **Planned paths don't know about fire.** The on-screen step refuses to enter a burning cell (the `isMapPassable` alias), which RMMZ's `findDirectionTo` search respects. The whole-area planner documented in `UF_World.md` (`findPath`, 2026-09-19, not yet in `UF_World.js` when this was built) plans over its own grid and offers only `avoid` for one cell, so a walker on a planned path will stop at a fire and give up rather than walk round it until `findPath` gets a blocked-cell or cost hook; `UF.Fire.blocksCell` is ready for one.
-- Off-screen units ignore fire (UF_World moves them in straight lines); fire burns in any area's state, but campfire escapes and accidental starts only happen in the area on screen.
+- Stored fire damage and spread advance off screen on every supported level. Off-screen movement avoidance still depends on UF_World consulting `UF.Fire.blocksCell`; Fire's own movement alias covers displayed unit events. Campfire escapes and accidental starts only happen in the area on screen.
 - Spread is 4-way, one roll per burning neighbour per beat, by the target's flammability only: no wind, rain, heat or smoke. Items lying on burning grass survive; only rules with `destroysItems` burn items.
 - UF_Combat has no system doc and no public damage function: UF_Fire lowers `data.hp` itself, fills in missing hp through `UF.Combat.calcAC` (which sets hp as a side effect), and uses `addPopup` and `onUnitDeath`. A burned unit whose sheet has no hurt frames shows its plain frames (V58).
 - Douse work is counted in map updates (60 per beat) as UF_Jobs does today; when UF_Jobs moves to per-beat progress (WORLD_ARCHITECTURE §1.7) the handler's `work` must return beats.
