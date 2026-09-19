@@ -45,5 +45,8 @@ var $plugins =
 {"name":"UF_Fire","status":true,"description":"[UF Fire] Fire spreads cell to cell by catalog rules and burns out; it hurts units; colonists carry water to put it out.","parameters":{}},
 {"name":"UF_Levels","status":true,"description":"[UF Levels] Five persistent 256x256 maps; , up, . down, Home Ground; underground biomes and level plate.","parameters":{}},
 {"name":"UF_Ownership","status":true,"description":"[UF Ownership] Object ownership, assigned beds and level-aware sleep priorities.","parameters":{}},
+{"name":"UF_CultureGrowth","status":true,"description":"[UF CultureGrowth] Learned faction practices, inherited preferences and distinct work policies.","parameters":{}},
+{"name":"UF_Households","status":true,"description":"[UF Households] Persistent families, exact material-built homes and private rooms.","parameters":{}},
+{"name":"UF_Goals","status":true,"description":"[UF Goals] Three-horizon personal goals and selected-creature F7 readout.","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

@@ -188,6 +188,19 @@
         return typeof p[type] === "number" ? p[type] : 1;
     };
 
+    // Extension steps remain owned by their persistent household/goal records. They are not copied into the
+    // fixed bootstrap plan, and each worker sees only their own personal goals plus their site's housing work.
+    function effectivePlan(ref) {
+        const c = colonyState(ref);
+        if (!c) return [];
+        const W = World(), u = typeof ref === "number" ? W.unit(ref) : ref && ref.data ? ref : siteColonists(c)[0];
+        const H = window.UF.Households, G = window.UF.Goals;
+        const extra = u ? [ ...(H && H.planSteps ? H.planSteps(u) : []), ...(G && G.planSteps ? G.planSteps(u) : []) ] : [];
+        const seen = new Set();
+        return [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
+            !seen.has(s.id) && (seen.add(s.id), true));
+    }
+
     //-------------------------------------------------------------------------
     // Names, facets, skills (pure functions of the seed and the unit id)
 
@@ -477,6 +490,8 @@
     // The home site's own standing pieces (its ring, its walls) are never taken apart for materials.
     function sitePiece(type, x, y, ref) {
         const c = colonyState(ref);
+        // Buildings are products of work, never raw-material sources for autonomous gathering.
+        if (hasTag(type, "building") || hasTag(type, "door") || hasTag(type, "bed")) return true;
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
     function objectSourceNear(u, itemId, radius) {
@@ -493,6 +508,11 @@
     function homeFire(ref) {
         const O = Objects(), c = colonyState(ref);
         if (!O || !c) return null;
+        const h = UF.Households && UF.Households.of(ref);
+        if (h && h.home && sameLevel(h, c)) {
+            const p = h.home.hearth, own = O.atIn(levelArea(h), p.x, p.y);
+            if (hasTag(own, "fire")) return { x: p.x, y: p.y, type: own, id: own.id };
+        }
         const f = O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, tags: ["fire"], limit: 1 });
         return f[0] || null;
     }
@@ -535,9 +555,16 @@
     function onBuildCell(x, y, ref) {
         const c = colonyState(ref);
         if (!c) return false;
-        for (const s of c.plan) {
+        // No goal refresh or new home search in this hot lookup. Protect every reserved household on the
+        // level, including another household's staged materials and retained homes after a merge.
+        for (const s of c.plan || []) {
             if (!s.build || s.done === true) continue;
             for (const [dx, dy] of s.cells || []) if (c.site.x + dx === x && c.site.y + dy === y) return true;
+        }
+        const households = World().state.households;
+        for (const h of Object.values(households && households.byId || {})) {
+            if (!h.home || !sameLevel(h, c)) continue;
+            for (const p of [...h.home.walls, ...h.home.doors, ...h.home.beds, h.home.hearth, h.home.storage]) if (p.x === x && p.y === y) return true;
         }
         return false;
     }
@@ -744,9 +771,13 @@
             if (j) return j;
         }
         if (n.sleep >= (th.sleep || 75) || (sleepingHours(u) && n.sleep > 40)) {
-            const mate = nightlyMateJob(u);
+            const mate = n.sleep < 85 ? nightlyMateJob(u) : null;
             if (mate) return mate;
             const j = sleepJob(u);
+            if (j) return j;
+        }
+        if (u.data.familyRendezvous && u.data.familyRendezvous.until > ticks() && n.sleep < 85) {
+            const j = nightlyMateJob(u);
             if (j) return j;
         }
         const socialAt = evening() ? Math.min(th.social || 40, 25) : (th.social || 40);
@@ -804,7 +835,8 @@
             if (j) return j;
         }
         // A brave colonist with prey close by takes it rather than walking to the larder.
-        const brave = facet(u, "bravery") >= BRAVE || priorityOf("hunt", u) > 1;
+        const adult = Number.isFinite(u.data.age) && u.data.age >= 18;
+        const brave = adult && (facet(u, "bravery") >= BRAVE || priorityOf("hunt", u) > 1);
         const near = brave ? preyNear(u, HUNT_NEAR) : null;
         if (near) {
             const j = give(u, { type: "hunt", target: { x: near.x, y: near.y }, params: { unitId: near.id } });
@@ -824,7 +856,7 @@
             const j = give(u, { type: plant.action, target: { x: plant.x, y: plant.y } });
             if (j) return j;
         }
-        const prey = preyNear(u, huntRadius());
+        const prey = adult ? preyNear(u, huntRadius()) : null;
         if (prey) {
             const j = give(u, { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id } });
             if (j) return j;
@@ -836,32 +868,59 @@
     //-------------------------------------------------------------------------
     // Reproduction, pregnancy and life stages
 
+    const familyDate = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 1}` : "0:0:1";
     function eligibleForIntimacy(u) {
         if (!u || !isSettler(u) || !u.data) return false;
-        if (u.data.age !== undefined && u.data.age < 16) return false; // must be adult
-        const day = window.$ufTime ? $ufTime.day : 1;
-        if (u.data.lastMatedDay === day) return false; // once nightly
+        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.familyDesire === false) return false;
+        if (["automaton", "undead", "swarm"].includes(u.data.species)) return false;
+        if (u.data.lastMatedDate === familyDate()) return false;
+        const n = u.data.needs || {};
+        if (n.hunger >= 75 || n.thirst >= 75 || n.sleep >= 85) return false;
         return true;
+    }
+
+    function privatePairRoom(u, partner, requireInside) {
+        const H = window.UF && UF.Households;
+        if (!H || !H.roomForPair || !eligibleForIntimacy(u) || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) return null;
+        if ((u.data.species || "human") !== (partner.data.species || "human")) return null;
+        const room = H.roomForPair(u, partner);
+        if (!room || !Array.isArray(room.cells)) return null;
+        const inside = p => room.cells.some(c => c.x === p.x && c.y === p.y);
+        return !requireInside || (inside(u) && inside(partner)) ? room : null;
     }
 
     function nightlyMateJob(u) {
         if (!eligibleForIntimacy(u)) return null;
-        const J = Jobs();
-        if (!J) return null;
-        const candidates = simulationUnits().filter(o => o.id !== u.id && sameLevel(o, u) && eligibleForIntimacy(o) && (!o.data.faction || o.data.faction === u.data.faction) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
-        if (!candidates.length) return null;
-        // Prioritize opposite gender for sexual reproduction
-        const opp = candidates.find(o => o.data.gender && u.data.gender && o.data.gender !== u.data.gender);
-        const partner = opp || candidates[0];
-        if (!partner) return null;
+        const J = Jobs(), W = World(), H = window.UF && UF.Households;
+        if (!J || !W || !H) return null;
+        const partner = W.unit(u.data.partnerId || u.data.partner);
+        const room = privatePairRoom(u, partner, false);
+        if (!room) return null;
+        const otherJob = J.of(partner.id);
+        if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
+        if (!privatePairRoom(u, partner, true)) {
+            if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
+            const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
+            const until = ticks() + 1200;
+            u.data.familyRendezvous = { partnerId: partner.id, until };
+            partner.data.familyRendezvous = { partnerId: u.id, until };
+            if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
+                give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
+            }
+            if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
+            return null;
+        }
         return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
     }
 
     function handleMated(u1, u2) {
-        if (!u1 || (u2 && !sameLevel(u1, u2))) return;
+        if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;
         const day = window.$ufTime ? $ufTime.day : 1;
         u1.data.lastMatedDay = day;
-        if (u2 && u2.data) u2.data.lastMatedDay = day;
+        u2.data.lastMatedDay = day;
+        u1.data.lastMatedDate = u2.data.lastMatedDate = familyDate();
+        delete u1.data.familyRendezvous;
+        delete u2.data.familyRendezvous;
 
         addThought(u1, "Made love with partner.", 12);
         if (u2 && isSettler(u2)) addThought(u2, "Made love with partner.", 12);
@@ -895,6 +954,46 @@
                 emit("colonists:conceived", female, male);
             }
         }
+        return true;
+    }
+
+    // Jobs owns the generic executor. Guard its public handler here so manual orders and loaded jobs obey
+    // the same adult/partnership/privacy rules as the autonomous planner, including a bystander arriving late.
+    function guardMateHandler() {
+        const J = Jobs(), prior = J && J.handler("mate");
+        if (!prior || prior.familyGuard) return;
+        J.define("mate", Object.assign({}, prior, {
+            familyGuard: true,
+            plan(job, u) {
+                const partner = World().unit(job.params.partnerId || job.params.unitId);
+                if (!privatePairRoom(u, partner, true)) return { ok: false, reason: "adults require a willing partner and a private sleeping room" };
+                return prior.plan(job, u);
+            },
+            apply(job, u) {
+                const partner = World().unit(job.params.partnerId || job.params.unitId);
+                job.result = { familyInteraction: handleMated(u, partner) };
+            }
+        }));
+    }
+
+    function rememberConversation(u, other) {
+        if (!other || !isSettler(other) || !sameLevel(u, other) || chebyshev(u.x, u.y, other.x, other.y) > 2) return;
+        for (const [a, b] of [[u, other], [other, u]]) {
+            const bonds = a.data.socialBonds || (a.data.socialBonds = []);
+            let bond = bonds.find(x => x.unitId === b.id);
+            if (!bond) { bond = { unitId: b.id, conversations: 0, familiarity: 0, affection: 0 }; bonds.push(bond); }
+            bond.conversations++;
+            bond.familiarity = Math.min(100, bond.familiarity + 8);
+            bond.affection = Math.min(100, bond.affection + 5);
+            bond.lastTick = ticks();
+            if (bonds.length > 16) bonds.splice(bonds.indexOf(bonds.reduce((x, y) => x.lastTick < y.lastTick ? x : y)), 1);
+            if (a.data.familyDesire === undefined) a.data.familyDesire = unit01(seed(), SALT.roll, a.id, 913) < 0.8;
+        }
+        const bond = u.data.socialBonds.find(x => x.unitId === other.id);
+        const reciprocal = other.data.socialBonds.find(x => x.unitId === u.id);
+        if (bond && reciprocal && bond.conversations >= 3 && reciprocal.conversations >= 3 && u.data.familyDesire === true && other.data.familyDesire === true && UF.Households) {
+            UF.Households.formPair(u, other);
+        }
     }
 
     function progressPregnancies() {
@@ -915,20 +1014,22 @@
         if (!W || !mother || !levelSupported(zOf(mother))) return null;
         const st = W.state;
         const preg = mother.data.pregnancy;
+        if (!preg || !Number.isFinite(mother.data.age) || mother.data.age < 18) return null;
         const fatherId = preg ? preg.fatherId : null;
         const father = fatherId ? settler(fatherId) : null;
 
         // Find standable cell next to mother
         const J = Jobs();
-        let birthX = mother.x, birthY = mother.y;
+        let birthX = null, birthY = null;
         for (const [dx, dy] of NEIGHBORS) {
             const nx = mother.x + dx, ny = mother.y + dy;
-            if (J && J.standable(levelArea(mother), nx, ny)) {
+            if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
                 birthX = nx;
                 birthY = ny;
                 break;
             }
         }
+        if (birthX === null) return null; // Keep the pregnancy pending; never claim a birth without a unit.
 
         // Generate child unit
         const childGender = unit01(st.seed, SALT.gender, mother.id, ticks()) < 0.5 ? "male" : "female";
@@ -963,6 +1064,7 @@
             }
         });
 
+        if (!childUnit) return null;
         delete mother.data.pregnancy;
 
         addThought(mother, "Gave birth to a healthy baby.", 20);
@@ -977,6 +1079,7 @@
             if (childEv) UF.Visuals.bark(childEv, "*Waaaah!*", 180);
         }
 
+        if (UF.Households) UF.Households.reconcile();
         emit("colonists:born", childUnit, mother, father);
         return childUnit;
     }
@@ -1024,7 +1127,13 @@
         const frames = Math.max(4, Math.min(10, hoursLeft)) * 3600;
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
         const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
-        const spots = beds.map(b => ({ x: b.x, y: b.y }));
+        const owned = UF.Ownership && UF.Ownership.bedOf(u);
+        const permitted = beds.filter(b => {
+            const owner = UF.Ownership && UF.Ownership.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
+            return !owner || owner.kind === "public" || owner.kind === "unit" && owner.id === u.id || owner.kind === "faction" && owner.id === u.data.faction;
+        });
+        const spots = owned && sameLevel(owned, u) && !taken.has(`${owned.x},${owned.y}`) ? [{ x: owned.x, y: owned.y }] : [];
+        spots.push(...permitted.map(b => ({ x: b.x, y: b.y })));
         const fire = nearestFire(u);
         if (fire) spots.push({ x: fire.x, y: fire.y });
         if (c) spots.push({ x: c.site.x, y: c.site.y });
@@ -1106,15 +1215,15 @@
         if (!c || !O || !t) return out;
         const centre = ((catalog().sites && catalog().sites.kinds && catalog().sites.kinds[(homeSiteRecord(ref) || {}).kind]) || {}).center;
         const cells = step.cells || [];
-        const byCount = (t.passable === true || t.id === centre) && siteCount(t.id, ref) >= cells.length;
+        const byCount = !step.exact && (t.passable === true || t.id === centre) && siteCount(t.id, ref) >= cells.length;
         for (const [dx, dy] of cells) {
             const x = c.site.x + dx, y = c.site.y + dy;
             const here = O.atIn(levelArea(c), x, y);
             let state = "todo";
             if (byCount || (here && here.id === t.id)) state = "done";
-            else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = "skipped";
-            else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = "skipped"; // nothing is built on water
-            else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = "skipped"; // no excavation or unsupported airborne construction
+            else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = step.exact ? "blocked" : "skipped";
+            else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = step.exact ? "blocked" : "skipped"; // nothing is built on water
+            else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = step.exact ? "blocked" : "skipped"; // no excavation or unsupported airborne construction
             out.push({ x, y, state, here });
         }
         return out;
@@ -1140,28 +1249,30 @@
     const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
 
     /** [{ id, done, detail }] for every plan step, evaluated from the world now (and recorded in state). */
-    function planStatus(ref) {
+    function planStatus(ref, selectedSteps) {
         const c = colonyState(ref);
         if (!c) return [];
         const people = siteColonists(ref);
-        return c.plan.map(step => {
+        return (selectedSteps || effectivePlan(ref)).map(step => {
             let done = false, detail = "";
             if (step.build) {
                 const cells = buildCells(step, ref);
-                const finished = cells.filter(x => x.state !== "todo");
+                const finished = cells.filter(x => x.state === "done" || (!step.exact && x.state === "skipped"));
                 done = cells.length > 0 && finished.length === cells.length;
                 const t = stepObject(step);
                 detail = cells.length === 1 ? (done ? "built" : "to build") : `${finished.length}/${cells.length}`;
-                if (!t) { done = true; detail = "unknown object"; }
+                if (!t) { done = !step.exact; detail = "unknown object"; }
                 if (done && step.done !== true) step.done = true;
-                else if (!done) step.done = cells.map((x, i) => (x.state !== "todo" ? i : -1)).filter(i => i >= 0);
+                else if (!done) step.done = cells.map((x, i) => (x.state === "done" || (!step.exact && x.state === "skipped") ? i : -1)).filter(i => i >= 0);
+                if (step.exact && cells.some(x => x.state === "blocked")) detail += " (blocked)";
             } else if (step.craft) {
                 const r = recipeOf(step.craft), out = outputOf(r);
                 if (!r || !out) { done = true; detail = "unknown recipe"; }
                 else if (step.each) {
-                    const have = people.filter(u => satisfiesEach(u, step, out)).length;
-                    done = people.length > 0 && have >= people.length;
-                    detail = `${have}/${people.length}`;
+                    const recipients = step.goalOwner ? people.filter(u => u.id === step.goalOwner) : people;
+                    const have = recipients.filter(u => satisfiesEach(u, step, out)).length;
+                    done = recipients.length > 0 && have >= recipients.length;
+                    detail = `${have}/${recipients.length}`;
                 } else {
                     const n = colonyCount(out, ref), want = step.count | 0 || 1;
                     done = n >= want;
@@ -1182,7 +1293,10 @@
         });
     }
     const stepLabel = step => capitalize(String(step.id || "").replace(/_/g, " "));
-    const planText = ref => planStatus(ref).map(s => `${stepLabel(colonyState(ref).plan.find(p => p.id === s.id))}: ${s.done ? (s.detail === "built" || s.detail === "to build" ? "built" : "done") : s.detail}`).join(" · ");
+    const planText = ref => {
+        const steps = effectivePlan(ref);
+        return planStatus(ref, steps).map(s => `${stepLabel(steps.find(p => p.id === s.id))}: ${s.done ? (s.detail === "built" || s.detail === "to build" ? "built" : "done") : s.detail}`).join(" · ");
+    };
 
     // What a colonist would do for a build step: [{ type, target, params }] candidates in order of preference.
     function buildStepJob(u, step) {
@@ -1280,20 +1394,34 @@
     function planJob(u) {
         const c = colonyState(u);
         if (!c) return null;
-        const status = planStatus(u);
+        const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
-        for (let i = 0; i < c.plan.length && candidates.length < LOOKAHEAD; i++) {
+        const groups = { bootstrap: 0, household: 0, goal: 0 };
+        // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
+        // hide every household and personal aspiration behind the old plan's first three unfinished steps.
+        for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
-            const step = c.plan[i];
+            const step = steps[i];
+            const group = step.household ? "household" : step.goalOwner ? "goal" : "bootstrap";
+            if (groups[group] >= LOOKAHEAD) continue;
+            groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
-            candidates.push({ step, spec, order: i });
+            if (spec) spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
+            candidates.push({ step, spec, order: groups[group] - 1 });
             if (!spec) continue;
         }
-        const ready = candidates.filter(x => x.spec);
+        let ready = candidates.filter(x => x.spec);
         if (!ready.length) return null;
         // The culture's priorities pick among the next few steps; ties keep the plan's order.
-        const score = x => priorityOf(x.spec.type, u) * (SKILL_OF[x.spec.type] ? 1 + ((u.data.skills && u.data.skills[SKILL_OF[x.spec.type]]) || 0) / 40 : 1) - x.order * 0.05;
-        ready.sort((a, b) => score(b) - score(a) || a.order - b.order);
+        const score = x => {
+            const skill = UF.Skills && UF.Skills.skillOfJob ? UF.Skills.skillOfJob(x.spec) : x.spec.type === "craft" ? (recipeOf(x.spec.params.recipeId) || {}).skill : SKILL_OF[x.spec.type];
+            const level = skill && UF.Skills && UF.Skills.level ? UF.Skills.level(u, skill) : skill ? ((u.data.skills && u.data.skills[skill]) || 0) : 0;
+            return priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
+        };
+        ready = ready.map(x => Object.assign({}, x, { score: score(x) }));
+        if (UF.CultureGrowth && UF.CultureGrowth.rankCandidates) ready = UF.CultureGrowth.rankCandidates(u, ready);
+        if (UF.Goals && UF.Goals.choosePlan) ready = UF.Goals.choosePlan(u, ready);
+        else ready.sort((a, b) => b.score - a.score || a.order - b.order);
         for (const x of ready) {
             const tool = toolJob(u, x.spec.type);
             if (tool) return tool;
@@ -1332,6 +1460,8 @@
     function homeJob(u) {
         const c = colonyState(u);
         if (!c || !sameLevel(u, c) || Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) return null;
+        const h = UF.Households && UF.Households.of(u), p = h && h.home;
+        if (p && sameLevel(h, u) && u.x >= p.x - 2 && u.y >= p.y - 2 && u.x <= p.x + p.w + 2 && u.y <= p.y + p.h + 2) return null;
         const cell = freeCellNear(levelArea(c), c.site.x, c.site.y, 4);
         return cell ? give(u, { type: "move", target: cell, params: { via: "move", home: true } }) : null;
     }
@@ -1340,6 +1470,18 @@
         const J = Jobs();
         if (!J || !u || !levelSupported(zOf(u))) return null;
         decisionAt.set(u.id, ticks());
+        // Dependants are not miniature workers. Infant care is tracked by the household; industrial work,
+        // hunting, military designations and adult relationships are never selected for children.
+        if (Number.isFinite(u.data.age) && u.data.age < 2) return null;
+        if (!Number.isFinite(u.data.age) || u.data.age < 18) return needJob(u) || homeJob(u) || idleJob(u);
+        // A short, saved rendezvous may need its door's ordinary auto-close delay. Wait at most the
+        // existing deadline, never instead of a meal, a drink or exhausted sleep, and never cancel an order.
+        const visit = u.data.familyRendezvous, n = u.data.needs || {}, th = thresholds();
+        if (visit && visit.until > ticks() && eligibleForIntimacy(u) && n.hunger < (th.hunger || 55) && n.thirst < (th.thirst || 55)) {
+            const j = nightlyMateJob(u);
+            if (j) return j;
+            return null;
+        }
         // Lazy colonists take a breather now and then instead of the next piece of work (needs still come first).
         const lazy = unit01(seed(), SALT.roll, u.id, ticks()) < (100 - facet(u, "industriousness")) / 400;
         return needJob(u) || homeJob(u) || designationJob(u) || (lazy ? null : planJob(u)) || idleJob(u);
@@ -1394,7 +1536,8 @@
             case "craft": return job.result && job.result.items && job.result.items.length ? "item" : null;
             case "equip": return u.data.equipment && (u.data.equipment.tool === job.params.itemId || u.data.equipment.clothes === job.params.itemId) ? "unit" : null;
             case "hunt": return World().unit(job.params.unitId) ? null : "unit";
-            case "drink": case "eat": case "sleep": case "talk": case "mate": return u.data.needs ? "need" : null;
+            case "mate": return job.result && job.result.familyInteraction ? "need" : null;
+            case "drink": case "eat": case "sleep": case "talk": return u.data.needs ? "need" : null;
             case "move": case "wander": return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
             default: return null;
         }
@@ -1421,12 +1564,11 @@
             case "drink": addThought(u, "Felt refreshed after a drink of water.", 8); break;
             case "eat": addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8); break;
             case "sleep": addThought(u, "Woke rested.", 10); break;
-            case "talk": addThought(u, `Enjoyed talking with ${job.params.otherName || "a friend"}.`, 8); break;
-            case "mate": {
-                const partner = World().unit(job.params.partnerId || job.params.unitId);
-                handleMated(u, partner);
+            case "talk":
+                addThought(u, `Enjoyed talking with ${job.params.otherName || "a friend"}.`, 8);
+                rememberConversation(u, World().unit(job.params.unitId));
                 break;
-            }
+            case "mate": break; // Exactly one guarded completion, in the handler's apply.
             case "hunt": addThought(u, `Brought down ${lower(job.params.preyName ? "a " + job.params.preyName : "prey")}.`, 8); break;
             case "build": {
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
@@ -1463,7 +1605,7 @@
         // A whole plan step finished: the log and a thought.
         if (job.params.plan && colonyState(u)) {
             const s = planStatus(u).find(x => x.id === job.params.plan);
-            const step = colonyState(u).plan.find(x => x.id === job.params.plan);
+            const step = effectivePlan(u).find(x => x.id === job.params.plan);
             if (s && s.done && step && !step.celebrated) {
                 step.celebrated = true;
                 colonyState(u).log.push({ tick: ticks(), text: `${stepLabel(step)} done` });
@@ -1512,7 +1654,9 @@
             pregnancy: u.data.pregnancy ? Object.assign({}, u.data.pregnancy) : null,
             age: u.data.age !== undefined ? u.data.age : 20,
             motherId: u.data.motherId || null,
-            fatherId: u.data.fatherId || null
+            fatherId: u.data.fatherId || null,
+            household: UF.Households ? UF.Households.describe(UF.Households.of(u)) : null,
+            lifeGoals: UF.Goals ? UF.Goals.describe(u) : null
         };
     }
     /** A player order: the colonist drops its job and does this one (jobSpec = { type, target?, params? }). */
@@ -1550,6 +1694,7 @@
         describe,
         order,
         planStatus,
+        effectivePlan,
         planText,
         decide,
         tickNeeds,
@@ -1568,7 +1713,7 @@
         updateAgeAppearance,
         nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -1611,6 +1756,7 @@
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() {
         hookEvents();
+        guardMateHandler();
         if (window.UF.Test && UF.Test.active) registerChecks();
         _Scene_Boot_start.call(this);
     };
@@ -1834,20 +1980,16 @@
             const maleColonist = livePeople.find(u => u.data.gender === "male") || livePeople[0];
             const femaleColonist = livePeople.find(u => u.data.gender === "female") || livePeople[1];
 
-            // 1. Mating interaction & intimacy thoughts
-            Colonists.onMated(maleColonist, femaleColonist);
-            const mateThought = (femaleColonist.data.thoughts || []).find(th => /Made love/i.test(th.text));
-            t.check("intimacy_awards_thought", !!mateThought, `female colonist thought: "${femaleColonist.data.thoughts[0]?.text}"`);
-
-            // 2. Conception and pregnancy state
-            femaleColonist.data._forceConceive = true;
-            Colonists.onMated(maleColonist, femaleColonist);
-            const preg = femaleColonist.data.pregnancy;
-            t.check("pregnancy_conceived", !!preg && preg.fatherId === maleColonist.id && preg.daysLeft === 3,
-                preg ? `expecting child of ${preg.fatherName}, ${preg.daysLeft} days left` : "not pregnant");
-
-            const pregThought = (femaleColonist.data.thoughts || []).find(th => /Expecting/i.test(th.text));
-            t.check("expecting_thought_awarded", !!pregThought, `mother thought: "${femaleColonist.data.thoughts[0]?.text}"`);
+            // Unsafe legacy test used to call mating twice with strangers in the open. Guard that explicitly;
+            // the society_runtime suite exercises a real completed private home and established adult pair.
+            const oldDesire = femaleColonist.data.familyDesire;
+            const beforePregnancy = femaleColonist.data.pregnancy;
+            femaleColonist.data.familyDesire = false;
+            const refused = !Colonists.onMated(maleColonist, femaleColonist);
+            t.check("unwilling_intimacy_refused", refused && femaleColonist.data.pregnancy === beforePregnancy, "no interaction or pregnancy when a person declines");
+            femaleColonist.data.familyDesire = oldDesire;
+            // Explicit gestation fixture, not evidence of conception or autonomous courtship.
+            femaleColonist.data.pregnancy = { fatherId: maleColonist.id, fatherName: maleColonist.name, daysLeft: 3, totalDays: 3, dayConceived: 1 };
 
             // 3. Pregnancy gestation countdown
             Colonists.progressPregnancies();

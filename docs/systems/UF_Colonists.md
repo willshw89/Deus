@@ -1,5 +1,19 @@
 # UF_Colonists
 
+## Household and personal-planner integration (2026-09-19)
+
+The user's explicit transfer authorizes the family/housing/planning hooks in this file; other agents' Jobs, Wildlife, Doors, Sheet and catalog implementations are not replaced.
+
+- `effectivePlan(unit)` combines the saved settlement bootstrap with `Households.planSteps(unit)` and that person's `Goals.planSteps(unit)`. Each demand stream has a separate three-step unfinished window. Viable candidates are scored using canonical Skills levels, then CultureGrowth policies, then personal Goals priorities. All execution remains real Jobs gathering, hauling, construction and crafting; no free material or timer-only completion.
+- Household steps use `exact:true`: the correct object must occupy every intended cell. Blocked terrain/another building is unfinished, and another home's bed does not count. `params.household`, `goalOwner`, and `goalId` survive into jobs. Personal `each` steps are satisfied only by their named owner's inventory/equipment.
+- Supply scans protect all reserved home build cells on the level; buildings, doors and beds are not autonomous raw-material sources. Existing home hearths and assigned beds are preferred by their residents. A resident's own home is exempt from the original camp-distance leash.
+- Actual talk completions maintain at most 16 reciprocal social bonds per person. Three conversations can form a household partnership only when both adults affirm a seeded family desire and Households accepts species/site/level/kinship/existing-partner checks. This is a simple relationship foundation, not dating, courtship choices, infidelity, disputed public parentage or marriage law.
+- Adult intimacy requires a finite age of at least 18, compatible biological life cycles, an established reciprocal partner, acceptable immediate needs, a completed private household sleeping room and no other creature in it. Manual and loaded `mate` jobs use the same public-handler guard; completion rechecks privacy. One completion per full calendar date prevents the former duplicate callback. A bounded saved rendezvous allows ordinary movement and door auto-closing; urgent needs still win.
+- Birth requires a free standable neighboring cell and a successfully created unit; otherwise pregnancy remains pending. A real newborn keeps parents/site/faction/z, joins its mother's household before birth listeners, and can increase real bed demand. Infants do not choose jobs; children/unknown-age actors do not receive industrial work or hunting. Caregiver feeding/education, adult aging and old-age mortality remain unimplemented here (the legacy seven-days-per-childhood-year rule remains).
+- `describe(unit)` additionally exposes `household` and structured `lifeGoals`. F7's selected-creature panel is supplied by UF_Goals; no action labels are added over heads.
+
+Focused actual-source checks live in `tools/test_family_integration.js`; the snapshot-only `tools/fixtures/UF_SocietyRuntime.js` exercises real construction/Jobs. Its arenas and material supply are explicitly prepared test setup, not proof of natural terrain abundance or excavation. Editor F5/F8 acceptance remains separate.
+
 ## Five-level settlement integration (2026-09-19)
 
 The following contract supersedes the single-home scope in the historical description below. Every inhabited, non-ruined founding site has a separate saved settlement plan. The player's people remain `kind: "colonist"`, `ai: "colonist"`; other factions keep `kind: "person"` and their faction identity, with `ai: "settlement"`. An internal settler loop runs needs, decisions, job callbacks, pregnancy and aging for both groups across all five levels. Changing the viewed map does not gate that loop or stockpile adoption. NPCs do not take the player's open designations and cannot receive `Colonists.order` commands.
