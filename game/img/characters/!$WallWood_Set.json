@@ -1,17 +1,17 @@
 {
   "id": "wall_wood",
+  "name": "Wooden Palisade Wall (Connected 20-Piece Set)",
+  "category": "Site",
   "frameWidth": 48,
-  "frameHeight": 48,
+  "frameHeight": 96,
   "anchor": [
     24,
-    47
+    95
   ],
   "footprint": [
     1,
-    1
+    2
   ],
-  "heightLifts": 3,
-  "autotile": "wall",
   "facings": [
     "S"
   ],
@@ -20,6 +20,26 @@
       0
     ]
   },
-  "frameMs": 150,
-  "standInSource": "Connected RMMZ Chipset Palisade Wall (16-shape autotile with visible N and S faces)"
+  "pieces": {
+    "post": 0,
+    "n": 1,
+    "e": 2,
+    "ne": 3,
+    "s": 4,
+    "ns": 5,
+    "es": 6,
+    "nes": 7,
+    "w": 8,
+    "nw": 9,
+    "ew": 10,
+    "new": 11,
+    "sw": 12,
+    "nsw": 13,
+    "esw": 14,
+    "nesw": 15,
+    "open_north_ew": 16,
+    "open_north_ew_var": 17,
+    "open_north_w": 18,
+    "open_north_e": 19
+  }
 }
