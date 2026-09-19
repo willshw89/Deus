@@ -1,0 +1,38 @@
+{
+  "id": "$UF_Layer_stone_axe",
+  "name": "Stone Axe Equipment Layer (RMMZ)",
+  "category": "equipment",
+  "layer": "weapon",
+  "slot": "weapon",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "frameMs": 150,
+  "behind": [
+    "N"
+  ]
+}
