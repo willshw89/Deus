@@ -1,0 +1,22 @@
+{
+  "id": "marsh",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "surface": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "layer": "water",
+  "kind": 2,
+  "tileId": 2144,
+  "slot": [
+    288,
+    0
+  ]
+}

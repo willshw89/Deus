@@ -1,0 +1,22 @@
+{
+  "id": "pond",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "surface": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "layer": "water",
+  "kind": 1,
+  "tileId": 2096,
+  "slot": [
+    0,
+    144
+  ]
+}

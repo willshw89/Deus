@@ -5,6 +5,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Google Nano Banana 2 Environment Chipsets: Animated Doors, Construction Floors, and Animated Water (AR-101, AR-300) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Yes, use Nano banana II to create every chipset we need, and animate Anything in the chipset that makes sense if we can"):
+- **Animated Doors (`!$UF_Door_Wood.png`, `!$UF_Door_Stone.png`):**
+  - Generated via Google Nano Banana 2 (`generate_image`) with style anchors (`art/raw/door_wood_nano_banana_raw.png`, `art/raw/door_stone_nano_banana_raw.png`).
+  - Assembled into 144×192 px RMMZ single-character sheets (3 columns × 4 rows of 48×48 px) with animations: `{ closed: [0], ajar: [1], open: [2] }`.
+  - Wood door: vertical warm timber planks, iron strap hinges, ring latch. Stone door: heavy ashlar masonry slab with dark iron reinforcements.
+  - Automated tests: `tools/run_tests.js doors` 12/12 PASS (exit 0).
+  - Screenshots visually inspected (Rule 5): `game/test_output/doors.closed_animal_outside.png` (unfactioned hare blocked outside closed door) and `doors.open_colonist_passing.png` (door swings open exposing interior corridor as colonist enters).
+  - Compliance: `art_check.js --native` PASS 2/2 (Wood: 30 colors, Stone: 29 colors <= 32 on `art/palette/uf.hex`), `originality_check.js` PASS 2/2 (closest distance >= 0.387 >= 0.28 vs 19,431 U7 shapes).
+- **Construction Floor Autotiles (`floor_wood.png`, `floor_stone.png`, `floor_rushes.png`):**
+  - Three complete 47-shape RMMZ A2 autotile blocks (96×144 px) sampled from Nano Banana raw generation (`art/raw/floors_nano_banana_raw.png`):
+    - `floor_wood`: Warm timber plank floor, aligned boards, restrained grain.
+    - `floor_stone`: Fitted flagstone slabs, walkable constructed paving.
+    - `floor_rushes`: Woven straw rush matting, golden herringbone fiber bundles.
+  - Compliance: `art_check.js --type tileset --native` PASS 3/3 (Wood: 11 colors, Stone: 19 colors, Rushes: 7 colors <= 32, alpha 255), `originality_check.js` PASS 3/3 (closest >= 0.327 >= 0.28).
+  - Review showcase inspected: `art/review/floors_showcase_1x.png` and `3x.png` (5×5 rooms of each material with straw beds, colonists, and doors).
+- **Animated Water Autotile Chipset (`UF_GenWater_A1.png`):**
+  - 3-frame animated water autotiles across all 9 catalog water kinds (`fresh`, `pond`, `marsh`, `swamp`, `icy`, `brackish`, `salt`, `deep`, `blighted`) generated via Nano Banana (`art/raw/water_animated_nano_banana_raw.png`).
+  - Animates wavelets, ripples, glints, floating scum/bubbles, and whitecaps across 3 frames in 0 -> 1 -> 2 -> 1 loop sequence.
+  - Delivered 288×144 master strips + `.json` sidecars in `art/masters/` and compiled full 768×576 A1 tileset sheet to `art/masters/UF_GenWater_A1.png` and `game/img/tilesets/UF_GenWater_A1.png`.
+  - Compliance: `art_check.js --type tileset --native` PASS 10/10, `originality_check.js` PASS 5/5 (closest >= 0.354 >= 0.28).
+  - Review showcase inspected: `art/review/water_animated_showcase_1x.png` and `2x.png` (animated frames lineup and live river scene with colonist and oak tree).
+
 ## Authentic Google Nano Banana 2 Wall Chipsets: Wood & Stone (AR-104, AR-300) — 2026-09-19 (Gemini)
 
 Delivered per user directives ("The walls are still ugly, I want you generating these assets with Nano banana 2", "All wall are 2 tiles high"):
@@ -580,6 +604,7 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
   - `jobs.jobs_working.png`: Worker chopping oak on Ground rolling meadow with HUD level controls.
 
 ## In progress (claims)
+- Codex / Astra team | User-requested next society chain: physical, saved, layer-aware farming and autonomous settlement planning | NEW `game/js/plugins/UF_Agriculture.js`, `UF_FarmView.js`, their system docs and agriculture tests/fixture; narrow `UF_Colonists.js` planner integration, `UF_Households.js` farm reservation guard, `UF_ProfileTabs.js` explanations and `UF_CultureGrowth.js` confirmed farming practice, their docs/tests; `docs/STATUS.md`, `docs/VISION.md`, `docs/design/EMERGENT_SOCIETY.md`, `docs/ASSET_REQUESTS.md` request text only; registration only after editor closure | since 2026-09-19
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`
 - Claude Code | **Five-level world engine, slices 1-2** (VISION V80; user 2026-09-19 13:15: "Continue coding features from U7 / DF into the game. We are now operating on 5 maps acting as vertical layers. we want to build up or down into this world, etc. Feel free to use duplicate RMMZ assets for these"): z on every cell, unit, item and job; five seeded levels; save migration; level switching and HUD; stairs, ramps and routes between levels; stock RMMZ tiles as placeholders. Design: `docs/design/VERTICAL_WORLD.md` (Codex). | new `game/js/plugins/UF_Levels.js`, `UF_World.js`, `UF_Objects.js` and `UF_Items.js` (z only), `UF_Jobs.js` (z only), `UF_Camera.js`, `UF_Look.js`, `UF_Interact.js`, `UF_Tiles.js`, `docs/design/VERTICAL_BUILD_PLAN.md`, `docs/systems/UF_Levels.md`, `docs/handoffs/HANDOFF_vertical.md`, `docs/ASSET_REQUESTS.md` (new AR rows) | since 2026-09-19 13:20. Not touching `UF_Wildlife.js` (claimed for creature AI) or Codex's design docs.

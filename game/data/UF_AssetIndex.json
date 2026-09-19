@@ -63,7 +63,8 @@
   "request": "AR-401",
   "requests": [
    "AR-401",
-   "AR-402"
+   "AR-402",
+   "AR-600"
   ],
   "usedBy": [
    "creature troll \"Troll\" (monster, tint #c0c8b0)"
@@ -148,7 +149,8 @@
   "request": "AR-403",
   "requests": [
    "AR-403",
-   "AR-401"
+   "AR-401",
+   "AR-600"
   ],
   "usedBy": [
    "creature wolf \"Wolf\" (predator)",
@@ -190,7 +192,8 @@
   "request": "AR-403",
   "requests": [
    "AR-403",
-   "AR-401"
+   "AR-401",
+   "AR-600"
   ],
   "usedBy": [
    "creature boar \"Boar\" (grazer, tint #7a5a40)",
@@ -215,7 +218,8 @@
   "status": "stock RMMZ",
   "request": "AR-401",
   "requests": [
-   "AR-401"
+   "AR-401",
+   "AR-600"
   ],
   "usedBy": [
    "creature deer \"Deer\" (grazer)",
@@ -290,7 +294,8 @@
   "status": "stock RMMZ",
   "request": "AR-401",
   "requests": [
-   "AR-401"
+   "AR-401",
+   "AR-600"
   ],
   "usedBy": [
    "creature giant_spider \"Giant spider\" (predator)"
@@ -330,9 +335,8 @@
  },
  "$UF_Stock_SF_People3_4": {
   "status": "stock RMMZ",
-  "request": "AR-400",
+  "request": "AR-1709",
   "requests": [
-   "AR-400",
    "AR-1709"
   ],
   "usedBy": [
@@ -350,9 +354,8 @@
  },
  "$UF_Stock_SF_People3_6": {
   "status": "stock RMMZ",
-  "request": "AR-400",
+  "request": "AR-1709",
   "requests": [
-   "AR-400",
    "AR-1709"
   ],
   "usedBy": [
@@ -370,9 +373,8 @@
  },
  "$UF_Stock_SF_People3_7": {
   "status": "stock RMMZ",
-  "request": "AR-400",
+  "request": "AR-1709",
   "requests": [
-   "AR-400",
    "AR-1709"
   ],
   "usedBy": [
@@ -487,10 +489,8 @@
  },
  "Outside_A1": {
   "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "tileset 91 slot A1: the 9 water kinds"
   ],
@@ -1722,7 +1722,8 @@
   "status": "generated",
   "request": "AR-1204",
   "requests": [
-   "AR-1204"
+   "AR-1204",
+   "AR-300"
   ],
   "usedBy": [
    "ground kind floor_wood \"Plank floor\""
@@ -1741,7 +1742,8 @@
   "status": "generated",
   "request": "AR-1205",
   "requests": [
-   "AR-1205"
+   "AR-1205",
+   "AR-300"
   ],
   "usedBy": [
    "ground kind floor_stone \"Flagstone floor\""
@@ -1758,8 +1760,10 @@
  },
  "UF_GenGround_A2#4016": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-300",
+  "requests": [
+   "AR-300"
+  ],
   "usedBy": [
    "ground kind floor_rushes \"Rush floor\""
   ],
@@ -2122,10 +2126,10 @@
  },
  "!$UF_Campfire": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-105",
   "requests": [
-   "AR-300",
-   "AR-105"
+   "AR-105",
+   "AR-300"
   ],
   "usedBy": [
    "object campfire \"Campfire\""
@@ -2263,10 +2267,10 @@
  },
  "!$UF_Door_Stone": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object door_stone \"Stone door\""
@@ -2287,10 +2291,10 @@
  },
  "!$UF_Door_Wood": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object door_wood \"Wooden door\""
@@ -3879,10 +3883,10 @@
  },
  "!$UF_Stockpile": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object stockpile \"Stockpile\""
@@ -3899,10 +3903,10 @@
  },
  "!$UF_Straw_Bed": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object floor_straw \"Straw bed\""
@@ -4195,10 +4199,10 @@
  },
  "!$WallStone_Set": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object wall_stone \"Stone wall\""
@@ -4219,10 +4223,10 @@
  },
  "!$WallWood_Set": {
   "status": "original",
-  "request": "AR-300",
+  "request": "AR-104",
   "requests": [
-   "AR-300",
-   "AR-104"
+   "AR-104",
+   "AR-300"
   ],
   "usedBy": [
    "object wall_wood \"Wooden wall\""
@@ -4243,11 +4247,11 @@
  },
  "$Adam": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-700",
   "requests": [
+   "AR-700",
    "AR-400",
    "AR-600",
-   "AR-700",
    "AR-010",
    "AR-011",
    "AR-1700"
@@ -4330,11 +4334,11 @@
  },
  "$Eve": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-700",
   "requests": [
+   "AR-700",
    "AR-400",
    "AR-600",
-   "AR-700",
    "AR-010",
    "AR-011",
    "AR-1700"
@@ -4394,11 +4398,11 @@
  },
  "$UF_Dwarf_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
+   "AR-900",
    "AR-400",
    "AR-600",
-   "AR-900",
    "AR-1702"
   ],
   "usedBy": [
@@ -4416,11 +4420,11 @@
  },
  "$UF_Dwarf_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
+   "AR-900",
    "AR-400",
    "AR-600",
-   "AR-900",
    "AR-1702"
   ],
   "usedBy": [
@@ -4438,11 +4442,11 @@
  },
  "$UF_Elf_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
+   "AR-900",
    "AR-400",
    "AR-600",
-   "AR-900",
    "AR-1701"
   ],
   "usedBy": [
@@ -4460,11 +4464,11 @@
  },
  "$UF_Elf_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
+   "AR-900",
    "AR-400",
    "AR-600",
-   "AR-900",
    "AR-1701"
   ],
   "usedBy": [
@@ -4482,10 +4486,11 @@
  },
  "$UF_Gnome_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1703"
   ],
   "usedBy": [
@@ -4503,10 +4508,11 @@
  },
  "$UF_Gnome_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1703"
   ],
   "usedBy": [
@@ -4524,10 +4530,11 @@
  },
  "$UF_Goblin_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1704"
   ],
   "usedBy": [
@@ -4545,10 +4552,11 @@
  },
  "$UF_Goblin_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1704"
   ],
   "usedBy": [
@@ -4566,12 +4574,12 @@
  },
  "$UF_Human_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-700",
   "requests": [
-   "AR-400",
-   "AR-600",
    "AR-700",
    "AR-011",
+   "AR-400",
+   "AR-600",
    "AR-010",
    "AR-1700"
   ],
@@ -4595,12 +4603,12 @@
  },
  "$UF_Human_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-700",
   "requests": [
-   "AR-400",
-   "AR-600",
    "AR-700",
    "AR-010",
+   "AR-400",
+   "AR-600",
    "AR-011",
    "AR-1700"
   ],
@@ -4625,10 +4633,11 @@
  },
  "$UF_Orc_Female": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1705"
   ],
   "usedBy": [
@@ -4646,10 +4655,11 @@
  },
  "$UF_Orc_Male": {
   "status": "original",
-  "request": "AR-400",
+  "request": "AR-900",
   "requests": [
-   "AR-400",
    "AR-900",
+   "AR-400",
+   "AR-600",
    "AR-1705"
   ],
   "usedBy": [
@@ -4667,10 +4677,8 @@
  },
  "$UF_Wolf": {
   "status": "original",
-  "request": "AR-401",
-  "requests": [
-   "AR-401"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Select.js (test suite)"
   ],

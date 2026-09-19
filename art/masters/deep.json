@@ -1,0 +1,22 @@
+{
+  "id": "deep",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "surface": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "layer": "water",
+  "kind": 12,
+  "tileId": 2624,
+  "slot": [
+    384,
+    288
+  ]
+}

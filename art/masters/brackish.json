@@ -1,0 +1,22 @@
+{
+  "id": "brackish",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "surface": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "layer": "water",
+  "kind": 8,
+  "tileId": 2432,
+  "slot": [
+    0,
+    288
+  ]
+}

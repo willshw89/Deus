@@ -1,0 +1,22 @@
+{
+  "id": "icy",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "surface": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "layer": "water",
+  "kind": 4,
+  "tileId": 2240,
+  "slot": [
+    384,
+    0
+  ]
+}

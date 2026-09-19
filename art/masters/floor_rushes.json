@@ -1,0 +1,15 @@
+{
+  "id": "floor_rushes",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "layer": "ground",
+  "kind": 25,
+  "tileId": 4016
+}

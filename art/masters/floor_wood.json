@@ -1,0 +1,15 @@
+{
+  "id": "floor_wood",
+  "frameWidth": 96,
+  "frameHeight": 144,
+  "anchor": null,
+  "facings": [],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "layer": "ground",
+  "kind": 23,
+  "tileId": 3920
+}
