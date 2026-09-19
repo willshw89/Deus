@@ -141,7 +141,39 @@ function processFacing(img, name, options = {}) {
         }
     }
 
+    if (options.darkOutline !== false) {
+        applyDarkOutline(out48, 48, 48, options.outlineFactor || 0.35);
+    }
+
     return out48;
+}
+
+function applyDarkOutline(buf, width = 48, height = 48, factor = 0.35) {
+    const copy = Buffer.from(buf);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            if (copy[idx + 3] === 0) continue;
+
+            const isBorder = (
+                x === 0 || copy[idx - 4 + 3] === 0 ||
+                x === width - 1 || copy[idx + 4 + 3] === 0 ||
+                y === 0 || copy[idx - width * 4 + 3] === 0 ||
+                y === height - 1 || copy[idx + width * 4 + 3] === 0
+            );
+
+            if (isBorder) {
+                const r = copy[idx];
+                const g = copy[idx + 1];
+                const b = copy[idx + 2];
+                const snapped = pal.snap(r * factor, g * factor, b * factor);
+                buf[idx] = snapped[0];
+                buf[idx + 1] = snapped[1];
+                buf[idx + 2] = snapped[2];
+                buf[idx + 3] = 255;
+            }
+        }
+    }
 }
 
 function mirrorFrame(buf) {
