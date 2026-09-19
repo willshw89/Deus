@@ -1,0 +1,52 @@
+{
+  "id": "human_male_adult_work",
+  "name": "Human Male Adult Settler (Work)",
+  "category": "people",
+  "species": "human",
+  "gender": "male",
+  "stage": "adult",
+  "action": "work",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "work": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "layer": "body",
+  "source": {
+    "file": "art/raw/human_male_adult_work.png",
+    "format": "png",
+    "size": [
+      576,
+      1536
+    ],
+    "sheet": [
+      3,
+      8
+    ],
+    "block": 4,
+    "background": "magenta #FF00FF"
+  }
+}
