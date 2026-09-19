@@ -57,6 +57,20 @@ Social bonds need both positive and negative changes, memory limits and context.
 - Streets, entrances, communal spaces and expansion reserves must be planned together so new rooms do not trap people or sever routes. Traffic, water, hazards and available buildable ground constrain the town's shape.
 - Windows, locks, keys, dining furniture and containers depend on their real catalog/interaction implementations. Current missing content must stay explicitly unsupported; do not repurpose an unrelated object and claim the feature exists.
 
+## Food production, layer economies and remembrance (user additions, 2026-09-19)
+
+Requested, not implemented by this document: agriculture, farms, fields, farmers, dairy, eggs, chickens, markets and equivalent underground production. Every world layer must have some exclusive content. Exclusive resources/crops/species need explicit allowed-layer data shared by world generation, replenishment and farming; moving the camera must not bypass habitat restrictions. Underground crops need their own inputs and growth conditions, not surface sunlight rules with a renamed sprite. Upper-layer exclusives must likewise respect actual supported terrain and climate. Exact new species, goods and artwork remain content-owner work; do not invent a completed catalog in a design note.
+
+Implementation sequence after the active housing/profile/fire/access checkpoint:
+
+1. Physical plots with suitable soil/light/moisture, planting stock, tending, timed crop growth and real harvest yields. Demand chooses field size; farmers perform jobs. No output from an unbuilt farm label.
+2. Animal care: pasture/enclosure space, feed/water, adult/female/lifecycle-appropriate milk and egg production, collection, breeding and offspring. Chickens, dairy animals and subterranean equivalents use actual creature records; no infinite free egg/milk timer independent of livestock.
+3. Processing, storage and markets: food safety/spoilage as supported, transport, surplus, demand, ownership and atomic trade. A marketplace needs working producers and exchange, not merely stalls.
+4. Death care: an identified body/remains record, family/faction claim, respectful hauling, a dug/built burial place, grave marker and persistent deceased identity. Graveyards reserve accessible space and permit mourning/visits. No vanished corpse counted as buried or duplicate person/remains after save/load.
+5. Beliefs and religion: personal beliefs, shared practices, observances, places and roles emerge through social transmission and history. Funerals can be religious or nonreligious; faction rituals can differ. Grief and remembrance link to actual relationships and events. Do not invent approved gods, doctrines or universal funeral customs.
+
+All five maps must advance crop growth, husbandry, food demand and remains state while off screen. Test each chain with real jobs, negative prerequisites, save/load and representative layer-exclusive refusal. Religious meaning and NPC beliefs remain separate from world truth.
+
 ## Faction identity versus learned culture
 
 Capabilities and distinctive mechanics constrain the possible: habitat, lifecycle, bodily/tool requirements and faction institutions. Learned practices describe what this specific community repeatedly does and teaches. Two factions of the same people must be able to diverge, and members retain personal variation.
