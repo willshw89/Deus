@@ -126,6 +126,36 @@ Delivered per user directives ("Actually, Do charsets and face sets for Biome as
   - `UF_Faces_Plants.png` and `UF_Faces_Minerals.png`: Opened and inspected; crisp 3× native grid, authentic ornate borders and silhouettes.
   - `smoke.map.png`: Ground start visually verified showing live `!$UF_Flowers_Blue`, `!$UF_IronstoneDeposit`, `!$UF_GraniteBoulder`, `!$UF_Reeds`, `!$UF_Wildflowers`, and `!$UF_Wheat_Wild` on the meadow with colonists.
 
+## Biome Objects, Workshop Benches & Extended Face Sets (Batch 6) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Actually, Do charsets and face sets for Biome assets liek trees, stumps, etc", "Keep working on tilesets with a variety of gradient terrains for 0,-1,and -2", "Going forward, for underground too, I want nature to change on a gradient which means more assets probly"):
+- **Authentic FF6 HD Workshop Benches, Doors & Structures (AR-104, AR-300, AR-510):**
+  - Delivered 9 original character sheets and AR-600 .json sidecars in `game/img/characters/!$UF_*.png`:
+    - Wooden Door (`!$UF_Door_Wood`): 3-frame animated opening sequence (closed studded oak, ajar inward swing, fully open threshold).
+    - Stone Door (`!$UF_Door_Stone`): 3-frame animated runic stone slab pivot.
+    - Bowyer's Bench (`!$UF_Bowyer_Bench`): Joiner's workbench with curved yew stave, shaving horse clamp, and drawknife.
+    - Fletcher's Bench (`!$UF_Fletcher_Bench`): Work table with feather sorting tray, goose fletchings, and arrow assembly jig.
+    - Tanning Rack (`!$UF_Tanning_Rack`): Upright timber frame with taut pegged rawhide hide and scraper.
+    - Weapon Rack (`!$UF_Weapon_Rack`): Armory stand holding forged iron longswords, spears, and battleaxe.
+    - Stone Well (`!$UF_Well`): Dressed stone circular wellhead with winding gallows, rope spindle, and bucket over dark water.
+    - Farm Plot (`!$UF_FarmPlot`): Tilled agricultural loam with parallel seed furrows and bright green sprouting shoots.
+    - Plank Bridge (`!$UF_Bridge`): Heavy transverse wooden plank deck with bolted timber stringers for water crossings.
+- **RMMZ Extended Face Sets (AR-700):**
+  - Delivered 2 complete 576×288 face sheets (4×2 grid of 144×144 portraits) inside authentic living oak carved wood borders and Romanesque stone arches:
+    - `game/img/faces/UF_Faces_Flora_Ex.png`: White Flowers, Wild Grain, Lichen, Lily Pad, Shrub, Desert Shrub, Snow Bush, Fern.
+    - `game/img/faces/UF_Faces_Landmarks.png`: Snow Fir Stump, Mangrove Stump, Tropical Giant Stump, Palm Stump, Cursed Tree Stump, Rubble, Work Stone (Workbench), Campfire.
+- **100% Elimination of Stock Catalog Object Placeholders:**
+  - Updated `game/data/UF_WorldCatalog.json` to link all 10 remaining objects (`door_wood`, `door_stone`, `bowyer_bench`, `fletcher_bench`, `tanning_rack`, `weapon_rack`, `well`, `farm_plot`, `bridge`, `stockpile`) to original character sheets.
+  - Zero catalog objects now use stock RMMZ tile or character placeholders!
+  - `tools/generate_asset_inventory.js`: Original assets increased from 124 to **134**; stock RMMZ assets dropped to **37**!
+- **Automated Verification:**
+  - `tools/verify_batch6_assets.js`: 22/22 PASS (100% `art_check.js` 3× Native Grid and palette compliance, 100% `originality_check.js` distance >= 0.28 vs 19,431 indexed U7 shapes).
+  - Test suites: `ground` 9/9 PASS, `worldgen` 22/22 PASS, `vertical` 11/11 PASS, `smoke` 9/9 PASS (0 errors).
+- **Screenshots visually inspected (Rule 5):**
+  - `UF_Faces_Flora_Ex.png` and `UF_Faces_Landmarks.png`: Opened and inspected; crisp 3× native grid, authentic ornate borders and silhouettes.
+  - `ground.terrain_gradient_closeup.png` & `ground.terrain_gradient_border.png`: Rolling multi-tone terrain gradient from olive to deep emerald and golden leaf litter to coastal shoreline with live original assets.
+  - `smoke.map.png`: Level -1 subterranean cavern showing live `!$UF_TowerCap`, `!$UF_Stalagmite`, `!$UF_GlowCaps`, `!$UF_CaveMushrooms`, `!$UF_CaveMoss` with settlers around the campfire.
+
 ## Household and goals checkpoint — 2026-09-19 (Codex / Astra)
 
 - **Saved implementation:** `UF_Households`, `UF_CultureGrowth`, and `UF_Goals` are enabled after Ownership. User confirmed the editor closed before `plugins.js` changed. Colonists consumes exact household construction and personal equipment steps through real Jobs; survival/explicit orders retain precedence. F7 opens the selected creature's goals. Reopen the editor before Playtest.
@@ -302,6 +332,9 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
 ## In progress (claims)
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`
+- Codex / Astra | Natural Ground / -1 / -2 passages and physical travel; final runtime checkpoint | NEW `UF_NaturalConnections.js`, `tools/test_natural_connections.js`, `docs/systems/UF_NaturalConnections.md`; narrow `UF_Colonists.js` travel result and `UF_Households.js` passage reservations | since 2026-09-19
+- Codex / Astra profile agent | User-requested creature factor tabs, additive companion preserving claimed Sheet code | NEW `UF_ProfileTabs.js`, `tools/test_profile_tabs.js`, `docs/systems/UF_ProfileTabs.md`; root handles registration | since 2026-09-19
+- Codex / Astra household agent | User-requested structural variety: saved functional home designs and orientation, existing cultural materials only | `UF_Households.js`, `tools/test_households.js`, `docs/systems/UF_Households.md`; preserve root's passage reservations | since 2026-09-19
 - Gemini | **Wildlife Action Suites Refinement: Bear, Troll, Giant Spider (AR-401, AR-402)** | `art/masters/{bear,troll,giant_spider}_*`, `game/img/characters/$UF_{Bear,Troll,GiantSpider}*`, `art/review/*` | since 2026-09-19
 - Claude Code | **Five-level world engine, slices 1-2** (VISION V80; user 2026-09-19 13:15: "Continue coding features from U7 / DF into the game. We are now operating on 5 maps acting as vertical layers. we want to build up or down into this world, etc. Feel free to use duplicate RMMZ assets for these"): z on every cell, unit, item and job; five seeded levels; save migration; level switching and HUD; stairs, ramps and routes between levels; stock RMMZ tiles as placeholders. Design: `docs/design/VERTICAL_WORLD.md` (Codex). | new `game/js/plugins/UF_Levels.js`, `UF_World.js`, `UF_Objects.js` and `UF_Items.js` (z only), `UF_Jobs.js` (z only), `UF_Camera.js`, `UF_Look.js`, `UF_Interact.js`, `UF_Tiles.js`, `docs/design/VERTICAL_BUILD_PLAN.md`, `docs/systems/UF_Levels.md`, `docs/handoffs/HANDOFF_vertical.md`, `docs/ASSET_REQUESTS.md` (new AR rows) | since 2026-09-19 13:20. Not touching `UF_Wildlife.js` (claimed for creature AI) or Codex's design docs.
 - Claude Code | **DF mechanics: remains and bones, ecology and spawns, culture permissions and tech trees** (user 2026-09-19 13:40: "continue working on pulling DF mechanics, bones, spawns, entities, resources, build/skill/technology trees, etc. Gemini can handle the art"; VISION V74-V77) | new `game/js/plugins/UF_Remains.js`, `UF_Ecology.js`, `UF_Tech.js`, `UF_Skills.js` (faction Building level and personal unlocks, VISION V84), `UF_Jobs.js` (work timing in world beats, VISION V85, after the progression build), `docs/design/WORK_TIMING.md`, their `docs/systems/` pages, `docs/design/DF_GAP_MAP.md`, `docs/design/REMAINS.md`, `docs/design/ECOLOGY.md`, `docs/design/TECH_TREE.md`, catalog keys `remains`, `ecology`, `tech` and new bone items and recipes, `docs/ASSET_REQUESTS.md` (new AR rows), `docs/handoffs/HANDOFF_df_mechanics.md` | since 2026-09-19 13:45. Hooks into other files only by aliases; not touching `UF_Wildlife.js` (claimed) or Codex's design docs.

@@ -2247,7 +2247,6 @@
     {
       "id": "stockpile",
       "name": "Stockpile",
-      "gen": "stockpile",
       "under": true,
       "passable": true,
       "tags": [
@@ -2257,7 +2256,8 @@
       "build": {
         "items": {},
         "work": 20
-      }
+      },
+      "image": "!$UF_Stockpile"
     },
     {
       "id": "workbench",
@@ -2316,10 +2316,6 @@
     {
       "id": "bowyer_bench",
       "name": "Bowyer's bench",
-      "tile": {
-        "sheet": "Inside_C",
-        "id": 403
-      },
       "tags": [
         "building",
         "workplace",
@@ -2331,16 +2327,12 @@
         },
         "work": 6
       },
-      "ruin": "rubble"
+      "ruin": "rubble",
+      "image": "!$UF_Bowyer_Bench"
     },
     {
       "id": "fletcher_bench",
       "name": "Fletcher's bench",
-      "tile": {
-        "sheet": "Inside_C",
-        "id": 403
-      },
-      "tint": "#c8d8f0",
       "tags": [
         "building",
         "workplace",
@@ -2353,15 +2345,12 @@
         },
         "work": 6
       },
-      "ruin": "rubble"
+      "ruin": "rubble",
+      "image": "!$UF_Fletcher_Bench"
     },
     {
       "id": "tanning_rack",
       "name": "Tanning rack",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 149
-      },
       "tags": [
         "building",
         "workplace",
@@ -2374,15 +2363,12 @@
         },
         "work": 4
       },
-      "ruin": "rubble"
+      "ruin": "rubble",
+      "image": "!$UF_Tanning_Rack"
     },
     {
       "id": "weapon_rack",
       "name": "Weapon rack",
-      "tile": {
-        "sheet": "Inside_C",
-        "id": 400
-      },
       "tags": [
         "building",
         "stockpile",
@@ -2394,15 +2380,12 @@
         },
         "work": 4
       },
-      "ruin": "rubble"
+      "ruin": "rubble",
+      "image": "!$UF_Weapon_Rack"
     },
     {
       "id": "bridge",
       "name": "Plank bridge",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 181
-      },
       "under": true,
       "passable": true,
       "onWater": true,
@@ -2411,15 +2394,12 @@
         "bridge",
         "road",
         "wood"
-      ]
+      ],
+      "image": "!$UF_Bridge"
     },
     {
       "id": "farm_plot",
       "name": "Farm plot",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 175
-      },
       "under": true,
       "passable": true,
       "tags": [
@@ -2427,27 +2407,24 @@
         "farm",
         "workplace",
         "plot"
-      ]
+      ],
+      "image": "!$UF_FarmPlot"
     },
     {
       "id": "well",
       "name": "Well",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 139
-      },
       "tags": [
         "building",
         "workplace",
         "water",
         "well"
-      ]
+      ],
+      "image": "!$UF_Well"
     },
     {
       "id": "door_wood",
       "name": "Wooden door",
-      "image": "!Door1",
-      "characterIndex": 0,
+      "image": "!$UF_Door_Wood",
       "passable": false,
       "tags": [
         "building",
@@ -2492,9 +2469,7 @@
     {
       "id": "door_stone",
       "name": "Stone door",
-      "image": "!Door1",
-      "characterIndex": 0,
-      "tint": "#b8c0c8",
+      "image": "!$UF_Door_Stone",
       "passable": false,
       "tags": [
         "building",

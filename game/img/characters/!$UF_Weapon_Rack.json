@@ -1,6 +1,6 @@
 {
-  "id": "door_stone",
-  "name": "Stone Door",
+  "id": "weapon_rack",
+  "name": "Weapon Rack",
   "category": "Building",
   "frameWidth": 48,
   "frameHeight": 48,
@@ -13,20 +13,11 @@
     1
   ],
   "facings": [
-    "S",
-    "W",
-    "E",
-    "N"
+    "S"
   ],
   "animations": {
-    "closed": [
+    "stand": [
       0
-    ],
-    "ajar": [
-      1
-    ],
-    "open": [
-      2
     ]
   }
 }

@@ -19,13 +19,14 @@
     "N"
   ],
   "animations": {
-    "stand": [
+    "closed": [
       0
+    ],
+    "ajar": [
+      1
+    ],
+    "open": [
+      2
     ]
-  },
-  "states": {
-    "closed": 0,
-    "ajar": 1,
-    "open": 2
   }
 }
