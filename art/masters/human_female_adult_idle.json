@@ -2,7 +2,6 @@
   "id": "human_female_adult_idle",
   "species": "human",
   "gender": "female",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -24,14 +23,10 @@
     "SE"
   ],
   "animations": {
-    "stand": [
-      0
-    ],
     "idle": [
       0,
-      1,
-      2
+      1
     ]
   },
-  "frameMs": 150
+  "frameMs": 250
 }

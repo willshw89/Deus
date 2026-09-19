@@ -1,5 +1,5 @@
 {
-  "id": "human_male",
+  "id": "$UF_Human_Male_AR600",
   "species": "human",
   "gender": "male",
   "stage": "adult",
@@ -58,7 +58,9 @@
     ],
     "idle": [
       18,
-      19
+      19,
+      18,
+      0
     ]
   },
   "frameMs": 150

@@ -1,7 +1,6 @@
 {
   "id": "$UF_Human_Female_Attack",
   "species": "human",
-  "gender": "female",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [

@@ -1,0 +1,33 @@
+{
+  "id": "$UF_Elf_Attack_Sword_8D",
+  "species": "elf",
+  "weapon": "elf_moonblade",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "attack": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 120
+}

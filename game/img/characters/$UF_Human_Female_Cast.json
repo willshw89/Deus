@@ -1,7 +1,6 @@
 {
   "id": "$UF_Human_Female_Cast",
   "species": "human",
-  "gender": "female",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -25,5 +24,5 @@
       2
     ]
   },
-  "frameMs": 150
+  "frameMs": 120
 }

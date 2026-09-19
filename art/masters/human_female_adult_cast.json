@@ -1,8 +1,6 @@
 {
   "id": "human_female_adult_cast",
   "species": "human",
-  "gender": "female",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -30,5 +28,5 @@
       2
     ]
   },
-  "frameMs": 150
+  "frameMs": 120
 }

@@ -1,11 +1,7 @@
 {
   "id": "human_male_adult_idle",
-  "name": "Human Male Adult Settler (Idle)",
-  "category": "people",
   "species": "human",
   "gender": "male",
-  "stage": "adult",
-  "action": "idle",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -27,30 +23,10 @@
     "SE"
   ],
   "animations": {
-    "stand": [
-      0
-    ],
     "idle": [
       0,
-      1,
-      2
+      1
     ]
   },
-  "frameMs": 200,
-  "layer": "body",
-  "source": {
-    "file": "art/raw/human_male_adult_idle.png",
-    "format": "png",
-    "size": [
-      576,
-      1536
-    ],
-    "sheet": [
-      3,
-      8
-    ],
-    "block": 4,
-    "background": "magenta #FF00FF"
-  },
-  "notes": "Approved style anchor adult human male settler idle animation (Stand, Inhale/Lift, Exhale/Blink) in all 8 directions."
+  "frameMs": 250
 }

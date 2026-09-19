@@ -1,4 +1,8 @@
 {
+  "id": "$UF_Elf_Male",
+  "species": "elf",
+  "gender": "male",
+  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -26,6 +30,5 @@
       1
     ]
   },
-  "species": "elf",
-  "gender": "male"
+  "frameMs": 150
 }

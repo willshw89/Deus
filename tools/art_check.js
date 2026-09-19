@@ -36,15 +36,25 @@ const ICON = 32;            // AR-800: IconSet icons are 32x32
 const ICON_SHEET_WIDTH = 512;
 const FACE = 144;           // AR-700: 4 columns x 2 rows of 144x144
 const A1A2 = { width: 768, height: 576 }; // AR-001: A1 and A2 sheets are 768x576
-const FACING_NAMES = { s: 'S', south: 'S', w: 'W', west: 'W', e: 'E', east: 'E', n: 'N', north: 'N' };
+const FACING_NAMES = {
+    s: 'S', south: 'S',
+    w: 'W', west: 'W',
+    e: 'E', east: 'E',
+    n: 'N', north: 'N',
+    sw: 'SW', southwest: 'SW',
+    nw: 'NW', northwest: 'NW',
+    ne: 'NE', northeast: 'NE',
+    se: 'SE', southeast: 'SE'
+};
 
 // ---------------------------------------------------------------- arguments
 
 function parseArgs(argv) {
-    const opts = { files: [], sidecar: false, json: false, summary: false, type: null, help: false, selftest: false };
+    const opts = { files: [], sidecar: false, native: false, json: false, summary: false, type: null, help: false, selftest: false };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--sidecar') opts.sidecar = true;
+        else if (a === '--native') opts.native = true;
         else if (a === '--selftest') opts.selftest = true;
         else if (a === '--json') opts.json = true;
         else if (a === '--summary') opts.summary = true;
@@ -180,7 +190,10 @@ function checkAlpha(img) {
     return fail(`${bad} of ${total} px have alpha between 1 and 254 (first at (${first.x},${first.y}) alpha ${first.a})`);
 }
 
-function checkGrid(img, cls) {
+function checkGrid(img, cls, opts) {
+    if (opts && opts.native) {
+        return ok('native 48px resolution: skipping 3x block check (--native)');
+    }
     const w = img.width, h = img.height;
     if (cls.type === 'icon') {
         return skip(`${ICON}-px icons (AR-800) are not on the ${SCALE}x grid: ${ICON} is not a multiple of ${SCALE}`);
@@ -451,7 +464,7 @@ function checkFile(file, opts) {
     report.sidecar = sidecar ? path.basename(sc) : null;
 
     add('alpha', checkAlpha(img));
-    add('grid', checkGrid(img, cls));
+    add('grid', checkGrid(img, cls, opts));
     const pal = add('palette', checkPalette(img));
     report.colors = pal.colors;
     add('size', checkSize(img, cls, grid));

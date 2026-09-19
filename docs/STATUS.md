@@ -5,6 +5,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
+## FF5 Proportions, Dynamic Footsteps & Complete 8D Suites: Human, Dwarf & Elf (AR-010..012, AR-400, AR-600) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Dude, look, they need footsteps, etc. They can be closer to ff5 in proportions", "Dwarves need 8 direction mvoement. idle, combat, sleep, death.. etc..."):
+- **Authentic Final Fantasy V (FF5) Proportions:**
+  - Standardized Human (M/F), Dwarf (M/F), and Elf (M/F) to classic 16-bit JRPG anatomy: ~1:2.8 head-to-body ratio (expressive 14–16px heads, 11–13px torsos, 12–14px legs/boots; total drawn stature 36–42px grounded at row 47, anchor `[24, 47]`, footprint `[1, 1]`).
+  - Eliminated tall fashion-model elongation, accordion squashing, and stiff sliding columns.
+- **Dynamic Footsteps & Scissor Strides (All 8 Facings):**
+  - **South Facing:** Alternate foot lift (leading boot planted flat on row 47, trailing boot lifted 2px with visible daylight beneath), 1px torso bob, and counter arm swing.
+  - **Profile Views (West / East):** True scissor stride leg split (leading boot extended forward onto row 47, trailing boot pushed back with lifted heel, creating clear negative space between legs).
+  - **North & Diagonals (SW, NW, NE, SE):** 8-directional footstep articulation with natural weight transfer.
+- **Elf Male & Female Complete 8D Action Suites:**
+  - Authentic platinum/silver-blonde hair, pointed sylvan ears, forest green tunics, fitted bodices, leather bracers, and boots.
+  - Complete 8D action set: Stand, agile high-step Walk, Moonblade melee strike (with luminous crescent slash arc), Longbow ranged attack (draw, aim, loose recoil), Sylvan Staff magic cast (emerald power gather and swirling verdant leaf vortex), Work, Hurt flinch, falling Death collapse, Prone sylvan remains, and restful Sleep.
+  - Delivered AR-600 20×8 masters (`art/masters/elf_{male,female}.png` & `.json`, `$UF_Elf_{Male,Female}_AR600.png`), 8D charsets (`$UF_Elf_8D.png`, `$UF_Elf_{Male,Female}_8D.png`, `$UF_Elf_Attack_Sword_8D.png`, `$UF_Elf_Attack_Bow_8D.png`, `$UF_Elf_Cast_Staff_8D.png`), and standard 4-way charsets.
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --native`: 100% PASS (7/7 checks on every character sheet: binary alpha 0/255, <= 31 colors from `art/palette/uf.hex`, valid sidecars, lean off by <= 0.3 px, row 47 grounding margin).
+  - `tools/originality_check.js`: 100% PASS across all frames (closest distance >= 0.475 >= 0.28 vs 19,431 indexed U7 shapes).
+  - `tools/run_tests.js smoke`: 13/13 PASS (0 console errors, clean colony rendering).
+  - Live in-engine NW.js snapshot (`tools/test_elves_ingame.js`): 13/13 PASS, live elves rendered in active play with ground items.
+- **Screenshots Visually Inspected (Rule 5):**
+  - `art/review/all_lineages_8d_compass_comparison_4x.png`: 6 rows × 8 compass facings showing Human M/F, Dwarf M/F, and Elf M/F standing in complete proportional harmony.
+  - `art/review/all_lineages_footsteps_walk_cycles_4x.png`: 6 rows × 9 columns showing South, West, and North walk cycles with distinct footsteps and scissor strides across all 6 archetypes.
+  - `art/review/elf_sprites_8d_actions_showcase_4x.png`: Elf Male/Female 8D stand, Moonblade strike, and Longbow full draw.
+  - `game/test_output/smoke.map.png`: Live in-engine test screenshot showing colonists on meadow.
+  - `game/test_output/elf_faction_live_ingame_closeup.png`: Live in-engine screenshot of elves around the campfire with racial weapons.
 
 ## Environmental Factors, Temperature, Weather, Hypothermia & Burning (UF_Environment) — 2026-09-19
 

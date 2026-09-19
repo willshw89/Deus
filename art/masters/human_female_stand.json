@@ -25,7 +25,13 @@
   ],
   "animations": {
     "stand": [
-      0
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
     ]
   },
   "frameMs": 150

@@ -1,4 +1,7 @@
 {
+  "id": "$UF_Elf_Attack_Sword",
+  "species": "elf",
+  "weapon": "elf_moonblade",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,6 +25,5 @@
       2
     ]
   },
-  "species": "elf",
-  "weapon": "elf_moonblade"
+  "frameMs": 120
 }

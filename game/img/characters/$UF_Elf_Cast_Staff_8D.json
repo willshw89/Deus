@@ -1,0 +1,33 @@
+{
+  "id": "$UF_Elf_Cast_Staff_8D",
+  "species": "elf",
+  "weapon": "elf_sylvan_staff",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "cast": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150
+}

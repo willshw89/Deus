@@ -1,4 +1,7 @@
 {
+  "id": "$UF_Elf_Cast_Staff",
+  "species": "elf",
+  "weapon": "elf_sylvan_staff",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,6 +25,5 @@
       2
     ]
   },
-  "species": "elf",
-  "weapon": "elf_sylvan_staff"
+  "frameMs": 150
 }

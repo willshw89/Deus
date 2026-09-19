@@ -1,4 +1,6 @@
 {
+  "id": "$UF_Elf",
+  "species": "elf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -26,5 +28,5 @@
       1
     ]
   },
-  "species": "elf"
+  "frameMs": 150
 }

@@ -293,33 +293,95 @@ function blendDiagonal(f1, f2) {
     return out;
 }
 
-function makeWalkVariant(base, stepSide) {
+function makeWalkVariant(base, stepSide, facingIndex = 0) {
     const out = Buffer.alloc(48 * 48 * 4);
-    const bob = Math.abs(stepSide); // 1px vertical dip
+    const bob = 1; // 1px vertical dip on footstep
+    const isProfile = (facingIndex === 2 || facingIndex === 6);
+    const isWest = (facingIndex === 2);
+    const isEast = (facingIndex === 6);
+    const isNorth = (facingIndex === 4);
+    const isSouth = (facingIndex === 0);
+    const isDiagonal = (!isProfile && !isNorth && !isSouth);
+
+    // Find leg center of mass on rows 37..47
+    let legMinX = 48, legMaxX = 0;
+    for (let y = 37; y < 48; y++) {
+        for (let x = 0; x < 48; x++) {
+            if (base[(y * 48 + x) * 4 + 3] > 0) {
+                if (x < legMinX) legMinX = x;
+                if (x > legMaxX) legMaxX = x;
+            }
+        }
+    }
+    const legMidX = (legMinX + legMaxX) / 2;
+
     for (let y = 0; y < 48; y++) {
-        const targetY = y + bob;
-        if (targetY >= 48) continue;
         for (let x = 0; x < 48; x++) {
             const sIdx = (y * 48 + x) * 4;
-            if (base[sIdx + 3] > 0) {
-                let dx = 0;
-                // Dwarf short legs: modify rows >= 38
-                if (y >= 38) {
-                    if (stepSide < 0) {
-                        if (x < 24) dx = -1; else dx = 1;
-                    } else if (stepSide > 0) {
-                        if (x >= 24) dx = 1; else dx = -1;
+            if (base[sIdx + 3] === 0) continue;
+
+            let targetX = x;
+            let targetY = y + bob;
+
+            if (isProfile) {
+                // Profile Left/Right dynamic leg split
+                if (y >= 37) {
+                    const prog = (y - 37) / 10;
+                    const shift = Math.round(prog * 4);
+                    const strideDir = (stepSide < 0) ? 1 : -1;
+                    const fwdLeft = isWest ? (strideDir > 0) : (strideDir < 0);
+
+                    if (fwdLeft) {
+                        if (x <= legMidX) {
+                            targetX = x - shift;
+                            targetY = y; // Grounded on row 47
+                        } else {
+                            targetX = x + shift;
+                            targetY = (y >= 46) ? (y - 2) : (y - 1); // Lift trailing boot off ground
+                        }
+                    } else {
+                        if (x <= legMidX) {
+                            targetX = x + shift;
+                            targetY = (y >= 46) ? (y - 2) : (y - 1);
+                        } else {
+                            targetX = x - shift;
+                            targetY = y;
+                        }
                     }
+                } else if (y >= 24 && y < 37) {
+                    targetX = x + (isWest ? (stepSide < 0 ? -1 : 1) : (stepSide < 0 ? 1 : -1));
                 }
-                const targetX = Math.max(0, Math.min(47, x + dx));
+            } else {
+                // Front, Back, or Diagonal: lateral footstep stride
+                if (y >= 37) {
+                    const isLeftFoot = (x < 24);
+                    const isLead = (stepSide < 0) ? isLeftFoot : !isLeftFoot;
+                    if (isLead) {
+                        // Leading foot plants flat on row 47
+                        targetX = x + (stepSide < 0 ? -2 : 2);
+                        targetY = y;
+                    } else {
+                        // Trailing foot lifts off ground
+                        targetX = x + (stepSide < 0 ? 1 : -1);
+                        targetY = (y >= 46) ? (y - 2) : (y - 1);
+                    }
+                } else if (y >= 24 && y < 37) {
+                    // Arm counter-swing
+                    if (x <= 16) targetY = y + (stepSide < 0 ? -1 : 1);
+                    else if (x >= 31) targetY = y + (stepSide < 0 ? 1 : -1);
+                }
+            }
+
+            if (targetX >= 0 && targetX < 48 && targetY >= 0 && targetY < 48) {
                 const dIdx = (targetY * 48 + targetX) * 4;
                 out[dIdx] = base[sIdx];
                 out[dIdx + 1] = base[sIdx + 1];
                 out[dIdx + 2] = base[sIdx + 2];
-                out[dIdx + 3] = base[sIdx + 3];
+                out[dIdx + 3] = 255;
             }
         }
     }
+    applyDarkOutline(out, 48, 48);
     return out;
 }
 
@@ -665,7 +727,7 @@ function processDwarfGender(gender, frontSrc, sideSrc, backSrc) {
     for (let r = 0; r < 8; r++) {
         const base = facings[r];
         standFrames.push(base);
-        walkFrames.push(makeWalkVariant(base, -1), base, makeWalkVariant(base, 1));
+        walkFrames.push(makeWalkVariant(base, -1, r), base, makeWalkVariant(base, 1, r));
         idleFrames.push(makeIdleVariant(base, 0), makeIdleVariant(base, 1), makeIdleVariant(base, 2));
         attackFrames.push(makeAttackVariant(base, 0, r), makeAttackVariant(base, 1, r), makeAttackVariant(base, 2, r));
         workFrames.push(makeWorkVariant(base, 0), makeWorkVariant(base, 1), makeWorkVariant(base, 2));

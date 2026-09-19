@@ -1,6 +1,8 @@
 {
   "id": "$UF_Human_8D",
   "species": "human",
+  "gender": "male",
+  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [

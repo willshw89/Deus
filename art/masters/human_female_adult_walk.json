@@ -24,10 +24,14 @@
     "SE"
   ],
   "animations": {
+    "stand": [
+      1
+    ],
     "walk": [
       0,
       1,
-      2
+      2,
+      1
     ]
   },
   "frameMs": 150
