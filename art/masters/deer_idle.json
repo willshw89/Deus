@@ -1,0 +1,39 @@
+{
+  "id": "deer_idle",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [24, 47],
+  "footprint": [1, 1],
+  "facings": ["S", "SW", "W", "NW", "N", "NE", "E", "SE"],
+  "animations": {
+    "stand": [0],
+    "loop": [0, 1, 2]
+  },
+  "frameMs": 150,
+  "lean": {
+    "mode": "none",
+    "slope": 1,
+    "top": null,
+    "east": 0
+  },
+  "scale": {
+    "subjectHeight": 46,
+    "target": null,
+    "factor": 1
+  },
+  "source": {
+    "file": "art/raw/deer_idle.png",
+    "format": "png",
+    "converted": null,
+    "size": [576, 1536],
+    "sheet": [3, 8],
+    "block": 4,
+    "phase": [0, 0],
+    "background": "magenta #FF00FF"
+  },
+  "made": {
+    "by": "tools/make_25d.js",
+    "at": "2026-09-19T16:50:54.506Z",
+    "options": ["art/raw/deer_idle.png", "--sheet", "3x8", "--facings", "S,SW,W,NW,N,NE,E,SE", "--max-colors", "32", "--lean", "none", "--bg-holes", "--force"]
+  }
+}
