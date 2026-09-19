@@ -1,10 +1,13 @@
 # Five-level vertical world
 
 **Date:** 2026-09-19  
-**Status:** approved design target from VISION V80; not implemented  
+**Status:** approved design target from VISION V80-V83; not implemented
+
 **Scope:** condense Dwarf Fortress's vertically dependent mechanics into one persistent 256x256 footprint with exactly five physical levels. This is a mechanics reference and architecture contract, not an import of DF raws, prose, names, creatures, or balance numbers.
 
 This document supersedes the surface-only clauses in `WORLD_ARCHITECTURE.md` and the obsolete V20 references in `DF_MECHANICS.md`. Those files remain descriptions of the current engine until the vertical build is implemented and tested.
+
+The complete biome, resource coverage, generation-density and mapwide spawn-rate contract is `RESOURCE_ATLAS.md`. Where this document gives only a category summary, the atlas is authoritative.
 
 ## 1. Fixed world stack
 
@@ -34,6 +37,7 @@ Suggested internal bands are `near`, `middle`, `deep`, `magma`, and `sealed`. Th
 
 ### 1.2 Five levels are persistent, not five RMMZ maps in memory
 
+- New Game generates and validates complete seeded baselines for all five levels before the first playable frame. No level is deferred until the player visits it.
 - All five levels always persist in `UF.World.state` and in saves.
 - One level is materialized into the RMMZ map and rendered at a time.
 - Units on every level retain exact positions, inventories, needs, relationships, jobs, and next scheduled decisions.
@@ -134,23 +138,27 @@ Generation uses the same seed for all five levels and derives every placement fr
 
 ### 4.1 Order
 
-1. Generate the complete `z=0` climate, biome, surface water, settlement starts, roads, and guaranteed starting resources.
-2. Generate geological columns beneath every ground cell: soil depth, rock families, aquifer kind, inclusions, and deep-domain eligibility.
-3. Materialize `z=-1` from the upper column: soil/upper stone, roots, aquifers, small caves, common deposits, and safe early descent opportunities.
-4. Materialize `z=-2`: deep stone, ore/gem veins, large caves, underground lakes, ecosystem domains, magma domains, and the sealed deepest domain.
-5. Generate `z=+1` and `z=+2` as air except where trees, rare high terrain, or generated structures require cells.
-6. Carve and validate at least two separated descent networks from ground to `-1`, and at least one reachable but gated route from `-1` into each required `-2` band.
-7. Validate water containment, support, faction start safety, resource guarantees, and that no required progression is sealed by an impossible aquifer or magma layout.
+1. Derive the complete `z=0` climate fields, geological columns and water table from the world seed.
+2. Allocate all five 256x256 baselines, then materialize `z=0`, the earth-biome mosaic on `z=-1`, the deep-biome domains on `z=-2`, and the derived exposure/canopy zones on `z=+1/+2`.
+3. Place aligned surface water, aquifers, underground lakes, magma, caves, openings and connector opportunities.
+4. Place all natural resource sources required by `RESOURCE_ATLAS.md`, with legal geology/habitat and mapwide density rather than one clustered cache.
+5. Populate renewable flora, fauna, fish and enemy populations on every eligible level/biome bucket under local and global caps.
+6. Place settlement starts, roads and V67 starting-resource guarantees without overwriting blockers, hazards or units.
+7. Carve and validate at least two separated descent networks from ground to `-1`, and at least one reachable but gated route from `-1` into each required `-2` band.
+8. Audit resource/variant coverage, production-chain satisfiability, reachability, water containment, support and faction-start safety. Repair missing coverage deterministically and rerun affected audits.
+9. Checksum and commit all five levels as one atomic world transaction. Play cannot begin with a deferred or invalid level.
 
 ### 4.2 Resource compression
 
-- `z=-1`: soil, sand, clay, ordinary stone, common metal ores, fuel/flux where the world seed permits, water-bearing layers, loose stone, and underground farming material.
-- `z=-2 near/middle`: broad stone variety, common-to-uncommon ore, gems, cave soil/mud, large water pockets and the first full ecosystem.
-- `z=-2 deep`: rare ores and gems, harder stone, more dangerous wildlife, stronger water and structural hazards.
-- `z=-2 magma`: magma-adjacent stone and heat-gated industry opportunities.
-- `z=-2 sealed`: scarce late-game resources and the highest danger, without copying DF's named places or creatures.
+- `z=0` supplies the full surface-biome range: woods, crops and wild plants, land and aquatic food, animal products, water, surface reagents and exposed earth/stone.
+- `z=-1` is a distinct earth-biome mosaic: rooted loam, clay, sand/gravel, peat, aquifer earth, chalk/karst, salt/evaporite, frozen earth, ash/tuff and shallow caves.
+- `z=-2` contains gated deep mine belts, crystal caverns, fungal forests, underground lakes, chasms, fossil/bone beds, salt caverns, magma chambers, frozen deep caverns and Hell.
+- `z=+1/+2` contain the real upper cells of multi-level trees plus suitable nests, products and flying creatures; they do not duplicate the ground resource node.
+- Every DF/U7/OSRS resource input maps through the canonical coverage manifest defined in `RESOURCE_ATLAS.md`; real variants remain variants while duplicated or proprietary names are normalized into original resources.
 
 Finite stone, ore, gems, and fuel obey V74 and do not respawn. Cave plants, fungi, fish, prey, and eligible monsters replenish through the ecology rules when habitat and caps allow.
+
+The ecology director rotates fairly through every `(z, biomeRegion)` bucket. Renewable sources and enemy populations recover toward data-driven targets at bounded rates; finite geology receives broad initial distribution but never respawns.
 
 ### 4.3 Trees across five levels
 
@@ -288,7 +296,7 @@ These are dependencies, not authorization to skip the currently approved project
 1. **State and migration:** introduce `z`, five seeded baselines, full `CellRef`, save migration and level switching with graybox rendering.
 2. **Connectors and routes:** stairs, ramps, open cells, multi-level connector graph, unit/job/item transitions and follow UI.
 3. **Excavation and construction:** mine, channel, construct floors/walls/connectors, support graph, falling and collapse.
-4. **Generation and ecology:** geological columns, aquifers, veins/clusters, depth bands, caves, underground plants/creatures, multi-level trees and replenishment.
+4. **Generation and ecology:** implement `RESOURCE_ATLAS.md`: atomic five-level generation, three unique biome mosaics, derived upper zones, coverage manifest, geological columns, aquifers, veins/clusters, caves, multi-level trees, mapwide distribution and capped replenishment.
 5. **Fluids and machines:** vertical water/magma, wells, gates/hatches/grates, pumps, power, bridges and tracks.
 6. **Combat and UI finish:** vertical line of sight, projectiles, climbing/flying assaults, multi-level designations, cutaway/above-below indicators.
 
@@ -301,6 +309,7 @@ Every check needs a deliberately provoked failure before its passing result coun
 | Check | Required observation |
 |---|---|
 | `vertical.five_levels` | Exactly five 256x256 baselines exist at `z=-2..2`; a sixth is rejected |
+| `vertical.complete_at_start` | All five baselines, biome maps, resource indexes and checksums exist before play; a deferred level is rejected |
 | `vertical.surface_migration` | A pre-V80 save loads its existing world unchanged at `z=0` |
 | `vertical.persistence` | Changes and entities on all five levels survive save/load and a New Game produces the same five baselines from the same seed |
 | `vertical.switch_view` | Switching level retains cursor coordinates and draws/interacts only with the selected level |
@@ -308,6 +317,9 @@ Every check needs a deliberately provoked failure before its passing result coun
 | `vertical.channel_fall` | Channeling opens the correct cells; worker stays safe; an object and liquid fall to the matching cell below |
 | `vertical.support_collapse` | Removing the final support collapses only the disconnected component and produces persistent debris/injury state |
 | `vertical.geology` | Soil/upper stone/aquifer occur in `-1`; deep stone, veins, cavern bands and magma domains occur in `-2` with reachable progression |
+| `vertical.biome_identity` | Surface, upper-earth and deep-world tables remain distinct; required earth and deep biome families all occur |
+| `vertical.resource_coverage` | The complete source manifest is mapped and every required canonical/variant source or production chain is present and legal |
+| `vertical.mapwide_ecology` | Every eligible level/biome bucket receives bounded ecology service; renewable resources and enemies recover toward targets without violating caps or spawn safety |
 | `vertical.tree_span` | One tree occupies its configured levels, blocks safe spawning there, and clears/updates every occupied level when felled |
 | `vertical.aquifer_well` | Seeping and pressurized sources behave differently and a well draws only through a valid shaft |
 | `vertical.magma_safe` | Unsafe construction is rejected or fails according to rule; safe construction contains magma |
