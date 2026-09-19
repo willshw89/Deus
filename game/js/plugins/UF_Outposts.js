@@ -597,19 +597,314 @@
     // Phased Construction Execution Pipeline
     //-------------------------------------------------------------------------
 
+    //-------------------------------------------------------------------------
+    // Level-Safe Coordinate Handles & Ground Isolation (Z_COMPATIBILITY_AUDIT)
+    //-------------------------------------------------------------------------
+
+    function levelArea(baseArea, z) {
+        return { x: baseArea ? baseArea.x : 0, y: baseArea ? baseArea.y : 0, z: z | 0 };
+    }
+
+    function setObjectAtLevel(area, z, x, y, objectId) {
+        const zNum = z | 0;
+        if (zNum === 0) {
+            const O = Objects();
+            return O && O.setIn ? O.setIn(area, x, y, objectId) : false;
+        }
+        // Non-ground levels (z = +1, +2 or z = -1): route through UF.Levels if available,
+        // or record in isolated level map state, strictly preventing writes to Ground z=0
+        if (window.UF && UF.Levels && typeof UF.Levels.setObject === "function") {
+            return UF.Levels.setObject(levelArea(area, zNum), x, y, objectId);
+        }
+        const W = World();
+        if (W && W.state) {
+            W.state.levelObjects = W.state.levelObjects || {};
+            const key = `${area.x},${area.y},${zNum}`;
+            W.state.levelObjects[key] = W.state.levelObjects[key] || {};
+            W.state.levelObjects[key][`${x},${y}`] = objectId;
+            return true;
+        }
+        return false;
+    }
+
+    function getObjectAtLevel(area, z, x, y) {
+        const zNum = z | 0;
+        if (zNum === 0) {
+            const O = Objects();
+            return O ? (O.atIn ? O.atIn(area, x, y) : O.at(x, y)) : null;
+        }
+        if (window.UF && UF.Levels && typeof UF.Levels.getObject === "function") {
+            return UF.Levels.getObject(levelArea(area, zNum), x, y);
+        }
+        const W = World();
+        if (W && W.state && W.state.levelObjects) {
+            const key = `${area.x},${area.y},${zNum}`;
+            const objId = W.state.levelObjects[key] && W.state.levelObjects[key][`${x},${y}`];
+            if (objId) {
+                const O = Objects();
+                return O && O.type ? O.type(objId) : { id: objId, name: objId };
+            }
+        }
+        return null;
+    }
+
+    function setFloorAtLevel(area, z, x, y, kind) {
+        const zNum = z | 0;
+        if (zNum === 0) {
+            const F = Floors();
+            return F && typeof F.setKindAt === "function" ? F.setKindAt(area, x, y, kind) : false;
+        }
+        if (window.UF && UF.Levels && typeof UF.Levels.setFloor === "function") {
+            return UF.Levels.setFloor(levelArea(area, zNum), x, y, kind);
+        }
+        const W = World();
+        if (W && W.state) {
+            W.state.levelFloors = W.state.levelFloors || {};
+            const key = `${area.x},${area.y},${zNum}`;
+            W.state.levelFloors[key] = W.state.levelFloors[key] || {};
+            W.state.levelFloors[key][`${x},${y}`] = kind;
+            return true;
+        }
+        return false;
+    }
+
+    function getFloorAtLevel(area, z, x, y) {
+        const zNum = z | 0;
+        if (zNum === 0) {
+            const F = Floors();
+            return F && typeof F.kindAt === "function" ? F.kindAt(area, x, y) : null;
+        }
+        if (window.UF && UF.Levels && typeof UF.Levels.getFloor === "function") {
+            return UF.Levels.getFloor(levelArea(area, zNum), x, y);
+        }
+        const W = World();
+        if (W && W.state && W.state.levelFloors) {
+            const key = `${area.x},${area.y},${zNum}`;
+            return (W.state.levelFloors[key] && W.state.levelFloors[key][`${x},${y}`]) || null;
+        }
+        return null;
+    }
+
+    //-------------------------------------------------------------------------
+    // Phased Construction Tasks & Creature Builder AI Pipeline
+    //-------------------------------------------------------------------------
+
+    function getPendingTasks(building) {
+        const tasks = [];
+        const ground = building.cellsByZ["0"];
+        if (!ground) return tasks;
+
+        if (building.stage === "clearance") {
+            const O = Objects();
+            for (let dy = 0; dy < building.h; dy++) {
+                for (let dx = 0; dx < building.w; dx++) {
+                    const cx = building.x + dx, cy = building.y + dy;
+                    const type = O ? (O.atIn ? O.atIn(building.area, cx, cy) : O.at(cx, cy)) : null;
+                    if (type && type.passable !== true) {
+                        tasks.push({ stage: "clearance", type: "clearance", x: cx, y: cy, z: 0, objectId: type.id });
+                    }
+                }
+            }
+        } else if (building.stage === "foundation") {
+            for (const fl of ground.floors) {
+                if (!fl.built) {
+                    tasks.push({ stage: "foundation", type: "floor", x: fl.x, y: fl.y, z: 0, kind: fl.kind, ref: fl });
+                }
+            }
+        } else if (building.stage === "walls") {
+            for (const w of ground.walls) {
+                if (!w.built) {
+                    tasks.push({ stage: "walls", type: "wall", x: w.x, y: w.y, z: 0, objectId: w.objectId, ref: w });
+                }
+            }
+            for (const d of ground.doors) {
+                if (!d.built) {
+                    tasks.push({ stage: "walls", type: "door", x: d.x, y: d.y, z: 0, objectId: d.objectId, ref: d });
+                }
+            }
+        } else if (building.stage === "vertical") {
+            for (const st of ground.stairs) {
+                if (!st.built) {
+                    tasks.push({ stage: "vertical", type: "stairs", x: st.x, y: st.y, z: 0, objectId: st.objectId, ref: st });
+                }
+            }
+        } else if (building.stage === "upper") {
+            for (const z of building.levels.filter(lvl => lvl > 0)) {
+                const upper = building.cellsByZ[String(z)];
+                if (!upper) continue;
+                for (const uf of upper.floors) {
+                    if (!uf.built) {
+                        tasks.push({ stage: "upper", type: "upper_floor", x: uf.x, y: uf.y, z, kind: uf.kind, ref: uf });
+                    }
+                }
+                for (const uw of upper.walls) {
+                    if (!uw.built) {
+                        tasks.push({ stage: "upper", type: "upper_wall", x: uw.x, y: uw.y, z, objectId: uw.objectId, ref: uw });
+                    }
+                }
+            }
+        } else if (building.stage === "cellar") {
+            const cellar = building.cellsByZ["-1"];
+            if (cellar) {
+                for (const st of cellar.stairs) {
+                    if (!st.built) {
+                        tasks.push({ stage: "cellar", type: "cellar_stairs", x: st.x, y: st.y, z: -1, objectId: st.objectId, ref: st });
+                    }
+                }
+                for (const cw of cellar.walls) {
+                    if (!cw.built) {
+                        tasks.push({ stage: "cellar", type: "cellar_wall", x: cw.x, y: cw.y, z: -1, objectId: cw.objectId, ref: cw });
+                    }
+                }
+            }
+        } else if (building.stage === "furnishing") {
+            for (const fn of ground.furniture) {
+                if (!fn.built) {
+                    tasks.push({ stage: "furnishing", type: "furniture", x: fn.x, y: fn.y, z: 0, objectId: fn.objectId, ref: fn });
+                }
+            }
+        }
+        return tasks;
+    }
+
+    function advanceBuildingStage(building) {
+        if (building.stage === "clearance") {
+            building.stage = "foundation";
+            building.progress = 20;
+        } else if (building.stage === "foundation") {
+            building.stage = "walls";
+            building.progress = 40;
+        } else if (building.stage === "walls") {
+            const hasVertical = building.levels.some(z => z !== 0);
+            building.stage = hasVertical ? "vertical" : "furnishing";
+            building.progress = 60;
+        } else if (building.stage === "vertical") {
+            if (building.levels.some(z => z > 0)) {
+                building.stage = "upper";
+            } else if (building.levels.some(z => z < 0)) {
+                building.stage = "cellar";
+            } else {
+                building.stage = "furnishing";
+            }
+            building.progress = 75;
+        } else if (building.stage === "upper") {
+            building.stage = building.levels.some(z => z < 0) ? "cellar" : "furnishing";
+            building.progress = 90;
+        } else if (building.stage === "cellar") {
+            building.stage = "furnishing";
+            building.progress = 95;
+        } else if (building.stage === "furnishing") {
+            building.stage = "complete";
+            building.progress = 100;
+            emit("outpost:buildingCompleted", building);
+            if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
+                UF.History.addEvent(`Construction of the ${building.archetype} (${building.name}) completed.`);
+            }
+        }
+    }
+
+    function executeTask(building, task, workerUnit = null) {
+        if (!building || !task) return false;
+        const area = building.area;
+
+        if (workerUnit) {
+            const ev = World().eventOf ? World().eventOf(workerUnit.id) : null;
+            if (ev) {
+                ev.setStepAnime(true);
+                const dx = task.x - workerUnit.x, dy = task.y - workerUnit.y;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    ev.setDirection(dx > 0 ? 6 : 4);
+                } else if (dy !== 0) {
+                    ev.setDirection(dy > 0 ? 2 : 8);
+                }
+            }
+        }
+
+        if (task.type === "clearance") {
+            const O = Objects();
+            if (O && O.setIn) O.setIn(area, task.x, task.y, null);
+        } else if (task.type === "floor" || task.type === "upper_floor") {
+            setFloorAtLevel(area, task.z, task.x, task.y, task.kind);
+            if (task.ref) task.ref.built = true;
+        } else if (task.type === "wall" || task.type === "door" || task.type === "stairs" || task.type === "upper_wall" || task.type === "cellar_stairs" || task.type === "cellar_wall" || task.type === "furniture") {
+            setObjectAtLevel(area, task.z, task.x, task.y, task.objectId);
+            if (task.ref) task.ref.built = true;
+        }
+
+        const remaining = getPendingTasks(building);
+        if (remaining.length === 0) {
+            advanceBuildingStage(building);
+        }
+        return true;
+    }
+
+    function findStairConnector(building, fromZ, toZ) {
+        const fromLevel = building.cellsByZ[String(fromZ)];
+        if (!fromLevel || !fromLevel.stairs) return null;
+        const targetType = toZ > fromZ ? "stairs_up" : "stairs_down";
+        return fromLevel.stairs.find(s => s.objectId === targetType) || fromLevel.stairs[0] || null;
+    }
+
+    function findStandCell(unit, task) {
+        const W = World();
+        const area = unit.area;
+        const cand = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]];
+        for (const [dx, dy] of cand) {
+            const sx = task.x + dx, sy = task.y + dy;
+            if (W && W.isPassable && W.isPassable(area, sx, sy, 0, unit.id)) {
+                return { x: sx, y: sy };
+            }
+        }
+        return { x: task.x, y: task.y };
+    }
+
+    function assignBuilder(unitId, building) {
+        const W = World();
+        const unit = W ? W.unit(unitId) : null;
+        if (!unit || !building || building.stage === "complete") return null;
+
+        const tasks = getPendingTasks(building);
+        if (tasks.length === 0) return null;
+        const task = tasks[0];
+
+        // Vertical transit: ascend/descend between Z levels if task is on another level
+        if ((unit.z || 0) !== (task.z || 0)) {
+            const connector = findStairConnector(building, unit.z || 0, task.z || 0);
+            if (connector) {
+                unit.x = connector.x;
+                unit.y = connector.y;
+                unit.z = task.z || 0;
+                const ev = W.eventOf ? W.eventOf(unit.id) : null;
+                if (ev) ev.locate(connector.x, connector.y);
+            } else {
+                unit.z = task.z || 0;
+            }
+        }
+
+        const stand = findStandCell(unit, task);
+        if (stand) {
+            unit.x = stand.x;
+            unit.y = stand.y;
+            const ev = W.eventOf ? W.eventOf(unit.id) : null;
+            if (ev) ev.locate(stand.x, stand.y);
+        }
+
+        executeTask(building, task, unit);
+        return task;
+    }
+
     /**
      * Executes creature AI construction steps: clearance -> foundation -> walls -> vertical -> upper -> furnish.
      */
-    function processBuildingConstruction(building) {
-        const O = Objects();
-        const J = Jobs();
-        const F = Floors();
+    function processBuildingConstruction(building, opts = {}) {
         const area = building.area;
         const ground = building.cellsByZ["0"];
-        if (!ground) return;
+        if (!ground || building.stage === "complete") return;
 
         // Phase 1: Clearance
         if (building.stage === "clearance") {
+            const J = Jobs();
+            const O = Objects();
             let obstaclesLeft = 0;
             for (let dy = 0; dy < building.h; dy++) {
                 for (let dx = 0; dx < building.w; dx++) {
@@ -617,7 +912,6 @@
                     const type = O ? (O.atIn ? O.atIn(area, cx, cy) : O.at(cx, cy)) : null;
                     if (type && type.passable !== true) {
                         obstaclesLeft++;
-                        // Dispatch clearance job if not already designated
                         if (J && J.create && !J.list().some(j => j.target && j.target.x === cx && j.target.y === cy && (j.type === "chop" || j.type === "quarry" || j.type === "mine"))) {
                             const act = (type.actions && Object.keys(type.actions)[0]) || "chop";
                             J.create({
@@ -631,132 +925,38 @@
             }
 
             if (obstaclesLeft === 0 || isProvoked("clearance_dispatch")) {
-                building.stage = "foundation";
-                building.progress = 20;
+                advanceBuildingStage(building);
             }
             return;
         }
 
-        // Phase 2: Foundations & Cultural Floors
-        if (building.stage === "foundation") {
-            for (const fl of ground.floors) {
-                if (F && typeof F.setKindAt === "function") {
-                    F.setKindAt(area, fl.x, fl.y, fl.kind);
-                }
-            }
-            building.stage = "walls";
-            building.progress = 40;
-            return;
-        }
-
-        // Phase 3: Perimeter Walls & Entrance Door
-        if (building.stage === "walls") {
-            // Erect walls
-            for (const w of ground.walls) {
-                if (O && O.setIn) {
-                    O.setIn(area, w.x, w.y, w.objectId);
-                }
-            }
-            // Install entrance door
-            for (const d of ground.doors) {
-                if (O && O.setIn) {
-                    O.setIn(area, d.x, d.y, d.objectId);
-                }
-            }
-
-            // Check if building has vertical stairs / upper storeys
-            const hasVertical = building.levels.some(z => z !== 0);
-            if (hasVertical) {
-                building.stage = "vertical";
-            } else {
-                building.stage = "furnishing";
-            }
-            building.progress = 60;
-            return;
-        }
-
-        // Phase 4: Vertical Staircases / Ladders
-        if (building.stage === "vertical") {
-            for (const st of ground.stairs) {
-                if (O && O.setIn) {
-                    O.setIn(area, st.x, st.y, st.objectId);
-                }
-            }
-            // If upper levels exist, advance to upper storey construction
-            if (building.levels.some(z => z > 0)) {
-                building.stage = "upper";
-            } else if (building.levels.some(z => z < 0)) {
-                building.stage = "cellar";
-            } else {
-                building.stage = "furnishing";
-            }
-            building.progress = 75;
-            return;
-        }
-
-        // Phase 5: Upper Storey Construction (Z = +1, Z = +2)
+        // Phase 5: Support Validation for Upper Storey
         if (building.stage === "upper") {
             for (const z of building.levels.filter(lvl => lvl > 0)) {
                 const upper = building.cellsByZ[String(z)];
                 if (!upper) continue;
+                const levelBelow = building.cellsByZ[String(z - 1)];
 
-                // Support Validation: ensure upper floors sit over lower structure
-                const supported = upper.floors.every(uf => {
+                const supported = levelBelow ? upper.floors.every(uf => {
                     const belowX = uf.x, belowY = uf.y;
-                    const belowWall = ground.walls.some(gw => gw.x === belowX && gw.y === belowY);
-                    const belowFloor = ground.floors.some(gf => gf.x === belowX && gf.y === belowY);
-                    return belowWall || belowFloor;
-                });
+                    const belowWall = levelBelow.walls && levelBelow.walls.some(gw => gw.x === belowX && gw.y === belowY);
+                    const belowFloor = levelBelow.floors && levelBelow.floors.some(gf => gf.x === belowX && gf.y === belowY);
+                    const belowDoor = levelBelow.doors && levelBelow.doors.some(gd => gd.x === belowX && gd.y === belowY);
+                    const belowStair = levelBelow.stairs && levelBelow.stairs.some(gs => gs.x === belowX && gs.y === belowY);
+                    return belowWall || belowFloor || belowDoor || belowStair;
+                }) : false;
 
                 if (!supported && !isProvoked("upper_floor_support")) {
                     console.warn(`[UF Outposts] Upper floor on Z=${z} failed structural support check!`);
-                    continue;
-                }
-
-                // Erect upper walls & battlements
-                for (const w of upper.walls) {
-                    if (O && O.setIn) {
-                        O.setIn(area, w.x, w.y, w.objectId);
-                    }
+                    return;
                 }
             }
-
-            if (building.levels.some(z => z < 0)) {
-                building.stage = "cellar";
-            } else {
-                building.stage = "furnishing";
-            }
-            building.progress = 90;
-            return;
         }
 
-        // Phase 5b: Subterranean Cellar Construction (Z = -1)
-        if (building.stage === "cellar") {
-            const cellar = building.cellsByZ["-1"];
-            if (cellar) {
-                for (const st of cellar.stairs) {
-                    if (O && O.setIn) O.setIn(area, st.x, st.y, st.objectId);
-                }
-                for (const w of cellar.walls) {
-                    if (O && O.setIn) O.setIn(area, w.x, w.y, w.objectId);
-                }
-            }
-            building.stage = "furnishing";
-            building.progress = 95;
-            return;
-        }
-
-        // Phase 6: Interior Furnishing & Completion
-        if (building.stage === "furnishing") {
-            // Place ground furniture
-            for (const furn of ground.furniture) {
-                if (O && O.setIn) {
-                    O.setIn(area, furn.x, furn.y, furn.objectId);
-                }
-            }
-            building.stage = "complete";
-            building.progress = 100;
-            emit("outpost:buildingCompleted", building);
+        // Execute pending tasks for the current stage
+        const tasks = getPendingTasks(building);
+        for (const t of tasks) {
+            executeTask(building, t, opts.worker || null);
         }
     }
 
@@ -771,6 +971,13 @@
         evaluate: evaluateOutpostNeeds,
         process: processBuildingConstruction,
         materials: getCultureMaterials,
+        tasks: getPendingTasks,
+        executeTask: executeTask,
+        assignBuilder: assignBuilder,
+        setObjectAtLevel: setObjectAtLevel,
+        getObjectAtLevel: getObjectAtLevel,
+        setFloorAtLevel: setFloorAtLevel,
+        getFloorAtLevel: getFloorAtLevel,
         stats: () => Object.assign({}, perfStats),
         allOutposts: () => {
             const st = ensureOutpostState();
@@ -796,10 +1003,8 @@
                     const outpost = st.factions[fid];
                     if (!outpost) continue;
 
-                    // Evaluate needs
                     evaluateOutpostNeeds(fid);
 
-                    // Step active construction projects
                     for (const b of outpost.buildings) {
                         if (b.stage !== "complete") {
                             processBuildingConstruction(b);
@@ -897,7 +1102,6 @@
             // 7. Check: outposts.upper_floor_support
             // A floating upper floor with no ground walls or floor below must fail
             const badTower = Outposts.generate({ archetype: "watchtower", width: 4, height: 4, levels: [0, 1], x: home.x + 50, y: home.y, area });
-            // Erase ground support
             badTower.cellsByZ["0"].walls = [];
             badTower.cellsByZ["0"].floors = [];
             let supportFailed = false;
@@ -950,6 +1154,58 @@
             const perfOk = !isProvoked("perf_budget") && stats.worstEvalMs <= 15;
             t.check("outposts.perf_budget", perfOk,
                 `Performance budget: worst evaluation=${stats.worstEvalMs.toFixed(2)} ms (budget <= 15 ms)`);
+
+            // 13. Check: outposts.creature_builder_flow
+            const workerBld = Outposts.generate({ archetype: "workshop", width: 5, height: 5, x: home.x + 60, y: home.y, area });
+            workerBld.stage = "walls";
+            const builder = W.addUnit({
+                name: "TEST_Builder",
+                image: { characterName: "$UF_Human_Male" },
+                area,
+                x: workerBld.x - 1,
+                y: workerBld.y - 1,
+                exact: true,
+                data: { kind: "colonist", faction: "player" }
+            });
+            const buildTask = Outposts.assignBuilder(builder.id, workerBld);
+            const taskPlaced = buildTask && buildTask.ref && buildTask.ref.built === true;
+            const builderAdjacent = buildTask && Math.abs(builder.x - buildTask.x) <= 2 && Math.abs(builder.y - buildTask.y) <= 2;
+            const builderFlowOk = !isProvoked("creature_builder_flow") && !!buildTask && taskPlaced && builderAdjacent;
+            $gameMap.setDisplayPos(workerBld.x - 4, workerBld.y - 4);
+            await t.waitFrames(4);
+            t.screenshot("outposts.creature_building");
+            t.check("outposts.creature_builder_flow", builderFlowOk,
+                `Creature builder flow: task=${buildTask ? buildTask.type : "none"}, placed=${taskPlaced}, builder adjacent=${builderAdjacent}`);
+
+            // 14. Check: outposts.z_level_isolation
+            const isoTower = Outposts.generate({ archetype: "watchtower", width: 4, height: 4, levels: [0, 1, -1], x: home.x + 70, y: home.y, area });
+            isoTower.stage = "vertical";
+            Outposts.process(isoTower); // vertical -> upper
+            const groundDiffKey = `${area.x},${area.y}`;
+            const diffsObj = (W.state.objectDiffs = W.state.objectDiffs || {});
+            const groundDiffCountBefore = Object.keys(diffsObj[groundDiffKey] || {}).length;
+            Outposts.process(isoTower); // upper -> cellar
+            Outposts.process(isoTower); // cellar -> furnishing
+            const groundDiffCountAfter = Object.keys(diffsObj[groundDiffKey] || {}).length;
+            const upperObj = Outposts.getObjectAtLevel(area, 1, isoTower.x, isoTower.y);
+            const cellarObj = Outposts.getObjectAtLevel(area, -1, isoTower.x, isoTower.y);
+            const zIsolationOk = !isProvoked("z_level_isolation") &&
+                groundDiffCountBefore === groundDiffCountAfter && !!upperObj && !!cellarObj;
+            t.check("outposts.z_level_isolation", zIsolationOk,
+                `Z level isolation: ground diffs before=${groundDiffCountBefore}, after=${groundDiffCountAfter} (want equal); upperObj=${!!upperObj}, cellarObj=${!!cellarObj}`);
+
+            // 15. Check: outposts.vertical_transit
+            const transitTower = Outposts.generate({ archetype: "watchtower", width: 4, height: 4, levels: [0, 1], x: home.x + 80, y: home.y, area });
+            transitTower.stage = "vertical";
+            Outposts.process(transitTower); // vertical -> upper
+            builder.x = transitTower.x;
+            builder.y = transitTower.y;
+            builder.z = 0;
+            const upperTransitTask = Outposts.assignBuilder(builder.id, transitTower);
+            const ascended = builder.z === 1;
+            const transitOk = !isProvoked("vertical_transit") && !!upperTransitTask && upperTransitTask.z === 1 && ascended;
+            t.check("outposts.vertical_transit", transitOk,
+                `Vertical transit: builder z=${builder.z} (want 1), task z=${upperTransitTask ? upperTransitTask.z : "none"}, ascended=${ascended}`);
         }, { isDefault: false });
     }
 
