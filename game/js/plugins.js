@@ -22,6 +22,7 @@ var $plugins =
 {"name":"UF_Factions","status":true,"description":"[UF Factions] Factions generated from the world seed each New Game: species, stances, homes (surface or underground), relations from allied to at war. F = ledger.","parameters":{}},
 {"name":"UF_History","status":true,"description":"[UF History] Simulates 500-600 years of history from the world seed: every faction founded at generation, sites, wars, rulers, ruins; the player is given one established faction. H = chronicle.","parameters":{}},
 {"name":"UF_Objects","status":true,"description":"[UF Objects] Per-cell world objects (plants, stones, buildings): drawing, passability, actions, regrowth.","parameters":{}},
+{"name":"UF_Walls","status":true,"description":"[UF Walls] Two-square walls: a blocking wall cell with its roof/top drawn in the square above.","parameters":{}},
 {"name":"UF_Doors","status":true,"description":"[UF Doors] Faction-aware site and house doors: passage, building, interaction, and damage.","parameters":{}},
 {"name":"UF_Items","status":true,"description":"[UF Items] Items on the ground, in stacks and in inventories.","parameters":{}},
 {"name":"UF_Jobs","status":true,"description":"[UF Jobs] DF-style jobs: walk to a target, work, change the world (gather, chop, haul, build, craft, hunt...).","parameters":{}},
