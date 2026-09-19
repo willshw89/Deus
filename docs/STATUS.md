@@ -68,6 +68,8 @@ Delivered per user directive ("Work on human sprites. Im tired of looking at thi
     - `art/review/human_walk_feet_animation_4x.png`: 4x zoom showing visible foot movement and scissor strides across all 8 facings.
     - `game/test_output/smoke.map.png`: In-game screenshot verifying crisp colony rendering with 0 errors.
 
+## Wildlife Action Suites Refinement: Bear, Troll, Giant Spider (AR-401, AR-402) — 2026-09-19 (Gemini)
+
 Delivered per user directive ("Refine Bear, Troll and Giant Spider action suites"):
 - **Giant Spider (96×96 frames, AR-401, AR-402):**
   - Completely eliminated all procedural shearing, neon green vector lines, and diagnostic white line loops.

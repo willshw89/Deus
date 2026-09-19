@@ -169,7 +169,12 @@
     function worldDims(st) {
         const size = st.size;
         const sa = st.startArea;
-        return { size, startGX: sa.x * size + Math.floor(size / 2), startGY: sa.y * size + Math.floor(size / 2) };
+        const c0 = sa ? campsOf(st).find(c => (c.z || 0) === 0 && c.area && c.area.x === sa.x && c.area.y === sa.y) : null;
+        return {
+            size,
+            startGX: c0 ? sa.x * size + c0.x : (sa ? sa.x * size + Math.floor(size / 2) : Math.floor(size / 2)),
+            startGY: c0 ? sa.y * size + c0.y : (sa ? sa.y * size + Math.floor(size / 2) : Math.floor(size / 2))
+        };
     }
     const distToStart = (d, gx, gy) => Math.hypot(gx - d.startGX, gy - d.startGY);
 

@@ -1,15 +1,15 @@
 {
-  "id": "giant_spider_idle",
-  "species": "giant_spider",
-  "frameWidth": 96,
-  "frameHeight": 96,
+  "id": "bear_action",
+  "species": "bear",
+  "frameWidth": 48,
+  "frameHeight": 48,
   "anchor": [
-    48,
-    95
+    24,
+    47
   ],
   "footprint": [
-    2,
-    2
+    1,
+    1
   ],
   "facings": [
     "S",

@@ -1,0 +1,28 @@
+{
+  "id": "UF_GiantSpider_Carcass",
+  "name": "Giant Spider Carcass",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "passable": true,
+  "layer": "under",
+  "category": "remains"
+}

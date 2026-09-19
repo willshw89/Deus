@@ -1,0 +1,49 @@
+{
+  "id": "UF_Troll_8D",
+  "name": "Troll",
+  "category": "wildlife",
+  "kind": "monster",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "idle": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "attack": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150
+}
