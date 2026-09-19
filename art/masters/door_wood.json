@@ -1,0 +1,31 @@
+{
+  "id": "door_wood",
+  "name": "Wooden Door",
+  "category": "Building",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "states": {
+    "closed": 0,
+    "ajar": 1,
+    "open": 2
+  }
+}
