@@ -39,7 +39,8 @@
         enabled: true,
         cooldownFrames: 60, // frames between attacks (~1.0s at 60fps)
         aggroRadius: 8,     // cells to detect enemies
-        popups: []
+        popups: [],
+        effects: []
     };
     window.UF = window.UF || {};
     window.UF.Combat = Combat;
@@ -191,6 +192,83 @@
         return { name: "fists", dice: "1d2", ability: "str", bonus: 0, reach: 1, flat: 1 };
     }
 
+    // Add dynamic visual strike effect (slash/claw)
+    Combat.addEffect = function(cellX, cellY, type) {
+        Combat.effects.push({
+            cellX,
+            cellY,
+            type: type || "slash",
+            frame: 0,
+            maxFrames: 10
+        });
+    };
+
+    // Play attack animation: lunge forward toward target and snap back
+    Combat.playAttackAnimation = function(attacker, target) {
+        const aEv = getUnitEvent(attacker);
+        if (!aEv) return;
+        const dx = Math.sign(target.x - attacker.x);
+        const dy = Math.sign(target.y - attacker.y);
+        const lungeDist = 18;
+        const maxFrames = 14;
+
+        aEv._combatOffset = { x: 0, y: 0 };
+        aEv._combatAnim = {
+            frame: 0,
+            update: function(sprite) {
+                this.frame++;
+                if (this.frame <= 6) {
+                    const p = this.frame / 6;
+                    aEv._combatOffset.x = dx * lungeDist * p;
+                    aEv._combatOffset.y = dy * lungeDist * p;
+                    if (aEv._originalPattern === undefined) aEv._originalPattern = aEv._pattern;
+                    aEv._pattern = (this.frame % 2 === 0) ? 0 : 2;
+                } else if (this.frame <= maxFrames) {
+                    const p = (maxFrames - this.frame) / (maxFrames - 6);
+                    aEv._combatOffset.x = dx * lungeDist * p;
+                    aEv._combatOffset.y = dy * lungeDist * p;
+                    aEv._pattern = aEv._originalPattern != null ? aEv._originalPattern : 1;
+                } else {
+                    aEv._combatOffset = null;
+                    aEv._combatAnim = null;
+                    if (aEv._originalPattern != null) aEv._pattern = aEv._originalPattern;
+                    delete aEv._originalPattern;
+                }
+            }
+        };
+
+        const isBeast = (attacker.data && attacker.data.species && attacker.data.species !== "human");
+        Combat.addEffect(target.x, target.y, isBeast ? "claw" : "slash");
+    };
+
+    // Play target hit flinch and red damage flash
+    Combat.playHitAnimation = function(target, attacker) {
+        const tEv = getUnitEvent(target);
+        if (!tEv) return;
+        const dx = Math.sign(target.x - attacker.x) || 1;
+        const dy = Math.sign(target.y - attacker.y) || 0;
+        const recoilDist = 8;
+        const maxFrames = 10;
+
+        tEv._combatOffset = { x: 0, y: 0 };
+        tEv._combatAnim = {
+            frame: 0,
+            update: function(sprite) {
+                this.frame++;
+                if (this.frame <= maxFrames) {
+                    const p = (maxFrames - this.frame) / maxFrames;
+                    tEv._combatOffset.x = dx * recoilDist * p;
+                    tEv._combatOffset.y = dy * recoilDist * p;
+                    sprite.setBlendColor([255, 50, 50, Math.floor(180 * p)]);
+                } else {
+                    tEv._combatOffset = null;
+                    tEv._combatAnim = null;
+                    sprite.setBlendColor([0, 0, 0, 0]);
+                }
+            }
+        };
+    };
+
     // Execute one d20 attack from attacker to target
     Combat.resolveAttack = function(attacker, target) {
         if (!attacker || !target) return null;
@@ -198,6 +276,10 @@
         ensureCombatStats(target);
 
         if (target.data.hp <= 0) return null;
+        if (target.data._isDying && target.data.hp > 0) target.data._isDying = false;
+
+        // Play physical lunge attack animation
+        Combat.playAttackAnimation(attacker, target);
 
         const weapon = getWeaponInfo(attacker);
         const abilityMod = getAbilityMod(attacker, weapon.ability);
@@ -212,8 +294,6 @@
         const isCrit = (d20 === 20);
         const isMiss = (d20 === 1) || (!isCrit && totalToHit < targetAC);
 
-        // Flash target sprite & show popup
-        const targetEv = getUnitEvent(target);
         const tx = target.x;
         const ty = target.y;
 
@@ -229,16 +309,14 @@
 
         target.data.hp -= finalDamage;
 
+        // Hit flinch reaction & flash
+        Combat.playHitAnimation(target, attacker);
+
         // Visual feedback
         if (isCrit) {
             Combat.addPopup(tx, ty, `CRIT -${finalDamage}!`, "#f59e0b");
         } else {
             Combat.addPopup(tx, ty, `-${finalDamage}`, "#ef4444");
-        }
-
-        if (targetEv) {
-            // Shake/flash effect
-            targetEv.jump(0, 0);
         }
 
         // Check Death
@@ -250,14 +328,18 @@
         return { hit: true, isCrit, d20, totalToHit, targetAC, damage: finalDamage };
     };
 
-    // Handle unit death
+    // Handle unit death with full death collapse animation
     Combat.onUnitDeath = function(victim, killer) {
+        if (!victim || victim.data._isDying) return;
+        victim.data._isDying = true;
+        victim.data.hp = 0;
+
         const curArea = victim.area || (World() && World().currentArea());
         const tx = victim.x;
         const ty = victim.y;
         Combat.addPopup(tx, ty, "SLAIN!", "#dc2626");
 
-        // Drop loot on cell
+        // Drop loot immediately so items appear on the ground under the falling creature
         const species = victim.data.species || "";
         const cat = fullCatalog();
         if (cat && cat.wildlife && Array.isArray(cat.wildlife.species)) {
@@ -276,10 +358,52 @@
             }
         }
 
-        // Remove from world after a brief moment
-        setTimeout(() => {
+        const vEv = getUnitEvent(victim);
+        if (!vEv) {
             if (World()) World().removeUnit(victim.id);
-        }, 150);
+            return;
+        }
+
+        vEv._through = true;
+        const maxFrames = 42;
+
+        vEv._combatAnim = {
+            frame: 0,
+            update: function(sprite) {
+                this.frame++;
+                if (this.frame <= 14) {
+                    // Phase 1: Reeling backwards and tilting 90 degrees onto its side
+                    const p = this.frame / 14;
+                    sprite.rotation = (Math.PI / 2) * p;
+                    sprite.setBlendColor([255, 30, 30, Math.floor(200 * (1 - p * 0.5))]);
+                } else if (this.frame <= 28) {
+                    // Phase 2: Squashing flat to the ground plane
+                    const p = (this.frame - 14) / 14;
+                    sprite.rotation = Math.PI / 2;
+                    sprite.scale.y = Math.max(0.3, 1.0 - 0.7 * p);
+                    sprite.scale.x = 1.0 + 0.2 * p;
+                    sprite.setBlendColor([200, 20, 20, Math.floor(100 * (1 - p))]);
+                } else if (this.frame <= maxFrames) {
+                    // Phase 3: Fading out into the earth
+                    const p = (this.frame - 28) / (maxFrames - 28);
+                    sprite.rotation = Math.PI / 2;
+                    sprite.scale.y = 0.3;
+                    sprite.scale.x = 1.2;
+                    sprite.opacity = Math.floor(255 * (1 - p));
+                    sprite.setBlendColor([0, 0, 0, 0]);
+                } else {
+                    // Clean up and remove unit from World
+                    sprite.rotation = 0;
+                    sprite.scale.x = 1;
+                    sprite.scale.y = 1;
+                    sprite.opacity = 255;
+                    sprite.setBlendColor([0, 0, 0, 0]);
+                    vEv._combatAnim = null;
+                    vEv._combatOffset = null;
+                    if (World()) World().removeUnit(victim.id);
+                }
+            }
+        };
     };
 
     // Add floating text popup
@@ -465,12 +589,57 @@
     Sprite_UFCombatPopups.prototype.update = function() {
         Sprite.prototype.update.call(this);
 
-        // Clear children and redraw active popups
+        // Clear children and redraw active popups & effects
         while (this.children.length > 0) {
             const c = this.children.pop();
             c.destroy();
         }
 
+        // 1. Draw Combat Strike Visual Effects (slashes, claw scratches)
+        const activeEffects = [];
+        for (const eff of Combat.effects) {
+            eff.frame++;
+            if (eff.frame < eff.maxFrames) {
+                activeEffects.push(eff);
+                const scX = $gameMap.adjustX(eff.cellX) * $gameMap.tileWidth() + 24;
+                const scY = $gameMap.adjustY(eff.cellY) * $gameMap.tileHeight() + 24;
+
+                const s = new Sprite();
+                const bmp = new Bitmap(48, 48);
+                const ctx = bmp.context;
+                const progress = eff.frame / eff.maxFrames;
+
+                if (eff.type === "claw") {
+                    // Triple red curved claw marks
+                    ctx.strokeStyle = progress < 0.4 ? "rgba(254, 240, 138, 0.95)" : "rgba(239, 68, 68, 0.85)";
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(10, 12 + progress * 6);
+                    ctx.lineTo(24, 36);
+                    ctx.moveTo(18, 10 + progress * 6);
+                    ctx.lineTo(32, 34);
+                    ctx.moveTo(26, 14 + progress * 6);
+                    ctx.lineTo(40, 38);
+                    ctx.stroke();
+                } else {
+                    // Curved steel slash arc with bright flash
+                    ctx.strokeStyle = progress < 0.3 ? "rgba(255, 255, 255, 0.95)" : "rgba(245, 158, 11, 0.85)";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(24, 24, 18, -0.6 * Math.PI, 0.4 * Math.PI, false);
+                    ctx.stroke();
+                }
+
+                s.bitmap = bmp;
+                s.x = scX - 24;
+                s.y = scY - 24;
+                s.alpha = Math.max(0, 1 - progress);
+                this.addChild(s);
+            }
+        }
+        Combat.effects = activeEffects;
+
+        // 2. Draw Floating Damage & Status Popups
         const active = [];
         for (const p of Combat.popups) {
             p.life--;
@@ -508,6 +677,26 @@
         _Spriteset_Map_createLowerLayer.call(this);
         this._ufCombatPopups = new Sprite_UFCombatPopups();
         this.addChild(this._ufCombatPopups);
+    };
+
+    //-------------------------------------------------------------------------
+    // Hook Sprite_Character for Combat Lunges, Flinches, and Death Animations
+    //-------------------------------------------------------------------------
+    const _Sprite_Character_updatePosition = Sprite_Character.prototype.updatePosition;
+    Sprite_Character.prototype.updatePosition = function() {
+        _Sprite_Character_updatePosition.call(this);
+        if (this._character && this._character._combatOffset) {
+            this.x += this._character._combatOffset.x;
+            this.y += this._character._combatOffset.y;
+        }
+    };
+
+    const _Sprite_Character_update = Sprite_Character.prototype.update;
+    Sprite_Character.prototype.update = function() {
+        _Sprite_Character_update.call(this);
+        if (this._character && this._character._combatAnim) {
+            this._character._combatAnim.update(this);
+        }
     };
 
     //-------------------------------------------------------------------------
@@ -579,9 +768,12 @@
             await t.waitFrames(20);
             t.screenshot("combat_engagement");
 
-            // 7. Live Hostile AI Engagement
-            const testWolf2 = Combat.spawnHostile("wolf", mid + 2, mid);
-            await t.waitFrames(40);
+            // 7. Live Hostile AI Engagement & Attack Animation Screenshot
+            const testWolf2 = Combat.spawnHostile("wolf", mid + 1, mid);
+            Combat.resolveAttack(testWolf2, testColonist);
+            await t.waitFrames(4);
+            t.screenshot("combat_attack_lunge");
+            await t.waitFrames(36);
             t.check("combat_popups", Combat.popups.length >= 0, `combat popups layer functioning`);
 
             // 8. Error check
