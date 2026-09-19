@@ -67,6 +67,7 @@ The build order is `docs/design/DF_MECHANICS.md` §14:
 11. d20 stats for every character at generation (V53, with the V47 combat step): `data.stats` rolled from the seed, species and age shifts, `UF.D20` checks, shown on the sheet.
 12. The settling run (V54, after item 10): 100 years of the coarse society tick on the real map before the player takes control, within the generation budget (WORLD_ARCHITECTURE §2.10).
 13. Combat production chains (V55): materials and quality, furnace/smithy/bowyer/fletcher/tanning rack, weapons and armor with d20 dice and AC, the five equipment slots, ranged weapons with ammunition, the matching labors and culture weights; spec docs/design/COMBAT_CHAINS.md; built on the UF_Combat core of 2026-09-18.
+14. Flooring in dwellings (V56, with the rooms-and-beds work): floor ground kinds by culture, a floor job, the flooring plan step, room value in the sleeper's thought (WORLD_ARCHITECTURE §2.10).
 Side items: projection fix + sprite anchors (K3), look cursor, removing the old autotest (K2).
 Each step ships with checks and a handoff report for Gemini (art waves: `docs/handoffs/HANDOFF_df_art.md`).
 
