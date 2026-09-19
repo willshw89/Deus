@@ -54,3 +54,33 @@
 /game/img/characters/$People1.png
 # Backups of the U7-derived originals kept beside their stock replacements ($Adam.u7bak.png, $Eve.u7bak.png; stock-swap run 2026-09-19). AGENTS rule 8: never commit.
 *.u7bak.png
+
+# U7-derived images committed by Gemini in ca87248 (audit A5): kept on disk as stand-ins, never committed (VISION V9, AGENTS rule 8)
+/game/img/characters/!\$BirchTree.png
+/game/img/characters/!\$BirchTree.json
+/game/img/characters/!\$CaveBoulder.png
+/game/img/characters/!\$CaveBoulder.json
+/game/img/characters/!\$CrystalCluster.png
+/game/img/characters/!\$CrystalCluster.json
+/game/img/characters/!\$DeadTree.png
+/game/img/characters/!\$DeadTree.json
+/game/img/characters/!\$FallenPillar.png
+/game/img/characters/!\$FallenPillar.json
+/game/img/characters/!\$LooseStones.png
+/game/img/characters/!\$LooseStones.json
+/game/img/characters/!\$OldBones.png
+/game/img/characters/!\$OldBones.json
+/game/img/characters/!\$Reeds.png
+/game/img/characters/!\$Reeds.json
+/game/img/characters/!\$WallStone.png
+/game/img/characters/!\$WallStone.json
+/game/img/characters/!\$WallWood.png
+/game/img/characters/!\$WallWood.json
+/game/img/characters/!\$WildShrub.png
+/game/img/characters/!\$WildShrub.json
+/game/img/characters/!\$Wildflowers.png
+/game/img/characters/!\$Wildflowers.json
+/game/img/characters/!\$GraniteBoulder.png
+/game/img/characters/!\$GraniteBoulder.json
+/game/img/characters/!\$PineTree.png
+/game/img/characters/!\$PineTree.json
