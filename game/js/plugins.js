@@ -48,5 +48,9 @@ var $plugins =
 {"name":"UF_CultureGrowth","status":true,"description":"[UF CultureGrowth] Learned faction practices, inherited preferences and distinct work policies.","parameters":{}},
 {"name":"UF_Households","status":true,"description":"[UF Households] Persistent families, exact material-built homes and private rooms.","parameters":{}},
 {"name":"UF_Goals","status":true,"description":"[UF Goals] Three-horizon personal goals and selected-creature F7 readout.","parameters":{}},
+{"name":"UF_Environment","status":true,"description":"[UF Environment] Environmental factors, temperature, weather, shelter, hypothermia, burning & wetness.","parameters":{}},
+{"name":"UF_NaturalConnections","status":true,"description":"[UF NaturalConnections] Saved natural passages between Ground and the two cave levels; F6 down, Shift+F6 up.","parameters":{}},
+{"name":"UF_FireSafety","status":true,"description":"[UF FireSafety] Local faction firefighting with real water-fetching and physical hearth clearance.","parameters":{}},
+{"name":"UF_ProfileTabs","status":true,"description":"[UF ProfileTabs] Creature needs, skills, personality, goals, family and culture tabs alongside native inventory.","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

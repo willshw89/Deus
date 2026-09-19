@@ -128,6 +128,7 @@
         const k = areaKey(area);
         st.overrides[k] = weatherType;
         emit("environment:weatherChanged", copyArea(area), weatherType);
+        syncWeatherVisuals();
     }
 
     //-------------------------------------------------------------------------
@@ -621,6 +622,32 @@
         }
     }
 
+    function syncWeatherVisuals() {
+        if (!window.$gameScreen || !window.$gameMap) return;
+        const W = World();
+        if (!W) return;
+        const lvl = typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        const z = lvl ? lvl.z : 0;
+        if (z < 0) {
+            if ($gameScreen.weatherType && $gameScreen.weatherType() !== "none") {
+                $gameScreen.changeWeather("none", 0, 30);
+            }
+            return;
+        }
+        const cur = (typeof W.currentArea === "function" && W.currentArea()) || (lvl ? { x: lvl.x, y: lvl.y } : null);
+        if (!cur) return;
+        const w = getWeather(cur);
+        let targetType = "none", power = 0;
+        if (w === "rain") { targetType = "rain"; power = 5; }
+        else if (w === "downpour") { targetType = "storm"; power = 8; }
+        else if (w === "snow") { targetType = "snow"; power = 5; }
+        else if (w === "blizzard") { targetType = "snow"; power = 9; }
+
+        if ($gameScreen.weatherType && ($gameScreen.weatherType() !== targetType || Math.abs(($gameScreen.weatherPower() || 0) - power) > 1)) {
+            $gameScreen.changeWeather(targetType, power, 60);
+        }
+    }
+
     /**
      * Master update cycle called every beat (TICKS_PER_STEP).
      */
@@ -629,6 +656,9 @@
         localBeat++;
         const W = World();
         if (!W || !W.state) return;
+
+        // Synchronize on-screen weather particles
+        syncWeatherVisuals();
 
         // Update all living units in active view and world
         const units = typeof W.units === "function" ? W.units() : [];
@@ -711,15 +741,14 @@
     Scene_Boot.prototype.start = function() {
         _Scene_Boot_start.call(this);
         hookEvents();
+        if (window.UF && UF.Test && (UF.Test.active || typeof UF.Test.suite === "function")) {
+            registerTestSuite();
+        }
     };
 
     //-------------------------------------------------------------------------
     // 6. Test Suite
     //-------------------------------------------------------------------------
-
-    if (window.UF && UF.Test && typeof UF.Test.suite === "function") {
-        registerTestSuite();
-    }
 
     function registerTestSuite() {
         UF.Test.suite("environment", async t => {
@@ -811,8 +840,17 @@
 
             // Check 9: Wetness accelerates cooling and tracks wet status
             setWeather(area, "clear");
-            const dryUnit = { id: 99991, area: copyArea(area), x: 121, y: 121, data: { thermal: { bodyTemp: 37.0, wetness: 0, stage: "normal" } } };
-            const wetUnit = { id: 99992, area: copyArea(area), x: 122, y: 122, data: { thermal: { bodyTemp: 37.0, wetness: 100, stage: "normal" } } };
+            let landX = 120, landY = 120;
+            if (G && typeof G.isWaterAt === "function") {
+                for (let dx = 0; dx < 30; dx++) {
+                    if (!G.isWaterAt(area.x * 256 + 120 + dx, area.y * 256 + 120, 0)) {
+                        landX = 120 + dx;
+                        break;
+                    }
+                }
+            }
+            const dryUnit = { id: 99991, area: copyArea(area), x: landX, y: landY, data: { thermal: { bodyTemp: 37.0, wetness: 0, stage: "normal" } } };
+            const wetUnit = { id: 99992, area: copyArea(area), x: landX, y: landY, data: { thermal: { bodyTemp: 37.0, wetness: 100, stage: "normal" } } };
             stepUnitThermal(dryUnit, 103);
             stepUnitThermal(wetUnit, 103);
             t.check("wet_status_tracks", wetUnit.data.thermal.wetness > 80 && dryUnit.data.thermal.wetness === 0,
