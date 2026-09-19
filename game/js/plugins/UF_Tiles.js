@@ -278,8 +278,8 @@
             for (const [pairKey, pairInfo] of Object.entries(cfg.pairs)) {
                 const [fA, fB] = pairKey.split("|");
                 if (cfg.families[fA] && cfg.families[fB]) {
-                    // add central diagonal blend masks
-                    for (const m of [1, 2, 4, 8, 3, 12, 5, 10, 7, 11, 13, 14]) {
+                    // add all 14 transition masks
+                    for (let m = 1; m < 15; m++) {
                         keys.push(`pair:${fA}:${pairInfo.steps[0]}:${fB}:${pairInfo.steps[1]}:${m}`);
                     }
                 }
@@ -318,7 +318,10 @@
         if (shadeKeyMap.size >= 256) {
             // Atlas full: fallback to pure base tile
             const p = parseShadeKey(key);
-            if (p && p.type === "mix") {
+            if (p && p.type === "pair") {
+                const pureKey = `pure:${p.famA}:${p.stepA}`;
+                if (shadeKeyMap.has(pureKey)) return shadeKeyMap.get(pureKey);
+            } else if (p && p.type === "mix") {
                 const pureKey = `pure:${p.family}:${p.lowStep}`;
                 if (shadeKeyMap.has(pureKey)) return shadeKeyMap.get(pureKey);
             }
@@ -406,7 +409,11 @@
             if (idA === idB) return true;
             const famA = Tiles.familyOf(idA);
             const famB = Tiles.familyOf(idB);
-            return !!famA && famA === famB;
+            if (!famA || !famB) return false;
+            if (famA === famB) return true;
+            const cfg = groundShadesConfig();
+            const pairs = (cfg && cfg.pairs) || {};
+            return !!(pairs[`${famA}|${famB}`] || pairs[`${famB}|${famA}`]);
         },
 
         shadeStats: () => Object.assign({}, shadeStats)
@@ -514,7 +521,7 @@
                     const drainTerm = f.d * fw.drainage;
                     const heightTerm = Math.max(0, f.e - ((cfg.field && cfg.field.heightFrom) || 0.55)) * fw.height;
                     const val = nMain * fw.noise + nDetail * fw.detail + rainTerm + drainTerm + heightTerm;
-                    subD[sy * subW + sx] = Math.max(0, Math.min(1, val));
+                    subD[sy * subW + sx] = Math.max(0, Math.min(1, (val - 0.15) / 0.70));
                 }
             }
             for (let cy = 0; cy < cornersW; cy++) {
@@ -620,7 +627,8 @@
 
         // 3. Write Layer 1 tiles
         initShadeAtlas();
-        let pureC = 0, mixC = 0;
+        let pureC = 0, mixC = 0, pairC = 0;
+        const pairsCfg = cfg.pairs || {};
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
@@ -635,6 +643,53 @@
                 const famName = kInfo.famName;
                 const baseStep = kInfo.base;
 
+                // Check 4 orthogonal neighbors for a blending family pair
+                let borderFam = null, pairKey = null, isFamA = true;
+                const checkFam = (nx, ny) => {
+                    if (nx < 0 || ny < 0 || nx >= size || ny >= size) return null;
+                    const nt = map.data[ny * size + nx];
+                    const nIdx = Math.floor((nt - 2816) / 48);
+                    const nInfo = (nt >= 2816 && nt < 4352) ? kindCache[nIdx] : null;
+                    return (nInfo && nInfo.famName !== famName) ? nInfo.famName : null;
+                };
+
+                const fN = checkFam(x, y - 1), fS = checkFam(x, y + 1), fW = checkFam(x - 1, y), fE = checkFam(x + 1, y);
+                const candFams = [fN, fS, fW, fE].filter(Boolean);
+                for (const cf of candFams) {
+                    if (pairsCfg[`${famName}|${cf}`]) {
+                        borderFam = cf; pairKey = `${famName}|${cf}`; isFamA = true; break;
+                    } else if (pairsCfg[`${cf}|${famName}`]) {
+                        borderFam = cf; pairKey = `${cf}|${famName}`; isFamA = false; break;
+                    }
+                }
+
+                if (borderFam && pairKey) {
+                    const pairInfo = pairsCfg[pairKey];
+                    const [fA, fB] = pairKey.split("|");
+                    let maskB = 0;
+                    if (isFamA) {
+                        if (fN === borderFam) maskB |= 3;
+                        if (fS === borderFam) maskB |= 12;
+                        if (fW === borderFam) maskB |= 5;
+                        if (fE === borderFam) maskB |= 10;
+                    } else {
+                        let maskA = 0;
+                        if (fN === borderFam) maskA |= 3;
+                        if (fS === borderFam) maskA |= 12;
+                        if (fW === borderFam) maskA |= 5;
+                        if (fE === borderFam) maskA |= 10;
+                        maskB = 15 & ~maskA;
+                    }
+
+                    if (maskB > 0 && maskB < 15) {
+                        const key = `pair:${fA}:${pairInfo.steps[0]}:${fB}:${pairInfo.steps[1]}:${maskB}`;
+                        const tId = getOrAllocateShadeTile(key);
+                        map.data[(1 * size + y) * size + x] = tId;
+                        pairC++;
+                        continue;
+                    }
+                }
+
                 const s0 = cornerSteps[y * cornersW + x];
                 const s1 = cornerSteps[y * cornersW + (x + 1)];
                 const s2 = cornerSteps[(y + 1) * cornersW + x];
@@ -644,15 +699,10 @@
                 const maxS = Math.max(s0, s1, s2, s3);
 
                 if (minS === maxS) {
-                    if (minS === baseStep) {
-                        // Pure base step: Layer 0 already shows base step, so Layer 1 can be 0 to save rects
-                        map.data[(1 * size + y) * size + x] = 0;
-                    } else {
-                        const key = `pure:${famName}:${minS}`;
-                        const tId = getOrAllocateShadeTile(key);
-                        map.data[(1 * size + y) * size + x] = tId;
-                        pureC++;
-                    }
+                    const key = `pure:${famName}:${minS}`;
+                    const tId = getOrAllocateShadeTile(key);
+                    map.data[(1 * size + y) * size + x] = tId;
+                    pureC++;
                 } else {
                     const lowS = minS;
                     const mask = ((s0 > lowS ? 1 : 0) | (s1 > lowS ? 2 : 0) | (s2 > lowS ? 4 : 0) | (s3 > lowS ? 8 : 0));
@@ -667,6 +717,7 @@
         shadeStats.keysUsed = shadeKeyMap.size;
         shadeStats.pureCount = pureC;
         shadeStats.mixCount = mixC;
+        shadeStats.pairCount = pairC;
     }
 
     function applyGroundShades(map, ax, ay) {

@@ -449,16 +449,18 @@
         } else if (!water) {
             // Continuous ecological ground gradient across moisture, temperature, and drainage
             if (bio.ground === "meadow") {
-                if (f.r > 0.50 || f.d < 0.30) ground = "tropical_grass";
-                else if (f.r < 0.28 || f.d > 0.68) ground = "dry_grass";
+                if (f.r > 0.58 && f.d > 0.38) ground = "forest_floor";
+                else if (f.r > 0.48 || f.d < 0.28) ground = "tropical_grass";
+                else if (f.r < 0.26 || f.d > 0.68) ground = "dry_grass";
             } else if (bio.ground === "dry_grass") {
-                if (f.r > 0.38) ground = "meadow";
+                if (f.r > 0.36) ground = "meadow";
                 else if (f.r < 0.16 || f.d > 0.72) ground = "shrub_soil";
             } else if (bio.ground === "shrub_soil") {
                 if (f.r > 0.28) ground = "dry_grass";
                 else if (f.d > 0.75) ground = "dirt";
             } else if (bio.ground === "forest_floor") {
-                if (f.t < 0.36) ground = "needle_floor";
+                if (f.r < 0.52 && f.d < 0.45) ground = "meadow";
+                else if (f.t < 0.36) ground = "needle_floor";
                 else if (f.r > 0.65 && f.t > 0.60) ground = "jungle_floor";
             } else if (bio.ground === "needle_floor") {
                 if (f.t > 0.50 && f.r > 0.48) ground = "forest_floor";

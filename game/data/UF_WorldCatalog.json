@@ -10295,7 +10295,7 @@
         "pattern": "grass",
         "steps": [
           {
-            "name": "lush",
+            "name": "vivid_emerald",
             "tones": [
               "#189218",
               "#006D00",
@@ -10305,17 +10305,37 @@
             "source": "tropical_grass"
           },
           {
-            "name": "deep_lush",
+            "name": "spring_green",
             "tones": [
-              "#4D5D28",
-              "#39451C",
+              "#45B645",
               "#189218",
-              "#45B645"
+              "#7DDF7D",
+              "#86D200"
             ],
             "source": "tropical_grass"
           },
           {
-            "name": "meadow",
+            "name": "lush_clover",
+            "tones": [
+              "#39451C",
+              "#189218",
+              "#45B645",
+              "#71864D"
+            ],
+            "source": "meadow"
+          },
+          {
+            "name": "deep_meadow",
+            "tones": [
+              "#4D5D28",
+              "#39451C",
+              "#5D7139",
+              "#71864D"
+            ],
+            "source": "meadow"
+          },
+          {
+            "name": "classic_meadow",
             "tones": [
               "#5D7139",
               "#4D5D28",
@@ -10325,27 +10345,47 @@
             "source": "meadow"
           },
           {
-            "name": "dry_meadow",
+            "name": "warm_meadow",
             "tones": [
               "#71864D",
               "#5D7139",
               "#8A9A61",
-              "#B28210"
+              "#9EAE7D"
             ],
             "source": "meadow"
           },
           {
-            "name": "khaki",
+            "name": "olive_grass",
+            "tones": [
+              "#697900",
+              "#515900",
+              "#7D9600",
+              "#86B200"
+            ],
+            "source": "meadow"
+          },
+          {
+            "name": "dry_pasture",
             "tones": [
               "#8A9A61",
               "#71864D",
+              "#9EAE7D",
+              "#B28210"
+            ],
+            "source": "dry_grass"
+          },
+          {
+            "name": "savanna_grass",
+            "tones": [
+              "#9A7141",
+              "#8A5D2D",
               "#AA8659",
               "#C69618"
             ],
             "source": "dry_grass"
           },
           {
-            "name": "straw",
+            "name": "straw_grass",
             "tones": [
               "#C69618",
               "#B28210",
@@ -10353,44 +10393,84 @@
               "#F3DF79"
             ],
             "source": "dry_grass"
+          },
+          {
+            "name": "earthy_grass",
+            "tones": [
+              "#6D4D3D",
+              "#553D31",
+              "#5D7139",
+              "#4D5D28"
+            ],
+            "source": "meadow"
+          },
+          {
+            "name": "mossy_grass",
+            "tones": [
+              "#415120",
+              "#313D18",
+              "#4D5D28",
+              "#5D350C"
+            ],
+            "source": "meadow"
+          },
+          {
+            "name": "frosty_grass",
+            "tones": [
+              "#B6C29A",
+              "#9EAE7D",
+              "#CAD7B6",
+              "#7D7D7D"
+            ],
+            "source": "meadow"
           }
         ],
         "kinds": {
           "tropical_grass": {
             "window": [
               0,
-              2
+              4
             ],
             "base": 0,
             "shares": [
               0.35,
-              0.45,
-              0.2
+              0.3,
+              0.2,
+              0.1,
+              0.05
             ]
           },
           "meadow": {
             "window": [
               1,
-              4
+              11
             ],
-            "base": 2,
+            "base": 4,
             "shares": [
+              0.08,
+              0.12,
+              0.15,
               0.2,
-              0.35,
-              0.3,
-              0.15
+              0.15,
+              0.1,
+              0.08,
+              0.05,
+              0.04,
+              0.02,
+              0.01
             ]
           },
           "dry_grass": {
             "window": [
-              3,
-              5
+              6,
+              9
             ],
-            "base": 5,
+            "base": 9,
             "shares": [
+              0.15,
               0.25,
-              0.35,
-              0.4
+              0.3,
+              0.3
             ]
           }
         }
@@ -10399,22 +10479,22 @@
         "pattern": "litter",
         "steps": [
           {
-            "name": "moss",
+            "name": "mossy_humus",
             "tones": [
               "#415120",
               "#313D18",
               "#5D7139",
-              "#7D4D18"
+              "#5D350C"
             ],
             "source": "jungle_floor"
           },
           {
-            "name": "jungle_litter",
+            "name": "green_litter",
             "tones": [
               "#4D5D28",
               "#39451C",
-              "#71864D",
-              "#8A5D2D"
+              "#6D4D3D",
+              "#5D7139"
             ],
             "source": "jungle_floor"
           },
@@ -10447,31 +10527,44 @@
               "#AE653D"
             ],
             "source": "forest_floor"
+          },
+          {
+            "name": "dark_loam",
+            "tones": [
+              "#4D2D0C",
+              "#3D240C",
+              "#5D350C",
+              "#7D4D18"
+            ],
+            "source": "forest_floor"
           }
         ],
         "kinds": {
           "jungle_floor": {
             "window": [
               0,
-              2
+              3
             ],
             "base": 1,
             "shares": [
-              0.3,
-              0.5,
-              0.2
+              0.25,
+              0.4,
+              0.25,
+              0.1
             ]
           },
           "forest_floor": {
             "window": [
-              2,
-              4
+              1,
+              5
             ],
             "base": 3,
             "shares": [
+              0.15,
               0.25,
-              0.5,
-              0.25
+              0.35,
+              0.15,
+              0.1
             ]
           }
         }
@@ -10480,7 +10573,7 @@
         "pattern": "needles",
         "steps": [
           {
-            "name": "mossy",
+            "name": "mossy_needles",
             "tones": [
               "#415120",
               "#313D18",
@@ -10490,7 +10583,7 @@
             "source": "needle_floor"
           },
           {
-            "name": "needles",
+            "name": "pine_needles",
             "tones": [
               "#39451C",
               "#283114",
@@ -10500,7 +10593,7 @@
             "source": "needle_floor"
           },
           {
-            "name": "brown",
+            "name": "dry_needles",
             "tones": [
               "#4D2D0C",
               "#3D240C",
@@ -10528,6 +10621,16 @@
       "soil": {
         "pattern": "dots",
         "steps": [
+          {
+            "name": "mossy_dirt",
+            "tones": [
+              "#4D5D28",
+              "#39451C",
+              "#6D4D3D",
+              "#5D7139"
+            ],
+            "source": "dirt"
+          },
           {
             "name": "loam",
             "tones": [
@@ -10564,7 +10667,7 @@
               "#AA8659",
               "#9A7141",
               "#BA9A71",
-              "#5D7139"
+              "#71864D"
             ],
             "source": "shrub_soil"
           },
@@ -10574,7 +10677,7 @@
               "#BA9A71",
               "#AA8659",
               "#CAB292",
-              "#9E928A"
+              "#9A7141"
             ],
             "source": "sand"
           },
@@ -10603,37 +10706,40 @@
           "dirt": {
             "window": [
               0,
-              2
+              3
             ],
-            "base": 1,
+            "base": 2,
             "shares": [
+              0.15,
               0.3,
-              0.5,
-              0.2
+              0.4,
+              0.15
             ]
           },
           "shrub_soil": {
             "window": [
               2,
-              4
+              5
             ],
-            "base": 3,
+            "base": 4,
             "shares": [
-              0.25,
-              0.5,
-              0.25
+              0.15,
+              0.3,
+              0.4,
+              0.15
             ]
           },
           "sand": {
             "window": [
               4,
-              6
+              7
             ],
-            "base": 5,
+            "base": 6,
             "shares": [
-              0.2,
-              0.5,
-              0.3
+              0.15,
+              0.35,
+              0.35,
+              0.15
             ]
           }
         }
@@ -10652,7 +10758,7 @@
             "source": "red_clay"
           },
           {
-            "name": "red",
+            "name": "clay",
             "tones": [
               "#AE653D",
               "#9E5124",
@@ -10662,22 +10768,12 @@
             "source": "red_clay"
           },
           {
-            "name": "orange",
+            "name": "light",
             "tones": [
               "#BE825D",
               "#AE653D",
-              "#CE9A7D",
+              "#CAB292",
               "#9E5124"
-            ],
-            "source": "red_clay"
-          },
-          {
-            "name": "pale",
-            "tones": [
-              "#CE9A7D",
-              "#BE825D",
-              "#DFBAA2",
-              "#AE653D"
             ],
             "source": "red_clay"
           }
@@ -10686,14 +10782,13 @@
           "red_clay": {
             "window": [
               0,
-              3
+              2
             ],
             "base": 1,
             "shares": [
-              0.2,
-              0.4,
               0.25,
-              0.15
+              0.5,
+              0.25
             ]
           }
         }
@@ -10702,12 +10797,12 @@
         "pattern": "cracks",
         "steps": [
           {
-            "name": "gravel",
+            "name": "mossy_stone",
             "tones": [
-              "#AEA29A",
-              "#9E928A",
-              "#BEB2AE",
-              "#7D7169"
+              "#71864D",
+              "#5D7139",
+              "#7D7169",
+              "#514945"
             ],
             "source": "stony"
           },
@@ -10742,14 +10837,14 @@
             "source": "rock"
           },
           {
-            "name": "dark_rock",
+            "name": "peak_rock",
             "tones": [
-              "#616161",
               "#515151",
+              "#453D39",
               "#6D6D6D",
-              "#453D39"
+              "#35312D"
             ],
-            "source": "rock"
+            "source": "peak_rock"
           }
         ],
         "kinds": {
@@ -10772,21 +10867,31 @@
             ],
             "base": 2,
             "shares": [
-              0.25,
-              0.5,
-              0.25
+              0.2,
+              0.6,
+              0.2
             ]
           },
           "rock": {
             "window": [
               2,
-              4
+              3
             ],
             "base": 3,
             "shares": [
+              0.3,
+              0.7
+            ]
+          },
+          "peak_rock": {
+            "window": [
+              3,
+              4
+            ],
+            "base": 4,
+            "shares": [
               0.2,
-              0.5,
-              0.3
+              0.8
             ]
           }
         }
@@ -10795,17 +10900,7 @@
         "pattern": "mud",
         "steps": [
           {
-            "name": "peat",
-            "tones": [
-              "#352D24",
-              "#241818",
-              "#45352D",
-              "#313D18"
-            ],
-            "source": "swamp_mud"
-          },
-          {
-            "name": "swamp_mud",
+            "name": "deep_mud",
             "tones": [
               "#45352D",
               "#352D24",
@@ -10813,6 +10908,16 @@
               "#39451C"
             ],
             "source": "swamp_mud"
+          },
+          {
+            "name": "wet_mud",
+            "tones": [
+              "#553D31",
+              "#45352D",
+              "#6D4D3D",
+              "#415120"
+            ],
+            "source": "mud"
           },
           {
             "name": "mud",
@@ -10828,9 +10933,9 @@
             "name": "dry_mud",
             "tones": [
               "#7D6559",
-              "#6D554D",
+              "#6D4D3D",
               "#8E7565",
-              "#6D4D3D"
+              "#5D7139"
             ],
             "source": "mud"
           }
@@ -10841,11 +10946,10 @@
               0,
               2
             ],
-            "base": 1,
+            "base": 0,
             "shares": [
-              0.35,
-              0.45,
-              0.2
+              0.6,
+              0.4
             ]
           },
           "mud": {
@@ -10866,6 +10970,16 @@
         "pattern": "dots",
         "steps": [
           {
+            "name": "mossy_tundra",
+            "tones": [
+              "#9EAE7D",
+              "#8A9A61",
+              "#7D7169",
+              "#615551"
+            ],
+            "source": "tundra"
+          },
+          {
             "name": "tundra",
             "tones": [
               "#9EAE7D",
@@ -10876,12 +10990,12 @@
             "source": "tundra"
           },
           {
-            "name": "frosted",
+            "name": "pale_tundra",
             "tones": [
               "#B6C29A",
               "#9EAE7D",
               "#CAD7B6",
-              "#DFD7D2"
+              "#AEAEAE"
             ],
             "source": "tundra"
           }
@@ -10890,12 +11004,13 @@
           "tundra": {
             "window": [
               0,
-              1
+              2
             ],
-            "base": 0,
+            "base": 1,
             "shares": [
-              0.6,
-              0.4
+              0.3,
+              0.5,
+              0.2
             ]
           }
         }
@@ -10903,6 +11018,16 @@
       "ash": {
         "pattern": "dots",
         "steps": [
+          {
+            "name": "dark_ash",
+            "tones": [
+              "#454545",
+              "#353535",
+              "#515151",
+              "#510000"
+            ],
+            "source": "ash"
+          },
           {
             "name": "ash",
             "tones": [
@@ -10914,12 +11039,12 @@
             "source": "ash"
           },
           {
-            "name": "pale",
+            "name": "cinder",
             "tones": [
               "#616161",
               "#515151",
-              "#6D6D6D",
-              "#514945"
+              "#7D7D7D",
+              "#8A4500"
             ],
             "source": "ash"
           }
@@ -10928,12 +11053,13 @@
           "ash": {
             "window": [
               0,
-              1
+              2
             ],
-            "base": 0,
+            "base": 1,
             "shares": [
-              0.65,
-              0.35
+              0.25,
+              0.5,
+              0.25
             ]
           }
         }
@@ -10942,12 +11068,12 @@
         "pattern": "snow",
         "steps": [
           {
-            "name": "shadowed",
+            "name": "crust",
             "tones": [
+              "#CECECE",
+              "#BEBEBE",
               "#DFDFDF",
-              "#CECEFF",
-              "#EFEFEF",
-              "#BEBEBE"
+              "#BABAFF"
             ],
             "source": "snow"
           },
@@ -10960,18 +11086,29 @@
               "#CECECE"
             ],
             "source": "snow"
+          },
+          {
+            "name": "powder",
+            "tones": [
+              "#FFFFFF",
+              "#EFEFEF",
+              "#FFFFFF",
+              "#DBDBFF"
+            ],
+            "source": "snow"
           }
         ],
         "kinds": {
           "snow": {
             "window": [
               0,
-              1
+              2
             ],
             "base": 1,
             "shares": [
-              0.35,
-              0.65
+              0.2,
+              0.6,
+              0.2
             ]
           }
         }
@@ -10980,7 +11117,17 @@
         "pattern": "ice",
         "steps": [
           {
-            "name": "blue",
+            "name": "deep_ice",
+            "tones": [
+              "#71AEE7",
+              "#358EDB",
+              "#6DB2E7",
+              "#006DD2"
+            ],
+            "source": "ice"
+          },
+          {
+            "name": "ice",
             "tones": [
               "#B2D7F3",
               "#71AEE7",
@@ -10990,12 +11137,12 @@
             "source": "ice"
           },
           {
-            "name": "pale",
+            "name": "glaze",
             "tones": [
               "#F3F3FF",
               "#B2D7F3",
               "#FFFFFF",
-              "#CECEFF"
+              "#71AEE7"
             ],
             "source": "ice"
           }
@@ -11004,12 +11151,13 @@
           "ice": {
             "window": [
               0,
-              1
+              2
             ],
-            "base": 0,
+            "base": 1,
             "shares": [
+              0.2,
               0.6,
-              0.4
+              0.2
             ]
           }
         }
@@ -11028,12 +11176,12 @@
             "source": "blessed_grass"
           },
           {
-            "name": "pale",
+            "name": "bright",
             "tones": [
-              "#71864D",
-              "#5D7139",
-              "#9EAE7D",
-              "#F3DF79"
+              "#7DDF7D",
+              "#45B645",
+              "#DBFFDB",
+              "#FFFFFF"
             ],
             "source": "blessed_grass"
           }
@@ -11092,40 +11240,70 @@
       }
     },
     "pairs": {
-      "grass|needles": {
+      "grass|litter": {
         "steps": [
-          2,
+          10,
           1
         ]
       },
-      "grass|litter": {
+      "grass|needles": {
         "steps": [
-          2,
-          3
+          11,
+          0
         ]
       },
       "grass|soil": {
         "steps": [
-          3,
-          3
+          10,
+          0
         ]
       },
       "grass|stone": {
+        "steps": [
+          10,
+          0
+        ]
+      },
+      "grass|tundra": {
+        "steps": [
+          12,
+          0
+        ]
+      },
+      "grass|mud": {
+        "steps": [
+          11,
+          2
+        ]
+      },
+      "litter|soil": {
+        "steps": [
+          1,
+          1
+        ]
+      },
+      "litter|needles": {
+        "steps": [
+          0,
+          0
+        ]
+      },
+      "soil|stone": {
+        "steps": [
+          4,
+          0
+        ]
+      },
+      "soil|clay": {
         "steps": [
           2,
           1
         ]
       },
-      "needles|tundra": {
+      "tundra|snow": {
         "steps": [
-          1,
+          2,
           0
-        ]
-      },
-      "litter|soil": {
-        "steps": [
-          3,
-          1
         ]
       }
     }
