@@ -1364,6 +1364,7 @@
 
     async function skinChecks(t) {
         const W = UF.World, Talk = UF.Talk, Sheet = UF.Sheet, Tm = UF.Time;
+        await t.waitUntil(() => !!(UF.World && UF.World.state && Factions.player() && skinsCfg() && facesCfg() && SceneManager._scene instanceof Scene_Map && UF.World.currentArea()), 10000, "map and world ready").catch(() => {});
         const scene = SceneManager._scene;
         const pf = W && W.state ? Factions.player() : null;
         const cfg = skinsCfg(), fcfg = facesCfg();

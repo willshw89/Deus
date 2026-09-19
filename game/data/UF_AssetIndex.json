@@ -1,31 +1,4 @@
 {
- "!Door1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object door_wood \"Wooden door\"",
-   "object door_stone \"Stone door\" (tint #b8c0c8)"
-  ],
-  "states": [
-   "door_wood: dismantle: Wooden door → gone (yields 1 Log)",
-   "door_wood: mine: Wooden door → gone (yields 1 Log)",
-   "door_wood: chop: Wooden door → gone (yields 1 Log)",
-   "door_wood: building: unbuilt (needs 1 Log on the cell) / built",
-   "door_wood: ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)",
-   "door_stone: dismantle: Stone door → gone (yields 1 Stone)",
-   "door_stone: mine: Stone door → gone (yields 1 Stone)",
-   "door_stone: quarry: Stone door → gone (yields 1 Stone)",
-   "door_stone: building: unbuilt (needs 2 Stone on the cell) / built",
-   "door_stone: ruined → Rubble (when its site is sacked)"
-  ],
-  "category": "objects",
-  "file": "img/characters/!Door1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "$UF_Stock_Actor1_0": {
   "status": "stock RMMZ",
   "request": "none yet",
@@ -359,7 +332,8 @@
   "status": "stock RMMZ",
   "request": "AR-400",
   "requests": [
-   "AR-400"
+   "AR-400",
+   "AR-1709"
   ],
   "usedBy": [
    "people automaton"
@@ -378,7 +352,8 @@
   "status": "stock RMMZ",
   "request": "AR-400",
   "requests": [
-   "AR-400"
+   "AR-400",
+   "AR-1709"
   ],
   "usedBy": [
    "people automaton"
@@ -397,7 +372,8 @@
   "status": "stock RMMZ",
   "request": "AR-400",
   "requests": [
-   "AR-400"
+   "AR-400",
+   "AR-1709"
   ],
   "usedBy": [
    "people automaton"
@@ -505,68 +481,6 @@
   ],
   "category": "ui",
   "file": "img/system/ButtonSet.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Inside_C": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510"
-  ],
-  "usedBy": [
-   "tile 403 (objects)",
-   "tile 400 (objects)"
-  ],
-  "states": [],
-  "category": "tiles",
-  "file": "img/tilesets/Inside_C.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Inside_C#400": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510",
-   "AR-905"
-  ],
-  "usedBy": [
-   "object weapon_rack \"Weapon rack\""
-  ],
-  "states": [
-   "building: unbuilt (needs 2 Log on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Inside_C.png (tile 400)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Inside_C#403": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510",
-   "AR-905"
-  ],
-  "usedBy": [
-   "object bowyer_bench \"Bowyer's bench\"",
-   "object fletcher_bench \"Fletcher's bench\" (tint #c8d8f0)"
-  ],
-  "states": [
-   "bowyer_bench: building: unbuilt (needs 2 Log on the cell) / built",
-   "bowyer_bench: ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)",
-   "fletcher_bench: building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
-   "fletcher_bench: ruined → Rubble (when its site is sacked)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Inside_C.png (tile 403)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -774,97 +688,20 @@
  },
  "Outside_B": {
   "status": "stock RMMZ",
-  "request": "AR-510",
+  "request": "AR-020",
   "requests": [
-   "AR-510",
    "AR-020",
    "AR-021",
    "AR-023",
+   "AR-510",
    "AR-1600"
   ],
   "usedBy": [
-   "tile 149 (objects)",
-   "tile 181 (objects)",
-   "tile 175 (objects)",
-   "tile 139 (objects)",
    "tileset 91 slot B"
   ],
   "states": [],
   "category": "tiles",
   "file": "img/tilesets/Outside_B.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#139": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object well \"Well\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 139)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#149": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510",
-   "AR-905"
-  ],
-  "usedBy": [
-   "object tanning_rack \"Tanning rack\""
-  ],
-  "states": [
-   "building: unbuilt (needs 3 Log, 2 Plant fiber on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 149)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#175": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object farm_plot \"Farm plot\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 175)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#181": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object bridge \"Plank bridge\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "sits on water cells",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 181)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -1648,7 +1485,8 @@
   "status": "generated",
   "request": "AR-100",
   "requests": [
-   "AR-100"
+   "AR-100",
+   "AR-1707"
   ],
   "usedBy": [
    "ground kind red_clay \"Red clay\"",
@@ -2095,17 +1933,12 @@
  },
  "UF_GenStockpile": {
   "status": "generated",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
-   "object stockpile \"Stockpile\"",
    "plugin UF_Objects.js"
   ],
   "states": [
-   "building: unbuilt (no materials) / built",
-   "flat: drawn under units and items",
    "flat dashed 48×48 square on the ground"
   ],
   "category": "generated",
@@ -2185,6 +2018,44 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Birch.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bowyer_Bench": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905"
+  ],
+  "usedBy": [
+   "object bowyer_bench \"Bowyer's bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bowyer_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bridge": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object bridge \"Plank bridge\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "sits on water cells",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bridge.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -2388,6 +2259,52 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Door_Stone": {
+  "status": "original",
+  "request": "AR-300",
+  "requests": [
+   "AR-300"
+  ],
+  "usedBy": [
+   "object door_stone \"Stone door\""
+  ],
+  "states": [
+   "dismantle: Stone door → gone (yields 1 Stone)",
+   "mine: Stone door → gone (yields 1 Stone)",
+   "quarry: Stone door → gone (yields 1 Stone)",
+   "building: unbuilt (needs 2 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Stone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Door_Wood": {
+  "status": "original",
+  "request": "AR-300",
+  "requests": [
+   "AR-300"
+  ],
+  "usedBy": [
+   "object door_wood \"Wooden door\""
+  ],
+  "states": [
+   "dismantle: Wooden door → gone (yields 1 Log)",
+   "mine: Wooden door → gone (yields 1 Log)",
+   "chop: Wooden door → gone (yields 1 Log)",
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_FallenPillar": {
   "status": "original",
   "request": "AR-104",
@@ -2403,6 +2320,23 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_FallenPillar.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_FarmPlot": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object farm_plot \"Farm plot\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_FarmPlot.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -2442,6 +2376,26 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Fir_Snow.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fletcher_Bench": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905"
+  ],
+  "usedBy": [
+   "object fletcher_bench \"Fletcher's bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fletcher_Bench.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -3002,7 +2956,8 @@
    "AR-1216",
    "AR-044",
    "AR-030",
-   "AR-033"
+   "AR-033",
+   "AR-1701"
   ],
   "usedBy": [
    "item gold \"Gold nugget\""
@@ -3202,7 +3157,9 @@
    "AR-903",
    "AR-904",
    "AR-902",
-   "AR-905"
+   "AR-905",
+   "AR-1705",
+   "AR-1704"
   ],
   "usedBy": [
    "item hide \"Hide\"",
@@ -3265,7 +3222,8 @@
   "status": "original",
   "request": "AR-200",
   "requests": [
-   "AR-200"
+   "AR-200",
+   "AR-1705"
   ],
   "usedBy": [
    "item bone \"Bone\""
@@ -3912,6 +3870,26 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Stockpile": {
+  "status": "original",
+  "request": "AR-300",
+  "requests": [
+   "AR-300",
+   "AR-104"
+  ],
+  "usedBy": [
+   "object stockpile \"Stockpile\""
+  ],
+  "states": [
+   "building: unbuilt (no materials) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stockpile.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Straw_Bed": {
   "status": "original",
   "request": "AR-300",
@@ -3951,6 +3929,27 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Stump.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tanning_Rack": {
+  "status": "original",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object tanning_rack \"Tanning rack\""
+  ],
+  "states": [
+   "building: unbuilt (needs 3 Log, 2 Plant fiber on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tanning_Rack.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4066,6 +4065,44 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Tree_Tropical.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Weapon_Rack": {
+  "status": "original",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object weapon_rack \"Weapon rack\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Weapon_Rack.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Well": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object well \"Well\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Well.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4202,7 +4239,8 @@
    "AR-400",
    "AR-700",
    "AR-010",
-   "AR-011"
+   "AR-011",
+   "AR-1700"
   ],
   "usedBy": [
    "people human",
@@ -4227,7 +4265,7 @@
   "file": "img/characters/$Adam.png",
   "exists": true,
   "sidecar": true,
-  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but is not a 144x192 single-character sheet"
  },
  "$Baby": {
   "status": "original",
@@ -4287,7 +4325,8 @@
    "AR-400",
    "AR-700",
    "AR-010",
-   "AR-011"
+   "AR-011",
+   "AR-1700"
   ],
   "usedBy": [
    "people human",
@@ -4306,7 +4345,7 @@
   "file": "img/characters/$Eve.png",
   "exists": true,
   "sidecar": true,
-  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but is not a 144x192 single-character sheet"
  },
  "$Teen_Boy": {
   "status": "original",
@@ -4348,7 +4387,8 @@
   "requests": [
    "AR-400",
    "AR-600",
-   "AR-900"
+   "AR-900",
+   "AR-1702"
   ],
   "usedBy": [
    "people dwarf"
@@ -4369,7 +4409,8 @@
   "requests": [
    "AR-400",
    "AR-600",
-   "AR-900"
+   "AR-900",
+   "AR-1702"
   ],
   "usedBy": [
    "people dwarf"
@@ -4389,7 +4430,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1701"
   ],
   "usedBy": [
    "people elf"
@@ -4409,7 +4451,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1701"
   ],
   "usedBy": [
    "people elf"
@@ -4429,7 +4472,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1703"
   ],
   "usedBy": [
    "people gnome"
@@ -4449,7 +4493,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1703"
   ],
   "usedBy": [
    "people gnome"
@@ -4469,7 +4514,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1704"
   ],
   "usedBy": [
    "people goblin"
@@ -4489,7 +4535,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1704"
   ],
   "usedBy": [
    "people goblin"
@@ -4512,7 +4559,8 @@
    "AR-600",
    "AR-700",
    "AR-011",
-   "AR-010"
+   "AR-010",
+   "AR-1700"
   ],
   "usedBy": [
    "people human",
@@ -4540,7 +4588,8 @@
    "AR-600",
    "AR-700",
    "AR-010",
-   "AR-011"
+   "AR-011",
+   "AR-1700"
   ],
   "usedBy": [
    "people human",
@@ -4566,7 +4615,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1705"
   ],
   "usedBy": [
    "people orc"
@@ -4586,7 +4636,8 @@
   "request": "AR-400",
   "requests": [
    "AR-400",
-   "AR-900"
+   "AR-900",
+   "AR-1705"
   ],
   "usedBy": [
    "people orc"
@@ -4643,8 +4694,10 @@
  },
  "img/system/Window.png": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-033",
+  "requests": [
+   "AR-033"
+  ],
   "usedBy": [
    "plugin UF_Factions.js (test suite)",
    "RMMZ core: skin of every window"

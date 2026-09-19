@@ -6,6 +6,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 
+## Thin Window Borders & Authentic Faction / Main Menu Window Skins (AR-033, AR-1700..1710) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("This menu style border is too thick. Also, I want a variety of DIFFERENT menu /windows for each faction / the main menu / etc"):
+- **Thin Border Redesign (AR-033):**
+  - Redesigned the 9-slice frame slice from 24 screen pixels down to a crisp 6 screen pixels (2 native pixels at 3× integer scale: 1px dark outer rim/shadow + 1px lit highlight/bevel).
+  - Interior corners beyond the 2-pixel perimeter and 3×3 corner motifs are 100% transparent (alpha 0). This clears the entire 12px window padding region so unit names, badges, inventory slots, equipment items, close buttons, and bottom text descriptions have clean breathing space with zero clipping or overlap.
+- **13 Authentic Distinct Window Skins (AR-033, AR-1700..1710):**
+  - Delivered dedicated 192×192 native window skins with themed wallpaper backgrounds, unique corner motifs, and matching cursors and scroll arrows in `game/img/system/` and `art/masters/`:
+    - `Window.png` / `Window_main.png`: Regal / Main Menu — midnight navy velvet with subtle diamond damask, gold filigree bevel and corner brackets.
+    - `Window_human.png`: Human culture — carved dark oak with linen weave, brass wire rim and rosette rivets.
+    - `Window_dwarf.png`: Dwarf culture — dressed granite stone slab with masonry lines, cold iron bevel with rune rivets.
+    - `Window_elf.png`: Elf culture — ancient woodland bower, deep forest green with leaf weave and pale gold leaf corner curls.
+    - `Window_gnome.png`: Gnome culture — dark teal blueprint enamel with brass bevel and cog/gear brackets.
+    - `Window_goblin.png`: Goblin culture — patchwork stitched hide with rusted scrap iron and barbed plates.
+    - `Window_orc.png`: Orc culture — raw crimson beast-hide with heavy black iron and bone tusk clamps.
+    - `Window_lizardfolk.png`: Lizardfolk culture — marsh teal reed weave with polished river-shell trim.
+    - `Window_kobold.png`: Kobold culture — warm earthen red clay with hammered copper and trinket notches.
+    - `Window_undead.png`: Undead culture — cold crypt slate with tarnished verdigris bronze and grave notches.
+    - `Window_starborn.png`: Starborn & automaton culture — cosmic indigo void with starlight grid and crystal lattice.
+    - `Window_swarm.png`: Swarm culture — dark insectoid chitin plates with iridescent violet membrane and sinew nodes.
+  - All 13 skins preserve the 32 standard RMMZ text colors at `[96..191, 144..191]` unchanged, ensuring 100% text color fidelity across all menus.
+- **Automated Verification:**
+  - `tools/art_check.js`: 13/13 PASS (alpha 0/255, 3× nearest-neighbor grid, <= 20 colors each on `art/palette/uf.hex`).
+  - `tools/originality_check.js`: 13/13 PASS (0 FAIL, 0 WARN; closest distances 0.451 to 0.505 >= 0.28 vs 19,431 indexed U7 shapes).
+  - Test suites: `skins` 8/8 PASS (`player_skin`, `cultures_differ` with min RGB distance 32 >= 30, `text_readable` with contrast up to 20.7:1, `fallback_default`, `stranger_in_talk`, `faces.by_culture`, `faces.fallback`, `no_errors`), `smoke` 9/9 PASS.
+- **Screenshots visually inspected (Rule 5):**
+  - `art/review/window_skins_all_factions_showcase.png`: Complete 4×3 visual showcase comparing all 12 window skin mockups side by side with distinctive faction colors, borders, and textures.
+  - `game/test_output/skins.sheet_dwarf.png`: Dwarven character sheet showing the sleek 6px dark iron/granite frame with ample breathing room, zero collision with header or bottom text.
+  - `game/test_output/skins.sheet_human.png` & `skins.sheet_elf.png`: Human carved oak/brass and Elf pale gold/leaf frames in live gameplay.
+  - `game/test_output/skins.talk_stranger.png`: Conversation window with stranger in goblin rusted scrap skin and player in human oak skin.
+  - `game/test_output/smoke.map.png`: Main game HUD with thin gold/navy level plate and speed controls.
+
 ## Human & Dwarf 8-Directional & Combat Suites (AR-010, AR-011, AR-400, AR-600) — 2026-09-19 (Gemini)
 
 Delivered per user directives ("Work on the human sprites 8 directions, combat, idle, etc", "Dwarves need 8 direction mvoement. idle, combat, sleep, death.. etc..."):
