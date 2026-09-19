@@ -12,6 +12,7 @@
 | U5 | **Palette:** 100% Ultima VII Daylight Palette (`STATIC/PALETTES.FLX` record 0 / `art/palette/uf.hex`). Background for generation/clean steps is flat magenta `#FF00FF`. No blur, no anti-aliasing to background. |
 | U6 | **Scale reference:** 1 tile = 48×48 screen pixels (RMMZ native tile grid). |
 | U7 | **Combat is on the map** (VISION V45): attacks, casts, and hits play as animation frames on the map sprite (AR-600), with DF-style injuries. |
+| U8 | **Everything that can be animated is animated (VISION V60):** creatures carry idle frames (breathing, a weight shift, a blink where the face shows) besides walk, work, carry, attack, hurt and death; plants carry a 3-frame sway (trees, grass, reeds, crops); fire, water, smoke and doors carry their loops; workshops a working loop. Frames go in the sheet with the sidecar naming them under `animations` (`idle`, `sway`, `lit`, `open`, `work`) and `frameMs`. |
 
 ## 2. Reference & Stand-ins
 - **Ultima VII assets decoded directly from `STATIC/SHAPES.VGA`** (scaled to 48×48 single-tile containment) serve as the approved visual masters and stand-ins during development (`art/u7_reference_squares/`).
