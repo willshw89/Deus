@@ -43,7 +43,11 @@ Registry keys, occupancy, faction passage, terrain reads, pending placements, ob
 | `store()` | Returns `UF.World.state.doors` |
 | `at(area,x,y)` / `stateAt(area,x,y)` | Door record or saved state at a cell |
 | `isDoorType(type)` / `isOpen(area,x,y)` | Type/state predicates |
-| `canUnitPass(unit,doorOrState)` | Faction/alliance decision; `heldOpen` admits any unit |
+| `canUnitPass(unit,doorOrState)` | Faction/alliance decision; if door is locked (`s.locked`), requires matching `keyId` in `unit.data.keys` or `unit.data.inventory`; `heldOpen` admits any unit |
+| `lock(area,x,y,keyId?)` | Locks door with specified `keyId`, cancels heldOpen and open timers |
+| `unlock(area,x,y,keyId?)` | Unlocks door if matching key provided or unkeyed |
+| `isLocked(area,x,y)` | Predicate returning true if door at cell is locked |
+| `keyOf(area,x,y)` | Returns the `keyId` assigned to the locked door |
 | `open(doorOrState,frames?)` | Extends the temporary open timer |
 | `toggleHeld(area,x,y)` | Player hold-open/close action |
 | `placeAll(force?)` / `placeSite(site)` / `retryPending()` | Generation and deferred placement |

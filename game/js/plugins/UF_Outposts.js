@@ -132,8 +132,12 @@
             W.state.outposts = {
                 version: 1,
                 factions: {},
-                nextBuildingId: 1
+                nextBuildingId: 1,
+                nextFamilyId: 1
             };
+        }
+        if (!W.state.outposts.nextFamilyId) {
+            W.state.outposts.nextFamilyId = 1;
         }
         return W.state.outposts;
     }
@@ -161,8 +165,12 @@
                 radius: DEFAULT_EXPANSION_RADIUS,
                 buildings: [],
                 parcels: [],
+                families: {},
+                cultureEvolution: null,
                 lastEvalFrame: 0
             };
+        } else {
+            st.factions[factionId].families = st.factions[factionId].families || {};
         }
         return st.factions[factionId];
     }
@@ -216,6 +224,12 @@
                 case "dwelling":
                     w = 5; h = 5; // standard cottage
                     break;
+                case "family_home":
+                    w = 8; h = 6; // 4-room family home (kitchen, dining, master bed, child bed)
+                    break;
+                case "homestead":
+                    w = 8; h = 8; // 2-storey homestead estate
+                    break;
                 case "longhouse":
                     w = 8; h = 5; // communal hall
                     break;
@@ -240,8 +254,11 @@
         h = Math.max(4, Math.min(8, h));
 
         const mats = getCultureMaterials(culture);
-        const buildingLevels = levels.slice().sort((a, b) => a - b);
+        const buildingLevels = (archetype === "homestead" && levels.length === 1 && levels[0] === 0) ?
+            [0, 1] : levels.slice().sort((a, b) => a - b);
         const cellsByZ = {};
+        const rooms = [];
+        const windows = [];
 
         // 1. Ground Level (Z = 0) Blueprint
         const groundCells = {
@@ -282,14 +299,113 @@
         const hasUpper = buildingLevels.some(z => z > 0);
         const hasCellar = buildingLevels.some(z => z < 0);
         if (hasUpper) {
-            groundCells.stairs.push({ x: x + 1, y: y + 1, objectId: "stairs_up", targetZ: 1 });
+            const stairX = archetype === "homestead" ? x + 6 : x + 1;
+            const stairY = archetype === "homestead" ? y + 2 : y + 1;
+            groundCells.stairs.push({ x: stairX, y: stairY, objectId: "stairs_up", targetZ: 1 });
         }
         if (hasCellar) {
             groundCells.stairs.push({ x: x + w - 2, y: y + 1, objectId: "stairs_down", targetZ: -1 });
         }
 
-        // Interior Furnishings at Z=0
-        if (archetype === "dwelling" || archetype === "longhouse") {
+        // Windows on exterior walls
+        if (archetype === "family_home" || archetype === "homestead" || archetype === "dwelling") {
+            windows.push(
+                { x: x + 1, y: y },
+                { x: x + Math.min(5, w - 2), y: y },
+                { x: x + Math.min(5, w - 2), y: y + h - 1 },
+                { x: x, y: y + 2 },
+                { x: x + w - 1, y: y + 2 }
+            );
+        }
+
+        // Multi-Room Layouts & Interior Partition Walls
+        if (archetype === "family_home") {
+            // Spine partition separating West (Kitchen/Dining) from East (Bedrooms) at dx = 3
+            groundCells.walls.push({ x: x + 3, y: y + 1, objectId: mats.wall });
+            groundCells.doors.push({ x: x + 3, y: y + 2, objectId: mats.door }); // doorway to master bed
+            groundCells.walls.push({ x: x + 3, y: y + 3, objectId: mats.wall });
+            groundCells.doors.push({ x: x + 3, y: y + 4, objectId: mats.door }); // doorway to child bed
+
+            // West partition separating Kitchen from Dining at dy = 2
+            groundCells.walls.push({ x: x + 1, y: y + 2, objectId: mats.wall });
+            groundCells.doors.push({ x: x + 2, y: y + 2, objectId: mats.door }); // doorway between kitchen & dining
+
+            // East partition separating Master Bedroom from Children's Bedroom at dy = 2
+            groundCells.doors.push({ x: x + 4, y: y + 2, objectId: mats.door });
+            groundCells.walls.push({ x: x + 5, y: y + 2, objectId: mats.wall });
+            groundCells.walls.push({ x: x + 6, y: y + 2, objectId: mats.wall });
+
+            // 1. Kitchen Room
+            groundCells.furniture.push({ x: x + 1, y: y + 1, objectId: "campfire" }); // cooking hearth
+            groundCells.furniture.push({ x: x + 2, y: y + 1, objectId: "stockpile" }); // pantry crate
+            rooms.push({
+                id: `${spec.id || "bld"}_kitchen`,
+                type: "kitchen",
+                name: "Kitchen",
+                x: x + 1, y: y + 1, w: 2, h: 2, z: 0,
+                hearth: { x: x + 1, y: y + 1, objectId: "campfire" }
+            });
+
+            // 2. Dining Room
+            groundCells.furniture.push({ x: x + 2, y: y + 3, objectId: "workbench" }); // dining table
+            groundCells.furniture.push({ x: x + 1, y: y + 3, objectId: "floor_straw" }); // dining bench
+            rooms.push({
+                id: `${spec.id || "bld"}_dining`,
+                type: "dining",
+                name: "Dining Room",
+                x: x + 1, y: y + 3, w: 2, h: 2, z: 0,
+                table: { x: x + 2, y: y + 3, objectId: "workbench" }
+            });
+
+            // 3. Master Bedroom
+            groundCells.furniture.push({ x: x + 5, y: y + 1, objectId: "floor_straw" }); // parent bed 1
+            groundCells.furniture.push({ x: x + 6, y: y + 1, objectId: "floor_straw" }); // parent bed 2
+            rooms.push({
+                id: `${spec.id || "bld"}_master_bedroom`,
+                type: "bedroom",
+                subType: "master",
+                name: "Master Bedroom",
+                x: x + 4, y: y + 1, w: 3, h: 2, z: 0,
+                beds: [{ x: x + 5, y: y + 1 }, { x: x + 6, y: y + 1 }]
+            });
+
+            // 4. Children's Bedroom
+            groundCells.furniture.push({ x: x + 5, y: y + 4, objectId: "floor_straw" }); // child bed 1
+            groundCells.furniture.push({ x: x + 6, y: y + 4, objectId: "floor_straw" }); // child bed 2
+            rooms.push({
+                id: `${spec.id || "bld"}_children_bedroom`,
+                type: "bedroom",
+                subType: "children",
+                name: "Children's Bedroom",
+                x: x + 4, y: y + 3, w: 3, h: 2, z: 0,
+                beds: [{ x: x + 5, y: y + 4 }, { x: x + 6, y: y + 4 }]
+            });
+        } else if (archetype === "homestead") {
+            // Ground level: Grand Kitchen and Great Dining Hall
+            groundCells.walls.push({ x: x + 1, y: y + 3, objectId: mats.wall });
+            groundCells.doors.push({ x: x + 2, y: y + 3, objectId: mats.door });
+            groundCells.walls.push({ x: x + 3, y: y + 3, objectId: mats.wall });
+
+            groundCells.furniture.push({ x: x + 1, y: y + 1, objectId: "campfire" }); // hearth
+            groundCells.furniture.push({ x: x + 2, y: y + 1, objectId: "stockpile" }); // pantry
+            groundCells.furniture.push({ x: x + 3, y: y + 5, objectId: "workbench" }); // grand table
+            groundCells.furniture.push({ x: x + 2, y: y + 5, objectId: "floor_straw" }); // bench
+
+            rooms.push({
+                id: `${spec.id || "bld"}_kitchen`,
+                type: "kitchen",
+                name: "Grand Kitchen",
+                x: x + 1, y: y + 1, w: 3, h: 3, z: 0,
+                hearth: { x: x + 1, y: y + 1, objectId: "campfire" }
+            });
+            rooms.push({
+                id: `${spec.id || "bld"}_dining`,
+                type: "dining",
+                name: "Great Dining Hall",
+                x: x + 1, y: y + 4, w: 6, h: 3, z: 0,
+                table: { x: x + 3, y: y + 5, objectId: "workbench" }
+            });
+        } else if (archetype === "dwelling" || archetype === "longhouse") {
             const bedCount = archetype === "longhouse" ? 4 : 2;
             let placed = 0;
             for (let dx = 1; dx < w - 1; dx++) {
@@ -416,6 +532,10 @@
             progress: 0,
             maxProgress: 100,
             cellsByZ,
+            rooms: rooms || [],
+            windows: windows || [],
+            familyId: spec.familyId || null,
+            upgradeTarget: null,
             assignedWorkers: [],
             createdFrame: Graphics.frameCount
         };
@@ -425,6 +545,379 @@
 
     function capitalize(s) {
         return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+    }
+
+    //-------------------------------------------------------------------------
+    // Domestic Families, Generational Culture & Creature Goals
+    //-------------------------------------------------------------------------
+
+    function generateSurname(culture) {
+        const cult = (culture || "human").toLowerCase();
+        const humanSurnames = ["Hawthorne", "Miller", "Baker", "Fletcher", "Blackwood", "Cooper", "Smith"];
+        const dwarfSurnames = ["Ironfoot", "Stonehammer", "Bronzebeard", "Deepdelver", "Anvilborn"];
+        const elfSurnames = ["Silverleaf", "Swiftwillow", "Greenbough", "Moonwhisper", "Starlight"];
+        const orcSurnames = ["Bloodtusk", "Goretusk", "Ironhide", "Skullcleaver"];
+        const gnomeSurnames = ["Cogspinner", "Springgear", "Tinkertop", "Brassbutton"];
+        const goblinSurnames = ["Snaggletooth", "Mudfoot", "Quickdagger", "Bonepicker"];
+
+        const pool = cult.includes("dwarf") ? dwarfSurnames :
+                     cult.includes("elf") ? elfSurnames :
+                     cult.includes("orc") ? orcSurnames :
+                     cult.includes("gnome") ? gnomeSurnames :
+                     cult.includes("goblin") ? goblinSurnames : humanSurnames;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function syncOutpostFamilies(factionId) {
+        const outpost = getFactionOutpost(factionId);
+        if (!outpost) return [];
+
+        const W = World();
+        const allUnits = (W && W.units) ? W.units() : [];
+        const factionUnits = allUnits.filter(u => u && !u.isDead && u.data && (u.data.faction === factionId || (factionId === "player" && u.data.kind === "colonist")));
+
+        const unassigned = factionUnits.filter(u => !u.data.familyId);
+        if (unassigned.length === 0) return Object.values(outpost.families || {});
+
+        const st = ensureOutpostState();
+        let currentFamily = null;
+
+        for (const u of unassigned) {
+            if (!currentFamily || currentFamily.members.length >= 4) {
+                const famId = `fam_${st.nextFamilyId++}`;
+                const surname = u.data.surname || generateSurname(u.data.culture || outpost.culture || "human");
+                currentFamily = {
+                    id: famId,
+                    factionId,
+                    surname,
+                    members: [],
+                    houseId: null,
+                    generation: (u.data && u.data.generation) || 1
+                };
+                outpost.families[famId] = currentFamily;
+            }
+            currentFamily.members.push(u.id);
+            u.data.familyId = currentFamily.id;
+            u.data.surname = currentFamily.surname;
+        }
+
+        return Object.values(outpost.families || {});
+    }
+
+    function assignFamilyHouse(familyId, buildingOrId) {
+        const st = ensureOutpostState();
+        if (!st) return false;
+
+        let building = (buildingOrId && typeof buildingOrId === "object") ? buildingOrId : null;
+        const bldId = (buildingOrId && typeof buildingOrId === "object") ? buildingOrId.id : buildingOrId;
+        let family = null;
+        for (const fId of Object.keys(st.factions)) {
+            const o = st.factions[fId];
+            if (o.families && o.families[familyId]) {
+                family = o.families[familyId];
+            }
+            if (!building && o.buildings) {
+                const b = o.buildings.find(bld => bld.id === bldId);
+                if (b) building = b;
+            }
+        }
+        if (!family || !building) return false;
+
+        family.houseId = building.id;
+        building.familyId = family.id;
+
+        const outpost = getFactionOutpost(family.factionId || building.factionId || "player");
+        if (outpost && outpost.buildings && !outpost.buildings.some(b => b.id === building.id)) {
+            outpost.buildings.push(building);
+        }
+
+        const keyId = `key_fam_${family.id}`;
+        const ground = building.cellsByZ["0"];
+        const entranceCell = ground && ground.doors && ground.doors.find(d => d.x === building.entrance.x && d.y === building.entrance.y);
+        if (entranceCell) {
+            entranceCell.locked = true;
+            entranceCell.keyId = keyId;
+        }
+        if (window.UF && UF.Doors && typeof UF.Doors.lock === "function") {
+            UF.Doors.lock(building.area, building.entrance.x, building.entrance.y, keyId);
+        }
+
+        const W = World();
+        const masterRoom = building.rooms.find(r => r.subType === "master");
+        const childRoom = building.rooms.find(r => r.subType === "children");
+        let parentIdx = 0;
+        let childIdx = 0;
+
+        for (const uid of (family.members || [])) {
+            const u = W ? W.unit(uid) : null;
+            if (!u || !u.data) continue;
+            u.data.keys = u.data.keys || [];
+            if (!u.data.keys.includes(keyId)) {
+                u.data.keys.push(keyId);
+            }
+            u.data.home = { area: copyArea(building.area), x: building.entrance.x, y: building.entrance.y };
+
+            const isChild = (u.data.ageStage === "child" || u.data.role === "child");
+            let bedCell = null;
+            if (isChild && childRoom && childRoom.beds && childRoom.beds[childIdx]) {
+                bedCell = childRoom.beds[childIdx++];
+                u.data.assignedRoom = childRoom.id;
+            } else if (masterRoom && masterRoom.beds && masterRoom.beds[parentIdx]) {
+                bedCell = masterRoom.beds[parentIdx++];
+                u.data.assignedRoom = masterRoom.id;
+            }
+
+            if (bedCell) {
+                const bedTarget = { area: copyArea(building.area), x: bedCell.x, y: bedCell.y };
+                if (window.UF && UF.Ownership && typeof UF.Ownership.assignBed === "function") {
+                    UF.Ownership.assignBed(u, bedTarget, { force: true });
+                }
+                u.data.bed = bedTarget;
+            }
+        }
+
+        emit("outpost:familyHoused", { familyId, buildingId: building.id });
+        return true;
+    }
+
+    function ensureCultureEvolution(factionId) {
+        const outpost = getFactionOutpost(factionId);
+        if (!outpost) return null;
+        if (!outpost.cultureEvolution) {
+            outpost.cultureEvolution = {
+                generation: 1,
+                traditions: ["Hearthfire Gathering"],
+                tastes: { hearth: 10, craft: 5, martial: 5, nature: 5 },
+                aesthetic: "rustic"
+            };
+        }
+        return outpost.cultureEvolution;
+    }
+
+    function evolveColonyCulture(factionId) {
+        const evo = ensureCultureEvolution(factionId);
+        if (!evo) return null;
+
+        const outpost = getFactionOutpost(factionId);
+        const W = World();
+        const allUnits = (W && W.units) ? W.units() : [];
+        const factionUnits = allUnits.filter(u => u && !u.isDead && u.data && (u.data.faction === factionId || (factionId === "player" && u.data.kind === "colonist")));
+
+        if (factionUnits.length === 0) return evo;
+
+        let hearthScore = 0;
+        let craftScore = 0;
+        let martialScore = 0;
+        let natureScore = 0;
+
+        for (const u of factionUnits) {
+            const goals = goalsOf(u);
+            const pers = (u.data && u.data.personality) || {};
+
+            if (goals) {
+                const allGoalText = [...goals.short, ...goals.medium, ...goals.long].join(" ").toLowerCase();
+                if (allGoalText.includes("hearth") || allGoalText.includes("dining") || allGoalText.includes("family") || allGoalText.includes("father") || allGoalText.includes("mother") || allGoalText.includes("meal")) {
+                    hearthScore += 3;
+                }
+                if (allGoalText.includes("craft") || allGoalText.includes("forge") || allGoalText.includes("build") || allGoalText.includes("furnish")) {
+                    craftScore += 3;
+                }
+                if (allGoalText.includes("sword") || allGoalText.includes("warrior") || allGoalText.includes("champion") || allGoalText.includes("defend")) {
+                    martialScore += 3;
+                }
+                if (allGoalText.includes("nature") || allGoalText.includes("graze") || allGoalText.includes("meadow") || allGoalText.includes("seasons")) {
+                    natureScore += 3;
+                }
+            }
+
+            if (pers.sociability && pers.sociability > 50) hearthScore += 2;
+            if (pers.industriousness && pers.industriousness > 50) craftScore += 2;
+            if (pers.bravery && pers.bravery > 50) martialScore += 2;
+            if (pers.natureAffinity && pers.natureAffinity > 50) natureScore += 2;
+        }
+
+        evo.tastes.hearth += hearthScore;
+        evo.tastes.craft += craftScore;
+        evo.tastes.martial += martialScore;
+        evo.tastes.nature += natureScore;
+
+        const highestUnitGen = Math.max(...factionUnits.map(u => (u.data && u.data.generation) || 1));
+        if (highestUnitGen > evo.generation) {
+            evo.generation = highestUnitGen;
+            const newTradition = evo.tastes.hearth > evo.tastes.martial ?
+                `Generation ${evo.generation}: Feasts of the Great Hearth` :
+                `Generation ${evo.generation}: Vigil of the Iron Shield`;
+            if (!evo.traditions.includes(newTradition)) {
+                evo.traditions.push(newTradition);
+                if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
+                    UF.History.addEvent(`A new cultural era dawned in ${factionId}: ${newTradition}`);
+                }
+            }
+        }
+
+        const maxTaste = Math.max(evo.tastes.hearth, evo.tastes.craft, evo.tastes.martial, evo.tastes.nature);
+        if (evo.tastes.hearth === maxTaste) evo.aesthetic = "domestic_hearth";
+        else if (evo.tastes.craft === maxTaste) evo.aesthetic = "artisan_craft";
+        else if (evo.tastes.martial === maxTaste) evo.aesthetic = "fortified_shield";
+        else evo.aesthetic = "pastoral_harmony";
+
+        emit("outpost:cultureEvolved", { factionId, evolution: evo });
+        return evo;
+    }
+
+    function isAnimalCreature(u) {
+        if (!u || !u.data) return false;
+        const kind = (u.data.kind || "").toLowerCase();
+        const race = (u.data.race || "").toLowerCase();
+        const animalKinds = ["animal", "wildlife", "wolf", "boar", "hare", "fox", "deer", "grazer", "predator", "bear", "beast"];
+        return animalKinds.includes(kind) || animalKinds.includes(race) || !!u.data.isWildlife;
+    }
+
+    function evaluateCreatureGoals(unit) {
+        if (!unit || !unit.data) return null;
+
+        const isAnimal = isAnimalCreature(unit);
+        let goals = { short: [], medium: [], long: [] };
+
+        if (isAnimal) {
+            const isPredator = ["wolf", "fox", "bear", "predator"].includes((unit.data.kind || "").toLowerCase()) ||
+                               ["wolf", "fox", "bear", "predator"].includes((unit.data.race || "").toLowerCase());
+            goals.short = [
+                isPredator ? "Hunt prey in territory" : "Graze fresh meadow grass",
+                "Drink cool water at stream",
+                "Rest and sleep in sheltered den",
+                "Watch and sniff for danger"
+            ];
+            goals.medium = [
+                "Defend territory and den from intruders",
+                "Seek compatible mate during breeding season"
+            ];
+            goals.long = [
+                "Survive the harsh winter season",
+                "Raise a strong, healthy litter to adulthood"
+            ];
+        } else {
+            const role = (unit.data.role || unit.data.profession || "").toLowerCase();
+            const personality = unit.data.personality || {};
+            const isCombat = role.includes("warrior") || role.includes("soldier") || role.includes("guard") || (personality.bravery && personality.bravery > 60);
+
+            goals.short = [
+                "Eat a warm meal at the family dining table",
+                "Sleep peacefully in assigned bedroom bed",
+                "Share stories and laughter around the hearth",
+                "Complete daily task and build materials"
+            ];
+            goals.medium = [
+                isCombat ? "Forge and polish a fine iron sword" : "Craft sturdy tools and room furnishings",
+                "Build and partition spacious house rooms",
+                "Install secure locked doors and distribute keys",
+                "Stock the kitchen pantry with cooked provisions"
+            ];
+            goals.long = [
+                unit.data.sex === "female" ? "Become a loving mother and nurture the family" : "Become a proud father and provide for the family",
+                "Construct a grand multi-room homestead for future generations",
+                isCombat ? "Become a revered outpost champion and war hero" : "Master the ancient crafting traditions of our culture",
+                "Ensure the prosperity and legacy of our colony"
+            ];
+        }
+
+        unit.data.goals = goals;
+        return goals;
+    }
+
+    function goalsOf(unit) {
+        if (!unit) return null;
+        return (unit.data && unit.data.goals) || evaluateCreatureGoals(unit);
+    }
+
+    function familyOf(unit) {
+        if (!unit || !unit.data || !unit.data.familyId) return null;
+        const outpost = getFactionOutpost(unit.data.faction || "player");
+        return (outpost && outpost.families && outpost.families[unit.data.familyId]) || null;
+    }
+
+    function houseOf(unit) {
+        const fam = familyOf(unit);
+        if (!fam || !fam.houseId) return null;
+        const outpost = getFactionOutpost(fam.factionId || (unit.data && unit.data.faction) || "player");
+        return (outpost && outpost.buildings && outpost.buildings.find(b => b.id === fam.houseId)) || null;
+    }
+
+    function kitchenOf(unit) {
+        const house = houseOf(unit);
+        return (house && house.rooms && house.rooms.find(r => r.type === "kitchen")) || null;
+    }
+
+    function diningOf(unit) {
+        const house = houseOf(unit);
+        return (house && house.rooms && house.rooms.find(r => r.type === "dining")) || null;
+    }
+
+    function bedroomOf(unit) {
+        const house = houseOf(unit);
+        if (!house || !house.rooms) return null;
+        if (unit.data && unit.data.assignedRoom) {
+            const r = house.rooms.find(rm => rm.id === unit.data.assignedRoom);
+            if (r) return r;
+        }
+        const isChild = unit.data && (unit.data.ageStage === "child" || unit.data.role === "child");
+        return house.rooms.find(r => r.type === "bedroom" && (isChild ? r.subType === "children" : r.subType === "master")) ||
+               house.rooms.find(r => r.type === "bedroom") || null;
+    }
+
+    function upgradeBuilding(building, targetArchetype = "family_home") {
+        if (!building) return null;
+
+        const oldArchetype = building.archetype;
+        building.upgradeTarget = targetArchetype;
+        building.stage = "upgrade";
+        building.progress = 50;
+
+        const targetSpec = {
+            id: building.id,
+            factionId: building.factionId,
+            archetype: targetArchetype,
+            x: building.x,
+            y: building.y,
+            area: building.area,
+            levels: building.levels,
+            culture: building.culture,
+            familyId: building.familyId
+        };
+
+        const targetBld = generateBuilding(targetSpec);
+
+        building.w = Math.max(building.w, targetBld.w);
+        building.h = Math.max(building.h, targetBld.h);
+        building.rooms = targetBld.rooms;
+        building.windows = targetBld.windows;
+        building.archetype = targetArchetype;
+        building.name = `${capitalize(building.culture)} ${capitalize(targetArchetype)}`;
+
+        const existingGround = building.cellsByZ["0"] || { floors: [], walls: [], doors: [], stairs: [], furniture: [] };
+        const targetGround = targetBld.cellsByZ["0"] || { floors: [], walls: [], doors: [], stairs: [], furniture: [] };
+
+        const mergeCells = (existingList, targetList) => {
+            for (const targetCell of targetList) {
+                const match = existingList.find(c => c.x === targetCell.x && c.y === targetCell.y);
+                if (!match) {
+                    targetCell.built = false;
+                    existingList.push(targetCell);
+                }
+            }
+        };
+
+        mergeCells(existingGround.floors, targetGround.floors);
+        mergeCells(existingGround.walls, targetGround.walls);
+        mergeCells(existingGround.doors, targetGround.doors);
+        mergeCells(existingGround.furniture, targetGround.furniture);
+
+        emit("outpost:upgraded", building);
+        if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
+            UF.History.addEvent(`${building.name} commenced upgrade from ${oldArchetype} to ${targetArchetype}.`);
+        }
+
+        return building;
     }
 
     //-------------------------------------------------------------------------
@@ -507,10 +1000,30 @@
         const outpost = getFactionOutpost(factionId);
         if (!outpost) return null;
 
+        // Ensure families and culture evolution are synchronized
+        syncOutpostFamilies(factionId);
+        ensureCultureEvolution(factionId);
+
         const W = World();
         const allUnits = (W && W.units) ? W.units() : [];
         const factionUnits = allUnits.filter(u => u && !u.isDead && u.data && (u.data.faction === factionId || (factionId === "player" && u.data.kind === "colonist")));
         const pop = factionUnits.length;
+
+        // Check unhoused families
+        const families = Object.values(outpost.families || {});
+        const unhousedFamily = families.find(f => !f.houseId);
+        if (unhousedFamily) {
+            const vacantHome = outpost.buildings.find(b => (b.archetype === "family_home" || b.archetype === "homestead") && !b.familyId);
+            if (vacantHome) {
+                assignFamilyHouse(unhousedFamily.id, vacantHome.id);
+            } else {
+                const upgDwelling = outpost.buildings.find(b => b.archetype === "dwelling" && b.stage === "complete");
+                if (upgDwelling) {
+                    upgradeBuilding(upgDwelling, "family_home");
+                    assignFamilyHouse(unhousedFamily.id, upgDwelling.id);
+                }
+            }
+        }
 
         // 1. Bed Count Evaluation
         let bedCount = 0;
@@ -520,7 +1033,7 @@
         let towerCount = 0;
 
         for (const b of outpost.buildings) {
-            if (b.archetype === "dwelling" || b.archetype === "longhouse") {
+            if (b.archetype === "dwelling" || b.archetype === "longhouse" || b.archetype === "family_home" || b.archetype === "homestead") {
                 dwellingCount++;
                 const ground = b.cellsByZ["0"];
                 if (ground && ground.furniture) {
@@ -539,9 +1052,14 @@
         let plannedArchetype = null;
         let width = 5, height = 5;
         let levels = [0];
+        let targetFamilyId = null;
 
         // Expansion Decision Logic
-        if (bedDeficit >= 4) {
+        if (unhousedFamily && !unhousedFamily.houseId) {
+            plannedArchetype = "family_home";
+            width = 8; height = 6; levels = [0];
+            targetFamilyId = unhousedFamily.id;
+        } else if (bedDeficit >= 4) {
             plannedArchetype = "longhouse";
             width = 8; height = 5; levels = [0, 1]; // 2-storey longhouse
         } else if (bedDeficit >= 1) {
@@ -573,11 +1091,16 @@
                     y: parcel.y,
                     area: outpost.area,
                     levels,
-                    culture: factionId === "player" ? "human" : factionId
+                    culture: factionId === "player" ? "human" : factionId,
+                    familyId: targetFamilyId
                 };
                 const newBld = generateBuilding(spec);
                 outpost.buildings.push(newBld);
                 outpost.parcels.push(parcel);
+
+                if (targetFamilyId) {
+                    assignFamilyHouse(targetFamilyId, newBld.id);
+                }
 
                 emit("outpost:planned", newBld);
                 if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
@@ -763,6 +1286,27 @@
                     tasks.push({ stage: "furnishing", type: "furniture", x: fn.x, y: fn.y, z: 0, objectId: fn.objectId, ref: fn });
                 }
             }
+        } else if (building.stage === "upgrade") {
+            for (const fl of ground.floors) {
+                if (!fl.built) {
+                    tasks.push({ stage: "upgrade", type: "floor", x: fl.x, y: fl.y, z: 0, kind: fl.kind, ref: fl });
+                }
+            }
+            for (const w of ground.walls) {
+                if (!w.built) {
+                    tasks.push({ stage: "upgrade", type: "wall", x: w.x, y: w.y, z: 0, objectId: w.objectId, ref: w });
+                }
+            }
+            for (const d of ground.doors) {
+                if (!d.built) {
+                    tasks.push({ stage: "upgrade", type: "door", x: d.x, y: d.y, z: 0, objectId: d.objectId, ref: d });
+                }
+            }
+            for (const fn of ground.furniture) {
+                if (!fn.built) {
+                    tasks.push({ stage: "upgrade", type: "furniture", x: fn.x, y: fn.y, z: 0, objectId: fn.objectId, ref: fn });
+                }
+            }
         }
         return tasks;
     }
@@ -800,6 +1344,14 @@
             if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
                 UF.History.addEvent(`Construction of the ${building.archetype} (${building.name}) completed.`);
             }
+        } else if (building.stage === "upgrade") {
+            building.stage = "complete";
+            building.progress = 100;
+            building.upgradeTarget = null;
+            emit("outpost:buildingCompleted", building);
+            if (window.UF && UF.History && typeof UF.History.addEvent === "function") {
+                UF.History.addEvent(`Upgrade of ${building.name} to ${building.archetype} completed.`);
+            }
         }
     }
 
@@ -828,7 +1380,12 @@
             if (task.ref) task.ref.built = true;
         } else if (task.type === "wall" || task.type === "door" || task.type === "stairs" || task.type === "upper_wall" || task.type === "cellar_stairs" || task.type === "cellar_wall" || task.type === "furniture") {
             setObjectAtLevel(area, task.z, task.x, task.y, task.objectId);
-            if (task.ref) task.ref.built = true;
+            if (task.ref) {
+                task.ref.built = true;
+                if (task.type === "door" && task.ref.locked && window.UF && UF.Doors && typeof UF.Doors.lock === "function") {
+                    UF.Doors.lock(area, task.x, task.y, task.ref.keyId);
+                }
+            }
         }
 
         const remaining = getPendingTasks(building);
@@ -982,7 +1539,20 @@
         allOutposts: () => {
             const st = ensureOutpostState();
             return st ? Object.values(st.factions) : [];
-        }
+        },
+        // Domestic, Family, Generational Culture, and Goals APIs
+        evaluateGoals: evaluateCreatureGoals,
+        goalsOf: goalsOf,
+        familyOf: familyOf,
+        houseOf: houseOf,
+        kitchenOf: kitchenOf,
+        diningOf: diningOf,
+        bedroomOf: bedroomOf,
+        ensureCulture: ensureCultureEvolution,
+        evolveCulture: evolveColonyCulture,
+        syncFamilies: syncOutpostFamilies,
+        assignHouse: assignFamilyHouse,
+        upgradeBuilding: upgradeBuilding
     };
 
     window.UF = window.UF || {};
@@ -1032,7 +1602,7 @@
                 return;
             }
 
-            const area = W.currentArea ? W.currentArea() : { x: 0, y: 0 };
+            const area = (W.currentArea && W.currentArea()) || (W.state && W.state.area) || { x: 0, y: 0 };
             const home = { x: 120, y: 120 };
 
             // 1. Check: outposts.archetype_dimensions
@@ -1075,7 +1645,11 @@
                 `Clearance dispatch: chop job found=${!!chopJob}, building stage=${testBld.stage}`);
 
             // 5. Check: outposts.floor_and_wall_build
-            O.setIn(area, home.x + 31, home.y + 1, null); // Clear tree
+            for (let dy = 0; dy < 5; dy++) {
+                for (let dx = 0; dx < 5; dx++) {
+                    O.setIn(area, home.x + 30 + dx, home.y + dy, null);
+                }
+            }
             Outposts.process(testBld); // Advances to foundation
             Outposts.process(testBld); // Advances to walls
             Outposts.process(testBld); // Advances to furnishing/complete
@@ -1206,6 +1780,144 @@
             const transitOk = !isProvoked("vertical_transit") && !!upperTransitTask && upperTransitTask.z === 1 && ascended;
             t.check("outposts.vertical_transit", transitOk,
                 `Vertical transit: builder z=${builder.z} (want 1), task z=${upperTransitTask ? upperTransitTask.z : "none"}, ascended=${ascended}`);
+
+            // 16. Check: outposts.creature_goals
+            const wolfCreature = { data: { kind: "wolf", race: "wolf", faction: "wildlife" } };
+            const colonistCreature = { data: { kind: "colonist", race: "human", faction: "player", sex: "male", role: "builder" } };
+            const wolfGoals = Outposts.evaluateGoals(wolfCreature);
+            const colonistGoals = Outposts.evaluateGoals(colonistCreature);
+
+            const wolfShortOk = wolfGoals && wolfGoals.short.some(g => g.toLowerCase().includes("hunt") || g.toLowerCase().includes("graze")) &&
+                                wolfGoals.short.some(g => g.toLowerCase().includes("drink")) &&
+                                wolfGoals.short.some(g => g.toLowerCase().includes("sleep"));
+            const wolfMedOk = wolfGoals && wolfGoals.medium.some(g => g.toLowerCase().includes("territory") || g.toLowerCase().includes("den"));
+            const wolfLongOk = wolfGoals && wolfGoals.long.some(g => g.toLowerCase().includes("litter") || g.toLowerCase().includes("survive"));
+
+            const colShortOk = colonistGoals && colonistGoals.short.some(g => g.toLowerCase().includes("dining") || g.toLowerCase().includes("meal")) &&
+                               colonistGoals.short.some(g => g.toLowerCase().includes("bed"));
+            const colMedOk = colonistGoals && colonistGoals.medium.some(g => g.toLowerCase().includes("forge") || g.toLowerCase().includes("partition") || g.toLowerCase().includes("door") || g.toLowerCase().includes("craft"));
+            const colLongOk = colonistGoals && colonistGoals.long.some(g => g.toLowerCase().includes("father") || g.toLowerCase().includes("mother") || g.toLowerCase().includes("homestead") || g.toLowerCase().includes("tradition"));
+
+            const goalsOk = !isProvoked("creature_goals") && wolfShortOk && wolfMedOk && wolfLongOk && colShortOk && colMedOk && colLongOk;
+            t.check("outposts.creature_goals", goalsOk,
+                `Creature goals: animal short/med/long=${wolfShortOk && wolfMedOk && wolfLongOk}, sapient short/med/long=${colShortOk && colMedOk && colLongOk}`);
+
+            // 17. Check: outposts.family_formation
+            const fatherUnit = W.addUnit({
+                name: "TEST_Father",
+                image: { characterName: "$UF_Human_Male" },
+                area, x: home.x, y: home.y, exact: true,
+                data: { kind: "colonist", faction: "player", sex: "male", role: "blacksmith" }
+            });
+            const motherUnit = W.addUnit({
+                name: "TEST_Mother",
+                image: { characterName: "$UF_Human_Male" },
+                area, x: home.x, y: home.y, exact: true,
+                data: { kind: "colonist", faction: "player", sex: "female", role: "cook" }
+            });
+            const childUnit = W.addUnit({
+                name: "TEST_Child",
+                image: { characterName: "$UF_Human_Male" },
+                area, x: home.x, y: home.y, exact: true,
+                data: { kind: "colonist", faction: "player", sex: "male", ageStage: "child", role: "child", generation: 2 }
+            });
+
+            const fams = Outposts.syncFamilies("player");
+            const testFam = fams.find(f => f.members.includes(fatherUnit.id));
+            const famOk = !isProvoked("family_formation") && !!testFam &&
+                          testFam.members.includes(motherUnit.id) &&
+                          testFam.members.includes(childUnit.id) &&
+                          !!testFam.surname &&
+                          fatherUnit.data.familyId === testFam.id &&
+                          motherUnit.data.familyId === testFam.id &&
+                          childUnit.data.familyId === testFam.id;
+            t.check("outposts.family_formation", famOk,
+                `Family formation: familyId=${testFam ? testFam.id : "none"}, surname=${testFam ? testFam.surname : "none"}, members=${testFam ? testFam.members.length : 0}`);
+
+            // 18. Check: outposts.multi_room_layout
+            const famHome = Outposts.generate({ archetype: "family_home", width: 8, height: 6, x: home.x + 95, y: home.y, area });
+            const roomTypes = (famHome.rooms || []).map(r => r.type);
+            const hasKitchen = roomTypes.includes("kitchen");
+            const hasDining = roomTypes.includes("dining");
+            const hasBedrooms = (famHome.rooms || []).filter(r => r.type === "bedroom").length >= 2;
+            const groundFam = famHome.cellsByZ["0"];
+            const hasPartitions = groundFam && groundFam.walls.length >= 28;
+            const hasInteriorDoors = groundFam && groundFam.doors.length >= 4;
+            const multiRoomOk = !isProvoked("multi_room_layout") && famHome.rooms.length === 4 && hasKitchen && hasDining && hasBedrooms && hasPartitions && hasInteriorDoors;
+            t.check("outposts.multi_room_layout", multiRoomOk,
+                `Multi-room layout: 4 rooms=${famHome.rooms.length === 4}, kitchen=${hasKitchen}, dining=${hasDining}, bedrooms=${hasBedrooms}, partitions=${hasPartitions}, doors=${hasInteriorDoors}`);
+
+            // 19. Check: outposts.home_amenities
+            const kitchenRoom = famHome.rooms.find(r => r.type === "kitchen");
+            const diningRoom = famHome.rooms.find(r => r.type === "dining");
+            const masterRoom = famHome.rooms.find(r => r.subType === "master");
+            const childrenRoom = famHome.rooms.find(r => r.subType === "children");
+
+            const hasHearth = kitchenRoom && kitchenRoom.hearth && kitchenRoom.hearth.objectId === "campfire";
+            const hasTable = diningRoom && diningRoom.table && diningRoom.table.objectId === "workbench";
+            const hasMasterBeds = masterRoom && masterRoom.beds && masterRoom.beds.length === 2;
+            const hasChildBeds = childrenRoom && childrenRoom.beds && childrenRoom.beds.length === 2;
+            const hasWindows = (famHome.windows || []).length >= 4;
+
+            const amenitiesOk = !isProvoked("home_amenities") && hasHearth && hasTable && hasMasterBeds && hasChildBeds && hasWindows;
+            t.check("outposts.home_amenities", amenitiesOk,
+                `Home amenities: hearth=${hasHearth}, table=${hasTable}, masterBeds=${hasMasterBeds}, childBeds=${hasChildBeds}, windows=${hasWindows}`);
+
+            // 20. Check: outposts.family_house_assignment
+            for (let dy = 0; dy < famHome.h; dy++) {
+                for (let dx = 0; dx < famHome.w; dx++) {
+                    O.setIn(area, famHome.x + dx, famHome.y + dy, null);
+                }
+            }
+            famHome.stage = "foundation";
+            Outposts.process(famHome);
+            Outposts.process(famHome);
+            Outposts.process(famHome);
+
+            const houseAssigned = Outposts.assignHouse(testFam.id, famHome);
+            const keyExpected = `key_fam_${testFam.id}`;
+            const doorLocked = window.UF && UF.Doors && UF.Doors.isLocked(famHome.area, famHome.entrance.x, famHome.entrance.y);
+            const doorKeyMatch = window.UF && UF.Doors && UF.Doors.keyOf(famHome.area, famHome.entrance.x, famHome.entrance.y) === keyExpected;
+            const fatherHasKey = fatherUnit.data.keys && fatherUnit.data.keys.includes(keyExpected);
+            const childHasKey = childUnit.data.keys && childUnit.data.keys.includes(keyExpected);
+            const fatherHasHome = fatherUnit.data.home && fatherUnit.data.home.x === famHome.entrance.x;
+
+            const strangerUnit = { area, x: home.x, y: home.y, data: { kind: "colonist", faction: "player", keys: [] } };
+            const doorObj = window.UF && UF.Doors && UF.Doors.at(famHome.area, famHome.entrance.x, famHome.entrance.y);
+            const familyCanPass = window.UF && UF.Doors && UF.Doors.canUnitPass(fatherUnit, doorObj);
+            const strangerBlocked = window.UF && UF.Doors && !UF.Doors.canUnitPass(strangerUnit, doorObj);
+
+            const houseAssignmentOk = !isProvoked("family_house_assignment") && houseAssigned && doorLocked && doorKeyMatch && fatherHasKey && childHasKey && fatherHasHome && familyCanPass && strangerBlocked;
+            $gameMap.setDisplayPos(famHome.x - 4, famHome.y - 4);
+            await t.waitFrames(4);
+            t.screenshot("outposts.family_home_multiroom");
+            t.check("outposts.family_house_assignment", houseAssignmentOk,
+                `Family house assignment: assigned=${houseAssigned}, doorLocked=${doorLocked}, keyMatch=${doorKeyMatch}, keysGiven=${fatherHasKey && childHasKey}, familyPass=${familyCanPass}, strangerBlocked=${strangerBlocked}`);
+
+            // 21. Check: outposts.generational_evolution_and_upgrade
+            const evo = Outposts.evolveCulture("player");
+            const cultureEvolved = evo && evo.generation >= 2 && evo.tastes.hearth > 0 && !!evo.aesthetic && evo.traditions.length >= 2;
+
+            const upgDwelling = Outposts.generate({ archetype: "dwelling", width: 5, height: 5, x: home.x + 115, y: home.y, area });
+            upgDwelling.stage = "walls";
+            Outposts.process(upgDwelling);
+            Outposts.process(upgDwelling);
+
+            Outposts.upgradeBuilding(upgDwelling, "family_home");
+            const upgradeStarted = upgDwelling.stage === "upgrade" && upgDwelling.archetype === "family_home" && upgDwelling.w === 8 && upgDwelling.rooms.length === 4;
+            const upgradeTasks = Outposts.tasks(upgDwelling);
+            const hasUpgradeTasks = upgradeTasks.length > 0;
+
+            Outposts.process(upgDwelling);
+            const upgradeCompleted = upgDwelling.stage === "complete" && upgDwelling.progress === 100;
+
+            $gameMap.setDisplayPos(upgDwelling.x - 4, upgDwelling.y - 4);
+            await t.waitFrames(4);
+            t.screenshot("outposts.building_upgraded");
+
+            const genUpgradeOk = !isProvoked("generational_evolution_and_upgrade") && cultureEvolved && upgradeStarted && hasUpgradeTasks && upgradeCompleted;
+            t.check("outposts.generational_evolution_and_upgrade", genUpgradeOk,
+                `Generational evolution & upgrade: cultureEvolved=${cultureEvolved} (gen ${evo ? evo.generation : 0}, aesthetic=${evo ? evo.aesthetic : ""}), upgStarted=${upgradeStarted}, tasks=${upgradeTasks.length}, upgCompleted=${upgradeCompleted}`);
         }, { isDefault: false });
     }
 

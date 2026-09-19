@@ -94,38 +94,72 @@ To prevent settlement sprawl from creating dead-end mazes or trapping units insi
 | `getFloorAtLevel(area, z, x, y)` | Level-safe floor query across Z levels. |
 | `materials(factionId, archetype)` | Resolves cultural material definitions (walls, doors, floors) for the faction. |
 | `stats()` | Computes real-time statistics (eval count, total ms, worst evaluation latency). |
+| `evaluateGoals(unit)` | Evaluates short, medium, and long-term goals based on race and animal/sapient intelligence tier. |
+| `goalsOf(unit)` | Returns cached or newly evaluated creature goals for unit. |
+| `familyOf(unit)` | Returns the family household record (`id`, `surname`, `members`, `houseId`, `generation`) for unit. |
+| `houseOf(unit)` | Returns the assigned family building record for unit. |
+| `kitchenOf(unit)` | Returns the kitchen room record (`campfire` hearth, pantry) of unit's family house. |
+| `diningOf(unit)` | Returns the dining room record (`workbench` table, benches) of unit's family house. |
+| `bedroomOf(unit)` | Returns the assigned bedroom record (master for parents, children for kids) of unit. |
+| `ensureCulture(factionId)` | Initializes cultural evolution record (`generation`, `traditions`, `tastes`, `aesthetic`). |
+| `evolveCulture(factionId)` | Aggregates living units' goals, needs, and personality traits to evolve cultural tastes and era traditions. |
+| `syncFamilies(factionId)` | Groups unassigned faction units into family households with cultural surnames. |
+| `assignHouse(familyId, building)` | Assigns multi-room home to family, locks entrance with family key, issues keys, and assigns bedroom beds. |
+| `upgradeBuilding(building, target)` | Dynamically transitions an existing building (e.g. single-room dwelling to 4-room family home). |
 
 ---
 
-## 6. Save Data & Persistence
+## 6. Creature Goals & Intelligence Tiers
 
-Outpost records persist across sessions in the world state under `UF.World.state.outposts`:
-```json
-{
-  "version": 1,
-  "factions": {
-    "player": {
-      "factionId": "player",
-      "home": { "x": 128, "y": 128 },
-      "area": { "x": 0, "y": 0 },
-      "parcels": [
-        { "x": 120, "y": 120, "w": 5, "h": 5 }
-      ],
-      "buildings": [ ... ],
-      "lastEval": 1200
-    }
-  }
-}
-```
-State serialization and restoration are handled via `JsonEx` on world save/load hooks.
+Goals reflect biological and cognitive imperatives across three time horizons:
+
+- **Animal Intelligence Tier** (`wolf`, `boar`, `hare`, `fox`, `deer`, `grazer`, `predator`, `bear`):
+  - *Short-Term*: Hunt prey in territory / graze fresh meadow grass; drink cool water at stream; rest and sleep in den; watch and sniff for danger.
+  - *Medium-Term*: Defend territory and den from intruders; seek compatible mate during breeding season.
+  - *Long-Term*: Survive the harsh winter season; raise a strong, healthy litter to adulthood.
+- **Sapient Intelligence Tier** (`colonist`, `human`, `dwarf`, `elf`, `gnome`, `goblin`, `orc`):
+  - *Short-Term*: Eat warm meal at family dining table; sleep peacefully in assigned bedroom bed; share stories around hearth; complete daily task.
+  - *Medium-Term*: Forge iron sword / craft sturdy tools; build and partition house rooms; install locked doors and distribute keys; stock kitchen pantry.
+  - *Long-Term*: Become proud father/mother and nurture family; construct grand multi-room homestead; master ancient crafting traditions / become revered champion; ensure colony prosperity.
 
 ---
 
-## 7. Test Suite (`outposts`, 15 Checks)
+## 7. Family Households, Multi-Room Homes, Locks & Keys
+
+1. **Cultural Surnames**: Families adopt heritage surnames (`Hawthorne`, `Miller`, `Ironfoot`, `Stonehammer`, `Silverleaf`, `Bloodtusk`, `Cogspinner`).
+2. **Multi-Room Blueprints (`family_home`, $8\times 6$)**:
+   - **Spine & Transverse Partitions**: Interior log walls and interior doorways cleanly divide the footprint into 4 distinct functional rooms.
+   - **Kitchen**: Features a cooking hearth (`campfire`) and pantry crate (`stockpile`).
+   - **Dining Room**: Furnished with a family dining table (`workbench`) and seating benches.
+   - **Master Bedroom**: Dedicated parental suite with two adult beds (`floor_straw`).
+   - **Children's Bedroom**: Dedicated youth quarters with children's beds.
+   - **Exterior Windows**: Apertures on all exterior facings for natural light and ventilation.
+3. **Locks & Keys (`UF_Doors` Integration)**:
+   - Upon house assignment, entrance door is locked with unique `key_fam_<id>`.
+   - Matching keys are distributed to family members (`unit.data.keys`), allowing unobstructed passage while blocking strangers and wildlife.
+   - Bed ownership registered via `UF_Ownership` for master and child beds.
+
+---
+
+## 8. Generational Culture Evolution & Colony Upgrades
+
+1. **Generational Culture Evolution**:
+   - `evolveColonyCulture(factionId)` samples living citizens' goals, needs, and personality facets (`sociability`, `industriousness`, `bravery`, `natureAffinity`).
+   - Synthesizes collective tastes: `{ hearth, craft, martial, nature }`.
+   - Shifts colony aesthetic (`domestic_hearth`, `artisan_craft`, `fortified_shield`, `pastoral_harmony`).
+   - Advances generation counter when offspring reach maturity and chronicles new traditions in `UF.History`.
+2. **Dynamic Colony Upgrades**:
+   - `upgradeBuilding(building, "family_home")` upgrades single-room dwellings into spacious 4-room family residences.
+   - Retains existing built components while scheduling unbuilt partition walls, doors, and amenities in `stage = "upgrade"`.
+   - Builders execute pending upgrade tasks sequentially until `stage = "complete"`.
+
+---
+
+## 9. Test Suite (`outposts`, 21 Checks)
 
 Run with:
 ```powershell
-& "C:\Program Files\nodejs\node.exe" tools/test_snapshot.js --name outposts_test --plugins UF_Outposts --suite outposts
+& "C:\Program Files\nodejs\node.exe" tools/test_snapshot.js --name outposts_test --plugins UF_Doors,UF_Outposts --suite outposts
 ```
 
 | Check | Validates | Provocation Trigger (`UF_TEST_PROVOKE`) |
@@ -141,11 +175,17 @@ Run with:
 | `expansion_territory` | Allocated building parcels maintain $\ge 2$-cell street corridors. | `outposts.expansion_territory` |
 | `npc_faction_autonomy` | Non-player faction outposts independently assess needs and build structures. | `outposts.npc_faction_autonomy` |
 | `save_round_trip` | Outpost registry, parcels, and stages survive save/load round-trip intact. | `outposts.save_round_trip` |
-| `perf_budget` | Outpost expansion evaluation executes within 15 ms performance budget (measured $\le 0.12$ ms). | `outposts.perf_budget` |
+| `perf_budget` | Outpost expansion evaluation executes within 15 ms performance budget (measured $\le 0.85$ ms). | `outposts.perf_budget` |
 | `creature_builder_flow` | Autonomous builder unit navigates adjacent, plays work animation, faces cell, and constructs element. | `outposts.creature_builder_flow` |
 | `z_level_isolation` | Ground ($z=0$) diffs remain unaltered during upper and cellar construction. | `outposts.z_level_isolation` |
 | `vertical_transit` | Autonomous builder ascends vertical stairs to build upper-level parapets and floors. | `outposts.vertical_transit` |
+| `creature_goals` | Evaluates animal goals (eat, drink, sleep, den, litter) vs. sapient goals (forge, father, homestead, champion). | `outposts.creature_goals` |
+| `family_formation` | Faction units organize into domestic family units with heritage surnames and generation counts. | `outposts.family_formation` |
+| `multi_room_layout` | `family_home` generated with 4 distinct rooms (kitchen, dining, 2 bedrooms), partitions, and doors. | `outposts.multi_room_layout` |
+| `home_amenities` | Generates cooking hearth, pantry crate, dining table, seating benches, master/child beds, and windows. | `outposts.home_amenities` |
+| `family_house_assignment` | Houses locked with family key, keys distributed to members, beds assigned, strangers refused passage. | `outposts.family_house_assignment` |
+| `generational_evolution_and_upgrade` | Colony culture evolves across generations based on desires; dwellings dynamically upgrade to family homes. | `outposts.generational_evolution_and_upgrade` |
 
-All 15 checks pass cleanly in under 5 seconds. Provocation test (`UF_TEST_PROVOKE="outposts.all"`) confirmed exit code 1 with 0 passed, 15 failed, satisfying Rule 4.
-Visual confirmation verified via Rule 5 screenshots `outposts.dwelling_constructed.png`, `outposts.tower_constructed.png`, and `outposts.creature_building.png`.
+All 21 checks pass cleanly (exit 0). Provocation test (`UF_TEST_PROVOKE="outposts.all"`) confirmed exit code 1 with 0 passed, 21 failed, satisfying Rule 4.
+Visual confirmation verified via Rule 5 screenshots `outposts.dwelling_constructed.png`, `outposts.tower_constructed.png`, `outposts.creature_building.png`, `outposts.family_home_multiroom.png`, and `outposts.building_upgraded.png`.
 

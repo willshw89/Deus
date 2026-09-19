@@ -106,6 +106,16 @@
         if (doorOrState && doorOrState.area && unit && unit.area && !sameArea(recordArea(unit), doorOrState.area)) return false;
         const s = doorOrState && doorOrState.state ? doorOrState.state : doorOrState;
         if (!s) return false;
+
+        // Locked door check: requires matching key in keys array or inventory
+        if (s.locked) {
+            if (!unit || !unit.data) return false;
+            const uKeys = unit.data.keys || [];
+            const uInv = unit.data.inventory || [];
+            const hasKey = s.keyId && (uKeys.includes(s.keyId) || uInv.some(i => i && (i.id === s.keyId || i.keyId === s.keyId)));
+            if (!hasKey) return false;
+        }
+
         if (s.heldOpen) return true;
         const faction = unit && unit.data ? unit.data.faction : null;
         if (!faction) return false;
@@ -113,6 +123,31 @@
         const F = window.UF && UF.Factions;
         return !!F && typeof F.relation === "function" && F.relation(faction, s.faction) >= FRIENDLY_RELATION;
     }
+
+    function lockDoor(area, x, y, keyId = null) {
+        const d = doorAt(area, x, y);
+        if (!d || !d.state) return false;
+        d.state.locked = true;
+        if (keyId) d.state.keyId = keyId;
+        d.state.heldOpen = false;
+        d.state.openUntil = 0;
+        emit("doors:locked", d);
+        syncSprites();
+        return true;
+    }
+
+    function unlockDoor(area, x, y, keyId = null) {
+        const d = doorAt(area, x, y);
+        if (!d || !d.state) return false;
+        if (d.state.locked && d.state.keyId && keyId && d.state.keyId !== keyId) {
+            return false;
+        }
+        d.state.locked = false;
+        emit("doors:unlocked", d);
+        syncSprites();
+        return true;
+    }
+
     function openDoor(doorOrState, frames = OPEN_FRAMES) {
         const s = doorOrState && doorOrState.state ? doorOrState.state : doorOrState;
         if (!s) return false;
@@ -430,7 +465,10 @@
     const Doors = {
         OPEN_FRAMES, FRIENDLY_RELATION, CLOSED_PATTERN, OPEN_PATTERN,
         cellKey, parseKey, store, at: doorAt, stateAt, isDoorType, isOpen: (area, x, y) => isOpenState(stateAt(area, x, y)),
-        canUnitPass, open: openDoor, toggleHeld, placeAll, placeSite, retryPending, damage, damageAt, syncSprites, frameFor, augmentOptions, hookInteract
+        canUnitPass, open: openDoor, toggleHeld, lock: lockDoor, unlock: unlockDoor,
+        isLocked: (area, x, y) => { const s = stateAt(area, x, y); return !!(s && s.locked); },
+        keyOf: (area, x, y) => { const s = stateAt(area, x, y); return s ? s.keyId : null; },
+        placeAll, placeSite, retryPending, damage, damageAt, syncSprites, frameFor, augmentOptions, hookInteract
     };
     window.UF = window.UF || {};
     window.UF.Doors = Doors;
