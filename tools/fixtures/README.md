@@ -1,0 +1,6 @@
+# Disposable runtime fixtures
+
+Do not register these plugins in the live project. Copy the required plugin into a disposable `tools/test_snapshot.js` snapshot, register it before `UF_Test`, then run its named suite with `tools/run_tests.js <suite> --game <snapshot>`.
+
+- `UF_CapturePreVertical.js`: `capture_pre_vertical`, only against a genuine pre-vertical version-3 core. Captures seed 424242 through the real RMMZ save serializer and verifies its compressed roundtrip. The control snapshot `codex_zcore_pre_v80_control_20260919` produced `game/test_fixtures/vertical_pre_v80.rmmzsave` and its metadata on 2026-09-19 (3/3 passed). It contains actual units, item/job records and a terrain diff, not a hand-invented save. Capture only in an isolated snapshot; never overwrite the migration fixture through a snapshot junction.
+- `UF_ZIntegration.js`: `z_integration`, requires merged World/Levels and related plugins. Builds all five maps, inspects both dwarf settlements and their starting resources, takes two screenshots, checks level switching, runs five fights on the real map-update loop while one map is viewed, checks cross-level refusal and death-drop isolation, and serializes settlement/founder records. These checks are runtime integration evidence, not editor F5 acceptance or proof of the complete resource atlas.

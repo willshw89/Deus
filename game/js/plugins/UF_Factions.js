@@ -124,8 +124,11 @@
         const oneArea = state.areasX * state.areasY === 1;
         const usedHomes = new Set([`${state.startArea.x},${state.startArea.y}`]);
         const founders = foundersCount();
+        const dwarf = cfg.species.find(sp => sp.id === "dwarf");
         for (let i = 0; i < count; i++) {
-            const sp = weighted(cfg.species);
+            const rolled = weighted(cfg.species);
+            // Reserve within the configured count, before naming or relations: never append a faction.
+            const sp = dwarf && i === count - 1 && !list.some(f => f.species === "dwarf") ? dwarf : rolled;
             const ethos = [pick(cfg.ethos).id];
             if (rand() < 0.4) {
                 const second = pick(cfg.ethos).id;
@@ -147,7 +150,7 @@
                 name: makeName(sp),
                 species: sp.id,
                 ethos,
-                home: { area, x: Math.floor(size / 2), y: Math.floor(size / 2) }, // the centre is set by placeAreas
+                home: { area, x: Math.floor(size / 2), y: Math.floor(size / 2), z: sp.id === "dwarf" ? -1 : 0 }, // the centre is set by placeAreas
                 color: COLORS[i % COLORS.length],
                 isPlayer: false,
                 met: false,
@@ -197,7 +200,7 @@
         player.met = true;
         player.color = "#4ade80";
         player.home.area = { x: state.startArea.x, y: state.startArea.y };
-        state.factions = { version: 3, list, relations, log: [], playerId: player.id };
+        state.factions = { version: 4, list, relations, log: [], playerId: player.id };
         Factions.placeAreas(state);
         emit("factions:generated", state.factions);
         return state.factions;
@@ -418,12 +421,29 @@
             }
         }
         for (const r of result || []) {
-            r.f.home = { area: r.area, x: r.x, y: r.y };
+            r.f.home = { area: r.area, x: r.x, y: r.y, z: r.f.species === "dwarf" ? -1 : 0 };
             r.f.areaInfo = { biome: r.info ? r.info.biomeId : null, water: Number.isFinite(r.water) ? Math.round(r.water) : null, rule: r.rule, disc: r.disc };
             if (relaxed) r.f.areaInfo.gap = gap;
         }
         if (!result) for (const f of others) f.areaInfo = { biome: null, water: null, rule: "none", disc: -1 }; // no land at all (never seen)
-        state.viewStart = { x: pCell.x, y: pCell.y };
+        // Geological pockets are selected before History or any world-map build: no surface camp is ever stamped.
+        const usedPockets = new Map();
+        for (const f of F.list) {
+            if (f.species !== "dwarf") continue;
+            if (!UF.Levels || typeof UF.Levels.settlementCell !== "function") throw new Error("Dwarf founding requires UF.Levels.settlementCell");
+            const anchor = f.home;
+            f.homes = [-1, -2].map(z => {
+                const key = `${anchor.area.x},${anchor.area.y},${z}`;
+                const used = usedPockets.get(key) || [];
+                const pocket = UF.Levels.settlementCell(state, { area: anchor.area, x: anchor.x, y: anchor.y, z, used });
+                if (!pocket) throw new Error(`No unused habitable pocket for ${f.id} on ${z}`);
+                used.push(pocket.id); usedPockets.set(key, used);
+                return { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
+            });
+            f.home = { ...f.homes[0], area: { ...f.homes[0].area } };
+            f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
+        }
+        state.viewStart = { area: { ...player.home.area }, x: player.home.x, y: player.home.y, z: player.home.z || 0 };
         Factions.lastAreas = { ms: now() - t0, attempts, relaxed, gap, cells };
         return F.list;
     }
@@ -512,7 +532,7 @@
         const met = [];
         for (const f of unmet) {
             const theirs = units.filter(u => u.data && u.data.faction === f.id);
-            const near = theirs.some(t => ours.some(o => o.area.x === t.area.x && o.area.y === t.area.y && Math.abs(o.x - t.x) <= CONTACT_CELLS && Math.abs(o.y - t.y) <= CONTACT_CELLS));
+            const near = theirs.some(t => ours.some(o => o.area.x === t.area.x && o.area.y === t.area.y && (o.z || 0) === (t.z || 0) && Math.abs(o.x - t.x) <= CONTACT_CELLS && Math.abs(o.y - t.y) <= CONTACT_CELLS));
             if (near) {
                 Factions.meet(f.id);
                 met.push(f);
@@ -665,6 +685,15 @@
             for (const f of d.list) {
                 const h = f.home, a = h && h.area;
                 if (!h || !a || !W.inWorld(a.x, a.y) || !Number.isInteger(h.x) || !Number.isInteger(h.y)) { areaProblems.push(`${f.name}: no area`); continue; }
+                if (f.species === "dwarf") {
+                    const homes = f.homes || [];
+                    if (h.z !== -1 || homes.length !== 2 || ![-1, -2].every(z => homes.some(c => c.z === z))) areaProblems.push(`${f.name}: missing underground homes`);
+                    for (const c of homes) {
+                        const pockets = UF.Levels.habitablePockets(c.z, a.x, a.y);
+                        if (!pockets.some(p => p.id === c.pocketId && p.x === c.x && p.y === c.y && p.clearRadius >= 3)) areaProblems.push(`${f.name}: home is not a habitable pocket on ${c.z}`);
+                    }
+                    continue;
+                }
                 const info = infoOf(f);
                 if (!Factions.habitable(info, f.species)) areaProblems.push(`${f.name} (${h.x},${h.y}): not habitable (${info ? `${info.biomeId}, walkable ${info.walkable}, water ${info.water}, ${info.region.alignment}` : "no cell info"})`);
                 let dry = 0, discCells = 0;
@@ -681,16 +710,16 @@
             let minPair = Infinity, closest = "";
             for (let i = 0; i < d.list.length; i++) for (let j = i + 1; j < d.list.length; j++) {
                 const p = d.list[i].home, q = d.list[j].home;
-                if (!p || !q || p.area.x !== q.area.x || p.area.y !== q.area.y) continue;
+                if (!p || !q || p.area.x !== q.area.x || p.area.y !== q.area.y || (p.z || 0) !== (q.z || 0)) continue;
                 const dist = Math.hypot(p.x - q.x, p.y - q.y);
                 if (dist < minPair) { minPair = dist; closest = `${d.list[i].name} and ${d.list[j].name}`; }
             }
             if (minPair < acfg.minGap) areaProblems.push(`${closest} only ${minPair.toFixed(1)} cells apart`);
             const pl = Factions.player();
             const plDist = pl ? Math.hypot(pl.home.x - mid, pl.home.y - mid) : Infinity;
-            if (!(plDist <= acfg.playerReach) || !pl || pl.home.area.x !== st.startArea.x || pl.home.area.y !== st.startArea.y) areaProblems.push(`the player's centre is ${plDist.toFixed(1)} cells from (${mid},${mid})`);
+            if (!pl || (pl.species !== "dwarf" && !(plDist <= acfg.playerReach)) || pl.home.area.x !== st.startArea.x || pl.home.area.y !== st.startArea.y) areaProblems.push(`the player's centre is ${plDist.toFixed(1)} cells from (${mid},${mid})`);
             const vs = st.viewStart;
-            if (!pl || !vs || vs.x !== pl.home.x || vs.y !== pl.home.y) areaProblems.push(`viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} is not the player's centre`);
+            if (!pl || !vs || vs.x !== pl.home.x || vs.y !== pl.home.y || (vs.z || 0) !== (pl.home.z || 0)) areaProblems.push(`viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} is not the player's centre`);
             const homesSig = f => JSON.stringify(f.list.map(x => [x.id, x.home]));
             const areasAgain = Factions.generate(fresh());
             const areasOther = Factions.generate(Object.assign(fresh(), { seed: st.seed + 1 }));
@@ -724,8 +753,9 @@
             if (unmetBefore.length) {
                 const target = unmetBefore[0];
                 const px = $gamePlayer.x, py = $gamePlayer.y;
-                const mine = W.addUnit({ name: "TEST_scout", image: { characterName: "$U7_Ranger", characterIndex: 0 }, area: W.currentArea(), x: px, y: py, data: { kind: "test", faction: Factions.playerId() } });
-                const theirs = W.addUnit({ name: "TEST_stranger", image: { characterName: "$U7_Townsman", characterIndex: 0 }, area: W.currentArea(), x: px + 3, y: py, data: { kind: "person", faction: target.id } });
+                const view = W.viewLevel();
+                const mine = W.addUnit({ name: "TEST_scout", image: { characterName: "$U7_Ranger", characterIndex: 0 }, area: view, z: view.z, x: px, y: py, data: { kind: "test", faction: Factions.playerId() } });
+                const theirs = W.addUnit({ name: "TEST_stranger", image: { characterName: "$U7_Townsman", characterIndex: 0 }, area: view, z: view.z, x: px + 3, y: py, data: { kind: "person", faction: target.id } });
                 await t.waitUntil(() => target.met, 6000, `${target.name} to be met`).catch(() => {});
                 t.check("contact_reveals_faction", target.met && Factions.listed().some(f => f.id === target.id),
                     `${target.name}: met ${target.met} after a scout of ours stood 3 cells from one of theirs; listed ${Factions.listed().some(f => f.id === target.id)}`);

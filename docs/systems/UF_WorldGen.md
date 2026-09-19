@@ -50,6 +50,16 @@ Generator `uf_worldgen` (order 10) runs in `UF.World.buildArea`:
 ## State it saves
 None. Everything is recomputed from `UF.World.state.seed`; changes to tiles and objects are UF_World's `diffs` / `objectDiffs`.
 
+## Five-map integration (2026-09-19, Codex)
+
+`cellInfo(gx, gy, z = 0)`, `cellInfoLocal(ax, ay, x, y, z = 0)`, `biomeAt(gx, gy, z = 0)` and `isWaterAt(gx, gy, z = 0)` accept a strict integer level. Ground retains the existing classifier. Other levels read `UF.Levels.cellAt/biomeAt/standableShape`, including the pocket freshwater cells; they never infer underground terrain from the surface climate. Invalid levels return null/false. `waterModel()` remains the legacy surface model; level-aware callers must use the cell APIs.
+
+`kitCentres(ax, ay, z = 0)` returns every bare settlement on the requested map, including two separate settlements of the same dwarven faction. Each centre carries `z` and its own `camp` ID. A missing level defaults to Ground for old saves; a dwarf's underground home is not a Ground kit centre.
+
+The generator `uf_underground_resources` runs at order 20 on -1/-2 only, after Levels paints the shape grid. Small seeded finite deposits use existing rock/ore objects. Settlement kits fill catalog minimums on dry floor reachable through the same natural pocket within 20 cells, leaving the central 7×7 clear. They never carve terrain or write surface diffs. `kitLog` and `stats` use `World.levelKey` for underground maps. Kits currently use the existing surface harvestable objects as explicit placeholders; cave-specific flora is not implemented. This is not the complete RESOURCE_ATLAS, and solid geology still needs excavation gameplay.
+
+Evidence: disposable snapshot `codex_zcore_integration_20260919_a`, `z_integration` 11/11. Both dwarf settlements had a campfire, nearby freshwater, and nonzero log/stone/fiber/straw/food resource potential; no Ground kit belonged to the dwarf faction. This check proves resource classes exist, not that every placement is usable after all blocking objects are placed. Both screenshots were opened: brown soil chamber at -1 and pale deep cavern at -2, visibly using surface vegetation placeholders. Editor F5/F8 not checked.
+
 ## Events
 Emits none, listens to none. Hooks: `UF.World.registerGenerator("uf_worldgen", generate, 10)`; the catalog is loaded through `DataManager._databaseFiles`.
 

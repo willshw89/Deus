@@ -3,9 +3,9 @@
 **Owner:** Claude Code · **File:** `game/js/plugins/UF_World.js` · **Load order:** after UF_ProcGen, before the plugins that use it (UF_WorldGen … UF_Interact), before `UF_Test`
 
 ## 1. Purpose
-The world is a grid of **areas**, each up to 256×256 cells (RMMZ's maximum). Since 2026-09-18 it is **one area** (VISION V14; `AreasX`/`AreasY` = 1) on **one surface layer** (the underground layer was removed the same day). Areas have no map files: each one is built in memory when it's visited, from the world seed, the registered generators, and the area's saved tile and object changes. **Units** (people, animals, anything that acts) live in a world registry rather than on maps. Units in the area on screen are drawn as ordinary RMMZ events. Units anywhere else keep moving in a simplified simulation. Units and the view (the RMMZ player, i.e. the cursor) cross area edges when there is more than one area.
+The world has one 256×256 area with five separate persistent levels: -2, -1, Ground (0), +1 and +2 (VISION V80). Each level builds from deterministic generators and its saved changes. UF_Levels owns the versioned baseline and migration; UF_World owns level addressing, map caches, units and paths. Units remain in one world registry and continue walking on their own level while another level is rendered. Other systems must schedule against their records' levels, not the view; the World seam alone does not establish that every consumer simulates all five levels.
 
-**Paths (2026-09-19, user: "Paths should not go through walls"):** units on screen walk a path planned over the whole area. They go round walls and through gaps, wait for other units in the way and then walk round them, and give up at once when nothing connects them to the goal.
+**Paths (2026-09-19):** on-screen and off-screen walkers follow terrain-aware paths on their own level. Current eight-direction planning, diagonal corner rules, facing and the existing movement/sliding integration are retained. Ground-only APIs remain deliberately ground-only so an unadapted plugin cannot mistake underground terrain for the surface.
 
 ## 2. Public API (`UF.World`)
 Anything not listed here is internal.
@@ -17,42 +17,55 @@ Anything not listed here is internal.
 | `state` | The saved world: `{ version, seed, areasX, areasY, size, startArea: {x,y}, units: {id: unit}, nextUnitId, diffs, objectDiffs }` plus what other plugins keep there (`items`, `jobs`, `factions`, …). Read it; change it only through the functions below. |
 | `newWorld(seed?)` | Creates a fresh world. Called automatically on New Game. |
 | `hash32(...ints)`, `mulberry32(seed)` | The seeded hash and random-number generator every plugin uses (never `Math.random` in the simulation). |
-| `currentArea()` | `{x, y}` of the area on screen, or `null` when not on an area map |
-| `inWorld(ax, ay)` | Whether the area exists |
-| `areaMapId(ax, ay)` / `areaOfMapId(mapId)` / `isAreaMap(mapId)` | Convert between areas and RMMZ map IDs (`1000 + ay × areasX + ax`) |
+| `currentArea()` | Ground-only `{x, y}`, or `null` when another level or a non-world map is on screen; use `viewLevel()` for all five |
+| `inWorld(ax, ay, z = 0)` | Whether the area exists |
+| `areaMapId(ax, ay, z = 0)` / `areaOfMapId(mapId)` / `isAreaMap(mapId)` | Ground keeps its IDs; the latter two recognize only Ground. Invalid area/level returns map ID 0 |
 | `isStartArea(ax, ay)` | Whether this is the start area |
 | `rngFor(ax, ay, salt)` | Deterministic random function for an area. Returns numbers in [0, 1). |
-| `registerGenerator(name, fn, order = 100)` / `unregisterGenerator(name)` / `generators()` | Area generators (see below). Registering the same name again replaces it. |
-| `buildArea(ax, ay)` | Builds and returns an area's `$dataMap` object without touching the current map. Slow (~393k cells), so don't call it every frame. |
-| `peekArea(ax, ay)` / `clearPeekCache()` | A cached build of an area for reading off-screen cells (tiles, objects). Don't read its `events`. |
-| `setTile(ax, ay, x, y, layer, tileId)` / `getTile(ax, ay, x, y, layer)` | Change or read a tile anywhere. Changes are recorded in `state.diffs`, survive leaving the area and saving, update the screen, and update the path grid. **All tile changes go through `setTile`.** |
-| `setObject(ax, ay, x, y, type)` / `getObject(ax, ay, x, y)` | Change or read the object on a cell (type number from UF_Objects, 0 = nothing), recorded in `state.objectDiffs`. **All object changes go through `setObject`** (UF_Objects' `set`/`setIn`/`apply` and its regrowth do), or paths won't see them. **Returns `false` and changes nothing** when the new type blocks movement and a unit that doesn't pass through everything stands on the cell (VISION V68): see Spawning below. |
-| `cellFree(ax, ay, x, y, ignoreUnitId)` / `nearestFreeCell(ax, ay, x, y, radius, ignoreUnitId)` | Whether a unit could be placed on a cell (walkable ground, no blocking object, no water, no unit there, fliers included), and the nearest such cell (rings outward, then by distance). UF_Doors wraps `cellFree` for door cells. |
+| `registerGenerator(name, fn, order = 100, { levels = [0] })` / `unregisterGenerator(name)` / `generators()` | Area generators (see below). Registering the same name again replaces it. |
+| `buildArea(ax, ay, z = 0)` | Builds and returns an area's `$dataMap` object without touching the current map. Slow (~393k cells), so don't call it every frame. |
+| `peekArea(ax, ay, z = 0)` / `clearPeekCache()` | A cached build of an area for reading off-screen cells (tiles, objects). Don't read its `events`. |
+| `setTile(ax, ay, x, y, layer, tileId, z = 0)` / `getTile(ax, ay, x, y, layer, z = 0)` | Change or read a tile anywhere. Changes are recorded in `state.diffs`, survive leaving the area and saving, update the screen, and update the path grid. **All tile changes go through `setTile`.** |
+| `setObject(ax, ay, x, y, type, z = 0)` / `getObject(ax, ay, x, y, z = 0)` | Change or read the object on a cell (type number from UF_Objects, 0 = nothing), recorded in `state.objectDiffs`. **All object changes go through `setObject`** (UF_Objects' `set`/`setIn`/`apply` and its regrowth do), or paths won't see them. **Returns `false` and changes nothing** when the new type blocks movement and a unit that doesn't pass through everything stands on the cell (VISION V68): see Spawning below. |
+| `cellFree(ax, ay, x, y, ignoreUnitId, z = 0)` / `nearestFreeCell(ax, ay, x, y, radius, ignoreUnitId, z = 0)` | Whether a unit could be placed on a cell (walkable ground, no blocking object, no water, no unit there, fliers included), and the nearest such cell (rings outward, then by distance). UF_Doors wraps `cellFree` for door cells. |
 
-**Generators.** `fn(ctx)` runs every time an area is built, in `order` (low first). It must be **deterministic**: use `ctx.rng` or `rngFor`, never `Math.random`, or areas change every time they're visited. `ctx` has `areaX`, `areaY`, `width`, `height`, `seed`, `rng()`, `isStart`, `templateRect`, `center`, `map` (the `$dataMap` being built), `setTile/getTile/index`, `objects` (Uint16Array), `setObject/getObject`, and `addEvent(spec)` (limit 999 per area).
+**Generators.** `fn(ctx)` runs every time an area is built, in `order` (low first). It must be **deterministic**: use `ctx.rng` or `rngFor`, never `Math.random`, or areas change every time they're visited. `ctx` has `areaX`, `areaY`, `z`, `width`, `height`, `seed`, `rng()`, `isStart`, `templateRect`, `center`, `map` (the `$dataMap` being built), `setTile/getTile/index`, `objects` (Uint16Array), `setObject/getObject`, and `addEvent(spec)` (limit 999 per area).
+
+### Level seam (merged 2026-09-19; runtime integration checks pending)
+
+- Record coordinates store `z` beside `area`: unit/goal `{ area: {x,y}, x, y, z }`. An API area handle may be `{x,y,z}`. Missing/undefined means Ground; explicit invalid levels (including null, strings, fractions, NaN and levels outside -2..+2) are not rounded into Ground. `addUnit` throws; mutators/path entry points refuse.
+- `LEVELS` = `[-2,-1,0,1,2]`; `zOf(record)` defaults only missing z; `isLevel(z)` validates; `levelKey(ax,ay,z)` keeps ground spelling `"ax,ay"`, otherwise `"ax,ay,z"`. `sameArea` deliberately compares only x/y.
+- `levelOfMapId(id)` → `{x,y,z}` or null; `isWorldMap(id)`; `viewLevel()` returns a frozen shared level handle or null. Slots: Ground=0, +1=1, +2=2, -1=3, -2=4; ID = MapIdBase + slot × area count + area index.
+- Generators default to Ground only; explicitly register `{levels:[...]}` for other levels. The start template is ground-only. `buildArea`/`peekArea` return null for invalid areas/levels.
+- `setDerivedTile(ax,ay,x,y,layer,tileId,z=0)` updates built maps and path grids without recording a tile diff (UF_Levels stores shape changes). `adoptBuild(ax,ay,z,map)`, `cachedBuild(ax,ay,z=0)`, `refreshUnitEvents(map,ax,ay,z=0)`, `reconcileEvents()` support view switching.
+- Cache: six least-recently-used level builds, with outgoing shown maps retained. Re-entering another shown level reuses its build and refreshes unit events; explicit reload rebuilds. Loading another world clears caches and plans.
+- `moveUnitToLevel(unitOrId,z,x?,y?)` changes a registered unit's level/cell, clears its goal/path and updates its event. It checks level and cell bounds; its caller must validate landing passability. `sendUnit` refuses cross-level goals until route integration.
+- `transferView(ax,ay,x,y,dir?,z?)` defaults to the current view level (else Ground); it never changes a unit's level. `reachable` uses area.z. Door checks receive the tested level; no boot-time bypass skips UF_Doors.
+- New Game accepts `state.viewStart = {area:{x,y},x,y,z}` from the founding system. Omitted area uses `startArea`; omitted z uses area.z or Ground. The initial view transfer uses that level (a dwarven primary home at -1 opens map 1003), while invalid founding levels throw rather than falling back to Ground.
+- Persistent level baselines and their version/checksum metadata belong to UF_Levels; tile/object differences and unit records belong to UF_World. Ground diff keys and map IDs remain unchanged. These APIs do not authorize reconstructing or overwriting a saved baseline.
 
 ### Units
-A unit record: `{ id, name, image: { characterName, characterIndex }, area: {x, y}, x, y, dir, goal, stuckFrames, data }`. Put your system's per-unit state in **`data`** (for example `data.needs`). It's saved with the unit. `data.through: true` (fliers) makes the unit's event pass through everything.
+A unit record: `{ id, name, image: { characterName, characterIndex }, area: {x, y}, z, x, y, dir, dir8, goal, stuckFrames, data }`. Put your system's per-unit state in **`data`** (for example `data.needs`). It's saved with the unit. `data.through: true` (fliers) makes the unit's event pass through everything.
 
 | Member | Description |
 |---|---|
-| `addUnit({ name, image, area, x, y, dir, data, snapToFree, exact })` | Creates a unit and returns its record. It appears immediately if its area is on screen. **It only ever appears on a cell it can stand on** (V68, since 2026-09-19): the cell asked for when `cellFree` accepts it, else the nearest free cell (see Spawning). `snapToFree: radius` only sets the first search radius now (`true` = 6). `exact: true` keeps the cell asked for (test fixtures; the cell must be one the unit can stand on, and a console warning names it when it isn't). Units with `data.through` are never moved. |
-| `spawnCellFor(ax, ay, x, y, radius = 6, name)` | The cell `addUnit` would put a unit asking for (x, y) on: `{ x, y, how, dist }`, `how` = `asked`, `moved`, `widened`, `shared` or `stuck` |
+| `addUnit({ name, image, area, z, x, y, dir, data, snapToFree, exact })` | Creates a unit and returns its record. It appears immediately if its area is on screen. **It only ever appears on a cell it can stand on** (V68, since 2026-09-19): the cell asked for when `cellFree` accepts it, else the nearest free cell (see Spawning). `snapToFree: radius` only sets the first search radius now (`true` = 6). `exact: true` keeps the cell asked for (test fixtures; the cell must be one the unit can stand on, and a console warning names it when it isn't). Units with `data.through` are never moved. |
+| `spawnCellFor(ax, ay, x, y, radius = 6, name, z = 0)` | The cell `addUnit` would put a unit asking for (x, y) on: `{ x, y, how, dist }`, `how` = `asked`, `moved`, `widened`, `shared` or `stuck` |
 | `spawnStats()` | Counts since the world was created or loaded: `added`, `asked` (kept its cell), `moved`, `widened`, `shared`, `stuck`, `exact`, `through`, `maxMove`, `objectRefusals`, `regrowWaits`, `warnings`, `last` (the last 10 warnings) |
-| `standerAt(ax, ay, x, y)` | The first unit on the cell that doesn't pass through everything, or `null` |
+| `standerAt(ax, ay, x, y, z = 0)` | The first unit on the cell that doesn't pass through everything, or `null` |
 | `lastObjectRefusal` | The last object change `setObject` refused: `{ area, x, y, type, objectId, unitId, unitName, reason }` |
 | `holdOccupiedRegrowth()` | Puts off by an hour every due regrowth (UF_Objects' regrow list) whose new type blocks and whose cell holds a unit. Runs by itself before UF_Objects' regrowth; returns how many it held |
-| `unit(id)`, `units()`, `unitsInArea(ax, ay)`, `unitByName(name)` | Look up units |
+| `unit(id)`, `units()`, `unitsInArea(ax, ay, z = 0)`, `unitByName(name)` | Look up units |
 | `removeUnit(id)` | Deletes a unit (death, leaving the world) |
-| `sendUnit(id, { area: {x, y}, x, y })` | Walks the unit there. `unit.goal` goes back to `null` on arrival (`world:unitArrived`) or when it gives up (`world:unitBlocked`). Sending the same goal again keeps the current plan. |
+| `sendUnit(id, { area: {x, y}, x, y, z })` | Walks the unit there. `unit.goal` goes back to `null` on arrival (`world:unitArrived`) or when it gives up (`world:unitBlocked`). Sending the same goal again keeps the current plan. |
 | `stopUnit(id)` | Clears the goal and the plan |
 | `isDisplayed(unit)`, `eventIdOf(id)` (= `1000 + id`), `eventOf(id)`, `unitOfEvent(gameEvent)` | Events of units on screen. **Never hold on to an event; ask again each time.** |
 | `refreshUnitImage(id)` | Re-reads `unit.image` and `data.through` into the unit's event (clothing tiers) |
 
 How units move:
-- **On screen, walkers:** the unit follows a planned path (below), one cell per step with `moveStraight` (4-way). Each step first checks the grid again: if the world changed under the path (a wall went up on the next cell) or the unit was moved off it, the unit plans again. If another unit (or any solid event) stands on the next cell, the unit waits up to **30 frames**, then plans a way round that cell; if that cell is the goal itself, it gives up with `"goal occupied"`. If the path left hasn't got shorter for **600 map updates** (10 s at ×1: walking round units that never move aside, back and forth between two held gaps), it gives up with `"no way past"`. A goal cell nobody can stand on (a tree to chop, a wall site to build, water) ends at its **nearest reachable open neighbour**, and the unit arrives there. When no path exists the unit gives up **at once** (`world:unitBlocked`, reason `"no path"`), with no press against a wall.
-- **On screen, fliers** (`data.through`) and **8-way mode or paths switched off** (`pathConfig.enabled = false`): the step used before paths: RMMZ's `findDirectionTo` (UF_Movement8D: a 200-node search in a small window), and after 300 frames without a step the goal is dropped (reason `"stuck"`).
-- **Off screen:** one cell every `unitStepFrames` frames (16 by default), in a straight line. **Terrain isn't checked off screen** (with one area, nothing is ever off screen).
+- **On screen, walkers:** the unit follows a planned path (below), one cell per step with straight or diagonal movement (4-way only when configured). Each step first checks the grid again: if the world changed under the path (a wall went up on the next cell) or the unit was moved off it, the unit plans again. If another unit (or any solid event) stands on the next cell, the unit waits up to **30 frames**, then plans a way round that cell; if that cell is the goal itself, it gives up with `"goal occupied"`. If the path left hasn't got shorter for **600 map updates** (10 s at ×1: walking round units that never move aside, back and forth between two held gaps), it gives up with `"no way past"`. A goal cell nobody can stand on (a tree to chop, a wall site to build, water) ends at its **nearest reachable open neighbour**, and the unit arrives there. When no path exists the unit gives up **at once** (`world:unitBlocked`, reason `"no path"`), with no press against a wall.
+- **On screen, fliers** (`data.through`) and **paths switched off** (`pathConfig.enabled = false`): the step used before paths: RMMZ's `findDirectionTo` (UF_Movement8D: a 200-node search in a small window), and after 300 frames without a step the goal is dropped (reason `"stuck"`).
+- **Off screen:** walkers in the same area as their goal follow the same level-aware planned paths, one cell per `unitStepFrames` frames (16 by default), spread by unit ID. Terrain, doors and other walkers are checked, including both corners of diagonal steps. On/off-screen requests share the planning queue. Fliers, explicit paths-off mode and multi-area cross-area travel retain the straight fallback.
 - **At an area edge** the unit steps into the neighbouring area, at the matching cell on the opposite edge (multi-area worlds only).
 
 ### Spawning (VISION V68, user 2026-09-19: "Nothing should spawn onto a square that is occupied by something they cant move thru")
@@ -71,13 +84,13 @@ How units move:
 ### Paths
 | Member | Description |
 |---|---|
-| `findPath(area, sx, sy, gx, gy, opts)` | A path in one area: `[{x, y}, …]` after the start, ending at the goal (or, for a goal cell nobody can stand on, at its nearest reachable open 4-neighbour); `[]` when already there; `null` when there is none. `opts`: `unit` (a unit record or id: doors let their own people through), `maxNodes` (cells expanded before giving up, default 12,000), `avoid: {x, y}` (a cell to walk round), `allowPartial` (a search that hits `maxNodes` returns the part toward the goal, marked `path.partial = true`), `resolveBlocked: false` (a blocked goal cell returns `null`). |
+| `findPath(area, sx, sy, gx, gy, opts)` | A path in one area: `[{x, y}, …]` after the start, ending at the goal (or, for a goal cell nobody can stand on, at its nearest reachable open 4-neighbour); `[]` when already there; `null` when there is none. `opts`: `unit` (a unit record or id: doors let their own people through), `maxNodes` (cells expanded before giving up, default 12,000), `avoid: {x, y}` (a cell to walk round), `allowPartial` (a search that hits `maxNodes` returns the part toward the goal, marked `path.partial = true`), `resolveBlocked: false` (a blocked goal cell returns `null`), `z` (defaults to `area.z`, else Ground). |
 | `lastPath` | What the last search did: `{ reason, ms, expanded, length, partial }`. Reasons: `found`, `partial`, `here`, `no path`, `goal walled in`, `start walled in`, `too far to plan`, `goal blocked`, `outside the area`, `not in the world`. |
-| `walkable(ax, ay, x, y, opts)` | Whether a unit could stand on the cell by the path rule (tiles, water, objects; a door only for `opts.unit` when UF_Doors lets it through). `opts.ground: true`: whether the ground alone (tiles and water, objects ignored) lets units walk every way. |
+| `walkable(ax, ay, x, y, opts)` | Whether a unit could stand on the cell by the path rule (tiles, water, objects; a door only for `opts.unit` when UF_Doors lets it through). `opts.z` selects the level (default Ground). `opts.ground: true`: whether the ground alone (tiles and water, objects ignored) lets units walk every way. |
 | `reachable(area, sx, sy, gx, gy)` | Whether (gx, gy) can be walked to from (sx, sy), from the region map (instant; doors count as open, units ignored). A blocked goal cell is never reachable itself: ask about its neighbours. |
 | `pathOf(unitId)` | The cells still ahead on the unit's current plan (`[{x, y}]`, next step first), or `null` |
 | `pathStats()` / `resetPathStats()` | Planner numbers since the world was created: `plans, found, partial, none, avgMs, p95Ms` (last 512 plans), `maxMs, maxPlan, avgExpanded, medianExpanded, maxExpanded, queuedTotal, queuePeak, queueNow, replans, detours, waitFrames, blocked {reason: n}, regionBuilds, regionMsAvg, gridBuilds, gridMsAvg, cachedPlans` |
-| `pathConfig` | Settings (read them; tests may change them): `enabled` (true), `maxNodes` (12,000), `plansPerUpdate` (4), `waitFrames` (30), `maxStepFails` (3), `maxPartialLegs` (8), `progressFrames` (600) |
+| `pathConfig` | Settings (read them; tests may change them): `enabled` (true), `maxNodes` (12,000), `plansPerUpdate` (4), `waitFrames` (30), `maxStepFails` (3), `maxPartialLegs` (8), `progressFrames` (600), `offscreenPaths` (true; tests may disable) |
 
 **The path rule is the on-screen stepping rule**, per cell and per direction:
 - the tiles' passage flags, exactly as RMMZ's `checkPassage` reads them (top layer first, [*] tiles skipped), out of the cell in the step's direction and into the next cell from the opposite side;
@@ -85,13 +98,14 @@ How units move:
 - no object whose catalog entry isn't `passable: true` (the same table UF_Objects' `blocks` uses; a unit can't leave such a cell either), except a door (UF_Doors) for units `UF.Doors.canUnitPass` lets through;
 - other units are ignored when planning (they are waited for when met).
 
-**How it works.** Each built map gets a walk grid (a byte per cell: the directions a unit may leave and enter it by) when its map is set up (about 8 ms on this machine), and a **region map** (cells joined by passable steps, doors open; 1.7–4.2 ms on average, rebuilt only after a change that opens or closes a cell). `setTile` and `setObject` update the grid cell and mark the region map stale. A plan first checks the region map, so an unreachable goal is known without searching; then A* runs over the whole area (4-way, Manhattan distance, binary heap, typed arrays allocated once and stamped per search, deeper nodes first on ties). A search that expands 12,000 cells without reaching the goal returns a partial plan toward it (only if that brings the unit at least 2 cells closer); the unit walks it and plans the next leg, and gives up with `"too far to plan"` after 8 legs.
+**How it works.** Each built map gets a walk grid (a byte per cell: the directions a unit may leave and enter it by) when its map is set up (about 8 ms on this machine), and a **region map** (cells joined by passable steps, doors open; 1.7–4.2 ms on average, rebuilt only after a change that opens or closes a cell). `setTile` and `setObject` update the grid cell and mark the region map stale. A plan first checks the region map, so an unreachable goal is known without searching; then A* runs over the whole area (8-way, octile costs 5 straight / 7 diagonal; 4-way when configured, binary heap, typed arrays allocated once and stamped per search, deeper nodes first on ties). A search that expands 12,000 cells without reaching the goal returns a partial plan toward it (only if that brings the unit at least 2 cells closer); the unit walks it and plans the next leg, and gives up with `"too far to plan"` after 8 legs.
 
 **Budget.** At most **4 new plans per map update** (per update, so at ×8 speed up to 32 per drawn frame); the other units wait in a queue, oldest first. Plans are runtime only: a cache keyed by unit and goal, never saved (a loaded game plans again).
 
 ## 3. Events (through `UF.Events`, when UF_Core has loaded)
 | Event | Payload |
 |---|---|
+| `world:initializing` | Fresh `state`, after clearing runtime caches and before template units or `world:created`; initialize persistent level baselines idempotently before factions choose founding cells. Do not reset saved levels in later generation listeners. |
 | `world:created` | `state` |
 | `world:areaBuilt` | `{x, y}`: the area just loaded for display |
 | `world:viewAreaChanged` | `from {x, y}` or `null`, `to {x, y}` |
@@ -102,6 +116,10 @@ How units move:
 | `world:unitImageChanged` | `unit` |
 | `world:tileChanged` | `area {x, y}`, `x`, `y`, `layer`, `tileId` |
 | `world:objectChanged` | `area {x, y}`, `x`, `y`, `type` |
+| `world:levelTileChanged` | `levelArea {x,y,z}`, `x`, `y`, `layer`, `tileId`; non-ground tile changes, plus derived tiles on any level |
+| `world:levelObjectChanged` | `levelArea {x,y,z}`, `x`, `y`, `type`; non-ground only |
+| `world:levelBuilt` | `levelArea {x,y,z}`; non-ground map loaded for display |
+| `world:unitLevelChanged` | `unit`, `fromZ`, `toZ` |
 | `world:objectRefused` | `{ area, x, y, type, objectId, unitId, unitName, reason }`: `setObject` refused a blocking object on a unit's cell (V68) |
 
 ## 4. Save data
@@ -110,7 +128,7 @@ How units move:
 ## 5. Checks (UF_Test suite `world`, a default suite)
 | Check | Proves |
 |---|---|
-| `in_area_map`, `area_size`, `one_layer` | New Game starts in the world's start area, a 256×256 map with a full data array and object grid, areas are `{x, y}` |
+| `in_area_map`, `area_size`, `level_ids` | New Game starts in the world's start area, a 256×256 map with a full data array and object grid, five distinct map IDs round-trip, ground ID is unchanged, ground-only APIs exclude other levels, sixth levels are refused |
 | `seeded` | Building the same area twice gives the same data |
 | `diff_applies_live`, `object_diffs`, `diff_persists` | `setTile`/`setObject` show immediately, go through the peek cache off screen, and are still there later |
 | `save_roundtrip` | The world state survives serialization |
@@ -145,6 +163,10 @@ The path checks take about 60 s (the play window runs alongside them); the whole
 Each was seen failing (2026-09-19) with the environment variable `UF_TEST_PROVOKE` set for the test run (read only in a `--uf-test` run): `spawn.guard` (addUnit places units exactly where asked, from boot), `spawn.exact` (addUnit ignores `exact`), `spawn.objects` (no object refusal, no regrowth hold), `spawn.misplace` (one unit put on a tree cell just before each scan).
 
 ## 6. Status (2026-09-19)
+
+**Current integration:** the World Z seam is merged with the active eight-way movement code. Node syntax and `git diff --check` pass. An ad-hoc in-memory Node VM check passed 26 contracts (five map IDs, strict invalid-z refusal, generator/tile/unit isolation, all-five off-screen walking and facing, actual save serialization, event families); changing unit construction to store `z: 0` caused its `unit record isolation` assertion to fail. This is not an RMMZ integration test. Five-level runtime and F5 acceptance have not yet been checked for this merged file. The historical results below describe earlier ground-only code, not proof of the merged version. Consumer-wide simulation across all five levels remains a release gate.
+
+### Historical ground-only results
 - **Spawning guard (V68), checked 2026-09-19 by Claude Code on snapshot copies; not yet run in Playtest F5:** suite `spawn` 6/6 in five runs on random seeds (two on earlier versions of the working copy, two on the final code in the working copy, one on a fresh snapshot of `game/` after the copy-back); each check seen failing with its provocation (`UF_TEST_PROVOKE`, see §5). In those runs 100–126 walking units were checked after world creation and 101–126 after play, 0 on a cell they can't stand on; `spawnStats()` after creation: 3–7 units moved 1 cell (these include callers that already asked for a free cell), none widened, shared or stuck, 0 object refusals. Also passed with the guard: world 26/26, smoke 13/13, history, objects, items, factions, timespeed, talk, combat, anim, sheet, fire, overseer, worldgen. The title-screen New Game flow reached the map with 143 units and no error.
   - **`wildlife.drawn_and_tinted` fails when a colonist stands at the test's tree cell** (2 of 5 runs with the guard, 0 of 4 without): the fixture at `UF_Wildlife.js` line 829 puts an oak on (cx, cy − 3) without looking for a unit there, and the guard refuses it (logged: `"oak" can't go on (128,125): "Braor" (unit 3) stands there`). The fixture needs a cell with no unit (`UF.World.standerAt`), which is UF_Wildlife's owner's change.
   - `UF_Jobs.js` line 351 (build `apply`) ignores `setIn`'s result: a build refused because a unit stands on the site uses up its items and ends `done` with nothing built. Not seen in a run; found by reading. UF_History line 756 also ignores it (0 refusals at creation so far).
@@ -155,7 +177,7 @@ Each was seen failing (2026-09-19) with the environment variable `UF_TEST_PROVOK
   - `UF.World.update`: 0.113–0.119 ms per map update on average (worst 4.6–10.5 ms, when a region map rebuild falls into it). With paths switched off (the old step, mutant MA) the same window cost 2.3–4.9 ms per update.
 - **Other suites with this code (snapshots, 2026-09-19):** smoke 9/9; wildlife 15/15 on one seed and 14/15 on seed 2109239665, where `by_biome` fails the same way without this change; colonists 20/21 (`plan_reads_the_site`, same without this change); jobs 13/17: `hunt`, `open_job_taken` and `saved` fail without this change too, and **`jobs.stalled_fails` now fails** because it expects a boxed-in unit to take 2 × 300 ticks to fail its job. The job now fails after 8 ticks with the same reason ("can't reach it"), as paths require. The check belongs to UF_Jobs.
 - **Known limits:**
-  - Off-screen units still walk in straight lines and ignore terrain (only matters with more than one area).
+  - Off-screen fliers, paths-off mode and cross-area travel retain straight stepping; ordinary same-area walkers use their own level's path grid.
   - The region map is rebuilt in full after any change that opens or closes a cell, the next time a plan needs it: 1.7–4.2 ms on average, up to 16 ms seen once in a 60 s window.
   - A goal more than 12,000 cells of search away is walked toward in partial legs (up to 8), which can end in a dead end (`"too far to plan"`). No test map needed one in these runs.
   - In play about 3–5 units a minute give up with `"goal occupied"` and 1–4 with `"no way past"` (herds, crowded gates). The caller decides what to do next (UF_Jobs picks a stand cell again; UF_Wildlife picks another wander goal).

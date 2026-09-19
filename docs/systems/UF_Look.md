@@ -5,6 +5,12 @@ Status: built 2026-09-18, checks: `look` (21 checks together with UF_Interact; 7
 **File:** `game/js/plugins/UF_Look.js` · **Load order:** after `UF_World`, `UF_Objects`, `UF_Items`, `UF_Jobs`, `UF_Stance`, `UF_Camera` (all optional except UF_World), before `UF_Interact` and `UF_Test`. Contract: `docs/design/WORLD_ARCHITECTURE.md` §5.10.
 
 ## API (`UF.Look`)
+### Five-level seam (2026-09-19)
+
+The tooltip remains enabled for `World.viewLevel()` on all five maps, falling back to the legacy `currentArea()` API when the level seam is absent. On nonzero levels, `cellAt` passes `{ area, x, y, z }` to `UF.Levels.describeCell` and `cellArt` and returns the displayed `level`; it does not read the surface biome. If Levels' description helpers are absent, the fallback is `Level <z>`. Surface site descriptions remain ground-only until History's site API becomes level-aware. Units, objects and items are read from the displayed map and the level-aware Objects/Items APIs.
+
+This merge changes no art assets or tooltip layout. RMMZ rendering and F5 Playtest remain separate verification gates.
+
 | Member | Description |
 |---|---|
 | `describeCell(x, y)` | `[line1, line2, line3]` (strings; `""` for an empty line) for a cell of the map on screen; `null` off the map. Line 1 = the first of: unit (`name · stance · job` for colonists, `name · stance` otherwise), items (`3 × Log, Stone` from `UF.Items.describe`), object (`Oak — chop`; a building without actions says `— dismantle`), site (`UF.History.describeSite`), else `""`. Line 2 = `Biome · Savagery, Alignment · Ground kind` plus ` · water: kind` on water (names from the catalog's `biomes`, `regions`, `groundKinds`; the ground kind is read from the tile actually on the map, so a dug cell says Dirt). Line 3 = `UF.Assets.describe(file).text` for the subject's image, else the ground sheet (`UF_GenGround_A2`) or the water sheet (`Outside_A1`). Over an unexplored fog cell: `["Unexplored", "", ""]` (fog is off, so this never shows today). |

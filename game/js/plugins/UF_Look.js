@@ -223,7 +223,9 @@
             return { kind: "object", text: actions.length ? `${type.name} — ${actions.join(", ")}` : type.name, file: imageOfType(type), object: type };
         }
         const H = window.UF.History;
-        const site = H && typeof H.describeSite === "function" ? H.describeSite(x, y) : null;
+        const W = World();
+        const onGround = !!W && !!W.currentArea(); // sites are on the ground (VISION V80: another level on screen shows none)
+        const site = onGround && H && typeof H.describeSite === "function" ? H.describeSite(x, y) : null;
         if (site) return { kind: "site", text: site, file: "" };
         return null;
     }
@@ -251,6 +253,15 @@
     function cellAt(x, y) {
         if (!onMap(x, y)) return null;
         const W = World(), G = window.UF.WorldGen, T = window.UF.Tiles;
+        // Another level on screen (VISION V80): UF_Levels says what the cell is ("-1 · Cave floor", "+1 · Open air").
+        const view = W && W.viewLevel ? W.viewLevel() : null;
+        if (view && view.z !== 0) {
+            const L = window.UF.Levels;
+            const ref = { area: { x: view.x, y: view.y }, x, y, z: view.z };
+            const text = L && typeof L.describeCell === "function" ? L.describeCell(ref) : `Level ${view.z}`;
+            const file = L && typeof L.cellArt === "function" ? L.cellArt(ref) : "";
+            return { text, biome: "", biomeId: null, region: null, ground: null, water: null, file, level: view.z };
+        }
         const area = W ? W.currentArea() : null;
         let info = null;
         if (area && G && typeof G.cellInfoLocal === "function") {
@@ -307,7 +318,7 @@
             this._age++;
             const scene = SceneManager._scene;
             const W = World();
-            if (!Look.enabled || !(scene instanceof Scene_Map) || !window.$gameMap || !W || !W.currentArea()) return this.hideTip();
+            if (!Look.enabled || !(scene instanceof Scene_Map) || !window.$gameMap || !W || !(W.viewLevel ? W.viewLevel() : W.currentArea())) return this.hideTip();
             if (this._pin) {
                 if (--this._pin.frames <= 0) {
                     this._pin = null;

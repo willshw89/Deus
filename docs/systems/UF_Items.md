@@ -4,15 +4,18 @@ Items from the world catalog (`items.types`): they lie on cells, where they're d
 File: `game/js/plugins/UF_Items.js`. Load order: after `UF_World` (and `UF_Objects` when it exists), before `UF_Test`. Contract: `docs/design/WORLD_ARCHITECTURE.md` §2.3, §4, §5.4.
 
 ## API (`UF.Items`)
+
+Level seam added 2026-09-19: every area argument accepts `{x,y,z?}`, with omitted z meaning Ground. Integer -2 through +2 is accepted; invalid/unsupported non-ground requests fail before mutation. `create`, `find`, and cell-form `count` also accept a separate `z` that takes precedence over `area.z`. On-screen APIs and item sprites use `World.viewLevel` when present. Ground index keys retain `"ax,ay"`; other levels use `"ax,ay,z"`.
+
 - `types()` → the catalog's item types (`{ id, name, image, tint?, tags, stack, food?: {hunger, thirst}, tool?: {jobType: multiplier}, wear?: {tier} }`), catalog order.
 - `type(id: string)` → the type entry or `null`.
-- `get(itemId: number)` → the item record `{ id, type, count, area: {x,y}|null, x, y, holder: unitId|null }` or `null`.
+- `get(itemId: number)` → the item record `{ id, type, count, area: {x,y}|null, x, y, z, holder: unitId|null }` or `null`. Old missing-z records mean Ground.
 - `all()` → every item (ground and carried). `inArea(area)` → every ground item in that area.
 - `create(typeId, count, at: { area, x, y } | { holder: unitId })` → one new record, no merging, or `null` (unknown type/unit, nowhere to put it).
 - `drop(area, x, y, typeId, count)` → puts `count` on the cell: fills stacks of that type already there, then makes new stacks of at most `stack`. Returns the stacks touched (`[item]`).
 - `at(x, y)` → items on that cell of the area on screen. `atIn(area, x, y)` → the same for any area.
 - `find({ near: {x, y}, radius?, tags?: [..], id?: typeId, limit?, area? })` → `[{ item, x, y, dist }]`, nearest first (Euclidean; `radius` inclusive; `tags` = any of them; `area` defaults to the one on screen).
-- `pickUp(itemId, unitId)` → `true` when the ground item is now in `unit.data.inventory` (the array is created when missing). No distance check: jobs stand on the cell first.
+- `pickUp(itemId, unitId)` → `true` when the ground item is now in `unit.data.inventory` (the array is created when missing). Cross-level pickup is refused. No distance check: jobs stand on the cell first.
 - `putDown(itemId, area, x, y)` → puts a carried item on a cell, merging into stacks of its type there; returns the ground stack that holds it (the item itself unless it merged away), or `null`.
 - `give(typeId, count, unitId)` → creates the items straight in the inventory, in stacks of the type's size; returns `[item]`.
 - `consume(itemId, count = 1)` → uses up `count` (the item is removed at 0); returns how many were consumed. `consumeFrom(unitId, typeId, count)` → the same across the unit's stacks of that type.
@@ -32,7 +35,7 @@ Rules: a stack's `count` is ≤ its type's `stack` when it lies on a cell; inven
 
 ## Events
 - Emits `items:changed(item, what)` on every change (`what` = `"created" | "count" | "moved" | "removed"`).
-- Listens: `world:unitRemoved` (drops the unit's inventory where it stood).
+- Listens: `world:unitRemoved` (drops the unit's inventory on its own area/cell/level), `world:unitLevelChanged` (carried item records follow the holder's new z and emit `items:changed(item,"moved")`).
 
 ## Keys and mouse
 None.
@@ -67,6 +70,9 @@ None.
 None, aliases only (`Spriteset_Map.createCharacters`, `Scene_Boot.start` for the checks).
 
 ## Known limits
+
+2026-09-19 merge verification: Objects/Items real source in a Node VM with documented World stubs passed 9 checks, including all-five-level indices/stack merging, separate-record z precedence, yields on the source level, strict invalid-z refusal, cross-level pickup refusal, inventory level changes and removal, viewed API reads, and JSON save-state replacement/index rebuilding. A loaded-source mutation dropping z from index keys produced 5 failures. Both plugins passed Node syntax checks. Coherent live five-level snapshots and RMMZ F5/F8 remain untested for this merge; the existing `find_sorted` fixture correction was preserved.
+
 - `pickUp`/`putDown`/`give` don't check distance, capacity or weight: jobs (UF_Jobs) enforce standing on the cell; there is no carry limit yet.
 - No stack-count label is drawn on a stack (a 5-log stack looks like one log); `describe` gives the number.
 - The stand-in sheets have frames of 48×48 up to 144×144 (`StrawBundle`, `Firewood`), so some items overhang their cell by up to a cell each side.

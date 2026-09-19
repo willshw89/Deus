@@ -334,6 +334,11 @@
     const faceFire = (dx, dy) => (dy < 0 ? 2 : dy > 0 ? 8 : dx < 0 ? 6 : 4);
     const CAMP_SEARCH = 24; // cells from the area centre searched for a camp cell before the whole area is (never needed so far)
     const SALT_RING = 0x7f1e; // where the ring's first man stands
+    const levelOf = p => p && p.z !== undefined ? p.z : 0;
+    const viewZ = () => levelOf(UF.World.viewLevel ? UF.World.viewLevel() : null);
+    const viewedArea = () => UF.World.viewLevel ? UF.World.viewLevel() : UF.World.currentArea();
+    const siteArea = s => ({ x: s.area.x, y: s.area.y, z: levelOf(s) });
+    const founderSites = (h, rec) => (rec.sites || [rec.site]).map(id => h.sites.find(s => s.id === id)).filter(Boolean);
 
     /**
      * The camp cell of a faction (pure: terrain only, the same answer for the same seed): the cell nearest its area
@@ -344,6 +349,7 @@
      */
     function campCell(state, f) {
         if (!f || !f.home || !f.home.area) return null;
+        if (levelOf(f.home) !== 0) return { x: f.home.x, y: f.home.y, z: levelOf(f.home), moved: 0 };
         const size = state.size, ax = f.home.area.x, ay = f.home.area.y;
         const cat = catalog() || {};
         const blocked = new Set((Array.isArray(cat.groundKinds) ? cat.groundKinds : []).filter(g => g.passable === false).map(g => g.id));
@@ -436,13 +442,22 @@
             if (!f.home || !f.home.area) continue;
             // The camp stands on the cell nearest the area centre whose 3 x 3 block is all land (the campfire and the
             // eight founders around it, VISION V4); in practice the centre itself.
-            const cell = campCell(state, f) || { x: f.home.x, y: f.home.y };
-            const site = {
-                id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false, area: { x: f.home.area.x, y: f.home.area.y },
-                x: cell.x, y: cell.y, radius, founded: 1, pop: count, ruined: null, name: placeName()
-            };
-            if (f.id === playerId) site.protected = true;
-            sites.push(site);
+            const levels = f.species === "dwarf" ? [-1, -2] : [0];
+            const camps = levels.map(z => {
+                const cell = z === 0 ? campCell(state, f) : f.homes && f.homes.find(c => c.z === z);
+                if (!cell) throw new Error(`No habitable founding cell for ${f.id} on level ${z}`);
+                const site = {
+                    id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false,
+                    area: { x: f.home.area.x, y: f.home.area.y }, x: cell.x, y: cell.y, z,
+                    radius, founded: 1, pop: 0, ruined: null, name: placeName()
+                };
+                if (f.id === playerId && z === levels[0]) site.protected = true;
+                sites.push(site);
+                return site;
+            });
+            const site = camps[0];
+            f.home = { ...f.home, area: { ...site.area }, x: site.x, y: site.y, z: site.z };
+            f.sites = camps.map(s => s.id);
             // The founders: genders in a seeded order, ages within the range, one leader with a title.
             const rng = mulberry32(hash32(state.seed, SALT_FOUNDERS, F.list.indexOf(f)));
             const genders = [];
@@ -457,19 +472,25 @@
                 if (p.leader) p.title = titles[Math.floor(rng() * titles.length)];
                 return p;
             });
-            founders[f.id] = { site: site.id, plan, units: [] };
+            // Split each configured gender between the two sites; never duplicate the faction's founders.
+            const genderIndex = { male: 0, female: 0 };
+            for (const p of plan) {
+                const dest = camps[genderIndex[p.gender]++ % camps.length];
+                p.site = dest.id; p.z = dest.z; dest.pop++;
+            }
+            founders[f.id] = { site: site.id, sites: camps.map(s => s.id), plan, units: [] };
             const lead = plan[leader];
             if (lead) rulers[f.id] = [{ name: lead.name, title: lead.title, from: 1, to: null, unitId: null }];
             f.population = count;
-            events.push({
-                year: 1, type: "founding", factions: [f.id], site: site.id,
-                text: `${WORDS[count] || String(count)} ${speciesWord(f.species)} of ${f.name} settled by ${site.name}.`
+            for (const camp of camps) events.push({
+                year: 1, type: "founding", factions: [f.id], site: camp.id, area: { ...camp.area }, x: camp.x, y: camp.y, z: camp.z,
+                text: `${WORDS[camp.pop] || String(camp.pop)} ${speciesWord(f.species)} of ${f.name} settled by ${camp.name}.`
             });
         }
         const home = sites.find(s => s.protected) || null;
-        if (home) state.viewStart = { x: home.x, y: home.y };
+        if (home) state.viewStart = { area: { ...home.area }, x: home.x, y: home.y, z: home.z };
         state.history = {
-            version: 4, simulated: false, years: 0, startYear: 1,
+            version: 5, simulated: false, years: 0, startYear: 1,
             clockYear0: live && window.$ufTime && typeof $ufTime.year === "number" ? $ufTime.year : null,
             events, sites, rulers, wars: [], homeSiteId: home ? home.id : null, founders
         };
@@ -494,7 +515,7 @@
         const h = History.current();
         if (!h || !e || typeof e.text !== "string" || !e.text) return null;
         const ev = { year: History.currentYear(), type: String(e.type || "event"), text: e.text, factions: Array.isArray(e.factions) ? e.factions.slice() : [], site: e.site === undefined ? null : e.site };
-        if (e.area) { ev.area = { x: e.area.x, y: e.area.y }; ev.x = e.x; ev.y = e.y; }
+        if (e.area) { ev.area = { x: e.area.x, y: e.area.y }; ev.x = e.x; ev.y = e.y; ev.z = e.z === undefined ? levelOf(e.area) : e.z; }
         if (window.$ufTime && typeof $ufTime.year === "number") ev.clock = { day: $ufTime.day, month: $ufTime.monthIndex, year: $ufTime.year }; // the game date as numbers
         h.events.push(ev);
         // Keep the newest events, never a year-1 founding (or a year-0 one of an older save).
@@ -1241,20 +1262,24 @@
         const fireId = campFireId();
         const typeId = Math.max(0, (cat.objects || []).findIndex(o => o.id === fireId)) + 1;
         const O = window.UF.Objects && typeof UF.Objects.setIn === "function" ? UF.Objects : null;
-        const read = (area, x, y) => (O ? O.typeIdIn(area, x, y) : W.getObject(area.x, area.y, x, y));
-        const write = (area, x, y, v) => (O ? O.setIn(area, x, y, v) : W.setObject(area.x, area.y, x, y, v ? typeId : 0));
+        const read = (area, x, y) => (O ? O.typeIdIn(area, x, y) : W.getObject(area.x, area.y, x, y, levelOf(area)));
+        const write = (area, x, y, v) => (O ? O.setIn(area, x, y, v) : W.setObject(area.x, area.y, x, y, v ? typeId : 0, levelOf(area)));
         let placed = 0;
         for (const f of state.factions.list) {
             const rec = h.founders[f.id];
-            const site = rec ? h.sites.find(s => s.id === rec.site) : null;
-            if (!rec || !site) continue;
+            if (!rec) continue;
+            rec.camps = [];
+            for (const site of founderSites(h, rec)) {
+            const area = siteArea(site);
             let cleared = 0;
             for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-                if ((dx || dy) && read(site.area, site.x + dx, site.y + dy)) { write(site.area, site.x + dx, site.y + dy, null); cleared++; }
+                if ((dx || dy) && read(area, site.x + dx, site.y + dy)) { write(area, site.x + dx, site.y + dy, null); cleared++; }
             }
-            const ok = !!write(site.area, site.x, site.y, fireId);
+            const ok = !!write(area, site.x, site.y, fireId);
             if (ok) placed++;
-            rec.camp = { x: site.x, y: site.y, fire: ok ? fireId : null, cleared };
+            rec.camps.push({ site: site.id, area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site), fire: ok ? fireId : null, cleared });
+            }
+            rec.camp = rec.camps[0];
         }
         return placed;
     }
@@ -1285,8 +1310,8 @@
         const taken = new Set();
         const land = (area, x, y) => {
             if (x < 0 || y < 0 || x >= size || y >= size) return false;
-            const tile = W.getTile(area.x, area.y, x, y, 0);
-            return !Tilemap.isTileA1(tile) && W.getTile(area.x, area.y, x, y, 5) !== 250; // any A1 autotile is water; region 250 is a peak
+            const tile = W.getTile(area.x, area.y, x, y, 0, levelOf(area));
+            return !Tilemap.isTileA1(tile) && W.getTile(area.x, area.y, x, y, 5, levelOf(area)) !== 250; // any A1 autotile is water; region 250 is a peak
         };
         placeCamps(state);
         const plainSheet = (species, gender) => {
@@ -1300,11 +1325,13 @@
         const playerId = state.factions.playerId;
         for (const f of state.factions.list) {
             const rec = h.founders[f.id];
-            const site = rec ? h.sites.find(s => s.id === rec.site) : null;
-            if (!rec || !site) continue;
+            if (!rec) continue;
+            for (const site of founderSites(h, rec)) {
+            const area = siteArea(site);
+            const plan = rec.plan.filter(p => p.site === undefined ? site.id === rec.site : p.site === site.id);
             const fi = state.factions.list.indexOf(f);
             // The ring: alternate men and women clockwise from a seeded cell, as long as both are left.
-            const men = rec.plan.filter(p => p.gender === "male"), women = rec.plan.filter(p => p.gender !== "male");
+            const men = plan.filter(p => p.gender === "male"), women = plan.filter(p => p.gender !== "male");
             const rot = Math.floor(mulberry32(hash32(state.seed, SALT_RING, fi))() * RING.length);
             const slots = [];
             let mi = 0, wi = 0;
@@ -1314,7 +1341,7 @@
                 const [dx, dy] = RING[(rot + k) % RING.length];
                 slots.push({ p, x: site.x + dx, y: site.y + dy, dir: faceFire(dx, dy), ring: (rot + k) % RING.length });
             }
-            for (const s of slots) taken.add(`${site.area.x},${site.area.y},${s.x},${s.y}`);
+            for (const s of slots) taken.add(`${site.area.x},${site.area.y},${levelOf(site)},${s.x},${s.y}`);
             // Anyone left over (more than eight founders in the catalog): the nearest free land cells within reach.
             const rest = men.slice(mi).concat(women.slice(wi));
             if (rest.length) {
@@ -1322,15 +1349,15 @@
                 const cands = [];
                 for (let dy = -reach; dy <= reach; dy++) {
                     for (let dx = -reach; dx <= reach; dx++) {
-                        const x = site.x + dx, y = site.y + dy, key = `${site.area.x},${site.area.y},${x},${y}`;
-                        if (Math.max(Math.abs(dx), Math.abs(dy)) <= 1 || taken.has(key) || !land(site.area, x, y) || !W.cellFree(site.area.x, site.area.y, x, y)) continue;
+                        const x = site.x + dx, y = site.y + dy, key = `${site.area.x},${site.area.y},${levelOf(site)},${x},${y}`;
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) <= 1 || taken.has(key) || !land(area, x, y) || !W.cellFree(site.area.x, site.area.y, x, y, 0, levelOf(site))) continue;
                         cands.push({ x, y, d: dx * dx + dy * dy, r: rng() });
                     }
                 }
                 cands.sort((a, b) => a.d - b.d || a.r - b.r);
                 rest.forEach((p, i) => {
                     const c = cands[i] || { x: site.x, y: site.y + 2 };
-                    taken.add(`${site.area.x},${site.area.y},${c.x},${c.y}`);
+                    taken.add(`${site.area.x},${site.area.y},${levelOf(site)},${c.x},${c.y}`);
                     slots.push({ p, x: c.x, y: c.y, dir: 2, ring: -1 });
                 });
             }
@@ -1341,6 +1368,7 @@
                 const plain = plainSheet(f.species, s.p.gender);
                 queues.push({ f, site, rec, p: s.p, cell: { x: s.x, y: s.y }, dir: s.dir, ring: s.ring, within: true, image: plain || imageSpec(images[i % images.length]), tint: plain ? null : sp.tint, player: f.id === playerId });
             });
+            }
         }
         // Spawn order: the player's founders on the ids UF_Colonists will read their own gender from, the others between.
         const colonistGender = window.UF.Colonists && typeof UF.Colonists.genderFor === "function" ? id => UF.Colonists.genderFor(state.seed, id) : null;
@@ -1366,14 +1394,14 @@
         for (const q of orderOut) {
             const { f, site, rec, p } = q;
             const data = {
-                kind: "person", faction: f.id, species: f.species, ai: "wander", home: { x: site.x, y: site.y }, wander: (site.radius || 4) + 2, site: site.id,
+                kind: "person", faction: f.id, species: f.species, ai: "wander", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
                 founder: true, born: 1 - p.age, age: p.age, stage: stageOf(p.age), gender: p.gender, rank: p.leader ? 1 : 0, superior: null
             };
             if (p.leader && p.title) data.title = p.title;
             if (q.tint) data.tint = q.tint;
-            const u = W.addUnit({ name: p.name, image: q.image, area: { x: site.area.x, y: site.area.y }, x: q.cell.x, y: q.cell.y, dir: q.dir || 2, data, snapToFree: reach });
+            const u = W.addUnit({ name: p.name, image: q.image, area: { x: site.area.x, y: site.area.y }, z: levelOf(site), x: q.cell.x, y: q.cell.y, dir: q.dir || 2, data, snapToFree: reach });
             u.data.stats = rollStats(state.seed, u.id, f.species, u.data.stage);
-            rec.units.push({ id: u.id, x: u.x, y: u.y, dir: u.dir, ring: q.ring, gender: p.gender, within: Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= reach });
+            rec.units.push({ id: u.id, site: site.id, z: levelOf(site), x: u.x, y: u.y, dir: u.dir, ring: q.ring, gender: p.gender, within: Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= reach });
             if (p.leader) {
                 leaders[f.id] = u.id;
                 const r = h.rulers[f.id] && h.rulers[f.id][0];
@@ -1555,10 +1583,10 @@
     }
 
     /** Sites of an area with their layout: [{ ...site, radius, pieces: [{dx, dy, object}] }]. */
-    History.sitesIn = function(ax, ay) {
+    History.sitesIn = function(ax, ay, z = 0) {
         const st = window.UF && UF.World && UF.World.state;
         if (!st || !st.history) return [];
-        return st.history.sites.filter(s => s.area.x === ax && s.area.y === ay)
+        return st.history.sites.filter(s => s.area.x === ax && s.area.y === ay && levelOf(s) === z)
             .map(s => Object.assign({}, s, { radius: s.radius !== undefined ? s.radius : kindConfig(s.kind).radius || 0, pieces: piecesFor(st, s) }));
     };
     History.pieces = site => piecesFor(UF.World.state, site);
@@ -1601,9 +1629,9 @@
     };
     /** The site under a cell of the area on screen (within radius + 1), described for the look label; null if none. */
     History.siteAt = function(x, y, area) {
-        const a = area || (window.UF && UF.World ? UF.World.currentArea() : null);
+        const a = area || (window.UF && UF.World ? viewedArea() : null);
         if (!a) return null;
-        for (const s of History.sitesIn(a.x, a.y)) {
+        for (const s of History.sitesIn(a.x, a.y, area ? levelOf(area) : viewZ())) {
             if (Math.max(Math.abs(s.x - x), Math.abs(s.y - y)) <= s.radius + 1) return s;
         }
         return null;
@@ -1631,8 +1659,8 @@
                     return !s || Math.max(Math.abs(u.x - s.x), Math.abs(u.y - s.y)) > foundersConfig().reach;
                 }).length;
                 const la = window.UF.Factions && UF.Factions.lastAreas;
-                const fires = Object.values(state.history.founders).filter(r => r.camp && r.camp.fire).length;
-                console.log(`UF_History: year 1, ${state.history.sites.length} factions settled (areas placed in ${la ? la.ms.toFixed(0) : "?"} ms), ${fires} campfires lit, `
+                const fires = Object.values(state.history.founders).flatMap(r => r.camps || [r.camp]).filter(c => c && c.fire).length;
+                console.log(`UF_History: year 1, ${state.factions.list.length} factions at ${state.history.sites.length} sites (areas placed in ${la ? la.ms.toFixed(0) : "?"} ms), ${fires} campfires lit, `
                     + `${people.length} founders (${people.filter(u => u.data.gender === "male").length} men, ${people.filter(u => u.data.gender === "female").length} women), ${off} outside their area's reach`);
                 return;
             }
@@ -1923,27 +1951,27 @@
                 }
             };
             const recordCamps = () => {
-                const W = UF.World, h = History.current(), here = W.currentArea();
+                const W = UF.World, h = History.current(), here = viewedArea();
                 for (const s of h.sites) {
-                    if (!sameArea(s.area, here)) continue;
+                    if (!sameArea(s.area, here) || levelOf(s) !== viewZ()) continue;
                     const cells = [];
                     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
                         const x = s.x + dx, y = s.y + dy;
-                        const t = W.getObject(s.area.x, s.area.y, x, y);
-                        const units = W.units().filter(u => sameArea(u.area, s.area) && u.x === x && u.y === y).map(u => {
+                        const t = W.getObject(s.area.x, s.area.y, x, y, levelOf(s));
+                        const units = W.units().filter(u => sameArea(u.area, s.area) && levelOf(u) === levelOf(s) && u.x === x && u.y === y).map(u => {
                             const ev = W.eventOf(u.id);
                             return { id: u.id, name: u.name, faction: u.data && u.data.faction, gender: u.data && u.data.gender, dir: ev ? ev.direction() : u.dir, onScreen: !!ev, sheet: u.image.characterName };
                         });
                         cells.push({ dx, dy, object: t ? ((catalog().objects[t - 1] || {}).id || t) : null, units });
                     }
-                    capture.camps[s.faction] = { site: s.id, x: s.x, y: s.y, cells };
+                    capture.camps[s.id] = { site: s.id, x: s.x, y: s.y, z: levelOf(s), cells };
                 }
             };
             const founderSpritesReady = () => {
                 const scene = SceneManager._scene, W = UF.World, h = History.current(), home = History.homeSite();
                 const rec = home && h.founders[home.faction];
                 if (!rec || !scene || !scene._spriteset) return false;
-                return rec.units.every(r => {
+                return rec.units.filter(r => levelOf(r) === viewZ()).every(r => {
                     const ev = W.eventOf(r.id);
                     const sp = ev && scene._spriteset._characterSprites.find(c => c._character === ev);
                     return !!sp && !!sp.bitmap && sp.bitmap.isReady();
@@ -1980,7 +2008,7 @@
                 if (capture.wait > 0) { capture.wait--; return; }
                 const home = History.homeSite(), h = History.current(), cam = window.UF.Camera || null;
                 const twoThirds = cam ? cam.levels.findIndex(z => Math.abs(z - 2 / 3) < 0.01) : -1;
-                const other = h.sites.find(s => !s.protected && sameArea(s.area, UF.World.currentArea())) || null;
+                const other = h.sites.find(s => !s.protected && sameArea(s.area, viewedArea()) && levelOf(s) === viewZ()) || null;
                 if (capture.phase === 0) {
                     const ready = ImageManager.isReady() && !(this._fadeDuration > 0) && founderSpritesReady();
                     if (!ready && capture.frames < 25) return;
@@ -2010,7 +2038,7 @@
             const W = UF.World, st = W && W.state;
             const h = st && st.history;
             const cfg = History.config(), fc = foundersConfig();
-            t.check("generated_with_world", !!cfg && !!h && Array.isArray(h.events) && Array.isArray(h.sites) && h.version === 4 && !!h.founders,
+            t.check("generated_with_world", !!cfg && !!h && Array.isArray(h.events) && Array.isArray(h.sites) && h.version === 5 && !!h.founders,
                 h ? `history version ${h.version}, ${h.sites.length} camps, ${h.events.length} events, founders for ${Object.keys(h.founders || {}).length} factions, seed ${st.seed} (${History.lastRun ? History.lastRun.ms.toFixed(1) + " ms" : "time unknown"})` : "no history in the world state");
             if (!h || !h.founders) return;
             const factions = UF.Factions.all();
@@ -2021,23 +2049,23 @@
             const home = History.homeSite();
             const objs = catalog().objects;
             const tagsOf = t2 => (objs[t2 - 1] && Array.isArray(objs[t2 - 1].tags) ? objs[t2 - 1].tags : []);
-            const pristine = area => withWorldState(Object.assign({}, st, { objectDiffs: {}, diffs: {}, units: {} }), () => W.buildArea(area.x, area.y));
+            const pristine = area => withWorldState(Object.assign({}, st, { objectDiffs: {}, diffs: {}, units: {} }), () => W.buildArea(area.x, area.y, levelOf(area)));
             const other = regenerate(st, st.seed + 1), third = regenerate(st, st.seed + 2);
 
             // player_faction: the player's camp is the home, at its area centre within playerReach of the map centre; the
             // view started there; the same for seeds +1 and +2.
             const homeDist = home ? Math.hypot(home.x - mid, home.y - mid) : Infinity;
             const vs = st.viewStart;
-            const viewOnHome = !!vs && !!home && vs.x === home.x && vs.y === home.y;
-            const playerNear = !!home && sameArea(W.currentArea(), home.area) && Math.hypot($gamePlayer.x - home.x, $gamePlayer.y - home.y) <= 6;
+            const viewOnHome = !!vs && !!home && vs.x === home.x && vs.y === home.y && levelOf(vs) === levelOf(home);
+            const playerNear = !!home && sameArea(viewedArea(), home.area) && viewZ() === levelOf(home) && Math.hypot($gamePlayer.x - home.x, $gamePlayer.y - home.y) <= 6;
             // The camp stands on the faction's camp cell: its area centre, or the nearest cell whose 3 x 3 block is all land.
             const homeCell = player ? History.campCell(st, player) : null;
             const onArea = !!home && !!player && !!homeCell && homeCell.x === home.x && homeCell.y === home.y && sameArea(player.home.area, home.area);
             const badSeeds = [other, third].filter(s2 => {
                 const hs = s2.history.sites.find(s => s.protected);
-                return !hs || hs.faction !== s2.factions.playerId || Math.hypot(hs.x - mid, hs.y - mid) > acfg.playerReach || !s2.viewStart || s2.viewStart.x !== hs.x || s2.viewStart.y !== hs.y;
+                return !hs || hs.faction !== s2.factions.playerId || (levelOf(hs) === 0 && Math.hypot(hs.x - mid, hs.y - mid) > acfg.playerReach) || !s2.viewStart || s2.viewStart.x !== hs.x || s2.viewStart.y !== hs.y || levelOf(s2.viewStart) !== levelOf(hs);
             });
-            t.check("player_faction", !!player && player.id === pid && player.isPlayer && !!home && home.faction === pid && home.bare === true && !home.ruined && homeDist <= acfg.playerReach
+            t.check("player_faction", !!player && player.id === pid && player.isPlayer && !!home && home.faction === pid && home.bare === true && !home.ruined && (levelOf(home) !== 0 || homeDist <= acfg.playerReach)
                 && h.homeSiteId === home.id && viewOnHome && playerNear && onArea && badSeeds.length === 0,
                 `playerId ${pid} = ${player ? `${player.name} (${player.species})` : "NO FACTION"}; home ${home ? `${home.name} (${home.kind}, bare ${home.bare}, id ${home.id}) at (${home.x},${home.y}), ${homeDist.toFixed(1)} cells from the centre (want <= ${acfg.playerReach})` : "NONE"}; `
                 + `on the faction's camp cell ${homeCell ? `(${homeCell.x},${homeCell.y}), ${homeCell.moved.toFixed(1)} from its area centre (${player.home.x},${player.home.y})` : "NONE"}: ${onArea}; viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} ${viewOnHome ? "matches" : "DOES NOT match"}; the view (${$gamePlayer.x},${$gamePlayer.y}) ${playerNear ? "is on" : "is NOT on"} it; `
@@ -2053,8 +2081,8 @@
                 await t.waitFrames(30);
                 t.screenshot("home_area");
             }
-            const otherCamp = h.sites.find(s => !s.protected && sameArea(s.area, W.currentArea())) || null;
-            if (otherCamp) {
+            const otherCamp = h.sites.find(s => !s.protected && sameArea(s.area, viewedArea()) && levelOf(s) === viewZ()) || h.sites.find(s => !s.protected) || null;
+            if (otherCamp && levelOf(otherCamp) === viewZ()) {
                 $gamePlayer.locate(otherCamp.x, otherCamp.y);
                 await t.waitFrames(30);
                 t.screenshot("other_area");
@@ -2078,17 +2106,35 @@
                     const mine = foundings.filter(e => e.factions.length === 1 && e.factions[0] === f.id);
                     const camp = hh.sites.filter(s => s.faction === f.id);
                     const plural = (((catalog().factions || {}).species || []).find(sp => sp.id === f.species) || {}).name;
-                    const want = camp.length ? new RegExp(`^\\w+ ${String(plural || f.species).toLowerCase()} of ${f.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} settled by ${camp[0].name}\\.$`) : null;
-                    if (mine.length !== 1 || !want || !want.test(mine[0].text)) out.push(`${f.name}: ${mine.length} founding lines${mine[0] ? ` ("${mine[0].text}")` : ""}`);
-                    if (camp.length !== 1 || !camp[0].bare || camp[0].ruined || camp[0].founded !== 1) out.push(`${f.name}: ${camp.length} camps`);
+                    const expectedCamps = f.species === "dwarf" ? 2 : 1;
+                    if (mine.length !== expectedCamps || camp.some(c => !mine.some(e => e.site === c.id && e.text === `${WORDS[c.pop] || String(c.pop)} ${String(plural || f.species).toLowerCase()} of ${f.name} settled by ${c.name}.`))) out.push(`${f.name}: founding lines do not match camps`);
+                    if (camp.length !== expectedCamps || camp.some(c => !c.bare || c.ruined || c.founded !== 1)) out.push(`${f.name}: ${camp.length} camps`);
                     if (!hh.rulers[f.id] || hh.rulers[f.id].length !== 1) out.push(`${f.name}: ${(hh.rulers[f.id] || []).length} rulers`);
                 }
-                if (hh.sites.length !== fl.length || hh.sites.some(s => s.kind === "lair" || s.ruined)) out.push(`${hh.sites.length} sites for ${fl.length} factions`);
+                if (hh.sites.length !== fl.reduce((n, f) => n + (f.species === "dwarf" ? 2 : 1), 0) || hh.sites.some(s => s.kind === "lair" || s.ruined)) out.push(`${hh.sites.length} sites for ${fl.length} factions`);
                 if ((hh.wars || []).length) out.push(`${hh.wars.length} wars`);
                 return out;
             };
             const noYears = [[st.seed, st], [st.seed + 1, other], [st.seed + 2, third]].map(([seed, s2]) => ({ seed, p: yearsProblems(s2) }));
             const flagsOff = cfg.simulate !== true && settleConfig(cfg).years === 0;
+            const dwarfProblems = [];
+            const dwarves = factions.filter(f => f.species === "dwarf");
+            if (!dwarves.length) dwarfProblems.push("no dwarven faction");
+            for (const f of dwarves) {
+                const camps = h.sites.filter(s => s.faction === f.id), rec = h.founders[f.id];
+                if (!rec || camps.length !== 2 || f.home.z !== -1 || ![-1, -2].every(z => camps.some(s => s.z === z))) { dwarfProblems.push(`${f.id}: missing two-level start`); continue; }
+                if (rec.plan.length !== fc.male + fc.female || rec.units.length !== rec.plan.length || f.population !== rec.plan.length) dwarfProblems.push(`${f.id}: founder count changed`);
+                for (const camp of camps) {
+                    const plan = rec.plan.filter(p => p.site === camp.id), units = rec.units.filter(u => u.site === camp.id);
+                    const men = plan.filter(p => p.gender === "male").length, women = plan.length - men;
+                    const index = camp.z === -1 ? 0 : 1;
+                    if (men !== (index ? Math.floor(fc.male / 2) : Math.ceil(fc.male / 2)) || women !== (index ? Math.floor(fc.female / 2) : Math.ceil(fc.female / 2))) dwarfProblems.push(`${f.id} z${camp.z}: unbalanced split`);
+                    if (units.length !== plan.length || units.some(r => { const u = W.unit(r.id); return !u || levelOf(u) !== camp.z || levelOf(u.data.home) !== camp.z || u.data.site !== camp.id; })) dwarfProblems.push(`${f.id} z${camp.z}: misplaced founders`);
+                    if (!(rec.sites || []).includes(camp.id) || !(f.sites || []).includes(camp.id)) dwarfProblems.push(`${f.id}: lost site membership`);
+                    if (History.sitesIn(camp.area.x, camp.area.y, 0).some(s => s.id === camp.id)) dwarfProblems.push(`${f.id}: underground camp appears on Ground`);
+                }
+            }
+            t.check("dwarf_two_level_start", dwarfProblems.length === 0, `${dwarves.length} dwarf faction(s), configured population ${fc.male + fc.female} split between -1/-2; ${dwarfProblems.join("; ") || "site membership, genders and unit levels agree"}`);
             t.check("no_years", flagsOff && noYears.every(r => r.p.length === 0),
                 `catalog history.simulate ${cfg.simulate}, settleYears ${cfg.settleYears} (want false and 0); this world: ${h.years} years simulated, ${h.sites.length} camps, ${(h.wars || []).length} wars, ${h.events.filter(e => e.year === 1 && e.type === "founding").length} year-1 lines, e.g. "${(h.events[0] || {}).text}"; `
                 + noYears.map(r => `seed ${r.seed}: ${r.p.length ? `PROBLEMS ${r.p.join("; ")}` : "ok"}`).join("; "));
@@ -2100,25 +2146,27 @@
             const [ageLo, ageHi] = fc.age;
             const perFaction = [];
             const areaBuilds = new Map();
-            const buildOf = area => { const k = `${area.x},${area.y}`; if (!areaBuilds.has(k)) areaBuilds.set(k, pristine(area)); return areaBuilds.get(k); };
+            const buildOf = area => { const k = `${area.x},${area.y},${levelOf(area)}`; if (!areaBuilds.has(k)) areaBuilds.set(k, pristine(area)); return areaBuilds.get(k); };
             for (const f of factions) {
                 const rec = h.founders[f.id];
                 const camp = rec ? h.sites.find(s => s.id === rec.site) : null;
                 if (!rec || !camp) { foundersProblems.push(`${f.name}: no founders record`); continue; }
                 const units = rec.units.map(r => ({ r, u: W.unit(r.id) }));
-                const map = buildOf(camp.area);
                 const men = units.filter(x => x.u && x.u.data.gender === "male").length, women = units.filter(x => x.u && x.u.data.gender === "female").length;
                 if (units.length !== fc.male + fc.female || men !== fc.male || women !== fc.female) foundersProblems.push(`${f.name}: ${units.length} founders, ${men} men, ${women} women`);
                 const cells = new Set();
                 for (const { r, u } of units) {
                     if (!u) { foundersProblems.push(`${f.name}: unit ${r.id} missing`); continue; }
+                    const camp = h.sites.find(s => s.id === (r.site === undefined ? rec.site : r.site));
+                    if (!camp || levelOf(camp) !== levelOf(r) || levelOf(u) !== levelOf(r)) { foundersProblems.push(`${u.name}: wrong founding level/site`); continue; }
+                    const map = buildOf(siteArea(camp));
                     founderUnits.push(u);
                     const d = u.data;
                     const wantKind = f.id === pid && window.UF.Colonists ? "colonist" : "person";
                     if (d.faction !== f.id || d.species !== f.species || d.kind !== wantKind || !u.name) foundersProblems.push(`${u.name || u.id}: faction ${d.faction}, species ${d.species}, kind ${d.kind} (want ${wantKind})`);
                     if (!(d.age >= ageLo && d.age <= ageHi) || d.stage !== "adult" || d.born + d.age !== 1) foundersProblems.push(`${u.name}: age ${d.age}, stage ${d.stage}, born ${d.born}`);
                     if (Math.max(Math.abs(r.x - camp.x), Math.abs(r.y - camp.y)) > fc.reach) foundersProblems.push(`${u.name} spawned at (${r.x},${r.y}), ${Math.max(Math.abs(r.x - camp.x), Math.abs(r.y - camp.y))} from the centre`);
-                    const key = `${r.x},${r.y}`;
+                    const key = `${levelOf(r)},${r.x},${r.y}`;
                     if (cells.has(key)) foundersProblems.push(`${u.name}: cell ${key} shared`);
                     cells.add(key);
                     const i = r.y * size + r.x;
@@ -2146,15 +2194,16 @@
             const cap = History.startCapture || { state: "missing", camps: {}, shots: [] };
             let captured = 0;
             if (fc.male + fc.female !== RING.length) campProblems.push(`catalog factions.founders is ${fc.male} men + ${fc.female} women; the drawing has ${RING.length} around the fire`);
-            for (const f of factions) {
-                const rec = h.founders[f.id];
-                const camp = rec ? h.sites.find(s => s.id === rec.site) : null;
-                const label = f.name.replace(/^The /, "");
+            for (const camp of h.sites) {
+                const f = factions.find(f => f.id === camp.faction);
+                const full = f && h.founders[f.id];
+                const rec = full && { ...full, units: full.units.filter(r => (r.site === undefined ? full.site : r.site) === camp.id), camp: (full.camps || [full.camp]).find(c => c && (c.site === undefined ? full.site : c.site) === camp.id) };
+                const label = `${f ? f.name.replace(/^The /, "") : camp.faction} z${levelOf(camp)}`;
                 if (!rec || !camp) { campProblems.push(`${label}: no camp`); continue; }
                 const p0 = campProblems.length;
-                const want = History.campCell(st, f);
+                const want = History.campCell(st, { home: { area: camp.area, x: camp.x, y: camp.y, z: levelOf(camp) } });
                 if (!want || want.x !== camp.x || want.y !== camp.y) campProblems.push(`${label}: camp at (${camp.x},${camp.y}) but the nearest all-land 3x3 block is at ${want ? `(${want.x},${want.y})` : "NONE"}`);
-                const map = buildOf(camp.area);
+                const map = buildOf(siteArea(camp));
                 const edge = camp.x < 1 || camp.y < 1 || camp.x > size - 2 || camp.y > size - 2;
                 if (edge) campProblems.push(`${label}: camp on the map edge`);
                 let notLand = 0;
@@ -2164,26 +2213,27 @@
                 }
                 if (notLand) campProblems.push(`${label}: ${notLand} of the nine cells water or peak`);
                 // The fire and nothing else, in the live object grid (the campfire is a built object: a diff).
-                const centreObj = W.getObject(camp.area.x, camp.area.y, camp.x, camp.y);
+                const centreObj = W.getObject(camp.area.x, camp.area.y, camp.x, camp.y, levelOf(camp));
                 const centreId = centreObj ? (objs[centreObj - 1] || {}).id : null;
-                const ringObjs = RING.map(([dx, dy]) => W.getObject(camp.area.x, camp.area.y, camp.x + dx, camp.y + dy)).filter(Boolean).map(t2 => (objs[t2 - 1] || {}).id);
+                const ringObjs = RING.map(([dx, dy]) => W.getObject(camp.area.x, camp.area.y, camp.x + dx, camp.y + dy, levelOf(camp))).filter(Boolean).map(t2 => (objs[t2 - 1] || {}).id);
                 if (centreId !== fireId || !rec.camp || rec.camp.fire !== fireId) campProblems.push(`${label}: centre holds ${centreId || "nothing"} (want ${fireId})`);
                 if (ringObjs.length) campProblems.push(`${label}: objects on the ring: ${ringObjs.join(", ")}`);
                 // The spawn records: eight founders, one per ring cell, alternating, facing the fire.
                 const ring = rec.units.map(r => ({ r, key: `${r.x - camp.x},${r.y - camp.y}` }));
                 const onRing = ring.filter(x => ringKeys.includes(x.key));
                 const keys = new Set(onRing.map(x => x.key));
-                if (rec.units.length !== RING.length || onRing.length !== RING.length || keys.size !== RING.length) campProblems.push(`${label}: ${rec.units.length} founders, ${onRing.length} on the ring, ${keys.size} ring cells taken (want ${RING.length} each)`);
+                if (rec.units.length !== camp.pop || onRing.length !== Math.min(RING.length, camp.pop) || keys.size !== onRing.length) campProblems.push(`${label}: ${rec.units.length} founders, ${onRing.length} on the ring, ${keys.size} ring cells taken (want ${camp.pop} founders)`);
                 const byCell = new Map(onRing.map(x => [x.key, x.r]));
                 const seq = ringKeys.map(k => byCell.get(k)).map(r => (r ? r.gender : "?"));
-                const alternating = seq.every((g, k) => g !== "?" && g !== seq[(k + 1) % seq.length]);
+                const alternating = seq.every((g, k) => g === "?" || seq[(k + 1) % seq.length] === "?" || g !== seq[(k + 1) % seq.length]);
                 if (!alternating) campProblems.push(`${label}: round the ring ${seq.map(g => (g === "male" ? "m" : g === "female" ? "f" : g)).join("")} (want men and women alternating)`);
                 const men = rec.units.filter(r => r.gender === "male").length, women = rec.units.filter(r => r.gender === "female").length;
-                if (men !== fc.male || women !== fc.female) campProblems.push(`${label}: ${men} men, ${women} women`);
+                const sitePlan = full.plan.filter(p => (p.site === undefined ? full.site : p.site) === camp.id);
+                if (men !== sitePlan.filter(p => p.gender === "male").length || women !== sitePlan.filter(p => p.gender === "female").length) campProblems.push(`${label}: ${men} men, ${women} women`);
                 const badFace = onRing.filter(x => { const [dx, dy] = x.key.split(",").map(Number); return x.r.dir !== faceFire(dx, dy); });
                 if (badFace.length) campProblems.push(`${label}: ${badFace.length} founders not facing the fire (first at ${badFace[0].key} facing ${badFace[0].r.dir}, want ${faceFire(...badFace[0].key.split(",").map(Number))})`);
                 // At the first frame (the start capture), as the player saw it.
-                const cc = cap.camps[f.id];
+                const cc = cap.camps[camp.id];
                 let capText = "not captured";
                 if (cc) {
                     captured++;
@@ -2193,7 +2243,7 @@
                         const k = `${cell.dx},${cell.dy}`;
                         if (k === "0,0") {
                             if (cell.object !== fireId || cell.units.length) cellProblems.push(`centre: ${cell.object || "nothing"}, ${cell.units.length} units`);
-                        } else if (cell.object || cell.units.length !== 1 || !ids.has(cell.units[0].id) || cell.units[0].dir !== faceFire(cell.dx, cell.dy)) {
+                        } else if (cell.object || (byCell.has(k) ? cell.units.length !== 1 || !ids.has(cell.units[0].id) || cell.units[0].dir !== faceFire(cell.dx, cell.dy) : cell.units.length !== 0)) {
                             cellProblems.push(`${k}: ${cell.object || "no object"}, ${cell.units.map(u => `${u.name} dir ${u.dir}${ids.has(u.id) ? "" : " (not a founder)"}`).join(" + ") || "empty"}`);
                         }
                     }
@@ -2209,7 +2259,7 @@
                 const sheets = [...new Set(rec.units.map(r => { const u = W.unit(r.id); return u ? `${u.data.gender === "male" ? "m" : "f"} ${u.image.characterName}` : "?"; }))].join(", ");
                 campRows.push(`${label} (${f.species}, ${camp.x},${camp.y})${want && want.moved ? `, ${want.moved.toFixed(1)} from its centre` : ""}: ${centreId || "nothing"} + ${onRing.length} on the ring (sheets ${sheets}), genders N-NE-E-SE-S-SW-W-NW ${seq.map(g => (g === "male" ? "m" : g === "female" ? "f" : g)).join("")}, facings ${face}, ${capText}${campProblems.length > p0 ? " [PROBLEM]" : ""}`);
             }
-            const wantCaptured = factions.filter(f => h.founders[f.id] && h.sites.some(s => s.id === h.founders[f.id].site && sameArea(s.area, W.currentArea()))).length;
+            const wantCaptured = h.sites.filter(s => sameArea(s.area, viewedArea()) && levelOf(s) === viewZ()).length;
             if (cap.state !== "done") campProblems.push(`start capture ${cap.state}${cap.note ? ` (${cap.note.trim()})` : ""}`);
             else if (captured < wantCaptured) campProblems.push(`start capture recorded ${captured} of ${wantCaptured} camps in this area`);
             if (!lit) campProblems.push(`${fireId}: tags ${fireType ? (fireType.tags || []).join("/") : "unknown object"}, fire rule ${fireRule ? JSON.stringify(fireRule) : "none"} (want tag fire and a contained source)`);
@@ -2240,7 +2290,7 @@
 
             // nothing_built: no camp has pieces, and a pristine build of every area with a camp holds no built object
             // (tags building or ruin) anywhere.
-            const withPieces = History.sitesIn(st.startArea.x, st.startArea.y).filter(s => s.pieces.length);
+            const withPieces = [-2, -1, 0, 1, 2].flatMap(z => History.sitesIn(st.startArea.x, st.startArea.y, z)).filter(s => s.pieces.length);
             let built = 0, firstBuilt = "";
             for (const [key, map] of areaBuilds) {
                 for (let i = 0; i < map.ufObjects.length; i++) {
@@ -2284,8 +2334,8 @@
                 `H (Input.keyMapper[72] = "${Input.keyMapper[72]}") opened the chronicle on page 1 of ${win ? win.pageCount() : "?"} (want 2): ${opened}; Tab turned to page 2: ${page1}, back to page 1: ${back}; a second H closed it: ${closed}; year now ${History.currentYear()}`);
 
             // describe_site: the look label for another faction's camp, for the home, and for a cell with no camp.
-            const dOther = otherCamp ? History.describeSite(otherCamp.x, otherCamp.y, otherCamp.area) : null;
-            const dHome = home ? History.describeSite(home.x, home.y, home.area) : null;
+            const dOther = otherCamp ? History.describeSite(otherCamp.x, otherCamp.y, siteArea(otherCamp)) : null;
+            const dHome = home ? History.describeSite(home.x, home.y, siteArea(home)) : null;
             let freeCell = null;
             for (let x = 0; x < size && !freeCell; x++) if (History.siteAt(x, mid, st.startArea) === null) freeCell = { x, y: mid };
             const dFree = freeCell ? History.describeSite(freeCell.x, freeCell.y, st.startArea) : "no free cell on row " + mid;

@@ -43,5 +43,7 @@ var $plugins =
 {"name":"UF_Sheet","status":true,"description":"[UF Sheet] Left-click anything in the world: a panel shows its inventory grid, equipment, face and stats, or its contents and state.","parameters":{}},
 {"name":"UF_Talk","status":true,"description":"[UF Talk] Right-click a person and choose Talk: a portrait, their line and keywords to click. The world pauses while it is open.","parameters":{}},
 {"name":"UF_Fire","status":true,"description":"[UF Fire] Fire spreads cell to cell by catalog rules and burns out; it hurts units; colonists carry water to put it out.","parameters":{}},
+{"name":"UF_Levels","status":true,"description":"[UF Levels] Five persistent 256x256 maps; , up, . down, Home Ground; underground biomes and level plate.","parameters":{}},
+{"name":"UF_Ownership","status":true,"description":"[UF Ownership] Object ownership, assigned beds and level-aware sleep priorities.","parameters":{}},
 {"name":"UF_Test","status":true,"description":"[UF_Test]","parameters":{}}
 ];

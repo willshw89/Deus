@@ -32,6 +32,10 @@
  *   every game hour);
  * - loads sprite sidecars (img/characters/<name>.json) once: UF.Sidecars.
  *
+ * Area APIs accept {x,y,z}; omitted z means Ground. Regrow records keep
+ * z beside area. On-screen APIs use World.viewLevel. Ground changes emit
+ * objects:changed; other levels emit objects:levelChanged.
+ *
  * API, events, save data and checks: docs/systems/UF_Objects.md
  * Architecture: docs/design/WORLD_ARCHITECTURE.md sections 2.2, 4, 5.3
  *
@@ -54,6 +58,18 @@
     };
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const tintOf = hex => parseInt(String(hex).replace("#", ""), 16);
+    const zOf = ref => ref && ref.z !== undefined ? ref.z
+        : ref && ref.area && ref.area.z !== undefined ? ref.area.z : 0;
+    const levelArea = (area, z = zOf(area)) => ({ x: area.x, y: area.y, z });
+    const validArea = area => {
+        const W = World(), z = zOf(area);
+        return !!(W && W.state && area && Number.isInteger(z) && z >= -2 && z <= 2 &&
+            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));
+    };
+    const onScreen = area => {
+        const W = World(), view = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea());
+        return sameArea(view, area) && zOf(view) === zOf(area);
+    };
 
     //-------------------------------------------------------------------------
     // Types: the catalog list with typeId = index + 1 (copies; the catalog itself stays untouched)
@@ -94,9 +110,10 @@
 
     function gridOf(area) {
         const W = World();
-        if (!W || !W.state || !area || !W.inWorld(area.x, area.y)) return null;
-        if (sameArea(area, W.currentArea()) && window.$dataMap && $dataMap.ufObjects) return $dataMap.ufObjects;
-        return W.peekArea(area.x, area.y).ufObjects || null;
+        if (!validArea(area)) return null;
+        if (onScreen(area) && window.$dataMap && $dataMap.ufObjects) return $dataMap.ufObjects;
+        const map = W.peekArea(area.x, area.y, zOf(area));
+        return map && map.ufObjects || null;
     }
     const inArea = (x, y) => {
         const W = World();
@@ -105,8 +122,8 @@
     };
     function typeIdIn(area, x, y) {
         const W = World();
-        if (!W || !W.state || !area || !inArea(x, y)) return 0;
-        return W.getObject(area.x, area.y, x, y) | 0;
+        if (!validArea(area) || !inArea(x, y)) return 0;
+        return W.getObject(area.x, area.y, x, y, zOf(area)) | 0;
     }
     // Passability of the map on screen, read straight from $dataMap (hot path: pathfinding calls it a lot).
     function blocksAt(x, y) {
@@ -117,7 +134,7 @@
     }
 
     //-------------------------------------------------------------------------
-    // Regrowth: UF.World.state.regrow = [{ area: {x, y}, x, y, from: typeId, to: typeId, due: hour }]
+    // Regrowth: [{ area:{x,y}, x, y, z, from:typeId, to:typeId, due:hour }]. Missing z is Ground.
 
     // A monotonic game-hour count from the clock (28-day months, 12 months), so "in 48 hours" survives saves.
     function absHour() {
@@ -136,11 +153,11 @@
         if (!list) return;
         for (let i = list.length - 1; i >= 0; i--) {
             const e = list[i];
-            if (e.x === x && e.y === y && sameArea(e.area, area)) list.splice(i, 1);
+            if (e.x === x && e.y === y && sameArea(e.area, area) && zOf(e) === zOf(area)) list.splice(i, 1);
         }
         const r = toType && toType.regrow;
         if (!r || !(r.hours > 0) || !typeIdOf(r.to)) return;
-        list.push({ area: { x: area.x, y: area.y }, x, y, from: toType.typeId, to: typeIdOf(r.to), due: absHour() + (r.hours | 0) });
+        list.push({ area: { x: area.x, y: area.y }, x, y, z: zOf(area), from: toType.typeId, to: typeIdOf(r.to), due: absHour() + (r.hours | 0) });
     }
     function processRegrow() {
         const W = World();
@@ -149,12 +166,14 @@
         if (!list || !list.length) return 0;
         const now = absHour();
         const due = [];
-        for (let i = list.length - 1; i >= 0; i--) if (list[i].due <= now) due.push(list.splice(i, 1)[0]);
+        for (let i = list.length - 1; i >= 0; i--) if (list[i].due <= now && validArea(levelArea(list[i].area, zOf(list[i])))) due.push(list.splice(i, 1)[0]);
         let grown = 0;
         for (const e of due) {
             // Only if the picked plant is still there: a built wall or a felled tree on that cell cancels the regrowth.
-            if (typeIdIn(e.area, e.x, e.y) !== e.from) continue;
-            if (setIn(e.area, e.x, e.y, e.to)) grown++;
+            const area = levelArea(e.area, zOf(e));
+            if (typeIdIn(area, e.x, e.y) !== e.from) continue;
+            if (setIn(area, e.x, e.y, e.to)) grown++;
+            else list.push(e); // a temporary spawn guard refusal must not erase regrowth
         }
         return grown;
     }
@@ -164,16 +183,18 @@
 
     function setIn(area, x, y, idOrTypeId) {
         const W = World();
-        if (!W || !W.state || !area || !W.inWorld(area.x, area.y) || !inArea(x, y)) return false;
+        if (!validArea(area) || !inArea(x, y)) return false;
+        const z = zOf(area);
         const to = resolve(idOrTypeId);
         if (to === null) return false;
-        const from = W.getObject(area.x, area.y, x, y) | 0;
+        const from = W.getObject(area.x, area.y, x, y, z) | 0;
         if (from === to) return true;
-        if (!W.setObject(area.x, area.y, x, y, to)) return false; // records the diff, patches the map on screen, emits world:objectChanged
+        if (!W.setObject(area.x, area.y, x, y, to, z)) return false; // records the diff and patches this level's maps
         const fromType = from ? typeOf(from) : null;
         const toType = to ? typeOf(to) : null;
         scheduleRegrow(area, x, y, toType);
-        emit("objects:changed", { x: area.x, y: area.y }, x, y, fromType ? fromType.id : null, toType ? toType.id : null);
+        if (z === 0) emit("objects:changed", { x: area.x, y: area.y }, x, y, fromType ? fromType.id : null, toType ? toType.id : null);
+        else emit("objects:levelChanged", levelArea(area), x, y, fromType ? fromType.id : null, toType ? toType.id : null);
         return true;
     }
 
@@ -190,14 +211,14 @@
         const items = [];
         if (window.UF && UF.Items && typeof UF.Items.drop === "function") {
             for (const itemId of Object.keys(yields)) {
-                const dropped = UF.Items.drop({ x: area.x, y: area.y }, x, y, itemId, yields[itemId]);
+                const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId]);
                 if (dropped) items.push(dropped);
             }
         }
         const toId = a.becomes === undefined ? null : a.becomes; // no "becomes" = the object is used up
         setIn(area, x, y, toId);
         return {
-            ok: true, action, area: { x: area.x, y: area.y }, x, y,
+            ok: true, action, area: { x: area.x, y: area.y }, x, y, z: zOf(area),
             from: from.id, to: toId, yields, items,
             actor: actor && actor.id !== undefined ? actor.id : (actor === undefined ? null : actor)
         };
@@ -574,7 +595,10 @@
     //-------------------------------------------------------------------------
     // The public object
 
-    const currentArea = () => (World() ? World().currentArea() : null);
+    const currentArea = () => {
+        const W = World(), view = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea());
+        return validArea(view) ? levelArea(view) : null;
+    };
     const Objects = {
         MIN_Z,
         UNDER_BONUS,
@@ -645,7 +669,11 @@
         hooked = true;
         UF.Events.on("world:objectChanged", area => {
             const l = currentLayer();
-            if (l && sameArea(area, currentArea())) l.markDirty();
+            if (l && onScreen(area)) l.markDirty();
+        });
+        UF.Events.on("world:levelObjectChanged", area => {
+            const l = currentLayer();
+            if (l && onScreen(area)) l.markDirty();
         });
         UF.Events.on("time:hour", () => processRegrow());
     }

@@ -5,6 +5,9 @@ Map objects (trees, plants, stones, ore, buildings) from `catalog.objects`: one 
 **Owner:** Claude Code (objects agent) · **File:** `game/js/plugins/UF_Objects.js` · **Load order:** after `UF_World`, `UF_WorldGen`, `UF_Tiles`, `UF_History`; before `UF_Items`, `UF_Jobs` and `UF_Test` (WORLD_ARCHITECTURE §5). Not yet registered in the real `game/js/plugins.js` (Claude Code registers it when the editor is closed); tests ran with `--plugins UF_Tiles,UF_Objects`.
 
 ## API
+
+Level seam added 2026-09-19: every area argument accepts a LevelArea `{x,y,z?}`. Omitted z means Ground; only integer -2 through +2 is accepted. Non-ground operations require World `viewLevel` and `levelOfMapId`; they refuse before reaching a legacy Ground-only core. Positional World reads/writes receive trailing z. `at`, `set`, `find`, `apply`, and `describe` use the viewed level. `applyIn` returns z beside its area and drops yields on that same level.
+
 `UF.Objects`:
 - `types()` → `[entry]`: the catalog list with `typeId` (index + 1) and `tintValue` added (copies; the catalog stays untouched).
 - `type(idOrTypeId: string | number)` → entry or `null`.
@@ -31,13 +34,13 @@ Rendering (WORLD_ARCHITECTURE §4): one pooled `Sprite` per object in view (`dis
 
 ## State it saves
 - `UF.World.state.objectDiffs[areaKey][cellIndex]` (written by `UF.World.setObject`): every changed cell.
-- `UF.World.state.regrow`: `[{ area: {x, y}, x, y, from: typeId, to: typeId, due: hour }]`, one entry at most per cell; `due` compared with `hourNow()`.
+- `UF.World.state.regrow`: `[{ area: {x, y}, x, y, z, from: typeId, to: typeId, due: hour }]`, one entry at most per cell and level; `due` compared with `hourNow()`. Old missing-z entries mean Ground. All levels' due entries are serviced on the same hour event regardless of the viewed map. If a spawn guard temporarily refuses regrowth, the due entry is retained for retry.
 - `UF.World.state.regrowHours`: only when `$ufTime` is missing (a fallback hour counter).
 - Nothing in `unit.data`.
 
 ## Events (UF.Events)
-- Emits `objects:changed(area, x, y, fromId | null, toId | null)` on every change made through `set`, `setIn`, `apply`, `applyIn` or regrowth. (`UF.World.setObject` also emits `world:objectChanged(area, x, y, typeId)`.)
-- Listens: `world:objectChanged` (redraw the cell's area if it's on screen), `time:hour` (regrowth; entries whose cell no longer holds the picked type are dropped).
+- Emits `objects:changed(area, x, y, fromId | null, toId | null)` for Ground changes through `set`, `setIn`, `apply`, `applyIn` or regrowth. Other levels emit `objects:levelChanged(levelArea,x,y,fromId,toId)` instead. (`UF.World.setObject` emits the corresponding `world:objectChanged` or `world:levelObjectChanged`.)
+- Listens: both World object-change events (redraw only when the changed level is viewed), `time:hour` (regrowth across every level; entries whose cell no longer holds the picked type are dropped).
 
 ## Keys and mouse
 None.
@@ -75,6 +78,9 @@ Screenshots: `objects.objects_in_view.png` (zoom 1: the pair among the test obje
 None, aliases only: `Game_Map.prototype.isPassable`, `Spriteset_Map.prototype.createCharacters`, `Scene_Boot.prototype.start`.
 
 ## Known limits
+
+2026-09-19 merge verification: Objects/Items real source in a Node VM with documented World stubs passed 9 contract checks covering five independent object grids and item indices, regrowth on all five levels at one hour, yields, event signatures, strict z validation, item record precedence, inventory level changes/removal, viewed reads, and JSON state reload. Removing z from the loaded Items index key produced 5 failures. Syntax checks passed. This is API evidence; coherent five-level runtime snapshots and RMMZ F5/F8 remain to be run for this merge. Existing wall framing and test-fixture changes were preserved.
+
 - A cell with an impassable object can't be left either (like an impassable tile), so a unit standing where a wall gets built is stuck until the wall goes. Regrowth can't cause this: only picked bushes and trees regrow, and units never stand on them.
 - A passable object that isn't `under` (a stump) has the same z as a unit on its cell; the tie falls to sprite creation order, so the unit may draw under the stump.
 - "Under" objects (grass, stones, beds, stockpiles) draw over stance markers (z 5) and designation markers (z 6) on every row, by the contract's z formula (foot row − 100 ≥ 7); `MIN_Z` 7 keeps the top screen rows consistent with the rest instead of letting them fall under the ground layer.

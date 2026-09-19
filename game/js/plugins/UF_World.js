@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF World] World made of 256x256 areas (one surface layer). Units and the view travel between areas; off-screen units keep moving.
+ * @plugindesc [UF World] World made of 256x256 areas on five levels (z -2..+2, VISION V80). Units and the view travel between areas; off-screen units keep moving.
  * @author UF project
  * @orderAfter UF_ProcGen
  *
@@ -98,6 +98,20 @@
  * setObject refuses a blocking object on a cell where a unit stands, and
  * regrowth onto such a cell waits until the unit has left.
  *
+ * Levels (2026-09-19, VISION V80, docs/design/VERTICAL_BUILD_PLAN.md): every
+ * area has five levels, z = -2..+2 (0 = the ground). Units, tiles and objects
+ * carry z; a trailing z argument that is left out means the ground. One map
+ * id per level: MapIdBase + slot * areas + area index, slot 0 = ground (so
+ * the ground keeps its old ids), 1 = +1, 2 = +2, 3 = -1, 4 = -2. The legacy
+ * calls stay ground-only on purpose: currentArea() / areaOfMapId() /
+ * isAreaMap() answer only for the ground (null while another level is on
+ * screen), and world:tileChanged / world:objectChanged / world:areaBuilt fire
+ * only for z 0 (world:levelTileChanged / world:levelObjectChanged /
+ * world:levelBuilt otherwise). viewLevel() and levelOfMapId() are z-aware.
+ * Generators run for the ground only unless registered with { levels }.
+ * Off-screen units walk planned paths on their own level. UF_Levels owns the
+ * level shapes, tiles and view switching.
+ *
  * API, events, save data and checks: docs/systems/UF_World.md
  * Architecture: docs/design/WORLD_ARCHITECTURE.md
  *
@@ -131,10 +145,24 @@
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
-    // Areas are { x, y }.
+    // Areas are { x, y }. sameArea ignores z on purpose (VISION V80: the legacy compare means "the same area").
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const areaKey = (ax, ay) => `${ax},${ay}`;
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    // Levels (VISION V80): z -2..+2, 0 = the ground. A record's z sits beside its area (unit.z, item.z); an API
+    // handle may carry it inside the area ({ x, y, z }). A missing z is the ground.
+    const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
+    const SLOT = { 0: 0, 1: 1, 2: 2, "-1": 3, "-2": 4 }; // map id slot of each level; the ground keeps slot 0 (changed only by a test provocation)
+    const zOf = o => (o && o.z !== undefined ? o.z : 0);
+    const isLevel = z => Number.isInteger(z) && z >= -2 && z <= 2;
+    // Diff and cache key of an area's level: the ground keeps the pre-V80 key "x,y".
+    const levelKey = (ax, ay, z) => (z ? `${ax},${ay},${z}` : `${ax},${ay}`);
+    // The level on screen matches (ax, ay, z)? (World.viewLevel is defined with the areas below.)
+    const onView = (ax, ay, z) => {
+        const v = World.viewLevel();
+        return !!v && v.x === ax && v.y === ay && v.z === z;
+    };
 
     // 8-way movement (VISION V3, 2026-09-19): UF_Movement8D's FourWay is off by default; with it on (the 2026-09-18
     // rule) units step along one axis at a time.
@@ -225,10 +253,14 @@
     const World = {
         config: CONFIG,
         EVENT_BASE,
+        LEVELS,
         state: null,
         _frame: 0,
         hash32,
-        mulberry32
+        mulberry32,
+        zOf,
+        isLevel,
+        levelKey
     };
     window.UF = window.UF || {};
     window.UF.World = World;
@@ -251,8 +283,12 @@
             objectDiffs: {}
         };
         buildCache.clear();
+        offOcc = null;
         clearPaths(true);
         spawnStats = newSpawnStats();
+        // Baselines must exist before faction/site listeners choose founding cells. This phase is for idempotent
+        // world-state initialization only; world:created below remains the populated-world generation hook.
+        emit("world:initializing", this.state);
         // Template units are placed before world:created, when generators' inputs (faction sites, history) aren't
         // there yet: checking their cells now would build and cache the area too early. They're seated right after.
         seatLater = [];
@@ -267,7 +303,7 @@
         for (const id of early) {
             const u = this.unit(id);
             if (!u) continue;
-            const c = seatCell(u.area.x, u.area.y, u.x, u.y, 0, u.name, u.id);
+            const c = seatCell(u.area.x, u.area.y, u.x, u.y, 0, u.name, u.id, zOf(u));
             spawnStats[c.how]++;
             u.x = c.x;
             u.y = c.y;
@@ -310,17 +346,44 @@
 
     const worldDims = () => (World.state ? World.state : CONFIG);
 
-    World.inWorld = (ax, ay) => ax >= 0 && ay >= 0 && ax < worldDims().areasX && ay < worldDims().areasY;
-    /** Map ID of an area: MapIdBase + ay * areasX + ax. */
-    World.areaMapId = (ax, ay) => CONFIG.mapIdBase + ay * worldDims().areasX + ax;
+    /** True for an area inside the world grid and a level -2..+2 (z left out = the ground). */
+    World.inWorld = (ax, ay, z = 0) => Number.isInteger(ax) && Number.isInteger(ay) && ax >= 0 && ay >= 0 && ax < worldDims().areasX && ay < worldDims().areasY && isLevel(z);
+    /** Map ID of an area's level: MapIdBase + slot * areas + ay * areasX + ax (ground slot 0, so ground ids are unchanged). 0 for a non-level z. */
+    World.areaMapId = (ax, ay, z = 0) => {
+        if (!World.inWorld(ax, ay, z)) return 0;
+        const d = worldDims();
+        return CONFIG.mapIdBase + SLOT[z] * d.areasX * d.areasY + ay * d.areasX + ax;
+    };
+    /** The ground area of a map ID, or null (another level's map, or not a world map). Ground-only by design (VISION V80). */
     World.areaOfMapId = function(mapId) {
         const d = worldDims();
         const i = mapId - CONFIG.mapIdBase;
         if (!Number.isInteger(i) || i < 0 || i >= d.areasX * d.areasY) return null;
         return { x: i % d.areasX, y: Math.floor(i / d.areasX) };
     };
+    /** { x, y, z } of any level's map ID, or null. */
+    World.levelOfMapId = function(mapId) {
+        const d = worldDims();
+        const n = d.areasX * d.areasY;
+        const i = mapId - CONFIG.mapIdBase;
+        if (!Number.isInteger(i) || i < 0 || i >= n * LEVELS.length) return null;
+        const slot = Math.floor(i / n), j = i % n;
+        const z = LEVELS.find(l => SLOT[l] === slot);
+        return { x: j % d.areasX, y: Math.floor(j / d.areasX), z };
+    };
     World.isAreaMap = mapId => World.areaOfMapId(mapId) !== null;
+    /** True for the map of any level of any area. */
+    World.isWorldMap = mapId => World.levelOfMapId(mapId) !== null;
+    /** The ground area on screen, or null (not a world map, or another level is on screen: see viewLevel). */
     World.currentArea = () => (window.$gameMap && World.state ? World.areaOfMapId($gameMap.mapId()) : null);
+    /** { x, y, z } of the level on screen, or null when the map on screen isn't a world map. (A shared object: don't change it.) */
+    let viewMemo = { id: NaN, state: null, level: null };
+    World.viewLevel = () => {
+        if (!window.$gameMap || !World.state) return null;
+        const id = $gameMap.mapId();
+        if (viewMemo.id !== id || viewMemo.state !== World.state) viewMemo = { id, state: World.state, level: Object.freeze(World.levelOfMapId(id)) };
+        return viewMemo.level;
+    };
     World.isStartArea = (ax, ay) => !!World.state && World.state.startArea.x === ax && World.state.startArea.y === ay;
     World.sameArea = sameArea;
     World.areaKey = areaKey;
@@ -337,11 +400,13 @@
      *        objects (Uint16Array), setObject(x, y, type), getObject(x, y),   (object types: UF_Objects)
      *        addEvent({ name, x, y, image, note, priorityType, through, directionFix, walkAnime }) -> event id }
      * Generators must be deterministic: use ctx.rng / UF.World.rngFor / hashes of coordinates only, never Math.random.
+     * opts.levels: the levels the generator paints (default [0], the ground). ctx.z says which level is being built.
      */
-    World.registerGenerator = function(name, fn, order = 100) {
+    World.registerGenerator = function(name, fn, order = 100, opts = {}) {
         const i = generators.findIndex(g => g.name === name);
         if (i >= 0) generators.splice(i, 1);
-        generators.push({ name, fn, order });
+        const levels = Array.isArray(opts && opts.levels) ? opts.levels.filter(isLevel) : [0];
+        generators.push({ name, fn, order, levels });
         generators.sort((a, b) => a.order - b.order);
     };
     World.generators = () => generators.map(g => g.name);
@@ -373,16 +438,20 @@
         return this._templateMask.mask[ty * tpl.width + tx] === 1;
     };
 
-    /** Build an area's $dataMap object in memory. Pure: doesn't touch the current map. */
-    World.buildArea = function(ax, ay) {
+    /**
+     * Build the $dataMap object of an area's level (z left out = the ground) in memory. Pure: doesn't touch the
+     * current map. Only the generators registered for that level run; the start template is ground-only.
+     */
+    World.buildArea = function(ax, ay, z = 0) {
         const st = this.state;
+        if (!st || !this.inWorld(ax, ay, z)) return null;
         const size = st.size;
         const cells = size * size;
         const index = (x, y, layer) => (layer * size + y) * size + x;
         const data = new Array(cells * 6).fill(0);
         for (let i = 0; i < cells; i++) data[i] = CONFIG.groundTileId;
 
-        const tpl = this.isStartArea(ax, ay) ? this.template() : null;
+        const tpl = z === 0 && this.isStartArea(ax, ay) ? this.template() : null;
         const off = this.templateOffset();
         const templateRect = tpl ? { x: off.x, y: off.y, width: tpl.width, height: tpl.height } : null;
         const events = [null];
@@ -397,11 +466,11 @@
             width: size, height: size, note: "",
             parallaxLoopX: false, parallaxLoopY: false, parallaxName: "", parallaxShow: false, parallaxSx: 0, parallaxSy: 0,
             scrollType: 0, specifyBattleback: false, tilesetId: CONFIG.tilesetId,
-            data, events, ufArea: { x: ax, y: ay }, ufObjects: objects
+            data, events, ufArea: { x: ax, y: ay, z }, ufObjects: objects
         };
 
         const ctx = {
-            areaX: ax, areaY: ay, width: size, height: size, seed: st.seed,
+            areaX: ax, areaY: ay, z, width: size, height: size, seed: st.seed,
             rng: this.rngFor(ax, ay), isStart: this.isStartArea(ax, ay), templateRect, index,
             map, // the $dataMap being built: generators may set map.note / map.displayName / map.tilesetId
             center: { x: Math.floor(size / 2), y: Math.floor(size / 2) },
@@ -424,7 +493,7 @@
                 return id;
             }
         };
-        for (const g of generators) g.fn(ctx);
+        for (const g of generators) if (g.levels.includes(z)) g.fn(ctx);
 
         if (tpl) {
             // The template is an overlay: only cells it paints (any tile on layers 0-3) replace the generated ground.
@@ -456,45 +525,69 @@
             for (const k of ["autoplayBgm", "autoplayBgs", "bgm", "bgs"]) map[k] = JSON.parse(JSON.stringify(tpl[k]));
         }
 
-        const diff = st.diffs[areaKey(ax, ay)];
+        const diff = st.diffs[levelKey(ax, ay, z)];
         if (diff) for (const i in diff) data[Number(i)] = diff[i];
-        const odiff = st.objectDiffs && st.objectDiffs[areaKey(ax, ay)];
+        const odiff = st.objectDiffs && st.objectDiffs[levelKey(ax, ay, z)];
         if (odiff) for (const i in odiff) objects[Number(i)] = odiff[i];
 
-        for (const u of this.unitsInArea(ax, ay)) events[EVENT_BASE + u.id] = unitEventData(u);
+        for (const u of this.unitsInArea(ax, ay, z)) events[EVENT_BASE + u.id] = unitEventData(u);
         return map;
     };
 
-    /** Change a tile anywhere in the world. Recorded, so it survives leaving the area and saving. */
-    World.setTile = function(ax, ay, x, y, layer, tileId) {
-        const size = this.state.size;
-        if (!this.inWorld(ax, ay) || x < 0 || y < 0 || x >= size || y >= size || layer < 0 || layer > 5) return false;
+    // Write one tile of an area's level: the map on screen and the cached build (and their walk grids). No diff.
+    function patchTile(ax, ay, x, y, layer, tileId, z) {
+        const size = World.state.size;
         const i = (layer * size + y) * size + x;
-        const key = areaKey(ax, ay);
-        (this.state.diffs[key] = this.state.diffs[key] || {})[i] = tileId;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.data) {
-            $dataMap.data[i] = tileId;
-            pathCellChanged($dataMap, x, y, true);
+        const screen = onView(ax, ay, z) && window.$dataMap && $dataMap.data ? $dataMap : null;
+        if (screen) {
+            screen.data[i] = tileId;
+            pathCellChanged(screen, x, y, true);
             const scene = SceneManager._scene;
             if (scene instanceof Scene_Map && scene._spriteset) scene._spriteset._tilemap.refresh();
         }
-        const cached = buildCache.get(cacheKey(ax, ay));
-        if (cached) {
+        const cached = buildCache.get(cacheKey(ax, ay, z));
+        if (cached && cached !== screen) {
             cached.data[i] = tileId;
             pathCellChanged(cached, x, y, true);
         }
-        emit("world:tileChanged", { x: ax, y: ay }, x, y, layer, tileId);
+    }
+    const tileArgsOk = (ax, ay, x, y, layer, z) => {
+        const size = World.state ? World.state.size : 0;
+        return Number.isInteger(x) && Number.isInteger(y) && Number.isInteger(layer) && World.inWorld(ax, ay, z) && x >= 0 && y >= 0 && x < size && y < size && layer >= 0 && layer <= 5;
+    };
+
+    /** Change a tile anywhere in the world (z left out = the ground). Recorded, so it survives leaving the area and saving. */
+    World.setTile = function(ax, ay, x, y, layer, tileId, z = 0) {
+        if (!tileArgsOk(ax, ay, x, y, layer, z)) return false;
+        const size = this.state.size;
+        const i = (layer * size + y) * size + x;
+        const key = levelKey(ax, ay, z);
+        (this.state.diffs[key] = this.state.diffs[key] || {})[i] = tileId;
+        patchTile(ax, ay, x, y, layer, tileId, z);
+        if (z === 0) emit("world:tileChanged", { x: ax, y: ay }, x, y, layer, tileId);
+        else emit("world:levelTileChanged", { x: ax, y: ay, z }, x, y, layer, tileId);
+        return true;
+    };
+    /**
+     * Change a tile that is derived from saved state kept elsewhere (UF_Levels' cell shapes): patches the map on
+     * screen and the cached build like setTile, but records no tile diff. Emits world:levelTileChanged.
+     */
+    World.setDerivedTile = function(ax, ay, x, y, layer, tileId, z = 0) {
+        if (!tileArgsOk(ax, ay, x, y, layer, z)) return false;
+        patchTile(ax, ay, x, y, layer, tileId, z);
+        emit("world:levelTileChanged", { x: ax, y: ay, z }, x, y, layer, tileId);
         return true;
     };
 
-    /** Read a tile. Off-screen areas come from the peek cache (built once, then reused). */
-    World.getTile = function(ax, ay, x, y, layer) {
+    /** Read a tile (z left out = the ground). Off-screen levels come from the peek cache (built once, then reused). */
+    World.getTile = function(ax, ay, x, y, layer, z = 0) {
+        if (!tileArgsOk(ax, ay, x, y, layer, z)) return 0;
         const size = this.state.size;
         const i = (layer * size + y) * size + x;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.data) return $dataMap.data[i];
-        const diff = this.state.diffs[areaKey(ax, ay)];
+        if (onView(ax, ay, z) && $dataMap && $dataMap.data) return $dataMap.data[i];
+        const diff = this.state.diffs[levelKey(ax, ay, z)];
         if (diff && diff[i] !== undefined) return diff[i];
-        return this.peekArea(ax, ay).data[i];
+        return this.peekArea(ax, ay, z).data[i];
     };
 
     /**
@@ -503,16 +596,16 @@
      * new type blocks movement and a unit that doesn't pass through everything stands on the cell (VISION V68);
      * World.lastObjectRefusal says why. Generators write their own grid while an area is built: worldgen is unaffected.
      */
-    World.setObject = function(ax, ay, x, y, type) {
+    World.setObject = function(ax, ay, x, y, type, z = 0) {
         const size = this.state.size;
-        if (!this.inWorld(ax, ay) || x < 0 || y < 0 || x >= size || y >= size) return false;
-        const stander = type && !(guardOff && guardOff.objects) && typeBlocks(type | 0) ? standerAt(ax, ay, x, y) : null;
-        if (stander && this.getObject(ax, ay, x, y) !== (type | 0)) {
+        if (!this.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= size || y >= size) return false;
+        const stander = type && !(guardOff && guardOff.objects) && typeBlocks(type | 0) ? standerAt(ax, ay, x, y, z) : null;
+        if (stander && this.getObject(ax, ay, x, y, z) !== (type | 0)) {
             const O = window.UF.Objects;
             const t = O && O.type ? O.type(type | 0) : null;
             const r = {
-                area: { x: ax, y: ay }, x, y, type: type | 0, objectId: t ? t.id : null, unitId: stander.id, unitName: stander.name,
-                reason: `${t ? `"${t.id}"` : `object type ${type | 0}`} can't go on (${x},${y}) in area (${ax},${ay}): "${stander.name}" (unit ${stander.id}) stands there`
+                area: { x: ax, y: ay }, x, y, z, type: type | 0, objectId: t ? t.id : null, unitId: stander.id, unitName: stander.name,
+                reason: `${t ? `"${t.id}"` : `object type ${type | 0}`} can't go on (${x},${y}) in area (${ax},${ay})${z ? ` at level ${z}` : ""}: "${stander.name}" (unit ${stander.id}) stands there`
             };
             this.lastObjectRefusal = r;
             spawnStats.objectRefusals++;
@@ -521,47 +614,78 @@
             return false;
         }
         const i = y * size + x;
-        const key = areaKey(ax, ay);
+        const key = levelKey(ax, ay, z);
         const diffs = (this.state.objectDiffs = this.state.objectDiffs || {});
         (diffs[key] = diffs[key] || {})[i] = type | 0;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.ufObjects) {
-            $dataMap.ufObjects[i] = type | 0;
-            pathCellChanged($dataMap, x, y, false);
+        const screen = onView(ax, ay, z) && $dataMap && $dataMap.ufObjects ? $dataMap : null;
+        if (screen) {
+            screen.ufObjects[i] = type | 0;
+            pathCellChanged(screen, x, y, false);
         }
-        const cached = buildCache.get(cacheKey(ax, ay));
-        if (cached) {
+        const cached = buildCache.get(cacheKey(ax, ay, z));
+        if (cached && cached !== screen) {
             cached.ufObjects[i] = type | 0;
             pathCellChanged(cached, x, y, false);
         }
-        emit("world:objectChanged", { x: ax, y: ay }, x, y, type | 0);
+        if (z === 0) emit("world:objectChanged", { x: ax, y: ay }, x, y, type | 0);
+        else emit("world:levelObjectChanged", { x: ax, y: ay, z }, x, y, type | 0);
         return true;
     };
-    /** Object type number on a cell (0 = nothing). Off-screen areas come from the peek cache. */
-    World.getObject = function(ax, ay, x, y) {
+    /** Object type number on a cell (0 = nothing; z left out = the ground). Off-screen levels come from the peek cache. */
+    World.getObject = function(ax, ay, x, y, z = 0) {
         const size = this.state.size;
-        if (!this.inWorld(ax, ay) || x < 0 || y < 0 || x >= size || y >= size) return 0;
+        if (!this.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= size || y >= size) return 0;
         const i = y * size + x;
-        if (sameArea({ x: ax, y: ay }, this.currentArea()) && $dataMap && $dataMap.ufObjects) return $dataMap.ufObjects[i];
-        return this.peekArea(ax, ay).ufObjects[i];
+        if (onView(ax, ay, z) && $dataMap && $dataMap.ufObjects) return $dataMap.ufObjects[i];
+        return this.peekArea(ax, ay, z).ufObjects[i];
     };
 
-    // Built areas kept for reading off-screen cells (AI, jobs, spawning) without rebuilding 256x256 every call.
-    // setTile/setObject patch the cached copy. Its events are a snapshot from build time: don't read them.
+    // Built levels kept for reading off-screen cells (AI, jobs, spawning) without rebuilding 256x256 every call.
+    // setTile/setObject patch the cached copy. Its unit events are a snapshot from build time: don't read them
+    // (refreshUnitEvents renews them when a cached build becomes the map on screen).
     const buildCache = new Map();
     const PEEK_CACHE = 6;
-    const cacheKey = (ax, ay) => (World.state ? `${World.state.seed}:${areaKey(ax, ay)}` : "");
-    /** A cached build of an area (tiles and objects). Same object on repeated calls until it's evicted. */
-    World.peekArea = function(ax, ay) {
-        const key = cacheKey(ax, ay);
+    const cacheKey = (ax, ay, z = 0) => (World.state ? `${World.state.seed}:${levelKey(ax, ay, z)}` : "");
+    let lastUsedKey = null;
+    const remember = (key, map) => {
+        buildCache.delete(key); // re-insert: the Map's order is least recently used first
+        buildCache.set(key, map);
+        lastUsedKey = key;
+        while (buildCache.size > PEEK_CACHE) buildCache.delete(buildCache.keys().next().value);
+    };
+    /** A cached build of an area's level (tiles and objects; z left out = the ground). Same object on repeated calls until it's evicted. */
+    World.peekArea = function(ax, ay, z = 0) {
+        if (!this.state || !this.inWorld(ax, ay, z)) return null;
+        const key = cacheKey(ax, ay, z);
         let map = buildCache.get(key);
         if (!map) {
-            map = this.buildArea(ax, ay);
-            buildCache.set(key, map);
-            while (buildCache.size > PEEK_CACHE) buildCache.delete(buildCache.keys().next().value);
+            map = this.buildArea(ax, ay, z);
+            remember(key, map);
+        } else if (key !== lastUsedKey) {
+            remember(key, map);
         }
         return map;
     };
-    World.clearPeekCache = () => buildCache.clear();
+    /** Keep a finished build (the map that was on screen) in the peek cache, so reading or showing that level again doesn't rebuild it. */
+    World.adoptBuild = function(ax, ay, z, map) {
+        if (!this.state || !map || !map.data || !map.ufObjects || !this.inWorld(ax, ay, z)) return false;
+        remember(cacheKey(ax, ay, z), map);
+        return true;
+    };
+    /** The cached build of a level if there is one (no build), else null. */
+    World.cachedBuild = (ax, ay, z = 0) => buildCache.get(cacheKey(ax, ay, z)) || null;
+    /** Replace a build's unit events with fresh ones for the units now on that level (a cached build about to be shown). */
+    World.refreshUnitEvents = function(map, ax, ay, z = 0) {
+        if (!map || !Array.isArray(map.events)) return 0;
+        for (let i = EVENT_BASE; i < map.events.length; i++) map.events[i] = null;
+        const units = this.unitsInArea(ax, ay, z);
+        for (const u of units) map.events[EVENT_BASE + u.id] = unitEventData(u);
+        return units.length;
+    };
+    World.clearPeekCache = () => {
+        buildCache.clear();
+        lastUsedKey = null;
+    };
 
     //-------------------------------------------------------------------------
     // Units
@@ -619,15 +743,15 @@
      * (UF_Objects) and no other unit there. Works for areas off screen (peek cache). User rule 2026-09-18: nothing
      * spawns into walls, trees or water.
      */
-    World.cellFree = function(ax, ay, x, y, ignoreUnitId = 0) {
+    World.cellFree = function(ax, ay, x, y, ignoreUnitId = 0, z = 0) {
         const st = this.state;
-        if (!st || !this.inWorld(ax, ay) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
-        const onScreen = sameArea({ x: ax, y: ay }, this.currentArea()) && window.$gameMap && $gameMap.mapId() === this.areaMapId(ax, ay);
+        if (!st || !this.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
+        const onScreen = onView(ax, ay, z) && window.$gameMap && $gameMap.mapId() === this.areaMapId(ax, ay, z);
         if (onScreen) {
             if (!$gameMap.isPassable(x, y, 2) && !$gameMap.isPassable(x, y, 8)) return false;
             if (Tilemap.isWaterTile($gameMap.tileId(x, y, 0))) return false;
         } else {
-            const map = this.peekArea(ax, ay);
+            const map = this.peekArea(ax, ay, z);
             const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
             const size = st.size;
             for (let layer = 3; layer >= 0; layer--) {
@@ -639,21 +763,21 @@
                 if ((flag & 0x0f) === 0x0f) return false;
                 break;
             }
-            if (window.UF.Objects && UF.Objects.blocksIn && UF.Objects.blocksIn({ x: ax, y: ay }, x, y)) return false;
+            if (window.UF.Objects && UF.Objects.blocksIn && UF.Objects.blocksIn({ x: ax, y: ay, z }, x, y)) return false;
         }
         if (onScreen && window.UF.Objects && UF.Objects.blocks && UF.Objects.blocks(x, y)) return false;
-        for (const u of this.units()) if (u.id !== ignoreUnitId && u.area.x === ax && u.area.y === ay && u.x === x && u.y === y) return false;
+        for (const u of this.units()) if (u.id !== ignoreUnitId && u.area.x === ax && u.area.y === ay && u.x === x && u.y === y && zOf(u) === z) return false;
         return true;
     };
     /** The nearest free cell to (x, y) within `radius` (rings outward, then by distance), or null. */
-    World.nearestFreeCell = function(ax, ay, x, y, radius = 6, ignoreUnitId = 0) {
-        if (this.cellFree(ax, ay, x, y, ignoreUnitId)) return { x, y };
+    World.nearestFreeCell = function(ax, ay, x, y, radius = 6, ignoreUnitId = 0, z = 0) {
+        if (this.cellFree(ax, ay, x, y, ignoreUnitId, z)) return { x, y };
         for (let r = 1; r <= radius; r++) {
             let best = null, bestD = Infinity;
             for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
                 if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
                 const d = dx * dx + dy * dy;
-                if (d < bestD && this.cellFree(ax, ay, x + dx, y + dy, ignoreUnitId)) { best = { x: x + dx, y: y + dy }; bestD = d; }
+                if (d < bestD && this.cellFree(ax, ay, x + dx, y + dy, ignoreUnitId, z)) { best = { x: x + dx, y: y + dy }; bestD = d; }
             }
             if (best) return best;
         }
@@ -674,9 +798,11 @@
         const argv = (typeof nw !== "undefined" && nw.App && nw.App.argv) || [];
         if (!argv.some(a => a === "--uf-test" || String(a).startsWith("--uf-test="))) return [];
         const env = (typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || "";
-        return env.split(",").map(s => s.trim()).filter(s => s.startsWith("spawn."));
+        return env.split(",").map(s => s.trim()).filter(s => s.startsWith("spawn.") || s.startsWith("world."));
     })();
     const provoked = name => PROVOKE.includes(`spawn.${name}`);
+    // world.level_ids (seen failing once): the -1 map id slot collides with +1's.
+    if (PROVOKE.includes("world.level_ids")) SLOT["-1"] = 1;
     let guardOff = provoked("guard") || provoked("exact") || provoked("objects")
         ? { units: provoked("guard"), exact: provoked("exact"), objects: provoked("objects") } : null;
     function newSpawnStats() {
@@ -695,14 +821,14 @@
      * that is at least walkable (World.walkable: tiles, water, objects) even if another unit stands there, with a
      * warning; with none of those either, (x, y) itself, with a warning. Returns { x, y, how, dist }.
      */
-    function seatCell(ax, ay, x, y, radius, name, ignoreId = 0) {
+    function seatCell(ax, ay, x, y, radius, name, ignoreId = 0, z = 0) {
         const W = World;
-        if (W.cellFree(ax, ay, x, y, ignoreId)) return { x, y, how: "asked", dist: 0 };
+        if (W.cellFree(ax, ay, x, y, ignoreId, z)) return { x, y, how: "asked", dist: 0 };
         const r0 = Math.max(1, Math.min(SPAWN.maxRadius, radius > 0 ? radius | 0 : SPAWN.radius));
-        let c = W.nearestFreeCell(ax, ay, x, y, r0, ignoreId);
+        let c = W.nearestFreeCell(ax, ay, x, y, r0, ignoreId, z);
         let how = "moved";
         if (!c && r0 < SPAWN.maxRadius) {
-            c = W.nearestFreeCell(ax, ay, x, y, SPAWN.maxRadius, ignoreId);
+            c = W.nearestFreeCell(ax, ay, x, y, SPAWN.maxRadius, ignoreId, z);
             how = "widened";
         }
         if (!c) {
@@ -712,11 +838,11 @@
             for (let dy = -SPAWN.maxRadius; dy <= SPAWN.maxRadius; dy++) {
                 for (let dx = -SPAWN.maxRadius; dx <= SPAWN.maxRadius; dx++) {
                     const d = dx * dx + dy * dy;
-                    if (d < bestD && W.walkable(ax, ay, x + dx, y + dy)) { best = { x: x + dx, y: y + dy }; bestD = d; }
+                    if (d < bestD && W.walkable(ax, ay, x + dx, y + dy, { z })) { best = { x: x + dx, y: y + dy }; bestD = d; }
                 }
             }
             if (best) {
-                const other = W.units().find(o => o.id !== ignoreId && o.area.x === ax && o.area.y === ay && o.x === best.x && o.y === best.y);
+                const other = W.units().find(o => o.id !== ignoreId && o.area.x === ax && o.area.y === ay && o.x === best.x && o.y === best.y && zOf(o) === z);
                 spawnWarn(`no free cell within ${SPAWN.maxRadius} of (${x},${y}) in area (${ax},${ay}) for "${name}": placed on walkable (${best.x},${best.y})${other ? ` where "${other.name}" (unit ${other.id}) stands` : ""}`);
                 c = best;
                 how = "shared";
@@ -727,7 +853,7 @@
         }
         return { x: c.x, y: c.y, how, dist: Math.max(Math.abs(c.x - x), Math.abs(c.y - y)) };
     }
-    World.spawnCellFor = (ax, ay, x, y, radius = SPAWN.radius, name = "a unit") => seatCell(ax, ay, x | 0, y | 0, radius, name);
+    World.spawnCellFor = (ax, ay, x, y, radius = SPAWN.radius, name = "a unit", z = 0) => seatCell(ax, ay, x | 0, y | 0, radius, name, 0, z);
     /** Counts since the world was created (or loaded): units added, how they were seated, object refusals, regrowth waits. */
     World.spawnStats = () => JSON.parse(JSON.stringify(spawnStats));
 
@@ -736,17 +862,17 @@
         const f = typeFlags()[type] | 0;
         return (f & T_BLOCK) !== 0 && (f & T_BRIDGE) === 0;
     }
-    // The first unit standing on a cell that doesn't pass through everything, or null.
-    function standerAt(ax, ay, x, y) {
+    // The first unit standing on a cell of a level (z left out = the ground) that doesn't pass through everything, or null.
+    function standerAt(ax, ay, x, y, z = 0) {
         const units = World.state ? World.state.units : null;
         if (!units) return null;
         for (const id in units) {
             const u = units[id];
-            if (u.x === x && u.y === y && u.area.x === ax && u.area.y === ay && !(u.data && u.data.through)) return u;
+            if (u.x === x && u.y === y && u.area.x === ax && u.area.y === ay && zOf(u) === z && !(u.data && u.data.through)) return u;
         }
         return null;
     }
-    World.standerAt = (ax, ay, x, y) => standerAt(ax, ay, x, y);
+    World.standerAt = (ax, ay, x, y, z = 0) => standerAt(ax, ay, x, y, z);
 
     // Regrowth waits while a unit stands on the cell: every due entry of UF.Objects' regrow list whose new type blocks
     // and whose cell holds a unit is put off by an hour, just before UF_Objects processes the list (on time:hour, and
@@ -761,8 +887,8 @@
         let held = 0;
         for (const e of list) {
             if (!(e.due <= now) || !e.area || !typeBlocks(e.to)) continue;
-            if ((World.getObject(e.area.x, e.area.y, e.x, e.y) | 0) !== e.from) continue;
-            if (!standerAt(e.area.x, e.area.y, e.x, e.y)) continue;
+            if ((World.getObject(e.area.x, e.area.y, e.x, e.y, zOf(e)) | 0) !== e.from) continue;
+            if (!standerAt(e.area.x, e.area.y, e.x, e.y, zOf(e))) continue;
             e.due = now + 1;
             held++;
         }
@@ -801,6 +927,9 @@
      */
     World.addUnit = function(spec) {
         const st = this.state;
+        // The unit's level: spec.z, else spec.area.z, else the ground. Anything but -2..+2 is refused (VISION V80).
+        const z = spec.z !== undefined ? spec.z : zOf(spec.area);
+        if (!isLevel(z)) throw new Error(`UF_World.addUnit: level ${JSON.stringify(z)} doesn't exist (levels are -2..+2)`);
         const id = st.nextUnitId++;
         const image = spec.image || {};
         const data = spec.data || {};
@@ -810,11 +939,11 @@
         if (data.through) spawnStats.through++;
         else if (spec.exact === true && !(guardOff && guardOff.exact)) {
             spawnStats.exact++;
-            if (seatLater === null && !this.cellFree(spec.area.x, spec.area.y, sx, sy)) spawnWarn(`"${name}" placed with exact: true on (${sx},${sy}) in area (${spec.area.x},${spec.area.y}), a cell it can't stand on`);
+            if (seatLater === null && !this.cellFree(spec.area.x, spec.area.y, sx, sy, 0, z)) spawnWarn(`"${name}" placed with exact: true on (${sx},${sy}) in area (${spec.area.x},${spec.area.y})${z ? ` at level ${z}` : ""}, a cell it can't stand on`);
         } else if (seatLater !== null) {
             seatLater.push(id);
         } else if (!(guardOff && guardOff.units)) {
-            const c = seatCell(spec.area.x, spec.area.y, sx, sy, typeof spec.snapToFree === "number" ? spec.snapToFree : SPAWN.radius, name);
+            const c = seatCell(spec.area.x, spec.area.y, sx, sy, typeof spec.snapToFree === "number" ? spec.snapToFree : SPAWN.radius, name, 0, z);
             spawnStats[c.how]++;
             if (c.dist > spawnStats.maxMove) spawnStats.maxMove = c.dist;
             sx = c.x;
@@ -827,6 +956,7 @@
             area: { x: spec.area.x, y: spec.area.y },
             x: sx,
             y: sy,
+            z,
             dir: project4(spec.dir || 2),
             dir8: spec.dir || 2,
             goal: null,
@@ -834,13 +964,15 @@
             data
         };
         st.units[id] = u;
+        offOcc = null;
         if (this.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
         emit("world:unitAdded", u);
         return u;
     };
     World.unit = id => (World.state && World.state.units[id]) || null;
     World.units = () => (World.state ? Object.values(World.state.units) : []);
-    World.unitsInArea = (ax, ay) => World.units().filter(u => u.area.x === ax && u.area.y === ay);
+    /** Units in an area on one level (z left out = the ground). */
+    World.unitsInArea = (ax, ay, z = 0) => World.units().filter(u => u.area.x === ax && u.area.y === ay && zOf(u) === z);
     World.unitByName = name => World.units().find(u => u.name === name) || null;
     World.removeUnit = function(id) {
         const u = this.unit(id);
@@ -848,6 +980,7 @@
         despawnUnitEvent(u);
         forgetPath(id);
         delete this.state.units[id];
+        offOcc = null;
         emit("world:unitRemoved", u);
         return true;
     };
@@ -857,9 +990,12 @@
      */
     World.sendUnit = function(id, goal) {
         const u = this.unit(id);
-        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y)) return false;
-        const same = !!u.goal && sameArea(u.goal.area, goal.area) && u.goal.x === (goal.x | 0) && u.goal.y === (goal.y | 0);
-        u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0 };
+        // The goal's level: goal.z, else goal.area.z, else the ground. A unit walks on its own level only: a goal on
+        // another level is refused here (false); UF_Levels routes units between levels.
+        const gz = goal && goal.z !== undefined ? goal.z : zOf(goal && goal.area);
+        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, gz) || gz !== zOf(u)) return false;
+        const same = !!u.goal && sameArea(u.goal.area, goal.area) && u.goal.x === (goal.x | 0) && u.goal.y === (goal.y | 0) && zOf(u.goal) === gz;
+        u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0, z: gz };
         u.stuckFrames = 0;
         if (!same) pathCache.delete(id);
         return true;
@@ -870,7 +1006,8 @@
         pathCache.delete(id);
     };
     World.eventIdOf = id => EVENT_BASE + id;
-    World.isDisplayed = u => sameArea(u.area, World.currentArea());
+    /** True when the unit's level is the one on screen (its event exists there). */
+    World.isDisplayed = u => !!u && onView(u.area.x, u.area.y, zOf(u));
     World.eventOf = function(id) {
         const u = this.unit(id);
         if (!u || !this.isDisplayed(u) || !window.$gameMap) return null;
@@ -919,17 +1056,150 @@
         pathCache.delete(u.id);
         if (World.isDisplayed(u)) despawnUnitEvent(u);
         u.area = { x: ax, y: ay };
+        offOcc = null;
         u.x = x;
         u.y = y;
         if (World.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
         emit("world:unitAreaChanged", u, from, { x: ax, y: ay });
     }
 
+    /**
+     * Put a unit on another level of its area, at (x, y) (default: where it is). Its goal and path are dropped (a goal
+     * is on one level); its event leaves the screen or appears on it. Emits world:unitLevelChanged(unit, fromZ, toZ).
+     * UF_Levels calls it for stairs, ramps and falls; tests call it directly.
+     */
+    World.moveUnitToLevel = function(unit, z, x, y) {
+        const u = typeof unit === "object" ? unit : this.unit(unit);
+        if (!u || !isLevel(z) || !this.state || this.state.units[u.id] !== u) return false;
+        if (![x === undefined ? u.x : x, y === undefined ? u.y : y].every(c => Number.isInteger(c) && c >= 0 && c < this.state.size)) return false;
+        const from = zOf(u);
+        forgetPath(u.id);
+        u.goal = null;
+        u.stuckFrames = 0;
+        if (this.isDisplayed(u)) despawnUnitEvent(u);
+        u.z = z;
+        offOcc = null;
+        if (x !== undefined && x !== null) u.x = x | 0;
+        if (y !== undefined && y !== null) u.y = y | 0;
+        if (this.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
+        emit("world:unitLevelChanged", u, from, z);
+        return true;
+    };
+    /** Give every unit on the level on screen an event (after a view change; a unit added mid-transfer has none). Returns how many were added. */
+    World.reconcileEvents = function() {
+        const v = this.viewLevel();
+        if (!v || !window.$gameMap || !window.$dataMap || $gamePlayer.isTransferring()) return 0;
+        let added = 0;
+        for (const u of this.unitsInArea(v.x, v.y, v.z)) {
+            if ($gameMap._events[EVENT_BASE + u.id]) continue;
+            spawnUnitEvent(u);
+            added++;
+        }
+        return added;
+    };
+
     const goalReached = u => goalDelta(u).dist === 0;
 
-    // Off screen: one cell per UnitStepFrames, straight toward the goal. Terrain isn't checked off screen (system doc).
+    // Units on levels that aren't on screen, by cell: built once per map update when an off-screen unit steps, kept
+    // up to date as they step (two units never step onto one cell in the same update).
+    let offOcc = null, offOccFrame = -1;
+    const occKey = (ax, ay, z, x, y) => {
+        const d = worldDims(), size = World.state.size;
+        return (((z + 2) * d.areasY + ay) * d.areasX + ax) * size * size + y * size + x;
+    };
+    function offscreenOccupancy() {
+        if (offOcc && offOccFrame === World._frame) return offOcc;
+        offOcc = new Map();
+        offOccFrame = World._frame;
+        for (const o of World.units()) {
+            if (o.data && o.data.through) continue;
+            const k = occKey(o.area.x, o.area.y, zOf(o), o.x, o.y);
+            offOcc.set(k, (offOcc.get(k) || 0) + 1);
+        }
+        return offOcc;
+    }
+    function occMove(u, fromX, fromY) {
+        if (!offOcc || offOccFrame !== World._frame || (u.data && u.data.through)) return;
+        const a = occKey(u.area.x, u.area.y, zOf(u), fromX, fromY), b = occKey(u.area.x, u.area.y, zOf(u), u.x, u.y);
+        const n = (offOcc.get(a) || 0) - 1;
+        if (n > 0) offOcc.set(a, n);
+        else offOcc.delete(a);
+        offOcc.set(b, (offOcc.get(b) || 0) + 1);
+    }
+
+    // Off screen, walkers on their own area follow a planned path on their own level, one cell per step, like the
+    // on-screen stepAlongPath (VISION V80: with the view on another level the whole colony is off screen, and a
+    // straight line crosses trees, walls, water and rock). They wait for a unit in the way, then walk round it.
+    function stepOffscreenAlongPath(u) {
+        const tgt = localTarget(u);
+        let p = pathCache.get(u.id);
+        if (!p || p.stale || p.key !== tgt.key) {
+            if (planQueued.has(u.id)) return;
+            if (planBudget <= 0) {
+                enqueuePlan(u.id);
+                return;
+            }
+            p = planFor(u, u);
+            if (!p) return;
+        }
+        const size = World.state.size;
+        const here = u.y * size + u.x;
+        const left = p.cells.length - p.i;
+        if (left < p.bestLeft) {
+            p.bestLeft = left;
+            p.bestAt = World._frame;
+        } else if (World._frame - p.bestAt > PATHS.progressFrames) {
+            return blockUnit(u, "no way past");
+        }
+        if (p.i >= p.cells.length) {
+            if (!p.partial && here === p.end) return arrive(u);
+            p.stale = true; // the end of a partial plan: the next step plans the next leg
+            return;
+        }
+        const next = p.cells[p.i];
+        const nx = next % size, ny = (next - nx) / size;
+        const d = dirTo(u.x, u.y, nx, ny);
+        if (!d || !stepOpen(u, here, next, d)) {
+            p.stale = true;
+            pathStats.replans++;
+            return;
+        }
+        const occupied = (x, y) => offscreenOccupancy().get(occKey(u.area.x, u.area.y, zOf(u), x, y));
+        let blockedAt = occupied(nx, ny) ? next : -1, viaCorner = 0;
+        if (blockedAt < 0 && isDiag(d)) {
+            const takenH = occupied(nx, u.y), takenV = occupied(u.x, ny);
+            if (takenH && takenV) blockedAt = u.y * size + nx;
+            else if (takenH) viaCorner = ny > u.y ? 2 : 8;
+            else if (takenV) viaCorner = nx > u.x ? 6 : 4;
+        }
+        if (blockedAt >= 0) {
+            faceUnit(u, d);
+            pathStats.waitFrames++;
+            if (++p.wait * CONFIG.unitStepFrames <= PATHS.waitFrames) return;
+            p.wait = 0;
+            if (blockedAt === next && !p.partial && p.i === p.cells.length - 1) return blockUnit(u, "goal occupied");
+            p.avoid = blockedAt;
+            p.stale = true;
+            pathStats.detours++;
+            return;
+        }
+        p.wait = 0;
+        const fx = u.x, fy = u.y;
+        u.x = viaCorner === 2 || viaCorner === 8 ? fx : nx;
+        u.y = viaCorner === 4 || viaCorner === 6 ? fy : ny;
+        faceUnit(u, viaCorner || d);
+        occMove(u, fx, fy);
+        if (!viaCorner) p.i++;
+        p.fails = 0;
+        u.stuckFrames = 0;
+        if (!p.partial && p.i >= p.cells.length && next === p.end) arrive(u);
+    }
+
+    // Off screen: one cell per UnitStepFrames. Walkers in their own area follow a path (above); fliers, paths switched
+    // off and goals in another area step straight toward the goal (terrain isn't checked for those).
     function stepOffscreen(u) {
         if (goalReached(u)) return arrive(u);
+        if (PATHS.enabled && PATHS.offscreenPaths && !(u.data && u.data.through) && sameArea(u.goal.area, u.area)) return stepOffscreenAlongPath(u);
         const g = goalDelta(u);
         const w = wrapStep(u, g.dx, g.dy);
         if (!World.inWorld(w.ax, w.ay)) return arrive(u);
@@ -943,7 +1213,7 @@
     }
 
     // On screen: the unit's event walks its planned path (stepAlongPath) with RMMZ movement; at an area edge it steps
-    // into the next area. Units that pass through everything (fliers), 8-way movement and paths switched off use the
+    // into the next area. Units that pass through everything (fliers) and paths switched off use the
     // direct step below.
     function stepOnscreen(u, ev) {
         if (ev.isMoving()) return;
@@ -994,10 +1264,11 @@
         this._frame++;
         planBudget = PATHS.plansPerUpdate;
         if (planQueue.length) servePlanQueue();
-        const current = this.currentArea();
-        const offscreenTick = this._frame % CONFIG.unitStepFrames === 0;
+        const view = this.viewLevel();
+        const steps = CONFIG.unitStepFrames, frame = this._frame;
         for (const u of this.units()) {
-            if (sameArea(u.area, current)) {
+            if (!isLevel(zOf(u))) continue;
+            if (view && u.area.x === view.x && u.area.y === view.y && zOf(u) === view.z) {
                 const ev = $gameMap._events[EVENT_BASE + u.id];
                 if (!ev) continue;
                 u.x = ev.x;
@@ -1005,7 +1276,8 @@
                 u.dir = ev.direction();
                 u.dir8 = ev.dir8 ? ev.dir8() : u.dir;
                 if (u.goal) stepOnscreen(u, ev);
-            } else if (u.goal && offscreenTick) {
+            } else if (u.goal && (frame + u.id) % steps === 0) {
+                // Off-screen steps are spread over the frames by unit id, so hundreds of units don't all step at once.
                 stepOffscreen(u);
             }
         }
@@ -1032,8 +1304,9 @@
         waitFrames: 30,      // frames a unit waits for another unit in its way before it walks round it
         maxStepFails: 3,     // steps the map refuses in a row (planner and map disagree) before the unit gives up
         maxPartialLegs: 8,   // partial plans in a row toward one goal before the unit gives up
-        progressFrames: 600  // map updates without the path left getting shorter (walking round units that never move
+        progressFrames: 600, // map updates without the path left getting shorter (walking round units that never move
                              // aside, back and forth between two blocked gaps) before the unit gives up
+        offscreenPaths: true // off-screen walkers follow paths too (VISION V80); false = the old straight step (tests)
     };
     const WATER_BIT = 16;
     const BIT_DOWN = 1, BIT_LEFT = 2, BIT_RIGHT = 4, BIT_UP = 8; // RMMZ passage bits of directions 2, 4, 6, 8
@@ -1110,12 +1383,12 @@
         return (p & WATER_BIT) ? 0 : (p & 15);
     }
 
-    // The built map and tileset flags of an area: the map on screen, or the peek cache's build.
-    function areaMapOf(ax, ay) {
-        if (sameArea({ x: ax, y: ay }, World.currentArea()) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
+    // The built map and tileset flags of an area's level: the map on screen, or the peek cache's build.
+    function areaMapOf(ax, ay, z = 0) {
+        if (onView(ax, ay, z) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
             return { map: $dataMap, flags: $gameMap.tilesetFlags() };
         }
-        const map = World.peekArea(ax, ay);
+        const map = World.peekArea(ax, ay, z);
         const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
         return { map, flags: ts ? ts.flags : [] };
     }
@@ -1237,9 +1510,9 @@
     }
 
     /**
-     * Plan a path in one area. opts: { unit (record or id: doors), maxNodes, avoid (cell index to walk round),
-     * allowPartial, resolveBlocked (default true), record }. Returns { cells: Int32Array (cell indices after the
-     * start, ending at `end`) | null, end, partial, expanded, ms, reason }.
+     * Plan a path in one area on one level. opts: { unit (record or id: doors), maxNodes, avoid (cell index to walk
+     * round), allowPartial, resolveBlocked (default true), record, z (default area.z, else the ground) }. Returns
+     * { cells: Int32Array (cell indices after the start, ending at `end`) | null, end, partial, expanded, ms, reason }.
      */
     function planPath(area, sx, sy, gx, gy, opts) {
         const t0 = performance.now();
@@ -1252,15 +1525,16 @@
             return res;
         };
         const st = World.state;
-        if (!st || !area || !World.inWorld(area.x, area.y)) return done("not in the world");
+        const z = opts.z !== undefined ? opts.z : zOf(area);
+        if (!st || !area || !World.inWorld(area.x, area.y, z)) return done("not in the world");
         const size = st.size, n = size * size;
         if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return done("outside the area");
-        const { map, flags } = areaMapOf(area.x, area.y);
+        const { map, flags } = areaMapOf(area.x, area.y, z);
         const g = gridOf(map, flags);
         const eff = g.eff, tf = typeFlags(), D = typeTable.doors;
         const unit = opts.unit ? (typeof opts.unit === "object" ? opts.unit : World.unit(opts.unit)) : null;
         const doorShut = i => !!D && (tf[g.objects[i]] & T_DOOR) !== 0 &&
-            !(unit && D.canUnitPass(unit, D.at(area, i % size, (i - (i % size)) / size)));
+            !(unit && D.canUnitPass(unit, D.at({ x: area.x, y: area.y, z }, i % size, (i - (i % size)) / size)));
         const enterable = i => eff[i] !== 0 && !doorShut(i);
         const s = sy * size + sx, goalCell = gy * size + gx;
         const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
@@ -1431,7 +1705,7 @@
             tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
             ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
         }
-        return { tx, ty, key: `${u.area.x},${u.area.y}:${tx},${ty}` };
+        return { tx, ty, key: `${u.area.x},${u.area.y},${zOf(u)}:${tx},${ty}` };
     }
 
     // Give up the goal at once and say why: world:unitBlocked(unit, reason, goal given up).
@@ -1452,14 +1726,15 @@
         if (planQueue.length > pathStats.queuePeak) pathStats.queuePeak = planQueue.length;
     }
 
-    // Plan (or re-plan) a unit's path from its event's cell. Uses one of this update's plans.
+    // Plan (or re-plan) a unit's path from its event's cell (off screen: from the unit's own cell), on the unit's level.
+    // Uses one of this update's plans.
     function planFor(u, ev) {
         const tgt = localTarget(u);
         const old = pathCache.get(u.id);
         const same = !!old && old.key === tgt.key;
         const avoid = same ? old.avoid : -1;
         planBudget--;
-        const res = planPath(u.area, ev.x, ev.y, tgt.tx, tgt.ty, { unit: u, avoid, allowPartial: true, record: true });
+        const res = planPath(u.area, ev.x, ev.y, tgt.tx, tgt.ty, { unit: u, avoid, allowPartial: true, record: true, z: zOf(u) });
         if (!res.cells) {
             blockUnit(u, avoid >= 0 && res.reason === "no path" ? "no way past" : res.reason);
             return null;
@@ -1485,7 +1760,12 @@
             const id = planQueue.shift();
             planQueued.delete(id);
             const u = World.unit(id);
-            if (!u || !u.goal || !World.isDisplayed(u) || !window.$gameMap) continue;
+            if (!u || !u.goal || (u.data && u.data.through)) continue;
+            if (!World.isDisplayed(u)) {
+                if (PATHS.offscreenPaths && sameArea(u.goal.area, u.area)) planFor(u, u);
+                continue;
+            }
+            if (!window.$gameMap) continue;
             const ev = $gameMap._events[EVENT_BASE + u.id];
             if (!ev || ev.isThrough()) continue;
             planFor(u, ev);
@@ -1505,7 +1785,7 @@
     // Can the unit step from cell i to cell j (direction d) right now, by the grid (units aside)? A diagonal needs both
     // ways round its corner open and neither corner cell a shut door (the planner's rule).
     function stepOpen(u, i, j, d) {
-        const { map, flags } = areaMapOf(u.area.x, u.area.y);
+        const { map, flags } = areaMapOf(u.area.x, u.area.y, zOf(u));
         const g = gridOf(map, flags);
         const size = g.size, eff = g.eff;
         const cells = [i, j];
@@ -1520,7 +1800,7 @@
         if (D) {
             const tf = typeTable.flags;
             for (const c of cells) {
-                if ((tf[g.objects[c]] & T_DOOR) && !D.canUnitPass(u, D.at(u.area, c % size, (c - (c % size)) / size))) return false;
+                if ((tf[g.objects[c]] & T_DOOR) && !D.canUnitPass(u, D.at({ x: u.area.x, y: u.area.y, z: zOf(u) }, c % size, (c - (c % size)) / size))) return false;
             }
         }
         return true;
@@ -1610,7 +1890,8 @@
      * on ends at its nearest reachable open neighbour (4-neighbours; in 8-way also diagonal ones whose two cells between
      * them and the goal are open). [] when already there.
      * opts: { unit (doors let their faction through), maxNodes (default 12000), avoid: {x, y} (a cell to walk
-     * round), allowPartial (capped searches return the part toward the goal, marked path.partial) }.
+     * round), allowPartial (capped searches return the part toward the goal, marked path.partial), z (the level:
+     * default area.z, else the ground) }.
      * World.lastPath says what the search did: { reason, ms, expanded, length, partial }.
      */
     World.findPath = function(area, sx, sy, gx, gy, opts = {}) {
@@ -1626,26 +1907,28 @@
     /**
      * Whether a unit could stand on the cell, by the same rule as paths (tiles, water, objects; doors shut unless
      * opts.unit may pass). opts.ground: the ground alone (tiles and water) lets units walk every way, objects ignored.
+     * opts.z: the level (default the ground).
      */
     World.walkable = function(ax, ay, x, y, opts = {}) {
         const st = this.state;
-        if (!st || !this.inWorld(ax, ay) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
-        const { map, flags } = areaMapOf(ax, ay);
+        const z = opts.z === undefined ? 0 : opts.z;
+        if (!st || !this.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
+        const { map, flags } = areaMapOf(ax, ay, z);
         const g = gridOf(map, flags);
         const i = y * g.size + x;
         if (opts.ground) return (g.pass[i] & WATER_BIT) === 0 && (g.pass[i] & 15) === 15;
         if (g.eff[i] === 0) return false;
         const D = typeTable.doors;
-        if (D && (typeTable.flags[g.objects[i]] & T_DOOR)) return !!opts.unit && D.canUnitPass(opts.unit, D.at({ x: ax, y: ay }, x, y));
+        if (D && (typeTable.flags[g.objects[i]] & T_DOOR)) return !!opts.unit && D.canUnitPass(opts.unit, D.at({ x: ax, y: ay, z }, x, y));
         return true;
     };
-    /** Whether (gx, gy) can be walked to from (sx, sy) in one area (region map: doors open, units ignored). */
+    /** Whether (gx, gy) can be walked to from (sx, sy) in one area on one level (area.z; region map: doors open, units ignored). */
     World.reachable = function(area, sx, sy, gx, gy) {
         const st = this.state;
-        if (!st || !area || !this.inWorld(area.x, area.y)) return false;
+        if (!st || !area || !this.inWorld(area.x, area.y, zOf(area))) return false;
         const size = st.size;
         if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return false;
-        const { map, flags } = areaMapOf(area.x, area.y);
+        const { map, flags } = areaMapOf(area.x, area.y, zOf(area));
         const g = gridOf(map, flags);
         const region = regionsOf(g);
         const s = sy * size + sx, t = gy * size + gx;
@@ -1681,23 +1964,25 @@
     //-------------------------------------------------------------------------
     // The view (the RMMZ player is the view/cursor)
 
-    /** Move the view to a cell of any area. */
-    World.transferView = function(ax, ay, x, y, dir) {
-        if (!this.state || !this.inWorld(ax, ay)) return false;
-        $gamePlayer.reserveTransfer(this.areaMapId(ax, ay), x, y, dir || $gamePlayer.direction(), 2);
+    /** Move the view to a cell of any area, on level z (default: the level on screen, else the ground). */
+    World.transferView = function(ax, ay, x, y, dir, z) {
+        const v = this.viewLevel();
+        const lz = z === undefined ? (v ? v.z : 0) : z;
+        if (!this.state || !this.inWorld(ax, ay, lz)) return false;
+        $gamePlayer.reserveTransfer(this.areaMapId(ax, ay, lz), x, y, dir || $gamePlayer.direction(), 2);
         return true;
     };
 
-    // Returns true when the move was turned into an area transfer.
+    // Returns true when the move was turned into an area transfer (the view keeps its level).
     function tryViewEdge(player, dx, dy) {
-        const area = World.currentArea();
-        if (!area || player.isTransferring()) return false;
+        const view = World.viewLevel();
+        if (!view || player.isTransferring()) return false;
         const size = World.state.size;
         const nx = player.x + dx, ny = player.y + dy;
         if (nx >= 0 && ny >= 0 && nx < size && ny < size) return false;
-        const w = wrapStep({ area, x: player.x, y: player.y }, dx, dy);
-        if (!World.inWorld(w.ax, w.ay)) return false;
-        return World.transferView(w.ax, w.ay, w.x, w.y);
+        const w = wrapStep({ area: view, x: player.x, y: player.y }, dx, dy);
+        if (!World.inWorld(w.ax, w.ay, view.z)) return false;
+        return World.transferView(w.ax, w.ay, w.x, w.y, undefined, view.z);
     }
 
     const _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
@@ -1727,15 +2012,36 @@
         DataManager._databaseFiles.push({ name: TEMPLATE_VAR, src: "Map%1.json".format(CONFIG.templateMapId.padZero(3)) });
     }
 
+    // A world map id (any level) is built in memory. The map leaving the screen stays in the peek cache, and a level
+    // that was on screen before is shown again from there (its unit events renewed) when the view comes from another
+    // level: switching levels and back doesn't rebuild the ground. Showing the same level again (a map reload, a
+    // return from another scene) still rebuilds it, as before. Builds made only for off-screen reads are never shown
+    // (they may be older than the generators' inputs, e.g. one made during world:created).
     const _DataManager_loadMapData = DataManager.loadMapData;
     DataManager.loadMapData = function(mapId) {
-        const area = World.state ? World.areaOfMapId(mapId) : null;
-        if (area) {
+        const lv = World.state ? World.levelOfMapId(mapId) : null;
+        if (lv) {
+            const out = World.viewLevel();
+            if (out && window.$dataMap && $dataMap._ufShown && $dataMap._ufState === World.state) World.adoptBuild(out.x, out.y, out.z, $dataMap);
             window.$dataMap = null;
-            const map = World.buildArea(area.x, area.y);
+            const cached = World.cachedBuild(lv.x, lv.y, lv.z);
+            let map;
+            const fromOtherLevel = !!out && (out.x !== lv.x || out.y !== lv.y || out.z !== lv.z) && !(window.$gamePlayer && $gamePlayer._needsMapReload);
+            if (fromOtherLevel && cached && cached._ufShown && cached._ufState === World.state) {
+                map = cached;
+                World.refreshUnitEvents(map, lv.x, lv.y, lv.z);
+                World.lastMapLoad = { mapId, level: { x: lv.x, y: lv.y, z: lv.z }, reused: true };
+            } else {
+                map = World.buildArea(lv.x, lv.y, lv.z);
+                map._ufShown = true;
+                map._ufState = World.state; // a build belongs to one world: a loaded game never shows another world's map
+                World.adoptBuild(lv.x, lv.y, lv.z, map);
+                World.lastMapLoad = { mapId, level: { x: lv.x, y: lv.y, z: lv.z }, reused: false };
+            }
             this.onLoad(map);
             window.$dataMap = map;
-            emit("world:areaBuilt", area);
+            if (lv.z === 0) emit("world:areaBuilt", { x: lv.x, y: lv.y });
+            else emit("world:levelBuilt", { x: lv.x, y: lv.y, z: lv.z });
             return;
         }
         _DataManager_loadMapData.call(this, mapId);
@@ -1757,7 +2063,8 @@
             return;
         }
         World.newWorld();
-        const start = World.state.startArea;
+        let start = World.state.startArea;
+        let z = 0;
         const tpl = World.template();
         const off = World.templateOffset();
         let x = Math.floor(World.state.size / 2), y = x;
@@ -1767,10 +2074,16 @@
         }
         // A generator (UF_History) may set where the view starts: the player's home site (user decision 2026-09-18).
         if (World.state.viewStart) {
-            x = World.state.viewStart.x | 0;
-            y = World.state.viewStart.y | 0;
+            const view = World.state.viewStart;
+            const area = view.area || start;
+            const level = view.z !== undefined ? view.z : zOf(area);
+            if (!World.inWorld(area.x, area.y, level)) throw new Error("UF_World: invalid founding view level");
+            start = area;
+            z = level;
+            x = view.x | 0;
+            y = view.y | 0;
         }
-        this.reserveTransfer(World.areaMapId(start.x, start.y), x, y, 2, 0);
+        this.reserveTransfer(World.areaMapId(start.x, start.y, z), x, y, 2, 0);
     };
 
     const _DataManager_makeSaveContents = DataManager.makeSaveContents;
@@ -1787,6 +2100,7 @@
         if (World.state && !World.state.objectDiffs) World.state.objectDiffs = {};
         spawnStats = newSpawnStats();
         buildCache.clear();
+        offOcc = null;
         clearPaths(true); // plans are runtime only: a loaded game plans again
     };
 
@@ -1794,7 +2108,7 @@
     const _Game_Map_setup = Game_Map.prototype.setup;
     Game_Map.prototype.setup = function(mapId) {
         _Game_Map_setup.call(this, mapId);
-        if (World.state && World.isAreaMap(mapId) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
+        if (World.state && World.isWorldMap(mapId) && window.$dataMap && $dataMap.data && $dataMap.ufObjects) {
             try {
                 regionsOf(gridOf($dataMap, this.tilesetFlags()));
             } catch (e) {
@@ -2761,7 +3075,20 @@
 
             t.check("area_size", size === 256 && $dataMap.width === 256 && $dataMap.height === 256 && $dataMap.data.length === 256 * 256 * 6 && $dataMap.ufObjects && $dataMap.ufObjects.length === 256 * 256,
                 `${$dataMap.width}x${$dataMap.height}, data length ${$dataMap.data.length}, objects ${$dataMap.ufObjects ? $dataMap.ufObjects.length : "missing"}`);
-            t.check("one_layer", !W.layers && !W.changeViewLayer && W.areaOfMapId(W.areaMapId(0, 0)).z === undefined, "areas are {x, y}; no layer API");
+            // Five levels (VISION V80): the ground keeps its map id; each level has its own id that levelOfMapId turns back
+            // into that level; the legacy areaOfMapId knows only the ground; a sixth level doesn't exist.
+            {
+                const ids = W.LEVELS.map(z => W.areaMapId(area.x, area.y, z));
+                const back = ids.map(id => W.levelOfMapId(id));
+                const roundTrip = W.LEVELS.every((z, i) => !!back[i] && back[i].z === z && back[i].x === area.x && back[i].y === area.y);
+                const distinct = new Set(ids).size === W.LEVELS.length && ids.every(id => id > 0);
+                const groundId = W.areaMapId(area.x, area.y) === W.areaMapId(area.x, area.y, 0) && W.areaMapId(0, 0) === W.config.mapIdBase;
+                const legacyGround = W.areaOfMapId(W.areaMapId(area.x, area.y, -1)) === null && sameArea(W.areaOfMapId(W.areaMapId(area.x, area.y)), area);
+                const noSixth = W.inWorld(area.x, area.y, 3) === false && W.inWorld(area.x, area.y, -3) === false && W.areaMapId(area.x, area.y, 3) === 0;
+                t.check("level_ids", roundTrip && distinct && groundId && legacyGround && noSixth,
+                    `levels ${W.LEVELS.join(", ")} -> map ids ${ids.join(", ")} (${distinct ? "distinct" : "NOT distinct"}); levelOfMapId round trip ${roundTrip}; ground id ${W.areaMapId(0, 0)} (MapIdBase ${W.config.mapIdBase}, ${groundId ? "unchanged" : "CHANGED"}); ` +
+                    `areaOfMapId(level -1) ${JSON.stringify(W.areaOfMapId(W.areaMapId(area.x, area.y, -1)))} (want null); inWorld at level 3 / -3: ${W.inWorld(area.x, area.y, 3)} / ${W.inWorld(area.x, area.y, -3)}${PROVOKE.length ? ` [PROVOKED: ${PROVOKE.join(", ")}]` : ""}`);
+            }
 
             const tpl = W.template();
             if (tpl) {

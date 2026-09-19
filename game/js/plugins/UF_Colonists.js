@@ -79,6 +79,19 @@
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const copyArea = a => ({ x: a.x, y: a.y });
+    // Persist z beside area; pass {x,y,z} only as API handles. Missing z is legacy Ground, invalid z stays invalid.
+    const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
+    const levelArea = r => { const a = r && (r.area || r); return a ? { x: a.x, y: a.y, z: zOf(r) } : null; };
+    const levelSupported = z => Number.isInteger(z) && z >= -2 && z <= 2 &&
+        (z === 0 || !!(World() && World().viewLevel && World().levelOfMapId));
+    const sameLevel = (a, b) => !!a && !!b && sameArea(a.area || a, b.area || b) &&
+        levelSupported(zOf(a)) && zOf(a) === zOf(b);
+    const targetFor = (u, target) => {
+        const t = target || u, area = t.area || u.area;
+        const z = t.z !== undefined ? t.z : t.area && t.area.z !== undefined ? t.area.z : zOf(u);
+        const ref = { area: copyArea(area), x: t.x | 0, y: t.y | 0, z };
+        return sameLevel(u, ref) ? ref : null;
+    };
     const chebyshev = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
     const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
     const lower = s => String(s || "").toLowerCase();
@@ -131,26 +144,47 @@
     //-------------------------------------------------------------------------
     // State: UF.World.state.colony
 
-    function colonyState() {
-        const W = World();
-        return W && W.state ? W.state.colony || null : null;
+    function colonyState(ref) {
+        const W = World(), c = W && W.state ? W.state.colony || null : null;
+        if (!c || ref === undefined || ref === null) return c;
+        if (ref.plan && ref.siteId !== undefined) return ref;
+        const u = typeof ref === "number" ? W.unit(ref) : ref;
+        if (!u) return null;
+        const site = u.data && u.data.site;
+        const home = site === c.siteId ? c : c.settlements && c.settlements[site];
+        if (home) return sameLevel(u, home) ? home : null;
+        // Old saves without a per-unit site retain the primary home only on its own level.
+        return site === undefined && sameLevel(u, c) ? c : null;
     }
+    const settlementStates = () => {
+        const c = colonyState();
+        return c ? [c, ...Object.values(c.settlements || {})] : [];
+    };
+    const siteColonists = ref => {
+        const c = colonyState(ref);
+        return c ? simulationUnits().filter(u => colonyState(u) === c) : [];
+    };
     const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
-    const isColonist = u => !!u && !!u.data && u.data.kind === "colonist";
+    const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
+    const isSettler = u => isColonist(u) || !!(u && u.data && u.data.kind === "person" && u.data.ai === "settlement");
+    const simulationUnits = () => (World() ? World().units().filter(isSettler) : []);
+    const settler = id => { const u = World() ? World().unit(id) : null; return isSettler(u) ? u : null; };
     const colonists = () => (World() ? World().units().filter(isColonist) : []);
     const colonist = id => {
         const u = World() ? World().unit(id) : null;
         return isColonist(u) ? u : null;
     };
-    const siteArea = () => (colonyState() && colonyState().area ? colonyState().area : (World() ? copyArea(World().state.startArea) : { x: 0, y: 0 }));
-    const homeSiteRecord = () => (colonyState() && window.UF.History && UF.History.siteById ? UF.History.siteById(colonyState().siteId) : null);
-    const cultureOf = () => {
-        const F = window.UF.Factions ? UF.Factions.player() : null;
+    const siteArea = ref => levelArea(colonyState(ref));
+    const homeSiteRecord = ref => (colonyState(ref) && window.UF.History && UF.History.siteById ? UF.History.siteById(colonyState(ref).siteId) : null);
+    const cultureOf = ref => {
+        const cstate = colonyState(ref);
+        const id = ref && ref.data ? ref.data.faction : ref && ref.faction ? ref.faction : cstate ? cstate.factionId : factionId();
+        const F = window.UF.Factions ? UF.Factions.get(id) : null;
         const c = catalog() && catalog().cultures;
         return (F && c && c[F.species]) || { priorities: {}, facetBias: {}, plan: "default" };
     };
-    const priorityOf = type => {
-        const p = cultureOf().priorities || {};
+    const priorityOf = (type, ref) => {
+        const p = cultureOf(ref).priorities || {};
         return typeof p[type] === "number" ? p[type] : 1;
     };
 
@@ -244,15 +278,15 @@
         const kinds = (catalog() && catalog().sites && catalog().sites.kinds) || {};
         return (site && kinds[site.kind] && kinds[site.kind].radius) || 4;
     }
-    function planTemplate() {
+    function planTemplate(ref) {
         const cfg = colonyConfig();
-        const key = cultureOf().plan || "default";
+        const key = cultureOf(ref).plan || "default";
         const variant = key !== "default" && cfg.plans && Array.isArray(cfg.plans[key]) ? cfg.plans[key] : null;
         return variant || cfg.plan || [];
     }
-    function makePlan() {
-        const wall = cultureOf().wall;
-        return planTemplate().map(step => {
+    function makePlan(ref) {
+        const wall = cultureOf(ref).wall;
+        return planTemplate(ref).map(step => {
             const s = JSON.parse(JSON.stringify(step));
             if (s.build && wall && (s.build === "wall_wood" || s.build === "wall_stone") && Objects() && Objects().typeId(wall)) s.build = wall;
             s.done = false;
@@ -262,33 +296,35 @@
 
     function convertPerson(u, state, site, taken) {
         const d = u.data;
-        const gender = genderFor(state.seed, u.id);
-        const name = nameFor(state.seed, u.id, gender, taken);
+        const player = site.faction === state.factions.playerId;
+        const gender = d.gender || genderFor(state.seed, u.id);
+        const name = !player && u.name ? u.name : nameFor(state.seed, u.id, gender, taken);
         taken.add(name);
         u.name = name;
-        d.kind = "colonist";
-        d.ai = "colonist";
+        d.kind = player ? "colonist" : "person";
+        d.ai = player ? "colonist" : "settlement";
         d.faction = site.faction;
         d.sight = 8;
         d.gender = gender;
         d.tier = 0;
         const tiers = tiersFor(d.species, gender);
-        if (tiers) {
+        if (tiers && player) {
             d.tiers = tiers;
             u.image = { characterName: tiers[0], characterIndex: 0 };
             delete d.tint; // the tier sheets are drawn as they are
         }
-        d.facets = facetsFor(state.seed, u.id, cultureOf().facetBias);
-        d.skills = skillsFor(state.seed, u.id);
-        d.needs = Object.assign({}, START_NEEDS);
-        d.inventory = [];
-        d.equipment = { tool: null, clothes: null };
-        d.workRate = 1;
-        d.thoughts = [];
-        d.moodScore = 20;
-        d.mood = moodOf(20);
-        d.jobsDone = {};
-        d.home = { x: site.x, y: site.y };
+        d.facets = d.facets || facetsFor(state.seed, u.id, cultureOf(u).facetBias);
+        d.skills = d.skills || skillsFor(state.seed, u.id);
+        d.needs = Object.assign({}, START_NEEDS, d.needs || {});
+        d.inventory = d.inventory || [];
+        d.equipment = d.equipment || { tool: null, clothes: null };
+        if (d.workRate === undefined) d.workRate = 1;
+        d.thoughts = d.thoughts || [];
+        if (d.moodScore === undefined) d.moodScore = 20;
+        d.mood = moodOf(d.moodScore);
+        d.jobsDone = d.jobsDone || {};
+        d.site = site.id;
+        d.home = { area: copyArea(site.area), x: site.x, y: site.y, z: zOf(site) };
         addThought(u, `Woke at home in ${site.name}.`, 10);
         return u;
     }
@@ -302,36 +338,67 @@
             console.warn("UF_Colonists: the player's faction has no home site; no colonists made");
             return null;
         }
-        const radius = siteRadius(site);
-        const taken = new Set();
-        const people = W.units().filter(u => u.data && u.data.kind === "person" && u.data.faction === playerId && sameArea(u.area, site.area)
-            && (u.data.site === site.id || chebyshev(u.x, u.y, site.x, site.y) <= radius + 2));
-        for (const u of people) convertPerson(u, state, site, taken);
-        // A site with fewer than 2 people gets colonists added at its centre (the people sheets of its species).
+        const taken = new Set(), people = [];
         const F = state.factions.list.find(f => f.id === playerId);
         const people2 = (catalog() && catalog().people && F && catalog().people[F.species]) || null;
-        let added = 0;
-        while (people.length + added < 2 && people2 && people2.images && people2.images.length) {
-            const cell = freeCellNear(site.area, site.x, site.y, 3) || { x: site.x, y: site.y + 1 };
-            const u = W.addUnit({ name: "", image: { characterName: people2.images[added % people2.images.length], characterIndex: 0 }, area: copyArea(site.area), x: cell.x, y: cell.y, dir: 2,
-                data: { kind: "person", faction: playerId, species: F.species, tint: people2.tint, site: site.id } });
-            convertPerson(u, state, site, taken);
-            people.push(u);
-            added++;
+        const sites = [site, ...state.history.sites.filter(s => s.id !== site.id && !s.ruined)];
+        let primary = null;
+        for (const local of sites) {
+            if (!levelSupported(zOf(local))) continue;
+            const radius = siteRadius(local);
+            const residents = W.units().filter(u => u.data && u.data.kind === "person" && u.data.faction === local.faction && sameLevel(u, local)
+                && (u.data.site === local.id || (u.data.site === undefined && chebyshev(u.x, u.y, local.x, local.y) <= radius + 2)));
+            for (const u of residents) convertPerson(u, state, local, taken);
+            // Preserve the legacy primary-site fallback, without increasing a valid two-settlement founder budget.
+            while (local.id === site.id && residents.length < 2 && people2 && people2.images && people2.images.length) {
+                const cell = freeCellNear(levelArea(local), local.x, local.y, 3);
+                if (!cell) break;
+                const u = W.addUnit({ name: "", image: { characterName: people2.images[residents.length % people2.images.length], characterIndex: 0 },
+                    area: copyArea(local.area), z: zOf(local), x: cell.x, y: cell.y, dir: 2,
+                    data: { kind: "person", faction: playerId, species: F.species, tint: people2.tint, site: local.id } });
+                convertPerson(u, state, local, taken);
+                residents.push(u);
+            }
+            if (local.faction === playerId) people.push(...residents);
+            const record = {
+                version: 2, factionId: local.faction, siteId: local.id,
+                site: { x: local.x, y: local.y }, area: copyArea(local.area), z: zOf(local), radius,
+                plan: makePlan(local), stockpiles: [],
+                log: [{ tick: 0, text: `${residents.length} colonists at ${local.name}` }]
+            };
+            if (!primary) {
+                primary = record;
+                primary.settlements = {};
+            } else primary.settlements[local.id] = record;
         }
-        state.colony = {
-            version: 1,
-            factionId: playerId,
-            siteId: site.id,
-            site: { x: site.x, y: site.y },
-            area: copyArea(site.area),
-            radius,
-            plan: makePlan(),
-            stockpiles: [],
-            log: [{ tick: 0, text: `${people.length} colonists at ${site.name}` }]
-        };
+        state.colony = primary;
+        if (primary) primary.settlementsReady = true;
         emit("colonists:ready", state.colony, people);
         return state.colony;
+    }
+
+    // Add settlement simulation to an existing save without rebuilding its primary plan or moving/replacing units.
+    function ensureSettlementActors() {
+        const W = World(), primary = colonyState();
+        if (!W || !primary || primary.settlementsReady || !W.state.history) return;
+        primary.settlements = primary.settlements || {};
+        const taken = new Set(W.units().map(u => u.name));
+        for (const site of W.state.history.sites || []) {
+            if (site.ruined || !levelSupported(zOf(site))) continue;
+            const residents = W.units().filter(u => u.data && (u.data.kind === "person" || u.data.kind === "colonist") &&
+                u.data.faction === site.faction && u.data.site === site.id && sameLevel(u, site));
+            if (!residents.length) continue;
+            if (site.id !== primary.siteId && !primary.settlements[site.id]) {
+                primary.settlements[site.id] = { version: 2, factionId: site.faction, siteId: site.id,
+                    site: { x: site.x, y: site.y }, area: copyArea(site.area), z: zOf(site), radius: siteRadius(site),
+                    plan: makePlan(site), stockpiles: [], log: [] };
+            }
+            for (const u of residents) {
+                if (u.data.kind === "person" && u.data.ai !== "settlement") convertPerson(u, W.state, site, taken);
+                if (!u.data.home || !u.data.home.area) u.data.home = { area: copyArea(site.area), x: site.x, y: site.y, z: zOf(site) };
+            }
+        }
+        primary.settlementsReady = true;
     }
 
     // Stockpiles the site already has: the plan's stockpile steps with `stores` take the nearest free ones.
@@ -340,7 +407,7 @@
         if (!O) return;
         const stockId = O.typeId("stockpile");
         if (!stockId) return;
-        const found = O.findIn(site.area, { near: { x: site.x, y: site.y }, radius: colony.radius + 1, id: "stockpile" });
+        const found = O.findIn(levelArea(site), { near: { x: site.x, y: site.y }, radius: colony.radius + 1, id: "stockpile" });
         const free = found.slice();
         for (const step of colony.plan) {
             if (!step.build || step.build !== "stockpile" || !Array.isArray(step.stores)) continue;
@@ -372,14 +439,18 @@
 
     function gridOf(area) {
         const W = World();
-        if (sameArea(area, W.currentArea()) && window.$dataMap && $dataMap.ufObjects) return $dataMap.ufObjects;
-        return W.peekArea(area.x, area.y).ufObjects;
+        if (!area || !levelSupported(zOf(area))) return null;
+        const view = W.viewLevel ? W.viewLevel() : W.currentArea();
+        if (sameLevel(area, view) && window.$dataMap && $dataMap.ufObjects) return $dataMap.ufObjects;
+        const map = W.peekArea(area.x, area.y, zOf(area));
+        return map ? map.ufObjects : null;
     }
     /** Nearest object around (x, y) whose type passes `pred(type)`: { x, y, type, dist } or null. */
     function scanObjects(area, x, y, radius, pred) {
         const O = Objects(), W = World();
         if (!O || !W) return null;
         const grid = gridOf(area);
+        if (!grid) return null;
         const size = W.state.size, list = O.types();
         let best = null, bestD = Infinity;
         const x0 = Math.max(0, x - radius), x1 = Math.min(size - 1, x + radius), y0 = Math.max(0, y - radius), y1 = Math.min(size - 1, y + radius);
@@ -404,36 +475,36 @@
 
     /** Nearest object with an action that yields the item: { x, y, type, action } or null. */
     // The home site's own standing pieces (its ring, its walls) are never taken apart for materials.
-    function sitePiece(type, x, y) {
-        const c = colonyState();
+    function sitePiece(type, x, y, ref) {
+        const c = colonyState(ref);
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
     function objectSourceNear(u, itemId, radius) {
         if (!sourcesOf(itemId).length) return null;
-        const f = scanObjects(u.area, u.x, u.y, radius, (t, x, y) => !!yieldsItem(t, itemId) && !sitePiece(t, x, y));
+        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => !!yieldsItem(t, itemId) && !sitePiece(t, x, y, u));
         return f ? Object.assign(f, { action: yieldsItem(f.type, itemId)[0] }) : null;
     }
     function foodObjectNear(u, radius) {
-        const f = scanObjects(u.area, u.x, u.y, radius, (t, x, y) => !!yieldsFood(t) && !sitePiece(t, x, y));
+        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => !!yieldsFood(t) && !sitePiece(t, x, y, u));
         return f ? Object.assign(f, { action: yieldsFood(f.type)[0] }) : null;
     }
     // The colony's own hearth: the fire object at the home site. Cooking and sleeping by the fire happen there,
     // never at some other faction's hearth that happens to be nearer after a long chase.
-    function homeFire() {
-        const O = Objects(), c = colonyState();
+    function homeFire(ref) {
+        const O = Objects(), c = colonyState(ref);
         if (!O || !c) return null;
-        const f = O.findIn(c.area, { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, tags: ["fire"], limit: 1 });
+        const f = O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, tags: ["fire"], limit: 1 });
         return f[0] || null;
     }
-    const fireNear = u => !!homeFire() && sameArea(u.area, colonyState().area);
-    const nearestFire = () => homeFire();
+    const fireNear = u => !!homeFire(u) && !!colonyState(u);
+    const nearestFire = u => homeFire(u);
     // The spec that gets a recipe cooked at home: the craft itself when the hearth is within UF_Jobs' workplace
     // search, else a walk to it first (the same decision follows from there).
     function cookSpec(u, recipeId, plan) {
-        const f = homeFire();
+        const f = homeFire(u);
         if (!f) return null;
         if (Math.hypot(f.x - u.x, f.y - u.y) > FIRE_RADIUS - 4) {
-            const cell = freeCellNear(u.area, f.x, f.y, 3);
+            const cell = freeCellNear(levelArea(u), f.x, f.y, 3);
             return cell ? { type: "move", target: cell, params: { via: "craft", viaTarget: { x: f.x, y: f.y } } } : null;
         }
         return { type: "craft", params: plan ? { recipeId, plan } : { recipeId } };
@@ -447,22 +518,22 @@
                 for (let dx = -r; dx <= r; dx++) {
                     if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
                     const x = u.x + dx, y = u.y + dy;
-                    if (!J.isWaterAt(u.area, x, y)) continue;
-                    if (NEIGHBORS.some(([nx, ny]) => J.standable(u.area, x + nx, y + ny, u.id))) return { x, y };
+                    if (!J.isWaterAt(levelArea(u), x, y)) continue;
+                    if (NEIGHBORS.some(([nx, ny]) => J.standable(levelArea(u), x + nx, y + ny, u.id))) return { x, y };
                 }
             }
         }
         return null;
     }
-    const stockpilesStoring = tag => (colonyState() ? colonyState().stockpiles.filter(s => !tag || (s.stores || []).includes(tag)) : []);
-    const onStockpile = (it, tag) => stockpilesStoring(tag).some(s => s.x === it.x && s.y === it.y);
+    const stockpilesStoring = (tag, ref) => (colonyState(ref) ? colonyState(ref).stockpiles.filter(s => !tag || (s.stores || []).includes(tag)) : []);
+    const onStockpile = (it, tag, ref) => sameLevel(it, colonyState(ref)) && stockpilesStoring(tag, ref).some(s => s.x === it.x && s.y === it.y);
     function groundItemsNear(u, opts) {
         const I = Items();
-        return I ? I.find(Object.assign({ near: { x: u.x, y: u.y }, area: u.area }, opts)) : [];
+        return I ? I.find(Object.assign({}, opts, { near: { x: u.x, y: u.y }, area: levelArea(u), z: zOf(u) })) : [];
     }
     // Items lying on plan build cells are reserved for their buildings.
-    function onBuildCell(x, y) {
-        const c = colonyState();
+    function onBuildCell(x, y, ref) {
+        const c = colonyState(ref);
         if (!c) return false;
         for (const s of c.plan) {
             if (!s.build || s.done === true) continue;
@@ -485,7 +556,7 @@
         const brave = facet(u, "bravery") >= BRAVE;
         let best = null, bestD = Infinity;
         for (const p of W.units()) {
-            if (!p.data || p.data.kind !== "creature" || !sameArea(p.area, u.area)) continue;
+            if (!p.data || p.data.kind !== "creature" || !sameLevel(p, u)) continue;
             const sp = Wl.speciesOf(p);
             if (!sp || !(sp.prey || (brave && sp.kind === "predator"))) continue;
             const d = Math.hypot(p.x - u.x, p.y - u.y);
@@ -501,7 +572,7 @@
         const W = World();
         let best = null, bestD = Infinity;
         for (const p of W.units()) {
-            if (!p.data || p.data.kind !== "creature" || !sameArea(p.area, u.area)) continue;
+            if (!p.data || p.data.kind !== "creature" || !sameLevel(p, u)) continue;
             const sp = speciesOfPrey(p);
             if (!sp || !sp.yields || !(sp.yields[itemId] > 0)) continue;
             const prey = ["grazer", "vermin", "flier"].includes(sp.kind) || (sp.kind === "predator" && facet(u, "bravery") >= BRAVE);
@@ -516,10 +587,10 @@
     // that needs to work outside (or the reverse) walks to the nearest opening first: the 200-node pathfinder
     // can't see round a radius-9 wall.
     function ringGap(u, tx, ty) {
-        const c = colonyState();
-        if (!c || !c.radius || !sameArea(u.area, c.area)) return null;
+        const c = colonyState(u);
+        if (!c || !c.radius || !sameLevel(u, c)) return null;
         const kinds = (catalog().sites && catalog().sites.kinds) || {};
-        const kind = kinds[(homeSiteRecord() || {}).kind];
+        const kind = kinds[(homeSiteRecord(u) || {}).kind];
         if (!kind || !kind.ring) return null;
         const r = c.radius;
         const inside = (x, y) => chebyshev(x, y, c.site.x, c.site.y) < r;
@@ -529,7 +600,7 @@
         let best = null, bestD = Infinity;
         for (let i = -r; i <= r; i++) {
             for (const [x, y] of [[c.site.x + i, c.site.y - r], [c.site.x + i, c.site.y + r], [c.site.x - r, c.site.y + i], [c.site.x + r, c.site.y + i]]) {
-                if (!J.standable(c.area, x, y, u.id)) continue;
+                if (!J.standable(levelArea(c), x, y, u.id)) continue;
                 const d = Math.hypot(x - u.x, y - u.y) + Math.hypot(tx - x, ty - y);
                 if (d < bestD) { best = { x, y }; bestD = d; }
             }
@@ -541,7 +612,7 @@
     // Giving jobs
 
     const avoid = new Map(); // `${unitId}:${type}:${x},${y}` -> tick until which it isn't tried again
-    const avoidKey = (u, type, x, y) => `${u.id}:${type}:${x},${y}`;
+    const avoidKey = (u, type, x, y) => `${u.id}:${zOf(u)}:${type}:${x},${y}`;
     const decisionAt = new Map(); // unit id -> tick of the last decision
     const arrivals = new Map();   // job id -> callback (the Overseer's assignMoveTo)
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
@@ -554,9 +625,9 @@
     // Someone else already works on this target (or crafts this recipe).
     function claimed(u, type, x, y, params) {
         for (const j of activeJobs()) {
-            if (j.assigned === u.id) continue;
+            if (j.assigned === u.id || !j.target || !sameLevel(j.target, u)) continue;
             if (type === "craft") {
-                if (j.type === "craft" && j.params.recipeId === params.recipeId && j.params.plan === params.plan) return true;
+                if (j.type === "craft" && j.params.recipeId === params.recipeId && j.params.plan === params.plan && j.params.siteId === params.siteId) return true;
                 continue;
             }
             if (type === "hunt" && j.type === "hunt" && j.params.unitId === params.unitId) return true;
@@ -570,7 +641,14 @@
     function give(u, spec) {
         const J = Jobs();
         if (!J) return null;
-        const params = spec.params || {};
+        const target = targetFor(u, spec.target);
+        if (!target) return null;
+        const params = Object.assign({}, spec.params || {});
+        params.siteId = u.data.site;
+        if (params.to) {
+            params.to = targetFor(u, params.to);
+            if (!params.to) return null;
+        }
         const tx = spec.target ? spec.target.x : u.x, ty = spec.target ? spec.target.y : u.y;
         const key = avoidKey(u, spec.type, tx, ty);
         if ((avoid.get(key) || 0) > ticks()) return null;
@@ -579,11 +657,11 @@
         if (spec.target) {
             const gap = ringGap(u, tx, ty);
             if (gap && !(u.x === gap.x && u.y === gap.y)) {
-                const via = J.create({ type: "move", target: { area: copyArea(u.area), x: gap.x, y: gap.y }, params: { via: spec.type, viaTarget: { x: tx, y: ty } }, owner: u.id });
+                const via = J.create({ type: "move", target: { area: copyArea(u.area), x: gap.x, y: gap.y, z: zOf(u) }, params: { via: spec.type, viaTarget: { x: tx, y: ty } }, owner: u.id });
                 if (via && via.state !== "failed") return via;
             }
         }
-        const job = J.create({ type: spec.type, target: spec.target ? { area: copyArea(spec.target.area || u.area), x: tx, y: ty } : undefined, params, owner: u.id });
+        const job = J.create({ type: spec.type, target, params, owner: u.id });
         if (!job || job.state === "failed") {
             avoid.set(key, ticks() + AVOID_TICKS);
             return null;
@@ -622,7 +700,7 @@
         const rates = needRates();
         const th = thresholds();
         const s = seed();
-        for (const u of colonists()) {
+        for (const u of simulationUnits()) {
             const n = u.data.needs || (u.data.needs = Object.assign({}, START_NEEDS));
             if (asleep(u)) {
                 n.sleep = Math.max(0, n.sleep - 0.6); // resting; the sleep job sets it to 5 at the end
@@ -660,7 +738,7 @@
                 if (j) return j;
             }
         }
-        const hungry = n.hunger >= (th.hunger || 55) || (isMealHour() && n.hunger >= 30 && stockpilesStoring("food").length && foodStored().length);
+        const hungry = n.hunger >= (th.hunger || 55) || (isMealHour() && n.hunger >= 30 && stockpilesStoring("food", u).length && foodStored(u).length);
         if (hungry) {
             const j = foodJob(u);
             if (j) return j;
@@ -673,7 +751,7 @@
         }
         const socialAt = evening() ? Math.min(th.social || 40, 25) : (th.social || 40);
         if (n.social >= socialAt) {
-            const partner = colonists().find(o => o.id !== u.id && sameArea(o.area, u.area) && !Jobs().of(o.id) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
+            const partner = simulationUnits().find(o => o.id !== u.id && sameLevel(o, u) && o.data.faction === u.data.faction && !Jobs().of(o.id) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
             if (partner) {
                 const j = give(u, { type: "talk", target: { x: partner.x, y: partner.y }, params: { unitId: partner.id } });
                 if (j) return j;
@@ -686,11 +764,11 @@
         return null;
     }
 
-    const foodStored = () => {
+    const foodStored = ref => {
         const I = Items();
         const out = [];
         if (!I) return out;
-        for (const s of stockpilesStoring("food")) for (const it of I.atIn(siteArea(), s.x, s.y)) if (isFoodType(itemType(it.type))) out.push(it);
+        for (const s of stockpilesStoring("food", ref)) for (const it of I.atIn(siteArea(ref), s.x, s.y)) if (isFoodType(itemType(it.type))) out.push(it);
         return out;
     };
     const rawFood = t => isFoodType(t) && hasTag(t, "raw");
@@ -714,7 +792,7 @@
         }
         // Food on the ground within reach, the larder included, nearest first. A fresh kill (raw food lying
         // about) comes before everything else: it's picked up and cooked, or eaten where it lies.
-        const stored = foodStored().map(it => ({ item: it, x: it.x, y: it.y, dist: Math.hypot(it.x - u.x, it.y - u.y) }));
+        const stored = foodStored(u).map(it => ({ item: it, x: it.x, y: it.y, dist: Math.hypot(it.x - u.x, it.y - u.y) }));
         const seen = new Set(stored.map(f => f.item.id));
         const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id))).sort((a, b) => a.dist - b.dist);
         const kill = ground.find(f => rawFood(itemType(f.item.type)) && f.dist <= FOOD_ITEM_RADIUS);
@@ -726,7 +804,7 @@
             if (j) return j;
         }
         // A brave colonist with prey close by takes it rather than walking to the larder.
-        const brave = facet(u, "bravery") >= BRAVE || priorityOf("hunt") > 1;
+        const brave = facet(u, "bravery") >= BRAVE || priorityOf("hunt", u) > 1;
         const near = brave ? preyNear(u, HUNT_NEAR) : null;
         if (near) {
             const j = give(u, { type: "hunt", target: { x: near.x, y: near.y }, params: { unitId: near.id } });
@@ -759,7 +837,7 @@
     // Reproduction, pregnancy and life stages
 
     function eligibleForIntimacy(u) {
-        if (!u || !isColonist(u) || !u.data) return false;
+        if (!u || !isSettler(u) || !u.data) return false;
         if (u.data.age !== undefined && u.data.age < 16) return false; // must be adult
         const day = window.$ufTime ? $ufTime.day : 1;
         if (u.data.lastMatedDay === day) return false; // once nightly
@@ -770,7 +848,7 @@
         if (!eligibleForIntimacy(u)) return null;
         const J = Jobs();
         if (!J) return null;
-        const candidates = colonists().filter(o => o.id !== u.id && sameArea(o.area, u.area) && eligibleForIntimacy(o) && (!o.data.faction || o.data.faction === u.data.faction) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
+        const candidates = simulationUnits().filter(o => o.id !== u.id && sameLevel(o, u) && eligibleForIntimacy(o) && (!o.data.faction || o.data.faction === u.data.faction) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
         if (!candidates.length) return null;
         // Prioritize opposite gender for sexual reproduction
         const opp = candidates.find(o => o.data.gender && u.data.gender && o.data.gender !== u.data.gender);
@@ -780,13 +858,13 @@
     }
 
     function handleMated(u1, u2) {
-        if (!u1) return;
+        if (!u1 || (u2 && !sameLevel(u1, u2))) return;
         const day = window.$ufTime ? $ufTime.day : 1;
         u1.data.lastMatedDay = day;
         if (u2 && u2.data) u2.data.lastMatedDay = day;
 
         addThought(u1, "Made love with partner.", 12);
-        if (u2 && isColonist(u2)) addThought(u2, "Made love with partner.", 12);
+        if (u2 && isSettler(u2)) addThought(u2, "Made love with partner.", 12);
 
         if (u1.data.needs) u1.data.needs.social = Math.max(0, (u1.data.needs.social || 0) - 50);
         if (u2 && u2.data && u2.data.needs) u2.data.needs.social = Math.max(0, (u2.data.needs.social || 0) - 50);
@@ -822,7 +900,7 @@
     function progressPregnancies() {
         const W = World();
         if (!W) return;
-        for (const u of colonists()) {
+        for (const u of simulationUnits()) {
             if (!u.data || !u.data.pregnancy) continue;
             const preg = u.data.pregnancy;
             preg.daysLeft--;
@@ -834,18 +912,18 @@
 
     function giveBirth(mother) {
         const W = World();
-        if (!W || !mother) return null;
+        if (!W || !mother || !levelSupported(zOf(mother))) return null;
         const st = W.state;
         const preg = mother.data.pregnancy;
         const fatherId = preg ? preg.fatherId : null;
-        const father = fatherId ? colonist(fatherId) : null;
+        const father = fatherId ? settler(fatherId) : null;
 
         // Find standable cell next to mother
         const J = Jobs();
         let birthX = mother.x, birthY = mother.y;
         for (const [dx, dy] of NEIGHBORS) {
             const nx = mother.x + dx, ny = mother.y + dy;
-            if (J && J.standable(mother.area, nx, ny)) {
+            if (J && J.standable(levelArea(mother), nx, ny)) {
                 birthX = nx;
                 birthY = ny;
                 break;
@@ -854,20 +932,23 @@
 
         // Generate child unit
         const childGender = unit01(st.seed, SALT.gender, mother.id, ticks()) < 0.5 ? "male" : "female";
-        const taken = new Set(colonists().map(c => c.name));
+        const taken = new Set(simulationUnits().map(c => c.name));
         const childName = nameFor(st.seed, ticks(), childGender, taken);
 
         const childUnit = W.addUnit({
             name: childName,
             image: { characterName: "$Baby", characterIndex: 0 },
             area: copyArea(mother.area),
+            z: zOf(mother),
             x: birthX,
             y: birthY,
             dir: 2,
             data: {
-                kind: "colonist",
-                ai: "colonist",
+                kind: isColonist(mother) ? "colonist" : "person",
+                ai: isColonist(mother) ? "colonist" : "settlement",
                 faction: mother.data.faction,
+                site: mother.data.site,
+                home: mother.data.home ? JSON.parse(JSON.stringify(mother.data.home)) : { area: copyArea(mother.area), x: mother.x, y: mother.y, z: zOf(mother) },
                 species: mother.data.species || "human",
                 gender: childGender,
                 age: 0,
@@ -885,7 +966,7 @@
         delete mother.data.pregnancy;
 
         addThought(mother, "Gave birth to a healthy baby.", 20);
-        if (father && isColonist(father)) {
+        if (father && isSettler(father)) {
             addThought(father, "Celebrated the birth of my child.", 15);
         }
 
@@ -901,7 +982,7 @@
     }
 
     function progressAging() {
-        for (const u of colonists()) {
+        for (const u of simulationUnits()) {
             if (!u.data || u.data.age === undefined) continue;
             u.data.ageDays = (u.data.ageDays || 0) + 1;
             if (u.data.ageDays >= 7 && u.data.age < 18) {
@@ -937,12 +1018,12 @@
 
     function sleepJob(u) {
         const O = Objects();
-        const c = colonyState();
+        const c = colonyState(u);
         const w = sleepWindow(u);
         const hoursLeft = ((w.to - hourNow() + 24) % 24) || 8;
         const frames = Math.max(4, Math.min(10, hoursLeft)) * 3600;
-        const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id).map(j => `${j.target.x},${j.target.y}`));
-        const beds = O ? O.findIn(u.area, { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
+        const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
+        const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const spots = beds.map(b => ({ x: b.x, y: b.y }));
         const fire = nearestFire(u);
         if (fire) spots.push({ x: fire.x, y: fire.y });
@@ -958,12 +1039,12 @@
     function natureJob(u) {
         const O = Objects();
         const water = waterNear(u, NATURE_RADIUS);
-        const tree = O ? O.findIn(u.area, { near: { x: u.x, y: u.y }, radius: NATURE_RADIUS, tags: ["tree"], limit: 1 })[0] : null;
+        const tree = O ? O.findIn(levelArea(u), { near: { x: u.x, y: u.y }, radius: NATURE_RADIUS, tags: ["tree"], limit: 1 })[0] : null;
         const J = Jobs();
         for (const spot of [water, tree].filter(Boolean)) {
             for (const [dx, dy] of NEIGHBORS) {
                 const x = spot.x + dx, y = spot.y + dy;
-                if (!J.standable(u.area, x, y, u.id)) continue;
+                if (!J.standable(levelArea(u), x, y, u.id)) continue;
                 const j = give(u, { type: "move", target: { x, y }, params: { nature: true } });
                 if (j) return j;
                 break;
@@ -974,13 +1055,14 @@
 
     // An open designation the colonist can do, the best by the culture's priorities, skill and distance.
     function designationJob(u) {
+        if (!isColonist(u)) return null; // open UI designations belong to the player, not autonomous NPC settlements
         const J = Jobs();
-        const open = J.open().filter(j => sameArea(j.target.area, u.area));
+        const open = J.open().filter(j => j.target && sameLevel(j.target, u));
         if (!open.length) return null;
         const score = j => {
             const skill = SKILL_OF[j.type] ? ((u.data.skills && u.data.skills[SKILL_OF[j.type]]) || 0) : 0;
             const dist = Math.hypot(j.target.x - u.x, j.target.y - u.y);
-            return priorityOf(j.type) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
+            return priorityOf(j.type, u) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
         };
         open.sort((a, b) => score(b) - score(a) || a.id - b.id);
         for (const j of open.slice(0, 6)) {
@@ -1011,27 +1093,28 @@
     // The society plan
 
     const stepObject = step => (Objects() ? Objects().type(step.build) : null);
-    function siteCount(objectId) {
-        const c = colonyState(), O = Objects();
-        return c && O ? O.findIn(c.area, { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, id: objectId }).length : 0;
+    function siteCount(objectId, ref) {
+        const c = colonyState(ref), O = Objects();
+        return c && O ? O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, id: objectId }).length : 0;
     }
     // A build step's cells: [{ x, y, state: "done" | "skipped" | "todo" }]. Furniture (passable objects) and the site's
     // own centre piece count wherever the site already has them; walls are counted cell by cell.
-    function buildCells(step) {
-        const c = colonyState(), O = Objects();
+    function buildCells(step, ref) {
+        const c = colonyState(ref), O = Objects();
         const t = stepObject(step);
         const out = [];
         if (!c || !O || !t) return out;
-        const centre = ((catalog().sites && catalog().sites.kinds && catalog().sites.kinds[(homeSiteRecord() || {}).kind]) || {}).center;
+        const centre = ((catalog().sites && catalog().sites.kinds && catalog().sites.kinds[(homeSiteRecord(ref) || {}).kind]) || {}).center;
         const cells = step.cells || [];
-        const byCount = (t.passable === true || t.id === centre) && siteCount(t.id) >= cells.length;
+        const byCount = (t.passable === true || t.id === centre) && siteCount(t.id, ref) >= cells.length;
         for (const [dx, dy] of cells) {
             const x = c.site.x + dx, y = c.site.y + dy;
-            const here = O.atIn(c.area, x, y);
+            const here = O.atIn(levelArea(c), x, y);
             let state = "todo";
             if (byCount || (here && here.id === t.id)) state = "done";
             else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = "skipped";
-            else if (Jobs() && Jobs().isWaterAt(c.area, x, y)) state = "skipped"; // nothing is built on water
+            else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = "skipped"; // nothing is built on water
+            else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = "skipped"; // no excavation or unsupported airborne construction
             out.push({ x, y, state, here });
         }
         return out;
@@ -1046,25 +1129,25 @@
         const tEq = eq ? itemType(eq.type) : null;
         return !!eq && (eq.type === out || (!!tOut && !!tOut.wear && !!tEq && !!tEq.wear && tEq.wear.tier >= tOut.wear.tier));
     }
-    function colonyCount(typeId) {
-        const I = Items(), c = colonyState();
+    function colonyCount(typeId, ref) {
+        const I = Items(), c = colonyState(ref);
         if (!I || !c) return 0;
         let n = 0;
-        for (const u of colonists()) n += I.count(u.id, typeId);
-        for (const f of I.find({ area: c.area, near: { x: c.site.x, y: c.site.y }, radius: c.radius + 2, id: typeId })) n += f.item.count;
+        for (const u of siteColonists(ref)) n += I.count(u.id, typeId);
+        for (const f of I.find({ area: levelArea(c), z: zOf(c), near: { x: c.site.x, y: c.site.y }, radius: c.radius + 2, id: typeId })) n += f.item.count;
         return n;
     }
-    const stockCount = step => foodStored().filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
+    const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
 
     /** [{ id, done, detail }] for every plan step, evaluated from the world now (and recorded in state). */
-    function planStatus() {
-        const c = colonyState();
+    function planStatus(ref) {
+        const c = colonyState(ref);
         if (!c) return [];
-        const people = colonists();
+        const people = siteColonists(ref);
         return c.plan.map(step => {
             let done = false, detail = "";
             if (step.build) {
-                const cells = buildCells(step);
+                const cells = buildCells(step, ref);
                 const finished = cells.filter(x => x.state !== "todo");
                 done = cells.length > 0 && finished.length === cells.length;
                 const t = stepObject(step);
@@ -1080,15 +1163,15 @@
                     done = people.length > 0 && have >= people.length;
                     detail = `${have}/${people.length}`;
                 } else {
-                    const n = colonyCount(out), want = step.count | 0 || 1;
+                    const n = colonyCount(out, ref), want = step.count | 0 || 1;
                     done = n >= want;
                     detail = `${Math.min(n, want)}/${want}`;
                 }
                 step.done = done;
             } else if (step.stock) {
-                const n = stockCount(step), want = step.count | 0 || 1;
+                const n = stockCount(step, ref), want = step.count | 0 || 1;
                 done = n >= want;
-                detail = stockpilesStoring(step.stock[0]).length ? `${Math.min(n, want)}/${want}` : "no larder";
+                detail = stockpilesStoring(step.stock[0], ref).length ? `${Math.min(n, want)}/${want}` : "no larder";
                 step.done = done;
             } else {
                 done = true;
@@ -1099,15 +1182,15 @@
         });
     }
     const stepLabel = step => capitalize(String(step.id || "").replace(/_/g, " "));
-    const planText = () => planStatus().map(s => `${stepLabel(colonyState().plan.find(p => p.id === s.id))}: ${s.done ? (s.detail === "built" || s.detail === "to build" ? "built" : "done") : s.detail}`).join(" · ");
+    const planText = ref => planStatus(ref).map(s => `${stepLabel(colonyState(ref).plan.find(p => p.id === s.id))}: ${s.done ? (s.detail === "built" || s.detail === "to build" ? "built" : "done") : s.detail}`).join(" · ");
 
     // What a colonist would do for a build step: [{ type, target, params }] candidates in order of preference.
     function buildStepJob(u, step) {
         const I = Items();
         const t = stepObject(step);
         if (!t || !t.build || !I) return null;
-        const c = colonyState();
-        for (const cell of buildCells(step)) {
+        const c = colonyState(u);
+        for (const cell of buildCells(step, u)) {
             if (cell.state !== "todo") continue;
             const target = { x: cell.x, y: cell.y };
             const here = cell.here;
@@ -1117,13 +1200,13 @@
                 return { type: action, target, params: { plan: step.id } };
             }
             const needs = t.build.items || {};
-            const missing = Object.keys(needs).filter(id => I.count({ area: c.area, x: cell.x, y: cell.y }, id) < (needs[id] | 0));
+            const missing = Object.keys(needs).filter(id => I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) < (needs[id] | 0));
             if (!missing.length) return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
             const m = missing[0];
             const carried = carriedOf(u, m)[0];
-            if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), x: cell.x, y: cell.y }, plan: step.id } };
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: m }).find(f => !onBuildCell(f.x, f.y));
-            if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), x: cell.x, y: cell.y }, plan: step.id } };
+            if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: m }).find(f => !onBuildCell(f.x, f.y, u));
+            if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
             const src = objectSourceNear(u, m, SEARCH_RADIUS);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
             const prey = preyYielding(u, m, huntRadius());
@@ -1134,10 +1217,10 @@
 
     function gatherInputsJob(u, recipe, step) {
         const I = Items();
-        const c = colonyState();
+        const c = colonyState(u);
         for (const [id, want] of Object.entries(recipe.inputs || {})) {
             if (carriedCount(u, id) >= (want | 0)) continue;
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !onBuildCell(f.x, f.y) && !(c && onStockpile(f.item, null) && isFoodType(itemType(id))));
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !onBuildCell(f.x, f.y, u) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
             if (ground) return { type: "fetch", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, plan: step.id } };
             const src = objectSourceNear(u, id, SEARCH_RADIUS);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
@@ -1157,17 +1240,17 @@
             if (satisfiesEach(u, step, out)) return null; // this colonist has theirs
             return gatherInputsJob(u, r, step);
         }
-        if (colonyCount(out) >= ((step.count | 0) || 1)) return null;
+        if (colonyCount(out, u) >= ((step.count | 0) || 1)) return null;
         return gatherInputsJob(u, r, step);
     }
     function stockStepJob(u, step) {
         const I = Items();
-        const c = colonyState();
+        const c = colonyState(u);
         const tags = step.stock || [];
-        const larder = stockpilesStoring(tags[0])[0];
+        const larder = stockpilesStoring(tags[0], u)[0];
         if (!larder || !I || !c) return null;
         const isWanted = t => isFoodType(t) && tags.some(tag => hasTag(t, tag));
-        const to = { area: copyArea(c.area), x: larder.x, y: larder.y };
+        const to = { area: copyArea(c.area), z: zOf(c), x: larder.x, y: larder.y };
         const fire = fireNear(u);
         // Carried food: cook it if raw and there's a fire, else haul it to the larder.
         for (const it of I.inventoryOf(u.id)) {
@@ -1188,16 +1271,16 @@
         const plant = foodObjectNear(u, SEARCH_RADIUS);
         const prey = step.hunt ? preyNear(u, huntRadius()) : null;
         const plantD = plant ? plant.dist : Infinity;
-        const preyD = prey ? Math.hypot(prey.x - u.x, prey.y - u.y) / Math.max(0.2, priorityOf("hunt")) / (equippedItem(u, "tool") && hasTag(itemType(equippedItem(u, "tool").type), "knife") ? 1.5 : 1) : Infinity;
+        const preyD = prey ? Math.hypot(prey.x - u.x, prey.y - u.y) / Math.max(0.2, priorityOf("hunt", u)) / (equippedItem(u, "tool") && hasTag(itemType(equippedItem(u, "tool").type), "knife") ? 1.5 : 1) : Infinity;
         if (prey && preyD <= plantD) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
         if (plant) return { type: plant.action, target: { x: plant.x, y: plant.y }, params: { plan: step.id } };
         return null;
     }
 
     function planJob(u) {
-        const c = colonyState();
+        const c = colonyState(u);
         if (!c) return null;
-        const status = planStatus();
+        const status = planStatus(u);
         const candidates = [];
         for (let i = 0; i < c.plan.length && candidates.length < LOOKAHEAD; i++) {
             if (status[i].done) continue;
@@ -1209,7 +1292,7 @@
         const ready = candidates.filter(x => x.spec);
         if (!ready.length) return null;
         // The culture's priorities pick among the next few steps; ties keep the plan's order.
-        const score = x => priorityOf(x.spec.type) * (SKILL_OF[x.spec.type] ? 1 + ((u.data.skills && u.data.skills[SKILL_OF[x.spec.type]]) || 0) / 40 : 1) - x.order * 0.05;
+        const score = x => priorityOf(x.spec.type, u) * (SKILL_OF[x.spec.type] ? 1 + ((u.data.skills && u.data.skills[SKILL_OF[x.spec.type]]) || 0) / 40 : 1) - x.order * 0.05;
         ready.sort((a, b) => score(b) - score(a) || a.order - b.order);
         for (const x of ready) {
             const tool = toolJob(u, x.spec.type);
@@ -1222,7 +1305,7 @@
 
     // Idle: explore (curiosity), stroll near the site, or stand and think.
     function idleJob(u) {
-        const c = colonyState();
+        const c = colonyState(u);
         const roll = unit01(seed(), SALT.stroll, u.id, ticks());
         const curiosity = facet(u, "curiosity") / 100;
         const J = Jobs();
@@ -1235,7 +1318,7 @@
                 const a = rng() * Math.PI * 2, d = 3 + rng() * (r - 3);
                 // Both kinds of walk are anchored to the home site, so nobody drifts off to another faction's hearth.
                 const x = Math.round(home.x + Math.cos(a) * d), y = Math.round(home.y + Math.sin(a) * d);
-                if (!J.standable(u.area, x, y, u.id)) continue;
+                if (!J.standable(levelArea(u), x, y, u.id)) continue;
                 const j = give(u, { type: "move", target: { x, y }, params: { stroll: true, explore } });
                 if (j) return j;
             }
@@ -1247,15 +1330,15 @@
 
     // Far from home (a hunt follows fleeing prey a long way): back to the site before anything but a need.
     function homeJob(u) {
-        const c = colonyState();
-        if (!c || !sameArea(u.area, c.area) || Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) return null;
-        const cell = freeCellNear(c.area, c.site.x, c.site.y, 4);
+        const c = colonyState(u);
+        if (!c || !sameLevel(u, c) || Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) return null;
+        const cell = freeCellNear(levelArea(c), c.site.x, c.site.y, 4);
         return cell ? give(u, { type: "move", target: cell, params: { via: "move", home: true } }) : null;
     }
 
     function decide(u) {
         const J = Jobs();
-        if (!J) return null;
+        if (!J || !u || !levelSupported(zOf(u))) return null;
         decisionAt.set(u.id, ticks());
         // Lazy colonists take a breather now and then instead of the next piece of work (needs still come first).
         const lazy = unit01(seed(), SALT.roll, u.id, ticks()) < (100 - facet(u, "industriousness")) / 400;
@@ -1268,13 +1351,17 @@
         const W = World();
         const c = colonyState();
         if (!enabled || !J || !W || !c) return;
-        if (!c.adopted && W.currentArea()) {
-            c.adopted = true; // the site's own stockpiles, read once the area on screen is built (no extra area build on New Game)
-            const s = homeSiteRecord();
-            if (s) adoptSiteStockpiles(c, s);
+        ensureSettlementActors();
+        for (const local of settlementStates()) {
+            if (local.adopted || !levelSupported(zOf(local))) continue;
+            const s = homeSiteRecord(local);
+            if (s) {
+                adoptSiteStockpiles(local, s);
+                local.adopted = true;
+            }
         }
         const t = ticks();
-        for (const u of colonists()) {
+        for (const u of simulationUnits()) {
             const job = J.of(u.id);
             if (job) {
                 const need = urgent(u);
@@ -1301,7 +1388,7 @@
         const I = Items(), O = Objects();
         switch (job.type) {
             case "chop": case "gather": case "pick": case "quarry": case "mine": return job.result && job.result.from ? "object" : null;
-            case "build": { const t = O && O.atIn(job.target.area, job.target.x, job.target.y); return t && t.id === job.params.objectId ? "object" : null; }
+            case "build": { const t = O && O.atIn(levelArea(job.target), job.target.x, job.target.y); return t && t.id === job.params.objectId ? "object" : null; }
             case "haul": return job.result && job.result.itemId ? "item" : null;
             case "fetch": { const it = I && I.get(job.params.itemId); return it && it.holder === u.id ? "item" : null; }
             case "craft": return job.result && job.result.items && job.result.items.length ? "item" : null;
@@ -1313,7 +1400,7 @@
         }
     }
     function onDone(job, u) {
-        if (!isColonist(u)) return;
+        if (!isSettler(u)) return;
         const d = u.data;
         doneLog.push({ id: job.id, unit: u.id, type: job.type, target: !!job.target, physical: physicalChange(job, u), plan: job.params.plan || null, recipe: job.params.recipeId || null });
         if (doneLog.length > 400) doneLog.shift();
@@ -1343,7 +1430,7 @@
             case "hunt": addThought(u, `Brought down ${lower(job.params.preyName ? "a " + job.params.preyName : "prey")}.`, 8); break;
             case "build": {
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
-                if (t && t.id === "stockpile" && colonyState()) colonyState().stockpiles.push({ x: job.target.x, y: job.target.y, stores: (job.params.stores || []).slice(), step: job.params.plan || null });
+                if (t && t.id === "stockpile" && colonyState(u)) colonyState(u).stockpiles.push({ x: job.target.x, y: job.target.y, stores: (job.params.stores || []).slice(), step: job.params.plan || null });
                 addThought(u, `Was pleased to see ${lower(t ? "the " + t.name : "the building")} finished.`, 10);
                 break;
             }
@@ -1355,7 +1442,7 @@
                 // A craft step with equip: put it on straight away (an instant job of its own, so it shows on the card).
                 if (job.params.equip && I && job.result && job.result.items && job.result.items[0]) {
                     const J = Jobs();
-                    J.create({ type: "equip", params: { itemId: job.result.items[0], plan: job.params.plan }, owner: u.id });
+                    J.create({ type: "equip", target: targetFor(u), params: { itemId: job.result.items[0], plan: job.params.plan, siteId: u.data.site }, owner: u.id });
                 }
                 break;
             }
@@ -1374,12 +1461,12 @@
             default: break;
         }
         // A whole plan step finished: the log and a thought.
-        if (job.params.plan && colonyState()) {
-            const s = planStatus().find(x => x.id === job.params.plan);
-            const step = colonyState().plan.find(x => x.id === job.params.plan);
+        if (job.params.plan && colonyState(u)) {
+            const s = planStatus(u).find(x => x.id === job.params.plan);
+            const step = colonyState(u).plan.find(x => x.id === job.params.plan);
             if (s && s.done && step && !step.celebrated) {
                 step.celebrated = true;
-                colonyState().log.push({ tick: ticks(), text: `${stepLabel(step)} done` });
+                colonyState(u).log.push({ tick: ticks(), text: `${stepLabel(step)} done` });
                 addThought(u, `Saw the ${lower(stepLabel(step))} come together.`, 12);
             }
         }
@@ -1391,7 +1478,7 @@
     }
     function onFailed(job) {
         arrivals.delete(job.id);
-        const u = job.assigned ? colonist(job.assigned) : null;
+        const u = job.assigned ? settler(job.assigned) : null;
         if (u) decisionAt.set(u.id, -Infinity);
     }
 
@@ -1410,7 +1497,7 @@
         const J = Jobs();
         const job = J ? J.of(u.id) : null;
         const F = window.UF.Factions ? UF.Factions.get(u.data.faction) : null;
-        const site = homeSiteRecord();
+        const site = homeSiteRecord(u);
         const tool = equippedItem(u, "tool"), clothes = equippedItem(u, "clothes");
         return {
             id: u.id, name: u.name, gender: u.data.gender, mood: u.data.mood || moodOf(u.data.moodScore | 0), moodScore: u.data.moodScore | 0,
@@ -1421,7 +1508,7 @@
             faction: F ? F.name : "", site: site ? site.name : "",
             thought: u.data.thoughts && u.data.thoughts[0] ? u.data.thoughts[0].text : "",
             facets: Object.assign({}, u.data.facets || {}), skills: Object.assign({}, u.data.skills || {}),
-            plan: planText(),
+            plan: planText(u),
             pregnancy: u.data.pregnancy ? Object.assign({}, u.data.pregnancy) : null,
             age: u.data.age !== undefined ? u.data.age : 20,
             motherId: u.data.motherId || null,
@@ -1432,9 +1519,15 @@
     function order(unitId, spec, onArrival) {
         const u = colonist(unitId), J = Jobs();
         if (!u || !J || !spec || !spec.type) return null;
+        const target = targetFor(u, spec.target), params = Object.assign({ ordered: true }, spec.params || {});
+        if (!target) return null;
+        if (params.to) {
+            params.to = targetFor(u, params.to);
+            if (!params.to) return null;
+        }
         const current = J.of(u.id);
         if (current) J.cancel(current.id, "ordered elsewhere");
-        const job = J.create({ type: spec.type, target: spec.target ? { area: copyArea(spec.target.area || u.area), x: spec.target.x | 0, y: spec.target.y | 0 } : undefined, params: Object.assign({ ordered: true }, spec.params || {}), owner: u.id });
+        const job = J.create({ type: spec.type, target, params, owner: u.id });
         decisionAt.set(u.id, ticks());
         if (job && typeof onArrival === "function") arrivals.set(job.id, onArrival);
         return job;
@@ -1447,9 +1540,9 @@
         isColonist,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),
-        site() {
-            const c = colonyState(), s = homeSiteRecord();
-            return c ? { x: c.site.x, y: c.site.y, id: c.siteId, name: s ? s.name : "", radius: c.radius, area: copyArea(c.area) } : null;
+        site(ref) {
+            const c = colonyState(ref), s = homeSiteRecord(ref);
+            return c ? { x: c.site.x, y: c.site.y, z: zOf(c), id: c.siteId, name: s ? s.name : "", radius: c.radius, area: copyArea(c.area) } : null;
         },
         culture: cultureOf,
         addThought,
@@ -1462,7 +1555,8 @@
         tickNeeds,
         setup: setupColony,
         nameFor, facetsFor, skillsFor, genderFor,
-        stockpiles: () => (colonyState() ? colonyState().stockpiles.slice() : []),
+        stockpiles: ref => (colonyState(ref) ? colonyState(ref).stockpiles.slice() : []),
+        settlements: () => settlementStates().slice(),
         /** Switch the decision loop off (needs still tick; running jobs finish). Tests of other systems use it. */
         setEnabled(on) { enabled = !!on; },
         isEnabled: () => enabled,
@@ -1474,7 +1568,7 @@
         updateAgeAppearance,
         nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;

@@ -15,8 +15,10 @@
  * image (a "!$" character sheet in img/characters), tint, tags, stack,
  * food, tool, wear. Code never names an item type.
  *
- * An item is { id, type, count, area: {x, y} | null, x, y, holder: unitId | null }.
+ * An item is { id, type, count, area: {x, y} | null, x, y, z, holder: unitId | null }.
  * On the ground: area set, holder null. Carried: holder set, area null.
+ * Area APIs accept {x,y,z}; missing z means Ground. On-screen calls use
+ * World.viewLevel. Item records carry z beside area and indices include it.
  * Stacks of one type merge on a cell up to the type's stack size.
  * Inventories are lists of item ids on unit.data.inventory (created when
  * missing). Everything is saved in UF.World.state.items.
@@ -48,9 +50,25 @@
     };
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
-    const areaKey = a => `${a.x},${a.y}`;
+    const zOf = ref => ref && ref.z !== undefined ? ref.z
+        : ref && ref.area && ref.area.z !== undefined ? ref.area.z : 0;
+    const levelArea = (area, z = zOf(area)) => area ? { x: area.x, y: area.y, z } : null;
+    const areaKey = a => `${a.x},${a.y}${zOf(a) === 0 ? "" : `,${zOf(a)}`}`;
+    const itemLevel = item => levelArea(item.area, zOf(item));
+    const validArea = area => {
+        const W = World(), z = zOf(area);
+        return !!(W && W.state && area && Number.isInteger(z) && z >= -2 && z <= 2 &&
+            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));
+    };
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
-    const currentArea = () => (World() ? World().currentArea() : null);
+    const currentArea = () => {
+        const W = World(), view = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea());
+        return validArea(view) ? levelArea(view) : null;
+    };
+    const whereArea = ref => {
+        const area = ref.area || currentArea();
+        return levelArea(area, ref.z === undefined ? zOf(area) : ref.z);
+    };
     const cellKey = (x, y) => y * CELL_STRIDE + x;
 
     const Items = {};
@@ -94,6 +112,7 @@
     // Ground items by area and cell. A cache: it's rebuilt whenever the state object changes (new game, load).
     const index = { source: null, areas: new Map() };
     function areaCells(area, create) {
+        if (!validArea(area)) return null;
         const k = areaKey(area);
         let cells = index.areas.get(k);
         if (!cells && create) {
@@ -104,7 +123,8 @@
     }
     function indexAdd(item) {
         if (!item.area) return;
-        const cells = areaCells(item.area, true);
+        const cells = areaCells(itemLevel(item), true);
+        if (!cells) return;
         const k = cellKey(item.x, item.y);
         const list = cells.get(k);
         if (list) list.push(item.id);
@@ -112,7 +132,7 @@
     }
     function indexRemove(item) {
         if (!item.area) return;
-        const cells = areaCells(item.area, false);
+        const cells = areaCells(itemLevel(item), false);
         const list = cells && cells.get(cellKey(item.x, item.y));
         if (!list) return;
         const i = list.indexOf(item.id);
@@ -153,6 +173,7 @@
         item.area = { x: area.x, y: area.y };
         item.x = x | 0;
         item.y = y | 0;
+        item.z = zOf(area);
         item.holder = null;
         indexAdd(item);
     }
@@ -203,14 +224,18 @@
     Items.create = function(typeId, count, at) {
         const st = ready(), t = Items.type(typeId);
         if (!st || !t || !at) return null;
-        const item = { id: st.nextId++, type: t.id, count: Math.max(1, count | 0), area: null, x: 0, y: 0, holder: null };
+        const held = at.holder !== undefined && at.holder !== null;
+        const holder = held ? World().unit(at.holder) : null;
+        const area = at.area ? whereArea(at) : null;
+        if (held ? !holder || !validArea(levelArea(holder.area, zOf(holder))) : !validArea(area)) return null;
+        const item = { id: st.nextId++, type: t.id, count: Math.max(1, count | 0), area: null, x: 0, y: 0, z: 0, holder: null };
         if (at.holder !== undefined && at.holder !== null) {
-            const u = World().unit(at.holder);
-            if (!u) return null;
+            const u = holder;
             item.holder = u.id;
+            item.z = zOf(u);
             inventoryArray(u).push(item.id);
         } else if (at.area) {
-            placeOnCell(item, at.area, at.x, at.y);
+            placeOnCell(item, area, at.x, at.y);
         } else {
             return null;
         }
@@ -222,7 +247,7 @@
     /** Put `count` of a type on a cell: fills stacks of that type already there, then makes new stacks. Returns the stacks touched. */
     Items.drop = function(area, x, y, typeId, count) {
         const st = ready(), t = Items.type(typeId);
-        if (!st || !t || !area) return [];
+        if (!st || !t || !validArea(area)) return [];
         let left = Math.max(0, count | 0);
         const max = stackOf(t), touched = [];
         for (const it of itemsOnCell(area, x, y)) {
@@ -255,7 +280,7 @@
      */
     Items.find = function(opts) {
         const o = opts || {};
-        const st = ready(), area = o.area || currentArea();
+        const st = ready(), area = whereArea(o);
         const cells = st && area ? areaCells(area, false) : null;
         if (!cells) return [];
         const near = o.near || { x: 0, y: 0 };
@@ -284,9 +309,10 @@
         const st = ready();
         const it = st && st.byId[itemId];
         const u = it && World().unit(unitId);
-        if (!it || !u || !it.area) return false;
+        if (!it || !u || !it.area || !validArea(itemLevel(it)) || zOf(it) !== zOf(u)) return false;
         detach(it);
         it.holder = u.id;
+        it.z = zOf(u);
         inventoryArray(u).push(it.id);
         changed(it, "moved");
         return true;
@@ -299,7 +325,7 @@
     Items.putDown = function(itemId, area, x, y) {
         const st = ready();
         const it = st && st.byId[itemId];
-        if (!it || it.holder === null || it.holder === undefined || !area) return null;
+        if (!it || it.holder === null || it.holder === undefined || !validArea(area)) return null;
         detach(it);
         const max = stackOf(Items.type(it.type));
         let merged = null;
@@ -386,7 +412,7 @@
     Items.count = function(where, typeId) {
         let list;
         if (typeof where === "number") list = Items.inventoryOf(where);
-        else if (where && typeof where === "object") list = Items.atIn(where.area || currentArea(), where.x, where.y);
+        else if (where && typeof where === "object") list = Items.atIn(whereArea(where), where.x, where.y);
         else return 0;
         return list.reduce((n, it) => n + (!typeId || it.type === typeId ? it.count : 0), 0);
     };
@@ -408,7 +434,14 @@
     // A unit that leaves the world drops what it carried where it stood.
     listen("world:unitRemoved", u => {
         if (!u || !u.data || !Array.isArray(u.data.inventory) || !u.data.inventory.length || !u.area) return;
-        for (const id of u.data.inventory.slice()) Items.putDown(id, u.area, u.x, u.y);
+        for (const id of u.data.inventory.slice()) Items.putDown(id, levelArea(u.area, zOf(u)), u.x, u.y);
+    });
+    listen("world:unitLevelChanged", u => {
+        if (!u || !u.area || !validArea(levelArea(u.area, zOf(u)))) return;
+        for (const item of Items.inventoryOf(u.id)) {
+            item.z = zOf(u);
+            changed(item, "moved");
+        }
     });
 
     //-------------------------------------------------------------------------

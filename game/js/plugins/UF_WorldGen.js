@@ -528,12 +528,27 @@
         const cat = catalog(), d = dims();
         return isLake(d.seed, cat.climate, fieldsFor(d.seed, d, cat.climate, gx, gy), gx, gy);
     };
-    WorldGen.biomeAt = (gx, gy) => WorldGen.cellInfo(gx, gy).biomeId;
+    WorldGen.biomeAt = (gx, gy, z = 0) => { const c = WorldGen.cellInfo(gx, gy, z); return c ? c.biomeId : null; };
     /** { biomeId, biome, ground, water, walkable, region: {savagery, alignment}, fields, lake, peak } for a world cell. */
-    WorldGen.cellInfo = function(gx, gy) {
+    WorldGen.cellInfo = function(gx, gy, z = 0) {
         const m = compiled();
         const st = UF.World.state;
         if (!m || !st) return null;
+        if (!Number.isInteger(z) || z < -2 || z > 2) return null;
+        if (z !== 0) {
+            const L = window.UF.Levels;
+            if (!L) return null;
+            const ax = Math.floor(gx / st.size), ay = Math.floor(gy / st.size);
+            const ref = { area: { x: ax, y: ay }, x: gx - ax * st.size, y: gy - ay * st.size, z };
+            const c = L.cellAt(ref);
+            if (!c) return null;
+            const biome = typeof L.biomeAt === "function" ? L.biomeAt(ref) : null;
+            const biomeId = typeof biome === "string" ? biome : biome && biome.id;
+            return { biomeId: biomeId || (z < 0 ? "cavern" : "open_air"),
+                biome: typeof biome === "object" && biome ? biome : { id: biomeId || "cavern", name: biomeId || "Cavern" },
+                ground: c.material, water: c.water || null, walkable: !c.water && L.standableShape(ref),
+                region: { savagery: "wild", alignment: "ordinary" }, fields: null, lake: !!c.water, peak: false, z };
+        }
         const c = resolve(st.seed, dims(st), m, waterModels(st), gx, gy, {});
         return {
             biomeId: c.biomeId, biome: m.biomes[c.b], ground: c.groundId, water: c.waterKey,
@@ -542,11 +557,11 @@
             fields: c.f, lake: c.lake, peak: !!(c.flags & FLAG_PEAK)
         };
     };
-    WorldGen.cellInfoLocal = function(ax, ay, x, y) {
+    WorldGen.cellInfoLocal = function(ax, ay, x, y, z = 0) {
         const size = dims().size;
-        return WorldGen.cellInfo(ax * size + x, ay * size + y);
+        return WorldGen.cellInfo(ax * size + x, ay * size + y, z);
     };
-    WorldGen.isWaterAt = (gx, gy) => waterModels(UF.World.state).isWater(gx, gy);
+    WorldGen.isWaterAt = (gx, gy, z = 0) => z === 0 ? waterModels(UF.World.state).isWater(gx, gy) : !!((WorldGen.cellInfo(gx, gy, z) || {}).water);
 
     /** The pair's names for this seed: { male, female }. */
     WorldGen.startNames = function(seed) {
@@ -566,22 +581,24 @@
      * isn't all land), else its area centre (faction.home), the player's first. Without factions, or for a save whose
      * history is from the older generator (no founders), the start cell of the start area only, as before.
      */
-    WorldGen.kitCentres = function(ax, ay) {
+    WorldGen.kitCentres = function(ax, ay, z = 0) {
         const st = window.UF.World && UF.World.state;
-        if (!st) return [];
+        if (!st || !Number.isInteger(z) || z < -2 || z > 2) return [];
         const F = st.factions;
         const legacy = !!st.history && !st.history.founders;
         if (!legacy && F && Array.isArray(F.list) && F.list.length) {
-            const camps = st.history && Array.isArray(st.history.sites) ? st.history.sites.filter(s => s.bare && s.area && s.area.x === ax && s.area.y === ay) : [];
-            return F.list.filter(f => f.home && f.home.area && f.home.area.x === ax && f.home.area.y === ay)
+            const camps = st.history && Array.isArray(st.history.sites) ? st.history.sites.filter(s => s.bare && s.area && s.area.x === ax && s.area.y === ay && (s.z === undefined ? (s.area.z === undefined ? 0 : s.area.z) : s.z) === z) : [];
+            return F.list.filter(f => f.home && f.home.area)
                 .sort((a, b) => (b.id === F.playerId ? 1 : 0) - (a.id === F.playerId ? 1 : 0))
-                .map(f => {
-                    const camp = camps.find(s => s.faction === f.id);
-                    return camp ? { x: camp.x, y: camp.y, faction: f.id, camp: camp.id } : { x: f.home.x, y: f.home.y, faction: f.id };
+                .flatMap(f => {
+                    const found = camps.filter(s => s.faction === f.id);
+                    if (found.length) return found.map(camp => ({ x: camp.x, y: camp.y, faction: f.id, camp: camp.id, z }));
+                    const h = f.home, hz = h.z === undefined ? (h.area.z === undefined ? 0 : h.area.z) : h.z;
+                    return h.area.x === ax && h.area.y === ay && hz === z ? [{ x: h.x, y: h.y, faction: f.id, z }] : [];
                 });
         }
         const mid = Math.floor(st.size / 2);
-        return ax === st.startArea.x && ay === st.startArea.y ? [{ x: mid, y: mid, faction: null }] : [];
+        return z === 0 && ax === st.startArea.x && ay === st.startArea.y ? [{ x: mid, y: mid, faction: null }] : [];
     };
 
     /** catalog start.kit with defaults: { radius, objects, ore: { ids, count } | null, nearWater, firstStage, water, wildlife }. */
@@ -932,9 +949,77 @@
         WorldGen.lastBuild = { area: { x: ctx.areaX, y: ctx.areaY }, ms: now() - started, objects: total, biomes: biomeCells, sites: sites.length };
     }
 
+    // Underground content uses the underground shape grid, never surface climate, clearing or water.
+    // Existing harvestable objects are temporary resource stand-ins until cave flora is approved.
+    function generateUnderground(ctx) {
+        const W = window.UF.World, L = window.UF.Levels, cat = catalog(), m = compiled();
+        if (!W || !W.state || !L || !cat || !m || (ctx.z !== -1 && ctx.z !== -2)) return;
+        const size = ctx.width, cells = size * size, seed = W.state.seed;
+        const area = { x: ctx.areaX, y: ctx.areaY, z: ctx.z };
+        const dry = new Uint8Array(cells), counts = {}, kitLog = [];
+        const ref = { area, x: 0, y: 0, z: ctx.z };
+        for (let i = 0; i < cells; i++) {
+            ref.x = i % size; ref.y = Math.floor(i / size);
+            const c = L.cellAt(ref);
+            dry[i] = c && !c.water && L.standableShape(ref) ? 1 : 0;
+        }
+        const centres = WorldGen.kitCentres(ctx.areaX, ctx.areaY, ctx.z);
+        const siteMask = new Uint8Array(cells);
+        for (const c of centres) for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+            const x = c.x + dx, y = c.y + dy;
+            if (x >= 0 && y >= 0 && x < size && y < size) siteMask[y * size + x] = 1;
+        }
+        // Small finite mineral deposits in the habitable regions. Solid geology remains a shape, not an object.
+        for (let i = 0; i < cells; i++) {
+            if (!dry[i] || siteMask[i] || ctx.objects[i]) continue;
+            const roll = unit(seed, SALT.kit ^ 0x706f636b, ctx.z, i);
+            const id = roll < 0.014 ? "rocks_small" : roll < 0.019 ? "granite_boulder" : roll < 0.023 ? "ironstone" : roll < 0.027 ? "copper_outcrop" : ctx.z === -2 && roll < 0.032 ? "crystal" : null;
+            const o = id && m.objectById.get(id);
+            if (o) { ctx.objects[i] = o.typeId; counts[id] = (counts[id] || 0) + 1; }
+        }
+        const kit = WorldGen.kitConfig(), r1 = kit.radius[1] || 20;
+        centres.forEach((c, ci) => {
+            // Flood only dry floor in this pocket; a kit never spawns beyond a rock barrier.
+            const reached = new Set(), queue = [c.y * size + c.x];
+            for (let q = 0; q < queue.length; q++) {
+                const i = queue[q], x = i % size, y = Math.floor(i / size);
+                if (reached.has(i) || !dry[i] || Math.hypot(x - c.x, y - c.y) > r1) continue;
+                reached.add(i);
+                for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && ny >= 0 && nx < size && ny < size && !reached.has(ny * size + nx)) queue.push(ny * size + nx);
+                }
+            }
+            let ki = 0;
+            for (const e of kitEntries(kit, seed ^ hash32(ctx.z), ctx.areaX, ctx.areaY, ci)) {
+                const o = m.objectById.get(e.place);
+                if (!o) continue;
+                const types = new Set(e.ids.map(id => (m.objectById.get(id) || {}).typeId).filter(Boolean));
+                const candidates = [];
+                let have = 0;
+                for (const i of reached) {
+                    if (types.has(ctx.objects[i])) have++;
+                    else if (!ctx.objects[i] && !siteMask[i]) candidates.push(i);
+                }
+                const rng = mulberry32(hash32(seed, SALT.kit, ctx.z, ci, ki++));
+                for (let n = have; n < e.minimum && candidates.length; n++) {
+                    const j = Math.floor(rng() * candidates.length), i = candidates[j];
+                    candidates[j] = candidates[candidates.length - 1]; candidates.pop();
+                    ctx.objects[i] = o.typeId;
+                    counts[e.place] = (counts[e.place] || 0) + 1;
+                    kitLog.push({ c: ci, faction: c.faction, camp: c.camp, z: ctx.z, id: e.place, x: i % size, y: Math.floor(i / size) });
+                }
+            }
+        });
+        const key = W.levelKey(ctx.areaX, ctx.areaY, ctx.z);
+        WorldGen.kitLog[key] = kitLog;
+        WorldGen.stats[key] = counts;
+    }
+
     if (window.UF.World) {
         UF.World.unregisterGenerator("df_wilderness_generator"); // superseded (UF_ProcGen, commit a09d3fd)
         UF.World.registerGenerator("uf_worldgen", generate, 10);
+        UF.World.registerGenerator("uf_underground_resources", generateUnderground, 20, { levels: [-1, -2] });
     }
 
     //-------------------------------------------------------------------------

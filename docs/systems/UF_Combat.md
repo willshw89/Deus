@@ -53,7 +53,7 @@ The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 wou
 
 **Sides.** A unit tagged `hostile` is hostile. Otherwise `UF.Stance.of`: colonists, the player's faction and allies are friendly; monsters and factions at war are hostile. Hostile units seek friendly ones and friendly units in a seeking mode seek hostile ones. Indifferent units (wildlife, neutral factions) seek nobody.
 
-**The loop, per tick** (only the area on screen; the world is one area):
+**The loop, per tick** (every occupied map/level, grouped by area and z):
 1. Seeking, as above. A current target is kept while it lives within `combat.leash` (16 cells).
 2. Each unit with a target attacks when the target is in reach and `tick ≥ data.combat.nextAttackTick`, then waits its weapon speed (+ the style's speed) in ticks. Melee reach is the 4 orthogonal neighbours (4-way movement, WORLD_ARCHITECTURE §1.6); ranged reach is Chebyshev ≤ range.
 3. Out of reach, a unit walks with `UF.World.sendUnit` to the free orthogonal neighbour of its target that is fewest steps away. A colonist busy with a job only fights what is in reach.
@@ -175,7 +175,7 @@ None; aliases only: `Game_Map.prototype.update` (the loop), `Scene_Map.prototype
   - Choosing the attack type that suits the target best.
   - DF-style injuries by body part: V64 leaves them open; the user decides (VISION Q12).
 - **Hunting isn't combat.** The `hunt` job (UF_Jobs) kills prey by working, as before. Prey never fights back.
-- **One area.** The loop runs in the area on screen only (the whole world is one area, V14). Regeneration covers every unit.
+- **Five-map integration (Codex, 2026-09-19):** each tick groups the world unit registry by area and z, then seeks/chases/fights within each group regardless of the viewed map. `engage` and direct `resolveAttack` refuse cross-level/area targets; movement goals and death drops retain z. Debug spawns and damage UI use the viewed level; lingering splat anchors cannot leak to another level. Ground API defaults remain unchanged. Snapshot `codex_zcore_integration_20260919_a`, `z_integration` passed 11/11, including real map-update attacks on all five levels while viewing Ground, cross-level refusal and underground equipment drops. Combat's full legacy regression suite is pending this integration; no editor F5/F8 check yet.
 - **Timing measured, not played.** The combat numbers (weapon and creature tables) are first-pass balance. The duels say a level-1 colonist loses to a wolf every time and a level-40 one in iron wins every time; nothing between has been tuned against play.
 - **Perf spikes.** The `perf` check's averages hold, but single updates spike (up to about 5 ms drawing, 3-5 ms for a tick of 100 fighters). The spikes are rare: the detail counts drawing updates over 1 ms, 3-5 in 360 frames. Probably garbage collection; not investigated further.
 - **Not run in the RMMZ editor's Playtest (F5).** Not checked at ×8 speed.

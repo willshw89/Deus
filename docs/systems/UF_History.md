@@ -1,4 +1,24 @@
 # UF_History
+
+## Two-depth dwarf founding — 2026-09-19
+
+New year-1 histories use **version 5**. A dwarf faction starts at **two sites of the same faction**, one at −1 and one at −2, using the natural pockets already selected by Factions. Its existing configured founder count is split, not duplicated: with the default four men/four women, each camp gets two men and two women. Other factions retain their single Ground camp and eight-person ring. Odd configured gender counts put the extra member at the primary −1 site. Names and culture remain catalog-generated; old saved sites/founders are not moved, renamed or regenerated.
+
+Public/save additions (the old primary fields remain for compatibility):
+
+- Each site has `z`; omitted legacy `z` means Ground. `faction.sites` contains both IDs; `faction.home` is the primary −1 site.
+- `history.founders[id] = {site, sites:[siteId,...], plan, units, camp, camps}`. `site`/`camp` are primary aliases. Every plan and spawn record has its own `site` and `z`; each camp record is `{site,area:{x,y},x,y,z,fire,cleared}`.
+- Each founder has `unit.z`, `data.site` (existing site-ID field), and `data.home = {area:{x,y},x,y,z}`. One ruler still leads the whole faction, and total faction population remains the configured founder count.
+- Campfire writes, ring object clears, overflow occupancy reservations and unit spawns use the site's level. Matching x/y at different depths are independent. `spawnPeople` continues to run for every site, independent of the viewed map.
+- `sitesIn(ax,ay,z=0)` returns only that level. `siteAt(x,y,area?)` and `describeSite` use `area.z` when explicit, otherwise the current `World.viewLevel()`; an explicit legacy `{x,y}` remains Ground.
+- `campCell(state,faction)` returns the selected pocket centre for an underground faction; surface search behavior is unchanged.
+- `addEvent({...,area,x,y,z})` retains z (falls back to `area.z`, then 0); founding events include their site location. There is one founding event per settlement.
+- `viewStart={area:{x,y},x,y,z}` and `homeSite()` refer only to the primary player home. A dwarf player's secondary −2 camp is not a second protected home.
+
+Checks: the existing history suite now uses level-specific maps, spawn records and first-frame captures, and accepts partial dwarf camp rings. New `dwarf_two_level_start` asserts guaranteed dwarf presence, exact configured population, two-site membership, balanced per-depth genders and matching unit/home levels. Surface-site checks exclude the underground sites. Existing saved histories still round-trip without relocation.
+
+Evidence: real Factions/History sources passed a controlled Node VM survey of 24 seeds (10 dwarf-player worlds; 4 multiple-dwarf worlds), checking configured faction/population counts, split genders, campfire writes, queries, view and JSON save data. A deliberately dropped founder z was rejected by the level assertion. The VM uses terrain/pocket/World doubles, not renderer evidence; editor Playtest and full snapshot checks are handled by integration. The older single-camp/version-4 descriptions below remain historical background and are superseded by this section.
+
 The world's chronicle and its first year. **No history** (user decision 2026-09-19, VISION V4 and V31 revised, V54 retired: "Lets do no history, just start by dropping 2 males and 2 females into each faction area"; the same afternoon: "Campfire in the middle, surrounded by 8 peasants", drawn as PPP / PFP / PPP): on every New Game, after UF_Factions has rolled the factions and placed each one's area, this plugin writes year 1: a bare camp record per faction on its camp cell (the area centre, or the nearest cell whose 3 × 3 block is all land), a lit campfire on that cell, eight founders per faction (four men and four women, adults, with rolled d20 scores, a leader and the others under it) on the eight cells around the fire exactly as the user drew it on 2026-09-19 (P a peasant, F the fire: `PPP` / `PFP` / `PPP`), and one "Year 1" line per faction in the chronicle. The player's eight become the colonists (UF_Colonists). In play, other plugins add lines with `UF.History.addEvent`. The older generator (500–600 simulated years of sites, wars and ruins, then the settling run on the map) stays in the file, switched off by the catalog.
 Status: built 2026-09-18 (rewrite of Gemini's draft of the same day), settling run, stats and ranks added 2026-09-18 night, **year-1 start added and the older generator switched off 2026-09-19**, **the campfire start (PPP / PFP / PPP, eight founders) 2026-09-19 afternoon**; checks: `history` (16 checks, all PASS on snapshot copies 2026-09-19; see Checks).
 

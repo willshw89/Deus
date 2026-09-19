@@ -87,7 +87,10 @@
     const pos = (v, fallback) => (typeof v === "number" && Number.isFinite(v) && v >= 1 ? Math.floor(v) : fallback);
     const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
     const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    const sameArea = (a, b) => !!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y;
+    const zOf = o => o && o.z !== undefined ? o.z : o && o.area && o.area.z !== undefined ? o.area.z : 0;
+    const levelArea = u => ({ x: u.area.x, y: u.area.y, z: zOf(u) });
+    const viewArea = w => typeof w.viewLevel === "function" ? w.viewLevel() : w.currentArea();
+    const sameArea = (a, b) => !!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b);
     const nowMs = () => performance.now();
 
     const Combat = {
@@ -541,6 +544,7 @@
      */
     Combat.resolveAttack = function(attacker, target, opts) {
         if (!attacker || !target || !attacker.data || !target.data || attacker === target) return null;
+        if (!sameArea(attacker, target)) return null;
         if (isDead(attacker) || target.data._isDying || target.data.dead) return null;
         ensureHp(attacker);
         ensureHp(target);
@@ -614,7 +618,7 @@
         d.dead = true;
         d.hp = 0;
         const w = World();
-        const area = victim.area ? { x: victim.area.x, y: victim.area.y } : (w ? w.currentArea() : null);
+        const area = victim.area ? levelArea(victim) : (w ? viewArea(w) : null);
         const x = victim.x, y = victim.y;
         const I = Items();
         if (I && typeof I.drop === "function" && area) {
@@ -700,6 +704,7 @@
     };
     Combat.engage = function(attacker, target) {
         if (!attacker || !target || attacker === target || isDead(target)) return false;
+        if (!sameArea(attacker, target)) return false;
         const c = cd(attacker);
         c.targetId = target.id;
         c.chase = null;
@@ -799,8 +804,8 @@
         return true;
     }
     function walkableFor(w, area, x, y, u) {
-        if (typeof w.walkable === "function") return w.walkable(area.x, area.y, x, y, { unit: u });
-        return w.cellFree(area.x, area.y, x, y, u.id);
+        if (typeof w.walkable === "function") return w.walkable(area.x, area.y, x, y, { unit: u, z: zOf(u) });
+        return w.cellFree(area.x, area.y, x, y, u.id, zOf(u));
     }
     function chase(u, t, occ, size, area) {
         const w = World();
@@ -820,7 +825,7 @@
         }
         if (!goal) goal = { x: t.x, y: t.y };
         if (!c.chase || c.chase.x !== goal.x || c.chase.y !== goal.y || !u.goal) {
-            w.sendUnit(u.id, { area: { x: u.area.x, y: u.area.y }, x: goal.x, y: goal.y });
+            w.sendUnit(u.id, { area: levelArea(u), x: goal.x, y: goal.y, z: zOf(u) });
             c.chase = goal;
         }
     }
@@ -850,7 +855,7 @@
         for (const [tx, ty] of tries) {
             const x = Math.max(0, Math.min(size - 1, u.x + tx * far)), y = Math.max(0, Math.min(size - 1, u.y + ty * far));
             if (walkableFor(w, area, x, y, u)) {
-                w.sendUnit(u.id, { area: { x: u.area.x, y: u.area.y }, x, y });
+                w.sendUnit(u.id, { area: levelArea(u), x, y, z: zOf(u) });
                 c.fleeTick = tick;
                 c.targetId = null;
                 return;
@@ -886,9 +891,18 @@
     }
     function runTick(tick) {
         const w = World();
-        const area = w.currentArea();
-        if (!area) return;
-        const all = w.unitsInArea(area.x, area.y);
+        if (!w || !w.state) return;
+        const groups = new Map();
+        for (const u of w.units()) {
+            if (!u.area || !w.inWorld(u.area.x, u.area.y, zOf(u))) continue;
+            const key = `${u.area.x},${u.area.y},${zOf(u)}`;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(u);
+        }
+        for (const all of groups.values()) runLevelTick(tick, all, levelArea(all[0]));
+    }
+    function runLevelTick(tick, all, area) {
+        const w = World();
         const units = Combat.testFilter ? all.filter(u => Combat.testFilter.has(u.id)) : all;
         if (!units.length) return;
         const size = w.state.size, seed = w.state.seed >>> 0;
@@ -975,7 +989,7 @@
     Combat.spawnHostile = function(speciesName, x, y) {
         const w = World();
         if (!w || !w.state) return null;
-        const area = w.currentArea();
+        const area = viewArea(w);
         if (!area) return null;
         const c = catalog();
         const list = (c && c.wildlife && Array.isArray(c.wildlife.species)) ? c.wildlife.species : [];
@@ -992,10 +1006,10 @@
         }
         x = Math.max(1, Math.min(size - 2, x | 0));
         y = Math.max(1, Math.min(size - 2, y | 0));
-        const free = w.nearestFreeCell(area.x, area.y, x, y, 6);
+        const free = w.nearestFreeCell(area.x, area.y, x, y, 6, undefined, zOf(area));
         if (!free) return null;
         const u = w.addUnit({
-            name: sp.name, image: { characterName: sp.image, characterIndex: 0 }, area: { x: area.x, y: area.y }, x: free.x, y: free.y, dir: 2,
+            name: sp.name, image: { characterName: sp.image, characterIndex: 0 }, area: { x: area.x, y: area.y }, z: zOf(area), x: free.x, y: free.y, dir: 2,
             data: { kind: "creature", species: sp.id, tags: [sp.kind, "hostile"].filter(Boolean), tint: sp.tint, through: sp.kind === "flier",
                 ai: "combat", faction: null, home: { x: free.x, y: free.y }, combat: { mode: "nearest", targetId: null, nextAttackTick: 0, lastTick: -1000 } }
         });
@@ -1081,9 +1095,9 @@
     /** Kept name: shows a hitsplat on the unit standing on the cell (the number in text, else a blue 0). No floating text. */
     Combat.addPopup = function(cellX, cellY, text) {
         const w = World();
-        const area = w && w.state ? w.currentArea() : null;
+        const area = w && w.state ? viewArea(w) : null;
         if (!area) return null;
-        const u = w.unitsInArea(area.x, area.y).find(v => v.x === cellX && v.y === cellY && !(v.data && v.data._isDying));
+        const u = w.unitsInArea(area.x, area.y, zOf(area)).find(v => v.x === cellX && v.y === cellY && !(v.data && v.data._isDying));
         if (!u) return null;
         const m = String(text === null || text === undefined ? "" : text).match(/\d+/);
         return addSplat(u, m ? parseInt(m[0], 10) : 0);
@@ -1339,7 +1353,7 @@
             const now = nowMs();
             const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
             const bm = barBitmaps();
-            const cur = w.currentArea(), events = $gameMap._events, base = w.EVENT_BASE;
+            const cur = viewArea(w), events = $gameMap._events, base = w.EVENT_BASE;
             for (const [id, r] of fx) {
                 let k = 0;
                 for (let i = 0; i < r.splats.length; i++) {
@@ -1363,7 +1377,7 @@
                     continue;
                 }
                 let geo = null;
-                if (alive && cur && u.area.x === cur.x && u.area.y === cur.y) {
+                if (alive && cur && u.area.x === cur.x && u.area.y === cur.y && zOf(u) === zOf(cur)) {
                     const ev = events[base + id];
                     const sp = ev ? this.spriteOf(r, ev) : null;
                     if (sp && sp.visible) {
@@ -1372,12 +1386,13 @@
                         const a = r.anchor || (r.anchor = { mx: 0, my: 0, dx: 0, dh: 0, df: 0 });
                         a.mx = ev._realX;
                         a.my = ev._realY;
+                        a.area = levelArea(u);
                         a.dx = geo.x - bx;
                         a.dh = geo.head - by;
                         a.df = geo.foot - by;
                     }
                 }
-                if (!geo && r.anchor && k) {
+                if (!geo && r.anchor && k && cur && r.anchor.area && r.anchor.area.x === cur.x && r.anchor.area.y === cur.y && zOf(r.anchor.area) === zOf(cur)) {
                     const a = r.anchor, bx = $gameMap.adjustX(a.mx) * tw, by = $gameMap.adjustY(a.my) * th;
                     geo = r.geo || (r.geo = { x: 0, head: 0, foot: 0 });
                     geo.x = bx + a.dx;

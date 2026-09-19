@@ -1,0 +1,9 @@
+{
+  "made": "2026-09-19",
+  "version": 3,
+  "seed": 424242,
+  "mapId": 1000,
+  "tiles": 4153258998,
+  "objects": 286534661,
+  "source": "codex_zcore_pre_v80_control_20260919; fixed seed before Z merge, current terrain generator"
+}

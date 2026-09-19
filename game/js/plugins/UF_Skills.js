@@ -542,7 +542,8 @@
         if (!type || !at || !at.area) return null;
         const chance = (levelAtWork > 0 ? levelAtWork : level(unit, id)) * c.extraYield.chancePerLevel;
         if (u01(seedOf(), SALT.yield, unit.id, job.id | 0) >= chance) return null;
-        const dropped = I.drop(at.area, at.x, at.y, type, 1);
+        const z = at.z === undefined ? (at.area.z === undefined ? 0 : at.area.z) : at.z;
+        const dropped = I.drop({ x: at.area.x, y: at.area.y, z }, at.x, at.y, type, 1);
         if (!dropped || !dropped.length) return null;
         r.extra = { type, count: 1 };
         emit("skills:extraYield", unit, job, type);

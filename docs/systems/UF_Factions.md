@@ -1,4 +1,21 @@
 # UF_Factions
+
+## Five-map founding update — 2026-09-19
+
+New generation uses faction state **version 4**. Within the configured faction count, the last species roll is reserved for the existing catalog `dwarf` species only when no previous faction is dwarven. Names, relations, player selection and population are then computed normally; there is no appended faction or extra founder population. Existing saved factions are not regenerated or relocated.
+
+After the surface placement calculation selects deterministic anchors (without building any maps), every dwarf faction chooses two distinct-per-level natural habitable pockets through `UF.Levels.settlementCell(state, {area,x,y,z,used})`. `used` is the pocket-ID list already selected in that area/level. No surface camps or clearing are made for those anchors. This requires Levels' pocket API; an unavailable pocket fails generation explicitly rather than placing dwarves on Ground.
+
+- `faction.home = {area:{x,y},x,y,z,pocketId?}`: primary home; dwarves use −1, other peoples 0.
+- `faction.homes = [{area,x,y,z,pocketId}, ...]`: dwarves' primary −1 and secondary −2 locations. Both belong to the same faction.
+- `faction.sites = [siteId, ...]`: assigned by History after founding; a dwarf has both sites.
+- `state.viewStart = {area:{x,y},x,y,z}` follows the player's primary home, including when it is underground.
+- `checkContact()` requires equal unit levels as well as nearby x/y; overlapping settlements on different levels do not reveal each other.
+
+The existing `areas` check validates dwarf pocket membership instead of surface biome/centre-distance rules. Ground factions retain the old spacing and habitat checks. The historical descriptions below document the surface algorithm; their former version-3/x-y-only save shapes are superseded above.
+
+Evidence: a Node VM run of the real Factions/History sources with controlled terrain/pocket/World doubles checked 24 seeds, including 10 dwarf-player worlds and 4 worlds with multiple dwarven factions: configured counts, two sites, gender-balanced 4/4 split, campfire levels, query isolation and JSON round trips passed. Real five-map terrain/render integration is tested separately; editor Playtest not checked by this change.
+
 Rolls the factions of a new world from the seed (4–7, species by weight, stances, relations from −100 at war to +100 allied, the player's among the playable species) and gives each one its own **area** on habitable land: the player's at the map centre, every other spread apart (VISION V4 and V31 as revised by the user on 2026-09-19: no history, every faction starts as two men and two women dropped into its area). Press **F** for the ledger of the factions your people have met.
 Status: built 2026-09-18 (seeded factions, d43e6de), areas added 2026-09-19; checks: `factions` (15 checks).
 

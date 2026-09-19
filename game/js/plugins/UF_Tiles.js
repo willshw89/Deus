@@ -735,7 +735,7 @@
     }
 
     function applyGroundShades(map, ax, ay) {
-        if (!map || !map.data) return;
+        if (!map || !map.data || map.tilesetId !== TILESET_ID || (map.ufArea && map.ufArea.z !== undefined && map.ufArea.z !== 0)) return;
         const t0 = (typeof performance !== "undefined" ? performance.now() : Date.now());
         computeShadePlan(map, ax, ay);
         const t1 = (typeof performance !== "undefined" ? performance.now() : Date.now());
@@ -761,7 +761,7 @@
             const origBuild = UF.World.buildArea;
             UF.World.buildArea = function(ax, ay, z) {
                 const map = origBuild.apply(this, arguments);
-                if (map) applyGroundShades(map, ax, ay);
+                if (map && (z === undefined || z === 0)) applyGroundShades(map, ax, ay);
                 return map;
             };
             if (UF.World.on) {
@@ -779,6 +779,19 @@
     }
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
+    // Dynamic shade slots are runtime state, not saved terrain. A different world must not
+    // inherit whichever final atlas slots an earlier seed happened to allocate first.
+    function resetWorldShades() {
+        genShadeBitmap = null;
+        shadeKeyMap.clear();
+        initShadeAtlas();
+    }
+    if (window.UF && UF.Events && UF.Events.on) UF.Events.on("world:initializing", resetWorldShades);
+    const _DataManager_extractSaveContents_shades = DataManager.extractSaveContents;
+    DataManager.extractSaveContents = function(contents) {
+        resetWorldShades();
+        return _DataManager_extractSaveContents_shades.call(this, contents);
+    };
     Scene_Boot.prototype.start = function() {
         registerTileset();
         initShadeAtlas();

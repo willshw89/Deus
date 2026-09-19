@@ -1,7 +1,7 @@
 # UF_Levels
 The five persistent levels of the world (VISION V80, `docs/design/VERTICAL_WORLD.md`): `-2`, `-1`, Ground, `+1`, `+2`, all 256×256 at the same x,y. Every cell of every level has a **shape** (`solid`, `floor`, `open`, `ramp`, `stairUp`, `stairDown`, `stairBoth`) and a **material** (`stone`, `soil`, `wood`). A level is a seeded **baseline** (regenerated from the world seed, never saved) plus sparse saved **changes**. One level is on screen at a time: each level has its own RMMZ map id, and the levels other than the ground are painted from their shapes with runtime tileset 92. The player moves the view up and down with keys or the level plate; the cursor cell and the camera stay where they were. Old saves load unchanged on the ground.
 
-Status: vertical slice 1 of `docs/design/VERTICAL_BUILD_PLAN.md` (§5), built 2026-09-19 by Claude Code. Checks: suite `vertical` (9 checks, not in the default run). Slices 2 (stairs, ramps, routes between levels) and 3 (digging, building, support, falling) are not built: nothing in play changes a unit's level or a cell's shape yet, except tests.
+Status: recovered vertical slice 1 of `docs/design/VERTICAL_BUILD_PLAN.md` (§5), with generator version 2 added 2026-09-19 for mostly-earth underground maps with separated habitable pockets. Checks: suite `vertical` (11 checks, not in the default run). Stairs/routes and digging/support remain separate work; the baseline generator does not implement them.
 
 **Owner:** Claude Code (engine) · **File:** `game/js/plugins/UF_Levels.js` · **Load order:** after `UF_Fire`, before `UF_Test` (`@base UF_World`; after UF_WorldGen, UF_Tiles, UF_Objects, UF_Items, UF_Jobs, UF_Combat, UF_TimeSpeed, UF_Camera, UF_Look).
 
@@ -19,7 +19,7 @@ The z support lives in the files it belongs to (the "z seam"): `UF_World.js` (ma
 | `LEVELS` | `[-2, -1, 0, 1, 2]` |
 | `SHAPES` | `{ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 }` |
 | `MATERIALS` | `["stone", "soil", "wood"]` |
-| `TILESET_ID`, `GEN` | 92; the baseline generator version of new worlds (1) |
+| `TILESET_ID`, `GEN` | 92; the baseline generator version of new worlds (2). Existing generator-1 saves retain their shapes/materials/checksums. |
 | `isLevel(z)` | `true` for integers -2..+2 |
 | `label(z)` | The player-visible name: `"+2"`, `"+1"`, `"Ground"`, `"-1"`, `"-2"` |
 | `levelKey(ax, ay, z)` | `"x,y"` for the ground (the pre-V80 key), `"x,y,z"` otherwise |
@@ -31,6 +31,13 @@ The z support lives in the files it belongs to (the "z seam"): `UF_World.js` (ma
 | `describeCell(ref)` | `"-1 · Rock"`, `"-1 · Cave floor"`, `"+1 · Open air"`, `"+1 · Wooden floor"`: UF_Look's second line on the levels |
 | `cellArt(ref)` | The stock sheet that draws the cell (`"Dungeon_A4"`, `"Outside_A5#19"`): UF_Look's art line |
 | `baseline(z, ax, ay)` → `{ shape, material }` (`Uint8Array`s of codes) | Runtime only |
+| `biomeAt(ref)` | Underground substrate `{id,name,material,floorLook,depthBand}`, or null for surface/air, invalid cells, or generator-1 baselines. |
+| `waterAt(ref)` | True on a generator-2 freshwater pool that remains natural floor. Solid/open/constructed replacements suppress its water. |
+| `habitablePockets(z,ax=0,ay=0)` | Detached candidates `{id,z,area,x,y,floorCells,clearRadius,bounds,biome,water:{x,y}}`, largest first. Natural floor counts include four pool cells; callers must validate current free dry cells before placement. |
+| `startingPocket(z,index=0,ax=0,ay=0)` | One candidate from the above order, or null. |
+| `settlementCell(st,ref)` | Nearest pocket to `{area,x,y,z,used?:[pocketId]}`, or null. `st` must be the active World state. Never carves terrain; caller records used IDs per level to separate camps. |
+| `terrainStats(z,ax=0,ay=0)` | On-demand natural-baseline counts `{solid,floor,water,soil,biomes,components,solidFraction}`; component sizes use four-way floor connectivity, including pools. No per-frame scan. |
+| `ensureWorldLevels(st)` | Idempotently allocates all five baselines and missing level-state/checksum entries on the active World state; returns bool. Keeps generator versions, saved cell changes, checksums, and view. Runs on `world:initializing` before faction/history creation; later `world:created` is an idempotent fallback. |
 | `checksum(z, seed?, gen?)` | FNV-1a hex of a level's baseline; the ground's is a 32×32 lattice of `UF.WorldGen.cellInfo` (ground kind, water, peak). With `seed` it regenerates another world's (tests) |
 | `migrate(state, view)` → migration record | Brings a pre-V80 state to version 4 in place (see Save data) |
 | `verifyLevels(state)` → list of mismatches | Regenerates every baseline and compares it with the saved checksum |
@@ -49,7 +56,7 @@ The z support lives in the files it belongs to (the "z seam"): `UF_World.js` (ma
 - `registerGenerator(name, fn, order, { levels })`: default `[0]`, so every existing generator stays ground-only; `ctx.z` says which level is built. `buildArea(ax, ay, z)`: the start template only on the ground.
 - `setTile(…, tileId, z)`, `getTile(…, layer, z)`, `setObject(…, type, z)`, `getObject(ax, ay, x, y, z)`; `setDerivedTile(ax, ay, x, y, layer, tileId, z)` (patches the built maps, records no diff: level tiles are derived from shapes).
 - `peekArea(ax, ay, z)` (least recently used eviction, 6 builds), `adoptBuild(ax, ay, z, map)`, `cachedBuild(ax, ay, z)`, `refreshUnitEvents(map, ax, ay, z)`, `reconcileEvents()`.
-- `cellFree(ax, ay, x, y, ignoreUnitId, z)`, `nearestFreeCell(…, ignoreUnitId, z)`, `spawnCellFor(…, name, z)`, `standerAt(ax, ay, x, y, z)`. At boot a dispatcher sends level cells straight to UF_World's own test, because UF_Doors wraps `cellFree` with the pre-V80 signature and drops `z`; ground calls still go through UF_Doors.
+- `cellFree(ax, ay, x, y, ignoreUnitId, z)`, `nearestFreeCell(…, ignoreUnitId, z)`, `spawnCellFor(…, name, z)`, `standerAt(ax, ay, x, y, z)`. The level-aware Doors wrapper receives every level; the obsolete bypass for non-ground doors is removed.
 - `addUnit({ …, z })` (throws for a level outside -2..+2; `u.z` is always written); `unitsInArea(ax, ay, z)`; `sendUnit(id, { area, x, y, z })` returns `false` for a goal on another level than the unit's; `moveUnitToLevel(unit, z, x, y)` (drops goal and path, moves the event on or off screen, emits `world:unitLevelChanged(u, fromZ, toZ)`); `isDisplayed(u)` compares the level.
 - `findPath(area, …, { z })`, `walkable(ax, ay, x, y, { z })`, `reachable(levelArea, …)`, `transferView(ax, ay, x, y, dir, z)`.
 - **Off-screen walking:** units on a level that isn't on screen follow planned paths on their own level (they used to step in a straight line through trees, walls and water), one cell per `UnitStepFrames`, spread over the frames by unit id; they wait for a unit in the way, then walk round it. `pathConfig.offscreenPaths` (default `true`) switches it off (tests). Fliers keep the straight step.
@@ -58,18 +65,33 @@ The z support lives in the files it belongs to (the "z seam"): `UF_World.js` (ma
 
 **`UF.Objects`:** all area functions take a level area; regrow entries carry `z`; `objects:levelChanged(levelArea, x, y, fromId, toId)` for levels other than the ground; the "on screen" calls (`at`, `set`, `find`, `apply`, `describe`) use the level on screen. **`UF.Items`:** items carry `z`; the ground index key is unchanged; `create`/`count`/`find` accept `z`; the sprites and "on screen" calls use the level on screen; a removed unit's items drop on its level. **`UF.Jobs`:** targets and stands carry `z` (a target without an area takes the level on screen); `take` offers a unit only jobs on its own level until slice 2; stand cells on another level off screen use `UF.World.walkable` on that level. **`UF_Look`:** the tooltip works on every level; on a level other than the ground its second line is `UF.Levels.describeCell` and sites aren't named.
 
-## Baselines (generator version 1)
-- `+1`, `+2`: every cell `open` (air).
-- `-1`: `solid` except a seeded value-noise blob field (`caveScale` 18, threshold 0.76), about 9-13 % floor in 25-30 pockets (measured on three seeds with the same code); material `soil` where a second noise (scale 36) is above 0.5, else `stone`; a 2-cell rock border.
-- `-2`: the same with scale 30, threshold 0.74 (bigger caverns), all `stone`.
-- Ground: `floor` (its passability is its tiles).
-- The noise, the salts (`"uf.levels.cave.<z>"`, `"uf.levels.soil.<z>"`) and the parameters are in UF_Levels itself and frozen per generator version, so a change elsewhere never changes a saved world's levels. Slice 4 (geology, RESOURCE_ATLAS) is generator version 2; saves keep the version they were made with (`levels[z].gen`).
-- All five are generated and checksummed at New Game (about 70 ms measured, `vertical.five_levels`).
+## Baselines and underground biomes
+
+Generator 2 is used for new worlds. Ground's existing generator/checksum and the open-air geometry of +1/+2 are unchanged by this underground change. Every level's complete shape/material arrays are allocated at `world:initializing`, before founders and kit placement. All five map baselines exist even though only one is rendered. Simulation of the other maps must continue.
+
+- `-1`: mostly solid earth, with 36 separated irregular oval chambers. Four jittered Voronoi substrate regions use rooted loam, clay bed, chalk/karst, and shallow cave labels from RESOURCE_ATLAS. Loam/clay/shallow-cave substrate uses soil; chalk/karst uses stone. Biome boundaries are irregular rather than tile-aligned rectangles.
+- `-2`: mostly solid stone, with 16 separated larger caverns. Its distinct regions are deep mine belt, crystal cavern, fossil bed, and deep salt cavern. These are natural geological regions, not historical mines or generated structures.
+- Each natural chamber has a dry founding square and a four-cell freshwater pool toward its eastern edge. Adjacent chambers are disconnected; mining or future connectors must create routes. The solid border is two cells wide.
+- Runtime baseline metadata adds `biome` and `water` byte arrays and pocket descriptors. None is stored wholesale in a save. Generator-2 underground checksums include shapes, materials, biome codes, and water. Sparse edits remain packed shape/material data.
+- Floor art uses existing cave-floor/dug-soil/dug-stone slots by biome. Solid earth distinguishes existing soil and rock looks. Freshwater pools use stock `Outside_A1` water, block land passage, and are recognized by `Tilemap.isWaterTile`. Biome labels appear in Look descriptions.
+
+Measured from the actual generator source on 2026-09-19, before camp carve or resource placement, seed 424242 (65,536 cells per level):
+
+| Level | Solid | Disconnected chambers | Floor cells per chamber | Freshwater cells | Minimum dry founding square |
+|---|---:|---:|---:|---:|---|
+| -1 | 54,742 (83.5297%) | 36 | 275–337 | 144 | Radius 5 (11×11 cells) |
+| -2 | 54,738 (83.5236%) | 16 | 603–762 | 64 | Radius 7 (15×15 cells) |
+
+Biome cells on -1: rooted loam 15,372; clay 16,548; chalk/karst 17,315; shallow cave 16,301. On -2: deep mine belt 14,946; crystal cavern 17,556; fossil bed 16,163; deep salt cavern 16,871. Seeds 0 and 1 also yielded exactly 36/16 disconnected chambers and 83.21–83.48% solid terrain; every advertised founding square was checked to be dry floor. These are generator measurements, not rendered runtime evidence.
+
+Generator 1 remains unchanged for saves whose `levels[z].gen` is 1: original noise pockets, materials, and checksum bytes. Those baselines have no biome/pool/pocket metadata. Loading does not move an existing faction into new chambers. A pre-V80 Ground-only save receives new underground baselines through its existing migration without changing Ground.
+
+Limits: four biome families per depth are a bounded subset of RESOURCE_ATLAS. Labels do not assert populated crystals, fossils, salt deposits, hazards, plants, or inhabitants. Surface-column alignment, aquifers, magma, mining jobs, routes, and support/falling are separate systems. Kits must select actual free dry floor inside a chamber; a radius-20 ring extends beyond shallow chambers.
 
 ## Drawing (tileset 92) and the looks
 The catalog's `levels.look` (else the same placeholders built into the code) says which sheet draws each look: `rock`, `soil`, `cave_floor`, `mined_stone`, `mined_soil`, `deck_wood`, `deck_stone`, `open_air`, `hole_edge`, `roof_wood`, `stair_up`, `stair_down`, `stair_both`, `ramp_up`, `ramp_top`, `ladder_foot`, `ladder_top`, `vein_iron`, `vein_copper`, `vein_gold`, `vein_gem` (`docs/handoffs/HANDOFF_vertical.md` §2 and §7). At boot (Scene_Boot waits for it, about 50 ms) UF_Levels copies each look, with its tint baked in, into three runtime sheets in the slots of the handoff's §3: `UF_GenLevels_A2` (A2 kinds 0-7: cave floor, dug stone, dug earth, wooden deck, stone deck, open air, hole edge, roof), `UF_GenLevels_A4` (A4 kinds 0-1: rock, soil) and `UF_GenLevels_B` (B tiles 1-11: stairs, ramps, ladders, veins). A sheet that fails to load is drawn as a flat colour and named in a warning. When Gemini's `UF_Levels_*` sheets are delivered and checked, each catalog entry becomes `{ "sheet": "UF_Levels_A2", "slot": "A2", "kind": n }` without a tint; no code changes.
 
-Cell → tiles: layer 0 the base look (autotiled against neighbours of the same look), layer 1 the hole edge over an underground `open` cell, layer 2 a stair or ramp. Passage flags: rock, soil, open air and hole edge `0x0f`; floors and connectors 0; B tile 0 and veins `0x10`. The ground keeps tileset 91 and draws nothing from here in slice 1.
+Cell → tiles: layer 0 the biome's base look (autotiled against matching neighbours), layer 1 the hole edge over an underground `open` cell, layer 2 a stair or ramp. Passage flags: rock, soil, open air, hole edge and freshwater pools `0x0f`; dry floors and connectors 0; B tile 0 and veins `0x10`. Tileset 92's A1 slot is stock `Outside_A1`; generated A2/A4/B contracts stay intact. Ground keeps tileset 91 and draws nothing from here.
 
 ## The view
 - **Keys:** `,` (also `<`) up, `.` (also `>`) down, Home the ground. A press in a frame when the map can't switch (a transfer finishing, an event running) is kept for 30 frames.
@@ -86,7 +108,7 @@ Cell → tiles: layer 0 the base look (autotiled against neighbours of the same 
 - **Migration** (on load when `version < 4` or `levels` is missing): writes `z: 0` on every unit (and goal), item, job target and stand and regrow entry, adds the five level entries (the four new levels regenerated from the seed), `view` on the ground, `version: 4` and one migration record. Nothing moves; no id, diff, object diff or fog key changes.
 
 ## Events
-Emitted: `levels:viewChanged(fromZ, toZ)`, `levels:shapeChanged(ref, from, to)` (`from`/`to` = `cellAt` records). Listened: `world:created` (make the levels). Hooks (aliases): `DataManager.onLoad` and `Scene_Boot.start` (tileset 92), `Scene_Boot.isReady` (runtime sheets), `ImageManager.loadTileset`, `DataManager.extractSaveContents` (migration, checksum check), `Game_Player.performTransfer`, `Scene_Map.prototype.start / update / onTransfer / shouldAutosave / createDisplayObjects / isAnyWindowUnderMouse`, `UF.Combat.engage` (units on different levels never engage).
+Emitted: `levels:viewChanged(fromZ, toZ)`, `levels:shapeChanged(ref, from, to)` (`from`/`to` are packed shape/material records). Listened: `world:initializing` (baselines before founders), `world:created` (idempotent fallback). Hooks (aliases): `DataManager.onLoad` and `Scene_Boot.start` (tileset 92), `Scene_Boot.isReady` (runtime sheets), `ImageManager.loadTileset`, `DataManager.extractSaveContents` (migration, checksum check), `Game_Player.performTransfer`, `Scene_Map.prototype.start / update / onTransfer / shouldAutosave / createDisplayObjects / isAnyWindowUnderMouse`, `UF.Combat.engage` (units on different levels never engage).
 
 ## Keys and mouse
 `,` / `<` up, `.` / `>` down, Home the ground; click the plate's arrows.
@@ -107,6 +129,8 @@ Suite `vertical` (run on its own: `--uf-test=vertical`; UF_Test's 180 s watchdog
 | Check | Proves | Provocation |
 |---|---|---|
 | `five_levels` | Exactly five levels saved; four 65 536-cell baselines whose regeneration equals the saved checksum; the ground lattice checksum; map ids round-trip, ground 1000; a sixth level refused by `isLevel`, `inWorld`, `areaMapId`, `setObject`, `setShape`, `addUnit` | `vertical.five_levels`: `isLevel` accepts 3 |
+| `underground_biomes` | Each depth is 80–90% solid, has its four distinct biome codes, 36/16 disconnected chambers with dry founding squares and four pool cells each; same-seed checksum repeats and seed+1 differs | `vertical.underground_biomes` fills the natural baseline with floor and one biome |
+| `complete_at_start` | All five complete arrays/checksums exist, early initialization ran for this seed, repeated initialization preserves saved cell edits/checksums/view | `vertical.complete_at_start` disables the early hook |
 | `switch_view` | Level down by key: map 1003, cursor and display kept, zoom kept; the `-1` unit drawn with pixels, the ground unit not; the `-1` object and item drawn, the ground ones not; Look doesn't name the ground unit; plate `-1`; `currentArea()` null; `unitsInArea` per level; ground `findIn`/`find` miss the `-1` fixtures; a `-1` object change fires only `objects:levelChanged`; `Combat.engage` refuses a cross-level pair. Back up, then `+1` (floor walkable, air not, by `isPassable` and `cellFree`), then Home. Screenshots `view_ground`, `view_minus1`, `view_plus1` at zoom 1 | `vertical.switch_view`: `unitsInArea` ignores z during the switch |
 | `follow_view` | A followed unit moved to `-1` takes the view with it, centred; an unfollowed unit's level change doesn't | `vertical.follow_view`: the follow hook off |
 | `offscreen_state` | A `-1` walker in an L corridor (the straight line crosses rock) arrives without leaving the corridor while the ground is on screen; a ground walker round a wall arrives without standing on it while `-1` is on screen; unit data kept; no level build, no baseline generated and ≤ 64 cell reads per frame meanwhile; back on the ground every ground unit has an event and none stands on a blocked cell | `vertical.offscreen_state`: `pathConfig.offscreenPaths = false` |
@@ -119,8 +143,9 @@ Suite `vertical` (run on its own: `--uf-test=vertical`; UF_Test's 180 s watchdog
 World suite: `level_ids` (replaces `one_layer`): ids distinct and round-trip, ground id = MapIdBase, `areaOfMapId` of a level map is null, levels 3 and -3 don't exist. Provocation `world.level_ids` (the `-1` slot collides with `+1`).
 
 ## Known problems
-- While a level other than the ground is on screen, the plugins that run only for `currentArea()` pause for the ground: wildlife decisions (UF_Wildlife `tick`), combat (UF_Combat `runTick`), speech bubbles, stance squares and action overlays (they draw nothing there anyway). Units still walk off screen and jobs still advance. The owner changes are listed in `docs/design/VERTICAL_BUILD_PLAN.md` §8.
+- All five maps must simulate concurrently regardless of the view. Combat now groups living units by level; unit movement and jobs also advance off view. Remaining `currentArea()`-gated wildlife decisions are an integration gap, not an acceptable final view-based simulation pause. Speech bubbles, stance squares and action overlays may remain view-filtered because they only render.
 - Units don't change level in play yet (slice 2); `take` keeps colonists on their own level.
 - UF_Fog stores a level's fog under `map:<id>` (fog is off for development); the plan's `area:x,y,z` key is a one-line change in UF_Fog.
 - Right-click options (UF_Interact) are ground-only: on another level nothing is offered.
-- `pool` (A1) is not composed yet; no level uses water in slice 1.
+- Generator-2 pools use existing stock A1 freshwater; liquids do not flow and no aquifer pressure is simulated.
+- The 2026-09-19 `vertical_b` runtime reported open-air passage on +1: UF_Tiles applied a passable Ground shade overlay to non-Ground maps, masking the blocking base tile. The Ground-only shade guard is owned by UF_Tiles; its runtime retest is pending. `switch_view` logs actual shape, tileset, tile IDs/flags and bridge state without relaxing blocked-air assertions. Its underground countercell is explicitly emptied/restored so natural resources cannot be mistaken for the Ground fixture leaking across levels.

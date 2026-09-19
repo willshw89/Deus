@@ -37,6 +37,11 @@
  * chop, pick, quarry, mine, haul, fetch, build, craft, equip, hunt, drink,
  * eat, sleep, talk. Nothing here is random.
  *
+ * Levels (VISION V80): job.target and job.stand carry z (-2..+2; missing =
+ * the ground; a target given without an area takes the level on screen). A
+ * unit takes open jobs on its own level only until units can walk between
+ * levels (vertical slice 2).
+ *
  * API, state, events and checks: docs/systems/UF_Jobs.md
  *
  * Replaced core methods: none (aliases only).
@@ -68,6 +73,22 @@
     };
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const copyArea = a => ({ x: a.x, y: a.y });
+    // Levels (VISION V80). A record ({ area, x, y, z }: a target, a stand, a unit, an item) carries z beside its area; an
+    // area handle may carry it inside ({ x, y, z }). Missing = the ground.
+    const zOf = o => o && o.z !== undefined ? o.z : (o && o.area && o.area.z !== undefined ? o.area.z : 0);
+    const refZ = zOf;
+    const lv = r => ({ x: r.area.x, y: r.area.y, z: refZ(r) });       // the level area of a record
+    const sameLevel = (a, b) => !!a && !!b && sameArea(a.area, b.area) && refZ(a) === refZ(b);
+    const validLevel = ref => {
+        const z = zOf(ref), W = World();
+        return Number.isInteger(z) && z >= -2 && z <= 2 && (z === 0 || !!(W && typeof W.isLevel === "function" && W.isLevel(z)));
+    };
+    // Is this area's level the one on screen?
+    const onScreen = area => {
+        const W = World();
+        const v = W && W.viewLevel ? W.viewLevel() : (W ? W.currentArea() : null);
+        return !!v && !!area && v.x === area.x && v.y === area.y && zOf(v) === zOf(area);
+    };
     const chebyshev = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
     const manhattan = (ax, ay, bx, by) => Math.abs(ax - bx) + Math.abs(ay - by);
 
@@ -90,11 +111,14 @@
     //-------------------------------------------------------------------------
     // Cells: what a unit can stand on, in the area on screen or any other
 
+    // area may be a level area { x, y, z } (missing z = the ground).
     function isWaterIn(area, x, y) {
         const W = World();
-        if (W && sameArea(area, W.currentArea()) && window.$gameMap && $dataMap) {
+        if (!area || !validLevel(area) || !W || !W.state || !W.inWorld(area.x, area.y, zOf(area))) return false;
+        if (W && onScreen(area) && window.$gameMap && $dataMap) {
             return Tilemap.isWaterTile($gameMap.tileId(x, y, 0));
         }
+        if (typeof W.getTile === "function") return Tilemap.isWaterTile(W.getTile(area.x, area.y, x, y, 0, zOf(area)) | 0);
         const G = window.UF && UF.WorldGen;
         if (G && G.cellInfoLocal) {
             const c = G.cellInfoLocal(area.x, area.y, x, y);
@@ -106,8 +130,8 @@
     // Another unit (or a solid non-unit event on screen) already stands there.
     function occupiedIn(area, x, y, unitId) {
         const W = World();
-        for (const u of W.unitsInArea(area.x, area.y)) if (u.id !== unitId && u.x === x && u.y === y) return true;
-        if (sameArea(area, W.currentArea()) && window.$gameMap) {
+        for (const u of W.unitsInArea(area.x, area.y, zOf(area))) if (u.id !== unitId && u.x === x && u.y === y) return true;
+        if (onScreen(area) && window.$gameMap) {
             for (const ev of $gameMap.eventsXy(x, y)) {
                 if (ev.eventId() >= W.EVENT_BASE) continue; // units were checked above
                 if (ev.isNormalPriority() && !ev.isThrough()) return true;
@@ -119,13 +143,16 @@
     /** True when a unit could stand on the cell: inside the area, walkable ground, no blocking object, no water, nobody there. */
     function standableIn(area, x, y, unitId) {
         const W = World();
-        if (!W || !W.state || !W.inWorld(area.x, area.y)) return false;
+        if (!area || !validLevel(area) || !W || !W.state || !W.inWorld(area.x, area.y, zOf(area))) return false;
         const size = W.state.size;
         if (x < 0 || y < 0 || x >= size || y >= size) return false;
-        if (sameArea(area, W.currentArea()) && window.$gameMap && $dataMap) {
+        if (onScreen(area) && window.$gameMap && $dataMap) {
             // Game_Map.isPassable includes UF_Objects' object blocking; a cell blocked in every direction can't be stood on.
             if (![2, 4, 6, 8].some(d => $gameMap.isPassable(x, y, d))) return false;
             if (Tilemap.isWaterTile($gameMap.tileId(x, y, 0))) return false;
+        } else if (typeof W.walkable === "function") {
+            // Every off-screen floor uses saved tiles/shapes and objects, including ground tile changes.
+            if (!W.walkable(area.x, area.y, x, y, { z: zOf(area) })) return false;
         } else {
             const O = Objects();
             if (O && O.blocksIn(area, x, y)) return false;
@@ -158,25 +185,26 @@
      * none (the target is walled in).
      */
     function standFor(target, unit, adjacentOnly) {
-        const area = target.area;
-        const onIt = unit.x === target.x && unit.y === target.y && sameArea(unit.area, area);
-        if (!adjacentOnly && (onIt || standableIn(area, target.x, target.y, unit.id))) return { area: copyArea(area), x: target.x, y: target.y };
+        if (!target || !unit || !target.area || !validLevel(target) || !validLevel(unit) || !sameLevel(target, unit)) return null;
+        const area = lv(target), z = refZ(target);
+        const onIt = unit.x === target.x && unit.y === target.y;
+        if (!adjacentOnly && (onIt || standableIn(area, target.x, target.y, unit.id))) return { area: copyArea(area), x: target.x, y: target.y, z };
         const W = World(), eight = eightWay();
         let best = null, bestDist = Infinity;
         for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
             const x = target.x + dx, y = target.y + dy;
-            const here = sameArea(unit.area, area) && unit.x === x && unit.y === y;
+            const here = unit.x === x && unit.y === y;
             if (!here && !standableIn(area, x, y, unit.id)) continue;
-            if (dx && dy && !(W.walkable(area.x, area.y, x, target.y, { unit }) && W.walkable(area.x, area.y, target.x, y, { unit }))) continue;
+            if (dx && dy && !(W.walkable(area.x, area.y, x, target.y, { unit, z }) && W.walkable(area.x, area.y, target.x, y, { unit, z }))) continue;
             const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
             if (dist < bestDist) {
                 bestDist = dist;
-                best = { area: copyArea(area), x, y };
+                best = { area: copyArea(area), x, y, z };
             }
         }
         return best;
     }
-    const atCell = (unit, cell) => !!cell && sameArea(unit.area, cell.area) && unit.x === cell.x && unit.y === cell.y;
+    const atCell = (unit, cell) => sameLevel(unit, cell) && unit.x === cell.x && unit.y === cell.y;
 
     //-------------------------------------------------------------------------
     // Words for cards and labels (no DF/U7 terms: names come from the catalog)
@@ -200,7 +228,7 @@
     };
     const objectName = job => {
         const O = Objects();
-        const t = O && job.target ? O.atIn(job.target.area, job.target.x, job.target.y) : null;
+        const t = O && job.target ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
         return t ? t.name : (job.params && job.params.objectName) || "";
     };
     const itemName = id => {
@@ -237,7 +265,7 @@
         verb,
         plan(job, unit) {
             const O = Objects();
-            const t = O ? O.atIn(job.target.area, job.target.x, job.target.y) : null;
+            const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
             if (!t || !t.actions || !t.actions[type]) return { ok: false, reason: `nothing to ${type} there` };
             job.params.objectName = t.name; // kept for the label after the object is gone
             const stand = standFor(job.target, unit, false);
@@ -245,12 +273,12 @@
         },
         work(job) {
             const O = Objects();
-            const t = O ? O.atIn(job.target.area, job.target.x, job.target.y) : null;
+            const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
             return t && t.actions && t.actions[type] ? t.actions[type].work | 0 : 0;
         },
         apply(job, unit) {
             const O = Objects();
-            const r = O ? O.applyIn(job.target.area, job.target.x, job.target.y, type, unit) : null;
+            const r = O ? O.applyIn(lv(job.target), job.target.x, job.target.y, type, unit) : null;
             job.result = r ? { from: r.from, to: r.to, yields: r.yields } : null;
         },
         describe: job => `${verb} ${withArticle(objectName(job))}`.trim()
@@ -281,7 +309,7 @@
         if (!it) return { ok: false, reason: "the item is gone" };
         if (it.holder === unit.id) return { ok: true, stand: null }; // already carried (a resumed job)
         if (!it.area) return { ok: false, reason: "someone else carries it" };
-        job.target = { area: copyArea(it.area), x: it.x, y: it.y };
+        job.target = { area: copyArea(it.area), x: it.x, y: it.y, z: zOf(it) };
         const stand = standFor(job.target, unit, false);
         return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
     }
@@ -310,7 +338,7 @@
             if (!it || it.holder !== unit.id) return { ok: false, reason: "the item is gone" };
             const to = job.params.to;
             if (!to || !to.area) return { ok: false, reason: "nowhere to take it" };
-            job.target = { area: copyArea(to.area), x: to.x | 0, y: to.y | 0 };
+            job.target = { area: copyArea(to.area), x: to.x | 0, y: to.y | 0, z: refZ(to) };
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach the place" };
         },
@@ -321,14 +349,14 @@
                 return "continue";
             }
             const I = Items(), to = job.params.to;
-            const placed = I.putDown(job.params.itemId, to.area, to.x | 0, to.y | 0);
+            const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
             job.result = placed ? { itemId: placed.id } : null;
         },
         cancel(job, unit) {
             // What was picked up and not delivered is put down where the carrier stands, so nothing vanishes.
             const I = Items();
             const it = I ? I.get(job.params.itemId) : null;
-            if (it && it.holder === unit.id && (job.phase | 0) > 0) I.putDown(it.id, unit.area, unit.x, unit.y);
+            if (it && it.holder === unit.id && (job.phase | 0) > 0) I.putDown(it.id, lv(unit), unit.x, unit.y);
         },
         describe: job => `Hauling ${withArticle(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`
     });
@@ -340,7 +368,7 @@
             const t = O ? O.type(job.params.objectId) : null;
             if (!t || !t.build) return { ok: false, reason: "nothing to build" };
             const needs = t.build.items || {};
-            const missing = Object.keys(needs).filter(id => (I ? I.count({ area: job.target.area, x: job.target.x, y: job.target.y }, id) : 0) < (needs[id] | 0));
+            const missing = Object.keys(needs).filter(id => (I ? I.count({ area: lv(job.target), x: job.target.x, y: job.target.y }, id) : 0) < (needs[id] | 0));
             if (missing.length) return { ok: false, reason: "needs items" };
             const stand = standFor(job.target, unit, t.passable !== true); // a wall is built from beside its cell
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
@@ -356,13 +384,13 @@
             const needs = (t.build && t.build.items) || {};
             for (const id of Object.keys(needs)) {
                 let left = needs[id] | 0;
-                for (const it of I.atIn(job.target.area, job.target.x, job.target.y)) {
+                for (const it of I.atIn(lv(job.target), job.target.x, job.target.y)) {
                     if (left <= 0) break;
                     if (it.type !== id) continue;
                     left -= I.consume(it.id, left);
                 }
             }
-            O.setIn(job.target.area, job.target.x, job.target.y, t.id);
+            O.setIn(lv(job.target), job.target.x, job.target.y, t.id);
         },
         describe(job) {
             const O = Objects();
@@ -386,12 +414,12 @@
             const short = Object.keys(inputs).find(id => !I || I.count(unit.id, id) < (inputs[id] | 0));
             if (short) return { ok: false, reason: `needs ${lower(itemName(short))}` };
             if (!r.at) {
-                job.target = { area: copyArea(unit.area), x: unit.x, y: unit.y };
+                job.target = { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) };
                 return { ok: true, stand: null }; // made where the crafter stands
             }
-            const found = O ? O.findIn(unit.area, { near: { x: unit.x, y: unit.y }, radius: CRAFT_SEARCH, tags: [r.at], limit: 4 }) : [];
+            const found = O ? O.findIn(lv(unit), { near: { x: unit.x, y: unit.y }, radius: CRAFT_SEARCH, tags: [r.at], limit: 4 }) : [];
             for (const f of found) {
-                const target = { area: copyArea(unit.area), x: f.x, y: f.y };
+                const target = { area: copyArea(unit.area), x: f.x, y: f.y, z: zOf(unit) };
                 const stand = standFor(target, unit, f.type.passable !== true);
                 if (stand) {
                     job.target = target;
@@ -465,9 +493,9 @@
             const prey = W.unit(job.params.unitId);
             if (!prey) return { ok: false, reason: "the prey is gone" };
             job.params.preyName = prey.name;
-            if (!sameArea(prey.area, unit.area)) return { ok: false, reason: "the prey left the area" };
+            if (!sameLevel(prey, unit)) return { ok: false, reason: "the prey left the area" };
             if (chebyshev(prey.x, prey.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "the prey got away" };
-            job.target = { area: copyArea(prey.area), x: prey.x, y: prey.y };
+            job.target = { area: copyArea(prey.area), x: prey.x, y: prey.y, z: zOf(prey) };
             const stand = standFor(job.target, unit, true);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
         },
@@ -483,8 +511,8 @@
             const s = speciesOf(prey);
             const yields = (s && s.yields) || {};
             const dropped = [];
-            if (I) for (const id of Object.keys(yields)) for (const it of I.drop(prey.area, prey.x, prey.y, id, yields[id] | 0)) dropped.push(it.id);
-            const where = { area: copyArea(prey.area), x: prey.x, y: prey.y };
+            if (I) for (const id of Object.keys(yields)) for (const it of I.drop(lv(prey), prey.x, prey.y, id, yields[id] | 0)) dropped.push(it.id);
+            const where = { area: copyArea(prey.area), x: prey.x, y: prey.y, z: zOf(prey) };
             W.removeUnit(prey.id);
             job.result = { prey: prey.id, species: prey.data && prey.data.species, at: where, yields, items: dropped };
             emit("jobs:kill", job, prey, unit);
@@ -495,7 +523,7 @@
     define("drink", {
         verb: "Drinking",
         plan(job, unit) {
-            if (!isWaterIn(job.target.area, job.target.x, job.target.y)) return { ok: false, reason: "no water there" };
+            if (!isWaterIn(lv(job.target), job.target.x, job.target.y)) return { ok: false, reason: "no water there" };
             const stand = standFor(job.target, unit, true);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach the water" };
         },
@@ -515,7 +543,7 @@
             if (!it || !t || !t.food) return { ok: false, reason: "nothing to eat" };
             if (it.holder === unit.id) return { ok: true, stand: null };
             if (!it.area) return { ok: false, reason: "someone else has it" };
-            if (!sameArea(it.area, job.target.area) || it.x !== job.target.x || it.y !== job.target.y) return { ok: false, reason: "the food moved" };
+            if (!sameLevel(it, job.target) || it.x !== job.target.x || it.y !== job.target.y) return { ok: false, reason: "the food moved" };
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
         },
@@ -553,8 +581,8 @@
             const other = World().unit(job.params.unitId);
             if (!other) return { ok: false, reason: "nobody to talk to" };
             job.params.otherName = other.name;
-            if (!sameArea(other.area, unit.area) || chebyshev(other.x, other.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
-            job.target = { area: copyArea(other.area), x: other.x, y: other.y };
+            if (!sameLevel(other, unit) || chebyshev(other.x, other.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
+            job.target = { area: copyArea(other.area), x: other.x, y: other.y, z: zOf(other) };
             const stand = standFor(job.target, unit, true);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't get near" };
         },
@@ -574,8 +602,8 @@
             const partner = World().unit(job.params.partnerId || job.params.unitId);
             if (!partner) return { ok: false, reason: "nobody to embrace" };
             job.params.partnerName = partner.name;
-            if (!sameArea(partner.area, unit.area) || chebyshev(partner.x, partner.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
-            job.target = { area: copyArea(partner.area), x: partner.x, y: partner.y };
+            if (!sameLevel(partner, unit) || chebyshev(partner.x, partner.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
+            job.target = { area: copyArea(partner.area), x: partner.x, y: partner.y, z: zOf(partner) };
             const stand = standFor(job.target, unit, true);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't get near" };
         },
@@ -599,16 +627,20 @@
         if (!st || !spec || !handlers[spec.type]) return null;
         const W = World();
         let target = spec.target || null;
-        if (target && !target.area) target = { area: W.currentArea() || copyArea(W.state.startArea), x: target.x | 0, y: target.y | 0 };
+        if (target && !target.area) {
+            // No area: the level on screen (else the start area's ground).
+            const v = W.viewLevel ? W.viewLevel() : W.currentArea();
+            target = { area: v ? copyArea(v) : copyArea(W.state.startArea), x: target.x | 0, y: target.y | 0, z: target.z !== undefined ? target.z : zOf(v) };
+        }
         if (!target && spec.owner) {
             const u = W.unit(spec.owner);
-            if (u) target = { area: copyArea(u.area), x: u.x, y: u.y };
+            if (u) target = { area: copyArea(u.area), x: u.x, y: u.y, z: zOf(u) };
         }
-        if (!target) return null;
+        if (!target || !target.area || !validLevel(target) || !W.inWorld(target.area.x, target.area.y, refZ(target))) return null;
         const job = {
             id: st.nextId++,
             type: spec.type,
-            target: { area: copyArea(target.area), x: target.x | 0, y: target.y | 0 },
+            target: { area: copyArea(target.area), x: target.x | 0, y: target.y | 0, z: refZ(target) },
             params: Object.assign({}, spec.params || {}),
             owner: spec.owner || null,
             assigned: null,
@@ -651,7 +683,7 @@
         const unit = job.assigned ? W.unit(job.assigned) : null;
         const h = handlers[job.type];
         if (unit) {
-            if (unit.goal && job.stand && atCell({ area: unit.goal.area, x: unit.goal.x, y: unit.goal.y }, job.stand)) W.stopUnit(unit.id);
+            if (unit.goal && job.stand && atCell({ area: unit.goal.area, x: unit.goal.x, y: unit.goal.y, z: zOf(unit.goal) }, job.stand)) W.stopUnit(unit.id);
             stopWorking(unit);
             if (h && typeof h.cancel === "function") {
                 try { h.cancel(job, unit); } catch (e) { console.error(e); }
@@ -685,6 +717,10 @@
     }
 
     function plan(job, unit) {
+        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit)) {
+            fail(job, "the target is on another level");
+            return false;
+        }
         const h = handlers[job.type];
         let r;
         try {
@@ -697,7 +733,12 @@
             fail(job, (r && r.reason) || "can't be done");
             return false;
         }
-        job.stand = r.stand ? { area: copyArea(r.stand.area || job.target.area), x: r.stand.x | 0, y: r.stand.y | 0 } : null;
+        job.stand = r.stand ? { area: copyArea(r.stand.area || job.target.area), x: r.stand.x | 0, y: r.stand.y | 0,
+            z: r.stand.z !== undefined ? r.stand.z : r.stand.area && r.stand.area.z !== undefined ? r.stand.area.z : refZ(job.target) } : null;
+        if (!validLevel(job.target) || !sameLevel(job.target, unit) || (job.stand && (!validLevel(job.stand) || !sameLevel(job.stand, unit)))) {
+            fail(job, "the target is on another level");
+            return false;
+        }
         job.planned = true;
         job.plannedAt = now();
         return true;
@@ -708,6 +749,7 @@
         const W = World();
         const unit = W ? W.unit(unitId) : null;
         if (!job || !unit || isFinished(job) || !handlers[job.type]) return null;
+        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit)) return fail(job, "the target is on another level");
         if (job.assigned === unitId && isActive(job)) return job;
         const current = of(unitId);
         if (current && current !== job) fail(current, "replaced");
@@ -743,9 +785,9 @@
     function take(unitId, filter) {
         const W = World();
         const unit = W ? W.unit(unitId) : null;
-        if (!unit) return null;
-        const candidates = open().filter(j => sameArea(j.target.area, unit.area) && matches(j, filter));
-        candidates.sort((a, b) => (b.priority - a.priority) || (unitDistance(unit, a.target.area, a.target.x, a.target.y) - unitDistance(unit, b.target.area, b.target.x, b.target.y)) || (a.id - b.id));
+        if (!unit || !validLevel(unit)) return null;
+        const candidates = open().filter(j => sameLevel(j.target, unit) && matches(j, filter));
+        candidates.sort((a, b) => (b.priority - a.priority) || (unitDistance(unit, lv(a.target), a.target.x, a.target.y) - unitDistance(unit, lv(b.target), b.target.x, b.target.y)) || (a.id - b.id));
         for (const job of candidates.slice(0, 8)) {
             // A dry run of the plan: a designation nobody can do yet (needs items, walled in) stays open.
             let r = null;
@@ -810,7 +852,7 @@
         if (ev) {
             const dx = job.target.x - unit.x, dy = job.target.y - unit.y;
             // Face the target before the work frames play: 8 ways (VISION V3), 4 with FourWay.
-            if ((dx || dy) && sameArea(job.target.area, unit.area)) {
+            if ((dx || dy) && sameLevel(job.target, unit)) {
                 if (ev.faceToward8) ev.faceToward8(dx, dy);
                 else ev.setDirection(facingTo(dx, dy));
             }
@@ -822,6 +864,18 @@
 
     function finish(job, unit) {
         const h = handlers[job.type];
+        // Moving targets may change floor after the last timed replan. Refuse
+        // before apply can kill a unit, consume an item or change either need.
+        let subject = null;
+        if (job.type === "hunt" || job.type === "talk" || job.type === "mate") subject = World().unit(job.params.partnerId || job.params.unitId);
+        else if (job.type === "fetch" || job.type === "eat" || (job.type === "haul" && (job.phase | 0) === 0)) {
+            const item = Items() && Items().get(job.params.itemId);
+            if (item && item.area && item.holder !== unit.id) subject = item;
+        } else if (job.type === "haul") subject = job.params.to;
+        if (!sameLevel(job.target, unit) || (subject && (!validLevel(subject) || !sameLevel(subject, unit)))) {
+            fail(job, "the target is on another level");
+            return;
+        }
         let result;
         try {
             result = h.apply(job, unit);
@@ -860,6 +914,11 @@
     function step(job, unit) {
         const W = World();
         const h = handlers[job.type];
+        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit) ||
+            (job.stand && (!validLevel(job.stand) || !sameLevel(job.stand, unit)))) {
+            fail(job, "the target is on another level");
+            return;
+        }
         if (!job.planned || (h.replanEvery > 0 && now() - job.plannedAt >= h.replanEvery)) {
             const wasStand = job.stand;
             if (!plan(job, unit)) return;
@@ -871,11 +930,11 @@
         }
         const stand = job.stand;
         if (stand && !atCell(unit, stand)) {
-            if (!unit.goal || !sameArea(unit.goal.area, stand.area) || unit.goal.x !== stand.x || unit.goal.y !== stand.y) {
-                W.sendUnit(unit.id, { area: stand.area, x: stand.x, y: stand.y });
+            if (!unit.goal || !sameLevel(unit.goal, stand) || unit.goal.x !== stand.x || unit.goal.y !== stand.y) {
+                W.sendUnit(unit.id, { area: stand.area, x: stand.x, y: stand.y, z: refZ(stand) });
             }
             // No progress toward the stand for a while counts as a block (an enclosed unit never reports one).
-            const key = `${unit.area.x},${unit.area.y}:${unit.x},${unit.y}`;
+            const key = `${unit.area.x},${unit.area.y},${zOf(unit)}:${unit.x},${unit.y}`;
             if (!job.stall || job.stall.key !== key) job.stall = { key, since: now() };
             else if (now() - job.stall.since >= STALL_TICKS) {
                 job.stall = null;
