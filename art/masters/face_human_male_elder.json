@@ -1,0 +1,75 @@
+{
+  "id": "face_human_male_elder",
+  "species": "human",
+  "gender": "male",
+  "age": "elder",
+  "stage": "elder",
+  "layer": "face",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "content": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "angry": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "columns": 4,
+  "rows": 3,
+  "variants": {
+    "male": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "moods": [
+    "neutral",
+    "content",
+    "angry"
+  ],
+  "faces": [
+    {
+      "variant": 0,
+      "description": "Wise village elder patriarch with long flowing silver-white beard and hair"
+    },
+    {
+      "variant": 1,
+      "description": "Grizzled scarred veteran with short grey beard and eye scar"
+    },
+    {
+      "variant": 2,
+      "description": "Bald elder craftsman with thick grey mustache"
+    },
+    {
+      "variant": 3,
+      "description": "Dark-skinned elder with silver-frosted curly beard and warm eyes"
+    }
+  ],
+  "rmmzFaceset": "game/img/faces/UF_Faces_Human_Male_Elder.png"
+}

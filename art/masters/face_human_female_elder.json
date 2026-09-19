@@ -1,0 +1,75 @@
+{
+  "id": "face_human_female_elder",
+  "species": "human",
+  "gender": "female",
+  "age": "elder",
+  "stage": "elder",
+  "layer": "face",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "content": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "angry": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "columns": 4,
+  "rows": 3,
+  "variants": {
+    "female": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "moods": [
+    "neutral",
+    "content",
+    "angry"
+  ],
+  "faces": [
+    {
+      "variant": 0,
+      "description": "Venerable matriarch with silver hair pinned in bun and embroidered tunic"
+    },
+    {
+      "variant": 1,
+      "description": "Weathered elder woods-woman with grey hair in braids and bone necklace"
+    },
+    {
+      "variant": 2,
+      "description": "Elder craftswoman with hair in patterned kerchief wrap"
+    },
+    {
+      "variant": 3,
+      "description": "Dark-skinned elder grandmother with silver-frosted afro-textured hair and bead necklace"
+    }
+  ],
+  "rmmzFaceset": "game/img/faces/UF_Faces_Human_Female_Elder.png"
+}

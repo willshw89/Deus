@@ -1,0 +1,75 @@
+{
+  "id": "face_human_female_adult",
+  "species": "human",
+  "gender": "female",
+  "age": "adult",
+  "stage": "adult",
+  "layer": "face",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "content": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "angry": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "columns": 4,
+  "rows": 3,
+  "variants": {
+    "female": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "moods": [
+    "neutral",
+    "content",
+    "angry"
+  ],
+  "faces": [
+    {
+      "variant": 0,
+      "description": "Young settler woman with dark hair in side braid and simple linen blouse"
+    },
+    {
+      "variant": 1,
+      "description": "Auburn red-haired hunter with leather bodice and hazel eyes"
+    },
+    {
+      "variant": 2,
+      "description": "Blonde craftswoman with hair pinned in bun and work apron"
+    },
+    {
+      "variant": 3,
+      "description": "Dark-skinned settler with short cropped curly hair and suspenders"
+    }
+  ],
+  "rmmzFaceset": "game/img/faces/UF_Faces_Human_Female_Adult.png"
+}
