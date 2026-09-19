@@ -1,0 +1,305 @@
+{
+  "about": "PROPOSAL, awaiting the user's approval (AGENTS rule 7). Nothing reads this file; it is not in the catalog. The rank names per culture for the catalog key command.rankNames (docs/design/CHAIN_OF_COMMAND.md §1.7 and §10). Keys are the catalog's culture ids (the keys of cultures); 'default' serves a culture that has no sets of its own. Each set has an id (saved per band as rankSet, §1.7), a label for people reading the file, and ranks 1 (the base) to 7 (the head of a band of up to 1093 people). 'female' is given only where the word is gendered; otherwise 'name' is used for everyone. A rank above 7 shows the rank-7 name. Written 2026-09-19 by Claude Code's naming review from three independent proposals. Revised the same day after a review: the automata's Array set is replaced by the Glass garrison, written by the naming review (CHAIN_OF_COMMAND.md §10.3).",
+  "human": [
+    {
+      "id": "human_manor",
+      "label": "Manor and shire",
+      "ranks": [
+        { "rank": 1, "name": "Villein" },
+        { "rank": 2, "name": "Hayward" },
+        { "rank": 3, "name": "Reeve" },
+        { "rank": 4, "name": "Bailiff" },
+        { "rank": 5, "name": "Seneschal" },
+        { "rank": 6, "name": "Earl", "female": "Countess" },
+        { "rank": 7, "name": "King", "female": "Queen" }
+      ]
+    },
+    {
+      "id": "human_banner",
+      "label": "Knight and banner",
+      "ranks": [
+        { "rank": 1, "name": "Liegeman", "female": "Liegewoman" },
+        { "rank": 2, "name": "Sergeant" },
+        { "rank": 3, "name": "Knight", "female": "Dame" },
+        { "rank": 4, "name": "Banneret" },
+        { "rank": 5, "name": "Baron", "female": "Baroness" },
+        { "rank": 6, "name": "Under-king", "female": "Under-queen" },
+        { "rank": 7, "name": "High King", "female": "High Queen" }
+      ]
+    },
+    {
+      "id": "human_freehold",
+      "label": "Freehold",
+      "ranks": [
+        { "rank": 1, "name": "Freeman", "female": "Freewoman" },
+        { "rank": 2, "name": "Yeoman", "female": "Yeowoman" },
+        { "rank": 3, "name": "Headman", "female": "Headwoman" },
+        { "rank": 4, "name": "Tithingman", "female": "Tithingwoman" },
+        { "rank": 5, "name": "Hundredman", "female": "Hundredwoman" },
+        { "rank": 6, "name": "Shire-reeve" },
+        { "rank": 7, "name": "Lord Marcher", "female": "Lady Marcher" }
+      ]
+    }
+  ],
+  "elf": [
+    {
+      "id": "elf_court",
+      "label": "Fey court",
+      "ranks": [
+        { "rank": 1, "name": "Fernling" },
+        { "rank": 2, "name": "Thornward" },
+        { "rank": 3, "name": "Glade Knight", "female": "Glade Dame" },
+        { "rank": 4, "name": "Grove Lord", "female": "Grove Lady" },
+        { "rank": 5, "name": "Wild Lord", "female": "Wild Lady" },
+        { "rank": 6, "name": "Fey Prince", "female": "Fey Princess" },
+        { "rank": 7, "name": "Fey King", "female": "Fey Queen" }
+      ]
+    },
+    {
+      "id": "elf_forest",
+      "label": "Royal forest",
+      "ranks": [
+        { "rank": 1, "name": "Woodward" },
+        { "rank": 2, "name": "Forester" },
+        { "rank": 3, "name": "Regarder" },
+        { "rank": 4, "name": "Verderer" },
+        { "rank": 5, "name": "Justiciar" },
+        { "rank": 6, "name": "Forest Lord", "female": "Forest Lady" },
+        { "rank": 7, "name": "Sovereign" }
+      ]
+    },
+    {
+      "id": "elf_hart",
+      "label": "Hart and mist",
+      "ranks": [
+        { "rank": 1, "name": "Reedkin" },
+        { "rank": 2, "name": "Harrier" },
+        { "rank": 3, "name": "Huntmaster" },
+        { "rank": 4, "name": "Hart-Knight", "female": "Hart-Dame" },
+        { "rank": 5, "name": "Mistwarden" },
+        { "rank": 6, "name": "Hunt-Lord", "female": "Hunt-Lady" },
+        { "rank": 7, "name": "Hart-King", "female": "Hart-Queen" }
+      ]
+    }
+  ],
+  "dwarf": [
+    {
+      "id": "dwarf_minelaw",
+      "label": "Mine law",
+      "ranks": [
+        { "rank": 1, "name": "Tinner" },
+        { "rank": 2, "name": "Free Miner" },
+        { "rank": 3, "name": "Barmaster" },
+        { "rank": 4, "name": "Gaveller" },
+        { "rank": 5, "name": "Stannator" },
+        { "rank": 6, "name": "Vice-warden" },
+        { "rank": 7, "name": "Lord Warden", "female": "Lady Warden" }
+      ]
+    },
+    {
+      "id": "dwarf_anvil",
+      "label": "Anvil",
+      "ranks": [
+        { "rank": 1, "name": "Hewer" },
+        { "rank": 2, "name": "Anvil-Sworn" },
+        { "rank": 3, "name": "Forgekeeper" },
+        { "rank": 4, "name": "Oathsmith" },
+        { "rank": 5, "name": "Clanfather", "female": "Clanmother" },
+        { "rank": 6, "name": "Starsmith" },
+        { "rank": 7, "name": "High Anvil" }
+      ]
+    },
+    {
+      "id": "dwarf_hold",
+      "label": "Hold",
+      "ranks": [
+        { "rank": 1, "name": "Delver" },
+        { "rank": 2, "name": "Lodesman", "female": "Lodeswoman" },
+        { "rank": 3, "name": "Keystone" },
+        { "rank": 4, "name": "Hallmaster" },
+        { "rank": 5, "name": "Hold-Lord", "female": "Hold-Lady" },
+        { "rank": 6, "name": "Cornerstone" },
+        { "rank": 7, "name": "Stone-King", "female": "Stone-Queen" }
+      ]
+    }
+  ],
+  "gnome": [
+    {
+      "id": "gnome_guild",
+      "label": "Craft guild",
+      "ranks": [
+        { "rank": 1, "name": "Apprentice" },
+        { "rank": 2, "name": "Journeyman", "female": "Journeywoman" },
+        { "rank": 3, "name": "Craftmaster" },
+        { "rank": 4, "name": "Alderman", "female": "Alderwoman" },
+        { "rank": 5, "name": "Portreeve" },
+        { "rank": 6, "name": "Burgrave", "female": "Burgravine" },
+        { "rank": 7, "name": "Landgrave", "female": "Landgravine" }
+      ]
+    },
+    {
+      "id": "gnome_bench",
+      "label": "The bench",
+      "ranks": [
+        { "rank": 1, "name": "Mender" },
+        { "rank": 2, "name": "Fitter" },
+        { "rank": 3, "name": "Wright" },
+        { "rank": 4, "name": "Contriver" },
+        { "rank": 5, "name": "Engineer" },
+        { "rank": 6, "name": "Inventor" },
+        { "rank": 7, "name": "Archwright" }
+      ]
+    },
+    {
+      "id": "gnome_relic",
+      "label": "Relic burrow",
+      "ranks": [
+        { "rank": 1, "name": "Rivet" },
+        { "rank": 2, "name": "Burnisher" },
+        { "rank": 3, "name": "Relic-Reader" },
+        { "rank": 4, "name": "Clockmaster" },
+        { "rank": 5, "name": "Lightwright" },
+        { "rank": 6, "name": "Engine-Sage" },
+        { "rank": 7, "name": "Wonderkeeper" }
+      ]
+    }
+  ],
+  "goblin": [
+    {
+      "id": "goblin_warren",
+      "label": "Warren",
+      "ranks": [
+        { "rank": 1, "name": "Grubber" },
+        { "rank": 2, "name": "Sniffer" },
+        { "rank": 3, "name": "Heap-Chief" },
+        { "rank": 4, "name": "Wreckmaster" },
+        { "rank": 5, "name": "Packlord", "female": "Packlady" },
+        { "rank": 6, "name": "Warrenfather", "female": "Warrenmother" },
+        { "rank": 7, "name": "Midden-King", "female": "Midden-Queen" }
+      ]
+    },
+    {
+      "id": "goblin_misrule",
+      "label": "Misrule court",
+      "ranks": [
+        { "rank": 1, "name": "Churl" },
+        { "rank": 2, "name": "Knave" },
+        { "rank": 3, "name": "Ruffler" },
+        { "rank": 4, "name": "Scrap Knight", "female": "Scrap Dame" },
+        { "rank": 5, "name": "Rag Baron", "female": "Rag Baroness" },
+        { "rank": 6, "name": "Misrule Lord", "female": "Misrule Lady" },
+        { "rank": 7, "name": "Beggar King", "female": "Beggar Queen" }
+      ]
+    },
+    {
+      "id": "goblin_haul",
+      "label": "The haul",
+      "ranks": [
+        { "rank": 1, "name": "Pocket" },
+        { "rank": 2, "name": "Sack" },
+        { "rank": 3, "name": "Barrow" },
+        { "rank": 4, "name": "Cart" },
+        { "rank": 5, "name": "Wagon" },
+        { "rank": 6, "name": "Caravan" },
+        { "rank": 7, "name": "Trove" }
+      ]
+    }
+  ],
+  "orc": [
+    {
+      "id": "orc_warclan",
+      "label": "Warclan",
+      "ranks": [
+        { "rank": 1, "name": "Tusk" },
+        { "rank": 2, "name": "Axe-Brother", "female": "Axe-Sister" },
+        { "rank": 3, "name": "Firebrand" },
+        { "rank": 4, "name": "Chieftain" },
+        { "rank": 5, "name": "Raid-Lord", "female": "Raid-Lady" },
+        { "rank": 6, "name": "Iron Tusk" },
+        { "rank": 7, "name": "Overking", "female": "Overqueen" }
+      ]
+    },
+    {
+      "id": "orc_horn",
+      "label": "Horn and scar",
+      "ranks": [
+        { "rank": 1, "name": "Bloodkin" },
+        { "rank": 2, "name": "Breacher" },
+        { "rank": 3, "name": "Horncaller" },
+        { "rank": 4, "name": "Scarbearer" },
+        { "rank": 5, "name": "Bloodfather", "female": "Bloodmother" },
+        { "rank": 6, "name": "Great Horn" },
+        { "rank": 7, "name": "Ash-King", "female": "Ash-Queen" }
+      ]
+    },
+    {
+      "id": "orc_line",
+      "label": "Battle line",
+      "ranks": [
+        { "rank": 1, "name": "Spear" },
+        { "rank": 2, "name": "Shield" },
+        { "rank": 3, "name": "Axe" },
+        { "rank": 4, "name": "Banner" },
+        { "rank": 5, "name": "Drum" },
+        { "rank": 6, "name": "Horn" },
+        { "rank": 7, "name": "War King", "female": "War Queen" }
+      ]
+    }
+  ],
+  "automaton": [
+    {
+      "id": "automaton_brazen",
+      "label": "Brazen court",
+      "ranks": [
+        { "rank": 1, "name": "Page" },
+        { "rank": 2, "name": "Armiger" },
+        { "rank": 3, "name": "Brass Knight", "female": "Brass Dame" },
+        { "rank": 4, "name": "Marshal" },
+        { "rank": 5, "name": "Palatine" },
+        { "rank": 6, "name": "Regent" },
+        { "rank": 7, "name": "Brazen Head" }
+      ]
+    },
+    {
+      "id": "automaton_oath",
+      "label": "Iron oath",
+      "ranks": [
+        { "rank": 1, "name": "Vassal" },
+        { "rank": 2, "name": "Iron Squire" },
+        { "rank": 3, "name": "Iron Knight", "female": "Iron Dame" },
+        { "rank": 4, "name": "Steward" },
+        { "rank": 5, "name": "Castle-Mind" },
+        { "rank": 6, "name": "Oath-Engine" },
+        { "rank": 7, "name": "Crown-Engine" }
+      ]
+    },
+    {
+      "id": "automaton_glass",
+      "label": "Glass garrison",
+      "ranks": [
+        { "rank": 1, "name": "Warder" },
+        { "rank": 2, "name": "Gatekeeper" },
+        { "rank": 3, "name": "Constable" },
+        { "rank": 4, "name": "Glass Warden" },
+        { "rank": 5, "name": "Glass Lord", "female": "Glass Lady" },
+        { "rank": 6, "name": "Duke", "female": "Duchess" },
+        { "rank": 7, "name": "Emperor", "female": "Empress" }
+      ]
+    }
+  ],
+  "default": [
+    {
+      "id": "default_plain",
+      "label": "Plain",
+      "ranks": [
+        { "rank": 1, "name": "Commoner" },
+        { "rank": 2, "name": "Foreman", "female": "Forewoman" },
+        { "rank": 3, "name": "Chief" },
+        { "rank": 4, "name": "Captain" },
+        { "rank": 5, "name": "Lord", "female": "Lady" },
+        { "rank": 6, "name": "Prince", "female": "Princess" },
+        { "rank": 7, "name": "Ruler" }
+      ]
+    }
+  ]
+}
