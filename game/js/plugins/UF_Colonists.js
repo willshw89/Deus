@@ -714,13 +714,33 @@
         const j = J ? J.of(u.id) : null;
         return !!j && j.type === "sleep";
     };
-    function sleepWindow(u) {
-        const [from, to] = colonyConfig().sleepHours || [22, 6];
-        const shift = clamp(Math.round((facet(u, "discipline") - 50) / 25), -2, 2); // disciplined people turn in earlier
-        return { from: (from - shift + 24) % 24, to: (to - shift + 24) % 24 };
+    function sleepSchedule(u) {
+        if (!u || !u.data) return null;
+        const old = u.data.sleepSchedule;
+        if (old && old.version === 1 && Number.isFinite(old.bedMinute) && old.bedMinute >= 0 && old.bedMinute < 1440 &&
+            Number.isFinite(old.durationMinutes) && old.durationMinutes >= 360 && old.durationMinutes <= 660 &&
+            old.wakeMinute === (old.bedMinute + old.durationMinutes) % 1440) return old;
+        const from = (colonyConfig().sleepHours || [22, 6])[0];
+        const personal = Math.floor(unit01(seed(), 0x51ee91, u.id, 1) * 17) - 8;
+        const discipline = Math.round((facet(u, "discipline") - 50) / 25);
+        const offset = personal * 15 - discipline * 30;
+        const bedMinute = ((from * 60 + offset) % 1440 + 1440) % 1440;
+        const durationMinutes = (u.data.age < 18 ? 540 : 420) + Math.floor(unit01(seed(), 0x51ee91, u.id, 2) * 9) * 15;
+        return (u.data.sleepSchedule = { version: 1, bedMinute, durationMinutes, wakeMinute: (bedMinute + durationMinutes) % 1440,
+            chronotype: offset <= -60 ? "early" : offset >= 60 ? "late" : "intermediate" });
     }
+    function sleepWindow(u) {
+        const s = sleepSchedule(u);
+        return s ? { from: s.bedMinute / 60, to: s.wakeMinute / 60 } : { from: 22, to: 6 };
+    }
+    const clockHour = () => hourNow() + (window.$ufTime ? ($ufTime.minute || 0) / 60 : 0);
     const inHours = (h, from, to) => (from <= to ? h >= from && h < to : h >= from || h < to);
-    const sleepingHours = u => { const w = sleepWindow(u); return inHours(hourNow(), w.from, w.to); };
+    const sleepingHours = u => { const w = sleepWindow(u); return inHours(clockHour(), w.from, w.to); };
+    function sleepFrames(u) {
+        const w = sleepWindow(u), s = sleepSchedule(u);
+        const left = sleepingHours(u) ? ((w.to - clockHour() + 24) % 24) : Math.min(4, s ? s.durationMinutes / 120 : 4);
+        return Math.round(Math.max(2, Math.min(11, left)) * 3600);
+    }
     const isMealHour = () => (colonyConfig().mealHours || []).includes(hourNow());
     const evening = () => inHours(hourNow(), 19, 22);
 
@@ -1145,9 +1165,7 @@
     function sleepJob(u) {
         const O = Objects();
         const c = colonyState(u);
-        const w = sleepWindow(u);
-        const hoursLeft = ((w.to - hourNow() + 24) % 24) || 8;
-        const frames = Math.max(4, Math.min(10, hoursLeft)) * 3600;
+        const frames = sleepFrames(u);
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
         const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const owned = UF.Ownership && UF.Ownership.bedOf(u);
@@ -1742,6 +1760,7 @@
         progressPregnancies,
         progressAging,
         updateAgeAppearance,
+        sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
         nightlyMateJob,
         // Things a test may want to know or reach.
         _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }

@@ -4,15 +4,20 @@
 const fs = require("fs"), path = require("path"), vm = require("vm"), assert = require("assert");
 let source = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_Colonists.js"), "utf8");
 const houseSource = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_Households.js"), "utf8");
+const ownershipSource = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_Ownership.js"), "utf8");
+const safetySource = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_FireSafety.js"), "utf8");
 function mutate(flag, from, to) { if (process.argv.includes(flag)) { assert(source.includes(from), `${flag} target missing`); source = source.replace(from, to); } }
 mutate("--mutate-adapters", "const extra = u ?", "const extra = false ?");
 mutate("--mutate-birth", "if (!childUnit) return null;", "// Mutant loses failed births.");
 mutate("--mutate-reservations", "if (!h.home || !sameLevel(h, c)) continue;", "if (!h.home) continue;");
 mutate("--mutate-owned-bed", "const owned = UF.Ownership && UF.Ownership.bedOf(u);", "const owned = null;");
 mutate("--mutate-source", "if (hasTag(type, \"building\") || hasTag(type, \"door\") || hasTag(type, \"bed\")) return true;", "// Mutant treats completed buildings as resources.");
-mutate("--mutate-home-exemption", "if (p && sameLevel(h, u) && u.x >= p.x - 2", "if (false && p && sameLevel(h, u) && u.x >= p.x - 2");
+mutate("--mutate-home-exemption", "if (p && sameLevel(h, u) && (UF.Households.structures", "if (false && p && sameLevel(h, u) && (UF.Households.structures");
 mutate("--mutate-rendezvous", "if (visit && visit.until > ticks() && eligibleForIntimacy(u)", "if (false && visit && visit.until > ticks() && eligibleForIntimacy(u)");
 mutate("--mutate-unknown-age", "if (!Number.isFinite(u.data.age) || u.data.age < 18) return needJob(u)", "if (u.data.age < 18) return needJob(u)");
+mutate("--mutate-sleep", "const personal = Math.floor(unit01(seed(), 0x51ee91, u.id, 1) * 17) - 8;", "const personal = 0;");
+mutate("--mutate-sleep", "Math.floor(unit01(seed(), 0x51ee91, u.id, 2) * 9) * 15", "0");
+mutate("--mutate-fire-scan", "if (UF.FireSafety && UF.FireSafety.respond(u)) { decisionAt.set(u.id, t); continue; }", "// Mutant omits fire response for busy workers.");
 if (process.argv.includes("--mutate-adult")) {
     const start = source.indexOf("function eligibleForIntimacy(u)"), end = source.indexOf("function privatePairRoom", start);
     const guard = source.slice(start, end); assert(guard.includes("u.data.age < 18"), "adult mutation target missing");
@@ -21,7 +26,7 @@ if (process.argv.includes("--mutate-adult")) {
 let passed = 0, failed = 0;
 function check(name, fn) { try { fn(); passed++; console.log(`PASS family_integration.${name}`); } catch (e) { failed++; console.error(`FAIL family_integration.${name}: ${e.message}`); } }
 const plain = x => JSON.parse(JSON.stringify(x));
-function fixture() {
+function fixture(opts = {}) {
     const events = {}, errors = [], cells = new Map(), items = new Map(), jobList = [], handlers = {}, hSteps = [], gSteps = [], seenCandidates = [];
     let time = 100, nextUnit = 1, nextItem = 1, refuseBirth = false, standable = true, water = false, roomAvailable = true;
     const types = [
@@ -39,6 +44,7 @@ function fixture() {
         mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; },
         units() { return Object.values(this.state.units); }, unit(id) { return this.state.units[id] || null; },
         viewLevel: () => ({ x: 0, y: 0, z: 0 }), currentArea: () => ({ x: 0, y: 0 }), levelOfMapId: () => ({ x: 0, y: 0, z: 0 }),
+        levelKey: a => `${a.x},${a.y},${a.z || 0}`,
         peekArea(ax, ay, z = 0) {
             const grid = new Array(this.state.size * this.state.size).fill(0);
             for (const [k, type] of cells) if (k.startsWith(`${ax},${ay},${z}:`)) {
@@ -65,17 +71,20 @@ function fixture() {
         cancel(id, reason) { const j = jobList.find(j => j.id === id); if (j) { j.state = "failed"; j.reason = reason; } },
         standable: () => standable, isWaterAt: (a, x, y) => water && x === 10 && y === 12, describe: j => j.type };
     J.define("mate", { plan: () => ({ ok: true, stand: null }), apply: () => {}, work: 120 });
+    J.define("sleep", { plan: () => ({ ok: true, stand: null }), apply: () => {} });
     function Game_Map() {} Game_Map.prototype.update = function() {};
     function Scene_Boot() {} Scene_Boot.prototype.start = function() {};
     const ctx = { console: { log: console.log, error: (...xs) => errors.push(xs.join(" ")) }, Game_Map, Scene_Boot,
-        DataManager: { extractSaveContents: save => world.state = save.ufWorld }, $ufWorldCatalog: catalog, $ufTime: { hour: 12, day: 1, monthIndex: 0, year: 1 },
+        DataManager: { extractSaveContents: save => world.state = save.ufWorld }, $ufWorldCatalog: catalog, $ufTime: { hour: 12, minute: 0, day: 1, monthIndex: 0, year: 1 },
         UF: { World: world, Items: I, Objects: O, Jobs: J, Time: { ticks: () => time },
             Factions: { get: () => ({ id: 1, species: "human" }), playerId: () => 1 },
             History: { siteById: () => ({ id: 1, kind: "camp", x: 10, y: 10, faction: 1, area: { x: 0, y: 0 }, z: colony.z }), sites: () => [] },
             Ownership: { ownerOf: () => null, assignBed: () => null, bedOf: u => u.data.bed || null },
             Events: { on: (n, f) => (events[n] || (events[n] = [])).push(f), emit: (n, ...args) => (events[n] || []).forEach(f => f(...args)) },
             Goals: { planSteps: () => gSteps, choosePlan(u, cs) { seenCandidates.push(...cs); return cs.slice().sort((a, b) => (b.step.household ? 2 : b.step.goalOwner ? 1 : 0) - (a.step.household ? 2 : a.step.goalOwner ? 1 : 0)); } } } };
-    ctx.window = ctx; vm.createContext(ctx); vm.runInContext(source, ctx, { filename: "UF_Colonists.js" }); vm.runInContext(houseSource, ctx, { filename: "UF_Households.js" }); new ctx.Scene_Boot().start();
+    ctx.window = ctx; vm.createContext(ctx); vm.runInContext(source, ctx, { filename: "UF_Colonists.js" }); vm.runInContext(houseSource, ctx, { filename: "UF_Households.js" });
+    if (opts.ownership) vm.runInContext(ownershipSource, ctx, { filename: "UF_Ownership.js" });
+    new ctx.Scene_Boot().start();
     const C = ctx.UF.Colonists, H = ctx.UF.Households;
     H.planSteps = () => hSteps; // The actual household layout has its own source tests.
     H.roomForPair = (a, b) => roomAvailable && a && b ? { cells: [{ x: 10, y: 10 }, { x: 11, y: 10 }], spots: [{ x: 10, y: 10 }, { x: 11, y: 10 }] } : null;
@@ -227,5 +236,137 @@ check("unknown_age_never_selects_industry", () => {
     f.colony.plan.push({ id: "manufacture", build: "wall", cells: [[2, 0]] });
     const j = f.C.decide(a); assert(!j || ["move", "sleep", "talk", "drink", "eat", "fetch", "gather"].includes(j.type));
     assert(!f.jobList.some(j => ["build", "craft", "mine", "chop", "hunt", "mate"].includes(j.type)));
+});
+
+function atMinute(f, minute) { f.ctx.$ufTime.hour = Math.floor(minute / 60); f.ctx.$ufTime.minute = minute % 60; }
+function savedSchedule(u, bedMinute, durationMinutes) {
+    return u.data.sleepSchedule = { version: 1, bedMinute, durationMinutes, wakeMinute: (bedMinute + durationMinutes) % 1440, chronotype: "intermediate" };
+}
+check("personal_sleep_varies_with_identical_facets", () => {
+    const f = fixture(), people = Array.from({ length: 24 }, () => f.add());
+    for (const u of people) u.data.facets.discipline = 50;
+    const schedules = people.map(u => f.C.sleepSchedule(u));
+    assert(new Set(schedules.map(s => s.bedMinute)).size > 1, "same-facet adults need individual bedtimes");
+    assert(new Set(schedules.map(s => s.durationMinutes)).size > 1, "same-facet adults need individual durations");
+    for (const s of schedules) {
+        assert(s.bedMinute >= 0 && s.bedMinute < 1440 && s.bedMinute % 15 === 0);
+        assert(s.durationMinutes >= 420 && s.durationMinutes <= 540 && s.durationMinutes % 15 === 0);
+        assert.strictEqual(s.wakeMinute, (s.bedMinute + s.durationMinutes) % 1440);
+    }
+    for (let i = 0; i < 8; i++) {
+        const s = f.C.sleepSchedule(f.add(8)); assert(s.durationMinutes >= 540 && s.durationMinutes <= 660);
+    }
+});
+check("personal_sleep_seeded_and_persisted_on_reload", () => {
+    const a = fixture(), b = fixture(), u = a.add(), other = b.add();
+    const schedule = a.C.sleepSchedule(u), expected = plain(schedule);
+    assert.deepStrictEqual(plain(b.C.sleepSchedule(other)), expected, "same world and person repeat the schedule");
+    const save = plain(a.world.state); save.seed++;
+    save.units[u.id].data.facets.discipline = 100;
+    a.ctx.DataManager.extractSaveContents({ ufWorld: save });
+    const loaded = a.world.unit(u.id); assert.notStrictEqual(loaded, u);
+    assert.strictEqual(a.C.sleepSchedule(loaded), loaded.data.sleepSchedule, "valid saved schedule must be reused");
+    assert.deepStrictEqual(plain(a.C.sleepSchedule(loaded)), expected, "reload cannot reroll an existing schedule");
+});
+check("personal_sleep_same_clock_different_preference_and_job", () => {
+    const f = fixture(), people = Array.from({ length: 24 }, () => f.add());
+    const paired = people.map(u => ({ u, s: f.C.sleepSchedule(u) })).sort((a, b) => a.s.bedMinute - b.s.bedMinute);
+    const early = paired.find(x => x.s.bedMinute >= 18 * 60), late = paired[paired.length - 1];
+    assert(early && late.s.bedMinute > early.s.bedMinute, "fixture needs different night preferences");
+    atMinute(f, early.s.bedMinute);
+    early.u.data.needs.sleep = late.u.data.needs.sleep = 50;
+    assert.strictEqual(f.C.sleepingHours(early.u), true); assert.strictEqual(f.C.sleepingHours(late.u), false);
+    assert.strictEqual(f.C._internal.needJob(early.u).type, "sleep");
+    assert.strictEqual(f.C._internal.needJob(late.u), null, "another person's bedtime must not force sleep");
+});
+check("personal_sleep_minute_boundaries_cross_midnight", () => {
+    const f = fixture(), u = f.add(); savedSchedule(u, 23 * 60 + 45, 480);
+    assert.deepStrictEqual(plain(f.C.sleepWindow(u)), { from: 23.75, to: 7.75 });
+    for (const [minute, expected] of [[1424, false], [1425, true], [0, true], [15, true], [464, true], [465, false]]) {
+        atMinute(f, minute); assert.strictEqual(f.C.sleepingHours(u), expected, `minute ${minute}`);
+    }
+    atMinute(f, 15); assert.strictEqual(f.C.sleepFrames(u), 7.5 * 3600, "fractional hour before waking is retained");
+    atMinute(f, 464); assert.strictEqual(f.C.sleepFrames(u), 2 * 3600, "current minimum rest is two hours");
+    savedSchedule(u, 60, 360);
+    for (const [minute, expected] of [[59, false], [60, true], [419, true], [420, false], [1400, false]]) {
+        atMinute(f, minute); assert.strictEqual(f.C.sleepingHours(u), expected, `non-wrapping minute ${minute}`);
+    }
+});
+check("sleep_jobs_use_personal_duration_and_level", () => {
+    const f = fixture(), a = f.add(), b = f.add(25, "male", -1);
+    savedSchedule(a, 1320, 420); savedSchedule(b, 1320, 540); atMinute(f, 1380);
+    a.data.needs.sleep = b.data.needs.sleep = 90;
+    const ja = f.C._internal.needJob(a), jb = f.C._internal.needJob(b);
+    assert(ja && jb && ja.type === "sleep" && jb.type === "sleep");
+    assert.strictEqual(ja.params.frames, 6 * 3600); assert.strictEqual(jb.params.frames, 8 * 3600);
+    assert.strictEqual(ja.target.z, 0); assert.strictEqual(jb.target.z, -1);
+});
+check("sleep_preference_yields_to_needs_and_does_not_force_rested_people", () => {
+    for (const kind of ["thirst", "hunger", "exhaustion", "rested"]) {
+        const f = fixture(), u = f.add(); savedSchedule(u, 1320, 480); atMinute(f, 1380);
+        u.data.needs.sleep = 50;
+        if (kind === "thirst") { u.data.needs.thirst = 95; f.setWater(true); }
+        if (kind === "hunger") { u.data.needs.hunger = 95; f.give(u, "food"); }
+        if (kind === "exhaustion") { atMinute(f, 720); u.data.needs.sleep = 90; assert.strictEqual(f.C.sleepingHours(u), false); }
+        if (kind === "rested") u.data.needs.sleep = 40;
+        const j = f.C._internal.needJob(u);
+        if (kind === "rested") assert.strictEqual(j, null);
+        else assert(j && j.type === ({ thirst: "drink", hunger: "eat", exhaustion: "sleep" })[kind], kind);
+    }
+});
+check("preferred_sleep_does_not_cancel_explicit_order", () => {
+    const f = fixture(), u = f.add(); savedSchedule(u, 1320, 480); atMinute(f, 1380); u.data.needs.sleep = 50;
+    const order = f.C.order(u.id, { type: "move", target: { x: 13, y: 10 } }); f.C._internal.scan();
+    assert.strictEqual(f.J.of(u.id), order);
+    u.data.needs.thirst = 95; f.setWater(true); f.advance(); f.C._internal.scan();
+    assert.strictEqual(order.state, "failed"); assert.strictEqual(f.J.of(u.id).type, "drink");
+});
+check("ownership_sleep_delegates_personal_duration_on_each_level", () => {
+    for (const z of [0, -1]) {
+        const f = fixture({ ownership: true }); f.colony.z = z;
+        const a = f.add(), b = f.add(), Own = f.ctx.UF.Ownership;
+        savedSchedule(a, 1320, 420); savedSchedule(b, 1320, 540); atMinute(f, 1380);
+        for (const [u, x] of [[a, 14], [b, 15]]) {
+            f.block(x, 10, "bed"); assert(Own.assignBed(u, { area: u.area, z, x, y: 10 })); u.data.needs.sleep = 90;
+        }
+        const ja = Own.scheduleSleep(a), jb = Own.scheduleSleep(b);
+        assert(ja && jb); assert.strictEqual(ja.params.frames, 21600); assert.strictEqual(jb.params.frames, 28800);
+        assert.strictEqual(ja.target.z || 0, z); assert.strictEqual(jb.target.z || 0, z);
+        assert.strictEqual(ja.params.ownedBed, true); assert.strictEqual(jb.params.ownedBed, true);
+        f.J.cancel(ja.id, "test new request"); const custom = Own.scheduleSleep(a, { frames: 1234 });
+        assert.strictEqual(custom.params.frames, 1234, "an explicit caller duration remains authoritative");
+        f.J.cancel(custom.id, "test thirst precedence"); a.data.needs.thirst = 95;
+        assert.strictEqual(Own.scheduleSleep(a), null); assert.deepStrictEqual(plain(Own.errors), []); assert.deepStrictEqual(f.errors, []);
+    }
+});
+
+// Actual FireSafety decisions, with only engine path/fire storage doubled. This
+// tests the Colonists busy-worker hook rather than duplicating its decision logic.
+function installFireSafety(f) {
+    const fire = { area: { x: 0, y: 0 }, z: 0, x: 12, y: 11, key: "TEST_fire" };
+    f.world.findPath = (a, sx, sy, x, y) => [{ x, y }];
+    f.J.assign = (id, owner) => { const j = f.jobList.find(x => x.id === id); if (j) { j.assigned = owner; j.state = "work"; } return j; };
+    f.J.define("douse", { plan: () => ({ ok: true, stand: { area: fire.area, z: 0, x: 10, y: 12 } }) });
+    f.ctx.UF.Fire = {
+        count: () => 1, burningCells: () => [fire], isBurning: (a, x, y) => x === fire.x && y === fire.y,
+        douseJobs: () => f.J.list(j => j.type === "douse" && ["open", "travel", "work"].includes(j.state)),
+        standBeside: () => ({ area: fire.area, z: 0, x: 11, y: 11 }),
+        douse: (a, x, y, opts) => f.J.create({ type: "douse", state: "open", assigned: null, target: { area: { x: a.x, y: a.y }, z: a.z, x, y }, params: { faction: opts.faction } })
+    };
+    vm.runInContext(safetySource, f.ctx, { filename: "UF_FireSafety.js" });
+}
+check("fire_scan_preempts_existing_routine_work", () => {
+    const f = fixture(), u = f.add(); installFireSafety(f);
+    const work = f.J.create({ type: "build", owner: u.id, target: { area: u.area, z: 0, x: 14, y: 10 } });
+    f.C._internal.scan(); assert.strictEqual(work.state, "failed");
+    const next = f.J.of(u.id); assert(next && next.type === "douse" && next.params.fireSafety === true); assert.deepStrictEqual(f.errors, []);
+});
+check("fire_scan_preserves_explicit_order_and_critical_needs", () => {
+    const f = fixture(), u = f.add(); installFireSafety(f);
+    const order = f.C.order(u.id, { type: "move", target: { x: 13, y: 10 } }); f.C._internal.scan();
+    assert.strictEqual(f.J.of(u.id), order); assert(!f.jobList.some(j => j.type === "douse"));
+    u.data.needs.thirst = 95; f.setWater(true); f.advance(); f.C._internal.scan();
+    assert.strictEqual(order.state, "failed"); assert.strictEqual(f.J.of(u.id).type, "drink");
+    assert(!f.jobList.some(j => j.type === "douse")); assert.deepStrictEqual(f.errors, []);
 });
 console.log(`RESULT: ${passed} passed, ${failed} failed`); process.exitCode = failed ? 1 : 0;

@@ -14,6 +14,14 @@ The user's explicit transfer authorizes the family/housing/planning hooks in thi
 
 Focused actual-source checks live in `tools/test_family_integration.js`; the snapshot-only `tools/fixtures/UF_SocietyRuntime.js` exercises real construction/Jobs. Its arenas and material supply are explicitly prepared test setup, not proof of natural terrain abundance or excavation. Editor F5/F8 acceptance remains separate.
 
+## Individual sleep preferences (2026-09-19)
+
+`sleepSchedule(unit)` creates/returns the person's saved `{version:1,bedMinute,wakeMinute,durationMinutes,chronotype}` on `unit.data`. Seed/identity and discipline set quarter-hour bedtime variation; adults prefer 7-9 hours, developing people 9-11. `sleepWindow`, `sleepingHours` and `sleepFrames` expose the actual minute-aware planner timing. Existing valid schedules are retained through save/load; old saves initialize lazily. Moderate fatigue follows the personal window; exhaustion outside it requests a shorter recovery sleep. Hunger/thirst and danger retain their other guards. The ownership-bed scheduler uses the same duration. Bedtime does not automatically cancel explicit orders or force a rested person to sleep.
+
+Observed actual-source integration checks: `tools/test_family_integration.js` passed 32/32; `--mutate-sleep` failed 2 checks (30/2), and `--mutate-fire-scan` failed the real busy-worker response check (31/1). Snapshot `sleep_schedules_20260919_a` with `tools/fixtures/UF_SleepRuntime.js` passed 10/10. At 20:00, a person preferring 20:00-03:45 selected a 27,900-frame sleep and physically reached its owned bed on +1; a person preferring 23:45-07:00 did not select sleep. Twenty-four adults with identical facets had 15 bedtime values and 8 durations. Daytime exhaustion and RMMZ save extraction also passed.
+
+Opened `C:\Users\snewt\AppData\Local\Temp\uf_snapshots\sleep_schedules_20260919_a\test_output\sleep_schedules.different_sleep_choices.png`: two characters on a prepared supported platform, with the early sleeper visually upright over its bed and the other away from its empty bed. This proves no prone sleeping animation; the fixture stages beds/floor, not housing construction. No editor F5/F8 acceptance. Valid childhood schedules currently persist into adulthood, and the two-hour minimum recovery can extend past a preferred waking time. No automatic night-watch roster or seasonal adaptation is claimed.
+
 ## Five-level settlement integration (2026-09-19)
 
 The following contract supersedes the single-home scope in the historical description below. Every inhabited, non-ruined founding site has a separate saved settlement plan. The player's people remain `kind: "colonist"`, `ai: "colonist"`; other factions keep `kind: "person"` and their faction identity, with `ai: "settlement"`. An internal settler loop runs needs, decisions, job callbacks, pregnancy and aging for both groups across all five levels. Changing the viewed map does not gate that loop or stockpile adoption. NPCs do not take the player's open designations and cannot receive `Colonists.order` commands.
@@ -99,6 +107,7 @@ Screenshots: `site_home` (the home site at zoom ⅔ before anything moves), `col
 None, aliases only (`Game_Map.prototype.update`, `Scene_Boot.prototype.start`).
 
 ## Known limits
+- 2026-09-19 addition: when `UF_FireSafety` is enabled, the scan can replace routine work with a preflighted local douse job, and idle planning clears unowned natural fuel from a hearth's four neighbors. New hearth construction waits for physical clearance; unsafe neighboring structures are not demolished. Successful dousing counts as a physical fire-state change. `Households.structures` protects annex materials and exempts annex residents from the camp leash.
 - The contract's `tools_and_clothes` window is 4 real minutes; the harness watchdog is 180 s, so the suite gives it 85 s at ×8 and reports how far it got (both runs reached it in 21–60 s).
 - The tier-0 sheets (`$Adam`/`$Eve`) are the unclothed pair placeholders, so an established human town starts with unclothed colonists until they weave wraps. Other species have no tier sheets and never change image.
 - Colonists take open designations in their area and change the world while other suites run in the same live world: the `jobs` suite lost a hare's meat to a hungry colonist and its "far" designation to another (3 of its checks); `UF.Colonists.setEnabled(false)` is the switch for that.

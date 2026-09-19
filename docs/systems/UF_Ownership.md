@@ -31,6 +31,10 @@ Ground colonist sleep requests retain the existing `Colonists.order` path. That 
 
 ## Events and hooks
 
+Sleep duration follow-up (2026-09-19): `scheduleSleep` now asks `UF.Colonists.sleepFrames(unit)` when available, so an assigned bed uses that individual's persisted schedule rather than a universal waking hour. The older catalog-hour fallback remains for legacy Colonists implementations. Eligibility, urgent-need/combat checks, explicit caller `frames`, level-aware assignment and preflight remain unchanged.
+
+Follow-up evidence: `tools/test_family_integration.js` passed 32/32 with actual Ownership delegation; `tools/test_z_ownership.js` still passed 16/16. Snapshot `sleep_schedules_20260919_a` passed 10/10, including physical arrival at the assigned +1 bed, different same-clock choices and RMMZ save extraction. Its opened screenshot shows the sleeper upright over the bed, not a demonstrated prone animation. See `UF_Colonists.md` for the saved preferences and remaining timing limitations. This does not supersede the editor F5/F8 acceptance gate.
+
 Emits `ownership:changed(key,newEntry,oldEntry)`, `ownership:bedAssigned(unit,bed)`, and `ownership:sleepOrdered(unit,job,bed)`.
 
 Listens to `world:created`, `colonists:ready`, `world:unitAdded`, `world:unitRemoved`, `objects:changed` (Ground), and `objects:levelChanged` (other levels). Destroying a bed clears only its level's claim and assignment. Aliases Game_Map update for scheduling, DataManager save extraction for registry initialization, Scene_Boot start for setup, and the public Look API for owner labels.

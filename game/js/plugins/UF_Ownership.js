@@ -358,7 +358,9 @@
         return "sleep";
     }
 
-    function sleepFrames() {
+    function sleepFrames(unit) {
+        const col = Colonists();
+        if (col && typeof col.sleepFrames === "function") return col.sleepFrames(unit);
         const c = catalog();
         const hours = (c && c.colony && c.colony.sleepHours) || [22, 6];
         const wake = hours[1] | 0;
@@ -390,7 +392,7 @@
         if (!bed || !supported(unit) || !sameArea(unit, bed)) return null;
         const current = J.of(unit.id);
         if (current && current.type === "sleep" && sameArea(current.target, bed) && current.target.x === bed.x && current.target.y === bed.y) return current;
-        const frames = o.frames > 0 ? o.frames | 0 : sleepFrames();
+        const frames = o.frames > 0 ? o.frames | 0 : sleepFrames(unit);
         if (!preflightSleep(unit, bed, frames)) return null;
         let job;
         const colonist = C && typeof C.isColonist === "function" && C.isColonist(unit);
