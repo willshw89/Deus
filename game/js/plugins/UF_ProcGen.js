@@ -1,34 +1,28 @@
 //=============================================================================
-// RPG Maker MZ - UF: glade embark setup
+// RPG Maker MZ - UF: glade embark setup (retired)
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [UF ProcGen] Starts the colony (Adam and Eve) when the glade is loaded. World generation lives in UF_WorldGen.
+ * @plugindesc [UF ProcGen] Retired: the start is the player's faction's home site (UF_History) and its people are the colonists (UF_Colonists). World generation lives in UF_WorldGen.
  * @author UF project
  *
  * @help
- * When a map whose note contains <glade> is loaded (the start area built by
- * UF_World from Map002), make sure the starting colonists exist.
+ * Kept only so older plugin lists and callers of
+ * Scene_Map.prototype.populateGladeEmbark keep working: the method exists and
+ * does nothing (2026-09-18). The colonists are made by UF_Colonists on
+ * world:created from the people UF_History spawned at the home site.
  *
- * World generation (terrain, the river, trees, rocks) moved to
- * UF_WorldGen.js on 2026-09-18, driven by data/UF_WorldCatalog.json.
- * The earlier df_wilderness_generator is in git history (commit a09d3fd).
+ * World generation (terrain, rivers, plants, sites) moved to UF_WorldGen.js
+ * on 2026-09-18, driven by data/UF_WorldCatalog.json. The earlier
+ * df_wilderness_generator is in git history (commit a09d3fd).
+ *
+ * Replaced core methods: none (aliases only).
  */
 
 (() => {
     "use strict";
 
-    const _Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
-    Scene_Map.prototype.onMapLoaded = function() {
-        _Scene_Map_onMapLoaded.call(this);
-        this.populateGladeEmbark();
-    };
-
-    Scene_Map.prototype.populateGladeEmbark = function() {
-        if (!$dataMap || (!$dataMap.note.includes("<glade>") && $gameMap.mapId() !== 2)) return;
-        if (window.$colonyManager && window.$colonyManager.colonists.length === 0) {
-            window.$colonyManager.initGladeColonists();
-        }
-    };
+    // A no-op: nothing is populated at map load any more (UF_Colonists owns the colony).
+    Scene_Map.prototype.populateGladeEmbark = function() {};
 })();

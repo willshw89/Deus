@@ -1,0 +1,77 @@
+# UF_Colonists
+The colonists are the people of the player's faction at its home site (the site UF_History placed at the map centre): on `world:created` every `person` unit of that faction at that site becomes a colonist with a name, gender, seeded facets and skills, needs, an empty pack and (humans) clothing tier sheets. Each colonist decides its own work when idle: needs first (drink, eat or forage/hunt, sleep, talk, a walk), then open designations, then the society plan from the catalog (build, craft, stock steps; the culture picks the plan variant, the wall piece and the priorities), else exploring and strolling. Every job is a UF_Jobs job, so every act is a physical interaction. Status: built 2026-09-18, checks: `colonists` (13 checks; on the finished code all PASS on 4 snapshot runs of 4 seeds 2026-09-18: dwarf hold ×2, human town with 10 colonists, elf village; earlier runs found and fixed test timing and hunt/cook ordering problems; `smoke` on the same kind of snapshot 14 passed, 0 failed).
+
+**Owner:** Claude Code (colonists agent) · **Files:** `game/js/plugins/UF_Colonists.js`; also edited `UF_ColonyOverseer.js` (see `docs/systems/UF_ColonyOverseer.md`) and `UF_ProcGen.js` (`populateGladeEmbark` is a no-op) · **Load order:** after `UF_Jobs` and `UF_History`, before `UF_Wildlife`, `UF_Stance` and `UF_Test` (WORLD_ARCHITECTURE §5). Not yet in the real `game/js/plugins.js`; tests ran with `--plugins UF_Tiles,UF_Objects,UF_Items,UF_Jobs,UF_Colonists,UF_Wildlife,UF_Stance`. Contract: `docs/design/WORLD_ARCHITECTURE.md` §2.4, §2.6, §2.7, §5.6.
+
+## API (`UF.Colonists`)
+- `list()` → the colonist units (`data.kind === "colonist"`); `get(unitId)` → the unit or `null`; `isColonist(unit)`.
+- `state()` → `UF.World.state.colony` (below) or `null`; `faction()` → the player's faction record; `site()` → `{ x, y, id, name, radius, area }` of the home site; `culture()` → the `catalog.cultures[species]` entry of the player's faction (`{ plan, wall, priorities, facetBias }`).
+- `describe(unitOrId)` → `{ id, name, gender, mood, moodScore, job (UF.Jobs.describe text or "Idle"), jobType, needs: {hunger, thirst, sleep, social, nature} (rounded), tier, tool (item name|null), clothes (item name|null), faction, site, thought (latest text), facets, skills, plan (text) }`.
+- `order(unitId, { type, target?: {x, y, area?}, params? }, onArrival?)` → the job or `null`. Cancels the colonist's current job ("ordered elsewhere") and creates the new one with `owner = unitId`; `onArrival` runs when it's done.
+- `addThought(unit, text, strength)` → the thought `{ text, strength, hour, tick }`; keeps 8, moves `moodScore` (−100..100) and `mood` (Ecstatic ≥ 50, Happy ≥ 25, Content ≥ 10, Fine ≥ −10, Unhappy ≥ −25, Stressed ≥ −50, else Miserable); emits `colonists:thought`.
+- `setTier(unit, tier)` → bool. Sets `data.tier`; when `data.tiers` exists, `image.characterName = tiers[min(tier, last)]` and `UF.World.refreshUnitImage`; emits `colonists:tier`. UF_Jobs' `equip` calls it for clothing.
+- `planStatus()` → `[{ id, done, detail }]` evaluated from the world now (and written back to `state.colony.plan[i].done`); `planText()` → "Hearth: built · Knives: 1/4 · Shelter: 2/13 · …".
+- `decide(unit)` → the job chosen now or `null` (what the loop does for an idle colonist); `tickNeeds()` (one needs tick); `setup(state)` (what `world:created` does); `setEnabled(on)` / `isEnabled()`: switches the decision loop off (needs still tick, running jobs finish) so another system's test can keep the colonists out of its arena.
+- Pure helpers for tests: `nameFor(seed, unitId, gender, taken?)`, `genderFor(seed, unitId)`, `facetsFor(seed, unitId, bias)`, `skillsFor(seed, unitId)`; `stockpiles()`; `doneLog()` (this session's finished colonist jobs: `{ id, unit, type, target, physical, plan, recipe }`).
+
+### The decision (when a colonist has no job, at most once per 60 ticks; a `thirst`/`hunger` need 25 above its threshold interrupts a non-need job, at most once per 600 ticks)
+1. **Needs** (`catalog.colony.thresholds`): thirst → `drink` at the nearest water cell with a standable land neighbour (spiral to 60 cells). Hunger (or a meal hour with hunger ≥ 30 and food in the larder) → food: cooked/plant food in the pack → `eat`; raw food in the pack with a fire within 40 → `craft` the cooking recipe, else eat it raw; a brave colonist (bravery ≥ 60, or a culture with hunt priority > 1) with prey within 15 cells → `hunt`; food in the larder, then on the ground within 30 → `fetch` (raw, with a fire) or `eat` there; else `gather` the nearest object whose action yields food (60 cells); else `hunt` prey within `huntRadius` (predators only when brave). Sleep ≥ threshold, or sleeping hours (`sleepHours` shifted up to ±2 h by discipline) with sleep > 40 → `sleep` on a free `bed` object near the site, else beside the hearth, else at the site centre (`frames` = hours until the wake hour × 3600, 4–10 h). Social ≥ threshold (25 in the evening, 19–22 h) → `talk` with an idle colonist within 40. Nature ≥ threshold → `move` next to water or a tree within 20 (nature −40 on arrival).
+2. **Open designations**: `UF.Jobs.take` of the best open job in the area by `priority[type] × (1 + skill/20) × (1 + job.priority) / (1 + distance/20)`.
+3. **The society plan** (`state.colony.plan`, the first 3 undone steps; the culture's `priorities` of the step's next job type pick among them, ties keep the plan's order; a lazy colonist, chance `(100 − industriousness)/400` per decision, skips this and strolls):
+   - `build` step: per cell relative to the site centre: a cell already holding the object is done; a cell holding another building or ruin piece, or water, is skipped; furniture (passable objects) and the site kind's own `center` object count as done when the site already holds as many as the step needs (so an established hearth and beds are done at once; walls are cell by cell). A tree or boulder on the cell is worked away first (its first action); when the `build.items` lie on the cell → `build`; else the first missing item: carried → `haul` it there; on the ground within 80 (not on another build cell) → `haul`; else the nearest object whose action yields it (60 cells; the site's own standing pieces are never quarried) → that action; else prey that yields it → `hunt`.
+   - `craft` step: `each` = every colonist holds the output (equip steps: wears it, or clothes of a higher tier); `count` = the colony holds that many (packs + ground within the site). Inputs: fetch the nearest ground item, else the yielding object's action, else prey; then `craft` (recipes with `at` stand by the workplace: UF_Jobs); with `equip: true` an `equip` job follows the craft. Before a plan job the best carried tool for that job type is equipped (an `equip` job).
+   - `stock` step: needs a stockpile whose `stores` include the step's first tag (the larder); carried food → cook if raw with a fire, else `haul` to the larder; food on the ground (not in the larder) → `fetch` raw to cook, else `haul`; else the nearer of the nearest food plant (`gather`) and, with `hunt: true`, the nearest prey (distance divided by the hunt priority and by 1.5 with a knife).
+   - Someone else's active job on the same target (or the same recipe of the same step, the same item, the same prey) is not taken; a job that fails at creation isn't retried on that target for 900 ticks.
+   - **Walled sites:** when the target is on the other side of the home site's ring, a `move` to the nearest opening in the ring comes first (`params.via`), then the same decision is taken again from there.
+4. **Idle**: a seeded roll: explore (`move` to a walkable cell within 30 of the site, chance `curiosity/2`), stroll within 12 of the site (chance 0.2), or a thought.
+
+Home: cooking happens at the colony's own hearth (the fire object at the home site), never at another faction's; a colonist farther than 40 cells from it walks home before a cooking craft, and any colonist more than 45 cells from the site (after a long chase) walks home before anything but a need (`params.home`).
+
+Needs tick every 60 ticks by `catalog.colony.needs` (a sleeping colonist's sleep need falls instead). Skills: `jobsDone` counts per job type and per skill; one skill point per five jobs of the kind (`chop` woodcutting; `gather`/`pick` gathering; `quarry`/`mine` stonework; `build` building; `haul`/`fetch` hauling; `hunt` hunting; `craft` = the recipe's `skill`, else crafting), cap 20. Thoughts: drinking +8, eating +8, sleeping +10, talking +8, a kill +8, a building finished +10, clothes finished +6, the first woven wrap worn +15, a plan step done +12, a walk in nature +8; hunger > 75 −5, thirst > 75 −6, sleep > 85 −7, social > 80 −5, nature > 80 −3 (seeded chances per needs tick); nothing to eat −4.
+
+## State it saves
+- `UF.World.state.colony = { version, factionId, siteId, site: {x, y}, area: {x, y}, radius, plan: [{ ...step, done: bool | [cellIndex…], celebrated? }], stockpiles: [{ x, y, stores: [tags], step? }], log: [{ tick, text }], adopted }`. `plan` is a copy of `catalog.colony.plan` (or `colony.plans[culture.plan]`) with `wall_wood`/`wall_stone` replaced by the culture's `wall`. `stockpiles` gets the site's own stockpiles once the map is up (the plan's `stores` steps take the nearest ones) and every stockpile the colonists build.
+- `unit.data` of a colonist: `kind: "colonist"`, `ai: "colonist"`, `faction` (the player's faction id), `species`, `sight: 8`, `gender`, `tier`, `tiers?` (humans: `catalog.start.pair[gender].tiers`), `facets {name: 0-100}`, `skills {name: 0-20}`, `needs {hunger, thirst, sleep, social, nature}`, `inventory`, `equipment {tool, clothes}`, `workRate: 1`, `thoughts`, `moodScore`, `mood`, `jobsDone`, `home`, `site`.
+- Nothing else: decision timers, the avoid list and the done log are caches.
+
+## Events (UF.Events)
+- Emits `colonists:ready(colony, units)` (after the conversion), `colonists:thought(unit, thought)`, `colonists:tier(unit, tier)`.
+- Listens: `world:created` (hooked in `Scene_Boot.start` before the original runs, so after every plugin's load-time listener: UF_Factions, UF_History, UF_Wildlife), `jobs:done` (thoughts, skills, stockpile registration, equip after an equip craft, the Overseer's arrival callbacks), `jobs:failed`.
+
+## Keys and mouse
+None here (UF_ColonyOverseer selects and orders; UF_Interact designates).
+
+## Assets used
+- Human colonists: `$Adam`, `$Eve` (tier 0, original placeholders), `$U7_Adam_T1..T3`, `$U7_Eve_T1..T3` (tiers 1–3, U7 stand-ins; from `catalog.start.pair[].tiers`). Other species keep their `catalog.people[species]` sheets (`$U7_Townsman`, `$U7_Ranger`, `$U7_Guard`, `$U7_Goblin`, `$U7_Skeleton`: U7 stand-ins) with no tier change.
+- Tests only: `$U7_Hare` (the test prey, U7 stand-in). Everything the colonists touch is catalog content drawn by UF_Objects / UF_Items.
+
+## Checks (suite `colonists`, default; ~35 s real, the plan window at ×8)
+| Check | FAILs when |
+|---|---|
+| `colony_is_a_faction` | `state.factions.playerId` isn't `UF.Factions.player()`, its home site is missing, ruined, or > 8 cells from the map centre, the view is > 6 cells from it, or `state.colony` is missing |
+| `people_became_colonists` | fewer than 2 colonists; one lacks a name, gender, all facets, needs, `ai` "colonist" or the player's faction; a colonist of another faction exists; an unconverted person of ours stands at the site; generator start events 1/2 exist; a banned word in a name; a human colonist isn't on its tier-0 sheet |
+| `state_in_save` | a JsonEx round-trip of `UF.World.state` loses `needs`, `facets`, `thoughts` or `equipment` of a colonist, or `colony`; or `makeSaveContents().ufWorld.colony` isn't the live colony |
+| `plan_reads_the_site` | the plan's fire step isn't done, the site centre holds no fire object, existing beds don't satisfy the beds step, or the plan has a different length than the template |
+| `thirst_makes_drink_job` | thirst 90 on colonist A doesn't produce a `drink` job within 8 s whose target is a water cell, or A doesn't close in on it over 60 frames |
+| `hunger_makes_food_job` | hunger 90 on colonist B doesn't produce an eat/gather/hunt/fetch/craft/pick job within 8 s |
+| `plan_starts_immediately` | at ×8 no plan job (chop/gather/pick/quarry/haul/build/fetch/craft with a step id) finishes within 60 s, or no object/item change fires |
+| `tools_and_clothes` | at the end of the ×8 stretch (85 s + the hunt) fewer than half the colonists hold a stone knife or nobody wears a wrap (tier ≥ 1; species without tiers: `equipment.clothes`) |
+| `hunts` | with a test hare 12 cells from the bravest colonist (bravery raised to 60, hunger 70, its carried food removed) no `hunt` on that hare finishes, the hare unit remains, no raw meat lands, or no `cook_meat` craft follows |
+| `every_job_is_physical` | a finished colonist job had no target cell or changed nothing (object, item, unit, need, or the unit's position) |
+| `order_replaces_job` | `order(move)` doesn't cancel the current job, isn't owned by the colonist, or isn't its active job |
+| `personality_differs` | fewer than 3 facets differ between two colonists, or between seeds |
+| `no_errors` | an uncaught error during the suite |
+Screenshots: `site_home` (the home site at zoom ⅔ before anything moves), `colonists_working` (zoom 1, centred on a working colonist at ×8).
+
+## Replaced core methods
+None, aliases only (`Game_Map.prototype.update`, `Scene_Boot.prototype.start`).
+
+## Known limits
+- The contract's `tools_and_clothes` window is 4 real minutes; the harness watchdog is 180 s, so the suite gives it 85 s at ×8 and reports how far it got (both runs reached it in 21–60 s).
+- The tier-0 sheets (`$Adam`/`$Eve`) are the unclothed pair placeholders, so an established human town starts with unclothed colonists until they weave wraps. Other species have no tier sheets and never change image.
+- Colonists take open designations in their area and change the world while other suites run in the same live world: the `jobs` suite lost a hare's meat to a hungry colonist and its "far" designation to another (3 of its checks); `UF.Colonists.setEnabled(false)` is the switch for that.
+- `via` moves solve the home site's ring; other enclosures rely on the 200-node pathfinder and UF_Jobs' two-stall failure.
+- The `hunts` check credits the hunter's first hunt of any prey (the kit herd or a passing herd is often nearer than the test hare) and removes the hunter's carried food and nearby raw food as setup; it says so in its detail.
+- UF_Test's `waitUntil` keeps a timed-out tester in its frame loop; the suite guards every wait with a liveness flag (`until`) so a stale closure can't reassign the job it watched.
+- Food value isn't weighed (a hare and a deer count the same); no cooking of fish unless the catalog's `cook_fish` matches (it does, by input type).
+- Skills change nothing yet except the designation score and the plan ordering weight (job speed is UF_Jobs' `workRate` × tools).
