@@ -1,0 +1,39 @@
+{
+  "id": "fiber_wrap_layer",
+  "name": "Woven Grass Wrap Layer",
+  "category": "equipment",
+  "layer": "torso",
+  "slot": "torso",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "idle": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "behind": []
+}

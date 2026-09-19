@@ -1,0 +1,34 @@
+{
+  "id": "UF_fx_blood",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "splat": [
+      0
+    ],
+    "smear": [
+      1
+    ],
+    "drops": [
+      2
+    ]
+  },
+  "layer": "under"
+}
