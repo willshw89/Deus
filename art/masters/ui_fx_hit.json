@@ -1,7 +1,5 @@
 {
-  "id": "stump",
-  "name": "Tree Stump",
-  "category": "Flora",
+  "id": "ui_fx_hit",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -18,6 +16,13 @@
   "animations": {
     "stand": [
       0
+    ],
+    "hit": [
+      0,
+      1,
+      2
     ]
-  }
+  },
+  "layer": "fx",
+  "frameMs": 80
 }
