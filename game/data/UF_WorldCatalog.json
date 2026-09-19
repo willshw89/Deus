@@ -3,7 +3,7 @@
   "about": "World generation and world content catalog. Read by UF_WorldGen, UF_Tiles, UF_Objects, UF_Items, UF_Jobs, UF_Wildlife, UF_History, UF_Colonists, UF_Factions, UF_Stance, UF_Look. Art and content are added here without touching code: docs/design/WORLD_ARCHITECTURE.md (schema), docs/handoffs/HANDOFF_world_generation.md (how to add an object), docs/ASSET_INVENTORY.md (every asset in use and its status). The world is one surface layer (the underground layer was removed 2026-09-18). Owner: Claude Code; Gemini may edit objects, items.types, wildlife.species and people only.",
   "tilesets": {
     "about": "Runtime tileset built by UF_Tiles (ID 91). A2 = ground kinds drawn in code (UF_GenGround_A2, same order as groundKinds). Flags are copied from the 'base' editor tileset. Replace a name here when art arrives (AR-100/AR-101).",
-    "surface": { "base": 2, "A1": "Outside_A1", "A2": "UF_GenGround_A2", "A5": "Outside_A5", "B": "Outside_B", "C": "Outside_C" }
+    "surface": { "base": 2, "A1": "Outside_A1", "A2": "UF_GenGround_A2", "B": "Outside_B", "C": "Outside_C" }
   },
   "groundKinds": [
     { "id": "meadow", "name": "Meadow", "pattern": "grass", "colors": ["#5a9a3c", "#467a2e", "#74b54c", "#c8d86a"], "edge": "#3b6326" },
