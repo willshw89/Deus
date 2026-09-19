@@ -65,6 +65,7 @@ The build order is `docs/design/DF_MECHANICS.md` §14:
 9. U7-style combat
 10. Societies for every faction (V51) and ranks (V52): the colonist simulation per faction site with an off-screen tick, `data.rank` / `data.superior`, orders flowing down (WORLD_ARCHITECTURE §2.10).
 11. d20 stats for every character at generation (V53, with the V47 combat step): `data.stats` rolled from the seed, species and age shifts, `UF.D20` checks, shown on the sheet.
+12. The settling run (V54, after item 10): 100 years of the coarse society tick on the real map before the player takes control, within the generation budget (WORLD_ARCHITECTURE §2.10).
 Side items: projection fix + sprite anchors (K3), look cursor, removing the old autotest (K2).
 Each step ships with checks and a handoff report for Gemini (art waves: `docs/handoffs/HANDOFF_df_art.md`).
 
