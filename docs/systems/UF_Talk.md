@@ -1,115 +1,239 @@
 # UF_Talk
-Conversations with anyone (VISION V25 and V62; built 2026-09-19, reworked the same day for V62 as revised at 10:12): right-click a person (your colonist or a stranger, never an animal) and choose **Talk to <name>**. The conversation uses the classic portrait-and-keywords layout: the person's portrait with their words beside it, **shown a page at a time**; **your portrait beside the keyword list**; and **nearby companions chiming in** with their own portrait and line. Keywords: always `name`, `job`, `bye`, then topics the world has something on (`family`, `home`, `mood`, `others`, `news`); every person, faction or place a line names becomes a new keyword. Nothing is scripted: each line is a catalog template (`talk`) filled with names and facts read from the simulation. Strangers greet by their faction's relation to yours (friendly, wary); hostile ones refuse. The world pauses while the talk is open.
-Status: V62 rework 2026-09-19 (review finding M1), checks: `talk` (14 checks, on request: `--suite talk`). On a snapshot of 2026-09-19 with the working tree's plugins and the catalog's new `talk.chime` and `talk.words.more`, the suite passed 14/14 (an elf player faction), and again 14/14 on a fresh snapshot of `game/` after the copy-back (elves again), with `smoke` 13/13 and `fire` 10/10 on their own fresh snapshots. A provoke run with `TestProvoke` = `player_portrait,pages_not_cut,companion_chimes` failed exactly those three checks, each for its own reason (see Checks). The earlier 11 checks passed 11/11 on the unmodified plugin before the rework, and 11/11 after it. Registered in the real `game/js/plugins.js` (status true) since before the rework, so Playtest loads it. Not checked: the editor's Playtest (F5) and its console (F8).
+Conversations with anyone, laid out like the old portrait-and-keyword conversations (VISION V25, V62 as revised 2026-09-19: "I dont like the current talk system. I want talk to be modeled after U7"). Right-click a person (your colonist or a stranger, never an animal) and choose **Talk to <name>**. The world pauses and the talk is written straight onto the screen over the map. There is no dialog window:
+- **Top left:** the other person's portrait (96×96 frame). Beside it, what they say, **a page at a time** (4 lines), over a faint darkening of the map behind the text only. A small "more" mark shows while pages remain; a click, Enter or Space turns the page.
+- **Lower left:** your portrait (the colonist selected in the Overseer, else your band's leader, else your nearest grown person; a shield in your colours when nobody can). Beside it, your **keywords** written as words you can click: `name`, `job`, `bye` first, then every topic the other person has mentioned (their partner, leader, children, a place, a faction, the news, a need, their family, home, mood). The pointed-at keyword is highlighted. Asked keywords are dimmed but can still be clicked.
+- **Middle left:** a colonist of yours standing within 4 cells may **chime in** with their own portrait and line. They always do when the answer concerns them. Otherwise it happens now and then, seeded.
+- `bye` ends the talk: the farewell floats over the person's head and the world runs again. **Hostile people refuse:** their refusal floats over their head (through `UF.Speech.say` when UF_Speech is loaded) and no talk opens. Babies babble over their heads.
 
-**File:** `game/js/plugins/UF_Talk.js` · **Load order:** after `UF_World`, `UF_Factions`, `UF_History`, `UF_Jobs`, `UF_Colonists`, `UF_Stance`, `UF_TimeSpeed`, `UF_Look`, `UF_Interact` (all optional except `UF_World` and `UF_Interact`), before `UF_Test`. **Catalog:** `talk` (top-level key of `data/UF_WorldCatalog.json`).
+Nothing is scripted. Every line is a catalog template (`talk.lines`, then the older `talk` sections) filled with names and facts read from the simulation.
+
+**History (all 2026-09-19):**
+- Morning: built as one bottom window with a portrait, the line and a grid of keyword buttons.
+- About 10:40: another run reworked it into three windows at the bottom (review finding M1). That rework added whoever speaks for you (`voiceOf`), content-based companion lines (`talk.chime`) and the `more` word (`talk.words.more`).
+- About 11:00: rebuilt on the U7 model in screen space: sprites over the map, no windows. It keeps that run's voice rule, its companion lines and its `more` word, adds seeded companion remarks (`talk.lines.chime`), `[topic]` words that grow the keyword list, the `need` topic, trade and title, and over-head refusals and farewells. The suite was rewritten (13 checks).
+
+**Status (2026-09-19):**
+- Suite `talk` on request, 13 checks. It passed 13/13 on a snapshot of `game/` with this file and `talk.lines`. It passed 12/12 before the `voice` check was added: on a snapshot with UF_Speech registered (the refusal went through `UF.Speech.say`), and on a fresh snapshot of `game/` after the first copy-back.
+- A run with `TestProvoke` = `all` failed 13/13, each check for its own reason (see Checks).
+- With UF_Talk: `smoke` 13/13 and `overseer` 6/6. `look` was 17/21, with the same 4 failures in a control run of an unmodified snapshot (`cell_lines`, `asset_line_names_status`, `hunt_and_haul_options`, `saved`).
+- Registered in the real `game/js/plugins.js` (status true), so Playtest loads it.
+- Not checked: the editor's Playtest (F5) and its console (F8).
+
+**File:** `game/js/plugins/UF_Talk.js` · **Load order:** after `UF_World` and `UF_Interact` (required); `UF_Factions`, `UF_History`, `UF_Jobs`, `UF_Colonists`, `UF_Stance`, `UF_TimeSpeed`, `UF_Camera`, `UF_Look`, `UF_Sheet`, `UF_Speech` are optional and read at runtime. Before `UF_Test`. **Catalog:** `talk` (top-level key of `data/UF_WorldCatalog.json`).
+
+## Layout (screen pixels, 816 × 624)
+| Part | Where | What |
+|---|---|---|
+| The person's portrait | (16, 16), 96×96 | Face-sheet cell scaled from 144 to 92 inside a 2 px frame (`#b89a5e`), or the code-drawn `UF_GenFace` |
+| Their words | x 126, top at 16; column up to 384 px wide (it ends left of the clock and speed controls at the top right) | Serif font (`Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif`), 20 px, 25 px lines, 4 lines a page, `#f4ecd8` with a dark outline. Behind the page only, a darkening sized to the text: 4 nested rectangles 2 px apart of `rgba(8,6,4,0.13)`, about 43% dark in the middle and 13% at the edge, with no border line. The "more" mark (the catalog word `talk.words.more`, italic, and a small down-pointing triangle, gold, blinking) sits under the bottom right of a page with more after it. |
+| A companion | portrait at (16, 142), words beside it at x 126 | Appears with the last page of the answer it follows. Hidden again on the next question. |
+| Your portrait | (16, 512), 96×96; moves up when the keywords need more than 3 rows | The voice's face, or `UF_GenEmblem` |
+| Your keywords | beside your portrait from x 122, in rows of 28 px, 14 px apart, bottom-anchored, up to 6 rows | 20 px serif. Each word is one cached white bitmap, tinted: `#eee4cc` normal, `#b9b09c` at 165 opacity when asked, `#ffd45e` when pointed at or selected. All at 90 opacity while the answer still has pages. A darkening behind the block, like the words. |
+
+While a talk is open:
+- The **window layer is hidden** (the Overseer's colonist card and anything else there step aside) and UF_Sheet's panel is closed.
+- The map takes no mouse input: `UF.Interact.handleMouse` returns `true`, which also skips the Overseer's select, move, deselect and camera panning.
+- `UF.Look.isOverUI()` returns `true`, so no map tooltip shows and UF_Sheet opens nothing.
+- Everything is sprites in one container added on top of the map scene (one per scene, reused for every talk).
+
+## Keys and mouse
+| Input | While the answer has pages left | On its last page |
+|---|---|---|
+| Left click (anywhere) | next page | on a keyword: ask it |
+| Enter / Z / Space | next page | ask the selected keyword |
+| Arrows / WASD | nothing | left/right: previous/next keyword; up/down: the nearest keyword in the row above/below |
+| Right-click / Esc / X | jump to the last page | `bye` |
+| Mouse move | nothing | the keyword under the pointer becomes the selected one |
+
+- Input waits 2 frames (`INPUT_DELAY`) after the talk opens and after each answer, so the click that chose Talk or asked a keyword does nothing more.
+- **Space:** a capture-phase `keydown` listener on `window` takes Space while a talk is open and stops it there. It never reaches UF_TimeSpeed's pause toggle (a `document` listener) or RMMZ's `Input`, and UF_Talk handles it as OK.
+- Arrows and WASD are mapped to camera panning (UF_ColonyOverseer); the talk reads the camera names too.
+- The context menu entry: right-click on a person → "Talk to <name>".
 
 ## API (`UF.Talk`)
 | Member | Description |
 |---|---|
-| `open(unitOrId)` | Opens a conversation with a person on the map on screen: `current()` or `null` (not talkable, not a map scene). Closes an open talk first. Picks who speaks for you (`voiceOf`), shows the greeting (paged) and, on a stranger's greeting, maybe a companion's line. Pauses the world (`UF.Time.pause()`) when it was running. Emits `talk:opened(unit, mode)` (and `talk:chimed` when a companion speaks). |
-| `ask(keywordIdOrLabel)` | Asks about a keyword of the open talk (id such as `"name"`, `"person:17"`, `"faction:f2"`, `"site:4"`, or its label, case-insensitive). Returns the line, or `null` (nothing open, farewell running, unknown keyword, or a hostile/baby talk and not `bye`). New keywords from the line (and from a companion's line) are added before `bye` and flagged `isNew`. The line is split into pages (`pagesLeft()`); a companion near the person may chime in after it (`chimeFor`), their pages following the person's. `bye` shows the farewell for `BYE_FRAMES` (45) frames after its last page, then closes. Works whether or not pages remain (the keyword window only takes input on the last page). Emits `talk:asked(unit, keywordId, line)` and `talk:chimed(companion, unit, text)` when one speaks. |
-| `close()` / `closeNow()` | Say goodbye (asks `bye`) / close at once without a farewell. Closing resumes the world only if this talk paused it. Emits `talk:closed(unit)`. |
-| `isOpen()` / `current()` | Whether a talk is open on the current scene / a copy: `{ unitId, name, mode, stance, line, closing, pausedByTalk, portrait, asked: {keywordId: n}, keywords: [{ id, label, topic, ref, asked, isNew }], page, pages, pagesLeft, showing: "speaker" | "companion", voice: { unitId, name, from }, chime: { unitId, name, text, variants } | null }`. `page`/`pages` count the person's pages and then the companion's; `voice.from` is `selected`, `ruler`, `nearest` or `emblem` (`unitId` null). |
-| `next()` / `skip()` / `pagesLeft()` | Show the next page / jump to the last page (both `false` when none is left) / pages still to come. The mouse and keys call `next` and `skip` while pages remain (see Windows and input). |
-| `voiceOf(unitOrId)` | Whoever speaks for you in a talk with this unit (there is no protagonist, V4): `{ unitId, from }` for the colonist selected in the Overseer (`$colonyManager.selectedColonist`), else your faction's ruler (highest rank ≥ 1), else your nearest adult or elder in the area, never the person spoken to, never a baby; `null` when nobody can (your window then shows `UF_GenEmblem`) |
-| `companionsOf(unitOrId, voiceId?)` | Ids of your people within `talk.chime.range` cells (Chebyshev, event cells on screen) of the person, nearest first (lowest id on a tie), not the person, not your voice, not babies |
-| `chimeFor(unitOrId, keywordId, n, adds, voiceId?)` | Pure: the companion's line after the person answered that keyword with a line whose new keywords are `adds`, or `null`: `{ unitId, name, variants, text, adds, portrait }`. The first companion (nearest first) with something to say speaks. Variants, most specific first: `self` (the topic is them), `named` (the line names them), `partner`/`child`/`mother`/`father` (the topic is that relative of theirs), `factionGood`/`factionBad` (the topic is a faction your faction is allied or friendly with / hostile to or at war with); only when none applies, on a stranger's greeting `greetFriendly`/`greetWary` and on `news` `news`, each by a seeded chance (`hash32(seed, companionId, 0xc41e, key, unitId, n) % 100 < talk.chime.chance`). Never on `bye`, never in a hostile or baby talk. |
-| `keywords()` / `line()` / `window()` / `keywordWindow()` / `companionWindow()` | Labels, the current line (whole, not paged), the person's window (`Window_UFTalk`, 144 px portrait), your window (`Window_UFTalkKeywords`: your portrait and the keywords), the companion's window (`Window_UFTalk`, 96 px portrait) |
-| `lineFor(unitOrId, keywordId, n = 0, label?)` | Pure: `{ text, adds: [keyword], key }`, the line a unit would say for a keyword, the `n`-th time it is asked (template choice = `hash32(seed, unitId, 0x7a1c, topic, n)`, so the same question gets the same answer until asked again). Keyword ids: `greet`, `name`, `job`, `family`, `home`, `mood`, `others`, `news`, `bye`, `faction:<id>`, `person:<unitId>`, `site:<siteId>`. |
-| `initialKeywords(unit)` | The keywords a talk with this unit starts with |
-| `facts(unitOrId)` | What the talk reads about a unit: `{ id, name, mode, stage, faction, doing, partner, children, leader, superior, home, knows, news }` |
-| `isTalkable(unit)` | `data.kind` in `talk.kinds` (`colonist`, `person`) and alive (not `hp <= 0`, `_isDying`, `dead`) |
-| `isOwn(unit)` / `stageOf(unit)` / `stanceOf(unit)` / `modeOf(unit)` | Your faction (`kind colonist`, `faction "player"` or the player's id) / `baby` (age < 2), else `data.stage`, else `UF.History.stageOf(age)` / `own`, `friendly`, `wary`, `hostile` (UF_Stance: friendly, indifferent → wary, hostile; else the factions' tier) / `baby` first, else the stance |
-| `portraitOf(unit)` | `{ kind: "face", sheet, index, from }` or `{ kind: "gen", name, from }`: `data.face`, then `catalog.faces[species][gender]` (the character sheet's key, V49, when it exists), then `catalog.talk.portraits[species][gender][stage]`, else the code-drawn `UF_GenFace` |
-| `genFace(unit)` | The code-drawn 144×144 bust (cached, 24 kept): species tint (`people.<species>.tint`) on the skin, the faction's colour on the clothes, hair by gender and seed (grey for elders), smaller for children |
-| `genEmblem(color)` | The code-drawn 144×144 shield in your faction's colour (cached per colour): your portrait when nobody of yours can speak |
-| `optionFor(x, y)` / `withTalk(options, x, y)` | The context-menu entry for a cell (`{ id: "talk", label, enabled, unitId, run }`) / the options with it inserted before the unit's own entries (`hunt`/`select`/`follow`/`info`), for a cell's top-level list only |
-| `easeSocial(unit)` / `lastSocial()` | Eases your colonist's social need through `UF.Colonists.satisfyNeed(unit, "social", 10)` **when that API exists** (it does not yet: `lastSocial()` then says `applied: false`). Called when a talk with your own colonist closes after at least one question. |
-| `tick()` / `stats()` / `resetStats()` | Per frame (from `Scene_Map.update`): page turning while pages remain, the farewell countdown and removing closed windows / `{ frames, ms }` of `tick` for the perf check |
-| `templates()` | The catalog's `talk` section (or the built-in minimal fallback when the catalog has none) |
-| `PORTRAIT` 144, `COMP_PORTRAIT` 96, `BYE_FRAMES` 45, `SOCIAL_RELIEF` 10, `KW_COLS` 4, `KW_ROWS` 4, `INPUT_LOCK` 2, `CHIME_RANGE` 5, `CHIME_CHANCE` 35 (defaults when the catalog has no `talk.chime.range`/`chance`), `BANNED`, `TalkWindow`, `KeywordWindow` | Constants and classes. `TalkWindow` has `paginate(text)` → pages of wrapped lines (every word kept), `linesPerPage()` (4 in the person's window, 2 in the companion's), `drawnState()` → `{ title, subtitle, stanceLabel, lines, page, pages, more, moreRect, unitId, portrait, portraitRect, titleRect }`. `KeywordWindow` has `voiceDrawn()` → `{ unitId, name, from, portrait, drawn, pending, rect }`, `isWaiting()`. |
+| `open(unitOrId)` | Opens a talk with a person on the map on screen and returns `current()`. It closes an open talk first, picks your voice (`voiceOf`), shows the greeting (paged, maybe with a companion's line), hides the window layer and pauses the world (`UF.Time.pause()`) when it was running. Returns `null` when the unit isn't talkable or this isn't a map scene. A **hostile** person or a **baby** also gets `null`: their line (a `talk.lines.refuse` / `baby` template) floats over their head through `sayOverHead`, `lastRefusal()` records it, and `talk:refused(unit, mode, text)` is emitted. Otherwise emits `talk:opened(unit, mode)`. |
+| `ask(keywordIdOrLabel)` | Asks a keyword of the open talk: an id (`"name"`, `"need:hunger"`, `"person:17"`, `"faction:f2"`, `"site:4"`) or its label, case-insensitive. Returns the answer, or `null` (nothing open, unknown keyword). New keywords from the answer, and from a companion's line, are appended and flagged `isNew`. The answer is paged, a companion may chime in (`chimeFor`), and `talk:asked(unit, keywordId, text)` is emitted. `bye` returns the farewell, closes the talk at once and floats the farewell over the person's head. |
+| `next()` / `skip()` / `pagesLeft()` | Next page / jump to the last page (`false` when on the last) / pages still to come |
+| `learn(id)` | Adds a keyword to the open talk as if it had been mentioned (`family`, `home`, `mood`, `others`, `news`, `need:<need>`, `person:<id>`, `faction:<id>`). `false` if unknown or already there. |
+| `close()` / `closeNow()` | Say `bye` / close without a farewell. Either one restores the window layer, eases your colonist's social need after at least one question (`easeSocial`), resumes the world only if this talk paused it, and emits `talk:closed(unit)`. |
+| `isOpen()` / `current()` | Whether a talk is open on this map scene / a copy: `{ unitId, name, mode, stance, playerId, voice: { unitId, name, from }, text, pages: [[line]], page, phase: "reading" or "choosing", more, chime: { unitId, name, text, variants, why, shown } or null, pausedByTalk, asked: { id: n }, sel, keywords: [{ id, label, topic, ref, asked, isNew }] }` |
+| `keywords()` / `line()` / `page()` / `screen()` / `layout()` | Labels / the whole answer / `{ index, count, lines, more }` / the screen object (sprites, bitmaps) / where everything is: `{ other, comp: { face, faceInfo, words, drawn: { lines, w, h, more }, more }, player: { face, faceInfo, unitId, keywords: [{ id, label, x, y, w, h, visible }], back } }` in screen pixels |
+| `voiceOf(unitOrId)` | Whoever speaks for you in a talk with this person (there is no protagonist, V4): `{ unitId, name, from }`. Tried in this order: `selected` (the colonist selected in the Overseer), `ruler` (your faction's highest rank ≥ 1, the band leader), `nearest` (your nearest adult or elder in the area). Never the person spoken to, never a baby. `null` when nobody can speak; your portrait is then the emblem. |
+| `companionsNear(unitOrId, voiceId?)` / `companionsOf(...)` | Your colonists within `talk.lines.chime.range` (4) cells (Chebyshev, event cells on screen) of the person, nearest first. Never the person, your voice, babies or children. Units / ids. |
+| `chimeFor(unitOrId, keywordId, n, lineAdds, voiceId?)` | Pure and seeded: what a companion says after the person answered that keyword the n-th time (`"greet"` for the greeting), or `null`: `{ unitId, name, variants, text, adds, why }`. First the nearest companion the answer concerns (`chimeAbout`, `why` = "about them"). Otherwise, with chance `talk.lines.chime.chance` (30%) from `hash32(seed, personId, 0xc41e, strHash(keywordId), n)`, a remark (`chimeRemark`, `why` = "remark") by the companion that `hash32(…, 1)` picks. Never on `bye`, never in a hostile or baby talk. |
+| `chimeAbout(c, u, key, n, lineAdds)` / `chimeRemark(c, u, key, n)` | The two kinds of companion line, from `talk.chime` and `talk.lines.chime` (see Companions) |
+| `lineFor(unitOrId, keywordId, n = 0, label?)` | Pure: `{ text, adds: [keyword], key }`, the line a unit says for a keyword the n-th time. The template choice is `hash32(seed, unitId, 0x7a1c, strHash(section.key), n)`, so the same question gets the same answer until it is asked again. |
+| `initialKeywords()` | `name`, `job`, `bye` |
+| `facts(unitOrId)` | `{ id, name, mode, stage, faction, doing, trade, title, partner, children, leader, superior, home, knows, news, need }` |
+| `tradeOf(unit)` / `titleOf(unit)` | "a woodcutter" from the best skill in `data.skills` (a number or `{ level }` per skill; none when no skill stands out) and `talk.lines.trades` / the rank title: `data.title`, else `talk.lines.titles.ruler` or `.leader` by gender (rank 2 / rank 1, V52) |
+| `isTalkable` / `isOwn` / `stageOf` / `stanceOf` / `modeOf` / `portraitOf` | As before: `talk.kinds` and alive / your faction / `baby` (age < 2), else `data.stage`, else `UF.History.stageOf(age)` / `own`, `friendly`, `wary`, `hostile` (UF_Stance, else the factions' tier) / `baby` first, else the stance / the portrait source (see Portraits) |
+| `sayOverHead(unitOrId, text, frames = 180)` / `lastOverHead()` / `overHead()` / `lastRefusal()` | A line over a unit's head: `UF.Speech.say(unitId, text, { frames, kind: "remark" })` when it returns line ids, else this plugin's fallback line. Returns `{ via: "UF.Speech" or "fallback", unitId, text, ids or sprite }` / the last one / the fallback lines on screen / the last refusal `{ unitId, mode, text, via }` |
+| `easeSocial(unit)` / `lastSocial()` | `UF.Colonists.satisfyNeed(unit, "social", 10)` **when that API exists**. It doesn't yet, so `lastSocial()` says `applied: false`. |
+| `optionFor(x, y)` / `withTalk(options, x, y)` | The context-menu entry for a cell / the options with Talk inserted before the unit's own entries (a cell's top-level list only) |
+| `tick()` / `stats()` / `resetStats()` / `bitmapsMade()` | Per frame (from `Scene_Map.update`): the over-head fallback lines, then the open talk's input / `{ frames, ms }` of `tick` / every Bitmap this plugin made (the perf check: none per frame) |
+| `templates()` / `section(name)` | The catalog's `talk` / a section, `talk.lines.<name>` first, then `talk.<name>` |
+| `FACE` 96, `PAGE_LINES` 4, `INPUT_DELAY` 2, `OH_Z` 900000, `OH_FRAMES` 180, `SOCIAL_RELIEF` 10, `BANNED` | Constants |
 
 ### What the topics read
 | Keyword | Reads | Adds keywords for |
 |---|---|---|
-| greeting | mood band of `data.mood` (own), stance (strangers) | the player's faction (strangers' greetings name it) |
-| `name` | `unit.name`, faction, `data.rank` (2 ruler, 1 leader), stage | the faction |
-| `job` | `UF.Jobs.describe(UF.Jobs.of(id))`, else `data.intent.text`, else idle; rank; `data.superior` | the superior; a person the job names (`params.unitId`) |
-| `family` | `data.partner` (id or `{id}`), else `data.pregnancy.fatherId`, else a child's other parent; children (`motherId`/`fatherId` of other units, `data.children`); `data.motherId`/`fatherId` | partner, each child, mother, father |
-| `home` | `UF.History.siteById(data.site)`; own colonists `UF.Colonists.site()`; else `data.home`; distance and direction from the speaker | the site |
-| `mood` | `data.mood` (band from `talk.moodBands`), the highest need ≥ `talk.needAt` (60), `data.thoughts[0].text` | — |
-| `others` | own colonists: factions met (`f.met`); strangers: factions with \|relation\| ≥ 15 and yours; at most 3, strongest feeling first | each faction |
-| `news` | the newest `UF.History.events({ faction })` (at the speaker's site first), else the newest event at a site within 40 cells | the event's factions and site when the line names them |
-| `faction:<id>` | own faction: species, member count, the ruler (highest rank ≥ 1, else the speaker's superior); another: `UF.Factions.tierBetween(own, it)` | the leader |
-| `person:<id>` | who they are to the speaker (self, partner, child, mother, father, leader, superior, kin, other) and what they are doing now | a person their job names |
+| greeting | the mood band of `data.mood` (your own) or the stance (strangers) | the player's faction; `[news]`, `[mood]` words |
+| `name` | `unit.name`, the title (V52), the faction, `data.rank`, the stage; wary strangers answer grudgingly (`wary_*` variants); adults with a partner or children add a `[family]` sentence | the faction, `family` |
+| `job` | `UF.Jobs.describe(UF.Jobs.of(id))`, else `data.intent.text`, else idle; the trade (`tradeOf`); rank; `data.superior`; then a `[home]` sentence when there is a home, a `[need]` sentence when a need is ≥ `talk.needAt` (60), else (your own) a `[mood]` hint | the superior, a person the job names, `home`, `need:<need>`, `mood` |
+| `family` | `data.partner`, else `data.pregnancy.fatherId`, else a child's other parent; children (`motherId`/`fatherId`, `data.children`); `data.motherId`/`fatherId` | partner, each child, mother, father |
+| `home` | `UF.History.siteById(data.site)`; your own: `UF.Colonists.site()`; else `data.home`; distance and direction | the site |
+| `mood` | the mood band, a `[need]` sentence, `data.thoughts[0].text` | `need:<need>` |
+| `need:<need>` | `talk.lines.needTopic.<need>` (hunger, thirst, sleep, social, nature), else `talk.needs.<need>` | — |
+| `others` | your own: factions met; strangers: factions with \|relation\| ≥ 15 and yours; at most 3 | each faction |
+| `news` | the newest `UF.History.events({ faction })` (at the speaker's site first), else the newest event at a site within 40 cells | the event's factions and site when named |
+| `faction:<id>` | your own faction: species, member count, the ruler, and an `[others]` sentence when they know other factions; another: `UF.Factions.tierBetween(own, it)` | the leader, `others` |
+| `person:<id>` | who they are to the speaker and what they are doing now | a person their job names |
 | `site:<id>` | kind, faction, distance and direction | — |
-Keyword labels: topic words from `talk.keywords`; people by name; factions by name without a leading "The"; sites by name.
 
-### Windows and input
-Three windows at the bottom of the screen (12 px margins, full width, 4 px apart), from the bottom up (VISION V62):
-- **Your window** (`Window_UFTalkKeywords`, 168 px): the portrait of whoever speaks for you (`voiceOf`: the selected colonist, else your ruler, else your nearest grown person; `UF_GenEmblem` when nobody can), 144×144 with a thin frame and their name on a dark band along its bottom, and the keywords beside it (a `Window_Command`, 4 columns × 4 rows visible, starting 156 px from the left; asked keywords dimmed, the line's new ones in yellow `#ffe28a`). While the line above has pages left the keywords are all dimmed and take no input.
-- **The person's window** (`Window_UFTalk`, 192 px): their 144×144 portrait with a thin frame, the name at 22 px in the system colour, the stance or mood on the right in its colour, `Stage · Faction` in grey, then **one page** of their words at 19 px, 4 lines a page. Nothing is cut: a longer line is split into pages, and a page with more after it (the next page, or the companion's line) ends in a "more" mark (the catalog word `talk.words.more` and a small down-pointing triangle) at the bottom right.
-- **A companion's window** (`Window_UFTalk` with a 96×96 portrait, 132 px): opens above the person's window when one of yours near the person chimes in (`chimeFor`), with their name and their line, 2 lines a page; it closes on the next question when nobody chimes in.
-All open with the standard opening animation; the keyword window takes input only once fully open, so the click that chose Talk can't also pick a keyword.
-- Mouse: click a keyword; right-click = `bye`. While pages remain: a click anywhere turns the page (read on the button's release, the same event the keyword window acts on, so the click that shows the last page can't also pick the keyword under the pointer), right-click shows the last page. Keys: arrows / WASD move between keywords (they're mapped to camera panning, so the window reads the camera names too), Enter / Z / Space choose, Esc = `bye`; while pages remain Enter / Z / Space turn the page and Esc shows the last one. For 2 frames after a line appears (`INPUT_LOCK`) no input turns its page.
-- While a talk is open the map takes no mouse input (`UF.Interact.handleMouse` returns `true`, which also skips the Overseer's select, move and deselect) and `UF.Look.isOverUI()` returns `true`, so the map tooltip stays hidden.
-- The Talk entry: `UF.Interact.optionsFor` is wrapped, and the context menu window's `initialize`/`setOptions` are aliased (UF_Interact's `open` builds its list from its own unwrapped function), so both the API and the real menu show it, including after "Back" from the build submenu.
+Labels come from `talk.keywords` (topic words), `talk.lines.needWords` (needs: hunger, thirst, sleep, company, the wild), names (people, sites) and faction names without a leading "The".
+
+## Companions
+- **About them** (`talk.chime`, from the review run): the nearest companion the answer concerns speaks, using one of these variants:
+  - `self`: the topic is them.
+  - `named`: the answer names them.
+  - `partner`, `child`, `mother`, `father`: the topic is that relative of theirs.
+  - `factionGood`, `factionBad`: a faction theirs is allied or friendly with, or hostile to or at war with.
+- **Remarks** (`talk.lines.chime`): otherwise, now and then (30%, seeded), one of them remarks on the topic. Each section is tried in order and the first with a usable template wins: `name`, `job`, `family`, `home`, `mood` (also for needs), `others`, `news`, `faction_own`, `faction_<tier>`, `person`. If none fits, the person's stance (`own`, `friendly`, `wary`) is tried, then `any`.
+- Slots in both sets: `{name}` is the companion, `{speaker}` is the person spoken to, plus `{person}` and `{faction}`. A companion's line adds its own keywords too.
+- The review run's `greetFriendly`, `greetWary` and `news` lists in `talk.chime` are kept and still readable, but this version doesn't use them. Greetings and news get remarks instead.
+
+## Over-head lines (refusals, farewells, babble)
+- With UF_Speech loaded, the line goes through `UF.Speech.say(unitId, text, { frames: 180, kind: "remark" })`.
+- Without it, a small fallback: plain text in the serif font, 18 px, with an outline and no box. Its sprites sit in the tilemap at z 900000 (above characters, below the fog at 1e6; WORLD_ARCHITECTURE §4).
+  - It follows the unit's event and is scaled by 1/zoom, so it stays screen-size at every zoom level (UF_Camera).
+  - It shows 2 lines at most, lasts 180 frames and fades over the last 30.
+  - A pool of 4 sprites per spriteset. Each sprite's bitmap is made once and redrawn only when a line is said.
+- UF_Speech's file appeared in `game/js/plugins/` at 10:45 on 2026-09-19. It is not yet in the real `plugins.js`, so Playtest uses the fallback until UF_Speech is registered.
 
 ## State it saves
-None. A conversation is view state (not saved; a loaded game has no talk open). Everything it says is read from `UF.World.state` and `unit.data` when asked. Caches: code-drawn portraits (24) and emblems (one per colour).
+None. A conversation is view state (not saved; a loaded game has no talk open). Everything it says is read from `UF.World.state` and `unit.data` when asked.
 
 ## Events
-Emits `talk:opened(unit, mode)`, `talk:asked(unit, keywordId, line)`, `talk:chimed(companion, unit, text)`, `talk:closed(unit|null)`. Listens: none. Reads `window.$colonyManager.selectedColonist` (UF_ColonyOverseer) for your voice.
+- Emits `talk:opened(unit, mode)`, `talk:asked(unit, keywordId, text)`, `talk:chimed(companion, unit, text)`, `talk:refused(unit, mode, text)` and `talk:closed(unit|null)`.
+- Listens to nothing.
+- Reads `window.$colonyManager.selectedColonist` (UF_ColonyOverseer) for your voice.
 
-## Keys and mouse
-See Windows and input. Right-click on a person → "Talk to <name>".
+## Catalog `talk`
+- **The older keys**, unchanged and still read as fallbacks: `about`, `kinds`, `optionLabel`, `keywords`, `stanceLabels`, `stages`, `moodBands`, `needAt`, `directions`, `words` (incl. `more`), `greet`, `refuse`, `baby`, `name`, `job`, `family`, `home`, `site`, `mood`, `needs`, `others`, `news`, `faction`, `person`, `bye`, `unknown`, `chime` (the review run's), `portraits`.
+- **`talk.lines`**, added 2026-09-19 by a layout-preserving script. The script re-reads the catalog right before writing and asserts that every other top-level key and every other `talk` key is unchanged, and that the bytes outside the inserted block are identical.
+  - Wording follows V65 in plain generic terms ("Well met", "Good morrow", "Fare you well"), with no named lore.
+  - Settings: `about`, `titles` (`ruler`: lord / lady, `leader`: leader), `trades` (skill → trade noun), `needWords`.
+  - Template lists that override the old ones: `greet`, `refuse`, `baby`, `name` (+ `wary_ruler`, `wary_leader`, `wary_default`, `family`), `job` (+ `trade`, `noTrade`, `home`, `need`, `moodHint`), `family`, `home`, `mood` (+ `need`), `needTopic`, `others`, `news`, `faction` (+ `othersHint`), `bye`, and `chime` (`about`, `chance` 30, `range` 4 and the remark lists).
+- **Markup:**
+  - `{slot}`: a name or fact. A slot that names a person, faction or place adds that keyword.
+  - `[topic]` or `[words|topic]`: the label or the words are written into the line and the topic joins the keyword list. Topics are `family`, `home`, `mood`, `others`, `news`, and `need` (the speaker's most pressing need).
+  - A template is skipped when the speaker lacks one of its slots or topics.
+  - A slot that opens a sentence is capitalised.
 
-## Catalog `talk` (added 2026-09-19 by a layout-preserving script that touched no other key)
-`kinds`, `optionLabel`, `keywords` (labels), `stanceLabels`, `stages`, `moodBands`, `needAt`, `directions`, `words` (`and`, `here`, `far`, `where`, `more`; `more` added 2026-09-19 for V62), and template lists: `greet` (`own_good`, `own_fine`, `own_bad`, `friendly`, `wary`), `refuse`, `baby`, `name` (`ruler`, `leader`, `child`, `default`, `nofaction`), `job` (`busy`, `idle`, `ruler`, `leader`, `superior`), `family`, `home`, `site`, `mood`, `needs`, `others`, `news`, `faction` (`own`, `leader`, `leaderSelf`, `noLeader`, and one per relation tier), `person`, `bye`, `unknown`, `chime` (added 2026-09-19 for V62 by a layout-preserving script that touched only `talk.about`, `talk.words` and `talk.chime`: `range` 5 cells, `chance` 35 percent, and template lists `named`, `self`, `partner`, `child`, `mother`, `father`, `factionGood`, `factionBad`, `greetFriendly`, `greetWary`, `news`, with the slots `{name}` the companion, `{speaker}` the person spoken to, `{person}`, `{faction}`), and `portraits`. Slots are `{name}`, `{faction}`, `{playerFaction}`, `{job}`, `{superior}`, `{partner}`, `{children}`, `{count}`, `{mother}`, `{father}`, `{home}`, `{where}`, `{kind}`, `{mood}`, `{thought}`, `{factions}`, `{event}`, `{people}`, `{leader}`, `{person}`, `{personJob}`. A template whose slots aren't all known is skipped; a slot that opens a sentence is capitalised. Wording is original and generic (no proper nouns); every string is scanned by `talk.no_banned_words`.
+## Portraits
+- The source is tried in this order:
+  1. `unit.data.face` (when the file exists).
+  2. `catalog.faces[species][gender]`: where AR-700 plugs in, when it exists.
+  3. `catalog.sheet.faces[species]`: UF_Sheet's rule (`<stage>_<gender>`, `<gender>`, `any`; unit id mod the list), so the talk shows the same face as the selection panel.
+  4. `talk.portraits[species][gender][stage]`.
+  5. Otherwise a code-drawn silhouette.
+- Every face file is checked with `fs.existsSync` before `ImageManager.loadFace`. A sheet still loading draws the silhouette first and the face when it arrives.
+- The silhouette (`UF_GenFace`) is a head-and-shoulders bust with no features: species tint on the skin, your faction's colour on the shoulders, hair by gender, grey for elders, smaller for children.
+- `UF_GenEmblem` is a shield in your faction's colour.
 
 ## Assets used
 | Asset | What for | Status |
 |---|---|---|
-| `img/faces/People1`, `People2`, `People3`, `People4` (stock RPG Maker face sheets) | Human portraits, by gender and stage (`talk.portraits.human`) | stock RMMZ placeholder until **AR-700** (face sets). Anime-style, so they don't match V2's "fantasy realism"; AR-700 replaces them. |
-| `UF_GenEmblem` | Your portrait when nobody of yours can speak for you: a code-drawn shield in your faction's colour | generated (code-drawn placeholder); no art request (it appears only when your faction has nobody else on hand) |
-| `UF_GenFace_<unitId>` | Every other species (and any face sheet that fails to load), for the person, your voice and companions alike: a code-drawn bust | generated (code-drawn placeholder). AR-700 faces replace it once they are listed in `catalog.faces` or `data.face`; no code change needed. |
-| `Window` (img/system) | The three windows' skin | stock RMMZ / as listed for every window (AR-033, AR-800) |
-| `$U7_Hare`, `people.<species>.images[0]` | The `talk` suite's test hare and test strangers | U7 stand-ins, already listed |
-How AR-700 plugs in: fill `catalog.faces[species][gender]` (a list of `"Sheet:index"`, `{ sheet, index }` or `{ sheet, indices }`, or per stage `{ child: [...], adult: [...], elder: [...] }`) or set `unit.data.face = { sheet, index }`; UF_Talk uses them before its own placeholders.
+| `img/faces/People1`–`People4`, `Nature`, `Evil` (the cells in `catalog.sheet.faces` and `talk.portraits`) | Portraits of people by species and gender | stock RMMZ placeholders until **AR-700** (face sets in the U7 portrait style, 96×96, REQUESTED). Anime-style, one or a few per species and gender, so two people can share a face (seen: a dwarf woman and her companion). |
+| `UF_GenFace` | Every species without a face entry (goblins, orcs, …), and any face that is missing | generated (code-drawn placeholder) |
+| `UF_GenEmblem` | Your portrait when nobody of yours can speak | generated (code-drawn); no request |
+| Fonts: Georgia (or Palatino Linotype, Book Antiqua, Times New Roman, serif) | The words, keywords and fallback over-head lines | system fonts on Windows, not shipped; the generic `serif` elsewhere |
+| `$U7_Hare`, `people.<species>.images[0]` | The suite's test hare and test strangers | U7 stand-ins, already listed |
+- **No window skin.** The talk draws no windows.
+- **AR-700 needs no code change.** Fill `catalog.faces[species][gender]` (a list of `"Sheet:index"`, `[sheet, index]`, `{ sheet, index }` or `{ sheet, indices }`, or per stage `{ child, adult, elder }`) or `catalog.sheet.faces`, or set `unit.data.face`.
+
+## Efficiency (V50)
+- Nothing is drawn per frame.
+- A page is drawn once, when it is shown. A keyword word is drawn once per label and cached, 64 per screen, least recently used dropped.
+- Portraits are drawn once per talk, and again only when a face sheet finishes loading.
+- The screen's bitmaps are made once per map scene.
+- Per frame with a talk open, `tick` reads the input, hit-tests up to about 40 keyword rectangles when the pointer moved, and sets a tint or opacity when the selection changes.
+- Measured 2026-09-19 (`performance.now` around `tick`, pointer moving over the keywords every frame):
+  - 0.02–0.04 ms per frame over 90 frames.
+  - 0 Bitmaps made in those frames.
+  - 0.03 ms per generated line.
 
 ## Checks (suite `talk`, on request: `node tools/run_tests.js talk --game <snapshot>`)
 | Check | What would make it FAIL |
 |---|---|
-| `option_listed` | `UF.Interact.optionsFor` on a colonist's cell or a test stranger's cell has no `talk` entry for that unit; the test hare's cell has one, or has no `hunt`; the real menu opened on the colonist's cell (`UF.Interact.open`) has no row starting "Talk" |
-| `window_opens` | Choosing "Talk" in the real menu (the world running) doesn't open the talk; the two windows aren't in the window layer, open, and the keywords active; the portrait's centre pixels are transparent; the drawn title isn't the unit's name or has < 20 inked pixels; `name`, `job`, `bye` (labels from the catalog) are missing; no line; or UF_Look's tooltip is visible with the pointer over the map above the windows |
-| `name_and_job` | The `name` answer or the window's text lacks the unit's real name; the `job` answer doesn't contain `UF.Jobs.describe` of its current job (or, idle, doesn't start with an idle template) |
-| `topics_from_state` | `family` doesn't name `data.partner`'s unit; the faction keyword's answer lacks the faction's name or the leader's (highest rank ≥ 1 of the faction, read from `unit.data`, else the superior); the leader keyword's answer lacks the leader's name |
-| `new_keyword_appears` | The partner's keyword existed before `family`, isn't added (flagged new) after it, isn't in the keyword window, or asking it doesn't name the partner |
-| `hostile_refuses` | A test stranger of a faction set to −80: Talk not offered, mode not `hostile`, line not from `talk.refuse`, keywords other than `bye`, or asking `name` answers or changes the line; a stranger at +30: mode not `friendly`, greeting not from `talk.greet.friendly`, or no `name`/`job` |
-| `bye_closes_and_resumes` | Opened while running: the world isn't paused by the talk, or `UF.Time.ticks()` moves in 20 frames; after `bye`: the windows aren't closed and removed within 4 s, the world isn't running, or fewer than 10 ticks in 30 frames. Opened while already paused: not still paused after `bye` |
-| `lines_well_formed` | Fewer than 200 generated lines, or any is empty, has an unfilled `{slot}`, or has a sentence starting in lower case |
-| `no_banned_words` | Fewer than 50 template strings or 200 generated lines (every topic, every keyword a line adds, 4 variants, of the colonist, partner, leader, the test strangers and every talkable unit in the area), or any contains a banned word (the AGENTS.md list: U7/DF proper nouns and signature terms, D&D product identity) |
-| `perf` | `tick` averages more than 0.2 ms per frame over 90 frames with a talk open, or one line takes more than 2 ms on average over 100 lines |
-| `player_portrait` | With another of your colonists selected in the Overseer (`$colonyManager.select`): the talk's voice isn't that colonist, your portrait isn't drawn (`voiceDrawn().drawn`), its centre pixel is transparent, or the first keyword doesn't start right of the portrait and beside it; with nothing selected: the voice is the person spoken to, isn't one of yours (or, when nobody else of yours exists, isn't the emblem), or the same drawing tests fail |
-| `pages_not_cut` | The colonist's `mood` answer with a 70-word test thought (`TEST_ a long thought, word1 … word70.`, restored afterwards): fewer than 2 pages; page 1 without the "more" mark or with no inked pixels in it; the keywords active or not waiting; a real click (a release put into `TouchInput`, the way the mouse does it) on the person's window doesn't turn to page 2; the pages seen, in order, don't give back every word of the line or contain "…"; a page before the last isn't full; after the last page the keywords aren't active or the mark is still drawn |
-| `companion_chimes` | Two test people of your faction: `TEST_companion` placed next to the colonist (within `talk.chime.range`), `TEST_faraway` placed range + 5 cells away; another colonist selected so neither is your voice; `TEST_companion` set as the colonist's partner: after `family` no chime, the chimer not named in the line, out of range, your voice, or the text not from `talk.chime.named`; no companion page after the line; after turning the pages the companion's window isn't open in the layer, its title and unit aren't the chimer, its portrait's centre is transparent, or it doesn't show the chime's text; with `TEST_faraway` as partner, a chime comes from `TEST_faraway` |
+| `option_listed` | `UF.Interact.optionsFor` on a colonist's or a test stranger's cell has no `talk` entry for that unit; the test hare's cell has one, or has no `hunt`; the real menu on the colonist's cell has no row starting "Talk" |
+| `layout` | Choosing Talk in the real menu (world running) doesn't open the talk; the other portrait isn't at x, y ≤ 40, 96×96, with > 400 opaque pixels in its middle; the words aren't beside it (right of it, overlapping its rows) or have < 150 inked pixels; the darkening's middle alpha isn't 40–200, any edge pixel is brighter than 40 or as opaque as the middle (a border); your portrait isn't at x ≤ 40 in the lower half below the other one, drawn; the keywords aren't right of it, or the first three aren't `name`, `job`, `bye`, or the first has < 30 inked pixels; the screen is a Window or holds one, a window other than the closing context menu joined the window layer, or the layer is visible; UF_Look's tooltip shows |
+| `pause_and_resume` | Opened while running: not paused by the talk, `UF.Time.ticks()` moves in 20 frames, a real Space `keydown` doesn't ask the selected keyword or unpauses; after `bye`: not running, or < 10 ticks in 30 frames; opened while paused: paused by the talk, or not paused after `bye` |
+| `name_job_bye` | The first three keywords aren't `name`, `job`, `bye`; the `name` answer lacks the name; the `job` answer lacks `UF.Jobs.describe` of the job (or the intent, or an idle template) or the trade (`a woodcutter`, from a skill the test gives); a ranked person's `name` lacks their title; after `bye` the talk is open, the farewell isn't a `bye.friendly` template, or it isn't over the stranger's head |
+| `voice` | With another colonist selected in the Overseer, the talk's voice isn't that colonist (`from: selected`), or your portrait isn't drawn for them |
+| `paging` | The colonist's `mood` answer, with a long test thought, is < 2 pages; page 1 isn't drawn exactly, has no "more" mark, the keywords aren't faint or the phase isn't `reading`; a real click (`TouchInput._onTrigger` then `_onRelease`) doesn't draw page 2 exactly; the pages together don't give back every word |
+| `keywords_grow` | The faction keyword was there before `name` or isn't added after; `family` isn't added after `name`; the partner's keyword was there before `family`, isn't added (flagged new), isn't drawn, or the answer lacks the partner's name |
+| `companion_chimes_in` | `TEST_companion` (one of yours, placed ≤ 4 cells away) isn't in `companionsNear`; a listed companion is out of range, your voice or the person; one of yours farther away is listed; any of up to 30 questions chimes differently from the pure `chimeFor` prediction; no chime in 30 questions; the speaker isn't a listed companion; the companion's portrait isn't drawn between the other and yours, or its words aren't the chime's text; the text isn't from `talk.chime` or `talk.lines.chime` |
+| `hostile_refuses_over_head` | A test stranger of a faction at −80: Talk not offered; `open` returns a talk or a talk is open; the world stopped; the refusal isn't a `refuse` template with mode `hostile`; the over-head line isn't that text for that unit; fallback: the sprite isn't in the tilemap, visible, at z 900000, above the unit and inked; UF_Speech: `UF.Speech.lines(unit)` isn't that text |
+| `lines_well_formed` | < 200 generated lines (every topic, need and added keyword of every talkable unit in the area and the test people, 4 variants, and companion remarks and lines about them), or any is empty, has an unfilled `{slot}` or `[topic]`, or a sentence starting in lower case |
+| `no_banned_words` | < 50 template strings or < 200 generated lines, or any contains a banned word (the AGENTS.md list) |
+| `perf` | `tick` averages > 0.2 ms per frame over 90 frames with a talk open and the pointer moving over the keywords, any Bitmap is made in those frames, or a line takes > 2 ms on average |
 | `no_errors` | Any uncaught error recorded by the harness during the suite |
-Screenshots: `talk.colonist.png` (a talk with a colonist after `family`: the partner's name in the line and as a new yellow keyword; when the partner stands near, the "more" mark announces their chime and the keywords are dimmed), `talk.stranger.png` (a real stranger of another faction on the map when one isn't hostile, else the test's `TEST_talker`, after `name` and its faction keyword), `talk.player_portrait.png` (a colonist selected: their portrait beside the keywords), `talk.pages.png` (page 1 of the long mood line, the "more" mark, dimmed keywords), `talk.companion.png` (the companion's window above the person's, with their portrait and line).
-**Provocation:** the plugin parameter `TestProvoke` (not declared in the header, honoured only in `--uf-test` runs; set only in a snapshot's `plugins.js`, e.g. `"parameters":{"TestProvoke":"all"}` or a comma list of check names) breaks the behaviour each check guards: Talk offered on creatures instead of people, no portrait/title and no tooltip hiding, "someone" for the name and "working" for the job, partner/leader/superior/family unreadable, no keywords added, hostile treated as wary, no resume on close, a banned word and an unfilled slot appended to every line, a 2 ms busy wait per tick, nobody speaking for you and your portrait not drawn (`player_portrait`), the old single page cut with "…" (`pages_not_cut`), no companion ever chiming in (`companion_chimes`), and one error entry pushed into the harness's error list (a real uncaught error makes RMMZ stop the game, `SceneManager.onError`, so the run could never print the FAIL). Run of 2026-09-19 with `all` (before the V62 rework): 0 passed, 11 failed, each for its own reason. Run of 2026-09-19 with `player_portrait,pages_not_cut,companion_chimes`: 11 passed, those 3 failed: `FAIL talk.player_portrait - Ulric (#2) selected: voice The Dunesh League (#null, emblem), portrait emblem  drawn false, alpha 0, …`; `FAIL talk.pages_not_cut - mood line of 81 words in 1 page(s) of 4 lines; page 1 shows 4 lines, "more" mark absent; keywords waiting false; a click turned to page 2 false; pages seen 1, words shown 39 of 81 (MISMATCH; page 1 ends "word20 … word27 …") …`; `FAIL talk.companion_chimes - range 5; TEST_companion 1 cells from Doren, TEST_faraway 10; … chime none (named in the line: [142]); companion window not drawn, pages after the line 0; …`.
-Tests set up what the world lacks and restore it afterwards: a partner (`data.partner`) when the colonist has none, a rank 2 when the faction has no ranked unit, two relations (±, restored), `met` flags (restored), the Overseer's selection (restored), the long test thought and the test partners of the V62 checks (restored); test units are removed.
+
+**Screenshots:**
+- `talk.stranger.png`: a friendly stranger after `job`, with the portraits, the words and the keyword list.
+- `talk.paging.png`: page 1 of the long mood answer, with the "more" mark and faint keywords.
+- `talk.companion.png`: a companion's portrait and line under the person's.
+- `talk.refuse.png`: the hostile stranger's refusal over their head.
+
+**Provocation:** the plugin parameter `TestProvoke` breaks the behaviour each check guards. It isn't declared in the header, is honoured only in `--uf-test` runs, and is set only in a snapshot's `plugins.js`: `all`, or a comma list of check names. What it does per check:
+- `option_listed`: Talk offered on creatures instead of people.
+- `layout`: the other portrait moved to the bottom right, your portrait to the top, and a light border drawn around the darkenings.
+- `pause_and_resume`: no pause, and Space not taken.
+- `name_job_bye`: "someone" and "working", and `bye` first.
+- `voice`: the selection ignored.
+- `paging`: one page only.
+- `keywords_grow`: no keywords added and the partner unreadable.
+- `companion_chimes_in`: no chime.
+- `hostile_refuses_over_head`: hostile treated as wary.
+- `lines_well_formed` and `no_banned_words`: a banned word and an unfilled slot appended to every line.
+- `perf`: a 2 ms busy wait and a Bitmap every frame.
+- `no_errors`: an error entry pushed into the harness's list. A real uncaught error stops RMMZ, so the run could never print the FAIL.
+
+The 2026-09-19 run with `all` gave 0 passed and 13 failed, each for its own reason. Some of its lines:
+- `FAIL talk.layout - other portrait at (704,512) … darkening: middle alpha 109, edge alpha max 255, edge brightness max 232 (a border would be bright); …`
+- `FAIL talk.voice - Braar (#3) selected: voice #2 Peria (from ruler), …`
+- `FAIL talk.paging - mood answer 333 chars in 1 page(s) …, more mark false, …`
+- `FAIL talk.companion_chimes_in - … no chime in 30 questions; …`
+- `FAIL talk.hostile_refuses_over_head - … open returned a talk, talk open true, …`
+- `FAIL talk.perf - tick 2.1927 ms per frame … 90 Bitmap(s) made in those frames; …`
+
+The tests set up what the world lacks and restore it afterwards:
+- A partner, when the colonist has none.
+- A rank 2, when the faction has no ranked unit.
+- Two relations and the `met` flags.
+- A long thought.
+- The Overseer's selection.
+- The test units (`TEST_talker`, `TEST_grump`, `TEST_hare`, `TEST_companion`), which are removed.
 
 ## Replaced core methods
-None, aliases only: `Scene_Map.prototype.update` (the tick), `Scene_Boot.prototype.start` (the hooks and the checks), `UF.Interact.MenuWindow.prototype.initialize` / `setOptions`. Runtime wraps of other plugins' public API: `UF.Interact.optionsFor`, `UF.Interact.handleMouse`, `UF.Look.isOverUI`.
+None; aliases only:
+- `Scene_Map.prototype.update` (the tick), `Scene_Map.prototype.terminate` (closes a talk with its scene) and `Scene_Boot.prototype.start` (the hooks and the checks).
+- `UF.Interact.MenuWindow.prototype.initialize` / `setOptions`.
+
+Runtime wraps of other plugins' public API: `UF.Interact.optionsFor`, `UF.Interact.handleMouse` and `UF.Look.isOverUI`. It also adds one capture-phase `keydown` listener on `window`, for Space during a talk.
 
 ## Known limits
-- The social need isn't eased: UF_Colonists has no public API for needs (`easeSocial` reports `applied: false`). Needs `UF.Colonists.satisfyNeed(unit, need, amount)`.
-- The map hotkeys (F ledger, H chronicle, K test spawn, `[` / `]` speed) still act while a talk is open; Space during the 45-frame farewell can toggle the pause.
-- The person doesn't turn to face anyone and keeps their job. Your voice is a portrait only: that colonist doesn't walk over or stop working, and nothing checks that they are near the person.
-- With a colonist selected, the Overseer's colonist card stays open behind the talk windows; a strip of it shows in the 4 px gap between the person's window and yours (seen in `talk.player_portrait.png` and `talk.companion.png`).
-- Companions chime in only from the catalog's variants (named, self, family, strong faction feelings, and by chance on a stranger's greeting and on news); they never ask their own questions or talk to each other. At most one companion speaks per line.
-- Portraits are placeholders: stock anime-style faces for humans, code-drawn busts for everyone else (AR-700 replaces both).
-- Keywords don't carry over between talks; nothing about a talk is remembered.
-- Group names are treated as plural ("The Belar Clan are welcome here").
-- `news` shows chronicle events only; with no history at generation (V31), these are the events play has recorded so far (for example "Four elves of The Duna Grove settled by …").
-- The `look` suite's `hunt_and_haul_options` sometimes fails with live colonists (seen 2026-09-19 once with UF_Talk and once in a control run without it; the repeat with UF_Talk passed 21/21).
+- **Social need:** not eased. UF_Colonists has no public API for needs (`easeSocial` reports `applied: false`). It needs `UF.Colonists.satisfyNeed(unit, need, amount)`.
+- **Hotkeys:** the map hotkeys (F ledger, H chronicle, K test spawn, `[` / `]` speed) still act while a talk is open.
+- **Placeholder portraits:** often one per species and gender, so two people can look the same. Humans get anime-style stock faces, goblins and orcs the silhouette. AR-700 replaces them.
+- **Fallback over-head lines:** they use Georgia (the talk's font), while UF_Speech uses the game font. Once UF_Speech is registered, the refusals and farewells use its style.
+- **Fonts:** Georgia and the other serif fonts are Windows system fonts. On a system without them the words fall back to the generic `serif`.
+- **The person:** doesn't turn to face anyone and keeps their job. Your voice is a portrait only: that colonist doesn't walk over, and nothing checks that they are near.
+- **Companions:** only one speaks per answer. They never ask their own questions or talk to each other.
+- **Keywords:** they don't carry over between talks; nothing about a talk is remembered. More than 6 rows of keywords aren't shown (about 40 keywords).
+- **Group names:** treated as plural ("The Belar Clan are welcome among us").
+- **News:** chronicle events only (V31: no history at generation).
+- **The `look` suite:** it fails 4 checks with or without UF_Talk: `cell_lines`, `asset_line_names_status`, `hunt_and_haul_options`, `saved`. Seen 2026-09-19 in a control run of an unmodified snapshot.

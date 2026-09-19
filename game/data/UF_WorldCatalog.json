@@ -855,6 +855,133 @@
         "male": { "child": ["People1:0"], "adult": ["People1:2", "People1:4", "People3:2", "People3:4", "People4:2", "People4:6"], "elder": ["People1:6", "People2:0", "People4:4"] },
         "female": { "child": ["People1:1", "People4:7"], "adult": ["People1:3", "People1:5", "People2:3", "People4:3", "People4:5"], "elder": ["People1:7"] }
       }
+    },
+    "lines": {
+      "about": "Conversation lines for the U7-model talk (VISION V62 revised 2026-09-19, V65 tone; added 2026-09-19). UF_Talk reads a section here first and falls back to the same section at the top of \"talk\" (the older keys stay readable). {slot} = a name or fact from the simulation (a slot that names a person, faction or place adds that keyword). [topic] or [words|topic] = a topic word: the words are written into the line and the topic joins the player's keyword list (family, home, mood, others, news, need = the speaker's most pressing need, labelled by needWords). A template whose slots or topics the speaker has nothing on is skipped. Plain generic wording only: no proper nouns.",
+      "titles": {
+        "ruler": { "male": "lord", "female": "lady" },
+        "leader": { "male": "leader", "female": "leader" }
+      },
+      "trades": {
+        "woodcutting": "woodcutter", "gathering": "gatherer", "stonework": "stonecutter", "building": "builder", "hauling": "carter",
+        "foraging": "forager", "hunting": "hunter", "crafting": "crafter", "cooking": "cook", "smelting": "smelter", "smithing": "smith",
+        "bowyery": "bowyer", "fletching": "fletcher", "tanning": "tanner", "leatherwork": "leatherworker", "carpentry": "carpenter",
+        "fighting": "soldier", "archery": "archer", "mining": "miner", "fishing": "fisher", "farming": "farmer", "masonry": "mason",
+        "healing": "healer", "attack": "soldier", "strength": "soldier", "defence": "soldier", "ranged": "archer", "magic": "student of the old arts"
+      },
+      "needWords": { "hunger": "hunger", "thirst": "thirst", "sleep": "sleep", "social": "company", "nature": "the wild" },
+      "greet": {
+        "own_good": ["Good morrow! What would you have of me?", "Ah, it is you. Ask what you will.", "{name} smiles. \"I am listening.\""],
+        "own_fine": ["Yes? What is it?", "I am listening.", "{name} looks up from the work. \"What do you need?\""],
+        "own_bad": ["Be quick. My [mood] is poor today.", "What now?", "{name} sighs. \"Yes?\""],
+        "friendly": ["Well met, friend of {playerFaction}.", "Good morrow. {playerFaction} are welcome among us.", "Well met, traveller. Have you heard the [news]?"],
+        "wary": ["What do you want?", "Keep your distance, stranger. Speak, if you must.", "{name} eyes you coldly. \"Yes?\""]
+      },
+      "refuse": ["Begone. I have nothing to say to {playerFaction}.", "Away with you, before blades are drawn.", "Leave, stranger. You are not welcome here."],
+      "baby": ["Ba-ba!", "Goo?", "Mama!"],
+      "name": {
+        "wary_ruler": ["If you must know, I am {name}, {title} of {faction}."],
+        "ruler": ["I am {name}, {title} of {faction}.", "{name}, {title} of {faction}. My word is law among us."],
+        "wary_leader": ["If you must know, I am {name}, {title} of {faction}."],
+        "leader": ["I am {name}, {title} of {faction}. The others look to me.", "{name}, {title} of {faction}. I keep the others at their work."],
+        "child": ["I am {name}! I live with {faction}.", "{name}. I belong to {faction}."],
+        "wary_default": ["If you must know, I am {name}, of {faction}.", "{name}. I ride with {faction}. What of it?"],
+        "default": ["I am {name}, of {faction}.", "My name is {name}. I am one of {faction}.", "Folk call me {name}. I ride with {faction}."],
+        "nofaction": ["I am {name}.", "Folk call me {name}."],
+        "family": ["I share my hearth with my [family].", "My [family] keep me busy enough."]
+      },
+      "job": {
+        "busy": ["Just now I am {job}.", "I am {job}, as you see.", "Can you not see? I am {job}."],
+        "idle": ["Nothing, just now. I wait for work worth doing.", "I have no task at the moment.", "I rest a little between tasks."],
+        "trade": ["By trade I am {trade}.", "I am {trade} by trade."],
+        "noTrade": ["I have learned no trade yet."],
+        "ruler": ["And I rule {faction}."],
+        "leader": ["And I see that the others keep to their work."],
+        "superior": ["{superior} tells me what needs doing.", "I answer to {superior}."],
+        "home": ["When the day is done I go back to our [home].", "Our [home] is not far."],
+        "need": ["Though in truth, my [need] troubles me.", "Though I will own that my [need] gnaws at me."],
+        "moodHint": ["You might ask after my [mood], for once."]
+      },
+      "family": {
+        "partner": ["My partner is {partner}.", "I share my life with {partner}."],
+        "noPartner": ["I have no partner.", "No partner, not yet."],
+        "children": ["We have {count} children: {children}.", "Our children are {children}."],
+        "child": ["We have a child, {children}."],
+        "noChildren": ["No children yet."],
+        "mother": ["My mother is {mother}."],
+        "father": ["My father is {father}."],
+        "none": ["My family? There is only me."]
+      },
+      "home": {
+        "site": ["We live at {home}, {where}.", "{home} is our home. It lies {where}."],
+        "camp": ["Our camp is {where}.", "We sleep around our camp, {where}."],
+        "none": ["We have no home yet. We sleep where we can."]
+      },
+      "mood": {
+        "good": ["I am {mood}, and glad of it.", "Life is good. I am {mood}."],
+        "fine": ["I am {mood}, I suppose.", "Well enough. You might say I am {mood}."],
+        "bad": ["I am {mood}. These are hard days.", "Honestly? I am {mood}."],
+        "unknown": ["I am well enough, thank you.", "I cannot complain."],
+        "need": ["Most of all, my [need] troubles me.", "It is my [need] that weighs on me."],
+        "thought": ["What is on my mind? {thought}", "I keep thinking on this: {thought}"]
+      },
+      "needTopic": {
+        "hunger": ["I could do with a proper meal.", "My belly will not stop growling. A bowl of pottage would be a blessing."],
+        "thirst": ["My throat is dry. I need a drink.", "I would give a great deal for clean water."],
+        "sleep": ["I can barely keep my eyes open.", "I need sleep, and soon."],
+        "social": ["I have been lonely. It is good to talk.", "Nobody has spoken to me in a long while."],
+        "nature": ["I miss the open sky and the trees.", "I need a walk under the green boughs."]
+      },
+      "others": {
+        "list": ["I know of {factions}.", "Other folk? {factions}, for a start."],
+        "none": ["I know little of other folk.", "We keep to ourselves. I know no other folk."]
+      },
+      "news": {
+        "event": ["Have you heard? {event}", "Word is going round: {event}"],
+        "none": ["Nothing much has happened hereabouts.", "No news. The days are quiet."]
+      },
+      "faction": {
+        "own": ["We are {faction}, {people}. {count} of us, all told.", "{faction}? That is us. {count} of us, all told."],
+        "leader": ["{leader} leads us.", "We follow {leader}."],
+        "leaderSelf": ["I lead us myself."],
+        "noLeader": ["Nobody leads us yet. We decide together."],
+        "othersHint": ["We keep watch on the [others] around us.", "There are [others] in these lands besides us."],
+        "allied": ["{faction}? Good friends of ours. We would stand with them.", "We are allied with {faction}."],
+        "friendly": ["{faction} treat us fairly.", "{faction}? Decent folk."],
+        "neutral": ["{faction}? We keep to ourselves where they are concerned.", "I have no quarrel with {faction}, and no love for them either."],
+        "hostile": ["I do not trust {faction}. Nobody here does.", "{faction}? Keep an eye on them."],
+        "war": ["{faction} are our enemies.", "We are at war with {faction}. Speak no kind word of them here."]
+      },
+      "bye": {
+        "own": ["Back to work, then.", "Take care."],
+        "friendly": ["Safe roads to you.", "Fare you well."],
+        "wary": ["Good. Go.", "Hmph."],
+        "hostile": ["Out of my sight."],
+        "baby": ["Ba!"]
+      },
+      "chime": {
+        "about": "Companions within range cells of the person spoken to (the player's colonists, not the player's own portrait, not babies or small children). After an answer (or a greeting), first the nearest one the answer concerns speaks, from talk.chime (the line names them, the topic is them or their kin, or a faction they love or hate); otherwise, now and then (chance percent, seeded by the world, the person, the keyword and how often it was asked), one of them makes a remark from the lists here: the topic first, then the person's stance (own, friendly, wary), then any. {speaker} = the person spoken to, {name} = the companion (the same slots as talk.chime).",
+        "chance": 30,
+        "range": 4,
+        "name": ["A fine name. Easy to remember, too.", "I have heard that name spoken at the fire."],
+        "job": ["{speaker} works harder than most, I will say that.", "Honest work. There is no shame in it."],
+        "family": ["Ha! Get {speaker} started on family and we will be here till nightfall.", "A full hearth is a blessing, they say."],
+        "home": ["I know the place. Cold at night, but it is home.", "Good land around there, if you ask me."],
+        "mood": ["Let us not keep {speaker} long. There is rest to be had.", "We all have our bad days."],
+        "others": ["Not all of them can be trusted, mind.", "Every road has neighbours on it, friend or foe."],
+        "news": ["I heard the same tale at the fire last night.", "News travels fast in these parts."],
+        "faction_own": ["We are few, but we are stubborn.", "There are none I would sooner stand with."],
+        "faction_allied": ["They have been good neighbours to us.", "I would share bread with them any day."],
+        "faction_friendly": ["They have been good neighbours to us.", "I would share bread with them any day."],
+        "faction_neutral": ["I have no quarrel with them. Not yet."],
+        "faction_hostile": ["Mind yourself. I would not trust them with a blunt knife.", "Say the word and I will fetch my spear."],
+        "faction_war": ["Mind yourself. I would not trust them with a blunt knife.", "Say the word and I will fetch my spear."],
+        "person": ["I know {person}. A good sort, mostly.", "{person}? We have shared a fire or two."],
+        "own": ["{speaker} is one of the best of us.", "Do not keep {speaker} too long. There is work waiting."],
+        "friendly": ["These folk have treated us fairly.", "A friendly face. Those are rarer than they should be."],
+        "wary": ["Careful. I do not like the look of this one.", "Keep your hand near your blade."],
+        "any": ["Hm.", "Well, well."]
+      }
     }
   },
   "skills": {
@@ -917,5 +1044,34 @@
     "oldRecord": { "levelPerPoint": 4.9, "map": { "woodcutting": ["woodcutting"], "gathering": ["foraging"], "foraging": ["foraging"], "stonework": ["mining"], "building": ["building"], "hauling": ["hauling"], "hunting": ["hunting"], "crafting": ["crafting"], "cooking": ["cooking"], "smelting": ["smithing"], "smithing": ["smithing"], "bowyery": ["fletching"], "fletching": ["fletching"], "tanning": ["leatherwork"], "leatherwork": ["leatherwork"], "carpentry": ["carpentry"], "fighting": ["attack", "strength", "defence"], "archery": ["ranged"] } },
     "chronicle": { "levels": [10, 25, 50, 75, 99], "who": "all", "deathMinTotal": 80, "deathBest": 3, "deathExclude": ["hitpoints"] },
     "speech": { "text": "{skill} level {level}", "kind": "thought", "barkFrames": 180 }
+  },
+  "speech": {
+    "about": "Over-head speech (UF_Speech, VISION V62; added 2026-09-19): remarks, barks, shouts, orders and thoughts float as plain text above the speaker's head, follow them and fade; no bubble, no box. Text is the game font at fontSize px with an outline of outlineWidth (RMMZ's canvas stroke width, centred on the letter edge) in outlineColor, rows lineHeight px apart, at most maxChars characters a row and maxLines rows a line; longer text becomes consecutive lines by the same speaker, in order. A line lasts framesBase + framesPerChar x its characters frames (at most framesMax) unless the caller gives frames; frames are 1/60 s at every game speed and stop while the game is paused. fadeIn/fadeOut: frames. gap: px between the head and the text; spacing: px kept between two lines that would overlap (the later line moves up). maxOnScreen: lines shown at once (the oldest bark gives way first, else the oldest line); maxQueue: lines one speaker keeps waiting. minZoom: below this map zoom no text is shown (the text keeps its screen size at every zoom). headDefault: px above the feet when a speaker's sprite size is unknown. routeBarks: UF_Visuals' barks are drawn by UF_Speech (false = UF_Visuals' own bubble, which fails in this NW.js build for want of the canvas roundRect, so no bark shows). kinds: colour per kind, optional bold/italic. Owner: Claude Code.",
+    "enabled": true,
+    "routeBarks": true,
+    "fontSize": 18,
+    "lineHeight": 21,
+    "outlineColor": "rgba(0, 0, 0, 0.9)",
+    "outlineWidth": 3,
+    "maxChars": 22,
+    "maxLines": 3,
+    "framesBase": 90,
+    "framesPerChar": 4,
+    "framesMax": 480,
+    "fadeIn": 6,
+    "fadeOut": 20,
+    "gap": 4,
+    "spacing": 2,
+    "maxOnScreen": 12,
+    "maxQueue": 6,
+    "minZoom": 0.3,
+    "headDefault": 48,
+    "kinds": {
+      "remark": { "color": "#f4f0e2" },
+      "bark": { "color": "#ffe39f" },
+      "shout": { "color": "#ff9d85", "bold": true },
+      "order": { "color": "#a9d7ff" },
+      "thought": { "color": "#cdc6ea", "italic": true }
+    }
   }
 }

@@ -1,59 +1,52 @@
 //=============================================================================
-// UF_Talk.js - Talk with anyone: keyword conversations built from the simulation
+// UF_Talk.js - Talk with anyone, the old way: portraits, words on the screen, keywords to click
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [UF Talk] Right-click a person and choose Talk: their portrait and words a page at a time, your portrait beside the keywords, nearby companions chiming in. The world pauses while it is open.
+ * @plugindesc [UF Talk] Right-click a person and choose Talk: their portrait and words at the top, yours and the keywords below; companions chime in. The world pauses.
  * @author UF project
  * @base UF_World
  * @base UF_Interact
  * @orderAfter UF_Interact
  *
  * @help
- * Conversations with anyone (VISION V25 and V62, user 2026-09-19), laid out
- * as the classic portrait-and-keywords conversation: right-click a person
- * (one of your colonists or a stranger; never an animal) and choose
- * "Talk to <name>". Three windows at the bottom of the screen:
- *   their window    the person's portrait, name and what they say, shown a
- *                   page at a time: a page with more after it ends in a
- *                   "more" mark; click, Enter, Z or Space turns the page,
- *                   right-click or Esc shows the last page.
- *   your window     the portrait of whoever speaks for you (the colonist
- *                   you have selected, else your faction's ruler, else
- *                   your nearest grown person; an emblem in your colours
- *                   when nobody can) with the keywords beside it. The
- *                   keywords wait (dimmed) until the last page is shown.
- *   a companion     one of your people standing near the person (catalog
- *                   talk.chime.range cells) may chime in with their own
- *                   portrait and line, when the line names them, is about
- *                   their family, or about a faction they love or hate
- *                   (greetings and news: a seeded chance). Their window
- *                   opens above the other two.
- * The keywords:
- *   always     name, job, bye
- *   then       family, home, mood, others, news (when the world has
- *              something to say about them)
- *   and        every person, faction or place a line names becomes a
- *              new keyword (shown highlighted), so a talk leads on.
- * Nothing is scripted: every line is a template from the catalog
- * (data/UF_WorldCatalog.json "talk") filled with names and facts read
- * from the simulation (their faction and its leader, their partner and
- * children, their current job, needs, mood and latest thought, the
- * factions they know and how they feel about them, the newest chronicle
- * event near them). Strangers greet by their faction's relation to yours:
- * friendly, wary, or (hostile) they refuse to talk.
+ * Conversations (VISION V25, V62 as revised 2026-09-19: talk modeled on the
+ * classic portrait-and-keyword conversations). Right-click a person (one of
+ * your colonists or a stranger; never an animal) and choose "Talk to
+ * <name>". The world pauses and the talk is written straight onto the
+ * screen over the map, with no dialog box:
+ *   top left     the other person's portrait, and beside it what they say,
+ *                a page at a time over a faint darkening of the map; a
+ *                "more" mark while pages remain (click, Enter or Space for
+ *                the next page; right-click or Esc for the last one)
+ *   lower left   your portrait (the selected colonist, else your band's
+ *                leader, else your nearest grown person; a shield in your
+ *                colours when nobody can) and beside it your keywords, the
+ *                questions you can ask: name, job and bye first, then every
+ *                topic the other person has mentioned (a partner, their
+ *                leader, a place, a faction, the news, a need...). Click one
+ *                (or arrows and Enter). Asked keywords are dimmed but can be
+ *                asked again.
+ *   middle left  a colonist of yours standing within 4 cells chimes in with
+ *                their own portrait and a line: always when the answer
+ *                concerns them (it names them, their kin, a faction they
+ *                love or hate), otherwise now and then (seeded).
+ * "bye" (or Esc, or a right-click, on the last page) ends the talk: the
+ * farewell floats over the person's head and the world runs again. Hostile
+ * people refuse to talk: their refusal floats over their head and no talk
+ * opens. Babies babble.
  *
- * The world pauses while the window is open (UF.Time.pause) and runs again
- * when it closes, unless it was already paused before.
- * Mouse: click a keyword; right-click or Esc = bye (while a line still has
- * pages: click turns the page, right-click shows the last one). Keys:
- * arrows / WASD move between keywords, Enter / Z / Space choose.
+ * Nothing is scripted: every line is a catalog template
+ * (data/UF_WorldCatalog.json "talk", section "lines" first, then the older
+ * sections) filled with facts read from the simulation.
  *
  * API, state, events and checks: docs/systems/UF_Talk.md
- * Replaced core methods: none (aliases only). Wraps UF.Interact.optionsFor
- * and UF.Interact.handleMouse at runtime and aliases the context menu
- * window's initialize / setOptions, so the Talk option shows in the menu.
+ * Replaced core methods: none (aliases only). Wraps UF.Interact.optionsFor,
+ * UF.Interact.handleMouse and UF.Look.isOverUI at runtime and aliases the
+ * context menu window's initialize / setOptions, so Talk is in the menu.
+ * A capture-phase keydown listener takes Space while a talk is open (so it
+ * turns the page instead of toggling the pause).
  */
 
 (() => {
@@ -65,30 +58,32 @@
     //-------------------------------------------------------------------------
     // Constants (layout and cadence; all wording lives in the catalog "talk" section)
 
-    const PORTRAIT = 144;          // the face frame (RPG Maker face cells are 144x144): the person, and whoever speaks for you
-    const COMP_PORTRAIT = 96;      // a companion who chimes in
-    const MARGIN = 12;             // distance of the windows from the screen edges
-    const GAP = 4;                 // between the windows
-    const MAIN_H = 192;            // the person's window: portrait, name, subtitle, 4 lines a page and the "more" mark
-    const COMP_H = 132;            // the companion's window: small portrait, name, 2 lines a page and the "more" mark
-    const KW_ROWS = 4;             // keyword rows beside your portrait before the list scrolls
-    const KW_COLS = 4;
-    const KW_LINE = 26;
-    const KW_X = PORTRAIT + 12;    // the keywords start right of your portrait
-    const TEXT_FONT = 19;          // speech
+    const FACE = 96;               // portrait frame (the stock face cells are 144x144, drawn scaled)
+    const MARGIN = 16;             // from the screen edges
+    const GAP = 14;                // portrait to text
+    const WORDS_MAX_W = 384;       // the words column beside a portrait (px, including padding; clear of the clock and speed controls at the top right)
+    const PAGE_LINES = 4;          // lines per page
+    const FONT_SIZE = 20;
     const LINE_H = 25;
-    const MORE_H = 16;             // the row under a page that has more after it
-    const INPUT_LOCK = 2;          // frames after a line appears before a click or key can turn its page
-    const CHIME_RANGE = 5;         // cells (Chebyshev) from the person; catalog talk.chime.range
-    const CHIME_CHANCE = 35;       // percent, greetings and news only; catalog talk.chime.chance
-    const BYE_FRAMES = 45;         // the farewell stays on screen this long (after its last page), then the windows close
+    const PAD_X = 10, PAD_Y = 6;   // the darkening around the text
+    const DIM_STEPS = 4;           // feathered darkening: DIM_STEPS nested rects, 2 px apart
+    const DIM_COLOR = "rgba(8,6,4,0.13)";
+    const COMP_Y = MARGIN + FACE + 30;  // the companion slot, below the other person's
+    const KW_FONT = 20, KW_LINE = 28, KW_PAD = 4, KW_GAP = 14, KW_MAX_ROWS = 6;
+    const KW_CACHE = 64;           // keyword word bitmaps kept per screen
+    const INPUT_DELAY = 2;         // frames after a talk opens or an answer appears before input is read (the click that chose it)
+    const CHIME_RANGE = 4;         // cells (Chebyshev) from the person; catalog talk.lines.chime.range, else talk.chime.range
+    const CHIME_CHANCE = 30;       // percent, a remark after an answer; catalog talk.lines.chime.chance, else talk.chime.chance
+    const OH_POOL = 4, OH_W = 380, OH_H = 52, OH_FRAMES = 180, OH_FADE = 30, OH_Z = 900000; // over-head fallback (WORLD_ARCHITECTURE s4: bark z 900000, fog 1e6)
     const SOCIAL_RELIEF = 10;      // how much a talk eases your colonist's social need (when UF_Colonists offers an API for it)
     const SALT_TALK = 0x7a1c;      // template choice
     const SALT_FACE = 0xfa5e;      // portrait choice
-    const SALT_CHIME = 0xc41e;     // whether a companion chimes in on a greeting or news
-    const FACE_CACHE = 24;         // code-drawn portraits kept
-    const STANCE_COLORS = { own: "#86efac", friendly: "#93c5fd", wary: "#fde68a", hostile: "#fca5a5", baby: "#e5e7eb" };
-    const NEW_COLOR = "#ffe28a";
+    const SALT_CHIME = 0xc41e;     // companions chiming in
+    const FONT_FACE = "Georgia, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif";
+    const TEXT_COLOR = "#f4ecd8";
+    const MORE_COLOR = "#e9c874";
+    const FRAME_COLOR = "#b89a5e";
+    const KW_TINT = 0xeee4cc, KW_TINT_ASKED = 0xb9b09c, KW_TINT_HOVER = 0xffd45e;
     const BANNED = /\b(avatar|britannia|guardian|lord british|iolo|dupre|shamino|fellowship|moongate|black ?gate|serpent isle|urist|armok|strange mood|fey mood|dwarf fortress|ultima|beholder|mind flayer|illithid|displacer beast|githyanki)\b/i;
 
     // Used only when the catalog has no "talk" section (a stripped catalog must not break the menu).
@@ -97,12 +92,12 @@
         optionLabel: "Talk to {name}",
         keywords: { name: "name", job: "job", bye: "bye", family: "family", home: "home", mood: "mood", others: "others", news: "news" },
         greet: { own_fine: ["Yes?"], friendly: ["Greetings."], wary: ["What do you want?"] },
-        refuse: ["{name} turns away."],
-        baby: ["The baby babbles."],
+        refuse: ["Begone."],
+        baby: ["Ba!"],
         name: { default: ["I am {name}."] },
-        job: { busy: ["Right now I'm {job}."], idle: ["Nothing just now."] },
-        bye: { own: ["Take care."], friendly: ["Farewell."], wary: ["Go."], hostile: ["Go."], baby: ["The baby waves."] },
-        unknown: ["I don't know anything about that."]
+        job: { busy: ["Just now I am {job}."], idle: ["Nothing just now."] },
+        bye: { own: ["Take care."], friendly: ["Farewell."], wary: ["Go."], hostile: ["Go."], baby: ["Ba!"] },
+        unknown: ["I know nothing of that."]
     };
 
     //-------------------------------------------------------------------------
@@ -118,6 +113,7 @@
     const Time = () => (window.UF && UF.Time) || null;
     const Interact = () => (window.UF && UF.Interact) || null;
     const Look = () => (window.UF && UF.Look) || null;
+    const Camera = () => (window.UF && UF.Camera) || null;
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -145,16 +141,50 @@
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const capFirst = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
     const lowerFirst = s => (s && s.length > 1 && s.charAt(1) === s.charAt(1).toLowerCase() ? s.charAt(0).toLowerCase() + s.slice(1) : s || "");
+    let bitmapsMade = 0;           // every Bitmap this plugin creates (the perf check: none per frame)
+    const newBitmap = (w, h) => {
+        bitmapsMade++;
+        return new Bitmap(Math.max(1, Math.ceil(w)), Math.max(1, Math.ceil(h)));
+    };
+
+    // Image files are checked before ImageManager sees them (a failed load throws at the next scene change).
+    let fsMod = null, pathMod = null, baseDir = "";
+    try {
+        if (typeof require === "function") {
+            fsMod = require("fs");
+            pathMod = require("path");
+            baseDir = (typeof nw !== "undefined" && nw.__dirname) || process.cwd();
+        }
+    } catch (e) {
+        fsMod = null;
+    }
+    const existsCache = new Map();
+    function fileExists(rel) {
+        if (!fsMod) return true;
+        if (existsCache.has(rel)) return existsCache.get(rel);
+        let ok = false;
+        try { ok = fsMod.existsSync(pathMod.join(baseDir, rel)); } catch (e) { ok = false; }
+        existsCache.set(rel, ok);
+        return ok;
+    }
 
     /** The catalog's "talk" section (or the minimal fallback). */
     const T = () => {
         const c = catalog();
         return (c && c.talk) || FALLBACK;
     };
+    /** A template section: talk.lines.<name> first (the portrait-and-keyword lines), then talk.<name> (the older keys), then the fallback. */
+    const L = name => {
+        const t = T();
+        if (t.lines && t.lines[name] !== undefined) return t.lines[name];
+        if (t[name] !== undefined) return t[name];
+        return FALLBACK[name];
+    };
     const word = (key, fallback) => {
         const w = T().words;
         return w && typeof w[key] === "string" ? w[key] : fallback;
     };
+    const keywordLabels = () => Object.assign({}, FALLBACK.keywords, T().keywords || {});
 
     //-------------------------------------------------------------------------
     // Who can talk, and how they feel about the player's faction
@@ -216,10 +246,10 @@
                 st = tier === "allied" || tier === "friendly" ? "friendly" : tier === "hostile" || tier === "war" ? "hostile" : "wary";
             } else st = "wary";
         }
-        if (st === "hostile" && provoked("hostile_refuses")) st = "wary";
+        if (st === "hostile" && provoked("hostile_refuses_over_head")) st = "wary";
         return st;
     }
-    /** How the talk goes: "baby" (babbles), "hostile" (refuses), else the stance. */
+    /** How the talk goes: "baby" (babbles over its head), "hostile" (refuses over its head), else the stance. */
     function modeOf(u) {
         if (stageOf(u) === "baby") return "baby";
         return stanceOf(u);
@@ -238,7 +268,7 @@
     const unitById = id => (World() && typeof id === "number" ? World().unit(id) : null);
     const idOf = v => (v && typeof v === "object" ? v.id : v);
     function partnerOf(u) {
-        if (provoked("topics_from_state")) return null;
+        if (provoked("keywords_grow")) return null;
         const d = u.data || {};
         const direct = unitById(idOf(d.partner));
         if (direct) return direct;
@@ -279,7 +309,6 @@
         return best;
     }
     function leaderOf(u) {
-        if (provoked("topics_from_state")) return null;
         return rulerOf(u.data.faction) || superiorOf(u);
     }
     function membersOf(fid) {
@@ -298,6 +327,32 @@
         const intent = u.data && u.data.intent;
         if (intent && intent.text) return { text: lowerFirst(intent.text), job: null, other: null };
         return null;
+    }
+    /**
+     * The skill a unit is best at (data.skills: a number or { level } per skill), or null: none above 0, or no skill
+     * standing out (all equal, as with the same starting level everywhere).
+     */
+    function bestSkill(u) {
+        const sk = u && u.data ? u.data.skills : null;
+        if (!sk || typeof sk !== "object") return null;
+        let best = null, bestLv = -Infinity, floor = Infinity, count = 0;
+        for (const k of Object.keys(sk).sort()) {
+            const v = sk[k];
+            const lv = typeof v === "number" ? v : v && typeof v.level === "number" ? v.level : null;
+            if (lv === null) continue;
+            count++;
+            floor = Math.min(floor, lv);
+            if (lv > bestLv) { best = k; bestLv = lv; }
+        }
+        return best && bestLv > 0 && (bestLv > floor || count === 1) ? best : null;
+    }
+    /** The unit's trade in words ("a woodcutter", "an archer") from its best skill and talk.lines.trades, or null. */
+    function tradeOf(u) {
+        const k = bestSkill(u);
+        const trades = L("trades") || {};
+        const noun = k && typeof trades[k] === "string" ? trades[k] : null;
+        if (!noun) return null;
+        return `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}`;
     }
     function homeOf(u) {
         const d = u.data || {};
@@ -351,6 +406,15 @@
         const e = list.length ? list[list.length - 1] : null;
         return e && e.text ? e : null;
     }
+    /** The need (hunger, thirst, sleep, social, nature) at or above talk.needAt that presses hardest, or null. */
+    function topNeed(u) {
+        const needs = u && u.data ? u.data.needs : null;
+        if (!needs) return null;
+        const at = typeof T().needAt === "number" ? T().needAt : 60;
+        let top = null;
+        for (const k of Object.keys(needs)) if (typeof needs[k] === "number" && needs[k] >= at && (!top || needs[k] > needs[top])) top = k;
+        return top;
+    }
     const shortName = name => String(name || "").replace(/^the\s+/i, "");
     const inSentence = name => String(name || "").replace(/^The\s+/, "the ");
     function directionWord(dx, dy) {
@@ -370,7 +434,7 @@
     }
 
     //-------------------------------------------------------------------------
-    // Keywords and slots
+    // Keywords, slots and topic words
 
     const personKw = p => ({ id: `person:${p.id}`, label: p.name, topic: "person", ref: p.id });
     const factionKw = f => ({ id: `faction:${f.id}`, label: shortName(f.name), topic: "faction", ref: f.id });
@@ -378,18 +442,54 @@
     const personSlot = p => (p ? { text: p.name, kw: personKw(p) } : null);
     const factionSlot = f => (f ? { text: inSentence(f.name), kw: factionKw(f) } : null);
     const siteSlot = s => (s && s.name ? { text: s.name, kw: siteKw(s) } : null);
+    const needLabel = k => {
+        const w = L("needWords") || {};
+        return typeof w[k] === "string" ? w[k] : k;
+    };
+    /** A topic keyword: family, home, mood, others, news, or need:<need>. */
+    function topicKw(id) {
+        const [topic, ref] = id.split(":");
+        if (topic === "need") return { id, label: needLabel(ref), topic: "need", ref };
+        return { id, label: keywordLabels()[topic] || topic, topic, ref: null };
+    }
+
+    // What the speaker of the line being built has something on (the [topic] words a template may use).
+    let ctx = { avail: new Set(), need: null };
+    function contextFor(u) {
+        const avail = new Set();
+        const d = u.data || {};
+        const st = stageOf(u);
+        if (partnerOf(u) || childrenOf(u).length || motherOf(u) || fatherOf(u) || st === "adult" || st === "elder") avail.add("family");
+        if (homeOf(u)) avail.add("home");
+        if (d.mood || d.needs || (Array.isArray(d.thoughts) && d.thoughts.length)) avail.add("mood");
+        if (knownFactions(u).length) avail.add("others");
+        if (newsFor(u)) avail.add("news");
+        const need = topNeed(u);
+        if (need) avail.add("need");
+        return { avail, need };
+    }
 
     const SLOT_RE = /\{(\w+)\}/g;
+    const MARK_RE = /\[([^\]|]+)(?:\|([^\]]+))?\]/g;
     const slotsIn = tpl => Array.from(String(tpl).matchAll(SLOT_RE), m => m[1]);
+    const marksIn = tpl => Array.from(String(tpl).matchAll(MARK_RE), m => (m[2] || m[1]).trim());
     const has = (slots, k) => slots[k] !== undefined && slots[k] !== null && !(Array.isArray(slots[k]) && !slots[k].length);
     function listJoin(texts) {
         if (texts.length <= 1) return texts.join("");
         return `${texts.slice(0, -1).join(", ")} ${word("and", "and")} ${texts[texts.length - 1]}`;
     }
-    /** Fill a template; every slot that names someone or something pushes its keyword into `adds`. */
+    const opensSentence = before => !before || /[.?!"]$/.test(before);
+    /** Fill a template: [topic] words (the topic joins the keywords) and {slots} (a slot naming someone adds that keyword). */
     function fill(tpl, slots, adds) {
-        const src = String(tpl);
-        return src.replace(SLOT_RE, (m, key, offset) => {
+        const marked = String(tpl).replace(MARK_RE, (m, a, b) => {
+            let topic = (b || a).trim();
+            if (topic === "need") topic = ctx.need ? `need:${ctx.need}` : null;
+            if (!topic) return m;
+            const kw = topicKw(topic);
+            adds.push(kw);
+            return b ? a : kw.label;
+        });
+        return marked.replace(SLOT_RE, (m, key, offset) => {
             const s = slots[key];
             if (s === undefined || s === null) return m;
             let text;
@@ -401,21 +501,26 @@
                 if (s.kw) adds.push(s.kw);
                 text = String(s.text);
             }
-            // A name that opens a sentence ("Greetings. The ... are welcome") starts with a capital.
-            const before = src.slice(0, offset).trimEnd();
-            return (!before || /[.?!"]$/.test(before)) && !provoked("lines_well_formed") ? capFirst(text) : text;
+            // A name that opens a sentence ("Good morrow. The ... are welcome") starts with a capital.
+            return opensSentence(marked.slice(0, offset).trimEnd()) && !provoked("lines_well_formed") ? capFirst(text) : text;
         });
     }
     /**
-     * One sentence from a template list: section[variant] for the first variant with a usable template (all its slots
-     * known), chosen by hash32(seed, unit, topic, n) so the same question gets the same answer until it is asked again.
+     * One sentence from a template section: section[variant] for the first variant with a usable template (its slots
+     * known and its [topic] words available), chosen by hash32(seed, unit, salt, section.key, n), so the same question
+     * gets the same answer until it is asked again.
      */
     function say(section, variants, slots, unit, key, n, adds) {
-        const sec = T()[section] !== undefined ? T()[section] : FALLBACK[section];
-        const usable = list => (Array.isArray(list) ? list.filter(t => typeof t === "string" && slotsIn(t).every(k => has(slots, k))) : []);
+        return sayIn(L(section), section, variants, slots, unit, key, n, adds);
+    }
+    /** say() on a given template section object; `label` names it in the choice hash. */
+    function sayIn(sec, section, variants, slots, unit, key, n, adds) {
+        const usable = list => (Array.isArray(list)
+            ? list.filter(t => typeof t === "string" && slotsIn(t).every(k => has(slots, k)) && marksIn(t).every(k => ctx.avail.has(k)))
+            : []);
         let list = [];
         if (Array.isArray(sec)) list = usable(sec);
-        else if (sec) {
+        else if (sec && typeof sec === "object") {
             for (const v of variants) {
                 list = usable(sec[v]);
                 if (list.length) break;
@@ -442,35 +547,56 @@
         }
         return say("greet", [mode, "wary"], slots, u, "greet", n, adds);
     }
+    /** The rank title (V52): data.title, else talk.lines.titles.ruler / .leader by gender. */
+    function titleOf(u) {
+        const d = (u && u.data) || {};
+        const rank = d.rank | 0;
+        if (rank < 1) return null;
+        if (typeof d.title === "string" && d.title) return d.title;
+        const titles = L("titles") || {};
+        const t = titles[rank >= 2 ? "ruler" : "leader"];
+        if (!t) return rank >= 2 ? "ruler" : "leader";
+        return typeof t === "string" ? t : t[d.gender === "female" ? "female" : "male"] || t.male || null;
+    }
     function nameLine(u, n, adds) {
         const d = u.data || {};
         const f = factionOf(u);
         const stage = stageOf(u);
-        const variants = [];
-        if ((d.rank | 0) >= 2) variants.push("ruler");
-        else if ((d.rank | 0) === 1) variants.push("leader");
-        if (stage === "child" || stage === "teen") variants.push("child");
-        variants.push(f ? "default" : "nofaction", "nofaction");
-        const name = provoked("name_and_job") ? "someone" : u.name;
-        return say("name", variants, { name, faction: factionSlot(f) }, u, "name", n, adds);
+        const base = [];
+        if ((d.rank | 0) >= 2) base.push("ruler");
+        else if ((d.rank | 0) === 1) base.push("leader");
+        if (stage === "child" || stage === "teen") base.push("child");
+        base.push(f ? "default" : "nofaction", "nofaction");
+        const variants = stanceOf(u) === "wary" ? base.map(v => `wary_${v}`).concat(base) : base;
+        const name = provoked("name_job_bye") ? "someone" : u.name;
+        const parts = [say("name", variants, { name, title: titleOf(u), faction: factionSlot(f) }, u, "name", n, adds)];
+        if ((stage === "adult" || stage === "elder") && (partnerOf(u) || childrenOf(u).length)) parts.push(say("name", ["family"], {}, u, "name.family", n, adds));
+        return join(parts);
     }
     function jobLine(u, n, adds) {
         const d = u.data || {};
-        const doing = provoked("name_and_job") ? { text: "working", other: null } : doingOf(u);
+        const doing = provoked("name_job_bye") ? { text: "working", other: null } : doingOf(u);
         const parts = [];
         if (doing) parts.push(say("job", ["busy"], { job: { text: doing.text, kw: doing.other ? personKw(doing.other) : null }, name: u.name }, u, "job", n, adds));
         else parts.push(say("job", ["idle"], { name: u.name }, u, "job", n, adds));
+        const stage = stageOf(u);
+        const trade = tradeOf(u);
+        if (trade) parts.push(say("job", ["trade"], { trade }, u, "job.trade", n, adds));
+        else if (stage === "adult" || stage === "elder") parts.push(say("job", ["noTrade"], {}, u, "job.trade", n, adds));
         const rank = d.rank | 0;
         if (rank >= 2) parts.push(say("job", ["ruler"], { faction: factionSlot(factionOf(u)) }, u, "job.role", n, adds));
         else if (rank === 1) parts.push(say("job", ["leader"], {}, u, "job.role", n, adds));
-        const sup = provoked("topics_from_state") ? null : superiorOf(u);
+        const sup = superiorOf(u);
         if (sup && rank < 2) parts.push(say("job", ["superior"], { superior: personSlot(sup) }, u, "job.superior", n, adds));
+        if (ctx.avail.has("home")) parts.push(say("job", ["home"], {}, u, "job.home", n, adds));
+        if (ctx.need) parts.push(say("job", ["need"], {}, u, "job.need", n, adds));
+        else if (ctx.avail.has("mood") && isOwn(u)) parts.push(say("job", ["moodHint"], {}, u, "job.mood", n, adds));
         return join(parts);
     }
     function familyLine(u, n, adds) {
         const parts = [];
         const partner = partnerOf(u);
-        const kids = provoked("topics_from_state") ? [] : childrenOf(u);
+        const kids = childrenOf(u);
         const stage = stageOf(u);
         if (partner) parts.push(say("family", ["partner"], { partner: personSlot(partner) }, u, "family.partner", n, adds));
         else if (stage === "adult" || stage === "elder") parts.push(say("family", ["noPartner"], {}, u, "family.partner", n, adds));
@@ -478,7 +604,7 @@
             const slots = { children: kids.map(personSlot), count: kids.length };
             parts.push(say("family", kids.length === 1 ? ["child", "children"] : ["children"], slots, u, "family.children", n, adds));
         } else if (stage === "adult" || stage === "elder") parts.push(say("family", ["noChildren"], {}, u, "family.children", n, adds));
-        const mother = provoked("topics_from_state") ? null : motherOf(u), father = provoked("topics_from_state") ? null : fatherOf(u);
+        const mother = motherOf(u), father = fatherOf(u);
         if (mother) parts.push(say("family", ["mother"], { mother: personSlot(mother) }, u, "family.mother", n, adds));
         if (father) parts.push(say("family", ["father"], { father: personSlot(father) }, u, "family.father", n, adds));
         return join(parts) || say("family", ["none", "noPartner"], {}, u, "family", n, adds);
@@ -503,16 +629,13 @@
         const parts = [];
         const band = moodBand(u);
         if (band) parts.push(say("mood", [band, "fine"], { mood: String(d.mood).toLowerCase() }, u, "mood", n, adds));
-        const needs = d.needs || null;
-        if (needs) {
-            const at = typeof T().needAt === "number" ? T().needAt : 60;
-            let top = null;
-            for (const k of Object.keys(needs)) if (typeof needs[k] === "number" && needs[k] >= at && (!top || needs[k] > needs[top])) top = k;
-            if (top) parts.push(say("needs", [top], {}, u, `needs.${top}`, n, adds));
-        }
+        if (ctx.need) parts.push(say("mood", ["need"], {}, u, "mood.need", n, adds));
         const thought = Array.isArray(d.thoughts) && d.thoughts[0] && d.thoughts[0].text ? d.thoughts[0].text : null;
         if (thought) parts.push(say("mood", ["thought"], { thought }, u, "mood.thought", n, adds));
         return join(parts) || say("mood", ["unknown"], {}, u, "mood", n, adds);
+    }
+    function needLine(u, need, n, adds) {
+        return say("needTopic", [need], {}, u, `need:${need}`, n, adds) || say("needs", [need], {}, u, `need:${need}`, n, adds);
     }
     function othersLine(u, n, adds) {
         const list = knownFactions(u);
@@ -546,6 +669,7 @@
             if (leader && leader.id === u.id) parts.push(say("faction", ["leaderSelf"], {}, u, "faction.leader", n, adds));
             else if (leader) parts.push(say("faction", ["leader"], { leader: personSlot(leader) }, u, "faction.leader", n, adds));
             else parts.push(say("faction", ["noLeader"], {}, u, "faction.leader", n, adds));
+            if (ctx.avail.has("others")) parts.push(say("faction", ["othersHint"], {}, u, "faction.others", n, adds));
             return join(parts);
         }
         const tier = mine ? F.tierBetween(mine, f.id).id : "neutral";
@@ -561,9 +685,9 @@
         if (childrenOf(u).some(c => c.id === p.id)) rels.push("child");
         if (u.data.motherId === p.id) rels.push("mother");
         if (u.data.fatherId === p.id) rels.push("father");
-        const ruler = provoked("topics_from_state") ? null : rulerOf(u.data.faction);
+        const ruler = rulerOf(u.data.faction);
         if (ruler && ruler.id === p.id) rels.push("leader");
-        const sup = provoked("topics_from_state") ? null : superiorOf(u);
+        const sup = superiorOf(u);
         if (sup && sup.id === p.id) rels.push("superior");
         const mine = resolveFaction(u.data.faction);
         if (mine && resolveFaction(p.data && p.data.faction) === mine) rels.push("kin");
@@ -582,52 +706,53 @@
         return say("bye", [mode, "wary"], { name: u.name }, u, "bye", n, adds);
     }
 
-    /** The line for a keyword id ("name", "job", "family", "faction:f2", "person:17", "site:4", "greet", "bye", ...). */
+    /** The line for a keyword id ("name", "job", "family", "need:hunger", "faction:f2", "person:17", "site:4", "greet", "bye", ...). */
     function lineFor(unitOrId, key, n = 0, label = "") {
         const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
         const adds = [];
         if (!u) return { text: "", adds, key };
-        const [topic, ref] = String(key).split(":");
-        const refId = ref !== undefined && /^\d+$/.test(ref) ? Number(ref) : ref;
-        let text = "";
-        switch (topic) {
-            case "greet": text = greetLine(u, n, adds); break;
-            case "name": text = nameLine(u, n, adds); break;
-            case "job": text = jobLine(u, n, adds); break;
-            case "family": text = familyLine(u, n, adds); break;
-            case "home": text = homeLine(u, n, adds); break;
-            case "mood": text = moodLine(u, n, adds); break;
-            case "others": text = othersLine(u, n, adds); break;
-            case "news": text = newsLine(u, n, adds); break;
-            case "faction": text = factionLine(u, refId, n, adds); break;
-            case "person": text = personLine(u, refId, n, adds, label); break;
-            case "site": text = siteLine(u, refId, n, adds); break;
-            case "bye": text = byeLine(u, n, adds); break;
-            default: text = say("unknown", [], {}, u, String(key), n, adds);
+        const saved = ctx;
+        ctx = contextFor(u);
+        try {
+            const [topic, ref] = String(key).split(":");
+            const refId = ref !== undefined && /^\d+$/.test(ref) ? Number(ref) : ref;
+            let text = "";
+            switch (topic) {
+                case "greet": text = greetLine(u, n, adds); break;
+                case "name": text = nameLine(u, n, adds); break;
+                case "job": text = jobLine(u, n, adds); break;
+                case "family": text = familyLine(u, n, adds); break;
+                case "home": text = homeLine(u, n, adds); break;
+                case "mood": text = moodLine(u, n, adds); break;
+                case "need": text = needLine(u, String(ref), n, adds); break;
+                case "others": text = othersLine(u, n, adds); break;
+                case "news": text = newsLine(u, n, adds); break;
+                case "faction": text = factionLine(u, refId, n, adds); break;
+                case "person": text = personLine(u, refId, n, adds, label); break;
+                case "site": text = siteLine(u, refId, n, adds); break;
+                case "bye": text = byeLine(u, n, adds); break;
+                default: text = say("unknown", [], {}, u, String(key), n, adds);
+            }
+            if (!text) text = say("unknown", [], {}, u, String(key), n, adds);
+            if (provoked("no_banned_words")) text += ` ${"Ava" + "tar"}`;
+            if (provoked("lines_well_formed")) text += " {unfilled}";
+            if (provoked("keywords_grow")) adds.length = 0;
+            return { text, adds, key: String(key) };
+        } finally {
+            ctx = saved;
         }
-        if (!text) text = say("unknown", [], {}, u, String(key), n, adds);
-        if (provoked("no_banned_words")) text += ` ${"Ava" + "tar"}`;
-        if (provoked("lines_well_formed")) text += " {unfilled}";
-        return { text, adds, key: String(key) };
     }
 
-    /** The keywords a talk starts with: name, job, then the topics the world has something on, bye last. */
-    function initialKeywords(u, mode) {
-        const K = Object.assign({}, FALLBACK.keywords, T().keywords || {});
+    /** The keywords a talk starts with: name, job and bye (the greeting's topic words join after them). */
+    function initialKeywords() {
+        const K = keywordLabels();
         const kw = id => ({ id, label: K[id] || id, topic: id, ref: null, asked: false, isNew: false });
-        if (mode === "hostile" || mode === "baby") return [kw("bye")];
-        const list = [kw("name"), kw("job"), kw("family")];
-        if (homeOf(u)) list.push(kw("home"));
-        const d = u.data || {};
-        if (d.mood || d.needs || (Array.isArray(d.thoughts) && d.thoughts.length)) list.push(kw("mood"));
-        if (knownFactions(u).length) list.push(kw("others"));
-        if (newsFor(u)) list.push(kw("news"));
-        list.push(kw("bye"));
-        return list;
+        if (provoked("name_job_bye")) return [kw("bye"), kw("name"), kw("job")];
+        return [kw("name"), kw("job"), kw("bye")];
     }
 
     //-------------------------------------------------------------------------
-    // Who speaks for you, and the companions who may chime in (V62)
+    // Who speaks for you, and the companions who chime in (V62)
 
     /** Where a unit stands now: its event's cell on the map on screen, else its world cell. */
     function cellNow(v) {
@@ -635,21 +760,22 @@
         const ev = W && W.eventOf ? W.eventOf(v.id) : null;
         return ev ? { x: ev.x, y: ev.y } : { x: v.x, y: v.y };
     }
-    const cellDist = (a, b) => {
+    const cheb = (a, b) => {
         const p = cellNow(a), q = cellNow(b);
         return Math.max(Math.abs(p.x - q.x), Math.abs(p.y - q.y));
     };
     /** One of yours who can speak: talkable, not a baby, not the person spoken to. */
     const canSpeakFor = (v, u) => !!v && !!v.data && (!u || v.id !== u.id) && isOwn(v) && isTalkable(v) && stageOf(v) !== "baby";
     /**
-     * Whoever speaks for you in a talk with `u` (there is no protagonist, V4): the colonist you have selected, else your
-     * faction's ruler, else your nearest grown person in the area. `{ unit, from }`, or null (nobody: an emblem is drawn).
+     * Whoever speaks for you in a talk with `u` (there is no protagonist, V4): the colonist selected in the Overseer,
+     * else your faction's ruler (the band leader), else your nearest grown person in the area. `{ unit, from }`, or
+     * null (nobody: your portrait is then an emblem in your faction's colour).
      */
-    function voiceOf(u) {
-        if (provoked("player_portrait")) return null;
+    function voiceOf(unitOrId) {
+        const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
         const cm = window.$colonyManager;
-        const s = cm && cm.selectedColonist ? cm.selectedColonist : null;
-        const sel = s ? (s.unit && s.unit.data ? s.unit : unitById(s.id)) : null;
+        const s = cm && cm.selectedColonist && !provoked("voice") ? cm.selectedColonist : null;
+        const sel = s ? unitById(s.id) : null;
         if (canSpeakFor(sel, u)) return { unit: sel, from: "selected" };
         const r = rulerOf(playerFactionId() || "player");
         if (canSpeakFor(r, u)) return { unit: r, from: "ruler" };
@@ -658,94 +784,144 @@
         let best = null, bd = Infinity;
         for (const v of W.units()) {
             if (!canSpeakFor(v, u) || !sameArea(v.area, u.area) || !["adult", "elder"].includes(stageOf(v))) continue;
-            const d = cellDist(v, u);
+            const d = cheb(v, u);
             if (d < bd || (d === bd && v.id < best.id)) { best = v; bd = d; }
         }
         return best ? { unit: best, from: "nearest" } : null;
     }
     const numOr = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
-    const chimeConf = () => {
-        const c = T().chime || {};
-        return { range: numOr(c.range, CHIME_RANGE), chance: numOr(c.chance, CHIME_CHANCE) };
+    /** The companions' two template sets: talk.chime (lines about a companion) and talk.lines.chime (remarks). */
+    const aboutThem = () => {
+        const c = T().chime;
+        return c && typeof c === "object" && !Array.isArray(c) ? c : {};
     };
-    /** Your people standing within talk.chime.range cells of `u` (not `u`, not your voice, not babies), nearest first. */
-    function companionsOf(u, voiceId) {
+    const remarks = () => {
+        const c = T().lines && T().lines.chime;
+        return c && typeof c === "object" && !Array.isArray(c) ? c : {};
+    };
+    const chimeRange = () => numOr(remarks().range, numOr(aboutThem().range, CHIME_RANGE));
+    const chimeChance = () => numOr(remarks().chance, numOr(aboutThem().chance, CHIME_CHANCE));
+    /** The player's colonists (not the person, not whoever speaks for you, not babies or small children) within range, nearest first. */
+    function companionsNear(unitOrId, voiceId = null) {
+        const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
         const W = World();
-        if (!W || !u) return [];
-        const { range } = chimeConf();
+        if (!u || !W) return [];
+        const r = chimeRange();
         const out = [];
         for (const v of W.units()) {
-            if (v.id === u.id || v.id === voiceId || !canSpeakFor(v, u) || !sameArea(v.area, u.area)) continue;
-            const d = cellDist(v, u);
-            if (d <= range) out.push({ v, d });
+            if (v.id === voiceId || !canSpeakFor(v, u) || stageOf(v) === "child" || !sameArea(v.area, u.area) || !W.eventOf(v.id)) continue;
+            const d = cheb(v, u);
+            if (d <= r) out.push({ v, d });
         }
         out.sort((a, b) => a.d - b.d || a.v.id - b.v.id);
         return out.map(e => e.v);
     }
+    const withCtx = fn => {
+        const saved = ctx;
+        ctx = { avail: new Set(), need: null };
+        try { return fn(); } finally { ctx = saved; }
+    };
+    const provokeText = text => {
+        if (text && provoked("no_banned_words")) text += ` ${"Ava" + "tar"}`;
+        if (text && provoked("lines_well_formed")) text += " {unfilled}";
+        return text;
+    };
     /**
-     * A companion's line after `u` answered `key` (the n-th time), or null. The first companion (nearest first) with
-     * something to say speaks: the line names them ("named"), the topic is them ("self") or their partner, child,
-     * mother or father, or a faction yours is allied or friendly with ("factionGood") or hostile or at war with
-     * ("factionBad"); on a stranger's greeting ("greetFriendly", "greetWary") and on news ("news") only by a seeded
-     * chance (talk.chime.chance percent). Never on bye, never in a hostile or baby talk.
+     * What companion c says when the answer concerns them (talk.chime): the topic is them ("self"), the line names them
+     * ("named"), the topic is their partner, child, mother or father, or a faction theirs is friendly or allied with
+     * ("factionGood") or hostile to or at war with ("factionBad"). { variants, text, adds } or null.
      */
-    function chimeFor(unitOrId, key, n, lineAdds, voiceId) {
-        const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
-        if (!u || provoked("companion_chimes")) return null;
-        const sec = T().chime;
-        if (!sec || typeof sec !== "object") return null;
-        const mode = modeOf(u);
-        if (mode === "hostile" || mode === "baby") return null;
+    function chimeAbout(c, u, key, n, lineAdds) {
         const [topic, ref] = String(key).split(":");
-        if (topic === "bye") return null;
         const refId = ref !== undefined && /^\d+$/.test(ref) ? Number(ref) : ref;
-        const { chance } = chimeConf();
         const named = new Set((lineAdds || []).filter(a => a && a.topic === "person").map(a => a.ref));
-        const F = Factions();
-        for (const c of companionsOf(u, voiceId)) {
-            const variants = [];
-            const slots = { name: c.name, speaker: personSlot(u) };
-            let byChance = false;
-            if (topic === "person" && refId === c.id) variants.push("self");
-            else if (named.has(c.id)) variants.push("named");
-            if (topic === "person" && refId !== c.id) {
-                const p = unitById(refId);
-                if (p) {
-                    slots.person = personSlot(p);
-                    const partner = partnerOf(c);
-                    if (partner && partner.id === p.id) variants.push("partner");
-                    if (childrenOf(c).some(k => k.id === p.id)) variants.push("child");
-                    if (c.data.motherId === p.id) variants.push("mother");
-                    if (c.data.fatherId === p.id) variants.push("father");
-                }
+        const variants = [];
+        const slots = { name: c.name, speaker: personSlot(u) };
+        if (topic === "person" && refId === c.id) variants.push("self");
+        else if (named.has(c.id)) variants.push("named");
+        if (topic === "person" && refId !== c.id) {
+            const p = unitById(refId);
+            if (p) {
+                slots.person = personSlot(p);
+                const partner = partnerOf(c);
+                if (partner && partner.id === p.id) variants.push("partner");
+                if (childrenOf(c).some(k => k.id === p.id)) variants.push("child");
+                if (c.data.motherId === p.id) variants.push("mother");
+                if (c.data.fatherId === p.id) variants.push("father");
             }
-            if (topic === "faction" && F && F.get) {
-                const f = F.get(refId);
-                const mine = resolveFaction(c.data.faction);
-                if (f && mine && f.id !== mine) {
-                    const tier = F.tierBetween(mine, f.id).id;
-                    slots.faction = factionSlot(f);
-                    if (tier === "war" || tier === "hostile") variants.push("factionBad");
-                    else if (tier === "allied" || tier === "friendly") variants.push("factionGood");
-                }
-            }
-            if (!variants.length) {
-                if (topic === "greet" && !isOwn(u)) variants.push(mode === "friendly" ? "greetFriendly" : "greetWary");
-                else if (topic === "news") variants.push("news");
-                byChance = variants.length > 0;
-            }
-            if (!variants.length) continue;
-            if (byChance && hash32(seed(), c.id, SALT_CHIME, strHash(String(key)), u.id, n | 0) % 100 >= chance) continue;
-            const adds = [];
-            const text = say("chime", variants, slots, c, `chime.${key}`, n, adds);
-            if (text) return { unitId: c.id, name: c.name, variants, text, adds, portrait: portraitOf(c) };
         }
-        return null;
+        const F = Factions();
+        if (topic === "faction" && F && F.get) {
+            const f = F.get(refId);
+            const mine = resolveFaction(c.data.faction);
+            if (f && mine && f.id !== mine) {
+                const tier = F.tierBetween(mine, f.id).id;
+                slots.faction = factionSlot(f);
+                if (tier === "war" || tier === "hostile") variants.push("factionBad");
+                else if (tier === "allied" || tier === "friendly") variants.push("factionGood");
+            }
+        }
+        if (!variants.length) return null;
+        const adds = [];
+        const text = withCtx(() => sayIn(aboutThem(), "chime", variants, slots, c, `about.${key}`, n, adds));
+        return text ? { variants, text: provokeText(text), adds } : null;
+    }
+    /** A remark by companion c about the topic or the person (talk.lines.chime): the topic's lines, then the person's stance, then any. */
+    function chimeRemark(c, u, key, n) {
+        const [topic, ref] = String(key).split(":");
+        const variants = [];
+        const slots = { name: c.name, speaker: personSlot(u) };
+        if (topic === "faction") {
+            const F = Factions();
+            const f = F && F.get ? F.get(ref) : null;
+            const mine = resolveFaction(u.data && u.data.faction);
+            const theirs = resolveFaction(c.data && c.data.faction);
+            if (f) {
+                slots.faction = factionSlot(f);
+                if (f.id === mine && mine === theirs) variants.push("faction_own");
+                else if (theirs && f.id !== theirs) variants.push(`faction_${F.tierBetween(theirs, f.id).id}`);
+            }
+        } else if (topic === "person") {
+            const p = unitById(Number(ref));
+            if (p && p.id !== c.id) {
+                slots.person = personSlot(p);
+                variants.push("person");
+            }
+        } else if (topic === "need") variants.push("mood");
+        else if (topic === "site") variants.push("home");
+        else if (topic !== "greet") variants.push(topic);
+        variants.push(stanceOf(u), "any");
+        const adds = [];
+        const text = withCtx(() => sayIn(remarks(), "chime.remark", variants, slots, c, `${u.id}.${key}`, n, adds));
+        return text ? { variants, text: provokeText(text), adds } : null;
+    }
+    /**
+     * What a companion says after the person answered keyword `key` (the n-th time; "greet" for the greeting), or null.
+     * Pure and seeded. First the nearest companion the answer concerns (chimeAbout); otherwise, by a seeded chance
+     * (talk.lines.chime.chance percent, hash32(seed, person, 0xc41e, key, n)), a remark by one of them picked by the
+     * same hash (chimeRemark). Never on bye, never in a hostile or baby talk. { unitId, name, variants, text, adds, why }.
+     */
+    function chimeFor(unitOrId, key, n = 0, lineAdds = [], voiceId = null) {
+        const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
+        if (!u || provoked("companion_chimes_in")) return null;
+        const mode = modeOf(u);
+        if (key === "bye" || mode === "hostile" || mode === "baby") return null;
+        const comps = companionsNear(u, voiceId);
+        if (!comps.length) return null;
+        for (const c of comps) {
+            const r = chimeAbout(c, u, key, n, lineAdds);
+            if (r) return Object.assign({ unitId: c.id, name: c.name, why: "about them" }, r);
+        }
+        const h = strHash(String(key));
+        if (hash32(seed(), u.id, SALT_CHIME, h, n | 0) % 100 >= chimeChance()) return null;
+        const c = comps[hash32(seed(), u.id, SALT_CHIME, h, n | 0, 1) % comps.length];
+        const r = chimeRemark(c, u, key, n);
+        return r ? Object.assign({ unitId: c.id, name: c.name, why: "remark" }, r) : null;
     }
 
     //-------------------------------------------------------------------------
-    // Portraits: data.face, then catalog.faces (the character sheet's key, V49), then talk.portraits (stock
-    // placeholders), else a code-drawn bust (UF_GenFace).
+    // Portraits: data.face, then catalog.faces (AR-700, when it exists), then catalog.sheet.faces (the same pick as
+    // UF_Sheet's panel), then talk.portraits (stock placeholders), else a code-drawn silhouette (UF_GenFace).
 
     function faceList(list) {
         const out = [];
@@ -761,7 +937,8 @@
             if (typeof e === "string") {
                 const [sheet, index] = e.split(":");
                 push(sheet, Number(index));
-            } else if (e && e.sheet) {
+            } else if (Array.isArray(e)) push(e[0], e[1]);
+            else if (e && e.sheet) {
                 if (Array.isArray(e.indices)) e.indices.forEach(i => push(e.sheet, i));
                 else push(e.sheet, e.index);
             }
@@ -778,23 +955,42 @@
         }
         return [];
     }
+    const faceOk = f => !!f && fileExists(`img/faces/${f.sheet}.png`);
     function portraitOf(u) {
         const d = (u && u.data) || {};
-        if (d.face && d.face.sheet) return { kind: "face", sheet: d.face.sheet, index: d.face.index | 0, from: "data.face" };
+        if (d.face && d.face.sheet && faceOk(d.face)) return { kind: "face", sheet: String(d.face.sheet), index: d.face.index | 0, from: "data.face" };
         const cat = catalog() || {};
         const g = d.gender === "female" ? "female" : "male";
         const stage = stageOf(u);
-        const pick = (list, from) => {
-            if (!list.length) return null;
-            const f = list[hash32(seed(), u.id, SALT_FACE) % list.length];
+        const pickHash = (list, from) => {
+            const ok = list.filter(faceOk);
+            if (!ok.length) return null;
+            const f = ok[hash32(seed(), u.id, SALT_FACE) % ok.length];
             return { kind: "face", sheet: f.sheet, index: f.index, from };
         };
-        const bySpecies = (root, from) => (root && d.species && root[d.species] ? pick(stagedFaces(root[d.species][g], stage), from) : null);
-        return bySpecies(cat.faces, "catalog.faces") || bySpecies(T().portraits, "catalog.talk.portraits")
-            || { kind: "gen", name: `UF_GenFace_${u.id}`, from: "code" };
+        if (cat.faces && d.species && cat.faces[d.species]) {
+            const p = pickHash(stagedFaces(cat.faces[d.species][g], stage), "catalog.faces");
+            if (p) return p;
+        }
+        // UF_Sheet's rule (docs/systems/UF_Sheet.md, Face): <stage>_<gender>, <gender>, any; unit.id mod the list.
+        const sf = cat.sheet && cat.sheet.faces && d.species ? cat.sheet.faces[d.species] : null;
+        if (sf && typeof sf === "object") {
+            const gl = String(d.gender || "any").toLowerCase();
+            const list = (d.stage && sf[`${String(d.stage).toLowerCase()}_${gl}`]) || sf[gl] || sf.any || null;
+            const ok = faceList(list).filter(faceOk);
+            if (ok.length) {
+                const f = ok[Math.abs(u.id | 0) % ok.length];
+                return { kind: "face", sheet: f.sheet, index: f.index, from: "catalog.sheet.faces" };
+            }
+        }
+        const tp = T().portraits;
+        if (tp && d.species && tp[d.species]) {
+            const p = pickHash(stagedFaces(tp[d.species][g], stage), "catalog.talk.portraits");
+            if (p) return p;
+        }
+        return { kind: "gen", name: "UF_GenFace", from: "code" };
     }
 
-    const faceCache = new Map();
     const hexRgb = hex => {
         const n = parseInt(String(hex || "#ffffff").replace("#", ""), 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -802,77 +998,64 @@
     const rgbHex = ([r, g, b]) => `#${[r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("")}`;
     const mulColor = (a, b) => rgbHex(hexRgb(a).map((v, i) => (v * hexRgb(b)[i]) / 255));
     const shade = (hex, f) => rgbHex(hexRgb(hex).map(v => v * f));
-    /** A code-drawn head-and-shoulders portrait: species tint on the skin, faction colour on the clothes, hair by gender and age. */
-    function genFace(u) {
-        const d = u.data || {};
-        const stage = stageOf(u);
-        const key = `${u.id}:${stage}:${d.gender}:${d.species}`;
-        if (faceCache.has(key)) return faceCache.get(key);
-        const S = PORTRAIT;
-        const b = new Bitmap(S, S);
-        const c = b.context;
+    /** A code-drawn head-and-shoulders silhouette (UF_GenFace): species tint, faction colour on the shoulders, hair by gender and age. */
+    function drawGenFace(bitmap, u, x, y, S) {
+        const c = bitmap.context;
+        const d = (u && u.data) || {};
+        const stage = u ? stageOf(u) : "adult";
         const people = (catalog() && catalog().people) || {};
         const tint = people[d.species] && people[d.species].tint ? people[d.species].tint : "#ffffff";
-        const skin = mulColor("#c99f7b", tint);
-        const f = factionOf(u);
-        const cloth = shade(f && f.color ? f.color : "#8a7050", 0.55);
+        const skin = shade(mulColor("#b08a6a", tint), 0.8);
+        const f = u ? factionOf(u) : null;
+        const cloth = shade(f && f.color ? f.color : "#6a5a44", 0.5);
         const hairs = ["#2b1d14", "#4a3020", "#6e4b2a", "#1c1b1a", "#8a6a3c", "#7a3a22"];
-        const hair = stage === "elder" ? "#bdb8ae" : hairs[hash32(seed(), u.id, SALT_FACE, 1) % hairs.length];
+        const hair = stage === "elder" ? "#aaa59a" : hairs[hash32(seed(), u ? u.id : 0, SALT_FACE, 1) % hairs.length];
         const long = d.gender === "female";
         const scale = stage === "baby" ? 0.62 : stage === "child" ? 0.78 : stage === "teen" ? 0.9 : 1;
-        const grad = c.createLinearGradient(0, 0, 0, S);
-        grad.addColorStop(0, "#3b352d");
-        grad.addColorStop(1, "#16130f");
-        c.fillStyle = grad;
-        c.fillRect(0, 0, S, S);
         c.save();
-        c.translate(S / 2, S);
-        c.scale(scale, scale);
-        c.translate(-S / 2, -S);
-        const ell = (x, y, rx, ry, color) => { c.fillStyle = color; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); };
-        if (long) ell(72, 84, 33, 46, shade(hair, 0.8));                  // hair behind the head
-        ell(72, 152, 60, 44, cloth);                                       // shoulders
-        ell(72, 150, 44, 30, shade(cloth, 1.25));                          // chest light
-        c.fillStyle = shade(skin, 0.78);
-        c.fillRect(62, 88, 20, 26);                                        // neck
-        ell(72, 68, 25, 31, skin);                                         // head
-        ell(80, 72, 14, 22, shade(skin, 1.08));                            // light from the upper left falls on the right cheek
-        c.fillStyle = hair;                                                // hair on top
+        c.beginPath();
+        c.rect(x, y, S, S);
+        c.clip();
+        const grad = c.createLinearGradient(0, y, 0, y + S);
+        grad.addColorStop(0, "#3a342b");
+        grad.addColorStop(1, "#14110d");
+        c.fillStyle = grad;
+        c.fillRect(x, y, S, S);
+        c.translate(x + S / 2, y + S);
+        c.scale((scale * S) / 144, (scale * S) / 144);
+        c.translate(-72, -144);
+        const ell = (ex, ey, rx, ry, color) => { c.fillStyle = color; c.beginPath(); c.ellipse(ex, ey, rx, ry, 0, 0, Math.PI * 2); c.fill(); };
+        if (long) ell(72, 84, 33, 46, shade(hair, 0.8));
+        ell(72, 152, 60, 44, cloth);
+        c.fillStyle = shade(skin, 0.8);
+        c.fillRect(62, 88, 20, 26);
+        ell(72, 68, 25, 31, skin);
+        c.fillStyle = hair;
         c.beginPath();
         c.ellipse(72, 54, 27, 21, 0, Math.PI, 0);
         c.fill();
         c.fillRect(45, 50, 6, long ? 40 : 16);
         c.fillRect(93, 50, 6, long ? 40 : 16);
-        ell(63, 71, 2.6, 2, "#1a1410");                                   // eyes
-        ell(81, 71, 2.6, 2, "#1a1410");
-        c.fillStyle = shade(skin, 0.6);
-        c.fillRect(66, 86, 12, 2);                                         // mouth
         c.restore();
-        if (b._baseTexture && b._baseTexture.update) b._baseTexture.update();
-        b._ufName = `UF_GenFace_${u.id}`;
-        faceCache.set(key, b);
-        while (faceCache.size > FACE_CACHE) {
-            const first = faceCache.keys().next().value;
-            const old = faceCache.get(first);
-            faceCache.delete(first);
-            if (old && old.destroy) old.destroy();
-        }
-        return b;
+        if (bitmap._baseTexture && bitmap._baseTexture.update) bitmap._baseTexture.update();
+        bitmap._ufName = "UF_GenFace";
     }
 
-    const emblemCache = new Map();
-    /** A code-drawn shield in your faction's colour: your portrait when nobody of yours can speak (UF_GenEmblem). */
-    function genEmblem(color) {
+    /** A code-drawn shield in your faction's colour (UF_GenEmblem): your portrait when nobody of yours can speak. */
+    function drawEmblem(bitmap, color, x, y, S) {
         const key = /^#[0-9a-f]{6}$/i.test(String(color || "")) ? String(color) : "#8a7050";
-        if (emblemCache.has(key)) return emblemCache.get(key);
-        const S = PORTRAIT;
-        const b = new Bitmap(S, S);
-        const c = b.context;
-        const grad = c.createLinearGradient(0, 0, 0, S);
+        const c = bitmap.context;
+        c.save();
+        c.beginPath();
+        c.rect(x, y, S, S);
+        c.clip();
+        const grad = c.createLinearGradient(0, y, 0, y + S);
         grad.addColorStop(0, "#3b352d");
         grad.addColorStop(1, "#16130f");
         c.fillStyle = grad;
-        c.fillRect(0, 0, S, S);
+        c.fillRect(x, y, S, S);
+        c.translate(x, y);
+        c.scale(S / 144, S / 144);
         const shield = (inset, fill) => {
             c.fillStyle = fill;
             c.beginPath();
@@ -887,83 +1070,139 @@
         shield(0, shade(key, 0.45));
         shield(5, key);
         shield(14, shade(key, 1.2));
-        if (b._baseTexture && b._baseTexture.update) b._baseTexture.update();
-        b._ufName = "UF_GenEmblem";
-        emblemCache.set(key, b);
-        return b;
-    }
-
-    /**
-     * Draw a portrait with a thin frame into bitmap `c` at (x, y), S px square. `holder` is { portrait, unitId }:
-     * a face sheet cell (loaded on demand; `onReady` runs when it arrives; a sheet that fails switches the holder to
-     * the code-drawn bust), an emblem, or the unit's code-drawn bust. `provokeName`: the test sabotage that skips it.
-     */
-    function drawPortraitInto(c, holder, x, y, S, onReady, provokeName) {
-        const border = "rgba(214,190,140,0.85)";
-        c.fillRect(x, y, S, 2, border);
-        c.fillRect(x, y + S - 2, S, 2, border);
-        c.fillRect(x, y, 2, S, border);
-        c.fillRect(x + S - 2, y, 2, S, border);
-        if (provokeName && provoked(provokeName)) return { drawn: false, pending: false };
-        const p = holder ? holder.portrait : null;
-        if (p && p.kind === "face") {
-            const bmp = ImageManager.loadFace(p.sheet);
-            if (bmp.isError && bmp.isError()) {
-                holder.portrait = { kind: "gen", name: `UF_GenFace_${holder.unitId}`, from: `code (${p.sheet} failed to load)` };
-                return drawPortraitInto(c, holder, x, y, S, onReady, provokeName);
-            }
-            if (!bmp.isReady()) {
-                bmp.addLoadListener(onReady);
-                return { drawn: false, pending: true };
-            }
-            const pw = ImageManager.faceWidth, ph = ImageManager.faceHeight;
-            c.blt(bmp, (p.index % 4) * pw, Math.floor(p.index / 4) * ph, pw, ph, x + 2, y + 2, S - 4, S - 4);
-            return { drawn: true, pending: false };
-        }
-        if (p && p.kind === "emblem") {
-            c.blt(genEmblem(p.color), 0, 0, PORTRAIT, PORTRAIT, x + 2, y + 2, S - 4, S - 4);
-            return { drawn: true, pending: false };
-        }
-        const u = holder ? unitById(holder.unitId) : null;
-        if (!u) return { drawn: false, pending: false };
-        c.blt(genFace(u), 0, 0, PORTRAIT, PORTRAIT, x + 2, y + 2, S - 4, S - 4);
-        return { drawn: true, pending: false };
+        c.restore();
+        if (bitmap._baseTexture && bitmap._baseTexture.update) bitmap._baseTexture.update();
+        bitmap._ufName = "UF_GenEmblem";
     }
 
     //-------------------------------------------------------------------------
-    // Windows
+    // The talk screen: sprites over the map (no windows). One per map scene, reused for every talk.
 
-    /**
-     * A speaker's window: portrait on the left, name (and for the person spoken to a stance label and a subtitle),
-     * then the current page of their words. The person's window has a 144 px portrait; a companion's 96 px.
-     */
-    class Window_UFTalk extends Window_Base {
-        initialize(rect, portraitSize) {
-            this._pSize = portraitSize || PORTRAIT;
-            Window_Base.prototype.initialize.call(this, rect);
-            this.openness = 0;
-            this.opacity = 245;
-            this._state = null;
-            this._drawn = null;
+    const setFont = (b, size, italic = false) => {
+        b.fontFace = FONT_FACE;
+        b.fontSize = size;
+        b.fontItalic = italic;
+        b.fontBold = false;
+        b.textColor = TEXT_COLOR;
+        b.outlineColor = "rgba(0,0,0,0.85)";
+        b.outlineWidth = 4;
+    };
+    /** The faint darkening behind text: nested rectangles, darker toward the middle, no edge line. */
+    function dim(b, x, y, w, h) {
+        for (let i = 0; i < DIM_STEPS; i++) {
+            const d = i * 2;
+            if (w - d * 2 > 0 && h - d * 2 > 0) b.fillRect(x + d, y + d, w - d * 2, h - d * 2, DIM_COLOR);
         }
-        /** The person's window (big portrait), as opposed to a companion's. */
-        isMain() { return this._pSize >= PORTRAIT; }
-        textX() { return this._pSize + 16; }
-        textWidth() { return this.innerWidth - this.textX(); }
-        textTop() { return this.isMain() ? 52 : 28; }
-        /** Lines of speech a page holds (the row under them is kept for the "more" mark). */
-        linesPerPage() { return Math.max(1, Math.floor((this.innerHeight - this.textTop() - MORE_H) / LINE_H)); }
-        setState(state) {
-            this._state = state;
-            this.refresh();
+        if (provoked("layout")) { // test-only: a bordered box, what the layout check must catch
+            b.fillRect(x, y, w, 2, "#e8d8a8");
+            b.fillRect(x, y + h - 2, w, 2, "#e8d8a8");
+            b.fillRect(x, y, 2, h, "#e8d8a8");
+            b.fillRect(x + w - 2, y, 2, h, "#e8d8a8");
         }
+    }
+
+    class TalkScreen {
+        constructor(scene) {
+            this.scene = scene;
+            this.root = new Sprite();
+            this.root._ufTalkScreen = true;
+            this.root.visible = false;
+            const gw = Graphics.width, gh = Graphics.height;
+            this.x0 = MARGIN + FACE + GAP;                               // where text starts beside a portrait
+            this.wordsW = Math.min(WORDS_MAX_W, gw - this.x0 - MARGIN + PAD_X);
+            this.wordsH = PAGE_LINES * LINE_H + PAD_Y * 2;
+            this.kwW = gw - this.x0 - MARGIN + PAD_X * 2 + KW_PAD;
+            this.measure = newBitmap(8, 8);
+            this.other = this.makeSlot(MARGIN, MARGIN);
+            this.comp = this.makeSlot(MARGIN, COMP_Y);
+            this.player = { face: new Sprite(newBitmap(FACE, FACE)), token: 0, faceInfo: null };
+            this.kwBack = new Sprite(newBitmap(this.kwW, KW_MAX_ROWS * KW_LINE + PAD_Y * 2));
+            this.root.addChild(this.player.face, this.kwBack);
+            this.kwSprites = [];
+            this.kwCache = new Map();
+            this.kwRects = [];
+            this.kwDrawn = null;
+            if (provoked("layout")) { // test-only: the other person's slot at the bottom right, what the layout check must catch
+                this.other.face.x = gw - MARGIN - FACE;
+                this.other.face.y = gh - MARGIN - FACE;
+            }
+        }
+        makeSlot(x, y) {
+            const face = new Sprite(newBitmap(FACE, FACE));
+            face.x = x;
+            face.y = y;
+            face.visible = false;
+            const words = new Sprite(newBitmap(this.wordsW, this.wordsH));
+            words.x = this.x0 - PAD_X;
+            words.y = y - PAD_Y;
+            words.visible = false;
+            const more = new Sprite(this.makeMore());
+            more.visible = false;
+            this.root.addChild(face, words, more);
+            return { face, words, more, token: 0, faceInfo: null, drawn: null };
+        }
+        /** The "more" mark: the catalog word talk.words.more (italic) and a small down-pointing triangle. */
+        makeMore() {
+            const label = word("more", "more");
+            setFont(this.measure, 16, true);
+            const lw = Math.ceil(this.measure.measureTextWidth(label)) + 4;
+            const b = newBitmap(lw + 20, 22);
+            setFont(b, 16, true);
+            b.textColor = MORE_COLOR;
+            b.drawText(label, 0, 0, lw, 22, "right");
+            const c = b.context;
+            c.fillStyle = MORE_COLOR;
+            c.beginPath();
+            c.moveTo(lw + 5, 8);
+            c.lineTo(lw + 15, 8);
+            c.lineTo(lw + 10, 15);
+            c.closePath();
+            c.fill();
+            b._baseTexture.update();
+            return b;
+        }
+        attach() {
+            const s = this.scene;
+            if (this.root.parent === s) s.removeChild(this.root); // back on top of anything added since
+            s.addChild(this.root);
+        }
+        /** Draw a portrait into a slot's face bitmap (once per person; again only when a face sheet finishes loading). */
+        drawFace(slot, u) {
+            const b = slot.face.bitmap;
+            const token = ++slot.token;
+            b.clear();
+            b.fillRect(0, 0, FACE, FACE, "#14110d");
+            const spec = u ? portraitOf(u) : { kind: "emblem", name: "UF_GenEmblem", from: "code (nobody of yours can speak)" };
+            let drawn = spec.kind === "emblem" ? "emblem" : "gen", pending = false;
+            if (spec.kind === "face") {
+                const src = ImageManager.loadFace(spec.sheet);
+                if (src.isReady()) {
+                    const pw = ImageManager.faceWidth, ph = ImageManager.faceHeight;
+                    b.blt(src, (spec.index % 4) * pw, Math.floor(spec.index / 4) * ph, pw, ph, 2, 2, FACE - 4, FACE - 4);
+                    drawn = "face";
+                } else if (!(src.isError && src.isError())) {
+                    pending = true;
+                    src.addLoadListener(() => { if (slot.token === token && !(src.isError && src.isError())) this.drawFace(slot, u); });
+                }
+            }
+            if (drawn === "emblem") {
+                const F = Factions();
+                const pf = F && F.player ? F.player() : null;
+                drawEmblem(b, pf && pf.color ? pf.color : null, 2, 2, FACE - 4);
+            } else if (drawn !== "face") drawGenFace(b, u, 2, 2, FACE - 4);
+            for (const [x, y, w, h] of [[0, 0, FACE, 2], [0, FACE - 2, FACE, 2], [0, 0, 2, FACE], [FACE - 2, 0, 2, FACE]]) b.fillRect(x, y, w, h, FRAME_COLOR);
+            slot.faceInfo = Object.assign({}, spec, { drawn, pending, unitId: u ? u.id : null });
+            slot.face.visible = true;
+        }
+        /** Word-wrap text to a width (the measure bitmap carries the font). */
         wrap(text, width) {
+            setFont(this.measure, FONT_SIZE);
             const words = String(text || "").split(/\s+/).filter(Boolean);
             const lines = [];
             let cur = "";
             for (const w of words) {
                 const next = cur ? `${cur} ${w}` : w;
-                if (!cur || this.contents.measureTextWidth(next) <= width) cur = next;
+                if (!cur || this.measure.measureTextWidth(next) <= width) cur = next;
                 else {
                     lines.push(cur);
                     cur = w;
@@ -972,374 +1211,387 @@
             if (cur) lines.push(cur);
             return lines;
         }
-        /** The text as pages of wrapped lines at the speech font: every word is kept, a page holds linesPerPage() lines. */
+        textWidth() { return this.wordsW - PAD_X * 2 - 4; }
         paginate(text) {
-            this.contents.fontSize = TEXT_FONT;
             const lines = this.wrap(text, this.textWidth());
-            const per = this.linesPerPage();
+            if (provoked("paging")) return [lines.slice(0, PAGE_LINES)];
             const pages = [];
-            for (let i = 0; i < lines.length; i += per) pages.push(lines.slice(i, i + per));
-            if (!pages.length) pages.push([]);
-            if (provoked("pages_not_cut") && pages.length > 1) { // the old behaviour: one page, the rest cut off with an ellipsis
-                const first = pages[0].slice();
-                first[first.length - 1] = `${first[first.length - 1].replace(/\s+\S*$/, "")} …`;
-                return [first];
-            }
-            return pages;
+            for (let i = 0; i < lines.length; i += PAGE_LINES) pages.push(lines.slice(i, i + PAGE_LINES));
+            return pages.length ? pages : [[]];
         }
-        /** The "more" mark at the bottom right: the word (catalog talk.words.more) and a small down-pointing triangle. */
-        drawMore() {
-            const c = this.contents;
-            const y = this.innerHeight - MORE_H;
-            const color = ColorManager.systemColor();
-            const tri = 10;
-            const right = this.innerWidth - 2;
-            c.fontSize = 14;
-            c.textColor = color;
-            const label = word("more", "more");
-            const lw = Math.ceil(c.measureTextWidth(label));
-            c.drawText(label, right - tri - 6 - lw, y - 3, lw + 2, MORE_H + 2, "left");
-            for (let i = 0; i < tri / 2; i++) c.fillRect(right - tri + i, y + 4 + i, tri - 2 * i, 1, color);
-            return { x: right - tri - 6 - lw, y, w: lw + tri + 6, h: MORE_H };
-        }
-        refresh() {
-            const c = this.contents;
-            c.clear();
-            this.resetFontSettings();
-            const st = this._state;
-            if (!st) {
-                this._drawn = null;
+        /** Draw one page of words beside a portrait: the darkening sized to the text, then the lines; the "more" mark. */
+        drawWords(slot, lines, more) {
+            const b = slot.words.bitmap;
+            b.clear();
+            if (!lines || !lines.length) {
+                slot.words.visible = false;
+                slot.more.visible = false;
+                slot.drawn = null;
                 return;
             }
-            const S = this._pSize, main = this.isMain();
-            const py = Math.max(0, Math.floor((this.innerHeight - S) / 2));
-            const pr = drawPortraitInto(c, st, 0, py, S, () => { if (this._state === st) this.refresh(); }, main ? "window_opens" : null);
-            const tx = this.textX(), tw = this.textWidth();
-            const labelW = st.stanceLabel ? 170 : 0;
-            const title = main && provoked("window_opens") ? "" : st.title;
-            c.fontSize = main ? 22 : 19;
-            c.textColor = ColorManager.systemColor();
-            c.drawText(title, tx, 0, tw - labelW, main ? 30 : 26, "left");
-            const titleRect = { x: tx, y: 4, w: Math.min(tw - labelW, Math.ceil(c.measureTextWidth(title)) + 4), h: main ? 24 : 20 };
-            if (st.stanceLabel) {
-                c.fontSize = 15;
-                c.textColor = st.stanceColor || ColorManager.normalColor();
-                c.drawText(st.stanceLabel, tx + tw - labelW, 2, labelW, 26, "right");
-            }
-            if (main && st.subtitle) {
-                c.fontSize = 15;
-                c.textColor = "#a8b0bc";
-                c.drawText(st.subtitle, tx, 30, tw, 22, "left");
-            }
-            c.fontSize = TEXT_FONT;
-            c.textColor = ColorManager.normalColor();
-            const lines = (st.lines || []).slice(0, this.linesPerPage());
-            const top = this.textTop();
-            lines.forEach((l, i) => c.drawText(l, tx, top + i * LINE_H, tw, LINE_H, "left"));
-            const moreRect = st.more ? this.drawMore() : null;
-            this._drawn = {
-                title, subtitle: main ? st.subtitle : "", stanceLabel: st.stanceLabel || "", lines: lines.slice(),
-                page: st.page || 1, pages: st.pages || 1, more: !!st.more, moreRect, unitId: st.unitId,
-                portrait: Object.assign({}, st.portrait, pr), portraitRect: { x: 2, y: py + 2, w: S - 4, h: S - 4 }, titleRect
-            };
+            setFont(b, FONT_SIZE);
+            const tw = Math.ceil(Math.max(...lines.map(l => b.measureTextWidth(l))));
+            const w = Math.min(b.width, tw + PAD_X * 2 + 4), h = lines.length * LINE_H + PAD_Y * 2;
+            dim(b, 0, 0, w, h);
+            lines.forEach((l, i) => b.drawText(l, PAD_X, PAD_Y + i * LINE_H, b.width - PAD_X, LINE_H, "left"));
+            slot.words.visible = true;
+            slot.more.visible = !!more;
+            slot.more.opacity = 255;
+            slot.more.x = slot.words.x + Math.max(w - 64, 0);
+            slot.more.y = slot.words.y + h - 2;
+            slot.drawn = { lines: lines.slice(), w, h, more: !!more };
         }
-        /** What the last refresh drew (tests, tools). */
-        drawnState() { return this._drawn ? JSON.parse(JSON.stringify(this._drawn)) : null; }
+        hideSlot(slot) {
+            slot.face.visible = false;
+            slot.words.visible = false;
+            slot.more.visible = false;
+            slot.drawn = null;
+            slot.faceInfo = null;
+            slot.token++;
+        }
+        /** The bitmap of one keyword (white, tinted when drawn): cached per label, at most KW_CACHE per screen. */
+        kwBitmap(label) {
+            let b = this.kwCache.get(label);
+            if (b) {
+                this.kwCache.delete(label); // most recently used last
+                this.kwCache.set(label, b);
+                return b;
+            }
+            setFont(this.measure, KW_FONT);
+            const w = Math.ceil(this.measure.measureTextWidth(label)) + KW_PAD * 2 + 2;
+            b = newBitmap(w, KW_LINE);
+            setFont(b, KW_FONT);
+            b.textColor = "#ffffff";
+            b.drawText(label, KW_PAD, 0, w - KW_PAD, KW_LINE, "left");
+            this.kwCache.set(label, b);
+            if (this.kwCache.size > KW_CACHE) {
+                const inUse = new Set(this.kwSprites.filter(s => s.visible).map(s => s.bitmap));
+                for (const [k, old] of this.kwCache) {
+                    if (this.kwCache.size <= KW_CACHE) break;
+                    if (inUse.has(old) || old === b) continue;
+                    this.kwCache.delete(k);
+                    old.destroy();
+                }
+            }
+            return b;
+        }
+        /** Lay out the keywords beside the player's portrait (rows, the block anchored to the bottom) and the darkening behind them. */
+        drawKeywords(list) {
+            const gw = Graphics.width, gh = Graphics.height;
+            const maxW = gw - this.x0 - MARGIN;
+            const items = [];
+            let x = 0, row = 0;
+            for (const k of list) {
+                const bmp = this.kwBitmap(k.label);
+                if (x > 0 && x + bmp.width > maxW) {
+                    row++;
+                    x = 0;
+                }
+                items.push({ k, bmp, rx: x, row });
+                x += bmp.width + KW_GAP;
+            }
+            const rows = Math.min(KW_MAX_ROWS, row + 1);
+            const blockH = rows * KW_LINE;
+            const top = gh - MARGIN - Math.max(FACE, blockH);
+            this.player.face.x = MARGIN;
+            this.player.face.y = provoked("layout") ? MARGIN : top; // provoked: the player's portrait at the top
+            while (this.kwSprites.length < items.length) {
+                const s = new Sprite();
+                this.kwSprites.push(s);
+                this.root.addChild(s);
+            }
+            this.kwRects = [];
+            let widest = 0;
+            items.forEach((it, i) => {
+                const s = this.kwSprites[i];
+                s.bitmap = it.bmp;
+                s.x = this.x0 + it.rx - KW_PAD;
+                s.y = top + it.row * KW_LINE;
+                s.visible = it.row < KW_MAX_ROWS;
+                if (s.visible) widest = Math.max(widest, it.rx + it.bmp.width);
+                this.kwRects.push({ id: it.k.id, label: it.k.label, x: s.x, y: s.y, w: it.bmp.width, h: KW_LINE, visible: s.visible });
+            });
+            for (let i = items.length; i < this.kwSprites.length; i++) this.kwSprites[i].visible = false;
+            const kb = this.kwBack.bitmap;
+            kb.clear();
+            this.kwBack.x = this.x0 - PAD_X - KW_PAD;
+            this.kwBack.y = top - PAD_Y;
+            if (items.length) dim(kb, 0, 0, Math.min(kb.width, widest + PAD_X * 2), Math.min(kb.height, blockH + PAD_Y * 2));
+            this.kwDrawn = { top, rows, widest };
+        }
+        /** Tint and opacity of the keywords: asked ones dimmed, the selected one highlighted, all faint while reading. */
+        styleKeywords(list, sel, active) {
+            this.kwSprites.forEach((s, i) => {
+                if (!s.visible) return;
+                const k = list[i];
+                const hi = active && i === sel;
+                const tint = hi ? KW_TINT_HOVER : k && k.asked ? KW_TINT_ASKED : KW_TINT;
+                const op = !active ? 90 : hi ? 255 : k && k.asked ? 165 : 255;
+                if (s.tint !== tint) s.tint = tint;
+                if (s.opacity !== op) s.opacity = op;
+            });
+        }
+        hitKeyword(x, y) {
+            for (let i = 0; i < this.kwRects.length; i++) {
+                const r = this.kwRects[i];
+                if (r.visible && x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h) return i;
+            }
+            return -1;
+        }
+        show() {
+            this.attach();
+            this.root.visible = true;
+        }
+        hide() {
+            this.root.visible = false;
+            this.hideSlot(this.comp);
+        }
     }
 
-    /**
-     * Your window: the portrait of whoever speaks for you on the left, the keywords beside it (a Window_Command,
-     * KW_COLS columns). While the line above still has pages the keywords are dimmed and take no input.
-     */
-    class Window_UFTalkKeywords extends Window_Command {
-        initialize(rect) {
-            this._kw = [];
-            this._voice = null;
-            this._voiceDrawn = null;
-            this._waiting = false;
-            Window_Command.prototype.initialize.call(this, rect);
-            this.openness = 0;
-            this.opacity = 245;
-            this.deactivate();
+    function mapScene() {
+        const s = SceneManager._scene;
+        return s instanceof Scene_Map && s._spriteset ? s : null;
+    }
+    function screenFor(scene) {
+        if (!scene) return null;
+        if (!scene._ufTalkScreen) scene._ufTalkScreen = new TalkScreen(scene);
+        return scene._ufTalkScreen;
+    }
+
+    //-------------------------------------------------------------------------
+    // Over-head lines (refusals, farewells, babble): UF.Speech.say when it exists, else a small pooled fallback here:
+    // plain text over the speaker's head in the tilemap (z 900000, below the fog), kept screen-size at any zoom, fading.
+
+    let lastOverHead = null;
+    function ohPool() {
+        const s = mapScene();
+        if (!s || !s._spriteset._tilemap) return null;
+        const ss = s._spriteset;
+        if (!ss._ufTalkOH) ss._ufTalkOH = [];
+        return ss._ufTalkOH;
+    }
+    function drawOverHead(sp, text) {
+        const b = sp.bitmap;
+        b.clear();
+        setFont(b, 18);
+        const words = String(text).split(/\s+/).filter(Boolean);
+        const lines = [];
+        let cur = "";
+        for (const w of words) {
+            const next = cur ? `${cur} ${w}` : w;
+            if (!cur || b.measureTextWidth(next) <= OH_W - 12) cur = next;
+            else { lines.push(cur); cur = w; }
         }
-        maxCols() { return KW_COLS; }
-        lineHeight() { return KW_LINE; }
-        itemTextAlign() { return "center"; }
-        itemWidth() { return Math.floor((this.innerWidth - KW_X) / this.maxCols()); }
-        itemRect(index) {
-            const r = Window_Command.prototype.itemRect.call(this, index);
-            r.x += KW_X;
-            return r;
+        if (cur) lines.push(cur);
+        const shown = lines.slice(-2);
+        const y0 = OH_H - shown.length * 24 - 2;
+        shown.forEach((l, i) => b.drawText(l, 0, y0 + i * 24, OH_W, 24, "center"));
+    }
+    function characterSpriteOf(ev) {
+        const s = mapScene();
+        const list = s && s._spriteset ? s._spriteset._characterSprites || [] : [];
+        for (const sp of list) if (sp._character === ev) return sp;
+        return null;
+    }
+    function placeOverHead(sp) {
+        const W = World();
+        const ev = W ? W.eventOf(sp._ufUnitId) : null;
+        if (!ev) { sp.visible = false; return; }
+        const z = Camera() && Camera().zoom ? Camera().zoom() : 1;
+        if (!sp._ufChar || sp._ufChar._character !== ev) sp._ufChar = characterSpriteOf(ev);
+        const h = sp._ufChar && sp._ufChar.patternHeight ? sp._ufChar.patternHeight() : 48;
+        sp.x = ev.screenX();
+        sp.y = ev.screenY() - Math.max(24, h || 48) - 2;
+        const k = 1 / (z || 1);
+        if (sp.scale.x !== k) sp.scale.set(k, k);
+    }
+    function sayOverHead(unitOrId, text, frames = OH_FRAMES) {
+        const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
+        if (!u || !text) return null;
+        // UF.Speech.say(speaker, text, { frames, kind }) returns the ids of the lines it shows, or null when it can't.
+        const S = window.UF && UF.Speech;
+        if (S && typeof S.say === "function") {
+            try {
+                const r = S.say(u.id, text, { frames, kind: "remark" });
+                if (Array.isArray(r) ? r.length > 0 : !!r) {
+                    lastOverHead = { via: "UF.Speech", unitId: u.id, text: String(text), ids: Array.isArray(r) ? r.slice() : r };
+                    return lastOverHead;
+                }
+            } catch (e) { /* fall back to our own line */ }
         }
-        resetFontSettings() {
-            Window_Command.prototype.resetFontSettings.call(this);
-            this.contents.fontSize = 19;
+        const pool = ohPool();
+        const W = World();
+        if (!pool || !W || !W.eventOf(u.id)) return null;
+        let sp = pool.find(s => s.visible && s._ufUnitId === u.id) || pool.find(s => !s.visible) || null;
+        if (!sp && pool.length < OH_POOL) {
+            sp = new Sprite(newBitmap(OH_W, OH_H));
+            sp.anchor.set(0.5, 1);
+            sp.z = OH_Z;
+            mapScene()._spriteset._tilemap.addChild(sp);
+            pool.push(sp);
         }
-        /** { unitId, name, from, portrait } of whoever speaks for you. */
-        setVoice(voice) {
-            this._voice = voice ? Object.assign({}, voice) : null;
-            this.paint();
+        if (!sp) sp = pool.reduce((a, b) => (a._ufLeft <= b._ufLeft ? a : b));
+        drawOverHead(sp, text);
+        sp._ufUnitId = u.id;
+        sp._ufText = String(text);
+        sp._ufLeft = frames;
+        sp.opacity = 255;
+        sp.visible = true;
+        placeOverHead(sp);
+        lastOverHead = { via: "fallback", unitId: u.id, text: String(text), sprite: sp };
+        return lastOverHead;
+    }
+    function tickOverHead() {
+        const s = SceneManager._scene;
+        const pool = s && s._spriteset ? s._spriteset._ufTalkOH : null;
+        if (!pool) return;
+        for (const sp of pool) {
+            if (!sp.visible) continue;
+            if (--sp._ufLeft <= 0) { sp.visible = false; continue; }
+            if (sp._ufLeft < OH_FADE) sp.opacity = Math.round((255 * sp._ufLeft) / OH_FADE);
+            placeOverHead(sp);
         }
-        setWaiting(on) {
-            if (this._waiting === !!on) return;
-            this._waiting = !!on;
-            this.paint();
-        }
-        isWaiting() { return this._waiting; }
-        setKeywords(list) {
-            const keep = this.currentExt();
-            this._kw = list.map(k => Object.assign({}, k));
-            this.refresh();
-            const at = this._list.findIndex(c => c.ext === keep);
-            this.select(Math.max(0, Math.min(this.maxItems() - 1, at >= 0 ? at : 0)));
-        }
-        makeCommandList() {
-            for (const k of this._kw || []) this.addCommand(k.label, "keyword", true, k.id);
-        }
-        drawAllItems() {
-            this.drawVoice();
-            Window_Command.prototype.drawAllItems.call(this);
-        }
-        /** Your portrait, with the speaker's name on a dark band along its bottom edge. */
-        drawVoice() {
-            const v = this._voice;
-            const S = PORTRAIT;
-            const y = Math.max(0, Math.floor((this.innerHeight - S) / 2));
-            if (!v) {
-                this._voiceDrawn = null;
-                return;
-            }
-            const c = this.contents;
-            const pr = drawPortraitInto(c, v, 0, y, S, () => { if (this._voice && this._voice.unitId === v.unitId) this.paint(); }, "player_portrait");
-            if (pr.drawn && v.name) {
-                c.fillRect(2, y + S - 24, S - 4, 22, "rgba(0,0,0,0.55)");
-                c.fontSize = 14;
-                c.textColor = ColorManager.normalColor();
-                c.drawText(v.name, 4, y + S - 24, S - 8, 22, "center");
-                this.resetFontSettings();
-                this.resetTextColor();
-            }
-            this._voiceDrawn = { unitId: v.unitId, name: v.name, from: v.from, portrait: Object.assign({}, v.portrait), drawn: pr.drawn, pending: pr.pending, rect: { x: 2, y: y + 2, w: S - 4, h: S - 4 } };
-        }
-        drawItem(index) {
-            const k = this._kw[index];
-            const rect = this.itemLineRect(index);
-            this.resetTextColor();
-            this.changePaintOpacity(!this._waiting && (!k || !k.asked || k.isNew));
-            if (k && k.isNew) this.changeTextColor(NEW_COLOR);
-            this.drawText(this.commandName(index), rect.x, rect.y, rect.width, "center");
-            this.changePaintOpacity(true);
-        }
-        processCursorMove() {
-            Window_Command.prototype.processCursorMove.call(this);
-            if (!this.isCursorMovable()) return;
-            // The arrow keys and WASD are mapped to camera panning (UF_ColonyOverseer); in a talk they move between keywords.
-            const last = this.index();
-            if (Input.isRepeated("cameraDown")) this.cursorDown(Input.isTriggered("cameraDown"));
-            if (Input.isRepeated("cameraUp")) this.cursorUp(Input.isTriggered("cameraUp"));
-            if (Input.isRepeated("cameraRight")) this.cursorRight(Input.isTriggered("cameraRight"));
-            if (Input.isRepeated("cameraLeft")) this.cursorLeft(Input.isTriggered("cameraLeft"));
-            if (this.index() !== last) this.playCursorSound();
-        }
-        labels() { return (this._kw || []).map(k => k.label); }
-        keywords() { return (this._kw || []).map(k => Object.assign({}, k)); }
-        /** What the last paint drew of your portrait (tests, tools), or null. */
-        voiceDrawn() { return this._voiceDrawn ? JSON.parse(JSON.stringify(this._voiceDrawn)) : null; }
     }
 
     //-------------------------------------------------------------------------
     // The conversation (view state: not saved; the facts it shows are read from the saved world)
 
-    // convo: { unitId, mode, stance, keywords, asked, line, chime, seq, pageAt, inputLock, closing, pausedByTalk, portrait,
-    //         voice, win, kwWin, compWin }. seq is the pages of the current line, then the companion's pages:
-    //         [{ who: "speaker" | "companion", unitId, lines, i, of }]; pageAt the one shown now.
     let convo = null;
-    const graveyard = [];    // closed windows, removed once their close animation ends
     let lastSocial = null;
+    let lastRefusal = null;
+    let spaceQueued = false;
+    let viewFrame = 0;         // a view counter for the "more" mark's blink (not simulation)
     const tickStats = { frames: 0, ms: 0 };
 
-    function stanceLabelFor(u, mode) {
-        const labels = Object.assign({ own: "one of yours", friendly: "friendly", wary: "wary", hostile: "hostile", baby: "baby" }, T().stanceLabels || {});
-        if (mode === "own" && u.data && u.data.mood) return String(u.data.mood);
-        return capFirst(labels[mode] || mode || "");
-    }
-    function subtitleFor(u) {
-        const stages = T().stages || {};
-        const stage = stageOf(u);
-        const f = factionOf(u);
-        return [capFirst(stages[stage] || stage), f ? f.name : ""].filter(Boolean).join(" · ");
-    }
-    function stateFor(u) {
-        return {
-            unitId: u.id, title: u.name, subtitle: subtitleFor(u), stanceLabel: stanceLabelFor(u, convo.mode),
-            stanceColor: STANCE_COLORS[convo.mode] || ColorManager.normalColor(), line: convo.line, portrait: convo.portrait
-        };
-    }
-    /** { unitId, name, from, portrait } for your window: the voice's portrait, or an emblem in your faction's colour. */
-    function voiceState(u) {
-        const v = voiceOf(u);
-        if (v) return { unitId: v.unit.id, name: v.unit.name, from: v.from, portrait: portraitOf(v.unit) };
-        const F = Factions();
-        const pf = F && F.player ? F.player() : null;
-        return { unitId: null, name: pf ? pf.name : "", from: "emblem", portrait: { kind: "emblem", color: pf && pf.color ? pf.color : null, from: "code (nobody of yours can speak)" } };
-    }
     function addKeyword(add, u) {
         if (!add || !add.id || !convo) return false;
         if (add.topic === "person" && add.ref === u.id) return false; // not themselves
         if (convo.keywords.some(k => k.id === add.id)) return false;
-        const kw = Object.assign({ asked: false }, add, { isNew: true });
-        const bye = convo.keywords.findIndex(k => k.id === "bye");
-        convo.keywords.splice(bye < 0 ? convo.keywords.length : bye, 0, kw);
+        convo.keywords.push(Object.assign({ asked: false }, add, { isNew: true }));
         return true;
     }
-    /** The line to show: its pages in the person's window, then the companion's pages (if one chimes in). */
-    function setLine(text, chime) {
-        convo.line = text;
-        convo.chime = chime || null;
-        const seq = [];
-        const sp = convo.win ? convo.win.paginate(text) : [[text]];
-        sp.forEach((lines, i) => seq.push({ who: "speaker", unitId: convo.unitId, lines, i, of: sp.length }));
-        if (chime) {
-            const cp = convo.compWin ? convo.compWin.paginate(chime.text) : [[chime.text]];
-            cp.forEach((lines, i) => seq.push({ who: "companion", unitId: chime.unitId, lines, i, of: cp.length }));
-        }
-        convo.seq = seq;
-        convo.pageAt = 0;
-        convo.inputLock = INPUT_LOCK;
-    }
-    const pagesLeft = () => (convo ? Math.max(0, convo.seq.length - 1 - convo.pageAt) : 0);
-    /** The keywords take input only when the last page is shown and no farewell is running. */
-    function updateInput() {
-        if (!convo || !convo.kwWin) return;
-        const waiting = pagesLeft() > 0;
-        convo.kwWin.setWaiting(waiting);
-        if (waiting || convo.closing > 0) convo.kwWin.deactivate();
-        else convo.kwWin.activate();
-    }
-    function redraw() {
+    const isChoosing = () => !!convo && convo.phase === "choosing";
+    function renderKeywords() {
         if (!convo) return;
-        const u = unitById(convo.unitId);
-        const seq = convo.seq.length ? convo.seq : [{ who: "speaker", unitId: convo.unitId, lines: [], i: 0, of: 1 }];
-        const at = Math.max(0, Math.min(convo.pageAt, seq.length - 1));
-        const last = at >= seq.length - 1;
-        let sp = null, cp = null;
-        for (let i = 0; i <= at; i++) {
-            if (seq[i].who === "speaker") sp = seq[i];
-            else cp = seq[i];
-        }
-        if (u && convo.win) {
-            convo.win.setState(Object.assign(stateFor(u), {
-                lines: sp ? sp.lines : [], page: sp ? sp.i + 1 : 1, pages: sp ? sp.of : 1, more: !last && seq[at].who === "speaker"
-            }));
-        }
-        if (convo.compWin) {
-            const cu = cp ? unitById(cp.unitId) : null;
-            if (cu && convo.chime) {
-                convo.compWin.setState({
-                    unitId: cu.id, title: cu.name, subtitle: "", stanceLabel: "", portrait: convo.chime.portrait,
-                    lines: cp.lines, page: cp.i + 1, pages: cp.of, more: !last && seq[at].who === "companion"
-                });
-                convo.compWin.open();
-            } else if (!convo.compWin.isClosed()) convo.compWin.close();
-        }
-        if (convo.kwWin) convo.kwWin.setKeywords(convo.keywords);
+        convo.screen.drawKeywords(convo.keywords);
+        convo.screen.styleKeywords(convo.keywords, convo.sel, isChoosing());
     }
-    function layerOf() {
-        const s = SceneManager._scene;
-        return s instanceof Scene_Map && s._windowLayer ? s._windowLayer : null;
+    /** Draw the current page; with the last page, the companion's line (if one chimes in) appears in its slot. */
+    function renderPage() {
+        const sc = convo.screen;
+        const last = convo.page >= convo.pages.length - 1;
+        sc.drawWords(sc.other, convo.pages[convo.page] || [], !last);
+        if (last && convo.chime && !convo.chime.shown) {
+            const c = unitById(convo.chime.unitId);
+            convo.chime.shown = true;
+            sc.drawFace(sc.comp, c);
+            sc.drawWords(sc.comp, sc.wrap(convo.chime.text, sc.textWidth()).slice(0, PAGE_LINES), false);
+            emit("talk:chimed", c, unitById(convo.unitId), convo.chime.text);
+        }
+        convo.phase = last ? "choosing" : "reading";
+        sc.styleKeywords(convo.keywords, convo.sel, isChoosing());
+    }
+    /** Show an answer: paginated; the chime (if any) appears with its last page. Input waits INPUT_DELAY frames. */
+    function present(text, chime) {
+        convo.text = text;
+        convo.pages = convo.screen.paginate(text);
+        convo.page = 0;
+        convo.chime = chime ? Object.assign({ shown: false }, chime) : null;
+        convo.inputDelay = Math.max(convo.inputDelay, INPUT_DELAY);
+        convo.screen.hideSlot(convo.screen.comp);
+        renderPage();
+    }
+    /** The companion's line joins the talk: what it names becomes keywords too. */
+    function takeChime(chime, u) {
+        if (!chime) return null;
+        if (!provoked("keywords_grow")) for (const a of chime.adds || []) addKeyword(a, u);
+        return chime;
     }
 
     const Talk = {
-        PORTRAIT, COMP_PORTRAIT, BYE_FRAMES, SOCIAL_RELIEF, KW_COLS, KW_ROWS, INPUT_LOCK, CHIME_RANGE, CHIME_CHANCE, BANNED,
-        TalkWindow: Window_UFTalk,
-        KeywordWindow: Window_UFTalkKeywords,
+        FACE, PAGE_LINES, SOCIAL_RELIEF, BANNED, OH_Z, OH_FRAMES, INPUT_DELAY,
         isTalkable,
         isOwn,
         stanceOf,
         modeOf,
         stageOf,
         lineFor,
-        initialKeywords: u => initialKeywords(u, modeOf(u)).map(k => Object.assign({}, k)),
+        initialKeywords: () => initialKeywords().map(k => Object.assign({}, k)),
         portraitOf,
-        genFace,
-        genEmblem,
-        /** Whoever speaks for you in a talk with this unit: { unitId, from: "selected" | "ruler" | "nearest" }, or null. */
-        voiceOf(unitOrId) {
-            const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
-            const v = u ? voiceOf(u) : null;
-            return v ? { unitId: v.unit.id, from: v.from } : null;
-        },
-        /** Ids of your people who could chime in on a talk with this unit (nearest first), your voice excluded. */
-        companionsOf(unitOrId, voiceId = null) {
-            const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
-            return companionsOf(u, voiceId).map(v => v.id);
-        },
-        /** A companion's line after this unit answered `key` with a line whose keywords are `adds`: { unitId, name, variants, text, adds, portrait } or null. */
-        chimeFor(unitOrId, key, n = 0, adds = [], voiceId = null) {
-            const r = chimeFor(unitOrId, key, n, adds, voiceId);
-            return r ? Object.assign({}, r, { adds: r.adds.slice(), variants: r.variants.slice(), portrait: Object.assign({}, r.portrait) }) : null;
-        },
         templates: () => T(),
+        section: L,
+        companionsNear,
+        /** Ids of the companions near a person (their API name before 2026-09-19 noon). */
+        companionsOf: (unitOrId, voiceId = null) => companionsNear(unitOrId, voiceId).map(v => v.id),
+        chimeFor,
+        chimeAbout,
+        chimeRemark,
+        /** Whoever speaks for you in a talk with this person: { unitId, name, from } (from: selected, ruler, nearest), or null. */
+        voiceOf(unitOrId) {
+            const v = voiceOf(unitOrId);
+            return v ? { unitId: v.unit.id, name: v.unit.name, from: v.from } : null;
+        },
+        tradeOf,
+        titleOf,
         facts(unitOrId) {
             const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
             if (!u) return null;
             const doing = doingOf(u), home = homeOf(u), news = newsFor(u), partner = partnerOf(u), leader = leaderOf(u), sup = superiorOf(u);
             return {
                 id: u.id, name: u.name, mode: modeOf(u), stage: stageOf(u), faction: factionOf(u) ? factionOf(u).id : null,
-                doing: doing ? doing.text : null, partner: partner ? partner.id : null, children: childrenOf(u).map(c => c.id),
+                doing: doing ? doing.text : null, trade: tradeOf(u), title: titleOf(u), partner: partner ? partner.id : null, children: childrenOf(u).map(c => c.id),
                 leader: leader ? leader.id : null, superior: sup ? sup.id : null, home: home ? { x: home.x, y: home.y, site: home.site ? home.site.id : null } : null,
-                knows: knownFactions(u).map(f => f.id), news: news ? news.text : null
+                knows: knownFactions(u).map(f => f.id), news: news ? news.text : null, need: topNeed(u)
             };
         },
-        /** Open a conversation with a person (unit or id). Returns current() or null (not talkable, not on the map). */
+        /**
+         * Open a conversation with a person (unit or id). Returns current(), or null: not talkable, not on the map, or it
+         * refuses (hostile: the refusal floats over its head) or babbles (a baby). Pauses the world.
+         */
         open(unitOrId) {
             const u = typeof unitOrId === "number" ? unitById(unitOrId) : unitOrId;
-            const layer = layerOf();
-            if (!u || !isTalkable(u) || !layer) return null;
+            const scene = mapScene();
+            if (!u || !isTalkable(u) || !scene) return null;
             if (convo) Talk.closeNow();
             const mode = modeOf(u);
+            if (mode === "hostile" || mode === "baby") {
+                const text = lineFor(u, "greet", 0).text;
+                const oh = sayOverHead(u, text);
+                lastRefusal = { unitId: u.id, mode, text, via: oh ? oh.via : null };
+                emit("talk:refused", u, mode, text);
+                return null;
+            }
+            const screen = screenFor(scene);
+            const voice = voiceOf(u);
             convo = {
-                unitId: u.id, mode, stance: stanceOf(u), keywords: initialKeywords(u, mode), asked: {}, line: "", chime: null, seq: [], pageAt: 0,
-                inputLock: INPUT_LOCK, closing: 0, pausedByTalk: false, portrait: portraitOf(u), voice: voiceState(u), win: null, kwWin: null, compWin: null
+                unitId: u.id, mode, stance: stanceOf(u), playerId: voice ? voice.unit.id : null, voiceFrom: voice ? voice.from : "emblem",
+                keywords: initialKeywords(), asked: {}, text: "", pages: [[]], page: 0, phase: "choosing", chime: null, sel: 0, inputDelay: INPUT_DELAY,
+                pausedByTalk: false, layerWas: null, screen, lastPX: TouchInput.x, lastPY: TouchInput.y
             };
-            // Three windows from the bottom up: yours (portrait + keywords), the person's, a companion's (opens when one chimes in).
-            const w = Graphics.boxWidth - MARGIN * 2;
-            const kwH = PORTRAIT + $gameSystem.windowPadding() * 2;
-            const kwRect = new Rectangle(MARGIN, Graphics.boxHeight - MARGIN - kwH, w, kwH);
-            const mainRect = new Rectangle(MARGIN, kwRect.y - GAP - MAIN_H, w, MAIN_H);
-            const compRect = new Rectangle(MARGIN, mainRect.y - GAP - COMP_H, w, COMP_H);
-            const compWin = new Window_UFTalk(compRect, COMP_PORTRAIT);
-            const win = new Window_UFTalk(mainRect, PORTRAIT);
-            const kwWin = new Window_UFTalkKeywords(kwRect);
-            kwWin.setHandler("keyword", () => Talk.ask(kwWin.currentExt()));
-            kwWin.setHandler("cancel", () => Talk.ask("bye"));
-            SceneManager._scene.addWindow(compWin);
-            SceneManager._scene.addWindow(win);
-            SceneManager._scene.addWindow(kwWin);
-            convo.win = win;
-            convo.kwWin = kwWin;
-            convo.compWin = compWin;
-            kwWin.setVoice(convo.voice);
             const greet = lineFor(u, "greet", 0);
-            if (mode !== "hostile" && mode !== "baby" && !provoked("new_keyword_appears")) for (const a of greet.adds) addKeyword(a, u);
-            const chime = chimeFor(u, "greet", 0, greet.adds, convo.voice.unitId);
-            if (chime && !provoked("new_keyword_appears")) for (const a of chime.adds) addKeyword(a, u);
-            for (const k of convo.keywords) k.isNew = false; // the greeting's names are there from the start, not "new"
-            setLine(greet.text, chime);
-            redraw();
-            kwWin.select(0);
-            win.open();
-            kwWin.open(); // input only once fully open (Window_Selectable needs isOpenAndActive), so the click that chose Talk can't pick a keyword
-            updateInput();
+            for (const a of greet.adds) addKeyword(a, u);
+            const chime = takeChime(chimeFor(u, "greet", 0, greet.adds, convo.playerId), u);
+            for (const k of convo.keywords) k.isNew = false; // the greeting's words are there from the start
+            screen.drawFace(screen.other, u);
+            screen.drawFace(screen.player, voice ? voice.unit : null);
+            renderKeywords();
+            present(greet.text, chime);
+            screen.show();
+            // The talk is the whole screen: the other windows (the colonist card, the selection panel) step aside.
+            const Sh = window.UF && UF.Sheet;
+            if (Sh && typeof Sh.isOpen === "function" && Sh.isOpen() && typeof Sh.close === "function") Sh.close();
+            if (scene._windowLayer) {
+                convo.layerWas = scene._windowLayer.visible;
+                scene._windowLayer.visible = false;
+            }
             const Tm = Time();
-            if (Tm && !Tm.paused) convo.pausedByTalk = Tm.pause() !== false;
+            if (Tm && !Tm.paused && !provoked("pause_and_resume")) convo.pausedByTalk = Tm.pause() !== false;
             emit("talk:opened", u, mode);
-            if (chime) emit("talk:chimed", unitById(chime.unitId), u, chime.text);
             return Talk.current();
         },
-        /** Ask about a keyword (id, or label, case-insensitive). Returns the line, or null (nothing open, unknown keyword, refused). */
+        /** Ask about a keyword (id, or label, case-insensitive). Returns the answer, or null (nothing open, unknown keyword). "bye" ends the talk. */
         ask(which) {
-            if (!Talk.isOpen() || convo.closing > 0) return null;
+            if (!Talk.isOpen()) return null;
             const want = String(which === undefined || which === null ? "" : which).toLowerCase();
             const kw = convo.keywords.find(k => k.id === which) || convo.keywords.find(k => k.id.toLowerCase() === want || k.label.toLowerCase() === want);
             if (!kw) return null;
@@ -1348,63 +1600,74 @@
                 Talk.closeNow();
                 return null;
             }
-            if ((convo.mode === "hostile" || convo.mode === "baby") && kw.id !== "bye") return null;
             const n = convo.asked[kw.id] || 0;
-            const res = lineFor(u, kw.id, n, kw.label);
             convo.asked[kw.id] = n + 1;
             kw.asked = true;
+            if (kw.id === "bye") {
+                const bye = lineFor(u, "bye", n).text;
+                emit("talk:asked", u, "bye", bye);
+                Talk.closeNow();
+                sayOverHead(u, bye);
+                return bye;
+            }
+            const res = lineFor(u, kw.id, n, kw.label);
             for (const k of convo.keywords) k.isNew = false;
-            if (!provoked("new_keyword_appears")) for (const a of res.adds) addKeyword(a, u);
-            const chime = kw.id === "bye" ? null : chimeFor(u, kw.id, n, res.adds, convo.voice ? convo.voice.unitId : null);
-            if (chime && !provoked("new_keyword_appears")) for (const a of chime.adds) addKeyword(a, u);
-            setLine(res.text, chime);
-            if (kw.id === "bye") convo.closing = BYE_FRAMES;
-            redraw();
-            updateInput();
+            for (const a of res.adds) addKeyword(a, u);
+            const chime = takeChime(chimeFor(u, kw.id, n, res.adds, convo.playerId), u);
+            renderKeywords();
+            present(res.text, chime);
             emit("talk:asked", u, kw.id, res.text);
-            if (chime) emit("talk:chimed", unitById(chime.unitId), u, chime.text);
             return res.text;
         },
-        /** Show the next page (click, Enter, Z or Space do this while pages remain). Returns false when there is none. */
+        /** A topic joins the open talk's keywords as if it had been mentioned (e.g. "mood", "need:hunger", "faction:f2", "person:17"). */
+        learn(id) {
+            if (!Talk.isOpen()) return false;
+            const u = unitById(convo.unitId);
+            const s = String(id);
+            const [topic, ref] = s.split(":");
+            let kw = null;
+            if (["family", "home", "mood", "others", "news", "need"].includes(topic)) kw = topicKw(s);
+            else if (topic === "person" && unitById(Number(ref))) kw = personKw(unitById(Number(ref)));
+            else if (topic === "faction" && Factions() && Factions().get(ref)) kw = factionKw(Factions().get(ref));
+            if (!kw || !addKeyword(kw, u)) return false;
+            renderKeywords();
+            return true;
+        },
+        /** The next page of the answer (a click, Enter or Space does this). Returns true if it turned a page. */
         next() {
-            if (!Talk.isOpen() || pagesLeft() <= 0) return false;
-            convo.pageAt++;
-            redraw();
-            updateInput();
+            if (!Talk.isOpen() || convo.phase !== "reading") return false;
+            convo.page = Math.min(convo.pages.length - 1, convo.page + 1);
+            renderPage();
             return true;
         },
-        /** Jump to the last page (right-click or Esc while pages remain). Returns false when it is already shown. */
+        /** Jump to the last page (a right-click or Esc while pages remain). Returns true if it moved. */
         skip() {
-            if (!Talk.isOpen() || pagesLeft() <= 0) return false;
-            convo.pageAt = convo.seq.length - 1;
-            redraw();
-            updateInput();
+            if (!Talk.isOpen() || convo.phase !== "reading") return false;
+            convo.page = convo.pages.length - 1;
+            renderPage();
             return true;
         },
-        /** Pages still to come after the one shown (the person's, then the companion's). */
-        pagesLeft: () => (Talk.isOpen() ? pagesLeft() : 0),
+        /** Pages of the current answer still to come. */
+        pagesLeft: () => (Talk.isOpen() ? Math.max(0, convo.pages.length - 1 - convo.page) : 0),
         /** Close now (no farewell). The world runs again if this talk paused it. */
         closeNow() {
             if (!convo) return false;
             const c = convo;
             convo = null;
-            for (const w of [c.compWin, c.win, c.kwWin]) {
-                if (!w) continue;
-                w.deactivate();
-                w.close();
-                graveyard.push(w);
-            }
+            c.screen.hide();
+            const scene = mapScene();
+            if (scene && c.screen.scene === scene && scene._windowLayer && c.layerWas !== null) scene._windowLayer.visible = c.layerWas;
             const u = unitById(c.unitId);
             if (u && isOwn(u) && Object.keys(c.asked).some(k => k !== "bye")) Talk.easeSocial(u);
             const Tm = Time();
-            if (c.pausedByTalk && Tm && Tm.paused && !provoked("bye_closes_and_resumes")) Tm.resume();
+            if (c.pausedByTalk && Tm && Tm.paused) Tm.resume();
             emit("talk:closed", u || null);
             return true;
         },
-        /** Say goodbye: the farewell line shows, then the window closes. */
+        /** Say goodbye (asks "bye": the farewell floats over their head, the talk closes). */
         close() {
             if (!Talk.isOpen()) return false;
-            if (convo.mode !== undefined && convo.closing <= 0) Talk.ask("bye");
+            Talk.ask("bye");
             return true;
         },
         /** Eases your colonist's social need through UF_Colonists' public API when it has one. */
@@ -1417,10 +1680,18 @@
             return lastSocial;
         },
         lastSocial: () => (lastSocial ? Object.assign({}, lastSocial) : null),
+        lastRefusal: () => (lastRefusal ? Object.assign({}, lastRefusal) : null),
+        sayOverHead,
+        lastOverHead: () => (lastOverHead ? Object.assign({}, lastOverHead) : null),
+        /** The fallback over-head lines on screen: [{ unitId, text, sprite }]. */
+        overHead() {
+            const pool = ohPool() || [];
+            return pool.filter(s => s.visible).map(s => ({ unitId: s._ufUnitId, text: s._ufText, sprite: s }));
+        },
         isOpen() {
             if (!convo) return false;
-            const layer = layerOf();
-            if (!layer || !convo.win || convo.win.parent !== layer) { // the scene changed under it
+            const scene = mapScene();
+            if (!scene || convo.screen.scene !== scene || convo.screen.root.parent !== scene) { // the scene changed under it
                 const c = convo;
                 convo = null;
                 const Tm = Time();
@@ -1433,67 +1704,128 @@
         current() {
             if (!Talk.isOpen()) return null;
             const u = unitById(convo.unitId);
-            const v = convo.voice || {};
             return {
-                unitId: convo.unitId, name: u ? u.name : "", mode: convo.mode, stance: convo.stance, line: convo.line, closing: convo.closing,
-                pausedByTalk: convo.pausedByTalk, portrait: Object.assign({}, convo.portrait), asked: Object.assign({}, convo.asked),
-                keywords: convo.keywords.map(k => Object.assign({}, k)),
-                page: convo.pageAt + 1, pages: convo.seq.length, pagesLeft: pagesLeft(),
-                showing: convo.seq[convo.pageAt] ? convo.seq[convo.pageAt].who : "speaker",
-                voice: { unitId: v.unitId === undefined ? null : v.unitId, name: v.name || "", from: v.from || "" },
-                chime: convo.chime ? { unitId: convo.chime.unitId, name: convo.chime.name, text: convo.chime.text, variants: convo.chime.variants.slice() } : null
+                unitId: convo.unitId, name: u ? u.name : "", mode: convo.mode, stance: convo.stance, playerId: convo.playerId,
+                voice: { unitId: convo.playerId, name: convo.playerId !== null && unitById(convo.playerId) ? unitById(convo.playerId).name : "", from: convo.voiceFrom },
+                text: convo.text, pages: convo.pages.map(p => p.slice()), page: convo.page, phase: convo.phase,
+                more: convo.page < convo.pages.length - 1, chime: convo.chime ? Object.assign({}, convo.chime) : null,
+                pausedByTalk: convo.pausedByTalk, asked: Object.assign({}, convo.asked), sel: convo.sel,
+                keywords: convo.keywords.map(k => Object.assign({}, k))
             };
         },
         keywords: () => (Talk.isOpen() ? convo.keywords.map(k => k.label) : []),
-        line: () => (Talk.isOpen() ? convo.line : ""),
-        window: () => (Talk.isOpen() ? convo.win : null),
-        keywordWindow: () => (Talk.isOpen() ? convo.kwWin : null),
-        companionWindow: () => (Talk.isOpen() ? convo.compWin : null),
-        /** Per frame (Scene_Map.update): page turning, the farewell countdown and the removal of closed windows. */
+        line: () => (Talk.isOpen() ? convo.text : ""),
+        page: () => (Talk.isOpen() ? { index: convo.page, count: convo.pages.length, lines: (convo.pages[convo.page] || []).slice(), more: convo.page < convo.pages.length - 1 } : null),
+        screen: () => (Talk.isOpen() ? convo.screen : null),
+        /** Where everything is on the screen (screen pixels), and what was drawn. */
+        layout() {
+            if (!Talk.isOpen()) return null;
+            const sc = convo.screen;
+            const rect = s => ({ x: s.x, y: s.y, w: s.bitmap ? s.bitmap.width : 0, h: s.bitmap ? s.bitmap.height : 0, visible: s.visible });
+            const slot = s => ({ face: rect(s.face), faceInfo: s.faceInfo ? Object.assign({}, s.faceInfo) : null, words: rect(s.words), drawn: s.drawn ? JSON.parse(JSON.stringify(s.drawn)) : null, more: s.more.visible, moreRect: rect(s.more) });
+            return {
+                other: slot(sc.other), comp: slot(sc.comp),
+                player: { face: rect(sc.player.face), faceInfo: sc.player.faceInfo ? Object.assign({}, sc.player.faceInfo) : null, unitId: convo.playerId, keywords: sc.kwRects.map(r => Object.assign({}, r)), back: rect(sc.kwBack) },
+                screen: { w: Graphics.width, h: Graphics.height }
+            };
+        },
+        /** Per frame (from Scene_Map.update): input for the open talk, the over-head fallback lines. */
         tick() {
             const t0 = performance.now();
             try {
                 Talk.tickBody();
             } finally {
-                if (provoked("perf")) { const until = performance.now() + 2; while (performance.now() < until) { /* test-only busy wait */ } }
+                if (provoked("perf")) {
+                    const until = performance.now() + 2;
+                    while (performance.now() < until) { /* test-only busy wait */ }
+                    if (convo) newBitmap(4, 4).destroy(); // test-only: a Bitmap per frame
+                }
                 tickStats.frames++;
                 tickStats.ms += performance.now() - t0;
             }
         },
-        /** { frames, ms } of tick() since the last resetStats() (the perf check). */
         stats: () => Object.assign({}, tickStats),
         resetStats() { tickStats.frames = 0; tickStats.ms = 0; },
+        bitmapsMade: () => bitmapsMade,
         tickBody() {
-            for (let i = graveyard.length - 1; i >= 0; i--) {
-                const w = graveyard[i];
-                if (w.isClosed() || !w.parent) {
-                    graveyard.splice(i, 1);
-                    try {
-                        if (w.parent) w.parent.removeChild(w);
-                        w.destroy();
-                    } catch (e) { /* gone with its scene */ }
-                }
-            }
+            tickOverHead();
+            if (!convo) { spaceQueued = false; return; }
             if (!Talk.isOpen()) return;
-            // Pages: the keywords are inactive while pages remain, so these inputs belong to the talk. A click is read on
-            // release (isClicked), the same event the keyword window acts on, so the click that turns the last page
-            // can't also pick the keyword under the pointer. The lock skips the frames in which a line appeared.
-            if (convo.inputLock > 0) convo.inputLock--;
-            else if (pagesLeft() > 0 && convo.win && convo.win.isOpen()) {
-                if (Input.isTriggered("ok") || TouchInput.isClicked()) {
-                    Talk.next();
-                    SoundManager.playCursor();
-                } else if (Input.isTriggered("cancel") || TouchInput.isCancelled()) {
-                    Talk.skip();
-                    SoundManager.playCursor();
+            viewFrame++;
+            const sc = convo.screen;
+            if (sc.other.more.visible) {
+                const op = (viewFrame >> 4) & 1 ? 150 : 255;
+                if (sc.other.more.opacity !== op) sc.other.more.opacity = op;
+            }
+            if (convo.inputDelay > 0) {
+                convo.inputDelay--;
+                spaceQueued = false;
+                convo.lastPX = TouchInput.x;
+                convo.lastPY = TouchInput.y;
+                return;
+            }
+            const okKey = Input.isTriggered("ok") || spaceQueued;
+            spaceQueued = false;
+            const click = TouchInput.isTriggered();
+            if (TouchInput.isCancelled() || Input.isTriggered("cancel")) {
+                if (convo.phase === "reading") Talk.skip(); // the last page first; the next right-click or Esc says bye
+                else Talk.ask("bye");
+                return;
+            }
+            if (convo.phase === "reading") {
+                if (click || okKey) Talk.next();
+                return;
+            }
+            const px = TouchInput.x, py = TouchInput.y;
+            if (px !== convo.lastPX || py !== convo.lastPY) {
+                convo.lastPX = px;
+                convo.lastPY = py;
+                const i = sc.hitKeyword(px, py);
+                if (i >= 0 && i !== convo.sel) {
+                    convo.sel = i;
+                    sc.styleKeywords(convo.keywords, convo.sel, true);
                 }
             }
-            if (convo && convo.closing > 0 && pagesLeft() === 0 && --convo.closing === 0) Talk.closeNow();
+            const move = d => {
+                const n = convo.keywords.length;
+                if (!n) return;
+                convo.sel = (convo.sel + d + n) % n;
+                sc.styleKeywords(convo.keywords, convo.sel, true);
+                SoundManager.playCursor();
+            };
+            const moveRow = d => {
+                const r = sc.kwRects[convo.sel];
+                if (!r) return;
+                let best = -1, bestD = Infinity;
+                sc.kwRects.forEach((q, i) => {
+                    if (!q.visible || Math.sign(q.y - r.y) !== d) return;
+                    const dist = Math.abs(q.y - r.y) * 1000 + Math.abs(q.x + q.w / 2 - (r.x + r.w / 2));
+                    if (dist < bestD) { bestD = dist; best = i; }
+                });
+                if (best >= 0) {
+                    convo.sel = best;
+                    sc.styleKeywords(convo.keywords, convo.sel, true);
+                    SoundManager.playCursor();
+                }
+            };
+            if (Input.isRepeated("right") || Input.isRepeated("cameraRight")) move(1);
+            else if (Input.isRepeated("left") || Input.isRepeated("cameraLeft")) move(-1);
+            else if (Input.isRepeated("down") || Input.isRepeated("cameraDown")) moveRow(1);
+            else if (Input.isRepeated("up") || Input.isRepeated("cameraUp")) moveRow(-1);
+            if (click) {
+                const i = sc.hitKeyword(px, py);
+                if (i >= 0) {
+                    convo.sel = i;
+                    Talk.ask(convo.keywords[i].id);
+                }
+                return;
+            }
+            if (okKey && convo.keywords[convo.sel]) Talk.ask(convo.keywords[convo.sel].id);
         },
         /** The context-menu entry for a cell (or null): used by the UF.Interact wrap. */
         optionFor(x, y) {
-            const L = Look();
-            const hit = L && L.unitAt ? L.unitAt(x, y) : null;
+            const Lk = Look();
+            const hit = Lk && Lk.unitAt ? Lk.unitAt(x, y) : null;
             const u = hit && hit.unit;
             let ok = !!u && isTalkable(u);
             if (provoked("option_listed")) ok = !!u && !!u.data && u.data.kind === "creature";
@@ -1518,7 +1850,7 @@
     window.UF.Talk = Talk;
 
     //-------------------------------------------------------------------------
-    // Hooks: the Talk entry in UF_Interact's menu, input while talking, the per-frame tick
+    // Hooks: the Talk entry in UF_Interact's menu, input while talking, the per-frame tick, Space
 
     function hookInteract() {
         const I = Interact();
@@ -1528,21 +1860,20 @@
         I.optionsFor = function(x, y) {
             return Talk.withTalk(_optionsFor.call(this, x, y), x, y);
         };
-        // While a talk is open the map takes no mouse input: no context menu, no select, move or deselect (the
-        // Overseer's controls run only when this returns false).
+        // While a talk is open the map takes no mouse input: no context menu, no select, move, deselect or camera
+        // panning (the Overseer's controls run only when this returns false).
         const _handleMouse = I.handleMouse;
         I.handleMouse = function() {
             if (Talk.isOpen()) return true;
             return _handleMouse.apply(this, arguments);
         };
-        // A talk is modal: the whole screen counts as UI, so UF_Look's map tooltip stays hidden instead of drawing
-        // over the portrait when the pointer is beside the windows.
-        const L = Look();
-        if (L && typeof L.isOverUI === "function" && !L._ufTalkHooked) {
-            L._ufTalkHooked = true;
-            const _isOverUI = L.isOverUI;
-            L.isOverUI = function() {
-                if (Talk.isOpen() && !provoked("window_opens")) return true;
+        // A talk is modal: the whole screen counts as UI, so UF_Look's map tooltip stays hidden and UF_Sheet opens nothing.
+        const Lk = Look();
+        if (Lk && typeof Lk.isOverUI === "function" && !Lk._ufTalkHooked) {
+            Lk._ufTalkHooked = true;
+            const _isOverUI = Lk.isOverUI;
+            Lk.isOverUI = function() {
+                if (Talk.isOpen()) return true;
                 return _isOverUI.apply(this, arguments);
             };
         }
@@ -1571,10 +1902,26 @@
     }
     hookInteract();
 
+    // Space turns the page or asks while a talk is open: taken in the capture phase at the window, before UF_TimeSpeed's
+    // document listener (which would toggle the pause) and before RMMZ's Input sees it.
+    window.addEventListener("keydown", e => {
+        if (e.code !== "Space" || !convo || provoked("pause_and_resume")) return;
+        if (!Talk.isOpen()) return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        if (!e.repeat) spaceQueued = true;
+    }, true);
+
     const _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
         _Scene_Map_update.call(this);
         Talk.tick();
+    };
+
+    const _Scene_Map_terminate = Scene_Map.prototype.terminate;
+    Scene_Map.prototype.terminate = function() {
+        if (convo && convo.screen.scene === this) Talk.closeNow();
+        _Scene_Map_terminate.call(this);
     };
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
@@ -1593,23 +1940,54 @@
             // A real uncaught error stops RMMZ (SceneManager.onError), so the provocation records one in the harness's list.
             if (provoked("no_errors")) UF.Test.errors.push("window.error: TEST provoked error (UF_Talk TestProvoke)");
             const W = World(), F = Factions(), I = Interact(), J = Jobs(), C = Colonists(), Tm = Time();
-            const K = Object.assign({}, FALLBACK.keywords, T().keywords || {});
-            const fx = { units: [], relations: [], met: null, partner: null, rank: null, pausedByTest: false };
+            const K = keywordLabels();
+            const NAMES = ["option_listed", "layout", "pause_and_resume", "name_job_bye", "voice", "paging", "keywords_grow", "companion_chimes_in", "hostile_refuses_over_head", "lines_well_formed", "no_banned_words", "perf"];
+            const done = new Set();
+            const check = (name, ok, detail) => { done.add(name); return t.check(name, ok, detail); };
+            const fx = { units: [], relations: [], met: null, partner: null, rank: null, thoughts: null, pausedByTest: false, sel: undefined };
             const cellOf = u => {
                 const ev = W.eventOf(u.id);
                 return ev ? { x: ev.x, y: ev.y } : { x: u.x, y: u.y };
             };
-            const inLayer = w => !!w && w.parent === layerOf();
             const centerOn = u => {
                 const c = cellOf(u);
-                $gameMap.setDisplayPos(c.x - $gameMap.screenTileX() / 2 + 0.5, c.y - $gameMap.screenTileY() * 0.28);
+                $gameMap.setDisplayPos(c.x - $gameMap.screenTileX() / 2 + 0.5, c.y - $gameMap.screenTileY() * 0.5 + 0.5);
             };
-            const tplRegex = tpl => new RegExp(`^${String(tpl).replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace(/\{\w+\}/g, ".+?")}$`, "i");
+            const tplRegex = tpl => new RegExp(`^${String(tpl).replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace(/\\\[[^\]]*\\\]/g, ".+?").replace(/\{\w+\}/g, ".+?")}$`, "i");
             const fromTemplates = (line, list) => (Array.isArray(list) ? list : []).some(tpl => tplRegex(tpl).test(String(line || "")));
             const pause = () => { if (Tm && !Tm.paused) Tm.pause(); fx.pausedByTest = true; };
             const run = () => { if (Tm && Tm.paused) Tm.resume(); fx.pausedByTest = false; };
-            const failAll = why => {
-                for (const n of ["option_listed", "window_opens", "name_and_job", "topics_from_state", "new_keyword_appears", "hostile_refuses", "bye_closes_and_resumes", "no_banned_words", "lines_well_formed", "perf", "player_portrait", "pages_not_cut", "companion_chimes"]) t.check(n, false, why);
+            const ink = (b, x, y, w, h, minA = 200) => {
+                x = Math.max(0, Math.floor(x));
+                y = Math.max(0, Math.floor(y));
+                w = Math.min(b.width - x, Math.floor(w));
+                h = Math.min(b.height - y, Math.floor(h));
+                if (w <= 0 || h <= 0) return 0;
+                const d = b.context.getImageData(x, y, w, h).data;
+                let n = 0;
+                for (let i = 3; i < d.length; i += 4) if (d[i] >= minA) n++;
+                return n;
+            };
+            const click = async (x, y) => {
+                TouchInput._onTrigger(x, y);
+                await t.waitFrames(1);
+                TouchInput._onRelease(x, y);
+                await t.waitFrames(2);
+            };
+            const pressSpace = async () => {
+                document.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true }));
+                await t.waitFrames(1);
+                document.dispatchEvent(new KeyboardEvent("keyup", { code: "Space", key: " ", bubbles: true }));
+                await t.waitFrames(2);
+            };
+            const readAll = () => { let g = 0; while (Talk.next() && g++ < 20) { /* turn every page */ } };
+            const waitFaces = async what => {
+                try {
+                    await t.waitUntil(() => {
+                        const l = Talk.layout();
+                        return !!l && !!l.other.faceInfo && !l.other.faceInfo.pending && !!l.player.faceInfo && !l.player.faceInfo.pending;
+                    }, 5000, what);
+                } catch (e) { /* the checks report it */ }
             };
 
             try {
@@ -1620,17 +1998,20 @@
                     ready = false;
                 }
                 if (!ready) {
-                    failAll(`not ready: area ${W && W.currentArea() ? "yes" : "no"}, UF.Interact ${!!I}, UF.Factions ${!!F}, UF.Colonists ${!!C}, colonists here ${C ? C.list().length : 0}`);
+                    for (const n of NAMES) check(n, false, `not ready: area ${W && W.currentArea() ? "yes" : "no"}, UF.Interact ${!!I}, UF.Factions ${!!F}, UF.Colonists ${!!C}, colonists here ${C ? C.list().length : 0}`);
                     return;
                 }
                 const area = W.currentArea();
                 pause();
                 await t.waitFrames(2);
+                if (window.$colonyManager && $colonyManager.deselect) {
+                    fx.sel = $colonyManager.selectedColonist ? $colonyManager.selectedColonist.id : null;
+                    $colonyManager.deselect();
+                }
 
-                // The people: A (a colonist, not the ruler), A's partner, the leader; two strangers and a hare placed by the test.
+                // The people: A (an adult colonist, not the ruler), A's partner, the leader; strangers, a hare and a companion placed by the test.
                 const adultStage = u => ["adult", "elder"].includes(stageOf(u));
                 const cols = C.list().filter(u => sameArea(u.area, area) && W.eventOf(u.id) && isAlive(u));
-                // The top of a faction's ladder, read straight from unit.data (rank >= 1, highest first, lowest id on a tie).
                 const rankTop = fid => {
                     let best = null;
                     for (const v of W.units()) {
@@ -1672,15 +2053,21 @@
                     const p = catalog() && catalog().people && catalog().people[sp];
                     return p && Array.isArray(p.images) && p.images[0] ? p.images[0] : "$U7_Townsman";
                 };
-                const spawn = (name, dx, dy, data, image) => {
-                    const u = W.addUnit({ name, image: { characterName: image, characterIndex: 0 }, area, x: A.x + dx, y: A.y + dy, dir: 2, snapToFree: 6, data });
+                const spawn = (name, dx, dy, data, image, snap = 6) => {
+                    const u = W.addUnit({ name, image: { characterName: image, characterIndex: 0 }, area, x: A.x + dx, y: A.y + dy, dir: 2, snapToFree: snap, data });
                     fx.units.push(u);
                     return u;
                 };
-                const stranger = spawn("TEST_talker", 2, 1, { kind: "person", faction: fFriend.id, species: fFriend.species, gender: "female", age: 34, ai: null }, peopleImage(fFriend.species));
-                const grump = spawn("TEST_grump", -2, 1, { kind: "person", faction: fHostile.id, species: fHostile.species, gender: "male", age: 40, ai: null }, peopleImage(fHostile.species));
+                const unspawn = u => {
+                    if (u && W.unit(u.id)) W.removeUnit(u.id);
+                    const i = fx.units.indexOf(u);
+                    if (i >= 0) fx.units.splice(i, 1);
+                };
+                const tradeKeys = Object.keys(L("trades") || {});
+                const stranger = spawn("TEST_talker", 5, 3, Object.assign({ kind: "person", faction: fFriend.id, species: fFriend.species, gender: "female", age: 34, ai: null }, tradeKeys.length ? { skills: { [tradeKeys[0]]: 12 } } : {}), peopleImage(fFriend.species));
+                const grump = spawn("TEST_grump", -5, 3, { kind: "person", faction: fHostile.id, species: fHostile.species, gender: "male", age: 40, ai: null }, peopleImage(fHostile.species));
                 const hareSp = catalog() && catalog().wildlife && Array.isArray(catalog().wildlife.species) ? catalog().wildlife.species.find(s => s.id === "hare") : null;
-                const hare = spawn("TEST_hare", 0, 3, { kind: "creature", species: "hare", tags: ["grazer"], ai: null }, hareSp && hareSp.image ? hareSp.image : "$U7_Hare");
+                const hare = spawn("TEST_hare", 0, 6, { kind: "creature", species: "hare", tags: ["grazer"], ai: null }, hareSp && hareSp.image ? hareSp.image : "$U7_Hare");
                 await t.waitUntil(() => [stranger, grump, hare].every(u => W.eventOf(u.id)), 3000, "the test units' events");
                 await t.waitFrames(2);
 
@@ -1693,163 +2080,306 @@
                     const menuLabels = menu ? menu.labels() : [];
                     I.close();
                     const ok = !!tA && tA.unitId === A.id && !!tS && tS.unitId === stranger.id && !tH && oH.some(o => o.id === "hunt") && menuLabels.some(l => /^talk/i.test(l));
-                    t.check("option_listed", ok, `colonist ${A.name} at (${ca.x},${ca.y}): ${tA ? `"${tA.label}"` : "NO Talk"}; stranger at (${cs.x},${cs.y}): ${tS ? `"${tS.label}"` : "NO Talk"}; `
+                    check("option_listed", ok, `colonist ${A.name} at (${ca.x},${ca.y}): ${tA ? `"${tA.label}"` : "NO Talk"}; stranger at (${cs.x},${cs.y}): ${tS ? `"${tS.label}"` : "NO Talk"}; `
                         + `hare at (${ch.x},${ch.y}): ${tH ? `"${tH.label}" (should not be there)` : "no Talk"}, options [${oH.map(o => o.id).join(", ")}]; real menu rows [${menuLabels.join(" | ")}]`);
                 }
 
-                // talk.window_opens: choose Talk in the real menu while the world runs; portrait, name line and keywords drawn.
-                centerOn(A);
+                // Open a talk with the friendly stranger from the real menu while the world runs (layout, then pause part 1).
+                centerOn(stranger);
                 run();
                 await t.waitFrames(6);
-                let c2 = cellOf(A);
-                const menu = I.open(c2.x, c2.y, { x: 120, y: 90 });
-                if (menu) I.choose("Talk");
-                const openedByMenu = Talk.isOpen() && Talk.current().unitId === A.id;
-                if (!openedByMenu) Talk.open(A.id); // so the rest can still run; the check below records the failure
+                const layer0 = SceneManager._scene._windowLayer;
+                const layerKids0 = layer0 ? layer0.children.slice() : [];
+                const cS = cellOf(stranger);
+                const menuS = I.open(cS.x, cS.y, { x: 120, y: 90 });
+                if (menuS) I.choose("Talk");
+                const openedByMenu = Talk.isOpen() && Talk.current().unitId === stranger.id;
+                if (!openedByMenu) Talk.open(stranger.id); // so the rest can still run; the checks below record the failure
                 const pausedWhileOpen = !!(Tm && Tm.paused);
                 const pausedByTalk = !!(Talk.current() && Talk.current().pausedByTalk);
-                try {
-                    await t.waitUntil(() => Talk.isOpen() && Talk.window().isOpen() && Talk.keywordWindow().isOpen() && Talk.window().drawnState() && !Talk.window().drawnState().portrait.pending, 5000, "the talk windows to open");
-                } catch (e) { /* reported below */ }
+                await waitFaces("the talk's portraits");
+                await t.waitFrames(3);
+
+                // talk.layout
                 {
-                    // The pointer over the map above the windows: UF_Look's tooltip must stay hidden while the talk is open.
-                    const L = Look();
+                    const Lk = Look();
                     const px = TouchInput._x, py = TouchInput._y;
                     TouchInput._x = Math.round(Graphics.width / 2);
-                    TouchInput._y = 60;
+                    TouchInput._y = Math.round(Graphics.height / 2);
                     await t.waitFrames(3);
-                    const tipSprite = L && L.sprite ? L.sprite() : null;
-                    const tipHidden = !tipSprite || !tipSprite.visible;
+                    const tipSprite = Lk && Lk.sprite ? Lk.sprite() : null;
+                    const tipHidden = !tipSprite || !tipSprite.visible || !tipSprite.worldVisible;
                     TouchInput._x = px;
                     TouchInput._y = py;
-                    const win = Talk.window(), kw = Talk.keywordWindow();
-                    const drawn = win ? win.drawnState() : null;
-                    let alpha = 0, alpha2 = 0, ink = 0;
-                    if (drawn) {
-                        const pr = drawn.portraitRect, tr = drawn.titleRect;
-                        alpha = win.contents.getAlphaPixel(Math.floor(pr.x + pr.w / 2), Math.floor(pr.y + pr.h / 2));
-                        alpha2 = win.contents.getAlphaPixel(Math.floor(pr.x + pr.w / 2), Math.floor(pr.y + pr.h * 0.3));
-                        for (let y = tr.y; y < tr.y + tr.h; y += 2) for (let x = tr.x; x < tr.x + tr.w; x += 2) if (win.contents.getAlphaPixel(x, y) > 0) ink++;
+                    const lay = Talk.layout();
+                    const sc = Talk.screen();
+                    const gh = Graphics.height;
+                    const why = [];
+                    let detail = "";
+                    if (!lay || !sc) why.push("no talk screen");
+                    else {
+                        const o = lay.other, p = lay.player;
+                        const faceInk = ink(sc.other.face.bitmap, 20, 20, FACE - 40, FACE - 40, 250);
+                        const topLeft = o.face.visible && o.face.x <= 40 && o.face.y <= 40 && o.face.w === FACE && o.face.h === FACE && faceInk > 400;
+                        if (!topLeft) why.push(`other portrait at (${o.face.x},${o.face.y}) ${o.face.w}x${o.face.h} visible ${o.face.visible}, ${faceInk} opaque px in its middle`);
+                        const wb = sc.other.words.bitmap, d = o.drawn;
+                        const beside = o.words.visible && !!d && o.words.x + PAD_X >= o.face.x + o.face.w && o.words.y < o.face.y + o.face.h && o.words.y + (d ? d.h : 0) > o.face.y;
+                        const textInk = d ? ink(wb, 0, 0, d.w, d.h, 200) : 0;
+                        if (!beside || textInk < 150) why.push(`words at (${o.words.x},${o.words.y}) beside the portrait ${beside}, ${textInk} inked px`);
+                        // The darkening: translucent inside, and no drawn border (every edge pixel dark and fainter than the middle).
+                        let edgeBright = 0, edgeAlphaMax = 0, midA = 0;
+                        if (d) {
+                            const data = wb.context.getImageData(0, 0, d.w, d.h).data;
+                            const at = (x, y) => (y * d.w + x) * 4;
+                            const edge = (x, y) => {
+                                const i = at(x, y);
+                                edgeBright = Math.max(edgeBright, data[i], data[i + 1], data[i + 2]);
+                                edgeAlphaMax = Math.max(edgeAlphaMax, data[i + 3]);
+                            };
+                            for (let x = 0; x < d.w; x++) { edge(x, 0); edge(x, d.h - 1); }
+                            for (let y = 0; y < d.h; y++) { edge(0, y); edge(d.w - 1, y); }
+                            midA = data[at(7, Math.floor(d.h / 2)) + 3];
+                        }
+                        const dimOk = !!d && midA >= 40 && midA <= 200 && edgeAlphaMax < midA && edgeBright <= 40;
+                        if (!dimOk) why.push(`darkening: middle alpha ${midA}, edge alpha max ${edgeAlphaMax}, edge brightness max ${edgeBright} (a border would be bright)`);
+                        const pInk = ink(sc.player.face.bitmap, 20, 20, FACE - 40, FACE - 40, 250);
+                        const lower = p.face.visible && p.face.x <= 40 && p.face.y >= gh / 2 && pInk > 400 && p.face.y > o.face.y + FACE;
+                        if (!lower) why.push(`player portrait at (${p.face.x},${p.face.y}) visible ${p.face.visible}, ${pInk} opaque px`);
+                        const kws = p.keywords.filter(k => k.visible);
+                        const kwBeside = kws.length >= 3 && kws.every(k => k.x >= p.face.x + FACE && k.y >= p.face.y - 2 && k.y + k.h <= gh);
+                        const first3 = kws.slice(0, 3).map(k => k.label).join(",") === [K.name, K.job, K.bye].join(",");
+                        const kwInk = kws.length ? ink(sc.kwSprites[0].bitmap, 0, 0, kws[0].w, kws[0].h, 200) : 0;
+                        if (!kwBeside || !first3 || kwInk < 30) why.push(`keywords [${kws.map(k => `${k.label}@${k.x},${k.y}`).join(" ")}] beside ${kwBeside}, name/job/bye first ${first3}, ${kwInk} inked px in the first`);
+                        // No dialog window: the talk is sprites; the window layer got nothing and is out of the way.
+                        const layer = SceneManager._scene._windowLayer;
+                        const added = layer ? layer.children.filter(ch => !layerKids0.includes(ch)) : [];
+                        const foreign = added.filter(ch => !(I.MenuWindow && ch instanceof I.MenuWindow)); // the context menu that chose Talk may still be closing
+                        const noWin = !(sc.root instanceof Window) && !sc.root.children.some(ch => ch instanceof Window) && !foreign.length && (!layer || !layer.visible);
+                        if (!noWin) why.push(`windows: the screen is ${sc.root.constructor.name}, windows added to the window layer other than the closing menu: ${foreign.map(w => w.constructor.name).join(", ") || "none"}, layer visible ${layer ? layer.visible : "-"}`);
+                        if (!tipHidden) why.push("UF_Look's tooltip visible over the talk");
+                        if (!openedByMenu) why.push("Talk from the real menu did not open the talk");
+                        if (d) detail = `other portrait ${o.faceInfo ? `${o.faceInfo.drawn} ${o.faceInfo.sheet || o.faceInfo.name}${o.faceInfo.sheet ? `:${o.faceInfo.index}` : ""} (${o.faceInfo.from})` : "?"} at (${o.face.x},${o.face.y}) ${FACE}x${FACE}, ${faceInk} opaque px; `
+                            + `words at (${o.words.x},${o.words.y}) ${d.w}x${d.h}, ${textInk} inked px, "${d.lines.join(" / ")}"; darkening middle alpha ${midA}, edge alpha max ${edgeAlphaMax}, edge brightness ${edgeBright}; `
+                            + `player portrait (#${p.unitId}, voice from ${Talk.current() ? Talk.current().voice.from : "?"}, ${p.faceInfo ? `${p.faceInfo.drawn} ${p.faceInfo.from}` : "?"}) at (${p.face.x},${p.face.y}); keywords [${kws.map(k => `${k.label}@${k.x},${k.y}`).join(" ")}]; screen is a ${sc.root.constructor.name}, window layer hidden ${layer ? !layer.visible : "-"}`;
                     }
-                    const labels = kw ? kw.labels() : [];
-                    const ok = openedByMenu && inLayer(win) && inLayer(kw) && win.visible && win.isOpen() && kw.isOpen() && kw.active && alpha > 0 && alpha2 > 0
-                        && !!drawn && drawn.title === A.name && ink > 20 && [K.name, K.job, K.bye].every(l => labels.includes(l)) && drawn.lines.join(" ").length > 0 && tipHidden;
-                    t.check("window_opens", ok, `opened from the menu: ${openedByMenu}; windows in the layer ${inLayer(win)}/${inLayer(kw)}, open ${win && win.isOpen()}/${kw && kw.isOpen()}, keywords active ${kw && kw.active}; `
-                        + `map tooltip ${tipSprite ? (tipHidden ? "hidden" : `VISIBLE ("${L.text().split("\n")[0]}")`) : "absent"} with the pointer over the map; `
-                        + `portrait ${drawn ? `${drawn.portrait.kind} ${drawn.portrait.sheet || drawn.portrait.name || ""}${drawn.portrait.sheet ? `:${drawn.portrait.index}` : ""} (${drawn.portrait.from}), alpha ${alpha}/${alpha2}` : "none"}; `
-                        + `title "${drawn ? drawn.title : ""}" (${ink} inked px); line "${drawn ? drawn.lines.join(" ") : ""}"; keywords [${labels.join(", ")}]`);
+                    check("layout", why.length === 0, why.length ? `${why.join("; ")}${detail ? ` | ${detail}` : ""}` : detail);
                 }
 
-                // "family" first: the partner's name must not be a keyword yet (talk.new_keyword_appears).
-                const before = Talk.current().keywords.map(k => k.id);
-                const famLine = Talk.ask(K.family) || "";
-                const pKw = Talk.current().keywords.find(k => k.id === `person:${partner.id}`) || null;
-                const kwShown = Talk.keywordWindow() ? Talk.keywordWindow().labels() : [];
-                await t.waitFrames(3);
-                t.screenshot("colonist");
-
-                // talk.name_and_job: the real name, and the current job's own text (the world is paused, so the job can't change).
-                {
-                    const nameLine = Talk.ask(K.name) || "";
-                    const shown = Talk.window() ? Talk.window().drawnState().lines.join(" ") : "";
-                    const job = J && J.of ? J.of(A.id) : null;
-                    const jobText = job ? J.describe(job) : null;
-                    const jobLineTxt = Talk.ask(K.job) || "";
-                    const idleOk = !job && jobLineTxt.length > 0 && Array.isArray(T().job && T().job.idle) && T().job.idle.some(s => jobLineTxt.startsWith(s));
-                    const jobOk = jobText ? jobLineTxt.toLowerCase().includes(jobText.toLowerCase()) : idleOk;
-                    t.check("name_and_job", nameLine.includes(A.name) && shown.includes(A.name) && jobOk,
-                        `name: "${nameLine}" (want ${A.name}; window shows "${shown}"); job now: ${jobText ? `"${jobText}"` : "none (idle)"}; job line: "${jobLineTxt}"`);
-                }
-
-                // talk.topics_from_state + talk.new_keyword_appears
-                {
-                    const fShort = shortName(faction.name);
-                    const facKw = Talk.current().keywords.find(k => k.id === `faction:${faction.id}`) || null;
-                    const facLine = facKw ? Talk.ask(facKw.id) || "" : "";
-                    const lKw = Talk.current().keywords.find(k => k.id === `person:${leader.id}`) || null;
-                    const leaderLine = lKw ? Talk.ask(lKw.id) || "" : "";
-                    t.check("topics_from_state", famLine.includes(partner.name) && facLine.toLowerCase().includes(fShort.toLowerCase()) && facLine.includes(leader.name) && leaderLine.includes(leader.name),
-                        `partner ${partner.name} (#${partner.id}, ${partnerFrom}) → family: "${famLine}"; faction ${faction.name} → ${facKw ? `"${facLine}"` : "no faction keyword"}; `
-                        + `leader ${leader.name} (#${leader.id}, rank ${leader.data.rank | 0}, ${leaderFrom}) → ${lKw ? `"${leaderLine}"` : "no leader keyword"}`);
-                    const partnerLine = pKw ? Talk.ask(pKw.id) || "" : "";
-                    t.check("new_keyword_appears", !before.includes(`person:${partner.id}`) && !!pKw && pKw.isNew && kwShown.includes(partner.name) && partnerLine.includes(partner.name),
-                        `before "family": [${before.join(", ")}]; after: ${pKw ? `"${pKw.label}" (new ${pKw.isNew})` : "no partner keyword"}; keyword window [${kwShown.join(", ")}]; asking it: "${partnerLine}"`);
-                }
-
-                // talk.bye_closes_and_resumes (part 1): the world stood still while open; bye closes the windows and it runs again.
+                // talk.pause_and_resume (part 1): the world stands still while the talk is open; Space asks instead of unpausing.
                 const tick0 = Tm ? Tm.ticks() : 0;
                 await t.waitFrames(20);
                 const tick1 = Tm ? Tm.ticks() : 0;
-                const winA = Talk.window(), kwA = Talk.keywordWindow();
-                const byeLineA = Talk.ask(K.bye) || "";
-                let closedA = true;
-                try {
-                    await t.waitUntil(() => !Talk.isOpen() && !winA.parent && !kwA.parent, 4000, "the talk windows to close");
-                } catch (e) { closedA = false; }
-                const resumedA = !!Tm && !Tm.paused;
-                const tick2 = Tm ? Tm.ticks() : 0;
-                await t.waitFrames(30);
-                const tick3 = Tm ? Tm.ticks() : 0;
-                const part1 = pausedWhileOpen && pausedByTalk && tick1 === tick0 && byeLineA.length > 0 && closedA && resumedA && tick3 - tick2 >= 10;
-                const part1Text = `running before; open: paused ${pausedWhileOpen} (by the talk ${pausedByTalk}), ticks ${tick0}→${tick1} over 20 frames; bye "${byeLineA}"; `
-                    + `closed and removed ${closedA}; running after ${resumedA}, ticks +${tick3 - tick2} over 30 frames`;
+                const cur0 = Talk.current();
+                const selId = cur0 ? cur0.keywords[cur0.sel].id : "";
+                const askedBeforeSpace = cur0 ? cur0.asked[selId] || 0 : 0;
+                await pressSpace();
+                const spaceAsked = Talk.current() ? (Talk.current().asked[selId] || 0) > askedBeforeSpace : false;
+                const pausedAfterSpace = !!(Tm && Tm.paused);
+                readAll();
 
-                // talk.hostile_refuses: a stranger of a faction at war refuses; a friendly one talks.
-                pause();
-                await t.waitFrames(2);
+                // talk.name_job_bye (with the friendly stranger): name, job, bye first; name and job answers from the state; bye closes.
                 {
-                    fx.relations.some(r => r[0] === fHostile.id) || fx.relations.push([fHostile.id, F.relation("player", fHostile.id)]);
-                    F.setRelation("player", fHostile.id, -80);
-                    const cg = cellOf(grump);
-                    const hasOption = I.optionsFor(cg.x, cg.y).some(o => o.id === "talk");
-                    const opened = Talk.open(grump.id);
-                    const refLine = opened ? opened.line : "";
-                    const refused = !!opened && opened.mode === "hostile" && fromTemplates(refLine, T().refuse);
-                    const onlyBye = !!opened && opened.keywords.map(k => k.id).join(",") === "bye";
-                    const nameAnswer = Talk.ask(K.name);
-                    const unchanged = Talk.line() === refLine;
-                    Talk.closeNow();
-                    F.setRelation("player", fHostile.id, fx.relations.find(r => r[0] === fHostile.id)[1]);
-                    const fr = Talk.open(stranger.id);
-                    const friendlyOk = !!fr && fr.mode === "friendly" && fromTemplates(fr.line, T().greet && T().greet.friendly) && fr.keywords.some(k => k.id === "name") && fr.keywords.some(k => k.id === "job");
-                    t.check("hostile_refuses", hasOption && refused && onlyBye && nameAnswer === null && unchanged && friendlyOk,
-                        `${grump.name} of ${fHostile.name} at war (-80): Talk offered ${hasOption}; mode ${opened ? opened.mode : "not opened"}, line "${refLine}" (a refuse template ${refused}); keywords [${opened ? opened.keywords.map(k => k.label).join(", ") : ""}]; `
-                        + `asking "${K.name}" gave ${nameAnswer === null ? "nothing" : `"${nameAnswer}"`}; ${stranger.name} of ${fFriend.name} at +30: mode ${fr ? fr.mode : "not opened"}, "${fr ? fr.line : ""}", keywords [${fr ? fr.keywords.map(k => k.label).join(", ") : ""}]`);
-                    Talk.closeNow();
+                    const kwIds = Talk.current() ? Talk.current().keywords.map(k => k.id) : [];
+                    const first3 = kwIds.slice(0, 3).join(",") === "name,job,bye";
+                    const nameText = Talk.ask("name") || "";
+                    readAll();
+                    const job = J && J.of ? J.of(stranger.id) : null;
+                    const doing = job ? lowerFirst(J.describe(job)) : stranger.data.intent && stranger.data.intent.text ? lowerFirst(stranger.data.intent.text) : null;
+                    const jobText = Talk.ask("job") || "";
+                    readAll();
+                    const trade = tradeOf(stranger);
+                    const idleOk = !doing && ((L("job") || {}).idle || []).some(tpl => jobText.startsWith(tpl));
+                    const jobOk = (doing ? jobText.toLowerCase().includes(doing.toLowerCase()) : idleOk) && !!trade && jobText.includes(trade);
+                    // A ranked person says their title with their name (V52).
+                    const title = titleOf(leader);
+                    const leaderName = lineFor(leader, "name", 0).text;
+                    const titleOk = !!title && leaderName.includes(leader.name) && leaderName.includes(title);
+                    await t.waitFrames(2);
+                    t.screenshot("stranger");
+                    const shotNote = `screenshot after "job": "${(Talk.page() || { lines: [] }).lines.join(" / ")}", keywords [${Talk.keywords().join(", ")}]`;
+                    const byeText = Talk.ask("bye") || "";
+                    await t.waitFrames(2);
+                    const closed = !Talk.isOpen() && !Talk.screen();
+                    const oh = Talk.lastOverHead();
+                    const byeOk = closed && byeText.length > 0 && fromTemplates(byeText, (L("bye") || {}).friendly) && !!oh && oh.unitId === stranger.id && oh.text === byeText;
+                    check("name_job_bye", openedByMenu && first3 && nameText.includes(stranger.name) && jobOk && titleOk && byeOk,
+                        `keywords at the start [${kwIds.join(", ")}] (name, job, bye first: ${first3}); name: "${nameText}"; doing now: ${doing ? `"${doing}"` : "nothing (idle)"}, trade ${trade ? `"${trade}"` : "none"}; job: "${jobText}"; `
+                        + `leader ${leader.name} (rank ${leader.data.rank | 0}, title "${title}", ${leaderFrom}): "${leaderName}"; bye: "${byeText}", talk closed ${closed}, over the head via ${oh ? oh.via : "nothing"}${oh && oh.unitId === stranger.id ? "" : " (not the stranger)"}; ${shotNote}`);
                 }
 
-                // Screenshot: a stranger (a real one of another faction on this map when there is one that isn't hostile, else TEST_talker).
-                await t.waitFrames(12);
-                const reals = W.unitsInArea(area.x, area.y).filter(u => isTalkable(u) && !isOwn(u) && !fx.units.includes(u) && stanceOf(u) !== "hostile" && W.eventOf(u.id) && stageOf(u) !== "baby");
-                const view = { x: $gameMap.displayX() + $gameMap.screenTileX() / 2, y: $gameMap.displayY() + $gameMap.screenTileY() / 2 };
-                reals.sort((a, b) => Math.hypot(a.x - view.x, a.y - view.y) - Math.hypot(b.x - view.x, b.y - view.y));
-                const shotWith = reals[0] || stranger;
-                centerOn(shotWith);
-                const opened2 = Talk.open(shotWith.id);
-                try {
-                    await t.waitUntil(() => Talk.isOpen() && Talk.window().isOpen() && Talk.window().drawnState() && !Talk.window().drawnState().portrait.pending, 5000, "the stranger's talk window");
-                } catch (e) { /* the screenshot shows it */ }
-                Talk.ask(K.name);
-                const sf = resolveFaction(shotWith.data.faction);
-                const sKw = Talk.current() ? Talk.current().keywords.find(k => k.id === `faction:${sf}`) : null;
-                if (sKw) Talk.ask(sKw.id);
-                await t.waitFrames(3);
-                t.screenshot("stranger");
-                const strangerNote = `stranger shot: ${shotWith.name} (${reals[0] ? "a real person of this map" : "the test's TEST_talker"}), faction ${sf}, line "${Talk.line()}"`;
+                // talk.pause_and_resume (part 2 and 3): running again after bye; a talk opened while paused leaves it paused.
+                {
+                    const resumed = !!Tm && !Tm.paused;
+                    const tk2 = Tm ? Tm.ticks() : 0;
+                    await t.waitFrames(30);
+                    const tk3 = Tm ? Tm.ticks() : 0;
+                    pause();
+                    await t.waitFrames(2);
+                    const o2 = Talk.open(stranger.id);
+                    const pausedBefore2 = !!(o2 && !o2.pausedByTalk && Tm && Tm.paused);
+                    Talk.ask("bye");
+                    const stillPaused = !!(Tm && Tm.paused);
+                    check("pause_and_resume", pausedWhileOpen && pausedByTalk && tick1 === tick0 && spaceAsked && pausedAfterSpace && resumed && tk3 - tk2 >= 10 && pausedBefore2 && stillPaused,
+                        `opened while running: paused ${pausedWhileOpen} (by the talk ${pausedByTalk}), ticks ${tick0}→${tick1} over 20 frames; Space asked "${selId}" ${spaceAsked}, still paused after Space ${pausedAfterSpace}; `
+                        + `after bye running ${resumed}, ticks +${tk3 - tk2} over 30 frames; opened while paused: not paused by the talk ${pausedBefore2}, still paused after bye ${stillPaused}`);
+                }
 
-                // talk.bye_closes_and_resumes (part 2): a talk opened while the world was already paused leaves it paused.
-                const winB = Talk.window();
-                const pausedBefore2 = !!(opened2 && !opened2.pausedByTalk && Tm && Tm.paused);
-                Talk.ask(K.bye);
-                let closedB = true;
-                try {
-                    await t.waitUntil(() => !Talk.isOpen() && (!winB || !winB.parent), 4000, "the stranger's talk to close");
-                } catch (e) { closedB = false; }
-                const stillPaused = !!(Tm && Tm.paused);
-                t.check("bye_closes_and_resumes", part1 && pausedBefore2 && closedB && stillPaused,
-                    `${part1Text}; paused before the second talk ${pausedBefore2}, closed ${closedB}, still paused after ${stillPaused}`);
+                // talk.paging: a long answer (A's newest thought, made long by the test) spans pages; a click shows the next page.
+                pause();
+                {
+                    const d = A.data;
+                    fx.thoughts = { unit: A, had: Object.prototype.hasOwnProperty.call(d, "thoughts"), old: Array.isArray(d.thoughts) ? d.thoughts.slice() : d.thoughts };
+                    const long = "TEST_ The river was high this morning and the ford was gone, so we carried the stones the long way round by the old ash trees, "
+                        + "and by the time we reached the camp the fire had burned low, the bread was cold, and nobody could agree on who should have watched it.";
+                    d.thoughts = [{ text: long, strength: 0 }].concat(Array.isArray(fx.thoughts.old) ? fx.thoughts.old : []);
+                    centerOn(A);
+                    // talk.voice: with another colonist selected in the Overseer, that colonist is your portrait.
+                    const B = cols.find(u => u !== A && canSpeakFor(u, A) && u.id !== (voiceOf(A) || { unit: {} }).unit.id) || cols.find(u => u !== A && canSpeakFor(u, A)) || null;
+                    if (B && window.$colonyManager && $colonyManager.select) $colonyManager.select(B.id);
+                    Talk.open(A.id);
+                    await waitFaces("A's portrait");
+                    {
+                        const cv = Talk.current(), lv = Talk.layout();
+                        const vInk = Talk.screen() ? ink(Talk.screen().player.face.bitmap, 20, 20, FACE - 40, FACE - 40, 250) : 0;
+                        const ok = !!B && !!cv && cv.voice.from === "selected" && cv.playerId === B.id && !!lv.player.faceInfo && lv.player.faceInfo.unitId === B.id && vInk > 400;
+                        check("voice", ok, `${B ? `${B.name} (#${B.id}) selected` : "no other colonist to select"}: voice ${cv ? `#${cv.playerId} ${cv.voice.name} (from ${cv.voice.from})` : "none"}, portrait drawn for #${lv && lv.player.faceInfo ? lv.player.faceInfo.unitId : "-"} (${lv && lv.player.faceInfo ? `${lv.player.faceInfo.drawn} ${lv.player.faceInfo.from}` : "-"}), ${vInk} opaque px in its middle`);
+                        if (window.$colonyManager && $colonyManager.deselect) $colonyManager.deselect();
+                    }
+                    Talk.learn("mood");
+                    const moodText = Talk.ask("mood") || "";
+                    await t.waitFrames(3);
+                    const c0 = Talk.current();
+                    const lay0 = Talk.layout();
+                    const drawn0 = lay0 && lay0.other.drawn ? lay0.other.drawn.lines.slice() : [];
+                    const more0 = !!lay0 && lay0.other.more;
+                    const kwFaint = Talk.screen() ? Talk.screen().kwSprites.filter(s => s.visible).every(s => s.opacity <= 120) : false;
+                    t.screenshot("paging");
+                    await click(Math.round(Graphics.width / 2), Math.round(Graphics.height / 2));
+                    const c1 = Talk.current();
+                    const lay1 = Talk.layout();
+                    const drawn1 = lay1 && lay1.other.drawn ? lay1.other.drawn.lines.slice() : [];
+                    const pages = c0 ? c0.pages : [];
+                    const allText = pages.map(p => p.join(" ")).join(" ");
+                    const whole = allText === moodText.split(/\s+/).join(" ");
+                    const ok = pages.length >= 2 && c0.page === 0 && drawn0.join("|") === pages[0].join("|") && more0 && kwFaint && c0.phase === "reading"
+                        && !!c1 && c1.page === 1 && drawn1.join("|") === (pages[1] || []).join("|") && whole;
+                    check("paging", ok, `mood answer ${moodText.length} chars in ${pages.length} page(s) of up to ${PAGE_LINES} lines; page 0 drawn "${drawn0.join(" / ")}", more mark ${more0}, keywords faint ${kwFaint}, phase ${c0 ? c0.phase : "-"}; `
+                        + `after a click: page ${c1 ? c1.page : "-"} drawn "${drawn1.join(" / ")}"; every word on some page ${whole}`);
+                    readAll();
+                }
 
-                // talk.no_banned_words: every template string, and at least 200 generated lines over every topic of every speaker.
+                // talk.keywords_grow: asking "name" adds the faction and "family"; asking "family" adds the partner by name.
+                {
+                    const before = Talk.current().keywords.map(k => k.id);
+                    const nameText = Talk.ask("name") || "";
+                    readAll();
+                    const afterName = Talk.current().keywords.map(k => k.id);
+                    const famText = Talk.ask("family") || "";
+                    readAll();
+                    const after = Talk.current().keywords;
+                    const pKw = after.find(k => k.id === `person:${partner.id}`) || null;
+                    const shown = Talk.layout().player.keywords.filter(k => k.visible).map(k => k.label);
+                    const facId = `faction:${fid}`;
+                    const ok = !before.includes(facId) && afterName.includes(facId) && afterName.includes("family") && !before.includes(`person:${partner.id}`) && !!pKw && pKw.isNew
+                        && famText.includes(partner.name) && shown.includes(partner.name) && nameText.toLowerCase().includes(shortName(faction.name).toLowerCase());
+                    check("keywords_grow", ok, `before [${before.join(", ")}]; "name": "${nameText}" → [${afterName.join(", ")}]; "family": "${famText}" → partner ${partner.name} (#${partner.id}, ${partnerFrom}) `
+                        + `${pKw ? `added (new ${pKw.isNew})` : "NOT added"}; drawn keywords [${shown.join(", ")}]`);
+                }
+
+                // talk.companion_chimes_in: a colonist of ours placed next to A; the seeded roll says after which question one speaks.
+                {
+                    const range = chimeRange();
+                    let comp = null;
+                    for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2], [1, 1], [-1, -1]]) {
+                        // The other gender, so the stock placeholder face (often one per species and gender) differs from A's.
+                        comp = spawn("TEST_companion", dx, dy, { kind: "colonist", faction: A.data.faction, species: A.data.species, gender: A.data.gender === "female" ? "male" : "female", age: 29, ai: null }, A.image.characterName, 1);
+                        if (comp && cheb(comp, A) <= range) break;
+                        unspawn(comp);
+                        comp = null;
+                    }
+                    if (comp) await t.waitUntil(() => !!W.eventOf(comp.id), 3000, "the companion's event");
+                    const repId = Talk.current().playerId;
+                    const near = companionsNear(A, repId);
+                    const allNear = near.every(v => cheb(v, A) <= range && isOwn(v) && v.id !== A.id && v.id !== repId);
+                    const farOnes = W.units().filter(v => isOwn(v) && isTalkable(v) && v.id !== A.id && v.id !== repId && sameArea(v.area, A.area) && cheb(v, A) > range);
+                    let seen = null, asks = 0;
+                    const mismatches = [];
+                    for (let i = 0; i < 30 && !seen; i++) {
+                        const kws = Talk.current().keywords.filter(k => k.id !== "bye");
+                        const k = kws[i % kws.length];
+                        const n = Talk.current().asked[k.id] || 0;
+                        const want = chimeFor(A, k.id, n, lineFor(A, k.id, n, k.label).adds, repId);
+                        Talk.ask(k.id);
+                        asks++;
+                        readAll();
+                        const got = Talk.current().chime;
+                        if (!!want !== !!got || (want && got && (want.unitId !== got.unitId || want.text !== got.text))) mismatches.push(`${k.id}#${n}: predicted ${want ? want.unitId : "none"}, got ${got ? got.unitId : "none"}`);
+                        if (got && got.shown) seen = { got, k: k.id };
+                    }
+                    await t.waitFrames(3);
+                    const lay = Talk.layout();
+                    let compInk = 0, compWords = "";
+                    if (seen && lay) {
+                        compInk = ink(Talk.screen().comp.face.bitmap, 20, 20, FACE - 40, FACE - 40, 250);
+                        compWords = lay.comp.drawn ? lay.comp.drawn.lines.join(" ") : "";
+                        t.screenshot("companion");
+                    }
+                    const speaker = seen ? unitById(seen.got.unitId) : null;
+                    const chimeTpls = [];
+                    for (const cs of [aboutThem(), remarks()]) for (const k of Object.keys(cs)) if (Array.isArray(cs[k])) chimeTpls.push(...cs[k]);
+                    const ok = !!comp && !!seen && near.some(v => v.id === comp.id) && allNear && !farOnes.some(v => near.includes(v)) && !mismatches.length && !!speaker && near.includes(speaker)
+                        && lay.comp.face.visible && compInk > 400 && lay.comp.face.y >= lay.other.face.y + FACE && lay.comp.face.y + FACE < lay.player.face.y
+                        && compWords === seen.got.text && fromTemplates(seen.got.text, chimeTpls);
+                    check("companion_chimes_in", ok, `companion placed: ${comp ? `${comp.name} ${cheb(comp, A)} cells from ${A.name}` : "NONE within range"}; within ${range} cells: [${near.map(v => v.name).join(", ")}] (all within range ${allNear}; ${farOnes.length} of ours farther, none listed ${!farOnes.some(v => near.includes(v))}); `
+                        + `${seen ? `after ${asks} question(s) ${speaker ? speaker.name : "?"} chimed in on "${seen.k}": "${seen.got.text}" (drawn "${compWords}", portrait ${compInk} opaque px at y ${lay.comp.face.y})` : `no chime in ${asks} questions`}; `
+                        + `prediction mismatches: ${mismatches.length ? mismatches.join("; ") : "none"}`);
+                    Talk.closeNow();
+                    unspawn(comp);
+                }
+
+                // talk.hostile_refuses_over_head: a stranger of a faction at war refuses; the refusal floats over their head; no talk opens.
+                {
+                    run();
+                    await t.waitFrames(2);
+                    if (!fx.relations.some(r => r[0] === fHostile.id)) fx.relations.push([fHostile.id, F.relation("player", fHostile.id)]);
+                    F.setRelation("player", fHostile.id, -80);
+                    centerOn(grump);
+                    await t.waitFrames(3);
+                    const cg = cellOf(grump);
+                    const hasOption = I.optionsFor(cg.x, cg.y).some(o => o.id === "talk");
+                    const res = Talk.open(grump.id);
+                    const ref = Talk.lastRefusal();
+                    const oh = Talk.lastOverHead();
+                    const openNow = Talk.isOpen();
+                    const runningNow = !!Tm && !Tm.paused;
+                    let spriteOk = false, spriteNote = "";
+                    if (oh && oh.via === "fallback") {
+                        await t.waitFrames(2);
+                        const sp = oh.sprite, ev = W.eventOf(grump.id);
+                        const tilemap = SceneManager._scene._spriteset._tilemap;
+                        const spInk = ink(sp.bitmap, 0, 0, sp.bitmap.width, sp.bitmap.height, 200);
+                        spriteOk = sp.parent === tilemap && sp.visible && sp.z === OH_Z && !!ev && Math.abs(sp.x - ev.screenX()) <= 1 && sp.y < ev.screenY() - 20 && spInk > 100;
+                        spriteNote = `fallback line in the tilemap ${sp.parent === tilemap}, visible ${sp.visible}, z ${sp.z}, at (${Math.round(sp.x)},${Math.round(sp.y)}) over the unit at (${ev ? ev.screenX() : "?"},${ev ? ev.screenY() : "?"}), ${spInk} inked px`;
+                        t.screenshot("refuse");
+                    } else if (oh && oh.via === "UF.Speech") {
+                        await t.waitFrames(8);
+                        const S = UF.Speech;
+                        const said = S.lines ? S.lines(grump.id).map(l => l.text).join(" ") : "";
+                        const norm = s => String(s || "").replace(/\s+/g, " ").trim();
+                        spriteOk = oh.unitId === grump.id && !!S.isSpeaking && S.isSpeaking(grump.id) && norm(said) === norm(ref && ref.text);
+                        spriteNote = `said through UF.Speech.say (ids ${JSON.stringify(oh.ids)}); UF.Speech.lines(${grump.name}): "${said}"`;
+                        t.screenshot("refuse");
+                    }
+                    const refuseOk = !!ref && ref.unitId === grump.id && ref.mode === "hostile" && fromTemplates(ref.text, L("refuse"));
+                    check("hostile_refuses_over_head", hasOption && res === null && !openNow && runningNow && refuseOk && !!oh && oh.unitId === grump.id && oh.text === (ref && ref.text) && spriteOk,
+                        `${grump.name} of ${fHostile.name} at war (-80): Talk offered ${hasOption}; open returned ${res === null ? "null" : "a talk"}, talk open ${openNow}, world running ${runningNow}; `
+                        + `refusal ${ref ? `"${ref.text}" (mode ${ref.mode}, a refuse template ${refuseOk})` : "none"}; ${spriteNote || "no over-head line"}`);
+                    if (Talk.isOpen()) Talk.closeNow();
+                    F.setRelation("player", fHostile.id, fx.relations.find(r => r[0] === fHostile.id)[1]);
+                    pause();
+                }
+
+                // talk.lines_well_formed + talk.no_banned_words: every template string, and at least 200 generated lines (chimes too).
                 {
                     const strings = [];
                     const walk = v => {
@@ -1861,219 +2391,75 @@
                     const badT = strings.filter(s => BANNED.test(s));
                     const speakers = [];
                     for (const u of [A, partner, leader, stranger, grump].concat(W.unitsInArea(area.x, area.y).filter(isTalkable))) if (u && !speakers.includes(u)) speakers.push(u);
+                    const topics = ["greet", "name", "job", "family", "home", "mood", "others", "news", "bye", "need:hunger", "need:thirst", "need:sleep", "need:social", "need:nature"];
                     const lines = [];
-                    for (let n = 0; n < 4 && lines.length < 200; n++) {
+                    for (let n = 0; n < 4; n++) {
                         for (const u of speakers) {
-                            const keys = ["greet", "bye"].concat(initialKeywords(u, modeOf(u) === "hostile" || modeOf(u) === "baby" ? "wary" : modeOf(u)).map(k => k.id));
                             const extra = [];
-                            for (const key of keys) {
+                            const addsOf = {};
+                            for (const key of topics) {
                                 const r = lineFor(u, key, n);
                                 lines.push(r.text);
+                                addsOf[key] = r.adds;
                                 for (const a of r.adds) if (!extra.includes(a.id)) extra.push(a.id);
                             }
-                            for (const key of extra) lines.push(lineFor(u, key, n).text);
+                            for (const key of extra) {
+                                const r = lineFor(u, key, n);
+                                lines.push(r.text);
+                                addsOf[key] = r.adds;
+                            }
+                            // Companions: a remark on every topic, and what the ones it concerns say (named, kin, factions).
+                            const comps = speakers.filter(v => v !== u && isOwn(v) && stageOf(v) !== "baby").slice(0, 3);
+                            for (const key of topics.concat(extra)) {
+                                if (key === "bye") continue;
+                                const rm = chimeRemark(comps[0] || A, u, key, n);
+                                if (rm) lines.push(rm.text);
+                                for (const c of comps) {
+                                    const ab = chimeAbout(c, u, key, n, addsOf[key]);
+                                    if (ab) lines.push(ab.text);
+                                }
+                            }
                         }
                     }
                     const badG = lines.filter(s => BANNED.test(s));
-                    const malformed = lines.filter(s => !s || /\{\w+\}/.test(s) || s.split(/(?<=[.?!])\s+/).some(p => /^["(]?[a-z]/.test(p)));
-                    t.check("lines_well_formed", lines.length >= 200 && !malformed.length, `${lines.length} generated lines, ${malformed.length} empty, with an unfilled {slot}, or with a sentence starting in lower case${malformed.length ? `; first: "${malformed[0]}"` : ""}`);
-                    t.check("no_banned_words", strings.length >= 50 && lines.length >= 200 && !badT.length && !badG.length,
-                        `${strings.length} template strings (catalog "talk" ${catalog() && catalog().talk ? "present" : "MISSING, fallback used"}), ${badT.length} with a banned word${badT.length ? `: "${badT[0]}"` : ""}; `
-                        + `${lines.length} generated lines from ${speakers.length} speakers, ${badG.length} with a banned word${badG.length ? `: "${badG[0]}"` : ""}; sample: "${lines[7] || ""}" / "${lines[lines.length - 1] || ""}"; ${strangerNote}`);
+                    const malformed = lines.filter(s => !s || /\{\w+\}|[[\]]/.test(s) || s.split(/(?<=[.?!])\s+/).some(p => /^["(]?[a-z]/.test(p)));
+                    check("lines_well_formed", lines.length >= 200 && !malformed.length, `${lines.length} generated lines, ${malformed.length} empty, with an unfilled {slot} or [topic], or with a sentence starting in lower case${malformed.length ? `; first: "${malformed[0]}"` : ""}`);
+                    check("no_banned_words", strings.length >= 50 && lines.length >= 200 && !badT.length && !badG.length,
+                        `${strings.length} template strings (catalog "talk" ${catalog() && catalog().talk ? "present" : "MISSING, fallback used"}, "lines" ${T().lines ? "present" : "missing"}), ${badT.length} with a banned word${badT.length ? `: "${badT[0]}"` : ""}; `
+                        + `${lines.length} generated lines from ${speakers.length} speakers (chimes included), ${badG.length} with a banned word${badG.length ? `: "${badG[0]}"` : ""}; sample: "${lines[9] || ""}" / "${lines[lines.length - 1] || ""}"`);
                 }
 
-                // talk.perf: per-frame cost with a talk open (budget 0.2 ms), and the cost of one line (budget 2 ms; per click, not per frame).
+                // talk.perf: per-frame cost with a talk open and the pointer moving over the keywords (budget 0.2 ms), no Bitmap made per frame.
                 {
                     Talk.open(stranger.id);
+                    await waitFaces("the stranger's portrait");
+                    await t.waitFrames(INPUT_DELAY + 2);
                     Talk.resetStats();
-                    await t.waitFrames(90);
+                    const made0 = bitmapsMade;
+                    const rects = Talk.layout().player.keywords.filter(k => k.visible);
+                    const px = TouchInput._x, py = TouchInput._y;
+                    for (let i = 0; i < 90; i++) {
+                        const r = rects[i % rects.length];
+                        TouchInput._x = Math.round(r.x + r.w / 2);
+                        TouchInput._y = Math.round(r.y + r.h / 2);
+                        await t.waitFrames(1);
+                    }
+                    TouchInput._x = px;
+                    TouchInput._y = py;
                     const st = Talk.stats();
                     const perFrame = st.frames ? st.ms / st.frames : Infinity;
+                    const made = bitmapsMade - made0;
                     const keys = ["name", "job", "family", "home", "mood", "others", "news", `faction:${fid}`, `person:${partner.id}`, `person:${leader.id}`];
                     const t0 = performance.now();
-                    let made = 0;
-                    for (let n = 0; n < 5; n++) for (const u of [A, stranger]) for (const key of keys) { lineFor(u, key, n); made++; }
-                    const perLine = (performance.now() - t0) / made;
+                    let n = 0;
+                    for (let k = 0; k < 5; k++) for (const u of [A, stranger]) for (const key of keys) { lineFor(u, key, k); n++; }
+                    const perLine = (performance.now() - t0) / n;
                     Talk.closeNow();
-                    t.check("perf", perFrame <= 0.2 && perLine <= 2, `tick ${perFrame.toFixed(4)} ms per frame over ${st.frames} frames with a talk open; ${perLine.toFixed(3)} ms per line over ${made} lines (${W.units().length} units in the world)`);
+                    check("perf", perFrame <= 0.2 && made === 0 && perLine <= 2, `tick ${perFrame.toFixed(4)} ms per frame over ${st.frames} frames with a talk open and the pointer moving over ${rects.length} keywords; `
+                        + `${made} Bitmap(s) made in those frames; ${perLine.toFixed(3)} ms per line over ${n} lines (${W.units().length} units in the world)`);
                 }
-
-                // The V62 layout. Helpers: open a talk and wait until its windows are open and every portrait is drawn.
-                const cm = window.$colonyManager;
-                const selBefore = cm && cm.selectedColonist ? cm.selectedColonist.id : null;
-                const restoreSel = () => {
-                    if (!cm) return;
-                    if (selBefore !== null && selBefore !== undefined && typeof cm.select === "function") cm.select(selBefore);
-                    else if (typeof cm.deselect === "function") cm.deselect();
-                };
-                const openAndWait = async (id, what) => {
-                    const o = Talk.open(id);
-                    try {
-                        await t.waitUntil(() => {
-                            if (!Talk.isOpen() || !Talk.window().isOpen() || !Talk.keywordWindow().isOpen()) return false;
-                            const d = Talk.window().drawnState(), v = Talk.keywordWindow().voiceDrawn();
-                            return !!d && !d.portrait.pending && !(v && v.pending);
-                        }, 5000, what);
-                    } catch (e) { /* the check reports what it found */ }
-                    await t.waitFrames(INPUT_LOCK + 2);
-                    return o;
-                };
-                const ownOthers = cols.filter(u => u !== A && canSpeakFor(u, A));
-                const pick = ownOthers.find(u => u !== partner && ["adult", "elder"].includes(stageOf(u))) || ownOthers[0] || null;
-
-                // talk.player_portrait (V62): your portrait beside the keywords. The voice is the colonist you have selected;
-                // with nothing selected another of yours (the ruler or the nearest grown person), never the person spoken to.
-                {
-                    const probe = () => {
-                        const kw = Talk.keywordWindow();
-                        const vd = kw ? kw.voiceDrawn() : null;
-                        let alpha = 0;
-                        if (vd && vd.drawn) alpha = kw.contents.getAlphaPixel(Math.floor(vd.rect.x + vd.rect.w / 2), Math.floor(vd.rect.y + vd.rect.h * 0.4));
-                        const r0 = kw && kw.maxItems() > 0 ? kw.itemRect(0) : null;
-                        const beside = !!vd && !!r0 && r0.x >= vd.rect.x + vd.rect.w && r0.y < vd.rect.y + vd.rect.h;
-                        return { vd, alpha, r0, beside };
-                    };
-                    let selOk = true, selPart = "nobody else of yours on the map to select";
-                    if (pick && cm && typeof cm.select === "function") {
-                        cm.select(pick.id);
-                        centerOn(A);
-                        await openAndWait(A.id, "the talk with a colonist selected");
-                        const cur = Talk.current();
-                        const p = probe();
-                        selOk = !!cur && cur.voice.unitId === pick.id && !!p.vd && p.vd.drawn && p.alpha > 0 && p.beside;
-                        selPart = `${pick.name} (#${pick.id}) selected: voice ${cur ? `${cur.voice.name} (#${cur.voice.unitId}, ${cur.voice.from})` : "none"}, portrait ${p.vd ? `${p.vd.portrait.kind} ${p.vd.portrait.sheet || p.vd.portrait.name || ""} drawn ${p.vd.drawn}` : "not drawn"}, alpha ${p.alpha}, first keyword at x ${p.r0 ? p.r0.x : "-"} (the portrait ends at ${p.vd ? p.vd.rect.x + p.vd.rect.w : "-"})`;
-                        t.screenshot("player_portrait");
-                        Talk.closeNow();
-                        if (typeof cm.deselect === "function") cm.deselect();
-                    }
-                    await openAndWait(A.id, "the talk with nothing selected");
-                    const cur2 = Talk.current();
-                    const p2 = probe();
-                    const vu = cur2 && cur2.voice.unitId !== null ? unitById(cur2.voice.unitId) : null;
-                    const whoOk = vu ? vu.id !== A.id && isOwn(vu) : (!ownOthers.length && !!cur2 && cur2.voice.from === "emblem");
-                    const noSelOk = !!cur2 && whoOk && !!p2.vd && p2.vd.drawn && p2.alpha > 0 && p2.beside;
-                    Talk.closeNow();
-                    restoreSel();
-                    t.check("player_portrait", selOk && noSelOk, `${selPart}; nothing selected: voice ${cur2 ? `${cur2.voice.name || "-"} (#${cur2.voice.unitId}, ${cur2.voice.from})` : "none"}, `
-                        + `portrait ${p2.vd ? `${p2.vd.portrait.kind} drawn ${p2.vd.drawn}` : "not drawn"}, alpha ${p2.alpha}, keywords beside it ${p2.beside}`);
-                }
-
-                // talk.pages_not_cut (V62): a long line is shown a page at a time with every word kept; a mouse click turns the
-                // page; the keywords wait (inactive, dimmed) until the last page.
-                {
-                    const hadT = Object.prototype.hasOwnProperty.call(A.data, "thoughts"), oldT = A.data.thoughts;
-                    const longThought = `TEST_ a long thought, ${Array.from({ length: 70 }, (_, i) => `word${i + 1}`).join(" ")}.`;
-                    let ok = false, detail = "";
-                    try {
-                        A.data.thoughts = [{ text: longThought, strength: 0 }].concat(Array.isArray(oldT) ? oldT : []);
-                        centerOn(A);
-                        await openAndWait(A.id, "the talk for the long line");
-                        const full = Talk.ask("mood") || "";
-                        await t.waitFrames(INPUT_LOCK + 2);
-                        const cur = Talk.current();
-                        const win = Talk.window(), kw = Talk.keywordWindow();
-                        const d1 = win ? win.drawnState() : null;
-                        let moreInk = 0;
-                        if (d1 && d1.moreRect) {
-                            for (let y = d1.moreRect.y; y < d1.moreRect.y + d1.moreRect.h; y++) {
-                                for (let x = d1.moreRect.x; x < d1.moreRect.x + d1.moreRect.w; x++) if (win.contents.getAlphaPixel(x, y) > 0) moreInk++;
-                            }
-                        }
-                        const waited = !!kw && !kw.active && kw.isWaiting();
-                        t.screenshot("pages");
-                        const seen = d1 ? [d1.lines.slice()] : [];
-                        // A real click on the person's window: the release TouchInput reads on its next update.
-                        const px = TouchInput._x, py = TouchInput._y;
-                        TouchInput._x = Math.round(win.x + win.width / 2);
-                        TouchInput._y = Math.round(win.y + win.height / 2);
-                        TouchInput._moved = false;
-                        TouchInput._newState.released = true;
-                        await t.waitFrames(2);
-                        TouchInput._x = px;
-                        TouchInput._y = py;
-                        const afterClick = Talk.current();
-                        const clicked = !!afterClick && afterClick.page === 2;
-                        if (clicked && afterClick.showing === "speaker") seen.push(win.drawnState().lines.slice());
-                        let guard = 0;
-                        while (Talk.pagesLeft() > 0 && guard++ < 30) {
-                            Talk.next();
-                            if (Talk.current().showing === "speaker") seen.push(win.drawnState().lines.slice());
-                        }
-                        await t.waitFrames(2);
-                        const dLast = win.drawnState();
-                        const norm = s => String(s).split(/\s+/).filter(Boolean).join(" ");
-                        const joined = norm(seen.map(l => l.join(" ")).join(" "));
-                        const want = norm(full);
-                        const perPage = win.linesPerPage();
-                        const fullPages = seen.slice(0, -1).every(l => l.length === perPage);
-                        const activeAfter = !!kw && kw.active && !kw.isWaiting() && !dLast.more;
-                        ok = full.length > 0 && !!cur && cur.pages >= 2 && !!d1 && d1.more && moreInk > 0 && waited && clicked && joined === want && !joined.includes("…") && fullPages && activeAfter;
-                        detail = `mood line of ${want.split(" ").length} words in ${cur ? cur.pages : 0} page(s) of ${perPage} lines; page 1 shows ${d1 ? d1.lines.length : 0} lines, "more" mark ${d1 && d1.more ? `drawn (${moreInk} inked px)` : "absent"}; `
-                            + `keywords waiting ${waited}; a click turned to page 2 ${clicked}; pages seen ${seen.length}, words shown ${joined ? joined.split(" ").length : 0} of ${want ? want.split(" ").length : 0}`
-                            + `${joined === want ? " (all, in order)" : ` (MISMATCH; page 1 ends "${seen[0] && seen[0].length ? seen[0][seen[0].length - 1] : ""}")`}; keywords active after the last page ${activeAfter}`;
-                        Talk.closeNow();
-                    } finally {
-                        if (hadT) A.data.thoughts = oldT;
-                        else delete A.data.thoughts;
-                    }
-                    t.check("pages_not_cut", ok, detail);
-                }
-
-                // talk.companion_chimes (V62): one of yours standing near the person chimes in with their own portrait and line
-                // when the line names them; the same question about one of yours out of range gets nothing from them.
-                {
-                    const hadP = Object.prototype.hasOwnProperty.call(A.data, "partner"), oldP = A.data.partner;
-                    const range = chimeConf().range;
-                    let ok = false, detail = "";
-                    try {
-                        const mk = (name, dx, dy) => spawn(name, dx, dy, { kind: "person", faction: A.data.faction, species: A.data.species,
-                            gender: A.data.gender === "male" ? "female" : "male", age: 31, ai: null }, A.image.characterName);
-                        const near = mk("TEST_companion", 1, 1);
-                        const far = mk("TEST_faraway", range + 5, 0);
-                        await t.waitUntil(() => W.eventOf(near.id) && W.eventOf(far.id), 3000, "the companions' events");
-                        await t.waitFrames(2);
-                        const dNear = cellDist(near, A), dFar = cellDist(far, A);
-                        if (pick && cm && typeof cm.select === "function") cm.select(pick.id); // so neither of them is your voice
-                        A.data.partner = near.id;
-                        centerOn(A);
-                        await openAndWait(A.id, "the talk with a companion near");
-                        const line = Talk.ask(K.family) || "";
-                        const cur = Talk.current();
-                        const ch = cur ? cur.chime : null;
-                        const namedIds = (lineFor(A, "family", 0).adds || []).filter(a => a.topic === "person").map(a => a.ref);
-                        const chU = ch ? unitById(ch.unitId) : null;
-                        const chOk = !!chU && namedIds.includes(chU.id) && cellDist(chU, A) <= range && chU.id !== (cur.voice.unitId) && fromTemplates(ch.text, T().chime && T().chime.named);
-                        const pagesBefore = cur ? cur.pagesLeft : 0;
-                        let guard = 0;
-                        while (Talk.pagesLeft() > 0 && guard++ < 10) Talk.next();
-                        const cw = Talk.companionWindow();
-                        try {
-                            await t.waitUntil(() => !!cw && cw.isOpen() && !!cw.drawnState() && !cw.drawnState().portrait.pending, 3000, "the companion's window");
-                        } catch (e) { /* reported below */ }
-                        const cd = cw ? cw.drawnState() : null;
-                        let alpha = 0;
-                        if (cd) alpha = cw.contents.getAlphaPixel(Math.floor(cd.portraitRect.x + cd.portraitRect.w / 2), Math.floor(cd.portraitRect.y + cd.portraitRect.h * 0.4));
-                        const norm = s => String(s).split(/\s+/).filter(Boolean).join(" ");
-                        const shown = cd ? norm(cd.lines.join(" ")) : "";
-                        const winOk = !!cd && inLayer(cw) && cw.isOpen() && !!chU && cd.title === chU.name && cd.unitId === chU.id && alpha > 0 && shown === norm(ch ? ch.text : "-") && pagesBefore >= 1;
-                        await t.waitFrames(3);
-                        t.screenshot("companion");
-                        A.data.partner = far.id;
-                        const farChime = Talk.chimeFor(A, "family", 0, lineFor(A, "family", 0).adds, cur ? cur.voice.unitId : null);
-                        const farOk = !farChime || farChime.unitId !== far.id;
-                        Talk.closeNow();
-                        ok = dNear <= range && dFar > range && chOk && winOk && farOk;
-                        detail = `range ${range}; ${near.name} ${dNear} cells from ${A.name}, ${far.name} ${dFar}; voice ${cur ? `${cur.voice.name} (${cur.voice.from})` : "-"}; family: "${line}"; `
-                            + `chime ${ch ? `${ch.name} (#${ch.unitId}, ${ch.variants.join("/")}): "${ch.text}"` : "none"} (named in the line: [${namedIds.join(", ")}]); `
-                            + `companion window ${cd ? `open ${cw.isOpen()}, title "${cd.title}", portrait ${cd.portrait.kind} alpha ${alpha}, shows "${shown}"` : "not drawn"}, pages after the line ${pagesBefore}; `
-                            + `partner ${far.name} out of range: ${farChime ? `chime from ${farChime.name}: "${farChime.text}"` : "no chime"}`;
-                    } finally {
-                        if (hadP) A.data.partner = oldP;
-                        else delete A.data.partner;
-                        restoreSel();
-                    }
-                    t.check("companion_chimes", ok, detail);
-                }
+            } catch (e) {
+                for (const n of NAMES) if (!done.has(n)) check(n, false, `not reached: the suite stopped with ${e && e.stack ? e.stack.split("\n").slice(0, 3).join(" | ") : e}`);
             } finally {
                 try { if (Talk.isOpen()) Talk.closeNow(); } catch (e) { /* cleanup */ }
                 for (const u of fx.units) if (W.unit(u.id)) W.removeUnit(u.id);
@@ -2081,6 +2467,8 @@
                 if (fx.met) for (const [id, met] of fx.met) { const f = F.get(id); if (f) f.met = met; }
                 if (fx.partner) { if (fx.partner.had) fx.partner.unit.data.partner = fx.partner.old; else delete fx.partner.unit.data.partner; }
                 if (fx.rank) { if (fx.rank.had) fx.rank.unit.data.rank = fx.rank.old; else delete fx.rank.unit.data.rank; }
+                if (fx.thoughts) { if (fx.thoughts.had) fx.thoughts.unit.data.thoughts = fx.thoughts.old; else delete fx.thoughts.unit.data.thoughts; }
+                if (window.$colonyManager && fx.sel !== undefined) { if (fx.sel !== null) $colonyManager.select(fx.sel); else $colonyManager.deselect(); }
                 if (fx.pausedByTest && Tm && Tm.paused) Tm.resume();
             }
             await t.waitFrames(10);
