@@ -63,6 +63,7 @@ The build order is `docs/design/DF_MECHANICS.md` §14:
 7. Edge arrivals and faction behaviors
 8. Relationships, children, aging
 9. U7-style combat
+10. Societies for every faction (V51) and ranks (V52): the colonist simulation per faction site with an off-screen tick, `data.rank` / `data.superior`, orders flowing down (WORLD_ARCHITECTURE §2.10).
 Side items: projection fix + sprite anchors (K3), look cursor, removing the old autotest (K2).
 Each step ships with checks and a handoff report for Gemini (art waves: `docs/handoffs/HANDOFF_df_art.md`).
 
