@@ -39,6 +39,18 @@ Line numbers refer to the source inspected on 2026-09-19 before this compatibili
 
 ## Required integration tests
 
+### Added founding requirement: dwarves (user, 2026-09-19)
+
+New worlds must contain a dwarven faction with a real underground starting camp on z=-1 or z=-2. Dwarven founding locations never use Ground or the upper layers. Other peoples retain their current policy until directed otherwise. This does not forbid later travel above ground.
+
+Pending the optional user choice between one camp and settlements on both underground layers, use one suitable starting camp selected deterministically from the allowed levels. Do not invent an extra faction, lore, doubled population or established fortress. Keep the existing founder-count and basic-start rules, with layer-appropriate safe floor, food/water and construction resources. Faction home, history site, campfire, founder units, spawn reservations, resource kit and saved view (if the player is dwarven) must all carry the same actual z.
+
+Read-only evidence in the current source: Factions uses weighted random species selection, so a dwarf faction is not guaranteed. Dwarf is playable, with weight 2; setting its weight to 0 is not a safe exclusion because the current weighted helper treats zero as 1. History creates sites from the x/y-only home and sends founders to the legacy World.addUnit, so setting only home.z still creates surface founders. WorldGen's resource kit is also Ground-oriented. The implementation therefore belongs in the coordinated Factions/History/WorldGen/core merge, not a metadata-only late patch. Existing saves should not have their surface factions silently moved by this new-world rule.
+
+Add checks: across fixed seeds at least one dwarf faction exists; every dwarf founding site/unit/camp/kit is on an allowed map and valid walkable cell; no dwarf founders or dwarf-camp kit are written into Ground diffs; identical x/y on other maps remains independent; save/load preserves the faction and z; the dwarven faction continues operating while another map is viewed. No claim of implementation until those tests run on the actual five-map core.
+
+### Core and consumer checks
+
 1. New Game creates/checksums all five 256x256 maps. Same seed regenerates their baselines, save/load preserves changed terrain, units, jobs, items and ownership. A legacy Ground save migrates without moving records.
 2. Place different objects, units, beds, room geometry, items and jobs at identical x/y on all five maps. Queries, deletion, damage, ownership, reservations and save/load never cross maps.
 3. Keep the view on one map while all five have creatures walking, working, needing food/sleep and fighting, fires burning, and renewal/spawn queues due. Advance the real world clock; each map progresses. Switch view twice; results must not depend on what was rendered. Pause and speed changes apply to all five together.
