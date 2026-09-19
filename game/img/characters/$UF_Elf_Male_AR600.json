@@ -1,8 +1,6 @@
 {
-  "id": "elf_male",
+  "id": "$UF_Elf_Male_AR600",
   "species": "elf",
-  "gender": "male",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,6 +21,9 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
   "animations": {
     "stand": [
       0
@@ -58,8 +59,9 @@
     ],
     "idle": [
       18,
-      19
+      19,
+      18,
+      0
     ]
-  },
-  "frameMs": 150
+  }
 }

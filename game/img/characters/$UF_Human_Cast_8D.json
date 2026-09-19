@@ -21,12 +21,14 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
   "animations": {
     "cast": [
       0,
       1,
       2
     ]
-  },
-  "frameMs": 120
+  }
 }

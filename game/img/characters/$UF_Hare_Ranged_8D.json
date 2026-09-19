@@ -1,0 +1,33 @@
+{
+  "id": "$UF_Hare_Ranged_8D",
+  "species": "hare",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "frameMs": 150,
+  "category": "wildlife",
+  "animations": {
+    "attack": [
+      0,
+      1,
+      2
+    ]
+  }
+}

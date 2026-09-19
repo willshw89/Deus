@@ -1,0 +1,23 @@
+{
+  "id": "oak_grand",
+  "name": "Grand Timber Oak",
+  "category": "Flora",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    143
+  ],
+  "footprint": [
+    3,
+    3
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Fallen pillar",
+  "category": "Building",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "layer": "object",
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  }
+}

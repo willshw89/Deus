@@ -47,6 +47,32 @@ Delivered per user directives ("All wall are 2 tiles high", "These walls are fun
   - `art/review/walls_live_enclosed_buildings.png`: Verified live wooden and stone enclosed buildings on meadow grass with fully visible room interiors, distinct doorways, seamless vertical grain, and zero graph-paper artifacts.
   - `art/review/walls_live_underground_stone_rooms.png`: Verified live underground stone room seamlessly integrating with cavern soil and corridors.
 
+## Complete 8-Directional Action Suites for Every Creature (Humanoids & Wildlife) (AR-400, AR-401, AR-402, AR-600) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Remember for every direction, every creature needs Use, attack, magic, ranged, etc sprites"):
+- **Universal 8-Directional Action Standard Across All 19 Beings:**
+  - **12 Humanoids:** Human (Male & Female), Dwarf (Male & Female), Elf (Male & Female), Orc (Male & Female), Goblin (Male & Female), Gnome (Male & Female).
+  - **7 Wildlife & Beasts:** Boar, Wolf, Bear, Fox, Hare, Giant Spider (96×96 multi-tile), Troll (96×96 multi-tile).
+- **Every Direction (S, SW, W, NW, N, NE, E, SE) Features Full Action Articulation:**
+  - **Walk / Stride (Cols 1, 2, 3, 2):** 3-frame scissor strides with planted boots, trailing heel daylight clearance, and 1px passing bobs.
+  - **Use / Work / Forage (Cols 4, 5, 6):** Active work stroke with contact sparks / dirt debris particles and recovery.
+  - **Melee Attack (Cols 8, 9, 10):** Windup, forward lunging strike with high-definition directional slashing weapon / claw arc, and recovery guard.
+  - **Ranged Attack:** Nock, full draw with gleaming tip, release recoil and follow-through across all 8 directions.
+  - **Magic Cast / Surge (Cols 11, 12, 13):** Mana gathering orb, radiant elemental burst in facing direction (Arcane cyan, Rune gold, Sylvan emerald, Blood crimson, Hex violet, Aether spark), and residual channel sparks.
+  - **Hurt (Col 14):** Directional flinch, recoil backward away from damage vector, and impact blood flash.
+  - **Death & Remains (Cols 15, 16, 17):** Mortal stagger, stumbling collapse, and fully grounded resting remains/carcass.
+  - **Idle (Cols 18, 19):** Ready stance with subtle 1px chest breathing expansion.
+- **Master & Sub-Sheet Deliveries:**
+  - Deployed full 20-col × 8-row AR-600 masters (960×384 for 48px; 1920×768 for 96px) in `game/img/characters/$UF_<Name>_AR600.png` and `art/masters/<species>_<gender>.png`.
+  - Deployed dedicated 3-col × 8-row 8D sub-sheets (144×384 or 288×768) in `game/img/characters/$UF_<Name>_{Work,Attack,Ranged,Cast}_8D.png`.
+  - Sidecars with exact anchors (`[24, 47]` for 48px, `[48, 95]` for 96px), footprint, 8 facings, animations, and frameMs.
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --native --sidecar`: 100% PASS on all character sheets (palette <= 31 colors from `art/palette/uf.hex`, binary alpha 0/255, center of mass <= 0.5px, grounded at bottom row).
+  - `tools/originality_check.js`: 100% PASS across all frames (distance >= 0.28 vs 19,431 U7 shapes).
+- **Visual Inspection (Rule 5):**
+  - Inspected `all_creatures_8d_actions_matrix.png` in brain directory: verified 9 creatures × 8 facings × 4 actions (Walk, Work, Attack, Cast) with distinct cultural weapons, anatomy, and glowing directional effects.
+  - Deployed interactive `sprite_walker.html` in brain directory allowing full live animation playback across all 12 embedded lineages/beasts in all 8 directions simultaneously.
+
 ## FF5 Proportions, Dynamic Footsteps & Complete 8D Suites: Human, Dwarf & Elf (AR-010..012, AR-400, AR-600) — 2026-09-19 (Gemini)
 
 Delivered per user directives ("Dude, look, they need footsteps, etc. They can be closer to ff5 in proportions", "Dwarves need 8 direction mvoement. idle, combat, sleep, death.. etc..."):

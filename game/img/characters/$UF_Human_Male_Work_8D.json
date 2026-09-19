@@ -1,0 +1,34 @@
+{
+  "id": "$UF_Human_Male_Work_8D",
+  "species": "human",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
+  "animations": {
+    "work": [
+      0,
+      1,
+      2
+    ]
+  }
+}

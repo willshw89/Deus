@@ -1,0 +1,38 @@
+{
+  "id": "test_nano_banana_settler_4x",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [24, 47],
+  "footprint": [1, 1],
+  "facings": ["S"],
+  "animations": {
+    "stand": [0]
+  },
+  "frameMs": 150,
+  "lean": {
+    "mode": "none",
+    "slope": 1,
+    "top": null,
+    "east": 0
+  },
+  "scale": {
+    "subjectHeight": 46,
+    "target": null,
+    "factor": 1
+  },
+  "source": {
+    "file": "scratch/test_nano_banana_settler_4x.png",
+    "format": "png",
+    "converted": null,
+    "size": [192, 192],
+    "sheet": [1, 1],
+    "block": 4,
+    "phase": [0, 0],
+    "background": "magenta #FF00FF"
+  },
+  "made": {
+    "by": "tools/make_25d.js",
+    "at": "2026-09-19T16:07:27.030Z",
+    "options": ["scratch/test_nano_banana_settler_4x.png", "--max-colors", "32", "--lean", "none", "--force"]
+  }
+}

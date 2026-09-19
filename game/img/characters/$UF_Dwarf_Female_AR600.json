@@ -1,8 +1,6 @@
 {
-  "id": "dwarf_female",
+  "id": "$UF_Dwarf_Female_AR600",
   "species": "dwarf",
-  "gender": "female",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,6 +21,9 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "female",
+  "category": "colonist",
   "animations": {
     "stand": [
       0
@@ -58,8 +59,9 @@
     ],
     "idle": [
       18,
-      19
+      19,
+      18,
+      0
     ]
-  },
-  "frameMs": 150
+  }
 }

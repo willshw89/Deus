@@ -1,0 +1,66 @@
+{
+  "id": "$UF_Hare_AR600",
+  "species": "hare",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "frameMs": 150,
+  "category": "wildlife",
+  "animations": {
+    "stand": [
+      0
+    ],
+    "walk": [
+      1,
+      2,
+      3,
+      2
+    ],
+    "work": [
+      4,
+      5,
+      6
+    ],
+    "attack": [
+      8,
+      9,
+      10
+    ],
+    "cast": [
+      11,
+      12,
+      13
+    ],
+    "hurt": [
+      14
+    ],
+    "death": [
+      15,
+      16,
+      17
+    ],
+    "idle": [
+      18,
+      19,
+      18,
+      0
+    ]
+  }
+}

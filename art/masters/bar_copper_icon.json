@@ -1,0 +1,25 @@
+{
+  "id": "bar_copper_icon",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "anchor": [
+    16,
+    31
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "layer": "icon",
+  "species": null,
+  "stage": null
+}

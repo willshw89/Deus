@@ -1,0 +1,34 @@
+{
+  "id": "$UF_Elf_Female_Cast_8D",
+  "species": "elf",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "frameMs": 150,
+  "gender": "female",
+  "category": "colonist",
+  "animations": {
+    "cast": [
+      0,
+      1,
+      2
+    ]
+  }
+}

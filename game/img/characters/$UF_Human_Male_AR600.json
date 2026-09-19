@@ -1,8 +1,6 @@
 {
   "id": "$UF_Human_Male_AR600",
   "species": "human",
-  "gender": "male",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,6 +21,9 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
   "animations": {
     "stand": [
       0
@@ -62,6 +63,5 @@
       18,
       0
     ]
-  },
-  "frameMs": 150
+  }
 }

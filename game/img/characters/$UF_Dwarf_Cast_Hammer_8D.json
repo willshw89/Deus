@@ -1,7 +1,6 @@
 {
   "id": "$UF_Dwarf_Cast_Hammer_8D",
   "species": "dwarf",
-  "weapon": "dwarf_rune_hammer",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,12 +21,14 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
   "animations": {
     "cast": [
       0,
       1,
       2
     ]
-  },
-  "frameMs": 150
+  }
 }

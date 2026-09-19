@@ -1,8 +1,6 @@
 {
   "id": "human_female",
   "species": "human",
-  "gender": "female",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,6 +21,9 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "female",
+  "category": "colonist",
   "animations": {
     "stand": [
       0
@@ -62,6 +63,5 @@
       18,
       0
     ]
-  },
-  "frameMs": 150
+  }
 }

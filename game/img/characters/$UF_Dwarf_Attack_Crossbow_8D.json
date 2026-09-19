@@ -1,7 +1,6 @@
 {
   "id": "$UF_Dwarf_Attack_Crossbow_8D",
   "species": "dwarf",
-  "weapon": "dwarf_crossbow",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,12 +21,14 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "gender": "male",
+  "category": "colonist",
   "animations": {
     "attack": [
       0,
       1,
       2
     ]
-  },
-  "frameMs": 120
+  }
 }

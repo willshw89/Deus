@@ -1,0 +1,33 @@
+{
+  "id": "$UF_Troll_Work_8D",
+  "species": "troll",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "frameMs": 150,
+  "category": "wildlife",
+  "animations": {
+    "work": [
+      0,
+      1,
+      2
+    ]
+  }
+}
