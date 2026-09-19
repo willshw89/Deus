@@ -1,0 +1,12 @@
+{
+  "id": "meadow",
+  "name": "Temperate Meadow Grass",
+  "category": "Ground",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": null,
+  "facings": [],
+  "animations": {},
+  "layer": "ground",
+  "slot": 0
+}
