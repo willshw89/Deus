@@ -430,7 +430,7 @@
     "sameSpecies": 10,
     "randomSpread": 30,
     "areas": { "about": "Where each faction's area centre goes (UF_Factions, seeded): on walkable land (no water, no peak rock, no cursed region unless the species is in cursedOk) whose disc of clearDisc cells is walkable too; the player's within playerReach cells of the map centre (the habitable start); every other at least minGap cells from every centre and edgeMargin cells from the map edge, in one of sites.preferredBiomes[species] with drinkable water within start.kit.water.reach when the map has such a place.", "minGap": 40, "edgeMargin": 12, "playerReach": 6, "clearDisc": 5, "cursedOk": [] },
-    "founders": { "about": "Every faction starts as this many men and women (VISION V4; six founders, user 2026-09-19), adults aged within age, on free cells within reach cells of its area centre (UF_History). One of them leads the band (rank 1, a title from titles); the others answer to the leader (VISION V52). Names from people[species].names when a species has its own table, else start.names; stats rolled per VISION V53.", "male": 3, "female": 3, "age": [18, 40], "reach": 3, "titles": ["Chief", "Warden", "Speaker", "Reeve"] },
+    "founders": { "about": "Every faction starts as this many men and women (VISION V4; eight founders around a lit campfire, user 2026-09-19 afternoon), adults aged within age, on free cells within reach cells of its area centre (UF_History). One of them leads the band (rank 1, a title from titles); the others answer to the leader (VISION V52). Names from people[species].names when a species has its own table, else start.names; stats rolled per VISION V53.", "male": 4, "female": 4, "age": [18, 40], "reach": 3, "titles": ["Chief", "Warden", "Speaker", "Reeve"] },
     "names": {
       "start": ["ar", "bel", "cor", "dun", "eth", "fal", "gor", "hal", "ir", "jas", "kel", "lor", "mar", "nor", "ost", "pel", "quin", "ras", "sol", "tor", "ul", "vas", "wen", "yor", "zan"],
       "end": ["a", "en", "is", "or", "um", "eth", "ar", "ic", "ok", "wyn", "ath", "esh"]
@@ -714,7 +714,7 @@
     ]
   },
   "talk": {
-    "about": "Conversations (UF_Talk, VISION V25; added 2026-09-19): keyword talks with any person, in the manner of the classic keyword conversations. Every line is a template below filled from the simulation: {slot} values are names and facts read from the world state, and a slot that names a person, faction or place adds that keyword to the talk. A section's variants are tried most specific first; a template whose slots are unknown is skipped. kinds = unit kinds that can talk. portraits = stock RPG Maker face placeholders by species > gender > stage (\"Sheet:index\"), used until the AR-700 face sets exist (catalog.faces or unit data.face win when present); species without an entry get a code-drawn UF_GenFace. Original generic wording only: no proper nouns.",
+    "about": "Conversations (UF_Talk, VISION V25; added 2026-09-19): keyword talks with any person, in the manner of the classic keyword conversations. Every line is a template below filled from the simulation: {slot} values are names and facts read from the world state, and a slot that names a person, faction or place adds that keyword to the talk. A section's variants are tried most specific first; a template whose slots are unknown is skipped. kinds = unit kinds that can talk. portraits = stock RPG Maker face placeholders by species > gender > stage (\"Sheet:index\"), used until the AR-700 face sets exist (catalog.faces or unit data.face win when present); species without an entry get a code-drawn UF_GenFace. Original generic wording only: no proper nouns. Layout (VISION V62, 2026-09-19): the person's portrait with their words a page at a time (words.more marks a page with more after it), the portrait of whoever speaks for you beside the keywords, and chime = what your people standing near the person may add with their own portrait.",
     "kinds": ["colonist", "person"],
     "optionLabel": "Talk to {name}",
     "keywords": { "name": "name", "job": "job", "bye": "bye", "family": "family", "home": "home", "mood": "mood", "others": "others", "news": "news" },
@@ -723,7 +723,7 @@
     "moodBands": { "good": ["Ecstatic", "Happy"], "fine": ["Content", "Fine"], "bad": ["Unhappy", "Stressed", "Miserable"] },
     "needAt": 60,
     "directions": { "n": "north", "s": "south", "e": "east", "w": "west", "ne": "north-east", "nw": "north-west", "se": "south-east", "sw": "south-west" },
-    "words": { "and": "and", "here": "right here", "far": "far from here", "where": "about {dist} paces to the {dir}" },
+    "words": { "and": "and", "here": "right here", "far": "far from here", "where": "about {dist} paces to the {dir}", "more": "more" },
     "greet": {
       "own_good": ["Good to see you! What do you need?", "Ah, it's you. Ask away.", "{name} grins. \"Yes? I'm listening.\""],
       "own_fine": ["Yes? What is it?", "I'm listening.", "{name} looks up from the work. \"What do you need?\""],
@@ -820,6 +820,22 @@
       "baby": ["The baby waves a tiny hand."]
     },
     "unknown": ["I don't know anything about that."],
+    "chime": {
+      "about": "What your people standing near the person say (UF_Talk, VISION V62, 2026-09-19): after each line, the nearest of yours within range cells (not the person, not whoever speaks for you, not a baby) who has something to say chimes in with their own portrait and line. named: the line names them; self: the topic is them; partner, child, mother, father: the topic is that relative of theirs; factionGood, factionBad: the topic is a faction yours is allied or friendly with, or hostile to or at war with; greetFriendly, greetWary: a stranger's greeting, and news: the news, these three only by chance percent (seeded). Never on bye, never in a hostile or baby talk. Slots: {name} the companion, {speaker} the person spoken to, {person}, {faction}.",
+      "range": 5,
+      "chance": 35,
+      "named": ["That's me they mean.", "Aye, that would be me.", "Yes, that's me."],
+      "self": ["I'm right here.", "That's me. Ask me yourself."],
+      "partner": ["{person} is my partner, you know.", "That's my partner you're asking about."],
+      "child": ["{person} is my child.", "That's my child."],
+      "mother": ["{person} is my mother."],
+      "father": ["{person} is my father."],
+      "factionGood": ["{faction} have always been fair with us.", "I like {faction}. Good folk."],
+      "factionBad": ["Don't trust {faction}.", "{faction}? Watch them closely."],
+      "greetFriendly": ["They seem friendly enough.", "Good folk, by the look of them."],
+      "greetWary": ["Careful. I don't like the look of this one.", "Stay close. Something about {speaker} bothers me."],
+      "news": ["I heard the same thing.", "So that's what happened."]
+    },
     "portraits": {
       "about": "Stock RPG Maker face placeholders (img/faces, 4 x 2 cells of 144 x 144, index 0-7 row by row) until AR-700. Species > gender > stage; a missing stage falls back to adult (baby to child).",
       "human": {
