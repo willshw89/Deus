@@ -61,7 +61,7 @@ You are making original game art for a living fantasy world seen from above: a c
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
 9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures have four facings in this row order: south (toward the viewer), west, east, north (back). West and east may be mirror images.
+10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
@@ -86,7 +86,7 @@ const spLine = id => { const s = species.find(x => x.id === id); return `- ${id}
 const items = cat.items.types;
 const itemLine = t => `- ${t.id} (${t.name})${t.weapon ? ": weapon" : ""}${t.armor ? ": armour" : ""}${t.shield ? ": shield" : ""}${t.ammo ? ": ammunition" : ""}`;
 
-const UNIT_SHEET = `Sheet layout for every creature: 4 rows (facings south, west, east, north) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".`;
+const UNIT_SHEET = `Sheet layout for every creature: 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".`;
 
 const GROUPS = [
     { n: 0, title: "Style lock (do this first, alone)", body: `Your job: the four style anchors every other generator will copy. Make them one at a time, in this order, and stop after each for approval.
