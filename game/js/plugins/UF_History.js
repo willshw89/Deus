@@ -503,7 +503,8 @@
                 if (sp.tint) data.tint = sp.tint;
                 out.push(W.addUnit({
                     name: newName(), image: { characterName: images[imageIndex++ % images.length], characterIndex: 0 },
-                    area: { x: site.area.x, y: site.area.y }, x: site.x + cell.dx, y: site.y + cell.dy, dir: 2, data
+                    area: { x: site.area.x, y: site.area.y }, x: site.x + cell.dx, y: site.y + cell.dy, dir: 2, data,
+                    snapToFree: 8 // never inside a wall piece, a tree or water (user rule 2026-09-18); UF_World finds the nearest free cell
                 }));
             }
         }

@@ -548,18 +548,72 @@
         if ($dataMap && $dataMap.events) $dataMap.events[eid] = null;
     }
 
-    /** Add a unit. spec: { name, image: { characterName, characterIndex }, area: { x, y }, x, y, dir, data } */
+    /**
+     * True when a unit can stand on the cell: walkable ground (tileset passage flags, no water), no blocking object
+     * (UF_Objects) and no other unit there. Works for areas off screen (peek cache). User rule 2026-09-18: nothing
+     * spawns into walls, trees or water.
+     */
+    World.cellFree = function(ax, ay, x, y, ignoreUnitId = 0) {
+        const st = this.state;
+        if (!st || !this.inWorld(ax, ay) || x < 0 || y < 0 || x >= st.size || y >= st.size) return false;
+        const onScreen = sameArea({ x: ax, y: ay }, this.currentArea()) && window.$gameMap && $gameMap.mapId() === this.areaMapId(ax, ay);
+        if (onScreen) {
+            if (!$gameMap.isPassable(x, y, 2) && !$gameMap.isPassable(x, y, 8)) return false;
+            if (Tilemap.isWaterTile($gameMap.tileId(x, y, 0))) return false;
+        } else {
+            const map = this.peekArea(ax, ay);
+            const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+            const size = st.size;
+            for (let layer = 3; layer >= 0; layer--) {
+                const tileId = map.data[(layer * size + y) * size + x];
+                if (!tileId) continue;
+                if (Tilemap.isWaterTile(tileId)) return false;
+                const flag = ts ? ts.flags[tileId] : 0;
+                if ((flag & 0x10) !== 0) continue; // [*] star: doesn't affect passage
+                if ((flag & 0x0f) === 0x0f) return false;
+                break;
+            }
+            if (window.UF.Objects && UF.Objects.blocksIn && UF.Objects.blocksIn({ x: ax, y: ay }, x, y)) return false;
+        }
+        if (onScreen && window.UF.Objects && UF.Objects.blocks && UF.Objects.blocks(x, y)) return false;
+        for (const u of this.units()) if (u.id !== ignoreUnitId && u.area.x === ax && u.area.y === ay && u.x === x && u.y === y) return false;
+        return true;
+    };
+    /** The nearest free cell to (x, y) within `radius` (rings outward, then by distance), or null. */
+    World.nearestFreeCell = function(ax, ay, x, y, radius = 6, ignoreUnitId = 0) {
+        if (this.cellFree(ax, ay, x, y, ignoreUnitId)) return { x, y };
+        for (let r = 1; r <= radius; r++) {
+            let best = null, bestD = Infinity;
+            for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                const d = dx * dx + dy * dy;
+                if (d < bestD && this.cellFree(ax, ay, x + dx, y + dy, ignoreUnitId)) { best = { x: x + dx, y: y + dy }; bestD = d; }
+            }
+            if (best) return best;
+        }
+        return null;
+    };
+
+    /**
+     * Add a unit. spec: { name, image: { characterName, characterIndex }, area: { x, y }, x, y, dir, data,
+     * snapToFree: true | number } — snapToFree moves the unit to the nearest free cell (radius 6, or the number given).
+     */
     World.addUnit = function(spec) {
         const st = this.state;
         const id = st.nextUnitId++;
         const image = spec.image || {};
+        let sx = spec.x | 0, sy = spec.y | 0;
+        if (spec.snapToFree) {
+            const free = this.nearestFreeCell(spec.area.x, spec.area.y, sx, sy, typeof spec.snapToFree === "number" ? spec.snapToFree : 6);
+            if (free) { sx = free.x; sy = free.y; }
+        }
         const u = {
             id,
             name: spec.name || `TEST_unit_${id}`,
             image: { characterName: image.characterName || "", characterIndex: image.characterIndex || 0 },
             area: { x: spec.area.x, y: spec.area.y },
-            x: spec.x | 0,
-            y: spec.y | 0,
+            x: sx,
+            y: sy,
             dir: spec.dir || 2,
             goal: null,
             stuckFrames: 0,
@@ -933,6 +987,21 @@
             t.check("four_way_steps", diagonal === 0, `${diagonal} diagonal step(s) on screen (FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"})`);
             await t.waitFrames(10);
             t.screenshot("unit_in_view");
+
+            // Spawning never lands in a wall, a tree or water: snapToFree moves the unit to the nearest free cell.
+            if (window.UF.Objects && UF.Objects.typeId) {
+                const treeType = UF.Objects.typeId("oak") || UF.Objects.typeId("pine");
+                const wx = 100, wy = 100;
+                W.setObject(area.x, area.y, wx, wy, treeType);
+                const blockedNow = !W.cellFree(area.x, area.y, wx, wy);
+                const spawned = W.addUnit({ name: "TEST_spawn", image: { characterName: "People1", characterIndex: 1 }, area, x: wx, y: wy, snapToFree: true });
+                const onTree = spawned.x === wx && spawned.y === wy;
+                const dist = Math.max(Math.abs(spawned.x - wx), Math.abs(spawned.y - wy));
+                t.check("spawn_not_in_walls", blockedNow && !onTree && dist <= 6 && W.cellFree(area.x, area.y, spawned.x, spawned.y, spawned.id),
+                    `an oak was set at (${wx},${wy}) (free: ${!blockedNow}); the unit spawned at (${spawned.x},${spawned.y}), ${dist} cell(s) away, on a free cell: ${W.cellFree(area.x, area.y, spawned.x, spawned.y, spawned.id)}`);
+                W.removeUnit(spawned.id);
+                W.setObject(area.x, area.y, wx, wy, 0);
+            }
 
             // Image refresh (clothing tiers) changes the drawn character.
             u.image.characterName = "$U7_Ranger";

@@ -419,7 +419,8 @@
                 const extra = h.origin === "kit" ? { kit: true, kitFallback: !!h.kitFallback } : h.origin === "lair" ? { lair: h.lair } : null;
                 if (extra && extra.kitFallback === false) delete extra.kitFallback;
                 for (let i = 0; i < h.cells.length; i++) {
-                    W.addUnit(unitSpec(sp, h.area, h.cells[i].x, h.cells[i].y, herdNo, h.dirs[i], h.home, extra));
+                    // snapToFree: never inside a tree, a wall or water (user rule 2026-09-18); UF_World finds the nearest free cell.
+                    W.addUnit(Object.assign(unitSpec(sp, h.area, h.cells[i].x, h.cells[i].y, herdNo, h.dirs[i], h.home, extra), { snapToFree: 6 }));
                     report.creatures++;
                     report.bySpecies[sp.id] = (report.bySpecies[sp.id] || 0) + 1;
                 }
