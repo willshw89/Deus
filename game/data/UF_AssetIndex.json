@@ -24,7 +24,6 @@
    "AR-510"
   ],
   "usedBy": [
-   "tile 404 (objects)",
    "tile 403 (objects)",
    "tile 400 (objects)"
   ],
@@ -76,27 +75,6 @@
   ],
   "category": "objects",
   "file": "img/tilesets/Inside_C.png (tile 403)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Inside_C#404": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510",
-   "AR-905"
-  ],
-  "usedBy": [
-   "object smithy \"Smithy\""
-  ],
-  "states": [
-   "building: unbuilt (needs 4 Stone, 1 Log, 1 Iron bar on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Inside_C.png (tile 404)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -314,7 +292,6 @@
    "tile 172 (objects)",
    "tile 173 (objects)",
    "tile 253 (objects)",
-   "tile 148 (objects)",
    "tile 149 (objects)",
    "tile 181 (objects)",
    "tile 175 (objects)",
@@ -341,27 +318,6 @@
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 139)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#148": {
-  "status": "stock RMMZ",
-  "request": "AR-510",
-  "requests": [
-   "AR-510",
-   "AR-905"
-  ],
-  "usedBy": [
-   "object furnace \"Furnace\" (tint #e0b898)"
-  ],
-  "states": [
-   "building: unbuilt (needs 6 Stone on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 148)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -902,15 +858,12 @@
    "AR-200"
   ],
   "usedBy": [
-   "item firewood \"Firewood\"",
    "item charcoal \"Charcoal\" (tint #585858)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "firewood: made by: Split firewood",
-   "firewood: used in: Burn charcoal",
-   "charcoal: made by: Burn charcoal",
-   "charcoal: used in: Smelt an iron bar, Smelt a copper bar"
+   "made by: Burn charcoal",
+   "used in: Smelt an iron bar, Smelt a copper bar"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_Firewood.png",
@@ -1053,26 +1006,6 @@
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_PlantFiber.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "!$U7_Item_RiverFish": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item fish \"Fish\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −25 hunger",
-   "used in: Roast fish"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_RiverFish.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "name starts with U7_"
@@ -1392,15 +1325,13 @@
    "AR-103"
   ],
   "usedBy": [
-   "object flowers \"Wildflowers\"",
    "object flowers_purple \"Purple flowers\" (tint #d0a0ff)",
    "object flowers_blue \"Blue flowers\" (tint #a0c0ff)",
    "object flowers_white \"White flowers\" (tint #f0f0f0)"
   ],
   "states": [
-   "flowers: one state (nothing interacts with it yet)",
-   "flat: drawn under units and items",
    "flowers_purple: one state (nothing interacts with it yet)",
+   "flat: drawn under units and items",
    "flowers_blue: one state (nothing interacts with it yet)",
    "flowers_white: one state (nothing interacts with it yet)"
   ],
@@ -2830,6 +2761,27 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Furnace": {
+  "status": "original",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object furnace \"Furnace\""
+  ],
+  "states": [
+   "building: unbuilt (needs 6 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Furnace.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Item_Berries": {
   "status": "original",
   "request": "none yet",
@@ -2860,6 +2812,44 @@
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_CopperOre.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Firewood": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511"
+  ],
+  "usedBy": [
+   "item firewood \"Firewood\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Split firewood",
+   "used in: Burn charcoal"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Firewood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Fish": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item fish \"Fish\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger",
+   "used in: Roast fish"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Fish.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -2997,6 +2987,27 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Smithy": {
+  "status": "original",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object smithy \"Smithy\""
+  ],
+  "states": [
+   "building: unbuilt (needs 4 Stone, 1 Log, 1 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Smithy.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Straw_Bed": {
   "status": "original",
   "request": "AR-104",
@@ -3033,6 +3044,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Stump.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wildflowers": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers \"Wildflowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wildflowers.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
