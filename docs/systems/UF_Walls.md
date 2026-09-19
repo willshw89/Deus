@@ -27,7 +27,7 @@ The wall-set contract is 20 frames in a 4×5 grid. Each frame is 48×96 in the f
 
 The engine also accepts a single 48×96 wall master while art is being reviewed. It repeats that one frame for every connection, which is structurally correct but not final art.
 
-The current live `!$WallWood_Set` and `!$WallStone_Set` are 192×240 sheets of 48×48 frames. Until approved 48×96 connected sets replace them, UF_Walls copies each roof frame into the top square and draws a simple code-generated wood or stone face in the bottom square. These are placeholders, not approved wall art.
+The current `!$WallWood_Set` and working-tree `!$WallStone_Set` are full 192×480 sheets of 20 connected 48×96 frames, so UF_Walls selects their frames directly. The wood set is committed and approved. The stone delivery belongs to another agent and was still uncommitted when this engine task ended. UF_Walls retains a compatibility fallback for any legacy 48×48 wall sheet: it copies the old roof frame into the top square and draws a simple code-generated wood or stone face in the bottom square.
 
 ## Public API (`UF.Walls`)
 
@@ -66,13 +66,13 @@ The plugin aliases `UF.Objects.Sprite_Layer._tryFrame` and `_rebuild`; it does n
 
 Set `UF_TEST_PROVOKE=walls.two_cell_render` only in a focused test run to disable two-square expansion and prove the rendering check can fail.
 
-Observed on 2026-09-19: the normal suite passed 7/7. With `UF_TEST_PROVOKE=walls.two_cell_render`, it exited 1 with `two_cell_render` reporting a 48×48 frame whose roof and wall-cell tops were both 252.0, and `connected_frames` reporting three undefined wall-frame selections. The opened failure capture showed the wooden run and stone wall as one row with no lower faces. The opened passing capture showed a connected three-piece wooden run and an isolated stone wall, each spanning a roof row and a lower wall-face row. Performance was 14.270 ms for 10,000 connection lookups (0.001427 ms per lookup, budget 0.005).
+Observed on 2026-09-19: the normal suite passed 7/7. With `UF_TEST_PROVOKE=walls.two_cell_render`, it exited 1 with `two_cell_render` reporting a 48×48 frame whose roof and wall-cell tops were both 252.0, and `connected_frames` reporting three undefined wall-frame selections. The opened failure capture showed the wooden run and stone wall as one row with no lower faces. The opened passing capture showed a connected three-piece wooden run and an isolated stone wall, each spanning a roof row and a lower wall-face row. The post-registration run `live_walls_v73_commit` also passed 7/7; performance was 11.315 ms for 10,000 connection lookups (0.001132 ms per lookup, budget 0.005).
 
 ## Assets and known limits
 
-- `art/masters/wall_wood.png` is a delivered 48×96 straight wooden-wall master, not a complete connected 20-frame set. It is not copied into `game/img/` by this engine task.
-- There is no delivered 48×96 stone-wall master or complete wood/stone connected set yet.
-- The code-generated lower faces are temporary and intentionally simple.
+- The approved wooden connected set is `art/masters/wall_wood.png` and `game/img/characters/!$WallWood_Set.png`: 20 frames at 48×96 in a 192×480 sheet.
+- A 192×480 stone connected set is present at `game/img/characters/!$WallStone_Set.png`, but it is another agent's uncommitted delivery and was not staged or committed by this task.
+- Code-generated lower faces remain only as compatibility placeholders for legacy 48×48 wall sheets.
 - Clicking the visual roof square still addresses its map cell. `UF.Walls.baseAt` exposes the redirect needed when roof interaction is added; this plugin does not silently redirect a click away from a unit or item that may stand north of the wall.
 - Real RMMZ editor F5 behavior and the F8 console remain unchecked.
 
