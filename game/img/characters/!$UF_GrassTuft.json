@@ -12,10 +12,7 @@
     1
   ],
   "facings": [
-    "S",
-    "W",
-    "E",
-    "N"
+    "S"
   ],
   "animations": {
     "stand": [

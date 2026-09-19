@@ -26,268 +26,21 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "$Adam": {
-  "status": "stock RMMZ",
-  "request": "AR-010",
-  "requests": [
-   "AR-010"
-  ],
-  "usedBy": [
-   "plugin UF_Anim.js (test suite)",
-   "plugin UF_Colonists.js",
-   "plugin UF_Combat.js (test suite)",
-   "plugin UF_Ecology.js (test suite)",
-   "plugin UF_Ownership.js (test suite)",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Adam.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "character 4 of stock characters/People1.png under a name the plugins hard-code, written by tools/extract_stock_characters.js --alias (pixels match; the file it replaced is $Adam.u7bak.png)"
- },
- "$Eve": {
-  "status": "stock RMMZ",
-  "request": "AR-011",
-  "requests": [
-   "AR-011"
-  ],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Eve.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "character 5 of stock characters/People1.png under a name the plugins hard-code, written by tools/extract_stock_characters.js --alias (pixels match; the file it replaced is $Eve.u7bak.png)"
- },
  "$UF_Stock_Actor1_0": {
   "status": "stock RMMZ",
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
    "plugin UF_Fire.js (test suite)"
   ],
   "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 3 = Iron mail equipped"
+   "4 facings × stand/walk (3 columns × 4 rows)"
   ],
   "category": "people",
   "file": "img/characters/$UF_Stock_Actor1_0.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "character 0 of stock characters/Actor1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor1_1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "start.pair female: clothing tier 3 (UF_Colonists.setTier)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 3 = Iron mail equipped"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor1_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 1 of stock characters/Actor1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor1_3": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people dwarf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor1_3.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 3 of stock characters/Actor1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor1_5": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people gnome"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor1_5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 5 of stock characters/Actor1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor2_3": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people orc (tint #90c078)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor2_3.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 3 of stock characters/Actor2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor2_4": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people orc (tint #90c078)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor2_4.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 4 of stock characters/Actor2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor2_5": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people orc (tint #90c078)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor2_5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 5 of stock characters/Actor2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor2_6": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people elf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor2_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/Actor2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor2_7": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people elf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor2_7.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 7 of stock characters/Actor2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor3_0": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "start.pair male: clothing tier 2 (UF_Colonists.setTier)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 2 = Hide cloak equipped"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor3_0.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 0 of stock characters/Actor3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor3_1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "start.pair female: clothing tier 2 (UF_Colonists.setTier)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 2 = Hide cloak equipped"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor3_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 1 of stock characters/Actor3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Actor3_3": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people gnome"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor3_3.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 3 of stock characters/Actor3.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
  "$UF_Stock_BigMonster1_r1": {
   "status": "stock RMMZ",
@@ -311,25 +64,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "row 1 of stock characters/$BigMonster1.png in every facing row, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_Evil_1": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people orc (tint #90c078)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Evil_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 1 of stock characters/Evil.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
  "$UF_Stock_Monster_0": {
   "status": "stock RMMZ",
@@ -547,38 +281,15 @@
   "sidecar": false,
   "statusWhy": "character 5 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
- "$UF_Stock_Nature_6": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people elf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Nature_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
  "$UF_Stock_People1_0": {
   "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
-   "people goblin (tint #a8e888)",
    "plugin UF_Factions.js (test suite)"
   ],
   "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+   "4 facings × stand/walk (3 columns × 4 rows)"
   ],
   "category": "people",
   "file": "img/characters/$UF_Stock_People1_0.png",
@@ -586,337 +297,21 @@
   "sidecar": false,
   "statusWhy": "character 0 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
- "$UF_Stock_People1_1": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people goblin (tint #a8e888)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 1 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_2": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "start.pair male: clothing tier 1 (UF_Colonists.setTier)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 1 = Woven wrap equipped"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_2.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 2 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_3": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "start.pair female: clothing tier 1 (UF_Colonists.setTier)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 1 = Woven wrap equipped"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_3.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 3 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
  "$UF_Stock_People1_4": {
   "status": "stock RMMZ",
-  "request": "AR-010",
-  "requests": [
-   "AR-010"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
-   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
    "plugin UF_Fire.js (test suite)"
   ],
   "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "clothing tier 0: unclad"
+   "4 facings × stand/walk (3 columns × 4 rows)"
   ],
   "category": "people",
   "file": "img/characters/$UF_Stock_People1_4.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "character 4 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_5": {
-  "status": "stock RMMZ",
-  "request": "AR-011",
-  "requests": [
-   "AR-011"
-  ],
-  "usedBy": [
-   "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "clothing tier 0: unclad"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 5 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_6": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people gnome"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_0": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people gnome"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_0.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 0 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_1": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400",
-   "AR-010",
-   "AR-011",
-   "AR-700"
-  ],
-  "usedBy": [
-   "people human"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 1 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_2": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people goblin (tint #a8e888)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_2.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 2 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_3": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people goblin (tint #a8e888)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_3.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 3 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_6": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people dwarf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People2_7": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people dwarf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People2_7.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 7 of stock characters/People2.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People3_5": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400",
-   "AR-010",
-   "AR-011",
-   "AR-700"
-  ],
-  "usedBy": [
-   "people human"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People3_5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 5 of stock characters/People3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People4_4": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people dwarf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People4_4.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 4 of stock characters/People4.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People4_5": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400",
-   "AR-010",
-   "AR-011",
-   "AR-700"
-  ],
-  "usedBy": [
-   "people human"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People4_5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 5 of stock characters/People4.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People4_6": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400",
-   "AR-010",
-   "AR-011",
-   "AR-700"
-  ],
-  "usedBy": [
-   "people human"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People4_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/People4.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People4_7": {
-  "status": "stock RMMZ",
-  "request": "AR-400",
-  "requests": [
-   "AR-400"
-  ],
-  "usedBy": [
-   "people elf"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People4_7.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 7 of stock characters/People4.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
  "$UF_Stock_SF_Monster_2": {
   "status": "stock RMMZ",
@@ -1066,11 +461,8 @@
  },
  "img/faces/People1.png": {
   "status": "stock RMMZ",
-  "request": "AR-010",
-  "requests": [
-   "AR-010",
-   "AR-011"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Dialogue.js (test suite)"
   ],
@@ -1387,30 +779,10 @@
    "AR-510",
    "AR-020",
    "AR-021",
-   "AR-022",
    "AR-023",
    "AR-1600"
   ],
   "usedBy": [
-   "tile 192 (objects)",
-   "tile 157 (objects)",
-   "tile 176 (objects)",
-   "tile 237 (objects)",
-   "tile 232 (objects)",
-   "tile 238 (objects)",
-   "tile 174 (objects)",
-   "tile 153 (objects)",
-   "tile 251 (objects)",
-   "tile 163 (objects)",
-   "tile 161 (objects)",
-   "tile 162 (objects)",
-   "tile 160 (objects)",
-   "tile 172 (objects)",
-   "tile 173 (objects)",
-   "tile 253 (objects)",
-   "tile 171 (objects)",
-   "tile 159 (objects)",
-   "tile 167 (objects)",
    "tile 149 (objects)",
    "tile 181 (objects)",
    "tile 175 (objects)",
@@ -1462,245 +834,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#153": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object grass_tuft \"Tall grass\""
-  ],
-  "states": [
-   "gather: Tall grass → gone (yields 1 Plant fiber)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 153)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#157": {
-  "status": "stock RMMZ",
-  "request": "AR-102",
-  "requests": [
-   "AR-102"
-  ],
-  "usedBy": [
-   "object mangrove \"Mangrove\" (tint #c8e0a0)"
-  ],
-  "states": [
-   "chop: Mangrove → Stump (yields 2 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 157)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#159": {
-  "status": "stock RMMZ",
-  "request": "AR-022",
-  "requests": [
-   "AR-022",
-   "AR-1903"
-  ],
-  "usedBy": [
-   "object granite_boulder \"Granite boulder\"",
-   "object stalagmite \"Stalagmite\" (tint #7a7a8a)"
-  ],
-  "states": [
-   "granite_boulder: quarry: Granite boulder → Loose stones (yields 4 Stone)",
-   "blocks movement (units work from a neighbouring cell)",
-   "stalagmite: quarry: Stalagmite → Loose stones (yields 3 Stone)",
-   "stalagmite: mine: Stalagmite → Loose stones (yields 3 Stone)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 159)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#160": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object flowers_white \"White flowers\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 160)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#161": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object flowers_purple \"Purple flowers\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 161)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#162": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object flowers_blue \"Blue flowers\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 162)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#163": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103",
-   "AR-1906"
-  ],
-  "usedBy": [
-   "object flowers \"Wildflowers\"",
-   "object glow_caps \"Glow-caps\" (tint #60f0c0)"
-  ],
-  "states": [
-   "flowers: one state (nothing interacts with it yet)",
-   "flat: drawn under units and items",
-   "glow_caps: gather: Glow-caps → gone (yields 2 Mushrooms)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 163)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#167": {
-  "status": "stock RMMZ",
-  "request": "AR-022",
-  "requests": [
-   "AR-022"
-  ],
-  "usedBy": [
-   "object ironstone \"Ironstone outcrop\""
-  ],
-  "states": [
-   "mine: Ironstone outcrop → Loose stones (yields 2 Iron ore, 1 Stone)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 167)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#171": {
-  "status": "stock RMMZ",
-  "request": "AR-1901",
-  "requests": [
-   "AR-1901",
-   "AR-1214",
-   "AR-1215",
-   "AR-1216",
-   "AR-044"
-  ],
-  "usedBy": [
-   "object rocks_small \"Loose stones\"",
-   "object gravel \"Gravel\" (tint #a0a0a8)",
-   "object crystal_small \"Small crystals\" (tint #90f0e0)"
-  ],
-  "states": [
-   "rocks_small: pick: Loose stones → gone (yields 2 Stone)",
-   "rocks_small: is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine), Stalagmite (quarry), Stalagmite (mine)",
-   "flat: drawn under units and items",
-   "gravel: pick: Gravel → gone (yields 1 Stone)",
-   "crystal_small: pick: Small crystals → gone (yields 1 Rough gem)",
-   "crystal_small: is the after-state of Crystal cluster (mine), Crystal spire (mine)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 171)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#172": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object wild_grain \"Wild grain\""
-  ],
-  "states": [
-   "gather: Wild grain → gone (yields 1 Seeds, 1 Straw)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 172)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#173": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object wheat_wild \"Wild wheat\""
-  ],
-  "states": [
-   "gather: Wild wheat → gone (yields 1 Seeds, 1 Straw)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 173)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#174": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object cactus_tall \"Tall cactus\""
-  ],
-  "states": [
-   "chop: Tall cactus → gone (yields 2 Plant fiber)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 174)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B#175": {
   "status": "stock RMMZ",
   "request": "none yet",
@@ -1714,26 +847,6 @@
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 175)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#176": {
-  "status": "stock RMMZ",
-  "request": "AR-021",
-  "requests": [
-   "AR-021",
-   "AR-020"
-  ],
-  "usedBy": [
-   "object tree_tropical \"Broadleaf giant\" (tint #90e888)"
-  ],
-  "states": [
-   "chop: Broadleaf giant → Stump (yields 4 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 176)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -1756,140 +869,11 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#192": {
-  "status": "stock RMMZ",
-  "request": "AR-1600",
-  "requests": [
-   "AR-1600"
-  ],
-  "usedBy": [
-   "object fir_snow \"Snow fir\""
-  ],
-  "states": [
-   "chop: Snow fir → Stump (yields 3 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 192)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#232": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "object tree_cursed \"Blighted tree\" (tint #c0a0e0)"
-  ],
-  "states": [
-   "chop: Blighted tree → Stump (yields 1 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 232)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#237": {
-  "status": "stock RMMZ",
-  "request": "AR-102",
-  "requests": [
-   "AR-102"
-  ],
-  "usedBy": [
-   "object palm \"Palm\""
-  ],
-  "states": [
-   "chop: Palm → Stump (yields 1 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 237)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#238": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object cactus \"Cactus\""
-  ],
-  "states": [
-   "gather: Cactus → gone (yields 1 Fruit)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 238)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#251": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103",
-   "AR-1901",
-   "AR-1902",
-   "AR-1907"
-  ],
-  "usedBy": [
-   "object reeds \"Reeds\"",
-   "object lichen \"Lichen\" (tint #c8d8c8)",
-   "object cave_mushrooms \"Cave mushrooms\" (tint #d090d0)",
-   "object cave_moss \"Cave moss\" (tint #50a060)",
-   "object spore_reeds \"Spore reeds\" (tint #90c0b0)"
-  ],
-  "states": [
-   "reeds: gather: Reeds → gone (yields 2 Straw)",
-   "flat: drawn under units and items",
-   "lichen: one state (nothing interacts with it yet)",
-   "cave_mushrooms: gather: Cave mushrooms → gone (yields 2 Mushrooms)",
-   "cave_moss: gather: Cave moss → gone (yields 2 Plant fiber)",
-   "spore_reeds: gather: Spore reeds → gone (yields 2 Straw)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 251)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#253": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object lily_pad \"Lily pads\""
-  ],
-  "states": [
-   "one state (nothing interacts with it yet)",
-   "sits on water cells",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 253)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_C": {
   "status": "stock RMMZ",
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "tile 282 (objects)",
-   "tile 285 (objects)",
-   "tile 287 (objects)",
-   "tile 281 (objects)",
-   "tile 286 (objects)",
    "tileset 91 slot C"
   ],
   "states": [],
@@ -1899,112 +883,10 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_C#281": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object bones_pile \"Old bones\""
-  ],
-  "states": [
-   "pick: Old bones → gone (yields 2 Bone)",
-   "is the ruin of Campfire",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 281)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#282": {
-  "status": "stock RMMZ",
-  "request": "AR-044",
-  "requests": [
-   "AR-044"
-  ],
-  "usedBy": [
-   "object copper_outcrop \"Copper outcrop\" (tint #90d0b0)"
-  ],
-  "states": [
-   "mine: Copper outcrop → Loose stones (yields 2 Copper ore, 1 Stone)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 282)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#285": {
-  "status": "stock RMMZ",
-  "request": "AR-044",
-  "requests": [
-   "AR-044"
-  ],
-  "usedBy": [
-   "object gold_outcrop \"Gold outcrop\" (tint #ffe070)"
-  ],
-  "states": [
-   "mine: Gold outcrop → Loose stones (yields 1 Gold nugget, 1 Stone)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 285)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#286": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object rubble_pillar \"Fallen pillar\""
-  ],
-  "states": [
-   "quarry: Fallen pillar → gone (yields 3 Stone)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 286)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#287": {
-  "status": "stock RMMZ",
-  "request": "AR-1908",
-  "requests": [
-   "AR-1908",
-   "AR-044"
-  ],
-  "usedBy": [
-   "object crystal \"Crystal cluster\"",
-   "object crystal_spire \"Crystal spire\" (tint #80d0ff)"
-  ],
-  "states": [
-   "crystal: mine: Crystal cluster → Small crystals (yields 2 Rough gem)",
-   "blocks movement (units work from a neighbouring cell)",
-   "crystal_spire: mine: Crystal spire → Small crystals (yields 2 Rough gem)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 287)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "People1": {
   "status": "stock RMMZ",
-  "request": "AR-010",
-  "requests": [
-   "AR-010",
-   "AR-011"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Doors.js (test suite)",
    "plugin UF_Levels.js (test suite)",
@@ -2077,10 +959,8 @@
  },
  "!$GraniteBoulder": {
   "status": "U7 stand-in",
-  "request": "AR-022",
-  "requests": [
-   "AR-022"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×85)"
   ],
@@ -2095,10 +975,8 @@
  },
  "!$IronstoneDeposit": {
   "status": "U7 stand-in",
-  "request": "AR-022",
-  "requests": [
-   "AR-022"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×64)"
   ],
@@ -2685,9 +1563,9 @@
   "request": "AR-100",
   "requests": [
    "AR-100",
-   "AR-103",
    "AR-1206",
-   "AR-102"
+   "AR-102",
+   "AR-103"
   ],
   "usedBy": [
    "ground kind snow \"Snow\""
@@ -3313,10 +2191,10 @@
  },
  "!$UF_Bush": {
   "status": "original",
-  "request": "AR-103",
+  "request": "AR-023",
   "requests": [
-   "AR-103",
-   "AR-023"
+   "AR-023",
+   "AR-103"
   ],
   "usedBy": [
    "object bush \"Shrub\""
@@ -3327,6 +2205,44 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Bush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Cactus": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object cactus \"Cactus\""
+  ],
+  "states": [
+   "gather: Cactus → gone (yields 1 Fruit)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Cactus.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CactusTall": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object cactus_tall \"Tall cactus\""
+  ],
+  "states": [
+   "chop: Tall cactus → gone (yields 2 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CactusTall.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -3353,6 +2269,106 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_CaveMoss": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object cave_moss \"Cave moss\""
+  ],
+  "states": [
+   "gather: Cave moss → gone (yields 2 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CaveMoss.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CaveMushrooms": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1902"
+  ],
+  "usedBy": [
+   "object cave_mushrooms \"Cave mushrooms\""
+  ],
+  "states": [
+   "gather: Cave mushrooms → gone (yields 2 Mushrooms)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CaveMushrooms.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CopperOutcrop": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object copper_outcrop \"Copper outcrop\""
+  ],
+  "states": [
+   "mine: Copper outcrop → Loose stones (yields 2 Copper ore, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CopperOutcrop.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CrystalCluster": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-103",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "object crystal \"Crystal cluster\""
+  ],
+  "states": [
+   "mine: Crystal cluster → Small crystals (yields 2 Rough gem)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CrystalCluster.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CrystalSpire": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "object crystal_spire \"Crystal spire\""
+  ],
+  "states": [
+   "mine: Crystal spire → Small crystals (yields 2 Rough gem)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CrystalSpire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_DesertShrub": {
   "status": "original",
   "request": "AR-103",
@@ -3368,6 +2384,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_DesertShrub.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_FallenPillar": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object rubble_pillar \"Fallen pillar\""
+  ],
+  "states": [
+   "quarry: Fallen pillar → gone (yields 3 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_FallenPillar.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -3388,6 +2423,82 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Fern.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fir_Snow": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fir_snow \"Snow fir\""
+  ],
+  "states": [
+   "chop: Snow fir → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fir_Snow.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_Blue": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_blue \"Blue flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_Blue.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_Purple": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_purple \"Purple flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_Purple.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_White": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_white \"White flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_White.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -3453,6 +2564,104 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Furnace.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GlowCaps": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1906"
+  ],
+  "usedBy": [
+   "object glow_caps \"Glow-caps\""
+  ],
+  "states": [
+   "gather: Glow-caps → gone (yields 2 Mushrooms)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GlowCaps.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GoldOutcrop": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object gold_outcrop \"Gold outcrop\""
+  ],
+  "states": [
+   "mine: Gold outcrop → Loose stones (yields 1 Gold nugget, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GoldOutcrop.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GraniteBoulder": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-022"
+  ],
+  "usedBy": [
+   "object granite_boulder \"Granite boulder\""
+  ],
+  "states": [
+   "quarry: Granite boulder → Loose stones (yields 4 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GraniteBoulder.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GrassTuft": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object grass_tuft \"Tall grass\""
+  ],
+  "states": [
+   "gather: Tall grass → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GrassTuft.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Gravel": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object gravel \"Gravel\""
+  ],
+  "states": [
+   "pick: Gravel → gone (yields 1 Stone)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Gravel.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4218,6 +3427,26 @@
   "sidecar": true,
   "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
  },
+ "!$UF_IronstoneDeposit": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-022"
+  ],
+  "usedBy": [
+   "object ironstone \"Ironstone outcrop\""
+  ],
+  "states": [
+   "mine: Ironstone outcrop → Loose stones (yields 2 Iron ore, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_IronstoneDeposit.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Item_Berries": {
   "status": "original",
   "request": "AR-200",
@@ -4338,18 +3567,17 @@
   "requests": [
    "AR-200",
    "AR-201",
-   "AR-104",
    "AR-906",
-   "AR-022",
-   "AR-700",
    "AR-1200",
    "AR-1203",
    "AR-1205",
    "AR-1207",
    "AR-1210",
-   "AR-1901",
    "AR-044",
-   "AR-105"
+   "AR-104",
+   "AR-022",
+   "AR-105",
+   "AR-1901"
   ],
   "usedBy": [
    "item stone \"Stone\""
@@ -4383,6 +3611,85 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Lichen": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object lichen \"Lichen\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Lichen.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Lily_Pad": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object lily_pad \"Lily pads\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "sits on water cells",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Lily_Pad.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_LooseStones": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object rocks_small \"Loose stones\""
+  ],
+  "states": [
+   "pick: Loose stones → gone (yields 2 Stone)",
+   "is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine), Stalagmite (quarry), Stalagmite (mine)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_LooseStones.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Mangrove": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object mangrove \"Mangrove\""
+  ],
+  "states": [
+   "chop: Mangrove → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Mangrove.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Oak": {
   "status": "original",
   "request": "AR-021",
@@ -4399,6 +3706,45 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Oak.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_OldBones": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object bones_pile \"Old bones\""
+  ],
+  "states": [
+   "pick: Old bones → gone (yields 2 Bone)",
+   "is the ruin of Campfire",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_OldBones.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Palm": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object palm \"Palm\""
+  ],
+  "states": [
+   "chop: Palm → Stump (yields 1 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Palm.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4423,6 +3769,26 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Reeds": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1907"
+  ],
+  "usedBy": [
+   "object reeds \"Reeds\""
+  ],
+  "states": [
+   "gather: Reeds → gone (yields 2 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Reeds.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Rubble": {
   "status": "original",
   "request": "AR-104",
@@ -4441,6 +3807,26 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Rubble.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_SmallCrystals": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object crystal_small \"Small crystals\""
+  ],
+  "states": [
+   "pick: Small crystals → gone (yields 1 Rough gem)",
+   "is the after-state of Crystal cluster (mine), Crystal spire (mine)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SmallCrystals.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4485,12 +3871,53 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_SporeReeds": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1907"
+  ],
+  "usedBy": [
+   "object spore_reeds \"Spore reeds\""
+  ],
+  "states": [
+   "gather: Spore reeds → gone (yields 2 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SporeReeds.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Stalagmite": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1903"
+  ],
+  "usedBy": [
+   "object stalagmite \"Stalagmite\""
+  ],
+  "states": [
+   "quarry: Stalagmite → Loose stones (yields 3 Stone)",
+   "mine: Stalagmite → Loose stones (yields 3 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stalagmite.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Straw_Bed": {
   "status": "original",
-  "request": "AR-104",
+  "request": "AR-300",
   "requests": [
-   "AR-104",
-   "AR-300"
+   "AR-300",
+   "AR-104"
   ],
   "usedBy": [
    "object floor_straw \"Straw bed\""
@@ -4511,8 +3938,8 @@
   "requests": [
    "AR-021",
    "AR-1600",
-   "AR-1905",
-   "AR-102"
+   "AR-102",
+   "AR-1905"
   ],
   "usedBy": [
    "object stump \"Stump\""
@@ -4530,10 +3957,10 @@
  },
  "!$UF_TowerCap": {
   "status": "original",
-  "request": "AR-1905",
+  "request": "AR-102",
   "requests": [
-   "AR-1905",
-   "AR-102"
+   "AR-102",
+   "AR-1905"
   ],
   "usedBy": [
    "object tower_cap \"Tower-cap\""
@@ -4544,6 +3971,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_TowerCap.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Cursed": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_cursed \"Blighted tree\""
+  ],
+  "states": [
+   "chop: Blighted tree → Stump (yields 1 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Cursed.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4605,6 +4051,82 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Tree_Tropical": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_tropical \"Broadleaf giant\""
+  ],
+  "states": [
+   "chop: Broadleaf giant → Stump (yields 4 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Tropical.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wheat_Wild": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object wheat_wild \"Wild wheat\""
+  ],
+  "states": [
+   "gather: Wild wheat → gone (yields 1 Seeds, 1 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wheat_Wild.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wild_Grain": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object wild_grain \"Wild grain\""
+  ],
+  "states": [
+   "gather: Wild grain → gone (yields 1 Seeds, 1 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wild_Grain.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wildflowers": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers \"Wildflowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wildflowers.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Workbench": {
   "status": "original",
   "request": "AR-104",
@@ -4627,10 +4149,10 @@
  },
  "!$WallStone_Set": {
   "status": "original",
-  "request": "AR-104",
+  "request": "AR-300",
   "requests": [
-   "AR-104",
-   "AR-300"
+   "AR-300",
+   "AR-104"
   ],
   "usedBy": [
    "object wall_stone \"Stone wall\""
@@ -4651,10 +4173,10 @@
  },
  "!$WallWood_Set": {
   "status": "original",
-  "request": "AR-104",
+  "request": "AR-300",
   "requests": [
-   "AR-104",
-   "AR-300"
+   "AR-300",
+   "AR-104"
   ],
   "usedBy": [
    "object wall_wood \"Wooden wall\""
@@ -4672,6 +4194,40 @@
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
+ },
+ "$Adam": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-700",
+   "AR-010",
+   "AR-011"
+  ],
+  "usedBy": [
+   "people human",
+   "start.pair male: clothing tier 1 (UF_Colonists.setTier)",
+   "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
+   "plugin UF_Anim.js (test suite)",
+   "plugin UF_Colonists.js",
+   "plugin UF_Combat.js (test suite)",
+   "plugin UF_Ecology.js (test suite)",
+   "plugin UF_Goals.js (test suite)",
+   "plugin UF_NaturalConnections.js (test suite)",
+   "plugin UF_Ownership.js (test suite)",
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
+   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$Adam.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
  },
  "$Baby": {
   "status": "original",
@@ -4724,6 +4280,34 @@
   "sidecar": false,
   "statusWhy": "not in 8e5fdc1"
  },
+ "$Eve": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-700",
+   "AR-010",
+   "AR-011"
+  ],
+  "usedBy": [
+   "people human",
+   "start.pair female: clothing tier 1 (UF_Colonists.setTier)",
+   "start.pair female: clothing tier 3 (UF_Colonists.setTier)",
+   "plugin UF_Colonists.js",
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
+   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$Eve.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
+ },
  "$Teen_Boy": {
   "status": "original",
   "request": "none yet",
@@ -4758,17 +4342,189 @@
   "sidecar": false,
   "statusWhy": "not in 8e5fdc1"
  },
+ "$UF_Dwarf_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-600",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people dwarf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Dwarf_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Dwarf_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-600",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people dwarf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Dwarf_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Elf_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people elf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Elf_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Elf_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people elf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Elf_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Gnome_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people gnome"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Gnome_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Gnome_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people gnome"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Gnome_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Goblin_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people goblin"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Goblin_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Goblin_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people goblin"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Goblin_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "$UF_Human_Female": {
   "status": "original",
   "request": "AR-400",
   "requests": [
-   "AR-400"
+   "AR-400",
+   "AR-600",
+   "AR-700",
+   "AR-011",
+   "AR-010"
   ],
   "usedBy": [
+   "people human",
+   "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
+   "start.pair female: clothing tier 2 (UF_Colonists.setTier)",
    "plugin UF_Select.js (test suite)"
   ],
   "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
+   "clothing tier 0: unclad",
+   "worn on the pair: clothing tier 2 = Hide cloak equipped"
   ],
   "category": "people",
   "file": "img/characters/$UF_Human_Female.png",
@@ -4780,17 +4536,67 @@
   "status": "original",
   "request": "AR-400",
   "requests": [
-   "AR-400"
+   "AR-400",
+   "AR-600",
+   "AR-700",
+   "AR-010",
+   "AR-011"
   ],
   "usedBy": [
+   "people human",
+   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
+   "start.pair male: clothing tier 2 (UF_Colonists.setTier)",
    "plugin UF_Outposts.js (test suite)",
    "plugin UF_Select.js (test suite)"
   ],
   "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
+   "clothing tier 0: unclad",
+   "worn on the pair: clothing tier 2 = Hide cloak equipped"
   ],
   "category": "people",
   "file": "img/characters/$UF_Human_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Orc_Female": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people orc"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Orc_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Orc_Male": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-900"
+  ],
+  "usedBy": [
+   "people orc"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Orc_Male.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"

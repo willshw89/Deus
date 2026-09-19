@@ -1,22 +1,28 @@
 {
   "id": "granite_boulder",
-  "name": "Granite Boulder (2.5D)",
-  "dimensions": "16x16",
-  "exportScale": "3x (48x48)",
-  "projection": "Ultima VII 2.5D Oblique (45-degree up-left lean, top/south/east faces)",
-  "format": "Exactly one asset square (16x16 native pixels)",
-  "palette": "Ultima VII Daylight Palette (PALETTES.FLX Record 0 / art/palette/uf.hex)",
-  "colorsUsed": [
-    "#201408",
-    "#CECECE",
-    "#BEBEBE",
-    "#6D6D6D",
-    "#86B200",
-    "#515151",
-    "#9E9E9E",
-    "#8E8E8E",
-    "#454545"
+  "name": "Granite boulder",
+  "category": "Geology",
+  "dimensions": "48x48",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
   ],
-  "colorCount": 9,
-  "updatedDate": "2026-09-18"
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "palette": "art/palette/uf.hex",
+  "colorCount": 18,
+  "updatedDate": "2026-09-19",
+  "passable": false
 }

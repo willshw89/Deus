@@ -12,23 +12,13 @@
     1
   ],
   "facings": [
-    "S",
-    "W",
-    "E",
-    "N"
+    "S"
   ],
   "animations": {
     "stand": [
       0
-    ],
-    "glint": [
-      0,
-      1,
-      2,
-      1
     ]
   },
   "passable": true,
-  "under": true,
-  "frameMs": 200
+  "under": true
 }

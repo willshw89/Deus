@@ -68,6 +68,32 @@ Delivered per user directive ("Actually, Do charsets and face sets for Biome ass
   - `game/test_output/smoke.map.png`: Level -1 subterranean cavern showing live `!$UF_TowerCap`, `!$UF_Stalagmite`, `!$UF_GlowCaps`, `!$UF_CaveMushrooms`, `!$UF_CaveMoss` with settlers around the campfire.
   - Face sets `UF_Faces_Trees_Ex.png` and `UF_Faces_CaveFlora.png` opened and visually inspected with flawless 3× pixel grid alignment and ornate borders.
 
+## Biome Small Plants, Minerals/Outcrops Charsets & Face Sets (Batches 4 & 5) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Actually, Do charsets and face sets for Biome assets liek trees, stumps, etc", "Going forward, for underground too, I want nature to change on a gradient which means more assets probly"):
+- **Authentic FF6 HD Small Plants & Ground Cover (AR-103):**
+  - Delivered 12 character sheets and AR-600 .json sidecars for small plants and ground cover in `game/img/characters/!$UF_*.png`:
+    - Cactus (`!$UF_Cactus`), Tall Cactus (`!$UF_CactusTall`), Wild Grass (`!$UF_GrassTuft`), Wetland Reeds (`!$UF_Reeds`), Wildflowers (`!$UF_Wildflowers`), Purple Flowers (`!$UF_Flowers_Purple`), Blue Flowers (`!$UF_Flowers_Blue`), White Flowers (`!$UF_Flowers_White`), Wild Wheat (`!$UF_Wheat_Wild`), Wild Grain (`!$UF_Wild_Grain`), Lichen (`!$UF_Lichen`), Lily Pad (`!$UF_Lily_Pad`).
+    - Standard 144×192 px character sheets (48×48 native frames), anchor `[24, 47]`, baseline grounded on row 47, binary alpha, <= 32 colors from `art/palette/uf.hex`.
+- **Authentic FF6 HD Minerals & Outcrops (AR-044, AR-103, AR-104):**
+  - Delivered 10 character sheets and AR-600 .json sidecars for surface and subterranean minerals and outcrops in `game/img/characters/!$UF_*.png`:
+    - Granite Boulder (`!$UF_GraniteBoulder`), Ironstone Deposit (`!$UF_IronstoneDeposit`), Copper Outcrop (`!$UF_CopperOutcrop`), Gold Outcrop (`!$UF_GoldOutcrop`), Crystal Cluster (`!$UF_CrystalCluster`), Small Crystals (`!$UF_SmallCrystals`), Loose Stones (`!$UF_LooseStones`), Gravel (`!$UF_Gravel`), Old Bones (`!$UF_OldBones`), Fallen Pillar (`!$UF_FallenPillar`).
+    - Standard 144×192 px character sheets (48×48 native frames), anchor `[24, 47]`, binary alpha, <= 32 colors from `art/palette/uf.hex`.
+- **RMMZ Face Sets (AR-700):**
+  - Delivered 2 complete 576×288 face sheets (4×2 grid of 144×144 portraits) inside authentic living oak carved wood borders and Romanesque stone arches:
+    - `game/img/faces/UF_Faces_Plants.png`: Cactus, Tall Cactus, Wild Grass, Wetland Reeds, Wildflowers, Purple Flowers, Blue Flowers, Wild Wheat.
+    - `game/img/faces/UF_Faces_Minerals.png`: Granite Boulder, Ironstone Outcrop, Copper Outcrop, Gold Outcrop, Crystal Cluster, Small Crystals, Loose Stones, Ancient Bones.
+- **Catalog Integration & Stand-ins Cleanup:**
+  - Swapped all 22 objects in `game/data/UF_WorldCatalog.json` from stock `Outside_B`/`Outside_C` tile placeholders to original `!$UF_*` character sheets.
+  - Removed `!$UF_Wildflowers.png` from Stand-ins list in `docs/STATUS.md`.
+  - `tools/generate_asset_inventory.js`: Original assets increased from 102 to 124; stock RMMZ assets dropped from 64 to 45.
+- **Automated Verification:**
+  - `tools/verify_batch4_assets.js`: 24/24 PASS (24/24 `art_check.js` PASS, 24/24 `originality_check.js` PASS min distance 0.413 to 0.584 >= 0.28 vs 19,431 indexed U7 shapes).
+  - Test suites: `ground` 9/9 PASS, `worldgen` 22/22 PASS, `vertical` 11/11 PASS, `smoke` 13/13 PASS (0 errors).
+- **Screenshots visually inspected (Rule 5):**
+  - `UF_Faces_Plants.png` and `UF_Faces_Minerals.png`: Opened and inspected; crisp 3× native grid, authentic ornate borders and silhouettes.
+  - `smoke.map.png`: Ground start visually verified showing live `!$UF_Flowers_Blue`, `!$UF_IronstoneDeposit`, `!$UF_GraniteBoulder`, `!$UF_Reeds`, `!$UF_Wildflowers`, and `!$UF_Wheat_Wild` on the meadow with colonists.
+
 ## Household and goals checkpoint — 2026-09-19 (Codex / Astra)
 
 - **Saved implementation:** `UF_Households`, `UF_CultureGrowth`, and `UF_Goals` are enabled after Ownership. User confirmed the editor closed before `plugins.js` changed. Colonists consumes exact household construction and personal equipment steps through real Jobs; survival/explicit orders retain precedence. F7 opens the selected creature's goals. Reopen the editor before Playtest.

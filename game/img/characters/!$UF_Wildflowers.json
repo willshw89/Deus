@@ -1,5 +1,5 @@
 {
-  "id": "wildflowers",
+  "id": "flowers",
   "name": "Wildflowers",
   "frameWidth": 48,
   "frameHeight": 48,
@@ -12,10 +12,7 @@
     1
   ],
   "facings": [
-    "S",
-    "W",
-    "E",
-    "N"
+    "S"
   ],
   "animations": {
     "stand": [
