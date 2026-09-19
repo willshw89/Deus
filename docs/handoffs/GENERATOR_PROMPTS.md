@@ -3,6 +3,7 @@
 The user's decisions behind these prompts (docs/VISION.md): HD pixel art in the style of Final Fantasy VI (flat top-down, no 2.5D lean), drawn at higher definition than the original; every sprite at its size against the 48 px RPG Maker grid square, with a grown person filling roughly one square and larger beings on bigger character sheets (V44); creatures move and act in eight directions, so every action is drawn in all eight facings and delivered one image per action (V3); the theme is Arthurian fantasy with science-fiction elements (V65); everything that can move is animated as frames and shows its equipment as layers (V58, V60, V61); every shipped asset is original and passes the originality check (AGENTS rule 8).
 
 ## How to use
+0. **Nano Banana is mandatory** (VISION V69, V70): every image is made with Google's Nano Banana image model, preferably Nano Banana 2 (model id gemini-3.1-flash-image, Google's recommended model for keeping a character consistent across reference images; Nano Banana Pro, gemini-3-pro-image, for hard cases; the older gemini-2.5-flash-image shuts down on 2026-10-02). No other generator, no drawing tool, and never a sprite typed in pixel by pixel in code. Save the model's output unmodified. Every group's prompt names the standard RPG Maker MZ set its deliveries end up in (docs/RMMZ_ASSET_SPEC.md); the project's tools pack single generations into those sheets.
 1. Start one generator with prompt 0 and get the four anchors approved before anything else.
 2. Then start one generator per group, 1 to 13 (group 7 waits for the first approved body from group 6). Each prompt is self-contained: paste the whole block.
 3. Attach to every generator a few stock RPG Maker MZ sprites as a size and view reference (for example game/img/characters/People1.png, Actor1.png, Nature.png and a crop of game/img/tilesets/Outside_B.png; RPG Maker's own art is licensed for RPG Maker games and uses the same flat view), and, once approved, the four anchors.
@@ -76,6 +77,8 @@ Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each
 - <id>_hurt.png: 1 frame (flinching back)
 - <id>_death.png: 3 frames (buckling, falling, lying still)
 If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: man: the AR-600 master plus a drop-in RPG Maker MZ single-character sheet $UF_<id>.png: 3 columns x 4 rows of frames (rows Down, Left, Right, Up; columns step, stand, step), 144 x 192 px for 48 x 48 frames, 288 x 384 for 96 x 96, 288 x 576 for 96 x 144; the full 8-facing, 20-column AR-600 master stays in art/masters and drives the game's own animation; oak: an upper-layer B-E tileset block (768 x 768 sheet of 48 x 48 tiles, the oak as a 2 x 2 tile block) plus a !$UF_oak.png object sheet for the sway frames; wall_wood: a wall piece on the 48 x 96 two-square wall standard (V73) exported as an A4-style wall block; meadow: one A2 ground autotile block of 96 x 144 (2 x 3 tiles) placed in a 768 x 576 A2 sheet. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 1: Ground and water tiles
@@ -135,6 +138,8 @@ Format: each ground kind is one RPG Maker "A2" autotile block of 96 x 144 pixels
 Ground kinds (26): meadow (Meadow), tropical_grass (Lush grass), dry_grass (Dry grass), shrub_soil (Scrub soil), forest_floor (Leaf litter), needle_floor (Needle floor), jungle_floor (Jungle floor), tundra (Tundra), snow (Snow), ice (Ice), sand (Sand), stony (Stony ground), red_clay (Red clay), rock (Bare rock), peak_rock (Rock face), mud (Mud), swamp_mud (Swamp mud), dirt (Dirt), cursed_grass (Blighted grass), blessed_grass (Flowering grass), ash (Ash), scree (Scree), road (Packed earth), floor_wood (Plank floor), floor_stone (Flagstone floor), floor_rushes (Rush floor). Notes: peak_rock is impassable cliff rock and may show a rock face on its south edge; scree is loose broken rock; cursed_grass and blessed_grass replace meadow in evil and good regions (sickly or luminous); floor_wood, floor_stone and floor_rushes are house floors (planks, flagstones, strewn rushes) laid by people; road is packed earth; ash is burnt ground.
 Water kinds (9): fresh, pond, marsh, swamp, icy, brackish, salt, deep, blighted. Each is an RPG Maker "A1" water block: the same 96 x 144 layout, three animation frames side by side (288 x 144) with small shifts of the ripples and glints; deep water darker, marsh and swamp murky with weed, icy water with floes, blighted water sickly.
 Name each file by its id (meadow.png, fresh.png ...).
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: ground kinds: A2 ground autotile blocks, 96 x 144 each (2 x 3 tiles of 48 x 48), up to 32 per 768 x 576 A2 sheet; water kinds: A1 animated blocks, three 96 x 144 frames each, in a 768 x 576 A1 sheet; house floors (floor_wood, floor_stone, floor_rushes): A5 single 48 x 48 tiles in a 384 x 768 A5 sheet (8 x 16 tiles), or A2 blocks if they need borders. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 2: Trees and large plants
@@ -206,6 +211,8 @@ Each tree sheet: frame 0 stand, frames 1-3 sway (the crown moves 1-2 px, leaves 
 - tree_cursed (Blighted tree). chop turns it into stump.
 - stump (Stump). chop turns it into nothing (it is removed).
 Notes: fruit_tree carries visible fruit; fruit_tree_bare is the same tree after picking (no fruit, a little duller). stump is the cut trunk with rings on its top face (48 x 48 frame, no sway). dead_tree has no leaves; tree_cursed is twisted and blighted; fir_snow carries snow on its boughs; tree_swamp and mangrove stand in wet ground with visible roots.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: the standing tree as an upper-layer B-E tileset block (768 x 768 sheet, 16 x 16 tiles of 48 x 48; a 96 x 96 tree is a 2 x 2 block, a 96 x 144 tree a 2 x 3 block); the sway frames as a !$UF_<id>.png object sheet (3 columns of frames, 4 identical rows); the stump as a single 48 x 48 B-E tile. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 3: Small plants and ground cover
@@ -280,6 +287,8 @@ Your job: bushes, grasses, flowers, crops and water plants, all in 48 x 48 frame
 - wheat_wild (Wild wheat). Lies low under people, drawn calm. gather turns it into nothing (it is removed).
 - lily_pad (Lily pads). Lies low under people, drawn calm.
 Notes: berry_bush carries red berries; berry_bush_bare is the same bush picked. lily_pad floats on water (drawn over a water tile, transparent elsewhere). cactus_tall is taller than a person (48 x 96 frame if needed).
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: each plant as a 48 x 48 upper-layer B-E tile (768 x 768 sheet); plants that sway also as a !$UF_<id>.png object sheet (3 frames, 4 identical rows, 144 x 192); lily_pad on water as a B-E tile with transparency around it. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 4: Stone, ore, crystals and ruins
@@ -347,6 +356,8 @@ Your job: rocks and minerals and the remains of old buildings. Frames 48 x 48 un
 - rubble (Rubble). Lies low under people, drawn calm. pick turns it into nothing (it is removed).
 - rubble_pillar (Fallen pillar). quarry turns it into nothing (it is removed).
 Notes: ironstone shows rust-streaked dark rock, copper_outcrop green-stained rock, gold_outcrop quartz with gold flecks; crystal and crystal_small get 2 extra frames of a faint glint. Quarrying or mining leaves rocks_small (loose stones), which people then pick up.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: each rock, ore and ruin as a 48 x 48 upper-layer B-E tile (768 x 768 sheet; 96 x 96 shapes as 2 x 2 blocks); crystals that glint also as a !$UF_<id>.png object sheet (3 frames, 144 x 192). Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 5: Buildings, camp and workshops
@@ -420,6 +431,8 @@ Your job: everything people build. Walls and doors: a wall is a CONNECTED SET li
 - farm_plot (Farm plot). Lies low under people, drawn calm.
 - well (Well).
 Animations and states: doors closed plus 3 frames opening (for east-west and north-south walls); campfire unlit, lit (4-frame flame loop with sparks), and burnt-out embers; furnace idle and working (glow loop); smithy idle and working (hammer spark loop); tanning_rack empty and with a hide stretched; weapon_rack empty and full; farm_plot as tilled soil plus 4 growth stages of a crop; well with its bucket; stockpile is a flat dashed marker on the ground (no height, low contrast); bridge is planks over water, seen from above with its side rails.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: walls: the two-square wall pieces (48 x 96, V73) packed as an A4 wall block per material (768 x 576 A4 sheet); doors, campfire, furnace, smithy, tanning rack, weapon rack and well: !$UF_<id>.png object sheets, one row per state (closed/opening, unlit/lit/embers, idle/working), 3 frames per row, 144 x 192 for 48 x 48 frames and 288 x 384 for 96 x 96; floor_straw, stockpile and farm_plot: 48 x 48 A5 tiles (384 x 768 sheet) or B-E tiles; bridge: B-E tiles. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 6: People (bodies)
@@ -489,6 +502,8 @@ Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each
 - <id>_death.png: 3 frames (buckling, falling, lying still)
 If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 Name files <species>_<gender>_<age>_<action>.png (human_male_adult_idle.png, human_male_adult_walk.png ...).
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: per body: the AR-600 master (8 facings x 20 columns) plus a drop-in RPG Maker MZ single-character sheet $UF_<id>.png: 3 columns x 4 rows of frames (rows Down, Left, Right, Up; columns step, stand, step), 144 x 192 px for 48 x 48 frames, 288 x 384 for 96 x 96, 288 x 576 for 96 x 144; the full 8-facing, 20-column AR-600 master stays in art/masters and drives the game's own animation. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 7: Equipment layers (after the first body is approved)
@@ -645,6 +660,8 @@ Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each
 - <id>_death.png: 3 frames (buckling, falling, lying still)
 If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 Notes: grazers use the work columns for running away; predators use the attack columns for a bite or pounce; fliers (hawk, songbird, bat) are drawn in the air above their cell with a flapping loop in the walk columns and a separate perched stand frame; the serpent slithers. Death frames end with the animal lying on its side: that last frame stays as the remains. Deer: stag with antlers and hind without, as two sheets.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: per animal: the AR-600 master plus a drop-in RPG Maker MZ single-character sheet $UF_<id>.png: 3 columns x 4 rows of frames (rows Down, Left, Right, Up; columns step, stand, step), 144 x 192 px for 48 x 48 frames, 288 x 384 for 96 x 96, 288 x 576 for 96 x 144; the full 8-facing, 20-column AR-600 master stays in art/masters and drives the game's own animation. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 9: Monsters
@@ -718,6 +735,8 @@ Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each
 - <id>_hurt.png: 1 frame (flinching back)
 - <id>_death.png: 3 frames (buckling, falling, lying still)
 If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: per monster: the AR-600 master plus a drop-in RPG Maker MZ single-character sheet $UF_<id>.png: 3 columns x 4 rows of frames (rows Down, Left, Right, Up; columns step, stand, step), 144 x 192 px for 48 x 48 frames, 288 x 384 for 96 x 96, 288 x 576 for 96 x 144; the full 8-facing, 20-column AR-600 master stays in art/masters and drives the game's own animation. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 10: Items and icons
@@ -825,6 +844,8 @@ Items (50):
 - shield_wood (Wooden shield): shield
 - shield_iron (Iron shield): shield
 Notes: a stack is one image (the game shows a count); arrows as a small bundle; food looks edible (cooked meat browned, raw meat red); tools and weapons show their material (stone heads lashed to wood, iron blades).
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: ground items: a !$UF_Item_<id>.png object sheet (48 x 48 frame, 144 x 192 sheet, the item in the stand cell of every row); inventory icons: 32 x 32 cells added to an IconSet-format sheet (16 icons per 512 px row). Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 11: Faces
@@ -879,8 +900,10 @@ You are making original game art for a living fantasy world seen from above: a c
 
 YOUR GROUP: FACES
 
-Your job: portraits for the character sheet and conversations. Portraits are not map sprites: a head-and-shoulders bust facing slightly toward the viewer, 96 x 96 pixels, painted in pixel art at full detail in the manner of early-1990s VGA role-playing-game portraits, warm light from the upper left, a plain dark background (use magenta outside the bust area only if the frame is not filled). Same palette.
-For every species (human, elf, dwarf, goblin, orc, gnome, automaton), male and female, adult and elder: four different faces each (varied hair, beards, scars, colouring), plus for each face two moods (content, angry or afraid) as extra frames. Name files face_<species>_<gender>_<age>.png, faces side by side (96 px each), moods in the rows below.
+Your job: portraits for the character sheet and conversations. Portraits are not map sprites: a head-and-shoulders bust facing slightly toward the viewer, 144 x 144 pixels (RPG Maker MZ's face size; 576 x 576 on your 4x canvas), painted in pixel art at full detail in the manner of early-1990s VGA role-playing-game portraits, warm light from the upper left, a plain dark background (use magenta outside the bust area only if the frame is not filled). Same palette.
+For every species (human, elf, dwarf, goblin, orc, gnome, automaton), male and female, adult and elder: four different faces each (varied hair, beards, scars, colouring), plus for each face two moods (content, angry or afraid) as extra frames. Name files face_<species>_<gender>_<age>_<n>_<mood>.png, one face and mood per image.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: faces: RPG Maker MZ face sheets game/img/faces/UF_Faces_<species>_<n>.png, 576 x 288, eight 144 x 144 faces in 4 columns x 2 rows. Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 12: Interface
@@ -938,9 +961,11 @@ YOUR GROUP: INTERFACE
 Your job: the game's screens and markers. Style: dark carved wood and aged parchment with brass fittings, readable and quiet, at full detail; flat interface art.
 - Window skin in RPG Maker's Window.png format (192 x 192: background, frame, cursor, arrows, text colours row).
 - Inventory grid slot (36 x 36, empty and highlighted), the five equipment slots (head, weapon, shield, torso, legs) with faint outline icons, a character-sheet panel frame, a small tooltip frame.
-- Conversation window: a portrait frame (96 x 96 inside) and keyword buttons (normal, hover, pressed).
+- Conversation window: a portrait frame (144 x 144 inside, the RPG Maker face size) and keyword buttons (normal, hover, pressed).
 - Badges: PAUSED, speed (1x, 2x, 4x, 8x), COMBAT.
 - Markers on the ground: stance squares green (friendly), yellow (neutral), red (hostile), 48 x 48, drawn under a creature's feet; a selection marker (a square of iron corners) that pulses (3 frames); 15 designation marks for jobs (chop, gather, pick, quarry, mine, dismantle, build, dig, fish, hunt, haul, eat, drink, move, other), 48 x 48 each.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: Window.png at exactly 192 x 192 in RPG Maker's layout; icons into an IconSet-format sheet (32 x 32 cells, 16 per 512 px row); balloons in Balloon.png format (48 x 48 cells, 8 frames x 15 rows, 384 x 720); buttons in ButtonSet.png format (528 x 96); stance squares, the selection marker and the job marks as !$UF_<id>.png sheets (48 x 48 frames, 144 x 192). Never try to draw a whole RPG Maker sheet in one image.
 ```
 
 ## Prompt 13: Effects
@@ -1002,5 +1027,7 @@ Your job: the small animated effects that make the world move. Same palette, in 
 - Missiles in eight directions (one image each, the eight directions as rows in the facing order south, south-west, west, north-west, north, north-east, east, south-east): an arrow in flight (2 frames), a thrown spear (2 frames); a sling stone is round (2 frames of spin, one row).
 - Spells: a hand glow (3 frames); a fire bolt and a frost bolt in flight, each in the eight directions (3 frames); three spell bursts (fire, frost, healing), 6 frames each, 48 x 48 or 96 x 96.
 Name files fx_<name>.png.
+
+RMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: each effect as $UF_fx_<name>.png, 144 x 192 (3 frames x 4 rows of 48 x 48; omni-directional effects repeat the frames on all 4 rows; missiles use the rows for Down, Left, Right, Up), or 288 x 384 for 96 x 96 bursts; the 8-direction master stays in art/masters. Never try to draw a whole RPG Maker sheet in one image.
 ```
 

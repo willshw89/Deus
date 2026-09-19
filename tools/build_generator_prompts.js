@@ -150,12 +150,12 @@ ${UNIT_SHEET}` },
 Items (${items.length}):
 ${items.map(itemLine).join("\n")}
 Notes: a stack is one image (the game shows a count); arrows as a small bundle; food looks edible (cooked meat browned, raw meat red); tools and weapons show their material (stone heads lashed to wood, iron blades).` },
-    { n: 11, title: "Faces", body: `Your job: portraits for the character sheet and conversations. Portraits are not map sprites: a head-and-shoulders bust facing slightly toward the viewer, 96 x 96 pixels, painted in pixel art at full detail in the manner of early-1990s VGA role-playing-game portraits, warm light from the upper left, a plain dark background (use magenta outside the bust area only if the frame is not filled). Same palette.
-For every species (${Object.keys(cat.people).filter(k => k !== "about").join(", ")}), male and female, adult and elder: four different faces each (varied hair, beards, scars, colouring), plus for each face two moods (content, angry or afraid) as extra frames. Name files face_<species>_<gender>_<age>.png, faces side by side (96 px each), moods in the rows below.` },
+    { n: 11, title: "Faces", body: `Your job: portraits for the character sheet and conversations. Portraits are not map sprites: a head-and-shoulders bust facing slightly toward the viewer, 144 x 144 pixels (RPG Maker MZ's face size; 576 x 576 on your 4x canvas), painted in pixel art at full detail in the manner of early-1990s VGA role-playing-game portraits, warm light from the upper left, a plain dark background (use magenta outside the bust area only if the frame is not filled). Same palette.
+For every species (${Object.keys(cat.people).filter(k => k !== "about").join(", ")}), male and female, adult and elder: four different faces each (varied hair, beards, scars, colouring), plus for each face two moods (content, angry or afraid) as extra frames. Name files face_<species>_<gender>_<age>_<n>_<mood>.png, one face and mood per image.` },
     { n: 12, title: "Interface", body: `Your job: the game's screens and markers. Style: dark carved wood and aged parchment with brass fittings, readable and quiet, at full detail; flat interface art.
 - Window skin in RPG Maker's Window.png format (192 x 192: background, frame, cursor, arrows, text colours row).
 - Inventory grid slot (36 x 36, empty and highlighted), the five equipment slots (head, weapon, shield, torso, legs) with faint outline icons, a character-sheet panel frame, a small tooltip frame.
-- Conversation window: a portrait frame (96 x 96 inside) and keyword buttons (normal, hover, pressed).
+- Conversation window: a portrait frame (144 x 144 inside, the RPG Maker face size) and keyword buttons (normal, hover, pressed).
 - Badges: PAUSED, speed (1x, 2x, 4x, 8x), COMBAT.
 - Markers on the ground: stance squares green (friendly), yellow (neutral), red (hostile), 48 x 48, drawn under a creature's feet; a selection marker (a square of iron corners) that pulses (3 frames); 15 designation marks for jobs (chop, gather, pick, quarry, mine, dismantle, build, dig, fish, hunt, haul, eat, drink, move, other), 48 x 48 each.` },
     { n: 13, title: "Effects", body: `Your job: the small animated effects that make the world move. Same palette, in the world's top-down view, magenta background, frames side by side.
@@ -172,14 +172,35 @@ let md = `# Generator prompts: one per asset group (rewritten 2026-09-19 by Clau
 The user's decisions behind these prompts (docs/VISION.md): HD pixel art in the style of Final Fantasy VI (flat top-down, no 2.5D lean), drawn at higher definition than the original; every sprite at its size against the 48 px RPG Maker grid square, with a grown person filling roughly one square and larger beings on bigger character sheets (V44); creatures move and act in eight directions, so every action is drawn in all eight facings and delivered one image per action (V3); the theme is Arthurian fantasy with science-fiction elements (V65); everything that can move is animated as frames and shows its equipment as layers (V58, V60, V61); every shipped asset is original and passes the originality check (AGENTS rule 8).
 
 ## How to use
+0. **Nano Banana is mandatory** (VISION V69, V70): every image is made with Google's Nano Banana image model, preferably Nano Banana 2 (model id gemini-3.1-flash-image, Google's recommended model for keeping a character consistent across reference images; Nano Banana Pro, gemini-3-pro-image, for hard cases; the older gemini-2.5-flash-image shuts down on 2026-10-02). No other generator, no drawing tool, and never a sprite typed in pixel by pixel in code. Save the model's output unmodified. Every group's prompt names the standard RPG Maker MZ set its deliveries end up in (docs/RMMZ_ASSET_SPEC.md); the project's tools pack single generations into those sheets.
 1. Start one generator with prompt 0 and get the four anchors approved before anything else.
 2. Then start one generator per group, 1 to 13 (group 7 waits for the first approved body from group 6). Each prompt is self-contained: paste the whole block.
 3. Attach to every generator a few stock RPG Maker MZ sprites as a size and view reference (for example game/img/characters/People1.png, Actor1.png, Nature.png and a crop of game/img/tilesets/Outside_B.png; RPG Maker's own art is licensed for RPG Maker games and uses the same flat view), and, once approved, the four anchors.
 4. Save each delivery under art/raw/ with the file name the prompt gives (art/raw/oak.png; creatures one file per action, art/raw/human_male_adult_walk.png). Claude Code reduces it with the project's tool, checks it (palette, size, originality) and wires it into the game after your approval.
 
 `;
+// The standard RPG Maker MZ set each group's deliveries end up in (VISION V70, user 2026-09-19: "include RMMZ asset
+// specifications so we can make standardized sets"). Sizes from docs/RMMZ_ASSET_SPEC.md (measured from the stock files).
+// The image model draws single subjects; the cleaning and export step packs them into these sheets.
+const CHAR_SET = `a drop-in RPG Maker MZ single-character sheet $UF_<id>.png: 3 columns x 4 rows of frames (rows Down, Left, Right, Up; columns step, stand, step), 144 x 192 px for 48 x 48 frames, 288 x 384 for 96 x 96, 288 x 576 for 96 x 144; the full 8-facing, 20-column AR-600 master stays in art/masters and drives the game's own animation`;
+const RMMZ_SET = {
+    0: `man: the AR-600 master plus ${CHAR_SET}; oak: an upper-layer B-E tileset block (768 x 768 sheet of 48 x 48 tiles, the oak as a 2 x 2 tile block) plus a !$UF_oak.png object sheet for the sway frames; wall_wood: a wall piece on the 48 x 96 two-square wall standard (V73) exported as an A4-style wall block; meadow: one A2 ground autotile block of 96 x 144 (2 x 3 tiles) placed in a 768 x 576 A2 sheet.`,
+    1: `ground kinds: A2 ground autotile blocks, 96 x 144 each (2 x 3 tiles of 48 x 48), up to 32 per 768 x 576 A2 sheet; water kinds: A1 animated blocks, three 96 x 144 frames each, in a 768 x 576 A1 sheet; house floors (floor_wood, floor_stone, floor_rushes): A5 single 48 x 48 tiles in a 384 x 768 A5 sheet (8 x 16 tiles), or A2 blocks if they need borders.`,
+    2: `the standing tree as an upper-layer B-E tileset block (768 x 768 sheet, 16 x 16 tiles of 48 x 48; a 96 x 96 tree is a 2 x 2 block, a 96 x 144 tree a 2 x 3 block); the sway frames as a !$UF_<id>.png object sheet (3 columns of frames, 4 identical rows); the stump as a single 48 x 48 B-E tile.`,
+    3: `each plant as a 48 x 48 upper-layer B-E tile (768 x 768 sheet); plants that sway also as a !$UF_<id>.png object sheet (3 frames, 4 identical rows, 144 x 192); lily_pad on water as a B-E tile with transparency around it.`,
+    4: `each rock, ore and ruin as a 48 x 48 upper-layer B-E tile (768 x 768 sheet; 96 x 96 shapes as 2 x 2 blocks); crystals that glint also as a !$UF_<id>.png object sheet (3 frames, 144 x 192).`,
+    5: `walls: the two-square wall pieces (48 x 96, V73) packed as an A4 wall block per material (768 x 576 A4 sheet); doors, campfire, furnace, smithy, tanning rack, weapon rack and well: !$UF_<id>.png object sheets, one row per state (closed/opening, unlit/lit/embers, idle/working), 3 frames per row, 144 x 192 for 48 x 48 frames and 288 x 384 for 96 x 96; floor_straw, stockpile and farm_plot: 48 x 48 A5 tiles (384 x 768 sheet) or B-E tiles; bridge: B-E tiles.`,
+    6: `per body: the AR-600 master (8 facings x 20 columns) plus ${CHAR_SET}.`,
+    8: `per animal: the AR-600 master plus ${CHAR_SET}.`,
+    9: `per monster: the AR-600 master plus ${CHAR_SET}.`,
+    10: `ground items: a !$UF_Item_<id>.png object sheet (48 x 48 frame, 144 x 192 sheet, the item in the stand cell of every row); inventory icons: 32 x 32 cells added to an IconSet-format sheet (16 icons per 512 px row).`,
+    11: `faces: RPG Maker MZ face sheets game/img/faces/UF_Faces_<species>_<n>.png, 576 x 288, eight 144 x 144 faces in 4 columns x 2 rows.`,
+    12: `Window.png at exactly 192 x 192 in RPG Maker's layout; icons into an IconSet-format sheet (32 x 32 cells, 16 per 512 px row); balloons in Balloon.png format (48 x 48 cells, 8 frames x 15 rows, 384 x 720); buttons in ButtonSet.png format (528 x 96); stance squares, the selection marker and the job marks as !$UF_<id>.png sheets (48 x 48 frames, 144 x 192).`,
+    13: `each effect as $UF_fx_<name>.png, 144 x 192 (3 frames x 4 rows of 48 x 48; omni-directional effects repeat the frames on all 4 rows; missiles use the rows for Down, Left, Right, Up), or 288 x 384 for 96 x 96 bursts; the 8-direction master stays in art/masters.`,
+};
 for (const g of GROUPS) {
-    md += `## Prompt ${g.n}: ${g.title}\n\n\`\`\`text\n${STYLE}\n\nYOUR GROUP: ${g.title.toUpperCase()}\n\n${g.body}\n\`\`\`\n\n`;
+    const set = RMMZ_SET[g.n] ? `\n\nRMMZ SET (VISION V70; exact formats in docs/RMMZ_ASSET_SPEC.md). You draw single subjects at 4x on magenta; the project's tools pack them into: ${RMMZ_SET[g.n]} Never try to draw a whole RPG Maker sheet in one image.` : "";
+    md += `## Prompt ${g.n}: ${g.title}\n\n\`\`\`text\n${STYLE}\n\nYOUR GROUP: ${g.title.toUpperCase()}\n\n${g.body}${set}\n\`\`\`\n\n`;
 }
 const out = path.join(root, "docs", "handoffs", "GENERATOR_PROMPTS.md");
 fs.writeFileSync(out, md);
