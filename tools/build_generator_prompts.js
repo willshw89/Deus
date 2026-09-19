@@ -56,8 +56,9 @@ ${rampLines}
 8. Never: baked ground shadows (the game draws them), text, borders, grid lines, watermarks, logos, or names from other games.
 9. Animation: everything that can move is animated (the art director's rule). Frames of one asset sit side by side on one sheet as your group section says. Frame timing is 150 ms unless your section says otherwise.
 10. Facings: creatures have four facings, drawn separately in this row order: south (toward the viewer), west, east, north (back). Because of the up-left lean, west and east are NOT mirror images of each other.
-11. Originality: all art is original. Reference images you are given (an old game's sprites) show scale and projection only: never trace, copy, recolour or edit them.
-12. Delivery, for every asset:
+11. Equipment shows (the art director's rule): what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks the layers the character has equipped. Every work and attack frame is drawn so a held tool or weapon lines up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
+12. Originality: all art is original. Reference images you are given (an old game's sprites) show scale and projection only: never trace, copy, recolour or edit them.
+13. Delivery, for every asset:
    - The PNG sheet, named <id>.png (the ids are listed in your section), saved by the art director to art/masters/.
    - A JSON sidecar named <id>.json, for example:
      { "id": "oak", "frameWidth": 96, "frameHeight": 96, "anchor": [72, 95], "footprint": [1, 1], "facings": ["S"], "animations": { "stand": [0], "sway": [0, 1, 2] }, "frameMs": 150 }
