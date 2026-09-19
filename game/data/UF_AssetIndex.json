@@ -3920,10 +3920,8 @@
  },
  "UF_GenSelect": {
   "status": "generated",
-  "request": "AR-031",
-  "requests": [
-   "AR-031"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
@@ -3938,10 +3936,8 @@
  },
  "UF_GenStance_friendly": {
   "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
@@ -3956,10 +3952,8 @@
  },
  "UF_GenStance_hostile": {
   "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
@@ -3974,10 +3968,8 @@
  },
  "UF_GenStance_indifferent": {
   "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "plugin UF_Stance.js"
   ],
@@ -4005,6 +3997,20 @@
    "flat: drawn under units and items",
    "flat dashed 48×48 square on the ground"
   ],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenTwoSquareWall_*": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Walls.js"
+  ],
+  "states": [],
   "category": "generated",
   "file": "(drawn in code)",
   "exists": true,

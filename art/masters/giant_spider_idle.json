@@ -1,0 +1,55 @@
+{
+  "id": "giant_spider_idle",
+  "name": "Giant Spider (Idle)",
+  "category": "wildlife",
+  "species": "giant_spider",
+  "kind": "predator",
+  "action": "idle",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "idle": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 200,
+  "layer": "body",
+  "source": {
+    "file": "art/raw/giant_spider_idle.png",
+    "format": "png",
+    "size": [
+      1152,
+      3072
+    ],
+    "sheet": [
+      3,
+      8
+    ],
+    "block": 4,
+    "background": "magenta #FF00FF"
+  },
+  "notes": "Giant spider cave predator idle animation (Stand, Idle 1, Idle 2) in all 8 directions."
+}
