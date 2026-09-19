@@ -1,0 +1,37 @@
+{
+  "id": "dwarf_female_adult_idle",
+  "species": "dwarf",
+  "gender": "female",
+  "stage": "adult",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "idle": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150
+}

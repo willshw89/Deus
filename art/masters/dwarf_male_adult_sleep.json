@@ -1,0 +1,32 @@
+{
+  "id": "dwarf_male_adult_sleep",
+  "species": "dwarf",
+  "gender": "male",
+  "stage": "adult",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "sleep": [
+      0
+    ]
+  },
+  "frameMs": 150
+}

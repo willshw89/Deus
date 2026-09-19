@@ -1,8 +1,7 @@
 {
   "id": "$UF_Dwarf_Attack_Crossbow",
   "species": "dwarf",
-  "gender": "male",
-  "stage": "adult",
+  "weapon": "dwarf_crossbow",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -20,20 +19,11 @@
     "N"
   ],
   "animations": {
-    "stand": [
-      1
-    ],
-    "walk": [
-      0,
-      1,
-      2,
-      1
-    ],
     "attack": [
       0,
       1,
       2
     ]
   },
-  "frameMs": 150
+  "frameMs": 120
 }

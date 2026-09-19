@@ -6,6 +6,42 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 **Roles:** Claude Code = engine and features; Gemini = art (AGENTS.md → Two agents)
 
+## Human & Dwarf 8-Directional & Combat Suites (AR-010, AR-011, AR-400, AR-600) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Work on the human sprites 8 directions, combat, idle, etc", "Dwarves need 8 direction mvoement. idle, combat, sleep, death.. etc..."):
+- **Complete 8-Directional Sprite Suites (S, SW, W, NW, N, NE, E, SE):**
+  - Delivered 8 compass facings for Human (Male & Female) and Dwarf (Male & Female) across all fundamental colonist actions: stand, walk, idle, combat (attack, cast, hurt), sleep (grounded resting on rows 41..47 for beds), death/remains, and work.
+  - Character sheets in `game/img/characters/`:
+    - `$UF_Human_8D.png`, `$UF_Human_Male_8D.png`, `$UF_Human_Female_8D.png` (144×384 px, 8 rows of 3 walk frames, anchor `[24, 47]`, footprint `[1, 1]`).
+    - `$UF_Dwarf_8D.png`, `$UF_Dwarf_Male_8D.png`, `$UF_Dwarf_Female_8D.png` (144×384 px, 8 rows of 3 walk frames, anchor `[24, 47]`, footprint `[1, 1]`).
+    - Standard 4-way fallback charsets: `$UF_Human.png`, `$UF_Human_Male.png`, `$UF_Human_Female.png`, `$UF_Dwarf.png`, `$UF_Dwarf_Male.png`, `$UF_Dwarf_Female.png` (144×192 px, 4 rows of 3 walk frames).
+- **Combat & Magic Classes (Human & Dwarf):**
+  - Human Melee Attack: `$UF_Human_Attack_Sword.png` (4-way) and `$UF_Human_Attack_8D.png` (8-way, sword slash).
+  - Human Ranged Attack: `$UF_Human_Attack_Bow.png` (bow draw and release).
+  - Human Magic Cast: `$UF_Human_Cast.png` (4-way) and `$UF_Human_Cast_8D.png` (8-way, arcane surge).
+  - Human Female Combat: `$UF_Human_Female_Attack.png` and `$UF_Human_Female_Cast.png`.
+  - Dwarf Melee Attack: `$UF_Dwarf_Attack_Axe.png` (4-way) and `$UF_Dwarf_Attack_Axe_8D.png` (8-way, runic cleave).
+  - Dwarf Ranged Attack: `$UF_Dwarf_Attack_Crossbow.png` (4-way) and `$UF_Dwarf_Attack_Crossbow_8D.png` (8-way, heavy arbalest aim).
+  - Dwarf Magic Cast: `$UF_Dwarf_Cast_Hammer.png` (4-way) and `$UF_Dwarf_Cast_Hammer_8D.png` (8-way, earth rune hammer surge).
+  - Dwarf Female Combat: `$UF_Dwarf_Female_Attack.png` and `$UF_Dwarf_Female_Cast.png`.
+- **AR-600 20-Column × 8-Row Master Sheets (960×384 px):**
+  - Delivered master sheets in `art/masters/` and `game/img/characters/`:
+    - `$UF_Human_Male_AR600.png` and `$UF_Human_Female_AR600.png` + JSON sidecars.
+    - `$UF_Dwarf_Male_AR600.png` and `$UF_Dwarf_Female_AR600.png` + JSON sidecars.
+    - Columns: 0 stand, 1..3 walk, 4..6 work, 7 stand (no carry, V89), 8..10 attack, 11..13 cast, 14 hurt, 15..17 death (corpse remains), 18..19 idle.
+    - Dedicated sleep masters in `art/masters/`: `human_male_adult_sleep.png`, `human_female_adult_sleep.png`, `dwarf_male_adult_sleep.png`, `dwarf_female_adult_sleep.png` (48×384 px) grounded on baseline row 47 for beds.
+- **Compliance & Automated Verification:**
+  - `art/palette/uf.hex` palette snapped (<= 32 colors), binary alpha (0/255), selective dark ink outlines (V104), grounded on row 47, anchor `[24, 47]`.
+  - `tools/art_check.js --native`: 100% PASS (7/7 checks on alpha, 48px grid, palette, size, lean <= 0.6px, margin).
+  - `tools/originality_check.js`: 100% PASS (0 FAIL, 0 WARN; all frame distances 0.438 to 0.528 >= 0.28 threshold vs 19,431 indexed U7 shapes).
+  - In-engine live test `tools/test_human_dwarf_8d_live.js`: 13/13 PASS (0 errors), verifying live NW.js rendering of all 8 facings and combat/colonist states.
+- **Screenshots visually inspected (Rule 5):**
+  - `art/review/human_dwarf_8d_compass_comparison_4x.png`: 4 rows comparing Human Male, Dwarf Male, Human Female, Dwarf Female across all 8 facings (S, SW, W, NW, N, NE, E, SE). Smooth diagonal transitions, stout dwarven proportions vs tall human proportions, perfect baseline alignment.
+  - `art/review/dwarf_sprites_8d_actions_showcase_4x.png`: Dwarf 8-directional stand, walk, and battleaxe cleave attack cycles.
+  - `art/review/human_sprites_8d_actions_showcase_4x.png`: Human 8-directional stand, walk, and sword slash attack cycles.
+  - `game/test_output/human_dwarf_8d_live_closeup.png`: Live in-game snapshot showing Human and Dwarf lineups facing 8 directions, combat units, and campfire colonists on the grass with zero errors.
+  - `game/test_output/human_dwarf_8d_live_normal.png`: Normal zoom level showing full colony map and unit roster.
+
 ## Biome Trees, Stumps, Cave Flora Charsets & Face Sets (Batches 1–3) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("Actually, Do charsets and face sets for Biome assets liek trees, stumps, etc"):
@@ -138,27 +174,77 @@ Delivered per user directive ("Actually, Do charsets and face sets for Biome ass
   - Updated catalog entries for `oak`, `birch`, `pine`, `fruit_tree`, `fruit_tree_bare`, `tree_savanna`, `tree_swamp`, `dead_tree`, `tower_cap`, `stump` from stock `Outside_B` tiles to original `!$UF_*` character sheets.
   - `docs/ASSET_INVENTORY.md` updated via `generate_asset_inventory.js`: original assets increased from 69 to 79.
 
+## Cavern Flora, Speleothems, Tree Batch 3 & Extended Face Sets — 2026-09-19 (Gemini)
+
+Delivered per user directives (Subterranean zero-sunlight ecosystem flora, rolling terrain layers Z 0/-1/-2):
+- **Cavern Flora & Speleothem Charsets (AR-1901 to AR-1908):**
+  - Delivered 6 subterranean vegetation & rock formation charsets (144×192 px, 48×48 frames, anchor [24, 47], footprint [1, 1]):
+    `!$UF_GlowCaps.png` (bioluminescent azure/cyan spore caps, ambient glow),
+    `!$UF_CaveMushrooms.png` (edible violet cave mushrooms with spore clusters),
+    `!$UF_CaveMoss.png` (vibrant emerald subterranean lichen patch),
+    `!$UF_SporeReeds.png` (moisture-loving cave wetland reeds),
+    `!$UF_Stalagmite.png` (limestone karst spires),
+    `!$UF_CrystalSpire.png` (glowing sapphire & amethyst bedrock formations).
+  - Matching `.json` sidecars written for all 6 charsets.
+- **Tree & Stump Batch 3 Charsets (AR-102):**
+  - Delivered 5 Tree character sheets (288×384 px, 96×96 frames, 4-way facings, sway animations, anchor [48, 95]):
+    `!$UF_Fir_Snow.png`, `!$UF_Mangrove.png`, `!$UF_Tree_Tropical.png`, `!$UF_Palm.png`, `!$UF_Tree_Cursed.png`.
+  - Delivered 5 matching Stump character sheets (144×192 px, 48×48 frames, anchor [24, 47]):
+    `!$UF_Fir_Snow_Stump.png`, `!$UF_Mangrove_Stump.png`, `!$UF_Tropical_Stump.png`, `!$UF_Palm_Stump.png`, `!$UF_Cursed_Stump.png`.
+- **Extended Face Sets (AR-700):**
+  - `game/img/faces/UF_Faces_CaveFlora.png` (576×288 px, 4×2 grid of 144×144 frames): 8 cave features & alpine stumps framed in Romanesque classical stone carved arches against midnight cavern darkness.
+  - `game/img/faces/UF_Faces_Trees_Ex.png` (576×288 px, 4×2 grid of 144×144 frames): 8 tree species framed in authentic Ultima VII living oak carved wood borders with scenic backdrops.
+- **Automated Verification:**
+  - `tools/verify_batch3_assets.js`: 18/18 PASS on `art_check.js` (alpha, 3×3 grid, palette <= 32, size, sidecars).
+  - `tools/verify_batch3_assets.js`: 18/18 PASS on `originality_check.js` (all frame distances >= 0.35 against 19,431 indexed U7 shapes).
+  - `tools/generate_asset_inventory.js`: original assets reached 102 (0 missing files).
+
+## Orc, Goblin & Gnome Faction Character Suites, Racial Weapons & Attack Animations — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, Gnome & Wildlife)"):
+- **Orc Faction Suite (AR-400, AR-900..903):**
+  - Character sheets: `$UF_Orc_Male.png`, `$UF_Orc_Female.png`, `$UF_Orc.png`, `$UF_Orc_8D.png` with sidecars. 48×48 frames, anchor [24, 47], V104 dark ink outlines, <= 31 colors on `art/palette/uf.hex`.
+  - 3 Racial Weapons: Melee Heavy Iron Cleaver (`orc_cleaver`), Ranged Bone Recurve Bow (`orc_bow`), Magic Blood Shaman Totem (`orc_blood_totem`).
+  - Attack Animations: `$UF_Orc_Attack_Cleaver.png` (fiery crescent cleave arc), `$UF_Orc_Attack_Bow.png` (bone recurve bow draw and loose), `$UF_Orc_Cast_Totem.png` (blood shaman spark surge).
+  - Equipment Layers: `$UF_Layer_orc_{cleaver,bow,blood_totem}.png` for layer composition in `UF_Anim.js`.
+  - Ground Items & Icons: `!$UF_Item_Orc{Cleaver,Bow,BloodTotem}.png` and 32×32 icons stamped into `IconSet.png` (slots 247, 248, 249).
+- **Goblin Faction Suite (AR-400, AR-900..903):**
+  - Character sheets: `$UF_Goblin_Male.png`, `$UF_Goblin_Female.png`, `$UF_Goblin.png`, `$UF_Goblin_8D.png` with sidecars. Pointy ears, wiry frame, loincloth, crouched stance, dark ink outlines.
+  - 3 Racial Weapons: Melee Poison Bone Shiv (`goblin_shiv`), Ranged Hollow Bone Blowgun (`goblin_blowgun`), Magic Necrotic Hex Wand (`goblin_hex_wand`).
+  - Attack Animations: `$UF_Goblin_Attack_Shiv.png` (poison slash lunge), `$UF_Goblin_Attack_Blowgun.png` (blowgun needle dart recoil), `$UF_Goblin_Cast_Hex.png` (sickly green necrotic skull vapor).
+  - Equipment Layers: `$UF_Layer_goblin_{shiv,blowgun,hex_wand}.png` for layer composition in `UF_Anim.js`.
+  - Ground Items & Icons: `!$UF_Item_Goblin{Shiv,Blowgun,HexWand}.png` and 32×32 icons stamped into `IconSet.png` (slots 250, 251, 252).
+- **Gnome Faction Suite (AR-400, AR-900..903):**
+  - Character sheets: `$UF_Gnome_Male.png`, `$UF_Gnome_Female.png`, `$UF_Gnome.png`, `$UF_Gnome_8D.png` with sidecars. Forehead goggles, leather tinker apron with pouches, monocular eyepiece, dark ink outlines.
+  - 3 Racial Weapons: Melee Tinker's Torque Wrench (`gnome_wrench`), Ranged Repeater Hand Crossbow (`gnome_hand_crossbow`), Magic Aether Capacitor Focusing Rod (`gnome_aether_rod`).
+  - Attack Animations: `$UF_Gnome_Attack_Wrench.png` (torque wrench swing), `$UF_Gnome_Attack_Crossbow.png` (repeater arbalest recoil), `$UF_Gnome_Cast_Aether.png` (electric blue aether surge).
+  - Equipment Layers: `$UF_Layer_gnome_{wrench,hand_crossbow,aether_rod}.png` for layer composition in `UF_Anim.js`.
+  - Ground Items & Icons: `!$UF_Item_Gnome{Wrench,Crossbow,AetherRod}.png` and 32×32 icons stamped into `IconSet.png` (slots 253, 254, 255).
+- **Wildlife Fox Suite (AR-401):**
+  - `$UF_Fox.png` and `$UF_Fox_8D.png` with 7 action suites (idle, walk, action, attack, graze, hurt, death).
+- **Automated Verification:**
+  - `art_check.js --native`: PASS 8/8 across all 4-way faction and creature character sheets (7/7 checks each).
+  - `art_check.js --native`: PASS 6/6 across all attack/cast animation sheets and ground items.
+  - `originality_check.js`: PASS 8/8 across all character sheets (all closest distances >= 0.428 >= 0.28 against 19,431 indexed U7 shapes).
+  - `smoke`: 9/9 PASS (0 errors).
+  - `jobs`: 19/19 PASS (includes `jobs.mine_built_wall` and `jobs.mine_subterranean_wall`).
+  - `vertical`: 11/11 PASS (5 layers -2..+2 verified).
+  - `natural_walls`: 4/4 PASS (2-cell walls verified).
+  - `wildlife`: 22/22 PASS (0 errors).
+  - `worldgen`: 22/22 PASS (0 errors).
+- **Screenshots visually inspected:**
+  - `art/review/orc_faction_showcase_4x.png` & `orc_weapons_showcase_4x.png`: Orc warrior lineup, cleave arc, bow draw, totem surge.
+  - `art/review/goblin_faction_showcase_4x.png` & `goblin_weapons_showcase_4x.png`: Goblin scavenger lineup, poison slash, blowgun dart, necrotic hex.
+  - `art/review/gnome_faction_showcase_4x.png` & `gnome_weapons_showcase_4x.png`: Gnome tinker lineup, wrench swing, repeater arbalest, aether rod surge.
+  - `art/review/fox_actions_showcase_4x.png`: Fox 4-way walk and action states.
+  - `game/img/faces/UF_Faces_CaveFlora.png` & `UF_Faces_Trees_Ex.png`: 16 framed face sets for cave flora and extended trees.
+  - `smoke.map.png`: Level -1 Dwarven underground start with glowing mushrooms, cave moss, tower-caps, stalagmites, and dark cavern lighting.
+  - `jobs.jobs_working.png`: Worker chopping oak on Ground rolling meadow with HUD level controls.
+
 ## In progress (claims)
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`
-- Gemini | **Human and Dwarf 8-Directional Sprite Suites (Movement, Idle, Combat, Sleep, Death, Work) (AR-010, AR-011, AR-400, AR-600)** | `game/img/characters/$UF_{Human,Dwarf}*`, `art/masters/{human,dwarf}_*`, `art/raw/{human,dwarf}_*`, `art/review/{human,dwarf}_*` | since 2026-09-19
-- Codex / Astra natural-access subtask | User-requested natural connections Ground ↔ z=-1 ↔ z=-2; deterministic paired endpoints and checked physical travel through existing APIs | NEW `UF_NaturalConnections.js`, `docs/systems/UF_NaturalConnections.md`, `tools/test_natural_connections.js`; no changes to claimed World/Levels/WorldGen/History/catalog | since 2026-09-19
-- Claude Code | **Creature AI Outpost Construction, Generational Culture, Family Multi-Room Homes, Locks & Keys** (user 2026-09-19 requests): Autonomous creature AI expanding outposts across Z-axes, animal vs. sapient creature goals (short, medium, long), family households with heritage surnames, multi-room homes (Kitchen hearth, Dining table, Master/Children bedrooms, exterior windows), lock & key access control (`UF_Doors`), generational culture evolution (`tastes`, traditions, aesthetic shifts), and dynamic dwelling upgrades | `game/js/plugins/UF_Outposts.js`, `game/js/plugins/UF_Doors.js`, `docs/systems/UF_Outposts.md`, `docs/systems/UF_Doors.md` | since 2026-09-19 15:30.
-- Claude Code | **Paths and DF life** (user 2026-09-19: "paths should not go through walls"; "keep pulling in and implementing behaviors / AI from DF, I want these characters living lives and building"): whole-area unit pathfinding, roads after the settling run and never under walls, ring gaps kept open, autonomous house building and daily life for every faction | `UF_World.js`, `UF_History.js`, `UF_Roads.js`, `UF_Colonists.js` (keeping Gemini's reproduction and life-stage code), `UF_Jobs.js`, new `UF_Society.js`, `tools/register_world_plugins.js`, `docs/systems/` | since 2026-09-19 08:55. Not touching `UF_Floors.js`/`UF_Doors.js` (Codex), `UF_Combat.js`, `UF_Objects.js`, `UF_Visuals.js`, `UF_Stance.js`, `UF_TimeSpeed.js` HUD (Gemini).
-- Claude Code | **Spawn guard** (VISION V68, user 2026-09-19 afternoon: "Nothing should spawn onto a square that is occupied by something they cant move thru") | `UF_World.js` (the default guard in addUnit, a runtime alias over UF_Objects' cell setter, the new `spawn` suite), `docs/systems/UF_World.md` | since 2026-09-19 11:00.
-- Claude Code | **Dwarf Fortress Creature AI** (user 2026-09-19: "pulling creature AI from DF and programming it into our creatures"): diurnal/nocturnal activity cycles and sleep, herbivore grazing, environmental threat fear, herd alarm propagation, predator autonomous hunting and feeding, defensive beast retaliation | `game/js/plugins/UF_Wildlife.js`, `docs/systems/UF_Wildlife.md` | since 2026-09-19 12:57
-- Claude Code | **Campfire start** (VISION V4, V31, V67, user 2026-09-19 afternoon: the start drawn as `PPP` / `PFP` / `PPP`, eight peasants around a lit campfire; every area guaranteed the resources to start building) | `UF_History.js` (founders and campfire), `UF_WorldGen.js` (kit), `UF_Wildlife.js` (kit animals), catalog `start.kit` and `factions.founders`, their `docs/systems/` pages | since 2026-09-19 10:40. Replaces the stopped AoE-II camp build, which wrote nothing.
-- Gemini | **Group 10: Items and Icons (AR-200 / AR-904) — Batches 1–6 complete (25 items / 50 assets); all standard ground items and chain materials delivered** | `art/raw/*`, `art/masters/*`, `art/review/batch6_items_showcase.png` | since 2026-09-19
-- Gemini | **Wildlife 8-way 7-Action Suites (AR-401): Boar, Hare, and Wolf complete (21 action masters, 6 RMMZ charsets, live in-engine tested)** | `art/masters/{boar,hare,wolf}_*`, `game/img/characters/$UF_{Boar,Hare,Wolf}*`, `art/review/{boar,hare,wolf}_actions_showcase_4x.png` | since 2026-09-19
-- Gemini | **Group 7: Equipment Layers (AR-501, AR-900..903) — Batches 1 & 2 complete (8 equipment layers / 16 assets on AR-600 standard)** | `art/masters/{club,spear,bow_short,hide_cloak}*`, `game/img/characters/$UF_Layer_*` | since 2026-09-19
-- Gemini | **Ground tiles batch 2: forest_floor, needle_floor, jungle_floor, tundra (AR-100)** | art/raw/{forest_floor,needle_floor,jungle_floor,tundra}.png, art/masters/{forest_floor,needle_floor,jungle_floor,tundra}.*, art/review/{forest_floor,needle_floor,jungle_floor,tundra}* | since 2026-09-19
-- Gemini | **Group: Faces (AR-700) — Batch 1 (Human) complete; Batch 2 (Elf) next** | `art/raw/face_elf_*`, `art/masters/face_elf_*`, `game/img/faces/UF_Faces_Elf_*`, `art/review/face_elf_*` | since 2026-09-19
-- Gemini | **Trees and Large Plants (AR-102) — Batch 2 complete, Batch 3 next** | `art/raw/*`, `art/masters/*`, `art/review/*` | since 2026-09-19
-- Gemini | **Group 3: Small Plants & Ground Cover (AR-103) — Batches 1 & 2 complete (11 flora assets delivered including wildflowers on Rule V81 micro scale)** | `art/masters/*`, `game/img/characters/*`, `art/review/batch2_plants_showcase_4x.png` | since 2026-09-19
-- Gemini | **Group: People (AR-400, AR-011) — Human Settlers pair complete (Male & Female adult 48×48 charsets on FF6 HD standard)** | `art/masters/human_{male,female}_stand.*`, `game/img/characters/$UF_Human_{Male,Female}.*`, `art/review/human_settlers_pair_showcase_4x.png` | since 2026-09-19
-- Gemini | **Camp Assets (AR-104, AR-105) — Campfire Suite (unlit + 3-frame animated lit) & Carpentry Workbench complete** | `art/masters/{campfire,campfire_lit,workbench}.*`, `game/img/characters/!$UF_{Campfire,Workbench}.*`, `art/review/camp_assets_showcase_4x.png` | since 2026-09-19
-- Gemini | **Group 12: Interface (AR-035, AR-701, AR-800) — Batch 1 & 2 complete (waiting for user approval)** | `art/masters/ui_*`, `game/img/system/*`, `art/review/batch2_interface_review.png` | since 2026-09-19
-- Gemini | **Faction & Wildlife Suites: Orc, Goblin, Gnome & Wildlife (Bear, Fox, Spider, Troll) (AR-400, AR-401, AR-900..903)** | `art/masters/*`, `art/raw/*`, `game/img/characters/*`, `art/review/*` | since 2026-09-19
+- Gemini | **Wildlife Action Suites Refinement: Bear, Troll, Giant Spider (AR-401, AR-402)** | `art/masters/{bear,troll,giant_spider}_*`, `game/img/characters/$UF_{Bear,Troll,GiantSpider}*`, `art/review/*` | since 2026-09-19
 - Claude Code | **Five-level world engine, slices 1-2** (VISION V80; user 2026-09-19 13:15: "Continue coding features from U7 / DF into the game. We are now operating on 5 maps acting as vertical layers. we want to build up or down into this world, etc. Feel free to use duplicate RMMZ assets for these"): z on every cell, unit, item and job; five seeded levels; save migration; level switching and HUD; stairs, ramps and routes between levels; stock RMMZ tiles as placeholders. Design: `docs/design/VERTICAL_WORLD.md` (Codex). | new `game/js/plugins/UF_Levels.js`, `UF_World.js`, `UF_Objects.js` and `UF_Items.js` (z only), `UF_Jobs.js` (z only), `UF_Camera.js`, `UF_Look.js`, `UF_Interact.js`, `UF_Tiles.js`, `docs/design/VERTICAL_BUILD_PLAN.md`, `docs/systems/UF_Levels.md`, `docs/handoffs/HANDOFF_vertical.md`, `docs/ASSET_REQUESTS.md` (new AR rows) | since 2026-09-19 13:20. Not touching `UF_Wildlife.js` (claimed for creature AI) or Codex's design docs.
 - Claude Code | **DF mechanics: remains and bones, ecology and spawns, culture permissions and tech trees** (user 2026-09-19 13:40: "continue working on pulling DF mechanics, bones, spawns, entities, resources, build/skill/technology trees, etc. Gemini can handle the art"; VISION V74-V77) | new `game/js/plugins/UF_Remains.js`, `UF_Ecology.js`, `UF_Tech.js`, `UF_Skills.js` (faction Building level and personal unlocks, VISION V84), `UF_Jobs.js` (work timing in world beats, VISION V85, after the progression build), `docs/design/WORK_TIMING.md`, their `docs/systems/` pages, `docs/design/DF_GAP_MAP.md`, `docs/design/REMAINS.md`, `docs/design/ECOLOGY.md`, `docs/design/TECH_TREE.md`, catalog keys `remains`, `ecology`, `tech` and new bone items and recipes, `docs/ASSET_REQUESTS.md` (new AR rows), `docs/handoffs/HANDOFF_df_mechanics.md` | since 2026-09-19 13:45. Hooks into other files only by aliases; not touching `UF_Wildlife.js` (claimed) or Codex's design docs.
 - Claude Code | **Eleven peoples** (VISION V87, user 2026-09-19 13:42): design done (`docs/design/PEOPLES.md`); **data layer build** since 14:35: the five new peoples in the catalog from data, the automaton no longer rolled, generation and founders for every people, stock placeholders, the `peoples` suite | `docs/design/PEOPLES.md`, catalog keys `people`, `cultures`, `factions.species` (new peoples appended; the automaton's weight set to 0; a `size` block added to the existing people entries), `factions.speciesAffinity` and `sites.preferredBiomes` (new entries appended), `factions.areas` (`cursedOk`, new `preferAlignment`), `game/js/plugins/UF_Factions.js` (weight 0, the player always of a playable people, preferred alignment, generate options, the `peoples` suite; merged with the menu-skins run), `game/img/characters/$UF_Stock_*` placeholder cuts, `tools/fixtures/` (an old-save fixture), `docs/ASSET_REQUESTS.md` (new AR-1700 rows), `docs/handoffs/HANDOFF_peoples.md`, `docs/handoffs/GENERATOR_PROMPTS.md` (rebuilt by the tool), `docs/systems/UF_Factions.md` | since 2026-09-19 13:45. Culture-specific mechanics (eggs, the hive, the undead) in a later wave after UF_Tech and UF_Remains land. Not touching `UF_Wildlife.js`, `UF_History.js`, `UF_Colonists.js`.
@@ -315,7 +401,7 @@ Each step ships with checks and a handoff report for Gemini (art waves: `docs/ha
 The U7 files below stay on disk (never committed) and nothing in the catalog draws them. The inventory tool reads this list: every backticked file on a bullet line counts as a U7 stand-in wherever it is used, so U7-derived files without the prefix must be named here. Format: `- <files> | source | what still names them`.
 - People: every `$U7_*` person sheet (`$U7_Adam*`, `$U7_Eve*`, `$U7_Townsman.png`, `$U7_Townswoman.png`, `$U7_Guard.png`, `$U7_Ranger.png`, `$U7_Goblin.png`, `$U7_Orc.png`, `$U7_Gnome.png`, `$U7_DwarfGuard.png`, `$U7_Miner.png`, `$U7_Blacksmith.png`, `$U7_Fighter*`, `$U7_Automaton.png` and the rest), and without the prefix `$Adam.u7bak.png`, `$Eve.u7bak.png` (the U7 files that were $Adam.png and $Eve.png, byte-identical to each other) and `$People1.png` | SHAPES.VGA 458 / 452 (Adam, Eve, tiers 0–2), 462 / 463 (tier 3), 720 (guard), 265 (townsman, `$People1.png`), 460 (ranger); 3×, E/W transposed | RMMZ editor data (not drawn in play, see above): `$U7_Miner`, `$U7_DwarfGuard`, `$U7_Blacksmith` (Actors.json actors 2, 5, 8 and Map001 events), `$U7_Goblin` (a Map001 event); test suites (grep of game/js/plugins at 11:20): `$U7_Townsman`, `$U7_Ranger`, `$U7_Guard`, `$U7_Goblin` (UF_Factions, UF_Fire, UF_Interact, UF_Items, UF_Jobs, UF_Look, UF_Objects, UF_Roads, UF_Skills, UF_Stance, UF_Talk fallback, UF_TimeSpeed, UF_Wildlife, UF_World), `$People1` (UF_Floors 457)
 - Creatures: every `$U7_*` creature sheet (`$U7_Deer.png`, `$U7_Wolf.png`, `$U7_Dog.png`, `$U7_Hare.png`, `$U7_Fox.png`, `$U7_Horse.png`, `$U7_Sheep.png`, `$U7_Ox.png`, `$U7_Aurochs.png`, `$U7_Chicken.png`, `$U7_WildBird.png`, `$U7_Hawk.png`, `$U7_Rat.png`, `$U7_Bat.png`, `$U7_CaveBat.png`, `$U7_Serpent.png`, `$U7_Snake.png`, `$U7_Cat.png`, `$U7_Spider.png`, `$U7_CaveSpider.png`, `$U7_CaveCrawler.png`, `$U7_CaveLurker.png`, `$U7_Troll.png`, `$U7_BogHorror.png`, `$U7_Skeleton.png`) | SHAPES.VGA 811, 498, 716, 523, 970, 537, 510, 496, 495, 555, 865, 493, 530, 502, 500, 727 and others, 3×, E/W transposed (AR-401 to AR-403) | test suites only: `$U7_Hare` (UF_Colonists, UF_Doors, UF_Interact, UF_Jobs, UF_Stance, UF_Talk fallback), `$U7_Troll` (UF_Stance). The combat rewrite of 2026-09-19 (UF_Combat.js, 10:59) draws spawned hostiles from the catalog species image, no longer `$U7_Wolf` / `$U7_CaveSpider`
-- Objects without the prefix: `!$TimberOak.png`, `!$PineTree.png`, `!$FruitTree.png`, `!$BirchTree.png`, `!$SwampTree.png`, `!$DeadTree.png`, `!$TreeStump.png`, `!$BerryBush.png`, `!$WildShrub.png`, `!$TallGrass.png`, `!$Reeds.png`, `!$Wildflowers.png`, `!$UF_Wildflowers.png` (byte-identical to `!$U7_Wildflowers.png`), `!$GraniteBoulder.png`, `!$IronstoneDeposit.png`, `!$CaveBoulder.png`, `!$LooseStones.png`, `!$CrystalCluster.png`, `!$IronOreVein.png`, `!$CaveMouth.png`, `!$CaveLadder.png`, `!$FallenPillar.png`, `!$OldBones.png`, `!$StrawBed.png`, `!$WallStone.png`, `!$WallWood.png`, `!$Campfire.png` | SHAPES.VGA shapes 181, 306, 328, 310, 332, 325, 313, 672, 619, 321, 323, 314, 342, 341, 343, 353, 747, 916, 389, 705, 360, 650, 683, 365, 362, 739 (each file's sidecar `standInSource`), 3× | RMMZ editor data (not drawn in play, see above): Map002 events, 336 pages (`!$GraniteBoulder` 85, `!$PineTree` 82, `!$IronstoneDeposit` 64, `!$BerryBush` 57, `!$TimberOak` 46, `!$FruitTree` 1, `!$Campfire` 1); test suites: `!$TimberOak` (UF_Look 546, 562–566)
+- Objects without the prefix: `!$TimberOak.png`, `!$PineTree.png`, `!$FruitTree.png`, `!$BirchTree.png`, `!$SwampTree.png`, `!$DeadTree.png`, `!$TreeStump.png`, `!$BerryBush.png`, `!$WildShrub.png`, `!$TallGrass.png`, `!$Reeds.png`, `!$Wildflowers.png`, `!$GraniteBoulder.png`, `!$IronstoneDeposit.png`, `!$CaveBoulder.png`, `!$LooseStones.png`, `!$CrystalCluster.png`, `!$IronOreVein.png`, `!$CaveMouth.png`, `!$CaveLadder.png`, `!$FallenPillar.png`, `!$OldBones.png`, `!$StrawBed.png`, `!$WallStone.png`, `!$WallWood.png`, `!$Campfire.png` | SHAPES.VGA shapes 181, 306, 328, 310, 332, 325, 313, 672, 619, 321, 323, 314, 342, 341, 343, 353, 747, 916, 389, 705, 360, 650, 683, 365, 362, 739 (each file's sidecar `standInSource`), 3× | RMMZ editor data (not drawn in play, see above): Map002 events, 336 pages (`!$GraniteBoulder` 85, `!$PineTree` 82, `!$IronstoneDeposit` 64, `!$BerryBush` 57, `!$TimberOak` 46, `!$FruitTree` 1, `!$Campfire` 1); test suites: `!$TimberOak` (UF_Look 546, 562–566)
 - Objects with the prefix: every `!$U7_*` object sheet (`!$U7_TimberOak.png`, `!$U7_PineTree.png`, `!$U7_FruitTree.png`, `!$U7_Flat-toptree.png`, `!$U7_Broadleafgiant.png`, `!$U7_Swamptree.png`, `!$U7_Deadtree.png`, `!$U7_TreeStump.png`, `!$U7_Shrub.png`, `!$U7_TallGrass.png`, `!$U7_Reeds.png`, `!$U7_Wildflowers.png`, `!$U7_LooseStones.png`, `!$U7_Gravel.png`, `!$U7_GraniteBoulder.png`, `!$U7_CaveBoulder.png`, `!$U7_MalachiteOutcrop.png`, `!$U7_GoldVeinOutcrop.png`, `!$U7_IronOreVein.png`, `!$U7_CrystalSpire.png`, `!$U7_SmallCrystals.png`, `!$U7_OldBones.png`, `!$U7_FallenPillar.png`, `!$U7_StrawBed.png`, `!$U7_WallStone.png`, `!$U7_WallWood.png`, `!$U7_CaveMouth.png`, `!$U7_CaveLadder.png`) | SHAPES.VGA, 3×, collision-aligned anchors (AR-021 to AR-023, AR-044, AR-102, AR-103) | test suites only: `!$U7_Flat-toptree` (UF_Look 555, 560), `!$U7_Shrub` (UF_Look 564)
 - Items: the 23 `!$U7_Item_*.png` sheets (WoodLog, Firewood, RoughStone, IronOre, LeadOre, Blackrock, GoldNugget, MetalBar, RoughGem, CutGem, PlantFiber, WoolFleece, StrawBundle, SeedPouch, WildBerries, TreeFruit, CaveMushroom, RootVegetable, RawMeat, HaunchMeat, RiverFish, AnimalBone, LeatherHide), and without the prefix `!$UF_Item_Firewood.png`, `!$UF_Item_Fish.png` (byte-identical to U7 item sheets) | SHAPES.VGA item shapes, 3× (AR-200) | nothing
 - Ground: `game/img/tilesets/U7_Ground_A1.png`, `U7_Ground_A2.png`, `U7_Outside_A1.png`, `U7_Outside_A2.png`, `U7_Dungeon_A1.png`, `U7_Dungeon_A2.png`, `U7_Fortress_B.png`, `U7_Glade_B.png` | SHAPES.VGA flat shapes 4, 23, 5 and others, 3× (AR-001) | nothing (the catalog's tileset is the code-drawn UF_GenGround_A2 with stock Outside_A1, Outside_B and Outside_C)

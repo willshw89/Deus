@@ -1,8 +1,7 @@
 {
   "id": "$UF_Dwarf_Cast_Hammer",
   "species": "dwarf",
-  "gender": "male",
-  "stage": "adult",
+  "weapon": "dwarf_rune_hammer",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -20,15 +19,6 @@
     "N"
   ],
   "animations": {
-    "stand": [
-      1
-    ],
-    "walk": [
-      0,
-      1,
-      2,
-      1
-    ],
     "cast": [
       0,
       1,

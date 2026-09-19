@@ -1,5 +1,8 @@
 {
   "id": "human_female_stand",
+  "species": "human",
+  "gender": "female",
+  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -12,34 +15,18 @@
   ],
   "facings": [
     "S",
+    "SW",
     "W",
+    "NW",
+    "N",
+    "NE",
     "E",
-    "N"
+    "SE"
   ],
   "animations": {
     "stand": [
       0
     ]
   },
-  "frameMs": 150,
-  "lean": {
-    "mode": "none",
-    "slope": 1,
-    "top": null,
-    "east": 0
-  },
-  "scale": {
-    "subjectHeight": 46,
-    "target": null,
-    "factor": 1
-  },
-  "source": {
-    "files": [
-      "nb_human_female_stand",
-      "nb_human_female_back",
-      "nb_human_female_side"
-    ],
-    "format": "png",
-    "background": "magenta #FF00FF"
-  }
+  "frameMs": 150
 }

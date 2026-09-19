@@ -1,0 +1,28 @@
+{
+  "id": "$UF_Human_Cast",
+  "species": "human",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "cast": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150
+}

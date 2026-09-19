@@ -1,0 +1,38 @@
+{
+  "id": "$UF_Human_Female_8D",
+  "species": "human",
+  "gender": "female",
+  "stage": "adult",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
+    ]
+  },
+  "frameMs": 150
+}

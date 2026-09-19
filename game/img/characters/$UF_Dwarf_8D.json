@@ -1,8 +1,6 @@
 {
   "id": "$UF_Dwarf_8D",
   "species": "dwarf",
-  "gender": "male",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
