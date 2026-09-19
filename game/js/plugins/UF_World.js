@@ -752,7 +752,8 @@
         // No direction at all (fully enclosed) counts as a failed step too, so the goal is dropped and
         // world:unitBlocked fires instead of the unit waiting forever (found by the jobs suite, 2026-09-18).
         if (tried && ev.isMovementSucceeded()) {
-            ev.setDirection(facing(g.dx, g.dy));
+            // The event already faces the step it just took (RMMZ sets it in moveStraight); a unit walking around a
+            // tree faces where it walks, not the far goal (user rule 2026-09-18).
             u.stuckFrames = 0;
         } else if (++u.stuckFrames > STUCK_LIMIT) {
             u.goal = null;
@@ -976,12 +977,16 @@
             const sprite = ev && SceneManager._scene._spriteset._characterSprites.find(s => s._character === ev);
             t.check("unit_enters_view", !!ev && !!sprite,
                 ev ? `event ${ev.eventId()} at (${ev.x},${ev.y}), sprite ${sprite ? "created" : "MISSING"}` : `still in area (${u.area.x},${u.area.y}) at (${u.x},${u.y})`);
-            // 4-way: the event never faces or steps diagonally.
-            let diagonal = 0;
-            const origDiag = ev ? ev.moveDiagonally : null;
+            // 4-way: the event never faces or steps diagonally. And it faces every step it takes.
+            let diagonal = 0, facedSteps = 0, wrongFaced = 0;
+            const origDiag = ev ? ev.moveDiagonally : null, origStraight = ev ? ev.moveStraight : null;
             if (ev) ev.moveDiagonally = function(h, v) { diagonal++; return origDiag.call(this, h, v); };
+            if (ev) ev.moveStraight = function(d) { origStraight.call(this, d); if (this.isMovementSucceeded()) { facedSteps++; if (this.direction() !== d) wrongFaced++; } };
             await t.waitUntil(() => !u.goal, 14000, "TEST_walker to reach its goal").catch(() => {});
-            if (ev) ev.moveDiagonally = origDiag;
+            await t.waitFrames(2);
+            if (ev) { ev.moveDiagonally = origDiag; ev.moveStraight = origStraight; }
+            t.check("faces_its_steps", facedSteps > 0 && wrongFaced === 0 && (!ev || ev.direction() === 4),
+                `${facedSteps} step(s) taken, ${wrongFaced} not facing the step's direction; facing ${ev ? ev.direction() : "?"} after walking west (want 4)`);
             t.check("unit_walks_to_goal", !u.goal && sameArea(u.area, area) && u.x === goalX && u.y === row,
                 `at (${u.x},${u.y}) in area (${u.area.x},${u.area.y}), goal (${goalX},${row}) ${u.goal ? "still set" : "reached"}`);
             t.check("four_way_steps", diagonal === 0, `${diagonal} diagonal step(s) on screen (FourWay ${window.UF_Dir8 ? UF_Dir8.fourWay : "n/a"})`);
