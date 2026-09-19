@@ -1,0 +1,17 @@
+{
+  "id": "human_male_settler",
+  "name": "Human Male Settler (Style Anchor)",
+  "frameWidth": 16,
+  "frameHeight": 16,
+  "exportWidth": 48,
+  "exportHeight": 48,
+  "anchor": [8, 15],
+  "footprint": [1, 1],
+  "facings": ["S"],
+  "animations": {
+    "stand": [0]
+  },
+  "palette": "16-bit SNES (20 colors max)",
+  "style": "Final Fantasy VI / Shining Force 2D flat 3/4 top-down",
+  "approvedDate": "2026-09-18"
+}
