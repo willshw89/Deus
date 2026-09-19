@@ -1,0 +1,50 @@
+{
+  "id": "human_male_adult_hurt",
+  "name": "Human Male Adult Settler (Hurt)",
+  "category": "people",
+  "species": "human",
+  "gender": "male",
+  "stage": "adult",
+  "action": "hurt",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "animations": {
+    "hurt": [
+      0
+    ]
+  },
+  "frameMs": 200,
+  "layer": "body",
+  "source": {
+    "file": "art/raw/human_male_adult_hurt.png",
+    "format": "png",
+    "size": [
+      192,
+      1536
+    ],
+    "sheet": [
+      1,
+      8
+    ],
+    "block": 4,
+    "background": "magenta #FF00FF"
+  }
+}
