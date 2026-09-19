@@ -1,16 +1,16 @@
 {
   "id": "oak",
-  "name": "Broadleaf Timber Oak",
+  "name": "Mature Broadleaf Oak",
   "category": "Flora",
   "frameWidth": 96,
   "frameHeight": 96,
   "anchor": [
-    72,
+    48,
     95
   ],
   "footprint": [
-    1,
-    1
+    2,
+    2
   ],
   "facings": [
     "S"

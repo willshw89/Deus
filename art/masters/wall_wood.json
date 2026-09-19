@@ -1,25 +1,22 @@
 {
   "id": "wall_wood",
-  "name": "Timber Palisade Wall (Straight E-W)",
-  "category": "Building",
+  "name": "Wooden Palisade Wall (2-Square)",
+  "category": "Site",
   "frameWidth": 48,
-  "frameHeight": 48,
+  "frameHeight": 96,
   "anchor": [
     24,
-    47
+    95
   ],
   "footprint": [
     1,
-    1
+    2
   ],
   "facings": [
     "S"
   ],
   "animations": {
-    "stand": [
-      0
-    ],
-    "straight_ew": [
+    "straight": [
       0
     ]
   }
