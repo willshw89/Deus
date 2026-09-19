@@ -44,7 +44,7 @@
 Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar is that point.
 
 ## 3. Placeholders
-- What is in use today stays until it is replaced: the `U7_` stand-ins (VISION V9) and the stock RPG Maker tiles and sheets the catalog names. `docs/ASSET_INVENTORY.md` lists every one with its request ID. The `U7_` stand-ins lean and clash with this look; whether to swap them for stock RPG Maker art now is a decision waiting on the user (STATUS).
+- **Stock RPG Maker MZ art is the placeholder set** (VISION V9, 2026-09-19): tiles from `Outside_*`, characters from `People1-4`, `Actor1-3`, `Nature`, `Monster`, `Evil` (cut into single-character sheets by a tool so the engine can use them), icons from `IconSet`. Its people fill a 48 px square, like §2. `docs/ASSET_INVENTORY.md` lists every one with its request ID. The `U7_` files stay on disk, unused.
 - New art is made to this standard only.
 - Code-drawn placeholders (`UF_Gen*`) are fine until art arrives.
 
