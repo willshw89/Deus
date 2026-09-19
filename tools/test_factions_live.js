@@ -26,7 +26,11 @@ if (fs.existsSync(testJsPath)) {
             { face: "UF_Faces_elf_1", index: 1, msg: "Elven Grove-Keepers: The forest spirits welcome your peaceful intent." },
             { face: "UF_Faces_dwarf_1", index: 0, msg: "Dwarven Clan: The mountain veins run deep with gold and iron." },
             { face: "UF_Faces_gnome_1", index: 0, msg: "Gnomish Guild: Calibration complete! The brass chronometer is ticking." },
+            { face: "UF_Faces_goblin_1", index: 0, msg: "Goblin Outcasts: Hehe, shiny trinkets or sharp daggers? You pick!" },
             { face: "UF_Faces_orc_1", index: 0, msg: "Orc War-Band: Blood and iron! Stand your ground, stranger." },
+            { face: "UF_Faces_lizardfolk_1", index: 0, msg: "Lizardfolk Marsh-Kin: Ssshh... the swamp provides for those who tread softly." },
+            { face: "UF_Faces_kobold_1", index: 0, msg: "Kobold Warren: Dig deep, watch the traps, keep the lanterns burning!" },
+            { face: "UF_Faces_undead_1", index: 0, msg: "Undead Crypt-Lords: The quiet of the grave awaits all mortal flesh." },
             { face: "UF_Faces_starborn_1", index: 1, msg: "Starborn Concord: The crystal lattice resonates with celestial light." },
             { face: "UF_Faces_swarm_1", index: 0, msg: "The Chitinous Swarm: The hive senses your arrival... biomass noted." }
         ];
@@ -35,10 +39,24 @@ if (fs.existsSync(testJsPath)) {
             const tf = testFaces[i];
             $gameMessage.setFaceImage(tf.face, tf.index);
             $gameMessage.add(tf.msg);
-            await t.waitFrames(15);
+            for (let f = 0; f < 25; f++) {
+                await t.waitFrames(1);
+                if (SceneManager._scene && SceneManager._scene._messageWindow) {
+                    SceneManager._scene._messageWindow._showFast = true;
+                    SceneManager._scene._messageWindow._lineShowFast = true;
+                }
+            }
             t.screenshot("faction_dialogue_" + tf.face);
+            const win = SceneManager._scene ? SceneManager._scene._messageWindow : null;
+            if (win) {
+                win.pause = false;
+                win.terminateMessage();
+                while (win.isClosing()) {
+                    await t.waitFrames(1);
+                }
+            }
             $gameMessage.clear();
-            await t.waitFrames(10);
+            await t.waitFrames(5);
         }
 
         ${hook}`;
