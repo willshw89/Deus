@@ -7,6 +7,8 @@
 //         game/js/plugins/UF_*.js         (characterName: "...", ImageManager.load*("..."), drawFace("..."),
 //                                          "img/<folder>/<name>", UF_Gen* names, string literals naming a file)
 //         game/img/**                     (which files exist; .json sidecars next to character sheets)
+//         game/data/Actors.json, Map*.json (read only: the editor's map sprites, faces and event images; their uses
+//                                          are added to listed assets, and U7 stand-ins among them are listed)
 //         docs/STATUS.md                  (the "Stand-ins" section: files that are U7-derived whatever their name)
 //         docs/ASSET_REQUESTS.md          (the "| AR-nnn |" rows)
 //         git                             (baseline commit 8e5fdc1 = stock RMMZ; what changed since)
@@ -14,6 +16,13 @@
 //         a "Needs a request" section) and game/data/UF_AssetIndex.json ({ "<key>": { status, request, usedBy,
 //         states, ... } }) for UF_Look's UF.Assets.describe.
 // Run:    "C:\Program Files\nodejs\node.exe" tools\generate_asset_inventory.js   (from the project root or anywhere)
+//         [--game <game folder>]  read the catalog, plugins and images of another copy of game/ (a snapshot or a
+//                                 scratch copy); git status is then not used (stock by name rules and stock cuts)
+//         [--out <folder>]        write ASSET_INVENTORY.md and UF_AssetIndex.json into this folder instead
+// Stock cuts (VISION V9, 2026-09-19): sheets cut out of stock RMMZ art by tools/extract_stock_characters.js
+// ($UF_Stock_<Sheet>_<i>, $UF_Stock_BigMonster<n>_r<r>, and legacy names written with --alias, which keep the file
+// they replaced as <name>.u7bak.png beside them) and tools/extract_stock_icons.js (!$UF_Icon_<n>) are "stock RMMZ"
+// when their pixels equal the stock source in game/img (check stock_cuts_verified); otherwise they are "original".
 // Every check prints PASS/FAIL with what it measured; the exit code is 1 when any check fails.
 // Contract: docs/design/WORLD_ARCHITECTURE.md §1.11 and §5.12. Owner: Claude Code (Gemini runs it, never edits it).
 "use strict";
@@ -22,15 +31,22 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 
+const argv = process.argv.slice(2);
+const argOpt = name => { const i = argv.indexOf(name); return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : null; };
 const ROOT = path.resolve(__dirname, "..");
-const GAME = path.join(ROOT, "game");
+const REAL_GAME = path.join(ROOT, "game");
+const GAME = path.resolve(argOpt("--game") || REAL_GAME);
+const OTHER_GAME = GAME.toLowerCase() !== REAL_GAME.toLowerCase();
 const IMG = path.join(GAME, "img");
 const CATALOG_FILE = path.join(GAME, "data", "UF_WorldCatalog.json");
 const PLUGIN_DIR = path.join(GAME, "js", "plugins");
 const STATUS_FILE = path.join(ROOT, "docs", "STATUS.md");
 const REQUESTS_FILE = path.join(ROOT, "docs", "ASSET_REQUESTS.md");
-const OUT_MD = path.join(ROOT, "docs", "ASSET_INVENTORY.md");
-const OUT_JSON = path.join(GAME, "data", "UF_AssetIndex.json");
+const OUT_DIR = argOpt("--out") ? path.resolve(argOpt("--out")) : null;
+if (OUT_DIR) fs.mkdirSync(OUT_DIR, { recursive: true });
+const OUT_MD = OUT_DIR ? path.join(OUT_DIR, "ASSET_INVENTORY.md") : path.join(ROOT, "docs", "ASSET_INVENTORY.md");
+const OUT_JSON = OUT_DIR ? path.join(OUT_DIR, "UF_AssetIndex.json") : path.join(GAME, "data", "UF_AssetIndex.json");
+const { readPNG } = require("./png_read");
 
 // The project's first commit holds the stock RPG Maker MZ assets. A file that is in that tree and has not
 // changed since is "stock RMMZ" (WORLD_ARCHITECTURE §5.12).
@@ -104,6 +120,7 @@ const namesInFolder = folder => imgFiles.filter(f => f.startsWith(`${folder}/`) 
 // git: which img files are stock (in the baseline tree and untouched since).
 const gitInfo = { ok: false, baseline: new Set(), changed: new Set(), why: "" };
 (function readGit() {
+    if (OTHER_GAME) { gitInfo.why = `--game ${GAME} is not the repository's game/`; return; }
     const candidates = ["git", "C:\\Program Files\\Git\\bin\\git.exe", "C:\\Program Files\\Git\\cmd\\git.exe"];
     let lastError = null;
     const run = args => {
@@ -422,11 +439,14 @@ for (const f of pluginFiles) {
     }
     // Any other string literal that names an existing file (e.g. UF_Gumps assigns "u7_gump_chest" to a variable).
     // A name that also exists in img/characters is a character sheet (caught above), not a face or system image.
-    // A line holding several quoted names is a list (UF_Look's table of stock names), not an image the plugin draws.
+    // A line holding four or more quoted file names is a list (UF_Look's table of stock names), not an image the
+    // plugin draws. (Counted as file names, not quoted strings, since 2026-09-19: UF_Combat's
+    // `(species === "wolf") ? "$U7_Wolf" : …` picks one of three sheets and was skipped as a list.)
+    const isFileName = s => known.characters.has(s) || known.system.has(s) || known.faces.has(s);
     for (const m of text.matchAll(/"([^"\\\n]{3,64})"/g)) {
         const lit = m[1];
         const line = text.slice(text.lastIndexOf("\n", m.index) + 1, text.indexOf("\n", m.index));
-        if ((line.match(/"[^"]*"/g) || []).length >= 4) continue;
+        if ((line.match(/"[^"]*"/g) || []).filter(q => isFileName(q.slice(1, -1))).length >= 4) continue;
         if (known.characters.has(lit)) { if (/^[!$]/.test(lit)) hit("characters", lit, m.index); continue; }
         for (const folder of ["system", "faces"]) {
             if (known[folder].has(lit)) { hit(folder, lit, m.index); break; }
@@ -451,6 +471,92 @@ if (assets.has("UF_GenDesignation_*")) state(assets.get("UF_GenDesignation_*"), 
 if (assets.has("UF_GenStockpile")) state(assets.get("UF_GenStockpile"), "flat dashed 48×48 square on the ground");
 
 //---------------------------------------------------------------------------------------------------------------
+// Stock cuts: sheets the two cutting tools made from stock RMMZ art (see the header). A candidate is verified by
+// comparing its pixels with the stock source in game/img; the source must itself be stock (unchanged since the
+// baseline when git is available, else a stock name).
+
+const STOCK_8_SHEETS = ["Actor1", "Actor2", "Actor3", "Evil", "Monster", "Nature", "People1", "People2", "People3", "People4", "Vehicle",
+    "SF_Actor1", "SF_Actor2", "SF_Actor3", "SF_Monster", "SF_People1", "SF_People2", "SF_People3", "SF_Vehicle",
+    "Damage1", "Damage2", "Damage3", "SF_Damage1", "SF_Damage2"];
+const pngCache = new Map();
+function pngOf(rel) {
+    if (!pngCache.has(rel)) {
+        let p = null;
+        try { p = fileSet.has(rel) ? readPNG(path.join(IMG, ...rel.split("/"))) : null; } catch (e) { p = null; }
+        pngCache.set(rel, p);
+    }
+    return pngCache.get(rel);
+}
+const isStockFile = rel => gitInfo.ok
+    ? gitInfo.baseline.has(`game/img/${rel}`) && !gitInfo.changed.has(`game/img/${rel}`)
+    : STOCK_NAME_RE.test(rel.slice(rel.lastIndexOf("/") + 1, -4));
+// True when rectangle (sx, sy, w, h) of src equals rectangle (dx, dy, w, h) of dst, RGBA byte for byte.
+function sameRect(src, sx, sy, dst, dx, dy, w, h) {
+    for (let y = 0; y < h; y++) {
+        const a = src.data.subarray(((sy + y) * src.width + sx) * 4, ((sy + y) * src.width + sx + w) * 4);
+        const b = dst.data.subarray(((dy + y) * dst.width + dx) * 4, ((dy + y) * dst.width + dx + w) * 4);
+        if (Buffer.compare(Buffer.from(a.buffer, a.byteOffset, a.length), Buffer.from(b.buffer, b.byteOffset, b.length)) !== 0) return false;
+    }
+    return true;
+}
+const stockCutMemo = new Map();
+/** null = not a stock-cut name; else { ok, source, why }. */
+function stockCutOf(folder, name) {
+    if (folder !== "characters") return null;
+    const key = `${folder}/${name}`;
+    if (stockCutMemo.has(key)) return stockCutMemo.get(key);
+    const res = (() => {
+        const out = pngOf(`characters/${name}.png`);
+        let m;
+        if ((m = /^\$UF_Stock_(BigMonster[12])_r([0-3])$/.exec(name))) {
+            const srcRel = `characters/$${m[1]}.png`, src = pngOf(srcRel), r = Number(m[2]);
+            if (!src || !isStockFile(srcRel)) return { ok: false, source: srcRel, why: `source ${srcRel} is missing or not stock` };
+            const fh = src.height / 4;
+            const ok = !!out && out.width === src.width && out.height === src.height && [0, 1, 2, 3].every(row => sameRect(src, 0, r * fh, out, 0, row * fh, src.width, fh));
+            return { ok, source: srcRel, why: ok ? `row ${r} of stock ${srcRel} in every facing row, cut by tools/extract_stock_characters.js (pixels match)` : `pixels differ from row ${r} of ${srcRel}` };
+        }
+        if ((m = /^\$UF_Stock_(.+)_([0-7])$/.exec(name)) && STOCK_8_SHEETS.includes(m[1])) {
+            const srcRel = `characters/${m[1]}.png`, src = pngOf(srcRel), i = Number(m[2]);
+            if (!src || !isStockFile(srcRel)) return { ok: false, source: srcRel, why: `source ${srcRel} is missing or not stock` };
+            const ok = !!out && out.width === 144 && out.height === 192 && sameRect(src, (i % 4) * 144, Math.floor(i / 4) * 192, out, 0, 0, 144, 192);
+            return { ok, source: srcRel, why: ok ? `character ${i} of stock ${srcRel}, cut by tools/extract_stock_characters.js (pixels match)` : `pixels differ from character ${i} of ${srcRel}` };
+        }
+        if ((m = /^!\$UF_Icon_(\d+)$/.exec(name))) {
+            const srcRel = "system/IconSet.png", src = pngOf(srcRel), n = Number(m[1]);
+            if (!src || !isStockFile(srcRel)) return { ok: false, source: srcRel, why: `source ${srcRel} is missing or not stock` };
+            const ix = (n % 16) * 32, iy = Math.floor(n / 16) * 32;
+            let ok = !!out && out.width === 144 && out.height === 192 && iy + 32 <= src.height;
+            for (let f = 0; ok && f < 12; f++) {
+                const fx = (f % 3) * 48, fy = Math.floor(f / 3) * 48;
+                ok = sameRect(src, ix, iy, out, fx + 8, fy + 8, 32, 32);
+            }
+            // Everything outside the twelve 32x32 icon squares is transparent.
+            for (let y = 0; ok && y < 192; y++) for (let x = 0; x < 144; x++) {
+                const fx = x % 48, fy = y % 48;
+                if (fx >= 8 && fx < 40 && fy >= 8 && fy < 40) continue;
+                if (out.data[(y * 144 + x) * 4 + 3] !== 0) { ok = false; break; }
+            }
+            return { ok, source: srcRel, why: ok ? `icon ${n} of stock ${srcRel}, cut by tools/extract_stock_icons.js (pixels match)` : `pixels differ from icon ${n} of ${srcRel} centred in each 48x48 frame` };
+        }
+        if (fileSet.has(`characters/${name}.u7bak.png`) && /^\$/.test(name)) {
+            // A legacy name the characters tool wrote with --alias: find the stock character it equals.
+            if (!out || out.width !== 144 || out.height !== 192) return { ok: false, source: null, why: "has a .u7bak.png beside it but is not a 144x192 single-character sheet" };
+            for (const sheet of STOCK_8_SHEETS) {
+                const srcRel = `characters/${sheet}.png`, src = pngOf(srcRel);
+                if (!src || !isStockFile(srcRel) || src.width !== 576 || src.height !== 384) continue;
+                for (let i = 0; i < 8; i++) if (sameRect(src, (i % 4) * 144, Math.floor(i / 4) * 192, out, 0, 0, 144, 192)) {
+                    return { ok: true, source: srcRel, why: `character ${i} of stock ${srcRel} under a name the plugins hard-code, written by tools/extract_stock_characters.js --alias (pixels match; the file it replaced is ${name}.u7bak.png)` };
+                }
+            }
+            return { ok: false, source: null, why: "has a .u7bak.png beside it but equals no stock character" };
+        }
+        return null;
+    })();
+    stockCutMemo.set(key, res);
+    return res;
+}
+
+//---------------------------------------------------------------------------------------------------------------
 // Status: missing > U7 stand-in > generated > stock RMMZ > original.
 
 function statusOf(a) {
@@ -459,6 +565,8 @@ function statusOf(a) {
     if (!fileSet.has(rel)) return ["missing", `no file game/img/${rel}`];
     if (/^(!?\$)?[Uu]7_/.test(a.name)) return ["U7 stand-in", "name starts with U7_"];
     if (standinListed(a.folder, a.name)) return ["U7 stand-in", "listed in docs/STATUS.md → Stand-ins"];
+    const cut = stockCutOf(a.folder, a.name);
+    if (cut) return cut.ok ? ["stock RMMZ", cut.why] : ["original", `named or placed like a stock cut, but ${cut.why}`];
     if (gitInfo.ok) {
         const gp = `game/img/${rel}`;
         if (gitInfo.baseline.has(gp) && !gitInfo.changed.has(gp)) return ["stock RMMZ", `in ${BASELINE} and unchanged since`];
@@ -468,6 +576,77 @@ function statusOf(a) {
     if (STOCK_NAME_RE.test(a.name)) return ["stock RMMZ", "stock RMMZ name (git unavailable)"];
     return ["original", "not a stock name (git unavailable)"];
 }
+
+// --- RMMZ database: images named by the editor's own data (added 2026-09-19) ------------------------------------
+// Actors.json (map sprite, face) and every MapNNN.json (event page images, Show Text faces, Change Actor Images,
+// Change Image in move routes). These are the editor's legacy maps and actors; the world itself is generated
+// (UF_World), so their images are not all inventoried: a use is added to an asset already listed, and a U7 stand-in
+// is listed even when nothing else names it (check rmmz_data_no_standins). Read-only: the tool never writes game/data.
+const rmmzData = { files: 0, refs: 0, errors: [] };
+(function readRmmzData() {
+    const dataDir = path.join(GAME, "data");
+    const found = new Map(); // "folder/name" -> { folder, name, labels: Map(label -> count) }
+    const add = (folder, name, label) => {
+        if (typeof name !== "string" || !name) return;
+        const k = `${folder}/${name}`;
+        if (!found.has(k)) found.set(k, { folder, name, labels: new Map() });
+        const e = found.get(k);
+        e.labels.set(label, (e.labels.get(label) || 0) + 1);
+        rmmzData.refs++;
+    };
+    const readJson = file => {
+        // Some editor files start with a UTF-8 byte order mark (Map001.json), which JSON.parse rejects.
+        try { return JSON.parse(fs.readFileSync(path.join(dataDir, file), "utf8").replace(/^﻿/, "")); } catch (e) { rmmzData.errors.push(`${file}: ${e.message}`); return null; }
+    };
+    const scanCommands = (list, what) => {
+        for (const c of list || []) {
+            if (!c || !Array.isArray(c.parameters)) continue;
+            if (c.code === 101) add("faces", c.parameters[0], `${what} (Show Text face)`);
+            if (c.code === 322) { add("characters", c.parameters[1], `${what} (Change Actor Images)`); add("faces", c.parameters[3], `${what} (Change Actor Images)`); }
+            if (c.code === 205 && c.parameters[1]) scanRoute(c.parameters[1].list, what);
+        }
+    };
+    const scanRoute = (list, what) => { for (const r of list || []) if (r && r.code === 41 && Array.isArray(r.parameters)) add("characters", r.parameters[0], `${what} (move route Change Image)`); };
+    const actors = fs.existsSync(path.join(dataDir, "Actors.json")) ? readJson("Actors.json") : null;
+    if (actors) {
+        rmmzData.files++;
+        for (const ac of actors) {
+            if (!ac) continue;
+            add("characters", ac.characterName, "RMMZ data Actors.json (map sprite)");
+            add("faces", ac.faceName, "RMMZ data Actors.json (face)");
+        }
+    }
+    const infos = (fs.existsSync(path.join(dataDir, "MapInfos.json")) && readJson("MapInfos.json")) || [];
+    const mapFiles = fs.existsSync(dataDir) ? fs.readdirSync(dataDir).filter(f => /^Map\d{3,}\.json$/.test(f)).sort() : [];
+    for (const f of mapFiles) {
+        const map = readJson(f);
+        if (!map) continue;
+        rmmzData.files++;
+        const id = Number(f.slice(3, -5)), info = infos[id];
+        const what = `RMMZ data ${f}${info && info.name ? ` "${info.name}"` : ""}`;
+        for (const ev of map.events || []) {
+            if (!ev || !Array.isArray(ev.pages)) continue;
+            for (const p of ev.pages) {
+                if (p.image && !(p.image.tileId > 0)) add("characters", p.image.characterName, `${what} (event pages)`);
+                if (p.moveRoute) scanRoute(p.moveRoute.list, what);
+                scanCommands(p.list, what);
+            }
+        }
+    }
+    for (const e of found.values()) {
+        const key = e.folder === "characters" ? e.name : `img/${e.folder}/${e.name}.png`;
+        let a = assets.get(key);
+        if (!a) {
+            if (statusOf({ kind: e.folder === "characters" ? "char" : e.folder, folder: e.folder, name: e.name })[0] !== "U7 stand-in") continue;
+            a = e.folder === "characters" ? charAsset(e.name, e.name.startsWith("!") ? "objects" : "people") : folderAsset(e.folder, e.name, "ui");
+            state(a, e.folder === "faces" ? "face sheet: 4 × 2 faces of 144×144" : e.name.startsWith("!") ? "one frame" : "4 facings × stand/walk (3 columns × 4 rows)");
+        }
+        for (const [label, n] of e.labels) use(a, n > 1 ? label.replace(/\)$/, ` ×${n})`) : label);
+    }
+})();
+check("rmmz_data_scanned", rmmzData.files > 0 && rmmzData.errors.length === 0,
+    rmmzData.errors.length ? `could not read: ${listText(rmmzData.errors, 3)}` : `${plural(rmmzData.files, "RMMZ data file")} (Actors.json, Map*.json): ${plural(rmmzData.refs, "image reference")}`);
+
 for (const a of assets.values()) [a.status, a.statusWhy] = statusOf(a);
 
 //---------------------------------------------------------------------------------------------------------------
@@ -555,11 +734,24 @@ const unreferenced = imgFiles.filter(f => f.endsWith(".png") && /^(characters|ti
     return { f, status: statusOf({ kind: "file", folder, name })[0] };
 });
 const unrefByStatus = Object.fromEntries(STATUS_ORDER.map(s => [s, unreferenced.filter(u => u.status === s).length]));
+// Where the U7 stand-ins are named (added 2026-09-19). In play: a catalog entry, plugin code outside its
+// UF.Test.suite block, or the RMMZ core itself. RMMZ data: the editor's Actors.json and Map*.json (drawn only when
+// that map, actor or menu is reached). Test suites: fixtures, never drawn in play. Checks runtime_no_standins and
+// rmmz_data_no_standins below.
+const suiteUse = u => /\(test suite\)$/.test(u);
+const rmmzDataUse = u => /^RMMZ data /.test(u);
+const inPlayUse = u => !suiteUse(u) && !rmmzDataUse(u);
+const standinList = sorted.filter(a => a.status === "U7 stand-in");
+const standinsInPlay = standinList.filter(a => a.usedBy.some(inPlayUse));
+const standinsInData = standinList.filter(a => a.usedBy.some(rmmzDataUse));
+const standinsInSuites = standinList.filter(a => a.usedBy.every(suiteUse));
+const usesText = (a, pick) => `${a.key} (${a.usedBy.filter(pick).map(u => u.replace(/^RMMZ data /, "")).join("; ")})`;
+const suiteText = a => `${a.key} (${a.usedBy.map(u => u.replace(/^plugin /, "").replace(/\.js \(test suite\)$/, "")).join(", ")})`;
 
 const md = [];
 md.push(`# ASSET INVENTORY: every image and tile the engine uses`);
 md.push(``);
-md.push(`Generated ${DATE} by \`tools/generate_asset_inventory.js\` (do not edit by hand; run the tool). Inputs: \`game/data/UF_WorldCatalog.json\` (version ${cat.version}), ${plural(pluginFiles.length, "plugin")} in \`game/js/plugins/UF_*.js\`, \`game/img/**\` (${imgFiles.length} files), \`docs/STATUS.md\` → Stand-ins, the ${plural(requestRows.length, "row")} of \`docs/ASSET_REQUESTS.md\`, git baseline \`${BASELINE}\`${gitInfo.ok ? "" : " (git was unavailable: stock status by name rules)"}. The same data is in \`game/data/UF_AssetIndex.json\` for the look tooltip (UF_Look).`);
+md.push(`Generated ${DATE} by \`tools/generate_asset_inventory.js\` (do not edit by hand; run the tool). Inputs: \`game/data/UF_WorldCatalog.json\` (version ${cat.version}), ${plural(pluginFiles.length, "plugin")} in \`game/js/plugins/UF_*.js\`, \`game/img/**\` (${imgFiles.length} files), the RMMZ editor data (\`Actors.json\` and ${plural(Math.max(0, rmmzData.files - 1), "map file")}, image names only), \`docs/STATUS.md\` → Stand-ins, the ${plural(requestRows.length, "row")} of \`docs/ASSET_REQUESTS.md\`, git baseline \`${BASELINE}\`${gitInfo.ok ? "" : " (git was unavailable: stock status by name rules)"}. The same data is in \`game/data/UF_AssetIndex.json\` for the look tooltip (UF_Look).`);
 md.push(``);
 md.push(`## Summary`);
 md.push(``);
@@ -567,7 +759,7 @@ md.push(`| Status | Count | Meaning |`);
 md.push(`|---|---|---|`);
 const meanings = {
     "missing": "referenced by the catalog or a plugin, but no file: the game draws nothing there",
-    "stock RMMZ": `the file is in the project's first commit \`${BASELINE}\` and unchanged since; RPG Maker's placeholder, to be replaced by an original (every one needs a request)`,
+    "stock RMMZ": `the file is in the project's first commit \`${BASELINE}\` and unchanged since, or a stock cut (one character or icon cut out of a stock sheet by \`tools/extract_stock_characters.js\` / \`tools/extract_stock_icons.js\`, pixels checked against the source); RPG Maker's placeholder, to be replaced by an original (every one needs a request)`,
     "U7 stand-in": "name starts with `U7_` or the file is listed under Stand-ins in `docs/STATUS.md`; dev only, replaced before any release",
     "generated": "drawn in code (`UF_Gen*`); replaced when its request says so",
     "original": "our own art (not stock, not a stand-in)"
@@ -582,10 +774,12 @@ for (const [cid, label] of CATEGORIES) {
     md.push(`| ${label} | ${STATUS_ORDER.map(s => sub.filter(a => a.status === s).length).join(" | ")} | ${sub.length} |`);
 }
 md.push(``);
+md.push(`**U7 stand-ins still named by the game** (VISION V9, user 2026-09-19 "stock is fine": each is to be swapped for stock RPG Maker art). Drawn in play: ${standinsInPlay.length ? standinsInPlay.map(a => `\`${esc(a.key)}\` (${esc(a.usedBy.filter(inPlayUse).join("; "))})`).join(", ") : "none"}. Named by the RMMZ editor data (legacy actors and maps): ${standinsInData.length ? standinsInData.map(a => `\`${esc(a.key)}\` (${esc(a.usedBy.filter(rmmzDataUse).map(u => u.replace(/^RMMZ data /, "")).join("; "))})`).join(", ") : "none"}. Named only by test suites (fixtures, never drawn in play): ${standinsInSuites.length ? standinsInSuites.map(a => `\`${esc(a.key)}\``).join(", ") : "none"}.`);
+md.push(``);
 md.push(`## How to read the tables`);
 md.push(``);
 md.push(`- **Key** is what the engine calls the asset: a character sheet name (\`img/characters/<key>.png\`; \`$\` = one character per sheet, \`!\` = no shadow offset), \`<sheet>#<tile id>\` for one 48×48 tile of a tileset (ids 0–255 = B, 256–511 = C, 2048+ = A1 water autotile base, 2816+ = A2 ground autotile base), the path \`img/system/<name>.png\` for system and face images, or a \`UF_Gen*\` bitmap drawn in code. \`+json\` after a file means a sidecar exists.`);
-md.push(`- **Used by** names the catalog entries (objects, items, species, people, ground and water kinds, biomes) and plugins that reference it. "(test suite)" = only a test uses it.`);
+md.push(`- **Used by** names the catalog entries (objects, items, species, people, ground and water kinds, biomes) and plugins that reference it. "(test suite)" = only a test uses it. "RMMZ data" = the editor's \`Actors.json\` or a \`MapNNN.json\` names it (legacy actors and maps; the world itself is generated, so those are drawn only when that map, actor or menu is reached).`);
 md.push(`- **States the art needs** come from the catalog: \`actions\` (what it turns into and yields), \`regrow\`, \`build\` (unbuilt/built), \`ruin\`, the \`fire\` tag (unlit/lit), \`hunt\` (alive/dead), clothing \`tiers\`, and the sheet format. When several kinds share one image (tints), each kind's states are prefixed with its id.`);
 md.push(`- **Format, unless a row says otherwise:** objects and items use one frame of a 3×4 sheet (sidecar \`animations.stand[0]\`, else column 1 row 0), anchored at the bottom-centre of their cell (or the sidecar's \`anchor\`); creatures and people use the 4 rows as facings S, W, E, N and the 3 columns as walk frames; tiles are 48×48. Specs: \`docs/ART_STANDARD.md\`, \`docs/ASSET_REQUESTS.md\` (AR-600 for the layered sheet standard).`);
 md.push(`- **Request** is the \`AR-\` row in \`docs/ASSET_REQUESTS.md\` that mentions the file, the tile, the catalog id or the name (its status word in brackets); other matching rows follow in smaller type. "none yet" = no row: tell Claude Code, don't invent an ID.`);
@@ -665,9 +859,57 @@ check("missing_files", missing.length === 0, missing.length ? `${missing.length}
 const catalogAssets = list.filter(a => a.ids.size > 0 && a.category !== "tiles");
 check("states_present", catalogAssets.every(a => a.states.length > 0), `${catalogAssets.length} catalog-backed assets all list at least one interaction state`);
 const stockInUse = list.filter(a => a.status === "stock RMMZ");
-check("stock_detected", stockInUse.length > 0 && stockInUse.every(a => gitInfo.ok ? gitInfo.baseline.has(`game/img/${a.folder}/${a.name}.png`) : true), `${stockInUse.length} stock RMMZ assets in use (e.g. ${listText(stockInUse.slice(0, 3).map(a => a.key), 3)})`);
+const isCut = a => !!a.folder && !!(stockCutOf(a.folder, a.name) || {}).ok;
+const cutsInUse = stockInUse.filter(isCut);
+check("stock_detected", stockInUse.length > 0 && stockInUse.every(a => isCut(a) || (gitInfo.ok ? gitInfo.baseline.has(`game/img/${a.folder}/${a.name}.png`) : true)),
+    `${stockInUse.length} stock RMMZ assets in use: ${stockInUse.length - cutsInUse.length} stock files and tiles (e.g. ${listText(stockInUse.filter(a => !isCut(a)).slice(0, 3).map(a => a.key), 3)}), ${cutsInUse.length} stock cuts (e.g. ${listText(cutsInUse.slice(0, 3).map(a => a.key), 3)})`);
+// Stock cuts: every sheet named like a cut (or written as an alias) must equal its stock source, pixel for pixel.
+const cutCandidates = list.filter(a => a.folder && fileSet.has(`${a.folder}/${a.name}.png`) && stockCutOf(a.folder, a.name));
+const badCuts = cutCandidates.filter(a => !stockCutOf(a.folder, a.name).ok);
+const cutFamily = re => cutCandidates.filter(a => re.test(a.name)).length;
+const aliasCuts = cutCandidates.filter(a => !/^(\$UF_Stock_|!\$UF_Icon_)/.test(a.name));
+check("stock_cuts_verified", badCuts.length === 0,
+    badCuts.length ? `${badCuts.length} of ${cutCandidates.length} stock cuts in use do not match their stock source: ${listText(badCuts.map(a => `${a.key} (${stockCutOf(a.folder, a.name).why})`), 5)}`
+        : `${cutCandidates.length} stock cuts in use match their stock source pixel for pixel: ${cutFamily(/^\$UF_Stock_/)} $UF_Stock_ sheets, ${cutFamily(/^!\$UF_Icon_/)} !$UF_Icon_ sheets, ${aliasCuts.length} legacy names${aliasCuts.length ? ` (${aliasCuts.map(a => `${a.key} = ${stockCutOf(a.folder, a.name).source.replace(/^characters\//, "").replace(/\.png$/, "")} ${/character (\d)/.exec(stockCutOf(a.folder, a.name).why)[1]}`).join(", ")})` : ""}`);
+// U7 stand-ins: the rules find them. Every U7_ character sheet, and every U7-derived one without the prefix (its
+// sidecar names a SHAPES.VGA source, or its bytes equal a U7_ file anywhere under img/), must be classed
+// "U7 stand-in"; an unprefixed one is only found when STATUS.md → Stand-ins lists it. Verified stock cuts are
+// exempt ($Adam.png / $Eve.png keep their old SHAPES.VGA sidecars but hold stock pixels).
 const standinCount = list.filter(a => a.status === "U7 stand-in").length;
-check("standins_detected", standinCount > 0, `${standinCount} U7 stand-ins in use (${list.filter(a => a.statusWhy.includes("STATUS.md")).length} of them found only through STATUS.md → Stand-ins)`);
+const crypto = require("crypto");
+const md5Of = rel => { try { return crypto.createHash("md5").update(fs.readFileSync(path.join(IMG, ...rel.split("/")))).digest("hex"); } catch (e) { return null; } };
+const u7Hashes = new Set(imgFiles.filter(f => /\.png$/i.test(f) && /(^|\/)[!$]*U7_[^/]*$/i.test(f)).map(md5Of).filter(Boolean));
+const u7Files = imgFiles.filter(f => /^characters\/[!$]*U7_[^/]*\.png$/.test(f));
+const derivedFiles = imgFiles.filter(f => /^characters\/[^/]*\.png$/.test(f) && !/U7_/.test(f)).filter(f => {
+    const name = f.slice(11, -4);
+    if ((stockCutOf("characters", name) || {}).ok) return false;
+    let side = "";
+    try { side = fs.readFileSync(path.join(IMG, "characters", `${name}.json`), "utf8"); } catch (e) { side = ""; }
+    return /SHAPES\.VGA/i.test(side) || u7Hashes.has(md5Of(f));
+});
+const probe = f => statusOf({ kind: "char", folder: "characters", name: f.slice(11, -4) })[0];
+const misclassed = [...u7Files, ...derivedFiles].filter(f => probe(f) !== "U7 stand-in");
+check("standins_detected", u7Files.length + derivedFiles.length > 0 && misclassed.length === 0,
+    misclassed.length ? `${misclassed.length} U7-derived files are not classed "U7 stand-in" (list them in STATUS.md → Stand-ins): ${listText(misclassed, 8)}`
+        : `${u7Files.length} U7_ character sheets and ${derivedFiles.length} U7-derived ones without the prefix (SHAPES.VGA sidecar or U7 bytes) are all classed "U7 stand-in"; ${standinCount} of the assets in use are stand-ins (${list.filter(a => a.statusWhy.includes("STATUS.md")).length} found only through STATUS.md)`);
+// ... and no catalog entry draws one (VISION V9, 2026-09-19: placeholders are stock RPG Maker art).
+const CATALOG_USE = /^(object|item|creature|people|start\.pair|tileset|tile \d|water kind|ground kind) /;
+const catalogStandins = list.filter(a => a.status === "U7 stand-in" && a.usedBy.some(u => CATALOG_USE.test(u)));
+check("catalog_no_standins", catalogStandins.length === 0,
+    catalogStandins.length ? `VISION V9: ${catalogStandins.length} U7 stand-ins are drawn by catalog entries: ${listText(catalogStandins.map(a => `${a.key} (${listText(a.usedBy.filter(u => CATALOG_USE.test(u)), 2)})`), 6)}`
+        : `no catalog entry draws a U7 stand-in (VISION V9); the ${standinCount} stand-ins in use are named only by plugins, the RMMZ core or the RMMZ editor data`);
+// ... and nothing else in play draws one either: plugin code outside its test suite, or the RMMZ core's system images
+// (user 2026-09-19, "stock is fine": the U7 stand-ins in the game are swapped for stock RPG Maker art). This one needs
+// code or image changes outside the catalog, so it fails until they land; test-suite fixtures are counted, not failed.
+check("runtime_no_standins", standinsInPlay.length === 0,
+    (standinsInPlay.length ? `VISION V9: ${plural(standinsInPlay.length, "U7 stand-in")} still drawn in play: ${listText(standinsInPlay.map(a => usesText(a, inPlayUse)), 8)}`
+        : `no U7 stand-in is drawn in play (catalog, plugin code outside UF.Test.suite, RMMZ core system images)`)
+    + `; ${standinsInSuites.length} more named only by test suites${standinsInSuites.length ? `: ${listText(standinsInSuites.map(suiteText), 10)}` : ""}`);
+// ... and the editor's own data (Actors.json, Map*.json) names none. Swapping these edits editor-managed files, so
+// the RMMZ editor must be closed first (AGENTS.md → RMMZ editor safety).
+check("rmmz_data_no_standins", standinsInData.length === 0,
+    standinsInData.length ? `VISION V9: ${plural(standinsInData.length, "U7 stand-in")} named by the RMMZ editor data: ${listText(standinsInData.map(a => usesText(a, rmmzDataUse)), 12)}`
+        : `Actors.json and the Map*.json events name no U7 stand-in (${plural(rmmzData.refs, "image reference")} read)`);
 const badRequest = list.filter(a => a.request !== "none yet" && !requestRows.some(r => r.id === a.request));
 check("request_ids_exist", badRequest.length === 0, badRequest.length ? `unknown request ids: ${badRequest.map(a => `${a.key}→${a.request}`).join(", ")}` : `${list.filter(a => a.request !== "none yet").length} assets matched to a request row, ${needs.length} need one`);
 let parsed = null, jsonWhy = "";
