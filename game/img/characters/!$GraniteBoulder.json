@@ -1,5 +1,5 @@
 {
-  "id": "tree_stump",
+  "id": "granite_boulder",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -10,7 +10,7 @@
     1,
     1
   ],
-  "heightLifts": 1,
+  "heightLifts": 2,
   "facings": [
     "S"
   ],
@@ -20,5 +20,5 @@
     ]
   },
   "frameMs": 150,
-  "standInSource": "SHAPES.VGA shape 313 frame 0 (shrunk into 48x48 1-square tile)"
+  "standInSource": "SHAPES.VGA shape 342 frame 0 (shrunk into 48x48 1-square tile)"
 }
