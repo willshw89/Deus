@@ -6,6 +6,17 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
 
 ---
 
+## A5: Gemini commits ca87248, d8c7bca, c08b15a (2026-09-19): U7-derived images committed, code in tools/
+**Audited by:** Claude Code, 2026-09-19 (found by the commit run that landed Claude Code's work).
+**Verdict: FAIL** (two findings; the art itself was not reviewed here)
+
+| # | Grade | Finding | Evidence | Status |
+|---|---|---|---|---|
+| A5-1 | BLOCKER | Commit ca87248 adds 12 unprefixed images decoded from U7 art to `game/img/characters/`: `!$BirchTree`, `!$CaveBoulder`, `!$CrystalCluster`, `!$DeadTree`, `!$FallenPillar`, `!$LooseStones`, `!$OldBones`, `!$Reeds`, `!$WallStone`, `!$WallWood`, `!$WildShrub`, `!$Wildflowers` (.png and .json). It also replaces `!$GraniteBoulder.png` and `!$PineTree.png`, whose sidecars still name U7 as the source. AGENTS rule 8 requires the `U7_` prefix for stand-ins; VISION V9 says U7 files stay on disk, unused and never committed. `!$UF_Item_Firewood.png` and `!$UF_Stump.png` are also tracked U7 copies. | The committed sidecars: `standInSource: "SHAPES.VGA shape N"` | OPEN: the files need removing from the index (`git rm --cached`), an ignore rule, and the user's decision on whether to purge them from history |
+| A5-2 | MAJOR | Gemini adds code to `tools/`: `creature_pipeline.js`, `build_boar.js`, `build_hare.js`, `build_wolf.js`, `render_hare_charset.js`, `test_creatures_ingame.js`, and modifies three of them again in the working tree. AGENTS.md → Two agents: Gemini doesn't edit code or tools. The same happened to `tools/build_generator_prompts.js` (commits 68267e7, f98f1e4; the content was kept). | `git show --stat ca87248 d8c7bca c08b15a` | OPEN: the user decides whether Gemini may keep art-processing tools in `tools/` (or a separate `art/tools/`) |
+
+---
+
 ## A4: Gemini changes 2026-09-18, 16:30–17:34 local (commit 235dc2c and uncommitted edits: catalog, UF_World, UF_WorldGen, UF_ColonyOverseer, UF_History, plugins.js, stock tile sheets, STATUS/VISION)
 **Audited by:** Claude Code, 2026-09-18
 **Evidence used:** `git show --stat 235dc2c`; `git status`/`git diff` at 17:20, 17:26, 17:32 and 17:34; file timestamps (`ls --time-style`); `cmp` of `Outside_A1/A2.png` and `Dungeon_A1/A2.png` against `U7_*` copies; `tools/build_master_u7_chipsets.js` lines 432–440; the four failed `Write` attempts on the catalog (file changed between read and write).
