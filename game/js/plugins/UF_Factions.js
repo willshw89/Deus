@@ -4,19 +4,27 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Factions] Factions generated from the world seed each New Game: species, stances, homes, relations from allied to at war. F = ledger.
+ * @plugindesc [UF Factions] Factions generated from the world seed each New Game: species, stances, relations from allied to at war, and each faction's own area on habitable land. F = ledger.
  * @author UF project
  * @base UF_World
  * @orderAfter UF_WorldGen
  *
  * @help
- * Every New Game rolls a new set of factions from the world seed (the same
- * seed that builds the surface and the caves), using the "factions" section
- * of data/UF_WorldCatalog.json: species, stances, name syllables, counts.
- * Your colony (Adam and Eve) is always faction "player".
+ * Every New Game rolls a new set of factions from the world seed, using the
+ * "factions" section of data/UF_WorldCatalog.json: species, stances, name
+ * syllables, counts. One of them, of a playable species, is the player's
+ * (state.factions.playerId); "player" is accepted everywhere as its alias.
  *
  * Each pair of factions has a relation from -100 (at war) to +100 (allied).
  * Every world has at least one strong alliance and one serious hostility.
+ *
+ * Every faction gets its own area (user decision 2026-09-19: no history, each
+ * faction starts as two men and two women dropped into its area): a centre on
+ * walkable, habitable land (factions.areas in the catalog), the player's at
+ * the map centre, every other at least 40 cells from every centre and 12 from
+ * the map edge, in a biome its species prefers with drinkable water within
+ * reach when the map has such a place. Seeded, so the same seed gives the
+ * same areas. The centres are faction.home; the view starts on the player's.
  * Everything is saved with the world.
  *
  * Press F on the map for the faction ledger.
@@ -108,7 +116,9 @@
 
         // Every faction is a generated one; the player's is picked from them below (user decision 2026-09-18).
         const list = [];
+        const oneArea = state.areasX * state.areasY === 1;
         const usedHomes = new Set([`${state.startArea.x},${state.startArea.y}`]);
+        const founders = foundersCount();
         for (let i = 0; i < count; i++) {
             const sp = weighted(cfg.species);
             const ethos = [pick(cfg.ethos).id];
@@ -116,8 +126,9 @@
                 const second = pick(cfg.ethos).id;
                 if (!ethos.includes(second)) ethos.push(second);
             }
-            // A provisional home area (UF_History moves the home to the faction's first site).
-            let area = null;
+            // The area of the world the faction lives in: the start area in a one-area world, else a rolled one
+            // (the player's moves to the start area below). placeAreas picks the centre inside it.
+            let area = oneArea ? { x: state.startArea.x, y: state.startArea.y } : null;
             for (let t = 0; t < 100 && !area; t++) {
                 const ax = Math.floor(rand() * state.areasX), ay = Math.floor(rand() * state.areasY);
                 const key = `${ax},${ay}`;
@@ -131,11 +142,11 @@
                 name: makeName(sp),
                 species: sp.id,
                 ethos,
-                home: { area, x: 32 + Math.floor(rand() * (size - 64)), y: 32 + Math.floor(rand() * (size - 64)) },
+                home: { area, x: Math.floor(size / 2), y: Math.floor(size / 2) }, // the centre is set by placeAreas
                 color: COLORS[i % COLORS.length],
                 isPlayer: false,
                 met: false,
-                population: 8 + Math.floor(rand() * 53)
+                population: founders // every faction starts as its founders (VISION V4, 2026-09-19)
             });
         }
 
@@ -170,8 +181,7 @@
             }
         }
         // The player's faction: one of the generated ones, of a playable species when there is one (user decision
-        // 2026-09-18). UF_History puts its home site at the map centre and keeps it alive; UF_Colonists turns its
-        // people there into the colonists.
+        // 2026-09-18). Its area is at the map centre (placeAreas); UF_Colonists turns its founders into the colonists.
         const playable = list.filter(f => {
             const sp = cfg.species.find(s => s.id === f.species);
             return !sp || sp.playable !== false;
@@ -181,10 +191,237 @@
         for (const f of list) f.isPlayer = f === player;
         player.met = true;
         player.color = "#4ade80";
-        state.factions = { version: 2, list, relations, log: [], playerId: player.id };
+        player.home.area = { x: state.startArea.x, y: state.startArea.y };
+        state.factions = { version: 3, list, relations, log: [], playerId: player.id };
+        Factions.placeAreas(state);
         emit("factions:generated", state.factions);
         return state.factions;
     };
+
+    //-------------------------------------------------------------------------
+    // Areas (VISION V4 and V31, revised by the user 2026-09-19: "no history, just start by dropping 2 males and 2
+    // females into each faction area"). Every faction's area centre stands on habitable land: the player's at the map
+    // centre (the habitable start), every other one spread apart. Seeded from the world seed (never Math.random) and
+    // separate from the roll above, so the terrain never changes a faction's name or relations.
+
+    const AREA_DEFAULTS = { minGap: 40, edgeMargin: 12, playerReach: 6, clearDisc: 5, cursedOk: [] };
+    const WATER_DEFAULTS = { reach: 30, kinds: ["fresh", "pond", "icy", "marsh", "swamp"] };
+    const AREA_STEP = 3;      // the coarse grid of candidate centres and water samples: a river is at least 3 cells wide, so every one crosses a sampled column
+    const AREA_ATTEMPTS = 16; // seeded restarts when a greedy pass boxes a faction in
+    const SALT_AREAS = 0xa7ea;
+    const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
+    const catalogOf = () => window.$ufWorldCatalog || null;
+    function foundersCount() {
+        const c = Factions.config();
+        const f = (c && c.founders) || {};
+        return (f.male !== undefined ? f.male | 0 : 2) + (f.female !== undefined ? f.female | 0 : 2);
+    }
+    /** catalog factions.areas with defaults. */
+    Factions.areasConfig = () => Object.assign({}, AREA_DEFAULTS, (Factions.config() && Factions.config().areas) || {});
+    /** catalog start.kit.water with defaults: drinkable water kinds and the reach an area centre wants them within. */
+    Factions.waterConfig = () => {
+        const c = catalogOf();
+        return Object.assign({}, WATER_DEFAULTS, (c && c.start && c.start.kit && c.start.kit.water) || {});
+    };
+    /** { ms, attempts, relaxed, cells } of the last placeAreas. */
+    Factions.lastAreas = null;
+
+    // UF.WorldGen reads UF.World.state, so a synthetic state (tests, other seeds) is swapped in for the call.
+    function withWorldState(state, fn) {
+        const W = window.UF && UF.World;
+        if (!W || W.state === state) return fn();
+        const saved = W.state;
+        W.state = state;
+        try {
+            return fn();
+        } finally {
+            W.state = saved;
+        }
+    }
+
+    // (info, species) => true for a cell a faction may settle on: walkable land (no water, no peak rock, no ground kind
+    // with passable false), not in a cursed region unless the species is in areas.cursedOk. The catalog's regions don't
+    // mark species as good or evil, so by default no species settles cursed land.
+    function makeHabitable() {
+        const cat = catalogOf();
+        const blocked = new Set((cat && Array.isArray(cat.groundKinds) ? cat.groundKinds : []).filter(g => g.passable === false).map(g => g.id));
+        const cursedOk = new Set(Factions.areasConfig().cursedOk || []);
+        return (info, species) => !!info && info.walkable && !info.peak && !info.water && !blocked.has(info.ground)
+            && !(info.region && info.region.alignment === "cursed" && !cursedOk.has(species));
+    }
+    /** True for a cell (a UF.WorldGen.cellInfo result) a faction of `species` may settle on. */
+    Factions.habitable = (info, species) => makeHabitable()(info, species);
+
+    /**
+     * Place every faction's area centre in state.factions (faction.home = { area: {x, y}, x, y }, faction.areaInfo =
+     * { biome, water, rule, disc }) and set state.viewStart to the player's. Returns the list, or null without UF_WorldGen.
+     */
+    Factions.placeAreas = function(state) {
+        const F = state && state.factions;
+        const WG = window.UF && UF.WorldGen;
+        if (!F || !Array.isArray(F.list) || !WG || typeof WG.cellInfo !== "function" || !catalogOf()) return null;
+        return withWorldState(state, () => placeAreas(state, F));
+    };
+
+    function placeAreas(state, F) {
+        const t0 = now();
+        const WG = UF.WorldGen;
+        const acfg = Factions.areasConfig(), wcfg = Factions.waterConfig();
+        const size = state.size, mid = Math.floor(size / 2);
+        const cat = catalogOf();
+        const preferredOf = sp => {
+            const p = cat.sites && cat.sites.preferredBiomes && cat.sites.preferredBiomes[sp];
+            return Array.isArray(p) ? p : null;
+        };
+        const drinkable = new Set(wcfg.kinds || []);
+        const reach = Math.max(0, wcfg.reach | 0);
+        const habitable = makeHabitable();
+        let cells = 0;
+        const infoAt = (area, x, y) => { cells++; return WG.cellInfo(area.x * size + x, area.y * size + y); };
+
+        // One coarse grid per area: every AREA_STEP cells, the cell's info and a chamfer distance to drinkable water.
+        const grids = new Map();
+        const gridOf = area => {
+            const key = `${area.x},${area.y}`;
+            let g = grids.get(key);
+            if (g) return g;
+            const n = Math.floor((size - 1) / AREA_STEP) + 1;
+            const infos = new Array(n * n);
+            const dist = new Float64Array(n * n).fill(1e9);
+            for (let j = 0; j < n; j++) {
+                for (let i = 0; i < n; i++) {
+                    const info = infoAt(area, i * AREA_STEP, j * AREA_STEP);
+                    infos[j * n + i] = info;
+                    if (info && info.water && drinkable.has(info.water)) dist[j * n + i] = 0;
+                }
+            }
+            // Two-pass 3-4 chamfer transform: dist / 3 * AREA_STEP approximates the distance in cells.
+            const relax = (i, j, di, dj, w) => {
+                const a = i + di, b = j + dj;
+                if (a < 0 || b < 0 || a >= n || b >= n) return;
+                const v = dist[b * n + a] + w;
+                if (v < dist[j * n + i]) dist[j * n + i] = v;
+            };
+            for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { relax(i, j, -1, 0, 3); relax(i, j, -1, -1, 4); relax(i, j, 0, -1, 3); relax(i, j, 1, -1, 4); }
+            for (let j = n - 1; j >= 0; j--) for (let i = n - 1; i >= 0; i--) { relax(i, j, 1, 0, 3); relax(i, j, 1, 1, 4); relax(i, j, 0, 1, 3); relax(i, j, -1, 1, 4); }
+            g = { area, n, infos, water: i => (dist[i] >= 1e9 ? Infinity : (dist[i] / 3) * AREA_STEP), disc: new Map() };
+            grids.set(key, g);
+            return g;
+        };
+        // Every cell within radius r (euclidean) of (x, y) is walkable land.
+        const discOk = (g, x, y, r) => {
+            const key = `${x},${y},${r}`;
+            if (g.disc.has(key)) return g.disc.get(key);
+            let ok = true;
+            for (let dy = -r; dy <= r && ok; dy++) {
+                for (let dx = -r; dx <= r && ok; dx++) {
+                    if (dx * dx + dy * dy > r * r) continue;
+                    const x2 = x + dx, y2 = y + dy;
+                    if (x2 < 0 || y2 < 0 || x2 >= size || y2 >= size) { ok = false; break; }
+                    const info = infoAt(g.area, x2, y2);
+                    if (!info || !info.walkable || info.peak) ok = false;
+                }
+            }
+            g.disc.set(key, ok);
+            return ok;
+        };
+
+        const player = F.list.find(f => f.id === F.playerId) || F.list[0];
+        const others = F.list.filter(f => f !== player);
+        const sameArea = (a, b) => a.x === b.x && a.y === b.y;
+
+        // The player's: the habitable cell nearest the map centre (within playerReach) whose disc is walkable; failing
+        // that a smaller disc, failing that any habitable cell there. No random numbers: a function of the terrain only.
+        const pArea = { x: state.startArea.x, y: state.startArea.y };
+        const pGrid = gridOf(pArea);
+        const near = [];
+        for (let dy = -acfg.playerReach; dy <= acfg.playerReach; dy++) {
+            for (let dx = -acfg.playerReach; dx <= acfg.playerReach; dx++) {
+                const d = Math.hypot(dx, dy);
+                if (d <= acfg.playerReach) near.push({ x: mid + dx, y: mid + dy, d });
+            }
+        }
+        near.sort((a, b) => a.d - b.d || a.y - b.y || a.x - b.x);
+        let pCell = null;
+        for (const r of [acfg.clearDisc, Math.min(acfg.clearDisc, 2), 0]) {
+            pCell = near.find(c => habitable(infoAt(pArea, c.x, c.y), player.species) && discOk(pGrid, c.x, c.y, r));
+            if (pCell) { pCell = { x: pCell.x, y: pCell.y, disc: r }; break; }
+        }
+        if (!pCell) pCell = { x: mid, y: mid, disc: -1 }; // never seen: the start climate keeps the centre habitable
+        const pInfo = infoAt(pArea, pCell.x, pCell.y);
+        const pWater = pGrid.water(Math.round(pCell.y / AREA_STEP) * pGrid.n + Math.round(pCell.x / AREA_STEP));
+        player.home = { area: pArea, x: pCell.x, y: pCell.y };
+        player.areaInfo = { biome: pInfo ? pInfo.biomeId : null, water: Math.round(pWater), rule: "centre", disc: pCell.disc };
+
+        // Everyone else: seeded picks among the coarse cells that keep every rule, the strictest rule first
+        // (preferred biome and water, then water, then the biome, then any habitable cell). A greedy pass can box the
+        // last faction in; then the whole pass restarts with the next seeded stream, and after AREA_ATTEMPTS the gap is
+        // relaxed step by step (recorded, and the factions.areas check fails on it).
+        const RULES = [
+            { id: "preferred+water", biome: true, water: true },
+            { id: "water", biome: false, water: true },
+            { id: "preferred", biome: true, water: false },
+            { id: "habitable", biome: false, water: false }
+        ];
+        const margin = acfg.edgeMargin;
+        const tryPlace = (rand, gap) => {
+            const placed = [{ area: pArea, x: pCell.x, y: pCell.y }];
+            const out = [];
+            for (const f of others) {
+                const area = f.home && f.home.area ? { x: f.home.area.x, y: f.home.area.y } : pArea;
+                const g = gridOf(area);
+                const pref = preferredOf(f.species);
+                const base = [];
+                for (let j = 0; j < g.n; j++) {
+                    for (let i = 0; i < g.n; i++) {
+                        const x = i * AREA_STEP, y = j * AREA_STEP;
+                        if (x < margin || y < margin || x > size - 1 - margin || y > size - 1 - margin) continue;
+                        const info = g.infos[j * g.n + i];
+                        if (!habitable(info, f.species)) continue;
+                        if (placed.some(p => sameArea(p.area, area) && Math.hypot(p.x - x, p.y - y) < gap)) continue;
+                        base.push({ x, y, info, water: g.water(j * g.n + i) });
+                    }
+                }
+                let chosen = null;
+                for (const rule of RULES) {
+                    if (rule.biome && !pref) continue;
+                    const pool = base.filter(c => (!rule.biome || pref.includes(c.info.biomeId)) && (!rule.water || c.water <= reach - AREA_STEP));
+                    while (pool.length && !chosen) {
+                        const k = Math.floor(rand() * pool.length);
+                        const c = pool[k];
+                        if (discOk(g, c.x, c.y, acfg.clearDisc)) chosen = { c, rule: rule.id, disc: acfg.clearDisc };
+                        else pool.splice(k, 1);
+                    }
+                    if (chosen) break;
+                }
+                if (!chosen) return null;
+                placed.push({ area, x: chosen.c.x, y: chosen.c.y });
+                out.push({ f, area, x: chosen.c.x, y: chosen.c.y, info: chosen.c.info, water: chosen.c.water, rule: chosen.rule, disc: chosen.disc });
+            }
+            return out;
+        };
+        let result = null, attempts = 0, gap = acfg.minGap, relaxed = false;
+        while (!result) {
+            for (let a = 0; a < AREA_ATTEMPTS && !result; a++) {
+                attempts++;
+                result = tryPlace(mulberry32(hash32(state.seed, SALT_AREAS, attempts)), gap);
+            }
+            if (!result) {
+                if (gap <= 8) break;
+                gap = Math.floor(gap * 0.8);
+                relaxed = true;
+            }
+        }
+        for (const r of result || []) {
+            r.f.home = { area: r.area, x: r.x, y: r.y };
+            r.f.areaInfo = { biome: r.info ? r.info.biomeId : null, water: Number.isFinite(r.water) ? Math.round(r.water) : null, rule: r.rule, disc: r.disc };
+            if (relaxed) r.f.areaInfo.gap = gap;
+        }
+        if (!result) for (const f of others) f.areaInfo = { biome: null, water: null, rule: "none", disc: -1 }; // no land at all (never seen)
+        state.viewStart = { x: pCell.x, y: pCell.y };
+        Factions.lastAreas = { ms: now() - t0, attempts, relaxed, gap, cells };
+        return F.list;
+    }
 
     //-------------------------------------------------------------------------
     // Queries and changes
@@ -393,7 +630,7 @@
             const cfg = Factions.config();
             const W = UF.World, st = W && W.state;
             const d = st && st.factions;
-            t.check("generated_with_world", !!cfg && !!d && Array.isArray(d.list), d ? `${d.list.length - 1} factions + your colony, seed ${st.seed}` : "no factions in the world state");
+            t.check("generated_with_world", !!cfg && !!d && Array.isArray(d.list), d ? `${d.list.length} factions (yours among them), seed ${st.seed}` : "no factions in the world state");
             if (!d) return;
             const others = d.list.filter(f => !f.isPlayer);
             t.check("count_in_range", d.list.length >= cfg.count[0] && d.list.length <= cfg.count[1], `${d.list.length} factions (allowed ${cfg.count[0]}-${cfg.count[1]}), ${others.length} besides the player's`);
@@ -412,19 +649,58 @@
             t.check("aligned_and_disaligned", allied.length > 0 && hostile.length > 0, `${allied.length} strong alliance(s), ${hostile.length} serious hostility(ies)`);
             t.check("relation_symmetric", others.length > 1 && Factions.relation(others[0].id, others[1].id) === Factions.relation(others[1].id, others[0].id), "relation(a, b) = relation(b, a)");
 
-            // Homes: inside the world; in a world of several areas, other factions don't share the start area.
-            const oneArea = st.areasX === 1 && st.areasY === 1;
-            const mid = Math.floor(st.size / 2);
-            const badHomes = others.filter(f => {
-                const a = f.home.area;
-                if (!W.inWorld(a.x, a.y)) return true;
-                if (oneArea) return Math.hypot(f.home.x - mid, f.home.y - mid) < 24; // not on top of the player's home
-                return a.x === st.startArea.x && a.y === st.startArea.y;
-            });
-            t.check("homes_valid", badHomes.length === 0, badHomes.length ? `wrong homes: ${badHomes.map(f => `${f.name} (${f.home.x},${f.home.y})`).join(", ")}` : `${others.length} homes in the world${oneArea ? ", none within 24 cells of the map centre" : ", none in the start area"}`);
+            // areas (VISION V4/V31 revised 2026-09-19): every faction's area centre on habitable land with a walkable
+            // disc, pairwise at least minGap apart, at least edgeMargin from the map edge, the player's within
+            // playerReach of the map centre, the view started there; the same areas for the same seed, others for the next.
+            const acfg = Factions.areasConfig();
+            const size = st.size, mid = Math.floor(size / 2);
+            const fresh = () => ({ seed: st.seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y } });
+            const areaProblems = [];
+            const infoOf = f => UF.WorldGen.cellInfoLocal(f.home.area.x, f.home.area.y, f.home.x, f.home.y);
+            for (const f of d.list) {
+                const h = f.home, a = h && h.area;
+                if (!h || !a || !W.inWorld(a.x, a.y) || !Number.isInteger(h.x) || !Number.isInteger(h.y)) { areaProblems.push(`${f.name}: no area`); continue; }
+                const info = infoOf(f);
+                if (!Factions.habitable(info, f.species)) areaProblems.push(`${f.name} (${h.x},${h.y}): not habitable (${info ? `${info.biomeId}, walkable ${info.walkable}, water ${info.water}, ${info.region.alignment}` : "no cell info"})`);
+                let dry = 0, discCells = 0;
+                const r = f.isPlayer ? Math.max(0, f.areaInfo ? f.areaInfo.disc : 0) : acfg.clearDisc;
+                for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+                    if (dx * dx + dy * dy > r * r) continue;
+                    discCells++;
+                    const c = UF.WorldGen.cellInfoLocal(a.x, a.y, h.x + dx, h.y + dy);
+                    if (!c || !c.walkable) dry++;
+                }
+                if (dry) areaProblems.push(`${f.name}: ${dry} of ${discCells} cells within ${r} not walkable`);
+                if (!f.isPlayer && (h.x < acfg.edgeMargin || h.y < acfg.edgeMargin || h.x > size - 1 - acfg.edgeMargin || h.y > size - 1 - acfg.edgeMargin)) areaProblems.push(`${f.name} (${h.x},${h.y}): within ${acfg.edgeMargin} of the edge`);
+            }
+            let minPair = Infinity, closest = "";
+            for (let i = 0; i < d.list.length; i++) for (let j = i + 1; j < d.list.length; j++) {
+                const p = d.list[i].home, q = d.list[j].home;
+                if (!p || !q || p.area.x !== q.area.x || p.area.y !== q.area.y) continue;
+                const dist = Math.hypot(p.x - q.x, p.y - q.y);
+                if (dist < minPair) { minPair = dist; closest = `${d.list[i].name} and ${d.list[j].name}`; }
+            }
+            if (minPair < acfg.minGap) areaProblems.push(`${closest} only ${minPair.toFixed(1)} cells apart`);
+            const pl = Factions.player();
+            const plDist = pl ? Math.hypot(pl.home.x - mid, pl.home.y - mid) : Infinity;
+            if (!(plDist <= acfg.playerReach) || !pl || pl.home.area.x !== st.startArea.x || pl.home.area.y !== st.startArea.y) areaProblems.push(`the player's centre is ${plDist.toFixed(1)} cells from (${mid},${mid})`);
+            const vs = st.viewStart;
+            if (!pl || !vs || vs.x !== pl.home.x || vs.y !== pl.home.y) areaProblems.push(`viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} is not the player's centre`);
+            const homesSig = f => JSON.stringify(f.list.map(x => [x.id, x.home]));
+            const areasAgain = Factions.generate(fresh());
+            const areasOther = Factions.generate(Object.assign(fresh(), { seed: st.seed + 1 }));
+            const sameAreas = homesSig(areasAgain) === homesSig(d);
+            const otherAreas = homesSig(areasOther) !== homesSig(d);
+            if (!sameAreas) areaProblems.push(`seed ${st.seed} regenerated gives other areas`);
+            if (!otherAreas) areaProblems.push(`seed ${st.seed + 1} gives the same areas`);
+            const la = Factions.lastAreas;
+            t.check("areas", areaProblems.length === 0,
+                `${d.list.map(f => `${f.name.replace(/^The /, "")} (${f.species}${f.isPlayer ? ", yours" : ""}) at (${f.home.x},${f.home.y}) ${f.areaInfo ? `${f.areaInfo.biome}, water ${f.areaInfo.water === null ? "none" : "~" + f.areaInfo.water} cells, rule ${f.areaInfo.rule}` : "no area info"}`).join("; ")}; `
+                + `closest pair ${minPair === Infinity ? "n/a" : minPair.toFixed(1)} (want >= ${acfg.minGap}); player's ${plDist.toFixed(1)} from the centre (want <= ${acfg.playerReach}); same seed ${sameAreas ? "same" : "DIFFERENT"} areas, seed+1 ${otherAreas ? "other" : "THE SAME"} areas; `
+                + `last placement ${la ? `${la.ms.toFixed(0)} ms, ${la.cells} cell lookups, ${la.attempts} attempt(s)${la.relaxed ? `, gap RELAXED to ${la.gap}` : ""}` : "?"}`
+                + (areaProblems.length ? `; PROBLEMS: ${areaProblems.join("; ")}` : ""));
 
-            // Determinism of generation itself (the live state is changed afterwards by UF_History: homes, populations, relations).
-            const fresh = () => ({ seed: st.seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: st.startArea });
+            // Determinism of generation itself (the live state changes in play: met, log, populations).
             const again = Factions.generate(fresh()), again2 = Factions.generate(fresh());
             const other = Factions.generate(Object.assign(fresh(), { seed: st.seed + 1 }));
             const sig = f => JSON.stringify({ list: f.list, relations: f.relations, playerId: f.playerId });

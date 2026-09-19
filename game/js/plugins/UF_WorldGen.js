@@ -25,9 +25,12 @@
  *   3. objects into the area's object grid (type = catalog objects index + 1):
  *      the biome's plant table walked in catalog order, seeded patches,
  *      one object per cell, no caps,
- *   4. faction sites from UF_History (cleared disc, stamped pieces),
- *   5. the start: a clearing, the resource kit, the start pair as events 1
- *      and 2 until UF_Colonists exists.
+ *   4. faction sites from UF_History (cleared disc, stamped pieces; the
+ *      year-1 camps of a New Game have no pieces, only the cleared disc),
+ *   5. the start: a clearing, the start pair as events 1 and 2 until
+ *      UF_Colonists exists,
+ *   6. the resource kit (catalog start.kit) around every faction's area
+ *      centre (2026-09-19; before that around the start only).
  *
  * Contract: docs/design/WORLD_ARCHITECTURE.md section 3.
  * API and checks: docs/systems/UF_WorldGen.md
@@ -504,6 +507,161 @@
         return { male, female };
     };
 
+    /**
+     * Where the kit goes in an area: [{ x, y, faction, camp? }] = every faction's campfire in it (its year-1 camp,
+     * UF_History, 2026-09-19 afternoon: VISION V4/V67; the camp cell is the area centre unless the centre's 3 x 3 block
+     * isn't all land), else its area centre (faction.home), the player's first. Without factions, or for a save whose
+     * history is from the older generator (no founders), the start cell of the start area only, as before.
+     */
+    WorldGen.kitCentres = function(ax, ay) {
+        const st = window.UF.World && UF.World.state;
+        if (!st) return [];
+        const F = st.factions;
+        const legacy = !!st.history && !st.history.founders;
+        if (!legacy && F && Array.isArray(F.list) && F.list.length) {
+            const camps = st.history && Array.isArray(st.history.sites) ? st.history.sites.filter(s => s.bare && s.area && s.area.x === ax && s.area.y === ay) : [];
+            return F.list.filter(f => f.home && f.home.area && f.home.area.x === ax && f.home.area.y === ay)
+                .sort((a, b) => (b.id === F.playerId ? 1 : 0) - (a.id === F.playerId ? 1 : 0))
+                .map(f => {
+                    const camp = camps.find(s => s.faction === f.id);
+                    return camp ? { x: camp.x, y: camp.y, faction: f.id, camp: camp.id } : { x: f.home.x, y: f.home.y, faction: f.id };
+                });
+        }
+        const mid = Math.floor(st.size / 2);
+        return ax === st.startArea.x && ay === st.startArea.y ? [{ x: mid, y: mid, faction: null }] : [];
+    };
+
+    /** catalog start.kit with defaults: { radius, objects, ore: { ids, count } | null, nearWater, firstStage, water, wildlife }. */
+    WorldGen.kitConfig = function() {
+        const kit = (catalog() && catalog().start && catalog().start.kit) || {};
+        const ore = kit.ore && Array.isArray(kit.ore.ids) && kit.ore.ids.length ? { ids: kit.ore.ids.slice(), count: Array.isArray(kit.ore.count) ? kit.ore.count.slice(0, 2) : [1, 1] } : null;
+        return Object.assign({}, kit, { radius: kit.radius || [5, 20], objects: kit.objects || {}, ore, nearWater: Array.isArray(kit.nearWater) ? kit.nearWater : [] });
+    };
+
+    // The kit's entries for one centre: every start.kit.objects id at its minimum, then the ore outcrop (one id of
+    // kit.ore.ids and a count within kit.ore.count, both seeded per area and centre). Any id of an entry already
+    // standing within the radius counts toward it.
+    function kitEntries(kit, seed, ax, ay, ci) {
+        const out = Object.entries(kit.objects).map(([id, minimum]) => ({ key: id, ids: [id], place: id, minimum: minimum | 0 }));
+        if (kit.ore) {
+            const rng = mulberry32(hash32(seed, SALT.kit, ax, ay, ci * 256 + 255));
+            const place = kit.ore.ids[Math.floor(rng() * kit.ore.ids.length)];
+            const [lo, hi] = [kit.ore.count[0] | 0, Math.max(kit.ore.count[0] | 0, kit.ore.count[kit.ore.count.length - 1] | 0)];
+            out.push({ key: "ore", ids: kit.ore.ids.slice(), place, minimum: lo + Math.floor(rng() * (hi - lo + 1)) });
+        }
+        return out;
+    }
+
+    //-------------------------------------------------------------------------
+    // What the kit must cover (VISION V67): the colony plan's first stage (catalog start.kit.firstStage) for every
+    // culture, and what each object is worth in those materials.
+
+    const KIT_RESOURCES = ["log", "stone", "fiber", "straw", "food", "ore"];
+    const itemTypes = () => new Map((((catalog() || {}).items || {}).types || []).map(i => [i.id, i]));
+    // An item's resource: log, stone, fiber, straw as themselves, any food item as "food", any ore item as "ore".
+    function resourceOf(itemId, types) {
+        if (["log", "stone", "fiber", "straw"].includes(itemId)) return itemId;
+        const t = types.get(itemId);
+        const tags = (t && t.tags) || [];
+        if (t && (t.food || tags.includes("food"))) return "food";
+        if (tags.includes("ore")) return "ore";
+        return null;
+    }
+    let worthCache = null;
+    /**
+     * What an object is worth: { log, stone, fiber, straw, food, ore } = per resource, the most one object yields
+     * through its actions, following what it becomes (an oak: 3 logs, then its stump 1 more = 4; a granite boulder:
+     * 4 stones, then the loose stones it leaves 2 more = 6). Regrowth isn't counted.
+     */
+    WorldGen.objectWorth = function(idOrTypeId) {
+        const cat = catalog();
+        if (!cat) return null;
+        if (!worthCache || worthCache.source !== cat.objects) worthCache = { source: cat.objects, byId: new Map(), objects: new Map(cat.objects.map(o => [o.id, o])), types: itemTypes() };
+        const byId = worthCache.objects, types = worthCache.types;
+        const worth = (id, depth) => {
+            if (worthCache.byId.has(id)) return worthCache.byId.get(id);
+            const zero = Object.fromEntries(KIT_RESOURCES.map(k => [k, 0]));
+            const o = byId.get(id);
+            if (!o || depth > 8) return zero;
+            const best = Object.assign({}, zero);
+            for (const a of Object.values(o.actions || {})) {
+                const got = Object.assign({}, zero);
+                for (const [item, n] of Object.entries(a.yields || {})) {
+                    const r = resourceOf(item, types);
+                    if (r) got[r] += n | 0;
+                }
+                const after = a.becomes ? worth(a.becomes, depth + 1) : zero;
+                for (const k of KIT_RESOURCES) best[k] = Math.max(best[k], got[k] + after[k]);
+            }
+            worthCache.byId.set(id, best);
+            return best;
+        };
+        const id = typeof idOrTypeId === "number" ? ((cat.objects[idOrTypeId - 1] || {}).id || null) : idOrTypeId;
+        return id ? worth(id, 0) : null;
+    };
+
+    /**
+     * The first stage of the colony plan, in materials (VISION V67): for every culture (catalog cultures, its plan
+     * variant and its wall), the steps named in start.kit.firstStage.steps: build steps = the object's build.items per
+     * cell (the camp's own centre piece, the campfire, stands at New Game and costs nothing); craft steps = the recipe's
+     * inputs once per founder ("each") or as often as "count" needs; stock steps = that many food items; plus
+     * mealsPerFounder food items per founder. Returns { founders, steps, meals, byCulture: { species: need }, needs }
+     * with needs = the most any culture needs of each resource (every faction gets the same kit).
+     */
+    WorldGen.kitNeeds = function() {
+        const cat = catalog();
+        if (!cat || !cat.colony) return null;
+        const fs0 = (cat.start && cat.start.kit && cat.start.kit.firstStage) || {};
+        const steps = Array.isArray(fs0.steps) ? fs0.steps : [];
+        const f = (cat.factions && cat.factions.founders) || {};
+        const founders = (f.male | 0) + (f.female | 0);
+        const meals = founders * (fs0.mealsPerFounder === undefined ? 1 : Number(fs0.mealsPerFounder) || 0);
+        const byId = new Map(cat.objects.map(o => [o.id, o]));
+        const recipes = new Map((((cat.recipes || {}).list) || []).map(r => [r.id, r]));
+        const types = itemTypes();
+        const founding = (cat.sites && cat.sites.founding) || {};
+        const centre = (((cat.sites || {}).kinds || {})[founding.kind || "camp"] || {}).center || null;
+        const cultures = Object.entries(cat.cultures || {}).filter(([k, v]) => k !== "about" && v && typeof v === "object");
+        if (!cultures.length) cultures.push(["default", { plan: "default" }]);
+        const byCulture = {};
+        const needs = Object.fromEntries(KIT_RESOURCES.filter(k => k !== "ore").map(k => [k, 0]));
+        const other = {};
+        for (const [species, cu] of cultures) {
+            const plan = cu.plan && cu.plan !== "default" && cat.colony.plans && Array.isArray(cat.colony.plans[cu.plan]) ? cat.colony.plans[cu.plan] : (cat.colony.plan || []);
+            const need = Object.fromEntries(Object.keys(needs).map(k => [k, 0]));
+            const add = (item, n) => {
+                const r = resourceOf(item, types);
+                if (r && r in need) need[r] += n;
+                else other[item] = Math.max(other[item] || 0, n);
+            };
+            for (const s of plan) {
+                if (!steps.includes(s.id)) continue;
+                if (s.build) {
+                    let b = s.build;
+                    if ((b === "wall_wood" || b === "wall_stone") && cu.wall && byId.has(cu.wall)) b = cu.wall;
+                    if (b === centre) continue; // the standing campfire is the hearth
+                    const o = byId.get(b);
+                    for (const [item, n] of Object.entries((o && o.build && o.build.items) || {})) add(item, (n | 0) * (s.cells || []).length);
+                } else if (s.craft) {
+                    const r = recipes.get(s.craft);
+                    if (!r) continue;
+                    const out = Object.keys(r.outputs || {})[0];
+                    const times = s.each ? founders : Math.ceil(((s.count | 0) || 1) / ((r.outputs || {})[out] || 1));
+                    for (const [item, n] of Object.entries(r.inputs || {})) add(item, (n | 0) * times);
+                } else if (s.stock) {
+                    need.food += s.count | 0;
+                }
+            }
+            need.food += meals;
+            byCulture[species] = need;
+            for (const k of Object.keys(needs)) needs[k] = Math.max(needs[k], need[k]);
+        }
+        return { founders, steps: steps.slice(), meals, byCulture, needs, other };
+    };
+    WorldGen.KIT_RESOURCES = KIT_RESOURCES;
+    /** The objects the kit placed in each built area: kitLog["ax,ay"] = [{ c (centre index), faction, id, x, y }]. */
+    WorldGen.kitLog = {};
+
     // Sites of an area from UF_History, if it's installed. Its errors never break the world build.
     function sitesFor(ax, ay) {
         if (!(window.UF.History && typeof UF.History.sitesIn === "function")) return [];
@@ -664,36 +822,52 @@
             }
         }
 
-        // 6. The kit: minimum resources within reach of the start, whatever the biome rolled.
-        if (start && start.kit && start.kit.objects) {
-            const [r0, r1] = start.kit.radius || [5, 20];
+        // 6. The kit (start.kit): minimum resources within reach of every faction's campfire (VISION V67, 2026-09-19:
+        //    every band has what its first buildings, tools, clothes and meals need at hand), whatever the biome rolled.
+        //    Placed on free land in the ring radius[0]..radius[1], never in a site disc (so never on a camp's nine cells).
+        //    Without factions, or for a save made before 2026-09-19, around the start as before.
+        const kit = cat.start && cat.start.kit ? WorldGen.kitConfig() : null;
+        const kitCentres = kit && !ctx.templateRect ? WorldGen.kitCentres(ctx.areaX, ctx.areaY) : [];
+        const [r0, r1] = (kit && kit.radius) || [5, 20];
+        const kitLog = [];
+        kitCentres.forEach((c, ci) => {
             let kitIndex = 0;
-            for (const [id, minimum] of Object.entries(start.kit.objects)) {
-                const o = m.objectById.get(id);
+            for (const e of kitEntries(kit, seed, ctx.areaX, ctx.areaY, ci)) {
+                const o = m.objectById.get(e.place);
+                const salt = e.key === "ore" ? ci * 256 + 254 : ci * 256 + kitIndex++;
                 if (!o) continue;
+                const typeIds = new Set(e.ids.map(id => (m.objectById.get(id) || {}).typeId).filter(Boolean));
                 let have = 0;
-                const candidates = [];
-                for (let y = Math.max(0, cy - r1); y <= Math.min(size - 1, cy + r1); y++) {
-                    for (let x = Math.max(0, cx - r1); x <= Math.min(size - 1, cx + r1); x++) {
-                        const dist = Math.hypot(x - cx, y - cy);
+                const candidates = [], nearWater = [];
+                const wantsWater = kit.nearWater.includes(e.place);
+                for (let y = Math.max(0, c.y - r1); y <= Math.min(size - 1, c.y + r1); y++) {
+                    for (let x = Math.max(0, c.x - r1); x <= Math.min(size - 1, c.x + r1); x++) {
+                        const dist = Math.hypot(x - c.x, y - c.y);
                         if (dist > r1) continue;
                         const i = y * size + x;
-                        if (objects[i] === o.typeId) have++;
+                        if (typeIds.has(objects[i])) have++;
                         else if (dist >= r0 && objects[i] === 0 && !water[i] && !(flags[i] & FLAG_PEAK) && waterDist[i] > (o.entry.avoidWater | 0)
-                            && !inClearing(x, y) && !(siteMask && siteMask[i]) && !ctx.isTemplateCell(x, y)) candidates.push(i);
+                            && !inClearing(x, y) && !(siteMask && siteMask[i]) && !ctx.isTemplateCell(x, y)) {
+                            candidates.push(i);
+                            if (wantsWater && waterDist[i] <= 3) nearWater.push(i); // reeds: on the banks when the ring has any
+                        }
                     }
                 }
-                const rng = mulberry32(hash32(seed, SALT.kit, ctx.areaX, ctx.areaY, kitIndex++));
-                for (let n = have; n < minimum && candidates.length; n++) {
-                    const j = Math.floor(rng() * candidates.length);
-                    const i = candidates[j];
-                    candidates[j] = candidates[candidates.length - 1];
-                    candidates.pop();
+                const rng = mulberry32(hash32(seed, SALT.kit, ctx.areaX, ctx.areaY, salt));
+                for (let n = have; n < e.minimum && (nearWater.length || candidates.length); n++) {
+                    const pool = nearWater.length ? nearWater : candidates; // the banks first, then the rest of the ring
+                    const j = Math.floor(rng() * pool.length);
+                    const i = pool[j];
+                    pool[j] = pool[pool.length - 1];
+                    pool.pop();
+                    if (objects[i] !== 0) { n--; continue; } // already taken from the other pool
                     objects[i] = o.typeId;
-                    counts[id] = (counts[id] || 0) + 1;
+                    counts[e.place] = (counts[e.place] || 0) + 1;
+                    kitLog.push({ c: ci, faction: c.faction, id: e.place, x: i % size, y: Math.floor(i / size) });
                 }
             }
-        }
+        });
+        WorldGen.kitLog[`${ctx.areaX},${ctx.areaY}`] = kitLog;
 
         let total = 0;
         for (let i = 0; i < cells; i++) if (objects[i]) total++;
@@ -730,22 +904,97 @@
             for (let i = 0; i < map.ufObjects.length; i++) if (map.ufObjects[i]) n++;
             return n;
         };
-        const kitReport = (map, mid, size) => {
-            const kit = catalog().start.kit;
+        // A build of the area as the generator makes it: no object or tile diffs from play (colonists chop and pick from
+        // the first second), no units. UF.World.state is swapped for the call.
+        const pristineBuild = (ax, ay) => {
+            const W = UF.World, st = W.state;
+            W.state = Object.assign({}, st, { objectDiffs: {}, diffs: {}, units: {} });
+            try { return W.buildArea(ax, ay); } finally { W.state = st; }
+        };
+        // Kind of water of an A1 tile (catalog water.surface), or null.
+        const waterKindOf = tileId => {
+            if (!Tilemap.isTileA1(tileId)) return null;
+            for (const [k, id] of Object.entries(catalog().water.surface || {})) {
+                const base = autotileBase(id);
+                if (tileId >= base && tileId < base + 48) return k;
+            }
+            return "?";
+        };
+        // The kit around every area centre (VISION V4/V31 revised 2026-09-19): each start.kit object at its minimum within
+        // kit.radius[1], and drinkable water (start.kit.water.kinds) within start.kit.water.reach.
+        // Per centre: the count of each kit entry within kit.radius[1] (the ore entry: any of kit.ore.ids, wanted at
+        // least kit.ore.count[0]) and the nearest drinkable water. Used by kit_per_area, kit_present and kit_fair.
+        const kitCounts = (map, size, c) => {
+            const kit = WorldGen.kitConfig();
             const r1 = kit.radius[1];
             const m = compiled();
-            const lines = [], short = [];
-            for (const [id, minimum] of Object.entries(kit.objects)) {
-                const o = m.objectById.get(id);
+            const entries = Object.entries(kit.objects).map(([id, minimum]) => ({ key: id, ids: [id], minimum: minimum | 0 }));
+            if (kit.ore) entries.push({ key: "ore", ids: kit.ore.ids, minimum: kit.ore.count[0] | 0 });
+            const out = entries.map(e => {
+                const typeIds = new Set(e.ids.map(id => (m.objectById.get(id) || {}).typeId).filter(Boolean));
                 let n = 0;
-                for (let y = mid - r1; y <= mid + r1; y++) for (let x = mid - r1; x <= mid + r1; x++) {
-                    if (Math.hypot(x - mid, y - mid) <= r1 && o && map.ufObjects[y * size + x] === o.typeId) n++;
+                const kinds = {};
+                for (let y = c.y - r1; y <= c.y + r1; y++) for (let x = c.x - r1; x <= c.x + r1; x++) {
+                    if (x < 0 || y < 0 || x >= size || y >= size || Math.hypot(x - c.x, y - c.y) > r1) continue;
+                    const t = map.ufObjects[y * size + x];
+                    if (typeIds.has(t)) { n++; kinds[catalog().objects[t - 1].id] = (kinds[catalog().objects[t - 1].id] || 0) + 1; }
                 }
-                lines.push(`${id} ${n}/${minimum}`);
-                if (n < minimum) short.push(id);
+                return { key: e.key, n, minimum: e.minimum, kinds };
+            });
+            const wcfg = Object.assign({ reach: 30, kinds: ["fresh", "pond", "icy", "marsh", "swamp"] }, kit.water || {});
+            const drink = new Set(wcfg.kinds);
+            let water = Infinity, kind = null;
+            const R = wcfg.reach;
+            for (let y = c.y - R; y <= c.y + R; y++) for (let x = c.x - R; x <= c.x + R; x++) {
+                if (x < 0 || y < 0 || x >= size || y >= size) continue;
+                const d = Math.hypot(x - c.x, y - c.y);
+                if (d > R || d >= water) continue;
+                const k = waterKindOf(map.data[y * size + x]);
+                if (k && drink.has(k)) { water = d; kind = k; }
             }
-            return { ok: short.length === 0, detail: `${lines.join(", ")} within ${r1} cells of the start${short.length ? `; short: ${short.join(", ")}` : ""}` };
+            const F = window.UF.Factions && c.faction ? UF.Factions.get(c.faction) : null;
+            return { entries: out, water, waterKind: kind, reach: R, label: F ? F.name.replace(/^The /, "") : "start" };
         };
+        const kitReport = (map, size, centres) => {
+            const r1 = WorldGen.kitConfig().radius[1];
+            const rows = [], bad = [];
+            let reach = 30;
+            for (const c of centres) {
+                const k = kitCounts(map, size, c);
+                reach = k.reach;
+                const short = k.entries.filter(e => e.n < e.minimum).map(e => `${e.key} ${e.n}/${e.minimum}`);
+                const lines = k.entries.map(e => `${e.key} ${e.n}/${e.minimum}`);
+                if (short.length || k.water === Infinity) bad.push(`${k.label} at (${c.x},${c.y}): ${short.length ? `short ${short.join(", ")}` : ""}${k.water === Infinity ? `${short.length ? "; " : ""}no drinkable water within ${k.reach}` : ""}`);
+                rows.push(`${k.label} (${c.x},${c.y}): ${lines.join(", ")}; water ${k.water === Infinity ? "NONE" : `${k.waterKind} at ${k.water.toFixed(1)}`}`);
+            }
+            return { ok: centres.length > 0 && bad.length === 0, detail: `${centres.length} area centre(s), kit within ${r1} cells, drinkable water within ${reach}: ${rows.join(" | ")}${bad.length ? `; FAILING: ${bad.join("; ")}` : ""}` };
+        };
+        // What the objects within kit.radius[1] of a centre are worth in the plan's materials (objectWorth summed).
+        const supplyAround = (map, size, c) => {
+            const r1 = WorldGen.kitConfig().radius[1];
+            const sum = Object.fromEntries(KIT_RESOURCES.map(k => [k, 0]));
+            for (let y = c.y - r1; y <= c.y + r1; y++) for (let x = c.x - r1; x <= c.x + r1; x++) {
+                if (x < 0 || y < 0 || x >= size || y >= size || Math.hypot(x - c.x, y - c.y) > r1) continue;
+                const t = map.ufObjects[y * size + x];
+                if (!t) continue;
+                const w = WorldGen.objectWorth(t);
+                for (const k of KIT_RESOURCES) sum[k] += w[k];
+            }
+            return sum;
+        };
+        // What the kit's minimums alone are worth (the guarantee whatever the biome rolled): each object at its minimum,
+        // the ore entry at its smallest count of its least valuable id.
+        const kitMinimumWorth = () => {
+            const kit = WorldGen.kitConfig();
+            const sum = Object.fromEntries(KIT_RESOURCES.map(k => [k, 0]));
+            for (const [id, n] of Object.entries(kit.objects)) {
+                const w = WorldGen.objectWorth(id) || {};
+                for (const k of KIT_RESOURCES) sum[k] += (w[k] || 0) * (n | 0);
+            }
+            if (kit.ore) for (const k of KIT_RESOURCES) sum[k] += Math.min(...kit.ore.ids.map(id => (WorldGen.objectWorth(id) || {})[k] || 0)) * (kit.ore.count[0] | 0);
+            return sum;
+        };
+        const factionCount = () => (window.UF.Factions && UF.World.state.factions ? UF.World.state.factions.list.length : 0);
 
         UF.Test.suite("worldgen", async t => {
             const cat = catalog();
@@ -771,7 +1020,8 @@
             }
             for (const p of Object.keys(cat.regions.cursedPlants || {}).concat(Object.keys(cat.regions.blessedPlants || {}))) if (!m.objectById.has(p)) bad.push(`regions ${p}`);
             for (const g of Object.values(cat.regions.cursedGround || {}).concat(Object.values(cat.regions.blessedGround || {}), ["peak_rock", "snow"])) if (!m.groundIndex.has(g)) bad.push(`ground ${g}`);
-            for (const p of Object.keys(cat.start.kit.objects)) if (!m.objectById.has(p)) bad.push(`kit ${p}`);
+            const kitCfg = WorldGen.kitConfig();
+            for (const p of Object.keys(kitCfg.objects).concat(kitCfg.ore ? kitCfg.ore.ids : [], kitCfg.nearWater)) if (!m.objectById.has(p)) bad.push(`kit ${p}`);
             for (const [k, s] of Object.entries((cat.sites && cat.sites.kinds) || {})) {
                 for (const id of [s.ring, s.center].concat(Object.keys(s.inside || {}))) if (id && !m.objectById.has(id)) bad.push(`sites.${k} ${id}`);
             }
@@ -845,8 +1095,11 @@
                 t.check("river_continuous_between_areas", last.length > 0 && last.some(x => first.includes(x)), `${last.length} water columns on the bottom row, ${first.length} on the next area's top row, ${last.filter(x => first.includes(x)).length} shared`);
             }
 
-            // Objects live in the object grid, not in events.
-            const total = countObjects(here);
+            // Objects live in the object grid, not in events. Counted on a pristine build: since 2026-09-19 afternoon every
+            // camp's campfire is written at New Game as a built object (a diff, UF_History), and colonists change objects
+            // from the first second, so the build with diffs never matched the generator's own counts.
+            const pristineStart = pristineBuild(a.x, a.y);
+            const total = countObjects(pristineStart);
             const statTotal = Object.values(WorldGen.stats[`${a.x},${a.y}`] || {}).reduce((s, n) => s + n, 0);
             const top = Object.entries(WorldGen.stats[`${a.x},${a.y}`] || {}).sort((p, q) => q[1] - p[1]).slice(0, 8).map(([k, v]) => `${k} ${v}`).join(", ");
             const objectEvents = here.events.filter(e => e && /<ufObject:/.test(e.note)).length;
@@ -854,8 +1107,10 @@
                 `${total} objects in map.ufObjects of the start area (stats sum ${statTotal}, ${objectEvents} object events); most common: ${top}`);
             let onGlade = 0;
             const clearR = cat.start.clearRadius;
-            for (let y = mid - clearR; y <= mid + clearR; y++) for (let x = mid - clearR; x <= mid + clearR; x++) if ((x - mid) ** 2 + (y - mid) ** 2 <= clearR * clearR && here.ufObjects[y * size + x]) onGlade++;
-            t.check("glade_clear", onGlade === 0, `${onGlade} objects inside the start clearing (radius ${clearR})`);
+            // The generator's clearing (pristine build: the campfire UF_History lights on the player's camp cell is a built
+            // object, not generated).
+            for (let y = mid - clearR; y <= mid + clearR; y++) for (let x = mid - clearR; x <= mid + clearR; x++) if ((x - mid) ** 2 + (y - mid) ** 2 <= clearR * clearR && pristineStart.ufObjects[y * size + x]) onGlade++;
+            t.check("glade_clear", onGlade === 0, `${onGlade} objects inside the start clearing (radius ${clearR}) as generated`);
             let inWater = 0, landOnWater = 0, waterOnLand = 0, waterCells = 0;
             for (let i = 0; i < size * size; i++) {
                 const wet = isWaterTile(here.data[i]);
@@ -867,8 +1122,77 @@
             }
             t.check("no_objects_in_water", landOnWater === 0 && waterOnLand === 0,
                 `${waterCells} water cells; ${inWater} objects on water, ${landOnWater} of them not water plants; ${waterOnLand} water plants on land`);
-            const kit = kitReport(here, mid, size);
-            t.check("kit", kit.ok, kit.detail);
+            // kit_per_area: the kit and drinkable water around every faction's area centre, on the map as generated.
+            const kitCentres = WorldGen.kitCentres(a.x, a.y);
+            const kit = kitReport(pristineStart, size, kitCentres);
+            const wantCentres = factionCount();
+            t.check("kit_per_area", kit.ok && (!wantCentres || kitCentres.length === wantCentres), `${wantCentres ? `${wantCentres} factions; ` : ""}${kit.detail}`);
+
+            // kit_covers_plan (VISION V67): within kit.radius[1] of every campfire the objects are worth at least the plan's
+            // first stage (WorldGen.kitNeeds: the most any culture needs of logs, stones, fiber, straw and food for its
+            // founders) and at least one ore outcrop's ore; and the kit's minimums alone cover it too, so the guarantee
+            // holds whatever the biome rolls.
+            const needInfo = WorldGen.kitNeeds();
+            const kitNeed = needInfo ? Object.assign({}, needInfo.needs, { ore: Math.min(...(kitCfg.ore ? kitCfg.ore.ids : ["-"]).map(id => (WorldGen.objectWorth(id) || {}).ore || 0)) * ((kitCfg.ore ? kitCfg.ore.count[0] : 1) | 0) }) : null;
+            const minWorth = kitMinimumWorth();
+            const coverRows = [], coverBad = [];
+            const shortOf = sup => (kitNeed ? KIT_RESOURCES.filter(k => (sup[k] || 0) < (kitNeed[k] || 0)).map(k => `${k} ${sup[k] || 0}/${kitNeed[k]}`) : ["no needs"]);
+            for (const c of kitCentres) {
+                const sup = supplyAround(pristineStart, size, c);
+                const short = shortOf(sup);
+                const F = window.UF.Factions && c.faction ? UF.Factions.get(c.faction) : null;
+                const label = F ? F.name.replace(/^The /, "") : "start";
+                coverRows.push(`${label} (${c.x},${c.y}): ${KIT_RESOURCES.map(k => `${k} ${sup[k]}`).join(", ")}`);
+                if (short.length) coverBad.push(`${label}: short ${short.join(", ")}`);
+            }
+            const minShort = shortOf(minWorth);
+            t.check("kit_covers_plan", !!needInfo && kitCentres.length > 0 && (!wantCentres || kitCentres.length === wantCentres) && coverBad.length === 0 && minShort.length === 0,
+                needInfo ? `first stage (${needInfo.steps.join(", ")}) for ${needInfo.founders} founders, the most any of ${Object.keys(needInfo.byCulture).length} cultures needs, plus ${needInfo.meals} meals: ${KIT_RESOURCES.map(k => `${k} ${kitNeed[k]}`).join(", ")} `
+                    + `(${Object.entries(needInfo.byCulture).map(([sp, n]) => `${sp} ${n.log}/${n.stone}/${n.fiber}/${n.straw}/${n.food}`).join(", ")} as log/stone/fiber/straw/food${Object.keys(needInfo.other).length ? `; not counted here: ${JSON.stringify(needInfo.other)}` : ""}); `
+                    + `the kit's minimums alone are worth ${KIT_RESOURCES.map(k => `${k} ${minWorth[k]}`).join(", ")}${minShort.length ? ` (SHORT: ${minShort.join(", ")})` : ""}; within ${kitCfg.radius[1]} cells of each campfire: ${coverRows.join(" | ")}${coverBad.length ? `; FAILING: ${coverBad.join("; ")}` : ""}`
+                    : "no colony plan or catalog");
+
+            // kit_fair: every campfire gets the same minimum counts (one table in the catalog); the counts per area, the
+            // ore kind and the distance to drinkable water.
+            const fairRows = [], fairBad = [];
+            for (const c of kitCentres) {
+                const k = kitCounts(pristineStart, size, c);
+                const short = k.entries.filter(e => e.n < e.minimum);
+                const ore = k.entries.find(e => e.key === "ore");
+                fairRows.push(`${k.label}: ${k.entries.filter(e => e.key !== "ore").map(e => `${e.key} ${e.n}`).join(", ")}, ore ${ore ? `${ore.n} (${Object.entries(ore.kinds).map(([id, n]) => `${id} ${n}`).join(", ") || "none"})` : "no ore entry"}; water ${k.water === Infinity ? "NONE" : `${k.waterKind} ${k.water.toFixed(1)}`}`);
+                if (short.length) fairBad.push(`${k.label}: ${short.map(e => `${e.key} ${e.n}/${e.minimum}`).join(", ")}`);
+                if (!ore) fairBad.push(`${k.label}: no ore entry in start.kit`);
+            }
+            t.check("kit_fair", kitCentres.length > 0 && (!wantCentres || kitCentres.length === wantCentres) && fairBad.length === 0,
+                `minimums for every area: ${Object.entries(kitCfg.objects).map(([id, n]) => `${id} ${n}`).join(", ")}, ore ${kitCfg.ore ? `${kitCfg.ore.count.join("-")} of ${kitCfg.ore.ids.join("/")}` : "NONE"}; per area: ${fairRows.join(" | ")}${fairBad.length ? `; SHORT: ${fairBad.join("; ")}` : ""}`);
+
+            // kit_seeded: the kit's placements (WorldGen.kitLog) are the same for two builds of this seed and differ for the
+            // next seed (a synthetic world: its factions, its year-1 camps, its build).
+            const kitSig = log => JSON.stringify((log || []).map(e => [e.c, e.id, e.x, e.y]));
+            pristineBuild(a.x, a.y);
+            const log1 = kitSig(WorldGen.kitLog[`${a.x},${a.y}`]);
+            pristineBuild(a.x, a.y);
+            const log2 = kitSig(WorldGen.kitLog[`${a.x},${a.y}`]);
+            let log3 = null, seed3 = st.seed + 1, oreKinds3 = "";
+            if (window.UF.Factions && window.UF.History) {
+                const s3 = { seed: seed3, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: a.x, y: a.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} };
+                const saved = W.state;
+                try {
+                    W.state = s3;
+                    UF.Factions.generate(s3);
+                    UF.History.generate(s3);
+                    W.buildArea(a.x, a.y);
+                    log3 = kitSig(WorldGen.kitLog[`${a.x},${a.y}`]);
+                    oreKinds3 = (WorldGen.kitLog[`${a.x},${a.y}`] || []).filter(e => kitCfg.ore && kitCfg.ore.ids.includes(e.id)).map(e => e.id).join("/");
+                } finally {
+                    W.state = saved;
+                }
+                pristineBuild(a.x, a.y); // leave this world's kit log and stats behind
+            }
+            const placed1 = JSON.parse(log1);
+            t.check("kit_seeded", placed1.length > 0 && log1 === log2 && log3 !== null && log3 !== log1,
+                `seed ${st.seed}: ${placed1.length} kit objects placed (first ${placed1.slice(0, 3).map(e => `${e[1]} (${e[2]},${e[3]})`).join(", ")}; ore ${placed1.filter(e => kitCfg.ore && kitCfg.ore.ids.includes(e[1])).map(e => `${e[1]} (${e[2]},${e[3]})`).join(", ") || "none placed (enough already stood there)"}), a second build ${log1 === log2 ? "identical" : "DIFFERENT"}; `
+                + `seed ${seed3}: ${log3 === null ? "not built (no UF_Factions/UF_History)" : `${JSON.parse(log3).length} placed, ore ${oreKinds3 || "none placed"}, ${log3 === log1 ? "THE SAME layout" : "another layout"}`}`);
             // Peaks: region 250 exactly where the ground is peak_rock.
             const peakBase = UF.Tiles ? UF.Tiles.groundBase("peak_rock") : null;
             let peakTiles = 0, peakRegions = 0, mismatched = 0;
@@ -994,31 +1318,43 @@
             const total = countObjects(here);
             const biomesHere = Object.entries(WorldGen.lastBuild.biomes).sort((p, q) => q[1] - p[1]).slice(0, 6).map(([k, v]) => `${k} ${v}`).join(", ");
             t.check("objects_dense", total >= 2500, `${total} objects in the start area (want >= 2500); biomes by cells: ${biomesHere}`);
-            const kit = kitReport(here, mid, size);
+            const pristineHere = pristineBuild(a.x, a.y);
+            const kit = kitReport(pristineHere, size, WorldGen.kitCentres(a.x, a.y));
             t.check("kit_present", kit.ok, kit.detail);
+            // camps_cleared (replaces sites_stamped, 2026-09-19: no site is stamped at New Game any more, VISION V31):
+            // every site UF_History gives this area is a bare camp with no pieces, and the generator kept its disc
+            // (radius + 1) free of every object; a site of an older save with pieces still gets them stamped.
             if (window.UF.History && typeof UF.History.sitesIn === "function") {
-                let found = null;
-                for (let ay = 0; ay < st.areasY && !found; ay++) for (let ax = 0; ax < st.areasX && !found; ax++) {
-                    const sites = sitesFor(ax, ay);
-                    if (sites.length) found = { ax, ay, site: sites[0] };
-                }
-                if (found) {
-                    const s = found.site;
-                    const map = W.buildArea(found.ax, found.ay);
-                    const ringId = (s.pieces || []).length ? s.pieces[0].object : null;
-                    const ringType = ringId && m.objectById.get(ringId) ? m.objectById.get(ringId).typeId : 0;
-                    let hits = 0, expected = 0;
-                    for (const piece of s.pieces || []) {
-                        const x = s.x + piece.dx, y = s.y + piece.dy;
-                        if (x < 0 || y < 0 || x >= size || y >= size) continue;
-                        expected++;
-                        const o = m.objectById.get(piece.object);
-                        if (o && map.ufObjects[y * size + x] === o.typeId) hits++;
+                const sites = sitesFor(a.x, a.y);
+                const problems = [];
+                let bare = 0, stampedOk = 0;
+                for (const s of sites) {
+                    if (!(s.pieces || []).length) {
+                        bare++;
+                        const r = (s.radius || 0) + 1;
+                        let n = 0, first = "";
+                        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+                            const x = s.x + dx, y = s.y + dy;
+                            if (dx * dx + dy * dy > r * r || x < 0 || y < 0 || x >= size || y >= size) continue;
+                            const o = pristineHere.ufObjects[y * size + x];
+                            if (o) { n++; if (!first) first = `${(cat.objects[o - 1] || {}).id} at (${x},${y})`; }
+                        }
+                        if (n) problems.push(`${s.name}: ${n} objects in its disc (first ${first})`);
+                    } else {
+                        let hits = 0, expected = 0;
+                        for (const piece of s.pieces) {
+                            const x = s.x + piece.dx, y = s.y + piece.dy;
+                            if (x < 0 || y < 0 || x >= size || y >= size) continue;
+                            expected++;
+                            const o = m.objectById.get(piece.object);
+                            if (o && pristineHere.ufObjects[y * size + x] === o.typeId) hits++;
+                        }
+                        if (hits === expected) stampedOk++; else problems.push(`${s.name}: ${hits} of ${expected} pieces stamped`);
                     }
-                    t.check("sites_stamped", expected > 0 && hits === expected, `site "${s.name || s.kind}" at (${s.x},${s.y}) in area (${found.ax},${found.ay}): ${hits} of ${expected} pieces in ufObjects (first piece ${ringId} = type ${ringType})`);
-                } else {
-                    t.check("sites_stamped", false, "UF.History.sitesIn returned no sites in any area");
                 }
+                const bareWanted = UF.World.state.history && UF.World.state.history.founders ? factionCount() : bare;
+                t.check("camps_cleared", sites.length > 0 && bare === bareWanted && problems.length === 0,
+                    `${sites.length} sites in area (${a.x},${a.y}): ${bare} bare camps (want ${bareWanted}), ${stampedOk} older sites stamped; ${problems.length ? `PROBLEMS: ${problems.join("; ")}` : "every bare camp's disc is free of objects"}`);
             }
             const sorted = times.slice().sort((p, q) => p - q);
             t.check("build_time", sorted[1] <= 1500, `median ${sorted[1].toFixed(0)} ms of 3 builds (${times.map(x => x.toFixed(0)).join(", ")} ms) for 256x256 with ${total} objects`);
