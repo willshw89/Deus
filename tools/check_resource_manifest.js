@@ -50,6 +50,40 @@ function parseBracketRecords(file, token) {
     });
 }
 
+function resolveCopiedRecords(records) {
+    const byId = new Map();
+    const problems = [];
+    for (const record of records) {
+        if (byId.has(record.id)) problems.push(`duplicate record ${record.id}`);
+        else byId.set(record.id, record);
+    }
+    const memo = new Map();
+    function resolve(record, stack) {
+        if (memo.has(record.id)) return memo.get(record.id);
+        if (stack.has(record.id)) {
+            problems.push(`copy cycle ${[...stack, record.id].join("->")}`);
+            return record.text;
+        }
+        const next = new Set(stack);
+        next.add(record.id);
+        const inherited = [];
+        const copies = record.text.matchAll(/\[COPY_TAGS_FROM:([^\]]+)\]/g);
+        for (const copy of copies) {
+            const parentId = copy[1].trim();
+            const parent = byId.get(parentId);
+            if (!parent) problems.push(`${record.id}: missing copied record ${parentId}`);
+            else inherited.push(resolve(parent, next));
+        }
+        const text = inherited.length ? `${inherited.join("\n")}\n${record.text}` : record.text;
+        memo.set(record.id, text);
+        return text;
+    }
+    return {
+        records: records.map(record => ({ ...record, text: resolve(record, new Set()) })),
+        problems
+    };
+}
+
 function conditionMatches(condition, record) {
     const c = condition || {};
     if (c.file && record.file !== c.file) return false;
@@ -188,8 +222,14 @@ function validate(manifest) {
     const sourceSetIds = new Set();
     const sourceSetProblems = [];
     for (const source of sourceSets) {
-        if (!source.id || !["explicitLedger", "bracketImport"].includes(source.mode) || !Number.isInteger(source.expectedRows) || source.expectedRows < 1) {
+        if (!source.id || !["explicitLedger", "bracketImport", "multiRoleImport"].includes(source.mode) || !Number.isInteger(source.expectedRows) || source.expectedRows < 1) {
             sourceSetProblems.push(`${source.id || "<missing>"}: base fields`);
+        }
+        if (source.mode === "multiRoleImport" && (!Number.isInteger(source.expectedRecords) || source.expectedRecords < 1)) {
+            sourceSetProblems.push(`${source.id}: expectedRecords`);
+        }
+        if (source.mode === "multiRoleImport" && (!Number.isInteger(source.expectedExclusions) || source.expectedExclusions < 0)) {
+            sourceSetProblems.push(`${source.id}: expectedExclusions`);
         }
         if (sourceSetIds.has(source.id)) sourceSetProblems.push(`${source.id}: duplicate`);
         sourceSetIds.add(source.id);
@@ -253,6 +293,66 @@ function validate(manifest) {
         if (mapped !== records.length) importProblems.push(`${source.id}: mapped ${mapped}/${records.length}`);
         importDetails.push(`${source.id} ${mapped}/${records.length} -> ${[...targetCounts.entries()].map(([id, count]) => `${id}:${count}`).join(",")}`);
     }
+    for (const source of sourceSets.filter(row => row.mode === "multiRoleImport")) {
+        const root = path.resolve(PROJECT_ROOT, source.root);
+        const files = listFiles(root, source.filePattern);
+        const parsed = files.flatMap(file => parseBracketRecords(file, source.recordToken));
+        const resolved = resolveCopiedRecords(parsed);
+        importProblems.push(...resolved.problems.map(problem => `${source.id}: ${problem}`));
+        const exclusions = new Map();
+        for (const exclusion of source.exclusions || []) {
+            if (exclusions.has(exclusion.id)) importProblems.push(`${source.id}:${exclusion.id}: duplicate exclusion`);
+            exclusions.set(exclusion.id, exclusion);
+        }
+        const seenExclusions = new Set();
+        const targetCounts = new Map();
+        const roleCounts = new Map();
+        const roleIds = new Set();
+        for (const rule of source.roleRules || []) {
+            if (!rule.id || !rule.when || !rule.outcome || !rule.target) importProblems.push(`${source.id}: malformed role rule`);
+            if (roleIds.has(rule.id)) importProblems.push(`${source.id}:${rule.id}: duplicate role rule`);
+            roleIds.add(rule.id);
+            roleCounts.set(rule.id, 0);
+        }
+        if (!roleIds.size) importProblems.push(`${source.id}: no role rules`);
+        let emitted = 0;
+        for (const record of resolved.records) {
+            let matched = 0;
+            for (const rule of source.roleRules || []) {
+                if (!conditionMatches(rule.when, record)) continue;
+                matched++;
+                roleCounts.set(rule.id, (roleCounts.get(rule.id) || 0) + 1);
+                if (!validOutcomes.has(rule.outcome) || rule.outcome === "excluded" || !resourceIds.has(rule.target)) {
+                    importProblems.push(`${source.id}:${record.id}: invalid role ${rule.id}`);
+                    continue;
+                }
+                const variantId = `${source.id}.${slug(record.id)}.${slug(rule.id)}`;
+                if (generatedVariantIds.has(variantId)) importProblems.push(`${variantId}: duplicate generated id`);
+                generatedVariantIds.add(variantId);
+                targetCounts.set(rule.target, (targetCounts.get(rule.target) || 0) + 1);
+                emitted++;
+            }
+            const exclusion = exclusions.get(record.id);
+            if (exclusion) {
+                seenExclusions.add(record.id);
+                if (!exclusion.reason) importProblems.push(`${source.id}:${record.id}: exclusion without reason`);
+                if (!conditionMatches(exclusion.when, record)) importProblems.push(`${source.id}:${record.id}: exclusion condition`);
+                if (matched) importProblems.push(`${source.id}:${record.id}: both mapped and excluded`);
+            } else if (!matched) {
+                importProblems.push(`${source.id}:${record.id}: no resource role`);
+            }
+        }
+        for (const id of exclusions.keys()) {
+            if (!seenExclusions.has(id)) importProblems.push(`${source.id}:${id}: exclusion does not match a record`);
+        }
+        for (const [id, count] of roleCounts) {
+            if (!count) importProblems.push(`${source.id}:${id}: role rule matched no records`);
+        }
+        if (parsed.length !== source.expectedRecords) importProblems.push(`${source.id}: source records ${parsed.length}/${source.expectedRecords}`);
+        if (seenExclusions.size !== source.expectedExclusions) importProblems.push(`${source.id}: exclusions ${seenExclusions.size}/${source.expectedExclusions}`);
+        if (emitted !== source.expectedRows) importProblems.push(`${source.id}: emitted roles ${emitted}/${source.expectedRows}`);
+        importDetails.push(`${source.id} ${emitted} roles from ${parsed.length} records; ${seenExclusions.size} reasoned exclusions -> ${[...targetCounts.entries()].map(([id, count]) => `${id}:${count}`).join(",")}`);
+    }
     report.check("dynamic_source_imports", importProblems.length === 0,
         importProblems.length ? importProblems.slice(0, 12).join("; ") : `${generatedVariantIds.size} variants; ${importDetails.join(" | ")}`);
 
@@ -301,6 +401,9 @@ function mutate(manifest, name) {
         if (target) target.renewable = true;
     } else if (name === "deferred-level") {
         changed.levels = [-2, -1, 0, 1];
+    } else if (name === "missing-creature-role") {
+        const source = changed.sourceSets.find(row => row.mode === "multiRoleImport");
+        if (source && source.roleRules && source.roleRules[0]) source.roleRules[0].target = "TEST_missing_resource";
     } else if (name) {
         throw new Error(`Unknown mutation ${name}`);
     }

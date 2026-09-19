@@ -324,7 +324,7 @@ Telemetry per bucket records initial count, current count, births/regrowth, spaw
 
 This design does not authorize skipping the current slice or editing around active claims.
 
-Phase-1 progress on 2026-09-19: `RESOURCE_MANIFEST.json` and `tools/check_resource_manifest.js` now encode and validate the five-level contract, 145 canonical resources, 490 dynamically audited local DF inorganic/plant rows, 116 explicit U7/OSRS reference roles and 11 provisional population profiles. The successful manifest check and deliberately failing mutations are development-tool evidence only. The manifest remains `design-input-not-live`; none of these rows are generated, replenished or playtested in RMMZ yet. `RESOURCE_MANIFEST.md` records the schema and the known coverage gaps.
+Phase-2 progress on 2026-09-19: `RESOURCE_MANIFEST.json` and `tools/check_resource_manifest.js` now encode and validate the five-level contract, 156 canonical resources, 11,538 dynamically audited local DF mappings (265 inorganic records, 225 plant records and 11,048 material roles inherited across 767 creature records), 116 explicit U7/OSRS reference roles and 11 provisional population profiles. Three non-spawning creature placeholders with no material definition are reasoned exclusions. The successful manifest check and deliberately failing mutations are development-tool evidence only. The manifest remains `design-input-not-live`; none of these rows are generated, replenished or playtested in RMMZ yet. `RESOURCE_MANIFEST.md` records the schema and the known coverage gaps.
 
 1. Create the source-to-canonical coverage manifest and an unmapped-row checker.
 2. Add the resource registry schema and original canonical entries; obtain approval for original fantasy tier names.
