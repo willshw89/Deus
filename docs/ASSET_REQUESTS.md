@@ -2,7 +2,7 @@
 
 **Claude Code** (engine) adds a request here whenever a feature needs art. **Gemini** (art) makes the assets to these specs. Claude Code checks each delivery against its spec and integrates it, and **the user approves** every asset before it counts as final (VISION V11).
 
-Every rule in `docs/ART_STANDARD.md` applies. **The look is 2D in the style of Final Fantasy VI (user decision 2026-09-18, evening)**: flat 3/4 top-down, 16×16 tiles at 3×, upright 4-facing sprites; the earlier Ultima VII 2.5D specs in the rows below (lean, transposed facings, U7 shapes as stand-ins) are superseded, and RPG Maker's stock art is the placeholder set until each original arrives. If a spec here seems wrong or impossible, write it under the request's **Notes** and tell the user. Don't silently change the asset or the spec.
+Every rule in `docs/ART_STANDARD.md` applies. **The look is High-Resolution 2.5D Ultima VII Oblique contained in 1-square tile (48×48 px)** (approved by user 2026-09-18, night): authentic 45° up-and-left lean (showing Top, South, and East faces), micro-dithered shading, and U7 Daylight Palette (`art/palette/uf.hex`). All assets fit strictly inside the 48×48 tile boundary. If a spec here seems wrong or impossible, write it under the request's **Notes** and tell the user. Don't silently change the asset or the spec.
 
 ## Status flow
 `REQUESTED` → `IN PROGRESS` (Gemini) → `DELIVERED` (files in place, sidecar written) → `CHECKED` (Claude Code: ART_STANDARD §8 checks pass and it works in the engine) → `APPROVED` (user) → `INTEGRATED`
@@ -11,18 +11,18 @@ A delivery that fails its check goes back to `IN PROGRESS`, with the reason in N
 ## Shared spec (applies to every request unless it says otherwise)
 Values marked *provisional* depend on the user's open decisions Q5 (facings) and Q6 (scale) in `docs/VISION.md`. Use them until those are locked.
 
-| Item | Spec (revised 2026-09-18 evening: FF6-style 2D) |
+| Item | Spec (approved 2026-09-18 night: U7 2.5D 1-Square Tile) |
 |---|---|
-| Native pixel size | Draw at **1× native**; export at exactly **3×**, nearest-neighbor |
-| Grid cell | 16×16 native = 48×48 exported |
-| View | **Flat 3/4 top-down JRPG view** (RPG Maker's own): no lean, no isometric. Ground tiles seen from above; objects and people show their front, feet on the bottom row of their cell |
-| Frame box | **Everything fits one tile: 48×48 exported (16×16 native), one-cell footprint, whatever the real size** (V44, like DF): people, animals, monsters, trees, wall pieces, items; anchor at the bottom-centre of the cell |
-| Facings | **4** (S, W, E, N), RPG Maker row order (down, left, right, up). E and W may mirror each other |
-| Palette | 16-bit look: 16–32 colors per sheet; the project palette once locked. Stock RPG Maker placeholders are what they are |
+| Native pixel size | 1-pixel micro-detail; native dimensions calibrated to fit 100% inside 48×48 screen tile |
+| Grid cell | 48×48 screen pixels (1 RMMZ tile) |
+| View | **Ultima VII 2.5D Oblique view**: 45° up-and-left lean, showing Top, South, and East faces |
+| Frame box | **Everything fits one tile: 48×48 pixels, one-cell footprint** (VISION V44, like DF): people, animals, monsters, trees, boulders, items; anchor at bottom-center [24, 47] |
+| Facings | **4** (S, W, E, N). West and East are transposed (X/Y swap) to preserve 45° up-and-left lean |
+| Palette | 100% Ultima VII Daylight Palette (`STATIC/PALETTES.FLX` record 0 / `art/palette/uf.hex`) |
 | Alpha | 0 or 255 only; no baked shadows (the engine draws shadows) |
 | Background for generation | Flat magenta `#FF00FF` |
-| Placeholders | Stock RPG Maker MZ art (licensed for RPG Maker games). U7 art is no longer used; existing `U7_` files are replaced one by one and never committed |
-| Original art | Goes through the ART_STANDARD §5 pipeline (`art/briefs` → `art/raw` → `art/masters` → review → `art/APPROVALS.md`) |
+| Reference / Stand-ins | Authentic Ultima VII assets from `STATIC/SHAPES.VGA` scaled to 48×48 single-tile containment (`art/u7_reference_squares/`) |
+| Original art | Goes through the ART_STANDARD pipeline matching the U7 2.5D 1-square standard |
 
 ### Sprite sheet + sidecar format (what the engine reads)
 Every object or character image comes with a JSON sidecar of the same name (`UF_Human_Male.png` + `UF_Human_Male.json`). Sheets are a grid: **one row per facing, one column per frame**, all frames the same size, in exported (3×) pixels.

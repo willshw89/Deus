@@ -1,22 +1,21 @@
-# ART STANDARD: the 2D look (16-bit JRPG style, in the manner of Final Fantasy VI)
+# ART STANDARD: High-Resolution 2.5D Ultima VII Oblique (1-Square Tile Containment)
 
-**Revised 2026-09-18 (evening) by user decision:** the game's look is **2D in the style of FF6**, not Ultima VII's 2.5D. The earlier 2.5D standard and `docs/GUIDE_25D.md` are superseded; they stay in the repo as history only. This applies to every image in the game, placeholders included. An image that breaks a rule here doesn't go into `game/img/`, however good it looks.
+**Approved 2026-09-18 (night) by user decision:** the game's look is **High-Resolution 2.5D Ultima VII Oblique**, strictly contained inside **1 asset square (48×48 screen pixels)**. This brings back the rich micro-dithered detail, textile folds, rock grain, and authentic 45° axonometric depth of Ultima VII (`STATIC/SHAPES.VGA` using the Daylight Palette `art/palette/uf.hex`), without multi-tile sprawl. Low-res chunky 16×16 pixel art is superseded.
 
 ## 1. The view
 | # | Rule |
 |---|---|
-| F1 | **Flat 3/4 top-down JRPG view** on a square grid, the same view RPG Maker draws by default: ground is seen from above, walls and objects show their front face, nothing leans, no isometric diamonds. |
-| F2 | **Tiles:** 16×16 native pixels, shown at exactly **3× = 48×48** (RMMZ's tile size). Ground and water are RMMZ autotiles (A1/A2 layouts). Trees, walls and furniture are objects drawn as sprites over the ground, sorted by their bottom row so people walk in front of and behind them. |
-| F3 | **Everything fits one tile (VISION V44, like DF):** every person, creature, tree, wall piece and item has a one-cell footprint and fits a **48×48 frame** (16×16 native), whatever its real size; a hare, a horse, a troll and an oak are all one tile. Bulk shows in the portrait and the description. Characters: upright, 4 facings (S, W, E, N), feet on the bottom row of the cell, anchor at the bottom-centre; E and W may mirror each other. RPG Maker's own 48×48 character frames are exactly this format. |
-| F4 | **Depth:** the engine sorts by foot row; a sprite may overhang the cells above it (tree canopies, tall walls) but never the cells below. |
-| F5 | **Palette:** 16-bit look: 16–32 colors per sheet, one project palette (`art/palette/uf.hex`) once locked, no gradients, no anti-aliasing, no blur, pixels fully opaque or fully transparent. Outlines dark and selective (as FF6 does), not pure black everywhere. |
-| F6 | **Scale reference:** everything is one cell (F3); a hut is 3×3 cells of one-cell wall pieces; a forest is many one-cell trees. |
-| F7 | **Combat is on the map** (VISION V45): attacks, casts and hits are frames of the character's own sheet (AR-600 `attack`, `cast`) plus small effect sprites; there is no battle screen and no separate battler art. |
+| U1 | **Ultima VII 2.5D Oblique view** on a square grid: ground is viewed from above; vertical height projects **up and to the left at 45°**. Top, South, and East faces are visible. |
+| U2 | **High-resolution micro-detail:** artwork uses fine 1-pixel micro-dithered shading, authentic textile folds, and mineral facets matching native Ultima VII assets, rather than chunky low-res block pixels. |
+| U3 | **Everything fits one tile (VISION V44, like DF):** every person, creature, tree, rock, and item has a one-cell footprint and fits inside a **48×48 screen pixel frame**; objects larger in the raw data (e.g. 72×70 oak) are proportionally shrunk to fit 100% within 48×48. No multi-tile map sprawl. Anchor is at the bottom-center of the cell. |
+| U4 | **Facings:** 4 facings for characters and creatures (South, West, East, North). In 2.5D oblique projection, West and East facings are transposed (X/Y swap) to maintain the 45° up-and-left lean. |
+| U5 | **Palette:** 100% Ultima VII Daylight Palette (`STATIC/PALETTES.FLX` record 0 / `art/palette/uf.hex`). Background for generation/clean steps is flat magenta `#FF00FF`. No blur, no anti-aliasing to background. |
+| U6 | **Scale reference:** 1 tile = 48×48 screen pixels (RMMZ native tile grid). |
+| U7 | **Combat is on the map** (VISION V45): attacks, casts, and hits play as animation frames on the map sprite (AR-600), with DF-style injuries. |
 
-## 2. Placeholders
-- **Stock RPG Maker MZ art is the placeholder set** (it is this style, and licensed for RPG Maker games): `Outside_*` tiles for ground, water, trees, bushes, rocks and buildings; `People1–4`, `Actor1–3`, `Nature`, `Monster`, `Evil` character sheets. The catalog names them; `docs/ASSET_INVENTORY.md` lists every one in use with its request ID.
-- **Ultima VII art is no longer a stand-in** (it leans). Existing `U7_` files stay on disk until each is replaced, listed in `docs/STATUS.md`, and are never committed; new `U7_` files are not made.
-- Code-drawn placeholders (`UF_Gen*`: ground kinds, stance squares, selection corners, designation marks) are fine until art arrives.
+## 2. Reference & Stand-ins
+- **Ultima VII assets decoded directly from `STATIC/SHAPES.VGA`** (scaled to 48×48 single-tile containment) serve as the approved visual masters and stand-ins during development (`art/u7_reference_squares/`).
+- Original art will match this standard: authentic 2.5D oblique lean, micro-dithered shading, and 48×48 square containment.
 
 ## 3. Sprite sheets and sidecars
 - Characters and creatures: RPG Maker's `$` single-character sheet, 3 columns × 4 rows (S, W, E, N), **frame 48×48 for everyone**, plus the animation columns of the layered standard (`docs/ASSET_REQUESTS.md` AR-600: work, carry, attack, cast, sleep) as they arrive.
