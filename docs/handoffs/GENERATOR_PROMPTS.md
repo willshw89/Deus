@@ -1,12 +1,12 @@
 # Generator prompts: one per asset group (rewritten 2026-09-19 by Claude Code)
 
-The user's decisions behind these prompts (docs/VISION.md): HD pixel art in the style of Final Fantasy VI (flat top-down, no 2.5D lean), drawn at higher definition than the original; every sprite at its size against the 48 px RPG Maker grid square, with a grown person filling roughly one square and larger beings on bigger character sheets (V44); the theme is Arthurian fantasy with science-fiction elements (V65); everything that can move is animated as frames and shows its equipment as layers (V58, V60, V61); every shipped asset is original and passes the originality check (AGENTS rule 8).
+The user's decisions behind these prompts (docs/VISION.md): HD pixel art in the style of Final Fantasy VI (flat top-down, no 2.5D lean), drawn at higher definition than the original; every sprite at its size against the 48 px RPG Maker grid square, with a grown person filling roughly one square and larger beings on bigger character sheets (V44); creatures move and act in eight directions, so every action is drawn in all eight facings and delivered one image per action (V3); the theme is Arthurian fantasy with science-fiction elements (V65); everything that can move is animated as frames and shows its equipment as layers (V58, V60, V61); every shipped asset is original and passes the originality check (AGENTS rule 8).
 
 ## How to use
 1. Start one generator with prompt 0 and get the four anchors approved before anything else.
 2. Then start one generator per group, 1 to 13 (group 7 waits for the first approved body from group 6). Each prompt is self-contained: paste the whole block.
 3. Attach to every generator a few stock RPG Maker MZ sprites as a size and view reference (for example game/img/characters/People1.png, Actor1.png, Nature.png and a crop of game/img/tilesets/Outside_B.png; RPG Maker's own art is licensed for RPG Maker games and uses the same flat view), and, once approved, the four anchors.
-4. Save each delivery as art/raw/<id>.png. Claude Code reduces it with the project's tool, checks it (palette, size, originality) and wires it into the game after your approval.
+4. Save each delivery under art/raw/ with the file name the prompt gives (art/raw/oak.png; creatures one file per action, art/raw/human_male_adult_walk.png). Claude Code reduces it with the project's tool, checks it (palette, size, originality) and wires it into the game after your approval.
 
 ## Prompt 0: Style lock (do this first, alone)
 
@@ -47,23 +47,33 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: STYLE LOCK (DO THIS FIRST, ALONE)
 
 Your job: the four style anchors every other generator will copy. Make them one at a time, in this order, and stop after each for approval.
-- human_male: an adult human man, a settler of a small frontier band, plain undyed homespun tunic, rope belt, dark trousers, simple shoes, short brown hair. First deliver only the south stand frame (48 x 48 frame, about 46 px tall, feet on the bottom row, centred). After approval, the full sheet (see the layout below).
+- human_male: an adult human man, a settler of a small frontier band, plain undyed homespun tunic, rope belt, dark trousers, simple shoes, short brown hair. First deliver only the south stand frame (48 x 48 frame, about 46 px tall, feet on the bottom row, centred). After approval, the stand frame in all eight facings (one image, one column of eight cells: this locks the diagonal view). After that, the rest of the sheet, one action per image (see the layout below).
 - oak: a mature broadleaf oak (96 x 96 frame, about 90 px wide and tall, the trunk standing upright at the bottom centre), stand frame plus 3 sway frames.
 - wall_wood: one straight piece of a wooden palisade wall of vertical logs, running east to west: its top on the square and its front face one square tall below it (a 48 x 96 piece, like an RPG Maker wall).
 - meadow: one 48 x 48 ground tile of meadow grass, seamless on all four sides, calm and low-contrast (people and objects stand on it).
-Sheet layout for every creature: 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".
+Sheet layout for every creature. The finished sheet has 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Every action has all eight facings.
+Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each image the frames run left to right and the eight facings run top to bottom in the order above; every cell is the same size (192 x 192 on your canvas for a 48 x 48 creature, so a three-frame action is 576 x 1536; 384 x 384 cells for a 96 x 96 creature), and the creature stands on the same point of every cell:
+- <id>_idle.png: 3 frames (stand, idle 1, idle 2)
+- <id>_walk.png: 3 frames (step, pass, step)
+- <id>_work.png: 3 frames (wind-up, strike, follow-through)
+- <id>_carry.png: 1 frame (walking with a load held in front)
+- <id>_attack.png: 3 frames (wind-up, strike, recover)
+- <id>_cast.png: 3 frames (raise, release, lower; people only)
+- <id>_hurt.png: 1 frame (flinching back)
+- <id>_death.png: 3 frames (buckling, falling, lying still)
+If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 ```
 
 ## Prompt 1: Ground and water tiles
@@ -105,13 +115,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: GROUND AND WATER TILES
@@ -162,13 +172,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: TREES AND LARGE PLANTS
@@ -231,13 +241,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: SMALL PLANTS AND GROUND COVER
@@ -303,13 +313,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: STONE, ORE, CRYSTALS AND RUINS
@@ -368,13 +378,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: BUILDINGS, CAMP AND WORKSHOPS
@@ -439,22 +449,32 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: PEOPLE (BODIES)
 
 Your job: the bodies of all peoples, at every age. A grown person fills roughly one grid square (see the scale); larger peoples may use bigger sheets. Frames 48 x 48 (96 x 96 only if a species does not fit). Plain undyed clothes (a simple tunic or wrap): armour, weapons and better clothes are separate layers made by another generator on exactly the same frames, so keep the body's pose and position identical to the approved human_male anchor frame by frame.
 Species (7): human, elf, dwarf, goblin, orc, gnome, automaton, each male and female. Make species clearly different in silhouette at this size: elves tall and slender with pointed ears; dwarves short and broad with beards (women too, shorter); gnomes small with big noses and caps; goblins small, hunched, green-grey skin, big ears; orcs tall, heavy, tusked, grey-green; the automaton a jointed figure of wood, brass and stone with a glowing eye.
-Ages: baby (carried or crawling, 10 px), child (16-20 px), teen (24-28 px), adult, elder (slightly stooped, grey hair). One sheet per species, gender and age.
-Sheet layout for every creature: 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".
-Name files <species>_<gender>_<age>.png (human_male_adult.png ...).
+Ages: baby (crawling, 14-18 px long), child (24-32 px tall), teen (36-42 px), adult (44-48 px), elder (slightly stooped, grey hair, 42-46 px). These heights are for humans, elves, orcs and the automaton; dwarves, goblins and gnomes scale down in proportion (adult 34-40 px). One sheet per species, gender and age, every action in all eight facings.
+Sheet layout for every creature. The finished sheet has 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Every action has all eight facings.
+Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each image the frames run left to right and the eight facings run top to bottom in the order above; every cell is the same size (192 x 192 on your canvas for a 48 x 48 creature, so a three-frame action is 576 x 1536; 384 x 384 cells for a 96 x 96 creature), and the creature stands on the same point of every cell:
+- <id>_idle.png: 3 frames (stand, idle 1, idle 2)
+- <id>_walk.png: 3 frames (step, pass, step)
+- <id>_work.png: 3 frames (wind-up, strike, follow-through)
+- <id>_carry.png: 1 frame (walking with a load held in front)
+- <id>_attack.png: 3 frames (wind-up, strike, recover)
+- <id>_cast.png: 3 frames (raise, release, lower; people only)
+- <id>_hurt.png: 1 frame (flinching back)
+- <id>_death.png: 3 frames (buckling, falling, lying still)
+If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
+Name files <species>_<gender>_<age>_<action>.png (human_male_adult_idle.png, human_male_adult_walk.png ...).
 ```
 
 ## Prompt 7: Equipment layers (after the first body is approved)
@@ -496,23 +516,34 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: EQUIPMENT LAYERS (AFTER THE FIRST BODY IS APPROVED)
 
-Your job: clothing, armour and held items as LAYERS drawn on transparent (magenta) frames that sit exactly on top of the approved people bodies, frame by frame, facing by facing, on the same 20-column sheet. Draw each layer against the approved human_male_adult sheet so it lines up pixel for pixel, including the work, attack and cast swings; a second pass fits the other species.
+Your job: clothing, armour and held items as LAYERS drawn on transparent (magenta) frames that sit exactly on top of the approved people bodies, frame by frame and facing by facing: all eight facings of every action, in the same one-image-per-action layout as the bodies. Draw each layer against the approved human_male_adult sheet so it lines up pixel for pixel, including the work, attack and cast swings; a second pass fits the other species.
 Layers:
 - Clothing tiers: fiber_wrap (woven grass wrap), hide_cloak (rough animal hide), tailored (dyed tunic and trousers).
 - Head: helmet_leather, helmet_iron. Torso: armor_leather, mail_iron. Legs: leggings_leather, greaves_iron. Shields: shield_wood, shield_iron (held on the arm).
 - Held weapons and tools: stone_axe, stone_knife, stone_pick, bow_short, bow_long, sling, club, spear, dagger_iron, sword_short, sword_long, axe_iron, mace; a quiver of arrows on the back when a bow is held.
-Name files <item id>_layer.png. The swing of each weapon must read in the attack columns (8-10) and tools in the work columns (4-6).
+Name files <item id>_layer_<action>.png (spear_layer_attack.png ...). The swing of each weapon must read in the attack images and tools in the work images, in every facing: a north-west swing is aimed north-west. Where the item passes behind the body (a sword swung across the back, a shield arm turned away), leave those pixels empty so the body shows in front.
+Sheet layout for every creature. The finished sheet has 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Every action has all eight facings.
+Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each image the frames run left to right and the eight facings run top to bottom in the order above; every cell is the same size (192 x 192 on your canvas for a 48 x 48 creature, so a three-frame action is 576 x 1536; 384 x 384 cells for a 96 x 96 creature), and the creature stands on the same point of every cell:
+- <id>_idle.png: 3 frames (stand, idle 1, idle 2)
+- <id>_walk.png: 3 frames (step, pass, step)
+- <id>_work.png: 3 frames (wind-up, strike, follow-through)
+- <id>_carry.png: 1 frame (walking with a load held in front)
+- <id>_attack.png: 3 frames (wind-up, strike, recover)
+- <id>_cast.png: 3 frames (raise, release, lower; people only)
+- <id>_hurt.png: 1 frame (flinching back)
+- <id>_death.png: 3 frames (buckling, falling, lying still)
+If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 ```
 
 ## Prompt 8: Animals
@@ -554,13 +585,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: ANIMALS
@@ -583,7 +614,17 @@ Your job: every animal, at its size against the grid square (see the scale): sma
 - hawk (Hawk, flier)
 - songbird (Songbird, flier)
 - bat (Bat, flier)
-Sheet layout for every creature: 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".
+Sheet layout for every creature. The finished sheet has 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Every action has all eight facings.
+Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each image the frames run left to right and the eight facings run top to bottom in the order above; every cell is the same size (192 x 192 on your canvas for a 48 x 48 creature, so a three-frame action is 576 x 1536; 384 x 384 cells for a 96 x 96 creature), and the creature stands on the same point of every cell:
+- <id>_idle.png: 3 frames (stand, idle 1, idle 2)
+- <id>_walk.png: 3 frames (step, pass, step)
+- <id>_work.png: 3 frames (wind-up, strike, follow-through)
+- <id>_carry.png: 1 frame (walking with a load held in front)
+- <id>_attack.png: 3 frames (wind-up, strike, recover)
+- <id>_cast.png: 3 frames (raise, release, lower; people only)
+- <id>_hurt.png: 1 frame (flinching back)
+- <id>_death.png: 3 frames (buckling, falling, lying still)
+If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 Notes: grazers use the work columns for running away; predators use the attack columns for a bite or pounce; fliers (hawk, songbird, bat) are drawn in the air above their cell with a flapping loop in the walk columns and a separate perched stand frame; the serpent slithers. Death frames end with the animal lying on its side: that last frame stays as the remains. Deer: stag with antlers and hind without, as two sheets.
 ```
 
@@ -626,13 +667,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: MONSTERS
@@ -645,7 +686,17 @@ Your job: the monsters, original designs only (no creatures from other games or 
 - restless_dead (Restless dead, monster)
 - ice_wraith (Ice wraith, monster)
 Designs: giant_spider a hairy cave spider the size of a large dog; troll a hulking grey-green brute with stony, mossy skin and long arms; bog_horror a shambling mass of mud, reeds and roots with a vaguely human shape; sand_stalker a low desert predator with sandy plates and long claws; restless_dead a walking skeleton in rags; ice_wraith a floating, translucent frost spirit trailing mist (use magenta for the background and the palette's pale blues for the body; no partial transparency). Avoid red bodies (the game marks hostiles with a red square under them).
-Sheet layout for every creature: 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Name the columns in the sidecar's "animations".
+Sheet layout for every creature. The finished sheet has 8 rows (facings south, south-west, west, north-west, north, north-east, east, south-east) and 20 columns of frames: 0 stand; 1-3 walk; 4-6 work (for animals: run or flee); 7 carry; 8-10 attack; 11-13 cast (people only; animals leave these empty); 14 hurt; 15-17 death (the last frame lying still on the ground: it stays as the remains); 18-19 idle (breathing, a weight shift or a look around). Every action has all eight facings.
+Deliver it ONE ACTION PER IMAGE; the project's tool assembles the sheet. In each image the frames run left to right and the eight facings run top to bottom in the order above; every cell is the same size (192 x 192 on your canvas for a 48 x 48 creature, so a three-frame action is 576 x 1536; 384 x 384 cells for a 96 x 96 creature), and the creature stands on the same point of every cell:
+- <id>_idle.png: 3 frames (stand, idle 1, idle 2)
+- <id>_walk.png: 3 frames (step, pass, step)
+- <id>_work.png: 3 frames (wind-up, strike, follow-through)
+- <id>_carry.png: 1 frame (walking with a load held in front)
+- <id>_attack.png: 3 frames (wind-up, strike, recover)
+- <id>_cast.png: 3 frames (raise, release, lower; people only)
+- <id>_hurt.png: 1 frame (flinching back)
+- <id>_death.png: 3 frames (buckling, falling, lying still)
+If one image cannot hold eight rows at full size, split it: <id>_<action>_a.png with the rows south, south-west, west, north-west and <id>_<action>_b.png with north, north-east, east, south-east. Start each creature with its idle image and wait for approval; the other actions follow.
 ```
 
 ## Prompt 10: Items and icons
@@ -687,13 +738,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: ITEMS AND ICONS
@@ -792,13 +843,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: FACES
@@ -846,13 +897,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: INTERFACE
@@ -904,13 +955,13 @@ You are making original game art for a living fantasy world seen from above: a c
 6. Frames: a thing that fits inside one square is drawn inside one 192 × 192 square of your canvas (48 × 48 final), standing on the bottom-centre of the square. A larger thing uses a 384 × 384 canvas (96 × 96 final; 384 × 576 for very tall things) and stands on the bottom-centre of that canvas; it may reach up and to the sides beyond one square, never below its base. Never crop a shape to make it fit.
 7. Colours: rich, warm and lively, as in FF6; the tool snaps every colour to the project palette, so avoid neon and pure black.
 8. Background: flat magenta #FF00FF, one subject per image, centred. No ground shadows (the game draws them), no text, no borders, no grid lines, no watermarks.
-9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames of one asset sit side by side on one sheet as your group section says.
-10. Facings: creatures move in eight directions, so every creature sheet has EIGHT facings in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows; draw the five others.
+9. Animation: everything that can move is animated as frames on the sheet (the game draws no motion of its own). Frames sit side by side as your group section says; creatures are delivered one image per action (see the sheet layout).
+10. Eight facings for EVERY action: creatures move AND act in eight directions, so every animation (stand, idle, walk, work, carry, attack, cast, hurt, death) is drawn in all eight facings, in this row order: south (toward the viewer), south-west, west, north-west, north (back), north-east, east, south-east. A creature facing north-east chops, carries, swings, casts, flinches and falls facing north-east. The diagonal facings are true three-quarter turns (the body turned 45 degrees, one shoulder nearer the viewer, the feet pointing along the diagonal), never a copy of a straight facing. The east-side rows (north-east, east, south-east) may be mirror images of the west-side rows (north-west, west, south-west): leave those three rows empty (magenta) and the project's tool mirrors them, or draw them when the design is not symmetrical.
 11. Equipment shows: what a creature holds and wears is what you see. Bodies are drawn bare-handed in plain clothes; clothing, armour, shields, tools and weapons are separate LAYER sheets on exactly the same frames, and the game stacks what the character has equipped. Every work and attack frame lines the tool or weapon up with the hand: an axe for chopping, a pick for mining and quarrying, a knife for crafting and butchering, a hammer at the smithy, a bow or spear for hunting, the equipped weapon in combat.
 12. Originality: all art is your own new drawing in this style. Never trace, copy, recolour or edit existing game sprites (from FF6, RPG Maker, Ultima VII or anything else); every delivery is checked against other games' sprites and near-copies are rejected.
 13. Delivery, for every asset:
-   - The 4× PNG (or sheet) named <id>.png, with the ids listed in your section. The art director reduces it with the project's tool and checks it.
-   - One line per asset: what you drew and the states and frames on the sheet.
+   - The 4× PNG named as your section says (<id>.png for things; <id>_<action>.png for creatures, one image per action), with the ids listed in your section. The art director reduces it with the project's tool and checks it.
+   - One line per image: what you drew and the states, frames and facings in it.
    - Deliver your FIRST asset alone and wait for the art director's approval. Then work in batches of three to five, each checked before the next.
 
 YOUR GROUP: EFFECTS
@@ -919,8 +970,8 @@ Your job: the small animated effects that make the world move. Same palette, in 
 - Hit flash (3 frames), blood splatter on the ground (3 sizes, small and not gory), dust puff for footsteps and work (4 frames), wood chips (chopping) and stone chips (mining), 4 frames each.
 - Fire loop (6 frames) for a burning cell and a small flame (4 frames), embers, smoke puff rising (6 frames), sparks (3 frames).
 - Water glint (3 frames), falling leaves and drifting pollen (4 frames each), snowflakes, rain streaks.
-- Arrow in flight (8 directions), sling stone, a thrown spear.
-- Spells: a hand glow (3 frames) and three spell bursts (fire, frost, healing), 6 frames each, 48 x 48 or 96 x 96.
+- Missiles in eight directions (one image each, the eight directions as rows in the facing order south, south-west, west, north-west, north, north-east, east, south-east): an arrow in flight (2 frames), a thrown spear (2 frames); a sling stone is round (2 frames of spin, one row).
+- Spells: a hand glow (3 frames); a fire bolt and a frost bolt in flight, each in the eight directions (3 frames); three spell bursts (fire, frost, healing), 6 frames each, 48 x 48 or 96 x 96.
 Name files fx_<name>.png.
 ```
 

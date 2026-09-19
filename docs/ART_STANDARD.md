@@ -10,7 +10,7 @@
 | F3 | **Highest definition that keeps the style and the scale:** one art pixel is one screen pixel at zoom 1 on the 48 px grid. That is the most detail a pixel-art sprite can carry at this grid size without turning into scaled-down painting; every sprite uses it fully (faces with eyes, clothing folds, buckles, hair and fur texture, bark and stone grain), keeping FF6's clarity. The generators' 4× originals are kept in `art/raw/` so a larger grid square could be adopted later without redrawing. |
 | F4 | **Scale against the grid square (V44):** a grown person fills roughly one square; smaller creatures, plants and items are smaller; larger beings use bigger character sheets and take up more space. The size table is in §2. Creatures move one per cell; large objects may cover several cells and may overhang the cells above them, never the cells below. |
 | F5 | **Palette:** the project palette `art/palette/uf.hex` (256 colours); the cleaning tool snaps every colour to it. Rich, warm, lively colour as in FF6; no neon, no pure black. Every pixel fully opaque or fully transparent. |
-| F6 | **Characters:** 8 facings (S, SW, W, NW, N, NE, E, SE; VISION V3), the east-side facings may mirror the west side. Bodies are bare-handed in plain clothes; clothing, armour, shields, tools and weapons are layer sheets on the same frames (V61). |
+| F6 | **Characters:** 8 facings (S, SW, W, NW, N, NE, E, SE; VISION V3) for **every action**, not only walking: stand, idle, walk, work, carry, attack, cast, hurt and death each have all eight. Diagonals are true three-quarter turns, never copies of a straight facing. The east-side facings may mirror the west side. Bodies are bare-handed in plain clothes; clothing, armour, shields, tools and weapons are layer sheets on the same frames (V61). |
 | F7 | **Animation is frames in the art** (V58, V60): idle, walk, work, carry, attack, cast, hurt, death; sway, lit, open and work loops for objects. The game draws no motion of its own. Combat happens on the map (V45, V64). |
 | F8 | **Theme (V65):** Arthurian fantasy with science-fiction touches. Named lore needs the user's approval (AGENTS rule 7). |
 
@@ -49,7 +49,8 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 - Code-drawn placeholders (`UF_Gen*`) are fine until art arrives.
 
 ## 4. Sheets and sidecars
-- Characters and creatures: one sheet per character on the layered standard (`docs/ASSET_REQUESTS.md` AR-600): 8 rows (S, SW, W, NW, N, NE, E, SE) and 20 columns (0 stand, 1–3 walk, 4–6 work, 7 carry, 8–10 attack, 11–13 cast, 14 hurt, 15–17 death, 18–19 idle), frames of the size in §2.
+- Characters and creatures: one sheet per character on the layered standard (`docs/ASSET_REQUESTS.md` AR-600): 8 rows (S, SW, W, NW, N, NE, E, SE) and 20 columns (0 stand, 1–3 walk, 4–6 work, 7 carry, 8–10 attack, 11–13 cast, 14 hurt, 15–17 death, 18–19 idle), frames of the size in §2. Every action fills all eight rows.
+- Generators deliver creatures **one image per action** (`<id>_idle`, `_walk`, `_work`, `_carry`, `_attack`, `_cast`, `_hurt`, `_death`): frames left to right, the eight facings top to bottom, equal cells. An image too large for the generator splits into `_a` (S, SW, W, NW) and `_b` (N, NE, E, SE). Empty east-side rows are mirrored from the west side. The cleaning tool assembles the 20-column sheet.
 - Objects: one frame per state, or a loop named in the sidecar. States that the catalog treats as separate objects (standing/stump, full/picked, unlit/lit, intact/ruined) are separate files.
 - Every sheet has a JSON sidecar of the same name: `frameWidth`, `frameHeight`, `anchor` (bottom-centre of the footprint), `footprint`, `facings`, `animations`, `frameMs`, `layer`, `species`, `stage`.
 
@@ -59,7 +60,7 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 | 1. Prompt | `docs/handoffs/GENERATOR_PROMPTS.md` (one prompt per asset group; built by `tools/build_generator_prompts.js` from the catalog) | Claude Code |
 | 2. Style lock (once) | Four anchors: a man, an oak, a wall piece, a meadow tile | a generator, then the user |
 | 3. Generate | `art/raw/<id>.png`: drawn on a 4× canvas (one grid square = 192 × 192), magenta background; kept as the high-resolution original | the generators |
-| 4. Clean | `art/masters/<id>.png` + sidecar: reduced by 4, background removed, snapped to the palette, placed on the anchor (the cleaning tool) | a tool |
+| 4. Clean | `art/masters/<id>.png` + sidecar: reduced by 4, background removed, snapped to the palette, placed on the anchor; creatures' action images assembled into the 20-column sheet with empty east rows mirrored (the cleaning tool) | a tool |
 | 5. Check | `tools/art_check.js --native` and `tools/originality_check.js` pass | tools |
 | 6. Review | the result at 1× and 4× on grass next to the person reference | the user |
 | 7. Approve | `art/APPROVALS.md` | **the user only** |
@@ -78,5 +79,6 @@ By eye: upright, no lean; the right size against the grid square and the person 
 | Wrong size against the grid square | Measure against §2 and the person reference; redraw. |
 | Too little detail (big flat areas, 16-bit-sized features) | Reject; this standard uses every pixel of the frame. |
 | The character changes between frames or facings | Approve one facing first, then use it as the reference for the others. |
+| Diagonals faked (a straight facing reused), or actions drawn in only four facings | Reject; lock the diagonal view with the eight-facing stand image first, and every action has all eight. |
 | Copies a reference | The originality check rejects it. |
 | Green fringes from green-screen | Magenta background only. |
