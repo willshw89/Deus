@@ -1,765 +1,4 @@
 {
- "!$UF_Icon_102": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item bow_short \"Short bow\"",
-   "item bow_long \"Long bow\" (tint #c8a070)"
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "bow_short: made by: Carve a short bow",
-   "bow_long: made by: Carve a long bow"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_102.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 102 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_107": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item spear \"Spear\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Haft a stone spear, Haft an iron spear"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_107.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 107 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_110": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item club \"Club\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Shape a club"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_110.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 110 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_114": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900",
-   "AR-906"
-  ],
-  "usedBy": [
-   "item sling \"Sling\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Braid a sling"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_114.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 114 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_120": {
-  "status": "stock RMMZ",
-  "request": "AR-201",
-  "requests": [
-   "AR-201",
-   "AR-512"
-  ],
-  "usedBy": [
-   "item stone_knife \"Stone knife\" (tint #c8b8a0)",
-   "item dagger_iron \"Iron dagger\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "stone_knife: held tool (hunt ×2, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
-   "stone_knife: made by: Knap a stone knife",
-   "dagger_iron: held tool (hunt ×2.5, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
-   "dagger_iron: made by: Forge an iron dagger"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_120.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 120 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_128": {
-  "status": "stock RMMZ",
-  "request": "AR-901",
-  "requests": [
-   "AR-901"
-  ],
-  "usedBy": [
-   "item shield_iron \"Iron shield\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Forge an iron shield"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_128.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 128 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_129": {
-  "status": "stock RMMZ",
-  "request": "AR-512",
-  "requests": [
-   "AR-512",
-   "AR-901"
-  ],
-  "usedBy": [
-   "item shield_wood \"Wooden shield\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Build a wooden shield"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_129.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 129 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_132": {
-  "status": "stock RMMZ",
-  "request": "AR-902",
-  "requests": [
-   "AR-902"
-  ],
-  "usedBy": [
-   "item helmet_iron \"Iron helmet\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Forge an iron helmet"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_132.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 132 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_135": {
-  "status": "stock RMMZ",
-  "request": "AR-903",
-  "requests": [
-   "AR-903"
-  ],
-  "usedBy": [
-   "item mail_iron \"Iron mail\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "worn: clothing tier 3 (the wearer's sheet changes)",
-   "made by: Forge iron mail"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_135.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 135 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_136": {
-  "status": "stock RMMZ",
-  "request": "AR-201",
-  "requests": [
-   "AR-201"
-  ],
-  "usedBy": [
-   "item fiber_wrap \"Woven wrap\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "worn: clothing tier 1 (the wearer's sheet changes)",
-   "made by: Weave a fiber wrap"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_136.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 136 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_138": {
-  "status": "stock RMMZ",
-  "request": "AR-201",
-  "requests": [
-   "AR-201"
-  ],
-  "usedBy": [
-   "item hide_cloak \"Hide cloak\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "worn: clothing tier 2 (the wearer's sheet changes)",
-   "made by: Sew a hide cloak"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_138.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 138 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_140": {
-  "status": "stock RMMZ",
-  "request": "AR-903",
-  "requests": [
-   "AR-903"
-  ],
-  "usedBy": [
-   "item leggings_leather \"Leather leggings\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Stitch leather leggings"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_140.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 140 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_141": {
-  "status": "stock RMMZ",
-  "request": "AR-903",
-  "requests": [
-   "AR-903"
-  ],
-  "usedBy": [
-   "item greaves_iron \"Iron greaves\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Forge iron greaves"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_141.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 141 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_150": {
-  "status": "stock RMMZ",
-  "request": "AR-902",
-  "requests": [
-   "AR-902"
-  ],
-  "usedBy": [
-   "item helmet_leather \"Leather cap\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Stitch a leather cap"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_150.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 150 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_153": {
-  "status": "stock RMMZ",
-  "request": "AR-903",
-  "requests": [
-   "AR-903"
-  ],
-  "usedBy": [
-   "item armor_leather \"Leather armor\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "worn: clothing tier 3 (the wearer's sheet changes)",
-   "made by: Stitch leather armor"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_153.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 153 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_167": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-511",
-   "AR-904"
-  ],
-  "usedBy": [
-   "item charcoal \"Charcoal\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Burn charcoal",
-   "used in: Smelt an iron bar, Smelt a copper bar"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_167.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 167 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_169": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-1216",
-   "AR-044",
-   "AR-030",
-   "AR-033"
-  ],
-  "usedBy": [
-   "item gold \"Gold nugget\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_169.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 169 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_216": {
-  "status": "stock RMMZ",
-  "request": "AR-201",
-  "requests": [
-   "AR-201",
-   "AR-512"
-  ],
-  "usedBy": [
-   "item stone_pick \"Stone pick\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "held tool (quarry ×2, mine ×2, pick ×1.5): shown in the hand on the held layer (AR-600)",
-   "made by: Haft a stone pick"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_216.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 216 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_225": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-904"
-  ],
-  "usedBy": [
-   "item arrows \"Arrows\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_225.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 225 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_256": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item root \"Root vegetable\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −25 hunger"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_256.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 256 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_260": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item fish \"Fish\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −25 hunger",
-   "used in: Roast fish"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_260.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 260 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_261": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-1905"
-  ],
-  "usedBy": [
-   "item mushroom \"Mushrooms\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −20 hunger"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_261.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 261 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_265": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-020",
-   "AR-102"
-  ],
-  "usedBy": [
-   "item fruit \"Fruit\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −30 hunger, −10 thirst"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_265.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 265 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_274": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item seeds \"Seeds\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_274.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 274 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_289": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item wool \"Wool\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_289.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 289 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_290": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item fiber \"Plant fiber\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak, Carve a short bow … (+6)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_290.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 290 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_291": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-511",
-   "AR-201",
-   "AR-903",
-   "AR-904",
-   "AR-902",
-   "AR-905"
-  ],
-  "usedBy": [
-   "item hide \"Hide\"",
-   "item leather \"Leather\" (tint #d09060)"
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "hide: used in: Sew a hide cloak, Tan a hide",
-   "leather: made by: Tan a hide",
-   "leather: used in: Braid a sling, Build a wooden shield, Forge an iron dagger, Forge a short sword, Forge a long sword, Stitch a leather cap … (+5)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_291.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 291 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_295": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item firewood \"Firewood\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Split firewood",
-   "used in: Burn charcoal"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_295.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 295 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_297": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-511",
-   "AR-904"
-  ],
-  "usedBy": [
-   "item feathers \"Feathers\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_297.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 297 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_298": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item bone \"Bone\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Fletch bone-tipped arrows"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_298.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 298 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_300": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item gem_cut \"Cut gem\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_300.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 300 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_301": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item gem_rough \"Rough gem\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_301.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 301 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_313": {
-  "status": "stock RMMZ",
-  "request": "AR-200",
-  "requests": [
-   "AR-200",
-   "AR-904"
-  ],
-  "usedBy": [
-   "item bar_iron \"Iron bar\"",
-   "item bar_copper \"Copper bar\" (tint #e0a070)"
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "bar_iron: made by: Smelt an iron bar",
-   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+4)",
-   "bar_copper: made by: Smelt a copper bar",
-   "bar_copper: used in: Cast a copper mace"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_313.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 313 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_96": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item sword_short \"Short sword\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Forge a short sword"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_96.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 96 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_97": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item sword_long \"Long sword\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Forge a long sword"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_97.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 97 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_98": {
-  "status": "stock RMMZ",
-  "request": "AR-511",
-  "requests": [
-   "AR-511",
-   "AR-512",
-   "AR-900"
-  ],
-  "usedBy": [
-   "item mace \"Copper mace\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Cast a copper mace"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_98.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 98 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
- "!$UF_Icon_99": {
-  "status": "stock RMMZ",
-  "request": "AR-201",
-  "requests": [
-   "AR-201",
-   "AR-512"
-  ],
-  "usedBy": [
-   "item stone_axe \"Stone axe\" (tint #c8b8a0)",
-   "item axe_iron \"Iron axe\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "stone_axe: held tool (chop ×2): shown in the hand on the held layer (AR-600)",
-   "stone_axe: made by: Haft a stone axe",
-   "axe_iron: held tool (chop ×3): shown in the hand on the held layer (AR-600)",
-   "axe_iron: made by: Forge an iron axe"
-  ],
-  "category": "items",
-  "file": "img/characters/!$UF_Icon_99.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "icon 99 of stock system/IconSet.png, cut by tools/extract_stock_icons.js (pixels match)"
- },
  "!Door1": {
   "status": "stock RMMZ",
   "request": "none yet",
@@ -769,9 +8,15 @@
    "object door_stone \"Stone door\" (tint #b8c0c8)"
   ],
   "states": [
+   "door_wood: dismantle: Wooden door → gone (yields 1 Log)",
+   "door_wood: mine: Wooden door → gone (yields 1 Log)",
+   "door_wood: chop: Wooden door → gone (yields 1 Log)",
    "door_wood: building: unbuilt (needs 1 Log on the cell) / built",
    "door_wood: ruined → Rubble (when its site is sacked)",
    "blocks movement (units work from a neighbouring cell)",
+   "door_stone: dismantle: Stone door → gone (yields 1 Stone)",
+   "door_stone: mine: Stone door → gone (yields 1 Stone)",
+   "door_stone: quarry: Stone door → gone (yields 1 Stone)",
    "door_stone: building: unbuilt (needs 2 Stone on the cell) / built",
    "door_stone: ruined → Rubble (when its site is sacked)"
   ],
@@ -1872,28 +1117,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "img/system/IconSet.png": {
-  "status": "stock RMMZ",
-  "request": "AR-800",
-  "requests": [
-   "AR-800",
-   "AR-201",
-   "AR-511",
-   "AR-902",
-   "AR-903"
-  ],
-  "usedBy": [
-   "RMMZ core: icons"
-  ],
-  "states": [
-   "sheet of fixed-size pieces (RMMZ layout)"
-  ],
-  "category": "ui",
-  "file": "img/system/IconSet.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Inside_C": {
   "status": "stock RMMZ",
   "request": "AR-510",
@@ -2169,13 +1392,11 @@
    "AR-1600"
   ],
   "usedBy": [
-   "tile 176 (objects)",
-   "tile 157 (objects)",
-   "tile 221 (objects)",
    "tile 192 (objects)",
+   "tile 157 (objects)",
+   "tile 176 (objects)",
    "tile 237 (objects)",
    "tile 232 (objects)",
-   "tile 156 (objects)",
    "tile 238 (objects)",
    "tile 174 (objects)",
    "tile 153 (objects)",
@@ -2260,28 +1481,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#156": {
-  "status": "stock RMMZ",
-  "request": "AR-021",
-  "requests": [
-   "AR-021",
-   "AR-102",
-   "AR-1600"
-  ],
-  "usedBy": [
-   "object stump \"Stump\""
-  ],
-  "states": [
-   "chop: Stump → gone (yields 1 Log)",
-   "is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+7)",
-   "walk-through"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 156)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B#157": {
   "status": "stock RMMZ",
   "request": "AR-102",
@@ -2289,15 +1488,11 @@
    "AR-102"
   ],
   "usedBy": [
-   "object birch \"Birch\" (tint #e6f0e0)",
-   "object tree_swamp \"Swamp tree\" (tint #98b090)",
    "object mangrove \"Mangrove\" (tint #c8e0a0)"
   ],
   "states": [
-   "birch: chop: Birch → Stump (yields 2 Log)",
-   "blocks movement (units work from a neighbouring cell)",
-   "tree_swamp: chop: Swamp tree → Stump (yields 2 Log)",
-   "mangrove: chop: Mangrove → Stump (yields 2 Log)"
+   "chop: Mangrove → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 157)",
@@ -2309,14 +1504,18 @@
   "status": "stock RMMZ",
   "request": "AR-022",
   "requests": [
-   "AR-022"
+   "AR-022",
+   "AR-1903"
   ],
   "usedBy": [
-   "object granite_boulder \"Granite boulder\""
+   "object granite_boulder \"Granite boulder\"",
+   "object stalagmite \"Stalagmite\" (tint #7a7a8a)"
   ],
   "states": [
-   "quarry: Granite boulder → Loose stones (yields 4 Stone)",
-   "blocks movement (units work from a neighbouring cell)"
+   "granite_boulder: quarry: Granite boulder → Loose stones (yields 4 Stone)",
+   "blocks movement (units work from a neighbouring cell)",
+   "stalagmite: quarry: Stalagmite → Loose stones (yields 3 Stone)",
+   "stalagmite: mine: Stalagmite → Loose stones (yields 3 Stone)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 159)",
@@ -2379,14 +1578,17 @@
   "status": "stock RMMZ",
   "request": "AR-103",
   "requests": [
-   "AR-103"
+   "AR-103",
+   "AR-1906"
   ],
   "usedBy": [
-   "object flowers \"Wildflowers\""
+   "object flowers \"Wildflowers\"",
+   "object glow_caps \"Glow-caps\" (tint #60f0c0)"
   ],
   "states": [
-   "one state (nothing interacts with it yet)",
-   "flat: drawn under units and items"
+   "flowers: one state (nothing interacts with it yet)",
+   "flat: drawn under units and items",
+   "glow_caps: gather: Glow-caps → gone (yields 2 Mushrooms)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 163)",
@@ -2430,11 +1632,11 @@
   ],
   "states": [
    "rocks_small: pick: Loose stones → gone (yields 2 Stone)",
-   "rocks_small: is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine)",
+   "rocks_small: is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine), Stalagmite (quarry), Stalagmite (mine)",
    "flat: drawn under units and items",
    "gravel: pick: Gravel → gone (yields 1 Stone)",
    "crystal_small: pick: Small crystals → gone (yields 1 Rough gem)",
-   "crystal_small: is the after-state of Crystal cluster (mine)"
+   "crystal_small: is the after-state of Crystal cluster (mine), Crystal spire (mine)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 171)",
@@ -2521,27 +1723,14 @@
   "request": "AR-021",
   "requests": [
    "AR-021",
-   "AR-020",
-   "AR-102"
+   "AR-020"
   ],
   "usedBy": [
-   "object oak \"Oak\"",
-   "object fruit_tree \"Fruit tree\" (tint #ffd0a0)",
-   "object fruit_tree_bare \"Fruit tree (picked)\" (tint #9a9a8a)",
-   "object tree_savanna \"Flat-top tree\" (tint #ffb8a0)",
    "object tree_tropical \"Broadleaf giant\" (tint #90e888)"
   ],
   "states": [
-   "oak: chop: Oak → Stump (yields 3 Log)",
-   "blocks movement (units work from a neighbouring cell)",
-   "fruit_tree: gather: Fruit tree → Fruit tree (picked) (yields 3 Fruit)",
-   "fruit_tree: chop: Fruit tree → Stump (yields 3 Log)",
-   "fruit_tree: is the regrown state of Fruit tree (picked)",
-   "fruit_tree_bare: chop: Fruit tree (picked) → Stump (yields 3 Log)",
-   "fruit_tree_bare: regrows into Fruit tree after 72 h",
-   "fruit_tree_bare: is the after-state of Fruit tree (gather)",
-   "tree_savanna: chop: Flat-top tree → Stump (yields 2 Log)",
-   "tree_tropical: chop: Broadleaf giant → Stump (yields 4 Log)"
+   "chop: Broadleaf giant → Stump (yields 4 Log)",
+   "blocks movement (units work from a neighbouring cell)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 176)",
@@ -2571,8 +1760,7 @@
   "status": "stock RMMZ",
   "request": "AR-1600",
   "requests": [
-   "AR-1600",
-   "AR-102"
+   "AR-1600"
   ],
   "usedBy": [
    "object fir_snow \"Snow fir\""
@@ -2587,38 +1775,16 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#221": {
-  "status": "stock RMMZ",
-  "request": "AR-021",
-  "requests": [
-   "AR-021",
-   "AR-102"
-  ],
-  "usedBy": [
-   "object pine \"Pine\" (tint #6aa86a)"
-  ],
-  "states": [
-   "chop: Pine → Stump (yields 3 Log)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 221)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B#232": {
   "status": "stock RMMZ",
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "object dead_tree \"Dead tree\"",
    "object tree_cursed \"Blighted tree\" (tint #c0a0e0)"
   ],
   "states": [
-   "dead_tree: chop: Dead tree → Stump (yields 1 Log, 2 Firewood)",
-   "blocks movement (units work from a neighbouring cell)",
-   "tree_cursed: chop: Blighted tree → Stump (yields 1 Log)"
+   "chop: Blighted tree → Stump (yields 1 Log)",
+   "blocks movement (units work from a neighbouring cell)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 232)",
@@ -2670,16 +1836,23 @@
   "requests": [
    "AR-103",
    "AR-1901",
+   "AR-1902",
    "AR-1907"
   ],
   "usedBy": [
    "object reeds \"Reeds\"",
-   "object lichen \"Lichen\" (tint #c8d8c8)"
+   "object lichen \"Lichen\" (tint #c8d8c8)",
+   "object cave_mushrooms \"Cave mushrooms\" (tint #d090d0)",
+   "object cave_moss \"Cave moss\" (tint #50a060)",
+   "object spore_reeds \"Spore reeds\" (tint #90c0b0)"
   ],
   "states": [
    "reeds: gather: Reeds → gone (yields 2 Straw)",
    "flat: drawn under units and items",
-   "lichen: one state (nothing interacts with it yet)"
+   "lichen: one state (nothing interacts with it yet)",
+   "cave_mushrooms: gather: Cave mushrooms → gone (yields 2 Mushrooms)",
+   "cave_moss: gather: Cave moss → gone (yields 2 Plant fiber)",
+   "spore_reeds: gather: Spore reeds → gone (yields 2 Straw)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 251)",
@@ -2811,11 +1984,13 @@
    "AR-044"
   ],
   "usedBy": [
-   "object crystal \"Crystal cluster\""
+   "object crystal \"Crystal cluster\"",
+   "object crystal_spire \"Crystal spire\" (tint #80d0ff)"
   ],
   "states": [
-   "mine: Crystal cluster → Small crystals (yields 2 Rough gem)",
-   "blocks movement (units work from a neighbouring cell)"
+   "crystal: mine: Crystal cluster → Small crystals (yields 2 Rough gem)",
+   "blocks movement (units work from a neighbouring cell)",
+   "crystal_spire: mine: Crystal spire → Small crystals (yields 2 Rough gem)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_C.png (tile 287)",
@@ -2832,6 +2007,7 @@
   ],
   "usedBy": [
    "plugin UF_Doors.js (test suite)",
+   "plugin UF_Levels.js (test suite)",
    "plugin UF_Speech.js (test suite)",
    "plugin UF_World.js",
    "plugin UF_World.js (test suite)",
@@ -3509,9 +2685,9 @@
   "request": "AR-100",
   "requests": [
    "AR-100",
-   "AR-102",
    "AR-103",
-   "AR-1206"
+   "AR-1206",
+   "AR-102"
   ],
   "usedBy": [
    "ground kind snow \"Snow\""
@@ -3910,6 +3086,48 @@
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
+ "UF_GenLevels_A2": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Levels.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenLevels_A4": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Levels.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenLevels_B": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Levels.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
  "UF_GenSelect": {
   "status": "generated",
   "request": "AR-031",
@@ -4074,6 +3292,25 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Birch": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object birch \"Birch\""
+  ],
+  "states": [
+   "chop: Birch → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Birch.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Bush": {
   "status": "original",
   "request": "AR-103",
@@ -4155,6 +3392,50 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Fruit_Tree": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fruit_tree \"Fruit tree\""
+  ],
+  "states": [
+   "gather: Fruit tree → Fruit tree (picked) (yields 3 Fruit)",
+   "chop: Fruit tree → Stump (yields 3 Log)",
+   "is the regrown state of Fruit tree (picked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fruit_Tree.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fruit_Tree_Bare": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fruit_tree_bare \"Fruit tree (picked)\""
+  ],
+  "states": [
+   "chop: Fruit tree (picked) → Stump (yields 3 Log)",
+   "regrows into Fruit tree after 72 h",
+   "is the after-state of Fruit tree (gather)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fruit_Tree_Bare.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Furnace": {
   "status": "original",
   "request": "AR-510",
@@ -4175,6 +3456,767 @@
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Icon_102": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item bow_short \"Short bow\"",
+   "item bow_long \"Long bow\" (tint #c8a070)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bow_short: made by: Carve a short bow",
+   "bow_long: made by: Carve a long bow"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_102.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_107": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item spear \"Spear\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Haft a stone spear, Haft an iron spear"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_107.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_110": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item club \"Club\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Shape a club"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_110.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_114": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900",
+   "AR-906"
+  ],
+  "usedBy": [
+   "item sling \"Sling\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Braid a sling"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_114.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_120": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_knife \"Stone knife\" (tint #c8b8a0)",
+   "item dagger_iron \"Iron dagger\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "stone_knife: held tool (hunt ×2, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
+   "stone_knife: made by: Knap a stone knife",
+   "dagger_iron: held tool (hunt ×2.5, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
+   "dagger_iron: made by: Forge an iron dagger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_120.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_128": {
+  "status": "original",
+  "request": "AR-901",
+  "requests": [
+   "AR-901"
+  ],
+  "usedBy": [
+   "item shield_iron \"Iron shield\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge an iron shield"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_128.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_129": {
+  "status": "original",
+  "request": "AR-512",
+  "requests": [
+   "AR-512",
+   "AR-901"
+  ],
+  "usedBy": [
+   "item shield_wood \"Wooden shield\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Build a wooden shield"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_129.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_132": {
+  "status": "original",
+  "request": "AR-902",
+  "requests": [
+   "AR-902"
+  ],
+  "usedBy": [
+   "item helmet_iron \"Iron helmet\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge an iron helmet"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_132.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_135": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item mail_iron \"Iron mail\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 3 (the wearer's sheet changes)",
+   "made by: Forge iron mail"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_135.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_136": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201"
+  ],
+  "usedBy": [
+   "item fiber_wrap \"Woven wrap\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 1 (the wearer's sheet changes)",
+   "made by: Weave a fiber wrap"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_136.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_138": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201"
+  ],
+  "usedBy": [
+   "item hide_cloak \"Hide cloak\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 2 (the wearer's sheet changes)",
+   "made by: Sew a hide cloak"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_138.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_140": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item leggings_leather \"Leather leggings\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Stitch leather leggings"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_140.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_141": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item greaves_iron \"Iron greaves\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge iron greaves"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_141.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_150": {
+  "status": "original",
+  "request": "AR-902",
+  "requests": [
+   "AR-902"
+  ],
+  "usedBy": [
+   "item helmet_leather \"Leather cap\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Stitch a leather cap"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_150.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_153": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item armor_leather \"Leather armor\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 3 (the wearer's sheet changes)",
+   "made by: Stitch leather armor"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_153.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_167": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item charcoal \"Charcoal\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Burn charcoal",
+   "used in: Smelt an iron bar, Smelt a copper bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_167.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_169": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-1216",
+   "AR-044",
+   "AR-030",
+   "AR-033"
+  ],
+  "usedBy": [
+   "item gold \"Gold nugget\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_169.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_216": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_pick \"Stone pick\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "held tool (quarry ×2, mine ×2, pick ×1.5): shown in the hand on the held layer (AR-600)",
+   "made by: Haft a stone pick"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_216.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_225": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item arrows \"Arrows\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_225.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_256": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item root \"Root vegetable\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_256.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_260": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item fish \"Fish\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger",
+   "used in: Roast fish"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_260.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_261": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "item mushroom \"Mushrooms\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −20 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_261.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_265": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "item fruit \"Fruit\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −30 hunger, −10 thirst"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_265.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_274": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item seeds \"Seeds\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_274.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_289": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item wool \"Wool\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_289.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_290": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item fiber \"Plant fiber\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak, Carve a short bow … (+6)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_290.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_291": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-201",
+   "AR-903",
+   "AR-904",
+   "AR-902",
+   "AR-905"
+  ],
+  "usedBy": [
+   "item hide \"Hide\"",
+   "item leather \"Leather\" (tint #d09060)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "hide: used in: Sew a hide cloak, Tan a hide",
+   "leather: made by: Tan a hide",
+   "leather: used in: Braid a sling, Build a wooden shield, Forge an iron dagger, Forge a short sword, Forge a long sword, Stitch a leather cap … (+5)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_291.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_295": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item firewood \"Firewood\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Split firewood",
+   "used in: Burn charcoal"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_295.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_297": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item feathers \"Feathers\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_297.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_298": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item bone \"Bone\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Fletch bone-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_298.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_300": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item gem_cut \"Cut gem\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_300.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_301": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item gem_rough \"Rough gem\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_301.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_313": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item bar_iron \"Iron bar\"",
+   "item bar_copper \"Copper bar\" (tint #e0a070)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bar_iron: made by: Smelt an iron bar",
+   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+4)",
+   "bar_copper: made by: Smelt a copper bar",
+   "bar_copper: used in: Cast a copper mace"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_313.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_96": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item sword_short \"Short sword\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge a short sword"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_96.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_97": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item sword_long \"Long sword\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge a long sword"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_97.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_98": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item mace \"Copper mace\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Cast a copper mace"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_98.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_99": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_axe \"Stone axe\" (tint #c8b8a0)",
+   "item axe_iron \"Iron axe\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "stone_axe: held tool (chop ×2): shown in the hand on the held layer (AR-600)",
+   "stone_axe: made by: Haft a stone axe",
+   "axe_iron: held tool (chop ×3): shown in the hand on the held layer (AR-600)",
+   "axe_iron: made by: Forge an iron axe"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_99.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
  },
  "!$UF_Item_Berries": {
   "status": "original",
@@ -4299,6 +4341,7 @@
    "AR-104",
    "AR-906",
    "AR-022",
+   "AR-700",
    "AR-1200",
    "AR-1203",
    "AR-1205",
@@ -4340,18 +4383,59 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Oak": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object oak \"Oak\""
+  ],
+  "states": [
+   "chop: Oak → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Oak.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Pine": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object pine \"Pine\""
+  ],
+  "states": [
+   "chop: Pine → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Pine.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Rubble": {
   "status": "original",
   "request": "AR-104",
   "requests": [
-   "AR-104"
+   "AR-104",
+   "AR-1903"
   ],
   "usedBy": [
    "object rubble \"Rubble\""
   ],
   "states": [
    "pick: Rubble → gone (yields 2 Stone)",
-   "is the after-state of Stone wall (quarry)",
+   "is the after-state of Stone wall (quarry), Stone wall (mine)",
    "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+5)",
    "flat: drawn under units and items"
   ],
@@ -4421,6 +4505,106 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Stump": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-1600",
+   "AR-1905",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object stump \"Stump\""
+  ],
+  "states": [
+   "chop: Stump → gone (yields 1 Log)",
+   "is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+8)",
+   "walk-through"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stump.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_TowerCap": {
+  "status": "original",
+  "request": "AR-1905",
+  "requests": [
+   "AR-1905",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tower_cap \"Tower-cap\""
+  ],
+  "states": [
+   "chop: Tower-cap → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_TowerCap.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Dead": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object dead_tree \"Dead tree\""
+  ],
+  "states": [
+   "chop: Dead tree → Stump (yields 1 Log, 2 Firewood)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Dead.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Savanna": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_savanna \"Flat-top tree\""
+  ],
+  "states": [
+   "chop: Flat-top tree → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Savanna.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Swamp": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_swamp \"Swamp tree\""
+  ],
+  "states": [
+   "chop: Swamp tree → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Swamp.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Workbench": {
   "status": "original",
   "request": "AR-104",
@@ -4453,6 +4637,8 @@
   ],
   "states": [
    "quarry: Stone wall → Rubble (yields 2 Stone)",
+   "mine: Stone wall → Rubble (yields 2 Stone)",
+   "dismantle: Stone wall → gone (yields 2 Stone)",
    "building: unbuilt (needs 2 Stone on the cell) / built",
    "ruined → Rubble (when its site is sacked)",
    "blocks movement (units work from a neighbouring cell)"
@@ -4475,6 +4661,8 @@
   ],
   "states": [
    "chop: Wooden wall → gone (yields 1 Log)",
+   "mine: Wooden wall → gone (yields 1 Log)",
+   "dismantle: Wooden wall → gone (yields 1 Log)",
    "building: unbuilt (needs 1 Log on the cell) / built",
    "ruined → Rubble (when its site is sacked)",
    "blocks movement (units work from a neighbouring cell)"
@@ -4624,6 +4812,28 @@
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
+ },
+ "img/system/IconSet.png": {
+  "status": "original",
+  "request": "AR-800",
+  "requests": [
+   "AR-800",
+   "AR-201",
+   "AR-511",
+   "AR-902",
+   "AR-903"
+  ],
+  "usedBy": [
+   "RMMZ core: icons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/IconSet.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
  },
  "img/system/Window.png": {
   "status": "original",

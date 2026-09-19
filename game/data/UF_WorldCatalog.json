@@ -1244,12 +1244,6 @@
     {
       "id": "oak",
       "name": "Oak",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
       "tags": [
         "tree",
         "wood"
@@ -1265,17 +1259,12 @@
       },
       "clump": 0.85,
       "clumpScale": 18,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Oak"
     },
     {
       "id": "birch",
       "name": "Birch",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 157,
-        "h": 2
-      },
-      "tint": "#e6f0e0",
       "tags": [
         "tree",
         "wood"
@@ -1291,17 +1280,12 @@
       },
       "clump": 0.7,
       "clumpScale": 14,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Birch"
     },
     {
       "id": "pine",
       "name": "Pine",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 221,
-        "h": 2
-      },
-      "tint": "#6aa86a",
       "tags": [
         "tree",
         "wood"
@@ -1317,7 +1301,8 @@
       },
       "clump": 0.9,
       "clumpScale": 24,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Pine"
     },
     {
       "id": "fir_snow",
@@ -1348,13 +1333,6 @@
     {
       "id": "fruit_tree",
       "name": "Fruit tree",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
-      "tint": "#ffd0a0",
       "tags": [
         "tree",
         "wood",
@@ -1379,18 +1357,12 @@
       },
       "clump": 0.5,
       "clumpScale": 12,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Fruit_Tree"
     },
     {
       "id": "fruit_tree_bare",
       "name": "Fruit tree (picked)",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
-      "tint": "#9a9a8a",
       "tags": [
         "tree",
         "wood"
@@ -1407,18 +1379,12 @@
           },
           "becomes": "stump"
         }
-      }
+      },
+      "image": "!$UF_Fruit_Tree_Bare"
     },
     {
       "id": "tree_savanna",
       "name": "Flat-top tree",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
-      "tint": "#ffb8a0",
       "tags": [
         "tree",
         "wood"
@@ -1434,17 +1400,12 @@
       },
       "clump": 0.4,
       "clumpScale": 20,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Tree_Savanna"
     },
     {
       "id": "tree_swamp",
       "name": "Swamp tree",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 157,
-        "h": 2
-      },
-      "tint": "#98b090",
       "tags": [
         "tree",
         "wood"
@@ -1460,7 +1421,8 @@
       },
       "clump": 0.7,
       "clumpScale": 14,
-      "avoidWater": 0
+      "avoidWater": 0,
+      "image": "!$UF_Tree_Swamp"
     },
     {
       "id": "mangrove",
@@ -1542,11 +1504,6 @@
     {
       "id": "dead_tree",
       "name": "Dead tree",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 232,
-        "h": 2
-      },
       "tags": [
         "tree",
         "wood"
@@ -1563,7 +1520,8 @@
       },
       "clump": 0.6,
       "clumpScale": 14,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_Tree_Dead"
     },
     {
       "id": "tree_cursed",
@@ -1595,10 +1553,6 @@
     {
       "id": "stump",
       "name": "Stump",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 156
-      },
       "passable": true,
       "tags": [
         "stump",
@@ -1612,7 +1566,8 @@
           },
           "becomes": null
         }
-      }
+      },
+      "image": "!$UF_Stump"
     },
     {
       "id": "berry_bush",
@@ -2737,13 +2692,6 @@
     {
       "id": "tower_cap",
       "name": "Tower-cap",
-      "tile": {
-        "sheet": "Outside_B",
-        "id": 176,
-        "w": 2,
-        "h": 2
-      },
-      "tint": "#a090b8",
       "tags": [
         "tree",
         "wood",
@@ -2761,7 +2709,8 @@
       },
       "clump": 0.6,
       "clumpScale": 14,
-      "avoidWater": 1
+      "avoidWater": 1,
+      "image": "!$UF_TowerCap"
     },
     {
       "id": "cave_moss",
