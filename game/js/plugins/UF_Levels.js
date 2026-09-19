@@ -53,7 +53,7 @@
     "use strict";
 
     const TILESET_ID = 92;
-    const GEN = 2;                        // a save keeps its baseline generator version; version 1 is preserved below
+    const GEN = 3;                        // a save keeps its baseline generator version; version 1 and 2 are preserved below
     const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
     const LABELS = Object.freeze({ 2: "+2", 1: "+1", 0: "Ground", "-1": "-1", "-2": "-2" });
     const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });
@@ -410,21 +410,71 @@
         return L && L.gen ? L.gen : GEN;
     }
 
-    function generateUnderground(seed, z, ax, ay, size, shape, material) {
+    function generateUnderground(seed, gen, z, ax, ay, size, shape, material) {
         const biome = new Uint8Array(size * size), water = new Uint8Array(size * size), pockets = [];
-        const salt = hashString(`uf.levels.v2.${z}`), offset = hash32(seed, salt, 99) % 4;
+        if (gen === 2) {
+            const salt = hashString(`uf.levels.v2.${z}`), offset = hash32(seed, salt, 99) % 4;
+            const rand = (...p) => hash32(seed, salt, ax, ay, ...p) / 4294967296;
+            const provinces = [];
+            for (let py = 0; py < 4; py++) for (let px = 0; px < 4; px++) {
+                const i = py * 4 + px;
+                provinces.push({ x: (px + 0.25 + rand(i, 1) * 0.5) * size / 4,
+                    y: (py + 0.25 + rand(i, 2) * 0.5) * size / 4,
+                    code: (z === -1 ? 1 : 5) + ((px + py + offset) % 4) });
+            }
+            shape.fill(SOLID);
+            for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+                let nearest = null, distance = Infinity;
+                for (const p of provinces) {
+                    const d = (x - p.x) ** 2 + (y - p.y) ** 2;
+                    if (d < distance) { nearest = p; distance = d; }
+                }
+                const i = y * size + x;
+                biome[i] = nearest.code;
+                material[i] = BIOMES[nearest.code].material;
+            }
+            const divisions = z === -1 ? 6 : 4, span = size / divisions;
+            for (let py = 0; py < divisions; py++) for (let px = 0; px < divisions; px++) {
+                const id = py * divisions + px + 1;
+                const x = Math.round((px + 0.5 + (rand(id, 3) - 0.5) * 0.16) * span);
+                const y = Math.round((py + 0.5 + (rand(id, 4) - 0.5) * 0.16) * span);
+                const rx = span * (0.235 + rand(id, 5) * 0.035), ry = span * (0.195 + rand(id, 6) * 0.030);
+                const bounds = { x0: Math.max(BORDER, Math.floor(x - rx * 1.06)), x1: Math.min(size - BORDER - 1, Math.ceil(x + rx * 1.06)),
+                    y0: Math.max(BORDER, Math.floor(y - ry * 1.06)), y1: Math.min(size - BORDER - 1, Math.ceil(y + ry * 1.06)) };
+                let floorCells = 0;
+                for (let cy = bounds.y0; cy <= bounds.y1; cy++) for (let cx = bounds.x0; cx <= bounds.x1; cx++) {
+                    const edge = 0.96 + valueNoise(seed, salt + id, cx + ax * size, cy + ay * size, 7) * 0.08;
+                    if (((cx - x) / rx) ** 2 + ((cy - y) / ry) ** 2 > edge) continue;
+                    shape[cy * size + cx] = FLOOR; floorCells++;
+                }
+                const wx = x + Math.floor(rx * 0.62), wy = y;
+                for (let cy = wy; cy <= wy + 1; cy++) for (let cx = wx; cx <= wx + 1; cx++) {
+                    if (shape[cy * size + cx] === FLOOR) water[cy * size + cx] = 1;
+                }
+                pockets.push({ id, z, area: { x: ax, y: ay }, x, y, floorCells,
+                    clearRadius: Math.max(1, Math.floor(Math.min(rx, ry) * 0.62)), bounds,
+                    biome: BIOMES[biome[y * size + x]].id, water: { x: wx, y: wy } });
+            }
+            if (provoked("underground_biomes")) { shape.fill(FLOOR); biome.fill(z === -1 ? 1 : 5); }
+            pockets.sort((a, b) => b.floorCells - a.floorCells || a.id - b.id);
+            return { biome, water, pockets };
+        }
+
+        // GEN >= 3: Continuous rolling cavern network with interconnected halls, corridors, and natural pillars
+        const salt = hashString(`uf.levels.v3.${z}`), offset = hash32(seed, salt, 99) % 4;
         const rand = (...p) => hash32(seed, salt, ax, ay, ...p) / 4294967296;
         const provinces = [];
         for (let py = 0; py < 4; py++) for (let px = 0; px < 4; px++) {
             const i = py * 4 + px;
-            provinces.push({ x: (px + 0.25 + rand(i, 1) * 0.5) * size / 4,
+            provinces.push({
+                x: (px + 0.25 + rand(i, 1) * 0.5) * size / 4,
                 y: (py + 0.25 + rand(i, 2) * 0.5) * size / 4,
-                code: (z === -1 ? 1 : 5) + ((px + py + offset) % 4) });
+                code: (z === -1 ? 1 : 5) + ((px + py + offset) % 4)
+            });
         }
         shape.fill(SOLID);
         for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
             let nearest = null, distance = Infinity;
-            // Jittered Voronoi regions avoid rectangular biome boundaries.
             for (const p of provinces) {
                 const d = (x - p.x) ** 2 + (y - p.y) ** 2;
                 if (d < distance) { nearest = p; distance = d; }
@@ -433,27 +483,96 @@
             biome[i] = nearest.code;
             material[i] = BIOMES[nearest.code].material;
         }
+
+        for (let y = BORDER; y < size - BORDER; y++) {
+            for (let x = BORDER; x < size - BORDER; x++) {
+                const gx = ax * size + x, gy = ay * size + y;
+                const n1 = valueNoise(seed, salt + 101, gx, gy, z === -1 ? 26 : 30);
+                const n2 = valueNoise(seed, salt + 102, gx, gy, 13);
+                const n3 = valueNoise(seed, salt + 103, gx, gy, 6);
+                const cVal = n1 * 0.55 + n2 * 0.32 + n3 * 0.13;
+
+                const t1 = Math.abs(valueNoise(seed, salt + 201, gx, gy, 20) - 0.5) * 2;
+                const t2 = Math.abs(valueNoise(seed, salt + 202, gx, gy, 20) - 0.5) * 2;
+                const tVal = Math.min(t1, t2);
+
+                const pVal = valueNoise(seed, salt + 301, gx, gy, 5);
+
+                const isHall = cVal > (z === -1 ? 0.54 : 0.56);
+                const isCorridor = tVal < (z === -1 ? 0.080 : 0.068);
+
+                if ((isHall || isCorridor) && !(isHall && pVal > 0.84)) {
+                    shape[y * size + x] = FLOOR;
+                }
+            }
+        }
+
         const divisions = z === -1 ? 6 : 4, span = size / divisions;
-        for (let py = 0; py < divisions; py++) for (let px = 0; px < divisions; px++) {
-            const id = py * divisions + px + 1;
-            const x = Math.round((px + 0.5 + (rand(id, 3) - 0.5) * 0.16) * span);
-            const y = Math.round((py + 0.5 + (rand(id, 4) - 0.5) * 0.16) * span);
-            const rx = span * (0.235 + rand(id, 5) * 0.035), ry = span * (0.195 + rand(id, 6) * 0.030);
-            const bounds = { x0: Math.max(BORDER, Math.floor(x - rx * 1.06)), x1: Math.min(size - BORDER - 1, Math.ceil(x + rx * 1.06)),
-                y0: Math.max(BORDER, Math.floor(y - ry * 1.06)), y1: Math.min(size - BORDER - 1, Math.ceil(y + ry * 1.06)) };
-            let floorCells = 0;
-            for (let cy = bounds.y0; cy <= bounds.y1; cy++) for (let cx = bounds.x0; cx <= bounds.x1; cx++) {
-                const edge = 0.96 + valueNoise(seed, salt + id, cx + ax * size, cy + ay * size, 7) * 0.08;
-                if (((cx - x) / rx) ** 2 + ((cy - y) / ry) ** 2 > edge) continue;
-                shape[cy * size + cx] = FLOOR; floorCells++;
+        for (let py = 0; py < divisions; py++) {
+            for (let px = 0; px < divisions; px++) {
+                const id = py * divisions + px + 1;
+                const minX = Math.max(BORDER + 4, Math.floor(px * span));
+                const maxX = Math.min(size - BORDER - 5, Math.floor((px + 1) * span));
+                const minY = Math.max(BORDER + 4, Math.floor(py * span));
+                const maxY = Math.min(size - BORDER - 5, Math.floor((py + 1) * span));
+
+                let bestX = Math.floor((minX + maxX) / 2);
+                let bestY = Math.floor((minY + maxY) / 2);
+                let bestScore = -1;
+
+                for (let cy = minY + 2; cy <= maxY - 2; cy += 2) {
+                    for (let cx = minX + 2; cx <= maxX - 2; cx += 2) {
+                        let score = 0;
+                        for (let dy = -3; dy <= 3; dy++) {
+                            for (let dx = -3; dx <= 3; dx++) {
+                                if (shape[(cy + dy) * size + (cx + dx)] === FLOOR) score++;
+                            }
+                        }
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestX = cx;
+                            bestY = cy;
+                        }
+                    }
+                }
+
+                const clearRadius = 3;
+                for (let dy = -clearRadius; dy <= clearRadius; dy++) {
+                    for (let dx = -clearRadius; dx <= clearRadius; dx++) {
+                        const idx = (bestY + dy) * size + (bestX + dx);
+                        shape[idx] = FLOOR;
+                        water[idx] = 0;
+                    }
+                }
+
+                const wx = Math.min(size - BORDER - 2, bestX + clearRadius + 2);
+                const wy = bestY;
+                for (let dy = 0; dy <= 1; dy++) {
+                    for (let dx = 0; dx <= 1; dx++) {
+                        const idx = (wy + dy) * size + (wx + dx);
+                        shape[idx] = FLOOR;
+                        water[idx] = 1;
+                    }
+                }
+
+                const bounds = {
+                    x0: Math.max(BORDER, bestX - 12),
+                    x1: Math.min(size - BORDER - 1, bestX + 12),
+                    y0: Math.max(BORDER, bestY - 12),
+                    y1: Math.min(size - BORDER - 1, bestY + 12)
+                };
+
+                pockets.push({
+                    id, z,
+                    area: { x: ax, y: ay },
+                    x: bestX, y: bestY,
+                    floorCells: bestScore * 10,
+                    clearRadius,
+                    bounds,
+                    biome: BIOMES[biome[bestY * size + bestX]].id,
+                    water: { x: wx, y: wy }
+                });
             }
-            const wx = x + Math.floor(rx * 0.62), wy = y;
-            for (let cy = wy; cy <= wy + 1; cy++) for (let cx = wx; cx <= wx + 1; cx++) {
-                if (shape[cy * size + cx] === FLOOR) water[cy * size + cx] = 1;
-            }
-            pockets.push({ id, z, area: { x: ax, y: ay }, x, y, floorCells,
-                clearRadius: Math.max(1, Math.floor(Math.min(rx, ry) * 0.62)), bounds,
-                biome: BIOMES[biome[y * size + x]].id, water: { x: wx, y: wy } });
         }
         if (provoked("underground_biomes")) { shape.fill(FLOOR); biome.fill(z === -1 ? 1 : 5); }
         pockets.sort((a, b) => b.floorCells - a.floorCells || a.id - b.id);
@@ -468,7 +587,7 @@
         if (z > 0) {
             shape.fill(OPEN);
         } else if (z < 0) {
-            if (gen >= 2) extra = generateUnderground(seed, z, ax, ay, size, shape, material);
+            if (gen >= 2) extra = generateUnderground(seed, gen, z, ax, ay, size, shape, material);
             else {
             const P = GEN_PARAMS[1][String(z)];
             const saltCave = hashString(`uf.levels.cave.${z}`), saltSoil = hashString(`uf.levels.soil.${z}`);
@@ -1433,11 +1552,19 @@
                     }
                 }
                 const expectedPockets = z === -1 ? 36 : 16;
-                geographyOk = geographyOk && metrics.solidFraction >= 0.80 && metrics.solidFraction <= 0.90 &&
-                    expectedCodes.every(code => metrics.biomes[code] > 0) && Object.keys(metrics.biomes).length === 4 &&
-                    metrics.components.length === expectedPockets && (b.pockets || []).length === expectedPockets &&
-                    metrics.water === expectedPockets * 4 && dryCores &&
-                    (z === -1 ? metrics.soil > size * size * 0.5 : metrics.soil === 0);
+                const gen = levelGen(st, z);
+                if (gen >= 3) {
+                    geographyOk = geographyOk && metrics.solidFraction >= 0.40 && metrics.solidFraction <= 0.65 &&
+                        expectedCodes.every(code => metrics.biomes[code] > 0) && Object.keys(metrics.biomes).length === 4 &&
+                        (b.pockets || []).length === expectedPockets && dryCores &&
+                        (z === -1 ? metrics.soil > size * size * 0.4 : metrics.soil === 0);
+                } else {
+                    geographyOk = geographyOk && metrics.solidFraction >= 0.80 && metrics.solidFraction <= 0.90 &&
+                        expectedCodes.every(code => metrics.biomes[code] > 0) && Object.keys(metrics.biomes).length === 4 &&
+                        metrics.components.length === expectedPockets && (b.pockets || []).length === expectedPockets &&
+                        metrics.water === expectedPockets * 4 && dryCores &&
+                        (z === -1 ? metrics.soil > size * size * 0.5 : metrics.soil === 0);
+                }
                 const ownSum = checksumOf(z), repeat = checksumOf(z, st.seed, levelGen(st, z)), other = checksumOf(z, st.seed + 1, levelGen(st, z));
                 deterministic = deterministic && ownSum === repeat && ownSum !== other;
                 report.push(`${z}: ${metrics.solid}/${size * size} solid (${(metrics.solidFraction * 100).toFixed(2)}%), ` +
@@ -1684,7 +1811,10 @@
             const corridor = [];
             for (let i = 0; i <= 8; i++) corridor.push({ x: lx - 8 + i, y: ly });      // west arm, east to the corner
             for (let i = 1; i <= 8; i++) corridor.push({ x: lx, y: ly + i });          // south arm, down from the corner
-            for (const c of corridor) shape(c.x, c.y, -1, "floor", { constructed: false, material: "stone" });
+            for (const c of corridor) {
+                shape(c.x, c.y, -1, "floor", { constructed: false, material: "stone" });
+                if (O && O.atIn && O.atIn({ x: area.x, y: area.y, z: -1 }, c.x, c.y)) O.setIn({ x: area.x, y: area.y, z: -1 }, c.x, c.y, null);
+            }
             // Rock round the corridor (the baseline may have pockets there).
             const corridorSet = new Set(corridor.map(c => c.y * size + c.x));
             for (let y = ly - 1; y <= ly + 9; y++) for (let x = lx - 9; x <= lx + 1; x++) if (!corridorSet.has(y * size + x) && Levels.shapeAt({ area, x, y, z: -1 }) !== "solid") shape(x, y, -1, "solid");

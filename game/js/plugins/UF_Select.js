@@ -457,9 +457,15 @@
 
         switch (toolDef.candidates) {
             case "objectAction": {
-                if (!type || !type.actions) return false;
                 const act = toolDef.job || toolDef.id;
-                return !!type.actions[act] && !!J.handler(act);
+                if (type && type.actions && type.actions[act] && J.handler(act)) return true;
+                if ((act === "mine" || act === "quarry") && z < 0) {
+                    const L = window.UF && UF.Levels;
+                    if (L && typeof L.shapeAt === "function" && L.shapeAt({ area, x, y, z }) === "solid") {
+                        return true;
+                    }
+                }
+                return false;
             }
             case "openLand":
                 return !water && !blocking;

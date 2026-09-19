@@ -274,9 +274,10 @@
     }
     function designationsAt(x, y, area) {
         const W = World();
-        const a = area || (W && W.currentArea());
+        const a = area || (W && (W.viewLevel ? W.viewLevel() : W.currentArea()));
         if (!a) return [];
-        return designations().filter(j => sameArea(j.target.area, a) && j.target.x === x && j.target.y === y);
+        const targetZ = typeof a.z === "number" ? a.z : 0;
+        return designations().filter(j => sameArea(j.target.area, a) && (typeof (j.target && j.target.z) === "number" ? j.target.z : 0) === targetZ && j.target.x === x && j.target.y === y);
     }
     /** Create an open job (owner null) at a target: the designation. Returns the job or null. */
     function designate(spec) {
@@ -430,14 +431,15 @@
     /** What the menu offers on a cell of the map on screen: [{ id, label, enabled, run }]. */
     function optionsFor(x, y) {
         const W = World(), O = Objects(), I = Items(), J = Jobs(), L = Look();
-        const area = W && W.currentArea();
+        const area = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
         if (!area || !window.$gameMap || !$gameMap.isValid(x, y) || !J) return [];
-        const target = { area: copyArea(area), x, y };
+        const z = typeof area.z === "number" ? area.z : 0;
+        const target = { area: copyArea(area), x, y, z };
         const opts = [];
         const add = (id, label, run, enabled = true) => opts.push({ id, label, enabled, run });
-        const type = O ? O.at(x, y) : null;
+        const type = O ? (O.atIn ? O.atIn(area, x, y) : O.at(x, y)) : null;
         const hit = L && L.unitAt ? L.unitAt(x, y) : null;
-        const onCell = I ? I.at(x, y) : [];
+        const onCell = I ? (I.atIn ? I.atIn(area, x, y) : I.at(x, y)) : [];
         const water = J.isWaterAt(area, x, y);
         const blocking = !!type && type.passable !== true;
 
@@ -448,6 +450,17 @@
             }
         }
         if (type && (type.build || type.ruin)) add("dismantle", `Dismantle ${lower(type.name)}`, () => designate({ type: "dismantle", target }));
+
+        // Natural subterranean walls (solid rock / soil walls at z < 0)
+        if (!type && z < 0) {
+            const Lv = window.UF && UF.Levels;
+            if (Lv && typeof Lv.shapeAt === "function" && Lv.shapeAt(target) === "solid") {
+                const c = Lv.cellAt ? Lv.cellAt(target) : null;
+                const matName = c && c.material === "soil" ? "soil wall" : "rock wall";
+                if (J.handler("mine")) add("action:mine", `Mine ${matName}`, () => designate({ type: "mine", target }));
+                if (J.handler("quarry")) add("action:quarry", `Quarry ${matName}`, () => designate({ type: "quarry", target }));
+            }
+        }
 
         if (onCell.length) {
             const pile = stockpileFor(onCell[0], target);
@@ -770,13 +783,15 @@
         sync() {
             const t0 = performance.now();
             const frame = Graphics.frameCount;
-            const W = World(), area = W && W.currentArea();
+            const W = World(), area = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
             let shown = 0;
             if (Interact.markersEnabled && area && window.$gameMap && Jobs()) {
+                const targetZ = typeof area.z === "number" ? area.z : 0;
                 const offX = $gameMap.adjustX(0), offY = $gameMap.adjustY(0);
                 const cols = $gameMap.screenTileX(), rows = $gameMap.screenTileY();
                 for (const job of designations()) {
                     if (!sameArea(job.target.area, area)) continue;
+                    if ((typeof (job.target && job.target.z) === "number" ? job.target.z : 0) !== targetZ) continue;
                     const sx = job.target.x + offX, sy = job.target.y + offY;
                     if (sx < -1 - VIEW_MARGIN || sy < -1 - VIEW_MARGIN || sx > cols + VIEW_MARGIN || sy > rows + VIEW_MARGIN) continue;
                     let m = this._byJob.get(job.id);

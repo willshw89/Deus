@@ -260,26 +260,59 @@
         unit.data.needs[key] = Math.max(0, unit.data.needs[key] - by);
     };
 
-    // Object actions (chop, gather, pick, quarry, mine): the object on the target cell must have that action.
+    // Object actions (chop, gather, pick, quarry, mine): the object on the target cell must have that action,
+    // or (for mine/quarry) the cell is a natural subterranean solid wall.
     const objectAction = (type, verb) => define(type, {
         verb,
         plan(job, unit) {
-            const O = Objects();
+            const O = Objects(), L = window.UF && UF.Levels;
             const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
-            if (!t || !t.actions || !t.actions[type]) return { ok: false, reason: `nothing to ${type} there` };
-            job.params.objectName = t.name; // kept for the label after the object is gone
-            const stand = standFor(job.target, unit, false);
-            return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
+            if (t && t.actions && t.actions[type]) {
+                job.params.objectName = t.name; // kept for the label after the object is gone
+                const stand = standFor(job.target, unit, false);
+                return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
+            }
+            if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
+                const s = L.shapeAt(job.target);
+                if (s === "solid") {
+                    const c = L.cellAt ? L.cellAt(job.target) : null;
+                    job.params.objectName = c && c.material === "soil" ? "Subterranean soil wall" : "Subterranean rock wall";
+                    const stand = standFor(job.target, unit, true);
+                    return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
+                }
+            }
+            return { ok: false, reason: `nothing to ${type} there` };
         },
         work(job) {
-            const O = Objects();
+            const O = Objects(), L = window.UF && UF.Levels;
             const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
-            return t && t.actions && t.actions[type] ? t.actions[type].work | 0 : 0;
+            if (t && t.actions && t.actions[type]) return t.actions[type].work | 0;
+            if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
+                return 180;
+            }
+            return 0;
         },
         apply(job, unit) {
-            const O = Objects();
-            const r = O ? O.applyIn(lv(job.target), job.target.x, job.target.y, type, unit) : null;
-            job.result = r ? { from: r.from, to: r.to, yields: r.yields } : null;
+            const O = Objects(), L = window.UF && UF.Levels, I = Items();
+            const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
+            if (t && t.actions && t.actions[type]) {
+                const r = O.applyIn(lv(job.target), job.target.x, job.target.y, type, unit);
+                job.result = r ? { from: r.from, to: r.to, yields: r.yields } : null;
+                return;
+            }
+            if ((type === "mine" || type === "quarry") && L && typeof L.setShape === "function" && zOf(job.target) < 0) {
+                const c = L.cellAt ? L.cellAt(job.target) : null;
+                const mat = c && c.material === "soil" ? "soil" : "stone";
+                L.setShape(job.target, "floor", { material: mat });
+                const yields = mat === "soil" ? { stone: 1 } : { stone: 2 };
+                if (I && typeof I.drop === "function") {
+                    for (const id of Object.keys(yields)) {
+                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id]);
+                    }
+                }
+                job.result = { from: "solid", to: "floor", yields };
+                emit("levels:mined", job.target, mat);
+            }
         },
         describe: job => `${verb} ${withArticle(objectName(job))}`.trim()
     });
@@ -1054,6 +1087,10 @@
     function registerChecks() {
         UF.Test.suite("jobs", async t => {
             const W = UF.World, O = UF.Objects, I = UF.Items;
+            if (window.UF && UF.Levels && typeof UF.Levels.view === "function" && UF.Levels.view() !== 0) {
+                UF.Levels.setView(0);
+                await t.waitUntil(() => !!(W && W.currentArea && W.currentArea()), 10000, "Ground view for jobs checks").catch(() => {});
+            }
             const area = W.currentArea();
             if (!area || !O || !I) {
                 t.check("world_present", false, `area ${JSON.stringify(area)}, UF.Objects ${!!O}, UF.Items ${!!I}`);
@@ -1230,6 +1267,34 @@
             t.check("describe_text", texts.chop === "Chopping an oak" && texts.hunt === "Hunting a hare" && texts.craft === "Weaving a fiber wrap" && texts.build === "Building a campfire" && texts.far === "Gathering tall grass",
                 Object.entries(texts).map(([k, v]) => `${k}: "${v}"`).join("; "));
             cancel(wrapJob.id, "test over");
+
+            // mine_built_wall: worker mines a wooden wall; the wall is removed and dropped logs appear.
+            const mx = mid + 4, my = mid + 7;
+            put(mx, my, "wall_wood");
+            const mineWall = create({ type: "mine", target: { area, x: mx, y: my }, owner: worker.id });
+            await waitJob(mineWall, 15000);
+            const wallGone = !O.typeIdAt(mx, my);
+            const logDropped = itemsOn(mx, my, "log");
+            t.check("mine_built_wall", mineWall.state === "done" && wallGone && logDropped >= 1,
+                `${jobText(mineWall)}; wall_wood cleared: ${wallGone}, logs on cell: ${logDropped}`);
+
+            // mine_subterranean_wall: worker on z = -1 mines a solid rock wall; shape becomes floor and stone drops.
+            const L = window.UF && UF.Levels;
+            if (L && typeof L.setShape === "function" && typeof L.shapeAt === "function") {
+                const subTarget = { area, x: mid + 1, y: mid + 1, z: -1 };
+                const subStand = { area, x: mid + 1, y: mid + 2, z: -1 };
+                L.setShape(subTarget, "solid", { material: "stone" });
+                L.setShape(subStand, "floor", { material: "stone" });
+                const subWorker = W.addUnit({ name: "TEST_miner", image: { characterName: "$U7_Townsman" }, area, x: subStand.x, y: subStand.y, z: -1, dir: 8,
+                    data: { kind: "test", faction: "player", inventory: [], equipment: {} } });
+                const subMine = create({ type: "mine", target: subTarget, owner: subWorker.id });
+                await waitJob(subMine, 15000);
+                const shapeAfter = L.shapeAt(subTarget);
+                const subStone = I.count({ area, x: subTarget.x, y: subTarget.y, z: -1 }, "stone");
+                t.check("mine_subterranean_wall", subMine.state === "done" && shapeAfter === "floor" && subStone >= 1,
+                    `${jobText(subMine)}; shape after mining: "${shapeAfter}" (want "floor"), stone dropped: ${subStone}`);
+                W.removeUnit(subWorker.id);
+            }
 
             // drink and eat: a water cell made for the test; needs go down and the drinker stays out of the water.
             worker.data.needs = { hunger: 60, thirst: 80, sleep: 50, social: 50 };

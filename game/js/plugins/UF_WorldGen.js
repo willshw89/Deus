@@ -608,6 +608,27 @@
         return Object.assign({}, kit, { radius: kit.radius || [5, 20], objects: kit.objects || {}, ore, nearWater: Array.isArray(kit.nearWater) ? kit.nearWater : [] });
     };
 
+    /** Depth-specific flora and starter objects. Surface vegetation is never a fallback underground. */
+    WorldGen.undergroundKitConfig = function(z) {
+        if (z !== -1 && z !== -2) return null;
+        const cat = catalog(), row = cat && cat.start && cat.start.undergroundKit && cat.start.undergroundKit[String(z)];
+        if (!row || !row.objects || !Array.isArray(row.natural)) throw new Error(`Missing underground flora configuration for level ${z}`);
+        const base = WorldGen.kitConfig();
+        const objects = Object.assign({}, row.objects);
+        const natural = row.natural.map(p => Object.assign({}, p));
+        const types = new Map((cat.objects || []).map(o => [o.id, o]));
+        for (const [id, count] of Object.entries(objects)) {
+            const type = types.get(id), tags = type && type.tags || [];
+            if (!type || !Number.isInteger(count) || count < 0) throw new Error(`Invalid underground kit object ${id} on level ${z}`);
+            if (tags.some(t => ["tree", "plant", "bush", "food", "fruit", "fiber", "straw"].includes(t)) && !tags.includes("underground")) throw new Error(`Surface vegetation ${id} in underground kit ${z}`);
+        }
+        for (const p of natural) {
+            const type = types.get(p.id);
+            if (!type || !(type.tags || []).includes("underground") || !Number.isFinite(p.chance) || p.chance < 0 || p.chance > 1) throw new Error(`Invalid natural underground flora ${p.id} on level ${z}`);
+        }
+        return { radius: base.radius.slice(), ore: base.ore, objects, nearWater: [], natural };
+    };
+
     // The kit's entries for one centre: every start.kit.objects id at its minimum, then the ore outcrop (one id of
     // kit.ore.ids and a count within kit.ore.count, both seeded per area and centre). Any id of an entry already
     // standing within the radius counts toward it.
@@ -950,18 +971,21 @@
     }
 
     // Underground content uses the underground shape grid, never surface climate, clearing or water.
-    // Existing harvestable objects are temporary resource stand-ins until cave flora is approved.
+    // Cave flora has its own depth tables; stock cave art remains a placeholder until original assets are approved.
     function generateUnderground(ctx) {
         const W = window.UF.World, L = window.UF.Levels, cat = catalog(), m = compiled();
         if (!W || !W.state || !L || !cat || !m || (ctx.z !== -1 && ctx.z !== -2)) return;
         const size = ctx.width, cells = size * size, seed = W.state.seed;
         const area = { x: ctx.areaX, y: ctx.areaY, z: ctx.z };
-        const dry = new Uint8Array(cells), counts = {}, kitLog = [];
+        const dry = new Uint8Array(cells), water = new Uint8Array(cells), biomes = new Array(cells), counts = {}, kitLog = [];
+        const kit = WorldGen.undergroundKitConfig(ctx.z), r1 = kit.radius[1] || 20;
         const ref = { area, x: 0, y: 0, z: ctx.z };
         for (let i = 0; i < cells; i++) {
             ref.x = i % size; ref.y = Math.floor(i / size);
             const c = L.cellAt(ref);
             dry[i] = c && !c.water && L.standableShape(ref) ? 1 : 0;
+            water[i] = c && c.water ? 1 : 0;
+            biomes[i] = c && c.biome ? c.biome.id : null;
         }
         const centres = WorldGen.kitCentres(ctx.areaX, ctx.areaY, ctx.z);
         const siteMask = new Uint8Array(cells);
@@ -977,7 +1001,29 @@
             const o = id && m.objectById.get(id);
             if (o) { ctx.objects[i] = o.typeId; counts[id] = (counts[id] || 0) + 1; }
         }
-        const kit = WorldGen.kitConfig(), r1 = kit.radius[1] || 20;
+        // Natural vegetation exists in uninhabited pockets too. Depth, world coordinates and plant ID seed it;
+        // neither settlement order nor the currently displayed map changes the result.
+        const nearWater = (i, radius) => {
+            const x = i % size, y = Math.floor(i / size);
+            for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+                const nx = x + dx, ny = y + dy;
+                if (dx * dx + dy * dy <= radius * radius && nx >= 0 && ny >= 0 && nx < size && ny < size && water[ny * size + nx]) return true;
+            }
+            return false;
+        };
+        for (let i = 0; i < cells; i++) {
+            if (!dry[i] || siteMask[i] || ctx.objects[i]) continue;
+            for (const p of kit.natural) {
+                if (p.biomes && !p.biomes.includes(biomes[i])) continue;
+                if (p.nearWater > 0 && !nearWater(i, p.nearWater)) continue;
+                const gx = ctx.areaX * size + i % size, gy = ctx.areaY * size + Math.floor(i / size);
+                if (unit(seed, SALT.kit ^ hashString(p.id), ctx.z, gx, gy) >= p.chance) continue;
+                const o = m.objectById.get(p.id);
+                ctx.objects[i] = o.typeId;
+                counts[p.id] = (counts[p.id] || 0) + 1;
+                break;
+            }
+        }
         centres.forEach((c, ci) => {
             // Flood only dry floor in this pocket; a kit never spawns beyond a rock barrier.
             const reached = new Set(), queue = [c.y * size + c.x];
@@ -1174,7 +1220,12 @@
             t.check("autotile_matches_editor", WorldGen.autotileShapeCount() === 47 && strip.join(",") === "16,0,24",
                 `${WorldGen.autotileShapeCount()} shapes derived; a 3-wide vertical strip gives ${strip.join(",")} (the editor painted 16,0,24)`);
 
-            const W = UF.World, st = W.state, a = st.startArea, size = st.size, mid = Math.floor(size / 2);
+            const W = UF.World;
+            if (window.UF && UF.Levels && typeof UF.Levels.view === "function" && UF.Levels.view() !== 0) {
+                UF.Levels.setView(0);
+                await t.waitUntil(() => !!(W && W.currentArea && W.currentArea()), 10000, "Ground view for worldgen checks").catch(() => {});
+            }
+            const st = W.state, a = st.startArea, size = st.size, mid = Math.floor(size / 2);
             const here = W.buildArea(a.x, a.y);
             const build = WorldGen.lastBuild;
             t.check("tileset_id", !!UF.Tiles && here.tilesetId === UF.Tiles.TILESET_ID && $gameMap.tilesetId() === UF.Tiles.TILESET_ID,
@@ -1267,7 +1318,7 @@
             // kit_per_area: the kit and drinkable water around every faction's area centre, on the map as generated.
             const kitCentres = WorldGen.kitCentres(a.x, a.y);
             const kit = kitReport(pristineStart, size, kitCentres);
-            const wantCentres = factionCount();
+            const wantCentres = window.UF.Factions && UF.World.state.factions ? UF.World.state.factions.list.filter(f => !f.species || f.species !== "dwarf").length : factionCount();
             t.check("kit_per_area", kit.ok && (!wantCentres || kitCentres.length === wantCentres), `${wantCentres ? `${wantCentres} factions; ` : ""}${kit.detail}`);
 
             // kit_covers_plan (VISION V67): within kit.radius[1] of every campfire the objects are worth at least the plan's
@@ -1498,7 +1549,8 @@
                         if (hits === expected) stampedOk++; else problems.push(`${s.name}: ${hits} of ${expected} pieces stamped`);
                     }
                 }
-                const bareWanted = UF.World.state.history && UF.World.state.history.founders ? factionCount() : bare;
+                const groundFactionsN = window.UF.Factions && UF.World.state.factions ? UF.World.state.factions.list.filter(f => !f.species || f.species !== "dwarf").length : factionCount();
+                const bareWanted = UF.World.state.history && UF.World.state.history.founders ? groundFactionsN : bare;
                 t.check("camps_cleared", sites.length > 0 && bare === bareWanted && problems.length === 0,
                     `${sites.length} sites in area (${a.x},${a.y}): ${bare} bare camps (want ${bareWanted}), ${stampedOk} older sites stamped; ${problems.length ? `PROBLEMS: ${problems.join("; ")}` : "every bare camp's disc is free of objects"}`);
             }
