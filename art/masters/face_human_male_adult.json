@@ -1,0 +1,75 @@
+{
+  "id": "face_human_male_adult",
+  "species": "human",
+  "gender": "male",
+  "age": "adult",
+  "stage": "adult",
+  "layer": "face",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "content": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "angry": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "columns": 4,
+  "rows": 3,
+  "variants": {
+    "male": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "moods": [
+    "neutral",
+    "content",
+    "angry"
+  ],
+  "faces": [
+    {
+      "variant": 0,
+      "description": "Young hardy settler, brown hair, brown eyes, clean shaven, homespun tunic"
+    },
+    {
+      "variant": 1,
+      "description": "Mature veteran settler, dark hair with grey temples, full beard and mustache"
+    },
+    {
+      "variant": 2,
+      "description": "Fair-haired hunter, blonde swept hair, cheek scar, hazel eyes"
+    },
+    {
+      "variant": 3,
+      "description": "Dark-skinned craftsman, textured curly dark hair, light mustache/beard"
+    }
+  ],
+  "rmmzFaceset": "game/img/faces/UF_Faces_Human_Male_Adult.png"
+}

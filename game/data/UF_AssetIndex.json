@@ -1465,8 +1465,7 @@
   "requests": [
    "AR-400",
    "AR-010",
-   "AR-011",
-   "AR-700"
+   "AR-011"
   ],
   "usedBy": [
    "people human"
@@ -1563,8 +1562,7 @@
   "requests": [
    "AR-400",
    "AR-010",
-   "AR-011",
-   "AR-700"
+   "AR-011"
   ],
   "usedBy": [
    "people human"
@@ -1604,8 +1602,7 @@
   "requests": [
    "AR-400",
    "AR-010",
-   "AR-011",
-   "AR-700"
+   "AR-011"
   ],
   "usedBy": [
    "people human"
@@ -1626,8 +1623,7 @@
   "requests": [
    "AR-400",
    "AR-010",
-   "AR-011",
-   "AR-700"
+   "AR-011"
   ],
   "usedBy": [
    "people human"
@@ -4487,10 +4483,8 @@
  },
  "img/system/Window.png": {
   "status": "original",
-  "request": "AR-033",
-  "requests": [
-   "AR-033"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "RMMZ core: skin of every window"
   ],
