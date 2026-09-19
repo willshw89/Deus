@@ -1,24 +1,10 @@
 {
- "img/system/Balloon.png": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "RMMZ core: speech balloons"
-  ],
-  "states": [
-   "sheet of fixed-size pieces (RMMZ layout)"
-  ],
-  "category": "ui",
-  "file": "img/system/Balloon.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "img/system/ButtonSet.png": {
   "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
   "usedBy": [
    "RMMZ core: touch buttons"
   ],
@@ -31,18 +17,86 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "img/system/IconSet.png": {
+ "Inside_C": {
   "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-510",
+  "requests": [
+   "AR-510"
+  ],
   "usedBy": [
-   "RMMZ core: icons"
+   "tile 404 (objects)",
+   "tile 403 (objects)",
+   "tile 400 (objects)"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Inside_C.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Inside_C#400": {
+  "status": "stock RMMZ",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object weapon_rack \"Weapon rack\""
   ],
   "states": [
-   "sheet of fixed-size pieces (RMMZ layout)"
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
   ],
-  "category": "ui",
-  "file": "img/system/IconSet.png",
+  "category": "objects",
+  "file": "img/tilesets/Inside_C.png (tile 400)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Inside_C#403": {
+  "status": "stock RMMZ",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object bowyer_bench \"Bowyer's bench\"",
+   "object fletcher_bench \"Fletcher's bench\" (tint #c8d8f0)"
+  ],
+  "states": [
+   "bowyer_bench: building: unbuilt (needs 2 Log on the cell) / built",
+   "bowyer_bench: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "fletcher_bench: building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "fletcher_bench: ruined → Rubble (when its site is sacked)"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Inside_C.png (tile 403)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Inside_C#404": {
+  "status": "stock RMMZ",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object smithy \"Smithy\""
+  ],
+  "states": [
+   "building: unbuilt (needs 4 Stone, 1 Log, 1 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Inside_C.png (tile 404)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -243,45 +297,92 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_A5": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "tileset 91 slot A5"
-  ],
-  "states": [],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A5.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B": {
   "status": "stock RMMZ",
   "request": "AR-102",
   "requests": [
    "AR-102",
    "AR-103",
-   "AR-104"
+   "AR-510"
   ],
   "usedBy": [
    "tile 237 (objects)",
    "tile 232 (objects)",
    "tile 238 (objects)",
    "tile 174 (objects)",
-   "tile 246 (objects)",
    "tile 251 (objects)",
    "tile 172 (objects)",
    "tile 173 (objects)",
    "tile 253 (objects)",
-   "tile 80 (objects)",
-   "tile 248 (objects)",
+   "tile 148 (objects)",
+   "tile 149 (objects)",
+   "tile 181 (objects)",
+   "tile 175 (objects)",
+   "tile 139 (objects)",
    "tileset 91 slot B"
   ],
   "states": [],
   "category": "tiles",
   "file": "img/tilesets/Outside_B.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Outside_B#139": {
+  "status": "stock RMMZ",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object well \"Well\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 139)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Outside_B#148": {
+  "status": "stock RMMZ",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object furnace \"Furnace\" (tint #e0b898)"
+  ],
+  "states": [
+   "building: unbuilt (needs 6 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 148)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Outside_B#149": {
+  "status": "stock RMMZ",
+  "request": "AR-510",
+  "requests": [
+   "AR-510",
+   "AR-905"
+  ],
+  "usedBy": [
+   "object tanning_rack \"Tanning rack\""
+  ],
+  "states": [
+   "building: unbuilt (needs 3 Log, 2 Plant fiber on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 149)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -343,6 +444,41 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
+ "Outside_B#175": {
+  "status": "stock RMMZ",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object farm_plot \"Farm plot\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 175)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "Outside_B#181": {
+  "status": "stock RMMZ",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object bridge \"Plank bridge\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "sits on water cells",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 181)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
  "Outside_B#232": {
   "status": "stock RMMZ",
   "request": "AR-103",
@@ -400,44 +536,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#246": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object fern \"Fern\""
-  ],
-  "states": [
-   "gather: Fern → gone (yields 1 Plant fiber)",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 246)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#248": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object floor_straw \"Straw bed\""
-  ],
-  "states": [
-   "building: unbuilt (needs 2 Straw on the cell) / built",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 248)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B#251": {
   "status": "stock RMMZ",
   "request": "AR-103",
@@ -477,102 +575,17 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#80": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object wall_wood \"Wooden wall\""
-  ],
-  "states": [
-   "building: unbuilt (needs 1 Log on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 80)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_C": {
   "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
-   "tile 282 (objects)",
    "tile 286 (objects)",
-   "tile 277 (objects)",
-   "tile 285 (objects)",
    "tileset 91 slot C"
   ],
   "states": [],
   "category": "tiles",
   "file": "img/tilesets/Outside_C.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#277": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object wall_stone \"Stone wall\""
-  ],
-  "states": [
-   "building: unbuilt (needs 2 Stone on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 277)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#282": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object rubble \"Rubble\""
-  ],
-  "states": [
-   "pick: Rubble → gone (yields 2 Stone)",
-   "is the ruin of Wooden wall, Stone wall, Work stone",
-   "flat: drawn under units and items"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 282)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_C#285": {
-  "status": "stock RMMZ",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
-  "usedBy": [
-   "object workbench \"Work stone\""
-  ],
-  "states": [
-   "building: unbuilt (needs 2 Stone, 1 Log on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_C.png (tile 285)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -595,67 +608,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "People1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_World.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/People1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "!$BerryBush": {
-  "status": "U7 stand-in",
-  "request": "AR-103",
-  "requests": [
-   "AR-103",
-   "AR-023"
-  ],
-  "usedBy": [
-   "object berry_bush \"Berry bush\"",
-   "object berry_bush_bare \"Berry bush (picked)\" (tint #a8b898)"
-  ],
-  "states": [
-   "berry_bush: gather: Berry bush → Berry bush (picked) (yields 2 Berries)",
-   "berry_bush: is the regrown state of Berry bush (picked)",
-   "blocks movement (units work from a neighbouring cell)",
-   "berry_bush_bare: regrows into Berry bush after 48 h",
-   "berry_bush_bare: is the after-state of Berry bush (gather)"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$BerryBush.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$Campfire": {
-  "status": "U7 stand-in",
-  "request": "AR-105",
-  "requests": [
-   "AR-105"
-  ],
-  "usedBy": [
-   "object campfire \"Campfire\""
-  ],
-  "states": [
-   "building: unbuilt (needs 3 Log, 3 Stone on the cell) / built",
-   "ruined → Old bones (when its site is sacked)",
-   "unlit / lit (a fire: cooking happens next to it)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$Campfire.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$FruitTree": {
   "status": "U7 stand-in",
@@ -680,7 +632,7 @@
   "category": "objects",
   "file": "img/characters/!$FruitTree.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$GraniteBoulder": {
@@ -699,7 +651,7 @@
   "category": "objects",
   "file": "img/characters/!$GraniteBoulder.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$IronstoneDeposit": {
@@ -719,7 +671,7 @@
   "category": "objects",
   "file": "img/characters/!$IronstoneDeposit.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$PineTree": {
@@ -741,7 +693,7 @@
   "category": "objects",
   "file": "img/characters/!$PineTree.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$TimberOak": {
@@ -764,7 +716,7 @@
   "category": "objects",
   "file": "img/characters/!$TimberOak.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "!$U7_Broadleafgiant": {
@@ -866,10 +818,8 @@
  },
  "!$U7_Gravel": {
   "status": "U7 stand-in",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object gravel \"Gravel\""
   ],
@@ -885,15 +835,20 @@
  },
  "!$U7_Item_AnimalBone": {
   "status": "U7 stand-in",
-  "request": "AR-200",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-904",
    "AR-200"
   ],
   "usedBy": [
-   "item bone \"Bone\""
+   "item bone \"Bone\"",
+   "item arrows \"Arrows\" (tint #d8c8a0)"
   ],
   "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bone: used in: Fletch bone-tipped arrows",
+   "arrows: made by: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_AnimalBone.png",
@@ -940,16 +895,22 @@
  },
  "!$U7_Item_Firewood": {
   "status": "U7 stand-in",
-  "request": "AR-200",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-904",
    "AR-200"
   ],
   "usedBy": [
-   "item firewood \"Firewood\""
+   "item firewood \"Firewood\"",
+   "item charcoal \"Charcoal\" (tint #585858)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "made by: Split firewood"
+   "firewood: made by: Split firewood",
+   "firewood: used in: Burn charcoal",
+   "charcoal: made by: Burn charcoal",
+   "charcoal: used in: Smelt an iron bar, Smelt a copper bar"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_Firewood.png",
@@ -976,78 +937,41 @@
   "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
- "!$U7_Item_HaunchMeat": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item meat_cooked \"Cooked meat\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −50 hunger",
-   "made by: Roast meat, Roast fish"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_HaunchMeat.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "!$U7_Item_IronOre": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item ore_iron \"Iron ore\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_IronOre.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "!$U7_Item_LeadOre": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item ore_copper \"Copper ore\" (tint #80e0a0)"
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_LeadOre.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
  "!$U7_Item_LeatherHide": {
   "status": "U7 stand-in",
   "request": "AR-201",
   "requests": [
    "AR-201",
+   "AR-511",
+   "AR-904",
+   "AR-512",
+   "AR-900",
+   "AR-902",
+   "AR-903",
+   "AR-906",
    "AR-200"
   ],
   "usedBy": [
    "item hide \"Hide\"",
-   "item hide_cloak \"Hide cloak\" (tint #c8a880)"
+   "item hide_cloak \"Hide cloak\" (tint #c8a880)",
+   "item leather \"Leather\" (tint #a06838)",
+   "item sling \"Sling\" (tint #806048)",
+   "item helmet_leather \"Leather cap\" (tint #b89060)",
+   "item armor_leather \"Leather armor\" (tint #8c5c30)",
+   "item leggings_leather \"Leather leggings\" (tint #a07848)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "hide: used in: Sew a hide cloak",
+   "hide: used in: Sew a hide cloak, Tan a hide",
    "hide_cloak: worn: clothing tier 2 (the wearer's sheet changes)",
-   "hide_cloak: made by: Sew a hide cloak"
+   "hide_cloak: made by: Sew a hide cloak",
+   "leather: made by: Tan a hide",
+   "leather: used in: Braid a sling, Build a wooden shield, Forge an iron dagger, Forge a short sword, Forge a long sword, Stitch a leather cap … (+5)",
+   "sling: made by: Braid a sling",
+   "helmet_leather: made by: Stitch a leather cap",
+   "armor_leather: worn: clothing tier 3 (the wearer's sheet changes)",
+   "armor_leather: made by: Stitch leather armor",
+   "leggings_leather: made by: Stitch leather leggings"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_LeatherHide.png",
@@ -1057,15 +981,48 @@
  },
  "!$U7_Item_MetalBar": {
   "status": "U7 stand-in",
-  "request": "AR-200",
+  "request": "AR-904",
   "requests": [
+   "AR-904",
+   "AR-511",
+   "AR-512",
+   "AR-900",
+   "AR-901",
+   "AR-902",
+   "AR-903",
    "AR-200"
   ],
   "usedBy": [
-   "item bar_iron \"Iron bar\""
+   "item bar_iron \"Iron bar\"",
+   "item bar_copper \"Copper bar\" (tint #e0a070)",
+   "item dagger_iron \"Iron dagger\" (tint #dce0e4)",
+   "item sword_short \"Short sword\" (tint #c8ccd0)",
+   "item sword_long \"Long sword\" (tint #b4b8bc)",
+   "item axe_iron \"Iron axe\" (tint #a4acb4)",
+   "item mace \"Copper mace\" (tint #d4a070)",
+   "item helmet_iron \"Iron helmet\" (tint #9098a4)",
+   "item mail_iron \"Iron mail\" (tint #8890a0)",
+   "item greaves_iron \"Iron greaves\" (tint #a0a8b8)",
+   "item shield_iron \"Iron shield\" (tint #b4bcc4)"
   ],
   "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bar_iron: made by: Smelt an iron bar",
+   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+4)",
+   "bar_copper: made by: Smelt a copper bar",
+   "bar_copper: used in: Cast a copper mace",
+   "dagger_iron: held tool (hunt ×2.5, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
+   "dagger_iron: made by: Forge an iron dagger",
+   "sword_short: made by: Forge a short sword",
+   "sword_long: made by: Forge a long sword",
+   "axe_iron: held tool (chop ×3): shown in the hand on the held layer (AR-600)",
+   "axe_iron: made by: Forge an iron axe",
+   "mace: made by: Cast a copper mace",
+   "helmet_iron: made by: Forge an iron helmet",
+   "mail_iron: worn: clothing tier 3 (the wearer's sheet changes)",
+   "mail_iron: made by: Forge iron mail",
+   "greaves_iron: made by: Forge iron greaves",
+   "shield_iron: made by: Forge an iron shield"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_MetalBar.png",
@@ -1078,40 +1035,24 @@
   "request": "AR-201",
   "requests": [
    "AR-201",
+   "AR-511",
+   "AR-904",
    "AR-200"
   ],
   "usedBy": [
    "item fiber \"Plant fiber\"",
-   "item fiber_wrap \"Woven wrap\" (tint #e0d0a0)"
+   "item fiber_wrap \"Woven wrap\" (tint #e0d0a0)",
+   "item feathers \"Feathers\" (tint #f4f4f8)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "fiber: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak",
+   "fiber: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak, Carve a short bow … (+6)",
    "fiber_wrap: worn: clothing tier 1 (the wearer's sheet changes)",
-   "fiber_wrap: made by: Weave a fiber wrap"
+   "fiber_wrap: made by: Weave a fiber wrap",
+   "feathers: used in: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_PlantFiber.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "!$U7_Item_RawMeat": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item meat_raw \"Raw meat\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −20 hunger",
-   "used in: Roast meat"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_RawMeat.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "name starts with U7_"
@@ -1178,19 +1119,15 @@
   "request": "AR-201",
   "requests": [
    "AR-201",
-   "AR-104",
-   "AR-200",
-   "AR-044"
+   "AR-200"
   ],
   "usedBy": [
-   "item stone \"Stone\"",
    "item stone_axe \"Stone axe\" (tint #a8b8c8)",
    "item stone_knife \"Stone knife\" (tint #d0d8e0)",
    "item stone_pick \"Stone pick\" (tint #b8a890)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "stone: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick",
    "stone_axe: held tool (chop ×2): shown in the hand on the held layer (AR-600)",
    "stone_axe: made by: Haft a stone axe",
    "stone_knife: held tool (hunt ×2, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
@@ -1222,25 +1159,6 @@
   "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
- "!$U7_Item_StrawBundle": {
-  "status": "U7 stand-in",
-  "request": "AR-104",
-  "requests": [
-   "AR-104",
-   "AR-200"
-  ],
-  "usedBy": [
-   "item straw \"Straw\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_StrawBundle.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
  "!$U7_Item_TreeFruit": {
   "status": "U7 stand-in",
   "request": "AR-200",
@@ -1260,37 +1178,30 @@
   "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
- "!$U7_Item_WildBerries": {
-  "status": "U7 stand-in",
-  "request": "AR-200",
-  "requests": [
-   "AR-200"
-  ],
-  "usedBy": [
-   "item berries \"Berries\""
-  ],
-  "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −25 hunger"
-  ],
-  "category": "items",
-  "file": "img/characters/!$U7_Item_WildBerries.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
  "!$U7_Item_WoodLog": {
   "status": "U7 stand-in",
-  "request": "AR-200",
+  "request": "AR-511",
   "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900",
+   "AR-901",
    "AR-200"
   ],
   "usedBy": [
-   "item log \"Log\""
+   "item bow_short \"Short bow\" (tint #d0a868)",
+   "item bow_long \"Long bow\" (tint #b08848)",
+   "item club \"Club\" (tint #a88858)",
+   "item spear \"Spear\" (tint #e0d0b0)",
+   "item shield_wood \"Wooden shield\" (tint #b89478)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Haft a stone axe, Haft a stone pick, Split firewood"
+   "bow_short: made by: Carve a short bow",
+   "bow_long: made by: Carve a long bow",
+   "club: made by: Shape a club",
+   "spear: made by: Haft a stone spear, Haft an iron spear",
+   "shield_wood: made by: Build a wooden shield"
   ],
   "category": "items",
   "file": "img/characters/!$U7_Item_WoodLog.png",
@@ -1318,10 +1229,8 @@
  },
  "!$U7_LooseStones": {
   "status": "U7 stand-in",
-  "request": "AR-104",
-  "requests": [
-   "AR-104"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
    "object rocks_small \"Loose stones\""
   ],
@@ -1398,8 +1307,7 @@
   "status": "U7 stand-in",
   "request": "AR-103",
   "requests": [
-   "AR-103",
-   "AR-023"
+   "AR-103"
   ],
   "usedBy": [
    "object bush \"Shrub\"",
@@ -1477,27 +1385,6 @@
   "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
- "!$U7_TreeStump": {
-  "status": "U7 stand-in",
-  "request": "AR-102",
-  "requests": [
-   "AR-102",
-   "AR-021"
-  ],
-  "usedBy": [
-   "object stump \"Stump\""
-  ],
-  "states": [
-   "chop: Stump → gone (yields 1 Log)",
-   "is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+7)",
-   "walk-through"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$U7_TreeStump.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
  "!$U7_Wildflowers": {
   "status": "U7 stand-in",
   "request": "AR-103",
@@ -1530,7 +1417,9 @@
    "AR-010"
   ],
   "usedBy": [
-   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)"
+   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
+   "plugin UF_Colonists.js",
+   "plugin UF_Combat.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1549,7 +1438,8 @@
    "AR-011"
   ],
   "usedBy": [
-   "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)"
+   "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
+   "plugin UF_Colonists.js"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -1559,6 +1449,24 @@
   "file": "img/characters/$Eve.png",
   "exists": true,
   "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "$People1": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "plugin UF_Floors.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$People1.png",
+  "exists": true,
+  "sidecar": false,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "$U7_Adam_T1": {
@@ -1610,7 +1518,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 3 (no item reaches this tier yet)"
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
   "category": "people",
   "file": "img/characters/$U7_Adam_T3.png",
@@ -1693,7 +1601,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat"
+   "alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat, 4 Feathers"
   ],
   "category": "creatures",
   "file": "img/characters/$U7_Chicken.png",
@@ -1790,7 +1698,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 3 (no item reaches this tier yet)"
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
   "category": "people",
   "file": "img/characters/$U7_Eve_T3.png",
@@ -1873,6 +1781,7 @@
   "usedBy": [
    "creature hare \"Hare\" (grazer)",
    "plugin UF_Colonists.js (test suite)",
+   "plugin UF_Doors.js (test suite)",
    "plugin UF_Interact.js (test suite)",
    "plugin UF_Jobs.js (test suite)"
   ],
@@ -1897,7 +1806,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat",
+   "alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat, 3 Feathers",
    "flies over objects"
   ],
   "category": "creatures",
@@ -2054,7 +1963,7 @@
   "category": "creatures",
   "file": "img/characters/$U7_Skeleton.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
  "$U7_Townsman": {
@@ -2074,6 +1983,7 @@
    "plugin UF_Items.js (test suite)",
    "plugin UF_Jobs.js (test suite)",
    "plugin UF_Objects.js (test suite)",
+   "plugin UF_Roads.js (test suite)",
    "plugin UF_Stance.js (test suite)",
    "plugin UF_TimeSpeed.js (test suite)",
    "plugin UF_Wildlife.js (test suite)"
@@ -2111,7 +2021,7 @@
   "category": "creatures",
   "file": "img/characters/$U7_Troll.png",
   "exists": true,
-  "sidecar": false,
+  "sidecar": true,
   "statusWhy": "name starts with U7_"
  },
  "$U7_WildBird": {
@@ -2125,7 +2035,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "alive / dead: hunted (work 90, flees the hunter) → drops 1 Raw meat",
+   "alive / dead: hunted (work 90, flees the hunter) → drops 1 Raw meat, 2 Feathers",
    "flies over objects"
   ],
   "category": "creatures",
@@ -2155,8 +2065,10 @@
  },
  "img/faces/U7_Faces.png": {
   "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
   "usedBy": [
    "plugin UF_Dialogue.js",
    "plugin UF_Gumps.js"
@@ -2269,11 +2181,11 @@
    "AR-120"
   ],
   "usedBy": [
-   "tileset 91 slot A2: all 22 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)",
+   "tileset 91 slot A2: all 23 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)",
    "plugin UF_Tiles.js"
   ],
   "states": [
-   "22 kinds × 47 autotile shapes on one 768×576 sheet"
+   "23 kinds × 47 autotile shapes on one 768×576 sheet"
   ],
   "category": "generated",
   "file": "(drawn in code)",
@@ -2729,6 +2641,23 @@
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
+ "UF_GenGround_A2#3872": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "ground kind road \"Packed earth\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #a8906a #8a7452 #c0aa84 #6e5a40"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 22)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
  "UF_GenSelect": {
   "status": "generated",
   "request": "AR-031",
@@ -2803,8 +2732,10 @@
  },
  "UF_GenStockpile": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
   "usedBy": [
    "object stockpile \"Stockpile\"",
    "plugin UF_Objects.js"
@@ -2819,5 +2750,494 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "!$UF_BerryBush": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object berry_bush \"Berry bush\""
+  ],
+  "states": [
+   "gather: Berry bush → Berry bush (picked) (yields 2 Berries)",
+   "is the regrown state of Berry bush (picked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_BerryBush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_BerryBush_Bare": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object berry_bush_bare \"Berry bush (picked)\""
+  ],
+  "states": [
+   "regrows into Berry bush after 48 h",
+   "is the after-state of Berry bush (gather)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_BerryBush_Bare.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Campfire": {
+  "status": "original",
+  "request": "AR-105",
+  "requests": [
+   "AR-105",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object campfire \"Campfire\""
+  ],
+  "states": [
+   "building: unbuilt (needs 3 Log, 3 Stone on the cell) / built",
+   "ruined → Old bones (when its site is sacked)",
+   "unlit / lit (a fire: cooking happens next to it)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Campfire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fern": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object fern \"Fern\""
+  ],
+  "states": [
+   "gather: Fern → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fern.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Berries": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item berries \"Berries\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Berries.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_CopperOre": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item ore_copper \"Copper ore\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Smelt a copper bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_CopperOre.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_IronOre": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item ore_iron \"Iron ore\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Smelt an iron bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_IronOre.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Log": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item log \"Log\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Haft a stone axe, Haft a stone pick, Split firewood, Carve a short bow, Carve a long bow, Fletch stone-tipped arrows … (+9)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Log.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_MeatCooked": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item meat_cooked \"Cooked meat\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −50 hunger",
+   "made by: Roast meat, Roast fish"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_MeatCooked.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_MeatRaw": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item meat_raw \"Raw meat\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −20 hunger",
+   "used in: Roast meat"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_MeatRaw.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Stone": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-104",
+   "AR-906",
+   "AR-105",
+   "AR-044",
+   "AR-022"
+  ],
+  "usedBy": [
+   "item stone \"Stone\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Fletch stone-tipped arrows, Haft a stone spear"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Stone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Straw": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "item straw \"Straw\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Straw.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Rubble": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object rubble \"Rubble\""
+  ],
+  "states": [
+   "pick: Rubble → gone (yields 2 Stone)",
+   "is the after-state of Stone wall (quarry)",
+   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+3)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Rubble.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Straw_Bed": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object floor_straw \"Straw bed\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Straw on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Straw_Bed.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Stump": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102",
+   "AR-021"
+  ],
+  "usedBy": [
+   "object stump \"Stump\""
+  ],
+  "states": [
+   "chop: Stump → gone (yields 1 Log)",
+   "is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+7)",
+   "walk-through"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stump.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Workbench": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object workbench \"Work stone\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Stone, 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Workbench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$WallStone_Set": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object wall_stone \"Stone wall\""
+  ],
+  "states": [
+   "quarry: Stone wall → Rubble (yields 2 Stone)",
+   "building: unbuilt (needs 2 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$WallStone_Set.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$WallWood_Set": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object wall_wood \"Wooden wall\""
+  ],
+  "states": [
+   "chop: Wooden wall → gone (yields 1 Log)",
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$WallWood_Set.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Baby": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Baby.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Child_Boy": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Child_Boy.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Child_Girl": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Child_Girl.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Teen_Boy": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Teen_Boy.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Teen_Girl": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Teen_Girl.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/system/Balloon.png": {
+  "status": "original",
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
+  "usedBy": [
+   "RMMZ core: speech balloons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/Balloon.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "img/system/IconSet.png": {
+  "status": "original",
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
+  "usedBy": [
+   "RMMZ core: icons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/IconSet.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "People1": {
+  "status": "original",
+  "request": "AR-400",
+  "requests": [
+   "AR-400",
+   "AR-700"
+  ],
+  "usedBy": [
+   "plugin UF_Doors.js (test suite)",
+   "plugin UF_World.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/People1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
  }
 }

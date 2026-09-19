@@ -65,7 +65,7 @@
     const SALT = Object.freeze({ name: 0x5a, gender: 0x9d, facet: 0xfa, skill: 0x5c, roll: 0xc0, thought: 0x7e, stroll: 0x57 });
     const MOODS = [[50, "Ecstatic"], [25, "Happy"], [10, "Content"], [-10, "Fine"], [-25, "Unhappy"], [-50, "Stressed"], [-Infinity, "Miserable"]];
     const SKILL_OF = Object.freeze({ chop: "woodcutting", gather: "gathering", pick: "gathering", quarry: "stonework", mine: "stonework", build: "building", haul: "hauling", fetch: "hauling", hunt: "hunting", craft: "crafting" });
-    const NEED_JOBS = Object.freeze(["drink", "eat", "sleep", "talk"]);
+    const NEED_JOBS = Object.freeze(["drink", "eat", "sleep", "talk", "mate"]);
     const NEIGHBORS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 
     const catalog = () => window.$ufWorldCatalog || null;
@@ -666,6 +666,8 @@
             if (j) return j;
         }
         if (n.sleep >= (th.sleep || 75) || (sleepingHours(u) && n.sleep > 40)) {
+            const mate = nightlyMateJob(u);
+            if (mate) return mate;
             const j = sleepJob(u);
             if (j) return j;
         }
@@ -751,6 +753,192 @@
         }
         if (unit01(seed(), SALT.thought, u.id, ticks(), 9) < 0.2) addThought(u, "Found nothing to eat.", -4);
         return null;
+    }
+
+    //-------------------------------------------------------------------------
+    // Reproduction, pregnancy and life stages
+
+    function eligibleForIntimacy(u) {
+        if (!u || !isColonist(u) || !u.data) return false;
+        if (u.data.age !== undefined && u.data.age < 16) return false; // must be adult
+        const day = window.$ufTime ? $ufTime.day : 1;
+        if (u.data.lastMatedDay === day) return false; // once nightly
+        return true;
+    }
+
+    function nightlyMateJob(u) {
+        if (!eligibleForIntimacy(u)) return null;
+        const J = Jobs();
+        if (!J) return null;
+        const candidates = colonists().filter(o => o.id !== u.id && sameArea(o.area, u.area) && eligibleForIntimacy(o) && (!o.data.faction || o.data.faction === u.data.faction) && chebyshev(o.x, o.y, u.x, u.y) <= 40);
+        if (!candidates.length) return null;
+        // Prioritize opposite gender for sexual reproduction
+        const opp = candidates.find(o => o.data.gender && u.data.gender && o.data.gender !== u.data.gender);
+        const partner = opp || candidates[0];
+        if (!partner) return null;
+        return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
+    }
+
+    function handleMated(u1, u2) {
+        if (!u1) return;
+        const day = window.$ufTime ? $ufTime.day : 1;
+        u1.data.lastMatedDay = day;
+        if (u2 && u2.data) u2.data.lastMatedDay = day;
+
+        addThought(u1, "Made love with partner.", 12);
+        if (u2 && isColonist(u2)) addThought(u2, "Made love with partner.", 12);
+
+        if (u1.data.needs) u1.data.needs.social = Math.max(0, (u1.data.needs.social || 0) - 50);
+        if (u2 && u2.data && u2.data.needs) u2.data.needs.social = Math.max(0, (u2.data.needs.social || 0) - 50);
+
+        const W = World();
+        const ev1 = W ? W.eventOf(u1.id) : null;
+        const ev2 = (W && u2) ? W.eventOf(u2.id) : null;
+        if (window.UF && UF.Visuals && UF.Visuals.bark) {
+            if (ev1) UF.Visuals.bark(ev1, "♥ *Embraces tenderly* ♥", 150);
+            if (ev2) UF.Visuals.bark(ev2, "♥ *Whispers sweet words* ♥", 150);
+        }
+
+        // Conception: opposite genders
+        const female = (u1.data.gender === "female") ? u1 : (u2 && u2.data && u2.data.gender === "female") ? u2 : null;
+        const male = (u1.data.gender === "male") ? u1 : (u2 && u2.data && u2.data.gender === "male") ? u2 : null;
+
+        if (female && male && !female.data.pregnancy) {
+            const roll = unit01(seed(), SALT.roll, female.id, day, ticks());
+            if (roll < 0.5 || female.data._forceConceive) {
+                female.data.pregnancy = {
+                    fatherId: male.id,
+                    fatherName: male.name,
+                    daysLeft: 3,
+                    totalDays: 3,
+                    dayConceived: day
+                };
+                delete female.data._forceConceive;
+                addThought(female, "Expecting a baby!", 12);
+                addThought(male, "Going to be a father!", 10);
+                const femEv = W ? W.eventOf(female.id) : null;
+                if (femEv && window.UF && UF.Visuals && UF.Visuals.bark) {
+                    UF.Visuals.bark(femEv, "*Feeling a gentle flutter in belly*", 180);
+                }
+                emit("colonists:conceived", female, male);
+            }
+        }
+    }
+
+    function progressPregnancies() {
+        const W = World();
+        if (!W) return;
+        for (const u of colonists()) {
+            if (!u.data || !u.data.pregnancy) continue;
+            const preg = u.data.pregnancy;
+            preg.daysLeft--;
+            if (preg.daysLeft <= 0) {
+                giveBirth(u);
+            }
+        }
+    }
+
+    function giveBirth(mother) {
+        const W = World();
+        if (!W || !mother) return null;
+        const st = W.state;
+        const preg = mother.data.pregnancy;
+        const fatherId = preg ? preg.fatherId : null;
+        const father = fatherId ? colonist(fatherId) : null;
+
+        // Find standable cell next to mother
+        const J = Jobs();
+        let birthX = mother.x, birthY = mother.y;
+        for (const [dx, dy] of NEIGHBORS) {
+            const nx = mother.x + dx, ny = mother.y + dy;
+            if (J && J.standable(mother.area, nx, ny)) {
+                birthX = nx;
+                birthY = ny;
+                break;
+            }
+        }
+
+        // Generate child unit
+        const childGender = unit01(st.seed, SALT.gender, mother.id, ticks()) < 0.5 ? "male" : "female";
+        const taken = new Set(colonists().map(c => c.name));
+        const childName = nameFor(st.seed, ticks(), childGender, taken);
+
+        const childUnit = W.addUnit({
+            name: childName,
+            image: { characterName: "$Baby", characterIndex: 0 },
+            area: copyArea(mother.area),
+            x: birthX,
+            y: birthY,
+            dir: 2,
+            data: {
+                kind: "colonist",
+                ai: "colonist",
+                faction: mother.data.faction,
+                species: mother.data.species || "human",
+                gender: childGender,
+                age: 0,
+                ageDays: 0,
+                motherId: mother.id,
+                fatherId: fatherId,
+                needs: Object.assign({}, START_NEEDS),
+                facets: facetsFor(st.seed, ticks()),
+                skills: skillsFor(st.seed, ticks()),
+                thoughts: [{ text: "Entered the world.", score: 10, ticks: ticks() }],
+                tiers: tiersFor(mother.data.species || "human", childGender)
+            }
+        });
+
+        delete mother.data.pregnancy;
+
+        addThought(mother, "Gave birth to a healthy baby.", 20);
+        if (father && isColonist(father)) {
+            addThought(father, "Celebrated the birth of my child.", 15);
+        }
+
+        const motherEv = W.eventOf(mother.id);
+        const childEv = childUnit ? W.eventOf(childUnit.id) : null;
+        if (window.UF && UF.Visuals && UF.Visuals.bark) {
+            if (motherEv) UF.Visuals.bark(motherEv, `♥ Welcome to the world, ${childName}! ♥`, 200);
+            if (childEv) UF.Visuals.bark(childEv, "*Waaaah!*", 180);
+        }
+
+        emit("colonists:born", childUnit, mother, father);
+        return childUnit;
+    }
+
+    function progressAging() {
+        for (const u of colonists()) {
+            if (!u.data || u.data.age === undefined) continue;
+            u.data.ageDays = (u.data.ageDays || 0) + 1;
+            if (u.data.ageDays >= 7 && u.data.age < 18) {
+                u.data.age++;
+                u.data.ageDays = 0;
+                updateAgeAppearance(u);
+            }
+        }
+    }
+
+    function updateAgeAppearance(u) {
+        if (!u.data) return;
+        const age = u.data.age;
+        if (age === undefined) return;
+        const isMale = u.data.gender === "male";
+        let targetImg = isMale ? "$Adam" : "$Eve";
+        if (age < 2) {
+            targetImg = "$Baby";
+        } else if (age < 12) {
+            targetImg = isMale ? "$Child_Boy" : "$Child_Girl";
+        } else if (age < 18) {
+            targetImg = isMale ? "$Teen_Boy" : "$Teen_Girl";
+        } else {
+            const tiers = tiersFor(u.data.species, u.data.gender);
+            targetImg = (tiers && tiers[u.data.tier | 0]) || (isMale ? "$Adam" : "$Eve");
+        }
+        if (u.image && u.image.characterName !== targetImg) {
+            u.image.characterName = targetImg;
+            const ev = World() ? World().eventOf(u.id) : null;
+            if (ev) ev.setImage(targetImg, 0);
+        }
     }
 
     function sleepJob(u) {
@@ -1125,7 +1313,7 @@
             case "craft": return job.result && job.result.items && job.result.items.length ? "item" : null;
             case "equip": return u.data.equipment && (u.data.equipment.tool === job.params.itemId || u.data.equipment.clothes === job.params.itemId) ? "unit" : null;
             case "hunt": return World().unit(job.params.unitId) ? null : "unit";
-            case "drink": case "eat": case "sleep": case "talk": return u.data.needs ? "need" : null;
+            case "drink": case "eat": case "sleep": case "talk": case "mate": return u.data.needs ? "need" : null;
             case "move": case "wander": return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
             default: return null;
         }
@@ -1153,6 +1341,11 @@
             case "eat": addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8); break;
             case "sleep": addThought(u, "Woke rested.", 10); break;
             case "talk": addThought(u, `Enjoyed talking with ${job.params.otherName || "a friend"}.`, 8); break;
+            case "mate": {
+                const partner = World().unit(job.params.partnerId || job.params.unitId);
+                handleMated(u, partner);
+                break;
+            }
             case "hunt": addThought(u, `Brought down ${lower(job.params.preyName ? "a " + job.params.preyName : "prey")}.`, 8); break;
             case "build": {
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
@@ -1234,7 +1427,11 @@
             faction: F ? F.name : "", site: site ? site.name : "",
             thought: u.data.thoughts && u.data.thoughts[0] ? u.data.thoughts[0].text : "",
             facets: Object.assign({}, u.data.facets || {}), skills: Object.assign({}, u.data.skills || {}),
-            plan: planText()
+            plan: planText(),
+            pregnancy: u.data.pregnancy ? Object.assign({}, u.data.pregnancy) : null,
+            age: u.data.age !== undefined ? u.data.age : 20,
+            motherId: u.data.motherId || null,
+            fatherId: u.data.fatherId || null
         };
     }
     /** A player order: the colonist drops its job and does this one (jobSpec = { type, target?, params? }). */
@@ -1276,8 +1473,14 @@
         setEnabled(on) { enabled = !!on; },
         isEnabled: () => enabled,
         doneLog: () => doneLog.slice(),
+        onMated: handleMated,
+        giveBirth,
+        progressPregnancies,
+        progressAging,
+        updateAgeAppearance,
+        nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -1306,6 +1509,14 @@
         });
         UF.Events.on("jobs:done", (job, u) => { try { onDone(job, u); } catch (e) { console.error(e); } });
         UF.Events.on("jobs:failed", job => onFailed(job));
+        UF.Events.on("time:day", (day, month, year) => {
+            try {
+                progressPregnancies();
+                progressAging();
+            } catch (e) {
+                console.error("UF_Colonists: time:day error", e);
+            }
+        });
     }
 
     // Hooked before the original start: in a test run the new game (and world:created) begins inside it.
@@ -1529,6 +1740,57 @@
             const other = facetsFor(st.seed + 1, people[0].id, cultureOf().facetBias);
             const bySeed = Object.keys(f0).filter(k => f0[k] !== other[k]).length;
             t.check("personality_differs", differ >= 3 && bySeed >= 3, `${people[0].name} vs ${people[1].name}: ${differ} of ${Object.keys(f0).length} facets differ; seed+1 changes ${bySeed} of ${people[0].name}'s facets`);
+
+            //-- Reproduction, pregnancy and childbirth
+            const livePeople = colonists();
+            const maleColonist = livePeople.find(u => u.data.gender === "male") || livePeople[0];
+            const femaleColonist = livePeople.find(u => u.data.gender === "female") || livePeople[1];
+
+            // 1. Mating interaction & intimacy thoughts
+            Colonists.onMated(maleColonist, femaleColonist);
+            const mateThought = (femaleColonist.data.thoughts || []).find(th => /Made love/i.test(th.text));
+            t.check("intimacy_awards_thought", !!mateThought, `female colonist thought: "${femaleColonist.data.thoughts[0]?.text}"`);
+
+            // 2. Conception and pregnancy state
+            femaleColonist.data._forceConceive = true;
+            Colonists.onMated(maleColonist, femaleColonist);
+            const preg = femaleColonist.data.pregnancy;
+            t.check("pregnancy_conceived", !!preg && preg.fatherId === maleColonist.id && preg.daysLeft === 3,
+                preg ? `expecting child of ${preg.fatherName}, ${preg.daysLeft} days left` : "not pregnant");
+
+            const pregThought = (femaleColonist.data.thoughts || []).find(th => /Expecting/i.test(th.text));
+            t.check("expecting_thought_awarded", !!pregThought, `mother thought: "${femaleColonist.data.thoughts[0]?.text}"`);
+
+            // 3. Pregnancy gestation countdown
+            Colonists.progressPregnancies();
+            t.check("pregnancy_progresses", femaleColonist.data.pregnancy.daysLeft === 2, `daysLeft now ${femaleColonist.data.pregnancy.daysLeft}`);
+
+            // 4. Childbirth when gestation completes
+            femaleColonist.data.pregnancy.daysLeft = 1;
+            const popBefore = colonists().length;
+            Colonists.progressPregnancies(); // daysLeft -> 0 -> giveBirth
+            const popAfter = colonists().length;
+            const newBorn = colonists().find(u => u.data && u.data.motherId === femaleColonist.id);
+            t.check("childbirth_spawns_baby", popAfter === popBefore + 1 && !!newBorn && newBorn.data.age === 0 && newBorn.image.characterName === "$Baby" && !femaleColonist.data.pregnancy,
+                newBorn ? `born ${newBorn.name} (${newBorn.data.gender}), age ${newBorn.data.age}, sprite ${newBorn.image.characterName}, mother pregnant: ${!!femaleColonist.data.pregnancy}` : "child not spawned");
+
+            const birthThought = (femaleColonist.data.thoughts || []).find(th => /Gave birth/i.test(th.text));
+            t.check("birth_thought_awarded", !!birthThought, `mother thought: "${femaleColonist.data.thoughts[0]?.text}"`);
+
+            // 5. Aging appearance progression
+            if (newBorn) {
+                newBorn.data.age = 5;
+                Colonists.updateAgeAppearance(newBorn);
+                const isBoy = newBorn.data.gender === "male";
+                t.check("child_sprite_updates", newBorn.image.characterName === (isBoy ? "$Child_Boy" : "$Child_Girl"),
+                    `child age 5 sprite: ${newBorn.image.characterName}`);
+
+                newBorn.data.age = 15;
+                Colonists.updateAgeAppearance(newBorn);
+                t.check("teen_sprite_updates", newBorn.image.characterName === (isBoy ? "$Teen_Boy" : "$Teen_Girl"),
+                    `teen age 15 sprite: ${newBorn.image.characterName}`);
+            }
+            t.screenshot("colonist_childbirth");
 
             await t.waitFrames(5);
             const errs = t.errorsSoFar().slice(errors0);

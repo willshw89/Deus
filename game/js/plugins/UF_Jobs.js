@@ -547,6 +547,30 @@
         describe: job => `Talking with ${job.params.otherName || "someone"}`
     });
 
+    define("mate", {
+        verb: "Embracing",
+        replanEvery: REPLAN_TICKS,
+        plan(job, unit) {
+            const partner = World().unit(job.params.partnerId || job.params.unitId);
+            if (!partner) return { ok: false, reason: "nobody to embrace" };
+            job.params.partnerName = partner.name;
+            if (!sameArea(partner.area, unit.area) || chebyshev(partner.x, partner.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
+            job.target = { area: copyArea(partner.area), x: partner.x, y: partner.y };
+            const stand = standFor(job.target, unit, true);
+            return stand ? { ok: true, stand } : { ok: false, reason: "can't get near" };
+        },
+        work: 120,
+        apply(job, unit) {
+            const partner = World().unit(job.params.partnerId || job.params.unitId);
+            lowerNeed(unit, "social", 50);
+            if (partner) lowerNeed(partner, "social", 50);
+            if (window.UF && UF.Colonists && typeof UF.Colonists.onMated === "function") {
+                UF.Colonists.onMated(unit, partner);
+            }
+        },
+        describe: job => `Intimate with ${job.params.partnerName || "partner"}`
+    });
+
     //-------------------------------------------------------------------------
     // The job list
 
@@ -974,7 +998,7 @@
                 data: { kind: "test", faction: "player", inventory: [], equipment: {} } });
 
             // define + create: a custom type runs through the loop and finishes; every built-in type is registered.
-            const builtIn = ["move", "wander", "gather", "chop", "pick", "quarry", "mine", "haul", "fetch", "build", "craft", "equip", "hunt", "drink", "eat", "sleep", "talk"];
+            const builtIn = ["move", "wander", "gather", "chop", "pick", "quarry", "mine", "haul", "fetch", "build", "craft", "equip", "hunt", "drink", "eat", "sleep", "talk", "mate"];
             let applied = 0;
             const events = { created: 0, assigned: 0, done: 0, failed: 0, kill: 0 };
             const listeners = {};

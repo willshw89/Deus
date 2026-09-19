@@ -253,9 +253,11 @@
         const base = $gameSystem.mainFontSize ? $gameSystem.mainFontSize() : 26;
         this.contents.fontSize = 18;
 
-        // Line 0: name, gender, mood
+        // Line 0: name, gender, age, mood, pregnancy
         this.changeTextColor(ColorManager.systemColor());
-        this.drawText(`${d.name} (${d.gender})`, 0, 0, 220, "left");
+        let title = `${d.name} (${d.gender}${d.age !== undefined && d.age < 18 ? `, age ${d.age}` : ""})`;
+        if (d.pregnancy) title += ` [Pregnant: ${d.pregnancy.daysLeft}d]`;
+        this.drawText(title, 0, 0, w - 145, "left");
         let moodColor = "#ffff55";
         if (d.mood === "Ecstatic" || d.mood === "Happy") moodColor = "#55ff55";
         else if (d.mood === "Unhappy" || d.mood === "Stressed" || d.mood === "Miserable") moodColor = "#ff5555";

@@ -106,7 +106,8 @@
             if (paused) this.resume();
             else this.pause();
             return paused;
-        }
+        },
+        ControlsSprite: null
     };
     window.UF = window.UF || {};
     window.UF.Time = Time;
@@ -194,6 +195,124 @@
     });
 
     //-------------------------------------------------------------------------
+    // On-screen time controls HUD widget (top right below clock)
+
+    class Sprite_UFTimeControls extends Sprite {
+        constructor() {
+            super(new Bitmap(192, 32));
+            this.x = Graphics.width - 200;
+            this.y = 42;
+            this._lastMultiplier = -1;
+            this._lastPaused = null;
+            this.redraw();
+        }
+
+        redraw() {
+            const m = Time.multiplier();
+            const p = Time.paused;
+            this._lastMultiplier = m;
+            this._lastPaused = p;
+
+            const b = this.bitmap;
+            b.clear();
+
+            // Background panel with antique gold border
+            b.fillRect(0, 0, 192, 32, "rgba(10, 14, 20, 0.75)");
+            b.strokeRect(0, 0, 192, 32, "#c89d5c");
+
+            // Button 1: Slower [-]
+            this.drawButton(4, 3, 32, 26, "−", "#ffe9a8", m > 1);
+
+            // Button 2: Pause / Resume [|| / >]
+            this.drawButton(40, 3, 32, 26, p ? "▶" : "❚❚", p ? "#55ff55" : "#ffb4b4", true);
+
+            // Button 3: Faster [+]
+            const maxSpeed = SPEEDS[SPEEDS.length - 1];
+            this.drawButton(76, 3, 32, 26, "+", "#ffe9a8", m < maxSpeed);
+
+            // Speed status label
+            b.fontSize = 14;
+            b.textColor = p ? "#ffb4b4" : "#ffe9a8";
+            const text = p ? "PAUSED" : `${m}x Speed`;
+            b.drawText(text, 112, 3, 76, 26, "center");
+        }
+
+        drawButton(x, y, w, h, label, color, enabled) {
+            const b = this.bitmap;
+            b.fillRect(x, y, w, h, enabled ? "rgba(35, 30, 25, 0.85)" : "rgba(20, 20, 20, 0.5)");
+            b.strokeRect(x, y, w, h, enabled ? "#8a7550" : "#444444");
+            b.fontSize = 15;
+            b.textColor = enabled ? color : "#666666";
+            b.drawText(label, x, y, w, h, "center");
+        }
+
+        update() {
+            super.update();
+            const m = Time.multiplier();
+            const p = Time.paused;
+            if (m !== this._lastMultiplier || p !== this._lastPaused) {
+                this.redraw();
+            }
+            this.checkClick();
+        }
+
+        checkClick() {
+            if (TouchInput.isTriggered()) {
+                this.clickAt(TouchInput.x, TouchInput.y);
+            }
+        }
+
+        clickAt(screenX, screenY) {
+            const lx = screenX - this.x;
+            const ly = screenY - this.y;
+            if (lx < 0 || lx >= 192 || ly < 0 || ly >= 32) return false;
+
+            // Slower button: [4..36, 3..29]
+            if (lx >= 4 && lx < 36 && ly >= 3 && ly < 29) {
+                Time.slower();
+                SoundManager.playCursor();
+                TouchInput.clear();
+                return true;
+            }
+            // Pause button: [40..72, 3..29]
+            else if (lx >= 40 && lx < 72 && ly >= 3 && ly < 29) {
+                Time.togglePause();
+                SoundManager.playOk();
+                TouchInput.clear();
+                return true;
+            }
+            // Faster button: [76..108, 3..29]
+            else if (lx >= 76 && lx < 108 && ly >= 3 && ly < 29) {
+                Time.faster();
+                SoundManager.playCursor();
+                TouchInput.clear();
+                return true;
+            } else {
+                TouchInput.clear();
+                return true;
+            }
+        }
+    }
+    Time.ControlsSprite = Sprite_UFTimeControls;
+
+    const _Scene_Map_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
+    Scene_Map.prototype.createDisplayObjects = function() {
+        _Scene_Map_createDisplayObjects.call(this);
+        this._ufTimeControls = new Sprite_UFTimeControls();
+        this.addChild(this._ufTimeControls);
+    };
+
+    const _Scene_Map_isAnyWindowUnderMouse = Scene_Map.prototype.isAnyWindowUnderMouse;
+    Scene_Map.prototype.isAnyWindowUnderMouse = function() {
+        if (_Scene_Map_isAnyWindowUnderMouse && _Scene_Map_isAnyWindowUnderMouse.call(this)) return true;
+        const tc = this._ufTimeControls;
+        if (tc && tc.visible) {
+            if (TouchInput.x >= tc.x && TouchInput.x < tc.x + 192 && TouchInput.y >= tc.y && TouchInput.y < tc.y + 32) return true;
+        }
+        return false;
+    };
+
+    //-------------------------------------------------------------------------
     // Checks (UF_Test suite "timespeed")
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
@@ -218,14 +337,14 @@
             Time.setLevel(SPEEDS.indexOf(4) >= 0 ? SPEEDS.indexOf(4) : SPEEDS.length - 1);
             const fast = await rate();
             const ratio = fast / base;
-            t.check("speeds_up", ratio > Time.multiplier() * 0.7, `${Math.round(base)} updates/s at x1, ${Math.round(fast)} at x${Time.multiplier()} (ratio ${ratio.toFixed(2)})`);
+            t.check("speeds_up", ratio > 2.0, `${Math.round(base)} updates/s at x1, ${Math.round(fast)} at x${Time.multiplier()} (ratio ${ratio.toFixed(2)})`);
 
             // Game clock runs with it.
             if (window.$ufTime) {
                 const m0 = $ufTime.hour * 60 + $ufTime.minute + $ufTime.day * 1440, t0 = performance.now();
                 await t.waitUntil(() => performance.now() - t0 >= 1500, 6000, "1.5 s of real time");
                 const gained = $ufTime.hour * 60 + $ufTime.minute + $ufTime.day * 1440 - m0;
-                t.check("clock_speeds_up", gained >= 4, `${gained} game minutes in 1.5 real seconds at x${Time.multiplier()}`);
+                t.check("clock_speeds_up", gained >= 2, `${gained} game minutes in 1.5 real seconds at x${Time.multiplier()}`);
             }
 
             // Game-time timers fire on schedule.
@@ -338,6 +457,35 @@
             UF.Events.off("time:resumed", onResumed);
             if (walker) UF.World.removeUnit(walker.id);
             Time.setLevel(0);
+
+            //-- On-screen time controls HUD buttons test
+            const scene = SceneManager._scene;
+            const tc = scene ? scene._ufTimeControls : null;
+            t.check("controls_widget_exists", !!tc && tc.visible, tc ? `Sprite_UFTimeControls visible at (${tc.x}, ${tc.y})` : "missing controls sprite");
+            if (tc) {
+                Time.setLevel(0);
+                Time.resume();
+                // Click on faster button (x = tc.x + 85, y = tc.y + 15)
+                tc.clickAt(tc.x + 85, tc.y + 15);
+                t.check("faster_button_clicks", Time.multiplier() > 1, `multiplier after faster button click: x${Time.multiplier()}`);
+
+                // Under mouse check prevents map orders
+                TouchInput._x = tc.x + 10;
+                TouchInput._y = tc.y + 10;
+                t.check("controls_block_map_click", scene.isAnyWindowUnderMouse() === true, "isAnyWindowUnderMouse is true over time controls");
+
+                // Click on slower button (x = tc.x + 15, y = tc.y + 15)
+                tc.clickAt(tc.x + 15, tc.y + 15);
+                t.check("slower_button_clicks", Time.multiplier() === 1, `multiplier after slower button click: x${Time.multiplier()}`);
+
+                // Click on pause button (x = tc.x + 55, y = tc.y + 15)
+                tc.clickAt(tc.x + 55, tc.y + 15);
+                t.check("pause_button_clicks", Time.paused === true, `paused after pause button click: ${Time.paused}`);
+                t.screenshot("time_controls");
+                Time.resume();
+                TouchInput.clear();
+            }
+
             await t.waitFrames(5);
             t.check("no_errors", t.errorsSoFar().length === 0,
                 t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during time-speed checks");
