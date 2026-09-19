@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { readPNG } = require('./png_read');
+const { decodePNG } = require('./png_read');
 const { writePNG } = require('./png_util');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -30,619 +30,412 @@ const palRGB = hexLines.map(parseHex).filter(Boolean);
 const palLab = palRGB.map(c => srgbToLab(...c));
 const cache = new Map();
 
+function isBg(r, g, b) {
+    return (r > 160 && g < 80 && b > 160) || (r > 200 && b > 200 && g < 50);
+}
+
 function snap(r, g, b) {
-    // Magenta background suppression
-    if ((r > 150 && b > 150 && g < 100) || (r > g * 1.4 && b > g * 1.4)) {
-        return [0, 0, 0, 0];
-    }
+    if (isBg(r, g, b)) return [0, 0, 0, 0];
     const key = (r << 16) | (g << 8) | b;
     if (cache.has(key)) return cache.get(key);
-    const lab = srgbToLab(r, g, b);
+    const l = srgbToLab(r, g, b);
     let best = palRGB[0], bd = Infinity;
     for (let i = 0; i < palLab.length; i++) {
-        const d = Math.hypot(lab[0] - palLab[i][0], lab[1] - palLab[i][1], lab[2] - palLab[i][2]);
+        const d = Math.hypot(l[0] - palLab[i][0], l[1] - palLab[i][1], l[2] - palLab[i][2]);
         if (d < bd) { bd = d; best = palRGB[i]; }
     }
     cache.set(key, best);
     return best;
 }
 
-// Palette constants for crisp structural lines
-const C_STONE_OUTLINE = snap(24, 24, 24);
-const C_STONE_DEEP    = snap(45, 45, 45);
-const C_STONE_DARK    = snap(65, 65, 65);
-const C_STONE_MID     = snap(125, 125, 125);
-const C_STONE_LIGHT   = snap(175, 175, 175);
-const C_STONE_HI      = snap(210, 210, 210);
-
-const C_WOOD_OUTLINE  = snap(32, 20, 8);
-const C_WOOD_DARK     = snap(61, 36, 12);
-const C_WOOD_SHADE    = snap(93, 53, 12);
-const C_WOOD_MID      = snap(125, 77, 24);
-const C_WOOD_LIGHT    = snap(186, 154, 113);
-const C_WOOD_HI       = snap(219, 202, 178);
-const C_IRON_HI       = snap(190, 190, 200);
-const C_IRON_MID      = snap(90, 90, 100);
-const C_IRON_DARK     = snap(40, 40, 45);
-
 // ----------------------------------------------------------------------------
-// 2. Load Authentic Nano Banana Source Assets
+// 2. Load Authentic Nano Banana 2 Raw Generations
 // ----------------------------------------------------------------------------
-const stoneNanoImg = readPNG(path.join(ROOT, 'scratch', 'stone_wall_pieces.png'));
-const woodConnectedImg = readPNG(path.join(ROOT, 'scratch', 'wall_wood_connected.png'));
-const sampleWoodImg = readPNG(path.join(ROOT, 'art', 'review', 'sample_horizontal_wood_wall.png'));
+const woodRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'wall_wood_nano_banana_raw.png')));
+const stoneRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'wall_stone_nano_banana_raw.png')));
 
-// ----------------------------------------------------------------------------
-// 3. Extract & Pre-snap Authentic Texture Blocks
-// ----------------------------------------------------------------------------
+// Helper to sample a sub-rectangle from raw and downsample with box averaging + palette snapping
+function sampleBlock(src, sx, sy, sw, sh, dw, dh, threshold = 0.25) {
+    const buf = Buffer.alloc(dw * dh * 4);
+    for (let dy = 0; dy < dh; dy++) {
+        for (let dx = 0; dx < dw; dx++) {
+            const startX = Math.round(sx + (dx * sw / dw));
+            const endX = Math.round(sx + ((dx + 1) * sw / dw));
+            const startY = Math.round(sy + (dy * sh / dh));
+            const endY = Math.round(sy + ((dy + 1) * sh / dh));
 
-// A. STONE TEXTURES
-// 1. Ashlar Face: 3 courses of 16px blocks, sampled from stoneNanoImg (x=302..349, y=847..894)
-const stoneFace = Array.from({ length: 48 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        const p = stoneNanoImg.px(302 + x, 847 + y);
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// 2. Walkway: flagstones with coping ledge at bottom (x=302..349, y=80..127)
-const stoneWalkway = Array.from({ length: 48 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        const p = stoneNanoImg.px(302 + x, 80 + y);
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// 3. Vertical Wall Column: x=44..91, y=250..345 (48x96)
-const stoneVertWalkway = Array.from({ length: 96 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        const p = stoneNanoImg.px(44 + x, 250 + y);
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// 4. Isolated Pillar: downscaled from 915..1001, 0..255 (48x96)
-function extractScaledBlock(img, minX, maxX, minY, maxY, outW, outH) {
-    const bboxW = maxX - minX + 1, bboxH = maxY - minY + 1;
-    const block = Array.from({ length: outH }, () => Array(outW).fill(null));
-    for (let gy = 0; gy < outH; gy++) {
-        for (let gx = 0; gx < outW; gx++) {
-            const y0 = minY + Math.floor(gy * bboxH / outH);
-            const y1 = minY + Math.floor((gy + 1) * bboxH / outH);
-            const x0 = minX + Math.floor(gx * bboxW / outW);
-            const x1 = minX + Math.floor((gx + 1) * bboxW / outW);
-            let sumR = 0, sumG = 0, sumB = 0, cnt = 0;
-            for (let sy = y0; sy < y1; sy++) {
-                for (let sx = x0; sx < x1; sx++) {
-                    const p = img.px(sx, sy);
-                    if (!((p[0] > 180 && p[1] < 60 && p[2] > 180) || (p[0] > 140 && p[2] > 140 && p[1] < 100))) {
-                        sumR += p[0]; sumG += p[1]; sumB += p[2]; cnt++;
+            let rSum = 0, gSum = 0, bSum = 0, count = 0;
+            for (let py = startY; py < endY; py++) {
+                if (py < 0 || py >= src.height) continue;
+                for (let px = startX; px < endX; px++) {
+                    if (px < 0 || px >= src.width) continue;
+                    const si = (py * src.width + px) * 4;
+                    const r = src.data[si], g = src.data[si + 1], b = src.data[si + 2];
+                    if (!isBg(r, g, b)) {
+                        rSum += r; gSum += g; bSum += b; count++;
                     }
                 }
             }
-            if (cnt > (y1 - y0) * (x1 - x0) * 0.2) {
-                block[gy][gx] = snap(Math.round(sumR / cnt), Math.round(sumG / cnt), Math.round(sumB / cnt));
+            const di = (dy * dw + dx) * 4;
+            const total = Math.max(1, (endX - startX) * (endY - startY));
+            if (count / total > threshold) {
+                const sn = snap(Math.round(rSum / count), Math.round(gSum / count), Math.round(bSum / count));
+                buf[di] = sn[0];
+                buf[di + 1] = sn[1];
+                buf[di + 2] = sn[2];
+                buf[di + 3] = 255;
             } else {
-                block[gy][gx] = [0, 0, 0, 0];
+                buf[di + 3] = 0;
             }
         }
     }
-    return block;
-}
-const stonePillar = extractScaledBlock(stoneNanoImg, 915, 1001, 0, 255, 48, 96);
-
-// B. WOOD TEXTURES
-// 1. Wood Face: 48x48 timber wall panel downscaled 8x from sample_horizontal_wood_wall.png
-const woodFace = Array.from({ length: 48 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        const p = sampleWoodImg.px(x * 8, y * 8);
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// 2. Wood Walkway: top rail (y=0..7) + plank deck (y=8..47)
-const woodWalkway = Array.from({ length: 48 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        let p;
-        if (y < 8) p = woodConnectedImg.px(50 + x, 332 + y);
-        else p = woodConnectedImg.px(50 + x, 438 + (y - 8));
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// 3. Wood Vertical Column (x=8..39, y=0..95): vertical hewn timber grain
-const woodColumn = Array.from({ length: 96 }, (_, y) =>
-    Array.from({ length: 48 }, (_, x) => {
-        if (x < 8 || x > 39) return [0, 0, 0, 0];
-        const p = sampleWoodImg.px(((x - 8) % 48) * 8, (((y % 28) + 16)) * 8);
-        return snap(p[0], p[1], p[2]);
-    })
-);
-
-// Helper buffer tools
-const W = 48, H = 96;
-function createBuf(w, h) { return Buffer.alloc(w * h * 4); }
-function setPx(buf, w, h, x, y, col, a = 255) {
-    if (x < 0 || x >= w || y < 0 || y >= h || !col) return;
-    if (col[3] === 0) return;
-    const idx = (y * w + x) * 4;
-    buf[idx] = col[0]; buf[idx + 1] = col[1]; buf[idx + 2] = col[2]; buf[idx + 3] = a;
-}
-
-// ----------------------------------------------------------------------------
-// 4. Stone Wall Piece Builder (20 Frames)
-// ----------------------------------------------------------------------------
-function buildStonePiece(frameIdx) {
-    const buf = createBuf(W, H);
-
-    let mask = frameIdx;
-    let isSouth = false;
-    if (frameIdx === 16 || frameIdx === 17) { mask = 10; isSouth = true; }
-    else if (frameIdx === 18) { mask = 8; isSouth = true; }
-    else if (frameIdx === 19) { mask = 2; isSouth = true; }
-
-    const n = (mask & 1) !== 0;
-    const e = (mask & 2) !== 0;
-    const s = (mask & 4) !== 0;
-    const w = (mask & 8) !== 0;
-
-    // A. SOUTH-FACING SILL / WALL (Frames 16..19)
-    // Rows 0..47 are fully transparent so room interior is NOT occluded!
-    // Rows 48..55 coping sill; Rows 56..95 ashlar stone face
-    if (isSouth) {
-        const x1 = w ? 0 : 8;
-        const x2 = e ? 47 : 39;
-        // Coping sill on cutaway wall
-        for (let y = 48; y <= 55; y++) {
-            for (let x = x1; x <= x2; x++) {
-                const c = stoneWalkway[y - 48 + 40][x];
-                setPx(buf, W, H, x, y, c);
-            }
-        }
-        // Ashlar face
-        for (let y = 56; y <= 95; y++) {
-            for (let x = x1; x <= x2; x++) {
-                const c = stoneFace[y - 48][x];
-                setPx(buf, W, H, x, y, c);
-            }
-        }
-        // Clean end borders if not connecting
-        if (!w) {
-            for (let y = 48; y <= 95; y++) {
-                setPx(buf, W, H, x1, y, C_STONE_OUTLINE);
-                setPx(buf, W, H, x1 + 1, y, C_STONE_HI);
-            }
-        }
-        if (!e) {
-            for (let y = 48; y <= 95; y++) {
-                setPx(buf, W, H, x2, y, C_STONE_OUTLINE);
-                setPx(buf, W, H, x2 - 1, y, C_STONE_DARK);
-            }
-        }
-        // Ground contact line
-        for (let x = x1; x <= x2; x++) {
-            setPx(buf, W, H, x, 94, C_STONE_DEEP);
-            setPx(buf, W, H, x, 95, C_STONE_OUTLINE);
-        }
-        return buf;
-    }
-
-    // B. ISOLATED PILLAR (Frame 0)
-    if (mask === 0) {
-        for (let y = 0; y < 96; y++) {
-            for (let x = 0; x < 48; x++) {
-                const c = stonePillar[y][x];
-                if (c && c[3] !== 0) setPx(buf, W, H, x, y, c);
-            }
-        }
-        return buf;
-    }
-
-    // C. VERTICAL WALL COLUMN (Frame 5: N + S)
-    if (mask === 5) {
-        for (let y = 0; y < 96; y++) {
-            for (let x = 8; x <= 39; x++) {
-                const c = stoneVertWalkway[y][x];
-                setPx(buf, W, H, x, y, c);
-            }
-        }
-        for (let y = 0; y < 96; y++) {
-            setPx(buf, W, H, 8, y, C_STONE_OUTLINE);
-            setPx(buf, W, H, 9, y, C_STONE_HI);
-            setPx(buf, W, H, 38, y, C_STONE_DARK);
-            setPx(buf, W, H, 39, y, C_STONE_OUTLINE);
-        }
-        return buf;
-    }
-
-    // D. CONNECTED TO NORTH (n === true)
-    if (n) {
-        if (s) {
-            // Continuous vertical column through rows 0..47
-            for (let y = 0; y < 96; y++) {
-                for (let x = 8; x <= 39; x++) {
-                    setPx(buf, W, H, x, y, stoneVertWalkway[y][x]);
-                }
-            }
-            for (let y = 0; y < 96; y++) {
-                setPx(buf, W, H, 8, y, C_STONE_OUTLINE);
-                setPx(buf, W, H, 9, y, C_STONE_HI);
-                setPx(buf, W, H, 38, y, C_STONE_DARK);
-                setPx(buf, W, H, 39, y, C_STONE_OUTLINE);
-            }
-        } else {
-            // Bottom end / bottom corner: rows 0..47 is transparent!
-            // Rows 48..95 has vertical column grounded on row 95
-            for (let y = 48; y < 96; y++) {
-                for (let x = 8; x <= 39; x++) {
-                    setPx(buf, W, H, x, y, stoneFace[y - 48][x]);
-                }
-            }
-            for (let y = 48; y < 96; y++) {
-                setPx(buf, W, H, 8, y, C_STONE_OUTLINE);
-                setPx(buf, W, H, 9, y, C_STONE_HI);
-                setPx(buf, W, H, 38, y, C_STONE_DARK);
-                setPx(buf, W, H, 39, y, C_STONE_OUTLINE);
-            }
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, 94, C_STONE_DEEP);
-                setPx(buf, W, H, x, 95, C_STONE_OUTLINE);
-            }
-        }
-
-        // Horizontal branch connections on rows 48..95
-        if (e) {
-            for (let y = 48; y <= 55; y++) {
-                for (let x = 39; x <= 47; x++) setPx(buf, W, H, x, y, stoneWalkway[y - 48 + 40][x]);
-            }
-            for (let y = 56; y <= 95; y++) {
-                for (let x = 39; x <= 47; x++) setPx(buf, W, H, x, y, stoneFace[y - 48][x]);
-            }
-            for (let x = 39; x <= 47; x++) {
-                setPx(buf, W, H, x, 94, C_STONE_DEEP);
-                setPx(buf, W, H, x, 95, C_STONE_OUTLINE);
-            }
-        }
-        if (w) {
-            for (let y = 48; y <= 55; y++) {
-                for (let x = 0; x <= 8; x++) setPx(buf, W, H, x, y, stoneWalkway[y - 48 + 40][x]);
-            }
-            for (let y = 56; y <= 95; y++) {
-                for (let x = 0; x <= 8; x++) setPx(buf, W, H, x, y, stoneFace[y - 48][x]);
-            }
-            for (let x = 0; x <= 8; x++) {
-                setPx(buf, W, H, x, 94, C_STONE_DEEP);
-                setPx(buf, W, H, x, 95, C_STONE_OUTLINE);
-            }
-        }
-        return buf;
-    }
-
-    // E. NORTH-FACING RUNS AND CORNERS (n === false)
-    // Rows 0..47 is the visual ROOF / WALKWAY!
-    // Rows 48..95 is the FRONT ASHLAR WALL FACE!
-    const topX1 = w ? 0 : 8;
-    const topX2 = e ? 47 : 39;
-
-    // 1. Walkway (rows 0..47)
-    for (let y = 0; y < 48; y++) {
-        for (let x = topX1; x <= topX2; x++) {
-            setPx(buf, W, H, x, y, stoneWalkway[y][x]);
-        }
-    }
-    for (let x = topX1; x <= topX2; x++) {
-        setPx(buf, W, H, x, 0, C_STONE_OUTLINE);
-        setPx(buf, W, H, x, 1, C_STONE_HI);
-    }
-    if (!w) {
-        for (let y = 0; y < 48; y++) {
-            setPx(buf, W, H, topX1, y, C_STONE_OUTLINE);
-            setPx(buf, W, H, topX1 + 1, y, C_STONE_HI);
-        }
-    }
-    if (!e) {
-        for (let y = 0; y < 48; y++) {
-            setPx(buf, W, H, topX2, y, C_STONE_OUTLINE);
-            setPx(buf, W, H, topX2 - 1, y, C_STONE_DARK);
-        }
-    }
-
-    // 2. Front Face (rows 48..95)
-    const faceX1 = w ? 0 : 8;
-    const faceX2 = e ? 47 : 39;
-
-    for (let y = 48; y <= 95; y++) {
-        for (let x = faceX1; x <= faceX2; x++) {
-            setPx(buf, W, H, x, y, stoneFace[y - 48][x]);
-        }
-    }
-
-    // Under-coping shadow line
-    for (let x = faceX1; x <= faceX2; x++) {
-        setPx(buf, W, H, x, 48, C_STONE_DARK);
-    }
-
-    if (!w) {
-        for (let y = 48; y <= 95; y++) {
-            setPx(buf, W, H, faceX1, y, C_STONE_OUTLINE);
-            setPx(buf, W, H, faceX1 + 1, y, C_STONE_HI);
-        }
-    }
-    if (!e) {
-        for (let y = 48; y <= 95; y++) {
-            setPx(buf, W, H, faceX2, y, C_STONE_OUTLINE);
-            setPx(buf, W, H, faceX2 - 1, y, C_STONE_DARK);
-        }
-    }
-
-    // Ground contact
-    for (let x = faceX1; x <= faceX2; x++) {
-        setPx(buf, W, H, x, 94, C_STONE_DEEP);
-        setPx(buf, W, H, x, 95, C_STONE_OUTLINE);
-    }
-
-    if (s) {
-        for (let y = 48; y < 96; y++) {
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, y, stoneFace[y - 48][x]);
-            }
-        }
-    }
-
     return buf;
 }
 
-// ----------------------------------------------------------------------------
-// 5. Wood Wall Piece Builder (20 Frames)
-// ----------------------------------------------------------------------------
-function buildWoodPiece(frameIdx) {
-    const buf = createBuf(W, H);
-
-    let mask = frameIdx;
-    let isSouth = false;
-    if (frameIdx === 16 || frameIdx === 17) { mask = 10; isSouth = true; }
-    else if (frameIdx === 18) { mask = 8; isSouth = true; }
-    else if (frameIdx === 19) { mask = 2; isSouth = true; }
-
-    const n = (mask & 1) !== 0;
-    const e = (mask & 2) !== 0;
-    const s = (mask & 4) !== 0;
-    const w = (mask & 8) !== 0;
-
-    function drawPostIronBand(iy) {
-        if (iy >= 0 && iy + 1 < H) {
-            for (let x = 9; x <= 38; x++) {
-                setPx(buf, W, H, x, iy - 1, C_IRON_HI);
-                setPx(buf, W, H, x, iy, C_IRON_MID);
-                setPx(buf, W, H, x, iy + 1, C_IRON_DARK);
-            }
-            setPx(buf, W, H, 14, iy, C_IRON_HI);
-            setPx(buf, W, H, 24, iy, C_IRON_HI);
-            setPx(buf, W, H, 33, iy, C_IRON_HI);
-        }
-    }
-
-    // A. SOUTH-FACING SILL / WALL (Frames 16..19)
-    if (isSouth) {
-        const x1 = w ? 0 : 8;
-        const x2 = e ? 47 : 39;
-        // Top sill
-        for (let y = 48; y <= 55; y++) {
-            for (let x = x1; x <= x2; x++) {
-                setPx(buf, W, H, x, y, woodWalkway[y - 48][x]);
-            }
-        }
-        // Front timber planks
-        for (let y = 56; y <= 95; y++) {
-            for (let x = x1; x <= x2; x++) {
-                setPx(buf, W, H, x, y, woodFace[y - 48][x]);
-            }
-        }
-        if (!w) {
-            for (let y = 48; y <= 95; y++) {
-                setPx(buf, W, H, x1, y, C_WOOD_OUTLINE);
-                setPx(buf, W, H, x1 + 1, y, C_WOOD_HI);
-            }
-        }
-        if (!e) {
-            for (let y = 48; y <= 95; y++) {
-                setPx(buf, W, H, x2, y, C_WOOD_OUTLINE);
-                setPx(buf, W, H, x2 - 1, y, C_WOOD_SHADE);
-            }
-        }
-        for (let x = x1; x <= x2; x++) {
-            setPx(buf, W, H, x, 94, C_WOOD_DARK);
-            setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-        }
-        return buf;
-    }
-
-    // B. ISOLATED POST (Frame 0)
-    if (mask === 0) {
-        for (let y = 8; y <= 47; y++) {
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, y, woodColumn[y][x]);
-            }
-        }
-        for (let x = 8; x <= 39; x++) {
-            setPx(buf, W, H, x, 8, C_WOOD_OUTLINE);
-            setPx(buf, W, H, x, 9, C_WOOD_HI);
-        }
-        for (let y = 8; y <= 47; y++) {
-            setPx(buf, W, H, 8, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, 9, y, C_WOOD_HI);
-            setPx(buf, W, H, 38, y, C_WOOD_SHADE);
-            setPx(buf, W, H, 39, y, C_WOOD_OUTLINE);
-        }
-        for (let y = 48; y <= 95; y++) {
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, y, woodColumn[y][x]);
-            }
-        }
-        for (let y = 48; y <= 95; y++) {
-            setPx(buf, W, H, 8, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, 9, y, C_WOOD_HI);
-            setPx(buf, W, H, 38, y, C_WOOD_SHADE);
-            setPx(buf, W, H, 39, y, C_WOOD_OUTLINE);
-        }
-        for (let x = 8; x <= 39; x++) {
-            setPx(buf, W, H, x, 94, C_WOOD_DARK);
-            setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-        }
-        return buf;
-    }
-
-    // C. VERTICAL POST COLUMN (Frame 5: N + S)
-    if (mask === 5) {
-        for (let y = 0; y < 96; y++) {
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, y, woodColumn[y][x]);
-            }
-        }
-        for (let y = 0; y < 96; y++) {
-            setPx(buf, W, H, 8, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, 9, y, C_WOOD_HI);
-            setPx(buf, W, H, 38, y, C_WOOD_SHADE);
-            setPx(buf, W, H, 39, y, C_WOOD_OUTLINE);
-        }
-        return buf;
-    }
-
-    // D. CONNECTED TO NORTH (n === true)
-    if (n) {
-        if (s) {
-            for (let y = 0; y < 96; y++) {
-                for (let x = 8; x <= 39; x++) {
-                    setPx(buf, W, H, x, y, woodColumn[y][x]);
-                }
-            }
-            for (let y = 0; y < 96; y++) {
-                setPx(buf, W, H, 8, y, C_WOOD_OUTLINE);
-                setPx(buf, W, H, 9, y, C_WOOD_HI);
-                setPx(buf, W, H, 38, y, C_WOOD_SHADE);
-                setPx(buf, W, H, 39, y, C_WOOD_OUTLINE);
-            }
-        } else {
-            // Bottom end / corner
-            for (let y = 48; y < 96; y++) {
-                for (let x = 8; x <= 39; x++) {
-                    setPx(buf, W, H, x, y, woodColumn[y][x]);
-                }
-            }
-            for (let y = 48; y < 96; y++) {
-                setPx(buf, W, H, 8, y, C_WOOD_OUTLINE);
-                setPx(buf, W, H, 9, y, C_WOOD_HI);
-                setPx(buf, W, H, 38, y, C_WOOD_SHADE);
-                setPx(buf, W, H, 39, y, C_WOOD_OUTLINE);
-            }
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, 94, C_WOOD_DARK);
-                setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-            }
-        }
-
-        // Horizontal branch connections on rows 48..95
-        if (e) {
-            for (let y = 48; y <= 55; y++) {
-                for (let x = 39; x <= 47; x++) setPx(buf, W, H, x, y, woodWalkway[y - 48][x]);
-            }
-            for (let y = 56; y <= 95; y++) {
-                for (let x = 39; x <= 47; x++) setPx(buf, W, H, x, y, woodFace[y - 48][x]);
-            }
-            for (let x = 39; x <= 47; x++) {
-                setPx(buf, W, H, x, 94, C_WOOD_DARK);
-                setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-            }
-        }
-        if (w) {
-            for (let y = 48; y <= 55; y++) {
-                for (let x = 0; x <= 8; x++) setPx(buf, W, H, x, y, woodWalkway[y - 48][x]);
-            }
-            for (let y = 56; y <= 95; y++) {
-                for (let x = 0; x <= 8; x++) setPx(buf, W, H, x, y, woodFace[y - 48][x]);
-            }
-            for (let x = 0; x <= 8; x++) {
-                setPx(buf, W, H, x, 94, C_WOOD_DARK);
-                setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-            }
-        }
-        return buf;
-    }
-
-    // E. NORTH-FACING RUNS AND CORNERS (n === false)
-    const topX1 = w ? 0 : 8;
-    const topX2 = e ? 47 : 39;
-
-    // 1. Walkway (rows 0..47)
-    for (let y = 0; y < 48; y++) {
-        for (let x = topX1; x <= topX2; x++) {
-            setPx(buf, W, H, x, y, woodWalkway[y][x]);
-        }
-    }
-    for (let x = topX1; x <= topX2; x++) {
-        setPx(buf, W, H, x, 0, C_WOOD_OUTLINE);
-        setPx(buf, W, H, x, 1, C_WOOD_HI);
-    }
-    if (!w) {
-        for (let y = 0; y < 48; y++) {
-            setPx(buf, W, H, topX1, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, topX1 + 1, y, C_WOOD_HI);
-        }
-    }
-    if (!e) {
-        for (let y = 0; y < 48; y++) {
-            setPx(buf, W, H, topX2, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, topX2 - 1, y, C_WOOD_SHADE);
-        }
-    }
-
-    // 2. Front Face (rows 48..95)
-    const faceX1 = w ? 0 : 8;
-    const faceX2 = e ? 47 : 39;
-
-    for (let y = 48; y <= 95; y++) {
-        for (let x = faceX1; x <= faceX2; x++) {
-            setPx(buf, W, H, x, y, woodFace[y - 48][x]);
-        }
-    }
-    for (let x = faceX1; x <= faceX2; x++) {
-        setPx(buf, W, H, x, 48, C_WOOD_DARK);
-        setPx(buf, W, H, x, 94, C_WOOD_DARK);
-        setPx(buf, W, H, x, 95, C_WOOD_OUTLINE);
-    }
-    if (!w) {
-        for (let y = 48; y <= 95; y++) {
-            setPx(buf, W, H, faceX1, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, faceX1 + 1, y, C_WOOD_HI);
-        }
-    }
-    if (!e) {
-        for (let y = 48; y <= 95; y++) {
-            setPx(buf, W, H, faceX2, y, C_WOOD_OUTLINE);
-            setPx(buf, W, H, faceX2 - 1, y, C_WOOD_SHADE);
-        }
-    }
-
-    if (s) {
-        for (let y = 48; y < 96; y++) {
-            for (let x = 8; x <= 39; x++) {
-                setPx(buf, W, H, x, y, woodColumn[y][x]);
+function blit(dst, dw, dh, src, sw, sh, dx, dy, sx = 0, sy = 0, w = sw, h = sh) {
+    for (let y = 0; y < h; y++) {
+        const destY = dy + y;
+        const srcY = sy + y;
+        if (destY < 0 || destY >= dh || srcY < 0 || srcY >= sh) continue;
+        for (let x = 0; x < w; x++) {
+            const destX = dx + x;
+            const srcX = sx + x;
+            if (destX < 0 || destX >= dw || srcX < 0 || srcX >= sw) continue;
+            const si = (srcY * sw + srcX) * 4;
+            const a = src[si + 3];
+            if (a > 0) {
+                const di = (destY * dw + destX) * 4;
+                dst[di] = src[si];
+                dst[di + 1] = src[si + 1];
+                dst[di + 2] = src[si + 2];
+                dst[di + 3] = 255;
             }
         }
     }
-
-    return buf;
 }
 
 // ----------------------------------------------------------------------------
-// 6. Assemble Sheets (192 x 480 px: 4 cols x 5 rows)
+// 3. Pre-extract Nano Banana Components at Native Scale (48w or 96h)
+// ----------------------------------------------------------------------------
+
+// === WOOD COMPONENTS ===
+// 1. Full North horizontal wall (48x96): top beam + plank face + baseboard
+const woodHorizFull = sampleBlock(woodRaw, 0, 0, 192, 256, 48, 96);
+const woodHorizFull2 = sampleBlock(woodRaw, 192, 0, 192, 256, 48, 96);
+
+// 2. Low South horizontal wall (48x48): top trim + plank face + baseboard
+const woodSouthLow = sampleBlock(woodRaw, 545, 770, 192, 185, 48, 48);
+const woodSouthLow2 = sampleBlock(woodRaw, 590, 770, 192, 185, 48, 48);
+
+// 3. Vertical timber post / column (16x96)
+const woodCol16 = sampleBlock(woodRaw, 448, 0, 60, 512, 16, 96);
+const woodPost16 = sampleBlock(woodRaw, 955, 255, 65, 240, 16, 96);
+
+// 4. Low vertical post (16x48)
+const woodPostLow16 = sampleBlock(woodRaw, 955, 375, 65, 120, 16, 48);
+
+// === STONE COMPONENTS ===
+// 1. Full North horizontal wall (48x96): coping + ashlar stone face + foundation
+const stoneHorizFull = sampleBlock(stoneRaw, 0, 0, 192, 256, 48, 96);
+const stoneHorizFull2 = sampleBlock(stoneRaw, 192, 0, 192, 256, 48, 96);
+
+// 2. Low South horizontal wall (48x48): coping + ashlar stone face + foundation
+const stoneSouthLow = sampleBlock(stoneRaw, 672, 830, 192, 190, 48, 48);
+const stoneSouthLow2 = sampleBlock(stoneRaw, 720, 830, 192, 190, 48, 48);
+
+// 3. Vertical stone wall column (16x96)
+const stoneCol16 = sampleBlock(stoneRaw, 448, 0, 64, 256, 16, 96);
+
+// 4. Carved stone pillar / isolated post (18x96)
+const stonePillar18 = sampleBlock(stoneRaw, 455, 685, 95, 260, 18, 96);
+
+// 5. Low stone post (16x48)
+const stonePostLow16 = sampleBlock(stoneRaw, 448, 128, 64, 128, 16, 48);
+
+// ----------------------------------------------------------------------------
+// 4. Piece Builder Functions (20 Frames: 48 x 96 px)
+// ----------------------------------------------------------------------------
+
+function createBlankFrame() {
+    return Buffer.alloc(48 * 96 * 4);
+}
+
+// === BUILD WOOD FRAME ===
+function buildWoodPiece(idx) {
+    const f = createBlankFrame();
+
+    switch (idx) {
+        case 0: // Isolated Column
+            blit(f, 48, 96, woodPost16, 16, 96, 16, 0);
+            break;
+
+        case 1: // End Cap North (connected only to North -> South end of vertical run)
+            // Top 0..47 transparent, bottom 48..95 has post
+            blit(f, 48, 96, woodPostLow16, 16, 48, 16, 48);
+            break;
+
+        case 2: // End Cap East (West end of horizontal run: cap on left, wall extends right)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0, 12, 0, 36, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 3: // Corner NE (connects North & East -> Bottom-West corner of room)
+            // Non-occluding South-facing: rows 0..47 transparent!
+            // Rows 48..95: West post + low wall extending East
+            blit(f, 48, 96, woodSouthLow, 48, 48, 16, 48, 16, 0, 32, 48);
+            blit(f, 48, 96, woodPostLow16, 16, 48, 0, 48, 0, 0, 16, 48);
+            break;
+
+        case 4: // End Cap South (North end of vertical wall: wall extends South)
+            blit(f, 48, 96, woodCol16, 16, 96, 16, 0);
+            break;
+
+        case 5: // Vertical Run (N+S)
+            blit(f, 48, 96, woodCol16, 16, 96, 16, 0);
+            break;
+
+        case 6: // Corner SE (connects East & South -> Top-West / NW corner of room)
+            // Left post running South + horizontal beam/wall extending East
+            blit(f, 48, 96, woodHorizFull, 48, 96, 16, 0, 16, 0, 32, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 7: // T-Junction East (N+E+S)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 16, 0, 16, 0, 32, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 8: // End Cap West (East end of horizontal run: wall extends left, cap on right)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0, 0, 0, 36, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 9: // Corner NW (connects North & West -> Bottom-East corner of room)
+            // Non-occluding South-facing: rows 0..47 transparent!
+            // Rows 48..95: Low wall extending West + East post
+            blit(f, 48, 96, woodSouthLow, 48, 48, 0, 48, 0, 0, 32, 48);
+            blit(f, 48, 96, woodPostLow16, 16, 48, 32, 48, 0, 0, 16, 48);
+            break;
+
+        case 10: // Horizontal Run (E+W: North horizontal wall)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0);
+            break;
+
+        case 11: // T-Junction North (N+E+W: South wall meeting interior partition going North)
+            // Rows 0..47 transparent! Rows 48..95 low wall with center join
+            blit(f, 48, 96, woodSouthLow, 48, 48, 0, 48);
+            blit(f, 48, 96, woodPostLow16, 16, 48, 16, 48);
+            break;
+
+        case 12: // Corner SW (connects West & South -> Top-East / NE corner of room)
+            // Right post running South + horizontal beam/wall extending West
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0, 0, 0, 32, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 13: // T-Junction West (N+S+W)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0, 0, 0, 32, 96);
+            blit(f, 48, 96, woodCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 14: // T-Junction South (E+S+W)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0);
+            blit(f, 48, 96, woodCol16, 16, 96, 16, 48, 0, 48, 16, 48);
+            break;
+
+        case 15: // 4-Way Cross Junction (N+E+S+W)
+            blit(f, 48, 96, woodHorizFull, 48, 96, 0, 0);
+            blit(f, 48, 96, woodCol16, 16, 96, 16, 0, 0, 0, 16, 24);
+            blit(f, 48, 96, woodCol16, 16, 96, 16, 48, 0, 48, 16, 48);
+            break;
+
+        case 16: // South Horizontal Run (low wall, non-occluding)
+            // Rows 0..47 transparent! Rows 48..95 low wall
+            blit(f, 48, 96, woodSouthLow, 48, 48, 0, 48);
+            break;
+
+        case 17: // South Horizontal Run Variant 2
+            blit(f, 48, 96, woodSouthLow2, 48, 48, 0, 48);
+            break;
+
+        case 18: // South Horizontal Run with West end (doorway left)
+            blit(f, 48, 96, woodSouthLow, 48, 48, 12, 48, 12, 0, 36, 48);
+            blit(f, 48, 96, woodPostLow16, 16, 48, 0, 48);
+            break;
+
+        case 19: // South Horizontal Run with East end (doorway right)
+            blit(f, 48, 96, woodSouthLow, 48, 48, 0, 48, 0, 0, 36, 48);
+            blit(f, 48, 96, woodPostLow16, 16, 48, 32, 48);
+            break;
+    }
+
+    return f;
+}
+
+// === BUILD STONE FRAME ===
+function buildStonePiece(idx) {
+    const f = createBlankFrame();
+
+    switch (idx) {
+        case 0: // Isolated Pillar
+            blit(f, 48, 96, stonePillar18, 18, 96, 15, 0);
+            break;
+
+        case 1: // End Cap North (connected only to North -> South end of vertical run)
+            // Rows 0..47 transparent, rows 48..95 end cap
+            blit(f, 48, 96, stonePostLow16, 16, 48, 16, 48);
+            break;
+
+        case 2: // End Cap East (West end of horizontal run: cap on left, wall extends right)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0, 12, 0, 36, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 3: // Corner NE (connects North & East -> Bottom-West corner of room)
+            // Non-occluding South-facing: rows 0..47 transparent!
+            // Rows 48..95: West post + low stone wall extending East
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 16, 48, 16, 0, 32, 48);
+            blit(f, 48, 96, stonePostLow16, 16, 48, 0, 48, 0, 0, 16, 48);
+            break;
+
+        case 4: // End Cap South (North end of vertical wall: wall extends South)
+            blit(f, 48, 96, stoneCol16, 16, 96, 16, 0);
+            break;
+
+        case 5: // Vertical Run (N+S)
+            blit(f, 48, 96, stoneCol16, 16, 96, 16, 0);
+            break;
+
+        case 6: // Corner SE (connects East & South -> Top-West / NW corner of room)
+            // Left post running South + horizontal stone wall extending East
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 16, 0, 16, 0, 32, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 7: // T-Junction East (N+E+S)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 16, 0, 16, 0, 32, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 0, 0, 0, 0, 16, 96);
+            break;
+
+        case 8: // End Cap West (East end of horizontal run: wall extends left, cap on right)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0, 0, 0, 36, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 9: // Corner NW (connects North & West -> Bottom-East corner of room)
+            // Non-occluding South-facing: rows 0..47 transparent!
+            // Rows 48..95: Low stone wall extending West + East post
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 0, 48, 0, 0, 32, 48);
+            blit(f, 48, 96, stonePostLow16, 16, 48, 32, 48, 0, 0, 16, 48);
+            break;
+
+        case 10: // Horizontal Run (E+W: North horizontal wall)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0);
+            break;
+
+        case 11: // T-Junction North (N+E+W: South wall meeting interior partition going North)
+            // Rows 0..47 transparent! Rows 48..95 low stone wall with center join
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 0, 48);
+            blit(f, 48, 96, stonePostLow16, 16, 48, 16, 48);
+            break;
+
+        case 12: // Corner SW (connects West & South -> Top-East / NE corner of room)
+            // Right post running South + horizontal stone wall extending West
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0, 0, 0, 32, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 13: // T-Junction West (N+S+W)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0, 0, 0, 32, 96);
+            blit(f, 48, 96, stoneCol16, 16, 96, 32, 0, 0, 0, 16, 96);
+            break;
+
+        case 14: // T-Junction South (E+S+W)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0);
+            blit(f, 48, 96, stoneCol16, 16, 96, 16, 48, 0, 48, 16, 48);
+            break;
+
+        case 15: // 4-Way Cross Junction (N+E+S+W)
+            blit(f, 48, 96, stoneHorizFull, 48, 96, 0, 0);
+            blit(f, 48, 96, stoneCol16, 16, 96, 16, 0, 0, 0, 16, 24);
+            blit(f, 48, 96, stoneCol16, 16, 96, 16, 48, 0, 48, 16, 48);
+            break;
+
+        case 16: // South Horizontal Run (low stone wall, non-occluding)
+            // Rows 0..47 transparent! Rows 48..95 low stone wall
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 0, 48);
+            break;
+
+        case 17: // South Horizontal Run Variant 2
+            blit(f, 48, 96, stoneSouthLow2, 48, 48, 0, 48);
+            break;
+
+        case 18: // South Horizontal Run with West end (doorway left)
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 12, 48, 12, 0, 36, 48);
+            blit(f, 48, 96, stonePostLow16, 16, 48, 0, 48);
+            break;
+
+        case 19: // South Horizontal Run with East end (doorway right)
+            blit(f, 48, 96, stoneSouthLow, 48, 48, 0, 48, 0, 0, 36, 48);
+            blit(f, 48, 96, stonePostLow16, 16, 48, 32, 48);
+            break;
+    }
+
+    return f;
+}
+
+// ----------------------------------------------------------------------------
+// 5. Assemble Sheets (192 x 480 px: 4 cols x 5 rows)
 // ----------------------------------------------------------------------------
 const SHEET_W = 192;
 const SHEET_H = 480;
 
+function quantizeToMaxColors(buf, maxColors = 30) {
+    const counts = new Map();
+    for (let i = 0; i < buf.length; i += 4) {
+        if (buf[i + 3] > 0) {
+            const key = (buf[i] << 16) | (buf[i + 1] << 8) | buf[i + 2];
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+    }
+    if (counts.size <= maxColors) return;
+
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const topColors = sorted.slice(0, maxColors).map(e => [
+        (e[0] >> 16) & 255,
+        (e[0] >> 8) & 255,
+        e[0] & 255
+    ]);
+    const topLab = topColors.map(c => srgbToLab(c[0], c[1], c[2]));
+
+    const remap = new Map();
+    for (let i = maxColors; i < sorted.length; i++) {
+        const k = sorted[i][0];
+        const r = (k >> 16) & 255, g = (k >> 8) & 255, b = k & 255;
+        const lab = srgbToLab(r, g, b);
+        let best = topColors[0], bd = Infinity;
+        for (let j = 0; j < topLab.length; j++) {
+            const d = Math.hypot(lab[0] - topLab[j][0], lab[1] - topLab[j][1], lab[2] - topLab[j][2]);
+            if (d < bd) { bd = d; best = topColors[j]; }
+        }
+        remap.set(k, best);
+    }
+
+    for (let i = 0; i < buf.length; i += 4) {
+        if (buf[i + 3] > 0) {
+            const k = (buf[i] << 16) | (buf[i + 1] << 8) | buf[i + 2];
+            if (remap.has(k)) {
+                const target = remap.get(k);
+                buf[i] = target[0];
+                buf[i + 1] = target[1];
+                buf[i + 2] = target[2];
+            }
+        }
+    }
+}
+
 function assembleSheet(builder) {
     const sheetBuf = Buffer.alloc(SHEET_W * SHEET_H * 4);
-    const uniqueColors = new Set();
 
     for (let frameIdx = 0; frameIdx < 20; frameIdx++) {
         const col = frameIdx % 4;
@@ -665,22 +458,27 @@ function assembleSheet(builder) {
                 sheetBuf[dstIdx + 1] = g;
                 sheetBuf[dstIdx + 2] = b;
                 sheetBuf[dstIdx + 3] = a;
-
-                if (a > 0) {
-                    uniqueColors.add((r << 16) | (g << 8) | b);
-                }
             }
         }
     }
 
-    return { sheetBuf, colorCount: uniqueColors.size };
+    quantizeToMaxColors(sheetBuf, 30);
+
+    const finalColors = new Set();
+    for (let i = 0; i < sheetBuf.length; i += 4) {
+        if (sheetBuf[i + 3] > 0) {
+            finalColors.add((sheetBuf[i] << 16) | (sheetBuf[i + 1] << 8) | sheetBuf[i + 2]);
+        }
+    }
+
+    return { sheetBuf, colorCount: finalColors.size };
 }
 
-console.log('Generating Stone Wall Sheet...');
+console.log('Generating Nano Banana 2 Stone Wall Sheet...');
 const stoneResult = assembleSheet(buildStonePiece);
 console.log(`Stone Wall generated. Colors: ${stoneResult.colorCount}`);
 
-console.log('Generating Wood Wall Sheet...');
+console.log('Generating Nano Banana 2 Wood Wall Sheet...');
 const woodResult = assembleSheet(buildWoodPiece);
 console.log(`Wood Wall generated. Colors: ${woodResult.colorCount}`);
 
@@ -691,4 +489,4 @@ writePNG(path.join(ROOT, 'art', 'masters', '!$WallStone_Set.png'), SHEET_W, SHEE
 writePNG(path.join(ROOT, 'game', 'img', 'characters', '!$WallWood_Set.png'), SHEET_W, SHEET_H, woodResult.sheetBuf);
 writePNG(path.join(ROOT, 'art', 'masters', '!$WallWood_Set.png'), SHEET_W, SHEET_H, woodResult.sheetBuf);
 
-console.log('Done generating clean textured two-square wall sheets!');
+console.log('Done generating authentic Nano Banana 2 wall sheets!');

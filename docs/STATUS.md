@@ -4,6 +4,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
+
+## Authentic Google Nano Banana 2 Wall Chipsets: Wood & Stone (AR-104, AR-300) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("The walls are still ugly, I want you generating these assets with Nano banana 2", "All wall are 2 tiles high"):
+- **Authentic Google Nano Banana 2 Image Model Generations (`generate_image`):**
+  - Generated brand new 16-bit SNES / Final Fantasy VI style wall spritesheets using Google Nano Banana 2 (`generate_image`) with style anchors (`art/masters/human_male_stand_south.png`, `art/masters/meadow.png`) as reference.
+  - Raw model outputs archived in `art/raw/wall_wood_nano_banana_raw.png` (warm golden timber planks, clean wood grain, horizontal header coping beam, sturdy baseboard) and `art/raw/wall_stone_nano_banana_raw.png` (dressed ashlar masonry blocks in slate/granite grey with dark recessed mortar seams, smooth coping slabs, foundation base stones).
+- **Two-Tile High 20-Frame Connected Wall Architecture:**
+  - 48×96 px frame dimensions (192×480 sheet, 4 columns × 5 rows), footprint `[1, 2]`, anchor `[24, 95]`.
+  - Non-occluding South-facing walls (Frames 16–19) and bottom corner segments (Frames 1, 3, 9, 11) feature transparent upper rows (0..47) to keep room interiors visible from the player's 3/4 top-down perspective while blocking grid movement.
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --native`: 100% PASS on both sheets (Stone: 30 colors, Wood: 30 colors <= 32 from `art/palette/uf.hex`, binary alpha 0/255, valid sidecars).
+  - `tools/originality_check.js`: 100% PASS across all 40 frames (closest distance >= 0.374 >= 0.28 vs 19,431 indexed U7 shapes).
+  - Live in-engine NW.js snapshot (`tools/test_walls_ingame.js`): 7/7 PASS (perf: 0.000510 ms/call vs 0.005 budget, 0 console errors).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `art/review/walls_live_enclosed_buildings.png`: Verified live wooden and stone enclosed buildings on meadow grass with fully visible room interiors (elves standing inside clearly seen through non-occluding South walls), distinct doorways, seamless vertical grain, and zero graph-paper artifacts.
+  - `art/review/walls_live_underground_stone_rooms.png`: Verified live underground stone room seamlessly integrating with cavern soil and corridors.
+
 ## Live society checkpoint enabled — 2026-09-19 (Codex / Astra)
 
 - After the user's "Lets go" reply to the closure/registration request, RPGMZ process count was observed as 0 before editing. Enabled `UF_NaturalConnections`, `UF_FireSafety` and `UF_ProfileTabs` in `game/js/plugins.js`, after their dependencies and before Test. All previous registrations/parameters were preserved. A concurrent owner's `UF_Environment` registration was retained and included in the regression runs; it is not Codex's change.
