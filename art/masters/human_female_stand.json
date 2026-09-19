@@ -1,0 +1,45 @@
+{
+  "id": "human_female_stand",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "lean": {
+    "mode": "none",
+    "slope": 1,
+    "top": null,
+    "east": 0
+  },
+  "scale": {
+    "subjectHeight": 46,
+    "target": null,
+    "factor": 1
+  },
+  "source": {
+    "files": [
+      "nb_human_female_stand",
+      "nb_human_female_back",
+      "nb_human_female_side"
+    ],
+    "format": "png",
+    "background": "magenta #FF00FF"
+  }
+}

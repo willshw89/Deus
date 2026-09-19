@@ -1,6 +1,6 @@
 {
-  "id": "wildflowers",
-  "name": "Wildflowers",
+  "id": "workbench",
+  "name": "Workbench",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,6 +22,6 @@
       0
     ]
   },
-  "passable": true,
-  "under": true
+  "passable": false,
+  "under": false
 }

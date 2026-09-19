@@ -1,25 +1,31 @@
 {
   "id": "campfire_lit",
-  "name": "Campfire Lit (2.5D)",
-  "dimensions": "16x16",
-  "exportScale": "3x (48x48)",
-  "projection": "Ultima VII 2.5D Oblique (45-degree up-left lean, top/south/east faces)",
-  "format": "Exactly one asset square (16x16 native pixels)",
-  "palette": "Ultima VII Daylight Palette (PALETTES.FLX Record 0 / art/palette/uf.hex)",
-  "colorsUsed": [
-    "#201408",
-    "#FFD200",
-    "#FF8E10",
-    "#FFAE00",
-    "#CECECE",
-    "#BA9A71",
-    "#6D6D6D",
-    "#9E9E9E",
-    "#515151",
-    "#EBE3D7",
-    "#3D240C",
-    "#CAB292"
+  "name": "Campfire (Lit)",
+  "category": "Building",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
   ],
-  "colorCount": 12,
-  "updatedDate": "2026-09-18"
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "lit": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "passable": false,
+  "under": false
 }

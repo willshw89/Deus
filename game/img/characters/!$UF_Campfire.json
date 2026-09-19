@@ -1,6 +1,6 @@
 {
-  "id": "wildflowers",
-  "name": "Wildflowers",
+  "id": "campfire",
+  "name": "Campfire",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -19,9 +19,11 @@
   ],
   "animations": {
     "stand": [
-      0
+      0,
+      1,
+      2
     ]
   },
-  "passable": true,
-  "under": true
+  "passable": false,
+  "under": false
 }

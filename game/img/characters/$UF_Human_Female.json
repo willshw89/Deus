@@ -1,6 +1,4 @@
 {
-  "id": "wildflowers",
-  "name": "Wildflowers",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -19,9 +17,17 @@
   ],
   "animations": {
     "stand": [
-      0
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
     ]
   },
-  "passable": true,
-  "under": true
+  "layer": "body",
+  "species": "human",
+  "gender": "female",
+  "stage": "adult"
 }

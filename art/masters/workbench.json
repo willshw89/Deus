@@ -1,6 +1,7 @@
 {
-  "id": "wildflowers",
-  "name": "Wildflowers",
+  "id": "workbench",
+  "name": "Workbench (Carpentry Table)",
+  "category": "Building",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -12,16 +13,13 @@
     1
   ],
   "facings": [
-    "S",
-    "W",
-    "E",
-    "N"
+    "S"
   ],
   "animations": {
     "stand": [
       0
     ]
   },
-  "passable": true,
-  "under": true
+  "passable": false,
+  "under": false
 }
