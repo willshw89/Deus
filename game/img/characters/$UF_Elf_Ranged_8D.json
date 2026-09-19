@@ -23,7 +23,7 @@
   "species": "elf",
   "gender": "male",
   "animations": {
-    "attack": [
+    "ranged": [
       0,
       1,
       2

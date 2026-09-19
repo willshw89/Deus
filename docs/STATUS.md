@@ -5,6 +5,39 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Universal 8-Directional Standard Charset Architecture & Labeled Template (AR-600) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Can we use this image as an import? If we can, just use this as the standard template for all races. Regenerate though, this still has flaws. What I want you to do is label each position on the set, and standardize what it is across all factions"):
+- **The Universal Standard Matrix (18 Columns × 8 Rows):**
+  - Standardized across all factions (Human, Dwarf, Elf, Orc, Goblin, Gnome, Kobold, Lizardfolk, Undead, Starborn, Swarm, wildlife, monsters).
+  - 18 Columns:
+    - Set 1 (Movement): C0 Step L, C1 Stand/Passing, C2 Step R
+    - Set 2 (Melee): C3 Windup, C4 Strike (crescent slash), C5 Recover
+    - Set 3 (Ranged): C6 Aim, C7 Draw, C8 Release (recoil follow-through, no in-flight projectiles on canvas)
+    - Set 4 (Magic): C9 Ready/Focus, C10 Channel/Glow (emerald mana hands), C11 Cast/Thrust (palms forward)
+    - Set 5 (Work): C12 Reach/Crouch, C13 Work/Carve (knife craft / tool swing), C14 Gather/Stand
+    - Set 6 (Downed): C15 Hurt Flinch, C16 Kneeling Collapse, C17 Sleep/Dead (grounded flat rows 34..47)
+  - 8 Rows: Row 0 (S, facing 2), Row 1 (SW, facing 1), Row 2 (W, facing 4), Row 3 (NW, facing 7), Row 4 (N, facing 8), Row 5 (NE, facing 9, mirror of NW), Row 6 (E, facing 6, mirror of W), Row 7 (SE, facing 3, mirror of SW). Mathematical mirroring of West-side rows eliminates reverse weapon bugs and directional hallucinations.
+- **Authoritative Labeled Specification Template:**
+  - `docs/design/STANDARD_8D_CHARSET_TEMPLATE.png` (2040×918 px): labeled headers, section titles, column tags (`[C0]` to `[C17]`), sub-frame names, row orientations, RMMZ facing codes, and grid boundaries.
+- **Universal Import Tool (`tools/import_standard_8d_charset.js`):**
+  - Directly ingests: (1) native 864×384 px 18-col sheets, (2) 2040×918 px labeled specification template (auto-extracting the 18×8 cell grid), and (3) 960×384 px AR-600 sheets.
+  - Automatically slices and outputs the 6 sub-charsets + AR-600 composite master + matching `.json` sidecars (anchor `[24, 47]`, footprint `[1, 1]`, facings array `['S', 'SW', 'W', 'NW', 'N', 'NE', 'E', 'SE']`, animation tags).
+- **Flaw Remediation for Elf Charsets:**
+  - Regenerated using genuine action keyframes:
+    - Magic: Focus, radiating mana hands, and forward thrust casting from `elf_base_magic_8d_1789860950219.jpg`.
+    - Work: Kneeling reach, knife carving, tool swinging, and gathering from `elf_work_8d_consistent_1789860706610.jpg`.
+    - Downed: Torso flinch, bowed-head kneeling collapse, and flat sleeping/corpse from `elf_death_8d_consistent_1789860759994.jpg`.
+  - Delivered 18-col master: `art/masters/Elf_Standard_8D_18Col.png`.
+  - Delivered 6 sub-charsets to `game/img/characters/`: `$UF_Elf_8D.png`, `$UF_Elf_Attack_8D.png`, `$UF_Elf_Bow_8D.png`, `$UF_Elf_Magic_8D.png`, `$UF_Elf_Work_8D.png`, `$UF_Elf_Dead_8D.png`.
+  - Delivered master AR-600: `$UF_Elf_Male_AR600.png`.
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --native --sidecar`: PASS 7/7 on all 7 sheets (binary alpha 0/255, native 48px grid, ≤ 31 palette colors on `art/palette/uf.hex`, exact dimensions, valid sidecars, mass center offset ≤ 0.9 px, row 47 grounding).
+  - `tools/originality_check.js`: PASS 7/7 with 0 warnings (closest distance 0.462 to 0.550 ≥ 0.28 vs 19,431 indexed Ultima VII shapes).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `docs/design/STANDARD_8D_CHARSET_TEMPLATE.png`: Inspected all 18 labeled columns, 8 labeled rows, and regenerated sprite animations.
+  - `elf_complete_standardized_charset_suite.png`: Inspected 18×8 grid showing authentic magic casting, active tool carving, kneeling collapse, and consistent elf attire.
+
 ## Authentic Google Nano Banana II Faction Face Sets with Ultima VII Borders & Menu Themes (AR-1700 to AR-1730, V99, V100) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("Use Nano banana II to create all of the UF Face Sets we need, giving each faction a unique ultima 7 style border that corresponds with their faction theme. Additionally, generate a menu theme for each faciton as well"):

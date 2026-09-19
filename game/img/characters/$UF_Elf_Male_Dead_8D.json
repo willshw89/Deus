@@ -23,9 +23,13 @@
   "species": "elf",
   "gender": "male",
   "animations": {
-    "attack": [
-      0,
-      1,
+    "hurt": [
+      0
+    ],
+    "collapse": [
+      1
+    ],
+    "dead": [
       2
     ]
   }

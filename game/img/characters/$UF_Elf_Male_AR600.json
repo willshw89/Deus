@@ -1,6 +1,4 @@
 {
-  "id": "$UF_Elf_Male_AR600",
-  "species": "elf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,8 +20,8 @@
     "SE"
   ],
   "frameMs": 150,
+  "species": "elf",
   "gender": "male",
-  "category": "colonist",
   "animations": {
     "stand": [
       0
@@ -31,13 +29,15 @@
     "walk": [
       1,
       2,
-      3,
-      2
+      3
     ],
     "work": [
       4,
       5,
       6
+    ],
+    "carry": [
+      7
     ],
     "attack": [
       8,
@@ -59,9 +59,7 @@
     ],
     "idle": [
       18,
-      19,
-      18,
-      0
+      19
     ]
   }
 }

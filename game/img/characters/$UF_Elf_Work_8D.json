@@ -1,6 +1,4 @@
 {
-  "id": "$UF_Elf_Work_8D",
-  "species": "elf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -22,8 +20,8 @@
     "SE"
   ],
   "frameMs": 150,
+  "species": "elf",
   "gender": "male",
-  "category": "colonist",
   "animations": {
     "work": [
       0,

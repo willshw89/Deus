@@ -1,8 +1,4 @@
 {
-  "id": "$UF_Elf_Male_8D",
-  "species": "elf",
-  "gender": "male",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,16 +19,14 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "species": "elf",
+  "gender": "male",
   "animations": {
-    "stand": [
-      1
-    ],
     "walk": [
       0,
       1,
-      2,
-      1
+      2
     ]
-  },
-  "frameMs": 150
+  }
 }

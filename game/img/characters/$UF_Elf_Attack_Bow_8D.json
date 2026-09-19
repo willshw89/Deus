@@ -1,6 +1,4 @@
 {
-  "id": "$UF_Elf_Attack_Bow_8D",
-  "species": "elf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -21,14 +19,14 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "gender": "male",
-  "category": "colonist",
   "animations": {
     "attack": [
       0,
       1,
       2
     ]
-  }
+  },
+  "frameMs": 150,
+  "species": "elf",
+  "gender": "male"
 }
