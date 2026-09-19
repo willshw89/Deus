@@ -1,21 +1,30 @@
 {
   "id": "fruit_tree_bare",
-  "name": "Fruit Tree Bare (2.5D)",
-  "dimensions": "16x16",
-  "exportScale": "3x (48x48)",
-  "projection": "Ultima VII 2.5D Oblique (45-degree up-left lean, top/south/east faces)",
-  "format": "Exactly one asset square (16x16 native pixels)",
-  "palette": "Ultima VII Daylight Palette (PALETTES.FLX Record 0 / art/palette/uf.hex)",
-  "colorsUsed": [
-    "#201408",
-    "#86D200",
-    "#45B645",
-    "#189218",
-    "#006D00",
-    "#5D350C",
-    "#4D2D0C",
-    "#3D240C"
+  "name": "Fruit Tree (Picked)",
+  "category": "Flora",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
   ],
-  "colorCount": 8,
-  "updatedDate": "2026-09-18"
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "sway": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "frameMs": 250
 }

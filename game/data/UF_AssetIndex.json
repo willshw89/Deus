@@ -2147,8 +2147,6 @@
    "tile 237 (objects)",
    "tile 232 (objects)",
    "tile 156 (objects)",
-   "tile 166 (objects)",
-   "tile 241 (objects)",
    "tile 238 (objects)",
    "tile 174 (objects)",
    "tile 153 (objects)",
@@ -2372,26 +2370,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_B#166": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103",
-   "AR-023"
-  ],
-  "usedBy": [
-   "object bush \"Shrub\""
-  ],
-  "states": [
-   "gather: Shrub → gone (yields 2 Plant fiber)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 166)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_B#167": {
   "status": "stock RMMZ",
   "request": "AR-044",
@@ -2609,14 +2587,12 @@
   ],
   "usedBy": [
    "object dead_tree \"Dead tree\"",
-   "object tree_cursed \"Blighted tree\" (tint #c0a0e0)",
-   "object snow_bush \"Snow bush\""
+   "object tree_cursed \"Blighted tree\" (tint #c0a0e0)"
   ],
   "states": [
    "dead_tree: chop: Dead tree → Stump (yields 1 Log, 2 Firewood)",
    "blocks movement (units work from a neighbouring cell)",
-   "tree_cursed: chop: Blighted tree → Stump (yields 1 Log)",
-   "snow_bush: gather: Snow bush → gone (yields 1 Plant fiber)"
+   "tree_cursed: chop: Blighted tree → Stump (yields 1 Log)"
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 232)",
@@ -2658,25 +2634,6 @@
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 238)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B#241": {
-  "status": "stock RMMZ",
-  "request": "AR-103",
-  "requests": [
-   "AR-103"
-  ],
-  "usedBy": [
-   "object desert_shrub \"Desert shrub\""
-  ],
-  "states": [
-   "gather: Desert shrub → gone (yields 1 Plant fiber)",
-   "blocks movement (units work from a neighbouring cell)"
-  ],
-  "category": "objects",
-  "file": "img/tilesets/Outside_B.png (tile 241)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
@@ -4063,6 +4020,26 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Bush": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-023"
+  ],
+  "usedBy": [
+   "object bush \"Shrub\""
+  ],
+  "states": [
+   "gather: Shrub → gone (yields 2 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Campfire": {
   "status": "original",
   "request": "AR-105",
@@ -4080,6 +4057,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Campfire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_DesertShrub": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object desert_shrub \"Desert shrub\""
+  ],
+  "states": [
+   "gather: Desert shrub → gone (yields 1 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_DesertShrub.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4321,6 +4317,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Smithy.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_SnowBush": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object snow_bush \"Snow bush\""
+  ],
+  "states": [
+   "gather: Snow bush → gone (yields 1 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SnowBush.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
