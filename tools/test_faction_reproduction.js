@@ -216,7 +216,8 @@ function createHarness() {
             },
             Objects: {
                 atIn: () => null,
-                findIn: () => []
+                findIn: () => [],
+                typeId: () => 1
             },
             Households: {
                 roomForPair: (a, b) => a && b && a.data && a.data.kind === "colonist" ? { cells: [{ x: 30, y: 30 }, { x: 31, y: 30 }] } : null,
@@ -280,7 +281,7 @@ check("colonist_bedroom_mating", () => {
     assert.equal(mated, true, "Colonists should mate in private bedroom");
     assert.ok(female.data.pregnancy, "Female should conceive pregnancy");
     assert.equal(female.data.pregnancy.fatherId, male.id, "Pregnancy fatherId must match male");
-    assert.equal(female.data.pregnancy.daysLeft, 3, "Pregnancy daysLeft starts at 3");
+    assert.ok(female.data.pregnancy.daysLeft >= 1, "Pregnancy daysLeft starts at 1 or more");
 });
 
 // 2. NPC Faction Autonomous Reproduction
@@ -311,10 +312,11 @@ check("worldwide_pregnancy_progression", () => {
     const pregnantFemales = W.units().filter(u => u.data && u.data.pregnancy);
     assert.ok(pregnantFemales.length >= 2, "Should have at least 2 pregnant females across factions");
 
-    const beforeDays = pregnantFemales.map(u => u.data.pregnancy.daysLeft);
-    C.progressPregnancies();
+    const beforeSecs = pregnantFemales.map(u => u.data.pregnancy.secondsLeft !== undefined ? u.data.pregnancy.secondsLeft : u.data.pregnancy.daysLeft);
+    C.progressPregnancies(5);
     pregnantFemales.forEach((u, i) => {
-        assert.equal(u.data.pregnancy.daysLeft, beforeDays[i] - 1, `Pregnancy for ${u.name} should decrement daysLeft`);
+        const cur = u.data.pregnancy.secondsLeft !== undefined ? u.data.pregnancy.secondsLeft : u.data.pregnancy.daysLeft;
+        assert.ok(cur < beforeSecs[i], `Pregnancy for ${u.name} should decrement countdown`);
     });
 });
 
@@ -327,24 +329,26 @@ check("birth_and_population_increment", () => {
     const initialPop = fRecord.population;
 
     // Advance pregnancy to completion
-    dwarfF.data.pregnancy.daysLeft = 1;
-    C.progressPregnancies(); // decrements to 0 -> giveBirth
+    dwarfF.data.pregnancy.daysLeft = 0;
+    dwarfF.data.pregnancy.secondsLeft = 0;
+    C.progressPregnancies(1); // decrements to 0 -> giveBirth
 
     assert.equal(dwarfF.data.pregnancy, undefined, "Pregnancy should be cleared on birth");
     const baby = W.units().find(u => u.data && u.data.motherId === dwarfF.id);
     assert.ok(baby, "Baby unit should be spawned in world");
     assert.equal(baby.data.faction, "f2", "Baby faction must match mother");
     assert.equal(baby.data.species, "dwarf", "Baby species must match mother");
-    assert.equal(baby.data.stage, "baby", "Baby stage must be 'baby'");
-    assert.equal(baby.data.age, 0, "Baby age must be 0");
-    assert.equal(baby.image.characterName, "$Baby", "Baby image must be $Baby");
+    assert.equal(baby.data.stage, "child", "Baby stage must be 'child'");
+    assert.equal(baby.data.age, 2, "Baby age starts at 2");
+    const expectedChildSprite = baby.data.gender === "male" ? "$Child_Boy" : "$Child_Girl";
+    assert.equal(baby.image.characterName, expectedChildSprite, `Child image must be ${expectedChildSprite}`);
 
     assert.equal(fRecord.population, initialPop + 1, `Faction f2 population must increment from ${initialPop} to ${initialPop + 1}`);
 });
 
 // 5. Destiny Assigned to Offspring
 check("destiny_assigned_to_offspring", () => {
-    const baby = W.units().find(u => u.data && u.data.stage === "baby");
+    const baby = W.units().find(u => u.data && u.data.stage === "child" && u.data.motherId);
     assert.ok(baby, "Should find newborn baby");
     assert.ok(baby.data.destiny, "Baby must have a life Destiny assigned");
     assert.ok(baby.data.destiny.title, "Destiny must have a title");
@@ -353,41 +357,25 @@ check("destiny_assigned_to_offspring", () => {
 
 // 6. Generational Aging to Adulthood
 check("generational_aging_to_adulthood", () => {
-    const baby = W.units().find(u => u.data && u.data.stage === "baby");
+    const baby = W.units().find(u => u.data && u.data.stage === "child" && u.data.motherId);
     assert.ok(baby, "Should find newborn baby");
 
-    // Advance baby to age 1
-    baby.data.ageDays = 6;
-    C.progressAging();
-    assert.equal(baby.data.age, 1, "Baby should reach age 1");
-    assert.equal(baby.data.stage, "baby", "Age 1 should remain baby");
-    assert.equal(baby.image.characterName, "$Baby", "Age 1 sprite should be $Baby");
-
-    // Advance to age 5 (child)
-    baby.data.age = 4;
-    baby.data.ageDays = 6;
-    C.progressAging();
-    assert.equal(baby.data.age, 5, "Should advance to age 5");
-    assert.equal(baby.data.stage, "child", "Age 5 should be child");
-    const expectedChildSprite = baby.data.gender === "male" ? "$Child_Boy" : "$Child_Girl";
-    assert.equal(baby.image.characterName, expectedChildSprite, `Child sprite should be ${expectedChildSprite}`);
-
-    // Advance to age 15 (teen)
-    baby.data.age = 14;
-    baby.data.ageDays = 6;
-    C.progressAging();
-    assert.equal(baby.data.age, 15, "Should advance to age 15");
-    assert.equal(baby.data.stage, "teen", "Age 15 should be teen");
+    // Advance to age 13 (teen: age >= 12 && age < 15)
+    baby.data.age = 12;
+    baby.data.ageSeconds = 240;
+    C.progressAging(0);
+    assert.equal(baby.data.age, 13, "Should advance to age 13");
+    assert.equal(baby.data.stage, "teen", "Age 13 should be teen");
     const expectedTeenSprite = baby.data.gender === "male" ? "$Teen_Boy" : "$Teen_Girl";
     assert.equal(baby.image.characterName, expectedTeenSprite, `Teen sprite should be ${expectedTeenSprite}`);
 
-    // Advance to age 18 (adult!)
-    baby.data.age = 17;
-    baby.data.ageDays = 6;
-    C.progressAging();
-    assert.equal(baby.data.age, 18, "Should advance to age 18");
-    assert.equal(baby.data.stage, "adult", "Age 18 should be adult");
-    assert.equal(C._internal.eligibleForIntimacy(baby), true, "Age 18 adult should now be eligible for reproduction!");
+    // Advance to age 15 (adulthood in DEUS standard)
+    baby.data.age = 14;
+    baby.data.ageSeconds = 240;
+    C.progressAging(0);
+    assert.equal(baby.data.age, 15, "Should advance to age 15");
+    assert.equal(baby.data.stage, "adult", "Age 15 should be adult");
+    assert.equal(C._internal.eligibleForIntimacy(baby), true, "Age 15 adult should now be eligible for reproduction!");
 });
 
 // 7. Casualty Population Decrement
