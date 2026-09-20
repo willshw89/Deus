@@ -22,13 +22,19 @@ if (mutant === "no_clock_advance") {
     historyCode = historyCode.replace(/\$ufTime\.advanceMinute\(6\);/g, "// no clock advance");
 } else if (mutant === "no_houses_built") {
     // Mutant: no houses constructed around fire
-    historyCode = historyCode.replace(/buildHomesteadAroundFire\(site, f, focal, year\);/g, "// disabled homestead");
+    historyCode = historyCode.replace(/buildHomesteadAroundFire\(site, f, [^,]+, year\);/g, "// disabled homestead");
 } else if (mutant === "no_indoor_hearth") {
     // Mutant: fail to place domestic indoor hearth
     historyCode = historyCode.replace(/write\(area, hearthCell\[0\], hearthCell\[1\], HEARTH_TYPE\);/g, "// disabled hearth");
 } else if (mutant === "no_offspring_aging") {
     // Mutant: disable progressAging in beat loop
     historyCode = historyCode.replace(/progressAging\(1\);/g, "// no aging");
+} else if (mutant === "unhoused_can_have_children") {
+    // Mutant: unhoused couples can have children
+    householdsCode = householdsCode.replace(/if \(!h \|\| !isSheltered\(h\)\) return false;/g, "if (!h || !h.home) return true;");
+} else if (mutant === "no_child_room_needed") {
+    // Mutant: couple can have children without building a room
+    householdsCode = householdsCode.replace(/return availableChildRooms > livingChildren;/g, "return true;");
 }
 
 let passed = 0, failed = 0;
@@ -372,6 +378,98 @@ check("chronicle_records_authentic_second_by_second_events", () => {
         assert.ok(e.year >= 1 && e.year <= 25, `Event year ${e.year} within range`);
         assert.ok(typeof e.text === "string" && e.text.length > 0, "Event has description text");
     }
+});
+
+// 6. Home Required Before Children & Room-Per-Child Expansion
+check("home_required_before_children_and_room_per_child", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 1 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+    UF.Households.reconcile();
+
+    const H = UF.Households;
+    const founders = World.units();
+    const mom = founders.find(u => u.data.gender === "female");
+    assert.ok(mom, "Found female founder");
+    const h = H.of(mom);
+    assert.ok(h, "Mom has household");
+
+    // 1. Unhoused pair cannot conceive
+    assert.equal(h.home, null, "Unhoused at creation");
+    assert.equal(H.canConceiveChild(h), false, "Unhoused couple CANNOT conceive children");
+
+    // 2. Pair with home but 0 child rooms cannot conceive child #1
+    h.home = {
+        x: 35, y: 35, w: 4, h: 4,
+        walls: [], doors: [{ x: 37, y: 38 }],
+        beds: [{ x: 36, y: 36, unitId: mom.id }],
+        hearth: { x: 37, y: 36 },
+        rooms: [{ type: "master", x: 35, y: 35, w: 4, h: 4, bed: { x: 36, y: 36 } }],
+        annexes: []
+    };
+    assert.ok(H.isSheltered(h), "Home is sheltered");
+    assert.equal(H.childRooms(h), 0, "0 child rooms currently built");
+    assert.equal(H.canConceiveChild(h), false, "Cannot conceive child #1 without a built child room");
+
+    // 3. Build child room #1 -> can conceive child #1
+    h.home.rooms.push({ type: "child", x: 39, y: 35, w: 3, h: 3, bed: { x: 40, y: 36 } });
+    h.home.beds.push({ x: 40, y: 36, unitId: null });
+    assert.equal(H.childRooms(h), 1, "1 child room built");
+    assert.equal(H.canConceiveChild(h), true, "Can now conceive child #1");
+
+    // 4. Child #1 is born -> now has 1 child, 1 child room -> cannot conceive child #2 until room #2 is built
+    const child1 = World.addUnit({
+        name: "TestChild1",
+        data: { kind: "colonist", faction: mom.data.faction, age: 2, stage: "child", motherId: mom.id }
+    });
+    H.join(child1, h);
+    h.home.beds[1].unitId = child1.id;
+    assert.equal(H.canConceiveChild(h), false, "Cannot conceive child #2 until room #2 is built");
+
+    // 5. Build child room #2 -> can now conceive child #2
+    h.home.rooms.push({ type: "child", x: 35, y: 39, w: 3, h: 3, bed: { x: 36, y: 40 } });
+    h.home.beds.push({ x: 36, y: 40, unitId: null });
+    assert.equal(H.childRooms(h), 2, "2 child rooms built");
+    assert.equal(H.canConceiveChild(h), true, "Can now conceive child #2");
+});
+
+// 7. Distributed Habitation (No Campfire Huddling)
+check("distributed_habitation_no_campfire_huddling", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 10 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    // Run second-by-second history
+    UF.History.iterateWorldHistory(st, 10);
+
+    const units = World.units().filter(u => !u.data.dead);
+    const H = UF.Households;
+    const housed = units.filter(u => {
+        const h = H.of(u);
+        return h && h.home;
+    });
+
+    assert.ok(housed.length >= 8, `At least 8 housed colonists exist (actual: ${housed.length})`);
+    // Verify that housed colonists are distributed across different coordinates in their homes, NOT huddled at (32, 32)
+    const distinctCoords = new Set(housed.map(u => `${u.x},${u.y}`));
+    console.log(`    Housed colonists: ${housed.length}, distinct locations across settlement: ${distinctCoords.size}`);
+    assert.ok(distinctCoords.size >= 4, `Colonists distributed across at least 4 distinct home coordinates (actual: ${distinctCoords.size})`);
+    const atCampfire = housed.filter(u => u.x === 32 && u.y === 32);
+    assert.equal(atCampfire.length, 0, "Zero housed colonists huddled on the central campfire");
 });
 
 console.log("\n===========================================");

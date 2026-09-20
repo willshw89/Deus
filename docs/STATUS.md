@@ -6,6 +6,44 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Home-Before-Children & Room-Per-Child Household Expansion (Distributed Habitation) — 2026-09-20 (Gemini)
+Delivered per user directives ("Nice, okay. Now, where we are at now is the entire civilization ends up huddled around the campfire. What I want is a dynamic where the 4 males and 4 females at world generation are pairbonded, and then their offspring become pairbonded as well as adults. A pair needs to build a home before having children. For every child they have, they need to build a room. And so on."):
+- **Pairbonded Founders at World Generation**:
+  - The 4 males and 4 females at Year 1 founding are pairbonded 1:1 into 4 founder households (`f_fam_1` through `f_fam_4`), initialized unhoused (`home = null`).
+- **Home-Before-Children Invariant (`UF_Households.canConceiveChild`)**:
+  - Unhoused couples sleeping around the campfire strictly cannot conceive (`canConceiveChild(h) === false` if `!isSheltered(h)`).
+  - Conception requires a completed, enclosed, sheltered homestead with master bedroom, straw bed, and indoor hearth.
+- **Room-Per-Child Sequential Expansion**:
+  - A housed couple with a completed master bedroom cannot conceive child #1 until an adjoining child room (3x3 annex with walls, door, and private bed) is constructed (`childRooms(h) > livingChildren`).
+  - For each subsequent child, an additional child room with bed must be built before conceiving (`childRooms >= livingChildren + 1`).
+  - Cooperative daytime construction priority in `UF_History.iterateWorldHistory`:
+    - Priority 1: Unhoused adult couples needing their own home -> construct master homestead around fire.
+    - Priority 2: Housed couples needing a child room for their next child -> construct contiguous 3x3 child room with straw bed and door.
+  - Each child room expansion logs a `room_built` event in the settlement Chronicle.
+- **Adulthood Branching & Pairbonding**:
+  - Offspring turn adult at age 15, branch into new unhoused households (`home = null`), pairbond with eligible non-kin, and must construct their own homes before reproducing.
+- **Distributed Habitation (Zero Campfire Huddling)**:
+  - When world generation / simulation ends (e.g. 10 AD or 50 AD), housed colonists (parents and children) are distributed across their private rooms and beds across the settlement, leaving zero housed colonists huddled at the campfire.
+- **Verification Evidence**:
+  - Dedicated automated suite `node tools/test_second_by_second_history.js`: **7/7 PASS, 0 FAIL (exit 0)**:
+    - `PASS universal_year_1_founding`
+    - `PASS second_by_second_50_year_simulation` (49 elapsed years / 11,760 beats simulated in 223 ms)
+    - `PASS focal_homesteads_with_indoor_hearth_and_bed`
+    - `PASS multi_generational_offspring_adulthood_pairbonding`
+    - `PASS chronicle_records_authentic_second_by_second_events`
+    - `PASS home_required_before_children_and_room_per_child` (verifies unhoused cannot conceive, 0 child rooms cannot conceive child #1, building room #1 unlocks child #1, 1 child + 1 room cannot conceive child #2 until room #2 is built)
+    - `PASS distributed_habitation_no_campfire_huddling` (verifies 18 housed colonists distributed across 10 distinct settlement locations, 0 huddled at campfire)
+  - Rule 4 mutant tests (all 6 verified to fail with exit code 1 when active):
+    - `--mutant=unhoused_can_have_children`: Exits with code 1 (fails unhoused conception gate)
+    - `--mutant=no_child_room_needed`: Exits with code 1 (fails room-per-child conception gate)
+    - `--mutant=no_clock_advance`: Exits with code 1 (fails clock day assertion)
+    - `--mutant=no_houses_built`: Exits with code 1 (fails house count & chronicle assertions)
+    - `--mutant=no_indoor_hearth`: Exits with code 1 (fails physical indoor hearth assertion)
+    - `--mutant=no_offspring_aging`: Exits with code 1 (fails adulthood & generation assertions)
+  - In-engine suite `node tools/run_tests.js setup`: **32/32 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `node tools/run_tests.js colonists`: **24/24 PASS, 0 FAIL (exit 0)**.
+  - In-engine screenshot inspection (`setup.live_dwarf_colony_year_42.png`): Opened and verified; shows the subterranean dwarf colony at Year 42 AD with constructed stone homesteads and rooms around the central campfire, illuminated domestic hearths and beds, and colonists distributed across their quarters with zero huddled at the campfire.
+
 ## Second-by-Second Living World History Iteration (1-200 AD) — 2026-09-20 (Gemini)
 Delivered per user directives ("Does the game actually generate a world and push through the current amount of time? Actually iterating a history? Thats what I want", "Selecting 'Human, 50AD' means i start as human, and the gamestart starts as if I had sat there and watched the first 50 years, except I didnt", "Factions build their society around that first bonfire. that should basically be the focal point of society. this starts by Sleep + fire attraction, where people sleep around the fire, building their own homes around the fire and eventually bringing the fire into their own home", "When we generate, I actually want second by second iteration, like the whole gameworld"):
 - **Universal Year 1 Founding at Campfire**:

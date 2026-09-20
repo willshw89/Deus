@@ -1358,7 +1358,10 @@
         const female = (u1.data.gender === "female") ? u1 : (u2.data.gender === "female") ? u2 : null;
         const male = (u1.data.gender === "male") ? u1 : (u2.data.gender === "male") ? u2 : null;
 
-        if (female && male && !female.data.pregnancy) {
+        const H = window.UF && UF.Households;
+        const canConceive = H && typeof H.canConceiveChild === "function" ? H.canConceiveChild(female) : true;
+
+        if (female && male && !female.data.pregnancy && canConceive) {
             const fId = female.data.faction;
             const pop = factionPopulation(fId);
             const chance = conceptionChance(pop);
@@ -1454,29 +1457,42 @@
         const fatherId = preg ? preg.fatherId : null;
         const father = fatherId ? (settler(fatherId) || W.unit(fatherId)) : null;
 
-        // Find standable cell next to mother
+        // Find standable cell in child's room/bed or next to mother
+        const H = window.UF && UF.Households;
+        const h = H && typeof H.of === "function" ? H.of(mother) : null;
+        let childBed = null;
+        if (h && h.home && Array.isArray(h.home.beds)) {
+            const livingMemberIds = new Set((H.members ? H.members(h) : []).map(m => m.id));
+            childBed = h.home.beds.find(b => !b.unitId || (!livingMemberIds.has(b.unitId) && b.unitId !== mother.id));
+        }
+
         const J = Jobs();
         let birthX = null, birthY = null;
-        for (const [dx, dy] of NEIGHBORS) {
-            const nx = mother.x + dx, ny = mother.y + dy;
-            if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
-                birthX = nx;
-                birthY = ny;
-                break;
-            }
-        }
-        if (birthX === null) {
-            for (let dy = -2; dy <= 2; dy++) {
-                for (let dx = -2; dx <= 2; dx++) {
-                    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) continue;
-                    const nx = mother.x + dx, ny = mother.y + dy;
-                    if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
-                        birthX = nx;
-                        birthY = ny;
-                        break;
-                    }
+        if (childBed) {
+            birthX = childBed.x;
+            birthY = childBed.y;
+        } else {
+            for (const [dx, dy] of NEIGHBORS) {
+                const nx = mother.x + dx, ny = mother.y + dy;
+                if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
+                    birthX = nx;
+                    birthY = ny;
+                    break;
                 }
-                if (birthX !== null) break;
+            }
+            if (birthX === null) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    for (let dx = -2; dx <= 2; dx++) {
+                        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) continue;
+                        const nx = mother.x + dx, ny = mother.y + dy;
+                        if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
+                            birthX = nx;
+                            birthY = ny;
+                            break;
+                        }
+                    }
+                    if (birthX !== null) break;
+                }
             }
         }
         if (birthX === null) return null; // Keep the pregnancy pending; never claim a birth without a unit.
@@ -1530,6 +1546,13 @@
         });
 
         if (!childUnit) return null;
+        if (childBed) {
+            childBed.unitId = childUnit.id;
+            childUnit.data.bed = { area: copyArea(mother.area), x: childBed.x, y: childBed.y, z: zOf(mother) };
+        }
+        if (h && H && typeof H.join === "function") {
+            H.join(childUnit, h);
+        }
         const wasTwins = preg && preg.isTwins;
         delete mother.data.pregnancy;
         const pop = factionPopulation(mother.data.faction);

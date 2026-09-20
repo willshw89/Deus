@@ -64,7 +64,7 @@
     function resolve(h) { const s = state(); return h && typeof h === "object" ? h : s && s.byId[h] || null; }
     function structures(refH) {
         const h = resolve(refH);
-        return h && h.home ? [h.home, ...(h.home.annexes || [])] : [];
+        return h && h.home ? [h.home, ...(h.home.annexes || []).filter(a => a && Array.isArray(a.beds))] : [];
     }
     function members(ref) {
         const h = resolve(ref), s = state();
@@ -496,7 +496,10 @@
             if (u && samePlace(h, u) && object(h, b) && object(h, b).id === "floor_straw" &&
                 (!owner || (owner.kind === "unit" && owner.id === u.id))) {
                 const assigned = own.bedOf ? own.bedOf(u) : u.data.bed;
-                if (!assigned || !samePlace(h, assigned) || assigned.x !== b.x || assigned.y !== b.y) own.assignBed(u, ref(h, b));
+                if (!assigned || !samePlace(h, assigned) || assigned.x !== b.x || assigned.y !== b.y) {
+                    if (typeof own.assignBed === "function") own.assignBed(u, ref(h, b));
+                    else u.data.bed = { area: copyArea(h.area), x: b.x, y: b.y, z: zOf(h) };
+                }
             }
         }
         const doors = window.UF && UF.Doors;
@@ -763,9 +766,34 @@
     }
     function isSheltered(refH) {
         const h = resolve(refH);
-        if (!h || !h.home || !strictEnclosure(h, h.home)) return false;
+        if (!h || !h.home) return false;
+        if (h.home.rooms && h.home.beds && h.home.beds.length > 0 && h.home.hearth) return true;
+        if (!strictEnclosure(h, h.home)) return false;
         const d = demands(h);
         return !d.beds && !d.cooking;
+    }
+    function childRooms(refH) {
+        const h = resolve(refH);
+        if (!h || !h.home) return 0;
+        if (Array.isArray(h.home.rooms)) {
+            return h.home.rooms.filter(r => r.type === "child" || r.type === "bedroom" || r.type === "annex").length;
+        }
+        if (Array.isArray(h.home.annexes) && h.home.annexes.length > 0) {
+            return h.home.annexes.length;
+        }
+        if (Array.isArray(h.home.beds)) {
+            return Math.max(0, h.home.beds.length - 1);
+        }
+        return 0;
+    }
+    function canConceiveChild(refH) {
+        const h = resolve(refH);
+        if (!h || !isSheltered(h)) return false; // A pair needs to build a home before having children
+        const people = members(h);
+        const livingChildren = people.filter(m => m && m.data && Number.isFinite(m.data.age) && m.data.age < 15 && !dead(m)).length;
+        const availableChildRooms = childRooms(h);
+        // For every child they have, they need to build a room:
+        return availableChildRooms > livingChildren;
     }
     function activeFocalHousehold(c) {
         const s = state();
@@ -801,7 +829,7 @@
         if (pairReason(a, b) || partnerId(a) !== b.id || partnerId(b) !== a.id) return null;
         const h = of(a);
         if (!h || of(b) !== h || !samePlace(h, a)) return null;
-        const home = structures(h).find(p => p.beds.some(bed => bed.unitId === a.id) && p.beds.some(bed => bed.unitId === b.id));
+        const home = structures(h).find(p => p && Array.isArray(p.beds) && p.beds.some(bed => bed.unitId === a.id || bed.unitId === b.id || (!bed.unitId && p.beds.length === 1)));
         if (!home || !strictEnclosure(h, home)) return null;
         const room = new Set(home.sleeping.map(p => key(p.x, p.y)));
         if (W().units().some(u => !dead(u) && u.id !== a.id && u.id !== b.id && samePlace(h, u) && room.has(key(u.x, u.y)))) return null;
@@ -826,7 +854,7 @@
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, join, make };
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, join, make };
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;

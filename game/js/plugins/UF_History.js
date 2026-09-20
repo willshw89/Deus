@@ -1527,7 +1527,11 @@
                     doors: [{ x: doorX, y: doorY }],
                     beds: [{ x: bedCell[0], y: bedCell[1], unitId: household.members ? household.members[0] : null }],
                     hearth: { x: hearthCell[0], y: hearthCell[1] },
-                    storage: { x: doorX, y: doorY }
+                    storage: { x: doorX, y: doorY },
+                    rooms: [
+                        { type: "master", x: x0, y: y0, w, h: hh, bed: { x: bedCell[0], y: bedCell[1] }, hearth: { x: hearthCell[0], y: hearthCell[1] } }
+                    ],
+                    annexes: []
                 };
                 // Assign home to household members
                 if (household.members) {
@@ -1536,8 +1540,8 @@
                         if (u && u.data) {
                             u.data.home = { area: { ...area }, x: x0 + 1, y: y0 + 1, z: levelOf(area) };
                             u.data.homeFire = { area: { ...area }, x: hearthCell[0], y: hearthCell[1], z: levelOf(area) };
-                            u.x = x0 + 1;
-                            u.y = y0 + 1;
+                            u.x = bedCell[0];
+                            u.y = bedCell[1];
                         }
                     }
                 }
@@ -1548,6 +1552,101 @@
                 year,
                 type: "settle_built",
                 text: `${f.name} completed a homestead by the fire for ${surname} in Year ${year}.`,
+                factions: [f.id],
+                site: site.id
+            });
+
+            return true;
+        };
+
+        // Build an adjoining room for a child
+        let roomsBuilt = 0;
+        const buildChildRoomForHousehold = (site, f, household, year) => {
+            if (!household || !household.home) return false;
+            const home = household.home;
+            const culture = (cat.cultures && cat.cultures[f.species]) || {};
+            const wallId = culture.wall || "wall_wood";
+            const doorId = culture.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
+            const WALL_TYPE = typeId(wallId) || typeId("wall_wood");
+            const DOOR_TYPE = typeId(doorId) || typeId("door_wood");
+            const area = siteArea(site);
+
+            const rw = 3, rh = 3;
+            const offsets = [
+                { x0: home.x + home.w, y0: home.y, doorX: home.x + home.w, doorY: home.y + 1 },
+                { x0: home.x, y0: home.y + home.h, doorX: home.x + 1, doorY: home.y + home.h },
+                { x0: home.x - rw, y0: home.y, doorX: home.x - 1, doorY: home.y + 1 },
+                { x0: home.x, y0: home.y - rh, doorX: home.x + 1, doorY: home.y - 1 }
+            ];
+
+            let chosenSpot = null;
+            for (const spot of offsets) {
+                let ok = true;
+                for (let dy = 0; dy < rh && ok; dy++) {
+                    for (let dx = 0; dx < rw && ok; dx++) {
+                        const px = spot.x0 + dx, py = spot.y0 + dy;
+                        if (!land(area, px, py)) { ok = false; break; }
+                        const key = `${px},${py}`;
+                        if (builtPositions.has(key)) { ok = false; break; }
+                        const t = read(area, px, py);
+                        if (t && t !== 0) {
+                            const e = entry(t);
+                            if (e && e.tags && (e.tags.includes("building") || e.tags.includes("fire"))) { ok = false; break; }
+                        }
+                    }
+                }
+                if (ok) {
+                    chosenSpot = spot;
+                    break;
+                }
+            }
+
+            if (!chosenSpot) return false;
+
+            const { x0, y0, doorX, doorY } = chosenSpot;
+            const x1 = x0 + rw - 1, y1 = y0 + rh - 1;
+
+            let bedX = x0 + 1, bedY = y0 + 1;
+            for (let y = y0; y <= y1; y++) {
+                for (let x = x0; x <= x1; x++) {
+                    builtPositions.add(`${x},${y}`);
+                    const isPerimeter = x === x0 || x === x1 || y === y0 || y === y1;
+                    if (x === doorX && y === doorY) {
+                        write(area, x, y, DOOR_TYPE);
+                    } else if (isPerimeter) {
+                        write(area, x, y, WALL_TYPE);
+                        wallsPlaced++;
+                    } else {
+                        bedX = x;
+                        bedY = y;
+                        write(area, x, y, BED_TYPE);
+                        bedsPlaced++;
+                    }
+                }
+            }
+
+            // Register child room on household
+            household.home.rooms = household.home.rooms || [];
+            const newRoom = {
+                type: "child",
+                x: x0, y: y0, w: rw, h: rh,
+                walls: [],
+                doors: [{ x: doorX, y: doorY }],
+                sleeping: [{ x: bedX, y: bedY }],
+                beds: [{ x: bedX, y: bedY, unitId: null }]
+            };
+            household.home.rooms.push(newRoom);
+            household.home.annexes = household.home.annexes || [];
+            household.home.annexes.push(newRoom);
+            household.home.beds = household.home.beds || [];
+            household.home.beds.push({ x: bedX, y: bedY, unitId: null });
+
+            roomsBuilt++;
+            const surname = household.surname || f.name;
+            History.addEvent({
+                year,
+                type: "room_built",
+                text: `${f.name} built an additional room for ${surname} in Year ${year}.`,
                 factions: [f.id],
                 site: site.id
             });
@@ -1587,6 +1686,12 @@
                     if (u.data && u.data.gender === "female" && !u.data.pregnancy && u.data.partnerId && !u.data.dead && u.data.age >= 15 && u.data.age < 50) {
                         const partner = W && W.unit(u.data.partnerId);
                         if (partner && !partner.data.dead && partner.data.age >= 15) {
+                            // User directive: A pair needs to build a home before having children.
+                            // For every child they have, they need to build a room. And so on.
+                            const hh = H && H.of ? H.of(u) : null;
+                            const canConceive = H && typeof H.canConceiveChild === "function" ? H.canConceiveChild(hh) : (u.data.home && u.data.homeFire);
+                            if (!canConceive) continue;
+
                             const pop = (internal.factionPopulation && internal.factionPopulation(u.data.faction)) || 8;
                             const chance = (internal.conceptionChance && internal.conceptionChance(pop)) || 0.95;
                             const rng = mulberry32(hash32(st.seed, 0x9b17, u.id, beat));
@@ -1633,18 +1738,65 @@
                 }
             }
 
-            // 7. Cooperative homestead construction during daytime hours (06:00 to 22:00)
+            // 7. Cooperative construction during daytime hours (06:00 to 22:00)
             if (hour >= 6 && hour < 22) {
                 workProgress++;
                 if (workProgress >= WORK_BEATS_PER_HOUSE) {
                     workProgress = 0;
-                    // For each faction, advance homestead construction around the fire
                     for (const f of st.factions.list) {
                         const site = st.history.sites.find(s => s.faction === f.id && !s.ruined) || st.history.sites[0];
                         if (!site) continue;
-                        const colony = st.colony;
-                        const focal = activeFocalHousehold(colony);
-                        buildHomesteadAroundFire(site, f, focal, year);
+
+                        const allHouseholds = (H && H.all ? H.all() : []).filter(h => h.faction === f.id && !h.mergedInto);
+                        // Priority 1: Unhoused adult couple needing their own home
+                        const unhousedHousehold = allHouseholds.find(h => !h.home && h.members && h.members.length >= 2);
+                        if (unhousedHousehold) {
+                            buildHomesteadAroundFire(site, f, unhousedHousehold, year);
+                        } else {
+                            // Priority 2: Housed couple who need an additional room for their next child
+                            // "A pair needs to build a home before having children. For every child they have, they need to build a room. And so on."
+                            const needRoomHousehold = allHouseholds.find(h => {
+                                if (!h.home) return false;
+                                const childRoomsCount = (H && H.childRooms) ? H.childRooms(h) : ((h.home.rooms || []).filter(r => r.type === "child").length);
+                                const people = (H && H.members) ? H.members(h) : [];
+                                const livingChildren = people.filter(m => m && m.data && Number.isFinite(m.data.age) && m.data.age < 15 && !m.data.dead).length;
+                                return childRoomsCount <= livingChildren && livingChildren < 4;
+                            });
+                            if (needRoomHousehold && buildChildRoomForHousehold(site, f, needRoomHousehold, year)) {
+                                // successfully expanded room for next child
+                            } else {
+                                const colony = st.colony;
+                                const focal = activeFocalHousehold(colony);
+                                buildHomesteadAroundFire(site, f, focal, year);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Distribute all housed colonists into their respective homes and bedrooms rather than all huddled at the campfire
+        const peopleList = (internal.allFactionPeople && internal.allFactionPeople()) || (W && W.units()) || [];
+        for (const u of peopleList) {
+            if (!u || !u.data || u.data.dead) continue;
+            const hh = H && H.of ? H.of(u) : null;
+            if (hh && hh.home) {
+                const bed = (hh.home.beds || []).find(b => b.unitId === u.id) || (u.data.bed ? u.data.bed : null);
+                if (bed) {
+                    u.x = bed.x;
+                    u.y = bed.y;
+                    u.data.home = { area: { ...siteArea(st.history.sites[0]) }, x: bed.x, y: bed.y, z: levelOf(u) };
+                } else if (hh.home.rooms && hh.home.rooms.length > 0) {
+                    const isAdult = Number.isFinite(u.data.age) && u.data.age >= 15;
+                    if (isAdult && hh.home.rooms[0].bed) {
+                        u.x = hh.home.rooms[0].bed.x;
+                        u.y = hh.home.rooms[0].bed.y;
+                    } else {
+                        const childRoom = hh.home.rooms.find(r => r.type === "child" || r.type === "bedroom") || hh.home.rooms[0];
+                        if (childRoom && childRoom.bed) {
+                            u.x = childRoom.bed.x;
+                            u.y = childRoom.bed.y;
+                        }
                     }
                 }
             }
@@ -1665,6 +1817,8 @@
             sites: st.history.sites.length,
             sitesGrown: st.history.sites.length,
             houses: housesBuilt,
+            rooms: housesBuilt + roomsBuilt,
+            childRooms: roomsBuilt,
             beds: bedsPlaced,
             hearths: hearthsPlaced,
             walls: wallsPlaced,
