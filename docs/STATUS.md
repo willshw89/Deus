@@ -8,6 +8,14 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Serious Chibi Aesthetic Refinement — 2026-09-19 (Gemini)
+Delivered per user directive ("Lets make it more of a serious chibi as opposed to a cute chibi"):
+- **Serious Chibi Direction Codification (VISION V116):**
+  - Scratched cute / juvenile / cartoonish chibi tropes: eliminated oversized bubble heads, giant round shiny anime eyes, and soft blobby limbs.
+  - Adopted mature tactical 16-bit RPG proportions (~3.0 to 3.2 heads tall, fitting 1 tile height: 40–44 px tall in RMMZ).
+  - Focused, narrow gaze with stern/determined brow ridge, defined combat posture, broader shoulders, articulated boots, functional medieval straps/scabbards/buckles, and sharp contour outlines.
+  - Preserved 1-tile humanoid / 2-tile large creature scale and 12-sprite dedicated action architecture.
+
 ## Final Fantasy V (FF5) 16-Bit Chibi Style, 1-Tile Standard, and 12-Sprite Action Architecture — 2026-09-19 (Gemini)
 Delivered per user directives ("Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time, thats 3 up, left, right, down. And then another 12 sprite sheet for melee. then another 12 sprite sheet for ranged. etc. Let's scratch our current style rules and go with ff5 style generated in Nano banana II, large creatures can be 2 tiles in height but generally 1 tile in a FF5 style"):
 - **Style Reset to Final Fantasy V (FF5):**
