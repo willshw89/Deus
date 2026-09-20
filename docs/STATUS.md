@@ -6,7 +6,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (Wildlife & Trees face sets, nature menu themes, and dynamic faction cursors delivered, awaiting user review)
+- None (Nano Banana II Tilesets Suite v2 & A4 Wall Autotile Architecture Fix delivered, awaiting user review)
+
+## Complete Nano Banana II Tileset Suite v2 & A4 Wall Autotile Architecture Fix — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Genrate the tilesets in nano banana II. The water animation is kinda weak. Redo the water. Keep going", "Make sure youre generating everything with nano banana II", "These look like dogshit, fix this with nano banana II", "I do want the tops of walls to be black though. Not like a black square, but black bordered by material", "Water needs to seamlessly border all terrain types", "I want the walls to take a style closer to the cave/rock walls, with a wall face and a top face"):
+- **Root Cause Resolution for Bugged A4 Walls (`media_1789864907268.png`):**
+  - **48-Pixel Autotile Vertical Shift**: RMMZ A4 specification allocates 96×144 px (y=0..143, 6 sub-rows) for Wall Top (`FLOOR_AUTOTILE_TABLE`) and 96×96 px (y=144..239, 4 sub-rows) for Wall Face (`WALL_AUTOTILE_TABLE`). The legacy generator inverted these dimensions (96 top / 144 face), shifting half of the wall face into the top autotile, which caused horizontal black slab bars across the map and sliced wall faces in half.
+  - **RMMZ Non-Sequential Sub-Row Ordering**: `Tilemap.WALL_AUTOTILE_TABLE` maps `sy=0` and `sy=2` as the upper wall course (requiring top cast shadow), while `sy=1` and `sy=3` map to the lower wall course (requiring foundation footers). Corrected sub-row construction to eliminate inverted wall courses and fragmented purple cuts.
+  - **Black Ceiling Cavity Framed by Coping Rim**: Eliminated legacy center-stone reversion. The entire inner top face (`edgeDist >= 8.0`) is solid pitch black `#000000`, framed on outer borders by a 7-px material coping rim (`rimDark`, `rimMid`, `rimHi`) with south overhang lip and drop shadow, producing authentic dungeon/cavern ceiling voids without giant black rectangular slabs or center stripe glitches.
+  - **Cavern Rock Wall Style for Subterranean Levels**: Mapped kinds 0 and 1 in `Dungeon_A4` to rugged cavern rock walls with 3D faceted cliff faces, stalactite lip shadows, and boulder footers sampled from `art/raw/dungeon_walls_nano_raw.png`.
+  - **Multi-Frame Animated Water & Organic Shoreline**: 3-frame wave flow with sunlight caustics (`art/raw/water_nano_animated_raw.png`) and soft white wave foam / translucent shallows (`art/raw/shoreline_nano_raw.png`) that organically transitions into grass, dirt, sand, and rock with zero hard dark outline box strokes.
+- **Delivered Assets:**
+  - `game/img/tilesets/Dungeon_A4.png` (768×720 px) & master `art/masters/Dungeon_A4.png`: 8 wall kinds (kinds 0-1: Cavern rock walls; kind 2: Ashlar stone wall; kind 3: Basalt crypt wall; kinds 4-7: rock/stone variations).
+  - `game/img/tilesets/Outside_A4.png` (768×720 px) & master `art/masters/Outside_A4.png`: 8 exterior wall kinds (timber palisade, fortress stone, mountain cliff, sandstone).
+  - `game/img/tilesets/Dungeon_A2.png` (768×576 px) & master `art/masters/Dungeon_A2.png`: 32 subterranean floor autotile blocks (dug earth, clay bed, flagstones, rough cavern rock).
+  - `game/img/tilesets/Outside_A1.png`, `game/img/tilesets/Dungeon_A1.png`, `game/img/tilesets/UF_GenWater_A1.png` (768×576 px) & masters: 3-frame animated water with multi-biome organic foam shorelines.
+- **Verification Evidence:**
+  - `tools/art_check.js --native`: **5/5 PASS** (Dungeon_A4: 39 colors, Outside_A4: 48 colors, Dungeon_A2: 39 colors, Outside_A1: 36 colors, Dungeon_A1: 36 colors; all <= 64 limit, 100% binary alpha 0/255).
+  - `tools/originality_check.js`: **5/5 PASS, 0 WARN** (all closest distances 0.349 to 0.412 >= 0.28 vs 19,431 indexed U7 shapes).
+  - `tools/run_tests.js smoke`: **9/9 PASS, 0 failed, exit 0, 0 console errors**.
+  - Rule 5 Visual Inspection:
+    - `art/review/nano_underground_noon_room.png`: In-engine Level -1 excavation showing natural cavern rock cliff walls, sturdy boulder footers, and solid black ceiling void framed by rock coping rim.
+    - `art/review/nano_tilesets_v2_underground.png`: Level -1 full scene displaying continuous ashlar and cavern rock corridors.
+    - `art/review/nano_tilesets_v2_ground.png`: Ground level showing sparkling animated water with soft seafoam shoreline meeting meadow grassland seamlessly.
 
 ## Wildlife, Trees & Nature Face Sets, Menu Themes & Dynamic Faction Cursors — 2026-09-19 (Gemini)
 
