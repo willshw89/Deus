@@ -216,17 +216,23 @@ function buildWoodSet() {
                     continue;
                 }
 
-                // 3. Black Interior with 1px inner drop shadow
-                const nearNorth = !hasN && (y === yMin + 6);
-                const nearWest = !hasW && (x === xMin + 6);
-                const nearEast = !hasE && (x === xMax - 6);
-                const nearSouth = !hasS && (y === 41);
-
-                if (nearNorth || nearWest || nearEast || nearSouth) {
-                    setPixel(f, x, y, C.shadowDeep);
+                // 3. Interior Timber Planking Top Face (Solid wood coping with plank joints)
+                const plankX = x % 8;
+                let col = C.topBody;
+                if (plankX === 0) {
+                    col = C.topGroove;
+                } else if (plankX === 1) {
+                    col = C.topHigh;
+                } else if (plankX >= 6) {
+                    col = C.topShade;
                 } else {
-                    setPixel(f, x, y, C.black);
+                    const grain = ((x * 11 + y * 17) % 13) / 13;
+                    col = grain > 0.65 ? C.topHigh : (grain < 0.35 ? C.topShade : C.topBody);
                 }
+                if (!hasN && y === yMin + 6) {
+                    col = C.topShade;
+                }
+                setPixel(f, x, y, col);
             }
         }
     }
@@ -432,17 +438,27 @@ function buildStoneSet() {
                     continue;
                 }
 
-                // 3. Black Interior with 1px inner drop shadow
-                const nearNorth = !hasN && (y === yMin + 6);
-                const nearWest = !hasW && (x === xMin + 6);
-                const nearEast = !hasE && (x === xMax - 6);
-                const nearSouth = !hasS && (y === 41);
+                // 3. Interior Ashlar Flagstone Top Face (Solid dressed stone coping)
+                const courseIdx = Math.floor(y / 12);
+                const courseY = y % 12;
+                const xOffset = (courseIdx % 2 === 1) ? 8 : 0;
+                const blockX = (x + xOffset) % 16;
 
-                if (nearNorth || nearWest || nearEast || nearSouth) {
-                    setPixel(f, x, y, C.shadowDeep);
+                let col = C.topBody;
+                if (courseY === 0 || blockX === 0) {
+                    col = C.mortarLine;
+                } else if (courseY === 1 || blockX === 1) {
+                    col = C.topHigh;
+                } else if (courseY >= 10 || blockX >= 14) {
+                    col = C.topShade;
                 } else {
-                    setPixel(f, x, y, C.black);
+                    const n = ((x * 13 + y * 19) % 17) / 17;
+                    col = n > 0.7 ? C.topLight : (n < 0.3 ? C.topShade : C.topBody);
                 }
+                if (!hasN && y === yMin + 6) {
+                    col = C.topShade;
+                }
+                setPixel(f, x, y, col);
             }
         }
     }
