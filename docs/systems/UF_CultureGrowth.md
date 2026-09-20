@@ -11,7 +11,7 @@ This is not a technology-permission system. Remembering that someone made a swor
 | `state()` | `World.state.cultureGrowth`, initialized lazily; null without a world. |
 | `ensureFaction(idOrFactionOrUnit)` | Existing faction's learned record or null for an unknown faction. `"player"` resolves to the actual faction ID. |
 | `ensurePerson(unit)` | Persistent practice/taste record for a `person` or `colonist`, or null. Reattaches `unit.data.preferences` to its saved preference map; never writes facets or skills. |
-| `domainOf(jobOrType)` | Building, gathering, woodcutting, mining, crafting, cooking, smithing, hauling or hunting domain, or null. Craft recipes determine cooking/smithing versus general crafting. |
+| `domainOf(jobOrType)` | Building, gathering, woodcutting, mining, crafting, cooking, smithing, hauling, hunting or farming domain, or null. Craft recipes determine cooking/smithing versus general crafting. The four exact `farm_till`, `farm_plant`, `farm_tend`, `farm_harvest` types map to farming. |
 | `priorityFor(unit,jobOrType)` | Modest learned-practice/taste factor in `[0.8,1.28]`; unknown/survival activities return 1. Does not apply the existing catalog priority again. |
 | `recordJob(job,unit)` | True only when a completed, not-yet-counted job has physical evidence and its worker/level matches. Updates practices, confirmed knowledge and bounded apprentice observation. |
 | `inherit(child,mother,father)` | Idempotent taste inheritance; returns child's record. Parents influence tastes, household practice adds exposure and the child's seeded variation remains. Saves parent IDs/generation, never copies skills. |
@@ -20,7 +20,7 @@ This is not a technology-permission system. Remembering that someone made a swor
 | `describeFaction(id)` | `{id,species,mechanic,generations,practices:[{domain,count}],knowledge:[key],professions:{domain:livingCount}}`, or null. |
 | `mechanicFor(idOrFactionOrUnit)` | `{species,id,text}` describing the available candidate policy. Unknown profiles use individual practice only. |
 | `initialize()` | Add missing faction/person records; does not reset existing knowledge or tastes. |
-| `DOMAINS` | Copy of the nine supported practice-domain IDs. |
+| `DOMAINS` | Copy of the ten supported practice-domain IDs, including farming. |
 
 ### Confirming work
 
@@ -28,6 +28,7 @@ This is not a technology-permission system. Remembering that someone made a swor
 - Craft: its actual `result.items` must identify distinct, existing output stacks held by the worker; all required recipe outputs must be present in the result counts.
 - Gather/chop/mine/quarry/hunt: nonempty `result.yields` must be valid catalog items and still exist in sufficient quantities at the target cell/level. A result-less job is not credited.
 - Fetch: the actual item must be held by the worker. Haul: the actual result stack must be at the destination cell/level.
+- Farming: only the four exact farm job types are eligible, and `UF.Agriculture.confirmedJob(job,unit)` must return boolean `true`. The farming owner verifies the saved plot's matching job/worker/action/revision/cycle receipt and physical harvest outputs. Missing API, missing/stale receipt, false or a truthy nonboolean result gives no cultural credit. CultureGrowth does not duplicate that system's XP award or infer success from a planted/ripe label.
 - A job must be `done`, have a positive integer ID and, when assigned, identify the supplied worker. Cross-level/area completions are refused.
 - Floor/eat and other jobs currently lack sufficient result evidence for this module and do not add knowledge. Merely proposing or failing a job creates no achievement.
 
@@ -66,6 +67,7 @@ Emits `culture:practice(unit,domain,knowledgeKey)` after confirmed, deduplicated
 - Household records: `{practices}` keyed by `factionId:householdId`. These are observations, not household ownership or membership authority.
 - `lastJob` is a single monotonic job-ID watermark per person; duplicate or older completion notifications are ignored. No unbounded completed-job list is saved. Assumes the existing Jobs registry's monotonic IDs and one active job per worker.
 - `unit.data.preferences` mirrors the canonical person preference map. Reinitializing after a plain JSON load reconnects it without resetting data.
+- Domain migration is additive: a missing/nonfinite preference receives its deterministic 35–65 starting taste. Every finite saved preference, including zero, remains untouched, along with existing practice counts, inheritance flags and extra preference keys. Thus an older save gains the farming taste without rerolling its existing culture. Existing children are not re-inherited; future children include the new farming taste normally.
 
 Records contain IDs and plain values, no unit references or cycles. Dead people's practice/parent records remain for lineage continuity. Old saves lazily acquire missing records; they do not receive invented prior achievements or parentage.
 
@@ -73,18 +75,20 @@ Records contain IDs and plain values, no unit references or cycles. Dead people'
 
 Run with `"C:\Program Files\nodejs\node.exe" tools/test_culture_growth.js`. This runs the real plugin in a Node VM with explicit World, Objects, Items and Events doubles; it is not RMMZ Playtest.
 
-Observed 2026-09-19: **18 passed, 0 failed**. Checks cover deterministic/additive initialization, invalid/failed completion refusal, exact object/output proof, duplicate completions, actor-level isolation, actual yield presence, divergence of same-species factions, all seven policies changing selected work under applicable conditions, parental and household influence without copied skills, lineage across two generations, death/save continuity, bounded watermark storage and priority ranges.
+Observed 2026-09-19: **23 passed, 0 failed**. Checks cover deterministic/additive initialization, invalid/failed completion refusal, exact object/output proof, duplicate completions, actor-level isolation, actual yield presence, divergence of same-species factions, all seven policies changing selected work under applicable conditions, parental and household influence without copied skills, lineage across two generations, death/save continuity, bounded watermark storage and priority ranges. Farming additions exercise additive old-taste migration, delegation to Agriculture's strict confirmation authority, four farm actions counted once across person/faction/household without XP calls, inherited farming tastes, and actual feasible-choice changes after human observation. These consumer tests use explicit Agriculture confirmation doubles; the core system's tests own physical planting/harvest receipt correctness.
 
 Behavior mutations observed in the same session:
 
-- `--mutate-evidence`: removes completed-result validation; **14 passed, 4 failed**, exit 1.
-- `--mutate-inheritance`: removes the parental contribution; **17 passed, 1 failed**, exit 1.
-- `--mutate-policies`: bypasses the seven candidate policies; **11 passed, 7 failed**, exit 1. Each actual-choice policy check fails.
+- `--mutate-evidence`: removes completed-result validation; **18 passed, 5 failed**, exit 1.
+- `--mutate-inheritance`: removes the parental contribution; **21 passed, 2 failed**, exit 1.
+- `--mutate-policies`: bypasses the seven candidate policies; **15 passed, 8 failed**, exit 1. Each actual-choice policy check fails, including observed farming.
+- `--mutate-farm-evidence`: accepts a farm job without its owning system's confirmation; **22 passed, 1 failed**, exit 1.
+- `--mutate-farm-migration`: rerolls all saved tastes instead of filling only missing ones; **20 passed, 3 failed**, exit 1.
 
 The first save-fixture run omitted normal world initialization, so reinitializing after load added six missing empty faction records and the exact-JSON assertion failed. The fixture now initializes all factions before capture, matching normal creation; no production save behavior was weakened.
 
 ## Status and limits
 
-Implemented and source-contract tested in this module. Planner and registration integration are coordinated by the lead; **live integration, RMMZ runtime screenshots, editor F5 and F8 are not checked by this module's author**. No image files were created or changed. No visual acceptance is claimed.
+Implemented and source-contract tested in this module. Planner and registration integration are coordinated by the lead. Earlier culture/profile checkpoints are recorded in STATUS. The farming follow-up has **source-contract evidence only at this handoff**; its actual Agriculture integration, runtime screenshots and editor F5/F8 are the lead's next checks. No image files were created or changed by this follow-up. No visual acceptance is claimed.
 
 This records learned work rather than a complete culture simulation. There are no customs, festivals, laws, religion, equipment restrictions, migrations, inheritance transfers, trade contracts or justice here. Profession is derived from experience, not a new class system. Some policy conditions require later feasible alternatives (for example optional furnishings); absence of alternatives correctly leaves the plan unchanged. Household authority, safe adult reproduction and child-only goals are implemented by their owning modules, not by this one.

@@ -586,14 +586,14 @@
             const errors0 = t.errorsSoFar().length, inner0 = errorCount;
             const check = (name, condition, detail) => t.check(name, !!condition && !provoked(name),
                 `${detail || ""}${provoked(name) ? "; deliberately provoked through UF_TEST_PROVOKE" : ""}`);
-            const area = W.currentArea();
+            const area = (typeof W.viewLevel === "function" ? W.viewLevel() : null) || (typeof W.currentArea === "function" ? W.currentArea() : null) || (W.state && W.state.startArea) || { x: 0, y: 0 };
             const priorEnabled = enabled;
             const C = window.UF.Colonists;
             const colonistsEnabled = C && C.isEnabled ? C.isEnabled() : null;
             enabled = false;
             if (C && C.setEnabled) C.setEnabled(false);
 
-            const occupied = (x, y) => W.unitsInArea(area.x, area.y).some(u => u.x === x && u.y === y);
+            const occupied = (x, y) => W.unitsInArea(area.x, area.y, area.z !== undefined ? area.z : 0).some(u => u.x === x && u.y === y);
             const free = [];
             const size = W.state.size;
             const cx = Math.floor(size / 2), cy = Math.floor(size / 2);

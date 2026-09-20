@@ -56,7 +56,22 @@ None. Everything is recomputed from `UF.World.state.seed`; changes to tiles and 
 
 `kitCentres(ax, ay, z = 0)` returns every bare settlement on the requested map, including two separate settlements of the same dwarven faction. Each centre carries `z` and its own `camp` ID. A missing level defaults to Ground for old saves; a dwarf's underground home is not a Ground kit centre.
 
-The generator `uf_underground_resources` runs at order 20 on -1/-2 only, after Levels paints the shape grid. Small seeded finite deposits use existing rock/ore objects. Settlement kits fill catalog minimums on dry floor reachable through the same natural pocket within 20 cells, leaving the central 7×7 clear. They never carve terrain or write surface diffs. `kitLog` and `stats` use `World.levelKey` for underground maps. Kits currently use the existing surface harvestable objects as explicit placeholders; cave-specific flora is not implemented. This is not the complete RESOURCE_ATLAS, and solid geology still needs excavation gameplay.
+The generator `uf_underground_resources` runs at order 20 on -1/-2 only, after Levels paints the shape grid. Small seeded finite deposits use existing rock/ore objects. Settlement kits fill catalog minimums on dry floor reachable through the same natural pocket within 20 cells, leaving the central 7×7 clear. They never carve terrain or write surface diffs. `kitLog` and `stats` use `World.levelKey` for underground maps. Since the flora follow-up on 2026-09-19, underground vegetation comes from explicit depth tables described below, not the surface kit. This is not the complete RESOURCE_ATLAS, and solid geology still needs excavation gameplay.
+
+### Distinct cave vegetation (2026-09-19)
+
+`undergroundKitConfig(z)` returns `{radius,ore,objects,nearWater:[],natural}` for strictly −1 or −2, otherwise `null`. `radius` and the ore choice/count come from the existing surface kit; **its object list is never inherited**. The depth table `catalog.start.undergroundKit[String(z)]` supplies:
+
+- `objects: {objectId:minimum,...}`: the complete starter table, including unchanged mineral minimums. Shallow/deep food, timber and fiber/straw use separate underground plant identities.
+- `natural: [{id,chance,biomes?,nearWater?},...]`: candidate plants in priority order. `chance` is 0–1 per eligible cell; optional `biomes` is a list of Levels biome IDs and `nearWater` is a distance in cells to underground water. Every natural plant and every resource plant in the kit must have tag `underground`. Unknown objects, missing depth configuration and a surface plant mistakenly placed in the table fail explicitly rather than silently restoring surface vegetation.
+
+Natural flora is seeded on dry, standable, unoccupied pocket floors outside settlement clearings, including uninhabited pockets. It is seeded independently by world seed, depth, global cell coordinates and plant ID, so changing the viewed level does not affect placement. The existing finite-mineral pass runs first and is not replaced or recolored by vegetation. The kit then tops up its explicit depth-specific minimums using the existing same-pocket flood fill.
+
+Object actions and harvested-state `regrow` records are catalog data. Existing `UF.Objects.applyIn`/`processRegrow` handle their yields and regeneration on the original level even while another map is viewed. No regrowth state is stored by WorldGen. Stock dungeon tiles are temporary distinct-shape placeholders, not approved original cave art; AR-1901–AR-1908 remain the original-art requests. Existing saved object diffs retain their type IDs; this change does not rewrite previously placed surface-placeholder diffs underground.
+
+`node tools/test_z_flora.js` loads the real WorldGen and Objects sources with controlled terrain/World storage. Its checks cover distinct natural vegetation in both occupied and empty pockets, kit/resource coverage, unchanged mineral baseline, dry cells and clear camps, deterministic generation independent of view, same-level harvest/regrowth after a JSON round-trip, refusal of absent/surface configuration, and an actual-source mutation that restores the surface kit. These are API/generation checks, not renderer or editor Playtest evidence.
+
+The disposable-only `tools/fixtures/UF_ZFlora.js` registers `underground_flora`: whole-map flora/depth checks, six displayed living/harvested forms per depth (`forms_minus1.png`, `forms_minus2.png`), real offscreen harvest/item counts, pending-regrowth save serialization, real clock-hour events through the due time while viewing Ground, matching Ground-cell isolation, and console-error checks. Never register this fixture in the live game. Its screenshots must be opened before reporting a run.
 
 Evidence: disposable snapshot `codex_zcore_integration_20260919_a`, `z_integration` 11/11. Both dwarf settlements had a campfire, nearby freshwater, and nonzero log/stone/fiber/straw/food resource potential; no Ground kit belonged to the dwarf faction. This check proves resource classes exist, not that every placement is usable after all blocking objects are placed. Both screenshots were opened: brown soil chamber at -1 and pale deep cavern at -2, visibly using surface vegetation placeholders. Editor F5/F8 not checked.
 
@@ -129,7 +144,7 @@ Results 2026-09-19 (snapshot copies with the catalog edit, seeds random): `world
 None, aliases only (`Scene_Boot.prototype.start` to register the suites in test mode).
 
 ## Known limits
-- The kit places the same object ids whatever the biome (60 tall-grass tufts on tundra or sand too); a biome-appropriate substitute table (desert shrubs for fiber, pines for oaks) would read better and isn't there.
+- The surface kit places the same object ids whatever its biome (60 tall-grass tufts on tundra or sand too); surface biome-appropriate substitutions are not implemented. Underground kits use separate explicit depth tables.
 - `kit_covers_plan` counts what the objects yield once; berry bushes and fruit trees regrow (48 and 72 game hours), which it doesn't count.
 - The map kit (`start.mapKit`, WORLD_ARCHITECTURE §3.8) is not placed by this plugin (2026-09-19): only `start.kit` is, around every faction area; there is no `biomes.map_kit` check. UF_Roads reads the map kit's minimums.
 - `objects_placed`, `glade_clear`, `kit_per_area`, `kit_covers_plan`, `kit_fair`, `kit_present` and `camps_cleared` use a pristine build (no diffs of play, no units): the campfires are written at New Game and colonists change objects from the first second.

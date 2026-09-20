@@ -7,6 +7,8 @@ function mutate(flag, from, to) { if (process.argv.includes(flag)) { assert(sour
 mutate("--mutate-evidence", "if (!confirmed(job, u)) return false;", "if (!job || !u) return false;");
 mutate("--mutate-inheritance", "0.55 * mean + 0.45 * p.preferences[d]", "0 * mean + 1 * p.preferences[d]");
 mutate("--mutate-policies", "if (!p || !f || rows.length < 2) return rows;", "if (true) return rows;");
+mutate("--mutate-farm-evidence", "return !!(agriculture && agriculture.confirmedJob && agriculture.confirmedJob(job, u) === true);", "return true;");
+mutate("--mutate-farm-migration", "if (!Number.isFinite(p.preferences[d])) p.preferences[d] =", "if (true) p.preferences[d] =");
 let pass = 0, fail = 0;
 function check(name, fn) { try { fn(); pass++; console.log(`PASS culture_growth.${name}`); } catch (e) { fail++; console.error(`FAIL culture_growth.${name}: ${e.message}`); } }
 function fixture() {
@@ -171,5 +173,69 @@ check("bounded_watermark_and_safe_priorities", () => {
     assert.strictEqual(f.culture.professionFor(u), "smithing"); assert.strictEqual(f.culture.describeFaction(1).professions.smithing, 1);
     for (const domain of f.culture.DOMAINS) { const n = f.culture.priorityFor(u, domain === "smithing" ? { type: "craft", params: { recipeId: "forge_sword" } } : "build"); assert(n >= 0.8 && n <= 1.28); }
     assert.strictEqual(f.culture.priorityFor(u, "drink"), 1);
+});
+// Agriculture's physical plot/receipt validation is its own system's test contract.
+// These doubles prove CultureGrowth calls that authority, rejects false/missing proof,
+// and never substitutes a planner's claimed success or awards duplicate skill XP.
+check("farming_domains_and_old_tastes_migrate_additively", () => {
+    const f = fixture(), u = f.person(), p = f.culture.ensurePerson(u);
+    for (const d of f.culture.DOMAINS) assert(Number.isFinite(p.preferences[d]));
+    delete p.preferences.farming; p.preferences.smithing = 0; p.preferences.cooking = 99; p.preferences.TEST_oldTaste = 17;
+    p.inherited = true; p.practices.smithing = 4;
+    const old = plain(p.preferences), skills = JSON.stringify(u.data.skills);
+    f.culture.ensurePerson(u);
+    for (const [k, v] of Object.entries(old)) assert.strictEqual(p.preferences[k], v, `preserve ${k}`);
+    assert(Number.isFinite(p.preferences.farming)); assert.strictEqual(p.inherited, true); assert.strictEqual(p.practices.smithing, 4);
+    const saved = JSON.stringify(p); f.culture.ensurePerson(u); assert.strictEqual(JSON.stringify(p), saved);
+    assert.strictEqual(JSON.stringify(u.data.skills), skills);
+    for (const type of ["farm_till", "farm_plant", "farm_tend", "farm_harvest"]) assert.strictEqual(f.culture.domainOf(type), "farming");
+    assert.strictEqual(f.culture.domainOf("farm_imagined"), null);
+});
+check("farming_requires_owning_system_physical_confirmation", () => {
+    const f = fixture(), u = f.person(1, 3, -1), job = { id: 1, type: "farm_harvest", state: "done", assigned: u.id, target: f.target(u), result: { harvests: 99 } };
+    assert.strictEqual(f.culture.recordJob(job, u), false, "no agriculture API");
+    f.ctx.UF.Agriculture = { confirmedJob: () => false };
+    assert.strictEqual(f.culture.recordJob(job, u), false, "authority refuses imaginary result");
+    f.ctx.UF.Agriculture.confirmedJob = () => ({ ok: true });
+    assert.strictEqual(f.culture.recordJob(job, u), false, "strict boolean contract");
+    f.ctx.UF.Agriculture.confirmedJob = () => true;
+    job.state = "failed"; assert.strictEqual(f.culture.recordJob(job, u), false);
+    job.state = "done"; job.assigned = 200; assert.strictEqual(f.culture.recordJob(job, u), false);
+    job.assigned = u.id; job.target.z = 0; assert.strictEqual(f.culture.recordJob(job, u), false);
+    assert.strictEqual(f.culture.ensureFaction(u).practices.farming, undefined);
+});
+check("confirmed_farm_actions_train_culture_once_not_skills", () => {
+    const f = fixture(), u = f.person(1, 3, -2), proof = new Map();
+    f.ctx.UF.Skills = { add: () => { throw new Error("Culture must not award XP"); } };
+    f.ctx.UF.Agriculture = { confirmedJob: (job, worker) => proof.get(job.id) === worker.id };
+    const before = JSON.stringify(u.data.skills), types = ["farm_till", "farm_plant", "farm_tend", "farm_harvest"];
+    types.forEach((type, i) => {
+        const job = { id: i + 1, type, state: "done", assigned: u.id, target: f.target(u), params: { plotId: "TEST_Plot" } };
+        proof.set(job.id, u.id); f.ctx.UF.Events.emit("jobs:done", job, u);
+        assert.strictEqual(f.culture.recordJob(job, u), false, "duplicate completion ignored");
+    });
+    const p = f.culture.ensurePerson(u), faction = f.culture.ensureFaction(u);
+    assert.strictEqual(p.practices.farming, 4); assert.strictEqual(faction.practices.farming, 4);
+    assert.strictEqual(f.culture.state().households["3:3"].practices.farming, 4);
+    assert(faction.knowledge["work:farming"]); assert.strictEqual(Object.keys(faction.knowledge).length, 1);
+    assert.strictEqual(f.culture.professionFor(u), "farming"); assert.strictEqual(JSON.stringify(u.data.skills), before);
+});
+check("farming_taste_inherited_without_skills", () => {
+    const f = fixture(), mother = f.person(), father = f.person(2), child = f.person(3);
+    for (const u of [mother, father]) f.culture.ensurePerson(u).preferences.farming = 100;
+    const savedSkills = JSON.stringify(child.data.skills), high = f.culture.inherit(child, mother, father).preferences.farming;
+    const g = fixture(), m = g.person(), d = g.person(2), c = g.person(3);
+    for (const u of [m, d]) g.culture.ensurePerson(u).preferences.farming = 0;
+    const low = g.culture.inherit(c, m, d).preferences.farming;
+    assert(high - low >= 50); assert(high < 100); assert.strictEqual(JSON.stringify(child.data.skills), savedSkills);
+});
+check("human_farming_observation_changes_feasible_choice", () => {
+    const f = fixture(), mentor = f.person(), pupil = f.person(2);
+    f.ctx.UF.Agriculture = { confirmedJob: () => true };
+    const p = f.culture.ensurePerson(pupil); for (const d of f.culture.DOMAINS) p.preferences[d] = 50;
+    f.culture.recordJob({ id: 1, type: "farm_tend", state: "done", assigned: mentor.id, target: f.target(mentor) }, mentor);
+    const ranked = f.culture.rankCandidates(pupil, [candidate("craft", { recipeId: "cook_meal" }), candidate("farm_tend")]);
+    assert.strictEqual(p.exposure.farming, 1); assert.strictEqual(p.practices.farming, undefined);
+    assert.strictEqual(ranked[0].spec.type, "farm_tend"); assert(ranked[0].cultureReason);
 });
 console.log(`RESULT: ${pass} passed, ${fail} failed`); process.exitCode = fail ? 1 : 0;

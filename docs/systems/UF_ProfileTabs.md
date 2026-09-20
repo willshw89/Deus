@@ -34,6 +34,7 @@ Clicks inside a companion window consume the actual TouchInput trigger/cancel fl
 - Personality displays saved facets and their currently implemented influences, separately from learned work preferences and confirmed practice. A facet without a known behavioral consumer is labeled as a recorded disposition, not credited with invented effects.
 - Goals reads existing `data.lifeGoals` without calling the mutating `Goals.describe/refresh/ensure` APIs. Current action is read live; stored goal progress is reported as recorded. Animal goals remain observational, and developing/unknown-age people are not described as industrial workers.
 - Family reads the existing household/genealogy records, known parent/partner IDs, resident names and social bonds. Dead/dying records are not counted as living residents. Genealogy is expressly simulation information, not NPC public knowledge. All saved `home` plus `home.annexes` structures are counted, with their saved design metadata, aggregate planned bed spaces, current-resident overflow and recorded expansion blocks. Actual per-building wall/door/bed counts use the household's own saved area/z. Main-home hearth/storage remain distinct from annexes without those facilities. Planned bed spaces are not presented as a maximum family size, and physical furniture does not imply supplies, ownership or privacy. Raw records are used because even `Households.structures/demands` resolve through a lazy state initializer.
+- When Agriculture is available, Family adds **Settlement farming (shared)** through its read-only `describe(unit)` contract. It distinguishes actual plot count from the population-driven planning target, reserved/tilled/growing/ripe phases from completed harvests, presently available edible stock from promised crop yields, missing inputs and blocked reasons, and the person's confirmed farm work. This does not label shared plots as household-private property. Missing data remains unavailable rather than invented zeroes; a legitimate summary with zero recorded plots may still have a nonzero planning target. The inspector never calls Agriculture's `state`, `planSteps` or reservation APIs.
 - Culture distinguishes catalog background/conditional work policy from saved faction practices and knowledge. The nonmutating `CultureGrowth.mechanicFor` API supplies policy wording. No practice/knowledge record is initialized by viewing it, and remembering a recipe is not described as unlocking technology.
 
 ## Events and hooks
@@ -48,9 +49,9 @@ None. Tab choice, page, window references, wrapped text and counters are scene-l
 
 ## Checks
 
-`"C:\Program Files\nodejs\node.exe" tools/test_profile_tabs.js` executes the actual plugin in a Node VM with explicit engine/UI doubles. Observed 2026-09-19: **42 passed, 0 failed**. The test covers sparse-state inspection purity, real saved Jobs, age 0/unknown age, actor z, actual needs and XP, distinct saved sleep schedules and malformed/missing schedules, animal unknowns/capabilities, separation of traits and preferences, saved goals/blocks, genealogy, same-level physical home/annex counts without fixed family size, design/expansion data, dying residents, culture evidence, eight tabs, 816×624 bounds, real touch handler containment, pagination, native Inventory visibility, NPC selection, object subjects, close/reopen/right-click, modal precedence, live level changes and bounded/closed polling. It also ensures the UI helper never overrides the engine's inherited `render` method.
+`"C:\Program Files\nodejs\node.exe" tools/test_profile_tabs.js` executes the actual plugin in a Node VM with explicit engine/UI doubles. Observed 2026-09-19: **46 passed, 0 failed**. The test covers sparse-state inspection purity, real saved Jobs, age 0/unknown age, actor z, actual needs and XP, distinct saved sleep schedules and malformed/missing schedules, animal unknowns/capabilities, separation of traits and preferences, saved goals/blocks, genealogy, same-level physical home/annex counts without fixed family size, design/expansion data, dying residents, culture evidence, eight tabs, 816×624 bounds, real touch handler containment, pagination, native Inventory visibility, NPC selection, object subjects, close/reopen/right-click, modal precedence, live level changes and bounded/closed polling. It also ensures the UI helper never overrides the engine's inherited `render` method. Four farming-consumer checks use an explicit read-only Agriculture double: actor-level/pure inspection, plans versus completed harvests, actual stock/missing inputs/personal work labels, and unavailable information without invented zeroes.
 
-The first six real-source mutations each produced **41 passed, 1 failed**, exit 1:
+The first six real-source mutations each produced **45 passed, 1 failed**, exit 1:
 
 - `--mutate-containment`: removes input consumption; tab click becomes a map action.
 - `--mutate-level`: reads household objects on Ground; the underground count becomes incorrect.
@@ -58,8 +59,10 @@ The first six real-source mutations each produced **41 passed, 1 failed**, exit 
 - `--mutate-native`: leaves the informational overlay visible on Inventory.
 - `--mutate-poll`: polls every render update rather than every 30.
 - `--mutate-load-guard`: calls the native lazy inventory reader without existing records; sparse inspection changes saved state.
-- `--mutate-sleep`: forces a common bedtime instead of the two distinct saved schedules: **40 passed, 2 failed**, exit 1.
-- `--mutate-annex`: removes saved annexes from the structure list: **40 passed, 2 failed**, exit 1.
+- `--mutate-sleep`: forces a common bedtime instead of the two distinct saved schedules: **44 passed, 2 failed**, exit 1.
+- `--mutate-annex`: removes saved annexes from the structure list: **44 passed, 2 failed**, exit 1.
+- `--mutate-farm-inspection`: initializes Agriculture state during inspection: **45 passed, 1 failed**, exit 1.
+- `--mutate-farm-harvest`: displays reserved plot count as completed harvests: **45 passed, 1 failed**, exit 1.
 
 The embedded nondefault RMMZ suite is `profile_tabs`. It uses existing real founder/NPC/wildlife subjects, actual TouchInput queued events, pixel assertions for all informational tabs, paused state preservation, native Inventory/Equipment availability, selection/close and closed polling. Fixture preparation asks the real `Households.planSteps` for a reservation if no candidate has an existing home; this occurs before the inspection baseline and does not fake completed walls, furniture or supplies. A separate native-controls regression gives a two-stone stack to a Ground player founder (or a bounded safely spawned Ground `TEST_ProfileInventory` clone when the player faction starts underground), clicks its real slot and Drop/Pick up rectangles, checks the actual item holder/cell/count/order, and removes only the test-given stack/clone during cleanup. No underground item transfer is exercised or implied safe.
 
@@ -78,6 +81,8 @@ Earlier runtime evidence is retained: snapshot `profile_tabs_20260919_a` failed 
 ## Status and known limits
 
 Implemented in new files; source checks/mutations and isolated runtime/visual evidence observed. Root owns live registration, STATUS and committing. Editor F5/F8 and user acceptance are not checked by this module's author. No slice approval is claimed.
+
+Farming explanation follow-up on 2026-09-19: the 46-check source run and ten mutations above include the new read-only summary. The historical 24-check runtime evidence predates this follow-up; actual Agriculture-backed summary rendering and purity are pending the lead's combined runtime checks. The existing Skills/Personality/Culture pages naturally show farming XP or recorded preferences/practices when their owning systems supply them; the UI itself grants nothing.
 
 - The existing native Sheet is still responsible for item operations. Its previously identified missing-z Drop/Pick up queries are not repaired by this additive plugin; an Inventory tab is not evidence of cross-layer item safety.
 - The native Sheet can expose a stranger's inventory; this addon does not change that pre-existing visibility policy.

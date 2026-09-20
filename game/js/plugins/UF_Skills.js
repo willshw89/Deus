@@ -723,12 +723,13 @@
             const W = UF.World, I = UF.Items, J = UF.Jobs;
             const S = Skills;
             const errors0 = t.errorsSoFar().length, inner0 = errorCount;
-            const area = W.currentArea();
+            const area = (typeof W.viewLevel === "function" ? W.viewLevel() : null) || (typeof W.currentArea === "function" ? W.currentArea() : null) || (W.state && W.state.startArea) || { x: 0, y: 0 };
+            const z = area.z !== undefined ? area.z : 0;
             const made = [];
-            const freeNear = (x, y) => W.nearestFreeCell(area.x, area.y, x, y, 10) || { x, y };
+            const freeNear = (x, y) => (W.nearestFreeCell(area.x, area.y, x, y, 10, z) || { x, y });
             const mk = (name, data, x, y) => {
                 const c = freeNear(x, y);
-                const u = W.addUnit({ name, image: { characterName: "$U7_Townsman", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: c.x, y: c.y, dir: 2, data });
+                const u = W.addUnit({ name, image: { characterName: "$U7_Townsman", characterIndex: 0 }, area: { x: area.x, y: area.y }, z, x: c.x, y: c.y, dir: 2, data });
                 made.push(u.id);
                 return u;
             };

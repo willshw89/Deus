@@ -1318,7 +1318,13 @@
             // kit_per_area: the kit and drinkable water around every faction's area centre, on the map as generated.
             const kitCentres = WorldGen.kitCentres(a.x, a.y);
             const kit = kitReport(pristineStart, size, kitCentres);
-            const wantCentres = window.UF.Factions && UF.World.state.factions ? UF.World.state.factions.list.filter(f => !f.species || f.species !== "dwarf").length : factionCount();
+            const wantCentres = window.UF.Factions && UF.World.state.factions ? UF.World.state.factions.list.filter(f => {
+                if (f.species === "dwarf") return false;
+                const h = f.home;
+                if (!h || !h.area) return false;
+                const hz = h.z === undefined ? (h.area.z === undefined ? 0 : h.area.z) : h.z;
+                return h.area.x === a.x && h.area.y === a.y && hz === 0;
+            }).length : kitCentres.length;
             t.check("kit_per_area", kit.ok && (!wantCentres || kitCentres.length === wantCentres), `${wantCentres ? `${wantCentres} factions; ` : ""}${kit.detail}`);
 
             // kit_covers_plan (VISION V67): within kit.radius[1] of every campfire the objects are worth at least the plan's

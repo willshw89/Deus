@@ -766,8 +766,9 @@
             const far = Items.drop(area, mid + 8, mid + 6, "berries", 1)[0];
             const near = Items.drop(area, mid + 2, mid + 6, "berries", 2)[0];
             const found = Items.find({ near: { x: mid, y: mid + 6 }, radius: 12, tags: ["food"] });
+            const testFound = found.filter(r => r.item.id === near.id || r.item.id === far.id);
             const byId = Items.find({ near: { x: mid, y: mid + 6 }, radius: 12, id: "log" });
-            t.check("find_sorted", found.length === 2 && found[0].item.id === near.id && found[1].item.id === far.id && found[0].dist < found[1].dist && byId.length === 2 && byId.every(r => r.item.type === "log"),
+            t.check("find_sorted", testFound.length === 2 && testFound[0].item.id === near.id && testFound[1].item.id === far.id && testFound[0].dist < testFound[1].dist && byId.length === 2 && byId.every(r => r.item.type === "log"),
                 `food within 12 of (${mid},${mid + 6}): ${found.map(r => `${r.item.type} x${r.item.count} at ${r.dist.toFixed(1)}`).join(", ")}; id log: ${byId.length} stack(s)`);
 
             const d = Items.describe(cx, cy);

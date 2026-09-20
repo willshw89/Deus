@@ -231,13 +231,13 @@
         const js = W && W.state ? W.state.jobs : null;
         const list = js && Array.isArray(js.list) ? js.list : null;
         if (!list) return;
-        const area = W.currentArea();
+        const area = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
         for (let i = 0; i < list.length; i++) {
             const j = list[i];
             if (!j || !j.assigned || (j.state !== "travel" && j.state !== "work")) continue;
             jobOfUnit.set(j.assigned, j);
             const t = j.target;
-            if (j.state === "work" && t && area && t.area && t.area.x === area.x && t.area.y === area.y) busyCells.add(cellKey(t.x, t.y));
+            if (j.state === "work" && t && area && t.area && t.area.x === area.x && t.area.y === area.y && ((t.area.z !== undefined && area.z !== undefined) ? t.area.z === area.z : true)) busyCells.add(cellKey(t.x, t.y));
         }
     }
     const hashOf = (...parts) => {
@@ -927,7 +927,7 @@
         if (!list.length) return;
         refreshIndex();
         const W = World();
-        const area = W ? W.currentArea() : null;
+        const area = W ? (W.viewLevel ? W.viewLevel() : W.currentArea()) : null;
         for (let i = 0; i < list.length; i++) {
             const a = list[i];
             // A loop that can't change state (sway or idle only) whose next column isn't due: nothing to do.
@@ -1128,6 +1128,8 @@
         }
         const ev = W.eventOf(u.id);
         const entry = {
+            area: u.area ? { x: u.area.x, y: u.area.y } : null,
+            z: u.z !== undefined ? u.z : 0,
             x: ev ? ev.x : u.x,
             y: ev ? ev.y : u.y,
             image: name,
@@ -1159,7 +1161,12 @@
         view.y1 = view.y0 + Math.ceil($gameMap.screenTileY()) + 2 * VIEW_MARGIN;
         return view;
     }
-    const inView = e => e.x >= view.x0 && e.x <= view.x1 && e.y >= view.y0 && e.y <= view.y1;
+    const currentViewZ = () => {
+        const W = World();
+        const v = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
+        return v && v.z !== undefined ? v.z : 0;
+    };
+    const inView = e => (e.z === undefined || e.z === currentViewZ()) && e.x >= view.x0 && e.x <= view.x1 && e.y >= view.y0 && e.y <= view.y1;
 
     class AnimLayer {
         constructor(spriteset) {
@@ -1208,7 +1215,8 @@
         step() {
             const W = World();
             const st = animState();
-            if (!this.tilemap() || !st || !window.$gameMap || !W || !W.currentArea()) {
+            const curArea = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
+            if (!this.tilemap() || !st || !window.$gameMap || !W || !curArea) {
                 this.releaseAll();
                 this._pending.length = 0;
                 return;
@@ -1446,7 +1454,8 @@
     }
     function stroke() {
         const W = World();
-        if (!W || !W.state || !spritesetOf() || !W.currentArea()) return 0;
+        const curArea = W && (W.viewLevel ? W.viewLevel() : W.currentArea());
+        if (!W || !W.state || !spritesetOf() || !curArea) return 0;
         const J = Jobs();
         if (J && typeof J.handler === "function") wrapHunt(J.handler("hunt"));
         let n = 0;

@@ -11,7 +11,9 @@ const mutations = {
     "--mutate-poll": ["const POLL = 30,", "const POLL = 1,"],
     "--mutate-load-guard": ["const loadRecorded = !!(st.jobs && st.items && st.items.byId && Array.isArray(d.inventory));", "const loadRecorded = true;"],
     "--mutate-sleep": ["clockText(sleep.bedMinute)", "clockText(1320)"],
-    "--mutate-annex": ["...(Array.isArray(h.home.annexes) ? h.home.annexes : [])", "...[]"]
+    "--mutate-annex": ["...(Array.isArray(h.home.annexes) ? h.home.annexes : [])", "...[]"],
+    "--mutate-farm-inspection": ["const farm = agriculture.describe(u);", "agriculture.state(); const farm = agriculture.describe(u);"],
+    "--mutate-farm-harvest": ["Completed harvests: ${farm.harvests}", "Completed harvests: ${farm.plotCount}"]
 };
 for (const [flag, [from, to]] of Object.entries(mutations)) if (process.argv.includes(flag)) {
     if (!source.includes(from)) throw new Error(`Mutation no longer matches source: ${flag}`);
@@ -145,6 +147,24 @@ const text = m => m.rows.map(r => r.text).join("\n");
     f.st.cultureGrowth.factions[1] = { practices: { smithing: 8 }, knowledge: { "recipe:test_bar": { by: 1 } }, generations: 2 };
     const culture = text(f.API.model(u, "culture"));
     check("culture_policy_and_learned_evidence_separate", /TEST_Conditional/.test(culture) && /Smithing: 8 confirmed jobs/.test(culture) && /Recipe: test bar/.test(culture) && /not a technology unlock/.test(culture));
+}
+{
+    const f = fixture(), u = f.add(1, {}, -2), requested = [];
+    const summary = { siteId: 4, faction: 1, area: { x: 0, y: 0 }, z: -2, population: 3, targetPlots: 2, plotCount: 1,
+        phases: { reserved: 1, tilled: 0, growing: 0, ripe: 0 }, unmetPlots: 1, harvests: 0, foodUnits: 7,
+        blocked: "TEST_No substrate", missingInputs: [{ itemId: "straw", count: 1 }],
+        crops: [{ id: "mushrooms", name: "TEST_Cave mushrooms", plots: 1, growing: 0, ripe: 0 }], personal: { jobs: 2, harvests: 0, lastAction: "farm_tend" } };
+    f.sandbox.UF.Agriculture = {
+        describe: actor => { requested.push(actor.id); if (actor.z !== summary.z) throw new Error("wrong layer"); return summary; },
+        state: () => { f.st.agriculture = { createdByInspection: true }; },
+        planSteps: () => { throw new Error("Inspection must not plan farms"); }
+    };
+    const before = JSON.stringify(f.st), farm = text(f.API.model(u, "family"));
+    check("farm_inspection_read_only_actor_scoped", JSON.stringify(f.st) === before && !f.st.agriculture && requested.length === 1 && requested[0] === u.id && /Farm level: z=-2/.test(farm));
+    check("farm_plans_not_completed_harvests", /Plots recorded: 1; planning target: 2/.test(farm) && /Reserved plots: 1/.test(farm) && /Completed harvests: 0/.test(farm) && /Reserved or growing crops are not ready food/.test(farm));
+    check("farm_stock_blocked_and_personal_work_explained", /Available edible stock: 7 units across the settlement/.test(farm) && /TEST_No substrate/.test(farm) && /Missing planting input: Straw × 1/.test(farm) && /confirmed farm work: 2 jobs; 0 harvests/.test(farm) && /TEST_Cave mushrooms/.test(farm));
+    f.sandbox.UF.Agriculture.describe = () => null;
+    check("farm_unknowns_not_zeroes", /No same-level settlement farming information/.test(text(f.API.model(u, "family"))) && !/Completed harvests:/.test(text(f.API.model(u, "family"))));
 }
 {
     const f = fixture(), u = f.add(1, { skillXp: { skill0: 200 } }); f.native.open(u.id);
