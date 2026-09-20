@@ -74,9 +74,8 @@ const pal = loadPalette();
 const C_DARK_OUTLINE = pal.snap(24, 16, 10);
 
 function isMagenta(r, g, b) {
-    if ((r + b) / 2 - g > 30) return true;
-    if (r > 120 && b > 100 && g < 100) return true;
-    return false;
+    // Magenta background has high red and high blue, low green
+    return (r > 130 && b > 130 && g < 100);
 }
 
 function applyDarkOutline(buf, w, h) {
@@ -281,3 +280,4 @@ module.exports = {
     saveSheetAndSidecar,
     quantizeSheet
 };
+

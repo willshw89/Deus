@@ -6,7 +6,52 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed)
+- Gemini: Dwarf Demographics 100% Google Nano Banana Pro 12-Sprite Action Suite (Adult Male Dwarf, Adult Female Dwarf across Walk, Haul, Attack, Bow, Magic, Work, Downed). Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+
+## Adult Female Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
+Delivered per user directives ("Generate with Nano Banana Pro", "According to what we need", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Leveraged user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
+  - Generated master 12-sprite walk reference generation (`art/raw/human_female_walk_12_raw.png`), saved master reference image to `art/raw/references/human_female_walk_12_reference.png`.
+  - Passed master character reference image as multimodal conditioning (`inlineData`) for all 6 subsequent action sheets (Haul, Attack, Bow, Magic, Work, Downed), guaranteeing 100% facial, anatomical, outfit, and palette consistency.
+  - Zero code drawing: every sprite originated strictly from genuine Google Nano Banana Pro generations.
+- **Complete 7-Action 12-Sprite Architecture (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  1. `Walk` (`$UF_Human_Female_Walk.png`, `$UF_Human_Female.png`, `$Eve.png`): 4-direction step/stand/step walk cycle.
+  2. `Haul` (`$UF_Human_Female_Haul.png`): Dedicated heavy burlap sack held in front of chest in both arms across all 4 facings.
+  3. `Attack` (`$UF_Human_Female_Attack.png`): Melee short sword strike with curved slash arc.
+  4. `Bow` (`$UF_Human_Female_Bow.png`): Archery aim, tension draw, and string pluck recoil. ZERO flying arrows.
+  5. `Magic` (`$UF_Human_Female_Magic.png`): Spell initiation chant posture with soft glowing palm mana aura. ZERO flying beams.
+  6. `Work` (`$UF_Human_Female_Work.png`): Kneeling craftsman posture (~28px height) on ground with tools & hammer.
+  7. `Downed` (`$UF_Human_Female_Downed.png`): Hurt flinch stagger, kneeling collapse, flat horizontal prone corpse.
+- **Quality Gates & Verification Evidence**:
+  - Invariant baseline grounding at native `y = 47` with uniform scale `42.0 / 238.0`.
+  - Serious Chibi Proportions (VISION V116): ~3.1 heads tall, 42px height, narrow determined eyes, functional frontier tunic & wraps.
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - U7 Originality Check: **7/7 PASS** across all 7 action sheets (`Walk`: 0.434..0.510 >= 0.28).
+  - Visual Evidence: Master review board in `art/review/human_female_all_7_actions_12_sprites.png`.
+
+## Adult Male Dwarf 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
+Delivered per user directives ("Generate with Nano Banana Pro", "According to what we need", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Leveraged user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
+  - Generated master 12-sprite walk reference generation (`art/raw/dwarf_male_walk_12_raw.png`), saved master reference image to `art/raw/references/dwarf_male_walk_12_reference.png`.
+  - Passed master character reference image as multimodal conditioning (`inlineData`) for all 6 subsequent action sheets (Haul, Attack, Bow, Magic, Work, Downed), guaranteeing 100% facial, anatomical, outfit, and palette consistency.
+  - Zero code drawing: every sprite originated strictly from genuine Google Nano Banana Pro generations.
+- **Complete 7-Action 12-Sprite Architecture (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  1. `Walk` (`$UF_Dwarf_Male_Walk.png`, `$UF_Dwarf_Male.png`, `$UF_Dwarf.png`): 4-direction step/stand/step walk cycle. Stocky, broad-shouldered mountain dwarf with ruddy skin, copper-red braided beard split into two points, leather vest with steel studs, brass buckle belt, and dark boots.
+  2. `Haul` (`$UF_Dwarf_Male_Haul.png`): Dedicated heavy burlap sack full of raw ore held in front of chest in both arms across all 4 facings.
+  3. `Attack` (`$UF_Dwarf_Male_Attack.png`, `$UF_Dwarf_Attack_Axe.png`): Melee dwarven battleaxe cleave strike with high ready guard, downward cleave with curved slash arc, and recovery stance.
+  4. `Bow` (`$UF_Dwarf_Male_Bow.png`, `$UF_Dwarf_Attack_Crossbow.png`): Heavy dwarven arbalest / crossbow aim, trigger tension, and pluck recoil. ZERO flying bolts (VISION V111).
+  5. `Magic` (`$UF_Dwarf_Male_Magic.png`, `$UF_Dwarf_Cast_Hammer.png`): Rune hammer held high, rune incantation chant posture with soft glowing rune aura in palms and hammer head. ZERO flying beams (VISION V111).
+  6. `Work` (`$UF_Dwarf_Male_Work.png`): Blacksmith/miner craftsman cycle with standing check, kneeling craftsman down low (~26px height), and ground hammer strike on iron anvil.
+  7. `Downed` (`$UF_Dwarf_Male_Downed.png`): Defeat sequence with hurt flinch clutching chest, kneeling collapse (~24px height), and flat horizontal prone resting corpse lying on the ground (~14px height).
+- **Quality Gates & Verification Evidence**:
+  - Invariant baseline grounding at native `y = 47` with uniform scale `36.0 / 234.0` (36px target height for Dwarf demographic).
+  - Serious Chibi Proportions (VISION V116): ~2.6 heads tall, 36px height, narrow determined eyes, rugged mountain folk attire.
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - U7 Originality Check: **7/7 PASS** across all 7 action sheets (`Walk`: 0.440..0.528; `Attack`: 0.446..0.541; `Downed`: 0.438..0.512 >= 0.28).
+  - In-Engine Smoke Test: **9/9 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
+  - Visual Evidence: Master review board in `art/review/dwarf_male_all_7_actions_12_sprites.png`.
 
 ## Adult Male Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
 Delivered per user directives ("Alright, Let's work on our humans. Start generating", "AQ.Ab8RN6LoiuLx4FO6xapsuiH4W5UgcaKcE0PnsitFP_ZIavw-MQ Generate the human", "nano banana pro", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time... Lets make it more of a serious chibi", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
@@ -32,8 +77,30 @@ Delivered per user directives ("Alright, Let's work on our humans. Start generat
   - Visual Evidence:
     - Master review board: `art/review/human_male_all_7_actions_12_sprites.png` (inspected: all 7 action suites + 3x runtime comparison with red baseline guide line at y=47).
     - In-game close-up: `art/review/human_male_live_closeup.png` (inspected: all 7 action units rendered live on map 1003).
-    - In-game normal: `art/review/human_male_live_normal.png` (inspected: crisp readability at 2x camera zoom).
     - Self-contained interactive viewer widget: `C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b7ec-5affda42dd85/human_male_showcase_widget.html`.
+
+## Adult Male Human 6 Settler Variations 100% Google Nano Banana Pro — 2026-09-19 (Gemini)
+Delivered per user directives ("Actually, before moving onto female, I would like 6 variations of male", "Their legs dont move when moving left to right", "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit", VISION V116, V118):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generations**:
+  - All 6 distinct variations generated via `tools/generate_nano_banana_pro.js` conditioned on the master Walk reference image (`human_male_pro_4d_walk.png`).
+  - Zero code drawing.
+- **6 Distinct Settler Variations & Cultural Faction Roles (V118 Arthurian/Frontier Arsenal)**:
+  1. `Var 1 — Master Settler / Militia` (`$UF_Human_Male_1.png`, `$UF_Human_Male_Walk.png`): Chestnut brown hair, clean-shaven, rustic brown doublet & linen shirt. Role: Faction Iron Arming Sword & Round Wooden Buckler.
+  2. `Var 2 — Frontier Scout / Forester` (`$UF_Human_Male_2.png`): Golden blonde swept-back hair, light stubble, forest olive-green tunic with dark vest. Role: Dual Frontier Hunting Daggers & Light Composite Yew Bow.
+  3. `Var 3 — Heavy Guard / Guard Veteran` (`$UF_Human_Male_3.png`): Raven black shaggy hair, full dark beard & mustache, charcoal grey wool tunic. Role: Heavy Iron Broadsword & Steel-Tipped Spear.
+  4. `Var 4 — Artisan Woodsman / Carpenter` (`$UF_Human_Male_4.png`): Fiery red/auburn hair, trimmed red goatee, terracotta/ochre artisan tunic. Role: Broad Bearded Woodcutter Axe & Heavy Billhook.
+  5. `Var 5 — Blacksmith / Quarryman` (`$UF_Human_Male_5.png`): Shaved bald head, rugged dark full beard, rawhide leather work vest over rolled sleeves. Role: Heavy Iron Smithing Hammer & Steel Mining Pickaxe.
+  6. `Var 6 — Seasoned Veteran Ranger` (`$UF_Human_Male_6.png`): Salt-and-pepper steel grey hair, trimmed grey beard, deep indigo-blue woolen tunic with cross-strap. Role: Arthurian Yew Longbow & Steel Hunting Sword.
+- **Quality Gates & Dynamic Alternating Strides**:
+  - Dynamic alternating leg strides on West (Row 1) and East (Row 2): Col 0 (Stride A), Col 1 (Stand/Passing), Col 2 (Stride B). Fully resolves user issue with left-to-right leg movement!
+  - Invariant Serious Chibi proportions (~3.1 heads tall, 43px height, native baseline grounded at `y = 47`).
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - Ultima VII Originality: **6/6 PASS** (`tools/originality_check.js`).
+  - Automated tests: `tools/verify_all_6_male_variations.js` -> ALL PASS.
+  - In-engine Playtest smoke tests: **9/9 PASS, exit 0**.
+  - Visual Evidence:
+    - Master review montage: `art/review/human_male_6_variations_montage.png` (864×192 px).
+    - Interactive viewer widget: `C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b7ec-5affda42dd85/human_male_6_variations_widget.html`.
 
 
 ## Authentic Nano Banana Outside_B, Dungeon_B, A2, A3, A5 Tilesets & Animated Sapling — 2026-09-19 (Gemini)

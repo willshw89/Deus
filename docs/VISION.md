@@ -292,6 +292,20 @@ Append only, newest at the bottom.
   - **Z=0 (Overland Biomes):** Full natural surface biomes (meadows, mixed forests, taiga/snow, arid deserts, wetlands/swamps, coastlines). Sunlight and weather cycles, wildlife herds, flora, trees, settler camps, surface agriculture, natural cave entrances descending into Z-1.
   - **Z=+1 and Z=+2 (Elevated / Vertical Layering):** ONLY built up (multi-story colonist architecture, second floors, roofs, watchtowers, defensive battlements) OR additional Z layers of elevated natural topography (cliffs, plateaus, mesa tops, mountain slopes, highlands, peaks). Not open flat ground by default; open sky/air wherever not occupied by elevated cliffs or built structures.
 - 2026-09-19: User directive: **"Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning (\"Thinking\") to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II"**. All agent directives, markdown documentation, specifications, prompt handoffs, generator tools, and asset briefs updated to require Google Nano Banana Pro (`gemini-3-pro-image`) exclusively. No other generator model is permitted.
+- 2026-09-19: V118 added by the user: **Unique Faction Weapons, Gear, and Within-Faction Variation Arsenals** (User directive: "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit"):
+  - **Unique Faction Arsenals & Aesthetic:** Each of the eleven peoples/factions has its own distinct cultural weapon and equipment identity:
+    - *Humans:* Arthurian/frontier steel & iron: arming swords, broadswords, shortswords, yew longbows, light crossbows, spears, round wooden/iron-banded shields, billhooks.
+    - *Dwarves:* Heavy mountain metallurgy: double-bitted bearded battleaxes, rune-inscribed warhammers, heavy arbalests/crossbows, sturdy tower bucklers, heavy mining pickaxes.
+    - *Elves:* Elegant living wood & graceful metallurgy: composite recurve longbows, curved leaf sabres, hunting daggers, graceful leaf-spears, staves.
+    - *Goblins:* Jagged scavenged scrap: notched rusty cleavers, spiked clubs, crude shortbows, barbed daggers.
+    - *Orcs:* Brutal heavy iron & bone: massive jagged broad cleavers, barbed javelins, spiked great clubs, heavy round hide shields.
+    - *Lizardfolk:* Primitive swampland craft: serrated alligator-bone spears, obsidian-toothed macuahuitl clubs, reed blowguns, turtle shell bucklers.
+    - *Kobolds:* Subterranean scrap & poison: small miner picks, slings, jagged notched stilettos, dart throwers.
+    - *Gnomes:* Clockwork & alchemical engineering: geared repeating crossbows, mechanical wrench maces, alchemical vial catapults.
+    - *Undead:* Ancient weathered relics: chipped ancient blades, rusted tomb flails, scythes, bone staves, rotting shields.
+    - *Starborn:* Crystalline psionic relics: glowing crystal resonator blades, prism staves, light-channeling focusers.
+    - *Swarm:* Bio-organic adaptations: serrated chitin scythe talons, barbed bone spikes, acid glands, hardened carapace plates.
+  - **Within-Faction Variations:** Individual variations of creatures and colonists within a faction can wield and carry different weapons, tools, and equipment loadouts (e.g. human militia shortsword, scout daggers, forester axe, artisan hammer, veteran ranger bow), but all gear must strictly adhere to their respective faction's materials, craftsmanship, and silhouette themes.
 
 
 
