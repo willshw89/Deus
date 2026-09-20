@@ -1,0 +1,59 @@
+{
+  "name": "face_trees_nature",
+  "culture": "flora",
+  "species": "flora",
+  "layer": "face",
+  "stage": "adult",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    144
+  ],
+  "facings": [
+    "S",
+    "N"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "portraits": [
+    {
+      "index": 0,
+      "name": "Grand Oak"
+    },
+    {
+      "index": 1,
+      "name": "Silver Birch"
+    },
+    {
+      "index": 2,
+      "name": "Highland Pine"
+    },
+    {
+      "index": 3,
+      "name": "Fruit Tree"
+    },
+    {
+      "index": 4,
+      "name": "Date Palm"
+    },
+    {
+      "index": 5,
+      "name": "Swamp Willow"
+    },
+    {
+      "index": 6,
+      "name": "Blighted Tree"
+    },
+    {
+      "index": 7,
+      "name": "Tower-Cap"
+    }
+  ]
+}

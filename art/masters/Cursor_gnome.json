@@ -1,13 +1,12 @@
 {
   "name": "Cursor_gnome",
-  "about": "Custom 48x48 menu selection cursor emblem for Gnome culture.",
-  "author": "Gemini (Google Nano Banana II)",
-  "date": "2026-09-19",
+  "culture": "gnome",
+  "about": "Nano Banana II 48x48 bespoke faction cursor for gnome.",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    24,
-    47
+    2,
+    2
   ],
   "facings": [
     "S"
@@ -17,10 +16,6 @@
       0
     ]
   },
-  "width": 48,
-  "height": 48,
   "layer": "ui_cursor",
-  "culture": "gnome",
-  "colors": 16,
   "palette": "art/palette/uf.hex"
 }

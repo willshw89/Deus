@@ -1,0 +1,59 @@
+{
+  "name": "face_wildlife_monsters",
+  "culture": "monster",
+  "species": "monster",
+  "layer": "face",
+  "stage": "adult",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    144
+  ],
+  "facings": [
+    "S",
+    "N"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "portraits": [
+    {
+      "index": 0,
+      "name": "Crag Troll"
+    },
+    {
+      "index": 1,
+      "name": "Bog Horror"
+    },
+    {
+      "index": 2,
+      "name": "Giant Spider"
+    },
+    {
+      "index": 3,
+      "name": "Sand Stalker"
+    },
+    {
+      "index": 4,
+      "name": "Cavern Bat"
+    },
+    {
+      "index": 5,
+      "name": "Restless Dead"
+    },
+    {
+      "index": 6,
+      "name": "Ice Wraith"
+    },
+    {
+      "index": 7,
+      "name": "Aurochs"
+    }
+  ]
+}

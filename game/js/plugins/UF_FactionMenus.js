@@ -78,10 +78,25 @@
         return defaultFaction;
     };
 
+    UF_FactionMenus.updateCanvasCursor = function() {
+        if (!Graphics._canvas) return;
+        if (window.UF && UF.Select && UF.Select.activeTool && UF.Select.activeTool()) return;
+        const faction = UF_FactionMenus.getFaction();
+        const curUrl = "img/system/" + `Cursor_${faction}.png`;
+        Graphics._canvas.style.cursor = `url("${curUrl}") 2 2, default`;
+    };
+
     UF_FactionMenus.setFaction = function(factionId) {
         if ($gameSystem) {
             $gameSystem._ufActiveMenuFaction = factionId.toLowerCase();
         }
+        UF_FactionMenus.updateCanvasCursor();
+    };
+
+    const _Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        _Scene_Map_start.call(this);
+        UF_FactionMenus.updateCanvasCursor();
     };
 
     // 1. Scene_Menu: Dynamic matching background frame

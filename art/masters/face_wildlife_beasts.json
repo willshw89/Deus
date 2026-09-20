@@ -1,0 +1,59 @@
+{
+  "name": "face_wildlife_beasts",
+  "culture": "wildlife",
+  "species": "wildlife",
+  "layer": "face",
+  "stage": "adult",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    144
+  ],
+  "facings": [
+    "S",
+    "N"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "portraits": [
+    {
+      "index": 0,
+      "name": "Stag"
+    },
+    {
+      "index": 1,
+      "name": "Boar"
+    },
+    {
+      "index": 2,
+      "name": "Wolf"
+    },
+    {
+      "index": 3,
+      "name": "Fox"
+    },
+    {
+      "index": 4,
+      "name": "Bear"
+    },
+    {
+      "index": 5,
+      "name": "Hare"
+    },
+    {
+      "index": 6,
+      "name": "Falcon"
+    },
+    {
+      "index": 7,
+      "name": "Wildcat"
+    }
+  ]
+}

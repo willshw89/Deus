@@ -1,0 +1,7 @@
+{
+  "name": "Window_cavern",
+  "theme": "cavern",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "layer": "window_skin"
+}

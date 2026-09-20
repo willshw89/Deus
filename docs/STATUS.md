@@ -6,9 +6,45 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (nature reproduction and continuous resource replenishment completed)
+- None (Wildlife & Trees face sets, nature menu themes, and dynamic faction cursors delivered, awaiting user review)
 
-## Nature Reproduction & Constant Resource Replenishment (VISION V74, V75, V83, V85) — 2026-09-19 (Claude Code)
+## Wildlife, Trees & Nature Face Sets, Menu Themes & Dynamic Faction Cursors — 2026-09-19 (Gemini)
+
+Delivered per user requests ("Now do face sets and themes for wildlife, trees, etc. generate everything in nano banana II. Also, generate faction cursors that change depending on what faction you roll."):
+- **Wildlife, Monsters & Botanical Trees Face Sets (24 Unique Portraits across 3 Sheets):**
+  - `game/img/faces/UF_Faces_Wildlife_Beasts.png` (576×288 px): 8 beast portraits inside rustic carved antler and horn borders on forest green background (Stag, Boar, Wolf, Fox, Bear, Hare, Falcon, Mountain Lynx).
+  - `game/img/faces/UF_Faces_Wildlife_Monsters.png` (576×288 px): 8 primeval monster portraits inside dark blackthorn root and obsidian rune borders on murky charcoal background (Crag Troll, Bog Horror, Giant Spider, Sand Stalker, Cavern Bat, Restless Dead, Ice Wraith, Aurochs).
+  - `game/img/faces/UF_Faces_Trees_Nature.png` (576×288 px): 8 ancient tree spirits and botanical flora portraits inside living heartwood vine borders with blossom rosettes (Grand Ancient Oak, Silver Birch, Highland Pine, Fruit Tree, Date Palm, Swamp Willow/Mangrove, Blighted Cursed Tree, Cavern Tower-Cap).
+  - Master sheets in `art/masters/face_{wildlife_beasts,wildlife_monsters,trees_nature}.png` and matching `.json` sidecars.
+  - Review showcase: `art/review/faces_wildlife_trees_showcase.png` (576×864 px).
+- **Wildlife & Cavern Menu Themes & Window Skins:**
+  - `game/img/pictures/UF_Menu_wildlife.png` (816×624 px): Untamed Nature menu wallpaper framed by towering ancient oaks, sunlit forest clearing, stag, wolf, and mossy stone altar.
+  - `game/img/system/Window_wildlife.png` (192×192 px): Carved heartwood window frame with acorn rosettes, leafy vines, and dark moss-green parchment backfill.
+  - `game/img/pictures/UF_Menu_cavern.png` (816×624 px): Subterranean Caverns menu wallpaper framed by stalactite stone pillars, waterfall pool, glowing azure glow-caps, and amethyst crystal clusters.
+  - `game/img/system/Window_cavern.png` (192×192 px): Chiseled cavern slate rock window frame with glowing cyan crystal corner inlays.
+  - Review preview: `art/review/nature_cavern_menus_preview.png`.
+- **Dynamic 11 Faction Cursors Suite (`game/img/system/Cursor_<faction>.png`):**
+  - Generated 11 bespoke 48×48 pixel art faction cursors in Nano Banana II:
+    - **Human**: Polished steel knight gauntlet pointing NW with gold cuff.
+    - **Elf**: Sylvan silver leaf-blade dagger wrapped in living ivy vine.
+    - **Dwarf**: Runic golden warhammer with dwarven runes.
+    - **Gnome**: Brass clockwork wrench with rotating gears.
+    - **Goblin**: Jagged notched rusty scrap-iron shiv with leather wrap.
+    - **Orc**: Chipped obsidian battleaxe on mammoth bone haft.
+    - **Lizardfolk**: Iridescent nautilus spiral sea-shell with coral tip.
+    - **Kobold**: Subterranean iron pickaxe with glowing candle flame tip.
+    - **Undead**: Skeletal bone finger with cyan soul-flame.
+    - **Starborn**: Luminous sapphire crystal prism with silver orbital halo.
+    - **Swarm**: Segmented violet chitinous mantis pincer with dripping venom.
+  - Review showcase: `art/review/faction_cursors_showcase.png` (528×48 px).
+  - **Dynamic Faction Cursor Engine (`UF_FactionMenus.js`):**
+    - Dynamic canvas cursor (`updateCanvasCursor`): Sets `Graphics._canvas.style.cursor = url("img/system/Cursor_<faction>.png") 2 2, default` to match the player's active rolled faction on map and menus.
+    - Dynamic window selection cursor: `Window_Selectable.prototype.updateFactionCursor` displays the faction's bespoke cursor next to menu items.
+- **Automated Verification:**
+  - `tools/art_check.js --native`: **PASS 100%** on all face sheets, menu backdrops, window skins, and cursors (exact dimensions, <= 32 colors on `art/palette/uf.hex`, binary alpha).
+  - `tools/originality_check.js`: **PASS 100%** on all 3 face sheets (distances 0.420, 0.466, 0.462 ≥ 0.28 vs 19,431 U7 shapes).
+  - `tools/run_tests.js faction_menus`: **3/3 PASS** (exit 0).
+  - In-game screenshots inspected (Rule 5): `faction_menus.menu_live_dwarf.png` (warhammer cursor), `faction_menus.menu_live_elf.png` (leaf dagger cursor), `faction_menus.menu_live_human.png` (knight gauntlet cursor).
 
 Delivered per user request ("program everything in nature to reproduce / regenerate so that natural resources are constantly replenishing"):
 - **Flora Lifecycle, Sapling Growth & Regrowth (`UF_Ecology.js`, `UF_WorldCatalog.json`):**
