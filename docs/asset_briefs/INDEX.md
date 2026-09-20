@@ -88,6 +88,9 @@ Inside a segment, follow the order its "How to work this segment" block gives; w
 6. **No Ultima or Dwarf Fortress proper nouns or signature words in shipped text** (AGENTS.md → Reference vs. shipped content): file names, display names, sidecars, the look tooltip. In a brief, "Ultima VII" and "U7" appear only in the Reference bullet and in the words "U7 2.5D" of the Projection bullet.
 7. **The Ultima VII shapes are references and development stand-ins; nothing copied ships** (AGENTS.md rule 8, VISION V9). Every delivered file is original work in that manner.
 8. The heading is `### <id> — <Display name> (<AR-nnn>)` with the catalog id and the request row; the Reference bullet and the `Deliver:` line are part of every brief; W and E facings are transposed (x and y swapped), never mirrored; N is the back view.
+9. **All generation tasks are to utilize Google Nano Banana II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109): Every visual asset across every category must originate exclusively from Google Nano Banana II (`generate_image`, model id `gemini-3.1-flash-image`). No other model is allowed; no sprites typed in code.
+10. **All animation must happen through the sprite; no after-effect animations** (AGENTS.md Rule 12, VISION V60, V108): All animations across every entity and environment feature must be delivered as discrete sprite animation frames on the sprite sheets. Zero programmatic distortion, squashing/stretching, sine sway, or shader warps.
+
 
 ## Files in this folder
 `README.md` (how the folder works, for writers), this `INDEX.md`, `SEG-00` to `SEG-18`. The 26 briefs of the earlier 16×16 style in `art/briefs/` (written 2026-09-18 20:03, never tracked) were deleted on 2026-09-18 when this index landed; `art/README.md` now points here. `docs/handoffs/HANDOFF_sprites_batch1.md` describes that retired batch and is history.

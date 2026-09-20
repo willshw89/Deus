@@ -23,9 +23,11 @@ Set 2026-09-19 by the user (VISION V2, V3, V44, V9). `docs/ART_STANDARD.md` has 
 | Character sheet | AR-600: 8 rows × 20 columns; generators deliver one image per action (no carry image), the cleaning tool assembles the sheet and fills column 7 with the stand frame |
 | Palette | `art/palette/uf.hex` (256 colours); the cleaning tool snaps to it |
 | Alpha | 0 or 255 only; no baked shadows (the engine draws shadows) |
-| Generation | 4× canvas (one grid square = 192×192), flat magenta `#FF00FF` background, kept in `art/raw/` |
+| Generation | **Google Nano Banana II exclusively** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109). 4× canvas (one grid square = 192×192), flat magenta `#FF00FF` background, kept in `art/raw/`. No other generator model allowed, and no agent may type in sprites pixel-by-pixel in code. |
+| Animation | **All animation must happen through the sprite; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All entity and environment movement (idle breaths, walk, combat, swaying flora, water ripples, flickering flames, doors, workshops) must be delivered as discrete sprite frames in the sheets. Zero programmatic distortion, affine squashing/stretching, sine sway, or shader warps. |
 | Placeholders | Stock RPG Maker MZ art (V9); the `U7_` stand-ins stay on disk, unused |
 | Original art | Passes `tools/art_check.js --native` and `tools/originality_check.js`, then the user approves it |
+
 
 ### Sprite sheet + sidecar format (what the engine reads)
 Every object or character image comes with a JSON sidecar of the same name (`UF_Human_Male.png` + `UF_Human_Male.json`). Sheets are a grid: **one row per facing, one column per frame**, all frames the same size, in final pixels (1 art pixel = 1 screen pixel).

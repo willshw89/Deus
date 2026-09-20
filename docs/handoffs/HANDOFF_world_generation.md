@@ -13,12 +13,14 @@ One 256×256 area, generated from the seed like a DF world with DF's standard se
 3. The test screenshots in `game/test_output/` (or a snapshot's `test_output/`) show the start at three zoom levels and a far corner; anything that looks wrong there is worth a note.
 
 ## 1. Making an asset
-Follow `docs/ART_STANDARD.md` and `docs/GUIDE_25D.md`. For world things:
-- **Projection:** stands on one cell, leans up-left at 45°, base at the **bottom-right** of its footprint. The engine now reads sidecar anchors (`anchor: [x, y]` in exported pixels = the pixel that sits on the bottom-right corner of the footprint); without a sidecar it anchors bottom-center.
-- **Files:** objects and items `game/img/characters/!$U7_<Name>.png` (U7 stand-ins) or `!$<Name>.png` (originals), creatures and people `$U7_<Name>.png` / `$<Name>.png`. Always a sidecar `<same name>.json` (format: `docs/ASSET_REQUESTS.md` → Sprite sheet + sidecar format).
-- **Layout:** a standard RMMZ 3-column × 4-row sheet. Objects and items use one frame: the sidecar's `animations.stand[0]`, else the middle frame of the top row. Creatures and people use the four rows as facings S, W, E, N (E and W transposed, never mirrored) and the three columns as walk frames.
-- **States as separate catalog entries:** a picked bush is `berry_bush_bare`, a felled tree is `stump`. Each state is its own object entry with its own `image` (or the same image with a `tint`). So "standing + stump" means two entries pointing at two images (or one image and a tint until the stump art exists).
+Follow `docs/ART_STANDARD.md` (HD pixel art in FF6 style, flat 3/4 top-down view, 48 px native grid, 8 facings per VISION V3, `art/palette/uf.hex`). For world things:
+- **Mandatory Generation Model:** **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109). No other model allowed, and no typing sprites in code.
+- **Mandatory Animation Standard:** **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion (swaying foliage, idle breathing, walk cycles, combat strikes, water ripples, fire flickers) must be delivered as discrete sprite animation frames on the sheets. No programmatic distortion, squashing/stretching, sine sway, or shader warps.
+- **Files:** objects and items `game/img/characters/!$<Name>.png` (originals), creatures and people `$<Name>.png`. Always a sidecar `<same name>.json` (format: `docs/ASSET_REQUESTS.md` → Sprite sheet + sidecar format).
+- **Layout:** a standard RMMZ 3-column × 4-row sheet, or full 8-facing AR-600 master. Objects and items use one frame or their animated loop: the sidecar's `animations.stand[0]`, else the middle frame of the top row.
+- **States as separate catalog entries:** a picked bush is `berry_bush_bare`, a felled tree is `stump`. Each state is its own object entry with its own `image`.
 - **Readability at 1×** (the farthest zoom): thousands of these are on screen; keep them quiet and recognizable.
+
 
 ## 2. Catalog entries (what the engine reads)
 Only these four lists are yours to edit: `objects`, `items.types`, `wildlife.species`, `people`. Everything else in the file is engine data (Claude Code). The catalog is JSON; check it before saving:

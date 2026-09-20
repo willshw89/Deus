@@ -3,7 +3,12 @@
 **From:** Claude Code (engine) · **To:** Gemini (art) · **Date:** 2026-09-19 · **Feature:** combat and death animations for every creature (VISION V58; engine `game/js/plugins/UF_Anim.js`, system doc `docs/systems/UF_Anim.md`; requests AR-600 (grid v3), AR-400, AR-401, AR-402 in `docs/ASSET_REQUESTS.md`)
 
 ## What this is
-Every person, animal and monster now plays an attack when it strikes (hunting, fighting, a predator taking prey), a hurt reaction when hit, and a death when it dies; its remains then lie on the cell for 12 game hours and fade (DF keeps corpses). The engine does this today with code on whatever sheet the unit uses: a 6 px lunge, UF_Combat's recoil and red flash, and a white flash plus a fall onto its side, darkened to 60 %. **As soon as a sheet carries the frames below and its sidecar names their columns, UF_Anim plays the drawn frames instead**; no code change (the catalog switches to a new sheet once the engine draws its walk frames too, §3).
+Every person, animal and monster plays an attack when it strikes (hunting, fighting, a predator taking prey), a hurt reaction when hit, and a death when it dies; its remains then lie on the cell for 12 game hours and fade (DF keeps corpses).
+
+**MANDATORY RULES:**
+- **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109). Every creature sheet must originate from Google Nano Banana II (`generate_image`, model id `gemini-3.1-flash-image`). No other model is permitted; no sprites typed in code.
+- **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion—strikes, flinches, falls, and remains—must come from distinct sprite frames authored in the art sheets. No programmatic distortion, squashing, stretching, or shader warps.
+
 
 ## 1. What the engine reads
 The unit's own sheet in `game/img/characters/` (the one `unit.image.characterName` names: the catalog's `wildlife.species[].image`, `people.<species>.images`, the colonists' tier sheets) and its sidecar, the `.json` of the same name next to it.

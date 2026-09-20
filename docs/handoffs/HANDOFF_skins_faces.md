@@ -10,7 +10,8 @@ The user, 2026-09-19 14:42: "Every faction should have a different menu skin"; 1
 - **Until your art arrives,** the engine draws stand-ins in code so the factions already look different: each skin is `Window.png` recoloured in the culture's materials, and each portrait is the older stock face inside a simple code-drawn frame in the culture's colours (`UF_GenFrame`). The screenshots from the `skins` suite show them (below).
 
 ## What needs art (requests in `docs/ASSET_REQUESTS.md`, spec section "AR-1700 to AR-1730")
-Every file is made with **Nano Banana** (V69, V70; preferably Nano Banana 2, `gemini-3.1-flash-image`) from prompts 11 and 12 in `docs/handoffs/GENERATOR_PROMPTS.md`, reduced and palette-snapped by the project's tool, and must pass `tools/originality_check.js` before it goes into `game/` (AGENTS rule 8). Deliver the first skin and the first face sheet alone for the user's approval; then batches of three to five.
+Every file is made exclusively with **Google Nano Banana II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109) from prompts 11 and 12 in `docs/handoffs/GENERATOR_PROMPTS.md`. Any animated interface elements (e.g. pause sign, cursor pulsing) must be authored as distinct sprite frames—**NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All art is reduced and palette-snapped by the project's tool, and must pass `tools/originality_check.js` before it goes into `game/` (AGENTS rule 8). Deliver the first skin and the first face sheet alone for the user's approval; then batches of three to five.
+
 
 ### Window skins: AR-1700 to AR-1710
 `game/img/system/Window_<culture>.png`, exactly **192 × 192**, RPG Maker MZ's `Window.png` layout:

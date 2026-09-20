@@ -14,7 +14,7 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 8. `docs/systems/`: the documented API of any system you build on
 9. `docs/ASSET_REQUESTS.md`: the art the engine needs, with specs (Gemini's work queue)
 
-## The ten rules
+## The twelve binding rules
 1. **One slice at a time.** Work only on the slice marked `IN PROGRESS` in `docs/SLICES.md`. No bonus features, nothing extra "while I was in there". Ideas go to `docs/STATUS.md` → Backlog.
 2. **Nothing is done until it's been seen working.** The Definition of Done below is the only one that counts.
 3. **Never claim what you didn't observe.** "Verified", "working", "0 errors", "60 FPS" need evidence you produced and looked at in this session. If you didn't check, write "not checked".
@@ -25,6 +25,9 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 8. **Ultima VII art may be used as examples, stand-ins, style references and training data for our art generators; everything that ships is our own original work.** (User decisions 2026-09-18 and 2026-09-19; the user accepted the risk of training on it.) No shipped asset may be a copy, trace, recolour, crop or near-copy of a U7 image: every delivered asset passes `tools/originality_check.js` against the U7 shape library before it goes into `game/`. Stand-in files in `game/` must start with `U7_` (`$U7_Man.png`), use exactly 3× scale, and be listed in `docs/STATUS.md` → Stand-ins. They all get replaced with original art before any release. See `docs/GUIDE_25D.md` §2 and "Reference vs. shipped content" below.
 9. **The engine core is read-only.** Never edit `game/js/rmmz_*.js`, `game/js/main.js`, or `game/js/libs/`. All behavior goes in `game/js/plugins/UF_*.js`.
 10. **Two failed fixes means stop.** If the same problem survives two attempts, stop patching. Write down what you know and what you've ruled out, then ask the user.
+11. **All generation tasks are to utilize Google Nano Banana II.** (User decisions 2026-09-19: "All generation tasks are to use nano banana II. Codify that in all the .MDs" and "I want you to codify in all the agent directives and .mds that ALL GENERATION TASKS ARE TO UTILIZE NANO BANANA II".) Every visual asset across every category (characters, creatures, wildlife, monsters, terrain, tilesets, autotiles, world objects, items, equipment layers, portraits, facesets, icons, and UI) MUST originate from Google Nano Banana II (`generate_image`). No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. Everything starts from an authentic Nano Banana II generation, processed into RMMZ standard formats via our palette and cleaning tools.
+12. **All animation must happen through the sprite; no after-effect animations.** (User decisions 2026-09-19: "The animation for these things should come from the sprites, not an after effect. this applies to everything we generate" and "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"; VISION V108.) All animations across every entity and environmental feature—humanoids, wildlife, monsters, trees, flora, crops, fire, campfires, water ripples, doors, workshops, and world objects—must be delivered and played as distinct pixel sprite animation frames on the sprite sheets (e.g. 8-direction walk/action cycles, multi-frame wind sway, flickering flame loops, rippling water waves). No animation is to be faked or produced using code-driven after-effects, procedural scaling/squashing, sine-wave swaying, rotation, or shader distortions. The engine draws no motion of its own.
+
 
 ## Definition of Done
 A task is done only when all of these are true:

@@ -6,7 +6,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed; Adult Male Elf 4D suite delivered and verified, awaiting user review)
+(None currently claimed)
+
+## Codification of Google Nano Banana II and Sprite-Only Animation Directives — 2026-09-19 (Claude Code)
+Delivered per user directives ("I want you to codify in all the agent directives and .mds that ALL GENERATION TASKS ARE TO UTILIZE NANO BANANA II", "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"):
+- **Agent Directives & Core Rules Updated:**
+  - `AGENTS.md`: Formally upgraded to "The twelve binding rules". Rule 11 mandates Google Nano Banana II (`generate_image`) for all asset generations across all categories (no code-drawn pixel sprites). Rule 12 mandates that all animation across all entities and environmental features must happen strictly through discrete sprite frames; zero after-effects, procedural squashing/stretching, or shader warps.
+  - `CLAUDE.md`: Added mandatory engine directives requiring Google Nano Banana II in all art requests and prompt handoffs, and strictly prohibiting procedural or shader animation in plugins.
+  - `GEMINI.md`: Codified top-level mandatory directives requiring Google Nano Banana II and sprite-frame authored animations.
+  - `docs/ENGINE_RULES.md`: Codified engine constraints banning programmatic motion, sine-wave swaying, or shader distortions, and mandating Nano Banana II.
+  - `docs/ART_STANDARD.md`: Formally codified rule F7 (Sprite-only animation; no after-effects) and rule F9 (Mandatory Google Nano Banana II for all visual assets), updated pipeline Step 3 generation, and added failure criteria.
+  - `docs/VISION.md`: Updated V60, V69, V70, V79; updated V108 ("All animation must happen through the sprite; no after-effect animations"); added locked decision V109 ("ALL GENERATION TASKS ARE TO UTILIZE NANO BANANA II"); added 2026-09-19 Decision Log entries.
+  - `docs/RMMZ_ASSET_SPEC.md` & `docs/ASSET_REQUESTS.md`: Updated preamble and shared specs to require Google Nano Banana II exclusively and enforce sprite-only animation across all entities and environment features.
+  - `art/README.md`, `art/briefs/FABLE_ASSET_BRIEF.md`, `docs/asset_briefs/INDEX.md`, `docs/asset_briefs/README.md`: Overrode brief schemas with mandatory Nano Banana II and sprite-frame animations.
+  - `docs/handoffs/HANDOFF_*.md` (`HANDOFF_vertical.md`, `HANDOFF_skins_faces.md`, `HANDOFF_floors_doors.md`, `HANDOFF_anim.md`, `HANDOFF_world_generation.md`): Updated generator and animation requirements across all active handoff documents.
+  - `tools/build_generator_prompts.js` & `docs/handoffs/GENERATOR_PROMPTS.md`: Added Rule 0 (Google Nano Banana II) and Rule 9 (Sprite-frame animations) to prompt generator, and rebuilt all 14 generator prompt sections.
+- **Verification Evidence:**
+  - `tools/run_tests.js smoke`: 9/9 PASS, 0 FAIL, exit 0. Screenshot `game/test_output/smoke.map.png` opened and verified (Rule 5).
+  - `tools/check_briefs.js`: 223/223 briefs PASS, 0 FAIL, exit 0.
 
 ## Adult Male Elf 4-Direction Standard Suite & Uniform Scale Invariant — 2026-09-19 (Gemini)
 Delivered per user directives ("All generation tasks are to use nano banana II. Codify that in all the .MDs", "Let's generate them one creater at a time (Male elf, female elf, etc) and pay attention to accuracy across each generation. No projectiles, rmemeber? Magic animations are just the initiation of the spell", "Umm... The sprites are not all at the same scale. regenerate", "Okay, look, 8 way animations are bottlenecking us. Let's do everything we just discussed, but 4 directions", "Dedicated Hauling / Carrying Pose (AR-600 column 7): Hauling a sack"):

@@ -15,11 +15,12 @@ Files:
 - `game/img/characters/!$UF_Door_Wood.png` + `!$UF_Door_Wood.json`
 - `game/img/characters/!$UF_Door_Stone.png` + `!$UF_Door_Stone.json`
 
-Each PNG is a single-character RMMZ sheet: 3 columns × 4 rows of 48×48 frames, total 144×192. The engine reads row 0, column 0 as **closed** and row 0, column 2 as **open**. Put a useful in-between/ajar frame in column 1 for future animation. Repeat or adapt those three states across the remaining facing rows so the unused rows are still valid. Sidecar: `frameWidth:48`, `frameHeight:48`, bottom-center anchor, `animations.stand:[0]`; record the state columns in a note.
+Each PNG is a single-character RMMZ sheet: 3 columns × 4 rows of 48×48 frames, total 144×192. The engine reads row 0, column 0 as **closed** and row 0, column 2 as **open**, with an in-between/ajar frame in column 1. **All animation must happen through the sprite; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). Repeat or adapt those three states across the remaining facing rows so the unused rows are still valid. Sidecar: `frameWidth:48`, `frameHeight:48`, bottom-center anchor, `animations.stand:[0]`; record the state columns in a note.
 
 Door requirements:
 
-- Original art in the current V2 flat, high-definition FF6-style 3/4 view: crisp clusters, selective outlines, lively cel shading, readable at 1×, no oblique 2.5D lean, blur, or semi-transparent edge pixels. Generate the source with Nano Banana and pack it into the standard RMMZ sheet required by V69/V70.
+- Original art in the current V2 flat, high-definition FF6-style 3/4 view: crisp clusters, selective outlines, lively cel shading, readable at 1×, no oblique 2.5D lean, blur, or semi-transparent edge pixels. Generate the source exclusively with **Google Nano Banana II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109) and pack it into the standard RMMZ sheet required by V69/V70.
+
 - The closed frame must fill the cell enough to read as a barrier, with its feet/threshold aligned to the bottom of the cell. The open frame must clearly expose a walkable opening while retaining a jamb/hinge cue.
 - Wood: vertical or braced warm planks, iron hinges/latch, sturdy settlement construction—not ornate, modern, or a portcullis.
 - Stone: a heavy stone or stone-framed slab with a distinct cooler mass and hardware. It must not look like the wood door recolored.
@@ -36,7 +37,8 @@ The engine needs one complete 47-shape RMMZ A2 autotile block per kind, ultimate
 2. `floor_stone` — fitted flagstones. Uneven but walkable slabs; visible joints; clearly constructed, not bare rock or the stone wall texture.
 3. `floor_rushes` — woven/laid rush matting. Straw-gold fibers in coherent bundles or weave; clearly a made interior surface, not wild grass or needle litter.
 
-Follow the same A2 block geometry and 47-shape validation used by AR-100. Floors are flat ground: no oblique lean, raised wall, furniture, or object shadow. The inner tile must be quiet enough for beds, items, stance markers, and characters to remain legible. Boundary shapes must make an intentional transition to neighboring dirt/grass without a modern hard outline. Avoid random markings that visibly repeat every 48 pixels. Generate the source with Nano Banana, then clean and pack it into the standard RMMZ A2 layout required by V69/V70.
+Follow the same A2 block geometry and 47-shape validation used by AR-100. Floors are flat ground: no oblique lean, raised wall, furniture, or object shadow. The inner tile must be quiet enough for beds, items, stance markers, and characters to remain legible. Boundary shapes must make an intentional transition to neighboring dirt/grass without a modern hard outline. Avoid random markings that visibly repeat every 48 pixels. Generate the source exclusively with **Google Nano Banana II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109), then clean and pack it into the standard RMMZ A2 layout required by V69/V70.
+
 
 Deliver either three correctly laid-out source blocks plus a merged candidate ground sheet, or the merged sheet and enough source to revise one material independently. Name candidate/review files clearly under `art/`; do not overwrite the active ground sheet before Claude Code checks all 47 shapes.
 

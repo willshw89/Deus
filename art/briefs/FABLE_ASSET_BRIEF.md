@@ -1,3 +1,8 @@
+> **SUPERSEDED SPEC NOTICE (2026-09-19):** This 16×16 2.5D brief template is superseded by `docs/asset_briefs/INDEX.md` and `docs/ART_STANDARD.md` (HD FF6 48px standard).  
+> **PROJECT-WIDE BINDING MANDATES:**  
+> 1. **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109). No other model is allowed.  
+> 2. **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion must be delivered as discrete sprite animation frames on the sheets.
+
 # Production Brief for Fable: 16×16 Pixel Art Asset Generation (Ultima VII 2.5D Square Standard)
 
 **Target Audience:** Fable (Narrative & Visual Direction Generator)  
@@ -7,6 +12,7 @@
 **Color Palette:** Strictly Ultima VII Daylight Palette (`PALETTES.FLX` Record 0 / `art/palette/uf.hex`)  
 **Canvas Constraint:** Exactly ONE Asset Square (16×16 native pixels, exported at 3× nearest-neighbor to 48×48 px)  
 **Date:** 2026-09-18  
+
 
 ---
 

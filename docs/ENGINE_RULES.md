@@ -15,8 +15,10 @@
 - Patch core methods by aliasing them and calling the original. If a plugin has to replace a core method outright, list it under "Replaced core methods" in that plugin's `@help`.
 - Use one global namespace: `window.UF`.
 - All simulation state saves and loads through RMMZ's save system. Every slice's checks include save, load, and confirming the state is identical.
-- Node APIs (`require('fs')` and the like) are allowed only in test and debug code, behind `Utils.isNwjs()`.
 - Any change to `game/index.html` or `game/package.json` gets a line in `docs/STATUS.md` explaining why.
+- **All animation must happen through the sprite; no after-effect animations (VISION V60, V108; AGENTS.md Rule 12):** Engine plugins must never synthesize motion via programmatic squashing, stretching, rotation, sine-wave swaying, or shader distortions. All animations (idle, walk, combat, trees swaying, water rippling, fire flickering, doors opening, workshops) must step discrete sprite frames loaded from the art sheets.
+- **All generation tasks are to utilize Google Nano Banana II (AGENTS.md Rule 11, VISION V69, V70, V79, V109):** All visual assets across all categories must originate exclusively from Google Nano Banana II (`generate_image`). No other model is permitted, and no agent may type in sprites pixel-by-pixel in code.
+
 
 ### System docs
 Every UF system has a doc at `docs/systems/<plugin name>.md` so the other agent can use it without reading the code. Update the doc in the same commit as the code. Sections:
