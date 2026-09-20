@@ -47,6 +47,23 @@
 
     window.UF_FactionMenus = {};
 
+    const nwArgs = (typeof nw !== "undefined" && nw.App && nw.App.argv) ? nw.App.argv : [];
+    if (nwArgs.includes("--show-menu")) {
+        const _Scene_Title_start = Scene_Title.prototype.start;
+        Scene_Title.prototype.start = function() {
+            _Scene_Title_start.call(this);
+            this.commandNewGame();
+            const checkMap = () => {
+                if (SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted()) {
+                    SceneManager.push(Scene_Menu);
+                } else {
+                    setTimeout(checkMap, 100);
+                }
+            };
+            setTimeout(checkMap, 200);
+        };
+    }
+
     UF_FactionMenus.getFaction = function() {
         if ($gameSystem && $gameSystem._ufActiveMenuFaction) {
             return $gameSystem._ufActiveMenuFaction;
