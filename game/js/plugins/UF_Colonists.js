@@ -44,7 +44,7 @@
     "use strict";
 
     const DECIDE_EVERY = 60;        // ticks between decisions of one idle colonist (one game second)
-    const SCAN_EVERY = 15;          // ticks between passes over the colonists
+    const SCAN_EVERY = 5;           // ticks between passes over the colonists (smooth distribution)
     const NEEDS_EVERY = 60;         // ticks per needs tick (one game minute)
     const SEARCH_RADIUS = 60;       // cells: how far a colonist looks for materials and objects
     const FOOD_ITEM_RADIUS = 30;    // cells: food lying on the ground is eaten from this far
@@ -67,6 +67,7 @@
     const SKILL_OF = Object.freeze({ chop: "woodcutting", gather: "gathering", pick: "gathering", quarry: "stonework", mine: "stonework", build: "building", haul: "hauling", fetch: "hauling", hunt: "hunting", craft: "crafting" });
     const NEED_JOBS = Object.freeze(["drink", "eat", "sleep", "talk", "mate"]);
     const NEIGHBORS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    let localTicks = 0;
 
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
@@ -283,6 +284,7 @@
         const c = colonyState(ref);
         if (!c) return [];
         const W = World(), u = typeof ref === "number" ? W.unit(ref) : ref && ref.data ? ref : siteColonists(c)[0];
+        if (u && u._cachedEffectivePlanTick === localTicks && u._cachedEffectivePlan) return u._cachedEffectivePlan;
         const H = window.UF && UF.Households, G = window.UF && UF.Goals;
         const mySteps = (u && H && H.planSteps) ? H.planSteps(u) : [];
         const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
@@ -350,8 +352,13 @@
         const pillarSteps = (c && P && P.pillarPlanSteps) ? P.pillarPlanSteps(c, u) : [];
         const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps ] : [];
         const seen = new Set();
-        return [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
+        const res = [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
+        if (u) {
+            u._cachedEffectivePlan = res;
+            u._cachedEffectivePlanTick = localTicks;
+        }
+        return res;
     }
 
     //-------------------------------------------------------------------------
@@ -637,6 +644,7 @@
     function ensureSettlementActors() {
         const W = World(), primary = colonyState();
         if (!W || !primary || !W.state.history) return;
+        if (primary.settlementsReady && (localTicks % 300 !== 0)) return;
         primary.settlements = primary.settlements || {};
         const taken = new Set(W.units().map(u => u.name));
         for (const site of W.state.history.sites || []) {
@@ -811,22 +819,32 @@
         return I ? I.find(Object.assign({}, opts, { near: { x: u.x, y: u.y }, area: levelArea(u), z: zOf(u) })) : [];
     }
     // Items lying on plan build cells are reserved for their buildings.
+    let _buildCellsSet = null;
+    let _buildCellsTick = -1;
     function onBuildCell(x, y, ref) {
         const c = colonyState(ref);
         if (!c) return false;
-        // No goal refresh or new home search in this hot lookup. Protect every reserved household on the
-        // level, including another household's staged materials and retained homes after a merge.
-        for (const s of c.plan || []) {
-            if (!s.build || s.done === true) continue;
-            for (const [dx, dy] of s.cells || []) if (c.site.x + dx === x && c.site.y + dy === y) return true;
+        if (_buildCellsTick !== localTicks || !_buildCellsSet) {
+            _buildCellsTick = localTicks;
+            _buildCellsSet = new Set();
+            for (const s of c.plan || []) {
+                if (!s.build || s.done === true) continue;
+                for (const [dx, dy] of s.cells || []) _buildCellsSet.add(`${c.site.x + dx},${c.site.y + dy}`);
+            }
+            const households = World().state.households;
+            for (const h of Object.values(households && households.byId || {})) {
+                if (!h.home || !sameLevel(h, c)) continue;
+                const buildings = UF.Households && UF.Households.structures ? UF.Households.structures(h) : [h.home];
+                for (const b of buildings) {
+                    if (b.walls) for (const p of b.walls) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
+                    if (b.doors) for (const p of b.doors) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
+                    if (b.beds) for (const p of b.beds) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
+                    if (b.hearth) _buildCellsSet.add(`${b.hearth.x},${b.hearth.y}`);
+                    if (b.storage) _buildCellsSet.add(`${b.storage.x},${b.storage.y}`);
+                }
+            }
         }
-        const households = World().state.households;
-        for (const h of Object.values(households && households.byId || {})) {
-            if (!h.home || !sameLevel(h, c)) continue;
-            const buildings = UF.Households && UF.Households.structures ? UF.Households.structures(h) : [h.home];
-            for (const b of buildings) for (const p of [...b.walls, ...b.doors, ...b.beds, b.hearth, b.storage].filter(Boolean)) if (p.x === x && p.y === y) return true;
-        }
-        return false;
+        return _buildCellsSet.has(`${x},${y}`);
     }
     const carriedOf = (u, typeId) => (Items() ? Items().inventoryOf(u.id).filter(it => it.type === typeId) : []);
     const carriedCount = (u, typeId) => (Items() ? Items().count(u.id, typeId) : 0);
@@ -2327,6 +2345,14 @@
         if (!c) return [];
         const people = siteColonists(ref);
         return (selectedSteps || effectivePlan(ref)).map(step => {
+            if (step.done === true) {
+                const total = step.cells ? step.cells.length : 1;
+                const detail = step.build ? (total === 1 ? "built" : `${total}/${total}`) : (step.detail || "done");
+                return { id: step.id, done: true, detail };
+            }
+            if (step._cachedStatus && step._cachedTick === localTicks && !step.craft && !step.stock) {
+                return Object.assign({}, step._cachedStatus);
+            }
             let done = false, detail = "";
             if (step.build) {
                 const cells = buildCells(step, ref);
@@ -2363,7 +2389,10 @@
                 detail = "nothing to do";
                 step.done = true;
             }
-            return { id: step.id, done, detail };
+            const res = { id: step.id, done, detail };
+            step._cachedStatus = res;
+            step._cachedTick = localTicks;
+            return res;
         });
     }
     const stepLabel = step => capitalize(String(step.id || "").replace(/_/g, " "));
@@ -2382,6 +2411,7 @@
             const floorSpec = cult.floor || { kind: step.build, item: step.build === "floor_stone" ? "stone" : step.build === "floor_rushes" ? "straw" : "log", count: 1 };
             const itemNeeded = step.build === "road" ? null : floorSpec.item;
             const countNeeded = step.build === "road" ? 0 : (floorSpec.count || 1);
+            let itemSourceSearched = false, itemSrc = null;
             for (const cell of buildCells(step, u)) {
                 if (cell.state !== "todo") continue;
                 const target = { x: cell.x, y: cell.y };
@@ -2399,14 +2429,18 @@
                 }
                 const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
                 if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-                const src = objectSourceNear(u, itemNeeded, SEARCH_RADIUS) || objectSourceNear(u, itemNeeded, 90);
-                if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
+                if (!itemSourceSearched) {
+                    itemSourceSearched = true;
+                    itemSrc = objectSourceNear(u, itemNeeded, SEARCH_RADIUS) || objectSourceNear(u, itemNeeded, 90);
+                }
+                if (itemSrc) return { type: itemSrc.action, target: { x: itemSrc.x, y: itemSrc.y }, params: { plan: step.id } };
             }
             return null;
         }
         const t = stepObject(step);
         if (!t || !t.build || !I) return null;
         const c = colonyState(u);
+        const missingFailed = new Set();
         for (const cell of buildCells(step, u)) {
             if (cell.state !== "todo") continue;
             const target = { x: cell.x, y: cell.y };
@@ -2425,6 +2459,7 @@
             const missing = Object.keys(needs).filter(id => I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) < (needs[id] | 0));
             if (!missing.length) return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
             const m = missing[0];
+            if (missingFailed.has(m)) continue;
             const carried = carriedOf(u, m)[0];
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
             const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
@@ -2433,6 +2468,7 @@
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
             const prey = preyYielding(u, m, huntRadius());
             if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
+            missingFailed.add(m);
         }
         return null;
     }
@@ -2536,7 +2572,14 @@
             }
             if (groups[group] >= limit) continue;
             groups[group]++;
-            const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
+            let spec;
+            if (step._cachedSpecTick === localTicks) {
+                spec = step._cachedSpec;
+            } else {
+                spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
+                step._cachedSpec = spec;
+                step._cachedSpecTick = localTicks;
+            }
             if (spec) spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
             candidates.push({ step, spec, order: groups[group] - 1 });
             if (!spec) continue;
@@ -2721,6 +2764,8 @@
             if (P && P.assignSkillRoster) P.assignSkillRoster(local);
         }
         const t = ticks();
+        let decideCount = 0;
+        const MAX_DECIDE_PER_SCAN = 1;
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();
@@ -2736,8 +2781,10 @@
                 } else continue;
             }
             if (t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;
+            if (decideCount >= MAX_DECIDE_PER_SCAN) break;
             try {
                 decide(u);
+                decideCount++;
             } catch (e) {
                 console.error("UF_Colonists: decision failed for", u.name, e);
                 decisionAt.set(u.id, t);
@@ -3038,11 +3085,12 @@
     // Engine hooks
 
     // The per-tick step, after UF_World moved the units and UF_Jobs worked (their aliases are below ours).
-    let localTicks = 0;
+    localTicks = 0;
     const _Game_Map_update = Game_Map.prototype.update;
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         localTicks++;
+
         if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();
         if (localTicks % NEEDS_EVERY === 0) tickNeeds();
         if (localTicks % SCAN_EVERY === 0) scan();
@@ -3050,14 +3098,8 @@
         if (localTicks % 60 === 0) {
             progressPregnancies(1);
             progressAging(1);
-            // Every 60 seconds (1 real minute = 1 season), run autonomous faction reproduction check
-            if (localTicks % 3600 === 0) {
-                stepFactionReproduction();
-            }
-            // Every 120 seconds (2 real minutes), check for prospective immigrant waves
-            if (localTicks % 7200 === 0) {
-                stepImmigration();
-            }
+            if (localTicks % 3600 === 0) stepFactionReproduction();
+            if (localTicks % 7200 === 0) stepImmigration();
         }
     };
 

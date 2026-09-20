@@ -577,18 +577,22 @@
         const rng = mulberry32(hash32(W.state.seed, 0x501a47, area.x, area.y, at));
 
         let parents = [];
-        if (typeof O.findIn === "function") {
-            parents = (O.findIn(area, { near: { x: Math.floor(size / 2), y: Math.floor(size / 2) }, radius: size, limit: 64 }) || [])
-                .filter(p => p && p.type && isRenewableObject(p.type) && p.type.id !== "sapling" && p.type.id !== "stump");
+        const limit = o.limit > 0 ? o.limit : 32;
+        const tries = o.tries > 0 ? o.tries : 64;
+        for (let i = 0; i < tries && parents.length < limit; i++) {
+            const sx = Math.floor(rng() * size), sy = Math.floor(rng() * size);
+            const p = O.atIn(area, sx, sy);
+            if (p && isRenewableObject(p) && p.id !== "sapling" && p.id !== "stump") {
+                parents.push({ x: sx, y: sy, type: p });
+            }
         }
-        if (!parents.length) {
-            const tries = o.tries > 0 ? o.tries : 32;
-            for (let i = 0; i < tries; i++) {
-                const sx = Math.floor(rng() * size), sy = Math.floor(rng() * size);
-                const p = O.atIn(area, sx, sy);
-                if (p && isRenewableObject(p) && p.id !== "sapling" && p.id !== "stump") {
-                    parents.push({ x: sx, y: sy, type: p });
-                }
+        if (!parents.length && typeof O.findIn === "function") {
+            const searchR = Math.min(32, Math.floor(size / 8));
+            parents = (O.findIn(area, { near: { x: Math.floor(size / 2), y: Math.floor(size / 2) }, radius: searchR, limit, unsorted: true }) || [])
+                .filter(p => p && p.type && isRenewableObject(p.type) && p.type.id !== "sapling" && p.type.id !== "stump");
+            if (!parents.length) {
+                parents = (O.findIn(area, { near: { x: Math.floor(size / 2), y: Math.floor(size / 2) }, radius: size, limit, unsorted: true }) || [])
+                    .filter(p => p && p.type && isRenewableObject(p.type) && p.type.id !== "sapling" && p.type.id !== "stump");
             }
         }
 

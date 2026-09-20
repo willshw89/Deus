@@ -342,6 +342,7 @@
         const out = [];
         const x0 = Math.max(0, Math.floor(near.x - r)), x1 = Math.min(size - 1, Math.ceil(near.x + r));
         const y0 = Math.max(0, Math.floor(near.y - r)), y1 = Math.min(size - 1, Math.ceil(near.y + r));
+        const r2 = r * r, nx = near.x, ny = near.y;
         for (let y = y0; y <= y1; y++) {
             for (let x = x0; x <= x1; x++) {
                 const t = grid[y * size + x];
@@ -350,12 +351,15 @@
                 if (!type) continue;
                 if (tags && !(type.tags && tags.every(tag => type.tags.includes(tag)))) continue;
                 if (o.action && !(type.actions && type.actions[o.action])) continue;
-                const dist = Math.hypot(x - near.x, y - near.y);
-                if (dist > r) continue;
-                out.push({ x, y, type, dist });
+                const dx = x - nx, dy = y - ny;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > r2) continue;
+                out.push({ x, y, type, dist: Math.sqrt(d2) });
             }
         }
-        out.sort((a, b) => (a.dist - b.dist) || (a.y - b.y) || (a.x - b.x));
+        if (o.sort !== false && !o.unsorted) {
+            out.sort((a, b) => (a.dist - b.dist) || (a.y - b.y) || (a.x - b.x));
+        }
         if (o.limit > 0 && out.length > o.limit) out.length = o.limit;
         return out;
     }

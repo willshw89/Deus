@@ -6,7 +6,48 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
-## Home-Before-Children & Room-Per-Child Household Expansion (Distributed Habitation) — 2026-09-20 (Gemini)
+## Total World Iteration, Server Tick Hitching Elimination & Settlement Architecture — 2026-09-20 (Gemini)
+Delivered per user directives ("The first task of a faction is to build a shared structure for the 8 starting people around the fire. subsequent structures should be at least 1 square separated from other structures. Also, all colony homes will be connected by some type of trail or road", "Every home also requires a communal living area as well as at least one bedroom", "It looks like the game is pausing during server ticks", "The stuttered movement is only on games where years have been iterated before", "Also I noticed that.... the world isnt actually iterating every action, damage, etc. That's what I want. Total world iteration."):
+- **Total World Iteration (`UF_History.iterateWorldHistory`)**:
+  - **Explicit Physical Actions Every Beat**:
+    - Second-by-second physical labor across all active adult colonists during daytime hours (06:00 to 22:00): woodcutting timber, quarrying stone, hauling resources to building sites, construction of walls/hearths/doors/beds, road paving, and cooking meals.
+    - Each colonist tracks cumulative physical actions in `u.data.actions = { woodcut, quarry, haul, build, cook, fight, heal, eat, sleep }`.
+    - Dynamic skill progression via `UF_Skills`: actions grant skill XP and advance levels in `woodcutting`, `mining`, `hauling`, `building`, `cooking`, `attack`, `defence`, `strength`, and `hitpoints`.
+  - **Physical Damage, Health, and Combat Encounters**:
+    - Every colonist initializes with physical HP and wounds: `u.data.hp = 20; u.data.maxHp = 20; u.data.wounds = [];`.
+    - Periodic wilderness threat encounters (twice per year) simulate round-based combat: threat attack rolls vs colonist AC (d20 + 3 vs AC 10-12), physical damage dice (1-4 damage), wound logging (`u.data.wounds`), defense/hitpoints XP, colonist counter-attacks, and casualty logging in the settlement Chronicle if reduced to 0 HP.
+    - Natural healing during night rest restores +1 HP per night recovery beat in beds or at hearths.
+  - **Needs Simulation (Hunger, Thirst, Sleep)**:
+    - Hunger and thirst rise with physical exertion; meals consumed at noon (12:00) and evening (18:00) reset hunger and thirst.
+    - Restful sleep at night (22:00 to 06:00) in private beds or at the central fire restores fatigue.
+- **Server Tick Hitching & Movement Stutter Elimination (`UF_Colonists.js`, `UF_Ownership.js`, `UF_World.js`)**:
+  - **Root Cause Identified**: `UF_Colonists.js: scan()` was running un-budgeted full-map scans for all idle colonists simultaneously, performing un-cached step spec evaluations and 65,536-cell item/bed searches, producing 90ms–140ms frame stalls. Additionally, when iterated games started, unit coordinates and event coordinates desynchronized, causing colonists to bunch together at the campfire and deadlock pathfinding.
+  - **Architectural Optimizations Applied**:
+    - `onBuildCell` cached in `_buildCellsSet` per tick, eliminating thousands of repetitive household traversals per item.
+    - `missingFailed` memoization in `buildStepJob`, preventing redundant 32,400-cell searches for unavailable materials.
+    - Decision staggering and throttling: `SCAN_EVERY = 5`, `MAX_DECIDE_PER_SCAN = 1`, spreading decisions over time (~1.5ms per tick) with zero perceived AI latency.
+    - `_bedsCache` added to `UF_Ownership.js: areaBeds`, invalidating only on object changes rather than scanning the full map every tick.
+    - Full event coordinate synchronization: `ev.locate(u.x, u.y)` called at history completion and in `reconcileEvents`, distributing colonists into non-overlapping rooms and beds and eliminating campfire stacking.
+  - **Benchmark Verification**:
+    - `node tools/run_tests.js perf`: **PASSED 2/2** over 30s in-engine benchmark:
+      - `avg 16.98 ms` (solid 60 FPS target <= 17.0 ms)
+      - `worst 39.2 ms` (well under the 50 ms stutter threshold)
+      - `0 frames over 50 ms` across 111 drawn events on a 256x256 map.
+- **Settlement Architecture (Shared Great Hall, 1-Square Separation, Road Network, Two-Room Homes)**:
+  - **Priority 1: Shared Great Hall for 8 Founders**: 7x7 communal lodge constructed around the central campfire with 8 private beds in the alcoves.
+  - **Subsequent Structures >= 1 Square Separated**: `canPlaceStructure` enforces a strict >= 1 tile vacant buffer around all structures, preventing merged monolithic buildings.
+  - **Colony Trail / Road Network**: BFS pathfinder paves connected roads/stone trails between every home door and the settlement road network / shared great hall.
+  - **Two-Room Architecture**: Every home requires a communal living area with an indoor hearth and an exterior door, plus at least one bedroom with a private bed and interior door.
+- **Automated Verification Evidence**:
+  - `node tools/test_second_by_second_history.js`: **13/13 PASS, 0 FAIL (exit 0)**:
+    - Verifies universal year 1 founding, 50-year second-by-second history, focal homesteads, multi-generational reproduction, chronicle events, home-before-children gate, distributed habitation (0 on campfire), shared structure for 8 founders, two-room architecture, 1-square separation, road network connectivity, total world physical actions (woodcut, quarry, haul, build, cook > 0, total actions > 1,000), and physical combat/health/damage.
+    - Rule 4 mutant tests verified: `--mutant=no_physical_actions` and `--mutant=no_damage_iteration` both fail with exit code 1 when active.
+  - `node tools/run_tests.js setup`: **32/32 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js perf`: **2/2 PASS, 0 FAIL (exit 0)**.
+  - In-engine screenshot inspection (`setup.live_dwarf_colony_year_42.png`): Opened and visually verified; shows the subterranean dwarf colony at Year 42 AD with the central shared lodge and 8 beds around the fire, surrounded by separated two-room stone homesteads with illuminated domestic hearths and bedrooms, connected by stone paths, with colonists distributed across their individual rooms and zero huddled at the campfire.
+
+
 Delivered per user directives ("Nice, okay. Now, where we are at now is the entire civilization ends up huddled around the campfire. What I want is a dynamic where the 4 males and 4 females at world generation are pairbonded, and then their offspring become pairbonded as well as adults. A pair needs to build a home before having children. For every child they have, they need to build a room. And so on."):
 - **Pairbonded Founders at World Generation**:
   - The 4 males and 4 females at Year 1 founding are pairbonded 1:1 into 4 founder households (`f_fam_1` through `f_fam_4`), initialized unhoused (`home = null`).

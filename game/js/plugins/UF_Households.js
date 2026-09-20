@@ -26,7 +26,7 @@
     const Own = () => window.UF && UF.Ownership;
     const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
     const copyArea = a => ({ x: a ? a.x : 0, y: a ? a.y : 0 });
-    const areaOf = r => ({ x: r.area.x, y: r.area.y, z: zOf(r) });
+    const areaOf = r => ({ x: (r && r.area) ? r.area.x : 0, y: (r && r.area) ? r.area.y : 0, z: zOf(r) });
     const samePlace = (a, b) => !!a && !!b && !!a.area && !!b.area &&
         a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b);
     const unitOf = u => u && typeof u === "object" ? u : W() && W().unit(u);
@@ -774,9 +774,9 @@
     }
     function childRooms(refH) {
         const h = resolve(refH);
-        if (!h || !h.home) return 0;
+        if (!h || !h.home || h.home.isShared) return 0;
         if (Array.isArray(h.home.rooms)) {
-            return h.home.rooms.filter(r => r.type === "child" || r.type === "bedroom" || r.type === "annex").length;
+            return h.home.rooms.filter(r => r.type === "child").length;
         }
         if (Array.isArray(h.home.annexes) && h.home.annexes.length > 0) {
             return h.home.annexes.length;
@@ -786,9 +786,27 @@
         }
         return 0;
     }
+    function hasCommunalLiving(refH) {
+        const h = resolve(refH);
+        if (!h || !h.home) return false;
+        if (Array.isArray(h.home.rooms) && h.home.rooms.some(r => r.type === "communal" || r.type === "living")) {
+            return true;
+        }
+        return !!(h.home.hearth && (h.home.livingArea || (Array.isArray(h.home.rooms) && h.home.rooms.length >= 2)));
+    }
+    function hasBedroom(refH) {
+        const h = resolve(refH);
+        if (!h || !h.home) return false;
+        if (Array.isArray(h.home.rooms) && h.home.rooms.some(r => r.type === "master" || r.type === "bedroom")) {
+            return true;
+        }
+        return !!(h.home.beds && h.home.beds.length > 0);
+    }
     function canConceiveChild(refH) {
         const h = resolve(refH);
         if (!h || !isSheltered(h)) return false; // A pair needs to build a home before having children
+        if (h.home && h.home.isShared) return false; // Must build their own private home
+        if (!hasCommunalLiving(h) || !hasBedroom(h)) return false; // Every home requires communal living area and at least one bedroom
         const people = members(h);
         const livingChildren = people.filter(m => m && m.data && Number.isFinite(m.data.age) && m.data.age < 15 && !dead(m)).length;
         const availableChildRooms = childRooms(h);
@@ -854,7 +872,7 @@
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, join, make };
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make };
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;

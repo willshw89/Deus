@@ -66,6 +66,7 @@
         console.log(line);
         fs.writeFileSync(path.join(outDir, "results.txt"), lines.join("\n") + "\n");
     };
+    Test.write = write;
     write(`UF_Test run ${new Date().toISOString()} args=${JSON.stringify(args.filter(a => a.startsWith("--uf")))}`);
 
     //-------------------------------------------------------------------------

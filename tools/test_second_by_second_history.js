@@ -22,10 +22,11 @@ if (mutant === "no_clock_advance") {
     historyCode = historyCode.replace(/\$ufTime\.advanceMinute\(6\);/g, "// no clock advance");
 } else if (mutant === "no_houses_built") {
     // Mutant: no houses constructed around fire
-    historyCode = historyCode.replace(/buildHomesteadAroundFire\(site, f, [^,]+, year\);/g, "// disabled homestead");
+    historyCode = historyCode.replace(/buildSharedCommunalStructure\(site, f, year\);/g, "// no shared")
+                           .replace(/buildHomesteadAroundFire\(site, f, [^,]+, year\);/g, "// no homestead");
 } else if (mutant === "no_indoor_hearth") {
     // Mutant: fail to place domestic indoor hearth
-    historyCode = historyCode.replace(/write\(area, hearthCell\[0\], hearthCell\[1\], HEARTH_TYPE\);/g, "// disabled hearth");
+    historyCode = historyCode.replace(/write\(area, x, y, HEARTH_TYPE\);/g, "// disabled hearth");
 } else if (mutant === "no_offspring_aging") {
     // Mutant: disable progressAging in beat loop
     historyCode = historyCode.replace(/progressAging\(1\);/g, "// no aging");
@@ -35,6 +36,21 @@ if (mutant === "no_clock_advance") {
 } else if (mutant === "no_child_room_needed") {
     // Mutant: couple can have children without building a room
     householdsCode = householdsCode.replace(/return availableChildRooms > livingChildren;/g, "return true;");
+} else if (mutant === "no_communal_living") {
+    // Mutant: home does not require communal living area
+    householdsCode = householdsCode.replace(/function hasCommunalLiving\(refH\) \{/g, "function hasCommunalLiving(refH) { return true;");
+} else if (mutant === "touching_structures") {
+    // Mutant: disable 1-square separation check
+    historyCode = historyCode.replace(/if \(!canPlaceStructure\(spot\.x0, spot\.y0, w, hh\)\) continue;/g, "// no separation check");
+} else if (mutant === "disconnected_roads") {
+    // Mutant: disable road network creation
+    historyCode = historyCode.replace(/connectHomeWithRoad\(site, f, [^)]+\);/g, "// no roads connected");
+} else if (mutant === "no_physical_actions") {
+    // Mutant: disable physical actions and labor
+    historyCode = historyCode.replace(/if \(hour >= 6 && hour < 22\) \{/g, "if (false) {");
+} else if (mutant === "no_damage_iteration") {
+    // Mutant: disable damage and combat iteration
+    historyCode = historyCode.replace(/totalCombatRounds\+\+;/g, "// no combat rounds");
 }
 
 let passed = 0, failed = 0;
@@ -346,9 +362,9 @@ check("multi_generational_offspring_adulthood_pairbonding", () => {
     console.log("After iterate, units count:", World.units().length, "units:", World.units().map(u => ({ id: u.id, name: u.name, gen: u.data.generation, age: u.data.age, preg: u.data.pregnancy })));
     const units = World.units();
     const children = units.filter(u => u.data.generation >= 2);
-    assert.ok(children.length > 0, `Offspring born into colony: ${children.length}`);
     const adultsGen2 = children.filter(u => u.data.age >= 15);
     console.log(`    Generation 2 total: ${children.length}, reached adulthood: ${adultsGen2.length}`);
+    assert.ok(adultsGen2.length > 0, `At least one Gen 2 offspring reached adulthood (actual: ${adultsGen2.length})`);
     for (const u of children) {
         assert.ok(u.data.familyId, `Child ${u.name} has familyId`);
         assert.ok(u.data.surname, `Child ${u.name} inherited surname: ${u.data.surname}`);
@@ -407,20 +423,26 @@ check("home_required_before_children_and_room_per_child", () => {
 
     // 2. Pair with home but 0 child rooms cannot conceive child #1
     h.home = {
-        x: 35, y: 35, w: 4, h: 4,
-        walls: [], doors: [{ x: 37, y: 38 }],
-        beds: [{ x: 36, y: 36, unitId: mom.id }],
-        hearth: { x: 37, y: 36 },
-        rooms: [{ type: "master", x: 35, y: 35, w: 4, h: 4, bed: { x: 36, y: 36 } }],
+        x: 35, y: 35, w: 6, h: 4,
+        isShared: false,
+        walls: [], doors: [{ x: 36, y: 38 }, { x: 38, y: 36 }],
+        beds: [{ x: 39, y: 36, unitId: mom.id }],
+        hearth: { x: 36, y: 36 },
+        rooms: [
+            { type: "communal", x: 35, y: 35, w: 3, h: 4, hearth: { x: 36, y: 36 } },
+            { type: "master", x: 38, y: 35, w: 3, h: 4, bed: { x: 39, y: 36 } }
+        ],
         annexes: []
     };
     assert.ok(H.isSheltered(h), "Home is sheltered");
+    assert.ok(H.hasCommunalLiving(h), "Home has communal living area");
+    assert.ok(H.hasBedroom(h), "Home has master bedroom");
     assert.equal(H.childRooms(h), 0, "0 child rooms currently built");
     assert.equal(H.canConceiveChild(h), false, "Cannot conceive child #1 without a built child room");
 
     // 3. Build child room #1 -> can conceive child #1
-    h.home.rooms.push({ type: "child", x: 39, y: 35, w: 3, h: 3, bed: { x: 40, y: 36 } });
-    h.home.beds.push({ x: 40, y: 36, unitId: null });
+    h.home.rooms.push({ type: "child", x: 41, y: 35, w: 3, h: 3, bed: { x: 42, y: 36 } });
+    h.home.beds.push({ x: 42, y: 36, unitId: null });
     assert.equal(H.childRooms(h), 1, "1 child room built");
     assert.equal(H.canConceiveChild(h), true, "Can now conceive child #1");
 
@@ -470,6 +492,205 @@ check("distributed_habitation_no_campfire_huddling", () => {
     assert.ok(distinctCoords.size >= 4, `Colonists distributed across at least 4 distinct home coordinates (actual: ${distinctCoords.size})`);
     const atCampfire = housed.filter(u => u.x === 32 && u.y === 32);
     assert.equal(atCampfire.length, 0, "Zero housed colonists huddled on the central campfire");
+});
+
+// 8. Shared Structure Built First for 8 Starting Founders Around Fire
+check("shared_structure_built_first_for_8_founders", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 2 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    UF.History.iterateWorldHistory(st, 2);
+
+    assert.ok(st.history.structures, "Structures list exists");
+    const shared = st.history.structures.find(s => s.isShared);
+    assert.ok(shared, "Shared communal structure built around campfire");
+    assert.ok(shared.beds && shared.beds.length >= 8, `Shared structure contains 8 beds (actual: ${shared.beds ? shared.beds.length : 0})`);
+    assert.ok(st.history.settled.sharedStructures >= 1, "Settlement summary records shared structure");
+
+    const founders = World.units().filter(u => u.data.founder && u.data.faction === "f1");
+    for (const u of founders) {
+        assert.ok(u.data.bed, `Founder ${u.name} assigned bed in shared structure`);
+    }
+});
+
+// 9. Every Home Requires Communal Living Area and Bedroom
+check("home_requires_communal_living_and_bedroom", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+
+    const H = sandbox.UF.Households;
+    const dummyH = {
+        area: { x: 0, y: 0 },
+        z: 0,
+        home: {
+            isShared: false,
+            walls: [], doors: [{ x: 1, y: 1 }],
+            rooms: [],
+            beds: [],
+            hearth: null
+        }
+    };
+
+    // 1. Missing both
+    assert.equal(H.hasCommunalLiving(dummyH), false, "Lacks communal living");
+    assert.equal(H.hasBedroom(dummyH), false, "Lacks bedroom");
+    assert.equal(H.canConceiveChild(dummyH), false, "Cannot conceive without communal living and bedroom");
+
+    // 2. Only communal living, no bedroom
+    dummyH.home.hearth = { x: 2, y: 2 };
+    dummyH.home.rooms = [{ type: "communal", x: 1, y: 1, w: 3, h: 3, hearth: { x: 2, y: 2 } }];
+    assert.equal(H.hasCommunalLiving(dummyH), true, "Has communal living");
+    assert.equal(H.hasBedroom(dummyH), false, "Still lacks bedroom");
+    assert.equal(H.canConceiveChild(dummyH), false, "Cannot conceive without bedroom");
+
+    // 3. Only bedroom, no communal living
+    dummyH.home.hearth = null;
+    dummyH.home.rooms = [{ type: "master", x: 1, y: 1, w: 3, h: 3, bed: { x: 2, y: 2 } }];
+    dummyH.home.beds = [{ x: 2, y: 2 }];
+    assert.equal(H.hasCommunalLiving(dummyH), false, "Lacks communal living");
+    assert.equal(H.hasBedroom(dummyH), true, "Has bedroom");
+    assert.equal(H.canConceiveChild(dummyH), false, "Cannot conceive without communal living");
+
+    // 4. Both present
+    dummyH.home.hearth = { x: 1, y: 2 };
+    dummyH.home.rooms.push({ type: "communal", x: 4, y: 1, w: 3, h: 3, hearth: { x: 5, y: 2 } });
+    assert.equal(H.hasCommunalLiving(dummyH), true, "Has communal living");
+    assert.equal(H.hasBedroom(dummyH), true, "Has bedroom");
+});
+
+// 10. Subsequent Structures at Least 1 Square Separated
+check("subsequent_structures_at_least_1_square_separated", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 10 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    UF.History.iterateWorldHistory(st, 10);
+
+    const structs = st.history.structures || [];
+    assert.ok(structs.length >= 3, `At least 3 structures built (actual: ${structs.length})`);
+
+    // Verify minimum 1 square separation between every pair of distinct structures
+    for (let i = 0; i < structs.length; i++) {
+        for (let j = i + 1; j < structs.length; j++) {
+            const A = structs[i], B = structs[j];
+            const dx = Math.max(0, A.x0 - B.x1, B.x0 - A.x1);
+            const dy = Math.max(0, A.y0 - B.y1, B.y0 - A.y1);
+            const sep = Math.max(dx, dy);
+            assert.ok(sep >= 2, `Structures ${A.id} and ${B.id} are separated by at least 1 square (actual gap: ${sep - 1} squares)`);
+        }
+    }
+});
+
+// 11. Colony Homes Connected by Trail / Road Network
+check("colony_homes_connected_by_road_network", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 10 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    UF.History.iterateWorldHistory(st, 10);
+
+    assert.ok(st.history.settled.roads > 0, `Colony road network created (actual road tiles: ${st.history.settled.roads})`);
+    assert.ok(st.history.roads && st.history.roads.length > 0, `Road cells recorded: ${st.history.roads.length}`);
+
+    // Verify all non-shared structures have a road touching their door
+    const roadSet = new Set(st.history.roads);
+    const homes = (st.history.structures || []).filter(s => !s.isShared);
+    for (const h of homes) {
+        const d = h.door;
+        const adjacentToRoad = roadSet.has(`${d.x},${d.y}`) ||
+            roadSet.has(`${d.x+1},${d.y}`) || roadSet.has(`${d.x-1},${d.y}`) ||
+            roadSet.has(`${d.x},${d.y+1}`) || roadSet.has(`${d.x},${d.y-1}`);
+        assert.ok(adjacentToRoad, `Home ${h.id} door (${d.x},${d.y}) is connected to the road network`);
+    }
+});
+
+// 12. Total World Iteration: Physical Actions and Skill Growth
+check("total_world_iteration_actions_and_skills", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 10 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    UF.History.iterateWorldHistory(st, 10);
+
+    const settled = st.history.settled;
+    assert.ok(settled.actions, "Actions summary recorded");
+    assert.ok(settled.actions.woodcut > 0, `Woodcutting actions performed: ${settled.actions.woodcut}`);
+    assert.ok(settled.actions.quarry > 0, `Quarrying actions performed: ${settled.actions.quarry}`);
+    assert.ok(settled.actions.haul > 0, `Hauling actions performed: ${settled.actions.haul}`);
+    assert.ok(settled.actions.build > 0, `Building actions performed: ${settled.actions.build}`);
+    assert.ok(settled.actions.cook > 0, `Cooking actions performed: ${settled.actions.cook}`);
+    assert.ok(settled.actions.total > 1000, `Total physical actions performed: ${settled.actions.total}`);
+
+    // Verify individual colonist actions and skills
+    const adults = World.units().filter(u => !u.data.dead && u.data.age >= 15);
+    for (const u of adults) {
+        assert.ok(u.data.actions, `Unit ${u.name} has actions log`);
+        assert.ok(u.data.actions.woodcut + u.data.actions.quarry + u.data.actions.build > 0, `Unit ${u.name} performed physical labor`);
+        assert.ok(u.data.skillXp && Object.keys(u.data.skillXp).length > 0, `Unit ${u.name} gained skill XP: ${JSON.stringify(u.data.skillXp)}`);
+        assert.ok(u.data.skills && (u.data.skills.woodcutting || u.data.skills.mining || u.data.skills.building), `Unit ${u.name} leveled skills`);
+    }
+});
+
+// 13. Total World Iteration: Physical Combat, Health, Damage, and Casualties
+check("total_world_iteration_combat_damage_and_wounds", () => {
+    const { sandbox, World } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 20 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    UF.History.iterateWorldHistory(st, 20);
+
+    const settled = st.history.settled;
+    assert.ok(settled.combat, "Combat summary recorded");
+    assert.ok(settled.combat.rounds > 0, `Combat rounds simulated: ${settled.combat.rounds}`);
+
+    // Verify all units have physical health state
+    const allUnits = World.units();
+    for (const u of allUnits) {
+        assert.equal(u.data.maxHp, 20, `Unit ${u.name} has standard maxHp (20)`);
+        assert.ok(typeof u.data.hp === "number", `Unit ${u.name} has numerical HP: ${u.data.hp}`);
+        assert.ok(Array.isArray(u.data.wounds), `Unit ${u.name} has wounds array`);
+    }
+
+    // Verify wounded or combat experience
+    const hasCombatExperience = allUnits.some(u => (u.data.wounds && u.data.wounds.length > 0) || (u.data.skills && (u.data.skills.defence || u.data.skills.attack || u.data.skills.hitpoints)));
+    assert.ok(hasCombatExperience, "Colony experienced physical damage and combat encounters");
 });
 
 console.log("\n===========================================");

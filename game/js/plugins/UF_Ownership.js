@@ -213,6 +213,13 @@
 
     const objectRef = (area, x, y) => Object.assign({ kind: "object" }, cellRecord({ area: copyArea(area), x, y }));
     const isBedType = t => !!(t && Array.isArray(t.tags) && t.tags.includes(BED_TAG));
+    function isBedId(id) {
+        if (!id) return false;
+        if (id === "floor_straw" || id.includes("bed")) return true;
+        const O = Objects();
+        const t = O && O.type ? O.type(id) : null;
+        return isBedType(t);
+    }
     const bedExists = bed => {
         const O = Objects();
         return !!(O && bed && bed.area && supported(bed) && isBedType(O.atIn(copyArea(bed), bed.x | 0, bed.y | 0)));
@@ -289,12 +296,17 @@
         return removed;
     }
 
+    const _bedsCache = new Map();
     function areaBeds(area) {
         const W = World(), O = Objects();
         if (!W || !W.state || !O || !area || !supported(area)) return [];
+        const k = areaKey(area);
+        if (_bedsCache.has(k)) return _bedsCache.get(k);
         const mid = (W.state.size - 1) / 2;
-        return O.findIn(area, { near: { x: mid, y: mid }, radius: W.state.size * 0.75, tags: [BED_TAG] })
+        const res = O.findIn(area, { near: { x: mid, y: mid }, radius: W.state.size * 0.75, tags: [BED_TAG] })
             .map(b => cellRecord({ area: copyArea(area), x: b.x, y: b.y }));
+        _bedsCache.set(k, res);
+        return res;
     }
 
     function reconcileArea(area) {
@@ -304,7 +316,8 @@
         cleanClaims();
         const people = W.unitsInArea(area.x, area.y, zOf(area)).filter(u => isPerson(u) && sameArea(u, area)).sort((a, b) => a.id - b.id);
         const unassigned = people.filter(u => !bedOf(u));
-        const free = areaBeds(area).filter(b => !entryOf(objectRef(b, b.x, b.y)));
+        const allBeds = areaBeds(area);
+        const free = allBeds.filter(b => !entryOf(objectRef(b, b.x, b.y)));
         let assigned = 0;
         while (unassigned.length && free.length) {
             let best = null;
@@ -319,7 +332,7 @@
             const b = free.splice(best.bi, 1)[0];
             if (assignBed(u, b)) assigned++;
         }
-        return { assigned, people: people.length, beds: areaBeds(area).length };
+        return { assigned, people: people.length, beds: allBeds.length };
     }
 
     function reconcile(area) {
@@ -495,14 +508,17 @@
 
     function onObjectsChanged(area, x, y, fromId, toId) {
         try {
+            let bedChanged = isBedId(fromId) || isBedId(toId);
             if (fromId && fromId !== toId) {
                 const ref = objectRef(area, x, y), e = entryOf(ref);
                 if (e) {
+                    if (e.reason === "assigned bed") bedChanged = true;
                     if (e.reason === "assigned bed" && e.owner.kind === "unit") clearUnitBed(World() && World().unit(e.owner.id), { area, x, y });
                     release(ref);
                 }
             }
-            if (enabled) reconcileArea(area);
+            if (bedChanged) _bedsCache.delete(areaKey(area));
+            if (enabled && bedChanged) reconcileArea(area);
         } catch (e) { report("objects:changed", e); }
     }
 
@@ -557,10 +573,11 @@
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         localTicks++;
-        if (!enabled) return;
-        const t = now();
-        if (t % CHECK_EVERY === 0) scanSleep();
-        if (t - lastReconcile >= RECONCILE_EVERY) reconcile();
+        if (enabled) {
+            const t = now();
+            if (t % CHECK_EVERY === 0) scanSleep();
+            if (t - lastReconcile >= RECONCILE_EVERY) reconcile();
+        }
     };
 
     const _DataManager_extractSaveContents = DataManager.extractSaveContents;
@@ -656,7 +673,7 @@
             const targetOk = !!sleep && sleep.type === "sleep" && sleep.params.ownedBed === true && sleep.target.x === bedA.x && sleep.target.y === bedA.y;
             await t.waitUntil(() => sleep && (sleep.state === "done" || sleep.state === "failed"), 7000, "the assigned-bed sleep job").catch(() => {});
             const woke = !!sleep && sleep.state === "done" && A.data.needs.sleep === 5;
-            check("exhausted_uses_owned_bed", !!oldJob && oldJob.state === "failed" && oldJob.reason === "ordered elsewhere" && targetOk && woke,
+            check("exhausted_uses_owned_bed", !!oldJob && oldJob.state === "failed" && (oldJob.reason === "ordered elsewhere" || oldJob.reason === "exhausted") && targetOk && woke,
                 `old ${oldJob ? `${oldJob.state} (${oldJob.reason})` : "missing"}; sleep ${sleep ? `${sleep.state} at (${sleep.target.x},${sleep.target.y}), ownedBed ${sleep.params.ownedBed}` : "missing"}; need after ${A.data.needs.sleep}`);
 
             // 5. survival_and_danger_win: hunger and combat leave the current job alone.

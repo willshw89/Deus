@@ -701,11 +701,16 @@
     function spawnUnitEvent(u) {
         if (!window.$dataMap || !window.$gameMap) return null;
         const eid = EVENT_BASE + u.id;
-        if ($gameMap._events[eid]) return $gameMap._events[eid];
+        const existing = $gameMap._events[eid];
+        if (existing) {
+            if (existing.x !== u.x || existing.y !== u.y) existing.locate(u.x, u.y);
+            return existing;
+        }
         const data = unitEventData(u);
         data.meta = { ufUnit: String(u.id) };
         $dataMap.events[eid] = data;
         const ev = new Game_Event($gameMap.mapId(), eid);
+        ev.locate(u.x, u.y);
         if (u.dir8 && ev.setDir8) ev.setDir8(u.dir8);
         else ev.setDirection(u.dir || 2);
         $gameMap._events[eid] = ev;
@@ -1100,7 +1105,13 @@
         if (!v || !window.$gameMap || !window.$dataMap || $gamePlayer.isTransferring()) return 0;
         let added = 0;
         for (const u of this.unitsInArea(v.x, v.y, v.z)) {
-            if ($gameMap._events[EVENT_BASE + u.id]) continue;
+            const ev = $gameMap._events[EVENT_BASE + u.id];
+            if (ev) {
+                if (ev.x !== u.x || ev.y !== u.y) {
+                    ev.locate(u.x, u.y);
+                }
+                continue;
+            }
             spawnUnitEvent(u);
             added++;
         }
