@@ -503,6 +503,8 @@
                 return site;
             });
             const site = camps[0];
+            site.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: site.z };
+            f.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.home = { ...f.home, area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.sites = camps.map(s => s.id);
             // The founders: 4 males and 4 females representing 4 distinct families (user directive 2026-09-20).
@@ -1612,14 +1614,10 @@
 
             housesBuilt++;
 
-            const sharedStruct = {
-                id: "shared_" + f.id,
-                x0, y0, x1, y1,
-                door: { x: doorX, y: doorY },
-                isShared: true,
-                beds: bedLocations
-            };
-            structuresList.push(sharedStruct);
+            const Floors = window.UF && UF.Floors;
+            if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
+                Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
+            }
 
             // Assign beds to the 8 starting founders of this faction
             const facFounders = (W && W.units ? W.units() : []).filter(u => u && u.data && u.data.faction === f.id && u.data.founder).sort((a, b) => a.id - b.id);
@@ -1634,6 +1632,17 @@
                 }
                 return { x: b.x, y: b.y, unitId };
             });
+
+            const sharedStruct = {
+                id: "shared_" + f.id,
+                x0, y0, x1, y1,
+                area: { ...area },
+                z: levelOf(area),
+                door: { x: doorX, y: doorY },
+                isShared: true,
+                beds: assignedBeds
+            };
+            structuresList.push(sharedStruct);
 
             // Provide initial communal shelter to all founder households
             const allH = (H && H.all ? H.all() : []).filter(h => h.faction === f.id && !h.mergedInto);
@@ -1660,7 +1669,7 @@
             History.addEvent({
                 year,
                 type: "settle_built",
-                text: `${f.name} built a shared great hall around the campfire for the 8 founders in Year ${year}.`,
+                text: `${f.name} built a shared great hall around the original campfire for the 8 founders to protect them from rain in Year ${year}.`,
                 factions: [f.id],
                 site: site.id
             });
@@ -1762,9 +1771,16 @@
 
             housesBuilt++;
 
+            const Floors = window.UF && UF.Floors;
+            if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
+                Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
+            }
+
             const structRecord = {
                 id: household ? household.id : `homestead_${x0}_${y0}`,
                 x0, y0, x1, y1,
+                area: { ...area },
+                z: levelOf(area),
                 door: { x: doorX, y: doorY },
                 isShared: false
             };
@@ -1774,6 +1790,8 @@
             connectHomeWithRoad(site, f, { x: doorX, y: doorY });
 
             // Register two-room home on household (communal living area + master bedroom)
+            let coupleMovedOut = false;
+            const sharedStruct = structuresList.find(s => s.isShared && s.id === "shared_" + f.id);
             if (household) {
                 household.home = {
                     x: x0, y: y0, w, h: hh,
@@ -1800,16 +1818,28 @@
                             u.data.homeFire = { area: { ...area }, x: hearthX, y: hearthY, z: levelOf(area) };
                             u.data.bed = { x: bedX, y: bedY };
                             u.x = bedX; u.y = bedY;
+                            if (u.data.founder) {
+                                u.data.movedOut = true;
+                                coupleMovedOut = true;
+                            }
+                        }
+                        if (sharedStruct && sharedStruct.beds) {
+                            for (const b of sharedStruct.beds) {
+                                if (b.unitId === mId) {
+                                    b.unitId = null;
+                                }
+                            }
                         }
                     }
                 }
             }
 
             const surname = (household && household.surname) || f.name;
+            const moveOutText = coupleMovedOut ? `, moving out from the communal lodge to their own family home` : "";
             History.addEvent({
                 year,
                 type: "settle_built",
-                text: `${f.name} completed a two-room homestead (communal living and bedroom) for ${surname} in Year ${year}.`,
+                text: `${f.name} completed a two-room homestead (communal living and bedroom) for ${surname}${moveOutText} in Year ${year}.`,
                 factions: [f.id],
                 site: site.id
             });
@@ -1913,10 +1943,17 @@
                 }
             }
 
+            const Floors = window.UF && UF.Floors;
+            if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
+                Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
+            }
+
             // Register structure
             structuresList.push({
                 id: `${household.id}_child_${household.home.rooms ? household.home.rooms.length : 1}`,
                 x0, y0, x1, y1,
+                area: { ...area },
+                z: levelOf(area),
                 door: { x: doorX, y: doorY },
                 isShared: false
             });
@@ -2360,6 +2397,9 @@
             const ok = !!write(area, site.x, site.y, fireId);
             if (ok) placed++;
             rec.camps.push({ site: site.id, area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site), fire: ok ? fireId : null, cleared });
+            site.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
+            f.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
+            rec.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
             }
             rec.camp = rec.camps[0];
         }

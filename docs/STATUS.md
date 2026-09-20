@@ -6,6 +6,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Structure Roofing, Upper Z-Deck Walkable Surfaces & Founder Lifecycle — 2026-09-20 (Gemini)
+Delivered per user directives ("When a structure is complete with 4 walls, the spaces within are considered roofed, and on the next higher Z layer, there is a walkable surface area (that can be built up to with stairs, ladder, etc. When the world starts, the first 8 people build a structure for all 8 of them around the original campfire, to protect them from rain. Then, the original couples move out and build family homes. The original fire is the focal point of a faction"):
+- **Roofed Spaces & Upper Z-Deck Walkable Surface (`UF_Floors.js`)**:
+  - `isRoofed(area, x, y, z)`: returns `true` if `z < 0` (subterranean), or if covered by an upper deck/floor on `z + 1` (`L.standableShape` or `L.shapeAt === "floor"`), or inside an enclosed room (`roomAt`).
+  - `applyRoofedUpperDeck(area, target, material)`: sets cells on `z + 1` over the structure footprint and barrier walls to `"floor"` via `Levels.setShape(..., { constructed: true, material })`.
+  - Rain Protection (`UF_Environment.js: updateWetness`): colonists and units inside roofed structures or under upper decks do not accumulate wetness from rain or downpour weather.
+- **8-Founder Communal Great Hall Around Original Campfire for Rain Protection (`UF_History.js`)**:
+  - At Year 1, the 8 founders construct a 7x7 communal lodge around the original campfire to protect all 8 from rain.
+  - The lodge interior is roofed and establishes a walkable surface deck on `z = 1` matching culture construction materials.
+  - Chronicle records founding event: `${f.name} built a shared great hall around the original campfire for the 8 founders to protect them from rain in Year ${year}.`
+- **Couples Move Out to Family Homesteads & Free Lodge Beds**:
+  - As years iterate, founder couples construct two-room private homesteads (communal living with hearth + master bedroom).
+  - When each home completes, the couple moves out (`u.data.movedOut = true`, updating `home`, `homeFire`, `bed`), freeing their bed assignment in `sharedStruct.beds` for newcomers or communal use.
+  - Each completed family home and child annex applies an upper roof deck on `z = 1`.
+  - Chronicle records move-out: `${f.name} completed a two-room homestead (communal living and bedroom) for ${surname}, moving out from the communal lodge to their own family home in Year ${year}.`
+- **Original Fire as Permanent Faction Focal Point**:
+  - The founding campfire at `(site.x, site.y)` remains the permanent focal point of the faction tagged on `site.focalFire` and `f.focalFire`.
+- **Automated Verification Evidence**:
+  - `node tools/test_second_by_second_history.js`: **15/15 PASS, 0 FAIL (exit 0)**:
+    - Verifies checks 14 (`roofed_spaces_and_upper_z_deck_walkable_surface`) and 15 (`founder_lifecycle_shared_lodge_to_homestead_and_focal_fire`).
+    - Rule 4 mutant tests verified: `--mutant=no_upper_roof_deck` and `--mutant=no_move_out` both fail with exit code 1 when active.
+  - `node tools/run_tests.js setup`: **43/43 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js floors`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS, 0 FAIL (exit 0)**.
+  - In-engine screenshots inspected:
+    - `floors.room_half_floored.png`: Opened and inspected; shows colonist inside enclosed room laying floor planks, surrounded by perimeter walls and exterior open meadow.
+    - `setup.live_dwarf_colony_year_42.png` (`live_dwarf_colony_year_42_roofed.png`): Opened and inspected; shows the subterranean fortress with central 7x7 communal lodge around the permanent focal bonfire, surrounded by separated private two-room homesteads with glowing hearths, connected by roadways.
+
 ## Total World Iteration, Server Tick Hitching Elimination & Settlement Architecture — 2026-09-20 (Gemini)
 Delivered per user directives ("The first task of a faction is to build a shared structure for the 8 starting people around the fire. subsequent structures should be at least 1 square separated from other structures. Also, all colony homes will be connected by some type of trail or road", "Every home also requires a communal living area as well as at least one bedroom", "It looks like the game is pausing during server ticks", "The stuttered movement is only on games where years have been iterated before", "Also I noticed that.... the world isnt actually iterating every action, damage, etc. That's what I want. Total world iteration."):
 - **Total World Iteration (`UF_History.iterateWorldHistory`)**:

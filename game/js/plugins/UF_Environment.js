@@ -387,8 +387,11 @@
 
         // Check rain / snow unroofed
         const weather = getWeather(area);
-        const insideRoom = F && typeof F.roomAt === "function" ? F.roomAt(area, x, y) : null;
-        if (!insideRoom && (weather === "rain" || weather === "downpour")) {
+        const R = window.UF && UF.Rooms;
+        const isRoofed = (R && typeof R.isRoofed === "function") ? R.isRoofed(area, x, y, z)
+            : (F && typeof F.isRoofed === "function") ? F.isRoofed(area, x, y, z)
+            : (F && typeof F.roomAt === "function" && !!F.roomAt(area, x, y));
+        if (!isRoofed && (weather === "rain" || weather === "downpour")) {
             const gain = weather === "downpour" ? 15 : 6;
             t.wetness = clamp(t.wetness + gain, 0, 100);
             if (unit.data && unit.data.burning && t.wetness > 40) {
@@ -684,6 +687,7 @@
         igniteUnit,
         extinguishUnit,
         stepUnitThermal,
+        updateWetness,
         updateEnvironment,
         isBurning: u => !!(u && u.data && u.data.burning),
         isHypothermic: u => {

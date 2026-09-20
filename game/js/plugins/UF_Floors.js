@@ -182,7 +182,80 @@
         }
         return n / room.cells.length;
     }
-    const Rooms = { MAX_ROOM_CELLS, MAX_ROOM_GAPS, roomAt, value: roomValue, invalidate };
+    function isRoofed(area, x, y, z) {
+        const zLevel = z !== undefined ? z : zOf(area);
+        if (zLevel < 0) return true;
+        const L = window.UF && UF.Levels;
+        if (L) {
+            const upperRef = { area: copyArea(area), x, y, z: zLevel + 1 };
+            if (typeof L.standableShape === "function" && L.standableShape(upperRef)) return true;
+            if (typeof L.shapeAt === "function" && L.shapeAt(upperRef) === "floor") return true;
+        }
+        const r = roomAt(area, x, y);
+        if (r && r.cells && r.cells.some(c => c.x === x && c.y === y)) return true;
+        return false;
+    }
+
+    function applyRoofedUpperDeck(area, target, material) {
+        const L = window.UF && UF.Levels;
+        if (!L || typeof L.setShape !== "function") return false;
+        const z = zOf(area);
+        const targetZ = z + 1;
+        if (targetZ > 2) return false;
+
+        let mat = material;
+        if (!mat) {
+            const cat = catalog();
+            const F = window.UF && UF.Factions;
+            const p = F && F.player && F.player();
+            const cult = p && cat && cat.cultures && cat.cultures[p.species];
+            const wallId = cult && cult.wall;
+            mat = (wallId && wallId.includes("stone")) ? "stone" : "wood";
+        }
+
+        const cells = new Set();
+        const addCell = (cx, cy) => cells.add(`${cx},${cy}`);
+
+        if (target && Array.isArray(target.cells)) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const c of target.cells) {
+                addCell(c.x, c.y);
+                if (c.x < minX) minX = c.x;
+                if (c.x > maxX) maxX = c.x;
+                if (c.y < minY) minY = c.y;
+                if (c.y > maxY) maxY = c.y;
+            }
+            for (let cy = minY - 1; cy <= maxY + 1; cy++) {
+                for (let cx = minX - 1; cx <= maxX + 1; cx++) {
+                    if (isBarrier(area, cx, cy)) addCell(cx, cy);
+                }
+            }
+        } else if (target && target.x0 !== undefined && target.x1 !== undefined && target.y0 !== undefined && target.y1 !== undefined) {
+            for (let cy = target.y0; cy <= target.y1; cy++) {
+                for (let cx = target.x0; cx <= target.x1; cx++) {
+                    addCell(cx, cy);
+                }
+            }
+        } else if (target && target.x !== undefined && target.y !== undefined && target.w !== undefined && target.h !== undefined) {
+            for (let cy = target.y; cy < target.y + target.h; cy++) {
+                for (let cx = target.x; cx < target.x + target.w; cx++) {
+                    addCell(cx, cy);
+                }
+            }
+        } else if (Array.isArray(target)) {
+            for (const c of target) if (c && c.x !== undefined && c.y !== undefined) addCell(c.x, c.y);
+        }
+
+        if (!cells.size) return false;
+
+        for (const key of cells) {
+            const [cx, cy] = key.split(",").map(Number);
+            L.setShape({ area: copyArea(area), x: cx, y: cy, z: targetZ }, "floor", { constructed: true, material: mat });
+        }
+        return true;
+    }
+
+    const Rooms = { MAX_ROOM_CELLS, MAX_ROOM_GAPS, roomAt, value: roomValue, invalidate, isRoofed, applyRoofedUpperDeck };
     window.UF = window.UF || {};
     window.UF.Rooms = Rooms;
 
@@ -466,7 +539,8 @@
 
     const Floors = {
         FLOOR_IDS: FLOOR_IDS.slice(), MAX_OPEN, FLOOR_WORK, kindAt, isFloorAt, isFloor: isFloorAt, canLay, setFloor, removeFloor, setGround,
-        createDesignations, floorOtherSites, playerCultureFloor, defineJobType, augmentOptions, hookInteract
+        createDesignations, floorOtherSites, playerCultureFloor, defineJobType, augmentOptions, hookInteract,
+        isRoofed, applyRoofedUpperDeck
     };
     window.UF.Floors = Floors;
     defineJobType();
@@ -506,8 +580,28 @@
                 `${samples.length} generated-sheet samples: ${samples.join(", ")}`);
 
             const colonists = window.UF.Colonists, worker = colonists && colonists.list().find(u => sameArea(u.area, area));
+            const site = colonists && typeof colonists.site === "function" ? colonists.site() : null;
             let cx = worker ? worker.x : $gamePlayer.x, cy = worker ? worker.y : $gamePlayer.y;
+            if (site) {
+                const candidates = [
+                    { x: site.x + 6, y: site.y },
+                    { x: site.x - 6, y: site.y },
+                    { x: site.x, y: site.y + 6 },
+                    { x: site.x, y: site.y - 6 }
+                ];
+                for (const c of candidates) {
+                    let clear = true;
+                    for (let dy = -3; dy <= 3 && clear; dy++) {
+                        for (let dx = -3; dx <= 3 && clear; dx++) {
+                            const px = c.x + dx, py = c.y + dy;
+                            if (!inBounds(area, px, py) || isWater(area, px, py)) clear = false;
+                        }
+                    }
+                    if (clear) { cx = c.x; cy = c.y; break; }
+                }
+            }
             cx = Math.max(3, Math.min(W.state.size - 4, cx)); cy = Math.max(3, Math.min(W.state.size - 4, cy));
+            if (worker) { worker.x = cx; worker.y = cy; }
             const wallId = O.type("wall_wood") ? "wall_wood" : (O.types().find(o => o.tags && o.tags.includes("wall")) || {}).id;
             const saved = new Map();
             for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx - 3; x <= cx + 3; x++) { saved.set(keyOf(x, y), O.typeIdIn(area, x, y)); O.setIn(area, x, y, null); }
@@ -515,10 +609,10 @@
             for (let x = cx - 2; x <= cx + 2; x++) { wall(x, cy - 2); wall(x, cy + 2); }
             for (let y = cy - 1; y <= cy + 1; y++) { wall(cx - 2, y); wall(cx + 2, y); }
             O.setIn(area, cx, cy - 2, null); invalidate(area);
-            let r = roomAt(area, cx, cy);
-            const one = !!r && r.cells.length === 9 && r.gaps.length === 1;
-            O.setIn(area, cx, cy + 2, null); invalidate(area); r = roomAt(area, cx, cy);
-            const two = !!r && r.cells.length === 9 && r.gaps.length === 2;
+            let r1 = roomAt(area, cx, cy);
+            const one = !!r1 && r1.cells.length === 9 && r1.gaps.length === 1;
+            O.setIn(area, cx, cy + 2, null); invalidate(area); let r2 = roomAt(area, cx, cy);
+            const two = !!r2 && r2.cells.length === 9 && r2.gaps.length === 2;
             O.setIn(area, cx - 2, cy, null); invalidate(area); const three = roomAt(area, cx, cy);
             t.check("room_detection", one && two && !three, `5x5 room: one gap ${one}, two gaps ${two}, three gaps -> ${three ? "room" : "null"}`);
             wall(cx - 2, cy); wall(cx, cy + 2); invalidate(area);

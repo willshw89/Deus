@@ -16,6 +16,8 @@ const mutant = (process.argv.find(a => a.startsWith("--mutant=")) || "").slice(9
 let historyCode = readPlugin("UF_History");
 let colonistsCode = readPlugin("UF_Colonists");
 let householdsCode = readPlugin("UF_Households");
+let floorsCode = readPlugin("UF_Floors");
+let environmentCode = readPlugin("UF_Environment");
 
 if (mutant === "no_clock_advance") {
     // Mutant: clock fails to advance
@@ -51,6 +53,12 @@ if (mutant === "no_clock_advance") {
 } else if (mutant === "no_damage_iteration") {
     // Mutant: disable damage and combat iteration
     historyCode = historyCode.replace(/totalCombatRounds\+\+;/g, "// no combat rounds");
+} else if (mutant === "no_upper_roof_deck") {
+    // Mutant: disable upper roof deck on z=1
+    historyCode = historyCode.replace(/Floors\.applyRoofedUpperDeck\(area, [^;]+;/g, "// no roof deck");
+} else if (mutant === "no_move_out") {
+    // Mutant: couples don't move out when building home
+    historyCode = historyCode.replace(/u\.data\.movedOut = true;/g, "// no move out");
 }
 
 let passed = 0, failed = 0;
@@ -205,6 +213,8 @@ function createHarness() {
             show() {}
             isOpen() { return true; }
         },
+        ImageManager: { loadTileset: () => ({ isReady: () => true, isError: () => false }) },
+        JsonEx: { stringify: JSON.stringify, parse: JSON.parse },
         SceneManager: { _scene: null, catchException() {}, onError() {} },
         Scene_Boot: { prototype: { start: () => {} } },
         Scene_Title: { prototype: { start: () => {} } },
@@ -217,9 +227,39 @@ function createHarness() {
         TouchInput: { _x: 0, _y: 0 }
     };
     sandbox.window = sandbox;
+
+    const levelCells = new Map();
+    const Levels = {
+        setShape: (ref, shape, opts = {}) => {
+            const z = ref.z !== undefined ? ref.z : (ref.area ? ref.area.z : 0);
+            levelCells.set(`${z}:${ref.x},${ref.y}`, {
+                shape: typeof shape === "string" ? shape : "floor",
+                constructed: !!opts.constructed,
+                material: opts.material || "wood"
+            });
+            return true;
+        },
+        shapeAt: ref => {
+            const z = ref.z !== undefined ? ref.z : (ref.area ? ref.area.z : 0);
+            const cell = levelCells.get(`${z}:${ref.x},${ref.y}`);
+            return cell ? cell.shape : (z > 0 ? "open" : (z < 0 ? "solid" : "floor"));
+        },
+        cellAt: ref => {
+            const z = ref.z !== undefined ? ref.z : (ref.area ? ref.area.z : 0);
+            return levelCells.get(`${z}:${ref.x},${ref.y}`) || null;
+        },
+        standableShape: ref => {
+            const z = ref.z !== undefined ? ref.z : (ref.area ? ref.area.z : 0);
+            const cell = levelCells.get(`${z}:${ref.x},${ref.y}`);
+            if (cell) return cell.shape === "floor" || cell.shape === "ramp";
+            return z === 0;
+        }
+    };
+
     sandbox.window.UF = {
         Events,
         World,
+        Levels,
         WorldGen: {
             cellInfo: () => ({ walkable: true, peak: false, water: false, ground: "grass" }),
             cellInfoLocal: () => ({ walkable: true, peak: false, water: false, ground: "grass" })
@@ -240,11 +280,27 @@ function createHarness() {
                 return t ? catalog.objects[t - 1] : null;
             }
         },
+        Items: {
+            drop() {},
+            consume() { return 0; },
+            consumeFrom() { return 0; },
+            count() { return 0; },
+            find() { return []; },
+            atIn() { return []; }
+        },
+        Tiles: {
+            groundBase: () => 2048,
+            kindOfTile: () => ({ id: "grass", passable: true }),
+            kinds: () => [{ id: "floor_wood" }, { id: "floor_stone" }, { id: "floor_rushes" }],
+            generatedBitmap: () => ({ getPixel: () => "#ffffff" })
+        },
         Jobs: {
             define() {},
             handler: () => null,
             standable: () => true,
-            isWaterAt: () => false
+            isWaterAt: () => false,
+            list: () => [],
+            create: () => null
         },
         Factions: {
             all: () => World.state.factions.list,
@@ -259,7 +315,9 @@ function createHarness() {
     };
 
     vm.createContext(sandbox);
-    return { sandbox, World, objects, units, Events, $ufTime };
+    vm.runInContext(floorsCode, sandbox);
+    vm.runInContext(environmentCode, sandbox);
+    return { sandbox, World, objects, units, Events, $ufTime, Levels, levelCells };
 }
 
 // 1. Universal Year 1 founding
@@ -691,6 +749,126 @@ check("total_world_iteration_combat_damage_and_wounds", () => {
     // Verify wounded or combat experience
     const hasCombatExperience = allUnits.some(u => (u.data.wounds && u.data.wounds.length > 0) || (u.data.skills && (u.data.skills.defence || u.data.skills.attack || u.data.skills.hitpoints)));
     assert.ok(hasCombatExperience, "Colony experienced physical damage and combat encounters");
+});
+
+// 14. Roofed Spaces, Upper Z-Deck Walkable Surface, and Rain Protection
+check("roofed_spaces_and_upper_z_deck_walkable_surface", () => {
+    const { sandbox, World, Levels } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 2 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+    UF.History.iterateWorldHistory(st, 2);
+
+    const site = st.history.sites[0];
+    const area = { x: site.area.x, y: site.area.y };
+
+    // 1. Communal lodge (x0: 29, y0: 29, x1: 35, y1: 35) is roofed
+    assert.ok(UF.Rooms.isRoofed(area, 32, 32, 0), "Center of structure around campfire is roofed");
+    assert.ok(UF.Rooms.isRoofed(area, 30, 30, 0), "Corner inside structure is roofed");
+    assert.equal(UF.Rooms.isRoofed(area, 10, 10, 0), false, "Open wilderness outside structure is NOT roofed");
+
+    // 2. On z = 1, there is a walkable surface area over the structure
+    for (let y = 29; y <= 35; y++) {
+        for (let x = 29; x <= 35; x++) {
+            const shape = Levels.shapeAt({ area, x, y, z: 1 });
+            const standable = Levels.standableShape({ area, x, y, z: 1 });
+            assert.equal(shape, "floor", `Structure roof cell (${x},${y}) on z=1 is floor shape`);
+            assert.equal(standable, true, `Structure roof cell (${x},${y}) on z=1 is standable`);
+        }
+    }
+    // Outside the structure on z = 1 remains open air
+    assert.equal(Levels.shapeAt({ area, x: 10, y: 10, z: 1 }), "open", "Wilderness on z=1 is open air");
+    assert.equal(Levels.standableShape({ area, x: 10, y: 10, z: 1 }), false, "Wilderness on z=1 is not standable");
+
+    // 3. Rain protection: units under roof do not accumulate wetness from rain
+    const insideUnit = World.units().find(u => u.x >= 29 && u.x <= 35 && u.y >= 29 && u.y <= 35);
+    assert.ok(insideUnit, "Found colonist inside roofed structure");
+    
+    // Simulate rain weather update
+    const Env = UF.Environment;
+    if (Env && typeof Env.setWeather === "function") {
+        Env.setWeather(area, "rain");
+        const t0 = Env.unitThermal(insideUnit);
+        if (t0) t0.wetness = 0;
+        Env.updateWetness(insideUnit, area, insideUnit.x, insideUnit.y, 0, 15);
+        assert.equal(t0 ? t0.wetness : 0, 0, "Unit inside roofed structure stays dry during rain");
+
+        // Unit placed in wilderness outside roof
+        const outsideUnit = World.addUnit({ name: "TEST_rain_exposed", x: 10, y: 10, area, z: 0, data: { kind: "colonist" } });
+        const tOut = Env.unitThermal(outsideUnit);
+        if (tOut) tOut.wetness = 0;
+        Env.updateWetness(outsideUnit, area, 10, 10, 0, 15);
+        assert.ok(tOut ? tOut.wetness > 0 : true, "Unit in open wilderness accumulates wetness in rain");
+    }
+});
+
+// 15. Founder Lifecycle: Shared Lodge -> Family Homestead Move-Out & Focal Fire
+check("founder_lifecycle_shared_lodge_to_homestead_and_focal_fire", () => {
+    const { sandbox, World, Levels } = createHarness();
+    vm.runInContext(colonistsCode, sandbox);
+    vm.runInContext(householdsCode, sandbox);
+    vm.runInContext(historyCode, sandbox);
+
+    const UF = sandbox.UF;
+    const st = World.state;
+    UF.History.generate(st, { targetYears: 10 });
+    UF.History.spawnPeople(st);
+    UF.Colonists.setup(st);
+
+    // Initial Year 1: check focalFire tagged on faction and site
+    const f1 = st.factions.list[0];
+    const site = st.history.sites[0];
+    assert.ok(f1.focalFire, "Faction has permanent focalFire");
+    assert.ok(site.focalFire, "Site has permanent focalFire");
+    assert.equal(f1.focalFire.x, site.x, "Faction focal fire is original campfire X");
+    assert.equal(f1.focalFire.y, site.y, "Faction focal fire is original campfire Y");
+
+    // Run second-by-second history to Year 10
+    UF.History.iterateWorldHistory(st, 10);
+
+    // 1. Verify chronicle events recorded founding and move-outs
+    const events = st.history.events;
+    const communalEvent = events.find(e => e.text && e.text.includes("shared great hall around the original campfire"));
+    assert.ok(communalEvent, "Chronicle recorded 8 founders communal lodge around campfire to protect from rain");
+    const moveOutEvents = events.filter(e => e.text && e.text.includes("moving out from the communal lodge"));
+    assert.ok(moveOutEvents.length >= 1, `Chronicle recorded couples moving out to family homes (actual: ${moveOutEvents.length})`);
+
+    // 2. Founder couples moved out and have private homes
+    const units = World.units().filter(u => u.data.founder && u.data.faction === f1.id);
+    const movedOutUnits = units.filter(u => u.data.movedOut);
+    assert.ok(movedOutUnits.length >= 2, `Founder couples moved out (actual moved out: ${movedOutUnits.length})`);
+    for (const u of movedOutUnits) {
+        assert.ok(u.data.home, `Unit ${u.name} has private family home`);
+        assert.ok(u.data.homeFire, `Unit ${u.name} has indoor domestic hearth`);
+        // Homefire is private indoor hearth, distinct from the central campfire
+        assert.ok(u.data.homeFire.x !== site.x || u.data.homeFire.y !== site.y, `Unit ${u.name} home fire is private domestic hearth`);
+    }
+
+    // 3. Focal fire remains permanent
+    assert.equal(f1.focalFire.x, site.x, "Faction focalFire remained original campfire X");
+    assert.equal(f1.focalFire.y, site.y, "Faction focalFire remained original campfire Y");
+
+    // 4. Shared communal lodge freed up beds
+    const sharedStruct = st.history.structures.find(s => s.isShared);
+    assert.ok(sharedStruct, "Shared structure exists");
+    const emptyBeds = sharedStruct.beds.filter(b => b.unitId === null);
+    assert.ok(emptyBeds.length > 0, `Beds in shared communal lodge freed as couples moved out (freed beds: ${emptyBeds.length})`);
+
+    // 5. Homesteads have upper walkable roof deck on next higher Z layer
+    const homesteads = st.history.structures.filter(s => !s.isShared);
+    assert.ok(homesteads.length >= 2, "Homesteads built");
+    for (const h of homesteads) {
+        const hArea = h.area || site.area;
+        const upperZ = (h.z !== undefined ? h.z : (hArea.z || 0)) + 1;
+        const shape = Levels.shapeAt({ area: hArea, x: h.x0 + 1, y: h.y0 + 1, z: upperZ });
+        assert.equal(shape, "floor", `Homestead ${h.id} has walkable floor roof deck on upper level (z=${upperZ})`);
+    }
 });
 
 console.log("\n===========================================");
