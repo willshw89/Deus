@@ -16,12 +16,9 @@
     "N"
   ],
   "animations": {
-    "shoot": [
+    "work": [
       0,
       1,
-      2
-    ],
-    "pluck": [
       2
     ]
   },
@@ -29,7 +26,7 @@
   "species": "human",
   "stage": "adult",
   "gender": "male",
-  "action": "Bow",
+  "action": "Work",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana II (Rule 11, VISION V109)"
 }

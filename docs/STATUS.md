@@ -6,7 +6,33 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (Foliage sprite sway animations restored and verified)
+(None currently claimed)
+
+## Adult Male Human 12-Sprite Serious Chibi Action Suite — 2026-09-19 (Gemini)
+Delivered per user directives ("Alright, Let's work on our humans. Start generating", "Lets make it more of a serious chibi as opposed to a cute chibi", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time, thats 3 up, left, right, down. And then another 12 sprite sheet for melee. then another 12 sprite sheet for ranged. etc", "Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II"):
+- **Demographic 1 Completed (Adult Male Human):**
+  - Compiled and deployed complete 12-sprite action suites (3 animation columns × 4 rows: South, West, East, North) on standard 144×192 px RMMZ sheets (`$filename.png`) with JSON sidecars (`$filename.json`):
+    1. **Walk (`$UF_Human_Male_Walk.png`, `$UF_Human_Male.png`, `$UF_Human_Male_Adult.png`, `$UF_Human.png`):** Master reference sheet. 4-direction walk cycle (left step, stand, right step).
+    2. **Haul (`$UF_Human_Male_Haul.png`):** Dedicated heavy burlap sack held in front of chest in both arms across full walking step cycle (AR-600 col 7 / VISION V112).
+    3. **Attack (`$UF_Human_Male_Attack.png`, `$UF_Human_Attack_Sword.png`):** High guard windup, heroic forward lunge + 2px broadsword steel blade + sweeping luminous crescent slash arc, recovery guard.
+    4. **Bow (`$UF_Human_Male_Bow.png`, `$UF_Human_Attack_Bow.png`):** Archery aim stance holding recurve yew wood bow, string tension draw held taut, string release pluck recoil (ZERO flying arrow projectiles on sheet per VISION V111).
+    5. **Magic (`$UF_Human_Male_Magic.png`, `$UF_Human_Cast.png`):** Incantation ready, arms raised in ritual incantation chant posture, soft glowing palm mana aura (ZERO flying projectile beams/bursts per VISION V111).
+    6. **Work (`$UF_Human_Male_Work.png`):** Standing reach/inspect, proportional kneeling craftsman position (~30px height, row 47 baseline), ground hammer strike on anvil with contact spark.
+    7. **Downed (`$UF_Human_Male_Downed.png`):** Hurt flinch recoil, kneeling collapse (~28px), flat horizontal prone resting corpse.
+- **Strict Grounding & Serious Chibi Proportions (VISION V116):**
+  - Grounded strictly at row `y = 47` native tile baseline across all 7 actions.
+  - Sized to ~3.07 heads tall (46 px tall in 48×48 px cell), fitting 1 tile height.
+  - Narrow, focused determined gaze, mature jawline, functional frontier linen tunic, leather belt, dark trousers, and cuffed boots.
+- **Palette Snapping & Originality:**
+  - Color-snapped to `art/palette/uf.hex` (max 31 opaque colors per sheet, binary alpha).
+  - Passed `tools/originality_check.js` across all 7 delivered sheets against U7 shape library (all distances >= 0.467, well above 0.28 threshold).
+- **Verification Evidence:**
+  - Automated test `tools/verify_human_male_suite.js`: All 7 sheets PASS dimensions (144×192), color count (<=31), binary alpha, and U7 originality.
+  - Live in-game snapshot test `tools/test_human_male_live_ingame.js`: 13/13 PASS with zero errors.
+  - Live in-game screenshots `art/review/human_male_live_closeup.png` (3× zoom) and `art/review/human_male_live_normal.png` (2× zoom) inspected and confirmed.
+  - Review board `art/review/human_male_all_7_actions_12_sprites.png` inspected and confirmed.
+  - Interactive HTML viewer `art/review/human_male_12_sprite_viewer.html` rendered.
+
 
 ## Foliage & Tree Sprite-Frame Sway Animations Restored — 2026-09-19 (Gemini)
 Delivered per user directive ("Turn back on all of the foliage, etc animations (SPRITE, not aftereffect)"):

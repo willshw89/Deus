@@ -16,12 +16,18 @@
     "N"
   ],
   "animations": {
-    "shoot": [
+    "downed": [
       0,
       1,
       2
     ],
-    "pluck": [
+    "hurt": [
+      0
+    ],
+    "collapse": [
+      1
+    ],
+    "corpse": [
       2
     ]
   },
@@ -29,7 +35,7 @@
   "species": "human",
   "stage": "adult",
   "gender": "male",
-  "action": "Bow",
+  "action": "Downed",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana II (Rule 11, VISION V109)"
 }
