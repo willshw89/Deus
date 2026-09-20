@@ -105,7 +105,8 @@
         };
         const size = state.size;
         const [cmin, cmax] = cfg.count || [4, 7];
-        const count = cmin + Math.floor(rand() * (cmax - cmin + 1));
+        const maxUnique = cfg.species && cfg.species.length ? cfg.species.length : 7;
+        const count = Math.min(maxUnique, cmin + Math.floor(rand() * (cmax - cmin + 1)));
         const usedNames = new Set();
         const makeName = sp => {
             for (let i = 0; i < 30; i++) {
@@ -124,11 +125,45 @@
         const oneArea = state.areasX * state.areasY === 1;
         const usedHomes = new Set([`${state.startArea.x},${state.startArea.y}`]);
         const founders = foundersCount();
-        const dwarf = cfg.species.find(sp => sp.id === "dwarf");
-        for (let i = 0; i < count; i++) {
-            const rolled = weighted(cfg.species);
-            // Reserve within the configured count, before naming or relations: never append a faction.
-            const sp = dwarf && i === count - 1 && !list.some(f => f.species === "dwarf") ? dwarf : rolled;
+        const chosen = [];
+        const pickedSpecies = new Set();
+        if (cfg.layers) {
+            const layerKeys = [0, -1, -2];
+            const perLayer = cfg.perLayer || 3;
+            for (const lz of layerKeys) {
+                const candIds = (cfg.layers[String(lz)] || []).filter(id => !pickedSpecies.has(id));
+                const candObjs = candIds.map(id => cfg.species.find(s => s.id === id) || { id, name: capitalize(id), weight: 1 });
+                // If dwarf is on layer -1 and not picked, guarantee dwarf is chosen
+                const mustPickDwarf = lz === -1 && candObjs.some(s => s.id === "dwarf") && !pickedSpecies.has("dwarf");
+                for (let k = 0; k < perLayer && candObjs.length > 0; k++) {
+                    let sp;
+                    if (mustPickDwarf && k === 0) {
+                        sp = candObjs.find(s => s.id === "dwarf");
+                    } else {
+                        sp = weighted(candObjs);
+                    }
+                    pickedSpecies.add(sp.id);
+                    candObjs.splice(candObjs.indexOf(sp), 1);
+                    chosen.push({ sp, z: lz });
+                }
+            }
+        } else {
+            const dwarf = cfg.species.find(sp => sp.id === "dwarf");
+            const availableSpecies = (cfg.species || []).slice();
+            for (let i = 0; i < count; i++) {
+                let sp;
+                if (dwarf && i === count - 1 && !chosen.some(c => c.sp.id === "dwarf") && availableSpecies.some(s => s.id === "dwarf")) {
+                    sp = dwarf;
+                } else {
+                    sp = weighted(availableSpecies.length ? availableSpecies : cfg.species);
+                }
+                const spIdx = availableSpecies.findIndex(s => s.id === sp.id);
+                if (spIdx >= 0) availableSpecies.splice(spIdx, 1);
+                chosen.push({ sp, z: sp.id === "dwarf" ? -1 : 0 });
+            }
+        }
+        for (let i = 0; i < chosen.length; i++) {
+            const { sp, z: targetZ } = chosen[i];
             const ethos = [pick(cfg.ethos).id];
             if (rand() < 0.4) {
                 const second = pick(cfg.ethos).id;
@@ -149,8 +184,9 @@
                 id: `f${i + 1}`,
                 name: makeName(sp),
                 species: sp.id,
+                layer: targetZ,
                 ethos,
-                home: { area, x: Math.floor(size / 2), y: Math.floor(size / 2), z: sp.id === "dwarf" ? -1 : 0 }, // the centre is set by placeAreas
+                home: { area, x: Math.floor(size / 2), y: Math.floor(size / 2), z: targetZ }, // the centre is set by placeAreas
                 color: COLORS[i % COLORS.length],
                 isPlayer: false,
                 met: false,
@@ -192,10 +228,10 @@
         // 2026-09-18). Its area is at the map centre (placeAreas); UF_Colonists turns its founders into the colonists.
         const playable = list.filter(f => {
             const sp = cfg.species.find(s => s.id === f.species);
-            return !sp || sp.playable !== false;
+            return (!sp || sp.playable !== false) && (f.layer === 0 || f.layer === undefined);
         });
-        const pool = playable.length ? playable : list;
-        const player = pool[Math.floor(rand() * pool.length)];
+        const pool = playable.length ? playable : list.filter(f => f.layer === 0 || f.layer === undefined);
+        const player = (pool.length ? pool : list)[Math.floor(rand() * (pool.length || list.length))];
         for (const f of list) f.isPlayer = f === player;
         player.met = true;
         player.color = "#4ade80";
@@ -358,7 +394,7 @@
         if (!pCell) pCell = { x: mid, y: mid, disc: -1 }; // never seen: the start climate keeps the centre habitable
         const pInfo = infoAt(pArea, pCell.x, pCell.y);
         const pWater = pGrid.water(Math.round(pCell.y / AREA_STEP) * pGrid.n + Math.round(pCell.x / AREA_STEP));
-        player.home = { area: pArea, x: pCell.x, y: pCell.y };
+        player.home = { area: pArea, x: pCell.x, y: pCell.y, z: 0 };
         player.areaInfo = { biome: pInfo ? pInfo.biomeId : null, water: Math.round(pWater), rule: "centre", disc: pCell.disc };
 
         // Everyone else: seeded picks among the coarse cells that keep every rule, the strictest rule first
@@ -421,27 +457,59 @@
             }
         }
         for (const r of result || []) {
-            r.f.home = { area: r.area, x: r.x, y: r.y, z: r.f.species === "dwarf" ? -1 : 0 };
+            const targetZ = r.f.layer !== undefined ? r.f.layer : (r.f.species === "dwarf" ? -1 : 0);
+            r.f.home = { area: r.area, x: r.x, y: r.y, z: targetZ };
             r.f.areaInfo = { biome: r.info ? r.info.biomeId : null, water: Number.isFinite(r.water) ? Math.round(r.water) : null, rule: r.rule, disc: r.disc };
             if (relaxed) r.f.areaInfo.gap = gap;
         }
         if (!result) for (const f of others) f.areaInfo = { biome: null, water: null, rule: "none", disc: -1 }; // no land at all (never seen)
         // Geological pockets are selected before History or any world-map build: no surface camp is ever stamped.
         const usedPockets = new Map();
-        for (const f of F.list) {
-            if (f.species !== "dwarf") continue;
-            if (!UF.Levels || typeof UF.Levels.settlementCell !== "function") throw new Error("Dwarf founding requires UF.Levels.settlementCell");
-            const anchor = f.home;
-            f.homes = [-1, -2].map(z => {
-                const key = `${anchor.area.x},${anchor.area.y},${z}`;
-                const used = usedPockets.get(key) || [];
-                const pocket = UF.Levels.settlementCell(state, { area: anchor.area, x: anchor.x, y: anchor.y, z, used });
-                if (!pocket) throw new Error(`No unused habitable pocket for ${f.id} on ${z}`);
-                used.push(pocket.id); usedPockets.set(key, used);
-                return { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
+        const placedSub = [];
+        const pickSubPocket = (anchorArea, anchorX, anchorY, z) => {
+            const key = `${anchorArea.x},${anchorArea.y},${z}`;
+            const used = usedPockets.get(key) || [];
+            const allPockets = (UF.Levels && UF.Levels.habitablePockets) ? UF.Levels.habitablePockets(z, anchorArea.x, anchorArea.y) : [];
+            const available = allPockets.filter(p => !used.includes(p.id));
+            if (!available.length) return null;
+            // Prefer pockets that maintain acfg.minGap distance from already placed factions on the same layer
+            const onLayer = placedSub.filter(p => p.z === z);
+            const spaced = available.filter(p => onLayer.every(o => Math.hypot(p.x - o.x, p.y - o.y) >= acfg.minGap));
+            const pool = spaced.length ? spaced : available;
+            pool.sort((a, b) => {
+                const distA = Math.min(...onLayer.map(o => Math.hypot(a.x - o.x, a.y - o.y)), 999);
+                const distB = Math.min(...onLayer.map(o => Math.hypot(b.x - o.x, b.y - o.y)), 999);
+                return distB - distA || ((a.x - anchorX) ** 2 + (a.y - anchorY) ** 2) - ((b.x - anchorX) ** 2 + (b.y - anchorY) ** 2) || a.id - b.id;
             });
-            f.home = { ...f.homes[0], area: { ...f.homes[0].area } };
-            f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
+            const chosen = pool[0];
+            used.push(chosen.id);
+            usedPockets.set(key, used);
+            placedSub.push({ x: chosen.x, y: chosen.y, z });
+            return chosen;
+        };
+
+        for (const f of F.list) {
+            const targetZ = f.layer !== undefined ? f.layer : (f.home && f.home.z !== undefined ? f.home.z : (f.species === "dwarf" ? -1 : 0));
+            if (targetZ >= 0 && f.species !== "dwarf") continue;
+            if (!UF.Levels || typeof UF.Levels.settlementCell !== "function") throw new Error("Subterranean founding requires UF.Levels.settlementCell");
+            const anchor = f.home;
+            if (f.species === "dwarf") {
+                f.homes = [-1, -2].map(z => {
+                    const pocket = pickSubPocket(anchor.area, anchor.x, anchor.y, z);
+                    if (!pocket) throw new Error(`No unused habitable pocket for ${f.id} on ${z}`);
+                    return { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
+                });
+                f.home = { ...f.homes[0], area: { ...f.homes[0].area } };
+                f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
+            } else {
+                const z = targetZ;
+                const pocket = pickSubPocket(anchor.area, anchor.x, anchor.y, z);
+                if (pocket) {
+                    f.home = { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
+                    f.homes = [{ ...f.home }];
+                    f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
+                }
+            }
         }
         state.viewStart = { area: { ...player.home.area }, x: player.home.x, y: player.home.y, z: player.home.z || 0 };
         Factions.lastAreas = { ms: now() - t0, attempts, relaxed, gap, cells };
@@ -526,6 +594,16 @@
                 child.data._popCounted = true;
                 const f = Factions.get(child.data.faction);
                 if (f) f.population = (f.population || 0) + 1;
+            }
+        });
+        UF.Events.on("factions:immigrated", immigrants => {
+            if (!Array.isArray(immigrants)) return;
+            for (const u of immigrants) {
+                if (u && u.data && u.data.faction && !u.data._popCounted) {
+                    u.data._popCounted = true;
+                    const f = Factions.get(u.data.faction);
+                    if (f) f.population = (f.population || 0) + 1;
+                }
             }
         });
         UF.Events.on("combat:kill", event => {
@@ -697,6 +775,13 @@
                 player ? `the player's faction is ${player.name} (${player.species}, id ${player.id}); "player" resolves to it` : "no player faction");
             const names = d.list.map(f => f.name);
             t.check("names_unique", new Set(names).size === names.length, names.join(" | "));
+            const speciesList = d.list.map(f => f.species);
+            t.check("species_unique", new Set(speciesList).size === speciesList.length, `species: ${speciesList.join(", ")}`);
+            const l0 = d.list.filter(f => (f.home.z || 0) === 0);
+            const lm1 = d.list.filter(f => f.home.z === -1);
+            const lm2 = d.list.filter(f => f.home.z === -2);
+            t.check("layer_distribution", l0.length === 3 && lm1.length === 3 && lm2.length === 3,
+                `layers: Z0 (${l0.map(f => f.species).join(", ")}), Z-1 (${lm1.map(f => f.species).join(", ")}), Z-2 (${lm2.map(f => f.species).join(", ")})`);
 
             const values = Object.values(d.relations);
             const pairs = (d.list.length * (d.list.length - 1)) / 2;
@@ -711,7 +796,7 @@
             // playerReach of the map centre, the view started there; the same areas for the same seed, others for the next.
             const acfg = Factions.areasConfig();
             const size = st.size, mid = Math.floor(size / 2);
-            const fresh = () => ({ seed: st.seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y } });
+            const fresh = () => ({ seed: st.seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, levels: st.levels });
             const areaProblems = [];
             const infoOf = f => UF.WorldGen.cellInfoLocal(f.home.area.x, f.home.area.y, f.home.x, f.home.y);
             for (const f of d.list) {
@@ -724,6 +809,11 @@
                         const pockets = UF.Levels.habitablePockets(c.z, a.x, a.y);
                         if (!pockets.some(p => p.id === c.pocketId && p.x === c.x && p.y === c.y && p.clearRadius >= 3)) areaProblems.push(`${f.name}: home is not a habitable pocket on ${c.z}`);
                     }
+                    continue;
+                }
+                if (h.z < 0) {
+                    const pockets = UF.Levels.habitablePockets(h.z, a.x, a.y);
+                    if (!pockets.some(p => p.x === h.x && p.y === h.y)) areaProblems.push(`${f.name}: home is not a habitable pocket on ${h.z}`);
                     continue;
                 }
                 const info = infoOf(f);
@@ -749,7 +839,7 @@
             if (minPair < acfg.minGap) areaProblems.push(`${closest} only ${minPair.toFixed(1)} cells apart`);
             const pl = Factions.player();
             const plDist = pl ? Math.hypot(pl.home.x - mid, pl.home.y - mid) : Infinity;
-            if (!pl || (pl.species !== "dwarf" && !(plDist <= acfg.playerReach)) || pl.home.area.x !== st.startArea.x || pl.home.area.y !== st.startArea.y) areaProblems.push(`the player's centre is ${plDist.toFixed(1)} cells from (${mid},${mid})`);
+            if (!pl || (pl.species !== "dwarf" && (pl.home.z || 0) === 0 && !(plDist <= acfg.playerReach)) || pl.home.area.x !== st.startArea.x || pl.home.area.y !== st.startArea.y) areaProblems.push(`the player's centre is ${plDist.toFixed(1)} cells from (${mid},${mid})`);
             const vs = st.viewStart;
             if (!pl || !vs || vs.x !== pl.home.x || vs.y !== pl.home.y || (vs.z || 0) !== (pl.home.z || 0)) areaProblems.push(`viewStart ${vs ? `(${vs.x},${vs.y})` : "unset"} is not the player's centre`);
             const homesSig = f => JSON.stringify(f.list.map(x => [x.id, x.home]));
@@ -757,7 +847,15 @@
             const areasOther = Factions.generate(Object.assign(fresh(), { seed: st.seed + 1 }));
             const sameAreas = homesSig(areasAgain) === homesSig(d);
             const otherAreas = homesSig(areasOther) !== homesSig(d);
-            if (!sameAreas) areaProblems.push(`seed ${st.seed} regenerated gives other areas`);
+            if (!sameAreas) {
+                const diffs = [];
+                for (let i = 0; i < d.list.length; i++) {
+                    const h1 = JSON.stringify(d.list[i].home);
+                    const h2 = JSON.stringify(areasAgain.list[i] ? areasAgain.list[i].home : null);
+                    if (h1 !== h2) diffs.push(`${d.list[i].name} (${d.list[i].species}) live:${h1} vs again:${h2}`);
+                }
+                areaProblems.push(`seed ${st.seed} regenerated gives other areas: ${diffs.join("; ")}`);
+            }
             if (!otherAreas) areaProblems.push(`seed ${st.seed + 1} gives the same areas`);
             const la = Factions.lastAreas;
             t.check("areas", areaProblems.length === 0,

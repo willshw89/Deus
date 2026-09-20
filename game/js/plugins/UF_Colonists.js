@@ -335,11 +335,32 @@
         emit("colonists:tier", unit, unit.data.tier);
         return true;
     }
-    function tiersFor(species, gender) {
-        const pair = ((catalog() && catalog().start) || {}).pair;
-        if (species !== "human" || !Array.isArray(pair)) return null;
-        const p = pair.find(e => e.gender === gender) || pair[0];
-        return p && Array.isArray(p.tiers) && p.tiers.length ? p.tiers.slice() : null;
+    function variationFor(worldSeed, unitId, mother, father) {
+        const roll = unit01(worldSeed, SALT.roll, unitId);
+        const mVar = mother && mother.data && mother.data.variation ? mother.data.variation | 0 : null;
+        const fVar = father && father.data && father.data.variation ? father.data.variation | 0 : null;
+        if (mVar && fVar) {
+            if (roll < 0.45) return mVar;
+            if (roll < 0.90) return fVar;
+            return 1 + Math.floor(unit01(worldSeed, SALT.facet, unitId) * 6);
+        }
+        if (mVar) {
+            if (roll < 0.70) return mVar;
+            return 1 + Math.floor(unit01(worldSeed, SALT.facet, unitId) * 6);
+        }
+        if (fVar) {
+            if (roll < 0.70) return fVar;
+            return 1 + Math.floor(unit01(worldSeed, SALT.facet, unitId) * 6);
+        }
+        return 1 + Math.floor(roll * 6);
+    }
+
+    function tiersFor(species, gender, variation = 1) {
+        if (species !== "human") return null;
+        const v = Math.max(1, Math.min(6, variation | 0 || 1));
+        const prefix = gender === "female" ? "$UF_Human_Female" : "$UF_Human_Male";
+        const walkSheet = `${prefix}_${v}_Walk`;
+        return [walkSheet, walkSheet, walkSheet, walkSheet];
     }
 
     //-------------------------------------------------------------------------
@@ -390,11 +411,18 @@
         d.sight = 8;
         d.gender = gender;
         d.tier = 0;
-        const tiers = tiersFor(d.species, gender);
-        if (tiers && player) {
+        const W = World();
+        const mother = d.motherId && W ? W.unit(d.motherId) : null;
+        const father = d.fatherId && W ? W.unit(d.fatherId) : null;
+        if (!d.variation) {
+            d.variation = variationFor(state.seed, u.id, mother, father);
+        }
+        const tiers = tiersFor(d.species, gender, d.variation);
+        if (tiers) {
             d.tiers = tiers;
             u.image = { characterName: tiers[0], characterIndex: 0 };
-            delete d.tint; // the tier sheets are drawn as they are
+            delete d.tint; // the authentic pixel sheets are drawn as they are
+            if (W && typeof W.refreshUnitImage === "function") W.refreshUnitImage(u.id);
         }
         d.facets = d.facets || facetsFor(state.seed, u.id, cultureOf(u).facetBias);
         d.skills = d.skills || skillsFor(state.seed, u.id);
@@ -1022,6 +1050,49 @@
     // Reproduction, pregnancy and life stages
 
     const familyDate = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 1}` : "0:0:1";
+
+    function factionPopulation(fId) {
+        const W = World();
+        if (!W) return 0;
+        const people = W.units().filter(u => u.data && u.data.faction === fId &&
+            (u.data.kind === "colonist" || u.data.kind === "person") &&
+            !u.data.dead && !u.data._isDying);
+        return people.length;
+    }
+
+    /**
+     * Conception rate curve:
+     * - Rapid expansion to 100: starts at 95% (pop < 20), scaling to 50% at pop 100.
+     * - Deceleration to 200: smoothly scales down quadratically from 50% down to 0% at 200.
+     * - Level-off: exactly 0% at pop >= 200.
+     */
+    function conceptionChance(pop) {
+        if (pop >= 200) return 0.0;
+        if (pop < 20) return 0.95;
+        if (pop < 100) {
+            return 0.95 - ((pop - 20) / 80) * 0.45;
+        }
+        const ratio = (200 - pop) / 100;
+        return Math.max(0.0, 0.50 * Math.pow(ratio, 2));
+    }
+
+    function twinChance(pop) {
+        if (pop < 40) return 0.15;
+        if (pop < 80) return 0.05;
+        return 0.0;
+    }
+
+    function postPartumCooldownSeconds(pop) {
+        if (pop < 50) return 45;
+        if (pop < 100) return 60 + Math.floor(((pop - 50) / 50) * 60);
+        return 120 + Math.floor(((pop - 100) / 100) * 180);
+    }
+
+    function gestationSeconds(pop) {
+        if (pop < 50) return 45;
+        return 60;
+    }
+
     function eligibleForIntimacy(u) {
         if (!u || !u.data) return false;
         if (!isSettler(u) && !(u.data.kind === "person" && u.data.faction)) return false;
@@ -1147,18 +1218,21 @@
         const male = (u1.data.gender === "male") ? u1 : (u2.data.gender === "male") ? u2 : null;
 
         if (female && male && !female.data.pregnancy) {
-            // Cut birth rate in half: 50% chance of conception per mating (user directive 2026-09-20)
+            const fId = female.data.faction;
+            const pop = factionPopulation(fId);
+            const chance = conceptionChance(pop);
             const roll = unit01(seed(), SALT.roll, female.id, day, ticks());
-            if (roll < 0.5 || female.data._forceConceive) {
-                // User specification: within 1 minute realworld time (60 seconds) is giving birth
+            if (roll < chance || female.data._forceConceive) {
+                const duration = gestationSeconds(pop);
                 female.data.pregnancy = {
                     fatherId: male.id,
                     fatherName: male.name,
-                    secondsLeft: 60,
-                    totalSeconds: 60,
+                    secondsLeft: duration,
+                    totalSeconds: duration,
                     daysLeft: 1,
                     totalDays: 1,
-                    dayConceived: day
+                    dayConceived: day,
+                    isTwins: unit01(seed(), SALT.roll, female.id, day, ticks(), 7) < twinChance(pop)
                 };
                 delete female.data._forceConceive;
                 addThought(female, "Expecting a child!", 12);
@@ -1272,6 +1346,7 @@
         const childName = nameFor(st.seed, ticks(), childGender, taken);
         const isBoy = childGender === "male";
         const kidSprite = isBoy ? "$Child_Boy" : "$Child_Girl";
+        const childVar = variationFor(st.seed, ticks(), mother, father);
 
         const childUnit = W.addUnit({
             name: childName,
@@ -1289,6 +1364,7 @@
                 home: mother.data.home ? JSON.parse(JSON.stringify(mother.data.home)) : { area: copyArea(mother.area), x: mother.x, y: mother.y, z: zOf(mother) },
                 species: mother.data.species || "human",
                 gender: childGender,
+                variation: childVar,
                 age: 2,
                 ageDays: 2,
                 ageSeconds: 2 * 240,
@@ -1299,24 +1375,93 @@
                 facets: facetsFor(st.seed, ticks()),
                 skills: skillsFor(st.seed, ticks()),
                 thoughts: [{ text: "Entered the world as a healthy kid.", score: 10, ticks: ticks() }],
-                tiers: tiersFor(mother.data.species || "human", childGender)
+                tiers: tiersFor(mother.data.species || "human", childGender, childVar)
             }
         });
 
         if (!childUnit) return null;
+        const wasTwins = preg && preg.isTwins;
         delete mother.data.pregnancy;
-        // 2-minute post-partum cooldown (doubled per user directive 2026-09-20 to reduce birth rate)
-        mother.data.postPartumUntil = ticks() + 120 * 60;
+        const pop = factionPopulation(mother.data.faction);
+        const cooldown = postPartumCooldownSeconds(pop);
+        mother.data.postPartumUntil = ticks() + cooldown * 60;
 
-        addThought(mother, "Gave birth to a healthy child.", 20);
-        if (father && isSettler(father)) {
-            addThought(father, "Celebrated the birth of my child.", 15);
+        let twinUnit = null;
+        if (wasTwins && pop + 1 < 200) {
+            let twinX = null, twinY = null;
+            for (const [dx, dy] of NEIGHBORS) {
+                const nx = birthX + dx, ny = birthY + dy;
+                if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
+                    twinX = nx; twinY = ny; break;
+                }
+            }
+            if (twinX !== null) {
+                const twinGender = unit01(st.seed, SALT.gender, mother.id, ticks() + 1) < 0.5 ? "male" : "female";
+                const twinName = nameFor(st.seed, ticks() + 7, twinGender, taken);
+                const isTwinBoy = twinGender === "male";
+                const twinSprite = isTwinBoy ? "$Child_Boy" : "$Child_Girl";
+                const twinVar = variationFor(st.seed, ticks() + 3, mother, father);
+                twinUnit = W.addUnit({
+                    name: twinName,
+                    image: { characterName: twinSprite, characterIndex: 0 },
+                    area: copyArea(mother.area),
+                    z: zOf(mother),
+                    x: twinX,
+                    y: twinY,
+                    dir: 2,
+                    data: {
+                        kind: isColonist(mother) ? "colonist" : "person",
+                        ai: isColonist(mother) ? "colonist" : (mother.data.ai || "wander"),
+                        faction: mother.data.faction,
+                        site: mother.data.site,
+                        home: mother.data.home ? JSON.parse(JSON.stringify(mother.data.home)) : { area: copyArea(mother.area), x: mother.x, y: mother.y, z: zOf(mother) },
+                        species: mother.data.species || "human",
+                        gender: twinGender,
+                        variation: twinVar,
+                        age: 2,
+                        ageDays: 2,
+                        ageSeconds: 2 * 240,
+                        stage: "child",
+                        motherId: mother.id,
+                        fatherId: fatherId,
+                        needs: Object.assign({}, START_NEEDS),
+                        facets: facetsFor(st.seed, ticks() + 11),
+                        skills: skillsFor(st.seed, ticks() + 11),
+                        thoughts: [{ text: "Born as a healthy twin!", score: 12, ticks: ticks() }],
+                        tiers: tiersFor(mother.data.species || "human", twinGender, twinVar)
+                    }
+                });
+                if (twinUnit) {
+                    if (window.UF && UF.Factions && mother.data.faction) {
+                        const f = UF.Factions.get(mother.data.faction);
+                        if (f) f.population = (f.population || 0) + 1;
+                        twinUnit.data._popCounted = true;
+                    }
+                    if (window.UF && UF.Goals && UF.Goals.ensure) {
+                        UF.Goals.ensure(twinUnit);
+                    }
+                    emit("colonists:born", twinUnit, mother, father);
+                    emit("factions:born", twinUnit, mother, father);
+                }
+            }
+        }
+
+        if (twinUnit) {
+            addThought(mother, "Gave birth to healthy twins!", 25);
+            if (father && isSettler(father)) {
+                addThought(father, "Celebrated the birth of twins!", 20);
+            }
+        } else {
+            addThought(mother, "Gave birth to a healthy child.", 20);
+            if (father && isSettler(father)) {
+                addThought(father, "Celebrated the birth of my child.", 15);
+            }
         }
 
         const motherEv = W.eventOf(mother.id);
         const childEv = childUnit ? W.eventOf(childUnit.id) : null;
         if (window.UF && UF.Visuals && UF.Visuals.bark) {
-            if (motherEv) UF.Visuals.bark(motherEv, `♥ Welcome to the world, ${childName}! ♥`, 200);
+            if (motherEv) UF.Visuals.bark(motherEv, twinUnit ? `♥ Welcome to the world, ${childName} and ${twinUnit.name}! ♥` : `♥ Welcome to the world, ${childName}! ♥`, 200);
             if (childEv) UF.Visuals.bark(childEv, "*Yay, I'm here!*", 180);
         }
 
@@ -1368,6 +1513,8 @@
 
         for (const faction of factionsList) {
             const fId = faction.id;
+            const pop = factionPopulation(fId);
+            if (pop >= 200) continue;
             const members = people.filter(u => u.data.faction === fId);
             const adults = members.filter(u => eligibleForIntimacy(u));
             if (adults.length < 2) continue;
@@ -1432,12 +1579,145 @@
         return { mated: totalMated, conceived: totalConceived };
     }
 
+    function immigrationWaveSize(pop) {
+        if (pop >= 180) return 0;
+        if (pop < 50) return 2 + Math.floor(unit01(seed(), SALT.roll, ticks(), pop) * 3); // 2, 3, or 4
+        if (pop < 100) return 1 + Math.floor(unit01(seed(), SALT.roll, ticks(), pop) * 2); // 1 or 2
+        return 1;
+    }
+
+    function immigrationChance(pop) {
+        if (pop >= 180) return 0.0;
+        if (pop < 50) return 0.80;
+        if (pop < 100) return 0.50;
+        return 0.20;
+    }
+
+    function spawnImmigrants(ref, count) {
+        const W = World();
+        if (!W) return [];
+        const c = colonyState(ref) || colonyState();
+        if (!c) return [];
+        const fId = c.factionId;
+        const pop = factionPopulation(fId);
+        if (pop >= 200) return [];
+        const want = count !== undefined ? (count | 0) : immigrationWaveSize(pop);
+        const actualCount = Math.min(want, 200 - pop);
+        if (actualCount <= 0) return [];
+
+        const F = window.UF && UF.Factions ? UF.Factions.get(fId) : null;
+        const species = F ? F.species : "human";
+        const isPlayer = F ? F.isPlayer : (fId === factionId());
+        const s = homeSiteRecord(c) || { id: c.siteId, x: c.site.x, y: c.site.y, area: c.area, faction: fId, name: "the settlement" };
+        const radius = c.radius || 4;
+        const st = W.state;
+        const taken = new Set(allFactionPeople().map(u => u.name));
+        const spawned = [];
+
+        for (let i = 0; i < actualCount; i++) {
+            const angle = unit01(st.seed, SALT.roll, ticks(), i, 3) * Math.PI * 2;
+            const dist = radius + 3 + (i % 2);
+            const tx = Math.round(c.site.x + Math.cos(angle) * dist);
+            const ty = Math.round(c.site.y + Math.sin(angle) * dist);
+            const cell = freeCellNear(levelArea(c), tx, ty, 6) ||
+                         freeCellNear(levelArea(c), c.site.x, c.site.y, radius + 5) ||
+                         freeCellNear(levelArea(c), c.site.x, c.site.y, radius + 2);
+            if (!cell) continue;
+
+            const gender = unit01(st.seed, SALT.gender, ticks(), i, 7) < 0.5 ? "male" : "female";
+            const age = 18 + Math.floor(unit01(st.seed, SALT.facet, ticks(), i, 11) * 12); // 18 - 29 young adult
+            const ageSeconds = age * 240;
+
+            const u = W.addUnit({
+                name: "",
+                image: { characterName: "$UF_Human_Male_1_Walk", characterIndex: 0 },
+                area: copyArea(c.area),
+                z: zOf(c),
+                x: cell.x,
+                y: cell.y,
+                dir: 2,
+                data: {
+                    kind: isPlayer ? "colonist" : "person",
+                    faction: fId,
+                    species: species,
+                    gender: gender,
+                    age: age,
+                    ageDays: age,
+                    ageSeconds: ageSeconds,
+                    stage: "adult",
+                    site: c.siteId
+                }
+            });
+            if (!u) continue;
+
+            convertPerson(u, st, s, taken);
+            addThought(u, "Arrived as a hopeful immigrant to join the settlement.", 12);
+
+            if (F && !u.data._popCounted) {
+                F.population = (F.population || 0) + 1;
+                u.data._popCounted = true;
+            }
+
+            if (window.UF && UF.Goals && UF.Goals.ensure) {
+                UF.Goals.ensure(u);
+            }
+
+            if (window.UF && UF.Visuals && UF.Visuals.bark) {
+                const ev = W.eventOf(u.id);
+                if (ev) UF.Visuals.bark(ev, `Glad to have made it to ${s.name || "the settlement"}!`, 180);
+            }
+
+            spawned.push(u);
+        }
+
+        if (spawned.length > 0) {
+            c.lastImmigrationTick = ticks();
+            if (window.UF && UF.Households && UF.Households.reconcile) {
+                try { UF.Households.reconcile(); } catch (e) {}
+            }
+            const P = Pillars();
+            if (P && P.assignSkillRoster) {
+                try { P.assignSkillRoster(c); } catch (e) {}
+            }
+            if (Array.isArray(c.log)) {
+                c.log.push({ tick: ticks(), text: `${spawned.length} immigrants arrived at ${s.name || "the settlement"}` });
+            }
+            emit("colonists:immigrated", spawned, s);
+            emit("factions:immigrated", spawned, s);
+        }
+        return spawned;
+    }
+
+    function stepImmigration(ref) {
+        const W = World();
+        if (!W) return [];
+        // In the test harness, automatic ambient waves are paused so they do not disrupt founder tool benchmarks.
+        if (!ref && window.UF && UF.Test && UF.Test.active) return [];
+        const targets = ref ? [colonyState(ref)].filter(Boolean) : settlementStates();
+        const allSpawned = [];
+        for (const c of targets) {
+            const fId = c.factionId;
+            const pop = factionPopulation(fId);
+            if (pop >= 180) continue;
+            // Migrant waves have a minimum cooldown between arrivals (at least 300s / 5 minutes real time)
+            if (c.lastImmigrationTick && (ticks() - c.lastImmigrationTick < 18000)) continue;
+            const chance = immigrationChance(pop);
+            const roll = unit01(seed(), SALT.roll, ticks(), c.siteId || 0);
+            if (roll < chance) {
+                const wave = spawnImmigrants(c);
+                allSpawned.push(...wave);
+            }
+        }
+        return allSpawned;
+    }
+
     function updateAgeAppearance(u) {
         if (!u.data) return;
         const age = u.data.age;
         if (age === undefined) return;
         const isMale = u.data.gender === "male";
-        let targetImg = isMale ? "$Adam" : "$Eve";
+        const v = u.data.variation || 1;
+        let targetImg = isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`;
         if (age < 2) {
             targetImg = "$Baby";
         } else if (age < 12) {
@@ -1445,8 +1725,8 @@
         } else if (age < 15) { // User specification: age 15 is adult
             targetImg = isMale ? "$Teen_Boy" : "$Teen_Girl";
         } else {
-            const tiers = tiersFor(u.data.species, u.data.gender);
-            targetImg = (tiers && tiers[u.data.tier | 0]) || (isMale ? "$Adam" : "$Eve");
+            const tiers = tiersFor(u.data.species, u.data.gender, v);
+            targetImg = (tiers && tiers[u.data.tier | 0]) || (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`);
         }
         if (u.image && u.image.characterName !== targetImg) {
             u.image.characterName = targetImg;
@@ -2229,11 +2509,21 @@
         progressAging,
         updateAgeAppearance,
         stepFactionReproduction,
+        growthTarget: 200,
+        conceptionChance,
+        twinChance,
+        postPartumCooldownSeconds,
+        gestationSeconds,
+        factionPopulation,
+        immigrationWaveSize,
+        immigrationChance,
+        spawnImmigrants,
+        stepImmigration,
         allFactionPeople,
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
         nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -2257,6 +2547,10 @@
             if (localTicks % 3600 === 0) {
                 stepFactionReproduction();
             }
+            // Every 120 seconds (2 real minutes), check for prospective immigrant waves
+            if (localTicks % 7200 === 0) {
+                stepImmigration();
+            }
         }
     };
 
@@ -2274,6 +2568,7 @@
         UF.Events.on("time:day", (day, month, year) => {
             try {
                 stepFactionReproduction();
+                stepImmigration();
                 progressPregnancies();
                 progressAging();
             } catch (e) {
@@ -2283,6 +2578,7 @@
         UF.Events.on("time:hour", hour => {
             try {
                 if (hour >= 21 || hour <= 6 || hour % 6 === 0) stepFactionReproduction();
+                if (hour === 12) stepImmigration();
             } catch (e) {
                 console.error("UF_Colonists: time:hour error", e);
             }
@@ -2399,7 +2695,7 @@
             UF.Events.on("items:changed", onItem);
             const PLAN_TYPES = ["chop", "gather", "pick", "quarry", "haul", "build", "fetch", "craft"];
             const firstPlanDone = () => doneLog.slice(doneBefore).find(x => PLAN_TYPES.includes(x.type) && x.plan);
-            const keepAwake = () => { for (const u of colonists()) u.data.needs.sleep = 0; };
+            const keepAwake = () => { for (const u of colonists()) { u.data.needs.sleep = 0; if (typeof u.data.hp === "number" && u.data.hp < 15) u.data.hp = 20; } };
             UF.Time.setLevel(3);
             const x8Start = performance.now();
             const secondsAtX8 = () => (performance.now() - x8Start) / 1000;
@@ -2563,7 +2859,7 @@
 
                 newBorn.data.age = 15;
                 Colonists.updateAgeAppearance(newBorn);
-                const tiers = tiersFor(newBorn.data.species || "human", newBorn.data.gender);
+                const tiers = tiersFor(newBorn.data.species || "human", newBorn.data.gender, newBorn.data.variation);
                 const adultWant = (tiers && tiers[0]) || (isBoy ? "$Adam" : "$Eve");
                 t.check("adult_sprite_updates", newBorn.image.characterName === adultWant,
                     `adult age 15 sprite: ${newBorn.image.characterName}`);

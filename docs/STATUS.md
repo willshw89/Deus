@@ -8,6 +8,44 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Dynamic Population Growth Curve (Rapid to 100, Level at 200) & Settlement Immigration — 2026-09-20 (Gemini)
+Delivered per user directive ("I also want immigration, so maybe a faction gets some immigrants. I want the population to grow rapidly to 100, and then slowly grow to naturally level off at 200. we should control this with birthrates"):
+- **Dynamic Birthrate & Growth Curve (Logistic / Carrying Capacity) (`UF_Colonists.js`)**:
+  - **Rapid expansion ($P < 100$)**:
+    - High conception probability: starts at 95% ($P < 20$), declining smoothly to 50% at $P = 100$.
+    - Twin births: 15% chance when $P < 40$, 5% chance when $40 \le P < 80$, 0% when $P \ge 80$.
+    - Rapid recovery: post-partum cooldown starts at only 45s ($P < 50$), scaling to 60s–120s up to $P = 100$.
+    - Accelerated gestation: 45s real-world duration at low population ($P < 50$), 60s standard.
+  - **Smooth deceleration ($100 \le P < 200$)**:
+    - Quadratic logistic falloff curve: $C(P) = 0.50 \times \left(\frac{200 - P}{100}\right)^2$.
+    - Evaluated rates: 28.1% at $P = 125$, 12.5% at $P = 150$, 3.1% at $P = 175$, 0.1% at $P = 195$.
+    - Post-partum cooldown scales up progressively to 300s (5 minutes).
+  - **Carrying Capacity Equilibrium & Reactivation ($P \ge 200$)**:
+    - Conception chance strictly drops to 0.0% when faction population reaches 200.
+    - Autonomous mating skips factions at or exceeding 200 members (`stepFactionReproduction`).
+    - If casualties or deaths drop the population below 200 (e.g. 197), conception chance and twin limits automatically reactivate, maintaining a stable carrying capacity.
+- **Settlement Immigration System (`UF_Colonists.js`, `UF_Factions.js`)**:
+  - Periodic migrant waves arrive on the settlement perimeter ($R + 3$ distance from site center) via `stepImmigration(ref)` and `spawnImmigrants(ref, count)`.
+  - Immigrant attributes: matching faction species, young adult age (18–29), gender balance, authentic tiered pixel sheets (`$UF_Human_Male_X_Walk` / `$UF_Human_Female_X_Walk`), personality facets, work skills, and starting needs.
+  - Social & civic integration: joins faction with +12 morale thought ("Arrived as a hopeful immigrant to join the settlement."), glad arrival speech barks, assigns domestic household lodging (`Households.reconcile()`), and registers overlapping discipline capabilities (`SettlementPillars.assignSkillRoster(c)`).
+  - Wave scaling & carrying capacity:
+    - Wave size: 2–4 settlers at $P < 50$, 1–2 at $50 \le P < 100$, 1 at $100 \le P < 180$, and strictly 0 at $P \ge 180$.
+    - Wave probability: 80% at $P < 50$, 50% at $50 \le P < 100$, 20% at $100 \le P < 180$, 0% at $P \ge 180$.
+    - Clamped wave arrivals: if a wave would push population over 200, it is clamped to `200 - pop` so the colony never exceeds capacity.
+    - Arrival cooldown: enforced minimum 5-minute real-time interval (`c.lastImmigrationTick`) between ambient waves.
+  - Global census synchronization: `UF_Factions.js` listens to `factions:immigrated` to increment faction census (`f.population`).
+- **Automated Verification**:
+  - `tools/test_population_growth_and_immigration.js`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - Main test suite `colonists`: **20/20 PASS, 0 FAIL (exit 0)** (tools and clothes reached, 334 colonist jobs: 101 object, 80 item, 83 position, 56 need, 14 unit; 0 without target, 0 unphysical).
+  - `tools/test_sanitation_system.js`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_settlement_pillars.js`: **10/10 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: View of the home site at zoom 2/3 with campfire stone ring, colonists gathered, and surrounding flora.
+  - `game/test_output/colonists.colonists_working.png`: Colonists engaged in gathering, building, and stockpiling at 8x speed.
+  - `game/test_output/colonists.colonist_childbirth.png`: Nighttime settlement view with constructed wooden door, timber wall, thread/fiber stockpile, and active newborn child.
+
 ## Waste & Sanitation Management, Latrines, Water Contamination, Dysentery & Medical Treatment — 2026-09-20 (Gemini)
 Delivered per user directives ("Does the user want specific civic designations for latrines/outhouses beyond the designated refuse/waste pit stockpile (stores: ["waste", "bones", "rubble"])? Yes. As a matter of fact, I want waste and sanitation to be part of the game. There needs to be a system for collecting waste and shit and keeping it away from society or else it will cause problems."):
 - **Sanitation Entities & Catalog Injection (`UF_Sanitation.js`)**:
