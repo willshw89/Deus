@@ -1,0 +1,34 @@
+{
+  "id": "sheep_attack",
+  "name": "Sheep Sheep_Attack",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "attack": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "stand": [
+      1
+    ]
+  },
+  "frameMs": 150,
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Final Fantasy VI 16-bit HD"
+}

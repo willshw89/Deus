@@ -6,7 +6,41 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- Gemini: Dwarf Demographics 100% Google Nano Banana Pro 12-Sprite Action Suite (Adult Male Dwarf, Adult Female Dwarf across Walk, Haul, Attack, Bow, Magic, Work, Downed). Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+- Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
+- Gemini: Orc Demographics 100% Google Nano Banana Pro 12-Sprite Action Suite (Adult Male Orc, Adult Female Orc across Walk, Haul, Attack, Bow, Magic, Work, Downed). Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+
+## Wildlife 100% Google Nano Banana Pro Action Suites (Eat, Attack, Sleep) — 2026-09-19 (Gemini)
+Delivered per user directives ("Generate with Nano Banana Pro", "Wildlife needs eat, attack, and sleep animations", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Leveraged user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
+  - Conditioned each action sheet on the master Walk sheet as multimodal image reference (`inlineData`), preserving exact creature scale, silhouette, features, and palette fidelity.
+  - Zero code drawing: every sprite originated strictly from authentic Google Nano Banana Pro generations.
+- **Species & Action Coverage (12 dedicated 12-sprite sheets, 144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  1. **Wild Boar**:
+     - `Eat` (`$UF_Boar_Eat.png`): Front view snout root foraging, side view grass rooting/chewing, rear view foraging.
+     - `Attack` (`$UF_Boar_Attack.png`): Charging gore strike, violent upward tusk thrust, recovery battle stance.
+     - `Sleep` (`$UF_Boar_Sleep.png`): Bedded down resting flat on the ground, limbs tucked in, head resting low.
+  2. **Red Deer Stag**:
+     - `Eat` (`$UF_Deer_Eat.png`): Lowered head ground-level grass grazing, standing chew cycle, rear grazing.
+     - `Attack` (`$UF_Deer_Attack.png`): Forward antler headbutt thrust, aggressive bucking charge, high antler ready stance.
+     - `Sleep` (`$UF_Deer_Sleep.png`): Gracefully bedded down on ground, branching antlers laid back, legs tucked beneath chest.
+  3. **Wild Hare**:
+     - `Eat` (`$UF_Hare_Eat.png`): Upright on haunches nibbling clover with forepaws, whisker twitching, low ground nibbling.
+     - `Attack` (`$UF_Hare_Attack.png`): Upright defensive boxing flurry with forepaws, leaping rear kicks. ZERO projectiles.
+     - `Sleep` (`$UF_Hare_Sleep.png`): Tightly curled compact furry ball (~12-14px height), ears folded flat, slow breathing.
+  4. **Wild Mountain Sheep**:
+     - `Eat` (`$UF_Sheep_Eat.png`): Head down nibbling alpine shrubs with curving spiral horns, chewing with heavy wool fleece.
+     - `Attack` (`$UF_Sheep_Attack.png`): Chin tucked, explosive forward headbutt ramming impact, clash recoil.
+     - `Sleep` (`$UF_Sheep_Sleep.png`): Bedded down with hooves tucked beneath thick wool fleece, horns resting along flanks.
+  5. **Timber Wolf** (delivered previously):
+     - `Eat` (`$UF_Wolf_Eat.png`), `Attack` (`$UF_Wolf_Attack.png`), `Sleep` (`$UF_Wolf_Sleep.png`).
+- **Quality Gates & Verification Evidence**:
+  - Invariant baseline grounding at native `y = 47` with invariant scaling (Boar: `38.0 / 304.0 = 0.1250`; Deer: `46.0 / 235.0 = 0.1957`; Hare: `20.0 / 169.0 = 0.1183`; Sheep: `36.0 / 216.0 = 0.1667`).
+  - Palette snapped to `art/palette/uf.hex` (<= 28 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - `tools/art_check.js --native`: **PASS 12/12 files without a FAIL**, 0 WARN.
+  - `tools/originality_check.js`: **PASS 12/12 files without a FAIL, 0 WARN** (closest distances 0.385..0.619 >= 0.28 vs U7 library).
+  - Test suites: `wildlife` **22 passed, 0 failed, exit 0**; `smoke` **9 passed, 0 failed, exit 0**; `tiles` **11 passed, 0 failed, exit 0**; `ground` **9 passed, 0 failed, exit 0**; `camera` **9 passed, 0 failed, exit 0**.
+  - Visual Evidence: Master review showcase rendered and verified in `art/review/wildlife_actions_showcase.png`.
 
 ## Adult Female Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
 Delivered per user directives ("Generate with Nano Banana Pro", "According to what we need", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
@@ -52,6 +86,49 @@ Delivered per user directives ("Generate with Nano Banana Pro", "According to wh
   - U7 Originality Check: **7/7 PASS** across all 7 action sheets (`Walk`: 0.440..0.528; `Attack`: 0.446..0.541; `Downed`: 0.438..0.512 >= 0.28).
   - In-Engine Smoke Test: **9/9 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
   - Visual Evidence: Master review board in `art/review/dwarf_male_all_7_actions_12_sprites.png`.
+
+## Adult Female Dwarf 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
+Delivered per user directives ("Generate with Nano Banana Pro", "According to what we need", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Leveraged user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
+  - Generated master 12-sprite walk reference generation (`art/raw/dwarf_female_walk_12_raw.png`), saved master reference image to `art/raw/references/dwarf_female_walk_12_reference.png`.
+  - Passed master character reference image as multimodal conditioning (`inlineData`) for all 6 subsequent action sheets (Haul, Attack, Bow, Magic, Work, Downed), guaranteeing 100% facial, anatomical, outfit, and palette consistency.
+  - Zero code drawing: every sprite originated strictly from genuine Google Nano Banana Pro generations.
+- **Complete 7-Action 12-Sprite Architecture (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  1. `Walk` (`$UF_Dwarf_Female_Walk.png`, `$UF_Dwarf_Female.png`): 4-direction step/stand/step walk cycle. Stocky fantasy dwarf woman with ruddy skin, long copper-red hair plaited into two thick braided pigtails on either side of the head, NO beard, rugged leather vest over sturdy woolen frontier tunic, dark trousers, and heavy boots.
+  2. `Haul` (`$UF_Dwarf_Female_Haul.png`): Dedicated heavy burlap sack full of raw ore held tightly in front of chest in both arms across all 4 facings.
+  3. `Attack` (`$UF_Dwarf_Female_Attack.png`): Melee dwarven battleaxe cleave strike with high ready guard, downward cleave with curved glowing slash arc, and recovery stance.
+  4. `Bow` (`$UF_Dwarf_Female_Bow.png`): Heavy dwarven arbalest / crossbow aim, trigger tension, and pluck recoil. ZERO flying bolts (VISION V111).
+  5. `Magic` (`$UF_Dwarf_Female_Magic.png`): Holding rune hammer high, rune chant posture with soft glowing rune palm aura. ZERO flying beams (VISION V111).
+  6. `Work` (`$UF_Dwarf_Female_Work.png`): Blacksmith/miner craftsman cycle with standing check, kneeling craftsman down low, and ground hammer strike on iron anvil.
+  7. `Downed` (`$UF_Dwarf_Female_Downed.png`): Defeat sequence with hurt flinch clutching chest, kneeling collapse, and flat horizontal prone resting corpse lying on the ground (~14px height).
+- **Quality Gates & Verification Evidence**:
+  - Invariant baseline grounding at native `y = 47` with uniform scale `36.0 / 236.0` (36px target height for Dwarf demographic).
+  - Serious Chibi Proportions (VISION V116): ~2.6 heads tall, 36px height, narrow determined eyes, rugged mountain folk attire.
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - U7 Originality Check: **7/7 PASS** across all 7 action sheets (min closest distances 0.436..0.534 >= 0.28).
+  - In-Engine Smoke Test: **13/13 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
+  - Visual Evidence: Master review board in `art/review/dwarf_female_all_7_actions_12_sprites.png`.
+
+## Elf Demographics 100% Google Nano Banana Pro 12-Sprite Action Suites — 2026-09-19 (Gemini)
+Delivered per user directives ("Generate with Nano Banana Pro", "According to what we need", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **Adult Male Elf & Adult Female Elf Standard 12-Sprite Action Suites (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  - Male sheets: `$UF_Elf_Male_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` and sidecars.
+  - Female sheets: `$UF_Elf_Female_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` and sidecars.
+  - Master aliases: `$UF_Elf_Walk.png`, `$UF_Elf_Haul.png`, `$UF_Elf_Attack.png`, `$UF_Elf_Bow.png`, `$UF_Elf_Magic.png`, `$UF_Elf_Work.png`, `$UF_Elf_Downed.png`, `$UF_Elf.png`.
+- **Quality Gates & Verification Evidence**:
+  - Invariant baseline grounding at native `y = 47` with uniform scale factor `40.0 / 276.0 = 0.144928` (40px standing height, ~3.1 heads tall, athletic sylvan proportions).
+  - ZERO flying arrows on Bow sheets (string draw, tension, and pluck recoil only).
+  - ZERO flying beams on Magic sheets (spell initiation chant posture with soft glowing emerald palm aura only).
+  - Dedicated heavy hauling pose holding sack/bundle in front of chest in both arms across all 4 facings.
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary alpha (0 or 255).
+  - U7 Originality Check: **PASS 14/14 files** without a FAIL, 0 WARN (Male: min 0.453..0.568 >= 0.28; Female: min 0.388..0.556 >= 0.28).
+  - In-Engine Smoke Test: **13/13 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
+  - Visual Evidence: Master review boards in `art/review/elf_male_standard_4d_review.png` and `art/review/elf_standard_4d_review_board.png`.
+
+
+
+
 
 ## Adult Male Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
 Delivered per user directives ("Alright, Let's work on our humans. Start generating", "AQ.Ab8RN6LoiuLx4FO6xapsuiH4W5UgcaKcE0PnsitFP_ZIavw-MQ Generate the human", "nano banana pro", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time... Lets make it more of a serious chibi", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
