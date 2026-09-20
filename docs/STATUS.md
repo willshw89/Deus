@@ -6,7 +6,47 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (Nano Banana II Tilesets Suite v2 & A4 Wall Autotile Architecture Fix delivered, awaiting user review)
+- None (Nano Banana II World Catalog Objects & Inventory Icons Suite Batches 1-4 delivered, awaiting user review)
+
+## Complete Google Nano Banana II World Catalog Objects & Inventory Icons Suite — 2026-09-19 (Gemini)
+
+Delivered per user requests ("Generate Character sets for RMMZ to represent all of our objects in the world, as well as their icons in the inventory. Everything that moves on its own or naturally should have an animation", "Make sure youre generating everything with nano banana II", "Show me", "Keep going, generating everyting in nano banana II"):
+- **Authentic Google Nano Banana II Generation Pipeline:**
+  - 100% generated via Google Nano Banana II (`generate_image` / `gemini-3.1-flash-image`) using authentic style/subject prompts on `#FF00FF` magenta background (Rule V69, V70, V79).
+  - Downsampled to 16-bit SNES / Final Fantasy VI style pixel art with crisp pixel clustering and cel shading.
+  - CIELAB quantized to <= 28 colors (limit 32) from `art/palette/uf.hex`.
+  - 100% binary transparency (alpha 0 or 255), zero purple/magenta halo fringe on outlines.
+- **Batches 1 - 4 Deliverables (Complete World Coverage):**
+  - **Batch 1 (Committed `c521cee`):**
+    - Fruit Trees: 96×96 mature blooming apple tree (`!$UF_Fruit_Tree.png`) and bare harvested tree (`!$UF_Fruit_Tree_Bare.png`).
+    - 3-Frame Swaying Flora: `!$UF_Reeds.png`, `!$UF_Wildflowers.png`.
+    - 16 Inventory Icons: Master 48×48 golden-bezel icons in `art/masters/<id>_icon.png` and packed into `game/img/system/IconSet.png` (log, dressed stone, rough stone, copper ore, gold ore, apple, berries, wheat, herbs, pickaxe, axe, sword, bow, campfire, crystal, potion).
+  - **Batch 2 (Committed `8b9acb1`):**
+    - Smelting Furnace (`!$UF_Furnace.png`): 96×96 masonry stone furnace with 3-frame animated roaring hearth fire loop.
+    - Village Water Well (`!$UF_Well.png`): 96×96 stone well with wooden roof canopy and 3-frame animated rippling water surface.
+    - Subterranean Bioluminescent Flora (`!$UF_{GlowCaps,CrystalCluster,CaveMushrooms}.png`): 3-frame glowing pulse loops.
+    - Wild Trees (`!$UF_{Palm,Pine}.png`): 96×96 coastal palm and evergreen pine with 3-frame wind canopy sway.
+  - **Batch 3 (Committed `45ced0d`):**
+    - Large Biome Trees & Cacti (96×96): Savanna Acacia (`!$UF_Tree_Savanna.png`), Swamp Cypress (`!$UF_Tree_Swamp.png`), Saguaro Cactus (`!$UF_CactusTall.png`), and 48×48 Prickly Pear (`!$UF_Cactus.png`).
+    - Workplaces & Ground Zones (48×48): Carpentry Workbench (`!$UF_Workbench.png`) and Stockpile ground zone (`!$UF_Stockpile.png`).
+    - Geology & Mineral Deposits (48×48): Granite Boulder (`!$UF_GraniteBoulder.png`), Copper Outcrop (`!$UF_CopperOutcrop.png`), Gold Outcrop (`!$UF_GoldOutcrop.png`), Ironstone Deposit (`!$UF_IronstoneDeposit.png`), Rubble (`!$UF_Rubble.png`), Fallen Pillar (`!$UF_FallenPillar.png`), Old Bones (`!$UF_OldBones.png`), Loose Stones (`!$UF_LooseStones.png`), Gravel (`!$UF_Gravel.png`).
+  - **Batch 4 (Committed `cdb95cc`):**
+    - Mature Timber Trees (96×96, 3-frame canopy sway): Grand Oak (`!$UF_Oak.png`), Silver Birch (`!$UF_Birch.png`), Snow Fir (`!$UF_Fir_Snow.png`).
+    - Campfire (4 Interaction States): 3-frame animated crackling fire loop (`!$UF_Campfire.png`) and cold unlit charred hearth (`!$UF_Campfire_Unlit.png`).
+    - Doors & Straw Bed (48×48): Wooden Door (`!$UF_Door_Wood.png`), Reinforced Stone Door (`!$UF_Door_Stone.png`), Thatched Straw Bed (`!$UF_Straw_Bed.png`).
+    - Shrubbery & Woodland Flora (48×48, 3-frame sway): Berry Bush Full (`!$UF_BerryBush.png`), Berry Bush Bare (`!$UF_BerryBush_Bare.png`), Shrub (`!$UF_Bush.png`), Desert Scrub (`!$UF_DesertShrub.png`), Snow Bush (`!$UF_SnowBush.png`), Tall Grass (`!$UF_GrassTuft.png`), Woodland Fern (`!$UF_Fern.png`), Tree Stump (`!$UF_Stump.png`).
+    - Subterranean Crystals: 3-frame bioluminescent shimmer pulse loop (`!$UF_SmallCrystals.png`).
+- **Verification Evidence:**
+  - `tools/art_check.js --native --sidecar`: **100% PASS across all character sets and sidecars** (all palette counts <= 28, binary alpha 0/255, proper grid sizing).
+  - `tools/originality_check.js`: **100% PASS across all character sets** (all closest distances 0.434 to 0.612 >= 0.28 vs 19,431 indexed Ultima VII shapes).
+  - In-engine Smoke Test: `tools/run_tests.js smoke`: **9/9 PASS, 0 failed, exit 0, 0 console errors**.
+  - Rule 5 Visual Inspection:
+    - `art/review/nano_banana_world_objects_showcase.png` (Batch 1 showcase).
+    - `art/review/nano_banana_batch2_showcase.png` (Batch 2 showcase).
+    - `art/review/nano_banana_batch3_showcase.png` (Batch 3 showcase).
+    - `art/review/nano_banana_batch4_showcase.png` (Batch 4 showcase).
+    - `game/test_output/smoke.map.png`: Live in-engine level -1 gameplay with colonists gathered around the circular campfire hearth, crystal clusters, and cavern mushrooms.
+  - Review gallery: all showcases integrated into `art/review/index.html`.
 
 ## Complete Nano Banana II Tileset Suite v2 & A4 Wall Autotile Architecture Fix — 2026-09-19 (Gemini)
 
