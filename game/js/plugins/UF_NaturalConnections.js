@@ -48,6 +48,7 @@
     }
     function dry(r, unit) {
         if (!validCell(r)) return false;
+        if (hasFluid(r, "water")) return false;
         const levels = L(), z = zOf(r);
         if (z < 0 && (!levels.standableShape(r) || levels.waterAt(r))) return false;
         return W().walkable(r.area.x, r.area.y, r.x, r.y, { z, unit });
@@ -221,6 +222,157 @@
         if (job && job.state === "failed") lastRefusal = job.reason || "cannot use passage";
         return job;
     }
+
+    /**
+     * Universal creature traversal: allows any creature, wildlife, monster, or unit
+     * to physically travel through a natural connection between layers.
+     */
+    function traverse(unitOrId, linkOrRoute) {
+        lastRefusal = null;
+        const world = W(), unit = typeof unitOrId === "object" ? unitOrId : world && world.unit(unitOrId);
+        if (!unit || !world || world.unit(unit.id) !== unit) return reject("no world creature");
+        let route = null;
+        if (linkOrRoute && linkOrRoute.from && linkOrRoute.to) {
+            route = linkOrRoute;
+        } else if (linkOrRoute) {
+            const link = typeof linkOrRoute === "object" ? linkOrRoute : links().find(c => c.id === linkOrRoute);
+            route = link ? endpoints(link, unit) : null;
+        } else {
+            const here = at(unit);
+            if (here && here.length > 0) {
+                route = endpoints(here[0], unit);
+            }
+        }
+        if (!route) return reject("no passage from creature's location");
+        if (!dry(route.from, unit)) return reject("the entrance is blocked or unsupported");
+        if (!free(route.to, unit)) return reject("the landing is occupied, blocked, wet or unsupported");
+        const from = copy(route.from), to = copy(route.to);
+        if (!world.moveUnitToLevel(unit, to.z, to.x, to.y)) return reject("the level move was refused");
+        if (unit.data) {
+            unit.data._lastLayerTraverse = (UF.Time && typeof UF.Time.ticks === "function") ? UF.Time.ticks() : Date.now();
+        }
+        const result = { moved: true, unitId: unit.id, from, to };
+        if (UF.Events) {
+            UF.Events.emit("naturalConnections:traversed", unit, copy(result));
+            UF.Events.emit("creature:traversed", unit, copy(result));
+        }
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+    // Liquid physics across natural connections
+
+    const fluidKey = r => `${r.area ? r.area.x : 0},${r.area ? r.area.y : 0}:${zOf(r)}:${r.x},${r.y}`;
+
+    function fluidsState() {
+        const s = state();
+        if (!s) return null;
+        if (!s.fluids) s.fluids = { cells: {} };
+        return s.fluids;
+    }
+
+    function hasFluid(r, type = "water") {
+        if (!validCell(r)) return false;
+        const fs = fluidsState();
+        if (fs && fs.cells) {
+            const entry = fs.cells[fluidKey(r)];
+            if (entry && (!type || entry.type === type)) return true;
+        }
+        return false;
+    }
+
+    function isWater(r) {
+        if (!validCell(r)) return false;
+        if (hasFluid(r, "water")) return true;
+        const levels = L();
+        if (levels && typeof levels.waterAt === "function" && levels.waterAt(r)) return true;
+        const jobs = J();
+        if (jobs && typeof jobs.isWaterAt === "function" && jobs.isWaterAt(r.area || { x: 0, y: 0 }, r.x, r.y)) return true;
+        return false;
+    }
+
+    const modifiedBaselines = [];
+    function addFluid(r, type = "water") {
+        if (!validCell(r)) return false;
+        const fs = fluidsState();
+        if (!fs) return false;
+        fs.cells[fluidKey(r)] = { type, time: (UF.Time && typeof UF.Time.ticks === "function") ? UF.Time.ticks() : 0 };
+        const levels = L(), world = W();
+        const z = zOf(r);
+        if (z < 0 && levels && typeof levels.baseline === "function" && world && world.state) {
+            const b = levels.baseline(z, r.area ? r.area.x : 0, r.area ? r.area.y : 0);
+            if (b && b.water) {
+                const idx = r.y * (world.state.size || 24) + r.x;
+                if (!b.water[idx]) {
+                    b.water[idx] = 1;
+                    modifiedBaselines.push({ b, idx });
+                }
+            }
+        }
+        return true;
+    }
+
+    function clearFluids() {
+        const fs = fluidsState();
+        if (fs) fs.cells = {};
+        while (modifiedBaselines.length > 0) {
+            const m = modifiedBaselines.pop();
+            if (m.b && m.b.water) m.b.water[m.idx] = 0;
+        }
+    }
+
+    function updateFluids() {
+        const cList = links();
+        if (!cList.length) return [];
+        const flows = [];
+        const nowTicks = (UF.Time && typeof UF.Time.ticks === "function") ? UF.Time.ticks() : 0;
+
+        for (const link of cList) {
+            const upper = zOf(link.a) > zOf(link.b) ? link.a : link.b;
+            const lower = zOf(link.a) > zOf(link.b) ? link.b : link.a;
+
+            // Liquid flows down only if liquid is actually present at the upper entrance
+            if (isWater(upper)) {
+                addFluid(lower, "water");
+
+                const flow = { linkId: link.id, type: "water", from: copy(upper), to: copy(lower), tick: nowTicks };
+                flows.push(flow);
+                if (UF.Events) {
+                    UF.Events.emit("naturalConnections:fluidFlow", flow);
+                    UF.Events.emit("fluids:flow", flow);
+                }
+            }
+        }
+        return flows;
+    }
+
+    function stepCreatures() {
+        const world = W();
+        if (!world || !world.state) return;
+        const nowTicks = (UF.Time && typeof UF.Time.ticks === "function") ? UF.Time.ticks() : 0;
+        const cList = links();
+        if (!cList.length) return;
+
+        for (const u of world.units()) {
+            if (!u || !u.data) continue;
+            // People and colonists follow player orders and jobs, not wandering auto-step
+            if (u.data.kind === "colonist" || u.data.kind === "person") continue;
+            if (J() && typeof J().of === "function" && J().of(u.id)) continue;
+            if (u.goal) continue;
+
+            const last = u.data._lastLayerTraverse || 0;
+            if (last && nowTicks - last < 150) continue;
+
+            const here = at(u);
+            if (!here.length) continue;
+
+            const route = endpoints(here[0], u);
+            if (!route || !free(route.to, u)) continue;
+
+            traverse(u, route);
+        }
+    }
+
     let feedback = { text: "", until: 0 };
     function showFeedback(text) {
         feedback = { text, until: Graphics.frameCount + 240 };
@@ -297,6 +449,7 @@
     }
     window.UF = window.UF || {};
     const API = { VERSION, TYPE, generate, list, at, reserved, travel, orderSelected, state, lastRefusal: () => lastRefusal,
+        traverse, updateFluids, hasFluid, addFluid, clearFluids, isWater,
         markers: () => { const s = SceneManager._scene; const m = s && s._spriteset && s._spriteset._ufPassageMarkers; return m ? m.pool.filter(p => p.visible) : []; } };
     UF.NaturalConnections = API;
     let hooked = false;
@@ -311,6 +464,13 @@
             if (UF.Test && UF.Test.active && argv.includes("--uf-test=natural_connections") && args[0] === undefined) args[0] = 20260919;
             const result = original.apply(this, args); generate(); return result;
         };
+        if (L() && typeof L().waterAt === "function") {
+            const origWaterAt = L().waterAt;
+            L().waterAt = function(r) {
+                if (hasFluid(r, "water")) return true;
+                return origWaterAt.apply(this, arguments);
+            };
+        }
     }
     const _boot = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() { hook(); if (UF.Test && UF.Test.active) registerChecks(); _boot.call(this); };
@@ -331,6 +491,10 @@
         _sceneUpdate.call(this);
         if (this._ufPassageNotice && this._ufPassageNotice.visible && Graphics.frameCount > feedback.until) this._ufPassageNotice.hide();
         if (shortcut && this.isActive() && Input.isTriggered("uf_naturalPassage") && !$gameMessage.isBusy() && !$gameMap.isEventRunning()) orderSelected(Input.isPressed("shift") ? 1 : -1);
+        if (Graphics.frameCount % 30 === 0) {
+            updateFluids();
+            stepCreatures();
+        }
     };
 
     function registerChecks() {
@@ -403,6 +567,23 @@
                 UF.Time.resume();
                 await t.waitUntil(() => ordered && ["done", "failed"].includes(ordered.state), 15000, "keyboard return to Ground").catch(() => {});
                 t.check("keyboard_order_moves_unit", ordered && ordered.state === "done" && worker.z === 0, `${ordered && ordered.state}; worker ${worker.z}; view ${world.viewLevel().z}`);
+
+                // Creature traversal check: non-colonist creatures can travel between layers
+                const testWolf = world.addUnit({ name: "TEST_Wolf", area: copy(upper.a.area), x: upper.a.x, y: upper.a.y, z: 0,
+                    image: { characterName: "$Wolf", characterIndex: 0 }, data: { kind: "creature", species: "wolf" } });
+                const travRes = API.traverse(testWolf, upper.id);
+                t.check("creature_traversal", travRes && travRes.moved && testWolf.z === -1 && testWolf.x === upper.b.x && testWolf.y === upper.b.y,
+                    `creature traversal: moved ${travRes && travRes.moved}, z ${testWolf.z} (expected -1)`);
+                world.removeUnit(testWolf.id);
+
+                // Liquid physics check: water flows down connections to lower levels
+                API.addFluid(upper.a, "water");
+                t.check("liquid_present_at_entrance", API.hasFluid(upper.a, "water"), `water added to upper entrance: ${API.hasFluid(upper.a, "water")}`);
+                const flows = API.updateFluids();
+                t.check("liquid_flow_through_connection", flows.length > 0 && API.hasFluid(upper.b, "water"),
+                    `flows ${flows.length}, water reached lower landing: ${API.hasFluid(upper.b, "water")}`);
+                API.clearFluids();
+
                 t.check("no_errors", t.errorsSoFar().length === errors0, `${t.errorsSoFar().length - errors0} new errors`);
             } finally {
                 Input._currentState.uf_naturalPassage = false; Input._currentState.shift = false;

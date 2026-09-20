@@ -121,10 +121,10 @@
     // Flat colours drawn in a slot whose sheet failed to load, so a level still reads (graybox).
     const FALLBACK_RGB = { rock: "#5c5c68", soil: "#6e5c48", open_air: "#6f8fb8", hole_edge: "#20242c" };
     const IMPASSABLE_LOOKS = new Set(["rock", "soil", "open_air", "hole_edge"]);
-    const SHEETS = Object.freeze({ A2: "UF_GenLevels_A2", A4: "UF_GenLevels_A4", B: "UF_GenLevels_B" });
-    const SHEET_SIZE = Object.freeze({ A2: [768, 576], A4: [768, 720], B: [768, 768] });
+    const SHEETS = Object.freeze({ A1: "UF_GenLevels_A1", A2: "UF_GenLevels_A2", A4: "UF_GenLevels_A4", B: "UF_GenLevels_B" });
+    const SHEET_SIZE = Object.freeze({ A1: [768, 576], A2: [768, 576], A4: [768, 720], B: [768, 768] });
     const NAME_OF = { rock: "Rock", soil: "Soil", cave_floor: "Cave floor", mined_stone: "Dug stone floor", mined_soil: "Dug earth floor",
-        deck_wood: "Wooden floor", deck_stone: "Stone floor", open_air: "Open air" };
+        deck_wood: "Wooden floor", deck_stone: "Stone floor", open_air: "Open air", freshwater_pool: "Fresh water", lava_pool: "Lava pool" };
 
     const World = () => (window.UF && UF.World) || null;
     const catalog = () => window.$ufWorldCatalog || null;
@@ -222,7 +222,8 @@
             const e = fromCat[key] || DEFAULT_LOOK[key];
             if (e && e.sheet && e.slot) out[key] = e;
         }
-        out.freshwater_pool = { sheet: "Outside_A1", slot: "A1", kind: 0 };
+        out.freshwater_pool = { sheet: "Dungeon_A1", slot: "A1", kind: 0 };
+        out.lava_pool = { sheet: "Dungeon_A1", slot: "A1", kind: 4 };
         return out;
     }
 
@@ -299,6 +300,18 @@
             composed.bitmaps[slot] = composed.bitmaps[slot] || new Bitmap(w, h);
             composed.bitmaps[slot].clear();
         }
+        const dstA1 = composed.bitmaps["A1"];
+        if (dstA1) {
+            const bmpDungA1 = composed.sources["Dungeon_A1"];
+            if (bmpDungA1 && bmpDungA1.isReady() && !bmpDungA1.isError()) {
+                dstA1.context.drawImage(bmpDungA1.canvas, 0, 0);
+            } else {
+                const bmpOutA1 = composed.sources["Outside_A1"];
+                if (bmpOutA1 && bmpOutA1.isReady() && !bmpOutA1.isError()) {
+                    dstA1.context.drawImage(bmpOutA1.canvas, 0, 0);
+                }
+            }
+        }
         composed.failed = [];
         for (const key of Object.keys(TARGET)) {
             const e = L[key];
@@ -352,6 +365,7 @@
     // Tile ids of the looks in tileset 92.
     function tileBase(key) {
         if (key === "freshwater_pool") return Tilemap.TILE_ID_A1;
+        if (key === "lava_pool") return Tilemap.TILE_ID_A1 + 4 * 48;
         const t = TARGET[key];
         if (!t) return 0;
         if (t[0] === "A2") return Tilemap.TILE_ID_A2 + t[1] * 48;
@@ -379,9 +393,10 @@
             if (slot === "A4") for (let s = 0; s < 48; s++) flags[base + 8 * 48 + s] = f; // the side autotile of the same kind
         }
         for (let s = 0; s < 48; s++) flags[Tilemap.TILE_ID_A1 + s] = 0x0f;
+        for (let s = 0; s < 48; s++) flags[Tilemap.TILE_ID_A1 + 4 * 48 + s] = 0x0f;
         $dataTilesets[TILESET_ID] = {
             id: TILESET_ID, mode: 1, name: "UF Levels (runtime)", note: "",
-            tilesetNames: ["Outside_A1", SHEETS.A2, "", SHEETS.A4, "", SHEETS.B, "", "", ""],
+            tilesetNames: [SHEETS.A1, SHEETS.A2, "", SHEETS.A4, "", SHEETS.B, "", "", ""],
             flags
         };
     }
@@ -758,7 +773,7 @@
             if (!c && s === FLOOR && biomeInfo) {
                 const b = BIOMES[biomeInfo.code];
                 if (b) base = b.floorLook;
-                if (biomeInfo.water) base = "freshwater_pool";
+                if (biomeInfo.water) base = (z === -2 ? "lava_pool" : "freshwater_pool");
             }
             if (s === RAMP) l2 = "ramp_up";
             else if (s === STAIR_UP) l2 = "stair_up";
@@ -950,8 +965,8 @@
         else if (s === OPEN) text = r.z > 0 ? "Open air" : "Hole";
         else if (s === RAMP) text = "Ramp";
         else if (s >= STAIR_UP) text = s === STAIR_UP ? "Stairs up" : s === STAIR_DOWN ? "Stairs down" : "Stairs up and down";
-        else if (waterAt(ref)) text = "Fresh water";
-        else text = NAME_OF[looksOfPacked(p, r.z, { code: biomeCodeAt(r.ax, r.ay, r.x, r.y, r.z) })[0]] || SHAPE_NAMES[s];
+        else if (waterAt(ref)) text = r.z === -2 ? "Lava pool" : "Fresh water";
+        else text = NAME_OF[looksOfPacked(p, r.z, { code: biomeCodeAt(r.ax, r.ay, r.x, r.y, r.z), water: waterAt(ref) })[0]] || SHAPE_NAMES[s];
         const biome = biomeAt(ref);
         return `${label} · ${text}${biome ? ` · ${biome.name}` : ""}`;
     }
@@ -1313,7 +1328,7 @@
         cellAt: ref => {
             const r = refOf(ref);
             const p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
-            return p ? Object.assign(unpack(p), { biome: biomeAt(ref), water: waterAt(ref) }) : null;
+            return p ? Object.assign(unpack(p), { biome: biomeAt(ref), water: waterAt(ref), liquid: waterAt(ref) ? (r.z === -2 ? "lava" : "water") : null }) : null;
         },
         setShape,
         lastRefusal: () => lastRefusal,

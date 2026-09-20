@@ -217,4 +217,29 @@ check("nonplayer_shortcut_refused", () => {
     const h = fixture(), { u } = enter(h); u.data.faction = "other"; h.context.$colonyManager = { selectedColonist: { id: u.id } };
     assert.equal(h.N.orderSelected(-1), null); assert.equal(h.J.list().length, 0);
 });
+check("universal_creature_traversal", () => {
+    const h = fixture(), { link } = enter(h);
+    const creature = h.unit(link.a.x, link.a.y, 0, { kind: "creature", species: "wolf" });
+    const res = h.N.traverse(creature, link.id);
+    assert.ok(res && res.moved);
+    assert.equal(creature.z, -1);
+    assert.equal(creature.x, link.b.x);
+    assert.equal(creature.y, link.b.y);
+});
+check("liquid_physics_flow", () => {
+    const h = fixture(), link = h.N.list().find(l => l.a.z === 0);
+    assert.ok(link);
+    h.N.addFluid(link.a, "water");
+    assert.ok(h.N.hasFluid(link.a, "water"));
+    const flows = h.N.updateFluids();
+    assert.ok(flows.length > 0);
+    assert.ok(h.N.hasFluid(link.b, "water"));
+});
+check("liquid_makes_landing_wet_refusing_travel", () => {
+    const h = fixture(), { link, u } = enter(h);
+    h.N.addFluid(link.b, "water");
+    const job = h.N.travel(u, link.id);
+    assert.equal(job.state, "failed");
+    assert.match(job.reason, /landing/);
+});
 console.log(`RESULT: ${passed} passed, ${failed} failed`); process.exitCode = failed ? 1 : 0;

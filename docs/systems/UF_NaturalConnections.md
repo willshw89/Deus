@@ -19,6 +19,11 @@ All cell references are `{area:{x,y},x,y,z}`. Missing z means Ground; strings, n
 | `at(cell)` | Detached links whose endpoint exactly matches the cell. At the middle entrance of a chain, returns both its upper and lower links. |
 | `reserved(cell)` | True for an endpoint or its one-cell clearance on the same level. A house/build planner can consult this without mutating passage records. |
 | `travel(unitOrId, linkId)` | Assigns a dedicated owned job from the worker's current area and level. Returns the job, including a failed job with a normal reason when planning fails; null for invalid workers/links or an existing job/movement order. Does not silently replace another order. |
+| `traverse(unitOrId, linkOrRoute)` | Universal creature traversal: allows any creature, wildlife, monster, or unit to physically cross between connected layers if at the passage and landing is clear. |
+| `updateFluids()` | Simulates liquid physics through layer connections: if water is present at an upper entrance, it pours down to the lower landing, wetting the lower landing and emitting `naturalConnections:fluidFlow` and `fluids:flow`. |
+| `hasFluid(cell, type="water")` | Checks if dynamic fluid is present at cell. |
+| `addFluid(cell, type="water")` | Marks fluid at cell (and syncs to baseline water if underground). |
+| `clearFluids()` | Clears dynamic fluids and resets modified baselines. |
 | `orderSelected(direction=-1)` | Explicit player command. `-1` descends, `1` ascends. Requires a selected player colonist. Searches nearest same-level direction-compatible endpoints, validates the path and landing, then calls `Colonists.order`. Invalid commands preserve the current job. Displays a short bottom-screen notice. |
 | `lastRefusal()` | Last public command/generation refusal string or null. Job failures also have their ordinary `job.reason`. |
 | `markers()` | Visible passage sprites in the current scene; useful for visual tests. Each has `_ufPassage` with its cell. |
