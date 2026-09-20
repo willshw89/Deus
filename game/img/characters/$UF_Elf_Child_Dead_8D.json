@@ -20,18 +20,21 @@
     "SE"
   ],
   "animations": {
-    "walk": [
-      0,
-      1,
-      2,
+    "hurt": [
+      0
+    ],
+    "collapse": [
       1
     ],
-    "stand": [
-      1
+    "dead": [
+      2
+    ],
+    "sleep": [
+      2
     ]
   },
   "frameMs": 200,
   "species": "Elf",
-  "stage": "adult",
-  "action": "Walk"
+  "stage": "child",
+  "action": "Dead"
 }

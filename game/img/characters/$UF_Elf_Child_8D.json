@@ -32,6 +32,6 @@
   },
   "frameMs": 200,
   "species": "Elf",
-  "stage": "adult",
+  "stage": "child",
   "action": "Walk"
 }

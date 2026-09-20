@@ -19,6 +19,8 @@
     "E",
     "SE"
   ],
+  "frameMs": 150,
+  "species": "elf",
   "animations": {
     "stand": [
       0
@@ -26,13 +28,15 @@
     "walk": [
       1,
       2,
-      3,
-      2
+      3
     ],
     "work": [
       4,
       5,
       6
+    ],
+    "carry": [
+      7
     ],
     "attack": [
       8,
@@ -47,13 +51,14 @@
     "hurt": [
       14
     ],
-    "dead": [
+    "death": [
       15,
-      16
+      16,
+      17
+    ],
+    "idle": [
+      18,
+      19
     ]
-  },
-  "frameMs": 200,
-  "species": "elf",
-  "demographic": "Female",
-  "stage": "adult"
+  }
 }

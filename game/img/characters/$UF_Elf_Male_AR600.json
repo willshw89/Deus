@@ -19,9 +19,6 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
-  "gender": "male",
   "animations": {
     "stand": [
       0
@@ -29,15 +26,13 @@
     "walk": [
       1,
       2,
-      3
+      3,
+      2
     ],
     "work": [
       4,
       5,
       6
-    ],
-    "carry": [
-      7
     ],
     "attack": [
       8,
@@ -52,14 +47,13 @@
     "hurt": [
       14
     ],
-    "death": [
+    "dead": [
       15,
-      16,
-      17
-    ],
-    "idle": [
-      18,
-      19
+      16
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "elf",
+  "demographic": "Male",
+  "stage": "adult"
 }

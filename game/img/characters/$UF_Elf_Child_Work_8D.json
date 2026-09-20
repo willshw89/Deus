@@ -20,18 +20,14 @@
     "SE"
   ],
   "animations": {
-    "walk": [
+    "work": [
       0,
       1,
-      2,
-      1
-    ],
-    "stand": [
-      1
+      2
     ]
   },
   "frameMs": 200,
   "species": "Elf",
-  "stage": "adult",
-  "action": "Walk"
+  "stage": "child",
+  "action": "Work"
 }

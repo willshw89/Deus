@@ -54,6 +54,6 @@
   },
   "frameMs": 200,
   "species": "elf",
-  "demographic": "Female",
-  "stage": "adult"
+  "demographic": "Child",
+  "stage": "child"
 }

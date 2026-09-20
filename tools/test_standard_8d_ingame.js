@@ -125,35 +125,70 @@ const showcaseCode = `
         ];
 
         if (W && curArea) {
-            // Row 0: Movement (8 directions walking in place)
+            // --- TOP SECTOR: 8-Directional Formations ---
+            // Row -5: Adult Male Walkers (8 facings walking in place)
             facings8.forEach((f, i) => {
-                addShowcaseUnit({ name: "Elf Walk " + f.name, image: { characterName: "$UF_Elf_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 4 }, f.dir, undefined, true);
+                addShowcaseUnit({ name: "Elf Male Walk " + f.name, image: { characterName: "$UF_Elf_Male_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 5 }, f.dir, undefined, true);
             });
 
-            // Row 1: Melee Attack (8 directions striking with crescent arcs, pattern 1)
+            // Row -4: Adult Female Walkers (8 facings walking in place)
             facings8.forEach((f, i) => {
-                addShowcaseUnit({ name: "Elf Strike " + f.name, image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 2 }, f.dir, 1, false);
+                addShowcaseUnit({ name: "Elf Female Walk " + f.name, image: { characterName: "$UF_Elf_Female_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 4 }, f.dir, undefined, true);
             });
 
-            // Row 2: Ranged Bow (8 directions aiming bows, pattern 1)
+            // Row -3: Elf Child Walkers (8 facings walking in place)
             facings8.forEach((f, i) => {
-                addShowcaseUnit({ name: "Elf Bow " + f.name, image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy }, f.dir, 1, false);
+                addShowcaseUnit({ name: "Elf Child Walk " + f.name, image: { characterName: "$UF_Elf_Child_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 3 }, f.dir, undefined, true);
             });
 
-            // Row 3: Arcane Magic (8 directions casting with radiant emerald mana, pattern 1)
-            facings8.forEach((f, i) => {
-                addShowcaseUnit({ name: "Elf Magic " + f.name, image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 2 }, f.dir, 1, false);
+            // --- MID SECTOR: Combat & Action Demographics Lineup ---
+            // Row -1: Melee Attack (Male, Female, Child lunging with crescent slashes)
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf M Strike " + f.name, image: { characterName: "$UF_Elf_Male_Attack_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 1 }, f.dir, 1, false);
+            });
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf F Strike " + f.name, image: { characterName: "$UF_Elf_Female_Attack_8D", characterIndex: 0 }, x: cx + i, y: cy - 1 }, f.dir, 1, false);
             });
 
-            // Row 4: Crafting / Work (8 directions kneeling carving with knife, pattern 1)
-            facings8.forEach((f, i) => {
-                addShowcaseUnit({ name: "Elf Work " + f.name, image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 4 }, f.dir, 1, false);
+            // Row 0: Ranged Bows (Male, Female, Child aiming longbows & training bows)
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf M Bow " + f.name, image: { characterName: "$UF_Elf_Male_Bow_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy }, f.dir, 1, false);
+            });
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf C Bow " + f.name, image: { characterName: "$UF_Elf_Child_Bow_8D", characterIndex: 0 }, x: cx + i, y: cy }, f.dir, 1, false);
             });
 
-            // Row 5: Downed / Medical (Flinch, Kneeling Collapse, Dead corpse)
-            addShowcaseUnit({ name: "Elf Hurt (Flinch)",    image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx - 2, y: cy + 6 }, 2, 0, false);
-            addShowcaseUnit({ name: "Elf Collapse (Kneel)", image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx,     y: cy + 6 }, 2, 1, false);
-            addShowcaseUnit({ name: "Elf Fallen (Corpse)",  image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx + 2, y: cy + 6 }, 2, 2, false);
+            // Row 1: Arcane Magic (Male, Female, Child casting radiant emerald mana glowing hands)
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf F Magic " + f.name, image: { characterName: "$UF_Elf_Female_Magic_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 1 }, f.dir, 1, false);
+            });
+            facings8.slice(0, 4).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf C Magic " + f.name, image: { characterName: "$UF_Elf_Child_Magic_8D", characterIndex: 0 }, x: cx + i, y: cy + 1 }, f.dir, 1, false);
+            });
+
+            // Row 2: Crafting & Gathering (Father carving, Mother crafting, Child gathering berries)
+            facings8.slice(0, 3).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf M Work " + f.name, image: { characterName: "$UF_Elf_Male_Work_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 2 }, f.dir, 1, false);
+            });
+            facings8.slice(0, 3).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf F Work " + f.name, image: { characterName: "$UF_Elf_Female_Work_8D", characterIndex: 0 }, x: cx - 1 + i, y: cy + 2 }, f.dir, 1, false);
+            });
+            facings8.slice(0, 2).forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf C Work " + f.name, image: { characterName: "$UF_Elf_Child_Work_8D", characterIndex: 0 }, x: cx + 2 + i, y: cy + 2 }, f.dir, 1, false);
+            });
+
+            // --- BOTTOM SECTOR: Downed & Family Group ---
+            // Row 4: Downed & Sleeping Demographics
+            addShowcaseUnit({ name: "Elf M Hurt",       image: { characterName: "$UF_Elf_Male_Dead_8D", characterIndex: 0 }, x: cx - 4, y: cy + 4 }, 2, 0, false);
+            addShowcaseUnit({ name: "Elf F Collapse",   image: { characterName: "$UF_Elf_Female_Dead_8D", characterIndex: 0 }, x: cx - 2, y: cy + 4 }, 2, 1, false);
+            addShowcaseUnit({ name: "Elf C Sleep",      image: { characterName: "$UF_Elf_Child_Dead_8D", characterIndex: 0 }, x: cx,     y: cy + 4 }, 2, 2, false);
+            addShowcaseUnit({ name: "Elf M Fallen",     image: { characterName: "$UF_Elf_Male_Dead_8D", characterIndex: 0 }, x: cx + 2, y: cy + 4 }, 2, 2, false);
+            addShowcaseUnit({ name: "Elf F Fallen",     image: { characterName: "$UF_Elf_Female_Dead_8D", characterIndex: 0 }, x: cx + 4, y: cy + 4 }, 2, 2, false);
+
+            // Row 5: Intimate Family Group (Father, Mother, Child standing side-by-side)
+            addShowcaseUnit({ name: "Father Guard", image: { characterName: "$UF_Elf_Male_8D", characterIndex: 0 }, x: cx - 1, y: cy + 6 }, 2, 1, false);
+            addShowcaseUnit({ name: "Mother Sylvan", image: { characterName: "$UF_Elf_Female_8D", characterIndex: 0 }, x: cx + 1, y: cy + 6 }, 2, 1, false);
+            addShowcaseUnit({ name: "Child Youth", image: { characterName: "$UF_Elf_Child_8D", characterIndex: 0 }, x: cx, y: cy + 6 }, 2, 1, false);
         }
 
         // Center camera directly on the showcase center

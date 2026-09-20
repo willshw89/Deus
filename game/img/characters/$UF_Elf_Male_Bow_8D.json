@@ -19,14 +19,15 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
-  "gender": "male",
   "animations": {
-    "bow": [
+    "shoot": [
       0,
       1,
       2
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Bow"
 }

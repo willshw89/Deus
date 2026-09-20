@@ -1,6 +1,4 @@
 {
-  "id": "$UF_Elf_Female_Attack_8D",
-  "species": "elf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -21,14 +19,15 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "gender": "female",
-  "category": "colonist",
   "animations": {
     "attack": [
       0,
       1,
       2
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Attack"
 }
