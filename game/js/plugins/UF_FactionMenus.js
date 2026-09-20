@@ -283,6 +283,9 @@
             if (w && w instanceof Window_Base) {
                 w.windowskin = skin;
                 w.opacity = 210;
+                if (typeof w.refresh === "function") {
+                    w.refresh();
+                }
             }
         };
         if (this._windowLayer && this._windowLayer.children) {
@@ -293,6 +296,37 @@
                 updateWin(this[key]);
             }
         }
+    };
+
+    // Dynamic Actor Face support for Faction Menus & Windows
+    const _Game_Actor_faceName = Game_Actor.prototype.faceName;
+    Game_Actor.prototype.faceName = function() {
+        const orig = _Game_Actor_faceName.call(this);
+        if (orig && orig !== "U7_Faces" && orig !== "") return orig;
+        const faction = safeFaction(UF_FactionMenus.getFaction());
+        return `UF_Faces_${faction === "default" ? "human" : faction}_1`;
+    };
+
+    const _Game_Actor_faceIndex = Game_Actor.prototype.faceIndex;
+    Game_Actor.prototype.faceIndex = function() {
+        const origName = _Game_Actor_faceName.call(this);
+        if (origName && origName !== "U7_Faces" && origName !== "") return _Game_Actor_faceIndex.call(this);
+        return 0;
+    };
+
+    const _Window_Base_drawFace = Window_Base.prototype.drawFace;
+    Window_Base.prototype.drawFace = function(faceName, faceIndex, x, y, width, height) {
+        if (faceName) {
+            const bmp = ImageManager.loadFace(faceName);
+            if (bmp && !bmp.isReady()) {
+                bmp.addLoadListener(() => {
+                    if (this && this.contents && typeof this.refresh === "function") {
+                        this.refresh();
+                    }
+                });
+            }
+        }
+        _Window_Base_drawFace.call(this, faceName, faceIndex, x, y, width, height);
     };
 
     // Keyboard navigation to preview / cycle faction themes in Scene_Menu
@@ -352,13 +386,15 @@
                 UF_FactionMenus.setFaction(fac);
                 const bmp = ImageManager.loadPicture(`UF_Menu_${fac}`);
                 const skin = ImageManager.loadSystem(`Window_${fac}`);
+                const faceName = `UF_Faces_${fac === "default" ? "human" : fac}_1`;
+                const face = ImageManager.loadFace(faceName);
 
-                await t.waitUntil(() => bmp.isReady() && skin.isReady(), 5000, `UF_Menu_${fac} assets ready`);
-                await t.waitFrames(8);
+                await t.waitUntil(() => bmp.isReady() && skin.isReady() && face.isReady(), 5000, `UF_Menu_${fac} and ${faceName} assets ready`);
+                await t.waitFrames(10);
                 t.screenshot(`menu_clean_${fac}`);
             }
 
-            t.check("menu_themes_rendered", true, "All 12 clean matching menus captured without selector cursors");
+            t.check("menu_themes_rendered", true, "All 12 clean matching menus with faction faces captured without selector cursors");
             SceneManager.pop();
             await t.waitFrames(10);
         });

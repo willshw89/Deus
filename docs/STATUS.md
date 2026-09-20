@@ -30,13 +30,15 @@ Delivered per user directives ("Ensure all of the cursors are pointy. Also, make
 - **Default Main Menu Backdrop & Windowskin**:
   - `UF_Menu_default.png` (816×624): Carved stone pillars, battlements, griffin gargoyles flanking a fortress crown crest, seamless dark slate masonry interior pattern with zero baked-in text.
   - `Window_default.png` (192×192): Clean fortress granite border, burnished bronze corner brackets, translucent slate stone backplate.
-- **Engine Integration (`UF_FactionMenus.js`)**:
+- **In-Window Faction Faces & Engine Integration (`UF_FactionMenus.js`)**:
   - `Scene_Title` displays `UF_Menu_default.png`, `Window_default.png`, and `Cursor_default.png`.
   - Zero selector cursor sprites rendered on menu command windows; all cursor behavior is native literal mouse cursors.
+  - `Window_MenuStatus` and menu windows dynamically render the matching 144×144 U7-framed faction face (`UF_Faces_<fac>_1`, index 0) for the Overseer / party leader, perfectly filling the designated face slot beside the status stats.
+  - Dynamic cycling: cycling faction themes via Tab / bracket keys simultaneously updates the 816×624 wallpaper, 192×192 windowskin, 48×48 pointy cursor, and the 144×144 in-window actor face in lockstep.
 - **Quality Gates & Verification Evidence**:
   - `tools/originality_check.js`: **PASS 5/5 files without a FAIL, 0 WARN** (Cursor_default 0.464, Cursor_dwarf 0.450, Cursor_orc 0.508, UF_Menu_default 0.323, Window_default 0.555 >= 0.28).
   - Automated tests: `tools/test_faction_menus_clean.js` **8 passed, 0 failed (exit 0)**.
-  - Visual Evidence: Master review board in `art/review/all_pointy_cursors_and_default_menu_showcase.png`, cursor hotspot inspection in `art/review/all_cursors_inspected.png`, live menu capture in `art/review/menus/faction_menus.menu_clean_default.png`.
+  - Visual Evidence: Master review board in `art/review/all_pointy_cursors_and_default_menu_showcase.png`, cursor hotspot inspection in `art/review/all_cursors_inspected.png`, live menu captures with in-window faction faces in `art/review/menus/faction_menus.menu_clean_*.png`.
 
 ## Wildlife 100% Google Nano Banana Pro Action Suites (Eat, Attack, Sleep) — 2026-09-19 (Gemini)
 Delivered per user directives ("Generate with Nano Banana Pro", "Wildlife needs eat, attack, and sleep animations", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
