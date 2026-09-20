@@ -510,8 +510,40 @@
     /** Factions the ledger shows: the player's and the ones met so far (user decision 2026-09-18). */
     Factions.listed = () => Factions.all().filter(f => f.isPlayer || f.met);
 
+    /** Current living census count for a faction. */
+    Factions.census = function(id) {
+        const fid = resolve(id);
+        const W = window.UF && UF.World;
+        if (!W || !fid) return 0;
+        return W.units().filter(u => u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction === fid && !u.data.dead && !u.data._isDying).length;
+    };
+
     // New Game rolls new factions together with the new world.
-    if (window.UF.Events && UF.Events.on) UF.Events.on("world:created", state => Factions.generate(state));
+    if (window.UF.Events && UF.Events.on) {
+        UF.Events.on("world:created", state => Factions.generate(state));
+        UF.Events.on("factions:born", child => {
+            if (child && child.data && child.data.faction && !child.data._popCounted) {
+                child.data._popCounted = true;
+                const f = Factions.get(child.data.faction);
+                if (f) f.population = (f.population || 0) + 1;
+            }
+        });
+        UF.Events.on("combat:kill", event => {
+            const victim = event && event.target;
+            if (victim && victim.data && victim.data.faction && !victim.data._popDeducted) {
+                victim.data._popDeducted = true;
+                const f = Factions.get(victim.data.faction);
+                if (f && f.population > 0) f.population--;
+            }
+        });
+        UF.Events.on("world:unitRemoved", u => {
+            if (u && u.data && u.data.faction && (u.data.dead || u.data._isDying) && !u.data._popDeducted) {
+                u.data._popDeducted = true;
+                const f = Factions.get(u.data.faction);
+                if (f && f.population > 0) f.population--;
+            }
+        });
+    }
 
     //-------------------------------------------------------------------------
     // Contact: an unmet faction is met when one of its units comes within CONTACT_CELLS of one of ours.

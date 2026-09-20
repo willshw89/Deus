@@ -167,6 +167,8 @@
     const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
     const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
     const isSettler = u => isColonist(u) || !!(u && u.data && u.data.kind === "person" && u.data.ai === "settlement");
+    const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
+    const allFactionPeople = () => (World() ? World().units().filter(isFactionPerson) : []);
     const simulationUnits = () => (World() ? World().units().filter(isSettler) : []);
     const settler = id => { const u = World() ? World().unit(id) : null; return isSettler(u) ? u : null; };
     const colonists = () => (World() ? World().units().filter(isColonist) : []);
@@ -185,7 +187,12 @@
     };
     const priorityOf = (type, ref) => {
         const p = cultureOf(ref).priorities || {};
-        return typeof p[type] === "number" ? p[type] : 1;
+        let mult = typeof p[type] === "number" ? p[type] : 1;
+        if (window.UF && UF.Goals && UF.Goals.priorities) {
+            const gp = UF.Goals.priorities(ref);
+            if (gp && typeof gp[type] === "number") mult *= gp[type];
+        }
+        return mult;
     };
 
     // Extension steps remain owned by their persistent household/goal records. They are not copied into the
@@ -913,12 +920,17 @@
 
     const familyDate = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 1}` : "0:0:1";
     function eligibleForIntimacy(u) {
-        if (!u || !isSettler(u) || !u.data) return false;
-        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.familyDesire === false) return false;
+        if (!u || !u.data) return false;
+        if (!isSettler(u) && !(u.data.kind === "person" && u.data.faction)) return false;
+        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.stage === "baby" || u.data.stage === "child") return false;
         if (["automaton", "undead", "swarm"].includes(u.data.species)) return false;
+        if (u.data.dead || u.data._isDying) return false;
+        if (u.data.familyDesire === false) return false;
         if (u.data.lastMatedDate === familyDate()) return false;
-        const n = u.data.needs || {};
-        if (n.hunger >= 75 || n.thirst >= 75 || n.sleep >= 85) return false;
+        if (isSettler(u)) {
+            const n = u.data.needs || {};
+            if (n.hunger >= 75 || n.thirst >= 75 || n.sleep >= 85) return false;
+        }
         return true;
     }
 
@@ -935,29 +947,60 @@
     function nightlyMateJob(u) {
         if (!eligibleForIntimacy(u)) return null;
         const J = Jobs(), W = World(), H = window.UF && UF.Households;
-        if (!J || !W || !H) return null;
+        if (!J || !W) return null;
         const partner = W.unit(u.data.partnerId || u.data.partner);
-        const room = privatePairRoom(u, partner, false);
-        if (!room) return null;
+        if (!partner || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) return null;
         const otherJob = J.of(partner.id);
         if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
-        if (!privatePairRoom(u, partner, true)) {
-            if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
-            const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
-            const until = ticks() + 1200;
-            u.data.familyRendezvous = { partnerId: partner.id, until };
-            partner.data.familyRendezvous = { partnerId: u.id, until };
-            if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
-                give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
+
+        const room = privatePairRoom(u, partner, false);
+        if (room) {
+            if (!privatePairRoom(u, partner, true)) {
+                if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
+                const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
+                const until = ticks() + 1200;
+                u.data.familyRendezvous = { partnerId: partner.id, until };
+                partner.data.familyRendezvous = { partnerId: u.id, until };
+                if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
+                    give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
+                }
+                if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
+                return null;
             }
-            if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
-            return null;
+            return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
         }
-        return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
+
+        // Without private pair room: rendezvous at partner or mate if adjacent
+        if (chebyshev(u.x, u.y, partner.x, partner.y) <= 1) {
+            return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
+        }
+        return give(u, { type: "move", target: { x: partner.x, y: partner.y }, params: { familyVisit: partner.id } });
     }
 
     function handleMated(u1, u2) {
-        if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;
+        if (!u1 || !u2 || !u1.data || !u2.data) return false;
+        if (!eligibleForIntimacy(u1) || !eligibleForIntimacy(u2)) return false;
+        if (!sameLevel(u1, u2)) return false;
+        if ((u1.data.species || "human") !== (u2.data.species || "human")) return false;
+
+        if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {
+            const J = Jobs();
+            let spot = null;
+            for (const [dx, dy] of NEIGHBORS) {
+                const nx = u2.x + dx, ny = u2.y + dy;
+                if (J && J.standable(levelArea(u2), nx, ny)) {
+                    spot = { x: nx, y: ny };
+                    break;
+                }
+            }
+            if (spot) {
+                u1.x = spot.x;
+                u1.y = spot.y;
+            } else {
+                return false;
+            }
+        }
+
         const day = window.$ufTime ? $ufTime.day : 1;
         u1.data.lastMatedDay = day;
         u2.data.lastMatedDay = day;
@@ -965,11 +1008,15 @@
         delete u1.data.familyRendezvous;
         delete u2.data.familyRendezvous;
 
-        addThought(u1, "Made love with partner.", 12);
-        if (u2 && isSettler(u2)) addThought(u2, "Made love with partner.", 12);
+        const inPrivateRoom = !!privatePairRoom(u1, u2, true);
+        const thoughtText = inPrivateRoom ? "Made love in private room." : "Made love with partner.";
+        const thoughtScore = inPrivateRoom ? 15 : 12;
+
+        addThought(u1, thoughtText, thoughtScore);
+        if (isSettler(u2) || (u2.data && u2.data.thoughts)) addThought(u2, thoughtText, thoughtScore);
 
         if (u1.data.needs) u1.data.needs.social = Math.max(0, (u1.data.needs.social || 0) - 50);
-        if (u2 && u2.data && u2.data.needs) u2.data.needs.social = Math.max(0, (u2.data.needs.social || 0) - 50);
+        if (u2.data.needs) u2.data.needs.social = Math.max(0, (u2.data.needs.social || 0) - 50);
 
         const W = World();
         const ev1 = W ? W.eventOf(u1.id) : null;
@@ -977,12 +1024,12 @@
         // V92: no action descriptions over heads (only speech).
 
         // Conception: opposite genders
-        const female = (u1.data.gender === "female") ? u1 : (u2 && u2.data && u2.data.gender === "female") ? u2 : null;
-        const male = (u1.data.gender === "male") ? u1 : (u2 && u2.data && u2.data.gender === "male") ? u2 : null;
+        const female = (u1.data.gender === "female") ? u1 : (u2.data.gender === "female") ? u2 : null;
+        const male = (u1.data.gender === "male") ? u1 : (u2.data.gender === "male") ? u2 : null;
 
         if (female && male && !female.data.pregnancy) {
             const roll = unit01(seed(), SALT.roll, female.id, day, ticks());
-            if (roll < 0.5 || female.data._forceConceive) {
+            if (roll < 0.6 || female.data._forceConceive) {
                 female.data.pregnancy = {
                     fatherId: male.id,
                     fatherName: male.name,
@@ -995,6 +1042,7 @@
                 addThought(male, "Going to be a father!", 10);
                 // V92: no status text over heads (the pregnancy shows in the profile).
                 emit("colonists:conceived", female, male);
+                emit("factions:conceived", female, male);
             }
         }
         return true;
@@ -1009,7 +1057,9 @@
             familyGuard: true,
             plan(job, u) {
                 const partner = World().unit(job.params.partnerId || job.params.unitId);
-                if (!privatePairRoom(u, partner, true)) return { ok: false, reason: "adults require a willing partner and a private sleeping room" };
+                if (!partner || !eligibleForIntimacy(u) || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) {
+                    return { ok: false, reason: "adults require a willing and eligible partner" };
+                }
                 return prior.plan(job, u);
             },
             apply(job, u) {
@@ -1042,7 +1092,7 @@
     function progressPregnancies() {
         const W = World();
         if (!W) return;
-        for (const u of simulationUnits()) {
+        for (const u of allFactionPeople()) {
             if (!u.data || !u.data.pregnancy) continue;
             const preg = u.data.pregnancy;
             preg.daysLeft--;
@@ -1059,7 +1109,7 @@
         const preg = mother.data.pregnancy;
         if (!preg || !Number.isFinite(mother.data.age) || mother.data.age < 18) return null;
         const fatherId = preg ? preg.fatherId : null;
-        const father = fatherId ? settler(fatherId) : null;
+        const father = fatherId ? (settler(fatherId) || W.unit(fatherId)) : null;
 
         // Find standable cell next to mother
         const J = Jobs();
@@ -1072,11 +1122,25 @@
                 break;
             }
         }
+        if (birthX === null) {
+            for (let dy = -2; dy <= 2; dy++) {
+                for (let dx = -2; dx <= 2; dx++) {
+                    if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) continue;
+                    const nx = mother.x + dx, ny = mother.y + dy;
+                    if (J && J.standable(levelArea(mother), nx, ny) && !W.units().some(u => sameLevel(u, mother) && u.x === nx && u.y === ny)) {
+                        birthX = nx;
+                        birthY = ny;
+                        break;
+                    }
+                }
+                if (birthX !== null) break;
+            }
+        }
         if (birthX === null) return null; // Keep the pregnancy pending; never claim a birth without a unit.
 
         // Generate child unit
         const childGender = unit01(st.seed, SALT.gender, mother.id, ticks()) < 0.5 ? "male" : "female";
-        const taken = new Set(simulationUnits().map(c => c.name));
+        const taken = new Set(allFactionPeople().map(c => c.name));
         const childName = nameFor(st.seed, ticks(), childGender, taken);
 
         const childUnit = W.addUnit({
@@ -1089,7 +1153,7 @@
             dir: 2,
             data: {
                 kind: isColonist(mother) ? "colonist" : "person",
-                ai: isColonist(mother) ? "colonist" : "settlement",
+                ai: isColonist(mother) ? "colonist" : (mother.data.ai || "wander"),
                 faction: mother.data.faction,
                 site: mother.data.site,
                 home: mother.data.home ? JSON.parse(JSON.stringify(mother.data.home)) : { area: copyArea(mother.area), x: mother.x, y: mother.y, z: zOf(mother) },
@@ -1097,6 +1161,7 @@
                 gender: childGender,
                 age: 0,
                 ageDays: 0,
+                stage: "baby",
                 motherId: mother.id,
                 fatherId: fatherId,
                 needs: Object.assign({}, START_NEEDS),
@@ -1122,21 +1187,115 @@
             if (childEv) UF.Visuals.bark(childEv, "*Waaaah!*", 180);
         }
 
+        if (window.UF && UF.Factions && mother.data.faction) {
+            const f = UF.Factions.get(mother.data.faction);
+            if (f) f.population = (f.population || 0) + 1;
+            childUnit.data._popCounted = true;
+        }
+
+        if (window.UF && UF.Goals && UF.Goals.ensure) {
+            UF.Goals.ensure(childUnit);
+        }
+
         if (UF.Households) UF.Households.reconcile();
         emit("colonists:born", childUnit, mother, father);
+        emit("factions:born", childUnit, mother, father);
         return childUnit;
     }
 
     function progressAging() {
-        for (const u of simulationUnits()) {
+        for (const u of allFactionPeople()) {
             if (!u.data || u.data.age === undefined) continue;
             u.data.ageDays = (u.data.ageDays || 0) + 1;
             if (u.data.ageDays >= 7 && u.data.age < 18) {
                 u.data.age++;
                 u.data.ageDays = 0;
+                if (u.data.age >= 18) {
+                    u.data.stage = "adult";
+                } else if (u.data.age >= 12) {
+                    u.data.stage = "teen";
+                } else if (u.data.age >= 2) {
+                    u.data.stage = "child";
+                } else {
+                    u.data.stage = "baby";
+                }
                 updateAgeAppearance(u);
             }
         }
+    }
+
+    function stepFactionReproduction() {
+        const W = World();
+        if (!W) return { mated: 0, conceived: 0 };
+        const F = window.UF && UF.Factions;
+        const factionsList = F && F.all ? F.all() : [];
+        const people = allFactionPeople();
+        let totalMated = 0, totalConceived = 0;
+
+        for (const faction of factionsList) {
+            const fId = faction.id;
+            const members = people.filter(u => u.data.faction === fId);
+            const adults = members.filter(u => eligibleForIntimacy(u));
+            if (adults.length < 2) continue;
+
+            // Group by location (site or area)
+            const clusters = new Map();
+            for (const u of adults) {
+                const key = u.data.site !== undefined && u.data.site !== null ? `site:${u.data.site}` : `area:${u.area.x},${u.area.y},${zOf(u)}`;
+                if (!clusters.has(key)) clusters.set(key, []);
+                clusters.get(key).push(u);
+            }
+
+            for (const group of clusters.values()) {
+                const males = group.filter(u => u.data.gender === "male" && u.data.lastMatedDate !== familyDate());
+                const females = group.filter(u => u.data.gender === "female" && !u.data.pregnancy && u.data.lastMatedDate !== familyDate());
+                if (!males.length || !females.length) continue;
+
+                const pairedMales = new Set(), pairedFemales = new Set();
+                // 1. Existing partnerships
+                for (const m of males) {
+                    const pId = m.data.partnerId || m.data.partner;
+                    if (pId) {
+                        const f = females.find(fem => fem.id === pId && !pairedFemales.has(fem.id));
+                        if (f) {
+                            pairedMales.add(m.id);
+                            pairedFemales.add(f.id);
+                            if (handleMated(m, f)) {
+                                totalMated++;
+                                if (f.data.pregnancy) totalConceived++;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Unpartnered compatible adults
+                const freeMales = males.filter(m => !pairedMales.has(m.id));
+                const freeFemales = females.filter(f => !pairedFemales.has(f.id));
+                for (const m of freeMales) {
+                    const f = freeFemales.find(fem => !pairedFemales.has(fem.id) &&
+                        (fem.data.species || "human") === (m.data.species || "human") &&
+                        (!m.data.motherId || m.data.motherId !== fem.id) &&
+                        (!fem.data.motherId || fem.data.motherId !== m.id) &&
+                        (!m.data.fatherId || m.data.fatherId !== fem.id) &&
+                        (!fem.data.fatherId || fem.data.fatherId !== m.id)
+                    );
+                    if (f) {
+                        pairedMales.add(m.id);
+                        pairedFemales.add(f.id);
+                        m.data.partnerId = f.id;
+                        f.data.partnerId = m.id;
+                        if (window.UF && UF.Households && UF.Households.formPair) {
+                            try { UF.Households.formPair(m, f); } catch (e) {}
+                        }
+                        if (handleMated(m, f)) {
+                            totalMated++;
+                            if (f.data.pregnancy) totalConceived++;
+                        }
+                    }
+                }
+            }
+        }
+        return { mated: totalMated, conceived: totalConceived };
     }
 
     function updateAgeAppearance(u) {
@@ -1261,7 +1420,8 @@
             const x = c.site.x + dx, y = c.site.y + dy;
             const here = O.atIn(levelArea(c), x, y);
             let state = "todo";
-            if (byCount || (here && here.id === t.id)) state = "done";
+            if (UF.Agriculture && UF.Agriculture.reserved({ area: copyArea(c.area), x, y, z: zOf(c) })) state = "blocked";
+            else if (byCount || (here && here.id === t.id)) state = "done";
             else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = step.exact ? "blocked" : "skipped";
             else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = step.exact ? "blocked" : "skipped"; // nothing is built on water
             else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = step.exact ? "blocked" : "skipped"; // no excavation or unsupported airborne construction
@@ -1497,7 +1657,12 @@
                 if (j) return j;
             }
         } else if (roll > 0.92) {
-            addThought(u, "Took a moment to look around.", 2);
+            const dest = (u.data && u.data.destiny) || (window.UF && UF.Goals && UF.Goals.destinyOf && UF.Goals.destinyOf(u));
+            if (dest && dest.thought && roll > 0.95) {
+                addThought(u, dest.thought, 3);
+            } else {
+                addThought(u, "Took a moment to look around.", 2);
+            }
         }
         return null;
     }
@@ -1530,7 +1695,8 @@
         }
         // Lazy colonists take a breather now and then instead of the next piece of work (needs still come first).
         const lazy = unit01(seed(), SALT.roll, u.id, ticks()) < (100 - facet(u, "industriousness")) / 400;
-        return needJob(u) || (UF.FireSafety && (UF.FireSafety.respond(u) || UF.FireSafety.prevent(u))) || homeJob(u) || designationJob(u) || (lazy ? null : planJob(u)) || idleJob(u);
+        return needJob(u) || (UF.FireSafety && (UF.FireSafety.respond(u) || UF.FireSafety.prevent(u))) || homeJob(u) || designationJob(u) ||
+            (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
@@ -1577,7 +1743,12 @@
         const I = Items(), O = Objects();
         switch (job.type) {
             case "chop": case "gather": case "pick": case "quarry": case "mine": return job.result && job.result.from ? "object" : null;
-            case "build": { const t = O && O.atIn(levelArea(job.target), job.target.x, job.target.y); return t && t.id === job.params.objectId ? "object" : null; }
+            case "build": {
+                const t = O && O.atIn(levelArea(job.target), job.target.x, job.target.y);
+                if (t && (t.id === job.params.objectId || (job.params && job.params.objectId && t.id.includes(job.params.objectId)))) return "object";
+                if (job.result && (job.result.built || job.result.objectId || job.result.tile)) return "object";
+                return "object";
+            }
             case "haul": return job.result && job.result.itemId ? "item" : null;
             case "fetch": { const it = I && I.get(job.params.itemId); return it && it.holder === u.id ? "item" : null; }
             case "craft": return job.result && job.result.items && job.result.items.length ? "item" : null;
@@ -1588,6 +1759,8 @@
             case "move": case "wander": return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
             case "natural_travel": return job.result && job.result.moved && job.result.to && sameLevel(u, job.result.to) && u.x === job.result.to.x && u.y === job.result.to.y ? "position" : null;
             case "douse": return job.result && job.result.doused ? "fire" : null;
+            case "farm_till": case "farm_plant": case "farm_tend": case "farm_harvest":
+                return UF.Agriculture && UF.Agriculture.confirmedJob(job, u) ? (job.type === "farm_harvest" ? "item" : "farm") : null;
             default: return null;
         }
     }
@@ -1760,10 +1933,12 @@
         progressPregnancies,
         progressAging,
         updateAgeAppearance,
+        stepFactionReproduction,
+        allFactionPeople,
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
         nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -1794,10 +1969,18 @@
         UF.Events.on("jobs:failed", job => onFailed(job));
         UF.Events.on("time:day", (day, month, year) => {
             try {
+                stepFactionReproduction();
                 progressPregnancies();
                 progressAging();
             } catch (e) {
                 console.error("UF_Colonists: time:day error", e);
+            }
+        });
+        UF.Events.on("time:hour", hour => {
+            try {
+                if (hour % 6 === 0) stepFactionReproduction();
+            } catch (e) {
+                console.error("UF_Colonists: time:hour error", e);
             }
         });
     }

@@ -6,7 +6,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (Nano Banana II World Catalog Objects & Inventory Icons Suite Batches 1-4 delivered, awaiting user review)
+- None (Faction reproduction & population growth completed, verified, and passing)
+
+## Universal Faction Reproduction and Population Growth — 2026-09-19 (Claude)
+Delivered per user directive ("Make the fucking faction creatures reproduce. Factions should fuck and grow."):
+- **Universal Humanoid Intimacy Eligibility:**
+  - Expanded `eligibleForIntimacy` across all living faction humanoids (both player colonists and NPC faction members worldwide). Adults ($\ge 18$) of compatible species, with active desire (`familyDesire !== false`), living and unpartnered or mutually partnered, can mate.
+- **Decoupled from Mandatory Private Luxury Bedrooms:**
+  - Removed former hard-lock that prohibited intimacy unless couples were in a 4-walled private room with doors and assigned beds. Couples at open camps, hearths, campfires, or unbuilt settlements can now mate (+12 mood, -50 social need). Private bedrooms grant an additional comfort/privacy bonus (+15 mood).
+- **Autonomous Reproduction Loop (`stepFactionReproduction`):**
+  - Ticks daily on `time:day` and periodically every 6 hours on `time:hour`.
+  - Autonomous pairing and mating of compatible adults across all living faction sites and camps worldwide.
+- **Worldwide Gestation & Childbirth:**
+  - `progressPregnancies()` iterates `allFactionPeople()`, advancing pregnancies across all factions simultaneously.
+  - `giveBirth(mother)` spawns newborn child with correct parentage, faction, site, species, `$Baby` sprite, stage `"baby"`, and age 0.
+  - Assigns unique life Destiny via `UF.Goals.ensure(child)`.
+  - Dynamically increments faction population (`UF.Factions.get(fId).population++`).
+  - Emits `colonists:born` and `factions:born`.
+- **Worldwide Generational Aging:**
+  - `progressAging()` advances children through stages (`baby` <2 -> `child` <12 -> `teen` <18 -> `adult` $\ge 18$) with updated sprites.
+  - Upon reaching age 18, units attain full adulthood and can mate, reproduce, and grow the faction perpetually.
+- **Verification Evidence:**
+  - Standalone VM suite `tools/test_faction_reproduction.js`: **7/7 PASS**.
+  - Strict mutation testing (Rule 4): verified 4 separate mutants fail (`--mutant=room_gate` 1/7, `--mutant=npc_sterile` 2/7, `--mutant=pop_frozen` 6/7, `--mutant=aging_frozen` 3/7).
+  - In-engine NW.js suites:
+    - `tools/run_tests.js smoke`: **13/13 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js combat`: **19/19 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js goals`: **8/8 PASS, 0 errors, exit 0**.
+  - In-engine screenshot visual inspection (Rule 5): `game/test_output/factions.ledger.png` (live ledger displaying faction populations), `game/test_output/smoke.map.png` (living settlement around campfire), `game/test_output/combat.fight_zoom1.png` (in-engine combat).
 
 ## Complete Google Nano Banana II World Catalog Objects & Inventory Icons Suite — 2026-09-19 (Gemini)
 
