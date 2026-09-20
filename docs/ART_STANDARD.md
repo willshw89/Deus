@@ -92,3 +92,15 @@ By eye: authentic FF5 16-bit chibi proportions; upright, no lean; fits 1 tile (o
 | Animation faked with code distortion or shaders | Reject; all animation must be authored as distinct sprite frames in the sheet. No after-effect animations. |
 | Drawn with non-Nano Banana model or typed in code | Reject; all assets must originate from authentic Google Nano Banana II generations. |
 
+## 8. Guidelines for the Five Vertical Layers (Z-2 to Z+2) (VISION V117)
+All environment, terrain, autotile, and structural generations must strictly follow the distinct color ramps and architectural definitions of the 5 layers:
+
+| Layer | Name | Palette & Mood | Environment & Architectural Role |
+|---|---|---|---|
+| **Z-2** | **The Deep Layer** | Blacks, dark blues, glowies, dark purples | Abyssal caverns, primordial chasms, bioluminescent fungal groves, radiant crystal clusters/spires, subterranean horrors. Perpetual darkness lit only by glowing ambient minerals, bioluminescence, and mana veins. |
+| **Z-1** | **The Subterranean Layer** | Browns, greys, slate | Rough-hewn stone, packed earth, excavated halls, mineable ore veins (iron, copper, gold, coal), rock outcroppings, early dwarven settlements, subterranean agriculture (mushrooms, roots). |
+| **Z=0** | **Overland Biomes** | Full natural surface palette (vibrant greens, earthy browns, snow whites, desert tans) | Surface biomes (meadows, mixed forests, taiga/snow, arid deserts, wetlands/swamps, coastlines). Sunlight and weather cycles, wildlife herds, trees, surface agriculture, settler camps, natural cave entrances to Z-1. |
+| **Z=+1** | **First Elevated Layer** | Architectural materials (cut timber, masonry stone, thatch/tile roofs) + cliff stone | **ONLY built up** (second-story rooms, roofs, wooden/stone walkways, watchtowers) OR **additional Z layers of natural topography** (cliffs, plateaus, mesa edges, mountain foothills). Open sky/air everywhere else. |
+| **Z=+2** | **High Elevated Layer** | Roofing materials, battlements, high alpine stone and snow | **ONLY built up** (high roofs, third-story parapets, watchtower tops) OR **additional Z layers of mountains/peaks** (mountain peaks, jagged alpine ridges). Open sky/air everywhere else. |
+
+

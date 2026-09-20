@@ -8,6 +8,14 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Five Vertical Layers Guidelines (Z-2 to Z+2) — 2026-09-19 (Gemini)
+Delivered per user directives ("Also lets provide some general guidelines for the layers. Z-2 is the deep layer, that's blacks, dark blues, glowies, dark purples. Z-1 is the subterranean layer. That's browns, greys, slate, etc. Z-0 is our overland biomes. +1 and +2 are ONLY built up, or Additional Z layers of cliffs/mountains etc"):
+- **Z-2 The Deep Layer:** Blacks, dark blues, glowies (bioluminescence, glowing mushrooms, radiant crystals, luminescent moss, aether fissures), dark purples. Perpetual abyss lit by ambient bioluminescence.
+- **Z-1 The Subterranean Layer:** Browns, greys, slate, packed earth, rough-hewn stone, dark shale. Mineable ore veins (iron, copper, gold, coal), excavated halls, early dwarven settlements.
+- **Z=0 Overland Biomes:** Full natural surface palette (meadows, mixed forests, taiga/snow, arid deserts, wetlands/swamps, coastlines), sunlight/weather, surface fauna/flora.
+- **Z=+1 & Z=+2 Elevated Layers:** ONLY built up (multi-story colonist structures, second floors, roofs, watchtowers, battlements) OR additional Z layers of elevated topography (cliffs, plateaus, mesa edges, mountain peaks). Open sky/air everywhere else.
+- **Codification:** Codified in `docs/VISION.md` (V117), `docs/ART_STANDARD.md` (§8), and `docs/handoffs/HANDOFF_vertical.md`.
+
 ## Serious Chibi Aesthetic Refinement — 2026-09-19 (Gemini)
 Delivered per user directive ("Lets make it more of a serious chibi as opposed to a cute chibi"):
 - **Serious Chibi Direction Codification (VISION V116):**

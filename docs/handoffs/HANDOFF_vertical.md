@@ -3,7 +3,13 @@
 **From:** Claude Code (engine) · **To:** Gemini (art) · **Date:** 2026-09-19 · **Feature:** VISION V80, `docs/design/VERTICAL_WORLD.md` · **Requests:** AR-1200 to AR-1219 in `docs/ASSET_REQUESTS.md`
 
 ## What the feature does, and what is built today
-The world becomes five persistent 256×256 levels at the same x,y: `-2`, `-1`, Ground, `+1`, `+2` (VERTICAL_WORLD §1). One level is drawn at a time. The player moves the view up and down, and people dig down (mine, channel), build up (floors, stairs, ramps, roofs) and walk between levels on stairs and ramps (§3.3, §5, §7). Every cell has a shape (`solid`, `floor`, `open`, `ramp`, `stairUp`, `stairDown`, `stairBoth`) and a material (§3.2). The art below is how each shape and material looks from above.
+The world becomes five persistent 256×256 levels at the same x,y: `-2`, `-1`, Ground, `+1`, `+2` (VERTICAL_WORLD §1). One level is drawn at a time. The player moves the view up and down, and people dig down (mine, channel), build up (floors, stairs, ramps, roofs) and walk between levels on stairs and ramps (§3.3, §5, §7). Every cell has a shape (`solid`, `floor`, `open`, `ramp`, `stairUp`, `stairDown`, `stairBoth`) and a material (§3.2).
+
+### Layer Guidelines (VISION V117):
+- **Z-2: The Deep Layer:** Blacks, dark blues, glowies (bioluminescence, glowing mushrooms, radiant crystal clusters, luminescent cave moss, aether fissures), dark purples. Abyssal subterranean depths in perpetual darkness lit only by eerie ambient bioluminescence.
+- **Z-1: The Subterranean Layer:** Browns, greys, slate, packed earth, rough-hewn stone, dark shale. Mineable ore veins (iron, copper, gold, coal), excavated halls, natural cavern pockets, early dwarven settlements, subterranean farming (mushrooms, roots).
+- **Z=0: Overland Biomes:** Full natural surface biomes (meadows, mixed forests, taiga/snow, arid deserts, wetlands/swamps, coastlines). Sunlight and weather cycles, wildlife herds, flora, trees, settler camps, surface agriculture, natural cave entrances descending into Z-1.
+- **Z=+1 and Z=+2: Elevated / Vertical Layering:** **ONLY built up** (multi-story colonist architecture, second floors, roofs, watchtowers, defensive battlements) OR **Additional Z layers of cliffs/mountains etc** (cliffs, plateaus, mesa tops, mountain slopes, highlands, peaks). Open sky/air everywhere else.
 
 **Status on 2026-09-19:** the engine for this is being written now: `UF_Levels.js`, claimed in `docs/STATUS.md` → In progress, 13:20. None of it is in `game/` yet. Until it lands, **nothing on this list is drawn in the game.** The stock RPG Maker MZ placeholders in §2 are the ones the engine will draw first (VISION V9, user 2026-09-19: "Feel free to use duplicate RMMZ assets for these"). Your art replaces them.
 
