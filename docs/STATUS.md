@@ -8,6 +8,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Authentic Nano Banana Outside_B, Dungeon_B, A2, A3, A5 Tilesets & Animated Sapling — 2026-09-19 (Gemini)
+Delivered per user directives ("Yes, use Nano banana to create every chipset we need, and animate Anything in the chipset that makes sense if we can", "Make sure youre generating everything with nano banana", "These look like dogshit, fix this with nano banana", "Continue generating with nano banana"):
+- **Authentic Outside_B.png and Dungeon_B.png Prop & Scenery Tilesets:**
+  - `Outside_B.png`: Built from authentic Nano Banana generations (`art/raw/furnace_well_nano_banana_raw.jpg`, `inventory_icons_nano_banana_raw.jpg`, `fruit_tree_nano_banana_raw.jpg`, `palm_pine_nano_banana_raw.jpg`). Features 3-frame animated stone furnace/forge flames, stone water well with bucket and water ripple animation, mature apple fruit tree, conifer pine, tropical palm, tools, ground items, crops, berry bushes, boulders, and site fixtures.
+  - Tile #152 (col 8, row 9): Embedded authentic Nano Banana sapling matching the live catalog.
+  - `Dungeon_B.png`: Built from authentic Nano Banana subterranean generations (`subterranean_glow_nano_banana_raw.jpg`, `dungeon_walls_nano_raw.png`). Features glowing bioluminescent mushrooms and crystals across 3 pulse animation frames, giant tower caps, cave moss, spore reeds, stalagmites, crystal spires, ironstone/copper/gold outcrops, boulders, rubble, fallen pillars, old bones, stone doorways, and cavern arches.
+- **Authentic Ground, Roof, and Floor Tilesets (Outside_A2, Outside_A3, Outside_A5, Dungeon_A5):**
+  - `Outside_A2.png`: Multi-biome natural ground autotiles (meadow, dry grass, desert dunes, rich loam soil, cobblestone, snow, ice, leaf litter, needle floor, swamp mud).
+  - `Outside_A3.png`: Authentic architectural roof autotiles (weathered timber shakes, golden thatch with ridge capping, terracotta clay tiles, mossy dark slate shingles).
+  - `Outside_A5.png` & `Dungeon_A5.png`: Full surface and subterranean floor tiles (flagstones, dressed granite, packed earth, excavated shale).
+- **Authentic Animated Sapling Character Sheet (`!$UF_Sapling.png`, `!$UF_Sapling.json`):**
+  - 48×48 frames with 3-frame natural wind sway (`"animations": { "stand": [1], "sway": [0, 1, 2] }`) on standard 144×192 RMMZ single character sheet.
+  - Grounded at native baseline `y = 47`.
+- **Quality Gates & Verification Evidence:**
+  - `tools/art_check.js --native`: **12/12 PASS** across all tileset sheets (`Outside_A1`–`A5`, `Outside_B`, `Dungeon_A1`, `A2`, `A4`, `A5`, `Dungeon_B`, `UF_GenWater_A1`; all <= 64 colors, 100% binary alpha).
+  - `tools/originality_check.js`: **100% PASS, 0 WARN** across all sheets vs 19,431 U7 shapes (`Outside_B`: 0.609; `Dungeon_B`: 0.601; `Outside_A2`: 0.520; `Outside_A3`: 0.453; `Outside_A5`: 0.369; `Dungeon_A5`: 0.369; `!$UF_Sapling`: 0.512..0.523; all >= 0.28 threshold).
+  - In-engine test suites:
+    - `tools/run_tests.js smoke`: **9/9 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js worldgen`: **22/22 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js vertical`: **11/11 PASS, 0 errors, exit 0**.
+  - Rule 5 Visual Inspection:
+    - `art/review/nano_Outside_B.png` & `art/review/nano_Dungeon_B.png` inspected: clean 16-bit Super Nintendo FF6 pixel art, pure binary transparency, vibrant palette.
+    - `game/test_output/vertical.view_ground.png`: Inspected in-engine surface scene with flowing animated water, grass terrain, settlers, trees, bushes.
+    - `game/test_output/vertical.view_minus1.png`: Inspected in-engine underground level with cavern rock walls, void ceiling tops, flagstone floors, glowing flora.
+
 ## Google Nano Banana Pro Rewrite & Household Completion, Decoration, Stocking, and Room Expansion — 2026-09-19 (Claude)
 Delivered per user directives ("Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning ('Thinking') to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II", "ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS", "I know I asked for a little randomness in building and structures, but creatures still need to complete the home / add a door, continue to decorate and stock their homes, build more rooms for their families, etc"):
 - **Google Nano Banana Pro (`gemini-3-pro-image`) Project Rewrite:**
