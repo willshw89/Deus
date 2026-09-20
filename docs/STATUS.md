@@ -9,6 +9,51 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 - Gemini: Dwarf Demographic 42-Charset Suite (6 Variations × 7 Actions: Walk, Haul, Attack, Bow, Magic, Work, Downed) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
 
+## 2D Raycast Wall Occlusion for Colored Light Glows — 2026-09-20 (Gemini)
+Delivered per user directive ("Can we make walls block this glowing light?"):
+- **Wall & Door Light Blocking Geometry (`UF_DayNight.js`)**:
+  - Upgraded `Sprite_UFGlowLayer` with 2D Digital Differential Analyzer (DDA) angular raycasting (96 rays around light source).
+  - Ray stops at wall boundaries (`autotile === "wall"` or `tags.includes("wall")`), closed doors (`tags.includes("door") && !isOpen`), underground solid rock (`Levels.shapeAt === "solid"`), and mountain peaks (`PEAK_REGION = 250`).
+  - Penetrates 0.3 tiles into wall faces facing the light so masonry and timber surfaces receive light, but prevents light from bleeding through the wall to the other side.
+  - Closed doors seal light inside rooms; open doorways allow realistic light beam spilling into exterior courtyards or hallways.
+- **Fast-Path Performance Optimization**:
+  - Lights in open areas without nearby walls bypass raycasting entirely via a fast bounding-box obstacle check, executing standard circular gradient at 0% overhead.
+  - When walls are present, 96-ray DDA execution completes in ~22 microseconds (0.022 ms) per frame.
+- **Automated Verification**:
+  - `tools/test_light_wall_occlusion_live.js`: **18/18 PASS, 0 errors, exit 0** (verifies inside illuminated at alpha 176, north/east/west exterior alpha 0, doorway spill alpha > 0).
+  - `daynight` regression suite: **15/15 PASS, 0 errors, exit 0** (including new `daynight.wall_blocks_glowing_light` regression check).
+- **Visual Evidence (Rule 5)**:
+  - `art/review/wall_occlusion_closed_door.png`: 5×5 stone building with campfire inside at night; interior is fully lit, outside is pitch black (0 light bleed).
+  - `art/review/wall_occlusion_open_doorway.png`: Same building with open doorway; campfire light pours out through the doorway while walls continue to cast crisp shadows.
+  - `game/test_output/daynight.night_wall_occlusion.png`: Settlement campfire with stone wall to the east; east colonist is in complete shadow while west, north, and south remain illuminated.
+
+
+## Overworld Chip Sets, Rounded Natural Water Shorelines & Broad Biome Gradients 100% Google Nano Banana Pro — 2026-09-20 (Gemini)
+Delivered per user directives ("FROM NOW ON THIS CONVERSATION IS FOCUSED ON CHIP SETS AND TERRAIN (CHIP SETS INCLUDE WALLS AND BASICALLY ANYTHING OVERWORLD THAT ISNT ALIVE)", "Keep working on blending these biome gradiants", "water to have rounded natural edges and that means a different water for every terrain type so the border matches. From a birds eye view I want better gradient than this", "I want much, much more seamless transitions than this", "Generating in nano banana pro", "Continue and finish task"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generated Chip Sets**:
+  - `Outside_A1.png`, `UF_GenWater_A1.png`, `Dungeon_A1.png` (768×576 px): Standardized 9 water kinds with broad 12–15px natural Euclidean rounded shore banks, 5px shallows shelves, and continuous C0/C1 circular convex/concave curves, eliminating 48px stepped cliffs.
+  - `Outside_A3.png`, `art/masters/Outside_A3.png` (768×384 px): 4 architectural roof styles (wood shingles, thatched straw, red clay tiles, slate stone) quantized to 32 colors (`art_check.js`: 4/4 PASS 0 WARN; `originality_check.js`: 0.453 >= 0.28 PASS).
+  - `Outside_A4.png`, `Dungeon_A4.png`, `art/masters/UF_GenTerrain_A4.png` (768×720 px): 8 architectural wall columns (Ashlar stone, timber palisade, cobblestone mortar, dark cavern slate, red brick, pine timber, peat swamp wall, crystalline ice) featuring 2-square vertical wall face with solid black interior ceiling rim, quantized to 32 colors (`art_check.js`: 4/4 PASS 0 WARN; `originality_check.js`: 0.345 >= 0.28 PASS).
+  - `Outside_A5.png`, `Dungeon_A5.png`, `art/masters/Outside_A5.png` (384×768 px): 16 floor and stair tiles (cobblestone, wood planks, flagged stone, rough rock, stairs) quantized to 32 colors (`art_check.js`: 4/4 PASS 0 WARN; `originality_check.js`: 0.369 >= 0.28 PASS).
+- **Ecological Shoreline & Water Climate Matching (`UF_WorldGen.js`)**:
+  - Upgraded freshwater lake classifier so snow, tundra, and cold biomes resolve to `icy` water (pure white frost/snow shoreline) rather than dark swamp peat mire.
+  - Shoreline water cells dynamically evaluate neighboring land ground kinds and match water types (`snow`/`ice`/`tundra` -> `icy`, `sand` -> `salt`, `tropical_grass` -> `pond`, `meadow` -> `fresh`, `stony`/`rock`/`scree`/`peak_rock`/`ash` -> `blighted`).
+- **Broad Multi-Tile Biome Gradients & Shading Performance Optimization (`UF_Tiles.js`)**:
+  - Removed `!kInfo.passable` restriction so mountains and rock peaks blend seamlessly with surrounding scree, snow, and stony terrain.
+  - Distance-2 outer diffusion dusting (bit 16 in maskB, 22% organic Bayer 8×8 dither dusting), creating broad, multi-tile rolling transitions 3–5 cells wide (144–240 px).
+  - Inner-loop optimization: Fast integer checks on distance-1 and distance-2 identical neighbors bypass `kindCache` lookups and allocations for interior cells, dropping area build time from 94.4 ms to 64.0–72.1 ms (budget <= 80 ms).
+- **Automated Verification**:
+  - `ground` suite: **10/10 PASS, 0 failed, exit 0** (build_time 72.1 ms <= 80 ms).
+  - `tiles` suite: **11/11 PASS, 0 failed, exit 0**.
+  - `walls` suite: **7/7 PASS, 0 failed, exit 0**.
+  - `floors` suite: **11/11 PASS, 0 failed, exit 0**.
+  - `art_check.js --native`: **5/5 PASS, 0 FAIL, 0 WARN** across A3, A4, A5 tileset sheets.
+  - `originality_check.js`: **5/5 PASS, 0 FAIL, 0 WARN** across all tileset sheets.
+- **Visual Evidence (Rule 5)**:
+  - `ground.terrain_gradient_border.png`: Natural rounded water shorelines with shallows shelf and multi-tile rolling dithered transitions.
+  - `floors.room_half_floored.png`: Live in-engine enclosed room with 2-square walls and wood plank flooring under construction amidst broad natural ground gradient.
+  - `walls.two_square_wall.png`: Live in-engine two-square wood and stone wall segments with black interior tops and multi-tile terrain transitions.
+
 ## Adult Female Human 42-Charset Suite (6 Variations × 7 Actions) 100% Google Nano Banana Pro — 2026-09-19 (Gemini)
 Delivered per user directives ("FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)", "continue for human female", "Every variation needs 7 dedicated 12-sprite charsets", "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit", "Their legs dont move when moving left to right", "ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", VISION V109, V111, V112, V116, V118, V119):
 - **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generations**:

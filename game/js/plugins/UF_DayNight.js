@@ -166,7 +166,7 @@
             if (SHOW_CLOCK) {
                 const hh = String($ufTime.hour).padStart(2, "0"), mm = String($ufTime.minute).padStart(2, "0");
                 const where = DayNight.phase(DayNight.hours(), DayNight.viewZ()).replace(/^./, c => c.toUpperCase());
-                text = `Day ${$ufTime.day}  ${hh}:${mm}  ${where}${speed ? "  " + speed : ""}`;
+                text = `Year ${$ufTime.year}  ${$ufTime.seasonName}  ${hh}:${mm}  ${where}${speed ? "  " + speed : ""}`;
             }
             if (text === this._text) return;
             this._text = text;
@@ -179,6 +179,269 @@
         }
     }
     DayNight.ClockSprite = Sprite_UFClock;
+
+    //-------------------------------------------------------------------------
+    // Colored Light Glows in the Dark (User specification 2026-09-19)
+    //-------------------------------------------------------------------------
+
+    class Sprite_UFGlowLayer extends Sprite {
+        constructor() {
+            super(new Bitmap(Graphics.width, Graphics.height));
+            this.blendMode = (typeof PIXI !== "undefined" && PIXI.BLEND_MODES) ? PIXI.BLEND_MODES.ADD : 1;
+            this._tick = 0;
+            this._lastDraw = 0;
+        }
+
+        update() {
+            super.update();
+            if (!DayNight.onWorldMap() || !(SceneManager._scene instanceof Scene_Map)) {
+                this.visible = false;
+                return;
+            }
+            const z = DayNight.viewZ();
+            const h = DayNight.hours();
+            const dark = underground(z) ? 1.0 : Math.max(0, 1.0 - DayNight.daylight(h, z));
+            if (dark <= 0.05) {
+                if (this.visible) {
+                    this.visible = false;
+                    this.bitmap.clear();
+                }
+                return;
+            }
+            this.visible = true;
+            this.opacity = Math.min(255, Math.round(dark * 255));
+            this._tick++;
+            if (this._tick - this._lastDraw < 2) return; // Update every 2 frames for smooth performance & flame flicker
+            this._lastDraw = this._tick;
+            this.renderGlows(z, dark);
+        }
+
+        isBlocked(area, x, y, z) {
+            if (x < 0 || y < 0) return true;
+            const W = window.UF && UF.World;
+            const size = (W && W.state && W.state.size) || (window.$dataMap && window.$dataMap.width) || 256;
+            if (x >= size || y >= size) return true;
+
+            // 1. Objects: Walls and closed doors
+            const O = window.UF && UF.Objects;
+            if (O && typeof O.atIn === "function") {
+                const obj = O.atIn(area, x, y);
+                if (obj) {
+                    if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) {
+                        return true;
+                    }
+                    const isDoor = (Array.isArray(obj.tags) && obj.tags.includes("door")) ||
+                                   (window.UF && UF.Doors && typeof UF.Doors.isDoorType === "function" && UF.Doors.isDoorType(obj));
+                    if (isDoor) {
+                        const isOpen = window.UF && UF.Doors && typeof UF.Doors.isOpen === "function" && UF.Doors.isOpen(area, x, y);
+                        if (!isOpen) return true;
+                    }
+                }
+            }
+
+            // 2. Underground solid rock
+            if (z < 0) {
+                const L = window.UF && UF.Levels;
+                if (L && typeof L.shapeAt === "function") {
+                    const s = L.shapeAt({ area, x, y, z });
+                    if (s === "solid" || s === 1) return true;
+                }
+            }
+
+            // 3. Peak mountain region
+            if (z === 0) {
+                const map = window.$dataMap;
+                if (map && map.data) {
+                    const idx = y * size + x;
+                    if (map.data[5 * size * size + idx] === 250) return true;
+                }
+            }
+
+            return false;
+        }
+
+        hasBlockingInRadius(area, cx, cy, z, tileRadius) {
+            const minX = Math.floor(cx - tileRadius);
+            const maxX = Math.ceil(cx + tileRadius);
+            const minY = Math.floor(cy - tileRadius);
+            const maxY = Math.ceil(cy + tileRadius);
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    if (this.isBlocked(area, x, y, z)) return true;
+                }
+            }
+            return false;
+        }
+
+        castRay(x0, y0, dx, dy, maxDist, area, z) {
+            let mapX = Math.floor(x0);
+            let mapY = Math.floor(y0);
+            const deltaDistX = Math.abs(1 / (dx || 1e-9));
+            const deltaDistY = Math.abs(1 / (dy || 1e-9));
+            let stepX, stepY, sideDistX, sideDistY;
+            if (dx < 0) {
+                stepX = -1;
+                sideDistX = (x0 - mapX) * deltaDistX;
+            } else {
+                stepX = 1;
+                sideDistX = (mapX + 1.0 - x0) * deltaDistX;
+            }
+            if (dy < 0) {
+                stepY = -1;
+                sideDistY = (y0 - mapY) * deltaDistY;
+            } else {
+                stepY = 1;
+                sideDistY = (mapY + 1.0 - y0) * deltaDistY;
+            }
+
+            let dist = 0;
+            while (dist < maxDist) {
+                if (sideDistX < sideDistY) {
+                    dist = sideDistX;
+                    sideDistX += deltaDistX;
+                    mapX += stepX;
+                } else {
+                    dist = sideDistY;
+                    sideDistY += deltaDistY;
+                    mapY += stepY;
+                }
+                if (dist >= maxDist) {
+                    return { x: x0 + maxDist * dx, y: y0 + maxDist * dy };
+                }
+                if (this.isBlocked(area, mapX, mapY, z)) {
+                    // Hit wall: stop at wall surface with small penetration (0.3 tiles) to illuminate the wall face
+                    const hitDist = dist + 0.3;
+                    const rawX = x0 + hitDist * dx;
+                    const rawY = y0 + hitDist * dy;
+                    const clampedX = Math.max(mapX + 0.05, Math.min(mapX + 0.95, rawX));
+                    const clampedY = Math.max(mapY + 0.05, Math.min(mapY + 0.95, rawY));
+                    return { x: clampedX, y: clampedY };
+                }
+            }
+            return { x: x0 + maxDist * dx, y: y0 + maxDist * dy };
+        }
+
+        renderGlows(z, dark) {
+            const b = this.bitmap;
+            b.clear();
+            const ctx = b.context;
+            const W = window.UF && UF.World;
+            const O = window.UF && UF.Objects;
+            const Fire = window.UF && UF.Fire;
+            const Levels = window.UF && UF.Levels;
+            const Cam = window.UF && UF.Camera;
+            if (!W || !$gameMap) return;
+
+            const area = DayNight.viewLevel();
+            const zFactor = Cam && typeof Cam.zoom === "function" ? Cam.zoom() : 1.0;
+            const dx = $gameMap.displayX(), dy = $gameMap.displayY();
+            const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
+            const minX = Math.max(0, Math.floor(dx) - 2);
+            const maxX = Math.min(W.state ? W.state.size - 1 : 255, Math.ceil(dx + (Graphics.width / (tw * zFactor))) + 2);
+            const minY = Math.max(0, Math.floor(dy) - 2);
+            const maxY = Math.min(W.state ? W.state.size - 1 : 255, Math.ceil(dy + (Graphics.height / (th * zFactor))) + 2);
+
+            const lights = [];
+            // 1. Objects & terrain
+            for (let cy = minY; cy <= maxY; cy++) {
+                for (let cx = minX; cx <= maxX; cx++) {
+                    const obj = O && O.atIn ? O.atIn(area, cx, cy) : null;
+                    if (obj) {
+                        const tags = obj.tags || [];
+                        const id = obj.id || "";
+                        if (id === "campfire" || tags.includes("fire") || tags.includes("light") || id === "torch" || id === "streetlamp" || id === "lantern") {
+                            lights.push({ x: cx, y: cy, color: "255, 175, 55,", radius: 100, flicker: true });
+                        } else if (id === "furnace" || id === "smithy" || id === "forge" || id === "kiln") {
+                            lights.push({ x: cx, y: cy, color: "255, 105, 25,", radius: 90, flicker: true });
+                        } else if (id.includes("crystal") || tags.includes("gem")) {
+                            lights.push({ x: cx, y: cy, color: "65, 215, 255,", radius: 80, flicker: false });
+                        } else if (id.includes("mushroom") || id.includes("glow") || id.includes("moss") || id === "glow_caps" || id === "tower_cap") {
+                            lights.push({ x: cx, y: cy, color: "50, 255, 160,", radius: 75, flicker: false });
+                        }
+                    }
+                    // Liquid lava on Z = -2
+                    if (z === -2 && Levels && Levels.waterAt && Levels.waterAt({ area, x: cx, y: cy, z })) {
+                        lights.push({ x: cx, y: cy, color: "255, 65, 15,", radius: 60, flicker: true });
+                    }
+                    // Burning cells from UF_Fire
+                    if (Fire && Fire.isBurning && Fire.isBurning(area, cx, cy)) {
+                        lights.push({ x: cx, y: cy, color: "255, 125, 20,", radius: 90, flicker: true });
+                    }
+                }
+            }
+
+            // 2. Units with light sources
+            if (W && typeof W.unitsInArea === "function") {
+                for (const u of W.unitsInArea(area.x, area.y)) {
+                    if (!u || (u.z !== undefined && u.z !== z)) continue;
+                    const eq = u.equipment || {};
+                    const tags = (u.data && u.data.tags) || [];
+                    if (eq.tool === "torch" || eq.held === "torch" || eq.light || tags.includes("light") || tags.includes("fire")) {
+                        lights.push({ x: u.x, y: u.y, color: "255, 175, 55,", radius: 85, flicker: true });
+                    }
+                }
+            }
+
+            for (const L of lights) {
+                const sx = Math.round(((L.x - dx) + 0.5) * tw * zFactor);
+                const sy = Math.round(((L.y - dy) + 0.5) * th * zFactor);
+                const flick = L.flicker ? (1 + 0.08 * Math.sin((this._tick + L.x * 13 + L.y * 29) * 0.25)) : 1.0;
+                const rad = Math.round(L.radius * flick * zFactor);
+                const maxTileDist = (L.radius * flick) / tw;
+
+                const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad);
+                grad.addColorStop(0, `rgba(${L.color} 0.70)`);
+                grad.addColorStop(0.35, `rgba(${L.color} 0.35)`);
+                grad.addColorStop(0.7, `rgba(${L.color} 0.10)`);
+                grad.addColorStop(1, `rgba(${L.color} 0.0)`);
+                ctx.fillStyle = grad;
+
+                const x0 = L.x + 0.5;
+                const y0 = L.y + 0.5;
+
+                if (!this.hasBlockingInRadius(area, L.x, L.y, z, maxTileDist + 0.5)) {
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, rad, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    const RAY_COUNT = 96;
+                    ctx.save();
+                    ctx.beginPath();
+                    for (let i = 0; i < RAY_COUNT; i++) {
+                        const angle = (i * 2 * Math.PI) / RAY_COUNT;
+                        const rdx = Math.cos(angle);
+                        const rdy = Math.sin(angle);
+                        const pt = this.castRay(x0, y0, rdx, rdy, maxTileDist, area, z);
+                        const px = ((pt.x - dx) * tw * zFactor);
+                        const py = ((pt.y - dy) * th * zFactor);
+                        if (i === 0) {
+                            ctx.moveTo(px, py);
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                    }
+                    ctx.closePath();
+                    ctx.clip();
+
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, rad, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+            b._baseTexture.update();
+        }
+    }
+    DayNight.GlowLayer = Sprite_UFGlowLayer;
+
+    const _Spriteset_Map_createUpperLayer = Spriteset_Map.prototype.createUpperLayer;
+    Spriteset_Map.prototype.createUpperLayer = function() {
+        _Spriteset_Map_createUpperLayer.call(this);
+        if (!this._ufGlowLayer) {
+            this._ufGlowLayer = new Sprite_UFGlowLayer();
+            this.addChild(this._ufGlowLayer);
+        }
+    };
 
     const _Scene_Map_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
     Scene_Map.prototype.createDisplayObjects = function() {
@@ -259,6 +522,58 @@
             if (UF.Fog) UF.Fog.refresh();
             await t.waitFrames(8);
             t.screenshot("night");
+
+            // Wall occlusion regression check: walls must block glowing light
+            const O = UF.Objects, area = DayNight.viewLevel();
+            const glowLayer = SceneManager._scene && SceneManager._scene._spriteset && SceneManager._scene._spriteset._ufGlowLayer;
+            if (O && glowLayer && glowLayer.bitmap) {
+                let campX = -1, campY = -1;
+                const minX = Math.max(0, Math.floor($gameMap.displayX()) - 5);
+                const maxX = Math.min(255, Math.ceil($gameMap.displayX() + 30));
+                const minY = Math.max(0, Math.floor($gameMap.displayY()) - 5);
+                const maxY = Math.min(255, Math.ceil($gameMap.displayY() + 25));
+                for (let y = minY; y <= maxY && campX < 0; y++) {
+                    for (let x = minX; x <= maxX; x++) {
+                        const o = O.atIn(area, x, y);
+                        if (o && (o.id === "campfire" || (o.tags && o.tags.includes("fire")))) {
+                            campX = x; campY = y; break;
+                        }
+                    }
+                }
+
+                if (campX >= 0) {
+                    const origEast = O.typeIdIn(area, campX + 1, campY);
+                    const origBehind = O.typeIdIn(area, campX + 2, campY);
+                    O.setIn(area, campX + 1, campY, "wall_stone");
+                    O.setIn(area, campX + 2, campY, null);
+                    if (O.refresh) O.refresh();
+                    await t.waitFrames(8);
+
+                    const bmp = glowLayer.bitmap;
+                    const ctx = bmp.context;
+                    const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
+                    const zF = window.UF && UF.Camera ? UF.Camera.zoom() : 1.0;
+                    const dX = $gameMap.displayX(), dY = $gameMap.displayY();
+                    const sxBehind = Math.round(((campX + 2 - dX) + 0.5) * tw * zF);
+                    const syBehind = Math.round(((campY - dY) + 0.5) * th * zF);
+                    const behindAlpha = ctx.getImageData(sxBehind, syBehind, 1, 1).data[3];
+                    const sxCenter = Math.round(((campX - dX) + 0.5) * tw * zF);
+                    const syCenter = Math.round(((campY - dY) + 0.5) * th * zF);
+                    const centerAlpha = ctx.getImageData(sxCenter, syCenter, 1, 1).data[3];
+                    const sxWest = Math.round(((campX - 1 - dX) + 0.5) * tw * zF);
+                    const syWest = Math.round(((campY - dY) + 0.5) * th * zF);
+                    const westAlpha = ctx.getImageData(sxWest, syWest, 1, 1).data[3];
+
+                    t.check("wall_blocks_glowing_light", centerAlpha > 30 && westAlpha > 30 && behindAlpha === 0,
+                        `center ${centerAlpha}, open west ${westAlpha}, occluded behind wall ${behindAlpha} === 0`);
+                    t.screenshot("night_wall_occlusion");
+
+                    O.setIn(area, campX + 1, campY, origEast || null);
+                    O.setIn(area, campX + 2, campY, origBehind || null);
+                    if (O.refresh) O.refresh();
+                    await t.waitFrames(4);
+                }
+            }
 
             if (L && W && typeof W.viewLevel === "function") {
                 for (const z of [-1, -2]) {
