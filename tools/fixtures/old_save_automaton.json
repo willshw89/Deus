@@ -1,0 +1,240 @@
+{
+ "about": "A save made by the code BEFORE the eleven-peoples change (VISION V87), for the peoples suite's save_old check. Made by tools/fixtures/UF_ZZ_OldSaveFixture.js in a snapshot of game/; RPG Maker MZ save format (JsonEx, zlib deflate, written as a binary string).",
+ "made": "2026-09-19T19:41:44.798Z",
+ "seed": 3,
+ "code": {
+  "js/plugins/UF_Factions.js": "b68b9cd17ecc096513350d9019b97251",
+  "js/plugins/UF_History.js": "3ff34d1aa44d8952922ee2be1d08baea",
+  "data/UF_WorldCatalog.json": "0bbc473945b6683d8a0d9efe8119c1d7"
+ },
+ "speciesInCatalog": [
+  "human:3",
+  "elf:2",
+  "dwarf:2",
+  "goblin:2",
+  "orc:2",
+  "gnome:1",
+  "automaton:1"
+ ],
+ "factions": [
+  {
+   "id": "f1",
+   "name": "The Iric Guild",
+   "species": "gnome",
+   "isPlayer": false
+  },
+  {
+   "id": "f2",
+   "name": "The Halbelen Deep",
+   "species": "dwarf",
+   "isPlayer": true
+  },
+  {
+   "id": "f3",
+   "name": "The Torostwyn Band",
+   "species": "orc",
+   "isPlayer": false
+  },
+  {
+   "id": "f4",
+   "name": "The Wentora Array",
+   "species": "automaton",
+   "isPlayer": false
+  }
+ ],
+ "automaton": {
+  "factionId": "f4",
+  "name": "The Wentora Array",
+  "speciesName": "Automata",
+  "units": [
+   {
+    "id": 25,
+    "name": "Naem",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_4",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 122,
+    "y": 15,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "male",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 26,
+    "name": "Helyveys",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_6",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 122,
+    "y": 14,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "female",
+     "founder": true,
+     "rank": 1,
+     "tint": null
+    }
+   },
+   {
+    "id": 27,
+    "name": "Liaus",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_7",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 124,
+    "y": 14,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "male",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 28,
+    "name": "Garulys",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_4",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 122,
+    "y": 13,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "female",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 29,
+    "name": "Jorald",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_7",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 126,
+    "y": 11,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "male",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 30,
+    "name": "Caetamah",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_6",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 124,
+    "y": 16,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "female",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 31,
+    "name": "Yveic",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_6",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 123,
+    "y": 16,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "male",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   },
+   {
+    "id": 32,
+    "name": "Alyveina",
+    "image": {
+     "characterName": "$UF_Stock_SF_People3_4",
+     "characterIndex": 0
+    },
+    "area": {
+     "x": 0,
+     "y": 0
+    },
+    "x": 122,
+    "y": 16,
+    "data": {
+     "kind": "person",
+     "species": "automaton",
+     "faction": "f4",
+     "gender": "female",
+     "founder": true,
+     "rank": 0,
+     "tint": null
+    }
+   }
+  ]
+ },
+ "unitCount": 136,
+ "bytes": {
+  "json": 246837
+ }
+}
