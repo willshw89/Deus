@@ -8,6 +8,7 @@ if (mutant && mutant.endsWith("=owner")) source = source.replace("c.step.goalOwn
 if (mutant && mutant.endsWith("=physical")) source = source.replace("g.progress = inv.some(i => i.type === g.item && i.holder === u.id && i.count > 0) ? 1 : 0", "g.progress = 1");
 if (mutant && mutant.endsWith("=backoff")) source = source.replace("if (f && f.retryAt > minute()) continue;", "if (false) continue;");
 if (mutant && mutant.endsWith("=age")) source = source.replace("Number.isFinite(u.data.age) && u.data.age >= 18", "(u.data.age === undefined || u.data.age >= 18)");
+if (mutant && mutant.endsWith("=destiny")) source = source.replace("u.data.destiny = u.data.destiny || destinyFor(u);", "u.data.destiny = null;");
 const catalog = JSON.parse(fs.readFileSync(path.join(root, "game/data/UF_WorldCatalog.json"), "utf8"));
 let passed = 0, failed = 0;
 function check(name, fn) { try { fn(); passed++; console.log(`PASS goals.${name}`); } catch (e) { failed++; console.error(`FAIL goals.${name}: ${e.message}`); } }
@@ -118,4 +119,95 @@ check("founders_wait_for_facets", () => {
     const h = harness(), u = h.unit(); delete u.data.facets; h.emit("world:unitAdded", u); assert.equal(u.data.lifeGoals, undefined);
     u.data.facets = { bravery: 100, sociability: 80 }; h.emit("colonists:ready"); assert.ok(u.data.lifeGoals);
 });
+check("destiny_assigned_to_sentient", () => {
+    const h = harness(), person = h.unit({ kind: "person", stats: { int: 10 } });
+    const wolf = h.unit({ kind: "creature", species: "wolf", stats: { int: 2 } });
+    const sPerson = h.G.ensure(person), sWolf = h.G.ensure(wolf);
+    assert.ok(person.data.destiny, "sentient unit missing destiny");
+    assert.ok(sPerson.destiny, "lifeGoals missing destiny");
+    assert.equal(person.data.destiny.id, sPerson.destiny.id);
+    assert.ok(typeof person.data.destiny.title === "string" && person.data.destiny.title.length > 0);
+    assert.ok(typeof person.data.destiny.motto === "string" && person.data.destiny.motto.length > 0);
+    assert.ok(Number.isFinite(person.data.destiny.target) && person.data.destiny.target > 0);
+    assert.equal(wolf.data.destiny, undefined, "wolf received a destiny");
+    assert.equal(sWolf.destiny, null, "wolf lifeGoals received a destiny");
+});
+check("destiny_stable_across_saves", () => {
+    const h = harness(), u = h.unit();
+    const initial = h.G.ensure(u);
+    const destinyId = initial.destiny.id;
+    const serialized = JSON.parse(JSON.stringify(u.data.lifeGoals));
+    u.data.lifeGoals = serialized;
+    u.data.facets.bravery = 99;
+    u.data.facets.ambition = 99;
+    const restored = h.G.ensure(u);
+    assert.equal(restored.destiny.id, destinyId, "destiny rerolled on restore");
+    assert.equal(u.data.destiny.id, destinyId);
+});
+check("destiny_influences_priorities", () => {
+    const h = harness(), u = h.unit();
+    h.G.ensure(u);
+    u.data.destiny = {
+        id: "great_artificer",
+        title: "The Master Artificer",
+        category: "creation",
+        motto: "Test motto",
+        jobAffinities: { craft: 1.5, build: 1.3 },
+        target: 10,
+        targetLabel: "Craft 10 items",
+        progress: 0,
+        fulfilled: false
+    };
+    u.data.lifeGoals.destiny = u.data.destiny;
+    const p = h.G.priorities(u);
+    assert.ok((p.craft || 1) >= 1.5, `expected craft priority >= 1.5, got ${p.craft}`);
+    assert.ok((p.build || 1) >= 1.3, `expected build priority >= 1.3, got ${p.build}`);
+});
+check("destiny_influences_choose_plan", () => {
+    const h = harness(), u = h.unit();
+    h.G.ensure(u);
+    u.data.destiny = {
+        id: "worldstrider_delver",
+        title: "The Deep Worldstrider",
+        category: "exploration",
+        motto: "Test",
+        jobAffinities: { mine: 1.4 },
+        target: 8,
+        progress: 0,
+        fulfilled: false
+    };
+    u.data.lifeGoals.destiny = u.data.destiny;
+    const candidates = [
+        { step: { id: "step_farm", goalOwner: u.id }, spec: { type: "farm" }, order: 0, score: 1.0 },
+        { step: { id: "step_mine", goalOwner: u.id }, spec: { type: "mine" }, order: 1, score: 1.0 }
+    ];
+    const ranked = h.G.choosePlan(u, candidates);
+    assert.equal(ranked[0].step.id, "step_mine", "destiny-aligned mine step was not ranked higher");
+});
+check("destiny_progress_and_achievement", () => {
+    const h = harness(), u = h.unit();
+    h.G.ensure(u);
+    u.data.destiny = {
+        id: "great_artificer",
+        title: "The Master Artificer",
+        category: "creation",
+        motto: "Test",
+        jobAffinities: { craft: 1.35 },
+        target: 2,
+        targetLabel: "Craft 2 items",
+        progress: 0,
+        fulfilled: false,
+        fulfilledAt: null
+    };
+    u.data.lifeGoals.destiny = u.data.destiny;
+    assert.equal(u.data.destiny.fulfilled, false);
+    h.emit("jobs:done", { id: 101, type: "craft" }, u);
+    assert.equal(u.data.destiny.progress, 1);
+    assert.equal(u.data.destiny.fulfilled, false);
+    h.emit("jobs:done", { id: 102, type: "craft" }, u);
+    assert.equal(u.data.destiny.progress, 2);
+    assert.equal(u.data.destiny.fulfilled, true);
+    assert.ok(u.data.lifeGoals.achievements.some(a => a.id === `destiny_${u.id}_great_artificer`), "destiny achievement not recorded");
+});
 console.log(`RESULT: ${passed} passed, ${failed} failed${mutant ? " (" + mutant + ")" : ""}`); process.exitCode = failed ? 1 : 0;
+
