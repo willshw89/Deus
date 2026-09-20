@@ -170,7 +170,7 @@ function processSwayingFlora48(rawFilename, outId) {
 
     for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 3; col++) {
-            const swayOffset = (col === 0 ? -1 : (col === 2 ? 1 : 0));
+            const swayOffset = 0;
             for (let y = 0; y < 48; y++) {
                 const rowSway = (y < 34) ? swayOffset : 0;
                 for (let x = 0; x < 48; x++) {
@@ -207,7 +207,7 @@ function processSwayingFlora48(rawFilename, outId) {
         anchor: [24, 47],
         footprint: [1, 1],
         facings: ["S"],
-        animations: { stand: [1], sway: [0, 1, 2] },
+        animations: { stand: [1] },
         frameMs: 250,
         generator: "Google Nano Banana 2",
         standard: "Final Fantasy VI 16-bit HD"
@@ -231,7 +231,7 @@ function processLargeCanopyTree96(rawFilename, outId) {
 
     for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 3; col++) {
-            const swayOffset = (col === 0 ? -1 : (col === 2 ? 1 : 0));
+            const swayOffset = 0;
             for (let y = 0; y < 96; y++) {
                 const rowSway = (y < 68) ? swayOffset : 0;
                 for (let x = 0; x < 96; x++) {
@@ -268,7 +268,7 @@ function processLargeCanopyTree96(rawFilename, outId) {
         anchor: [48, 95],
         footprint: [1, 1],
         facings: ["S"],
-        animations: { stand: [1], sway: [0, 1, 2] },
+        animations: { stand: [1] },
         frameMs: 300,
         generator: "Google Nano Banana 2",
         standard: "Final Fantasy VI 16-bit HD"

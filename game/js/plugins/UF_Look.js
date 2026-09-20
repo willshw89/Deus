@@ -199,6 +199,71 @@
         return "";
     }
 
+    const WILDLIFE_BEAST_FACES = {
+        deer: 0, stag: 0, wild_horse: 0, wild_sheep: 0,
+        boar: 1,
+        wolf: 2,
+        fox: 3, jackal: 3, arctic_fox: 3,
+        bear: 4,
+        hare: 5, rabbit: 5,
+        hawk: 6, fowl: 6, falcon: 6, songbird: 6,
+        wildcat: 7, lynx: 7
+    };
+
+    const WILDLIFE_MONSTER_FACES = {
+        troll: 0,
+        bog_horror: 1,
+        giant_spider: 2, spider: 2,
+        sand_stalker: 3, serpent: 3,
+        bat: 4, rat: 4,
+        restless_dead: 5, skeleton: 5, zombie: 5, ghost: 5,
+        ice_wraith: 6, wraith: 6,
+        aurochs: 7
+    };
+
+    const TREE_FLORA_FACES = {
+        oak: 0, tree_savanna: 0, bush: 0, desert_shrub: 0, snow_bush: 0, sapling: 0,
+        birch: 1,
+        pine: 2, fir_snow: 2, fir: 2,
+        fruit_tree: 3, fruit_tree_bare: 3, berry_bush: 3, berry_bush_bare: 3,
+        palm: 4, tree_tropical: 4, cactus: 4, cactus_tall: 4,
+        tree_swamp: 5, mangrove: 5, willow: 5, reeds: 5, lily_pad: 5, fern: 5,
+        dead_tree: 6, tree_cursed: 6, stump: 6,
+        tower_cap: 7, glow_caps: 7, cave_mushrooms: 7, cave_moss: 7, spore_reeds: 7
+    };
+
+    function faceOfSubject(subject) {
+        if (!subject) return null;
+        if (subject.kind === "unit" && subject.hit) {
+            const hit = subject.hit;
+            const F = window.UF && UF.Factions;
+            if (hit.unit && F && typeof F.cultureFace === "function") {
+                const cf = F.cultureFace(hit.unit);
+                if (cf && cf.sheet) return { sheet: cf.sheet, index: cf.index | 0 };
+            }
+            const spId = (hit.unit && hit.unit.data && hit.unit.data.species) || lower(hit.name);
+            if (spId) {
+                if (Object.prototype.hasOwnProperty.call(WILDLIFE_BEAST_FACES, spId)) {
+                    return { sheet: "UF_Faces_Wildlife_Beasts", index: WILDLIFE_BEAST_FACES[spId] };
+                }
+                if (Object.prototype.hasOwnProperty.call(WILDLIFE_MONSTER_FACES, spId)) {
+                    return { sheet: "UF_Faces_Wildlife_Monsters", index: WILDLIFE_MONSTER_FACES[spId] };
+                }
+            }
+            if (hit.colonist || hit.person) {
+                const culture = (hit.unit && hit.unit.data && (hit.unit.data.culture || hit.unit.data.species)) || "human";
+                return { sheet: `UF_Faces_${culture}_1`, index: 0 };
+            }
+        }
+        if (subject.kind === "object" && subject.object) {
+            const objId = subject.object.id || lower(subject.object.name);
+            if (objId && Object.prototype.hasOwnProperty.call(TREE_FLORA_FACES, objId)) {
+                return { sheet: "UF_Faces_Trees_Nature", index: TREE_FLORA_FACES[objId] };
+            }
+        }
+        return null;
+    }
+
     /** Line 1: { kind: "unit"|"items"|"object"|"site", text, file, ... } or null. */
     function subjectAt(x, y) {
         const hit = unitAt(x, y);
@@ -294,16 +359,17 @@
         };
     }
 
-    /** Everything the tooltip shows for a cell: { x, y, lines: [l1, l2, l3], subject, cell, art, unexplored } or null off the map. */
+    /** Everything the tooltip shows for a cell: { x, y, lines: [l1, l2, l3], subject, cell, art, face, unexplored } or null off the map. */
     function inspect(x, y) {
         if (!onMap(x, y)) return null;
         const F = window.UF.Fog;
-        if (F && typeof F.isExplored === "function" && !F.isExplored(x, y)) return { x, y, lines: ["Unexplored", "", ""], subject: null, cell: null, art: null, unexplored: true };
+        if (F && typeof F.isExplored === "function" && !F.isExplored(x, y)) return { x, y, lines: ["Unexplored", "", ""], subject: null, cell: null, art: null, face: null, unexplored: true };
         const subject = subjectAt(x, y);
         const cell = cellAt(x, y);
         const file = (subject && subject.file) || (cell && cell.file) || "";
         const art = file ? Assets.describe(file) : null;
-        return { x, y, lines: [subject ? subject.text : "", cell ? cell.text : "", art ? art.text : ""], subject, cell, art, unexplored: false };
+        const face = faceOfSubject(subject);
+        return { x, y, lines: [subject ? subject.text : "", cell ? cell.text : "", art ? art.text : ""], subject, cell, art, face, unexplored: false };
     }
 
     //-------------------------------------------------------------------------
@@ -316,6 +382,8 @@
             this.visible = false;
             this._text = "";
             this._lines = [];
+            this._face = null;
+            this._faceKey = "";
             this._cell = { x: NaN, y: NaN };
             this._age = REFRESH_FRAMES;
             this._pin = null;
@@ -333,7 +401,7 @@
                     this._pin = null;
                     this._age = REFRESH_FRAMES; // re-read the cell under the mouse at once
                 } else {
-                    this.setLines(this._pin.lines);
+                    this.setTip(this._pin.lines, this._pin.face);
                     this.place(this._pin.sx, this._pin.sy);
                     this.visible = this._lines.length > 0;
                     return;
@@ -346,7 +414,7 @@
                 this._cell = cell;
                 this._age = 0;
                 const info = inspect(cell.x, cell.y);
-                this.setLines(info ? info.lines : []);
+                this.setTip(info ? info.lines : [], info ? info.face : null);
             }
             if (!this._lines.length) return this.hideTip();
             this.place(TouchInput.x, TouchInput.y);
@@ -357,40 +425,85 @@
             this.visible = false;
         }
 
-        pin(lines, sx, sy, frames) {
-            this._pin = { lines: (lines || []).slice(), sx, sy, frames: Math.max(1, frames | 0) };
+        pin(lines, sx, sy, frames, face = null) {
+            this._pin = { lines: (lines || []).slice(), sx, sy, frames: Math.max(1, frames | 0), face };
         }
 
         setLines(lines) {
+            this.setTip(lines, this._face);
+        }
+
+        setTip(lines, face = null) {
             const shown = (lines || []).filter(l => typeof l === "string" && l.length);
             const text = shown.join("\n");
-            if (text === this._text) return;
+            const faceKey = face ? `${face.sheet}#${face.index}` : "";
+            if (text === this._text && faceKey === this._faceKey) return;
             this._text = text;
             this._lines = shown;
+            this._face = face || null;
+            this._faceKey = faceKey;
             this.redraw();
         }
 
         redraw() {
             const lines = this._lines;
             if (!lines.length) return;
-            const probe = this.bitmap;
+            const probe = this.bitmap || new Bitmap(8, 8);
             probe.fontSize = FONT_SIZE;
             let widest = 0;
             for (const l of lines) widest = Math.max(widest, probe.measureTextWidth(l));
-            const w = Math.min(MAX_WIDTH, Math.ceil(widest)) + PAD_X * 2;
-            const h = lines.length * LINE_H + PAD_Y * 2;
+
+            const hasFace = !!(this._face && this._face.sheet);
+            const faceSize = 48;
+            const faceSpacing = hasFace ? faceSize + 8 : 0;
+            const textStartX = PAD_X + faceSpacing;
+
+            const textW = Math.min(MAX_WIDTH, Math.ceil(widest));
+            const w = textW + textStartX + PAD_X;
+            const textH = lines.length * LINE_H;
+            const minH = hasFace ? faceSize + PAD_Y * 2 : 0;
+            const h = Math.max(textH + PAD_Y * 2, minH);
+
             const b = new Bitmap(w, h);
-            b.fillRect(0, 0, w, h, "rgba(12, 14, 18, 0.82)");
+            b.fillRect(0, 0, w, h, "rgba(12, 14, 18, 0.88)");
             b.fillRect(0, 0, w, 1, "rgba(255, 255, 255, 0.16)");
             b.fillRect(0, h - 1, w, 1, "rgba(255, 255, 255, 0.16)");
             b.fillRect(0, 0, 1, h, "rgba(255, 255, 255, 0.16)");
             b.fillRect(w - 1, 0, 1, h, "rgba(255, 255, 255, 0.16)");
+
+            if (hasFace) {
+                b.fillRect(PAD_X - 1, PAD_Y - 1, faceSize + 2, faceSize + 2, "rgba(0, 0, 0, 0.6)");
+                b.fillRect(PAD_X, PAD_Y, faceSize, faceSize, "#14110d");
+                b.fillRect(PAD_X, PAD_Y, faceSize, 1, "rgba(255, 255, 255, 0.25)");
+                b.fillRect(PAD_X, PAD_Y + faceSize - 1, faceSize, 1, "rgba(0, 0, 0, 0.6)");
+                b.fillRect(PAD_X, PAD_Y, 1, faceSize, "rgba(255, 255, 255, 0.25)");
+                b.fillRect(PAD_X + faceSize - 1, PAD_Y, 1, faceSize, "rgba(0, 0, 0, 0.6)");
+
+                const faceBmp = ImageManager.loadFace(this._face.sheet);
+                if (faceBmp.isReady()) {
+                    const fi = this._face.index | 0;
+                    const pw = ImageManager.faceWidth || 144;
+                    const ph = ImageManager.faceHeight || 144;
+                    const sx = (fi % 4) * pw;
+                    const sy = Math.floor(fi / 4) * ph;
+                    b.blt(faceBmp, sx, sy, pw, ph, PAD_X, PAD_Y, faceSize, faceSize);
+                } else if (!(faceBmp.isError && faceBmp.isError())) {
+                    const expectedSheet = this._face.sheet;
+                    faceBmp.addLoadListener(() => {
+                        if (this._face && this._face.sheet === expectedSheet) {
+                            this.redraw();
+                        }
+                    });
+                }
+            }
+
             b.fontSize = FONT_SIZE;
             b.outlineWidth = 2;
             b.outlineColor = "rgba(0, 0, 0, 0.7)";
+            const textY0 = hasFace ? Math.round((h - textH) / 2) : PAD_Y;
             lines.forEach((l, i) => {
                 b.textColor = COLORS[Math.min(i, COLORS.length - 1)];
-                b.drawText(l, PAD_X, PAD_Y + i * LINE_H, w - PAD_X * 2, LINE_H, "left");
+                b.drawText(l, textStartX, textY0 + i * LINE_H, textW, LINE_H, "left");
             });
             const old = this.bitmap;
             this.bitmap = b;
@@ -460,11 +573,13 @@
         show(x, y, seconds = 3, lines) {
             const s = tip();
             if (!s || !onMap(x, y)) return false;
-            const text = lines || Look.describeCell(x, y) || [];
+            const i = inspect(x, y);
+            const text = lines || (i ? i.lines : []) || [];
+            const face = lines ? null : (i ? i.face : null);
             const z = window.UF.Camera ? UF.Camera.zoom() : 1;
             const sx = Math.round(($gameMap.adjustX(x) + 1) * $gameMap.tileWidth() * z);
             const sy = Math.round(($gameMap.adjustY(y) + 0.5) * $gameMap.tileHeight() * z);
-            s.pin(text, sx, sy, Math.round(seconds * PIN_FRAMES_PER_S));
+            s.pin(text, sx, sy, Math.round(seconds * PIN_FRAMES_PER_S), face);
             s.update();
             emit("look:shown", x, y, text);
             return true;
@@ -480,6 +595,11 @@
         /** The text now drawn in the tooltip (lines joined by newlines), "" when hidden or empty. */
         text: () => (tip() && tip().visible ? tip()._text : ""),
         lines: () => (tip() ? tip()._lines.slice() : []),
+        face: () => (tip() && tip().visible ? tip()._face : null),
+        faceAt: (x, y) => {
+            const i = inspect(x, y);
+            return i ? i.face : null;
+        },
         isPinned: () => !!(tip() && tip()._pin),
         /** Screen position the tooltip was last placed for ({ x, y } of the mouse or the pinned cell). */
         anchor: () => (tip() ? Object.assign({}, tip()._shownAt) : null)
@@ -571,10 +691,18 @@
         t.check("cell_lines", okTree && okWater && okUnit,
             `tree ${JSON.stringify(L1)} (catalog image "${oakFile}"); water ${JSON.stringify(L2)}; unit ${JSON.stringify(L3)}`);
 
+        // cell_lines & face_portraits: three lines and face metadata for tree, water and unit.
+        const fOak = Look.faceAt(cells.oak.x, cells.oak.y);
+        const fWater = Look.faceAt(cells.water.x, cells.water.y);
+        const fUnit = Look.faceAt(cells.unit.x, cells.unit.y);
+        const okFaces = !!fOak && fOak.sheet === "UF_Faces_Trees_Nature" && fOak.index === 0 && fWater === null && !!fUnit && !!fUnit.sheet;
+        t.check("face_portraits", okFaces,
+            `tree face: ${JSON.stringify(fOak)}; water face: ${JSON.stringify(fWater)}; unit face: ${JSON.stringify(fUnit)}`);
+
         // asset_line_names_status: by the name rules (the index, if one is loaded, is set aside for this check).
         const hadIndex = Assets.index();
         Assets.setIndex(null);
-        put(cells.bare.x - 3, cells.bare.y, "palm");         // Outside_B tile
+        put(cells.bare.x - 3, cells.bare.y, "sapling");         // Outside_B tile
         const l3 = (x, y) => (Look.describeCell(x, y) || ["", "", ""])[2];
         // No catalog object draws U7 art since the V9 stock swap (2026-09-19), so the U7_ name rule is read from a name.
         const u7 = Assets.describe("!$U7_Flat-toptree");
@@ -645,7 +773,7 @@
         t.check("show_pins_lines", pinned && pinnedText.startsWith("Oak — chop") && unpinned, `pinned ${pinned} with "${pinnedText.split("\n")[0]}" while the mouse is over bare ground; released after 0.5 s: ${unpinned}`);
 
         moveMouse(cells.oak);
-        await t.waitFrames(3);
+        await t.waitFrames(10);
         t.screenshot("look_label");
         fx.cells = cells;
         return fx;

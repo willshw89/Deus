@@ -211,9 +211,7 @@
         const rect = this.itemRect(this.index());
         if (rect && this._factionCursorSprite) {
             this._factionCursorSprite.visible = true;
-            // Subtle horizontal bobbing for classic tactile menu feel
-            const bob = Math.sin(Graphics.frameCount * 0.12) * 3;
-            this._factionCursorSprite.x = this.padding + rect.x + 14 + bob;
+            this._factionCursorSprite.x = this.padding + rect.x + 14;
             this._factionCursorSprite.y = this.padding + rect.y + rect.height / 2;
         }
     };

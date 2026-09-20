@@ -199,7 +199,7 @@ function processFruitTree() {
         const cdata = Buffer.alloc(charsetW * charsetH * 4);
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 3; col++) {
-                const swayOffset = (col === 0 ? -1 : (col === 2 ? 1 : 0));
+                const swayOffset = 0;
                 for (let y = 0; y < frameH; y++) {
                     const rowSway = (y < 60) ? swayOffset : 0;
                     for (let x = 0; x < frameW; x++) {
@@ -238,7 +238,7 @@ function processFruitTree() {
         anchor: [48, 95],
         footprint: [1, 1],
         facings: ["S"],
-        animations: { stand: [1], sway: [0, 1, 2] },
+        animations: { stand: [1] },
         generator: "Google Nano Banana 2",
         standard: "Final Fantasy VI 16-bit HD"
     };

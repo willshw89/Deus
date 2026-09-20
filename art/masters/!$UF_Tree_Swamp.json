@@ -16,11 +16,6 @@
   "animations": {
     "stand": [
       1
-    ],
-    "sway": [
-      0,
-      1,
-      2
     ]
   },
   "generator": "Google Nano Banana 2",

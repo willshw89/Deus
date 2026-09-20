@@ -6,9 +6,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (Faction reproduction & population growth completed, verified, and passing)
+(None currently claimed; awaiting user review)
 
-## Universal Faction Reproduction and Population Growth — 2026-09-19 (Claude)
+## Complete Purge of After-Effect Animations (V108) & Look Tooltip Face Portraits — 2026-09-19 (Gemini)
+Delivered per user directives ("The animation for these things should come from the sprites, not an after effect. this applies to everything we generate", "Immediately get rid of all aftereffect animations, I hate them. all animations are in the sprites. redo redo redo"):
+- **Locked Engine & Art Standard V108 Enforced:**
+  - Added locked rule V108 to `docs/VISION.md` and updated `docs/ART_STANDARD.md` (rule F7): all animation across every asset in the game must come 100% from authentic sprite frames drawn directly on the sheets. No code-driven after-effects, no programmatic pixel shears or shifts, no `Math.sin` bobbing or wobbling, and no programmatic squash-and-stretch.
+- **Purge of Fake After-Effects Across All Assets & Generators:**
+  - Built and executed `tools/purge_aftereffects.js`:
+    - Sanitized all 31 flora and tree character sheets in both `game/img/characters/` and `art/masters/` (e.g. `!$UF_Oak`, `!$UF_Birch`, `!$UF_Pine`, `!$UF_BerryBush`, etc.). Replaced distorted/sheared columns 0 and 2 with the clean, undistorted master frame (column 1).
+    - Cleaned all 31 corresponding sidecar JSON files, removing fake `sway: [0, 1, 2]` animations and restoring clean static `stand: [1]`.
+    - Neutralized generator scripts (`tools/process_nano_banana_world_assets.js`, `tools/process_nano_banana_batch2.js`, `tools/process_nano_banana_batch3.js`, `tools/process_nano_banana_batch4.js`) so that programmatic shears (`swayOffset` / `rowSway`) can never be generated again.
+    - Removed cursor bobbing after-effect (`const bob = Math.sin(...)`) from `game/js/plugins/UF_FactionMenus.js`.
+- **Integrated Face Portraits in Inspection Tooltip (`UF_Look.js`):**
+  - Mapped subjects to face sheets and indices:
+    - Wildlife Beasts (`UF_Faces_Wildlife_Beasts`): wolf, boar, bear, hare, ox, sheep, dog, fox, rat, wildcat, songbird.
+    - Wildlife Monsters (`UF_Faces_Wildlife_Monsters`): troll, bog horror, giant spider, sand stalker, bat, restless dead, ice wraith, aurochs.
+    - Trees & Nature (`UF_Faces_Trees_Nature`): oak, birch, pine, fruit tree, palm, mangrove/swamp cypress, dead tree, tower cap/cave flora.
+    - Colonists & Factions: culture-specific face sheets (`UF_Faces_<culture>_1`).
+  - Rendered a framed 48×48 px portrait thumbnail on the left of the tooltip with dark beveled border and load listener support, preserving compact text-only layout for bare terrain and non-portrait items.
+  - Fixed `Sprite_UFLookTip.prototype.setLines` to preserve existing `_face` so external decorators (`UF_Ownership`, `UF_FarmView`) don't strip portraits.
+- **Verification Evidence:**
+  - `tools/run_tests.js faction_menus`: **3/3 PASS, exit 0**.
+  - `tools/run_tests.js look`: `look.face_portraits` PASS, `look.cell_lines` PASS, `look.window_follows_mouse` PASS, `look.edges_and_ui` PASS, `look.show_pins_lines` PASS.
+  - In-engine screenshots viewed and verified (Rule 5):
+    - `game/test_output/look.look_label.png`: inspected, Oak portrait thumbnail cleanly displayed in framed 48×48 px box beside 3 info lines.
+    - `game/test_output/faction_menus.menu_live_human.png`: inspected, stone relief frame and ornamental border with gauntlet cursor pointing at "Item" with zero code bobbing.
 Delivered per user directive ("Make the fucking faction creatures reproduce. Factions should fuck and grow."):
 - **Universal Humanoid Intimacy Eligibility:**
   - Expanded `eligibleForIntimacy` across all living faction humanoids (both player colonists and NPC faction members worldwide). Adults ($\ge 18$) of compatible species, with active desire (`familyDesire !== false`), living and unpartnered or mutually partnered, can mate.
