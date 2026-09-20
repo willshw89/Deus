@@ -236,6 +236,9 @@
         if (!subject) return null;
         if (subject.kind === "unit" && subject.hit) {
             const hit = subject.hit;
+            if (hit.unit && hit.unit.data && hit.unit.data.face && hit.unit.data.face.sheet) {
+                return { sheet: hit.unit.data.face.sheet, index: hit.unit.data.face.index | 0 };
+            }
             const F = window.UF && UF.Factions;
             if (hit.unit && F && typeof F.cultureFace === "function") {
                 const cf = F.cultureFace(hit.unit);
@@ -277,14 +280,25 @@
             if (cond) parts.push(`[${cond}]`);
             return { kind: "unit", text: parts.filter(Boolean).join(" · "), file: hit.image, hit };
         }
+        const O = window.UF.Objects;
+        const type = O && typeof O.at === "function" ? O.at(x, y) : null;
+        const isStructure = type && (type.door || (Array.isArray(type.tags) && (type.tags.includes("door") || type.tags.includes("building") || type.tags.includes("wall"))) || type.autotile === "wall");
+        if (isStructure) {
+            const D = window.UF && UF.Doors;
+            const open = D && typeof D.isOpen === "function" && D.isOpen(x, y);
+            let stateStr = type.door ? (open ? " (open)" : " (closed)") : "";
+            let actions = Object.keys(type.actions || {});
+            if (type.door && !actions.length) actions = [open ? "close" : "open"];
+            if (!actions.length && (type.build || type.ruin)) actions = ["dismantle"];
+            const desc = actions.length ? `${type.name}${stateStr} — ${actions.join(", ")}` : `${type.name}${stateStr}`;
+            return { kind: "object", text: desc, file: imageOfType(type), object: type };
+        }
         const I = window.UF.Items;
         const items = I && typeof I.describe === "function" ? I.describe(x, y) : null;
         if (items && items.items && items.items.length) {
             const first = I.type(items.items[0].type);
             return { kind: "items", text: items.text, file: first ? first.image : "", items: items.items };
         }
-        const O = window.UF.Objects;
-        const type = O && typeof O.at === "function" ? O.at(x, y) : null;
         if (type) {
             let actions = Object.keys(type.actions || {});
             if (!actions.length && (type.build || type.ruin)) actions = ["dismantle"];
@@ -337,7 +351,7 @@
         }
         const tileId = $gameMap.tileId(x, y, 0);
         const kind = T && typeof T.kindOfTile === "function" ? T.kindOfTile(tileId) : null;
-        const water = Tilemap.isWaterTile(tileId);
+        const water = Tilemap.isTileA1(tileId);
         const waterKey = water ? ((T && typeof T.waterKindOfTile === "function" && T.waterKindOfTile(tileId)) || (info && info.water) || "water") : null;
         const groundId = kind ? kind.id : (info ? info.ground : null);
         const names = $gameMap.tileset() ? $gameMap.tileset().tilesetNames : [];

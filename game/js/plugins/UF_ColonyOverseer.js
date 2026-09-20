@@ -259,39 +259,48 @@
         const base = $gameSystem.mainFontSize ? $gameSystem.mainFontSize() : 26;
         this.contents.fontSize = 18;
 
-        // Line 0: name, gender, age, mood, pregnancy, illness
+        const portraitW = 72;
+        const portraitH = 70;
+        const portraitX = w - portraitW;
+        const portraitY = 0;
+        const textW = portraitX - 8;
+
+        // Draw the stone-arch portrait at top-right
+        this.drawPortrait(d, sel, portraitX, portraitY, portraitW, portraitH);
+
+        // Line 0: name, gender, age, life stage, mood, pregnancy, illness
         this.changeTextColor(ColorManager.systemColor());
-        let title = `${d.name} (${d.gender}${d.age !== undefined && d.age < 18 ? `, age ${d.age}` : ""})`;
+        let title = `${d.name} (${d.gender}${d.age !== undefined ? `, age ${d.age}` : ""}${d.stage ? ` · ${d.stage.charAt(0).toUpperCase() + d.stage.slice(1)}` : ""})`;
         if (d.pregnancy) title += ` [Pregnant: ${d.pregnancy.daysLeft}d]`;
         if (d.illness || (sel && sel.data && sel.data.illness)) {
             const ill = d.illness || sel.data.illness;
             const illName = ill.type ? (ill.type.charAt(0).toUpperCase() + ill.type.slice(1)) : "Dysentery";
             title += ` [Ill: ${illName}]`;
         }
-        this.drawText(title, 0, 0, w - 145, "left");
+        this.drawText(title, 0, 0, textW - 75, "left");
         let moodColor = "#ffff55";
         if (d.mood === "Ecstatic" || d.mood === "Happy") moodColor = "#55ff55";
         else if (d.mood === "Unhappy" || d.mood === "Stressed" || d.mood === "Miserable") moodColor = "#ff5555";
         this.changeTextColor(moodColor);
-        this.drawText(`[${d.mood}]`, w - 140, 0, 140, "right");
+        this.drawText(`[${d.mood}]`, textW - 70, 0, 70, "right");
 
         // Line 1: faction and home site
         this.contents.fontSize = 13;
         this.changeTextColor("#94a3b8");
-        this.drawText(`${d.faction}${d.site ? ` · ${d.site}` : ""}`, 0, 22, w, "left");
+        this.drawText(`${d.faction}${d.site ? ` · ${d.site}` : ""}`, 0, 20, textW, "left");
 
         // Line 2: the job
-        this.contents.fontSize = 16;
+        this.contents.fontSize = 15;
         this.resetTextColor();
-        this.drawText(`Job: ${d.job}`, 0, 40, w, "left");
+        this.drawText(`Job: ${d.job}`, 0, 38, textW, "left");
 
         // Line 3: what it carries (V89; UF_Sheet words it), nothing when it carries nothing
         this.contents.fontSize = 14;
         this.changeTextColor("#f0dca0");
         const S = window.UF && UF.Sheet;
         const load = S && typeof S.loadOf === "function" ? S.loadOf(sel.id) : null;
-        this._ufLoadText = load && typeof S.fittedLoadText === "function" ? S.fittedLoadText(load, w, text => this.textWidth(text)) : "";
-        if (this._ufLoadText) this.drawText(this._ufLoadText, 0, LOAD_Y, w, "left");
+        this._ufLoadText = load && typeof S.fittedLoadText === "function" ? S.fittedLoadText(load, textW, text => this.textWidth(text)) : "";
+        if (this._ufLoadText) this.drawText(this._ufLoadText, 0, LOAD_Y, textW, "left");
         this.resetTextColor();
         const dy = BELOW_LOAD;
 
@@ -354,6 +363,56 @@
         this.contents.fillRect(gx, y + 6, Math.round(gw * rate), gh, color);
         this.resetTextColor();
         this.drawText(`${Math.round(current)}/${max}`, gx + gw + 10, y, 60, "left");
+    };
+
+    Window_UFColonistCard.prototype.drawPortrait = function(d, sel, x, y, w, h) {
+        let face = (d && d.face) || (sel && sel.unit && sel.unit.data && sel.unit.data.face);
+        if (!face && sel && sel.unit) {
+            const S = window.UF && UF.Sheet;
+            if (S && typeof S.faceSpecOf === "function") {
+                const spec = S.faceSpecOf(sel.unit);
+                if (spec && spec.type === "face") face = { sheet: spec.sheet, index: spec.index };
+            }
+        }
+        if (!face && sel && sel.unit) {
+            const F = window.UF && UF.Factions;
+            if (F && typeof F.cultureFace === "function") {
+                const cf = F.cultureFace(sel.unit);
+                if (cf && cf.sheet) face = { sheet: cf.sheet, index: cf.index };
+            }
+        }
+        if (!face) {
+            const gender = (d && d.gender && String(d.gender).toLowerCase()) || "male";
+            face = { sheet: gender === "male" ? "UF_Faces_human_1" : "UF_Faces_human_2", index: 0 };
+        }
+
+        const c = this.contents;
+        // Stone frame borders and dark slate opening
+        c.fillRect(x, y, w, h, "#18181f");
+        c.fillRect(x, y, w, 1, "#475569");
+        c.fillRect(x, y, 1, h, "#475569");
+        c.fillRect(x, y + h - 1, w, 1, "#1e293b");
+        c.fillRect(x + w - 1, y, 1, h, "#1e293b");
+        c.fillRect(x + 1, y + 1, w - 2, 1, "#64748b");
+        c.fillRect(x + 1, y + 1, 1, h - 2, "#64748b");
+
+        if (face && face.sheet) {
+            const bmp = ImageManager.loadFace(face.sheet);
+            if (!bmp.isReady()) {
+                if (!bmp._ufCardListening) {
+                    bmp._ufCardListening = true;
+                    bmp.addLoadListener(() => {
+                        if (this.visible && this.parent) this.refresh();
+                    });
+                }
+                return;
+            }
+            const fw = ImageManager.faceWidth || 144;
+            const fh = ImageManager.faceHeight || 144;
+            const sx = (face.index % 4) * fw;
+            const sy = Math.floor(face.index / 4) * fh;
+            c.blt(bmp, sx, sy, fw, fh, x + 2, y + 2, w - 4, h - 4);
+        }
     };
 
     const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;

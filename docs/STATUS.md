@@ -8,6 +8,39 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## In-Game U7 Stone-Arch Portraits, Card UI & Human Genetics Showcase — 2026-09-20 (Gemini)
+Delivered per user directive ("Save it so I can check it out ingame. It currently appears to not be implemented"):
+- **U7 Stone-Arch Portrait on Overseer Colonist Card (`UF_ColonyOverseer.js`)**:
+  - Allocated a 72×70 px stone-arch portrait frame at the top-right (`x: innerWidth - 72, y: 0`) of `Window_UFColonistCard`.
+  - Classic Ultima VII styling: dark slate granite background (`#18181f`), double beveled stone borders (`#475569`, `#1e293b`, `#64748b`), and scaled portrait rendering via `c.blt(bmp, sx, sy, fw, fh, x + 2, y + 2, w - 4, h - 4)`.
+  - Non-blocking asynchronous bitmap load listener ensures portraits render smoothly upon initial selection without blank frames.
+  - Zero coordinate overlap with `loadRect` (`y: 73..86`), fully preserving `card_shows_load` check.
+- **Colonist Age, Life Stage & Demographic Info (`UF_ColonyOverseer.js`, `UF_Colonists.js`)**:
+  - Replaced `< 18` suppression: card title now universally displays age and life stage: e.g. `"[Name] (male, age 25 · Adult) [Mood]"` or `"[Name] (female, age 6 · Child) [Happy]"`.
+  - `describe(x)` in `UF_Colonists.js` now exports `stage`, `variation`, `face`, and `genetics`.
+  - `faceOfSubject` in `UF_Look.js` prioritizes `hit.unit.data.face` for tooltip inspect.
+- **Self-Healing Genetics & Aging Migration (`UF_Colonists.js`)**:
+  - `ensureColonistsGeneticsAndAging()` runs automatically on map tick 1 and periodically every 5 seconds.
+  - Automatically heals legacy save files and incoming units: assigns authentic genetic variations (1–6), alleles, natural ages, life stages, and matching U7 stone-arch faces, replacing legacy `$Adam`/`$Eve` placeholders with Western FF5 sprites.
+- **Pre-Configured In-Game Showcase Save (`game/save/file0.rmmzsave`, `game/save/global.rmmzsave`)**:
+  - Configured `file0.rmmzsave` with active player faction `f1` ("The Ostbela Kingdom", Human Freehold) settled at camp Solirwyn `(69, 54)`.
+  - Camera and player positioned directly at the home camp.
+  - Includes 12 active colonists demonstrating the complete demographic and genetic spectrum:
+    - Adult Males: Variations 1, 3, 5 (blonde, dark hair, red/auburn beard) in `$UF_Human_Male_1..6_Walk` with matching U7 portraits.
+    - Adult Females: Variations 2, 4, 6 (brunette, blonde, braided raven hair) in `$UF_Human_Female_1..6_Walk`.
+    - Children: Robbie (Boy, age 6) and Elise (Girl, age 8) in `$UF_Human_Child_Walk` with child U7 stone-arch portraits.
+    - Elders: Aldous (Male, age 60) and Marta (Female, age 63) with silver-haired elder U7 stone-arch portraits.
+  - Updated `global.rmmzsave` with U7 human portrait preview so "Continue" displays the authentic human portrait on the main menu.
+- **Automated Verification**:
+  - `tools/test_aging_and_lifespan.js`: **16/16 PASS (exit 0)** (mean lifespan 59.97 years).
+  - `tools/test_human_inheritance.js`: **PASS (exit 0)** (1,200 variation distributions and 1,000 offspring alleles).
+  - In-engine suite `run_tests.js overseer`: **6/6 PASS (exit 0)**.
+  - In-engine suite `run_tests.js genetics`: **4/4 PASS (exit 0)**.
+  - In-engine suite `run_tests.js sheet`: **card_shows_load PASS**, **shows_load PASS**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/overseer.card.png`: Opened and inspected. Shows the Overseer card on selected colonist Garar with the authentic U7 stone-arch portrait rendered at top-right, age 21 · Adult, job, gauges, and needs.
+  - `game/test_output/genetics.human_genetics_and_aging.png`: Opened and inspected. Shows all 6 male variations, 6 female variations, child boy and girl, and elder colonists standing around the campfire.
+
 ## Creature Callings & Professions System (89 Professions, Population-Scaled Weighting) — 2026-09-20 (Gemini)
 Delivered per user directive ("Every faction creature has a calling. These are the professions I want in the game. When society is smaller, I want characters generated closer to the critical end of the list. Every faction creature is randomly assigned three of these, with heavier weight towards the critical end when factions are small and when more lenience for the less critical side the larger society grows. bear in mind our factions cap at 200"):
 - **Full 89-Profession Roster (`UF_Callings.js`)**:
