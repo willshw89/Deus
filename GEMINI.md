@@ -1,6 +1,7 @@
 @AGENTS.md
 
-# Gemini notes
+# Gemini notes — Project DEUS
+- Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 **Read `AGENTS.md` in this folder before doing anything. It's binding.** If the import above didn't load it, open it yourself now.
 
 ## Your role (set by the user 2026-09-18): art

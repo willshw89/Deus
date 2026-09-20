@@ -1,4 +1,4 @@
-# ENGINE RULES: RMMZ technical guardrails
+# ENGINE RULES: RMMZ technical guardrails (Project DEUS)
 
 ## 1. Environment (checked 2026-09-18)
 - RPG Maker MZ **v1.10.0** is at `C:\Program Files (x86)\Steam\steamapps\common\RPG Maker MZ\` (`RPGMZ.exe`, `nwjs-win\nw.exe`).
@@ -21,7 +21,7 @@
 
 
 ### System docs
-Every UF system has a doc at `docs/systems/<plugin name>.md` so the other agent can use it without reading the code. Update the doc in the same commit as the code. Sections:
+Every DEUS (`UF`) system has a doc at `docs/systems/<plugin name>.md` so the other agent can use it without reading the code. Update the doc in the same commit as the code. Sections:
 1. **Purpose**: one paragraph.
 2. **Public API**: every function, event, and data structure other code may use, with arguments and return values. Anything not listed here is internal and may change without notice.
 3. **Events** emitted and listened to (name, payload).

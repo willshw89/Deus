@@ -1,6 +1,6 @@
 # VISION: what we're building
 
-Working title: **UF**. Not final: "Ultima" is a trademark, so it can't be in the release name.
+Project title: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 
 ## In one paragraph
 A living, randomly generated world simulated with Dwarf Fortress depth (terrain, materials, gathering, construction, needs, jobs, combat with body-part wounds). It's shown and played like Ultima VII: the U7 2.5D view, objects you can pick up, drag, and open, and inhabitants with daily lives. Built in RPG Maker MZ using plugins only.
@@ -118,6 +118,7 @@ These came from the user. Only the user can change them. When they do, edit the 
 | V107 | **Ultima VII authentic menus and face set borders** (user, 2026-09-19): window skins feature deep slate/charcoal fields, hand-carved dark walnut moulding, fine gold/brass wire inlays, and corner rivets; face set borders adopt authentic U7 silhouette frames with transparent outer contours. |
 | V108 | **All animation must happen through the sprite; no after-effect animations** (user, 2026-09-19: "The animation for these things should come from the sprites, not an after effect. this applies to everything we generate" and "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"): all animations across every generated asset (characters, creatures, wildlife, trees, flora, crops, water, fire, doors, workshops, objects) must be delivered as actual, distinct sprite animation frames in the art sheets, never synthesized through code-driven after-effects, procedural scaling/squashing, sine-wave swaying, rotation, or shader distortions. The engine draws no motion of its own. |
 | V109 | **ALL GENERATION TASKS ARE TO UTILIZE NANO BANANA PRO** (user, 2026-09-19: "Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning (\"Thinking\") to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II"): every visual asset across every category (characters, creatures, wildlife, monsters, terrain, autotiles, world objects, items, equipment layers, portraits, facesets, icons, and UI) MUST originate from Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`). Nano Banana Pro is Google's Gemini 3 Pro Image model, utilizing advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. Everything starts from an authentic Nano Banana Pro generation, processed into RMMZ standard formats via our palette and cleaning tools. |
+| V124 | **Formal Project Name: DEUS** (user directive 2026-09-20: "I am formally renaming the project to DEUS. update all instructions accordingly"): The project is formally named **DEUS**, superseding all previous working titles ("UF", "Ultima Frontier", "Wayfarer"). All agent instructions, directives, and documentation are updated accordingly. |
 | V11 | The user sees and approves every art asset before it goes into the game. |
 | V12 | Work happens in vertical slices. The user approves each slice before the next starts. |
 
@@ -324,6 +325,7 @@ Append only, newest at the bottom.
   - **Average Lifespan Standard (60 Years):** 1 real hour at 1x speed = 15 game years (1 year = 240 seconds; 60 years = 4 real hours).
   - **Calibrated Natural Mortality Curve:** 0% mortality before age 55; gentle progressive mortality centering at 60.0 years (6% at 55–57, 16% at 58–60, 28% at 61–65, 42% at 66–70, 60% at 71–75, 80% at 76+), producing a mean simulated lifespan of 59.97 years across Monte Carlo cohorts.
   - **Peaceful Passing & Mourning:** Natural deaths chronicle peacefully (`"[Name] passed away peacefully of old age at the age of [Age]."`), kin receive mourning thoughts (-8 morale), and the corpse transitions through in-sprite decomposition into lootable skeletal remains (`!$UF_Skeleton`).
+- 2026-09-20: V124 added by the user: **Formal Project Name: DEUS** (User directive: "I am formally renaming the project to DEUS. update all instructions accordingly"): The project is formally named **DEUS**, superseding all previous working titles ("UF", "Ultima Frontier", "Wayfarer"). All agent instructions, documentation, and directives updated accordingly.
 
 
 

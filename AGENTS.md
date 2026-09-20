@@ -1,5 +1,6 @@
-# AGENTS.md — Binding rules for every AI agent on this project
+# AGENTS.md — Binding rules for every AI agent on Project DEUS
 
+Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Applies to every AI agent working in this folder (Claude Code, Gemini, anything else). Read it at the start of every session, before touching anything.
 If a rule here conflicts with your habits, this file wins. If it conflicts with something the user tells you directly, the user wins. Then record the change in `docs/VISION.md` → Decision log.
 

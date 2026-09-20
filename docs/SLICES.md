@@ -1,4 +1,4 @@
-# SLICES: roadmap and approval gates
+# SLICES: roadmap and approval gates (Project DEUS)
 
 ## How a slice works
 1. The acceptance criteria are finalized **with the user before the slice starts**. Only the user changes them.

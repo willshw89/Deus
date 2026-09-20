@@ -1,4 +1,4 @@
-# ART STANDARD: 16-Bit Pixel Art in the Serious Chibi Style (FF5 / Tactics Ogre)
+# ART STANDARD: 16-Bit Pixel Art in the Serious Chibi Style (FF5 / Tactics Ogre) — Project DEUS
 
 **Set 2026-09-19 by user decision (VISION V115, V116):** earlier style rules are scratched. The look is **16-bit pixel art in a serious chibi style** (reminiscent of classic 16-bit tactical RPGs like Tactics Ogre and mature FF5/FF6 job sprites: grounded proportions, focused expressions, functional gear, no cute/cartoonish tropes) generated exclusively with **Google Nano Banana Pro** (`gemini-3-pro-image` / `generate_image`). Humanoids and standard creatures are **generally 1 tile in height (48 px in RMMZ)**; large creatures can be **2 tiles in height (96 px in RMMZ)**. Sprites are organized **12 sprites at a time on a 3×4 grid (3 Down, 3 Left, 3 Right, 3 Up)**, with a dedicated 12-sprite sheet for each action (Walk, Melee, Ranged, Magic, Haul, Work, Downed).
 
@@ -17,7 +17,7 @@
 | F10 | **All animation must happen through the sprite; no after-effect animations** (V58, V60, V108): all animation must come from distinct sprite frames authored on the sheets. Zero code-driven affine transforms, procedural squash/stretch, sine-wave swaying, or shader distortions. |
 | F11 | **Zero Flying Projectiles on Sprite Sheets; Initiation-Only Magic (V111):** Ranged attack frames depict string draw, tension, and pluck recoil only (zero flying arrows; ballistic missiles are rendered by the engine projectile system). Magic frames depict incantation/chant posture with soft palm or staff aura only (zero flying projectile beams, blasts, or leaves). |
 | F12 | **Dedicated Hauling / Carrying Pose (V113, AR-600 col 7):** dedicated 4-facing 12-sprite walk cycle holding a heavy load (burlap sack, crate, timber, or stone) in both arms against the torso in front. |
-| F13 | **Theme (V65):** Arthurian fantasy with science-fiction touches. Named lore needs the user's approval (AGENTS rule 7). |
+| F13 | **Theme (V65):** Arthurian fantasy with science-fiction touches for project DEUS. Named lore needs the user's approval (AGENTS rule 7). |
 
 
 
