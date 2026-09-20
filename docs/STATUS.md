@@ -6,7 +6,21 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed; awaiting quota reset at 2026-09-20T04:15:16Z to execute Nano Banana II batch generations with first sheet references)
+(None currently claimed)
+
+## Name-Only Hover Tooltip and Authentic Facesets in Window_UFSheet — 2026-09-19 (Gemini)
+Delivered per user directives ("I dont want these facesets in the tooltip, I want them in the window. and whiel we're at it, I want to completely replace the tooltip so the only thing that displays is the name of whatever it is hovering over"):
+- **Name-Only Hover Tooltip (`UF_Look.js`):**
+  - Completely replaced `Sprite_UFLookTip` hover badge. Removed all faceset rendering, subtitle, biome, temperature, weather, and asset lines.
+  - Sized compactly (`PAD_X = 6, PAD_Y = 3, LINE_H = 15`) to display exclusively the single name of the entity or terrain under the cursor (e.g., "Oak", "Fresh water", "Meadow", "Colonist").
+- **Authentic Portraits in Inspection Window (`UF_Sheet.js`):**
+  - Integrated authentic faceset portraits into `Window_UFSheet`'s 72×72 px header picture frame when inspecting trees/flora (`UF_Faces_Trees_Nature.png`), minerals (`UF_Faces_Minerals.png`), wildlife beasts (`UF_Faces_Wildlife_Beasts.png`), and monsters (`UF_Faces_Wildlife_Monsters.png`).
+  - Added bevel-bordered frame styling to make portraits pop crisply against dark window skins.
+- **Verification Evidence:**
+  - `tools/run_tests.js sheet`: `PASS sheet.object` (`picture {"type":"face","sheet":"UF_Faces_Trees_Nature","index":0} (drawn true)`).
+  - Screenshot `game/test_output/sheet.oak_sheet.png`: Inspected and confirmed the Grand Ancient Oak face portrait rendered inside `Window_UFSheet` alongside object stats and actions.
+  - `tools/run_tests.js look`: `PASS look.window_follows_mouse`, `PASS look.show_pins_lines`.
+  - Screenshot `game/test_output/look.look_label.png`: Inspected and confirmed the tooltip is a sleek, minimal dark badge showing only "Oak" directly beside the tree.
 
 ## 12 Sprites at a Time with First Sheet Reference Standard — 2026-09-19 (Gemini)
 Delivered per user directive ("Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II"):

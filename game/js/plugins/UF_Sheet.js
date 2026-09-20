@@ -323,6 +323,72 @@
         return b;
     }
 
+    const WILDLIFE_BEAST_FACES = {
+        wolf: 0, boar: 1, bear: 2, hare: 3, rabbit: 3, ox: 4, sheep: 5,
+        dog: 6, fox: 6, songbird: 6, rat: 7, wildcat: 7, lynx: 7
+    };
+
+    const WILDLIFE_MONSTER_FACES = {
+        troll: 0, bog_horror: 1, giant_spider: 2, spider: 2, sand_stalker: 3, serpent: 3,
+        bat: 4, restless_dead: 5, skeleton: 5, zombie: 5, ghost: 5, ice_wraith: 6, wraith: 6, aurochs: 7
+    };
+
+    const TREE_FLORA_FACES = {
+        oak: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        tree_savanna: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        bush: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        desert_shrub: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        snow_bush: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        sapling: { sheet: "UF_Faces_Trees_Nature", index: 0 },
+        birch: { sheet: "UF_Faces_Trees_Nature", index: 1 },
+        pine: { sheet: "UF_Faces_Trees_Nature", index: 2 },
+        fir_snow: { sheet: "UF_Faces_Trees_Nature", index: 2 },
+        fir: { sheet: "UF_Faces_Trees_Nature", index: 2 },
+        fruit_tree: { sheet: "UF_Faces_Trees_Nature", index: 3 },
+        fruit_tree_bare: { sheet: "UF_Faces_Trees_Nature", index: 3 },
+        berry_bush: { sheet: "UF_Faces_Trees_Nature", index: 3 },
+        berry_bush_bare: { sheet: "UF_Faces_Trees_Nature", index: 3 },
+        palm: { sheet: "UF_Faces_Trees_Nature", index: 4 },
+        tree_tropical: { sheet: "UF_Faces_Trees_Nature", index: 4 },
+        cactus: { sheet: "UF_Faces_Trees_Nature", index: 4 },
+        cactus_tall: { sheet: "UF_Faces_Trees_Nature", index: 4 },
+        tree_swamp: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        mangrove: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        willow: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        reeds: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        lily_pad: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        fern: { sheet: "UF_Faces_Trees_Nature", index: 5 },
+        dead_tree: { sheet: "UF_Faces_Trees_Nature", index: 6 },
+        tree_cursed: { sheet: "UF_Faces_Trees_Nature", index: 6 },
+        stump: { sheet: "UF_Faces_Trees_Nature", index: 6 },
+        tower_cap: { sheet: "UF_Faces_Trees_Nature", index: 7 },
+        glow_caps: { sheet: "UF_Faces_Trees_Nature", index: 7 },
+        cave_mushrooms: { sheet: "UF_Faces_Trees_Nature", index: 7 },
+        cave_moss: { sheet: "UF_Faces_Trees_Nature", index: 7 },
+        spore_reeds: { sheet: "UF_Faces_Trees_Nature", index: 7 },
+        granite_boulder: { sheet: "UF_Faces_Minerals", index: 0 },
+        ironstone_outcrop: { sheet: "UF_Faces_Minerals", index: 1 },
+        copper_outcrop: { sheet: "UF_Faces_Minerals", index: 2 },
+        gold_outcrop: { sheet: "UF_Faces_Minerals", index: 3 },
+        crystal_cluster: { sheet: "UF_Faces_Minerals", index: 4 },
+        small_crystals: { sheet: "UF_Faces_Minerals", index: 5 },
+        loose_stones: { sheet: "UF_Faces_Minerals", index: 6 },
+        ancient_bones: { sheet: "UF_Faces_Minerals", index: 7 },
+        old_bones: { sheet: "UF_Faces_Minerals", index: 7 },
+        rubble: { sheet: "UF_Faces_Minerals", index: 6 },
+        fallen_pillar: { sheet: "UF_Faces_Minerals", index: 6 }
+    };
+
+    function faceOfObject(type) {
+        if (!type) return null;
+        const id = lower(type.id || type.name || "").replace(/\s+/g, "_");
+        if (id && Object.prototype.hasOwnProperty.call(TREE_FLORA_FACES, id)) {
+            const spec = TREE_FLORA_FACES[id];
+            if (fileExists(`img/faces/${spec.sheet}.png`)) return spec;
+        }
+        return null;
+    }
+
     // { type: "face", sheet, index, frame } from unit.data.face or the catalog, else { type: "gen", kind, color, frame }.
     // frame: the culture whose code-drawn frame goes around the picture (UF.Factions.drawPortrait), or null.
     function faceSpecOf(u, species) {
@@ -334,6 +400,17 @@
         const frame = F && typeof F.faceFrameCulture === "function" ? F.faceFrameCulture(u) : null;
         const cf = F && typeof F.cultureFace === "function" ? F.cultureFace(u) : null;
         if (cf && fileExists(`img/faces/${cf.sheet}.png`)) return { type: "face", sheet: cf.sheet, index: cf.index, from: cf.from, culture: cf.culture, frame: cf.framed === false ? frame : null };
+        const spId = lower((species && species.id) || d.species || u.name || "").replace(/\s+/g, "_");
+        if (spId) {
+            if (Object.prototype.hasOwnProperty.call(WILDLIFE_BEAST_FACES, spId)) {
+                const sheet = "UF_Faces_Wildlife_Beasts";
+                if (fileExists(`img/faces/${sheet}.png`)) return { type: "face", sheet, index: WILDLIFE_BEAST_FACES[spId], frame };
+            }
+            if (Object.prototype.hasOwnProperty.call(WILDLIFE_MONSTER_FACES, spId)) {
+                const sheet = "UF_Faces_Wildlife_Monsters";
+                if (fileExists(`img/faces/${sheet}.png`)) return { type: "face", sheet, index: WILDLIFE_MONSTER_FACES[spId], frame };
+            }
+        }
         const entry = config().faces[d.species];
         if (entry && typeof entry === "object") {
             const g = lower(d.gender) || "any";
@@ -688,7 +765,8 @@
         } else {
             m.title = type.name;
             m.subtitle = [KIND_LABELS[kind], tagsOf(type).join(", ")].filter(Boolean).join(" · ");
-            m.picture = { type: "icon", spec: objectIconSpec(type) };
+            const face = faceOfObject(type);
+            m.picture = face ? { type: "face", sheet: face.sheet, index: face.index } : { type: "icon", spec: objectIconSpec(type) };
             const lines = [];
             lines.push(type.passable === true ? "Can be walked over" : "Blocks the way");
             const regrow = O && typeof O.regrowList === "function" ? O.regrowList().find(r => sameArea(r.area, s.area) && r.x === s.x && r.y === s.y) : null;
@@ -1028,6 +1106,10 @@
         drawPicture(m, L) {
             const c = this.contents, r = L.picture, F = Factions();
             c.fillRect(r.x, r.y, r.w, r.h, COLORS.pictureBack);
+            c.fillRect(r.x, r.y, r.w, 1, COLORS.light);
+            c.fillRect(r.x, r.y, 1, r.h, COLORS.light);
+            c.fillRect(r.x, r.y + r.h - 1, r.w, 1, COLORS.shade);
+            c.fillRect(r.x + r.w - 1, r.y, 1, r.h, COLORS.shade);
             const p = m.picture;
             if (!p) return;
             if (p.type === "face") {
@@ -1510,6 +1592,7 @@
 
     function registerChecks() {
         UF.Test.suite("sheet", async t => {
+            await t.waitUntil(() => !!(World() && World().currentArea && World().currentArea() && window.$colonyManager && Sheet.window()), 10000, "world, area, colony manager and sheet window").catch(() => {});
             const W = World(), O = Objects(), I = Items(), J = Jobs(), F = Factions();
             const C = window.UF.Colonists, Int = window.UF.Interact, Time = window.UF.Time, Cam = window.UF.Camera;
             const scene = SceneManager._scene;
@@ -1797,13 +1880,16 @@
         // sheet.object: a tree has no grid; its catalog actions are listed.
         await clickCell(cell.oak.x, cell.oak.y);
         await waitDrawn();
+        await t.waitFrames(2);
         m = Sheet.model();
         L = Sheet.layout();
         const wantActs = Object.keys(oakType.actions || {});
+        const oakPictureOk = !!m && m.picture && m.picture.type === "face" && Sheet.opaqueCount(L.picture) >= 1000;
+        await shot("oak_sheet");
         const objOk = !!m && m.kind === "object" && m.title === oakType.name && m.grid === null && !L.grid && Array.isArray(m.actions) && wantActs.length > 0
-            && wantActs.every(a => m.actions.some(x => x.id === a)) && !!L.actions && Sheet.opaqueCount(L.actions, 150) >= 60;
+            && wantActs.every(a => m.actions.some(x => x.id === a)) && !!L.actions && Sheet.opaqueCount(L.actions, 150) >= 60 && oakPictureOk;
         t.check("object", objOk,
-            `panel on the ${oakType.name} at (${cell.oak.x},${cell.oak.y}): kind ${m && m.kind}, grid ${m && m.grid ? "SHOWN" : "none"}; state ${m && m.stateLines ? m.stateLines.join(" | ") : ""}; ` +
+            `panel on the ${oakType.name} at (${cell.oak.x},${cell.oak.y}): kind ${m && m.kind}, grid ${m && m.grid ? "SHOWN" : "none"}; picture ${m && JSON.stringify(m.picture)} (drawn ${oakPictureOk}); state ${m && m.stateLines ? m.stateLines.join(" | ") : ""}; ` +
             `actions ${m && m.actions ? m.actions.map(a => `"${a.text}"`).join(", ") : "none"} (catalog: ${wantActs.join(", ")})`);
 
         // sheet.menu_option: "Inventory" in the right-click menu on a unit's cell and an items cell, not on bare ground; choosing it opens the panel.

@@ -359,6 +359,37 @@
         };
     }
 
+    /** The single clean name of whatever is at (x, y) on the map: "Oak", "Verelle", "Hare", "Fresh water", "Meadow", etc. */
+    function nameAt(x, y) {
+        if (!onMap(x, y)) return "";
+        const F = window.UF.Fog;
+        if (F && typeof F.isExplored === "function" && !F.isExplored(x, y)) return "Unexplored";
+        const hit = unitAt(x, y);
+        if (hit) return hit.name || "Unit";
+        const I = window.UF.Items;
+        const items = I && typeof I.describe === "function" ? I.describe(x, y) : null;
+        if (items && items.items && items.items.length) {
+            const first = I.type ? I.type(items.items[0].type) : null;
+            if (items.items.length === 1 && first) return first.name;
+            return `${items.items.length} items`;
+        }
+        const O = window.UF.Objects;
+        const type = O && typeof O.at === "function" ? O.at(x, y) : null;
+        if (type) return type.name;
+        const H = window.UF.History;
+        const W = World();
+        const onGround = !!W && !!W.currentArea();
+        const site = onGround && H && typeof H.describeSite === "function" ? H.describeSite(x, y) : null;
+        if (site) return site;
+        const c = cellAt(x, y);
+        if (c) {
+            if (c.water) return c.water === "water" ? "Water" : `${cap(c.water.replace(/_/g, " "))} water`;
+            if (c.ground) return groundName(c.ground);
+            if (c.biome) return c.biome;
+        }
+        return "";
+    }
+
     /** Everything the tooltip shows for a cell: { x, y, lines: [l1, l2, l3], subject, cell, art, face, unexplored } or null off the map. */
     function inspect(x, y) {
         if (!onMap(x, y)) return null;
@@ -382,8 +413,6 @@
             this.visible = false;
             this._text = "";
             this._lines = [];
-            this._face = null;
-            this._faceKey = "";
             this._cell = { x: NaN, y: NaN };
             this._age = REFRESH_FRAMES;
             this._pin = null;
@@ -401,7 +430,7 @@
                     this._pin = null;
                     this._age = REFRESH_FRAMES; // re-read the cell under the mouse at once
                 } else {
-                    this.setTip(this._pin.lines, this._pin.face);
+                    this.setTip(this._pin.lines);
                     this.place(this._pin.sx, this._pin.sy);
                     this.visible = this._lines.length > 0;
                     return;
@@ -413,8 +442,8 @@
             if (cell.x !== this._cell.x || cell.y !== this._cell.y || this._age >= REFRESH_FRAMES) {
                 this._cell = cell;
                 this._age = 0;
-                const info = inspect(cell.x, cell.y);
-                this.setTip(info ? info.lines : [], info ? info.face : null);
+                const name = nameAt(cell.x, cell.y);
+                this.setTip(name ? [name] : []);
             }
             if (!this._lines.length) return this.hideTip();
             this.place(TouchInput.x, TouchInput.y);
@@ -425,23 +454,25 @@
             this.visible = false;
         }
 
-        pin(lines, sx, sy, frames, face = null) {
-            this._pin = { lines: (lines || []).slice(), sx, sy, frames: Math.max(1, frames | 0), face };
+        pin(lines, sx, sy, frames) {
+            this._pin = { lines: (lines || []).slice(), sx, sy, frames: Math.max(1, frames | 0) };
         }
 
         setLines(lines) {
-            this.setTip(lines, this._face);
+            this.setTip(lines);
         }
 
-        setTip(lines, face = null) {
+        setTip(lines) {
             const shown = (lines || []).filter(l => typeof l === "string" && l.length);
-            const text = shown.join("\n");
-            const faceKey = face ? `${face.sheet}#${face.index}` : "";
-            if (text === this._text && faceKey === this._faceKey) return;
+            let name = "";
+            if (shown.length > 0) {
+                name = shown[0].split(" — ")[0].split(" · ")[0].trim();
+            }
+            const displayLines = name ? [name] : [];
+            const text = displayLines.join("\n");
+            if (text === this._text) return;
             this._text = text;
-            this._lines = shown;
-            this._face = face || null;
-            this._faceKey = faceKey;
+            this._lines = displayLines;
             this.redraw();
         }
 
@@ -453,57 +484,24 @@
             let widest = 0;
             for (const l of lines) widest = Math.max(widest, probe.measureTextWidth(l));
 
-            const hasFace = !!(this._face && this._face.sheet);
-            const faceSize = 48;
-            const faceSpacing = hasFace ? faceSize + 8 : 0;
-            const textStartX = PAD_X + faceSpacing;
-
             const textW = Math.min(MAX_WIDTH, Math.ceil(widest));
-            const w = textW + textStartX + PAD_X;
+            const w = textW + PAD_X * 2;
             const textH = lines.length * LINE_H;
-            const minH = hasFace ? faceSize + PAD_Y * 2 : 0;
-            const h = Math.max(textH + PAD_Y * 2, minH);
+            const h = textH + PAD_Y * 2;
 
             const b = new Bitmap(w, h);
-            b.fillRect(0, 0, w, h, "rgba(12, 14, 18, 0.88)");
-            b.fillRect(0, 0, w, 1, "rgba(255, 255, 255, 0.16)");
-            b.fillRect(0, h - 1, w, 1, "rgba(255, 255, 255, 0.16)");
-            b.fillRect(0, 0, 1, h, "rgba(255, 255, 255, 0.16)");
-            b.fillRect(w - 1, 0, 1, h, "rgba(255, 255, 255, 0.16)");
-
-            if (hasFace) {
-                b.fillRect(PAD_X - 1, PAD_Y - 1, faceSize + 2, faceSize + 2, "rgba(0, 0, 0, 0.6)");
-                b.fillRect(PAD_X, PAD_Y, faceSize, faceSize, "#14110d");
-                b.fillRect(PAD_X, PAD_Y, faceSize, 1, "rgba(255, 255, 255, 0.25)");
-                b.fillRect(PAD_X, PAD_Y + faceSize - 1, faceSize, 1, "rgba(0, 0, 0, 0.6)");
-                b.fillRect(PAD_X, PAD_Y, 1, faceSize, "rgba(255, 255, 255, 0.25)");
-                b.fillRect(PAD_X + faceSize - 1, PAD_Y, 1, faceSize, "rgba(0, 0, 0, 0.6)");
-
-                const faceBmp = ImageManager.loadFace(this._face.sheet);
-                if (faceBmp.isReady()) {
-                    const fi = this._face.index | 0;
-                    const pw = ImageManager.faceWidth || 144;
-                    const ph = ImageManager.faceHeight || 144;
-                    const sx = (fi % 4) * pw;
-                    const sy = Math.floor(fi / 4) * ph;
-                    b.blt(faceBmp, sx, sy, pw, ph, PAD_X, PAD_Y, faceSize, faceSize);
-                } else if (!(faceBmp.isError && faceBmp.isError())) {
-                    const expectedSheet = this._face.sheet;
-                    faceBmp.addLoadListener(() => {
-                        if (this._face && this._face.sheet === expectedSheet) {
-                            this.redraw();
-                        }
-                    });
-                }
-            }
+            b.fillRect(0, 0, w, h, "rgba(12, 14, 18, 0.90)");
+            b.fillRect(0, 0, w, 1, "rgba(255, 255, 255, 0.20)");
+            b.fillRect(0, h - 1, w, 1, "rgba(255, 255, 255, 0.20)");
+            b.fillRect(0, 0, 1, h, "rgba(255, 255, 255, 0.20)");
+            b.fillRect(w - 1, 0, 1, h, "rgba(255, 255, 255, 0.20)");
 
             b.fontSize = FONT_SIZE;
             b.outlineWidth = 2;
-            b.outlineColor = "rgba(0, 0, 0, 0.7)";
-            const textY0 = hasFace ? Math.round((h - textH) / 2) : PAD_Y;
+            b.outlineColor = "rgba(0, 0, 0, 0.8)";
+            b.textColor = "#ffffff";
             lines.forEach((l, i) => {
-                b.textColor = COLORS[Math.min(i, COLORS.length - 1)];
-                b.drawText(l, textStartX, textY0 + i * LINE_H, textW, LINE_H, "left");
+                b.drawText(l, PAD_X, PAD_Y + i * LINE_H, textW, LINE_H, "left");
             });
             const old = this.bitmap;
             this.bitmap = b;
@@ -643,16 +641,17 @@
 
     /** The look checks. Returns the test fixtures it placed so the caller (UF_Interact's suite) can reuse and clean them up. */
     Look.runChecks = async function(t) {
+        await t.waitUntil(() => !!(World() && World().currentArea && World().currentArea()), 10000, "world area").catch(() => {});
         const W = World(), O = window.UF.Objects, I = window.UF.Items, T = window.UF.Tiles;
         const area = W && W.currentArea();
         t.check("look_ready", !!area && !!O && !!I && !!T && !!tip(), area ? `area (${area.x},${area.y}); Objects ${!!O}, Items ${!!I}, Tiles ${!!T}, tooltip sprite ${!!tip()}` : "not on an area map");
-        if (!area || !O || !I || !T) return null;
         const mid = Math.floor(W.state.size / 2);
         const fx = {
             area, mid, placed: [], units: [], tiles: [], itemsBefore: new Set(Object.keys(I.state().byId)),
             arena: { x0: mid - 10, y0: mid + 16, x1: mid + 10, y1: mid + 27 },
             mouseLock: {}
         };
+
         // The checks drive the mouse through TouchInput._x/_y. The real pointer must not overwrite them mid-check
         // (the document listeners are bound, so the handlers they call are replaced instead; restored by cleanup).
         for (const k of ["_onHover", "_onMove", "_onTrigger", "_onCancel", "_onRelease"]) {
@@ -742,9 +741,9 @@
         const t2 = Look.text(), pos2 = s ? { x: s.x, y: s.y } : null;
         const want2 = s ? wantAt(p2, s) : null;
         const at2 = !!pos2 && pos2.x === want2.x && pos2.y === want2.y;
-        t.check("window_follows_mouse", v1 && t1.startsWith("Oak — chop") && t2.includes("water: fresh") && t1 !== t2 && at1 && at2 && s.bitmap.fontSize === FONT_SIZE,
-            `mouse at (${p1.x},${p1.y}) over the oak: visible ${v1}, tooltip at (${pos1 && pos1.x},${pos1 && pos1.y}) [want (${want1 && want1.x},${want1 && want1.y})], text "${t1.replace(/\n/g, " | ")}"; ` +
-            `mouse at (${p2.x},${p2.y}) over water: tooltip at (${pos2 && pos2.x},${pos2 && pos2.y}) [want (${want2 && want2.x},${want2 && want2.y}), ${s ? s.bitmap.width : "?"} px wide${want2 && want2.x < p2.x ? ", flipped left at the screen edge" : ""}], text "${t2.replace(/\n/g, " | ")}"; font ${s && s.bitmap.fontSize}px`);
+        t.check("window_follows_mouse", v1 && t1 === "Oak" && t2 === "Fresh water" && t1 !== t2 && at1 && at2 && s.bitmap.fontSize === FONT_SIZE,
+            `mouse at (${p1.x},${p1.y}) over the oak: visible ${v1}, tooltip at (${pos1 && pos1.x},${pos1 && pos1.y}) [want (${want1 && want1.x},${want1 && want1.y})], text "${t1}"; ` +
+            `mouse at (${p2.x},${p2.y}) over water: tooltip at (${pos2 && pos2.x},${pos2 && pos2.y}) [want (${want2 && want2.x},${want2 && want2.y}), ${s ? s.bitmap.width : "?"} px wide${want2 && want2.x < p2.x ? ", flipped left at the screen edge" : ""}], text "${t2}"; font ${s && s.bitmap.fontSize}px`);
 
         // Flipped at the screen edges; hidden over a UI window.
         TouchInput._x = Graphics.width - 4;
@@ -770,7 +769,7 @@
         const pinnedText = Look.text(), pinned = Look.isPinned();
         await t.waitFrames(40);
         const unpinned = !Look.isPinned();
-        t.check("show_pins_lines", pinned && pinnedText.startsWith("Oak — chop") && unpinned, `pinned ${pinned} with "${pinnedText.split("\n")[0]}" while the mouse is over bare ground; released after 0.5 s: ${unpinned}`);
+        t.check("show_pins_lines", pinned && pinnedText === "Oak" && unpinned, `pinned ${pinned} with "${pinnedText.split("\n")[0]}" while the mouse is over bare ground; released after 0.5 s: ${unpinned}`);
 
         moveMouse(cells.oak);
         await t.waitFrames(10);
