@@ -1,0 +1,25 @@
+{
+  "id": "wall_stone",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 3,
+  "autotile": "wall",
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "Connected RMMZ Chipset Stone Masonry Wall (16-shape autotile with visible N and S faces)"
+}

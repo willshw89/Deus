@@ -1,0 +1,24 @@
+{
+  "id": "stone",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 1,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 815 frame 0 (shrunk into 48x48 1-square tile)"
+}

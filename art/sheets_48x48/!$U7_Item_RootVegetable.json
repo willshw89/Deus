@@ -1,0 +1,24 @@
+{
+  "id": "root",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 1,
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 377 frame 18 (shrunk into 48x48 1-square tile)"
+}
