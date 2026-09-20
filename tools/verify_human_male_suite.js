@@ -139,7 +139,7 @@ function drawText(x, y, text, rgb, scale = 1) {
 fillRect(0, 0, BOARD_W, 65, 20, 26, 38);
 drawRect(0, 64, BOARD_W, 1, 45, 58, 80);
 drawText(24, 14, "ADULT MALE HUMAN - COMPLETE 7-ACTION 12-SPRITE ARCHITECTURE SUITE", [255, 235, 160], 2);
-drawText(24, 40, "SERIOUS CHIBI (~3.1 HEADS, 46PX HEIGHT, GROUNDED Y=47) | 100% NANO BANANA II | 4 FACINGS (S, W, E, N)", [140, 190, 230], 1);
+drawText(24, 40, "SERIOUS CHIBI (~3.1 HEADS, 43PX HEIGHT, GROUNDED Y=47) | 100% GOOGLE NANO BANANA PRO | 4 FACINGS (S, W, E, N)", [140, 190, 230], 1);
 
 // Render each of the 7 action sheets side by side
 // 7 sheets across: width 144 + 30 spacing = 174 * 7 = 1218 px

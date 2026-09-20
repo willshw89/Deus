@@ -8,6 +8,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Adult Male Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
+Delivered per user directives ("Alright, Let's work on our humans. Start generating", "AQ.Ab8RN6LoiuLx4FO6xapsuiH4W5UgcaKcE0PnsitFP_ZIavw-MQ Generate the human", "nano banana pro", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time... Lets make it more of a serious chibi", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Leveraged the user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
+  - First produced master 12-sprite walk reference generation (`art/raw/human_male_pro_walk.png` and `human_male_pro_4d_walk.png`).
+  - Passed the master character reference image as multimodal conditioning (`inlineData: { mimeType, data }`) to Google Nano Banana Pro for all subsequent action sheet generations, guaranteeing 100% facial, anatomical, outfit, and palette consistency.
+  - Zero code drawing: every sprite originated strictly from genuine Google Nano Banana Pro generations.
+- **Complete 7-Action 12-Sprite Architecture (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  1. `Walk` (`$UF_Human_Male_Walk.png`, `$UF_Human_Male.png`, `$UF_Human_Male_Adult.png`, `$UF_Human.png`): 4-direction step/stand/step walk cycle.
+  2. `Haul` (`$UF_Human_Male_Haul.png`): Dedicated heavy burlap sack held in arm/shoulder across full walk cycle.
+  3. `Attack` (`$UF_Human_Male_Attack.png`, `$UF_Human_Attack_Sword.png`): Melee broadsword combat with high guard, 2-handed battle guard, and heroic lunge slash strike.
+  4. `Bow` (`$UF_Human_Male_Bow.png`, `$UF_Human_Attack_Bow.png`): Archery aim stance, full tension draw, and string pluck recoil with quiver on back. ZERO flying arrows.
+  5. `Magic` (`$UF_Human_Male_Magic.png`, `$UF_Human_Cast.png`): Focused incantation hand-seal chant posture, hands outstretched channeling, and soft glowing palm mana aura initiation. ZERO flying beams.
+  6. `Work` (`$UF_Human_Male_Work.png`): Craftsman standing inspection with iron hammer, kneeling craftsman posture (~32px), and ground hammer strike on anvil.
+  7. `Downed` (`$UF_Human_Male_Downed.png`): Defeat sequence with hurt flinch stagger, kneeling collapse (~30px), and flat horizontal prone resting corpse lying on the ground.
+- **Quality Gates & Verification Evidence**:
+  - Grounding: Strict invariant baseline grounding at native `y = 47` in 48×48 px cells.
+  - Serious Chibi Proportions (VISION V116): ~3.1 heads tall, 43px height, narrow determined eyes, functional medieval gear.
+  - Color & Alpha: Exactly <= 31 opaque colors from `art/palette/uf.hex` per sheet, 100% binary alpha (0 or 255 only).
+  - U7 Originality Check: **7/7 PASS** across all 7 action sheets (`Walk`: 0.569; `Haul`: 0.449; `Attack`: 0.428; `Bow`: 0.452; `Magic`: 0.438; `Work`: 0.445; `Downed`: 0.462; all >= 0.28 threshold).
+  - In-Engine Smoke Test: **9/9 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
+  - Visual Evidence:
+    - Master review board: `art/review/human_male_all_7_actions_12_sprites.png` (inspected: all 7 action suites + 3x runtime comparison with red baseline guide line at y=47).
+    - In-game close-up: `art/review/human_male_live_closeup.png` (inspected: all 7 action units rendered live on map 1003).
+    - In-game normal: `art/review/human_male_live_normal.png` (inspected: crisp readability at 2x camera zoom).
+    - Self-contained interactive viewer widget: `C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b7ec-5affda42dd85/human_male_showcase_widget.html`.
+
+
 ## Authentic Nano Banana Outside_B, Dungeon_B, A2, A3, A5 Tilesets & Animated Sapling — 2026-09-19 (Gemini)
 Delivered per user directives ("Yes, use Nano banana to create every chipset we need, and animate Anything in the chipset that makes sense if we can", "Make sure youre generating everything with nano banana", "These look like dogshit, fix this with nano banana", "Continue generating with nano banana"):
 - **Authentic Outside_B.png and Dungeon_B.png Prop & Scenery Tilesets:**
