@@ -16,6 +16,11 @@
   "animations": {
     "stand": [
       1
+    ],
+    "sway": [
+      0,
+      1,
+      2
     ]
   },
   "frameMs": 250,

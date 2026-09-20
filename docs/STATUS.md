@@ -6,7 +6,25 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed)
+- None (Foliage sprite sway animations restored and verified)
+
+## Foliage & Tree Sprite-Frame Sway Animations Restored — 2026-09-19 (Gemini)
+Delivered per user directive ("Turn back on all of the foliage, etc animations (SPRITE, not aftereffect)"):
+- **Authentic 3-Frame Sprite Animations Restored:**
+  - Restored pre-purge 3-frame sprite sheets and sidecar `"sway": [0, 1, 2]` definitions for all 37 flora, tree, and foliage character assets across `game/img/characters/` and `art/masters/`:
+    - Large Trees (96×96 px): Oak, Pine, Birch, Fruit Tree, Bare Fruit Tree, Palm, Savanna Tree, Swamp Tree, Tropical Tree, Dead Tree, Cursed Tree, Fir Snow, Mangrove, Tall Cactus, Tower Cap.
+    - Foliage & Bushes (48×48 px): Berry Bush, Bare Berry Bush, Bush, Snow Bush, Desert Shrub, Fern, Grass Tuft, Reeds, Spore Reeds, Lily Pad, Wildflowers, Wild Wheat, Wild Grain, Blue Flowers, Purple Flowers, White Flowers.
+  - Every asset now features 3 distinct sprite frames (col 0: sway left, col 1: center/stand, col 2: sway right) authored directly onto the sprite sheets.
+- **Pure Sprite-Frame Stepping (Rule 12 Compliant):**
+  - All foliage sway is driven 100% by cycling sprite sheet columns via `UF_Anim.js` (`stCols = a.sway; sp.setFrame(x, y, w, h)`) with phase offsets per tile.
+  - Zero code-driven after-effects, zero shaders, and zero programmatic distortion/shears.
+- **Generator Scripts Restored & Purge Tool Removed:**
+  - Restored generator pipelines (`tools/process_nano_banana_batch2.js`, `tools/process_nano_banana_batch3.js`, `tools/process_nano_banana_batch4.js`, `tools/process_nano_banana_world_assets.js`) to generate 3-frame sprite sway sheets and `sway: [0, 1, 2]` sidecars.
+  - Deleted `tools/purge_aftereffects.js`.
+- **Verification Evidence:**
+  - Automated check `tools/test_foliage_sprite_animations.js`: **62/62 PASS** across all character sheets and sidecars.
+  - In-engine test `tools/run_tests.js smoke`: **9/9 PASS, 0 errors, exit 0**.
+  - Review gallery `art/review/foliage_sprite_sway_showcase_3x.png` generated and visually inspected with `view_file` (Rule 5), confirming clean 3-frame sway animation columns across canopies, boughs, fronds, and flora.
 
 ## Five Vertical Layers Guidelines (Z-2 to Z+2) — 2026-09-19 (Gemini)
 Delivered per user directives ("Also lets provide some general guidelines for the layers. Z-2 is the deep layer, that's blacks, dark blues, glowies, dark purples. Z-1 is the subterranean layer. That's browns, greys, slate, etc. Z-0 is our overland biomes. +1 and +2 are ONLY built up, or Additional Z layers of cliffs/mountains etc"):
