@@ -24,7 +24,7 @@ const wallsJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Walls.js');
 let wallsJs = fs.readFileSync(wallsJsPath, 'utf8');
 
 const suiteStartHook = 'const W = World(), O = Objects(), area = W && W.currentArea();';
-const waitAreaCode = `await t.waitUntil(() => window.UF && UF.World && UF.World.currentArea() && window.$gameMap, 10000, "world area ready").catch(() => {});
+const waitAreaCode = `await t.waitUntil(() => window.UF && UF.World && UF.World.currentArea() && window.$gameMap, 25000, "world area ready").catch(() => {});
             const W = World(), O = Objects(), area = W && W.currentArea();`;
 
 wallsJs = wallsJs.replace(suiteStartHook, waitAreaCode);

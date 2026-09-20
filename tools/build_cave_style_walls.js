@@ -158,23 +158,23 @@ function buildWoodSet() {
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
         const yMin = hasN ? 0 : 6;
-        const yMax = 46;
+        const yMax = 47;
 
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
-                // 1. South coping lip (y=41..46) across full width from xMin to xMax
-                if (y >= 41) {
-                    if (y === 41) {
+                // 1. South coping lip (y=42..47) across full width from xMin to xMax (only if wall terminates south)
+                if (!hasS && y >= 42) {
+                    if (y === 42) {
                         setPixel(f, x, y, C.topHigh);
-                    } else if (y === 42) {
-                        setPixel(f, x, y, C.topLip);
                     } else if (y === 43) {
-                        setPixel(f, x, y, C.topHigh);
-                    } else if (y === 44) {
                         setPixel(f, x, y, C.topLip);
+                    } else if (y === 44) {
+                        setPixel(f, x, y, C.topHigh);
                     } else if (y === 45) {
-                        setPixel(f, x, y, C.topBody);
+                        setPixel(f, x, y, C.topLip);
                     } else if (y === 46) {
+                        setPixel(f, x, y, C.topBody);
+                    } else if (y === 47) {
                         setPixel(f, x, y, C.topEdgeDark);
                     }
                     continue;
@@ -220,7 +220,7 @@ function buildWoodSet() {
                 const nearNorth = !hasN && (y === yMin + 6);
                 const nearWest = !hasW && (x === xMin + 6);
                 const nearEast = !hasE && (x === xMax - 6);
-                const nearSouth = (y === 40);
+                const nearSouth = !hasS && (y === 41);
 
                 if (nearNorth || nearWest || nearEast || nearSouth) {
                     setPixel(f, x, y, C.shadowDeep);
@@ -240,15 +240,15 @@ function buildWoodSet() {
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
 
-        // 1. Cast shadow directly under top face lip (y=47..50)
+        // 1. Cast shadow directly under top face lip (y=48..50)
         for (let x = xMin; x <= xMax; x++) {
-            setPixel(f, x, 47, C.shadowDeep);
-            setPixel(f, x, 48, C.shadowMid);
-            setPixel(f, x, 49, C.shadowSoft);
+            setPixel(f, x, 48, C.shadowDeep);
+            setPixel(f, x, 49, C.shadowMid);
+            setPixel(f, x, 50, C.shadowSoft);
         }
 
-        // 2. Vertical wood plank wall face (y=50..91)
-        for (let y = 50; y <= 91; y++) {
+        // 2. Vertical wood plank wall face (y=51..91)
+        for (let y = 51; y <= 91; y++) {
             for (let x = xMin; x <= xMax; x++) {
                 const plankX = x % 8;
                 let col = C.wallBody;
@@ -265,14 +265,14 @@ function buildWoodSet() {
 
         // 3. West & East corner / post edges on the wall face
         if (!hasW) {
-            for (let y = 47; y <= 95; y++) {
+            for (let y = 48; y <= 95; y++) {
                 setPixel(f, xMin, y, C.postDark);
                 setPixel(f, xMin + 1, y, C.postDark);
                 setPixel(f, xMin + 2, y, C.postHigh);
             }
         }
         if (!hasE) {
-            for (let y = 47; y <= 95; y++) {
+            for (let y = 48; y <= 95; y++) {
                 setPixel(f, xMax, y, C.postDark);
                 setPixel(f, xMax - 1, y, C.postDark);
                 setPixel(f, xMax - 2, y, C.postBody);
@@ -370,26 +370,26 @@ function buildStoneSet() {
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
         const yMin = hasN ? 0 : 6;
-        const yMax = 46;
+        const yMax = 47;
 
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
-                // 1. South stone coping lip (y=41..46) across full width from xMin to xMax
-                if (y >= 41) {
+                // 1. South stone coping lip (y=42..47) across full width from xMin to xMax (only if wall terminates south)
+                if (!hasS && y >= 42) {
                     const isMortar = (x % 16 === 0);
                     if (isMortar) {
                         setPixel(f, x, y, C.mortarLine);
-                    } else if (y === 41) {
-                        setPixel(f, x, y, C.topHigh);
                     } else if (y === 42) {
-                        setPixel(f, x, y, C.topLight);
+                        setPixel(f, x, y, C.topHigh);
                     } else if (y === 43) {
-                        setPixel(f, x, y, C.topBody);
-                    } else if (y === 44) {
                         setPixel(f, x, y, C.topLight);
+                    } else if (y === 44) {
+                        setPixel(f, x, y, C.topBody);
                     } else if (y === 45) {
-                        setPixel(f, x, y, C.topShade);
+                        setPixel(f, x, y, C.topLight);
                     } else if (y === 46) {
+                        setPixel(f, x, y, C.topShade);
+                    } else if (y === 47) {
                         setPixel(f, x, y, C.topEdgeDark);
                     }
                     continue;
@@ -436,7 +436,7 @@ function buildStoneSet() {
                 const nearNorth = !hasN && (y === yMin + 6);
                 const nearWest = !hasW && (x === xMin + 6);
                 const nearEast = !hasE && (x === xMax - 6);
-                const nearSouth = (y === 40);
+                const nearSouth = !hasS && (y === 41);
 
                 if (nearNorth || nearWest || nearEast || nearSouth) {
                     setPixel(f, x, y, C.shadowDeep);
@@ -456,19 +456,19 @@ function buildStoneSet() {
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
 
-        // 1. Cast shadow under stone coping lip (y=47..50)
+        // 1. Cast shadow under stone coping lip (y=48..50)
         for (let x = xMin; x <= xMax; x++) {
-            setPixel(f, x, 47, C.shadowDeep);
-            setPixel(f, x, 48, C.shadowMid);
-            setPixel(f, x, 49, C.shadowSoft);
+            setPixel(f, x, 48, C.shadowDeep);
+            setPixel(f, x, 49, C.shadowMid);
+            setPixel(f, x, 50, C.shadowSoft);
         }
 
-        // 2. Dressed ashlar stone masonry front wall face (y=50..91)
+        // 2. Dressed ashlar stone masonry front wall face (y=51..91)
         // 3 horizontal courses of stone blocks (each ~14 px high)
         // with alternating brick offset
-        for (let y = 50; y <= 91; y++) {
-            const courseIdx = Math.floor((y - 50) / 14);
-            const courseY = (y - 50) % 14;
+        for (let y = 51; y <= 91; y++) {
+            const courseIdx = Math.floor((y - 51) / 14);
+            const courseY = (y - 51) % 14;
             const xOffset = (courseIdx % 2 === 1) ? 8 : 0;
 
             for (let x = xMin; x <= xMax; x++) {
@@ -487,14 +487,14 @@ function buildStoneSet() {
 
         // 3. Corner block vertical quoins
         if (!hasW) {
-            for (let y = 47; y <= 95; y++) {
+            for (let y = 48; y <= 95; y++) {
                 setPixel(f, xMin, y, C.cornerDark);
                 setPixel(f, xMin + 1, y, C.cornerDark);
                 setPixel(f, xMin + 2, y, C.cornerHigh);
             }
         }
         if (!hasE) {
-            for (let y = 47; y <= 95; y++) {
+            for (let y = 48; y <= 95; y++) {
                 setPixel(f, xMax, y, C.cornerDark);
                 setPixel(f, xMax - 1, y, C.cornerDark);
                 setPixel(f, xMax - 2, y, C.masonryShade);

@@ -5,7 +5,28 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
-## Black-Top Cave-Style Walls (AR-104 & AR-300) — 2026-09-19 (Gemini)
+## Faction Aid in Combat & Layer Connections Creature Traversal / Liquid Physics — 2026-09-19
+
+Delivered per user requests ("When a faction gets attacked, nearby faction members should come to their aid in combat" and "Also if there is a connection between layers, any creature can travel between them, in addition to liquid physiques like water, etc"):
+- **Faction Aid in Combat (`UF_Combat.js`):**
+  - Added `Combat.factionOf(unit)` resolving canonical faction IDs for units, colonists, and player factions.
+  - Implemented `Combat.callFactionAid(victim, attacker, tick)` / `aidFaction`: when any faction member takes an attack (including lethal attacks), living faction allies within `combat.aidRadius` (10 tiles) who are not already fighting a living enemy or in `flee`/`manual` mode acquire the attacker as `targetId`, cancel any non-combat colonist jobs with reason `"aid_faction"`, and rally to attack the threat.
+  - Victim retaliates by acquiring attacker and canceling non-combat jobs with reason `"attacked"`.
+  - Added `sameFaction` recognition in `seek()` for `mode === "protect"`.
+  - Emits `combat:aid` `{ victim, attacker, helpers }`.
+  - Added Ground view switch guard to `registerChecks()` for robust test suite initialization.
+  - Automated tests: `combat.faction_aid_called`, `combat.faction_aid_range`, `combat.faction_aid_isolated`.
+- **Universal Creature Traversal & Liquid Physics Across Layer Connections (`UF_NaturalConnections.js`):**
+  - Added `UF.NaturalConnections.traverse(unitOrId, linkOrRoute)` allowing any creature, wildlife, monster, or unit to physically cross between connected layers (`World.moveUnitToLevel`) when at the entrance and landing is clear.
+  - Added autonomous stepping traversal (`stepCreatures`) for non-colonist creatures at connection entrances with anti-thrash cooldown.
+  - Added liquid physics simulation (`updateFluids`, `hasFluid`, `addFluid`, `clearFluids`): when water is present at an upper entrance, water flows down through the connection to lower landings, marking dynamic fluid, updating underground baseline water arrays, and emitting `naturalConnections:fluidFlow` and `fluids:flow`.
+  - Ground/underground travel validation recognizes flooded landings as wet, correctly refusing non-aquatic traversal.
+- **Verification Evidence:**
+  - `tools/test_natural_connections.js`: **25 passed, 0 failed** (exit 0). Mutation tests verified able to fail (`--mutant=water` catches failure).
+  - `tools/run_tests.js natural_connections`: **15 passed, 0 failed** (exit 0, including `creature_traversal`, `liquid_present_at_entrance`, and `liquid_flow_through_connection`).
+  - `tools/run_tests.js combat`: **19 passed, 0 failed** (exit 0, including `faction_aid_called`, `faction_aid_range`, `faction_aid_isolated`, 0 errors, perf 0.291 ms/frame).
+  - `tools/run_tests.js smoke`: **13 passed, 0 failed** (exit 0).
+
 
 Delivered per user directive ("I do want the tops of walls to be black though. Not like a black square, but black bordered by material"):
 - **Authentic Black-Top Wall Architecture:**
