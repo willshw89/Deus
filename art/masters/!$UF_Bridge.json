@@ -1,0 +1,28 @@
+{
+  "id": "bridge",
+  "name": "Plank bridge",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "passable": true,
+  "under": true
+}

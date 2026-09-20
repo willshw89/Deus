@@ -41,3 +41,4 @@ for (let y = 0; y < 192; y++) {
 const outPath = path.join(ROOT, 'art', 'review', 'hare_rmmz_charset_4x.png');
 writePNG(outPath, outW, outH, buf);
 console.log(`Saved: ${outPath}`);
+

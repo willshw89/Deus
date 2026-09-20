@@ -341,3 +341,4 @@ drawWindow(170, 130, 210, 150);
 
 writePNG(destReview, revW, revH, revBuf);
 console.log(`Saved review to: ${destReview}`);
+

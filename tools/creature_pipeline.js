@@ -61,11 +61,14 @@ function loadPalette() {
 const pal = loadPalette();
 
 function isBgPixel(r, g, b) {
-    if (r > 150 && g < 90 && b > 150) return true;
-    if (r > 130 && g < 70 && b > 130) return true;
-    if (r > 180 && g < 120 && b > 180) return true;
-    if (r > 20 && b > 20 && (r + b) > 2 * g + 20) return true;
-    if (r > 15 && b > 15 && r > g + 10 && b > g + 10) return true;
+    // In magenta/purple background, blue is always substantially higher than green.
+    // In red, orange, brown, and tan fur, green is greater than blue (g >= b).
+    if (b <= g + 20) return false;
+
+    if (r > 140 && g < 110 && b > 140) return true;
+    if (r > 90 && g < 70 && b > 90) return true;
+    if (r > 40 && g < 35 && b > 40 && Math.abs(r - b) < 40) return true;
+    if (r > 20 && g < 20 && b > 20 && Math.abs(r - b) < 25) return true;
     return false;
 }
 

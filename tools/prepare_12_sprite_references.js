@@ -4,7 +4,7 @@
  * tools/prepare_12_sprite_references.js
  *
  * Prepares high-resolution (576x768 px at 4x, 3x4 grid) reference sheets
- * on #FF00FF magenta background for Google Nano Banana II ImagePaths conditioning:
+ * on #FF00FF magenta background for Google Nano Banana Pro ImagePaths conditioning:
  * - 12 sprites per sheet (3 animation frames x 4 facings: S, W, E, N).
  * - Used as direct visual reference image for subsequent action sheet generation (Haul, Attack, Bow, Magic, Work, Downed).
  */

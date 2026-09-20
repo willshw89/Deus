@@ -32,7 +32,7 @@ const html = `<!DOCTYPE html>
       <div>
         <h2 class="text-xl font-bold flex items-center gap-2">
           <span class="inline-block w-3 h-3 rounded-full bg-emerald-500"></span>
-          Adult Male Elf: 100% Nano Banana II Suite (Character 1 of 3)
+          Adult Male Elf: 100% Nano Banana Pro Suite (Character 1 of 3)
         </h2>
         <p class="text-sm text-[var(--muted-foreground)]">Standard 4-Directional Charsets &amp; 7 Core Actions in RPG Maker MZ Playtest</p>
       </div>

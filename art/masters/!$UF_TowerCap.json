@@ -1,0 +1,33 @@
+{
+  "id": "tower_cap",
+  "name": "Tower-cap",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "anchor": [
+    48,
+    95
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "sway": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 240,
+  "passable": false,
+  "under": false
+}

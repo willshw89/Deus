@@ -18,6 +18,7 @@ mutate("--mutate-unknown-age", "if (!Number.isFinite(u.data.age) || u.data.age <
 mutate("--mutate-sleep", "const personal = Math.floor(unit01(seed(), 0x51ee91, u.id, 1) * 17) - 8;", "const personal = 0;");
 mutate("--mutate-sleep", "Math.floor(unit01(seed(), 0x51ee91, u.id, 2) * 9) * 15", "0");
 mutate("--mutate-fire-scan", "if (UF.FireSafety && UF.FireSafety.respond(u)) { decisionAt.set(u.id, t); continue; }", "// Mutant omits fire response for busy workers.");
+mutate("--mutate-farming", "(UF.Agriculture && UF.Agriculture.planJob(u))", "null");
 if (process.argv.includes("--mutate-adult")) {
     const start = source.indexOf("function eligibleForIntimacy(u)"), end = source.indexOf("function privatePairRoom", start);
     const guard = source.slice(start, end); assert(guard.includes("u.data.age < 18"), "adult mutation target missing");
@@ -368,5 +369,31 @@ check("fire_scan_preserves_explicit_order_and_critical_needs", () => {
     u.data.needs.thirst = 95; f.setWater(true); f.advance(); f.C._internal.scan();
     assert.strictEqual(order.state, "failed"); assert.strictEqual(f.J.of(u.id).type, "drink");
     assert(!f.jobList.some(j => j.type === "douse")); assert.deepStrictEqual(f.errors, []);
+});
+check("farming_is_real_idle_adult_planner_candidate", () => {
+    const f = fixture(), u = f.add(); let calls = 0;
+    f.ctx.UF.Agriculture = { planJob(w) { calls++; return f.J.create({ type: "farm_till", owner: w.id, target: { area: w.area, z: w.z, x: 12, y: 10 } }); }, reserved: () => false };
+    const j = f.C.decide(u); assert.strictEqual(j.type, "farm_till"); assert.strictEqual(calls, 1);
+});
+check("farming_keeps_needs_children_and_orders_priorities", () => {
+    const f = fixture(), adult = f.add(), child = f.add(10); let calls = 0;
+    f.ctx.UF.Agriculture = { planJob() { calls++; return null; }, reserved: () => false };
+    adult.data.needs.thirst = 95; f.setWater(true); assert.strictEqual(f.C.decide(adult).type, "drink");
+    f.C.decide(child); assert.strictEqual(calls, 0);
+    f.J.cancel(f.J.of(adult.id).id, "test fixture"); adult.data.needs.thirst = 0;
+    const order = f.C.order(adult.id, { type: "move", target: { x: 13, y: 10 } }); f.C._internal.scan();
+    assert.strictEqual(f.J.of(adult.id), order); assert.strictEqual(calls, 0);
+});
+check("building_does_not_overwrite_farm_reservation", () => {
+    const f = fixture(), u = f.add(), s = { id: "future_wall", build: "wall", cells: [[2, 0]], exact: true };
+    f.ctx.UF.Agriculture = { reserved: r => r.x === 12 && r.y === 10 && r.z === 0 };
+    assert.strictEqual(f.C._internal.buildCells(s, u)[0].state, "blocked");
+    f.colony.z = -1; u.z = -1;
+    assert.strictEqual(f.C._internal.buildCells(s, u)[0].state, "todo");
+});
+check("farm_work_log_requires_confirmed_physical_result", () => {
+    const f = fixture(), u = f.add(), j = { type: "farm_harvest", result: { farm: true } };
+    f.ctx.UF.Agriculture = { confirmedJob: () => false }; assert.strictEqual(f.C._internal.physicalChange(j, u), null);
+    f.ctx.UF.Agriculture.confirmedJob = () => true; assert.strictEqual(f.C._internal.physicalChange(j, u), "item");
 });
 console.log(`RESULT: ${passed} passed, ${failed} failed`); process.exitCode = failed ? 1 : 0;

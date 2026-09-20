@@ -83,3 +83,4 @@ console.log('Saved 12-sprite grid showcase:', outPath);
 
 fs.copyFileSync(outPath, path.join(BRAIN_DIR, 'elf_male_all_7_actions_12_sprites.png'));
 console.log('Copied to brain artifacts.');
+

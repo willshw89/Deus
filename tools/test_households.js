@@ -7,6 +7,7 @@ if (process.argv.includes("--mutate-enclosure")) source = source.replace("return
 if (process.argv.includes("--mutate-variety")) source = source.replace("const variant = roll % 100 < 25 + social / 2 ? 1 : 0;", "const variant = 0;");
 if (process.argv.includes("--mutate-size")) source = source.replace("designFor(h, members(h).length)", "designFor(h, 2)");
 if (process.argv.includes("--mutate-natural-reservations")) source = source.replace("const connections = W().state.naturalConnections;", "const connections = null;");
+if (process.argv.includes("--mutate-farm-reservations")) source = source.replaceAll("if (UF.Agriculture && UF.Agriculture.reserved(", "if (false && UF.Agriculture && UF.Agriculture.reserved(");
 let passed = 0, failed = 0;
 function check(name, condition, detail = "") {
     if (condition) { passed++; console.log(`PASS households.${name}${detail ? " - " + detail : ""}`); }
@@ -293,6 +294,16 @@ function geometricSafety(home) {
     f.H.planSteps(a);
     const changed = f.H.of(a).home;
     check("hearth_buffer_rejects_existing_fuel_cover", changed && (changed.x !== home.x || changed.y !== home.y));
+}
+{
+    const f = fixture(), a = f.add(1);
+    f.sandbox.UF.Agriculture = { reserved: r => r.z === 0 };
+    f.H.reconcile(); const h = f.H.of(a); f.H.planSteps(a);
+    check("homes_preserve_reserved_unbuilt_farms", !h.home, "Every candidate cell on Ground is reserved by real farming policy seam");
+    const g = fixture(), b = g.add(1, { z: -1 });
+    g.sandbox.UF.Agriculture = { reserved: r => r.z === 0 };
+    g.H.reconcile(); g.H.planSteps(b);
+    check("farms_on_other_level_do_not_block_home", !!g.H.of(b).home);
 }
 console.log(`RESULT: ${passed} passed, ${failed} failed`);
 process.exitCode = failed ? 1 : 0;

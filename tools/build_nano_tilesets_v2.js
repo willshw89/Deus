@@ -49,7 +49,7 @@ function snapHex(hex) {
 }
 
 // ----------------------------------------------------------------------------
-// 2. Load Raw Nano Banana II Generations
+// 2. Load Raw Nano Banana Pro Generations
 // ----------------------------------------------------------------------------
 const dungeonWallsRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'dungeon_walls_nano_raw.png')));
 const dungeonFloorsRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'dungeon_floors_nano_raw.png')));
@@ -538,7 +538,7 @@ function buildWaterStrip(spec) {
 // ----------------------------------------------------------------------------
 // 6. MAIN EXECUTION & SHEET ASSEMBLY
 // ----------------------------------------------------------------------------
-console.log('=== Building Complete Nano Banana II Tileset Suite v2 ===');
+console.log('=== Building Complete Nano Banana Pro Tileset Suite v2 ===');
 
 // --- A4 WALLS ASSEMBLY ---
 const A4_W = 768, A4_H = 720;
@@ -864,4 +864,4 @@ writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'UF_GenWater_A1.png'), A1_W,
 writePNG(path.join(ROOT, 'art', 'masters', 'UF_GenWater_A1.png'), A1_W, A1_H, fullA1);
 console.log('Successfully wrote Outside_A1.png, Dungeon_A1.png, UF_GenWater_A1.png, and masters.');
 
-console.log('=== All Nano Banana II Tilesets Built Successfully ===');
+console.log('=== All Nano Banana Pro Tilesets Built Successfully ===');

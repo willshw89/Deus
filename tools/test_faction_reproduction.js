@@ -10,8 +10,8 @@ let sourceGoals = fs.readFileSync(path.join(root, "game/js/plugins/UF_Goals.js")
 const mutant = process.argv.find(a => a.startsWith("--mutant="));
 if (mutant && mutant.endsWith("=room_gate")) {
     sourceColonists = sourceColonists.replace(
-        'if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {',
-        'if (!privatePairRoom(u1, u2, true)) return false; if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {'
+        'if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;',
+        'if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;'
     );
 }
 if (mutant && mutant.endsWith("=npc_sterile")) {
@@ -219,7 +219,7 @@ function createHarness() {
                 findIn: () => []
             },
             Households: {
-                roomForPair: () => null, // Camps and sites start with NO luxury bedroom!
+                roomForPair: (a, b) => a && b && a.data && a.data.kind === "colonist" ? { cells: [{ x: 30, y: 30 }, { x: 31, y: 30 }] } : null,
                 formPair: (u1, u2) => {
                     u1.data.partnerId = u2.id;
                     u2.data.partnerId = u1.id;
@@ -258,9 +258,9 @@ const C = context.UF.Colonists;
 const F = context.UF.Factions;
 const G = context.UF.Goals;
 
-// 1. Colonist camp mating without private bedroom
-check("colonist_camp_mating", () => {
-    // Spawn 1 male and 1 female colonist at camp (no private bedroom)
+// 1. Colonist mating in private bedroom (V78)
+check("colonist_bedroom_mating", () => {
+    // Spawn 1 male and 1 female colonist in their private bedroom
     const male = W.addUnit({
         name: "Adam",
         x: 30, y: 30,
@@ -272,12 +272,12 @@ check("colonist_camp_mating", () => {
         data: { kind: "colonist", faction: "f1", species: "human", gender: "female", age: 24, stage: "adult", needs: { hunger: 10, thirst: 10, sleep: 10 }, _forceConceive: true }
     });
 
-    assert.equal(context.UF.Households.roomForPair(male, female), null, "Pair should not have private bedroom");
+    assert.ok(context.UF.Households.roomForPair(male, female), "Pair should have private bedroom");
     assert.equal(C._internal.eligibleForIntimacy(male), true, "Male should be eligible for intimacy");
     assert.equal(C._internal.eligibleForIntimacy(female), true, "Female should be eligible for intimacy");
 
     const mated = C.onMated(male, female);
-    assert.equal(mated, true, "Colonists should mate without a private bedroom");
+    assert.equal(mated, true, "Colonists should mate in private bedroom");
     assert.ok(female.data.pregnancy, "Female should conceive pregnancy");
     assert.equal(female.data.pregnancy.fatherId, male.id, "Pregnancy fatherId must match male");
     assert.equal(female.data.pregnancy.daysLeft, 3, "Pregnancy daysLeft starts at 3");

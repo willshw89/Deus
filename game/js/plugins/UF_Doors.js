@@ -450,11 +450,34 @@
             syncSprites();
         });
         UF.Events.on("world:levelBuilt", syncSprites);
+        const factionForCell = (area, x, y) => {
+            const HH = window.UF && UF.Households;
+            if (HH && typeof HH.all === "function") {
+                for (const h of HH.all()) {
+                    if (h.home && sameArea(h.area, area)) {
+                        const blds = HH.structures ? HH.structures(h) : [h.home];
+                        for (const b of blds) if (b.doors && b.doors.some(p => p.x === x && p.y === y)) return h.faction;
+                    }
+                }
+            }
+            const H = window.UF && UF.History;
+            if (H && typeof H.sites === "function") {
+                const sites = H.sites().filter(s => !s.ruined && s.faction && sameArea(recordArea(s), area));
+                const near = sites.find(s => Math.hypot(s.x - x, s.y - y) <= Math.max(6, (s.radius || 4) + 4));
+                if (near) return near.faction;
+            }
+            const Own = window.UF && UF.Ownership;
+            if (Own && typeof Own.ownerOf === "function") {
+                const claim = Own.ownerOf({ kind: "object", area, x, y, z: zOf(area) });
+                if (claim && claim.kind === "faction" && claim.id) return claim.id;
+            }
+            return playerFactionId();
+        };
         const objectChanged = (area, x, y, from, to) => {
             if (!supported(area)) return;
             const O = Objects(), type = O && O.type(to), ds = store(), key = cellKey(area, x, y);
             if (!ds) return;
-            if (isDoorType(type)) ensureDoor(area, x, y, type, playerFactionId());
+            if (isDoorType(type)) ensureDoor(area, x, y, type, factionForCell(area, x, y));
             else if (ds.byCell[key] && from && O && isDoorType(O.type(from))) delete ds.byCell[key];
         };
         UF.Events.on("objects:changed", objectChanged);

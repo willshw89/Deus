@@ -195,7 +195,7 @@ const p2X = 540, p2Y = 85, p2W = W - 20 - p2X, p2H = 325;
 fillRect(p2X, p2Y, p2W, p2H, 22, 28, 40);
 drawRect(p2X, p2Y, p2W, p2H, 45, 60, 85);
 drawText(p2X + 16, p2Y + 14, "12-SPRITE GENERATION & REFERENCE-PASSING PIPELINE", [255, 220, 120], 1);
-drawText(p2X + 16, p2Y + 30, "Master Walk Sheet passed via ImagePaths to Google Nano Banana II", [130, 150, 180], 1);
+drawText(p2X + 16, p2Y + 30, "Master Walk Sheet passed via ImagePaths to Google Nano Banana Pro", [130, 150, 180], 1);
 
 // Step 1: Master Walk Reference Sheet Preview
 const b1X = p2X + 20, b1Y = p2Y + 55, b1W = 160, b1H = 210;
@@ -264,7 +264,7 @@ const p3Y = 425;
 fillRect(20, p3Y, W - 40, H - p3Y - 20, 20, 25, 35);
 drawRect(20, p3Y, W - 40, H - p3Y - 20, 45, 60, 85);
 drawText(36, p3Y + 14, "THE 7 DEDICATED 12-SPRITE ACTION SHEETS (3 COLUMNS x 4 ROWS: 3 DOWN, 3 LEFT, 3 RIGHT, 3 UP)", [255, 230, 150], 1);
-drawText(36, p3Y + 30, "Generated in Google Nano Banana II, conditioned on Master Walk Reference, snapped to art/palette/uf.hex", [140, 180, 220], 1);
+drawText(36, p3Y + 30, "Generated in Google Nano Banana Pro, conditioned on Master Walk Reference, snapped to art/palette/uf.hex", [140, 180, 220], 1);
 
 const actionCards = [
     { name: '1. WALK (MASTER REF)', file: '$UF_Elf_Male_Walk.png',   tag: 'REFERENCE', color: [80, 240, 160] },
@@ -374,7 +374,7 @@ const htmlContent = `<!DOCTYPE html>
           <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Final Fantasy V (FF5) Style</span>
           <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-950 text-blue-400 border border-blue-800">12 Sprites at a Time (3x4 Grid)</span>
           <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-purple-950 text-purple-400 border border-purple-800">1-Tile vs 2-Tile Standard</span>
-          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-rose-950 text-rose-400 border border-rose-800">Nano Banana II Exclusive</span>
+          <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-rose-950 text-rose-400 border border-rose-800">Nano Banana Pro Exclusive</span>
         </div>
         <h1 class="text-xl font-bold mt-1 text-white">FF5 16-Bit Sprite Architecture & 12-Sprite Action Suite</h1>
         <p class="text-xs text-slate-400">Standardized 4 facings (3 Down, 3 Left, 3 Right, 3 Up) &bull; 1-Tile Humanoids (48px) &bull; 2-Tile Monsters (96px) &bull; First Sheet as Conditioning Reference</p>
@@ -393,7 +393,7 @@ const htmlContent = `<!DOCTYPE html>
     <div id="tab-showcase" class="space-y-2">
       <div class="flex items-center justify-between text-xs text-slate-400 px-1">
         <span>High-resolution master review composite (1320 &times; 1080 px):</span>
-        <span class="text-emerald-400 font-semibold">100% Google Nano Banana II Pipeline</span>
+        <span class="text-emerald-400 font-semibold">100% Google Nano Banana Pro Pipeline</span>
       </div>
       <div class="bg-black rounded-lg border border-slate-800 overflow-auto max-h-[640px] flex items-center justify-center p-2">
         <img src="${sheetsB64.showcase}" class="w-full h-auto rounded border border-slate-900 shadow">
@@ -468,7 +468,7 @@ const htmlContent = `<!DOCTYPE html>
           <div>
             <span id="sheet-badge" class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-300 border border-emerald-800">MASTER REFERENCE</span>
             <h3 id="sheet-title" class="text-sm font-bold mt-1 text-white">1. Master Walk Sheet</h3>
-            <p id="sheet-desc" class="text-slate-300 mt-1">Generated first in Google Nano Banana II. Passed via ImagePaths to lock anatomical scale, facial features, and palette across all subsequent action sheets.</p>
+            <p id="sheet-desc" class="text-slate-300 mt-1">Generated first in Google Nano Banana Pro. Passed via ImagePaths to lock anatomical scale, facial features, and palette across all subsequent action sheets.</p>
           </div>
           <div class="p-3 rounded bg-slate-900 border border-slate-800 space-y-1.5 text-[11px]">
             <div class="font-semibold text-emerald-400">12-Sprite Architectural Rules:</div>
@@ -536,7 +536,7 @@ const htmlContent = `<!DOCTYPE html>
     };
 
     const sheetMeta = {
-      walk:   { badge: "MASTER REFERENCE", color: "bg-emerald-950 text-emerald-300 border-emerald-800", title: "1. Master Walk Sheet", desc: "Generated first in Google Nano Banana II. Passed via ImagePaths to lock anatomical scale, facial features, and palette across all subsequent action sheets." },
+      walk:   { badge: "MASTER REFERENCE", color: "bg-emerald-950 text-emerald-300 border-emerald-800", title: "1. Master Walk Sheet", desc: "Generated first in Google Nano Banana Pro. Passed via ImagePaths to lock anatomical scale, facial features, and palette across all subsequent action sheets." },
       haul:   { badge: "AR-600 COL 7", color: "bg-amber-950 text-amber-300 border-amber-800", title: "2. Dedicated Hauling Pose", desc: "Dedicated 4-facing 12-sprite walk cycle holding heavy load (burlap sack/crate) in front of chest in both arms." },
       attack: { badge: "MELEE STRIKE", color: "bg-blue-950 text-blue-300 border-blue-800", title: "3. Melee Sword Attack", desc: "Two-handed sword strike with sweeping crescent mithril slash arc across South, West, East, and North." },
       bow:    { badge: "ZERO ARROWS", color: "bg-purple-950 text-purple-300 border-purple-800", title: "4. Bow Archery Attack", desc: "Aim, string tension draw, and pluck release ONLY. Zero flying arrow projectiles (handled separately by engine projectile system)." },

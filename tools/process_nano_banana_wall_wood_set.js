@@ -488,11 +488,11 @@ for (let i = 0; i < 20; i++) {
             const o = (outY * masterW + outX) * 4;
 
             if (!c) {
-                // Flat magenta background #FF00FF for transparency
-                masterBuf[o] = 255;
+                // Transparent background (alpha 0)
+                masterBuf[o] = 0;
                 masterBuf[o + 1] = 0;
-                masterBuf[o + 2] = 255;
-                masterBuf[o + 3] = 255;
+                masterBuf[o + 2] = 0;
+                masterBuf[o + 3] = 0;
             } else {
                 const k = (c[0] << 16) | (c[1] << 8) | c[2];
                 const isTop = topPalette.some(tc => ((tc[0] << 16) | (tc[1] << 8) | tc[2]) === k);
@@ -570,10 +570,17 @@ for (let y = 0; y < rawH; y++) {
         const srcY = Math.floor(y / 4);
         const srcO = (srcY * masterW + srcX) * 4;
         const dstO = (y * rawW + x) * 4;
-        rawBuf[dstO] = masterBuf[srcO];
-        rawBuf[dstO + 1] = masterBuf[srcO + 1];
-        rawBuf[dstO + 2] = masterBuf[srcO + 2];
-        rawBuf[dstO + 3] = masterBuf[srcO + 3];
+        if (masterBuf[srcO + 3] === 0) {
+            rawBuf[dstO] = 255;
+            rawBuf[dstO + 1] = 0;
+            rawBuf[dstO + 2] = 255;
+            rawBuf[dstO + 3] = 255;
+        } else {
+            rawBuf[dstO] = masterBuf[srcO];
+            rawBuf[dstO + 1] = masterBuf[srcO + 1];
+            rawBuf[dstO + 2] = masterBuf[srcO + 2];
+            rawBuf[dstO + 3] = masterBuf[srcO + 3];
+        }
     }
 }
 const rawFile = path.join(ROOT, 'art', 'raw', 'wall_wood.png');

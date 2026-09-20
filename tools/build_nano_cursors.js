@@ -196,7 +196,7 @@ for (let idx = 0; idx < FACTIONS.length; idx++) {
     const sidecar = {
         name: `Cursor_${fac}`,
         culture: fac,
-        about: `Nano Banana II 48x48 bespoke faction cursor for ${fac}.`,
+        about: `Nano Banana Pro 48x48 bespoke faction cursor for ${fac}.`,
         frameWidth: 48,
         frameHeight: 48,
         anchor: [2, 2],

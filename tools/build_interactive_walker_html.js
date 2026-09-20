@@ -320,3 +320,4 @@ const html = `<!DOCTYPE html>
 
 fs.writeFileSync(OUT_FILE, html);
 console.log(`Successfully generated interactive walker at: ${OUT_FILE}`);
+

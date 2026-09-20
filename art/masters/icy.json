@@ -2,8 +2,13 @@
   "id": "icy",
   "frameWidth": 96,
   "frameHeight": 144,
-  "anchor": null,
-  "facings": [],
+  "anchor": [
+    0,
+    0
+  ],
+  "facings": [
+    "S"
+  ],
   "animations": {
     "surface": [
       0,

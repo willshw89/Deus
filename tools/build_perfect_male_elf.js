@@ -4,7 +4,7 @@
  * tools/build_perfect_male_elf.js
  *
  * UNIFORM SCALE BUILDER for Adult Male Elf (40px standing anatomy) across all 7 actions:
- * - 100% Google Nano Banana II source generations.
+ * - 100% Google Nano Banana Pro source generations.
  * - Single Uniform Global Scale Factor (40.0 / 276.0 = 0.1449275).
  * - Exact same head, face, torso, limb, and boot proportions across every action.
  * - Grounding at native baseline y = 47.
@@ -24,7 +24,7 @@ const CHAR_DIR = path.join(ROOT, 'game', 'img', 'characters');
 const REVIEW_DIR = path.join(ROOT, 'art', 'review');
 const PALETTE_FILE = path.join(ROOT, 'art', 'palette', 'uf.hex');
 
-// Uniform Global Scale: 276px standing height in raw Nano Banana II -> 40px native in RMMZ
+// Uniform Global Scale: 276px standing height in raw Nano Banana Pro -> 40px native in RMMZ
 const UNIFORM_SCALE = 40.0 / 276.0;
 
 function loadPalette() {
@@ -295,7 +295,7 @@ function saveSheetAndSidecar(buf, baseName, actionTag, animations) {
         gender: 'male',
         action: actionTag,
         scale: "UNIFORM 40/276",
-        generator: "Google Nano Banana II (Rule V69/V70/V79)"
+        generator: "Google Nano Banana Pro (Rule V69/V70/V79)"
     };
     fs.writeFileSync(path.join(CHAR_DIR, `$UF_${baseName}.json`), JSON.stringify(sidecar, null, 2));
 }

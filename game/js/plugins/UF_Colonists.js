@@ -306,9 +306,11 @@
     }
     function makePlan(ref) {
         const wall = cultureOf(ref).wall;
+        const door = cultureOf(ref).door;
         return planTemplate(ref).map(step => {
             const s = JSON.parse(JSON.stringify(step));
             if (s.build && wall && (s.build === "wall_wood" || s.build === "wall_stone") && Objects() && Objects().typeId(wall)) s.build = wall;
+            if (s.build && door && (s.build === "door_wood" || s.build === "door_stone" || s.build === "door") && Objects() && Objects().typeId(door)) s.build = door;
             s.done = false;
             return s;
         });
@@ -947,34 +949,26 @@
     function nightlyMateJob(u) {
         if (!eligibleForIntimacy(u)) return null;
         const J = Jobs(), W = World(), H = window.UF && UF.Households;
-        if (!J || !W) return null;
+        if (!J || !W || !H) return null;
         const partner = W.unit(u.data.partnerId || u.data.partner);
         if (!partner || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) return null;
+        const room = privatePairRoom(u, partner, false);
+        if (!room) return null;
         const otherJob = J.of(partner.id);
         if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
-
-        const room = privatePairRoom(u, partner, false);
-        if (room) {
-            if (!privatePairRoom(u, partner, true)) {
-                if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
-                const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
-                const until = ticks() + 1200;
-                u.data.familyRendezvous = { partnerId: partner.id, until };
-                partner.data.familyRendezvous = { partnerId: u.id, until };
-                if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
-                    give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
-                }
-                if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
-                return null;
+        if (!privatePairRoom(u, partner, true)) {
+            if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
+            const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
+            const until = ticks() + 1200;
+            u.data.familyRendezvous = { partnerId: partner.id, until };
+            partner.data.familyRendezvous = { partnerId: u.id, until };
+            if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
+                give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
             }
-            return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
+            if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
+            return null;
         }
-
-        // Without private pair room: rendezvous at partner or mate if adjacent
-        if (chebyshev(u.x, u.y, partner.x, partner.y) <= 1) {
-            return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
-        }
-        return give(u, { type: "move", target: { x: partner.x, y: partner.y }, params: { familyVisit: partner.id } });
+        return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
     }
 
     function handleMated(u1, u2) {
@@ -983,21 +977,26 @@
         if (!sameLevel(u1, u2)) return false;
         if ((u1.data.species || "human") !== (u2.data.species || "human")) return false;
 
-        if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {
-            const J = Jobs();
-            let spot = null;
-            for (const [dx, dy] of NEIGHBORS) {
-                const nx = u2.x + dx, ny = u2.y + dy;
-                if (J && J.standable(levelArea(u2), nx, ny)) {
-                    spot = { x: nx, y: ny };
-                    break;
+        const isSettlerPair = isSettler(u1) || isSettler(u2);
+        if (isSettlerPair) {
+            if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;
+        } else {
+            if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {
+                const J = Jobs();
+                let spot = null;
+                for (const [dx, dy] of NEIGHBORS) {
+                    const nx = u2.x + dx, ny = u2.y + dy;
+                    if (J && J.standable(levelArea(u2), nx, ny)) {
+                        spot = { x: nx, y: ny };
+                        break;
+                    }
                 }
-            }
-            if (spot) {
-                u1.x = spot.x;
-                u1.y = spot.y;
-            } else {
-                return false;
+                if (spot) {
+                    u1.x = spot.x;
+                    u1.y = spot.y;
+                } else {
+                    return false;
+                }
             }
         }
 
@@ -1009,8 +1008,8 @@
         delete u2.data.familyRendezvous;
 
         const inPrivateRoom = !!privatePairRoom(u1, u2, true);
-        const thoughtText = inPrivateRoom ? "Made love in private room." : "Made love with partner.";
-        const thoughtScore = inPrivateRoom ? 15 : 12;
+        const thoughtText = inPrivateRoom ? "Made love with partner." : "Made love with partner.";
+        const thoughtScore = inPrivateRoom ? 12 : 12;
 
         addThought(u1, thoughtText, thoughtScore);
         if (isSettler(u2) || (u2.data && u2.data.thoughts)) addThought(u2, thoughtText, thoughtScore);
@@ -1057,9 +1056,7 @@
             familyGuard: true,
             plan(job, u) {
                 const partner = World().unit(job.params.partnerId || job.params.unitId);
-                if (!partner || !eligibleForIntimacy(u) || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) {
-                    return { ok: false, reason: "adults require a willing and eligible partner" };
-                }
+                if (!privatePairRoom(u, partner, true)) return { ok: false, reason: "adults require a willing partner and a private sleeping room" };
                 return prior.plan(job, u);
             },
             apply(job, u) {
@@ -1567,10 +1564,12 @@
         const I = Items();
         const c = colonyState(u);
         const tags = step.stock || [];
-        const larder = stockpilesStoring(tags[0], u)[0];
+        const h = step.household && window.UF && UF.Households && UF.Households.of(u);
+        const homeStorage = h && h.home && h.home.storage ? h.home.storage : null;
+        const larder = homeStorage || stockpilesStoring(tags[0], u)[0];
         if (!larder || !I || !c) return null;
-        const isWanted = t => isFoodType(t) && tags.some(tag => hasTag(t, tag));
-        const to = { area: copyArea(c.area), z: zOf(c), x: larder.x, y: larder.y };
+        const isWanted = t => (isFoodType(t) || tags.includes("wood")) && tags.some(tag => hasTag(t, tag) || (tag === "wood" && hasTag(t, "wood")));
+        const to = homeStorage ? { area: copyArea(h.area || c.area), z: zOf(h), x: larder.x, y: larder.y } : { area: copyArea(c.area), z: zOf(c), x: larder.x, y: larder.y };
         const fire = fireNear(u);
         // Carried food: cook it if raw and there's a fire, else haul it to the larder.
         for (const it of I.inventoryOf(u.id)) {
@@ -1609,7 +1608,8 @@
             if (status[i].done) continue;
             const step = steps[i];
             const group = step.household ? "household" : step.goalOwner ? "goal" : "bootstrap";
-            if (groups[group] >= LOOKAHEAD) continue;
+            const limit = group === "household" ? 8 : LOOKAHEAD;
+            if (groups[group] >= limit) continue;
             groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
             if (spec) spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });

@@ -310,7 +310,7 @@ function saveSheetAndSidecar(buf, baseName, actionTag, animations) {
         gender: 'male',
         action: actionTag,
         style: 'Serious Chibi (VISION V116)',
-        generator: 'Google Nano Banana II (Rule 11, VISION V109)'
+        generator: 'Google Nano Banana Pro (Rule 11, VISION V109)'
     };
     fs.writeFileSync(path.join(CHAR_DIR, `$UF_${baseName}.json`), JSON.stringify(sidecar, null, 2));
     console.log(`Saved $UF_${baseName}.png and .json`);

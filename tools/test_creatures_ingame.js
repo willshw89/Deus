@@ -38,8 +38,14 @@ if (wolf) {
     wolf.tint = '#ffffff';
 }
 
+const fox = catalog.wildlife.species.find(s => s.id === 'fox');
+if (fox) {
+    fox.image = '$UF_Fox';
+    fox.tint = '#ffffff';
+}
+
 fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2) + '\n');
-console.log('Updated catalog in snapshot: boar -> $UF_Boar, hare -> $UF_Hare, wolf -> $UF_Wolf');
+console.log('Updated catalog in snapshot: boar -> $UF_Boar, hare -> $UF_Hare, wolf -> $UF_Wolf, fox -> $UF_Fox');
 
 // Add a high-visibility in-game showcase step to UF_Wildlife.js test in the snapshot
 const wildlifeJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Wildlife.js');
@@ -47,13 +53,15 @@ let wildlifeJs = fs.readFileSync(wildlifeJsPath, 'utf8');
 
 const targetHook = 't.screenshot("df_behaviors");';
 const customShowcase = `
-            // In-Game Live Creature Visual Showcase (Boar, Hare, Wolf)
+            // In-Game Live Creature Visual Showcase (Boar, Hare, Wolf, Fox)
             const showBoar = add("boar", px - 1, py, { ai: "wander", state: "idle" });
             const showHare = add("hare", px + 1, py, { ai: "wander", state: "idle" });
             const showBoarGraze = add("boar", px - 2, py + 1, { ai: "none", state: "graze" });
             const showHareHop = add("hare", px + 2, py + 1, { ai: "none", state: "walk" });
             const showWolf = add("wolf", px, py - 2, { ai: "wander", state: "idle" });
             const showWolfAttack = add("wolf", px - 2, py - 1, { ai: "none", state: "attack" });
+            const showFox = add("fox", px + 1, py - 2, { ai: "wander", state: "idle" });
+            const showFoxWalk = add("fox", px + 2, py - 1, { ai: "none", state: "walk" });
 
             if (UF.Camera) UF.Camera.setLevel(0);
             $gamePlayer.locate(px, py);
@@ -63,7 +71,7 @@ const customShowcase = `
             if (UF.Camera) UF.Camera.setLevel(1);
             await t.waitFrames(15);
             t.screenshot("creatures_live_ingame");
-            ${targetHook}
+            \${targetHook}
 `;
 
 wildlifeJs = wildlifeJs.replace(targetHook, customShowcase);

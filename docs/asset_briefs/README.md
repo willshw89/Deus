@@ -3,7 +3,7 @@
 This folder holds the prompts Gemini draws from: one `SEG-<nn>_<family>.md` file per family of assets, each a list of briefs in the format of `art/briefs/FABLE_ASSET_BRIEF.md` §6 with the HD FF6 48×48 precisions (48×48 at native resolution, anchor `[24, 47]`, palette-only ramps from `art/palette/uf.hex`). `INDEX.md` lists the segments and the order to work them.
 
 **MANDATORY GENERATION & ANIMATION RULES:**
-- **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109). Every visual asset must originate exclusively from Google Nano Banana II (`generate_image`, model id `gemini-3.1-flash-image`). No other model is allowed.
+- **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO** (AGENTS.md Rule 11, VISION V69, V70, V79, V109). Every visual asset must originate exclusively from Google Nano Banana Pro (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model). Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other model is allowed.
 - **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion across all assets must be delivered as discrete sprite animation frames on the sheets. No programmatic distortion, squashing/stretching, sine sway, or shader warps.
 
 Work one segment at a time: open it, open the reference square each brief names, deliver every brief in it (`art/masters/<id>.png` + `.json`), then move to the next. Where an older brief in `art/briefs/` disagrees with one here, the one here wins.

@@ -20,3 +20,4 @@ for (let i = 0; i < files.length; i += 25) {
 }
 
 console.log('Staging complete.');
+

@@ -123,3 +123,4 @@ for (let y = 0; y < H; y++) {
 const out2x = path.join(ROOT, 'art', 'review', 'water_animated_showcase_2x.png');
 writePNG(out2x, W2, H2, buf2x);
 console.log('Water animated showcase written: 1x and 2x!');
+

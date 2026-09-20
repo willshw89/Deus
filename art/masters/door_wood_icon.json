@@ -1,0 +1,17 @@
+{
+  "id": "door_wood_icon",
+  "name": "Wooden door Icon",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "anchor": [
+    16,
+    31
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ]
+}

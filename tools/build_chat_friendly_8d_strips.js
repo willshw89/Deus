@@ -171,3 +171,4 @@ sprites.forEach(sp => {
     writePNG(outPath, WIDTH, HEIGHT, canvas);
     console.log(`Saved: ${outPath} (${WIDTH}x${HEIGHT})`);
 });
+

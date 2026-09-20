@@ -1,0 +1,33 @@
+{
+  "id": "lily_pad",
+  "name": "Lily pads",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ],
+    "sway": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 240,
+  "passable": true,
+  "under": true
+}

@@ -17,7 +17,7 @@
 - All simulation state saves and loads through RMMZ's save system. Every slice's checks include save, load, and confirming the state is identical.
 - Any change to `game/index.html` or `game/package.json` gets a line in `docs/STATUS.md` explaining why.
 - **All animation must happen through the sprite; no after-effect animations (VISION V60, V108; AGENTS.md Rule 12):** Engine plugins must never synthesize motion via programmatic squashing, stretching, rotation, sine-wave swaying, or shader distortions. All animations (idle, walk, combat, trees swaying, water rippling, fire flickering, doors opening, workshops) must step discrete sprite frames loaded from the art sheets.
-- **All generation tasks are to utilize Google Nano Banana II (AGENTS.md Rule 11, VISION V69, V70, V79, V109):** All visual assets across all categories must originate exclusively from Google Nano Banana II (`generate_image`). No other model is permitted, and no agent may type in sprites pixel-by-pixel in code.
+- **All generation tasks are to utilize Google Nano Banana Pro (AGENTS.md Rule 11, VISION V69, V70, V79, V109):** All visual assets across all categories must originate exclusively from Google Nano Banana Pro (Gemini 3 Pro Image model, `gemini-3-pro-image` / `generate_image`). Nano Banana Pro uses advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other model is permitted, and no agent may type in sprites pixel-by-pixel in code.
 
 
 ### System docs

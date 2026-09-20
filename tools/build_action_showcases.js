@@ -102,3 +102,4 @@ SHOWCASE_CREATURES.forEach((c, cIdx) => {
 const outPath = path.join(OUT_DIR, 'all_creatures_8d_actions_matrix.png');
 writePNG(outPath, TOTAL_W, TOTAL_H, outBuf);
 console.log(`Saved showcase to ${outPath}`);
+

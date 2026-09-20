@@ -1,0 +1,17 @@
+{
+  "id": "flowers_purple_icon",
+  "name": "Purple flowers Icon",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "anchor": [
+    16,
+    31
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ]
+}

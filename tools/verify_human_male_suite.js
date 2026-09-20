@@ -275,7 +275,7 @@ const html = `<!DOCTYPE html>
 </head>
 <body>
 <h1>Adult Male Human — 12-Sprite Action Suite (Serious Chibi)</h1>
-<div class="subtitle">100% Google Nano Banana II | Serious Chibi (~3.1 heads, 46px height, grounded y=47) | Dedicated 12-Sprite Sheets (3×4 Grid)</div>
+<div class="subtitle">100% Google Nano Banana Pro | Serious Chibi (~3.1 heads, 46px height, grounded y=47) | Dedicated 12-Sprite Sheets (3×4 Grid)</div>
 <div class="grid">
 ${SUITES.map((s, idx) => `
   <div class="card">

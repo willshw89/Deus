@@ -1,6 +1,6 @@
 > **SUPERSEDED SPEC NOTICE (2026-09-19):** This 16×16 2.5D brief template is superseded by `docs/asset_briefs/INDEX.md` and `docs/ART_STANDARD.md` (HD FF6 48px standard).  
 > **PROJECT-WIDE BINDING MANDATES:**  
-> 1. **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (`generate_image`, model id `gemini-3.1-flash-image`; AGENTS.md Rule 11, VISION V69, V70, V79, V109). No other model is allowed.  
+> 1. **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO** (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model; AGENTS.md Rule 11, VISION V69, V70, V79, V109). Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other model is allowed.  
 > 2. **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion must be delivered as discrete sprite animation frames on the sheets.
 
 # Production Brief for Fable: 16×16 Pixel Art Asset Generation (Ultima VII 2.5D Square Standard)

@@ -178,3 +178,4 @@ const html = `<!DOCTYPE html>
 
 fs.writeFileSync(path.join(BRAIN, 'sprite_walker.html'), html, 'utf8');
 console.log('Saved compact 8D walker to sprite_walker.html');
+

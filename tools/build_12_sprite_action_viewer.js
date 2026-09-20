@@ -5,7 +5,7 @@
  *
  * Generates an interactive HTML artifact and widget showcasing:
  * - 12 Sprites at a Time (3x4 Grid: South, West, East, North x 3 animation frames)
- * - The First Sprite Sheet as Master Reference for subsequent Nano Banana II sheets
+ * - The First Sprite Sheet as Master Reference for subsequent Nano Banana Pro sheets
  * - Interactive Canvas Player animating all 7 actions in real-time across all 4 facings
  */
 
@@ -307,3 +307,4 @@ const html = `<!DOCTYPE html>
 
 fs.writeFileSync(path.join(BRAIN_DIR, 'elf_12_sprite_viewer.html'), html);
 console.log('Saved 12-sprite action viewer to:', path.join(BRAIN_DIR, 'elf_12_sprite_viewer.html'));
+

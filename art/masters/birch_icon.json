@@ -1,0 +1,17 @@
+{
+  "id": "birch_icon",
+  "name": "Birch Icon",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "anchor": [
+    16,
+    31
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ]
+}

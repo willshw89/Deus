@@ -246,3 +246,4 @@ fs.writeFileSync(path.join(ROOT, 'game', 'img', 'characters', '!$UF_Door_Stone.j
 fs.writeFileSync(path.join(ROOT, 'art', 'masters', '!$UF_Door_Stone.json'), JSON.stringify(stoneSidecar, null, 2));
 
 console.log('Successfully generated animated door chipsets with sidecars!');
+

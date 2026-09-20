@@ -274,3 +274,4 @@ renderShowcase([
     { id: 'dwarf_female', title: 'DWARF MOUNTAIN FOLK (FEMALE)', subtitle: '36px Stature · 1:2.4 FF5 Stocky', file: '$UF_Dwarf_Female_8D.png' },
     { id: 'elf_female', title: 'ELF SYLVAN MAIDEN (FEMALE)', subtitle: '40px Stature · 1:2.8 FF5 Sylvan', file: '$UF_Elf_Female_8D.png' }
 ], 'ULTIMATE FRONTIER - 16-BIT 8-DIRECTIONAL WALK SUITES (FEMALES)', 'three_females_8d_walk_cycles_all_8_facings_4x.png');
+

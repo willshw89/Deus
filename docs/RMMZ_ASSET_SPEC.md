@@ -1,6 +1,6 @@
 # RMMZ Asset Specifications (measured from stock files)
 
-Binding specification for standard RPG Maker MZ asset formats (VISION Rules V70, V108, V109; AGENTS.md Rules 11, 12). **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II (`generate_image`).** All animation must happen through distinct sprite frames authored on the sheets; **NO AFTER-EFFECT ANIMATIONS** (no programmatic distortion, squashing/stretching, sine-wave sway, or shader warps).
+Binding specification for standard RPG Maker MZ asset formats (VISION Rules V70, V108, V109; AGENTS.md Rules 11, 12). **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO (`gemini-3-pro-image` / `generate_image`).** All animation must happen through distinct sprite frames authored on the sheets; **NO AFTER-EFFECT ANIMATIONS** (no programmatic distortion, squashing/stretching, sine-wave sway, or shader warps).
 
 ---
 
@@ -10,8 +10,8 @@ Binding specification for standard RPG Maker MZ asset formats (VISION Rules V70,
 | :--- | :--- | :--- |
 | **Grid Tile Size** | **48 × 48 px** | The fundamental screen pixel grid of RPG Maker MZ. |
 | **Art Definition** | **1 : 1 Native** | One art pixel = one screen pixel at zoom level 1 (48×48 per square). |
-| **Image Generator** | **Google Nano Banana II** | Mandatory generator model (`generate_image` / `gemini-3.1-flash-image`). No other model allowed. |
-| **Canvas Generation** | **4× Scale (192 × 192 px)** | Google Nano Banana II generates at 4× (192×192 per cell) for clean pixel clustering, then tools reduce by 4 to 48×48 native. |
+| **Image Generator** | **Google Nano Banana Pro** | Mandatory generator model (`generate_image` / `gemini-3-pro-image`, Gemini 3 Pro Image model). No other model allowed. |
+| **Canvas Generation** | **4× Scale (192 × 192 px)** | Google Nano Banana Pro generates at 4× (192×192 per cell) for clean pixel clustering, then tools reduce by 4 to 48×48 native. |
 | **Animation Standard** | **Distinct Sprite Frames** | All animation happens via sprite frames; no after-effects or procedural warps allowed. |
 | **Palette** | `art/palette/uf.hex` | 256-color daylight palette. Snapped during reduction. |
 | **Background / Alpha** | `#FF00FF` Magenta | Raw generators use solid flat magenta `#FF00FF`. Final exports use true transparency (Alpha 0 or 255). |
@@ -95,7 +95,7 @@ All tileset sheets are standard 48×48 grid composites:
 
 ## 6. The Dual Pipeline: AR-600 Master to RMMZ Set
 
-1. **Nano Banana Generation (`generate_image`)**:
+1. **Nano Banana Pro Generation (`gemini-3-pro-image` / `generate_image`)**:
    - Creates subject at 4× scale (192×192 per 48×48 tile) on magenta `#FF00FF`.
 2. **Master Assembly (`art/masters/`)**:
    - Assembles native 48×48 cells into the full 8-facing AR-600 specification (8 rows: S, SW, W, NW, N, NE, E, SE; 20 columns: stand, walk, work, carry, attack, cast, hurt, death, idle).

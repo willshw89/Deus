@@ -8,6 +8,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Google Nano Banana Pro Rewrite & Household Completion, Decoration, Stocking, and Room Expansion — 2026-09-19 (Claude)
+Delivered per user directives ("Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning ('Thinking') to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II", "ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS", "I know I asked for a little randomness in building and structures, but creatures still need to complete the home / add a door, continue to decorate and stock their homes, build more rooms for their families, etc"):
+- **Google Nano Banana Pro (`gemini-3-pro-image`) Project Rewrite:**
+  - Standardized all generation pipelines, directives, guidelines, and tool suites across the entire repository to Google Nano Banana Pro (`gemini-3-pro-image`), utilizing advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity pixel art.
+  - Updated binding rules: `AGENTS.md` (Rule 11), `GEMINI.md`, `CLAUDE.md`, `docs/ENGINE_RULES.md` (Rule 20), `docs/ART_STANDARD.md` (Preamble, F8, F9, Steps 2-3, failure table), `docs/VISION.md` (V69, V70, V79, V100, V109, V114, V115, and 2026-09-19 Decision Log entry), `docs/RMMZ_ASSET_SPEC.md`, `docs/ASSET_REQUESTS.md`, all handoff documents (`HANDOFF_vertical.md`, `HANDOFF_floors_doors.md`, `HANDOFF_skins_faces.md`, `HANDOFF_anim.md`, `HANDOFF_world_generation.md`), `art/README.md`, `art/briefs/FABLE_ASSET_BRIEF.md`, 33 master configs in `art/masters/`, and 18 scripts in `tools/`.
+  - Re-generated `docs/handoffs/GENERATOR_PROMPTS.md` with updated prompt generator tools.
+- **Household Completion, Doors, Home Furnishings, Pantry Stocking, and Room Expansion:**
+  - Added door step to settlement blueprints in `game/data/UF_WorldCatalog.json` (`cat.colony.plan`, `cat.colony.plans.forest`, `cat.colony.plans.stone`, `cat.colony.plans.workshop`).
+  - Added `crib` definition to `game/data/UF_WorldCatalog.json` (`!$UF_Crib`, tags: `building`, `bed`, `crib`, `furniture`, `wood`).
+  - In `UF_Colonists.js`: `makePlan` maps blueprint door steps to `culture.door`. `planJob` expands household candidate window (limit 8) so interior furnishings are planned. `stockStepJob` routes home storage stockpiling directly into `h.home.storage`.
+  - In `UF_Doors.js`: `factionForCell` resolves doors placed during household and site construction to inherit their owning household or site faction.
+  - In `UF_Households.js`: `layout` positions `workbench`, `weaponRack`, and `crib` in designed homes; `footprintOK` protects their placement; `planSteps(u)` appends furnishing steps and pantry stocking (`stock_food`, `stock_wood`) once structural enclosure, beds, hearth, and storage are built and unfulfilled demands are satisfied. Outward bedroom annex expansion dynamically accommodates new children.
+- **Intimacy, Privacy & Rendezvous System Restored:**
+  - Restored strict privacy checks in `handleMated`, `nightlyMateJob`, `guardMateHandler`, and `decide(u)` per VISION V78. Settlers require an enclosed room with door (`privatePairRoom`) for intimacy; door travel delays wait up to the deadline before yielding to threshold needs or sleep.
+- **Verification Evidence:**
+  - `tools/test_households.js`: **56/56 PASS** (0 failed).
+  - `tools/test_family_integration.js`: **36/36 PASS** (0 failed).
+  - `tools/test_faction_reproduction.js`: **7/7 PASS** (0 failed).
+  - `tools/test_goals.js`: **19/19 PASS** (0 failed).
+  - `tools/test_profile_tabs.js`: **46/46 PASS** (0 failed).
+  - `tools/test_natural_connections.js`: **25/25 PASS** (0 failed).
+  - `tools/test_culture_growth.js`: **23/23 PASS** (0 failed).
+  - `tools/check_briefs.js`: **PASS 223 briefs, 0 fails**.
+  - `tools/run_tests.js smoke`: **13/13 PASS, 0 errors, exit 0**.
+  - Visual verification of `game/test_output/smoke.map.png`: Meadow terrain with clean campfire colony, settlers, and 0 console errors.
+
 ## Authentic Nano Banana II Cave Rock Walls (A4) and 3-Frame Flowing Water (A1) — 2026-09-19 (Gemini)
 Delivered per user directives ("Very good, slightly visually bugged, though I want the walls to take a style closer to the cave/rock walls, with a wall face and a top face", "Water needs to seamlessly border all terrain types", "I do want the tops of walls to be black though. Not like a black square, but black bordered by material", "Fix that real quick and carry on", "Genrate the tilesets in nano banana II. The water animation is kinda weak. Redo the water. Keep going", "Make sure youre generating everything with nano banana II", "Continue generating with nano banana II"):
 - **Authentic Cave Rock Walls Architecture (`Dungeon_A4.png`, `Outside_A4.png`):**

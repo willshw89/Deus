@@ -246,23 +246,29 @@
         for (let py = 1; py <= design.sleepRows; py++) for (const px of bedColumns) if (beds.length < design.capacity)
             beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
         const hearth = annex ? null : { x: Math.floor(width / 2), y: divider + 2 };
+        const workbench = annex || width < 7 ? null : transform({ x: 1, y: height - 2 });
+        const weaponRack = annex || width < 7 ? null : transform({ x: 1, y: divider + 2 });
+        const crib = annex || width < 7 ? null : transform({ x: width - 2, y: 1 });
         return Object.assign({ x, y, wall, door, design, walls, doors: doors.map(transform), sleeping, beds,
             spots: [transform({ x: Math.floor(width / 2), y: design.sleepRows }), transform({ x: Math.floor(width / 2) + 1, y: design.sleepRows })],
             hearth: hearth && transform(hearth), storage: annex ? null : transform({ x: width - 2, y: height - 2 }),
+            workbench, weaponRack, crib,
             hearthClearance: hearth ? [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([dx, dy]) => transform({ x: hearth.x + dx, y: hearth.y + dy })) : [],
             entrance: transform({ x: design.outerLane, y: height }), steps: [] }, dimensions(design));
     }
     function footprintOK(h, home, u, reservations, occupied, bootstrap) {
-        const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.storage].filter(Boolean).map(p => key(p.x, p.y)));
+        const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
         const clear = new Set((home.hearthClearance || []).map(p => key(p.x, p.y)));
         for (let y = home.y; y < home.y + home.h; y++) for (let x = home.x; x < home.x + home.w; x++) {
             const k = key(x, y), p = { x, y }, o = object(h, p);
+            if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x, y, z: zOf(h) })) return false;
             if (!dry(h, x, y) || reservations.has(k) || occupied.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
             if (Own() && Own().ownerOf(ref(h, p))) return false;
             if (clear.has(k) && o) return false; // No existing plant/furniture in the hearth's four-neighbor buffer.
             if (o && o.passable !== true && (!built.has(k) || !o.actions || !Object.keys(o.actions).length)) return false;
         }
         const e = home.entrance, eo = object(h, e);
+        if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x: e.x, y: e.y, z: zOf(h) })) return false;
         if (!dry(h, e.x, e.y) || (eo && eo.passable !== true) || occupied.has(key(e.x, e.y)) || reservations.has(key(e.x, e.y))) return false;
         const w = W();
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
@@ -381,6 +387,26 @@
             const a = home.annexes[i];
             home.steps.push(step(`annex${i}_walls`, a.wall, a.walls), step(`annex${i}_doors`, a.door, a.doors),
                 step(`annex${i}_beds`, "floor_straw", a.beds.filter(b => b.unitId !== null)));
+        }
+        const o = O();
+        const baseBuilt = strictEnclosure(h, home) &&
+            home.beds.some(b => object(h, b) && object(h, b).id === "floor_straw") &&
+            object(h, home.hearth) && object(h, home.hearth).id === "campfire" &&
+            object(h, home.storage) && object(h, home.storage).id === "stockpile";
+        const d = demands(h);
+        const noDemands = !d.bedrooms && !d.beds && !d.cooking && !d.storage;
+        if (baseBuilt && noDemands && home.design && o) {
+            if (home.workbench && o.type("workbench") && o.type("workbench").build) {
+                home.steps.push(step("workbench", "workbench", [home.workbench]));
+            }
+            if (home.weaponRack && o.type("weapon_rack") && o.type("weapon_rack").build) {
+                home.steps.push(step("weapon_rack", "weapon_rack", [home.weaponRack]));
+            }
+            if (home.crib && o.type("crib") && o.type("crib").build && members(h).some(m => m.data && Number.isFinite(m.data.age) && m.data.age < 3)) {
+                home.steps.push(step("crib", "crib", [home.crib]));
+            }
+            home.steps.push(step("stock_food", null, [home.storage], { stock: ["food"], count: 5, exact: true }));
+            home.steps.push(step("stock_wood", null, [home.storage], { stock: ["wood"], count: 5, exact: true }));
         }
         return home.steps;
     }

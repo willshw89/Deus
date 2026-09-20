@@ -259,7 +259,7 @@ for (const f of FACTIONS) {
     const sidecar = {
         name: `face_${f.id}`,
         about: `${f.label} faceset in authentic Ultima VII ornate border style.`,
-        author: "Gemini (Google Nano Banana II)",
+        author: "Gemini (Google Nano Banana Pro)",
         date: "2026-09-19",
         frameWidth: 144,
         frameHeight: 144,
@@ -470,8 +470,8 @@ for (const f of FACTIONS) {
 
     const winSidecar = {
         name: `Window_${f.id}`,
-        about: `Authentic ${f.label} menu windowskin generated via Google Nano Banana II.`,
-        author: "Gemini (Google Nano Banana II)",
+        about: `Authentic ${f.label} menu windowskin generated via Google Nano Banana Pro.`,
+        author: "Gemini (Google Nano Banana Pro)",
         date: "2026-09-19",
         frameWidth: 192,
         frameHeight: 192,

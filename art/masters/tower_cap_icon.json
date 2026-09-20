@@ -1,0 +1,17 @@
+{
+  "id": "tower_cap_icon",
+  "name": "Tower-cap Icon",
+  "frameWidth": 32,
+  "frameHeight": 32,
+  "anchor": [
+    16,
+    31
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ]
+}

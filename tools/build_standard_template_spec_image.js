@@ -232,3 +232,4 @@ const docsDir = path.join(ROOT, 'docs', 'design');
 if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir, { recursive: true });
 writePNG(path.join(docsDir, 'STANDARD_8D_CHARSET_TEMPLATE.png'), TOTAL_W, TOTAL_H, buf);
 console.log('Saved docs/design/STANDARD_8D_CHARSET_TEMPLATE.png');
+

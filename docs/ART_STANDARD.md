@@ -1,6 +1,6 @@
 # ART STANDARD: 16-Bit Pixel Art in the Serious Chibi Style (FF5 / Tactics Ogre)
 
-**Set 2026-09-19 by user decision (VISION V115, V116):** earlier style rules are scratched. The look is **16-bit pixel art in a serious chibi style** (reminiscent of classic 16-bit tactical RPGs like Tactics Ogre and mature FF5/FF6 job sprites: grounded proportions, focused expressions, functional gear, no cute/cartoonish tropes) generated exclusively with **Google Nano Banana II** (`generate_image`). Humanoids and standard creatures are **generally 1 tile in height (48 px in RMMZ)**; large creatures can be **2 tiles in height (96 px in RMMZ)**. Sprites are organized **12 sprites at a time on a 3×4 grid (3 Down, 3 Left, 3 Right, 3 Up)**, with a dedicated 12-sprite sheet for each action (Walk, Melee, Ranged, Magic, Haul, Work, Downed).
+**Set 2026-09-19 by user decision (VISION V115, V116):** earlier style rules are scratched. The look is **16-bit pixel art in a serious chibi style** (reminiscent of classic 16-bit tactical RPGs like Tactics Ogre and mature FF5/FF6 job sprites: grounded proportions, focused expressions, functional gear, no cute/cartoonish tropes) generated exclusively with **Google Nano Banana Pro** (`gemini-3-pro-image` / `generate_image`). Humanoids and standard creatures are **generally 1 tile in height (48 px in RMMZ)**; large creatures can be **2 tiles in height (96 px in RMMZ)**. Sprites are organized **12 sprites at a time on a 3×4 grid (3 Down, 3 Left, 3 Right, 3 Up)**, with a dedicated 12-sprite sheet for each action (Walk, Melee, Ranged, Magic, Haul, Work, Downed).
 
 ## 1. The view and the look
 | # | Rule |
@@ -12,8 +12,8 @@
 | F5 | **Standardized 4 Directions (V110, V115):** 4 facings (Down, Left, Right, Up; RMMZ rows 0=Down, 1=Left, 2=Right, 3=Up) for **every action**: Walk, Melee, Ranged, Magic, Haul, Work, Downed. Movement in the engine remains 8 directions, but animation is standardized on 4 facings to eliminate bottlenecks. |
 | F6 | **12 Sprites at a Time (3x4 Grid; V114, V115):** all character generations produce exactly 12 sprites arranged as 3 columns × 4 rows (3 Down, 3 Left, 3 Right, 3 Up) on a 144×192 px sheet ($filename.png). |
 | F7 | **Separate 12-Sprite Sheet per Action (V115):** each action is delivered as its own dedicated 12-sprite sheet: Walk (12), Melee (12), Ranged (12), Magic (12), Haul (12), Work (12), Downed (12). |
-| F8 | **First Sheet as Reference for Nano Banana II (V114):** the first sheet generated for a character (the standard 12-sprite Walk sheet) serves as the persistent visual conditioning reference (`ImagePaths`) passed to Google Nano Banana II for all subsequent action sheets, locking 100% anatomical scale, costume, and palette. |
-| F9 | **All generation tasks utilize Google Nano Banana II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109): every visual asset across all categories MUST originate from Google Nano Banana II (`generate_image`). No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. |
+| F8 | **First Sheet as Reference for Nano Banana Pro (V114):** the first sheet generated for a character (the standard 12-sprite Walk sheet) serves as the persistent visual conditioning reference (`ImagePaths`) passed to Google Nano Banana Pro for all subsequent action sheets, locking 100% anatomical scale, costume, and palette. |
+| F9 | **All generation tasks utilize Google Nano Banana Pro** (AGENTS.md Rule 11, VISION V69, V70, V79, V109): every visual asset across all categories MUST originate from Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`). Nano Banana Pro is Google's Gemini 3 Pro Image model, the premium choice for complex visual tasks utilizing advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. |
 | F10 | **All animation must happen through the sprite; no after-effect animations** (V58, V60, V108): all animation must come from distinct sprite frames authored on the sheets. Zero code-driven affine transforms, procedural squash/stretch, sine-wave swaying, or shader distortions. |
 | F11 | **Zero Flying Projectiles on Sprite Sheets; Initiation-Only Magic (V111):** Ranged attack frames depict string draw, tension, and pluck recoil only (zero flying arrows; ballistic missiles are rendered by the engine projectile system). Magic frames depict incantation/chant posture with soft palm or staff aura only (zero flying projectile beams, blasts, or leaves). |
 | F12 | **Dedicated Hauling / Carrying Pose (V113, AR-600 col 7):** dedicated 4-facing 12-sprite walk cycle holding a heavy load (burlap sack, crate, timber, or stone) in both arms against the torso in front. |
@@ -59,7 +59,7 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 ## 4. Sheets and sidecars
 - **Characters and creatures (V110, V114, V115):** organized as dedicated 12-sprite sheets on a 3×4 grid (3 animation columns × 4 rows: Down, Left, Right, Up) matching native RMMZ character sheets (`$filename.png`, 144×192 px total, each frame 48×48 px).
 - **Dedicated action sheets (V115):** each action is delivered as its own dedicated 12-sprite sheet: `<id>_walk.png`, `<id>_melee.png`, `<id>_ranged.png`, `<id>_magic.png`, `<id>_haul.png`, `<id>_work.png`, `<id>_downed.png`.
-- **First sheet as reference (V114):** the first sheet generated for a demographic (the standard 12-sprite Walk sheet) serves as the persistent master visual reference image (`ImagePaths`) passed to Google Nano Banana II (`generate_image`) for all subsequent action sheets, locking anatomical scale, costume, and palette across every action.
+- **First sheet as reference (V114):** the first sheet generated for a demographic (the standard 12-sprite Walk sheet) serves as the persistent master visual reference image (`ImagePaths`) passed to Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`) for all subsequent action sheets, locking anatomical scale, costume, and palette across every action.
 - **Objects:** one frame per state, or a loop named in the sidecar. States that the catalog treats as separate objects (standing/stump, full/picked, unlit/lit, intact/ruined) are separate files.
 - **Every sheet has a JSON sidecar** of the same name: `frameWidth`, `frameHeight`, `anchor` (bottom-centre of the footprint), `footprint`, `facings`, `animations`, `frameMs`.
 
@@ -67,8 +67,8 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 | Step | Output | Who |
 |---|---|---|
 | 1. Prompt | Prompt template specifying FF5 16-bit chibi style (2.5–2.8 heads tall, expressive eyes, scissor-step boots, 1 tile high, 3x4 grid on magenta background) | Gemini |
-| 2. Master Walk Sheet | Generate the 12-sprite Walk sheet (3 Down, 3 Left, 3 Right, 3 Up) in **Google Nano Banana II** (`generate_image`) | Gemini |
-| 3. Action Sheets with Reference | Generate subsequent 12-sprite action sheets (Melee, Ranged, Magic, Haul, Work, Downed) in **Google Nano Banana II** passing the Walk sheet via `ImagePaths` | Gemini |
+| 2. Master Walk Sheet | Generate the 12-sprite Walk sheet (3 Down, 3 Left, 3 Right, 3 Up) in **Google Nano Banana Pro** (`gemini-3-pro-image` / `generate_image`) | Gemini |
+| 3. Action Sheets with Reference | Generate subsequent 12-sprite action sheets (Melee, Ranged, Magic, Haul, Work, Downed) in **Google Nano Banana Pro** (`gemini-3-pro-image`) passing the Walk sheet via `ImagePaths` | Gemini |
 | 4. Clean & Snap | Process raw generation, remove magenta background, snap to `art/palette/uf.hex`, align frames to 48×48 px on baseline y=47 | cleaning tool |
 | 5. Check | `tools/art_check.js --native` and `tools/originality_check.js` pass | tools |
 | 6. Review | Review 12-sprite grid and live in-game animation loop across all 4 facings | Gemini & user |
@@ -86,11 +86,11 @@ By eye: authentic FF5 16-bit chibi proportions; upright, no lean; fits 1 tile (o
 | Mixed pixel sizes and blur | Reject; enforce crisp pixel-art styling without blur or bilinear filtering. |
 | Drifts to 2.5D, isometric or painterly | Reject anything that isn't the flat 3/4 top-down RPG view. |
 | Wrong size against the grid square | Measure against §2: humanoids must fit 1 tile (38–48 px); large creatures 2 tiles (80–96 px). |
-| The character changes between actions | Pass the master Walk sheet as reference (`ImagePaths`) to Google Nano Banana II for all subsequent sheets. |
+| The character changes between actions | Pass the master Walk sheet as reference (`ImagePaths`) to Google Nano Banana Pro for all subsequent sheets. |
 | Flying projectiles or burst spells on sheets | Reject; bow is draw/pluck only; magic is initiation chant/aura only. Projectiles are engine-rendered. |
 | Green fringes from green-screen | Magenta background (`#FF00FF`) only. |
 | Animation faked with code distortion or shaders | Reject; all animation must be authored as distinct sprite frames in the sheet. No after-effect animations. |
-| Drawn with non-Nano Banana model or typed in code | Reject; all assets must originate from authentic Google Nano Banana II generations. |
+| Drawn with non-Nano Banana model or typed in code | Reject; all assets must originate from authentic Google Nano Banana Pro (`gemini-3-pro-image`) generations. |
 
 ## 8. Guidelines for the Five Vertical Layers (Z-2 to Z+2) (VISION V117)
 All environment, terrain, autotile, and structural generations must strictly follow the distinct color ramps and architectural definitions of the 5 layers:

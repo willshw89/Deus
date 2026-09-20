@@ -479,3 +479,4 @@ function runVerification(masterPath, rmmzPath) {
 if (require.main === module) {
     main();
 }
+

@@ -6,7 +6,7 @@
 Every person, animal and monster plays an attack when it strikes (hunting, fighting, a predator taking prey), a hurt reaction when hit, and a death when it dies; its remains then lie on the cell for 12 game hours and fade (DF keeps corpses).
 
 **MANDATORY RULES:**
-- **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109). Every creature sheet must originate from Google Nano Banana II (`generate_image`, model id `gemini-3.1-flash-image`). No other model is permitted; no sprites typed in code.
+- **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO** (AGENTS.md Rule 11, VISION V69, V70, V79, V109). Every creature sheet must originate from Google Nano Banana Pro (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model). Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other model is permitted; no sprites typed in code.
 - **ALL ANIMATION MUST HAPPEN THROUGH THE SPRITE; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All motion—strikes, flinches, falls, and remains—must come from distinct sprite frames authored in the art sheets. No programmatic distortion, squashing, stretching, or shader warps.
 
 

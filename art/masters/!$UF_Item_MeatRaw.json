@@ -1,0 +1,31 @@
+{
+  "id": "item_meatraw",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "stand": [
+      0,
+      1,
+      2
+    ],
+    "idle": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 200,
+  "generator": "Google Nano Banana 2",
+  "standard": "Final Fantasy VI 16-bit HD"
+}

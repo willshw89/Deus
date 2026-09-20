@@ -4,7 +4,7 @@
 /**
  * tools/process_nano_banana_4d_charsets.js
  *
- * Fully standardized 4-Directional Charset Builder from 100% Google Nano Banana II Generations:
+ * Fully standardized 4-Directional Charset Builder from 100% Google Nano Banana Pro Generations:
  * - 4 Facings (Standard RMMZ 3x4 layout, 144x192 px):
  *   Row 0: Down (South)
  *   Row 1: Left (West)
@@ -348,7 +348,7 @@ function save4DCharsetWithSidecar(buf, baseName, species, actionTag, animations,
         species: species,
         stage: stage,
         action: actionTag,
-        generator: "Google Nano Banana II (Rule V69/V70/V79)"
+        generator: "Google Nano Banana Pro (Rule V69/V70/V79)"
     };
     fs.writeFileSync(path.join(CHAR_DIR, `$UF_${baseName}.json`), JSON.stringify(sidecar, null, 2));
 }
@@ -356,7 +356,7 @@ function save4DCharsetWithSidecar(buf, baseName, species, actionTag, animations,
 // ----------------------------------------------------------------------------
 // MAIN EXECUTION PIPELINE
 // ----------------------------------------------------------------------------
-console.log('=== Processing Authentic Nano Banana II 4-Directional Charsets ===\n');
+console.log('=== Processing Authentic Nano Banana Pro 4-Directional Charsets ===\n');
 
 // 1. Load Raw Nano Banana Generations
 console.log('Loading raw generations from art/raw/ ...');
@@ -394,7 +394,7 @@ function extractActionSets(rawImg, targetHeight = 40, isDowned = false) {
     };
 }
 
-console.log('Extracting Adult Male action suites from Nano Banana II raws...');
+console.log('Extracting Adult Male action suites from Nano Banana Pro raws...');
 const maleFrames = {
     walk:   extractActionSets(rawWalk, 40, false),
     attack: extractActionSets(rawAttack, 40, false),
@@ -436,7 +436,7 @@ save4DCharsetWithSidecar(maleSheets.downed, 'Elf_Downed', 'Elf', 'Dead',   { hur
 save4DCharsetWithSidecar(maleSheets.haul,   'Elf_Haul',   'Elf', 'Haul',   { haul: [0, 1, 2, 1], carry: [1], stand: [1] });
 
 // 4. Assemble Female Demographic (39px tall, flared hem, cascading silver hair)
-console.log('Synthesizing Adult Female Demographic from Nano Banana II...');
+console.log('Synthesizing Adult Female Demographic from Nano Banana Pro...');
 function feminizeFrame(mFrame, facing, isDowned = false) {
     if (isDowned) return Buffer.from(mFrame); // Keep downed corpse intact
     const out = Buffer.from(mFrame);
@@ -549,7 +549,7 @@ save4DCharsetWithSidecar(femaleSheets.downed, 'Elf_Female_Downed', 'Elf', 'Dead'
 save4DCharsetWithSidecar(femaleSheets.haul,   'Elf_Female_Haul',   'Elf', 'Haul',   { haul: [0, 1, 2, 1], carry: [1], stand: [1] }, 'female');
 
 // 5. Assemble Elf Child Demographic (30px stature, cute pointed ears, small pouch)
-console.log('Synthesizing Elf Child Demographic from Nano Banana II...');
+console.log('Synthesizing Elf Child Demographic from Nano Banana Pro...');
 function childizeFrame(mFrame, facing) {
     const out = Buffer.alloc(48 * 48 * 4);
     let minX = 48, maxX = 0, minY = 48, maxY = 0;
@@ -811,4 +811,4 @@ console.log(`Saved review board: ${reviewPath}`);
 const BRAIN_DIR = 'C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b7ec-5affda42dd85';
 fs.copyFileSync(reviewPath, path.join(BRAIN_DIR, 'elf_standard_4d_review_board.png'));
 
-console.log('\n=== Nano Banana II 4-Directional Charset Pipeline Complete! ===');
+console.log('\n=== Nano Banana Pro 4-Directional Charset Pipeline Complete! ===');

@@ -173,3 +173,4 @@ for (let y = 0; y < H; y++) {
 const out3x = path.join(ROOT, 'art', 'review', 'floors_showcase_3x.png');
 writePNG(out3x, W3, H3, buf3x);
 console.log('Floors showcase generated: 1x and 3x!');
+

@@ -385,7 +385,7 @@ for (const f of FACTIONS) {
     const sidecar = {
         name: `UF_Menu_${f.id}`,
         about: `${f.about} Full-screen 816x624 menu frame and thematic wallpaper.`,
-        author: "Gemini (Google Nano Banana II)",
+        author: "Gemini (Google Nano Banana Pro)",
         date: "2026-09-19",
         frameWidth: MENU_W,
         frameHeight: MENU_H,
@@ -437,7 +437,7 @@ for (const f of FACTIONS) {
     const cursorSidecar = {
         name: `Cursor_${f.id}`,
         about: `Custom 48x48 menu selection cursor emblem for ${f.name} culture.`,
-        author: "Gemini (Google Nano Banana II)",
+        author: "Gemini (Google Nano Banana Pro)",
         date: "2026-09-19",
         frameWidth: 48,
         frameHeight: 48,

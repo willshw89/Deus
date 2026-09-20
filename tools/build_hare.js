@@ -21,3 +21,4 @@ const config = {
 };
 
 processCreature(config).catch(console.error);
+
