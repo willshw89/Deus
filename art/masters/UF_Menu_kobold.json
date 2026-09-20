@@ -1,0 +1,26 @@
+{
+  "name": "UF_Menu_kobold",
+  "about": "Kobold Warren cavern rock niche with copper bells, candles, and clay ochre wall. Full-screen 816x624 menu frame and thematic wallpaper.",
+  "author": "Gemini (Google Nano Banana II)",
+  "date": "2026-09-19",
+  "frameWidth": 816,
+  "frameHeight": 624,
+  "anchor": [
+    408,
+    623
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "default": [
+      0
+    ]
+  },
+  "width": 816,
+  "height": 624,
+  "layer": "menu_picture",
+  "culture": "kobold",
+  "colors": 32,
+  "palette": "art/palette/uf.hex"
+}

@@ -5,6 +5,60 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Authentic Matching Faction Menu Themes & Custom Selection Cursors (AR-1740 to AR-1750) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Those are pretty good, Lets create a matching menu for each"):
+- **Full-Screen 816×624 Matching Menu Backdrops (`UF_Menu_<culture>.png`):**
+  - Delivered 11 full-screen 816×624 px cultural menu backdrops to `game/img/pictures/UF_Menu_<culture>.png` and `art/masters/UF_Menu_<culture>.png` with valid AR-600 `.json` sidecars.
+  - Slices the outer cultural architectural border motifs and combines them with procedural cultural material wallpapers (zero text bleed, crisp 16-bit texture, high contrast against window panes):
+    - **Human (`human`):** Stone relief archway with bronze rosette medallions on warm timber plank wallpaper.
+    - **Elf (`elf`):** Entwined living bower with golden leaf brooch on woven emerald moss wallpaper.
+    - **Dwarf (`dwarf`):** Chiseled granite frame with glowing blue runes on ashlar stone block wallpaper.
+    - **Gnome (`gnome`):** Interlocking brass cogs, steam pipes, and pressure dials on blueprint teal enamel wallpaper.
+    - **Goblin (`goblin`):** Jagged rusted scrap iron with barbed wire and spiked spear corners on stitched war-hide wallpaper.
+    - **Orc (`orc`):** Heavy black iron framing with skull relief and curved ivory war-tusks on crimson beast-hide wallpaper.
+    - **Lizardfolk (`lizardfolk`):** Lashed green bamboo reeds with iridescent spiral nautilus shells on wetland swamp ripple wallpaper.
+    - **Kobold (`kobold`):** Rough tunnel rock with hanging trinket ropes and candle stubs on warm cave clay wallpaper.
+    - **Undead (`undead`):** Ancient tomb slate with verdigris-tarnished bronze fittings and creeping moss on cracked crypt stone wallpaper.
+    - **Starborn (`starborn`):** Sleek geometric silver lattice with blue sapphire rhombus facets on cosmic indigo starlight void wallpaper.
+    - **Swarm (`swarm`):** Ribbed chitin exoskeleton frame with glowing purple biopods on iridescent violet bio-membrane wallpaper.
+- **Custom Cultural Selection Cursors (`Cursor_<culture>.png`):**
+  - Delivered 11 custom 48×48 px selection cursor emblems to `game/img/system/Cursor_<culture>.png` and `art/masters/Cursor_<culture>.png` with `.json` sidecars:
+    - `Cursor_human`: Miniature knight helm with gold crest.
+    - `Cursor_elf`: Emerald elven leaf emblem.
+    - `Cursor_dwarf`: Chiseled stone dwarven warhammer.
+    - `Cursor_gnome`: Polished brass engineer's spanner.
+    - `Cursor_goblin`: Crude crooked scrap shiv.
+    - `Cursor_orc`: Heavy iron war-cleaver.
+    - `Cursor_lizardfolk`: Polished river-reed spearhead.
+    - `Cursor_kobold`: Curved copper tunnel pick.
+    - `Cursor_undead`: Bleached crypt skull / bone fragment.
+    - `Cursor_starborn`: Faceted violet star crystal shard.
+    - `Cursor_swarm`: Serrated chitin mandible.
+- **Engine Plugin Integration (`UF_FactionMenus.js`):**
+  - Created non-invasive plugin `game/js/plugins/UF_FactionMenus.js` hooking `Scene_Menu`:
+    - Dynamically attaches matching `UF_Menu_<culture>.png` backdrop sprite.
+    - Dynamically applies matching `Window_<culture>.png` windowskin to command, status, and gold windows.
+    - Attaches custom animated cursor emblem with subtle horizontal hovering bob to active `Window_Selectable` command rows.
+    - Script API: `UF_FactionMenus.setFaction(factionId)`, `UF_FactionMenus.getFaction()`.
+- **Compliance & Automated Verification:**
+  - `tools/art_check.js --native --sidecar`: PASS 22/22 on all 22 master assets (≤ 32 colors on `art/palette/uf.hex`, binary alpha 0/255, exact dimensions, valid sidecars).
+  - `tools/originality_check.js`: PASS 22/22 with 0 warnings (closest distance 0.317 to 0.454 ≥ 0.28 vs 19,431 indexed Ultima VII shapes).
+  - Live in-engine NW.js snapshot test (`tools/test_all_faction_menus.js`): 3/3 PASS (exit 0, 0 console errors).
+- **Screenshots Visually Inspected (Rule 5):**
+  - `art/review/all_factions_matching_menus_showcase.png`: Full 11-panel showcase of all menu frames and cursors.
+  - `art/review/menus/faction_menus.menu_live_human.png`: Verified live menu in-engine with stone arch, timber wallpaper, gold windowskin, and knight crest cursor.
+  - `art/review/menus/faction_menus.menu_live_elf.png`: Verified live menu in-engine with living bower, moss wallpaper, and leaf cursor.
+  - `art/review/menus/faction_menus.menu_live_dwarf.png`: Verified live menu in-engine with glowing rune stone, granite wallpaper, and warhammer cursor.
+  - `art/review/menus/faction_menus.menu_live_gnome.png`: Verified live menu in-engine with brass cogs, teal enamel wallpaper, and spanner cursor.
+  - `art/review/menus/faction_menus.menu_live_goblin.png`: Verified live menu in-engine with scrap iron, hide wallpaper, and shiv cursor.
+  - `art/review/menus/faction_menus.menu_live_orc.png`: Verified live menu in-engine with iron tusks, war-hide wallpaper, and cleaver cursor.
+  - `art/review/menus/faction_menus.menu_live_lizardfolk.png`: Verified live menu in-engine with reeds, spiral shells, swamp wallpaper, and spear cursor.
+  - `art/review/menus/faction_menus.menu_live_kobold.png`: Verified live menu in-engine with tunnel rock, red clay wallpaper, and copper pick cursor.
+  - `art/review/menus/faction_menus.menu_live_undead.png`: Verified live menu in-engine with tomb slate, crypt wallpaper, and skull cursor.
+  - `art/review/menus/faction_menus.menu_live_starborn.png`: Verified live menu in-engine with silver lattice, cosmic void wallpaper, and star crystal cursor.
+  - `art/review/menus/faction_menus.menu_live_swarm.png`: Verified live menu in-engine with chitin frame, violet membrane wallpaper, and mandible cursor.
+
 ## Cave-Rock Style Two-Tile High Walls & Seamless Water Autotiles Across All Terrains (AR-101, AR-104, AR-300) — 2026-09-19 (Gemini)
 
 Delivered per user directives ("Very good, slightly visually bugged, though I want the walls to take a style closer to the cave/rock walls, with a wall face and a top face" and "Water needs to seamlessly border all terrain types"):

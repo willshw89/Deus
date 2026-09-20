@@ -1,0 +1,26 @@
+{
+  "name": "Cursor_lizardfolk",
+  "about": "Custom 48x48 menu selection cursor emblem for Lizardfolk culture.",
+  "author": "Gemini (Google Nano Banana II)",
+  "date": "2026-09-19",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "facings": [
+    "S"
+  ],
+  "animations": {
+    "default": [
+      0
+    ]
+  },
+  "width": 48,
+  "height": 48,
+  "layer": "ui_cursor",
+  "culture": "lizardfolk",
+  "colors": 16,
+  "palette": "art/palette/uf.hex"
+}
