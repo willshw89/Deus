@@ -179,49 +179,62 @@ function buildWaterStrip(spec) {
         }
 
         // Top-Left tile (x 0..47, y 0..47): Showcase / isolated water tile with shore ring
-        for (let i = 0; i < 48; i++) {
-            // Outermost wet line
-            setPixel(i, 0, shoreLine);
-            setPixel(i, 47, shoreLine);
-            setPixel(0, i, shoreLine);
-            setPixel(47, i, shoreLine);
-            // Shallows band inside wet line
-            setPixel(i, 1, rampShallows);
-            setPixel(i, 46, rampShallows);
-            setPixel(1, i, rampShallows);
-            setPixel(46, i, rampShallows);
+        // Ring is 3 px thick (dist 0 = shoreLine, dist 1 = shallows, dist 2 = shallows/current dither)
+        for (let x = 0; x < 48; x++) {
+            for (let y = 0; y < 48; y++) {
+                const dist = Math.min(x, 47 - x, y, 47 - y);
+                if (dist === 0) {
+                    setPixel(x, y, shoreLine);
+                } else if (dist === 1) {
+                    setPixel(x, y, rampShallows);
+                } else if (dist === 2) {
+                    const dither = (x + y) % 2 === 0;
+                    setPixel(x, y, dither ? rampShallows : rampCurrent);
+                }
+            }
         }
 
         // Top-Right tile (x 48..95, y 0..47): Inner corner notches
-        const corners = [
-            [48, 0, 1, 1],
-            [95, 0, -1, 1],
-            [48, 47, 1, -1],
-            [95, 47, -1, -1]
+        // Each notch is 3 px thick and 8 px long along both edges at the 4 corners:
+        const innerCorners = [
+            { cx: 48, cy: 0, dx: 1, dy: 1 },
+            { cx: 95, cy: 0, dx: -1, dy: 1 },
+            { cx: 48, cy: 47, dx: 1, dy: -1 },
+            { cx: 95, cy: 47, dx: -1, dy: -1 }
         ];
-        for (const [cx, cy, dx, dy] of corners) {
-            for (let i = 0; i < 4; i++) {
-                setPixel(cx + i * dx, cy, shoreLine);
-                setPixel(cx, cy + i * dy, shoreLine);
-                if (i > 0 && i < 3) {
-                    setPixel(cx + i * dx, cy + dy, rampShallows);
-                    setPixel(cx + dx, cy + i * dy, rampShallows);
+        for (const { cx, cy, dx, dy } of innerCorners) {
+            for (let lx = 0; lx < 8; lx++) {
+                for (let ly = 0; ly < 8; ly++) {
+                    if (lx < 3 || ly < 3) {
+                        const px = cx + lx * dx;
+                        const py = cy + ly * dy;
+                        const dist = Math.min(lx, ly);
+                        if (dist === 0) {
+                            setPixel(px, py, shoreLine);
+                        } else if (dist === 1) {
+                            setPixel(px, py, rampShallows);
+                        } else if (dist === 2) {
+                            const dither = (px + py) % 2 === 0;
+                            setPixel(px, py, dither ? rampShallows : rampCurrent);
+                        }
+                    }
                 }
             }
         }
 
         // Bottom 2x2 (x 0..95, y 48..143): Shore ring on outer perimeter only
-        for (let y = 48; y < 144; y++) {
-            setPixel(0, y, shoreLine);
-            setPixel(1, y, rampShallows);
-            setPixel(95, y, shoreLine);
-            setPixel(94, y, rampShallows);
-        }
         for (let x = 0; x < 96; x++) {
-            setPixel(x, 48, shoreLine);
-            setPixel(x, 49, rampShallows);
-            setPixel(x, 143, shoreLine);
-            setPixel(x, 142, rampShallows);
+            for (let y = 48; y < 144; y++) {
+                const dist = Math.min(x, 95 - x, y - 48, 143 - y);
+                if (dist === 0) {
+                    setPixel(x, y, shoreLine);
+                } else if (dist === 1) {
+                    setPixel(x, y, rampShallows);
+                } else if (dist === 2) {
+                    const dither = (x + y) % 2 === 0;
+                    setPixel(x, y, dither ? rampShallows : rampCurrent);
+                }
+            }
         }
     }
 
@@ -330,5 +343,8 @@ for (const k of WATER_KINDS) {
 // Write compiled A1 sheets
 writePNG(path.join(ROOT, 'art', 'masters', 'UF_GenWater_A1.png'), A1_W, A1_H, fullA1);
 writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'UF_GenWater_A1.png'), A1_W, A1_H, fullA1);
+writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'Outside_A1.png'), A1_W, A1_H, fullA1);
+writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'Dungeon_A1.png'), A1_W, A1_H, fullA1);
 
-console.log('Successfully generated all 9 animated water kinds, strips, sidecars, and compiled UF_GenWater_A1.png!');
+console.log('Successfully generated all 9 animated water kinds, strips, sidecars, and compiled UF_GenWater_A1.png, Outside_A1.png, and Dungeon_A1.png!');
+

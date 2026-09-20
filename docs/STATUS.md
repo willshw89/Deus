@@ -5,6 +5,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Cave-Rock Style Two-Tile High Walls & Seamless Water Autotiles Across All Terrains (AR-101, AR-104, AR-300) — 2026-09-19 (Gemini)
+
+Delivered per user directives ("Very good, slightly visually bugged, though I want the walls to take a style closer to the cave/rock walls, with a wall face and a top face" and "Water needs to seamlessly border all terrain types"):
+- **Cave/Rock Style Connected 20-Piece Wall Sets (`!$WallWood_Set.png`, `!$WallStone_Set.png`):**
+  - Designed with authentic SNES/FF6 cave wall architecture (matching `Dungeon_A4` rock ledge structure):
+    - **Upper 48×48 px square (y = 0..47):** Solid **TOP FACE** (horizontal timber walkway deck or chiseled stone block coping seen from directly above, flat 3/4 top-down).
+    - **Coping Lip & Overhang (y = 44..46):** Highlighted edge and dark bevel creating a clear physical overhang.
+    - **Cast Shadow (y = 47..49):** Prominent 3-pixel deep shadow directly beneath the lip onto the vertical wall face.
+    - **Lower 48×48 px square (y = 50..95):** Vertical **WALL FACE** (hewn timber vertical planks or ashlar stone masonry running down to a sturdy footer trim / stone foundation).
+  - **Fixed Visual Disconnection Bug:** Frames 16, 17, 18, 19 (used for south-facing horizontal runs and end caps) now feature solid top faces and wall faces, resolving the bug where horizontal building walls rendered as 1-tile high floating strips.
+  - Delivered: `game/img/characters/!$WallWood_Set.png`, `game/img/characters/!$WallStone_Set.png` (192×480 px, 20 frames of 48×96 px), `art/masters/` masters, and `.json` sidecars (`anchor: [24, 95]`, `footprint: [1, 2]`, `facings: ["S"]`).
+  - Passed `tools/art_check.js --native` (11 and 14 colors ≤ 32, binary alpha 0/255) and `tools/originality_check.js` (closest distances 0.361 to 0.469 ≥ 0.28).
+  - Passed live in-engine test suite: `tools/run_tests.js walls` (7/7 PASS, 0 errors, two-cell render verified).
+- **Seamless Water Autotiles Across All Terrain Types (`Outside_A1.png`, `Dungeon_A1.png`, `UF_GenWater_A1.png`):**
+  - **Root Cause of Green Cavern Water:** Stock RMMZ `Outside_A1.png` had bright lime-green grass (`#88C839`) baked directly into the shoreline border of its water autotiles. When water pools spawned on underground levels (`-1 · Dug earth floor · Rooted loam`, `Dug stone floor · Chalk and karst`) or non-grass surface biomes (sand, rock, snow), the baked-in grass created jarring green rectangular borders.
+  - **Engine Standard Water Integration (AR-101 / SEG-15):** Replaced `game/img/tilesets/Outside_A1.png` and `game/img/tilesets/Dungeon_A1.png` with the original clean 9-kind water sheet (`UF_GenWater_A1.png`):
+    - Shoreline is drawn on the **water side only**: 1 px dark wet boundary line (`#00006D`) + 2 px shallows/foam band (`#7D7DFF`).
+    - Inner corner notches are 3 px thick and 8 px long along both edges.
+    - **Zero grass, sand, or mud baked into water tiles**: Water now seamlessly borders all 26 ground kinds and cavern floors (rooted loam, dug earth, chalk and karst, meadow, sand, tundra, rock).
+  - Passed `tools/art_check.js --native --type tileset` (40 colors across all 9 kinds, binary alpha 0/255, exact 768×576 px).
+  - Passed `tools/originality_check.js` (0.351 ≥ 0.28 vs U7 shape library).
+  - Passed live in-engine test suites: `tools/run_tests.js tiles` (11/11 PASS), `tools/run_tests.js biomes` (12/12 PASS), and `tools/run_tests.js smoke` (13/13 PASS).
+  - Visual verification (Rule 5): Inspected `smoke.map.png`, `biomes.start_zoom_0.png`, `biomes.corner.png`, and `walls.two_square_wall.png`—water borders cave soil and karst rock seamlessly with zero green grass halo.
+
 ## Universal 8-Directional Standard Charset Architecture & Labeled Template (AR-600) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("Can we use this image as an import? If we can, just use this as the standard template for all races. Regenerate though, this still has flaws. What I want you to do is label each position on the set, and standardize what it is across all factions"):
