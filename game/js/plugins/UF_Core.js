@@ -56,7 +56,9 @@
 
     const pluginName = "UF_Core";
     const params = PluginManager.parameters(pluginName);
-    const timeSpeed = parseFloat(params["TimeSpeed"] || 1.0);
+    // User specification: 1 real minute = 1 season (6h), 1 day/night cycle (24h) = 1 in-game year (4 real minutes), 1 real hour = 15 years.
+    // 240 real seconds / 1440 game minutes = 1/6 real seconds per game minute (10 frames at 60 FPS).
+    const timeSpeed = params["TimeSpeed"] && params["TimeSpeed"] !== "1.0" ? parseFloat(params["TimeSpeed"]) : (1.0 / 6.0);
     const startHour = parseInt(params["StartHour"] || 8, 10);
     const startMinute = parseInt(params["StartMinute"] || 0, 10);
     const defaultShowHUD = (params["ShowClockHUD"] || "true") === "true";
@@ -273,7 +275,7 @@
             this.minute = startMinute;
             this.day = 1;
             this.monthIndex = 0; // Granite
-            this.year = 125;
+            this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year) || 1;
             this._timer = 0;
             this.isPaused = false;
             this.showHUD = defaultShowHUD;
@@ -289,6 +291,7 @@
         }
 
         advanceMinute(amount = 1) {
+            const oldSeason = this.seasonName;
             this.minute += amount;
             while (this.minute >= 60) {
                 this.minute -= 60;
@@ -298,7 +301,11 @@
             while (this.hour >= 24) {
                 this.hour -= 24;
                 this.day++;
+                this.year++; // 1 day/night cycle per year
                 this.onDayPass();
+            }
+            if (this.seasonName !== oldSeason) {
+                UF.Events.emit("time:season", this.seasonName, this.year);
             }
             // Broadcast minute event
             UF.Events.emit("time:minute", this.hour, this.minute);
@@ -314,14 +321,8 @@
         }
 
         onDayPass() {
-            if (this.day > 28) { // 28 days per DF month
-                this.day = 1;
-                this.monthIndex = (this.monthIndex + 1) % 12;
-                if (this.monthIndex === 0) {
-                    this.year++;
-                }
-            }
             UF.Events.emit("time:day", this.day, this.monthName, this.year);
+            UF.Events.emit("time:year", this.year);
         }
 
         setTime(h, m) {
@@ -334,10 +335,10 @@
         }
 
         get seasonName() {
-            const m = this.monthIndex;
-            if (m < 3) return "Spring";
-            if (m < 6) return "Summer";
-            if (m < 9) return "Autumn";
+            const h = this.hour;
+            if (h >= 6 && h < 12) return "Spring";
+            if (h >= 12 && h < 18) return "Summer";
+            if (h >= 18 && h < 24) return "Autumn";
             return "Winter";
         }
 
@@ -348,7 +349,7 @@
         }
 
         get dateString() {
-            return `${this.day} ${this.monthName}, ${this.year} (${this.seasonName})`;
+            return `Year ${this.year}, ${this.seasonName} (${this.timeString})`;
         }
     }
 

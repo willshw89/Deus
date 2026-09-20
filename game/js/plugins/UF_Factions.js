@@ -127,6 +127,21 @@
         const founders = foundersCount();
         const chosen = [];
         const pickedSpecies = new Set();
+        const chosenFac = (window.UF && UF.NewGameSetup && UF.NewGameSetup.faction) ? UF.NewGameSetup.faction.toLowerCase() : null;
+        const SPECIES_MAP = {
+            human: "human",
+            elf: "elf",
+            dwarf: "dwarf",
+            gnome: "gnome",
+            goblin: "goblin",
+            orc: "orc",
+            lizardfolk: "serpentkin",
+            kobold: "goblin",
+            undead: "undead",
+            starborn: "automaton",
+            swarm: "swarmer"
+        };
+        const targetSpecies = chosenFac ? (SPECIES_MAP[chosenFac] || chosenFac) : null;
         if (cfg.layers) {
             const layerKeys = [0, -1, -2];
             const perLayer = cfg.perLayer || 3;
@@ -161,6 +176,10 @@
                 if (spIdx >= 0) availableSpecies.splice(spIdx, 1);
                 chosen.push({ sp, z: sp.id === "dwarf" ? -1 : 0 });
             }
+        }
+        if (targetSpecies && !chosen.some(c => c.sp.id === targetSpecies)) {
+            const cand = (cfg.species && cfg.species.find(s => s.id === targetSpecies)) || { id: targetSpecies, name: capitalize(targetSpecies), weight: 1 };
+            chosen.unshift({ sp: cand, z: 0 });
         }
         for (let i = 0; i < chosen.length; i++) {
             const { sp, z: targetZ } = chosen[i];
@@ -224,19 +243,31 @@
                 relations[worst] = -60;
             }
         }
-        // The player's faction: one of the generated ones, of a playable species when there is one (user decision
-        // 2026-09-18). Its area is at the map centre (placeAreas); UF_Colonists turns its founders into the colonists.
-        const playable = list.filter(f => {
-            const sp = cfg.species.find(s => s.id === f.species);
-            return (!sp || sp.playable !== false) && (f.layer === 0 || f.layer === undefined);
-        });
-        const pool = playable.length ? playable : list.filter(f => f.layer === 0 || f.layer === undefined);
-        const player = (pool.length ? pool : list)[Math.floor(rand() * (pool.length || list.length))];
-        for (const f of list) f.isPlayer = f === player;
+        // The player's faction: chosen in New Game Expedition Setup (or random playable if not set)
+        // Its area is at the map centre (placeAreas); UF_Colonists turns its founders into the colonists.
+        let player = null;
+        if (targetSpecies) {
+            player = list.find(f => f.species === targetSpecies || (f.culture && f.culture.toLowerCase() === chosenFac));
+        }
+        if (!player) {
+            const playable = list.filter(f => {
+                const sp = cfg.species.find(s => s.id === f.species);
+                return (!sp || sp.playable !== false) && (f.layer === 0 || f.layer === undefined);
+            });
+            const pool = playable.length ? playable : list.filter(f => f.layer === 0 || f.layer === undefined);
+            player = (pool.length ? pool : list)[Math.floor(rand() * (pool.length || list.length))];
+        }
+        for (const f of list) f.isPlayer = (f === player);
         player.met = true;
         player.color = "#4ade80";
+        player.layer = 0;
+        player.culture = chosenFac || player.species;
         player.home.area = { x: state.startArea.x, y: state.startArea.y };
+        player.home.z = 0;
         state.factions = { version: 4, list, relations, log: [], playerId: player.id };
+        if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
+            UF_FactionMenus.setFaction(player.culture);
+        }
         Factions.placeAreas(state);
         emit("factions:generated", state.factions);
         return state.factions;

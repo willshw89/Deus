@@ -304,15 +304,25 @@
         const cfg = this.config();
         if (!cfg || !state || !state.factions || !Array.isArray(state.factions.list)) return null;
         const live = !!(window.UF && UF.World && UF.World.state === state); // the world being created, not a test state
-        const simulateOn = opts.simulate !== undefined ? !!opts.simulate : cfg.simulate === true;
+        const setupYear = (opts.targetYears !== undefined) ? opts.targetYears : ((window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.year === "number") ? UF.NewGameSetup.year : null);
+        const simulateOn = opts.simulate !== undefined ? !!opts.simulate : (setupYear !== null && setupYear > 1 ? true : cfg.simulate === true);
         return withWorldState(state, () => {
             let h;
             if (simulateOn) {
-                h = simulate(state, cfg);
-                const years = opts.years !== undefined ? opts.years | 0 : settleConfig(cfg).years;
-                if (h && opts.settle !== false && years > 0) settle(state, cfg, live, years);
+                const targetYears = (setupYear !== null && setupYear > 1) ? setupYear : (opts.targetYears !== undefined ? opts.targetYears : null);
+                h = simulate(state, cfg, targetYears);
+                const settleYrs = opts.years !== undefined ? opts.years | 0 : (targetYears ? Math.min(targetYears, settleConfig(cfg).years) : settleConfig(cfg).years);
+                if (h && opts.settle !== false && settleYrs > 0) settle(state, cfg, live, settleYrs);
             } else {
                 h = found(state, cfg, live);
+            }
+            if (h && setupYear !== null) {
+                h.startYear = setupYear;
+                if (setupYear === 1) {
+                    h.years = 1;
+                    h.clockYear0 = 1;
+                }
+                if (window.$ufTime) $ufTime.year = setupYear;
             }
             emit("history:generated", h);
             return h;
@@ -599,13 +609,14 @@
         return state.history;
     }
 
-    /** The chronicle's year now: 1 at New Game, then one more for every year of the game clock since. */
+    /** The chronicle's year now: matches the live game clock $ufTime.year, or the world history years. */
     History.currentYear = function() {
         const h = History.current();
         if (!h) return 0;
+        if (window.$ufTime && typeof $ufTime.year === "number") return $ufTime.year;
         if (h.version < 4) return h.years;
         const y0 = h.clockYear0;
-        return typeof y0 === "number" && window.$ufTime && typeof $ufTime.year === "number" ? Math.max(1, $ufTime.year - y0 + 1) : 1;
+        return typeof y0 === "number" && window.$ufTime && typeof $ufTime.year === "number" ? Math.max(1, $ufTime.year - y0 + 1) : (h.years || 1);
     };
 
     /**
@@ -637,7 +648,7 @@
         return withWorldState(state, () => settle(state, cfg, live, years));
     };
 
-    function simulate(state, cfg) {
+    function simulate(state, cfg, targetYears) {
         const started = now();
         const rand = mulberry32(hash32(state.seed, SALT_HISTORY));
         const pick = arr => arr[Math.floor(rand() * arr.length)];
@@ -650,7 +661,7 @@
         const drift = cfg.relationDrift || {};
         const shift = (a, b, key) => { relations[pairKey(a, b)] = clamp(Math.round(relation(a, b) + (drift[key] || 0)), -100, 100); };
 
-        const years = range(cfg.years || [500, 600]);
+        const years = (targetYears !== undefined && targetYears !== null) ? targetYears : range(cfg.years || [500, 600]);
         const events = [];
         const sites = [];
         const rulers = {};
@@ -849,7 +860,7 @@
         }
         for (const s of sites) delete s.level;
         if (homeSite) state.viewStart = { x: homeSite.x, y: homeSite.y };
-        state.history = { version: 3, years, events, sites, rulers, wars, homeSiteId: homeSite ? homeSite.id : null };
+        state.history = { version: 3, years, events, sites, rulers, wars, homeSiteId: homeSite ? homeSite.id : null, clockYear0: years };
         History.lastRun = { ms: now() - started, years, factions: fx.length, sites: sites.length, events: events.length };
         return state.history;
     }
@@ -919,7 +930,7 @@
         const factionOf = id => F.list.find(f => f.id === id) || null;
         const events = [];
         const record = (year, type, text, site) => events.push({ year, type, text, factions: site.faction ? [site.faction] : [], site: site.id });
-        const y0 = h.years - years + 1;
+        const y0 = Math.max(1, h.years - years + 1);
         const totals = { sitesGrown: 0, houses: 0, beds: 0, stockpiles: 0, walls: 0, workbenches: 0, ruined: 0, items: 0, depleted: { trees: 0, bushes: 0, stones: 0 } };
         let objectHash = 2166136261 >>> 0, writes = 0, buildMs = 0;
         const BED = typeId("floor_straw"), STOCK = typeId("stockpile"), BENCH = typeId("workbench");

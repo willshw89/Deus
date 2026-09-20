@@ -60,6 +60,7 @@
 
     const CURSOR_HOTSPOTS = {
         default: [4, 4],
+        deus: [4, 4],
         human: [5, 4],
         elf: [4, 4],
         dwarf: [4, 4],
@@ -109,7 +110,7 @@
     }
 
     UF_FactionMenus.getFaction = function() {
-        if (SceneManager._scene instanceof Scene_Title) {
+        if (SceneManager._scene instanceof Scene_Title || SceneManager._scene instanceof Scene_File) {
             return "default";
         }
         if ($gameSystem && $gameSystem._ufActiveMenuFaction) {
@@ -128,11 +129,9 @@
         return defaultFaction;
     };
 
-    UF_FactionMenus.getCursorCss = function(faction) {
-        const rawFac = faction || UF_FactionMenus.getFaction();
-        const fac = safeFaction(rawFac);
-        const spot = CURSOR_HOTSPOTS[fac] || [4, 4];
-        return 'url("img/system/Cursor_' + fac + '.png") ' + spot[0] + ' ' + spot[1] + ', auto';
+    UF_FactionMenus.getCursorCss = function(/*faction*/) {
+        const spot = [4, 4];
+        return 'url("img/system/Cursor_default.png") ' + spot[0] + ' ' + spot[1] + ', auto';
     };
 
     UF_FactionMenus.applyMouseCursor = function(faction) {
@@ -199,18 +198,398 @@
         if (window.UF && UF.Test && UF.Test.active) registerChecks();
     };
 
-    const _Scene_Title_createBackground = Scene_Title.prototype.createBackground;
-    Scene_Title.prototype.createBackground = function() {
-        _Scene_Title_createBackground.call(this);
-        this._defaultMenuSprite = new Sprite();
-        this._defaultMenuSprite.bitmap = ImageManager.loadPicture("UF_Menu_default");
-        this.addChild(this._defaultMenuSprite);
-    };
 
+    // Title Screen Customization for Project DEUS
     const _Scene_Title_start = Scene_Title.prototype.start;
     Scene_Title.prototype.start = function() {
         _Scene_Title_start.call(this);
-        UF_FactionMenus.applyMouseCursor("default");
+        UF_FactionMenus.applyMouseCursor("deus");
+    };
+
+    // 1. Remove Options from the menu & rename commands to "New Game" and "Continue"
+    Window_TitleCommand.prototype.makeCommandList = function() {
+        const continueEnabled = this.isContinueEnabled();
+        this.addCommand("New Game", "newGame");
+        this.addCommand("Continue", "continue", continueEnabled);
+    };
+
+    // 2. Remove ALL system elements: window background, frame, scroll arrows, cursor box, item background rects
+    const _Scene_Title_createCommandWindow = Scene_Title.prototype.createCommandWindow;
+    Scene_Title.prototype.createCommandWindow = function() {
+        _Scene_Title_createCommandWindow.call(this);
+        this._commandWindow.opacity = 0;
+        this._commandWindow.backOpacity = 0;
+        this._commandWindow.setBackgroundType(2); // 2 = Transparent
+        if (this._commandWindow._windowBackSprite) this._commandWindow._windowBackSprite.visible = false;
+        if (this._commandWindow._windowFrameSprite) this._commandWindow._windowFrameSprite.visible = false;
+        if (this._commandWindow._downArrowSprite) this._commandWindow._downArrowSprite.visible = false;
+        if (this._commandWindow._upArrowSprite) this._commandWindow._upArrowSprite.visible = false;
+        if (this._commandWindow._pauseSignSprite) this._commandWindow._pauseSignSprite.visible = false;
+        if (this._commandWindow._cursorSprite) this._commandWindow._cursorSprite.visible = false;
+        if (this._cancelButton) this._cancelButton.visible = false;
+
+        // Setup Window for New Game Expedition Setup
+        const setupRect = this.newGameSetupWindowRect();
+        this._newGameSetupWindow = new Window_NewGameSetup(setupRect);
+        this._newGameSetupWindow.setHandler("embark", this.onNewGameEmbark.bind(this));
+        this._newGameSetupWindow.setHandler("cancel", this.onNewGameCancel.bind(this));
+        this.addWindow(this._newGameSetupWindow);
+        this._newGameSetupWindow.close();
+        this._newGameSetupWindow.deactivate();
+    };
+
+    Scene_Title.prototype.newGameSetupWindowRect = function() {
+        const ww = 440;
+        const wh = 210;
+        const wx = Math.round((Graphics.boxWidth - ww) / 2);
+        const wy = 270;
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    Scene_Title.prototype.commandNewGame = function() {
+        const nwArgs = (typeof nw !== 'undefined' && nw.App && nw.App.argv) ? nw.App.argv : [];
+        const procArgs = (typeof process !== 'undefined' && process.argv) ? process.argv : [];
+        const isAutoTest = nwArgs.some(a => a.includes('autotest')) || procArgs.some(a => a.includes('autotest'));
+        if (isAutoTest) {
+            this.onNewGameEmbark();
+            return;
+        }
+        this._commandWindow.deactivate();
+        this._commandWindow.close();
+        this._newGameSetupWindow.open();
+        this._newGameSetupWindow.activate();
+    };
+
+    Scene_Title.prototype.onNewGameEmbark = function() {
+        const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
+        const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
+        window.UF = window.UF || {};
+        window.UF.NewGameSetup = {
+            faction: faction.toLowerCase(),
+            year: year
+        };
+        if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
+            UF_FactionMenus.setFaction(faction.toLowerCase());
+        }
+        DataManager.setupNewGame();
+        if (this._commandWindow) this._commandWindow.close();
+        if (this._newGameSetupWindow) this._newGameSetupWindow.close();
+        this.fadeOutAll();
+        SceneManager.goto(Scene_Map);
+    };
+
+    Scene_Title.prototype.onNewGameCancel = function() {
+        this._newGameSetupWindow.close();
+        this._newGameSetupWindow.deactivate();
+        this._commandWindow.open();
+        this._commandWindow.activate();
+    };
+
+    // Class: Window_NewGameSetup
+    // Expedition setup menu allowing player to choose faction and starting year (1-200 AD)
+    class Window_NewGameSetup extends Window_Selectable {
+        initialize(rect) {
+            super.initialize(rect);
+            this._factionChoices = [
+                "Human", "Elf", "Dwarf", "Gnome", "Goblin", "Orc",
+                "Lizardfolk", "Kobold", "Undead", "Starborn", "Swarm"
+            ];
+            this._factionIndex = 0;
+            this._year = 1;
+            this.windowskin = ImageManager.loadSystem("Window_default");
+            this.backOpacity = 225;
+            this._cursorVisible = false;
+            if (this._cursorSprite) {
+                this._cursorSprite.visible = false;
+                this._cursorSprite.alpha = 0;
+            }
+            this.select(0);
+            this.refresh();
+        }
+
+        maxItems() {
+            return 4;
+        }
+
+        itemHeight() {
+            return 38;
+        }
+
+        currentFaction() {
+            return this._factionChoices[this._factionIndex];
+        }
+
+        currentYear() {
+            return this._year;
+        }
+
+        setFaction(factionName) {
+            const idx = this._factionChoices.findIndex(f => f.toLowerCase() === String(factionName).toLowerCase());
+            if (idx >= 0) {
+                this._factionIndex = idx;
+                this.redrawItem(0);
+            }
+        }
+
+        setYear(y) {
+            this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
+            this.redrawItem(1);
+        }
+
+        refreshCursor() {
+            this.setCursorRect(0, 0, 0, 0);
+            if (this._cursorSprite) {
+                this._cursorSprite.visible = false;
+                this._cursorSprite.alpha = 0;
+            }
+        }
+
+        _updateCursor() {
+            if (this._cursorSprite) {
+                this._cursorSprite.visible = false;
+                this._cursorSprite.alpha = 0;
+            }
+        }
+
+        _makeCursorAlpha() {
+            return 0;
+        }
+
+        update() {
+            super.update();
+            if (this._cursorSprite) {
+                this._cursorSprite.visible = false;
+                this._cursorSprite.alpha = 0;
+            }
+        }
+
+        select(index) {
+            const prev = this.index();
+            super.select(index);
+            if (prev !== index) {
+                if (prev >= 0) this.redrawItem(prev);
+                if (index >= 0) this.redrawItem(index);
+            }
+        }
+
+        drawItemBackground(index) {
+            const rect = this.itemRect(index);
+            const isSelected = index === this.index();
+            const x = rect.x + 2;
+            const y = rect.y + 2;
+            const w = rect.width - 4;
+            const h = rect.height - 4;
+
+            if (isSelected) {
+                // Luminous electric cyan glow background
+                const c1 = "rgba(0, 212, 255, 0.32)";
+                const c2 = "rgba(0, 140, 220, 0.12)";
+                this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, false);
+                this.contentsBack.strokeRect(x, y, w, h, "rgba(0, 220, 255, 0.85)");
+                this.contentsBack.strokeRect(x + 1, y + 1, w - 2, h - 2, "rgba(160, 240, 255, 0.45)");
+                this.contentsBack.fillRect(x + 2, y + 1, w - 4, 1, "rgba(220, 250, 255, 0.90)");
+            } else {
+                // Subtle dark slate backing
+                const c1 = "rgba(15, 20, 30, 0.65)";
+                const c2 = "rgba(8, 12, 18, 0.45)";
+                this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, true);
+                this.contentsBack.strokeRect(x, y, w, h, "rgba(60, 80, 110, 0.35)");
+            }
+        }
+
+        drawItem(index) {
+            const rect = this.itemLineRect(index);
+            const isSelected = index === this.index();
+            this.resetTextColor();
+            this.contents.outlineColor = "rgba(0, 0, 0, 0.95)";
+            this.contents.outlineWidth = 3;
+            this.contents.fontSize = 20;
+
+            if (index === 0) {
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
+                this.drawText("Faction", rect.x + 12, rect.y, 140, "left");
+
+                const factionText = `◄  ${this.currentFaction()}  ►`;
+                this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
+                this.drawText(factionText, rect.x + 160, rect.y, rect.width - 172, "right");
+            } else if (index === 1) {
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
+                this.drawText("Starting Year", rect.x + 12, rect.y, 140, "left");
+
+                const yearText = `◄  ${this._year} AD  ►`;
+                this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
+                this.drawText(yearText, rect.x + 160, rect.y, rect.width - 172, "right");
+            } else if (index === 2) {
+                if (isSelected) {
+                    this.changeTextColor("#ffd700");
+                } else {
+                    this.changeTextColor("#a0f0ff");
+                }
+                this.drawText("Embark", rect.x, rect.y, rect.width, "center");
+            } else if (index === 3) {
+                this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
+                this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
+            }
+        }
+
+        cursorRight(wrap) {
+            if (this.index() === 0) {
+                this.nextFaction();
+            } else if (this.index() === 1) {
+                this.changeYear(Input.isPressed("shift") ? 10 : 1);
+            } else {
+                super.cursorRight(wrap);
+            }
+        }
+
+        cursorLeft(wrap) {
+            if (this.index() === 0) {
+                this.prevFaction();
+            } else if (this.index() === 1) {
+                this.changeYear(Input.isPressed("shift") ? -10 : -1);
+            } else {
+                super.cursorLeft(wrap);
+            }
+        }
+
+        cursorPageup() {
+            if (this.index() === 1) {
+                this.changeYear(10);
+            } else {
+                super.cursorPageup();
+            }
+        }
+
+        cursorPagedown() {
+            if (this.index() === 1) {
+                this.changeYear(-10);
+            } else {
+                super.cursorPagedown();
+            }
+        }
+
+        nextFaction() {
+            this._factionIndex = (this._factionIndex + 1) % this._factionChoices.length;
+            SoundManager.playCursor();
+            this.redrawItem(0);
+        }
+
+        prevFaction() {
+            this._factionIndex = (this._factionIndex - 1 + this._factionChoices.length) % this._factionChoices.length;
+            SoundManager.playCursor();
+            this.redrawItem(0);
+        }
+
+        changeYear(delta) {
+            const oldYear = this._year;
+            this._year = Math.max(1, Math.min(200, this._year + delta));
+            if (this._year !== oldYear) {
+                SoundManager.playCursor();
+                this.redrawItem(1);
+            }
+        }
+
+        processOk() {
+            if (this.index() === 0) {
+                this.nextFaction();
+            } else if (this.index() === 1) {
+                this.changeYear(1);
+            } else if (this.index() === 2) {
+                this.playOkSound();
+                this.callHandler("embark");
+            } else if (this.index() === 3) {
+                this.playCancelSound();
+                this.callHandler("cancel");
+            }
+        }
+
+        processCancel() {
+            this.playCancelSound();
+            this.callHandler("cancel");
+        }
+
+        onTouchSelect(trigger) {
+            super.onTouchSelect(trigger);
+            if (trigger) {
+                const hitIndex = this.hitIndex();
+                const touchPos = new Point(TouchInput.x, TouchInput.y);
+                const localPos = this.toLocalCoords(touchPos);
+                if (hitIndex === 0 && localPos.x > this.width / 2) {
+                    if (localPos.x > (this.width * 3) / 4) {
+                        this.nextFaction();
+                    } else {
+                        this.prevFaction();
+                    }
+                } else if (hitIndex === 1 && localPos.x > this.width / 2) {
+                    if (localPos.x > (this.width * 3) / 4) {
+                        this.changeYear(1);
+                    } else {
+                        this.changeYear(-1);
+                    }
+                }
+            }
+        }
+    }
+    window.Window_NewGameSetup = Window_NewGameSetup;
+
+    // Eliminate item background gradients and strokes (contentsBack)
+    Window_TitleCommand.prototype.drawItemBackground = function(/*index*/) {
+        // Zero system elements
+    };
+
+    Window_TitleCommand.prototype.lineHeight = function() {
+        return 32;
+    };
+
+    Scene_Title.prototype.commandWindowRect = function() {
+        const offsetX = $dataSystem.titleCommandWindow.offsetX;
+        const offsetY = $dataSystem.titleCommandWindow.offsetY;
+        const ww = 240;
+        const wh = this.calcWindowHeight(2, true);
+        const wx = (Graphics.boxWidth - ww) / 2 + offsetX;
+        const wy = 353 + offsetY; // Centered vertically in the pure black doorway opening (y=360..434)
+        return new Rectangle(wx, wy, ww, wh);
+    };
+
+    // 3. Clean title command window with ZERO menu pointers
+    const _Window_TitleCommand_initialize = Window_TitleCommand.prototype.initialize;
+    Window_TitleCommand.prototype.initialize = function(rect) {
+        _Window_TitleCommand_initialize.call(this, rect);
+        this.opacity = 0;
+        this.backOpacity = 0;
+    };
+
+    const _Window_TitleCommand_select = Window_TitleCommand.prototype.select;
+    Window_TitleCommand.prototype.select = function(index) {
+        const changed = this.index() !== index;
+        _Window_TitleCommand_select.call(this, index);
+        if (changed) this.refresh();
+    };
+
+    Window_TitleCommand.prototype.drawItem = function(index) {
+        const rect = this.itemLineRect(index);
+        const align = this.itemTextAlign();
+        this.resetTextColor();
+        this.changePaintOpacity(this.isCommandEnabled(index));
+        if (index === this.index()) {
+            this.changeTextColor("#a0f0ff"); // Glowing electric cyan matching DEUS
+        } else {
+            this.changeTextColor("#ffffff"); // Pure white
+        }
+        this.contents.outlineColor = "rgba(0, 0, 0, 0.95)";
+        this.contents.outlineWidth = 4;
+        this.contents.fontSize = 24;
+        this.drawText(this.commandName(index), rect.x, rect.y, rect.width, align);
+    };
+
+    Window_TitleCommand.prototype.refreshCursor = function() {
+        this.setCursorRect(0, 0, 0, 0);
+    };
+
+    const _Window_TitleCommand_update = Window_TitleCommand.prototype.update;
+    Window_TitleCommand.prototype.update = function() {
+        _Window_TitleCommand_update.call(this);
+        if (this._cursorSprite) this._cursorSprite.visible = false;
     };
 
     const _Scene_Map_start = Scene_Map.prototype.start;
@@ -230,7 +609,7 @@
     const _Window_Base_loadWindowskin = Window_Base.prototype.loadWindowskin;
     Window_Base.prototype.loadWindowskin = function() {
         _Window_Base_loadWindowskin.call(this);
-        if (SceneManager._scene instanceof Scene_Title) {
+        if (SceneManager._scene instanceof Scene_Title || SceneManager._scene instanceof Scene_File) {
             this.windowskin = ImageManager.loadSystem("Window_default");
             return;
         }
@@ -247,6 +626,15 @@
     const _Scene_MenuBase_createBackground = Scene_MenuBase.prototype.createBackground;
     Scene_MenuBase.prototype.createBackground = function() {
         _Scene_MenuBase_createBackground.call(this);
+        if (this instanceof Scene_File) {
+            // Replace background with Title Screen art for Load/Save screen
+            if (this._backgroundSprite) {
+                this._backgroundSprite.bitmap = ImageManager.loadTitle1($dataSystem.title1Name || "DEUS_Title");
+                this._backgroundSprite.filters = [];
+                this._backgroundSprite.opacity = 255;
+            }
+            return;
+        }
         const faction = safeFaction(UF_FactionMenus.getFaction());
         this._factionMenuSprite = new Sprite();
         this._factionMenuSprite.bitmap = ImageManager.loadPicture(`UF_Menu_${faction}`);
@@ -261,7 +649,7 @@
         UF_FactionMenus.applyMouseCursor(faction);
 
         // Optional BGM transition if catalog theme defined
-        if (window.UF && UF.World && UF.World.catalog && UF.World.catalog.factions) {
+        if (!(this instanceof Scene_File) && window.UF && UF.World && UF.World.catalog && UF.World.catalog.factions) {
             const facDef = UF.World.catalog.factions[faction];
             if (facDef && facDef.themeBgm) {
                 AudioManager.playBgm({ name: facDef.themeBgm, pan: 0, pitch: 100, volume: 80 });
@@ -270,6 +658,31 @@
     };
 
     Scene_MenuBase.prototype.applyFactionTheme = function(faction) {
+        if (this instanceof Scene_File) {
+            // DEUS system set on title screen background
+            if (this._factionMenuSprite) {
+                this._factionMenuSprite.visible = false;
+            }
+            const deusSkin = ImageManager.loadSystem("Window_default");
+            const updateWin = (w) => {
+                if (w && w instanceof Window_Base) {
+                    w.windowskin = deusSkin;
+                    w.backOpacity = 160;
+                    if (typeof w.refresh === "function") {
+                        w.refresh();
+                    }
+                }
+            };
+            if (this._windowLayer && this._windowLayer.children) {
+                this._windowLayer.children.forEach(updateWin);
+            }
+            for (const key of Object.keys(this)) {
+                if (this[key] instanceof Window_Base) {
+                    updateWin(this[key]);
+                }
+            }
+            return;
+        }
         let skin = null;
         if (window.UF && UF.Factions && typeof UF.Factions.skinFor === "function") {
             skin = UF.Factions.skinFor(faction);
@@ -295,6 +708,100 @@
             if (this[key] instanceof Window_Base) {
                 updateWin(this[key]);
             }
+        }
+    };
+
+    // Custom Window_SavefileList for DEUS Load/Save Screen:
+    // 1. Zero flashing cursor box
+    const _Window_SavefileList_initialize = Window_SavefileList.prototype.initialize;
+    Window_SavefileList.prototype.initialize = function(rect) {
+        _Window_SavefileList_initialize.call(this, rect);
+        this._cursorVisible = false;
+        if (this._cursorSprite) {
+            this._cursorSprite.visible = false;
+            this._cursorSprite.alpha = 0;
+        }
+    };
+
+    Window_SavefileList.prototype.refreshCursor = function() {
+        this.setCursorRect(0, 0, 0, 0);
+        if (this._cursorSprite) {
+            this._cursorSprite.visible = false;
+            this._cursorSprite.alpha = 0;
+        }
+    };
+
+    Window_SavefileList.prototype._updateCursor = function() {
+        if (this._cursorSprite) {
+            this._cursorSprite.visible = false;
+            this._cursorSprite.alpha = 0;
+        }
+    };
+
+    Window_SavefileList.prototype._makeCursorAlpha = function() {
+        return 0;
+    };
+
+    const _Window_SavefileList_update = Window_SavefileList.prototype.update;
+    Window_SavefileList.prototype.update = function() {
+        _Window_SavefileList_update.call(this);
+        if (this._cursorSprite) {
+            this._cursorSprite.visible = false;
+            this._cursorSprite.alpha = 0;
+        }
+    };
+
+    // 2. Responsive hover/selection redraw
+    const _Window_SavefileList_select = Window_SavefileList.prototype.select;
+    Window_SavefileList.prototype.select = function(index) {
+        const prev = this.index();
+        _Window_SavefileList_select.call(this, index);
+        if (prev !== index) {
+            if (prev >= 0) this.redrawItem(prev);
+            if (index >= 0) this.redrawItem(index);
+        }
+    };
+
+    // 3. Clean steady cyan glow in the background of selected/hovered save file
+    Window_SavefileList.prototype.drawItemBackground = function(index) {
+        const rect = this.itemRect(index);
+        const isSelected = index === this.index();
+        const x = rect.x + 2;
+        const y = rect.y + 2;
+        const w = rect.width - 4;
+        const h = rect.height - 4;
+
+        if (isSelected) {
+            // Luminous electric cyan glow background
+            const c1 = "rgba(0, 212, 255, 0.32)";
+            const c2 = "rgba(0, 140, 220, 0.12)";
+            this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, false);
+            // Outer bright cyan stroke
+            this.contentsBack.strokeRect(x, y, w, h, "rgba(0, 220, 255, 0.85)");
+            this.contentsBack.strokeRect(x + 1, y + 1, w - 2, h - 2, "rgba(160, 240, 255, 0.45)");
+            // Top accent line
+            this.contentsBack.fillRect(x + 2, y + 1, w - 4, 1, "rgba(220, 250, 255, 0.90)");
+        } else {
+            // Subtle dark slate backing for unselected files
+            const c1 = "rgba(15, 20, 30, 0.65)";
+            const c2 = "rgba(8, 12, 18, 0.45)";
+            this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, true);
+            this.contentsBack.strokeRect(x, y, w, h, "rgba(60, 80, 110, 0.35)");
+        }
+    };
+
+    // 4. Glowing title text matching DEUS text aesthetic
+    Window_SavefileList.prototype.drawTitle = function(savefileId, x, y) {
+        const isSelected = this.index() === this.savefileIdToIndex(savefileId);
+        if (isSelected) {
+            this.changeTextColor("#a0f0ff");
+        } else {
+            this.changeTextColor("#ffffff");
+        }
+        if (savefileId === 0) {
+            this.drawText(TextManager.autosave, x, y, 180);
+        } else {
+            this.drawText(TextManager.file + " " + savefileId, x, y, 180);
         }
     };
 
@@ -364,10 +871,10 @@
             const curDefault = UF_FactionMenus.getCursorCss("default");
             t.check("mouse_cursor_default_applied", curDefault.includes("Cursor_default.png"), "Default mouse cursor configured with Cursor_default.png");
 
-            // Verify literal mouse cursor style for dwarf
+            // Verify literal mouse cursor style is always Cursor_default.png regardless of faction
             UF_FactionMenus.applyMouseCursor("dwarf");
             const curDwarf = UF_FactionMenus.getCursorCss("dwarf");
-            t.check("mouse_cursor_dwarf_applied", curDwarf.includes("Cursor_dwarf.png"), "Mouse cursor configured with Cursor_dwarf.png");
+            t.check("mouse_cursor_dwarf_applied", curDwarf.includes("Cursor_default.png"), "Mouse cursor is always Cursor_default.png regardless of faction");
 
             SceneManager.push(Scene_Menu);
             await t.waitFrames(15);
@@ -398,6 +905,113 @@
             SceneManager.pop();
             await t.waitFrames(10);
         });
+
+        UF.Test.suite("title", async t => {
+            SceneManager.goto(Scene_Title);
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Title && SceneManager._scene.isStarted(), 5000, "Scene_Title started");
+            const scene = SceneManager._scene;
+            await t.waitUntil(() => scene._commandWindow && scene._commandWindow.isOpen(), 5000, "Command window open");
+            await t.waitFrames(20);
+            t.check("title_scene_active", SceneManager._scene instanceof Scene_Title, "Scene_Title is active");
+            t.check("title1_is_deus", $dataSystem.title1Name === "DEUS_Title", "System title1Name is DEUS_Title");
+            t.check("no_menu_overlay_sprite", !SceneManager._scene._defaultMenuSprite, "No UF_Menu_default sprite covering title");
+            t.check("window_frame_transparent", scene._commandWindow.opacity === 0, "Title command window frame is transparent");
+            t.check("new_game_command", scene._commandWindow.commandName(0) === "New Game", "Command 0 is New Game");
+            t.check("continue_command", scene._commandWindow.commandName(1) === "Continue", "Command 1 is Continue");
+            t.check("no_menu_pointer_sprites", !scene._commandWindow._deusCursorSprite && !scene._commandWindow._leftFlameSprite && !scene._commandWindow._rightFlameSprite, "No menu pointer sprites on title command window");
+            t.screenshot("live_deus_title_screen");
+        }, { isDefault: false });
+
+        UF.Test.suite("load", async t => {
+            SceneManager.goto(Scene_Title);
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Title && SceneManager._scene.isStarted(), 5000);
+            SceneManager.push(Scene_Load);
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Load && SceneManager._scene.isStarted(), 5000);
+            await t.waitFrames(25);
+            const scene = SceneManager._scene;
+            t.check("load_scene_active", scene instanceof Scene_Load, "Scene_Load is active");
+            t.check("load_faction_default", UF_FactionMenus.getFaction() === "default", "Load menu uses default DEUS theme");
+            t.check("title_background_attached", !!(scene._backgroundSprite && scene._backgroundSprite.bitmap), "Title background attached to load scene");
+            t.check("no_faction_frame_visible", !scene._factionMenuSprite || !scene._factionMenuSprite.visible, "Faction menu frame is hidden on load screen");
+            t.check("list_window_skin_attached", !!(scene._listWindow && scene._listWindow.windowskin), "List window has windowskin attached");
+            t.check("no_flashing_cursor_sprite", !scene._listWindow._cursorSprite || !scene._listWindow._cursorSprite.visible, "Flashing cursor sprite is hidden");
+            t.screenshot("live_deus_load_screen_autosave");
+
+            // Simulate hover / selection of File 2 (index 2)
+            scene._listWindow.select(2);
+            await t.waitFrames(10);
+            t.check("file_2_selected", scene._listWindow.index() === 2, "File 2 is selected");
+            t.screenshot("live_deus_load_screen_file2");
+        }, { isDefault: false });
+
+        UF.Test.suite("setup", async t => {
+            SceneManager.goto(Scene_Title);
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Title && SceneManager._scene.isStarted(), 5000, "Scene_Title started");
+            const scene = SceneManager._scene;
+            await t.waitUntil(() => scene._commandWindow && scene._commandWindow.isOpen(), 5000, "Command window open");
+            await t.waitFrames(20);
+
+            t.check("title_scene_active", scene instanceof Scene_Title, "Scene_Title is active");
+            t.check("setup_window_created", !!scene._newGameSetupWindow, "Window_NewGameSetup instance attached to Scene_Title");
+            t.check("setup_window_initially_closed", !scene._newGameSetupWindow.isOpen(), "Setup window starts closed");
+
+            // Open Expedition Setup window via commandNewGame
+            scene.commandNewGame();
+            await t.waitFrames(15);
+
+            t.check("setup_window_open", scene._newGameSetupWindow.isOpen(), "Setup window is open");
+            t.check("setup_window_active", scene._newGameSetupWindow.active, "Setup window is active");
+            t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
+            t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
+            t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
+
+            t.screenshot("live_deus_new_game_setup");
+
+            // Cycle factions on Row 0
+            scene._newGameSetupWindow.select(0);
+            scene._newGameSetupWindow.cursorRight();
+            t.check("faction_cycled_to_elf", scene._newGameSetupWindow.currentFaction() === "Elf", "Faction cycled to Elf");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("faction_cycled_to_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Faction cycled to Dwarf");
+
+            // Test Year Adjustment and Clamping on Row 1
+            scene._newGameSetupWindow.select(1);
+            scene._newGameSetupWindow.changeYear(49);
+            t.check("year_adjusted_to_50", scene._newGameSetupWindow.currentYear() === 50, "Year stepped to 50 AD");
+
+            scene._newGameSetupWindow.setYear(250);
+            t.check("year_clamped_max_200", scene._newGameSetupWindow.currentYear() === 200, "Year clamped at maximum 200 AD");
+
+            scene._newGameSetupWindow.setYear(-10);
+            t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
+
+            // Configure Dwarf expedition at Year 42 AD
+            scene._newGameSetupWindow.setFaction("Dwarf");
+            scene._newGameSetupWindow.setYear(42);
+            scene._newGameSetupWindow.select(2); // Hover "Embark"
+            await t.waitFrames(15);
+
+            t.check("configured_faction_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Configured faction is Dwarf");
+            t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
+            t.screenshot("live_deus_new_game_setup_dwarf_42");
+
+            // Embark into the world
+            scene.onNewGameEmbark();
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 15000, "Scene_Map started");
+            await t.waitFrames(30);
+
+            const st = window.UF && UF.World && UF.World.state;
+            t.check("map_scene_active", SceneManager._scene instanceof Scene_Map, "Transitioned to live game map");
+            t.check("state_exists", !!st, "World state created");
+
+            const playerFac = st.factions.list.find(f => f.isPlayer);
+            t.check("player_faction_is_dwarf", !!playerFac && (playerFac.species === "dwarf" || playerFac.culture === "dwarf"), "Player faction is Dwarf");
+            t.check("clock_year_is_42", window.$ufTime && $ufTime.year === 42, "Clock year is 42 AD");
+            t.check("history_simulated_42_years", st.history && st.history.years === 42, "History simulated exactly 42 years");
+            t.check("theme_switched_to_dwarf", UF_FactionMenus.getFaction() === "dwarf", "Window theme switched to Dwarf");
+
+            t.screenshot("live_dwarf_colony_year_42");
+        }, { isDefault: false });
     }
 
 })();

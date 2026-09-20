@@ -1,12 +1,44 @@
-# STATUS: what's actually true right now
+# STATUS: what's actually true right now (Project DEUS)
 
+Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
+(none)
+
+## New Game Expedition Setup Menu & History Simulation (1-200 AD) — 2026-09-20 (Gemini)
+Delivered per user directive ("when we hit 'New Game' I want another small menu to populate on the screen, where you can select your faction, and the year, between 1-200AD. When the game generates, that will be their faction, and you will simulate the correct number of years from the original generation"):
+- **DEUS Expedition Setup Window (`Window_NewGameSetup`)**:
+  - Centered popup window (440x210 px) positioned directly within the dark doorway opening of the DEUS title screen.
+  - Slices from the DEUS marble & divine lightning windowskin (`Window_default.png`) with `backOpacity = 225`.
+  - Zero flashing cursor box artifacts: cursor sprite completely suppressed.
+  - Steady electric cyan background glow fill (`rgba(0, 212, 255, 0.32)`), dual cyan borders, and electric cyan text (`#a0f0ff`) on hover/selection.
+  - **Row 0: Faction**: Cycles smoothly through all 11 DEUS factions (`Human`, `Elf`, `Dwarf`, `Gnome`, `Goblin`, `Orc`, `Lizardfolk`, `Kobold`, `Undead`, `Starborn`, `Swarm`) via Left/Right arrows, touch/click, or Enter.
+  - **Row 1: Starting Year**: Stepper between 1 AD and 200 AD. Supports single-year stepping via Left/Right and 10-year stepping via Shift/PageUp/PageDown. Clamped to [1, 200].
+  - **Row 2: Embark**: Centered bold gold/cyan action button to launch expedition.
+  - **Row 3: Cancel**: Cancels and returns cleanly to Title command menu.
+- **Dynamic Faction Generation & Assignment (`UF_Factions.js`)**:
+  - Guarantees the chosen faction is generated into the world's faction list.
+  - Assigns `f.isPlayer = true`, `player.met = true`, `player.color = "#4ade80"`, `player.layer = 0`, and `player.home.area = state.startArea`.
+  - Sets `player.culture` and automatically switches the active windowskin and menu theme to the selected faction via `UF_FactionMenus.setFaction(culture)`.
+- **Scaled History Simulation & Settling (`UF_History.js`, `UF_Core.js`)**:
+  - Year 1: Runs `found(state, cfg, live)` with 8 founders around the campfire in pristine wilderness. Sets `$ufTime.year = 1` and `state.history.years = 1`.
+  - Years 2-200 AD: Runs `simulate(state, cfg, targetYears)` for the exact chosen year, simulating wars, alliances, ruler successions, and site foundings.
+  - Runs `settle(state, cfg, live, years)` stamping fortress walls, straw beds, workbenches, stockpiles, and depleted groves.
+  - Spawns settled population via `spawnSettled` with rolled ability scores, stages, ranks, and jobs.
+  - Sets `$ufTime.year = targetYears` and `state.history.years = targetYears`.
+- **Verification Evidence**:
+  - In-engine suite `node tools/run_tests.js setup`: **21/21 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `node tools/run_tests.js title`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `node tools/run_tests.js load`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - Screenshot inspection:
+    - `setup.live_deus_new_game_setup.png`: opened and verified showing centered setup menu over DEUS title screen with marble windowskin and steady cyan glow.
+    - `setup.live_deus_new_game_setup_dwarf_42.png`: opened and verified showing Faction "Dwarf", Starting Year "42 AD", and Embark hovered in gold.
+    - `setup.live_dwarf_colony_year_42.png`: opened and verified showing Dwarf colony generated at Year 42 AD with fortress stone walls, beds, workbenches, stockpiles, campfire, and colonists.
+
 
 ## Cooperative Settlement Construction, Founder Pairbonding Confirmation, and Adult Offspring Pairbonding — 2026-09-20 (Gemini)
 Delivered per user directives ("Instead of everyone building their own shit from the get go, let's have the starting villagers help each other. Also, please confirm that the 4 males and 4 females are pairbonding at creation? The male and female offspring should also pairbond when they become adults"):
