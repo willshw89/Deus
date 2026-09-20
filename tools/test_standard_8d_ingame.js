@@ -28,15 +28,14 @@ const BRAIN_DIR = 'C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b
 const REVIEW_DIR = path.join(ROOT, 'art', 'review');
 
 console.log(`Setting up 8D Standard in-game test snapshot at: ${SNAPSHOT_DIR}`);
+try {
+    fs.rmSync(SNAPSHOT_DIR, { recursive: true, force: true });
+} catch (e) {}
 fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
 
 // 1. Sync game/ to snapshot using robocopy
 try {
     childProcess.execSync(`robocopy "${path.join(ROOT, 'game')}" "${SNAPSHOT_DIR}" /E /NDL /NFL /NJH /NJS /nc /ns /np`, { stdio: 'ignore' });
-} catch (e) {}
-// Clear existing save in snapshot so test launches on Ground level
-try {
-    fs.rmSync(path.join(SNAPSHOT_DIR, 'save', 'file0.rmmzsave'), { force: true });
 } catch (e) {}
 
 // 2. Inject live 8D Showcase into UF_Test.js in snapshot
@@ -47,73 +46,143 @@ const targetHook = 't.screenshot("map");';
 const showcaseCode = `
         // --- Live In-Game 8-Directional Standard Charset Showcase ---
         const W = window.UF && UF.World;
+        if (W && typeof W.areaMapId === 'function') {
+            const curLevel0 = typeof W.levelOfMapId === 'function' ? W.levelOfMapId($gameMap.mapId()) : null;
+            const curArea0 = curLevel0 ? { x: curLevel0.x, y: curLevel0.y } : (W && W.currentArea ? W.currentArea() : { x: 0, y: 0 });
+            const groundMapId = W.areaMapId(curArea0.x, curArea0.y, 0);
+            if ($gameMap.mapId() !== groundMapId) {
+                $gamePlayer.reserveTransfer(groundMapId, 15, 15, 2, 0);
+                await t.waitFrames(45);
+            }
+        }
+
         const curLevel = W && typeof W.levelOfMapId === 'function' ? W.levelOfMapId($gameMap.mapId()) : null;
         const curArea = curLevel ? { x: curLevel.x, y: curLevel.y } : (W && W.currentArea ? W.currentArea() : { x: 0, y: 0 });
         const curZ = curLevel ? curLevel.z : 0;
         const px = $gamePlayer.x || 15;
         const py = $gamePlayer.y || 15;
 
-        if (W && curArea) {
-            // 1. Circular 8-Direction Movement Compass (using $UF_Elf_8D)
-            const cx = px - 1;
-            const cy = py - 4;
-            const compass = [
-                { name: "Elf Walk N",  x: cx,     y: cy - 2, dir: 8 },
-                { name: "Elf Walk NE", x: cx + 2, y: cy - 2, dir: 9 },
-                { name: "Elf Walk E",  x: cx + 2, y: cy,     dir: 6 },
-                { name: "Elf Walk SE", x: cx + 2, y: cy + 2, dir: 3 },
-                { name: "Elf Walk S",  x: cx,     y: cy + 2, dir: 2 },
-                { name: "Elf Walk SW", x: cx - 2, y: cy + 2, dir: 1 },
-                { name: "Elf Walk W",  x: cx - 2, y: cy,     dir: 4 },
-                { name: "Elf Walk NW", x: cx - 2, y: cy - 2, dir: 7 }
-            ];
-            compass.forEach(u => {
-                W.addUnit({ name: u.name, image: { characterName: "$UF_Elf_8D", characterIndex: 0 }, area: curArea, z: curZ, x: u.x, y: u.y, dir: u.dir, snapToFree: 6, data: { species: "elf" } });
-            });
+        // Ensure 8-Directional 48x48 framing is used by Sprite_Character for 8D sheets
+        const _origUpdateCharFrame = Sprite_Character.prototype.updateCharacterFrame;
+        const dir8ToRow = { 2: 0, 1: 1, 4: 2, 7: 3, 8: 4, 9: 5, 6: 6, 3: 7 };
+        Sprite_Character.prototype.updateCharacterFrame = function() {
+            if (this._character && this._character._testFrame) {
+                const tf = this._character._testFrame;
+                this.setFrame(tf.col * 48, tf.row * 48, 48, 48);
+                return;
+            }
+            if (this._character && this._character._is8D) {
+                const row = dir8ToRow[this._character.direction()] !== undefined ? dir8ToRow[this._character.direction()] : 0;
+                const col = this._character.pattern();
+                this.setFrame(col * 48, row * 48, 48, 48);
+                return;
+            }
+            _origUpdateCharFrame.call(this);
+        };
 
-            // 2. Combat & Magic Lineup (py)
-            // Melee Slash (South & West)
-            W.addUnit({ name: "Elf Swordsman S", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 4, y: py, dir: 2, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Swordsman W", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 3, y: py, dir: 4, snapToFree: 6, data: { species: "elf" } });
-            
-            // Ranged Bow (South-West & East)
-            W.addUnit({ name: "Elf Archer SW",   image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 2, y: py, dir: 1, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Archer E",    image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 1, y: py, dir: 6, snapToFree: 6, data: { species: "elf" } });
-
-            // Magic Cast (South & North-West)
-            W.addUnit({ name: "Elf Mage S",      image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px,     y: py, dir: 2, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Mage NW",     image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px + 1, y: py, dir: 7, snapToFree: 6, data: { species: "elf" } });
-
-            // 3. Industry, Work, Downed (py + 2)
-            // Work / Carve / Gather
-            W.addUnit({ name: "Elf Crafter S",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 4, y: py + 2, dir: 2, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Artisan SW",  image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 3, y: py + 2, dir: 1, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Forager W",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 2, y: py + 2, dir: 4, snapToFree: 6, data: { species: "elf" } });
-
-            // Downed / Collapse / Dead
-            W.addUnit({ name: "Elf Fallen S",    image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px,     y: py + 2, dir: 2, snapToFree: 6, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Resting E",   image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px + 1, y: py + 2, dir: 6, snapToFree: 6, data: { species: "elf" } });
+        // Move all non-showcase events away from the viewport
+        for (const ev of $gameMap.events()) {
+            if (!ev) continue;
+            const evName = (ev.event() && ev.event().name) || '';
+            if (!evName.startsWith('Elf ')) {
+                ev.locate(px + 40, py - 30);
+            }
         }
 
+        const cx = 22;
+        const cy = 20;
 
-        // Position camera and look cursor over the Elf Mage
-        $gamePlayer.locate(px, py);
-        if (window.UF && UF.Look && typeof UF.Look.show === 'function') {
-            UF.Look.show();
+        function addShowcaseUnit(spec, dir, pattern, stepAnime) {
+            const u = W.addUnit(Object.assign({ exact: true, area: curArea, z: curZ, data: { species: "elf" } }, spec));
+            if (u && u.eventId) {
+                const ev = $gameMap.event(u.eventId);
+                if (ev) {
+                    ev.setDirection(dir);
+                    ev.setDirectionFix(true);
+                    ev._is8D = true;
+                    const r = dir8ToRow[dir] !== undefined ? dir8ToRow[dir] : 0;
+                    if (pattern !== undefined) {
+                        ev.setPattern(pattern);
+                        ev._testFrame = { col: pattern, row: r };
+                    }
+                    if (stepAnime) {
+                        ev.setStepAnime(true);
+                    }
+                }
+            }
+            return u;
+        }
+
+        const facings8 = [
+            { name: "S",  dir: 2 },
+            { name: "SW", dir: 1 },
+            { name: "W",  dir: 4 },
+            { name: "NW", dir: 7 },
+            { name: "N",  dir: 8 },
+            { name: "NE", dir: 9 },
+            { name: "E",  dir: 6 },
+            { name: "SE", dir: 3 }
+        ];
+
+        if (W && curArea) {
+            // Row 0: Movement (8 directions walking in place)
+            facings8.forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf Walk " + f.name, image: { characterName: "$UF_Elf_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 4 }, f.dir, undefined, true);
+            });
+
+            // Row 1: Melee Attack (8 directions striking with crescent arcs, pattern 1)
+            facings8.forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf Strike " + f.name, image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy - 2 }, f.dir, 1, false);
+            });
+
+            // Row 2: Ranged Bow (8 directions aiming bows, pattern 1)
+            facings8.forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf Bow " + f.name, image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy }, f.dir, 1, false);
+            });
+
+            // Row 3: Arcane Magic (8 directions casting with radiant emerald mana, pattern 1)
+            facings8.forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf Magic " + f.name, image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 2 }, f.dir, 1, false);
+            });
+
+            // Row 4: Crafting / Work (8 directions kneeling carving with knife, pattern 1)
+            facings8.forEach((f, i) => {
+                addShowcaseUnit({ name: "Elf Work " + f.name, image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, x: cx - 4 + i, y: cy + 4 }, f.dir, 1, false);
+            });
+
+            // Row 5: Downed / Medical (Flinch, Kneeling Collapse, Dead corpse)
+            addShowcaseUnit({ name: "Elf Hurt (Flinch)",    image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx - 2, y: cy + 6 }, 2, 0, false);
+            addShowcaseUnit({ name: "Elf Collapse (Kneel)", image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx,     y: cy + 6 }, 2, 1, false);
+            addShowcaseUnit({ name: "Elf Fallen (Corpse)",  image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, x: cx + 2, y: cy + 6 }, 2, 2, false);
+        }
+
+        // Center camera directly on the showcase center
+        $gamePlayer.locate(cx, cy + 1);
+
+        // Hide Look tooltip for clean screenshot
+        if (window.UF && UF.Look && typeof UF.Look.hide === 'function') {
+            UF.Look.hide();
+        }
+        if (SceneManager._scene && SceneManager._scene._windowLayer) {
+            for (const w of SceneManager._scene._windowLayer.children) {
+                if (w && w.constructor && (w.constructor.name === 'Window_UFLook' || w._isUFLook)) {
+                    w.visible = false;
+                }
+            }
         }
 
         // Capture in-game screenshots at Zoom Levels 0 (3x closeup), 1 (2x normal), and 2 (1x wide)
-        if (UF.Camera && typeof UF.Camera.setLevel === 'function') {
-            UF.Camera.setLevel(0);
-        }
-        await t.waitFrames(30);
-        t.screenshot("standard_8d_live_closeup");
-
         if (UF.Camera && typeof UF.Camera.setLevel === 'function') {
             UF.Camera.setLevel(1);
         }
         await t.waitFrames(30);
         t.screenshot("standard_8d_live_normal");
+
+        if (UF.Camera && typeof UF.Camera.setLevel === 'function') {
+            UF.Camera.setLevel(0);
+        }
+        await t.waitFrames(30);
+        t.screenshot("standard_8d_live_closeup");
 
         if (UF.Camera && typeof UF.Camera.setLevel === 'function') {
             UF.Camera.setLevel(2);
@@ -156,14 +225,16 @@ if (fs.existsSync(snapOutDir)) {
 }
 
 // 5. Create a 2x focused crop of the combat and movement lineup
+const normalFile = path.join(REVIEW_DIR, 'standard_8d_live_normal.png');
 const closeupFile = path.join(REVIEW_DIR, 'standard_8d_live_closeup.png');
-if (fs.existsSync(closeupFile)) {
-    const buf = fs.readFileSync(closeupFile);
-    const img = decodePNG(buf, 'standard_8d_live_closeup.png');
+const targetFile = fs.existsSync(normalFile) ? normalFile : closeupFile;
+if (fs.existsSync(targetFile)) {
+    const buf = fs.readFileSync(targetFile);
+    const img = decodePNG(buf, path.basename(targetFile));
 
-    // Crop center 640x480 area around the player/units
-    const cw = Math.min(img.width, 680);
-    const ch = Math.min(img.height, 520);
+    // Crop center area around the player/units
+    const cw = Math.min(img.width, 860);
+    const ch = Math.min(img.height, 640);
     const cx = Math.max(0, Math.round((img.width - cw) / 2));
     const cy = Math.max(0, Math.round((img.height - ch) / 2));
 
