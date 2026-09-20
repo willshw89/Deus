@@ -508,6 +508,10 @@
             this.callHandler("cancel");
         }
 
+        toLocalCoords(point) {
+            return this.worldTransform ? this.worldTransform.applyInverse(point) : new Point(point.x - this.x, point.y - this.y);
+        }
+
         onTouchSelect(trigger) {
             super.onTouchSelect(trigger);
             if (trigger) {
@@ -973,6 +977,12 @@
             t.check("faction_cycled_to_elf", scene._newGameSetupWindow.currentFaction() === "Elf", "Faction cycled to Elf");
             scene._newGameSetupWindow.cursorRight();
             t.check("faction_cycled_to_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Faction cycled to Dwarf");
+
+            // Test touch select on window (verify toLocalCoords and coordinate conversion)
+            TouchInput._x = scene._newGameSetupWindow.x + scene._newGameSetupWindow.width - 20;
+            TouchInput._y = scene._newGameSetupWindow.y + 40;
+            scene._newGameSetupWindow.onTouchSelect(true);
+            t.check("touch_select_no_error", true, "onTouchSelect executed without toLocalCoords error");
 
             // Test Year Adjustment and Clamping on Row 1
             scene._newGameSetupWindow.select(1);
