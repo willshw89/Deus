@@ -8,6 +8,40 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Waste & Sanitation Management, Latrines, Water Contamination, Dysentery & Medical Treatment — 2026-09-20 (Gemini)
+Delivered per user directives ("Does the user want specific civic designations for latrines/outhouses beyond the designated refuse/waste pit stockpile (stores: ["waste", "bones", "rubble"])? Yes. As a matter of fact, I want waste and sanitation to be part of the game. There needs to be a system for collecting waste and shit and keeping it away from society or else it will cause problems."):
+- **Sanitation Entities & Catalog Injection (`UF_Sanitation.js`)**:
+  - `latrine_pit` object: early settlement pit latrine (`build: { items: { wood: 2 }, work: 30 }`, capacity: 10 uses, tags: `["building", "sanitation", "latrine"]`).
+  - `outhouse` object: enclosed timber outhouse (`build: { items: { wood: 4 }, work: 60 }`, capacity: 25 uses, tags: `["building", "sanitation", "outhouse"]`).
+  - `night_soil` item: organic waste byproduct (`tags: ["waste", "organic"]`).
+- **Bodily Excretion Cycle & Relief Behaviors (`UF_Colonists.js`, `UF_Sanitation.js`)**:
+  - Natural `waste` need builds up over time (+0.25 per tick), accelerated by eating food (+20 on meal completion) and drinking water (+15 on drink completion).
+  - Colonists seek latrines when waste >= 65 (`relieveJob`), walking to the nearest latrine, resetting waste to 0, incrementing latrine usage, and earning +4 morale thought ("Relieved myself in a proper latrine.").
+  - Full latrines: when usage reaches capacity, latrine is flagged `full: true` and spawns a `night_soil` item adjacent to the structure for sanitation pickup.
+  - Open accidents: desperate colonists (waste >= 85) without an available latrine relieve themselves outdoors in the dirt, suffering a -8 morale penalty ("Had an unsanitary accident in the dirt.") and depositing loose `night_soil`.
+- **Hazards, Water Contamination & Dysentery Contagion (`UF_Sanitation.js`, `UF_Colonists.js`)**:
+  - Foul Stench: uncollected `night_soil` within 4 cells inflicts negative morale thoughts during need ticking ("Gagged from the foul stench of uncollected waste.", -6).
+  - Water Contamination: `isWaterContaminated(area, x, y)` detects any `night_soil`, full latrines, or waste pits within 6 cells of drinking water / wells.
+  - Sickness (Dysentery): drinking from contaminated water infects the colonist with dysentery (`u.data.illness = { type: "dysentery", severity: 1.0 }`), inflicting painful cramps/fever (-12 morale thought), and elevating decision urgency to "illness".
+- **Sanitation Discipline & Healer Treatment (`UF_Sanitation.js`, `UF_Colonists.js`)**:
+  - Sanitation Workers: colonists with `sanitation` or `hauling` capability perform `cleanWasteJob`, hauling uncontained `night_soil` from living areas to distant designated waste pit stockpiles (>= 6 cells away) and gaining +4 morale ("Disposed of foul waste in the designated pit.").
+  - Apothecary / Healer Treatment: practitioners with `medicine` capability perform `treatSickJob`, administering remedies to bedridden/sick colonists, curing dysentery and granting +8 morale to both patient ("Recovered from sickness with careful medicine.") and healer ("Treated ... with healing remedies.").
+- **Overseer HUD Card Display (`UF_ColonyOverseer.js`)**:
+  - `Window_UFColonistCard` renders `[Ill: Dysentery]` tag in red/warning next to colonist name, age, and mood.
+- **Settlement Pillars & Civic Planning (`UF_SettlementPillars.js`)**:
+  - Sanitation pillar comprehensively evaluates latrine coverage, latrine cleanliness, safe waste pit separation, uncollected filth count, and active illnesses.
+  - Automatically generates `civic_latrine` and distant `sanitation_waste_pit` when sanitation is deficient.
+- **Automated Verification**:
+  - `tools/test_sanitation_system.js`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_settlement_pillars.js`: **10/10 PASS, 0 FAIL (exit 0)**.
+  - Main test suite `colonists`: **20/20 PASS, 0 FAIL (exit 0)** (319 colonist jobs: 135 position, 63 object, 58 need, 57 item, 6 unit; 0 without target, 0 unphysical).
+  - `tools/test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: View of the home site at zoom 2/3 with campfire, colonists gathered, and flora.
+  - `game/test_output/colonists.colonists_working.png`: Colonists engaged in gathering, building, and stockpiling at 8x speed.
+  - `game/test_output/colonists.colonist_childbirth.png`: Nighttime settlement view with warm campfire illumination, constructed doorways/walls, thread/fiber stockpile, and active newborn child.
+
 ## The 10 Core Settlement Pillars & Colony Progression AI — 2026-09-20 (Gemini)
 Delivered per user directives ("This is what I want the faction to focus on, collectively, at the start of the game. These are the pillars of the colony and the colony should always bear these things in mind. Let's go ahead and put all of these AI behaviors into the game, including completing their shelter structures: Water -> Food -> Shelter -> Sanitation -> Workshop -> Medicine -> Storage -> Security -> Governance -> Community"):
 - **The 10 Settlement Pillars (`game/js/plugins/UF_SettlementPillars.js`)**:

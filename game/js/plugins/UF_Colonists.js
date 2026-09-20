@@ -61,7 +61,7 @@
     const THOUGHTS_KEPT = 8;
     const MAX_SKILL = 20;
     const BRAVE = 60;
-    const START_NEEDS = Object.freeze({ hunger: 12, thirst: 18, sleep: 8, social: 20, nature: 15 });
+    const START_NEEDS = Object.freeze({ hunger: 12, thirst: 18, sleep: 8, social: 20, nature: 15, waste: 10 });
     const SALT = Object.freeze({ name: 0x5a, gender: 0x9d, facet: 0xfa, skill: 0x5c, roll: 0xc0, thought: 0x7e, stroll: 0x57 });
     const MOODS = [[50, "Ecstatic"], [25, "Happy"], [10, "Content"], [-10, "Fine"], [-25, "Unhappy"], [-50, "Stressed"], [-Infinity, "Miserable"]];
     const SKILL_OF = Object.freeze({ chop: "woodcutting", gather: "gathering", pick: "gathering", quarry: "stonework", mine: "stonework", build: "building", haul: "hauling", fetch: "hauling", hunt: "hunting", craft: "crafting" });
@@ -79,6 +79,12 @@
         } catch (_) {}
     }
     const Pillars = () => (window.UF && UF.SettlementPillars) || null;
+    if (typeof require === "function" && (!window.UF || !UF.Sanitation)) {
+        try {
+            require("./UF_Sanitation.js");
+        } catch (_) {}
+    }
+    const Sanitation = () => (window.UF && UF.Sanitation) || null;
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -839,6 +845,7 @@
                 n.sleep = Math.max(0, n.sleep - 0.6); // resting; the sleep job sets it to 5 at the end
             } else {
                 for (const k of Object.keys(rates)) n[k] = clamp((n[k] || 0) + rates[k], 0, 100);
+                n.waste = clamp((n.waste !== undefined ? n.waste : 10) + 0.25, 0, 100);
             }
             const roll = k => unit01(s, SALT.thought, u.id, ticks(), k);
             if (n.hunger > 75 && roll(1) < 0.05) addThought(u, "Was bothered by hunger.", -5);
@@ -846,6 +853,14 @@
             if (n.sleep > 85 && roll(3) < 0.05) addThought(u, "Was worn out for lack of sleep.", -7);
             if (n.social > 80 && roll(4) < 0.04) addThought(u, "Felt lonely.", -5);
             if (n.nature > 80 && roll(5) < 0.03) addThought(u, "Longed for the open country.", -3);
+            if (n.waste > 85 && roll(10) < 0.06) addThought(u, "Desperately needed to find a latrine.", -6);
+            const S = Sanitation();
+            if (S && S.stenchNear && S.stenchNear(levelArea(u), u.x, u.y) && roll(11) < 0.08) {
+                addThought(u, "Gagged from the foul stench of uncollected waste.", -6);
+            }
+            if (u.data && u.data.illness && roll(12) < 0.1) {
+                addThought(u, "Suffered from painful stomach cramps and fever.", -8);
+            }
             const Env = window.UF && UF.Environment;
             if (Env && typeof Env.unitThermal === "function") {
                 const thm = Env.unitThermal(u);
@@ -868,6 +883,7 @@
     // Urgent needs interrupt other work (not a need job that's already running).
     function urgent(u) {
         if (u.data && u.data.burning) return "burning";
+        if (u.data && u.data.illness && u.data.illness.severity >= 0.8) return "illness";
         const Env = window.UF && UF.Environment;
         if (Env && typeof Env.unitThermal === "function") {
             const thm = Env.unitThermal(u);
@@ -875,6 +891,7 @@
         }
         const n = u.data.needs, th = thresholds();
         if (!n) return null;
+        if (n.waste >= (th.waste || 65) + URGENT_MARGIN) return "waste";
         if (n.thirst >= (th.thirst || 55) + URGENT_MARGIN) return "thirst";
         if (n.hunger >= (th.hunger || 55) + URGENT_MARGIN) return "hunger";
         return null;
@@ -897,6 +914,14 @@
         if (hungry) {
             const j = foodJob(u);
             if (j) return j;
+        }
+        if ((n.waste || 0) >= (th.waste || 65)) {
+            const S = Sanitation();
+            const rel = S && S.relieveJob ? S.relieveJob(u) : null;
+            if (rel) {
+                const j = give(u, rel);
+                if (j) return j;
+            }
         }
         if (n.sleep >= (th.sleep || 75) || (sleepingHours(u) && n.sleep > 40)) {
             const mate = n.sleep < 85 ? nightlyMateJob(u) : null;
@@ -1516,8 +1541,14 @@
     const stepObject = step => {
         if (!Objects()) return null;
         const t = Objects().type(step.build);
-        if (t && step.build === "well" && !t.build) {
-            return { ...t, passable: false, build: { items: { stone: 2, wood: 2 }, work: 40 } };
+        if (step.build === "well" && (!t || !t.build)) {
+            return { ...(t || {}), id: "well", passable: false, build: { items: { stone: 2, wood: 2 }, work: 40 } };
+        }
+        if (step.build === "latrine_pit" && (!t || !t.build)) {
+            return { ...(t || {}), id: "latrine_pit", passable: false, build: { items: { wood: 2 }, work: 30 } };
+        }
+        if (step.build === "outhouse" && (!t || !t.build)) {
+            return { ...(t || {}), id: "outhouse", passable: false, build: { items: { wood: 4 }, work: 60 } };
         }
         return t;
     };
@@ -1799,7 +1830,7 @@
             if (P && P.priorityPillar) {
                 const focus = P.priorityPillar(c);
                 if (focus === "water" && (x.step.pillar === "water" || x.step.build === "well")) s += 1.0;
-                else if (focus === "sanitation" && (x.step.pillar === "sanitation" || (x.step.stores && x.step.stores.includes("waste")))) s += 0.8;
+                else if (focus === "sanitation" && (x.step.pillar === "sanitation" || x.step.build === "latrine_pit" || x.step.build === "outhouse" || (x.step.stores && x.step.stores.includes("waste")))) s += 0.8;
                 else if (focus === "shelter" && (x.step.household || (x.step.build && ["wall_wood", "door_wood", "floor_straw", "bed_wood", "floor_wood", "floor_stone"].includes(x.step.build)))) s += 0.5;
                 else if (focus === "food" && (x.step.stock || x.step.build === "farm_plot")) s += 0.6;
                 else if (focus === "workshop" && (x.step.build === "workbench" || x.step.build === "smithy" || (x.step.craft && (recipeOf(x.step.craft) || {}).workbench))) s += 0.5;
@@ -1891,8 +1922,30 @@
                 if (j) return j;
             }
         }
-        return needJob(u) || (UF.FireSafety && (UF.FireSafety.respond(u) || UF.FireSafety.prevent(u))) || homeJob(u) || designationJob(u) ||
-            (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
+        const need = needJob(u);
+        if (need) return need;
+        if (UF.FireSafety) {
+            const fire = UF.FireSafety.respond(u) || UF.FireSafety.prevent(u);
+            if (fire) return fire;
+        }
+        const home = homeJob(u);
+        if (home) return home;
+
+        const S = Sanitation();
+        if (S) {
+            const med = S.treatSickJob ? S.treatSickJob(u) : null;
+            if (med) {
+                const j = give(u, med);
+                if (j) return j;
+            }
+            const clean = S.cleanWasteJob ? S.cleanWasteJob(u) : null;
+            if (clean) {
+                const j = give(u, clean);
+                if (j) return j;
+            }
+        }
+
+        return designationJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
@@ -1959,7 +2012,10 @@
             case "hunt": return World().unit(job.params.unitId) ? null : "unit";
             case "mate": return job.result && job.result.familyInteraction ? "need" : null;
             case "drink": case "eat": case "sleep": case "talk": return u.data.needs ? "need" : null;
-            case "move": case "wander": return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
+            case "move": case "wander":
+                if (job.params && (job.params.relieve || job.params.relieveOpen)) return "need";
+                if (job.params && job.params.treat) return "unit";
+                return chebyshev(u.x, u.y, job.target.x, job.target.y) <= 1 ? "position" : null;
             case "natural_travel": return job.result && job.result.moved && job.result.to && sameLevel(u, job.result.to) && u.x === job.result.to.x && u.y === job.result.to.y ? "position" : null;
             case "douse": return job.result && job.result.doused ? "fire" : null;
             case "farm_till": case "farm_plant": case "farm_tend": case "farm_harvest":
@@ -1986,8 +2042,22 @@
         }
         const I = Items();
         switch (job.type) {
-            case "drink": addThought(u, "Felt refreshed after a drink of water.", 8); break;
-            case "eat": addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8); break;
+            case "drink":
+                addThought(u, "Felt refreshed after a drink of water.", 8);
+                if (u.data && u.data.needs) {
+                    u.data.needs.waste = clamp((u.data.needs.waste || 0) + 15, 0, 100);
+                }
+                const S = Sanitation();
+                if (S && S.isWaterContaminated && S.isWaterContaminated(levelArea(u), job.target ? job.target.x : u.x, job.target ? job.target.y : u.y)) {
+                    S.infect(u, "dysentery");
+                }
+                break;
+            case "eat":
+                addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8);
+                if (u.data && u.data.needs) {
+                    u.data.needs.waste = clamp((u.data.needs.waste || 0) + 20, 0, 100);
+                }
+                break;
             case "sleep":
                 addThought(u, "Woke rested.", 10);
                 if (eligibleForIntimacy(u)) checkNighttimeSleepMating(u);
@@ -2026,6 +2096,24 @@
                 if (job.params.nature && u.data.needs) {
                     u.data.needs.nature = Math.max(0, u.data.needs.nature - 40);
                     addThought(u, "Felt calm out in the open.", 8);
+                }
+                if (job.params && (job.params.relieve || job.params.relieveOpen)) {
+                    const S = Sanitation();
+                    if (S && S.onRelieved) S.onRelieved(u, job.params);
+                }
+                if (job.params && job.params.treat && job.params.patientId) {
+                    const W = World();
+                    const patient = W ? W.unit(job.params.patientId) : null;
+                    const S = Sanitation();
+                    if (patient && S && S.cure) {
+                        S.cure(patient);
+                        addThought(u, `Treated ${patient.name} with healing remedies.`, 8);
+                    }
+                }
+                break;
+            case "haul":
+                if (job.params && job.params.sanitation) {
+                    addThought(u, "Disposed of foul waste in the designated pit.", 4);
                 }
                 break;
             default: break;
@@ -2080,6 +2168,7 @@
             facets: Object.assign({}, u.data.facets || {}), skills: Object.assign({}, u.data.skills || {}),
             plan: planText(u),
             pregnancy: u.data.pregnancy ? Object.assign({}, u.data.pregnancy) : null,
+            illness: u.data.illness ? Object.assign({}, u.data.illness) : null,
             age: u.data.age !== undefined ? u.data.age : 20,
             motherId: u.data.motherId || null,
             fatherId: u.data.fatherId || null,

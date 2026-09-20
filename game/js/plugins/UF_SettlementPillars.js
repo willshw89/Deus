@@ -129,7 +129,7 @@
         if (I) {
             const items = I.find({ area: levelArea(c), z: zOf(c), near: sitePos, radius: radius + 4 });
             for (const f of items) {
-                const it = f.item;
+                const it = f.item || f;
                 if (!it) continue;
                 if (it.type === "meat_cooked" || it.type === "berries" || it.type === "bread") {
                     storedFood += it.count;
@@ -180,20 +180,25 @@
             detail: `${totalBuilt}/${totalWanted} shelter components built across ${allHouseholds.length} households`
         };
 
-        // 4. SANITATION: Waste pit separated from clean water & hearths
+        // 4. SANITATION: Waste pit separated from clean water & hearths + Latrines
         const stockpiles = (c.stockpiles || []).concat(O ? O.findIn(levelArea(c), { near: sitePos, radius: radius + 4, id: "stockpile" }) : []);
-        const wastePits = stockpiles.filter(s => s.stores && s.stores.includes("waste"));
-        let safeDistance = true;
-        for (const wp of wastePits) {
-            const dWater = Math.hypot(wp.x - sitePos.x, wp.y - sitePos.y);
-            if (dWater < 5) safeDistance = false;
-        }
-        if (wastePits.length > 0 && safeDistance) {
-            res.sanitation = { id: "sanitation", name: "Sanitation", score: 1.0, status: "secure", detail: `${wastePits.length} waste pit(s) safely separated from water` };
-        } else if (wastePits.length > 0) {
-            res.sanitation = { id: "sanitation", name: "Sanitation", score: 0.6, status: "poor_placement", detail: "Waste pit too close to living area / water" };
+        const S = window.UF && UF.Sanitation;
+        if (S && S.evaluateSanitation) {
+            res.sanitation = S.evaluateSanitation(c);
         } else {
-            res.sanitation = { id: "sanitation", name: "Sanitation", score: 0.3, status: "no_waste_pit", detail: "No refuse dump designated; waste uncontained" };
+            const wastePits = stockpiles.filter(s => s.stores && s.stores.includes("waste"));
+            let safeDistance = true;
+            for (const wp of wastePits) {
+                const dWater = Math.hypot(wp.x - sitePos.x, wp.y - sitePos.y);
+                if (dWater < 5) safeDistance = false;
+            }
+            if (wastePits.length > 0 && safeDistance) {
+                res.sanitation = { id: "sanitation", name: "Sanitation", score: 1.0, status: "secure", detail: `${wastePits.length} waste pit(s) safely separated from water` };
+            } else if (wastePits.length > 0) {
+                res.sanitation = { id: "sanitation", name: "Sanitation", score: 0.6, status: "poor_placement", detail: "Waste pit too close to living area / water" };
+            } else {
+                res.sanitation = { id: "sanitation", name: "Sanitation", score: 0.3, status: "no_waste_pit", detail: "No refuse dump designated; waste uncontained" };
+            }
         }
 
         // 5. WORKSHOP: Essential crafts and energy/fuel
@@ -324,8 +329,20 @@
             }
         }
 
-        // 2. Sanitation deficient: Build waste pit at safe distance
+        // 2. Sanitation deficient: Build civic latrine and safe waste pit
         if (priority === "sanitation") {
+            const O = Objects();
+            const existingLatrine = O ? O.findIn(levelArea(c), { near: c.site, radius: (c.radius || 8) + 6 })
+                .filter(o => o.id === "latrine_pit" || o.id === "outhouse") : [];
+            if (!existingLatrine.length) {
+                steps.push({
+                    id: "civic_latrine",
+                    build: "latrine_pit",
+                    cells: [[-3, 4]],
+                    exact: true,
+                    pillar: "sanitation"
+                });
+            }
             const stockpiles = c.stockpiles || [];
             const hasWastePit = stockpiles.some(s => s.stores && s.stores.includes("waste"));
             if (!hasWastePit) {
