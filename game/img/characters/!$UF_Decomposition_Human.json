@@ -1,0 +1,28 @@
+{
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
+  "type": "decomposition_human",
+  "description": "Authentic 16-bit humanoid decomposition animation sequence",
+  "frames": {
+    "south": [
+      "fresh_corpse",
+      "bloated_decay",
+      "active_rot"
+    ],
+    "west": [
+      "active_rot",
+      "skeletonizing",
+      "bleached_skeleton"
+    ],
+    "east": [
+      "bleached_skeleton",
+      "bleached_skeleton",
+      "bleached_skeleton"
+    ],
+    "north": [
+      "curled_skeleton",
+      "curled_skeleton",
+      "curled_skeleton"
+    ]
+  }
+}

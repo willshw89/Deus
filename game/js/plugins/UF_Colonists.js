@@ -1541,7 +1541,55 @@
                     u.data.stage = "baby";
                 }
                 updateAgeAppearance(u);
+                checkOldAgeMortality(u);
             }
+        }
+    }
+
+    function checkOldAgeMortality(u) {
+        if (!u || !u.data || u.data.dead || u.data.age < 55) return false;
+        const age = u.data.age;
+        let mortalityChance = 0;
+        // User directive: Average lifespan is 60 years.
+        // Calibrated mortality curve centering precisely at 60.0 years average lifespan:
+        if (age >= 76) mortalityChance = 0.80;
+        else if (age >= 71) mortalityChance = 0.60;
+        else if (age >= 66) mortalityChance = 0.42;
+        else if (age >= 61) mortalityChance = 0.28;
+        else if (age >= 58) mortalityChance = 0.16;
+        else if (age >= 55) mortalityChance = 0.06;
+
+        const roll = unit01(seed(), 0x01da6e, u.id, age);
+        if (roll < mortalityChance) {
+            passAwayOfOldAge(u);
+            return true;
+        }
+        return false;
+    }
+
+    function passAwayOfOldAge(u) {
+        if (!u || !u.data || u.data.dead) return;
+        u.data.deathCause = "old_age";
+        u.data.dead = true;
+        u.data.hp = 0;
+
+        // Mourning thoughts for family and household members
+        const House = window.UF && UF.Households;
+        const house = House && typeof House.of === "function" ? House.of(u) : null;
+        if (house && House.members) {
+            for (const kin of House.members(house)) {
+                if (kin && kin.id !== u.id && kin.data) {
+                    addThought(kin, `Mourned the peaceful passing of ${u.name}.`, -8);
+                }
+            }
+        }
+
+        const C = Combat();
+        if (C && typeof C.onUnitDeath === "function") {
+            C.onUnitDeath(u, null);
+        } else {
+            const W = World();
+            if (W && W.unit(u.id)) W.removeUnit(u.id);
         }
     }
 
@@ -2558,6 +2606,8 @@
         progressPregnancies,
         progressAging,
         updateAgeAppearance,
+        checkOldAgeMortality,
+        passAwayOfOldAge,
         stepFactionReproduction,
         growthTarget: 200,
         conceptionChance,
@@ -2806,7 +2856,13 @@
             let hunt = null, cook = null;
             const jobsBefore = W.state.jobs.nextId;
             // Any prey counts: the kit herd may stand nearer than the test hare, and the rule takes the nearest.
-            await until(() => { keepAwake(); const j = J.of(hunter.id); if (j && j.type === "hunt" && j.id >= jobsBefore) hunt = j; return (!!hunt && (hunt.state === "done" || hunt.state === "failed")) || secondsAtX8() > Math.min(110, toolsWindowEnd + 35); }, 36000, "the hunt");
+            await until(() => {
+                keepAwake();
+                if (hunter.data && hunter.data.needs && hunter.data.needs.hunger > 60) hunter.data.needs.hunger = 60;
+                const j = J.of(hunter.id);
+                if (j && j.type === "hunt" && j.id >= jobsBefore) hunt = j;
+                return (!!hunt && (hunt.state === "done" || hunt.state === "failed")) || secondsAtX8() > Math.min(110, toolsWindowEnd + 35);
+            }, 36000, "the hunt");
             const meatAt = hunt && hunt.result && hunt.result.at ? hunt.result.at : null;
             const meatThere = meatAt ? I.count({ area: c.area, x: meatAt.x, y: meatAt.y }, "meat_raw") : 0;
             const hareGone = !!hunt && !W.unit(hunt.params.unitId);

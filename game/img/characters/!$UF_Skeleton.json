@@ -1,0 +1,25 @@
+{
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
+  "type": "skeleton_remains",
+  "description": "Authentic 16-bit interactive skeletal remains",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "passable": true,
+  "layer": "under",
+  "category": "remains",
+  "variants": {
+    "south": "humanoid_skeleton_flat",
+    "west": "humanoid_skeleton_curled",
+    "east": "beast_skeleton",
+    "north": "skeleton_with_loot_pouch"
+  }
+}

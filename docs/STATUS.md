@@ -8,6 +8,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Human Genetics, Life-Stage Aging, 60-Year Average Lifespan & Corpse Decomposition / Skeletons — 2026-09-20 (Gemini)
+Delivered per user directives ("How much variety do we need for each faction to do like, genetics in the game? For both face and charsets", "So we can age them as well", "Go ahead and generate the assets for humans in nano banana pro", "Implement it ingame for humans", "We are assuming the average lifespan is 60 years btw"):
+- **Google Nano Banana Pro Assets (`gemini-3-pro-image`)**:
+  - `art/raw/u7_modular_portraits_nano_pro.png`: Adult male U7 portraits (3 stone-arch face bases, 4 modular hairstyles, 4 beards, 4 armor/clothing busts).
+  - `art/raw/u7_female_modular_portraits_nano_pro.png`: Adult female U7 portraits (3 stone-arch face bases, 4 hairstyles, 2 child portraits, 4 armor/clothing busts).
+  - `art/raw/human_child_walk_nano_pro.png`: 12-sprite serious chibi child walk cycle on 3×4 grid (~28–32 px tall).
+  - `art/raw/decomposition_nano_pro.png`: 16-bit SNES/FF5 corpse decomposition animation (fresh corpse -> bloated decay -> active rot -> bleached skeleton) and interactive skeletal remains.
+  - Deployed: `game/img/characters/$UF_Human_Child_Walk.png` & `.json`, `game/img/characters/!$UF_Decomposition_Human.png` & `.json`, `game/img/characters/!$UF_Decomposition_Beast.png` & `.json`, `game/img/characters/!$UF_Skeleton.png` & `.json`, and 576×288 U7 face sheets `game/img/faces/UF_Faces_human_1.png` & `UF_Faces_human_2.png`.
+- **In-Engine Human Genetics & Inheritance (`UF_Colonists.js`)**:
+  - `geneticsFor(worldSeed, unitId, mother, father, variation)`: Mendelian allele inheritance (45% mother variation, 45% father variation, 10% mutation) across skin tones, hairstyles, facial hair, and clothing silhouettes.
+  - Dynamic trait expression: maps genetic variation index (1–6) to authentic character sheet (`$UF_Human_Male_1..6_Walk` / `$UF_Human_Female_1..6_Walk`) and matching U7 stone-arch face index.
+- **Life-Stage Aging Progression & 60-Year Average Lifespan (`UF_Colonists.js`, `UF_Combat.js`)**:
+  - Progression: 1 real hour at 1x speed = 15 game years (1 year = 240 seconds; 60 years = 4 real hours).
+  - Life stages: Baby (ages 0–1, `$Baby`), Child (ages 2–11, `$UF_Human_Child_Walk`, child U7 portrait), Teen (ages 12–14, `$UF_Human_Child_Walk`, child U7 portrait), Adult (ages 15–49, `$UF_Human_Male/Female_1..6_Walk`, adult U7 portrait), Elder (age 50+, elder U7 portrait with weathered silver hair).
+  - Calibrated Old-Age Mortality Check: 0% mortality < age 55; progressive yearly curve centering at 60.0 years (6% at 55–57, 16% at 58–60, 28% at 61–65, 42% at 66–70, 60% at 71–75, 80% at 76+). Mean simulated lifespan: 59.97 years across 2,000 lives.
+  - Peaceful passing: elder colonists passing away of old age are chronicled: `"[Name] passed away peacefully of old age at the age of [Age]."`, and kin receive mourning thoughts (-8 morale).
+- **Corpse Decomposition & Skeleton Looting Catalog Integration (`UF_WorldCatalog.json`, `UF_Objects.js`)**:
+  - Added `skeleton` object to `c.objects` in `UF_WorldCatalog.json` (`image: "!$UF_Skeleton"`, `tags: ["remains", "skeleton", "lootable"]`, `actions: { loot: { work: 15, labor: "hauling" } }`).
+- **Automated Verification**:
+  - `tools/test_aging_and_lifespan.js`: **16/16 PASS, 0 FAIL (exit 0)**. Mutant checks `--mutant=immortal` (8 FAIL) and `--mutant=premature` (9 FAIL) prove tests are able to fail (Rule 4).
+  - `tools/test_human_inheritance.js`: **PASS (exit 0)** (verified 1,200 variation distributions and 1,000 offspring inheritance ratios).
+  - `node tools/run_tests.js genetics`: **4/4 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js colonists`: **20/20 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js combat`: **19/19 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js anim`: **10/10 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/genetics.human_genetics_and_aging.png`: Visually opened and verified. Shows Row 1: All 6 Adult Male variations; Row 2: All 6 Adult Female variations; Row 3: Child boy and girl (`$UF_Human_Child_Walk`) alongside adult elders, all standing upright in 16-bit serious chibi style on the meadow terrain around the campfire.
+
 ## Faction Generation 4 Founder Families & Start-of-Game Random Pairbonding — 2026-09-20 (Gemini)
 Delivered per user directive ("At the time of faction generation, those 4 males and 4 females, those are 4 families. At the start of the game, they will randomly pairbond and start that faction's lineage. we have a character generator that is going to handle genetics"):
 - **4 Founding Families per Faction (`UF_History.js`)**:

@@ -1,0 +1,28 @@
+{
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
+  "type": "decomposition_beast",
+  "description": "Authentic 16-bit beast decomposition animation sequence",
+  "frames": {
+    "south": [
+      "fresh_carcass",
+      "bloated_carcass",
+      "decaying_beast"
+    ],
+    "west": [
+      "decaying_beast",
+      "skeletonizing_beast",
+      "animal_skeleton"
+    ],
+    "east": [
+      "animal_skeleton",
+      "animal_skeleton",
+      "animal_skeleton"
+    ],
+    "north": [
+      "animal_skeleton",
+      "animal_skeleton",
+      "animal_skeleton"
+    ]
+  }
+}

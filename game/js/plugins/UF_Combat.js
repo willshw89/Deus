@@ -74,6 +74,7 @@
         aggroRadius: 8,
         leash: 16,
         fleeRadius: 5,
+        aidRadius: 10,
         regen: { hp: 1, everyTicks: 100 },
         display: { splatMs: 1000, maxSplats: 4, barHideMs: 6000, barWidth: 30 },
         aliases: { tool: "weapon", clothes: "torso" },
@@ -519,6 +520,21 @@
     Combat.modeOf = modeOf;
     Combat.styleOf = unit => styleOf(unit, weaponOf(unit));
 
+    function factionOf(unit) {
+        if (!unit || !unit.data) return null;
+        if (unit.data.faction) {
+            if (unit.data.faction === "player" && window.UF && UF.Factions && typeof UF.Factions.playerId === "function") {
+                return UF.Factions.playerId();
+            }
+            return unit.data.faction;
+        }
+        if (unit.data.kind === "colonist") {
+            return (window.UF && UF.Factions && typeof UF.Factions.playerId === "function") ? UF.Factions.playerId() : "player";
+        }
+        return null;
+    }
+    Combat.factionOf = factionOf;
+
     function retaliate(target, attacker, tick) {
         if (!attacker || !attacker.data || attacker.id === undefined || isDead(target)) return;
         const c = cd(target);
@@ -535,7 +551,65 @@
         c.targetId = attacker.id;
         c.chase = null;
         c.nextAttackTick = Math.max(c.nextAttackTick, tick + Math.ceil(speedOf(target) / 2));
+        if (target.data && target.data.ai === "colonist" && window.UF && UF.Jobs && typeof UF.Jobs.cancel === "function") {
+            const j = typeof UF.Jobs.of === "function" ? UF.Jobs.of(target.id) : null;
+            if (j && j.id) {
+                UF.Jobs.cancel(j.id, "attacked");
+            }
+        }
     }
+
+    function aidFaction(victim, attacker, tick) {
+        if (!victim || !attacker || isDead(attacker)) return [];
+        const f = factionOf(victim);
+        if (!f) return [];
+        const af = factionOf(attacker);
+        if (af && af === f) return []; // intra-faction fight does not call faction aid
+
+        const w = World();
+        if (!w) return [];
+        const R = cfg().aidRadius || 10;
+        const helpers = [];
+
+        for (const m of w.units()) {
+            if (!m || m === victim || m === attacker || isDead(m)) continue;
+            if (!sameArea(m, victim)) continue;
+            if (factionOf(m) !== f) continue;
+            const dest = (m.data && m.data.destiny) || (window.UF && UF.Goals && UF.Goals.destinyOf && UF.Goals.destinyOf(m));
+            const bonusR = (dest && (dest.id === "legendary_guardian" || dest.id === "hearth_tender")) ? 4 : 0;
+            if (cheb(m, victim) > (R + bonusR)) continue;
+
+            const mode = modeOf(m);
+            if (mode === "flee" || mode === "manual") continue;
+
+            const mc = cd(m);
+            if (mc.retaliate === false) continue;
+
+            if (mc.targetId !== null && mc.targetId !== undefined && mc.targetId !== attacker.id) {
+                const cur = w.unit(mc.targetId);
+                if (cur && !isDead(cur) && sameArea(cur, m)) continue;
+            }
+
+            mc.targetId = attacker.id;
+            mc.chase = null;
+            mc.nextAttackTick = Math.max(mc.nextAttackTick, tick + Math.ceil(speedOf(m) / 2));
+
+            if (m.data && m.data.ai === "colonist" && window.UF && UF.Jobs && typeof UF.Jobs.cancel === "function") {
+                const j = typeof UF.Jobs.of === "function" ? UF.Jobs.of(m.id) : null;
+                if (j && j.id) {
+                    UF.Jobs.cancel(j.id, "aid_faction");
+                }
+            }
+
+            helpers.push(m);
+        }
+
+        if (helpers.length > 0) {
+            emit("combat:aid", { victim, attacker, helpers });
+        }
+        return helpers;
+    }
+    Combat.callFactionAid = aidFaction;
 
     /**
      * One attack now, whatever the range and timer (the loop checks those). opts.rng: a function returning [0, 1)
@@ -572,6 +646,7 @@
         addSplat(target, damage);
         markBar(attacker);
         if (target.data.hp > 0) retaliate(target, attacker, tick);
+        aidFaction(target, attacker, tick);
         Combat.stats.attacks++;
         if (r.hit) Combat.stats.hits++;
         const result = { hit: r.hit, damage, rolled: r.rolled, maxHit: n.maxHit, attackRoll: n.A, defenceRoll: n.D, chance: n.chance,
@@ -645,7 +720,9 @@
                 const kIsCreature = !!speciesOf(killer);
                 const by = kname ? (kIsCreature ? `a ${kname.toLowerCase()}` : kname) : "";
                 const lvl = combatLevel(victim);
-                const text = by ? `${victim.name} (fighting level ${lvl}) was killed by ${by}.` : `${victim.name} (fighting level ${lvl}) died of wounds.`;
+                const text = d.deathCause === "old_age"
+                    ? `${victim.name} passed away peacefully of old age at the age of ${d.age || 60}.`
+                    : (by ? `${victim.name} (fighting level ${lvl}) was killed by ${by}.` : `${victim.name} (fighting level ${lvl}) died of wounds.`);
                 const fid = d.faction === "player" && w && w.state && w.state.factions ? w.state.factions.playerId : d.faction;
                 H.addEvent({ type: "death", text, factions: fid ? [fid] : [], area, x, y });
             } catch (e) {
@@ -786,7 +863,8 @@
             if (mode === "protect") {
                 const ec = e.data.combat;
                 const victim = ec && ec.targetId !== null && ec.targetId !== undefined ? byId.get(ec.targetId) : null;
-                if (!victim || victim === u || sideOf(victim) !== mySide) continue;
+                const sameFac = victim && factionOf(victim) && factionOf(victim) === factionOf(u);
+                if (!victim || victim === u || (!sameFac && sideOf(victim) !== mySide)) continue;
                 key = pickKey(u, e, "nearest", tick, seed) + (c && c.protectId !== undefined && c.protectId !== null && victim.id !== c.protectId ? 1000 : 0);
             } else {
                 key = pickKey(u, e, mode, tick, seed);
@@ -1481,6 +1559,10 @@
     function registerChecks() {
         UF.Test.suite("combat", async t => {
             const w = UF.World, I = UF.Items;
+            if (window.UF && UF.Levels && typeof UF.Levels.view === "function" && UF.Levels.view() !== 0) {
+                UF.Levels.setView(0);
+                await t.waitUntil(() => !!(w && w.currentArea && w.currentArea()), 10000, "Ground view for combat checks").catch(() => {});
+            }
             const area = w && w.currentArea();
             if (!area || !Combat.layer()) throw new Error(`not ready: area ${!!area}, layer ${!!Combat.layer()}`);
             const cat = window.$ufWorldCatalog || {};
@@ -2004,6 +2086,38 @@
                 }
                 made.delete(dummy.id);
                 w.removeUnit(dummy.id);
+
+                // 13b. Faction aid: nearby faction members come to the aid of an attacked ally
+                {
+                    const axf = ax + 2, ayf = ay + 2;
+                    const victim = person("TEST_fac_victim", axf, ayf, L(10, 10, 10, 50), {}, { faction: "test_aid_fac", combat: { mode: "defend" } });
+                    const helperClose = person("TEST_fac_helper_close", axf + 3, ayf, L(10, 10, 10, 50), {}, { faction: "test_aid_fac", combat: { mode: "defend" } });
+                    const helperFar = person("TEST_fac_helper_far", axf + 15, ayf, L(10, 10, 10, 50), {}, { faction: "test_aid_fac", combat: { mode: "defend" } });
+                    const otherFac = person("TEST_fac_other", axf + 2, ayf + 1, L(10, 10, 10, 50), {}, { faction: "other_fac", combat: { mode: "defend" } });
+                    const attacker = foe("TEST_fac_attacker", axf + 1, ayf, L(10, 10, 10, 50), { faction: "enemy_fac" });
+
+                    let aidEvent = null;
+                    const onAid = e => { aidEvent = e; };
+                    UF.Events.on("combat:aid", onAid);
+
+                    try {
+                        const res = Combat.resolveAttack(attacker, victim, { rng: () => 0.5 });
+                        t.check("faction_aid_called", !!res && !!aidEvent && aidEvent.victim === victim && aidEvent.attacker === attacker && aidEvent.helpers.includes(helperClose) && helperClose.data.combat.targetId === attacker.id,
+                            `aid called: event ${!!aidEvent}, helper target ${helperClose.data.combat.targetId} === attacker ${attacker.id}`);
+
+                        t.check("faction_aid_range", helperFar.data.combat.targetId !== attacker.id,
+                            `far helper (> aidRadius 10) did not acquire target: targetId ${helperFar.data.combat.targetId}`);
+
+                        t.check("faction_aid_isolated", otherFac.data.combat.targetId !== attacker.id,
+                            `other faction helper did not join: targetId ${otherFac.data.combat.targetId}`);
+                    } finally {
+                        UF.Events.off("combat:aid", onAid);
+                        for (const u of [victim, helperClose, helperFar, otherFac, attacker]) {
+                            made.delete(u.id);
+                            if (w.unit(u.id)) w.removeUnit(u.id);
+                        }
+                    }
+                }
 
                 // 14. perf: 100 units fighting (50 pairs), zoom 1/3 so all are drawn; the combat loop plus hitsplats and bars per frame.
                 {
