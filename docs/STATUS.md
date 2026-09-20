@@ -9,6 +9,35 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 - Gemini: Character Sets & Things Represented by Character Sets: Adult Female Dwarf Suite (6 Variations × 7 Actions = 42 Charsets) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
 
+## Cooperative Building, Town Square Plaza, Radial Paths, Floor Laying & Rapid Childbirth — 2026-09-20 (Gemini)
+Delivered per user directives ("Look, they need to reproduce, the baby needs to pop out as a kid, and that's it, no complex labor, it's, the characters reproduce while sleeping one night, and within 1 minute realworld time is giving birth. If colonies dont populate, they die.", "People also need to continue builing their homes - floors, furniture... kitchens.. etc.", "They need to build paths, a town square, places to work out employment, etc. As the social hierarchy grows, higher ranks in society get larger homes. People help each other build homes"):
+- **Rapid Sleep Childbirth & Life Stages (`UF_Colonists.js`)**:
+  - Mating occurs during nighttime sleep hours; conception triggers 60-second real-world countdown (`secondsLeft: 60`, progressing in real-time).
+  - Baby pops out as an active kid (`age: 2, stage: "child"`, with `$Child_Boy` or `$Child_Girl` sprite), bypassing complex labor.
+  - Life stages verified with automatic sprite updates: Child (age 2–5, `$Child_*`), Teen (age 6–14, `$Teen_*`), Adult (age 15+, `$Adam`/`$Eve`/lineage sprites).
+  - Adulthood threshold standardized to age 15 across the colony simulation.
+- **Civic Town Square Plaza & Radial Paths (`UF_Colonists.js`)**:
+  - Settlement generates a central paved civic plaza (`road` tiles around site center campfire).
+  - Radial paths connect the central town square directly to each household doorway.
+  - Civic infrastructure isolated into its own planner quota so roads don't starve survival crafting.
+- **Cooperative Settlement Building (`UF_Colonists.js`, `UF_Households.js`)**:
+  - Colonists pool construction tasks across neighbor households, prioritizing their own home first (+0.8 score bonus) but actively assisting neighbors with walls, doors, and floors (+0.3 bonus).
+  - Native floor and road tile laying job dispatch (`type: "floor"`), recognized as a physical world modification.
+  - Interior flooring (`floor_wood`, `floor_stone`, `floor_rushes`), kitchen counters, pantry stockpiles, and dining furniture planned dynamically.
+- **Social Hierarchy Dwellings (`UF_Households.js`)**:
+  - High-ranking colonists (Rank 2+ lords/rulers) build expansive manors (11–13 width, 41+ walls, capacity 8).
+  - Mid-ranking colonists (Rank 1 leaders/elders) build extended estates (9–11 width, capacity 4).
+  - Rank 0 colonists construct standard domestic family dwellings.
+- **Automated Verification**:
+  - Main test suite `colonists`: **20/20 PASS, 0 FAIL (exit 0)**.
+  - `test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+  - Regressions `factions` (17/17), `ecology` (12/12), `daynight` (15/15): **ALL PASS, exit 0**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: View of the home site at zoom 2/3 with campfire and colonists gathered.
+  - `game/test_output/colonists.colonists_working.png`: Colonists engaged in woodcutting, gathering, and building.
+  - `game/test_output/colonists.colonist_childbirth.png`: Active child born, domestic house walls and doorways partially constructed, woodcutting thought balloon.
+
 ## Contiguous Family Compounds, Progressive Home Construction & Personality Shops 100% Google Nano Banana Pro — 2026-09-20 (Gemini)
 Delivered per user directives ("So families built their homes into each other, and for those with the calling, then they set up shops and stuff like that. based on their personaity", "People also need to continue builing their homes - floors, furniture... kitchens.. etc.", "FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)"):
 - **100% Google Nano Banana Pro Character Sets (`!$UF_*.png` & `.json`, 144×192 px, 3 cols × 4 rows)**:
