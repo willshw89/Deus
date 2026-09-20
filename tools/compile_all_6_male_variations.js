@@ -127,6 +127,7 @@ function compileAll() {
 
         const baseName = `Human_Male_${v.num}`;
         saveSheetAndSidecar(sheet, baseName, 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
+        saveSheetAndSidecar(sheet, `${baseName}_Walk`, 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
         writePNG(path.join(REVIEW_DIR, `pro_male_var${v.num}_walk_12_sheet.png`), 144, 192, sheet);
 
         if (v.num === 1) {
@@ -135,6 +136,7 @@ function compileAll() {
             saveSheetAndSidecar(sheet, 'Human_Male', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
             saveSheetAndSidecar(sheet, 'Human_Male_Adult', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
             saveSheetAndSidecar(sheet, 'Human', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
+            writePNG(path.join(ROOT, 'game', 'img', 'characters', '$Adam.png'), 144, 192, sheet);
         }
 
         compiledSheets.push({ ...v, sheet });

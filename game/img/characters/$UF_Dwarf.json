@@ -1,8 +1,4 @@
 {
-  "id": "$UF_Dwarf",
-  "species": "dwarf",
-  "gender": "male",
-  "stage": "adult",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -20,15 +16,22 @@
     "N"
   ],
   "animations": {
-    "stand": [
-      1
-    ],
     "walk": [
       0,
       1,
       2,
       1
+    ],
+    "stand": [
+      1
     ]
   },
-  "frameMs": 150
+  "frameMs": 180,
+  "species": "dwarf",
+  "stage": "adult",
+  "gender": "male",
+  "variation": 1,
+  "action": "Walk",
+  "style": "Serious Chibi (VISION V116)",
+  "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }

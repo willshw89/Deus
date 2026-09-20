@@ -140,6 +140,7 @@ function compileVariation(v) {
         saveSheetAndSidecar(walkSheet, 'Human_Female_Walk', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
         saveSheetAndSidecar(walkSheet, 'Human_Female', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
         saveSheetAndSidecar(walkSheet, 'Eve', 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
+        writePNG(path.join(CHAR_DIR, '$Eve.png'), 144, 192, walkSheet);
     }
 
     // 2. HAUL

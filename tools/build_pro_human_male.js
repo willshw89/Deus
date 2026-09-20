@@ -74,8 +74,11 @@ const pal = loadPalette();
 const C_DARK_OUTLINE = pal.snap(24, 16, 10);
 
 function isMagenta(r, g, b) {
-    // Magenta background has high red and high blue, low green
-    return (r > 130 && b > 130 && g < 100);
+    // Magenta chroma key (high red and high blue, low green)
+    if (r > 130 && b > 130 && g < 100) return true;
+    // Cyan chroma key (low red, high green and high blue)
+    if (r < 70 && g > 130 && b > 130) return true;
+    return false;
 }
 
 function applyDarkOutline(buf, w, h) {
@@ -146,7 +149,7 @@ function quantizeSheet(buf, w, h, maxColors = 31) {
     }
 }
 
-function extractFrameFromCell(img, minX, maxX, minY, maxY, targetH = 43) {
+function extractFrameFromCell(img, minX, maxX, minY, maxY, targetH = 43, maxW = 44) {
     const startX = minX + 15, endX = maxX - 15;
     const startY = minY + 15, endY = maxY - 15;
 
@@ -168,9 +171,12 @@ function extractFrameFromCell(img, minX, maxX, minY, maxY, targetH = 43) {
 
     const origW = sMaxX - sMinX + 1;
     const origH = sMaxY - sMinY + 1;
-    const scale = targetH / origH;
+    let scale = targetH / origH;
+    if (origW * scale > maxW) {
+        scale = maxW / origW;
+    }
     const outW = Math.round(origW * scale);
-    const outH = targetH;
+    const outH = Math.round(origH * scale);
 
     const out = Buffer.alloc(48 * 48 * 4);
     const dstBaseline = 47;
@@ -218,12 +224,46 @@ function extractFrameFromCell(img, minX, maxX, minY, maxY, targetH = 43) {
     return out;
 }
 
+function checkFrameFacing(frame, w = 48, h = 48) {
+    let leftSkin = 0, rightSkin = 0;
+    let leftAlpha = 0, rightAlpha = 0;
+    for (let py = 8; py < 34; py++) {
+        for (let px = 0; px < 24; px++) {
+            const idx = (py * w + px) * 4;
+            if (frame[idx + 3] > 50) {
+                leftAlpha++;
+                const r = frame[idx], g = frame[idx + 1], b = frame[idx + 2];
+                if ((r > 130 && g > 80 && b > 50) || (g > r && g > b && g > 80)) leftSkin++;
+            }
+        }
+        for (let px = 24; px < 48; px++) {
+            const idx = (py * w + px) * 4;
+            if (frame[idx + 3] > 50) {
+                rightAlpha++;
+                const r = frame[idx], g = frame[idx + 1], b = frame[idx + 2];
+                if ((r > 130 && g > 80 && b > 50) || (g > r && g > b && g > 80)) rightSkin++;
+            }
+        }
+    }
+    const skinDiff = leftSkin - rightSkin;
+    const alphaDiff = leftAlpha - rightAlpha;
+    return (skinDiff > 5) ? 'LEFT' : (skinDiff < -5) ? 'RIGHT' : (alphaDiff > 0) ? 'LEFT' : 'RIGHT';
+}
+
 function assemble12SpriteSheet(framesByFacing) {
     const buf = Buffer.alloc(144 * 192 * 4);
+
+    // Standardize West (Row 1) to ALL LEFT (VISION V110, Rule 12)
+    const westFrames = framesByFacing.W.map(f => (checkFrameFacing(f) === 'RIGHT' ? mirrorFrame(f) : f));
+    // Standardize East (Row 2) to ALL RIGHT (either mirrored West or normalized East)
+    const eastFrames = framesByFacing.E
+        ? framesByFacing.E.map(f => (checkFrameFacing(f) === 'LEFT' ? mirrorFrame(f) : f))
+        : westFrames.map(mirrorFrame);
+
     const rows = [
         framesByFacing.S,
-        framesByFacing.W,
-        framesByFacing.E || framesByFacing.W.map(mirrorFrame),
+        westFrames,
+        eastFrames,
         framesByFacing.N
     ];
 
@@ -272,12 +312,83 @@ function saveSheetAndSidecar(buf, baseName, actionTag, animations) {
     console.log(`Saved $UF_${baseName}.png and .json (quantized <= 31 colors, grounded y=47)`);
 }
 
+const UNIFORM_SCALE = 43.0 / 234.0;
+
+function extractUniformCell(img, minX, maxX, minY, maxY) {
+    const startX = minX + 5, endX = maxX - 5;
+    const startY = minY + 5, endY = maxY - 5;
+
+    let sMinX = Infinity, sMaxX = -Infinity, sMinY = Infinity, sMaxY = -Infinity;
+    for (let y = startY; y <= endY; y++) {
+        for (let x = startX; x <= endX; x++) {
+            const idx = (y * img.width + x) * 4;
+            const r = img.data[idx], g = img.data[idx+1], b = img.data[idx+2];
+            if (!isMagenta(r, g, b)) {
+                if (x < sMinX) sMinX = x;
+                if (x > sMaxX) sMaxX = x;
+                if (y < sMinY) sMinY = y;
+                if (y > sMaxY) sMaxY = y;
+            }
+        }
+    }
+
+    if (sMinX === Infinity) return Buffer.alloc(48 * 48 * 4);
+
+    const out = Buffer.alloc(48 * 48 * 4);
+    const rawFootY = sMaxY;
+    const rawCenterX = (sMinX + sMaxX) / 2;
+
+    for (let outY = 0; outY < 48; outY++) {
+        const dyFromBase = 47 - outY;
+        const rawY0 = Math.round(rawFootY - (dyFromBase + 1) / UNIFORM_SCALE);
+        const rawY1 = Math.round(rawFootY - dyFromBase / UNIFORM_SCALE);
+
+        if (rawY1 < sMinY || rawY0 > sMaxY || rawY1 < 0 || rawY0 >= img.height) continue;
+
+        for (let outX = 0; outX < 48; outX++) {
+            const dxFromCenter = outX - 24;
+            const rawX0 = Math.round(rawCenterX + dxFromCenter / UNIFORM_SCALE);
+            const rawX1 = Math.round(rawCenterX + (dxFromCenter + 1) / UNIFORM_SCALE);
+
+            if (rawX1 < sMinX || rawX0 > sMaxX || rawX1 < 0 || rawX0 >= img.width) continue;
+
+            let sumR = 0, sumG = 0, sumB = 0, count = 0;
+            for (let ry = Math.max(sMinY, rawY0); ry <= Math.min(sMaxY, rawY1); ry++) {
+                for (let rx = Math.max(sMinX, rawX0); rx <= Math.min(sMaxX, rawX1); rx++) {
+                    const idx = (ry * img.width + rx) * 4;
+                    const r = img.data[idx], g = img.data[idx+1], b = img.data[idx+2];
+                    if (!isMagenta(r, g, b)) {
+                        sumR += r; sumG += g; sumB += b;
+                        count++;
+                    }
+                }
+            }
+
+            if (count > 0) {
+                const sn = pal.snap(Math.round(sumR / count), Math.round(sumG / count), Math.round(sumB / count));
+                const dIdx = (outY * 48 + outX) * 4;
+                out[dIdx]     = sn[0];
+                out[dIdx + 1] = sn[1];
+                out[dIdx + 2] = sn[2];
+                out[dIdx + 3] = 255;
+            }
+        }
+    }
+
+    applyDarkOutline(out, 48, 48);
+    return out;
+}
+
 module.exports = {
     pal,
+    isMagenta,
+    applyDarkOutline,
     extractFrameFromCell,
+    extractUniformCell,
     mirrorFrame,
     assemble12SpriteSheet,
     saveSheetAndSidecar,
-    quantizeSheet
+    quantizeSheet,
+    checkFrameFacing
 };
 

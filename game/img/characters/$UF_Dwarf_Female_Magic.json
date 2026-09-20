@@ -1,0 +1,35 @@
+{
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "cast": [
+      0,
+      1,
+      2
+    ],
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 180,
+  "species": "dwarf",
+  "stage": "adult",
+  "gender": "female",
+  "action": "Magic",
+  "style": "Serious Chibi (VISION V116)",
+  "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
+}

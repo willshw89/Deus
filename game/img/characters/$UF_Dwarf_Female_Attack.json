@@ -1,7 +1,4 @@
 {
-  "id": "$UF_Dwarf_Female_Attack",
-  "species": "dwarf",
-  "gender": "female",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -23,7 +20,16 @@
       0,
       1,
       2
+    ],
+    "stand": [
+      0
     ]
   },
-  "frameMs": 120
+  "frameMs": 180,
+  "species": "dwarf",
+  "stage": "adult",
+  "gender": "female",
+  "action": "Attack",
+  "style": "Serious Chibi (VISION V116)",
+  "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }
