@@ -14,8 +14,10 @@
  */
 (() => {
     "use strict";
-    const DOMAINS = ["building", "gathering", "woodcutting", "mining", "crafting", "cooking", "smithing", "hauling", "hunting"];
-    const WORK = { build: "building", floor: "building", gather: "gathering", pick: "gathering", chop: "woodcutting", mine: "mining", quarry: "mining", fetch: "hauling", haul: "hauling", hunt: "hunting" };
+    const DOMAINS = ["building", "gathering", "woodcutting", "mining", "crafting", "cooking", "smithing", "hauling", "hunting", "farming"];
+    const FARM_JOBS = ["farm_till", "farm_plant", "farm_tend", "farm_harvest"];
+    const WORK = { build: "building", floor: "building", gather: "gathering", pick: "gathering", chop: "woodcutting", mine: "mining", quarry: "mining", fetch: "hauling", haul: "hauling", hunt: "hunting",
+        farm_till: "farming", farm_plant: "farming", farm_tend: "farming", farm_harvest: "farming" };
     const MECHANICS = {
         human: { id: "apprentice_observation", text: "Nearby adults observe successful work and favour practising what they have seen." },
         elf: { id: "renewable_sources", text: "When the same resource is available, prefer a regrowing source." },
@@ -77,6 +79,9 @@
             for (const d of DOMAINS) preferences[d] = Math.round(35 + roll(u.id, d) * 30);
             p = s.people[u.id] = { id: u.id, faction: f.id, species: u.data.species || f.species, preferences, practices: {}, exposure: {}, generation: 0, parents: [], lastJob: 0, inherited: false, batch: null };
         }
+        // Add new practice domains to older records without rerolling any finite saved taste.
+        p.preferences = p.preferences || {};
+        for (const d of DOMAINS) if (!Number.isFinite(p.preferences[d])) p.preferences[d] = Math.round(35 + roll(u.id, d) * 30);
         // This mirror is replaced after JSON load, without overwriting facets or skills.
         u.data.preferences = p.preferences;
         return p;
@@ -101,6 +106,11 @@
         if (!job || job.state !== "done" || !Number.isInteger(job.id) || job.id <= 0 || !person(u) || u.data.dead) return false;
         if (job.assigned !== undefined && job.assigned !== null && job.assigned !== u.id) return false;
         if (job.target && !samePlace(job.target, u)) return false;
+        if (FARM_JOBS.includes(job.type)) {
+            const agriculture = window.UF && UF.Agriculture;
+            // Only the owning system can verify the actual plot revision/cycle and physical outputs.
+            return !!(agriculture && agriculture.confirmedJob && agriculture.confirmedJob(job, u) === true);
+        }
         const params = job.params || {}, I = window.UF && UF.Items, O = window.UF && UF.Objects;
         if (job.type === "build") {
             const target = job.target, t = objectType(params.objectId);
@@ -139,6 +149,13 @@
         const hp = householdPractice(u); if (hp) hp[d] = (hp[d] || 0) + 1;
         const key = job.type === "craft" ? `recipe:${job.params.recipeId}` : job.type === "build" ? `building:${job.params.objectId}` : `work:${d}`;
         if (!Object.prototype.hasOwnProperty.call(f.knowledge, key)) f.knowledge[key] = { by: u.id, tick: tick(), generation: p.generation };
+        if (job.type === "build") {
+            const tech = constructionTech(u);
+            if (tech && tech.key && !Object.prototype.hasOwnProperty.call(f.knowledge, tech.key)) {
+                f.knowledge[tech.key] = { by: u.id, tick: tick(), generation: p.generation, tier: tech.tier };
+                emit("culture:techUnlocked", f.id, tech.key, tech.tier);
+            }
+        }
         if (job.type === "craft") {
             const id = job.params.recipeId;
             p.batch = p.batch && p.batch.recipe === id ? { recipe: id, count: p.batch.count + 1 } : { recipe: id, count: 1 };
@@ -247,6 +264,132 @@
         const entries = p ? Object.entries(p.practices).filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])) : [];
         return entries.length ? entries[0][0] : null;
     }
+    function factionPopulation(ref) {
+        const f = factionOf(ref);
+        if (f && Number.isFinite(f.population) && f.population > 0) return f.population;
+        const fid = factionId(ref);
+        const w = W();
+        if (!w || !w.units) return 0;
+        return w.units().filter(u => person(u) && !u.data.dead && factionId(u) === fid).length;
+    }
+    function constructionTier(ref) {
+        const f = ensureFaction(ref);
+        if (!f) return 0;
+        const pop = factionPopulation(ref);
+        const buildCount = (f.practices && f.practices["building"]) || 0;
+        const craftCount = (f.practices && f.practices["crafting"]) || 0;
+        const dwarfBonus = (f.species === "dwarf") ? 8 : 0;
+        const autoBonus = (f.species === "automaton") ? 10 : 0;
+        const expScore = pop + Math.floor(buildCount * 0.8) + Math.floor(craftCount * 0.3) + dwarfBonus + autoBonus;
+
+        if ((expScore >= 100 && buildCount >= 40) || buildCount >= 60) return 4; // Monumental Citadel
+        if ((expScore >= 50 && buildCount >= 20) || buildCount >= 30)  return 3; // Ashlar & Civic Works
+        if ((expScore >= 25 && buildCount >= 10) || buildCount >= 15)  return 2; // Masonry & Kilns
+        if ((expScore >= 10 && buildCount >= 4)  || buildCount >= 6)   return 1; // Hewn Settlement
+        return 0;                                                                // Frontier Pioneer
+    }
+    const CONSTRUCTION_TIERS = [
+        {
+            tier: 0,
+            name: "Frontier Pioneer",
+            key: "tech:pioneer",
+            walls: ["wall_wood"],
+            doors: ["door_wood"],
+            materials: ["log", "stone", "straw"],
+            workplaces: ["campfire", "workbench"],
+            sturdinessMultiplier: 1.0,
+            wallHp: 100,
+            maxStories: 1
+        },
+        {
+            tier: 1,
+            name: "Hewn Settlement",
+            key: "tech:hewn_settlement",
+            walls: ["wall_wood", "wall_timber_frame"],
+            doors: ["door_wood"],
+            materials: ["log", "stone", "straw", "plank_dressed"],
+            workplaces: ["campfire", "workbench", "furnace"],
+            sturdinessMultiplier: 1.25,
+            wallHp: 160,
+            maxStories: 1
+        },
+        {
+            tier: 2,
+            name: "Masonry & Kilns",
+            key: "tech:masonry_kilns",
+            walls: ["wall_timber_frame", "wall_brick"],
+            doors: ["door_wood", "door_stone"],
+            materials: ["brick_clay", "mortar_lime", "clay", "sand", "plank_dressed"],
+            workplaces: ["pottery_kiln", "mason_bench", "furnace", "smithy"],
+            sturdinessMultiplier: 1.75,
+            wallHp: 240,
+            maxStories: 2
+        },
+        {
+            tier: 3,
+            name: "Ashlar & Civic Works",
+            key: "tech:ashlar_architecture",
+            walls: ["wall_brick", "wall_ashlar", "wall_stone"],
+            doors: ["door_stone", "door_iron"],
+            materials: ["stone_block", "mortar_lime", "hardware_iron", "brick_clay"],
+            workplaces: ["pottery_kiln", "mason_bench", "furnace", "smithy"],
+            sturdinessMultiplier: 2.5,
+            wallHp: 350,
+            maxStories: 2
+        },
+        {
+            tier: 4,
+            name: "Monumental Citadel",
+            key: "tech:monumental_citadel",
+            walls: ["wall_ashlar"],
+            doors: ["door_stone", "door_iron"],
+            materials: ["stone_block", "mortar_lime", "hardware_iron"],
+            workplaces: ["pottery_kiln", "mason_bench", "furnace", "smithy"],
+            sturdinessMultiplier: 3.5,
+            wallHp: 500,
+            maxStories: 3
+        }
+    ];
+    function constructionTech(ref) {
+        const tier = constructionTier(ref);
+        return CONSTRUCTION_TIERS[tier] || CONSTRUCTION_TIERS[0];
+    }
+    function preferredWall(ref) {
+        const f = ensureFaction(ref);
+        if (!f) return "wall_wood";
+        const tier = constructionTier(ref);
+        const spec = f.species || "";
+        if (spec === "dwarf") {
+            return tier >= 3 ? "wall_ashlar" : "wall_stone";
+        }
+        if (spec === "elf") {
+            return tier >= 3 ? "wall_timber_frame" : "wall_wood";
+        }
+        if (spec === "automaton") {
+            return tier >= 3 ? "wall_ashlar" : "wall_stone";
+        }
+        if (spec === "goblin") {
+            if (tier >= 3) return "wall_brick";
+            if (tier >= 1) return "wall_wood";
+            return "rubble_pillar";
+        }
+        // Humans, Gnomes, Orcs:
+        if (tier >= 3) return "wall_ashlar";
+        if (tier === 2) return "wall_brick";
+        if (tier === 1) return "wall_timber_frame";
+        return "wall_wood";
+    }
+    function preferredDoor(ref) {
+        const f = ensureFaction(ref);
+        if (!f) return "door_wood";
+        const tier = constructionTier(ref);
+        const spec = f.species || "";
+        if (spec === "dwarf" || spec === "automaton") {
+            return tier >= 3 ? "door_iron" : "door_stone";
+        }
+        if (tier >= 3) return "door_stone";
+        return "door_wood";
+    }
     function initialize() { if (!W() || !W().state) return; for (const f of (W().state.factions && W().state.factions.list) || []) ensureFaction(f.id); for (const u of W().units()) ensurePerson(u); }
     let hooked = false;
     function hook() {
@@ -259,7 +402,13 @@
         UF.Events.on("world:unitRemoved", u => { const p = person(u) && state() && state().people[u.id]; if (p && u.data.dead) p.deceased = true; });
     }
     window.UF = window.UF || {};
-    UF.CultureGrowth = { state, ensureFaction, ensurePerson, priorityFor, recordJob, inherit, describeFaction, mechanicFor, rankCandidates, domainOf, professionFor, initialize, DOMAINS: DOMAINS.slice() };
+    UF.CultureGrowth = {
+        state, ensureFaction, ensurePerson, priorityFor, recordJob, inherit,
+        describeFaction, mechanicFor, rankCandidates, domainOf, professionFor,
+        initialize, DOMAINS: DOMAINS.slice(),
+        factionPopulation, constructionTier, constructionTech, preferredWall, preferredDoor,
+        CONSTRUCTION_TIERS: CONSTRUCTION_TIERS.slice()
+    };
     const boot = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() { hook(); boot.call(this); };
 })();

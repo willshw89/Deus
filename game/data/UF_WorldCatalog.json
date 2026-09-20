@@ -2960,6 +2960,231 @@
         "skeleton",
         "lootable"
       ]
+    },
+    {
+      "id": "clay_deposit",
+      "name": "Clay deposit",
+      "image": "!$UF_Gravel",
+      "tint": "#b06030",
+      "tags": [
+        "resource",
+        "clay",
+        "earth"
+      ],
+      "actions": {
+        "gather": {
+          "work": 60,
+          "yields": {
+            "clay": 2
+          },
+          "becomes": null
+        },
+        "quarry": {
+          "work": 80,
+          "yields": {
+            "clay": 3
+          },
+          "becomes": null
+        }
+      }
+    },
+    {
+      "id": "sand_deposit",
+      "name": "Sand bank",
+      "image": "!$UF_Gravel",
+      "tint": "#d8c070",
+      "tags": [
+        "resource",
+        "sand",
+        "earth"
+      ],
+      "actions": {
+        "gather": {
+          "work": 50,
+          "yields": {
+            "sand": 3
+          },
+          "becomes": null
+        }
+      }
+    },
+    {
+      "id": "pottery_kiln",
+      "name": "Pottery kiln",
+      "image": "!$UF_Furnace",
+      "tint": "#b05030",
+      "tags": [
+        "building",
+        "workplace",
+        "pottery_kiln",
+        "kiln",
+        "fire",
+        "heat"
+      ],
+      "build": {
+        "items": {
+          "stone": 3
+        },
+        "work": 100
+      },
+      "ruin": "rubble"
+    },
+    {
+      "id": "mason_bench",
+      "name": "Mason's bench",
+      "image": "!$UF_Workbench",
+      "tint": "#888898",
+      "tags": [
+        "building",
+        "workplace",
+        "mason_bench",
+        "masonry",
+        "crafting"
+      ],
+      "build": {
+        "items": {
+          "stone": 3,
+          "log": 1
+        },
+        "work": 90
+      },
+      "ruin": "rubble"
+    },
+    {
+      "id": "wall_timber_frame",
+      "name": "Reinforced timber wall",
+      "image": "!$WallWood_Set",
+      "tint": "#d8a860",
+      "autotile": "wall",
+      "tags": [
+        "building",
+        "wall",
+        "wood",
+        "reinforced"
+      ],
+      "actions": {
+        "chop": {
+          "work": 160,
+          "yields": {
+            "plank_dressed": 2
+          },
+          "becomes": null
+        },
+        "mine": {
+          "work": 160,
+          "yields": {
+            "plank_dressed": 2
+          },
+          "becomes": null
+        },
+        "dismantle": {
+          "work": 120,
+          "yields": {
+            "plank_dressed": 2,
+            "hardware_iron": 1
+          },
+          "becomes": null
+        }
+      },
+      "build": {
+        "items": {
+          "plank_dressed": 2,
+          "hardware_iron": 1
+        },
+        "work": 120
+      },
+      "ruin": "rubble"
+    },
+    {
+      "id": "wall_brick",
+      "name": "Brick wall",
+      "image": "!$WallStone_Set",
+      "tint": "#b05030",
+      "autotile": "wall",
+      "tags": [
+        "building",
+        "wall",
+        "stone",
+        "brick"
+      ],
+      "actions": {
+        "quarry": {
+          "work": 200,
+          "yields": {
+            "brick_clay": 2
+          },
+          "becomes": "rubble"
+        },
+        "mine": {
+          "work": 200,
+          "yields": {
+            "brick_clay": 2
+          },
+          "becomes": "rubble"
+        },
+        "dismantle": {
+          "work": 160,
+          "yields": {
+            "brick_clay": 2,
+            "mortar_lime": 1
+          },
+          "becomes": null
+        }
+      },
+      "build": {
+        "items": {
+          "brick_clay": 2,
+          "mortar_lime": 1
+        },
+        "work": 140
+      },
+      "ruin": "rubble"
+    },
+    {
+      "id": "wall_ashlar",
+      "name": "Ashlar stone wall",
+      "image": "!$WallStone_Set",
+      "tint": "#e0e0e8",
+      "autotile": "wall",
+      "tags": [
+        "building",
+        "wall",
+        "stone",
+        "fortified",
+        "ashlar"
+      ],
+      "actions": {
+        "quarry": {
+          "work": 280,
+          "yields": {
+            "stone_block": 2
+          },
+          "becomes": "rubble"
+        },
+        "mine": {
+          "work": 280,
+          "yields": {
+            "stone_block": 2
+          },
+          "becomes": "rubble"
+        },
+        "dismantle": {
+          "work": 220,
+          "yields": {
+            "stone_block": 2,
+            "mortar_lime": 1
+          },
+          "becomes": null
+        }
+      },
+      "build": {
+        "items": {
+          "stone_block": 2,
+          "mortar_lime": 1
+        },
+        "work": 200
+      },
+      "ruin": "rubble"
     }
   ],
   "items": {
@@ -4137,6 +4362,105 @@
             }
           }
         }
+      },
+      {
+        "id": "clay",
+        "name": "Clay",
+        "image": "!$UF_Gravel",
+        "tint": "#b06030",
+        "tags": [
+          "material",
+          "earth",
+          "clay"
+        ],
+        "stack": 10,
+        "material": "earth",
+        "weight": 1.5
+      },
+      {
+        "id": "sand",
+        "name": "Sand",
+        "image": "!$UF_Gravel",
+        "tint": "#d8c070",
+        "tags": [
+          "material",
+          "earth",
+          "sand"
+        ],
+        "stack": 10,
+        "material": "earth",
+        "weight": 1.5
+      },
+      {
+        "id": "brick_clay",
+        "name": "Fired brick",
+        "image": "!$UF_Item_Stone",
+        "tint": "#b04828",
+        "tags": [
+          "material",
+          "building",
+          "brick"
+        ],
+        "stack": 10,
+        "material": "ceramic",
+        "weight": 2.0
+      },
+      {
+        "id": "mortar_lime",
+        "name": "Slaked lime mortar",
+        "image": "!$UF_Item_Straw",
+        "tint": "#e8e8dc",
+        "tags": [
+          "material",
+          "building",
+          "mortar"
+        ],
+        "stack": 10,
+        "material": "mineral",
+        "weight": 1.2
+      },
+      {
+        "id": "stone_block",
+        "name": "Ashlar stone block",
+        "image": "!$UF_Item_Stone",
+        "tint": "#d0d0d8",
+        "tags": [
+          "material",
+          "building",
+          "cut_stone"
+        ],
+        "stack": 10,
+        "material": "stone",
+        "weight": 3.0
+      },
+      {
+        "id": "plank_dressed",
+        "name": "Dressed timber plank",
+        "image": "!$UF_Item_Log",
+        "tint": "#d0a060",
+        "tags": [
+          "material",
+          "building",
+          "timber",
+          "wood"
+        ],
+        "stack": 10,
+        "material": "wood",
+        "weight": 1.8
+      },
+      {
+        "id": "hardware_iron",
+        "name": "Iron construction hardware",
+        "image": "!$UF_Item_Bone",
+        "tint": "#707888",
+        "tags": [
+          "material",
+          "hardware",
+          "metal"
+        ],
+        "stack": 20,
+        "material": "iron",
+        "weight": 0.5
       }
     ]
   },
@@ -4809,6 +5133,98 @@
         "ability": "str",
         "material": "iron",
         "quality": true
+      },
+      {
+        "id": "fire_brick",
+        "name": "Fire clay bricks",
+        "inputs": {
+          "clay": 2
+        },
+        "outputs": {
+          "brick_clay": 2
+        },
+        "work": 90,
+        "at": "pottery_kiln",
+        "skill": "crafting"
+      },
+      {
+        "id": "lime_mortar",
+        "name": "Slake lime mortar",
+        "inputs": {
+          "stone": 1,
+          "sand": 1
+        },
+        "outputs": {
+          "mortar_lime": 2
+        },
+        "work": 80,
+        "at": "pottery_kiln",
+        "skill": "crafting"
+      },
+      {
+        "id": "chisel_stone_block",
+        "name": "Chisel ashlar stone block",
+        "inputs": {
+          "stone": 2
+        },
+        "outputs": {
+          "stone_block": 1
+        },
+        "work": 100,
+        "at": "mason_bench",
+        "skill": "stonework"
+      },
+      {
+        "id": "plane_planks",
+        "name": "Plane timber planks",
+        "inputs": {
+          "log": 1
+        },
+        "outputs": {
+          "plank_dressed": 2
+        },
+        "work": 80,
+        "at": "workbench",
+        "skill": "carpentry"
+      },
+      {
+        "id": "forge_hardware",
+        "name": "Forge construction hardware",
+        "inputs": {
+          "bar_iron": 1
+        },
+        "outputs": {
+          "hardware_iron": 4
+        },
+        "work": 90,
+        "at": "smithy",
+        "skill": "smithing"
+      },
+      {
+        "id": "sift_sand",
+        "name": "Sift sand from stone",
+        "inputs": {
+          "stone": 1
+        },
+        "outputs": {
+          "sand": 2
+        },
+        "work": 60,
+        "at": "workbench",
+        "skill": "crafting"
+      },
+      {
+        "id": "dig_clay",
+        "name": "Extract clay from earth",
+        "inputs": {
+          "stone": 1
+        },
+        "outputs": {
+          "clay": 2
+        },
+        "work": 60,
+        "at": "workbench",
+        "skill": "crafting"
       }
     ]
   },

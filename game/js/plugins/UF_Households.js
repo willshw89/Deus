@@ -341,11 +341,15 @@
         }
         const o = O(), culture = C() && C().culture(u) || {};
         if (!c || !samePlace(h, c) || !o) { h.reason = "No same-level settlement"; return null; }
-        let wall = culture.wall || "wall_wood";
-        const door = culture.door || "door_wood";
+        let wall = (window.UF && UF.CultureGrowth && UF.CultureGrowth.preferredWall) ?
+            UF.CultureGrowth.preferredWall(h.faction) : (culture.wall || "wall_wood");
+        let door = (window.UF && UF.CultureGrowth && UF.CultureGrowth.preferredDoor) ?
+            UF.CultureGrowth.preferredDoor(h.faction) : (culture.door || "door_wood");
         // Some approved cultures start with a ruin-style wall descriptor that
         // has no recipe. Only their own existing laterWall is a valid fallback.
         if ((!o.type(wall) || !o.type(wall).build) && culture.laterWall && o.type(culture.laterWall) && o.type(culture.laterWall).build) wall = culture.laterWall;
+        if (!o.type(wall) || !o.type(wall).build) wall = "wall_wood";
+        if (!o.type(door) || !o.type(door).build) door = "door_wood";
         if ([wall, door, ...SUPPORTED].some(id => !o.type(id) || !o.type(id).build)) { h.reason = "Home building definitions unavailable"; return null; }
         const reserved = new Set(), occupied = new Set(), bootstrap = new Set();
         // Natural passages and their access cells survive later housing growth.
@@ -466,6 +470,8 @@
         const WORKSTATIONS = {
             blacksmith: { station: "smithy", station2: "furnace", title: "Blacksmith", shop: "Forge & Armory" },
             carpenter: { station: "workbench", station2: "chest_wood", title: "Carpenter", shop: "Woodcraft Shop" },
+            potter: { station: "pottery_kiln", station2: "chest_wood", title: "Potter & Brickmaker", shop: "Kiln & Brickyard" },
+            mason: { station: "mason_bench", station2: "chest_wood", title: "Stone Mason", shop: "Mason's Yard" },
             bowyer: { station: "bowyer_bench", station2: "fletcher_bench", title: "Bowyer & Fletcher", shop: "Archery Shop" },
             tanner: { station: "tanning_rack", station2: "chest_wood", title: "Tanner & Furrier", shop: "Leather Shop" },
             apothecary: { station: "apothecary_bench", station2: "kitchen_pantry", title: "Apothecary", shop: "Apothecary" },
@@ -476,6 +482,8 @@
         const CALLING_TO_STATION = {
             blacksmith: "blacksmith", weaponsmith: "blacksmith", armorsmith: "blacksmith",
             carpenter: "carpenter",
+            potter: "potter", brickmaker: "potter",
+            mason: "mason", stonemason: "mason", stonecutter: "mason",
             fletcher: "bowyer", bowyer: "bowyer",
             tanner: "tanner", leatherworker: "tanner",
             physician: "apothecary", medic: "apothecary", herbalist: "apothecary", surgeon: "apothecary", alchemist: "apothecary",
@@ -505,6 +513,8 @@
         const scores = {
             blacksmith: getF("industriousness") * 1.2 + getF("bravery") * 0.8 + getS("smithing") * 10 + getS("mining") * 5,
             carpenter: getF("curiosity") * 1.0 + getF("industriousness") * 1.0 + getS("carpentry") * 10 + getS("crafting") * 5,
+            potter: getF("industriousness") * 1.0 + getF("patience") * 1.0 + getS("crafting") * 10,
+            mason: getF("industriousness") * 1.1 + getF("bravery") * 0.9 + getS("stonework") * 10 + getS("mining") * 5,
             bowyer: getF("natureAffinity") * 1.2 + getF("patience") * 0.8 + getS("fletching") * 10 + getS("ranged") * 5,
             tanner: getF("industriousness") * 1.0 + getF("tidiness") * 1.0 + getS("leatherwork") * 10,
             apothecary: getF("curiosity") * 1.2 + getF("natureAffinity") * 0.8 + getS("healing") * 10,
@@ -656,6 +666,13 @@
 
             home.steps.push(step("stock_food", null, [home.storage], { stock: ["food"], count: 5, exact: true }));
             home.steps.push(step("stock_wood", null, [home.storage], { stock: ["wood"], count: 5, exact: true }));
+
+            // Stage 6: Refined Wall Sturdiness Upgrades
+            const advancedWall = (window.UF && UF.CultureGrowth && UF.CultureGrowth.preferredWall) ?
+                UF.CultureGrowth.preferredWall(h.faction) : home.wall;
+            if (advancedWall !== home.wall && o.type(advancedWall) && o.type(advancedWall).build) {
+                home.steps.push(step("wall_upgrade", advancedWall, buildableWalls, { upgrade: true }));
+            }
         }
         return home.steps;
     }

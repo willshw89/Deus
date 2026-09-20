@@ -8,6 +8,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Material Refinement Chains, Construction Knowledge Tech Progression & Sturdier Building Styles — 2026-09-20 (Gemini)
+Delivered per user directives ("we need construction knowledge to progress through the faction at about the same rate as expansion so we can get more complex constructions with better materials and stuff. we need to combine/refine materials and have a variety of building materials. I also want refined building styles over time so that construction is sturdier etc."):
+- **Material Refinement & Multi-Component Processing Chains (`game/data/UF_WorldCatalog.json`)**:
+  - Added 7 refined items to `items.types`: `clay`, `sand`, `brick_clay` (fired brick), `mortar_lime` (slaked lime mortar), `stone_block` (ashlar stone block), `plank_dressed` (planed timber), `hardware_iron` (nails, brackets, hinges).
+  - Added 7 objects to `objects`: raw deposits (`clay_deposit`, `sand_deposit`), refining workplaces (`pottery_kiln`, `mason_bench`), and sturdier building walls (`wall_timber_frame`, `wall_brick`, `wall_ashlar`).
+  - Added 7 recipes to `recipes.list`: `fire_brick` (clay at pottery kiln), `lime_mortar` (stone + sand at pottery kiln), `chisel_stone_block` (stone at mason's bench), `plane_planks` (log at workbench), `forge_hardware` (iron bar at smithy), `sift_sand` and `dig_clay` (workbench sifting fallbacks).
+  - High-tier walls require multi-item refined inputs: `wall_brick` requires 2 `brick_clay` + 1 `mortar_lime`; `wall_ashlar` requires 2 `stone_block` + 1 `mortar_lime`; `wall_timber_frame` requires 2 `plank_dressed` + 1 `hardware_iron`.
+- **Faction Construction Knowledge Tech Progression Engine (`game/js/plugins/UF_CultureGrowth.js`)**:
+  - Implemented `factionPopulation(ref)` dynamically resolving population across faction records and active units.
+  - Implemented `constructionTier(ref)` establishing a 5-tier architectural progression paced to population and building practice:
+    - Tier 0: *Frontier Pioneer* (Pop 1-9, Pioneer construction, `wall_wood`, sturdiness 1.0x / 100 HP).
+    - Tier 1: *Hewn Settlement* (Pop >= 10 || 4+ builds, `wall_timber_frame`, sturdiness 1.25x / 160 HP).
+    - Tier 2: *Masonry & Kilns* (Pop >= 25 || 10+ builds, `pottery_kiln`, `mason_bench`, `wall_brick`, sturdiness 1.75x / 240 HP).
+    - Tier 3: *Ashlar & Civic Works* (Pop >= 50 || 20+ builds, `wall_ashlar`, `door_iron`, sturdiness 2.5x / 350 HP, 2 stories).
+    - Tier 4: *Monumental Citadel* (Pop >= 100 || 40+ builds, fortified keeps, sturdiness 3.5x / 500 HP, 3 stories).
+  - Implemented `constructionTech(ref)` returning tier metadata, unlocked material sets, and wall HP ratings.
+  - Implemented `preferredWall(ref)` and `preferredDoor(ref)` culturally harmonized with faction species (e.g. Dwarves favor stone and ashlar; Elves favor timber frame and living wood; Goblins advance from rubble pillar to brick; Humans progress through all 5 tiers).
+  - Enhanced `recordJob` to record unlocked milestone tech keys (`tech:pioneer`, `tech:hewn_settlement`, `tech:masonry_kilns`, `tech:ashlar_architecture`, `tech:monumental_citadel`) into `f.knowledge`.
+- **Household Domestic Integration & In-Place Upgrades (`game/js/plugins/UF_Households.js`, `game/js/plugins/UF_Colonists.js`)**:
+  - In `findPlot`, newly planned homes select `preferredWall` and `preferredDoor` according to the faction's construction knowledge tier.
+  - Expanded `WORKSTATIONS`, `CALLING_TO_STATION`, and calling scoring to include `potter` (`pottery_kiln`, title "Potter & Brickmaker") and `mason` (`mason_bench`, title "Stone Mason").
+  - Added Stage 6 wall sturdiness upgrade step in `planSteps(u)`: when a faction advances its construction knowledge, existing completed homes schedule `wall_upgrade` steps to replace lower-tier walls with higher-tier materials.
+  - Enhanced `buildCells` in `UF_Colonists.js` to mark existing lower-tier walls as `"todo"` when `step.upgrade` is active, enabling in-place wall replacement.
+- **Verification Evidence**:
+  - Automated test suite `tools/test_material_refining_and_tech_pacing.js`: **9/9 PASS, 0 FAIL (exit 0)**.
+  - Rule 4 mutant checks verified: `--mutant=missing_material` (caught, exit 1), `--mutant=broken_recipe_inputs` (caught, exit 1), `--mutant=flat_tech_tier` (caught, exit 1), `--mutant=generic_wall_selection` (caught, exit 1), `--mutant=no_wall_upgrades` (caught, exit 1).
+  - Automated test suite `tools/test_faction_construction_and_homes.js`: **5/5 PASS, 0 FAIL (exit 0)**.
+  - `node tools/generate_asset_inventory.js`: Catalog loaded with 87 objects, 57 item types; 0 missing files; all objects and items have art and states.
+  - In-engine suite `run_tests.bat colonists`: **20/20 PASS, 0 FAIL (exit 0)** in 25s at x8 speed, 0 console errors.
+  - In-engine suite `tools/run_tests.js genetics`: **4/4 PASS, 0 FAIL (exit 0)**.
+  - Screenshot `game/test_output/doors.open_colonist_passing.png` verified showing domestic home structure with solid wall tops and wooden door on meadow terrain.
+
 ## Overworld Props & Chipset Overhaul (Outside_B & Outside_C Nano Banana Pro Originals, Disparate Wall Corner End-Caps) — 2026-09-20 (Gemini)
 Delivered per user directives ("Diagonal corner transitions between disparate wall materials (e.g. wood meeting stone at an orthogonal corner) default to independent end-caps rather than an integrated mixed corner piece. Outside_B and Outside_C still contain stock RMMZ world objects (boulders, signposts, fences) which will be progressively replaced with Google Nano Banana Pro originals. Continue generating necessary assets on nano banana pro"):
 - **Disparate Wall Material Corner Transitions (`game/js/plugins/UF_Walls.js`)**:

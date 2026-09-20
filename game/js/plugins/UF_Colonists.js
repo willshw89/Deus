@@ -86,10 +86,30 @@
         } catch (_) {}
     }
     const Sanitation = () => (window.UF && UF.Sanitation) || null;
-    if (typeof require === "function" && (!window.UF || !UF.Generator)) {
-        try {
-            require("./UF_Generator.js");
-        } catch (_) {}
+    if (!window.UF || !UF.Generator) {
+        if (typeof require === "function") {
+            const candidates = [
+                "./game/js/plugins/UF_Generator.js",
+                "./js/plugins/UF_Generator.js",
+                "./UF_Generator.js",
+                "game/js/plugins/UF_Generator.js",
+                "js/plugins/UF_Generator.js"
+            ];
+            for (const c of candidates) {
+                try {
+                    require(c);
+                    if (window.UF && UF.Generator) break;
+                } catch (_) {}
+            }
+            if (!window.UF || !UF.Generator) {
+                try {
+                    const path = require("path");
+                    const p1 = path.resolve("game/js/plugins/UF_Generator.js");
+                    const p2 = path.resolve("js/plugins/UF_Generator.js");
+                    try { require(p1); } catch (_) { require(p2); }
+                } catch (_) {}
+            }
+        }
     }
     const Generator = () => (window.UF && UF.Generator) || null;
     const emit = (name, ...args) => {
@@ -1897,6 +1917,7 @@
             u.data.stage = "adult";
         }
         const age = u.data.age;
+        u.data.stage = age >= 55 ? "elder" : (age < 12 ? "child" : (age < 15 ? "teen" : "adult"));
         const isMale = u.data.gender === "male";
         const isHuman = !u.data.species || u.data.species === "human";
 
@@ -2125,6 +2146,7 @@
             let state = "todo";
             if (UF.Agriculture && UF.Agriculture.reserved({ area: copyArea(c.area), x, y, z: zOf(c) })) state = "blocked";
             else if (byCount || (here && here.id === t.id)) state = "done";
+            else if (step.upgrade && here && here.id !== t.id && hasTag(here, "wall") && hasTag(t, "wall")) state = "todo";
             else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = step.exact ? "blocked" : "skipped";
             else if (here && here.passable !== true && (!here.actions || !Object.keys(here.actions).length)) state = step.exact ? "blocked" : "skipped";
             else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = step.exact ? "blocked" : "skipped"; // nothing is built on water
@@ -3141,20 +3163,22 @@
             if (newBorn) {
                 newBorn.data.age = 5;
                 Colonists.updateAgeAppearance(newBorn);
-                const childWant = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Child_Boy" : "$Child_Girl");
+                const G = Generator();
+                const genActive = G && typeof G.applyToUnit === "function" && newBorn.image.characterName.startsWith("$gen_");
+                const childWant = genActive ? newBorn.image.characterName : (isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Child_Boy" : "$Child_Girl"));
                 t.check("child_sprite_updates", newBorn.image.characterName === childWant,
                     `child age 5 sprite: ${newBorn.image.characterName}`);
 
                 newBorn.data.age = 14;
                 Colonists.updateAgeAppearance(newBorn);
-                const teenWant = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Teen_Boy" : "$Teen_Girl");
+                const teenWant = genActive ? newBorn.image.characterName : (isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Teen_Boy" : "$Teen_Girl"));
                 t.check("teen_sprite_updates", newBorn.image.characterName === teenWant,
                     `teen age 14 sprite: ${newBorn.image.characterName}`);
 
                 newBorn.data.age = 15;
                 Colonists.updateAgeAppearance(newBorn);
                 const tiers = tiersFor(newBorn.data.species || "human", newBorn.data.gender, newBorn.data.variation);
-                const adultWant = (tiers && tiers[0]) || (isHuman ? (isBoy ? `$UF_Human_Male_${newBorn.data.variation || 1}_Walk` : `$UF_Human_Female_${newBorn.data.variation || 1}_Walk`) : (isBoy ? "$Adam" : "$Eve"));
+                const adultWant = genActive ? newBorn.image.characterName : ((tiers && tiers[0]) || (isHuman ? (isBoy ? `$UF_Human_Male_${newBorn.data.variation || 1}_Walk` : `$UF_Human_Female_${newBorn.data.variation || 1}_Walk`) : (isBoy ? "$Adam" : "$Eve")));
                 t.check("adult_sprite_updates", newBorn.image.characterName === adultWant,
                     `adult age 15 sprite: ${newBorn.image.characterName}`);
             }

@@ -2376,12 +2376,16 @@
    "AR-510"
   ],
   "usedBy": [
-   "object furnace \"Furnace\""
+   "object furnace \"Furnace\"",
+   "object pottery_kiln \"Pottery kiln\" (tint #b05030)"
   ],
   "states": [
-   "building: unbuilt (needs 6 Stone on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
+   "furnace: building: unbuilt (needs 6 Stone on the cell) / built",
+   "furnace: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "pottery_kiln: building: unbuilt (needs 3 Stone on the cell) / built",
+   "pottery_kiln: ruined → Rubble (when its site is sacked)",
+   "pottery_kiln: unlit / lit (a fire: cooking happens next to it)"
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Furnace.png",
@@ -2475,11 +2479,24 @@
    "AR-1901"
   ],
   "usedBy": [
-   "object gravel \"Gravel\""
+   "object gravel \"Gravel\"",
+   "object clay_deposit \"Clay deposit\" (tint #b06030)",
+   "object sand_deposit \"Sand bank\" (tint #d8c070)",
+   "item clay \"Clay\" (tint #b06030)",
+   "item sand \"Sand\" (tint #d8c070)"
   ],
   "states": [
-   "pick: Gravel → gone (yields 1 Stone)",
-   "flat: drawn under units and items"
+   "gravel: pick: Gravel → gone (yields 1 Stone)",
+   "flat: drawn under units and items",
+   "clay_deposit: gather: Clay deposit → gone (yields 2 Clay)",
+   "clay_deposit: quarry: Clay deposit → gone (yields 3 Clay)",
+   "blocks movement (units work from a neighbouring cell)",
+   "sand_deposit: gather: Sand bank → gone (yields 3 Sand)",
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "clay: made by: Extract clay from earth",
+   "clay: used in: Fire clay bricks",
+   "sand: made by: Sift sand from stone",
+   "sand: used in: Slake lime mortar"
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Gravel.png",
@@ -3160,7 +3177,7 @@
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
    "bar_iron: made by: Smelt an iron bar",
-   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+4)",
+   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+5)",
    "bar_copper: made by: Smelt a copper bar",
    "bar_copper: used in: Cast a copper mace"
   ],
@@ -3296,6 +3313,23 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Item_Bone": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item hardware_iron \"Iron construction hardware\" (tint #707888)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge construction hardware"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Bone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_Item_CopperOre": {
   "status": "original",
   "request": "AR-200",
@@ -3339,11 +3373,13 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "item log \"Log\""
+   "item log \"Log\"",
+   "item plank_dressed \"Dressed timber plank\" (tint #d0a060)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Haft a stone axe, Haft a stone pick, Split firewood, Carve a short bow, Carve a long bow, Fletch stone-tipped arrows … (+9)"
+   "log: used in: Haft a stone axe, Haft a stone pick, Split firewood, Carve a short bow, Carve a long bow, Fletch stone-tipped arrows … (+10)",
+   "plank_dressed: made by: Plane timber planks"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_Log.png",
@@ -3413,11 +3449,15 @@
    "AR-1901"
   ],
   "usedBy": [
-   "item stone \"Stone\""
+   "item stone \"Stone\"",
+   "item brick_clay \"Fired brick\" (tint #b04828)",
+   "item stone_block \"Ashlar stone block\" (tint #d0d0d8)"
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Fletch stone-tipped arrows, Haft a stone spear"
+   "stone: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Fletch stone-tipped arrows, Haft a stone spear, Slake lime mortar … (+3)",
+   "brick_clay: made by: Fire clay bricks",
+   "stone_block: made by: Chisel ashlar stone block"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_Stone.png",
@@ -3433,10 +3473,12 @@
    "AR-104"
   ],
   "usedBy": [
-   "item straw \"Straw\""
+   "item straw \"Straw\"",
+   "item mortar_lime \"Slaked lime mortar\" (tint #e8e8dc)"
   ],
   "states": [
-   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "mortar_lime: made by: Slake lime mortar"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_Straw.png",
@@ -3689,8 +3731,8 @@
   ],
   "states": [
    "pick: Rubble → gone (yields 2 Stone)",
-   "is the after-state of Stone wall (quarry), Stone wall (mine)",
-   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+13)",
+   "is the after-state of Stone wall (quarry), Stone wall (mine), Brick wall (quarry), Brick wall (mine), Ashlar stone wall (quarry), Ashlar stone wall (mine)",
+   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+18)",
    "flat: drawn under units and items"
   ],
   "category": "objects",
@@ -4138,12 +4180,15 @@
    "AR-104"
   ],
   "usedBy": [
-   "object workbench \"Work stone\""
+   "object workbench \"Work stone\"",
+   "object mason_bench \"Mason's bench\" (tint #888898)"
   ],
   "states": [
-   "building: unbuilt (needs 2 Stone, 1 Log on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
+   "workbench: building: unbuilt (needs 2 Stone, 1 Log on the cell) / built",
+   "workbench: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "mason_bench: building: unbuilt (needs 3 Stone, 1 Log on the cell) / built",
+   "mason_bench: ruined → Rubble (when its site is sacked)"
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Workbench.png",
@@ -4159,15 +4204,27 @@
    "AR-300"
   ],
   "usedBy": [
-   "object wall_stone \"Stone wall\""
+   "object wall_stone \"Stone wall\"",
+   "object wall_brick \"Brick wall\" (tint #b05030)",
+   "object wall_ashlar \"Ashlar stone wall\" (tint #e0e0e8)"
   ],
   "states": [
-   "quarry: Stone wall → Rubble (yields 2 Stone)",
-   "mine: Stone wall → Rubble (yields 2 Stone)",
-   "dismantle: Stone wall → gone (yields 2 Stone)",
-   "building: unbuilt (needs 2 Stone on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
+   "wall_stone: quarry: Stone wall → Rubble (yields 2 Stone)",
+   "wall_stone: mine: Stone wall → Rubble (yields 2 Stone)",
+   "wall_stone: dismantle: Stone wall → gone (yields 2 Stone)",
+   "wall_stone: building: unbuilt (needs 2 Stone on the cell) / built",
+   "wall_stone: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "wall_brick: quarry: Brick wall → Rubble (yields 2 Fired brick)",
+   "wall_brick: mine: Brick wall → Rubble (yields 2 Fired brick)",
+   "wall_brick: dismantle: Brick wall → gone (yields 2 Fired brick, 1 Slaked lime mortar)",
+   "wall_brick: building: unbuilt (needs 2 Fired brick, 1 Slaked lime mortar on the cell) / built",
+   "wall_brick: ruined → Rubble (when its site is sacked)",
+   "wall_ashlar: quarry: Ashlar stone wall → Rubble (yields 2 Ashlar stone block)",
+   "wall_ashlar: mine: Ashlar stone wall → Rubble (yields 2 Ashlar stone block)",
+   "wall_ashlar: dismantle: Ashlar stone wall → gone (yields 2 Ashlar stone block, 1 Slaked lime mortar)",
+   "wall_ashlar: building: unbuilt (needs 2 Ashlar stone block, 1 Slaked lime mortar on the cell) / built",
+   "wall_ashlar: ruined → Rubble (when its site is sacked)"
   ],
   "category": "objects",
   "file": "img/characters/!$WallStone_Set.png",
@@ -4183,15 +4240,21 @@
    "AR-300"
   ],
   "usedBy": [
-   "object wall_wood \"Wooden wall\""
+   "object wall_wood \"Wooden wall\"",
+   "object wall_timber_frame \"Reinforced timber wall\" (tint #d8a860)"
   ],
   "states": [
-   "chop: Wooden wall → gone (yields 1 Log)",
-   "mine: Wooden wall → gone (yields 1 Log)",
-   "dismantle: Wooden wall → gone (yields 1 Log)",
-   "building: unbuilt (needs 1 Log on the cell) / built",
-   "ruined → Rubble (when its site is sacked)",
-   "blocks movement (units work from a neighbouring cell)"
+   "wall_wood: chop: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: mine: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: dismantle: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: building: unbuilt (needs 1 Log on the cell) / built",
+   "wall_wood: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "wall_timber_frame: chop: Reinforced timber wall → gone (yields 2 Dressed timber plank)",
+   "wall_timber_frame: mine: Reinforced timber wall → gone (yields 2 Dressed timber plank)",
+   "wall_timber_frame: dismantle: Reinforced timber wall → gone (yields 2 Dressed timber plank, 1 Iron construction hardware)",
+   "wall_timber_frame: building: unbuilt (needs 2 Dressed timber plank, 1 Iron construction hardware on the cell) / built",
+   "wall_timber_frame: ruined → Rubble (when its site is sacked)"
   ],
   "category": "objects",
   "file": "img/characters/!$WallWood_Set.png",
