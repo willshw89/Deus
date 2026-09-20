@@ -1,10 +1,10 @@
 {
-  "id": "birch",
-  "frameWidth": 96,
-  "frameHeight": 96,
+  "id": "campfire_unlit",
+  "frameWidth": 48,
+  "frameHeight": 48,
   "anchor": [
-    48,
-    95
+    24,
+    47
   ],
   "footprint": [
     1,
@@ -15,15 +15,9 @@
   ],
   "animations": {
     "stand": [
-      1
-    ],
-    "sway": [
-      0,
-      1,
-      2
+      0
     ]
   },
-  "frameMs": 300,
   "generator": "Google Nano Banana 2",
   "standard": "Final Fantasy VI 16-bit HD"
 }
