@@ -6,7 +6,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed; awaiting user review)
+(None currently claimed; Adult Male Elf 4D suite delivered and verified, awaiting user review)
+
+## Adult Male Elf 4-Direction Standard Suite & Uniform Scale Invariant — 2026-09-19 (Gemini)
+Delivered per user directives ("All generation tasks are to use nano banana II. Codify that in all the .MDs", "Let's generate them one creater at a time (Male elf, female elf, etc) and pay attention to accuracy across each generation. No projectiles, rmemeber? Magic animations are just the initiation of the spell", "Umm... The sprites are not all at the same scale. regenerate", "Okay, look, 8 way animations are bottlenecking us. Let's do everything we just discussed, but 4 directions", "Dedicated Hauling / Carrying Pose (AR-600 column 7): Hauling a sack"):
+- **100% Google Nano Banana II Generations:**
+  - Characters originate from authentic Google Nano Banana II generations (`generate_image`, Rule 11, VISION V109).
+- **Uniform Invariant Anatomical Scale (40/276):**
+  - Eliminated per-bounding-box scaling bugs where kneeling poses were stretched tall and overhead weapon frames were squashed.
+  - Implemented single invariant global scale factor: `UNIFORM_SCALE = 40.0 / 276.0 = 0.1449275` anchored to native baseline `y = 47`.
+  - Adult Male Elf head, face, torso, and limbs maintain 100% identical proportions across all 7 actions. Kneeling poses naturally sit at ~26-28 px; horizontal resting corpse naturally rests flat at ~16 px thick.
+- **Clean Extraction & Noise Filter:**
+  - Clamped raw extraction strictly to sprite bounding boxes, eliminating inter-column sprite bleeding.
+  - Enhanced magenta/purple edge filter and 8-neighbor orphan pixel cleaner eliminate all purple JPEG compression fringing and floating edge noise.
+- **7 Core Actions Delivered:**
+  1. Walk: 4 facings (S, W, E mirrored, N) x 3 frames (`$UF_Elf_Male_Walk.{png,json}`).
+  2. Haul: Dedicated burlap sack carrying pose in front of chest in both arms (`$UF_Elf_Male_Haul.{png,json}`).
+  3. Attack: Melee sword slash strike with clean blade sweep arc (`$UF_Elf_Male_Attack.{png,json}`).
+  4. Bow: Archery aim, tension draw, string pluck release — 0 flying arrows (`$UF_Elf_Male_Bow.{png,json}`).
+  5. Magic: Spell initiation incantation posture with soft glowing palms — 0 flying projectiles/beams/leaves (`$UF_Elf_Male_Magic.{png,json}`).
+  6. Work: Reaching, kneeling craft with hammer, inspect (`$UF_Elf_Male_Work.{png,json}`).
+  7. Downed: Hurt flinch, kneeling collapse, flat horizontal corpse on ground (`$UF_Elf_Male_Downed.{png,json}`).
+- **Verification Evidence:**
+  - `tools/originality_check.js`: **PASS 7/7 files, 0 FAIL, 0 WARN** (distances 0.453 to 0.568 >= 0.28 vs 19,431 U7 shapes).
+  - In-engine live test harness (`tools/test_standard_4d_ingame.js`): **13 passed, 0 failed, exit 0, 0 console errors**.
+  - Rule 5 Inspection:
+    - Master Review Board: `art/review/elf_male_standard_4d_review.png` (2016x444 px at 2x).
+    - In-Engine 3x Closeup: `art/review/elf_male_live_closeup.png`.
+    - In-Engine 2x Normal: `art/review/elf_male_live_normal.png`.
 
 ## Complete Purge of After-Effect Animations (V108) & Look Tooltip Face Portraits — 2026-09-19 (Gemini)
 Delivered per user directives ("The animation for these things should come from the sprites, not an after effect. this applies to everything we generate", "Immediately get rid of all aftereffect animations, I hate them. all animations are in the sprites. redo redo redo"):

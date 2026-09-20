@@ -31,5 +31,6 @@
   "stage": "adult",
   "gender": "male",
   "action": "Walk",
+  "scale": "UNIFORM 40/276",
   "generator": "Google Nano Banana II (Rule V69/V70/V79)"
 }

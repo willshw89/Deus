@@ -34,5 +34,6 @@
   "stage": "adult",
   "gender": "male",
   "action": "Dead",
+  "scale": "UNIFORM 40/276",
   "generator": "Google Nano Banana II (Rule V69/V70/V79)"
 }
