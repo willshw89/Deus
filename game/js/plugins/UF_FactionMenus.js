@@ -82,11 +82,30 @@
     Scene_Menu.prototype.start = function() {
         _Scene_Menu_start.call(this);
         const faction = UF_FactionMenus.getFaction();
-        const skin = ImageManager.loadSystem(`Window_${faction}`);
+        this.applyFactionTheme(faction);
 
+        // Optional BGM transition if catalog theme defined
+        if (window.UF && UF.World && UF.World.catalog && UF.World.catalog.factions) {
+            const facDef = UF.World.catalog.factions[faction];
+            if (facDef && facDef.themeBgm) {
+                AudioManager.playBgm({ name: facDef.themeBgm, pan: 0, pitch: 100, volume: 80 });
+            }
+        }
+    };
+
+    const FACTIONS = ["human", "elf", "dwarf", "gnome", "goblin", "orc", "lizardfolk", "kobold", "undead", "starborn", "swarm"];
+
+    Scene_Menu.prototype.applyFactionTheme = function(faction) {
+        const skin = ImageManager.loadSystem(`Window_${faction}`);
+        if (this._factionMenuSprite) {
+            this._factionMenuSprite.bitmap = ImageManager.loadPicture(`UF_Menu_${faction}`);
+        }
         if (this._commandWindow) {
             this._commandWindow.windowskin = skin;
             this._commandWindow.opacity = 210;
+            if (this._commandWindow._factionCursorSprite) {
+                this._commandWindow._factionCursorSprite._cursorFaction = null; // force reload cursor
+            }
         }
         if (this._statusWindow) {
             this._statusWindow.windowskin = skin;
@@ -96,13 +115,32 @@
             this._goldWindow.windowskin = skin;
             this._goldWindow.opacity = 210;
         }
+    };
 
-        // Optional BGM transition if catalog theme defined
-        if (window.UF && UF.World && UF.World.catalog && UF.World.catalog.factions) {
-            const facDef = UF.World.catalog.factions[faction];
-            if (facDef && facDef.themeBgm) {
-                AudioManager.playBgm({ name: facDef.themeBgm, pan: 0, pitch: 100, volume: 80 });
-            }
+    // Ensure Tab and bracket keys are mapped
+    Input.keyMapper[9] = "tab";
+    Input.keyMapper[219] = "bracketLeft";
+    Input.keyMapper[221] = "bracketRight";
+
+    const _Scene_Menu_update = Scene_Menu.prototype.update;
+    Scene_Menu.prototype.update = function() {
+        _Scene_Menu_update.call(this);
+        if (Input.isTriggered("tab") || Input.isTriggered("bracketRight") || Input.isTriggered("pagedown")) {
+            const cur = UF_FactionMenus.getFaction();
+            const idx = FACTIONS.indexOf(cur);
+            const nextIdx = (idx + 1) % FACTIONS.length;
+            const nextFac = FACTIONS[nextIdx];
+            UF_FactionMenus.setFaction(nextFac);
+            this.applyFactionTheme(nextFac);
+            SoundManager.playCursor();
+        } else if (Input.isTriggered("bracketLeft") || Input.isTriggered("pageup")) {
+            const cur = UF_FactionMenus.getFaction();
+            const idx = FACTIONS.indexOf(cur);
+            const nextIdx = (idx - 1 + FACTIONS.length) % FACTIONS.length;
+            const nextFac = FACTIONS[nextIdx];
+            UF_FactionMenus.setFaction(nextFac);
+            this.applyFactionTheme(nextFac);
+            SoundManager.playCursor();
         }
     };
 
