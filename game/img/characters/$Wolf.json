@@ -1,0 +1,71 @@
+{
+  "id": "UF_Wolf",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      1
+    ],
+    "walk": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "idle": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "action": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "attack": [
+      0,
+      1,
+      2
+    ],
+    "graze": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "eat": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "hurt": [
+      0,
+      1,
+      2
+    ],
+    "death": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "category": "wildlife"
+}
