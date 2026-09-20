@@ -311,7 +311,8 @@
             if (simulateOn) {
                 const targetYears = (setupYear !== null && setupYear > 1) ? setupYear : (opts.targetYears !== undefined ? opts.targetYears : null);
                 h = simulate(state, cfg, targetYears);
-                const settleYrs = opts.years !== undefined ? opts.years | 0 : (targetYears ? Math.min(targetYears, settleConfig(cfg).years) : settleConfig(cfg).years);
+                const defaultSettle = (setupYear !== null && setupYear > 1) ? targetYears : settleConfig(cfg).years;
+                const settleYrs = opts.years !== undefined ? opts.years | 0 : (targetYears ? Math.min(targetYears, defaultSettle) : defaultSettle);
                 if (h && opts.settle !== false && settleYrs > 0) settle(state, cfg, live, settleYrs);
             } else {
                 h = found(state, cfg, live);
