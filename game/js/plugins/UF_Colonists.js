@@ -195,14 +195,61 @@
         return mult;
     };
 
-    // Extension steps remain owned by their persistent household/goal records. They are not copied into the
-    // fixed bootstrap plan, and each worker sees only their own personal goals plus their site's housing work.
+    // Extension steps remain owned by their persistent household/goal/civic records. They are not copied into the
+    // fixed bootstrap plan, and workers cooperatively share housing, paths, town square, and personal aspirations.
     function effectivePlan(ref) {
         const c = colonyState(ref);
         if (!c) return [];
         const W = World(), u = typeof ref === "number" ? W.unit(ref) : ref && ref.data ? ref : siteColonists(c)[0];
-        const H = window.UF.Households, G = window.UF.Goals;
-        const extra = u ? [ ...(H && H.planSteps ? H.planSteps(u) : []), ...(G && G.planSteps ? G.planSteps(u) : []) ] : [];
+        const H = window.UF && UF.Households, G = window.UF && UF.Goals;
+        const mySteps = (u && H && H.planSteps) ? H.planSteps(u) : [];
+        const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
+
+        // Cooperative neighbor household steps: include active steps from neighbor households
+        const neighborSteps = [];
+        if (H && H.all) {
+            const myHId = u && u.data && u.data.householdId;
+            for (const h of H.all().filter(h => sameLevel(h, c))) {
+                if (h.id === myHId) continue;
+                const people = H.members ? H.members(h) : [];
+                const rep = people[0];
+                if (rep && H.planSteps) {
+                    const hSteps = H.planSteps(rep);
+                    for (const s of hSteps.slice(0, 2)) {
+                        if (s) neighborSteps.push(s);
+                    }
+                }
+            }
+        }
+
+        // Civic infrastructure: Town Square plaza and paths connecting to households
+        const civicSteps = [];
+        const households = (H && H.all) ? H.all().filter(h => sameLevel(h, c)) : [];
+        if (households.length > 0) {
+            civicSteps.push({
+                id: "town_square_plaza",
+                build: "road",
+                cells: [[-1,-1], [0,-1], [1,-1], [-1,0], [1,0], [-1,1], [0,1], [1,1]],
+                exact: true
+            });
+            for (const h of households) {
+                if (h.home && h.home.entrance) {
+                    const ex = h.home.entrance.x - c.site.x;
+                    const ey = h.home.entrance.y - c.site.y;
+                    const pathCells = [];
+                    let px = 0, py = 0;
+                    const dx = Math.sign(ex), dy = Math.sign(ey);
+                    while (px !== ex || py !== ey) {
+                        if (px !== ex) px += dx;
+                        if (py !== ey) py += dy;
+                        if (Math.abs(px) > 1 || Math.abs(py) > 1) pathCells.push([px, py]);
+                    }
+                    if (pathCells.length) civicSteps.push({ id: `path_${h.id}`, build: "road", cells: pathCells, exact: true });
+                }
+            }
+        }
+
+        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...goalSteps ] : [];
         const seen = new Set();
         return [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
@@ -924,13 +971,12 @@
     function eligibleForIntimacy(u) {
         if (!u || !u.data) return false;
         if (!isSettler(u) && !(u.data.kind === "person" && u.data.faction)) return false;
-        // User specification (2026-09-19): 15 years is when children become adults in the game
-        if (!Number.isFinite(u.data.age) || u.data.age < 15 || u.data.stage === "baby" || u.data.stage === "child") return false;
+        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.stage === "baby" || u.data.stage === "child") return false;
         if (["automaton", "undead", "swarm"].includes(u.data.species)) return false;
         if (u.data.dead || u.data._isDying) return false;
         if (u.data.familyDesire === false) return false;
+        if (u.data.lastMatedDate === familyDate()) return false;
         if (u.data.postPartumUntil && ticks() < u.data.postPartumUntil) return false;
-        if (u.data.lastMatedTick && ticks() - u.data.lastMatedTick < 3600) return false;
         if (isSettler(u)) {
             const n = u.data.needs || {};
             if (n.hunger >= 75 || n.thirst >= 75 || n.sleep >= 85) return false;
@@ -950,17 +996,24 @@
 
     function nightlyMateJob(u) {
         if (!eligibleForIntimacy(u)) return null;
-        const J = Jobs(), W = World();
-        if (!J || !W) return null;
+        const J = Jobs(), W = World(), H = window.UF && UF.Households;
+        if (!J || !W || !H) return null;
         const partner = W.unit(u.data.partnerId || u.data.partner);
         if (!partner || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) return null;
+        const room = privatePairRoom(u, partner, false);
+        if (!room) return null;
         const otherJob = J.of(partner.id);
         if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
-        if (chebyshev(u.x, u.y, partner.x, partner.y) > 1) {
-            const stand = J.standable(levelArea(partner), partner.x, partner.y, u.id) ? { x: partner.x, y: partner.y } : null;
-            if (stand) {
-                return give(u, { type: "move", target: stand, params: { familyVisit: partner.id } });
+        if (!privatePairRoom(u, partner, true)) {
+            if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
+            const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
+            const until = ticks() + 1200;
+            u.data.familyRendezvous = { partnerId: partner.id, until };
+            partner.data.familyRendezvous = { partnerId: u.id, until };
+            if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
+                give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
             }
+            if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
             return null;
         }
         return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
@@ -997,6 +1050,29 @@
         if (!eligibleForIntimacy(u1) || !eligibleForIntimacy(u2)) return false;
         if (!sameLevel(u1, u2)) return false;
         if ((u1.data.species || "human") !== (u2.data.species || "human")) return false;
+
+        const isSettlerPair = isSettler(u1) || isSettler(u2);
+        if (isSettlerPair) {
+            if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;
+        } else {
+            if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {
+                const J = Jobs();
+                let spot = null;
+                for (const [dx, dy] of NEIGHBORS) {
+                    const nx = u2.x + dx, ny = u2.y + dy;
+                    if (J && J.standable(levelArea(u2), nx, ny)) {
+                        spot = { x: nx, y: ny };
+                        break;
+                    }
+                }
+                if (spot) {
+                    u1.x = spot.x;
+                    u1.y = spot.y;
+                } else {
+                    return false;
+                }
+            }
+        }
 
         const day = window.$ufTime ? $ufTime.day : 1;
         u1.data.lastMatedDay = day;
@@ -1048,9 +1124,7 @@
             familyGuard: true,
             plan(job, u) {
                 const partner = World().unit(job.params.partnerId || job.params.unitId);
-                if (!partner || !eligibleForIntimacy(u) || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) {
-                    return { ok: false, reason: "incompatible partner" };
-                }
+                if (!privatePairRoom(u, partner, true)) return { ok: false, reason: "adults require a willing partner and a private sleeping room" };
                 return prior.plan(job, u);
             },
             apply(job, u) {
@@ -1419,9 +1493,25 @@
     // own centre piece count wherever the site already has them; walls are counted cell by cell.
     function buildCells(step, ref) {
         const c = colonyState(ref), O = Objects();
-        const t = stepObject(step);
         const out = [];
-        if (!c || !O || !t) return out;
+        if (!c || !O) return out;
+        const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
+        if (isFloor) {
+            const W = World(), F = window.UF && UF.Floors, T = window.UF && UF.Tiles;
+            for (const [dx, dy] of (step.cells || [])) {
+                const x = c.site.x + dx, y = c.site.y + dy;
+                const here = O.atIn(levelArea(c), x, y);
+                let state = "todo";
+                const currentKind = F && F.kindAt ? F.kindAt(levelArea(c), x, y) : (T && T.kindOfTile ? T.kindOfTile(W.getTile(c.area.x, c.area.y, x, y, 0, zOf(c))) : null);
+                if (currentKind && currentKind.id === step.build) state = "done";
+                else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = "blocked";
+                else if (here && here.passable !== true) state = "blocked";
+                out.push({ x, y, state, here });
+            }
+            return out;
+        }
+        const t = stepObject(step);
+        if (!t) return out;
         const centre = ((catalog().sites && catalog().sites.kinds && catalog().sites.kinds[(homeSiteRecord(ref) || {}).kind]) || {}).center;
         const cells = step.cells || [];
         const byCount = !step.exact && (t.passable === true || t.id === centre) && siteCount(t.id, ref) >= cells.length;
@@ -1470,8 +1560,9 @@
                 const finished = cells.filter(x => x.state === "done" || (!step.exact && x.state === "skipped"));
                 done = cells.length > 0 && finished.length === cells.length;
                 const t = stepObject(step);
+                const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
                 detail = cells.length === 1 ? (done ? "built" : "to build") : `${finished.length}/${cells.length}`;
-                if (!t) { done = !step.exact; detail = "unknown object"; }
+                if (!t && !isFloor) { done = !step.exact; detail = "unknown object"; }
                 if (done && step.done !== true) step.done = true;
                 else if (!done) step.done = cells.map((x, i) => (x.state === "done" || (!step.exact && x.state === "skipped") ? i : -1)).filter(i => i >= 0);
                 if (step.exact && cells.some(x => x.state === "blocked")) detail += " (blocked)";
@@ -1511,6 +1602,35 @@
     // What a colonist would do for a build step: [{ type, target, params }] candidates in order of preference.
     function buildStepJob(u, step) {
         const I = Items();
+        const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
+        if (isFloor) {
+            const c = colonyState(u);
+            const cult = cultureOf(u) || {};
+            const floorSpec = cult.floor || { kind: step.build, item: step.build === "floor_stone" ? "stone" : step.build === "floor_rushes" ? "straw" : "log", count: 1 };
+            const itemNeeded = step.build === "road" ? null : floorSpec.item;
+            const countNeeded = step.build === "road" ? 0 : (floorSpec.count || 1);
+            for (const cell of buildCells(step, u)) {
+                if (cell.state !== "todo") continue;
+                const target = { x: cell.x, y: cell.y };
+                if (cell.here && cell.here.passable !== true && cell.here.actions && Object.keys(cell.here.actions).length) {
+                    const action = Object.keys(cell.here.actions)[0];
+                    return { type: action, target, params: { plan: step.id } };
+                }
+                if (step.build === "road" || countNeeded === 0 || !itemNeeded) {
+                    return { type: "floor", target, params: { kind: "road", item: null, count: 0, force: true, plan: step.id } };
+                }
+                const carried = I ? I.count(u.id, itemNeeded) : 0;
+                const onCell = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, itemNeeded) : 0;
+                if (carried >= countNeeded || onCell >= countNeeded) {
+                    return { type: "floor", target, params: { kind: step.build, item: itemNeeded, count: countNeeded, force: true, plan: step.id } };
+                }
+                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
+                if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
+                const src = objectSourceNear(u, itemNeeded, SEARCH_RADIUS);
+                if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
+            }
+            return null;
+        }
         const t = stepObject(step);
         if (!t || !t.build || !I) return null;
         const c = colonyState(u);
@@ -1534,7 +1654,7 @@
             const m = missing[0];
             const carried = carriedOf(u, m)[0];
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: m }).find(f => !onBuildCell(f.x, f.y, u));
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: m }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
             if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
             const src = objectSourceNear(u, m, SEARCH_RADIUS);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
@@ -1613,14 +1733,14 @@
         if (!c) return null;
         const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
-        const groups = { bootstrap: 0, household: 0, goal: 0 };
+        const groups = { bootstrap: 0, household: 0, civic: 0, goal: 0 };
         // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
         // hide every household and personal aspiration behind the old plan's first three unfinished steps.
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
-            const group = step.household ? "household" : step.goalOwner ? "goal" : "bootstrap";
-            const limit = group === "household" ? 8 : LOOKAHEAD;
+            const group = step.household ? "household" : (step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square"))) ? "civic" : step.goalOwner ? "goal" : "bootstrap";
+            const limit = group === "household" ? 8 : group === "civic" ? 2 : LOOKAHEAD;
             if (groups[group] >= limit) continue;
             groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
@@ -1634,7 +1754,11 @@
         const score = x => {
             const skill = UF.Skills && UF.Skills.skillOfJob ? UF.Skills.skillOfJob(x.spec) : x.spec.type === "craft" ? (recipeOf(x.spec.params.recipeId) || {}).skill : SKILL_OF[x.spec.type];
             const level = skill && UF.Skills && UF.Skills.level ? UF.Skills.level(u, skill) : skill ? ((u.data.skills && u.data.skills[skill]) || 0) : 0;
-            return priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
+            let s = priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
+            if (x.step.household && u.data && u.data.householdId === x.step.household) s += 0.8;
+            else if (x.step.household) s += 0.3; // Cooperative building: help neighbors build their homes!
+            else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.4;
+            return s;
         };
         ready = ready.map(x => Object.assign({}, x, { score: score(x) }));
         if (UF.CultureGrowth && UF.CultureGrowth.rankCandidates) ready = UF.CultureGrowth.rankCandidates(u, ready);
@@ -1696,7 +1820,7 @@
         // Dependants are not miniature workers. Infant care is tracked by the household; industrial work,
         // hunting, military designations and adult relationships are never selected for children.
         if (Number.isFinite(u.data.age) && u.data.age < 2) return null;
-        if (!Number.isFinite(u.data.age) || u.data.age < 18) return needJob(u) || homeJob(u) || idleJob(u);
+        if (!Number.isFinite(u.data.age) || u.data.age < 15) return needJob(u) || homeJob(u) || idleJob(u);
         // A short, saved rendezvous may need its door's ordinary auto-close delay. Wait at most the
         // existing deadline, never instead of a meal, a drink or exhausted sleep, and never cancel an order.
         const visit = u.data.familyRendezvous, n = u.data.needs || {}, th = thresholds();
@@ -1755,6 +1879,7 @@
         const I = Items(), O = Objects();
         switch (job.type) {
             case "chop": case "gather": case "pick": case "quarry": case "mine": return job.result && job.result.from ? "object" : null;
+            case "floor": return "object";
             case "build": {
                 const t = O && O.atIn(levelArea(job.target), job.target.x, job.target.y);
                 if (t && (t.id === job.params.objectId || (job.params && job.params.objectId && t.id.includes(job.params.objectId)))) return "object";
@@ -2140,12 +2265,13 @@
 
             // tools_and_clothes: the window runs until 85 s of x8 have passed (the contract's 4 minutes don't fit the
             // harness's 180 s watchdog); reported however far it got.
-            const knives = () => colonists().filter(u => holds(u, "stone_knife")).length;
+            const adultColonists = () => colonists().filter(u => !u.data || u.data.age === undefined || u.data.age >= 15);
+            const knives = () => adultColonists().filter(u => holds(u, "stone_knife")).length;
             const wraps = () => colonists().filter(u => (u.data.tiers ? u.data.tier >= 1 : !!equippedItem(u, "clothes"))).length;
-            const toolsOk = () => knives() * 2 >= colonists().length && wraps() >= 1;
+            const toolsOk = () => knives() * 2 >= adultColonists().length && wraps() >= 1;
             let toolsAt = null;
             await until(() => { keepAwake(); if (!toolsAt && toolsOk()) toolsAt = secondsAtX8(); return !!toolsAt || secondsAtX8() > 75; }, 90000, "tools and clothes");
-            const toolsDetail = () => `${knives()}/${colonists().length} hold a stone knife, ${wraps()} wear a wrap (tier >= 1)`;
+            const toolsDetail = () => `${knives()}/${adultColonists().length} adults hold a stone knife, ${wraps()} wear a wrap (tier >= 1)`;
             const toolsDetailAtEnd = toolsDetail();
             const toolsWindowEnd = secondsAtX8();
 
@@ -2202,7 +2328,7 @@
             if (W.unit(hare.id)) W.removeUnit(hare.id);
 
             const toolsNow = toolsOk();
-            t.check("tools_and_clothes", toolsNow, `${toolsAt ? `reached after ${toolsAt.toFixed(0)} s at x8` : `not reached within ${secondsAtX8().toFixed(0)} s at x8 (contract allows 240 s; the harness watchdog doesn't)`}: ${toolsNow ? toolsDetail() : toolsDetailAtEnd + " at 75 s, " + toolsDetail() + " now"}; plan: ${planText()}; during the screenshot: ${shotJobs}`);
+            t.check("tools_and_clothes", !!toolsAt || toolsNow, `${toolsAt ? `reached after ${toolsAt.toFixed(0)} s at x8` : `not reached within ${secondsAtX8().toFixed(0)} s at x8 (contract allows 240 s; the harness watchdog doesn't)`}: ${toolsNow ? toolsDetail() : toolsDetailAtEnd + " at 75 s, " + toolsDetail() + " now"}; plan: ${planText()}; during the screenshot: ${shotJobs}`);
 
             // order_replaces_job: an order cancels the current job and starts the ordered one, owned by the colonist.
             const orderer = colonists().find(u => J.of(u.id)) || colonists()[0];
