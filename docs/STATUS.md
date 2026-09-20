@@ -7,7 +7,43 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
-- Gemini: Character Sets & Things Represented by Character Sets: Adult Female Dwarf Suite (6 Variations × 7 Actions = 42 Charsets) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+
+## The 10 Core Settlement Pillars & Colony Progression AI — 2026-09-20 (Gemini)
+Delivered per user directives ("This is what I want the faction to focus on, collectively, at the start of the game. These are the pillars of the colony and the colony should always bear these things in mind. Let's go ahead and put all of these AI behaviors into the game, including completing their shelter structures: Water -> Food -> Shelter -> Sanitation -> Workshop -> Medicine -> Storage -> Security -> Governance -> Community"):
+- **The 10 Settlement Pillars (`game/js/plugins/UF_SettlementPillars.js`)**:
+  - Implemented the foundational settlement model in strict evaluated priority order:
+    `Water -> Food -> Shelter -> Sanitation -> Workshop -> Medicine -> Storage -> Security -> Governance -> Community`
+  - **1. Water**: Evaluates natural springs/rivers and constructed wells. Score 1.0 when water within 15 cells or well built; 0.6 when water distant (15–30 cells); 0.2 when critical (>30 cells). Generates `civic_well` build step.
+  - **2. Food**: Evaluates staple calories, cooked preservation vs raw meat, and farm plots.
+  - **3. Shelter**: Evaluates complete weatherproofing (walls, doors, floors, beds, hearths) across all domestic households. Gives priority scoring bonus to complete unfinished structures.
+  - **4. Sanitation**: Evaluates waste pits / refuse dumps (`stores: ["waste", "bones", "rubble"]`). Enforces strict distance separation (>= 5–6 cells) from clean drinking water and hearths. Generates `sanitation_waste_pit` at safe perimeter coordinates (`[-6, -6]`).
+  - **5. Workshop**: Evaluates carpentry workbenches, smithies/furnaces, and split firewood fuel reserves.
+  - **6. Medicine**: Evaluates presence of dedicated medical practitioners (apothecary/healer calling or capability) and apothecary benches. Generates `civic_apothecary_bench` step.
+  - **7. Storage**: Evaluates categorized, defensible stockpiles (food larder, woodpile, stone yard).
+  - **8. Security**: Evaluates guard equipment, defensive tool coverage, and fire safety vigilance.
+  - **9. Governance**: Evaluates social hierarchy home scaling (manors/estates for leaders) and redundant skill coverage across the populace.
+  - **10. Community**: Evaluates generational reproduction (children), population mood/morale, and communal dining.
+- **Overlapping Skill Coverage (`assignSkillRoster`, `UF_SettlementPillars.js`)**:
+  - Assigns 2–3 overlapping capabilities to every colonist across the 10 settlement disciplines (farming, medicine, carpentry, smithing, masonry, cooking, hunting, textiles, security, sanitation) based on personality facets and skills.
+  - Guarantees settlement capability redundancy so key disciplines are not lost if a colonist dies.
+- **Communal Meals & Night Watch Sentry Patrols (`UF_SettlementPillars.js`, `UF_Colonists.js`)**:
+  - **Communal Meals**: Colonists gather collectively to dine at 08:00, 12:00, and 18:00 at the central hearth/site centre, earning +10 morale thought ("Shared a hearty communal meal with the colony.").
+  - **Night Watch**: Colonists with `security` capability conduct perimeter sentry patrols during night hours (22:00–06:00).
+- **Resource Claiming & Contention Prevention (`UF_Colonists.js`)**:
+  - Implemented `isObjectClaimed(u, x, y, action)`: workers dynamically claim natural resources (trees, boulders, flora), preventing duplicate jobs and race conditions on felled objects.
+  - Added well construction fallback (`build: { items: { stone: 2, wood: 2 }, work: 40 }`) in `stepObject`.
+- **Overseer HUD Card Integration (`UF_ColonyOverseer.js`)**:
+  - `Window_UFColonistCard` renders live compact settlement pillars status and active focus pillar:
+    `Pillars: W:OK · F:OK · Sh:85% · San:OK · Wk:OK · Med:OK · St:OK · Sec:OK · Gov:OK · Com:OK [Focus: Shelter]`.
+- **Automated Verification**:
+  - `tools/test_settlement_pillars.js`: **10/10 PASS, 0 FAIL (exit 0)**.
+  - Main test suite `colonists`: **20/20 PASS, 0 FAIL (exit 0)** (329 colonist jobs: 125 object, 99 position, 91 item, 8 unit, 6 need; 0 without target, 0 unphysical).
+  - `tools/test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: Campfire, oak trees, flora, stones, and 8 colonists at the settlement center in light rain.
+  - `game/test_output/colonists.colonists_working.png`: Colonists actively carrying out stockpiling, foraging, and woodcutting.
+  - `game/test_output/colonists.colonist_childbirth.png`: Household entrance and walls built on meadow site, wood stump from felled tree, stone knife, campfire, and colonist speech thought balloon.
 
 ## Cooperative Building, Town Square Plaza, Radial Paths, Floor Laying & Rapid Childbirth — 2026-09-20 (Gemini)
 Delivered per user directives ("Look, they need to reproduce, the baby needs to pop out as a kid, and that's it, no complex labor, it's, the characters reproduce while sleeping one night, and within 1 minute realworld time is giving birth. If colonies dont populate, they die.", "People also need to continue builing their homes - floors, furniture... kitchens.. etc.", "They need to build paths, a town square, places to work out employment, etc. As the social hierarchy grows, higher ranks in society get larger homes. People help each other build homes"):

@@ -326,7 +326,14 @@
             } else line = next;
         }
         if (line) lines.push(line);
-        lines.slice(0, 3).forEach((text, i) => this.drawText(text, 0, 190 + dy + i * 15, w, "left"));
+        lines.slice(0, 2).forEach((text, i) => this.drawText(text, 0, 190 + dy + i * 15, w, "left"));
+        const P = window.UF && UF.SettlementPillars;
+        if (P && P.statusSummary) {
+            this.contents.fontSize = 11;
+            this.changeTextColor("#34d399");
+            this.drawText(P.statusSummary(sel), 0, 222 + dy, w, "left");
+        }
+        this.contents.fontSize = 12;
         this.changeTextColor("#38bdf8");
         this.drawText("[F] factions · [H] chronicle", 0, 240 + dy, w, "left");
         this.contents.fontSize = base;

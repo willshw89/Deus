@@ -73,6 +73,12 @@
     const Jobs = () => (window.UF && UF.Jobs) || null;
     const Items = () => (window.UF && UF.Items) || null;
     const Objects = () => (window.UF && UF.Objects) || null;
+    if (typeof require === "function" && (!window.UF || !UF.SettlementPillars)) {
+        try {
+            require("./UF_SettlementPillars.js");
+        } catch (_) {}
+    }
+    const Pillars = () => (window.UF && UF.SettlementPillars) || null;
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -249,7 +255,9 @@
             }
         }
 
-        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...goalSteps ] : [];
+        const P = Pillars();
+        const pillarSteps = (c && P && P.pillarPlanSteps) ? P.pillarPlanSteps(c, u) : [];
+        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps ] : [];
         const seen = new Set();
         return [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
@@ -441,7 +449,13 @@
             } else primary.settlements[local.id] = record;
         }
         state.colony = primary;
-        if (primary) primary.settlementsReady = true;
+        if (primary) {
+            primary.settlementsReady = true;
+            const P = Pillars();
+            if (P && P.assignSkillRoster) {
+                for (const s of settlementStates()) P.assignSkillRoster(s);
+            }
+        }
         emit("colonists:ready", state.colony, people);
         return state.colony;
     }
@@ -550,13 +564,27 @@
         if (hasTag(type, "building") || hasTag(type, "door") || hasTag(type, "bed")) return true;
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
+    function isObjectClaimed(u, x, y, action) {
+        for (const j of activeJobs()) {
+            if (j.assigned === u.id || !j.target || !sameLevel(j.target, u)) continue;
+            if (j.type === action && j.target.x === x && j.target.y === y) return true;
+            if (j.type === "move" && j.params && j.params.via === action && j.params.viaTarget && j.params.viaTarget.x === x && j.params.viaTarget.y === y) return true;
+        }
+        return false;
+    }
     function objectSourceNear(u, itemId, radius) {
         if (!sourcesOf(itemId).length) return null;
-        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => !!yieldsItem(t, itemId) && !sitePiece(t, x, y, u));
+        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
+            const act = yieldsItem(t, itemId);
+            return !!act && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
+        });
         return f ? Object.assign(f, { action: yieldsItem(f.type, itemId)[0] }) : null;
     }
     function foodObjectNear(u, radius) {
-        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => !!yieldsFood(t) && !sitePiece(t, x, y, u));
+        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
+            const act = yieldsFood(t);
+            return !!act && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
+        });
         return f ? Object.assign(f, { action: yieldsFood(f.type)[0] }) : null;
     }
     // The colony's own hearth: the fire object at the home site. Cooking and sleeping by the fire happen there,
@@ -717,6 +745,7 @@
             if (type === "hunt" && j.type === "hunt" && j.params.unitId === params.unitId) return true;
             if ((type === "haul" || type === "fetch") && (j.type === "haul" || j.type === "fetch") && j.params.itemId === params.itemId) return true;
             if (j.type === type && j.target && j.target.x === x && j.target.y === y) return true;
+            if (j.type === "move" && j.params && j.params.via === type && j.params.viaTarget && j.params.viaTarget.x === x && j.params.viaTarget.y === y) return true;
         }
         return false;
     }
@@ -1484,7 +1513,14 @@
     //-------------------------------------------------------------------------
     // The society plan
 
-    const stepObject = step => (Objects() ? Objects().type(step.build) : null);
+    const stepObject = step => {
+        if (!Objects()) return null;
+        const t = Objects().type(step.build);
+        if (t && step.build === "well" && !t.build) {
+            return { ...t, passable: false, build: { items: { stone: 2, wood: 2 }, work: 40 } };
+        }
+        return t;
+    };
     function siteCount(objectId, ref) {
         const c = colonyState(ref), O = Objects();
         return c && O ? O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, id: objectId }).length : 0;
@@ -1739,8 +1775,9 @@
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
-            const group = step.household ? "household" : (step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square"))) ? "civic" : step.goalOwner ? "goal" : "bootstrap";
-            const limit = group === "household" ? 8 : group === "civic" ? 2 : LOOKAHEAD;
+            const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
+            const group = step.household ? "household" : (isCivic || step.pillar) ? "civic" : step.goalOwner ? "goal" : "bootstrap";
+            const limit = group === "household" ? 8 : group === "civic" ? 4 : LOOKAHEAD;
             if (groups[group] >= limit) continue;
             groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
@@ -1758,6 +1795,16 @@
             if (x.step.household && u.data && u.data.householdId === x.step.household) s += 0.8;
             else if (x.step.household) s += 0.3; // Cooperative building: help neighbors build their homes!
             else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.4;
+            const P = Pillars();
+            if (P && P.priorityPillar) {
+                const focus = P.priorityPillar(c);
+                if (focus === "water" && (x.step.pillar === "water" || x.step.build === "well")) s += 1.0;
+                else if (focus === "sanitation" && (x.step.pillar === "sanitation" || (x.step.stores && x.step.stores.includes("waste")))) s += 0.8;
+                else if (focus === "shelter" && (x.step.household || (x.step.build && ["wall_wood", "door_wood", "floor_straw", "bed_wood", "floor_wood", "floor_stone"].includes(x.step.build)))) s += 0.5;
+                else if (focus === "food" && (x.step.stock || x.step.build === "farm_plot")) s += 0.6;
+                else if (focus === "workshop" && (x.step.build === "workbench" || x.step.build === "smithy" || (x.step.craft && (recipeOf(x.step.craft) || {}).workbench))) s += 0.5;
+                else if (focus === "medicine" && (x.step.pillar === "medicine" || x.step.build === "apothecary_bench")) s += 0.7;
+            }
             return s;
         };
         ready = ready.map(x => Object.assign({}, x, { score: score(x) }));
@@ -1831,6 +1878,19 @@
         }
         // Lazy colonists take a breather now and then instead of the next piece of work (needs still come first).
         const lazy = unit01(seed(), SALT.roll, u.id, ticks()) < (100 - facet(u, "industriousness")) / 400;
+        const P = Pillars();
+        if (P) {
+            const communal = P.communalMealJob ? P.communalMealJob(u) : null;
+            if (communal) {
+                const j = give(u, communal);
+                if (j) return j;
+            }
+            const sentry = P.nightWatchJob ? P.nightWatchJob(u) : null;
+            if (sentry) {
+                const j = give(u, sentry);
+                if (j) return j;
+            }
+        }
         return needJob(u) || (UF.FireSafety && (UF.FireSafety.respond(u) || UF.FireSafety.prevent(u))) || homeJob(u) || designationJob(u) ||
             (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
     }
@@ -1849,9 +1909,15 @@
                 adoptSiteStockpiles(local, s);
                 local.adopted = true;
             }
+            const P = Pillars();
+            if (P && P.assignSkillRoster) P.assignSkillRoster(local);
         }
         const t = ticks();
         for (const u of simulationUnits()) {
+            if (!u.data.capabilities) {
+                const P = Pillars();
+                if (P && P.assignSkillRoster) P.assignSkillRoster(colonyState(u));
+            }
             if (UF.FireSafety && UF.FireSafety.respond(u)) { decisionAt.set(u.id, t); continue; }
             const job = J.of(u.id);
             if (job) {
