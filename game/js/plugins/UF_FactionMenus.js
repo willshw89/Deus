@@ -239,9 +239,11 @@
     };
 
     Scene_Title.prototype.newGameSetupWindowRect = function() {
-        const ww = 440;
-        const wh = 210;
-        const wx = Math.round((Graphics.boxWidth - ww) / 2);
+        const ww = 350;
+        const wh = 205;
+        // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
+        const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
+        const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
         const wy = 270;
         return new Rectangle(wx, wy, ww, wh);
     };
@@ -254,13 +256,17 @@
             this.onNewGameEmbark();
             return;
         }
+        this._embarking = false;
         this._commandWindow.deactivate();
         this._commandWindow.close();
+        this._newGameSetupWindow.select(0);
         this._newGameSetupWindow.open();
         this._newGameSetupWindow.activate();
     };
 
     Scene_Title.prototype.onNewGameEmbark = function() {
+        if (this._embarking) return;
+        this._embarking = true;
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
         window.UF = window.UF || {};
@@ -279,6 +285,7 @@
     };
 
     Scene_Title.prototype.onNewGameCancel = function() {
+        if (!this._newGameSetupWindow || !this._newGameSetupWindow.isOpen()) return;
         this._newGameSetupWindow.close();
         this._newGameSetupWindow.deactivate();
         this._commandWindow.open();
@@ -407,18 +414,18 @@
 
             if (index === 0) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
-                this.drawText("Faction", rect.x + 12, rect.y, 140, "left");
+                this.drawText("Faction", rect.x + 8, rect.y, 100, "left");
 
                 const factionText = `◄  ${this.currentFaction()}  ►`;
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(factionText, rect.x + 160, rect.y, rect.width - 172, "right");
+                this.drawText(factionText, rect.x + 110, rect.y, rect.width - 118, "right");
             } else if (index === 1) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
-                this.drawText("Starting Year", rect.x + 12, rect.y, 140, "left");
+                this.drawText("Starting Year", rect.x + 8, rect.y, 120, "left");
 
                 const yearText = `◄  ${this._year} AD  ►`;
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(yearText, rect.x + 160, rect.y, rect.width - 172, "right");
+                this.drawText(yearText, rect.x + 130, rect.y, rect.width - 138, "right");
             } else if (index === 2) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
@@ -430,6 +437,22 @@
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
+        }
+
+        isOkEnabled() {
+            return true;
+        }
+
+        isCancelEnabled() {
+            return true;
+        }
+
+        isTouchOkEnabled() {
+            return true;
+        }
+
+        onTouchOk() {
+            this.processOk();
         }
 
         cursorRight(wrap) {
@@ -498,13 +521,13 @@
                 this.playOkSound();
                 this.callHandler("embark");
             } else if (this.index() === 3) {
-                this.playCancelSound();
+                SoundManager.playCancel();
                 this.callHandler("cancel");
             }
         }
 
         processCancel() {
-            this.playCancelSound();
+            SoundManager.playCancel();
             this.callHandler("cancel");
         }
 
@@ -516,20 +539,27 @@
             super.onTouchSelect(trigger);
             if (trigger) {
                 const hitIndex = this.hitIndex();
+                if (hitIndex < 0) return;
                 const touchPos = new Point(TouchInput.x, TouchInput.y);
                 const localPos = this.toLocalCoords(touchPos);
-                if (hitIndex === 0 && localPos.x > this.width / 2) {
-                    if (localPos.x > (this.width * 3) / 4) {
+                if (hitIndex === 0) {
+                    if (localPos.x > 240) {
                         this.nextFaction();
-                    } else {
+                    } else if (localPos.x > 120) {
                         this.prevFaction();
                     }
-                } else if (hitIndex === 1 && localPos.x > this.width / 2) {
-                    if (localPos.x > (this.width * 3) / 4) {
+                } else if (hitIndex === 1) {
+                    if (localPos.x > 240) {
                         this.changeYear(1);
-                    } else {
+                    } else if (localPos.x > 120) {
                         this.changeYear(-1);
                     }
+                } else if (hitIndex === 2) {
+                    this.select(2);
+                    this.processOk();
+                } else if (hitIndex === 3) {
+                    this.select(3);
+                    this.processCancel();
                 }
             }
         }
@@ -965,6 +995,9 @@
 
             t.check("setup_window_open", scene._newGameSetupWindow.isOpen(), "Setup window is open");
             t.check("setup_window_active", scene._newGameSetupWindow.active, "Setup window is active");
+            t.check("setup_window_width_350", scene._newGameSetupWindow.width === 350, "Setup window slimmed to 350 px");
+            t.check("setup_window_x_centered", scene._newGameSetupWindow.x >= 248 && scene._newGameSetupWindow.x <= 256, "Setup window centered squarely between D and S (x=" + scene._newGameSetupWindow.x + ")");
+            t.check("fits_between_d_and_s", scene._newGameSetupWindow.x > 243 && (scene._newGameSetupWindow.x + scene._newGameSetupWindow.width) < 618, "Fits squarely between letter D and letter S");
             t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
             t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
             t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
@@ -995,6 +1028,19 @@
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
 
+            // Test Cancel action: click or trigger Cancel row (index 3)
+            TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
+            scene._newGameSetupWindow.onTouchSelect(true);
+            await t.waitFrames(15);
+            t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
+            t.check("command_window_open_on_cancel", scene._commandWindow.isOpen(), "Command window reopened on Cancel");
+
+            // Reopen setup window
+            scene.commandNewGame();
+            await t.waitFrames(15);
+            t.check("setup_window_reopened", scene._newGameSetupWindow.isOpen(), "Setup window reopened");
+
             // Configure Dwarf expedition at Year 42 AD
             scene._newGameSetupWindow.setFaction("Dwarf");
             scene._newGameSetupWindow.setYear(42);
@@ -1005,8 +1051,10 @@
             t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
             t.screenshot("live_deus_new_game_setup_dwarf_42");
 
-            // Embark into the world
-            scene.onNewGameEmbark();
+            // Test Embark action via click / touch trigger on Row 2
+            TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 2 + 19;
+            scene._newGameSetupWindow.onTouchSelect(true);
             await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 15000, "Scene_Map started");
             await t.waitFrames(30);
 
