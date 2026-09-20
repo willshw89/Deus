@@ -16,10 +16,13 @@
     "N"
   ],
   "animations": {
-    "attack": [
+    "shoot": [
       0,
       1,
       2
+    ],
+    "aim": [
+      1
     ],
     "ready": [
       0
@@ -29,7 +32,7 @@
   "species": "human",
   "stage": "adult",
   "gender": "male",
-  "action": "Attack",
+  "action": "Bow",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana Pro (gemini-3-pro-image, Rule 11, VISION V109)"
 }

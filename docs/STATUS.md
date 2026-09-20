@@ -7,7 +7,61 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
-- Gemini: Orc Demographics 100% Google Nano Banana Pro 12-Sprite Action Suite (Adult Male Orc, Adult Female Orc across Walk, Haul, Attack, Bow, Magic, Work, Downed). Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+- Gemini: Dwarf Demographic 42-Charset Suite (6 Variations × 7 Actions: Walk, Haul, Attack, Bow, Magic, Work, Downed) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+
+## Adult Female Human 42-Charset Suite (6 Variations × 7 Actions) 100% Google Nano Banana Pro — 2026-09-19 (Gemini)
+Delivered per user directives ("FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)", "continue for human female", "Every variation needs 7 dedicated 12-sprite charsets", "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit", "Their legs dont move when moving left to right", "ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", VISION V109, V111, V112, V116, V118, V119):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generations**:
+  - All 6 settler variations and their 7 action suites (42 charsets total) generated via `tools/generate_nano_banana_pro.js` conditioned on the master Walk reference sheet (`art/raw/references/human_female_walk_12_reference.png`).
+  - Zero code drawing: every sprite frame originated strictly from genuine Google Nano Banana Pro generations.
+- **42 Dedicated 12-Sprite Charsets (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  - Deployed in `game/img/characters/` with matching JSON sidecars:
+    1. **Var 1 (Master Settler / Militia Pioneer)**: `$UF_Human_Female_1_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` and aliases `$UF_Human_Female_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png`, `$UF_Human_Female.png`, `$Eve.png` (Faction Steel Shortsword & Round Buckler).
+    2. **Var 2 (Frontier Scout / Wayfinder)**: `$UF_Human_Female_2_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Dual Hunting Daggers & Light Composite Yew Scout Bow).
+    3. **Var 3 (Heavy Guard / Shieldmaiden Veteran)**: `$UF_Human_Female_3_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Heavy Iron Broadsword & Garrison Longbow).
+    4. **Var 4 (Artisan Herbalist / Woodcrafter)**: `$UF_Human_Female_4_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Curved Woodcutter Hatchet / Cleaver & Forester Bow).
+    5. **Var 5 (Forge Artisan / Quarrywoman)**: `$UF_Human_Female_5_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Heavy Forge Hammer & Miner Crossbow/Sling).
+    6. **Var 6 (Seasoned Veteran Huntress / Ranger Captain)**: `$UF_Human_Female_6_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Steel Hunting Sabre & Arthurian Yew Longbow).
+- **Quality Gates & Dynamic Alternating Strides**:
+  - Dynamic alternating leg strides on West (Row 1) and East (Row 2): Col 0 (Stride A), Col 1 (Stand/Passing), Col 2 (Stride B). Resolves left-to-right leg movement.
+  - Invariant Serious Chibi proportions (~3.1 heads tall, 42–43px height, native baseline grounded at `y = 47`).
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - Ultima VII Originality: **42/42 PASS** (`tools/verify_all_42_female_charsets.js`, all distances >= 0.28).
+  - In-engine Playtest smoke tests: **5/5 PASS, 0 errors, exit 0** (`tools/test_human_female_variations_live.js`).
+- **Visual Evidence & Artifacts**:
+  - Live in-engine close-up: `art/review/human_female_6_variations_live_closeup.png`.
+  - Live in-engine normal view: `art/review/human_female_6_variations_live_normal.png`.
+  - Master review montage: `art/review/human_female_6_variations_montage.png` (864×192 px).
+  - Individual 7-action boards in `art/review/`: `human_female_var{1,2,3,4,5,6}_all_7_actions_12_sprites.png` (1008×192 px each).
+  - Interactive HTML viewer: `human_female_master_showcase.html` in brain artifacts.
+  - Master showcase artifact: `adult_female_human_complete_showcase.md` in brain artifacts.
+
+## Adult Male Human 42-Charset Suite (6 Variations × 7 Actions) 100% Google Nano Banana Pro — 2026-09-19 (Gemini)
+Delivered per user directives ("Actually, before moving onto female, I would like 6 variations of male", "Every variation needs 7 dedicated 12-sprite charsets", "Their legs dont move when moving left to right", "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit", "Show me everything", "FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generations**:
+  - All 6 settler variations and their 7 action suites (42 charsets total) generated via `tools/generate_nano_banana_pro.js` conditioned on the master Walk sheet.
+  - Zero code drawing: every sprite frame originated strictly from genuine Google Nano Banana Pro generations.
+- **42 Dedicated 12-Sprite Charsets (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  - Deployed in `game/img/characters/` with matching JSON sidecars:
+    1. **Var 1 (Master Settler / Militia)**: `$UF_Human_Male_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Faction Iron Arming Sword & Round Buckler).
+    2. **Var 2 (Frontier Scout / Forester)**: `$UF_Human_Male_2_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Dual Frontier Hunting Daggers & Light Composite Yew Bow).
+    3. **Var 3 (Heavy Town Guard / Veteran)**: `$UF_Human_Male_3_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Heavy Iron Broadsword & Garrison Longbow).
+    4. **Var 4 (Artisan Woodsman / Carpenter)**: `$UF_Human_Male_4_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Broad Bearded Woodcutter Axe & Carpentry Mallet).
+    5. **Var 5 (Blacksmith / Quarryman)**: `$UF_Human_Male_5_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Heavy Smithing Hammer & Miner Crossbow/Sling).
+    6. **Var 6 (Seasoned Veteran Ranger)**: `$UF_Human_Male_6_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Arthurian Yew Longbow & Steel Sidearm Hunting Sword).
+- **Quality Gates & Dynamic Alternating Strides**:
+  - Dynamic alternating leg strides on West (Row 1) and East (Row 2): Col 0 (Stride A), Col 1 (Stand/Passing), Col 2 (Stride B). Resolves left-to-right leg movement.
+  - Invariant Serious Chibi proportions (~3.1 heads tall, 43px height, native baseline grounded at `y = 47`).
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - Ultima VII Originality: **42/42 PASS** (`tools/verify_all_42_male_charsets.js`, all distances >= 0.28).
+  - In-engine Playtest smoke tests: **13/13 PASS, 0 errors, exit 0** (`tools/run_tests.js smoke`).
+- **Visual Evidence & Artifacts**:
+  - Live in-engine close-up: `art/review/human_male_6_variations_live_closeup.png`.
+  - Live in-engine normal view: `art/review/human_male_6_variations_live_normal.png`.
+  - Master review montage: `art/review/human_male_6_variations_montage.png` (864×192 px).
+  - Individual 7-action boards in `art/review/`: `human_male_var{2,3,4,5,6}_all_7_actions_12_sprites.png`.
+  - Interactive HTML viewer: `human_male_master_showcase.html` in brain artifacts.
+
 
 ## 12 Pointy Cursors & Default Main Menu Theme — 2026-09-19 (Gemini)
 Delivered per user directives ("Ensure all of the cursors are pointy. Also, make a default menu and a default mouse cursor for the main menu.", "I wanted faction cursors for the mouse cursor, as well as faction based menus", "I do not want a selector cursor on the menu"):
