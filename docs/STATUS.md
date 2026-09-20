@@ -8,6 +8,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Final Fantasy V (FF5) 16-Bit Chibi Style, 1-Tile Standard, and 12-Sprite Action Architecture — 2026-09-19 (Gemini)
+Delivered per user directives ("Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time, thats 3 up, left, right, down. And then another 12 sprite sheet for melee. then another 12 sprite sheet for ranged. etc. Let's scratch our current style rules and go with ff5 style generated in Nano banana II, large creatures can be 2 tiles in height but generally 1 tile in a FF5 style"):
+- **Style Reset to Final Fantasy V (FF5):**
+  - Scratched all previous style rules and adopted authentic 16-bit Super Famicom FF5 chibi pixel art aesthetic (~2.5 to 2.8 heads tall, expressive eyes, compact torso, scissor-step boots).
+  - Scaled humanoids and standard creatures to **1 tile in height** (38–48 px within 48×48 px RMMZ grid). Large creatures/bosses scale to **2 tiles in height** (80–96 px within 96×96 px frames).
+- **12 Sprites at a Time (3×4 Grid) with First Sheet Reference Conditioning:**
+  - Standardized on 12-sprite sheets arranged as 3 animation columns × 4 rows (Down, Left, Right, Up) on 144×192 px sheets (`$filename.png`).
+  - Master Walk sheet (12 sprites) generated first in Google Nano Banana II (`generate_image`), saved to `art/raw/references/`, and passed as master conditioning reference (`ImagePaths`) for subsequent action sheets.
+- **Dedicated 12-Sprite Action Sheets:**
+  - Walk (12), Melee Attack (12), Ranged Bow (12, string pluck only, zero flying arrows), Magic Cast (12, initiation chant/aura only, zero burst projectiles), Haul (12, dedicated sack/crate carrying cycle), Work (12), Downed (12).
+- **Codification & Verification:**
+  - Codified in `docs/VISION.md` (V115), `docs/ART_STANDARD.md` (Preamble, F1-F13, Sections 4 & 7), `GEMINI.md`.
+
 ## Name-Only Hover Tooltip and Authentic Facesets in Window_UFSheet — 2026-09-19 (Gemini)
 Delivered per user directives ("I dont want these facesets in the tooltip, I want them in the window. and whiel we're at it, I want to completely replace the tooltip so the only thing that displays is the name of whatever it is hovering over"):
 - **Name-Only Hover Tooltip (`UF_Look.js`):**

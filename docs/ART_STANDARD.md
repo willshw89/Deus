@@ -1,23 +1,23 @@
-# ART STANDARD: HD pixel art in the style of Final Fantasy VI
+# ART STANDARD: 16-Bit Pixel Art in the Style of Final Fantasy V (FF5)
 
-**Set 2026-09-19 (early afternoon) by user decision (VISION V2, V44):** the look is **HD pixel art in the style of Final Fantasy VI**: the flat 3/4 top-down RPG view, upright sprites, no lean, at the **highest definition that keeps the art style and the scale** (user: "i want the highest definition assets that keep the art style and scale"), with every sprite sized against the 48 px RPG Maker grid square. The earlier standards (U7 2.5D, flat 16×16 at 3×, high-resolution 2.5D squares, the 2.5D proportional-scale version) are withdrawn; `docs/GUIDE_25D.md` is obsolete. This applies to every image in the game. An image that breaks a rule here doesn't go into `game/img/`, however good it looks.
+**Set 2026-09-19 by user decision (VISION V115):** earlier style rules are scratched. The look is **16-bit pixel art in the authentic style of Final Fantasy V (FF5)** generated exclusively with **Google Nano Banana II** (`generate_image`). Humanoids and standard creatures are **generally 1 tile in height (48 px in RMMZ)**; large creatures can be **2 tiles in height (96 px in RMMZ)**. Sprites are organized **12 sprites at a time on a 3×4 grid (3 Down, 3 Left, 3 Right, 3 Up)**, with a dedicated 12-sprite sheet for each action (Walk, Melee, Ranged, Magic, Haul, Work, Downed).
 
 ## 1. The view and the look
 | # | Rule |
 |---|---|
-| F1 | **Flat 3/4 top-down RPG view**, the one RPG Maker draws by default: ground seen from above; people, animals, trees and objects stand upright and show their front; walls show their top and front face. Nothing leans, tilts or slants; no isometric diamonds; no perspective. |
-| F2 | **FF6's design language:** clear readable silhouettes, charming proportions (people with slightly large heads, about three heads tall), a dark selective outline (darkest at the bottom and right, never plain black everywhere), lively cel shading in 3–5 flat tones per material, light from the upper left, a little dithering only for texture. No gradients, no blur, no anti-aliasing against the background. |
-| F3 | **Highest definition that keeps the style and the scale:** one art pixel is one screen pixel at zoom 1 on the 48 px grid. That is the most detail a pixel-art sprite can carry at this grid size without turning into scaled-down painting; every sprite uses it fully (faces with eyes, clothing folds, buckles, hair and fur texture, bark and stone grain), keeping FF6's clarity. The generators' 4× originals are kept in `art/raw/` so a larger grid square could be adopted later without redrawing. |
-| F4 | **Scale against the grid square (V44):** a grown person fills roughly one square; smaller creatures, plants and items are smaller; larger beings use bigger character sheets and take up more space. The size table is in §2. Creatures move one per cell; large objects may cover several cells and may overhang the cells above them, never the cells below. |
-| F5 | **Palette:** the project palette `art/palette/uf.hex` (256 colours); the cleaning tool snaps every colour to it. Rich, warm, lively colour as in FF6; no neon, no pure black. Every pixel fully opaque or fully transparent. |
-| F6 | **Characters & 4D Animation:** 4 facings (South, West, East, North; VISION V110; user decision 2026-09-19: "8 way animations are bottlenecking us. Let's do everything we just discussed, but 4 directions. We will still be 8 direction movement but we're animating it with 4 directions") for **every action**: stand, walk, work, attack, bow, cast, hurt, death, and haul. East facings are cleanly mirrored from West. Bodies are bare-handed in plain clothes; clothing, armour, shields, tools and weapons are layer sheets on the same frames (V61). |
-| F7 | **All animation must happen through the sprite; no after-effect animations** (V58, V60, V108; user 2026-09-19: "The animation for these things should come from the sprites, not an after effect. this applies to everything we generate" and "ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"): idle, walk, work, attack, cast, hurt, death; sway, lit, open, ripple, flicker, and work loops for objects. All animation must come from distinct sprite frames in the art, never an after-effect (no programmatic distortion, procedural scaling, squashing, rotation, sine-wave sway, or shader warps). The game draws no motion of its own. Combat happens on the map (V45, V64). |
-| F8 | **Theme (V65):** Arthurian fantasy with science-fiction touches. Named lore needs the user's approval (AGENTS rule 7). |
-| F9 | **All generation tasks utilize Google Nano Banana II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109; user decisions 2026-09-19): Every visual asset across every category (characters, creatures, wildlife, monsters, terrain, autotiles, world objects, items, equipment layers, portraits, facesets, icons, and UI) MUST originate from Google Nano Banana II (`generate_image`). No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. Everything starts from an authentic Nano Banana II generation, processed into RMMZ standard formats via our palette and cleaning tools. |
-| F10 | **Dedicated Hauling / Carrying Pose** (VISION V113, AR-600 col 7; user decision 2026-09-19: "Dedicated Hauling / Carrying Pose (AR-600 column 7): Hauling a sack... A dedicated walk cycle with hands raised holding a crate or load in front can be added. Do it"): A dedicated 4-facing walk cycle holding a heavy burlap sack, crate, timber, or stone chunk in both arms against the torso. |
-| F11 | **Zero Flying Projectiles; Initiation-Only Magic** (VISION V111; user decision 2026-09-19: "No projectiles, rmemeber? Magic animations are just the initiation of the spell" and "The ranged attack is a pluck/etc, magic is glowy hands or a staff raise or whatever"): Bow attacks show aim, tension, and string pluck recoil only (zero flying arrows; ballistic projectiles are handled separately by the engine). Magic animations depict spell chant/initiation posture with soft glowing hands/staff only (zero projectile beams, bursts, or flying leaves). |
-| F12 | **Uniform Invariant Anatomical Scale across Actions** (VISION V112; user decision 2026-09-19: "Let's generate them one creater at a time (Male elf, female elf, etc) and pay attention to accuracy across each generation" and "Umm... The sprites are not all at the same scale. regenerate"): All 7 actions of a demographic share a single invariant scale factor (e.g. 40/276 for adult male) anchored to native baseline y=47. Head, torso, and limb dimensions are 100% consistent across standing, attacking, kneeling, and collapsed poses. |
-| F13 | **12 Sprites at a Time with First Sheet as Reference** (VISION V114; user decision 2026-09-19: "Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II"): Character action sheets are generated 12 sprites at a time in a 3×4 grid (3 columns × 4 rows: South, West, East, North). The first sheet produced for a character (the 12-sprite Walk sheet) serves as the persistent visual reference image passed to Google Nano Banana II (`generate_image`) in `ImagePaths` for all subsequent action sheets (Haul, Attack, Bow, Magic, Work, Downed). |
+| F1 | **Flat 3/4 top-down RPG view:** ground seen from above; people, animals, trees and objects stand upright in 2D space. Nothing leans, tilts or slants; no isometric diamonds; no perspective distortion. |
+| F2 | **FF5's design language:** charming, iconic 16-bit Super Famicom proportions (~2.5 to 2.8 heads tall: expressive face with signature 2x2/2x3 eyes, compact torso/tunic, punchy scissor-step boots), selective dark contour outlines, lively cel shading in 3–4 flat tones per material, light from upper left. No blur, no modern gradients, no anti-aliasing against the background. |
+| F3 | **Scale against the grid square (V115):** humanoids and standard creatures are generally 1 tile in height (38–48 px tall inside the 48×48 frame). Large creatures, bosses, and mature trees can be 2 tiles in height (80–96 px inside 96×96 frames). Micro items, small flora, and loose resources are sub-tile (12–28 px). |
+| F4 | **Palette:** the project palette `art/palette/uf.hex` (256 colours); the cleaning tool snaps every colour to it. Rich, warm, lively 16-bit colour; no neon, no pure black except interior voids. Every pixel fully opaque or fully transparent. |
+| F5 | **Standardized 4 Directions (V110, V115):** 4 facings (Down, Left, Right, Up; RMMZ rows 0=Down, 1=Left, 2=Right, 3=Up) for **every action**: Walk, Melee, Ranged, Magic, Haul, Work, Downed. Movement in the engine remains 8 directions, but animation is standardized on 4 facings to eliminate bottlenecks. |
+| F6 | **12 Sprites at a Time (3x4 Grid; V114, V115):** all character generations produce exactly 12 sprites arranged as 3 columns × 4 rows (3 Down, 3 Left, 3 Right, 3 Up) on a 144×192 px sheet ($filename.png). |
+| F7 | **Separate 12-Sprite Sheet per Action (V115):** each action is delivered as its own dedicated 12-sprite sheet: Walk (12), Melee (12), Ranged (12), Magic (12), Haul (12), Work (12), Downed (12). |
+| F8 | **First Sheet as Reference for Nano Banana II (V114):** the first sheet generated for a character (the standard 12-sprite Walk sheet) serves as the persistent visual conditioning reference (`ImagePaths`) passed to Google Nano Banana II for all subsequent action sheets, locking 100% anatomical scale, costume, and palette. |
+| F9 | **All generation tasks utilize Google Nano Banana II** (AGENTS.md Rule 11, VISION V69, V70, V79, V109): every visual asset across all categories MUST originate from Google Nano Banana II (`generate_image`). No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. |
+| F10 | **All animation must happen through the sprite; no after-effect animations** (V58, V60, V108): all animation must come from distinct sprite frames authored on the sheets. Zero code-driven affine transforms, procedural squash/stretch, sine-wave swaying, or shader distortions. |
+| F11 | **Zero Flying Projectiles on Sprite Sheets; Initiation-Only Magic (V111):** Ranged attack frames depict string draw, tension, and pluck recoil only (zero flying arrows; ballistic missiles are rendered by the engine projectile system). Magic frames depict incantation/chant posture with soft palm or staff aura only (zero flying projectile beams, blasts, or leaves). |
+| F12 | **Dedicated Hauling / Carrying Pose (V113, AR-600 col 7):** dedicated 4-facing 12-sprite walk cycle holding a heavy load (burlap sack, crate, timber, or stone) in both arms against the torso in front. |
+| F13 | **Theme (V65):** Arthurian fantasy with science-fiction touches. Named lore needs the user's approval (AGENTS rule 7). |
 
 
 
@@ -57,40 +57,38 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 - Code-drawn placeholders (`UF_Gen*`) are fine until art arrives.
 
 ## 4. Sheets and sidecars
-- Characters and creatures: one sheet per character on the layered standard (`docs/ASSET_REQUESTS.md` AR-600): 8 rows (S, SW, W, NW, N, NE, E, SE) and 20 columns (0 stand, 1–3 walk, 4–6 work, 7 the stand frame again (formerly carry; not drawn since V89, F7), 8–10 attack, 11–13 cast, 14 hurt, 15–17 death, 18–19 idle), frames of the size in §2. Every action fills all eight rows.
-- Generators deliver creatures **one image per action** (`<id>_idle`, `_walk`, `_work`, `_attack`, `_cast`, `_hurt`, `_death`): frames left to right, the eight facings top to bottom, equal cells. There is **no `_carry` image** (V89): the generators skip it, and the cleaning tool fills column 7 with the stand frame (column 0) of the same facing. A `_carry` image already delivered is not used. An image too large for the generator splits into `_a` (S, SW, W, NW) and `_b` (N, NE, E, SE). Empty east-side rows are mirrored from the west side. The cleaning tool assembles the 20-column sheet.
-- The sidecar's `animations` leaves out `carry` (the engine ignores a `carry` list if one is there: UF_Anim never shows column 7).
-- Objects: one frame per state, or a loop named in the sidecar. States that the catalog treats as separate objects (standing/stump, full/picked, unlit/lit, intact/ruined) are separate files.
-- Every sheet has a JSON sidecar of the same name: `frameWidth`, `frameHeight`, `anchor` (bottom-centre of the footprint), `footprint`, `facings`, `animations`, `frameMs`, `layer`, `species`, `stage`.
+- **Characters and creatures (V110, V114, V115):** organized as dedicated 12-sprite sheets on a 3×4 grid (3 animation columns × 4 rows: Down, Left, Right, Up) matching native RMMZ character sheets (`$filename.png`, 144×192 px total, each frame 48×48 px).
+- **Dedicated action sheets (V115):** each action is delivered as its own dedicated 12-sprite sheet: `<id>_walk.png`, `<id>_melee.png`, `<id>_ranged.png`, `<id>_magic.png`, `<id>_haul.png`, `<id>_work.png`, `<id>_downed.png`.
+- **First sheet as reference (V114):** the first sheet generated for a demographic (the standard 12-sprite Walk sheet) serves as the persistent master visual reference image (`ImagePaths`) passed to Google Nano Banana II (`generate_image`) for all subsequent action sheets, locking anatomical scale, costume, and palette across every action.
+- **Objects:** one frame per state, or a loop named in the sidecar. States that the catalog treats as separate objects (standing/stump, full/picked, unlit/lit, intact/ruined) are separate files.
+- **Every sheet has a JSON sidecar** of the same name: `frameWidth`, `frameHeight`, `anchor` (bottom-centre of the footprint), `footprint`, `facings`, `animations`, `frameMs`.
 
 ## 5. Making real art
 | Step | Output | Who |
 |---|---|---|
-| 1. Prompt | `docs/handoffs/GENERATOR_PROMPTS.md` (one prompt per asset group; built by `tools/build_generator_prompts.js` from the catalog) | Claude Code |
-| 2. Style lock (once) | Four anchors: a man, an oak, a wall piece, a meadow tile | a generator, then the user |
-| 3. Generate | `art/raw/<id>.png`: drawn on a 4× canvas (one grid square = 192 × 192), magenta background; kept as the high-resolution original | **Google Nano Banana II** (`generate_image`) |
-| 4. Clean | `art/masters/<id>.png` + sidecar: reduced by 4, background removed, snapped to the palette, placed on the anchor; creatures' action images assembled into the 20-column sheet with empty east rows mirrored (the cleaning tool) | a tool |
+| 1. Prompt | Prompt template specifying FF5 16-bit chibi style (2.5–2.8 heads tall, expressive eyes, scissor-step boots, 1 tile high, 3x4 grid on magenta background) | Gemini |
+| 2. Master Walk Sheet | Generate the 12-sprite Walk sheet (3 Down, 3 Left, 3 Right, 3 Up) in **Google Nano Banana II** (`generate_image`) | Gemini |
+| 3. Action Sheets with Reference | Generate subsequent 12-sprite action sheets (Melee, Ranged, Magic, Haul, Work, Downed) in **Google Nano Banana II** passing the Walk sheet via `ImagePaths` | Gemini |
+| 4. Clean & Snap | Process raw generation, remove magenta background, snap to `art/palette/uf.hex`, align frames to 48×48 px on baseline y=47 | cleaning tool |
 | 5. Check | `tools/art_check.js --native` and `tools/originality_check.js` pass | tools |
-| 6. Review | the result at 1× and 4× on grass next to the person reference | the user |
-| 7. Approve | `art/APPROVALS.md` | **the user only** |
-| 8. Export | copy to `game/img/` and point the catalog at it | Claude Code |
+| 6. Review | Review 12-sprite grid and live in-game animation loop across all 4 facings | Gemini & user |
+| 7. Approve | User approval of demographic suite | **the user only** |
+| 8. Export | Export to `game/img/characters/` with sidecars | Gemini / Claude Code |
 
 ## 6. Asset checklist
-Automated: palette colours only; alpha 0 or 255; frame size, anchor and frame counts as the sidecar says; originality check passes.
-By eye: upright, no lean; the right size against the grid square and the person reference; the same character in every frame and facing; the detail uses the full resolution; reads at zoom ⅓ and at night; no stray pixels.
+Automated: palette colours only; alpha 0 or 255; frame size 48×48 px (or 96×96 for large 2-tile creatures), anchor bottom-centre, 12 frames per sheet on 3×4 grid; originality check passes.
+By eye: authentic FF5 16-bit chibi proportions; upright, no lean; fits 1 tile (or 2 tiles for large creatures); consistent scale across all actions; reads cleanly at 1×, 2×, and 3× zoom.
 
 ## 7. How image models fail here, and the rule for each
 | Failure | Rule |
 |---|---|
-| Can't hit exact pixel sizes or sheet grids | Draw at 4× with even blocks; the cleaning step rebuilds the grid. |
-| Mixed pixel sizes and blur | Reject; ask for even 4 × 4 blocks. |
-| Drifts to 2.5D, isometric or painterly | Reject anything that isn't the flat 3/4 top-down view. |
-| Wrong size against the grid square | Measure against §2 and the person reference; redraw. |
-| Too little detail (big flat areas, 16-bit-sized features) | Reject; this standard uses every pixel of the frame. |
-| The character changes between frames or facings | Approve one facing first, then use it as the reference for the others. |
-| Diagonals faked (a straight facing reused), or actions drawn in only four facings | Reject; lock the diagonal view with the eight-facing stand image first, and every action has all eight. |
-| Copies a reference | The originality check rejects it. |
-| Green fringes from green-screen | Magenta background only. |
+| Can't hit exact pixel sizes or sheet grids | Draw at 4× with even blocks; the cleaning step extracts and normalizes to 48×48 px cells. |
+| Mixed pixel sizes and blur | Reject; enforce crisp pixel-art styling without blur or bilinear filtering. |
+| Drifts to 2.5D, isometric or painterly | Reject anything that isn't the flat 3/4 top-down RPG view. |
+| Wrong size against the grid square | Measure against §2: humanoids must fit 1 tile (38–48 px); large creatures 2 tiles (80–96 px). |
+| The character changes between actions | Pass the master Walk sheet as reference (`ImagePaths`) to Google Nano Banana II for all subsequent sheets. |
+| Flying projectiles or burst spells on sheets | Reject; bow is draw/pluck only; magic is initiation chant/aura only. Projectiles are engine-rendered. |
+| Green fringes from green-screen | Magenta background (`#FF00FF`) only. |
 | Animation faked with code distortion or shaders | Reject; all animation must be authored as distinct sprite frames in the sheet. No after-effect animations. |
 | Drawn with non-Nano Banana model or typed in code | Reject; all assets must originate from authentic Google Nano Banana II generations. |
 
