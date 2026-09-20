@@ -487,224 +487,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_A1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "tileset 91 slot A1: the 9 water kinds"
-  ],
-  "states": [],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2048": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind fresh",
-   "biomes: forest_temperate_conifer, forest_temperate_broadleaf, forest_tropical_conifer, forest_tropical_dry_broadleaf, forest_tropical_moist_broadleaf, grassland_temperate, grassland_tropical, savanna_temperate … (+3)",
-   "rivers and the start pond"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2048)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2096": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind pond",
-   "biomes: lake_fresh",
-   "lakes by salinity"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2096)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2144": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind marsh",
-   "biomes: marsh_temperate_fresh, marsh_tropical_fresh"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2144)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2192": {
-  "status": "stock RMMZ",
-  "request": "AR-100",
-  "requests": [
-   "AR-100",
-   "AR-101",
-   "AR-102"
-  ],
-  "usedBy": [
-   "water kind swamp",
-   "biomes: marsh_temperate_salt, marsh_tropical_salt, swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2192)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2240": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind icy",
-   "biomes: glacier, tundra, taiga, mountain, ocean_arctic",
-   "rivers where it is cold"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2240)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2432": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind brackish",
-   "biomes: desert_rock, desert_badland, lake_brackish",
-   "lakes by salinity"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2432)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2528": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101"
-  ],
-  "usedBy": [
-   "water kind salt",
-   "biomes: desert_sand, swamp_mangrove, lake_salt",
-   "lakes by salinity"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2528)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2624": {
-  "status": "stock RMMZ",
-  "request": "AR-101",
-  "requests": [
-   "AR-101",
-   "AR-1903",
-   "AR-1905",
-   "AR-1906",
-   "AR-1907",
-   "AR-1908"
-  ],
-  "usedBy": [
-   "water kind deep",
-   "biomes: ocean_temperate, ocean_tropical"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2624)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_A1#2720": {
-  "status": "stock RMMZ",
-  "request": "AR-100",
-  "requests": [
-   "AR-100",
-   "AR-101",
-   "AR-102"
-  ],
-  "usedBy": [
-   "water kind blighted",
-   "water in cursed regions"
-  ],
-  "states": [
-   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
-  ],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_A1.png (A1 autotile 2720)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "Outside_B": {
-  "status": "stock RMMZ",
-  "request": "AR-020",
-  "requests": [
-   "AR-020",
-   "AR-021",
-   "AR-023",
-   "AR-1600"
-  ],
-  "usedBy": [
-   "tileset 91 slot B"
-  ],
-  "states": [],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_B.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "Outside_C": {
   "status": "stock RMMZ",
   "request": "none yet",
@@ -775,40 +557,6 @@
   "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
- "!$FruitTree": {
-  "status": "U7 stand-in",
-  "request": "AR-021",
-  "requests": [
-   "AR-021"
-  ],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$FruitTree.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$GraniteBoulder": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×85)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$GraniteBoulder.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
  "!$IronstoneDeposit": {
   "status": "U7 stand-in",
   "request": "none yet",
@@ -821,24 +569,6 @@
   ],
   "category": "objects",
   "file": "img/characters/!$IronstoneDeposit.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$PineTree": {
-  "status": "U7 stand-in",
-  "request": "AR-021",
-  "requests": [
-   "AR-021"
-  ],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×82)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$PineTree.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
@@ -861,38 +591,6 @@
   "exists": true,
   "sidecar": true,
   "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$U7_Flat-toptree": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Look.js (test suite)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$U7_Flat-toptree.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "!$U7_Shrub": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Look.js (test suite)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$U7_Shrub.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
  },
  "$People1": {
   "status": "U7 stand-in",
@@ -1114,11 +812,10 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
+   "plugin UF_FactionMenus.js",
    "RMMZ data Actors.json (face ×8)"
   ],
-  "states": [
-   "face sheet: 4 × 2 faces of 144×144"
-  ],
+  "states": [],
   "category": "ui",
   "file": "img/faces/U7_Faces.png",
   "exists": true,
@@ -1148,6 +845,35 @@
   "requests": [],
   "usedBy": [
    "plugin UF_Talk.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_Generator": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Generator.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GeneratorPool": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Generator.js"
   ],
   "states": [],
   "category": "generated",
@@ -1216,10 +942,10 @@
  },
  "UF_GenGround_A2": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-120",
   "requests": [
-   "AR-100",
-   "AR-120"
+   "AR-120",
+   "AR-100"
   ],
   "usedBy": [
    "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)",
@@ -1396,10 +1122,10 @@
  },
  "UF_GenGround_A2#3200": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-1206",
   "requests": [
-   "AR-100",
    "AR-1206",
+   "AR-100",
    "AR-102",
    "AR-103"
   ],
@@ -1485,6 +1211,7 @@
   "request": "AR-100",
   "requests": [
    "AR-100",
+   "AR-1747",
    "AR-1707"
   ],
   "usedBy": [
@@ -1503,9 +1230,8 @@
  },
  "UF_GenGround_A2#3440": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-1203",
   "requests": [
-   "AR-100",
    "AR-1203",
    "AR-1214",
    "AR-1215",
@@ -1514,6 +1240,9 @@
    "AR-1202",
    "AR-1217",
    "AR-1218",
+   "AR-100",
+   "AR-1747",
+   "AR-1727",
    "AR-041 (withdrawn)",
    "AR-044"
   ],
@@ -1593,9 +1322,8 @@
  },
  "UF_GenGround_A2#3632": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-1201",
   "requests": [
-   "AR-100",
    "AR-1201",
    "AR-1203",
    "AR-1214",
@@ -1603,6 +1331,7 @@
    "AR-1216",
    "AR-1211",
    "AR-1212",
+   "AR-100",
    "AR-001"
   ],
   "usedBy": [
@@ -1661,10 +1390,10 @@
  },
  "UF_GenGround_A2#3776": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-120",
   "requests": [
-   "AR-100",
-   "AR-120"
+   "AR-120",
+   "AR-100"
   ],
   "usedBy": [
    "ground kind ash \"Ash\"",
@@ -1797,6 +1526,20 @@
   "requests": [],
   "usedBy": [
    "plugin UF_Combat.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenLevels_A1": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Levels.js"
   ],
   "states": [],
   "category": "generated",
@@ -1963,6 +1706,41 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "!$UF_Apothecary_Bench": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object apothecary_bench \"Apothecary bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Apothecary_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bed_Wood": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object bed_wood \"Wooden bed\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Plant fiber on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bed_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
  },
  "!$UF_BerryBush": {
   "status": "original",
@@ -2186,6 +1964,24 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "!$UF_Chest_Wood": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object chest_wood \"Storage chest\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Chest_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "!$UF_CopperOutcrop": {
   "status": "original",
   "request": "AR-044",
@@ -2201,6 +1997,25 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_CopperOutcrop.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Crib": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object crib \"Crib\""
+  ],
+  "states": [
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Crib.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -2261,6 +2076,61 @@
   ],
   "category": "objects",
   "file": "img/characters/!$UF_DesertShrub.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Dining_Bench": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object dining_bench \"Dining bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Dining_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Dining_Table": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object dining_table \"Dining table\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Dining_Table.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Door_Iron": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object door_iron \"Iron door\""
+  ],
+  "states": [
+   "dismantle: Iron door → gone (yields 1 Iron bar)",
+   "mine: Iron door → gone (yields 1 Iron bar)",
+   "building: unbuilt (needs 2 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Iron.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -2660,7 +2530,8 @@
   "requests": [
    "AR-511",
    "AR-512",
-   "AR-900"
+   "AR-900",
+   "AR-1746"
   ],
   "usedBy": [
    "item spear \"Spear\""
@@ -3170,7 +3041,10 @@
    "AR-902",
    "AR-905",
    "AR-1705",
-   "AR-1704"
+   "AR-1704",
+   "AR-1724",
+   "AR-1744",
+   "AR-1745"
   ],
   "usedBy": [
    "item hide \"Hide\"",
@@ -3234,7 +3108,8 @@
   "request": "AR-200",
   "requests": [
    "AR-200",
-   "AR-1705"
+   "AR-1705",
+   "AR-1725"
   ],
   "usedBy": [
    "item bone \"Bone\""
@@ -3545,6 +3420,9 @@
    "AR-044",
    "AR-104",
    "AR-022",
+   "AR-1720",
+   "AR-1722",
+   "AR-1742",
    "AR-105",
    "AR-1901"
   ],
@@ -3576,6 +3454,61 @@
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_Straw.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Counter": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_counter \"Kitchen counter\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Counter.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Hearth": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_hearth \"Cooking hearth\""
+  ],
+  "states": [
+   "building: unbuilt (needs 4 Stone, 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "unlit / lit (a fire: cooking happens next to it)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Hearth.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Pantry": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_pantry \"Kitchen larder\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Pantry.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -3771,11 +3704,46 @@
   "states": [
    "pick: Rubble → gone (yields 2 Stone)",
    "is the after-state of Stone wall (quarry), Stone wall (mine)",
-   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+5)",
+   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+13)",
    "flat: drawn under units and items"
   ],
   "category": "objects",
   "file": "img/characters/!$UF_Rubble.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Shop_Counter": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object shop_counter \"Trade counter\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Shop_Counter.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Skeleton": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object skeleton \"Skeletal remains\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "walk-through"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Skeleton.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4247,21 +4215,14 @@
  },
  "$Adam": {
   "status": "original",
-  "request": "AR-700",
-  "requests": [
-   "AR-700",
-   "AR-400",
-   "AR-600",
-   "AR-010",
-   "AR-011",
-   "AR-1700"
-  ],
+  "request": "none yet",
+  "requests": [],
   "usedBy": [
-   "people human",
    "start.pair male: clothing tier 1 (UF_Colonists.setTier)",
    "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
    "plugin UF_Anim.js (test suite)",
    "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)",
    "plugin UF_Combat.js (test suite)",
    "plugin UF_Ecology.js (test suite)",
    "plugin UF_Goals.js (test suite)",
@@ -4271,7 +4232,6 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
    "worn on the pair: clothing tier 1 = Woven wrap equipped",
    "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
@@ -4286,8 +4246,7 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
+   "plugin UF_Colonists.js"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)"
@@ -4334,25 +4293,19 @@
  },
  "$Eve": {
   "status": "original",
-  "request": "AR-700",
+  "request": "AR-011",
   "requests": [
-   "AR-700",
-   "AR-400",
-   "AR-600",
-   "AR-010",
-   "AR-011",
-   "AR-1700"
+   "AR-011"
   ],
   "usedBy": [
-   "people human",
    "start.pair female: clothing tier 1 (UF_Colonists.setTier)",
    "start.pair female: clothing tier 3 (UF_Colonists.setTier)",
    "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)",
    "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
    "worn on the pair: clothing tier 1 = Woven wrap equipped",
    "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
@@ -4403,7 +4356,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1702"
+   "AR-1702",
+   "AR-1722",
+   "AR-1742"
   ],
   "usedBy": [
    "people dwarf"
@@ -4425,7 +4380,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1702"
+   "AR-1702",
+   "AR-1722",
+   "AR-1742"
   ],
   "usedBy": [
    "people dwarf"
@@ -4447,7 +4404,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1701"
+   "AR-1701",
+   "AR-1721",
+   "AR-1741"
   ],
   "usedBy": [
    "people elf"
@@ -4469,7 +4428,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1701"
+   "AR-1701",
+   "AR-1721",
+   "AR-1741"
   ],
   "usedBy": [
    "people elf"
@@ -4491,7 +4452,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1703"
+   "AR-1703",
+   "AR-1723",
+   "AR-1743"
   ],
   "usedBy": [
    "people gnome"
@@ -4513,7 +4476,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1703"
+   "AR-1703",
+   "AR-1723",
+   "AR-1743"
   ],
   "usedBy": [
    "people gnome"
@@ -4535,7 +4500,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1704"
+   "AR-1704",
+   "AR-1724",
+   "AR-1744"
   ],
   "usedBy": [
    "people goblin"
@@ -4557,7 +4524,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1704"
+   "AR-1704",
+   "AR-1724",
+   "AR-1744"
   ],
   "usedBy": [
    "people goblin"
@@ -4572,26 +4541,38 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
+ "$UF_Human_Child_Walk": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js (test suite)",
+   "plugin UF_Colonists.js"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Child_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
  "$UF_Human_Female": {
   "status": "original",
-  "request": "AR-700",
+  "request": "AR-011",
   "requests": [
-   "AR-700",
-   "AR-011",
-   "AR-400",
-   "AR-600",
-   "AR-010",
-   "AR-1700"
+   "AR-011"
   ],
   "usedBy": [
-   "people human",
    "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
    "start.pair female: clothing tier 2 (UF_Colonists.setTier)",
+   "plugin UF_Colonists.js",
+   "plugin UF_History.js",
    "plugin UF_Select.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
    "clothing tier 0: unclad",
    "worn on the pair: clothing tier 2 = Hide cloak equipped"
   ],
@@ -4601,32 +4582,342 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
- "$UF_Human_Male": {
+ "$UF_Human_Female_1_Walk": {
   "status": "original",
   "request": "AR-700",
   "requests": [
    "AR-700",
-   "AR-010",
    "AR-400",
    "AR-600",
    "AR-011",
-   "AR-1700"
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
   ],
   "usedBy": [
    "people human",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_1_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_2_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_2_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_3_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_3_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_4_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_4_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_5_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_5_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_6_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_6_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male": {
+  "status": "original",
+  "request": "AR-010",
+  "requests": [
+   "AR-010"
+  ],
+  "usedBy": [
    "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
    "start.pair male: clothing tier 2 (UF_Colonists.setTier)",
+   "plugin UF_Colonists.js",
+   "plugin UF_History.js",
    "plugin UF_Outposts.js (test suite)",
    "plugin UF_Select.js (test suite)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)",
    "clothing tier 0: unclad",
    "worn on the pair: clothing tier 2 = Hide cloak equipped"
   ],
   "category": "people",
   "file": "img/characters/$UF_Human_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_1_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human",
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_1_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_2_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_2_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_3_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_3_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_4_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_4_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_5_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_5_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_6_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_6_Walk.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4638,7 +4929,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1705"
+   "AR-1705",
+   "AR-1725",
+   "AR-1745"
   ],
   "usedBy": [
    "people orc"
@@ -4660,7 +4953,9 @@
    "AR-900",
    "AR-400",
    "AR-600",
-   "AR-1705"
+   "AR-1705",
+   "AR-1725",
+   "AR-1745"
   ],
   "usedBy": [
    "people orc"
@@ -4689,6 +4984,132 @@
   "file": "img/characters/$UF_Wolf.png",
   "exists": true,
   "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Wolf": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_NaturalConnections.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$Wolf.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_human_1.png": {
+  "status": "original",
+  "request": "AR-1720",
+  "requests": [
+   "AR-1720"
+  ],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)",
+   "plugin UF_ColonyOverseer.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_human_1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_human_2.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js",
+   "plugin UF_Colonists.js (test suite)",
+   "plugin UF_ColonyOverseer.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_human_2.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_Minerals.png": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700"
+  ],
+  "usedBy": [
+   "plugin UF_Sheet.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_Minerals.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_Trees_Nature.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Look.js",
+   "plugin UF_Look.js (test suite)",
+   "plugin UF_Sheet.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_Trees_Nature.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_Wildlife_Beasts.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Look.js",
+   "plugin UF_Sheet.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_Wildlife_Beasts.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/faces/UF_Faces_Wildlife_Monsters.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Look.js",
+   "plugin UF_Sheet.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/faces/UF_Faces_Wildlife_Monsters.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/pictures/UF_Menu_default.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_FactionMenus.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/pictures/UF_Menu_default.png",
+  "exists": true,
+  "sidecar": false,
   "statusWhy": "not in 8e5fdc1"
  },
  "img/system/IconSet.png": {
@@ -4728,6 +5149,260 @@
   ],
   "category": "ui",
   "file": "img/system/Window.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "img/system/Window_default.png": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_FactionMenus.js"
+  ],
+  "states": [],
+  "category": "ui",
+  "file": "img/system/Window_default.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "Outside_A1": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "tileset 91 slot A1: the 9 water kinds"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2048": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind fresh",
+   "biomes: forest_temperate_conifer, forest_temperate_broadleaf, forest_tropical_conifer, forest_tropical_dry_broadleaf, forest_tropical_moist_broadleaf, grassland_temperate, grassland_tropical, savanna_temperate … (+3)",
+   "rivers and the start pond"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2048)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2096": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind pond",
+   "biomes: lake_fresh",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2096)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2144": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind marsh",
+   "biomes: marsh_temperate_fresh, marsh_tropical_fresh"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2144)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2240": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind icy",
+   "biomes: glacier, tundra, taiga, mountain, ocean_arctic",
+   "rivers where it is cold"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2240)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2336": {
+  "status": "original",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-101",
+   "AR-102",
+   "AR-1746"
+  ],
+  "usedBy": [
+   "water kind swamp",
+   "biomes: marsh_temperate_salt, marsh_tropical_salt, swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2336)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2432": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind brackish",
+   "biomes: desert_rock, desert_badland, lake_brackish",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2432)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2528": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind salt",
+   "biomes: desert_sand, swamp_mangrove, lake_salt",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2528)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2624": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101",
+   "AR-1903",
+   "AR-1905",
+   "AR-1906",
+   "AR-1907",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "water kind deep",
+   "biomes: ocean_temperate, ocean_tropical"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2624)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2720": {
+  "status": "original",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-101",
+   "AR-102"
+  ],
+  "usedBy": [
+   "water kind blighted",
+   "water in cursed regions"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2720)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_B": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-021",
+   "AR-023",
+   "AR-1600"
+  ],
+  "usedBy": [
+   "tile 152 (objects)",
+   "tileset 91 slot B"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_B.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_B#152": {
+  "status": "original",
+  "request": "AR-1600",
+  "requests": [
+   "AR-1600",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "object sapling \"Sapling\" (tint #7fb35a)"
+  ],
+  "states": [
+   "gather: Sapling → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 152)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 but changed since"
