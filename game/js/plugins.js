@@ -29,6 +29,7 @@ var $plugins =
 {"name":"UF_Floors","status":true,"description":"[UF Floors] Enclosed rooms, cultural floor jobs, ground autotiles, and room value.","parameters":{}},
 {"name":"UF_Colonists","status":true,"description":"[UF Colonists] The player faction's people at its home site: needs, personality, the society plan, hunting, tools and clothes; every act is a UF_Jobs job.","parameters":{}},
 {"name":"UF_Wildlife","status":true,"description":"[UF Wildlife] Creatures spawned with the map by biome; wander and flee.","parameters":{}},
+{"name":"UF_Ecology","status":true,"description":"[UF Ecology] Plants spread and regrow; wildlife and monsters recover under biome caps; ore never returns.","parameters":{}},
 {"name":"UF_Stance","status":true,"description":"[UF Stance] Green / yellow / red squares under units by stance toward the colony.","parameters":{}},
 {"name":"UF_Combat","status":true,"description":"[UF Combat] On-map d20 combat engine: attack rolls vs AC, damage dice, criticals, hostile AI aggro, floating damage popups, hit reactions, and death.","parameters":{}},
 {"name":"UF_Anim","status":true,"description":"[UF Anim] Attack, hurt and death animations for every person, animal and monster; the remains lie on the ground for a while.","parameters":{}},

@@ -2684,7 +2684,8 @@
       "clumpScale": 10,
       "avoidWater": 1,
       "image": "!$UF_CrystalSpire"
-    }
+    },
+    { "id": "sapling", "name": "Sapling", "tile": { "sheet": "Outside_B", "id": 152 }, "tint": "#7fb35a", "under": true, "passable": true, "tags": ["plant", "sapling", "wood"], "actions": { "gather": { "work": 20, "yields": { "fiber": 1 }, "becomes": null } } }
   ],
   "items": {
     "about": "Things that lie on the ground, get carried and stored (UF_Items). image = character sheet drawn at the cell (stand-ins !$U7_Item_* until AR-200 originals). food.hunger = hunger removed when eaten. tool = what jobs it speeds up (skill multiplier); wear = clothing tier it gives when equipped.",
@@ -12238,6 +12239,63 @@
         "spore_reeds": 0.03,
         "rocks_small": 0.03
       }
+    }
+  },
+  "ecology": {
+    "about": "UF_Ecology (VISION V74, V75, V83, V85; docs/design/ECOLOGY.md, docs/systems/UF_Ecology.md): a census per (level, 64x64 block, biome) bucket; fauna breed near their herds and arrive from the map edge; monsters come on a seeded clock away from camps, sites and people; plants spread, seed and regrow on the same cell; minerals never return. The director runs once per game hour and services bucketsPerStep buckets in a seeded round-robin, never placing anything in view or on a cell a unit could not walk onto (V68). Every duration is in world beats. Owner: Claude Code.",
+    "version": 2,
+    "director": { "bucketsPerStep": 6, "attemptsPerStep": 32, "blockSize": 64, "sampleStride": 4, "minBucketSamples": 4, "viewMargin": 4, "stepBudgetMs": 2 },
+    "seasons": { "Spring": 1.5, "Summer": 1, "Autumn": 0.6, "Winter": 0.2 },
+    "fauna": {
+      "targetScale": 1,
+      "localCapScale": 1.5,
+      "globalCapScale": 1.3,
+      "worldCap": 320,
+      "birth": { "rate": 0.5, "minHerd": 2, "spread": 3, "maxOverSize0": 0, "tries": 4 },
+      "arrival": { "rate": 0.25, "entryPoints": 64, "cooldownBeats": 4320, "maxInFlight": 3, "flightBeats": 2880, "tries": 6 },
+      "species": {
+        "hare": { "birthBeats": 2880, "litter": [1, 3] },
+        "rat": { "birthBeats": 2880, "litter": [1, 3] },
+        "fowl": { "birthBeats": 2880, "litter": [1, 2] },
+        "songbird": { "birthBeats": 4320, "litter": [1, 2] },
+        "bat": { "birthBeats": 4320, "litter": [1, 2] },
+        "deer": { "birthBeats": 8640, "litter": [1, 1] },
+        "boar": { "birthBeats": 8640, "litter": [1, 2] },
+        "wild_sheep": { "birthBeats": 8640, "litter": [1, 1] },
+        "aurochs": { "birthBeats": 14400, "litter": [1, 1] },
+        "wild_horse": { "birthBeats": 14400, "litter": [1, 1] },
+        "@predator": { "birthBeats": 11520, "litter": [1, 1] },
+        "@default": { "birthBeats": 8640, "litter": [1, 1] }
+      }
+    },
+    "monsters": { "localCapScale": 1, "globalCapScale": 1, "bucketCap": 2, "intervalBeats": [2160, 5760], "chance": 0.6, "entry": "habitat", "tries": 8, "clearance": { "playerCamp": 60, "camp": 40, "site": 40, "person": 12 } },
+    "plants": {
+      "absentFloor": 0.25,
+      "hardCapScale": 1.2,
+      "maxDensity": 0.35,
+      "seedRadius": 3,
+      "seedRainRate": 0.05,
+      "spreadTries": 3,
+      "rainTries": 2,
+      "campClearance": { "tree": 8, "bush": 4, "plant": 0 },
+      "maxTimers": 4096,
+      "timersPerStep": 64,
+      "kinds": {
+        "@tree": { "via": "sapling", "stumpToSaplingBeats": 4320, "saplingToTreeBeats": 8640, "spreadRate": 0.15 },
+        "@bush": { "regrowBeats": 7200, "spreadRate": 0.35 },
+        "@plant": { "regrowBeats": 2880, "spreadRate": 0.6 },
+        "berry_bush": { "regrowBeats": 8640, "spreadRate": 0.3 },
+        "cactus_tall": { "regrowBeats": 14400, "spreadRate": 0.15 },
+        "lily_pad": { "regrowBeats": 4320, "spreadRate": 0.4, "on": "water" },
+        "dead_tree": { "renewable": false }
+      }
+    },
+    "levels": {
+      "-2": { "enabled": false, "creatureCap": 60, "monsterCap": 8, "species": [], "plants": [], "biomes": "deep" },
+      "-1": { "enabled": false, "creatureCap": 60, "monsterCap": 6, "species": [], "plants": [], "biomes": "earth" },
+      "0": { "enabled": true, "creatureCap": 240, "monsterCap": 12, "species": "@wildlife", "plants": "@biomes" },
+      "1": { "enabled": false, "creatureCap": 30, "monsterCap": 0, "species": ["hawk", "songbird", "bat"], "plants": [], "biomes": "@column" },
+      "2": { "enabled": false, "creatureCap": 20, "monsterCap": 0, "species": ["hawk", "songbird"], "plants": [], "biomes": "@column" }
     }
   }
 }

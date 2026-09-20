@@ -66,9 +66,9 @@
     const History = () => (window.UF && UF.History) || null;
     const catalog = () => window.$ufWorldCatalog || null;
     const nowMs = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
-    const copyArea = a => ({ x: a.x | 0, y: a.y | 0 });
+    const copyArea = a => (a ? { x: a.x | 0, y: a.y | 0 } : { x: 0, y: 0 });
     const sameArea = (a, b) => !!a && !!b && (a.x | 0) === (b.x | 0) && (a.y | 0) === (b.y | 0);
-    const areaKey = a => `${a.x | 0},${a.y | 0}`;
+    const areaKey = a => (a ? `${a.x | 0},${a.y | 0}` : "0,0");
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -129,10 +129,11 @@
             version: VERSION,
             resources: [],
             areas: {},
+            herds: {},
             cursor: 0,
             nextHerd: 1,
             lastHour: null,
-            stats: { hours: 0, areas: 0, resources: 0, prey: 0, monsters: 0, attempts: 0, ms: 0 }
+            stats: { hours: 0, areas: 0, resources: 0, prey: 0, monsters: 0, attempts: 0, births: 0, germinated: 0, ms: 0 }
         };
     }
 
@@ -146,6 +147,7 @@
             st.version = VERSION;
             if (!Array.isArray(st.resources)) st.resources = [];
             if (!st.areas || typeof st.areas !== "object") st.areas = {};
+            if (!st.herds || typeof st.herds !== "object") st.herds = {};
             if (!(st.cursor >= 0)) st.cursor = 0;
             if (!(st.nextHerd > 0)) st.nextHerd = 1;
             if (!st.stats || typeof st.stats !== "object") st.stats = blankState().stats;
@@ -225,11 +227,13 @@
     function isRenewableObject(idOrType) {
         const O = Objects();
         const type = typeof idOrType === "object" ? idOrType : (O && O.type ? O.type(idOrType) : null);
-        if (!type || !Array.isArray(type.tags) || !type.actions) return false;
+        if (!type) return false;
+        if (type.renewable === false || type.id === "dead_tree") return false;
+        if (!Array.isArray(type.tags)) return false;
         const tags = type.tags;
         if (tags.some(t => ["building", "mineral", "ore", "gem", "stone", "ruin"].includes(t))) return false;
-        if (!tags.some(t => t === "tree" || t === "bush" || t === "plant")) return false;
-        return ["chop", "gather", "pick"].some(a => !!type.actions[a]);
+        if (!tags.some(t => t === "tree" || t === "bush" || t === "plant" || t === "sapling" || t === "flower")) return false;
+        return true;
     }
 
     function resourceHours(idOrType) {
@@ -239,6 +243,26 @@
         if (tags.includes("tree")) return TREE_HOURS;
         if (tags.includes("bush")) return BUSH_HOURS;
         return PLANT_HOURS;
+    }
+
+    function startSapling(area, x, y, treeSpecies, opts) {
+        const O = Objects(), st = state(), o = opts || {};
+        if (!O || !st || !area) return null;
+        const treeType = O.type(treeSpecies);
+        if (!treeType) return null;
+        cancelResource(area, x, y);
+        O.setIn(area, x, y, "sapling");
+        const at = (O.hourNow ? O.hourNow() : 0);
+        const due = Number.isFinite(o.due) ? o.due : (at + (Number.isFinite(o.hours) ? o.hours : 48));
+        const entry = {
+            area: copyArea(area), x: x | 0, y: y | 0,
+            from: "sapling", to: treeType.id,
+            expected: "sapling",
+            due
+        };
+        st.resources.push(entry);
+        emit("ecology:resourceScheduled", Object.assign({}, entry));
+        return entry;
     }
 
     function resourceIndex(area, x, y) {
@@ -501,6 +525,164 @@
         return { area: copyArea(area), prey, monsters };
     }
 
+    function spreadPlants(area, hour, opts) {
+        const W = World(), O = Objects(), st = state(), o = opts || {};
+        const result = { area: copyArea(area), spread: 0, ms: 0 };
+        const t0 = nowMs();
+        if (!enabled && !o.force || !W || !W.state || !O || !area || !W.inWorld(area.x, area.y)) return result;
+        const at = Number.isFinite(hour) ? hour : (O.hourNow ? O.hourNow() : 0);
+        const size = W.state.size;
+        const rng = mulberry32(hash32(W.state.seed, 0x501a47, area.x, area.y, at));
+
+        let parents = [];
+        if (typeof O.findIn === "function") {
+            parents = (O.findIn(area, { near: { x: Math.floor(size / 2), y: Math.floor(size / 2) }, radius: size, limit: 64 }) || [])
+                .filter(p => p && p.type && isRenewableObject(p.type) && p.type.id !== "sapling" && p.type.id !== "stump");
+        }
+        if (!parents.length) {
+            const tries = o.tries > 0 ? o.tries : 32;
+            for (let i = 0; i < tries; i++) {
+                const sx = Math.floor(rng() * size), sy = Math.floor(rng() * size);
+                const p = O.atIn(area, sx, sy);
+                if (p && isRenewableObject(p) && p.id !== "sapling" && p.id !== "stump") {
+                    parents.push({ x: sx, y: sy, type: p });
+                }
+            }
+        }
+
+        for (const parent of parents) {
+            const sx = parent.x, sy = parent.y, pType = parent.type;
+            const tags = pType.tags || [];
+            const isTree = tags.includes("tree");
+            const isBush = tags.includes("bush");
+            const isWater = pType.id === "lily_pad" || pType.id === "reeds";
+
+            const spreadRate = isTree ? 0.20 : (isBush ? 0.35 : 0.50);
+            if (!o.force && rng() >= spreadRate) continue;
+
+            let sprouted = false;
+            for (let t = 0; t < 8 && !sprouted; t++) {
+                const r = 1 + Math.floor(rng() * 3);
+                const angle = rng() * Math.PI * 2;
+                const tx = sx + Math.round(Math.cos(angle) * r);
+                const ty = sy + Math.round(Math.sin(angle) * r);
+
+                if (tx < 0 || ty < 0 || tx >= size || ty >= size) continue;
+                if (O.atIn(area, tx, ty)) continue;
+                if (standerAt(area, tx, ty)) continue;
+
+                const gx = area.x * size + tx, gy = area.y * size + ty;
+                const info = (window.UF && UF.WorldGen && UF.WorldGen.cellInfo) ? UF.WorldGen.cellInfo(gx, gy) : null;
+                if (info) {
+                    if (isWater && !info.water) continue;
+                    if (!isWater && (info.water || !info.walkable)) continue;
+                }
+
+                if (window.UF && UF.Floors && UF.Floors.isFloor && UF.Floors.isFloor(area, tx, ty)) continue;
+                if (window.UF && UF.Roads && UF.Roads.isRoad && UF.Roads.isRoad(area, tx, ty)) continue;
+
+                let densityCount = 0;
+                for (let dy = -2; dy <= 2; dy++) {
+                    for (let dx = -2; dx <= 2; dx++) {
+                        const nx = tx + dx, ny = ty + dy;
+                        if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
+                            const nobj = O.atIn(area, nx, ny);
+                            if (nobj && isRenewableObject(nobj)) densityCount++;
+                        }
+                    }
+                }
+                if (!o.force && densityCount / 25 > 0.35) continue;
+
+                if (isTree) {
+                    startSapling(area, tx, ty, pType.id, { hour: at, hours: 48 });
+                    result.spread++;
+                    sprouted = true;
+                    if (st) st.stats.germinated = (st.stats.germinated || 0) + 1;
+                    emit("ecology:germinated", { area: copyArea(area), x: tx, y: ty, kind: "sapling", parent: pType.id, via: "spread" });
+                } else {
+                    if (O.setIn(area, tx, ty, pType.id)) {
+                        result.spread++;
+                        sprouted = true;
+                        if (st) st.stats.germinated = (st.stats.germinated || 0) + 1;
+                        emit("ecology:germinated", { area: copyArea(area), x: tx, y: ty, kind: pType.id, parent: pType.id, via: "spread" });
+                    }
+                }
+            }
+        }
+        result.ms = nowMs() - t0;
+        return result;
+    }
+
+    function stepBreeding(area, hour, opts) {
+        const W = World(), wild = Wildlife(), st = state(), o = opts || {};
+        const result = { area: copyArea(area), births: 0, ms: 0 };
+        const t0 = nowMs();
+        if (!enabled && !o.force || !W || !W.state || !wild || !area || !W.inWorld(area.x, area.y)) return result;
+
+        const at = Number.isFinite(hour) ? hour : (Objects() && Objects().hourNow ? Objects().hourNow() : 0);
+        const p = population(area);
+        const cap = capFor(area, "prey");
+        if (p.prey >= cap && !o.force) return result;
+
+        const units = W.unitsInArea(area.x, area.y).filter(u => u.data && u.data.kind === "creature");
+        const herds = new Map();
+        for (const u of units) {
+            const hId = u.data.herd | 0;
+            if (!herds.has(hId)) herds.set(hId, []);
+            herds.get(hId).push(u);
+        }
+
+        const rng = mulberry32(hash32(W.state.seed, 0x627265, area.x, area.y, at));
+
+        for (const [hId, members] of herds.entries()) {
+            const count = members.length;
+            const canBreed = count >= 2;
+            if (!canBreed) continue;
+
+            const sample = members[0];
+            const sp = speciesOf(sample);
+            if (!sp || sp.kind === "monster") continue;
+
+            const herdMax = (Array.isArray(sp.herd) ? sp.herd[1] : 4) | 0;
+            if (count >= herdMax && !o.force) continue;
+
+            const herdRecord = st && st.herds && st.herds[hId];
+            if (!o.force && herdRecord && herdRecord.lastBirth && at - herdRecord.lastBirth < 12) continue;
+
+            const chance = sp.kind === "predator" ? 0.35 : 0.55;
+            if (!o.force && rng() >= chance) continue;
+
+            const parent = members[Math.floor(rng() * count)];
+            let babyCell = null;
+            for (let t = 0; t < 16; t++) {
+                const bx = parent.x + Math.floor(rng() * 5) - 2;
+                const by = parent.y + Math.floor(rng() * 5) - 2;
+                if (candidateValid(area, bx, by, sp, "prey")) {
+                    babyCell = { x: bx, y: by };
+                    break;
+                }
+            }
+            if (!babyCell) continue;
+
+            const spec = wild.unitSpec(sp, area, babyCell.x, babyCell.y, hId, DIRS[Math.floor(rng() * DIRS.length)],
+                parent.data.home || { x: parent.x, y: parent.y },
+                { ecology: true, born: true, spawnedAt: at });
+            const baby = W.addUnit(Object.assign(spec, { snapToFree: 6 }));
+            if (baby) {
+                result.births++;
+                if (st) {
+                    st.stats.births = (st.stats.births || 0) + 1;
+                    st.stats.prey++;
+                    st.herds = st.herds || {};
+                    st.herds[hId] = Object.assign(st.herds[hId] || {}, { lastBirth: at, species: sp.id });
+                }
+                emit("ecology:born", { unit: baby, herd: hId, species: sp.id, area: copyArea(area) });
+            }
+        }
+        result.ms = nowMs() - t0;
+        return result;
+    }
+
     //-------------------------------------------------------------------------
     // Hourly driver: resources every hour, populations every six hours.
 
@@ -522,10 +704,19 @@
         if (!enabled || !W || !W.state || !st) return result;
         st.lastHour = at;
         st.stats.hours++;
+
+        const here = W.currentArea();
+        const rotate = cursorArea();
+        const seen = new Set();
+        for (const a of [here, rotate]) {
+            if (!a || seen.has(areaKey(a))) continue;
+            seen.add(areaKey(a));
+            spreadPlants(a, at);
+            stepBreeding(a, at);
+        }
+
         if (at % POPULATION_INTERVAL === 0) {
-            const seen = new Set();
-            const here = W.currentArea();
-            const rotate = cursorArea();
+            seen.clear();
             for (const a of [here, rotate]) {
                 if (!a || seen.has(areaKey(a))) continue;
                 seen.add(areaKey(a));
@@ -564,6 +755,9 @@
         scheduleResource,
         cancelResource,
         processResources,
+        startSapling,
+        spreadPlants,
+        stepBreeding,
         isRenewableObject,
         resourceHours,
         population,
@@ -611,7 +805,7 @@
                 `${detail || ""}${provoked(name) ? "; deliberately provoked through UF_TEST_PROVOKE" : ""}`);
             const priorEnabled = enabled;
             enabled = false;
-            const area = W.currentArea();
+            const area = W.currentArea() || (W.state && W.state.startArea) || { x: 0, y: 0 };
             initializeBaselines();
 
             // 1. state_saved: registry, baselines and counters live inside the world save.

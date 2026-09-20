@@ -6,7 +6,35 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (world objects and inventory icons generated with Nano Banana II delivered)
+- None (nature reproduction and continuous resource replenishment completed)
+
+## Nature Reproduction & Constant Resource Replenishment (VISION V74, V75, V83, V85) — 2026-09-19 (Claude Code)
+
+Delivered per user request ("program everything in nature to reproduce / regenerate so that natural resources are constantly replenishing"):
+- **Flora Lifecycle, Sapling Growth & Regrowth (`UF_Ecology.js`, `UF_WorldCatalog.json`):**
+  - **Felled Trees & Stumps**: Chopping trees produces a `stump`. Stumps transition through scheduled ecological timers to mature trees or saplings. Blocked cells wait cleanly until standing units clear.
+  - **Harvested Plants & Bushes**: Foraged flora (grass tufts, herbs, wildflowers, mushrooms, reeds, wild grains) regrow naturally on their cell after biological due times.
+  - **Sapling Maturation (`startSapling`)**: Saplings planted by colonists or spawned via natural seed rain mature into their specific adult tree species (oak, pine, birch, fruit tree, palm, etc.) over time.
+- **Active Plant Propagation & Spreading (`spreadPlants`):**
+  - Living plants and trees periodically disperse seeds and spread vegetative runners into adjacent empty, passable tiles within radius 1–3.
+  - Trees spread saplings that grow into mature trees; bushes, wildflowers, herbs, and mushrooms spread new patches.
+  - Enforces local density cap (`maxDensity` <= 0.35 in 5×5 window) to preserve natural spacing and avoid over-packing.
+  - Cavern flora (`glow_caps`, `cave_mushrooms`, `tower_cap`, `cave_moss`, `spore_reeds`) spread across subterranean cavern floors.
+- **Autonomous Fauna Herd Breeding & Population Recovery (`stepBreeding`, `attemptSpawn`):**
+  - Wild herds with $\ge 2$ members actively reproduce. Breeding checks produce offspring near the parents on neighboring passable cells, with the newborn joining the parent herd under the species/area cap.
+  - Overhunted or depleted wildlife populations recover via habitat and perimeter arrival rolls, ensuring the world never becomes permanently devoid of game.
+- **Strict Non-Renewable Mineral Guard:**
+  - Geological resources (ironstone, copper ore, gold ore, rock piles, crystals, ruins) remain finite (`isRenewableObject` returns `false`).
+- **Plugin Registration & Catalog Configuration:**
+  - Registered `UF_Ecology` in `game/js/plugins.js` after `UF_Wildlife`.
+  - Configured `ecology` director parameters and appended `sapling` object to `game/data/UF_WorldCatalog.json`.
+- **Automated Verification:**
+  - `tools/test_ecology.js`: **7/7 PASS** (renewable vs finite integrity, sapling lifecycle, harvested flora regrowth, plant spreading, herd breeding, depleted recovery, cavern ecology).
+  - Mutation verification (Rule 4): Verified all 4 mutation tests (`--mutant=finite`, `--mutant=sapling`, `--mutant=breeding`, `--mutant=spread`) fail as intended.
+  - `tools/run_tests.js ecology`: **10/10 PASS** (exit code 0, 0 uncaught errors).
+  - `tools/run_tests.js smoke`: **9/9 PASS** (exit code 0, 0 errors on map).
+  - `tools/run_tests.js goals`: **8/8 PASS** (exit code 0).
+  - Visual Inspection (Rule 5): Opened and verified `ecology.replenished_prey.png` (deer herd with yellow neutral rings in meadow) and `ecology.replenished_monster.png` (troll with red hostile stance ring).
 
 ## World Objects & Inventory Icons Generation via Nano Banana II (AR-020, AR-021, AR-023, V69, V70, V79) — 2026-09-19 (Gemini)
 
