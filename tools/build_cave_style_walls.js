@@ -145,7 +145,8 @@ function buildWoodSet() {
         postDark: snapHex('#2C1402'),
         
         baseTrim: snapHex('#452308'),
-        baseEdge: snapHex('#241103')
+        baseEdge: snapHex('#241103'),
+        black: snapHex('#000000')
     };
 
     function drawWoodTopFace(f, mask) {
@@ -154,57 +155,79 @@ function buildWoodSet() {
         const hasS = !!(mask & 4);
         const hasW = !!(mask & 8);
 
-        // Standard Top Face bounds
-        // If isolated (mask===0): 32x32 center cap at x=8..39, y=8..39
-        // If connecting: expands towards connections
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
         const yMin = hasN ? 0 : 6;
-        const yMax = 45; // South edge of top face sits at y=45
+        const yMax = 46;
 
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
-                // Horizontal plank grain on top deck
-                const plankY = y % 8;
-                let col = C.topBody;
-                if (plankY === 0) col = C.topGroove;
-                else if (plankY === 1) col = C.topHigh;
-                else if (plankY >= 6) col = C.topShade;
-                else {
-                    const n = ((x * 7 + y * 13) % 11) / 11;
-                    col = n > 0.7 ? C.topHigh : (n < 0.3 ? C.topShade : C.topBody);
+                // 1. South coping lip (y=41..46) across full width from xMin to xMax
+                if (y >= 41) {
+                    if (y === 41) {
+                        setPixel(f, x, y, C.topHigh);
+                    } else if (y === 42) {
+                        setPixel(f, x, y, C.topLip);
+                    } else if (y === 43) {
+                        setPixel(f, x, y, C.topHigh);
+                    } else if (y === 44) {
+                        setPixel(f, x, y, C.topLip);
+                    } else if (y === 45) {
+                        setPixel(f, x, y, C.topBody);
+                    } else if (y === 46) {
+                        setPixel(f, x, y, C.topEdgeDark);
+                    }
+                    continue;
                 }
-                setPixel(f, x, y, col);
-            }
-        }
 
-        // Top Face outer borders & bevels
-        // North border
-        if (!hasN) {
-            for (let x = xMin; x <= xMax; x++) {
-                setPixel(f, x, yMin, C.topEdgeDark);
-                setPixel(f, x, yMin + 1, C.topHigh);
+                // 2. Outer borders on non-connecting edges:
+                const isNorthBorder = !hasN && (y <= yMin + 5);
+                const isWestBorder = !hasW && (x <= xMin + 5);
+                const isEastBorder = !hasE && (x >= xMax - 5);
+
+                if (isNorthBorder || isWestBorder || isEastBorder) {
+                    // Outer edge outline
+                    const isOuter = (!hasN && y === yMin) || (!hasW && x === xMin) || (!hasE && x === xMax);
+                    if (isOuter) {
+                        setPixel(f, x, y, C.topEdgeDark);
+                        continue;
+                    }
+                    // Outer highlight line on North / West
+                    const isHigh = (!hasN && y === yMin + 1) || (!hasW && x === xMin + 1);
+                    if (isHigh) {
+                        setPixel(f, x, y, C.topHigh);
+                        continue;
+                    }
+                    // East edge shading
+                    if (!hasE && x === xMax - 1) {
+                        setPixel(f, x, y, C.topShade);
+                        continue;
+                    }
+                    // Inner bevel groove into black interior
+                    const isInnerGroove = (!hasN && y === yMin + 5) || (!hasW && x === xMin + 5) || (!hasE && x === xMax - 5);
+                    if (isInnerGroove) {
+                        setPixel(f, x, y, C.topGroove);
+                        continue;
+                    }
+                    // Body of timber beam rim
+                    const grain = ((x * 7 + y * 13) % 11) / 11;
+                    const col = grain > 0.65 ? C.topHigh : (grain < 0.35 ? C.topShade : C.topBody);
+                    setPixel(f, x, y, col);
+                    continue;
+                }
+
+                // 3. Black Interior with 1px inner drop shadow
+                const nearNorth = !hasN && (y === yMin + 6);
+                const nearWest = !hasW && (x === xMin + 6);
+                const nearEast = !hasE && (x === xMax - 6);
+                const nearSouth = (y === 40);
+
+                if (nearNorth || nearWest || nearEast || nearSouth) {
+                    setPixel(f, x, y, C.shadowDeep);
+                } else {
+                    setPixel(f, x, y, C.black);
+                }
             }
-        }
-        // West border
-        if (!hasW) {
-            for (let y = yMin; y <= yMax; y++) {
-                setPixel(f, xMin, y, C.topEdgeDark);
-                setPixel(f, xMin + 1, y, C.topHigh);
-            }
-        }
-        // East border
-        if (!hasE) {
-            for (let y = yMin; y <= yMax; y++) {
-                setPixel(f, xMax, y, C.topEdgeDark);
-                setPixel(f, xMax - 1, y, C.topShade);
-            }
-        }
-        // South coping lip (y=44..46): The overhang lip seen across the front!
-        for (let x = xMin; x <= xMax; x++) {
-            setPixel(f, x, 44, C.topHigh);
-            setPixel(f, x, 45, C.topLip);
-            setPixel(f, x, 46, C.topEdgeDark);
         }
     }
 
@@ -334,7 +357,8 @@ function buildStoneSet() {
         cornerHigh: snapHex('#9E9E96'),
         
         baseTrim: snapHex('#40403C'),
-        baseEdge: snapHex('#1E1E1A')
+        baseEdge: snapHex('#1E1E1A'),
+        black: snapHex('#000000')
     };
 
     function drawStoneTopFace(f, mask) {
@@ -346,49 +370,80 @@ function buildStoneSet() {
         const xMin = hasW ? 0 : 6;
         const xMax = hasE ? 47 : 41;
         const yMin = hasN ? 0 : 6;
-        const yMax = 45;
+        const yMax = 46;
 
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
-                // Flat chiseled stone block paving on top face (like cave ledge in Dungeon_A4)
-                const isBlockSeamX = (x % 16 === 0);
-                const isBlockSeamY = (y % 12 === 0);
-                let col = C.topBody;
-                if (isBlockSeamX || isBlockSeamY) col = C.topGroove;
-                else if (x % 16 === 1 || y % 12 === 1) col = C.topHigh;
-                else if (x % 16 >= 14 || y % 12 >= 10) col = C.topShade;
-                else {
-                    const n = ((x * 13 + y * 19) % 17) / 17;
-                    col = n > 0.7 ? C.topLight : (n < 0.3 ? C.topShade : C.topBody);
+                // 1. South stone coping lip (y=41..46) across full width from xMin to xMax
+                if (y >= 41) {
+                    const isMortar = (x % 16 === 0);
+                    if (isMortar) {
+                        setPixel(f, x, y, C.mortarLine);
+                    } else if (y === 41) {
+                        setPixel(f, x, y, C.topHigh);
+                    } else if (y === 42) {
+                        setPixel(f, x, y, C.topLight);
+                    } else if (y === 43) {
+                        setPixel(f, x, y, C.topBody);
+                    } else if (y === 44) {
+                        setPixel(f, x, y, C.topLight);
+                    } else if (y === 45) {
+                        setPixel(f, x, y, C.topShade);
+                    } else if (y === 46) {
+                        setPixel(f, x, y, C.topEdgeDark);
+                    }
+                    continue;
                 }
-                setPixel(f, x, y, col);
-            }
-        }
 
-        // Top Face outer borders & chiseled bevels
-        if (!hasN) {
-            for (let x = xMin; x <= xMax; x++) {
-                setPixel(f, x, yMin, C.topEdgeDark);
-                setPixel(f, x, yMin + 1, C.topHigh);
+                // 2. Outer coping stone borders on non-connecting edges:
+                const isNorthBorder = !hasN && (y <= yMin + 5);
+                const isWestBorder = !hasW && (x <= xMin + 5);
+                const isEastBorder = !hasE && (x >= xMax - 5);
+
+                if (isNorthBorder || isWestBorder || isEastBorder) {
+                    const isOuter = (!hasN && y === yMin) || (!hasW && x === xMin) || (!hasE && x === xMax);
+                    if (isOuter) {
+                        setPixel(f, x, y, C.topEdgeDark);
+                        continue;
+                    }
+                    const isHigh = (!hasN && y === yMin + 1) || (!hasW && x === xMin + 1);
+                    if (isHigh) {
+                        setPixel(f, x, y, C.topHigh);
+                        continue;
+                    }
+                    if (!hasE && x === xMax - 1) {
+                        setPixel(f, x, y, C.topShade);
+                        continue;
+                    }
+                    const isInnerGroove = (!hasN && y === yMin + 5) || (!hasW && x === xMin + 5) || (!hasE && x === xMax - 5);
+                    if (isInnerGroove) {
+                        setPixel(f, x, y, C.topGroove);
+                        continue;
+                    }
+                    // Chiseled ashlar stone texture
+                    const isBlockJoint = (!hasN && (x % 16 === 0)) || ((!hasW || !hasE) && (y % 12 === 0));
+                    if (isBlockJoint) {
+                        setPixel(f, x, y, C.topGroove);
+                        continue;
+                    }
+                    const n = ((x * 13 + y * 19) % 17) / 17;
+                    const col = n > 0.7 ? C.topLight : (n < 0.3 ? C.topShade : C.topBody);
+                    setPixel(f, x, y, col);
+                    continue;
+                }
+
+                // 3. Black Interior with 1px inner drop shadow
+                const nearNorth = !hasN && (y === yMin + 6);
+                const nearWest = !hasW && (x === xMin + 6);
+                const nearEast = !hasE && (x === xMax - 6);
+                const nearSouth = (y === 40);
+
+                if (nearNorth || nearWest || nearEast || nearSouth) {
+                    setPixel(f, x, y, C.shadowDeep);
+                } else {
+                    setPixel(f, x, y, C.black);
+                }
             }
-        }
-        if (!hasW) {
-            for (let y = yMin; y <= yMax; y++) {
-                setPixel(f, xMin, y, C.topEdgeDark);
-                setPixel(f, xMin + 1, y, C.topHigh);
-            }
-        }
-        if (!hasE) {
-            for (let y = yMin; y <= yMax; y++) {
-                setPixel(f, xMax, y, C.topEdgeDark);
-                setPixel(f, xMax - 1, y, C.topShade);
-            }
-        }
-        // South coping stone lip (y=44..46)
-        for (let x = xMin; x <= xMax; x++) {
-            setPixel(f, x, 44, C.topHigh);
-            setPixel(f, x, 45, C.topLight);
-            setPixel(f, x, 46, C.topEdgeDark);
         }
     }
 

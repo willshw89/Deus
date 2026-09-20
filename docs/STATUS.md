@@ -5,6 +5,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## Black-Top Cave-Style Walls (AR-104 & AR-300) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("I do want the tops of walls to be black though. Not like a black square, but black bordered by material"):
+- **Authentic Black-Top Wall Architecture:**
+  - Updated `tools/build_cave_style_walls.js` for both Wood and Stone two-tile-high wall sets:
+    - **Top Face (y = 0..46):**
+      - Outer non-connecting edges (`!hasN`, `!hasW`, `!hasE`) feature a 6-pixel wide material rim (timber beams for wood; dressed ashlar coping stones for stone) with dark outer edge outline and bright top highlight catch-lights.
+      - South coping lip (y = 41..46) runs across the full front width with multi-toned bevel and lower edge overhang.
+      - Connecting edges (`hasN`, `hasW`, `hasE`) leave the rim and interior open so adjacent tiles connect with zero seams.
+      - Interior center is solid black (`#000000`) with a 1-pixel inner drop shadow (`shadowDeep`) along the inside of the rim for authentic retro RPG ceiling cavity depth (matching `Dungeon_A4.png` block 6,2).
+    - **Front Wall Face (y = 47..95):**
+      - 3-pixel cast shadow directly below the south coping lip, followed by vertical wall face (vertical planks with iron bolts for wood; 3 staggered courses of ashlar masonry for stone) and sturdy foundation baseboard.
+  - Deployed to:
+    - `game/img/characters/!$WallWood_Set.png` & `art/masters/!$WallWood_Set.png` (sidecars `!$WallWood_Set.json`)
+    - `game/img/characters/!$WallStone_Set.png` & `art/masters/!$WallStone_Set.png` (sidecars `!$WallStone_Set.json`)
+- **Automated Verification:**
+  - `tools/art_check.js --native`: PASS (Wood: 12 colors, Stone: 15 colors, both ≤ 32 limit, 100% binary alpha, valid sidecars).
+  - `tools/originality_check.js`: PASS (closest distance 0.373 to 0.437 >= 0.28 vs 19,431 U7 shapes, 0 FAIL, 0 WARN).
+  - `tools/run_tests.js walls`: PASS (3/3 checks pass, exit 0).
+  - `tools/run_tests.js smoke`: PASS (9/9 checks pass, exit 0, 0 console errors).
+- **Visual Inspection (Rule 5):**
+  - `art/review/black_top_walls_review.png`: Visual review showing isolated pillars, seamless 3-tile horizontal runs, and vertical runs in both wood and stone styles. Tops show crisp material borders enclosing the deep black void; front faces show cast shadows and foundation footers.
+  - `game/test_output/smoke.map.png`: In-engine live test screenshot on active map.
+
 ## Authentic Matching Faction Menu Themes & Custom Selection Cursors (AR-1740 to AR-1750) — 2026-09-19 (Gemini)
 
 Delivered per user directive ("Those are pretty good, Lets create a matching menu for each"):
