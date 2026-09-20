@@ -8,6 +8,29 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None currently claimed)
 
+## Authentic Nano Banana II Cave Rock Walls (A4) and 3-Frame Flowing Water (A1) — 2026-09-19 (Gemini)
+Delivered per user directives ("Very good, slightly visually bugged, though I want the walls to take a style closer to the cave/rock walls, with a wall face and a top face", "Water needs to seamlessly border all terrain types", "I do want the tops of walls to be black though. Not like a black square, but black bordered by material", "Fix that real quick and carry on", "Genrate the tilesets in nano banana II. The water animation is kinda weak. Redo the water. Keep going", "Make sure youre generating everything with nano banana II", "Continue generating with nano banana II"):
+- **Authentic Cave Rock Walls Architecture (`Dungeon_A4.png`, `Outside_A4.png`):**
+  - Built from authentic Google Nano Banana II generations in `art/raw/dungeon_walls_nano_raw.png` (cliff rock face, boulder footers, and natural rock cavity coping).
+  - Wall Face (`y = 144..239`, `WALL_AUTOTILE_TABLE`): 100% solid, rugged cliff rock face with cast shadow along top course (`isUpper && ly 0..2`) under south coping overhang, and natural boulder footers at foundation base (`!isUpper && ly >= 18`). Zero voids or black cutouts on wall faces.
+  - Wall Top (`y = 0..143`, `FLOOR_AUTOTILE_TABLE`): Features 7px natural textured rock coping rim bordering pitch black (`#000000`) unmined ceiling cavity void.
+  - Geometry Fix for Inner Corners: Replaced flawed `Math.min(lx, ly)` logic with true Euclidean radial distance `Math.hypot(...)` across all 4 inner corners (`sx=2,3`, `sy=0,1`). Rock coping wraps continuously around convex and concave room edges without cutting rectangular grooves or creating disconnected black squares.
+- **3-Frame Flowing Wave Water & Universal Multi-Biome Shorelines (`Outside_A1.png`, `Dungeon_A1.png`, `UF_GenWater_A1.png`):**
+  - Sampled from authentic 3-frame sweeping wave ribbon generation in `art/raw/water_nano_flow_raw.png` (Panels 1, 2, 3).
+  - Universal Shoreline: Eliminated artificial wide cyan halo box (`dist < 4.0`) and baked-in grass/sand embankments. Implemented subtle 1.5px shoreline depth transition with organic wave froth crests (`waveFroth > 0.5`) at land contact points, allowing water to border all 26 ground kinds seamlessly.
+  - Inner Corner Fix: Replaced `Math.min` with `Math.hypot` so connected water tiles join without internal wireframe borders.
+- **Quality Gates & Verification Evidence:**
+  - `tools/art_check.js --native`: **6/6 PASS** (`Outside_A1`: 29 colors; `Dungeon_A1`: 29 colors; `UF_GenWater_A1`: 29 colors; `Dungeon_A4`: 36 colors; `Outside_A4`: 48 colors; `Dungeon_A2`: 39 colors; all <= 64 limit, 100% binary alpha).
+  - `tools/originality_check.js`: **PASS 6/6 files, 0 WARN** (all closest distances 0.348 to 0.412 >= 0.28 vs 19,431 U7 shapes).
+  - In-engine test suites:
+    - `tools/run_tests.js smoke`: **13/13 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js worldgen`: **22/22 PASS, 0 errors, exit 0**.
+    - `tools/run_tests.js vertical`: **11/11 PASS, 0 errors, exit 0**.
+  - Rule 5 Visual Inspection:
+    - `art/review/nano_underground_noon_room.png`: In-engine Level -1 view inspected. Natural rock wall face with boulder footers; wall top cleanly bordered by textured rock coping enclosing pure black ceiling void; water pool meets stone floor seamlessly with flowing wave ripples.
+    - `game/test_output/smoke.map.png`: Surface view inspected. River water flows seamlessly against meadow grassland with zero wireframe boxes or clashing borders.
+    - `game/test_output/vertical.view_minus1.png`: Underground cavern rooms and water pools verified.
+
 ## Adult Male Human 12-Sprite Serious Chibi Action Suite — 2026-09-19 (Gemini)
 Delivered per user directives ("Alright, Let's work on our humans. Start generating", "Lets make it more of a serious chibi as opposed to a cute chibi", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time, thats 3 up, left, right, down. And then another 12 sprite sheet for melee. then another 12 sprite sheet for ranged. etc", "Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II"):
 - **Demographic 1 Completed (Adult Male Human):**

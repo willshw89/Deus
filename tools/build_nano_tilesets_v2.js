@@ -54,6 +54,7 @@ function snapHex(hex) {
 const dungeonWallsRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'dungeon_walls_nano_raw.png')));
 const dungeonFloorsRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'dungeon_floors_nano_raw.png')));
 const waterAnimatedRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'water_nano_animated_raw.png')));
+const waterFlowRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'water_nano_flow_raw.png')));
 const wallStoneRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'wall_stone_nano_banana_raw.png')));
 const wallWoodRaw = decodePNG(fs.readFileSync(path.join(ROOT, 'art', 'raw', 'wall_wood_nano_banana_raw.png')));
 
@@ -138,8 +139,8 @@ function buildA4WallColumn(style) {
     const lipH = snapHex(style.lipHi || style.rimHi);
 
     // --- Part A: Wall Top (y = 0..143, 4x6 sub-tiles of 24x24) ---
-    // Sample 48x48 bedrock texture from topRaw for interior unmined rock
-    const topBedrock = makeSeamless(sampleBox(style.topRaw || style.faceRaw, style.topX || style.faceX, style.topY || style.faceY, 300, 300, 48, 48), 48, 48);
+    // Sample 48x48 bedrock texture from topRaw for interior unmined rock coping
+    const topBedrock = makeSeamless(sampleBox(style.topRaw || style.faceRaw, style.topX !== undefined ? style.topX : (style.faceX || 720), style.topY !== undefined ? style.topY : 10, style.topW || 160, style.topH || 150, 48, 48), 48, 48, 4);
 
     for (let sy = 0; sy < 6; sy++) {
         for (let sx = 0; sx < 4; sx++) {
@@ -153,40 +154,45 @@ function buildA4WallColumn(style) {
                     const di = (py * 96 + px) * 4;
 
                     const si = ((baseTy + ly) * 48 + (baseTx + lx)) * 4;
-                    let r = topBedrock[si], g = topBedrock[si + 1], b = topBedrock[si + 2];
 
                     let edgeDist = Infinity;
                     let isSouthLip = false;
 
                     if ((sy === 3 || sy === 4) && (sx === 1 || sx === 2)) {
-                        edgeDist = Infinity; // Fully connected interior (solid bedrock)
+                        edgeDist = Infinity; // Fully connected interior (solid ceiling)
                     } else if (sy === 2 && (sx === 1 || sx === 2)) {
-                        edgeDist = ly; // North edge
+                        edgeDist = ly; // North straight edge
                     } else if (sy === 5 && (sx === 1 || sx === 2)) {
-                        edgeDist = 23 - ly; // South edge
+                        edgeDist = 23 - ly; // South straight edge
                         isSouthLip = true;
                     } else if (sx === 0 && (sy === 3 || sy === 4)) {
-                        edgeDist = lx; // West edge
+                        edgeDist = lx; // West straight edge
                     } else if (sx === 3 && (sy === 3 || sy === 4)) {
-                        edgeDist = 23 - lx; // East edge
+                        edgeDist = 23 - lx; // East straight edge
                     } else if (sx === 0 && sy === 2) {
-                        edgeDist = Math.hypot(lx, ly);
+                        edgeDist = Math.hypot(lx, ly); // NW outer corner
                     } else if (sx === 3 && sy === 2) {
-                        edgeDist = Math.hypot(23 - lx, ly);
+                        edgeDist = Math.hypot(23 - lx, ly); // NE outer corner
                     } else if (sx === 0 && sy === 5) {
-                        edgeDist = Math.hypot(lx, 23 - ly);
+                        edgeDist = Math.hypot(lx, 23 - ly); // SW outer corner
                         isSouthLip = true;
                     } else if (sx === 3 && sy === 5) {
-                        edgeDist = Math.hypot(23 - lx, 23 - ly);
+                        edgeDist = Math.hypot(23 - lx, 23 - ly); // SE outer corner
                         isSouthLip = true;
                     } else if (sx === 2 && sy === 0) {
-                        if (lx < 6 && ly < 6) edgeDist = Math.hypot(lx, ly);
+                        // NW inner corner (open room diagonally to NW)
+                        edgeDist = Math.hypot(lx, ly);
                     } else if (sx === 3 && sy === 0) {
-                        if ((23 - lx) < 6 && ly < 6) edgeDist = Math.hypot(23 - lx, ly);
+                        // NE inner corner (open room diagonally to NE)
+                        edgeDist = Math.hypot(23 - lx, ly);
                     } else if (sx === 2 && sy === 1) {
-                        if (lx < 6 && (23 - ly) < 6) { edgeDist = Math.hypot(lx, 23 - ly); isSouthLip = true; }
+                        // SW inner corner (open room diagonally to SW)
+                        edgeDist = Math.hypot(lx, 23 - ly);
+                        isSouthLip = true;
                     } else if (sx === 3 && sy === 1) {
-                        if ((23 - lx) < 6 && (23 - ly) < 6) { edgeDist = Math.hypot(23 - lx, 23 - ly); isSouthLip = true; }
+                        // SE inner corner (open room diagonally to SE)
+                        edgeDist = Math.hypot(23 - lx, 23 - ly);
+                        isSouthLip = true;
                     } else if (sx === 0 && sy === 0) {
                         edgeDist = Math.hypot(lx, ly);
                     } else if (sx === 1 && sy === 0) {
@@ -200,20 +206,34 @@ function buildA4WallColumn(style) {
                     }
 
                     // Render Wall Top:
-                    // edgeDist 0..6.5: Coping rim with highlight and bevel
-                    // edgeDist 6.5..8: Inner bevel shadow into the dark void
-                    // edgeDist >= 8: Pure black ceiling void inside the material rim
+                    // Authentic cave rock coping bordering pitch black ceiling void.
+                    // edgeDist 0..7.0: Textured rock coping from topBedrock!
+                    //   - edgeDist < 2.0: highlight on North/West, crisp bevel on South
+                    //   - edgeDist 5.0..7.0: inner shadow into the void
+                    // edgeDist >= 7.0: Pure black ceiling void (#000000)
                     let c = null;
-                    if (edgeDist < 1.0) {
-                        c = isSouthLip ? lipD : rimD;
-                    } else if (edgeDist < 2.5) {
-                        c = isSouthLip ? lipM : rimM;
-                    } else if (edgeDist < 4.5) {
-                        c = isSouthLip ? lipH : rimH;
-                    } else if (edgeDist < 6.5) {
-                        c = isSouthLip ? lipM : rimM;
-                    } else if (edgeDist < 8.0) {
-                        c = innerShd;
+                    if (edgeDist < 7.0) {
+                        let pr = topBedrock[si], pg = topBedrock[si + 1], pb = topBedrock[si + 2];
+                        if (style.tint) {
+                            pr = Math.round((pr * style.tint[0]) / 255);
+                            pg = Math.round((pg * style.tint[1]) / 255);
+                            pb = Math.round((pb * style.tint[2]) / 255);
+                        }
+                        if (edgeDist < 2.0) {
+                            if (isSouthLip) {
+                                pr = Math.round(pr * 0.70); pg = Math.round(pg * 0.70); pb = Math.round(pb * 0.70);
+                            } else {
+                                pr = Math.min(255, Math.round(pr * 1.30));
+                                pg = Math.min(255, Math.round(pg * 1.30));
+                                pb = Math.min(255, Math.round(pb * 1.30));
+                            }
+                        } else if (edgeDist >= 5.0) {
+                            const t = (edgeDist - 5.0) / 2.0;
+                            pr = Math.round(pr * (1 - t * 0.85));
+                            pg = Math.round(pg * (1 - t * 0.85));
+                            pb = Math.round(pb * (1 - t * 0.85));
+                        }
+                        c = snap(pr, pg, pb);
                     } else {
                         // Pure pitch black ceiling void inside the material rim
                         c = voidCol;
@@ -407,13 +427,13 @@ function buildA2FloorBlock(tile48, borderColors) {
 // 5. BUILD ANIMATED WATER A1 (Outside_A1.png, Dungeon_A1.png)
 //    Width: 768 px (16 tiles)
 //    Height: 576 px (12 tiles)
-//    From water_nano_animated_raw.png (Panels 1, 2, 3)
+//    From water_nano_flow_raw.png (3 animated wave ribbon frames)
 //    Universal seamless shoreline with soft translucent shallows & white surf foam
 // ----------------------------------------------------------------------------
-const waterPanels = [
-    makeSeamless(sampleBox(waterAnimatedRaw, 70, 120, 350, 600, 48, 48), 48, 48),
-    makeSeamless(sampleBox(waterAnimatedRaw, 490, 120, 350, 600, 48, 48), 48, 48),
-    makeSeamless(sampleBox(waterAnimatedRaw, 910, 120, 350, 600, 48, 48), 48, 48)
+const waterFlowPanels = [
+    makeSeamless(sampleBox(waterFlowRaw, 40, 180, 400, 400, 48, 48), 48, 48, 6),
+    makeSeamless(sampleBox(waterFlowRaw, 485, 180, 400, 400, 48, 48), 48, 48, 6),
+    makeSeamless(sampleBox(waterFlowRaw, 930, 180, 400, 400, 48, 48), 48, 48, 6)
 ];
 
 function buildWaterStrip(spec) {
@@ -421,14 +441,13 @@ function buildWaterStrip(spec) {
     const strip = Buffer.alloc(W * H * 4);
 
     const foamWhite = snapHex('#FFFFFF');
-    const foamAqua = snapHex(spec.ramp.foam || '#A0FFFF');
     const shallowGlint = snapHex(spec.ramp.crest || '#7DFFFF');
     const shallowWater = snapHex(spec.ramp.shallows || '#3DBBFF');
     const deepWater = snapHex(spec.ramp.deep || '#001850');
 
     for (let f = 0; f < 3; f++) {
         const frameOriginX = f * 96;
-        const panel = waterPanels[f];
+        const panel = waterFlowPanels[f];
 
         for (let sy = 0; sy < 6; sy++) {
             for (let sx = 0; sx < 4; sx++) {
@@ -467,13 +486,13 @@ function buildWaterStrip(spec) {
                         } else if (sx === 3 && sy === 5) {
                             dist = Math.hypot(23 - lx, 23 - ly);
                         } else if (sx === 2 && sy === 0) {
-                            if (lx < 5 && ly < 5) dist = Math.hypot(lx, ly);
+                            dist = Math.hypot(lx, ly);
                         } else if (sx === 3 && sy === 0) {
-                            if ((23 - lx) < 5 && ly < 5) dist = Math.hypot(23 - lx, ly);
+                            dist = Math.hypot(23 - lx, ly);
                         } else if (sx === 2 && sy === 1) {
-                            if (lx < 5 && (23 - ly) < 5) dist = Math.hypot(lx, 23 - ly);
+                            dist = Math.hypot(lx, 23 - ly);
                         } else if (sx === 3 && sy === 1) {
-                            if ((23 - lx) < 5 && (23 - ly) < 5) dist = Math.hypot(23 - lx, 23 - ly);
+                            dist = Math.hypot(23 - lx, 23 - ly);
                         } else if (sx === 0 && sy === 0) {
                             dist = Math.hypot(lx, ly);
                         } else if (sx === 1 && sy === 0) {
@@ -484,23 +503,20 @@ function buildWaterStrip(spec) {
                             dist = Math.hypot(23 - lx, 23 - ly);
                         }
 
-                        // Universal Shoreline Transition (Organic wave surf & shallow water)
-                        // No hard dark navy box borders!
-                        // Dist 0: Crisp white wave foam / surf froth
-                        // Dist 1..2: Translucent turquoise / aqua shallows with ripple highlights
-                        // Dist 3..4: Dithered transition to open water
-                        if (dist < 1.0) {
-                            // Organic surf edge with subtle wave break
-                            const rippleBreak = ((lx * 7 + ly * 13 + f * 5) % 4 === 0);
-                            const c = rippleBreak ? foamAqua : foamWhite;
-                            r = c[0]; g = c[1]; b = c[2];
-                        } else if (dist < 2.5) {
-                            const c = shallowGlint;
-                            r = c[0]; g = c[1]; b = c[2];
-                        } else if (dist < 4.0) {
-                            const dither = ((lx + ly + f) % 2 === 0);
-                            const c = dither ? shallowWater : shallowGlint;
-                            r = c[0]; g = c[1]; b = c[2];
+                        // Universal Shoreline Transition (Organic shallow water & subtle wave froth)
+                        // Zero baked-in soil or sand: water breaks naturally against any bordering terrain!
+                        if (dist < 2.0) {
+                            const t = (2.0 - dist) / 2.0;
+                            const waveFroth = Math.sin((lx * 2 + ly * 3 + f * 4) * 0.6);
+                            if (dist < 1.0 && waveFroth > 0.5) {
+                                r = Math.min(255, r + 40);
+                                g = Math.min(255, g + 50);
+                                b = Math.min(255, b + 50);
+                            } else {
+                                r = Math.round(r * (1 - t * 0.20) + shallowWater[0] * (t * 0.20));
+                                g = Math.round(g * (1 - t * 0.20) + shallowWater[1] * (t * 0.20));
+                                b = Math.round(b * (1 - t * 0.20) + shallowWater[2] * (t * 0.20));
+                            }
                         }
 
                         const c = snap(r, g, b);
@@ -533,14 +549,16 @@ const outsideA4 = Buffer.alloc(A4_W * A4_H * 4);
 const dungeonWallStyles = [
     // 0: Subterranean Soil / Earthen Cavern Rock Wall (kind 0)
     {
-        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 280, faceW: 160, faceH: 160, footerY: 580,
+        topRaw: dungeonWallsRaw, topX: 720, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         rimDark: '#3A281A', rimMid: '#6B4E32', rimHi: '#9E7750',
         lipDark: '#2E1E12', lipMid: '#543C24', lipHi: '#82603C',
         shadowColor: '#120A04', voidColor: '#000000'
     },
     // 1: Subterranean Granite / Slate Cavern Rock Wall (kind 1)
     {
-        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 280, faceW: 160, faceH: 160, footerY: 580,
+        topRaw: dungeonWallsRaw, topX: 720, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         tint: [170, 185, 205],
         rimDark: '#262D38', rimMid: '#4E5B6E', rimHi: '#7C8FA8',
         lipDark: '#1E242E', lipMid: '#3E4B5C', lipHi: '#6A7D96',
@@ -548,14 +566,16 @@ const dungeonWallStyles = [
     },
     // 2: Ancient Chiseled Ashlar Stone Fortress Wall (kind 2)
     {
-        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 280, faceW: 160, faceH: 160,
+        topRaw: dungeonWallsRaw, topX: 50, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         rimDark: '#262D38', rimMid: '#4E5B6E', rimHi: '#7C8FA8',
         lipDark: '#1E242E', lipMid: '#3E4B5C', lipHi: '#6A7D96',
         shadowColor: '#0A0E14', voidColor: '#000000'
     },
     // 3: Chiseled Crypt Basalt Wall (kind 3)
     {
-        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 280, faceW: 160, faceH: 160,
+        topRaw: dungeonWallsRaw, topX: 50, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         tint: [140, 140, 160],
         rimDark: '#1E1E26', rimMid: '#3A3A4A', rimHi: '#5C5C72',
         lipDark: '#16161E', lipMid: '#2E2E3C', lipHi: '#4C4C60',
@@ -563,26 +583,30 @@ const dungeonWallStyles = [
     },
     // 4..7: Additional underground wall variations
     {
-        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 280, faceW: 160, faceH: 160, footerY: 580,
+        topRaw: dungeonWallsRaw, topX: 720, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         rimDark: '#3A281A', rimMid: '#6B4E32', rimHi: '#9E7750',
         lipDark: '#2E1E12', lipMid: '#543C24', lipHi: '#82603C',
         shadowColor: '#120A04', voidColor: '#000000'
     },
     {
-        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 280, faceW: 160, faceH: 160, footerY: 580,
+        topRaw: dungeonWallsRaw, topX: 720, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 720, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         tint: [170, 185, 205],
         rimDark: '#262D38', rimMid: '#4E5B6E', rimHi: '#7C8FA8',
         lipDark: '#1E242E', lipMid: '#3E4B5C', lipHi: '#6A7D96',
         shadowColor: '#0A0E14', voidColor: '#000000'
     },
     {
-        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 280, faceW: 160, faceH: 160,
+        topRaw: dungeonWallsRaw, topX: 50, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         rimDark: '#262D38', rimMid: '#4E5B6E', rimHi: '#7C8FA8',
         lipDark: '#1E242E', lipMid: '#3E4B5C', lipHi: '#6A7D96',
         shadowColor: '#0A0E14', voidColor: '#000000'
     },
     {
-        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 280, faceW: 160, faceH: 160,
+        topRaw: dungeonWallsRaw, topX: 50, topY: 10, topW: 160, topH: 150,
+        faceRaw: dungeonWallsRaw, faceX: 50, faceY: 380, faceW: 160, faceH: 160, footerY: 580,
         tint: [140, 140, 160],
         rimDark: '#1E1E26', rimMid: '#3A3A4A', rimHi: '#5C5C72',
         lipDark: '#16161E', lipMid: '#2E2E3C', lipHi: '#4C4C60',
