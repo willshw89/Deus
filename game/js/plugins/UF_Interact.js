@@ -388,14 +388,26 @@
 
     /** The build submenu: every catalog object with `build`, the culture's wall first. */
     function buildOptions(target) {
-        const O = Objects();
+        const O = Objects(), W = World();
         const list = O ? O.types().filter(t => t.build) : [];
         const wall = cultureWall();
         list.sort((a, b) => (b.id === wall ? 1 : 0) - (a.id === wall ? 1 : 0));
-        const opts = [{ id: "back", label: "Back", enabled: true, run: () => ({ submenu: optionsFor(target.x, target.y), header: headerFor(target.x, target.y) }) }];
+        const tx = target && typeof target.x === "number" ? target.x : 0;
+        const ty = target && typeof target.y === "number" ? target.y : 0;
+        const targetArea = target && target.area ? target.area : (W && (W.viewLevel ? W.viewLevel() : W.currentArea()));
+        const opts = [{ id: "back", label: "Back", enabled: true, run: () => ({ submenu: optionsFor(tx, ty), header: headerFor(tx, ty) }) }];
+        const D = window.UF && UF.Doors;
+        const betweenWalls = D && typeof D.isBetweenBottomWalls === "function" && targetArea
+            ? D.isBetweenBottomWalls(targetArea, tx, ty)
+            : false;
         for (const t of list) {
-            opts.push({ id: `build:${t.id}`, label: `${t.name} — ${costText(t.build)}`, enabled: true, objectId: t.id,
-                run: () => designate({ type: "build", target, params: { objectId: t.id } }) });
+            const isDoor = (Array.isArray(t.tags) && t.tags.includes("door")) || String(t.id).startsWith("door_");
+            const allowed = !isDoor || betweenWalls;
+            const label = isDoor && !betweenWalls
+                ? `${t.name} — ${costText(t.build)} (must be between walls)`
+                : `${t.name} — ${costText(t.build)}`;
+            opts.push({ id: `build:${t.id}`, label, enabled: allowed, objectId: t.id,
+                run: () => allowed ? designate({ type: "build", target: target || { area: targetArea, x: tx, y: ty }, params: { objectId: t.id } }) : null });
         }
         return opts;
     }

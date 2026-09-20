@@ -1,7 +1,7 @@
 {
   "generator": "gemini-3-pro-image",
   "model": "Google Nano Banana Pro",
-  "material": "stone",
+  "material": "iron",
   "type": "door",
   "frameWidth": 48,
   "frameHeight": 96,
@@ -13,7 +13,7 @@
     "48x96_wall_attached",
     "100_percent_seamless_wall_coping",
     "flushing_wall_piers",
-    "dressed_stone_arch_and_pillars",
+    "riveted_iron_strapped_door",
     "horizontal_front_facing",
     "vertical_side_profile",
     "clear_doorway_opening"

@@ -1,23 +1,37 @@
 {
-  "id": "door_wood",
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
+  "material": "wood",
+  "type": "door",
   "frameWidth": 48,
-  "frameHeight": 48,
+  "frameHeight": 96,
   "anchor": [
     24,
-    47
+    96
   ],
-  "footprint": [
-    1,
-    1
+  "features": [
+    "48x96_wall_attached",
+    "100_percent_seamless_wall_coping",
+    "flushing_wall_piers",
+    "timber_jambs_and_lintel",
+    "horizontal_front_facing",
+    "vertical_side_profile",
+    "clear_doorway_opening"
   ],
-  "facings": [
-    "S"
-  ],
+  "directions": {
+    "south": 0,
+    "west": 1,
+    "east": 2,
+    "north": 3
+  },
+  "patterns": {
+    "0": "closed",
+    "1": "ajar",
+    "2": "open"
+  },
   "animations": {
     "stand": [
       0
     ]
-  },
-  "generator": "Google Nano Banana 2",
-  "standard": "Final Fantasy VI 16-bit HD"
+  }
 }

@@ -27,7 +27,9 @@
     const OPEN_FRAMES = 90;
     const FRIENDLY_RELATION = 15;
     const CLOSED_PATTERN = 0;
+    const AJAR_PATTERN = 1;
     const OPEN_PATTERN = 2;
+    const TRANSITION_FRAMES = 8;
     const NEIGHBORS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
     const catalog = () => window.$ufWorldCatalog || null;
@@ -102,6 +104,52 @@
     };
     const isOpenState = s => !!s && (!!s.heldOpen || (s.openUntil || 0) > now());
 
+    function patternFor(s) {
+        if (!s) return CLOSED_PATTERN;
+        const t = now();
+        if (s.closingUntil && t < s.closingUntil) return AJAR_PATTERN;
+        if (!isOpenState(s)) return CLOSED_PATTERN;
+        const openedAt = s.openedAt || 0;
+        const elapsed = t - openedAt;
+        const remaining = (s.openUntil || 0) - t;
+        if (openedAt > 0 && elapsed < TRANSITION_FRAMES) return AJAR_PATTERN;
+        if (!s.heldOpen && remaining <= TRANSITION_FRAMES) return AJAR_PATTERN;
+        return OPEN_PATTERN;
+    }
+
+    function isWallAt(area, x, y) {
+        const O = Objects();
+        if (!O || !area) return false;
+        const t = O.atIn ? O.atIn(area, x, y) : O.at(x, y);
+        if (t && (t.autotile === "wall" || (Array.isArray(t.tags) && t.tags.includes("wall")))) return true;
+        const z = typeof area.z === "number" ? area.z : 0;
+        if (z < 0) {
+            const Lv = window.UF && UF.Levels;
+            if (Lv && typeof Lv.shapeAt === "function" && Lv.shapeAt({ area, x, y, z }) === "solid") return true;
+        }
+        return false;
+    }
+
+    function isBetweenBottomWalls(area, x, y) {
+        if (!supported(area)) return false;
+        const horiz = isWallAt(area, x - 1, y) && isWallAt(area, x + 1, y);
+        const vert = isWallAt(area, x, y - 1) && isWallAt(area, x, y + 1);
+        return horiz || vert;
+    }
+
+    function orientationAt(area, x, y) {
+        if (!supported(area)) return 2;
+        const horiz = isWallAt(area, x - 1, y) && isWallAt(area, x + 1, y);
+        const vert = isWallAt(area, x, y - 1) && isWallAt(area, x, y + 1);
+        if (vert && !horiz) return 4; // West (vertical wall door model)
+        if (horiz) return 2; // South (horizontal wall door model)
+        // One-sided wall fallback
+        const topOrBottom = isWallAt(area, x, y - 1) || isWallAt(area, x, y + 1);
+        const leftOrRight = isWallAt(area, x - 1, y) || isWallAt(area, x + 1, y);
+        if (topOrBottom && !leftOrRight) return 4;
+        return 2;
+    }
+
     function canUnitPass(unit, doorOrState) {
         if (doorOrState && doorOrState.area && unit && unit.area && !sameArea(recordArea(unit), doorOrState.area)) return false;
         const s = doorOrState && doorOrState.state ? doorOrState.state : doorOrState;
@@ -152,19 +200,26 @@
         const s = doorOrState && doorOrState.state ? doorOrState.state : doorOrState;
         if (!s) return false;
         const was = isOpenState(s);
-        s.openUntil = Math.max(s.openUntil || 0, now() + Math.max(1, frames | 0));
+        const t = now();
+        if (!was) s.openedAt = t;
+        s.closingUntil = 0;
+        s.openUntil = Math.max(s.openUntil || 0, t + Math.max(1, frames | 0));
         if (!was) emit("doors:opened", s);
         return true;
     }
     function toggleHeld(area, x, y) {
         const d = doorAt(area, x, y);
         if (!d) return false;
+        const t = now();
         if (isOpenState(d.state)) {
             d.state.heldOpen = false;
-            d.state.openUntil = now();
+            d.state.openUntil = t;
+            d.state.closingUntil = t + TRANSITION_FRAMES;
             emit("doors:closed", d);
         } else {
             d.state.heldOpen = true;
+            d.state.openedAt = t;
+            d.state.closingUntil = 0;
             emit("doors:opened", d);
         }
         syncSprites();
@@ -262,6 +317,24 @@
         const c = cultureForFaction(site.faction);
         return c && c.door ? c.door : c && /stone/.test(c.wall || "") ? "door_stone" : "door_wood";
     }
+    function wallMaterialAt(area, x, y) {
+        const O = Objects();
+        if (!O || !supported(area)) return null;
+        const t = O.atIn ? O.atIn(area, x, y) : O.at(x, y);
+        if (!t || !Array.isArray(t.tags)) return null;
+        if (t.tags.includes("stone")) return "stone";
+        if (t.tags.includes("wood")) return "wood";
+        if (t.tags.includes("iron")) return "iron";
+        return null;
+    }
+    function doorMaterialForWalls(area, x, y) {
+        const left = wallMaterialAt(area, x - 1, y), right = wallMaterialAt(area, x + 1, y);
+        const top = wallMaterialAt(area, x, y - 1), bottom = wallMaterialAt(area, x, y + 1);
+        const mat = left || right || top || bottom;
+        if (mat === "stone") return "door_stone";
+        if (mat === "iron") return "door_iron";
+        return "door_wood";
+    }
     function perimeter(r) {
         const out = [];
         for (let dx = -r; dx < r; dx++) out.push([dx, -r]);
@@ -272,6 +345,10 @@
     }
     function placeAt(site, x, y, id) {
         const O = Objects(), area = recordArea(site);
+        if (!id || (id === "door_wood" && doorMaterialForWalls(area, x, y) === "door_stone")) {
+            const autoDoor = doorMaterialForWalls(area, x, y);
+            if (O && O.type(autoDoor)) id = autoDoor;
+        }
         if (!supported(area) || !O || !O.type(id) || isWater(area, x, y)) return false;
         const occupant = unitAt(area, x, y);
         if (occupant) {
@@ -375,12 +452,22 @@
     }
     const damageAt = (area, x, y, amount) => damage(cellKey(area, x, y), amount);
 
-    function frameFor(type, open, bitmap) {
+    function frameFor(type, stateOrPattern, bitmap, dir = 2) {
         if (!type || !bitmap || !bitmap.width || !bitmap.height) return null;
         const big = String(type.image || "").includes("$");
         const pw = bitmap.width / (big ? 3 : 12), ph = bitmap.height / (big ? 4 : 8);
-        const ci = type.characterIndex | 0, bx = big ? 0 : (ci % 4) * 3 * pw, by = big ? 0 : Math.floor(ci / 4) * 4 * ph;
-        return { x: bx + (open ? OPEN_PATTERN : CLOSED_PATTERN) * pw, y: by, w: pw, h: ph };
+        const ci = type.characterIndex | 0, bx = big ? 0 : (ci % 4) * 3 * pw;
+        const row = dir === 8 ? 3 : dir === 6 ? 2 : dir === 4 ? 1 : 0;
+        const by = (big ? 0 : Math.floor(ci / 4) * 4 * ph) + row * ph;
+        let p = CLOSED_PATTERN;
+        if (typeof stateOrPattern === "number") {
+            p = stateOrPattern;
+        } else if (typeof stateOrPattern === "boolean") {
+            p = stateOrPattern ? OPEN_PATTERN : CLOSED_PATTERN;
+        } else if (stateOrPattern && typeof stateOrPattern === "object") {
+            p = patternFor(stateOrPattern);
+        }
+        return { x: bx + p * pw, y: by, w: pw, h: ph };
     }
     function syncSprites() {
         const O = Objects(), ds = store(), area = viewArea();
@@ -391,7 +478,8 @@
             if (!at || !sameArea(at.area, area)) continue;
             const type = O.atIn(area, at.x, at.y), sprite = O.spriteAt(at.x, at.y);
             if (!isDoorType(type) || !sprite || !sprite.bitmap) continue;
-            const f = frameFor(type, isOpenState(s), sprite.bitmap);
+            const dir = orientationAt(area, at.x, at.y);
+            const f = frameFor(type, s, sprite.bitmap, dir);
             if (f) { sprite.setFrame(f.x, f.y, f.w, f.h); n++; }
         }
         return n;
@@ -486,11 +574,12 @@
     }
 
     const Doors = {
-        OPEN_FRAMES, FRIENDLY_RELATION, CLOSED_PATTERN, OPEN_PATTERN,
+        OPEN_FRAMES, FRIENDLY_RELATION, CLOSED_PATTERN, AJAR_PATTERN, OPEN_PATTERN, TRANSITION_FRAMES,
         cellKey, parseKey, store, at: doorAt, stateAt, isDoorType, isOpen: (area, x, y) => isOpenState(stateAt(area, x, y)),
         canUnitPass, open: openDoor, toggleHeld, lock: lockDoor, unlock: unlockDoor,
         isLocked: (area, x, y) => { const s = stateAt(area, x, y); return !!(s && s.locked); },
         keyOf: (area, x, y) => { const s = stateAt(area, x, y); return s ? s.keyId : null; },
+        isWallAt, isBetweenBottomWalls, orientationAt, patternFor,
         placeAll, placeSite, retryPending, damage, damageAt, syncSprites, frameFor, augmentOptions, hookInteract
     };
     window.UF = window.UF || {};
@@ -574,7 +663,7 @@
 
             const home = H && H.homeSite ? H.homeSite() : living[0], doorCell = expected.find(e => home && e.site.id === home.id) || expected[0];
             const player = playerFactionId(), factions = window.UF.Factions, others = factions ? factions.all().filter(f => f.id !== player) : [];
-            const mk = (name, faction, kind) => ({ id: -1, name, data: { faction, kind: kind || "person" } });
+            const mk = (name, faction, kind) => ({ id: -1, name, data: { faction, kind: kind || "person", manual: true, ai: "manual" } });
             const friendly = mk("TEST_friend", doorCell && doorCell.site.faction), ally = mk("TEST_ally", others[0] && others[0].id), animal = mk("TEST_animal", null, "creature"), stranger = mk("TEST_stranger", others[1] && others[1].id || (others[0] && others[0].id));
             let oldAlly = null, oldStranger = null;
             if (factions && doorCell && ally.data.faction) { oldAlly = factions.relation(ally.data.faction, doorCell.site.faction); factions.setRelation(ally.data.faction, doorCell.site.faction, 30, "TEST"); }
@@ -602,6 +691,8 @@
             };
 
             if (fixture) {
+                const colWasEnabled = window.UF && UF.Colonists && UF.Colonists.isEnabled ? UF.Colonists.isEnabled() : true;
+                if (window.UF && UF.Colonists && UF.Colonists.setEnabled) UF.Colonists.setEnabled(false);
                 const dc = fixture.door, s = doorAt(area, dc.x, dc.y);
                 $gamePlayer.locate(dc.x + 3, dc.y + 3);
                 closeFixture(s);
@@ -622,14 +713,14 @@
                 W.removeUnit(testAnimal.id);
 
                 closeFixture(s);
-                const testStranger = W.addUnit({ name: "TEST_door_stranger", image: { characterName: "People1", characterIndex: 3 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: stranger.data.faction } });
+                const testStranger = W.addUnit({ name: "TEST_door_stranger", image: { characterName: "People1", characterIndex: 3 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: stranger.data.faction, manual: true, ai: "manual" } });
                 W.sendUnit(testStranger.id, { area, x: dc.x, y: dc.y });
                 await t.waitUntil(() => !testStranger.goal, 8000, "stranger to be refused by the closed door").catch(() => {});
                 strangerStayed = !(testStranger.x === dc.x && testStranger.y === dc.y) && !(testStranger.x === fixture.inner.x && testStranger.y === fixture.inner.y);
                 W.removeUnit(testStranger.id);
 
                 closeFixture(s);
-                const testFriend = W.addUnit({ name: "TEST_door_friend", image: { characterName: "People1", characterIndex: 0 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: dc.site.faction } });
+                const testFriend = W.addUnit({ name: "TEST_door_friend", image: { characterName: "People1", characterIndex: 0 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: dc.site.faction, manual: true, ai: "manual" } });
                 const reachedDoor = await walkTo(testFriend, { x: dc.x, y: dc.y }, 8000, "friendly unit to enter the doorway");
                 await t.waitFrames(1);
                 const sprite = O.spriteAt(dc.x, dc.y), f = s && sprite ? frameFor(s.type, true, sprite.bitmap) : null;
@@ -639,10 +730,11 @@
                 W.removeUnit(testFriend.id);
 
                 closeFixture(s);
-                const testAlly = W.addUnit({ name: "TEST_door_ally", image: { characterName: "People1", characterIndex: 1 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: ally.data.faction } });
+                const testAlly = W.addUnit({ name: "TEST_door_ally", image: { characterName: "People1", characterIndex: 1 }, area, x: fixture.outer.x, y: fixture.outer.y, data: { kind: "person", faction: ally.data.faction, manual: true, ai: "manual" } });
                 allyWalk = await walkTo(testAlly, fixture.inner, 8000, "allied unit to pass through the door");
                 W.removeUnit(testAlly.id);
                 closeFixture(s);
+                if (window.UF && UF.Colonists && UF.Colonists.setEnabled) UF.Colonists.setEnabled(colWasEnabled);
             }
 
             t.check("faction_passes", directFriendly && friendlyWalk && playerPasses, d0 ? `${friendly.data.faction} was admitted by owner ${d0.state.faction}; unit ${friendlyWalk ? "reached the inner cell" : "did not cross"}; player view ${playerPasses ? "can cross" : "blocked"}` : "no placed door");
@@ -657,6 +749,64 @@
             const build = window.UF.Interact ? UF.Interact.buildOptions({ area, x: $gamePlayer.x, y: $gamePlayer.y }) : [];
             const wood = build.find(o => o.objectId === "door_wood");
             t.check("player_can_build", !!wood && /Wooden door/.test(wood.label) && /1 log/.test(wood.label), wood ? wood.label : "wooden door missing from Build submenu");
+
+            // Fantasy door materials in catalog
+            const ironType = O && O.type("door_iron");
+            const ironOk = isDoorType(ironType) && ironType.door && ironType.door.material === "iron" && ironType.door.hp === 80;
+            t.check("iron_door_catalog", ironOk, ironType ? `${ironType.id}: hp=${ironType.door && ironType.door.hp}, image=${ironType.image}` : "door_iron missing from catalog");
+
+            // Placement validation: doors must go between two bottom portions of wall
+            const openCell = { area, x: Math.max(2, Math.min(W.state.size - 3, $gamePlayer.x + 5)), y: Math.max(2, Math.min(W.state.size - 3, $gamePlayer.y + 5)) };
+            const savedOpen = [
+                { x: openCell.x, y: openCell.y, id: O.typeIdIn(area, openCell.x, openCell.y) },
+                { x: openCell.x - 1, y: openCell.y, id: O.typeIdIn(area, openCell.x - 1, openCell.y) },
+                { x: openCell.x + 1, y: openCell.y, id: O.typeIdIn(area, openCell.x + 1, openCell.y) },
+                { x: openCell.x, y: openCell.y - 1, id: O.typeIdIn(area, openCell.x, openCell.y - 1) },
+                { x: openCell.x, y: openCell.y + 1, id: O.typeIdIn(area, openCell.x, openCell.y + 1) }
+            ];
+            for (const c of savedOpen) O.setIn(area, c.x, c.y, null);
+
+            const openBetween = isBetweenBottomWalls(area, openCell.x, openCell.y);
+            const openOpts = window.UF.Interact ? UF.Interact.buildOptions({ area, x: openCell.x, y: openCell.y }) : [];
+            const openWood = openOpts.find(o => o.objectId === "door_wood");
+            const openStone = openOpts.find(o => o.objectId === "door_stone");
+            const openIron = openOpts.find(o => o.objectId === "door_iron");
+            const openDisallowed = !openBetween && !!openWood && openWood.enabled === false && !!openStone && openStone.enabled === false && !!openIron && openIron.enabled === false;
+
+            // Add flanking walls horizontally
+            O.setIn(area, openCell.x - 1, openCell.y, "wall_wood");
+            O.setIn(area, openCell.x + 1, openCell.y, "wall_wood");
+            const horizBetween = isBetweenBottomWalls(area, openCell.x, openCell.y);
+            const horizOpts = window.UF.Interact ? UF.Interact.buildOptions({ area, x: openCell.x, y: openCell.y }) : [];
+            const horizWood = horizOpts.find(o => o.objectId === "door_wood");
+            const horizAllowed = horizBetween && !!horizWood && horizWood.enabled === true;
+
+            // Clean up test cells
+            for (const c of savedOpen) O.setIn(area, c.x, c.y, c.id || null);
+
+            t.check("door_requires_between_walls", openDisallowed && horizAllowed,
+                `open cell between=${openBetween} (wood enabled=${openWood && openWood.enabled}); flanked cell between=${horizBetween} (wood enabled=${horizWood && horizWood.enabled})`);
+
+            // Visible open/close animation check: frame 0 closed, frame 1 ajar (transition), frame 2 open
+            const animDoor = { objectId: "door_wood", hp: 20, maxHp: 20, heldOpen: false, openUntil: 0, openedAt: 0, closingUntil: 0 };
+            const pClosed = patternFor(animDoor);
+            animDoor.openUntil = now() + 90;
+            animDoor.openedAt = now();
+            const pOpening = patternFor(animDoor);
+            animDoor.openedAt = now() - 15;
+            const pOpen = patternFor(animDoor);
+            animDoor.openUntil = now() + 4;
+            const pAutoClosing = patternFor(animDoor);
+            animDoor.heldOpen = false;
+            animDoor.openUntil = now();
+            animDoor.closingUntil = now() + 6;
+            const pManualClosing = patternFor(animDoor);
+            animDoor.closingUntil = now() - 1;
+            const pFinalClosed = patternFor(animDoor);
+
+            const animOk = pClosed === 0 && pOpening === 1 && pOpen === 2 && pAutoClosing === 1 && pManualClosing === 1 && pFinalClosed === 0;
+            t.check("visible_open_close_animation", animOk,
+                `patterns: closed=${pClosed} (want 0), opening=${pOpening} (want 1), open=${pOpen} (want 2), autoClosing=${pAutoClosing} (want 1), manualClosing=${pManualClosing} (want 1), finalClosed=${pFinalClosed} (want 0)`);
 
             let damageOk = false;
             if (doorCell) {

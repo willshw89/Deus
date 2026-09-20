@@ -127,6 +127,11 @@
     }
     // Passability of the map on screen, read straight from $dataMap (hot path: pathfinding calls it a lot).
     function blocksAt(x, y) {
+        const area = currentArea();
+        if (area) {
+            const t = typeIdIn(area, x, y);
+            if (t !== 0) return table().blocks[t] === 1;
+        }
         const map = window.$dataMap;
         if (!map || !map.ufObjects || x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
         const t = map.ufObjects[y * map.width + x];
