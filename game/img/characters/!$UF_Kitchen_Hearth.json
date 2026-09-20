@@ -1,0 +1,19 @@
+{
+  "sheet": "!$UF_Kitchen_Hearth",
+  "cellWidth": 48,
+  "cellHeight": 48,
+  "type": "world_object",
+  "animations": {
+    "stand": [
+      0,
+      1,
+      2
+    ],
+    "walk": [
+      0,
+      1,
+      2
+    ],
+    "frameMs": 130
+  }
+}

@@ -204,11 +204,26 @@
             (u.data.facets && Number.isFinite(u.data.facets.sociability) ? u.data.facets.sociability : 50), 0) / Math.max(1, people.length));
         const roll = hash(W().state.seed || 0, h.id, h.faction, h.siteId, h.z, annex ? structures(h).length : 0, social);
         const variant = roll % 100 < 25 + social / 2 ? 1 : 0;
+        const maxRank = Math.max(0, ...people.map(u => (u && u.data && Number.isFinite(u.data.rank) ? u.data.rank : 0)));
         let capacity, width, height, sleepRows, size;
         if (annex) {
             capacity = need <= 2 ? 2 : Math.ceil(need / 2) * 2;
             width = capacity <= 4 ? 7 + variant : 9 + variant;
             sleepRows = Math.max(3, Math.ceil(capacity / 2)); height = sleepRows + 2; size = "annex";
+        } else if (maxRank >= 2) {
+            // Higher ranks in society get larger homes: Ruler / Lord Manor / Great Hall
+            capacity = Math.max(8, need);
+            width = variant ? 13 : 11;
+            sleepRows = Math.max(3, Math.ceil(capacity / 4));
+            height = sleepRows + 7;
+            size = "manor";
+        } else if (maxRank === 1) {
+            // Site Leader / Elder / Master Craftsman Estate / Longhouse
+            capacity = Math.max(4, need);
+            width = variant ? 11 : 9;
+            sleepRows = Math.max(2, Math.ceil(capacity / 2));
+            height = sleepRows + 6;
+            size = "estate";
         } else if (need <= 2) {
             capacity = 2; width = variant ? 7 : 6; height = 8; sleepRows = 2; size = "small";
         } else if (need <= 4) {
@@ -222,7 +237,7 @@
         return { version: 1, kind: annex ? "bedroom" : "home", size, variant, capacity, width, height, sleepRows,
             rotation: (roll >>> 8) % 4, mirrored: !!((roll >>> 10) & 1),
             outerLane: 2 + (roll >>> 12) % (width - 4), innerLane: 2 + (roll >>> 17) % (width - 4),
-            householdSize: people.length, requiredBeds: need, sociability: social };
+            householdSize: people.length, requiredBeds: need, sociability: social, rank: maxRank };
     }
     function dimensions(d) { return d.rotation % 2 ? { w: d.height, h: d.width } : { w: d.width, h: d.height }; }
     function layout(x, y, wall, door, design) {
@@ -236,32 +251,60 @@
         };
         const doors = [{ x: design.outerLane, y: height - 1 }];
         if (!annex) doors.push({ x: design.innerLane, y: divider });
-        const walls = [], sleeping = [], beds = [];
+        const walls = [], sleeping = [], beds = [], floors = [];
         for (let py = 0; py < height; py++) for (let px = 0; px < width; px++) {
-            if ((px === 0 || px === width - 1 || py === 0 || py === height - 1 || !annex && py === divider) &&
-                !doors.some(p => p.x === px && p.y === py)) walls.push(transform({ x: px, y: py }));
+            const isPerimeter = px === 0 || px === width - 1 || py === 0 || py === height - 1;
+            const isDivider = !annex && py === divider;
+            const isDoor = doors.some(p => p.x === px && p.y === py);
+            if ((isPerimeter || isDivider) && !isDoor) walls.push(transform({ x: px, y: py }));
             if (px > 0 && px < width - 1 && py > 0 && py <= design.sleepRows) sleeping.push(transform({ x: px, y: py }));
+            // Interior floor cells:
+            if (px > 0 && px < width - 1 && py > 0 && py < height - 1 && !isDivider) {
+                floors.push(transform({ x: px, y: py }));
+            }
         }
         const bedColumns = !annex && width >= 11 ? [1, width - 2, 2, width - 3] : [1, width - 2];
         for (let py = 1; py <= design.sleepRows; py++) for (const px of bedColumns) if (beds.length < design.capacity)
             beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
+        
+        // Kitchen & Dining appointments:
         const hearth = annex ? null : { x: Math.floor(width / 2), y: divider + 2 };
+        const kitchenCounter = annex || width < 7 ? null : transform({ x: 1, y: divider + 2 });
+        const kitchenPantry = annex || width < 7 ? null : transform({ x: 2, y: divider + 2 });
+        const diningTable = annex || width < 7 ? null : transform({ x: Math.floor(width / 2), y: Math.min(height - 3, divider + 3) });
+        const diningBench = annex || width < 7 ? null : transform({ x: Math.floor(width / 2) + 1, y: Math.min(height - 3, divider + 3) });
         const workbench = annex || width < 7 ? null : transform({ x: 1, y: height - 2 });
-        const weaponRack = annex || width < 7 ? null : transform({ x: 1, y: divider + 2 });
+        const weaponRack = annex || width < 7 ? null : transform({ x: width - 2, y: divider + 2 });
         const crib = annex || width < 7 ? null : transform({ x: width - 2, y: 1 });
-        return Object.assign({ x, y, wall, door, design, walls, doors: doors.map(transform), sleeping, beds,
+        const storage = annex ? null : transform({ x: width - 2, y: height - 2 });
+        const shopCounter = annex || width < 7 ? null : transform({ x: width - 3, y: height - 2 });
+
+        return Object.assign({ x, y, wall, door, design, walls, doors: doors.map(transform), sleeping, beds, floors,
             spots: [transform({ x: Math.floor(width / 2), y: design.sleepRows }), transform({ x: Math.floor(width / 2) + 1, y: design.sleepRows })],
-            hearth: hearth && transform(hearth), storage: annex ? null : transform({ x: width - 2, y: height - 2 }),
-            workbench, weaponRack, crib,
+            hearth: hearth && transform(hearth), kitchenCounter, kitchenPantry, diningTable, diningBench, storage,
+            workbench, weaponRack, crib, shopCounter,
             hearthClearance: hearth ? [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([dx, dy]) => transform({ x: hearth.x + dx, y: hearth.y + dy })) : [],
             entrance: transform({ x: design.outerLane, y: height }), steps: [] }, dimensions(design));
     }
     function footprintOK(h, home, u, reservations, occupied, bootstrap) {
-        const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
+        const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.kitchenCounter, home.kitchenPantry, home.diningTable, home.diningBench, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
         const clear = new Set((home.hearthClearance || []).map(p => key(p.x, p.y)));
+        const isWallCell = (x, y) => home.walls.some(w => w.x === x && w.y === y);
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
         for (let y = home.y; y < home.y + home.h; y++) for (let x = home.x; x < home.x + home.w; x++) {
             const k = key(x, y), p = { x, y }, o = object(h, p);
             if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x, y, z: zOf(h) })) return false;
+            // Subterranean races: perimeter wall cells can be natural solid cave walls!
+            if (isWallCell(x, y) && isCaveWall(x, y)) {
+                if (reservations.has(k) || occupied.has(k) || bootstrap.has(k)) return false;
+                continue;
+            }
             if (!dry(h, x, y) || reservations.has(k) || occupied.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
             if (Own() && Own().ownerOf(ref(h, p))) return false;
             if (clear.has(k) && o) return false; // No existing plant/furniture in the hearth's four-neighbor buffer.
@@ -294,7 +337,41 @@
         for (const other of Object.values(state().byId)) if (samePlace(h, other)) for (const p of structures(other))
             for (let y = p.y - 1; y <= p.y + p.h; y++) for (let x = p.x - 1; x <= p.x + p.w; x++) reserved.add(key(x, y));
         for (const p of W().units()) if (!dead(p) && samePlace(h, p)) occupied.add(key(p.x, p.y));
-        for (const s of c.plan || []) for (const [dx, dy] of s.cells || []) bootstrap.add(key(c.site.x + dx, c.site.y + dy));
+        // Contiguous Family Housing Search ("Homes Into Each Other"):
+        // For annexes, or when household members have kin in an existing household at this site:
+        const kinStructures = [];
+        if (h.home) kinStructures.push(...structures(h));
+        for (const other of Object.values(state().byId)) {
+            if (other.id !== h.id && samePlace(h, other) && structures(other).length) {
+                const isKin = members(h).some(m => members(other).some(o => closeKin(m, o)));
+                if (isKin) kinStructures.push(...structures(other));
+            }
+        }
+
+        if (kinStructures.length > 0) {
+            const size = dimensions(design);
+            for (const anchor of kinStructures) {
+                // Abutting candidates sharing party walls on 4 sides:
+                const candidates = [
+                    layout(anchor.x + anchor.w - 1, anchor.y, wall, door, design),
+                    layout(anchor.x, anchor.y + anchor.h - 1, wall, door, design),
+                    layout(anchor.x - size.w + 1, anchor.y, wall, door, design),
+                    layout(anchor.x, anchor.y - size.h + 1, wall, door, design)
+                ];
+                for (const candidate of candidates) {
+                    if (candidate.x < 1 || candidate.y < 1 || candidate.x + size.w >= (W().state.size - 1) || candidate.y + size.h >= (W().state.size - 1)) continue;
+                    // Allow the shared party wall cells (which overlap the anchor's walls):
+                    const anchorWallSet = new Set(anchor.walls.map(w => key(w.x, w.y)));
+                    const candidateReserved = new Set([...reserved].filter(k => !anchorWallSet.has(k)));
+                    if (footprintOK(h, candidate, u, candidateReserved, occupied, bootstrap)) {
+                        candidate.sharedPartyWall = true;
+                        candidate.anchorHome = anchor;
+                        return candidate;
+                    }
+                }
+            }
+        }
+
         for (let r = 1; r <= SEARCH_RINGS; r++) for (let gy = -r; gy <= r; gy++) for (let gx = -r; gx <= r; gx++) {
             if (Math.max(Math.abs(gx), Math.abs(gy)) !== r) continue;
             const size = dimensions(design);
@@ -359,6 +436,44 @@
             }
         }
     }
+    function callingFor(u) {
+        u = unitOf(u);
+        if (!u || !u.data) return null;
+        const facets = u.data.facets || {};
+        const skills = u.data.skills || {};
+        const getF = k => Number.isFinite(facets[k]) ? facets[k] : 50;
+        const getS = k => (skills[k] && skills[k].level) || 0;
+
+        const scores = {
+            blacksmith: getF("industriousness") * 1.2 + getF("bravery") * 0.8 + getS("smithing") * 10 + getS("mining") * 5,
+            carpenter: getF("curiosity") * 1.0 + getF("industriousness") * 1.0 + getS("carpentry") * 10 + getS("crafting") * 5,
+            bowyer: getF("natureAffinity") * 1.2 + getF("patience") * 0.8 + getS("fletching") * 10 + getS("ranged") * 5,
+            tanner: getF("industriousness") * 1.0 + getF("tidiness") * 1.0 + getS("leatherwork") * 10,
+            apothecary: getF("curiosity") * 1.2 + getF("natureAffinity") * 0.8 + getS("healing") * 10,
+            cook: getF("sociability") * 1.2 + getF("cheerfulness") * 0.8 + getS("cooking") * 10,
+            merchant: getF("ambition") * 1.3 + getF("sociability") * 0.9
+        };
+
+        let best = null, maxScore = 0;
+        for (const [trade, score] of Object.entries(scores)) {
+            if (score > maxScore) { maxScore = score; best = trade; }
+        }
+        if (maxScore < 100) return null;
+
+        const WORKSTATIONS = {
+            blacksmith: { station: "smithy", station2: "furnace", title: "Blacksmith", shop: "Forge & Armory" },
+            carpenter: { station: "workbench", station2: "chest_wood", title: "Carpenter", shop: "Woodcraft Shop" },
+            bowyer: { station: "bowyer_bench", station2: "fletcher_bench", title: "Bowyer & Fletcher", shop: "Archery Shop" },
+            tanner: { station: "tanning_rack", station2: "chest_wood", title: "Tanner & Furrier", shop: "Leather Shop" },
+            apothecary: { station: "apothecary_bench", station2: "kitchen_pantry", title: "Apothecary", shop: "Apothecary" },
+            cook: { station: "kitchen_hearth", station2: "dining_table", title: "Chef & Baker", shop: "Tavern & Bakery" },
+            merchant: { station: "shop_counter", station2: "chest_wood", title: "Merchant", shop: "General Store" }
+        };
+        const res = Object.assign({ id: best, score: Math.round(maxScore) }, WORKSTATIONS[best]);
+        u.data.calling = res;
+        return res;
+    }
+
     function planSteps(u) {
         u = unitOf(u);
         if (!person(u) || dead(u)) return [];
@@ -378,40 +493,119 @@
             // objects let save data and the executor retain real plan progress.
             return Object.assign({ id, build, cells: offsets, exact: true, household: h.id }, extras || {});
         };
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
         // Exact placement is essential: another household's beds/hearth do not
-        // satisfy these steps. The consumer must not count blocked cells as done.
-        home.steps = [step("walls", home.wall, home.walls), step("doors", home.door, home.doors),
+        // satisfy these steps. Natural cave walls do not require construction.
+        const buildableWalls = home.walls.filter(w => !isCaveWall(w.x, w.y));
+        const culture = C() && C().culture(u) || {};
+        const o = O();
+
+        // 5 base bootstrap steps for fresh unbuilt homes:
+        home.steps = [
+            step("walls", home.wall, buildableWalls),
+            step("doors", home.door, home.doors),
             step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
-            step("hearth", "campfire", [home.hearth]), step("storage", "stockpile", [home.storage], { stores: ["food"] })];
+            step("hearth", "campfire", [home.hearth].filter(Boolean)),
+            step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
+        ];
+
         for (let i = 0; i < (home.annexes || []).length; i++) {
             const a = home.annexes[i];
-            home.steps.push(step(`annex${i}_walls`, a.wall, a.walls), step(`annex${i}_doors`, a.door, a.doors),
-                step(`annex${i}_beds`, "floor_straw", a.beds.filter(b => b.unitId !== null)));
+            const annexWalls = a.walls.filter(w => !isCaveWall(w.x, w.y));
+            home.steps.push(
+                step(`annex${i}_walls`, a.wall, annexWalls),
+                step(`annex${i}_doors`, a.door, a.doors),
+                step(`annex${i}_beds`, "floor_straw", a.beds.filter(b => b.unitId !== null))
+            );
         }
-        const o = O();
+
         const baseBuilt = strictEnclosure(h, home) &&
-            home.beds.some(b => object(h, b) && object(h, b).id === "floor_straw") &&
-            object(h, home.hearth) && object(h, home.hearth).id === "campfire" &&
-            object(h, home.storage) && object(h, home.storage).id === "stockpile";
+            home.beds.some(b => object(h, b) && (object(h, b).id === "floor_straw" || object(h, b).id === "bed_wood")) &&
+            object(h, home.hearth) && (object(h, home.hearth).id === "campfire" || object(h, home.hearth).id === "kitchen_hearth") &&
+            object(h, home.storage) && (object(h, home.storage).id === "stockpile" || object(h, home.storage).id === "chest_wood");
         const d = demands(h);
         const noDemands = !d.bedrooms && !d.beds && !d.cooking && !d.storage;
+
+        // Progressive domestic improvement: floors, furniture, kitchens, calling workshops & shops:
         if (baseBuilt && noDemands && home.design && o) {
-            if (home.workbench && o.type("workbench") && o.type("workbench").build) {
+            // Stage 2: Interior floors
+            const cultureFloor = (culture.floor && culture.floor.kind) || (zOf(h) < 0 || h.faction === "dwarf" ? "floor_stone" : "floor_wood");
+            if (home.floors && home.floors.length) {
+                home.steps.push(step("floors", cultureFloor, home.floors));
+            }
+            for (let i = 0; i < (home.annexes || []).length; i++) {
+                const a = home.annexes[i];
+                if (a.floors && a.floors.length) {
+                    home.steps.push(step(`annex${i}_floors`, a.floor || cultureFloor, a.floors));
+                }
+            }
+
+            // Stage 3: Kitchen & Dining appointments
+            if (home.kitchenCounter && o.type("kitchen_counter") && o.type("kitchen_counter").build) {
+                home.steps.push(step("kitchen_counter", "kitchen_counter", [home.kitchenCounter]));
+            }
+            if (home.kitchenPantry && o.type("kitchen_pantry") && o.type("kitchen_pantry").build) {
+                home.steps.push(step("kitchen_pantry", "kitchen_pantry", [home.kitchenPantry], { stores: ["food"] }));
+            }
+            if (home.hearth && o.type("kitchen_hearth") && o.type("kitchen_hearth").build) {
+                home.steps.push(step("kitchen_hearth", "kitchen_hearth", [home.hearth]));
+            }
+            if (home.diningTable && o.type("dining_table") && o.type("dining_table").build) {
+                home.steps.push(step("dining_table", "dining_table", [home.diningTable]));
+            }
+            if (home.diningBench && o.type("dining_bench") && o.type("dining_bench").build) {
+                home.steps.push(step("dining_bench", "dining_bench", [home.diningBench]));
+            }
+
+            // Stage 4: Bed upgrades & Domestic Storage Chest
+            if (o.type("bed_wood") && o.type("bed_wood").build) {
+                home.steps.push(step("beds_wood", "bed_wood", home.beds.filter(b => b.unitId !== null)));
+            }
+            if (home.storage && o.type("chest_wood") && o.type("chest_wood").build) {
+                home.steps.push(step("chest_wood", "chest_wood", [home.storage]));
+            }
+
+            // Stage 5: Personality Calling Workstations & Shops
+            const calling = members(h).map(callingFor).filter(Boolean)[0];
+            if (calling) {
+                if (home.workbench && o.type(calling.station) && o.type(calling.station).build) {
+                    home.steps.push(step("calling_station", calling.station, [home.workbench]));
+                }
+                if (home.shopCounter && o.type("shop_counter") && o.type("shop_counter").build) {
+                    home.steps.push(step("shop_counter", "shop_counter", [home.shopCounter]));
+                }
+            } else if (home.workbench && o.type("workbench") && o.type("workbench").build) {
                 home.steps.push(step("workbench", "workbench", [home.workbench]));
             }
+
             if (home.weaponRack && o.type("weapon_rack") && o.type("weapon_rack").build) {
                 home.steps.push(step("weapon_rack", "weapon_rack", [home.weaponRack]));
             }
             if (home.crib && o.type("crib") && o.type("crib").build && members(h).some(m => m.data && Number.isFinite(m.data.age) && m.data.age < 3)) {
                 home.steps.push(step("crib", "crib", [home.crib]));
             }
+
             home.steps.push(step("stock_food", null, [home.storage], { stock: ["food"], count: 5, exact: true }));
             home.steps.push(step("stock_wood", null, [home.storage], { stock: ["wood"], count: 5, exact: true }));
         }
         return home.steps;
     }
     function strictEnclosure(h, p = h && h.home) {
-        return !!p && p.walls.every(c => object(h, c) && object(h, c).id === p.wall) &&
+        if (!p) return false;
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
+        return p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
             p.doors.every(c => object(h, c) && object(h, c).id === p.door);
     }
     function demands(refH) {
@@ -424,7 +618,7 @@
             storage: people.length && !(p && object(h, p.storage) && object(h, p.storage).id === "stockpile") ? 1 : 0,
             capacity: beds.length, overflow: Math.max(0, people.length - beds.length), expansionBlocked: !!(h && h.expansionBlocked),
             blocked: !p && !!(h && h.lastSearchDay !== undefined) || !!(h && h.expansionBlocked),
-            unsupported: ["dining", "windows", "locks"] };
+            unsupported: ["windows", "locks"] };
     }
     function describe(refH) {
         const h = resolve(refH);
@@ -434,6 +628,21 @@
             complete: d.members > 0 && !d.bedrooms && !d.beds && !d.cooking && !d.storage && !d.overflow,
             demands: d, children: people.filter(u => Number.isFinite(u.data.age) && u.data.age < 18).map(u => u.id),
             reason: h.expansionBlocked ? h.expansionReason : h.reason };
+    }
+    function sitePlanSteps(c, u) {
+        const s = state();
+        if (!s || !c) return [];
+        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c));
+        const allSteps = [];
+        for (const h of siteH) {
+            const people = members(h);
+            const adults = people.filter(adult);
+            const rep = adults[0] || people[0];
+            if (rep) {
+                allSteps.push(...planSteps(rep));
+            }
+        }
+        return allSteps;
     }
     function roomForPair(a, b) {
         a = unitOf(a); b = unitOf(b);
@@ -458,11 +667,11 @@
         if (!aBed || !bBed || !has(object(h, aBed), "bed") || !has(object(h, bBed), "bed")) return null;
         return { householdId: h.id, area: { x: h.area.x, y: h.area.y }, z: h.z,
             spots: (home.spots || [{ x: home.x + 3, y: home.y + 2 }, { x: home.x + 4, y: home.y + 2 }]).map(p => ({ x: p.x, y: p.y })),
-            cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[home.doors.length - 1]) };
+            cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
     }
     window.UF = window.UF || {};
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
-        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, demands, describe, roomForPair, CAPACITY };
+        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY };
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;

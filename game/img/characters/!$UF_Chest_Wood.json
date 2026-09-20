@@ -1,0 +1,12 @@
+{
+  "sheet": "!$UF_Chest_Wood",
+  "cellWidth": 48,
+  "cellHeight": 48,
+  "type": "world_object",
+  "animations": {
+    "stand": [
+      0
+    ],
+    "frameMs": 200
+  }
+}

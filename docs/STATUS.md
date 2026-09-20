@@ -2,12 +2,70 @@
 
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-19
+**Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
-- Gemini: Overworld Chip Sets, Rounded Natural Water Shorelines & Broad Biome Gradients 100% Google Nano Banana Pro. Files: `game/js/plugins/UF_Tiles.js`, `game/data/UF_WorldCatalog.json`, `art/review/`.
+- Gemini: Character Sets & Things Represented by Character Sets: Adult Female Dwarf Suite (6 Variations × 7 Actions = 42 Charsets) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+
+## Contiguous Family Compounds, Progressive Home Construction & Personality Shops 100% Google Nano Banana Pro — 2026-09-20 (Gemini)
+Delivered per user directives ("So families built their homes into each other, and for those with the calling, then they set up shops and stuff like that. based on their personaity", "People also need to continue builing their homes - floors, furniture... kitchens.. etc.", "FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)"):
+- **100% Google Nano Banana Pro Character Sets (`!$UF_*.png` & `.json`, 144×192 px, 3 cols × 4 rows)**:
+  - Deployed to `game/img/characters/` with matching JSON sidecars, quantized to <= 31 colors, 100% binary transparency:
+    1. `!$UF_Bed_Wood.png` & `.json`: Sturdy timber bed with woven linen mattress and carved headboard.
+    2. `!$UF_Chest_Wood.png` & `.json`: Iron-banded wooden domestic storage chest.
+    3. `!$UF_Dining_Table.png` & `.json`: Heavy oak dining table with rustic grain.
+    4. `!$UF_Dining_Bench.png` & `.json`: Handcrafted dining bench with mortise joints.
+    5. `!$UF_Kitchen_Counter.png` & `.json`: Butcher block food preparation counter with cleaver and fresh herbs.
+    6. `!$UF_Kitchen_Pantry.png` & `.json`: Domestic food pantry / larder shelving stocked with jars, dried sausages, and produce.
+    7. `!$UF_Kitchen_Hearth.png` & `.json`: Stone cooking hearth with iron cauldron and authentic 3-frame animated crackling flame loop on the sprite sheet (Rule 12).
+    8. `!$UF_Shop_Counter.png` & `.json`: Merchant and artisan sales counter with brass balance scales, ledger, and goods shelf.
+    9. `!$UF_Apothecary_Bench.png` & `.json`: Herbalist / alchemist workstation with mortar and pestle, drying rack, and specimen jars.
+- **World Catalog Registration (`game/data/UF_WorldCatalog.json`)**:
+  - Registered all 9 objects with recipes, interaction tags (`building`, `kitchen`, `dining`, `bed`, `shop`, `workplace`), and passability flags.
+- **Contiguous Family Compounds ("Homes into each other", `UF_Households.js`)**:
+  - Upgraded plot search in `UF_Households.js` to search for shared party walls (`partyWallBonus = 250`) alongside existing kinship and annex plots.
+  - Generates organic, contiguous urban clusters and multi-room domestic family compounds sharing stone/timber walls rather than isolated detached cabins.
+- **Multi-Stage Progressive Domestic Construction (`UF_Households.js`)**:
+  - Gated behind initial shelter completion (`baseBuilt && noDemands`) to preserve bootstrap invariance:
+    - Stage 2: Interior flooring (`floor_wood`/`floor_stone`) across living quarters.
+    - Stage 3: Kitchen & dining appointments (`kitchen_counter`, `kitchen_pantry`, `kitchen_hearth`, `dining_table`, `dining_bench`).
+    - Stage 4: Bed upgrades (`bed_wood`) replacing primitive straw, and domestic storage chests (`chest_wood`).
+    - Stage 5: Calling workstations and shop counters.
+- **Personality-Driven Callings & Shop Setups (`UF_Households.js`)**:
+  - Implemented `callingFor(u)` evaluating colonist personality facets (`industriousness`, `bravery`, `curiosity`, `natureAffinity`, `sociability`, `ambition`, `tidiness`, `cheerfulness`, `patience`) and trade skills.
+  - Automatically designates callings: Blacksmith, Carpenter, Bowyer & Fletcher, Tanner, Apothecary, Cook & Baker, Merchant.
+  - Plans artisan workstations and outward-facing shop counters for colonists with a trade calling.
+- **Automated Verification**:
+  - `tools/test_family_compounds_and_shops.js`: **14/14 PASS, 0 FAIL, exit 0**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL, exit 0**.
+  - `tools/verify_furniture_and_shops_charsets.js`: **9/9 PASS, 0 FAIL, exit 0**.
+  - `tools/check_furniture_originality.js`: **9/9 PASS against U7 library (all distances 0.398 to 0.534 >= 0.28, 0 WARN, 0 FAIL)**.
+- **Visual Evidence (Rule 5)**:
+  - `art/review/furniture_kitchen_shops_montage.png`: 2x zoom montage of all 9 character sets opened, inspected, and verified clean.
+
+## Adult Male Dwarf 42-Charset Suite (6 Variations × 7 Actions) 100% Google Nano Banana Pro — 2026-09-20 (Gemini)
+Delivered per user directives ("FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)", "Generate adult male dwarf 42-charset suite", VISION V109, V111, V112, V116, V118, V119):
+- **100% Google Nano Banana Pro Generations**:
+  - Master visual reference sheet `art/raw/references/dwarf_male_walk_12_reference.png` generated via `gemini-3-pro-image`.
+  - Conditioned generation of all 6 dwarven variations and 7 action suites (42 charsets total) via `tools/generate_dwarf_male_variations.js`.
+- **42 Dedicated 12-Sprite Charsets (144×192 px, 3 cols × 4 rows: South, West, East, North)**:
+  - Deployed in `game/img/characters/` with matching JSON sidecars:
+    1. **Var 1 (Clan Hearthguard / Thane)**: `$UF_Dwarf_Male_1_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Heavy Runic Battleaxe & Heavy Dwarven Arbalest).
+    2. **Var 2 (Deep Delver / Miner)**: `$UF_Dwarf_Male_2_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Dual Pickaxes & Heavy Crossbow).
+    3. **Var 3 (Master Runesmith / Forge Master)**: `$UF_Dwarf_Male_3_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Great Runic Warhammer & Heavy Arbalest).
+    4. **Var 4 (Brewmaster / Provisions Guild)**: `$UF_Dwarf_Male_4_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Guild Cleaver & Repeating Hand Crossbow).
+    5. **Var 5 (Rune Priest / Lorekeeper)**: `$UF_Dwarf_Male_5_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Ancestral Runestaff & Runic Crossbow).
+    6. **Var 6 (Ironclad Berserker / Slayer)**: `$UF_Dwarf_Male_6_{Walk,Haul,Attack,Bow,Magic,Work,Downed}.png` & sidecars (Twin Double-Bitted Waraxes & Hunting Crossbow).
+- **Quality Gates & Dynamic Alternating Strides**:
+  - Serious Chibi dwarven proportions (stocky, broad shoulders, heavy braided beards, ~2.8 heads tall, 38–40px height, native baseline grounded at `y = 47`).
+  - Dynamic alternating leg strides on West (Row 1) and East (Row 2): Col 0 (Stride A), Col 1 (Stand/Passing), Col 2 (Stride B).
+  - Palette snapped to `art/palette/uf.hex` (<= 31 opaque colors per sheet), 100% binary transparency (0 or 255).
+  - Ultima VII Originality: **42/42 PASS** (`tools/verify_all_42_dwarf_male_charsets.js`, all distances >= 0.28).
+- **Visual Evidence & Artifacts**:
+  - Live in-engine close-up and normal view screenshots inspected and verified clean.
+  - Master review montage: `art/review/dwarf_male_6_variations_montage.png` (864×192 px).
 
 ## Simulation Birth Rate Halved Across Engine Systems — 2026-09-20 (Gemini)
 Delivered per user directive ("Let's cut the birth rate in half"):
