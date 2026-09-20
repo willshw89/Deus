@@ -21,7 +21,6 @@
   ],
   "frameMs": 150,
   "species": "elf",
-  "gender": "male",
   "animations": {
     "attack": [
       0,

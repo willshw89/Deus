@@ -34,6 +34,10 @@ fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
 try {
     childProcess.execSync(`robocopy "${path.join(ROOT, 'game')}" "${SNAPSHOT_DIR}" /E /NDL /NFL /NJH /NJS /nc /ns /np`, { stdio: 'ignore' });
 } catch (e) {}
+// Clear existing save in snapshot so test launches on Ground level
+try {
+    fs.rmSync(path.join(SNAPSHOT_DIR, 'save', 'file0.rmmzsave'), { force: true });
+} catch (e) {}
 
 // 2. Inject live 8D Showcase into UF_Test.js in snapshot
 const testJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Test.js');
@@ -43,13 +47,14 @@ const targetHook = 't.screenshot("map");';
 const showcaseCode = `
         // --- Live In-Game 8-Directional Standard Charset Showcase ---
         const W = window.UF && UF.World;
-        const curArea = W ? W.currentArea() : null;
+        const curLevel = W && typeof W.levelOfMapId === 'function' ? W.levelOfMapId($gameMap.mapId()) : null;
+        const curArea = curLevel ? { x: curLevel.x, y: curLevel.y } : (W && W.currentArea ? W.currentArea() : { x: 0, y: 0 });
+        const curZ = curLevel ? curLevel.z : 0;
         const px = $gamePlayer.x || 15;
         const py = $gamePlayer.y || 15;
 
         if (W && curArea) {
             // 1. Circular 8-Direction Movement Compass (using $UF_Elf_8D)
-            // Center is (px, py - 4)
             const cx = px - 1;
             const cy = py - 4;
             const compass = [
@@ -63,32 +68,33 @@ const showcaseCode = `
                 { name: "Elf Walk NW", x: cx - 2, y: cy - 2, dir: 7 }
             ];
             compass.forEach(u => {
-                W.addUnit({ name: u.name, image: { characterName: "$UF_Elf_8D", characterIndex: 0 }, area: curArea, x: u.x, y: u.y, dir: u.dir, data: { species: "elf" } });
+                W.addUnit({ name: u.name, image: { characterName: "$UF_Elf_8D", characterIndex: 0 }, area: curArea, z: curZ, x: u.x, y: u.y, dir: u.dir, snapToFree: 6, data: { species: "elf" } });
             });
 
             // 2. Combat & Magic Lineup (py)
             // Melee Slash (South & West)
-            W.addUnit({ name: "Elf Swordsman S", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, x: px - 4, y: py, dir: 2, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Swordsman W", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, x: px - 3, y: py, dir: 4, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Swordsman S", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 4, y: py, dir: 2, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Swordsman W", image: { characterName: "$UF_Elf_Attack_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 3, y: py, dir: 4, snapToFree: 6, data: { species: "elf" } });
             
             // Ranged Bow (South-West & East)
-            W.addUnit({ name: "Elf Archer SW",   image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, x: px - 2, y: py, dir: 1, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Archer E",    image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, x: px - 1, y: py, dir: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Archer SW",   image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 2, y: py, dir: 1, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Archer E",    image: { characterName: "$UF_Elf_Bow_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 1, y: py, dir: 6, snapToFree: 6, data: { species: "elf" } });
 
             // Magic Cast (South & North-West)
-            W.addUnit({ name: "Elf Mage S",      image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, x: px,     y: py, dir: 2, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Mage NW",     image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, x: px + 1, y: py, dir: 7, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Mage S",      image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px,     y: py, dir: 2, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Mage NW",     image: { characterName: "$UF_Elf_Magic_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px + 1, y: py, dir: 7, snapToFree: 6, data: { species: "elf" } });
 
             // 3. Industry, Work, Downed (py + 2)
             // Work / Carve / Gather
-            W.addUnit({ name: "Elf Crafter S",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, x: px - 4, y: py + 2, dir: 2, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Artisan SW",  image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, x: px - 3, y: py + 2, dir: 1, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Forager W",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, x: px - 2, y: py + 2, dir: 4, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Crafter S",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 4, y: py + 2, dir: 2, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Artisan SW",  image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 3, y: py + 2, dir: 1, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Forager W",   image: { characterName: "$UF_Elf_Work_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px - 2, y: py + 2, dir: 4, snapToFree: 6, data: { species: "elf" } });
 
             // Downed / Collapse / Dead
-            W.addUnit({ name: "Elf Fallen S",    image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, x: px,     y: py + 2, dir: 2, data: { species: "elf" } });
-            W.addUnit({ name: "Elf Resting E",   image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, x: px + 1, y: py + 2, dir: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Fallen S",    image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px,     y: py + 2, dir: 2, snapToFree: 6, data: { species: "elf" } });
+            W.addUnit({ name: "Elf Resting E",   image: { characterName: "$UF_Elf_Dead_8D", characterIndex: 0 }, area: curArea, z: curZ, x: px + 1, y: py + 2, dir: 6, snapToFree: 6, data: { species: "elf" } });
         }
+
 
         // Position camera and look cursor over the Elf Mage
         $gamePlayer.locate(px, py);

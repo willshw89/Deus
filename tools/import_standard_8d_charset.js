@@ -148,11 +148,17 @@ if (masterImg.width === 864 && masterImg.height === 384) {
                         const sIdx = (srcY * masterImg.width + srcX) * 4;
                         const dIdx = ((r * 48 + py) * 864 + (colIdx * 48 + px)) * 4;
 
-                        // Check if background grid/slate (#131722 or similar dark)
+                        const aCol = masterImg.data[sIdx + 3];
                         const rCol = masterImg.data[sIdx];
                         const gCol = masterImg.data[sIdx + 1];
                         const bCol = masterImg.data[sIdx + 2];
-                        if (rCol <= 25 && gCol <= 30 && bCol <= 40) {
+                        const isBg = (aCol === 0) ||
+                                     (rCol === 16 && gCol === 20 && bCol === 30) ||
+                                     (rCol === 35 && gCol === 40 && bCol === 60) ||
+                                     (rCol === 28 && gCol === 32 && bCol === 48) ||
+                                     (rCol === 65 && gCol === 75 && bCol === 105) ||
+                                     (rCol === 255 && gCol === 0 && bCol === 255);
+                        if (isBg) {
                             native18Buf[dIdx + 3] = 0;
                         } else {
                             native18Buf[dIdx]     = rCol;
@@ -160,6 +166,7 @@ if (masterImg.width === 864 && masterImg.height === 384) {
                             native18Buf[dIdx + 2] = bCol;
                             native18Buf[dIdx + 3] = 255;
                         }
+
                     }
                 }
             }

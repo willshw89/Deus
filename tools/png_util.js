@@ -30,7 +30,20 @@ function makeChunk(type, data) {
     return buf;
 }
 
-function writePNG(filePath, width, height, rgbaBuffer) {
+function writePNG(arg1, arg2, arg3, arg4) {
+    let filePath, width, height, rgbaBuffer;
+    if (typeof arg1 === 'string') {
+        filePath = arg1;
+        width = arg2;
+        height = arg3;
+        rgbaBuffer = arg4;
+    } else {
+        rgbaBuffer = arg1;
+        width = arg2;
+        height = arg3;
+        filePath = null;
+    }
+
     const signature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
 
     // IHDR
@@ -61,7 +74,11 @@ function writePNG(filePath, width, height, rgbaBuffer) {
     const iendChunk = makeChunk('IEND', Buffer.alloc(0));
 
     const finalBuf = Buffer.concat([signature, ihdrChunk, idatChunk, iendChunk]);
-    fs.writeFileSync(filePath, finalBuf);
+    if (filePath) {
+        fs.writeFileSync(filePath, finalBuf);
+    }
+    return finalBuf;
 }
 
 module.exports = { writePNG };
+

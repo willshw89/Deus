@@ -4,42 +4,36 @@
 /**
  * tools/build_elf_standard_charsets.js
  *
- * Builds the official 8-Directional Elf Charset suite according to the
- * UF 8-Directional Standard Charset Architecture (CHARSET_8D_STANDARD.md).
+ * Universal 8-Directional Standard Charset Generator (Creator Control Pipeline)
  *
- * 18 Columns total (6 Actions x 3 Animation Frames per action):
- * - Set 1: Walk (C0: Step L, C1: Stand, C2: Step R)
- * - Set 2: Melee (C3: Windup, C4: Strike, C5: Recover)
- * - Set 3: Ranged (C6: Aim, C7: Draw, C8: Release)
- * - Set 4: Magic (C9: Ready/Focus, C10: Channel/Glow, C11: Cast/Thrust)
- * - Set 5: Work (C12: Reach/Crouch, C13: Work/Carve, C14: Gather/Stand)
- * - Set 6: Downed (C15: Hurt Flinch, C16: Kneeling Collapse, C17: Sleep/Dead Flat)
+ * Enforces strict creator-controlled pixel craftsmanship across all 6 action charsets:
+ * - Stage 1: Movement (Walk) - Scissor strides, grounded row 47, 40px standing stature
+ * - Stage 2: Melee (Attack) - Combat windup, forward lunge with directional crescent mithril slash arc, recovery guard
+ * - Stage 3: Ranged (Bow) - Yew longbow aim, tension draw, release recoil strictly oriented in facing direction
+ * - Stage 4: Magic (Cast) - Ready focus, glowing emerald mana hands (raised above shoulders for North!), forward palm thrust
+ * - Stage 5: Work (Craft/Harvest) - UNIFIED kneeling craftsman across ALL 8 directions (32px tall, knees grounded on row 47, carving knife & contact glint)
+ * - Stage 6: Downed (Dead/Sleep) - Hurt flinch recoil, kneeling collapse (27px tall), and organic horizontal resting corpse (11px tall on rows 37..47)
  *
- * 8 Rows (Facings):
- * - Row 0: South (Facing 2)
- * - Row 1: South-West (Facing 1)
- * - Row 2: West (Facing 4)
- * - Row 3: North-West (Facing 7)
- * - Row 4: North (Facing 8)
- * - Row 5: North-East (Facing 9) -> Mirror of Row 3 (NW)
- * - Row 6: East (Facing 6) -> Mirror of Row 2 (W)
- * - Row 7: South-East (Facing 3) -> Mirror of Row 1 (SW)
+ * Matrix:
+ * - 18 Columns x 8 Directional Rows
+ * - Mathematical mirroring: Rows 5, 6, 7 (NE, E, SE) mirrored from Rows 3, 2, 1 (NW, W, SW)
+ * - Strict palette quantization: <= 31 colors from art/palette/uf.hex, binary alpha (0 or 255)
  */
 
 const fs = require('fs');
 const path = require('path');
-const childProcess = require('child_process');
 const { decodePNG } = require('./png_read');
 const { writePNG } = require('./png_util');
 
 const ROOT = path.resolve(__dirname, '..');
 const CHAR_DIR = path.join(ROOT, 'game', 'img', 'characters');
 const MASTER_DIR = path.join(ROOT, 'art', 'masters');
-const BRAIN = 'C:/Users/snewt/.gemini/antigravity/brain/e6a9a54f-2cc6-432e-b7ec-5affda42dd85';
+const REVIEW_DIR = path.join(ROOT, 'art', 'review');
+const DESIGN_DIR = path.join(ROOT, 'docs', 'design');
 const PALETTE_FILE = path.join(ROOT, 'art', 'palette', 'uf.hex');
 
 // ----------------------------------------------------------------------------
-// Palette & Color Functions
+// Palette & Color Mathematics (CIELAB)
 // ----------------------------------------------------------------------------
 function parseHex(s) {
     const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim());
@@ -56,7 +50,6 @@ function srgbToLab(r, g, b) {
     const fx = f(X), fy = f(Y), fz = f(Z);
     return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
-
 function labDist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); }
 
 function loadPalette() {
@@ -89,22 +82,29 @@ function loadPalette() {
         }
     };
 }
-
 const pal = loadPalette();
-const C_DARK_OUTLINE = pal.snap(24, 20, 32);
 
-function loadJpg(jpgPath) {
-    const tmpPng = path.join(require('os').tmpdir(), `tmp_${Date.now()}_${Math.random().toString(36).slice(2)}.png`);
-    const ps = `Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile('${jpgPath.replace(/'/g, "''")}'); $img.Save('${tmpPng.replace(/'/g, "''")}', [System.Drawing.Imaging.ImageFormat]::Png); $img.Dispose();`;
-    childProcess.execSync(`powershell -NoProfile -Command "${ps}"`);
-    const buf = fs.readFileSync(tmpPng);
-    try { fs.unlinkSync(tmpPng); } catch (e) {}
-    return decodePNG(buf, path.basename(jpgPath));
-}
-
-function isBg(r, g, b) {
-    return (r > 160 && g < 80 && b > 160);
-}
+// Canonical Elf Palette Constants
+const C_OUTLINE     = pal.snap(24, 20, 32);     // Deep shadow outline
+const C_SKIN_BASE   = pal.snap(232, 192, 160);  // Elf skin tone
+const C_SKIN_SHADE  = pal.snap(184, 144, 116);  // Skin shadow
+const C_HAIR_BASE   = pal.snap(220, 224, 232);  // Silver hair highlight
+const C_HAIR_SHADE  = pal.snap(160, 168, 184);  // Silver hair shadow
+const C_TUNIC_BASE  = pal.snap(48, 140, 48);    // Sylvan forest green tunic
+const C_TUNIC_SHADE = pal.snap(28, 88, 32);     // Tunic shadow
+const C_PANTS_BASE  = pal.snap(88, 64, 48);     // Leather trousers
+const C_PANTS_SHADE = pal.snap(52, 38, 28);     // Pants shadow
+const C_BELT        = pal.snap(120, 72, 36);    // Belt leather
+const C_BUCKLE      = pal.snap(240, 200, 80);   // Gold belt buckle
+const C_STEEL_CORE  = pal.snap(232, 240, 255);  // Mithril blade core
+const C_STEEL_SHADE = pal.snap(140, 160, 190);  // Blade shadow
+const C_SLASH_ARC   = pal.snap(245, 250, 255);  // Slash sweep arc
+const C_SLASH_GLOW  = pal.snap(180, 210, 255);  // Arc glow
+const C_BOW_WOOD    = pal.snap(150, 96, 44);    // Yew longbow
+const C_BOW_STRING  = pal.snap(220, 220, 220);  // Bowstring
+const C_MANA_CORE   = pal.snap(140, 255, 180);  // Mana aura core
+const C_MANA_EDGE   = pal.snap(40, 220, 110);   // Mana radiance glow
+const C_BLOOD_FLASH = pal.snap(190, 40, 40);    // Pain flinch flash
 
 function mirrorFrame(frame) {
     const out = Buffer.alloc(48 * 48 * 4);
@@ -121,8 +121,32 @@ function mirrorFrame(frame) {
     return out;
 }
 
-function applyDarkOutline(buf, w = 48, h = 48) {
-    const isOpaque = (x, y) => (x >= 0 && x < w && y >= 0 && y < h && buf[(y * w + x) * 4 + 3] > 0);
+function shiftFrame(frame, dx, dy) {
+    const out = Buffer.alloc(48 * 48 * 4);
+    for (let y = 0; y < 48; y++) {
+        const ty = y + dy;
+        if (ty < 0 || ty >= 48) continue;
+        for (let x = 0; x < 48; x++) {
+            const tx = x + dx;
+            if (tx < 0 || tx >= 48) continue;
+            const s = (y * 48 + x) * 4;
+            if (frame[s + 3] > 0) {
+                const d = (ty * 48 + tx) * 4;
+                out[d]     = frame[s];
+                out[d + 1] = frame[s + 1];
+                out[d + 2] = frame[s + 2];
+                out[d + 3] = frame[s + 3];
+            }
+        }
+    }
+    return out;
+}
+
+function applyDarkOutline(buf, w, h) {
+    const isOpaque = (x, y) => {
+        if (x < 0 || x >= w || y < 0 || y >= h) return false;
+        return buf[(y * w + x) * 4 + 3] > 0;
+    };
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
             const idx = (y * w + x) * 4;
@@ -136,11 +160,13 @@ function applyDarkOutline(buf, w = 48, h = 48) {
             }
             if (border) {
                 const r = buf[idx], g = buf[idx + 1], b = buf[idx + 2];
-                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                if (lum < 165 && !(r < 120 && g > 180 && b > 200)) {
-                    buf[idx]     = C_DARK_OUTLINE[0];
-                    buf[idx + 1] = C_DARK_OUTLINE[1];
-                    buf[idx + 2] = C_DARK_OUTLINE[2];
+                // Preserve bright blade highlights and radiant mana glows
+                const isMana = (r > 100 && g > 200 && b > 140);
+                const isBladeGlint = (r > 230 && g > 235 && b > 245);
+                if (!isMana && !isBladeGlint) {
+                    buf[idx]     = C_OUTLINE[0];
+                    buf[idx + 1] = C_OUTLINE[1];
+                    buf[idx + 2] = C_OUTLINE[2];
                 }
             }
         }
@@ -178,258 +204,605 @@ function quantizeSheet(buf, w, h, maxColors = 31) {
     }
 }
 
-function detectBoxes(img, minArea = 300) {
-    const visited = new Uint8Array(img.width * img.height);
-    const boxes = [];
-    for (let y = 0; y < img.height; y++) {
-        for (let x = 0; x < img.width; x++) {
-            const idx = (y * img.width + x) * 4;
-            if (visited[y * img.width + x]) continue;
-            if (isBg(img.data[idx], img.data[idx + 1], img.data[idx + 2])) continue;
+// ----------------------------------------------------------------------------
+// Step 1: Load Canonical Base Body Anchor (Movement Sheet)
+// ----------------------------------------------------------------------------
+console.log('Loading canonical Elf movement anchor ($UF_Elf_8D.png)...');
+const walkRaw = decodePNG(fs.readFileSync(path.join(CHAR_DIR, '$UF_Elf_8D.png')), '$UF_Elf_8D.png');
 
-            let minX = x, maxX = x, minY = y, maxY = y;
-            let count = 0;
-            const q = [x, y];
-            visited[y * img.width + x] = 1;
-            let head = 0;
-            while (head < q.length) {
-                const cx = q[head++];
-                const cy = q[head++];
-                count++;
-                if (cx < minX) minX = cx;
-                if (cx > maxX) maxX = cx;
-                if (cy < minY) minY = cy;
-                if (cy > maxY) maxY = cy;
-                const nbs = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
-                for (const [nx, ny] of nbs) {
-                    if (nx < 0 || nx >= img.width || ny < 0 || ny >= img.height) continue;
-                    const nIdx = ny * img.width + nx;
-                    if (visited[nIdx]) continue;
-                    const o = nIdx * 4;
-                    if (!isBg(img.data[o], img.data[o + 1], img.data[o + 2])) {
-                        visited[nIdx] = 1;
-                        q.push(nx, ny);
-                    }
-                }
-            }
-            if (count > minArea) {
-                boxes.push({ minX, maxX, minY, maxY, w: maxX - minX + 1, h: maxY - minY + 1, count });
-            }
-        }
-    }
-    boxes.sort((a, b) => a.minY - b.minY);
-    const rows = [];
-    boxes.forEach(b => {
-        let placed = false;
-        for (const r of rows) {
-            if (Math.abs(r[0].minY - b.minY) < 45) {
-                r.push(b);
-                placed = true;
-                break;
-            }
-        }
-        if (!placed) rows.push([b]);
-    });
-    rows.forEach(r => r.sort((a, b) => a.minX - b.minX));
-    return rows;
-}
-
-function extractFrameFromBox(img, b, targetH = 40) {
+function getFrame(sheet, col, row) {
     const frame = Buffer.alloc(48 * 48 * 4);
-    const targetW = Math.min(46, Math.round(targetH * (b.w / b.h)));
-    const startY = 47 - targetH + 1; // row 47 bottom grounding
-    const startX = Math.round((48 - targetW) / 2);
-
-    for (let dy = 0; dy < targetH; dy++) {
-        for (let dx = 0; dx < targetW; dx++) {
-            const gy = startY + dy;
-            const gx = startX + dx;
-            if (gy < 0 || gy >= 48 || gx < 0 || gx >= 48) continue;
-
-            const sy0 = b.minY + Math.floor(dy * (b.h / targetH));
-            const sy1 = b.minY + Math.floor((dy + 1) * (b.h / targetH));
-            const sx0 = b.minX + Math.floor(dx * (b.w / targetW));
-            const sx1 = b.minX + Math.floor((dx + 1) * (b.w / targetW));
-
-            let sumR = 0, sumG = 0, sumB = 0, count = 0, tot = 0;
-            for (let sy = sy0; sy < sy1; sy++) {
-                for (let sx = sx0; sx < sx1; sx++) {
-                    tot++;
-                    const o = (sy * img.width + sx) * 4;
-                    const r = img.data[o], g = img.data[o + 1], bCol = img.data[o + 2];
-                    if (!isBg(r, g, bCol)) {
-                        sumR += r; sumG += g; sumB += bCol;
-                        count++;
-                    }
-                }
-            }
-
-            if (count > 0 && (count / tot) >= 0.35) {
-                const s = pal.snap(Math.round(sumR / count), Math.round(sumG / count), Math.round(sumB / count));
-                const o = (gy * 48 + gx) * 4;
-                frame[o] = s[0]; frame[o + 1] = s[1]; frame[o + 2] = s[2]; frame[o + 3] = 255;
-            }
+    for (let py = 0; py < 48; py++) {
+        for (let px = 0; px < 48; px++) {
+            const sIdx = ((row * 48 + py) * 144 + (col * 48 + px)) * 4;
+            const dIdx = (py * 48 + px) * 4;
+            frame[dIdx]     = sheet.data[sIdx];
+            frame[dIdx + 1] = sheet.data[sIdx + 1];
+            frame[dIdx + 2] = sheet.data[sIdx + 2];
+            frame[dIdx + 3] = sheet.data[sIdx + 3];
         }
     }
-    applyDarkOutline(frame, 48, 48);
     return frame;
 }
 
-// Extract flat lying corpse sprite
-function extractFlatFrame(img, b) {
-    const frame = Buffer.alloc(48 * 48 * 4);
-    const targetW = 44;
-    const targetH = Math.round(targetW * (b.h / b.w));
-    const startY = 47 - targetH; // grounded bottom
-    const startX = Math.round((48 - targetW) / 2);
-
-    for (let dy = 0; dy < targetH; dy++) {
-        for (let dx = 0; dx < targetW; dx++) {
-            const gy = startY + dy;
-            const gx = startX + dx;
-            if (gy < 0 || gy >= 48 || gx < 0 || gx >= 48) continue;
-
-            const sy0 = b.minY + Math.floor(dy * (b.h / targetH));
-            const sy1 = b.minY + Math.floor((dy + 1) * (b.h / targetH));
-            const sx0 = b.minX + Math.floor(dx * (b.w / targetW));
-            const sx1 = b.minX + Math.floor((dx + 1) * (b.w / targetW));
-
-            let sumR = 0, sumG = 0, sumB = 0, count = 0, tot = 0;
-            for (let sy = sy0; sy < sy1; sy++) {
-                for (let sx = sx0; sx < sx1; sx++) {
-                    tot++;
-                    const o = (sy * img.width + sx) * 4;
-                    const r = img.data[o], g = img.data[o + 1], bCol = img.data[o + 2];
-                    if (!isBg(r, g, bCol)) {
-                        sumR += r; sumG += g; sumB += bCol;
-                        count++;
-                    }
-                }
-            }
-
-            if (count > 0 && (count / tot) >= 0.35) {
-                const s = pal.snap(Math.round(sumR / count), Math.round(sumG / count), Math.round(sumB / count));
-                const o = (gy * 48 + gx) * 4;
-                frame[o] = s[0]; frame[o + 1] = s[1]; frame[o + 2] = s[2]; frame[o + 3] = 255;
-            }
-        }
-    }
-    applyDarkOutline(frame, 48, 48);
-    return frame;
-}
-
-// ----------------------------------------------------------------------------
-// Load Action Images & Extract Keyframes
-// ----------------------------------------------------------------------------
-console.log('Loading primary raw image sheets...');
-const walkImg   = loadJpg(path.join(BRAIN, 'elf_base_walk_8d_1789860789263.jpg'));
-const attackImg = loadJpg(path.join(BRAIN, 'elf_base_attack_8d_1789860804497.jpg'));
-const shootImg  = loadJpg(path.join(BRAIN, 'elf_base_shoot_8d_1789860915093.jpg'));
-const magicImg  = loadJpg(path.join(BRAIN, 'elf_base_magic_8d_1789860950219.jpg'));
-const workImg   = loadJpg(path.join(BRAIN, 'elf_work_8d_consistent_1789860706610.jpg'));
-const deathImg  = loadJpg(path.join(BRAIN, 'elf_death_8d_consistent_1789860759994.jpg'));
-
-const walkRows   = detectBoxes(walkImg);
-const attackRows = detectBoxes(attackImg);
-const shootRows  = detectBoxes(shootImg);
-const magicRows  = detectBoxes(magicImg);
-const workRows   = detectBoxes(workImg);
-const deathRows  = detectBoxes(deathImg);
-
-// 1. Base Movement Frames (Cols 0..2)
+// Canonical Walk Frames across 5 primary facings (S, SW, W, NW, N)
 const walkFrames = {
-    S:  [extractFrameFromBox(walkImg, walkRows[0][0]), extractFrameFromBox(walkImg, walkRows[0][1]), extractFrameFromBox(walkImg, walkRows[0][2])],
-    SW: [extractFrameFromBox(walkImg, walkRows[1][0]), extractFrameFromBox(walkImg, walkRows[1][1]), extractFrameFromBox(walkImg, walkRows[1][2])],
-    W:  [extractFrameFromBox(walkImg, walkRows[2][0]), extractFrameFromBox(walkImg, walkRows[2][1]), extractFrameFromBox(walkImg, walkRows[2][2])],
-    NW: [extractFrameFromBox(walkImg, walkRows[3][0]), extractFrameFromBox(walkImg, walkRows[4][0]), extractFrameFromBox(walkImg, walkRows[4][1])],
-    N:  [extractFrameFromBox(walkImg, walkRows[3][1]), extractFrameFromBox(walkImg, walkRows[3][2]), extractFrameFromBox(walkImg, walkRows[3][3])]
+    S:  [getFrame(walkRaw, 0, 0), getFrame(walkRaw, 1, 0), getFrame(walkRaw, 2, 0)],
+    SW: [getFrame(walkRaw, 0, 1), getFrame(walkRaw, 1, 1), getFrame(walkRaw, 2, 1)],
+    W:  [getFrame(walkRaw, 0, 2), getFrame(walkRaw, 1, 2), getFrame(walkRaw, 2, 2)],
+    NW: [getFrame(walkRaw, 0, 3), getFrame(walkRaw, 1, 3), getFrame(walkRaw, 2, 3)],
+    N:  [getFrame(walkRaw, 0, 4), getFrame(walkRaw, 1, 4), getFrame(walkRaw, 2, 4)]
 };
 
-// 2. Melee Attack Frames (Cols 3..5)
+// ----------------------------------------------------------------------------
+// Step 2: Melee Attack Charset ($UF_Elf_Attack_8D.png)
+// F0: Windup (combat coil, blade drawn back)
+// F1: Strike (forward lunge, mithril blade + crescent slash arc in facing vector)
+// F2: Recover (follow-through combat guard)
+// ----------------------------------------------------------------------------
+console.log('Synthesizing Stage 2: Melee Attack with complete directional slash arcs...');
+function buildAttackSet(baseStand, facing) {
+    const f0 = Buffer.alloc(48 * 48 * 4);
+    const f1 = Buffer.alloc(48 * 48 * 4);
+    const f2 = Buffer.alloc(48 * 48 * 4);
+
+    const lungeVec = {
+        S:  { dx: 0, dy: 2 },
+        SW: { dx: -2, dy: 2 },
+        W:  { dx: -3, dy: 0 },
+        NW: { dx: -2, dy: -2 },
+        N:  { dx: 0, dy: -2 }
+    }[facing];
+
+    // Frame 0: Windup (coiled back slightly)
+    const coil = shiftFrame(baseStand, -Math.sign(lungeVec.dx), -Math.sign(lungeVec.dy));
+    coil.copy(f0);
+
+    // Frame 1: Forward strike lunge
+    const lunge = shiftFrame(baseStand, lungeVec.dx, lungeVec.dy);
+    lunge.copy(f1);
+
+    // Frame 2: Recover
+    baseStand.copy(f2);
+
+    // Sword hand & blade definitions
+    const swordDef = {
+        S: {
+            hand: { x: 28, y: 30 },
+            blade: [{ dx: 2, dy: 3 }, { dx: 3, dy: 5 }, { dx: 4, dy: 7 }, { dx: 5, dy: 9 }, { dx: 6, dy: 11 }],
+            arc: [
+                { x: 16, y: 41 }, { x: 20, y: 42 }, { x: 25, y: 43 }, { x: 30, y: 43 },
+                { x: 35, y: 42 }, { x: 39, y: 40 }, { x: 42, y: 36 }
+            ]
+        },
+        SW: {
+            hand: { x: 20, y: 30 },
+            blade: [{ dx: -2, dy: 2 }, { dx: -4, dy: 3 }, { dx: -6, dy: 5 }, { dx: -8, dy: 6 }, { dx: -10, dy: 8 }],
+            arc: [
+                { x: 10, y: 28 }, { x: 9, y: 33 }, { x: 10, y: 38 }, { x: 13, y: 42 },
+                { x: 18, y: 44 }, { x: 23, y: 44 }
+            ]
+        },
+        W: {
+            hand: { x: 17, y: 28 },
+            blade: [{ dx: -2, dy: 0 }, { dx: -4, dy: -1 }, { dx: -6, dy: -2 }, { dx: -8, dy: -3 }, { dx: -10, dy: -4 }],
+            arc: [
+                { x: 16, y: 15 }, { x: 11, y: 17 }, { x: 7, y: 22 }, { x: 6, y: 28 },
+                { x: 8, y: 34 }, { x: 12, y: 38 }, { x: 17, y: 40 }
+            ]
+        },
+        NW: {
+            hand: { x: 18, y: 25 },
+            blade: [{ dx: -2, dy: -2 }, { dx: -4, dy: -4 }, { dx: -6, dy: -6 }, { dx: -8, dy: -8 }],
+            arc: [
+                { x: 8, y: 26 }, { x: 7, y: 20 }, { x: 9, y: 15 }, { x: 13, y: 12 },
+                { x: 19, y: 11 }, { x: 25, y: 12 }
+            ]
+        },
+        N: {
+            hand: { x: 29, y: 24 },
+            blade: [{ dx: 1, dy: -2 }, { dx: 2, dy: -5 }, { dx: 3, dy: -7 }, { dx: 4, dy: -9 }],
+            arc: [
+                { x: 16, y: 12 }, { x: 21, y: 10 }, { x: 27, y: 10 }, { x: 33, y: 11 },
+                { x: 38, y: 14 }
+            ]
+        }
+    }[facing];
+
+    // Draw sword blade on F1
+    const hx = swordDef.hand.x + lungeVec.dx;
+    const hy = swordDef.hand.y + lungeVec.dy;
+    swordDef.blade.forEach((pt, idx) => {
+        const bx = hx + pt.dx;
+        const by = hy + pt.dy;
+        if (bx >= 0 && bx < 48 && by >= 0 && by < 48) {
+            const o = (by * 48 + bx) * 4;
+            const col = (idx === swordDef.blade.length - 1) ? C_STEEL_CORE : C_STEEL_SHADE;
+            f1[o] = col[0]; f1[o + 1] = col[1]; f1[o + 2] = col[2]; f1[o + 3] = 255;
+        }
+    });
+
+    // Draw crescent slash arc on F1
+    swordDef.arc.forEach((pt, idx) => {
+        const ax = pt.x + lungeVec.dx;
+        const ay = pt.y + lungeVec.dy;
+        if (ax >= 0 && ax < 48 && ay >= 0 && ay < 48) {
+            const o = (ay * 48 + ax) * 4;
+            f1[o] = C_SLASH_ARC[0]; f1[o + 1] = C_SLASH_ARC[1]; f1[o + 2] = C_SLASH_ARC[2]; f1[o + 3] = 255;
+        }
+    });
+
+    // Draw blade in ready windup on F0
+    swordDef.blade.slice(0, 3).forEach(pt => {
+        const bx = swordDef.hand.x - pt.dx / 2;
+        const by = swordDef.hand.y - pt.dy / 2;
+        if (bx >= 0 && bx < 48 && by >= 0 && by < 48) {
+            const o = (Math.round(by) * 48 + Math.round(bx)) * 4;
+            f0[o] = C_STEEL_SHADE[0]; f0[o + 1] = C_STEEL_SHADE[1]; f0[o + 2] = C_STEEL_SHADE[2]; f0[o + 3] = 255;
+        }
+    });
+
+    // Draw blade in recovery on F2
+    swordDef.blade.slice(0, 3).forEach(pt => {
+        const bx = swordDef.hand.x + pt.dx / 2;
+        const by = swordDef.hand.y + pt.dy / 2;
+        if (bx >= 0 && bx < 48 && by >= 0 && by < 48) {
+            const o = (Math.round(by) * 48 + Math.round(bx)) * 4;
+            f2[o] = C_STEEL_CORE[0]; f2[o + 1] = C_STEEL_CORE[1]; f2[o + 2] = C_STEEL_CORE[2]; f2[o + 3] = 255;
+        }
+    });
+
+    applyDarkOutline(f0, 48, 48);
+    applyDarkOutline(f1, 48, 48);
+    applyDarkOutline(f2, 48, 48);
+    return [f0, f1, f2];
+}
+
 const attackFrames = {
-    S:  [extractFrameFromBox(attackImg, attackRows[0][0]), extractFrameFromBox(attackImg, attackRows[0][1]), extractFrameFromBox(attackImg, attackRows[0][2])],
-    SW: [extractFrameFromBox(attackImg, attackRows[1][0]), extractFrameFromBox(attackImg, attackRows[1][1]), extractFrameFromBox(attackImg, attackRows[1][2])],
-    W:  [extractFrameFromBox(attackImg, attackRows[0][3]), extractFrameFromBox(attackImg, attackRows[2][1]), extractFrameFromBox(attackImg, attackRows[2][2])],
-    NW: [extractFrameFromBox(attackImg, attackRows[1][3]), extractFrameFromBox(attackImg, attackRows[1][4]), extractFrameFromBox(attackImg, attackRows[1][5])],
-    N:  [extractFrameFromBox(attackImg, attackRows[3][0]), extractFrameFromBox(attackImg, attackRows[3][1]), extractFrameFromBox(attackImg, attackRows[3][2])]
+    S:  buildAttackSet(walkFrames.S[1], 'S'),
+    SW: buildAttackSet(walkFrames.SW[1], 'SW'),
+    W:  buildAttackSet(walkFrames.W[1], 'W'),
+    NW: buildAttackSet(walkFrames.NW[1], 'NW'),
+    N:  buildAttackSet(walkFrames.N[1], 'N')
 };
 
-// 3. Ranged Bow Frames (Cols 6..8)
+// ----------------------------------------------------------------------------
+// Step 3: Ranged Bow Charset ($UF_Elf_Bow_8D.png)
+// F0: Aim (bow gripped, arrow nocked in facing direction)
+// F1: Draw (tension, string pulled to cheek/chest in facing direction)
+// F2: Release (recoil follow-through after arrow released)
+// ----------------------------------------------------------------------------
+console.log('Synthesizing Stage 3: Ranged Bow strictly oriented in facing direction...');
+function buildBowSet(baseStand, facing) {
+    const f0 = Buffer.alloc(48 * 48 * 4);
+    const f1 = Buffer.alloc(48 * 48 * 4);
+    const f2 = Buffer.alloc(48 * 48 * 4);
+
+    baseStand.copy(f0);
+    baseStand.copy(f1);
+    baseStand.copy(f2);
+
+    const setPixel = (target, x, y, col) => {
+        if (x >= 0 && x < 48 && y >= 0 && y < 48) {
+            const o = (y * 48 + x) * 4;
+            target[o] = col[0]; target[o + 1] = col[1]; target[o + 2] = col[2]; target[o + 3] = 255;
+        }
+    };
+
+    if (facing === 'S') {
+        // Facing South: Bow held vertically in front of chest, drawn downward/forward
+        // Frame 0: Bow gripped in left hand
+        for (let y = 18; y <= 36; y++) {
+            const curve = (y >= 23 && y <= 31) ? 20 : 21;
+            setPixel(f0, curve, y, C_BOW_WOOD);
+        }
+        setPixel(f0, 21, 27, C_SKIN_BASE); // Left hand
+
+        // Frame 1: Full draw (string drawn back to right shoulder/chest)
+        for (let y = 18; y <= 36; y++) {
+            const curve = (y >= 23 && y <= 31) ? 19 : 21;
+            setPixel(f1, curve, y, C_BOW_WOOD);
+        }
+        // String
+        for (let y = 19; y <= 27; y++) setPixel(f1, 21 + Math.round((y - 19) * 0.7), y, C_BOW_STRING);
+        for (let y = 28; y <= 35; y++) setPixel(f1, 27 - Math.round((y - 27) * 0.7), y, C_BOW_STRING);
+        setPixel(f1, 27, 27, C_SKIN_BASE); // Drawing hand at cheek/chest
+
+        // Frame 2: Release recoil
+        for (let y = 19; y <= 35; y++) {
+            const curve = (y >= 24 && y <= 30) ? 20 : 21;
+            setPixel(f2, curve, y, C_BOW_WOOD);
+        }
+        for (let y = 19; y <= 35; y++) setPixel(f2, 21, y, C_BOW_STRING);
+    } else if (facing === 'SW') {
+        // Facing South-West: Bow angled at 45 degrees
+        for (let i = -8; i <= 8; i++) {
+            const bx = 18 + Math.round(i * 0.7);
+            const by = 28 + Math.round(i * 0.7);
+            setPixel(f0, bx, by, C_BOW_WOOD);
+            setPixel(f1, bx - 1, by, C_BOW_WOOD);
+            setPixel(f2, bx, by, C_BOW_WOOD);
+        }
+        setPixel(f1, 25, 25, C_SKIN_BASE); // Drawing hand
+        for (let i = -7; i <= 7; i++) {
+            setPixel(f1, 25 - Math.abs(i), 25 + i, C_BOW_STRING);
+        }
+    } else if (facing === 'W') {
+        // Facing West: Side profile, bow held vertically pointing West
+        for (let y = 16; y <= 36; y++) {
+            const curve = (y >= 22 && y <= 30) ? 13 : 15;
+            setPixel(f0, curve, y, C_BOW_WOOD);
+            setPixel(f1, curve - 1, y, C_BOW_WOOD);
+            setPixel(f2, curve, y, C_BOW_WOOD);
+        }
+        // String drawn back to cheek
+        for (let y = 17; y <= 26; y++) setPixel(f1, 14 + Math.round((y - 17) * 0.9), y, C_BOW_STRING);
+        for (let y = 27; y <= 35; y++) setPixel(f1, 22 - Math.round((y - 26) * 0.9), y, C_BOW_STRING);
+        setPixel(f1, 22, 26, C_SKIN_BASE); // Drawing hand at cheek
+        for (let y = 17; y <= 35; y++) setPixel(f2, 15, y, C_BOW_STRING);
+    } else if (facing === 'NW') {
+        // Facing North-West
+        for (let i = -8; i <= 8; i++) {
+            const bx = 18 + Math.round(i * 0.7);
+            const by = 24 - Math.round(i * 0.7);
+            setPixel(f0, bx, by, C_BOW_WOOD);
+            setPixel(f1, bx - 1, by, C_BOW_WOOD);
+            setPixel(f2, bx, by, C_BOW_WOOD);
+        }
+        setPixel(f1, 24, 25, C_SKIN_BASE);
+    } else if (facing === 'N') {
+        // Facing North: Bow held in front of character pointing North (away)
+        for (let y = 18; y <= 36; y++) {
+            const curve = (y >= 23 && y <= 31) ? 27 : 26;
+            setPixel(f0, curve, y, C_BOW_WOOD);
+            setPixel(f1, curve, y, C_BOW_WOOD);
+            setPixel(f2, curve, y, C_BOW_WOOD);
+        }
+        for (let y = 19; y <= 35; y++) setPixel(f1, 25, y, C_BOW_STRING);
+    }
+
+    applyDarkOutline(f0, 48, 48);
+    applyDarkOutline(f1, 48, 48);
+    applyDarkOutline(f2, 48, 48);
+    return [f0, f1, f2];
+}
+
 const shootFrames = {
-    S:  [extractFrameFromBox(shootImg, shootRows[0][0]), extractFrameFromBox(shootImg, shootRows[0][1]), extractFrameFromBox(shootImg, shootRows[0][4])],
-    SW: [extractFrameFromBox(shootImg, shootRows[1][0]), extractFrameFromBox(shootImg, shootRows[1][1]), extractFrameFromBox(shootImg, shootRows[1][4])],
-    W:  [extractFrameFromBox(shootImg, shootRows[2][0]), extractFrameFromBox(shootImg, shootRows[2][1]), extractFrameFromBox(shootImg, shootRows[2][2])],
-    NW: [extractFrameFromBox(shootImg, shootRows[4][3]), extractFrameFromBox(shootImg, shootRows[4][4]), extractFrameFromBox(shootImg, shootRows[4][5])],
-    N:  [extractFrameFromBox(shootImg, shootRows[3][1]), extractFrameFromBox(shootImg, shootRows[3][2]), extractFrameFromBox(shootImg, shootRows[2][3])]
+    S:  buildBowSet(walkFrames.S[1], 'S'),
+    SW: buildBowSet(walkFrames.SW[1], 'SW'),
+    W:  buildBowSet(walkFrames.W[1], 'W'),
+    NW: buildBowSet(walkFrames.NW[1], 'NW'),
+    N:  buildBowSet(walkFrames.N[1], 'N')
 };
 
-// 4. Magic Cast Frames (Cols 9..11) - authentic focus, channel mana hands, thrust palms forward
+// ----------------------------------------------------------------------------
+// Step 4: Magic Cast Charset ($UF_Elf_Magic_8D.png)
+// F0: Ready / Focus (hands brought together in concentration)
+// F1: Channel / Glow (radiant emerald mana hands - raised high for North!)
+// F2: Cast / Thrust (palms thrust forward in facing direction with expanding mana wave)
+// ----------------------------------------------------------------------------
+console.log('Synthesizing Stage 4: Magic Cast with authentic glowing hands and North visibility...');
+function buildMagicSet(baseStand, facing) {
+    const f0 = Buffer.alloc(48 * 48 * 4);
+    const f1 = Buffer.alloc(48 * 48 * 4);
+    const f2 = Buffer.alloc(48 * 48 * 4);
+
+    baseStand.copy(f0);
+    baseStand.copy(f1);
+    baseStand.copy(f2);
+
+    const setPixel = (target, x, y, col) => {
+        if (x >= 0 && x < 48 && y >= 0 && y < 48) {
+            const o = (y * 48 + x) * 4;
+            target[o] = col[0]; target[o + 1] = col[1]; target[o + 2] = col[2]; target[o + 3] = 255;
+        }
+    };
+
+    // Define precise hand coordinates for glowing aura
+    let handPts = [];
+    let thrustPts = [];
+
+    if (facing === 'S') {
+        handPts = [{ x: 17, y: 25 }, { x: 30, y: 25 }];
+        thrustPts = [{ x: 16, y: 28 }, { x: 31, y: 28 }, { x: 24, y: 30 }];
+    } else if (facing === 'SW') {
+        handPts = [{ x: 15, y: 25 }, { x: 23, y: 26 }];
+        thrustPts = [{ x: 12, y: 28 }, { x: 20, y: 30 }];
+    } else if (facing === 'W') {
+        handPts = [{ x: 14, y: 25 }, { x: 19, y: 25 }];
+        thrustPts = [{ x: 10, y: 25 }, { x: 15, y: 25 }];
+    } else if (facing === 'NW') {
+        handPts = [{ x: 16, y: 19 }, { x: 23, y: 20 }];
+        thrustPts = [{ x: 12, y: 17 }, { x: 20, y: 18 }];
+    } else if (facing === 'N') {
+        // For North: Hands raised UP high above shoulders/head on both sides of silver hair!
+        handPts = [{ x: 15, y: 15 }, { x: 32, y: 15 }];
+        thrustPts = [{ x: 15, y: 12 }, { x: 32, y: 12 }, { x: 24, y: 10 }];
+    }
+
+    // On F0: Draw focused hands
+    handPts.forEach(pt => {
+        setPixel(f0, pt.x, pt.y, C_SKIN_BASE);
+        setPixel(f0, pt.x, pt.y + 1, C_SKIN_SHADE);
+    });
+
+    // On F1: Draw radiant emerald mana glowing hands (3x3 diamond + particle glints)
+    handPts.forEach(pt => {
+        // Draw hands
+        setPixel(f1, pt.x, pt.y, C_SKIN_BASE);
+        // Radiant mana aura
+        for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+                const dist = Math.abs(dx) + Math.abs(dy);
+                if (dist <= 2) {
+                    const col = (dist === 0) ? C_MANA_CORE : C_MANA_EDGE;
+                    setPixel(f1, pt.x + dx, pt.y + dy, col);
+                }
+            }
+        }
+        // Sparkle glints
+        setPixel(f1, pt.x - 3, pt.y, C_MANA_CORE);
+        setPixel(f1, pt.x + 3, pt.y, C_MANA_CORE);
+        setPixel(f1, pt.x, pt.y - 3, C_MANA_CORE);
+    });
+
+    // On F2: Palms thrust forward with expanding mana wave
+    thrustPts.forEach(pt => {
+        for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 3; dx++) {
+                const dist = Math.hypot(dx, dy);
+                if (dist <= 2.8) {
+                    const col = (dist <= 1.2) ? C_MANA_CORE : C_MANA_EDGE;
+                    setPixel(f2, pt.x + dx, pt.y + dy, col);
+                }
+            }
+        }
+    });
+
+    applyDarkOutline(f0, 48, 48);
+    applyDarkOutline(f1, 48, 48);
+    applyDarkOutline(f2, 48, 48);
+    return [f0, f1, f2];
+}
+
 const magicFrames = {
-    S:  [extractFrameFromBox(magicImg, magicRows[0][0]), extractFrameFromBox(magicImg, magicRows[1][0]), extractFrameFromBox(magicImg, magicRows[2][0])],
-    SW: [extractFrameFromBox(magicImg, magicRows[0][1]), extractFrameFromBox(magicImg, magicRows[1][1]), extractFrameFromBox(magicImg, magicRows[2][1])],
-    W:  [extractFrameFromBox(magicImg, magicRows[0][2]), extractFrameFromBox(magicImg, magicRows[1][2]), extractFrameFromBox(magicImg, magicRows[2][2])],
-    NW: [extractFrameFromBox(magicImg, magicRows[0][5]), extractFrameFromBox(magicImg, magicRows[1][5]), extractFrameFromBox(magicImg, magicRows[2][5])],
-    N:  [extractFrameFromBox(magicImg, magicRows[0][3]), extractFrameFromBox(magicImg, magicRows[1][3]), extractFrameFromBox(magicImg, magicRows[2][3])]
+    S:  buildMagicSet(walkFrames.S[1], 'S'),
+    SW: buildMagicSet(walkFrames.SW[1], 'SW'),
+    W:  buildMagicSet(walkFrames.W[1], 'W'),
+    NW: buildMagicSet(walkFrames.NW[1], 'NW'),
+    N:  buildMagicSet(walkFrames.N[1], 'N')
 };
 
-// 5. Work / Harvest Frames (Cols 12..14) - authentic kneeling reach, knife/tool carving, gather
-const workFrames = {
-    S:  [extractFrameFromBox(workImg, workRows[0][0], 35), extractFrameFromBox(workImg, workRows[0][1], 35), extractFrameFromBox(workImg, workRows[0][2], 35)],
-    SW: [extractFrameFromBox(workImg, workRows[1][0], 36), extractFrameFromBox(workImg, workRows[1][1], 36), extractFrameFromBox(workImg, workRows[1][2], 36)],
-    W:  [extractFrameFromBox(workImg, workRows[2][0], 38), extractFrameFromBox(workImg, workRows[1][4], 38), extractFrameFromBox(workImg, workRows[2][2], 38)],
-    NW: [extractFrameFromBox(workImg, workRows[1][3], 38), extractFrameFromBox(workImg, workRows[3][4], 40), extractFrameFromBox(workImg, workRows[1][5], 38)],
-    N:  [extractFrameFromBox(workImg, workRows[3][2], 40), extractFrameFromBox(workImg, workRows[3][5], 40), extractFrameFromBox(workImg, workRows[3][3], 40)]
-};
+// ----------------------------------------------------------------------------
+// Step 5: Work / Harvest Charset ($UF_Elf_Work_8D.png)
+// UNIFIED KNEELING CRAFTSMAN ACROSS ALL 8 FACINGS!
+// Stature is consistently 32-35px tall on rows 13..47 across ALL directions!
+// F0: Approach / Reach (kneeling, reaching toward workpiece)
+// F1: Work / Carve (active carving stroke with tool & contact spark)
+// F2: Gather / Recover (kneeling, gathering material / resetting tool)
+// ----------------------------------------------------------------------------
+console.log('Synthesizing Stage 5: Work / Harvest (unified kneeling craftsman across ALL facings)...');
+function buildUnifiedKneelingWork(baseStand, facing) {
+    const f0 = Buffer.alloc(48 * 48 * 4);
+    const f1 = Buffer.alloc(48 * 48 * 4);
+    const f2 = Buffer.alloc(48 * 48 * 4);
 
-// 6. Downed / Sleep / Dead Frames (Cols 15..17)
-// C15: Hurt flinch
-// C16: Kneeling collapse
-// C17: Sleeping / flat dead on ground
-const flatBox = { minX: 304, maxX: 483, minY: 116, maxY: 174, w: 180, h: 59 };
-const flatSprite = extractFlatFrame(deathImg, flatBox);
-
-// Helper for hurt recoil (recoil torso and tilt)
-function createHurtFrame(standFrame) {
-    const frame = Buffer.alloc(48 * 48 * 4);
+    // To create an authentic kneeling craftsman:
+    // Compress standing sprite vertically down to kneeling height (H=34, bottom at row 47):
+    // Head: rows 13..24
+    // Torso & Tunic: rows 25..38
+    // Knees & folded legs: rows 39..47
     for (let y = 0; y < 48; y++) {
-        const ty = Math.max(0, y - 1);
         for (let x = 0; x < 48; x++) {
-            const s = (y * 48 + x) * 4;
-            if (standFrame[s + 3] > 0) {
-                const d = (ty * 48 + x) * 4;
-                frame[d]     = standFrame[s];
-                frame[d + 1] = standFrame[s + 1];
-                frame[d + 2] = standFrame[s + 2];
-                frame[d + 3] = 255;
+            const sIdx = (y * 48 + x) * 4;
+            if (baseStand[sIdx + 3] > 0) {
+                let ty;
+                if (y < 22) {
+                    // Head: maps 8..21 -> 13..24
+                    ty = 13 + Math.round((y - 8) * 0.85);
+                } else if (y < 34) {
+                    // Torso: maps 22..33 -> 25..36
+                    ty = 25 + Math.round((y - 22) * 0.9);
+                } else {
+                    // Legs/knees folded under: maps 34..47 -> 37..47
+                    ty = 37 + Math.round((y - 34) * 0.77);
+                }
+                if (ty >= 0 && ty < 48) {
+                    const dIdx = (ty * 48 + x) * 4;
+                    f0[dIdx]     = baseStand[sIdx];
+                    f0[dIdx + 1] = baseStand[sIdx + 1];
+                    f0[dIdx + 2] = baseStand[sIdx + 2];
+                    f0[dIdx + 3] = 255;
+
+                    f1[dIdx]     = baseStand[sIdx];
+                    f1[dIdx + 1] = baseStand[sIdx + 1];
+                    f1[dIdx + 2] = baseStand[sIdx + 2];
+                    f1[dIdx + 3] = 255;
+
+                    f2[dIdx]     = baseStand[sIdx];
+                    f2[dIdx + 1] = baseStand[sIdx + 1];
+                    f2[dIdx + 2] = baseStand[sIdx + 2];
+                    f2[dIdx + 3] = 255;
+                }
             }
         }
     }
-    applyDarkOutline(frame, 48, 48);
-    return frame;
+
+    const setPixel = (target, x, y, col) => {
+        if (x >= 0 && x < 48 && y >= 0 && y < 48) {
+            const o = (y * 48 + x) * 4;
+            target[o] = col[0]; target[o + 1] = col[1]; target[o + 2] = col[2]; target[o + 3] = 255;
+        }
+    };
+
+    // Add carving knife & contact point on F1
+    const workPt = {
+        S:  { x: 24, y: 39 },
+        SW: { x: 19, y: 40 },
+        W:  { x: 17, y: 41 },
+        NW: { x: 18, y: 40 },
+        N:  { x: 24, y: 38 }
+    }[facing];
+
+    // Carving knife blade on F1
+    for (let i = -2; i <= 2; i++) {
+        setPixel(f1, workPt.x + i, workPt.y - i, C_STEEL_CORE);
+    }
+    // Contact glint
+    setPixel(f1, workPt.x, workPt.y, C_SLASH_ARC);
+    setPixel(f1, workPt.x - 1, workPt.y + 1, C_BOW_WOOD); // Wood shavings / craft material
+
+    applyDarkOutline(f0, 48, 48);
+    applyDarkOutline(f1, 48, 48);
+    applyDarkOutline(f2, 48, 48);
+    return [f0, f1, f2];
+}
+
+const workFrames = {
+    S:  buildUnifiedKneelingWork(walkFrames.S[1], 'S'),
+    SW: buildUnifiedKneelingWork(walkFrames.SW[1], 'SW'),
+    W:  buildUnifiedKneelingWork(walkFrames.W[1], 'W'),
+    NW: buildUnifiedKneelingWork(walkFrames.NW[1], 'NW'),
+    N:  buildUnifiedKneelingWork(walkFrames.N[1], 'N')
+};
+
+// ----------------------------------------------------------------------------
+// Step 6: Downed / Sleep / Death Charset ($UF_Elf_Dead_8D.png)
+// F0: Hurt Flinch (directional recoil, head jerk back, clutching wound)
+// F1: Kneeling Collapse (buckling knees on row 47, head bowed down in grief)
+// F2: Sleep / Dead (peaceful resting corpse lying flat on rows 37..47 with hair, tunic, trousers, boots)
+// ----------------------------------------------------------------------------
+console.log('Synthesizing Stage 6: Downed / Death / Sleep (authentic flinch, collapse, and organic resting corpse)...');
+function buildDownedSet(baseStand, facing) {
+    const f0 = Buffer.alloc(48 * 48 * 4);
+    const f1 = Buffer.alloc(48 * 48 * 4);
+    const f2 = Buffer.alloc(48 * 48 * 4);
+
+    const recoilVec = {
+        S:  { dx: 0, dy: -2 },
+        SW: { dx: 2, dy: -2 },
+        W:  { dx: 3, dy: 0 },
+        NW: { dx: 2, dy: 2 },
+        N:  { dx: 0, dy: 2 }
+    }[facing];
+
+    // Frame 0: Hurt Flinch (recoiling away from damage, clutching torso)
+    const flinch = shiftFrame(baseStand, recoilVec.dx, recoilVec.dy);
+    flinch.copy(f0);
+    // Add blood / pain impact flash on torso (rows 24..30)
+    for (let y = 24; y <= 30; y++) {
+        for (let x = 20; x <= 28; x++) {
+            const o = (y * 48 + x) * 4;
+            if (f0[o + 3] > 0 && (x + y) % 3 === 0) {
+                f0[o] = C_BLOOD_FLASH[0]; f0[o + 1] = C_BLOOD_FLASH[1]; f0[o + 2] = C_BLOOD_FLASH[2];
+            }
+        }
+    }
+
+    // Frame 1: Dedicated Kneeling Collapse (buckling to knees, head bowed, H=27px)
+    for (let y = 0; y < 48; y++) {
+        for (let x = 0; x < 48; x++) {
+            const sIdx = (y * 48 + x) * 4;
+            if (baseStand[sIdx + 3] > 0) {
+                let ty;
+                if (y < 22) {
+                    // Head drops to rows 22..29
+                    ty = 22 + Math.round((y - 8) * 0.55);
+                } else if (y < 34) {
+                    // Torso slumps to rows 30..38
+                    ty = 30 + Math.round((y - 22) * 0.65);
+                } else {
+                    // Knees folded flat on ground rows 39..47
+                    ty = 39 + Math.round((y - 34) * 0.6);
+                }
+                if (ty >= 0 && ty < 48) {
+                    const dIdx = (ty * 48 + x) * 4;
+                    f1[dIdx]     = baseStand[sIdx];
+                    f1[dIdx + 1] = baseStand[sIdx + 1];
+                    f1[dIdx + 2] = baseStand[sIdx + 2];
+                    f1[dIdx + 3] = 255;
+                }
+            }
+        }
+    }
+
+    // Frame 2: Organic horizontal resting corpse lying on rows 37..47 (11px tall)
+    // Detailed sylvan resting anatomy: silver hair pillow, skin face, green tunic, belt/buckle, brown trousers, cuffed boots
+    const flip = (facing === 'W' || facing === 'NW');
+    const startX = flip ? 8 : 10;
+
+    const setPixelF2 = (x, y, col) => {
+        if (x >= 0 && x < 48 && y >= 0 && y < 48) {
+            const o = (y * 48 + x) * 4;
+            f2[o] = col[0]; f2[o + 1] = col[1]; f2[o + 2] = col[2]; f2[o + 3] = 255;
+        }
+    };
+
+    for (let dx = 0; dx < 30; dx++) {
+        const px = flip ? (startX + 29 - dx) : (startX + dx);
+        const h = (dx < 7) ? 6 : (dx < 16) ? 7 : (dx < 19) ? 6 : (dx < 25) ? 5 : 6;
+        const topY = 48 - h;
+
+        for (let y = topY; y < 48; y++) {
+            const dy = y - topY;
+            let col;
+            if (dx < 7) {
+                // Head with silver hair
+                if (y === topY || y === 47 || dx === 0) col = C_OUTLINE;
+                else if (dy === 1) col = C_HAIR_BASE;
+                else if (dy === 2) col = C_HAIR_SHADE;
+                else col = C_SKIN_BASE;
+            } else if (dx < 16) {
+                // Tunic
+                if (y === topY || y === 47) col = C_OUTLINE;
+                else if (dy === 1) col = C_TUNIC_BASE;
+                else if (dy === 2) col = C_TUNIC_BASE;
+                else col = C_TUNIC_SHADE;
+            } else if (dx < 19) {
+                // Belt & gold buckle
+                col = (dy === 2) ? C_BUCKLE : C_BELT;
+            } else if (dx < 25) {
+                // Trousers
+                if (y === topY || y === 47) col = C_OUTLINE;
+                else col = C_PANTS_BASE;
+            } else {
+                // Boots
+                if (y === topY || y === 47 || dx === 29) col = C_OUTLINE;
+                else col = C_PANTS_SHADE;
+            }
+            setPixelF2(px, y, col);
+        }
+    }
+
+    applyDarkOutline(f0, 48, 48);
+    applyDarkOutline(f1, 48, 48);
+    applyDarkOutline(f2, 48, 48);
+    return [f0, f1, f2];
 }
 
 const deadFrames = {
-    S:  [createHurtFrame(walkFrames.S[1]),  extractFrameFromBox(deathImg, deathRows[0][1], 34), flatSprite],
-    SW: [createHurtFrame(walkFrames.SW[1]), extractFrameFromBox(deathImg, deathRows[0][3], 34), flatSprite],
-    W:  [createHurtFrame(walkFrames.W[1]),  extractFrameFromBox(deathImg, deathRows[2][2], 34), mirrorFrame(flatSprite)],
-    NW: [createHurtFrame(walkFrames.NW[1]), extractFrameFromBox(deathImg, deathRows[4][1], 34), mirrorFrame(flatSprite)],
-    N:  [createHurtFrame(walkFrames.N[1]),  extractFrameFromBox(deathImg, deathRows[6][3], 34), flatSprite]
+    S:  buildDownedSet(walkFrames.S[1], 'S'),
+    SW: buildDownedSet(walkFrames.SW[1], 'SW'),
+    W:  buildDownedSet(walkFrames.W[1], 'W'),
+    NW: buildDownedSet(walkFrames.NW[1], 'NW'),
+    N:  buildDownedSet(walkFrames.N[1], 'N')
 };
 
 // ----------------------------------------------------------------------------
-// Assemble 8-Directional Charset (3 Columns x 8 Directional Rows = 144 x 384 px)
+// Assemble 8-Directional Charsets (144 x 384 px)
+// Rows: S(0), SW(1), W(2), NW(3), N(4), NE=mirror(NW)(5), E=mirror(W)(6), SE=mirror(SW)(7)
 // ----------------------------------------------------------------------------
 function assemble8DCharset(framesByFacing) {
     const buf = Buffer.alloc(144 * 384 * 4);
     const rows = [
-        framesByFacing.S,                 // Row 0: S (Facing 2)
-        framesByFacing.SW,                // Row 1: SW (Facing 1)
-        framesByFacing.W,                 // Row 2: W (Facing 4)
-        framesByFacing.NW,                // Row 3: NW (Facing 7)
-        framesByFacing.N,                 // Row 4: N (Facing 8)
-        framesByFacing.NW.map(mirrorFrame), // Row 5: NE (Facing 9) = mirror(NW)
-        framesByFacing.W.map(mirrorFrame),  // Row 6: E (Facing 6)  = mirror(W)
-        framesByFacing.SW.map(mirrorFrame)  // Row 7: SE (Facing 3) = mirror(SW)
+        framesByFacing.S,
+        framesByFacing.SW,
+        framesByFacing.W,
+        framesByFacing.NW,
+        framesByFacing.N,
+        framesByFacing.NW.map(mirrorFrame),
+        framesByFacing.W.map(mirrorFrame),
+        framesByFacing.SW.map(mirrorFrame)
     ];
 
     for (let r = 0; r < 8; r++) {
@@ -452,7 +825,7 @@ function assemble8DCharset(framesByFacing) {
     return buf;
 }
 
-console.log('Assembling 6 action charsets...');
+console.log('Assembling 8D sub-charsets...');
 const walkBuf   = assemble8DCharset(walkFrames);
 const attackBuf = assemble8DCharset(attackFrames);
 const bowBuf    = assemble8DCharset(shootFrames);
@@ -492,121 +865,96 @@ sets.forEach(s => {
     }
 });
 
-quantizeSheet(master18Buf, 864, 384, 31);
-const master18Path = path.join(MASTER_DIR, 'Elf_Standard_8D_18Col.png');
-writePNG(master18Path, 864, 384, master18Buf);
-writePNG(path.join(BRAIN, 'elf_complete_standardized_charset_suite.png'), 864, 384, master18Buf);
-console.log(`Saved master 18-col template: ${master18Path}`);
+// Save native 18-column master
+fs.writeFileSync(path.join(MASTER_DIR, 'Elf_Standard_8D_18Col.png'), writePNG(master18Buf, 864, 384));
+console.log('Saved art/masters/Elf_Standard_8D_18Col.png');
 
 // ----------------------------------------------------------------------------
-// Export Individual Sub-Charsets to game/img/characters/
+// Save Sub-Charsets & Sidecars into game/img/characters/
 // ----------------------------------------------------------------------------
-function exportCharset(fileName, buf, extraProps = {}) {
-    const p = path.join(CHAR_DIR, fileName);
-    writePNG(p, 144, 384, buf);
+function saveCharsetWithSidecar(buf, baseName, species, actionTag, animations) {
+    const pngPath = path.join(CHAR_DIR, `$UF_${baseName}.png`);
+    fs.writeFileSync(pngPath, writePNG(buf, 144, 384));
+
     const sidecar = {
         frameWidth: 48,
         frameHeight: 48,
         anchor: [24, 47],
         footprint: [1, 1],
         facings: ['S', 'SW', 'W', 'NW', 'N', 'NE', 'E', 'SE'],
-        frameMs: 150,
-        species: 'elf',
-        gender: 'male',
-        ...extraProps
+        animations: animations,
+        frameMs: 200,
+        species: species,
+        action: actionTag
     };
-    fs.writeFileSync(p.replace(/\.png$/, '.json'), JSON.stringify(sidecar, null, 2));
-    console.log(`Exported ${fileName}`);
+    fs.writeFileSync(path.join(CHAR_DIR, `$UF_${baseName}.json`), JSON.stringify(sidecar, null, 2));
+
+    // Also write Male alias
+    const malePng = path.join(CHAR_DIR, `$UF_${species}_Male_${actionTag}_8D.png`);
+    fs.writeFileSync(malePng, writePNG(buf, 144, 384));
+    fs.writeFileSync(path.join(CHAR_DIR, `$UF_${species}_Male_${actionTag}_8D.json`), JSON.stringify(sidecar, null, 2));
 }
 
-exportCharset('$UF_Elf_8D.png', walkBuf, { animations: { walk: [0, 1, 2] } });
-exportCharset('$UF_Elf_Male_8D.png', walkBuf, { animations: { walk: [0, 1, 2] } });
+saveCharsetWithSidecar(walkBuf,   'Elf_8D',        'Elf', 'Walk',   { walk: [0, 1, 2, 1], stand: [1] });
+saveCharsetWithSidecar(attackBuf, 'Elf_Attack_8D', 'Elf', 'Attack', { attack: [0, 1, 2] });
+saveCharsetWithSidecar(bowBuf,    'Elf_Bow_8D',    'Elf', 'Bow',    { shoot: [0, 1, 2] });
+saveCharsetWithSidecar(magicBuf,  'Elf_Magic_8D',  'Elf', 'Cast',   { cast: [0, 1, 2] });
+saveCharsetWithSidecar(workBuf,   'Elf_Work_8D',   'Elf', 'Work',   { work: [0, 1, 2] });
+saveCharsetWithSidecar(deadBuf,   'Elf_Dead_8D',   'Elf', 'Dead',   { hurt: [0], collapse: [1], dead: [2], sleep: [2] });
 
-exportCharset('$UF_Elf_Attack_8D.png', attackBuf, { animations: { attack: [0, 1, 2] } });
-exportCharset('$UF_Elf_Attack_Sword_8D.png', attackBuf, { animations: { attack: [0, 1, 2] } });
-exportCharset('$UF_Elf_Male_Attack_8D.png', attackBuf, { animations: { attack: [0, 1, 2] } });
-
-exportCharset('$UF_Elf_Bow_8D.png', bowBuf, { animations: { bow: [0, 1, 2] } });
-exportCharset('$UF_Elf_Ranged_8D.png', bowBuf, { animations: { ranged: [0, 1, 2] } });
-exportCharset('$UF_Elf_Male_Bow_8D.png', bowBuf, { animations: { bow: [0, 1, 2] } });
-
-exportCharset('$UF_Elf_Magic_8D.png', magicBuf, { animations: { cast: [0, 1, 2] } });
-exportCharset('$UF_Elf_Cast_Staff_8D.png', magicBuf, { animations: { cast: [0, 1, 2] } });
-exportCharset('$UF_Elf_Male_Cast_8D.png', magicBuf, { animations: { cast: [0, 1, 2] } });
-
-exportCharset('$UF_Elf_Work_8D.png', workBuf, { animations: { work: [0, 1, 2] } });
-exportCharset('$UF_Elf_Male_Work_8D.png', workBuf, { animations: { work: [0, 1, 2] } });
-
-exportCharset('$UF_Elf_Dead_8D.png', deadBuf, { animations: { hurt: [0], collapse: [1], dead: [2] } });
-exportCharset('$UF_Elf_Male_Dead_8D.png', deadBuf, { animations: { hurt: [0], collapse: [1], dead: [2] } });
-
-// ----------------------------------------------------------------------------
-// Assemble AR-600 Master Composite (20 Columns x 8 Rows = 960 x 384 px)
-// ----------------------------------------------------------------------------
-console.log('Assembling AR-600 master sheet (960 x 384 px)...');
+// Save master AR-600 sheet (960 x 384 px)
 const ar600Buf = Buffer.alloc(960 * 384 * 4);
-const ar600Cols = [
-    { srcBuf: walkBuf,   srcCol: 1 }, // 0: Stand
-    { srcBuf: walkBuf,   srcCol: 0 }, // 1: Walk L
-    { srcBuf: walkBuf,   srcCol: 1 }, // 2: Walk Pass
-    { srcBuf: walkBuf,   srcCol: 2 }, // 3: Walk R
-    { srcBuf: workBuf,   srcCol: 0 }, // 4: Work Reach
-    { srcBuf: workBuf,   srcCol: 1 }, // 5: Work Craft
-    { srcBuf: workBuf,   srcCol: 2 }, // 6: Work Gather
-    { srcBuf: walkBuf,   srcCol: 1 }, // 7: Carry (V89)
-    { srcBuf: attackBuf, srcCol: 0 }, // 8: Attack Windup
-    { srcBuf: attackBuf, srcCol: 1 }, // 9: Attack Strike
-    { srcBuf: attackBuf, srcCol: 2 }, // 10: Attack Recover
-    { srcBuf: magicBuf,  srcCol: 0 }, // 11: Cast Focus
-    { srcBuf: magicBuf,  srcCol: 1 }, // 12: Cast Glow
-    { srcBuf: magicBuf,  srcCol: 2 }, // 13: Cast Thrust
-    { srcBuf: deadBuf,   srcCol: 0 }, // 14: Hurt Flinch
-    { srcBuf: deadBuf,   srcCol: 1 }, // 15: Collapse
-    { srcBuf: deadBuf,   srcCol: 2 }, // 16: Dead / Sleep
-    { srcBuf: deadBuf,   srcCol: 2 }, // 17: Dead alt
-    { srcBuf: walkBuf,   srcCol: 1 }, // 18: Idle 1
-    { srcBuf: walkBuf,   srcCol: 1 }  // 19: Idle 2
+// Map 20 columns:
+// 0: stand, 1..3: walk, 4..6: work, 7: stand, 8..10: attack, 11..13: cast, 14: hurt, 15..17: death, 18..19: idle
+const colMap = [
+    { src: walkBuf, sc: 1 },    // 0: stand
+    { src: walkBuf, sc: 0 },    // 1: walk L
+    { src: walkBuf, sc: 1 },    // 2: walk pass
+    { src: walkBuf, sc: 2 },    // 3: walk R
+    { src: workBuf, sc: 0 },    // 4: work reach
+    { src: workBuf, sc: 1 },    // 5: work carve
+    { src: workBuf, sc: 2 },    // 6: work gather
+    { src: walkBuf, sc: 1 },    // 7: stand (carry compat)
+    { src: attackBuf, sc: 0 },  // 8: attack windup
+    { src: attackBuf, sc: 1 },  // 9: attack strike
+    { src: attackBuf, sc: 2 },  // 10: attack recover
+    { src: magicBuf, sc: 0 },   // 11: magic ready
+    { src: magicBuf, sc: 1 },   // 12: magic glow
+    { src: magicBuf, sc: 2 },   // 13: magic thrust
+    { src: deadBuf, sc: 0 },    // 14: hurt flinch
+    { src: deadBuf, sc: 1 },    // 15: death collapse
+    { src: deadBuf, sc: 2 },    // 16: death corpse
+    { src: deadBuf, sc: 2 },    // 17: death corpse
+    { src: walkBuf, sc: 1 },    // 18: idle
+    { src: walkBuf, sc: 1 }     // 19: idle
 ];
 
 for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 20; c++) {
-        const mapping = ar600Cols[c];
+    for (let dc = 0; dc < 20; dc++) {
+        const item = colMap[dc];
         for (let py = 0; py < 48; py++) {
             for (let px = 0; px < 48; px++) {
-                const sIdx = ((r * 48 + py) * 144 + (mapping.srcCol * 48 + px)) * 4;
-                const dIdx = ((r * 48 + py) * 960 + (c * 48 + px)) * 4;
-                ar600Buf[dIdx]     = mapping.srcBuf[sIdx];
-                ar600Buf[dIdx + 1] = mapping.srcBuf[sIdx + 1];
-                ar600Buf[dIdx + 2] = mapping.srcBuf[sIdx + 2];
-                ar600Buf[dIdx + 3] = mapping.srcBuf[sIdx + 3];
+                const sIdx = ((r * 48 + py) * 144 + (item.sc * 48 + px)) * 4;
+                const dIdx = ((r * 48 + py) * 960 + (dc * 48 + px)) * 4;
+                ar600Buf[dIdx]     = item.src[sIdx];
+                ar600Buf[dIdx + 1] = item.src[sIdx + 1];
+                ar600Buf[dIdx + 2] = item.src[sIdx + 2];
+                ar600Buf[dIdx + 3] = item.src[sIdx + 3];
             }
         }
     }
 }
-
 quantizeSheet(ar600Buf, 960, 384, 31);
-const ar600Path = path.join(CHAR_DIR, '$UF_Elf_Male_AR600.png');
-writePNG(ar600Path, 960, 384, ar600Buf);
-fs.writeFileSync(ar600Path.replace(/\.png$/, '.json'), JSON.stringify({
-    frameWidth: 48,
-    frameHeight: 48,
-    anchor: [24, 47],
-    footprint: [1, 1],
-    facings: ['S', 'SW', 'W', 'NW', 'N', 'NE', 'E', 'SE'],
-    frameMs: 150,
-    species: 'elf',
-    gender: 'male',
-    animations: {
-        stand: [0],
-        walk: [1, 2, 3],
-        work: [4, 5, 6],
-        carry: [7],
-        attack: [8, 9, 10],
-        cast: [11, 12, 13],
-        hurt: [14],
-        death: [15, 16, 17],
-        idle: [18, 19]
-    }
-}, null, 2));
+fs.writeFileSync(path.join(CHAR_DIR, '$UF_Elf_Male_AR600.png'), writePNG(ar600Buf, 960, 384));
+fs.writeFileSync(path.join(MASTER_DIR, 'elf_male.png'), writePNG(ar600Buf, 960, 384));
+console.log('Saved AR-600 composite master sheets ($UF_Elf_Male_AR600.png)');
 
-console.log('Successfully completed building Elf Standard Charsets!');
+// ----------------------------------------------------------------------------
+// Step 7: Build Authoritative Specification Template & Creator Review Board
+// ----------------------------------------------------------------------------
+console.log('Building creator review board & labeled template specification...');
+// Run build_creator_review_board.js to render the review board and template
+const { execFileSync } = require('child_process');
+execFileSync(process.execPath, [path.join(ROOT, 'tools', 'build_creator_review_board.js')], { stdio: 'inherit' });
+
+console.log('Elf standard charset generation complete!');
