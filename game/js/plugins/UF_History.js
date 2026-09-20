@@ -442,9 +442,9 @@
             if (!f.home || !f.home.area) continue;
             // The camp stands on the cell nearest the area centre whose 3 x 3 block is all land (the campfire and the
             // eight founders around it, VISION V4); in practice the centre itself.
-            const levels = f.species === "dwarf" ? [-1, -2] : [0];
+            const levels = f.species === "dwarf" ? [-1, -2] : (f.homes ? f.homes.map(h => h.z) : [f.home.z || 0]);
             const camps = levels.map(z => {
-                const cell = z === 0 ? campCell(state, f) : f.homes && f.homes.find(c => c.z === z);
+                const cell = z === 0 ? campCell(state, f) : ((f.homes && f.homes.find(c => c.z === z)) || (f.home && f.home.z === z ? f.home : null));
                 if (!cell) throw new Error(`No habitable founding cell for ${f.id} on level ${z}`);
                 const site = {
                     id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false,
@@ -769,7 +769,7 @@
     const numberWord = n => NUMBERS[n] || String(n);
     const SETTLE_DEFAULTS = {
         years: 100,                 // history.settleYears wins when present
-        birthChancePerPair: 0.11,   // per adult pair per year (halved near capacity, a fifth above it)
+        birthChancePerPair: 0.055,  // per adult pair per year (halved per user directive 2026-09-20)
         feverChancePerYear: 0.02, feverLoss: [0.1, 0.35],
         peoplePerHouse: 5, peoplePerBed: 2, peoplePerStockpile: 12, workbenchAt: 8, secondWallAt: 0.5,
         treesPerPersonYear: 0.06, stonesPerPersonYear: 0.04, bushesPerPerson: 0.3, depleteFraction: 0.5,

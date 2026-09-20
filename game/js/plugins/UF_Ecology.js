@@ -128,12 +128,15 @@
         return {
             version: VERSION,
             resources: [],
+            sprouts: [],
+            beatCount: 0,
             areas: {},
             herds: {},
             cursor: 0,
             nextHerd: 1,
+            nextSproutId: 1,
             lastHour: null,
-            stats: { hours: 0, areas: 0, resources: 0, prey: 0, monsters: 0, attempts: 0, births: 0, germinated: 0, ms: 0 }
+            stats: { hours: 0, areas: 0, resources: 0, sprouts: 0, matured: 0, prey: 0, monsters: 0, attempts: 0, births: 0, germinated: 0, ms: 0 }
         };
     }
 
@@ -146,6 +149,9 @@
         } else {
             st.version = VERSION;
             if (!Array.isArray(st.resources)) st.resources = [];
+            if (!Array.isArray(st.sprouts)) st.sprouts = [];
+            if (!(st.beatCount >= 0)) st.beatCount = 0;
+            if (!(st.nextSproutId > 0)) st.nextSproutId = 1;
             if (!st.areas || typeof st.areas !== "object") st.areas = {};
             if (!st.herds || typeof st.herds !== "object") st.herds = {};
             if (!(st.cursor >= 0)) st.cursor = 0;
@@ -360,6 +366,16 @@
         try {
             const st = state();
             if (!st) return;
+            if (st.sprouts) {
+                const z = (area && area.z !== undefined) ? area.z : 0;
+                const spIdx = st.sprouts.findIndex(e => sameArea(e.area, area) && (e.z || 0) === z && e.x === x && e.y === y);
+                if (spIdx >= 0) {
+                    const sp = st.sprouts[spIdx];
+                    if (toId !== sp.sproutType && toId !== sp.matureType) {
+                        st.sprouts.splice(spIdx, 1);
+                    }
+                }
+            }
             const i = resourceIndex(area, x, y), pending = i >= 0 ? st.resources[i] : null;
             if (isRenewableObject(fromId)) {
                 scheduleResource(area, x, y, fromId, toId);
@@ -480,8 +496,8 @@
             result.status = "interval"; result.ms = nowMs() - t0; return result;
         }
         a.last[key] = at;
-        const roll = a.rolls[key] | 0;
-        a.rolls[key] = roll + 1;
+        const roll = Number.isFinite(o.roll) ? o.roll : (a.rolls[key] | 0);
+        a.rolls[key] = (a.rolls[key] | 0) + 1;
         st.stats.attempts++;
         const chance = key === "monsters" ? MONSTER_CHANCE : PREY_CHANCE;
         const chanceRoll = hash32(W.state.seed, 0xec0110, area.x, area.y, at, roll, key === "monsters" ? 1 : 0) / 4294967296;
@@ -649,7 +665,7 @@
             const herdRecord = st && st.herds && st.herds[hId];
             if (!o.force && herdRecord && herdRecord.lastBirth && at - herdRecord.lastBirth < 12) continue;
 
-            const chance = sp.kind === "predator" ? 0.35 : 0.55;
+            const chance = sp.kind === "predator" ? 0.175 : 0.275; // halved per user directive 2026-09-20
             if (!o.force && rng() >= chance) continue;
 
             const parent = members[Math.floor(rng() * count)];
@@ -680,6 +696,143 @@
             }
         }
         result.ms = nowMs() - t0;
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+    // Per-Beat Resource Sprouting and Maturation (User specification 2026-09-19)
+    // Resources sprout across axes 0, -1, -2 each beat and mature over 2-3 minutes.
+
+    const SPROUT_CAP_PER_LEVEL = 40;
+    const SPROUT_DEFS = {
+        0: [
+            { sprout: "sapling", matures: ["oak", "pine", "birch", "fruit_tree"], weights: [5, 2, 2, 1], delay: 120 },
+            { sprout: "rocks_small", matures: ["ironstone", "copper_outcrop", "granite_boulder", "gold_outcrop"], weights: [4, 3, 2, 1], delay: 150 },
+            { sprout: "bush", matures: ["berry_bush", "fruit_tree", "wild_grain"], weights: [5, 3, 2], delay: 120 }
+        ],
+        "-1": [
+            { sprout: "cave_mushrooms", matures: ["tower_cap", "glow_caps", "cave_moss"], weights: [5, 3, 2], delay: 120 },
+            { sprout: "rocks_small", matures: ["ironstone", "copper_outcrop", "granite_boulder", "gold_outcrop"], weights: [4, 3, 2, 1], delay: 150 },
+            { sprout: "crystal_small", matures: ["crystal", "crystal_spire"], weights: [6, 4], delay: 180 }
+        ],
+        "-2": [
+            { sprout: "glow_caps", matures: ["tower_cap", "crystal_spire"], weights: [6, 4], delay: 120 },
+            { sprout: "rocks_small", matures: ["ironstone", "gold_outcrop", "granite_boulder"], weights: [4, 3, 3], delay: 150 },
+            { sprout: "crystal_small", matures: ["crystal_spire", "crystal"], weights: [6, 4], delay: 180 }
+        ]
+    };
+
+    function pickWeighted(items, weights, rng) {
+        let total = weights.reduce((a, b) => a + b, 0);
+        let roll = rng() * total;
+        for (let i = 0; i < items.length; i++) {
+            if (roll < weights[i]) return items[i];
+            roll -= weights[i];
+        }
+        return items[0];
+    }
+
+    function stepBeat(opts) {
+        const W = World(), O = Objects(), st = state(), o = opts || {};
+        if (!enabled && !o.force || !W || !W.state || !O) return { spawned: 0, matured: 0 };
+        st.beatCount++;
+        const currentBeat = st.beatCount;
+        const result = { spawned: 0, matured: 0 };
+
+        // 1. Process maturation of existing sprouts
+        for (let i = st.sprouts.length - 1; i >= 0; i--) {
+            const s = st.sprouts[i];
+            if (currentBeat >= s.matureBeat) {
+                const levelArea = { x: s.area.x, y: s.area.y, z: s.z };
+                const cur = O.atIn(levelArea, s.x, s.y);
+                if (cur && cur.id === s.sproutType) {
+                    if (!standerAt(levelArea, s.x, s.y)) {
+                        O.setIn(levelArea, s.x, s.y, s.matureType);
+                        st.stats.matured++;
+                        result.matured++;
+                        emit("ecology:resourceMatured", levelArea, s.x, s.y, s.matureType);
+                    } else {
+                        s.matureBeat += 5;
+                        continue;
+                    }
+                }
+                st.sprouts.splice(i, 1);
+            }
+        }
+
+        // 2. Spawn new sprouts across axes 0, -1, -2
+        const Levels = window.UF && UF.Levels;
+        const JobsPlugin = window.UF && UF.Jobs;
+        const H = History();
+        const allSites = H && typeof H.sites === "function" ? H.sites() : [];
+        const baseArea = (W.currentArea && W.currentArea()) || { x: 0, y: 0 };
+
+        for (const z of [0, -1, -2]) {
+            const activeOnLevel = st.sprouts.filter(s => s.z === z).length;
+            if (activeOnLevel >= SPROUT_CAP_PER_LEVEL) continue;
+
+            const rng = mulberry32(hash32(W.state.seed, 0x5b3a7, baseArea.x, baseArea.y, z, currentBeat));
+            const defs = SPROUT_DEFS[z] || SPROUT_DEFS[0];
+            const def = defs[Math.floor(rng() * defs.length)];
+            const matureType = pickWeighted(def.matures, def.weights, rng);
+
+            // Find sites on this level
+            const levelSites = allSites.filter(s => !s.ruined && (s.z === z || (!s.z && z === 0)));
+            const levelArea = { x: baseArea.x, y: baseArea.y, z };
+
+            let placed = false;
+            for (let attempt = 0; attempt < 8; attempt++) {
+                let tx, ty;
+                if (levelSites.length > 0 && rng() < 0.65) {
+                    // Cluster near a colony/site (12 - 28 cells away)
+                    const s = levelSites[Math.floor(rng() * levelSites.length)];
+                    const ang = rng() * Math.PI * 2;
+                    const dist = 12 + Math.floor(rng() * 16);
+                    tx = Math.round(s.x + Math.cos(ang) * dist);
+                    ty = Math.round(s.y + Math.sin(ang) * dist);
+                } else {
+                    tx = 5 + Math.floor(rng() * (W.state.size - 10));
+                    ty = 5 + Math.floor(rng() * (W.state.size - 10));
+                }
+
+                if (tx < 2 || ty < 2 || tx >= W.state.size - 2 || ty >= W.state.size - 2) continue;
+                if (JobsPlugin && JobsPlugin.isWaterAt && JobsPlugin.isWaterAt(levelArea, tx, ty)) continue;
+                if (Levels && Levels.waterAt && Levels.waterAt({ area: levelArea, x: tx, y: ty, z })) continue;
+
+                // Passability and shape check
+                if (z === 0) {
+                    if (!W.walkable(baseArea.x, baseArea.y, tx, ty, { z: 0, ground: true })) continue;
+                } else {
+                    if (!Levels || typeof Levels.shapeAt !== "function") continue;
+                    const sh = Levels.shapeAt({ area: levelArea, x: tx, y: ty, z });
+                    if (sh !== "floor" && sh !== 0) continue; // Must be open cavern floor, not solid cave rock
+                }
+
+                // Cell must be clear of objects and standing units
+                if (O.atIn(levelArea, tx, ty)) continue;
+                if (standerAt(levelArea, tx, ty)) continue;
+
+                // Success! Place the sprout
+                if (O.setIn(levelArea, tx, ty, def.sprout)) {
+                    st.sprouts.push({
+                        id: `sprout_${st.nextSproutId++}`,
+                        area: copyArea(baseArea),
+                        x: tx,
+                        y: ty,
+                        z,
+                        sproutType: def.sprout,
+                        matureType,
+                        createdBeat: currentBeat,
+                        matureBeat: currentBeat + def.delay
+                    });
+                    st.stats.sprouts++;
+                    result.spawned++;
+                    emit("ecology:sproutAppeared", levelArea, tx, ty, def.sprout, matureType);
+                    placed = true;
+                    break;
+                }
+            }
+        }
         return result;
     }
 
@@ -752,6 +905,9 @@
         }),
         state,
         resources: () => (state() ? state().resources : []),
+        sprouts: () => (state() ? state().sprouts : []),
+        stepBeat,
+        sproutDefs: () => SPROUT_DEFS,
         scheduleResource,
         cancelResource,
         processResources,
@@ -780,6 +936,19 @@
     window.UF.Ecology = Ecology;
 
     hookEvents();
+
+    let _beatFrame = 0;
+    const _Game_Map_update_ecology = Game_Map.prototype.update;
+    Game_Map.prototype.update = function(sceneActive) {
+        _Game_Map_update_ecology.call(this, sceneActive);
+        if (sceneActive && window.UF && UF.World && UF.World.isWorldMap && UF.World.isWorldMap(this.mapId())) {
+            _beatFrame++;
+            if (_beatFrame >= 60) {
+                _beatFrame = 0;
+                stepBeat();
+            }
+        }
+    };
 
     const _DataManager_extractSaveContents = DataManager.extractSaveContents;
     DataManager.extractSaveContents = function(contents) {
@@ -956,6 +1125,37 @@
             const driverBounded = quietHour.areas.length === 0 && ecologyHour.areas.length >= 1 && ecologyHour.areas.length <= 2;
             check("bounded_work", cappedRuns === 100 && elapsed <= 20 && driverBounded,
                 `100 capped attempts in ${elapsed.toFixed(3)} ms (budget 20 ms); current prey/monsters ${p0.prey}/${p0.monsters}; hour 305/306 processed ${quietHour.areas.length}/${ecologyHour.areas.length} area(s)`);
+
+            // 10. beat_sprouting: resources sprout across axes 0, -1, -2 each beat
+            enabled = true;
+            const sproutsBefore = E.sprouts().length;
+            let totalSpawned = 0;
+            for (let b = 0; b < 5; b++) {
+                const stepRes = E.stepBeat({ force: true });
+                totalSpawned += stepRes.spawned;
+            }
+            const sproutsAfter = E.sprouts();
+            const zSet = new Set(sproutsAfter.map(s => s.z));
+            const hasSprouts = sproutsAfter.length > sproutsBefore && totalSpawned > 0;
+            check("beat_sprouting", hasSprouts && zSet.size > 0,
+                `5 beats spawned ${totalSpawned} sprouts (total ${sproutsAfter.length} active); levels represented: ${Array.from(zSet).join(", ")}`);
+
+            // 11. maturation_cycle: sprouts mature into full resources after delay
+            let maturedSprout = null;
+            if (sproutsAfter.length > 0) {
+                const targetSprout = sproutsAfter[0];
+                const st = E.state();
+                st.beatCount = targetSprout.matureBeat;
+                const matRes = E.stepBeat({ force: true });
+                const levelArea = { x: targetSprout.area.x, y: targetSprout.area.y, z: targetSprout.z };
+                const objAfter = O.atIn(levelArea, targetSprout.x, targetSprout.y);
+                maturedSprout = objAfter && objAfter.id === targetSprout.matureType;
+                check("maturation_cycle", !!maturedSprout && matRes.matured > 0,
+                    `sprout ${targetSprout.sproutType} at (${targetSprout.x},${targetSprout.y},z=${targetSprout.z}) matured into ${targetSprout.matureType}: ${!!maturedSprout}`);
+                O.setIn(levelArea, targetSprout.x, targetSprout.y, null);
+            } else {
+                check("maturation_cycle", false, "no active sprouts to mature");
+            }
 
             for (const id of made) if (W.unit(id)) W.removeUnit(id);
             O.setIn(area, treeCell.x, treeCell.y, null);

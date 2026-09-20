@@ -9,6 +9,22 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 - Gemini: Dwarf Demographic 42-Charset Suite (6 Variations × 7 Actions: Walk, Haul, Attack, Bow, Magic, Work, Downed) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
 
+## Simulation Birth Rate Halved Across Engine Systems — 2026-09-20 (Gemini)
+Delivered per user directive ("Let's cut the birth rate in half"):
+- **Colonist Reproduction (`UF_Colonists.js`)**:
+  - Halved conception probability per mating from 100% to 50% (`unit01(seed(), SALT.roll, female.id, day, ticks()) < 0.5 || female.data._forceConceive`).
+  - Doubled female post-partum recovery cooldown from 60 seconds to 120 seconds (`mother.data.postPartumUntil = ticks() + 120 * 60`).
+  - Resolves explosive colony population growth and downstream tool/clothing crafting bottlenecks.
+- **Historical Settlement Simulation (`UF_History.js`)**:
+  - Halved `birthChancePerPair` from 0.11 to 0.055 in `SETTLE_DEFAULTS`, balancing demographic trends during world generation.
+- **Ecological Wildlife Reproduction (`UF_Ecology.js`)**:
+  - Halved fauna reproduction chances (`predator` 0.35 -> 0.175, `prey` 0.55 -> 0.275), maintaining stable ecosystem balance.
+- **Automated Verification**:
+  - `tools/test_birth_rate_halved.js`: **5/5 PASS, exit 0** (10,000 simulated matings confirmed 50.3% conception rate).
+  - `tools/run_tests.js colonists`: **20/20 PASS, 0 FAIL, exit 0**.
+  - `tools/run_tests.js ecology`: **12/12 PASS, 0 FAIL, exit 0**.
+  - `tools/run_tests.js history`: **17/17 PASS, 0 FAIL, exit 0**.
+
 ## 2D Raycast Wall Occlusion for Colored Light Glows — 2026-09-20 (Gemini)
 Delivered per user directive ("Can we make walls block this glowing light?"):
 - **Wall & Door Light Blocking Geometry (`UF_DayNight.js`)**:

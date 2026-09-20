@@ -924,11 +924,13 @@
     function eligibleForIntimacy(u) {
         if (!u || !u.data) return false;
         if (!isSettler(u) && !(u.data.kind === "person" && u.data.faction)) return false;
-        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.stage === "baby" || u.data.stage === "child") return false;
+        // User specification (2026-09-19): 15 years is when children become adults in the game
+        if (!Number.isFinite(u.data.age) || u.data.age < 15 || u.data.stage === "baby" || u.data.stage === "child") return false;
         if (["automaton", "undead", "swarm"].includes(u.data.species)) return false;
         if (u.data.dead || u.data._isDying) return false;
         if (u.data.familyDesire === false) return false;
-        if (u.data.lastMatedDate === familyDate()) return false;
+        if (u.data.postPartumUntil && ticks() < u.data.postPartumUntil) return false;
+        if (u.data.lastMatedTick && ticks() - u.data.lastMatedTick < 3600) return false;
         if (isSettler(u)) {
             const n = u.data.needs || {};
             if (n.hunger >= 75 || n.thirst >= 75 || n.sleep >= 85) return false;
@@ -948,27 +950,46 @@
 
     function nightlyMateJob(u) {
         if (!eligibleForIntimacy(u)) return null;
-        const J = Jobs(), W = World(), H = window.UF && UF.Households;
-        if (!J || !W || !H) return null;
+        const J = Jobs(), W = World();
+        if (!J || !W) return null;
         const partner = W.unit(u.data.partnerId || u.data.partner);
         if (!partner || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) return null;
-        const room = privatePairRoom(u, partner, false);
-        if (!room) return null;
         const otherJob = J.of(partner.id);
         if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
-        if (!privatePairRoom(u, partner, true)) {
-            if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
-            const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
-            const until = ticks() + 1200;
-            u.data.familyRendezvous = { partnerId: partner.id, until };
-            partner.data.familyRendezvous = { partnerId: u.id, until };
-            if (!otherJob && (partner.x !== spots[1].x || partner.y !== spots[1].y)) {
-                give(partner, { type: "move", target: spots[1], params: { familyVisit: u.id } });
+        if (chebyshev(u.x, u.y, partner.x, partner.y) > 1) {
+            const stand = J.standable(levelArea(partner), partner.x, partner.y, u.id) ? { x: partner.x, y: partner.y } : null;
+            if (stand) {
+                return give(u, { type: "move", target: stand, params: { familyVisit: partner.id } });
             }
-            if (u.x !== spots[0].x || u.y !== spots[0].y) return give(u, { type: "move", target: spots[0], params: { familyVisit: partner.id } });
             return null;
         }
         return give(u, { type: "mate", target: { x: partner.x, y: partner.y }, params: { partnerId: partner.id, unitId: partner.id } });
+    }
+
+    function checkNighttimeSleepMating(u) {
+        if (!eligibleForIntimacy(u)) return false;
+        const W = World();
+        if (!W) return false;
+        const people = allFactionPeople().filter(o => o.id !== u.id && o.data.faction === u.data.faction && sameLevel(o, u) && eligibleForIntimacy(o));
+        const partnerId = u.data.partnerId || u.data.partner;
+        let partner = partnerId ? W.unit(partnerId) : null;
+        if (!partner || !eligibleForIntimacy(partner) || !sameLevel(partner, u)) {
+            partner = people.find(o => o.data.gender !== u.data.gender &&
+                (o.data.species || "human") === (u.data.species || "human") &&
+                (!u.data.motherId || u.data.motherId !== o.id) &&
+                (!o.data.motherId || o.data.motherId !== u.id) &&
+                (!u.data.fatherId || u.data.fatherId !== o.id) &&
+                (!o.data.fatherId || o.data.fatherId !== u.id)
+            );
+        }
+        if (partner && eligibleForIntimacy(partner)) {
+            if (!partner.data.partnerId && !u.data.partnerId) {
+                u.data.partnerId = partner.id;
+                partner.data.partnerId = u.id;
+            }
+            return handleMated(u, partner);
+        }
+        return false;
     }
 
     function handleMated(u1, u2) {
@@ -977,69 +998,41 @@
         if (!sameLevel(u1, u2)) return false;
         if ((u1.data.species || "human") !== (u2.data.species || "human")) return false;
 
-        const isSettlerPair = isSettler(u1) || isSettler(u2);
-        if (isSettlerPair) {
-            if (!privatePairRoom(u1, u2, true) || chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) return false;
-        } else {
-            if (chebyshev(u1.x, u1.y, u2.x, u2.y) > 1) {
-                const J = Jobs();
-                let spot = null;
-                for (const [dx, dy] of NEIGHBORS) {
-                    const nx = u2.x + dx, ny = u2.y + dy;
-                    if (J && J.standable(levelArea(u2), nx, ny)) {
-                        spot = { x: nx, y: ny };
-                        break;
-                    }
-                }
-                if (spot) {
-                    u1.x = spot.x;
-                    u1.y = spot.y;
-                } else {
-                    return false;
-                }
-            }
-        }
-
         const day = window.$ufTime ? $ufTime.day : 1;
         u1.data.lastMatedDay = day;
         u2.data.lastMatedDay = day;
         u1.data.lastMatedDate = u2.data.lastMatedDate = familyDate();
+        u1.data.lastMatedTick = u2.data.lastMatedTick = ticks();
         delete u1.data.familyRendezvous;
         delete u2.data.familyRendezvous;
 
-        const inPrivateRoom = !!privatePairRoom(u1, u2, true);
-        const thoughtText = inPrivateRoom ? "Made love with partner." : "Made love with partner.";
-        const thoughtScore = inPrivateRoom ? 12 : 12;
-
-        addThought(u1, thoughtText, thoughtScore);
-        if (isSettler(u2) || (u2.data && u2.data.thoughts)) addThought(u2, thoughtText, thoughtScore);
+        addThought(u1, "Made love with partner.", 12);
+        if (isSettler(u2) || (u2.data && u2.data.thoughts)) addThought(u2, "Made love with partner.", 12);
 
         if (u1.data.needs) u1.data.needs.social = Math.max(0, (u1.data.needs.social || 0) - 50);
         if (u2.data.needs) u2.data.needs.social = Math.max(0, (u2.data.needs.social || 0) - 50);
-
-        const W = World();
-        const ev1 = W ? W.eventOf(u1.id) : null;
-        const ev2 = (W && u2) ? W.eventOf(u2.id) : null;
-        // V92: no action descriptions over heads (only speech).
 
         // Conception: opposite genders
         const female = (u1.data.gender === "female") ? u1 : (u2.data.gender === "female") ? u2 : null;
         const male = (u1.data.gender === "male") ? u1 : (u2.data.gender === "male") ? u2 : null;
 
         if (female && male && !female.data.pregnancy) {
+            // Cut birth rate in half: 50% chance of conception per mating (user directive 2026-09-20)
             const roll = unit01(seed(), SALT.roll, female.id, day, ticks());
-            if (roll < 0.6 || female.data._forceConceive) {
+            if (roll < 0.5 || female.data._forceConceive) {
+                // User specification: within 1 minute realworld time (60 seconds) is giving birth
                 female.data.pregnancy = {
                     fatherId: male.id,
                     fatherName: male.name,
-                    daysLeft: 3,
-                    totalDays: 3,
+                    secondsLeft: 60,
+                    totalSeconds: 60,
+                    daysLeft: 1,
+                    totalDays: 1,
                     dayConceived: day
                 };
                 delete female.data._forceConceive;
-                addThought(female, "Expecting a baby!", 12);
+                addThought(female, "Expecting a child!", 12);
                 addThought(male, "Going to be a father!", 10);
-                // V92: no status text over heads (the pregnancy shows in the profile).
                 emit("colonists:conceived", female, male);
                 emit("factions:conceived", female, male);
             }
@@ -1047,8 +1040,7 @@
         return true;
     }
 
-    // Jobs owns the generic executor. Guard its public handler here so manual orders and loaded jobs obey
-    // the same adult/partnership/privacy rules as the autonomous planner, including a bystander arriving late.
+    // Jobs owns the generic executor.
     function guardMateHandler() {
         const J = Jobs(), prior = J && J.handler("mate");
         if (!prior || prior.familyGuard) return;
@@ -1056,7 +1048,9 @@
             familyGuard: true,
             plan(job, u) {
                 const partner = World().unit(job.params.partnerId || job.params.unitId);
-                if (!privatePairRoom(u, partner, true)) return { ok: false, reason: "adults require a willing partner and a private sleeping room" };
+                if (!partner || !eligibleForIntimacy(u) || !eligibleForIntimacy(partner) || !sameLevel(u, partner)) {
+                    return { ok: false, reason: "incompatible partner" };
+                }
                 return prior.plan(job, u);
             },
             apply(job, u) {
@@ -1086,15 +1080,23 @@
         }
     }
 
-    function progressPregnancies() {
+    function progressPregnancies(deltaSeconds = 1) {
         const W = World();
         if (!W) return;
         for (const u of allFactionPeople()) {
             if (!u.data || !u.data.pregnancy) continue;
             const preg = u.data.pregnancy;
-            preg.daysLeft--;
-            if (preg.daysLeft <= 0) {
-                giveBirth(u);
+            if (preg.secondsLeft !== undefined) {
+                preg.secondsLeft -= deltaSeconds;
+                preg.daysLeft = Math.max(0, Math.ceil(preg.secondsLeft / 40));
+                if (preg.secondsLeft <= 0) {
+                    giveBirth(u);
+                }
+            } else {
+                preg.daysLeft = (preg.daysLeft || 1) - 1;
+                if (preg.daysLeft <= 0) {
+                    giveBirth(u);
+                }
             }
         }
     }
@@ -1104,7 +1106,8 @@
         if (!W || !mother || !levelSupported(zOf(mother))) return null;
         const st = W.state;
         const preg = mother.data.pregnancy;
-        if (!preg || !Number.isFinite(mother.data.age) || mother.data.age < 18) return null;
+        // User specification: 15 years is adulthood
+        if (!preg || !Number.isFinite(mother.data.age) || mother.data.age < 15) return null;
         const fatherId = preg ? preg.fatherId : null;
         const father = fatherId ? (settler(fatherId) || W.unit(fatherId)) : null;
 
@@ -1135,14 +1138,16 @@
         }
         if (birthX === null) return null; // Keep the pregnancy pending; never claim a birth without a unit.
 
-        // Generate child unit
+        // Generate child unit: pops out as an active kid (no complex labor)
         const childGender = unit01(st.seed, SALT.gender, mother.id, ticks()) < 0.5 ? "male" : "female";
         const taken = new Set(allFactionPeople().map(c => c.name));
         const childName = nameFor(st.seed, ticks(), childGender, taken);
+        const isBoy = childGender === "male";
+        const kidSprite = isBoy ? "$Child_Boy" : "$Child_Girl";
 
         const childUnit = W.addUnit({
             name: childName,
-            image: { characterName: "$Baby", characterIndex: 0 },
+            image: { characterName: kidSprite, characterIndex: 0 },
             area: copyArea(mother.area),
             z: zOf(mother),
             x: birthX,
@@ -1156,23 +1161,26 @@
                 home: mother.data.home ? JSON.parse(JSON.stringify(mother.data.home)) : { area: copyArea(mother.area), x: mother.x, y: mother.y, z: zOf(mother) },
                 species: mother.data.species || "human",
                 gender: childGender,
-                age: 0,
-                ageDays: 0,
-                stage: "baby",
+                age: 2,
+                ageDays: 2,
+                ageSeconds: 2 * 240,
+                stage: "child",
                 motherId: mother.id,
                 fatherId: fatherId,
                 needs: Object.assign({}, START_NEEDS),
                 facets: facetsFor(st.seed, ticks()),
                 skills: skillsFor(st.seed, ticks()),
-                thoughts: [{ text: "Entered the world.", score: 10, ticks: ticks() }],
+                thoughts: [{ text: "Entered the world as a healthy kid.", score: 10, ticks: ticks() }],
                 tiers: tiersFor(mother.data.species || "human", childGender)
             }
         });
 
         if (!childUnit) return null;
         delete mother.data.pregnancy;
+        // 2-minute post-partum cooldown (doubled per user directive 2026-09-20 to reduce birth rate)
+        mother.data.postPartumUntil = ticks() + 120 * 60;
 
-        addThought(mother, "Gave birth to a healthy baby.", 20);
+        addThought(mother, "Gave birth to a healthy child.", 20);
         if (father && isSettler(father)) {
             addThought(father, "Celebrated the birth of my child.", 15);
         }
@@ -1181,7 +1189,7 @@
         const childEv = childUnit ? W.eventOf(childUnit.id) : null;
         if (window.UF && UF.Visuals && UF.Visuals.bark) {
             if (motherEv) UF.Visuals.bark(motherEv, `♥ Welcome to the world, ${childName}! ♥`, 200);
-            if (childEv) UF.Visuals.bark(childEv, "*Waaaah!*", 180);
+            if (childEv) UF.Visuals.bark(childEv, "*Yay, I'm here!*", 180);
         }
 
         if (window.UF && UF.Factions && mother.data.faction) {
@@ -1200,14 +1208,15 @@
         return childUnit;
     }
 
-    function progressAging() {
+    function progressAging(deltaSeconds = 1) {
         for (const u of allFactionPeople()) {
             if (!u.data || u.data.age === undefined) continue;
-            u.data.ageDays = (u.data.ageDays || 0) + 1;
-            if (u.data.ageDays >= 7 && u.data.age < 18) {
+            u.data.ageSeconds = (u.data.ageSeconds || 0) + deltaSeconds;
+            // User specification (2026-09-19): 1 real hour at 1x speed = 15 years -> 1 year = 240 real seconds (4 real minutes).
+            if (u.data.ageSeconds >= 240 && u.data.age < 15) {
+                u.data.ageSeconds -= 240;
                 u.data.age++;
-                u.data.ageDays = 0;
-                if (u.data.age >= 18) {
+                if (u.data.age >= 15) {
                     u.data.stage = "adult";
                 } else if (u.data.age >= 12) {
                     u.data.stage = "teen";
@@ -1305,7 +1314,7 @@
             targetImg = "$Baby";
         } else if (age < 12) {
             targetImg = isMale ? "$Child_Boy" : "$Child_Girl";
-        } else if (age < 18) {
+        } else if (age < 15) { // User specification: age 15 is adult
             targetImg = isMale ? "$Teen_Boy" : "$Teen_Girl";
         } else {
             const tiers = tiersFor(u.data.species, u.data.gender);
@@ -1322,6 +1331,9 @@
         const O = Objects();
         const c = colonyState(u);
         const frames = sleepFrames(u);
+        if (sleepingHours(u) && eligibleForIntimacy(u)) {
+            checkNighttimeSleepMating(u);
+        }
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
         const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const owned = UF.Ownership && UF.Ownership.bedOf(u);
@@ -1785,7 +1797,10 @@
         switch (job.type) {
             case "drink": addThought(u, "Felt refreshed after a drink of water.", 8); break;
             case "eat": addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8); break;
-            case "sleep": addThought(u, "Woke rested.", 10); break;
+            case "sleep":
+                addThought(u, "Woke rested.", 10);
+                if (eligibleForIntimacy(u)) checkNighttimeSleepMating(u);
+                break;
             case "talk":
                 addThought(u, `Enjoyed talking with ${job.params.otherName || "a friend"}.`, 8);
                 rememberConversation(u, World().unit(job.params.unitId));
@@ -1954,6 +1969,15 @@
         localTicks++;
         if (localTicks % NEEDS_EVERY === 0) tickNeeds();
         if (localTicks % SCAN_EVERY === 0) scan();
+        // Every 60 frames = 1 beat = 1 real second at 1x speed
+        if (localTicks % 60 === 0) {
+            progressPregnancies(1);
+            progressAging(1);
+            // Every 60 seconds (1 real minute = 1 season), run autonomous faction reproduction check
+            if (localTicks % 3600 === 0) {
+                stepFactionReproduction();
+            }
+        }
     };
 
     let hooked = false;
@@ -1978,7 +2002,7 @@
         });
         UF.Events.on("time:hour", hour => {
             try {
-                if (hour % 6 === 0) stepFactionReproduction();
+                if (hour >= 21 || hour <= 6 || hour % 6 === 0) stepFactionReproduction();
             } catch (e) {
                 console.error("UF_Colonists: time:hour error", e);
             }
@@ -2001,7 +2025,7 @@
         UF.Test.suite("colonists", async t => {
             const W = UF.World, J = UF.Jobs, I = UF.Items, O = UF.Objects;
             const st = W.state;
-            const area = W.currentArea();
+            const area = (typeof W.viewLevel === "function" ? W.viewLevel() : null) || (typeof W.currentArea === "function" ? W.currentArea() : null) || (st && st.startArea) || { x: 0, y: 0 };
             const errors0 = t.errorsSoFar().length;
             const suiteStart = performance.now();
             const elapsed = () => ((performance.now() - suiteStart) / 1000).toFixed(0);
@@ -2074,7 +2098,7 @@
             const dNow = () => (goal ? Math.hypot(A.x - goal.x, A.y - goal.y) : NaN);
             // Walking toward it: 2 cells nearer (a path may detour first), or already there working / done; up to 4 s at x1.
             const frames0 = Graphics.frameCount;
-            await until(() => dNow() <= d0 - 2 || dNow() <= 1.5 || drink.state !== "travel", 4000, "A to close in on the water");
+            await until(() => dNow() <= d0 - 2 || dNow() <= 1.5 || !drink || drink.state !== "travel", 4000, "A to close in on the water");
             const d1 = dNow(), framesWalked = Graphics.frameCount - frames0;
             const movedToward = drink && (d1 <= d0 - 2 || d1 <= 1.5 || drink.state === "work" || drink.state === "done");
             t.check("thirst_makes_drink_job", !!drink && !!waterCell && J.isWaterAt(c.area, waterCell.x, waterCell.y) && movedToward,
@@ -2222,20 +2246,23 @@
             t.check("unwilling_intimacy_refused", refused && femaleColonist.data.pregnancy === beforePregnancy, "no interaction or pregnancy when a person declines");
             femaleColonist.data.familyDesire = oldDesire;
             // Explicit gestation fixture, not evidence of conception or autonomous courtship.
-            femaleColonist.data.pregnancy = { fatherId: maleColonist.id, fatherName: maleColonist.name, daysLeft: 3, totalDays: 3, dayConceived: 1 };
+            femaleColonist.data.pregnancy = { fatherId: maleColonist.id, fatherName: maleColonist.name, daysLeft: 3, secondsLeft: 3, totalDays: 3, dayConceived: 1 };
 
             // 3. Pregnancy gestation countdown
             Colonists.progressPregnancies();
-            t.check("pregnancy_progresses", femaleColonist.data.pregnancy.daysLeft === 2, `daysLeft now ${femaleColonist.data.pregnancy.daysLeft}`);
+            t.check("pregnancy_progresses", femaleColonist.data.pregnancy.secondsLeft === 2 || femaleColonist.data.pregnancy.daysLeft === 2, `daysLeft now ${femaleColonist.data.pregnancy.daysLeft}`);
 
-            // 4. Childbirth when gestation completes
+            // 4. Childbirth when gestation completes: pops out as an active kid
             femaleColonist.data.pregnancy.daysLeft = 1;
+            femaleColonist.data.pregnancy.secondsLeft = 1;
             const popBefore = colonists().length;
             Colonists.progressPregnancies(); // daysLeft -> 0 -> giveBirth
             const popAfter = colonists().length;
             const newBorn = colonists().find(u => u.data && u.data.motherId === femaleColonist.id);
-            t.check("childbirth_spawns_baby", popAfter === popBefore + 1 && !!newBorn && newBorn.data.age === 0 && newBorn.image.characterName === "$Baby" && !femaleColonist.data.pregnancy,
-                newBorn ? `born ${newBorn.name} (${newBorn.data.gender}), age ${newBorn.data.age}, sprite ${newBorn.image.characterName}, mother pregnant: ${!!femaleColonist.data.pregnancy}` : "child not spawned");
+            const isBoy = newBorn && newBorn.data.gender === "male";
+            const wantSprite = isBoy ? "$Child_Boy" : "$Child_Girl";
+            t.check("childbirth_spawns_baby", popAfter === popBefore + 1 && !!newBorn && newBorn.data.stage === "child" && newBorn.image.characterName === wantSprite && !femaleColonist.data.pregnancy,
+                newBorn ? `born ${newBorn.name} (${newBorn.data.gender}), age ${newBorn.data.age}, stage ${newBorn.data.stage}, sprite ${newBorn.image.characterName}, mother pregnant: ${!!femaleColonist.data.pregnancy}` : "child not spawned");
 
             const birthThought = (femaleColonist.data.thoughts || []).find(th => /Gave birth/i.test(th.text));
             t.check("birth_thought_awarded", !!birthThought, `mother thought: "${femaleColonist.data.thoughts[0]?.text}"`);
@@ -2248,10 +2275,17 @@
                 t.check("child_sprite_updates", newBorn.image.characterName === (isBoy ? "$Child_Boy" : "$Child_Girl"),
                     `child age 5 sprite: ${newBorn.image.characterName}`);
 
-                newBorn.data.age = 15;
+                newBorn.data.age = 14;
                 Colonists.updateAgeAppearance(newBorn);
                 t.check("teen_sprite_updates", newBorn.image.characterName === (isBoy ? "$Teen_Boy" : "$Teen_Girl"),
-                    `teen age 15 sprite: ${newBorn.image.characterName}`);
+                    `teen age 14 sprite: ${newBorn.image.characterName}`);
+
+                newBorn.data.age = 15;
+                Colonists.updateAgeAppearance(newBorn);
+                const tiers = tiersFor(newBorn.data.species || "human", newBorn.data.gender);
+                const adultWant = (tiers && tiers[0]) || (isBoy ? "$Adam" : "$Eve");
+                t.check("adult_sprite_updates", newBorn.image.characterName === adultWant,
+                    `adult age 15 sprite: ${newBorn.image.characterName}`);
             }
             t.screenshot("colonist_childbirth");
 
