@@ -3005,9 +3005,8 @@
         stepImmigration,
         allFactionPeople,
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
-        nightlyMateJob,
-        // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
+        _internal: { advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;

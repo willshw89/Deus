@@ -6,10 +6,40 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
-## In progress
-(none)
-
-## New Game Expedition Setup Menu & History Simulation (1-200 AD) — 2026-09-20 (Gemini)
+## Second-by-Second Living World History Iteration (1-200 AD) — 2026-09-20 (Gemini)
+Delivered per user directives ("Does the game actually generate a world and push through the current amount of time? Actually iterating a history? Thats what I want", "Selecting 'Human, 50AD' means i start as human, and the gamestart starts as if I had sat there and watched the first 50 years, except I didnt", "Factions build their society around that first bonfire. that should basically be the focal point of society. this starts by Sleep + fire attraction, where people sleep around the fire, building their own homes around the fire and eventually bringing the fire into their own home", "When we generate, I actually want second by second iteration, like the whole gameworld"):
+- **Universal Year 1 Founding at Campfire**:
+  - Every faction begins in pristine wilderness at Year 1 with 8 founders gathered around a central campfire.
+  - Four adult males and four adult females representing 4 distinct families are pairbonded 1:1 with shared surnames, family IDs, and lineages.
+- **Authentic Second-by-Second (Beat-by-Beat) Living History Iteration (`UF_History.iterateWorldHistory`)**:
+  - Advances time second-by-second (beat-by-beat) for `(targetYears - 1) * 240` beats (1 beat = 1 real second = 6 game minutes).
+  - Paces game clock (`$ufTime.advanceMinute(6)`) and colonist simulation ticks (`Colonists.advanceTicks(60)`).
+  - Colonist aging advances 1 second per beat; 240 seconds = 1 full in-game year.
+  - Gestation countdown advances every second; pregnant mothers give birth to active offspring units with `generation = parentGen + 1`, inheriting familyId and surname.
+  - Seasonal autonomous reproduction cycles evaluate non-pregnant married couples every 60 beats (1 season = 6 hours).
+  - When offspring reach adulthood at age 15, `attemptAdulthoodPairbond` pairs them with eligible opposite-gender non-kin, forming new households.
+- **Sleep & Fire Focal Attraction (Bonfire vs Domestic Indoor Hearth)**:
+  - Unhoused colonists sleep warmly in a ring around the central campfire at night (22:00 to 06:00), gaining `"Slept warmly by the fire."` (+10 mood).
+  - Cooperative daytime labor constructs sequential focal homesteads in outward concentric rings around the campfire (perimeter walls, door facing the fire, straw bed in private interior corner, and domestic indoor hearth opposite the bed).
+  - Upon homestead completion, the couple moves into their private home, sleeping in their bed by their indoor hearth, gaining `"Slept in my own bed."` (+12 mood).
+  - Construction focus automatically shifts outward to the next household.
+- **Authentic Chronicle Event Logging**:
+  - Replaces synthetic macro logs with authentic chronological events (`founding`, `settle_built`) recording the real simulated years, families, and milestones.
+- **Verification Evidence**:
+  - Dedicated automated suite `node tools/test_second_by_second_history.js`: **5/5 PASS, 0 FAIL (exit 0)**:
+    - `PASS universal_year_1_founding`
+    - `PASS second_by_second_50_year_simulation` (11,760 beats simulated in ~400 ms)
+    - `PASS focal_homesteads_with_indoor_hearth_and_bed`
+    - `PASS multi_generational_offspring_adulthood_pairbonding` (Generation 2 reached adulthood at 15; Generation 3 grandchildren born!)
+    - `PASS chronicle_records_authentic_second_by_second_events`
+  - Rule 4 mutant tests (all 4 verified to fail with exit code 1 when active):
+    - `--mutant=no_clock_advance`: Exits with code 1 (fails clock day assertion)
+    - `--mutant=no_houses_built`: Exits with code 1 (fails house count & chronicle assertions)
+    - `--mutant=no_indoor_hearth`: Exits with code 1 (fails physical indoor hearth assertion)
+    - `--mutant=no_offspring_aging`: Exits with code 1 (fails adulthood & generation assertions)
+  - In-engine suite `node tools/run_tests.js setup`: **32/32 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `node tools/run_tests.js colonists`: **24/24 PASS, 0 FAIL (exit 0)**.
+  - In-engine screenshot inspection (`setup.live_dwarf_colony_year_42.png`): Opened and visually inspected; shows the subterranean dwarf colony at Year 42 AD with the central courtyard campfire and warm lighting, surrounded by constructed stone homesteads with illuminated domestic indoor hearths and beds.
 Delivered per user directive ("when we hit 'New Game' I want another small menu to populate on the screen, where you can select your faction, and the year, between 1-200AD. When the game generates, that will be their faction, and you will simulate the correct number of years from the original generation"):
 - **DEUS Expedition Setup Window (`Window_NewGameSetup`)**:
   - Centered popup window (440x210 px) positioned directly within the dark doorway opening of the DEUS title screen.

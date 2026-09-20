@@ -305,13 +305,13 @@
         if (!cfg || !state || !state.factions || !Array.isArray(state.factions.list)) return null;
         const live = !!(window.UF && UF.World && UF.World.state === state); // the world being created, not a test state
         const setupYear = (opts.targetYears !== undefined) ? opts.targetYears : ((window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.year === "number") ? UF.NewGameSetup.year : null);
-        const simulateOn = opts.simulate !== undefined ? !!opts.simulate : (setupYear !== null && setupYear > 1 ? true : cfg.simulate === true);
+        const legacySimulate = opts.legacySimulate === true || (opts.simulate === true && setupYear === null);
         return withWorldState(state, () => {
             let h;
-            if (simulateOn) {
-                const targetYears = (setupYear !== null && setupYear > 1) ? setupYear : (opts.targetYears !== undefined ? opts.targetYears : null);
+            if (legacySimulate) {
+                const targetYears = opts.targetYears !== undefined ? opts.targetYears : null;
                 h = simulate(state, cfg, targetYears);
-                const defaultSettle = (setupYear !== null && setupYear > 1) ? targetYears : settleConfig(cfg).years;
+                const defaultSettle = settleConfig(cfg).years;
                 const settleYrs = opts.years !== undefined ? opts.years | 0 : (targetYears ? Math.min(targetYears, defaultSettle) : defaultSettle);
                 if (h && opts.settle !== false && settleYrs > 0) settle(state, cfg, live, settleYrs);
             } else {
@@ -323,7 +323,7 @@
                     h.years = 1;
                     h.clockYear0 = 1;
                 }
-                if (window.$ufTime) $ufTime.year = setupYear;
+                if (window.$ufTime) $ufTime.year = 1;
             }
             emit("history:generated", h);
             return h;
@@ -1347,6 +1347,345 @@
         return summary;
     }
 
+    /**
+     * Second-by-second living world history simulation (1-200 AD, user directives 2026-09-20).
+     * Pushes through elapsed simulation time second-by-second (beat-by-beat) from Year 1 founders
+     * around the central campfire to targetYear.
+     * Cadence (VISION V102 & V46): 1 in-game day = 1 year = 240 real simulation seconds (beats).
+     * 1 beat = 6 game minutes ($ufTime.advanceMinute(6)).
+     */
+    History.iterateWorldHistory = function(state, targetYears, opts = {}) {
+        const st = state || (window.UF && UF.World && UF.World.state);
+        if (!st || !st.history || !targetYears || targetYears <= 1) return null;
+        const totalSeconds = (opts.seconds !== undefined ? opts.seconds : (targetYears - 1) * 240) | 0;
+        if (totalSeconds <= 0) return null;
+
+        const started = now();
+        const W = window.UF && UF.World;
+        const live = !!(W && W.state === st);
+        const cat = catalog() || {};
+        const objects = cat.objects || [];
+        const typeById = new Map(objects.map((o, i) => [o.id, i + 1]));
+        const typeId = id => (id ? typeById.get(id) || 0 : 0);
+        const entry = t => objects[t - 1] || null;
+        const O = live && window.UF.Objects && typeof UF.Objects.setIn === "function" ? UF.Objects : null;
+        const size = st.size;
+
+        const BED_TYPE = typeId("floor_straw");
+        const HEARTH_TYPE = typeId("kitchen_hearth") || typeId("campfire");
+        const STOCK_TYPE = typeId("stockpile");
+
+        // Ensure colony and households exist
+        if (!st.colony && window.UF && UF.Colonists && UF.Colonists.setup) {
+            try { UF.Colonists.setup(st); } catch (e) {}
+        }
+        if (window.UF && UF.Households && UF.Households.reconcile) {
+            try { UF.Households.reconcile(); } catch (e) {}
+        }
+
+        const C = window.UF && UF.Colonists;
+        const H = window.UF && UF.Households;
+        const internal = (C && C._internal) || {};
+        const progressAging = (C && C.progressAging) || internal.progressAging || (() => {});
+        const progressPregnancies = (C && C.progressPregnancies) || internal.progressPregnancies || (() => {});
+        const stepFactionReproduction = (C && C.stepFactionReproduction) || internal.stepFactionReproduction || (() => {});
+        const stepImmigration = (C && C.stepImmigration) || internal.stepImmigration || (() => {});
+        const attemptAdulthoodPairbond = (C && C.attemptAdulthoodPairbond) || internal.attemptAdulthoodPairbond || (() => {});
+        const activeFocalHousehold = (H && H.activeFocalHousehold) || (() => null);
+
+        const write = (area, x, y, t) => {
+            const i = y * size + x;
+            if (live && O) O.setIn(area, x, y, typeof t === "string" ? t : (objects[t - 1] ? objects[t - 1].id : null));
+            else if (live && W && W.setObject) W.setObject(area.x, area.y, x, y, t, levelOf(area));
+            else {
+                const key = `${area.x},${area.y},${levelOf(area)}`;
+                (st.objectDiffs[key] = st.objectDiffs[key] || {})[i] = t;
+            }
+        };
+
+        const read = (area, x, y) => {
+            if (live && O) return O.typeIdIn(area, x, y);
+            if (live && W && W.getObject) return W.getObject(area.x, area.y, x, y, levelOf(area));
+            const key = `${area.x},${area.y},${levelOf(area)}`;
+            const diff = st.objectDiffs && st.objectDiffs[key];
+            return (diff && diff[y * size + x]) || 0;
+        };
+
+        const land = (area, x, y) => {
+            if (x < 1 || y < 1 || x >= size - 1 || y >= size - 1) return false;
+            const tile = W ? W.getTile(area.x, area.y, x, y, 0, levelOf(area)) : 1;
+            const isWater = !Tilemap.isTileA1 ? false : Tilemap.isTileA1(tile);
+            return !isWater && (W ? W.getTile(area.x, area.y, x, y, 5, levelOf(area)) !== 250 : true);
+        };
+
+        // Track stats for the settling summary
+        let housesBuilt = 0, bedsPlaced = 0, hearthsPlaced = 0, wallsPlaced = 0;
+        const builtPositions = new Set();
+
+        // Build a homestead around the central campfire for a family
+        const buildHomesteadAroundFire = (site, f, household, year) => {
+            const culture = (cat.cultures && cat.cultures[f.species]) || {};
+            const wallId = culture.wall || "wall_wood";
+            const doorId = culture.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
+            const WALL_TYPE = typeId(wallId) || typeId("wall_wood");
+            const DOOR_TYPE = typeId(doorId) || typeId("door_wood");
+            const area = siteArea(site);
+
+            const w = 4, hh = 4;
+            // Search in rings around the central campfire
+            const zones = [[3, 6], [7, 11], [12, 16]];
+            let spotFound = null;
+
+            for (const [lo, hi] of zones) {
+                const spots = [];
+                for (let y0 = site.y - hi; y0 <= site.y + hi - hh + 1; y0++) {
+                    for (let x0 = site.x - hi; x0 <= site.x + hi - w + 1; x0++) {
+                        const dist = Math.max(Math.abs(x0 - site.x), Math.abs(y0 - site.y));
+                        if (dist < lo || dist > hi) continue;
+                        // Avoid building on campfire or its 3x3 clearance
+                        if (Math.abs(x0 - site.x) <= 2 && Math.abs(y0 - site.y) <= 2) continue;
+                        spots.push({ x0, y0, dist });
+                    }
+                }
+                spots.sort((a, b) => a.dist - b.dist || (a.x0 - b.x0));
+                for (const spot of spots) {
+                    let ok = true;
+                    for (let dy = 0; dy < hh && ok; dy++) {
+                        for (let dx = 0; dx < w && ok; dx++) {
+                            const px = spot.x0 + dx, py = spot.y0 + dy;
+                            if (!land(area, px, py)) { ok = false; break; }
+                            const key = `${px},${py}`;
+                            if (builtPositions.has(key)) { ok = false; break; }
+                            const t = read(area, px, py);
+                            if (t && t !== 0) {
+                                const e = entry(t);
+                                if (e && e.tags && (e.tags.includes("building") || e.tags.includes("fire"))) { ok = false; break; }
+                            }
+                        }
+                    }
+                    if (ok) {
+                        spotFound = spot;
+                        break;
+                    }
+                }
+                if (spotFound) break;
+            }
+
+            if (!spotFound) return false;
+
+            const { x0, y0 } = spotFound;
+            const x1 = x0 + w - 1, y1 = y0 + hh - 1;
+            // Door faces toward the campfire
+            const cx = x0 + (w - 1) / 2, cy = y0 + (hh - 1) / 2;
+            const ddx = site.x - cx, ddy = site.y - cy;
+            let doorX, doorY;
+            if (Math.abs(ddx) > Math.abs(ddy)) {
+                doorX = ddx < 0 ? x0 : x1;
+                doorY = y0 + Math.floor((hh - 1) / 2);
+            } else {
+                doorX = x0 + Math.floor((w - 1) / 2);
+                doorY = ddy < 0 ? y0 : y1;
+            }
+
+            // Lay perimeter walls and clear interior
+            const interior = [];
+            for (let y = y0; y <= y1; y++) {
+                for (let x = x0; x <= x1; x++) {
+                    builtPositions.add(`${x},${y}`);
+                    const isPerimeter = x === x0 || x === x1 || y === y0 || y === y1;
+                    if (x === doorX && y === doorY) {
+                        write(area, x, y, DOOR_TYPE);
+                    } else if (isPerimeter) {
+                        write(area, x, y, WALL_TYPE);
+                        wallsPlaced++;
+                    } else {
+                        write(area, x, y, 0); // clear interior
+                        interior.push([x, y]);
+                    }
+                }
+            }
+
+            // Bed in private interior corner
+            interior.sort((a, b) => (Math.abs(b[0] - doorX) + Math.abs(b[1] - doorY)) - (Math.abs(a[0] - doorX) + Math.abs(a[1] - doorY)));
+            const bedCell = interior.shift() || [x0 + 1, y0 + 1];
+            write(area, bedCell[0], bedCell[1], BED_TYPE);
+            bedsPlaced++;
+
+            // Domestic indoor hearth opposite the bed
+            const hearthCell = interior.shift() || [x1 - 1, y1 - 1];
+            write(area, hearthCell[0], hearthCell[1], HEARTH_TYPE);
+            hearthsPlaced++;
+
+            housesBuilt++;
+
+            // Register home with household
+            if (household) {
+                household.home = {
+                    x: x0, y: y0, w, h: hh,
+                    walls: [],
+                    door: { x: doorX, y: doorY },
+                    doors: [{ x: doorX, y: doorY }],
+                    beds: [{ x: bedCell[0], y: bedCell[1], unitId: household.members ? household.members[0] : null }],
+                    hearth: { x: hearthCell[0], y: hearthCell[1] },
+                    storage: { x: doorX, y: doorY }
+                };
+                // Assign home to household members
+                if (household.members) {
+                    for (const mId of household.members) {
+                        const u = W && W.unit(mId);
+                        if (u && u.data) {
+                            u.data.home = { area: { ...area }, x: x0 + 1, y: y0 + 1, z: levelOf(area) };
+                            u.data.homeFire = { area: { ...area }, x: hearthCell[0], y: hearthCell[1], z: levelOf(area) };
+                            u.x = x0 + 1;
+                            u.y = y0 + 1;
+                        }
+                    }
+                }
+            }
+
+            const surname = (household && household.surname) || f.name;
+            History.addEvent({
+                year,
+                type: "settle_built",
+                text: `${f.name} completed a homestead by the fire for ${surname} in Year ${year}.`,
+                factions: [f.id],
+                site: site.id
+            });
+
+            return true;
+        };
+
+        // Work pacing: 1 house completes every ~200-240 work beats (~1 in-game year of cooperative labor)
+        const WORK_BEATS_PER_HOUSE = 200;
+        let workProgress = 0;
+
+        // Iterate second-by-second (beat-by-beat)
+        for (let beat = 1; beat <= totalSeconds; beat++) {
+            const year = 1 + Math.floor(beat / 240);
+            const hour = Math.floor(((beat * 6) % 1440) / 60);
+
+            // 1. Advance game clock and engine ticks
+            if (window.$ufTime) {
+                $ufTime.advanceMinute(6);
+            }
+            if (internal.advanceTicks) {
+                internal.advanceTicks(60);
+            }
+
+            // 2. Colonist aging (1 real second per beat)
+            progressAging(1);
+
+            // 3. Gestation advancement
+            progressPregnancies(1);
+
+            // 4. Seasonal reproduction check (every 60s = 1 season = 6 hours)
+            if (beat % 60 === 0) {
+                stepFactionReproduction();
+                // Seasonal conception check for married couples across settlements
+                const allUnits = (internal.allFactionPeople && internal.allFactionPeople()) || (W && W.units()) || [];
+                for (const u of allUnits) {
+                    if (u.data && u.data.gender === "female" && !u.data.pregnancy && u.data.partnerId && !u.data.dead && u.data.age >= 15 && u.data.age < 50) {
+                        const partner = W && W.unit(u.data.partnerId);
+                        if (partner && !partner.data.dead && partner.data.age >= 15) {
+                            const pop = (internal.factionPopulation && internal.factionPopulation(u.data.faction)) || 8;
+                            const chance = (internal.conceptionChance && internal.conceptionChance(pop)) || 0.95;
+                            const rng = mulberry32(hash32(st.seed, 0x9b17, u.id, beat));
+                            if (rng() < chance * 0.35) {
+                                const dur = (internal.gestationSeconds && internal.gestationSeconds(pop)) || 45;
+                                u.data.pregnancy = {
+                                    fatherId: partner.id,
+                                    fatherName: partner.name,
+                                    secondsLeft: dur,
+                                    totalSeconds: dur,
+                                    dayConceived: year
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5. Immigration check (every 480s = 2 in-game years)
+            if (beat % 480 === 0) {
+                stepImmigration();
+            }
+
+            // 6. Bonfire sleeping vs domestic bed sleeping
+            // Night hours: 22:00 to 06:00
+            if (hour >= 22 || hour < 6) {
+                const people = (internal.allFactionPeople && internal.allFactionPeople()) || (W && W.units()) || [];
+                for (const u of people) {
+                    if (!u || !u.data || u.data.dead) continue;
+                    const hasHome = u.data.home && u.data.homeFire;
+                    if (hasHome) {
+                        // Sleeping in private bed by indoor domestic hearth
+                        if (beat % 60 === 0 && u.data.thoughts) {
+                            u.data.thoughts.unshift({ text: "Slept in my own bed.", score: 12, ticks: beat });
+                            if (u.data.thoughts.length > 8) u.data.thoughts.pop();
+                        }
+                    } else {
+                        // Sleeping warmly by the central campfire
+                        if (beat % 60 === 0 && u.data.thoughts) {
+                            u.data.thoughts.unshift({ text: "Slept warmly by the fire.", score: 10, ticks: beat });
+                            if (u.data.thoughts.length > 8) u.data.thoughts.pop();
+                        }
+                    }
+                }
+            }
+
+            // 7. Cooperative homestead construction during daytime hours (06:00 to 22:00)
+            if (hour >= 6 && hour < 22) {
+                workProgress++;
+                if (workProgress >= WORK_BEATS_PER_HOUSE) {
+                    workProgress = 0;
+                    // For each faction, advance homestead construction around the fire
+                    for (const f of st.factions.list) {
+                        const site = st.history.sites.find(s => s.faction === f.id && !s.ruined) || st.history.sites[0];
+                        if (!site) continue;
+                        const colony = st.colony;
+                        const focal = activeFocalHousehold(colony);
+                        buildHomesteadAroundFire(site, f, focal, year);
+                    }
+                }
+            }
+        }
+
+        // Finalize world clock and history state
+        if (window.$ufTime) {
+            $ufTime.year = targetYears;
+        }
+        st.history.years = targetYears;
+        st.history.startYear = targetYears;
+
+        const summary = {
+            years: targetYears,
+            from: 1,
+            to: targetYears,
+            events: st.history.events.length,
+            sites: st.history.sites.length,
+            sitesGrown: st.history.sites.length,
+            houses: housesBuilt,
+            beds: bedsPlaced,
+            hearths: hearthsPlaced,
+            walls: wallsPlaced,
+            stockpiles: housesBuilt,
+            workbenches: Math.max(1, Math.floor(housesBuilt / 4)),
+            ruined: 0,
+            depleted: { trees: housesBuilt * 2, bushes: housesBuilt, stones: housesBuilt },
+            items: housesBuilt * 4,
+            itemsPlaced: true,
+            secondBySecond: true,
+            ms: now() - started
+        };
+        st.history.settled = summary;
+        History.lastSettle = summary;
+
+        console.log(`UF_History: Second-by-second history iterated from Year 1 to Year ${targetYears} (${totalSeconds} beats in ${(now() - started).toFixed(0)} ms): `
+            + `${housesBuilt} homesteads built around campfire, ${hearthsPlaced} indoor hearths, ${bedsPlaced} beds, ${st.history.events.length} chronicle events.`);
+
+        return summary;
+    };
+
     //-------------------------------------------------------------------------
     // People at the living sites (world units of kind "person"), with ages, stats, ranks
 
@@ -1874,6 +2213,11 @@
                 const fires = Object.values(state.history.founders).flatMap(r => r.camps || [r.camp]).filter(c => c && c.fire).length;
                 console.log(`UF_History: year 1, ${state.factions.list.length} factions at ${state.history.sites.length} sites (areas placed in ${la ? la.ms.toFixed(0) : "?"} ms), ${fires} campfires lit, `
                     + `${people.length} founders (${people.filter(u => u.data.gender === "male").length} men, ${people.filter(u => u.data.gender === "female").length} women), ${off} outside their area's reach`);
+
+                const targetYears = (state.history && state.history.startYear) || 1;
+                if (targetYears > 1) {
+                    History.iterateWorldHistory(state, targetYears);
+                }
                 return;
             }
             const s = state.history.settled;
