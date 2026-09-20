@@ -1,0 +1,35 @@
+{
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "downed": [
+      0,
+      1,
+      2
+    ],
+    "corpse": [
+      2
+    ]
+  },
+  "frameMs": 180,
+  "species": "human",
+  "stage": "adult",
+  "gender": "male",
+  "action": "Downed",
+  "style": "Serious Chibi (VISION V116)",
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image, Rule 11, VISION V109)"
+}

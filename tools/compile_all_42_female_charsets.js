@@ -38,15 +38,13 @@ const VARIATIONS = [
     {
         num: 1,
         name: 'Variation 1 (Master Settler / Militia Pioneer)',
-        walkRaw: 'references/human_female_walk_12_reference.png',
+        walkRaw: 'human_female_pro_4d_walk.png',
         haulRaw: 'human_female_haul_12_raw.png',
         attackRaw: 'human_female_attack_12_raw.png',
         bowRaw: 'human_female_bow_12_raw.png',
         magicRaw: 'human_female_magic_12_raw.png',
         workRaw: 'human_female_work_12_raw.png',
-        downedRaw: 'human_female_downed_12_raw.png',
-        // Var 1 uses master reference grid
-        isMasterGrid: true
+        downedRaw: 'human_female_downed_12_raw.png'
     },
     {
         num: 2,
@@ -116,23 +114,16 @@ function compileVariation(v) {
     console.log('1. Walk...');
     const imgWalk = decodePNG(fs.readFileSync(path.join(RAW_DIR, v.walkRaw)));
     const wS = [0, 1, 2].map(c => extractFrameFromCell(imgWalk, c * cW, (c + 1) * cW, 0, cH, 43));
-    let wE;
-    if (v.isMasterGrid) {
-        // Master reference: row 0 col 3 (Stride A), row 0 col 4 (Stand), row 1 col 0 (Stride B)
-        wE = [
-            extractFrameFromCell(imgWalk, 3 * cW, 4 * cW, 0, cH, 43),
-            extractFrameFromCell(imgWalk, 4 * cW, 5 * cW, 0, cH, 43),
-            extractFrameFromCell(imgWalk, 0 * cW, 1 * cW, cH, 2 * cH, 43)
-        ];
+    let wWest;
+    if (v.num === 1) {
+        // Var 1 Row 1: cell 0 (Stride A), cell 2 (Stand), cell 1 (Stride B)
+        wWest = [0, 2, 1].map(c => extractFrameFromCell(imgWalk, c * cW, (c + 1) * cW, cH, 2 * cH, 43));
     } else {
-        wE = [
-            extractFrameFromCell(imgWalk, 3 * cW, 4 * cW, 0, cH, 43),   // Stride A
-            extractFrameFromCell(imgWalk, 4 * cW, 5 * cW, 0, cH, 43),   // Stand
-            extractFrameFromCell(imgWalk, 0 * cW, 1 * cW, cH, 2 * cH, 43) // Stride B
-        ];
+        // Var 2..6 Row 1: cell 0 (Stride A), cell 1 (Stand), cell 2 (Stride B)
+        wWest = [0, 1, 2].map(c => extractFrameFromCell(imgWalk, c * cW, (c + 1) * cW, cH, 2 * cH, 43));
     }
     const wN = [0, 1, 2].map(c => extractFrameFromCell(imgWalk, c * cW, (c + 1) * cW, 2 * cH, 3 * cH, 43));
-    const walkSheet = assemble12SpriteSheet({ S: wS, W: wE.map(mirrorFrame), E: wE, N: wN });
+    const walkSheet = assemble12SpriteSheet({ S: wS, W: wWest, E: wWest.map(mirrorFrame), N: wN });
     saveSheetAndSidecar(walkSheet, `Human_Female_${v.num}_Walk`, 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
     saveSheetAndSidecar(walkSheet, `Human_Female_${v.num}`, 'Walk', { walk: [0, 1, 2, 1], stand: [1] });
 
@@ -147,13 +138,10 @@ function compileVariation(v) {
     console.log('2. Haul...');
     const imgHaul = decodePNG(fs.readFileSync(path.join(RAW_DIR, v.haulRaw)));
     const hS = [0, 1, 2].map(c => extractFrameFromCell(imgHaul, c * cW, (c + 1) * cW, 0, cH, 43));
-    const hE = [
-        extractFrameFromCell(imgHaul, 3 * cW, 4 * cW, 0, cH, 43),   // Stride A
-        extractFrameFromCell(imgHaul, 4 * cW, 5 * cW, 0, cH, 43),   // Stand
-        extractFrameFromCell(imgHaul, 0 * cW, 1 * cW, cH, 2 * cH, 43) // Stride B
-    ];
+    // Haul Row 1: cell 0 (Stride A), cell 1 (Stand), cell 2 (Stride B)
+    const hWest = [0, 1, 2].map(c => extractFrameFromCell(imgHaul, c * cW, (c + 1) * cW, cH, 2 * cH, 43));
     const hN = [0, 1, 2].map(c => extractFrameFromCell(imgHaul, c * cW, (c + 1) * cW, 2 * cH, 3 * cH, 43));
-    const haulSheet = assemble12SpriteSheet({ S: hS, W: hE.map(mirrorFrame), E: hE, N: hN });
+    const haulSheet = assemble12SpriteSheet({ S: hS, W: hWest, E: hWest.map(mirrorFrame), N: hN });
     saveSheetAndSidecar(haulSheet, `Human_Female_${v.num}_Haul`, 'Haul', { haul: [0, 1, 2, 1], carry: [1], stand: [1] });
     if (v.num === 1) saveSheetAndSidecar(haulSheet, 'Human_Female_Haul', 'Haul', { haul: [0, 1, 2, 1], carry: [1], stand: [1] });
 

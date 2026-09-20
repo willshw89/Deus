@@ -253,12 +253,10 @@ function checkFrameFacing(frame, w = 48, h = 48) {
 function assemble12SpriteSheet(framesByFacing) {
     const buf = Buffer.alloc(144 * 192 * 4);
 
-    // Standardize West (Row 1) to ALL LEFT (VISION V110, Rule 12)
-    const westFrames = framesByFacing.W.map(f => (checkFrameFacing(f) === 'RIGHT' ? mirrorFrame(f) : f));
-    // Standardize East (Row 2) to ALL RIGHT (either mirrored West or normalized East)
-    const eastFrames = framesByFacing.E
-        ? framesByFacing.E.map(f => (checkFrameFacing(f) === 'LEFT' ? mirrorFrame(f) : f))
-        : westFrames.map(mirrorFrame);
+    // Row 1: West (Left) directly from authentic frames
+    const westFrames = framesByFacing.W;
+    // Row 2: East (Right) - mirrored from West per VISION V110 / AGENTS.md Rule 12
+    const eastFrames = framesByFacing.E || westFrames.map(mirrorFrame);
 
     const rows = [
         framesByFacing.S,

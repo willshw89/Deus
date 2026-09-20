@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Live Walk Cycle Animation Verification</title>
+<style>
+body { background: #1a1a24; color: #eee; font-family: monospace; padding: 24px; }
+h1 { margin-bottom: 8px; color: #4ade80; }
+.card { background: #222230; border: 1px solid #333348; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+.character-row { display: flex; gap: 32px; align-items: center; margin-top: 12px; }
+.anim-box { text-align: center; }
+.sprite-view {
+    width: 48px;
+    height: 48px;
+    image-rendering: pixelated;
+    display: inline-block;
+    transform: scale(3);
+    transform-origin: top left;
+    margin-right: 96px;
+    margin-bottom: 96px;
+}
+.label { font-size: 13px; color: #aaa; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<h1>Bipedal Walk Cycle Live Verification (180ms RMMZ cadence)</h1>
+<p>Each row demonstrates the active 4-step walk cycle: <strong>Col 0 (Step 1) &rarr; Col 1 (Stand) &rarr; Col 2 (Step 2) &rarr; Col 1 (Stand)</strong>.</p>
+
+<div class="card">
+    <h3>Male 1 (Master Settler)</h3>
+    <div class="character-row">
+        <div class="anim-box">
+            <div class="label">&larr; Walk West (Left)</div>
+            <div id="anim_w_0" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Male_1_Walk.png') 0px -48px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">Walk East (Right) &rarr;</div>
+            <div id="anim_e_0" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Male_1_Walk.png') 0px -96px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&darr; Walk South (Down)</div>
+            <div id="anim_s_0" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Male_1_Walk.png') 0px 0px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&uarr; Walk North (Up)</div>
+            <div id="anim_n_0" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Male_1_Walk.png') 0px -144px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Female 1 (Master Settler)</h3>
+    <div class="character-row">
+        <div class="anim-box">
+            <div class="label">&larr; Walk West (Left)</div>
+            <div id="anim_w_1" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Female_1_Walk.png') 0px -48px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">Walk East (Right) &rarr;</div>
+            <div id="anim_e_1" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Female_1_Walk.png') 0px -96px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&darr; Walk South (Down)</div>
+            <div id="anim_s_1" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Female_1_Walk.png') 0px 0px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&uarr; Walk North (Up)</div>
+            <div id="anim_n_1" class="sprite-view" style="background: url('../../game/img/characters/$UF_Human_Female_1_Walk.png') 0px -144px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Generator Colonist ($gen_c0)</h3>
+    <div class="character-row">
+        <div class="anim-box">
+            <div class="label">&larr; Walk West (Left)</div>
+            <div id="anim_w_2" class="sprite-view" style="background: url('../../game/img/characters/gen/$gen_c0.png') 0px -48px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">Walk East (Right) &rarr;</div>
+            <div id="anim_e_2" class="sprite-view" style="background: url('../../game/img/characters/gen/$gen_c0.png') 0px -96px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&darr; Walk South (Down)</div>
+            <div id="anim_s_2" class="sprite-view" style="background: url('../../game/img/characters/gen/$gen_c0.png') 0px 0px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&uarr; Walk North (Up)</div>
+            <div id="anim_n_2" class="sprite-view" style="background: url('../../game/img/characters/gen/$gen_c0.png') 0px -144px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Adam ($Adam.png)</h3>
+    <div class="character-row">
+        <div class="anim-box">
+            <div class="label">&larr; Walk West (Left)</div>
+            <div id="anim_w_3" class="sprite-view" style="background: url('../../game/img/characters/$Adam.png') 0px -48px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">Walk East (Right) &rarr;</div>
+            <div id="anim_e_3" class="sprite-view" style="background: url('../../game/img/characters/$Adam.png') 0px -96px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&darr; Walk South (Down)</div>
+            <div id="anim_s_3" class="sprite-view" style="background: url('../../game/img/characters/$Adam.png') 0px 0px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&uarr; Walk North (Up)</div>
+            <div id="anim_n_3" class="sprite-view" style="background: url('../../game/img/characters/$Adam.png') 0px -144px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Eve ($Eve.png)</h3>
+    <div class="character-row">
+        <div class="anim-box">
+            <div class="label">&larr; Walk West (Left)</div>
+            <div id="anim_w_4" class="sprite-view" style="background: url('../../game/img/characters/$Eve.png') 0px -48px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">Walk East (Right) &rarr;</div>
+            <div id="anim_e_4" class="sprite-view" style="background: url('../../game/img/characters/$Eve.png') 0px -96px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&darr; Walk South (Down)</div>
+            <div id="anim_s_4" class="sprite-view" style="background: url('../../game/img/characters/$Eve.png') 0px 0px;"></div>
+        </div>
+        <div class="anim-box">
+            <div class="label">&uarr; Walk North (Up)</div>
+            <div id="anim_n_4" class="sprite-view" style="background: url('../../game/img/characters/$Eve.png') 0px -144px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+const pattern = [0, 1, 2, 1];
+let step = 0;
+setInterval(() => {
+    step = (step + 1) % pattern.length;
+    const col = pattern[step];
+    const xPos = -col * 48;
+    for (let i = 0; i < 5; i++) {
+        document.getElementById('anim_w_' + i).style.backgroundPosition = xPos + 'px -48px';
+        document.getElementById('anim_e_' + i).style.backgroundPosition = xPos + 'px -96px';
+        document.getElementById('anim_s_' + i).style.backgroundPosition = xPos + 'px 0px';
+        document.getElementById('anim_n_' + i).style.backgroundPosition = xPos + 'px -144px';
+    }
+}, 180);
+</script>
+</body>
+</html>

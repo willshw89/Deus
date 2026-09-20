@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { decodePNG } = require('./png_read');
+const { writePNG } = require('./png_util');
 const {
     extractFrameFromCell,
     mirrorFrame,
@@ -10,29 +11,35 @@ const {
     saveSheetAndSidecar
 } = require('./build_pro_human_male');
 
+const ROOT = path.resolve(__dirname, '..');
+const CHAR_DIR = path.join(ROOT, 'game', 'img', 'characters');
+
 const imgWalk = decodePNG(fs.readFileSync('art/raw/human_male_pro_4d_walk.png'));
 const imgHaul = decodePNG(fs.readFileSync('art/raw/human_male_pro_4d_haul.png'));
 
+const cw = Math.floor(imgWalk.width / 6);
+const ch = Math.floor(imgWalk.height / 3);
+
 // --- 1. WALK (Dynamic Alternating Strides) ---
-// South
-const south0 = extractFrameFromCell(imgWalk, 0, 234, 0, 258, 43);
-const south1 = extractFrameFromCell(imgWalk, 234, 470, 0, 258, 43);
-const south2 = extractFrameFromCell(imgWalk, 470, 704, 0, 258, 43);
+// South: [Step 1, Stand, Step 2]
+const south0 = extractFrameFromCell(imgWalk, 0 * cw, 1 * cw, 0, ch, 43);
+const south1 = extractFrameFromCell(imgWalk, 1 * cw, 2 * cw, 0, ch, 43);
+const south2 = extractFrameFromCell(imgWalk, 2 * cw, 3 * cw, 0, ch, 43);
 
-// East: Col 0 = Stride A, Col 1 = Stand/Passing, Col 2 = Stride B
-const east0 = extractFrameFromCell(imgWalk, 704, 938, 0, 258, 43);   // R0_C3: Stride A
-const east1 = extractFrameFromCell(imgWalk, 0, 234, 258, 511, 43);    // R1_C0: Feet together (Stand)
-const east2 = extractFrameFromCell(imgWalk, 938, 1172, 258, 511, 43); // R1_C4: Stride B
+// West: Col 0 = Stride A (Cell 0), Col 1 = Stand/Passing (Cell 2), Col 2 = Stride B (Cell 1)
+const west0 = extractFrameFromCell(imgWalk, 0 * cw, 1 * cw, ch, 2 * ch, 43);
+const west1 = extractFrameFromCell(imgWalk, 2 * cw, 3 * cw, ch, 2 * ch, 43);
+const west2 = extractFrameFromCell(imgWalk, 1 * cw, 2 * cw, ch, 2 * ch, 43);
 
-// North
-const north0 = extractFrameFromCell(imgWalk, 0, 234, 511, 767, 43);
-const north1 = extractFrameFromCell(imgWalk, 470, 704, 511, 767, 43);
-const north2 = extractFrameFromCell(imgWalk, 234, 470, 511, 767, 43);
+// North: [Step 1, Stand, Step 2]
+const north0 = extractFrameFromCell(imgWalk, 0 * cw, 1 * cw, 2 * ch, 3 * ch, 43);
+const north1 = extractFrameFromCell(imgWalk, 1 * cw, 2 * cw, 2 * ch, 3 * ch, 43);
+const north2 = extractFrameFromCell(imgWalk, 2 * cw, 3 * cw, 2 * ch, 3 * ch, 43);
 
 const walkSheet = assemble12SpriteSheet({
     S: [south0, south1, south2],
-    W: [east0, east1, east2].map(mirrorFrame),
-    E: [east0, east1, east2],
+    W: [west0, west1, west2],
+    E: [west0, west1, west2].map(mirrorFrame),
     N: [north0, north1, north2]
 });
 
@@ -40,25 +47,26 @@ saveSheetAndSidecar(walkSheet, 'Human_Male_Walk', 'Walk', { walk: [0, 1, 2, 1], 
 saveSheetAndSidecar(walkSheet, 'Human_Male',      'Walk', { walk: [0, 1, 2, 1], stand: [1] });
 saveSheetAndSidecar(walkSheet, 'Human_Male_Adult','Walk', { walk: [0, 1, 2, 1], stand: [1] });
 saveSheetAndSidecar(walkSheet, 'Human',           'Walk', { walk: [0, 1, 2, 1], stand: [1] });
+writePNG(path.join(CHAR_DIR, '$Adam.png'), 144, 192, walkSheet);
 
 // --- 2. HAUL (Dynamic Alternating Strides) ---
-const haulSouth0 = extractFrameFromCell(imgHaul, 0, 234, 0, 258, 43);
-const haulSouth1 = extractFrameFromCell(imgHaul, 234, 470, 0, 258, 43);
-const haulSouth2 = extractFrameFromCell(imgHaul, 470, 704, 0, 258, 43);
+const haulSouth0 = extractFrameFromCell(imgHaul, 0 * cw, 1 * cw, 0, ch, 43);
+const haulSouth1 = extractFrameFromCell(imgHaul, 1 * cw, 2 * cw, 0, ch, 43);
+const haulSouth2 = extractFrameFromCell(imgHaul, 2 * cw, 3 * cw, 0, ch, 43);
 
-// East Haul: Stride A (Col 1), Passing (Col 0), Stride B (Col 4)
-const haulEast0 = extractFrameFromCell(imgHaul, 234, 470, 258, 511, 43); // Stride A
-const haulEast1 = extractFrameFromCell(imgHaul, 0, 234, 258, 511, 43);   // Stand / passing
-const haulEast2 = extractFrameFromCell(imgHaul, 938, 1172, 258, 511, 43);// Stride B
+// West Haul: Col 0 = Stride A (Cell 1), Col 1 = Stand/Carry (Cell 0), Col 2 = Stride B (Cell 2)
+const haulWest0 = extractFrameFromCell(imgHaul, 1 * cw, 2 * cw, ch, 2 * ch, 43);
+const haulWest1 = extractFrameFromCell(imgHaul, 0 * cw, 1 * cw, ch, 2 * ch, 43);
+const haulWest2 = extractFrameFromCell(imgHaul, 2 * cw, 3 * cw, ch, 2 * ch, 43);
 
-const haulNorth0 = extractFrameFromCell(imgHaul, 0, 234, 511, 767, 43);
-const haulNorth1 = extractFrameFromCell(imgHaul, 234, 470, 511, 767, 43);
-const haulNorth2 = extractFrameFromCell(imgHaul, 470, 704, 511, 767, 43);
+const haulNorth0 = extractFrameFromCell(imgHaul, 0 * cw, 1 * cw, 2 * ch, 3 * ch, 43);
+const haulNorth1 = extractFrameFromCell(imgHaul, 1 * cw, 2 * cw, 2 * ch, 3 * ch, 43);
+const haulNorth2 = extractFrameFromCell(imgHaul, 2 * cw, 3 * cw, 2 * ch, 3 * ch, 43);
 
 const haulSheet = assemble12SpriteSheet({
     S: [haulSouth0, haulSouth1, haulSouth2],
-    W: [haulEast0, haulEast1, haulEast2].map(mirrorFrame),
-    E: [haulEast0, haulEast1, haulEast2],
+    W: [haulWest0, haulWest1, haulWest2],
+    E: [haulWest0, haulWest1, haulWest2].map(mirrorFrame),
     N: [haulNorth0, haulNorth1, haulNorth2]
 });
 

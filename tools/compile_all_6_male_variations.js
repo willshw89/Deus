@@ -30,15 +30,15 @@ const VARIATIONS = [
         name: 'Chestnut Brown Doublet (Master)',
         file: 'human_male_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[704, 938, 0, 258], [0, 234, 258, 511], [938, 1172, 258, 511]],
-        nCols: [0, 2, 1]
+        wCols: [0, 2, 1], // Stride A (0), Stand (2), Stride B (1)
+        nCols: [0, 1, 2]
     },
     {
         num: 2,
         name: 'Golden Blonde Swept Hair / Olive Tunic',
         file: 'human_male_var2_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[704, 938, 0, 258], [0, 234, 258, 511], [938, 1172, 258, 511]],
+        wCols: [0, 2, 1],
         nCols: [0, 1, 2]
     },
     {
@@ -46,7 +46,7 @@ const VARIATIONS = [
         name: 'Raven Black Hair & Beard / Charcoal Tunic',
         file: 'human_male_var3_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[704, 938, 0, 258], [0, 234, 258, 511], [938, 1172, 258, 511]],
+        wCols: [0, 2, 1],
         nCols: [1, 2, 3] // Var 3 Row 2 Col 0 was South
     },
     {
@@ -54,7 +54,7 @@ const VARIATIONS = [
         name: 'Auburn Hair & Goatee / Terracotta Tunic',
         file: 'human_male_var4_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[704, 938, 0, 258], [0, 234, 258, 511], [938, 1172, 258, 511]],
+        wCols: [0, 2, 1],
         nCols: [0, 1, 2]
     },
     {
@@ -62,7 +62,7 @@ const VARIATIONS = [
         name: 'Bald Artisan & Beard / Rawhide Work Vest',
         file: 'human_male_var5_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[0, 234, 258, 511], [234, 470, 258, 511], [470, 704, 258, 511]],
+        wCols: [0, 1, 2], // Var 5 has cell 1 as stand and cell 2 as stride B
         customNorth: (img) => {
             const n0 = extractFrameFromCell(img, 0, 234, 511, 767, 43);
             const n2 = extractFrameFromCell(img, 470, 704, 511, 767, 43);
@@ -81,7 +81,7 @@ const VARIATIONS = [
         name: 'Salt & Pepper Veteran / Indigo Blue Tunic',
         file: 'human_male_var6_pro_4d_walk.png',
         sCols: [0, 1, 2],
-        eCoords: [[704, 938, 0, 258], [0, 234, 258, 511], [938, 1172, 258, 511]],
+        wCols: [0, 2, 1],
         nCols: [0, 1, 2]
     }
 ];
@@ -96,32 +96,39 @@ function compileAll() {
             continue;
         }
         const img = decodePNG(fs.readFileSync(rawPath));
+        const cw = Math.floor(img.width / 6);
+        const ch = Math.floor(img.height / 3);
 
-        // South
-        const s0 = extractFrameFromCell(img, v.sCols[0] * 234, (v.sCols[0] + 1) * 234, 0, 258, 43);
-        const s1 = extractFrameFromCell(img, v.sCols[1] * 234, (v.sCols[1] + 1) * 234, 0, 258, 43);
-        const s2 = extractFrameFromCell(img, v.sCols[2] * 234, (v.sCols[2] + 1) * 234, 0, 258, 43);
+        // South: [Step 1, Stand, Step 2]
+        const s0 = extractFrameFromCell(img, v.sCols[0] * cw, (v.sCols[0] + 1) * cw, 0, ch, 43);
+        const s1 = extractFrameFromCell(img, v.sCols[1] * cw, (v.sCols[1] + 1) * cw, 0, ch, 43);
+        const s2 = extractFrameFromCell(img, v.sCols[2] * cw, (v.sCols[2] + 1) * cw, 0, ch, 43);
 
-        // East: Stride A, Stand/Passing, Stride B
-        const e0 = extractFrameFromCell(img, v.eCoords[0][0], v.eCoords[0][1], v.eCoords[0][2], v.eCoords[0][3], 43);
-        const e1 = extractFrameFromCell(img, v.eCoords[1][0], v.eCoords[1][1], v.eCoords[1][2], v.eCoords[1][3], 43);
-        const e2 = extractFrameFromCell(img, v.eCoords[2][0], v.eCoords[2][1], v.eCoords[2][2], v.eCoords[2][3], 43);
+        // West: [Stride A, Stand/Passing, Stride B]
+        const w0 = extractFrameFromCell(img, v.wCols[0] * cw, (v.wCols[0] + 1) * cw, ch, 2 * ch, 43);
+        const w1 = extractFrameFromCell(img, v.wCols[1] * cw, (v.wCols[1] + 1) * cw, ch, 2 * ch, 43);
+        const w2 = extractFrameFromCell(img, v.wCols[2] * cw, (v.wCols[2] + 1) * cw, ch, 2 * ch, 43);
 
-        // North
+        // North: [Step 1, Stand, Step 2]
         let northFrames;
         if (v.customNorth) {
             northFrames = v.customNorth(img);
         } else {
-            const n0 = extractFrameFromCell(img, v.nCols[0] * 234, (v.nCols[0] + 1) * 234, 511, 767, 43);
-            const n1 = extractFrameFromCell(img, v.nCols[1] * 234, (v.nCols[1] + 1) * 234, 511, 767, 43);
-            const n2 = extractFrameFromCell(img, v.nCols[2] * 234, (v.nCols[2] + 1) * 234, 511, 767, 43);
+            const n0 = extractFrameFromCell(img, v.nCols[0] * cw, (v.nCols[0] + 1) * cw, 2 * ch, 3 * ch, 43);
+            const n1 = extractFrameFromCell(img, v.nCols[1] * cw, (v.nCols[1] + 1) * cw, 2 * ch, 3 * ch, 43);
+            const n2 = extractFrameFromCell(img, v.nCols[2] * cw, (v.nCols[2] + 1) * cw, 2 * ch, 3 * ch, 43);
             northFrames = [n0, n1, n2];
         }
 
+        // Standard 12-sprite layout:
+        // Row 0: South
+        // Row 1: West (Left)
+        // Row 2: East (Right - mirrored from West per VISION V110 / AGENTS.md Rule 12)
+        // Row 3: North
         const sheet = assemble12SpriteSheet({
             S: [s0, s1, s2],
-            W: [e0, e1, e2].map(mirrorFrame),
-            E: [e0, e1, e2],
+            W: [w0, w1, w2],
+            E: [w0, w1, w2].map(mirrorFrame),
             N: northFrames
         });
 
