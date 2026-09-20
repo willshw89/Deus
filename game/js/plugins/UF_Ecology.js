@@ -251,9 +251,28 @@
         return PLANT_HOURS;
     }
 
+    function isConstructedOrPaved(area, x, y, z = 0) {
+        const O = Objects();
+        if (O && typeof O.isConstructedOrPaved === "function") return O.isConstructedOrPaved(area, x, y, z);
+        const F = window.UF && UF.Floors;
+        if (F && typeof F.isFloor === "function" && F.isFloor(area, x, y)) return true;
+        const R = window.UF && UF.Roads;
+        if (R && typeof R.isRoadAt === "function" && R.isRoadAt(area, x, y)) return true;
+        const tid = O && O.typeIdIn ? O.typeIdIn(area, x, y) : null;
+        if (tid) {
+            const t = O.type(tid);
+            if (t) {
+                if (t.autotile === "wall" || t.build !== undefined) return true;
+                if (Array.isArray(t.tags) && t.tags.some(tag => ["wall", "door", "building", "furniture", "workplace", "bed", "sanitation", "latrine", "outhouse"].includes(tag))) return true;
+            }
+        }
+        return false;
+    }
+
     function startSapling(area, x, y, treeSpecies, opts) {
         const O = Objects(), st = state(), o = opts || {};
         if (!O || !st || !area) return null;
+        if (isConstructedOrPaved(area, x, y)) return null;
         const treeType = O.type(treeSpecies);
         if (!treeType) return null;
         cancelResource(area, x, y);
@@ -291,6 +310,7 @@
         const from = O && O.type ? O.type(fromId) : null;
         const expected = expectedId ? O.type(expectedId) : null;
         if (!st || !from || !isRenewableObject(from)) return null;
+        if (isConstructedOrPaved(area, x, y)) return null;
         // UF_Objects already owns the normal picked-plant timer.
         if (!o.force && expected && expected.regrow && expected.regrow.to) {
             cancelResource(area, x, y);
@@ -330,6 +350,12 @@
             const e = st.resources[i];
             if (!(e.due <= at)) continue;
             result.due++;
+            // Resources must never regrow on any tile with a floor, wall, or constructed object
+            if (isConstructedOrPaved(e.area, e.x, e.y, e.z || 0)) {
+                st.resources.splice(i, 1);
+                result.cancelled++;
+                continue;
+            }
             const current = currentObjectId(e.area, e.x, e.y);
             if (current !== (e.expected || null)) {
                 st.resources.splice(i, 1);
@@ -594,8 +620,7 @@
                     if (!isWater && (info.water || !info.walkable)) continue;
                 }
 
-                if (window.UF && UF.Floors && UF.Floors.isFloor && UF.Floors.isFloor(area, tx, ty)) continue;
-                if (window.UF && UF.Roads && UF.Roads.isRoad && UF.Roads.isRoad(area, tx, ty)) continue;
+                if (isConstructedOrPaved(area, tx, ty, 0)) continue;
 
                 let densityCount = 0;
                 for (let dy = -2; dy <= 2; dy++) {
@@ -744,6 +769,12 @@
             const s = st.sprouts[i];
             if (currentBeat >= s.matureBeat) {
                 const levelArea = { x: s.area.x, y: s.area.y, z: s.z };
+                if (isConstructedOrPaved(levelArea, s.x, s.y, s.z)) {
+                    st.sprouts.splice(i, 1);
+                    const cur = O.atIn(levelArea, s.x, s.y);
+                    if (cur && cur.id === s.sproutType) O.setIn(levelArea, s.x, s.y, null);
+                    continue;
+                }
                 const cur = O.atIn(levelArea, s.x, s.y);
                 if (cur && cur.id === s.sproutType) {
                     if (!standerAt(levelArea, s.x, s.y)) {
@@ -808,7 +839,8 @@
                     if (sh !== "floor" && sh !== 0) continue; // Must be open cavern floor, not solid cave rock
                 }
 
-                // Cell must be clear of objects and standing units
+                // Cell must be clear of floors, walls, and constructed objects
+                if (isConstructedOrPaved(levelArea, tx, ty, z)) continue;
                 if (O.atIn(levelArea, tx, ty)) continue;
                 if (standerAt(levelArea, tx, ty)) continue;
 
@@ -893,6 +925,18 @@
         UF.Events.on("world:created", () => {
             try { initializeBaselines(); } catch (e) { report("world:created", e); }
         });
+        const onFloorLaid = (area, x, y) => {
+            cancelResource(area, x, y);
+            const st = state();
+            if (st && st.sprouts) {
+                for (let i = st.sprouts.length - 1; i >= 0; i--) {
+                    const s = st.sprouts[i];
+                    if (sameArea(s.area, area) && s.x === x && s.y === y) st.sprouts.splice(i, 1);
+                }
+            }
+        };
+        UF.Events.on("floors:laid", onFloorLaid);
+        UF.Events.on("floors:groundChanged", onFloorLaid);
     }
 
     const Ecology = {
@@ -938,17 +982,19 @@
     hookEvents();
 
     let _beatFrame = 0;
-    const _Game_Map_update_ecology = Game_Map.prototype.update;
-    Game_Map.prototype.update = function(sceneActive) {
-        _Game_Map_update_ecology.call(this, sceneActive);
-        if (sceneActive && window.UF && UF.World && UF.World.isWorldMap && UF.World.isWorldMap(this.mapId())) {
-            _beatFrame++;
-            if (_beatFrame >= 60) {
-                _beatFrame = 0;
-                stepBeat();
+    if (typeof Game_Map !== "undefined" && Game_Map.prototype) {
+        const _Game_Map_update_ecology = Game_Map.prototype.update;
+        Game_Map.prototype.update = function(sceneActive) {
+            _Game_Map_update_ecology.call(this, sceneActive);
+            if (sceneActive && window.UF && UF.World && UF.World.isWorldMap && UF.World.isWorldMap(this.mapId())) {
+                _beatFrame++;
+                if (_beatFrame >= 60) {
+                    _beatFrame = 0;
+                    stepBeat();
+                }
             }
-        }
-    };
+        };
+    }
 
     const _DataManager_extractSaveContents = DataManager.extractSaveContents;
     DataManager.extractSaveContents = function(contents) {

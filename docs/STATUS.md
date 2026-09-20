@@ -8,6 +8,37 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## World Asset Regrowth & Flora Construction Guard — 2026-09-20 (Gemini)
+Delivered per user directive ("When assets in the world regenerate (plants and stuff) I dont want them growing on any tile with floor or wall, or something constructed on it"):
+- **Floor & Road Guard (`UF_Floors.js`, `UF_Roads.js`)**:
+  - `UF.Floors.isFloor(area, x, y)` / `isFloorAt(area, x, y)`: identifies registered floors (`floor_wood`, `floor_stone`, `floor_rushes`), any `floor_*` ground kinds, road tiles, and underground constructed floors (`Levels.cellAt: cell.constructed === true && cell.shape === "floor"`).
+  - `UF.Roads.isRoad(area, x, y)`: aliased to `Roads.isRoadAt` for consistent API access.
+- **Core Object Regrowth Guard (`UF_Objects.js`)**:
+  - `isConstructedOrPaved(area, x, y, z)`: checks if the cell contains a floor/road, wall/door (`autotile === "wall"` or tags `["wall", "door"]`), or constructed object (`build !== undefined`, tags `["building", "furniture", "workplace", "sanitation", "latrine", "outhouse", "bed", ...]`, blueprints, or underground `cell.constructed === true`).
+  - `scheduleRegrow(area, x, y, toType)`: immediately refuses to queue regrowth if `isConstructedOrPaved` is true.
+  - `processRegrow()`: before restoring a plant/asset whose timer has matured, verifies `!isConstructedOrPaved(area, e.x, e.y, zOf(e))`. If paved or built on, the regrowth entry is permanently cancelled/discarded, and any residual picked plant/stump is cleared.
+  - Event listeners on `"floors:laid"` and `"floors:groundChanged"`: laying a floor or road cancels any pending regrowth in `W.state.regrow` and removes any lingering plant/stump on that cell.
+- **Ecosystem Spreading, Maturation & Sprouts Guard (`UF_Ecology.js`)**:
+  - `scheduleResource` & `startSapling`: refuses to schedule felled trees/plants if the target cell is floored, walled, or constructed.
+  - `processResources(hour)`: cancels and discards pending resource entries if cell has become floored, walled, or built upon.
+  - `spreadPlants(area, hour, opts)`: checks `isConstructedOrPaved(area, tx, ty, 0)` so natural plant/tree seed spreading never lands on floors, roads, walls, or buildings.
+  - `stepBeat(opts)`: sprout spawning skips any cell where `isConstructedOrPaved` is true; sprout maturation skips cells that became paved/walled/built while sprouting.
+  - Listeners on `"floors:laid"` and `"floors:groundChanged"`: cancel pending ecology resources and sprouts.
+- **Automated Verification**:
+  - `tools/test_regrowth_construction_guard.js`: **10/10 PASS, 0 FAIL (exit 0)**.
+  - Mutant check `--mutant=bypass-guard`: **7 PASS, 3 FAIL (exit 1)** (confirms tests are able to fail when guard is bypassed).
+  - `tools/test_ecology.js`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_population_growth_and_immigration.js`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_sanitation_system.js`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_settlement_pillars.js`: **10/10 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+  - Main in-engine test suite `colonists`: **20/20 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: Home site at zoom 2/3 showing campfire, colonists, and clean terrain.
+  - `game/test_output/colonists.colonists_working.png`: Colonists harvesting and building at 8x speed.
+  - `game/test_output/colonists.colonist_childbirth.png`: Active night scene showing constructed timber door, wall, thread stockpile, and child.
+
 ## Dynamic Population Growth Curve (Rapid to 100, Level at 200) & Settlement Immigration — 2026-09-20 (Gemini)
 Delivered per user directive ("I also want immigration, so maybe a faction gets some immigrants. I want the population to grow rapidly to 100, and then slowly grow to naturally level off at 200. we should control this with birthrates"):
 - **Dynamic Birthrate & Growth Curve (Logistic / Carrying Capacity) (`UF_Colonists.js`)**:

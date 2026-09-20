@@ -60,6 +60,18 @@
         return (W.state.floors = W.state.floors || { version: 1, laid: 0, removed: 0, designationOrder: [] });
     }
     const floorKind = id => FLOOR_IDS.includes(id);
+    function isFloorAt(area, x, y) {
+        if (!supportedArea(area)) return false;
+        const z = zOf(area);
+        if (z !== 0) {
+            const L = window.UF && UF.Levels;
+            const cell = L && typeof L.cellAt === "function" && L.cellAt({ area, x, y, z });
+            return !!cell && cell.constructed === true && cell.shape === "floor";
+        }
+        const k = kindAt(area, x, y);
+        if (!k) return false;
+        return floorKind(k.id) || (typeof k.id === "string" && (k.id.startsWith("floor_") || k.id === "road")) || (Array.isArray(k.tags) && k.tags.includes("floor"));
+    }
     function kindAt(area, x, y) {
         // UF_Tiles' A2 kinds describe tileset 91, not the levels' tileset 92.
         if (!supportedArea(area) || zOf(area) !== 0) return null;
@@ -453,7 +465,7 @@
     }
 
     const Floors = {
-        FLOOR_IDS: FLOOR_IDS.slice(), MAX_OPEN, FLOOR_WORK, kindAt, canLay, setFloor, removeFloor, setGround,
+        FLOOR_IDS: FLOOR_IDS.slice(), MAX_OPEN, FLOOR_WORK, kindAt, isFloorAt, isFloor: isFloorAt, canLay, setFloor, removeFloor, setGround,
         createDesignations, floorOtherSites, playerCultureFloor, defineJobType, augmentOptions, hookInteract
     };
     window.UF.Floors = Floors;

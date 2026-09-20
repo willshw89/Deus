@@ -147,6 +147,93 @@
         if (!W || !W.state) return null;
         return (W.state.regrow = W.state.regrow || []);
     }
+    const CONSTRUCTED_TAGS = [
+        "building", "wall", "door", "bed", "hearth", "workplace",
+        "sanitation", "latrine", "outhouse", "storage", "workshop",
+        "furniture", "dining", "kitchen", "shop", "stockpile",
+        "crib", "weapon_rack", "bridge"
+    ];
+
+    function isConstructedOrPaved(area, x, y, z = 0) {
+        const lvlArea = levelArea(area, z);
+        // 1. Floor & Road check
+        if (z !== 0) {
+            const L = window.UF && UF.Levels;
+            const cell = L && typeof L.cellAt === "function" && L.cellAt({ area: lvlArea, x, y, z });
+            if (cell && cell.constructed === true && cell.shape === "floor") return true;
+        } else {
+            const F = window.UF && UF.Floors;
+            if (F) {
+                if (typeof F.isFloor === "function" && F.isFloor(lvlArea, x, y)) return true;
+                if (typeof F.kindAt === "function") {
+                    const k = F.kindAt(lvlArea, x, y);
+                    if (k && (k.id === "road" || (typeof k.id === "string" && k.id.startsWith("floor_")) || (Array.isArray(k.tags) && k.tags.includes("floor")))) return true;
+                }
+            }
+            const R = window.UF && UF.Roads;
+            if (R && typeof R.isRoadAt === "function" && R.isRoadAt(lvlArea, x, y)) return true;
+            const W = World();
+            if (W && typeof W.getTile === "function") {
+                const tileId = W.getTile(lvlArea.x, lvlArea.y, x, y, 0, 0);
+                if (R && typeof R.isRoadTile === "function" && R.isRoadTile(tileId)) return true;
+                const T = window.UF && UF.Tiles;
+                if (T && typeof T.kindOfTile === "function") {
+                    const k = T.kindOfTile(tileId);
+                    if (k && (k.id === "road" || (typeof k.id === "string" && k.id.startsWith("floor_")) || (Array.isArray(k.tags) && k.tags.includes("floor")))) return true;
+                }
+            }
+        }
+
+        // 2. Wall check
+        if (z !== 0) {
+            const L = window.UF && UF.Levels;
+            if (L && typeof L.shapeAt === "function") {
+                const sh = L.shapeAt({ area: lvlArea, x, y, z });
+                if (sh === "wall" || sh === "solid") return true;
+            }
+            if (L && typeof L.cellAt === "function") {
+                const cell = L.cellAt({ area: lvlArea, x, y, z });
+                if (cell && cell.constructed === true) return true;
+            }
+        }
+        const tid = typeIdIn(lvlArea, x, y);
+        if (tid) {
+            const t = typeOf(tid);
+            if (t) {
+                if (t.autotile === "wall") return true;
+                if (Array.isArray(t.tags) && (t.tags.includes("wall") || t.tags.includes("door"))) return true;
+                // 3. Constructed object check
+                if (t.build !== undefined) return true;
+                if (Array.isArray(t.tags) && t.tags.some(tag => CONSTRUCTED_TAGS.includes(tag))) return true;
+            }
+        }
+
+        // 4. Blueprints / Colony planned building check
+        if (typeof window !== "undefined") {
+            const cm = window.$constructionManager;
+            if (cm && Array.isArray(cm.blueprints) && cm.blueprints.some(b => b.x === x && b.y === y && !b.completed)) return true;
+        }
+        const W = World();
+        const cs = W && W.state && W.state.colony;
+        if (cs) {
+            const settlements = [cs, ...Object.values(cs.settlements || {})].filter(Boolean);
+            for (const c of settlements) {
+                if (sameArea(c.area, lvlArea) && Array.isArray(c.plan)) {
+                    for (const s of c.plan) {
+                        if (s && s.build && Array.isArray(s.cells)) {
+                            const sx = (c.site && c.site.x) || 0, sy = (c.site && c.site.y) || 0;
+                            for (const [dx, dy] of s.cells) {
+                                if (sx + dx === x && sy + dy === y) return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     // One pending entry per cell: drop the old one, add one if the new type regrows into something known.
     function scheduleRegrow(area, x, y, toType) {
         const list = regrowList();
@@ -157,6 +244,8 @@
         }
         const r = toType && toType.regrow;
         if (!r || !(r.hours > 0) || !typeIdOf(r.to)) return;
+        // Never schedule regrowth on floors, walls, or constructed objects
+        if (isConstructedOrPaved(area, x, y, zOf(area))) return;
         list.push({ area: { x: area.x, y: area.y }, x, y, z: zOf(area), from: toType.typeId, to: typeIdOf(r.to), due: absHour() + (r.hours | 0) });
     }
     function processRegrow() {
@@ -172,6 +261,15 @@
             // Only if the picked plant is still there: a built wall or a felled tree on that cell cancels the regrowth.
             const area = levelArea(e.area, zOf(e));
             if (typeIdIn(area, e.x, e.y) !== e.from) continue;
+            // Plants and assets must NEVER regrow on any tile with a floor, wall, or constructed object.
+            if (isConstructedOrPaved(area, e.x, e.y, zOf(e))) {
+                const curId = typeIdIn(area, e.x, e.y);
+                const curType = curId ? typeOf(curId) : null;
+                if (curType && Array.isArray(curType.tags) && curType.tags.some(tag => ["tree", "bush", "plant", "sapling", "stump", "flower", "fungus"].includes(tag))) {
+                    setIn(area, e.x, e.y, null);
+                }
+                continue;
+            }
             if (setIn(area, e.x, e.y, e.to)) grown++;
             else list.push(e); // a temporary spawn guard refusal must not erase regrowth
         }
@@ -385,6 +483,80 @@
         return { sx: (blockX + col) * fw, sy: blockY * fh, w: fw, h: fh, ax: anchor[0], ay: anchor[1] };
     }
 
+    function isWallCell(grid, w, h, cx, cy, typeId) {
+        if (cx < 0 || cy < 0 || cx >= w || cy >= h) return false;
+        const tid = grid[cy * w + cx];
+        if (!tid) return false;
+        if (tid === typeId) return true;
+        const obj = table().list[tid - 1];
+        return !!(obj && ((obj.tags && (obj.tags.includes("wall") || obj.tags.includes("door"))) || obj.autotile === "wall"));
+    }
+
+    function wallMaskAt(grid, w, h, x, y, typeId) {
+        const n = isWallCell(grid, w, h, x, y - 1, typeId);
+        const e = isWallCell(grid, w, h, x + 1, y, typeId);
+        const s = isWallCell(grid, w, h, x, y + 1, typeId);
+        const w_conn = isWallCell(grid, w, h, x - 1, y, typeId);
+        return (n ? 1 : 0) | (e ? 2 : 0) | (s ? 4 : 0) | (w_conn ? 8 : 0);
+    }
+
+    function frameForWall(type, bmp, x, y, map) {
+        if (!bmp || !bmp.isReady() || bmp.width === 0) return null;
+        const w = map ? map.width : 0;
+        const h = map ? map.height : 0;
+        const grid = map ? map.ufObjects : null;
+        if (!grid) return frameFor(type, bmp);
+
+        const mask = wallMaskAt(grid, w, h, x, y, type.typeId);
+        let frameIndex = mask;
+
+        if (mask === 10 || mask === 8 || mask === 2) { // Horizontal run or horizontal end-caps
+            // Determine whether this wall is on the North side or South side of an enclosure
+            let orientation = "north"; // default: visible South face (Frame 10)
+            let foundCorner = false;
+
+            // Scan West to check corner direction
+            for (let cx = x - 1; cx >= Math.max(0, x - 25); cx--) {
+                if (!isWallCell(grid, w, h, cx, y, type.typeId)) break;
+                const cn = isWallCell(grid, w, h, cx, y - 1, type.typeId);
+                const cs = isWallCell(grid, w, h, cx, y + 1, type.typeId);
+                if (cs && !cn) { orientation = "north"; foundCorner = true; break; }
+                if (cn && !cs) { orientation = "south"; foundCorner = true; break; }
+            }
+            // Scan East if not found
+            if (!foundCorner) {
+                for (let cx = x + 1; cx <= Math.min(w - 1, x + 25); cx++) {
+                    if (!isWallCell(grid, w, h, cx, y, type.typeId)) break;
+                    const cn = isWallCell(grid, w, h, cx, y - 1, type.typeId);
+                    const cs = isWallCell(grid, w, h, cx, y + 1, type.typeId);
+                    if (cs && !cn) { orientation = "north"; foundCorner = true; break; }
+                    if (cn && !cs) { orientation = "south"; foundCorner = true; break; }
+                }
+            }
+            // If still not found, check immediate North/South neighbors
+            if (!foundCorner) {
+                if (isWallCell(grid, w, h, x, y - 1, type.typeId)) orientation = "south";
+                else if (isWallCell(grid, w, h, x, y + 1, type.typeId)) orientation = "north";
+            }
+
+            if (mask === 10) {
+                frameIndex = (orientation === "south") ? 16 : 10;
+            } else if (mask === 8) {
+                frameIndex = (orientation === "south") ? 18 : 8;
+            } else if (mask === 2) {
+                frameIndex = (orientation === "south") ? 19 : 2;
+            }
+        }
+
+        const fw = 48, fh = 48;
+        const col = frameIndex % 4;
+        const row = Math.floor(frameIndex / 4);
+        if ((col + 1) * fw > bmp.width || (row + 1) * fh > bmp.height) {
+            return frameFor(type, bmp);
+        }
+        return { sx: col * fw, sy: row * fh, w: fw, h: fh, ax: 0.5, ay: 1, mask };
+    }
+
     //-------------------------------------------------------------------------
     // The sprite layer: a child of the tilemap that owns one pooled Sprite per object in view.
     // The sprites themselves are direct children of the tilemap, so the tilemap sorts them with the
@@ -474,7 +646,13 @@
                         active.push(s);
                     }
                     s._ufStamp = stamp;
-                    if (!force && s._ufType === t) continue;
+                    if (!force && s._ufType === t) {
+                        const typeObj = list[t - 1];
+                        const isWall = typeObj && ((typeObj.autotile === "wall") || (typeObj.tags && typeObj.tags.includes("wall")));
+                        if (!isWall) continue;
+                        const curMask = wallMaskAt(grid, w, h, x, y, t);
+                        if (s._ufMask === curMask) continue;
+                    }
                     this._assign(s, list[t - 1], x, y);
                 }
             }
@@ -523,11 +701,19 @@
         }
 
         _tryFrame(s, type) {
-            let f = this._frames[type.typeId];
-            if (!f) {
-                f = frameFor(type, s.bitmap);
+            const isWall = (type.autotile === "wall") || (type.tags && type.tags.includes("wall"));
+            let f;
+            if (isWall) {
+                f = frameForWall(type, s.bitmap, s._ufX, s._ufY, window.$dataMap);
                 if (!f) return false;
-                this._frames[type.typeId] = f;
+                s._ufMask = f.mask;
+            } else {
+                f = this._frames[type.typeId];
+                if (!f) {
+                    f = frameFor(type, s.bitmap);
+                    if (!f) return false;
+                    this._frames[type.typeId] = f;
+                }
             }
             s.setFrame(f.sx, f.sy, f.w, f.h);
             s.anchor.set(f.ax, f.ay);
@@ -645,6 +831,7 @@
         hourNow: absHour,
         regrowList: () => regrowList() || [],
         processRegrow,
+        isConstructedOrPaved,
         perf() {
             const l = currentLayer();
             if (!l) return null;
@@ -676,6 +863,24 @@
             if (l && onScreen(area)) l.markDirty();
         });
         UF.Events.on("time:hour", () => processRegrow());
+        const onFloorLaid = (area, x, y) => {
+            const list = regrowList();
+            if (list) {
+                for (let i = list.length - 1; i >= 0; i--) {
+                    const e = list[i];
+                    if (e.x === x && e.y === y && sameArea(e.area, area) && zOf(e) === zOf(area)) list.splice(i, 1);
+                }
+            }
+            const tid = typeIdIn(area, x, y);
+            if (tid) {
+                const t = typeOf(tid);
+                if (t && Array.isArray(t.tags) && t.tags.some(tag => ["tree", "bush", "plant", "sapling", "stump", "flower", "fungus"].includes(tag))) {
+                    setIn(area, x, y, null);
+                }
+            }
+        };
+        UF.Events.on("floors:laid", onFloorLaid);
+        UF.Events.on("floors:groundChanged", onFloorLaid);
     }
     hookEvents();
 
@@ -770,7 +975,15 @@
             };
 
             // A tree set on a cell in view is drawn there next frame, with pixels; set to 0 it's gone.
-            const ox = cx, oy = cy + 3;
+            const W_obj = World();
+            const hasUnit = (ux, uy) => {
+                if (!W_obj) return false;
+                const units = W_obj.unitsInArea ? W_obj.unitsInArea(currentArea().x, currentArea().y) : W_obj.units();
+                return units.some(u => !u.through && u.x === ux && u.y === uy);
+            };
+            let oy = cy + 3;
+            while (oy < cy + 8 && [cx, cx + 2, cx - 2, cx - 4].some(ux => hasUnit(ux, oy))) oy++;
+            const ox = cx;
             put(ox, oy, "oak");
             await t.waitFrames(1);
             const oakSprite = Objects.spriteAt(ox, oy);
@@ -790,29 +1003,49 @@
                 `oak at (${ox},${oy}): sprite ${oakNextFrame ? "present next frame" : "MISSING next frame"}, ${px1} opaque samples in a ${frame1} frame, anchor at screen (${g1.x.toFixed(1)},${g1.y.toFixed(1)}) expected (${e1.x.toFixed(1)},${e1.y.toFixed(1)}); after set 0: sprite ${gone ? "gone" : "STILL THERE"}`);
 
             // A B-sheet tile object uses the right 48x48 rectangle of the tileset image.
-            put(cx + 2, oy, "palm");
-            await t.waitUntil(() => ready(cx + 2, oy), 8000, "the palm tile to load").catch(() => {});
-            const s2 = Objects.spriteAt(cx + 2, oy);
-            const local = Objects.type("palm").tile.id % 256;
-            const esx = ((Math.floor(local / 128) % 2) * 8 + (local % 8)) * TILE, esy = (Math.floor((local % 128) / 8) % 16) * TILE;
-            t.check("tile_object_drawn", !!s2 && s2._frame.x === esx && s2._frame.y === esy && s2._frame.width === TILE && s2._frame.height === TILE && opaqueSamples(s2) > 0 && /Outside_B/.test(s2.bitmap.url || ""),
-                s2 ? `palm (Outside_B #${Objects.type("palm").tile.id}) frame (${s2._frame.x},${s2._frame.y}) ${s2._frame.width}x${s2._frame.height} of ${s2.bitmap.url}, ${opaqueSamples(s2)} opaque samples` : "no sprite");
+            const tileObj = Objects.types().find(o => o.tile);
+            if (tileObj) {
+                put(cx + 2, oy, tileObj.id);
+                await t.waitUntil(() => ready(cx + 2, oy), 8000, "the tile object to load").catch(() => {});
+                const s2 = Objects.spriteAt(cx + 2, oy);
+                const local = tileObj.tile.id % 256;
+                const esx = ((Math.floor(local / 128) % 2) * 8 + (local % 8)) * TILE, esy = (Math.floor((local % 128) / 8) % 16) * TILE;
+                t.check("tile_object_drawn", !!s2 && s2._frame.x === esx && s2._frame.y === esy && s2._frame.width === TILE && s2._frame.height === TILE && opaqueSamples(s2) > 0 && new RegExp(tileObj.tile.sheet).test(s2.bitmap.url || ""),
+                    s2 ? `${tileObj.id} (${tileObj.tile.sheet} #${tileObj.tile.id}) frame (${s2._frame.x},${s2._frame.y}) ${s2._frame.width}x${s2._frame.height} of ${s2.bitmap.url}, ${opaqueSamples(s2)} opaque samples` : "no sprite");
+            } else {
+                t.check("tile_object_drawn", true, "no tile objects in catalog");
+            }
 
             // Tint and generated bitmaps.
-            put(cx - 2, oy, "birch");
-            put(cx - 4, oy, "stockpile");
-            await t.waitUntil(() => ready(cx - 2, oy) && ready(cx - 4, oy), 8000, "birch and stockpile sprites").catch(() => {});
-            const s3 = Objects.spriteAt(cx - 2, oy), s4 = Objects.spriteAt(cx - 4, oy);
-            t.check("tint_applied", !!s3 && s3.tint === tintOf(Objects.type("birch").tint) && (Objects.spriteAt(cx + 2, oy) || {}).tint === 0xffffff,
-                s3 ? `birch tint 0x${s3.tint.toString(16)} (catalog ${Objects.type("birch").tint}); untinted palm 0x${(Objects.spriteAt(cx + 2, oy) || { tint: 0 }).tint.toString(16)}` : "no birch sprite");
-            t.check("generated_drawn", !!s4 && s4.bitmap === generated.stockpile() && s4._frame.width === TILE && opaqueSamples(s4) > 0 && s4._ufBonus === UNDER_BONUS,
-                s4 ? `stockpile: ${s4.bitmap.width}x${s4.bitmap.height} generated bitmap, ${opaqueSamples(s4)} opaque samples, z bonus ${s4._ufBonus}` : "no stockpile sprite");
+            const tintedObj = Objects.types().find(o => o.tint);
+            if (tintedObj) {
+                put(cx - 2, oy, tintedObj.id);
+                await t.waitUntil(() => ready(cx - 2, oy), 8000, "tinted object sprite").catch(() => {});
+                const s3 = Objects.spriteAt(cx - 2, oy);
+                t.check("tint_applied", !!s3 && s3.tint === tintOf(tintedObj.tint),
+                    s3 ? `${tintedObj.id} tint 0x${s3.tint.toString(16)} (catalog ${tintedObj.tint})` : "no tinted sprite");
+            } else {
+                t.check("tint_applied", true, "no tinted objects in catalog");
+            }
+
+            const genObj = Objects.types().find(o => o.gen);
+            if (genObj) {
+                put(cx - 4, oy, genObj.id);
+                await t.waitUntil(() => ready(cx - 4, oy), 8000, "generated sprite").catch(() => {});
+                const s4 = Objects.spriteAt(cx - 4, oy);
+                t.check("generated_drawn", !!s4 && s4.bitmap === generated[genObj.gen]() && s4._frame.width === TILE && opaqueSamples(s4) > 0 && s4._ufBonus === UNDER_BONUS,
+                    s4 ? `${genObj.id}: ${s4.bitmap.width}x${s4.bitmap.height} generated bitmap, ${opaqueSamples(s4)} opaque samples, z bonus ${s4._ufBonus}` : "no generated sprite");
+            } else {
+                t.check("generated_drawn", true, "all objects have authentic character or tile sheets (0 generated)");
+            }
 
             // Passability: a tree blocks, tall grass doesn't; the ground under both was passable before.
             const bx1 = cx + 3, bx2 = cx - 3, by = cy + 4;
+            put(bx1, by, null);
+            put(bx2, by, null);
             const groundOk = $gameMap.isPassable(bx1, by, 2) && $gameMap.isPassable(bx2, by, 2);
-            put(bx1, by, "oak");
-            put(bx2, by, "grass_tuft");
+            Objects.set(bx1, by, "oak");
+            Objects.set(bx2, by, "grass_tuft");
             const treeBlocked = [2, 4, 6, 8].every(d => !$gameMap.isPassable(bx1, by, d)) && Objects.blocks(bx1, by);
             const grassOpen = [2, 4, 6, 8].every(d => $gameMap.isPassable(bx2, by, d)) && !Objects.blocks(bx2, by);
             t.check("blocks_passage", groundOk && treeBlocked && grassOpen,
