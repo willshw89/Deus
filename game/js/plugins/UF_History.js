@@ -2149,16 +2149,24 @@
                     if (defender && !defender.data.dead) {
                         totalCombatRounds++;
                         const cRng = mulberry32(hash32(st.seed, 0x117a, defender.id, beat));
-                        // Threat attacks defender: d20 + 3 vs AC
-                        const beastAtkRoll = Math.floor(cRng() * 20) + 1 + 3;
-                        const defAC = 10 + (defender.data.faction && defender.data.faction.includes("dwarf") ? 2 : 1);
-                        if (beastAtkRoll >= defAC) {
-                            const dmg = Math.floor(cRng() * 4) + 1; // 1-4 damage
+                        // Threat attacks defender: OSRS accuracy roll 0..A vs defence roll 0..D
+                        const beastAtk = 8;
+                        const beastAtkRollMax = (beastAtk + 8) * 64;
+                        const beastAtkRoll = Math.floor(cRng() * (beastAtkRollMax + 1));
+
+                        const defSkill = (defender.data.skills && defender.data.skills.defence) || 1;
+                        const defBonus = (defender.data.faction && defender.data.faction.includes("dwarf")) ? 10 : 0;
+                        const defRollMax = (defSkill + 8) * (64 + defBonus);
+                        const defRoll = Math.floor(cRng() * (defRollMax + 1));
+
+                        if (beastAtkRoll > defRoll) {
+                            const beastMaxHit = Math.max(1, Math.floor(0.5 + (beastAtk + 8) * 64 / 640)); // 1-3 damage
+                            const dmg = Math.floor(cRng() * (beastMaxHit + 1)) || 1;
                             defender.data.hp = Math.max(0, (defender.data.hp || 20) - dmg);
                             defender.data.wounds = defender.data.wounds || [];
                             defender.data.wounds.push({ type: "bite", damage: dmg, beat, year });
-                            gainSkillXp(defender, "defence", 15);
-                            gainSkillXp(defender, "hitpoints", 10);
+                            gainSkillXp(defender, "defence", 16);
+                            gainSkillXp(defender, "hitpoints", Math.round(dmg * 5.33));
 
                             if (defender.data.hp <= 0) {
                                 defender.data.dead = true;
@@ -2171,15 +2179,26 @@
                                     site: st.history.sites[0] ? st.history.sites[0].id : null
                                 });
                             }
+                        } else {
+                            gainSkillXp(defender, "defence", 8);
                         }
 
                         // Defender counter-attacks if still alive
                         if (!defender.data.dead) {
-                            const defAtkRoll = Math.floor(cRng() * 20) + 1 + 2;
-                            if (defAtkRoll >= 11) {
+                            const atkSkill = (defender.data.skills && defender.data.skills.attack) || 1;
+                            const strSkill = (defender.data.skills && defender.data.skills.strength) || 1;
+                            const defAtkRollMax = (atkSkill + 8) * 64;
+                            const beastDefRollMax = (8 + 8) * 64;
+                            const defAtkRoll = Math.floor(cRng() * (defAtkRollMax + 1));
+                            const beastDefRoll = Math.floor(cRng() * (beastDefRollMax + 1));
+
+                            if (defAtkRoll > beastDefRoll) {
                                 defender.data.actions.fight = (defender.data.actions.fight || 0) + 1;
-                                gainSkillXp(defender, "attack", 20);
-                                gainSkillXp(defender, "strength", 15);
+                                const maxHit = Math.max(1, Math.floor(0.5 + (strSkill + 8) * 64 / 640));
+                                const dmg = Math.floor(cRng() * (maxHit + 1)) || 1;
+                                gainSkillXp(defender, "attack", Math.round(dmg * 16));
+                                gainSkillXp(defender, "strength", Math.round(dmg * 16));
+                                gainSkillXp(defender, "hitpoints", Math.round(dmg * 5.33));
                             }
                         }
                     }

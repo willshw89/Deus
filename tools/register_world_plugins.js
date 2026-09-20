@@ -28,7 +28,7 @@ const DESCRIPTIONS = {
     UF_Colonists: "[UF Colonists] The pair as world units: needs, personality, daily pattern, the society plan.",
     UF_Wildlife: "[UF Wildlife] Creatures spawned with the map by biome; wander and flee.",
     UF_Stance: "[UF Stance] Green / yellow / red squares under units by stance toward the colony.",
-    UF_Combat: "[UF Combat] On-map d20 combat engine: attack rolls vs AC, damage dice, criticals, hostile AI aggro, floating damage popups, hit reactions, and death.",
+    UF_Combat: "[UF Combat] Real-time combat on the map in ticks: accuracy and defence rolls, max hits, attack speeds, combat styles, attack modes, hitsplats and health bars.",
     UF_Anim: "[UF Anim] Attack, hurt and death animations for every person, animal and monster; the remains lie on the ground for a while.",
     UF_Speech: "[UF Speech] Remarks, barks, shouts, orders and thoughts float as plain text above the speaker's head (VISION V62).",
     UF_Skills: "[UF Skills] Every person has skills (trades and the fighting skills) that level from 1 to 99 by doing them; higher levels work faster, yield more and make better things.",

@@ -818,33 +818,48 @@
         const I = Items();
         return I ? I.find(Object.assign({}, opts, { near: { x: u.x, y: u.y }, area: levelArea(u), z: zOf(u) })) : [];
     }
-    // Items lying on plan build cells are reserved for their buildings.
+    // Items lying on plan build cells are reserved for their buildings if they match the material needed.
     let _buildCellsSet = null;
     let _buildCellsTick = -1;
-    function onBuildCell(x, y, ref) {
+    function onBuildCell(x, y, ref, itemTypeId) {
         const c = colonyState(ref);
         if (!c) return false;
         if (_buildCellsTick !== localTicks || !_buildCellsSet) {
             _buildCellsTick = localTicks;
-            _buildCellsSet = new Set();
+            _buildCellsSet = new Map();
             for (const s of c.plan || []) {
                 if (!s.build || s.done === true) continue;
-                for (const [dx, dy] of s.cells || []) _buildCellsSet.add(`${c.site.x + dx},${c.site.y + dy}`);
+                const t = stepObject(s);
+                const needs = (t && t.build && t.build.items) || {};
+                for (const [dx, dy] of s.cells || []) {
+                    _buildCellsSet.set(`${c.site.x + dx},${c.site.y + dy}`, needs);
+                }
             }
             const households = World().state.households;
             for (const h of Object.values(households && households.byId || {})) {
                 if (!h.home || !sameLevel(h, c)) continue;
                 const buildings = UF.Households && UF.Households.structures ? UF.Households.structures(h) : [h.home];
                 for (const b of buildings) {
-                    if (b.walls) for (const p of b.walls) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
-                    if (b.doors) for (const p of b.doors) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
-                    if (b.beds) for (const p of b.beds) if (p) _buildCellsSet.add(`${p.x},${p.y}`);
-                    if (b.hearth) _buildCellsSet.add(`${b.hearth.x},${b.hearth.y}`);
-                    if (b.storage) _buildCellsSet.add(`${b.storage.x},${b.storage.y}`);
+                    const wallNeeds = (Objects() && Objects().type(b.wall) && Objects().type(b.wall).build && Objects().type(b.wall).build.items) || { log: 1 };
+                    const doorNeeds = (Objects() && Objects().type(b.door) && Objects().type(b.door).build && Objects().type(b.door).build.items) || { log: 1 };
+                    if (b.walls) for (const p of b.walls) if (p) _buildCellsSet.set(`${p.x},${p.y}`, wallNeeds);
+                    if (b.doors) for (const p of b.doors) if (p) _buildCellsSet.set(`${p.x},${p.y}`, doorNeeds);
+                    if (b.beds) for (const p of b.beds) if (p) _buildCellsSet.set(`${p.x},${p.y}`, { straw: 2 });
+                    if (b.hearth) _buildCellsSet.set(`${b.hearth.x},${b.hearth.y}`, { stone: 2, wood: 2 });
+                    if (b.storage) _buildCellsSet.set(`${b.storage.x},${b.storage.y}`, { wood: 2 });
                 }
             }
         }
-        return _buildCellsSet.has(`${x},${y}`);
+        const needs = _buildCellsSet.get(`${x},${y}`);
+        if (!needs) return false;
+        if (!itemTypeId) return true;
+        if (!needs[itemTypeId]) return false;
+        const I = Items();
+        if (I) {
+            const countOnCell = I.count({ area: levelArea(c), z: zOf(c), x, y }, itemTypeId);
+            if (countOnCell > (needs[itemTypeId] || 1)) return false;
+        }
+        return true;
     }
     const carriedOf = (u, typeId) => (Items() ? Items().inventoryOf(u.id).filter(it => it.type === typeId) : []);
     const carriedCount = (u, typeId) => (Items() ? Items().count(u.id, typeId) : 0);
@@ -2633,6 +2648,56 @@
         return null;
     }
 
+    // Clean site logistics: tidy loose items on the ground into designated stockpiles
+    function tidyStockpileJob(u) {
+        const c = colonyState(u);
+        const I = Items();
+        if (!c || !I || !c.stockpiles || !c.stockpiles.length) return null;
+        if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
+
+        // Find loose ground items within the settlement radius
+        const loose = groundItemsNear(u, { radius: c.radius + 6 }).filter(f => {
+            if (onStockpile(f.item, null, u)) return false;
+            if (onBuildCell(f.x, f.y, u, f.item.type)) return false;
+            return true;
+        });
+        if (!loose.length) return null;
+
+        for (const f of loose) {
+            const t = itemType(f.item.type);
+            if (!t) continue;
+            // Find a stockpile that accepts this item
+            const sp = c.stockpiles.find(s => {
+                const stores = s.stores || [];
+                if (!stores.length) return true;
+                if (Array.isArray(t.tags) && t.tags.some(tag => stores.includes(tag))) return true;
+                if (stores.includes("material") && (hasTag(t, "wood") || hasTag(t, "stone") || hasTag(t, "metal") || hasTag(t, "mineral") || hasTag(t, "fuel"))) return true;
+                if (stores.includes("wood") && hasTag(t, "wood")) return true;
+                if (stores.includes("stone") && hasTag(t, "stone")) return true;
+                if (stores.includes("metal") && hasTag(t, "metal")) return true;
+                if (stores.includes("food") && isFoodType(t)) return true;
+                return false;
+            });
+            if (!sp) continue;
+
+            const itemsAtDest = I.atIn(levelArea(c), sp.x, sp.y);
+            const canStack = itemsAtDest.some(existing => existing.type === f.item.type && (existing.count || 1) < (t.stack || 10));
+            const hasSlot = itemsAtDest.length < 5;
+            if (canStack || hasSlot) {
+                return give(u, {
+                    type: "haul",
+                    target: { x: f.x, y: f.y },
+                    params: {
+                        itemId: f.item.id,
+                        to: { area: copyArea(c.area), z: zOf(c), x: sp.x, y: sp.y },
+                        tidy: true
+                    }
+                });
+            }
+        }
+        return null;
+    }
+
     // Idle: explore (curiosity), stroll near the site, or stand and think.
     function idleJob(u) {
         const c = colonyState(u);
@@ -2653,6 +2718,10 @@
                 }
             }
         }
+
+        // Clean site logistics: tidy loose ground clutter into stockpiles
+        const tidy = tidyStockpileJob(u);
+        if (tidy) return tidy;
 
         const roll = unit01(seed(), SALT.stroll, u.id, ticks());
         const curiosity = facet(u, "curiosity") / 100;

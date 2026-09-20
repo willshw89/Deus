@@ -4,7 +4,31 @@ Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; re
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
 **Last updated:** 2026-09-20
-**Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
+**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
+
+## Autonomous Colonist AI, Room Enclosure & RuneScape Progression — 2026-09-20 (Gemini)
+Delivered per user directives ("Lets get rid of all the d20 stuff too, we're going in the runescape direction of leveling stuff as you do it", "Do all of this that you can", and resolving the 15-wall line and purple icon clutter from the user screenshot):
+- **Full RuneScape / OSRS Combat & Skill Progression**:
+  - `UF_History.js`: Purged legacy d20 dice rolls (`d20 + 3 vs AC`, `d20 + 2`) from historical wilderness combat in favor of authentic OSRS accuracy and defence rolls:
+    - Attack roll: `0..((beastAtk + 8) * 64)`.
+    - Defence roll: `0..((defSkill + 8) * (64 + defBonus))`.
+    - Hit resolution: `atkRoll > defRoll`.
+    - Max hit formula: `Math.max(1, Math.floor(0.5 + effective * (bonus + 64) / 640))`.
+    - Direct XP gains earned by doing: 16 XP per damage to combat styles (`attack`, `strength`, `defence`) and 5.33 XP per damage to `hitpoints`.
+  - `game/js/plugins.js` & `tools/register_world_plugins.js`: Updated `UF_Combat` plugin descriptions to retire d20 AC references in favor of tick-based accuracy/defence/max-hit mechanics.
+  - Verification: `node tools/run_tests.js combat` (19/19 PASS), `node tools/run_tests.js skills` (14/14 PASS), `node tools/test_second_by_second_history.js` (15/15 PASS).
+- **Adaptive Architectural Room Enclosure & Separation Buffer (`UF_Households.js`)**:
+  - Resolved 15-wall continuous slab bug: restricted abutting party-wall candidate search strictly to bedroom annexes of the same household. Distinct household homes enforce $\ge 1$ tile buffer separation (`reserved` grid bounds), ensuring distinct 4-wall standalone buildings with navigable alleys.
+  - Doorway First: `home.steps` reordered to frame entrance doors concurrently with perimeter walls rather than locking door placement behind 30+ wall completions.
+  - In-Engine Roof Deck Construction: `strictEnclosure(h, p)` now directly triggers `UF_Floors.applyRoofedUpperDeck` upon four-wall + door completion, generating an upper walkable floor on Z+1 and marking all interior cells `isRoofed`.
+- **Clean Site Logistics & Clutter Elimination (`UF_Colonists.js`, `UF_WorldCatalog.json`)**:
+  - `tidyStockpileJob(u)`: Colonists actively haul loose ground clutter (felled logs, quarried stone, smelted iron/copper bars, food, resources) within settlement radius into appropriate stockpiles.
+  - `onBuildCell(x, y, ref, itemTypeId)`: Construction footprint reservation refined to only reserve materials actually needed by that specific structure cell. Non-required items (such as iron bars lying on a wooden wall plot) and surplus materials are immediately unlocked for haulers to clear.
+  - `UF_WorldCatalog.json`: Added `"metal"` and `"material"` to `woodpile` / materials stockpile `stores` arrays so that smelted iron bars (`!$UF_Icon_313.png`) are neatly stored in stockpiles instead of accumulating on the grass.
+  - Fixed `check_catalog.js` validation: added missing `earth`, `ceramic`, and `mineral` to `materials.list`; removed misplaced `workplace` tag from passable `farm_plot`. Result: 19/19 catalog checks PASS.
+- **Slice 0 Marked APPROVED**:
+  - Slice 0 (Toroidal Round World, 2.5D projection, 8-way movement, zoom, honest test harness) formally approved; Slice 1 activated.
+
 ## Round / Toroidal World & Seamless Seam Wrapping — 2026-09-20 (Gemini)
 Delivered per user directive ("make the world round. I want to be able to talk [walk] from the right side of the map onto the left, vice verse, north and south and well"):
 - **Fully Round / Toroidal World Navigation (`UF_World.js`)**:

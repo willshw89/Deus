@@ -412,15 +412,10 @@
             for (let y = p.y - 1; y <= p.y + p.h; y++) for (let x = p.x - 1; x <= p.x + p.w; x++) reserved.add(key(x, y));
         for (const p of W().units()) if (!dead(p) && samePlace(h, p)) occupied.add(key(p.x, p.y));
         // Contiguous Family Housing Search ("Homes Into Each Other"):
-        // For annexes, or when household members have kin in an existing household at this site:
+        // Abutting candidates sharing party walls are strictly for bedroom annexes of the same household.
+        // Distinct household homes must remain detached with buffer spacing for settlement navigation.
         const kinStructures = [];
-        if (h.home) kinStructures.push(...structures(h));
-        for (const other of Object.values(state().byId)) {
-            if (other.id !== h.id && samePlace(h, other) && structures(other).length) {
-                const isKin = members(h).some(m => members(other).some(o => closeKin(m, o)));
-                if (isKin) kinStructures.push(...structures(other));
-            }
-        }
+        if (annex && h.home) kinStructures.push(...structures(h));
 
         if (kinStructures.length > 0) {
             const size = dimensions(design);
@@ -632,8 +627,8 @@
 
         // 5 base bootstrap steps for fresh unbuilt homes:
         home.steps = [
-            step("walls", home.wall, buildableWalls),
             step("doors", home.door, home.doors),
+            step("walls", home.wall, buildableWalls),
             step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
             step("hearth", "campfire", [home.hearth].filter(Boolean)),
             step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
@@ -643,8 +638,8 @@
             const a = home.annexes[i];
             const annexWalls = a.walls.filter(w => !isCaveWall(w.x, w.y));
             home.steps.push(
-                step(`annex${i}_walls`, a.wall, annexWalls),
                 step(`annex${i}_doors`, a.door, a.doors),
+                step(`annex${i}_walls`, a.wall, annexWalls),
                 step(`annex${i}_beds`, "floor_straw", a.beds.filter(b => b.unitId !== null))
             );
         }
@@ -736,8 +731,16 @@
             const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
             return s === "solid" || s === 1;
         };
-        return p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
+        const enclosed = p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
             p.doors.every(c => object(h, c) && object(h, c).id === p.door);
+        if (enclosed && !p.isRoofed) {
+            p.isRoofed = true;
+            const F = window.UF && UF.Floors;
+            if (F && typeof F.applyRoofedUpperDeck === "function") {
+                F.applyRoofedUpperDeck(areaOf(h), { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
+            }
+        }
+        return enclosed;
     }
     function demands(refH) {
         const h = resolve(refH), people = h ? members(h) : [], p = h && h.home;

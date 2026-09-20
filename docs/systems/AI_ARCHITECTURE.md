@@ -193,3 +193,4 @@ Colonists synchronize their daily schedules to create a living community:
 3. **Step 3: Adaptive Architectural Construction Engine (`UF_Construction.js`)**: Transition live construction from static catalog coordinate lists to autonomous 4-wall room enclosure with doorway, hearth, and roof deck integration.
 4. **Step 4: Logistics & Site Clearing Protocol**: Introduce pre-construction site clearing so felled materials are neatly stockpiled rather than abandoned as ground clutter.
 5. **Step 5: Verification & Acceptance**: Verify across automated unit tests (`node tools/run_tests.js colonists`, `setup`, `smoke`), 60 FPS performance benchmarks, and live in-engine screenshots of colonists building cohesive homes.
+

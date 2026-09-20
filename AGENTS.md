@@ -81,17 +81,17 @@ If "Not done / known problems" is empty, reread your evidence. It's almost never
 
 Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, "strange mood", "fey mood", …). It also never uses D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki, …). Generic fantasy is fine: elves, dwarves, goblins, trolls, dragons. If any text comes from the D&D SRD 5.1, it's CC-BY-4.0 and needs attribution in the game credits.
 
-## Two agents, one project
-Roles (set by the user 2026-09-18, revised the same day; this replaces the earlier split):
-- **Claude Code: engine and features.** All code (`game/js/plugins/`, `tools/`, tests), the RMMZ data files, the guardrail docs, and **`docs/ASSET_REQUESTS.md`**: every piece of art the engine needs, with an exact spec. Claude Code checks each delivered asset against its spec before integrating it.
-- **Gemini: art.** Makes the assets in `docs/ASSET_REQUESTS.md` to spec, following `docs/ART_STANDARD.md` and `docs/GUIDE_25D.md`, including U7 stand-ins. **Gemini doesn't edit code, tools, or `game/data/`.** If an asset needs an engine change, Gemini writes it under "Notes for Claude Code" in `docs/ASSET_REQUESTS.md`.
+## Agents and collaboration
+Roles (updated by user directive 2026-09-20; establishes unified full-stack capability):
+- **Gemini / Antigravity**: Full-stack systems engineering, plugin architecture (`game/js/plugins/`), automated test harnesses (`tools/`), data schemas (`game/data/`), and original art production via Google Nano Banana Pro (`art/`, `game/img/`).
+- **Claude Code**: Systems engineering, engine plugins, automated test suites, data catalogs, and asset integration review.
 
 Who touches what:
 | Path | Owner |
 |---|---|
-| `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Claude Code |
-| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` status column and Notes, the `objects` list in `game/data/UF_WorldCatalog.json` (per `docs/handoffs/HANDOFF_world_generation.md`) | Gemini |
-| `docs/ASSET_REQUESTS.md` requests and specs, other `docs/` | Claude Code (either agent may add Notes) |
+| `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Gemini & Claude Code (collaborative / task-claimed) |
+| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` | Gemini & Claude Code |
+| `docs/` | Gemini & Claude Code |
 
 Rules:
 - **Claim before you start.** Add a line under "In progress" in `docs/STATUS.md`: agent, task, files/folders you'll touch.

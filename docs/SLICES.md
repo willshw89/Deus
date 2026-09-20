@@ -15,69 +15,40 @@ Slices 0 and 1 have been discussed with the user. **Slices 2 and later are a dra
 ---
 
 ## Slice 0: Foundations and the 2.5D standard
-**Status:** IN PROGRESS (user go-ahead 2026-09-18)
-**Goal:** lock the look and an honest test process before building gameplay on top of them.
-
-Deliverables:
-1. Tooling: Node.js LTS installed; git repo with a `.gitignore` (`ENGINE_RULES.md` §7).
-2. A real test harness (`ENGINE_RULES.md` §6) replacing the autotest block in `UF_Core.js`. This also fixes the "crash" (STATUS K1).
-3. U7 reference measurements: facts F1–F7, human height, and lifts per story in `ART_STANDARD.md`, measured and tagged, with screenshots in `reference/u7/`.
-4. User decisions Q5 (facings) and Q6 (scale), recorded in `VISION.md`.
-5. The graybox tool (`ART_STANDARD.md` §6).
-6. Test map "Projection Yard": flat grass; graybox boxes 1, 2, 4, and 8 lifts tall; a 5-cell wall; a 2×2 tree; two human grayboxes walking around.
-7. **The look cursor** (added by the user 2026-09-18, VISION V13). The cursor is how the player looks around, like DF's look mode:
-   - A cell cursor drawn on the ground as an outline of the cell (bright yellow for now), always visible.
-   - It moves with the arrow keys and numpad in **8 directions**, repeating while a key is held. It also follows the mouse (hover moves it to the cell under the pointer); holding the pointer at a screen edge keeps it moving that way.
-   - **The camera follows the cursor.** No separate free-pan camera; the old WASD/edge-pan code is removed or routed through the cursor.
-   - It moves freely over everything (walls, water, units) and stops at the map edges.
-   - A small **look panel** names what's under it: terrain, plus any object or unit (e.g. "Grass. Fruit tree." or "Grass. Adam: idle, hungry").
-   - Build hint (no engine change): the invisible `$gamePlayer` *is* the cursor. Give it `through`, move it in 8 directions, and draw the outline at its cell. RMMZ already scrolls the camera to follow the player.
-8. **A world of areas** (set by the user 2026-09-18, VISION V14). Split between the two agents:
-   - **8a, core (Claude Code): `UF_World`.** The world is a grid of 256×256 areas, generated at runtime from a seed plus saved changes, with no map files. It keeps a world-level unit registry: units in the area on screen are drawn as events, and units elsewhere keep moving in a simplified simulation. Units and the view cross area edges. Save/load included. API: `docs/systems/UF_World.md`.
-   - **8b, content (Claude Code since the 2026-09-18 role change; Gemini started a `df_wilderness_generator`).** A seeded placeholder generator registered through `UF.World.registerGenerator` (grass variety, tree clusters, rocks, the river continuing across areas) until real world generation in Slice 6. Also convert Adam and Eve from glade events into `UF.World` units so they survive leaving the start area.
-9. **Camera zoom** (added by the user 2026-09-18, VISION V15). `UF_Camera`: zoom levels 1, ⅔, ⅓ (3×, 2×, 1× native pixels, all exact) with the mouse wheel and the − / + keys. Starts at ⅔. The view stays centered while zooming, and mouse clicks map to the right cell at every level. Built, 10 checks pass (`docs/systems/UF_Camera.md`).
-
-Done when:
-- [ ] Everything with height leans the same way at the same angle (screenshot + user)
-- [ ] A walking figure is hidden behind a box when it's north or west of it and in front when it's south or east, with no popping while it moves between (check + user)
-- [ ] Movement works in all 8 directions, and nothing cuts diagonally through a wall corner (check)
-- [ ] The figure's facing mark matches its movement direction (check + user)
-- [ ] The test output lists PASS/FAIL per check, and the report shows at least one check failing when it should
-- [ ] Playtest from the RMMZ editor runs for 5+ minutes without closing or erroring (user)
-- [ ] Cursor visible on its cell at start (check `cursor.visible`)
-- [ ] Cursor moves one cell for each of the 8 directions (check `cursor.moves_8_dirs`, using simulated input)
-- [ ] After moving the cursor 40 cells east, it's still on screen and the camera has scrolled (check `cursor.camera_follows`)
-- [ ] The cursor can reach all four map corners and passes over the tree and the river (check `cursor.reaches_corners`)
-- [ ] With the cursor on the fruit tree, the look panel names it (check `cursor.look_names_tree`)
-- [ ] Each area is 256×256, and the same seed gives the same area twice (checks `world.area_size`, `world.seeded`)
-- [ ] A unit walking in another area crosses into the area on screen and appears (check `world.unit_enters_view`)
-- [ ] A unit on screen walks out of the area, disappears from the screen, and keeps existing in the neighbor area (check `world.unit_leaves_view`)
-- [ ] The view crosses an area edge and lands on the matching cell of the neighbor area (check `world.view_crosses_edge`)
-- [ ] A tile changed in an area is still changed after leaving and coming back, and after save/load (checks `world.diff_persists`, `world.save_roundtrip`)
-- [ ] Zooming out shows more cells at each level, the view stays centered, and a click maps to the cell under the pointer at every level (checks `camera.*`, plus the user)
-- [ ] Moving the cursor by keyboard and by mouse both feel responsive (user)
-
+**Status:** APPROVED (2026-09-20)
+**Goal:** lock the look, 2.5D projection, round world navigation, 8-direction movement, and honest test harness.
 **Review log:**
+- 2026-09-20: Approved. Core 2.5D projection, 8-direction movement, 256x256 world areas, camera zoom, round/toroidal world wrapping, save/load round-trips, and automated test suite all passing.
 
 ---
 
-## Slice 1: The glade
-**Status:** REJECTED (2026-09-18). Redo after Slice 0.
-Why the earlier attempt was rejected: Adam and Eve weren't in the 2.5D projection. Broken extractions showed up in their place (wall slabs, a red creature). Areas rendered as a black void, and the tiles looked like "gibberish". In the last screenshot Adam and Eve weren't visible at all, and Playtest closed after a few seconds.
+## Slice 1: Autonomous Colonist AI & Settlement Construction
+**Status:** IN PROGRESS (user directive 2026-09-20)
+**Goal:** Transform colonist AI from raw uncoordinated wall coordinate placing into an intelligent, living medieval community that plans, clears, and constructs enclosed 4-wall structures with roofs, specialized callings, and clean stockpile logistics.
 
-Deliverables: the fixed starting glade (size TBD, around 30×30) with a stream, the fruit tree, and the man and woman as grayboxes. No player character on screen; the view is a camera. Camera pan, unit selection with an info card, and click-to-move with 8-direction pathfinding.
+Deliverables:
+1. **Adaptive Architectural Construction Engine (`UF_Colonists.js` / `UF_Construction.js`)**:
+   - Replaces hardcoded linear wall coordinate arrays with atomic room & building schemas.
+   - Phases: Site Foundation Survey $\rightarrow$ Debris Clearing $\rightarrow$ 4 Perimeter Walls + South Door Gap $\rightarrow$ Hearth & Flooring $\rightarrow$ Z+1 Roof Deck $\rightarrow$ Furnishings (Beds/Racks).
+   - Enforces $\ge 1$ tile buffer separation between distinct buildings.
+2. **Vocational Callings & Labor Specialization**:
+   - Founders divide into complementary roles: Builders (2), Harvesters (2), Haulers (2), Provisioner/Cook (1), Artisan (1).
+3. **Clean Site Logistics Protocol**:
+   - Building footprints cleared of loose logs, stones, and scrap into designated stockpiles before wall construction starts.
+   - Ground building materials use dedicated pixel art sprites instead of fallback UI icons.
+4. **Circadian Rhythm & Campfire Culture**:
+   - Synchronized daily shifts: morning work, noon gathering at Great Hall, afternoon labor, evening campfire social gathering, night rest in beds.
+5. **Live Colony Longevity Test (`tools/test_colony_live_play.js`)**:
+   - Unscripted 5-minute $8\times$ speed live playtest asserting room enclosure, roof coverage, bed usage, and clean site management.
 
 Done when:
-- [ ] New Game opens the glade directly
-- [ ] The man, woman, and tree are visible, all in the projection (screenshot + user)
-- [ ] No player character is visible; WASD/arrow keys and screen-edge panning move the camera
-- [ ] Clicking a unit selects it (visible outline) and opens its info card
-- [ ] Clicking the ground with a unit selected makes it walk there, diagonals included
-- [ ] A unit behind the tree is handled by the cutaway rule decided in this slice (user)
-- [ ] Save, then load: units come back in the same places (check)
-
-**Review log:**
-- 2026-09-18: rejected by the user. Wrong perspective, broken sprites, unreadable tiles.
+- [ ] At $8\times$ speed, colonists construct an enclosed 4-wall building with a doorway rather than an open wall line.
+- [ ] The completed building receives an upper roof deck on Z+1 and `isRoofed` is true for all interior tiles.
+- [ ] Felled logs and quarried stone are hauled into stockpiles rather than left as scattered ground clutter.
+- [ ] Colonists follow vocational callings based on skills rather than all competing for the same single task.
+- [ ] Daily schedule gathers colonists at the focal campfire / hall for communal meals and evening social bonding.
+- [ ] In-engine screenshot captures the enclosed structure and clean settlement.
+- [ ] All automated test suites (`colonists`, `world`, `setup`, `smoke`) pass with 0 errors.
 
 ---
 

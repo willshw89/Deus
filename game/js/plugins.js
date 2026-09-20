@@ -32,7 +32,7 @@ var $plugins =
 {"name":"UF_Wildlife","status":true,"description":"[UF Wildlife] Creatures spawned with the map by biome; wander and flee.","parameters":{}},
 {"name":"UF_Ecology","status":true,"description":"[UF Ecology] Plants spread and regrow; wildlife and monsters recover under biome caps; ore never returns.","parameters":{}},
 {"name":"UF_Stance","status":true,"description":"[UF Stance] Green / yellow / red squares under units by stance toward the colony.","parameters":{}},
-{"name":"UF_Combat","status":true,"description":"[UF Combat] On-map d20 combat engine: attack rolls vs AC, damage dice, criticals, hostile AI aggro, floating damage popups, hit reactions, and death.","parameters":{}},
+{"name":"UF_Combat","status":true,"description":"[UF Combat] Real-time combat on the map in ticks: accuracy and defence rolls, max hits, attack speeds, combat styles, attack modes, hitsplats and health bars.","parameters":{}},
 {"name":"UF_Anim","status":true,"description":"[UF Anim] Attack, hurt and death animations for every person, animal and monster; the remains lie on the ground for a while.","parameters":{}},
 {"name":"UF_Fog","status":true,"description":"[UF_Fog]","parameters":{}},
 {"name":"UF_DayNight","status":true,"description":"[UF DayNight] Day/night cycle on world maps: smooth light from the clock, shorter sight at night, constant cave light, on-screen clock.","parameters":{"NightVision":"0.55","ShowClock":"false"}},
