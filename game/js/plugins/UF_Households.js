@@ -32,7 +32,7 @@
     const unitOf = u => u && typeof u === "object" ? u : W() && W().unit(u);
     const dead = u => !!(u && u.data && (u.data.dead === true || u.data._isDying === true));
     const person = u => !!(u && u.data && ["colonist", "person"].includes(u.data.kind));
-    const adult = u => !!(u && u.data && Number.isFinite(u.data.age) && u.data.age >= 18);
+    const adult = u => !!(u && u.data && ((Number.isFinite(u.data.age) && u.data.age >= 15) || u.data.stage === "adult" || u.data.stage === "elder"));
     const tick = () => window.UF && UF.Time && typeof UF.Time.ticks === "function" ? UF.Time.ticks() : W() && W()._frame || 0;
     const day = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 0}` : "0:0:0";
     const emit = (event, ...args) => { if (window.UF && UF.Events) UF.Events.emit(event, ...args); };
@@ -150,11 +150,40 @@
     }
     function formPair(a, b) {
         a = unitOf(a); b = unitOf(b);
+        if (!a || !b) return null;
         reconcile();
         if (pairReason(a, b)) return null;
-        a.data.partner = b.id; b.data.partner = a.id;
-        const h = merge(of(a) || make(a), of(b) || make(b));
+        a.data.partner = b.id;
+        a.data.partnerId = b.id;
+        a.data.partnerName = b.name;
+        b.data.partner = a.id;
+        b.data.partnerId = a.id;
+        b.data.partnerName = a.name;
+
+        const ha = of(a);
+        const hb = of(b);
+
+        // If either unit is living with parents or other relatives, they branch off to establish
+        // their own independent household rather than merging parental households together!
+        const aHasFamily = ha && members(ha).some(m => m.id !== a.id && m.id !== b.id);
+        const bHasFamily = hb && members(hb).some(m => m.id !== b.id && m.id !== a.id);
+
+        let h;
+        if (aHasFamily || bHasFamily) {
+            if (ha) ha.members = (ha.members || []).filter(id => id !== a.id && id !== b.id);
+            if (hb && hb.id !== (ha && ha.id)) hb.members = (hb.members || []).filter(id => id !== a.id && id !== b.id);
+            h = make(a);
+            join(b, h);
+        } else {
+            h = merge(ha || make(a), hb || make(b));
+        }
+
+        if (h && !h.surname) {
+            h.surname = a.data.surname || b.data.surname || (ha && ha.surname) || (hb && hb.surname) || "Newfamily";
+        }
+
         emit("households:paired", a, b, h);
+        emit("colonists:pairbonded", a, b, h);
         return h;
     }
     function generations() {
@@ -183,7 +212,23 @@
             for (const u of people) if (!fits(of(u), context(u))) make(u);
             for (const u of people) {
                 const p = unitOf(partnerId(u));
-                if (p && partnerId(p) === u.id && !pairReason(u, p)) merge(of(u), of(p));
+                if (p && partnerId(p) === u.id && !pairReason(u, p)) {
+                    const hu = of(u), hp = of(p);
+                    if (hu && hp && hu.id !== hp.id) {
+                        const uHasOther = members(hu).some(m => m.id !== u.id && m.id !== p.id);
+                        const pHasOther = members(hp).some(m => m.id !== p.id && m.id !== u.id);
+                        if (uHasOther || pHasOther) {
+                            if (hu) hu.members = (hu.members || []).filter(id => id !== u.id && id !== p.id);
+                            if (hp && hp.id !== hu.id) hp.members = (hp.members || []).filter(id => id !== u.id && id !== p.id);
+                            const h = make(u);
+                            join(p, h);
+                            if (!h.surname) h.surname = u.data.surname || p.data.surname || (hu && hu.surname) || (hp && hp.surname) || "Newfamily";
+                            emit("households:paired", u, p, h);
+                        } else {
+                            merge(hu, hp);
+                        }
+                    }
+                }
             }
             // A child joins a known parent's household; parenthood does not
             // invent a marriage or merge two unpartnered parents' households.
@@ -349,6 +394,9 @@
         // has no recipe. Only their own existing laterWall is a valid fallback.
         if ((!o.type(wall) || !o.type(wall).build) && culture.laterWall && o.type(culture.laterWall) && o.type(culture.laterWall).build) wall = culture.laterWall;
         if (!o.type(wall) || !o.type(wall).build) wall = "wall_wood";
+        if ((!window.UF || !UF.CultureGrowth || !UF.CultureGrowth.preferredDoor) && (wall === "wall_stone" || wall.includes("stone"))) {
+            if (o.type("door_stone") && o.type("door_stone").build) door = "door_stone";
+        }
         if (!o.type(door) || !o.type(door).build) door = "door_wood";
         if ([wall, door, ...SUPPORTED].some(id => !o.type(id) || !o.type(id).build)) { h.reason = "Home building definitions unavailable"; return null; }
         const reserved = new Set(), occupied = new Set(), bootstrap = new Set();
@@ -706,8 +754,32 @@
         const d = demands(h), people = members(h);
         return { id: h.id, members: people.map(u => u.id), generation: h.generation, home: h.home,
             complete: d.members > 0 && !d.bedrooms && !d.beds && !d.cooking && !d.storage && !d.overflow,
-            demands: d, children: people.filter(u => Number.isFinite(u.data.age) && u.data.age < 18).map(u => u.id),
+            demands: d, children: people.filter(u => Number.isFinite(u.data.age) && u.data.age < 15).map(u => u.id),
             reason: h.expansionBlocked ? h.expansionReason : h.reason };
+    }
+    function isEnclosed(refH) {
+        const h = resolve(refH);
+        return !!(h && h.home && strictEnclosure(h, h.home));
+    }
+    function isSheltered(refH) {
+        const h = resolve(refH);
+        if (!h || !h.home || !strictEnclosure(h, h.home)) return false;
+        const d = demands(h);
+        return !d.beds && !d.cooking;
+    }
+    function activeFocalHousehold(c) {
+        const s = state();
+        if (!s || !c) return null;
+        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && h.home)
+            .sort((a, b) => (a.foundedTick || 0) - (b.foundedTick || 0) || String(a.id).localeCompare(String(b.id)));
+        if (!siteH.length) return null;
+        // 1. Primary priority: first household whose home is not yet sheltered
+        const unsheltered = siteH.find(h => !isSheltered(h));
+        if (unsheltered) return unsheltered;
+        // 2. Secondary priority: any household whose home is not yet completely built
+        const incomplete = siteH.find(h => !describe(h).complete);
+        if (incomplete) return incomplete;
+        return siteH[0];
     }
     function sitePlanSteps(c, u) {
         const s = state();
@@ -753,7 +825,8 @@
     root.UF = root.UF || {};
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
-        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor };
+        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
+        isEnclosed, isSheltered, activeFocalHousehold, join, make };
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;

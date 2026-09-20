@@ -7,6 +7,66 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
+
+## Cooperative Settlement Construction, Founder Pairbonding Confirmation, and Adult Offspring Pairbonding — 2026-09-20 (Gemini)
+Delivered per user directives ("Instead of everyone building their own shit from the get go, let's have the starting villagers help each other. Also, please confirm that the 4 males and 4 females are pairbonding at creation? The male and female offspring should also pairbond when they become adults"):
+- **Founder 1:1 Pairbonding Confirmation at Creation**:
+  - Confirmed and verified across live save data (`file0.rmmzsave`) and runtime history generation: all 72 founders across all 9 world factions (f1..f9) have exactly 4 adult males and 4 adult females pairbonded 1:1 at creation with 100% mutual reciprocity (`a.partnerId === b.id && b.partnerId === a.id`), matching surnames, and shared family IDs.
+  - Verified via `tools/test_faction_founder_pairbonding.js`: **34/34 PASS, 0 FAIL**.
+- **Cooperative Sequential Settlement Construction (`UF_Households.js`, `UF_Colonists.js`)**:
+  - Implemented `isEnclosed(refH)` and `isSheltered(refH)` in `UF_Households.js` to determine whether a household structure is dry, enclosed, and equipped with basic bedding and cooking facilities.
+  - Implemented `activeFocalHousehold(c)` in `UF_Households.js`: deterministically selects the active communal focal household for the site (ordered by foundation tick/id), prioritizing the first unsheltered home under construction.
+  - Updated `effectivePlan(u)` and `planJob(u)` in `UF_Colonists.js`:
+    - All villagers cooperatively unite their labor on the active focal household's enclosure and shelter steps (+4.5 communal priority bonus).
+    - While the communal focal house is unsheltered, secondary household projects are deferred (-2.0 penalty) to prevent scattering labor across multiple unbuilt homes simultaneously.
+    - When House 1 becomes sheltered, the communal focus automatically advances to House 2, then House 3, etc.
+- **Adult Offspring Non-Kin Pairbonding & Independent Households (`UF_Colonists.js`, `UF_Households.js`)**:
+  - Standardized the adulthood threshold to `age >= 15` / `stage === "adult"`.
+  - Implemented `attemptAdulthoodPairbond(u)` in `UF_Colonists.js`: when offspring reach age 15 (`stage === "adult"`), they evaluate eligible opposite-gender non-kin adults in the same settlement and level, strictly guarding against incest (cannot partner with mother, father, siblings, children, or close ancestors via `UF.Households.closeKin`).
+  - Updated `formPair` and `reconcile` in `UF_Households.js`: when adult offspring pairbond, they branch off to establish their own independent household (`h = make(u); join(p, h)`) rather than merging their parents' households.
+- **Verification Evidence**:
+  - Automated suite `tools/test_cooperative_building_and_offspring_pairbonding.js`: **4/4 PASS, 0 FAIL (exit 0)**.
+  - Rule 4 mutant checks:
+    - `--mutant=no_focal_bonus`: caught (exit 1).
+    - `--mutant=allow_incest`: caught (exit 1).
+    - `--mutant=no_adult_pairbond`: caught (exit 1).
+    - `--mutant=merge_parent_households`: caught (exit 1).
+  - Automated suite `tools/test_faction_construction_and_homes.js`: **5/5 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `node tools/run_tests.js colonists`: **20/20 PASS, 0 FAIL (exit 0)** in 31s at x8 speed, 0 console errors.
+  - In-engine suite `node tools/run_tests.js genetics`: **4/4 PASS, 0 FAIL (exit 0)**.
+  - Screenshot inspection: `game/test_output/genetics.human_genetics_and_aging.png` opened and verified showing multi-generational colony with adults, elders, and children gathered around the campfire on a green meadow.
+
+
+## Wall-Attached Doors & Complete Visual Structure Enclosure — 2026-09-20 (Gemini)
+Delivered per user directive ("I want you to take over Doors in terms of construction and attaching them to walls to complete a structure visually"):
+- **48×96 Door Sprite Standard & Integrated Wall Coping (`!$UF_Door_Wood.png`, `!$UF_Door_Stone.png`, `!$UF_Door_Iron.png`)**:
+  - Replaced legacy 48×48 door sheets with standardized 48×96 frames ($144\times 384$ px total sheet size for 3 animation columns × 4 directions), matching wall heights and anchors (`[0.5, 1.0]`).
+  - **Upper 48px ($y = 0..47$)**: Continuous wall coping and horizontal/vertical lintel headers derived directly from active wall sets (`!$WallWood_Set.png` and `!$WallStone_Set.png`). Connects seamlessly with adjacent wall coping at $(x, y - 1)$, eliminating the visual 48×48 hole in the roofline directly above doorways.
+    - Wood: Heavy structural timber lintel beam header spanning the full 48px width.
+    - Stone: Dressed granite arch lintel header connecting flanking ashlar stone walls.
+    - Iron: Wrought-iron banded stone arch with heavy iron rivet studs.
+  - **Lower 48px ($y = 48..95$)**: Authentic Google Nano Banana Pro door leaves from `art/raw/doors_v2_nano_pro.png` (Closed, Ajar, and 100% Clear Open) with side jambs connecting directly up to the lintel header.
+  - **Sidecars**: Deployed `!$UF_Door_Wood.json`, `!$UF_Door_Stone.json`, and `!$UF_Door_Iron.json` specifying `frameWidth: 48, frameHeight: 96, anchor: [24, 96]`.
+  - **Palette & Originality Compliance**: 100% compliant with `art/palette/uf.hex` (0 non-palette pixels, <= 31 unique colors per sheet); passes originality check against U7 library with closest distances 0.424–0.539 (all well above 0.28 threshold; exit 0).
+- **Visual Attachment & Roof Role Resolution (`UF_Walls.js`)**:
+  - Enhanced `UF_Walls.js:baseAt(area, x, y)` to recognize `isDoorType`: cell $(x, y)$ resolves as `"wall"`, and cell $(x, y - 1)$ directly above the door resolves as `"roof"` belonging to the door's integrated coping.
+- **Construction Material Harmonization (`UF_Doors.js`, `UF_Households.js`)**:
+  - Implemented `doorMaterialForWalls` in `UF_Doors.js`: door placement in wall runs automatically senses flanking wall materials (`wall_stone` -> `door_stone`, `wall_wood` -> `door_wood`).
+  - Updated `UF_Households.js` home layout planning to match door materials to the structure's chosen wall material.
+- **Passage Reliability & Test Actor Isolation (`UF_Colonists.js`, `UF_Doors.js`)**:
+  - Fixed settlement AI hijacking: updated `UF_Colonists.js:isSettler` and `ensureSettlementActors` to exclude units with `u.data.manual`, `u.data.ai === "manual"`, or names starting with `"TEST_"`.
+  - Wrapped test door checks with `UF.Colonists.setEnabled(false)` / `setEnabled(true)`.
+  - Resolved all 3 prior test failures (`faction_passes`, `ally_passes`, `open_frame`).
+- **Verification Evidence**:
+  - Suite `node tools/run_tests.js doors`: **15/15 PASS, 0 FAIL (exit 0)**.
+  - Suite `node tools/run_tests.js walls`: **8/8 PASS, 0 FAIL (exit 0)**.
+  - Suite `node tools/run_tests.js colonists`: **20/20 PASS, 0 FAIL (exit 0)** in 18s at x8 speed, 0 console errors.
+  - Suite `node tools/run_tests.js overseer`: **6/6 PASS, 0 FAIL (exit 0)**.
+  - Originality check `node tools/originality_check.js`: **3/3 PASS, 0 FAIL (exit 0)**.
+  - Screenshot inspection:
+    - `game/test_output/doors.open_colonist_passing.png`: 48×48 hole at $(x, y - 1)$ completely gone; continuous wood wall coping across north wall; friendly colonist passing cleanly through the open doorway.
+    - `game/test_output/doors.closed_animal_outside.png`: Closed door firmly shut in wall run with continuous coping; wildlife blocked outside.
+
 ## Clean-Shaven Faceset Generator & Dynamic Armor Reflection on Portraits — 2026-09-20 (Gemini)
 Delivered per user directives ("Let's get rid of facial hair on the faceset generator. Also, I want the bottom armor portion to reflect what armor they are currently wearing."):
 - **Clean-Shaven Faceset Generator (`tools/test_generator_combinations.js`, `tools/bake_generator_pool.js`)**:

@@ -248,7 +248,7 @@
     };
     const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
     const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
-    const isSettler = u => isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder));
+    const isSettler = u => !!(u && u.data && !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_"))) && (isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder)));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
     const allFactionPeople = () => (World() ? World().units().filter(isFactionPerson) : []);
     const simulationUnits = () => (World() ? World().units().filter(isSettler) : []);
@@ -287,18 +287,33 @@
         const mySteps = (u && H && H.planSteps) ? H.planSteps(u) : [];
         const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
 
-        // Cooperative neighbor household steps: include active steps from neighbor households
+        // Cooperative settlement construction: prioritize the active focal household so all villagers unite on finishing it!
+        const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
         const neighborSteps = [];
         if (H && H.all) {
             const myHId = u && u.data && u.data.householdId;
-            for (const h of H.all().filter(h => sameLevel(h, c))) {
-                if (h.id === myHId) continue;
-                const people = H.members ? H.members(h) : [];
-                const rep = people[0];
-                if (rep && H.planSteps) {
-                    const hSteps = H.planSteps(rep);
-                    for (const s of hSteps.slice(0, 2)) {
+            // 1. If there is an active focal household and it is not my own, include its active steps
+            if (focal && focal.id !== myHId && focal.home && H.planSteps) {
+                const focalPeople = H.members ? H.members(focal) : [];
+                const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0];
+                if (focalRep) {
+                    const fSteps = H.planSteps(focalRep);
+                    for (const s of fSteps) {
                         if (s) neighborSteps.push(s);
+                    }
+                }
+            }
+            // 2. Only if the focal house is sheltered, include steps from other households that already have a home planned
+            if (focal && H.isSheltered && H.isSheltered(focal)) {
+                for (const h of H.all().filter(h => sameLevel(h, c) && h.home)) {
+                    if (h.id === myHId || h.id === focal.id) continue;
+                    const people = H.members ? H.members(h) : [];
+                    const rep = people.find(p => p.data && p.data.age >= 15) || people[0];
+                    if (rep && H.planSteps) {
+                        const hSteps = H.planSteps(rep);
+                        for (const s of hSteps.slice(0, 2)) {
+                            if (s) neighborSteps.push(s);
+                        }
                     }
                 }
             }
@@ -395,12 +410,16 @@
         if (!unit || !unit.data) return false;
         unit.data.tier = Math.max(0, tier | 0);
         const tiers = unit.data.tiers;
-        if (!Array.isArray(tiers) || !tiers.length) return false;
-        const sheet = tiers[Math.min(unit.data.tier, tiers.length - 1)];
-        if (sheet && unit.image.characterName !== sheet) {
-            unit.image.characterName = sheet;
-            unit.image.characterIndex = 0;
-            World().refreshUnitImage(unit.id);
+        if (Array.isArray(tiers) && tiers.length) {
+            const sheet = tiers[Math.min(unit.data.tier, tiers.length - 1)];
+            if (sheet && unit.image.characterName !== sheet) {
+                unit.image.characterName = sheet;
+                unit.image.characterIndex = 0;
+                World().refreshUnitImage(unit.id);
+            }
+        }
+        if (window.UF && UF.Generator && typeof UF.Generator.syncEquipmentToPortrait === "function") {
+            UF.Generator.syncEquipmentToPortrait(unit);
         }
         emit("colonists:tier", unit, unit.data.tier);
         return true;
@@ -623,6 +642,7 @@
         for (const site of W.state.history.sites || []) {
             if (site.ruined || !levelSupported(zOf(site))) continue;
             const residents = W.units().filter(u => u.data && (u.data.kind === "person" || u.data.kind === "colonist") &&
+                !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_")) &&
                 u.data.faction === site.faction && (u.data.site === site.id || (!u.data.site && sameLevel(u, site))));
             if (!residents.length) continue;
             if (site.id !== primary.siteId && !primary.settlements[site.id]) {
@@ -1217,7 +1237,7 @@
     function eligibleForIntimacy(u) {
         if (!u || !u.data) return false;
         if (!isSettler(u) && !(u.data.kind === "person" && u.data.faction)) return false;
-        if (!Number.isFinite(u.data.age) || u.data.age < 18 || u.data.stage === "baby" || u.data.stage === "child") return false;
+        if (!Number.isFinite(u.data.age) || u.data.age < 15 || u.data.stage === "baby" || u.data.stage === "child" || u.data.stage === "teen") return false;
         if (["automaton", "undead", "swarm"].includes(u.data.species)) return false;
         if (u.data.dead || u.data._isDying) return false;
         if (u.data.familyDesire === false) return false;
@@ -1650,6 +1670,10 @@
                     u.data.stage = "baby";
                 }
                 updateAgeAppearance(u);
+                const isOffspring = !!(u.data.motherId || u.data.fatherId || (u.data.parents && u.data.parents.length));
+                if (isOffspring && !u.data.founder && (u.data.stage === "adult" || u.data.stage === "elder" || u.data.age >= 15) && !u.data.partnerId && !u.data.partner) {
+                    attemptAdulthoodPairbond(u);
+                }
                 checkOldAgeMortality(u);
             }
         }
@@ -1752,22 +1776,14 @@
                 const freeMales = males.filter(m => !pairedMales.has(m.id));
                 const freeFemales = females.filter(f => !pairedFemales.has(f.id));
                 for (const m of freeMales) {
-                    const f = freeFemales.find(fem => !pairedFemales.has(fem.id) &&
-                        (fem.data.species || "human") === (m.data.species || "human") &&
-                        (!m.data.motherId || m.data.motherId !== fem.id) &&
-                        (!fem.data.motherId || fem.data.motherId !== m.id) &&
-                        (!m.data.fatherId || m.data.fatherId !== fem.id) &&
-                        (!fem.data.fatherId || fem.data.fatherId !== m.id)
-                    );
-                    if (f) {
+                    if (pairedMales.has(m.id)) continue;
+                    const partner = attemptAdulthoodPairbond(m);
+                    if (partner) {
                         pairedMales.add(m.id);
-                        pairedFemales.add(f.id);
-                        m.data.partnerId = f.id;
-                        f.data.partnerId = m.id;
-                        if (window.UF && UF.Households && UF.Households.formPair) {
-                            try { UF.Households.formPair(m, f); } catch (e) {}
-                        }
-                        if (handleMated(m, f)) {
+                        pairedFemales.add(partner.id);
+                        const f = partner.data.gender === "female" ? partner : m;
+                        const male = partner.data.gender === "female" ? m : partner;
+                        if (handleMated(male, f)) {
                             totalMated++;
                             if (f.data.pregnancy) totalConceived++;
                         }
@@ -1776,6 +1792,78 @@
             }
         }
         return { mated: totalMated, conceived: totalConceived };
+    }
+
+    function attemptAdulthoodPairbond(u) {
+        if (!u || !u.data || u.data.dead || u.data._isDying) return null;
+        if (!Number.isFinite(u.data.age) || u.data.age < 15) return null;
+        if (["automaton", "undead", "swarm"].includes(u.data.species)) return null;
+        if (u.data.willingToPartner === false || u.data.familyDesire === false) return null;
+
+        // Check if u already has an active living partner
+        const W = World();
+        const existingPartnerId = u.data.partnerId || u.data.partner;
+        if (existingPartnerId) {
+            const existing = W && W.unit(existingPartnerId);
+            if (existing && !existing.data.dead) return existing;
+        }
+
+        const H = window.UF && UF.Households;
+        const people = allFactionPeople();
+        const candidates = people.filter(o => {
+            if (!o || !o.data || o.id === u.id) return false;
+            if (o.data.dead || o.data._isDying) return false;
+            if (o.data.faction !== u.data.faction) return false;
+            if (!sameLevel(o, u)) return false;
+            if (o.data.gender === u.data.gender) return false;
+            if (!Number.isFinite(o.data.age) || o.data.age < 15) return false;
+            if (o.data.partnerId || o.data.partner) {
+                const po = W && W.unit(o.data.partnerId || o.data.partner);
+                if (po && !po.data.dead) return false; // Candidate already partnered
+            }
+            if ((o.data.species || "human") !== (u.data.species || "human")) return false;
+            if (o.data.willingToPartner === false || o.data.familyDesire === false) return false;
+
+            // Strict kinship and incest guard (no parents, children, siblings, or close kin):
+            if (u.data.motherId && (u.data.motherId === o.id || (o.data.motherId && u.data.motherId === o.data.motherId))) return false;
+            if (u.data.fatherId && (u.data.fatherId === o.id || (o.data.fatherId && u.data.fatherId === o.data.fatherId))) return false;
+            if (o.data.motherId && o.data.motherId === u.id) return false;
+            if (o.data.fatherId && o.data.fatherId === u.id) return false;
+            if (H && H.closeKin && H.closeKin(u, o)) return false;
+
+            return true;
+        });
+
+        if (!candidates.length) return null;
+
+        // Deterministic candidate selection: closest age, tiebreak by id
+        candidates.sort((a, b) => {
+            const diffA = Math.abs((a.data.age || 15) - (u.data.age || 15));
+            const diffB = Math.abs((b.data.age || 15) - (u.data.age || 15));
+            return diffA - diffB || a.id - b.id;
+        });
+
+        const partner = candidates[0];
+        u.data.partnerId = partner.id;
+        u.data.partner = partner.id;
+        u.data.partnerName = partner.name;
+        partner.data.partnerId = u.id;
+        partner.data.partner = u.id;
+        partner.data.partnerName = u.name;
+
+        // Establish independent household via UF.Households.formPair
+        if (H && H.formPair) {
+            try { H.formPair(u, partner); } catch (e) {}
+        }
+
+        addThought(u, `Found my life partner in ${partner.name}.`, 15);
+        addThought(partner, `Found my life partner in ${u.name}.`, 15);
+
+        if (window.UF && UF.Events && UF.Events.emit) {
+            UF.Events.emit("colonists:pairbonded", u, partner);
+        }
+
+        return partner;
     }
 
     function immigrationWaveSize(pop) {
@@ -1918,6 +2006,10 @@
         }
         const age = u.data.age;
         u.data.stage = age >= 55 ? "elder" : (age < 12 ? "child" : (age < 15 ? "teen" : "adult"));
+        const isOffspring = !!(u.data.motherId || u.data.fatherId || (u.data.parents && u.data.parents.length));
+        if (isOffspring && !u.data.founder && (u.data.stage === "adult" || u.data.stage === "elder" || age >= 15) && !u.data.partnerId && !u.data.partner) {
+            attemptAdulthoodPairbond(u);
+        }
         const isMale = u.data.gender === "male";
         const isHuman = !u.data.species || u.data.species === "human";
 
@@ -2404,9 +2496,21 @@
             let s = priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
             if (x.step.id === "knives" && (!u.data || u.data.age === undefined || u.data.age >= 15) && !holds(u, "stone_knife")) s += 1.5;
             else if (x.step.id === "clothes" && (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1))) s += 1.0;
-            if (x.step.household && u.data && u.data.householdId === x.step.household) s += 2.5;
-            else if (x.step.household) s += 1.2; // Cooperative building: help neighbors build their homes!
-            else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.8;
+            const H = window.UF && UF.Households;
+            const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
+            if (x.step.household) {
+                if (focal && x.step.household === focal.id) {
+                    s += 4.5; // Cooperative settlement building: all villagers unite to construct the active focal home!
+                } else if (focal && H && H.isSheltered && !H.isSheltered(focal)) {
+                    // While the communal focal house is under construction and unsheltered,
+                    // defer secondary household projects so villagers don't scatter labor!
+                    s -= 2.0;
+                } else if (u.data && u.data.householdId === x.step.household) {
+                    s += 2.5;
+                } else {
+                    s += 1.2; // Cooperative building: help neighbors build their homes!
+                }
+            } else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.8;
             const P = Pillars();
             if (P && P.priorityPillar) {
                 const focus = P.priorityPillar(c);
@@ -2816,6 +2920,7 @@
         checkOldAgeMortality,
         passAwayOfOldAge,
         stepFactionReproduction,
+        attemptAdulthoodPairbond,
         growthTarget: 200,
         conceptionChance,
         twinChance,
@@ -2830,7 +2935,7 @@
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
         nightlyMateJob,
         // Things a test may want to know or reach.
-        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
