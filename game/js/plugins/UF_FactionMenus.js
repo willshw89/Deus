@@ -256,6 +256,8 @@
             this.onNewGameEmbark();
             return;
         }
+        TouchInput.clear();
+        Input.clear();
         this._embarking = false;
         this._commandWindow.deactivate();
         this._commandWindow.close();
@@ -285,11 +287,23 @@
     };
 
     Scene_Title.prototype.onNewGameCancel = function() {
-        if (!this._newGameSetupWindow || !this._newGameSetupWindow.isOpen()) return;
-        this._newGameSetupWindow.close();
+        if (!this._newGameSetupWindow) return;
+        TouchInput.clear();
+        Input.clear();
         this._newGameSetupWindow.deactivate();
+        this._newGameSetupWindow.close();
         this._commandWindow.open();
         this._commandWindow.activate();
+        this._commandWindow.selectSymbol("newGame");
+    };
+
+    const _Scene_Title_isBusy = Scene_Title.prototype.isBusy;
+    Scene_Title.prototype.isBusy = function() {
+        const setupBusy = this._newGameSetupWindow && (
+            this._newGameSetupWindow.isOpen() ||
+            this._newGameSetupWindow.isOpening()
+        );
+        return setupBusy || _Scene_Title_isBusy.call(this);
     };
 
     // Class: Window_NewGameSetup
@@ -452,6 +466,10 @@
         }
 
         onTouchOk() {
+            const hitIndex = this.hitIndex();
+            if (hitIndex >= 0) {
+                this.select(hitIndex);
+            }
             this.processOk();
         }
 
@@ -519,15 +537,18 @@
                 this.changeYear(1);
             } else if (this.index() === 2) {
                 this.playOkSound();
+                this.updateInputData();
+                this.deactivate();
                 this.callHandler("embark");
             } else if (this.index() === 3) {
-                SoundManager.playCancel();
-                this.callHandler("cancel");
+                this.processCancel();
             }
         }
 
         processCancel() {
             SoundManager.playCancel();
+            this.updateInputData();
+            this.deactivate();
             this.callHandler("cancel");
         }
 
@@ -1035,6 +1056,63 @@
             await t.waitFrames(15);
             t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
             t.check("command_window_open_on_cancel", scene._commandWindow.isOpen(), "Command window reopened on Cancel");
+
+            // Test Cancel via keyboard ESC
+            scene.commandNewGame();
+            await t.waitFrames(15);
+            t.check("setup_window_open_for_esc", scene._newGameSetupWindow.isOpen(), "Setup window open before Esc");
+            Input._currentState["escape"] = true;
+            Input._latestButton = "escape";
+            Input._pressedTime = 0;
+            scene._newGameSetupWindow.update();
+            Input._currentState["escape"] = false;
+            await t.waitFrames(15);
+            t.check("setup_window_closed_on_esc", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Esc key");
+            t.check("command_window_open_after_esc", scene._commandWindow.isOpen(), "Command window reopened after Esc key");
+
+            // Test Cancel via real mouse click cycle (trigger + release on Cancel row)
+            scene.commandNewGame();
+            await t.waitFrames(15);
+            t.check("setup_window_open_for_mouse_click", scene._newGameSetupWindow.isOpen(), "Setup window open before mouse click");
+            TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
+            TouchInput._triggerX = TouchInput._x;
+            TouchInput._triggerY = TouchInput._y;
+            TouchInput._newState.triggered = true;
+            TouchInput.update();
+            scene.update();
+            TouchInput._newState.released = true;
+            TouchInput.update();
+            scene.update();
+            await t.waitFrames(15);
+            t.check("setup_window_closed_on_mouse_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on mouse click");
+            t.check("command_window_open_after_mouse_click", scene._commandWindow.isOpen(), "Command window reopened after mouse click");
+
+            // Test Cancel via Enter / OK key on Cancel row (index 3)
+            scene.commandNewGame();
+            await t.waitFrames(15);
+            scene._newGameSetupWindow.select(3);
+            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 3, "Cancel row selected");
+            Input._currentState["ok"] = true;
+            Input._latestButton = "ok";
+            Input._pressedTime = 0;
+            scene._newGameSetupWindow.update();
+            Input._currentState["ok"] = false;
+            await t.waitFrames(15);
+            t.check("setup_window_closed_on_enter_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Enter on Cancel row");
+            t.check("command_window_open_after_enter_cancel", scene._commandWindow.isOpen(), "Command window reopened after Enter on Cancel row");
+
+            // Test Cancel via Right-Click
+            scene.commandNewGame();
+            await t.waitFrames(15);
+            TouchInput._newState.cancelled = true;
+            TouchInput.update();
+            scene._newGameSetupWindow.update();
+            TouchInput.update();
+            await t.waitFrames(15);
+            t.check("setup_window_closed_on_right_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on right-click");
+            t.check("command_window_open_after_right_click", scene._commandWindow.isOpen(), "Command window reopened after right-click");
+            t.screenshot("live_deus_title_after_cancel");
 
             // Reopen setup window
             scene.commandNewGame();
