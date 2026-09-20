@@ -73,6 +73,7 @@
     const Jobs = () => (window.UF && UF.Jobs) || null;
     const Items = () => (window.UF && UF.Items) || null;
     const Objects = () => (window.UF && UF.Objects) || null;
+    const Combat = () => (window.UF && UF.Combat) || null;
     if (typeof require === "function" && (!window.UF || !UF.SettlementPillars)) {
         try {
             require("./UF_SettlementPillars.js");
@@ -431,6 +432,13 @@
         const W = World();
         const mother = d.motherId && W ? W.unit(d.motherId) : null;
         const father = d.fatherId && W ? W.unit(d.fatherId) : null;
+        if (d.age === undefined) {
+            d.age = 18 + Math.floor(unit01(state.seed, 0xa9e, u.id, 0) * 22);
+            d.ageSeconds = 0;
+            d.stage = d.stage || (d.age >= 55 ? "elder" : "adult");
+        } else if (!d.stage) {
+            d.stage = d.age >= 55 ? "elder" : (d.age < 12 ? "child" : (d.age < 15 ? "teen" : "adult"));
+        }
         if (!d.variation) {
             d.variation = variationFor(state.seed, u.id, mother, father);
         }
@@ -440,6 +448,7 @@
         if ((!d.species || d.species === "human") && !d.face) {
             d.face = { sheet: gender === "male" ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (d.variation | 0) - 1)) };
         }
+        updateAgeAppearance(u);
         const tiers = tiersFor(d.species, gender, d.variation);
         if (tiers) {
             d.tiers = tiers;
@@ -1826,10 +1835,14 @@
 
     function updateAgeAppearance(u) {
         if (!u.data) return;
+        if (u.data.age === undefined) {
+            u.data.age = 25;
+            u.data.stage = "adult";
+        }
         const age = u.data.age;
-        if (age === undefined) return;
         const isMale = u.data.gender === "male";
         const isHuman = !u.data.species || u.data.species === "human";
+        if (!u.data.variation) u.data.variation = 1 + (Math.abs(u.id | 0) % 6);
         const v = u.data.variation || 1;
         let targetImg = isHuman ? (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`) : (isMale ? "$Adam" : "$Eve");
         if (age < 2) {
@@ -1851,8 +1864,44 @@
         }
         if (u.image && u.image.characterName !== targetImg) {
             u.image.characterName = targetImg;
+            delete u.data.tint;
             const ev = World() ? World().eventOf(u.id) : null;
             if (ev) ev.setImage(targetImg, 0);
+        }
+    }
+
+    function ensureColonistsGeneticsAndAging() {
+        const W = World();
+        if (!W) return;
+        const all = simulationUnits();
+        for (const u of all) {
+            if (!u || !u.data) continue;
+            const d = u.data;
+            let changed = false;
+            if (d.age === undefined) {
+                d.age = 20 + Math.floor(unit01(seed(), 0xa9e, u.id, 0) * 20);
+                d.ageSeconds = 0;
+                d.stage = d.age >= 55 ? "elder" : (d.age < 12 ? "child" : (d.age < 15 ? "teen" : "adult"));
+                changed = true;
+            }
+            if (!d.stage) {
+                d.stage = d.age >= 55 ? "elder" : (d.age < 12 ? "child" : (d.age < 15 ? "teen" : "adult"));
+                changed = true;
+            }
+            if (!d.variation) {
+                d.variation = 1 + (Math.abs(u.id | 0) % 6);
+                changed = true;
+            }
+            if (!d.genetics) {
+                d.genetics = geneticsFor(seed(), u.id, null, null, d.variation);
+                changed = true;
+            }
+            if ((!d.species || d.species === "human") && (!d.face || !d.face.sheet || d.face.sheet.startsWith("People") || (u.image && (u.image.characterName === "$Adam" || u.image.characterName === "$Eve")))) {
+                changed = true;
+            }
+            if (changed) {
+                updateAgeAppearance(u);
+            }
         }
     }
 
@@ -2571,6 +2620,10 @@
             pregnancy: u.data.pregnancy ? Object.assign({}, u.data.pregnancy) : null,
             illness: u.data.illness ? Object.assign({}, u.data.illness) : null,
             age: u.data.age !== undefined ? u.data.age : 20,
+            stage: u.data.stage || (u.data.age !== undefined && u.data.age >= 55 ? "elder" : (u.data.age !== undefined && u.data.age < 15 ? "child" : "adult")),
+            variation: u.data.variation || 1,
+            face: u.data.face || null,
+            genetics: u.data.genetics ? Object.assign({}, u.data.genetics) : null,
             motherId: u.data.motherId || null,
             fatherId: u.data.fatherId || null,
             household: UF.Households ? UF.Households.describe(UF.Households.of(u)) : null,
@@ -2660,6 +2713,7 @@
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         localTicks++;
+        if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();
         if (localTicks % NEEDS_EVERY === 0) tickNeeds();
         if (localTicks % SCAN_EVERY === 0) scan();
         // Every 60 frames = 1 beat = 1 real second at 1x speed
