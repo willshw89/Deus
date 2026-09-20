@@ -25,6 +25,7 @@
     const O = () => window.UF && UF.Objects;
     const Own = () => window.UF && UF.Ownership;
     const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
+    const copyArea = a => ({ x: a ? a.x : 0, y: a ? a.y : 0 });
     const areaOf = r => ({ x: r.area.x, y: r.area.y, z: zOf(r) });
     const samePlace = (a, b) => !!a && !!b && !!a.area && !!b.area &&
         a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b);
@@ -329,7 +330,16 @@
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
     }
     function findPlot(h, u, design) {
-        const c = C() && C().state(u), o = O(), culture = C() && C().culture(u) || {};
+        let c = C() && C().state(u);
+        if (!c || !samePlace(h, c)) {
+            const w = W();
+            const sites = (w && w.state && w.state.history && w.state.history.sites) || [];
+            const siteRec = sites.find(s => s.id === h.siteId || (s.faction === h.faction && samePlace(h, s)));
+            if (siteRec) {
+                c = { site: { x: siteRec.x, y: siteRec.y }, area: copyArea(siteRec.area), z: zOf(siteRec) };
+            }
+        }
+        const o = O(), culture = C() && C().culture(u) || {};
         if (!c || !samePlace(h, c) || !o) { h.reason = "No same-level settlement"; return null; }
         let wall = culture.wall || "wall_wood";
         const door = culture.door || "door_wood";
@@ -519,8 +529,20 @@
         u = unitOf(u);
         if (!person(u) || dead(u)) return [];
         if (!of(u)) reconcile();
-        const h = of(u), c = C() && C().state(u);
-        if (!h || !c || !samePlace(h, u) || !adult(u)) return [];
+        const h = of(u);
+        if (!h || !samePlace(h, u) || !adult(u)) return [];
+        let c = C() && C().state(u);
+        if (!c || !samePlace(h, c) || !c.site) {
+            const w = W();
+            const sites = (w && w.state && w.state.history && w.state.history.sites) || [];
+            const siteRec = sites.find(s => s.id === h.siteId || (s.faction === h.faction && samePlace(h, s)));
+            if (siteRec) {
+                c = { site: { x: siteRec.x, y: siteRec.y }, area: copyArea(siteRec.area), z: zOf(siteRec) };
+            } else if (h.home) {
+                c = { site: { x: h.home.x, y: h.home.y }, area: copyArea(h.area), z: zOf(h) };
+            }
+        }
+        if (!c || !c.site) return [];
         const home = ensureHome(h, u);
         if (!home) return [];
         ensureExpansion(h, u);

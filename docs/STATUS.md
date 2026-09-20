@@ -8,6 +8,27 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Autonomous Faction Construction and Domestic Home Completion — 2026-09-20 (Gemini)
+Delivered per user directive ("I need members of the factions to actually finish their building projects, like homes, etc"):
+- **Multi-Faction Autonomous Settlement Simulation (`UF_History.js`, `UF_Colonists.js`, `UF_Outposts.js`):**
+  - Updated `spawnFounders` and `spawnSettled` to assign `ai: "settlement"`, activating active settlement AI for all NPC faction founders across all 9 factions.
+  - Expanded `isSettler(u)` to recognize all active settlement and founder units across all factions (`isColonist(u) || (u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder))`).
+  - Enhanced `colonyState(ref)` to dynamically resolve and cache settlement records from `W.state.history.sites` for any faction member, giving every faction member an active settlement site, area, radius, and building plan context.
+  - Registered all factions from `UF.Factions.all()` into `st.factions` in `Scene_Map.prototype.update` for continuous autonomous needs evaluation.
+- **Obstacle Clearance Deadlock Resolution (`UF_Colonists.js`):**
+  - Updated `buildCells` for road, wall, and floor cells: impassable obstacle entities with harvestable actions (`chop`, `quarry`, `mine`) are marked `"todo"` rather than permanently `"blocked"`. This allows `buildStepJob` to dispatch clearance harvest jobs directly to felling/quarrying.
+  - Expanded ground search radius by `+30` tiles and added fallback harvesting radius of 90 tiles so construction never stalls when nearby timber is depleted.
+- **Domestic Enclosure Drive & Decoupled Pipelines (`UF_Colonists.js`, `UF_Households.js`):**
+  - Decoupled `planJob` bootstrap stream lookaheads (`bootstrap_build: 4`, `bootstrap_craft: 2`, `bootstrap_stock: 2`), ensuring workshop and building steps are never starved by perpetual knife/clothes crafting or food stocking.
+  - Added a `+2.5` domestic enclosure priority bonus for household members building their own family walls, doors, floors, and hearths, plus a `+1.2` cooperative bonus for assisting neighbors.
+  - Added domestic plot fallback to faction site records in `UF_Households.js` (`findPlot`, `planSteps`).
+- **Verification Evidence:**
+  - Automated test suite `tools/test_faction_construction_and_homes.js`: **5/5 PASS, 0 FAIL (exit 0)**.
+  - Mutant check `--mutant=no_obstacle_clearance`: correctly caught and failed (exit 1).
+  - Mutant check `--mutant=flat_domestic_priority`: correctly caught and failed (exit 1).
+  - In-engine suite `run_tests.bat colonists`: **20/20 PASS, 0 FAIL (exit 0)** in 37s at x8 speed, 0 console errors.
+  - Screenshot `game/test_output/colonists.colonist_childbirth.png`: Inspected and confirmed settlers building stone floor pathways and wooden domestic walls around campfire with active thought bubbles and verified storage grids.
+
 ## In-Game U7 Stone-Arch Portraits, Card UI & Human Genetics Showcase — 2026-09-20 (Gemini)
 Delivered per user directive ("Save it so I can check it out ingame. It currently appears to not be implemented"):
 - **U7 Stone-Arch Portrait on Overseer Colonist Card (`UF_ColonyOverseer.js`)**:

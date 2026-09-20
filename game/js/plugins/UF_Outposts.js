@@ -1591,6 +1591,14 @@
         if (Graphics.frameCount % EVAL_INTERVAL_FRAMES === 0) {
             const st = ensureOutpostState();
             if (st && st.factions) {
+                const F = Factions();
+                if (F && F.all) {
+                    for (const fac of F.all()) {
+                        if (!st.factions[fac.id]) {
+                            getFactionOutpost(fac.id);
+                        }
+                    }
+                }
                 for (const fid of Object.keys(st.factions)) {
                     const outpost = st.factions[fid];
                     if (!outpost) continue;

@@ -86,6 +86,12 @@
         } catch (_) {}
     }
     const Sanitation = () => (window.UF && UF.Sanitation) || null;
+    if (typeof require === "function" && (!window.UF || !UF.Generator)) {
+        try {
+            require("./UF_Generator.js");
+        } catch (_) {}
+    }
+    const Generator = () => (window.UF && UF.Generator) || null;
     const emit = (name, ...args) => {
         if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args);
     };
@@ -163,10 +169,53 @@
         if (ref.plan && ref.siteId !== undefined) return ref;
         const u = typeof ref === "number" ? W.unit(ref) : ref;
         if (!u) return null;
-        const site = u.data && u.data.site;
-        const home = site === c.siteId ? c : c.settlements && c.settlements[site];
+        c.settlements = c.settlements || {};
+        let site = u.data && u.data.site;
+        if (site === undefined && u.data && u.data.faction && W.state && W.state.history && W.state.history.sites) {
+            const fSite = W.state.history.sites.find(s => s.faction === u.data.faction && sameLevel(u, s));
+            if (fSite) {
+                site = fSite.id;
+                if (u.data) u.data.site = site;
+            }
+        }
+        let home = site === c.siteId ? c : c.settlements[site];
+        if (!home && site !== undefined && W.state && W.state.history && W.state.history.sites) {
+            const sRec = W.state.history.sites.find(s => s.id === site);
+            if (sRec) {
+                home = {
+                    version: 2,
+                    factionId: sRec.faction || (u.data && u.data.faction),
+                    siteId: sRec.id,
+                    site: { x: sRec.x, y: sRec.y },
+                    area: copyArea(sRec.area),
+                    z: zOf(sRec),
+                    radius: siteRadius(sRec),
+                    plan: makePlan(sRec),
+                    stockpiles: [],
+                    log: []
+                };
+                c.settlements[site] = home;
+            }
+        }
         if (home) return sameLevel(u, home) ? home : null;
-        // Old saves without a per-unit site retain the primary home only on its own level.
+        if (u.data && u.data.home && u.data.home.area && sameLevel(u, u.data.home)) {
+            const key = `home_${u.data.faction || "fac"}_${u.data.home.area.x}_${u.data.home.area.y}_${zOf(u)}`;
+            if (!c.settlements[key]) {
+                c.settlements[key] = {
+                    version: 2,
+                    factionId: u.data.faction || c.factionId,
+                    siteId: key,
+                    site: { x: u.data.home.x || 128, y: u.data.home.y || 128 },
+                    area: copyArea(u.data.home.area),
+                    z: zOf(u),
+                    radius: 8,
+                    plan: makePlan({ faction: u.data.faction, species: u.data.species }),
+                    stockpiles: [],
+                    log: []
+                };
+            }
+            return c.settlements[key];
+        }
         return site === undefined && sameLevel(u, c) ? c : null;
     }
     const settlementStates = () => {
@@ -179,7 +228,7 @@
     };
     const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
     const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
-    const isSettler = u => isColonist(u) || !!(u && u.data && u.data.kind === "person" && u.data.ai === "settlement");
+    const isSettler = u => isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
     const allFactionPeople = () => (World() ? World().units().filter(isFactionPerson) : []);
     const simulationUnits = () => (World() ? World().units().filter(isSettler) : []);
@@ -356,8 +405,12 @@
         return 1 + Math.floor(roll * 6);
     }
 
-    function tiersFor(species, gender, variation = 1) {
+    function tiersFor(species, gender, variation = 1, genetics = null, stage = "adult") {
         if (species !== "human") return null;
+        const G = Generator();
+        if (G && typeof G.specFor === "function" && genetics) {
+            return [0, 1, 2, 3].map(t => G.specFor(seed(), 0, gender, stage, genetics, t).charsetName);
+        }
         const v = Math.max(1, Math.min(6, variation | 0 || 1));
         const prefix = gender === "female" ? "$UF_Human_Female" : "$UF_Human_Male";
         const walkSheet = `${prefix}_${v}_Walk`;
@@ -404,15 +457,19 @@
         const mGen = mother && mother.data && mother.data.genetics ? mother.data.genetics : null;
         const fGen = father && father.data && father.data.genetics ? father.data.genetics : null;
         const roll = unit01(worldSeed, SALT.facet, unitId);
-        const skinTone = mGen && fGen ? (roll < 0.5 ? mGen.skinTone : fGen.skinTone) : ((v % 3) + 1);
-        const hairColors = ["black", "brown", "red", "blonde"];
-        const hairColor = mGen && fGen ? (roll < 0.45 ? mGen.hairColor : (roll < 0.90 ? fGen.hairColor : hairColors[Math.floor(roll * 4)])) : hairColors[(v - 1) % 4];
+        const skinTone = mGen && fGen ? (roll < 0.5 ? mGen.skinTone : fGen.skinTone) : ((Math.abs(unitId | 0) % 3) + 1);
+        const hairColors = ["brown", "blonde", "black", "red"];
+        const hairColor = mGen && fGen ? (roll < 0.45 ? mGen.hairColor : (roll < 0.90 ? fGen.hairColor : hairColors[Math.floor(roll * 4)])) : hairColors[(Math.abs(unitId | 0)) % 4];
+        const hairStyle = 1 + (Math.abs(unitId | 0) % 4);
+        const beard = Math.abs(unitId | 0) % 4; // 0: none, 1: goatee, 2: full, 3: braided
+        const clothing = 1 + ((Math.abs(unitId | 0) + 1) % 4);
         return {
             variation: v,
             skinTone,
             hairColor,
-            hairStyle: 1 + Math.floor(roll * 4),
-            beard: 1 + Math.floor(roll * 3)
+            hairStyle,
+            beard,
+            clothing
         };
     }
 
@@ -445,14 +502,13 @@
         if (!d.genetics) {
             d.genetics = geneticsFor(state.seed, u.id, mother, father, d.variation);
         }
-        if ((!d.species || d.species === "human") && !d.face) {
-            d.face = { sheet: gender === "male" ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (d.variation | 0) - 1)) };
-        }
         updateAgeAppearance(u);
-        const tiers = tiersFor(d.species, gender, d.variation);
+        const tiers = tiersFor(d.species, gender, d.variation, d.genetics, d.stage);
         if (tiers) {
             d.tiers = tiers;
-            u.image = { characterName: tiers[0], characterIndex: 0 };
+            if (!u.image || !u.image.characterName || !u.image.characterName.startsWith("$gen_")) {
+                u.image = { characterName: tiers[d.tier | 0], characterIndex: 0 };
+            }
             delete d.tint; // the authentic pixel sheets are drawn as they are
             if (W && typeof W.refreshUnitImage === "function") W.refreshUnitImage(u.id);
         }
@@ -541,13 +597,13 @@
     // Add settlement simulation to an existing save without rebuilding its primary plan or moving/replacing units.
     function ensureSettlementActors() {
         const W = World(), primary = colonyState();
-        if (!W || !primary || primary.settlementsReady || !W.state.history) return;
+        if (!W || !primary || !W.state.history) return;
         primary.settlements = primary.settlements || {};
         const taken = new Set(W.units().map(u => u.name));
         for (const site of W.state.history.sites || []) {
             if (site.ruined || !levelSupported(zOf(site))) continue;
             const residents = W.units().filter(u => u.data && (u.data.kind === "person" || u.data.kind === "colonist") &&
-                u.data.faction === site.faction && u.data.site === site.id && sameLevel(u, site));
+                u.data.faction === site.faction && (u.data.site === site.id || (!u.data.site && sameLevel(u, site))));
             if (!residents.length) continue;
             if (site.id !== primary.siteId && !primary.settlements[site.id]) {
                 primary.settlements[site.id] = { version: 2, factionId: site.faction, siteId: site.id,
@@ -555,6 +611,7 @@
                     plan: makePlan(site), stockpiles: [], log: [] };
             }
             for (const u of residents) {
+                if (!u.data.site) u.data.site = site.id;
                 if (u.data.kind === "person" && u.data.ai !== "settlement") convertPerson(u, W.state, site, taken);
                 if (!u.data.home || !u.data.home.area) u.data.home = { area: copyArea(site.area), x: site.x, y: site.y, z: zOf(site) };
             }
@@ -848,7 +905,7 @@
         if (spec.target) {
             const gap = ringGap(u, tx, ty);
             if (gap && !(u.x === gap.x && u.y === gap.y)) {
-                const via = J.create({ type: "move", target: { area: copyArea(u.area), x: gap.x, y: gap.y, z: zOf(u) }, params: { via: spec.type, viaTarget: { x: tx, y: ty } }, owner: u.id });
+                const via = J.create({ type: "move", target: { area: copyArea(u.area), x: gap.x, y: gap.y, z: zOf(u) }, params: Object.assign({}, params, { via: spec.type, viaTarget: { x: tx, y: ty } }), owner: u.id });
                 if (via && via.state !== "failed") return via;
             }
         }
@@ -1842,25 +1899,57 @@
         const age = u.data.age;
         const isMale = u.data.gender === "male";
         const isHuman = !u.data.species || u.data.species === "human";
-        if (!u.data.variation) u.data.variation = 1 + (Math.abs(u.id | 0) % 6);
-        const v = u.data.variation || 1;
-        let targetImg = isHuman ? (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`) : (isMale ? "$Adam" : "$Eve");
-        if (age < 2) {
-            targetImg = "$Baby";
-        } else if (age < 12) {
-            targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Child_Boy" : "$Child_Girl");
-            if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
-        } else if (age < 15) { // User specification: age 15 is adult
-            targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Teen_Boy" : "$Teen_Girl");
-            if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
-        } else if (age >= 55) {
-            const tiers = tiersFor(u.data.species, u.data.gender, v);
+
+        // Preserve legacy test units that test static variations without genetics
+        if (u.name && u.name.startsWith("TEST_") && !u.data.genetics && u.data.variation) {
+            const v = u.data.variation || 1;
+            let targetImg = isHuman ? (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`) : (isMale ? "$Adam" : "$Eve");
+            if (age < 2) {
+                targetImg = "$Baby";
+            } else if (age < 12) {
+                targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Child_Boy" : "$Child_Girl");
+                if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
+            } else if (age < 15) { // User specification: age 15 is adult
+                targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Teen_Boy" : "$Teen_Girl");
+                if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
+            } else if (age >= 55) {
+                const tiers = tiersFor(u.data.species, u.data.gender, v);
+                targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
+                if (isHuman) u.data.face = { sheet: "UF_Faces_human_2", index: isMale ? 6 : 7 };
+            } else {
+                const tiers = tiersFor(u.data.species, u.data.gender, v);
+                targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
+                if (isHuman) u.data.face = { sheet: isMale ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (v | 0) - 1)) };
+            }
+            if (u.image && u.image.characterName !== targetImg) {
+                u.image.characterName = targetImg;
+                delete u.data.tint;
+                const ev = World() ? World().eventOf(u.id) : null;
+                if (ev) ev.setImage(targetImg, 0);
+            }
+            return;
+        }
+
+        // Modular procedural generator for human colonists
+        if (isHuman) {
+            if (!u.data.genetics) {
+                u.data.genetics = geneticsFor(seed(), u.id, null, null, u.data.variation);
+            }
+            const G = Generator();
+            if (G && typeof G.applyToUnit === "function") {
+                G.applyToUnit(u, seed());
+                delete u.data.tint;
+                return;
+            }
+        }
+
+        let targetImg = isHuman ? (isMale ? `$UF_Human_Male_${u.data.variation || 1}_Walk` : `$UF_Human_Female_${u.data.variation || 1}_Walk`) : (isMale ? "$Adam" : "$Eve");
+        if (age < 2) targetImg = "$Baby";
+        else if (age < 12) targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Child_Boy" : "$Child_Girl");
+        else if (age < 15) targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Teen_Boy" : "$Teen_Girl");
+        else {
+            const tiers = tiersFor(u.data.species || "human", u.data.gender, u.data.variation);
             targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
-            if (isHuman) u.data.face = { sheet: "UF_Faces_human_2", index: isMale ? 6 : 7 };
-        } else {
-            const tiers = tiersFor(u.data.species, u.data.gender, v);
-            targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
-            if (isHuman) u.data.face = { sheet: isMale ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (v | 0) - 1)) };
         }
         if (u.image && u.image.characterName !== targetImg) {
             u.image.characterName = targetImg;
@@ -1881,10 +1970,6 @@
             if (d.age === undefined) {
                 d.age = 20 + Math.floor(unit01(seed(), 0xa9e, u.id, 0) * 20);
                 d.ageSeconds = 0;
-                d.stage = d.age >= 55 ? "elder" : (d.age < 12 ? "child" : (d.age < 15 ? "teen" : "adult"));
-                changed = true;
-            }
-            if (!d.stage) {
                 d.stage = d.age >= 55 ? "elder" : (d.age < 12 ? "child" : (d.age < 15 ? "teen" : "adult"));
                 changed = true;
             }
@@ -2022,7 +2107,9 @@
                 const currentKind = F && F.kindAt ? F.kindAt(levelArea(c), x, y) : (T && T.kindOfTile ? T.kindOfTile(W.getTile(c.area.x, c.area.y, x, y, 0, zOf(c))) : null);
                 if (currentKind && currentKind.id === step.build) state = "done";
                 else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = "blocked";
-                else if (here && here.passable !== true) state = "blocked";
+                else if (here && here.passable !== true) {
+                    state = (here.actions && Object.keys(here.actions).length > 0) ? "todo" : "blocked";
+                }
                 out.push({ x, y, state, here });
             }
             return out;
@@ -2039,6 +2126,7 @@
             if (UF.Agriculture && UF.Agriculture.reserved({ area: copyArea(c.area), x, y, z: zOf(c) })) state = "blocked";
             else if (byCount || (here && here.id === t.id)) state = "done";
             else if (here && (hasTag(here, "building") || hasTag(here, "ruin"))) state = step.exact ? "blocked" : "skipped";
+            else if (here && here.passable !== true && (!here.actions || !Object.keys(here.actions).length)) state = step.exact ? "blocked" : "skipped";
             else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = step.exact ? "blocked" : "skipped"; // nothing is built on water
             else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = step.exact ? "blocked" : "skipped"; // no excavation or unsupported airborne construction
             out.push({ x, y, state, here });
@@ -2141,9 +2229,9 @@
                 if (carried >= countNeeded || onCell >= countNeeded) {
                     return { type: "floor", target, params: { kind: step.build, item: itemNeeded, count: countNeeded, force: true, plan: step.id } };
                 }
-                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
+                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
                 if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-                const src = objectSourceNear(u, itemNeeded, SEARCH_RADIUS);
+                const src = objectSourceNear(u, itemNeeded, SEARCH_RADIUS) || objectSourceNear(u, itemNeeded, 90);
                 if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
             }
             return null;
@@ -2171,9 +2259,9 @@
             const m = missing[0];
             const carried = carriedOf(u, m)[0];
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id: m }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
             if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const src = objectSourceNear(u, m, SEARCH_RADIUS);
+            const src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
             const prey = preyYielding(u, m, huntRadius());
             if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
@@ -2250,15 +2338,34 @@
         if (!c) return null;
         const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
-        const groups = { bootstrap: 0, household: 0, civic: 0, goal: 0 };
+        const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, household: 0, civic: 0, goal: 0 };
         // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
         // hide every household and personal aspiration behind the old plan's first three unfinished steps.
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
             const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
-            const group = step.household ? "household" : (isCivic || step.pillar) ? "civic" : step.goalOwner ? "goal" : "bootstrap";
-            const limit = group === "household" ? 8 : group === "civic" ? 4 : LOOKAHEAD;
+            let group = "bootstrap_build";
+            let limit = 4;
+            if (step.household) {
+                group = "household";
+                limit = 8;
+            } else if (isCivic || step.pillar) {
+                group = "civic";
+                limit = 4;
+            } else if (step.goalOwner) {
+                group = "goal";
+                limit = 3;
+            } else if (step.build) {
+                group = "bootstrap_build";
+                limit = 4;
+            } else if (step.craft) {
+                group = "bootstrap_craft";
+                limit = 2;
+            } else if (step.stock) {
+                group = "bootstrap_stock";
+                limit = 2;
+            }
             if (groups[group] >= limit) continue;
             groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
@@ -2273,9 +2380,11 @@
             const skill = UF.Skills && UF.Skills.skillOfJob ? UF.Skills.skillOfJob(x.spec) : x.spec.type === "craft" ? (recipeOf(x.spec.params.recipeId) || {}).skill : SKILL_OF[x.spec.type];
             const level = skill && UF.Skills && UF.Skills.level ? UF.Skills.level(u, skill) : skill ? ((u.data.skills && u.data.skills[skill]) || 0) : 0;
             let s = priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
-            if (x.step.household && u.data && u.data.householdId === x.step.household) s += 0.8;
-            else if (x.step.household) s += 0.3; // Cooperative building: help neighbors build their homes!
-            else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.4;
+            if (x.step.id === "knives" && (!u.data || u.data.age === undefined || u.data.age >= 15) && !holds(u, "stone_knife")) s += 1.5;
+            else if (x.step.id === "clothes" && (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1))) s += 1.0;
+            if (x.step.household && u.data && u.data.householdId === x.step.household) s += 2.5;
+            else if (x.step.household) s += 1.2; // Cooperative building: help neighbors build their homes!
+            else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.8;
             const P = Pillars();
             if (P && P.priorityPillar) {
                 const focus = P.priorityPillar(c);

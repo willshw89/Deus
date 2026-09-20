@@ -1496,7 +1496,7 @@
         for (const q of orderOut) {
             const { f, site, rec, p } = q;
             const data = {
-                kind: "person", faction: f.id, species: f.species, ai: "wander", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
+                kind: "person", faction: f.id, species: f.species, ai: "settlement", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
                 founder: true, born: 1 - p.age, age: p.age, stage: stageOf(p.age), gender: p.gender, rank: p.leader ? 1 : 0, superior: null,
                 variation: q.variation,
                 familyId: p.familyId || null, lineageId: p.lineageId || null, surname: p.surname || null,
@@ -1658,7 +1658,7 @@
                 const gender = rand() < 0.5 ? "male" : "female";
                 const varIdx = 1 + Math.floor(rand() * 6);
                 const data = {
-                    kind: "person", faction: f.id, species: f.species, ai: "wander", home: { x: site.x, y: site.y }, wander: radius + 2, site: site.id,
+                    kind: "person", faction: f.id, species: f.species, ai: "settlement", home: { x: site.x, y: site.y }, wander: radius + 2, site: site.id,
                     born: h.years - age, age, stage, gender, rank, superior: null,
                     variation: varIdx
                 };
