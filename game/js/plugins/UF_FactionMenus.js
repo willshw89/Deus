@@ -1066,7 +1066,8 @@
             t.check("player_faction_is_dwarf", !!playerFac && (playerFac.species === "dwarf" || playerFac.culture === "dwarf"), "Player faction is Dwarf");
             t.check("clock_year_is_42", window.$ufTime && $ufTime.year === 42, "Clock year is 42 AD");
             t.check("history_simulated_42_years", st.history && st.history.years === 42, "History simulated exactly 42 years");
-            t.check("history_settled_run", !!st.history.settled, "Settling run executed: " + JSON.stringify(st.history.settled ? { houses: st.history.settled.houses, sitesGrown: st.history.settled.sitesGrown } : {}));
+            t.check("history_settled_run", !!st.history.settled, "Settling run executed: " + JSON.stringify(st.history.settled ? { houses: st.history.settled.houses, beds: st.history.settled.beds, hearths: st.history.settled.hearths, sitesGrown: st.history.settled.sitesGrown } : {}));
+            t.check("settled_hearths_constructed", !!(st.history.settled && st.history.settled.hearths > 0), "Indoor hearths constructed inside settled houses: " + (st.history.settled ? st.history.settled.hearths : 0));
             t.check("history_events_recorded", st.history.events && st.history.events.length > 0, "Chronicle events recorded: " + (st.history.events ? st.history.events.length : 0));
             t.check("history_sites_exist", st.history.sites && st.history.sites.length > 0, "Sites exist in world: " + (st.history.sites ? st.history.sites.length : 0));
             t.check("theme_switched_to_dwarf", UF_FactionMenus.getFaction() === "dwarf", "Window theme switched to Dwarf");

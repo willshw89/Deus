@@ -932,9 +932,9 @@
         const events = [];
         const record = (year, type, text, site) => events.push({ year, type, text, factions: site.faction ? [site.faction] : [], site: site.id });
         const y0 = Math.max(1, h.years - years + 1);
-        const totals = { sitesGrown: 0, houses: 0, beds: 0, stockpiles: 0, walls: 0, workbenches: 0, ruined: 0, items: 0, depleted: { trees: 0, bushes: 0, stones: 0 } };
+        const totals = { sitesGrown: 0, houses: 0, beds: 0, hearths: 0, stockpiles: 0, walls: 0, workbenches: 0, ruined: 0, items: 0, depleted: { trees: 0, bushes: 0, stones: 0 } };
         let objectHash = 2166136261 >>> 0, writes = 0, buildMs = 0;
-        const BED = typeId("floor_straw"), STOCK = typeId("stockpile"), BENCH = typeId("workbench");
+        const BED = typeId("floor_straw"), HEARTH = typeId("kitchen_hearth") || typeId("campfire"), STOCK = typeId("stockpile"), BENCH = typeId("workbench");
 
         // One built map per area: the peek cache for the live world (shared with the spawning that follows), a
         // fresh pure build for a test state.
@@ -1108,10 +1108,10 @@
             record(year, "settle_built", `${S.site.name} set up a ${e ? e.name.toLowerCase() : "workbench"}.`, S.site);
             return true;
         };
-        /** A house: a w x h rectangle of the culture's wall, a door in the side facing the site, a straw bed inside. */
+        /** A house: a w x h rectangle of the culture's wall, a door in the side facing the site, a straw bed inside and an indoor hearth. */
         const addHouse = (S, year) => {
             const R = S.R, site = S.site;
-            const w = 3 + (rand() < 0.4 ? 1 : 0), hh = 3 + (rand() < 0.4 ? 1 : 0);
+            const w = 4 + (rand() < 0.4 ? 1 : 0), hh = 4 + (rand() < 0.4 ? 1 : 0);
             const zones = [[0, R - 2], [R + 3, R + 7]]; // inside the ring first, then the band just outside it
             for (const [lo, hi] of zones) {
                 if (hi - lo + 1 < Math.max(w, hh)) continue;
@@ -1155,14 +1155,21 @@
                         }
                     }
                     S.reserved.add(out[1] * size + out[0]);
-                    interior.sort((a, b) => (Math.abs(a[0] - door[0]) + Math.abs(a[1] - door[1])) - (Math.abs(b[0] - door[0]) + Math.abs(b[1] - door[1])));
+                    interior.sort((a, b) => (Math.abs(b[0] - door[0]) + Math.abs(b[1] - door[1])) - (Math.abs(a[0] - door[0]) + Math.abs(a[1] - door[1])));
                     const bed = interior.shift();
                     place(S, bed[0], bed[1], BED);
                     S.beds++;
                     totals.beds++;
+                    let hearth = null;
+                    if (interior.length >= 2 && HEARTH) {
+                        hearth = interior.shift();
+                        place(S, hearth[0], hearth[1], HEARTH);
+                        S.hearths = (S.hearths || 0) + 1;
+                        totals.hearths = (totals.hearths || 0) + 1;
+                    }
                     for (const [x, y] of interior) S.rooms.push(y * size + x);
                     const wallEntry = entry(S.wall);
-                    S.houses.push({ x: x0, y: y0, w, h: hh, door, bed, wall: wallEntry ? wallEntry.id : null, year });
+                    S.houses.push({ x: x0, y: y0, w, h: hh, door, bed, hearth, wall: wallEntry ? wallEntry.id : null, year });
                     S.walls += w * 2 + hh * 2 - 5;
                     totals.walls += w * 2 + hh * 2 - 5;
                     totals.houses++;
@@ -1332,7 +1339,7 @@
         h.events = h.events.concat(events).map((e, i) => [e, i]).sort((a, b) => a[0].year - b[0].year || a[1] - b[1]).map(p => p[0]);
         const summary = {
             years, from: y0, to: h.years, events: events.length, sites: sims.length, sitesGrown: totals.sitesGrown, houses: totals.houses,
-            beds: totals.beds, stockpiles: totals.stockpiles, walls: totals.walls, workbenches: totals.workbenches, ruined: totals.ruined,
+            beds: totals.beds, hearths: totals.hearths, stockpiles: totals.stockpiles, walls: totals.walls, workbenches: totals.workbenches, ruined: totals.ruined,
             depleted: totals.depleted, items: totals.items, itemsPlaced: !!I, writes, objectHash, ms: now() - t0 - buildMs, buildMs
         };
         h.settled = summary;

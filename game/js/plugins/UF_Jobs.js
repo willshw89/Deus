@@ -883,13 +883,22 @@
         job.stall = null;
         const ev = unitEvent(unit);
         if (ev) {
-            const dx = job.target.x - unit.x, dy = job.target.y - unit.y;
+            let dx = job.target.x - unit.x, dy = job.target.y - unit.y;
+            if (!dx && !dy && job.params && job.params.faceTowards) {
+                dx = job.params.faceTowards.x - unit.x;
+                dy = job.params.faceTowards.y - unit.y;
+            }
             // Face the target before the work frames play: 8 ways (VISION V3), 4 with FourWay.
             if ((dx || dy) && sameLevel(job.target, unit)) {
                 if (ev.faceToward8) ev.faceToward8(dx, dy);
                 else ev.setDirection(facingTo(dx, dy));
+                if (unit) unit.dir = ev.direction();
             }
-            ev.setStepAnime(true);
+            if (job.type === "sleep") {
+                ev.setStepAnime(false);
+            } else {
+                ev.setStepAnime(true);
+            }
             // V92 (user 2026-09-19): no status text over heads; the job shows in the profile, not as a bark.
         }
         job.barked = true;
