@@ -57,7 +57,7 @@ The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 wou
 1. Seeking, as above. A current target is kept while it lives within `combat.leash` (16 cells).
 2. Each unit with a target attacks when the target is in reach and `tick ≥ data.combat.nextAttackTick`, then waits its weapon speed (+ the style's speed) in ticks. Melee reach is the 4 orthogonal neighbours (4-way movement, WORLD_ARCHITECTURE §1.6); ranged reach is Chebyshev ≤ range.
 3. Out of reach, a unit walks with `UF.World.sendUnit` to the free orthogonal neighbour of its target that is fewest steps away. A colonist busy with a job only fights what is in reach.
-4. **Retaliation:** a unit attacked while it has no living target takes the attacker as its target. Its first swing comes after `ceil(speed / 2)` ticks. Units in `flee` or `manual` mode, and units with `data.combat.retaliate === false`, don't hit back.
+4. **Retaliation & Faction Aid:** a unit attacked while it has no living target takes the attacker as its target (cancelling any non-combat colonist job with reason `"attacked"`). Its first swing comes after `ceil(speed / 2)` ticks. Units in `flee` or `manual` mode, and units with `data.combat.retaliate === false`, don't hit back. When any faction member is attacked, `aidFaction(victim, attacker, tick)` is called: living same-faction members in the same area within `combat.aidRadius` (10) who are not already fighting a living enemy or in `flee`/`manual` mode acquire the attacker as `targetId` and cancel non-combat jobs to come to their aid (`combat:aid`).
 
 **Feedback** (interface, timed in real milliseconds so it reads the same at ×8).
 - **Hitsplats:** a red splat with the damage in white, or a blue splat with 0 for a miss or a zero hit. They sit over the target's body for `display.splatMs` (1000). Up to `display.maxSplats` (4) stack on a unit (centre, above, lower left, lower right); a fifth replaces the oldest. A killing blow's splat stays over the cell after the unit is gone. A unit removed without dying (a despawn) takes its splats with it.
@@ -92,6 +92,8 @@ The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 wou
 | `hitChance(A, D)`, `maxHitFor(effectiveStrength, bonus)`, `roll({ A, D, maxHit }, rng)` → `{ a, d, hit, rolled }` | The formulas |
 | `duel(a, b, seed, maxTicks = 3000)` → `{ winner: "a" \| "b" \| null, ticks, hpA, hpB }` | A fight of two units worked out in ticks from their current numbers, without touching them (balance, tests) |
 | `setMode(unit, mode)`, `setStyle(unit, style)`, `setAttackType(unit, type)`, `engage(attacker, target)`, `disengage(unit)` | Orders (the faction menu of V49 and click targeting will call these) |
+| `factionOf(unit)` | Resolves canonical faction ID for a unit (returns player ID for player/colonists) |
+| `callFactionAid(victim, attacker, tick)` → `[helperUnits]` | Summons nearby same-faction members within `aidRadius` (10) to target the attacker and join the fight |
 | `inCombat(unit)` → bool | A living target, or an attack made or taken within the last 10 ticks (6 s at ×1) |
 | `tick()`, `updates()`, `state()`, `config()` | Counters, the saved state, the catalog block merged over the defaults |
 | `layer()` | The map's hitsplat layer (`visibleSprites()`, `allChildren()`, `poolSizes()`), for tests. `fxOf(unitId)`, `clearFx()`, `splatBitmap(n)`, `barBitmaps()`, `headOf(sprite)`, `framePixels(bitmap, rect)` |
@@ -104,7 +106,7 @@ The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 wou
 | `TYPES`, `SKILLS`, `STYLES`, `MODES`, `SLOTS` | The id lists |
 
 ## The contract with UF_Skills (2026-09-19)
-- **Emits** `combat:hit` `{ attacker, target, damage (0 on a miss), hit, style, attackType }` (exactly these six keys) after every attack, and `combat:kill` `{ attacker, target }` when a target dies (after the killing `combat:hit`). `attacker` is `null` for a death without a killer (fire).
+- **Emits** `combat:hit` `{ attacker, target, damage (0 on a miss), hit, style, attackType }` (exactly these six keys) after every attack, `combat:kill` `{ attacker, target }` when a target dies, and `combat:aid` `{ victim, attacker, helpers }` when faction aid is summoned. `attacker` is `null` for a death without a killer (fire).
 - **Reads** levels through `UF.Skills.level(unit, id)`, as above. Creature blocks come first, so a wolf never asks UF_Skills.
 - **Hitpoints:** the maximum is the hitpoints level. UF_Skills raises `data.hp` by the levels gained.
 
@@ -115,7 +117,7 @@ The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 wou
 - Not saved: hitsplats and bars (`fx`), the pooled sprites, caches.
 
 ## Events
-- **Emits:** `combat:hit`, `combat:kill`, as in the contract.
+- **Emits:** `combat:hit`, `combat:kill`, `combat:aid` as in the contract.
 - **Listens:** `world:unitRemoved`, to drop the hitsplats of a unit removed without dying.
 
 ## Keys and mouse

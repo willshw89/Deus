@@ -1,5 +1,6 @@
 {
-  "id": "UF_Wolf",
+  "id": "wolf",
+  "name": "Wolf",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -25,47 +26,9 @@
       1,
       2,
       1
-    ],
-    "idle": [
-      0,
-      1,
-      2,
-      1
-    ],
-    "action": [
-      0,
-      1,
-      2,
-      1
-    ],
-    "attack": [
-      0,
-      1,
-      2
-    ],
-    "graze": [
-      0,
-      1,
-      2,
-      1
-    ],
-    "eat": [
-      0,
-      1,
-      2,
-      1
-    ],
-    "hurt": [
-      0,
-      1,
-      2
-    ],
-    "death": [
-      0,
-      1,
-      2
     ]
   },
   "frameMs": 150,
-  "category": "wildlife"
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Final Fantasy VI 16-bit HD"
 }

@@ -53,8 +53,8 @@ Everything you need for one asset is in its brief in `art/briefs/<id>.md`; the b
 | `items_batch1` | `log`, `stone`, `berries`, `fruit`, `meat_raw`, `meat_cooked`, `fiber`, `straw`, `hide`, `bone`, `stone_knife`, `stone_axe`, `stone_pick`, `fiber_wrap`, `hide_cloak` | `!$U7_Item_*` (tools and clothes as tints) | AR-200, AR-201, AR-800 | 15 × `!$UF_Item_<Name>.png` + json, `UF_IconSet_Items.png` + json |
 | `face_human_male` | none yet (`catalog.faces`, planned) | `img/faces/U7_Faces.png`, stock face sheets | AR-700 | `UF_Face_human_male_adult.png` + json |
 | `face_human_female` | none yet | same | AR-700 | `UF_Face_human_female_adult.png` + json |
-| `target_square` | none (UI) | `UF_GenSelect` | AR-031 | `UF_Select.png` (3 frames) + json |
-| `stance_squares` | `stance.colors` (Claude Code's) | `UF_GenStance_*` | AR-034 | `UF_Stance.png` (3 frames) + json |
+| `target_square` (superseded 2026-09-19 by the selection ring: `HANDOFF_stance_rings.md`) | none (UI) | `UF_GenSelect` | AR-031 | `UF_SelectRing_1.png`, `UF_SelectRing_2.png` (3 frames each) + json |
+| `stance_squares` (superseded 2026-09-19 by the stance rings: `HANDOFF_stance_rings.md`) | `stance.colors` (Claude Code's) | `UF_GenStance_*` | AR-034 | `UF_StanceRing_1.png`, `UF_StanceRing_2.png` (3 frames each) + json |
 
 ## What the engine can show today, and what waits for Claude Code
 

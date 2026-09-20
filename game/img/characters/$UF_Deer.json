@@ -1,5 +1,6 @@
 {
-  "id": "UF_Deer",
+  "id": "deer",
+  "name": "Deer",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -25,14 +26,9 @@
       1,
       2,
       1
-    ],
-    "idle": [
-      0,
-      1,
-      2,
-      1
     ]
   },
-  "frameMs": 250,
-  "category": "wildlife"
+  "frameMs": 150,
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Final Fantasy VI 16-bit HD"
 }
