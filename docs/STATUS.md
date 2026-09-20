@@ -7,8 +7,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
-
-## Material Refinement Chains, Construction Knowledge Tech Progression & Sturdier Building Styles — 2026-09-20 (Gemini)
+## Clean-Shaven Faceset Generator & Dynamic Armor Reflection on Portraits — 2026-09-20 (Gemini)
+Delivered per user directives ("Let's get rid of facial hair on the faceset generator. Also, I want the bottom armor portion to reflect what armor they are currently wearing."):
+- **Clean-Shaven Faceset Generator (`tools/test_generator_combinations.js`, `tools/bake_generator_pool.js`)**:
+  - Removed beard overlay logic from `compositePortrait` so all generated stone-arch facesets are clean-shaven across all demographics (young, rugged, elder, children).
+  - Re-baked all 116 generator pool portrait files (`game/img/faces/gen/face_gen_*.png` and `game/img/faces/face_gen_*.png`) without facial hair.
+- **Dynamic Armor Reflection on Portraits (`game/js/plugins/UF_Generator.js`, `game/js/plugins/UF_ColonyOverseer.js`, `game/js/plugins/UF_Colonists.js`)**:
+  - Implemented `UF.Generator.clothingIndexForUnit(unit, d)` dynamically mapping currently equipped torso armor items (`mail_iron` -> 2, `armor_leather` -> 1, `fiber_wrap` / `hide_cloak` -> 3, civilian tunics/aprons -> 4) and tiers (`tier 0..3`).
+  - Implemented `UF.Generator.armorSheetForUnit(unit, d)` resolving the precise modular armor layer (`male_cloth_1..4`, `female_cloth_1..4`) while preserving clean child portraits (`null` for children).
+  - Implemented `UF.Generator.syncEquipmentToPortrait(unit)` synchronizing portrait specs and character sheets when equipment or tier changes.
+  - Enhanced `Window_UFColonistCard.prototype.drawPortrait` in `UF_ColonyOverseer.js` to blit the currently equipped armor layer on top of the base portrait, dynamically reflecting the unit's active torso armor on the bottom chest portion (y: 108..144).
+  - Deployed all modular clothing layers (`male_cloth_1..4.png`, `female_cloth_1..4.png`) to `game/img/faces/` and `game/img/faces/gen/`.
+- **Verification Evidence**:
+  - Automated suite `tools/test_dynamic_armor_reflection.js`: **9/9 PASS, 0 FAIL (exit 0)**.
+  - Rule 4 mutant test `--mutant=beard_returns`: caught and failed (exit 1).
+  - Suite `node tools/run_tests.js genetics`: **4/4 PASS, 0 FAIL (exit 0)**.
+  - Suite `node tools/run_tests.js overseer`: **6/6 PASS, 0 FAIL (exit 0)**.
+  - Suite `node tools/run_tests.js smoke`: **13/13 PASS, 0 FAIL (exit 0)**.
+  - Visual inspection montage: `game/test_output/armor_reflection_progression_montage.png` verified showing 4 distinct armor states on a clean-shaven portrait.
 Delivered per user directives ("we need construction knowledge to progress through the faction at about the same rate as expansion so we can get more complex constructions with better materials and stuff. we need to combine/refine materials and have a variety of building materials. I also want refined building styles over time so that construction is sturdier etc."):
 - **Material Refinement & Multi-Component Processing Chains (`game/data/UF_WorldCatalog.json`)**:
   - Added 7 refined items to `items.types`: `clay`, `sand`, `brick_clay` (fired brick), `mortar_lime` (slaked lime mortar), `stone_block` (ashlar stone block), `plank_dressed` (planed timber), `hardware_iron` (nails, brackets, hinges).

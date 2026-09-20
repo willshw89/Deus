@@ -412,6 +412,22 @@
             const sx = (face.index % 4) * fw;
             const sy = Math.floor(face.index / 4) * fh;
             c.blt(bmp, sx, sy, fw, fh, x + 2, y + 2, w - 4, h - 4);
+
+            // Dynamic Armor Reflection: reflect currently equipped armor on bottom portion (y: 108..144)
+            const unitObj = (sel && (sel.unit || sel)) || (d && d.id && Colonists && Colonists() ? Colonists().colonist(d.id) : null);
+            const armorSheet = (window.UF && UF.Generator && typeof UF.Generator.armorSheetForUnit === "function") ?
+                UF.Generator.armorSheetForUnit(unitObj, d) : null;
+            if (armorSheet) {
+                const armorBmp = ImageManager.loadFace(armorSheet);
+                if (armorBmp && armorBmp.isReady()) {
+                    c.blt(armorBmp, 0, 0, 144, 144, x + 2, y + 2, w - 4, h - 4);
+                } else if (armorBmp && !armorBmp._ufArmorListening) {
+                    armorBmp._ufArmorListening = true;
+                    armorBmp.addLoadListener(() => {
+                        if (this.visible && this.parent) this.refresh();
+                    });
+                }
+            }
         }
     };
 
@@ -496,7 +512,7 @@
             TouchInput._y = Math.round(($gameMap.adjustY(ev.y) * $gameMap.tileHeight() + $gameMap.tileHeight() / 2) * zoom);
             const clicked = colonistAt($gameMap.canvasToMapX(TouchInput.x), $gameMap.canvasToMapY(TouchInput.y));
             $colonyManager.select(clicked);
-            await t.waitFrames(2);
+            await t.waitFrames(15);
             const card = SceneManager._scene._colonyCard;
             const d = C.describe(c.id);
             t.check("click_selects_and_card_opens", clicked === c && $colonyManager.selectedColonist === c && !!card && card.visible && !!d && d.name === c.name && d.faction.length > 0,

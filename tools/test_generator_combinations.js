@@ -202,16 +202,7 @@ function compositePortrait(spec) {
         blitOver(out, cloth.data, 144, 144);
     }
 
-    // 4. Beard (Male only, not child)
-    if (isMale && beard && beard > 0 && beard <= 3 && stage !== 'child') {
-        const beardFile = path.join(GEN_DIR, 'face', `male_beard_${beard}.png`);
-        if (fs.existsSync(beardFile)) {
-            const bData = decodePNG(fs.readFileSync(beardFile));
-            const recoloredBeard = recolorHair(bData.data, ramp);
-            blitOver(out, recoloredBeard, 144, 144);
-        }
-    }
-
+    // 4. Facial hair removed per user directive ("Let's get rid of facial hair on the faceset generator")
     return out;
 }
 
