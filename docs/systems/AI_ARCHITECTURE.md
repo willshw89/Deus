@@ -136,15 +136,50 @@ Instead of reading hardcoded `[x, y]` coordinate offsets, settlements construct 
 1. **Founding Phase: 7x7 Communal Great Hall**:
    - Centered around the original faction focal fire at `(site.x, site.y)`.
    - Dimensions: $7 \times 7$ tiles (Interior: $5 \times 5$).
-   - Perimeter: 24 wall tiles, with 1 South-facing doorway cell.
+   - Perimeter: 23 wall tiles, with 1 South-facing doorway cell at `[0, 3]`.
    - Interior:
-     - Central focal campfire.
-     - 8 straw/wood beds arranged along the East and West interior alcoves.
-     - Timber or stone floor laid across all 25 interior tiles.
-   - Enclosure Verification:
-     - When all 24 perimeter wall/door tiles are standing, the structure triggers `UF_Floors.applyRoofedUpperDeck()`.
-     - Cells on `z = 1` become a solid, walkable roof deck.
-     - The interior receives `isRoofed = true`, shielding all 8 colonists from rain and dampness penalties.
+     - Central focal campfire at `[0, 0]` (the founding flame).
+     - 8 straw/wood beds arranged across 4 distinct 2-bed corner alcoves (one alcove per founder pair):
+       - Northwest Alcove (Pair 1): `[-2, -2]`, `[-1, -2]`
+       - Northeast Alcove (Pair 2): `[ 1, -2]`, `[ 2, -2]`
+       - Southwest Alcove (Pair 3): `[-2,  1]`, `[-2,  2]`
+       - Southeast Alcove (Pair 4): `[ 2,  1]`, `[ 2,  2]`
+     - Central cross-aisle and fire surrounding cells remain completely open and walkable.
+     - Timber or stone floor laid across interior tiles.
+   - Enclosure & Comfort Verification:
+     - When all 23 perimeter wall tiles and 1 door tile are standing, `strictEnclosure` recognizes the building.
+     - The structure triggers `UF_Floors.applyRoofedUpperDeck()`, generating a walkable upper roof deck on `z = 1`.
+     - Colonists sleeping by the open fire without a bed receive the unbedded thought: `"Needs a bed and space to sleep."` (-2 mood penalty).
+     - Colonists retiring to their assigned alcove beds receive the positive thought: `"Slept in a bed."` (+8 mood bonus).
+
+### Specification 1b: The 7-Tier AI Motivation Hierarchy
+To achieve hyperrealistic colony simulation without chaotic task thrashing, humanoid colonist decisions follow a strict 7-Tier Motivation Hierarchy evaluated in a single deterministic pass:
+
+1. **Tier 1 — Acute Survival & Physical Safety**:
+   - Imminent lethal threat, self-preservation, combat flight, extinguishing self if ignited.
+2. **Tier 2 — Biological Homeostasis & Emergency Needs**:
+   - Critical dehydration (`thirst >= 55`), severe starvation (`hunger >= 55`), extreme body temperature shock (`thermal`), urgent sanitation relief (`waste >= 65`).
+3. **Tier 3 — Psychological Facets, Trauma & Moral Taboos**:
+   - Grief coping, trauma response, mourning fallen kin, severe breakdown avoidance, behavioral facets (bravery vs. cowardice, sociability).
+4. **Tier 4 — Kinship, Pairbonding & Rites**:
+   - Partner courting, nocturnal mating rendezvous, nursing/caring for infants and young children, household defense, ancestor remembrance.
+5. **Tier 5 — Faction Duty & Cooperative Construction**:
+   - Communal Town Hall perimeter and bed construction (hearth enclosure), civic defense, cooperative logistics, communal meal gathering.
+6. **Tier 6 — Circadian Rhythm & Domestic Life**:
+   - Retiring to assigned private bed at night, scheduled morning wakeup, structured meal times, campfire conversation and socialization.
+7. **Tier 7 — Vocation, Crafting & Ambition**:
+   - Specialized calling labors (stonecutting, forestry, farming, smithing, tailoring), skill training, personal life goals and creative expression.
+
+### Specification 1c: AI System Consolidation & Modularity Standard
+- **Why Monolithic Merging Is Rejected**:
+  Merging all AI into a single 15,000-line script creates severe maintenance debt, breaks modular testing, and entangles distinct simulation domains.
+- **The Modularity Standard**:
+  - `UF_Jobs.js`: Physical execution engine (verbs, pathing, tile arrival, kinetic interactions). Has no opinions on high-level goals.
+  - `UF_Wildlife.js`: Ecological lifecycle (fauna grazing, predator territory, herd migration).
+  - `UF_Combat.js`: Tactical weapon ranges, damage calculations, stance evaluation.
+  - `UF_Households.js`: Kinship, generational tracking, bed ownership, structural demands.
+  - `UF_Goals.js`: Long-term colonist ambitions and life milestones.
+  - `UF_Colonists.js`: The central decision evaluator. Implements the single-pass 7-Tier Motivation pipeline, queries the other modules for state, and assigns concrete jobs to `UF_Jobs.js`.
 
 2. **Growth Phase: Private Two-Room Homesteads**:
    - Built when founder couples partner up and prepare to move out.

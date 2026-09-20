@@ -392,7 +392,7 @@ function selftest(catalogFile) {
         ["plan_steps", () => { c.colony.plan.find(s => s.id === "blades").craft = "lightsaber"; }],
         ["plan_steps", () => { c.colony.plan.find(s => s.id === "arm").first = ["knight"]; }],
         ["plan_steps", () => { c.colony.plan.find(s => s.id === "food").stock = ["caviar"]; }],
-        ["plan_steps", () => { c.colony.plans.stone.find(s => s.id === "smithy").cells = [[3, -1]]; }],
+        ["plan_steps", () => { c.colony.plans.stone.find(s => s.id === "smithy").cells = [[5, -1]]; }],
         ["plan_steps", () => { c.cultures.elf.plan = "jungle"; }],
         ["culture_chain_weights", () => { c.cultures.dwarf.chainWeights.alchemist = 2; }],
         ["culture_chain_weights", () => { c.cultures.orc.arms.prefer.push("berries"); }],

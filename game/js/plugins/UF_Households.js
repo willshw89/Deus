@@ -32,7 +32,7 @@
     const unitOf = u => u && typeof u === "object" ? u : W() && W().unit(u);
     const dead = u => !!(u && u.data && (u.data.dead === true || u.data._isDying === true));
     const person = u => !!(u && u.data && ["colonist", "person"].includes(u.data.kind));
-    const adult = u => !!(u && u.data && ((Number.isFinite(u.data.age) && u.data.age >= 15) || u.data.stage === "adult" || u.data.stage === "elder"));
+    const adult = u => !!(u && u.data && (Number.isFinite(u.data.age) ? u.data.age >= 18 : (u.data.stage === "adult" || u.data.stage === "elder")));
     const tick = () => window.UF && UF.Time && typeof UF.Time.ticks === "function" ? UF.Time.ticks() : W() && W()._frame || 0;
     const day = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 0}` : "0:0:0";
     const emit = (event, ...args) => { if (window.UF && UF.Events) UF.Events.emit(event, ...args); };
@@ -240,9 +240,117 @@
                 }
             }
             generations();
+            ensureTownHallHomes(people);
             for (const h of all()) if (h.home) syncHome(h);
             return all();
         } finally { reconciling = false; }
+    }
+    function ensureTownHallHomes(people) {
+        const w = W();
+        if (!w || !w.state || !w.state.history || !w.state.history.sites) return;
+        for (const site of w.state.history.sites) {
+            if (!site || site.ruined) continue;
+            const siteUnits = people.filter(u => u.data && (u.data.site === site.id || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
+            const founders = siteUnits.filter(u => u.data && u.data.founder);
+            if (founders.length < 2) continue;
+            const founderH = [...new Set(founders.map(u => of(u)).filter(Boolean))];
+            if (founderH.length === 0) continue;
+            const existingPrivate = founderH.some(h => h.home && !h.home.isShared);
+            if (existingPrivate) continue;
+
+            const area = { x: site.area.x, y: site.area.y };
+            const z = zOf(site);
+            const x0 = site.x - 3, y0 = site.y - 3;
+            const x1 = site.x + 3, y1 = site.y + 3;
+            const wSpan = 7, hSpan = 7;
+            const doorPos = { x: site.x, y: y1 };
+
+            const bedPositions = [
+                { x: site.x - 2, y: site.y - 2 }, { x: site.x - 1, y: site.y - 2 },
+                { x: site.x + 1, y: site.y - 2 }, { x: site.x + 2, y: site.y - 2 },
+                { x: site.x - 2, y: site.y + 1 }, { x: site.x - 2, y: site.y + 2 },
+                { x: site.x + 2, y: site.y + 1 }, { x: site.x + 2, y: site.y + 2 }
+            ];
+
+            const culture = (C() && typeof C().culture === "function" && C().culture(founders[0])) || {};
+            const wallId = culture.wall || "wall_wood";
+            const doorId = culture.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
+
+            const walls = [];
+            for (let y = y0; y <= y1; y++) {
+                for (let x = x0; x <= x1; x++) {
+                    if (x === x0 || x === x1 || y === y0 || y === y1) {
+                        if (x !== doorPos.x || y !== doorPos.y) {
+                            walls.push({ x, y });
+                        }
+                    }
+                }
+            }
+
+            const orderedFounders = [];
+            const visited = new Set();
+            for (const f of founders) {
+                if (visited.has(f.id)) continue;
+                orderedFounders.push(f);
+                visited.add(f.id);
+                const partner = f.data && (unitOf(f.data.partner) || unitOf(f.data.partnerId));
+                if (partner && founders.some(u => u.id === partner.id) && !visited.has(partner.id)) {
+                    orderedFounders.push(partner);
+                    visited.add(partner.id);
+                }
+            }
+            for (const f of founders) {
+                if (!visited.has(f.id)) {
+                    orderedFounders.push(f);
+                    visited.add(f.id);
+                }
+            }
+
+            const sharedBeds = [];
+            for (let i = 0; i < 8; i++) {
+                const bPos = bedPositions[i];
+                const member = orderedFounders[i] || null;
+                const unitId = member ? member.id : null;
+                sharedBeds.push({ x: bPos.x, y: bPos.y, unitId });
+                if (member && member.data && (!member.data.bed || member.data.bed.isShared)) {
+                    member.data.bed = { area: copyArea(area), x: bPos.x, y: bPos.y, z, isShared: true };
+                }
+            }
+
+            let townHall = (founderH.find(h => h.home && h.home.isShared) || {}).home;
+            if (!townHall) {
+                townHall = {
+                    id: `town_hall_${site.id}`,
+                    x: x0, y: y0, w: wSpan, h: hSpan,
+                    area: copyArea(area), z,
+                    wall: wallId,
+                    door: doorId,
+                    walls,
+                    doors: [doorPos],
+                    entrance: { x: site.x, y: y1 + 1 },
+                    sleeping: bedPositions.map(p => ({ x: p.x, y: p.y })),
+                    spots: [
+                        { x: site.x - 2, y: site.y - 2 }, { x: site.x - 1, y: site.y - 2 }
+                    ],
+                    beds: sharedBeds,
+                    hearth: { x: site.x, y: site.y },
+                    storage: { x: site.x - 5, y: site.y },
+                    isShared: true,
+                    rooms: [
+                        { type: "communal", name: "Town Hall", x: x0, y: y0, w: wSpan, h: hSpan, hearth: { x: site.x, y: site.y } }
+                    ],
+                    annexes: []
+                };
+            } else {
+                townHall.beds = sharedBeds;
+            }
+
+            for (const h of founderH) {
+                if (!h.home || h.home.isShared) {
+                    h.home = townHall;
+                }
+            }
+        }
     }
     function object(h, p) { return O() && O().atIn(areaOf(h), p.x, p.y); }
     function ref(h, p) { return { kind: "object", area: { x: h.area.x, y: h.area.y }, z: h.z, x: p.x, y: p.y }; }
@@ -374,7 +482,7 @@
         const w = W();
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
     }
-    function findPlot(h, u, design) {
+    function findPlot(h, u, design, annex = false) {
         let c = C() && C().state(u);
         if (!c || !samePlace(h, c)) {
             const w = W();
@@ -392,8 +500,10 @@
             UF.CultureGrowth.preferredDoor(h.faction) : (culture.door || "door_wood");
         // Some approved cultures start with a ruin-style wall descriptor that
         // has no recipe. Only their own existing laterWall is a valid fallback.
-        if ((!o.type(wall) || !o.type(wall).build) && culture.laterWall && o.type(culture.laterWall) && o.type(culture.laterWall).build) wall = culture.laterWall;
-        if (!o.type(wall) || !o.type(wall).build) wall = "wall_wood";
+        if (!o.type(wall) || !o.type(wall).build) {
+            if (culture.laterWall) wall = culture.laterWall;
+            else wall = "wall_wood";
+        }
         if ((!window.UF || !UF.CultureGrowth || !UF.CultureGrowth.preferredDoor) && (wall === "wall_stone" || wall.includes("stone"))) {
             if (o.type("door_stone") && o.type("door_stone").build) door = "door_stone";
         }
@@ -480,7 +590,8 @@
         const home = h.home, own = Own(), current = members(h);
         if (!home) return;
         const buildings = structures(h), beds = buildings.flatMap(p => p.beds);
-        const ids = new Set(current.map(u => u.id));
+        const residents = home.isShared ? all().filter(otherH => otherH.home === home).flatMap(otherH => members(otherH)) : current;
+        const ids = new Set(residents.map(u => u.id));
         for (const b of beds) if (!ids.has(b.unitId)) b.unitId = null;
         for (const u of current) if (!beds.some(b => b.unitId === u.id)) {
             const b = beds.find(b => b.unitId === null);
@@ -627,8 +738,8 @@
 
         // 5 base bootstrap steps for fresh unbuilt homes:
         home.steps = [
-            step("doors", home.door, home.doors),
             step("walls", home.wall, buildableWalls),
+            step("doors", home.door, home.doors),
             step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
             step("hearth", "campfire", [home.hearth].filter(Boolean)),
             step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
@@ -734,7 +845,7 @@
         const enclosed = p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
             p.doors.every(c => object(h, c) && object(h, c).id === p.door);
         if (enclosed && !p.isRoofed) {
-            p.isRoofed = true;
+            Object.defineProperty(p, "isRoofed", { value: true, writable: true, configurable: true, enumerable: false });
             const F = window.UF && UF.Floors;
             if (F && typeof F.applyRoofedUpperDeck === "function") {
                 F.applyRoofedUpperDeck(areaOf(h), { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");

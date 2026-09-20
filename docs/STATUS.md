@@ -6,6 +6,45 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## 4-Pair Cooperative Town Hall Construction & 8-Bed Alcove Allocation — 2026-09-20 (Gemini)
+Delivered per user directives ("When the game starts, the 4 pairs need to work together to build a town hall around the starting fire. everyone wants/needs a bed and space to sleep.", "Should we consolidate all the js related to AI", "Is there anything else that belongs in that hierarchy for a hyperrealistic roleplaying world", "Okay, where are we and what do we need? What is the standard going forward"):
+- **7x7 Town Hall Plan & Hearth Enclosure (`UF_WorldCatalog.json`)**:
+  - `colony.plan` and culture variants (`forest`, `stone`, `workshop`):
+    - `hearth`: `cells: [[0, 0]]` centered on the starting campfire at `(site.x, site.y)`.
+    - `shelter`: 23 perimeter wall cells (`[-3..3, -3]`, `[-3..3, 3]` except door, `[-3, -2..2]`, `[3, -2..2]`).
+    - `door`: South entrance doorway at `[0, 3]`.
+    - `beds`: 8 distinct beds arranged across 4 corner alcoves:
+      - Northwest Alcove (Pair 1): `[-2, -2]`, `[-1, -2]`
+      - Northeast Alcove (Pair 2): `[ 1, -2]`, `[ 2, -2]`
+      - Southwest Alcove (Pair 3): `[-2,  1]`, `[-2,  2]`
+      - Southeast Alcove (Pair 4): `[ 2,  1]`, `[ 2,  2]`
+    - Surrounding facilities (`woodpile`, `larder`, workshops) shifted outside the 7x7 footprint to `x = -5` and `x = 5`.
+- **4 Founder Pairs Bed & Household Binding (`UF_Households.js`)**:
+  - `ensureTownHallHomes(people)`: Automatically binds all 4 founder pairs to the shared Town Hall (`isShared: true`).
+  - Corrected `syncHome(h)` for shared communal buildings (`isShared`): preserves beds assigned to all sharing households rather than overwriting non-member beds to `null`.
+  - All 8 founder colonists receive explicit bed assignments in the 4 corner alcoves.
+  - Corrected `findPlot` parameter signature (`annex = false`) and wall fallback resolution.
+- **Colonist AI Cooperative Utility Boost & Sleep Feedback (`UF_Colonists.js`)**:
+  - Boosted utility score for Town Hall perimeter walls (`s += 3.5`), doorway (`s += 3.5`), and beds (`s += 4.0` when unbedded, `s += 2.0` when bedded).
+  - Instant `reconcile` and `reconcileArea` triggers upon bed construction completion.
+  - Unbedded thought: `"Needs a bed and space to sleep."` (-2 mood) awarded when sleeping near the fire without a bed.
+  - Bedded thought: `"Slept in a bed."` (+8 mood) awarded when sleeping in an assigned bed.
+- **System Architecture & 7-Tier Motivation Standard (`docs/systems/AI_ARCHITECTURE.md`)**:
+  - Documented the 7-Tier AI Motivation Hierarchy (Survival -> Homeostasis -> Psychology/Facets -> Kinship/Rites -> Faction Duty -> Circadian Rhythm -> Vocation & Ambition).
+  - Standardized the single-pass colonist decision pipeline while preserving modularity across `UF_Households`, `UF_Jobs`, `UF_Combat`, `UF_Wildlife`.
+- **Verification Evidence**:
+  - `node tools/check_catalog.js`: **19/19 checks PASS, 53/53 selftests PASS**.
+  - `node tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS, 0 FAIL (exit 0)**.
+  - `node tools/test_town_hall_ai_live.js`: **23/23 PASS, 0 FAIL (exit 0)** in NW.js live engine harness:
+    - Verifies 8 colonists (4 pairs) start around the campfire.
+    - Verifies 7x7 Town Hall plan has 23 perimeter walls, south door at `[0, 3]`, and 8 distinct beds.
+    - Verifies 4 founder pairs bound to shared Town Hall and 8/8 beds allocated.
+    - Rule 4 mutant check verified: `--mutant=no_town_hall_beds` fails with exit code 1.
+    - Screenshots opened and inspected (Rule 5):
+      - `live_town_hall_initial_setup.png`: Campfire in meadow with 8 founder colonists starting around it.
+      - `live_town_hall_built_beds.png`: 7x7 wooden Town Hall enclosing the campfire with south door and 8 straw beds in 4 corner alcoves occupied by resting colonists.
+
 ## Greater Z-Plane House Roof Deck Representation & Live Enclosure Hooks — 2026-09-20 (Gemini)
 Delivered per user directive ("represent the tiles on the greater Z plane when houses are finished. I want to make sure it works"):
 - **Autonomous Room Roof Deck Generation on Greater Z Plane ($Z = 1$) (`UF_Floors.js`)**:

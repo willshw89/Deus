@@ -2620,9 +2620,17 @@
                 } else if (u.data && u.data.householdId === x.step.household) {
                     s += 2.5;
                 } else {
-                    s += 1.2; // Cooperative building: help neighbors build their homes!
+                    s += 1.2;
                 }
             } else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.8;
+            if (x.step.id === "shelter" || x.step.id === "door" || x.step.society === "shelter" || x.step.society === "door") {
+                s += 3.5;
+            }
+            if (x.step.id === "beds" || x.step.society === "beds" || (x.step.build && hasTag(Objects().type(x.step.build), "bed"))) {
+                const Own = window.UF && UF.Ownership;
+                const hasMyBed = (u.data && u.data.bed && Objects().atIn(levelArea(u), u.data.bed.x, u.data.bed.y)) || (Own && Own.bedOf && Own.bedOf(u));
+                s += hasMyBed ? 2.0 : 4.0;
+            }
             const P = Pillars();
             if (P && P.priorityPillar) {
                 const focus = P.priorityPillar(c);
@@ -2944,6 +2952,7 @@
                     addThought(u, "Slept in a bed.", 8);
                 } else if (fireDist <= 3) {
                     addThought(u, "Slept warmly by the fire.", 10);
+                    addThought(u, "Needs a bed and space to sleep.", -2);
                     if (u.data && u.data.thermal) {
                         u.data.thermal.bodyTemp = 37.0;
                         u.data.thermal.stage = "normal";
@@ -2967,6 +2976,10 @@
             case "build": {
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
                 if (t && t.id === "stockpile" && colonyState(u)) colonyState(u).stockpiles.push({ x: job.target.x, y: job.target.y, stores: (job.params.stores || []).slice(), step: job.params.plan || null });
+                if (t && (t.id === "floor_straw" || (t.tags && t.tags.includes("bed")))) {
+                    if (window.UF && UF.Households && UF.Households.reconcile) UF.Households.reconcile();
+                    if (window.UF && UF.Ownership && UF.Ownership.reconcileArea) UF.Ownership.reconcileArea(levelArea(u));
+                }
                 addThought(u, `Was pleased to see ${lower(t ? "the " + t.name : "the building")} finished.`, 10);
                 break;
             }
