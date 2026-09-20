@@ -1,12 +1,12 @@
 {
   "name": "Cursor_kobold",
   "culture": "kobold",
-  "about": "Nano Banana Pro 48x48 bespoke faction cursor for kobold.",
+  "about": "Pointy 16-bit mouse cursor for kobold (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    2,
-    2
+    4,
+    4
   ],
   "facings": [
     "S"

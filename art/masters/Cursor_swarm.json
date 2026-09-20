@@ -1,12 +1,12 @@
 {
   "name": "Cursor_swarm",
   "culture": "swarm",
-  "about": "Nano Banana Pro 48x48 bespoke faction cursor for swarm.",
+  "about": "Pointy 16-bit mouse cursor for swarm (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    2,
-    2
+    4,
+    4
   ],
   "facings": [
     "S"

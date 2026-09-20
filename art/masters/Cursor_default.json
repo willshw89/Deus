@@ -1,7 +1,7 @@
 {
-  "name": "Cursor_starborn",
-  "culture": "starborn",
-  "about": "Pointy 16-bit mouse cursor for starborn (hotspot: [4, 4]).",
+  "name": "Cursor_default",
+  "culture": "default",
+  "about": "Pointy 16-bit mouse cursor for default (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [

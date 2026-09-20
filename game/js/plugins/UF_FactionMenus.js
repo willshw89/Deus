@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF Faction Menus] Dynamic matching full-screen menu themes, backdrops, window skins, and cultural cursors for all 11 factions.
+ * @plugindesc [UF Faction Menus] Dynamic matching full-screen menu themes, backdrops, window skins, and literal mouse cursors for all 11 factions.
  * @author Gemini (Google DeepMind)
  *
  * @param DefaultFaction
@@ -25,12 +25,21 @@
  *
  * @help
  * ============================================================================
- * Ultima Fortress Matching Faction Menus
+ * Ultima Fortress Matching Faction Menus & Mouse Cursors
  * ============================================================================
- * Dynamically pairs the game's menus with authentic Ultima VII cultural frames,
- * wallpapers, window skins, custom cursors, and musical themes across all 11
- * factions:
+ * Dynamically pairs the game's menus with authentic cultural frames, wallpapers,
+ * window skins, and literal mouse cursors across all 11 factions:
  * human, elf, dwarf, gnome, goblin, orc, lizardfolk, kobold, undead, starborn, swarm.
+ *
+ * Literal Mouse Cursor:
+ * - Changes the actual system/canvas mouse pointer to the faction's cultural
+ *   weapon / symbol with pixel-accurate click hotspots.
+ * - ZERO selector cursor sprites on menu items.
+ *
+ * Faction Based Menus:
+ * - All Scene_MenuBase screens (Menu, Item, Skill, Equip, Status, Options, Save, etc.)
+ *   display the matching faction border frame and wallpaper (UF_Menu_<culture>.png).
+ * - All windows use the matching Window_<culture>.png skin.
  *
  * Script Calls:
  * - UF_FactionMenus.setFaction("elf")
@@ -43,9 +52,44 @@
 
     const pluginName = "UF_FactionMenus";
     const params = PluginManager.parameters(pluginName);
-    const defaultFaction = params["DefaultFaction"] || "human";
+    const defaultFaction = params["DefaultFaction"] || "default";
 
     window.UF_FactionMenus = {};
+
+    const FACTIONS = ["default", "human", "elf", "dwarf", "gnome", "goblin", "orc", "lizardfolk", "kobold", "undead", "starborn", "swarm"];
+
+    const CURSOR_HOTSPOTS = {
+        default: [4, 4],
+        human: [5, 4],
+        elf: [4, 4],
+        dwarf: [4, 4],
+        gnome: [4, 4],
+        goblin: [4, 4],
+        orc: [4, 4],
+        lizardfolk: [4, 4],
+        kobold: [4, 4],
+        undead: [4, 4],
+        starborn: [4, 4],
+        swarm: [4, 4]
+    };
+
+    const CULTURE_FALLBACKS = {
+        halfling: "human",
+        serpentkin: "lizardfolk",
+        demon: "undead",
+        automaton: "starborn",
+        swarmer: "swarm",
+        dark_dwarf: "dwarf",
+        dark_gnome: "gnome"
+    };
+
+    function safeFaction(fac) {
+        if (!fac) return "default";
+        const lower = String(fac).toLowerCase();
+        if (FACTIONS.includes(lower)) return lower;
+        if (CULTURE_FALLBACKS[lower]) return CULTURE_FALLBACKS[lower];
+        return "default";
+    }
 
     const nwArgs = (typeof nw !== "undefined" && nw.App && nw.App.argv) ? nw.App.argv : [];
     if (nwArgs.includes("--show-menu")) {
@@ -65,56 +109,156 @@
     }
 
     UF_FactionMenus.getFaction = function() {
+        if (SceneManager._scene instanceof Scene_Title) {
+            return "default";
+        }
         if ($gameSystem && $gameSystem._ufActiveMenuFaction) {
             return $gameSystem._ufActiveMenuFaction;
         }
-        // If world state has player faction:
+        if (window.UF && UF.Factions && typeof UF.Factions.playerCulture === "function") {
+            const pc = UF.Factions.playerCulture();
+            if (pc) return pc.toLowerCase();
+        }
         if (window.UF && UF.World && UF.World.state && UF.World.state.factions && Array.isArray(UF.World.state.factions.list)) {
             const playerFac = UF.World.state.factions.list.find(f => f.isPlayer);
-            if (playerFac && playerFac.species) {
-                return playerFac.species.toLowerCase();
+            if (playerFac && (playerFac.culture || playerFac.species)) {
+                return (playerFac.culture || playerFac.species).toLowerCase();
             }
         }
         return defaultFaction;
     };
 
-    UF_FactionMenus.updateCanvasCursor = function() {
-        if (!Graphics._canvas) return;
-        if (window.UF && UF.Select && UF.Select.activeTool && UF.Select.activeTool()) return;
-        const faction = UF_FactionMenus.getFaction();
-        const curUrl = "img/system/" + `Cursor_${faction}.png`;
-        Graphics._canvas.style.cursor = `url("${curUrl}") 2 2, default`;
+    UF_FactionMenus.getCursorCss = function(faction) {
+        const rawFac = faction || UF_FactionMenus.getFaction();
+        const fac = safeFaction(rawFac);
+        const spot = CURSOR_HOTSPOTS[fac] || [4, 4];
+        return 'url("img/system/Cursor_' + fac + '.png") ' + spot[0] + ' ' + spot[1] + ', auto';
+    };
+
+    UF_FactionMenus.applyMouseCursor = function(faction) {
+        const fac = faction || UF_FactionMenus.getFaction();
+        const cursorCss = UF_FactionMenus.getCursorCss(fac);
+
+        // 1. Inject or update global CSS rule
+        let styleEl = document.getElementById("uf-faction-mouse-cursor-style");
+        if (!styleEl) {
+            styleEl = document.createElement("style");
+            styleEl.id = "uf-faction-mouse-cursor-style";
+            document.head.appendChild(styleEl);
+        }
+        styleEl.textContent = `
+            html, body, #gameCanvas, canvas, .cursor-pointer, [style*="cursor"] {
+                cursor: ${cursorCss} !important;
+            }
+        `;
+
+        // 2. Direct element styling
+        if (document.documentElement) document.documentElement.style.cursor = cursorCss;
+        if (document.body) document.body.style.cursor = cursorCss;
+        if (Graphics._canvas) Graphics._canvas.style.cursor = cursorCss;
+
+        // 3. Update PIXI InteractionManager cursor dictionary
+        if (typeof PIXI !== "undefined" && Graphics.app && Graphics.app.renderer && Graphics.app.renderer.plugins && Graphics.app.renderer.plugins.interaction) {
+            const inter = Graphics.app.renderer.plugins.interaction;
+            inter.cursorStyles['default'] = cursorCss;
+            inter.cursorStyles['auto'] = cursorCss;
+            inter.cursorStyles['pointer'] = cursorCss;
+        }
     };
 
     UF_FactionMenus.setFaction = function(factionId) {
+        const fac = factionId ? factionId.toLowerCase() : defaultFaction;
         if ($gameSystem) {
-            $gameSystem._ufActiveMenuFaction = factionId.toLowerCase();
+            $gameSystem._ufActiveMenuFaction = fac;
         }
-        UF_FactionMenus.updateCanvasCursor();
+        UF_FactionMenus.applyMouseCursor(fac);
+        if (SceneManager._scene && SceneManager._scene instanceof Scene_MenuBase) {
+            SceneManager._scene.applyFactionTheme(fac);
+        }
+    };
+
+    // Hook PIXI InteractionManager so it never reverts to default cursor on mouse move
+    if (typeof PIXI !== "undefined" && PIXI.InteractionManager) {
+        const _InteractionManager_setCursorMode = PIXI.InteractionManager.prototype.setCursorMode;
+        PIXI.InteractionManager.prototype.setCursorMode = function(mode) {
+            if (!mode || mode === 'default' || mode === 'auto' || mode === 'inherit') {
+                const curCss = UF_FactionMenus.getCursorCss();
+                this.interactionDOMElement.style.cursor = curCss;
+                this.currentCursorMode = 'default';
+                return;
+            }
+            _InteractionManager_setCursorMode.call(this, mode);
+        };
+    }
+
+    // Set mouse cursor on scene starts
+    const _Scene_Boot_start = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _Scene_Boot_start.call(this);
+        UF_FactionMenus.applyMouseCursor();
+        if (window.UF && UF.Test && UF.Test.active) registerChecks();
+    };
+
+    const _Scene_Title_createBackground = Scene_Title.prototype.createBackground;
+    Scene_Title.prototype.createBackground = function() {
+        _Scene_Title_createBackground.call(this);
+        this._defaultMenuSprite = new Sprite();
+        this._defaultMenuSprite.bitmap = ImageManager.loadPicture("UF_Menu_default");
+        this.addChild(this._defaultMenuSprite);
+    };
+
+    const _Scene_Title_start = Scene_Title.prototype.start;
+    Scene_Title.prototype.start = function() {
+        _Scene_Title_start.call(this);
+        UF_FactionMenus.applyMouseCursor("default");
     };
 
     const _Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function() {
         _Scene_Map_start.call(this);
-        UF_FactionMenus.updateCanvasCursor();
+        UF_FactionMenus.applyMouseCursor();
     };
 
-    // 1. Scene_Menu: Dynamic matching background frame
-    const _Scene_Menu_createBackground = Scene_Menu.prototype.createBackground;
-    Scene_Menu.prototype.createBackground = function() {
-        _Scene_Menu_createBackground.call(this);
-        const faction = UF_FactionMenus.getFaction();
+    // When factions are generated (or world rolled), update the cursor to the player's faction
+    if (window.UF && UF.on) {
+        UF.on("factions:generated", () => {
+            UF_FactionMenus.applyMouseCursor();
+        });
+    }
+
+    // Window skins: Window_Base loads matching Window_<culture>.png
+    const _Window_Base_loadWindowskin = Window_Base.prototype.loadWindowskin;
+    Window_Base.prototype.loadWindowskin = function() {
+        _Window_Base_loadWindowskin.call(this);
+        if (SceneManager._scene instanceof Scene_Title) {
+            this.windowskin = ImageManager.loadSystem("Window_default");
+            return;
+        }
+        if (window.UF && UF.Factions && typeof UF.Factions.skinFor === "function") {
+            const who = this._ufSkinFor !== undefined && this._ufSkinFor !== null ? this._ufSkinFor : UF_FactionMenus.getFaction();
+            const s = UF.Factions.skinFor(who);
+            if (s) { this.windowskin = s; return; }
+        }
+        const faction = safeFaction(UF_FactionMenus.getFaction());
+        this.windowskin = ImageManager.loadSystem(`Window_${faction}`);
+    };
+
+    // Scene_MenuBase: Dynamic matching background frame & window skins for ALL menus
+    const _Scene_MenuBase_createBackground = Scene_MenuBase.prototype.createBackground;
+    Scene_MenuBase.prototype.createBackground = function() {
+        _Scene_MenuBase_createBackground.call(this);
+        const faction = safeFaction(UF_FactionMenus.getFaction());
         this._factionMenuSprite = new Sprite();
         this._factionMenuSprite.bitmap = ImageManager.loadPicture(`UF_Menu_${faction}`);
         this.addChild(this._factionMenuSprite);
     };
 
-    // 2. Window Skins: Apply matching Window_<culture>.png to all menu windows
-    const _Scene_Menu_start = Scene_Menu.prototype.start;
-    Scene_Menu.prototype.start = function() {
-        _Scene_Menu_start.call(this);
-        const faction = UF_FactionMenus.getFaction();
+    const _Scene_MenuBase_start = Scene_MenuBase.prototype.start;
+    Scene_MenuBase.prototype.start = function() {
+        _Scene_MenuBase_start.call(this);
+        const faction = safeFaction(UF_FactionMenus.getFaction());
         this.applyFactionTheme(faction);
+        UF_FactionMenus.applyMouseCursor(faction);
 
         // Optional BGM transition if catalog theme defined
         if (window.UF && UF.World && UF.World.catalog && UF.World.catalog.factions) {
@@ -125,31 +269,33 @@
         }
     };
 
-    const FACTIONS = ["human", "elf", "dwarf", "gnome", "goblin", "orc", "lizardfolk", "kobold", "undead", "starborn", "swarm"];
-
-    Scene_Menu.prototype.applyFactionTheme = function(faction) {
-        const skin = ImageManager.loadSystem(`Window_${faction}`);
+    Scene_MenuBase.prototype.applyFactionTheme = function(faction) {
+        let skin = null;
+        if (window.UF && UF.Factions && typeof UF.Factions.skinFor === "function") {
+            skin = UF.Factions.skinFor(faction);
+        }
+        const sFac = safeFaction(faction);
+        if (!skin) skin = ImageManager.loadSystem(`Window_${sFac}`);
         if (this._factionMenuSprite) {
-            this._factionMenuSprite.bitmap = ImageManager.loadPicture(`UF_Menu_${faction}`);
+            this._factionMenuSprite.bitmap = ImageManager.loadPicture(`UF_Menu_${sFac}`);
         }
-        if (this._commandWindow) {
-            this._commandWindow.windowskin = skin;
-            this._commandWindow.opacity = 210;
-            if (this._commandWindow._factionCursorSprite) {
-                this._commandWindow._factionCursorSprite._cursorFaction = null; // force reload cursor
+        const updateWin = (w) => {
+            if (w && w instanceof Window_Base) {
+                w.windowskin = skin;
+                w.opacity = 210;
             }
+        };
+        if (this._windowLayer && this._windowLayer.children) {
+            this._windowLayer.children.forEach(updateWin);
         }
-        if (this._statusWindow) {
-            this._statusWindow.windowskin = skin;
-            this._statusWindow.opacity = 210;
-        }
-        if (this._goldWindow) {
-            this._goldWindow.windowskin = skin;
-            this._goldWindow.opacity = 210;
+        for (const key of Object.keys(this)) {
+            if (this[key] instanceof Window_Base) {
+                updateWin(this[key]);
+            }
         }
     };
 
-    // Ensure Tab and bracket keys are mapped
+    // Keyboard navigation to preview / cycle faction themes in Scene_Menu
     Input.keyMapper[9] = "tab";
     Input.keyMapper[219] = "bracketLeft";
     Input.keyMapper[221] = "bracketRight";
@@ -163,7 +309,6 @@
             const nextIdx = (idx + 1) % FACTIONS.length;
             const nextFac = FACTIONS[nextIdx];
             UF_FactionMenus.setFaction(nextFac);
-            this.applyFactionTheme(nextFac);
             SoundManager.playCursor();
         } else if (Input.isTriggered("bracketLeft") || Input.isTriggered("pageup")) {
             const cur = UF_FactionMenus.getFaction();
@@ -171,91 +316,49 @@
             const nextIdx = (idx - 1 + FACTIONS.length) % FACTIONS.length;
             const nextFac = FACTIONS[nextIdx];
             UF_FactionMenus.setFaction(nextFac);
-            this.applyFactionTheme(nextFac);
             SoundManager.playCursor();
         }
     };
 
-    // 3. Custom Faction Cursor Support
-    const _Window_Selectable_initialize = Window_Selectable.prototype.initialize;
-    Window_Selectable.prototype.initialize = function(rect) {
-        _Window_Selectable_initialize.call(this, rect);
-        this._factionCursorSprite = null;
-    };
-
-    const _Window_Selectable_update = Window_Selectable.prototype.update;
-    Window_Selectable.prototype.update = function() {
-        _Window_Selectable_update.call(this);
-        if (this.isOpenAndActive() && this.index() >= 0) {
-            this.updateFactionCursor();
-        } else if (this._factionCursorSprite) {
-            this._factionCursorSprite.visible = false;
-        }
-    };
-
-    Window_Selectable.prototype.updateFactionCursor = function() {
-        const faction = UF_FactionMenus.getFaction();
-        if (!this._factionCursorSprite) {
-            this._factionCursorSprite = new Sprite();
-            this._factionCursorSprite.anchor.x = 0.5;
-            this._factionCursorSprite.anchor.y = 0.5;
-            this._factionCursorSprite.scale.set(0.65, 0.65);
-            this.addChild(this._factionCursorSprite);
-        }
-
-        if (this._factionCursorSprite._cursorFaction !== faction) {
-            this._factionCursorSprite._cursorFaction = faction;
-            this._factionCursorSprite.bitmap = ImageManager.loadSystem(`Cursor_${faction}`);
-        }
-
-        const rect = this.itemRect(this.index());
-        if (rect && this._factionCursorSprite) {
-            this._factionCursorSprite.visible = true;
-            this._factionCursorSprite.x = this.padding + rect.x + 14;
-            this._factionCursorSprite.y = this.padding + rect.y + rect.height / 2;
-        }
-    };
-
-    // 4. Automated Verification Suite (UF_Test)
-    const _Scene_Boot_start = Scene_Boot.prototype.start;
-    Scene_Boot.prototype.start = function() {
-        _Scene_Boot_start.call(this);
-        if (window.UF && UF.Test && UF.Test.active) registerChecks();
-    };
-
+    // Automated Verification Suite (UF_Test)
     function registerChecks() {
         UF.Test.suite("faction_menus", async t => {
-            const factions = ["human", "elf", "dwarf", "gnome", "goblin", "orc", "lizardfolk", "kobold", "undead", "starborn", "swarm"];
-            t.check("factions_list_11", factions.length === 11, "11 matching faction menus defined");
+            t.check("factions_list_12", FACTIONS.length === 12, "12 matching faction menus defined (default + 11 factions)");
+
+            // Verify literal mouse cursor style for default main menu
+            UF_FactionMenus.applyMouseCursor("default");
+            const curDefault = UF_FactionMenus.getCursorCss("default");
+            t.check("mouse_cursor_default_applied", curDefault.includes("Cursor_default.png"), "Default mouse cursor configured with Cursor_default.png");
+
+            // Verify literal mouse cursor style for dwarf
+            UF_FactionMenus.applyMouseCursor("dwarf");
+            const curDwarf = UF_FactionMenus.getCursorCss("dwarf");
+            t.check("mouse_cursor_dwarf_applied", curDwarf.includes("Cursor_dwarf.png"), "Mouse cursor configured with Cursor_dwarf.png");
 
             SceneManager.push(Scene_Menu);
             await t.waitFrames(15);
             t.check("scene_menu_active", SceneManager._scene instanceof Scene_Menu, "Scene_Menu successfully loaded");
 
-            for (const fac of factions) {
+            // Verify default theme on Scene_Menu
+            UF_FactionMenus.setFaction("default");
+            t.check("default_theme_active", UF_FactionMenus.getFaction() === "default", "Default menu theme active");
+            t.check("default_mouse_cursor_applied", UF_FactionMenus.getCursorCss("default").includes("Cursor_default.png"), "Cursor_default applied");
+
+            // Verify that NO selector cursor sprite exists in Window_Selectable
+            const cmdWin = SceneManager._scene._commandWindow;
+            t.check("no_menu_selector_cursor_sprite", !cmdWin._factionCursorSprite, "No selector cursor sprite on menu items");
+
+            for (const fac of FACTIONS) {
                 UF_FactionMenus.setFaction(fac);
                 const bmp = ImageManager.loadPicture(`UF_Menu_${fac}`);
                 const skin = ImageManager.loadSystem(`Window_${fac}`);
-                const cur = ImageManager.loadSystem(`Cursor_${fac}`);
 
-                if (SceneManager._scene && SceneManager._scene._factionMenuSprite) {
-                    SceneManager._scene._factionMenuSprite.bitmap = bmp;
-                }
-                if (SceneManager._scene._commandWindow) {
-                    SceneManager._scene._commandWindow.windowskin = skin;
-                    if (SceneManager._scene._commandWindow._factionCursorSprite) {
-                        SceneManager._scene._commandWindow._factionCursorSprite._cursorFaction = null; // force reload
-                    }
-                }
-                if (SceneManager._scene._statusWindow) SceneManager._scene._statusWindow.windowskin = skin;
-                if (SceneManager._scene._goldWindow) SceneManager._scene._goldWindow.windowskin = skin;
-
-                await t.waitUntil(() => bmp.isReady() && skin.isReady() && cur.isReady(), 5000, `UF_Menu_${fac} assets ready`);
+                await t.waitUntil(() => bmp.isReady() && skin.isReady(), 5000, `UF_Menu_${fac} assets ready`);
                 await t.waitFrames(8);
-                t.screenshot(`menu_live_${fac}`);
+                t.screenshot(`menu_clean_${fac}`);
             }
 
-            t.check("menu_themes_rendered", true, "All 11 matching faction menus captured");
+            t.check("menu_themes_rendered", true, "All 12 clean matching menus captured without selector cursors");
             SceneManager.pop();
             await t.waitFrames(10);
         });

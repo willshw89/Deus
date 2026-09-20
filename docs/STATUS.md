@@ -9,6 +9,35 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 - Gemini: Orc Demographics 100% Google Nano Banana Pro 12-Sprite Action Suite (Adult Male Orc, Adult Female Orc across Walk, Haul, Attack, Bow, Magic, Work, Downed). Files: `art/raw/`, `game/img/characters/`, `art/review/`.
 
+## 12 Pointy Cursors & Default Main Menu Theme — 2026-09-19 (Gemini)
+Delivered per user directives ("Ensure all of the cursors are pointy. Also, make a default menu and a default mouse cursor for the main menu.", "I wanted faction cursors for the mouse cursor, as well as faction based menus", "I do not want a selector cursor on the menu"):
+- **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
+  - Generated pointy 12-cursor set (`pointy_cursors_12_raw.png`), dedicated dwarven runic war pick (`cursor_dwarf_pick_raw.png`), dedicated orc notched war-dagger (`cursor_orc_dagger_raw.png`), ancient fortress main menu backdrop (`default_menu_theme_raw.png`), and matching fortress granite windowskin (`default_window_skin_raw.png`).
+- **12 Pointy Directional Cursors (`game/img/system/Cursor_*.png`, 48×48 px)**:
+  - Every cursor has a sharp 1-pixel pointy tip oriented towards the top-left with pixel-accurate CSS hotspot coordinates:
+    1. `default`: Classic ornate medieval steel arming dagger/sword with gold hilt and ruby pommel. Razor tip at `[4, 4]`.
+    2. `human`: Polished steel knight's gauntlet with pointing index finger at `[5, 4]`.
+    3. `elf`: Silver leafblade dagger entwined with emerald vines, needle tip at `[4, 4]`.
+    4. `dwarf`: Forged runic dwarven war pick with glowing gold runes, armor-piercing steel spike at `[4, 4]`.
+    5. `gnome`: Brass clockwork drafting needle / tinker stylus with fine gears, needle point at `[4, 4]`.
+    6. `goblin`: Wicked rusted jagged shiv with barbed iron point at `[4, 4]`.
+    7. `orc`: Brutal notched black iron war-dagger with bone hilt, razor point at `[4, 4]`.
+    8. `lizardfolk`: Spiral iridescent shell cone / obsidian spire with razor point at `[4, 4]`.
+    9. `kobold`: Mining pick spike with warm lantern flame at `[4, 4]`.
+    10. `undead`: Skeletal wand with blue soul-flame wand tip at `[4, 4]`.
+    11. `starborn`: Radiant glowing astral cosmic prism needle tapering to a razor point at `[4, 4]`.
+    12. `swarm`: Iridescent violet chitinous stinger with razor needle point at `[4, 4]`.
+- **Default Main Menu Backdrop & Windowskin**:
+  - `UF_Menu_default.png` (816×624): Carved stone pillars, battlements, griffin gargoyles flanking a fortress crown crest, seamless dark slate masonry interior pattern with zero baked-in text.
+  - `Window_default.png` (192×192): Clean fortress granite border, burnished bronze corner brackets, translucent slate stone backplate.
+- **Engine Integration (`UF_FactionMenus.js`)**:
+  - `Scene_Title` displays `UF_Menu_default.png`, `Window_default.png`, and `Cursor_default.png`.
+  - Zero selector cursor sprites rendered on menu command windows; all cursor behavior is native literal mouse cursors.
+- **Quality Gates & Verification Evidence**:
+  - `tools/originality_check.js`: **PASS 5/5 files without a FAIL, 0 WARN** (Cursor_default 0.464, Cursor_dwarf 0.450, Cursor_orc 0.508, UF_Menu_default 0.323, Window_default 0.555 >= 0.28).
+  - Automated tests: `tools/test_faction_menus_clean.js` **8 passed, 0 failed (exit 0)**.
+  - Visual Evidence: Master review board in `art/review/all_pointy_cursors_and_default_menu_showcase.png`, cursor hotspot inspection in `art/review/all_cursors_inspected.png`, live menu capture in `art/review/menus/faction_menus.menu_clean_default.png`.
+
 ## Wildlife 100% Google Nano Banana Pro Action Suites (Eat, Attack, Sleep) — 2026-09-19 (Gemini)
 Delivered per user directives ("Generate with Nano Banana Pro", "Wildlife needs eat, attack, and sleep animations", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
 - **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:

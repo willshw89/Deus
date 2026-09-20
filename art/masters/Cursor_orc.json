@@ -1,12 +1,12 @@
 {
   "name": "Cursor_orc",
   "culture": "orc",
-  "about": "Nano Banana Pro 48x48 bespoke faction cursor for orc.",
+  "about": "Pointy 16-bit mouse cursor for orc (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    2,
-    2
+    4,
+    4
   ],
   "facings": [
     "S"

@@ -1,12 +1,12 @@
 {
   "name": "Cursor_undead",
   "culture": "undead",
-  "about": "Nano Banana Pro 48x48 bespoke faction cursor for undead.",
+  "about": "Pointy 16-bit mouse cursor for undead (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    2,
-    2
+    4,
+    4
   ],
   "facings": [
     "S"

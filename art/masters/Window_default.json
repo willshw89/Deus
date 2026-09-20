@@ -1,0 +1,8 @@
+{
+  "name": "Window_default",
+  "culture": "default",
+  "about": "Default fortress windowskin (192x192).",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "palette": "art/palette/uf.hex"
+}

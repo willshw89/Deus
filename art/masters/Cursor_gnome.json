@@ -1,12 +1,12 @@
 {
   "name": "Cursor_gnome",
   "culture": "gnome",
-  "about": "Nano Banana Pro 48x48 bespoke faction cursor for gnome.",
+  "about": "Pointy 16-bit mouse cursor for gnome (hotspot: [4, 4]).",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
-    2,
-    2
+    4,
+    4
   ],
   "facings": [
     "S"

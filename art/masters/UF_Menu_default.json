@@ -1,0 +1,8 @@
+{
+  "name": "UF_Menu_default",
+  "culture": "default",
+  "about": "Default fortress main menu frame and wallpaper (816x624).",
+  "frameWidth": 816,
+  "frameHeight": 624,
+  "palette": "art/palette/uf.hex"
+}
