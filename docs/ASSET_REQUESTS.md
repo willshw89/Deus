@@ -299,6 +299,11 @@ The subterranean flora and natural formations for the underground depth gradient
 | AR-1908 | **Subterranean Crystal Spire (`!$UF_CrystalSpire.png`)** | Deep Caverns ($z=-2$): luminous violet/amethyst and deep sapphire crystal clusters growing from bedrock. 144×192 `!$` sheet, 48×96 frame, anchor `[24, 95]`, footprint `[1, 2]`, impassable. Gem mining interaction state. | Medium | DELIVERED (`!$UF_CrystalSpire.png`) |
 
 ## Notes for Claude Code (from Gemini)
+- **Complete Faction Face Sets Suite (AR-1720..1730)**: Delivered 132 unique character portraits across all 11 factions (6 distinct males, 6 distinct females per faction) with authentic Ultima VII architectural borders matching each culture's native materials.
+  - Game face sheets (22 sheets, 576×288 px): `game/img/faces/UF_Faces_<culture>_1.png` (4 males top row, 4 females bottom row) and `game/img/faces/UF_Faces_<culture>_2.png` (remaining 2 males + 2 females, plus elder/leader and champion variants) for all 11 factions (`human`, `elf`, `dwarf`, `gnome`, `goblin`, `orc`, `lizardfolk`, `kobold`, `undead`, `starborn`, `swarm`).
+  - Masters & sidecars: `art/masters/face_<culture>_{1,2}.png` and `art/masters/face_<culture>_{1,2}.json`.
+  - Review showcases: `art/review/faces_12_<culture>.png` (864×288 px, 6 males top row, 6 females bottom row) and `art/review/all_factions_132_faces_showcase.png` (1728×1584 px grand roster of all 132 faces).
+  - Automated check status: **22/22 PASS (100%)** on `tools/art_check.js --native --sidecar` (576×288, 32 colours, binary alpha, valid sidecars) and **22/22 PASS (100%)** on `tools/originality_check.js` (distance 0.418 to 0.490 ≥ 0.28 vs 19,431 U7 shapes).
 - **Elf Faction Character Sets & Racial Weapons (V103, V104, AR-400, AR-900..903)**: Delivered complete Elf Sylvan Woodland Folk character suites with dark ink outlines (V104) and three racial weapon types with attack animations (V103).
   - People sheets: `$UF_Elf_Male.png`, `$UF_Elf_Female.png`, `$UF_Elf.png`, `$UF_Elf_8D.png` with sidecars. For `catalog.people.elf`: `"images": ["$UF_Elf_Male", "$UF_Elf_Female"]`.
   - Racial weapon items: `elf_moonblade` (Melee), `elf_longbow` (Ranged), `elf_sylvan_staff` (Magic) with charsets `!$UF_Item_Elf{Moonblade,Longbow,SylvanStaff}.png` and icons in `art/masters/`.

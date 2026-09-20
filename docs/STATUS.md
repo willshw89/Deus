@@ -5,6 +5,64 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-19
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
+## In progress
+- None (132 unique faction face sets delivered, awaiting user review)
+
+## Complete Faction Face Sets Suite (132 Unique Faces across 11 Factions) — 2026-09-19
+
+Delivered per user requests ("Use Nano banana II to create all of the UF Face Sets we need, giving each faction a unique ultima 7 style border that corresponds with their faction theme... Cool, now back to the face sets, I want a dozen unique faces for each faction, half male half female"):
+- **Scope & Delivery:**
+  - Exactly 12 unique character portraits for each of the 11 factions (6 distinct males, 6 distinct females = 132 unique character faces total).
+  - Every portrait features an authentic Ultima VII architectural border crafted from each faction's native cultural materials:
+    - **Human**: Gothic arched stone niche with grey ashlar masonry and rounded arch.
+    - **Elf**: Living ivy-leaf greenwood bower with woven emerald vines and morning dew.
+    - **Dwarf**: Carved runic stone border with brass rivets and subterranean fiery forge glow.
+    - **Gnome**: Brass clockwork porthole with exposed gears, pressure dials, and rivets.
+    - **Goblin**: Crude scavenged timber and rusted iron nail frame.
+    - **Orc**: Tribal carved mammoth bone, tusks, and leather sinew lashings.
+    - **Lizardfolk**: Coral and nacre sea-shell border with pearlescent shell rosettes.
+    - **Kobold**: Subterranean timber mine shaft with glowing hanging miner lanterns.
+    - **Undead**: Ancient crypt slate stone niche draped in creeping grave moss and verdigris bronze fittings.
+    - **Starborn**: Geometric silver crystal lattice border with faceted sapphire rhombuses on cosmic starlight indigo void.
+    - **Swarm**: Segmented chitinous exoskeleton carapace border with violet pulsing bio-nodes and organic sinew tendons on dark hive-purple background.
+- **RMMZ Sheet Packaging (22 Game Sheets, 576×288 px):**
+  - `game/img/faces/UF_Faces_<culture>_1.png`: 4 Males (top row), 4 Females (bottom row).
+  - `game/img/faces/UF_Faces_<culture>_2.png`: Remaining 2 Males + 2 Females, plus Elder/Leader and Champion variants.
+  - Native master sheets in `art/masters/face_<culture>_1.png` and `_2.png` with sidecars `face_<culture>_1.json` and `_2.json`.
+- **Review Showcases:**
+  - 11 dedicated faction showcases: `art/review/faces_12_<culture>.png` (864×288 px, 6 males top, 6 females bottom).
+  - Grand Composite Showcase: `art/review/all_factions_132_faces_showcase.png` (1728×1584 px, all 132 portraits in an 11-row visual roster).
+- **Verification Evidence:**
+  - `tools/art_check.js --native`: **22/22 PASS (100%)** on all game face sheets (exact 576×288 size, 32 colors snapped to `art/palette/uf.hex`, binary alpha 0/255).
+  - `tools/art_check.js --native --sidecar`: **22/22 PASS (100%)** on all master sheets and JSON sidecars.
+  - `tools/originality_check.js`: **22/22 PASS (100%)** (closest distance 0.418 to 0.490 ≥ 0.28 vs 19,431 U7 shapes).
+  - Visual inspection (Rule 5): Opened and verified each showcase and the grand composite showcase.
+
+Delivered per user request ("Give every sentient creature a "Destiny," the ultimate goal of themselves that drives their overall decision making"):
+- **Sentient Creature Destiny Engine (`UF_Goals.js`):**
+  - Added 12 core Destiny archetypes (`great_artificer`, `legendary_guardian`, `grand_lorekeeper`, `dynastic_founder`, `beast_communer`, `master_cultivator`, `worldstrider_delver`, `high_sovereign`, `wealth_accumulator`, `hearth_tender`, `shadow_operative`, `monument_builder`).
+  - Added `destinyFor(u)` assigning a deterministic Destiny based on seed, unit ID, personality traits, and cultural inclination. Preserves existing saved destinies across save/load cycles without rerolls.
+  - Added `isSentient(u)` ensuring humanoids, colonists, and sapient creatures receive Destinies while non-sentient wildlife (`mode: "instinctive_observation"`) retain observational goals without manufactured destinies.
+  - Decision making influence:
+    - `UF.Goals.priorities(u)` boosts job weights with `destiny.jobAffinities`.
+    - `UF.Goals.choosePlan(u, candidates)` factors in a Destiny alignment bonus score so candidates aligned with the creature's life purpose are prioritized.
+    - `UF_Colonists.js`: `priorityOf(type, ref)` incorporates `UF.Goals.priorities(ref)` multipliers; `idleJob(u)` triggers Destiny-inspired reflective thoughts during leisure.
+    - `UF_Combat.js`: `aidFaction` extends faction aid radius (+4 tiles) for guardian and caretaking destinies.
+  - Progression and Milestones:
+    - Tracks milestone progress across real actions (crafting, mining, social study, home building, combat defense). Upon reaching target, records achievement and marks Destiny fulfilled.
+  - UI Readout:
+    - `Window_UFGoals` (F7 panel): Displays Destiny title, motto, and milestone progress in gold header text above short/medium/long term ambitions.
+    - `UF_ProfileTabs.js`: Profile sheet "goals" tab displays creature Destiny, motto, and active/fulfilled status.
+  - Public API: `UF.Goals.destinyOf(unit)`, `UF.Goals.DESTINIES`, `UF.Goals.isSentient(unit)`.
+- **Verification Evidence:**
+  - `tools/test_goals.js`: **19 passed, 0 failed** (exit 0). Includes `destiny_assigned_to_sentient`, `destiny_stable_across_saves`, `destiny_influences_priorities`, `destiny_influences_choose_plan`, `destiny_progress_and_achievement`.
+  - Mutation tests verified able to fail: `--mutant=owner` (exit 1), `--mutant=physical` (exit 1), `--mutant=backoff` (exit 1), `--mutant=age` (exit 1), `--mutant=destiny` (exit 1).
+  - `tools/test_profile_tabs.js`: **46 passed, 0 failed** (exit 0).
+  - `tools/run_tests.js goals`: **8 passed, 0 failed** (exit 0). Verified `goals.destiny_assigned` and save round-trip with Destiny.
+  - `tools/run_tests.js combat`: **19 passed, 0 failed** (exit 0).
+  - `tools/run_tests.js smoke`: **9 passed, 0 failed** (exit 0, 0 console errors).
+  - Screenshot inspected (Rule 5): `game/test_output/goals.selected_goals.png` displays clean Destiny title, motto, and target without text clipping or UI overlaps.
+
 ## Faction Aid in Combat & Layer Connections Creature Traversal / Liquid Physics — 2026-09-19
 
 Delivered per user requests ("When a faction gets attacked, nearby faction members should come to their aid in combat" and "Also if there is a connection between layers, any creature can travel between them, in addition to liquid physiques like water, etc"):

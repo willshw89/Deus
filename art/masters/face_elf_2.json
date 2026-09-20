@@ -1,0 +1,25 @@
+{
+  "name": "face_elf_2",
+  "culture": "elf",
+  "species": "elf",
+  "layer": "face",
+  "stage": "adult_and_elder",
+  "frameWidth": 144,
+  "frameHeight": 144,
+  "anchor": [
+    72,
+    144
+  ],
+  "facings": [
+    "S",
+    "N"
+  ],
+  "animations": {
+    "neutral": [
+      0,
+      1,
+      2,
+      3
+    ]
+  }
+}
