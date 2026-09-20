@@ -16,10 +16,13 @@
     "N"
   ],
   "animations": {
-    "walk": [
+    "haul": [
       0,
       1,
       2,
+      1
+    ],
+    "carry": [
       1
     ],
     "stand": [
@@ -31,7 +34,7 @@
   "stage": "adult",
   "gender": "male",
   "variation": 1,
-  "action": "Walk",
+  "action": "Haul",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }

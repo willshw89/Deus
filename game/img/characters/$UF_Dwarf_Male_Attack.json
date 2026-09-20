@@ -16,14 +16,13 @@
     "N"
   ],
   "animations": {
-    "walk": [
+    "attack": [
       0,
       1,
-      2,
-      1
+      2
     ],
-    "stand": [
-      1
+    "ready": [
+      0
     ]
   },
   "frameMs": 180,
@@ -31,7 +30,7 @@
   "stage": "adult",
   "gender": "male",
   "variation": 1,
-  "action": "Walk",
+  "action": "Attack",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }

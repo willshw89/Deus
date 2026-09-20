@@ -16,22 +16,24 @@
     "N"
   ],
   "animations": {
-    "walk": [
+    "shoot": [
       0,
       1,
-      2,
+      2
+    ],
+    "aim": [
       1
     ],
-    "stand": [
-      1
+    "ready": [
+      0
     ]
   },
   "frameMs": 180,
   "species": "dwarf",
   "stage": "adult",
   "gender": "male",
-  "variation": 1,
-  "action": "Walk",
+  "variation": 3,
+  "action": "Bow",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }

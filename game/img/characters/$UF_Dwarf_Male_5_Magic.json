@@ -16,22 +16,22 @@
     "N"
   ],
   "animations": {
-    "walk": [
+    "cast": [
       0,
       1,
       2,
       1
     ],
-    "stand": [
-      1
+    "chant": [
+      0
     ]
   },
   "frameMs": 180,
   "species": "dwarf",
   "stage": "adult",
   "gender": "male",
-  "variation": 1,
-  "action": "Walk",
+  "variation": 5,
+  "action": "Magic",
   "style": "Serious Chibi (VISION V116)",
   "generator": "Google Nano Banana Pro (Rule 11, VISION V109)"
 }
