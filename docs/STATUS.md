@@ -6,7 +6,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-(None currently claimed)
+(None currently claimed; awaiting quota reset at 2026-09-20T04:15:16Z to execute Nano Banana II batch generations with first sheet references)
+
+## 12 Sprites at a Time with First Sheet Reference Standard — 2026-09-19 (Gemini)
+Delivered per user directive ("Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II"):
+- **Native 3×4 Grid Format (12 Sprites per Generation):**
+  - Standardized character generations to produce complete 3×4 grids (12 sprites: 3 animation frames × 4 facings: South, West, East, North) mapping directly to standard RPG Maker MZ charset sheets (`$filename.png`).
+  - Row 0: South / Front view (3 frames: step left, stand, step right).
+  - Row 1: West / Left profile (3 frames: step, stand, step).
+  - Row 2: East / Right profile (3 frames: step, stand, step).
+  - Row 3: North / Back view (3 frames: step, stand, step).
+- **First Sheet as Persistent Master Image Reference (`ImagePaths`):**
+  - The first sheet generated for a demographic (the standard 12-sprite Walk sheet) is saved to `art/raw/references/` and passed directly into Google Nano Banana II (`generate_image`) in `ImagePaths`.
+  - Nano Banana II conditions subsequent action sheet generations (Haul, Attack, Bow, Magic, Work, Downed) on this complete 12-sprite visual matrix, ensuring 100% anatomical scale, head size, costume details, lighting, and palette lock across the entire action suite.
 
 ## Codification of Google Nano Banana II and Sprite-Only Animation Directives — 2026-09-19 (Claude Code)
 Delivered per user directives ("I want you to codify in all the agent directives and .mds that ALL GENERATION TASKS ARE TO UTILIZE NANO BANANA II", "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"):
