@@ -27,6 +27,7 @@ var $plugins =
 {"name":"UF_Items","status":true,"description":"[UF Items] Items on the ground, in stacks and in inventories.","parameters":{}},
 {"name":"UF_Jobs","status":true,"description":"[UF Jobs] DF-style jobs: walk to a target, work, change the world (gather, chop, haul, build, craft, hunt...).","parameters":{}},
 {"name":"UF_Floors","status":true,"description":"[UF Floors] Enclosed rooms, cultural floor jobs, ground autotiles, and room value.","parameters":{}},
+{"name":"UF_Generator","status":true,"description":"[UF Generator] Procedural modular character and portrait generator for Ultima / DF colonists.","parameters":{}},
 {"name":"UF_Colonists","status":true,"description":"[UF Colonists] The player faction's people at its home site: needs, personality, the society plan, hunting, tools and clothes; every act is a UF_Jobs job.","parameters":{}},
 {"name":"UF_Wildlife","status":true,"description":"[UF Wildlife] Creatures spawned with the map by biome; wander and flee.","parameters":{}},
 {"name":"UF_Ecology","status":true,"description":"[UF Ecology] Plants spread and regrow; wildlife and monsters recover under biome caps; ore never returns.","parameters":{}},

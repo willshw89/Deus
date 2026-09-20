@@ -464,9 +464,9 @@ for (const [name, why] of [["Window", "RMMZ core: skin of every window"], ["Icon
 // Non-file UI states worth naming for the artist.
 for (const [key, text] of [["img/system/U7_Cursor.png", "2-frame pulse under the mouse cell"], ["img/system/U7_Select.png", "one frame under the selected unit"]]) if (assets.has(key)) state(assets.get(key), text);
 if (assets.has("UF_GenStance_friendly") || assets.has("UF_GenStance_indifferent") || assets.has("UF_GenStance_hostile")) {
-    for (const s of ["friendly", "indifferent", "hostile"]) if (assets.has(`UF_GenStance_${s}`)) state(assets.get(`UF_GenStance_${s}`), `48×48 square under a unit's feet, color ${(cat.stance && cat.stance.colors && cat.stance.colors[s]) || "?"} at alpha ${(cat.stance && cat.stance.alpha) || "?"}`);
+    for (const s of ["friendly", "indifferent", "hostile"]) if (assets.has(`UF_GenStance_${s}`)) state(assets.get(`UF_GenStance_${s}`), `flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color ${(cat.stance && cat.stance.colors && cat.stance.colors[s]) || "?"} at alpha ${(cat.stance && cat.stance.alpha) || "?"} inside a darker rim`);
 }
-if (assets.has("UF_GenSelect")) state(assets.get("UF_GenSelect"), "four corner brackets around the selected unit's feet (AR-031 look)");
+if (assets.has("UF_GenSelect")) state(assets.get("UF_GenSelect"), "bright iron ring around the selected unit's stance ring, 44×22 per square of footprint, open middle, 3 pulse frames (AR-031)");
 if (assets.has("UF_GenDesignation_*")) state(assets.get("UF_GenDesignation_*"), "48×48 outline on a designated cell with a small glyph per job type (chop, gather, pick, quarry, mine, hunt, build, haul, dig, fish, dismantle); gone when the job finishes or is cancelled");
 if (assets.has("UF_GenStockpile")) state(assets.get("UF_GenStockpile"), "flat dashed 48×48 square on the ground");
 

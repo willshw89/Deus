@@ -55,3 +55,4 @@ function checkDemographic(gender) {
 
 checkDemographic('Male');
 checkDemographic('Female');
+

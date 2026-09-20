@@ -18,3 +18,4 @@ for (const act of actions) {
     }
 }
 console.log('Aliases checked and synchronized.');
+

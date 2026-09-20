@@ -40,7 +40,13 @@ function generateWithNanoBananaPro({ prompt, outputPath, referenceImagePaths = [
         parts.push({ text: prompt });
 
         const payload = JSON.stringify({
-            contents: [{ parts }]
+            contents: [{ parts }],
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+            ]
         });
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
@@ -85,8 +91,8 @@ function generateWithNanoBananaPro({ prompt, outputPath, referenceImagePaths = [
                     }
 
                     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-                    if (outputPath.endsWith('.png')) {
-                        const jpgPath = outputPath.replace(/\.png$/, '.jpg');
+                    if (outputPath.toLowerCase().endsWith('.png')) {
+                        const jpgPath = outputPath.replace(/\.png$/i, '.jpg');
                         fs.writeFileSync(jpgPath, imageBuffer);
                         const { convertJpgToPng } = require('./jpg_to_png');
                         convertJpgToPng(jpgPath, outputPath);
