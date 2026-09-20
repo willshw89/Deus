@@ -12,13 +12,22 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
+    ],
+    "idle": [
+      0,
+      1,
+      2
     ]
   },
+  "frameMs": 180,
   "passable": false,
   "under": false
 }

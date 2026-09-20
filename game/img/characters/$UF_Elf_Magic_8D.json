@@ -19,13 +19,15 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
   "animations": {
     "cast": [
       0,
       1,
       2
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Cast"
 }

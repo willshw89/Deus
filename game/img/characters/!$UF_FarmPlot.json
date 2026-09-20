@@ -1,7 +1,6 @@
 {
   "id": "farm_plot",
-  "name": "Farm Plot",
-  "category": "Workplace",
+  "name": "Farm plot",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -13,13 +12,17 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
     ]
   },
-  "under": true,
-  "passable": true
+  "frameMs": 150,
+  "passable": true,
+  "under": true
 }

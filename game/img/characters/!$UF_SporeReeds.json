@@ -1,5 +1,6 @@
 {
-  "id": "sporereeds",
+  "id": "spore_reeds",
+  "name": "Spore reeds",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -19,8 +20,14 @@
   "animations": {
     "stand": [
       0
+    ],
+    "sway": [
+      0,
+      1,
+      2
     ]
   },
+  "frameMs": 200,
   "passable": true,
   "under": true
 }

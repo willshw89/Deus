@@ -19,13 +19,19 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
   "animations": {
     "walk": [
       0,
       1,
-      2
+      2,
+      1
+    ],
+    "stand": [
+      1
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Walk"
 }

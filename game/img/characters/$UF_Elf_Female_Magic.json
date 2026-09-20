@@ -1,0 +1,30 @@
+{
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "cast": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "female",
+  "action": "Cast",
+  "generator": "Google Nano Banana II (Rule V69/V70/V79)"
+}

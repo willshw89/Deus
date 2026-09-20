@@ -1,5 +1,6 @@
 {
   "id": "berry_bush",
+  "name": "Berry bush",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -10,13 +11,23 @@
     1,
     1
   ],
-  "heightLifts": 1,
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
+    ],
+    "sway": [
+      0,
+      1,
+      2
     ]
-  }
+  },
+  "frameMs": 200,
+  "passable": false,
+  "under": false
 }

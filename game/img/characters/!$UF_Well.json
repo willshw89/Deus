@@ -1,7 +1,6 @@
 {
   "id": "well",
-  "name": "Stone Well",
-  "category": "Workplace",
+  "name": "Well",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -13,11 +12,22 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
+    ],
+    "idle": [
+      0,
+      1,
+      2
     ]
-  }
+  },
+  "frameMs": 200,
+  "passable": false,
+  "under": false
 }

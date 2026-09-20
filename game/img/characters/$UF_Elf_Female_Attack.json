@@ -1,7 +1,4 @@
 {
-  "id": "$UF_Elf_Female_Attack",
-  "species": "elf",
-  "gender": "female",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -25,5 +22,9 @@
       2
     ]
   },
-  "frameMs": 120
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "female",
+  "action": "Attack",
+  "generator": "Google Nano Banana II (Rule V69/V70/V79)"
 }

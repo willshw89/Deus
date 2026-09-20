@@ -20,8 +20,14 @@
   "animations": {
     "stand": [
       0
+    ],
+    "sway": [
+      0,
+      1,
+      2
     ]
   },
-  "passable": true,
+  "frameMs": 200,
+  "passable": false,
   "under": false
 }

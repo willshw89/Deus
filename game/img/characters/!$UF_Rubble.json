@@ -22,6 +22,7 @@
       0
     ]
   },
+  "frameMs": 150,
   "passable": true,
   "under": true
 }

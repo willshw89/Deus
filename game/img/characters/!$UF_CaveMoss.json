@@ -1,5 +1,6 @@
 {
-  "id": "cavemoss",
+  "id": "cave_moss",
+  "name": "Cave moss",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -19,8 +20,14 @@
   "animations": {
     "stand": [
       0
+    ],
+    "idle": [
+      0,
+      1,
+      2
     ]
   },
+  "frameMs": 250,
   "passable": true,
   "under": true
 }

@@ -10,10 +10,9 @@ function toBase64(filePath) {
     return 'data:image/png;base64,' + fs.readFileSync(filePath).toString('base64');
 }
 
-const closeupB64 = toBase64(path.join(REVIEW_DIR, 'standard_8d_live_closeup.png'));
-const focusedB64 = toBase64(path.join(REVIEW_DIR, 'standard_8d_live_focused_scene.png'));
-const normalB64  = toBase64(path.join(REVIEW_DIR, 'standard_8d_live_normal.png'));
-const familyB64  = toBase64(path.join(REVIEW_DIR, 'elf_demographics_family_board.png'));
+const closeupB64 = toBase64(path.join(REVIEW_DIR, 'standard_4d_live_closeup.png'));
+const normalB64  = toBase64(path.join(REVIEW_DIR, 'standard_4d_live_normal.png'));
+const reviewB64  = toBase64(path.join(REVIEW_DIR, 'elf_standard_4d_review_board.png'));
 
 const html = `<!DOCTYPE html>
 <html>
@@ -33,78 +32,77 @@ const html = `<!DOCTYPE html>
       <div>
         <h2 class="text-xl font-bold flex items-center gap-2">
           <span class="inline-block w-3 h-3 rounded-full bg-emerald-500"></span>
-          Live In-Engine RMMZ Gameplay: Elf Demographics (Male, Female, Child)
+          Standard 4-Directional Charset Suite: 100% Nano Banana II
         </h2>
         <p class="text-sm text-[var(--muted-foreground)]">Captured live in RPG Maker MZ Playtest engine on Ground level (Map 1000)</p>
       </div>
       <div class="flex gap-2 text-xs">
-        <button onclick="setTab('focused')" id="btn-focused" class="px-3 py-1.5 rounded-lg font-semibold bg-emerald-600 text-white transition">Family Showcase</button>
-        <button onclick="setTab('closeup')" id="btn-closeup" class="px-3 py-1.5 rounded-lg font-semibold bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-white transition">3x Close-up</button>
-        <button onclick="setTab('family')" id="btn-family" class="px-3 py-1.5 rounded-lg font-semibold bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-white transition">Demographics Board</button>
+        <button onclick="setTab('closeup')" id="btn-closeup" class="px-3 py-1.5 rounded-lg font-semibold bg-emerald-600 text-white transition">3x Live Close-up</button>
         <button onclick="setTab('normal')" id="btn-normal" class="px-3 py-1.5 rounded-lg font-semibold bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-white transition">2x Wide View</button>
+        <button onclick="setTab('review')" id="btn-review" class="px-3 py-1.5 rounded-lg font-semibold bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-white transition">Full Master Matrix</button>
       </div>
     </div>
 
     <!-- Active Viewport Container -->
     <div class="relative bg-black/80 rounded-lg overflow-hidden border border-[var(--border)] flex items-center justify-center p-2 min-h-[480px]">
-      <div id="view-focused" class="w-full flex flex-col items-center">
-        <img src="${focusedB64}" class="pixelated rounded max-h-[520px] w-auto border border-zinc-800 shadow-md">
-        <div class="mt-3 text-xs text-zinc-400 text-center max-w-3xl bg-zinc-900/90 px-3 py-1.5 rounded border border-zinc-800">
-          <span class="text-emerald-400 font-semibold">Live In-Game Family Scene:</span> Adult Male (40px), Adult Female (39px), and Elf Child (30px) side-by-side in active gameplay! Notice the bottom family group with Father on left, Mother on right, and Child in center.
-        </div>
-      </div>
-
-      <div id="view-closeup" class="w-full hidden flex flex-col items-center">
+      <div id="view-closeup" class="w-full flex flex-col items-center">
         <img src="${closeupB64}" class="pixelated rounded max-h-[520px] w-auto border border-zinc-800 shadow-md">
         <div class="mt-3 text-xs text-zinc-400 text-center max-w-3xl bg-zinc-900/90 px-3 py-1.5 rounded border border-zinc-800">
-          <span class="text-emerald-400 font-semibold">3x In-Game Close-up:</span> Full parade showing 8-directional movement cycles for Male, Female, and Child, directional attacks with mithril slash arcs, ranged bows, radiant emerald mana casting, and grounded kneeling craftsmen.
-        </div>
-      </div>
-
-      <div id="view-family" class="w-full hidden flex flex-col items-center">
-        <img src="${familyB64}" class="pixelated rounded max-h-[520px] w-auto border border-zinc-800 shadow-md">
-        <div class="mt-3 text-xs text-zinc-400 text-center max-w-3xl bg-zinc-900/90 px-3 py-1.5 rounded border border-zinc-800">
-          <span class="text-emerald-400 font-semibold">Creator Review Board (All Demographics):</span> Stacked 18 columns × 8 rows specification matrices for Adult Male, Adult Female, and Elf Child with 100% anatomical alignment and palette locking.
+          <span class="text-emerald-400 font-semibold">Live In-Game 3x Close-up:</span> 3 rows of demographics (Adult Male 40px top, Adult Female 39px mid, Elf Child 30px bottom). Each row showcases 4 walking directions (S, W, E, N) followed by the 6 core actions: Dedicated Hauling Sack (AR-600 col 7), Melee Attack Slash, Ranged Bow String Pluck, Magic Mana Channel, Kneeling Craft/Harvest, and Downed Horizontal Resting Corpse!
         </div>
       </div>
 
       <div id="view-normal" class="w-full hidden flex flex-col items-center">
         <img src="${normalB64}" class="pixelated rounded max-h-[520px] w-auto border border-zinc-800 shadow-md">
         <div class="mt-3 text-xs text-zinc-400 text-center max-w-3xl bg-zinc-900/90 px-3 py-1.5 rounded border border-zinc-800">
-          <span class="text-emerald-400 font-semibold">2x Normal Overview:</span> The entire colony contingent assembled on savannah terrain with active weather, stances, and proper grounding.
+          <span class="text-emerald-400 font-semibold">2x Normal Gameplay Overview:</span> All 30 units deployed on active terrain with live river water, rain particle effects, and proper RMMZ tile-anchored grounding at row 47.
+        </div>
+      </div>
+
+      <div id="view-review" class="w-full hidden flex flex-col items-center">
+        <img src="${reviewB64}" class="pixelated rounded max-h-[520px] w-auto border border-zinc-800 shadow-md">
+        <div class="mt-3 text-xs text-zinc-400 text-center max-w-3xl bg-zinc-900/90 px-3 py-1.5 rounded border border-zinc-800">
+          <span class="text-emerald-400 font-semibold">Master Matrix Review Board (21 Columns × 4 Rows per Demographic):</span> 100% sourced from Google Nano Banana II generations, quantized to &le;31 colors on uf.hex, binary alpha 0/255, and zero U7 likeness (0 FAIL, 0 WARN).
         </div>
       </div>
     </div>
 
-    <!-- Demographics Specification Details -->
-    <div class="grid grid-cols-3 gap-3 mt-4 text-xs">
+    <!-- Action & Architecture Highlights -->
+    <div class="grid grid-cols-4 gap-3 mt-4 text-xs">
       <div class="p-3 rounded bg-[var(--muted)]/30 border border-[var(--border)]">
         <div class="font-semibold text-emerald-400 mb-1 flex items-center justify-between">
-          <span>Adult Male</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">40px Stature</span>
+          <span>4-Direction Movement</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Clean Standard</span>
         </div>
-        <p class="text-[var(--muted-foreground)]">Ground rows 8..47, athletic warrior silhouette, longbow tension, mithril blade slash arcs, high North mana channel, 34px kneeling craftsman.</p>
+        <p class="text-[var(--muted-foreground)]">Down (2), Left (4), Right (6 mirrored), Up (8). Movement stays 8-way in engine while sprites use authentic SNES/FF6 4-facing charsets without diagonal bloat.</p>
       </div>
       <div class="p-3 rounded bg-[var(--muted)]/30 border border-[var(--border)]">
         <div class="font-semibold text-emerald-400 mb-1 flex items-center justify-between">
-          <span>Adult Female</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">39px Stature</span>
+          <span>Dedicated Hauling</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">AR-600 Col 7</span>
         </div>
-        <p class="text-[var(--muted-foreground)]">Ground rows 9..47, slender waist, flared sylvan tunic hem with silver trim, cascading silver hair past shoulders, graceful sylvan rapier & recurve bow.</p>
+        <p class="text-[var(--muted-foreground)]">Colonists visibly carry a heavy burlap sack in their arms when hauling logs, stone, or supplies, replacing the generic walk cycle.</p>
       </div>
       <div class="p-3 rounded bg-[var(--muted)]/30 border border-[var(--border)]">
         <div class="font-semibold text-emerald-400 mb-1 flex items-center justify-between">
-          <span>Elf Child / Kid</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">30px Stature</span>
+          <span>Ranged & Magic</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Separated Missiles</span>
         </div>
-        <p class="text-[var(--muted-foreground)]">Ground rows 18..47, youthful 1:2.8 proportions, cute pointed elven ears, practice dagger swing, training shortbow, fairy mana sparkles, kneeling berry forager.</p>
+        <p class="text-[var(--muted-foreground)]">Bow frames depict string tension and release pluck; Magic frames depict radiant hand-glow / staff raising. Projectiles are animated independently.</p>
+      </div>
+      <div class="p-3 rounded bg-[var(--muted)]/30 border border-[var(--border)]">
+        <div class="font-semibold text-emerald-400 mb-1 flex items-center justify-between">
+          <span>Demographics</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">3 Archetypes</span>
+        </div>
+        <p class="text-[var(--muted-foreground)]">Adult Male (40px, amber eyes), Adult Female (39px, cyan eyes & silver hair), Elf Child (30px, youthful proportions & scaled accessories).</p>
       </div>
     </div>
   </div>
 
   <script>
     function setTab(tab) {
-      ['focused', 'closeup', 'family', 'normal'].forEach(t => {
+      ['closeup', 'normal', 'review'].forEach(t => {
         const v = document.getElementById('view-' + t);
         const b = document.getElementById('btn-' + t);
         if (t === tab) {

@@ -19,18 +19,15 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
   "animations": {
-    "bow": [
-      0,
-      1,
-      2
-    ],
-    "ranged": [
+    "shoot": [
       0,
       1,
       2
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Bow"
 }

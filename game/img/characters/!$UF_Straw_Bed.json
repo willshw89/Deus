@@ -1,7 +1,6 @@
 {
   "id": "floor_straw",
-  "name": "Straw Bed Pallet",
-  "category": "Building",
+  "name": "Straw bed",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -13,11 +12,17 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
     ]
-  }
+  },
+  "frameMs": 150,
+  "passable": true,
+  "under": true
 }

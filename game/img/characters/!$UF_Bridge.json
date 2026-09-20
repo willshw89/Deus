@@ -1,7 +1,6 @@
 {
   "id": "bridge",
-  "name": "Plank Bridge",
-  "category": "Building",
+  "name": "Plank bridge",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -13,14 +12,17 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
     ]
   },
-  "under": true,
+  "frameMs": 150,
   "passable": true,
-  "onWater": true
+  "under": true
 }

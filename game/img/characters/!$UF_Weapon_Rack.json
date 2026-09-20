@@ -1,7 +1,6 @@
 {
   "id": "weapon_rack",
-  "name": "Weapon Rack",
-  "category": "Building",
+  "name": "Weapon rack",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -13,11 +12,17 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
       0
     ]
-  }
+  },
+  "frameMs": 150,
+  "passable": false,
+  "under": false
 }

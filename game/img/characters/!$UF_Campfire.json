@@ -19,11 +19,15 @@
   ],
   "animations": {
     "stand": [
+      0
+    ],
+    "lit": [
       0,
       1,
       2
     ]
   },
+  "frameMs": 120,
   "passable": false,
   "under": false
 }

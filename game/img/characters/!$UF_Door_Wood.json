@@ -1,5 +1,6 @@
 {
   "id": "door_wood",
+  "name": "Wooden door",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -29,5 +30,8 @@
     "open": [
       2
     ]
-  }
+  },
+  "frameMs": 150,
+  "passable": false,
+  "under": false
 }

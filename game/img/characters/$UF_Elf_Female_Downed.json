@@ -1,0 +1,37 @@
+{
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "hurt": [
+      0
+    ],
+    "collapse": [
+      1
+    ],
+    "dead": [
+      2
+    ],
+    "sleep": [
+      2
+    ]
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "female",
+  "action": "Dead",
+  "generator": "Google Nano Banana II (Rule V69/V70/V79)"
+}

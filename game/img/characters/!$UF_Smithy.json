@@ -1,11 +1,28 @@
 {
-  "id": "!$UF_Smithy",
+  "id": "smithy",
+  "name": "Smithy",
   "frameWidth": 48,
   "frameHeight": 48,
-  "anchor": [24, 47],
-  "footprint": [1, 1],
-  "heightLifts": 3,
-  "facings": ["S"],
-  "animations": {"stand": [0]},
-  "frameMs": 150
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "stand": [
+      0
+    ]
+  },
+  "frameMs": 150,
+  "passable": false,
+  "under": false
 }

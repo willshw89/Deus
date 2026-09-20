@@ -1,5 +1,6 @@
 {
   "id": "tree_savanna",
+  "name": "Flat-top tree",
   "frameWidth": 96,
   "frameHeight": 96,
   "anchor": [
@@ -7,8 +8,8 @@
     95
   ],
   "footprint": [
-    1,
-    1
+    2,
+    2
   ],
   "facings": [
     "S",
@@ -26,6 +27,7 @@
       2
     ]
   },
+  "frameMs": 240,
   "passable": false,
   "under": false
 }

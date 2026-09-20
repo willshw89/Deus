@@ -1,5 +1,6 @@
 {
   "id": "stump",
+  "name": "Stump",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -21,6 +22,7 @@
       0
     ]
   },
+  "frameMs": 150,
   "passable": true,
   "under": false
 }

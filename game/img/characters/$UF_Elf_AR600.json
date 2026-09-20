@@ -11,16 +11,10 @@
   ],
   "facings": [
     "S",
-    "SW",
     "W",
-    "NW",
-    "N",
-    "NE",
     "E",
-    "SE"
+    "N"
   ],
-  "frameMs": 150,
-  "species": "elf",
   "animations": {
     "stand": [
       0
@@ -28,7 +22,8 @@
     "walk": [
       1,
       2,
-      3
+      3,
+      2
     ],
     "work": [
       4,
@@ -51,14 +46,11 @@
     "hurt": [
       14
     ],
-    "death": [
+    "dead": [
       15,
-      16,
-      17
-    ],
-    "idle": [
-      18,
-      19
+      16
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "elf"
 }

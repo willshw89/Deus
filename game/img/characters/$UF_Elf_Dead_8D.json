@@ -19,8 +19,6 @@
     "E",
     "SE"
   ],
-  "frameMs": 150,
-  "species": "elf",
   "animations": {
     "hurt": [
       0
@@ -30,6 +28,13 @@
     ],
     "dead": [
       2
+    ],
+    "sleep": [
+      2
     ]
-  }
+  },
+  "frameMs": 200,
+  "species": "Elf",
+  "stage": "adult",
+  "action": "Dead"
 }
