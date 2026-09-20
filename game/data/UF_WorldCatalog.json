@@ -5950,9 +5950,15 @@
   "factions": {
     "about": "Factions are rolled from the world seed on every New Game (UF_Factions): 4-7 of them, species by weight, stances, relations from -100 (at war) to +100 (allied). One of them, of a species with playable != false, is the player's (factions.playerId). User decision 2026-09-19 (VISION V4, V31): no history; every faction gets its own area (areas) on habitable land and starts there as founders (founders) with nothing built. Species are generic placeholders (VISION V7-V9); rename or replace them freely.",
     "count": [
-      4,
-      7
+      9,
+      9
     ],
+    "perLayer": 3,
+    "layers": {
+      "0": ["human", "elf", "halfling", "goblin", "orc"],
+      "-1": ["dwarf", "gnome", "serpentkin", "undead", "goblin"],
+      "-2": ["demon", "automaton", "swarmer", "dark_dwarf", "dark_gnome"]
+    },
     "species": [
       {
         "id": "human",
@@ -5975,6 +5981,18 @@
           "Circle",
           "Grove",
           "Court"
+        ]
+      },
+      {
+        "id": "halfling",
+        "name": "Halflings",
+        "weight": 2,
+        "playable": true,
+        "groups": [
+          "Shire",
+          "Burrow",
+          "Clan",
+          "Moot"
         ]
       },
       {
@@ -6022,6 +6040,42 @@
         ]
       },
       {
+        "id": "serpentkin",
+        "name": "Serpentkin",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Coil",
+          "Brood",
+          "Den",
+          "Nest"
+        ]
+      },
+      {
+        "id": "undead",
+        "name": "Undead",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Crypt",
+          "Court",
+          "Host",
+          "Tomb"
+        ]
+      },
+      {
+        "id": "demon",
+        "name": "Demons",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Legion",
+          "Hell",
+          "Dominion",
+          "Cabal"
+        ]
+      },
+      {
         "id": "automaton",
         "name": "Automata",
         "weight": 1,
@@ -6032,6 +6086,42 @@
           "Foundry"
         ],
         "about": "science-fiction element (VISION V8)"
+      },
+      {
+        "id": "swarmer",
+        "name": "Swarmers",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Swarm",
+          "Hive",
+          "Nest",
+          "Colony"
+        ]
+      },
+      {
+        "id": "dark_dwarf",
+        "name": "Dark Dwarves",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Deep",
+          "Delve",
+          "Spire",
+          "Hold"
+        ]
+      },
+      {
+        "id": "dark_gnome",
+        "name": "Dark Gnomes",
+        "weight": 1,
+        "playable": false,
+        "groups": [
+          "Coven",
+          "Warrens",
+          "Workshop",
+          "Guild"
+        ]
       }
     ],
     "speciesAffinity": {
@@ -10374,6 +10464,24 @@
       },
       "automaton": {
         "like": "starborn"
+      },
+      "halfling": {
+        "like": "human"
+      },
+      "serpentkin": {
+        "like": "lizardfolk"
+      },
+      "demon": {
+        "like": "undead"
+      },
+      "swarmer": {
+        "like": "swarm"
+      },
+      "dark_dwarf": {
+        "like": "dwarf"
+      },
+      "dark_gnome": {
+        "like": "gnome"
       }
     }
   },
@@ -12205,6 +12313,42 @@
       "tundra|snow": {
         "steps": [
           7,
+          0
+        ]
+      },
+      "needles|tundra": {
+        "steps": [
+          2,
+          0
+        ]
+      },
+      "needles|stone": {
+        "steps": [
+          2,
+          0
+        ]
+      },
+      "tundra|stone": {
+        "steps": [
+          0,
+          0
+        ]
+      },
+      "soil|mud": {
+        "steps": [
+          4,
+          2
+        ]
+      },
+      "snow|ice": {
+        "steps": [
+          0,
+          0
+        ]
+      },
+      "snow|stone": {
+        "steps": [
+          0,
           0
         ]
       }

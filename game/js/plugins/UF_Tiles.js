@@ -53,6 +53,18 @@
         [15.0/16,  7.0/16, 13.0/16,  5.0/16]
     ];
 
+    // Bayer 8x8 dither matrix normalized to [0, 1) for native 48px micro-dithering
+    const BAYER8 = [
+        [ 0.0/64, 32.0/64,  8.0/64, 40.0/64,  2.0/64, 34.0/64, 10.0/64, 42.0/64],
+        [48.0/64, 16.0/64, 56.0/64, 24.0/64, 50.0/64, 18.0/64, 58.0/64, 26.0/64],
+        [12.0/64, 44.0/64,  4.0/64, 36.0/64, 14.0/64, 46.0/64,  6.0/64, 38.0/64],
+        [60.0/64, 28.0/64, 52.0/64, 20.0/64, 62.0/64, 30.0/64, 54.0/64, 22.0/64],
+        [ 3.0/64, 35.0/64, 11.0/64, 43.0/64,  1.0/64, 33.0/64,  9.0/64, 41.0/64],
+        [51.0/64, 19.0/64, 59.0/64, 27.0/64, 49.0/64, 17.0/64, 57.0/64, 25.0/64],
+        [15.0/64, 47.0/64,  7.0/64, 39.0/64, 13.0/64, 45.0/64,  5.0/64, 37.0/64],
+        [63.0/64, 31.0/64, 55.0/64, 23.0/64, 61.0/64, 29.0/64, 53.0/64, 21.0/64]
+    ];
+
     //-------------------------------------------------------------------------
     // Deterministic pixel noise
 
@@ -130,7 +142,11 @@
         };
         // Texture everywhere first (world-seamless: same (x, y) sampling in every region of the block).
         for (let y = 0; y < 48; y++) for (let x = 0; x < 32; x++) set(x, y, texel(kind, k, x & 15, y & 15));
-        const outline = (x, y) => set(x, y, edge);
+        const natural = ["grass", "dots", "mud", "litter", "needles"].includes(kind.pattern);
+        const outline = (x, y) => {
+            if (natural && ((x + y) & 1)) return; // 50% dither on natural terrain borders
+            set(x, y, edge);
+        };
         // Preview tile (0,0)-(16,16): isolated, outline all around.
         for (let i = 0; i < 16; i++) { outline(i, 0); outline(i, 15); outline(0, i); outline(15, i); }
         // Inner-corner tile (16,0)-(32,16): notches at its four outer corners.
@@ -189,26 +205,22 @@
         const cfg = groundShadesConfig();
         if (!cfg || !cfg.families) return;
 
-        const setPixel3x = (nx, ny, rgb) => {
-            for (let py = 0; py < 3; py++) {
-                for (let px = 0; px < 3; px++) {
-                    const idx = ((oy + ny * 3 + py) * stride + (ox + nx * 3 + px)) * 4;
-                    imgData[idx] = rgb[0];
-                    imgData[idx + 1] = rgb[1];
-                    imgData[idx + 2] = rgb[2];
-                    imgData[idx + 3] = 255;
-                }
-            }
+        const setPixel = (px, py, rgb) => {
+            const idx = ((oy + py) * stride + (ox + px)) * 4;
+            imgData[idx] = rgb[0];
+            imgData[idx + 1] = rgb[1];
+            imgData[idx + 2] = rgb[2];
+            imgData[idx + 3] = 255;
         };
 
         if (parsed.type === "pure") {
             const fam = cfg.families[parsed.family];
             if (!fam || !fam.steps[parsed.step]) return;
             const tones = fam.steps[parsed.step].tones;
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
+            for (let y = 0; y < 48; y++) {
+                for (let x = 0; x < 48; x++) {
                     const rgb = texelByTones(fam.pattern, parsed.step, x, y, tones);
-                    setPixel3x(x, y, rgb);
+                    setPixel(x, y, rgb);
                 }
             }
         } else if (parsed.type === "mix") {
@@ -219,45 +231,70 @@
             const mask = parsed.mask;
             const b0 = (mask & 1) ? 1 : 0, b1 = (mask & 2) ? 1 : 0;
             const b2 = (mask & 4) ? 1 : 0, b3 = (mask & 8) ? 1 : 0;
-            const ditherBand = cfg.ditherBand !== undefined ? cfg.ditherBand : 0.15;
+            const ditherBand = 1.20;
             const toneJitter = cfg.toneJitter !== undefined ? cfg.toneJitter : 0.08;
 
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
-                    const u = (x + 0.5) / 16, v = (y + 0.5) / 16;
+            for (let y = 0; y < 48; y++) {
+                for (let x = 0; x < 48; x++) {
+                    const u = (x + 0.5) / 48, v = (y + 0.5) / 48;
                     const val = (1 - u) * (1 - v) * b0 + u * (1 - v) * b1 + (1 - u) * v * b2 + u * v * b3;
-                    const bayer = BAYER4[y & 3][x & 3] - 0.5;
+                    const bayer = BAYER8[y & 7][x & 7] - 0.5;
                     const jitter = (rnd(parsed.lowStep, x, y, 71) - 0.5) * toneJitter;
                     const useHigh = (val + bayer * ditherBand + jitter) > 0.5;
                     const tones = useHigh ? step1.tones : step0.tones;
                     const stepK = useHigh ? parsed.lowStep + 1 : parsed.lowStep;
                     const rgb = texelByTones(fam.pattern, stepK, x, y, tones);
-                    setPixel3x(x, y, rgb);
+                    setPixel(x, y, rgb);
                 }
             }
         } else if (parsed.type === "pair") {
             const famA = cfg.families[parsed.famA], famB = cfg.families[parsed.famB];
             if (!famA || !famB) return;
-            const stepA = famA.steps[parsed.stepA], stepB = famB.steps[parsed.stepB];
+            const stepA = (famA.steps && famA.steps[parsed.stepA]) || (famA.steps && famA.steps[0]);
+            const stepB = (famB.steps && famB.steps[parsed.stepB]) || (famB.steps && famB.steps[0]);
+            if (!stepA || !stepB) return;
             const maskB = parsed.maskB;
             const b0 = (maskB & 1) ? 1 : 0, b1 = (maskB & 2) ? 1 : 0;
             const b2 = (maskB & 4) ? 1 : 0, b3 = (maskB & 8) ? 1 : 0;
-            const ditherBand = cfg.ditherBand !== undefined ? cfg.ditherBand : 0.15;
+            const isDust = (maskB & 32) !== 0; // Bit 32 = distance-3 outer dusting
+            const isD2   = (maskB & 16) !== 0; // Bit 16 = distance-2 outer diffusion
+            const weight = isDust ? 0.12 : (isD2 ? 0.30 : 0.55);
+            const ditherBand = isDust ? 1.60 : (isD2 ? 1.40 : 1.20);
 
-            for (let y = 0; y < 16; y++) {
-                for (let x = 0; x < 16; x++) {
-                    const u = (x + 0.5) / 16, v = (y + 0.5) / 16;
-                    const val = (1 - u) * (1 - v) * b0 + u * (1 - v) * b1 + (1 - u) * v * b2 + u * v * b3;
-                    const bayer = BAYER4[y & 3][x & 3] - 0.5;
-                    const useB = (val + bayer * ditherBand) > 0.5;
+            for (let y = 0; y < 48; y++) {
+                for (let x = 0; x < 48; x++) {
+                    const u = (x + 0.5) / 48, v = (y + 0.5) / 48;
+                    const val = ((1 - u) * (1 - v) * b0 + u * (1 - v) * b1 + (1 - u) * v * b2 + u * v * b3) * weight;
+                    const bayer = BAYER8[y & 7][x & 7] - 0.5;
+                    const meander = (rnd(parsed.stepA, x >> 2, y >> 2, 79) - 0.5) * 0.16;
+                    const useB = (val + bayer * ditherBand + meander) > 0.5;
                     const fam = useB ? famB : famA;
                     const s = useB ? stepB : stepA;
                     const sIdx = useB ? parsed.stepB : parsed.stepA;
                     const rgb = texelByTones(fam.pattern, sIdx, x, y, s.tones);
-                    setPixel3x(x, y, rgb);
+                    setPixel(x, y, rgb);
                 }
             }
         }
+    }
+
+    let pairLookup = null;
+    function getPairDef(cfg, fam1, fam2) {
+        if (!fam1 || !fam2 || fam1 === fam2) return null;
+        if (!pairLookup) {
+            pairLookup = Object.create(null);
+            const p = (cfg && cfg.pairs) || (groundShadesConfig() && groundShadesConfig().pairs) || {};
+            for (const [k, def] of Object.entries(p)) {
+                const [a, b] = k.split("|");
+                const entry = { fA: a, fB: b, def };
+                if (!pairLookup[a]) pairLookup[a] = Object.create(null);
+                if (!pairLookup[b]) pairLookup[b] = Object.create(null);
+                pairLookup[a][b] = entry;
+                pairLookup[b][a] = entry;
+            }
+        }
+        const row = pairLookup[fam1];
+        return row ? (row[fam2] || null) : null;
     }
 
     function initShadeAtlas() {
@@ -265,28 +302,35 @@
         const cfg = groundShadesConfig();
         if (!cfg || !cfg.families) return null;
 
-        // Collect all pure step keys first so they always have guaranteed slots in E
-        const keys = [];
-        for (const [famName, fam] of Object.entries(cfg.families)) {
-            for (let s = 0; s < fam.steps.length; s++) {
-                keys.push(`pure:${famName}:${s}`);
-            }
-        }
-
-        // Add pre-configured pairs
-        if (cfg.pairs) {
-            for (const [pairKey, pairInfo] of Object.entries(cfg.pairs)) {
-                const [fA, fB] = pairKey.split("|");
-                if (cfg.families[fA] && cfg.families[fB]) {
-                    // add all 14 transition masks
-                    for (let m = 1; m < 15; m++) {
-                        keys.push(`pair:${fA}:${pairInfo.steps[0]}:${fB}:${pairInfo.steps[1]}:${m}`);
-                    }
-                }
-            }
-        }
-
         shadeKeyMap.clear();
+
+        // Pre-allocate canonical boundary pair keys from catalog
+        const keys = [];
+        const pairsCfg = cfg.pairs || {};
+        const cardinalMasks = [3, 12, 5, 10, 1, 2, 4, 8, 7, 11, 13, 14];
+
+        for (const [pairKey, pairDef] of Object.entries(pairsCfg)) {
+            const [fA, fB] = pairKey.split("|");
+            const sA = (pairDef.steps && pairDef.steps[0]) || 0;
+            const sB = (pairDef.steps && pairDef.steps[1]) || 0;
+            // Distance-1 masks
+            for (const m of cardinalMasks) {
+                if (keys.length >= 240) break;
+                keys.push(`pair:${fA}:${sA}:${fB}:${sB}:${m}`);
+            }
+            // Distance-2 cardinal masks
+            for (const m of [3, 12, 5, 10]) {
+                if (keys.length >= 240) break;
+                keys.push(`pair:${fA}:${sA}:${fB}:${sB}:${m | 16}`);
+            }
+        }
+
+        // Pre-allocate a few pure base keys so Layer 1 always has fallback tiles
+        for (const [famName, fam] of Object.entries(cfg.families)) {
+            if (keys.length >= 240) break;
+            keys.push(`pure:${famName}:0`);
+        }
+
         keys.slice(0, 256).forEach((k, idx) => {
             shadeKeyMap.set(k, SHADE_TILE_START + idx);
         });
@@ -305,6 +349,7 @@
         }
 
         ctx.putImageData(imgData, 0, 0);
+        genShadeImgData = imgData;
         const bmp = new Bitmap(sheetW, sheetH);
         bmp.context.imageSmoothingEnabled = false;
         bmp.context.drawImage(canvas, 0, 0);
@@ -313,37 +358,32 @@
         return bmp;
     }
 
+    let genShadeImgData = null;
+    let shadeAtlasDirty = false;
+
     function getOrAllocateShadeTile(key) {
-        if (shadeKeyMap.has(key)) return shadeKeyMap.get(key);
+        const tId = shadeKeyMap.get(key);
+        if (tId !== undefined) return tId;
         if (shadeKeyMap.size >= 256) {
-            // Atlas full: fallback to pure base tile
+            // Fast O(1) fallback
             const p = parseShadeKey(key);
             if (p && p.type === "pair") {
-                const pureKey = `pure:${p.famA}:${p.stepA}`;
-                if (shadeKeyMap.has(pureKey)) return shadeKeyMap.get(pureKey);
-            } else if (p && p.type === "mix") {
-                const pureKey = `pure:${p.family}:${p.lowStep}`;
-                if (shadeKeyMap.has(pureKey)) return shadeKeyMap.get(pureKey);
+                const baseMask = p.maskB & 15;
+                const d1Key = `pair:${p.famA}:${p.stepA}:${p.famB}:${p.stepB}:${baseMask}`;
+                const fallbackId = shadeKeyMap.get(d1Key);
+                if (fallbackId !== undefined) return fallbackId;
             }
-            return SHADE_TILE_START;
+            return 0; // Return 0 (transparent) instead of corrupted Tile 768
         }
-        const tileId = SHADE_TILE_START + shadeKeyMap.size;
-        shadeKeyMap.set(key, tileId);
-        if (genShadeBitmap) {
-            const idx = tileId - SHADE_TILE_START;
+        const newId = SHADE_TILE_START + shadeKeyMap.size;
+        shadeKeyMap.set(key, newId);
+        if (genShadeImgData) {
+            const idx = newId - SHADE_TILE_START;
             const tx = idx % 16, ty = Math.floor(idx / 16);
-            const sheetW = 768;
-            const canvas = document.createElement("canvas");
-            canvas.width = 48;
-            canvas.height = 48;
-            const cctx = canvas.getContext("2d");
-            const imgData = cctx.createImageData(48, 48);
-            paintShadeTile(imgData.data, 48, key, 0, 0);
-            cctx.putImageData(imgData, 0, 0);
-            genShadeBitmap.context.drawImage(canvas, tx * 48, ty * 48);
-            genShadeBitmap._baseTexture.update();
+            paintShadeTile(genShadeImgData.data, 768, key, tx * 48, ty * 48);
+            shadeAtlasDirty = true;
         }
-        return tileId;
+        return newId;
     }
 
     // Serve the generated sheets whenever RMMZ asks for them.
@@ -407,13 +447,14 @@
             const idB = typeof b === "number" ? (kList[b] && kList[b].id) : b;
             if (!idA || !idB) return false;
             if (idA === idB) return true;
+            if (idA.startsWith("floor_") || idA === "road" || idB.startsWith("floor_") || idB === "road") return false;
             const famA = Tiles.familyOf(idA);
             const famB = Tiles.familyOf(idB);
             if (!famA || !famB) return false;
             if (famA === famB) return true;
             const cfg = groundShadesConfig();
-            const pairs = (cfg && cfg.pairs) || {};
-            return !!(pairs[`${famA}|${famB}`] || pairs[`${famB}|${famA}`]);
+            if (cfg && getPairDef(cfg, famA, famB) !== null) return true;
+            return false;
         },
 
         shadeStats: () => Object.assign({}, shadeStats)
@@ -505,7 +546,7 @@
                 }
             }
         } else {
-            const STEP = 4;
+            const STEP = 8;
             const subW = Math.floor((cornersW - 1) / STEP) + 1;
             const subD = new Float32Array(subW * subW);
             for (let sy = 0; sy < subW; sy++) {
@@ -514,8 +555,8 @@
                 for (let sx = 0; sx < subW; sx++) {
                     const cx = Math.min(cornersW - 1, sx * STEP);
                     const gx = ax * size + cx;
-                    const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, cfg.field.scale || 24);
-                    const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, cfg.field.detailScale || 10);
+                    const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, (cfg.field && cfg.field.scale ? cfg.field.scale * 2.5 : 60));
+                    const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, (cfg.field && cfg.field.detailScale ? cfg.field.detailScale * 2.5 : 25));
                     const f = WG.fieldsFor ? WG.fieldsFor(seed, d, cl, gx, gy) : { r: 0.5, d: 0.5, e: 0.5 };
                     const rainTerm = (1 - f.r) * fw.rain;
                     const drainTerm = f.d * fw.drainage;
@@ -571,15 +612,19 @@
                 const cellTile = map.data[y * size + x];
                 const kIdx = Math.floor((cellTile - 2816) / 48);
                 const kInfo = (cellTile >= 2816 && cellTile < 4352) ? kindCache[kIdx] : null;
-                if (!kInfo || !kInfo.passable || kInfo.isBuilt || !kInfo.famName || !kInfo.kindCfg) continue;
+                if (!kInfo || kInfo.isBuilt || !kInfo.famName || !kInfo.kindCfg) continue;
 
                 const famName = kInfo.famName;
                 const fam = kInfo.fam;
                 const win = kInfo.window;
                 const shares = kInfo.shares;
 
-                const cIndices = [y * cornersW + x, y * cornersW + (x + 1), (y + 1) * cornersW + x, (y + 1) * cornersW + (x + 1)];
-                for (const cIdx of cIndices) {
+                const ci0 = y * cornersW + x;
+                const ci1 = ci0 + 1;
+                const ci2 = ci0 + cornersW;
+                const ci3 = ci2 + 1;
+                for (let c = 0; c < 4; c++) {
+                    const cIdx = c === 0 ? ci0 : c === 1 ? ci1 : c === 2 ? ci2 : ci3;
                     if (!cornerFams[cIdx]) {
                         cornerFams[cIdx] = famName;
                         const dVal = D[cIdx];
@@ -635,7 +680,7 @@
                 const cellTile = map.data[y * size + x];
                 const kIdx = Math.floor((cellTile - 2816) / 48);
                 const kInfo = (cellTile >= 2816 && cellTile < 4352) ? kindCache[kIdx] : null;
-                if (!kInfo || !kInfo.passable || kInfo.isBuilt || !kInfo.famName || !kInfo.kindCfg) {
+                if (!kInfo || kInfo.isBuilt || !kInfo.famName || !kInfo.kindCfg) {
                     map.data[(1 * size + y) * size + x] = 0;
                     continue;
                 }
@@ -643,80 +688,197 @@
                 const famName = kInfo.famName;
                 const baseStep = kInfo.base;
 
-                // Check 4 orthogonal neighbors for a blending family pair
-                let borderFam = null, pairKey = null, isFamA = true;
-                const ntN = y > 0 ? map.data[(y - 1) * size + x] : 0;
-                const ntS = y < size - 1 ? map.data[(y + 1) * size + x] : 0;
-                const ntW = x > 0 ? map.data[y * size + (x - 1)] : 0;
-                const ntE = x < size - 1 ? map.data[y * size + (x + 1)] : 0;
-
-                const infoN = (ntN >= 2816 && ntN < 4352) ? kindCache[(ntN - 2816) / 48 | 0] : null;
-                const infoS = (ntS >= 2816 && ntS < 4352) ? kindCache[(ntS - 2816) / 48 | 0] : null;
-                const infoW = (ntW >= 2816 && ntW < 4352) ? kindCache[(ntW - 2816) / 48 | 0] : null;
-                const infoE = (ntE >= 2816 && ntE < 4352) ? kindCache[(ntE - 2816) / 48 | 0] : null;
-
-                const fN = infoN && infoN.famName !== famName ? infoN.famName : null;
-                const fS = infoS && infoS.famName !== famName ? infoS.famName : null;
-                const fW = infoW && infoW.famName !== famName ? infoW.famName : null;
-                const fE = infoE && infoE.famName !== famName ? infoE.famName : null;
-
-                if (fN) {
-                    if (pairsCfg[`${famName}|${fN}`]) { borderFam = fN; pairKey = `${famName}|${fN}`; isFamA = true; }
-                    else if (pairsCfg[`${fN}|${famName}`]) { borderFam = fN; pairKey = `${fN}|${famName}`; isFamA = false; }
-                }
-                if (!borderFam && fS) {
-                    if (pairsCfg[`${famName}|${fS}`]) { borderFam = fS; pairKey = `${famName}|${fS}`; isFamA = true; }
-                    else if (pairsCfg[`${fS}|${famName}`]) { borderFam = fS; pairKey = `${fS}|${famName}`; isFamA = false; }
-                }
-                if (!borderFam && fW) {
-                    if (pairsCfg[`${famName}|${fW}`]) { borderFam = fW; pairKey = `${famName}|${fW}`; isFamA = true; }
-                    else if (pairsCfg[`${fW}|${famName}`]) { borderFam = fW; pairKey = `${fW}|${famName}`; isFamA = false; }
-                }
-                if (!borderFam && fE) {
-                    if (pairsCfg[`${famName}|${fE}`]) { borderFam = fE; pairKey = `${famName}|${fE}`; isFamA = true; }
-                    else if (pairsCfg[`${fE}|${famName}`]) { borderFam = fE; pairKey = `${fE}|${famName}`; isFamA = false; }
-                }
-
-                if (borderFam && pairKey) {
-                    const pairInfo = pairsCfg[pairKey];
-                    const [fA, fB] = pairKey.split("|");
-                    let maskB = 0;
-                    if (isFamA) {
-                        if (fN === borderFam) maskB |= 3;
-                        if (fS === borderFam) maskB |= 12;
-                        if (fW === borderFam) maskB |= 5;
-                        if (fE === borderFam) maskB |= 10;
-                    } else {
-                        let maskA = 0;
-                        if (fN === borderFam) maskA |= 3;
-                        if (fS === borderFam) maskA |= 12;
-                        if (fW === borderFam) maskA |= 5;
-                        if (fE === borderFam) maskA |= 10;
-                        maskB = 15 & ~maskA;
-                    }
-
-                    if (maskB > 0 && maskB < 15) {
-                        const key = `pair:${fA}:${pairInfo.steps[0]}:${fB}:${pairInfo.steps[1]}:${maskB}`;
-                        const tId = getOrAllocateShadeTile(key);
-                        map.data[(1 * size + y) * size + x] = tId;
-                        pairC++;
-                        continue;
-                    }
-                }
+                // Check 8 neighbors (orthogonals and diagonals) for a blending family pair
+                let borderFam = null;
+                const idx = y * size + x;
+                const ntN  = y > 0 ? map.data[idx - size] : 0;
+                const ntS  = y < size - 1 ? map.data[idx + size] : 0;
+                const ntW  = x > 0 ? map.data[idx - 1] : 0;
+                const ntE  = x < size - 1 ? map.data[idx + 1] : 0;
+                const ntNW = (y > 0 && x > 0) ? map.data[idx - size - 1] : 0;
+                const ntNE = (y > 0 && x < size - 1) ? map.data[idx - size + 1] : 0;
+                const ntSW = (y < size - 1 && x > 0) ? map.data[idx + size - 1] : 0;
+                const ntSE = (y < size - 1 && x < size - 1) ? map.data[idx + size + 1] : 0;
 
                 const s0 = cornerSteps[y * cornersW + x];
                 const s1 = cornerSteps[y * cornersW + (x + 1)];
                 const s2 = cornerSteps[(y + 1) * cornersW + x];
                 const s3 = cornerSteps[(y + 1) * cornersW + (x + 1)];
-
                 const minS = Math.min(s0, s1, s2, s3);
                 const maxS = Math.max(s0, s1, s2, s3);
 
+                // Quick interior check: if all 8 distance-1 neighbors are identical to cellTile, distance-1 has no border
+                const allSameD1 = (ntN === cellTile && ntS === cellTile && ntW === cellTile && ntE === cellTile &&
+                                   ntNW === cellTile && ntNE === cellTile && ntSW === cellTile && ntSE === cellTile);
+
+                if (!allSameD1) {
+                    const infoN  = (ntN  >= 2816 && ntN  < 4352) ? kindCache[(ntN  - 2816) / 48 | 0] : null;
+                    const infoS  = (ntS  >= 2816 && ntS  < 4352) ? kindCache[(ntS  - 2816) / 48 | 0] : null;
+                    const infoW  = (ntW  >= 2816 && ntW  < 4352) ? kindCache[(ntW  - 2816) / 48 | 0] : null;
+                    const infoE  = (ntE  >= 2816 && ntE  < 4352) ? kindCache[(ntE  - 2816) / 48 | 0] : null;
+                    const infoNW = (ntNW >= 2816 && ntNW < 4352) ? kindCache[(ntNW - 2816) / 48 | 0] : null;
+                    const infoNE = (ntNE >= 2816 && ntNE < 4352) ? kindCache[(ntNE - 2816) / 48 | 0] : null;
+                    const infoSW = (ntSW >= 2816 && ntSW < 4352) ? kindCache[(ntSW - 2816) / 48 | 0] : null;
+                    const infoSE = (ntSE >= 2816 && ntSE < 4352) ? kindCache[(ntSE - 2816) / 48 | 0] : null;
+
+                    const fN  = infoN  && infoN.famName  !== famName ? infoN.famName  : null;
+                    const fS  = infoS  && infoS.famName  !== famName ? infoS.famName  : null;
+                    const fW  = infoW  && infoW.famName  !== famName ? infoW.famName  : null;
+                    const fE  = infoE  && infoE.famName  !== famName ? infoE.famName  : null;
+                    const fNW = infoNW && infoNW.famName !== famName ? infoNW.famName : null;
+                    const fNE = infoNE && infoNE.famName !== famName ? infoNE.famName : null;
+                    const fSW = infoSW && infoSW.famName !== famName ? infoSW.famName : null;
+                    const fSE = infoSE && infoSE.famName !== famName ? infoSE.famName : null;
+
+                    const candBf = fN || fS || fW || fE || fNW || fNE || fSW || fSE;
+                    const pairInfo = candBf ? getPairDef(cfg, famName, candBf) : null;
+                    if (pairInfo) {
+                        borderFam = candBf;
+                        const { fA, fB, def: pairDef } = pairInfo;
+                        const isFamA = (famName === fA);
+                        const sA = (pairDef.steps && pairDef.steps[0]) || 0;
+                        const sB = (pairDef.steps && pairDef.steps[1]) || 0;
+
+                        let maskTouch = 0;
+                        if (fN === borderFam) maskTouch |= 3;   // NW(1) | NE(2)
+                        if (fS === borderFam) maskTouch |= 12;  // SW(4) | SE(8)
+                        if (fW === borderFam) maskTouch |= 5;   // NW(1) | SW(4)
+                        if (fE === borderFam) maskTouch |= 10;  // NE(2) | SE(8)
+                        if (fNW === borderFam) maskTouch |= 1;  // NW(1)
+                        if (fNE === borderFam) maskTouch |= 2;  // NE(2)
+                        if (fSW === borderFam) maskTouch |= 4;  // SW(4)
+                        if (fSE === borderFam) maskTouch |= 8;  // SE(8)
+
+                        const maskB = isFamA ? maskTouch : (15 & ~maskTouch);
+
+                        if (maskB > 0) {
+                            const key = `pair:${fA}:${sA}:${fB}:${sB}:${maskB}`;
+                            const tId = getOrAllocateShadeTile(key);
+                            if (tId > 0) {
+                                map.data[(1 * size + y) * size + x] = tId;
+                                pairC++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // Check distance-2 neighbors for broad multi-tile outer diffusion
+                if (!borderFam && x > 1 && x < size - 2 && y > 1 && y < size - 2) {
+                    const d2N  = map.data[idx - size * 2];
+                    const d2S  = map.data[idx + size * 2];
+                    const d2W  = map.data[idx - 2];
+                    const d2E  = map.data[idx + 2];
+                    const d2NW = map.data[idx - size * 2 - 2];
+                    const d2NE = map.data[idx - size * 2 + 2];
+                    const d2SW = map.data[idx + size * 2 - 2];
+                    const d2SE = map.data[idx + size * 2 + 2];
+
+                    if (d2N !== cellTile || d2S !== cellTile || d2W !== cellTile || d2E !== cellTile ||
+                        d2NW !== cellTile || d2NE !== cellTile || d2SW !== cellTile || d2SE !== cellTile) {
+                        const d2InfoN  = (d2N  >= 2816 && d2N  < 4352) ? kindCache[(d2N  - 2816) / 48 | 0] : null;
+                        const d2InfoS  = (d2S  >= 2816 && d2S  < 4352) ? kindCache[(d2S  - 2816) / 48 | 0] : null;
+                        const d2InfoW  = (d2W  >= 2816 && d2W  < 4352) ? kindCache[(d2W  - 2816) / 48 | 0] : null;
+                        const d2InfoE  = (d2E  >= 2816 && d2E  < 4352) ? kindCache[(d2E  - 2816) / 48 | 0] : null;
+                        const d2InfoNW = (d2NW >= 2816 && d2NW < 4352) ? kindCache[(d2NW - 2816) / 48 | 0] : null;
+                        const d2InfoNE = (d2NE >= 2816 && d2NE < 4352) ? kindCache[(d2NE - 2816) / 48 | 0] : null;
+                        const d2InfoSW = (d2SW >= 2816 && d2SW < 4352) ? kindCache[(d2SW - 2816) / 48 | 0] : null;
+                        const d2InfoSE = (d2SE >= 2816 && d2SE < 4352) ? kindCache[(d2SE - 2816) / 48 | 0] : null;
+
+                        const d2fN  = d2InfoN  && d2InfoN.famName  !== famName ? d2InfoN.famName  : null;
+                        const d2fS  = d2InfoS  && d2InfoS.famName  !== famName ? d2InfoS.famName  : null;
+                        const d2fW  = d2InfoW  && d2InfoW.famName  !== famName ? d2InfoW.famName  : null;
+                        const d2fE  = d2InfoE  && d2InfoE.famName  !== famName ? d2InfoE.famName  : null;
+                        const d2fNW = d2InfoNW && d2InfoNW.famName !== famName ? d2InfoNW.famName : null;
+                        const d2fNE = d2InfoNE && d2InfoNE.famName !== famName ? d2InfoNE.famName : null;
+                        const d2fSW = d2InfoSW && d2InfoSW.famName !== famName ? d2InfoSW.famName : null;
+                        const d2fSE = d2InfoSE && d2InfoSE.famName !== famName ? d2InfoSE.famName : null;
+
+                        const candD2Bf = d2fN || d2fS || d2fW || d2fE || d2fNW || d2fNE || d2fSW || d2fSE;
+                        const pairD2Info = candD2Bf ? getPairDef(cfg, famName, candD2Bf) : null;
+                        if (pairD2Info) {
+                            borderFam = candD2Bf;
+                            const { fA, fB, def: pairDef } = pairD2Info;
+                            const isFamA = (famName === fA);
+                            const sA = (pairDef.steps && pairDef.steps[0]) || 0;
+                            const sB = (pairDef.steps && pairDef.steps[1]) || 0;
+
+                            let maskTouch = 0;
+                            if (d2fN === borderFam) maskTouch |= 3;
+                            if (d2fS === borderFam) maskTouch |= 12;
+                            if (d2fW === borderFam) maskTouch |= 5;
+                            if (d2fE === borderFam) maskTouch |= 10;
+                            if (d2fNW === borderFam) maskTouch |= 1;
+                            if (d2fNE === borderFam) maskTouch |= 2;
+                            if (d2fSW === borderFam) maskTouch |= 4;
+                            if (d2fSE === borderFam) maskTouch |= 8;
+
+                            const maskB = (isFamA ? maskTouch : (15 & ~maskTouch)) | 16; // Bit 16: distance-2 dusting
+                            const key = `pair:${fA}:${sA}:${fB}:${sB}:${maskB}`;
+                            const tId = getOrAllocateShadeTile(key);
+                            if (tId > 0) {
+                                map.data[(1 * size + y) * size + x] = tId;
+                                pairC++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // Check distance-3 neighbors for broad multi-tile outer diffusion
+                if (!borderFam && x > 2 && x < size - 3 && y > 2 && y < size - 3) {
+                    const d3N = map.data[idx - size * 3];
+                    const d3S = map.data[idx + size * 3];
+                    const d3W = map.data[idx - 3];
+                    const d3E = map.data[idx + 3];
+
+                    if (d3N !== cellTile || d3S !== cellTile || d3W !== cellTile || d3E !== cellTile) {
+                        const d3InfoN = (d3N >= 2816 && d3N < 4352) ? kindCache[(d3N - 2816) / 48 | 0] : null;
+                        const d3InfoS = (d3S >= 2816 && d3S < 4352) ? kindCache[(d3S - 2816) / 48 | 0] : null;
+                        const d3InfoW = (d3W >= 2816 && d3W < 4352) ? kindCache[(d3W - 2816) / 48 | 0] : null;
+                        const d3InfoE = (d3E >= 2816 && d3E < 4352) ? kindCache[(d3E - 2816) / 48 | 0] : null;
+
+                        const d3fN = d3InfoN && d3InfoN.famName !== famName ? d3InfoN.famName : null;
+                        const d3fS = d3InfoS && d3InfoS.famName !== famName ? d3InfoS.famName : null;
+                        const d3fW = d3InfoW && d3InfoW.famName !== famName ? d3InfoW.famName : null;
+                        const d3fE = d3InfoE && d3InfoE.famName !== famName ? d3InfoE.famName : null;
+
+                        const candD3Bf = d3fN || d3fS || d3fW || d3fE;
+                        const pairD3Info = candD3Bf ? getPairDef(cfg, famName, candD3Bf) : null;
+                        if (pairD3Info) {
+                            borderFam = candD3Bf;
+                            const { fA, fB, def: pairDef } = pairD3Info;
+                            const isFamA = (famName === fA);
+                            const sA = (pairDef.steps && pairDef.steps[0]) || 0;
+                            const sB = (pairDef.steps && pairDef.steps[1]) || 0;
+
+                            let maskTouch = 0;
+                            if (d3fN === borderFam) maskTouch |= 3;
+                            if (d3fS === borderFam) maskTouch |= 12;
+                            if (d3fW === borderFam) maskTouch |= 5;
+                            if (d3fE === borderFam) maskTouch |= 10;
+
+                            const maskB = (isFamA ? maskTouch : (15 & ~maskTouch)) | 32; // Bit 32: distance-3 dusting
+                            const key = `pair:${fA}:${sA}:${fB}:${sB}:${maskB}`;
+                            const tId = getOrAllocateShadeTile(key);
+                            if (tId > 0) {
+                                map.data[(1 * size + y) * size + x] = tId;
+                                pairC++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
                 if (minS === maxS) {
-                    const key = `pure:${famName}:${minS}`;
-                    const tId = getOrAllocateShadeTile(key);
-                    map.data[(1 * size + y) * size + x] = tId;
-                    pureC++;
+                    if (minS === baseStep) {
+                        map.data[(1 * size + y) * size + x] = 0; // Pure base is already rendered on Layer 0!
+                    } else {
+                        const key = `pure:${famName}:${minS}`;
+                        const tId = getOrAllocateShadeTile(key);
+                        map.data[(1 * size + y) * size + x] = tId;
+                        pureC++;
+                    }
                 } else {
                     const lowS = minS;
                     const mask = ((s0 > lowS ? 1 : 0) | (s1 > lowS ? 2 : 0) | (s2 > lowS ? 4 : 0) | (s3 > lowS ? 8 : 0));
@@ -728,6 +890,12 @@
             }
         }
 
+        if (shadeAtlasDirty && genShadeBitmap && genShadeImgData) {
+            genShadeBitmap.context.putImageData(genShadeImgData, 0, 0);
+            genShadeBitmap._baseTexture.update();
+            shadeAtlasDirty = false;
+        }
+
         shadeStats.keysUsed = shadeKeyMap.size;
         shadeStats.pureCount = pureC;
         shadeStats.mixCount = mixC;
@@ -736,6 +904,7 @@
 
     function applyGroundShades(map, ax, ay) {
         if (!map || !map.data || map.tilesetId !== TILESET_ID || (map.ufArea && map.ufArea.z !== undefined && map.ufArea.z !== 0)) return;
+        initShadeAtlas();
         const t0 = (typeof performance !== "undefined" ? performance.now() : Date.now());
         computeShadePlan(map, ax, ay);
         const t1 = (typeof performance !== "undefined" ? performance.now() : Date.now());
@@ -783,6 +952,8 @@
     // inherit whichever final atlas slots an earlier seed happened to allocate first.
     function resetWorldShades() {
         genShadeBitmap = null;
+        genShadeImgData = null;
+        pairLookup = null;
         shadeKeyMap.clear();
         initShadeAtlas();
     }
@@ -839,6 +1010,7 @@
             // The kind of a tile round-trips through groundBase/kindOfTile, and the area on screen uses the runtime tileset.
             const kind = Tiles.kindOfTile(Tiles.groundBase("forest_floor") + 17);
             t.check("kind_of_tile", !!kind && kind.id === "forest_floor" && Tiles.kindOfTile(Tilemap.TILE_ID_A1) === null, kind ? `forest_floor shape 17 -> ${kind.id}; an A1 tile -> ${Tiles.kindOfTile(Tilemap.TILE_ID_A1)}` : "kindOfTile returned null for a ground tile");
+            await t.waitUntil(() => window.UF.World && UF.World.currentArea() && $gameMap && $gameMap.mapId() > 0, 8000, "currentArea");
             const onArea = window.UF.World && UF.World.currentArea();
             t.check("area_uses_tileset", !!onArea && $gameMap.tilesetId() === TILESET_ID && $gameMap.tileset() === ts,
                 onArea ? `area (${onArea.x},${onArea.y}) on screen has tilesetId ${$gameMap.tilesetId()} (want ${TILESET_ID})` : "not on an area map");
@@ -934,6 +1106,24 @@
 
             // Visual screenshots of terrain gradient at multiple zoom levels
             const mid = 128;
+            const borderCells = [];
+            const curMap = $dataMap;
+            const revMap = new Map();
+            for (const [k, id] of shadeKeyMap.entries()) revMap.set(id, k);
+            for (let dy = -1; dy <= 2; dy++) {
+                const y = mid + dy;
+                const row = [];
+                for (let dx = -4; dx <= 4; dx++) {
+                    const x = mid + dx;
+                    const t0 = curMap.data[y * size + x];
+                    const t1 = curMap.data[(1 * size + y) * size + x];
+                    const kd = Tiles.kindOfTile(t0);
+                    const kId = kd ? kd.id : (Tilemap.isTileA1(t0) ? "water" : "?");
+                    row.push(`(${dx},${dy}):${kId}:L1=${t1}[${revMap.get(t1) || "?"}]`);
+                }
+                borderCells.push(row.join(" | "));
+            }
+            t.check("diag_seam", true, borderCells.join(" || "));
             $gamePlayer.locate(mid, mid);
             if (UF.Camera) UF.Camera.setLevel(0); // 100% closeup zoom
             await t.waitFrames(20);
@@ -952,6 +1142,7 @@
             if (UF.Camera) UF.Camera.setLevel(1);
             await t.waitFrames(20);
             t.screenshot("terrain_gradient_border");
+
 
             // Reset camera to default
             if (UF.Camera) UF.Camera.setLevel(1);

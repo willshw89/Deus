@@ -7,7 +7,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
-- Gemini: Dwarf Demographic 42-Charset Suite (6 Variations × 7 Actions: Walk, Haul, Attack, Bow, Magic, Work, Downed) 100% Google Nano Banana Pro. Files: `art/raw/`, `game/img/characters/`, `art/review/`.
+- Gemini: Overworld Chip Sets, Rounded Natural Water Shorelines & Broad Biome Gradients 100% Google Nano Banana Pro. Files: `game/js/plugins/UF_Tiles.js`, `game/data/UF_WorldCatalog.json`, `art/review/`.
 
 ## Simulation Birth Rate Halved Across Engine Systems — 2026-09-20 (Gemini)
 Delivered per user directive ("Let's cut the birth rate in half"):
@@ -56,19 +56,24 @@ Delivered per user directives ("FROM NOW ON THIS CONVERSATION IS FOCUSED ON CHIP
   - Shoreline water cells dynamically evaluate neighboring land ground kinds and match water types (`snow`/`ice`/`tundra` -> `icy`, `sand` -> `salt`, `tropical_grass` -> `pond`, `meadow` -> `fresh`, `stony`/`rock`/`scree`/`peak_rock`/`ash` -> `blighted`).
 - **Broad Multi-Tile Biome Gradients & Shading Performance Optimization (`UF_Tiles.js`)**:
   - Removed `!kInfo.passable` restriction so mountains and rock peaks blend seamlessly with surrounding scree, snow, and stony terrain.
-  - Distance-2 outer diffusion dusting (bit 16 in maskB, 22% organic Bayer 8×8 dither dusting), creating broad, multi-tile rolling transitions 3–5 cells wide (144–240 px).
-  - Inner-loop optimization: Fast integer checks on distance-1 and distance-2 identical neighbors bypass `kindCache` lookups and allocations for interior cells, dropping area build time from 94.4 ms to 64.0–72.1 ms (budget <= 80 ms).
+  - Distance-2 outer diffusion dusting (bit 16 in maskB, 22% organic Bayer 8×8 dither dusting) and distance-3 diffusion dusting (bit 32), creating broad, multi-tile rolling transitions 3–5 cells wide (144–240 px).
+  - **Atlas Key Invariance & Symmetrical Lookup**: Resolved boundary corruption where alphabetical pair ordering caused lookup mismatches; implemented zero-allocation 2D `pairLookup[fam1][fam2]` cache.
+  - **Safe Transparent Fallback**: Replaced out-of-bounds / unregistered fallback to tile 0 (transparent) instead of 768, permanently eliminating purplish/grey corrupted squares on map boundaries.
+  - **Catalog Biome Boundary Pairs (`UF_WorldCatalog.json`)**: Added 6 missing boundary pairs (`needles|stone`, `needles|tundra`, `tundra|stone`, `soil|mud`, `snow|ice`, `snow|stone`).
+  - Inner-loop optimization: Fast integer checks and 2D property lookups drop area build time to 65.3–69.4 ms (budget <= 80 ms).
 - **Automated Verification**:
-  - `ground` suite: **10/10 PASS, 0 failed, exit 0** (build_time 72.1 ms <= 80 ms).
+  - `ground` suite: **10/10 PASS, 0 failed, exit 0** (build_time 69.4 ms <= 80 ms).
   - `tiles` suite: **11/11 PASS, 0 failed, exit 0**.
   - `walls` suite: **7/7 PASS, 0 failed, exit 0**.
   - `floors` suite: **11/11 PASS, 0 failed, exit 0**.
   - `art_check.js --native`: **5/5 PASS, 0 FAIL, 0 WARN** across A3, A4, A5 tileset sheets.
   - `originality_check.js`: **5/5 PASS, 0 FAIL, 0 WARN** across all tileset sheets.
 - **Visual Evidence (Rule 5)**:
-  - `ground.terrain_gradient_border.png`: Natural rounded water shorelines with shallows shelf and multi-tile rolling dithered transitions.
-  - `floors.room_half_floored.png`: Live in-engine enclosed room with 2-square walls and wood plank flooring under construction amidst broad natural ground gradient.
-  - `walls.two_square_wall.png`: Live in-engine two-square wood and stone wall segments with black interior tops and multi-tile terrain transitions.
+  - `art/review/birds_eye_zoom_0_normal.png`: 1.0x closeup view showing settlement campfire, 8 colonists, soft grass blades, and rounded natural water shore.
+  - `art/review/birds_eye_zoom_1_medium.png`: 0.667x medium view showing campfire clearing, grazing hares, smooth dithered transitions, and rounded water curves.
+  - `art/review/birds_eye_zoom_2_wide.png`: 0.333x wide bird's-eye view showing broad rolling meadow and rounded pond with zero grey squares, zero corrupted tiles, and zero hard seams.
+  - `art/review/birds_eye_biome_corner.png`: Ocean coast, conifer forest, savanna, and meadow with 100% stable boundary rendering.
+  - `game/test_output/walls.two_square_wall.png`: In-engine live test showing 2-square wooden wall with dark interior rim, stone wall segment, rounded pond shore, and rolling terrain.
 
 ## Adult Female Human 42-Charset Suite (6 Variations × 7 Actions) 100% Google Nano Banana Pro — 2026-09-19 (Gemini)
 Delivered per user directives ("FROM NOW ON THE FOCUS ON THISCONVERSATION IS CHARACTER SETS (AND THINGS REPRESENTED BY CHARRACTER SETS)", "continue for human female", "Every variation needs 7 dedicated 12-sprite charsets", "Bear in mind I want each faction to have its own unique like, weapons and shit you know? And the variations of each of these creatures can have different weapons and stuff, but like, within their faction shit", "Their legs dont move when moving left to right", "ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", VISION V109, V111, V112, V116, V118, V119):
