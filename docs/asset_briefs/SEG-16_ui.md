@@ -19,6 +19,7 @@ The interface pieces the engine draws today in code or from stand-in files: the 
 ---
 
 ### ui_stance_friendly — Stance square, friendly (AR-034)
+> **Superseded 2026-09-19 (VISION V32 revised: rings, not squares).** Make the ring in `docs/ASSET_REQUESTS.md` AR-034 and `docs/handoffs/HANDOFF_stance_rings.md` instead. This square brief stays for the record; its delivery is not exported.
 - **Category**: UI (map marker under a unit's feet)
 - **Dimensions**: exactly 48×48 (a flat marker filling its cell); the drawn shape is 48 px wide and 48 px tall: a 2-px frame with a dithered field inside
 - **Anchor**: bottom-centre of the cell `[24, 47]` (`UF_Stance.js` draws the marker with anchor (0.5, 1) at the unit's screen x and foot row, so it lies exactly on the unit's cell and follows the unit every frame, mid-step included)
@@ -40,6 +41,7 @@ Deliver: art/masters/ui_stance_friendly.png (48×48, magenta background) + art/m
 ---
 
 ### ui_stance_indifferent — Stance square, indifferent (AR-034)
+> **Superseded 2026-09-19 (VISION V32 revised: rings, not squares).** Make the ring in `docs/ASSET_REQUESTS.md` AR-034 and `docs/handoffs/HANDOFF_stance_rings.md` instead. This square brief stays for the record; its delivery is not exported.
 - **Category**: UI (map marker under a unit's feet)
 - **Dimensions**: exactly 48×48 (a flat marker filling its cell); the drawn shape is 48 px wide and 48 px tall: a 2-px frame with a dithered field inside
 - **Anchor**: bottom-centre of the cell `[24, 47]` (drawn with anchor (0.5, 1) at the unit's screen x and foot row)
@@ -61,6 +63,7 @@ Deliver: art/masters/ui_stance_indifferent.png (48×48, magenta background) + ar
 ---
 
 ### ui_stance_hostile — Stance square, hostile (AR-034)
+> **Superseded 2026-09-19 (VISION V32 revised: rings, not squares).** Make the ring in `docs/ASSET_REQUESTS.md` AR-034 and `docs/handoffs/HANDOFF_stance_rings.md` instead. This square brief stays for the record; its delivery is not exported.
 - **Category**: UI (map marker under a unit's feet)
 - **Dimensions**: exactly 48×48 (a flat marker filling its cell); the drawn shape is 48 px wide and 48 px tall: a 2-px frame with a dithered field inside
 - **Anchor**: bottom-centre of the cell `[24, 47]` (drawn with anchor (0.5, 1) at the unit's screen x and foot row)
@@ -82,6 +85,7 @@ Deliver: art/masters/ui_stance_hostile.png (48×48, magenta background) + art/ma
 ---
 
 ### ui_target_square — Target square, the selected unit's marker (AR-031)
+> **Superseded 2026-09-19 (VISION V32 revised: rings, not squares).** Make the ring in `docs/ASSET_REQUESTS.md` AR-031 and `docs/handoffs/HANDOFF_stance_rings.md` instead. This square brief stays for the record; its delivery is not exported.
 - **Category**: UI (map marker under the selected unit's feet)
 - **Dimensions**: exactly 48×48 per frame (a flat marker filling its cell); the sheet is two frames side by side = 96×48 (bright, dim); the drawn shape is 48 px wide and 48 px tall with the middle open
 - **Anchor**: bottom-centre of the cell `[24, 47]` (drawn with anchor (0.5, 1) at the selected unit's screen x and foot row)
