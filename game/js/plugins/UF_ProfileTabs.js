@@ -34,9 +34,10 @@
         cheerfulness: "A recorded disposition; no direct decision effect is shown here.",
         discipline: "Shifts preferred sleep hours and helps shape smithing aspirations."
     };
-    const W = () => window.UF && UF.World;
-    const S = () => window.UF && UF.Sheet;
-    const cat = () => window.$ufWorldCatalog || {};
+    const rootUF = () => (typeof window !== "undefined" ? window.UF : (typeof globalThis !== "undefined" ? globalThis.UF : null)) || {};
+    const W = () => rootUF().World;
+    const S = () => rootUF().Sheet;
+    const cat = () => (typeof window !== "undefined" ? window.$ufWorldCatalog : (typeof globalThis !== "undefined" ? globalThis.$ufWorldCatalog : null)) || {};
     const zOf = u => u && u.z !== undefined ? u.z : u && u.area && u.area.z !== undefined ? u.area.z : 0;
     const label = s => String(s || "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
     const known = n => typeof n === "number" && Number.isFinite(n);
@@ -56,7 +57,7 @@
         return ((all && all.list) || []).find(f => String(f.id) === String(u.data.faction)) || null;
     };
     function activity(u) {
-        const J = UF.Jobs, saved = worldState().jobs;
+        const J = rootUF().Jobs, saved = worldState().jobs;
         const j = ((saved && saved.list) || []).find(j => j.assigned === u.id && (j.state === "travel" || j.state === "work"));
         if (j) return J && J.describe ? J.describe(j) : label(j.type);
         if (u.data.state) return label(u.data.state);
@@ -87,6 +88,13 @@
             const loadRecorded = !!(st.jobs && st.items && st.items.byId && Array.isArray(d.inventory));
             const load = loadRecorded && S() && S().loadOf ? S().loadOf(u) : null;
             add(loadRecorded ? load && load.text || "No carried load reported." : "Carried-load information is not recorded.");
+            if (Array.isArray(d.callings) && d.callings.length > 0) {
+                const names = d.callings.map(c => typeof c === "string" ? c : c.name || c.id).join(", ");
+                const primary = d.calling?.name || (typeof d.calling === "string" ? d.calling : d.callings[0].name || d.callings[0]);
+                add(`Callings: ${names} (Primary: ${primary})`);
+            } else if (d.calling) {
+                add(`Calling: ${d.calling.name || d.calling}`);
+            }
             if (d.lifeGoals && d.lifeGoals.profession) add(`Professional aspiration: ${d.lifeGoals.profession.label}`);
             const practice = cp && Object.entries(cp.practices || {}).filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]);
             if (practice && practice.length) add(`Most practised trade: ${label(practice[0][0])} (${practice[0][1]} confirmed jobs)`);
@@ -148,6 +156,12 @@
             else {
                 if (g.mode === "instinctive_observation") missing("Observed animal behavior only. The wildlife controller, not a human ambition planner, makes these decisions.");
                 if (g.mode === "developing") missing("Developing or unknown-age person: no personal industrial goals are dispatched.");
+                const dest = g.destiny || d.destiny;
+                if (dest) {
+                    head(`Destiny: ${dest.title}`);
+                    add(`"${dest.motto}"`);
+                    add(`Target: ${dest.targetLabel} — ${dest.fulfilled ? "Fulfilled" : "Active"}${known(dest.progress) ? ` (${dest.progress}${known(dest.target) ? ` / ${dest.target}` : ""})` : ""}`);
+                }
                 if (g.profession) add(`Professional aspiration: ${g.profession.label}`);
                 for (const [key, name] of [["medium", "Medium-term goals"], ["long", "Long-term goals"]]) {
                     head(name);
@@ -209,6 +223,33 @@
                     else if (h.expansionReason) add(h.expansionReason, "dim");
                     if (h.reason) add(h.reason, "dim");
                 } else missing("No household membership recorded.");
+                const agriculture = UF.Agriculture;
+                if (agriculture && typeof agriculture.describe === "function") {
+                    const farm = agriculture.describe(u); // Read-only authority: must not ensure a settlement or reserve a plot.
+                    head("Settlement farming (shared)");
+                    if (!farm) missing("No same-level settlement farming information is available.");
+                    else {
+                        if (known(farm.z)) add(`Farm level: ${levelText(farm.z)}`);
+                        if (known(farm.plotCount)) add(`Plots recorded: ${farm.plotCount}${known(farm.targetPlots) ? `; planning target: ${farm.targetPlots}` : ""}.`);
+                        for (const [phase, count] of Object.entries(farm.phases || {})) if (known(count)) add(`${label(phase)} plots: ${count}.`);
+                        if (known(farm.unmetPlots) && farm.unmetPlots > 0) add(`Further plots wanted: ${farm.unmetPlots}.`);
+                        if (known(farm.harvests)) add(`Completed harvests: ${farm.harvests} (saved total).`);
+                        if (known(farm.foodUnits)) add(`Available edible stock: ${farm.foodUnits} units across the settlement, not just farm output.`);
+                        for (const crop of (farm.crops || []).slice(0, 8)) {
+                            const counts = [["recorded plots", crop.plots], ["growing", crop.growing], ["ripe", crop.ripe]].filter(([, n]) => known(n)).map(([name, n]) => `${n} ${name}`);
+                            add(`${crop.name || label(crop.id)}${counts.length ? `: ${counts.join(", ")}` : ""}.`);
+                        }
+                        if (farm.blocked) add(`Farming blocked: ${farm.blocked}`, "dim");
+                        for (const input of (farm.missingInputs || []).slice(0, 8)) {
+                            const definition = ((cat().items && cat().items.types) || []).find(t => t.id === input.itemId);
+                            add(`Missing planting input: ${definition && definition.name || label(input.itemId)}${known(input.count) ? ` × ${input.count}` : ""}.`, "dim");
+                        }
+                        const practice = farm.personal;
+                        if (practice && known(practice.jobs)) add(`This person's confirmed farm work: ${practice.jobs} jobs${known(practice.harvests) ? `; ${practice.harvests} harvests` : ""}.`);
+                        if (practice && practice.lastAction) add(`Last confirmed farm action: ${label(practice.lastAction)}.`);
+                        missing("Reserved or growing crops are not ready food. Shared settlement plots are not a claim of private household ownership.");
+                    }
+                }
                 if (d.pregnancy && known(d.pregnancy.daysLeft)) add(`Pregnancy: ${Math.max(0, d.pregnancy.daysLeft)} game days remaining (birth still needs a safe cell).`);
                 const bonds = Array.isArray(d.socialBonds) ? d.socialBonds : [];
                 if (bonds.length) { head("Recorded social contacts"); for (const b of bonds.slice(0, 16)) add(`${recordName(b.unitId)}: ${known(b.conversations) ? b.conversations : "unknown"} conversations${known(b.familiarity) ? `; familiarity ${b.familiarity}` : ""}`); }
@@ -248,7 +289,8 @@
         const x = win.x + (win.parent && win.parent.x || 0) + win.padding + r.x, y = win.y + (win.parent && win.parent.y || 0) + win.padding + r.y;
         return { x, y, w: r.w, h: r.h, cx: x + r.w / 2, cy: y + r.h / 2 };
     }
-    class ProfileWindow extends Window_Base {
+    const BaseWin = typeof Window_Base !== "undefined" ? Window_Base : class {};
+    class ProfileWindow extends BaseWin {
         initialize(rect) { super.initialize(rect); this.backOpacity = 235; this._pending = 0; this._rows = []; this._page = 0; this._pages = 1; this._renderedLines = []; this.hide(); }
         pointer() { return { x: TouchInput.x - this.x - (this.parent && this.parent.x || 0) - this.padding, y: TouchInput.y - this.y - (this.parent && this.parent.y || 0) - this.padding }; }
         containsPointer() { const p = this.pointer(); return p.x >= -this.padding && p.y >= -this.padding && p.x < this.width - this.padding && p.y < this.height - this.padding; }
@@ -332,35 +374,41 @@
         p.tab = tab; p.page = 0; sync(scene(), true); return true;
     }
     function turnPage(delta) { const p = parts(); if (!p || !p.info.visible) return false; p.page = Math.max(0, Math.min(p.info._pages - 1, p.page + delta)); sync(scene(), true); return true; }
-    window.UF = window.UF || {};
+    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
+    root.UF = root.UF || {};
+    const UF = root.UF;
     const API = UF.ProfileTabs = { model, selectTab, turnPage, tabs: () => TABS.map(name => ({ id: name.toLowerCase(), name })), POLL,
         windows: parts, current: () => { const p = parts(); return p && p.unitId ? { unitId: p.unitId, tab: p.tab, page: p.page, pages: p.info._pages } : null; },
         sync: () => sync(scene(), true), screenRect(kind, which) { const p = parts(); if (!p) return null; return kind === "tab" ? rectOnScreen(p.side, p.side._buttons && p.side._buttons.find(b => b.id === which)) : rectOnScreen(p.info, kind === "close" ? p.info._close : kind === "next" ? p.info._next : p.info._previous); } };
-    const _windows = Scene_Map.prototype.createAllWindows;
-    Scene_Map.prototype.createAllWindows = function() {
-        _windows.call(this);
-        const sheet = this._ufSheetWindow; if (!sheet) return;
-        const sw = Math.max(80, Math.min(SIDE_W, sheet.x - 4));
-        const side = new ProfileWindow(new Rectangle(Math.max(0, sheet.x - sw - 4), sheet.y, sw, TABS.length * TAB_H + sheet.padding * 2));
-        const info = new ProfileWindow(new Rectangle(sheet.x, sheet.y, sheet.width, Graphics.boxHeight - sheet.y - 4));
-        const at = this._windowLayer.children.indexOf(sheet) + 1;
-        this._windowLayer.addChildAt(side, at); this._windowLayer.addChildAt(info, at + 1);
-        this._ufProfileTabs = { side, info, unitId: null, tab: "overview", page: 0, age: 0, sig: "", checks: 0, redraws: 0 };
-    };
-    const _mapUpdate = Scene_Map.prototype.update;
-    Scene_Map.prototype.update = function() { sync(this); _mapUpdate.call(this); };
-    const _underMouse = Scene_Map.prototype.isAnyWindowUnderMouse;
-    Scene_Map.prototype.isAnyWindowUnderMouse = function() {
-        if (_underMouse && _underMouse.call(this)) return true;
-        const p = this._ufProfileTabs; return !!p && [p.side, p.info].some(w => w.visible && w.containsPointer());
-    };
+    if (typeof Scene_Map !== "undefined" && Scene_Map.prototype) {
+        const _windows = Scene_Map.prototype.createAllWindows;
+        Scene_Map.prototype.createAllWindows = function() {
+            _windows.call(this);
+            const sheet = this._ufSheetWindow; if (!sheet) return;
+            const sw = Math.max(80, Math.min(SIDE_W, sheet.x - 4));
+            const side = new ProfileWindow(new Rectangle(Math.max(0, sheet.x - sw - 4), sheet.y, sw, TABS.length * TAB_H + sheet.padding * 2));
+            const info = new ProfileWindow(new Rectangle(sheet.x, sheet.y, sheet.width, Graphics.boxHeight - sheet.y - 4));
+            const at = this._windowLayer.children.indexOf(sheet) + 1;
+            this._windowLayer.addChildAt(side, at); this._windowLayer.addChildAt(info, at + 1);
+            this._ufProfileTabs = { side, info, unitId: null, tab: "overview", page: 0, age: 0, sig: "", checks: 0, redraws: 0 };
+        };
+        const _mapUpdate = Scene_Map.prototype.update;
+        Scene_Map.prototype.update = function() { sync(this); _mapUpdate.call(this); };
+        const _underMouse = Scene_Map.prototype.isAnyWindowUnderMouse;
+        Scene_Map.prototype.isAnyWindowUnderMouse = function() {
+            if (_underMouse && _underMouse.call(this)) return true;
+            const p = this._ufProfileTabs; return !!p && [p.side, p.info].some(w => w.visible && w.containsPointer());
+        };
+    }
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return; hooked = true;
         UF.Events.on("sheet:opened", () => sync(scene(), true)); UF.Events.on("sheet:closed", () => sync(scene(), true));
     }
-    const _boot = Scene_Boot.prototype.start;
-    Scene_Boot.prototype.start = function() { hook(); if (UF.Test && UF.Test.active) registerChecks(); _boot.call(this); };
+    if (typeof Scene_Boot !== "undefined" && Scene_Boot.prototype) {
+        const _boot = Scene_Boot.prototype.start;
+        Scene_Boot.prototype.start = function() { hook(); if (UF.Test && UF.Test.active) registerChecks(); _boot.call(this); };
+    }
     function registerChecks() {
         UF.Test.suite("profile_tabs", async t => {
             const world = W(), sheet = S(), C = UF.Colonists, time = UF.Time, enabled = C && C.isEnabled(), wasPaused = time && time.paused;
@@ -460,5 +508,8 @@
                 if (C) C.setEnabled(enabled); if (time && !wasPaused) time.resume();
             }
         }, { isDefault: false });
+    }
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = { model, TABS };
     }
 })();

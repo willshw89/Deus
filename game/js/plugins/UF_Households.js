@@ -451,6 +451,42 @@
     function callingFor(u) {
         u = unitOf(u);
         if (!u || !u.data) return null;
+        if (u.data.callingStation) return u.data.callingStation;
+
+        const WORKSTATIONS = {
+            blacksmith: { station: "smithy", station2: "furnace", title: "Blacksmith", shop: "Forge & Armory" },
+            carpenter: { station: "workbench", station2: "chest_wood", title: "Carpenter", shop: "Woodcraft Shop" },
+            bowyer: { station: "bowyer_bench", station2: "fletcher_bench", title: "Bowyer & Fletcher", shop: "Archery Shop" },
+            tanner: { station: "tanning_rack", station2: "chest_wood", title: "Tanner & Furrier", shop: "Leather Shop" },
+            apothecary: { station: "apothecary_bench", station2: "kitchen_pantry", title: "Apothecary", shop: "Apothecary" },
+            cook: { station: "kitchen_hearth", station2: "dining_table", title: "Chef & Baker", shop: "Tavern & Bakery" },
+            merchant: { station: "shop_counter", station2: "chest_wood", title: "Merchant", shop: "General Store" }
+        };
+
+        const CALLING_TO_STATION = {
+            blacksmith: "blacksmith", weaponsmith: "blacksmith", armorsmith: "blacksmith",
+            carpenter: "carpenter",
+            fletcher: "bowyer", bowyer: "bowyer",
+            tanner: "tanner", leatherworker: "tanner",
+            physician: "apothecary", medic: "apothecary", herbalist: "apothecary", surgeon: "apothecary", alchemist: "apothecary",
+            chef: "cook", butcher: "cook", brewer: "cook", cheesewright: "cook", miller: "cook",
+            merchant: "merchant", shopkeeper: "merchant", broker: "merchant", innkeep: "merchant"
+        };
+
+        // Check if unit has assigned callings that map to a domestic workstation
+        const callingsList = Array.isArray(u.data.callings) ? u.data.callings : (u.data.calling ? [u.data.calling] : []);
+        for (const c of callingsList) {
+            const cid = typeof c === "string" ? c.toLowerCase() : (c && c.id);
+            const mapped = CALLING_TO_STATION[cid];
+            if (mapped && WORKSTATIONS[mapped]) {
+                const res = Object.assign({ id: mapped, score: 150 }, WORKSTATIONS[mapped]);
+                u.data.callingStation = res;
+                if (u.data.calling && typeof u.data.calling === "object") Object.assign(u.data.calling, res);
+                else if (!u.data.calling) u.data.calling = res;
+                return res;
+            }
+        }
+
         const facets = u.data.facets || {};
         const skills = u.data.skills || {};
         const getF = k => Number.isFinite(facets[k]) ? facets[k] : 50;
@@ -472,17 +508,10 @@
         }
         if (maxScore < 100) return null;
 
-        const WORKSTATIONS = {
-            blacksmith: { station: "smithy", station2: "furnace", title: "Blacksmith", shop: "Forge & Armory" },
-            carpenter: { station: "workbench", station2: "chest_wood", title: "Carpenter", shop: "Woodcraft Shop" },
-            bowyer: { station: "bowyer_bench", station2: "fletcher_bench", title: "Bowyer & Fletcher", shop: "Archery Shop" },
-            tanner: { station: "tanning_rack", station2: "chest_wood", title: "Tanner & Furrier", shop: "Leather Shop" },
-            apothecary: { station: "apothecary_bench", station2: "kitchen_pantry", title: "Apothecary", shop: "Apothecary" },
-            cook: { station: "kitchen_hearth", station2: "dining_table", title: "Chef & Baker", shop: "Tavern & Bakery" },
-            merchant: { station: "shop_counter", station2: "chest_wood", title: "Merchant", shop: "General Store" }
-        };
         const res = Object.assign({ id: best, score: Math.round(maxScore) }, WORKSTATIONS[best]);
-        u.data.calling = res;
+        u.data.callingStation = res;
+        if (u.data.calling && typeof u.data.calling === "object") Object.assign(u.data.calling, res);
+        else if (!u.data.calling) u.data.calling = res;
         return res;
     }
 
@@ -681,9 +710,11 @@
             spots: (home.spots || [{ x: home.x + 3, y: home.y + 2 }, { x: home.x + 4, y: home.y + 2 }]).map(p => ({ x: p.x, y: p.y })),
             cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
     }
-    window.UF = window.UF || {};
+    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
+    root.UF = root.UF || {};
+    const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
-        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY };
+        closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor };
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;
@@ -698,8 +729,15 @@
         UF.Events.on("world:unitRemoved", u => { if (person(u)) { remember(u, dead(u)); reconcile(); } });
         UF.Events.on("combat:kill", event => { if (event && person(event.target)) remember(event.target, true); });
     }
-    const boot = Scene_Boot.prototype.start;
-    Scene_Boot.prototype.start = function() { hook(); boot.call(this); };
-    const extract = DataManager.extractSaveContents;
-    DataManager.extractSaveContents = function(contents) { extract.call(this, contents); reconcile(); };
+    if (typeof Scene_Boot !== "undefined" && Scene_Boot.prototype) {
+        const boot = Scene_Boot.prototype.start;
+        Scene_Boot.prototype.start = function() { hook(); boot.call(this); };
+    }
+    if (typeof DataManager !== "undefined") {
+        const extract = DataManager.extractSaveContents;
+        DataManager.extractSaveContents = function(contents) { if (extract) extract.call(this, contents); reconcile(); };
+    }
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = UF.Households;
+    }
 })();

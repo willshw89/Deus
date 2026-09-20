@@ -450,6 +450,18 @@
         d.facets = d.facets || facetsFor(state.seed, u.id, cultureOf(u).facetBias);
         d.skills = d.skills || skillsFor(state.seed, u.id);
         d.needs = Object.assign({}, START_NEEDS, d.needs || {});
+        if (!d.callings || d.callings.length < 3) {
+            let Callings = window.UF && UF.Callings;
+            if (!Callings && typeof require === "function") {
+                try { Callings = require("./UF_Callings.js"); } catch (_) {
+                    try { Callings = require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+                }
+            }
+            if (Callings && Callings.assignCallings) {
+                const pop = factionPopulation(d.faction);
+                Callings.assignCallings(u, pop);
+            }
+        }
         d.inventory = d.inventory || [];
         d.equipment = d.equipment || { tool: null, clothes: null };
         if (d.workRate === undefined) d.workRate = 1;
@@ -1484,6 +1496,17 @@
                     emit("factions:born", twinUnit, mother, father);
                 }
             }
+        }
+
+        let Callings = window.UF && UF.Callings;
+        if (!Callings && typeof require === "function") {
+            try { Callings = require("./UF_Callings.js"); } catch (_) {
+                try { Callings = require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+            }
+        }
+        if (Callings && Callings.assignCallings) {
+            Callings.assignCallings(childUnit, pop);
+            if (twinUnit) Callings.assignCallings(twinUnit, pop);
         }
 
         if (twinUnit) {

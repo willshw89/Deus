@@ -8,6 +8,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Creature Callings & Professions System (89 Professions, Population-Scaled Weighting) — 2026-09-20 (Gemini)
+Delivered per user directive ("Every faction creature has a calling. These are the professions I want in the game. When society is smaller, I want characters generated closer to the critical end of the list. Every faction creature is randomly assigned three of these, with heavier weight towards the critical end when factions are small and when more lenience for the less critical side the larger society grows. bear in mind our factions cap at 200"):
+- **Full 89-Profession Roster (`UF_Callings.js`)**:
+  - Implemented exactly the 89 user-specified professions across 11 tiers (Ranks 1–18 "Critical": Farmer, Carpenter, Physician, ..., Waste Collector, Hunter; Ranks 19–30 "Very high": Veterinarian, ..., Brewer; Ranks 31–43 "High": Cooper, ..., Merchant; Ranks 44–55 "Medium-high": Potter/Artisan, ..., Shipwright; Ranks 56–66 "Medium": Guard/Soldier, ..., Actor; Ranks 67–75 "Medium-low": Glassblower, ..., Navigator; Ranks 76–80 "Low": Perfumer, ..., Astrologer; Ranks 81–83 "Very low": Diplomat, Jester, Cartographer; Rank 84 "Minimal": Executioner; Rank 85 "Negligible": Tax Collector; Ranks 86–89 "Prestige rather than production": Noble, Knight, Guildmaster, Duke).
+- **Dynamic Population-Scaled Weighting Curve**:
+  - Mathematical model: $W(r, P) = \exp(-\lambda(P) \cdot (r - 1))$ parameterized by live faction population $P \in [1, 200]$.
+  - Decay parameter: $\lambda(P) = 0.095 \cdot (1 - t) + 0.012 \cdot t$ where $t = \frac{\text{clamp}(P, 1, 200) - 1}{199}$.
+  - At small population ($P = 8$ founders): Critical + Very High comprise ~93.5% of selections (>90% requirement); Prestige tiers represent <0.02% (<0.1% requirement).
+  - At peak population ($P = 200$ carrying capacity): Lenient distribution where mid/late professions appear regularly (~42% mid-tiers, ~2.6% prestige), while Critical professions maintain healthy plurality (~29.5%).
+- **Sampling Without Replacement (3 Callings Per Creature)**:
+  - `sampleCallings(population, count = 3, rng)`: Weighted lottery sampling without replacement ensuring every faction creature possesses 3 distinct callings (`u.data.callings = [c1, c2, c3]`), with `u.data.calling = c1` designating their primary calling.
+  - `assignCallings(unit, population, rng)`: Safely attaches callings to any unit lacking them.
+- **Deep Engine Integration**:
+  - `UF_History.js`: Founder plan members and spawned settled founders receive callings weighted for $P = 8$, with deterministic seeded RNG (`SALT_CALLINGS = 0xca11`).
+  - `UF_Colonists.js`: `convertPerson`, `giveBirth` (child and twin), and `spawnImmigrants` assign 3 callings using live faction population.
+  - `UF_World.js`: Universal safety net in `World.addUnit` automatically assigns 3 callings to any faction person/colonist lacking them.
+  - `UF_Households.js`: `callingFor(u)` resolves callings to domestic workstations (smithy, tannery, loom, etc.).
+  - `UF_ProfileTabs.js`: Overview tab displays the creature's 3 distinct callings and primary calling.
+- **Automated Verification**:
+  - `tools/test_callings_system.js`: **16/16 PASS, 0 FAIL (exit 0)**. Provocation mutant check `--mutant=flat-weights` produces **1 FAIL (exit 1)**, confirming tests are able to fail (Rule 4).
+  - `tools/test_faction_founder_pairbonding.js`: **34/34 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_family_integration.js`: **36/36 PASS, 0 FAIL (exit 0)**.
+  - `tools/test_population_growth_and_immigration.js`: **7/7 PASS, 0 FAIL (exit 0)**.
+  - In-engine suite `run_tests.bat colonists`: **20/20 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.colonist_childbirth.png`: Inspected and verified in session. Shows active colony settlement with campfire, built wooden structures, stockpiles, and colonists walking in 3/4 serious chibi style.
+
 ## Human Genetics, Life-Stage Aging, 60-Year Average Lifespan & Corpse Decomposition / Skeletons — 2026-09-20 (Gemini)
 Delivered per user directives ("How much variety do we need for each faction to do like, genetics in the game? For both face and charsets", "So we can age them as well", "Go ahead and generate the assets for humans in nano banana pro", "Implement it ingame for humans", "We are assuming the average lifespan is 60 years btw"):
 - **Google Nano Banana Pro Assets (`gemini-3-pro-image`)**:

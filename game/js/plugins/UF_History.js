@@ -111,6 +111,17 @@
     const SALT_HISTORY = 0x4157, SALT_PIECES = 0x5173, SALT_PEOPLE = 0x9e0b;
     const SALT_SETTLE = 0x5e77;  // the settling run
     const SALT_STATS = 0x57a7;   // "stats": ability scores per unit (hash32(seed, unitId, SALT_STATS))
+    const SALT_CALLINGS = 0xca11; // callings RNG salt
+    function getCallings() {
+        if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
+        if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
+        if (typeof require === "function") {
+            try { return require("./UF_Callings.js"); } catch (_) {
+                try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+            }
+        }
+        return null;
+    }
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
     const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -559,6 +570,14 @@
             if (plan[leader]) {
                 plan[leader].leader = true;
                 plan[leader].title = titles[Math.floor(rng() * titles.length)];
+            }
+            const Callings = getCallings();
+            if (Callings && Callings.sampleCallings) {
+                plan.forEach((p, idx) => {
+                    const pRng = mulberry32(hash32(state.seed, SALT_CALLINGS, f.id, idx));
+                    p.callings = Callings.sampleCallings(count || 8, 3, pRng);
+                    p.calling = p.callings[0];
+                });
             }
             founders[f.id] = { site: site.id, sites: camps.map(s => s.id), families, plan, units: [] };
             const lead = plan[leader];
@@ -1482,11 +1501,19 @@
                 variation: q.variation,
                 familyId: p.familyId || null, lineageId: p.lineageId || null, surname: p.surname || null,
                 generation: 1, parents: [], motherId: null, fatherId: null, genetics: null,
+                callings: p.callings || null, calling: p.calling || null,
                 willingToPartner: true, familyDesire: true
             };
             if (p.leader && p.title) data.title = p.title;
             if (q.tint) data.tint = q.tint;
             const u = W.addUnit({ name: p.name, image: q.image, area: { x: site.area.x, y: site.area.y }, z: levelOf(site), x: q.cell.x, y: q.cell.y, dir: q.dir || 2, data, snapToFree: reach });
+            if (!u.data.callings || u.data.callings.length < 3) {
+                const Callings = getCallings();
+                if (Callings && Callings.assignCallings) {
+                    const uRng = mulberry32(hash32(state.seed, SALT_CALLINGS, u.id));
+                    Callings.assignCallings(u, 8, uRng);
+                }
+            }
             u.data.stats = rollStats(state.seed, u.id, f.species, u.data.stage);
             rec.units.push({ id: u.id, site: site.id, z: levelOf(site), x: u.x, y: u.y, dir: u.dir, ring: q.ring, gender: p.gender, within: Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= reach });
             if (p.leader) {
@@ -1646,6 +1673,13 @@
                     snapToFree: 8 // never inside a wall piece, a tree or water (user rule 2026-09-18); UF_World finds the nearest free cell
                 });
                 u.data.stats = rollStats(state.seed, u.id, f.species, stage);
+                if (!u.data.callings || u.data.callings.length < 3) {
+                    const Callings = getCallings();
+                    if (Callings && Callings.assignCallings) {
+                        const uRng = mulberry32(hash32(h.seed || state.seed, SALT_CALLINGS, u.id));
+                        Callings.assignCallings(u, f.population || f.settled || 8, uRng);
+                    }
+                }
                 if (rank === 2) rulerUnit[f.id] = u.id;
                 else if (rank === 1) leaderUnit[site.id] = u.id;
                 out.push(u);

@@ -964,6 +964,15 @@
             data
         };
         st.units[id] = u;
+        if (u.data && u.data.faction && (!u.data.callings || u.data.callings.length < 3) && (u.data.kind === "person" || u.data.kind === "colonist" || u.data.species)) {
+            let Callings = window.UF && UF.Callings;
+            if (!Callings && typeof require === "function") {
+                try { Callings = require("./UF_Callings.js"); } catch (_) {
+                    try { Callings = require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+                }
+            }
+            if (Callings && Callings.assignCallings) Callings.assignCallings(u);
+        }
         offOcc = null;
         if (this.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
         emit("world:unitAdded", u);
