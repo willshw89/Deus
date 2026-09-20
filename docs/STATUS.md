@@ -6,6 +6,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Greater Z-Plane House Roof Deck Representation & Live Enclosure Hooks — 2026-09-20 (Gemini)
+Delivered per user directive ("represent the tiles on the greater Z plane when houses are finished. I want to make sure it works"):
+- **Autonomous Room Roof Deck Generation on Greater Z Plane ($Z = 1$) (`UF_Floors.js`)**:
+  - `isRoofed(area, x, y, z)`: When an enclosed room on Ground ($Z = 0$) is detected, it automatically invokes `applyRoofedUpperDeck(area, r)` if `!r.deckApplied`, physically writing upper roof deck tiles onto $Z = 1$.
+  - `applyRoofedUpperDeck(area, target, material)`: Sets all cells of the structure footprint on $Z = 1$ to `shape = "floor"`, `standable = true`, with `constructed: true` and culture-appropriate material (`deck_wood` / `deck_stone`).
+  - `playerCultureFloor()`: Safely resolves culture floor spec from `UF_Factions.player()`, with resilient fallback `{ kind: "floor_wood", item: "log", count: 1 }`.
+  - `roomsNearSite(site)`: Corrected room lookup to return cached candidate rooms only if `rooms.size > 0`, ensuring accurate fallback scanning.
+- **Dynamic Live Enclosure Hooks (`UF_Households.js`)**:
+  - Added `checkEnclosures()` evaluating `strictEnclosure(h, b)` for all household structures upon engine events `objects:changed`, `objects:levelChanged`, and `jobs:done`.
+  - When all perimeter walls and door are placed in live play, `isRoofed = true` is marked and upper deck generation is instantly triggered.
+- **Z-Level Runtime Tileset Representation (Tileset 92)**:
+  - On Upper Level +1 ($Z = 1$), autotiled `deck_wood` tiles (`["A2", 3]`, base tile ID 2960) render on Layer 0 across the entire 7x7 roof platform.
+  - Wilderness outside the roof deck renders as non-walkable `open_air` sky tiles (`["A2", 5]`, base tile ID 3056).
+- **Automated Verification Evidence**:
+  - `node tools/test_greater_z_roof_live.js`: **16/16 PASS, 0 FAIL (exit 0)** in NW.js live engine harness:
+    - Verifies all 49 cells of the 7x7 house roof deck on $Z = 1$ have `shape === "floor"` and `standableShape === true`.
+    - Verifies wilderness cells outside the roof on $Z = 1$ have `shape === "open"` and `standableShape === false`.
+    - Verifies autotiled tile IDs on Level +1: center roof tile is `2960` (`deck_wood`) and surrounding wilderness is `3056` (`open_air`).
+    - Rule 4 mutant check verified: `--mutant=no_roof_deck` fails with 2 test failures and exit code 1.
+  - `node tools/run_tests.js floors`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `node tools/test_z_floors.js`: **18/18 PASS, 0 FAIL (exit 0)**.
+  - `node tools/test_second_by_second_history.js`: **15/15 PASS, 0 FAIL (exit 0)**.
+  - Screenshots opened and inspected (Rule 5):
+    - `live_ground_plane_roofed_house.png`: Ground ($Z = 0$) view showing fully enclosed 7x7 wooden house with walls, south door, hearth, beds, colonists, and meadow.
+    - `live_greater_z_plane_roof_deck.png`: Level +1 ($Z = 1$) view showing the solid 7x7 autotiled `deck_wood` platform surrounded by open air sky texture.
+
 ## Autonomous Colonist AI, Room Enclosure & RuneScape Progression — 2026-09-20 (Gemini)
 Delivered per user directives ("Lets get rid of all the d20 stuff too, we're going in the runescape direction of leveling stuff as you do it", "Do all of this that you can", and resolving the 15-wall line and purple icon clutter from the user screenshot):
 - **Full RuneScape / OSRS Combat & Skill Progression**:
@@ -2339,6 +2365,7 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
   - `jobs.jobs_working.png`: Worker chopping oak on Ground rolling meadow with HUD level controls.
 
 ## In progress (claims)
+- Gemini | **Greater Z-Plane House Roof Deck Representation & Enclosure Event Hooks** (user 2026-09-20: "represent the tiles on the greater Z plane when houses are finished. I want to make sure it works") | `game/js/plugins/UF_Households.js`, `game/js/plugins/UF_Floors.js`, `tools/test_greater_z_roof_live.js` | since 2026-09-20
 - Codex / Astra team | User-requested next society chain: physical, saved, layer-aware farming and autonomous settlement planning | NEW `game/js/plugins/UF_Agriculture.js`, `UF_FarmView.js`, their system docs and agriculture tests/fixture; narrow `UF_Colonists.js` planner integration, `UF_Households.js` farm reservation guard, `UF_ProfileTabs.js` explanations and `UF_CultureGrowth.js` confirmed farming practice, their docs/tests; `docs/STATUS.md`, `docs/VISION.md`, `docs/design/EMERGENT_SOCIETY.md`, `docs/ASSET_REQUESTS.md` request text only; registration only after editor closure | since 2026-09-19
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`

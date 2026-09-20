@@ -192,7 +192,13 @@
             if (typeof L.shapeAt === "function" && L.shapeAt(upperRef) === "floor") return true;
         }
         const r = roomAt(area, x, y);
-        if (r && r.cells && r.cells.some(c => c.x === x && c.y === y)) return true;
+        if (r && r.cells && r.cells.some(c => c.x === x && c.y === y)) {
+            if (L && typeof L.setShape === "function" && zLevel === 0 && !r.deckApplied) {
+                r.deckApplied = true;
+                applyRoofedUpperDeck(area, r);
+            }
+            return true;
+        }
         return false;
     }
 
@@ -382,9 +388,17 @@
 
     function playerCultureFloor() {
         const cat = catalog(), C = window.UF && UF.Colonists, F = window.UF && UF.Factions;
-        let c = C && typeof C.culture === "function" ? C.culture() : null;
-        if (!c && F && typeof F.player === "function") { const p = F.player(); c = p && cat && cat.cultures ? cat.cultures[p.species] : null; }
-        return c && c.floor ? Object.assign({}, c.floor) : null;
+        let cult = null;
+        if (F && typeof F.player === "function") {
+            const p = F.player();
+            cult = p && cat && cat.cultures ? cat.cultures[p.species] : null;
+        }
+        if (!cult && C && typeof C.culture === "function") {
+            const c = C.culture();
+            if (c && c.floor) cult = c;
+        }
+        if (cult && cult.floor) return Object.assign({}, cult.floor);
+        return { kind: "floor_wood", item: "log", count: 1 };
     }
     function activeFloorAt(area, x, y) {
         const J = Jobs();
@@ -404,7 +418,7 @@
             const room = roomFromHouse(area, h, full.id);
             if (room) rooms.set(room.id, room);
         }
-        if (rooms.size || houses.length) {
+        if (rooms.size) {
             const found = [...rooms.values()].sort((a, b) => a.id.localeCompare(b.id));
             cache.siteRooms.set(scanKey, found);
             return found;

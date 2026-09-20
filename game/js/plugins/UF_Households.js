@@ -876,6 +876,15 @@
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
         isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make };
+    function checkEnclosures() {
+        const s = state();
+        if (!s || !s.byId) return;
+        for (const h of Object.values(s.byId)) {
+            for (const b of structures(h)) {
+                strictEnclosure(h, b);
+            }
+        }
+    }
     let hooked = false;
     function hook() {
         if (hooked || !UF.Events) return;
@@ -883,9 +892,12 @@
         UF.Events.on("colonists:ready", reconcile);
         UF.Events.on("colonists:born", reconcile);
         UF.Events.on("time:day", reconcile);
+        UF.Events.on("objects:changed", checkEnclosures);
+        UF.Events.on("objects:levelChanged", checkEnclosures);
         UF.Events.on("jobs:done", job => {
             const h = job && job.params && resolve(job.params.household);
             if (h && h.home) syncHome(h);
+            checkEnclosures();
         });
         UF.Events.on("world:unitRemoved", u => { if (person(u)) { remember(u, dead(u)); reconcile(); } });
         UF.Events.on("combat:kill", event => { if (event && person(event.target)) remember(event.target, true); });
