@@ -487,20 +487,6 @@
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
  },
- "Outside_C": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "tileset 91 slot C"
-  ],
-  "states": [],
-  "category": "tiles",
-  "file": "img/tilesets/Outside_C.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "People1": {
   "status": "stock RMMZ",
   "request": "none yet",
@@ -522,6 +508,93 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "!$BerryBush": {
+  "status": "U7 stand-in",
+  "request": "AR-023",
+  "requests": [
+   "AR-023"
+  ],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×57)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$BerryBush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$Campfire": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$Campfire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$IronstoneDeposit": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×64)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$IronstoneDeposit.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$TimberOak": {
+  "status": "U7 stand-in",
+  "request": "AR-021",
+  "requests": [
+   "AR-021"
+  ],
+  "usedBy": [
+   "plugin UF_Look.js (test suite)",
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×46)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$TimberOak.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "$People1": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "plugin UF_Floors.js (test suite)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$People1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "$U7_Blacksmith": {
   "status": "U7 stand-in",
@@ -1619,25 +1692,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
- },
- "!$TimberOak": {
-  "status": "original",
-  "request": "AR-021",
-  "requests": [
-   "AR-021"
-  ],
-  "usedBy": [
-   "plugin UF_Look.js (test suite)",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×46)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$TimberOak.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "in 8e5fdc1 but changed since"
  },
  "!$UF_Apothecary_Bench": {
   "status": "original",
@@ -4247,24 +4301,6 @@
   "sidecar": true,
   "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
  },
- "$People1": {
-  "status": "original",
-  "request": "AR-050",
-  "requests": [
-   "AR-050"
-  ],
-  "usedBy": [
-   "plugin UF_Floors.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$People1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
  "$Teen_Boy": {
   "status": "original",
   "request": "none yet",
@@ -4518,6 +4554,7 @@
    "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
    "start.pair female: clothing tier 2 (UF_Colonists.setTier)",
    "plugin UF_Colonists.js",
+   "plugin UF_History.js",
    "plugin UF_Select.js (test suite)"
   ],
   "states": [
@@ -4698,6 +4735,7 @@
    "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
    "start.pair male: clothing tier 2 (UF_Colonists.setTier)",
    "plugin UF_Colonists.js",
+   "plugin UF_History.js",
    "plugin UF_Outposts.js (test suite)",
    "plugin UF_Select.js (test suite)"
   ],
@@ -5351,6 +5389,20 @@
   ],
   "category": "objects",
   "file": "img/tilesets/Outside_B.png (tile 152)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_C": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "tileset 91 slot C"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_C.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 but changed since"

@@ -50,7 +50,15 @@ function loadPng(pngPath) {
     return decodePNG(fs.readFileSync(pngPath), path.basename(pngPath));
 }
 
-function blitTile(dstBuf, dstW, col, row, srcImg, sx, sy, sw, sh, transparentColor = null) {
+function isMagentaOrFringe(r, g, b) {
+    if (r > 175 && g < 80 && b > 175) return true;
+    if (r > 80 && b > 80 && g < 70 && (r + b) > g * 2.2) return true;
+    if (r === 142 && g === 16 && b === 142) return true;
+    if (r === 162 && g === 40 && b === 162) return true;
+    return false;
+}
+
+function blitTile(dstBuf, dstW, col, row, srcImg, sx, sy, sw, sh, transparentColor = isMagentaOrFringe) {
     const dx = col * 48;
     const dy = row * 48;
     for (let y = 0; y < 48; y++) {
@@ -125,12 +133,25 @@ console.log('Building authentic Outside_B.png...');
 const W = 768, H = 768;
 const outsideB = Buffer.alloc(W * H * 4); // all alpha 0 by default
 
-// Load sources
 const furnaceWell = loadJpg(path.join(ROOT, 'art', 'raw', 'furnace_well_nano_banana_raw.jpg'));
 const inventoryIcons = loadJpg(path.join(ROOT, 'art', 'raw', 'inventory_icons_nano_banana_raw.jpg'));
 const fruitTree = loadJpg(path.join(ROOT, 'art', 'raw', 'fruit_tree_nano_banana_raw.jpg'));
 const palmPine = loadJpg(path.join(ROOT, 'art', 'raw', 'palm_pine_nano_banana_raw.jpg'));
 const saplingSheet = loadPng(path.join(ROOT, 'game', 'img', 'characters', '!$UF_Sapling.png'));
+
+const fencesGates = loadJpg(path.join(ROOT, 'art', 'raw', 'nano_fences_gates_raw.jpg'));
+const signposts = loadJpg(path.join(ROOT, 'art', 'raw', 'nano_signposts_markers_raw.jpg'));
+const bouldersMegaliths = loadJpg(path.join(ROOT, 'art', 'raw', 'nano_boulders_megaliths_raw.jpg'));
+const campProps = loadJpg(path.join(ROOT, 'art', 'raw', 'nano_camp_farm_props_raw.jpg'));
+
+function cellRect(c, r, pad = 6) {
+    return {
+        x: c * 256 + pad,
+        y: r * 256 + pad,
+        w: 256 - pad * 2,
+        h: 256 - pad * 2
+    };
+}
 
 // Tile 0 is reserved empty.
 // Row 0: Tools and Items from inventory_icons (16 icons in a 4x4 grid on 1024x1024 canvas)
@@ -197,27 +218,97 @@ masterList.forEach((mFile, idx) => {
     blitTile(outsideB, W, col, row, mImg, sx, sy, 48, 48);
 });
 
-// Row 9, Col 8 (Tile 152): AUTHENTIC NANO BANANA II SAPLING
-// In saplingSheet (144x192), center rest frame is at col 1 (x: 48, y: 0)
-blitTile(outsideB, W, 8, 9, saplingSheet, 48, 0, 48, 48);
+// Row 5: 16 Fence & Wall sprites from fencesGates
+for (let c = 0; c < 4; c++) {
+    const f0 = cellRect(c, 0); // Split-rail fence
+    blitTile(outsideB, W, c, 5, fencesGates, f0.x, f0.y, f0.w, f0.h);
+    const f1 = cellRect(c, 1); // Field drystone wall
+    blitTile(outsideB, W, 4 + c, 5, fencesGates, f1.x, f1.y, f1.w, f1.h);
+    const f2 = cellRect(c, 2); // Village picket fence
+    blitTile(outsideB, W, 8 + c, 5, fencesGates, f2.x, f2.y, f2.w, f2.h);
+    const f3 = cellRect(c, 3); // Defensive log palisade
+    blitTile(outsideB, W, 12 + c, 5, fencesGates, f3.x, f3.y, f3.w, f3.h);
+}
+
+// Row 6: 16 Signpost & Waymarker sprites from signposts
+for (let c = 0; c < 4; c++) {
+    const s0 = cellRect(c, 0); // Wooden trail signposts
+    blitTile(outsideB, W, c, 6, signposts, s0.x, s0.y, s0.w, s0.h);
+    const s1 = cellRect(c, 1); // Notice boards & clan totems
+    blitTile(outsideB, W, 4 + c, 6, signposts, s1.x, s1.y, s1.w, s1.h);
+    const s2 = cellRect(c, 2); // Stone cairns & boundary obelisks
+    blitTile(outsideB, W, 8 + c, 6, signposts, s2.x, s2.y, s2.w, s2.h);
+    const s3 = cellRect(c, 3); // Weathered gravestones
+    blitTile(outsideB, W, 12 + c, 6, signposts, s3.x, s3.y, s3.w, s3.h);
+}
+
+// Row 7: 16 Boulder & Rock sprites from bouldersMegaliths
+for (let c = 0; c < 4; c++) {
+    const b0 = cellRect(c, 0); // Granite field boulders
+    blitTile(outsideB, W, c, 7, bouldersMegaliths, b0.x, b0.y, b0.w, b0.h);
+    const b1 = cellRect(c, 1); // Megaliths & table altars
+    blitTile(outsideB, W, 4 + c, 7, bouldersMegaliths, b1.x, b1.y, b1.w, b1.h);
+    const b2 = cellRect(c, 2); // Quarry blocks & flagstones
+    blitTile(outsideB, W, 8 + c, 7, bouldersMegaliths, b2.x, b2.y, b2.w, b2.h);
+    const b3 = cellRect(c, 3); // Cavern spires & basalt
+    blitTile(outsideB, W, 12 + c, 7, bouldersMegaliths, b3.x, b3.y, b3.w, b3.h);
+}
+
+// Row 8: 16 Camp & Farmstead props from campProps
+for (let c = 0; c < 4; c++) {
+    const p0 = cellRect(c, 0); // Firewood, chopping block, logs, campfire
+    blitTile(outsideB, W, c, 8, campProps, p0.x, p0.y, p0.w, p0.h);
+    const p1 = cellRect(c, 1); // Burlap grain sacks, baskets, vegetables
+    blitTile(outsideB, W, 4 + c, 8, campProps, p1.x, p1.y, p1.w, p1.h);
+    const p2 = cellRect(c, 2); // Oak barrels, ale casks, water buckets
+    blitTile(outsideB, W, 8 + c, 8, campProps, p2.x, p2.y, p2.w, p2.h);
+    const p3 = cellRect(c, 3); // Shipping crates, wheelbarrow, hitching post
+    blitTile(outsideB, W, 12 + c, 8, campProps, p3.x, p3.y, p3.w, p3.h);
+}
+
+// Row 9: Tile 152 at Col 8 is authentic Nano Banana Pro sapling
+for (let col = 0; col < 16; col++) {
+    if (col === 8) {
+        // Tile 152: Sapling
+        blitTile(outsideB, W, 8, 9, saplingSheet, 48, 0, 48, 48);
+    } else {
+        // Additional world props (cairns, barrels, markers)
+        const srcCol = col % 4;
+        const srcRow = Math.floor((col % 16) / 4);
+        const cr = cellRect(srcCol, srcRow);
+        blitTile(outsideB, W, col, 9, campProps, cr.x, cr.y, cr.w, cr.h);
+    }
+}
 console.log('Placed authentic sapling at Outside_B tile #152 (col 8, row 9)');
 
-// Fill remaining tiles in rows 9..15 with varied vegetation, rocks, and wooden/stone structures
-for (let row = 9; row < 16; row++) {
+// Rows 10-15: Varied authentic Nano Banana Pro world objects
+const worldSheets = [fencesGates, signposts, bouldersMegaliths, campProps];
+for (let row = 10; row < 16; row++) {
     for (let col = 0; col < 16; col++) {
-        if (row === 9 && col === 8) continue; // tile 152 already set
-        const pickIdx = ((row - 9) * 16 + col) % masterList.length;
-        const mFile = masterList[pickIdx];
-        const mPath = path.join(ROOT, 'game', 'img', 'characters', mFile);
-        if (fs.existsSync(mPath)) {
-            const mImg = loadPng(mPath);
-            const sx = (mImg.width >= 144) ? 48 : 0;
-            blitTile(outsideB, W, col, row, mImg, sx, 0, 48, 48);
+        const sheet = worldSheets[(row + col) % worldSheets.length];
+        const srcCol = col % 4;
+        const srcRow = (row - 10) % 4;
+        const cr = cellRect(srcCol, srcRow);
+        blitTile(outsideB, W, col, row, sheet, cr.x, cr.y, cr.w, cr.h);
+    }
+}
+
+function cleanFringe(buf) {
+    for (let i = 0; i < buf.length; i += 4) {
+        if (buf[i + 3] === 0) continue;
+        const r = buf[i], g = buf[i + 1], b = buf[i + 2];
+        if (isMagentaOrFringe(r, g, b)) {
+            buf[i] = 0;
+            buf[i + 1] = 0;
+            buf[i + 2] = 0;
+            buf[i + 3] = 0;
         }
     }
 }
 
+cleanFringe(outsideB);
 quantizeToColors(outsideB, 56);
+cleanFringe(outsideB);
 writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'Outside_B.png'), W, H, outsideB);
 writePNG(path.join(ROOT, 'art', 'masters', 'Outside_B.png'), W, H, outsideB);
 console.log('Saved authentic Outside_B.png!');
@@ -281,3 +372,4 @@ quantizeToColors(dungeonB, 56);
 writePNG(path.join(ROOT, 'game', 'img', 'tilesets', 'Dungeon_B.png'), W, H, dungeonB);
 writePNG(path.join(ROOT, 'art', 'masters', 'Dungeon_B.png'), W, H, dungeonB);
 console.log('Saved authentic Dungeon_B.png!');
+

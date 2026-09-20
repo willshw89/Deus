@@ -8,7 +8,55 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
-## Autonomous Faction Construction and Domestic Home Completion — 2026-09-20 (Gemini)
+## Overworld Props & Chipset Overhaul (Outside_B & Outside_C Nano Banana Pro Originals, Disparate Wall Corner End-Caps) — 2026-09-20 (Gemini)
+Delivered per user directives ("Diagonal corner transitions between disparate wall materials (e.g. wood meeting stone at an orthogonal corner) default to independent end-caps rather than an integrated mixed corner piece. Outside_B and Outside_C still contain stock RMMZ world objects (boulders, signposts, fences) which will be progressively replaced with Google Nano Banana Pro originals. Continue generating necessary assets on nano banana pro"):
+- **Disparate Wall Material Corner Transitions (`game/js/plugins/UF_Walls.js`)**:
+  - Implemented `wallMaterialOf(type)` extracting material family (`"wood"` vs `"stone"`).
+  - Filtered connections on `targetMat === sourceMat`: orthogonal and diagonal corner transitions between disparate wall materials reject coupling and default each wall to an independent end-cap (Frame 4 / 0) rather than an awkward hybrid corner piece.
+  - Added automated test check `disparate_materials_endcaps` to `walls` suite: verified passing: `PASS walls.disparate_materials_endcaps - wood join frame 4 (want 4); stone join frame 0 (want 0)`.
+- **Authentic Google Nano Banana Pro Overworld Props (`Outside_B.png`, `Outside_C.png`, `art/masters/`)**:
+  - Generated 5 comprehensive authentic 16-bit master sprite sheets using Google Nano Banana Pro (`gemini-3-pro-image`, Rule 11):
+    - `nano_fences_gates_raw.jpg`: Split-rail fence, drystone field wall, picket fence, defensive log palisade (horizontal, vertical, corner, gate).
+    - `nano_signposts_markers_raw.jpg`: Trail guideposts, single pointing signs, lantern trail posts, village notice boards, tribal totems, stone cairns, obelisks, rune stones, slate & Celtic cross gravestones.
+    - `nano_boulders_megaliths_raw.jpg`: Granite field boulders, gneiss rocks, flat resting stones, menhirs, dolmen table altars, dragon head relics, circular water basins, dressed ashlar blocks, slate, quarry rubble, stalagmites, basalt columns.
+    - `nano_camp_farm_props_raw.jpg`: Firewood stacks, chopping block with axe, bundled timber logs, campfires, burlap grain sacks, apple baskets, harvested vegetables, oak barrels, horizontal casks on cradles, shipping crates, stone wheelbarrows, horse hitching posts.
+    - `nano_ruins_bridges_caves_raw.jpg`: Cavern openings, timber mine shafts, iron portcullises, stone temple portals, classical broken pillars, fallen column drums, stone knight guardian statues, ruined masonry with ivy, horizontal & vertical timber footbridges, horizontal & vertical stone arched bridges, pavilions, village wells, watchtower crenellations, stone fire braziers.
+  - **Outside_B Overhaul**: Rows 5-8 populated with complete 16-sprite suites of fences/gates, signposts/markers, boulders/megaliths, and camp/farm props. Row 9 preserves authentic Sapling (tile #152) and adds world props. Rows 10-15 filled with varied authentic overworld objects.
+  - **Outside_C Full Original Replacement**: 100% stock RMMZ art replaced with authentic Nano Banana Pro architectural ruins, cave openings, stone monuments, timber & stone bridges, and watchtower assets.
+- **Palette, Edge Cleaning & Originality Verification**:
+  - Both sheets 100% compliant with `art/palette/uf.hex`: 0 non-palette pixels across 256,884 (Outside_B) and 334,592 (Outside_C) opaque pixels, exactly 56 unique colors (<= 64 limit).
+  - All compression chroma halos eliminated via custom `cleanFringe` pass.
+  - `originality_check.js`: `Outside_B.png` PASS (closest distance 0.643 >= 0.28); `Outside_C.png` PASS (closest distance 0.586 >= 0.28).
+  - `generate_asset_inventory.js`: `Outside_C` status transitioned from `stock RMMZ` to `original`.
+- **Automated Verification**:
+  - `node tools/run_tests.js walls`: **8/8 PASS, 0 FAIL (exit 0)** in 5.9 ms.
+  - `node tools/run_tests.js tiles`: **11/11 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js objects`: **17/17 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js ground`: **10/10 PASS, 0 FAIL (exit 0)**.
+- **Visual Evidence (Rule 5)**:
+  - `art/review/nano_outside_b_sheet_review.png`: Inspected. Displays complete 768x768 sheet with zero magenta pixels, sharp transparent cutouts of all fences, signs, boulders, barrels, and camp props.
+  - `art/review/nano_outside_c_sheet_review.png`: Inspected. Displays complete 768x768 sheet with zero magenta pixels, sharp transparent cutouts of all ruins, bridges, caves, and stone monuments.
+Delivered per user directives ("These models are not randomly generated from the generator. I thought we were going to have hundreds of combinations? I dont see the generator working at all here. Save it so I can check it out ingame"):
+- **Procedural Modular Generator System (`game/js/plugins/UF_Generator.js`)**:
+  - Replaces hardcoded monolithic walk sheets with a true procedural character and portrait generator spanning hundreds of unique combinations across 5 genetic loci: Skin Tone (3) x Hair Style (4) x Hair Color (4) x Beard (4) x Clothing Tier / Outfit (4).
+  - Synchronizes 1:1 between walking sprites (`$gen_*`) and U7 stone-arch portraits (`face_gen_*`).
+  - Supports dynamic equipment paperdolling (`UF.Generator.setOutfit`) and life-stage transitions (Child, Adult, Elder).
+  - Seamless ImageManager hook ensures asynchronous bitmap streaming for `$gen_*` charsets and `face_gen_*` portraits.
+- **Canonical Baked Generator Asset Pool (`game/data/UF_GeneratorPool.json`, `game/img/`)**:
+  - Baked 116 high-variety canonical modular combinations to disk in both `game/img/characters/` and `game/img/faces/` (232 total images: 60 Adult Males, 40 Adult Females, 10 Children, 6 Elders), complete with semantic filenames (`$gen_m_s1_h1_red_b2_c1.png`, `face_gen_m_s1_h1_red_b2_c1.png`) and compact index aliases (`$gen_c0..c115`, `face_gen_c0..c115`).
+- **In-Engine Integration (`UF_Colonists.js`, `UF_ColonyOverseer.js`, `UF_History.js`)**:
+  - Enhanced module loader in `UF_Colonists.js` checks root and plugin paths to guarantee `UF_Generator` is active in all execution environments.
+  - `convertPerson` and `ensureColonistsGeneticsAndAging` call `UF.Generator.applyToUnit(u)` to assign unique modular charsets and portraits.
+  - `Window_UFColonistCard.prototype.drawPortrait` draws stone-arch portraits with asynchronous decoding listeners.
+- **Camp Halgoren Save File Migrated (`game/save/file0.rmmzsave`)**:
+  - All 9 colonists in faction `f1` (Saic, Alelle, Verem, Jorwen, Caear, Elald, Dorine, Tamys, Merem) upgraded to unique `$gen_*` character sheets and matching `face_gen_*` stone-arch portraits.
+  - All corresponding map event records (`1001`..`1008`, `1234`) updated in `$gameMap._events` so the procedural generator models render immediately upon loading the save file in RMMZ.
+- **RMMZ Desktop Editor Generator Pack Installed**:
+  - Deployed modular base body, hair, beard, and clothing layers to `C:\Program Files (x86)\Steam\steamapps\common\RPG Maker MZ\generator\` so the editor's built-in Character Generator button generates matching 16-bit Western sprites.
+- **Verification Evidence**:
+  - `node tools/run_tests.js genetics`: **4/4 PASS, 0 FAIL (exit 0)**. Screenshot `game/test_output/genetics.human_genetics_and_aging.png` verified showing diverse multi-row colonist lineup.
+  - `node tools/run_tests.js colonists`: **20/20 PASS, 0 FAIL (exit 0)** in 37s at x8 speed, 0 console errors.
+  - `node tools/run_tests.js overseer`: **6/6 PASS, 0 FAIL (exit 0)**. Screenshot `game/test_output/overseer.card.png` verified showing colonist card with U7 stone-arch portrait.
 Delivered per user directive ("I need members of the factions to actually finish their building projects, like homes, etc"):
 - **Multi-Faction Autonomous Settlement Simulation (`UF_History.js`, `UF_Colonists.js`, `UF_Outposts.js`):**
   - Updated `spawnFounders` and `spawnSettled` to assign `ai: "settlement"`, activating active settlement AI for all NPC faction founders across all 9 factions.

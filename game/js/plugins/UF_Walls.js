@@ -42,41 +42,66 @@
 
     const Objects = () => (window.UF && UF.Objects) || null;
     const World = () => (window.UF && UF.World) || null;
+    const isDoorType = type => !!type && (Array.isArray(type.tags) && type.tags.includes("door"));
     const isWallType = type => !!type && (type.autotile === "wall" || (Array.isArray(type.tags) && type.tags.includes("wall")));
     const inBounds = (w, h, x, y) => x >= 0 && y >= 0 && x < w && y < h;
 
-    function isWallCell(grid, w, h, x, y) {
+    function wallMaterialOf(type) {
+        if (!type || !type.tags) return null;
+        if (type.tags.includes("wood")) return "wood";
+        if (type.tags.includes("stone")) return "stone";
+        return null;
+    }
+
+    function isWallCell(grid, w, h, x, y, sourceMat = null) {
         if (!grid || !inBounds(w, h, x, y)) return false;
         const typeId = grid[y * w + x] | 0;
         const O = Objects();
-        return !!(typeId && O && isWallType(O.type(typeId)));
+        if (!typeId || !O) return false;
+        const t = O.type(typeId);
+        if (!t || (!isWallType(t) && !isDoorType(t))) return false;
+        if (sourceMat) {
+            const targetMat = wallMaterialOf(t);
+            if (targetMat && targetMat !== sourceMat) return false;
+        }
+        return true;
     }
 
-    function maskAt(grid, w, h, x, y) {
-        return (isWallCell(grid, w, h, x, y - 1) ? 1 : 0)
-            | (isWallCell(grid, w, h, x + 1, y) ? 2 : 0)
-            | (isWallCell(grid, w, h, x, y + 1) ? 4 : 0)
-            | (isWallCell(grid, w, h, x - 1, y) ? 8 : 0);
+    function maskAt(grid, w, h, x, y, sourceMat = null) {
+        if (!sourceMat && grid) {
+            const O = Objects();
+            const curType = O ? O.type(grid[y * w + x] | 0) : null;
+            sourceMat = wallMaterialOf(curType);
+        }
+        return (isWallCell(grid, w, h, x, y - 1, sourceMat) ? 1 : 0)
+            | (isWallCell(grid, w, h, x + 1, y, sourceMat) ? 2 : 0)
+            | (isWallCell(grid, w, h, x, y + 1, sourceMat) ? 4 : 0)
+            | (isWallCell(grid, w, h, x - 1, y, sourceMat) ? 8 : 0);
     }
 
     // Frames 0-15 are NESW masks. Frames 16,18,19 are the alternate
     // horizontal north-face run and caps from the wall-set contract.
-    function frameIndexAt(grid, w, h, x, y) {
-        const mask = maskAt(grid, w, h, x, y);
+    function frameIndexAt(grid, w, h, x, y, sourceMat = null) {
+        if (!sourceMat && grid) {
+            const O = Objects();
+            const curType = O ? O.type(grid[y * w + x] | 0) : null;
+            sourceMat = wallMaterialOf(curType);
+        }
+        const mask = maskAt(grid, w, h, x, y, sourceMat);
         if (mask !== 10 && mask !== 8 && mask !== 2) return mask;
         let southSide = false;
         let foundCorner = false;
         for (let cx = x - 1; cx >= Math.max(0, x - 25); cx--) {
-            if (!isWallCell(grid, w, h, cx, y)) break;
-            const n = isWallCell(grid, w, h, cx, y - 1), s = isWallCell(grid, w, h, cx, y + 1);
+            if (!isWallCell(grid, w, h, cx, y, sourceMat)) break;
+            const n = isWallCell(grid, w, h, cx, y - 1, sourceMat), s = isWallCell(grid, w, h, cx, y + 1, sourceMat);
             if (s !== n) { southSide = n && !s; foundCorner = true; break; }
         }
         if (!foundCorner) for (let cx = x + 1; cx <= Math.min(w - 1, x + 25); cx++) {
-            if (!isWallCell(grid, w, h, cx, y)) break;
-            const n = isWallCell(grid, w, h, cx, y - 1), s = isWallCell(grid, w, h, cx, y + 1);
+            if (!isWallCell(grid, w, h, cx, y, sourceMat)) break;
+            const n = isWallCell(grid, w, h, cx, y - 1, sourceMat), s = isWallCell(grid, w, h, cx, y + 1, sourceMat);
             if (s !== n) { southSide = n && !s; foundCorner = true; break; }
         }
-        if (!foundCorner) southSide = isWallCell(grid, w, h, x, y - 1) && !isWallCell(grid, w, h, x, y + 1);
+        if (!foundCorner) southSide = isWallCell(grid, w, h, x, y - 1, sourceMat) && !isWallCell(grid, w, h, x, y + 1, sourceMat);
         if (!southSide) return mask;
         return mask === 10 ? 16 : mask === 8 ? 18 : 19;
     }
@@ -282,6 +307,20 @@
             const roofHasObject = !!O.atIn(area, center.x, center.y - 1);
             t.check("footprint_roles", !!atRoof && atRoof.role === "roof" && atRoof.y === center.y && baseBlocked && !roofHasObject,
                 `${atRoof ? `roof resolves to ${atRoof.type.id} base (${atRoof.x},${atRoof.y})` : "roof did not resolve"}; base blocked ${baseBlocked}; roof grid cell ${roofHasObject ? "contains an object" : "is visual overhang"}`);
+
+            // Verify disparate wall materials (wood meeting stone at orthogonal corner) default to independent end-caps
+            O.setIn(area, center.x, center.y, "wall_wood");
+            O.setIn(area, center.x + 1, center.y, "wall_stone");
+            O.setIn(area, center.x, center.y + 1, "wall_wood");
+            O.setIn(area, center.x - 1, center.y, null);
+            O.refresh();
+            await t.waitFrames(2);
+            const woodJoin = O.spriteAt(center.x, center.y);
+            const stoneJoin = O.spriteAt(center.x + 1, center.y);
+            const woodIndependent = woodJoin && woodJoin._ufWallFrame === 4;
+            const stoneIndependent = stoneJoin && stoneJoin._ufWallFrame === 0;
+            t.check("disparate_materials_endcaps", woodIndependent && stoneIndependent,
+                `wood join frame ${woodJoin ? woodJoin._ufWallFrame : "null"} (want 4); stone join frame ${stoneJoin ? stoneJoin._ufWallFrame : "null"} (want 0)`);
 
             t.screenshot("two_square_wall");
 
