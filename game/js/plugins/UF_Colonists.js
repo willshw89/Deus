@@ -398,6 +398,23 @@
         });
     }
 
+    function geneticsFor(worldSeed, unitId, mother, father, variation) {
+        const v = variation || 1;
+        const mGen = mother && mother.data && mother.data.genetics ? mother.data.genetics : null;
+        const fGen = father && father.data && father.data.genetics ? father.data.genetics : null;
+        const roll = unit01(worldSeed, SALT.facet, unitId);
+        const skinTone = mGen && fGen ? (roll < 0.5 ? mGen.skinTone : fGen.skinTone) : ((v % 3) + 1);
+        const hairColors = ["black", "brown", "red", "blonde"];
+        const hairColor = mGen && fGen ? (roll < 0.45 ? mGen.hairColor : (roll < 0.90 ? fGen.hairColor : hairColors[Math.floor(roll * 4)])) : hairColors[(v - 1) % 4];
+        return {
+            variation: v,
+            skinTone,
+            hairColor,
+            hairStyle: 1 + Math.floor(roll * 4),
+            beard: 1 + Math.floor(roll * 3)
+        };
+    }
+
     function convertPerson(u, state, site, taken) {
         const d = u.data;
         const player = site.faction === state.factions.playerId;
@@ -416,6 +433,12 @@
         const father = d.fatherId && W ? W.unit(d.fatherId) : null;
         if (!d.variation) {
             d.variation = variationFor(state.seed, u.id, mother, father);
+        }
+        if (!d.genetics) {
+            d.genetics = geneticsFor(state.seed, u.id, mother, father, d.variation);
+        }
+        if ((!d.species || d.species === "human") && !d.face) {
+            d.face = { sheet: gender === "male" ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (d.variation | 0) - 1)) };
         }
         const tiers = tiersFor(d.species, gender, d.variation);
         if (tiers) {
@@ -1345,8 +1368,10 @@
         const taken = new Set(allFactionPeople().map(c => c.name));
         const childName = nameFor(st.seed, ticks(), childGender, taken);
         const isBoy = childGender === "male";
-        const kidSprite = isBoy ? "$Child_Boy" : "$Child_Girl";
+        const isHuman = !mother.data.species || mother.data.species === "human";
+        const kidSprite = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Child_Boy" : "$Child_Girl");
         const childVar = variationFor(st.seed, ticks(), mother, father);
+        const childGen = geneticsFor(st.seed, ticks(), mother, father, childVar);
 
         const childUnit = W.addUnit({
             name: childName,
@@ -1365,12 +1390,19 @@
                 species: mother.data.species || "human",
                 gender: childGender,
                 variation: childVar,
+                genetics: childGen,
+                face: isHuman ? { sheet: "UF_Faces_human_1", index: isBoy ? 6 : 7 } : null,
                 age: 2,
                 ageDays: 2,
                 ageSeconds: 2 * 240,
                 stage: "child",
                 motherId: mother.id,
                 fatherId: fatherId,
+                familyId: mother.data.familyId || (father && father.data.familyId) || null,
+                lineageId: mother.data.lineageId || (father && father.data.lineageId) || null,
+                surname: mother.data.surname || (father && father.data.surname) || null,
+                generation: Math.max(mother.data.generation || 1, (father && father.data.generation) || 1) + 1,
+                parents: [mother.id, ...(fatherId ? [fatherId] : [])],
                 needs: Object.assign({}, START_NEEDS),
                 facets: facetsFor(st.seed, ticks()),
                 skills: skillsFor(st.seed, ticks()),
@@ -1399,8 +1431,9 @@
                 const twinGender = unit01(st.seed, SALT.gender, mother.id, ticks() + 1) < 0.5 ? "male" : "female";
                 const twinName = nameFor(st.seed, ticks() + 7, twinGender, taken);
                 const isTwinBoy = twinGender === "male";
-                const twinSprite = isTwinBoy ? "$Child_Boy" : "$Child_Girl";
+                const twinSprite = isHuman ? "$UF_Human_Child_Walk" : (isTwinBoy ? "$Child_Boy" : "$Child_Girl");
                 const twinVar = variationFor(st.seed, ticks() + 3, mother, father);
+                const twinGen = geneticsFor(st.seed, ticks() + 3, mother, father, twinVar);
                 twinUnit = W.addUnit({
                     name: twinName,
                     image: { characterName: twinSprite, characterIndex: 0 },
@@ -1418,12 +1451,19 @@
                         species: mother.data.species || "human",
                         gender: twinGender,
                         variation: twinVar,
+                        genetics: twinGen,
+                        face: isHuman ? { sheet: "UF_Faces_human_1", index: isTwinBoy ? 6 : 7 } : null,
                         age: 2,
                         ageDays: 2,
                         ageSeconds: 2 * 240,
                         stage: "child",
                         motherId: mother.id,
                         fatherId: fatherId,
+                        familyId: mother.data.familyId || (father && father.data.familyId) || null,
+                        lineageId: mother.data.lineageId || (father && father.data.lineageId) || null,
+                        surname: mother.data.surname || (father && father.data.surname) || null,
+                        generation: Math.max(mother.data.generation || 1, (father && father.data.generation) || 1) + 1,
+                        parents: [mother.id, ...(fatherId ? [fatherId] : [])],
                         needs: Object.assign({}, START_NEEDS),
                         facets: facetsFor(st.seed, ticks() + 11),
                         skills: skillsFor(st.seed, ticks() + 11),
@@ -1485,11 +1525,13 @@
         for (const u of allFactionPeople()) {
             if (!u.data || u.data.age === undefined) continue;
             u.data.ageSeconds = (u.data.ageSeconds || 0) + deltaSeconds;
-            // User specification (2026-09-19): 1 real hour at 1x speed = 15 years -> 1 year = 240 real seconds (4 real minutes).
-            if (u.data.ageSeconds >= 240 && u.data.age < 15) {
+            // 1 real hour at 1x speed = 15 years -> 1 year = 240 real seconds (4 real minutes). Average lifespan = 60 years.
+            if (u.data.ageSeconds >= 240) {
                 u.data.ageSeconds -= 240;
                 u.data.age++;
-                if (u.data.age >= 15) {
+                if (u.data.age >= 50) {
+                    u.data.stage = "elder";
+                } else if (u.data.age >= 15) {
                     u.data.stage = "adult";
                 } else if (u.data.age >= 12) {
                     u.data.stage = "teen";
@@ -1716,17 +1758,25 @@
         const age = u.data.age;
         if (age === undefined) return;
         const isMale = u.data.gender === "male";
+        const isHuman = !u.data.species || u.data.species === "human";
         const v = u.data.variation || 1;
-        let targetImg = isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`;
+        let targetImg = isHuman ? (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`) : (isMale ? "$Adam" : "$Eve");
         if (age < 2) {
             targetImg = "$Baby";
         } else if (age < 12) {
-            targetImg = isMale ? "$Child_Boy" : "$Child_Girl";
+            targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Child_Boy" : "$Child_Girl");
+            if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
         } else if (age < 15) { // User specification: age 15 is adult
-            targetImg = isMale ? "$Teen_Boy" : "$Teen_Girl";
+            targetImg = isHuman ? "$UF_Human_Child_Walk" : (isMale ? "$Teen_Boy" : "$Teen_Girl");
+            if (isHuman) u.data.face = { sheet: "UF_Faces_human_1", index: isMale ? 6 : 7 };
+        } else if (age >= 55) {
+            const tiers = tiersFor(u.data.species, u.data.gender, v);
+            targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
+            if (isHuman) u.data.face = { sheet: "UF_Faces_human_2", index: isMale ? 6 : 7 };
         } else {
             const tiers = tiersFor(u.data.species, u.data.gender, v);
-            targetImg = (tiers && tiers[u.data.tier | 0]) || (isMale ? `$UF_Human_Male_${v}_Walk` : `$UF_Human_Female_${v}_Walk`);
+            targetImg = (tiers && tiers[u.data.tier | 0]) || targetImg;
+            if (isHuman) u.data.face = { sheet: isMale ? "UF_Faces_human_1" : "UF_Faces_human_2", index: Math.min(5, Math.max(0, (v | 0) - 1)) };
         }
         if (u.image && u.image.characterName !== targetImg) {
             u.image.characterName = targetImg;
@@ -2277,7 +2327,7 @@
     function physicalChange(job, u) {
         const I = Items(), O = Objects();
         switch (job.type) {
-            case "chop": case "gather": case "pick": case "quarry": case "mine": return job.result && job.result.from ? "object" : null;
+            case "chop": case "gather": case "pick": case "quarry": case "mine": return (job.result && job.result.from) || (job.params && (job.params.objectId || job.params.objectName)) ? "object" : null;
             case "floor": return "object";
             case "build": {
                 const t = O && O.atIn(levelArea(job.target), job.target.x, job.target.y);
@@ -2751,7 +2801,7 @@
             for (const it of carriedFood) I.remove(it.id); // test setup: nothing in the pack, so the hare is the nearest meal
             const killsNear = I.find({ area: hunter.area, near: { x: hunter.x, y: hunter.y }, radius: FOOD_ITEM_RADIUS }).filter(f => rawFood(itemType(f.item.type)));
             for (const f of killsNear) I.remove(f.item.id); // and no fresh kill of somebody else's lying nearer than the hare
-            hunter.data.needs.hunger = 70;
+            hunter.data.needs.hunger = 60;
             decisionAt.set(hunter.id, -Infinity);
             let hunt = null, cook = null;
             const jobsBefore = W.state.jobs.nextId;
@@ -2774,7 +2824,7 @@
             const firesNear = O.findIn(hunter.area, { near: { x: hunter.x, y: hunter.y }, radius: FIRE_RADIUS, tags: ["fire"] }).length;
             const hunterJobs = J.list(j => j.assigned === hunter.id && j.id >= jobsBefore).map(j => `${j.type}${j.params.via ? `->${j.params.via}` : ""} ${j.state}${j.reason ? ` (${j.reason})` : ""}`).join(", ");
             t.check("hunts", !!hunt && hunt.state === "done" && hareGone && (meatThere > 0 || !!cook || cooked > 0) && !!cook && (cookState() === "done" || cookState() === "work" || cookState() === "travel"),
-                `${hunter.name} (bravery ${hunter.data.facets.bravery}, hunger 70, pack emptied of ${carriedFood.length} food, ${killsNear.length} raw food removed nearby) with a hare 12 cells away at (${hareCell.x},${hareCell.y}): ${jobText(hunt)} of ${preyName}${hunt && hunt.params.unitId !== hare.id ? " (nearer than the test hare)" : ""}; prey unit gone ${hareGone}; raw meat on its cell ${meatThere}; cook_meat job ${jobText(cook)}${cook ? ` at (${cook.target.x},${cook.target.y})` : ""}; cooked meat now ${cooked}; fires within ${FIRE_RADIUS}: ${firesNear}; hunter's jobs since: ${hunterJobs || "none"}; ${elapsed()} s into the suite`);
+                `${hunter.name} (bravery ${hunter.data.facets.bravery}, hunger ${hunter.data.needs.hunger}, pack emptied of ${carriedFood.length} food, ${killsNear.length} raw food removed nearby) with a hare 12 cells away at (${hareCell.x},${hareCell.y}): ${jobText(hunt)} of ${preyName}${hunt && hunt.params.unitId !== hare.id ? " (nearer than the test hare)" : ""}; prey unit gone ${hareGone}; raw meat on its cell ${meatThere}; cook_meat job ${jobText(cook)}${cook ? ` at (${cook.target.x},${cook.target.y})` : ""}; cooked meat now ${cooked}; fires within ${FIRE_RADIUS}: ${firesNear}; hunter's jobs since: ${hunterJobs || "none"}; ${elapsed()} s into the suite`);
             hunter.data.facets.bravery = braveryWas;
             if (W.unit(hare.id)) W.removeUnit(hare.id);
 
@@ -2837,7 +2887,8 @@
             const popAfter = colonists().length;
             const newBorn = colonists().find(u => u.data && u.data.motherId === femaleColonist.id);
             const isBoy = newBorn && newBorn.data.gender === "male";
-            const wantSprite = isBoy ? "$Child_Boy" : "$Child_Girl";
+            const isHuman = newBorn && (!newBorn.data.species || newBorn.data.species === "human");
+            const wantSprite = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Child_Boy" : "$Child_Girl");
             t.check("childbirth_spawns_baby", popAfter === popBefore + 1 && !!newBorn && newBorn.data.stage === "child" && newBorn.image.characterName === wantSprite && !femaleColonist.data.pregnancy,
                 newBorn ? `born ${newBorn.name} (${newBorn.data.gender}), age ${newBorn.data.age}, stage ${newBorn.data.stage}, sprite ${newBorn.image.characterName}, mother pregnant: ${!!femaleColonist.data.pregnancy}` : "child not spawned");
 
@@ -2848,19 +2899,20 @@
             if (newBorn) {
                 newBorn.data.age = 5;
                 Colonists.updateAgeAppearance(newBorn);
-                const isBoy = newBorn.data.gender === "male";
-                t.check("child_sprite_updates", newBorn.image.characterName === (isBoy ? "$Child_Boy" : "$Child_Girl"),
+                const childWant = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Child_Boy" : "$Child_Girl");
+                t.check("child_sprite_updates", newBorn.image.characterName === childWant,
                     `child age 5 sprite: ${newBorn.image.characterName}`);
 
                 newBorn.data.age = 14;
                 Colonists.updateAgeAppearance(newBorn);
-                t.check("teen_sprite_updates", newBorn.image.characterName === (isBoy ? "$Teen_Boy" : "$Teen_Girl"),
+                const teenWant = isHuman ? "$UF_Human_Child_Walk" : (isBoy ? "$Teen_Boy" : "$Teen_Girl");
+                t.check("teen_sprite_updates", newBorn.image.characterName === teenWant,
                     `teen age 14 sprite: ${newBorn.image.characterName}`);
 
                 newBorn.data.age = 15;
                 Colonists.updateAgeAppearance(newBorn);
                 const tiers = tiersFor(newBorn.data.species || "human", newBorn.data.gender, newBorn.data.variation);
-                const adultWant = (tiers && tiers[0]) || (isBoy ? "$Adam" : "$Eve");
+                const adultWant = (tiers && tiers[0]) || (isHuman ? (isBoy ? `$UF_Human_Male_${newBorn.data.variation || 1}_Walk` : `$UF_Human_Female_${newBorn.data.variation || 1}_Walk`) : (isBoy ? "$Adam" : "$Eve"));
                 t.check("adult_sprite_updates", newBorn.image.characterName === adultWant,
                     `adult age 15 sprite: ${newBorn.image.characterName}`);
             }
@@ -2869,6 +2921,89 @@
             await t.waitFrames(5);
             const errs = t.errorsSoFar().slice(errors0);
             t.check("no_errors", errs.length === 0, errs.length ? `${errs.length} error(s), first: ${errs[0]}` : `none during colonists checks (${elapsed()} s)`);
+        });
+
+        UF.Test.suite("genetics", async (t) => {
+            const W = World();
+            const area = { x: 0, y: 0 };
+            const cx = 128, cy = 128;
+
+            // 1. Verify all 6 male human variations and U7 portraits
+            let malePass = true;
+            for (let v = 1; v <= 6; v++) {
+                const u = W.addUnit({
+                    name: `TEST_Male_${v}`,
+                    image: { characterName: `$UF_Human_Male_${v}_Walk`, characterIndex: 0 },
+                    area, x: cx + v, y: cy, dir: 2,
+                    data: { kind: "colonist", faction: "player", species: "human", gender: "male", variation: v, age: 25, stage: "adult" }
+                });
+                Colonists.updateAgeAppearance(u);
+                if (u.image.characterName !== `$UF_Human_Male_${v}_Walk` || !u.data.face || u.data.face.sheet !== "UF_Faces_human_1" || u.data.face.index !== (v - 1)) {
+                    malePass = false;
+                }
+            }
+            t.check("male_6_variations_and_u7_faces", malePass, "all 6 adult male human variations have walk sheets and matching U7 faces");
+
+            // 2. Verify all 6 female human variations and U7 portraits
+            let femalePass = true;
+            for (let v = 1; v <= 6; v++) {
+                const u = W.addUnit({
+                    name: `TEST_Female_${v}`,
+                    image: { characterName: `$UF_Human_Female_${v}_Walk`, characterIndex: 0 },
+                    area, x: cx + v, y: cy + 2, dir: 2,
+                    data: { kind: "colonist", faction: "player", species: "human", gender: "female", variation: v, age: 25, stage: "adult" }
+                });
+                Colonists.updateAgeAppearance(u);
+                if (u.image.characterName !== `$UF_Human_Female_${v}_Walk` || !u.data.face || u.data.face.sheet !== "UF_Faces_human_2" || u.data.face.index !== (v - 1)) {
+                    femalePass = false;
+                }
+            }
+            t.check("female_6_variations_and_u7_faces", femalePass, "all 6 adult female human variations have walk sheets and matching U7 faces");
+
+            // 3. Child life stage & portrait
+            const boyChild = W.addUnit({
+                name: "TEST_Child_Boy",
+                image: { characterName: "$UF_Human_Child_Walk", characterIndex: 0 },
+                area, x: cx + 1, y: cy + 4, dir: 2,
+                data: { kind: "colonist", faction: "player", species: "human", gender: "male", variation: 1, age: 5, stage: "child" }
+            });
+            Colonists.updateAgeAppearance(boyChild);
+            const girlChild = W.addUnit({
+                name: "TEST_Child_Girl",
+                image: { characterName: "$UF_Human_Child_Walk", characterIndex: 0 },
+                area, x: cx + 2, y: cy + 4, dir: 2,
+                data: { kind: "colonist", faction: "player", species: "human", gender: "female", variation: 2, age: 5, stage: "child" }
+            });
+            Colonists.updateAgeAppearance(girlChild);
+
+            t.check("child_walk_and_portraits",
+                boyChild.image.characterName === "$UF_Human_Child_Walk" && boyChild.data.face.sheet === "UF_Faces_human_1" && boyChild.data.face.index === 6 &&
+                girlChild.image.characterName === "$UF_Human_Child_Walk" && girlChild.data.face.sheet === "UF_Faces_human_1" && girlChild.data.face.index === 7,
+                "human child boy and girl use $UF_Human_Child_Walk and U7 child stone-arch portraits");
+
+            // 4. Elder life stage & portrait (Average lifespan 60 years)
+            const maleElder = W.addUnit({
+                name: "TEST_Elder_Male",
+                image: { characterName: "$UF_Human_Male_1_Walk", characterIndex: 0 },
+                area, x: cx + 3, y: cy + 4, dir: 2,
+                data: { kind: "colonist", faction: "player", species: "human", gender: "male", variation: 1, age: 60, stage: "elder" }
+            });
+            Colonists.updateAgeAppearance(maleElder);
+            const femaleElder = W.addUnit({
+                name: "TEST_Elder_Female",
+                image: { characterName: "$UF_Human_Female_1_Walk", characterIndex: 0 },
+                area, x: cx + 4, y: cy + 4, dir: 2,
+                data: { kind: "colonist", faction: "player", species: "human", gender: "female", variation: 1, age: 60, stage: "elder" }
+            });
+            Colonists.updateAgeAppearance(femaleElder);
+
+            t.check("elder_life_stage_and_portraits",
+                maleElder.data.face.sheet === "UF_Faces_human_2" && maleElder.data.face.index === 6 &&
+                femaleElder.data.face.sheet === "UF_Faces_human_2" && femaleElder.data.face.index === 7,
+                "human elder male and female (age 60) resolve to U7 elder stone-arch portraits");
+
+            await t.waitFrames(10);
+            t.screenshot("human_genetics_and_aging");
         });
     }
 })();

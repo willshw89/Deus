@@ -576,6 +576,26 @@
         const allUnits = (W && W.units) ? W.units() : [];
         const factionUnits = allUnits.filter(u => u && !u.isDead && u.data && (u.data.faction === factionId || (factionId === "player" && u.data.kind === "colonist")));
 
+        outpost.families = outpost.families || {};
+        for (const u of factionUnits) {
+            if (u.data.familyId) {
+                if (!outpost.families[u.data.familyId]) {
+                    outpost.families[u.data.familyId] = {
+                        id: u.data.familyId,
+                        factionId,
+                        surname: u.data.surname || "",
+                        lineageId: u.data.lineageId || null,
+                        members: [],
+                        houseId: null,
+                        generation: (u.data && u.data.generation) || 1
+                    };
+                }
+                if (!outpost.families[u.data.familyId].members.includes(u.id)) {
+                    outpost.families[u.data.familyId].members.push(u.id);
+                }
+            }
+        }
+
         const unassigned = factionUnits.filter(u => !u.data.familyId);
         if (unassigned.length === 0) return Object.values(outpost.families || {});
 
@@ -590,6 +610,7 @@
                     id: famId,
                     factionId,
                     surname,
+                    lineageId: null,
                     members: [],
                     houseId: null,
                     generation: (u.data && u.data.generation) || 1
@@ -1551,6 +1572,7 @@
         ensureCulture: ensureCultureEvolution,
         evolveCulture: evolveColonyCulture,
         syncFamilies: syncOutpostFamilies,
+        syncOutpostFamilies: syncOutpostFamilies,
         assignHouse: assignFamilyHouse,
         upgradeBuilding: upgradeBuilding
     };

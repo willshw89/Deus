@@ -74,6 +74,9 @@
         if (!s || !person(u)) return;
         const old = s.people[u.id] || {}, d = u.data;
         s.people[u.id] = Object.assign(old, { id: u.id, name: u.name || "", species: d.species || "human",
+            familyId: d.familyId || old.familyId || null,
+            surname: d.surname || old.surname || null,
+            lineageId: d.lineageId || old.lineageId || null,
             motherId: d.motherId === undefined ? old.motherId || null : d.motherId,
             fatherId: d.fatherId === undefined ? old.fatherId || null : d.fatherId });
         if (death || dead(u)) { old.deceased = true; if (old.deathTick === undefined) old.deathTick = tick(); }
@@ -84,12 +87,18 @@
         s.byUnit[u.id] = h.id;
         if (!h.members.includes(u.id)) h.members.push(u.id);
         u.data.householdId = h.id;
+        if (u.data && u.data.familyId && !h.familyId) h.familyId = u.data.familyId;
+        if (u.data && u.data.surname && !h.surname) h.surname = u.data.surname;
+        if (u.data && u.data.lineageId && !h.lineageId) h.lineageId = u.data.lineageId;
         return h;
     }
     function make(u) {
         const s = state(), c = context(u);
         if (!s || !c) return null;
         const h = Object.assign({ id: `household:${s.nextId++}`, members: [], foundedTick: tick(), generation: 0, home: null, reason: "No home planned" }, c);
+        if (u.data && u.data.familyId) h.familyId = u.data.familyId;
+        if (u.data && u.data.surname) h.surname = u.data.surname;
+        if (u.data && u.data.lineageId) h.lineageId = u.data.lineageId;
         s.byId[h.id] = h;
         return join(u, h);
     }
@@ -99,6 +108,9 @@
         // former home reservation until a future explicit moving/demolition rule.
         if ((!a.home && b.home) || (!!a.home === !!b.home && a.foundedTick > b.foundedTick)) [a, b] = [b, a];
         for (const u of members(b)) join(u, a);
+        a.familyId = a.familyId || b.familyId || null;
+        a.surname = a.surname || b.surname || null;
+        a.lineageId = a.lineageId || b.lineageId || null;
         b.mergedInto = a.id;
         emit("households:merged", a, b);
         return a;

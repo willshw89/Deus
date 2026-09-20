@@ -8,6 +8,35 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - Claude Code: Unique factions per generated game (no duplicate species) & vertical layer parity (-2..+2). Files: `game/js/plugins/UF_Factions.js`, `game/js/plugins/UF_Anim.js`, `game/js/plugins/UF_Wildlife.js`, `game/js/plugins/UF_Interact.js`, `game/js/plugins/UF_Floors.js`, `game/js/plugins/UF_Look.js`.
 
+## Faction Generation 4 Founder Families & Start-of-Game Random Pairbonding — 2026-09-20 (Gemini)
+Delivered per user directive ("At the time of faction generation, those 4 males and 4 females, those are 4 families. At the start of the game, they will randomly pairbond and start that faction's lineage. we have a character generator that is going to handle genetics"):
+- **4 Founding Families per Faction (`UF_History.js`)**:
+  - `founderSurnames(rng, species, count)`: Generates authentic species/cultural surnames for human, dwarf, elf, orc, gnome, and goblin factions (e.g. human: Miller, Cooper, Smith, Ward, Fletcher, Tanner; dwarf: Stonehelm, Ironforge, Goldbeard; elf: Moonwhisper, Leafstrider; orc: Skullcrusher, Ironfang; gnome: Clockspark; goblin: Skitterclaw).
+  - In `History.found(state, cfg, live)`: Every faction creates 4 founding family records (`f.families` and `founders[f.id].families`): `{ id: "${f.id}_fam_${i}", factionId: f.id, surname, lineageId: "${f.id}_lin_${i}", members: [], generation: 1, familyIndex: i }`.
+  - In `founders[f.id].plan`: The 4 males and 4 females are explicitly grouped into the 4 families (1 male and 1 female per family), ensuring a clean 1:1 balance.
+  - Multi-site vertical level parity: For factions spanning multiple sites/levels (e.g. Dwarven settlements across cavern level -1 and cavern level -2), 2 families are allocated to level -1 (2 males, 2 females) and 2 families to level -2 (2 males, 2 females), so couples are strictly co-located on their home site and level.
+  - In `History.spawnPeople`: Founder unit records receive `familyId`, `lineageId`, `surname`, `generation: 1`, `parents: []`, `motherId: null`, `fatherId: null`, `genetics: null`, `willingToPartner: true`, and `familyDesire: true`.
+- **Start-of-Game Random Pairbonding (`UF_History.js`)**:
+  - `History.pairFounders(state, liveUnits)`: Automatically invoked at the conclusion of `spawnPeople` (or upon game start).
+  - Uses seeded, deterministic RNG (`SALT_PAIRBOND = 0x5a17`, hashed with world seed, faction ID, and site ID) to randomly pair co-located males and females into 4 couples per faction (0 unpaired single founders).
+  - Establishes reciprocal links: `male.partnerId = female.id`, `male.partnerName = female.name`, `female.partnerId = male.id`, `female.partnerName = male.name`.
+  - Pairs share identical `familyId`, `lineageId`, and `surname`.
+  - Emits `"factions:pairbonded"` event with the established couples.
+- **Household & Outpost Integration (`UF_Households.js`, `UF_Outposts.js`)**:
+  - `UF_Households`: `remember`, `join`, `make`, and `merge` track `familyId`, `surname`, and `lineageId`. When pairbonded founders are reconciled, `reconcile()` merges the couples into 4 family households (2 members each) instead of 8 solitary huts.
+  - `UF_Outposts.syncOutpostFamilies(factionId)`: Pre-assigned founder units with existing `familyId` and `surname` are indexed directly into `outpost.families` without creating duplicate unassigned family IDs.
+- **Lineage Inheritance at Childbirth (`UF_Colonists.js`)**:
+  - In `giveBirth(femaleColonist, st)`: Newborn children (`childUnit` and `twinUnit`) inherit `familyId`, `lineageId`, and `surname` from their mother/father, set `parents = [mother.id, father.id]`, and increment `generation = parentGen + 1` (generation 2).
+- **Automated Verification**:
+  - `tools/test_faction_founder_pairbonding.js`: **34/34 PASS, 0 FAIL (exit 0)** across all 10 success criteria (factions defined, 4 families per faction, authentic distinct surnames, 1M+1F plan grouping, dwarven multi-site split, 0 unpaired founders, reciprocal links, co-location, household & outpost registration, seeded determinism, childbirth inheritance).
+  - Rule 4 Mutant Check: `--mutant=unpaired` produces **34 PASS, 1 FAIL (exit 1)**, confirming the test suite reliably catches unpaired founders.
+  - In-engine `colonists` test suite (`run_tests.bat colonists`): **20/20 PASS, 0 FAIL (exit 0)**.
+  - Regressions clean: `test_households.js` (56/56 PASS), `test_family_integration.js` (36/36 PASS), `test_population_growth_and_immigration.js` (7/7 PASS), `test_regrowth_construction_guard.js` (10/10 PASS).
+- **Visual Evidence (Rule 5)**:
+  - `game/test_output/colonists.site_home.png`: 8 colonists (4 males, 4 females) gathered at home campfire in clean meadow terrain.
+  - `game/test_output/colonists.colonists_working.png`: Colonists actively chopping oak, gathering tall grass, and constructing stockpiles.
+  - `game/test_output/colonists.colonist_childbirth.png`: Active night scene showing newly built timber shelter, thread stockpiles, campfire, and newborn child.
+
 ## World Asset Regrowth & Flora Construction Guard — 2026-09-20 (Gemini)
 Delivered per user directive ("When assets in the world regenerate (plants and stuff) I dont want them growing on any tile with floor or wall, or something constructed on it"):
 - **Floor & Road Guard (`UF_Floors.js`, `UF_Roads.js`)**:

@@ -422,6 +422,31 @@
         return s;
     }
 
+    function founderSurnames(rng, species, count) {
+        const cult = String(species || "human").toLowerCase();
+        const human = ["Hawthorne", "Miller", "Baker", "Fletcher", "Blackwood", "Cooper", "Smith", "Tanner", "Ward", "Weaver"];
+        const dwarf = ["Ironfoot", "Stonehammer", "Bronzebeard", "Deepdelver", "Anvilborn", "Goldvein", "Copperhand", "Forgefire"];
+        const elf = ["Silverleaf", "Swiftwillow", "Greenbough", "Moonwhisper", "Starlight", "Sunstrider", "Windstrider", "Duskwalker"];
+        const orc = ["Bloodtusk", "Goretusk", "Ironhide", "Skullcleaver", "Warsnout", "Bonecrusher", "Grimmaw", "Redfist"];
+        const gnome = ["Cogspinner", "Springgear", "Tinkertop", "Brassbutton", "Copperwidget", "Clockwinder"];
+        const goblin = ["Snaggletooth", "Mudfoot", "Quickdagger", "Bonepicker", "Rustblade", "Ratbite"];
+        const pool = cult.includes("dwarf") ? dwarf :
+                     cult.includes("elf") ? elf :
+                     cult.includes("orc") ? orc :
+                     cult.includes("gnome") ? gnome :
+                     cult.includes("goblin") ? goblin : human;
+        const shuffled = pool.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const out = [];
+        for (let i = 0; i < count; i++) {
+            out.push(shuffled[i % shuffled.length] || `Lineage${i + 1}`);
+        }
+        return out;
+    }
+
     function found(state, cfg, live) {
         const started = now();
         const F = state.factions;
@@ -458,27 +483,84 @@
             const site = camps[0];
             f.home = { ...f.home, area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.sites = camps.map(s => s.id);
-            // The founders: genders in a seeded order, ages within the range, one leader with a title.
+            // The founders: 4 males and 4 females representing 4 distinct families (user directive 2026-09-20).
             const rng = mulberry32(hash32(state.seed, SALT_FOUNDERS, F.list.indexOf(f)));
-            const genders = [];
-            for (let i = 0; i < (fc.male | 0); i++) genders.push("male");
-            for (let i = 0; i < (fc.female | 0); i++) genders.push("female");
-            for (let i = genders.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [genders[i], genders[j]] = [genders[j], genders[i]]; }
-            const leader = Math.floor(rng() * genders.length);
-            const titles = Array.isArray(fc.titles) && fc.titles.length ? fc.titles : FOUNDER_DEFAULTS.titles;
-            const plan = genders.map((gender, i) => {
-                const age = ageLo + Math.floor(rng() * (ageHi - ageLo + 1));
-                const p = { name: personName(rng, f.species, gender, usedPeople), gender, age, leader: i === leader };
-                if (p.leader) p.title = titles[Math.floor(rng() * titles.length)];
-                return p;
-            });
-            // Split each configured gender between the two sites; never duplicate the faction's founders.
-            const genderIndex = { male: 0, female: 0 };
-            for (const p of plan) {
-                const dest = camps[genderIndex[p.gender]++ % camps.length];
-                p.site = dest.id; p.z = dest.z; dest.pop++;
+            const famCount = Math.max(1, Math.min(fc.male | 0, fc.female | 0));
+            const surnames = founderSurnames(rng, f.species, famCount);
+            const families = [];
+            for (let k = 0; k < famCount; k++) {
+                const camp = camps[Math.floor((k * camps.length) / famCount)];
+                families.push({
+                    id: `${f.id}_fam_${k + 1}`,
+                    lineageId: `${f.id}_lin_${k + 1}`,
+                    faction: f.id,
+                    surname: surnames[k],
+                    familyIndex: k,
+                    site: camp.id,
+                    z: camp.z,
+                    generation: 1,
+                    members: []
+                });
             }
-            founders[f.id] = { site: site.id, sites: camps.map(s => s.id), plan, units: [] };
+            f.families = families.map(fam => ({ id: fam.id, lineageId: fam.lineageId, surname: fam.surname, site: fam.site, z: fam.z, generation: fam.generation }));
+            const titles = Array.isArray(fc.titles) && fc.titles.length ? fc.titles : FOUNDER_DEFAULTS.titles;
+            const plan = [];
+            for (let k = 0; k < famCount; k++) {
+                const fam = families[k];
+                const mAge = ageLo + Math.floor(rng() * (ageHi - ageLo + 1));
+                const fAge = ageLo + Math.floor(rng() * (ageHi - ageLo + 1));
+                const m = {
+                    name: personName(rng, f.species, "male", usedPeople),
+                    gender: "male",
+                    age: mAge,
+                    leader: false,
+                    familyId: fam.id,
+                    lineageId: fam.lineageId,
+                    surname: fam.surname,
+                    familyIndex: k,
+                    site: fam.site,
+                    z: fam.z
+                };
+                const w = {
+                    name: personName(rng, f.species, "female", usedPeople),
+                    gender: "female",
+                    age: fAge,
+                    leader: false,
+                    familyId: fam.id,
+                    lineageId: fam.lineageId,
+                    surname: fam.surname,
+                    familyIndex: k,
+                    site: fam.site,
+                    z: fam.z
+                };
+                const camp = camps.find(c => c.id === fam.site) || camps[0];
+                camp.pop += 2;
+                plan.push(m, w);
+            }
+            // Handle any extra males/females beyond pair count if configured
+            let extraMales = (fc.male | 0) - famCount;
+            let extraFemales = (fc.female | 0) - famCount;
+            let extraIndex = 0;
+            while (extraMales > 0) {
+                const dest = camps[extraIndex++ % camps.length];
+                const age = ageLo + Math.floor(rng() * (ageHi - ageLo + 1));
+                plan.push({ name: personName(rng, f.species, "male", usedPeople), gender: "male", age, leader: false, site: dest.id, z: dest.z });
+                dest.pop++;
+                extraMales--;
+            }
+            while (extraFemales > 0) {
+                const dest = camps[extraIndex++ % camps.length];
+                const age = ageLo + Math.floor(rng() * (ageHi - ageLo + 1));
+                plan.push({ name: personName(rng, f.species, "female", usedPeople), gender: "female", age, leader: false, site: dest.id, z: dest.z });
+                dest.pop++;
+                extraFemales--;
+            }
+            const leader = Math.floor(rng() * plan.length);
+            if (plan[leader]) {
+                plan[leader].leader = true;
+                plan[leader].title = titles[Math.floor(rng() * titles.length)];
+            }
+            founders[f.id] = { site: site.id, sites: camps.map(s => s.id), families, plan, units: [] };
             const lead = plan[leader];
             if (lead) rulers[f.id] = [{ name: lead.name, title: lead.title, from: 1, to: null, unitId: null }];
             f.population = count;
@@ -1314,11 +1396,11 @@
             return !Tilemap.isTileA1(tile) && W.getTile(area.x, area.y, x, y, 5, levelOf(area)) !== 250; // any A1 autotile is water; region 250 is a peak
         };
         placeCamps(state);
-        const plainSheet = (species, gender) => {
-            const pair = cat.start && Array.isArray(cat.start.pair) ? cat.start.pair : null;
-            if (species !== "human" || !pair) return null; // the same rule as UF_Colonists' clothing tiers
-            const p = pair.find(e => e.gender === gender);
-            return p && Array.isArray(p.tiers) && p.tiers[0] ? imageSpec(p.tiers[0]) : null;
+        const plainSheet = (species, gender, varIndex = 1) => {
+            if (species !== "human") return null;
+            const v = Math.max(1, Math.min(6, varIndex | 0 || 1));
+            const prefix = gender === "female" ? "$UF_Human_Female" : "$UF_Human_Male";
+            return imageSpec(`${prefix}_${v}_Walk`);
         };
         // Cells for each faction first (before any unit exists, so founders never take each other's cells).
         const queues = [];
@@ -1363,10 +1445,11 @@
             }
             const sp = people[f.species] || {};
             const images = Array.isArray(sp.images) && sp.images.length ? sp.images : [""];
-            slots.forEach(s => {
+            slots.forEach((s, idx) => {
                 const i = rec.plan.indexOf(s.p);
-                const plain = plainSheet(f.species, s.p.gender);
-                queues.push({ f, site, rec, p: s.p, cell: { x: s.x, y: s.y }, dir: s.dir, ring: s.ring, within: true, image: plain || imageSpec(images[i % images.length]), tint: plain ? null : sp.tint, player: f.id === playerId });
+                const varIndex = 1 + (idx % 6);
+                const plain = plainSheet(f.species, s.p.gender, varIndex);
+                queues.push({ f, site, rec, p: s.p, cell: { x: s.x, y: s.y }, dir: s.dir, ring: s.ring, within: true, image: plain || imageSpec(images[i % images.length]), tint: plain ? null : sp.tint, player: f.id === playerId, variation: varIndex });
             });
             }
         }
@@ -1395,7 +1478,11 @@
             const { f, site, rec, p } = q;
             const data = {
                 kind: "person", faction: f.id, species: f.species, ai: "wander", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
-                founder: true, born: 1 - p.age, age: p.age, stage: stageOf(p.age), gender: p.gender, rank: p.leader ? 1 : 0, superior: null
+                founder: true, born: 1 - p.age, age: p.age, stage: stageOf(p.age), gender: p.gender, rank: p.leader ? 1 : 0, superior: null,
+                variation: q.variation,
+                familyId: p.familyId || null, lineageId: p.lineageId || null, surname: p.surname || null,
+                generation: 1, parents: [], motherId: null, fatherId: null, genetics: null,
+                willingToPartner: true, familyDesire: true
             };
             if (p.leader && p.title) data.title = p.title;
             if (q.tint) data.tint = q.tint;
@@ -1410,8 +1497,75 @@
             out.push(u);
         }
         for (const u of out) if (u.data.rank === 0) u.data.superior = leaders[u.data.faction] || null;
+        History.pairFounders(state, out);
         return out;
     }
+
+    const SALT_PAIRBOND = 0x5a17;
+    History.pairFounders = function(state, liveUnits) {
+        const W = window.UF && UF.World;
+        const st = state || (W && W.state);
+        if (!st || !st.history || !st.factions || !st.factions.list) return [];
+        const units = Array.isArray(liveUnits) ? liveUnits : (W && W.units ? W.units() : []);
+        const founders = units.filter(u => u && u.data && u.data.founder);
+        const pairs = [];
+        for (const f of st.factions.list) {
+            const rec = st.history.founders && st.history.founders[f.id];
+            const facFamilies = (rec && rec.families) || f.families || [];
+            const facUnits = founders.filter(u => u.data.faction === f.id);
+            const sites = [...new Set(facUnits.map(u => u.data.site))];
+            let famCursor = 0;
+            for (const siteId of sites) {
+                const siteUnits = facUnits.filter(u => u.data.site === siteId);
+                const males = siteUnits.filter(u => u.data.gender === "male");
+                const females = siteUnits.filter(u => u.data.gender === "female");
+                const pairRng = mulberry32(hash32(st.seed, SALT_PAIRBOND, f.id, siteId));
+                for (let i = males.length - 1; i > 0; i--) {
+                    const j = Math.floor(pairRng() * (i + 1));
+                    [males[i], males[j]] = [males[j], males[i]];
+                }
+                for (let i = females.length - 1; i > 0; i--) {
+                    const j = Math.floor(pairRng() * (i + 1));
+                    [females[i], females[j]] = [females[j], females[i]];
+                }
+                const count = Math.min(males.length, females.length);
+                for (let i = 0; i < count; i++) {
+                    const m = males[i];
+                    const w = females[i];
+                    const fam = facFamilies[famCursor++] || {
+                        id: `${f.id}_fam_${pairs.length + 1}`,
+                        lineageId: `${f.id}_lin_${pairs.length + 1}`,
+                        surname: m.data.surname || w.data.surname || "Founder"
+                    };
+                    m.data.partnerId = w.id;
+                    m.data.partner = w.id;
+                    m.data.partnerName = w.name;
+                    w.data.partnerId = m.id;
+                    w.data.partner = m.id;
+                    w.data.partnerName = m.name;
+                    m.data.familyId = fam.id;
+                    w.data.familyId = fam.id;
+                    m.data.lineageId = fam.lineageId;
+                    w.data.lineageId = fam.lineageId;
+                    m.data.surname = fam.surname;
+                    w.data.surname = fam.surname;
+                    m.data.generation = 1;
+                    w.data.generation = 1;
+                    m.data.willingToPartner = true;
+                    w.data.willingToPartner = true;
+                    m.data.familyDesire = true;
+                    w.data.familyDesire = true;
+                    fam.members = [m.id, w.id];
+                    fam.pairbonded = true;
+                    pairs.push({ faction: f.id, siteId, familyId: fam.id, lineageId: fam.lineageId, surname: fam.surname, male: m, female: w });
+                }
+            }
+        }
+        if (window.UF && UF.Events && UF.Events.emit) {
+            UF.Events.emit("factions:pairbonded", pairs);
+        }
+        return pairs;
+    };
 
     /**
      * The older generator's people: at every living faction site of the state, a count within sites.peoplePerSite
@@ -1474,15 +1628,20 @@
                 const rank = i === 0 ? (rulerHere ? 2 : 1) : 0;
                 let age = drawAge(rank > 0);
                 if (rank === 2) age = Math.min(95, Math.max(age, h.years - ruler.from + 20 + Math.floor(rand() * 20)));
-                const stage = stageOf(age);
+                const gender = rand() < 0.5 ? "male" : "female";
+                const varIdx = 1 + Math.floor(rand() * 6);
                 const data = {
                     kind: "person", faction: f.id, species: f.species, ai: "wander", home: { x: site.x, y: site.y }, wander: radius + 2, site: site.id,
-                    born: h.years - age, age, stage, gender: rand() < 0.5 ? "male" : "female", rank, superior: null
+                    born: h.years - age, age, stage, gender, rank, superior: null,
+                    variation: varIdx
                 };
                 if (rank === 2) data.title = ruler.title;
-                if (sp.tint) data.tint = sp.tint;
+                if (sp.tint && f.species !== "human") data.tint = sp.tint;
+                const unitImg = f.species === "human"
+                    ? imageSpec(`${gender === "female" ? "$UF_Human_Female" : "$UF_Human_Male"}_${varIdx}_Walk`)
+                    : imageSpec(images[imageIndex++ % images.length]);
                 const u = W.addUnit({
-                    name: rank === 2 ? ruler.name : newName(), image: imageSpec(images[imageIndex++ % images.length]),
+                    name: rank === 2 ? ruler.name : newName(), image: unitImg,
                     area: { x: site.area.x, y: site.area.y }, x: site.x + cell.dx, y: site.y + cell.dy, dir: 2, data,
                     snapToFree: 8 // never inside a wall piece, a tree or water (user rule 2026-09-18); UF_World finds the nearest free cell
                 });
