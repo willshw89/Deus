@@ -201,3 +201,4 @@ const globalInfo = [
 const globalZip = pako.deflate(JSON.stringify(globalInfo), { to: "string", level: 1 });
 fs.writeFileSync(globalPath, globalZip, "utf8");
 console.log("Updated global.rmmzsave successfully.");
+

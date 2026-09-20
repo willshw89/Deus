@@ -1,5 +1,7 @@
 {
   "id": "salt",
+  "name": "Salt Water (Golden Beach Sand)",
+  "terrainBorder": "Golden Beach Sand",
   "frameWidth": 96,
   "frameHeight": 144,
   "anchor": [
@@ -23,5 +25,7 @@
   "slot": [
     0,
     432
-  ]
+  ],
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Rounded Natural Shorelines HD"
 }

@@ -77,3 +77,4 @@ $sorted = $boxes | Sort-Object Y, X
 foreach ($b in $sorted) {
     Write-Host "x=$($b.X), y=$($b.Y), w=$($b.Width), h=$($b.Height)"
 }
+

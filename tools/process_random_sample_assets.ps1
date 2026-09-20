@@ -234,3 +234,4 @@ $showcase8x.Dispose()
 
 $gallery.Dispose()
 Write-Host "Batch process completed cleanly."
+

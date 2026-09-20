@@ -39,3 +39,4 @@ sheets.forEach((s, idx) => {
 const outPath = path.join(REVIEW_DIR, 'walk_cycle_direction_verified_montage.png');
 writePNG(outPath, totalW, totalH, composite);
 console.log('Saved verified walk montage to:', outPath);
+

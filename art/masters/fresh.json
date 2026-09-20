@@ -1,5 +1,7 @@
 {
   "id": "fresh",
+  "name": "Fresh Water (Meadow Grass Shore)",
+  "terrainBorder": "Meadow Grass",
   "frameWidth": 96,
   "frameHeight": 144,
   "anchor": [
@@ -23,5 +25,7 @@
   "slot": [
     0,
     0
-  ]
+  ],
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Rounded Natural Shorelines HD"
 }

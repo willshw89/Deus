@@ -1,5 +1,7 @@
 {
   "id": "swamp",
+  "name": "Swamp Water (Dark Peat Mire)",
+  "terrainBorder": "Swamp Mud",
   "frameWidth": 96,
   "frameHeight": 144,
   "anchor": [
@@ -18,10 +20,12 @@
     ]
   },
   "layer": "water",
-  "kind": 3,
-  "tileId": 2192,
+  "kind": 6,
+  "tileId": 2336,
   "slot": [
-    288,
+    384,
     144
-  ]
+  ],
+  "generator": "Google Nano Banana Pro (gemini-3-pro-image)",
+  "standard": "Rounded Natural Shorelines HD"
 }

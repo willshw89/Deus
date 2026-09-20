@@ -5147,7 +5147,7 @@
   "sidecar": false,
   "statusWhy": "not in 8e5fdc1"
  },
- "img/pictures/UF_Menu_default.png": {
+ "img/system/Cursor_default.png": {
   "status": "original",
   "request": "none yet",
   "requests": [],
@@ -5156,7 +5156,7 @@
   ],
   "states": [],
   "category": "ui",
-  "file": "img/pictures/UF_Menu_default.png",
+  "file": "img/system/Cursor_default.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "not in 8e5fdc1"

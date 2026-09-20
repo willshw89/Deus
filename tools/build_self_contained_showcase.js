@@ -133,3 +133,4 @@ ${suiteData.map((s, idx) => `
 const widgetPath = path.join(BRAIN_DIR, 'human_male_showcase_widget.html');
 fs.writeFileSync(widgetPath, html);
 console.log('Saved self-contained showcase widget to:', widgetPath);
+
