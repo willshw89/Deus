@@ -6,7 +6,23 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
 
 ## In progress
-- None (132 unique faction face sets delivered, awaiting user review)
+- None (world objects and inventory icons generated with Nano Banana II delivered)
+
+## World Objects & Inventory Icons Generation via Nano Banana II (AR-020, AR-021, AR-023, V69, V70, V79) — 2026-09-19 (Gemini)
+
+Delivered per user directive ("Make sure youre generating everything with nano banana II"):
+- **Authentic Google Nano Banana II Generative Pixel Art (`generate_image`):**
+  - Generated original high-definition 16-bit SNES / Final Fantasy VI style assets using Google Nano Banana II (`generate_image`) with style anchors (`art/masters/oak.png`, `art/masters/berry_bush.png`, `art/masters/meadow.png`):
+    - **Fruit Tree (`fruit_tree`, `fruit_tree_bare`, AR-020)**: 2-square vertical 96×96 px mature fruit tree with lush foliage, gnarled trunk, and ripe red apples (`art/raw/fruit_tree_nano_banana_raw.jpg`, `art/masters/fruit_tree.png`). Picking interaction produces `fruit_tree_bare` with matching canopy silhouette. Packaged into drop-in 3×4 animated RMMZ character sheets `game/img/characters/!$UF_Fruit_Tree.png` and `!$UF_Fruit_Tree_Bare.png` with valid JSON sidecars.
+    - **Naturally Animated Swaying Plants & Reeds (`reeds`, `wildflowers`, AR-021, AR-023)**: 3-frame natural wind-swaying animation (Frame 0: sway left, Frame 1: upright rest, Frame 2: sway right) extracted from Nano Banana II generation (`art/raw/plants_sway_nano_banana_raw.jpg`), delivered to `game/img/characters/!$UF_Reeds.png`, `!$UF_Wildflowers.png`, and `art/masters/`.
+    - **16 Authentic Inventory Icons**: 16 distinct inventory items generated in 4×4 grid on flat magenta (`art/raw/inventory_icons_nano_banana_raw.jpg`) with warm golden beveled borders: log, dressed stone, rough granite stone, copper ore, gold ore, red apples, blueberries, wheat sheaf, medicinal herbs, wooden pickaxe, battleaxe, steel sword, hunting bow, campfire, crystal shard, and alchemy potion vial. Extracted to `art/masters/<id>_icon.png` (48×48 masters with valid sidecars and 32×32 icons) and packed into `game/img/system/IconSet.png`.
+- **Validation & Quality Gate:**
+  - `tools/art_check.js --native --sidecar`: PASS (0 failures; 100% binary alpha 0/255, 28 colors <= 32 on `art/palette/uf.hex`, correct 48px/96px grid dimensions and sidecars).
+  - `tools/originality_check.js`: PASS (all distances 0.482 to 0.568 >= 0.28 vs 19,431 indexed U7 shapes, 0 FAIL, 0 WARN).
+  - `tools/run_tests.js smoke`: PASS (13/13 checks pass, exit 0, 0 console errors).
+  - Rule 5 Inspection:
+    - `art/review/nano_banana_world_objects_showcase.png`: Visually verified fruit trees (full & bare), 3-frame swaying plants, and 16 golden-bezeled inventory icons on clean midnight slate background.
+    - `game/test_output/smoke.map.png`: Live in-engine screenshot verifying fruit tree, campfire, and colonists rendering cleanly on the active world map.
 
 ## Complete Faction Face Sets Suite (132 Unique Faces across 11 Factions) — 2026-09-19
 

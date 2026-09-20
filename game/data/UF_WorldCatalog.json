@@ -2134,7 +2134,8 @@
         "fire",
         "light",
         "heat",
-        "workplace"
+        "workplace",
+        "lit"
       ],
       "build": {
         "items": {

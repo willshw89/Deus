@@ -1,10 +1,10 @@
 {
   "id": "log_icon",
-  "frameWidth": 32,
-  "frameHeight": 32,
+  "frameWidth": 48,
+  "frameHeight": 48,
   "anchor": [
-    16,
-    31
+    24,
+    47
   ],
   "footprint": [
     1,
@@ -18,8 +18,6 @@
       0
     ]
   },
-  "frameMs": 150,
-  "layer": "icon",
-  "species": null,
-  "stage": null
+  "generator": "Google Nano Banana 2",
+  "standard": "Final Fantasy VI 16-bit HD"
 }
