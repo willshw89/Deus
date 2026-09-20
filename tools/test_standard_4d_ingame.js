@@ -93,41 +93,18 @@ const showcaseCode = `
         const cx = px;
         const cy = py;
 
-        // Row 0: Adult Male 4D Walkers & Actions (y = cy - 2)
-        addShowcaseUnit("Elf 4D Male Walk S",   "$UF_Elf_Male_Walk",   cx - 5, cy - 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Male Walk W",   "$UF_Elf_Male_Walk",   cx - 4, cy - 2, 4, 1, true);
-        addShowcaseUnit("Elf 4D Male Walk E",   "$UF_Elf_Male_Walk",   cx - 3, cy - 2, 6, 1, true);
-        addShowcaseUnit("Elf 4D Male Walk N",   "$UF_Elf_Male_Walk",   cx - 2, cy - 2, 8, 1, true);
-        addShowcaseUnit("Elf 4D Male Haul S",   "$UF_Elf_Male_Haul",   cx + 0, cy - 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Male Attack S", "$UF_Elf_Male_Attack", cx + 1, cy - 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Male Bow W",     "$UF_Elf_Male_Bow",    cx + 2, cy - 2, 4, 1, false);
-        addShowcaseUnit("Elf 4D Male Magic N",   "$UF_Elf_Male_Magic",  cx + 3, cy - 2, 8, 1, true);
-        addShowcaseUnit("Elf 4D Male Work S",    "$UF_Elf_Male_Work",   cx + 4, cy - 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Male Downed S",  "$UF_Elf_Male_Downed", cx + 5, cy - 2, 2, 2, false);
-
-        // Row 1: Adult Female Formations (y = cy)
-        addShowcaseUnit("Elf 4D Fem Walk S",   "$UF_Elf_Female_Walk",   cx - 5, cy, 2, 1, true);
-        addShowcaseUnit("Elf 4D Fem Walk W",   "$UF_Elf_Female_Walk",   cx - 4, cy, 4, 1, true);
-        addShowcaseUnit("Elf 4D Fem Walk E",   "$UF_Elf_Female_Walk",   cx - 3, cy, 6, 1, true);
-        addShowcaseUnit("Elf 4D Fem Walk N",   "$UF_Elf_Female_Walk",   cx - 2, cy, 8, 1, true);
-        addShowcaseUnit("Elf 4D Fem Haul S",   "$UF_Elf_Female_Haul",   cx + 0, cy, 2, 1, true);
-        addShowcaseUnit("Elf 4D Fem Attack S", "$UF_Elf_Female_Attack", cx + 1, cy, 2, 1, true);
-        addShowcaseUnit("Elf 4D Fem Bow W",     "$UF_Elf_Female_Bow",    cx + 2, cy, 4, 1, false);
-        addShowcaseUnit("Elf 4D Fem Magic N",   "$UF_Elf_Female_Magic",  cx + 3, cy, 8, 1, true);
-        addShowcaseUnit("Elf 4D Fem Work S",    "$UF_Elf_Female_Work",   cx + 4, cy, 2, 1, true);
-        addShowcaseUnit("Elf 4D Fem Downed S",  "$UF_Elf_Female_Downed", cx + 5, cy, 2, 2, false);
-
-        // Row 2: Elf Child Formations (y = cy + 2)
-        addShowcaseUnit("Elf 4D Kid Walk S",   "$UF_Elf_Child_Walk",   cx - 5, cy + 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Kid Walk W",   "$UF_Elf_Child_Walk",   cx - 4, cy + 2, 4, 1, true);
-        addShowcaseUnit("Elf 4D Kid Walk E",   "$UF_Elf_Child_Walk",   cx - 3, cy + 2, 6, 1, true);
-        addShowcaseUnit("Elf 4D Kid Walk N",   "$UF_Elf_Child_Walk",   cx - 2, cy + 2, 8, 1, true);
-        addShowcaseUnit("Elf 4D Kid Haul S",   "$UF_Elf_Child_Haul",   cx + 0, cy + 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Kid Attack S", "$UF_Elf_Child_Attack", cx + 1, cy + 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Kid Bow W",     "$UF_Elf_Child_Bow",    cx + 2, cy + 2, 4, 1, false);
-        addShowcaseUnit("Elf 4D Kid Magic N",   "$UF_Elf_Child_Magic",  cx + 3, cy + 2, 8, 1, true);
-        addShowcaseUnit("Elf 4D Kid Work S",    "$UF_Elf_Child_Work",   cx + 4, cy + 2, 2, 1, true);
-        addShowcaseUnit("Elf 4D Kid Downed S",  "$UF_Elf_Child_Downed", cx + 5, cy + 2, 2, 2, false);
+        // Center line: Adult Male Elf across 7 actions
+        addShowcaseUnit("Elf Male Walk S",   "$UF_Elf_Male_Walk",   cx - 5, cy, 2, 1, true);
+        addShowcaseUnit("Elf Male Walk W",   "$UF_Elf_Male_Walk",   cx - 4, cy, 4, 1, true);
+        addShowcaseUnit("Elf Male Walk E",   "$UF_Elf_Male_Walk",   cx - 3, cy, 6, 1, true);
+        addShowcaseUnit("Elf Male Walk N",   "$UF_Elf_Male_Walk",   cx - 2, cy, 8, 1, true);
+        addShowcaseUnit("Elf Male Haul S",   "$UF_Elf_Male_Haul",   cx - 1, cy, 2, 1, true);
+        addShowcaseUnit("Elf Male Attack S", "$UF_Elf_Male_Attack", cx + 0, cy, 2, 1, true);
+        addShowcaseUnit("Elf Male Bow W",     "$UF_Elf_Male_Bow",    cx + 1, cy, 4, 1, false);
+        addShowcaseUnit("Elf Male Magic S",   "$UF_Elf_Male_Magic",  cx + 2, cy, 2, 2, true);
+        addShowcaseUnit("Elf Male Magic N",   "$UF_Elf_Male_Magic",  cx + 3, cy, 8, 2, true);
+        addShowcaseUnit("Elf Male Work S",    "$UF_Elf_Male_Work",   cx + 4, cy, 2, 1, true);
+        addShowcaseUnit("Elf Male Downed S",  "$UF_Elf_Male_Downed", cx + 5, cy, 2, 2, false);
 
         if (window.UF && UF.Objects && typeof UF.Objects.refresh === 'function') {
             UF.Objects.refresh();
@@ -147,14 +124,14 @@ const showcaseCode = `
             UF.Camera.setLevel(0);
         }
         await t.waitFrames(40);
-        t.screenshot("standard_4d_live_closeup");
+        t.screenshot("elf_male_live_closeup");
 
         // Capture Zoom Level 1 (2x normal)
         if (window.UF && UF.Camera && typeof UF.Camera.setLevel === 'function') {
             UF.Camera.setLevel(1);
         }
         await t.waitFrames(30);
-        t.screenshot("standard_4d_live_normal");
+        t.screenshot("elf_male_live_normal");
 `;
 
 testCode = testCode.replace(targetHook, `${showcaseCode}\n        ${targetHook}`);
@@ -179,7 +156,7 @@ const snapOutDir = path.join(SNAPSHOT_DIR, 'test_output');
 if (fs.existsSync(snapOutDir)) {
     const files = fs.readdirSync(snapOutDir);
     for (const f of files) {
-        if (f.startsWith('smoke.standard_4d_live_') && f.endsWith('.png')) {
+        if ((f.startsWith('smoke.standard_4d_live_') || f.startsWith('smoke.elf_male_live_')) && f.endsWith('.png')) {
             const clean = f.replace('smoke.', '');
             const src = path.join(snapOutDir, f);
             fs.copyFileSync(src, path.join(REVIEW_DIR, clean));

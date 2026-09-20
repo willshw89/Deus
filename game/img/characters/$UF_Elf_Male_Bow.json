@@ -20,11 +20,15 @@
       0,
       1,
       2
+    ],
+    "pluck": [
+      2
     ]
   },
   "frameMs": 200,
-  "species": "Elf",
+  "species": "elf",
   "stage": "adult",
+  "gender": "male",
   "action": "Bow",
   "generator": "Google Nano Banana II (Rule V69/V70/V79)"
 }

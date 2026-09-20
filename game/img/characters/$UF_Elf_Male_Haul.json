@@ -30,8 +30,9 @@
     ]
   },
   "frameMs": 200,
-  "species": "Elf",
+  "species": "elf",
   "stage": "adult",
+  "gender": "male",
   "action": "Haul",
   "generator": "Google Nano Banana II (Rule V69/V70/V79)"
 }
