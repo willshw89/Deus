@@ -127,12 +127,16 @@
     }
     // Passability of the map on screen, read straight from $dataMap (hot path: pathfinding calls it a lot).
     function blocksAt(x, y) {
+        const map = window.$dataMap;
+        if (map && map.width && map.height) {
+            if ($gameMap && $gameMap.isLoopHorizontal()) x = ((x % map.width) + map.width) % map.width;
+            if ($gameMap && $gameMap.isLoopVertical()) y = ((y % map.height) + map.height) % map.height;
+        }
         const area = currentArea();
         if (area) {
             const t = typeIdIn(area, x, y);
             if (t !== 0) return table().blocks[t] === 1;
         }
-        const map = window.$dataMap;
         if (!map || !map.ufObjects || x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
         const t = map.ufObjects[y * map.width + x];
         return t !== 0 && table().blocks[t] === 1;
@@ -493,6 +497,8 @@
     }
 
     function isWallCell(grid, w, h, cx, cy, typeId) {
+        if ($gameMap && $gameMap.isLoopHorizontal()) cx = ((cx % w) + w) % w;
+        if ($gameMap && $gameMap.isLoopVertical()) cy = ((cy % h) + h) % h;
         if (cx < 0 || cy < 0 || cx >= w || cy >= h) return false;
         const tid = grid[cy * w + cx];
         if (!tid) return false;
@@ -637,14 +643,23 @@
         _rebuild(map, dx, dy, force) {
             const grid = map.ufObjects, w = map.width, h = map.height;
             const cols = Math.ceil($gameMap.screenTileX()) + 1, rows = Math.ceil($gameMap.screenTileY()) + 1;
-            const x0 = Math.max(0, dx - MARGIN), x1 = Math.min(w - 1, dx + cols + MARGIN);
-            const y0 = Math.max(0, dy - MARGIN - TALLEST_CELLS), y1 = Math.min(h - 1, dy + rows + MARGIN);
+            const loopH = $gameMap && $gameMap.isLoopHorizontal(), loopV = $gameMap && $gameMap.isLoopVertical();
+            const spanX = cols + 2 * MARGIN;
+            const spanY = rows + 2 * MARGIN + TALLEST_CELLS;
+            const startX = dx - MARGIN;
+            const startY = dy - MARGIN - TALLEST_CELLS;
             const list = table().list;
             const active = this._active, byCell = this._byCell;
             const stamp = ++this._stamp;
-            for (let y = y0; y <= y1; y++) {
+            for (let dyOff = 0; dyOff <= spanY; dyOff++) {
+                let y = startY + dyOff;
+                if (loopV) y = ((y % h) + h) % h;
+                else if (y < 0 || y >= h) continue;
                 const row = y * w;
-                for (let x = x0; x <= x1; x++) {
+                for (let dxOff = 0; dxOff <= spanX; dxOff++) {
+                    let x = startX + dxOff;
+                    if (loopH) x = ((x % w) + w) % w;
+                    else if (x < 0 || x >= w) continue;
                     const i = row + x;
                     const t = grid[i];
                     if (!t || t > list.length) continue;
@@ -731,16 +746,18 @@
             return true;
         }
 
-        // Every frame: follow the (fractional) display position, like Sprite_Character does. Areas never loop,
-        // so adjustX/Y are plain offsets, computed once.
+        // Every frame: follow the (fractional) display position, like Sprite_Character does.
         _place() {
             const active = this._active, list = table().list;
-            const offX = $gameMap.adjustX(0), offY = $gameMap.adjustY(0);
+            const loopH = $gameMap && $gameMap.isLoopHorizontal(), loopV = $gameMap && $gameMap.isLoopVertical();
+            const offX = loopH ? 0 : ($gameMap ? $gameMap.adjustX(0) : 0);
+            const offY = loopV ? 0 : ($gameMap ? $gameMap.adjustY(0) : 0);
             for (let i = 0; i < active.length; i++) {
                 const s = active[i];
                 if (!s._ufReady && !this._tryFrame(s, list[s._ufType - 1])) continue;
-                const ay = s._ufY + offY;
-                s.x = Math.round((s._ufX + offX + 0.5) * TILE);
+                const ax = loopH ? $gameMap.adjustX(s._ufX) : (s._ufX + offX);
+                const ay = loopV ? $gameMap.adjustY(s._ufY) : (s._ufY + offY);
+                s.x = Math.round((ax + 0.5) * TILE);
                 s.y = Math.round((ay + 1) * TILE);
                 s.z = Math.max(MIN_Z, Math.round(ay * TILE + TILE) + s._ufBonus);
             }

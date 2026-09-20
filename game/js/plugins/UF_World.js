@@ -464,8 +464,8 @@
             bgm: { name: "", pan: 0, pitch: 100, volume: 90 }, bgs: { name: "", pan: 0, pitch: 100, volume: 90 },
             disableDashing: false, displayName: "", encounterList: [], encounterStep: 30,
             width: size, height: size, note: "",
-            parallaxLoopX: false, parallaxLoopY: false, parallaxName: "", parallaxShow: false, parallaxSx: 0, parallaxSy: 0,
-            scrollType: 0, specifyBattleback: false, tilesetId: CONFIG.tilesetId,
+            parallaxLoopX: true, parallaxLoopY: true, parallaxName: "", parallaxShow: false, parallaxSx: 0, parallaxSy: 0,
+            scrollType: 3, specifyBattleback: false, tilesetId: CONFIG.tilesetId,
             data, events, ufArea: { x: ax, y: ay, z }, ufObjects: objects
         };
 
@@ -1044,18 +1044,49 @@
 
     function wrapStep(pos, dx, dy) {
         const size = World.state.size;
+        const areasX = World.state.areasX || 1;
+        const areasY = World.state.areasY || 1;
         let x = pos.x + dx, y = pos.y + dy, ax = pos.area.x, ay = pos.area.y;
-        if (x < 0) { ax--; x += size; } else if (x >= size) { ax++; x -= size; }
-        if (y < 0) { ay--; y += size; } else if (y >= size) { ay++; y -= size; }
-        return { ax, ay, x, y, crossed: ax !== pos.area.x || ay !== pos.area.y };
+        if (x < 0) {
+            ax--;
+            x += size;
+            if (ax < 0) ax = areasX - 1;
+        } else if (x >= size) {
+            ax++;
+            x -= size;
+            if (ax >= areasX) ax = 0;
+        }
+        if (y < 0) {
+            ay--;
+            y += size;
+            if (ay < 0) ay = areasY - 1;
+        } else if (y >= size) {
+            ay++;
+            y -= size;
+            if (ay >= areasY) ay = 0;
+        }
+        const crossed = ax !== pos.area.x || ay !== pos.area.y;
+        return { ax, ay, x, y, crossed };
     }
 
     function goalDelta(u) {
         const size = World.state.size;
+        const areasX = World.state.areasX || 1;
+        const areasY = World.state.areasY || 1;
+        const totalW = size * areasX;
+        const totalH = size * areasY;
         const gx = u.goal.area.x * size + u.goal.x, gy = u.goal.area.y * size + u.goal.y;
         const cx = u.area.x * size + u.x, cy = u.area.y * size + u.y;
-        const step = stepToward(gx - cx, gy - cy);
-        return { dx: step.dx, dy: step.dy, dist: Math.max(Math.abs(gx - cx), Math.abs(gy - cy)) };
+        let ddx = gx - cx;
+        let ddy = gy - cy;
+        if (Math.abs(ddx) > totalW / 2) {
+            ddx = ddx > 0 ? ddx - totalW : ddx + totalW;
+        }
+        if (Math.abs(ddy) > totalH / 2) {
+            ddy = ddy > 0 ? ddy - totalH : ddy + totalH;
+        }
+        const step = stepToward(ddx, ddy);
+        return { dx: step.dx, dy: step.dy, dist: Math.max(Math.abs(ddx), Math.abs(ddy)) };
     }
 
     function arrive(u) {
@@ -1465,15 +1496,15 @@
             let top = 0;
             stack[top++] = s;
             while (top > 0) {
-                const i = stack[--top], e = eff[i], x = i % size;
-                let j = i + size;
-                if ((e & BIT_DOWN) && j < n && region[j] === 0 && (eff[j] & BIT_UP)) { region[j] = label; stack[top++] = j; }
-                j = i - size;
-                if ((e & BIT_UP) && j >= 0 && region[j] === 0 && (eff[j] & BIT_DOWN)) { region[j] = label; stack[top++] = j; }
-                j = i - 1;
-                if ((e & BIT_LEFT) && x > 0 && region[j] === 0 && (eff[j] & BIT_RIGHT)) { region[j] = label; stack[top++] = j; }
-                j = i + 1;
-                if ((e & BIT_RIGHT) && x < size - 1 && region[j] === 0 && (eff[j] & BIT_LEFT)) { region[j] = label; stack[top++] = j; }
+                const i = stack[--top], e = eff[i], x = i % size, y = (i - x) / size;
+                let j = (y < size - 1) ? (i + size) : (i + size - n);
+                if ((e & BIT_DOWN) && region[j] === 0 && (eff[j] & BIT_UP)) { region[j] = label; stack[top++] = j; }
+                j = (y > 0) ? (i - size) : (i - size + n);
+                if ((e & BIT_UP) && region[j] === 0 && (eff[j] & BIT_DOWN)) { region[j] = label; stack[top++] = j; }
+                j = (x > 0) ? (i - 1) : (i - 1 + size);
+                if ((e & BIT_LEFT) && region[j] === 0 && (eff[j] & BIT_RIGHT)) { region[j] = label; stack[top++] = j; }
+                j = (x < size - 1) ? (i + 1) : (i + 1 - size);
+                if ((e & BIT_RIGHT) && region[j] === 0 && (eff[j] & BIT_LEFT)) { region[j] = label; stack[top++] = j; }
             }
         }
         g.region = region;
@@ -1568,15 +1599,14 @@
             if (opts.resolveBlocked === false) return done("goal blocked");
             hOff = eight ? DIAG_COST : STEP_COST;
             goals = [];
-            if (gy + 1 < size) goals.push(goalCell + size);
-            if (gy > 0) goals.push(goalCell - size);
-            if (gx > 0) goals.push(goalCell - 1);
-            if (gx + 1 < size) goals.push(goalCell + 1);
+            goals.push(((gy + 1) % size) * size + gx);
+            goals.push(((gy - 1 + size) % size) * size + gx);
+            goals.push(gy * size + ((gx - 1 + size) % size));
+            goals.push(gy * size + ((gx + 1) % size));
             goals = goals.filter(enterable);
             if (eight) {
                 for (const [dx, dy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
-                    const x = gx + dx, y = gy + dy;
-                    if (x < 0 || y < 0 || x >= size || y >= size) continue;
+                    const x = (gx + dx + size) % size, y = (gy + dy + size) % size;
                     const c = y * size + x;
                     if (enterable(c) && enterable(gy * size + x) && enterable(y * size + gx)) goals.push(c);
                 }
@@ -1600,11 +1630,18 @@
         const G = AS.g, P = AS.parent, seen = AS.seen, closed = AS.closed, goalMark = AS.goal, hc = AS.heapCell, hk = AS.heapKey;
         for (const c of goals) goalMark[c] = gen;
         const hOf = eight ? i => {
-            const x = i % size, ax = Math.abs(x - gx), ay = Math.abs((i - x) / size - gy);
+            const x = i % size, y = (i - x) / size;
+            let ax = Math.abs(x - gx), ay = Math.abs(y - gy);
+            if (ax > size / 2) ax = size - ax;
+            if (ay > size / 2) ay = size - ay;
             const d = STEP_COST * (ax + ay) - (2 * STEP_COST - DIAG_COST) * (ax < ay ? ax : ay) - hOff; // octile
             return d > 0 ? d : 0;
         } : i => {
-            const x = i % size, d = STEP_COST * (Math.abs(x - gx) + Math.abs((i - x) / size - gy)) - hOff;
+            const x = i % size, y = (i - x) / size;
+            let ax = Math.abs(x - gx), ay = Math.abs(y - gy);
+            if (ax > size / 2) ax = size - ax;
+            if (ay > size / 2) ay = size - ay;
+            const d = STEP_COST * (ax + ay) - hOff;
             return d > 0 ? d : 0;
         };
         let hn = 0;
@@ -1683,20 +1720,27 @@
                 best = i;
                 bestH = hi;
             }
-            const e = eff[i], x = i % size;
+            const e = eff[i], x = i % size, y = (i - x) / size;
             from = i;
             gi = G[i] + STEP_COST;
-            if ((e & BIT_DOWN) && i + size < n) relax(i + size, BIT_UP);
-            if ((e & BIT_UP) && i >= size) relax(i - size, BIT_DOWN);
-            if ((e & BIT_LEFT) && x > 0) relax(i - 1, BIT_RIGHT);
-            if ((e & BIT_RIGHT) && x < size - 1) relax(i + 1, BIT_LEFT);
+            const yDown = y < size - 1 ? y + 1 : 0;
+            const yUp = y > 0 ? y - 1 : size - 1;
+            const xLeft = x > 0 ? x - 1 : size - 1;
+            const xRight = x < size - 1 ? x + 1 : 0;
+            const aDown = yDown * size + x;
+            const aUp = yUp * size + x;
+            const bLeft = y * size + xLeft;
+            const bRight = y * size + xRight;
+            if (e & BIT_DOWN) relax(aDown, BIT_UP);
+            if (e & BIT_UP) relax(aUp, BIT_DOWN);
+            if (e & BIT_LEFT) relax(bLeft, BIT_RIGHT);
+            if (e & BIT_RIGHT) relax(bRight, BIT_LEFT);
             if (eight) {
                 gi = G[i] + DIAG_COST;
-                const down = i + size < n, up = i >= size, left = x > 0, right = x < size - 1;
-                if (down && left) relaxDiag(i + size - 1, i + size, i - 1, BIT_DOWN, BIT_UP, BIT_LEFT, BIT_RIGHT);
-                if (down && right) relaxDiag(i + size + 1, i + size, i + 1, BIT_DOWN, BIT_UP, BIT_RIGHT, BIT_LEFT);
-                if (up && left) relaxDiag(i - size - 1, i - size, i - 1, BIT_UP, BIT_DOWN, BIT_LEFT, BIT_RIGHT);
-                if (up && right) relaxDiag(i - size + 1, i - size, i + 1, BIT_UP, BIT_DOWN, BIT_RIGHT, BIT_LEFT);
+                relaxDiag(yDown * size + xLeft, aDown, bLeft, BIT_DOWN, BIT_UP, BIT_LEFT, BIT_RIGHT);
+                relaxDiag(yDown * size + xRight, aDown, bRight, BIT_DOWN, BIT_UP, BIT_RIGHT, BIT_LEFT);
+                relaxDiag(yUp * size + xLeft, aUp, bLeft, BIT_UP, BIT_DOWN, BIT_LEFT, BIT_RIGHT);
+                relaxDiag(yUp * size + xRight, aUp, bRight, BIT_UP, BIT_DOWN, BIT_RIGHT, BIT_LEFT);
             }
         }
         res.expanded = expanded;
@@ -1795,7 +1839,12 @@
     // The direction (numpad 1-9) of a one-cell step, 0 when (nx, ny) isn't next to (x, y).
     const DIR_OF = [7, 8, 9, 4, 0, 6, 1, 2, 3]; // by (dy + 1) * 3 + (dx + 1)
     const dirTo = (x, y, nx, ny) => {
-        const dx = nx - x, dy = ny - y;
+        let dx = nx - x, dy = ny - y;
+        const size = (World.state && World.state.size) || 256;
+        if (dx === -(size - 1)) dx = 1;
+        else if (dx === size - 1) dx = -1;
+        if (dy === -(size - 1)) dy = 1;
+        else if (dy === size - 1) dy = -1;
         return dx < -1 || dx > 1 || dy < -1 || dy > 1 ? 0 : DIR_OF[(dy + 1) * 3 + dx + 1];
     };
     const isDiag = d => d === 1 || d === 3 || d === 7 || d === 9;
@@ -1811,7 +1860,10 @@
         const cells = [i, j];
         if (isDiag(d)) {
             const h = d === 1 || d === 7 ? 4 : 6, v = d === 1 || d === 3 ? 2 : 8;
-            const a = i + (v === 2 ? size : -size), b = i + (h === 6 ? 1 : -1);
+            const x = i % size, y = (i - x) / size;
+            const y_v = v === 2 ? (y < size - 1 ? y + 1 : 0) : (y > 0 ? y - 1 : size - 1);
+            const x_h = h === 6 ? (x < size - 1 ? x + 1 : 0) : (x > 0 ? x - 1 : size - 1);
+            const a = y_v * size + x, b = y * size + x_h;
             if ((eff[i] & BIT_OUT[v]) === 0 || (eff[a] & BIT_IN[v]) === 0 || (eff[a] & BIT_OUT[h]) === 0 || (eff[j] & BIT_IN[h]) === 0 ||
                 (eff[i] & BIT_OUT[h]) === 0 || (eff[b] & BIT_IN[h]) === 0 || (eff[b] & BIT_OUT[v]) === 0 || (eff[j] & BIT_IN[v]) === 0) return false;
             cells.push(a, b);
@@ -1997,11 +2049,22 @@
     function tryViewEdge(player, dx, dy) {
         const view = World.viewLevel();
         if (!view || player.isTransferring()) return false;
+        if ($gameMap && ($gameMap.isLoopHorizontal() || $gameMap.isLoopVertical())) {
+            const size = World.state.size;
+            const nx = player.x + dx, ny = player.y + dy;
+            const wrapsX = $gameMap.isLoopHorizontal() && (nx < 0 || nx >= size);
+            const wrapsY = $gameMap.isLoopVertical() && (ny < 0 || ny >= size);
+            if (wrapsX || wrapsY) {
+                const areasX = World.state.areasX || 1, areasY = World.state.areasY || 1;
+                if ((!wrapsX || areasX === 1) && (!wrapsY || areasY === 1)) return false;
+            }
+        }
         const size = World.state.size;
         const nx = player.x + dx, ny = player.y + dy;
         if (nx >= 0 && ny >= 0 && nx < size && ny < size) return false;
         const w = wrapStep({ area: view, x: player.x, y: player.y }, dx, dy);
         if (!World.inWorld(w.ax, w.ay, view.z)) return false;
+        if (w.ax === view.x && w.ay === view.y) return false;
         return World.transferView(w.ax, w.ay, w.x, w.y, undefined, view.z);
     }
 
@@ -2360,7 +2423,8 @@
         }
         const cellOf = (x, y) => y * size + x;
         const xyOf = c => ({ x: c % size, y: (c - (c % size)) / size });
-        const blocksHere = (x, y) => O.blocks(x, y) || (Tilemap.isWaterTile($gameMap.tileId(x, y, 0)) && !(window.UF.Roads && UF.Roads.bridgeAt && UF.Roads.bridgeAt(x, y)));
+        const isDoor = (x, y) => window.UF && UF.Doors && UF.Doors.isDoorType && UF.Doors.isDoorType(O.at(x, y));
+        const blocksHere = (x, y) => (O.blocks(x, y) && !isDoor(x, y)) || (Tilemap.isWaterTile($gameMap.tileId(x, y, 0)) && !(window.UF.Roads && UF.Roads.bridgeAt && UF.Roads.bridgeAt(x, y)));
         const kindOf = u => (u.data && u.data.kind ? u.data.kind + (u.data.species ? "/" + u.data.species : "") : "?");
 
         // Watch every unit on screen from here on (at least 60 s): its steps, and steps by walkers (units without
@@ -3239,11 +3303,18 @@
                 t.check("view_returns", sameArea(W.currentArea(), area) && $gamePlayer.x === size - 1 && $gamePlayer.y === row,
                     `area ${JSON.stringify(W.currentArea())}, view at (${$gamePlayer.x},${$gamePlayer.y})`);
             } else {
-                // One area: the view stops at the edge instead of leaving the world.
+                // One area: round world wraps from east edge to west edge.
                 $gamePlayer.locate(size - 1, row);
                 $gamePlayer.moveStraight(6);
                 await t.waitFrames(10);
-                t.check("view_stays_in_world", sameArea(W.currentArea(), area) && $gamePlayer.x === size - 1, `view at (${$gamePlayer.x},${$gamePlayer.y}) after pushing east at the edge`);
+                const wantX = ($gameMap && $gameMap.isLoopHorizontal()) ? 0 : size - 1;
+                t.check("view_wraps_in_round_world", sameArea(W.currentArea(), area) && $gamePlayer.x === wantX, `view at (${$gamePlayer.x},${$gamePlayer.y}) after stepping east at the edge (expected ${wantX})`);
+                t.screenshot("round_seam_wrap");
+                if ($gameMap && $gameMap.isLoopHorizontal()) {
+                    $gamePlayer.moveStraight(4);
+                    await t.waitFrames(10);
+                    t.check("view_wraps_back_west", sameArea(W.currentArea(), area) && $gamePlayer.x === size - 1, `view returned to (${$gamePlayer.x},${$gamePlayer.y}) after stepping west from 0`);
+                }
             }
             t.check("diff_persists", $dataMap.data[idx] === changed && $dataMap.ufObjects[oy * size + ox] === 7,
                 `tile (${tx},${ty}) is ${$dataMap.data[idx]} (expected ${changed}) and object (${ox},${oy}) is ${$dataMap.ufObjects[oy * size + ox]} (expected 7) after leaving and returning`);

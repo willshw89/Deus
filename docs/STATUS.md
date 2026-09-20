@@ -5,6 +5,42 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 **Last updated:** 2026-09-20
 **Current slice:** Slice 0 (IN PROGRESS since 2026-09-18)
+## Round / Toroidal World & Seamless Seam Wrapping — 2026-09-20 (Gemini)
+Delivered per user directive ("make the world round. I want to be able to talk [walk] from the right side of the map onto the left, vice verse, north and south and well"):
+- **Fully Round / Toroidal World Navigation (`UF_World.js`)**:
+  - `scrollType: 3` (`Loop Both`) enabled on all generated world maps, activating RMMZ's native `isLoopHorizontal()` and `isLoopVertical()`.
+  - Player character ($gamePlayer) seamlessly steps across borders in all 8 directions:
+    - East edge (`x = 255`) to West edge (`x = 0`) and vice-versa.
+    - North edge (`y = 0`) to South edge (`y = 255`) and vice-versa.
+    - Corners wrap diagonally (e.g. `(255, 255) -> (0, 0)`).
+  - `wrapStep(pos, dx, dy)` wraps internal area coordinates modulo `st.size` for single-area worlds.
+  - `goalDelta(u)` computes the shortest toroidal delta across wrap boundaries (`if (Math.abs(dx) > size / 2) dx -= Math.sign(dx) * size;`).
+  - `tryViewEdge` updated so intra-area single-world seam crossings delegate directly to RMMZ's native looping rather than area transfer.
+- **Shortest Toroidal A* Pathfinding (`UF_World.js`)**:
+  - `regionsOf(g)` flood-fill wraps across all four borders, establishing continuous region connectivity.
+  - Octile heuristic `hOf(i)` updated with toroidal delta minimization along both X and Y axes.
+  - Blocked goal 4- and 8-neighbors wrapped modulo `size`.
+  - A* relaxation loop wraps cardinal (`yDown`, `yUp`, `xLeft`, `xRight`) and diagonal (`relaxDiag`) exploration across all borders.
+  - Direction calculation (`dirTo`) and step validation (`stepOpen`) correctly classify seam-spanning steps `-(size - 1) => 1` and `size - 1 => -1`.
+- **Seamless Object Passability and Multi-Layer Rendering (`UF_Objects.js`, `UF_Roads.js`)**:
+  - `UF_Objects.js: blocksAt(x, y)` and `isWallCell(x, y)` wrap coordinates modulo grid dimensions when looping.
+  - `Sprite_UFObjectLayer`:
+    - `_rebuild`: Iterates view cells wrapping modulo `w` and `h`, preventing missing or popped objects along seam lines.
+    - `_place`: Computes screen coordinates using `$gameMap.adjustX(s._ufX)` and `$gameMap.adjustY(s._ufY)`.
+  - `UF_Roads.js: bridgeAt(x, y)` wraps coordinates modulo map dimensions when looping.
+- **Automated Verification Evidence**:
+  - `node tools/test_round_world.js`: **13/13 PASS, 0 FAIL (exit 0)**:
+    - Verifies `scrollType: 3`, `Game_Map` looping flags, player E->W, W->E, S->N, N->S, SE corner diagonal, NW corner diagonal, shortest toroidal pathfinding (length 2 instead of 254), first step direction, unit `goalDelta`, and object blocks wrapping.
+    - Rule 4 mutant checks verified: `--mutate-scroll` (8 failures) and `--mutate-delta` (1 failure).
+  - `node tools/test_round_world_live.js`: **13/13 PASS, 0 FAIL (exit 0)** in NW.js live engine harness:
+    - Live screenshots captured and inspected:
+      - `live_round_world_at_east_edge.png`: Player ($U7_Ranger) standing on tile (255, 128) at East border facing East, with paired trees along the seam.
+      - `live_round_world_crossed_to_west.png`: Player stepping East across the border onto tile (0, 128) at West edge; terrain and objects render seamlessly.
+      - `live_round_world_at_north_edge.png`: Player standing on tile (128, 0) at North border facing North.
+      - `live_round_world_crossed_to_south.png`: Player stepping North across the border onto tile (128, 255) at South edge; water and land wrap seamlessly.
+  - `node tools/run_tests.js world`: **30/30 PASS, 0 FAIL (exit 0)**.
+  - `node tools/run_tests.js setup`: **43/43 PASS, 0 FAIL (exit 0)**.
+  - `node tools/test_z_floors.js`: **18/18 PASS, 0 FAIL (exit 0)**.
 
 ## Structure Roofing, Upper Z-Deck Walkable Surfaces & Founder Lifecycle — 2026-09-20 (Gemini)
 Delivered per user directives ("When a structure is complete with 4 walls, the spaces within are considered roofed, and on the next higher Z layer, there is a walkable surface area (that can be built up to with stairs, ladder, etc. When the world starts, the first 8 people build a structure for all 8 of them around the original campfire, to protect them from rain. Then, the original couples move out and build family homes. The original fire is the focal point of a faction"):

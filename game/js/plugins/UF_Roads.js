@@ -110,7 +110,12 @@
         /** True when the cell of the map on screen holds a bridge (a walkable water cell). */
         bridgeAt(x, y) {
             const map = window.$dataMap;
-            if (!map || !map.ufObjects || x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
+            if (!map || !map.ufObjects) return false;
+            if (map.width && map.height) {
+                if ($gameMap && $gameMap.isLoopHorizontal()) x = ((x % map.width) + map.width) % map.width;
+                if ($gameMap && $gameMap.isLoopVertical()) y = ((y % map.height) + map.height) % map.height;
+            }
+            if (x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
             const b = Roads.bridgeTypeId();
             return b !== 0 && map.ufObjects[y * map.width + x] === b;
         },
