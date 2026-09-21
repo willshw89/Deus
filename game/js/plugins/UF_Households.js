@@ -995,6 +995,28 @@
                 if (s) s.faction = h.faction;
             }
         }
+        // Physical Move-In / Housewarming event: couple occupies their private homestead
+        if (h && !h.isMovedIn && !home.isShared && strictEnclosure(h, home) && home.beds.some(b => object(h, b))) {
+            h.isMovedIn = true;
+            if (h.previousSharedHome) {
+                for (const m of current) {
+                    if (m.data && m.data.bed && m.data.bed.isShared) {
+                        const thBed = (h.previousSharedHome.beds || []).find(b => b.unitId === m.id);
+                        if (thBed) thBed.unitId = null;
+                        m.data.bed = null;
+                    }
+                }
+            }
+            for (const m of current) {
+                if (m && m.data) {
+                    m.data.housewarmingIntimacy = true;
+                    if (window.UF && UF.Colonists && typeof UF.Colonists.addThought === "function") {
+                        UF.Colonists.addThought(m, "Moved into our new home!", 15);
+                    }
+                }
+            }
+            emit("households:movedIn", h, current);
+        }
     }
     function callingFor(u) {
         u = unitOf(u);
@@ -1139,11 +1161,9 @@
         const d = demands(h);
         const noDemands = !d.bedrooms && !d.beds && !d.cooking && !d.storage;
 
-        // Floors start as soon as walls are up (sheltered), not waiting for full baseBuilt.
-        // Other domestic improvements wait for full base construction.
-        const sheltered = isSheltered(h);
-        if (sheltered && o) {
-            // Stage 2: Interior floors — start immediately once sheltered
+        // Progressive domestic improvement: floors, furniture, kitchens, calling workshops & shops:
+        if (baseBuilt && noDemands && home.design && o) {
+            // Stage 2: Interior floors
             const cultureFloor = (culture.floor && culture.floor.kind) || (zOf(h) < 0 || h.faction === "dwarf" ? "floor_stone" : "floor_wood");
             if (home.floors && home.floors.length) {
                 home.steps.push(step("floors", cultureFloor, home.floors));
@@ -1154,10 +1174,6 @@
                     home.steps.push(step(`annex${i}_floors`, a.floor || cultureFloor, a.floors));
                 }
             }
-        }
-
-        // Progressive domestic improvement: furniture, kitchens, calling workshops & shops:
-        if (baseBuilt && noDemands && home.design && o) {
 
             // Stage 3: Kitchen & Dining appointments
             if (home.kitchenCounter && o.type("kitchen_counter") && o.type("kitchen_counter").build) {
@@ -1242,16 +1258,6 @@
                         F.setFloor(areaOf(h), fl.x, fl.y, floorKind);
                     }
                 }
-            }
-            if (h && h.previousSharedHome) {
-                for (const m of members(h)) {
-                    if (m.data && m.data.bed && m.data.bed.isShared) {
-                        const thBed = (h.previousSharedHome.beds || []).find(b => b.unitId === m.id);
-                        if (thBed) thBed.unitId = null;
-                        m.data.bed = null;
-                    }
-                }
-                syncHome(h);
             }
         }
         return enclosed;

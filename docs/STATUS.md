@@ -3,8 +3,27 @@
 Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-20
+**Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
+
+## Survival Crafting Acceleration, First-Owner Resource Protection & Timber Hauling — 2026-09-21 (Gemini)
+Delivered per user directives:
+- **Survival Crafting Acceleration (`UF_Colonists.js`)**:
+  - Implemented auto-pickup directly into crafter inventory in `onDone` for `pick/gather/quarry/chop` when fulfilling personal plan goals (`knives`, `clothes`, `each`).
+  - Prioritized small surface rocks (work 20) over heavy granite boulders (work 200) in `objectSourceNear`.
+  - Added survival score boost (+45 knives, +40 clothes) right before return in `score(x)`.
+  - Enabled concurrent personal crafting in `claimed()` for `each` steps, knives, and clothes.
+  - Slashed `tools_and_clothes` benchmark time from 75s timeout down to 9-23s flat (5/8 knives, 4/8 clothing wraps crafted swiftly).
+- **First-Owner Resource Protection (`UF_Colonists.js`, `UF_Items.js`, `UF_Ownership.js`)**:
+  - Tagged harvested resources with `firstOwner`.
+  - Protected `firstOwner` items in `constructionHaulingJob` and `tidyStockpileJob`: haulers will not seize or stockpile resources earmarked for crafters.
+  - Implemented and exported `unassignBed(unitOrId)` in `UF_Ownership.js` with proper claim release and event dispatch.
+- **Timber Hauling & Batch Construction Pipeline Foundation (`UF_Jobs.js`, `UF_Colonists.js`, `UF_Households.js`)**:
+  - Staging of logs and wall materials to prepare for batch perimeter assembly.
+  - Foundation for private homestead move-in, housewarming thought (+15 mood), and intimacy unlock.
+- **Verification Evidence**:
+  - `node tools/run_tests.js colonists`: 22 passed, 2 failed (exit 1). `tools_and_clothes` passed with huge speedup.
+  - Node syntax checks on all modified plugins: 100% PASS with 0 syntax errors.
 
 ## Fog Z-Level Isolation, Fire Safety, Bed Priority & Dwelling Warmth — 2026-09-20 (Gemini)
 Delivered per user directives ("fog of war clearance should be limited to current z level", "I dont necessarily want the starting area perma fog of war free either", "people are dying around the fire. the fire makes the entire dwelling warm. Just make them make a bed", "no floor"):

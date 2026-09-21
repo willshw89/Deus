@@ -245,7 +245,7 @@
     };
 
     /** Put `count` of a type on a cell: fills stacks of that type already there, then makes new stacks. Returns the stacks touched. */
-    Items.drop = function(area, x, y, typeId, count) {
+    Items.drop = function(area, x, y, typeId, count, harvesterId) {
         const st = ready(), t = Items.type(typeId);
         if (!st || !t || !validArea(area)) return [];
         let left = Math.max(0, count | 0);
@@ -265,6 +265,18 @@
             if (!it) break;
             touched.push(it);
             left -= n;
+        }
+        if (harvesterId) {
+            const Own = window.UF && UF.Ownership;
+            const W = World(), u = W && W.unit(harvesterId);
+            for (const it of touched) {
+                if (!it.firstOwner) {
+                    it.firstOwner = harvesterId;
+                    if (Own && typeof Own.claim === "function" && u && !Own.ownerOf({ kind: "item", id: it.id })) {
+                        Own.claim({ kind: "item", id: it.id }, u, { reason: "harvested" });
+                    }
+                }
+            }
         }
         return touched;
     };
@@ -314,6 +326,13 @@
         it.holder = u.id;
         it.z = zOf(u);
         inventoryArray(u).push(it.id);
+        if (!it.firstOwner) {
+            it.firstOwner = u.id;
+            const Own = window.UF && UF.Ownership;
+            if (Own && typeof Own.claim === "function" && !Own.ownerOf({ kind: "item", id: it.id })) {
+                Own.claim({ kind: "item", id: it.id }, u, { reason: "first pickup" });
+            }
+        }
         changed(it, "moved");
         return true;
     };

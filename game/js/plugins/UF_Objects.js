@@ -315,10 +315,11 @@
         if (!from || !from.actions || !from.actions[action]) return null;
         const a = from.actions[action];
         const yields = Object.assign({}, a.yields || {});
+        const actorId = actor && actor.id !== undefined ? actor.id : (actor === undefined ? null : actor);
         const items = [];
         if (window.UF && UF.Items && typeof UF.Items.drop === "function") {
             for (const itemId of Object.keys(yields)) {
-                const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId]);
+                const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId], actorId);
                 if (dropped) items.push(dropped);
             }
         }

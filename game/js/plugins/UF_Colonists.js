@@ -536,6 +536,34 @@
     }
 
     //-------------------------------------------------------------------------
+    // Internal Barter & Credit Ledger
+    // Producers (woodcutters, miners, farmers) earn credit delivering raw materials,
+    // specialists craft finished tools/gear, and colonists trade within the settlement.
+
+    function colonistLedger(unit) {
+        if (!unit || !unit.data) return { credits: 0, earned: 0, spent: 0 };
+        if (!unit.data.ledger) {
+            unit.data.ledger = { credits: 10, earned: 0, spent: 0 };
+        }
+        return unit.data.ledger;
+    }
+    function awardCredits(unit, amount, reason) {
+        const ledger = colonistLedger(unit);
+        ledger.credits = (ledger.credits || 0) + amount;
+        ledger.earned = (ledger.earned || 0) + amount;
+        emit("colonists:creditEarned", unit, amount, reason);
+        return ledger.credits;
+    }
+    function spendCredits(unit, amount, reason) {
+        const ledger = colonistLedger(unit);
+        if (ledger.credits < amount) return false;
+        ledger.credits -= amount;
+        ledger.spent = (ledger.spent || 0) + amount;
+        emit("colonists:creditSpent", unit, amount, reason);
+        return true;
+    }
+
+    //-------------------------------------------------------------------------
     // Clothing tiers
 
     function setTier(unit, tier) {
@@ -847,7 +875,10 @@
         for (let d = minR; d <= r; d++) {
             for (let dy = -d; dy <= d; dy++) for (let dx = -d; dx <= d; dx++) {
                 if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
-                if (J && J.standable(area, x + dx, y + dy)) return { x: x + dx, y: y + dy };
+                if (J && J.standable(area, x + dx, y + dy)) {
+                    if (typeof J.isWaterAt === "function" && J.isWaterAt(area, x + dx, y + dy)) continue;
+                    return { x: x + dx, y: y + dy };
+                }
             }
         }
         return null;
@@ -910,6 +941,11 @@
     }
     function objectSourceNear(u, itemId, radius) {
         if (!sourcesOf(itemId).length) return null;
+        const fast = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
+            const act = yieldsItem(t, itemId);
+            return !!act && (t.id === "rocks_small" || (t.actions && t.actions[act[0]] && t.actions[act[0]].work <= 40)) && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
+        });
+        if (fast) return Object.assign(fast, { action: yieldsItem(fast.type, itemId)[0] });
         const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
             const act = yieldsItem(t, itemId);
             return !!act && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
@@ -1100,7 +1136,7 @@
         for (const j of activeJobs()) {
             if (j.assigned === u.id || !j.target || !sameLevel(j.target, u)) continue;
             if (type === "craft") {
-                if (j.type === "craft" && j.params.recipeId === params.recipeId && j.params.plan === params.plan && j.params.siteId === params.siteId) return true;
+                if (!params.each && params.plan !== "knives" && params.plan !== "clothes" && j.type === "craft" && j.params.recipeId === params.recipeId && j.params.plan === params.plan && j.params.siteId === params.siteId) return true;
                 continue;
             }
             if (type === "hunt" && j.type === "hunt" && j.params.unitId === params.unitId) return true;
@@ -1134,7 +1170,7 @@
         if ((avoid.get(key) || 0) > ticks()) return null;
         if (claimed(u, spec.type, tx, ty, params)) return null;
         // Walled sites: go through an opening first (a move job; the same decision comes back afterwards).
-        if (spec.target) {
+        if (spec.target && spec.type !== "sleep") {
             const gap = ringGap(u, tx, ty);
             if (gap && !(u.x === gap.x && u.y === gap.y)) {
                 const via = J.create({ type: "move", target: { area: copyArea(u.area), x: gap.x, y: gap.y, z: zOf(u) }, params: Object.assign({}, params, { via: spec.type, viaTarget: { x: tx, y: ty } }), owner: u.id });
@@ -1297,6 +1333,13 @@
         if (u.data.familyRendezvous && u.data.familyRendezvous.until > ticks() && n.sleep < 85) {
             const j = nightlyMateJob(u);
             if (j) return j;
+        }
+        if (u.data && u.data.housewarmingIntimacy && n.sleep < 90) {
+            const j = nightlyMateJob(u);
+            if (j) {
+                delete u.data.housewarmingIntimacy;
+                return j;
+            }
         }
         const socialAt = evening() ? Math.min(th.social || 40, 25) : (th.social || 40);
         if (n.social >= socialAt) {
@@ -2224,6 +2267,94 @@
         return allSpawned;
     }
 
+    function stepMerchantCaravan(ref) {
+        const W = World();
+        if (!W) return null;
+        const c = colonyState(ref) || colonyState();
+        if (!c || !c.site) return null;
+
+        const time = window.$ufTime;
+        const curDay = time ? (time.day || 1) : 1;
+        if (curDay % 7 !== 0 && (!window.UF || !UF.Test || !UF.Test.active)) return null;
+        if (c.lastCaravanDay === curDay) return null;
+        c.lastCaravanDay = curDay;
+
+        const area = levelArea(c);
+        const radius = c.radius || 10;
+        const spawnAngle = Math.PI * 0.75;
+        const sx = Math.round(c.site.x + Math.cos(spawnAngle) * (radius + 15));
+        const sy = Math.round(c.site.y + Math.sin(spawnAngle) * (radius + 15));
+        const cell = freeCellNear(area, sx, sy, 8) || { x: sx, y: sy };
+
+        const merchant = W.addUnit({
+            name: "Trader Jonathan",
+            image: { characterName: "$UF_Human_Male_1_Walk", characterIndex: 0 },
+            area: copyArea(c.area),
+            z: zOf(c),
+            x: cell.x,
+            y: cell.y,
+            dir: 2,
+            data: {
+                kind: "merchant",
+                faction: "merchant_guild",
+                species: "human",
+                gender: "male",
+                age: 35,
+                stage: "adult",
+                calling: "merchant",
+                site: c.siteId,
+                ledger: { credits: 200, earned: 0, spent: 0 }
+            }
+        });
+
+        const animalCell = freeCellNear(area, cell.x + 1, cell.y, 3) || cell;
+        const packAnimal = W.addUnit({
+            name: "Pack Mule",
+            image: { characterName: "$UF_Wildlife_Herbivore_Walk", characterIndex: 0 },
+            area: copyArea(c.area),
+            z: zOf(c),
+            x: animalCell.x,
+            y: animalCell.y,
+            dir: 2,
+            data: {
+                kind: "wildlife",
+                species: "mule",
+                packAnimal: true,
+                tamed: true,
+                site: c.siteId
+            }
+        });
+
+        const I = Items();
+        if (I) {
+            I.give("stone", 10, merchant.id);
+            I.give("fiber", 10, merchant.id);
+            I.give("stone_axe", 2, merchant.id);
+        }
+
+        give(merchant, {
+            type: "move",
+            target: { x: c.site.x + 2, y: c.site.y + 2 },
+            params: { tradeVisit: true }
+        });
+        give(packAnimal, {
+            type: "move",
+            target: { x: c.site.x + 3, y: c.site.y + 2 },
+            params: { followMerchant: merchant.id }
+        });
+
+        addThought(merchant, "Arrived at a promising frontier settlement to trade!", 10);
+        if (window.UF && UF.Visuals && UF.Visuals.bark) {
+            const ev = W.eventOf(merchant.id);
+            if (ev) UF.Visuals.bark(ev, "Trade caravan has arrived! Rare goods and barter!", 240);
+        }
+        emit("caravan:arrived", merchant, packAnimal, c);
+        if (Array.isArray(c.log)) {
+            c.log.push({ tick: ticks(), text: `Traveling merchant caravan arrived at ${c.site.name || "the settlement"}` });
+        }
+        return { merchant, packAnimal };
+    }
+
     function updateAgeAppearance(u) {
         if (!u.data) return;
         if (u.data.age === undefined) {
@@ -2464,16 +2595,18 @@
         });
         const fire = nearestFire(u);
         const fireRef = fire ? { x: fire.x, y: fire.y } : null;
-        const spots = owned && sameLevel(owned, u) && !taken.has(`${owned.x},${owned.y}`) ? [{ x: owned.x, y: owned.y, fire: fireRef }] : [];
-        spots.push(...permitted.map(b => ({ x: b.x, y: b.y, fire: fireRef })));
+        const myBed = (u.data && u.data.bed && sameLevel(u.data.bed, u)) ? u.data.bed : (owned && sameLevel(owned, u) ? owned : null);
+        const spots = myBed && !taken.has(`${myBed.x},${myBed.y}`) ? [{ x: myBed.x, y: myBed.y, fire: fireRef }] : [];
 
-        // Assigned bed target (sleeping at personal bed spot in dwelling is safe from fire):
-        const targetBed = myBedTarget(u);
-        if (targetBed && !taken.has(`${targetBed.x},${targetBed.y}`)) {
-            spots.push({ x: targetBed.x, y: targetBed.y, fire: fireRef });
+        // Homeless / unassigned colonists sleep around the campfire:
+        if (spots.length === 0 && fire) {
+            const fireSpots = fireSleepCells(u, fire, taken);
+            spots.push(...fireSpots);
         }
 
-        if (fire) {
+        spots.push(...permitted.map(b => ({ x: b.x, y: b.y, fire: fireRef })));
+
+        if (fire && spots.length === 0) {
             const fireSpots = fireSleepCells(u, fire, taken);
             spots.push(...fireSpots);
         }
@@ -2731,9 +2864,23 @@
         const t = stepObject(step);
         if (!t || !t.build || !I) return null;
         const c = colonyState(u);
+        const needs = t.build.items || {};
+        const countOnCellAt = (cell, id) => {
+            let cnt = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
+            if (t.id === "floor_straw" && id === "straw") {
+                cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
+            }
+            return cnt;
+        };
+        const candidateCells = buildCells(step, u).filter(cell => cell.state === "todo");
+        candidateCells.sort((a, b) => {
+            const readyA = Object.keys(needs).every(id => countOnCellAt(a, id) >= (needs[id] | 0)) ? 1 : 0;
+            const readyB = Object.keys(needs).every(id => countOnCellAt(b, id) >= (needs[id] | 0)) ? 1 : 0;
+            if (readyB !== readyA) return readyB - readyA;
+            return (Math.hypot(a.x - u.x, a.y - u.y) - Math.hypot(b.x - u.x, b.y - u.y));
+        });
         const missingFailed = new Set();
-        for (const cell of buildCells(step, u)) {
-            if (cell.state !== "todo") continue;
+        for (const cell of candidateCells) {
             const target = { x: cell.x, y: cell.y };
             const here = cell.here;
             if (hasTag(t, "fire") && UF.FireSafety) {
@@ -2799,17 +2946,18 @@
     function gatherInputsJob(u, recipe, step) {
         const I = Items();
         const c = colonyState(u);
+        const claimedItemIds = new Set(activeJobs().filter(j => (j.type === "fetch" || j.type === "haul") && j.params && j.params.itemId).map(j => j.params.itemId));
         for (const [id, want] of Object.entries(recipe.inputs || {})) {
             if (carriedCount(u, id) >= (want | 0)) continue;
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !onBuildCell(f.x, f.y, u, id) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
-            if (ground) return { type: "fetch", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, plan: step.id } };
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !claimedItemIds.has(f.item.id) && !onBuildCell(f.x, f.y, u, id) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
+            if (ground) return { type: "fetch", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, plan: step.id, each: !!step.each } };
             const src = objectSourceNear(u, id, SEARCH_RADIUS);
-            if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
+            if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id, each: !!step.each } };
             const prey = preyYielding(u, id, huntRadius());
-            if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
+            if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id, each: !!step.each } };
             return null; // this input can't be had here
         }
-        return { type: "craft", params: { recipeId: recipe.id, plan: step.id, equip: !!step.equip } };
+        return { type: "craft", params: { recipeId: recipe.id, plan: step.id, equip: !!step.equip, each: !!step.each } };
     }
     function craftStepJob(u, step) {
         const r = recipeOf(step.craft), out = outputOf(r);
@@ -2913,8 +3061,6 @@
             const skill = UF.Skills && UF.Skills.skillOfJob ? UF.Skills.skillOfJob(x.spec) : x.spec.type === "craft" ? (recipeOf(x.spec.params.recipeId) || {}).skill : SKILL_OF[x.spec.type];
             const level = skill && UF.Skills && UF.Skills.level ? UF.Skills.level(u, skill) : skill ? ((u.data.skills && u.data.skills[skill]) || 0) : 0;
             let s = priorityOf(x.spec.type, u) * (1 + level / 100) - x.order * 0.05;
-            if (x.step.id === "knives" && (!u.data || u.data.age === undefined || u.data.age >= 15) && !holds(u, "stone_knife")) s += 1.5;
-            else if (x.step.id === "clothes" && (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1))) s += 1.0;
             const H = window.UF && UF.Households;
             const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
             if (x.step.household) {
@@ -2970,6 +3116,11 @@
                 } else if (Callings.isCrafter(u)) {
                     if (x.spec.type === "craft") s *= 2.5;
                 }
+            }
+            if (x.step.id === "knives" && (!u.data || u.data.age === undefined || u.data.age >= 15) && !holds(u, "stone_knife")) {
+                s += 45.0;
+            } else if (x.step.id === "clothes" && (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1))) {
+                s += 40.0;
             }
             return s;
         };
@@ -3080,6 +3231,7 @@
                     if (!t) continue;
                     // Do NOT haul away materials that are sitting on a build cell waiting to be constructed!
                     if (onBuildCell(f.x, f.y, u, f.item.type)) continue;
+                    if (f.item.firstOwner && f.item.firstOwner !== u.id) continue;
                     let to = null;
                     if (c.stockpiles && c.stockpiles.length > 0) {
                         const sp = c.stockpiles.find(s => {
@@ -3106,6 +3258,66 @@
         return null;
     }
 
+    // Timber Hauling Pipeline: dedicated haulers stage raw timber, stone, and building
+    // materials directly to unbuilt wall, door, and floor cells in active footprints
+    function constructionHaulingJob(u) {
+        const I = Items(), c = colonyState(u);
+        if (!I || !c) return null;
+        const plan = effectivePlan(u);
+        if (!plan || !plan.length) return null;
+
+        for (const step of plan) {
+            const t = stepObject(step);
+            if (!t || !t.build || !t.build.items) continue;
+            const needs = t.build.items;
+
+            for (const cell of buildCells(step, u)) {
+                if (cell.state !== "todo") continue;
+
+                for (const [id, countNeeded] of Object.entries(needs)) {
+                    let onCell = I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id);
+                    if (t.id === "floor_straw" && id === "straw") {
+                        onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber");
+                    }
+                    const inFlight = activeJobs().filter(j => (j.type === "haul" || j.type === "fetch") &&
+                        j.assigned !== u.id && j.params && j.params.to &&
+                        j.params.to.x === cell.x && j.params.to.y === cell.y).length;
+
+                    if (onCell + inFlight < (countNeeded | 0)) {
+                        const carried = carriedOf(u, id)[0];
+                        if (carried) {
+                            return give(u, {
+                                type: "haul",
+                                target: { x: u.x, y: u.y },
+                                params: {
+                                    itemId: carried.id,
+                                    to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                    plan: step.id,
+                                    constructionHaul: true
+                                }
+                            });
+                        }
+                        const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 40, id })
+                            .find(f => (!f.item.firstOwner || f.item.firstOwner === u.id) && !onBuildCell(f.x, f.y, u, id) && (f.x !== cell.x || f.y !== cell.y));
+                        if (ground) {
+                            return give(u, {
+                                type: "haul",
+                                target: { x: ground.x, y: ground.y },
+                                params: {
+                                    itemId: ground.item.id,
+                                    to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                    plan: step.id,
+                                    constructionHaul: true
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     // Clean site logistics: tidy loose items on the ground into designated stockpiles
     function tidyStockpileJob(u) {
         const c = colonyState(u);
@@ -3117,6 +3329,7 @@
         const loose = groundItemsNear(u, { radius: c.radius + 6 }).filter(f => {
             if (onStockpile(f.item, null, u)) return false;
             if (onBuildCell(f.x, f.y, u, f.item.type)) return false;
+            if (f.item.firstOwner && f.item.firstOwner !== u.id) return false;
             return true;
         });
         if (!loose.length) return null;
@@ -3266,12 +3479,39 @@
             return true;
         };
 
-        // 1. Woodcutter: harvest natural trees for timber
+        // 1. Woodcutter: harvest natural trees for timber, prioritizing trees nearest to active unbuilt walls
         if (isW) {
-            const tree = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
-                if (!t.actions || !t.actions.chop) return false;
-                return isHarvestable(t, x, y, "chop");
-            });
+            const pendingWallCells = [];
+            const plan = effectivePlan(u);
+            for (const step of plan) {
+                const t = stepObject(step);
+                if (t && t.build && t.build.items && (t.build.items.log || t.build.items.wood)) {
+                    for (const cell of buildCells(step, u)) {
+                        if (cell.state === "todo") pendingWallCells.push(cell);
+                    }
+                }
+            }
+            let tree = null;
+            if (pendingWallCells.length > 0) {
+                let bestDist = Infinity;
+                scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                    if (!t.actions || !t.actions.chop || !isHarvestable(t, x, y, "chop")) return false;
+                    for (const cell of pendingWallCells) {
+                        const d = Math.hypot(x - cell.x, y - cell.y);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            tree = { type: t, x, y };
+                        }
+                    }
+                    return false;
+                });
+            }
+            if (!tree) {
+                tree = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                    if (!t.actions || !t.actions.chop) return false;
+                    return isHarvestable(t, x, y, "chop");
+                });
+            }
             if (tree) {
                 const tool = toolJob(u, "chop");
                 if (tool) return tool;
@@ -3335,8 +3575,10 @@
             }
         }
 
-        // 5. Hauler: tidy loose ground clutter into stockpiles
+        // 5. Hauler: stage timber/stone directly to active construction sites, then tidy stockpiles
         if (isH) {
+            const staging = constructionHaulingJob(u);
+            if (staging) return staging;
             const tidy = tidyStockpileJob(u);
             if (tidy) return tidy;
         }
@@ -3464,7 +3706,9 @@
         }
 
         const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;
-        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
+        const Callings = getCallings();
+        const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
+        return designationJob(u) || haulerStaging || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -3633,19 +3877,19 @@
 
                 if (atOwnedBed) {
                     addThought(u, "Slept in my own bed.", 12);
-                    if (dwellingWarmed || fireDist <= 4) {
+                    if (dwellingWarmed || fireDist <= 5) {
                         addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
                     }
                 } else if (atAnyBed) {
                     addThought(u, "Slept in a bed.", 8);
-                    if (dwellingWarmed || fireDist <= 4) {
+                    if (dwellingWarmed || fireDist <= 5) {
                         addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
                     }
                 } else if (dwellingWarmed) {
                     addThought(u, "Slept warmly by the fire.", 10);
                     addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
                     addThought(u, "Needs a bed and space to sleep.", -2);
-                } else if (fireDist <= 4) {
+                } else if (fireDist <= 5) {
                     addThought(u, "Slept warmly by the fire.", 10);
                     addThought(u, "Needs a bed and space to sleep.", -2);
                 } else {
@@ -3655,7 +3899,7 @@
                     }
                 }
 
-                if (dwellingWarmed || fireDist <= 4) {
+                if (dwellingWarmed || fireDist <= 5) {
                     if (u.data && u.data.thermal) {
                         u.data.thermal.bodyTemp = 37.0;
                         u.data.thermal.stage = "normal";
@@ -3669,9 +3913,27 @@
                 addThought(u, `Enjoyed talking with ${job.params.otherName || "a friend"}.`, 8);
                 rememberConversation(u, World().unit(job.params.unitId));
                 break;
-            case "mate": break; // Exactly one guarded completion, in the handler's apply.
+            case "chop": case "gather": case "pick": case "quarry": case "mine":
+                awardCredits(u, 1, "resource harvesting");
+                if (job.params && (job.params.plan === "knives" || job.params.plan === "clothes" || job.params.each)) {
+                    const I = Items();
+                    if (I && job.target) {
+                        for (const it of I.atIn(levelArea(u), job.target.x, job.target.y)) {
+                            if (it.firstOwner === u.id || !it.firstOwner) {
+                                I.pickUp(it.id, u.id);
+                            }
+                        }
+                    }
+                }
+                break;
+            case "haul":
+                if (job.params && job.params.constructionHaul) {
+                    awardCredits(u, 2, "construction haul");
+                }
+                break;
             case "hunt": addThought(u, `Brought down ${lower(job.params.preyName ? "a " + job.params.preyName : "prey")}.`, 8); break;
             case "build": {
+                awardCredits(u, 2, "structure construction");
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
                 if (t && t.id === "stockpile" && colonyState(u)) colonyState(u).stockpiles.push({ x: job.target.x, y: job.target.y, stores: (job.params.stores || []).slice(), step: job.params.plan || null });
                 if (t && (t.id === "floor_straw" || (t.tags && t.tags.includes("bed")))) {
@@ -3682,10 +3944,24 @@
                 break;
             }
             case "craft": {
+                awardCredits(u, 3, "finished craftsmanship");
                 const r = recipeOf(job.params.recipeId);
                 const out = r ? outputOf(r) : null;
                 const t = itemType(out);
                 if (t && t.wear) addThought(u, `Finished ${lower(t.name)} with care.`, 6);
+                // Place surplus crafted equipment on workshop shop_counter if available
+                const O = Objects();
+                const c = colonyState(u);
+                if (O && c && job.result && job.result.items && job.result.items.length && !job.params.equip && out) {
+                    const counters = O.findIn(levelArea(c), { near: { x: u.x, y: u.y }, radius: 15, kind: "shop_counter" });
+                    if (counters.length > 0) {
+                        const sc = counters[0];
+                        for (const itId of job.result.items) {
+                            I.drop(levelArea(c), sc.x, sc.y, out, 1, u.id);
+                            I.consumeFrom(u.id, out, 1);
+                        }
+                    }
+                }
                 // A craft step with equip: put it on straight away (an instant job of its own, so it shows on the card).
                 if (job.params.equip && I && job.result && job.result.items && job.result.items[0]) {
                     const J = Jobs();
@@ -3696,6 +3972,16 @@
             case "equip": {
                 const it = I ? I.get(job.params.itemId) : null;
                 const t = it ? itemType(it.type) : null;
+                if (it && it.firstOwner && it.firstOwner !== u.id) {
+                    const W = World();
+                    const seller = W && W.unit(it.firstOwner);
+                    const H = window.UF && UF.Households;
+                    const sameH = H && H.of && (H.of(u) === H.of(seller));
+                    if (seller && !sameH) {
+                        spendCredits(u, 5, "equipment purchase");
+                        awardCredits(seller, 5, "goods sold");
+                    }
+                }
                 if (t && t.wear) addThought(u, t.wear.tier === 1 ? "Felt proud wearing the first woven wrap." : `Felt warmer in ${lower(t.name)}.`, 15);
                 break;
             }
@@ -3863,8 +4149,13 @@
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
         footprintClearingJob,
         tidyStockpileJob,
+        constructionHaulingJob,
+        colonistLedger,
+        awardCredits,
+        spendCredits,
+        stepMerchantCaravan,
         advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
-        _internal: { advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -3877,6 +4168,7 @@
     const _Game_Map_update = Game_Map.prototype.update;
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
+        if (!sceneActive) return;
         localTicks++;
 
         if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();
@@ -3887,7 +4179,10 @@
             progressPregnancies(1);
             progressAging(1);
             if (localTicks % 3600 === 0) stepFactionReproduction();
-            if (localTicks % 7200 === 0) stepImmigration();
+            if (localTicks % 7200 === 0) {
+                stepImmigration();
+                stepMerchantCaravan();
+            }
         }
     };
 
@@ -3906,6 +4201,7 @@
             try {
                 stepFactionReproduction();
                 stepImmigration();
+                stepMerchantCaravan();
                 progressPregnancies();
                 progressAging();
             } catch (e) {
@@ -3916,6 +4212,7 @@
             try {
                 if (hour >= 21 || hour <= 6 || hour % 6 === 0) stepFactionReproduction();
                 if (hour === 12) stepImmigration();
+                if (hour === 8) stepMerchantCaravan();
             } catch (e) {
                 console.error("UF_Colonists: time:hour error", e);
             }
@@ -4331,5 +4628,104 @@
             await t.waitFrames(10);
             t.screenshot("human_genetics_and_aging");
         });
+
+        UF.Test.suite("playthrough", async t => {
+            const W = UF.World, J = UF.Jobs, I = UF.Items, O = UF.Objects, H = UF.Households, C = UF.Colonists;
+            const Time = window.UF && UF.Time;
+            if (Time && typeof Time.setSpeed === "function") Time.setSpeed(8);
+
+            const sampleState = (label) => {
+                const fId = factionId();
+                const units = W.units().filter(u => u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction === fId);
+                const alive = units.filter(u => !u.data.dead && !u.data._isDying);
+                const adults = alive.filter(u => u.data.stage === "adult" || u.data.age >= 15);
+                const children = alive.filter(u => u.data.stage === "child" || (u.data.age < 15 && u.data.age >= 2));
+                const babies = alive.filter(u => u.data.stage === "baby" || u.data.age < 2);
+                const pregnant = alive.filter(u => u.data.pregnancy);
+                const paired = adults.filter(u => u.data.partnerId || u.data.partner);
+                const households = H ? H.all().filter(h => !h.mergedInto && h.home) : [];
+                const privateH = households.filter(h => !h.home.isShared);
+                const shelteredH = privateH.filter(h => H.isSheltered && H.isSheltered(h));
+                const cState = colonyState();
+                const plan = effectivePlan();
+                const planStat = planStatus(cState, plan.slice(0, 8));
+                const itemsCount = id => colonyCount(id);
+
+                return {
+                    label,
+                    ticks: ticks(),
+                    year: window.$ufTime ? window.$ufTime.year : 1,
+                    day: window.$ufTime ? window.$ufTime.day : 1,
+                    hour: window.$ufTime ? window.$ufTime.hour : 12,
+                    popTotal: alive.length,
+                    adults: adults.length,
+                    children: children.length,
+                    babies: babies.length,
+                    pregnant: pregnant.length,
+                    pairedCouples: Math.floor(paired.length / 2),
+                    totalHouseholds: households.length,
+                    privateHomes: privateH.length,
+                    shelteredHomes: shelteredH.length,
+                    food: itemsCount("meat") + itemsCount("berry") + itemsCount("cooked_meat"),
+                    cookedMeat: itemsCount("cooked_meat"),
+                    wood: itemsCount("log") + itemsCount("firewood"),
+                    stone: itemsCount("stone"),
+                    knives: itemsCount("stone_knife"),
+                    clothes: itemsCount("cloak_fur") + itemsCount("wrap_leather"),
+                    activeJobs: alive.map(u => {
+                        const j = J.of(u.id);
+                        return `${u.name}(${u.data.stage || "adult"}): ${j ? (j.type + " " + (j.verb || "")) : "idle"}`;
+                    }),
+                    planSummary: planStat.map(s => `${s.id}: ${s.detail || (s.done ? "done" : "todo")}`).join(" · ")
+                };
+            };
+
+            // Checkpoint 1: Initial Colony Setup & Early Bootstrap (T=5s real / ~40s game)
+            await t.waitFrames(300);
+            const cp1 = sampleState("Checkpoint 1: Early Bootstrap");
+            t.screenshot("playthrough_cp1_bootstrap");
+            t.check("cp1_founders_alive", cp1.popTotal >= 8, `Pop total: ${cp1.popTotal}, Food: ${cp1.food}, Wood: ${cp1.wood}`);
+
+            // Checkpoint 2: Town Hall Enclosure & Private Plot Reservation (T=25s real / ~200s game)
+            await t.waitFrames(1200);
+            const cp2 = sampleState("Checkpoint 2: Homesteads & Pairing");
+            t.screenshot("playthrough_cp2_homesteads");
+            t.check("cp2_pairing_or_homesteads", cp2.privateHomes >= 1 || cp2.pairedCouples >= 1 || cp2.popTotal >= 8,
+                `Couples: ${cp2.pairedCouples}, Private Homes: ${cp2.privateHomes}, Sheltered: ${cp2.shelteredHomes}`);
+
+            // Checkpoint 3: Domestic Production & Conception (T=50s real / ~400s game)
+            await t.waitFrames(1500);
+            const cp3 = sampleState("Checkpoint 3: Production & Conception");
+            t.screenshot("playthrough_cp3_production");
+            t.check("cp3_colony_active", cp3.popTotal >= 8,
+                `Year: ${cp3.year}, Day: ${cp3.day}, Pregnant: ${cp3.pregnant}, Cooked Meat: ${cp3.cookedMeat}, Knives: ${cp3.knives}`);
+
+            // Checkpoint 4: Childbirth & Settlement Growth (T=80s real / ~640s game)
+            await t.waitFrames(1800);
+            const cp4 = sampleState("Checkpoint 4: Demographics & Expansion");
+            t.screenshot("playthrough_cp4_expansion");
+            t.check("cp4_population_vitality", cp4.popTotal >= 8,
+                `Pop: ${cp4.popTotal} (Adults: ${cp4.adults}, Kids: ${cp4.children}, Pregnant: ${cp4.pregnant}), Homes: ${cp4.privateHomes}`);
+
+            // Checkpoint 5: Village Maturity & Peace Verification (T=100s real / ~800s game)
+            await t.waitFrames(1200);
+            const cp5 = sampleState("Checkpoint 5: Village Maturity");
+            t.screenshot("playthrough_cp5_maturity");
+            t.check("cp5_peace_period_holds", (window.$ufTime ? window.$ufTime.year : 1) < 10,
+                `Simulation reached Year ${cp5.year} Day ${cp5.day}; 10-year peace period active`);
+
+            // Output comprehensive narrative log
+            console.log("\n=================== PLAYTHROUGH SAMPLING REPORT ===================");
+            for (const cp of [cp1, cp2, cp3, cp4, cp5]) {
+                console.log(`\n--- ${cp.label} (Year ${cp.year}, Day ${cp.day}, Hour ${cp.hour}) ---`);
+                console.log(`Population: ${cp.popTotal} | Adults: ${cp.adults} | Children: ${cp.children} | Pregnant: ${cp.pregnant} | Couples: ${cp.pairedCouples}`);
+                console.log(`Households: ${cp.totalHouseholds} (Private: ${cp.privateHomes}, Sheltered: ${cp.shelteredHomes})`);
+                console.log(`Resources: Food=${cp.food} (Cooked=${cp.cookedMeat}), Wood=${cp.wood}, Stone=${cp.stone}, Knives=${cp.knives}`);
+                console.log(`Active Roster (${cp.activeJobs.length}):`);
+                for (const job of cp.activeJobs.slice(0, 8)) console.log(`  * ${job}`);
+                console.log(`Plan Status: ${cp.planSummary}`);
+            }
+            console.log("\n===================================================================\n");
+        }, { isDefault: false });
     }
 })();

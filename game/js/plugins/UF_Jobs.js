@@ -307,7 +307,7 @@
                 const yields = mat === "soil" ? { stone: 1 } : { stone: 2 };
                 if (I && typeof I.drop === "function") {
                     for (const id of Object.keys(yields)) {
-                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id]);
+                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id], unit.id);
                     }
                 }
                 job.result = { from: "solid", to: "floor", yields };
@@ -482,6 +482,13 @@
             for (const id of Object.keys(r.outputs || {})) {
                 for (const it of I.give(id, r.outputs[id] | 0, unit.id)) {
                     if (quality > 0) it.quality = quality;
+                    if (!it.firstOwner) {
+                        it.firstOwner = unit.id;
+                        const Own = window.UF && UF.Ownership;
+                        if (Own && typeof Own.claim === "function" && !Own.ownerOf({ kind: "item", id: it.id })) {
+                            Own.claim({ kind: "item", id: it.id }, unit, { reason: "crafted" });
+                        }
+                    }
                     made.push(it.id);
                 }
             }
@@ -552,7 +559,7 @@
             const s = speciesOf(prey);
             const yields = (s && s.yields) || {};
             const dropped = [];
-            if (I) for (const id of Object.keys(yields)) for (const it of I.drop(lv(prey), prey.x, prey.y, id, yields[id] | 0)) dropped.push(it.id);
+            if (I) for (const id of Object.keys(yields)) for (const it of I.drop(lv(prey), prey.x, prey.y, id, yields[id] | 0, unit.id)) dropped.push(it.id);
             const where = { area: copyArea(prey.area), x: prey.x, y: prey.y, z: zOf(prey) };
             W.removeUnit(prey.id);
             job.result = { prey: prey.id, species: prey.data && prey.data.species, at: where, yields, items: dropped };

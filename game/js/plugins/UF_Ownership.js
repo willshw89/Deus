@@ -171,6 +171,17 @@
         return e ? Object.assign({}, e.owner) : null;
     }
 
+    function firstOwnerOf(ref) {
+        const I = window.UF && UF.Items;
+        const itemId = ref && ref.kind === "item" ? ref.id : typeof ref === "number" ? ref : null;
+        if (itemId !== null && I && typeof I.get === "function") {
+            const it = I.get(itemId);
+            if (it && it.firstOwner) return { kind: "unit", id: it.firstOwner };
+        }
+        const e = entryOf(ref);
+        return e ? Object.assign({}, e.owner) : null;
+    }
+
     function sameOwner(a, b) {
         return !!a && !!b && a.kind === b.kind && (a.kind === "public" || a.id === b.id);
     }
@@ -265,6 +276,19 @@
         unit.data.bed = cellRecord(bed);
         emit("ownership:bedAssigned", unit, Object.assign({}, unit.data.bed));
         return Object.assign({}, unit.data.bed);
+    }
+
+    function unassignBed(unitOrId) {
+        const W = World();
+        const unit = typeof unitOrId === "object" ? unitOrId : (W ? W.unit(unitOrId) : null);
+        if (!unit) return false;
+        const oldBed = bedOf(unit) || (unit.data && unit.data.bed);
+        if (oldBed) {
+            release(objectRef(oldBed, oldBed.x, oldBed.y), unit);
+        }
+        if (unit.data && unit.data.bed) delete unit.data.bed;
+        emit("ownership:bedUnassigned", unit, oldBed ? Object.assign({}, oldBed) : null);
+        return true;
     }
 
     function cleanClaims() {
@@ -547,9 +571,11 @@
         claim,
         release,
         ownerOf,
+        firstOwnerOf,
         entryOf,
         entries,
         assignBed,
+        unassignBed,
         bedOf,
         reconcile,
         reconcileArea,
