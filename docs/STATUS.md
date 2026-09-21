@@ -6,6 +6,46 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## In progress
+- **Gemini**: Milestone 3 / Tasks 9 & 10: Volumetric Column Landform Generator & Mineable World Geometry with Space Creation (`game/js/plugins/UF_Levels.js`, `game/js/plugins/UF_WorldGen.js`, `game/js/plugins/UF_Jobs.js`, `tools/test_column_landforms.js`).
+
+## Systemic Material Economy: Milestone 2 / Task 7 Material-Aware Recipes with Functional Roles & Material Inheritance Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy & Continuous Vertical Worldgen Roadmap):
+- **Functional Recipe Role Mapping (`game/data/UF_WorldCatalog.json`)**:
+  - Enhanced 27 catalog recipes with `roles` mappings while preserving base item IDs in `inputs` for 100% backward compatibility (e.g. `stone_knife`: `BUILDING_STONE`, `stone_axe`: `BUILDING_STONE` + `STRUCTURAL_TIMBER` + `CORDAGE`, `bow_short`: `FLEXIBLE_BOW_WOOD` + `CORDAGE`, `sword_short`: `CUTTING_METAL` + `LEATHER`).
+  - Added `primaryInput` declarations to ensure precise material identity transfer to crafted items.
+- **Recipe Planning & Dynamic Candidate Consumption (`UF_Jobs.js`)**:
+  - Updated `craft` `plan(job, unit)`: dynamically resolves ingredient shortages via `Items.countRequirement(unit.id, req)`.
+  - Updated `craft` `apply(job, unit)`: identifies primary material from `r.primaryInput` or priority roles (`CUTTING_METAL`, `FLEXIBLE_BOW_WOOD`, `BUILDING_STONE`, etc.), consumes candidates using `Items.consumeRequirementFrom`, and passes `{ mat: primaryMat, q: quality }` to `Items.give`.
+  - Output items dynamically inherit material identity and physical properties (e.g. Granite Stone Axe, Yew Short Bow, Bronze Dagger).
+- **Verification Evidence**:
+  - `node tools/test_material_recipes.js`: **21/21 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_material_recipes.js --mutant` failed on `output_axe_material_inheritance` with exit 1.
+  - `node tools/run_tests.js items`: **20/20 PASS (exit 0)**.
+  - `node tools/run_tests.js jobs`: **19/19 PASS (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 20s.
+  - Node syntax check on `UF_Jobs.js`: 100% clean.
+
+## Systemic Material Economy: Milestone 2 / Task 6 Material Substitution Matrix & Property Matcher Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval):
+- **Functional Property Requirements (`catalog.materials.functionalRoles`, `UF_Items.js`)**:
+  - Implemented `Items.matchesRequirement(itemOrType, requirement, opts)`: evaluates item types, material keys, and functional tags across `FUEL`, `STRUCTURAL_TIMBER`, `FLEXIBLE_BOW_WOOD`, `HARD_WOOD`, `SOFT_WOOD`, `BUILDING_STONE`, `HARD_STONE`, `SOFT_STONE`, `ROOFING_MATERIAL`, `CUTTING_METAL`, `PRECIOUS_METAL`, `CORDAGE`, `TEXTILE_FIBER`, `LEATHER`, `INSULATING_MATERIAL`.
+  - Registered 15 functional roles in `catalog.materials.functionalRoles` with property threshold filters and item/material tags.
+  - Enhanced `tools/validate_materials.js` to validate all 15 functional roles and property bounds.
+- **Candidate Desirability Scoring & Strategic Material Preservation (`UF_Items.js`)**:
+  - Implemented `Items.scoreCandidate(itemOrType, requirement, opts)`: calculates suitability score (base 100) penalizing high-rarity materials (`- rarity * 2`).
+  - Enforced strategic resource conservation: using strategic/prestige/master materials (Yew, Marble, Steel, Gold, Silver) for bulk structural or fuel roles incurs a heavy `-150` penalty, ensuring Pine and Sandstone are consumed first.
+  - Implemented `Items.sortCandidates(items, requirement, opts)`, `Items.findCandidates(where, requirement, opts)`, and `Items.countRequirement(where, requirement, opts)`.
+  - Implemented `Items.consumeRequirementFrom(unitId, requirement, count, opts)`: consumes items prioritizing least wasteful/highest scoring candidates.
+  - Extended `Items.consumeFrom` and `Items.count` to transparently resolve functional requirements with 100% backward compatibility.
+- **Verification Evidence**:
+  - `tools/test_material_substitution.js`: **7/7 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_material_substitution.js --mutant` failed on `structural_timber_matcher` with exit 1.
+  - `node tools/run_tests.js items`: **20/20 PASS (exit 0)** (including new in-engine `material_substitution_and_scoring` check).
+  - `node tools/run_tests.js jobs`: **19/19 PASS (exit 0)**.
+  - `node tools/validate_materials.js`: **PASS (Woods: 7, Stones: 6, Metals: 7, Aliases: 5, Roles: 15)**.
+  - Node syntax check on `UF_Items.js`: 100% clean.
+
 ## Systemic Material Economy: Milestone 1 / Task 5 Extraction Difficulty, Tool Effectiveness & Tiered Yields Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy Roadmap approval):
 - **Material Hardness & Workability Scaling (`UF_Jobs.js`)**:

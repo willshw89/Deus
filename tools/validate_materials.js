@@ -116,6 +116,26 @@ function validateMaterials(catalogOrPath) {
         }
     }
 
+    // 5. Validate Functional Substitution Roles
+    const roles = mats.functionalRoles;
+    if (roles && typeof roles === "object") {
+        for (const [roleId, r] of Object.entries(roles)) {
+            if (!r || typeof r !== "object") {
+                errors.push(`Functional role '${roleId}' must be an object`);
+                continue;
+            }
+            if (!r.name || typeof r.name !== "string") {
+                errors.push(`Functional role '${roleId}' is missing a valid 'name'`);
+            }
+            if (r.materialFilter) {
+                const { domain, property } = r.materialFilter;
+                if (!["woods", "stones", "metals"].includes(domain)) {
+                    errors.push(`Functional role '${roleId}' has invalid filter domain '${domain}'`);
+                }
+            }
+        }
+    }
+
     return {
         ok: errors.length === 0,
         errors,
@@ -123,7 +143,8 @@ function validateMaterials(catalogOrPath) {
             woods: woods ? Object.keys(woods).length : 0,
             stones: stones ? Object.keys(stones).length : 0,
             metals: metals ? Object.keys(metals).length : 0,
-            aliases: mats.aliases ? Object.keys(mats.aliases).length : 0
+            aliases: mats.aliases ? Object.keys(mats.aliases).length : 0,
+            roles: roles ? Object.keys(roles).length : 0
         }
     };
 }
@@ -139,7 +160,7 @@ if (require.main === module) {
         }
         process.exit(1);
     } else {
-        console.log(`PASS: Material registry is valid. Woods: ${res.counts.woods}, Stones: ${res.counts.stones}, Metals: ${res.counts.metals}, Aliases: ${res.counts.aliases}`);
+        console.log(`PASS: Material registry is valid. Woods: ${res.counts.woods}, Stones: ${res.counts.stones}, Metals: ${res.counts.metals}, Aliases: ${res.counts.aliases}, Roles: ${res.counts.roles}`);
         process.exit(0);
     }
 }

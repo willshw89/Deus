@@ -411,17 +411,25 @@
         return n;
     };
 
-    /** Use up `count` of a type from a unit's inventory, across its stacks. Returns how many were consumed. */
-    Items.consumeFrom = function(unitId, typeId, count) {
+    /** Use up `count` of a type or requirement from a unit's inventory, across its stacks. Returns how many were consumed. */
+    Items.consumeFrom = function(unitId, typeOrReq, count, opts) {
         let left = Math.max(0, count | 0), used = 0;
-        for (const it of Items.inventoryOf(unitId)) {
-            if (left <= 0) break;
-            if (it.type !== typeId) continue;
-            const n = Items.consume(it.id, left);
-            left -= n;
-            used += n;
+        const inv = Items.inventoryOf(unitId);
+        const hasExact = inv.some(it => it.type === typeOrReq);
+        if (hasExact) {
+            for (const it of inv) {
+                if (left <= 0) break;
+                if (it.type !== typeOrReq) continue;
+                const n = Items.consume(it.id, left);
+                left -= n;
+                used += n;
+            }
+            return used;
         }
-        return used;
+        if (typeof Items.consumeRequirementFrom === "function") {
+            return Items.consumeRequirementFrom(unitId, typeOrReq, count, opts);
+        }
+        return 0;
     };
 
     /** Delete an item wherever it is. */
@@ -449,6 +457,9 @@
         if (typeof where === "number") list = Items.inventoryOf(where);
         else if (where && typeof where === "object") list = Items.atIn(whereArea(where), where.x, where.y);
         else return 0;
+        if (typeId && !Items.type(typeId) && !mat && typeof Items.countRequirement === "function") {
+            return Items.countRequirement(where, typeId);
+        }
         return list.reduce((n, it) => {
             if (typeId && it.type !== typeId) return n;
             if (mat && it.mat !== mat) return n;
@@ -525,6 +536,275 @@
         return null;
     };
     Items.canMerge = canMerge;
+
+    /**
+     * Test whether an item, item type, or material matches a functional requirement.
+     * Requirement can be:
+     * - An exact item type (e.g. "log", "stone", "fiber")
+     * - An exact material key (e.g. "pine", "woods:pine", "limestone")
+     * - An item or material tag (e.g. "fuel", "wood", "softwood", "hard_stone")
+     * - A functional role (e.g. "FUEL", "STRUCTURAL_TIMBER", "FLEXIBLE_BOW_WOOD",
+     *   "HARD_WOOD", "SOFT_WOOD", "BUILDING_STONE", "HARD_STONE", "SOFT_STONE",
+     *   "ROOFING_MATERIAL", "CUTTING_METAL", "PRECIOUS_METAL", "CORDAGE",
+     *   "TEXTILE_FIBER", "LEATHER", "INSULATING_MATERIAL").
+     */
+    Items.matchesRequirement = function(itemOrType, requirement, opts) {
+        if (!itemOrType || !requirement) return false;
+
+        // Resolve item object, item type definition, and material definition
+        let it = null, typeId = null, matKey = null;
+        if (typeof itemOrType === "number") {
+            it = Items.get(itemOrType);
+            if (!it) return false;
+            typeId = it.type;
+            matKey = it.mat || null;
+        } else if (typeof itemOrType === "object") {
+            it = itemOrType;
+            typeId = it.type || (it.id && Items.type(it.id) ? it.id : null);
+            matKey = it.mat || null;
+        } else if (typeof itemOrType === "string") {
+            if (Items.type(itemOrType)) {
+                typeId = itemOrType;
+            } else {
+                matKey = itemOrType;
+            }
+        }
+
+        // Optional quality filter
+        if (opts && opts.minQuality !== undefined && opts.minQuality !== null) {
+            const itemQ = (it && it.q !== undefined && it.q !== null) ? it.q : 0;
+            if (itemQ < opts.minQuality) return false;
+        }
+
+        const t = typeId ? Items.type(typeId) : null;
+        const matDef = Items.materialOf(it || matKey || typeId);
+        const itemTags = (t && Array.isArray(t.tags)) ? t.tags : [];
+        const matTags = (matDef && Array.isArray(matDef.tags)) ? matDef.tags : [];
+
+        const req = String(requirement).trim();
+        const reqUpper = req.toUpperCase();
+
+        // 1. Direct item type match
+        if (typeId && typeId === req) return true;
+
+        // 2. Direct material key match
+        if (matKey) {
+            const rawMat = matKey.includes(":") ? matKey.split(":")[1] : matKey;
+            const reqMat = req.includes(":") ? req.split(":")[1] : req;
+            if (matKey === req || rawMat === reqMat) return true;
+        }
+
+        // 3. Direct tag match (from item tags or material tags)
+        const reqLower = req.toLowerCase();
+        if (itemTags.includes(reqLower) || matTags.includes(reqLower)) return true;
+
+        // 4. Functional roles
+        switch (reqUpper) {
+            case "FUEL":
+                if (itemTags.includes("fuel") || reqLower === "fuel") return true;
+                if (matDef && matDef.burnQuality !== undefined && matDef.burnQuality >= 50) return true;
+                return false;
+
+            case "STRUCTURAL_TIMBER":
+                if (!itemTags.includes("wood") && typeId !== "log" && typeId !== "plank_dressed") return false;
+                if (matDef && matDef.structuralStrength !== undefined) {
+                    return matDef.structuralStrength >= 40;
+                }
+                return true;
+
+            case "FLEXIBLE_BOW_WOOD":
+                if (!itemTags.includes("wood") && typeId !== "log") return false;
+                if (matDef) {
+                    if (matTags.includes("bows") || matTags.includes("master_bows") || matTags.includes("elastic")) return true;
+                    return (matDef.flexibility || 0) >= 60;
+                }
+                return false;
+
+            case "HARD_WOOD":
+                if (!itemTags.includes("wood") && typeId !== "log") return false;
+                if (matDef) {
+                    return (matDef.hardness || 0) >= 5 || matDef.category === "hardwood";
+                }
+                return false;
+
+            case "SOFT_WOOD":
+                if (!itemTags.includes("wood") && typeId !== "log") return false;
+                if (matDef) {
+                    return (matDef.density || 0) <= 0.55 || matDef.category === "softwood" || matTags.includes("softwood");
+                }
+                return false;
+
+            case "BUILDING_STONE":
+                if (!itemTags.includes("stone") && typeId !== "stone" && typeId !== "stone_block") return false;
+                if (matDef && matDef.compressiveStrength !== undefined) {
+                    return matDef.compressiveStrength >= 30;
+                }
+                return true;
+
+            case "HARD_STONE":
+                if (!itemTags.includes("stone") && typeId !== "stone" && typeId !== "stone_block") return false;
+                if (matDef) {
+                    return matTags.includes("hard_stone") || (matDef.fractureResistance || 0) >= 75;
+                }
+                return false;
+
+            case "SOFT_STONE":
+                if (!itemTags.includes("stone") && typeId !== "stone" && typeId !== "stone_block") return false;
+                if (matDef) {
+                    return matTags.includes("soft_stone") || (matDef.fractureResistance || 0) < 60;
+                }
+                return false;
+
+            case "ROOFING_MATERIAL":
+                if (typeId === "slate" || matTags.includes("roofing")) return true;
+                if (typeId === "straw" || typeId === "fiber" || typeId === "plank_dressed") return true;
+                return false;
+
+            case "CUTTING_METAL":
+                if (!itemTags.includes("metal") && !(typeId && (typeId.startsWith("bar_") || typeId.startsWith("ore_")))) return false;
+                if (matDef && matDef.edgeRetention !== undefined) {
+                    return matDef.edgeRetention >= 40;
+                }
+                if (typeId === "bar_iron" || typeId === "bar_bronze" || typeId === "bar_steel") return true;
+                return false;
+
+            case "PRECIOUS_METAL":
+                if (matTags.includes("precious") || (matDef && (matDef.value || 0) >= 30)) return true;
+                if (typeId === "gold" || typeId === "silver" || typeId === "bar_silver") return true;
+                return false;
+
+            case "CORDAGE":
+                if (typeId === "fiber" || typeId === "leather" || itemTags.includes("fiber") || itemTags.includes("sinew")) return true;
+                return false;
+
+            case "TEXTILE_FIBER":
+                if (typeId === "fiber" || typeId === "wool" || typeId === "straw" || itemTags.includes("fiber") || itemTags.includes("wool")) return true;
+                return false;
+
+            case "LEATHER":
+                if (typeId === "leather" || typeId === "hide" || itemTags.includes("leather") || itemTags.includes("hide")) return true;
+                return false;
+
+            case "INSULATING_MATERIAL":
+                if (["wool", "hide", "leather", "straw", "feathers"].includes(typeId)) return true;
+                if (itemTags.includes("wool") || itemTags.includes("hide") || itemTags.includes("bedding")) return true;
+                return false;
+        }
+
+        return false;
+    };
+
+    /**
+     * Calculate desirability score for selecting an item to satisfy a requirement.
+     * Higher scores mean higher priority/desirability to consume.
+     * Prevents strategic material waste (e.g. Yew, Marble, Steel for basic construction).
+     */
+    Items.scoreCandidate = function(itemOrType, requirement, opts) {
+        if (!Items.matchesRequirement(itemOrType, requirement, opts)) return -Infinity;
+
+        let score = 100;
+        const matDef = Items.materialOf(itemOrType);
+        const reqUpper = String(requirement).trim().toUpperCase();
+
+        if (matDef) {
+            // Rarity penalty: prefer common over rare
+            const rarity = matDef.rarity || 0;
+            score -= rarity * 2;
+
+            const matTags = Array.isArray(matDef.tags) ? matDef.tags : [];
+            const isStrategic = rarity >= 70 ||
+                matTags.includes("strategic") ||
+                matTags.includes("prestige") ||
+                matTags.includes("rare") ||
+                matTags.includes("luxury") ||
+                matTags.includes("master_bows") ||
+                matTags.includes("master_weapons");
+
+            // Bulk construction roles where strategic materials should NOT be wasted
+            const bulkRoles = ["STRUCTURAL_TIMBER", "BUILDING_STONE", "FUEL", "ROOFING_MATERIAL", "CORDAGE", "SOFT_WOOD"];
+            if (bulkRoles.includes(reqUpper) && isStrategic) {
+                score -= 150; // Heavy preservation penalty
+            }
+
+            // Specialized aptitude bonuses
+            if (reqUpper === "FLEXIBLE_BOW_WOOD") {
+                score += (matDef.flexibility || 0);
+                if (matTags.includes("master_bows")) score += 50;
+            } else if (reqUpper === "CUTTING_METAL") {
+                score += (matDef.edgeRetention || 0) + Math.round((matDef.toughness || 0) / 2);
+                if (matTags.includes("master_weapons")) score += 50;
+            } else if (reqUpper === "BUILDING_STONE") {
+                if (opts && opts.fortification) {
+                    score += (matDef.compressiveStrength || 0) + Math.round((matDef.fractureResistance || 0) / 2);
+                } else {
+                    // General construction: softer, workable stones assemble faster with primitive tools
+                    score += Math.round((matDef.workability || 0) / 2);
+                }
+            } else if (reqUpper === "STRUCTURAL_TIMBER") {
+                // High workability wood builds faster
+                score += Math.round((matDef.workability || 0) / 2);
+            } else if (reqUpper === "FUEL") {
+                score += (matDef.burnQuality || 0);
+            }
+        }
+
+        // Quality consideration
+        const q = (typeof itemOrType === "object" && itemOrType.q !== undefined && itemOrType.q !== null) ? itemOrType.q : null;
+        if (q !== null) {
+            // For rough bulk construction, preserve high-quality harvested logs/stone
+            const bulkRoles = ["STRUCTURAL_TIMBER", "BUILDING_STONE", "FUEL"];
+            if (bulkRoles.includes(reqUpper)) {
+                score -= q * 5;
+            } else {
+                score += q * 10;
+            }
+        }
+
+        return score;
+    };
+
+    /** Sort an array of items by suitability for a requirement (highest score first). */
+    Items.sortCandidates = function(items, requirement, opts) {
+        if (!Array.isArray(items)) return [];
+        return items.slice().sort((a, b) => {
+            return Items.scoreCandidate(b, requirement, opts) - Items.scoreCandidate(a, requirement, opts);
+        });
+    };
+
+    /** Total count of items satisfying requirement in a unit's inventory or on a cell. */
+    Items.countRequirement = function(where, requirement, opts) {
+        let list;
+        if (typeof where === "number") list = Items.inventoryOf(where);
+        else if (where && typeof where === "object") list = Items.atIn(whereArea(where), where.x, where.y);
+        else return 0;
+        return list.reduce((n, it) => {
+            if (Items.matchesRequirement(it, requirement, opts)) return n + it.count;
+            return n;
+        }, 0);
+    };
+
+    /** Find and sort items satisfying requirement in a unit's inventory or on a cell. */
+    Items.findCandidates = function(where, requirement, opts) {
+        let list;
+        if (typeof where === "number") list = Items.inventoryOf(where);
+        else if (where && typeof where === "object") list = Items.atIn(whereArea(where), where.x, where.y);
+        else return [];
+        const matching = list.filter(it => Items.matchesRequirement(it, requirement, opts));
+        return Items.sortCandidates(matching, requirement, opts);
+    };
+
+    /** Consume up to count items from a unit's inventory matching requirement, prioritizing least wasteful. */
+    Items.consumeRequirementFrom = function(unitId, requirement, count, opts) {
+        let left = Math.max(0, count | 0), used = 0;
+        const candidates = Items.findCandidates(unitId, requirement, opts);
+        for (const it of candidates) {
+            if (left <= 0) break;
+            const n = Items.consume(it.id, left);
+            left -= n;
+            used += n;
+        }
+        return used;
+    };
 
     // A unit that leaves the world drops what it carried where it stood.
     listen("world:unitRemoved", u => {
@@ -968,6 +1248,19 @@
             const tintOk = !!oakSp && oakSp.tint === parseInt(oakDef.color.replace("#", ""), 16);
             t.check("material_describe_and_tint", descOk && tintOk,
                 `describe: "${matDesc ? matDesc.text : "null"}"; oak sprite tint: 0x${oakSp ? oakSp.tint.toString(16) : "none"} (expected ${oakDef ? oakDef.color : "none"})`);
+
+            // Material requirement matching & candidate scoring
+            const pineTimber = Items.matchesRequirement(pineLogs[0], "STRUCTURAL_TIMBER");
+            const oakTimber = Items.matchesRequirement(oakLogs[0], "STRUCTURAL_TIMBER");
+            const willowLog = { id: 9999, type: "log", mat: "willow" };
+            const willowTimber = Items.matchesRequirement(willowLog, "STRUCTURAL_TIMBER");
+            const yewBowWood = Items.matchesRequirement({ id: 9998, type: "log", mat: "yew" }, "FLEXIBLE_BOW_WOOD");
+            const oakBowWood = Items.matchesRequirement(oakLogs[0], "FLEXIBLE_BOW_WOOD");
+            const pScore = Items.scoreCandidate(pineLogs[0], "STRUCTURAL_TIMBER");
+            const yScore = Items.scoreCandidate({ id: 9998, type: "log", mat: "yew" }, "STRUCTURAL_TIMBER");
+            const subOk = pineTimber && oakTimber && !willowTimber && yewBowWood && !oakBowWood && pScore > yScore && yScore < 0;
+            t.check("material_substitution_and_scoring", subOk,
+                `structural timber: pine=${pineTimber}, oak=${oakTimber}, willow=${willowTimber}; bow wood: yew=${yewBowWood}, oak=${oakBowWood}; scores: pine=${pScore}, yew=${yScore}`);
 
             // Clean up: the test items go, the zoom comes back.
             for (const id of Object.keys(Items.state().byId)) if (!before.has(id)) Items.remove(Number(id));

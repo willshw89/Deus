@@ -4873,6 +4873,189 @@
       "iron": "metals:iron",
       "copper": "metals:copper",
       "bronze": "metals:bronze"
+    },
+    "functionalRoles": {
+      "FUEL": {
+        "name": "Fuel",
+        "itemTags": [
+          "fuel"
+        ],
+        "materialFilter": {
+          "domain": "woods",
+          "property": "burnQuality",
+          "min": 50
+        }
+      },
+      "STRUCTURAL_TIMBER": {
+        "name": "Structural Timber",
+        "itemTypes": [
+          "log",
+          "plank_dressed"
+        ],
+        "materialFilter": {
+          "domain": "woods",
+          "property": "structuralStrength",
+          "min": 40
+        }
+      },
+      "FLEXIBLE_BOW_WOOD": {
+        "name": "Flexible Bow Wood",
+        "itemTypes": [
+          "log"
+        ],
+        "materialFilter": {
+          "domain": "woods",
+          "property": "flexibility",
+          "min": 60
+        }
+      },
+      "HARD_WOOD": {
+        "name": "Hardwood",
+        "itemTypes": [
+          "log"
+        ],
+        "materialFilter": {
+          "domain": "woods",
+          "property": "hardness",
+          "min": 5
+        }
+      },
+      "SOFT_WOOD": {
+        "name": "Softwood",
+        "itemTypes": [
+          "log"
+        ],
+        "materialFilter": {
+          "domain": "woods",
+          "property": "density",
+          "max": 0.55
+        }
+      },
+      "BUILDING_STONE": {
+        "name": "Building Stone",
+        "itemTypes": [
+          "stone",
+          "stone_block"
+        ],
+        "materialFilter": {
+          "domain": "stones",
+          "property": "compressiveStrength",
+          "min": 30
+        }
+      },
+      "HARD_STONE": {
+        "name": "Hard Stone",
+        "itemTypes": [
+          "stone",
+          "stone_block"
+        ],
+        "materialFilter": {
+          "domain": "stones",
+          "property": "fractureResistance",
+          "min": 75
+        }
+      },
+      "SOFT_STONE": {
+        "name": "Soft Stone",
+        "itemTypes": [
+          "stone",
+          "stone_block"
+        ],
+        "materialFilter": {
+          "domain": "stones",
+          "property": "fractureResistance",
+          "max": 59
+        }
+      },
+      "ROOFING_MATERIAL": {
+        "name": "Roofing Material",
+        "itemTypes": [
+          "slate",
+          "straw",
+          "fiber",
+          "plank_dressed"
+        ],
+        "materialTags": [
+          "roofing"
+        ]
+      },
+      "CUTTING_METAL": {
+        "name": "Cutting Metal",
+        "itemTypes": [
+          "bar_iron",
+          "bar_copper",
+          "bar_bronze",
+          "bar_steel"
+        ],
+        "materialFilter": {
+          "domain": "metals",
+          "property": "edgeRetention",
+          "min": 40
+        }
+      },
+      "PRECIOUS_METAL": {
+        "name": "Precious Metal",
+        "itemTypes": [
+          "gold",
+          "bar_silver",
+          "silver"
+        ],
+        "materialTags": [
+          "precious"
+        ]
+      },
+      "CORDAGE": {
+        "name": "Cordage",
+        "itemTypes": [
+          "fiber",
+          "leather"
+        ],
+        "itemTags": [
+          "fiber",
+          "sinew",
+          "cordage"
+        ]
+      },
+      "TEXTILE_FIBER": {
+        "name": "Textile Fiber",
+        "itemTypes": [
+          "fiber",
+          "wool",
+          "straw"
+        ],
+        "itemTags": [
+          "fiber",
+          "wool",
+          "straw"
+        ]
+      },
+      "LEATHER": {
+        "name": "Leather",
+        "itemTypes": [
+          "leather",
+          "hide"
+        ],
+        "itemTags": [
+          "leather",
+          "hide"
+        ]
+      },
+      "INSULATING_MATERIAL": {
+        "name": "Insulating Material",
+        "itemTypes": [
+          "wool",
+          "hide",
+          "leather",
+          "straw",
+          "feathers"
+        ],
+        "itemTags": [
+          "wool",
+          "hide",
+          "feathers",
+          "bedding"
+        ]
+      }
     }
   },
   "recipes": {
@@ -4890,7 +5073,12 @@
         },
         "work": 90,
         "at": null,
-        "skill": "stonework"
+        "skill": "stonework",
+        "roles": {
+          "stone": "BUILDING_STONE",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "stone_axe",
@@ -4905,7 +5093,13 @@
         },
         "work": 120,
         "at": null,
-        "skill": "stonework"
+        "skill": "stonework",
+        "roles": {
+          "stone": "BUILDING_STONE",
+          "log": "STRUCTURAL_TIMBER",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "stone_pick",
@@ -4920,7 +5114,13 @@
         },
         "work": 120,
         "at": null,
-        "skill": "stonework"
+        "skill": "stonework",
+        "roles": {
+          "stone": "BUILDING_STONE",
+          "log": "STRUCTURAL_TIMBER",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "fiber_wrap",
@@ -4933,7 +5133,11 @@
         },
         "work": 180,
         "at": null,
-        "skill": "crafting"
+        "skill": "crafting",
+        "roles": {
+          "fiber": "TEXTILE_FIBER"
+        },
+        "primaryInput": "fiber"
       },
       {
         "id": "hide_cloak",
@@ -4948,7 +5152,12 @@
         "work": 240,
         "at": null,
         "tool": "knife",
-        "skill": "crafting"
+        "skill": "crafting",
+        "roles": {
+          "hide": "LEATHER",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "hide"
       },
       {
         "id": "cook_meat",
@@ -4988,7 +5197,11 @@
         "work": 60,
         "at": null,
         "tool": "axe",
-        "skill": "woodcutting"
+        "skill": "woodcutting",
+        "roles": {
+          "log": "FUEL"
+        },
+        "primaryInput": "log"
       },
       {
         "id": "charcoal",
@@ -5004,7 +5217,11 @@
         "labor": "furnace_operator",
         "skill": "smelting",
         "ability": "con",
-        "quality": false
+        "quality": false,
+        "roles": {
+          "firewood": "FUEL"
+        },
+        "primaryInput": "firewood"
       },
       {
         "id": "bar_iron",
@@ -5077,7 +5294,12 @@
         "ability": "dex",
         "material": "wood",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "log": "FLEXIBLE_BOW_WOOD",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "log"
       },
       {
         "id": "bow_long",
@@ -5096,7 +5318,12 @@
         "ability": "dex",
         "material": "wood",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "log": "FLEXIBLE_BOW_WOOD",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "log"
       },
       {
         "id": "arrows_stone",
@@ -5116,7 +5343,12 @@
         "ability": "dex",
         "material": "stone",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "log": "SOFT_WOOD",
+          "stone": "BUILDING_STONE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "arrows_bone",
@@ -5212,7 +5444,13 @@
         "ability": "dex",
         "material": "stone",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "log": "STRUCTURAL_TIMBER",
+          "stone": "BUILDING_STONE",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "spear_iron",
@@ -5231,7 +5469,13 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "log": "STRUCTURAL_TIMBER",
+          "bar_iron": "CUTTING_METAL",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "shield_wood",
@@ -5250,7 +5494,12 @@
         "ability": "dex",
         "material": "wood",
         "quality": true,
-        "tool": "axe"
+        "tool": "axe",
+        "roles": {
+          "log": "STRUCTURAL_TIMBER",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "log"
       },
       {
         "id": "dagger_iron",
@@ -5268,7 +5517,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "sword_short",
@@ -5286,7 +5540,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "sword_long",
@@ -5304,7 +5563,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "axe_iron",
@@ -5322,7 +5586,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "log": "STRUCTURAL_TIMBER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "mace",
@@ -5340,7 +5609,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "copper",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_copper": "CUTTING_METAL",
+          "log": "HARD_WOOD"
+        },
+        "primaryInput": "bar_copper"
       },
       {
         "id": "helmet_leather",
@@ -5358,7 +5632,11 @@
         "ability": "dex",
         "material": "leather",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "leather": "LEATHER"
+        },
+        "primaryInput": "leather"
       },
       {
         "id": "armor_leather",
@@ -5377,7 +5655,12 @@
         "ability": "dex",
         "material": "leather",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "leather": "LEATHER",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "leather"
       },
       {
         "id": "leggings_leather",
@@ -5396,7 +5679,12 @@
         "ability": "dex",
         "material": "leather",
         "quality": true,
-        "tool": "knife"
+        "tool": "knife",
+        "roles": {
+          "leather": "LEATHER",
+          "fiber": "CORDAGE"
+        },
+        "primaryInput": "leather"
       },
       {
         "id": "helmet_iron",
@@ -5414,7 +5702,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "mail_iron",
@@ -5432,7 +5725,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "greaves_iron",
@@ -5450,7 +5748,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "leather": "LEATHER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "shield_iron",
@@ -5468,7 +5771,12 @@
         "skill": "smithing",
         "ability": "str",
         "material": "iron",
-        "quality": true
+        "quality": true,
+        "roles": {
+          "bar_iron": "CUTTING_METAL",
+          "log": "STRUCTURAL_TIMBER"
+        },
+        "primaryInput": "bar_iron"
       },
       {
         "id": "fire_brick",
@@ -5508,7 +5816,11 @@
         },
         "work": 100,
         "at": "mason_bench",
-        "skill": "stonework"
+        "skill": "stonework",
+        "roles": {
+          "stone": "BUILDING_STONE"
+        },
+        "primaryInput": "stone"
       },
       {
         "id": "plane_planks",
@@ -5521,7 +5833,11 @@
         },
         "work": 80,
         "at": "workbench",
-        "skill": "carpentry"
+        "skill": "carpentry",
+        "roles": {
+          "log": "STRUCTURAL_TIMBER"
+        },
+        "primaryInput": "log"
       },
       {
         "id": "forge_hardware",

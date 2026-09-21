@@ -504,7 +504,11 @@
             const r = recipeOf(job.params.recipeId);
             if (!r) return { ok: false, reason: "no such recipe" };
             const inputs = r.inputs || {};
-            const short = Object.keys(inputs).find(id => !I || I.count(unit.id, id) < (inputs[id] | 0));
+            const short = Object.keys(inputs).find(id => {
+                const req = (r.roles && r.roles[id]) || id;
+                const need = inputs[id] | 0;
+                return !I || (typeof I.countRequirement === "function" ? I.countRequirement(unit.id, req) : I.count(unit.id, id)) < need;
+            });
             if (short) return { ok: false, reason: `needs ${lower(itemName(short))}` };
             if (!r.at) {
                 job.target = { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) };
@@ -528,11 +532,53 @@
         apply(job, unit) {
             const I = Items();
             const r = recipeOf(job.params.recipeId);
-            for (const id of Object.keys(r.inputs || {})) I.consumeFrom(unit.id, id, r.inputs[id] | 0);
+            if (!r) return;
+
+            // 1. Determine primary material to inherit on output
+            let primaryMat = null;
+            let primaryKey = r.primaryInput;
+            if (primaryKey === undefined) {
+                const inputKeys = Object.keys(r.inputs || {});
+                if (r.roles) {
+                    const priorityRoles = ["CUTTING_METAL", "FLEXIBLE_BOW_WOOD", "HARD_STONE", "BUILDING_STONE", "STRUCTURAL_TIMBER", "LEATHER"];
+                    for (const prole of priorityRoles) {
+                        const foundKey = inputKeys.find(k => r.roles[k] === prole);
+                        if (foundKey) { primaryKey = foundKey; break; }
+                    }
+                }
+                if (!primaryKey && inputKeys.length > 0) {
+                    primaryKey = inputKeys[0];
+                }
+            }
+            if (primaryKey && I && typeof I.findCandidates === "function") {
+                const primaryReq = (r.roles && r.roles[primaryKey]) || primaryKey;
+                const candidates = I.findCandidates(unit.id, primaryReq);
+                if (candidates && candidates.length > 0 && candidates[0].mat) {
+                    primaryMat = candidates[0].mat;
+                }
+            }
+
+            // 2. Consume required inputs
+            for (const id of Object.keys(r.inputs || {})) {
+                const req = (r.roles && r.roles[id]) || id;
+                const need = r.inputs[id] | 0;
+                if (I && typeof I.consumeRequirementFrom === "function") {
+                    I.consumeRequirementFrom(unit.id, req, need);
+                } else if (I) {
+                    I.consumeFrom(unit.id, id, need);
+                }
+            }
+
+            // 3. Roll quality and prepare output options
             const made = [];
             const quality = (window.UF && UF.Skills && typeof UF.Skills.qualityRoll === "function") ? UF.Skills.qualityRoll(unit, r.id) : 0;
+            const giveOpts = {};
+            if (primaryMat) giveOpts.mat = primaryMat;
+            if (quality > 0) giveOpts.q = quality;
+
+            // 4. Produce output items with inherited material and quality
             for (const id of Object.keys(r.outputs || {})) {
-                for (const it of I.give(id, r.outputs[id] | 0, unit.id)) {
+                for (const it of I.give(id, r.outputs[id] | 0, unit.id, giveOpts)) {
                     if (quality > 0) it.quality = quality;
                     if (!it.firstOwner) {
                         it.firstOwner = unit.id;
@@ -544,7 +590,7 @@
                     made.push(it.id);
                 }
             }
-            job.result = { items: made, quality };
+            job.result = { items: made, quality, mat: primaryMat };
         },
         describe(job) {
             const r = recipeOf(job.params.recipeId);
