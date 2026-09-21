@@ -375,6 +375,7 @@
             return list;
         },
         isExplored(x, y, z = currentZ()) {
+            if (!this.enabled) return true;
             if (z === currentZ()) {
                 return ensureMap() && x >= 0 && y >= 0 && x < width && y < height && explored[y * width + x] === 1;
             }
@@ -390,11 +391,13 @@
             return x >= 0 && y >= 0 && x < w && y < h && dec[y * w + x] === 1;
         },
         isVisible(x, y, z = currentZ()) {
+            if (!this.enabled) return true;
             if (z !== currentZ()) return false;
             return ensureMap() && x >= 0 && y >= 0 && x < width && y < height && visible[y * width + x] === 1;
         },
         /** Mark cells explored (not visible) around (x, y) on level z (default currentZ()). */
         reveal(x, y, radius = 0, z = currentZ()) {
+            if (!this.enabled) return;
             if (z === currentZ()) {
                 if (!ensureMap()) return;
                 const r2 = radius * radius;
@@ -425,6 +428,9 @@
             s[key] = encode(exp);
         },
         exploredCount(z = currentZ()) {
+            if (!this.enabled) {
+                return (window.$gameMap ? $gameMap.width() * $gameMap.height() : (width * height));
+            }
             if (z === currentZ()) {
                 if (!ensureMap()) return 0;
                 let n = 0;
@@ -446,6 +452,7 @@
         },
         /** Recompute what the faction sees now. Runs every few frames by itself. */
         refresh() {
+            if (!this.enabled) return;
             if (!ensureMap()) return;
             const obs = this.observers();
             const signature = `${currentZ()}:` + obs.map(o => `${o.x},${o.y},${o.radius}`).join("|");
@@ -455,20 +462,34 @@
             for (const o of obs) mark(o.x, o.y, o.radius | 0);
             dirty = true;
         },
+        setEnabled(val) {
+            this.enabled = !!val;
+            if (window.$gameSystem) $gameSystem._ufFogEnabled = this.enabled;
+            const scene = window.SceneManager && SceneManager._scene;
+            if (scene && scene._spriteset && scene._spriteset._ufFog) {
+                scene._spriteset._ufFog.visible = this.enabled;
+            }
+            if (this.enabled) {
+                dirty = true;
+                this.refresh();
+            }
+        },
         encode,
         decode
     };
+    function resolveEnabled() {
+        if (window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.fogOfWar === "boolean") {
+            return UF.NewGameSetup.fogOfWar;
+        }
+        if (window.$gameSystem && $gameSystem._ufFogEnabled !== undefined) {
+            return $gameSystem._ufFogEnabled;
+        }
+        return ENABLED;
+    }
+
     window.UF = window.UF || {};
     window.UF.Fog = Fog;
-    Fog.enabled = ENABLED;
-    if (!ENABLED) {
-        // Development: no fog. Everything counts as explored and visible; reveal/refresh do nothing.
-        Fog.isExplored = () => true;
-        Fog.isVisible = () => true;
-        Fog.reveal = () => {};
-        Fog.refresh = () => {};
-        Fog.exploredCount = () => (window.$gameMap ? $gameMap.width() * $gameMap.height() : 0);
-    }
+    Fog.enabled = resolveEnabled();
 
     //-------------------------------------------------------------------------
     // Drawing: one pixel per cell, scaled up inside the tilemap (so it follows scrolling and zoom)
@@ -479,11 +500,13 @@
             // Above every character. UF_Perspective25D sets character z to their foot pixel row (plus up to
             // 1000), so the core's small z values (1-9) aren't enough.
             this.z = 1000000;
+            this._tiles = [];
+            this._fogBitmap = null;
         }
 
         update() {
             super.update();
-            if (currentZ() > 0) {
+            if (!Fog.enabled || currentZ() > 0) {
                 this.visible = false;
                 return;
             }
@@ -492,50 +515,67 @@
                 return;
             }
             this.visible = true;
-            if (!this.bitmap || this.bitmap.width !== width || this.bitmap.height !== height) {
-                this.bitmap = new Bitmap(width, height);
-                this.bitmap.smooth = true; // soft edges between cells
+            if (!this._fogBitmap || this._fogBitmap.width !== width || this._fogBitmap.height !== height) {
+                this._fogBitmap = new Bitmap(width, height);
+                this._fogBitmap.smooth = true; // soft edges between cells
                 dirty = true;
             }
+            this.bitmap = this._fogBitmap;
+
             const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
             this.scale.set(tw, th);
+
+            const z = (window.UF && UF.Camera && typeof UF.Camera.zoom === "function") ? UF.Camera.zoom() : 1;
+            const gW = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
+            const gH = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
+            const viewW = Math.ceil(gW / z);
+            const viewH = Math.ceil(gH / z);
+
             const mapW = width * tw;
             const mapH = height * th;
-            let ox = (-$gameMap.displayX() * tw) % mapW;
-            if (ox > 0) ox -= mapW;
-            let oy = (-$gameMap.displayY() * th) % mapH;
-            if (oy > 0) oy -= mapH;
-            this.x = ox;
-            this.y = oy;
+            const baseX = -$gameMap.displayX() * tw;
+            const baseY = -$gameMap.displayY() * th;
+            this.x = baseX;
+            this.y = baseY;
 
-            if (!this._quadrants) this._quadrants = [];
-            const screenW = (window.Graphics && Graphics.width) || 816;
-            const screenH = (window.Graphics && Graphics.height) || 624;
-            const repsX = Math.max(2, Math.ceil(screenW / mapW) + 1);
-            const repsY = Math.max(2, Math.ceil(screenH / mapH) + 1);
-            const needed = repsX * repsY;
-            while (this._quadrants.length < needed - 1) {
-                const s = new Sprite(this.bitmap);
-                this._quadrants.push(s);
-                this.addChild(s);
-            }
-            let qIdx = 0;
-            for (let ry = 0; ry < repsY; ry++) {
-                for (let rx = 0; rx < repsX; rx++) {
-                    if (rx === 0 && ry === 0) continue;
-                    const s = this._quadrants[qIdx++];
+            // Viewport bounds in tilemap pixel coordinates with safety margins
+            const minX = -tw * 2;
+            const maxX = viewW + tw * 2;
+            const minY = -th * 2;
+            const maxY = viewH + th * 2;
+
+            const loopH = $gameMap.isLoopHorizontal ? $gameMap.isLoopHorizontal() : true;
+            const loopV = $gameMap.isLoopVertical ? $gameMap.isLoopVertical() : true;
+
+            const kStart = loopH ? Math.floor((minX - baseX) / mapW) : 0;
+            const kEnd = loopH ? Math.floor((maxX - baseX) / mapW) : 0;
+            const mStart = loopV ? Math.floor((minY - baseY) / mapH) : 0;
+            const mEnd = loopV ? Math.floor((maxY - baseY) / mapH) : 0;
+
+            let tIdx = 0;
+            for (let m = mStart; m <= mEnd; m++) {
+                for (let k = kStart; k <= kEnd; k++) {
+                    if (k === 0 && m === 0) continue; // (0, 0) rendered directly by this
+                    while (this._tiles.length <= tIdx) {
+                        const s = new Sprite(this._fogBitmap);
+                        s.scale.set(1, 1);
+                        this._tiles.push(s);
+                        this.addChild(s);
+                    }
+                    const s = this._tiles[tIdx++];
                     s.visible = true;
-                    if (s.bitmap !== this.bitmap) s.bitmap = this.bitmap;
-                    s.x = rx * width;
-                    s.y = ry * height;
+                    if (s.bitmap !== this._fogBitmap) s.bitmap = this._fogBitmap;
+                    s.scale.set(1, 1);
+                    s.x = k * width;
+                    s.y = m * height;
                 }
             }
-            while (qIdx < this._quadrants.length) {
-                this._quadrants[qIdx++].visible = false;
+            while (tIdx < this._tiles.length) {
+                this._tiles[tIdx++].visible = false;
             }
 
             if (dirty) {
-                const context = this.bitmap.context;
+                const context = this._fogBitmap.context;
                 if (!this._fogImage || this._fogImage.width !== width || this._fogImage.height !== height) {
                     this._fogImage = context.createImageData(width, height);
                     this._fogData32 = new Uint32Array(this._fogImage.data.buffer);
@@ -550,7 +590,7 @@
                     d32[i] = visible[i] ? cClear : (explored[i] ? cDim : cDark);
                 }
                 context.putImageData(this._fogImage, 0, 0);
-                this.bitmap._baseTexture.update();
+                this._fogBitmap._baseTexture.update();
                 dirty = false;
             }
         }
@@ -560,7 +600,6 @@
     const _Spriteset_Map_createCharacters = Spriteset_Map.prototype.createCharacters;
     Spriteset_Map.prototype.createCharacters = function() {
         _Spriteset_Map_createCharacters.call(this);
-        if (!ENABLED) return;
         this._ufFog = new Sprite_UFFog();
         this._tilemap.addChild(this._ufFog);
     };
@@ -585,6 +624,9 @@
         _DataManager_extractSaveContents.call(this, contents);
         mapKey = null; // reload from the loaded save
         explored = null;
+        if (contents.system && contents.system._ufFogEnabled !== undefined) {
+            Fog.enabled = contents.system._ufFogEnabled;
+        }
     };
 
     const _DataManager_createGameObjects = DataManager.createGameObjects;
@@ -592,6 +634,8 @@
         _DataManager_createGameObjects.call(this);
         mapKey = null;
         explored = null;
+        Fog.enabled = resolveEnabled();
+        if ($gameSystem) $gameSystem._ufFogEnabled = Fog.enabled;
     };
 
     //-------------------------------------------------------------------------
@@ -605,10 +649,10 @@
 
     function registerChecks() {
         UF.Test.suite("fog", async t => {
-            if (!ENABLED) {
+            if (!Fog.enabled) {
                 const sprite = SceneManager._scene._spriteset && SceneManager._scene._spriteset._ufFog;
-                t.check("disabled_whole_map_visible", !sprite && Fog.isExplored(2, 2) && Fog.isVisible(250, 250) && Fog.exploredCount() === $gameMap.width() * $gameMap.height(),
-                    `Enabled=false: ${sprite ? "a fog sprite exists" : "no fog sprite"}, corner explored ${Fog.isExplored(2, 2)}, ${Fog.exploredCount()} of ${$gameMap.width() * $gameMap.height()} cells explored`);
+                t.check("disabled_whole_map_visible", (!sprite || !sprite.visible) && Fog.isExplored(2, 2) && Fog.isVisible(250, 250) && Fog.exploredCount() === $gameMap.width() * $gameMap.height(),
+                    `Enabled=false: ${sprite && sprite.visible ? "a visible fog sprite exists" : "fog sprite invisible/absent"}, corner explored ${Fog.isExplored(2, 2)}, ${Fog.exploredCount()} of ${$gameMap.width() * $gameMap.height()} cells explored`);
                 return;
             }
             // Look at the start, where the colonists are.

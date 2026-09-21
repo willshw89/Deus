@@ -16,16 +16,17 @@ function check(name, cond, info) {
 const mutateRiver = process.argv.includes("--mutate-river");
 const mutateNoise = process.argv.includes("--mutate-noise");
 const mutateTemp = process.argv.includes("--mutate-temp");
+const mutateFog = process.argv.includes("--mutate-fog");
 
 const gameDir = path.join(__dirname, "../game");
 const catalogPath = path.join(gameDir, "data/UF_WorldCatalog.json");
 const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 
 const mockDataMap = {
-    width: 64, height: 64,
-    data: new Int32Array(64 * 64 * 6),
+    width: 256, height: 256,
+    data: new Int32Array(256 * 256 * 6),
     events: [null],
-    ufObjects: new Uint16Array(64 * 64),
+    ufObjects: new Uint16Array(256 * 256),
     scrollType: 3
 };
 
@@ -56,6 +57,8 @@ const sandbox = {
     Map,
     Set,
     JSON,
+    btoa: str => Buffer.from(str, "binary").toString("base64"),
+    atob: b64 => Buffer.from(b64, "base64").toString("binary"),
     performance: { now: () => Date.now() },
     window: {},
     $ufWorldCatalog: catalog,
@@ -70,6 +73,9 @@ const sandbox = {
     },
     PluginManager: {
         parameters: () => ({ Enabled: "true", SightRadius: "8", ExploredDim: "150" })
+    },
+    PIXI: {
+        Texture: { EMPTY: {} }
     },
     Graphics: {
         width: 816,
@@ -105,6 +111,12 @@ const sandbox = {
     }
 };
 sandbox.window = sandbox;
+let currentZoom = 1;
+sandbox.UF = {
+    Camera: {
+        zoom: () => currentZoom
+    }
+};
 sandbox.Sprite.prototype.update = function() {};
 sandbox.Spriteset_Map.prototype = { createCharacters: () => {} };
 sandbox.Game_Map.prototype = mockGameMap;
@@ -259,36 +271,101 @@ console.log("\n--- Section 4: Autotiling and Shading Continuity ---");
     }
 }
 
-// 5. Fog Toroidal Visibility and Sprite Wrapping
+// 5. Fog Toroidal Visibility, Dynamic Toggle, and Sprite Wrapping Coverage
 console.log("\n--- Section 5: Fog Toroidal Visibility & Viewport Coverage ---");
 {
     mockGameMap._width = 64;
     mockGameMap._height = 64;
+    mockGameMap._displayX = 0;
+    mockGameMap._displayY = 0;
+
+    // 5a. Dynamic Fog Toggle
+    Fog.setEnabled(false);
+    check("fog_disabled_is_explored", Fog.isExplored(10, 10) === true, "all cells explored when fog disabled");
+    check("fog_disabled_is_visible", Fog.isVisible(10, 10) === true, "all cells visible when fog disabled");
+    check("fog_disabled_explored_count", Fog.exploredCount() === 64 * 64, "full count returned when fog disabled");
+    const fogSprite = new Fog.Sprite();
+    fogSprite.update();
+    check("fog_disabled_sprite_hidden", fogSprite.visible === false, "fog sprite hidden when fog disabled");
+
+    Fog.setEnabled(true);
+    check("fog_re_enabled_state", Fog.enabled === true, "fog enabled restored");
+
+    // 5b. Toroidal Raycast Seam Crossing
     Fog.refresh();
-
-    // Mark sight from observer right next to North boundary (cy = 0)
     Fog.mark(32, 0, 8);
-
-    // Sight should have penetrated across North boundary into South tiles (y = 63, 62, etc.)
     const southExplored = Fog.isExplored(32, 63, 0);
     const southVisible = Fog.isVisible(32, 63, 0);
     check("fog_raycast_wraps_north_south_seam", southExplored && southVisible,
         `Observer at (32, 0) r8 saw wrapped tile (32, 63): explored=${southExplored}, visible=${southVisible}`);
 
-    // Check Sprite_UFFog quadrant coverage
-    const fogSprite = new Fog.Sprite();
-    fogSprite.update();
+    // 5c. Viewport Full Coverage Across Toroidal Seams and Zooms
+    const testCases = [
+        { sz: 64, zoom: 1.0, dx: 0, dy: 0 },
+        { sz: 64, zoom: 1.0, dx: 63.5, dy: 63.5 },
+        { sz: 64, zoom: 0.666, dx: 63.5, dy: 63.5 },
+        { sz: 64, zoom: 0.333, dx: 63.5, dy: 63.5 },
+        { sz: 64, zoom: 0.333, dx: 32.0, dy: 0.2 },
+        { sz: 128, zoom: 0.333, dx: 127.5, dy: 127.5 },
+        { sz: 256, zoom: 0.333, dx: 255.5, dy: 255.5 }
+    ];
 
-    check("fog_sprite_has_quadrants", fogSprite._quadrants && fogSprite._quadrants.length >= 3,
-        `quadrants created: ${fogSprite._quadrants ? fogSprite._quadrants.length : 0}`);
+    let allViewportsCovered = true;
+    for (const tc of testCases) {
+        mockGameMap._width = tc.sz;
+        mockGameMap._height = tc.sz;
+        mockGameMap._displayX = tc.dx;
+        mockGameMap._displayY = tc.dy;
+        currentZoom = tc.zoom;
 
-    // Verify positioning when camera is scrolled across edge:
-    mockGameMap._displayY = 63.5;
-    fogSprite.update();
-    const tw = 48, th = 48;
-    const mapH = 64 * th;
-    check("fog_sprite_wrapped_position", fogSprite.y <= 0 && fogSprite.y + mapH >= 0,
-        `camera displayY=63.5 -> fogSprite.y=${fogSprite.y}, bottom=${fogSprite.y + mapH}`);
+        fogSprite.update();
+
+        const tw = 48, th = 48;
+        const mapW = tc.sz * tw;
+        const mapH = tc.sz * th;
+        const viewW = Math.ceil(sandbox.Graphics.width / currentZoom);
+        const viewH = Math.ceil(sandbox.Graphics.height / currentZoom);
+
+        const tileRects = [
+            { x1: fogSprite.x, y1: fogSprite.y, x2: fogSprite.x + mapW, y2: fogSprite.y + mapH }
+        ];
+        for (const t of fogSprite._tiles) {
+            if (!t.visible) continue;
+            const tx = fogSprite.x + t.x * tw;
+            const ty = fogSprite.y + t.y * th;
+            tileRects.push({ x1: tx, y1: ty, x2: tx + mapW, y2: ty + mapH });
+        }
+
+        if (mutateFog) {
+            // Simulate the old bug: only allow tiles with non-negative origin coordinates
+            for (let i = tileRects.length - 1; i >= 0; i--) {
+                if (tileRects[i].x1 < 0 || tileRects[i].y1 < 0) tileRects.splice(i, 1);
+            }
+        }
+
+        // Probe grid of points across viewport
+        let caseCovered = tileRects.length > 0;
+
+        for (let py = 0; py <= viewH; py += Math.max(16, Math.floor(viewH / 6))) {
+            for (let px = 0; px <= viewW; px += Math.max(16, Math.floor(viewW / 6))) {
+                const pointCovered = tileRects.some(r =>
+                    px >= r.x1 && px <= r.x2 &&
+                    py >= r.y1 && py <= r.y2
+                );
+                if (!pointCovered) {
+                    caseCovered = false;
+                    break;
+                }
+            }
+            if (!caseCovered) break;
+        }
+
+        if (!caseCovered) allViewportsCovered = false;
+        check(`fog_viewport_covered_sz${tc.sz}_z${Math.round(tc.zoom * 100)}_dx${Math.round(tc.dx)}_dy${Math.round(tc.dy)}`,
+            caseCovered,
+            `total tiles=${tileRects.length}, view=${viewW}x${viewH}, map=${mapW}x${mapH}`);
+    }
+    check("fog_all_viewports_seamlessly_covered", allViewportsCovered, "100% viewport coverage with zero gaps");
 }
 
 // Summary

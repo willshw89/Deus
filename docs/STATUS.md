@@ -9,6 +9,27 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Full Toroidal Fog of War Coverage & Title Screen Fog Option Delivered — 2026-09-21 (Gemini)
+Delivered per user directives ("I need the fog of war to covereverything even along world seams. Also, lets make fog of war an option on the start screen"):
+- **Full Viewport Toroidal Fog Coverage Across All Seams & Zooms (`UF_Fog.js`)**:
+  - Identified root cause in previous quadrant fog implementation: only tiled in positive coordinate space without accounting for camera zoom scale ($816 / zoom$), leaving outer screen areas exposed when zoomed out to $1/3$ or when viewing across world boundaries.
+  - Rewrote `Sprite_UFFog` to compute exact viewport bounding box in tilemap coordinates and instantiate a toroidal grid of child sprites spanning $[kStart, kEnd] \times [mStart, mEnd]$ covering all camera positions, zooms ($1.0$, $0.666$, $0.333$), and map sizes ($64\times64$, $128\times128$, $256\times256$).
+  - Parent sprite maintains native tile scaling (`tw, th`) while child sprites tile relative coordinates with zero gaps or overlaps.
+  - Evaluates `Fog.enabled` dynamically across all methods (`isExplored`, `isVisible`, `exploredCount`, `Sprite_UFFog.update`), allowing dynamic runtime toggling.
+  - Save/load persistence via `$gameSystem._ufFogEnabled` with backward-compatible defaults.
+- **Title Screen Fog of War Option (`UF_FactionMenus.js`)**:
+  - Added "Fog of War" toggle on `Window_NewGameSetup` at index 3:
+    `Faction` (0), `Starting Year` (1), `World Size` (2), `Fog of War` (3), `Start` (4), `Cancel` (5).
+  - Selectable between `◄  Enabled  ►` and `◄  Disabled  ►` via left/right arrows, enter key, and touch/click. Default: `Enabled`.
+  - Embarking applies `window.UF.NewGameSetup.fogOfWar` immediately to `UF.Fog.setEnabled()`.
+- **Automated Verification**:
+  - `tools/test_seamless_map_edges.js`: 37/37 PASS (exit 0), including Section 5 testing dynamic toggle, seam raycast wrapping, and multi-zoom toroidal probe coverage.
+  - Rule 4 mutation verification: `test_seamless_map_edges.js --mutate-fog` fails with 7 failures when non-negative quadrant restriction is simulated.
+  - `tools/run_tests.js setup`: 62/62 PASS (exit 0), asserting default enabled, left/right toggle, explicit setters, and world enablement on embark.
+  - `tools/run_tests.js fog`: 17/17 PASS (exit 0), asserting screen coverage at zoom 1.0, 0.667, and 0.333.
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Screenshots inspected (Rule 5): `live_deus_new_game_setup_fog_option.png` (Fog of War option cleanly positioned on expedition setup menu) and `live_fog_zoom_third.png` / `smoke.fog_debug_seam.png` (100% impenetrable black fog coverage extending to all viewport edges at 1/3 zoom across toroidal seams).
+
 ## Standardized Three World Sizes: Small, Med, Large Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Also lets do 3 sizes: 64x64 = Small, 128x128 = med, 256x256 large. The two smallest sizes arent large enough."):
 - **Expedition Setup Menu Standardized (`UF_FactionMenus.js`)**:

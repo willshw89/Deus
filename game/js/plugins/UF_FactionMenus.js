@@ -240,11 +240,11 @@
 
     Scene_Title.prototype.newGameSetupWindowRect = function() {
         const ww = 350;
-        const wh = 245;
+        const wh = 270;
         // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
         const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
         const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
-        const wy = 250;
+        const wy = 238;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -272,14 +272,19 @@
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
         const worldSize = this._newGameSetupWindow ? this._newGameSetupWindow.currentSize() : 64;
+        const fogOfWar = this._newGameSetupWindow ? this._newGameSetupWindow.currentFog() : true;
         window.UF = window.UF || {};
         window.UF.NewGameSetup = {
             faction: faction.toLowerCase(),
             year: year,
-            worldSize: worldSize
+            worldSize: worldSize,
+            fogOfWar: fogOfWar
         };
         if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
             UF_FactionMenus.setFaction(faction.toLowerCase());
+        }
+        if (window.UF && UF.Fog && typeof UF.Fog.setEnabled === "function") {
+            UF.Fog.setEnabled(fogOfWar);
         }
         DataManager.setupNewGame();
         if (this._commandWindow) this._commandWindow.close();
@@ -325,6 +330,7 @@
                 { size: 256, label: "256x256 (Large)" }
             ];
             this._sizeIndex = 0; // Default: 64x64 Small
+            this._fogEnabled = true; // Default: Fog of War Enabled
             this.windowskin = ImageManager.loadSystem("Window_default");
             this.backOpacity = 225;
             this._cursorVisible = false;
@@ -337,11 +343,11 @@
         }
 
         maxItems() {
-            return 5;
+            return 6;
         }
 
         itemHeight() {
-            return 38;
+            return 36;
         }
 
         currentFaction() {
@@ -358,6 +364,21 @@
 
         currentSizeLabel() {
             return this._sizeChoices[this._sizeIndex].label;
+        }
+
+        currentFog() {
+            return this._fogEnabled;
+        }
+
+        setFog(val) {
+            this._fogEnabled = (val === true || String(val).toLowerCase() === "enabled" || String(val).toLowerCase() === "on");
+            this.redrawItem(3);
+        }
+
+        toggleFog() {
+            this._fogEnabled = !this._fogEnabled;
+            SoundManager.playCursor();
+            this.redrawItem(3);
         }
 
         setFaction(factionName) {
@@ -484,13 +505,20 @@
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
                 this.drawText(sizeText, rect.x + 110, rect.y, rect.width - 118, "right");
             } else if (index === 3) {
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
+                this.drawText("Fog of War", rect.x + 8, rect.y, 110, "left");
+
+                const fogText = `◄  ${this._fogEnabled ? "Enabled" : "Disabled"}  ►`;
+                this.changeTextColor(isSelected ? "#ffffff" : (this._fogEnabled ? "#a0f0ff" : "#94a3b8"));
+                this.drawText(fogText, rect.x + 110, rect.y, rect.width - 118, "right");
+            } else if (index === 4) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
-            } else if (index === 4) {
+            } else if (index === 5) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
@@ -523,6 +551,8 @@
                 this.changeYear(Input.isPressed("shift") ? 10 : 1);
             } else if (this.index() === 2) {
                 this.nextSize();
+            } else if (this.index() === 3) {
+                this.toggleFog();
             } else {
                 super.cursorRight(wrap);
             }
@@ -535,6 +565,8 @@
                 this.changeYear(Input.isPressed("shift") ? -10 : -1);
             } else if (this.index() === 2) {
                 this.prevSize();
+            } else if (this.index() === 3) {
+                this.toggleFog();
             } else {
                 super.cursorLeft(wrap);
             }
@@ -585,11 +617,13 @@
             } else if (this.index() === 2) {
                 this.nextSize();
             } else if (this.index() === 3) {
+                this.toggleFog();
+            } else if (this.index() === 4) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (this.index() === 4) {
+            } else if (this.index() === 5) {
                 this.processCancel();
             }
         }
@@ -631,10 +665,12 @@
                         this.prevSize();
                     }
                 } else if (hitIndex === 3) {
-                    this.select(3);
-                    this.processOk();
+                    this.toggleFog();
                 } else if (hitIndex === 4) {
                     this.select(4);
+                    this.processOk();
+                } else if (hitIndex === 5) {
+                    this.select(5);
                     this.processCancel();
                 }
             }
@@ -1127,9 +1163,21 @@
             scene._newGameSetupWindow.setSize(64);
             t.check("size_reset_to_64", scene._newGameSetupWindow.currentSize() === 64, "Size reset to 64");
 
-            // Test Cancel action: click or trigger Cancel row (index 4)
+            // Test Fog of War toggle on Row 3
+            scene._newGameSetupWindow.select(3);
+            t.check("default_fog_enabled", scene._newGameSetupWindow.currentFog() === true, "Default Fog of War is Enabled");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("fog_toggled_to_disabled", scene._newGameSetupWindow.currentFog() === false, "Fog toggled to Disabled via Right");
+            scene._newGameSetupWindow.cursorLeft();
+            t.check("fog_toggled_to_enabled", scene._newGameSetupWindow.currentFog() === true, "Fog toggled to Enabled via Left");
+            scene._newGameSetupWindow.setFog(false);
+            t.check("fog_set_false", scene._newGameSetupWindow.currentFog() === false, "Fog explicitly set to false");
+            scene._newGameSetupWindow.setFog(true);
+            t.check("fog_set_true", scene._newGameSetupWindow.currentFog() === true, "Fog explicitly set to true");
+
+            // Test Cancel action: click or trigger Cancel row (index 5)
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 4 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 5 + 18;
             scene._newGameSetupWindow.onTouchSelect(true);
             await t.waitFrames(15);
             t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
@@ -1148,12 +1196,12 @@
             t.check("setup_window_closed_on_esc", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Esc key");
             t.check("command_window_open_after_esc", scene._commandWindow.isOpen(), "Command window reopened after Esc key");
 
-            // Test Cancel via real mouse click cycle (trigger + release on Cancel row)
+            // Test Cancel via real mouse click cycle (trigger + release on Cancel row, index 5)
             scene.commandNewGame();
             await t.waitFrames(15);
             t.check("setup_window_open_for_mouse_click", scene._newGameSetupWindow.isOpen(), "Setup window open before mouse click");
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 4 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 5 + 18;
             TouchInput._triggerX = TouchInput._x;
             TouchInput._triggerY = TouchInput._y;
             TouchInput._newState.triggered = true;
@@ -1166,11 +1214,11 @@
             t.check("setup_window_closed_on_mouse_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on mouse click");
             t.check("command_window_open_after_mouse_click", scene._commandWindow.isOpen(), "Command window reopened after mouse click");
 
-            // Test Cancel via Enter / OK key on Cancel row (index 4)
+            // Test Cancel via Enter / OK key on Cancel row (index 5)
             scene.commandNewGame();
             await t.waitFrames(15);
-            scene._newGameSetupWindow.select(4);
-            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 4, "Cancel row selected");
+            scene._newGameSetupWindow.select(5);
+            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 5, "Cancel row selected");
             Input._currentState["ok"] = true;
             Input._latestButton = "ok";
             Input._pressedTime = 0;
@@ -1197,21 +1245,23 @@
             await t.waitFrames(15);
             t.check("setup_window_reopened", scene._newGameSetupWindow.isOpen(), "Setup window reopened");
 
-            // Configure Dwarf expedition at Year 42 AD with Standard 64x64 world
+            // Configure Dwarf expedition at Year 42 AD with Standard 64x64 world and Fog Enabled
             scene._newGameSetupWindow.setFaction("Dwarf");
             scene._newGameSetupWindow.setYear(42);
             scene._newGameSetupWindow.setSize(64);
-            scene._newGameSetupWindow.select(3); // Hover "Start"
+            scene._newGameSetupWindow.setFog(true);
+            scene._newGameSetupWindow.select(4); // Hover "Start"
             await t.waitFrames(15);
 
             t.check("configured_faction_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Configured faction is Dwarf");
             t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
             t.check("configured_size_64", scene._newGameSetupWindow.currentSize() === 64, "Configured size is 64x64");
+            t.check("configured_fog_true", scene._newGameSetupWindow.currentFog() === true, "Configured fog of war is true");
             t.screenshot("live_deus_new_game_setup_dwarf_42");
 
-            // Test Embark action via click / touch trigger on Row 3
+            // Test Embark action via click / touch trigger on Row 4 (Start)
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
             scene._newGameSetupWindow.onTouchSelect(true);
             await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 15000, "Scene_Map started");
             await t.waitFrames(30);
@@ -1230,6 +1280,7 @@
             t.check("history_events_recorded", st.history.events && st.history.events.length > 0, "Chronicle events recorded: " + (st.history.events ? st.history.events.length : 0));
             t.check("history_sites_exist", st.history.sites && st.history.sites.length > 0, "Sites exist in world: " + (st.history.sites ? st.history.sites.length : 0));
             t.check("theme_switched_to_dwarf", UF_FactionMenus.getFaction() === "dwarf", "Window theme switched to Dwarf");
+            t.check("fog_enabled_in_world", window.UF && UF.Fog && UF.Fog.enabled === true, "Fog of War enabled in world");
 
             t.screenshot("live_dwarf_colony_year_42");
         }, { isDefault: false });
