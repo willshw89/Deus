@@ -69,6 +69,15 @@
             emit("time:speedChanged", SPEEDS[index]);
             return SPEEDS[index];
         },
+        /** Set by multiplier value (e.g. 1, 2, 4, 8, 16, 32). */
+        setMultiplier(m) {
+            const idx = SPEEDS.indexOf(m | 0);
+            if (idx >= 0) return this.setLevel(idx);
+            return SPEEDS[index];
+        },
+        set(m) {
+            return this.setMultiplier(m);
+        },
         faster() { return this.setLevel(index + 1); },
         slower() { return this.setLevel(index - 1); },
         /** Run fn after `frames` map updates. Returns an id for cancel(). */
@@ -125,6 +134,38 @@
         return running ? n * SPEEDS[index] : n;
     };
 
+    let currentSubTick = 0;
+    let totalSubTicks = 1;
+
+    const _SceneManager_update = SceneManager.update;
+    SceneManager.update = function(deltaTime) {
+        try {
+            const n = this.determineRepeatNumber(deltaTime);
+            totalSubTicks = n;
+            for (let i = 0; i < n; i++) {
+                currentSubTick = i;
+                this.updateMain();
+            }
+        } catch (e) {
+            this.catchException(e);
+        } finally {
+            currentSubTick = 0;
+            totalSubTicks = 1;
+        }
+    };
+
+    const _SceneManager_updateInputData = SceneManager.updateInputData;
+    SceneManager.updateInputData = function() {
+        if (SPEEDS[index] > 1 && totalSubTicks > 1 && currentSubTick < totalSubTicks - 1) return;
+        _SceneManager_updateInputData.call(this);
+    };
+
+    const _SceneManager_updateEffekseer = SceneManager.updateEffekseer;
+    SceneManager.updateEffekseer = function() {
+        if (SPEEDS[index] > 1 && totalSubTicks > 1 && currentSubTick < totalSubTicks - 1) return;
+        _SceneManager_updateEffekseer.call(this);
+    };
+
     // Timers advance with the map (paused in menus, while paused, and while the map isn't updating).
     const _Game_Map_update = Game_Map.prototype.update;
     Game_Map.prototype.update = function(sceneActive) {
@@ -171,6 +212,15 @@
     Input.keyMapper[219] = "ufSlower"; // [
     const _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
+        if (SPEEDS[index] > 1 && totalSubTicks > 1 && currentSubTick < totalSubTicks - 1) {
+            // Intermediate sub-tick: advance map simulation without heavy presentation/UI re-rendering
+            this.updateMain();
+            if (window.$ufTime) $ufTime.update();
+            if (window.UF && UF.Time && typeof UF.Time.update === "function") {
+                UF.Time.update(1 / 60);
+            }
+            return;
+        }
         _Scene_Map_update.call(this);
         if (!this.isActive()) return;
         if (Input.isTriggered("ufFaster")) Time.faster();

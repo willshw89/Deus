@@ -496,16 +496,20 @@
             this.y = -$gameMap.displayY() * th;
             if (dirty) {
                 const context = this.bitmap.context;
-                const image = context.createImageData(width, height);
-                const d = image.data;
-                for (let i = 0; i < width * height; i++) {
-                    const j = i * 4;
-                    d[j] = FOG_RGB[0];
-                    d[j + 1] = FOG_RGB[1];
-                    d[j + 2] = FOG_RGB[2];
-                    d[j + 3] = visible[i] ? 0 : explored[i] ? DIM : 255;
+                if (!this._fogImage || this._fogImage.width !== width || this._fogImage.height !== height) {
+                    this._fogImage = context.createImageData(width, height);
+                    this._fogData32 = new Uint32Array(this._fogImage.data.buffer);
                 }
-                context.putImageData(image, 0, 0);
+                const r = FOG_RGB[0], g = FOG_RGB[1], b = FOG_RGB[2];
+                const cClear = (0 << 24) | (b << 16) | (g << 8) | r;
+                const cDim = (DIM << 24) | (b << 16) | (g << 8) | r;
+                const cDark = (255 << 24) | (b << 16) | (g << 8) | r;
+                const d32 = this._fogData32;
+                const len = width * height;
+                for (let i = 0; i < len; i++) {
+                    d32[i] = visible[i] ? cClear : (explored[i] ? cDim : cDark);
+                }
+                context.putImageData(this._fogImage, 0, 0);
                 this.bitmap._baseTexture.update();
                 dirty = false;
             }

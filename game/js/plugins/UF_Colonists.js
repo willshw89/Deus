@@ -893,19 +893,46 @@
         if (!W || !primary || !W.state.history) return;
         if (primary.settlementsReady && (localTicks % 300 !== 0)) return;
         primary.settlements = primary.settlements || {};
-        const taken = new Set(W.units().map(u => u.name));
+        const allUnits = W.units();
+        const taken = new Set(allUnits.map(u => u.name));
+
+        // Group eligible units in a single O(U) pass instead of O(S * U) filters per site
+        const bySite = new Map();
+        const byFactionLevel = new Map();
+        for (let i = 0; i < allUnits.length; i++) {
+            const u = allUnits[i];
+            if (!u || !u.data) continue;
+            const k = u.data.kind;
+            if (k !== "person" && k !== "colonist") continue;
+            if (u.data.manual || u.data.ai === "manual") continue;
+            if (u.name && u.name.startsWith("TEST_")) continue;
+
+            if (u.data.site) {
+                let list = bySite.get(u.data.site);
+                if (!list) { list = []; bySite.set(u.data.site, list); }
+                list.push(u);
+            } else {
+                const key = `${u.data.faction}:${zOf(u)}`;
+                let list = byFactionLevel.get(key);
+                if (!list) { list = []; byFactionLevel.set(key, list); }
+                list.push(u);
+            }
+        }
+
         for (const site of W.state.history.sites || []) {
             if (site.ruined || !levelSupported(zOf(site))) continue;
-            const residents = W.units().filter(u => u.data && (u.data.kind === "person" || u.data.kind === "colonist") &&
-                !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_")) &&
-                u.data.faction === site.faction && (u.data.site === site.id || (!u.data.site && sameLevel(u, site))));
+            const siteResidents = bySite.get(site.id) || [];
+            const flResidents = byFactionLevel.get(`${site.faction}:${zOf(site)}`) || [];
+            if (!siteResidents.length && !flResidents.length) continue;
+            const residents = siteResidents.length ? siteResidents : flResidents.filter(u => u.data.faction === site.faction);
             if (!residents.length) continue;
             if (site.id !== primary.siteId && !primary.settlements[site.id]) {
                 primary.settlements[site.id] = { version: 2, factionId: site.faction, siteId: site.id,
                     site: { x: site.x, y: site.y }, area: copyArea(site.area), z: zOf(site), radius: siteRadius(site),
                     plan: makePlan(site), stockpiles: [], log: [] };
             }
-            for (const u of residents) {
+            for (let r = 0; r < residents.length; r++) {
+                const u = residents[r];
                 if (!u.data.site) u.data.site = site.id;
                 if (u.data.kind === "person" && u.data.ai !== "settlement") convertPerson(u, W.state, site, taken);
                 if (!u.data.home || !u.data.home.area) u.data.home = { area: copyArea(site.area), x: site.x, y: site.y, z: zOf(site) };
@@ -2518,6 +2545,7 @@
         for (const u of all) {
             if (!u || !u.data) continue;
             const d = u.data;
+            if (d._geneticsEnsured) continue;
             let changed = false;
             if (d.age === undefined) {
                 d.age = 20 + Math.floor(unit01(seed(), 0xa9e, u.id, 0) * 20);
@@ -2539,6 +2567,7 @@
             if (changed) {
                 updateAgeAppearance(u);
             }
+            d._geneticsEnsured = true;
         }
     }
 
@@ -2855,6 +2884,7 @@
     }
     const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
 
+    let planInvalidatedAt = 0;
     /** [{ id, done, detail }] for every plan step, evaluated from the world now (and recorded in state). */
     function planStatus(ref, selectedSteps) {
         const c = colonyState(ref);
@@ -2866,7 +2896,7 @@
                 const detail = step.build ? (total === 1 ? "built" : `${total}/${total}`) : (step.detail || "done");
                 return { id: step.id, done: true, detail };
             }
-            if (step._cachedStatus && step._cachedTick === localTicks && !step.craft && !step.stock) {
+            if (step._cachedStatus && step._cachedTick >= planInvalidatedAt && (localTicks - step._cachedTick < 30)) {
                 return Object.assign({}, step._cachedStatus);
             }
             let done = false, detail = "";
@@ -4412,17 +4442,19 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; };
+        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; };
         UF.Events.on("world:unitAdded", clearCaches);
         UF.Events.on("world:unitRemoved", clearCaches);
         UF.Events.on("colonists:born", clearCaches);
         UF.Events.on("combat:kill", clearCaches);
+        UF.Events.on("objects:changed", clearCaches);
+        UF.Events.on("items:changed", clearCaches);
         // world:created is hooked here at boot, after every plugin has registered its own listener (UF_Factions,
         // UF_History, UF_Wildlife), so the colony is made last, from the people History spawned.
         UF.Events.on("world:created", state => {
             try { setupColony(state); } catch (e) { console.error("UF_Colonists: setup failed", e); }
         });
-        UF.Events.on("jobs:done", (job, u) => { try { onDone(job, u); } catch (e) { console.error(e); } });
+        UF.Events.on("jobs:done", (job, u) => { clearCaches(); try { onDone(job, u); } catch (e) { console.error(e); } });
         UF.Events.on("jobs:failed", job => onFailed(job));
         UF.Events.on("time:day", (day, month, year) => {
             try {

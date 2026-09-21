@@ -127,19 +127,26 @@
     };
 
     Sprite_Character.prototype.update2DShadow = function() {
-        if (!this._shadowSprite || !this._character) return;
+        if (!this._shadowSprite || !this._character || !this.visible) {
+            if (this._shadowSprite) this._shadowSprite.visible = false;
+            return;
+        }
         if (this._character === $gamePlayer || !this._character.characterName()) {
             this._shadowSprite.visible = false;
             return;
         }
-        if (this._character.event && this._character.event() && 
-            (this._character.event().note.includes("<tree>") || this._character.event().note.includes("<canopy>"))) {
+        if (this._character._isFloraOrCanopy === undefined) {
+            const ev = this._character.event && this._character.event();
+            const note = ev ? ev.note || "" : "";
+            this._character._isFloraOrCanopy = note.includes("<tree>") || note.includes("<canopy>");
+        }
+        if (this._character._isFloraOrCanopy) {
             this._shadowSprite.visible = false;
             return;
         }
 
         // Only show shadow for visible living characters
-        if (this._character.isTransparent() || this._character.opacity() === 0 || !this.visible) {
+        if (this._character.isTransparent() || this._character.opacity() === 0) {
             this._shadowSprite.visible = false;
             return;
         }
@@ -185,13 +192,15 @@
     // Canopy & Roof Occlusion Transparency (Ultima VII Cutaways)
     //-----------------------------------------------------------------------------
     Sprite_Character.prototype.updateOcclusion = function() {
-        if (!this._character || !($gameMap && $gamePlayer)) return;
+        if (!this._character || !($gameMap && $gamePlayer) || !this.visible) return;
 
-        // Check if this sprite is an overhead scenery/canopy event
-        const isCanopy = this._character._isCanopy || (this._character.event && this._character.event() && 
-                         (this._character.event().note.includes("<canopy>") || this._character.event().note.includes("<tree>")));
-        
-        if (!isCanopy) return;
+        // Check if this sprite is an overhead scenery/canopy event (cached flag)
+        if (this._character._isCanopy === undefined) {
+            const ev = this._character.event && this._character.event();
+            const note = ev ? ev.note || "" : "";
+            this._character._isCanopy = note.includes("<canopy>") || note.includes("<tree>");
+        }
+        if (!this._character._isCanopy) return;
 
         // Check if player or any colonist is within the canopy bounding box (e.g. 1 tile above/behind)
         const cx = this._character.x;
@@ -205,10 +214,21 @@
 
         // Check all colonists/NPCs
         if (!occluded) {
-            for (const ev of $gameMap.events()) {
-                if (ev && ev._isColonist && Math.abs(ev.x - cx) <= 1 && (ev.y >= cy - 1 && ev.y <= cy + 1)) {
-                    occluded = true;
-                    break;
+            const colonists = (window.UF && UF.Colonists && typeof UF.Colonists.list === "function") ? UF.Colonists.list() : null;
+            if (colonists && colonists.length) {
+                for (let i = 0; i < colonists.length; i++) {
+                    const u = colonists[i];
+                    if (Math.abs(u.x - cx) <= 1 && (u.y >= cy - 1 && u.y <= cy + 1)) {
+                        occluded = true;
+                        break;
+                    }
+                }
+            } else {
+                for (const ev of $gameMap.events()) {
+                    if (ev && ev._isColonist && Math.abs(ev.x - cx) <= 1 && (ev.y >= cy - 1 && ev.y <= cy + 1)) {
+                        occluded = true;
+                        break;
+                    }
                 }
             }
         }

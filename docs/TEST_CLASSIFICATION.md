@@ -1,16 +1,16 @@
 # Project DEUS — Test Classification & Execution Authority
 
 Generated: 2026-09-21
-Total scripts audited: 585
+Total scripts audited: 605
 
 ## Summary
-- **Headless Automated Proofs/Suites (CI/Regression)**: 100
+- **Headless Automated Proofs/Suites (CI/Regression)**: 102
 - **Playtest / In-Game Live Suites (Browser/Canvas)**: 16
 - **Art Production & Verification Pipeline**: 12
-- **Diagnostic & Build Utilities**: 457
+- **Diagnostic & Build Utilities**: 475
 - **Legacy / Stale Scripts**: 0
 
-### HEADLESS_AUTOMATED (100)
+### HEADLESS_AUTOMATED (102)
 | File | Purpose / Reason |
 |---|---|
 | `test_adam_res.js` | Automated headless Node test script |
@@ -37,6 +37,7 @@ Total scripts audited: 585
 | `test_creatures_ingame.js` | Automated headless Node test script |
 | `test_culture_growth.js` | Automated headless Node test script |
 | `test_deer_action_boxes.js` | Automated headless Node test script |
+| `test_diagonal_corners_and_doorways.js` | Automated headless Node test script |
 | `test_dwarves_ingame.js` | Automated headless Node test script |
 | `test_dynamic_armor_reflection.js` | Automated headless Node test script |
 | `test_ecology.js` | Automated headless Node test script |
@@ -76,6 +77,7 @@ Total scripts audited: 585
 | `test_portrait_clothing_offsets.js` | Automated headless Node test script |
 | `test_process_human_12.js` | Automated headless Node test script |
 | `test_profile_tabs.js` | Automated headless Node test script |
+| `test_r4c2_foreshorten.js` | Automated headless Node test script |
 | `test_regrowth_construction_guard.js` | Automated headless Node test script |
 | `test_resize_face.js` | Automated headless Node test script |
 | `test_resource_node_materials.js` | Automated headless Node test script |
@@ -150,7 +152,7 @@ Total scripts audited: 585
 | `test_object_originality.js` | Art pipeline / image processing tool |
 | `test_palette.js` | Art pipeline / image processing tool |
 
-### UTILITY_TOOL (457)
+### UTILITY_TOOL (475)
 | File | Purpose / Reason |
 |---|---|
 | `add_ambient_catalog.js` | General utility script |
@@ -176,7 +178,10 @@ Total scripts audited: 585
 | `apply_ground_shades_catalog.js` | General utility script |
 | `apply_underground_catalog.js` | General utility script |
 | `art_check.js` | General utility script |
+| `assemble_approved_master_chest.js` | General utility script |
 | `assemble_deus_windowskin.js` | General utility script |
+| `assemble_final_chest_sheet.js` | General utility script |
+| `audit_chest_frames.js` | General utility script |
 | `bake_generator_pool.js` | General utility script |
 | `bench_shades.js` | Diagnostic, benchmark, or build utility |
 | `benchmark_performance.js` | Diagnostic, benchmark, or build utility |
@@ -284,6 +289,7 @@ Total scripts audited: 585
 | `build_nano_wolf.js` | General utility script |
 | `build_nature_menu_themes.js` | General utility script |
 | `build_oak_sway_sheet.js` | General utility script |
+| `build_perfect_chest_sheet.js` | General utility script |
 | `build_perfect_female_dwarf.js` | General utility script |
 | `build_perfect_female_human.js` | General utility script |
 | `build_perfect_female_orc.js` | General utility script |
@@ -291,6 +297,7 @@ Total scripts audited: 585
 | `build_perfect_male_elf.js` | General utility script |
 | `build_perfect_male_human.js` | General utility script |
 | `build_perfect_male_orc.js` | General utility script |
+| `build_pink_chest_master.js` | General utility script |
 | `build_pointy_cursors_and_default_menu_showcase.js` | General utility script |
 | `build_pointy_cursors_and_default_menu.js` | General utility script |
 | `build_pro_human_female.js` | General utility script |
@@ -320,6 +327,7 @@ Total scripts audited: 585
 | `check_120.js` | General utility script |
 | `check_area_biomes.js` | General utility script |
 | `check_briefs.js` | General utility script |
+| `check_catalog_containers.js` | General utility script |
 | `check_catalog.js` | General utility script |
 | `check_generator_alignment.js` | General utility script |
 | `check_resource_manifest.js` | General utility script |
@@ -331,6 +339,7 @@ Total scripts audited: 585
 | `clean_hearth_top.js` | General utility script |
 | `clean_packed_sheet.js` | General utility script |
 | `clean_prop_fringe.js` | General utility script |
+| `clean_staging_game.js` | General utility script |
 | `commit_batch4.js` | General utility script |
 | `commit_batch6.js` | General utility script |
 | `compare_stances.js` | General utility script |
@@ -353,6 +362,7 @@ Total scripts audited: 585
 | `compile_var4_suite.js` | General utility script |
 | `compile_var5_suite.js` | General utility script |
 | `compile_var6_suite.js` | General utility script |
+| `convert_batches.js` | General utility script |
 | `creature_pipeline.js` | General utility script |
 | `crop_ingame_showcase.js` | General utility script |
 | `crop_raw_cells.js` | General utility script |
@@ -361,6 +371,8 @@ Total scripts audited: 585
 | `crop_showcase_2x.js` | General utility script |
 | `crop_wolf_row1.js` | General utility script |
 | `decode_u7_samples.js` | General utility script |
+| `deploy_batch1.js` | General utility script |
+| `deploy_chest.js` | General utility script |
 | `deploy_complete_u7_portrait_generator.js` | General utility script |
 | `deploy_human_genetics_assets.js` | General utility script |
 | `deploy_pro_human_male_suite.js` | General utility script |
@@ -370,8 +382,11 @@ Total scripts audited: 585
 | `diagnose_all_raw_walks.js` | General utility script |
 | `diagnose_walk_cycles.js` | General utility script |
 | `ensure_male_aliases.js` | General utility script |
+| `execute_chest_repair.js` | General utility script |
 | `explore_settler_designs.js` | General utility script |
 | `export_u7_style_dataset.js` | General utility script |
+| `extract_approved_chest_master.js` | General utility script |
+| `extract_cells.js` | General utility script |
 | `extract_modular_generator_layers.js` | General utility script |
 | `extract_modular_u7_portrait_parts.js` | General utility script |
 | `extract_stock_characters.js` | General utility script |
@@ -386,7 +401,10 @@ Total scripts audited: 585
 | `fix_all_walk_facings.js` | General utility script |
 | `generate_all_u7_assets.js` | General utility script |
 | `generate_asset_inventory.js` | Diagnostic, benchmark, or build utility |
+| `generate_audit_contact_sheet.js` | General utility script |
 | `generate_boar_actions.js` | General utility script |
+| `generate_chest_review_package.js` | General utility script |
+| `generate_context_preview.js` | General utility script |
 | `generate_decomposition_nano_pro.js` | General utility script |
 | `generate_deer_actions.js` | General utility script |
 | `generate_df_factions_flora.js` | General utility script |
@@ -465,6 +483,7 @@ Total scripts audited: 585
 | `inspect_wall.js` | General utility script |
 | `inspect_wolf.js` | General utility script |
 | `jpg_to_png.js` | General utility script |
+| `lock_in_chest.js` | General utility script |
 | `make_25d.js` | General utility script |
 | `measure_attack_grid.js` | General utility script |
 | `measure_baselines.js` | General utility script |
@@ -581,6 +600,7 @@ Total scripts audited: 585
 | `setup_256_middle_start.js` | General utility script |
 | `setup_showcase_save.js` | General utility script |
 | `stage_action_assets.js` | General utility script |
+| `stage_batch1_containers.js` | General utility script |
 | `switch_things_to_stock.js` | General utility script |
 | `sync_save_events.js` | General utility script |
 | `transform_boar_to_bear.js` | General utility script |
