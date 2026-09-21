@@ -846,22 +846,27 @@
     function ensureHome(h, u) {
         if (h.home && !h.home.isShared) return h.home;
         if (h.home && h.home.isShared) {
-            // The Town Hall is the leader's court — the leader and their partner stay permanently.
-            // Everyone else seeks a private homestead plot once the Town Hall is sheltered.
-            const Callings = window.UF && UF.Callings;
-            const isLeaderHousehold = Callings && members(h).some(m => Callings.isLeader(m));
-            if (isLeaderHousehold) return h.home; // Leader stays in the Town Hall as their court
+            // The original 8 founders share the Town Hall communally.
+            // They only leave when they pair up (forming a new family household).
+            // Non-founders (immigrants, grown children) always seek private homes.
+            const mems = members(h);
+            const allFounders = mems.every(m => m.data && m.data.founder);
+            const hasPair = mems.length >= 2 && mems.some(m => m.data && (m.data.partner || m.data.partnerId));
 
-            // All other colonists (paired or single) seek private homes once walls are up
+            // Founders without a partner stay in the town hall
+            if (allFounders && !hasPair) return h.home;
+
+            // Once the town hall is sheltered, paired founders and non-founders seek private plots
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
             if (sheltered) {
                 if (h.lastSearchDay === day()) return h.home;
                 h.lastSearchDay = day();
-                const p = findPlot(h, u, designFor(h, Math.max(2, members(h).length)));
+                const p = findPlot(h, u, designFor(h, Math.max(2, mems.length)));
                 if (p) {
                     h.previousSharedHome = h.home;
                     h.home = p;
-                    h.reason = "Private homestead reserved; construction needed";
+                    h.reason = hasPair ? "Newlywed homestead reserved; construction needed"
+                                       : "Private homestead reserved; construction needed";
                     emit("households:homePlanned", h, p);
                     return p;
                 }
