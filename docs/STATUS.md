@@ -6,6 +6,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Systemic Material Economy: Milestone 1 / Task 3 Geological Stratum Generation Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval):
+- **Deterministic Geological Stratum Mapping (`UF_WorldGen.js`, `UF_Levels.js`)**:
+  - Implemented `WorldGen.geologyAt(gx, gy, z)`: maps climate noise fields (elevation, volcanism, drainage, rainfall, alignment) and subterranean biomes across Z=0, Z=-1, and Z=-2 into physical stone materials registered in `catalog.materials.stones` (`limestone`, `sandstone`, `granite`, `basalt`, `slate`, `marble`).
+  - Added dedicated `SALT.geology` (0x5701) to ensure deterministic noise uncoupled from other systems.
+  - Surface (Z=0): volcanic hotspots -> `basalt`, high peaks/mountains -> `granite`, upland drainage slopes -> `slate`, contact metamorphism -> `marble`, arid basins -> `sandstone`, temperate valleys and river basins -> `limestone`.
+  - Upper Earth (Z=-1): `chalk_karst` -> `limestone`, `rooted_loam` -> `sandstone`/`slate`, `clay_bed` -> `slate`, `shallow_cave` -> `limestone`.
+  - Deep Earth (Z=-2): `deep_mine_belt` -> `granite`, `crystal_cavern` -> `marble`, `fossil_bed` -> `limestone`/`slate`, `deep_salt_cavern` -> `basalt`.
+  - Added `Levels.stratumAt(ref)`: resolves world coordinates and returns stratum definition with depthBand and physical stone attributes.
+  - Integrated `geology` into `WorldGen.cellInfo(gx, gy, z)` and `stratum` into `Levels.cellAt(ref)`.
+  - Created automated test harness `tools/test_geology_strata.js` testing physical stone mapping, determinism, depth bands, and engine integration.
+- **Verification Evidence**:
+  - `node tools/test_geology_strata.js`: **9/9 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_geology_strata.js --mutant` failed on `surface_strata_valid` with exit 1.
+  - `node tools/run_tests.js items`: **19/19 PASS (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 20s (0 regressions).
+  - Node syntax checks on `UF_WorldGen.js` and `UF_Levels.js`: 100% clean.
+
 ## Systemic Material Economy: Milestone 1 / Task 2 Item Material Binding Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy Roadmap approval):
 - **Item Material Binding & Quality Tracking (`UF_Items.js`)**:

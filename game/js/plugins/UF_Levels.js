@@ -1339,11 +1339,24 @@
             const r = refOf(ref);
             return SHAPE_NAMES[packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7] || "";
         },
-        /** { shape, code, constructed, material } of a cell, or null outside the world. */
+        /** { shape, code, constructed, material, stratum } of a cell, or null outside the world. */
         cellAt: ref => {
             const r = refOf(ref);
             const p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
-            return p ? Object.assign(unpack(p), { biome: biomeAt(ref), water: waterAt(ref), liquid: waterAt(ref) ? (r.z === -2 ? "lava" : "water") : null }) : null;
+            return p ? Object.assign(unpack(p), {
+                biome: biomeAt(ref),
+                water: waterAt(ref),
+                liquid: waterAt(ref) ? (r.z === -2 ? "lava" : "water") : null,
+                stratum: Levels.stratumAt(ref)
+            }) : null;
+        },
+        stratumAt: ref => {
+            const r = refOf(ref);
+            const W = World(), st = W && W.state;
+            const size = st ? st.size : 256;
+            const gx = r.ax * size + r.x, gy = r.ay * size + r.y;
+            const G = window.UF && UF.WorldGen;
+            return G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, r.z) : null;
         },
         setShape,
         lastRefusal: () => lastRefusal,

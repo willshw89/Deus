@@ -52,7 +52,7 @@
     const SALT = Object.freeze({
         elevation: 0x1e11, rainfall: 0x2a1f, temperature: 0x3e3f, drainage: 0x4d4a, volcanism: 0x5f0c,
         savagery: 0x6a5a, alignment: 0x7a11, lake: 0x8a4e, detail: 0x9d37,
-        river: 0x21e5, riverWidth: 0x21e6, riverPhase: 0x7e11, pond: 0x90ed, names: 0x4e41, kit: 0x6b17
+        river: 0x21e5, riverWidth: 0x21e6, riverPhase: 0x7e11, pond: 0x90ed, names: 0x4e41, kit: 0x6b17, geology: 0x5701
     });
     const PEAK_REGION = 250;   // impassable rock (informational: UF_Tiles flags peak_rock itself)
     const WATER_DIST_MAX = 4;  // how far from water "avoidWater" can ask for
@@ -529,12 +529,105 @@
         return isLake(d.seed, cat.climate, fieldsFor(d.seed, d, cat.climate, gx, gy), gx, gy);
     };
     WorldGen.biomeAt = (gx, gy, z = 0) => { const c = WorldGen.cellInfo(gx, gy, z); return c ? c.biomeId : null; };
-    /** { biomeId, biome, ground, water, walkable, region: {savagery, alignment}, fields, lake, peak } for a world cell. */
+
+    /**
+     * Deterministic geological stratum at world coordinates (gx, gy, z).
+     * Maps climate fields, elevation, volcanism, and subterranean biomes
+     * to physical stone materials in catalog.materials.stones (Limestone, Sandstone, Granite, Basalt, Slate, Marble).
+     * Returns: { stone, name, category, depthBand, density, compressiveStrength, workability, color, tags, z } or null.
+     */
+    WorldGen.geologyAt = function(gx, gy, z = 0) {
+        const cat = catalog();
+        const stones = cat && cat.materials && cat.materials.stones;
+        if (!stones) return null;
+        const st = UF.World && UF.World.state;
+        const seed = st ? st.seed : 0;
+        const d = dims(st);
+        if (gx < 0 || gy < 0 || gx >= d.width || gy >= d.height) return null;
+
+        let stoneId = "limestone";
+        let depthBand = "surface";
+
+        if (z < 0) {
+            depthBand = z === -1 ? "upper_earth" : "deep";
+            const L = window.UF.Levels;
+            const size = d.size;
+            const ax = Math.floor(gx / size), ay = Math.floor(gy / size);
+            const lx = gx - ax * size, ly = gy - ay * size;
+            const biome = L && typeof L.biomeAt === "function" ? L.biomeAt({ area: { x: ax, y: ay }, x: lx, y: ly, z }) : null;
+            const bId = (biome && biome.id) || (typeof biome === "string" ? biome : "");
+            const localNoise = unit4(seed, SALT.geology, gx, gy);
+
+            if (z === -1) {
+                // Upper Earth (z === -1)
+                if (bId === "chalk_karst") stoneId = "limestone";
+                else if (bId === "rooted_loam") stoneId = localNoise > 0.5 ? "sandstone" : "slate";
+                else if (bId === "clay_bed") stoneId = "slate";
+                else if (bId === "shallow_cave") stoneId = localNoise > 0.6 ? "limestone" : "sandstone";
+                else stoneId = localNoise > 0.6 ? "limestone" : (localNoise > 0.3 ? "sandstone" : "slate");
+            } else {
+                // Deep Earth (z === -2)
+                if (bId === "deep_mine_belt") stoneId = "granite";
+                else if (bId === "crystal_cavern") stoneId = "marble";
+                else if (bId === "fossil_bed") stoneId = localNoise > 0.5 ? "limestone" : "slate";
+                else if (bId === "deep_salt_cavern") stoneId = "basalt";
+                else stoneId = localNoise > 0.5 ? "granite" : (localNoise > 0.25 ? "basalt" : "marble");
+            }
+        } else {
+            // Surface (z >= 0)
+            const f = fieldsFor(seed, d, cat.climate, gx, gy);
+            const localNoise = unit4(seed, SALT.geology, gx, gy);
+
+            // Volcanic hotspots produce extrusive basalt
+            if (f.v > 0.62 || (f.v > 0.50 && localNoise > 0.70)) {
+                stoneId = "basalt";
+            }
+            // Mountain peaks and high elevations expose massive plutonic granite
+            else if (f.e > 0.60 || (f.e > 0.52 && localNoise > 0.60)) {
+                stoneId = "granite";
+            }
+            // High drainage upland slopes form metamorphic slate
+            else if (f.e > 0.44 && f.d > 0.48) {
+                stoneId = "slate";
+            }
+            // Contact metamorphism zones form rare marble
+            else if (f.e > 0.48 && f.v > 0.45 && localNoise > 0.85) {
+                stoneId = "marble";
+            }
+            // Arid, dry or well-drained basins form sedimentary sandstone
+            else if (f.r < 0.38 || f.d < 0.32 || localNoise < 0.22) {
+                stoneId = "sandstone";
+            }
+            // Valleys, lush river basins, and temperate meadows form sedimentary limestone
+            else {
+                stoneId = "limestone";
+            }
+        }
+
+        const matDef = stones[stoneId] || stones.limestone;
+        if (!matDef) return null;
+
+        return {
+            stone: stoneId,
+            name: matDef.name,
+            category: matDef.category,
+            depthBand,
+            density: matDef.density,
+            compressiveStrength: matDef.compressiveStrength,
+            workability: matDef.workability,
+            color: matDef.color,
+            tags: matDef.tags,
+            z
+        };
+    };
+
+    /** { biomeId, biome, ground, water, walkable, region: {savagery, alignment}, fields, lake, peak, geology } for a world cell. */
     WorldGen.cellInfo = function(gx, gy, z = 0) {
         const m = compiled();
         const st = UF.World.state;
         if (!m || !st) return null;
         if (!Number.isInteger(z) || z < -2 || z > 2) return null;
+        const geology = WorldGen.geologyAt(gx, gy, z);
         if (z !== 0) {
             const L = window.UF.Levels;
             if (!L) return null;
@@ -547,14 +640,14 @@
             return { biomeId: biomeId || (z < 0 ? "cavern" : "open_air"),
                 biome: typeof biome === "object" && biome ? biome : { id: biomeId || "cavern", name: biomeId || "Cavern" },
                 ground: c.material, water: c.water || null, walkable: !c.water && L.standableShape(ref),
-                region: { savagery: "wild", alignment: "ordinary" }, fields: null, lake: !!c.water, peak: false, z };
+                region: { savagery: "wild", alignment: "ordinary" }, fields: null, lake: !!c.water, peak: false, z, geology };
         }
         const c = resolve(st.seed, dims(st), m, waterModels(st), gx, gy, {});
         return {
             biomeId: c.biomeId, biome: m.biomes[c.b], ground: c.groundId, water: c.waterKey,
             walkable: !c.waterKey && !(c.flags & FLAG_PEAK),
             region: { savagery: m.savTiers[c.sav].id, alignment: m.alignTiers[c.align].id },
-            fields: c.f, lake: c.lake, peak: !!(c.flags & FLAG_PEAK)
+            fields: c.f, lake: c.lake, peak: !!(c.flags & FLAG_PEAK), geology
         };
     };
     WorldGen.cellInfoLocal = function(ax, ay, x, y, z = 0) {
