@@ -160,6 +160,21 @@ Every functional workshop or energy source must provide both:
 1. **Idle / Unlit / Cold static frame**
 2. **Active / Lit / Burning multi-frame animation sequence**
 
+### 7.4 Universal 12-Sprite Charset Layout Standard (DOWN / LEFT / RIGHT / UP)
+Every character set, humanoid action, creature, and directional animated object sheet across Project DEUS strictly follows this 3-column × 4-row layout (User directive 2026-09-21, VISION V130):
+
+```text
+Row 0: DOWN   DOWN   DOWN   (South facing / front toward player: Frame 0, Frame 1, Frame 2)
+Row 1: LEFT   LEFT   LEFT   (West facing / left side profile:    Frame 0, Frame 1, Frame 2)
+Row 2: RIGHT  RIGHT  RIGHT  (East facing / right side profile:   Frame 0, Frame 1, Frame 2)
+Row 3: UP     UP     UP     (North facing / rear from behind:    Frame 0, Frame 1, Frame 2)
+```
+
+- **Columns (X-Axis):** Animation progression / cycle (Frame 0 = closed / stand / step 1, Frame 1 = half-open / step 2, Frame 2 = fully-open / step 3).
+- **Rows (Y-Axis):** Directional facings (Row 0 = Down, Row 1 = Left, Row 2 = Right, Row 3 = Up).
+- **Base Stability:** The entity chassis and ground baseline must remain pixel-stable across all animation columns within each row.
+- **Native Dimensions:** 144×192 px (3×4 frames of 48×48 px) for standard entities; 288×384 px (3×4 frames of 96×96 px) for 2-tile large entities.
+
 ---
 
 ## 8. Nano Banana Pro Production Prompt Template
