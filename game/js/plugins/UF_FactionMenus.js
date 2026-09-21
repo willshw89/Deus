@@ -320,13 +320,11 @@
             this._factionIndex = 0;
             this._year = 1;
             this._sizeChoices = [
-                { size: 16, label: "16x16 (Tiny)" },
-                { size: 32, label: "32x32 (Small)" },
-                { size: 64, label: "64x64 (Standard)" },
-                { size: 128, label: "128x128 (Large)" },
-                { size: 256, label: "256x256 (Massive)" }
+                { size: 64, label: "64x64 (Small)" },
+                { size: 128, label: "128x128 (Med)" },
+                { size: 256, label: "256x256 (Large)" }
             ];
-            this._sizeIndex = 2; // Default: 64x64 Standard
+            this._sizeIndex = 0; // Default: 64x64 Small
             this.windowskin = ImageManager.loadSystem("Window_default");
             this.backOpacity = 225;
             this._cursorVisible = false;
@@ -1078,8 +1076,8 @@
             t.check("fits_between_d_and_s", scene._newGameSetupWindow.x > 243 && (scene._newGameSetupWindow.x + scene._newGameSetupWindow.width) < 618, "Fits squarely between letter D and letter S");
             t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
             t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
-            t.check("default_size_standard", scene._newGameSetupWindow.currentSize() === 64, "Default world size is 64x64 Standard");
-            t.check("default_size_label_standard", scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Standard)", "Default world size label matches");
+            t.check("default_size_small", scene._newGameSetupWindow.currentSize() === 64, "Default world size is 64x64 Small");
+            t.check("default_size_label_small", scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Small)", "Default world size label matches");
             t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
 
             t.screenshot("live_deus_new_game_setup");
@@ -1108,31 +1106,24 @@
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
 
-            // Test World Size cycling on Row 2
+            // Test World Size cycling on Row 2 (3 sizes: 64x64 Small, 128x128 Med, 256x256 Large)
             scene._newGameSetupWindow.select(2);
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_large", scene._newGameSetupWindow.currentSize() === 128, "Size cycled right to 128x128 Large");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_massive", scene._newGameSetupWindow.currentSize() === 256, "Size cycled right to 256x256 Massive");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_tiny", scene._newGameSetupWindow.currentSize() === 16, "Size cycled right to 16x16 Tiny");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_small", scene._newGameSetupWindow.currentSize() === 32, "Size cycled right to 32x32 Small");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_back_to_standard", scene._newGameSetupWindow.currentSize() === 64, "Size cycled right to 64x64 Standard");
-            scene._newGameSetupWindow.cursorLeft();
-            t.check("size_cycled_left_to_small", scene._newGameSetupWindow.currentSize() === 32, "Size cycled left to 32x32 Small");
-            // Verify all 5 size choices
-            scene._newGameSetupWindow.setSize(16);
-            t.check("size_set_16", scene._newGameSetupWindow.currentSize() === 16 && scene._newGameSetupWindow.currentSizeLabel() === "16x16 (Tiny)", "Size set to 16x16 Tiny");
-            scene._newGameSetupWindow.setSize(32);
-            t.check("size_set_32", scene._newGameSetupWindow.currentSize() === 32 && scene._newGameSetupWindow.currentSizeLabel() === "32x32 (Small)", "Size set to 32x32 Small");
             scene._newGameSetupWindow.setSize(64);
-            t.check("size_set_64", scene._newGameSetupWindow.currentSize() === 64 && scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Standard)", "Size set to 64x64 Standard");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_med", scene._newGameSetupWindow.currentSize() === 128, "Size cycled right to 128x128 Med");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_large", scene._newGameSetupWindow.currentSize() === 256, "Size cycled right to 256x256 Large");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_wrap_to_small", scene._newGameSetupWindow.currentSize() === 64, "Size cycled right wrapping to 64x64 Small");
+            scene._newGameSetupWindow.cursorLeft();
+            t.check("size_cycled_left_to_large", scene._newGameSetupWindow.currentSize() === 256, "Size cycled left to 256x256 Large");
+            // Verify all 3 size choices
+            scene._newGameSetupWindow.setSize(64);
+            t.check("size_set_64", scene._newGameSetupWindow.currentSize() === 64 && scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Small)", "Size set to 64x64 Small");
             scene._newGameSetupWindow.setSize(128);
-            t.check("size_set_128", scene._newGameSetupWindow.currentSize() === 128 && scene._newGameSetupWindow.currentSizeLabel() === "128x128 (Large)", "Size set to 128x128 Large");
+            t.check("size_set_128", scene._newGameSetupWindow.currentSize() === 128 && scene._newGameSetupWindow.currentSizeLabel() === "128x128 (Med)", "Size set to 128x128 Med");
             scene._newGameSetupWindow.setSize(256);
-            t.check("size_set_256", scene._newGameSetupWindow.currentSize() === 256 && scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Massive)", "Size set to 256x256 Massive");
+            t.check("size_set_256", scene._newGameSetupWindow.currentSize() === 256 && scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Large)", "Size set to 256x256 Large");
             scene._newGameSetupWindow.setSize(64);
             t.check("size_reset_to_64", scene._newGameSetupWindow.currentSize() === 64, "Size reset to 64");
 

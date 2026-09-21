@@ -9,6 +9,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Standardized Three World Sizes: Small, Med, Large Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Also lets do 3 sizes: 64x64 = Small, 128x128 = med, 256x256 large. The two smallest sizes arent large enough."):
+- **Expedition Setup Menu Standardized (`UF_FactionMenus.js`)**:
+  - Removed 16x16 (Tiny) and 32x32 (Small) options from `Window_NewGameSetup._sizeChoices`.
+  - Standardized exactly on 3 selectable sizes:
+    1. `64x64 (Small)` (size 64, default)
+    2. `128x128 (Med)` (size 128)
+    3. `256x256 (Large)` (size 256)
+  - Left/right arrow navigation, wrapping, and direct selection updated across all 3 options.
+- **Automated Verification**:
+  - `tools/run_tests.js setup`: 55/55 PASS (exit 0), verifying size initialization to Small (64), cycling right to Med (128) and Large (256), wrapping back to Small (64), left cycling to Large (256), and explicit size setters.
+  - Live in-engine screenshot inspected (Rule 5): `live_deus_new_game_setup_3_sizes.png`.
+
 ## Toroidal Seam Alignment & Seamless Map Edges Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Map edges need to match/line up seamlessly"):
 - **Toroidal Value Noise Lattice Wrapping (`UF_WorldGen.js`)**:
