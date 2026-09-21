@@ -56,6 +56,21 @@ const f4 = decodePNG(fs.readFileSync('game/img/characters/$UF_Human_Female_4_Wal
 // ----------------------------------------------------------------------------
 // 1. EXTRACT HAIR OVERLAYS (Rows y: 0..22 in each 48x48 cell)
 // ----------------------------------------------------------------------------
+function mirrorRow1ToRow2(buf) {
+    for (let c = 0; c < 3; c++) {
+        for (let py = 0; py < 48; py++) {
+            for (let px = 0; px < 48; px++) {
+                const sIdx = ((1 * 48 + py) * 144 + (c * 48 + (47 - px))) * 4;
+                const dIdx = ((2 * 48 + py) * 144 + (c * 48 + px)) * 4;
+                buf[dIdx]     = buf[sIdx];
+                buf[dIdx + 1] = buf[sIdx + 1];
+                buf[dIdx + 2] = buf[sIdx + 2];
+                buf[dIdx + 3] = buf[sIdx + 3];
+            }
+        }
+    }
+}
+
 function extractHairLayer(sheetBuf) {
     const hairBuf = Buffer.alloc(144 * 192 * 4);
     for (let row = 0; row < 4; row++) {
@@ -79,6 +94,7 @@ function extractHairLayer(sheetBuf) {
             }
         }
     }
+    mirrorRow1ToRow2(hairBuf);
     return hairBuf;
 }
 
@@ -122,12 +138,12 @@ function extractBeardLayer(sheetBuf) {
                         beardBuf[idx] = r;
                         beardBuf[idx + 1] = g;
                         beardBuf[idx + 2] = b;
-                        beardBuf[idx + 3] = a;
                     }
                 }
             }
         }
     }
+    mirrorRow1ToRow2(beardBuf);
     return beardBuf;
 }
 
@@ -167,6 +183,7 @@ function extractClothingLayer(sheetBuf) {
             }
         }
     }
+    mirrorRow1ToRow2(clothBuf);
     return clothBuf;
 }
 
@@ -218,6 +235,7 @@ function extractBaseBody(sheetBuf, skinMultiplier) {
             }
         }
     }
+    mirrorRow1ToRow2(bodyBuf);
     return bodyBuf;
 }
 

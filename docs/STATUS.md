@@ -9,6 +9,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Universal 12-Sprite Walk Cycle Alignment & Faction Charset Routing Delivered — 2026-09-21 (Gemini)
+Delivered per user directives ("Their feet do not appear to be walking. we need to make sure the assets are all being routed into the game", "We are only using the charset generator ingame for faction creatures. thats all we are focused on right now", "The resulting sprite should have animated walking in every direction. Some of the sprites must be animating incorrectly. mostly left and right"):
+- **Root Cause Fixed Across All 12 Human Walk Masters (`tools/build_all_uniform_walk_masters.js`)**:
+  - Identified that raw Google Nano Banana Pro sheets place a 90° static side profile in column 0, while columns 1..5 contain the 3/4-angle walk cycle (c:1 Stride A, c:2 Stand / feet together, c:3 Stride B).
+  - Fixed West extraction coordinates across all 12 sheets to `c: [1, 2, 3]`, ensuring RMMZ's 1->0->1->2 walk cycle plays `[Stand -> Stride A -> Stand -> Stride B]` with distinct, alternating foot strides.
+  - Mirrored West cleanly to East (Row 2) per VISION V110, ensuring East steps alternate symmetrically with zero backwards moonwalking or 180° head flips.
+  - Recompiled all 12 `$UF_Human_Male_1..6_Walk.png`, `$UF_Human_Female_1..6_Walk.png`, and aliases (`$Adam.png`, `$Eve.png`).
+- **Faction Creature Walk Sheets (`tools/build_faction_creature_walk_masters.js`)**:
+  - Replaced procedural slicing artifacts with authentic Nano Banana Pro extractions for Elf Male, Elf Female, Dwarf Male, Dwarf Female, and Orc Male.
+  - Resolved Orc Male center-split slicing bug by implementing `assembleBoxConfigSheet` with exact non-magenta bounding boxes from `art/raw/orc_male_walk_12_raw.png`.
+- **Modular Charset Layers & 116 Generator Pool Re-baked**:
+  - Re-extracted base body, hair, beard, and clothing layers from corrected human walk masters.
+  - Re-baked all 116 generator combinations (`$gen_*.png`) and synchronized portraits (`face_gen_*.png`).
+- **Verification**:
+  - Verified 4-step playback review sheets for all assets via `view_file` (Rule 5).
+  - Automated test passes: `colonists` (24/24 PASS, exit 0), `smoke` (13/13 PASS, exit 0).
+  - Live in-game screenshots: `game/test_output/colonists.colonists_working.png` and `game/test_output/smoke.map.png`.
+
 ## Multi-Level Fluid Breach, Cascading Flooding & Animated Tile Shading Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Okay, now, if there is water on ground layer, and there is no wall on layer -1, then that square and any squares until it hits a wall are flooded. Same logic ok layer -1, if there is a flooded square or a body of water without a wall under it, that square is flooded and the flood extends until it hits walls. The same logic applies for lava. These can be animated by shading the tile blue or red"):
 - **Multi-Level Fluid Simulation & Breach Engine (`UF_Levels.js`)**:

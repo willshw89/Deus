@@ -22,6 +22,7 @@
 /game/test_screenshot.png
 /game/test_output/
 /game/save/
+/art/review/
 
 # U7 stand-ins (AGENTS.md rule 8): any file starting with U7_ / $U7_ / !$U7_ / u7_ anywhere under game/img
 /game/img/**/U7_*
