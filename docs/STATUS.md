@@ -9,6 +9,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## World Size Selection on New Game Setup Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("On the menu where you select your faction and the year, add an option for world size: 16x16 = tiny, 32x32 = small, 64x64 = standard, 128x128 = large, 256x256 = massive"):
+- **New Game Setup Window (`Window_NewGameSetup` in `UF_FactionMenus.js`)**:
+  - Added dedicated Row 2 "World Size" between "Starting Year" and "Start", expanding window from 4 rows (205 px) to 5 rows (245 px) vertically centered between the title logo letters D and S.
+  - Implemented 5 selectable options with cycle navigation (left/right cursors and click/touch arrows):
+    - `16x16 (Tiny)` (size: 16)
+    - `32x32 (Small)` (size: 32)
+    - `64x64 (Standard)` (size: 64, default)
+    - `128x128 (Large)` (size: 128)
+    - `256x256 (Massive)` (size: 256)
+  - Styled with 18 px font size, cyan highlight, dark slate backing, and spacious arrow spacing matching DEUS visual identity.
+  - Passes user choice via `Scene_Title.prototype.onNewGameEmbark` into `window.UF.NewGameSetup.worldSize`.
+- **Engine Size Scalability (`UF_World.js`, `UF_History.js`, `UF_Wildlife.js`, `UF_Households.js`)**:
+  - `UF_World.js`: `World.newWorld(seed, size)` now reads `UF.NewGameSetup.worldSize` when present, dynamically creating world states with the selected dimension.
+  - `UF_History.js`: Scaled site placement margins (`size / 4`), minimum start distance (`size / 3`), and site gap (`minSiteGap`) so sites and camps place reliably without rejection on compact map sizes (16x16 and 32x32). Added fallback coordinates for `campCell` to prevent null returns when compact maps lack 3x3 open blocks.
+  - `UF_Wildlife.js`: Scaled wildlife start kit distances (`d0, d1`) and underground pocket border clearance (`BORDER = Math.min(16, size / 8)`) to map boundaries, enabling wildlife herds to spawn cleanly on small maps.
+  - `UF_Households.js`: Fixed TypeError in `roomForPair` where uninitialized `home.sleeping` array caused a crash during second-by-second historical living world simulation.
+- **Verification Evidence (Measured Native NW.js Runtime)**:
+  - `tools/run_tests.js setup`: **59/59 PASS (exit 0)** (covers all 5 size choices, size cycling, row navigation, Cancel/Esc/Right-click, and live embark into 64x64 world with 42 years of living history).
+  - `tools/run_tests.js smoke`: **13/13 PASS (exit 0)**.
+  - `tools/run_tests.js world`: **30/30 PASS (exit 0)**.
+  - `tools/run_tests.js colonists`: **24/24 PASS (exit 0)**.
+  - `tools/test_second_by_second_history.js`: **15/15 PASS (exit 0)**.
+  - Screenshots inspected: `setup.live_deus_new_game_setup_dwarf_42.png` and `setup.live_dwarf_colony_year_42.png`.
+
 ## World Beat & Colonist Decision Stutter Elimination Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The game is still stuttering, maybe it has to do with the world beat? I want the world to remain smooth in terms of movement"):
 - **Root Causes Diagnosed via Native NW.js Instrumentation**:

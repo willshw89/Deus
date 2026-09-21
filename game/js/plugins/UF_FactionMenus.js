@@ -240,11 +240,11 @@
 
     Scene_Title.prototype.newGameSetupWindowRect = function() {
         const ww = 350;
-        const wh = 205;
+        const wh = 245;
         // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
         const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
         const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
-        const wy = 270;
+        const wy = 250;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -271,10 +271,12 @@
         this._embarking = true;
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
+        const worldSize = this._newGameSetupWindow ? this._newGameSetupWindow.currentSize() : 64;
         window.UF = window.UF || {};
         window.UF.NewGameSetup = {
             faction: faction.toLowerCase(),
-            year: year
+            year: year,
+            worldSize: worldSize
         };
         if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
             UF_FactionMenus.setFaction(faction.toLowerCase());
@@ -307,7 +309,7 @@
     };
 
     // Class: Window_NewGameSetup
-    // Expedition setup menu allowing player to choose faction and starting year (1-200 AD)
+    // Expedition setup menu allowing player to choose faction, starting year (1-200 AD), and world size
     class Window_NewGameSetup extends Window_Selectable {
         initialize(rect) {
             super.initialize(rect);
@@ -317,6 +319,14 @@
             ];
             this._factionIndex = 0;
             this._year = 1;
+            this._sizeChoices = [
+                { size: 16, label: "16x16 (Tiny)" },
+                { size: 32, label: "32x32 (Small)" },
+                { size: 64, label: "64x64 (Standard)" },
+                { size: 128, label: "128x128 (Large)" },
+                { size: 256, label: "256x256 (Massive)" }
+            ];
+            this._sizeIndex = 2; // Default: 64x64 Standard
             this.windowskin = ImageManager.loadSystem("Window_default");
             this.backOpacity = 225;
             this._cursorVisible = false;
@@ -329,7 +339,7 @@
         }
 
         maxItems() {
-            return 4;
+            return 5;
         }
 
         itemHeight() {
@@ -344,6 +354,14 @@
             return this._year;
         }
 
+        currentSize() {
+            return this._sizeChoices[this._sizeIndex].size;
+        }
+
+        currentSizeLabel() {
+            return this._sizeChoices[this._sizeIndex].label;
+        }
+
         setFaction(factionName) {
             const idx = this._factionChoices.findIndex(f => f.toLowerCase() === String(factionName).toLowerCase());
             if (idx >= 0) {
@@ -355,6 +373,26 @@
         setYear(y) {
             this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
             this.redrawItem(1);
+        }
+
+        setSize(s) {
+            const idx = this._sizeChoices.findIndex(c => c.size === parseInt(s, 10) || c.label.toLowerCase().includes(String(s).toLowerCase()));
+            if (idx >= 0) {
+                this._sizeIndex = idx;
+                this.redrawItem(2);
+            }
+        }
+
+        nextSize() {
+            this._sizeIndex = (this._sizeIndex + 1) % this._sizeChoices.length;
+            SoundManager.playCursor();
+            this.redrawItem(2);
+        }
+
+        prevSize() {
+            this._sizeIndex = (this._sizeIndex - 1 + this._sizeChoices.length) % this._sizeChoices.length;
+            SoundManager.playCursor();
+            this.redrawItem(2);
         }
 
         refreshCursor() {
@@ -424,7 +462,7 @@
             this.resetTextColor();
             this.contents.outlineColor = "rgba(0, 0, 0, 0.95)";
             this.contents.outlineWidth = 3;
-            this.contents.fontSize = 20;
+            this.contents.fontSize = 18;
 
             if (index === 0) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
@@ -432,22 +470,29 @@
 
                 const factionText = `◄  ${this.currentFaction()}  ►`;
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(factionText, rect.x + 110, rect.y, rect.width - 118, "right");
+                this.drawText(factionText, rect.x + 100, rect.y, rect.width - 108, "right");
             } else if (index === 1) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
                 this.drawText("Starting Year", rect.x + 8, rect.y, 120, "left");
 
                 const yearText = `◄  ${this._year} AD  ►`;
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(yearText, rect.x + 130, rect.y, rect.width - 138, "right");
+                this.drawText(yearText, rect.x + 120, rect.y, rect.width - 128, "right");
             } else if (index === 2) {
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
+                this.drawText("World Size", rect.x + 8, rect.y, 110, "left");
+
+                const sizeText = `◄  ${this.currentSizeLabel()}  ►`;
+                this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
+                this.drawText(sizeText, rect.x + 110, rect.y, rect.width - 118, "right");
+            } else if (index === 3) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
-            } else if (index === 3) {
+            } else if (index === 4) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
@@ -478,6 +523,8 @@
                 this.nextFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? 10 : 1);
+            } else if (this.index() === 2) {
+                this.nextSize();
             } else {
                 super.cursorRight(wrap);
             }
@@ -488,6 +535,8 @@
                 this.prevFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? -10 : -1);
+            } else if (this.index() === 2) {
+                this.prevSize();
             } else {
                 super.cursorLeft(wrap);
             }
@@ -536,11 +585,13 @@
             } else if (this.index() === 1) {
                 this.changeYear(1);
             } else if (this.index() === 2) {
+                this.nextSize();
+            } else if (this.index() === 3) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (this.index() === 3) {
+            } else if (this.index() === 4) {
                 this.processCancel();
             }
         }
@@ -566,20 +617,26 @@
                 if (hitIndex === 0) {
                     if (localPos.x > 240) {
                         this.nextFaction();
-                    } else if (localPos.x > 120) {
+                    } else if (localPos.x > 100) {
                         this.prevFaction();
                     }
                 } else if (hitIndex === 1) {
                     if (localPos.x > 240) {
                         this.changeYear(1);
-                    } else if (localPos.x > 120) {
+                    } else if (localPos.x > 100) {
                         this.changeYear(-1);
                     }
                 } else if (hitIndex === 2) {
-                    this.select(2);
-                    this.processOk();
+                    if (localPos.x > 240) {
+                        this.nextSize();
+                    } else if (localPos.x > 100) {
+                        this.prevSize();
+                    }
                 } else if (hitIndex === 3) {
                     this.select(3);
+                    this.processOk();
+                } else if (hitIndex === 4) {
+                    this.select(4);
                     this.processCancel();
                 }
             }
@@ -1021,6 +1078,8 @@
             t.check("fits_between_d_and_s", scene._newGameSetupWindow.x > 243 && (scene._newGameSetupWindow.x + scene._newGameSetupWindow.width) < 618, "Fits squarely between letter D and letter S");
             t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
             t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
+            t.check("default_size_standard", scene._newGameSetupWindow.currentSize() === 64, "Default world size is 64x64 Standard");
+            t.check("default_size_label_standard", scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Standard)", "Default world size label matches");
             t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
 
             t.screenshot("live_deus_new_game_setup");
@@ -1049,9 +1108,37 @@
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
 
-            // Test Cancel action: click or trigger Cancel row (index 3)
+            // Test World Size cycling on Row 2
+            scene._newGameSetupWindow.select(2);
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_large", scene._newGameSetupWindow.currentSize() === 128, "Size cycled right to 128x128 Large");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_massive", scene._newGameSetupWindow.currentSize() === 256, "Size cycled right to 256x256 Massive");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_tiny", scene._newGameSetupWindow.currentSize() === 16, "Size cycled right to 16x16 Tiny");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_to_small", scene._newGameSetupWindow.currentSize() === 32, "Size cycled right to 32x32 Small");
+            scene._newGameSetupWindow.cursorRight();
+            t.check("size_cycled_back_to_standard", scene._newGameSetupWindow.currentSize() === 64, "Size cycled right to 64x64 Standard");
+            scene._newGameSetupWindow.cursorLeft();
+            t.check("size_cycled_left_to_small", scene._newGameSetupWindow.currentSize() === 32, "Size cycled left to 32x32 Small");
+            // Verify all 5 size choices
+            scene._newGameSetupWindow.setSize(16);
+            t.check("size_set_16", scene._newGameSetupWindow.currentSize() === 16 && scene._newGameSetupWindow.currentSizeLabel() === "16x16 (Tiny)", "Size set to 16x16 Tiny");
+            scene._newGameSetupWindow.setSize(32);
+            t.check("size_set_32", scene._newGameSetupWindow.currentSize() === 32 && scene._newGameSetupWindow.currentSizeLabel() === "32x32 (Small)", "Size set to 32x32 Small");
+            scene._newGameSetupWindow.setSize(64);
+            t.check("size_set_64", scene._newGameSetupWindow.currentSize() === 64 && scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Standard)", "Size set to 64x64 Standard");
+            scene._newGameSetupWindow.setSize(128);
+            t.check("size_set_128", scene._newGameSetupWindow.currentSize() === 128 && scene._newGameSetupWindow.currentSizeLabel() === "128x128 (Large)", "Size set to 128x128 Large");
+            scene._newGameSetupWindow.setSize(256);
+            t.check("size_set_256", scene._newGameSetupWindow.currentSize() === 256 && scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Massive)", "Size set to 256x256 Massive");
+            scene._newGameSetupWindow.setSize(64);
+            t.check("size_reset_to_64", scene._newGameSetupWindow.currentSize() === 64, "Size reset to 64");
+
+            // Test Cancel action: click or trigger Cancel row (index 4)
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 4 + 19;
             scene._newGameSetupWindow.onTouchSelect(true);
             await t.waitFrames(15);
             t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
@@ -1075,7 +1162,7 @@
             await t.waitFrames(15);
             t.check("setup_window_open_for_mouse_click", scene._newGameSetupWindow.isOpen(), "Setup window open before mouse click");
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 4 + 19;
             TouchInput._triggerX = TouchInput._x;
             TouchInput._triggerY = TouchInput._y;
             TouchInput._newState.triggered = true;
@@ -1088,11 +1175,11 @@
             t.check("setup_window_closed_on_mouse_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on mouse click");
             t.check("command_window_open_after_mouse_click", scene._commandWindow.isOpen(), "Command window reopened after mouse click");
 
-            // Test Cancel via Enter / OK key on Cancel row (index 3)
+            // Test Cancel via Enter / OK key on Cancel row (index 4)
             scene.commandNewGame();
             await t.waitFrames(15);
-            scene._newGameSetupWindow.select(3);
-            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 3, "Cancel row selected");
+            scene._newGameSetupWindow.select(4);
+            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 4, "Cancel row selected");
             Input._currentState["ok"] = true;
             Input._latestButton = "ok";
             Input._pressedTime = 0;
@@ -1119,19 +1206,21 @@
             await t.waitFrames(15);
             t.check("setup_window_reopened", scene._newGameSetupWindow.isOpen(), "Setup window reopened");
 
-            // Configure Dwarf expedition at Year 42 AD
+            // Configure Dwarf expedition at Year 42 AD with Standard 64x64 world
             scene._newGameSetupWindow.setFaction("Dwarf");
             scene._newGameSetupWindow.setYear(42);
-            scene._newGameSetupWindow.select(2); // Hover "Embark"
+            scene._newGameSetupWindow.setSize(64);
+            scene._newGameSetupWindow.select(3); // Hover "Start"
             await t.waitFrames(15);
 
             t.check("configured_faction_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Configured faction is Dwarf");
             t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
+            t.check("configured_size_64", scene._newGameSetupWindow.currentSize() === 64, "Configured size is 64x64");
             t.screenshot("live_deus_new_game_setup_dwarf_42");
 
-            // Test Embark action via click / touch trigger on Row 2
+            // Test Embark action via click / touch trigger on Row 3
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 2 + 19;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 38 * 3 + 19;
             scene._newGameSetupWindow.onTouchSelect(true);
             await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 15000, "Scene_Map started");
             await t.waitFrames(30);
@@ -1139,6 +1228,7 @@
             const st = window.UF && UF.World && UF.World.state;
             t.check("map_scene_active", SceneManager._scene instanceof Scene_Map, "Transitioned to live game map");
             t.check("state_exists", !!st, "World state created");
+            t.check("world_size_is_64", st.size === 64, "World state size initialized to 64x64 Standard");
 
             const playerFac = st.factions.list.find(f => f.isPlayer);
             t.check("player_faction_is_dwarf", !!playerFac && (playerFac.species === "dwarf" || playerFac.culture === "dwarf"), "Player faction is Dwarf");

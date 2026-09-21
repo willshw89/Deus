@@ -353,14 +353,19 @@
     //-------------------------------------------------------------------------
     // World creation
 
-    World.newWorld = function(seed) {
+    World.newWorld = function(seed, size) {
         const s = seed || CONFIG.seed || Math.floor(Math.random() * 0x7ffffffe) + 1;
+        const worldSize = (typeof size === "number" && size > 0)
+            ? size
+            : ((window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.worldSize === "number")
+                ? UF.NewGameSetup.worldSize
+                : CONFIG.size);
         this.state = {
             version: 3,
             seed: s,
             areasX: CONFIG.areasX,
             areasY: CONFIG.areasY,
-            size: CONFIG.size,
+            size: worldSize,
             startArea: { x: Math.floor(CONFIG.areasX / 2), y: Math.floor(CONFIG.areasY / 2) },
             units: {},
             nextUnitId: 1,

@@ -353,8 +353,10 @@
         const mid = Math.floor(d.size / 2);
         const WG = WorldGen();
         const groundCamps = campsOf(st).filter(c => (c.z || 0) === 0);
-        const camps = groundCamps.length ? groundCamps : [{ id: 0, faction: null, area: { x: st.startArea.x, y: st.startArea.y }, x: mid, y: mid, z: 0 }];
-        const [d0, d1] = kit.distance;
+        const rawD0 = kit.distance[0], rawD1 = kit.distance[1];
+        const maxReach = Math.max(2, Math.floor(d.size / 2) - 2);
+        const d0 = Math.min(rawD0, Math.max(1, Math.floor(maxReach * 0.5)));
+        const d1 = Math.max(d0 + 1, Math.min(rawD1, maxReach));
         const out = [];
         camps.forEach((camp, ci) => {
             const info = WG.cellInfo(camp.area.x * d.size + camp.x, camp.area.y * d.size + camp.y);
@@ -447,7 +449,7 @@
         const b = L.baseline(z, ax, ay);
         if (!b || !b.pockets || !b.pockets.length) return [];
         const size = st.size;
-        const BORDER = 16;
+        const BORDER = Math.min(16, Math.max(1, Math.floor(size / 8)));
         const FLOOR = (L.SHAPES && L.SHAPES.floor) || 2;
         const caveSpecies = speciesList().filter(s => ["giant_spider", "bat", "rat", "troll", "bog_horror"].includes(s.id));
         if (!caveSpecies.length) return [];
@@ -456,7 +458,8 @@
 
         const zOf = o => (typeof (o && o.z) === "number" ? o.z : (o && o.area && typeof o.area.z === "number" ? o.area.z : 0));
         const camps = campsOf(st).filter(c => zOf(c) === z && c.area.x === ax && c.area.y === ay);
-        const wildPockets = b.pockets.filter(p => !camps.some(c => Math.hypot(p.x - c.x, p.y - c.y) < 25));
+        const safeCampDist = Math.min(25, Math.max(3, Math.floor(size / 3)));
+        const wildPockets = b.pockets.filter(p => !camps.some(c => Math.hypot(p.x - c.x, p.y - c.y) < safeCampDist));
         if (!wildPockets.length) return [];
 
         const herdCount = Math.min(wildPockets.length, z === -1 ? 6 : 4);

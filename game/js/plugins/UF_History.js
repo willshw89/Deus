@@ -218,12 +218,13 @@
     function placeSite(rand, state, sites, opts) {
         const size = state.size;
         const sc = History.sitesConfig() || {};
-        const margin = opts.radius + 2;
-        const minStart = sc.minDistanceFromStart || 48;
+        const margin = Math.max(1, Math.min(Math.floor(size / 4), opts.radius + 2));
+        const minStart = Math.min(Math.floor(size / 3), sc.minDistanceFromStart || 48);
+        const minSiteGap = Math.min(MIN_SITE_GAP, Math.max(3, Math.floor(size / 3)));
         const preferred = (sc.preferredBiomes && Array.isArray(sc.preferredBiomes[opts.species])) ? sc.preferredBiomes[opts.species] : null;
         const gx0 = opts.area.x * size, gy0 = opts.area.y * size;
         const discWalkable = (x, y) => {
-            const r = opts.radius + 1;
+            const r = Math.min(Math.floor(size / 4), opts.radius + 1);
             for (let dy = -r; dy <= r; dy++) {
                 for (let dx = -r; dx <= r; dx++) {
                     const info = cellInfo(gx0 + x + dx, gy0 + y + dy);
@@ -232,6 +233,7 @@
             }
             return true;
         };
+        const span = Math.max(1, size - 2 * margin);
         for (let pass = 0; pass < 2; pass++) {
             const wantBiome = pass === 0 ? preferred : null;
             for (let i = 0; i < SITE_TRIES; i++) {
@@ -241,11 +243,11 @@
                     y = opts.near.y + Math.round((rand() * 2 - 1) * NEW_SITE_REACH);
                     if (x < margin || y < margin || x > size - 1 - margin || y > size - 1 - margin) continue;
                 } else {
-                    x = margin + Math.floor(rand() * (size - 2 * margin));
-                    y = margin + Math.floor(rand() * (size - 2 * margin));
+                    x = margin + Math.floor(rand() * span);
+                    y = margin + Math.floor(rand() * span);
                 }
                 if (opts.start && Math.hypot(x - opts.start.x, y - opts.start.y) < minStart) continue;
-                if (sites.some(s => sameArea(s.area, opts.area) && Math.hypot(s.x - x, s.y - y) < MIN_SITE_GAP)) continue;
+                if (sites.some(s => sameArea(s.area, opts.area) && Math.hypot(s.x - x, s.y - y) < minSiteGap)) continue;
                 const info = cellInfo(gx0 + x, gy0 + y);
                 if (info && !info.walkable) continue;
                 if (wantBiome && info && !wantBiome.includes(info.biomeId)) continue;
@@ -275,21 +277,27 @@
             return true;
         };
         const cells = [];
-        for (let dy = -HOME_REACH; dy <= HOME_REACH; dy++) {
-            for (let dx = -HOME_REACH; dx <= HOME_REACH; dx++) {
+        const reach = Math.min(HOME_REACH, Math.max(1, Math.floor(size / 3)));
+        for (let dy = -reach; dy <= reach; dy++) {
+            for (let dx = -reach; dx <= reach; dx++) {
                 const d = Math.hypot(dx, dy);
-                if (d <= HOME_REACH) cells.push({ x: mid + dx, y: mid + dy, d });
+                if (d <= reach) {
+                    const cx = mid + dx, cy = mid + dy;
+                    if (cx >= 0 && cx < size && cy >= 0 && cy < size) {
+                        cells.push({ x: cx, y: cy, d });
+                    }
+                }
             }
         }
         cells.sort((a, b) => a.d - b.d || a.y - b.y || a.x - b.x);
-        for (const r of [radius + 1, Math.min(radius + 1, 2), 0]) {
+        for (const r of [Math.min(Math.floor(size / 4), radius + 1), Math.min(radius + 1, 2), 0]) {
             const c = cells.find(c => discWalkable(c.x, c.y, r));
             if (c) {
                 const info = cellInfo(gx0 + c.x, gy0 + c.y);
                 return { x: c.x, y: c.y, biomeId: info ? info.biomeId : null, clearRadius: r };
             }
         }
-        return null;
+        return { x: mid, y: mid, biomeId: null, clearRadius: 0 };
     }
 
     //-------------------------------------------------------------------------
@@ -404,7 +412,7 @@
                 }
                 return best;
             };
-            return search(CAMP_SEARCH) || search(size * 2);
+            return search(CAMP_SEARCH) || search(size * 2) || { x: Math.max(1, Math.min(size - 2, f.home.x)), y: Math.max(1, Math.min(size - 2, f.home.y)), moved: 0 };
         });
     }
     History.campCell = (state, f) => {
@@ -3052,7 +3060,11 @@
 
                 const targetYears = (state.history && state.history.startYear) || 1;
                 if (targetYears > 1) {
-                    History.iterateWorldHistory(state, targetYears);
+                    try {
+                        History.iterateWorldHistory(state, targetYears);
+                    } catch (err) {
+                        console.error("UF_History.iterateWorldHistory ERROR:", err);
+                    }
                 }
                 return;
             }

@@ -1414,16 +1414,17 @@
             if (!dry(h, p.x, p.y) || o && o.passable !== true) return null;
         }
         const doors = window.UF && UF.Doors;
-        if (doors && doors.at) for (const p of home.doors) {
+        if (doors && doors.at && Array.isArray(home.doors)) for (const p of home.doors) {
             const d = doors.at(areaOf(h), p.x, p.y);
             if (!d || d.state.heldOpen || doors.isOpen && doors.isOpen(areaOf(h), p.x, p.y) ||
                 !doors.canUnitPass(a, d) || !doors.canUnitPass(b, d)) return null;
         }
-        const aBed = home.beds.find(p => p.unitId === a.id), bBed = home.beds.find(p => p.unitId === b.id);
+        const aBed = Array.isArray(home.beds) ? home.beds.find(p => p.unitId === a.id) : null;
+        const bBed = Array.isArray(home.beds) ? home.beds.find(p => p.unitId === b.id) : null;
         if (!aBed || !bBed || !has(object(h, aBed), "bed") || !has(object(h, bBed), "bed")) return null;
         return { householdId: h.id, area: { x: h.area.x, y: h.area.y }, z: h.z,
             spots: (home.spots || [{ x: home.x + 3, y: home.y + 2 }, { x: home.x + 4, y: home.y + 2 }]).map(p => ({ x: p.x, y: p.y })),
-            cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
+            cells: sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, (home.doors && (home.doors[1] || home.doors[0])) || null) };
     }
     function hasFloors(refH) {
         const h = resolve(refH);
