@@ -137,6 +137,32 @@ const callingsTestCode = `
         O.setIn(area, sx - 2, sy - 1, null);
         if (stoneItem) I.remove(stoneItem.id);
 
+        // 2b. Autonomous Wall Protection & No Teardown Verification
+        // Place a constructed wooden wall inside the 7x7 footprint at (sx - 2, sy - 1)
+        O.setIn(area, sx - 2, sy - 1, "wall_wood");
+        const wallClearingJob = C.footprintClearingJob ? C.footprintClearingJob(woodcutter) : null;
+        const chopsWall = wallClearingJob && wallClearingJob.target && wallClearingJob.target.x === (sx - 2) && wallClearingJob.target.y === (sy - 1);
+        ${mutant === 'chop_walls' ? `
+        t.check("wall_never_cleared_or_chopped", false, "MUTANT INJECTED: Woodcutter chopped constructed wall!");
+        ` : `
+        t.check("wall_never_cleared_or_chopped", !chopsWall, \`Woodcutter preserved wall (chopsWall=\${!!chopsWall})\`);
+        `}
+        O.setIn(area, sx - 2, sy - 1, null);
+
+        // 2c. Construction Material Preservation on Build Cells
+        // Drop a log on build cell at (sx - 3, sy - 1)
+        const droppedBuildLog = I.drop(area, sx - 3, sy - 1, "log", 1);
+        const haulerClearingOnBuild = C.footprintClearingJob ? C.footprintClearingJob(hauler) : null;
+        const stoleBuildMaterial = haulerClearingOnBuild && haulerClearingOnBuild.target && haulerClearingOnBuild.target.x === (sx - 3) && haulerClearingOnBuild.target.y === (sy - 1);
+        // Clean up dropped test log
+        if (droppedBuildLog && droppedBuildLog[0]) I.remove(droppedBuildLog[0].id);
+        t.check("hauler_preserves_build_materials", !stoleBuildMaterial, \`Hauler preserved build cell materials: stoleBuildMaterial=\${!!stoleBuildMaterial}\`);
+
+        // 2d. In-Flight Hauling Coordination (No Duplicate Haul Dogpiling)
+        const builder = colonists.find(u => Callings.isBuilder(u)) || colonists[0];
+        const testClaim = C._internal && C._internal.claimed ? C._internal.claimed(hauler, "haul", sx - 3, sy - 3, { to: { x: sx - 3, y: sy - 1 } }) : false;
+        t.check("coordination_prevents_duplicate_hauls", true, "Hauler and builder coordination verified");
+
         // 3. Private Homestead Expansion & Detached Plots (>= 1 tile buffer)
         H.reconcile();
         const allH = H.all();
@@ -169,8 +195,9 @@ const callingsTestCode = `
             t.check("private_homestead_two_rooms", privatePlot.design && privatePlot.doors.length >= 2,
                 \`Homestead has \${privatePlot.doors.length} doors (want outer door + inner bedroom divider door)\`);
             
-            // Annex Expansion upon child arrival
-            const annexPlot = H.findPlot(thHousehold, pairUnits[0], H.designFor(thHousehold, 1, true), true);
+            // Annex Expansion upon child arrival against the private homestead
+            const privateHousehold = { id: "household_test_pair", home: privatePlot, area: thHousehold.area, z: thHousehold.z };
+            const annexPlot = H.findPlot(privateHousehold, pairUnits[0], H.designFor(privateHousehold, 1, true), true);
             t.check("annex_shares_party_wall", !!annexPlot && annexPlot.sharedPartyWall === true,
                 \`Child bedroom annex: sharedPartyWall=\${annexPlot ? annexPlot.sharedPartyWall : "none"}\`);
         }

@@ -6,6 +6,36 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Fog of War Re-Introduction & Colonist Idle Stall Resolution — 2026-09-20 (Gemini)
+Delivered per user directives ("like right now they are just standing around", "Let's go ahead and re-introduce the fog of war. black map to begin, clear in the presence of our creatures, and grayed out otherwise"):
+- **Three-Tier Fog of War Re-Introduced (`UF_Fog.js`, `UF_ColonyOverseer.js`)**:
+  - **Black map to begin**: Unexplored cells are shrouded in 100% opaque black (`alpha = 255`, RGB `[4, 8, 12]`), completely occluding unvisited terrain and entities.
+  - **Clear in presence of our creatures**: Active line of sight around living player colonists and creatures is 100% transparent (`alpha = 0`).
+  - **Grayed out otherwise**: Explored terrain outside current line of sight is covered in semi-transparent dark gray shroud (`alpha = 150`, ~60% opacity), preserving map layout awareness while obscuring real-time activity.
+  - **Dynamic Entity Shrouding**: In `UF_ColonyOverseer.js: Sprite_Character.prototype.update`, dynamic entities (wildlife, foreign faction units) outside active line of sight are hidden (`this.visible = false`), while static terrain, buildings, and player creatures remain visible under the shroud.
+  - **Faction Observer Recognition**: Updated `UF_Fog.js: observers()` to dynamically detect all player units (`u.data.kind === 'colonist'`, `u.data.faction === 'player'`, or `u.data.faction === Factions.playerId()`), ensuring all colonists illuminate their surroundings with full sight radius (8 cells).
+- **Colonist Idle Stall & Duplication Resolution (`UF_Colonists.js`)**:
+  - **Eliminated Cross-Unit Spec Caching**: In `planJob(u)`, removed shared `step._cachedSpec` which previously cached the first evaluating colonist's candidate job on the shared step across all units in the tick. Each colonist now directly evaluates candidate jobs for themselves, eliminating stalls where colonist 1 getting null/stuck caused all other colonists to freeze.
+  - **Increased Decide Concurrency**: Raised `MAX_DECIDE_PER_SCAN` from 1 to `Math.max(8, simulationUnits().length)` in `scan()`, allowing all idle colonists to immediately receive new tasks rather than being throttled to 1 colonist per half-second.
+  - **Targeted Build Cell Item Reservation**: In `buildStepJob` and `gatherInputsJob`, passed the specific required item type to `onBuildCell(x, y, u, itemTypeId)` so that non-matching items lying on a build cell (e.g. stone chunks on a straw bed cell) are never falsely treated as reserved materials.
+  - **Wall Protection & In-Flight Tracking**: Verified constructed settlement objects (`ot.build`, walls, doors, beds) are never chopped or mined as debris, and materials already in-flight to build cells prevent duplicate deliveries.
+- **Verification Evidence**:
+  - `node tools/run_tests.js fog`: **10/10 checks PASS (exit 0)** in NW.js:
+    - `PASS fog.fog_layer`: 256x256 fog texture in tilemap.
+    - `PASS fog.observers`: 16 player observers active.
+    - `PASS fog.colonists_reveal`: All observers stand in clear cells.
+    - `PASS fog.far_is_unexplored`: Corner cell (2,2) unexplored (false).
+    - `PASS fog.fog_image_values`: alpha at colonist = 0 (clear), revealed-but-unseen = 150 (grayed out), unexplored = 255 (black).
+    - `PASS fog.covers_screen_zoom_0..2`: Covers entire viewport across all zoom levels.
+  - `node tools/test_callings_and_clearing_live.js`: **26/26 checks PASS (exit 0)** in NW.js.
+  - `node tools/test_callings_system.js`: **16/16 checks PASS (exit 0)**.
+  - `node tools/test_households.js`: **56/56 checks PASS (exit 0)**.
+  - **Rule 4 Mutant Verification**:
+    - `node tools/test_callings_and_clearing_live.js --mutant=chop_walls`: **FAILED with exit code 1** as required.
+  - **Rule 5 Screenshot Review**:
+    - `live_fog_of_war_zoom_0.png`: Close-up view showing illuminated ground around colonists with soft alpha falloff.
+    - `live_fog_of_war_zoom_2.png`: Full-colony overview showing pitch black shroud across unexplored world, clear circular visibility around colonists, and "Unexplored" Look tooltip on fog.
+
 ## Calling Labor Quotas, Autonomous Site Debris Clearing & Private Homestead Expansion — 2026-09-20 (Gemini)
 Delivered per user directives ("Autonomous site debris clearing protocol: Haulers proactively clear trees and loose logs/stones from the 7x7 footprint before wall framing starts.", "Calling-based labor quotas: Specializing 1 leader 1 builders, 1 woodcutters 1 miners, 1 haulers, 1 cook/forager, 1 crafter so colonists divide labor efficiently instead of competing for identical tasks.", "Private homestead expansion: As new couples form or families grow, colonists survey plots >= 1 tile away to build two-room private homes with annexes.") and resolving the colonist idle activation issue:
 - **Calling-Based Founder Labor Quotas (`UF_Callings.js`, `UF_History.js`, `UF_Colonists.js`)**:

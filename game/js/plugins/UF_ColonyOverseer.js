@@ -480,10 +480,16 @@
         if (!this._character || this._character === $gamePlayer) return;
         const W = World();
         const unit = W && W.unitOfEvent ? W.unitOfEvent(this._character) : null;
-        if (unit && unit.data && unit.data.kind === "colonist") return;
+        const pid = window.UF && UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
+        const isMine = unit && (unit.data.kind === "colonist" || unit.data.faction === "player" || (pid !== null && unit.data.faction === pid));
+        if (isMine) return;
         const ev = this._character.event ? this._character.event() : null;
         if (ev && (ev.note.includes("<tree>") || ev.note.includes("<canopy>") || ev.note.includes("<terrain>"))) return;
-        if ($gameSystem && $gameMap && !$gameSystem.isTileExplored($gameMap.mapId(), this._character.x, this._character.y)) this.visible = false;
+        if (window.UF && UF.Fog && UF.Fog.enabled) {
+            if (!UF.Fog.isVisible(this._character.x, this._character.y)) this.visible = false;
+        } else if ($gameSystem && $gameMap && !$gameSystem.isTileExplored($gameMap.mapId(), this._character.x, this._character.y)) {
+            this.visible = false;
+        }
     };
 
     //-----------------------------------------------------------------------------

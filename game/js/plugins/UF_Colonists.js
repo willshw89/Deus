@@ -170,6 +170,7 @@
         if (!sourceCache || sourceCache.source !== objects) {
             const map = {};
             for (const o of objects) {
+                if (o.build || (o.tags && (o.tags.includes("wall") || o.tags.includes("door") || o.tags.includes("bed") || o.tags.includes("building") || o.tags.includes("furniture")))) continue;
                 for (const [action, a] of Object.entries(o.actions || {})) {
                     for (const id of Object.keys(a.yields || {})) (map[id] = map[id] || []).push({ objectId: o.id, action });
                 }
@@ -778,8 +779,8 @@
     // The home site's own standing pieces (its ring, its walls) are never taken apart for materials.
     function sitePiece(type, x, y, ref) {
         const c = colonyState(ref);
-        // Buildings are products of work, never raw-material sources for autonomous gathering.
-        if (hasTag(type, "building") || hasTag(type, "door") || hasTag(type, "bed")) return true;
+        // Buildings, walls, doors, beds, furniture are products of work, never raw-material sources for autonomous gathering.
+        if (hasTag(type, "wall") || hasTag(type, "building") || hasTag(type, "door") || hasTag(type, "bed") || hasTag(type, "furniture") || type.build) return true;
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
     function isObjectClaimed(u, x, y, action) {
@@ -986,7 +987,13 @@
                 continue;
             }
             if (type === "hunt" && j.type === "hunt" && j.params.unitId === params.unitId) return true;
-            if ((type === "haul" || type === "fetch") && (j.type === "haul" || j.type === "fetch") && j.params.itemId === params.itemId) return true;
+            if ((type === "haul" || type === "fetch") && (j.type === "haul" || j.type === "fetch")) {
+                if (j.params.itemId === params.itemId) return true;
+                if (params && params.to && j.params && j.params.to && j.params.to.x === params.to.x && j.params.to.y === params.to.y) {
+                    const destCell = onBuildCell(params.to.x, params.to.y, u);
+                    if (destCell) return true;
+                }
+            }
             if (j.type === type && j.target && j.target.x === x && j.target.y === y) return true;
             if (j.type === "move" && j.params && j.params.via === type && j.params.viaTarget && j.params.viaTarget.x === x && j.params.viaTarget.y === y) return true;
         }
@@ -2465,19 +2472,24 @@
             for (const cell of buildCells(step, u)) {
                 if (cell.state !== "todo") continue;
                 const target = { x: cell.x, y: cell.y };
-                if (cell.here && cell.here.passable !== true && cell.here.actions && Object.keys(cell.here.actions).length) {
+                if (cell.here && cell.here.passable !== true && !hasTag(cell.here, "wall") && !hasTag(cell.here, "door") && !hasTag(cell.here, "building") && !cell.here.build && cell.here.actions && Object.keys(cell.here.actions).length) {
                     const action = Object.keys(cell.here.actions)[0];
                     return { type: action, target, params: { plan: step.id } };
+                }
+                if (activeJobs().some(j => j.type === "floor" && j.assigned !== u.id && j.target && j.target.x === cell.x && j.target.y === cell.y)) {
+                    continue;
                 }
                 if (step.build === "road" || countNeeded === 0 || !itemNeeded) {
                     return { type: "floor", target, params: { kind: "road", item: null, count: 0, force: true, plan: step.id } };
                 }
                 const carried = I ? I.count(u.id, itemNeeded) : 0;
                 const onCell = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, itemNeeded) : 0;
+                const inFlight = activeJobs().some(j => (j.type === "haul" || j.type === "fetch") && j.assigned !== u.id && j.params && j.params.to && j.params.to.x === cell.x && j.params.to.y === cell.y);
                 if (carried >= countNeeded || onCell >= countNeeded) {
                     return { type: "floor", target, params: { kind: step.build, item: itemNeeded, count: countNeeded, force: true, plan: step.id } };
                 }
-                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
+                if (inFlight) continue;
+                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u, itemNeeded) && (f.x !== cell.x || f.y !== cell.y));
                 if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
                 if (!itemSourceSearched) {
                     itemSourceSearched = true;
@@ -2501,18 +2513,38 @@
                 if (!clearance.safe) continue;
             }
             // A tree or boulder on the cell is worked away first (its yields land on the cell).
-            if (here && here.passable !== true && here.actions && Object.keys(here.actions).length) {
+            // Do NOT clear walls, doors, or buildings!
+            if (here && here.passable !== true && !hasTag(here, "wall") && !hasTag(here, "door") && !hasTag(here, "building") && !here.build && here.actions && Object.keys(here.actions).length) {
                 const action = Object.keys(here.actions)[0];
                 return { type: action, target, params: { plan: step.id } };
             }
+
+            // Check if another colonist is already building this cell:
+            if (activeJobs().some(j => j.type === "build" && j.assigned !== u.id && j.target && j.target.x === cell.x && j.target.y === cell.y)) {
+                continue;
+            }
+
             const needs = t.build.items || {};
-            const missing = Object.keys(needs).filter(id => I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) < (needs[id] | 0));
-            if (!missing.length) return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
+            const missing = Object.keys(needs).filter(id => {
+                const onCell = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
+                const inFlight = activeJobs().filter(j => (j.type === "haul" || j.type === "fetch") && j.assigned !== u.id && j.params && j.params.to && j.params.to.x === cell.x && j.params.to.y === cell.y).length;
+                return (onCell + inFlight) < (needs[id] | 0);
+            });
+
+            if (!missing.length) {
+                const allHere = Object.keys(needs).every(id => I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) >= (needs[id] | 0));
+                if (allHere) {
+                    return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
+                }
+                // Materials are currently in flight with another colonist: skip to next cell to avoid duplicating effort!
+                continue;
+            }
+
             const m = missing[0];
             if (missingFailed.has(m)) continue;
             const carried = carriedOf(u, m)[0];
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u) && (f.x !== cell.x || f.y !== cell.y));
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
             if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
             const src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
@@ -2528,7 +2560,7 @@
         const c = colonyState(u);
         for (const [id, want] of Object.entries(recipe.inputs || {})) {
             if (carriedCount(u, id) >= (want | 0)) continue;
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !onBuildCell(f.x, f.y, u) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
+            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !onBuildCell(f.x, f.y, u, id) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
             if (ground) return { type: "fetch", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, plan: step.id } };
             const src = objectSourceNear(u, id, SEARCH_RADIUS);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
@@ -2622,14 +2654,7 @@
             }
             if (groups[group] >= limit) continue;
             groups[group]++;
-            let spec;
-            if (step._cachedSpecTick === localTicks) {
-                spec = step._cachedSpec;
-            } else {
-                spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
-                step._cachedSpec = spec;
-                step._cachedSpecTick = localTicks;
-            }
+            const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
             if (spec) spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
             candidates.push({ step, spec, order: groups[group] - 1 });
             if (!spec) continue;
@@ -2743,6 +2768,13 @@
                     if (!ob) continue;
                     const ot = O.type(ob.id);
                     if (!ot) continue;
+                    // NEVER clear constructed settlement structures (walls, doors, beds, hearths, furniture, etc.)
+                    if (ot.build || (ot.tags && (ot.tags.includes("wall") || ot.tags.includes("door") || ot.tags.includes("bed") || ot.tags.includes("building") || ot.tags.includes("furniture") || ot.tags.includes("fire")))) {
+                        continue;
+                    }
+                    if (isObjectClaimed(u, x, y, "chop") || isObjectClaimed(u, x, y, "mine") || isObjectClaimed(u, x, y, "clear")) {
+                        continue;
+                    }
                     const actions = ot.actions || {};
                     if (actions.chop && isW) {
                         const tool = toolJob(u, "chop");
@@ -2770,8 +2802,11 @@
             });
             if (looseInFootprint.length > 0) {
                 for (const f of looseInFootprint) {
+                    if (claimed(u, "haul", f.x, f.y, { itemId: f.item.id, plan: "clear_footprint" })) continue;
                     const t = itemType(f.item.type);
                     if (!t) continue;
+                    // Do NOT haul away materials that are sitting on a build cell waiting to be constructed!
+                    if (onBuildCell(f.x, f.y, u, f.item.type)) continue;
                     let to = null;
                     if (c.stockpiles && c.stockpiles.length > 0) {
                         const sp = c.stockpiles.find(s => {
@@ -2985,7 +3020,7 @@
         }
         const t = ticks();
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 1;
+        const MAX_DECIDE_PER_SCAN = Math.max(8, simulationUnits().length);
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();

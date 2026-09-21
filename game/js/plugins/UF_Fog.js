@@ -47,9 +47,9 @@
     "use strict";
 
     const P = PluginManager.parameters("UF_Fog");
-    const ENABLED = (P.Enabled || "false") === "true";
+    const ENABLED = P.Enabled !== undefined && P.Enabled !== "" ? P.Enabled === "true" : true;
     const SIGHT = Math.max(1, Number(P.SightRadius || 8));
-    const DIM = Math.max(0, Math.min(255, P.ExploredDim !== undefined && P.ExploredDim !== "" ? Number(P.ExploredDim) : 0));
+    const DIM = Math.max(0, Math.min(255, P.ExploredDim !== undefined && P.ExploredDim !== "" ? Number(P.ExploredDim) : 150));
     const UPDATE_FRAMES = 6;
     const FOG_RGB = [4, 8, 12];
 
@@ -143,8 +143,17 @@
                 }
             }
             if (window.UF && UF.World && UF.World.state) {
-                for (const u of UF.World.units()) {
-                    if (u.data && u.data.faction === "player" && UF.World.isDisplayed(u)) list.push({ x: u.x, y: u.y, radius: u.data.sight || SIGHT });
+                const W = UF.World;
+                const pid = window.UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
+                for (const u of W.units()) {
+                    const isPlayerCreature = u.data && (
+                        u.data.faction === "player" ||
+                        (pid !== null && u.data.faction === pid) ||
+                        u.data.kind === "colonist"
+                    );
+                    if (isPlayerCreature && W.isDisplayed(u)) {
+                        list.push({ x: u.x, y: u.y, radius: u.data.sight || SIGHT });
+                    }
                 }
             }
             for (const fn of sources) {
