@@ -288,6 +288,123 @@
 
     // Extension steps remain owned by their persistent household/goal/civic records. They are not copied into the
     // fixed bootstrap plan, and workers cooperatively share housing, paths, town square, and personal aspirations.
+    // -----------------------------------------------------------------------
+    // Standing orders: continuous production that keeps workshops busy after
+    // the bootstrap plan's fixed quotas are met.  Each order defines a minimum
+    // stock level; when the colony's count drops below that, a virtual craft
+    // step is injected into the effective plan.
+    // -----------------------------------------------------------------------
+    const STANDING_ORDERS = [
+        // Survival basics — always keep a buffer
+        { id: "so_meat",      craft: "cook_meat",    min: 6,  per: 4, stock: ["food"], hunt: true },
+        { id: "so_firewood",  craft: "split_firewood", min: 8, per: 0, needs: "stone_axe" },
+        // Intermediate materials — process raw inputs as they arrive
+        { id: "so_charcoal",  craft: "charcoal",     min: 4,  per: 0, needs: "furnace" },
+        { id: "so_bar_iron",  craft: "bar_iron",     min: 4,  per: 0, needs: "furnace" },
+        { id: "so_bar_copper",craft: "bar_copper",   min: 2,  per: 0, needs: "furnace" },
+        { id: "so_leather",   craft: "leather",      min: 4,  per: 0, needs: "tanning_rack" },
+        { id: "so_planks",    craft: "plane_planks", min: 4,  per: 0, needs: "workbench" },
+        { id: "so_hardware",  craft: "forge_hardware", min: 4, per: 0, needs: "smithy" },
+        // Military consumables — keep stocked
+        { id: "so_arrows",    craft: "arrows_stone", min: 24, per: 0, needs: "fletcher_bench" },
+        // Armament — 1 per 4 adult colonists
+        { id: "so_swords",    craft: "sword_short",  min: 0,  per: 4, needs: "smithy" },
+        { id: "so_bows",      craft: "bow_short",    min: 0,  per: 4, needs: "bowyer_bench" },
+        { id: "so_armor_l",   craft: "armor_leather",min: 0,  per: 4, needs: "workbench" },
+        { id: "so_helmet_l",  craft: "helmet_leather",min: 0, per: 4, needs: "workbench" },
+        // Building materials
+        { id: "so_bricks",    craft: "fire_brick",   min: 4,  per: 0, needs: "pottery_kiln" },
+        { id: "so_mortar",    craft: "lime_mortar",  min: 4,  per: 0, needs: "pottery_kiln" },
+        { id: "so_blocks",    craft: "chisel_stone_block", min: 4, per: 0, needs: "mason_bench" },
+    ];
+
+    function standingOrders(ref) {
+        const c = colonyState(ref);
+        if (!c || !c.site) return [];
+        const O = Objects();
+        if (!O) return [];
+        const adults = siteColonists(ref).filter(u => u.data && (u.data.age === undefined || u.data.age >= 15));
+        const pop = adults.length;
+        const area = levelArea(c);
+        const steps = [];
+
+        for (const order of STANDING_ORDERS) {
+            // Check prerequisites: the workshop must exist at the colony
+            if (order.needs) {
+                const ws = O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 6, kind: order.needs });
+                if (!ws || ws.length === 0) continue;
+            }
+            const r = recipeOf(order.craft);
+            if (!r) continue;
+            const outKey = outputOf(r);
+            if (!outKey) continue;
+
+            // Calculate target: fixed minimum + per-capita scaling
+            const target = order.min + (order.per > 0 ? Math.ceil(pop / order.per) : 0);
+            const have = colonyCount(outKey, ref);
+            if (have >= target) continue;
+
+            // Check if raw inputs are available (don't schedule impossible crafts)
+            const inputs = r.inputs || {};
+            let canCraft = true;
+            for (const [inp, qty] of Object.entries(inputs)) {
+                if (colonyCount(inp, ref) < qty) { canCraft = false; break; }
+            }
+            if (!canCraft) continue;
+
+            const need = target - have;
+            if (order.stock) {
+                steps.push({ id: order.id, stock: order.stock, count: need, hunt: !!order.hunt, standing: true });
+            } else {
+                steps.push({ id: order.id, craft: order.craft, count: need, standing: true });
+            }
+        }
+        return steps;
+    }
+
+    // -----------------------------------------------------------------------
+    // Population milestones: new plan steps that unlock as the colony grows.
+    // Each milestone adds build/craft goals when the colony reaches a
+    // population threshold and the prerequisite isn't already placed.
+    // -----------------------------------------------------------------------
+    const POP_MILESTONES = [
+        // Pop 12+: pottery kiln, mason's bench
+        { pop: 12, steps: [
+            { id: "ms_kiln",   build: "pottery_kiln", cells: [[6, 3]], milestone: true },
+            { id: "ms_mason",  build: "mason_bench",  cells: [[7, 3]], milestone: true },
+        ]},
+        // Pop 20+: additional workshops
+        { pop: 20, steps: [
+            { id: "ms_kitchen", build: "kitchen_hearth", cells: [[5, 4]], milestone: true },
+            { id: "ms_dining",  build: "dining_table",   cells: [[5, 5]], milestone: true },
+        ]},
+        // Pop 30+: defensive structures
+        { pop: 30, steps: [
+            { id: "ms_gate_door", build: "door_iron", cells: [[0, -5]], milestone: true },
+        ]},
+    ];
+
+    function populationMilestoneSteps(ref) {
+        const c = colonyState(ref);
+        if (!c || !c.site) return [];
+        const pop = siteColonists(ref).filter(u => u.data && (u.data.age === undefined || u.data.age >= 15)).length;
+        const O = Objects();
+        if (!O) return [];
+        const area = levelArea(c);
+        const steps = [];
+
+        for (const m of POP_MILESTONES) {
+            if (pop < m.pop) continue;
+            for (const s of m.steps) {
+                // Skip if the object already exists near the colony
+                const existing = O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 6, kind: s.build });
+                if (existing && existing.length > 0) continue;
+                steps.push(s);
+            }
+        }
+        return steps;
+    }
+
     function effectivePlan(ref) {
         const c = colonyState(ref);
         if (!c) return [];
@@ -358,7 +475,9 @@
 
         const P = Pillars();
         const pillarSteps = (c && P && P.pillarPlanSteps) ? P.pillarPlanSteps(c, u) : [];
-        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps ] : [];
+        const soSteps = standingOrders(u || ref);
+        const msSteps = populationMilestoneSteps(u || ref);
+        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps ] : [];
         const seen = new Set();
         const res = [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
@@ -2741,7 +2860,7 @@
         if (!c) return null;
         const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
-        const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, household: 0, civic: 0, goal: 0 };
+        const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, household: 0, civic: 0, goal: 0, standing: 0, milestone: 0 };
         // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
         // hide every household and personal aspiration behind the old plan's first three unfinished steps.
         for (let i = 0; i < steps.length; i++) {
@@ -2750,7 +2869,13 @@
             const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
             let group = "bootstrap_build";
             let limit = 4;
-            if (step.household) {
+            if (step.standing) {
+                group = "standing";
+                limit = 4;
+            } else if (step.milestone) {
+                group = "milestone";
+                limit = 3;
+            } else if (step.household) {
                 group = "household";
                 limit = 8;
             } else if (isCivic || step.pillar) {
@@ -2795,7 +2920,9 @@
                     // defer secondary household projects so villagers don't scatter labor!
                     s -= 2.0;
                 } else if (u.data && u.data.householdId === x.step.household) {
-                    s += 2.5;
+                    // Paired colonists urgently build their own private home for their family
+                    const isPaired = u.data.partner || u.data.partnerId;
+                    s += isPaired ? 6.0 : 3.0;
                 } else {
                     s += 1.2;
                 }
@@ -3001,6 +3128,70 @@
         return null;
     }
 
+    // -----------------------------------------------------------------------
+    // Workshop calling jobs: specialist craftsmen autonomously seek their
+    // workshop to process available raw materials.  Maps callings to workshop
+    // objects and the recipes they can execute.
+    // -----------------------------------------------------------------------
+    const WORKSHOP_CALLING_MAP = [
+        // { calling test, workshop object kind, recipes to try (in priority order) }
+        { test: "isSmith",     ws: "smithy",         recipes: ["sword_short", "axe_iron", "dagger_iron", "helmet_iron", "mail_iron", "greaves_iron", "shield_iron", "forge_hardware"] },
+        { test: "isSmelter",   ws: "furnace",        recipes: ["bar_iron", "bar_copper", "charcoal"] },
+        { test: "isTanner",    ws: "tanning_rack",   recipes: ["leather"] },
+        { test: "isBowyer",    ws: "bowyer_bench",   recipes: ["bow_short", "bow_long"] },
+        { test: "isFletcher",  ws: "fletcher_bench", recipes: ["arrows_stone", "arrows_bone", "arrows_iron"] },
+        { test: "isCarpenter", ws: "workbench",      recipes: ["plane_planks", "club", "shield_wood", "spear_stone"] },
+        { test: "isMason",     ws: "mason_bench",    recipes: ["chisel_stone_block"] },
+        { test: "isPotter",    ws: "pottery_kiln",   recipes: ["fire_brick", "lime_mortar"] },
+        { test: "isLeatherworker", ws: "workbench",  recipes: ["armor_leather", "helmet_leather", "leggings_leather", "sling"] },
+    ];
+
+    function workshopCallingJob(u) {
+        const c = colonyState(u);
+        const O = Objects();
+        if (!c || !O || !c.site) return null;
+        if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
+
+        const Callings = getCallings();
+        if (!Callings) return null;
+        const area = levelArea(u);
+
+        for (const mapping of WORKSHOP_CALLING_MAP) {
+            // Check if the colonist has this calling
+            if (!Callings[mapping.test] || !Callings[mapping.test](u)) continue;
+
+            // Check if the workshop exists at the colony
+            const ws = O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 6, kind: mapping.ws });
+            if (!ws || ws.length === 0) continue;
+
+            // Try each recipe in priority order
+            for (const recipeId of mapping.recipes) {
+                const r = recipeOf(recipeId);
+                if (!r) continue;
+                const outKey = outputOf(r);
+                if (!outKey) continue;
+
+                // Check if raw inputs are available
+                const inputs = r.inputs || {};
+                let canCraft = true;
+                for (const [inp, qty] of Object.entries(inputs)) {
+                    // Check both carried and colony-wide availability
+                    if (carriedCount(u, inp) + colonyCount(inp, u) < qty) { canCraft = false; break; }
+                }
+                if (!canCraft) continue;
+
+                // Generate the craft job via the standard gather-inputs pipeline
+                const step = { id: `ws_${mapping.ws}_${recipeId}`, craft: recipeId, count: 1, standing: true };
+                const spec = gatherInputsJob(u, r, step);
+                if (spec) {
+                    const j = give(u, spec);
+                    if (j) return j;
+                }
+            }
+        }
+        return null;
+    }
+
     // Autonomous calling jobs: when direct plan steps are waiting on raw materials, in-flight hauling,
     // or blocked, specialists proactively practice their callings (Woodcutters harvest timber, Miners
     // quarry stone, Foragers collect food/fiber, Cooks prepare hot meals, and Haulers tidy loose resources).
@@ -3014,6 +3205,21 @@
 
         const Callings = getCallings();
         if (!Callings) return null;
+
+        // 0. Leader holds court: the leader goes to the Town Hall during the day
+        if (Callings.isLeader(u)) {
+            const H = window.UF && UF.Households;
+            const h = H && H.of(u);
+            if (h && h.home && h.home.isShared && h.home.hearth) {
+                const hearth = h.home.hearth;
+                const dist = Math.abs(u.x - hearth.x) + Math.abs(u.y - hearth.y);
+                if (dist > 2) {
+                    // Walk to the court
+                    return give(u, { type: "move", target: { x: hearth.x, y: hearth.y + 1 }, params: { court: true, calling: "leader" } });
+                }
+                // Already at court — stand and manage (idle behavior will handle social)
+            }
+        }
 
         const area = levelArea(u);
         const radius = c.radius ? Math.max(c.radius + 20, 40) : 40;
@@ -3106,6 +3312,11 @@
             const tidy = tidyStockpileJob(u);
             if (tidy) return tidy;
         }
+
+        // 6. Workshop specialists: craftsmen autonomously seek their workshop
+        //    to process available raw materials into finished goods.
+        const workshopCraft = workshopCallingJob(u);
+        if (workshopCraft) return workshopCraft;
 
         return null;
     }

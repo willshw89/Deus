@@ -2623,6 +2623,7 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
   - `jobs.jobs_working.png`: Worker chopping oak on Ground rolling meadow with HUD level controls.
 
 ## In progress (claims)
+- Gemini / Antigravity | Phase 1: Living Workshop Colony — standing orders, workshop routing, population milestones, daily routine | `game/js/plugins/UF_Colonists.js`, `game/data/UF_WorldCatalog.json` | since 2026-09-20
 - Codex / Astra team | User-requested next society chain: physical, saved, layer-aware farming and autonomous settlement planning | NEW `game/js/plugins/UF_Agriculture.js`, `UF_FarmView.js`, their system docs and agriculture tests/fixture; narrow `UF_Colonists.js` planner integration, `UF_Households.js` farm reservation guard, `UF_ProfileTabs.js` explanations and `UF_CultureGrowth.js` confirmed farming practice, their docs/tests; `docs/STATUS.md`, `docs/VISION.md`, `docs/design/EMERGENT_SOCIETY.md`, `docs/ASSET_REQUESTS.md` request text only; registration only after editor closure | since 2026-09-19
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`

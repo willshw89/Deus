@@ -126,7 +126,17 @@
             const F = window.UF.Factions;
             const tier = F && F.tierBetween ? F.tierBetween("player", d.faction).id : "neutral";
             if (tier === "allied" || tier === "friendly") return "friendly";
-            return tier === "neutral" ? "indifferent" : "hostile";
+            // Hostile/war factions: only explicitly military units attack.
+            // Civilians, settlers, and craftsmen mind their own business.
+            // This prevents enemy factions from immediately hunting the player
+            // — they focus on their own expansion and development.
+            const tags = Array.isArray(d.tags) ? d.tags : [];
+            const isMilitary = tags.includes("hostile") || tags.includes("raider") ||
+                tags.includes("soldier") || tags.includes("warband") || tags.includes("military") ||
+                tags.includes("scout") || tags.includes("guard");
+            if (isMilitary) return "hostile";
+            // Non-military members of hostile factions are wary but not aggressive
+            return "indifferent";
         }
         const tags = Array.isArray(d.tags) ? d.tags : [];
         return tags.includes("monster") ? "hostile" : "indifferent";

@@ -265,6 +265,44 @@
         return id === "blacksmith" || id === "tanner" || id === "leatherworker" || id === "fletcher" || id === "potter" || id === "weaver" || id === "crafter";
     }
 
+    // Workshop-specific specialist tests for autonomous workshop routing
+    function isSmith(u) {
+        const id = callingIdOf(u);
+        return id === "blacksmith" || id === "weaponsmith" || id === "armorsmith" || id === "tinker";
+    }
+    function isSmelter(u) {
+        const id = callingIdOf(u);
+        return id === "blacksmith" || id === "smelter" || id === "furnace_operator";
+    }
+    function isTanner(u) {
+        const id = callingIdOf(u);
+        return id === "tanner" || id === "leatherworker";
+    }
+    function isBowyer(u) {
+        const id = callingIdOf(u);
+        return id === "bowyer" || id === "fletcher";
+    }
+    function isFletcher(u) {
+        const id = callingIdOf(u);
+        return id === "fletcher" || id === "bowyer";
+    }
+    function isCarpenter(u) {
+        const id = callingIdOf(u);
+        return id === "carpenter" || id === "woodworker";
+    }
+    function isMason(u) {
+        const id = callingIdOf(u);
+        return id === "mason" || id === "stonecutter";
+    }
+    function isPotter(u) {
+        const id = callingIdOf(u);
+        return id === "potter" || id === "brickmaker";
+    }
+    function isLeatherworker(u) {
+        const id = callingIdOf(u);
+        return id === "leatherworker" || id === "tanner" || id === "cobbler";
+    }
+
     function assignFounderQuotas(unitsOrPlan, rng = Math.random) {
         if (!Array.isArray(unitsOrPlan) || unitsOrPlan.length === 0) return;
         const leaderIdx = unitsOrPlan.findIndex(p => p && (p.leader || (p.data && (p.data.leader || p.data.rank === 1))));
@@ -346,7 +384,16 @@
         isHauler,
         isCook,
         isForager,
-        isCrafter
+        isCrafter,
+        isSmith,
+        isSmelter,
+        isTanner,
+        isBowyer,
+        isFletcher,
+        isCarpenter,
+        isMason,
+        isPotter,
+        isLeatherworker
     };
 
     const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});

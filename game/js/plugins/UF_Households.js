@@ -846,11 +846,18 @@
     function ensureHome(h, u) {
         if (h.home && !h.home.isShared) return h.home;
         if (h.home && h.home.isShared) {
-            // Coupled pairs in the Town Hall seek private homestead plots once Town Hall is established
-            if (members(h).length >= 2 && h.home.isRoofed) {
+            // The Town Hall is the leader's court — the leader and their partner stay permanently.
+            // Everyone else seeks a private homestead plot once the Town Hall is sheltered.
+            const Callings = window.UF && UF.Callings;
+            const isLeaderHousehold = Callings && members(h).some(m => Callings.isLeader(m));
+            if (isLeaderHousehold) return h.home; // Leader stays in the Town Hall as their court
+
+            // All other colonists (paired or single) seek private homes once walls are up
+            const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
+            if (sheltered) {
                 if (h.lastSearchDay === day()) return h.home;
                 h.lastSearchDay = day();
-                const p = findPlot(h, u, designFor(h, members(h).length));
+                const p = findPlot(h, u, designFor(h, Math.max(2, members(h).length)));
                 if (p) {
                     h.previousSharedHome = h.home;
                     h.home = p;
