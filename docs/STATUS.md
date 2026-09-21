@@ -9,6 +9,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Toroidal Seam Alignment & Seamless Map Edges Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Map edges need to match/line up seamlessly"):
+- **Toroidal Value Noise Lattice Wrapping (`UF_WorldGen.js`)**:
+  - Replaced non-periodic lattice coordinates in `valueNoise` with exact toroidal modular lattice points: `modW = Math.max(1, Math.round(wrapW / scale))`, `modH = Math.max(1, Math.round(wrapH / scale))`.
+  - Lattice corners $(x_0, y_0), (x_1, y_1)$ wrap modulo $(modW, modH)$ with $C^1$-continuous Hermite interpolation.
+  - Generates identical elevation, rainfall, drainage, and volcanism values across all boundary edges ($gx=0$ vs $gx=W$, $gy=0$ vs $gy=H$).
+- **Quantized Periodic River Meanders (`UF_WorldGen.js`)**:
+  - River meander frequencies quantized to exact integer cycle counts: `cycles = Math.max(1, Math.round(worldH / period))`, ensuring $2\pi \cdot cycles$ divides map height.
+  - Sine offsets and first/second derivatives match identically at $gy=0$ and $gy=H$ (max center diff: $2.84 \times 10^{-14}$, max slope diff: $2.84 \times 10^{-13}$).
+  - Meander distances wrap horizontally modulo `worldW` with toroidal shortest-path metrics.
+- **Latitude Temperature Symmetry (`UF_WorldGen.js`)**:
+  - Replaced linear vertical gradient with equatorial symmetry: `distFromEq = Math.abs(gy - wh / 2) / (wh / 2)`.
+  - North pole ($gy=0$) and South pole ($gy=H$) both evaluate to cold polar climates (base temp 0.15) and meet seamlessly across the North/South boundary.
+- **Toroidal Autotiling & Shading Continuity (`UF_WorldGen.js`, `UF_Tiles.js`)**:
+  - Autotile sampling `groundAt` and `waterAt` wrap coordinates modulo `size`, eliminating rectangular seam cutoffs.
+  - `UF_Tiles.js`: Distance-1, distance-2, and distance-3 neighbor lookups wrap toroidally via `tileAt(gx, gy) = mapData[((gy % size + size) % size) * size + ((gx % size + size) % size)]`, eliminating edge clamping striping artifacts.
+  - Dryness field $D$ and corner step / family arrays synchronized across $(size, cy) \to (0, cy)$ and $(cx, size) \to (cx, 0)$.
+- **Fog of War Toroidal Viewport & Raycast Wrapping (`UF_Fog.js`)**:
+  - `mark(cx, cy, r)`: Raycast coordinates wrap modulo $(width, height)$, allowing vision to penetrate across toroidal boundaries.
+  - `Sprite_UFFog`: Multi-quadrant wrapping with shared bitmap texture covers viewport continuously across camera scroll offsets.
+- **Verification**:
+  - Automated test suite `tools/test_seamless_map_edges.js`: 26/26 PASS (exit 0).
+  - Rule 4 mutation verification: `--mutate-noise` (FAIL), `--mutate-river` (FAIL), `--mutate-temp` (FAIL).
+  - Regressions: `tools/test_round_world.js` (13/13 PASS), `smoke` (13/13 PASS).
+  - Live in-engine screenshots inspected (Rule 5): `live_seamless_river_and_terrain_at_seam.png` (river flows smoothly across middle of screen with zero horizontal jump) and `live_seamless_landscape_across_seam.png`.
+
 ## Universal 12-Sprite Walk Cycle Alignment & Faction Charset Routing Delivered — 2026-09-21 (Gemini)
 Delivered per user directives ("Their feet do not appear to be walking. we need to make sure the assets are all being routed into the game", "We are only using the charset generator ingame for faction creatures. thats all we are focused on right now", "The resulting sprite should have animated walking in every direction. Some of the sprites must be animating incorrectly. mostly left and right"):
 - **Root Cause Fixed Across All 12 Human Walk Masters (`tools/build_all_uniform_walk_masters.js`)**:

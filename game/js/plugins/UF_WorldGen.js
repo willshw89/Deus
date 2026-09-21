@@ -125,13 +125,48 @@
         }
         return v;
     }
-    /** Smooth value noise in 0-1 at world cell (gx, gy), lattice spacing `scale` cells. */
-    function valueNoise(seed, salt, gx, gy, scale) {
-        const fx = gx / scale, fy = gy / scale;
-        const ix = Math.floor(fx), iy = Math.floor(fy);
-        const tx = smooth(fx - ix), ty = smooth(fy - iy);
-        const a = corner(seed, salt, ix, iy), b = corner(seed, salt, ix + 1, iy);
-        const c = corner(seed, salt, ix, iy + 1), d = corner(seed, salt, ix + 1, iy + 1);
+    function valueNoise(seed, salt, gx, gy, scale, wrapW, wrapH) {
+        if (!wrapW || !wrapH) {
+            const st = window.UF && UF.World && UF.World.state;
+            if (st && st.size) {
+                wrapW = wrapW || ((st.areasX || 1) * st.size);
+                wrapH = wrapH || ((st.areasY || 1) * st.size);
+            }
+        }
+        let fx, fy;
+        let x0, x1, y0, y1, tx, ty;
+        if (wrapW && scale) {
+            const modW = Math.max(1, Math.round(wrapW / scale));
+            const effScaleX = wrapW / modW;
+            fx = gx / effScaleX;
+            const ix = Math.floor(fx);
+            tx = smooth(fx - ix);
+            x0 = ((ix % modW) + modW) % modW;
+            x1 = (((ix + 1) % modW) + modW) % modW;
+        } else {
+            fx = gx / scale;
+            const ix = Math.floor(fx);
+            tx = smooth(fx - ix);
+            x0 = ix;
+            x1 = ix + 1;
+        }
+        if (wrapH && scale) {
+            const modH = Math.max(1, Math.round(wrapH / scale));
+            const effScaleY = wrapH / modH;
+            fy = gy / effScaleY;
+            const iy = Math.floor(fy);
+            ty = smooth(fy - iy);
+            y0 = ((iy % modH) + modH) % modH;
+            y1 = (((iy + 1) % modH) + modH) % modH;
+        } else {
+            fy = gy / scale;
+            const iy = Math.floor(fy);
+            ty = smooth(fy - iy);
+            y0 = iy;
+            y1 = iy + 1;
+        }
+        const a = corner(seed, salt, x0, y0), b = corner(seed, salt, x1, y0);
+        const c = corner(seed, salt, x0, y1), d = corner(seed, salt, x1, y1);
         const top = a + (b - a) * tx, bottom = c + (d - c) * tx;
         return top + (bottom - top) * ty;
     }
@@ -266,22 +301,27 @@
 
     function fieldsFor(seed, d, cl, gx, gy) {
         const sc = cl.scale;
+        const ww = d && d.width ? d.width : 256;
+        const wh = d && d.height ? d.height : 256;
         // Each field: its own noise plus a detail octave at 25 % weight.
-        const n = (salt, scale) => valueNoise(seed, salt, gx, gy, scale) * 0.75 + valueNoise(seed, salt ^ SALT.detail, gx, gy, sc.detail) * 0.25;
-        // Continent mask: the world's rim is ocean or coast.
-        const edge = Math.min(gx, gy, d.width - 1 - gx, d.height - 1 - gy);
-        const mask = smoothstep(0, 1, edge / (d.width * cl.continentRim));
-        let e = n(SALT.elevation, sc.elevation) * mask;
+        const n = (salt, scale) => valueNoise(seed, salt, gx, gy, scale, ww, wh) * 0.75 + valueNoise(seed, salt ^ SALT.detail, gx, gy, sc.detail, ww, wh) * 0.25;
+        let e = n(SALT.elevation, sc.elevation);
         let r = n(SALT.rainfall, sc.rainfall);
-        // North is cold, high ground is cold.
-        let t = clamp01(0.15 + 0.7 * (1 - gy / d.height) + (n(SALT.temperature, sc.temperature) - 0.5) * 0.4 - Math.max(0, e - 0.5) * 0.6);
+        // North and South poles are cold, equator (middle) is warm, high ground is cold.
+        const distFromEq = Math.abs(gy - wh / 2) / (wh / 2);
+        const baseTemp = 0.85 - 0.7 * distFromEq;
+        let t = clamp01(baseTemp + (n(SALT.temperature, sc.temperature) - 0.5) * 0.4 - Math.max(0, e - 0.5) * 0.6);
         let dr = n(SALT.drainage, sc.drainage);
         let v = n(SALT.volcanism, sc.volcanism);
         let sav = n(SALT.savagery, sc.savagery);
         let al = n(SALT.alignment, sc.alignment);
         // The start is always temperate and habitable: blend toward startClimate near it.
         const radius = cl.startHabitableRadius || [28, 110];
-        const w = smoothstep(radius[1], radius[0], Math.hypot(gx - d.startX, gy - d.startY));
+        let dx = Math.abs(gx - d.startX);
+        if (dx > ww / 2) dx = ww - dx;
+        let dy = Math.abs(gy - d.startY);
+        if (dy > wh / 2) dy = wh - dy;
+        const w = smoothstep(radius[1], radius[0], Math.hypot(dx, dy));
         if (w > 0 && cl.startClimate) {
             const s = cl.startClimate;
             e += (s.elevation - e) * w;
@@ -295,10 +335,10 @@
         const sal = clamp01(1 - (e - cl.seaLevel) / 0.08);
         return { e, r, t, d: dr, v, sav, al, sal };
     }
-    const isLake = (seed, cl, f, gx, gy) => {
+    const isLake = (seed, cl, f, gx, gy, wrapW, wrapH) => {
         const L = cl.lakes;
         return !!L && f.e >= cl.seaLevel && f.e < cl.mountainLevel && f.d < L.maxDrainage && f.r > L.minRainfall
-            && valueNoise(seed, SALT.lake, gx, gy, L.scale) > L.threshold;
+            && valueNoise(seed, SALT.lake, gx, gy, L.scale, wrapW, wrapH) > L.threshold;
     };
 
     /** Biome id from fields (section 3.3). Pure. */
@@ -333,12 +373,25 @@
     //-------------------------------------------------------------------------
     // Water bodies (section 3.2): rivers and the start pond are models in world coordinates
 
-    function makeRiver(anchorX, anchorY, halfWidth, phase, amp, period) {
+    function makeRiver(anchorX, anchorY, halfWidth, phase, amp, period, worldW, worldH) {
+        const h = worldH || 256;
+        const w = worldW || 256;
+        const cycles = Math.max(1, Math.round(h / period));
+        const freq1 = (2 * Math.PI * cycles) / h;
+        const freq2 = (4 * Math.PI * cycles) / h;
         const center = gy => {
             const dd = gy - anchorY;
-            return anchorX + amp * (0.7 * Math.sin((2 * Math.PI * dd) / period + phase) + 0.3 * Math.sin((2 * Math.PI * dd) / (period * 0.43) + 2 * phase));
+            return anchorX + amp * (0.7 * Math.sin(freq1 * dd + phase) + 0.3 * Math.sin(freq2 * dd + 2 * phase));
         };
-        return { anchorX, anchorY, halfWidth, center, isWater: (gx, gy) => Math.abs(gx - Math.round(center(gy))) <= halfWidth };
+        const isWater = (gx, gy) => {
+            let dx = Math.abs(gx - Math.round(center(gy)));
+            if (w) {
+                dx = dx % w;
+                if (dx > w / 2) dx = w - dx;
+            }
+            return dx <= halfWidth;
+        };
+        return { anchorX, anchorY, halfWidth, center, isWater };
     }
     /** All rivers of this world: north-south meanders at seeded columns, never within keepAwayFromStart of the start. */
     WorldGen.riverModels = function(state) {
@@ -356,16 +409,22 @@
             const phase = unit(seed, SALT.riverPhase, i) * Math.PI * 2;
             let chosen = null;
             for (let j = 0; j < 60 && !chosen; j++) {
-                const m = makeRiver(Math.floor(unit(seed, SALT.river, i * 64 + j) * d.width), d.startY, hw, phase, R.meanderCells || 0, R.meanderPeriodCells || 97);
+                const m = makeRiver(Math.floor(unit(seed, SALT.river, i * 64 + j) * d.width), d.startY, hw, phase, R.meanderCells || 0, R.meanderPeriodCells || 97, d.width, d.height);
                 let clear = true;
                 for (let dy = -keep; dy <= keep && clear; dy += 2) {
-                    if (Math.abs(Math.round(m.center(d.startY + dy)) - d.startX) <= keep + hw) clear = false;
+                    let distToStart = Math.abs(Math.round(m.center(d.startY + dy)) - d.startX);
+                    if (distToStart > d.width / 2) distToStart = d.width - distToStart;
+                    if (distToStart <= keep + hw) clear = false;
                 }
                 // Rivers keep apart, so two don't run as one wide river.
-                if (clear && rivers.some(o => Math.abs(o.anchorX - m.anchorX) < 24)) clear = false;
+                if (clear && rivers.some(o => {
+                    let sep = Math.abs(o.anchorX - m.anchorX);
+                    if (sep > d.width / 2) sep = d.width - sep;
+                    return sep < 24;
+                })) clear = false;
                 if (clear) chosen = m;
             }
-            rivers.push(chosen || makeRiver(d.startX + keep * 3 * (i + 1), d.startY, hw, phase, R.meanderCells || 0, R.meanderPeriodCells || 97));
+            rivers.push(chosen || makeRiver(d.startX + keep * 3 * (i + 1), d.startY, hw, phase, R.meanderCells || 0, R.meanderPeriodCells || 97, d.width, d.height));
         }
         return rivers;
     };
@@ -383,8 +442,18 @@
         const angle = unit(seed, SALT.pond, 0) * Math.PI * 2;
         const dist = dmin + unit(seed, SALT.pond, 1) * (dmax - dmin);
         const rx = rmin + unit(seed, SALT.pond, 2) * (rmax - rmin), ry = rmin + unit(seed, SALT.pond, 3) * (rmax - rmin);
-        const cx = d.startX + Math.cos(angle) * dist, cy = d.startY + Math.sin(angle) * dist;
-        return { cx, cy, rx, ry, isWater: (gx, gy) => ((gx - cx) / rx) ** 2 + ((gy - cy) / ry) ** 2 <= 1 };
+        let cx = (d.startX + Math.cos(angle) * dist) % d.width;
+        if (cx < 0) cx += d.width;
+        let cy = (d.startY + Math.sin(angle) * dist) % d.height;
+        if (cy < 0) cy += d.height;
+        const isWater = (gx, gy) => {
+            let dx = Math.abs(gx - cx);
+            if (dx > d.width / 2) dx = d.width - dx;
+            let dy = Math.abs(gy - cy);
+            if (dy > d.height / 2) dy = d.height - dy;
+            return ((dx) / rx) ** 2 + ((dy) / ry) ** 2 <= 1;
+        };
+        return { cx, cy, rx, ry, isWater };
     };
 
     // Rivers and pond are built once per world (seed and size) and reused by every cell lookup.
@@ -406,7 +475,7 @@
             isWater(gx, gy) {
                 if (isRiverOrPond(gx, gy)) return true;
                 const f = fieldsFor(d.seed, d, cl, gx, gy);
-                return f.e < cl.seaLevel || isLake(d.seed, cl, f, gx, gy);
+                return f.e < cl.seaLevel || isLake(d.seed, cl, f, gx, gy, d.width, d.height);
             }
         };
         return waterCache;
@@ -420,7 +489,7 @@
     function resolve(seed, d, m, wm, gx, gy, out) {
         const cat = m.source, cl = cat.climate;
         const f = fieldsFor(seed, d, cl, gx, gy);
-        const lake = isLake(seed, cl, f, gx, gy);
+        const lake = isLake(seed, cl, f, gx, gy, d.width, d.height);
         const biomeId = classify(cl, f, lake);
         const b = m.biomeIndex.get(biomeId);
         const bio = m.biomes[b];
@@ -526,7 +595,7 @@
     };
     WorldGen.lakeAt = function(gx, gy) {
         const cat = catalog(), d = dims();
-        return isLake(d.seed, cat.climate, fieldsFor(d.seed, d, cat.climate, gx, gy), gx, gy);
+        return isLake(d.seed, cat.climate, fieldsFor(d.seed, d, cat.climate, gx, gy), gx, gy, d.width, d.height);
     };
     WorldGen.biomeAt = (gx, gy, z = 0) => { const c = WorldGen.cellInfo(gx, gy, z); return c ? c.biomeId : null; };
     WorldGen.surfaceElevationAt = (gx, gy, seed) => (window.UF && UF.Levels && typeof UF.Levels.surfaceElevationAt === "function") ? UF.Levels.surfaceElevationAt(gx, gy, seed) : 0;
@@ -888,21 +957,37 @@
                 align[i] = cell.align;
             }
         }
-        // Neighbors outside this area come from the same pure function, so edges match the next area.
+        // Neighbors outside this area come from the same pure function, wrapping around the toroidal world.
         const outside = new Map();
         const probe = (x, y) => {
-            const key = (y + 8) * 4096 + (x + 8);
+            const wx = ((gx0 + x) % d.width + d.width) % d.width;
+            const wy = ((gy0 + y) % d.height + d.height) % d.height;
+            const key = wy * 4096 + wx;
             let p = outside.get(key);
             if (!p) {
-                const c = resolve(seed, d, m, wm, gx0 + x, gy0 + y, {});
+                const c = resolve(seed, d, m, wm, wx, wy, {});
                 p = { g: c.g, w: c.w };
                 outside.set(key, p);
             }
             return p;
         };
         const inside = (x, y) => x >= 0 && y >= 0 && x < size && y < size;
-        const groundAt = (x, y) => (inside(x, y) ? ground[y * size + x] : probe(x, y).g);
-        const waterAt = (x, y) => (inside(x, y) ? water[y * size + x] !== 0 : probe(x, y).w !== 0);
+        const groundAt = (x, y) => {
+            if (d.areasX === 1 && d.areasY === 1) {
+                const wx = ((x % size) + size) % size;
+                const wy = ((y % size) + size) % size;
+                return ground[wy * size + wx];
+            }
+            return inside(x, y) ? ground[y * size + x] : probe(x, y).g;
+        };
+        const waterAt = (x, y) => {
+            if (d.areasX === 1 && d.areasY === 1) {
+                const wx = ((x % size) + size) % size;
+                const wy = ((y % size) + size) % size;
+                return water[wy * size + wx] !== 0;
+            }
+            return inside(x, y) ? water[y * size + x] !== 0 : probe(x, y).w !== 0;
+        };
 
         // 2. Tiles: water autotiles join any water; ground autotiles join the same ground kind (biome borders get outlines).
         const shapes = shapeTable();

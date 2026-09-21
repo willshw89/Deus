@@ -158,8 +158,10 @@
         return true;
     }
 
-    function isOpaque(x, y) {
-        if (x < 0 || y < 0 || x >= width || y >= height) return true;
+    function isOpaque(rawX, rawY) {
+        if (!width || !height) return true;
+        const x = ((rawX % width) + width) % width;
+        const y = ((rawY % height) + height) % height;
 
         const W = window.UF && UF.World;
         const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
@@ -224,11 +226,12 @@
             let prevX = cx, prevY = cy;
 
             for (let d = 0.5; d <= r; d += 0.5) {
-                const x = Math.round(cx + cos * d);
-                const y = Math.round(cy + sin * d);
-                if (x < 0 || x >= width || y < 0 || y >= height) break;
+                const rx = Math.round(cx + cos * d);
+                const ry = Math.round(cy + sin * d);
+                const x = ((rx % width) + width) % width;
+                const y = ((ry % height) + height) % height;
 
-                const dx = x - cx, dy = y - cy;
+                const dx = rx - cx, dy = ry - cy;
                 if (dx * dx + dy * dy > r2) break;
 
                 if (x !== prevX || y !== prevY) {
@@ -496,8 +499,41 @@
             }
             const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
             this.scale.set(tw, th);
-            this.x = -$gameMap.displayX() * tw;
-            this.y = -$gameMap.displayY() * th;
+            const mapW = width * tw;
+            const mapH = height * th;
+            let ox = (-$gameMap.displayX() * tw) % mapW;
+            if (ox > 0) ox -= mapW;
+            let oy = (-$gameMap.displayY() * th) % mapH;
+            if (oy > 0) oy -= mapH;
+            this.x = ox;
+            this.y = oy;
+
+            if (!this._quadrants) this._quadrants = [];
+            const screenW = (window.Graphics && Graphics.width) || 816;
+            const screenH = (window.Graphics && Graphics.height) || 624;
+            const repsX = Math.max(2, Math.ceil(screenW / mapW) + 1);
+            const repsY = Math.max(2, Math.ceil(screenH / mapH) + 1);
+            const needed = repsX * repsY;
+            while (this._quadrants.length < needed - 1) {
+                const s = new Sprite(this.bitmap);
+                this._quadrants.push(s);
+                this.addChild(s);
+            }
+            let qIdx = 0;
+            for (let ry = 0; ry < repsY; ry++) {
+                for (let rx = 0; rx < repsX; rx++) {
+                    if (rx === 0 && ry === 0) continue;
+                    const s = this._quadrants[qIdx++];
+                    s.visible = true;
+                    if (s.bitmap !== this.bitmap) s.bitmap = this.bitmap;
+                    s.x = rx * width;
+                    s.y = ry * height;
+                }
+            }
+            while (qIdx < this._quadrants.length) {
+                this._quadrants[qIdx++].visible = false;
+            }
+
             if (dirty) {
                 const context = this.bitmap.context;
                 if (!this._fogImage || this._fogImage.width !== width || this._fogImage.height !== height) {

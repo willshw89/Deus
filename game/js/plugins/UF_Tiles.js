@@ -578,8 +578,8 @@
                 for (let sx = 0; sx < subW; sx++) {
                     const cx = Math.min(cornersW - 1, sx * STEP);
                     const gx = ax * size + cx;
-                    const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, (cfg.field && cfg.field.scale ? cfg.field.scale * 2.5 : 60));
-                    const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, (cfg.field && cfg.field.detailScale ? cfg.field.detailScale * 2.5 : 25));
+                    const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, (cfg.field && cfg.field.scale ? cfg.field.scale * 2.5 : 60), d.width, d.height);
+                    const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, (cfg.field && cfg.field.detailScale ? cfg.field.detailScale * 2.5 : 25), d.width, d.height);
                     const f = WG.fieldsFor ? WG.fieldsFor(seed, d, cl, gx, gy) : { r: 0.5, d: 0.5, e: 0.5 };
                     const rainTerm = (1 - f.r) * fw.rain;
                     const drainTerm = f.d * fw.drainage;
@@ -589,8 +589,10 @@
                     let nearWater = false;
                     if (mapDataForD) {
                         const checkR = 4;
-                        for (let wy = Math.max(0, cy - checkR); wy <= Math.min(size - 1, cy + checkR); wy += 2) {
-                            for (let wx = Math.max(0, cx - checkR); wx <= Math.min(size - 1, cx + checkR); wx += 2) {
+                        for (let dy = -checkR; dy <= checkR; dy += 2) {
+                            const wy = ((cy + dy) % size + size) % size;
+                            for (let dx = -checkR; dx <= checkR; dx += 2) {
+                                const wx = ((cx + dx) % size + size) % size;
                                 const tile = mapDataForD[wy * size + wx];
                                 if (tile >= 2048 && tile < 2816) { nearWater = true; break; }
                             }
@@ -620,6 +622,13 @@
                     const btm = v01 + (v11 - v01) * tx;
                     D[cyRow + cx] = top + (btm - top) * ty;
                 }
+            }
+            for (let cy = 0; cy < cornersW; cy++) {
+                D[cy * cornersW + size] = D[cy * cornersW + 0];
+            }
+            const lastRowD = size * cornersW;
+            for (let cx = 0; cx < cornersW; cx++) {
+                D[lastRowD + cx] = D[0 * cornersW + cx];
             }
         }
 
@@ -739,6 +748,16 @@
             }
         }
 
+        for (let cy = 0; cy < cornersW; cy++) {
+            cornerFams[cy * cornersW + size] = cornerFams[cy * cornersW + 0];
+            cornerSteps[cy * cornersW + size] = cornerSteps[cy * cornersW + 0];
+        }
+        const lastRowCorners = size * cornersW;
+        for (let cx = 0; cx < cornersW; cx++) {
+            cornerFams[lastRowCorners + cx] = cornerFams[0 * cornersW + cx];
+            cornerSteps[lastRowCorners + cx] = cornerSteps[0 * cornersW + cx];
+        }
+
         const t1_5 = performance.now();
 
         // Lipschitz closure: raster passes forward and backward
@@ -822,6 +841,16 @@
             }
         }
 
+        for (let cy = 0; cy < cornersW; cy++) {
+            cornerFams[cy * cornersW + size] = cornerFams[cy * cornersW + 0];
+            cornerSteps[cy * cornersW + size] = cornerSteps[cy * cornersW + 0];
+        }
+        const lastRowCornersEnd = size * cornersW;
+        for (let cx = 0; cx < cornersW; cx++) {
+            cornerFams[lastRowCornersEnd + cx] = cornerFams[0 * cornersW + cx];
+            cornerSteps[lastRowCornersEnd + cx] = cornerSteps[0 * cornersW + cx];
+        }
+
         const t2 = performance.now();
 
         // 3. Write Layer 1 tiles
@@ -830,6 +859,7 @@
         const pairsCfg = cfg.pairs || {};
         const layer1Offset = size * size;
         const size2 = size * 2;
+        const tileAt = (gx, gy) => mapData[(((gy % size) + size) % size) * size + (((gx % size) + size) % size)];
 
         for (let y = 0; y < size; y++) {
             const rowOffset = y * size;
@@ -861,14 +891,14 @@
                     ntSW = mapData[idx + size - 1];
                     ntSE = mapData[idx + size + 1];
                 } else {
-                    ntN  = y > 0 ? mapData[idx - size] : 0;
-                    ntS  = y < size - 1 ? mapData[idx + size] : 0;
-                    ntW  = x > 0 ? mapData[idx - 1] : 0;
-                    ntE  = x < size - 1 ? mapData[idx + 1] : 0;
-                    ntNW = (y > 0 && x > 0) ? mapData[idx - size - 1] : 0;
-                    ntNE = (y > 0 && x < size - 1) ? mapData[idx - size + 1] : 0;
-                    ntSW = (y < size - 1 && x > 0) ? mapData[idx + size - 1] : 0;
-                    ntSE = (y < size - 1 && x < size - 1) ? mapData[idx + size + 1] : 0;
+                    ntN  = tileAt(x, y - 1);
+                    ntS  = tileAt(x, y + 1);
+                    ntW  = tileAt(x - 1, y);
+                    ntE  = tileAt(x + 1, y);
+                    ntNW = tileAt(x - 1, y - 1);
+                    ntNE = tileAt(x + 1, y - 1);
+                    ntSW = tileAt(x - 1, y + 1);
+                    ntSE = tileAt(x + 1, y + 1);
                 }
 
                 const s0 = cornerSteps[cy0 + x];
@@ -977,17 +1007,17 @@
                 }
 
                 // Check distance-2 neighbors for broad multi-tile outer diffusion
-                if (!borderFam && x > 1 && x < size - 2 && y > 1 && y < size - 2) {
-                    const d2N  = mapData[idx - size2];
-                    const d2S  = mapData[idx + size2];
-                    const d2W  = mapData[idx - 2];
-                    const d2E  = mapData[idx + 2];
+                if (!borderFam) {
+                    const d2N  = (y >= 2) ? mapData[idx - size2] : tileAt(x, y - 2);
+                    const d2S  = (y < size - 2) ? mapData[idx + size2] : tileAt(x, y + 2);
+                    const d2W  = (x >= 2) ? mapData[idx - 2] : tileAt(x - 2, y);
+                    const d2E  = (x < size - 2) ? mapData[idx + 2] : tileAt(x + 2, y);
 
                     if (d2N !== cellTile || d2S !== cellTile || d2W !== cellTile || d2E !== cellTile) {
-                        const d2NW = mapData[idx - size2 - 2];
-                        const d2NE = mapData[idx - size2 + 2];
-                        const d2SW = mapData[idx + size2 - 2];
-                        const d2SE = mapData[idx + size2 + 2];
+                        const d2NW = (y >= 2 && x >= 2) ? mapData[idx - size2 - 2] : tileAt(x - 2, y - 2);
+                        const d2NE = (y >= 2 && x < size - 2) ? mapData[idx - size2 + 2] : tileAt(x + 2, y - 2);
+                        const d2SW = (y < size - 2 && x >= 2) ? mapData[idx + size2 - 2] : tileAt(x - 2, y + 2);
+                        const d2SE = (y < size - 2 && x < size - 2) ? mapData[idx + size2 + 2] : tileAt(x + 2, y + 2);
                         const d2fN  = d2N !== cellTile ? tileToFam[d2N] : null;
                         const d2fS  = d2S !== cellTile ? tileToFam[d2S] : null;
                         const d2fW  = d2W !== cellTile ? tileToFam[d2W] : null;
@@ -1063,11 +1093,11 @@
                 }
 
                 // Check distance-3 neighbors for broad outer rolling gradient
-                if (!borderFam && x > 2 && x < size - 3 && y > 2 && y < size - 3) {
-                    const d3N = mapData[idx - size * 3];
-                    const d3S = mapData[idx + size * 3];
-                    const d3W = mapData[idx - 3];
-                    const d3E = mapData[idx + 3];
+                if (!borderFam) {
+                    const d3N = (y >= 3) ? mapData[idx - size * 3] : tileAt(x, y - 3);
+                    const d3S = (y < size - 3) ? mapData[idx + size * 3] : tileAt(x, y + 3);
+                    const d3W = (x >= 3) ? mapData[idx - 3] : tileAt(x - 3, y);
+                    const d3E = (x < size - 3) ? mapData[idx + 3] : tileAt(x + 3, y);
 
                     if (d3N !== cellTile || d3S !== cellTile || d3W !== cellTile || d3E !== cellTile) {
                         const dfN = d3N !== cellTile ? tileToFam[d3N] : null;
