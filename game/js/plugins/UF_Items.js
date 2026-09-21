@@ -193,6 +193,10 @@
         }
     }
 
+    function canMerge(a, b) {
+        return !!a && !!b && a.type === b.type && (a.mat || null) === (b.mat || null) && (a.q ?? null) === (b.q ?? null);
+    }
+
     //-------------------------------------------------------------------------
     // API
 
@@ -219,9 +223,10 @@
 
     /**
      * Create one item record, without merging. at = { area, x, y } for the ground or { holder: unitId } for an inventory.
+     * opts = { mat, q } optional material and quality.
      * Returns the item, or null (unknown type, unknown unit, nowhere to put it).
      */
-    Items.create = function(typeId, count, at) {
+    Items.create = function(typeId, count, at, opts) {
         const st = ready(), t = Items.type(typeId);
         if (!st || !t || !at) return null;
         const held = at.holder !== undefined && at.holder !== null;
@@ -229,6 +234,10 @@
         const area = at.area ? whereArea(at) : null;
         if (held ? !holder || !validArea(levelArea(holder.area, zOf(holder))) : !validArea(area)) return null;
         const item = { id: st.nextId++, type: t.id, count: Math.max(1, count | 0), area: null, x: 0, y: 0, z: 0, holder: null };
+        const mat = (opts && opts.mat) || at.mat || null;
+        const q = (opts && opts.q !== undefined && opts.q !== null) ? opts.q : (at.q !== undefined && at.q !== null ? at.q : null);
+        if (mat) item.mat = mat;
+        if (q !== null) item.q = q;
         if (at.holder !== undefined && at.holder !== null) {
             const u = holder;
             item.holder = u.id;
@@ -245,14 +254,20 @@
     };
 
     /** Put `count` of a type on a cell: fills stacks of that type already there, then makes new stacks. Returns the stacks touched. */
-    Items.drop = function(area, x, y, typeId, count, harvesterId) {
+    Items.drop = function(area, x, y, typeId, count, harvesterId, opts) {
         const st = ready(), t = Items.type(typeId);
         if (!st || !t || !validArea(area)) return [];
+        if (typeof harvesterId === "object" && harvesterId !== null && opts === undefined) {
+            opts = harvesterId;
+            harvesterId = null;
+        }
         let left = Math.max(0, count | 0);
         const max = stackOf(t), touched = [];
+        const mat = (opts && opts.mat) || null;
+        const q = (opts && opts.q !== undefined && opts.q !== null) ? opts.q : null;
         for (const it of itemsOnCell(area, x, y)) {
             if (left <= 0) break;
-            if (it.type !== t.id || it.count >= max) continue;
+            if (it.type !== t.id || (it.mat || null) !== mat || (it.q ?? null) !== q || it.count >= max) continue;
             const add = Math.min(max - it.count, left);
             it.count += add;
             left -= add;
@@ -261,7 +276,7 @@
         }
         while (left > 0) {
             const n = Math.min(max, left);
-            const it = Items.create(t.id, n, { area, x, y });
+            const it = Items.create(t.id, n, { area, x, y }, opts);
             if (!it) break;
             touched.push(it);
             left -= n;
@@ -303,6 +318,7 @@
             for (const id of ids) {
                 const it = st.byId[id];
                 if (!it || (o.id && it.type !== o.id)) continue;
+                if (o.mat && it.mat !== o.mat) continue;
                 if (tags) {
                     const t = Items.type(it.type);
                     if (!t || !Array.isArray(t.tags) || !tags.some(tag => t.tags.includes(tag))) continue;
@@ -350,7 +366,7 @@
         let merged = null;
         for (const other of itemsOnCell(area, x, y)) {
             if (it.count <= 0) break;
-            if (other.type !== it.type || other.count >= max) continue;
+            if (!canMerge(other, it) || other.count >= max) continue;
             const add = Math.min(max - other.count, it.count);
             other.count += add;
             it.count -= add;
@@ -368,14 +384,14 @@
     };
 
     /** Create `count` of a type straight in a unit's inventory (in stacks of the type's size). Returns the items made. */
-    Items.give = function(typeId, count, unitId) {
+    Items.give = function(typeId, count, unitId, opts) {
         const st = ready(), t = Items.type(typeId), u = st && World().unit(unitId);
         if (!st || !t || !u) return [];
         let left = Math.max(0, count | 0);
         const max = stackOf(t), made = [];
         while (left > 0) {
             const n = Math.min(max, left);
-            const it = Items.create(t.id, n, { holder: u.id });
+            const it = Items.create(t.id, n, { holder: u.id }, opts);
             if (!it) break;
             made.push(it);
             left -= n;
@@ -428,12 +444,16 @@
     };
 
     /** Total count of a type (all types when typeId is omitted) in a unit's inventory (unit id) or on a cell ({ x, y, area? }). */
-    Items.count = function(where, typeId) {
+    Items.count = function(where, typeId, mat) {
         let list;
         if (typeof where === "number") list = Items.inventoryOf(where);
         else if (where && typeof where === "object") list = Items.atIn(whereArea(where), where.x, where.y);
         else return 0;
-        return list.reduce((n, it) => n + (!typeId || it.type === typeId ? it.count : 0), 0);
+        return list.reduce((n, it) => {
+            if (typeId && it.type !== typeId) return n;
+            if (mat && it.mat !== mat) return n;
+            return n + it.count;
+        }, 0);
     };
 
     /** Whether a unit carries at least { typeId: count, ... }. */
@@ -446,9 +466,65 @@
     Items.describe = function(x, y) {
         const list = Items.at(x, y);
         if (!list.length) return null;
-        const items = list.map(it => ({ id: it.id, type: it.type, name: nameOf(it.type), count: it.count }));
+        const items = list.map(it => {
+            const baseName = nameOf(it.type);
+            const matDef = it.mat ? Items.materialOf(it.mat) : null;
+            const name = matDef ? `${matDef.name} ${baseName}` : baseName;
+            return { id: it.id, type: it.type, name, count: it.count, mat: it.mat || null, q: it.q ?? null };
+        });
         return { text: items.map(i => (i.count > 1 ? `${i.count} × ${i.name}` : i.name)).join(", "), items };
     };
+
+    /**
+     * Resolve material definition from catalog.materials for an item, material key, or item id.
+     * Supports:
+     * - Item object with item.mat (e.g. "oak", "woods:oak")
+     * - Item object without item.mat, falling back to item.type (e.g. "wood" -> alias "woods:oak", "log" -> "wood" -> "woods:oak", "stone" -> "stones:limestone")
+     * - Material key string (e.g. "oak", "woods:oak", "limestone", "copper")
+     * - Legacy alias string (e.g. "wood", "stone", "iron")
+     */
+    Items.materialOf = function(ref) {
+        const cat = catalog();
+        const mats = cat && cat.materials;
+        if (!mats || !ref) return null;
+
+        let key = null;
+        if (typeof ref === "number") {
+            const it = Items.get(ref);
+            if (!it) return null;
+            key = it.mat || it.type;
+        } else if (typeof ref === "object") {
+            key = ref.mat || ref.type;
+        } else if (typeof ref === "string") {
+            key = ref;
+        }
+
+        if (!key) return null;
+
+        // Check if key is in aliases (e.g. "wood", "stone", "iron")
+        if (mats.aliases && mats.aliases[key]) {
+            key = mats.aliases[key];
+        }
+
+        // Direct alias for log/timber if not explicit
+        if ((key === "log" || key === "timber") && mats.aliases && mats.aliases["wood"]) {
+            key = mats.aliases["wood"];
+        }
+
+        // If key contains domain prefix, e.g. "woods:oak"
+        if (typeof key === "string" && key.includes(":")) {
+            const [domain, id] = key.split(":");
+            if (mats[domain] && mats[domain][id]) return mats[domain][id];
+        }
+
+        // Search across domains (woods, stones, metals)
+        if (mats.woods && mats.woods[key]) return mats.woods[key];
+        if (mats.stones && mats.stones[key]) return mats.stones[key];
+        if (mats.metals && mats.metals[key]) return mats.metals[key];
+
+        return null;
+    };
+    Items.canMerge = canMerge;
 
     // A unit that leaves the world drops what it carried where it stood.
     listen("world:unitRemoved", u => {
@@ -592,7 +668,14 @@
             sp._ufFrameVersion = -1;
             sp.visible = false; // shown once the frame is set, so the whole sheet never flashes
             sp.bitmap = t && t.image ? ImageManager.loadCharacter(t.image) : null;
-            sp.tint = t && t.tint ? parseInt(String(t.tint).replace("#", ""), 16) : 0xffffff;
+            const matDef = item && item.mat ? Items.materialOf(item.mat) : null;
+            if (matDef && matDef.color) {
+                sp.tint = parseInt(String(matDef.color).replace("#", ""), 16);
+            } else if (t && t.tint) {
+                sp.tint = parseInt(String(t.tint).replace("#", ""), 16);
+            } else {
+                sp.tint = 0xffffff;
+            }
             sp.anchor.set(0.5, 1);
         }
         // Frame: column 1, row 0 of the 3x4 sheet (contract section 4); size and anchor from the sidecar when it has them.
@@ -839,6 +922,52 @@
             t.check("perf", frames >= 100 && avg <= 1.0,
                 `layer update avg ${avg.toFixed(3)} ms over ${frames} frames, ${layer.activeCount()} item sprites in view (${made} stacks dropped) at zoom ${(UF.Camera ? UF.Camera.zoom() : 1).toFixed(3)}; the tilemap's own child sort isn't included`);
             t.screenshot("items_zoomed_out");
+
+            // Material-aware stacks: different materials don't merge, identical materials do
+            const matCellX = mid + 7, matCellY = mid + 7;
+            const pineLogs = Items.drop(area, matCellX, matCellY, "log", 2, null, { mat: "pine" });
+            const oakLogs = Items.drop(area, matCellX, matCellY, "log", 2, null, { mat: "oak" });
+            const genericLogs = Items.drop(area, matCellX, matCellY, "log", 2);
+            const cellStacks = Items.at(matCellX, matCellY);
+            const distinctOk = cellStacks.length === 3 &&
+                cellStacks.some(it => it.mat === "pine" && it.count === 2) &&
+                cellStacks.some(it => it.mat === "oak" && it.count === 2) &&
+                cellStacks.some(it => !it.mat && it.count === 2);
+            t.check("material_stacks_distinct", distinctOk,
+                `distinct stacks on (${matCellX},${matCellY}): count ${cellStacks.length} (expected 3: pine, oak, generic); items: ${cellStacks.map(it => `${it.mat || "generic"}:${it.count}`).join(", ")}`);
+
+            // Merging matching materials
+            const moreOak = Items.drop(area, matCellX, matCellY, "log", 2, null, { mat: "oak" });
+            const cellStacksAfter = Items.at(matCellX, matCellY);
+            const oakMergedOk = cellStacksAfter.length === 3 &&
+                cellStacksAfter.find(it => it.mat === "oak").count === 4;
+            t.check("matching_material_merges", oakMergedOk,
+                `after dropping 2 more oak logs: oak count ${cellStacksAfter.find(it => it.mat === "oak") ? cellStacksAfter.find(it => it.mat === "oak").count : "missing"} (expected 4), total stacks ${cellStacksAfter.length}`);
+
+            // Material property lookup
+            const pineDef = Items.materialOf("pine");
+            const oakDef = Items.materialOf("woods:oak");
+            const woodAlias = Items.materialOf("wood");
+            const graniteDef = Items.materialOf("granite");
+            const ironDef = Items.materialOf("iron");
+            const itemMatDef = Items.materialOf(oakLogs[0]);
+            const lookupOk = !!pineDef && pineDef.density === 0.45 &&
+                !!oakDef && oakDef.density === 0.75 &&
+                !!woodAlias && woodAlias.name === "Oak" &&
+                !!graniteDef && graniteDef.density === 2.75 &&
+                !!ironDef && ironDef.name === "Iron" &&
+                !!itemMatDef && itemMatDef.name === "Oak";
+            t.check("material_property_lookup", lookupOk,
+                `materialOf lookups: pine density ${pineDef ? pineDef.density : "null"}, oak density ${oakDef ? oakDef.density : "null"}, wood alias ${woodAlias ? woodAlias.name : "null"}, granite density ${graniteDef ? graniteDef.density : "null"}, iron name ${ironDef ? ironDef.name : "null"}`);
+
+            // Material describe and tint
+            const matDesc = Items.describe(matCellX, matCellY);
+            const descOk = !!matDesc && matDesc.text.includes("Oak Log") && matDesc.text.includes("Pine Log") && matDesc.text.includes("Log");
+            await t.waitFrames(2);
+            const oakSp = layer ? layer.spriteFor(oakLogs[0].id) : null;
+            const tintOk = !!oakSp && oakSp.tint === parseInt(oakDef.color.replace("#", ""), 16);
+            t.check("material_describe_and_tint", descOk && tintOk,
+                `describe: "${matDesc ? matDesc.text : "null"}"; oak sprite tint: 0x${oakSp ? oakSp.tint.toString(16) : "none"} (expected ${oakDef ? oakDef.color : "none"})`);
 
             // Clean up: the test items go, the zoom comes back.
             for (const id of Object.keys(Items.state().byId)) if (!before.has(id)) Items.remove(Number(id));

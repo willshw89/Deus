@@ -6,6 +6,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Systemic Material Economy: Milestone 1 / Task 2 Item Material Binding Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval):
+- **Item Material Binding & Quality Tracking (`UF_Items.js`)**:
+  - Attached optional `mat` (material id) and `q` (quality tier) to item instances in `Items.create(typeId, count, at, opts)`.
+  - Implemented `canMerge(a, b)`: items only merge on the ground or during `putDown` if `a.type === b.type && (a.mat || null) === (b.mat || null) && (a.q ?? null) === (b.q ?? null)`.
+  - Updated `Items.drop(area, x, y, typeId, count, harvesterId, opts)`: accepts options/material and only stacks with matching materials up to capacity.
+  - Updated `Items.putDown(itemId, area, x, y)`: carried material-bound items will not merge into differing material stacks on the destination cell.
+  - Implemented `Items.materialOf(ref)`: resolves physical property definitions from `catalog.materials` across woods, stones, metals, and aliases (`wood` -> Oak, `stone` -> Limestone, `iron` -> Iron).
+  - Updated `Items.describe(x, y)`: dynamically formats material-aware labels (e.g. "2 × Pine Log, 4 × Oak Log, 2 × Log") while preserving generic naming for legacy items.
+  - Updated `Items.count(where, typeId, mat)`: supports querying item counts by material.
+  - Updated `Items.find(opts)`: supports filtering ground items by `o.mat`.
+  - Updated `Sprite_UFItemLayer.prototype.assign(sp, item)`: ground items with `mat` dynamically tint their sprite using `matDef.color`.
+- **Verification Evidence**:
+  - `node tools/run_tests.js items`: **19/19 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `items.material_property_lookup` caught density discrepancy (2.70 vs 2.75) and failed with exit 1 before correction.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 27s (0 regressions).
+  - Node syntax check on `UF_Items.js`: 100% clean.
+
 ## Systemic Material Economy: Milestone 1 / Task 1 Registry Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy Roadmap approval & "save with editor open"):
 - **Material Physical Property Registry (`UF_WorldCatalog.json`)**:
