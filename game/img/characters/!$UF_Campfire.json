@@ -1,5 +1,8 @@
 {
   "id": "campfire",
+  "name": "Campfire",
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
   "frameWidth": 48,
   "frameHeight": 48,
   "anchor": [
@@ -11,7 +14,10 @@
     1
   ],
   "facings": [
-    "S"
+    "S",
+    "W",
+    "E",
+    "N"
   ],
   "animations": {
     "stand": [
@@ -25,7 +31,6 @@
       2
     ]
   },
-  "frameMs": 160,
-  "generator": "Google Nano Banana 2",
-  "standard": "Final Fantasy VI 16-bit HD"
+  "frameMs": 150,
+  "standard": "Project DEUS 16-bit HD"
 }
