@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Project DEUS — Batch 1 Containers Gate B Review Gallery</title>
+<style>
+  body { background: #0c0c14; color: #d0d0e0; font-family: sans-serif; padding: 20px; }
+  h1 { color: #f0c040; border-bottom: 1px solid #303040; padding-bottom: 8px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px; }
+  .card { background: #181824; border: 1px solid #282838; border-radius: 8px; padding: 16px; width: 320px; }
+  .card h3 { margin-top: 0; color: #60b0ff; }
+  .anim-box { width: 192px; height: 192px; background: #202030; border: 1px solid #404050; position: relative; overflow: hidden; margin: 0 auto; image-rendering: pixelated; }
+  .sprite { width: 192px; height: 192px; position: absolute; background-size: 576px 768px; }
+  .controls { margin-top: 12px; display: flex; gap: 8px; justify-content: center; }
+  button { background: #303048; color: #fff; border: 1px solid #505070; padding: 4px 12px; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #404060; }
+  .strip { display: flex; gap: 8px; margin-top: 12px; justify-content: center; }
+  .strip-frame { width: 48px; height: 48px; background: #202030; border: 1px solid #383848; overflow: hidden; position: relative; image-rendering: pixelated; }
+  .strip-frame div { width: 48px; height: 48px; position: absolute; background-size: 144px 192px; }
+</style>
+</head>
+<body>
+<h1>PROJECT DEUS — Batch 1 Storage Containers (Approval Gate B)</h1>
+<p>Each container is presented below with full 3-frame discrete sprite animation playback (Closed &rarr; Ajar &rarr; Open Hold &rarr; Closing).</p>
+<div class="grid">
+  
+    <div class="card">
+      <h3>Storage Chest (<code>chest_wood</code>)</h3>
+      <div class="anim-box">
+        <div id="anim-chest_wood" class="sprite" style="background-image: url('../masters/batch1_containers_master_4x.png'); background-position: 0px -0px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="toggle('chest_wood')">Pause/Play</button>
+        <button onclick="step('chest_wood', -1)">&larr;</button>
+        <button onclick="step('chest_wood', 1)">&rarr;</button>
+        <span id="frame-chest_wood" style="align-self: center; font-family: monospace;">Frame 0</span>
+      </div>
+      <div class="strip">
+        <div class="strip-frame" title="Closed (Col 0)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: 0px -0px;"></div></div>
+        <div class="strip-frame" title="Ajar (Col 1)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -48px -0px;"></div></div>
+        <div class="strip-frame" title="Open (Col 2)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -96px -0px;"></div></div>
+      </div>
+    </div>
+  
+    <div class="card">
+      <h3>Storage Crate (<code>crate_wood</code>)</h3>
+      <div class="anim-box">
+        <div id="anim-crate_wood" class="sprite" style="background-image: url('../masters/batch1_containers_master_4x.png'); background-position: 0px -192px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="toggle('crate_wood')">Pause/Play</button>
+        <button onclick="step('crate_wood', -1)">&larr;</button>
+        <button onclick="step('crate_wood', 1)">&rarr;</button>
+        <span id="frame-crate_wood" style="align-self: center; font-family: monospace;">Frame 0</span>
+      </div>
+      <div class="strip">
+        <div class="strip-frame" title="Closed (Col 0)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: 0px -48px;"></div></div>
+        <div class="strip-frame" title="Ajar (Col 1)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -48px -48px;"></div></div>
+        <div class="strip-frame" title="Open (Col 2)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -96px -48px;"></div></div>
+      </div>
+    </div>
+  
+    <div class="card">
+      <h3>Food Barrel (<code>barrel_food</code>)</h3>
+      <div class="anim-box">
+        <div id="anim-barrel_food" class="sprite" style="background-image: url('../masters/batch1_containers_master_4x.png'); background-position: 0px -384px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="toggle('barrel_food')">Pause/Play</button>
+        <button onclick="step('barrel_food', -1)">&larr;</button>
+        <button onclick="step('barrel_food', 1)">&rarr;</button>
+        <span id="frame-barrel_food" style="align-self: center; font-family: monospace;">Frame 0</span>
+      </div>
+      <div class="strip">
+        <div class="strip-frame" title="Closed (Col 0)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: 0px -96px;"></div></div>
+        <div class="strip-frame" title="Ajar (Col 1)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -48px -96px;"></div></div>
+        <div class="strip-frame" title="Open (Col 2)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -96px -96px;"></div></div>
+      </div>
+    </div>
+  
+    <div class="card">
+      <h3>Kitchen Pantry (<code>kitchen_pantry</code>)</h3>
+      <div class="anim-box">
+        <div id="anim-kitchen_pantry" class="sprite" style="background-image: url('../masters/batch1_containers_master_4x.png'); background-position: 0px -576px;"></div>
+      </div>
+      <div class="controls">
+        <button onclick="toggle('kitchen_pantry')">Pause/Play</button>
+        <button onclick="step('kitchen_pantry', -1)">&larr;</button>
+        <button onclick="step('kitchen_pantry', 1)">&rarr;</button>
+        <span id="frame-kitchen_pantry" style="align-self: center; font-family: monospace;">Frame 0</span>
+      </div>
+      <div class="strip">
+        <div class="strip-frame" title="Closed (Col 0)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: 0px -144px;"></div></div>
+        <div class="strip-frame" title="Ajar (Col 1)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -48px -144px;"></div></div>
+        <div class="strip-frame" title="Open (Col 2)"><div style="background-image: url('../masters/batch1_containers_master_native.png'); background-position: -96px -144px;"></div></div>
+      </div>
+    </div>
+  
+</div>
+<script>
+  const states = {
+    chest_wood: { frame: 0, row: 0, playing: true, seq: [0, 1, 2, 2, 1, 0] },
+    crate_wood: { frame: 0, row: 1, playing: true, seq: [0, 1, 2, 2, 1, 0] },
+    barrel_food: { frame: 0, row: 2, playing: true, seq: [0, 1, 2, 2, 1, 0] },
+    kitchen_pantry: { frame: 0, row: 3, playing: true, seq: [0, 1, 2, 2, 1, 0] }
+  };
+  function render(id) {
+    const st = states[id];
+    const col = st.seq[st.frame];
+    const el = document.getElementById('anim-' + id);
+    el.style.backgroundPosition = (-col * 192) + 'px ' + (-st.row * 192) + 'px';
+    document.getElementById('frame-' + id).innerText = 'Frame ' + col + ' (' + (col === 0 ? 'Closed' : col === 1 ? 'Ajar' : 'Open') + ')';
+  }
+  function toggle(id) { states[id].playing = !states[id].playing; }
+  function step(id, d) {
+    const st = states[id];
+    st.frame = (st.frame + d + st.seq.length) % st.seq.length;
+    render(id);
+  }
+  setInterval(() => {
+    for (const id of Object.keys(states)) {
+      if (states[id].playing) {
+        states[id].frame = (states[id].frame + 1) % states[id].seq.length;
+        render(id);
+      }
+    }
+  }, 220);
+</script>
+</body>
+</html>
