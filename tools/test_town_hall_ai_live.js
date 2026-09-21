@@ -29,7 +29,7 @@ const os = require('os');
 
 const ROOT = path.resolve(__dirname, '..');
 const SNAPSHOT_DIR = path.join(os.tmpdir(), 'uf_snapshots', 'town_hall_ai_live');
-const ARTIFACT_DIR = 'C:/Users/snewt/.gemini/antigravity/brain/74107bfb-a5b5-43a6-8ab7-87deb97997e1';
+const ARTIFACT_DIR = process.env.ARTIFACT_DIR || 'C:/Users/snewt/.gemini/antigravity/brain/28d55bd5-5c9e-48a3-84ae-0a03f62bd3d0';
 
 const mutant = (process.argv.find(a => a.startsWith('--mutant=')) || '').slice(9);
 
@@ -196,6 +196,7 @@ for (const s of shots) {
     const srcFile = path.join(snapOutDir, s.src);
     const destFile = path.join(ARTIFACT_DIR, s.dest);
     if (fs.existsSync(srcFile)) {
+        fs.mkdirSync(path.dirname(destFile), { recursive: true });
         fs.copyFileSync(srcFile, destFile);
         console.log(`Copied ${s.src} -> ${destFile}`);
     } else {

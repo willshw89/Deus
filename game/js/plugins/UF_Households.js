@@ -35,7 +35,7 @@
     const unitOf = u => u && typeof u === "object" ? u : W() && W().unit(u);
     const dead = u => !!(u && u.data && (u.data.dead === true || u.data._isDying === true));
     const person = u => !!(u && u.data && ["colonist", "person"].includes(u.data.kind));
-    const adult = u => !!(u && u.data && (Number.isFinite(u.data.age) ? u.data.age >= 18 : (u.data.stage === "adult" || u.data.stage === "elder")));
+    const adult = u => !!(u && u.data && (Number.isFinite(u.data.age) ? u.data.age >= 15 : (u.data.stage === "adult" || u.data.stage === "elder")));
     const tick = () => window.UF && UF.Time && typeof UF.Time.ticks === "function" ? UF.Time.ticks() : W() && W()._frame || 0;
     const day = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 0}` : "0:0:0";
     const emit = (event, ...args) => { if (window.UF && UF.Events) UF.Events.emit(event, ...args); };
@@ -311,7 +311,7 @@
             const siteArea = site.area || (w.viewLevel ? w.viewLevel() : { x: 0, y: 0 });
             site.area = siteArea;
             const siteUnits = people.filter(u => u.data && (u.data.site === siteId || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
-            const founders = siteUnits.filter(u => u.data && (u.data.founder || (!u.data.motherId && !u.data.fatherId && u.data.stage !== "child")));
+            const founders = siteUnits.filter(u => u.data && (u.data.founder === true || (u.data.founder !== false && !u.data.motherId && !u.data.fatherId && u.data.stage !== "child")));
             if (founders.length < 2) continue;
             const founderH = [...new Set(founders.map(u => of(u)).filter(Boolean))];
             if (founderH.length === 0) continue;
@@ -1321,7 +1321,7 @@
     function isSheltered(refH) {
         const h = resolve(refH);
         if (!h || !h.home) return false;
-        if (h.home.rooms && h.home.beds && h.home.beds.length > 0 && h.home.hearth) return true;
+        if (h.home.isSheltered === true || h.isSheltered === true) return true;
         if (!strictEnclosure(h, h.home)) return false;
         const d = demands(h);
         return !d.beds && !d.cooking;
@@ -1406,9 +1406,10 @@
         if (!h || of(b) !== h || !samePlace(h, a)) return null;
         const home = structures(h).find(p => p && Array.isArray(p.beds) && p.beds.some(bed => bed.unitId === a.id || bed.unitId === b.id || (!bed.unitId && p.beds.length === 1)));
         if (!home || !strictEnclosure(h, home)) return null;
-        const room = new Set(home.sleeping.map(p => key(p.x, p.y)));
+        const sleeping = home.sleeping || (home.beds ? home.beds.map(b => ({ x: b.x, y: b.y })) : []);
+        const room = new Set(sleeping.map(p => key(p.x, p.y)));
         if (W().units().some(u => !dead(u) && u.id !== a.id && u.id !== b.id && samePlace(h, u) && room.has(key(u.x, u.y)))) return null;
-        for (const p of home.sleeping) {
+        for (const p of sleeping) {
             const o = object(h, p);
             if (!dry(h, p.x, p.y) || o && o.passable !== true) return null;
         }

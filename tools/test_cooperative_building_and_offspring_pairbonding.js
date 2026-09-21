@@ -23,7 +23,7 @@ let historyCode = readPlugin("UF_History");
 
 if (mutant === "no_focal_bonus") {
     // Mutant: disable cooperative focal household priority boost
-    colonistsCode = colonistsCode.replace("s += 4.5;", "s += 0.0;");
+    colonistsCode = colonistsCode.replace("if (focal && x.step.household === focal.id)", "if (false && focal && x.step.household === focal.id)");
 } else if (mutant === "allow_incest") {
     // Mutant: disable kinship guards in attemptAdulthoodPairbond
     colonistsCode = colonistsCode
@@ -200,7 +200,9 @@ function createHarness() {
         items: [],
         count: () => 10,
         find: () => [],
-        inventoryOf: () => []
+        inventoryOf: () => [],
+        type: id => (cat.items && cat.items.types ? cat.items.types.find(t => t.id === id) : null),
+        get: id => ({ id, type: id.startsWith("knife") ? "stone_knife" : "fiber_wrap", holder: 3 })
     };
 
     const ctx = {
@@ -321,20 +323,20 @@ check("cooperative_sequential_focal_pacing", () => {
     const colony = { factionId: "player", site: { x: 16, y: 16 }, area: { x: 0, y: 0 }, z: 0 };
 
     // Create 3 households
-    const u1 = W.addUnit({ name: "H1_M", data: { kind: "colonist", faction: "player", gender: "male", age: 25, site: 1, home: colony } });
-    const u2 = W.addUnit({ name: "H1_F", data: { kind: "colonist", faction: "player", gender: "female", age: 24, site: 1, home: colony } });
+    const u1 = W.addUnit({ name: "H1_M", data: { kind: "colonist", faction: "player", gender: "male", age: 25, founder: false, site: 1, home: colony } });
+    const u2 = W.addUnit({ name: "H1_F", data: { kind: "colonist", faction: "player", gender: "female", age: 24, founder: false, site: 1, home: colony } });
     H.formPair(u1, u2);
     const h1 = H.of(u1);
     H.planSteps(u1);
 
-    const u3 = W.addUnit({ name: "H2_M", data: { kind: "colonist", faction: "player", gender: "male", age: 28, site: 1, home: colony } });
-    const u4 = W.addUnit({ name: "H2_F", data: { kind: "colonist", faction: "player", gender: "female", age: 26, site: 1, home: colony } });
+    const u3 = W.addUnit({ name: "H2_M", data: { kind: "colonist", faction: "player", gender: "male", age: 28, founder: false, site: 1, home: colony } });
+    const u4 = W.addUnit({ name: "H2_F", data: { kind: "colonist", faction: "player", gender: "female", age: 26, founder: false, site: 1, home: colony } });
     H.formPair(u3, u4);
     const h2 = H.of(u3);
     H.planSteps(u3);
 
-    const u5 = W.addUnit({ name: "H3_M", data: { kind: "colonist", faction: "player", gender: "male", age: 30, site: 1, home: colony } });
-    const u6 = W.addUnit({ name: "H3_F", data: { kind: "colonist", faction: "player", gender: "female", age: 29, site: 1, home: colony } });
+    const u5 = W.addUnit({ name: "H3_M", data: { kind: "colonist", faction: "player", gender: "male", age: 30, founder: false, site: 1, home: colony } });
+    const u6 = W.addUnit({ name: "H3_F", data: { kind: "colonist", faction: "player", gender: "female", age: 29, founder: false, site: 1, home: colony } });
     H.formPair(u5, u6);
     const h3 = H.of(u5);
     H.planSteps(u5);
@@ -381,15 +383,15 @@ check("cooperative_job_scoring_priority", () => {
     W.state.colony = Object.assign({ plan: [], stockpiles: [] }, colony);
 
     // H1 (focal house, unsheltered)
-    const u1 = W.addUnit({ name: "Founder1", data: { kind: "colonist", faction: "player", gender: "male", age: 25, site: 1, home: colony } });
-    const u2 = W.addUnit({ name: "Founder2", data: { kind: "colonist", faction: "player", gender: "female", age: 24, site: 1, home: colony } });
+    const u1 = W.addUnit({ name: "Founder1", data: { kind: "colonist", faction: "player", gender: "male", age: 25, founder: false, site: 1, home: colony } });
+    const u2 = W.addUnit({ name: "Founder2", data: { kind: "colonist", faction: "player", gender: "female", age: 24, founder: false, site: 1, home: colony } });
     H.formPair(u1, u2);
     const h1 = H.of(u1);
     H.planSteps(u1);
 
     // H2 (member u3)
-    const u3 = W.addUnit({ name: "Neighbor3", data: { kind: "colonist", faction: "player", gender: "male", age: 28, site: 1, home: colony } });
-    const u4 = W.addUnit({ name: "Neighbor4", data: { kind: "colonist", faction: "player", gender: "female", age: 26, site: 1, home: colony } });
+    const u3 = W.addUnit({ name: "Neighbor3", data: { kind: "colonist", faction: "player", gender: "male", age: 28, founder: false, site: 1, home: colony, tier: 1, equipment: { tool: "knife_1", clothes: "wrap_1" } } });
+    const u4 = W.addUnit({ name: "Neighbor4", data: { kind: "colonist", faction: "player", gender: "female", age: 26, founder: false, site: 1, home: colony, tier: 1, equipment: { tool: "knife_2", clothes: "wrap_2" } } });
     H.formPair(u3, u4);
     const h2 = H.of(u3);
     H.planSteps(u3);

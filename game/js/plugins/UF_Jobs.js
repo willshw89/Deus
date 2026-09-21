@@ -594,7 +594,11 @@
 
             // 4. Produce output items with inherited material and quality
             for (const id of Object.keys(r.outputs || {})) {
-                for (const it of I.give(id, r.outputs[id] | 0, unit.id, giveOpts)) {
+                let itemsGiven = I.give(id, r.outputs[id] | 0, unit.id, giveOpts);
+                if (!itemsGiven || itemsGiven.length === 0) {
+                    itemsGiven = I.drop(lv(unit), unit.x, unit.y, id, r.outputs[id] | 0, unit.id, giveOpts);
+                }
+                for (const it of (itemsGiven || [])) {
                     if (quality > 0) it.quality = quality;
                     if (!it.firstOwner) {
                         it.firstOwner = unit.id;

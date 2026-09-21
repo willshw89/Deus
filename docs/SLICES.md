@@ -23,7 +23,7 @@ Slices 0 and 1 have been discussed with the user. **Slices 2 and later are a dra
 ---
 
 ## Slice 1: Autonomous Colonist AI & Settlement Construction
-**Status:** IN PROGRESS (user directive 2026-09-20)
+**Status:** AWAITING REVIEW (completed 2026-09-21)
 **Goal:** Transform colonist AI from raw uncoordinated wall coordinate placing into an intelligent, living medieval community that plans, clears, and constructs enclosed 4-wall structures with roofs, specialized callings, and clean stockpile logistics.
 
 Deliverables:
@@ -42,13 +42,13 @@ Deliverables:
    - Unscripted 5-minute $8\times$ speed live playtest asserting room enclosure, roof coverage, bed usage, and clean site management.
 
 Done when:
-- [ ] At $8\times$ speed, colonists construct an enclosed 4-wall building with a doorway rather than an open wall line.
-- [ ] The completed building receives an upper roof deck on Z+1 and `isRoofed` is true for all interior tiles.
-- [ ] Felled logs and quarried stone are hauled into stockpiles rather than left as scattered ground clutter.
-- [ ] Colonists follow vocational callings based on skills rather than all competing for the same single task.
-- [ ] Daily schedule gathers colonists at the focal campfire / hall for communal meals and evening social bonding.
-- [ ] In-engine screenshot captures the enclosed structure and clean settlement.
-- [ ] All automated test suites (`colonists`, `world`, `setup`, `smoke`) pass with 0 errors.
+- [x] At $8\times$ speed, colonists construct an enclosed 4-wall building with a doorway rather than an open wall line.
+- [x] The completed building receives an upper roof deck on Z+1 and `isRoofed` is true for all interior tiles.
+- [x] Felled logs and quarried stone are hauled into stockpiles rather than left as scattered ground clutter.
+- [x] Colonists follow vocational callings based on skills rather than all competing for the same single task.
+- [x] Daily schedule gathers colonists at the focal campfire / hall for communal meals and evening social bonding.
+- [x] In-engine screenshot captures the enclosed structure and clean settlement.
+- [x] All automated test suites (`colonists`, `world`, `setup`, `smoke`) pass with 0 errors.
 
 ---
 

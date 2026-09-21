@@ -23,7 +23,8 @@ const os = require('os');
 
 const ROOT = path.resolve(__dirname, '..');
 const SNAPSHOT_DIR = path.join(os.tmpdir(), 'uf_snapshots', 'callings_and_clearing_live');
-const ARTIFACT_DIR = 'C:/Users/snewt/.gemini/antigravity/brain/74107bfb-a5b5-43a6-8ab7-87deb97997e1';
+const ARTIFACT_DIR = process.env.ARTIFACT_DIR || 'C:/Users/snewt/.gemini/antigravity/brain/28d55bd5-5c9e-48a3-84ae-0a03f62bd3d0';
+try { fs.mkdirSync(ARTIFACT_DIR, { recursive: true }); } catch (e) {}
 
 const mutant = (process.argv.find(a => a.startsWith('--mutant=')) || '').slice(9);
 
@@ -89,12 +90,33 @@ const callingsTestCode = `
         `}
 
         // 2. Footprint Debris Clearing Protocol Verification
-        // Place a blocking tree at [sx - 2, sy - 1] and loose stone chunk at [sx + 2, sy + 1] inside 7x7 footprint
+        // Find empty cells inside 7x7 footprint (sx - 2 .. sx + 2, sy - 2 .. sy + 2) not occupied by any unit
         const woodcutter = colonists.find(u => Callings.isWoodcutter(u)) || colonists[2];
         const hauler = colonists.find(u => Callings.isHauler(u)) || colonists[4];
 
-        const setOak = O.setIn(area, sx - 2, sy - 1, "oak");
-        const dropped = I.drop(area, sx + 2, sy + 1, "stone", 3);
+        let treeCell = null, stoneCell = null;
+        for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const tx = sx + dx, ty = sy + dy;
+                const stander = (W && typeof W.standerAt === "function") ? W.standerAt(area.x, area.y, tx, ty, 0) : null;
+                const curOb = O.atIn(area, tx, ty);
+                if (!stander && (!curOb || curOb.id === "grass")) {
+                    if (!treeCell) {
+                        treeCell = { x: tx, y: ty };
+                    } else if (!stoneCell) {
+                        stoneCell = { x: tx, y: ty };
+                        break;
+                    }
+                }
+            }
+            if (treeCell && stoneCell) break;
+        }
+        if (!treeCell) treeCell = { x: sx - 2, y: sy - 1 };
+        if (!stoneCell) stoneCell = { x: sx + 2, y: sy + 1 };
+
+        const setOak = O.setIn(area, treeCell.x, treeCell.y, "oak");
+        const dropped = I.drop(area, stoneCell.x, stoneCell.y, "stone", 3);
         const stoneItem = dropped && dropped[0];
 
         const diag = [];
@@ -113,7 +135,8 @@ const callingsTestCode = `
         diag.push(\`thRoofed=\${siteTownHall ? siteTownHall.isRoofed : "no_th"}\`);
         diag.push(\`isW=\${Callings ? Callings.isWoodcutter(woodcutter) : "no_callings"}\`);
         diag.push(\`isH=\${Callings ? Callings.isHauler(hauler) : "no_callings"}\`);
-        const obTree = O.atIn(area, sx - 2, sy - 1);
+        diag.push(\`setOak=\${setOak}\`);
+        const obTree = O.atIn(area, treeCell.x, treeCell.y);
         diag.push(\`obTree=\${obTree ? obTree.id : "none"}\`);
         if (obTree) diag.push(\`actions=\${obTree.actions ? Object.keys(obTree.actions).join(",") : "none"}\`);
 
@@ -134,20 +157,20 @@ const callingsTestCode = `
             \`Hauler \${hauler.name} job: \${haulerJob ? haulerJob.type + " (" + (haulerJob.params ? (haulerJob.params.plan || haulerJob.params.tidy) : "none") + ")" : "none"}\`);
 
         // Clean up injected test items
-        O.setIn(area, sx - 2, sy - 1, null);
+        O.setIn(area, treeCell.x, treeCell.y, null);
         if (stoneItem) I.remove(stoneItem.id);
 
         // 2b. Autonomous Wall Protection & No Teardown Verification
-        // Place a constructed wooden wall inside the 7x7 footprint at (sx - 2, sy - 1)
-        O.setIn(area, sx - 2, sy - 1, "wall_wood");
+        // Place a constructed wooden wall inside the 7x7 footprint at treeCell
+        O.setIn(area, treeCell.x, treeCell.y, "wall_wood");
         const wallClearingJob = C.footprintClearingJob ? C.footprintClearingJob(woodcutter) : null;
-        const chopsWall = wallClearingJob && wallClearingJob.target && wallClearingJob.target.x === (sx - 2) && wallClearingJob.target.y === (sy - 1);
+        const chopsWall = wallClearingJob && wallClearingJob.target && wallClearingJob.target.x === treeCell.x && wallClearingJob.target.y === treeCell.y;
         ${mutant === 'chop_walls' ? `
         t.check("wall_never_cleared_or_chopped", false, "MUTANT INJECTED: Woodcutter chopped constructed wall!");
         ` : `
         t.check("wall_never_cleared_or_chopped", !chopsWall, \`Woodcutter preserved wall (chopsWall=\${!!chopsWall})\`);
         `}
-        O.setIn(area, sx - 2, sy - 1, null);
+        O.setIn(area, treeCell.x, treeCell.y, null);
 
         // 2c. Construction Material Preservation on Build Cells
         // Drop a log on build cell at (sx - 3, sy - 1)
@@ -209,6 +232,11 @@ const callingsTestCode = `
             for (const d of privatePlot.doors) O.setIn(area, d.x, d.y, "door_wood");
             for (const b of privatePlot.beds) O.setIn(area, b.x, b.y, "floor_straw");
             if (privatePlot.hearth) O.setIn(area, privatePlot.hearth.x, privatePlot.hearth.y, "kitchen_hearth");
+
+            if (window.UF && UF.Fog && typeof UF.Fog.reveal === "function") {
+                UF.Fog.reveal(px0 + 3, py0 + 3, 12);
+                if (typeof UF.Fog.refresh === "function") UF.Fog.refresh();
+            }
 
             $gameMap.setDisplayPos(px0 - 6, py0 - 4);
             await t.waitFrames(15);

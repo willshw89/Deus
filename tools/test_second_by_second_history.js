@@ -34,7 +34,7 @@ if (mutant === "no_clock_advance") {
     historyCode = historyCode.replace(/progressAging\(1\);/g, "// no aging");
 } else if (mutant === "unhoused_can_have_children") {
     // Mutant: unhoused couples can have children
-    householdsCode = householdsCode.replace(/if \(!h \|\| !isSheltered\(h\)\) return false;/g, "if (!h || !h.home) return true;");
+    householdsCode = householdsCode.replace("if (!h || !isSheltered(h)) return false;", "return true;");
 } else if (mutant === "no_child_room_needed") {
     // Mutant: couple can have children without building a room
     householdsCode = householdsCode.replace(/return availableChildRooms > livingChildren;/g, "return true;");
@@ -295,7 +295,8 @@ function createHarness() {
             consumeFrom() { return 0; },
             count() { return 0; },
             find() { return []; },
-            atIn() { return []; }
+            atIn() { return []; },
+            give() { return []; }
         },
         Tiles: {
             groundBase: id => (id && id.startsWith("floor_") ? 2816 : (id === "road" ? 2048 : 0)),
@@ -514,6 +515,7 @@ check("home_required_before_children_and_room_per_child", () => {
     h.home = {
         x: 35, y: 35, w: 6, h: 4,
         isShared: false,
+        isSheltered: true,
         walls: [], doors: [{ x: 36, y: 38 }, { x: 38, y: 36 }],
         beds: [{ x: 39, y: 36, unitId: mom.id }],
         hearth: { x: 36, y: 36 },

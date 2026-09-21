@@ -205,6 +205,9 @@
             case "CORDAGE":
                 return item.type === "fiber" || item.type === "straw" || (t.tags && t.tags.includes("fiber"));
 
+            case "TEXTILE_FIBER":
+                return item.type === "fiber" || item.type === "straw" || item.type === "wool" || (t.tags && t.tags.includes("fiber"));
+
             case "FUEL":
                 return item.type === "charcoal" || item.type === "coal" || item.type === "log" || (t.tags && t.tags.includes("fuel"));
 
@@ -241,9 +244,9 @@
 
         const reqRole = request.role || request.typeId;
         const want = Math.max(1, request.quantity | 0);
-        const loc = request.targetLocation || { x: 0, y: 0, z: 0 };
-        const area = copyArea(loc.area || (request.actor && request.actor.area) || W.currentArea());
         const actor = request.actor ? (typeof request.actor === "object" ? request.actor : W.unit(request.actor)) : null;
+        const loc = request.targetLocation || (actor ? { area: copyArea(actor.area), x: actor.x, y: actor.y, z: zOf(actor) } : { x: 0, y: 0, z: 0 });
+        const area = copyArea(loc.area || (actor && actor.area) || W.currentArea());
         const jobId = request.jobId || null;
         const allowHarvest = request.allowHarvest !== false;
 
@@ -376,7 +379,7 @@
                 } else if (reqRole === "BUILDING_STONE" || reqRole === "HARD_STONE" || reqRole === "stone") {
                     targetTag = "stone";
                     harvestAction = "quarry";
-                } else if (reqRole === "CORDAGE" || reqRole === "fiber") {
+                } else if (reqRole === "CORDAGE" || reqRole === "TEXTILE_FIBER" || reqRole === "fiber") {
                     targetTag = "plant";
                     harvestAction = "gather";
                 }
@@ -386,9 +389,30 @@
                         ? O.findIn(area, { near: { x: loc.x, y: loc.y }, radius: 50, tags: [targetTag], limit: 8 })
                         : (typeof O.find === "function" ? O.find({ near: { x: loc.x, y: loc.y }, radius: 50, tags: [targetTag], limit: 8 }) : []);
                     if (nodes && nodes.length > 0) {
-                        const targetNode = nodes[0];
+                        const J = (window.UF && UF.Jobs) || null;
+                        const isClaimed = (nx, ny) => {
+                            if (!J) return false;
+                            return J.list(j => (j.state === "travel" || j.state === "work") && j.target && j.target.x === nx && j.target.y === ny).length > 0;
+                        };
+                        const targetNode = nodes.find(n => {
+                            if (isClaimed(n.x, n.y)) return false;
+                            const acts = n.type && n.type.actions;
+                            if (!acts) return true;
+                            return !!(acts[harvestAction] || acts.pick || acts.gather || acts.quarry || acts.mine || acts.chop);
+                        }) || nodes[0];
+                        let chosenAction = harvestAction;
+                        if (targetNode.type && targetNode.type.actions) {
+                            const acts = targetNode.type.actions;
+                            if (acts[harvestAction]) chosenAction = harvestAction;
+                            else if (acts.pick) chosenAction = "pick";
+                            else if (acts.gather) chosenAction = "gather";
+                            else if (acts.quarry) chosenAction = "quarry";
+                            else if (acts.mine) chosenAction = "mine";
+                            else if (acts.chop) chosenAction = "chop";
+                            else chosenAction = Object.keys(acts)[0] || harvestAction;
+                        }
                         harvestDemand = {
-                            action: harvestAction,
+                            action: chosenAction,
                             target: { area, x: targetNode.x, y: targetNode.y, z: zOf(loc) },
                             x: targetNode.x,
                             y: targetNode.y,

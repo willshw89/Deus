@@ -4,10 +4,31 @@ Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; re
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
 **Last updated:** 2026-09-21
-**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
+**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- None (SRD 5.1 official framework codification, centralized rules resolver, combat integration, and automated verification suites delivered).
+- None (Slice 1 Colonist AI & Settlement Construction stabilized, verified green, and awaiting review).
+
+## Slice 1: Autonomous Colonist AI & Settlement Construction Stabilized & Verified — 2026-09-21 (Gemini)
+Delivered per Slice 1 acceptance criteria and user directives:
+- **Household Pairbonding & Adulthood Age Standardization (`UF_Households.js`, `UF_Colonists.js`)**:
+  - Unified adulthood age threshold across the simulation to age 15 (`age >= 15`), resolving pairbonding rejections for coming-of-age offspring forming independent homesteads.
+  - Eliminated premature `isSheltered` room presence bypass: physical walls and doors are strictly required for residential enclosure before shelter thoughts and pairbonding triggers fire.
+  - Segregated immigrants from founders (`founder: false` in `spawnImmigrants`) to preserve 8-founder Town Hall lodge allocation invariants.
+- **Resource Resolver, Harvesting & Tool/Clothing Crafting (`UF_Resources.js`, `UF_Colonists.js`)**:
+  - Fixed `UF.Resources.resolve` spatial coordinate fallback: default `loc` to `actor` location when `targetLocation` is omitted, eliminating out-of-bounds (0,0) queries that blocked loose item and harvest searches.
+  - Added full support for `TEXTILE_FIBER` role in `itemMatchesRole` and `harvestDemand`, allowing fiber wraps and cordage items to resolve correctly to local flora (grass tufts, reeds, shrubs).
+  - Implemented unclaimed node filtering in `harvestDemand` so multiple colonists gathering resources concurrently do not lock on the same node.
+  - Updated `satisfiesEach` to enforce `step.equip` verification (wearing clothes/gear) before falling back to backpack inventory `holds`, ensuring crafted fiber wraps are actively donned.
+  - Expanded `homeFire` search radius to 40 tiles so remote hunters can locate the settlement campfire hearth and cook fresh meat.
+- **Automated Verification Suites Passing (Obeying Rule 4)**:
+  - `tools/run_tests.js colonists`: **24/24 PASS (exit 0)** (`colonists.tools_and_clothes` reached in 49s, all 8 colonists wearing wraps, 4/8 adults holding knapped stone knives; `colonists.hunts` passed).
+  - `tools/test_cooperative_building_and_offspring_pairbonding.js`: **4/4 PASS (exit 0)**; all 4 mutant modes (`no_focal_bonus`, `allow_incest`, `no_adult_pairbond`, `merge_parent_households`) proven to fail with exit 1.
+  - `tools/test_second_by_second_history.js`: **15/15 PASS (exit 0)**; mutant modes (`unhoused_can_have_children`, `no_child_room_needed`) proven to fail with exit 1.
+  - `tools/test_town_hall_ai_live.js`: **23/23 PASS (exit 0)**; in-engine live screenshots verified (`live_town_hall_initial_setup.png`, `live_town_hall_built_beds.png`).
+  - `tools/run_tests.js smoke`: **13/13 PASS (exit 0)**.
+  - `tools/test_srd_rules_proof.js`: **49/49 PASS (exit 0)**.
+  - `tools/test_srd_combat_proof.js`: **43/43 PASS (exit 0)**.
 
 ## SRD 5.1 Official Framework Codification & Centralized Rules Engine Delivered — 2026-09-21 (Gemini)
 Delivered per user directive (SRD 5.1 Complete Audit, Codification, Normalization & Rules Integration):

@@ -156,7 +156,7 @@
     const huntRadius = () => colonyConfig().huntRadius || 45;
     const recipes = () => (catalog() && catalog().recipes && catalog().recipes.list) || [];
     const recipeOf = id => recipes().find(r => r.id === id) || null;
-    const itemType = id => (Items() ? Items().type(id) : null);
+    const itemType = id => (Items() && typeof Items().type === "function" ? Items().type(id) : ((catalog() && catalog().items && catalog().items.types) || []).find(t => t.id === id) || null);
     const hasTag = (t, tag) => !!t && Array.isArray(t.tags) && t.tags.includes(tag);
     const isFoodType = t => !!t && !!t.food;
     const speciesOfPrey = u => {
@@ -1035,7 +1035,8 @@
             const p = h.home.hearth, own = O.atIn(levelArea(h), p.x, p.y);
             if (hasTag(own, "fire")) return { area: copyArea(h.area), z: zOf(h), x: p.x, y: p.y, type: own, id: own.id };
         }
-        const f = O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, tags: ["fire"], limit: 1 });
+        const radius = Math.max((c.radius || 6) + 2, 40);
+        const f = O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius, tags: ["fire"], limit: 1 });
         return f[0] ? Object.assign({ area: copyArea(c.area), z: zOf(c) }, f[0]) : null;
     }
     const fireNear = u => !!homeFire(u) && !!colonyState(u);
@@ -1049,7 +1050,7 @@
             const cell = freeCellNear(levelArea(u), f.x, f.y, 3);
             return cell ? { type: "move", target: cell, params: { via: "craft", viaTarget: { x: f.x, y: f.y } } } : null;
         }
-        return { type: "craft", params: plan ? { recipeId, plan } : { recipeId } };
+        return { type: "craft", target: { x: f.x, y: f.y }, params: plan ? { recipeId, plan } : { recipeId } };
     }
     // Nearest water cell that has a standable land neighbor, spiralling out from the colonist.
     function waterNear(u, radius) {
@@ -1121,7 +1122,7 @@
     const equippedItem = (u, slot) => {
         const I = Items();
         const id = u.data.equipment && u.data.equipment[slot];
-        const it = id && I ? I.get(id) : null;
+        const it = id && I && typeof I.get === "function" ? I.get(id) : null;
         return it && it.holder === u.id ? it : null;
     };
     // Nearest prey within radius that nobody else is hunting (predators too for the brave).
@@ -2281,6 +2282,7 @@
                     ageDays: age,
                     ageSeconds: ageSeconds,
                     stage: "adult",
+                    founder: false,
                     site: c.siteId
                 }
             });
@@ -2825,11 +2827,12 @@
     const holds = (u, typeId) => carriedCount(u, typeId) > 0;
     // An "each" craft step is met for a colonist that holds the output, or (equip steps) wears it or something of a higher tier.
     function satisfiesEach(u, step, out) {
-        if (holds(u, out)) return true;
-        if (!step.equip) return false;
-        const eq = equippedItem(u, "clothes"), tOut = itemType(out);
-        const tEq = eq ? itemType(eq.type) : null;
-        return !!eq && (eq.type === out || (!!tOut && !!tOut.wear && !!tEq && !!tEq.wear && tEq.wear.tier >= tOut.wear.tier));
+        if (step.equip) {
+            const eq = equippedItem(u, "clothes"), tOut = itemType(out);
+            const tEq = eq ? itemType(eq.type) : null;
+            return !!eq && (eq.type === out || (!!tOut && !!tOut.wear && !!tEq && !!tEq.wear && tEq.wear.tier >= tOut.wear.tier));
+        }
+        return holds(u, out);
     }
     function colonyCount(typeId, ref) {
         const I = Items(), c = colonyState(ref);
@@ -3072,8 +3075,10 @@
             if (window.UF && UF.Resources && UF.Resources.resolve) {
                 const res = UF.Resources.resolve({
                     typeId: id,
+                    role: (recipe.roles && recipe.roles[id]) || id,
                     quantity: (want | 0) - carriedCount(u, id),
                     actor: u,
+                    targetLocation: { area: levelArea(u), x: u.x, y: u.y, z: zOf(u) },
                     purpose: "craft",
                     projectId: step ? step.id : null
                 });
@@ -3218,6 +3223,9 @@
                     s += 1.2;
                 }
             } else if (x.step.id && (x.step.id.startsWith("path_") || x.step.id.startsWith("town_square"))) s += 0.8;
+            if (x.step.id === "knives" || x.step.id === "clothes" || x.step.society === "knives" || x.step.society === "clothes") {
+                s += 5.5; // Essential personal starter tools and clothing priority
+            }
             if (x.step.id === "shelter" || x.step.id === "door" || x.step.society === "shelter" || x.step.society === "door") {
                 s += 3.5;
             }
@@ -3920,7 +3928,9 @@
         const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;
         const Callings = getCallings();
         const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
-        return designationJob(u) || haulerStaging || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
+        const needsGear = (!holds(u, "stone_knife") && (!u.data || u.data.age === undefined || u.data.age >= 15)) || (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1));
+        const gearPlan = needsGear && !lazy ? planJob(u) : null;
+        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4612,8 +4622,14 @@
                 keepAwake();
                 if (hunter.data && hunter.data.needs && hunter.data.needs.hunger > 60) hunter.data.needs.hunger = 60;
                 const j = J.of(hunter.id);
-                if (j && j.type === "hunt" && j.id >= jobsBefore) hunt = j;
-                return (!!hunt && (hunt.state === "done" || hunt.state === "failed")) || secondsAtX8() > Math.min(110, toolsWindowEnd + 35);
+                if (j && j.type === "hunt" && j.id >= jobsBefore) {
+                    if (j.state === "done") { hunt = j; return true; }
+                    if (j.state === "failed") { decisionAt.set(hunter.id, -Infinity); }
+                    else { hunt = j; }
+                }
+                const doneHunt = J.list(x => x.assigned === hunter.id && x.type === "hunt" && x.id >= jobsBefore && x.state === "done")[0];
+                if (doneHunt) { hunt = doneHunt; return true; }
+                return secondsAtX8() > Math.min(110, toolsWindowEnd + 35);
             }, 36000, "the hunt");
             const meatAt = hunt && hunt.result && hunt.result.at ? hunt.result.at : null;
             const meatThere = meatAt ? I.count({ area: c.area, x: meatAt.x, y: meatAt.y }, "meat_raw") : 0;
