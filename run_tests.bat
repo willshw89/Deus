@@ -1,5 +1,5 @@
 @echo off
-rem Runs the UF test harness (game\js\plugins\UF_Test.js).
+rem Runs the Deus test harness (game\js\plugins\UF_Test.js).
 rem Usage: run_tests.bat [suite]    e.g. run_tests.bat smoke / selftest / perf
 rem Results: game\test_output\results.txt. Exit code 0 = all passed, 1 = failures, 2 = harness problem.
 set NODE=node

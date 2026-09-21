@@ -1,9 +1,9 @@
 {
-    "name": "rmmz-game",
+    "name": "deus",
     "main": "index.html",
     "chromium-args": "--force-color-profile=srgb",
     "window": {
-        "title": "Ultima Fortress - The Living Mountainhall",
+        "title": "Deus",
         "width": 816,
         "height": 624,
         "position": "center",

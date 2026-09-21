@@ -6,6 +6,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Deus Branding, Executable & Project Cleanup — 2026-09-20 (Gemini)
+Delivered per user directives ("Also let's rename the executable Deus", "Anything UF, U7, Ultima, DF, Dwarf Fortress, can be renamed Deus or pruned if we dont need it"):
+- **Native Deus Game Executable (`Deus.exe`, `game/Deus.exe`)**:
+  - Compiled lightweight native C# launcher via `csc.exe` (`tools/DeusLauncher.cs`) that targets NW.js pointing directly to `game/` with standard flags (`--disable-features=Translate`, etc.) and zero console window flashing.
+  - Deployed in project root (`Deus.exe`) and inside `game/` (`game/Deus.exe`).
+  - Whitelisted `!/Deus.exe` in root `.gitignore`.
+- **Game Title & Window Branding**:
+  - `game/package.json`: Updated `"name": "deus"` and `"window": { "title": "Deus" }`.
+  - `game/index.html`: Set `<title>Deus</title>`.
+  - `game/js/plugins/UF_Core.js`: Hooked `Scene_Boot.prototype.updateDocumentTitle` to ensure runtime `document.title = "Deus"`, and updated in-game time HUD header from "ULTIMA FORTRESS" to "DEUS".
+- **Batch Scripts Updated**:
+  - `launch_demo.bat`: Title and launch updated to start `Deus.exe`.
+  - `open_in_rmmz.bat`: Title updated to "Opening Deus in RPG Maker MZ".
+  - `run_tests.bat`: Comments updated to "Runs the Deus test harness".
+- **Legacy DF & U7 Root Pruning**:
+  - Removed root Dwarf Fortress DLLs (`SDL2.dll`, `SDL2_image.dll`, `fmod.dll`, `jpeg.dll`, `libjpeg-8.dll`, `libpng12-0.dll`, `libpng15-15.dll`, `libtiff-3.dll`, `libtiff-5.dll`, `libwebp-2.dll`, `zlib1.dll`).
+  - Removed legacy DF raws directory `data/` and DF documentation/logs (`licenses/`, `command line.txt`, `compress_bitmaps.bat`, `file changes.txt`, `gamelog.txt`, `readme.txt`, `release notes.txt`, `errorlog.txt`).
+  - Removed stray root resume scratch files and extracted shape dumps (`.*_resume.js`, `.UF_Wildlife.fixed.js`, `avatar_464_grid.png`, `test_shape464.png`, `shapes_contact_sheet.png`).
+  - Pruned 110 empty corrupted OneDrive `Microsoft/Spelling` sync directories in the project root.
+- **Verification Evidence**:
+  - `Deus.exe`: Successfully tested launch with NW.js runtime.
+  - `node tools/run_tests.js smoke`: **13/13 PASS (exit 0)**.
+  - `node tools/run_tests.js fog`: **10/10 PASS (exit 0)**.
+  - `node tools/test_callings_and_clearing_live.js`: **26/26 PASS (exit 0)**.
+
 ## Fog of War Re-Introduction & Colonist Idle Stall Resolution — 2026-09-20 (Gemini)
 Delivered per user directives ("like right now they are just standing around", "Let's go ahead and re-introduce the fog of war. black map to begin, clear in the presence of our creatures, and grayed out otherwise"):
 - **Three-Tier Fog of War Re-Introduced (`UF_Fog.js`, `UF_ColonyOverseer.js`)**:

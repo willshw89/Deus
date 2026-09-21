@@ -421,7 +421,7 @@
             
             // Gold header
             this.changeTextColor(ColorManager.textColor(14)); // Yellow/gold
-            this.drawText("ULTIMA FORTRESS", 0, 0, this.innerWidth, "center");
+            this.drawText("DEUS", 0, 0, this.innerWidth, "center");
             
             // Time & Date
             this.changeTextColor(ColorManager.normalColor());
@@ -448,8 +448,10 @@
         $ufTime.advanceMinute(parseInt(args.minutes, 10));
     });
 
-    PluginManager.registerCommand(pluginName, "ToggleClockHUD", () => {
-        $ufTime.showHUD = !$ufTime.showHUD;
-    });
+    // Enforce formal game title 'Deus'
+    const _Scene_Boot_updateDocumentTitle = Scene_Boot.prototype.updateDocumentTitle;
+    Scene_Boot.prototype.updateDocumentTitle = function() {
+        document.title = "Deus";
+    };
 
 })();
