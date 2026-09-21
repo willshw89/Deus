@@ -239,6 +239,52 @@
                     if (previous && previous.id !== of(p).id && !members(previous).length) previous.mergedInto = of(p).id;
                 }
             }
+            // Home inheritance: when all members of a household are dead, any homeless
+            // faction member can claim the vacant home. Nothing sits unbuilt.
+            const vacantHomes = [];
+            for (const h of all()) {
+                if (h.mergedInto || !h.home || h.home.isShared) continue;
+                const alive = members(h);
+                if (alive.length === 0) vacantHomes.push(h);
+            }
+            if (vacantHomes.length) {
+                // Find homeless faction people (in shared town hall or no home at all)
+                const homeless = people.filter(u => {
+                    const uh = of(u);
+                    if (!uh) return true;
+                    if (uh.home && uh.home.isShared) return true; // still in town hall
+                    if (!uh.home) return true;
+                    return false;
+                });
+                // Prioritize paired couples first, then singles
+                homeless.sort((a, b) => {
+                    const pairA = (a.data && (a.data.partner || a.data.partnerId)) ? 1 : 0;
+                    const pairB = (b.data && (b.data.partner || b.data.partnerId)) ? 1 : 0;
+                    return (pairB - pairA) || (a.id - b.id);
+                });
+
+                for (const vacant of vacantHomes) {
+                    if (!homeless.length) break;
+                    const claimer = homeless.shift();
+                    const oldH = of(claimer);
+                    // Move claimer into the vacant household
+                    if (oldH) oldH.members = (oldH.members || []).filter(id => id !== claimer.id);
+                    join(claimer, vacant);
+                    vacant.reason = "Inherited home";
+                    // If claimer has a partner, bring them too
+                    const partner = unitOf(partnerId(claimer));
+                    if (partner && !dead(partner)) {
+                        const idx = homeless.indexOf(partner);
+                        if (idx >= 0) homeless.splice(idx, 1);
+                        const partnerH = of(partner);
+                        if (partnerH && partnerH.id !== vacant.id) {
+                            partnerH.members = (partnerH.members || []).filter(id => id !== partner.id);
+                        }
+                        join(partner, vacant);
+                    }
+                    emit("households:inherited", vacant, claimer);
+                }
+            }
             generations();
             ensureTownHallHomes(people);
             for (const h of all()) if (h.home) syncHome(h);
@@ -843,6 +889,23 @@
         h.reason = "No dry accessible space within the bounded home search";
         return null;
     }
+    function claimVacantHome(h, u) {
+        const s = state();
+        if (!s) return null;
+        const vacant = Object.values(s.byId).find(otherH =>
+            otherH.id !== h.id && !otherH.mergedInto && otherH.home && !otherH.home.isShared && members(otherH).length === 0 && samePlace(otherH, h)
+        );
+        if (vacant) {
+            h.previousSharedHome = h.home;
+            h.home = vacant.home;
+            h.reason = "Claimed vacant homestead; construction continuing";
+            vacant.mergedInto = h.id;
+            emit("households:homePlanned", h, h.home);
+            emit("households:inherited", h, u);
+            return h.home;
+        }
+        return null;
+    }
     function ensureHome(h, u) {
         if (h.home && !h.home.isShared) return h.home;
         if (h.home && h.home.isShared) {
@@ -855,6 +918,10 @@
 
             // Founders without a partner stay in the town hall
             if (allFounders && !hasPair) return h.home;
+
+            // Any home without ownership can be claimed by a member of the faction
+            const claimed = claimVacantHome(h, u);
+            if (claimed) return claimed;
 
             // Once the town hall is sheltered, paired founders and non-founders seek private plots
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
@@ -873,6 +940,8 @@
             }
             return h.home;
         }
+        const claimed = claimVacantHome(h, u);
+        if (claimed) return claimed;
         if (h.lastSearchDay === day()) return null;
         h.lastSearchDay = day();
         const p = findPlot(h, u, designFor(h, members(h).length));
@@ -1070,9 +1139,11 @@
         const d = demands(h);
         const noDemands = !d.bedrooms && !d.beds && !d.cooking && !d.storage;
 
-        // Progressive domestic improvement: floors, furniture, kitchens, calling workshops & shops:
-        if (baseBuilt && noDemands && home.design && o) {
-            // Stage 2: Interior floors
+        // Floors start as soon as walls are up (sheltered), not waiting for full baseBuilt.
+        // Other domestic improvements wait for full base construction.
+        const sheltered = isSheltered(h);
+        if (sheltered && o) {
+            // Stage 2: Interior floors — start immediately once sheltered
             const cultureFloor = (culture.floor && culture.floor.kind) || (zOf(h) < 0 || h.faction === "dwarf" ? "floor_stone" : "floor_wood");
             if (home.floors && home.floors.length) {
                 home.steps.push(step("floors", cultureFloor, home.floors));
@@ -1083,6 +1154,10 @@
                     home.steps.push(step(`annex${i}_floors`, a.floor || cultureFloor, a.floors));
                 }
             }
+        }
+
+        // Progressive domestic improvement: furniture, kitchens, calling workshops & shops:
+        if (baseBuilt && noDemands && home.design && o) {
 
             // Stage 3: Kitchen & Dining appointments
             if (home.kitchenCounter && o.type("kitchen_counter") && o.type("kitchen_counter").build) {

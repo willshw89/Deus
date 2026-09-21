@@ -312,7 +312,8 @@
         if (!inBounds(area, x, y)) return { ok: false, reason: "off the map" };
         if (isWater(area, x, y)) return { ok: false, reason: "water" };
         const O = Objects(), o = O && O.atIn(area, x, y);
-        if (o && o.passable !== true) return { ok: false, reason: "blocked" };
+        const isDomesticObject = o && o.tags && (o.tags.includes("bed") || o.tags.includes("furniture") || o.tags.includes("fire") || o.tags.includes("storage"));
+        if (o && o.passable !== true && !force && !isDomesticObject) return { ok: false, reason: "blocked" };
         const k = kindAt(area, x, y);
         if (!k || k.passable === false) return { ok: false, reason: "solid ground" };
         if (floorKind(k.id)) return { ok: false, reason: "already floored" };

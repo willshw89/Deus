@@ -422,7 +422,7 @@
             // 1. If there is an active focal household and it is not my own, include its active steps
             if (focal && focal.id !== myHId && focal.home && H.planSteps) {
                 const focalPeople = H.members ? H.members(focal) : [];
-                const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0];
+                const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
                 if (focalRep) {
                     const fSteps = H.planSteps(focalRep);
                     for (const s of fSteps) {
@@ -430,17 +430,15 @@
                     }
                 }
             }
-            // 2. Only if the focal house is sheltered, include steps from other households that already have a home planned
-            if (focal && H.isSheltered && H.isSheltered(focal)) {
-                for (const h of H.all().filter(h => sameLevel(h, c) && h.home)) {
-                    if (h.id === myHId || h.id === focal.id) continue;
-                    const people = H.members ? H.members(h) : [];
-                    const rep = people.find(p => p.data && p.data.age >= 15) || people[0];
-                    if (rep && H.planSteps) {
-                        const hSteps = H.planSteps(rep);
-                        for (const s of hSteps.slice(0, 2)) {
-                            if (s) neighborSteps.push(s);
-                        }
+            // 2. Include steps from all other households with a home planned so nothing sits unbuilt
+            for (const h of H.all().filter(h => sameLevel(h, c) && h.home && !h.mergedInto)) {
+                if (h.id === myHId || (focal && h.id === focal.id)) continue;
+                const people = H.members ? H.members(h) : [];
+                const rep = people.find(p => p.data && p.data.age >= 15) || people[0] || u;
+                if (rep && H.planSteps) {
+                    const hSteps = H.planSteps(rep);
+                    for (const s of hSteps) {
+                        if (s) neighborSteps.push(s);
                     }
                 }
             }
@@ -2580,7 +2578,7 @@
                 const currentKind = F && F.kindAt ? F.kindAt(levelArea(c), x, y) : (T && T.kindOfTile ? T.kindOfTile(W.getTile(c.area.x, c.area.y, x, y, 0, zOf(c))) : null);
                 if (currentKind && currentKind.id === step.build) state = "done";
                 else if (Jobs() && Jobs().isWaterAt(levelArea(c), x, y)) state = "blocked";
-                else if (here && here.passable !== true) {
+                else if (here && here.passable !== true && !hasTag(here, "bed") && !hasTag(here, "fire") && !hasTag(here, "furniture") && !hasTag(here, "storage")) {
                     state = (here.actions && Object.keys(here.actions).length > 0) ? "todo" : "blocked";
                 }
                 out.push({ x, y, state, here });
@@ -2942,6 +2940,9 @@
                 const hasMyBed = (u.data && u.data.bed && Objects().atIn(levelArea(u), u.data.bed.x, u.data.bed.y)) || (Own && Own.bedOf && Own.bedOf(u));
                 s += hasMyBed ? 2.0 : 4.0;
             }
+            if (x.step.build && (x.step.build.startsWith("floor_") || x.step.id.includes("floors") || (x.spec && x.spec.type === "floor"))) {
+                s += 2.0; // Priority boost to complete floors alongside walls
+            }
             const P = Pillars();
             if (P && P.priorityPillar) {
                 const focus = P.priorityPillar(c);
@@ -2955,7 +2956,7 @@
             const Callings = getCallings();
             if (Callings) {
                 if (Callings.isBuilder(u)) {
-                    if (x.spec.type === "build") s *= 2.5;
+                    if (x.spec.type === "build" || x.spec.type === "floor") s *= 2.5;
                 } else if (Callings.isWoodcutter(u)) {
                     if (x.spec.type === "chop" || (x.step && x.step.build && hasTag(Objects().type(x.step.build), "wood"))) s *= 2.5;
                 } else if (Callings.isMiner(u)) {
@@ -3002,57 +3003,78 @@
 
         // If Town Hall is already fully enclosed and roofed, site clearing is finished
         const H = window.UF && UF.Households;
+        const footprints = [];
         const siteTownHall = H && H.all().map(h => h.home).find(h => h && h.isShared && h.id === `town_hall_${c.siteId}`);
-        if (siteTownHall && siteTownHall.isRoofed) return null;
+        if (!siteTownHall || !siteTownHall.isRoofed) {
+            footprints.push({ x0: site.x - 3, y0: site.y - 3, x1: site.x + 3, y1: site.y + 3, ignoreHearth: true });
+        }
+        if (H && H.all) {
+            for (const h of H.all().filter(h => sameLevel(h, c) && h.home && !h.mergedInto)) {
+                if (H.isSheltered && H.isSheltered(h)) continue;
+                const home = h.home;
+                if (home.x !== undefined && home.w !== undefined) {
+                    footprints.push({ x0: home.x, y0: home.y, x1: home.x + home.w - 1, y1: home.y + home.h - 1, ignoreHearth: false });
+                }
+                for (const a of home.annexes || []) {
+                    if (a && a.x !== undefined && a.w !== undefined) {
+                        footprints.push({ x0: a.x, y0: a.y, x1: a.x + a.w - 1, y1: a.y + a.h - 1, ignoreHearth: false });
+                    }
+                }
+            }
+        }
+        if (!footprints.length) return null;
 
         const Callings = getCallings();
         const isW = Callings ? Callings.isWoodcutter(u) : true;
         const isM = Callings ? Callings.isMiner(u) : true;
         const isH = Callings ? Callings.isHauler(u) : true;
 
-        // 1. Standing obstacles inside 7x7 footprint (excluding central hearth at site.x, site.y)
+        // 1. Standing obstacles inside active footprints (trees, boulders)
         if (isW || isM) {
-            for (let y = y0; y <= y1; y++) {
-                for (let x = x0; x <= x1; x++) {
-                    if (x === site.x && y === site.y) continue;
-                    const ob = O.atIn(area, x, y);
-                    if (!ob) continue;
-                    const ot = O.type(ob.id);
-                    if (!ot) continue;
-                    // NEVER clear constructed settlement structures (walls, doors, beds, hearths, furniture, etc.)
-                    if (ot.build || (ot.tags && (ot.tags.includes("wall") || ot.tags.includes("door") || ot.tags.includes("bed") || ot.tags.includes("building") || ot.tags.includes("furniture") || ot.tags.includes("fire")))) {
-                        continue;
-                    }
-                    if (isObjectClaimed(u, x, y, "chop") || isObjectClaimed(u, x, y, "mine") || isObjectClaimed(u, x, y, "clear")) {
-                        continue;
-                    }
-                    const actions = ot.actions || {};
-                    if (actions.chop && isW) {
-                        const tool = toolJob(u, "chop");
-                        if (tool) return tool;
-                        return give(u, { type: "chop", target: { x, y }, params: { plan: "clear_footprint" } });
-                    }
-                    if (actions.mine && isM) {
-                        const tool = toolJob(u, "mine");
-                        if (tool) return tool;
-                        return give(u, { type: "mine", target: { x, y }, params: { plan: "clear_footprint" } });
-                    }
-                    if (actions.clear) {
-                        return give(u, { type: "clear", target: { x, y }, params: { plan: "clear_footprint" } });
+            for (const fp of footprints) {
+                for (let y = fp.y0; y <= fp.y1; y++) {
+                    for (let x = fp.x0; x <= fp.x1; x++) {
+                        if (fp.ignoreHearth && x === site.x && y === site.y) continue;
+                        const ob = O.atIn(area, x, y);
+                        if (!ob) continue;
+                        const ot = O.type(ob.id);
+                        if (!ot) continue;
+                        // NEVER clear constructed settlement structures (walls, doors, beds, hearths, furniture, etc.)
+                        if (ot.build || (ot.tags && (ot.tags.includes("wall") || ot.tags.includes("door") || ot.tags.includes("bed") || ot.tags.includes("building") || ot.tags.includes("furniture") || ot.tags.includes("fire")))) {
+                            continue;
+                        }
+                        if (isObjectClaimed(u, x, y, "chop") || isObjectClaimed(u, x, y, "mine") || isObjectClaimed(u, x, y, "clear")) {
+                            continue;
+                        }
+                        const actions = ot.actions || {};
+                        if (actions.chop && isW) {
+                            const tool = toolJob(u, "chop");
+                            if (tool) return tool;
+                            return give(u, { type: "chop", target: { x, y }, params: { plan: "clear_footprint" } });
+                        }
+                        if (actions.mine && isM) {
+                            const tool = toolJob(u, "mine");
+                            if (tool) return tool;
+                            return give(u, { type: "mine", target: { x, y }, params: { plan: "clear_footprint" } });
+                        }
+                        if (actions.clear) {
+                            return give(u, { type: "clear", target: { x, y }, params: { plan: "clear_footprint" } });
+                        }
                     }
                 }
             }
         }
 
-        // 2. Loose debris items lying inside 7x7 footprint hauled to stockpiles
+        // 2. Loose debris items lying inside active footprints hauled to stockpiles
         if (isH) {
-            const looseInFootprint = groundItemsNear(u, { radius: 12 }).filter(f => {
-                if (f.x < x0 || f.x > x1 || f.y < y0 || f.y > y1) return false;
-                if (f.x === site.x && f.y === site.y) return false;
+            const looseInFootprints = groundItemsNear(u, { radius: SEARCH_RADIUS }).filter(f => {
+                const inFp = footprints.find(fp => f.x >= fp.x0 && f.x <= fp.x1 && f.y >= fp.y0 && f.y <= fp.y1);
+                if (!inFp) return false;
+                if (inFp.ignoreHearth && f.x === site.x && f.y === site.y) return false;
                 return true;
             });
-            if (looseInFootprint.length > 0) {
-                for (const f of looseInFootprint) {
+            if (looseInFootprints.length > 0) {
+                for (const f of looseInFootprints) {
                     if (claimed(u, "haul", f.x, f.y, { itemId: f.item.id, plan: "clear_footprint" })) continue;
                     const t = itemType(f.item.type);
                     if (!t) continue;
@@ -3074,7 +3096,6 @@
                         if (sp) to = { area: copyArea(c.area), z, x: sp.x, y: sp.y };
                     }
                     if (!to) {
-                        // Drop outside the 7x7 Town Hall footprint
                         to = { area: copyArea(c.area), z, x: site.x + 4, y: site.y };
                     }
                     return give(u, { type: "haul", target: { x: f.x, y: f.y }, params: { itemId: f.item.id, to, plan: "clear_footprint" } });
