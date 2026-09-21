@@ -224,6 +224,21 @@
                 case "dwelling":
                     w = 5; h = 5; // standard cottage
                     break;
+                case "l_homestead":
+                case "l_shape":
+                    w = 7; h = 6;
+                    break;
+                case "octagonal_lodge":
+                case "octagonal":
+                    w = 6; h = 6;
+                    break;
+                case "t_manor":
+                case "t_shape":
+                    w = 7; h = 6;
+                    break;
+                case "cruciform":
+                    w = 7; h = 7;
+                    break;
                 case "family_home":
                     w = 8; h = 6; // 4-room family home (kitchen, dining, master bed, child bed)
                     break;
@@ -260,6 +275,37 @@
         const rooms = [];
         const windows = [];
 
+        // Procedural non-square footprint mask and perimeter detection
+        const inFootprint = (dx, dy) => {
+            if (dx < 0 || dx >= w || dy < 0 || dy >= h) return false;
+            switch (archetype) {
+                case "l_homestead":
+                case "l_shape":
+                    return !(dx >= Math.ceil(w * 0.5) && dy < Math.floor(h * 0.5));
+                case "octagonal_lodge":
+                case "octagonal":
+                    if ((dx === 0 || dx === w - 1) && (dy === 0 || dy === h - 1)) return false;
+                    return true;
+                case "t_manor":
+                case "t_shape": {
+                    if (dy < Math.ceil(h * 0.5)) return true;
+                    const stemLeft = Math.floor(w * 0.25), stemRight = Math.ceil(w * 0.75) - 1;
+                    return dx >= stemLeft && dx <= stemRight;
+                }
+                case "cruciform": {
+                    const midX = Math.floor(w / 2), midY = Math.floor(h / 2);
+                    return Math.abs(dx - midX) <= 1 || Math.abs(dy - midY) <= 1;
+                }
+                default:
+                    return true;
+            }
+        };
+
+        const isPerim = (dx, dy) => {
+            if (!inFootprint(dx, dy)) return false;
+            return !inFootprint(dx + 1, dy) || !inFootprint(dx - 1, dy) || !inFootprint(dx, dy + 1) || !inFootprint(dx, dy - 1);
+        };
+
         // 1. Ground Level (Z = 0) Blueprint
         const groundCells = {
             floors: [],
@@ -269,31 +315,47 @@
             furniture: []
         };
 
-        // Perimeter walls
-        for (let dx = 0; dx < w; dx++) {
-            groundCells.walls.push({ x: x + dx, y: y, objectId: mats.wall }); // North wall
-            groundCells.walls.push({ x: x + dx, y: y + h - 1, objectId: mats.wall }); // South wall
-        }
-        for (let dy = 1; dy < h - 1; dy++) {
-            groundCells.walls.push({ x: x, y: y + dy, objectId: mats.wall }); // West wall
-            groundCells.walls.push({ x: x + w - 1, y: y + dy, objectId: mats.wall }); // East wall
+        // Perimeter walls and interior floors
+        for (let dy = 0; dy < h; dy++) {
+            for (let dx = 0; dx < w; dx++) {
+                if (!inFootprint(dx, dy)) continue;
+                if (isPerim(dx, dy)) {
+                    groundCells.walls.push({ x: x + dx, y: y + dy, objectId: mats.wall });
+                } else {
+                    groundCells.floors.push({ x: x + dx, y: y + dy, kind: mats.floor });
+                }
+            }
         }
 
         // Entrance Doorway (Centered on South wall facing camp/street)
         const doorDx = Math.floor(w / 2);
-        const doorIdx = groundCells.walls.findIndex(cw => cw.x === x + doorDx && cw.y === y + h - 1);
+        let doorIdx = groundCells.walls.findIndex(cw => cw.x === x + doorDx && cw.y === y + h - 1);
+        let doorCell = null;
         if (doorIdx >= 0) {
+            doorCell = groundCells.walls[doorIdx];
             groundCells.walls.splice(doorIdx, 1);
-        }
-        groundCells.doors.push({ x: x + doorDx, y: y + h - 1, objectId: mats.door });
-        const entrance = { x: x + doorDx, y: y + h - 1, z: 0 };
-
-        // Interior Floors
-        for (let dy = 1; dy < h - 1; dy++) {
-            for (let dx = 1; dx < w - 1; dx++) {
-                groundCells.floors.push({ x: x + dx, y: y + dy, kind: mats.floor });
+        } else {
+            // Find southern-most perimeter wall closest to center
+            let bestWall = null, maxDy = -1, minD = 999;
+            for (const cw of groundCells.walls) {
+                const cdx = cw.x - x, cdy = cw.y - y;
+                if (!inFootprint(cdx, cdy + 1)) {
+                    if (cdy > maxDy || (cdy === maxDy && Math.abs(cdx - doorDx) < minD)) {
+                        maxDy = cdy; minD = Math.abs(cdx - doorDx);
+                        bestWall = cw;
+                    }
+                }
+            }
+            if (bestWall) {
+                doorIdx = groundCells.walls.indexOf(bestWall);
+                doorCell = bestWall;
+                groundCells.walls.splice(doorIdx, 1);
             }
         }
+        const doorX = doorCell ? doorCell.x : x + doorDx;
+        const doorY = doorCell ? doorCell.y : y + h - 1;
+        groundCells.doors.push({ x: doorX, y: doorY, objectId: mats.door });
+        const entrance = { x: doorX, y: doorY, z: 0 };
 
         // Stairs at Z=0
         const hasUpper = buildingLevels.some(z => z > 0);
@@ -422,6 +484,29 @@
             }
         } else if (archetype === "storehouse") {
             groundCells.furniture.push({ x: x + 2, y: y + 2, objectId: "stockpile" });
+        } else if (archetype === "l_homestead" || archetype === "l_shape" || archetype === "octagonal_lodge" || archetype === "octagonal" || archetype === "t_manor" || archetype === "t_shape" || archetype === "cruciform") {
+            const intCells = [];
+            for (let dy = 0; dy < h; dy++) {
+                for (let dx = 0; dx < w; dx++) {
+                    if (inFootprint(dx, dy) && !isPerim(dx, dy)) intCells.push({ dx, dy });
+                }
+            }
+            if (intCells.length >= 2) {
+                groundCells.furniture.push({ x: x + intCells[0].dx, y: y + intCells[0].dy, objectId: "campfire" });
+                groundCells.furniture.push({ x: x + intCells[intCells.length - 1].dx, y: y + intCells[intCells.length - 1].dy, objectId: "floor_straw" });
+                if (intCells.length >= 4) {
+                    groundCells.furniture.push({ x: x + intCells[intCells.length - 2].dx, y: y + intCells[intCells.length - 2].dy, objectId: "floor_straw" });
+                }
+            } else if (intCells.length === 1) {
+                groundCells.furniture.push({ x: x + intCells[0].dx, y: y + intCells[0].dy, objectId: "floor_straw" });
+            }
+            rooms.push({
+                id: `${spec.id || "bld"}_hall`,
+                type: "hall",
+                name: `${capitalize(culture)} Hall`,
+                x: x + 1, y: y + 1, w: w - 2, h: h - 2, z: 0,
+                beds: intCells.length >= 2 ? [{ x: x + intCells[intCells.length - 1].dx, y: y + intCells[intCells.length - 1].dy }] : []
+            });
         }
 
         cellsByZ["0"] = groundCells;
@@ -439,7 +524,9 @@
             // Support Rule: Upper floors strictly supported by perimeter walls & ground interior below
             for (let dy = 0; dy < h; dy++) {
                 for (let dx = 0; dx < w; dx++) {
-                    upperCells.floors.push({ x: x + dx, y: y + dy, kind: mats.floor });
+                    if (inFootprint(dx, dy)) {
+                        upperCells.floors.push({ x: x + dx, y: y + dy, kind: mats.floor });
+                    }
                 }
             }
 
@@ -466,16 +553,24 @@
                 }
             } else {
                 // Full upper perimeter walls
-                for (let dx = 0; dx < w; dx++) {
-                    upperCells.walls.push({ x: x + dx, y: y, objectId: mats.wall });
-                    upperCells.walls.push({ x: x + dx, y: y + h - 1, objectId: mats.wall });
-                }
-                for (let dy = 1; dy < h - 1; dy++) {
-                    upperCells.walls.push({ x: x, y: y + dy, objectId: mats.wall });
-                    upperCells.walls.push({ x: x + w - 1, y: y + dy, objectId: mats.wall });
+                for (let dy = 0; dy < h; dy++) {
+                    for (let dx = 0; dx < w; dx++) {
+                        if (inFootprint(dx, dy) && isPerim(dx, dy)) {
+                            upperCells.walls.push({ x: x + dx, y: y + dy, objectId: mats.wall });
+                        }
+                    }
                 }
                 // Upper bedroom / observation furniture
-                upperCells.furniture.push({ x: x + 2, y: y + 2, objectId: "floor_straw" });
+                const intCells = [];
+                for (let dy = 0; dy < h; dy++) {
+                    for (let dx = 0; dx < w; dx++) {
+                        if (inFootprint(dx, dy) && !isPerim(dx, dy)) intCells.push({ dx, dy });
+                    }
+                }
+                if (intCells.length > 0) {
+                    const bedCell = intCells[Math.floor(intCells.length / 2)];
+                    upperCells.furniture.push({ x: x + bedCell.dx, y: y + bedCell.dy, objectId: "floor_straw" });
+                }
             }
 
             cellsByZ[String(z)] = upperCells;
@@ -492,19 +587,20 @@
             };
 
             // Excavated stone retaining walls around cellar perimeter
-            for (let dx = 0; dx < w; dx++) {
-                cellarCells.walls.push({ x: x + dx, y: y, objectId: "wall_stone" });
-                cellarCells.walls.push({ x: x + dx, y: y + h - 1, objectId: "wall_stone" });
-            }
-            for (let dy = 1; dy < h - 1; dy++) {
-                cellarCells.walls.push({ x: x, y: y + dy, objectId: "wall_stone" });
-                cellarCells.walls.push({ x: x + w - 1, y: y + dy, objectId: "wall_stone" });
+            for (let dy = 0; dy < h; dy++) {
+                for (let dx = 0; dx < w; dx++) {
+                    if (inFootprint(dx, dy) && isPerim(dx, dy)) {
+                        cellarCells.walls.push({ x: x + dx, y: y + dy, objectId: "wall_stone" });
+                    }
+                }
             }
 
             // Cellar floor
-            for (let dy = 1; dy < h - 1; dy++) {
-                for (let dx = 1; dx < w - 1; dx++) {
-                    cellarCells.floors.push({ x: x + dx, y: y + dy, kind: "floor_stone" });
+            for (let dy = 0; dy < h; dy++) {
+                for (let dx = 0; dx < w; dx++) {
+                    if (inFootprint(dx, dy) && !isPerim(dx, dy)) {
+                        cellarCells.floors.push({ x: x + dx, y: y + dy, kind: "floor_stone" });
+                    }
                 }
             }
 
@@ -1033,12 +1129,13 @@
         // Check unhoused families
         const families = Object.values(outpost.families || {});
         const unhousedFamily = families.find(f => !f.houseId);
+        const RESIDENTIAL_ARCHETYPES = ["dwelling", "longhouse", "family_home", "homestead", "l_homestead", "octagonal_lodge", "t_manor", "cruciform"];
         if (unhousedFamily) {
-            const vacantHome = outpost.buildings.find(b => (b.archetype === "family_home" || b.archetype === "homestead") && !b.familyId);
+            const vacantHome = outpost.buildings.find(b => (b.archetype === "family_home" || b.archetype === "homestead" || b.archetype === "l_homestead" || b.archetype === "t_manor") && !b.familyId);
             if (vacantHome) {
                 assignFamilyHouse(unhousedFamily.id, vacantHome.id);
             } else {
-                const upgDwelling = outpost.buildings.find(b => b.archetype === "dwelling" && b.stage === "complete");
+                const upgDwelling = outpost.buildings.find(b => (b.archetype === "dwelling" || b.archetype === "octagonal_lodge") && b.stage === "complete");
                 if (upgDwelling) {
                     upgradeBuilding(upgDwelling, "family_home");
                     assignFamilyHouse(unhousedFamily.id, upgDwelling.id);
@@ -1054,7 +1151,7 @@
         let towerCount = 0;
 
         for (const b of outpost.buildings) {
-            if (b.archetype === "dwelling" || b.archetype === "longhouse" || b.archetype === "family_home" || b.archetype === "homestead") {
+            if (RESIDENTIAL_ARCHETYPES.includes(b.archetype)) {
                 dwellingCount++;
                 const ground = b.cellsByZ["0"];
                 if (ground && ground.furniture) {
@@ -1081,11 +1178,26 @@
             width = 8; height = 6; levels = [0];
             targetFamilyId = unhousedFamily.id;
         } else if (bedDeficit >= 4) {
-            plannedArchetype = "longhouse";
-            width = 8; height = 5; levels = [0, 1]; // 2-storey longhouse
+            const roll = Math.random();
+            if (roll < 0.35) {
+                plannedArchetype = "l_homestead";
+                width = 7; height = 6; levels = [0];
+            } else if (roll < 0.65) {
+                plannedArchetype = "t_manor";
+                width = 7; height = 6; levels = [0];
+            } else {
+                plannedArchetype = "longhouse";
+                width = 8; height = 5; levels = [0, 1]; // 2-storey longhouse
+            }
         } else if (bedDeficit >= 1) {
-            plannedArchetype = "dwelling";
-            width = 6; height = 5; levels = [0];
+            const roll = Math.random();
+            if (roll < 0.4) {
+                plannedArchetype = "octagonal_lodge";
+                width = 6; height = 6; levels = [0];
+            } else {
+                plannedArchetype = "dwelling";
+                width = 6; height = 5; levels = [0];
+            }
         } else if (workshopCount === 0 && pop >= 3) {
             plannedArchetype = "workshop";
             width = 6; height = 5; levels = [0];
@@ -1645,6 +1757,18 @@
             const diffDims = !isProvoked("archetype_dimensions") && sizesOk;
             t.check("outposts.archetype_dimensions", diffDims,
                 `Archetype dimensions: bld1=${bld1.w}x${bld1.h}, bld2=${bld2.w}x${bld2.h}, bld3=${bld3.w}x${bld3.h}, bld4=${bld4.w}x${bld4.h}`);
+
+            // 1b. Check: outposts.non_square_archetypes
+            const bldL = Outposts.generate({ archetype: "l_homestead", x: home.x, y: home.y, area });
+            const bldOct = Outposts.generate({ archetype: "octagonal_lodge", x: home.x + 10, y: home.y, area });
+            const bldT = Outposts.generate({ archetype: "t_manor", x: home.x + 20, y: home.y, area });
+            const bldCross = Outposts.generate({ archetype: "cruciform", x: home.x + 30, y: home.y, area });
+            const octCornersFree = !bldOct.cellsByZ["0"].walls.some(w => (w.x === bldOct.x || w.x === bldOct.x + bldOct.w - 1) && (w.y === bldOct.y || w.y === bldOct.y + bldOct.h - 1));
+            const allHaveDoors = [bldL, bldOct, bldT, bldCross].every(b => b.cellsByZ["0"].doors.length >= 1);
+            const allHaveFurniture = [bldL, bldOct, bldT, bldCross].every(b => b.cellsByZ["0"].furniture.length >= 1);
+            const nonSquareOk = !isProvoked("non_square_archetypes") && octCornersFree && allHaveDoors && allHaveFurniture;
+            t.check("outposts.non_square_archetypes", nonSquareOk,
+                `Non-square archetypes: L-shape=${bldL.cellsByZ["0"].walls.length}w/${bldL.cellsByZ["0"].floors.length}f, Octagon=${bldOct.cellsByZ["0"].walls.length}w/${bldOct.cellsByZ["0"].floors.length}f (corners chamfered: ${octCornersFree}), T-shape=${bldT.cellsByZ["0"].walls.length}w/${bldT.cellsByZ["0"].floors.length}f, Cruciform=${bldCross.cellsByZ["0"].walls.length}w/${bldCross.cellsByZ["0"].floors.length}f`);
 
             // 2. Check: outposts.perimeter_and_doors
             const g1 = bld1.cellsByZ["0"];

@@ -6,6 +6,42 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Structural & Shelter Architectural Variety (Non-Square Homes) — 2026-09-20 (Gemini)
+Delivered per user directive ("introduce the greatest reasonable variety in the shape and size of structures creatures build as shelter. Im tired of looking at square homes"):
+- **Diverse Procedural Architectural Footprints (`UF_Households.js`, `UF_History.js`, `UF_Outposts.js`)**:
+  - Replaced uniform square/monolithic rectangular footprints with authentic medieval and demographic architectural archetypes:
+    - **L-Shaped Homesteads (`"l_shape"` / `"l_homestead"`)**: Main living hall joined perpendicularly to private bedroom wing, framing an authentic exterior patio/garden nook.
+    - **T-Shaped Meadhalls & Manors (`"t_shape"` / `"t_manor"`)**: Central entrance stem flanked by transept wings.
+    - **Chamfered Octagonal Roundhouses (`"octagonal"` / `"octagonal_lodge"`)**: 8-sided polygonal rotunda/pavilions with chamfered corner cuts.
+    - **Cruciform Estates (`"cruciform"`)**: Central chamber with 4 cardinal functional wings.
+    - **Asymmetrical Alcove Cottages (`"alcove"`)**: Recessed entry porches breaking monotonic rectangular outlines.
+    - **Narrow Longhouses (`"longhouse"`)**: Authentic timber halls with aspect ratios from 1:2 to 1:3.
+  - Cultural affinities by species: Elves favor octagonal pavilions and cruciform halls; Dwarves favor stone octagons, cruciform bastions, and T-delves; Orcs/Goblins favor alcoves and L-shapes; Humans favor full architectural variety.
+- **Strict Geometric & Navigation Safety**:
+  - Boundary tracing via `isPerim(px, py)` guarantees unbroken exterior perimeter walls.
+  - Entrance doorway dynamically selected on southern perimeter wall with clear step outside.
+  - Domestic hearth placement mathematically constrained to cells with Manhattan distance $\ge 2$ from all walls, doors, beds, and storage. Narrow homes (`width < 7`) restricted to full-width silhouettes (`box`, `longhouse`) where hearth clearance is provable.
+  - Non-decreasing area progression maintained across family sizes `[2, 4, 8, 12]` with party-wall annex expansions.
+- **Level +1 Upper Roof Decks (`UF_Floors.js`, `UF_Households.js`)**:
+  - `strictEnclosure(h, p)` passes exact non-square cells (`p.walls.concat(p.doors).concat(p.floors)`) to `UF_Floors.applyRoofedUpperDeck`.
+  - Level +1 generates matching non-square autotiled roof decks (`deck_wood` / `deck_stone`), surrounded by pitch black `open_air`.
+- **World History & Outpost Integration**:
+  - `UF_History.js:addHouse`: Stamps L-shaped, octagonal, longhouse, T-shaped, and box cottages during simulated history with hearths and beds. Fixed Dwarven multi-level camp `focalFire` determinism seam.
+  - `UF_Outposts.js:generateBuilding` & `evaluateOutpostNeeds`: Non-square archetypes supported in outpost generation, AI expansion evaluation, and structural support validation.
+- **Automated Verification**:
+  - `node tools/test_building_variety_live.js`: **15/15 PASS (exit 0)** in live NW.js engine:
+    - `PASS smoke.architectural_variety_areas`: Distinct non-square areas: L-Shape=40, Octagon=41, T-Shape=33 (want <49).
+    - `PASS smoke.non_square_upper_decks_rendered`: Z=1 non-square roof contours: L-deck=2960, L-patioAir=3056, T-deck=2960, T-cutoutAir=3080.
+    - Provocation check (`--mutant=no_variety`): **FAILED with exit 1** (2 failed checks, Rule 4).
+  - `node tools/test_households.js`: **56/56 PASS (exit 0)**.
+  - `node tools/test_second_by_second_history.js`: **15/15 PASS (exit 0)**.
+  - `node tools/test_snapshot.js --name outpost_test --plugins UF_Outposts --suite outposts`: **22/22 PASS (exit 0)**.
+  - `node tools/run_tests.js history`: **17/17 PASS (exit 0)**.
+  - `node tools/run_tests.js setup`: **43/43 PASS (exit 0)** (86 history houses, 77 hearths simulated).
+- **Evidence**:
+  - `live_structure_variety_ground.png`: Live in-engine ground view showing L-shaped homestead, chamfered octagonal stone roundhouse with hearth and colonists, and T-shaped meadhall side by side.
+  - `live_structure_variety_roof.png`: Live in-engine Level +1 view showing exact non-square roof decks (`deck_wood`, `deck_stone`) surrounded by pure pitch black open air.
+
 ## Tile Selector, Targeted Brackets, Black Upper Levels, Sight Radii & Dynamic AI Task Swapping — 2026-09-20 (Gemini)
 Delivered per user directives ("I would like a translucent white selector on the tile currently hovered by the cursor. An additional square bracket on the tile if it is targetted", "I want the panoramic background on layers +1 and +2 to be pure black", "If something is in the fog of war, do not display its glow", "Change 'Embark' here to 'Start'", "Also for AI, if something is stopping you from doing something higher priority, let's have them swap what they are doing (within reason)", and sight radii / clearance affected by LOS):
 - **Hover Tile Translucent White Selector (`UF_Select.js`)**:
@@ -2548,7 +2584,6 @@ Delivered per user directive ("Creatures & Faction Character Sets (Orc, Goblin, 
   - `jobs.jobs_working.png`: Worker chopping oak on Ground rolling meadow with HUD level controls.
 
 ## In progress (claims)
-- Gemini | **Greater Z-Plane House Roof Deck Representation & Enclosure Event Hooks** (user 2026-09-20: "represent the tiles on the greater Z plane when houses are finished. I want to make sure it works") | `game/js/plugins/UF_Households.js`, `game/js/plugins/UF_Floors.js`, `tools/test_greater_z_roof_live.js` | since 2026-09-20
 - Codex / Astra team | User-requested next society chain: physical, saved, layer-aware farming and autonomous settlement planning | NEW `game/js/plugins/UF_Agriculture.js`, `UF_FarmView.js`, their system docs and agriculture tests/fixture; narrow `UF_Colonists.js` planner integration, `UF_Households.js` farm reservation guard, `UF_ProfileTabs.js` explanations and `UF_CultureGrowth.js` confirmed farming practice, their docs/tests; `docs/STATUS.md`, `docs/VISION.md`, `docs/design/EMERGENT_SOCIETY.md`, `docs/ASSET_REQUESTS.md` request text only; registration only after editor closure | since 2026-09-19
 **2026-09-19 16:55: Claude Code delivered Creature AI Outpost Construction, Generational Culture Evolution, Multi-Room Family Homes, and Locks & Keys (UF_Outposts.js & UF_Doors.js verified 21/21 PASS, 0/21 provoked, regressions doors 12/12, smoke 9/9 PASS).**
 Format: `- <agent> | <task> | <files/folders> | since <date>`

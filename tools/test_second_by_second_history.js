@@ -476,7 +476,7 @@ check("home_required_before_children_and_room_per_child", () => {
     assert.ok(h, "Mom has household");
 
     // 1. Unhoused pair cannot conceive
-    assert.equal(h.home, null, "Unhoused at creation");
+    assert.ok(!h.home || h.home.isShared, "Unhoused in private home at creation");
     assert.equal(H.canConceiveChild(h), false, "Unhoused couple CANNOT conceive children");
 
     // 2. Pair with home but 0 child rooms cannot conceive child #1

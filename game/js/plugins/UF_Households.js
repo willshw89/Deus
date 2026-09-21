@@ -352,8 +352,8 @@
             }
         }
     }
-    function object(h, p) { return O() && O().atIn(areaOf(h), p.x, p.y); }
-    function ref(h, p) { return { kind: "object", area: { x: h.area.x, y: h.area.y }, z: h.z, x: p.x, y: p.y }; }
+    function object(h, p) { return p ? (O() && O().atIn(areaOf(h), p.x, p.y)) : null; }
+    function ref(h, p) { return p ? { kind: "object", area: { x: h.area.x, y: h.area.y }, z: h.z, x: p.x, y: p.y } : null; }
     function dry(h, x, y) {
         const w = W(), j = window.UF && UF.Jobs;
         return !!(w && w.state && x >= 1 && y >= 1 && x < w.state.size - 1 && y < w.state.size - 1 &&
@@ -365,6 +365,102 @@
         for (const c of parts.join("|")) n = Math.imul(n ^ c.charCodeAt(0), 16777619);
         return n >>> 0;
     }
+    const SHAPES_BY_SPECIES = {
+        elf: ["octagonal", "cruciform", "t_shape", "longhouse", "l_shape"],
+        dwarf: ["octagonal", "cruciform", "t_shape", "box", "l_shape"],
+        orc: ["alcove", "l_shape", "longhouse", "box", "t_shape"],
+        goblin: ["alcove", "l_shape", "box", "octagonal", "longhouse"],
+        human: ["l_shape", "t_shape", "alcove", "octagonal", "cruciform", "longhouse", "box"],
+        default: ["l_shape", "t_shape", "alcove", "octagonal", "cruciform", "longhouse", "box"]
+    };
+
+    function makeFootprint(shape, width, height, sleepRows = 2) {
+        const divider = sleepRows + 1;
+        const grid = [];
+        for (let y = 0; y < height; y++) {
+            grid[y] = [];
+            for (let x = 0; x < width; x++) grid[y][x] = false;
+        }
+
+        if (shape === "box") {
+            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
+        } else if (shape === "l_shape") {
+            const cutX = Math.max(5, Math.floor(width * 0.6));
+            const cutY = Math.max(divider + 1, Math.floor(height * 0.6));
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (x >= cutX && y >= cutY) continue;
+                    grid[y][x] = true;
+                }
+            }
+        } else if (shape === "octagonal") {
+            const corner = Math.min(2, Math.floor(Math.min(width, height) / 4));
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (x + y < corner) continue;
+                    if ((width - 1 - x) + y < corner) continue;
+                    if (x + (height - 1 - y) < corner) continue;
+                    if ((width - 1 - x) + (height - 1 - y) < corner) continue;
+                    grid[y][x] = true;
+                }
+            }
+        } else if (shape === "t_shape") {
+            const stemW = Math.max(5, Math.floor(width * 0.6));
+            const stemX0 = Math.floor((width - stemW) / 2);
+            const stemX1 = stemX0 + stemW;
+            const hTop = divider;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (y < hTop || (x >= stemX0 && x < stemX1)) {
+                        grid[y][x] = true;
+                    }
+                }
+            }
+        } else if (shape === "cruciform") {
+            const cutW = Math.max(1, Math.floor(width * 0.22));
+            const cutH = Math.max(1, Math.floor(height * 0.22));
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const isTL = (x < cutW && y < cutH);
+                    const isTR = (x >= width - cutW && y < cutH);
+                    const isBL = (x < cutW && y >= height - cutH);
+                    const isBR = (x >= width - cutW && y >= height - cutH);
+                    if (isTL || isTR || isBL || isBR) continue;
+                    grid[y][x] = true;
+                }
+            }
+        } else if (shape === "alcove") {
+            const cutW = Math.max(2, Math.floor(width * 0.25));
+            const cutH = Math.max(2, Math.floor(height * 0.25));
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (x >= width - cutW && y >= height - cutH) continue;
+                    grid[y][x] = true;
+                }
+            }
+        } else if (shape === "u_shape") {
+            const cutY = Math.max(divider + 2, Math.floor(height * 0.7));
+            const courtW = Math.max(3, Math.floor(width * 0.35));
+            const cutX0 = Math.floor((width - courtW) / 2);
+            const cutX1 = cutX0 + courtW;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (y >= cutY && x >= cutX0 && x < cutX1) continue;
+                    grid[y][x] = true;
+                }
+            }
+        } else if (shape === "longhouse") {
+            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
+        } else {
+            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
+        }
+
+        return (x, y) => {
+            if (x < 0 || y < 0 || x >= width || y >= height) return false;
+            return !!grid[y][x];
+        };
+    }
+
     function designFor(h, need, annex = false) {
         const people = members(h), social = Math.round(people.reduce((n, u) => n +
             (u.data.facets && Number.isFinite(u.data.facets.sociability) ? u.data.facets.sociability : 50), 0) / Math.max(1, people.length));
@@ -400,7 +496,24 @@
             capacity = Math.ceil(need / 4) * 4; width = variant ? 13 : 11;
             sleepRows = Math.ceil(capacity / 4); height = sleepRows + 6; size = "large";
         }
+
+        // Cultural architectural footprint archetype:
+        let shape = "box";
+        if (!annex) {
+            const species = (people[0] && people[0].data && people[0].data.species) || "human";
+            const pool = SHAPES_BY_SPECIES[species] || SHAPES_BY_SPECIES.default;
+            const validPool = pool.filter(s => {
+                if (s === "u_shape" && width < 9) return false;
+                if (s === "cruciform" && width < 8) return false;
+                if (width < 7 && s !== "box" && s !== "longhouse") return false;
+                return true;
+            });
+            const shapeIdx = (roll >>> 5) % validPool.length;
+            shape = validPool[shapeIdx];
+        }
+
         return { version: 1, kind: annex ? "bedroom" : "home", size, variant, capacity, width, height, sleepRows,
+            shape,
             rotation: (roll >>> 8) % 4, mirrored: !!((roll >>> 10) & 1),
             outerLane: 2 + (roll >>> 12) % (width - 4), innerLane: 2 + (roll >>> 17) % (width - 4),
             householdSize: people.length, requiredBeds: need, sociability: social, rank: maxRank };
@@ -408,6 +521,9 @@
     function dimensions(d) { return d.rotation % 2 ? { w: d.height, h: d.width } : { w: d.width, h: d.height }; }
     function layout(x, y, wall, door, design) {
         const width = design.width, height = design.height, divider = design.sleepRows + 1, annex = design.kind === "bedroom";
+        const shape = design.shape || "box";
+        const inFootprint = makeFootprint(shape, width, height, design.sleepRows);
+
         const transform = p => {
             let px = design.mirrored ? width - 1 - p.x : p.x, py = p.y;
             if (design.rotation === 1) [px, py] = [height - 1 - py, px];
@@ -415,42 +531,175 @@
             else if (design.rotation === 3) [px, py] = [py, width - 1 - px];
             return { x: x + px, y: y + py };
         };
-        const doors = [{ x: design.outerLane, y: height - 1 }];
-        if (!annex) doors.push({ x: design.innerLane, y: divider });
-        const walls = [], sleeping = [], beds = [], floors = [];
-        for (let py = 0; py < height; py++) for (let px = 0; px < width; px++) {
-            const isPerimeter = px === 0 || px === width - 1 || py === 0 || py === height - 1;
-            const isDivider = !annex && py === divider;
-            const isDoor = doors.some(p => p.x === px && p.y === py);
-            if ((isPerimeter || isDivider) && !isDoor) walls.push(transform({ x: px, y: py }));
-            if (px > 0 && px < width - 1 && py > 0 && py <= design.sleepRows) sleeping.push(transform({ x: px, y: py }));
-            // Interior floor cells:
-            if (px > 0 && px < width - 1 && py > 0 && py < height - 1 && !isDivider) {
-                floors.push(transform({ x: px, y: py }));
+
+        const isPerim = (px, py) => !inFootprint(px - 1, py) || !inFootprint(px + 1, py) ||
+                                    !inFootprint(px, py - 1) || !inFootprint(px, py + 1);
+
+        // Find valid outerLane on the true bottom wall (y = height - 1)
+        let outerLane = design.outerLane;
+        let bottomY = height - 1;
+        const isValidBottom = px => inFootprint(px, height - 1) && !inFootprint(px, height) &&
+                                    inFootprint(px, height - 2) && inFootprint(px - 1, height - 1) && inFootprint(px + 1, height - 1);
+        if (!isValidBottom(outerLane)) {
+            let candidates = [];
+            for (let px = 1; px < width - 1; px++) {
+                if (isValidBottom(px)) candidates.push(px);
+            }
+            if (candidates.length > 0) {
+                candidates.sort((a, b) => Math.abs(a - design.outerLane) - Math.abs(b - design.outerLane));
+                outerLane = candidates[0];
+            } else {
+                for (let px = 1; px < width - 1; px++) {
+                    if (inFootprint(px, height - 1)) { outerLane = px; break; }
+                }
             }
         }
+
+        // Interior door on divider: must have walkable interior floor on BOTH sides (divider - 1 and divider + 1)
+        let innerLane = design.innerLane;
+        const isValidDivider = px => inFootprint(px, divider) && !isPerim(px, divider) &&
+                                     inFootprint(px, divider - 1) && !isPerim(px, divider - 1) &&
+                                     inFootprint(px, divider + 1) && !isPerim(px, divider + 1);
+        if (!isValidDivider(innerLane)) {
+            let candidates = [];
+            for (let px = 1; px < width - 1; px++) {
+                if (isValidDivider(px)) candidates.push(px);
+            }
+            if (candidates.length > 0) {
+                candidates.sort((a, b) => Math.abs(a - design.innerLane) - Math.abs(b - design.innerLane));
+                innerLane = candidates[0];
+            }
+        }
+
+        const doors = [{ x: outerLane, y: bottomY }];
+        if (!annex) doors.push({ x: innerLane, y: divider });
+
+        const walls = [], sleeping = [], beds = [], floors = [];
+        for (let py = 0; py < height; py++) {
+            for (let px = 0; px < width; px++) {
+                if (!inFootprint(px, py)) continue;
+
+                const isPerimeter = isPerim(px, py);
+                const isDivider = !annex && py === divider && !isPerimeter;
+                const isDoor = doors.some(d => d.x === px && d.y === py);
+
+                if ((isPerimeter || isDivider) && !isDoor) {
+                    walls.push(transform({ x: px, y: py }));
+                }
+                if (!isPerimeter && py > 0 && py <= design.sleepRows) {
+                    sleeping.push(transform({ x: px, y: py }));
+                }
+                if (!isPerimeter && !isDivider) {
+                    floors.push(transform({ x: px, y: py }));
+                }
+            }
+        }
+
+        // Beds placement in sleeping area
         const bedColumns = !annex && width >= 11 ? [1, width - 2, 2, width - 3] : [1, width - 2];
-        for (let py = 1; py <= design.sleepRows; py++) for (const px of bedColumns) if (beds.length < design.capacity)
-            beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
-        
-        // Kitchen & Dining appointments:
-        const hearth = annex ? null : { x: Math.floor(width / 2), y: divider + 2 };
-        const kitchenCounter = annex || width < 7 ? null : transform({ x: 1, y: divider + 2 });
-        const kitchenPantry = annex || width < 7 ? null : transform({ x: 2, y: divider + 2 });
-        const diningTable = annex || width < 7 ? null : transform({ x: Math.floor(width / 2), y: Math.min(height - 3, divider + 3) });
-        const diningBench = annex || width < 7 ? null : transform({ x: Math.floor(width / 2) + 1, y: Math.min(height - 3, divider + 3) });
+        for (let py = 1; py <= design.sleepRows; py++) {
+            for (const px of bedColumns) {
+                if (beds.length < design.capacity && inFootprint(px, py)) {
+                    if (!isPerim(px, py) && py < divider) {
+                        beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
+                    }
+                }
+            }
+        }
+        if (beds.length < design.capacity) {
+            for (let py = 1; py <= design.sleepRows; py++) {
+                for (let px = 1; px < width - 1; px++) {
+                    if (beds.length >= design.capacity) break;
+                    if (inFootprint(px, py) && !isPerim(px, py) && py < divider) {
+                        const pt = transform({ x: px, y: py });
+                        if (!beds.some(b => b.x === pt.x && b.y === pt.y)) {
+                            beds.push(Object.assign(pt, { unitId: null }));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Spots (2 adjacent cells for couple)
+        let s0 = null, s1 = null;
+        const midX = Math.floor(width / 2);
+        const sPy = Math.min(design.sleepRows, divider - 1);
+        for (let px = 1; px < width - 2; px++) {
+            if (inFootprint(px, sPy) && inFootprint(px + 1, sPy) && !isPerim(px, sPy) && !isPerim(px + 1, sPy)) {
+                s0 = transform({ x: px, y: sPy });
+                s1 = transform({ x: px + 1, y: sPy });
+                break;
+            }
+        }
+        if (!s0) {
+            s0 = sleeping[0] || transform({ x: 1, y: 1 });
+            s1 = sleeping[1] || transform({ x: 2, y: 1 });
+        }
+
+        // Hearth: in living area, with distance >= 2 from all walls, doors, beds, storage
+        let hearth = null;
+        if (!annex) {
+            const existingBlocked = [...walls, ...doors.map(transform), ...beds];
+            const isSafeHearth = pt => existingBlocked.every(p => Math.abs(p.x - pt.x) + Math.abs(p.y - pt.y) >= 2);
+            let candidates = [];
+            for (let py = divider + 1; py < height - 1; py++) {
+                for (let px = 1; px < width - 1; px++) {
+                    if (inFootprint(px, py) && !isPerim(px, py)) {
+                        const pt = transform({ x: px, y: py });
+                        if (isSafeHearth(pt)) {
+                            const score = Math.abs(px - midX) + Math.abs(py - (divider + 2));
+                            candidates.push({ px, py, pt, score });
+                        }
+                    }
+                }
+            }
+            if (candidates.length > 0) {
+                candidates.sort((a, b) => a.score - b.score);
+                hearth = { x: candidates[0].px, y: candidates[0].py };
+            } else {
+                hearth = { x: midX, y: Math.min(height - 2, divider + 2) };
+            }
+        }
+
+        // Domestic furniture & amenities:
+        const hearthPt = hearth ? transform(hearth) : null;
+        let storage = null;
+        if (!annex) {
+            for (let py = height - 2; py > divider; py--) {
+                for (let px = width - 2; px > 1; px--) {
+                    if (inFootprint(px, py) && !isPerim(px, py)) {
+                        const pt = transform({ x: px, y: py });
+                        if (!hearthPt || (Math.abs(pt.x - hearthPt.x) + Math.abs(pt.y - hearthPt.y) >= 2)) {
+                            storage = pt;
+                            break;
+                        }
+                    }
+                }
+                if (storage) break;
+            }
+        }
+
+        const kitchenCounter = annex || width < 7 ? null : transform({ x: 1, y: Math.min(height - 2, divider + 2) });
+        const kitchenPantry = annex || width < 7 ? null : transform({ x: 2, y: Math.min(height - 2, divider + 2) });
+        const diningTable = annex || width < 7 ? null : transform({ x: midX, y: Math.min(height - 3, divider + 3) });
+        const diningBench = annex || width < 7 ? null : transform({ x: midX + 1, y: Math.min(height - 3, divider + 3) });
         const workbench = annex || width < 7 ? null : transform({ x: 1, y: height - 2 });
-        const weaponRack = annex || width < 7 ? null : transform({ x: width - 2, y: divider + 2 });
+        const weaponRack = annex || width < 7 ? null : transform({ x: width - 2, y: Math.min(height - 2, divider + 2) });
         const crib = annex || width < 7 ? null : transform({ x: width - 2, y: 1 });
-        const storage = annex ? null : transform({ x: width - 2, y: height - 2 });
         const shopCounter = annex || width < 7 ? null : transform({ x: width - 3, y: height - 2 });
 
-        return Object.assign({ x, y, wall, door, design, walls, doors: doors.map(transform), sleeping, beds, floors,
-            spots: [transform({ x: Math.floor(width / 2), y: design.sleepRows }), transform({ x: Math.floor(width / 2) + 1, y: design.sleepRows })],
-            hearth: hearth && transform(hearth), kitchenCounter, kitchenPantry, diningTable, diningBench, storage,
+        return Object.assign({
+            x, y, wall, door, design, walls,
+            doors: doors.map(transform),
+            sleeping, beds, floors,
+            spots: [s0, s1],
+            hearth: hearth && transform(hearth),
+            kitchenCounter, kitchenPantry, diningTable, diningBench, storage,
             workbench, weaponRack, crib, shopCounter,
             hearthClearance: hearth ? [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([dx, dy]) => transform({ x: hearth.x + dx, y: hearth.y + dy })) : [],
-            entrance: transform({ x: design.outerLane, y: height }), steps: [] }, dimensions(design));
+            entrance: transform({ x: outerLane, y: bottomY + 1 }),
+            steps: []
+        }, dimensions(design));
     }
     function footprintOK(h, home, u, reservations, occupied, bootstrap) {
         const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.kitchenCounter, home.kitchenPantry, home.diningTable, home.diningBench, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
@@ -869,7 +1118,8 @@
             Object.defineProperty(p, "isRoofed", { value: true, writable: true, configurable: true, enumerable: false });
             const F = window.UF && UF.Floors;
             if (F && typeof F.applyRoofedUpperDeck === "function") {
-                F.applyRoofedUpperDeck(areaOf(h), { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
+                const targetCells = (p.walls || []).concat(p.doors || []).concat(p.floors || []);
+                F.applyRoofedUpperDeck(areaOf(h), targetCells.length ? targetCells : { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
             }
             if (h && h.previousSharedHome) {
                 for (const m of members(h)) {

@@ -504,8 +504,10 @@
                 sites.push(site);
                 return site;
             });
+            for (const s of camps) {
+                s.focalFire = { area: { ...s.area }, x: s.x, y: s.y, z: s.z };
+            }
             const site = camps[0];
-            site.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.home = { ...f.home, area: { ...site.area }, x: site.x, y: site.y, z: site.z };
             f.sites = camps.map(s => s.id);
@@ -1117,10 +1119,46 @@
             record(year, "settle_built", `${S.site.name} set up a ${e ? e.name.toLowerCase() : "workbench"}.`, S.site);
             return true;
         };
-        /** A house: a w x h rectangle of the culture's wall, a door in the side facing the site, a straw bed inside and an indoor hearth. */
+        /** A house with diverse architectural footprints: L-shaped, octagonal rotunda, T-shaped, longhouse, or box cottage. */
         const addHouse = (S, year) => {
             const R = S.R, site = S.site;
-            const w = 4 + (rand() < 0.4 ? 1 : 0), hh = 4 + (rand() < 0.4 ? 1 : 0);
+            const shapeRoll = rand();
+            let shape = "box", w = 4 + (rand() < 0.4 ? 1 : 0), hh = 4 + (rand() < 0.4 ? 1 : 0);
+            if (shapeRoll < 0.25) {
+                shape = "l_shape";
+                w = 5 + (rand() < 0.5 ? 1 : 0);
+                hh = 5 + (rand() < 0.5 ? 1 : 0);
+            } else if (shapeRoll < 0.45) {
+                shape = "octagonal";
+                w = 5 + (rand() < 0.5 ? 1 : 0);
+                hh = w;
+            } else if (shapeRoll < 0.65) {
+                shape = "longhouse";
+                if (rand() < 0.5) { w = 4; hh = 6 + (rand() < 0.5 ? 1 : 0); }
+                else { w = 6 + (rand() < 0.5 ? 1 : 0); hh = 4; }
+            } else if (shapeRoll < 0.80) {
+                shape = "t_shape";
+                w = 5 + (rand() < 0.5 ? 1 : 0);
+                hh = 5 + (rand() < 0.5 ? 1 : 0);
+            }
+
+            const inFootprint = (dx, dy) => {
+                if (dx < 0 || dy < 0 || dx >= w || dy >= hh) return false;
+                if (shape === "l_shape") {
+                    if (dx >= w - 2 && dy >= hh - 2) return false;
+                } else if (shape === "octagonal") {
+                    if (dx + dy < 1) return false;
+                    if ((w - 1 - dx) + dy < 1) return false;
+                    if (dx + (hh - 1 - dy) < 1) return false;
+                    if ((w - 1 - dx) + (hh - 1 - dy) < 1) return false;
+                } else if (shape === "t_shape") {
+                    if (dy < 2 && (dx < 1 || dx >= w - 1)) return false;
+                }
+                return true;
+            };
+            const isPerim = (dx, dy) => !inFootprint(dx - 1, dy) || !inFootprint(dx + 1, dy) ||
+                                        !inFootprint(dx, dy - 1) || !inFootprint(dx, dy + 1);
+
             const zones = [[0, R - 2], [R + 3, R + 7]]; // inside the ring first, then the band just outside it
             for (const [lo, hi] of zones) {
                 if (hi - lo + 1 < Math.max(w, hh)) continue;
@@ -1136,39 +1174,58 @@
                 }
                 spots.sort((a, b) => a.order - b.order);
                 for (const { x0, y0 } of spots) {
-                    const x1 = x0 + w - 1, y1 = y0 + hh - 1;
                     let ok = true;
-                    for (let y = y0; y <= y1 && ok; y++) for (let x = x0; x <= x1 && ok; x++) if (!free(S, x, y)) ok = false;
-                    if (!ok) continue;
-                    // The door: the middle of the side that faces the site's centre; the cell beyond it must be free too.
-                    const cx = x0 + (w - 1) / 2, cy = y0 + (hh - 1) / 2;
-                    const ddx = site.x - cx, ddy = site.y - cy;
-                    let door, out;
-                    if (Math.abs(ddx) > Math.abs(ddy)) {
-                        const y = y0 + Math.floor((hh - 1) / 2) + (hh === 4 && ddy > 0 ? 1 : 0);
-                        door = ddx < 0 ? [x0, y] : [x1, y];
-                        out = ddx < 0 ? [x0 - 1, y] : [x1 + 1, y];
-                    } else {
-                        const x = x0 + Math.floor((w - 1) / 2) + (w === 4 && ddx > 0 ? 1 : 0);
-                        door = ddy < 0 ? [x, y0] : [x, y1];
-                        out = ddy < 0 ? [x, y0 - 1] : [x, y1 + 1];
+                    for (let dy = 0; dy < hh && ok; dy++) {
+                        for (let dx = 0; dx < w && ok; dx++) {
+                            if (inFootprint(dx, dy) && !free(S, x0 + dx, y0 + dy)) ok = false;
+                        }
                     }
-                    if (!free(S, out[0], out[1])) continue;
+                    if (!ok) continue;
+
+                    // Find perimeter cell facing site center whose exterior step 'out' is free
+                    const candidateDoors = [];
+                    for (let dy = 0; dy < hh; dy++) {
+                        for (let dx = 0; dx < w; dx++) {
+                            if (!inFootprint(dx, dy) || !isPerim(dx, dy)) continue;
+                            const x = x0 + dx, y = y0 + dy;
+                            for (const [ox, oy] of [[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y]]) {
+                                if (!inFootprint(ox - x0, oy - y0) && free(S, ox, oy)) {
+                                    const dist = Math.abs(ox - site.x) + Math.abs(oy - site.y);
+                                    candidateDoors.push({ door: [x, y], out: [ox, oy], dist });
+                                }
+                            }
+                        }
+                    }
+                    if (!candidateDoors.length) continue;
+                    candidateDoors.sort((a, b) => a.dist - b.dist);
+                    const { door, out } = candidateDoors[0];
+
                     const interior = [];
-                    for (let y = y0; y <= y1; y++) {
-                        for (let x = x0; x <= x1; x++) {
-                            const edge = x === x0 || x === x1 || y === y0 || y === y1;
-                            if (x === door[0] && y === door[1]) { write(S.m, x, y, 0); S.built.set(y * size + x, 0); }
-                            else if (edge) place(S, x, y, S.wall);
-                            else { write(S.m, x, y, 0); S.built.set(y * size + x, 0); interior.push([x, y]); }
+                    let wallsCount = 0;
+                    for (let dy = 0; dy < hh; dy++) {
+                        for (let dx = 0; dx < w; dx++) {
+                            if (!inFootprint(dx, dy)) continue;
+                            const x = x0 + dx, y = y0 + dy;
+                            const edge = isPerim(dx, dy);
+                            if (x === door[0] && y === door[1]) {
+                                write(S.m, x, y, 0); S.built.set(y * size + x, 0);
+                            } else if (edge) {
+                                place(S, x, y, S.wall);
+                                wallsCount++;
+                            } else {
+                                write(S.m, x, y, 0); S.built.set(y * size + x, 0);
+                                interior.push([x, y]);
+                            }
                         }
                     }
                     S.reserved.add(out[1] * size + out[0]);
                     interior.sort((a, b) => (Math.abs(b[0] - door[0]) + Math.abs(b[1] - door[1])) - (Math.abs(a[0] - door[0]) + Math.abs(a[1] - door[1])));
                     const bed = interior.shift();
-                    place(S, bed[0], bed[1], BED);
-                    S.beds++;
-                    totals.beds++;
+                    if (bed) {
+                        place(S, bed[0], bed[1], BED);
+                        S.beds++;
+                        totals.beds++;
+                    }
                     let hearth = null;
                     if (interior.length >= 2 && HEARTH) {
                         hearth = interior.shift();
@@ -1178,12 +1235,12 @@
                     }
                     for (const [x, y] of interior) S.rooms.push(y * size + x);
                     const wallEntry = entry(S.wall);
-                    S.houses.push({ x: x0, y: y0, w, h: hh, door, bed, hearth, wall: wallEntry ? wallEntry.id : null, year });
-                    S.walls += w * 2 + hh * 2 - 5;
-                    totals.walls += w * 2 + hh * 2 - 5;
+                    S.houses.push({ x: x0, y: y0, w, h: hh, shape, door, bed, hearth, wall: wallEntry ? wallEntry.id : null, year });
+                    S.walls += wallsCount;
+                    totals.walls += wallsCount;
                     totals.houses++;
                     const n = S.houses.length;
-                    if (n <= 3 || n % 5 === 0) record(year, "settle_built", `${site.name} raised its ${ordinal(n)} house.`, site);
+                    if (n <= 3 || n % 5 === 0) record(year, "settle_built", `${site.name} raised its ${ordinal(n)} house (${shape}).`, site);
                     return true;
                 }
             }
@@ -1956,17 +2013,34 @@
             }
 
             // Register structure
-            structuresList.push({
-                id: `${household.id}_child_${household.home.rooms ? household.home.rooms.length : 1}`,
-                x0, y0, x1, y1,
-                area: { ...area },
-                z: levelOf(area),
-                door: { x: doorX, y: doorY },
-                isShared: false
-            });
-
-            // If detached, connect with road
-            if (!isAdjoining) {
+            if (isAdjoining) {
+                const parentStruct = structuresList.find(s => s.id === household.home.id || s.id === household.id);
+                if (parentStruct) {
+                    parentStruct.x0 = Math.min(parentStruct.x0, x0);
+                    parentStruct.y0 = Math.min(parentStruct.y0, y0);
+                    parentStruct.x1 = Math.max(parentStruct.x1, x1);
+                    parentStruct.y1 = Math.max(parentStruct.y1, y1);
+                    parentStruct.annexes = parentStruct.annexes || [];
+                    parentStruct.annexes.push({ x0, y0, x1, y1, door: { x: doorX, y: doorY } });
+                } else {
+                    structuresList.push({
+                        id: `${household.id}_child_${household.home.rooms ? household.home.rooms.length : 1}`,
+                        x0, y0, x1, y1,
+                        area: { ...area },
+                        z: levelOf(area),
+                        door: { x: doorX, y: doorY },
+                        isShared: false
+                    });
+                }
+            } else {
+                structuresList.push({
+                    id: `${household.id}_child_${household.home.rooms ? household.home.rooms.length : 1}`,
+                    x0, y0, x1, y1,
+                    area: { ...area },
+                    z: levelOf(area),
+                    door: { x: doorX, y: doorY },
+                    isShared: false
+                });
                 connectHomeWithRoad(site, f, { x: doorX, y: doorY });
             }
 
