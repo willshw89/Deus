@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DEUS Asset Pipeline — Chest Animation Review</title>
+<style>
+  body { background: #12131a; color: #e0e0ea; font-family: monospace; padding: 24px; }
+  h1 { color: #d4a359; font-size: 20px; }
+  h2 { color: #8fa0c0; font-size: 15px; margin-top: 24px; border-bottom: 1px solid #2e3245; padding-bottom: 6px; }
+  .grid { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 16px; }
+  .card { background: #1a1b26; border: 1px solid #2e3245; border-radius: 6px; padding: 16px; text-align: center; }
+  .canvas-wrap { background: #222334; border: 1px solid #3c405a; display: inline-block; padding: 8px; border-radius: 4px; }
+  canvas { image-rendering: pixelated; width: 144px; height: 144px; }
+  .status { margin-top: 8px; font-size: 12px; color: #73c991; }
+  .meta { font-size: 11px; color: #888ca0; margin-top: 4px; }
+</style>
+</head>
+<body>
+<h1>PROJECT DEUS — REPAIRED CHEST ASSET FAMILY REVIEW</h1>
+<p>Animation playback cycle: Closed (Col 1) &rarr; Half-Open (Col 2) &rarr; Fully Open (Col 3) &rarr; Half-Open (Col 2) &rarr; Closed (Col 1) at 150ms per frame.</p>
+
+<h2>Interactive Animated Playback (All 4 Facings)</h2>
+<div class="grid">
+  <div class="card">
+    <div class="canvas-wrap"><canvas id="cv_down" width="48" height="48"></canvas></div>
+    <div class="status">ROW 1: DOWN (South)</div>
+    <div class="meta">Hinged rear, front latch, empty oak interior</div>
+  </div>
+  <div class="card">
+    <div class="canvas-wrap"><canvas id="cv_left" width="48" height="48"></canvas></div>
+    <div class="status">ROW 2: LEFT (West)</div>
+    <div class="meta">Latch on left, hinge on right, empty interior</div>
+  </div>
+  <div class="card">
+    <div class="canvas-wrap"><canvas id="cv_right" width="48" height="48"></canvas></div>
+    <div class="status">ROW 3: RIGHT (East)</div>
+    <div class="meta">Latch on right, hinge on left, empty interior</div>
+  </div>
+  <div class="card">
+    <div class="canvas-wrap"><canvas id="cv_up" width="48" height="48"></canvas></div>
+    <div class="status">ROW 4: UP (North)</div>
+    <div class="meta">Rear oak wall, rear hinges, vertical lid back</div>
+  </div>
+</div>
+
+<h2>Static Frame Inspection Sheets</h2>
+<p><a href="chest_repair_contact_sheet.png" target="_blank">View 4x Master Contact Sheet</a> | <a href="chest_repair_playback_cycle.png" target="_blank">View 5-Step Playback Cycle Sheet</a> | <a href="chest_repair_context_preview.png" target="_blank">View In-Context Preview</a></p>
+
+<script>
+const img = new Image();
+img.src = '!$UF_Chest_Wood.png';
+img.onload = () => {
+  const canvases = [
+    { id: 'cv_down', row: 0 },
+    { id: 'cv_left', row: 1 },
+    { id: 'cv_right', row: 2 },
+    { id: 'cv_up', row: 3 }
+  ];
+  const frames = [0, 1, 2, 1];
+  let cur = 0;
+  setInterval(() => {
+    const col = frames[cur];
+    canvases.forEach(c => {
+      const cv = document.getElementById(c.id);
+      const ctx = cv.getContext('2d');
+      ctx.clearRect(0, 0, 48, 48);
+      ctx.drawImage(img, col * 48, c.row * 48, 48, 48, 0, 0, 48, 48);
+    });
+    cur = (cur + 1) % frames.length;
+  }, 150);
+};
+</script>
+</body>
+</html>

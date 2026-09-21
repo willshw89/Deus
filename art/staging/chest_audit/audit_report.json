@@ -1,0 +1,182 @@
+[
+  {
+    "frameId": "R1C1",
+    "row": 1,
+    "col": 1,
+    "nonMagentaPixels": 48211,
+    "bounds": {
+      "minX": 31,
+      "maxX": 266,
+      "width": 236,
+      "minY": 82,
+      "maxY": 297,
+      "height": 216
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R1C1.png"
+  },
+  {
+    "frameId": "R1C2",
+    "row": 1,
+    "col": 2,
+    "nonMagentaPixels": 58941,
+    "bounds": {
+      "minX": 29,
+      "maxX": 271,
+      "width": 243,
+      "minY": 44,
+      "maxY": 299,
+      "height": 256
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R1C2.png"
+  },
+  {
+    "frameId": "R1C3",
+    "row": 1,
+    "col": 3,
+    "nonMagentaPixels": 66318,
+    "bounds": {
+      "minX": 32,
+      "maxX": 274,
+      "width": 243,
+      "minY": 8,
+      "maxY": 299,
+      "height": 292
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R1C3.png"
+  },
+  {
+    "frameId": "R2C1",
+    "row": 2,
+    "col": 1,
+    "nonMagentaPixels": 47138,
+    "bounds": {
+      "minX": 47,
+      "maxX": 248,
+      "width": 202,
+      "minY": 36,
+      "maxY": 299,
+      "height": 264
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R2C1.png"
+  },
+  {
+    "frameId": "R2C2",
+    "row": 2,
+    "col": 2,
+    "nonMagentaPixels": 48140,
+    "bounds": {
+      "minX": 48,
+      "maxX": 262,
+      "width": 215,
+      "minY": 8,
+      "maxY": 299,
+      "height": 292
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R2C2.png"
+  },
+  {
+    "frameId": "R2C3",
+    "row": 2,
+    "col": 3,
+    "nonMagentaPixels": 43085,
+    "bounds": {
+      "minX": 20,
+      "maxX": 262,
+      "width": 243,
+      "minY": 0,
+      "maxY": 299,
+      "height": 300
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R2C3.png"
+  },
+  {
+    "frameId": "R3C1",
+    "row": 3,
+    "col": 1,
+    "nonMagentaPixels": 47554,
+    "bounds": {
+      "minX": 47,
+      "maxX": 248,
+      "width": 202,
+      "minY": 30,
+      "maxY": 295,
+      "height": 266
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R3C1.png"
+  },
+  {
+    "frameId": "R3C2",
+    "row": 3,
+    "col": 2,
+    "nonMagentaPixels": 48688,
+    "bounds": {
+      "minX": 48,
+      "maxX": 265,
+      "width": 218,
+      "minY": 6,
+      "maxY": 298,
+      "height": 293
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R3C2.png"
+  },
+  {
+    "frameId": "R3C3",
+    "row": 3,
+    "col": 3,
+    "nonMagentaPixels": 43398,
+    "bounds": {
+      "minX": 20,
+      "maxX": 264,
+      "width": 245,
+      "minY": 7,
+      "maxY": 298,
+      "height": 292
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R3C3.png"
+  },
+  {
+    "frameId": "R4C1",
+    "row": 4,
+    "col": 1,
+    "nonMagentaPixels": 62824,
+    "bounds": {
+      "minX": 21,
+      "maxX": 273,
+      "width": 253,
+      "minY": 34,
+      "maxY": 293,
+      "height": 260
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R4C1.png"
+  },
+  {
+    "frameId": "R4C2",
+    "row": 4,
+    "col": 2,
+    "nonMagentaPixels": 44829,
+    "bounds": {
+      "minX": 12,
+      "maxX": 276,
+      "width": 265,
+      "minY": 14,
+      "maxY": 293,
+      "height": 280
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R4C2.png"
+  },
+  {
+    "frameId": "R4C3",
+    "row": 4,
+    "col": 3,
+    "nonMagentaPixels": 65877,
+    "bounds": {
+      "minX": 26,
+      "maxX": 277,
+      "width": 252,
+      "minY": 22,
+      "maxY": 293,
+      "height": 272
+    },
+    "filePath": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\art\\staging\\chest_audit\\R4C3.png"
+  }
+]
