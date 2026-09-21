@@ -117,7 +117,9 @@
         if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
         if (typeof require === "function") {
             try { return require("./UF_Callings.js"); } catch (_) {
-                try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+                try { return require("./js/plugins/UF_Callings.js"); } catch (_) {
+                    try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+                }
             }
         }
         return null;
@@ -585,12 +587,17 @@
                 plan[leader].title = titles[Math.floor(rng() * titles.length)];
             }
             const Callings = getCallings();
-            if (Callings && Callings.sampleCallings) {
-                plan.forEach((p, idx) => {
-                    const pRng = mulberry32(hash32(state.seed, SALT_CALLINGS, f.id, idx));
-                    p.callings = Callings.sampleCallings(count || 8, 3, pRng);
-                    p.calling = p.callings[0];
-                });
+            if (Callings) {
+                if (typeof Callings.assignFounderQuotas === "function") {
+                    const pRng = mulberry32(hash32(state.seed, SALT_CALLINGS, f.id));
+                    Callings.assignFounderQuotas(plan, pRng);
+                } else if (Callings.sampleCallings) {
+                    plan.forEach((p, idx) => {
+                        const pRng = mulberry32(hash32(state.seed, SALT_CALLINGS, f.id, idx));
+                        p.callings = Callings.sampleCallings(count || 8, 3, pRng);
+                        p.calling = p.callings[0];
+                    });
+                }
             }
             founders[f.id] = { site: site.id, sites: camps.map(s => s.id), families, plan, units: [] };
             const lead = plan[leader];
@@ -2565,6 +2572,16 @@
         }
         for (const u of out) if (u.data.rank === 0) u.data.superior = leaders[u.data.faction] || null;
         History.pairFounders(state, out);
+        const Callings = getCallings();
+        if (Callings && typeof Callings.assignFounderQuotas === "function" && state.factions && state.factions.list) {
+            for (const f of state.factions.list) {
+                const facFounders = out.filter(u => u.data && u.data.faction === f.id && u.data.founder);
+                if (facFounders.length >= 2) {
+                    const fRng = mulberry32(hash32(state.seed, SALT_CALLINGS, f.id));
+                    Callings.assignFounderQuotas(facFounders, fRng);
+                }
+            }
+        }
         return out;
     }
 

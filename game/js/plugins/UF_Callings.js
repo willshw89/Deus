@@ -217,6 +217,115 @@
         return callings;
     }
 
+    function callingIdOf(u) {
+        if (!u) return "";
+        const c = u.calling || (u.data && (u.data.calling || (u.data.callings && u.data.callings[0])));
+        if (!c) return "";
+        return typeof c === "string" ? c.toLowerCase() : (c.id || slugify(c.name) || "").toLowerCase();
+    }
+
+    function isLeader(u) {
+        if (u && ((u.leader || (u.data && (u.data.rank === 1 || u.data.leader))) && !u.dead)) return true;
+        const id = callingIdOf(u);
+        return id === "mayor" || id === "leader" || id === "chief" || id === "speaker" || id === "reeve" || id === "warden" || id === "captain";
+    }
+
+    function isBuilder(u) {
+        const id = callingIdOf(u);
+        return id === "carpenter" || id === "mason" || id === "construction_worker";
+    }
+
+    function isWoodcutter(u) {
+        const id = callingIdOf(u);
+        return id === "lumberjack";
+    }
+
+    function isMiner(u) {
+        const id = callingIdOf(u);
+        return id === "miner" || id === "stonecutter";
+    }
+
+    function isHauler(u) {
+        const id = callingIdOf(u);
+        return id === "laborer" || id === "waste_collector" || id === "cleaner";
+    }
+
+    function isCook(u) {
+        const id = callingIdOf(u);
+        return id === "chef" || id === "cook" || id === "butcher";
+    }
+
+    function isForager(u) {
+        const id = callingIdOf(u);
+        return id === "herbalist" || id === "farmer" || id === "farmhand" || id === "hunter" || id === "trapper" || id === "forager";
+    }
+
+    function isCrafter(u) {
+        const id = callingIdOf(u);
+        return id === "blacksmith" || id === "tanner" || id === "leatherworker" || id === "fletcher" || id === "potter" || id === "weaver" || id === "crafter";
+    }
+
+    function assignFounderQuotas(unitsOrPlan, rng = Math.random) {
+        if (!Array.isArray(unitsOrPlan) || unitsOrPlan.length === 0) return;
+        const leaderIdx = unitsOrPlan.findIndex(p => p && (p.leader || (p.data && (p.data.leader || p.data.rank === 1))));
+        const nonLeaders = unitsOrPlan.map((p, i) => i).filter(i => i !== leaderIdx);
+
+        function makeCallings(primaryId) {
+            const primary = BY_ID.get(primaryId) || PROFESSIONS.find(x => x.id === primaryId) || PROFESSIONS[0];
+            const pool = sampleCallings(8, 8, rng);
+            const secondaries = [];
+            for (const c of pool) {
+                if (c && c.id !== primary.id && !secondaries.some(s => s.id === c.id)) {
+                    secondaries.push(c);
+                    if (secondaries.length >= 2) break;
+                }
+            }
+            for (const c of PROFESSIONS) {
+                if (secondaries.length >= 2) break;
+                if (c.id !== primary.id && !secondaries.some(s => s.id === c.id)) {
+                    secondaries.push(c);
+                }
+            }
+            return [primary, secondaries[0], secondaries[1]];
+        }
+
+        const leadObj = leaderIdx >= 0 ? unitsOrPlan[leaderIdx] : unitsOrPlan[0];
+        const leadCallings = makeCallings("mayor");
+        const leadCalling = leadCallings[0];
+        if (leadObj.data) {
+            leadObj.data.calling = leadCalling;
+            leadObj.data.callings = leadCallings;
+        }
+        leadObj.calling = leadCalling;
+        leadObj.callings = leadCallings;
+
+        const otherRoles = [
+            "carpenter",
+            "lumberjack",
+            "miner",
+            "laborer",
+            "chef",
+            "herbalist",
+            "blacksmith"
+        ];
+
+        const remainingIndices = leaderIdx >= 0 ? nonLeaders : unitsOrPlan.slice(1).map((_, i) => i + 1);
+        for (let i = 0; i < remainingIndices.length; i++) {
+            const idx = remainingIndices[i];
+            const p = unitsOrPlan[idx];
+            if (!p) continue;
+            const primaryId = otherRoles[i % otherRoles.length];
+            const callings = makeCallings(primaryId);
+            const primaryCalling = callings[0];
+            if (p.data) {
+                p.data.calling = primaryCalling;
+                p.data.callings = callings;
+            }
+            p.calling = primaryCalling;
+            p.callings = callings;
+        }
+    }
+
     const UF_Callings = {
         PROFESSIONS,
         BY_RANK,
@@ -226,8 +335,18 @@
         sampleCallings,
         factionPopulation,
         assignCallings,
+        assignFounderQuotas,
         callingByRank: rank => BY_RANK.get(rank) || null,
-        callingById: id => BY_ID.get(id) || null
+        callingById: id => BY_ID.get(id) || null,
+        callingIdOf,
+        isLeader,
+        isBuilder,
+        isWoodcutter,
+        isMiner,
+        isHauler,
+        isCook,
+        isForager,
+        isCrafter
     };
 
     const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});

@@ -6,6 +6,52 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Calling Labor Quotas, Autonomous Site Debris Clearing & Private Homestead Expansion — 2026-09-20 (Gemini)
+Delivered per user directives ("Autonomous site debris clearing protocol: Haulers proactively clear trees and loose logs/stones from the 7x7 footprint before wall framing starts.", "Calling-based labor quotas: Specializing 1 leader 1 builders, 1 woodcutters 1 miners, 1 haulers, 1 cook/forager, 1 crafter so colonists divide labor efficiently instead of competing for identical tasks.", "Private homestead expansion: As new couples form or families grow, colonists survey plots >= 1 tile away to build two-room private homes with annexes.") and resolving the colonist idle activation issue:
+- **Calling-Based Founder Labor Quotas (`UF_Callings.js`, `UF_History.js`, `UF_Colonists.js`)**:
+  - `assignFounderQuotas(unitsOrPlan, rng)`: Allocates exactly the 8 distinct founding callings required by the colony:
+    - 1 Leader (Mayor/Elder)
+    - 1 Builder (Carpenter/Mason)
+    - 1 Woodcutter (Lumberjack)
+    - 1 Miner (Miner/Stonecutter)
+    - 1 Hauler (Laborer/Cleaner/Waste Collector)
+    - 1 Cook (Chef/Cook/Butcher)
+    - 1 Forager (Herbalist/Farmer/Hunter)
+    - 1 Crafter (Blacksmith/Tanner/Tailor)
+  - `makeCallings(primaryId)`: Guarantees every founder receives exactly 3 distinct callings with primary vocation at index 0, preventing accidental length drops below 3.
+  - Automatically invoked during founder generation in `UF_History.js: spawnFounders` and reinforced in `UF_Colonists.js: setupColony`.
+  - Added vocational multipliers in `UF_Colonists.js: planJob` scoring: Builder ($\times 2.5$), Woodcutter ($\times 2.5$), Miner ($\times 2.5$), Hauler ($\times 3.0$), Cook ($\times 2.5$), Forager ($\times 2.5$), Crafter ($\times 2.5$).
+- **Autonomous Site Debris Clearing Protocol (`UF_Colonists.js`)**:
+  - `footprintClearingJob(u)`: Priority decision hook running before wall framing starts.
+  - Woodcutters proactively fell trees (`actions.chop`), Miners quarry boulders (`actions.mine`), and Haulers clear loose logs, stone chunks, and debris from the 7x7 Town Hall footprint (`[-3..3, -3..3]`).
+  - Loose debris is hauled to designated colony stockpiles or temporarily dropped at `site.x + 4, site.y` outside the footprint.
+  - Halts automatically once the Town Hall is enclosed and roofed (`siteTownHall.isRoofed`).
+- **Private Homestead Expansion & Shared Party Wall Annexes (`UF_Households.js`)**:
+  - `findPlot`: Coupled pairs established in the communal Town Hall survey detached plots $\ge 1$ tile away for 2-room private homesteads (entry door + internal wall divider with inner bedroom door).
+  - Child bedroom annexes seamlessly attach directly to the exterior wall, sharing party walls (`candidateReserved` buffer calculation excludes the anchor's own footprint).
+  - Exported `designFor`, `layout`, and `findPlot` on `UF.Households`.
+- **Colonist Activation & Initialization Fixes (`UF_Colonists.js`)**:
+  - `homeSiteFor`: Added robust fallbacks for player faction sites (founder site records, non-ruined sites, and `history.homeSiteId`) when `startArea` filter is empty.
+  - `colonyState`: Added lazy initialization (`setupColony`) with recursion guard `settingUp`, ensuring `state.colony` is always ready and `scan()` never aborts.
+  - Moved `getCallings` to module scope.
+  - Called `hookEvents()` immediately at script load time.
+- **Verification Evidence**:
+  - `node tools/test_callings_system.js`: **16/16 checks PASS (exit 0)**.
+  - `node tools/test_households.js`: **56/56 checks PASS (exit 0)**.
+  - `node tools/test_callings_and_clearing_live.js`: **23/23 checks PASS (exit 0)** in live NW.js engine harness:
+    - Verifies 8 colonists active and moving around the campfire.
+    - Verifies all 8 specialized roles assigned (Leader, Builder, Woodcutter, Miner, Hauler, Cook, Forager, Crafter).
+    - Verifies Woodcutter clears oak tree (`job: chop (clear_footprint)`).
+    - Verifies Hauler clears loose stone (`job: haul (clear_footprint)`).
+    - Verifies private homestead surveyed with $\ge 1$ tile separation (2 tiles from Town Hall).
+    - Verifies 2 doors in private homestead (entry + inner divider).
+    - Verifies child bedroom annex shares party wall (`sharedPartyWall=true`).
+  - **Rule 4 Mutant Verification**:
+    - `node tools/test_callings_and_clearing_live.js --mutant=no_callings`: **FAILED with exit code 1** as required.
+  - **Rule 5 Screenshot Review**:
+    - `live_calling_specialization_roster.png`: Colonists active, walking out from campfire to perform clearing and construction tasks.
+    - `live_private_homestead_with_annex.png`: 2-room wooden private homestead with private hearth, outer and inner doors, and abutting child bedroom annex sharing the party wall.
+
 ## 4-Pair Cooperative Town Hall Construction & 8-Bed Alcove Allocation — 2026-09-20 (Gemini)
 Delivered per user directives ("When the game starts, the 4 pairs need to work together to build a town hall around the starting fire. everyone wants/needs a bed and space to sleep.", "Should we consolidate all the js related to AI", "Is there anything else that belongs in that hierarchy for a hyperrealistic roleplaying world", "Okay, where are we and what do we need? What is the standard going forward"):
 - **7x7 Town Hall Plan & Hearth Enclosure (`UF_WorldCatalog.json`)**:

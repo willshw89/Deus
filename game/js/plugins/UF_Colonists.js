@@ -184,8 +184,15 @@
     //-------------------------------------------------------------------------
     // State: UF.World.state.colony
 
+    let settingUp = false;
     function colonyState(ref) {
-        const W = World(), c = W && W.state ? W.state.colony || null : null;
+        const W = World();
+        if (!W || !W.state) return null;
+        if (!W.state.colony && W.state.factions && !settingUp) {
+            settingUp = true;
+            try { setupColony(W.state); } finally { settingUp = false; }
+        }
+        const c = W.state.colony || null;
         if (!c || ref === undefined || ref === null) return c;
         if (ref.plan && ref.siteId !== undefined) return ref;
         const u = typeof ref === "number" ? W.unit(ref) : ref;
@@ -199,7 +206,7 @@
                 if (u.data) u.data.site = site;
             }
         }
-        let home = site === c.siteId ? c : c.settlements[site];
+        let home = (site === undefined || site === c.siteId) ? c : c.settlements[site];
         if (!home && site !== undefined && W.state && W.state.history && W.state.history.sites) {
             const sRec = W.state.history.sites.find(s => s.id === site);
             if (sRec) {
@@ -218,7 +225,7 @@
                 c.settlements[site] = home;
             }
         }
-        if (home) return sameLevel(u, home) ? home : null;
+        if (home) return sameLevel(u, home) ? home : c;
         if (u.data && u.data.home && u.data.home.area && sameLevel(u, u.data.home)) {
             const key = `home_${u.data.faction || "fac"}_${u.data.home.area.x}_${u.data.home.area.y}_${zOf(u)}`;
             if (!c.settlements[key]) {
@@ -237,7 +244,7 @@
             }
             return c.settlements[key];
         }
-        return site === undefined && sameLevel(u, c) ? c : null;
+        return c;
     }
     const settlementStates = () => {
         const c = colonyState();
@@ -471,10 +478,23 @@
         if (!H || !state.history) return null;
         const protectedSite = H.homeSite ? H.homeSite() : null;
         if (protectedSite && protectedSite.faction === playerId) return protectedSite;
+        const founders = state.history.founders && state.history.founders[playerId];
+        if (founders && founders.site) {
+            const fs = state.history.sites.find(s => s.id === founders.site && !s.ruined);
+            if (fs) return fs;
+        }
         const mid = Math.floor(state.size / 2);
         const mine = state.history.sites.filter(s => s.faction === playerId && !s.ruined && sameArea(s.area, state.startArea));
         mine.sort((a, b) => Math.hypot(a.x - mid, a.y - mid) - Math.hypot(b.x - mid, b.y - mid));
-        return mine[0] || null;
+        if (mine[0]) return mine[0];
+        const anyMine = state.history.sites.filter(s => s.faction === playerId && !s.ruined);
+        anyMine.sort((a, b) => Math.hypot(a.x - mid, a.y - mid) - Math.hypot(b.x - mid, b.y - mid));
+        if (anyMine[0]) return anyMine[0];
+        if (state.history.homeSiteId) {
+            const hs = state.history.sites.find(s => s.id === state.history.homeSiteId && !s.ruined);
+            if (hs) return hs;
+        }
+        return state.history.sites.find(s => !s.ruined) || null;
     }
     function siteRadius(site) {
         const kinds = (catalog() && catalog().sites && catalog().sites.kinds) || {};
@@ -496,6 +516,19 @@
             s.done = false;
             return s;
         });
+    }
+
+    function getCallings() {
+        if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
+        if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
+        if (typeof require === "function") {
+            try { return require("./UF_Callings.js"); } catch (_) {
+                try { return require("./js/plugins/UF_Callings.js"); } catch (_) {
+                    try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
+                }
+            }
+        }
+        return null;
     }
 
     function geneticsFor(worldSeed, unitId, mother, father, variation) {
@@ -562,12 +595,7 @@
         d.skills = d.skills || skillsFor(state.seed, u.id);
         d.needs = Object.assign({}, START_NEEDS, d.needs || {});
         if (!d.callings || d.callings.length < 3) {
-            let Callings = window.UF && UF.Callings;
-            if (!Callings && typeof require === "function") {
-                try { Callings = require("./UF_Callings.js"); } catch (_) {
-                    try { Callings = require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
-                }
-            }
+            const Callings = getCallings();
             if (Callings && Callings.assignCallings) {
                 const pop = factionPopulation(d.faction);
                 Callings.assignCallings(u, pop);
@@ -603,9 +631,16 @@
         for (const local of sites) {
             if (!levelSupported(zOf(local))) continue;
             const radius = siteRadius(local);
-            const residents = W.units().filter(u => u.data && u.data.kind === "person" && u.data.faction === local.faction && sameLevel(u, local)
+            const residents = W.units().filter(u => u.data && (u.data.kind === "person" || u.data.kind === "colonist") && u.data.faction === local.faction && sameLevel(u, local)
                 && (u.data.site === local.id || (u.data.site === undefined && chebyshev(u.x, u.y, local.x, local.y) <= radius + 2)));
             for (const u of residents) convertPerson(u, state, local, taken);
+            const founders = residents.filter(u => u.data && u.data.founder);
+            if (founders.length >= 2) {
+                const Callings = getCallings();
+                if (Callings && typeof Callings.assignFounderQuotas === "function") {
+                    Callings.assignFounderQuotas(founders);
+                }
+            }
             // Preserve the legacy primary-site fallback, without increasing a valid two-settlement founder budget.
             while (local.id === site.id && residents.length < 2 && people2 && people2.images && people2.images.length) {
                 const cell = freeCellNear(levelArea(local), local.x, local.y, 3);
@@ -2641,6 +2676,24 @@
                 else if (focus === "workshop" && (x.step.build === "workbench" || x.step.build === "smithy" || (x.step.craft && (recipeOf(x.step.craft) || {}).workbench))) s += 0.5;
                 else if (focus === "medicine" && (x.step.pillar === "medicine" || x.step.build === "apothecary_bench")) s += 0.7;
             }
+            const Callings = getCallings();
+            if (Callings) {
+                if (Callings.isBuilder(u)) {
+                    if (x.spec.type === "build") s *= 2.5;
+                } else if (Callings.isWoodcutter(u)) {
+                    if (x.spec.type === "chop" || (x.step && x.step.build && hasTag(Objects().type(x.step.build), "wood"))) s *= 2.5;
+                } else if (Callings.isMiner(u)) {
+                    if (x.spec.type === "mine" || (x.step && x.step.build && hasTag(Objects().type(x.step.build), "stone"))) s *= 2.5;
+                } else if (Callings.isHauler(u)) {
+                    if (x.spec.type === "haul" || x.spec.type === "fetch") s *= 3.0;
+                } else if (Callings.isCook(u)) {
+                    if (x.spec.type === "craft" && x.spec.params && x.spec.params.recipeId && x.spec.params.recipeId.includes("cook")) s *= 2.5;
+                } else if (Callings.isForager(u)) {
+                    if (x.spec.type === "gather" || x.spec.type === "harvest" || x.spec.type === "hunt") s *= 2.5;
+                } else if (Callings.isCrafter(u)) {
+                    if (x.spec.type === "craft") s *= 2.5;
+                }
+            }
             return s;
         };
         ready = ready.map(x => Object.assign({}, x, { score: score(x) }));
@@ -2653,6 +2706,96 @@
             const j = give(u, x.spec);
             if (j) return j;
         }
+        return null;
+    }
+
+    // Autonomous site debris clearing protocol: Woodcutters, Miners, and Haulers proactively clear
+    // trees, boulders, and loose debris from the 7x7 Town Hall footprint before wall construction proceeds.
+    function footprintClearingJob(u) {
+        const c = colonyState(u);
+        const O = Objects();
+        const I = Items();
+        if (!c || !O || !I || !c.site) return null;
+        if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
+
+        const site = c.site;
+        const area = levelArea(u);
+        const z = zOf(c);
+        const x0 = site.x - 3, y0 = site.y - 3;
+        const x1 = site.x + 3, y1 = site.y + 3;
+
+        // If Town Hall is already fully enclosed and roofed, site clearing is finished
+        const H = window.UF && UF.Households;
+        const siteTownHall = H && H.all().map(h => h.home).find(h => h && h.isShared && h.id === `town_hall_${c.siteId}`);
+        if (siteTownHall && siteTownHall.isRoofed) return null;
+
+        const Callings = getCallings();
+        const isW = Callings ? Callings.isWoodcutter(u) : true;
+        const isM = Callings ? Callings.isMiner(u) : true;
+        const isH = Callings ? Callings.isHauler(u) : true;
+
+        // 1. Standing obstacles inside 7x7 footprint (excluding central hearth at site.x, site.y)
+        if (isW || isM) {
+            for (let y = y0; y <= y1; y++) {
+                for (let x = x0; x <= x1; x++) {
+                    if (x === site.x && y === site.y) continue;
+                    const ob = O.atIn(area, x, y);
+                    if (!ob) continue;
+                    const ot = O.type(ob.id);
+                    if (!ot) continue;
+                    const actions = ot.actions || {};
+                    if (actions.chop && isW) {
+                        const tool = toolJob(u, "chop");
+                        if (tool) return tool;
+                        return give(u, { type: "chop", target: { x, y }, params: { plan: "clear_footprint" } });
+                    }
+                    if (actions.mine && isM) {
+                        const tool = toolJob(u, "mine");
+                        if (tool) return tool;
+                        return give(u, { type: "mine", target: { x, y }, params: { plan: "clear_footprint" } });
+                    }
+                    if (actions.clear) {
+                        return give(u, { type: "clear", target: { x, y }, params: { plan: "clear_footprint" } });
+                    }
+                }
+            }
+        }
+
+        // 2. Loose debris items lying inside 7x7 footprint hauled to stockpiles
+        if (isH) {
+            const looseInFootprint = groundItemsNear(u, { radius: 12 }).filter(f => {
+                if (f.x < x0 || f.x > x1 || f.y < y0 || f.y > y1) return false;
+                if (f.x === site.x && f.y === site.y) return false;
+                return true;
+            });
+            if (looseInFootprint.length > 0) {
+                for (const f of looseInFootprint) {
+                    const t = itemType(f.item.type);
+                    if (!t) continue;
+                    let to = null;
+                    if (c.stockpiles && c.stockpiles.length > 0) {
+                        const sp = c.stockpiles.find(s => {
+                            const stores = s.stores || [];
+                            if (!stores.length) return true;
+                            if (Array.isArray(t.tags) && t.tags.some(tag => stores.includes(tag))) return true;
+                            if (stores.includes("material") && (hasTag(t, "wood") || hasTag(t, "stone") || hasTag(t, "metal"))) return true;
+                            if (stores.includes("wood") && hasTag(t, "wood")) return true;
+                            if (stores.includes("stone") && hasTag(t, "stone")) return true;
+                            if (stores.includes("metal") && hasTag(t, "metal")) return true;
+                            if (stores.includes("food") && isFoodType(t)) return true;
+                            return false;
+                        });
+                        if (sp) to = { area: copyArea(c.area), z, x: sp.x, y: sp.y };
+                    }
+                    if (!to) {
+                        // Drop outside the 7x7 Town Hall footprint
+                        to = { area: copyArea(c.area), z, x: site.x + 4, y: site.y };
+                    }
+                    return give(u, { type: "haul", target: { x: f.x, y: f.y }, params: { itemId: f.item.id, to, plan: "clear_footprint" } });
+                }
+            }
+        }
+
         return null;
     }
 
@@ -2820,7 +2963,7 @@
             }
         }
 
-        return designationJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
+        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
@@ -3157,8 +3300,10 @@
         stepImmigration,
         allFactionPeople,
         sleepSchedule, sleepWindow, sleepingHours, sleepFrames,
+        footprintClearingJob,
+        tidyStockpileJob,
         advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
-        _internal: { advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.UF = window.UF || {};
     window.UF.Colonists = Colonists;
@@ -3215,6 +3360,7 @@
             }
         });
     }
+    hookEvents();
 
     // Hooked before the original start: in a test run the new game (and world:created) begins inside it.
     const _Scene_Boot_start = Scene_Boot.prototype.start;

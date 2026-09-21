@@ -525,7 +525,8 @@
         // Abutting candidates sharing party walls are strictly for bedroom annexes of the same household.
         // Distinct household homes must remain detached with buffer spacing for settlement navigation.
         const kinStructures = [];
-        if (annex && h.home) kinStructures.push(...structures(h));
+        const isAnnex = !!annex || (design && design.kind === "bedroom");
+        if (isAnnex && h.home) kinStructures.push(...structures(h));
 
         if (kinStructures.length > 0) {
             const size = dimensions(design);
@@ -539,9 +540,13 @@
                 ];
                 for (const candidate of candidates) {
                     if (candidate.x < 1 || candidate.y < 1 || candidate.x + size.w >= (W().state.size - 1) || candidate.y + size.h >= (W().state.size - 1)) continue;
-                    // Allow the shared party wall cells (which overlap the anchor's walls):
-                    const anchorWallSet = new Set(anchor.walls.map(w => key(w.x, w.y)));
-                    const candidateReserved = new Set([...reserved].filter(k => !anchorWallSet.has(k)));
+                    const anchorBuffer = new Set();
+                    for (let ay = anchor.y - 1; ay <= anchor.y + anchor.h; ay++) {
+                        for (let ax = anchor.x - 1; ax <= anchor.x + anchor.w; ax++) {
+                            anchorBuffer.add(key(ax, ay));
+                        }
+                    }
+                    const candidateReserved = new Set([...reserved].filter(k => !anchorBuffer.has(k)));
                     if (footprintOK(h, candidate, u, candidateReserved, occupied, bootstrap)) {
                         candidate.sharedPartyWall = true;
                         candidate.anchorHome = anchor;
@@ -564,7 +569,23 @@
         return null;
     }
     function ensureHome(h, u) {
-        if (h.home) return h.home;
+        if (h.home && !h.home.isShared) return h.home;
+        if (h.home && h.home.isShared) {
+            // Coupled pairs in the Town Hall seek private homestead plots once Town Hall is established
+            if (members(h).length >= 2 && h.home.isRoofed) {
+                if (h.lastSearchDay === day()) return h.home;
+                h.lastSearchDay = day();
+                const p = findPlot(h, u, designFor(h, members(h).length));
+                if (p) {
+                    h.previousSharedHome = h.home;
+                    h.home = p;
+                    h.reason = "Private homestead reserved; construction needed";
+                    emit("households:homePlanned", h, p);
+                    return p;
+                }
+            }
+            return h.home;
+        }
         if (h.lastSearchDay === day()) return null;
         h.lastSearchDay = day();
         const p = findPlot(h, u, designFor(h, members(h).length));
@@ -850,6 +871,16 @@
             if (F && typeof F.applyRoofedUpperDeck === "function") {
                 F.applyRoofedUpperDeck(areaOf(h), { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
             }
+            if (h && h.previousSharedHome) {
+                for (const m of members(h)) {
+                    if (m.data && m.data.bed && m.data.bed.isShared) {
+                        const thBed = (h.previousSharedHome.beds || []).find(b => b.unitId === m.id);
+                        if (thBed) thBed.unitId = null;
+                        m.data.bed = null;
+                    }
+                }
+                syncHome(h);
+            }
         }
         return enclosed;
     }
@@ -986,7 +1017,8 @@
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make };
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make,
+        designFor, layout, findPlot };
     function checkEnclosures() {
         const s = state();
         if (!s || !s.byId) return;
