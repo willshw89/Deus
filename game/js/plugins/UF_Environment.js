@@ -290,6 +290,36 @@
             }
         }
 
+        // 3. Dwelling / room-wide hearth warming: if cell (x, y) is inside a dwelling/room or shelter
+        // that has an active hearth/campfire, the entire dwelling is kept warm ("the fire makes the entire dwelling warm")
+        const H = window.UF && UF.Households;
+        if (H && typeof H.all === "function") {
+            for (const h of H.all()) {
+                if (!h.home) continue;
+                const home = h.home;
+                const inHome = (x >= home.x && x <= home.x + home.w && y >= home.y && y <= home.y + home.h) ||
+                    ((home.annexes || []).some(a => x >= a.x && x <= a.x + a.w && y >= a.y && y <= a.y + a.h));
+                if (inHome) {
+                    const hearth = home.hearth;
+                    const hObj = hearth && O && O.atIn(area, hearth.x, hearth.y);
+                    const hasFire = (hObj && (hObj.id === "campfire" || (Array.isArray(hObj.tags) && hObj.tags.includes("fire")))) ||
+                        (F && typeof F.isBurning === "function" && hearth && F.isBurning(area, hearth.x, hearth.y));
+                    if (hasFire) {
+                        addedHeat = Math.max(addedHeat, 18.0);
+                    }
+                }
+            }
+        }
+        const C = window.UF && UF.Colonists;
+        const colSite = C && typeof C.site === "function" ? C.site() : null;
+        if (colSite && Math.abs(x - colSite.x) <= 4 && Math.abs(y - colSite.y) <= 4) {
+            const sObj = O && O.atIn(area, colSite.x, colSite.y);
+            const hasFire = sObj && (sObj.id === "campfire" || (Array.isArray(sObj.tags) && sObj.tags.includes("fire")));
+            if (hasFire) {
+                addedHeat = Math.max(addedHeat, 18.0);
+            }
+        }
+
         return addedHeat;
     }
 

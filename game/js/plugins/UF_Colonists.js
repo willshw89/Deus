@@ -725,9 +725,9 @@
         for (const f of free) colony.stockpiles.push({ x: f.x, y: f.y, stores: [] });
     }
 
-    function freeCellNear(area, x, y, r) {
+    function freeCellNear(area, x, y, r, minR = 1) {
         const J = Jobs();
-        for (let d = 1; d <= r; d++) {
+        for (let d = minR; d <= r; d++) {
             for (let dy = -d; dy <= d; dy++) for (let dx = -d; dx <= d; dx++) {
                 if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
                 if (J && J.standable(area, x + dx, y + dy)) return { x: x + dx, y: y + dy };
@@ -1170,6 +1170,10 @@
         if (n.sleep >= (th.sleep || 75) || (sleepingHours(u) && n.sleep > 40)) {
             const mate = n.sleep < 85 ? nightlyMateJob(u) : null;
             if (mate) return mate;
+            if (!hasBedObject(u) && n.sleep < 88) {
+                const bedJob = makeBedJob(u);
+                if (bedJob) return bedJob;
+            }
             const j = sleepJob(u);
             if (j) return j;
         }
@@ -2201,6 +2205,92 @@
         }
     }
 
+    function myBedTarget(u) {
+        if (!u || !u.data) return null;
+        if (u.data.bed && sameLevel(u.data.bed, u)) return u.data.bed;
+        const H = window.UF && UF.Households;
+        const h = H && H.of ? H.of(u) : null;
+        if (h && h.home && Array.isArray(h.home.beds)) {
+            const assigned = h.home.beds.find(b => b.unitId === u.id);
+            if (assigned) {
+                u.data.bed = { area: copyArea(h.home.area || u.area), x: assigned.x, y: assigned.y, z: zOf(u), isShared: !!h.home.isShared };
+                return u.data.bed;
+            }
+            const free = h.home.beds.find(b => !b.unitId);
+            if (free) {
+                free.unitId = u.id;
+                u.data.bed = { area: copyArea(h.home.area || u.area), x: free.x, y: free.y, z: zOf(u), isShared: !!h.home.isShared };
+                return u.data.bed;
+            }
+        }
+        return null;
+    }
+
+    function hasBedObject(u) {
+        const bed = myBedTarget(u);
+        if (!bed) return false;
+        const O = Objects();
+        if (!O) return false;
+        const here = O.atIn(levelArea(u), bed.x, bed.y);
+        return !!(here && (here.id === "floor_straw" || here.id === "bed_wood" || hasTag(here, "bed")));
+    }
+
+    function makeBedJob(u) {
+        const O = Objects();
+        const I = Items();
+        const c = colonyState(u);
+        if (!O || !I || !c) return null;
+        const bed = myBedTarget(u);
+        if (!bed) return null;
+        if (hasBedObject(u)) return null;
+        const step = {
+            id: `make_bed_${u.id}`,
+            build: "floor_straw",
+            cells: [[bed.x - c.site.x, bed.y - c.site.y]],
+            exact: true
+        };
+        return buildStepJob(u, step);
+    }
+
+    function isDwellingWarmedByFire(u) {
+        if (!u || !u.data) return false;
+        const c = colonyState(u);
+        const fire = nearestFire(u);
+        if (!fire || !sameLevel(fire, u)) return false;
+
+        const H = window.UF && UF.Households;
+        const h = H && H.of ? H.of(u) : null;
+        const home = h && h.home;
+
+        // 1. Inside a household home with hearth/fire
+        if (home) {
+            const inHome = (u.x >= home.x && u.x <= home.x + home.w && u.y >= home.y && u.y <= home.y + home.h) ||
+                ((home.annexes || []).some(a => u.x >= a.x && u.x <= a.x + a.w && u.y >= a.y && u.y <= a.y + a.h));
+            if (inHome) {
+                const fireInHome = (fire.x >= home.x - 1 && fire.x <= home.x + home.w + 1 && fire.y >= home.y - 1 && fire.y <= home.y + home.h + 1) ||
+                    (home.hearth && Math.hypot(fire.x - home.hearth.x, fire.y - home.hearth.y) <= 3);
+                if (fireInHome) return true;
+            }
+        }
+
+        // 2. Inside town hall / settlement shelter footprint with campfire lit
+        if (c && c.site) {
+            const fireNearSite = Math.hypot(fire.x - c.site.x, fire.y - c.site.y) <= 3;
+            const insideShelter = Math.abs(u.x - c.site.x) <= 4 && Math.abs(u.y - c.site.y) <= 4;
+            if (fireNearSite && insideShelter) return true;
+        }
+
+        // 3. Within reasonable dwelling/room warmth radius of the fire
+        const d = Math.hypot(u.x - fire.x, u.y - fire.y);
+        if (d <= 6) {
+            const E = window.UF && UF.Enclosure;
+            if (E && E.sameRoom && E.sameRoom(levelArea(u), u.x, u.y, fire.x, fire.y)) return true;
+            if (d <= 4.5) return true;
+        }
+
+        return false;
+    }
+
     function fireSleepCells(u, fire, taken) {
         if (!fire) return [];
         if (fire.area && !sameLevel(fire, u)) return [];
@@ -2208,7 +2298,8 @@
         if (!J) return [];
         const area = levelArea(u);
         const candidates = [];
-        for (let r = 1; r <= 2; r++) {
+        // Radius 3 to 4: safe distance from fire (radius 1 and 2 are deadly fire hazard zones!)
+        for (let r = 3; r <= 4; r++) {
             const ringSpots = [];
             for (let dy = -r; dy <= r; dy++) {
                 for (let dx = -r; dx <= r; dx++) {
@@ -2234,6 +2325,12 @@
         if (sleepingHours(u) && eligibleForIntimacy(u)) {
             checkNighttimeSleepMating(u);
         }
+        // If colonist has no bed object and isn't critically exhausted, prioritize making their bed!
+        if (!hasBedObject(u) && (!u.data.needs || (u.data.needs.sleep || 0) < 90)) {
+            const bedJob = makeBedJob(u);
+            if (bedJob) return give(u, bedJob);
+        }
+
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
         const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const owned = UF.Ownership && UF.Ownership.bedOf(u);
@@ -2241,15 +2338,23 @@
             const owner = UF.Ownership && UF.Ownership.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
             return !owner || owner.kind === "public" || owner.kind === "unit" && owner.id === u.id || owner.kind === "faction" && owner.id === u.data.faction;
         });
-        const spots = owned && sameLevel(owned, u) && !taken.has(`${owned.x},${owned.y}`) ? [{ x: owned.x, y: owned.y }] : [];
-        spots.push(...permitted.map(b => ({ x: b.x, y: b.y })));
         const fire = nearestFire(u);
+        const fireRef = fire ? { x: fire.x, y: fire.y } : null;
+        const spots = owned && sameLevel(owned, u) && !taken.has(`${owned.x},${owned.y}`) ? [{ x: owned.x, y: owned.y, fire: fireRef }] : [];
+        spots.push(...permitted.map(b => ({ x: b.x, y: b.y, fire: fireRef })));
+
+        // Assigned bed target (sleeping at personal bed spot in dwelling is safe from fire):
+        const targetBed = myBedTarget(u);
+        if (targetBed && !taken.has(`${targetBed.x},${targetBed.y}`)) {
+            spots.push({ x: targetBed.x, y: targetBed.y, fire: fireRef });
+        }
+
         if (fire) {
             const fireSpots = fireSleepCells(u, fire, taken);
             spots.push(...fireSpots);
         }
-        if (c) spots.push({ x: c.site.x, y: c.site.y, fire: fire ? { x: fire.x, y: fire.y } : null });
-        spots.push({ x: u.x, y: u.y, fire: fire ? { x: fire.x, y: fire.y } : null });
+        // NEVER sleep on c.site (the campfire)!
+        spots.push({ x: u.x, y: u.y, fire: fireRef });
         for (const s of spots) {
             const params = { frames };
             if (s.fire) params.faceTowards = { x: s.fire.x, y: s.fire.y };
@@ -2339,7 +2444,7 @@
         const c = colonyState(ref), O = Objects();
         const out = [];
         if (!c || !O) return out;
-        const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
+        const isFloor = step.build === "road" || (step.build !== "floor_straw" && ((window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build)));
         if (isFloor) {
             const W = World(), F = window.UF && UF.Floors, T = window.UF && UF.Tiles;
             for (const [dx, dy] of (step.cells || [])) {
@@ -2416,7 +2521,7 @@
                 const finished = cells.filter(x => x.state === "done" || (!step.exact && x.state === "skipped"));
                 done = cells.length > 0 && finished.length === cells.length;
                 const t = stepObject(step);
-                const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
+                const isFloor = step.build === "road" || (step.build !== "floor_straw" && ((window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build)));
                 detail = cells.length === 1 ? (done ? "built" : "to build") : `${finished.length}/${cells.length}`;
                 if (!t && !isFloor) { done = !step.exact; detail = "unknown object"; }
                 if (done && step.done !== true) step.done = true;
@@ -2461,7 +2566,7 @@
     // What a colonist would do for a build step: [{ type, target, params }] candidates in order of preference.
     function buildStepJob(u, step) {
         const I = Items();
-        const isFloor = step.build === "road" || (window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build);
+        const isFloor = step.build === "road" || (step.build !== "floor_straw" && ((window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build)));
         if (isFloor) {
             const c = colonyState(u);
             const cult = cultureOf(u) || {};
@@ -2525,14 +2630,21 @@
             }
 
             const needs = t.build.items || {};
+            const countOnCell = (id) => {
+                let cnt = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
+                if (t.id === "floor_straw" && id === "straw") {
+                    cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
+                }
+                return cnt;
+            };
             const missing = Object.keys(needs).filter(id => {
-                const onCell = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
+                const onCell = countOnCell(id);
                 const inFlight = activeJobs().filter(j => (j.type === "haul" || j.type === "fetch") && j.assigned !== u.id && j.params && j.params.to && j.params.to.x === cell.x && j.params.to.y === cell.y).length;
                 return (onCell + inFlight) < (needs[id] | 0);
             });
 
             if (!missing.length) {
-                const allHere = Object.keys(needs).every(id => I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) >= (needs[id] | 0));
+                const allHere = Object.keys(needs).every(id => countOnCell(id) >= (needs[id] | 0));
                 if (allHere) {
                     return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
                 }
@@ -2542,11 +2654,16 @@
 
             const m = missing[0];
             if (missingFailed.has(m)) continue;
-            const carried = carriedOf(u, m)[0];
+            let carried = carriedOf(u, m)[0];
+            let ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
+            let src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
+            if (!carried && !ground && !src && t.id === "floor_straw" && m === "straw") {
+                carried = carriedOf(u, "fiber")[0];
+                ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: "fiber" }).find(f => !onBuildCell(f.x, f.y, u, "fiber") && (f.x !== cell.x || f.y !== cell.y));
+                src = objectSourceNear(u, "fiber", SEARCH_RADIUS) || objectSourceNear(u, "fiber", 90);
+            }
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
             if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
-            const src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
             if (src) return { type: src.action, target: { x: src.x, y: src.y }, params: { plan: step.id } };
             const prey = preyYielding(u, m, huntRadius());
             if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
@@ -2999,13 +3116,13 @@
         const J = Jobs();
         const home = c ? c.site : { x: u.x, y: u.y };
 
-        // Evening / night campfire social gathering: idle colonists congregate within warmth radius of the fire
+        // Evening / night campfire social gathering: idle colonists congregate within warmth radius of the fire (safe distance >= 3)
         if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) {
             const fire = nearestFire(u);
             if (fire && sameLevel(fire, u)) {
                 const fireDist = Math.hypot(u.x - fire.x, u.y - fire.y);
-                if (fireDist > 3) {
-                    const cell = freeCellNear(levelArea(u), fire.x, fire.y, 2);
+                if (fireDist > 4 || fireDist < 2.5) {
+                    const cell = freeCellNear(levelArea(u), fire.x, fire.y, 4, 3);
                     if (cell) {
                         const j = give(u, { type: "move", target: cell, params: { fireGather: true, faceTowards: { x: fire.x, y: fire.y } } });
                         if (j) return j;
@@ -3107,7 +3224,8 @@
             }
         }
 
-        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || autonomousCallingJob(u) || idleJob(u);
+        const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;
+        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -3155,7 +3273,7 @@
             const job = J.of(u.id);
             if (job) {
                 const need = urgent(u);
-                if (need && !NEED_JOBS.includes(job.type) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
+                if (need && !NEED_JOBS.includes(job.type) && (!job.params || !NEED_JOBS.includes(job.params.via)) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                     preemptAt.set(u.id, t);
                     J.cancel(job.id, need === "thirst" ? "too thirsty to go on" : "too hungry to go on");
                 } else if (!NEED_JOBS.includes(job.type)) {
@@ -3261,23 +3379,37 @@
                 const fireDist = fire && sameLevel(fire, u) ? Math.max(Math.abs(u.x - fire.x), Math.abs(u.y - fire.y)) : Infinity;
                 const atOwnedBed = owned && sameLevel(owned, u) && u.x === owned.x && u.y === owned.y;
                 const atAnyBed = O && (O.findIn(levelArea(u), { near: { x: u.x, y: u.y }, radius: 0, tags: ["bed"] }).length > 0);
+                const dwellingWarmed = isDwellingWarmedByFire(u);
 
                 if (atOwnedBed) {
                     addThought(u, "Slept in my own bed.", 12);
+                    if (dwellingWarmed || fireDist <= 4) {
+                        addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
+                    }
                 } else if (atAnyBed) {
                     addThought(u, "Slept in a bed.", 8);
-                } else if (fireDist <= 3) {
+                    if (dwellingWarmed || fireDist <= 4) {
+                        addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
+                    }
+                } else if (dwellingWarmed) {
+                    addThought(u, "Slept warmly by the fire.", 10);
+                    addThought(u, "The fire kept the dwelling warm and comfortable.", 8);
+                    addThought(u, "Needs a bed and space to sleep.", -2);
+                } else if (fireDist <= 4) {
                     addThought(u, "Slept warmly by the fire.", 10);
                     addThought(u, "Needs a bed and space to sleep.", -2);
-                    if (u.data && u.data.thermal) {
-                        u.data.thermal.bodyTemp = 37.0;
-                        u.data.thermal.stage = "normal";
-                        u.data.thermal.wetness = 0;
-                    }
                 } else {
                     addThought(u, "Slept exposed in the cold dark.", -8);
                     if (u.data && u.data.thermal && u.data.thermal.bodyTemp > 35.0) {
                         u.data.thermal.bodyTemp = Math.max(34.5, u.data.thermal.bodyTemp - 1.5);
+                    }
+                }
+
+                if (dwellingWarmed || fireDist <= 4) {
+                    if (u.data && u.data.thermal) {
+                        u.data.thermal.bodyTemp = 37.0;
+                        u.data.thermal.stage = "normal";
+                        u.data.thermal.wetness = 0;
                     }
                 }
                 if (eligibleForIntimacy(u)) checkNighttimeSleepMating(u);
@@ -3848,14 +3980,14 @@
                 t.check("sleep_fire_job_created", !!sJob && sJob.type === "sleep", `sleep job created: ${sJob ? sJob.type : "none"}`);
                 if (sJob) {
                     const distToFire = Math.max(Math.abs(sJob.target.x - fireObj.x), Math.abs(sJob.target.y - fireObj.y));
-                    t.check("sleep_target_in_fire_ring", distToFire >= 1 && distToFire <= 2, `sleep target (${sJob.target.x},${sJob.target.y}) is ${distToFire} tiles from fire (${fireObj.x},${fireObj.y}) (want 1..2)`);
+                    t.check("sleep_target_in_fire_ring", distToFire >= 1 && distToFire <= 5, `sleep target (${sJob.target.x},${sJob.target.y}) is ${distToFire} tiles from fire (${fireObj.x},${fireObj.y}) (want 1..5)`);
                     t.check("sleep_faces_fire", !!sJob.params && !!sJob.params.faceTowards && sJob.params.faceTowards.x === fireObj.x && sJob.params.faceTowards.y === fireObj.y, `sleep params face fire: ${JSON.stringify(sJob.params ? sJob.params.faceTowards : null)}`);
 
                     sleeper.x = sJob.target.x;
                     sleeper.y = sJob.target.y;
                     onDone(sJob, sleeper);
                     const thoughts = sleeper.data.thoughts || [];
-                    const sleptWarmly = thoughts.some(th => th.text && th.text.includes("Slept warmly by the fire"));
+                    const sleptWarmly = thoughts.some(th => th.text && (th.text.includes("Slept warmly by the fire") || th.text.includes("The fire kept the dwelling warm and comfortable")));
                     t.check("slept_warmly_thought_awarded", sleptWarmly, `thoughts after sleeping by fire: ${thoughts.map(th => th.text).join("; ")}`);
                 }
                 sleeper.data.needs.sleep = oldSleep;

@@ -1219,6 +1219,7 @@
                         }
                     }
                     S.reserved.add(out[1] * size + out[0]);
+                    const allInterior = interior.slice();
                     interior.sort((a, b) => (Math.abs(b[0] - door[0]) + Math.abs(b[1] - door[1])) - (Math.abs(a[0] - door[0]) + Math.abs(a[1] - door[1])));
                     const bed = interior.shift();
                     if (bed) {
@@ -1227,15 +1228,33 @@
                         totals.beds++;
                     }
                     let hearth = null;
-                    if (interior.length >= 2 && HEARTH) {
+                    if (interior.length >= 1 && HEARTH) {
                         hearth = interior.shift();
                         place(S, hearth[0], hearth[1], HEARTH);
                         S.hearths = (S.hearths || 0) + 1;
                         totals.hearths = (totals.hearths || 0) + 1;
                     }
+                    let bed2 = null;
+                    if (interior.length >= 1 && BED) {
+                        bed2 = interior.shift();
+                        place(S, bed2[0], bed2[1], BED);
+                        S.beds++;
+                        totals.beds++;
+                    }
+                    const floorKind = (S.f && cat.cultures && cat.cultures[S.f.species] && cat.cultures[S.f.species].floor && cat.cultures[S.f.species].floor.kind) ||
+                        (entry(S.wall) && entry(S.wall).id.includes("stone") ? "floor_stone" : "floor_wood");
+                    const Floors = window.UF && UF.Floors;
+                    if (Floors && typeof Floors.setFloor === "function") {
+                        for (const [ix, iy] of allInterior) {
+                            Floors.setFloor(S.m.area, ix, iy, floorKind);
+                        }
+                    }
+                    if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
+                        Floors.applyRoofedUpperDeck(S.m.area, { x0, y0, x1: x0 + w - 1, y1: y0 + hh - 1 }, entry(S.wall) && entry(S.wall).id.includes("stone") ? "stone" : "wood");
+                    }
                     for (const [x, y] of interior) S.rooms.push(y * size + x);
                     const wallEntry = entry(S.wall);
-                    S.houses.push({ x: x0, y: y0, w, h: hh, shape, door, bed, hearth, wall: wallEntry ? wallEntry.id : null, year });
+                    S.houses.push({ x: x0, y: y0, w, h: hh, shape, door, bed, bed2, hearth, wall: wallEntry ? wallEntry.id : null, year });
                     S.walls += wallsCount;
                     totals.walls += wallsCount;
                     totals.houses++;
@@ -1679,6 +1698,14 @@
             housesBuilt++;
 
             const Floors = window.UF && UF.Floors;
+            const floorId = (culture.floor && culture.floor.kind) || (wallId.includes("stone") ? "floor_stone" : "floor_wood");
+            if (Floors && typeof Floors.setFloor === "function") {
+                for (let y = y0 + 1; y < y1; y++) {
+                    for (let x = x0 + 1; x < x1; x++) {
+                        Floors.setFloor(area, x, y, floorId);
+                    }
+                }
+            }
             if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
                 Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
             }
@@ -1804,8 +1831,9 @@
             const intDoorX = x0 + 3, intDoorY = y0 + 1;
             // Hearth in communal living area
             const hearthX = x0 + 1, hearthY = y0 + 1;
-            // Bed in master bedroom
+            // Beds in master bedroom (one for each partner)
             const bedX = x0 + 4, bedY = y0 + 1;
+            const bed2X = x0 + 4, bed2Y = y0 + 2;
 
             // Lay perimeter walls, dividing wall, and doors
             for (let y = y0; y <= y1; y++) {
@@ -1827,6 +1855,9 @@
                     } else if (x === bedX && y === bedY) {
                         write(area, x, y, BED_TYPE);
                         bedsPlaced++;
+                    } else if (x === bed2X && y === bed2Y) {
+                        write(area, x, y, BED_TYPE);
+                        bedsPlaced++;
                     } else {
                         write(area, x, y, 0); // clear floor
                     }
@@ -1836,6 +1867,16 @@
             housesBuilt++;
 
             const Floors = window.UF && UF.Floors;
+            const floorId = (culture.floor && culture.floor.kind) || (wallId.includes("stone") ? "floor_stone" : "floor_wood");
+            if (Floors && typeof Floors.setFloor === "function") {
+                for (let y = y0 + 1; y < y1; y++) {
+                    for (let x = x0 + 1; x < x1; x++) {
+                        if (x !== x0 + 3 || (x === intDoorX && y === intDoorY)) {
+                            Floors.setFloor(area, x, y, floorId);
+                        }
+                    }
+                }
+            }
             if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
                 Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
             }
@@ -1864,7 +1905,10 @@
                     walls: [],
                     door: { x: doorX, y: doorY },
                     doors: [{ x: doorX, y: doorY }, { x: intDoorX, y: intDoorY }],
-                    beds: [{ x: bedX, y: bedY, unitId: household.members ? household.members[0] : null }],
+                    beds: [
+                        { x: bedX, y: bedY, unitId: household.members ? household.members[0] : null },
+                        { x: bed2X, y: bed2Y, unitId: household.members && household.members.length > 1 ? household.members[1] : null }
+                    ],
                     hearth: { x: hearthX, y: hearthY },
                     storage: { x: doorX, y: doorY },
                     rooms: [
@@ -1875,13 +1919,15 @@
                 };
                 // Relocate household members to private home
                 if (household.members) {
-                    for (const mId of household.members) {
+                    for (let mi = 0; mi < household.members.length; mi++) {
+                        const mId = household.members[mi];
                         const u = W && W.unit(mId);
+                        const bCoord = mi === 0 ? { x: bedX, y: bedY } : { x: bed2X, y: bed2Y };
                         if (u && u.data) {
-                            u.data.home = { area: { ...area }, x: bedX, y: bedY, z: levelOf(area) };
+                            u.data.home = { area: { ...area }, x: bCoord.x, y: bCoord.y, z: levelOf(area) };
                             u.data.homeFire = { area: { ...area }, x: hearthX, y: hearthY, z: levelOf(area) };
-                            u.data.bed = { x: bedX, y: bedY };
-                            u.x = bedX; u.y = bedY;
+                            u.data.bed = { x: bCoord.x, y: bCoord.y };
+                            u.x = bCoord.x; u.y = bCoord.y;
                             if (u.data.founder) {
                                 u.data.movedOut = true;
                                 coupleMovedOut = true;
@@ -2008,6 +2054,14 @@
             }
 
             const Floors = window.UF && UF.Floors;
+            const floorId = (culture.floor && culture.floor.kind) || (wallId.includes("stone") ? "floor_stone" : "floor_wood");
+            if (Floors && typeof Floors.setFloor === "function") {
+                for (let y = y0 + 1; y < y1; y++) {
+                    for (let x = x0 + 1; x < x1; x++) {
+                        Floors.setFloor(area, x, y, floorId);
+                    }
+                }
+            }
             if (Floors && typeof Floors.applyRoofedUpperDeck === "function") {
                 Floors.applyRoofedUpperDeck(area, { x0, y0, x1, y1 }, wallId.includes("stone") ? "stone" : "wood");
             }
@@ -2060,6 +2114,15 @@
             household.home.annexes.push(newRoom);
             household.home.beds = household.home.beds || [];
             household.home.beds.push({ x: bedX, y: bedY, unitId: null });
+
+            const unbeddedChild = (household.members || [])
+                .map(mId => W && W.unit(mId))
+                .find(u => u && u.data && Number.isFinite(u.data.age) && u.data.age < 15 && !u.data.bed);
+            if (unbeddedChild) {
+                unbeddedChild.data.bed = { x: bedX, y: bedY };
+                newRoom.beds[0].unitId = unbeddedChild.id;
+                household.home.beds[household.home.beds.length - 1].unitId = unbeddedChild.id;
+            }
 
             roomsBuilt++;
 

@@ -59,6 +59,12 @@ if (mutant === "no_clock_advance") {
 } else if (mutant === "no_move_out") {
     // Mutant: couples don't move out when building home
     historyCode = historyCode.replace(/u\.data\.movedOut = true;/g, "// no move out");
+} else if (mutant === "no_interior_floors") {
+    // Mutant: disable interior floor laying
+    historyCode = historyCode.replaceAll(/Floors\.setFloor\([^;]+;/g, "// no floor laid");
+} else if (mutant === "no_couple_beds") {
+    // Mutant: disable second bed for couple
+    historyCode = historyCode.replaceAll(/write\(area, bed2X, bed2Y, BED_TYPE\);/g, "// no bed 2");
 }
 
 let passed = 0, failed = 0;
@@ -165,8 +171,11 @@ function createHarness() {
             objects.set(`${ax},${ay}:${x},${y}`, type);
             return true;
         },
-        getTile: () => 1,
-        setTile: () => true,
+        getTile: (ax, ay, x, y) => ground.get(`${ax},${ay}:${x},${y}`) || 1,
+        setTile: (ax, ay, x, y, layer, tile) => {
+            ground.set(`${ax},${ay}:${x},${y}`, tile);
+            return true;
+        },
         walkable: (ax, ay, x, y) => {
             const o = objects.get(`${ax},${ay}:${x},${y}`);
             return !o || o === 1; // 1 is campfire (passable)
@@ -289,8 +298,8 @@ function createHarness() {
             atIn() { return []; }
         },
         Tiles: {
-            groundBase: () => 2048,
-            kindOfTile: () => ({ id: "grass", passable: true }),
+            groundBase: id => (id && id.startsWith("floor_") ? 2816 : (id === "road" ? 2048 : 0)),
+            kindOfTile: (tile) => (tile && tile >= 2816 ? { id: "floor_wood", passable: true } : (tile && tile >= 2048 ? { id: "road", passable: true } : { id: "grass", passable: true })),
             kinds: () => [{ id: "floor_wood" }, { id: "floor_stone" }, { id: "floor_rushes" }],
             generatedBitmap: () => ({ getPixel: () => "#ffffff" })
         },
@@ -317,7 +326,7 @@ function createHarness() {
     vm.createContext(sandbox);
     vm.runInContext(floorsCode, sandbox);
     vm.runInContext(environmentCode, sandbox);
-    return { sandbox, World, objects, units, Events, $ufTime, Levels, levelCells };
+    return { sandbox, World, objects, ground, units, Events, $ufTime, Levels, levelCells };
 }
 
 // 1. Universal Year 1 founding
@@ -373,7 +382,7 @@ check("second_by_second_50_year_simulation", () => {
 
 // 3. Focal Homestead Construction and Indoor Hearth Placement
 check("focal_homesteads_with_indoor_hearth_and_bed", () => {
-    const { sandbox, World, objects } = createHarness();
+    const { sandbox, World, objects, ground } = createHarness();
     vm.runInContext(colonistsCode, sandbox);
     vm.runInContext(householdsCode, sandbox);
     vm.runInContext(historyCode, sandbox);
@@ -388,7 +397,7 @@ check("focal_homesteads_with_indoor_hearth_and_bed", () => {
     const settled = st.history.settled;
     assert.ok(settled.houses >= 4, `At least 4 founder homes built (actual: ${settled.houses})`);
     assert.ok(settled.hearths >= 4, `At least 4 indoor hearths placed (actual: ${settled.hearths})`);
-    assert.ok(settled.beds >= 4, `At least 4 beds placed (actual: ${settled.beds})`);
+    assert.ok(settled.beds >= 8, `At least 8 beds placed (couples have 2 beds) (actual: ${settled.beds})`);
 
     // Verify physical placement of hearth and bed in objects map
     let hearthsFound = 0, bedsFound = 0;
@@ -400,7 +409,29 @@ check("focal_homesteads_with_indoor_hearth_and_bed", () => {
         if (type === bedId) bedsFound++;
     }
     assert.ok(hearthsFound >= 4, `Physical indoor hearths found: ${hearthsFound}`);
-    assert.ok(bedsFound >= 4, `Physical beds found: ${bedsFound}`);
+    assert.ok(bedsFound >= 8, `Physical beds found (couples have 2 beds): ${bedsFound}`);
+
+    // Verify interior floors are laid for every home
+    let floorsFound = 0;
+    for (const [key, tile] of ground.entries()) {
+        if (tile >= 2816) floorsFound++;
+    }
+    assert.ok(floorsFound >= 20, `Cultural interior floor tiles laid across homes: ${floorsFound}`);
+
+    // Verify each couple living in a private homestead has assigned beds
+    const H = sandbox.UF.Households;
+    const privateHouseholds = (H && H.all ? H.all() : []).filter(h => h.home && !h.home.isShared);
+    assert.ok(privateHouseholds.length >= 4, `At least 4 private homestead households (actual: ${privateHouseholds.length})`);
+    for (const h of privateHouseholds) {
+        assert.ok(h.home.beds && h.home.beds.length >= 2, `Homestead ${h.id} has at least 2 beds`);
+        assert.ok(h.home.hearth, `Homestead ${h.id} has a domestic hearth`);
+        for (const mId of (h.members || []).slice(0, 2)) {
+            const m = World.unit(mId);
+            if (m && m.data) {
+                assert.ok(m.data.bed, `Partner ${m.name} in homestead ${h.id} has assigned bed`);
+            }
+        }
+    }
 });
 
 // 4. Multi-Generational Offspring Aging and Non-Kin Pairbonding

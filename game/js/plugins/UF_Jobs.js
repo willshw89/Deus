@@ -401,7 +401,14 @@
             const t = O ? O.type(job.params.objectId) : null;
             if (!t || !t.build) return { ok: false, reason: "nothing to build" };
             const needs = t.build.items || {};
-            const missing = Object.keys(needs).filter(id => (I ? I.count({ area: lv(job.target), x: job.target.x, y: job.target.y }, id) : 0) < (needs[id] | 0));
+            const countFor = (cell, id) => {
+                let cnt = I ? I.count(cell, id) : 0;
+                if (job.params.objectId === "floor_straw" && id === "straw") {
+                    cnt += I ? I.count(cell, "fiber") : 0;
+                }
+                return cnt;
+            };
+            const missing = Object.keys(needs).filter(id => countFor({ area: lv(job.target), x: job.target.x, y: job.target.y }, id) < (needs[id] | 0));
             if (missing.length) return { ok: false, reason: "needs items" };
             const stand = standFor(job.target, unit, t.passable !== true); // a wall is built from beside its cell
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
@@ -419,7 +426,8 @@
                 let left = needs[id] | 0;
                 for (const it of I.atIn(lv(job.target), job.target.x, job.target.y)) {
                     if (left <= 0) break;
-                    if (it.type !== id) continue;
+                    const matches = it.type === id || (job.params.objectId === "floor_straw" && id === "straw" && it.type === "fiber");
+                    if (!matches) continue;
                     left -= I.consume(it.id, left);
                 }
             }

@@ -275,6 +275,7 @@
             const culture = (C() && typeof C().culture === "function" && C().culture(founders[0])) || {};
             const wallId = culture.wall || "wall_wood";
             const doorId = culture.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
+            const floorId = (culture.floor && culture.floor.kind) || (wallId.includes("stone") ? "floor_stone" : "floor_wood");
 
             const walls = [];
             for (let y = y0; y <= y1; y++) {
@@ -284,6 +285,13 @@
                             walls.push({ x, y });
                         }
                     }
+                }
+            }
+
+            const floors = [];
+            for (let y = y0 + 1; y < y1; y++) {
+                for (let x = x0 + 1; x < x1; x++) {
+                    floors.push({ x, y });
                 }
             }
 
@@ -325,8 +333,10 @@
                     area: copyArea(area), z,
                     wall: wallId,
                     door: doorId,
+                    floor: floorId,
                     walls,
                     doors: [doorPos],
+                    floors,
                     entrance: { x: site.x, y: y1 + 1 },
                     sleeping: bedPositions.map(p => ({ x: p.x, y: p.y })),
                     spots: [
@@ -343,6 +353,8 @@
                 };
             } else {
                 townHall.beds = sharedBeds;
+                townHall.floors = floors;
+                townHall.floor = floorId;
             }
 
             for (const h of founderH) {
@@ -611,6 +623,20 @@
                 for (let px = 1; px < width - 1; px++) {
                     if (beds.length >= design.capacity) break;
                     if (inFootprint(px, py) && !isPerim(px, py) && py < divider) {
+                        const pt = transform({ x: px, y: py });
+                        if (!beds.some(b => b.x === pt.x && b.y === pt.y)) {
+                            beds.push(Object.assign(pt, { unitId: null }));
+                        }
+                    }
+                }
+            }
+        }
+        if (beds.length < design.capacity) {
+            for (let py = 1; py < height - 1; py++) {
+                if (py === divider) continue;
+                for (let px = 1; px < width - 1; px++) {
+                    if (beds.length >= design.capacity) break;
+                    if (inFootprint(px, py) && !isPerim(px, py)) {
                         const pt = transform({ x: px, y: py });
                         if (!beds.some(b => b.x === pt.x && b.y === pt.y)) {
                             beds.push(Object.assign(pt, { unitId: null }));
@@ -1121,6 +1147,15 @@
                 const targetCells = (p.walls || []).concat(p.doors || []).concat(p.floors || []);
                 F.applyRoofedUpperDeck(areaOf(h), targetCells.length ? targetCells : { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
             }
+            if (F && typeof F.setFloor === "function" && p.floors && p.floors.length) {
+                const culture = (C() && typeof C().culture === "function" && C().culture(members(h)[0])) || {};
+                const floorKind = p.floor || (culture.floor && culture.floor.kind) || (zOf(h) < 0 || (h && h.faction === "dwarf") || (p.wall && p.wall.includes("stone")) ? "floor_stone" : "floor_wood");
+                for (const fl of p.floors) {
+                    if (!F.isFloorAt(areaOf(h), fl.x, fl.y)) {
+                        F.setFloor(areaOf(h), fl.x, fl.y, floorKind);
+                    }
+                }
+            }
             if (h && h.previousSharedHome) {
                 for (const m of members(h)) {
                     if (m.data && m.data.bed && m.data.bed.isShared) {
@@ -1262,12 +1297,20 @@
             spots: (home.spots || [{ x: home.x + 3, y: home.y + 2 }, { x: home.x + 4, y: home.y + 2 }]).map(p => ({ x: p.x, y: p.y })),
             cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
     }
+    function hasFloors(refH) {
+        const h = resolve(refH);
+        if (!h || !h.home || !h.home.floors || !h.home.floors.length) return false;
+        const F = window.UF && UF.Floors;
+        if (!F || typeof F.isFloorAt !== "function") return true;
+        const area = areaOf(h);
+        return h.home.floors.every(fl => F.isFloorAt(area, fl.x, fl.y));
+    }
     const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
     root.UF = root.UF || {};
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make,
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, hasFloors, join, make,
         designFor, layout, findPlot };
     function checkEnclosures() {
         const s = state();

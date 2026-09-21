@@ -6,6 +6,45 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Fog Z-Level Isolation, Fire Safety, Bed Priority & Dwelling Warmth — 2026-09-20 (Gemini)
+Delivered per user directives ("fog of war clearance should be limited to current z level", "I dont necessarily want the starting area perma fog of war free either", "people are dying around the fire. the fire makes the entire dwelling warm. Just make them make a bed", "no floor"):
+- **Fog of War Z-Level Isolation (`UF_Fog.js`)**:
+  - Observers filtered by Z-level: colonists on z=0 only clear fog on z=0, not on z=+1 or z=-1.
+  - Per-Z storage for explored cells; `observers()` respects `sameLevel()`.
+  - Removed static start camp observer that gave the starting area permanent fog-free status.
+- **Starting Camp Floor Removed (`UF_Households.js`)**:
+  - `ensureTownHallHomes` no longer lays floor tiles at game start. Natural ground only.
+- **Fire Safety (`UF_Colonists.js`)**:
+  - `fireSleepCells` radius changed from 1..2 (deadly adjacent to fire) to 3..4 (safe distance).
+  - Removed code that pushed campfire coordinates as a sleep spot.
+  - `idleJob` campfire gathering uses safe distance (radius 3-4).
+- **Bed-Making Priority (`UF_Colonists.js`)**:
+  - New `makeBedJob(u)`, `hasBedObject(u)`, `myBedTarget(u)` functions.
+  - Colonists prioritize building their bed before sleeping when not critically exhausted.
+  - `unbeddedJob` added to `decide(u)` pipeline.
+  - `needJob` attempts bed-making before `sleepJob` when sleep < 88.
+- **Dwelling-Wide Hearth Warming (`UF_Environment.js`)**:
+  - `heatSourceRadiance()` now provides 18°C warmth to all cells within a household home or settlement shelter footprint that has an active hearth/campfire.
+  - Sleep `onDone` thought: "The fire kept the dwelling warm and comfortable."
+- **Fiber as Straw Substitute (`UF_Jobs.js`, `UF_Colonists.js`)**:
+  - Build handler `plan()` and `apply()` accept fiber as straw substitute for `floor_straw` beds.
+  - `buildStepJob` counts fiber+straw; searches for fiber when straw unavailable.
+  - `floor_straw` excluded from `isFloor` classification (it's an object, not a ground tile).
+- **Sleep faceTowards Fix (`UF_Colonists.js`)**:
+  - `nearestFire` lookup moved above all sleep spot creation so owned/permitted bed spots also get the `.fire` property, enabling `faceTowards` on the sleep job for all sleep positions near a fire.
+- **Scan Preemption Guard (`UF_Colonists.js`)**:
+  - Added guard so move jobs fulfilling needs (drink via move, eat via move) aren't preempted by the scan loop.
+- **Verification Evidence**:
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)**.
+  - `node tools/run_tests.js fog`: **17/17 PASS (exit 0)**.
+  - `node tools/test_fog_z_level_live.js`: **18/18 PASS (exit 0)**.
+  - `node tools/test_households.js`: **56/56 PASS (exit 0)**.
+  - All 5 edited plugins pass `node --check` (zero syntax errors).
+  - **Rule 5 Visual Screenshots Inspected**:
+    - `live_ground_start_camp_no_floor.png`: Colonists around campfire on natural grass/dirt terrain — no floor tiles.
+    - `live_upper_deck_fog_isolated.png`: Z=+1 fully black "Unexplored" — ground observers don't leak.
+    - `live_cave_level_fog_isolated.png`: Z=-1 fully black "Unexplored" — ground observers don't leak.
+
 ## Structural & Shelter Architectural Variety (Non-Square Homes) — 2026-09-20 (Gemini)
 Delivered per user directive ("introduce the greatest reasonable variety in the shape and size of structures creatures build as shelter. Im tired of looking at square homes"):
 - **Diverse Procedural Architectural Footprints (`UF_Households.js`, `UF_History.js`, `UF_Outposts.js`)**:

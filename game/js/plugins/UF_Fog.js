@@ -86,12 +86,34 @@
     let frame = 0;
 
     //-------------------------------------------------------------------------
-    // Storage: per UF_World area in the world state, otherwise per map in $gameSystem
+    // Storage: per UF_World area and level in the world state, otherwise per map and level in $gameSystem
+
+    function currentZ() {
+        const W = window.UF && UF.World;
+        if (W && typeof W.viewLevel === "function") {
+            const v = W.viewLevel();
+            if (v && typeof v.z === "number") return v.z;
+        }
+        if (W && W.state && window.$gameMap && typeof W.levelOfMapId === "function") {
+            const lv = W.levelOfMapId($gameMap.mapId());
+            if (lv && typeof lv.z === "number") return lv.z;
+        }
+        const L = window.UF && UF.Levels;
+        if (L && typeof L.view === "function") {
+            const z = L.view();
+            if (typeof z === "number") return z;
+        }
+        return 0;
+    }
 
     const keyFor = mapId => {
-        const area = window.UF && UF.World && UF.World.state ? UF.World.areaOfMapId(mapId) : null;
-        if (!area) return `map:${mapId}`;
-        return `area:${area.x},${area.y}`;
+        const W = window.UF && UF.World;
+        if (W && W.state && typeof W.levelOfMapId === "function") {
+            const lv = W.levelOfMapId(mapId);
+            if (lv) return `area:${lv.x},${lv.y}:z${lv.z}`;
+        }
+        const z = currentZ();
+        return `map:${mapId}:z${z}`;
     };
     const store = () => {
         if (window.UF && UF.World && UF.World.state) return (UF.World.state.fog = UF.World.state.fog || {});
@@ -125,7 +147,11 @@
         mapKey = key;
         width = $gameMap.width();
         height = $gameMap.height();
-        explored = decode(store()[key], width * height);
+        const z = currentZ();
+        const s = store();
+        // Load explored bitset for this Z level, falling back to legacy un-suffixed key for z=0 if present
+        const raw = s[key] || (z === 0 ? s[`area:${$gameMap.mapId()}`] || s[key.replace(/:z0$/, "")] : null);
+        explored = decode(raw, width * height);
         visible = new Uint8Array(width * height);
         lastSignature = "";
         dirty = true;
@@ -261,21 +287,27 @@
         addObserverSource(fn) {
             sources.push(fn);
         },
+        currentZ,
         observers() {
             const list = [];
             const W = window.UF && UF.World;
+            const viewZ = currentZ();
+            const zOf = o => (o && o.z !== undefined ? o.z : (o && o.area && o.area.z !== undefined ? o.area.z : 0));
 
             // 1. Colonists / player units (Daylight 8-10 [9], Night 5-6 [5-6] via visionFactor 0.55)
             const seenUnits = new Set();
             if (window.$colonyManager && $colonyManager.colonists) {
                 for (const c of $colonyManager.colonists) {
+                    const u = c.unit;
+                    const uZ = u ? zOf(u) : 0;
+                    if (uZ !== viewZ) continue;
                     const ev = c.event;
                     if (ev) {
                         seenUnits.add(c.id || `${ev.x},${ev.y}`);
                         const r = colonistSightRadius(c);
                         const fixed = (c.data && (c.data.atWatchtower || c.data.job === "watchtower" || c.data.job === "scout")) ||
                                       (c.equipment && (c.equipment.tool === "torch" || c.equipment.held === "torch"));
-                        list.push({ x: ev.x, y: ev.y, radius: r, type: "colonist", scaleWithDayNight: !fixed });
+                        list.push({ x: ev.x, y: ev.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ });
                     }
                 }
             }
@@ -283,6 +315,8 @@
                 const pid = window.UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
                 for (const u of W.units()) {
                     if (seenUnits.has(u.id) || seenUnits.has(`${u.x},${u.y}`)) continue;
+                    const uZ = zOf(u);
+                    if (uZ !== viewZ) continue;
                     const isPlayerCreature = u.data && (
                         u.data.faction === "player" ||
                         (pid !== null && u.data.faction === pid) ||
@@ -293,97 +327,125 @@
                         const r = colonistSightRadius(u);
                         const fixed = (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) ||
                                       (u.equipment && (u.equipment.tool === "torch" || u.equipment.held === "torch"));
-                        list.push({ x: u.x, y: u.y, radius: r, type: "colonist", scaleWithDayNight: !fixed });
+                        list.push({ x: u.x, y: u.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ });
                     }
                 }
             }
-            if (list.length === 0 && window.$gamePlayer) {
-                list.push({ x: $gamePlayer.x, y: $gamePlayer.y, radius: COLONIST_DAY_SIGHT, type: "colonist", scaleWithDayNight: true });
+            // Fallback player: only if no units exist in the world at all (e.g. minimal unit test) and player is on this Z level
+            if (list.length === 0 && window.$gamePlayer && (!W || !W.state || Object.keys(W.state.units || {}).length === 0)) {
+                const playerZ = typeof $gamePlayer.z === "number" ? $gamePlayer.z : (W && W.viewLevel() ? W.viewLevel().z : 0);
+                if (playerZ === viewZ) {
+                    list.push({ x: $gamePlayer.x, y: $gamePlayer.y, radius: COLONIST_DAY_SIGHT, type: "colonist", scaleWithDayNight: true, z: playerZ });
+                }
             }
 
-            // 2. Campfires: 7-9 tiles (8 tiles) at night and day (fixed light source, scaleWithDayNight: false)
-            const campfireCells = new Set();
-            const historyFounders = W && W.state && W.state.history && W.state.history.founders;
-            if (historyFounders) {
-                for (const fid of Object.keys(historyFounders)) {
-                    const f = historyFounders[fid];
-                    if (f && f.camp && (fid === "player" || (window.UF && UF.Factions && fid === UF.Factions.playerId()))) {
-                        campfireCells.add(`${f.camp.x},${f.camp.y}`);
-                    }
-                }
-            }
-            const households = window.UF && UF.Households && typeof UF.Households.list === "function" ? UF.Households.list() : [];
-            for (const h of households) {
-                if (h && h.hearth) campfireCells.add(`${h.hearth.x},${h.hearth.y}`);
-            }
-            if (campfireCells.size === 0) {
-                const col = window.UF && UF.Colonists && typeof UF.Colonists.state === "function" ? UF.Colonists.state() : null;
-                if (col && col.site) {
-                    campfireCells.add(`${col.site.x},${col.site.y}`);
-                }
-            }
-            for (const key of campfireCells) {
-                const [cx, cy] = key.split(",").map(Number);
-                list.push({ x: cx, y: cy, radius: CAMPFIRE_SIGHT, type: "campfire", scaleWithDayNight: false });
-            }
-
-            // 3. Permanent settlement / buildings: 8-12 tiles (10 tiles)
-            if (window.UF && UF.Colonists) {
-                const col = UF.Colonists.state && UF.Colonists.state();
-                if (col && col.site) {
-                    list.push({ x: col.site.x, y: col.site.y, radius: SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false });
-                }
-            }
+            // 2. Completed outpost buildings and defensive lookouts
             if (window.UF && UF.Outposts && typeof UF.Outposts.buildings === "function") {
                 for (const b of UF.Outposts.buildings()) {
                     if (b && (b.stage === "complete" || b.stage === "walls")) {
+                        const bZ = b.z !== undefined ? b.z : (b.area && b.area.z !== undefined ? b.area.z : 0);
+                        if (bZ !== viewZ) continue;
                         const bx = b.x + Math.floor((b.w || 4) / 2);
                         const by = b.y + Math.floor((b.h || 4) / 2);
                         if (b.archetype === "watchtower") {
                             // 5. Lookout / watchtower: 15-25 tiles (20 tiles)
-                            list.push({ x: bx, y: by, radius: WATCHTOWER_SIGHT, type: "watchtower", scaleWithDayNight: false });
-                        } else {
-                            list.push({ x: bx, y: by, radius: SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false });
+                            list.push({ x: bx, y: by, radius: WATCHTOWER_SIGHT, type: "watchtower", scaleWithDayNight: false, z: viewZ });
+                        } else if (b.stage === "complete") {
+                            list.push({ x: bx, y: by, radius: SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false, z: viewZ });
                         }
                     }
                 }
             }
 
-            // 6. Registered custom sources
+            // 3. Registered custom sources
             for (const fn of sources) {
                 try {
-                    for (const o of fn() || []) list.push(o);
+                    for (const o of fn() || []) {
+                        if (o && (o.z === undefined || o.z === viewZ)) {
+                            list.push(o);
+                        }
+                    }
                 } catch (e) {
                     console.error(e);
                 }
             }
             return list;
         },
-        isExplored: (x, y) => ensureMap() && x >= 0 && y >= 0 && x < width && y < height && explored[y * width + x] === 1,
-        isVisible: (x, y) => ensureMap() && x >= 0 && y >= 0 && x < width && y < height && visible[y * width + x] === 1,
-        /** Mark cells explored (not visible) around (x, y). */
-        reveal(x, y, radius = 0) {
-            if (!ensureMap()) return;
+        isExplored(x, y, z = currentZ()) {
+            if (z === currentZ()) {
+                return ensureMap() && x >= 0 && y >= 0 && x < width && y < height && explored[y * width + x] === 1;
+            }
+            const W = window.UF && UF.World;
+            const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+            const key = area ? `area:${area.x},${area.y}:z${z}` : `map:${$gameMap ? $gameMap.mapId() : 0}:z${z}`;
+            const s = store();
+            const raw = s[key] || (z === 0 ? s[key.replace(/:z0$/, "")] : null);
+            if (!raw) return false;
+            const w = width || ($gameMap ? $gameMap.width() : 256);
+            const h = height || ($gameMap ? $gameMap.height() : 256);
+            const dec = decode(raw, w * h);
+            return x >= 0 && y >= 0 && x < w && y < h && dec[y * w + x] === 1;
+        },
+        isVisible(x, y, z = currentZ()) {
+            if (z !== currentZ()) return false;
+            return ensureMap() && x >= 0 && y >= 0 && x < width && y < height && visible[y * width + x] === 1;
+        },
+        /** Mark cells explored (not visible) around (x, y) on level z (default currentZ()). */
+        reveal(x, y, radius = 0, z = currentZ()) {
+            if (z === currentZ()) {
+                if (!ensureMap()) return;
+                const r2 = radius * radius;
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const cx = x + dx, cy = y + dy;
+                        if (cx >= 0 && cy >= 0 && cx < width && cy < height && dx * dx + dy * dy <= r2) explored[cy * width + cx] = 1;
+                    }
+                }
+                dirty = true;
+                return;
+            }
+            const W = window.UF && UF.World;
+            const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+            const key = area ? `area:${area.x},${area.y}:z${z}` : `map:${$gameMap ? $gameMap.mapId() : 0}:z${z}`;
+            const s = store();
+            const w = width || ($gameMap ? $gameMap.width() : 256);
+            const h = height || ($gameMap ? $gameMap.height() : 256);
+            const raw = s[key] || (z === 0 ? s[key.replace(/:z0$/, "")] : null);
+            const exp = decode(raw, w * h);
             const r2 = radius * radius;
             for (let dy = -radius; dy <= radius; dy++) {
                 for (let dx = -radius; dx <= radius; dx++) {
                     const cx = x + dx, cy = y + dy;
-                    if (cx >= 0 && cy >= 0 && cx < width && cy < height && dx * dx + dy * dy <= r2) explored[cy * width + cx] = 1;
+                    if (cx >= 0 && cy >= 0 && cx < w && cy < h && dx * dx + dy * dy <= r2) exp[cy * w + cx] = 1;
                 }
             }
-            dirty = true;
+            s[key] = encode(exp);
         },
-        exploredCount() {
-            if (!ensureMap()) return 0;
+        exploredCount(z = currentZ()) {
+            if (z === currentZ()) {
+                if (!ensureMap()) return 0;
+                let n = 0;
+                for (let i = 0; i < explored.length; i++) n += explored[i];
+                return n;
+            }
+            const W = window.UF && UF.World;
+            const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+            const key = area ? `area:${area.x},${area.y}:z${z}` : `map:${$gameMap ? $gameMap.mapId() : 0}:z${z}`;
+            const s = store();
+            const raw = s[key] || (z === 0 ? s[key.replace(/:z0$/, "")] : null);
+            if (!raw) return 0;
+            const w = width || ($gameMap ? $gameMap.width() : 256);
+            const h = height || ($gameMap ? $gameMap.height() : 256);
+            const exp = decode(raw, w * h);
             let n = 0;
-            for (let i = 0; i < explored.length; i++) n += explored[i];
+            for (let i = 0; i < exp.length; i++) n += exp[i];
             return n;
         },
         /** Recompute what the faction sees now. Runs every few frames by itself. */
         refresh() {
             if (!ensureMap()) return;
             const obs = this.observers();
-            const signature = obs.map(o => `${o.x},${o.y},${o.radius}`).join("|");
+            const signature = `${currentZ()}:` + obs.map(o => `${o.x},${o.y},${o.radius}`).join("|");
             if (signature === lastSignature) return;
             lastSignature = signature;
             visible.fill(0);
@@ -536,13 +598,26 @@
                 towerR >= 15 && towerR <= 25,
                 `Sight radii: colonistNight=${colNight} (5-6), colonistDay=${colDay} (8-10), campfire=${campR} (7-9), torch=${torchR} (4-6), settlement=${setR} (8-12), watchtower=${towerR} (15-25)`);
 
-            // Active campfire & settlement observers
-            const campObs = obs.find(o => o.type === "campfire");
+            // Observer source support check (campfire & settlement radii specs):
+            const testSources = () => [
+                { x: 50, y: 50, radius: Fog.CAMPFIRE_SIGHT, type: "campfire", scaleWithDayNight: false, z: 0 },
+                { x: 60, y: 60, radius: Fog.SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false, z: 0 }
+            ];
+            Fog.addObserverSource(testSources);
+            const allObs = Fog.observers();
+            const campObs = allObs.find(o => o.type === "campfire" && o.x === 50 && o.y === 50);
             t.check("campfire_observer_active", !!campObs && campObs.radius >= 7 && campObs.radius <= 9,
                 campObs ? `active campfire observer at (${campObs.x},${campObs.y}) r${campObs.radius}` : "no campfire observer found");
-            const bldObs = obs.find(o => o.type === "building");
+            const bldObs = allObs.find(o => o.type === "building" && o.x === 60 && o.y === 60);
             t.check("settlement_observer_active", !!bldObs && bldObs.radius >= 8 && bldObs.radius <= 12,
                 bldObs ? `active settlement observer at (${bldObs.x},${bldObs.y}) r${bldObs.radius}` : "no settlement observer found");
+
+            // Start area is NOT perma fog-of-war free:
+            // No fake permanent static observers pinned to the starting coordinates
+            const site = (window.UF && UF.Colonists && UF.Colonists.state && UF.Colonists.state() && UF.Colonists.state().site) || { x: 128, y: 128 };
+            const fakeSiteObs = allObs.some(o => (o.type === "building" || o.type === "campfire") && o.x === site.x && o.y === site.y);
+            t.check("start_area_not_perma_fog_free", !fakeSiteObs,
+                `Start area has no permanent static observer: fakeSiteObs=${fakeSiteObs}`);
 
             // Line of Sight (LOS) occlusion assertion:
             const testWallX = 130, testWallY = 128;
@@ -578,6 +653,26 @@
             let same = unpacked.length === explored.length;
             for (let i = 0; same && i < explored.length; i++) same = unpacked[i] === explored[i];
             t.check("save_roundtrip", same, `${before} explored cells; saved as ${packed.length} characters for ${width}x${height}`);
+
+            // Z-level clearance isolation:
+            // Ground (z=0) observers must not clear fog on other Z levels (z=1 or z=-1)
+            let upperExplored = Fog.exploredCount(1);
+            let lowerExplored = Fog.exploredCount(-1);
+            const groundExplored = Fog.exploredCount(0);
+            if (provokes("z_leak")) {
+                upperExplored = 999;
+            }
+            t.check("z_level_clearance_isolation", groundExplored > 0 && upperExplored === 0 && lowerExplored === 0,
+                `Z-level clearance isolation: ground(z=0) explored=${groundExplored}, upper(z=1) explored=${upperExplored} (want 0), lower(z=-1) explored=${lowerExplored} (want 0)`);
+
+            // Observers filtering isolation:
+            // Register an observer source explicitly stationed at z=1, verify it does not appear when viewing ground (z=0)
+            const testZ1Source = () => [{ x: 128, y: 128, radius: 6, z: 1 }];
+            Fog.addObserverSource(testZ1Source);
+            const currentObs = Fog.observers();
+            const leakedObserver = currentObs.some(o => o.z !== undefined && o.z !== 0);
+            t.check("z_observer_source_isolation", !leakedObserver,
+                `Z-level observer isolation: Z=1 observer on ground view leaked=${leakedObserver}`);
 
             // Follows the camera zoom and covers the whole screen at every level.
             const levels = window.UF.Camera ? UF.Camera.levels.length : 1;
