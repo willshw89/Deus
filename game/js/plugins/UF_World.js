@@ -247,6 +247,89 @@
     }
 
     //-------------------------------------------------------------------------
+    // UF.Space: Authoritative spatial standard (VISION V127, 5ft/cell, 5ft/Z)
+    //-------------------------------------------------------------------------
+
+    const Space = {
+        GRID_SIZE_FEET: 5,
+        Z_STEP_FEET: 5,
+        FEET_PER_CELL: 5,
+
+        feetToCells(feet) {
+            return Math.floor((feet || 0) / 5);
+        },
+
+        cellsToFeet(cells) {
+            return (cells || 0) * 5;
+        },
+
+        zOf(o) {
+            if (!o) return 0;
+            if (typeof o.z === "number") return o.z;
+            if (o.area && typeof o.area.z === "number") return o.area.z;
+            return 0;
+        },
+
+        sameZ(a, b) {
+            return Space.zOf(a) === Space.zOf(b);
+        },
+
+        sameArea(a, b) {
+            if (!a || !b) return false;
+            const aArea = a.area || a;
+            const bArea = b.area || b;
+            return aArea.x === bArea.x && aArea.y === bArea.y && Space.sameZ(a, b);
+        },
+
+        sameCell(a, b) {
+            return Space.sameArea(a, b) && a.x === b.x && a.y === b.y;
+        },
+
+        chebyshev(a, b) {
+            if (!a || !b) return Infinity;
+            return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+        },
+
+        manhattan(a, b) {
+            if (!a || !b) return Infinity;
+            return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+        },
+
+        euclidean(a, b) {
+            if (!a || !b) return Infinity;
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        },
+
+        gridDistance(a, b) {
+            if (!Space.sameArea(a, b)) return Infinity;
+            return Space.chebyshev(a, b);
+        },
+
+        rulesDistanceFeet(a, b) {
+            if (!a || !b) return Infinity;
+            if (!Space.sameArea(a, b)) return Infinity;
+            const gridDist = Space.chebyshev(a, b);
+            const dz = Math.abs(Space.zOf(a) - Space.zOf(b));
+            if (dz === 0) return gridDist * 5;
+            return Math.round(Math.sqrt((gridDist * 5) ** 2 + (dz * 5) ** 2));
+        },
+
+        inMeleeReach(attacker, target, reachFeet = 5) {
+            if (!attacker || !target) return false;
+            if (!Space.sameZ(attacker, target)) return false;
+            const reachCells = Space.feetToCells(reachFeet) || 1;
+            return Space.gridDistance(attacker, target) <= reachCells;
+        },
+
+        inRangedRange(attacker, target, maxRangeFeet) {
+            if (!attacker || !target) return false;
+            const distFeet = Space.rulesDistanceFeet(attacker, target);
+            return distFeet <= maxRangeFeet;
+        }
+    };
+
     // The public object
 
     const generators = [];
@@ -258,12 +341,14 @@
         _frame: 0,
         hash32,
         mulberry32,
-        zOf,
+        zOf: Space.zOf,
         isLevel,
-        levelKey
+        levelKey,
+        Space
     };
     window.UF = window.UF || {};
     window.UF.World = World;
+    window.UF.Space = Space;
 
     //-------------------------------------------------------------------------
     // World creation

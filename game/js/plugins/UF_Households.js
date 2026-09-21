@@ -904,7 +904,13 @@
                     const candidateReserved = new Set([...reserved].filter(k => !anchorBuffer.has(k)));
                     if (footprintOK(h, candidate, u, candidateReserved, occupied, bootstrap)) {
                         candidate.sharedPartyWall = true;
-                        candidate.anchorHome = anchor;
+                        candidate.anchorHomeId = h.id ? `${h.id}:main` : "home:main";
+                        candidate.anchorHouseholdId = h.id || null;
+                        Object.defineProperty(candidate, "anchorHome", {
+                            get: function() { return h && h.home ? h.home : null; },
+                            enumerable: false,
+                            configurable: true
+                        });
                         return candidate;
                     }
                 }
@@ -1290,11 +1296,11 @@
     function demands(refH) {
         const h = resolve(refH), people = h ? members(h) : [], p = h && h.home;
         const buildings = structures(h), beds = buildings.flatMap(b => b.beds);
-        const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && object(h, b).id === "floor_straw" &&
+        const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && (object(h, b).id === "floor_straw" || object(h, b).id === "bed_wood") &&
             (!Own() || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && Own().ownerOf(ref(h, b)).id === b.unitId)).length : 0;
-        return { members: people.length, bedrooms: people.length ? (p ? buildings.filter(b => !strictEnclosure(h, b)).length : 1) : 0,
-            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && object(h, p.hearth).id === "campfire") ? 1 : 0,
-            storage: people.length && !(p && object(h, p.storage) && object(h, p.storage).id === "stockpile") ? 1 : 0,
+        return { members: people.length, bedrooms: people.length ? (p ? (buildings.some(b => !strictEnclosure(h, b)) ? 1 : 0) : 1) : 0,
+            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && (object(h, p.hearth).id === "campfire" || object(h, p.hearth).id === "kitchen_hearth")) ? 1 : 0,
+            storage: people.length && !(p && object(h, p.storage) && (object(h, p.storage).id === "stockpile" || object(h, p.storage).id === "chest_wood" || object(h, p.storage).id === "crate_wood")) ? 1 : 0,
             capacity: beds.length, overflow: Math.max(0, people.length - beds.length), expansionBlocked: !!(h && h.expansionBlocked),
             blocked: !p && !!(h && h.lastSearchDay !== undefined) || !!(h && h.expansionBlocked),
             unsupported: ["windows", "locks"] };

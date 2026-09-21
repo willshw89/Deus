@@ -86,12 +86,13 @@
     const catalog = () => window.$ufWorldCatalog || null;
     const num = v => (typeof v === "number" && Number.isFinite(v) ? v : 0);
     const pos = (v, fallback) => (typeof v === "number" && Number.isFinite(v) && v >= 1 ? Math.floor(v) : fallback);
-    const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-    const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    const zOf = o => o && o.z !== undefined ? o.z : o && o.area && o.area.z !== undefined ? o.area.z : 0;
+    const Space = () => (window.UF && UF.Space) || null;
+    const cheb = (a, b) => (Space() ? Space().chebyshev(a, b) : Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)));
+    const manhattan = (a, b) => (Space() ? Space().manhattan(a, b) : Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
+    const zOf = o => (Space() ? Space().zOf(o) : (o && o.z !== undefined ? o.z : o && o.area && o.area.z !== undefined ? o.area.z : 0));
     const levelArea = u => ({ x: u.area.x, y: u.area.y, z: zOf(u) });
     const viewArea = w => typeof w.viewLevel === "function" ? w.viewLevel() : w.currentArea();
-    const sameArea = (a, b) => !!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b);
+    const sameArea = (a, b) => (Space() ? Space().sameArea(a, b) : (!!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b)));
     const nowMs = () => performance.now();
 
     const Combat = {
@@ -970,8 +971,28 @@
     function runTick(tick) {
         const w = World();
         if (!w || !w.state) return;
+        const allUnits = w.units();
+        if (!allUnits || allUnits.length === 0) return;
+        // Fast-path: if no unit has combat data, hostile side, or target, avoid level grouping
+        let anyCombatOrHostile = false;
+        if (Combat.testFilter) {
+            anyCombatOrHostile = true;
+        } else {
+            for (let i = 0; i < allUnits.length; i++) {
+                const u = allUnits[i];
+                const d = u.data;
+                if (!d || isDead(u)) continue;
+                if (d.hostile || d.side === "hostile" || (d.combat && d.combat.targetId !== null) || d.ai === "hostile" || (d.species && d.species.includes("wolf"))) {
+                    anyCombatOrHostile = true;
+                    break;
+                }
+            }
+        }
+        if (!anyCombatOrHostile) return;
+
         const groups = new Map();
-        for (const u of w.units()) {
+        for (let i = 0; i < allUnits.length; i++) {
+            const u = allUnits[i];
             if (!u.area || !w.inWorld(u.area.x, u.area.y, zOf(u))) continue;
             const key = `${u.area.x},${u.area.y},${zOf(u)}`;
             if (!groups.has(key)) groups.set(key, []);
@@ -1030,7 +1051,7 @@
     }
     function step() {
         const w = World();
-        if (!Combat.enabled || !w || !w.state || loopBlocked()) return;
+        if (!Combat.enabled || !w || !w.state || loopBlocked() || (window.UF && UF.Time && UF.Time.paused)) return;
         const st = cstate();
         st.updates++;
         if (st.updates % cfg().tickFrames !== 0) return;

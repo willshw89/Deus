@@ -349,6 +349,7 @@
         const W = World();
         if (!W || !W.state || !area || !supported(area)) return { assigned: 0, people: 0, beds: 0 };
         area = copyArea(area);
+        _bedsCache.delete(areaKey(area));
         cleanClaims();
         const people = W.unitsInArea(area.x, area.y, zOf(area)).filter(u => isPerson(u) && sameArea(u, area)).sort((a, b) => a.id - b.id);
         const unassigned = people.filter(u => !bedOf(u));

@@ -182,7 +182,7 @@ function createFixture(opts = {}) {
         Objects: ObjectsAPI,
         Items: ItemsAPI,
         Households: HouseholdsAPI,
-        Events: { emit: () => {} },
+        Events: { emit: () => {}, on: () => {}, off: () => {} },
         FireSafety: { safe: () => true }
     };
 

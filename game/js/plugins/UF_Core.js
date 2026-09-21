@@ -68,6 +68,22 @@
             PluginManager.loadScript("UF_Environment");
             PluginManager._scripts.push("UF_Environment");
         }
+        if (!PluginManager._scripts.includes("UF_Containers")) {
+            PluginManager.loadScript("UF_Containers");
+            PluginManager._scripts.push("UF_Containers");
+        }
+        if (!PluginManager._scripts.includes("UF_Resources")) {
+            PluginManager.loadScript("UF_Resources");
+            PluginManager._scripts.push("UF_Resources");
+        }
+        if (!PluginManager._scripts.includes("UF_Proficiency")) {
+            PluginManager.loadScript("UF_Proficiency");
+            PluginManager._scripts.push("UF_Proficiency");
+        }
+        if (!PluginManager._scripts.includes("UF_Time")) {
+            PluginManager.loadScript("UF_Time");
+            PluginManager._scripts.push("UF_Time");
+        }
     }
 
     if (typeof require !== 'undefined') {
@@ -393,6 +409,9 @@
     Scene_Map.prototype.update = function() {
         _Scene_Map_update.call(this);
         $ufTime.update();
+        if (window.UF && UF.Time && typeof UF.Time.update === "function") {
+            UF.Time.update(1 / 60);
+        }
     };
 
     //-----------------------------------------------------------------------------

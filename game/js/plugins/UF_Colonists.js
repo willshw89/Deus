@@ -120,11 +120,12 @@
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const copyArea = a => ({ x: a.x, y: a.y });
     // Persist z beside area; pass {x,y,z} only as API handles. Missing z is legacy Ground, invalid z stays invalid.
-    const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
+    const Space = () => (window.UF && UF.Space) || null;
+    const zOf = r => (Space() ? Space().zOf(r) : (r && r.z !== undefined ? r.z : (r && r.area && r.area.z !== undefined ? r.area.z : 0)));
     const levelArea = r => { const a = r && (r.area || r); return a ? { x: a.x, y: a.y, z: zOf(r) } : null; };
     const levelSupported = z => Number.isInteger(z) && z >= -2 && z <= 2 &&
         (z === 0 || !!(World() && World().viewLevel && World().levelOfMapId));
-    const sameLevel = (a, b) => !!a && !!b && sameArea(a.area || a, b.area || b) &&
+    const sameLevel = (a, b) => !!a && !!b && (Space() ? Space().sameArea(a.area || a, b.area || b) : sameArea(a.area || a, b.area || b)) &&
         levelSupported(zOf(a)) && zOf(a) === zOf(b);
     const targetFor = (u, target) => {
         const t = target || u, area = t.area || u.area;
@@ -132,7 +133,7 @@
         const ref = { area: copyArea(area), x: t.x | 0, y: t.y | 0, z };
         return sameLevel(u, ref) ? ref : null;
     };
-    const chebyshev = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
+    const chebyshev = (ax, ay, bx, by) => (Space() ? Space().chebyshev({ x: ax, y: ay }, { x: bx, y: by }) : Math.max(Math.abs(ax - bx), Math.abs(ay - by)));
     const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
     const lower = s => String(s || "").toLowerCase();
     const ticks = () => (window.UF && UF.Time && UF.Time.ticks ? UF.Time.ticks() : (World() ? World()._frame : 0));
@@ -260,9 +261,25 @@
     const isSettler = u => !!(u && u.data && !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_"))) && (isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder)));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
     const allFactionPeople = () => (World() ? World().units().filter(isFactionPerson) : []);
-    const simulationUnits = () => (World() ? World().units().filter(isSettler) : []);
+    let simUnitsCache = null;
+    let simUnitsCacheTick = -1;
+    const simulationUnits = () => {
+        const t = (window.UF && UF.Time && UF.Time.Engine) ? UF.Time.Engine.ticks : localTicks;
+        if (simUnitsCache && simUnitsCacheTick === t) return simUnitsCache;
+        simUnitsCache = World() ? World().units().filter(isSettler) : [];
+        simUnitsCacheTick = t;
+        return simUnitsCache;
+    };
     const settler = id => { const u = World() ? World().unit(id) : null; return isSettler(u) ? u : null; };
-    const colonists = () => (World() ? World().units().filter(isColonist) : []);
+    let colonistsCache = null;
+    let colonistsCacheTick = -1;
+    const colonists = () => {
+        const t = (window.UF && UF.Time && UF.Time.Engine) ? UF.Time.Engine.ticks : localTicks;
+        if (colonistsCache && colonistsCacheTick === t) return colonistsCache;
+        colonistsCache = World() ? World().units().filter(isColonist) : [];
+        colonistsCacheTick = t;
+        return colonistsCache;
+    };
     const colonist = id => {
         const u = World() ? World().unit(id) : null;
         return isColonist(u) ? u : null;
@@ -405,6 +422,50 @@
         return steps;
     }
 
+    function autonomousStorageSteps(ref) {
+        const c = colonyState(ref);
+        if (!c || !c.site) return [];
+        const C = window.UF && UF.Containers, O = Objects(), I = Items();
+        if (!C || !O || !I) return [];
+        const area = levelArea(c), z = zOf(c);
+        const workers = siteColonists(ref);
+        if (!workers.length) return [];
+
+        const loose = groundItemsNear(workers[0], { radius: c.radius + 6 }).filter(f => !onBuildCell(f.x, f.y, workers[0], f.item.type));
+        const containers = C.all(area, z);
+
+        let needContainer = false;
+        if (containers.length === 0 && loose.length >= 6) {
+            needContainer = true;
+        } else if (containers.length > 0) {
+            const allFull = containers.every(cont => C.slotsUsed(cont.id) >= cont.maxSlots * 0.8 || C.currentWeight(cont.id) >= cont.maxWeight * 0.8);
+            if (allFull && loose.length >= 6) {
+                needContainer = true;
+            }
+        }
+
+        if (!needContainer) return [];
+
+        const chestType = O.type("chest_wood") ? "chest_wood" : (O.type("crate_wood") ? "crate_wood" : null);
+        if (!chestType) return [];
+
+        for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 3; dx++) {
+                if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) continue;
+                const wx = c.site.x + dx, wy = c.site.y + dy;
+                if (O.at(area, wx, wy) || C.at(area, wx, wy, z)) continue;
+                return [{
+                    id: `auto_storage_${wx}_${wy}`,
+                    build: chestType,
+                    cells: [[dx, dy]],
+                    exact: true,
+                    autoStorage: true
+                }];
+            }
+        }
+        return [];
+    }
+
     function effectivePlan(ref) {
         const c = colonyState(ref);
         if (!c) return [];
@@ -475,7 +536,8 @@
         const pillarSteps = (c && P && P.pillarPlanSteps) ? P.pillarPlanSteps(c, u) : [];
         const soSteps = standingOrders(u || ref);
         const msSteps = populationMilestoneSteps(u || ref);
-        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps ] : [];
+        const storageSteps = autonomousStorageSteps(u || ref);
+        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps, ...storageSteps ] : [];
         const seen = new Set();
         const res = [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
@@ -741,6 +803,9 @@
         d.facets = d.facets || facetsFor(state.seed, u.id, cultureOf(u).facetBias);
         d.skills = d.skills || skillsFor(state.seed, u.id);
         d.needs = Object.assign({}, START_NEEDS, d.needs || {});
+        if (window.UF && UF.Proficiency && typeof UF.Proficiency.migrateLegacySkills === "function") {
+            UF.Proficiency.migrateLegacySkills(u);
+        }
         if (!d.callings || d.callings.length < 3) {
             const Callings = getCallings();
             if (Callings && Callings.assignCallings) {
@@ -1362,6 +1427,14 @@
         const out = [];
         if (!I) return out;
         for (const s of stockpilesStoring("food", ref)) for (const it of I.atIn(siteArea(ref), s.x, s.y)) if (isFoodType(itemType(it.type))) out.push(it);
+        if (window.UF && UF.Containers) {
+            const containers = UF.Containers.all(siteArea(ref), zOf(ref));
+            for (const cont of containers) {
+                for (const it of UF.Containers.itemsIn(cont.id)) {
+                    if (isFoodType(itemType(it.type))) out.push(it);
+                }
+            }
+        }
         return out;
     };
     const rawFood = t => isFoodType(t) && hasTag(t, "raw");
@@ -1383,16 +1456,22 @@
             }
             return give(u, { type: "eat", params: { itemId: raw.id } });
         }
-        // Food on the ground within reach, the larder included, nearest first. A fresh kill (raw food lying
-        // about) comes before everything else: it's picked up and cooked, or eaten where it lies.
-        const stored = foodStored(u).map(it => ({ item: it, x: it.x, y: it.y, dist: Math.hypot(it.x - u.x, it.y - u.y) }));
+        // Food on the ground within reach, the larder/containers included, nearest first.
+        const stored = foodStored(u).map(it => {
+            const C = window.UF && UF.Containers;
+            const cont = it.container && C ? C.get(it.container) : null;
+            const pos = cont || it;
+            return { item: it, x: pos.x, y: pos.y, dist: Math.hypot(pos.x - u.x, pos.y - u.y), containerId: it.container || null };
+        });
         const seen = new Set(stored.map(f => f.item.id));
         const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id))).sort((a, b) => a.dist - b.dist);
         const kill = ground.find(f => rawFood(itemType(f.item.type)) && f.dist <= FOOD_ITEM_RADIUS);
         if (kill) {
             const spec = fire && cookRecipeFor(kill.item.type)
-                ? { type: "fetch", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id } }
-                : { type: "eat", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id } };
+                ? { type: "fetch", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id, fromContainer: kill.containerId } }
+                : (kill.containerId
+                    ? { type: "fetch", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id, fromContainer: kill.containerId } }
+                    : { type: "eat", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id } });
             const j = give(u, spec);
             if (j) return j;
         }
@@ -2758,6 +2837,17 @@
         let n = 0;
         for (const u of siteColonists(ref)) n += I.count(u.id, typeId);
         for (const f of I.find({ area: levelArea(c), z: zOf(c), near: { x: c.site.x, y: c.site.y }, radius: c.radius + 2, id: typeId })) n += f.item.count;
+        if (window.UF && UF.Containers) {
+            const containers = UF.Containers.all(levelArea(c), zOf(c));
+            for (const cont of containers) {
+                const d = chebyshev(cont.x, cont.y, c.site.x, c.site.y);
+                if (d <= c.radius + 6) {
+                    for (const it of UF.Containers.itemsIn(cont.id)) {
+                        if (it.type === typeId) n += (it.count || 1);
+                    }
+                }
+            }
+        }
         return n;
     }
     const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
@@ -2929,6 +3019,31 @@
 
             const m = missing[0];
             if (missingFailed.has(m)) continue;
+
+            // Resource Resolver Integration: check stored/accessible materials FIRST
+            if (window.UF && UF.Resources && UF.Resources.resolve) {
+                const res = UF.Resources.resolve({
+                    typeId: m,
+                    quantity: 1,
+                    actor: u,
+                    purpose: "construction",
+                    targetLocation: { x: cell.x, y: cell.y, z: zOf(c), area: copyArea(c.area) },
+                    projectId: step.id
+                });
+                if (res && res.allocations && res.allocations.length > 0) {
+                    const alloc = res.allocations[0];
+                    if (alloc.sourceKind === "carried") {
+                        return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: alloc.itemId, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
+                    } else if (alloc.sourceKind === "container") {
+                        return { type: "haul", target: { x: alloc.x, y: alloc.y }, params: { itemId: alloc.itemId, fromContainer: alloc.containerId, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
+                    } else if (alloc.sourceKind === "loose" || alloc.sourceKind === "household" || alloc.sourceKind === "staged") {
+                        return { type: "haul", target: { x: alloc.x, y: alloc.y }, params: { itemId: alloc.itemId, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
+                    }
+                } else if (res && res.harvestDemand) {
+                    return { type: res.harvestDemand.action, target: { x: res.harvestDemand.x, y: res.harvestDemand.y }, params: { plan: step.id } };
+                }
+            }
+
             let carried = carriedOf(u, m)[0];
             let ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
             let src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
@@ -2953,6 +3068,27 @@
         const claimedItemIds = new Set(activeJobs().filter(j => (j.type === "fetch" || j.type === "haul") && j.params && j.params.itemId).map(j => j.params.itemId));
         for (const [id, want] of Object.entries(recipe.inputs || {})) {
             if (carriedCount(u, id) >= (want | 0)) continue;
+
+            if (window.UF && UF.Resources && UF.Resources.resolve) {
+                const res = UF.Resources.resolve({
+                    typeId: id,
+                    quantity: (want | 0) - carriedCount(u, id),
+                    actor: u,
+                    purpose: "craft",
+                    projectId: step ? step.id : null
+                });
+                if (res && res.allocations && res.allocations.length > 0) {
+                    const alloc = res.allocations[0];
+                    if (alloc.sourceKind === "container") {
+                        return { type: "fetch", target: { x: alloc.x, y: alloc.y }, params: { itemId: alloc.itemId, fromContainer: alloc.containerId, plan: step.id, each: !!step.each } };
+                    } else if (alloc.sourceKind === "loose" || alloc.sourceKind === "household" || alloc.sourceKind === "staged") {
+                        return { type: "fetch", target: { x: alloc.x, y: alloc.y }, params: { itemId: alloc.itemId, plan: step.id, each: !!step.each } };
+                    }
+                } else if (res && res.harvestDemand) {
+                    return { type: res.harvestDemand.action, target: { x: res.harvestDemand.x, y: res.harvestDemand.y }, params: { plan: step.id, each: !!step.each } };
+                }
+            }
+
             const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 20, id }).find(f => !claimedItemIds.has(f.item.id) && !onBuildCell(f.x, f.y, u, id) && !(c && onStockpile(f.item, null, u) && isFoodType(itemType(id))));
             if (ground) return { type: "fetch", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, plan: step.id, each: !!step.each } };
             const src = objectSourceNear(u, id, SEARCH_RADIUS);
@@ -3288,6 +3424,55 @@
                         j.params.to.x === cell.x && j.params.to.y === cell.y).length;
 
                     if (onCell + inFlight < (countNeeded | 0)) {
+                        if (window.UF && UF.Resources && UF.Resources.resolve) {
+                            const res = UF.Resources.resolve({
+                                typeId: id,
+                                quantity: 1,
+                                actor: u,
+                                purpose: "construction",
+                                targetLocation: { x: cell.x, y: cell.y, z: zOf(c), area: copyArea(c.area) },
+                                projectId: step.id
+                            });
+                            if (res && res.allocations && res.allocations.length > 0) {
+                                const alloc = res.allocations[0];
+                                if (alloc.sourceKind === "carried") {
+                                    return give(u, {
+                                        type: "haul",
+                                        target: { x: u.x, y: u.y },
+                                        params: {
+                                            itemId: alloc.itemId,
+                                            to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                            plan: step.id,
+                                            constructionHaul: true
+                                        }
+                                    });
+                                } else if (alloc.sourceKind === "container") {
+                                    return give(u, {
+                                        type: "haul",
+                                        target: { x: alloc.x, y: alloc.y },
+                                        params: {
+                                            itemId: alloc.itemId,
+                                            fromContainer: alloc.containerId,
+                                            to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                            plan: step.id,
+                                            constructionHaul: true
+                                        }
+                                    });
+                                } else if (alloc.sourceKind === "loose" || alloc.sourceKind === "household" || alloc.sourceKind === "staged") {
+                                    return give(u, {
+                                        type: "haul",
+                                        target: { x: alloc.x, y: alloc.y },
+                                        params: {
+                                            itemId: alloc.itemId,
+                                            to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                            plan: step.id,
+                                            constructionHaul: true
+                                        }
+                                    });
+                                }
+                            }
+                        }
+
                         const carried = carriedOf(u, id)[0];
                         if (carried) {
                             return give(u, {
@@ -3322,11 +3507,11 @@
         return null;
     }
 
-    // Clean site logistics: tidy loose items on the ground into designated stockpiles
+    // Clean site logistics: tidy loose items on the ground into designated containers or stockpiles
     function tidyStockpileJob(u) {
         const c = colonyState(u);
-        const I = Items();
-        if (!c || !I || !c.stockpiles || !c.stockpiles.length) return null;
+        const I = Items(), C = window.UF && UF.Containers;
+        if (!c || !I) return null;
         if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
 
         // Find loose ground items within the settlement radius
@@ -3341,33 +3526,56 @@
         for (const f of loose) {
             const t = itemType(f.item.type);
             if (!t) continue;
-            // Find a stockpile that accepts this item
-            const sp = c.stockpiles.find(s => {
-                const stores = s.stores || [];
-                if (!stores.length) return true;
-                if (Array.isArray(t.tags) && t.tags.some(tag => stores.includes(tag))) return true;
-                if (stores.includes("material") && (hasTag(t, "wood") || hasTag(t, "stone") || hasTag(t, "metal") || hasTag(t, "mineral") || hasTag(t, "fuel"))) return true;
-                if (stores.includes("wood") && hasTag(t, "wood")) return true;
-                if (stores.includes("stone") && hasTag(t, "stone")) return true;
-                if (stores.includes("metal") && hasTag(t, "metal")) return true;
-                if (stores.includes("food") && isFoodType(t)) return true;
-                return false;
-            });
-            if (!sp) continue;
 
-            const itemsAtDest = I.atIn(levelArea(c), sp.x, sp.y);
-            const canStack = itemsAtDest.some(existing => existing.type === f.item.type && (existing.count || 1) < (t.stack || 10));
-            const hasSlot = itemsAtDest.length < 5;
-            if (canStack || hasSlot) {
-                return give(u, {
-                    type: "haul",
-                    target: { x: f.x, y: f.y },
-                    params: {
-                        itemId: f.item.id,
-                        to: { area: copyArea(c.area), z: zOf(c), x: sp.x, y: sp.y },
-                        tidy: true
+            // 1. Prioritize physical storage containers
+            if (C) {
+                const containers = C.all(levelArea(c), zOf(c));
+                for (const cont of containers) {
+                    const can = C.canStore(cont.id, f.item.type, f.item.count || 1, u);
+                    if (can.ok) {
+                        return give(u, {
+                            type: "haul",
+                            target: { x: f.x, y: f.y },
+                            params: {
+                                itemId: f.item.id,
+                                toContainer: cont.id,
+                                to: { area: copyArea(cont.area), z: zOf(cont), x: cont.x, y: cont.y },
+                                tidy: true
+                            }
+                        });
                     }
+                }
+            }
+
+            // 2. Fall back to designated ground stockpiles
+            if (c.stockpiles && c.stockpiles.length) {
+                const sp = c.stockpiles.find(s => {
+                    const stores = s.stores || [];
+                    if (!stores.length) return true;
+                    if (Array.isArray(t.tags) && t.tags.some(tag => stores.includes(tag))) return true;
+                    if (stores.includes("material") && (hasTag(t, "wood") || hasTag(t, "stone") || hasTag(t, "metal") || hasTag(t, "mineral") || hasTag(t, "fuel"))) return true;
+                    if (stores.includes("wood") && hasTag(t, "wood")) return true;
+                    if (stores.includes("stone") && hasTag(t, "stone")) return true;
+                    if (stores.includes("metal") && hasTag(t, "metal")) return true;
+                    if (stores.includes("food") && isFoodType(t)) return true;
+                    return false;
                 });
+                if (sp) {
+                    const itemsAtDest = I.atIn(levelArea(c), sp.x, sp.y);
+                    const canStack = itemsAtDest.some(existing => existing.type === f.item.type && (existing.count || 1) < (t.stack || 10));
+                    const hasSlot = itemsAtDest.length < 5;
+                    if (canStack || hasSlot) {
+                        return give(u, {
+                            type: "haul",
+                            target: { x: f.x, y: f.y },
+                            params: {
+                                itemId: f.item.id,
+                                to: { area: copyArea(c.area), z: zOf(c), x: sp.x, y: sp.y },
+                                tidy: true
+                            }
+                        });
+                    }
+                }
             }
         }
         return null;
@@ -4172,7 +4380,7 @@
     const _Game_Map_update = Game_Map.prototype.update;
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
-        if (!sceneActive) return;
+        if (!sceneActive || (window.UF && UF.Time && UF.Time.paused)) return;
         localTicks++;
 
         if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();
@@ -4194,6 +4402,11 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
+        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; };
+        UF.Events.on("world:unitAdded", clearCaches);
+        UF.Events.on("world:unitRemoved", clearCaches);
+        UF.Events.on("colonists:born", clearCaches);
+        UF.Events.on("combat:kill", clearCaches);
         // world:created is hooked here at boot, after every plugin has registered its own listener (UF_Factions,
         // UF_History, UF_Wildlife), so the colony is made last, from the people History spawned.
         UF.Events.on("world:created", state => {

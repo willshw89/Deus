@@ -15,7 +15,7 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 8. `docs/systems/`: the documented API of any system you build on
 9. `docs/ASSET_REQUESTS.md`: the art the engine needs, with specs (Gemini's work queue)
 
-## The thirteen binding rules
+## The fourteen binding rules
 1. **One slice at a time.** Work only on the slice marked `IN PROGRESS` in `docs/SLICES.md`. No bonus features, nothing extra "while I was in there". Ideas go to `docs/STATUS.md` → Backlog.
 2. **Nothing is done until it's been seen working.** The Definition of Done below is the only one that counts.
 3. **Never claim what you didn't observe.** "Verified", "working", "0 errors", "60 FPS" need evidence you produced and looked at in this session. If you didn't check, write "not checked".
@@ -32,6 +32,16 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
     - *Autonomous Non-Living Pipeline:* Whenever current implementation requires NON-LIVING artwork (walls, doors, terrain, flora, crops, furniture, workshops, machinery, items, effects), agents continuously identify those needs, batch them aggressively into packed character/sprite sheets (80–100% useful area), prompt Nano Banana Pro with explicit slot maps, process approved results, integrate them into the project, log them in `docs/ASSET_MANIFEST.md`, and verify them in context. DO NOT wait for the user to manually request individual non-living assets.
     - *Absolute Exclusion of Living Beings:* This autonomous pipeline DOES NOT apply to living beings (humans, colonists, humanoids, animals, wildlife, monsters, creatures, living portraits, living character sprites/animation sheets). When living assets are needed, register the requirement in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md`, but do NOT generate autonomously.
     - *Dwarf-Fortress-Style Black Wall-Top Convention:* For TWO-GRID-HIGH walls, doors, gates, cliff-adjacent elements, and vertical architectural pieces (48×96 px), the upper 48 px cap MUST read as flat near-black (`#08080C` to `#121218`) with minimal edge definition for readability, creating an unbroken horizontal black occlusion line connecting with DEUS void and darkness language. The lower 48 px displays the authentic material face. The black cap is an architectural/occlusion convention, not a dynamic shadow. Follow `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md` for all prompts.
+14. **Engineering Health, Lean Architecture & Long-Term Maintainability** (User directive 2026-09-21): Treat project health as an ongoing system. Follow `docs/ENGINEERING_STANDARD.md` and `docs/ARCHITECTURE.md` as binding standards across all tasks:
+    - *One canonical project:* Exactly one authoritative working copy (`c:\Users\snewt\OneDrive\Desktop\UF`); single integration authority for canonical changes.
+    - *One source of truth per concept:* Strict subsystem ownership (World, WorldGen, Entities, Time, Capabilities, Jobs, Inventory, Resources, Construction, Pathfinding, AI, Combat, Rendering, Save, Diagnostics). No duplicated implementations.
+    - *Data over hardcoding:* `System + Data = Content`. Logic stays general; content lives in catalogs (`game/data/UF_WorldCatalog.json`).
+    - *No global full-world scans every frame:* Hard performance rule. Use spatial registries, localized queries, dirty flags, and event-driven updates. Never iterate all units, objects, or items per frame.
+    - *Small refactors over rewrites:* Incremental debt cleanup; no risky monolithic engine rewrites.
+    - *Stable persistent IDs:* Identify entities by ID (`Creature #1042`, `Household #83`), never live JS object references across ticks or saves.
+    - *Explicit multi-domain time:* Disallow naked ambiguous timers; tag all timers/conditions (`domain: "action" | "historical" | "presentation" | "engine"`).
+    - *Versioned saves:* Save truth, rebuild temporary caches upon load. Provide explicit schema migrations (`saveSchemaVersion`).
+    - *Observability before complexity:* The simulation must be able to explain itself via `UF_Sheet` and `UF_Look` (why this goal, why this resource, capability breakdown, cell geology/moisture).
 
 
 ## Definition of Done

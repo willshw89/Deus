@@ -3,7 +3,7 @@
 const fs = require("fs"), vm = require("vm"), path = require("path");
 let source = fs.readFileSync(path.join(__dirname, "../game/js/plugins/UF_Households.js"), "utf8");
 if (process.argv.includes("--mutate-z")) source = source.replace("&& zOf(a) === zOf(b)", "");
-if (process.argv.includes("--mutate-enclosure")) source = source.replace("return !!p && p.walls.every", "return !!p || p.walls.every");
+if (process.argv.includes("--mutate-enclosure")) source = source.replace("(p.walls || []).every(c => isStructuralEnclosureAt(h, c.x, c.y, zOf(h), p.wall))", "true");
 if (process.argv.includes("--mutate-variety")) source = source.replace("const variant = roll % 100 < 25 + social / 2 ? 1 : 0;", "const variant = 0;");
 if (process.argv.includes("--mutate-size")) source = source.replace("designFor(h, members(h).length)", "designFor(h, 2)");
 if (process.argv.includes("--mutate-natural-reservations")) source = source.replace("const connections = W().state.naturalConnections;", "const connections = null;");
