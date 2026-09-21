@@ -1219,6 +1219,7 @@
     const decisionAt = new Map(); // unit id -> tick of the last decision
     const arrivals = new Map();   // job id -> callback (the Overseer's assignMoveTo)
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
+    const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
     const PREEMPT_EVERY = 600;
 
     function activeJobs() {
@@ -2885,6 +2886,7 @@
     const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
 
     let planInvalidatedAt = 0;
+    const _planStatusCacheById = new Map();
     /** [{ id, done, detail }] for every plan step, evaluated from the world now (and recorded in state). */
     function planStatus(ref, selectedSteps) {
         const c = colonyState(ref);
@@ -2895,6 +2897,11 @@
                 const total = step.cells ? step.cells.length : 1;
                 const detail = step.build ? (total === 1 ? "built" : `${total}/${total}`) : (step.detail || "done");
                 return { id: step.id, done: true, detail };
+            }
+            const _stepId = step.id || "";
+            const _cached = _planStatusCacheById.get(_stepId);
+            if (_cached && _cached.tick >= planInvalidatedAt && (localTicks - _cached.tick < 30)) {
+                return Object.assign({}, _cached.status);
             }
             if (step._cachedStatus && step._cachedTick >= planInvalidatedAt && (localTicks - step._cachedTick < 30)) {
                 return Object.assign({}, step._cachedStatus);
@@ -2938,6 +2945,7 @@
             const res = { id: step.id, done, detail };
             step._cachedStatus = res;
             step._cachedTick = localTicks;
+            if (step.id) _planStatusCacheById.set(step.id, { status: res, tick: localTicks });
             return res;
         });
     }
@@ -3443,6 +3451,7 @@
         if (!I || !c) return null;
         const plan = effectivePlan(u);
         if (!plan || !plan.length) return null;
+        const failedNeeds = new Set();
 
         for (const step of plan) {
             const t = stepObject(step);
@@ -3453,6 +3462,7 @@
                 if (cell.state !== "todo") continue;
 
                 for (const [id, countNeeded] of Object.entries(needs)) {
+                    if (failedNeeds.has(id)) continue;
                     let onCell = I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id);
                     if (t.id === "floor_straw" && id === "straw") {
                         onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber");
@@ -3471,6 +3481,10 @@
                                 targetLocation: { x: cell.x, y: cell.y, z: zOf(c), area: copyArea(c.area) },
                                 projectId: step.id
                             });
+                            if (!res || !res.allocations || res.allocations.length === 0) {
+                                failedNeeds.add(id);
+                                continue;
+                            }
                             if (res && res.allocations && res.allocations.length > 0) {
                                 const alloc = res.allocations[0];
                                 if (alloc.sourceKind === "carried") {
@@ -4009,7 +4023,7 @@
         }
         const t = ticks();
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = Math.max(8, simulationUnits().length);
+        const MAX_DECIDE_PER_SCAN = 1;
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();
@@ -4031,9 +4045,20 @@
                             avoid.set(key, t + AVOID_TICKS);
                         }
                         decisionAt.set(u.id, -Infinity);
-                    } else if (isLowPriorityJob(job, u) && hasHighPriorityJob(u)) {
-                        J.cancel(job.id, "high-priority task ready, swapping task");
-                        decisionAt.set(u.id, -Infinity);
+                    } else if (isLowPriorityJob(job, u)) {
+                        const lastHp = _lastHpCheckAt.get(u.id) || -Infinity;
+                        if (t - lastHp >= 30) {
+                            _lastHpCheckAt.set(u.id, t);
+                            const lazy = unit01(seed(), SALT.roll, u.id, t) < (100 - facet(u, "industriousness")) / 400;
+                            if (!lazy) {
+                                const nextJob = designationJob(u) || footprintClearingJob(u) || (UF.Agriculture && UF.Agriculture.planJob && UF.Agriculture.planJob(u)) || planJob(u);
+                                if (nextJob) {
+                                    J.cancel(job.id, "high-priority task ready, swapping task");
+                                    decisionAt.set(u.id, t);
+                                    give(u, nextJob);
+                                }
+                            }
+                        }
                     } else continue;
                 } else continue;
             }
@@ -4442,7 +4467,7 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; };
+        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); };
         UF.Events.on("world:unitAdded", clearCaches);
         UF.Events.on("world:unitRemoved", clearCaches);
         UF.Events.on("colonists:born", clearCaches);

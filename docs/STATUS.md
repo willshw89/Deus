@@ -9,6 +9,33 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## World Beat & Colonist Decision Stutter Elimination Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("The game is still stuttering, maybe it has to do with the world beat? I want the world to remain smooth in terms of movement"):
+- **Root Causes Diagnosed via Native NW.js Instrumentation**:
+  - *160 ms World Beat Spike (`UF_Environment.js` at `ticks % 60 === 0`)*: All 195 units in the world were updated on the exact same frame. Each unit checked 49 tiles for fires + 49 tiles for objects, plus Perlin noise and room polygon checks (19,110 inspections on beat frames).
+  - *40–140 ms Colonist Scan Spikes (`UF_Colonists.js` at `ticks % 5 === 0`)*:
+    - `scan()` ran `hasHighPriorityJob(u)` on low-priority workers every 5 frames; when tasks were blocked or colonists rolled lazy, it cancelled stroll/idle jobs and re-decided, locking all colonists into an infinite 5-frame cancel-redecide loop.
+    - `effectivePlan(u)` regenerated step objects without persistent IDs, causing `step._cachedStatus` to miss cache 100% of the time across ticks.
+    - `constructionHaulingJob(u)` called `UF.Resources.resolve` up to 1,600 times across 70 plan steps and 23 wall cells without early-outing on failed resource queries.
+    - `MAX_DECIDE_PER_SCAN` was set to `simulationUnits().length`, allowing dozens of colonists to execute `decide(u)` simultaneously on a single frame.
+- **Optimizations Implemented**:
+  - **Interleaved Biological/Thermal Timing (`UF_Environment.js`)**: Spread unit thermal updates across 60 frames via `(frameCount + unit.id) % TICKS_PER_STEP === 0`. Every unit still updates exactly once per beat (1 biological step/sec at 1x speed), but CPU work is divided evenly (~3 units/tick), completely eliminating the 160 ms freeze.
+  - **Heat Source Radiance Pruning (`UF_Environment.js`)**: Burning tile inspections early-out if `state.fire.burning` has 0 fires. Object radiant heat checks early-out for distant wildlife outside colony radius (18 tiles).
+  - **Persistent Plan Status Caching (`UF_Colonists.js`)**: Added `_planStatusCacheById` Map keyed by `step.id` (valid for 30 ticks unless `planInvalidatedAt` changes), cutting plan evaluation from 15 ms to 0.05 ms.
+  - **Construction Hauling Early-Out (`UF_Colonists.js`)**: Added `failedNeeds` Set in `constructionHaulingJob(u)`. When a resource fails to resolve, all remaining cells for that plan step skip redundant queries.
+  - **Decision Budgeting & Preemption Throttle (`UF_Colonists.js`)**: Throttled low-priority preemption to once per 30 ticks via `_lastHpCheckAt`, and directly assign `give(u, nextJob)` rather than triggering infinite cancel-redecide thrash. Capped `MAX_DECIDE_PER_SCAN = 1` for smooth decision distribution across ticks.
+- **Verification Evidence (Measured Native NW.js Runtime)**:
+  - `tools/profile_beat_hotspots.js` (300 frames in native NW.js):
+    - **Beat frame max time (`beatMax`) dropped from 160.0 ms to 1.8 ms (99% reduction, 0 ms freeze on beat frames)**.
+    - **Spikes (>25 ms) dropped from 45+ down to only 2** (33.1 ms and 25.3 ms).
+    - Average frame busy time reduced from 15.8 ms to 8.4 ms (8.2 ms headroom under 16.6 ms 60 FPS budget).
+  - `tools/run_tests.js colonists`: **24/24 PASS (exit 0)** (tools and clothes reached in 39s).
+  - `tools/run_tests.js world`: **30/30 PASS (exit 0)** (`path_budget`, `faces_eight_ways`, `no_corner_cut`).
+  - `tools/run_tests.js timespeed`: **24/24 PASS (exit 0)** (1x to 32x speed scaling).
+  - `tools/run_tests.js smoke`: **13/13 PASS (exit 0)**.
+  - `tools/run_tests.js environment`: **16/16 PASS (exit 0)**.
+  - `tools/test_town_hall_ai_live.js`: **23/23 PASS (exit 0)**.
+
 ## Sky Panoramic Background (+1/+2), Colonist Card Removal & Plugin Retirement Batch 1 Delivered — 2026-09-21 (Gemini)
 Delivered per user directives ("The panoramic background for +1 and +2 should be sky", "also get rid of the colonist card. all the data will be on the other menu when we click a unit", and Plugin Retirement Batch 1 Conditional Approval):
 - **Sky Panoramic Background on Levels +1 and +2 (`UF_Levels.js`, `UF_Fog.js`)**:

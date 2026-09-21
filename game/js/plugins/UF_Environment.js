@@ -249,10 +249,12 @@
     function heatSourceRadiance(area, x, y, z) {
         let addedHeat = 0;
         const radius = 3;
-        const F = Fire(), O = Objects();
+        const F = Fire(), O = Objects(), W = World();
 
-        // 1. Burning tiles
-        if (F && typeof F.isBurning === "function") {
+        // 1. Burning tiles: only check if there are active fires recorded in state
+        const fState = W && W.state && W.state.fire;
+        const hasActiveFires = fState ? (fState.burning && Object.keys(fState.burning).length > 0) : true;
+        if (hasActiveFires && F && typeof F.isBurning === "function") {
             for (let dy = -radius; dy <= radius; dy++) {
                 for (let dx = -radius; dx <= radius; dx++) {
                     const dist = Math.max(Math.abs(dx), Math.abs(dy)); // Chebyshev distance
@@ -268,8 +270,10 @@
             }
         }
 
-        // 2. Objects with "heat" or "fire" tag or "campfire"
-        if (O && typeof O.atIn === "function") {
+        // 2. Objects with "heat" or "fire" tag or "campfire": only search if near a colony site or known hearth/campfire
+        const site = W && W.state && W.state.colonists && W.state.colonists.site;
+        const nearSite = !site || Math.max(Math.abs(x - site.x), Math.abs(y - site.y)) <= 18;
+        if (nearSite && O && typeof O.atIn === "function") {
             for (let dy = -radius; dy <= radius; dy++) {
                 for (let dx = -radius; dx <= radius; dx++) {
                     const dist = Math.max(Math.abs(dx), Math.abs(dy));
@@ -682,20 +686,26 @@
     }
 
     /**
-     * Master update cycle called every beat (TICKS_PER_STEP).
+     * Master update cycle called every tick.
+     * Living units are interleaved across 60 frames (TICKS_PER_STEP) so that each unit
+     * is stepped exactly once per beat, but work is spread smoothly (~3 units/tick)
+     * eliminating frame hitching.
      */
     let localBeat = 0;
     function updateEnvironment() {
-        localBeat++;
         const W = World();
         if (!W || !W.state) return;
 
-        // Synchronize on-screen weather particles
-        syncWeatherVisuals();
+        if (frameCount % TICKS_PER_STEP === 0) {
+            localBeat++;
+            // Synchronize on-screen weather particles once per beat
+            syncWeatherVisuals();
+        }
 
-        // Update all living units in active view and world
+        // Interleave living units over 60 frames so simulation is smooth and spike-free
         const units = typeof W.units === "function" ? W.units() : [];
         for (const u of units) {
+            if ((frameCount + (u.id | 0)) % TICKS_PER_STEP !== 0) continue;
             try {
                 stepUnitThermal(u, localBeat);
             } catch (e) {
@@ -756,9 +766,7 @@
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         frameCount++;
-        if (frameCount % TICKS_PER_STEP === 0) {
-            updateEnvironment();
-        }
+        updateEnvironment();
     };
 
     // Listen to fire events: if a unit is burned in UF_Fire, ignite it!
