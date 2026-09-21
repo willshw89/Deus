@@ -6,6 +6,21 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Systemic Material Economy: Milestone 1 / Task 4 Natural Terrain & Resource Node Material Binding Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval):
+- **Resource Node & Harvest Material Binding (`UF_Objects.js`, `UF_Jobs.js`)**:
+  - Implemented `Objects.materialOf(objOrId, area, x, y)`: dynamically maps object instances and catalog IDs to typed materials.
+  - Tree species bind to authentic woods (`oak` -> `woods:oak`, `fir_snow` -> `woods:pine`, `birch` -> `woods:birch`, `ash` -> `woods:ash`, `tree_swamp` -> `woods:willow`, `tree_savanna` -> `woods:ash`, `tree_tropical` -> `woods:birch`, `tree_cursed` -> `woods:yew`).
+  - Geological rock nodes (`rocks_small`, `ironstone`, `wall_stone`) query the local geological stratum from `WorldGen.geologyAt(gx, gy, z)` to bind to the authentic local stone material (`stones:granite`, `stones:limestone`, `stones:basalt`, etc.).
+  - Updated `Objects.applyIn(area, x, y, action, actor)`: harvesting trees (`chop`) and quarrying stone nodes (`pick`) passes `{ mat }` to `Items.drop`, dropping timber and stone bearing the exact material identity of the source entity and bedrock.
+  - Updated underground mining jobs in `UF_Jobs.js` (`apply` for `mine`/`quarry`) to look up `WorldGen.geologyAt(gx, gy, z)` and drop material-bound stone blocks matching the stratum layer.
+- **Verification Evidence**:
+  - `node tools/test_resource_node_materials.js`: **5/5 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_resource_node_materials.js --mutant` failed with exit 1 on `tree_felling_yields_bound_logs`.
+  - `node tools/run_tests.js items`: **19/19 PASS (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 16s (0 regressions).
+  - Node syntax checks on `UF_Objects.js` and `UF_Jobs.js`: 100% clean.
+
 ## Systemic Material Economy: Milestone 1 / Task 3 Geological Stratum Generation Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy Roadmap approval):
 - **Deterministic Geological Stratum Mapping (`UF_WorldGen.js`, `UF_Levels.js`)**:

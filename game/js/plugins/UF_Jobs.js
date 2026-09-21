@@ -306,8 +306,14 @@
                 L.setShape(job.target, "floor", { material: mat });
                 const yields = mat === "soil" ? { stone: 1 } : { stone: 2 };
                 if (I && typeof I.drop === "function") {
+                    const W = World(), st = W && W.state;
+                    const size = st ? st.size : 256;
+                    const gx = job.target.area.x * size + job.target.x, gy = job.target.area.y * size + job.target.y;
+                    const G = window.UF && UF.WorldGen;
+                    const geo = G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, zOf(job.target)) : null;
+                    const stoneMat = geo ? geo.stone : "limestone";
                     for (const id of Object.keys(yields)) {
-                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id], unit.id);
+                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id], unit.id, { mat: stoneMat });
                     }
                 }
                 job.result = { from: "solid", to: "floor", yields };

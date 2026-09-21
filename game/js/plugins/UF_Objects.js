@@ -306,6 +306,44 @@
     }
 
     /**
+     * Determine the physical material binding of an object.
+     * For trees/plants: resolves from object.mat or derives from tree species (oak -> woods:oak, pine/fir -> woods:pine, etc.).
+     * For stone nodes / boulders / cliffs: resolves from object.mat or local geological stratum from UF_WorldGen.
+     */
+    function materialOfObject(objOrId, area, x, y) {
+        const t = typeof objOrId === "object" && objOrId ? objOrId : typeOf(objOrId);
+        if (t && t.mat) return t.mat;
+
+        const id = (t && t.id ? t.id : (typeof objOrId === "string" ? objOrId : "")).toLowerCase();
+        if (!id) return null;
+
+        // Tree species mappings
+        if (id.includes("oak")) return "woods:oak";
+        if (id.includes("pine") || id.includes("fir") || id.includes("cedar")) return "woods:pine";
+        if (id.includes("birch")) return "woods:birch";
+        if (id.includes("ash")) return "woods:ash";
+        if (id.includes("willow") || id.includes("swamp")) return "woods:willow";
+        if (id.includes("elm")) return "woods:elm";
+        if (id.includes("yew")) return "woods:yew";
+        if (id.includes("savanna") || id.includes("tropical")) return "woods:oak";
+
+        // Stone node / boulder mappings: derive from geological stratum if coordinates provided
+        if (id.includes("stone") || id.includes("rock") || id.includes("boulder") || id.includes("quarry")) {
+            if (area && x !== undefined && y !== undefined) {
+                const W = World(), st = W && W.state;
+                const size = st ? st.size : 256;
+                const gx = area.x * size + x, gy = area.y * size + y;
+                const G = window.UF && UF.WorldGen;
+                const geo = G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, zOf(area)) : null;
+                if (geo && geo.stone) return `stones:${geo.stone}`;
+            }
+            return "stones:limestone";
+        }
+
+        return null;
+    }
+
+    /**
      * Run an action (chop, gather, pick, quarry, mine) on the object of a cell. Returns null when the cell has
      * no object or the object has no such action; otherwise { ok, action, area, x, y, from, to, yields, items, actor }.
      * Items are dropped through UF.Items.drop when UF_Items is installed; `yields` always says what was produced.
@@ -318,8 +356,17 @@
         const actorId = actor && actor.id !== undefined ? actor.id : (actor === undefined ? null : actor);
         const items = [];
         if (window.UF && UF.Items && typeof UF.Items.drop === "function") {
+            const objMat = materialOfObject(from, area, x, y);
             for (const itemId of Object.keys(yields)) {
-                const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId], actorId);
+                let opts = null;
+                if (objMat) {
+                    if ((itemId === "log" || itemId === "timber" || itemId === "wood") && objMat.startsWith("woods:")) {
+                        opts = { mat: objMat.replace("woods:", "") };
+                    } else if ((itemId === "stone" || itemId === "rock") && objMat.startsWith("stones:")) {
+                        opts = { mat: objMat.replace("stones:", "") };
+                    }
+                }
+                const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId], actorId, opts);
                 if (dropped) items.push(dropped);
             }
         }
@@ -828,6 +875,7 @@
         typeIdAt: (x, y) => typeIdIn(currentArea(), x, y),
         atIn: (area, x, y) => typeOf(typeIdIn(area, x, y)),
         typeIdIn,
+        materialOf: (objOrId, area, x, y) => materialOfObject(objOrId, area, x, y),
         /** Put an object (catalog id or type number; null/0 = nothing) on a cell of the map on screen. */
         set: (x, y, idOrTypeId) => setIn(currentArea(), x, y, idOrTypeId),
         setIn,
