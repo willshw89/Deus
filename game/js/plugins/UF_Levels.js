@@ -632,6 +632,72 @@
         return 0;
     }
 
+    function cliffCaveMouthsForArea(seed, ax, ay, size, d, cl) {
+        const mid = Math.floor(size / 2);
+        const saltCliffCave = hashString("uf.levels.cliff_cave");
+        const S_cache = new Int8Array(size * size);
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const gx = ax * size + x, gy = ay * size + y;
+                S_cache[y * size + x] = surfaceElevation(seed, gx, gy, size, d, cl);
+            }
+        }
+
+        const candidates = [];
+        const minCoord = BORDER + 3, maxCoord = size - BORDER - 4;
+        for (let y = minCoord; y <= maxCoord; y++) {
+            for (let x = minCoord; x <= maxCoord; x++) {
+                const i = y * size + x;
+                const S = S_cache[i];
+                if (S < 1) continue; // Must be on elevated landform (S >= 1)
+
+                const gx = ax * size + x, gy = ay * size + y;
+                const distToCamp = Math.hypot(x - mid, y - mid);
+                if (distToCamp <= 16) continue; // Outside camp clearing radius
+
+                const caveNoise = valueNoise(seed, saltCliffCave, gx, gy, 12);
+                if (caveNoise <= 0.72) continue;
+
+                // Look for an adjacent cell that is valley floor (S == 0)
+                let outDir = null;
+                for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+                    const nx = x + dx, ny = y + dy;
+                    if (S_cache[ny * size + nx] === 0) {
+                        outDir = { dx, dy };
+                        break;
+                    }
+                }
+                if (!outDir) continue;
+
+                // Inward direction into the cliff face
+                const inDir = { dx: -outDir.dx, dy: -outDir.dy };
+                const t1 = { x: x + inDir.dx, y: y + inDir.dy };
+                const t2 = { x: x + 2 * inDir.dx, y: y + 2 * inDir.dy };
+
+                // Ensure tunnel remains within solid landform bounds
+                if (t2.x < BORDER + 1 || t2.x >= size - BORDER - 1 || t2.y < BORDER + 1 || t2.y >= size - BORDER - 1) continue;
+                if (S_cache[t1.y * size + t1.x] < 1 || S_cache[t2.y * size + t2.x] < 1) continue;
+
+                candidates.push({
+                    x, y, gx, gy,
+                    noise: caveNoise,
+                    inDir, outDir,
+                    tunnel: [{ x, y }, t1, t2],
+                    terminus: t2
+                });
+            }
+        }
+
+        // Filter candidates by minimum distance (at least 8 tiles apart) to avoid clutter
+        candidates.sort((a, b) => b.noise - a.noise);
+        const selected = [];
+        for (const c of candidates) {
+            const tooClose = selected.some(s => Math.hypot(s.x - c.x, s.y - c.y) < 8);
+            if (!tooClose) selected.push(c);
+        }
+        return selected;
+    }
+
     function generateBaseline(seed, gen, z, ax, ay, size) {
         const t0 = performance.now();
         const n = size * size;
@@ -643,7 +709,65 @@
             const cat = catalog(), cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
 
             if (z < 0) {
-                extra = generateUnderground(seed, gen, z, ax, ay, size, shape, material);
+                extra = generateUnderground(seed, gen, z, ax, ay, size, shape, material) || {};
+                if (z === -1) {
+                    const cliffMouths = cliffCaveMouthsForArea(seed, ax, ay, size, d, cl);
+                    extra.cliffCaves = cliffMouths;
+                    for (const m of cliffMouths) {
+                        const term = m.terminus;
+                        const termi = term.y * size + term.x;
+                        shape[termi] = STAIR_UP;
+                        material[termi] = STONE;
+                        if (extra.water) extra.water[termi] = 0;
+
+                        // 3x3 dry landing vestibule around stairs up
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const vx = term.x + dx, vy = term.y + dy;
+                                if (vx >= BORDER && vx < size - BORDER && vy >= BORDER && vy < size - BORDER) {
+                                    const vi = vy * size + vx;
+                                    if (shape[vi] === SOLID) {
+                                        shape[vi] = FLOOR;
+                                        material[vi] = STONE;
+                                    }
+                                    if (extra.water) extra.water[vi] = 0;
+                                }
+                            }
+                        }
+
+                        // Connect vestibule to nearest underground cavern floor
+                        let nearestDist = Infinity, targetX = -1, targetY = -1;
+                        for (let cy = BORDER; cy < size - BORDER; cy++) {
+                            for (let cx = BORDER; cx < size - BORDER; cx++) {
+                                const ci = cy * size + cx;
+                                if (shape[ci] === FLOOR && (Math.abs(cx - term.x) > 1 || Math.abs(cy - term.y) > 1)) {
+                                    const dist = Math.hypot(cx - term.x, cy - term.y);
+                                    if (dist < nearestDist) {
+                                        nearestDist = dist;
+                                        targetX = cx;
+                                        targetY = cy;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (targetX >= 0 && nearestDist < 30) {
+                            let curX = term.x, curY = term.y;
+                            while (curX !== targetX || curY !== targetY) {
+                                if (curX < targetX) curX++;
+                                else if (curX > targetX) curX--;
+                                else if (curY < targetY) curY++;
+                                else if (curY > targetY) curY--;
+                                const ci = curY * size + curX;
+                                if (shape[ci] === SOLID) {
+                                    shape[ci] = FLOOR;
+                                    material[ci] = STONE;
+                                }
+                                if (extra.water) extra.water[ci] = 0;
+                            }
+                        }
+                    }
+                }
             } else {
                 const S_grid = new Int8Array(n);
                 for (let y = 0; y < size; y++) {
@@ -684,6 +808,22 @@
                                 }
                             }
                         }
+                    }
+                }
+
+                // Cliff cave mouths breaching cliff faces horizontally into the mountain at z = 0
+                if (z === 0) {
+                    const cliffMouths = cliffCaveMouthsForArea(seed, ax, ay, size, d, cl);
+                    extra = { cliffCaves: cliffMouths };
+                    for (const m of cliffMouths) {
+                        shape[m.y * size + m.x] = FLOOR;
+                        material[m.y * size + m.x] = STONE;
+                        const t1 = m.tunnel[1];
+                        shape[t1.y * size + t1.x] = FLOOR;
+                        material[t1.y * size + t1.x] = STONE;
+                        const term = m.terminus;
+                        shape[term.y * size + term.x] = STAIR_DOWN;
+                        material[term.y * size + term.x] = STONE;
                     }
                 }
             }
@@ -1022,7 +1162,7 @@
         }
 
         // Room enclosure invalidation
-        const Households = window.UF && UF.Households;
+        const Households = window.UF && window.UF.Households;
         if (Households && typeof Households.invalidateRoomEnclosure === "function") {
             try { Households.invalidateRoomEnclosure(area, r.x, r.y, r.z); } catch (e) {}
         }
@@ -1536,6 +1676,18 @@
             const d = (st && st.areasX) ? { width: st.areasX * size, height: st.areasY * size, seed: s } : { width: size, height: size, seed: s };
             const cat = catalog(), cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
             return surfaceElevation(s, gx, gy, size, d, cl);
+        },
+        cliffCaveMouths: area => {
+            const W = World(), st = W && W.state;
+            if (!st) return [];
+            const ax = area && area.x !== undefined ? area.x : (st.startArea ? st.startArea.x : 0);
+            const ay = area && area.y !== undefined ? area.y : (st.startArea ? st.startArea.y : 0);
+            const b = baseline(0, ax, ay);
+            if (b && b.cliffCaves) return b.cliffCaves;
+            const size = st.size || 96;
+            const d = (st && st.areasX) ? { width: st.areasX * size, height: st.areasY * size, seed: st.seed } : { width: size, height: size, seed: st.seed };
+            const cat = catalog(), cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
+            return cliffCaveMouthsForArea(st.seed, ax, ay, size, d, cl);
         },
         isExposedSurface,
         exposedFacesAround,

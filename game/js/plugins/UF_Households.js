@@ -20,10 +20,13 @@
  */
 (() => {
     "use strict";
-    const W = () => window.UF && UF.World;
-    const C = () => window.UF && UF.Colonists;
-    const O = () => window.UF && UF.Objects;
-    const Own = () => window.UF && UF.Ownership;
+    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
+    root.UF = root.UF || {};
+    const UF = root.UF;
+    const W = () => UF.World;
+    const C = () => UF.Colonists;
+    const O = () => UF.Objects;
+    const Own = () => UF.Ownership;
     const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
     const copyArea = a => ({ x: a ? a.x : 0, y: a ? a.y : 0 });
     const areaOf = r => ({ x: (r && r.area) ? r.area.x : 0, y: (r && r.area) ? r.area.y : 0, z: zOf(r) });
@@ -787,22 +790,39 @@
             steps: []
         }, dimensions(design));
     }
+    function isNaturalRock(h, x, y, z) {
+        const L = window.UF && UF.Levels;
+        if (!L || typeof L.shapeAt !== "function") return false;
+        const currentZ = z !== undefined ? z : zOf(h);
+        const s = L.shapeAt({ area: areaOf(h), x, y, z: currentZ });
+        return s === "solid" || s === 1;
+    }
+    function isStructuralEnclosureAt(h, x, y, z, expectedWallId) {
+        if (isNaturalRock(h, x, y, z)) return true;
+        const obj = object(h, { x, y });
+        if (!obj) return false;
+        if (expectedWallId && obj.id === expectedWallId) return true;
+        if (obj.type && Array.isArray(obj.type.tags) && obj.type.tags.includes("wall")) return true;
+        if (typeof obj.id === "string" && (obj.id.startsWith("wall_") || obj.id.includes("wall"))) return true;
+        return false;
+    }
+    function isDoorEnclosureAt(h, x, y, z, expectedDoorId) {
+        const obj = object(h, { x, y });
+        if (!obj) return false;
+        if (expectedDoorId && obj.id === expectedDoorId) return true;
+        if (obj.type && Array.isArray(obj.type.tags) && obj.type.tags.includes("door")) return true;
+        if (typeof obj.id === "string" && (obj.id.startsWith("door_") || obj.id.includes("door"))) return true;
+        return false;
+    }
     function footprintOK(h, home, u, reservations, occupied, bootstrap) {
         const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.kitchenCounter, home.kitchenPantry, home.diningTable, home.diningBench, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
         const clear = new Set((home.hearthClearance || []).map(p => key(p.x, p.y)));
         const isWallCell = (x, y) => home.walls.some(w => w.x === x && w.y === y);
-        const isCaveWall = (x, y) => {
-            if (zOf(h) >= 0) return false;
-            const L = window.UF && UF.Levels;
-            if (!L || typeof L.shapeAt !== "function") return false;
-            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
-            return s === "solid" || s === 1;
-        };
         for (let y = home.y; y < home.y + home.h; y++) for (let x = home.x; x < home.x + home.w; x++) {
             const k = key(x, y), p = { x, y }, o = object(h, p);
             if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x, y, z: zOf(h) })) return false;
-            // Subterranean races: perimeter wall cells can be natural solid cave walls!
-            if (isWallCell(x, y) && isCaveWall(x, y)) {
+            // Natural solid geological terrain & existing structural walls satisfy perimeter boundary!
+            if (isWallCell(x, y) && (isNaturalRock(h, x, y, zOf(h)) || isStructuralEnclosureAt(h, x, y, zOf(h), home.wall))) {
                 if (reservations.has(k) || occupied.has(k) || bootstrap.has(k)) return false;
                 continue;
             }
@@ -1140,16 +1160,9 @@
             // objects let save data and the executor retain real plan progress.
             return Object.assign({ id, build, cells: offsets, exact: true, household: h.id }, extras || {});
         };
-        const isCaveWall = (x, y) => {
-            if (zOf(h) >= 0) return false;
-            const L = window.UF && UF.Levels;
-            if (!L || typeof L.shapeAt !== "function") return false;
-            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
-            return s === "solid" || s === 1;
-        };
         // Exact placement is essential: another household's beds/hearth do not
-        // satisfy these steps. Natural cave walls do not require construction.
-        const buildableWalls = home.walls.filter(w => !isCaveWall(w.x, w.y));
+        // satisfy these steps. Natural rock boundaries do not require construction.
+        const buildableWalls = home.walls.filter(w => !isNaturalRock(h, w.x, w.y, zOf(h)));
         const culture = C() && C().culture(u) || {};
         const o = O();
 
@@ -1164,7 +1177,7 @@
 
         for (let i = 0; i < (home.annexes || []).length; i++) {
             const a = home.annexes[i];
-            const annexWalls = a.walls.filter(w => !isCaveWall(w.x, w.y));
+            const annexWalls = a.walls.filter(w => !isNaturalRock(h, w.x, w.y, zOf(h)));
             home.steps.push(
                 step(`annex${i}_doors`, a.door, a.doors),
                 step(`annex${i}_walls`, a.wall, annexWalls),
@@ -1252,21 +1265,15 @@
     }
     function strictEnclosure(h, p = h && h.home) {
         if (!p) return false;
-        const isCaveWall = (x, y) => {
-            if (zOf(h) >= 0) return false;
-            const L = window.UF && UF.Levels;
-            if (!L || typeof L.shapeAt !== "function") return false;
-            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
-            return s === "solid" || s === 1;
-        };
-        const enclosed = p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
-            p.doors.every(c => object(h, c) && object(h, c).id === p.door);
+        const enclosed = (p.walls || []).every(c => isStructuralEnclosureAt(h, c.x, c.y, zOf(h), p.wall)) &&
+            (p.doors || []).every(c => isDoorEnclosureAt(h, c.x, c.y, zOf(h), p.door));
         if (enclosed && !p.isRoofed) {
             Object.defineProperty(p, "isRoofed", { value: true, writable: true, configurable: true, enumerable: false });
             const F = window.UF && UF.Floors;
             if (F && typeof F.applyRoofedUpperDeck === "function") {
                 const targetCells = (p.walls || []).concat(p.doors || []).concat(p.floors || []);
-                F.applyRoofedUpperDeck(areaOf(h), targetCells.length ? targetCells : { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
+                const isStone = (p.wall && p.wall.includes("stone")) || (zOf(h) < 0) || (p.walls || []).some(c => isNaturalRock(h, c.x, c.y, zOf(h)));
+                F.applyRoofedUpperDeck(areaOf(h), targetCells.length ? targetCells : { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, isStone ? "stone" : "wood");
             }
             if (F && typeof F.setFloor === "function" && p.floors && p.floors.length) {
                 const culture = (C() && typeof C().culture === "function" && C().culture(members(h)[0])) || {};
@@ -1419,13 +1426,32 @@
         const area = areaOf(h);
         return h.home.floors.every(fl => F.isFloorAt(area, fl.x, fl.y));
     }
-    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
-    root.UF = root.UF || {};
-    const UF = root.UF;
+    function invalidateRoomEnclosure(area, x, y, z) {
+        const s = state();
+        if (!s || !s.byId) return;
+        for (const h of Object.values(s.byId)) {
+            if (h.area && area && (h.area.x !== area.x || h.area.y !== area.y)) continue;
+            if (zOf(h) !== undefined && z !== undefined && zOf(h) !== z) continue;
+            for (const b of structures(h)) {
+                if (!b) continue;
+                const touches = (b.walls && b.walls.some(w => w.x === x && w.y === y)) ||
+                                (b.doors && b.doors.some(d => d.x === x && d.y === y)) ||
+                                (b.floors && b.floors.some(f => f.x === x && f.y === y));
+                if (touches) {
+                    const wasRoofed = b.isRoofed;
+                    const nowEnclosed = strictEnclosure(h, b);
+                    if (!nowEnclosed && wasRoofed) {
+                        b.isRoofed = false;
+                        emit("households:enclosureBreached", h, b, { x, y, z });
+                    }
+                }
+            }
+        }
+    }
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
         isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, hasFloors, join, make,
-        designFor, layout, findPlot };
+        designFor, layout, findPlot, invalidateRoomEnclosure, isStructuralEnclosure: isStructuralEnclosureAt, isNaturalRock, strictEnclosure };
     function checkEnclosures() {
         const s = state();
         if (!s || !s.byId) return;

@@ -7,7 +7,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
 ## In progress
-- **Gemini**: Milestone 3 / Tasks 11 & 12: Horizontal Cliff Cave Carving & Structural Rock Enclosure Core (`game/js/plugins/UF_Levels.js`, `game/js/plugins/UF_Households.js`, `tools/test_vertical_worldgen_proof.js`).
+- (None currently claimed)
+
+## Systemic Verticality: Milestone 3 / Tasks 11, 12 & 13 Horizontal Cliff Caves, Structural Rock Enclosure & Vertical Worldgen Proof Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (V126, V127, V128):
+- **Horizontal Cliff Cave Carving & Seamless Vertical Linking (`UF_Levels.js`, `UF_NaturalConnections.js`)**:
+  - Horizontal cave mouths generated at $z = 0$ wherever macro/relief landforms elevate $S(gx, gy) \ge 1$ adjacent to the $S = 0$ valley floor.
+  - Carves through the cliff face into natural stone terrain: floor cave mouth at surface, 2-cell stone tunnel into the mountain, terminating in a `STAIR_DOWN` at $z = 0$.
+  - Generates matching subterranean terminus at $z = -1$: matching `STAIR_UP`, cleared water (dry landing), 3×3 walkable vestibule, and excavated stone corridor connecting to the nearest underground cavern network.
+  - Exported `Levels.cliffCaveMouths(area)` and integrated into `UF_NaturalConnections.js` to automatically register `cliff_cave_passage` links.
+- **Natural Rock Structural Enclosure & Hybrid Dwelling Rooms (`UF_Households.js`, `UF_Floors.js`)**:
+  - Natural solid rock (`Levels.shapeAt === "solid" || 1`) is recognized as an authoritative structural boundary across all Z levels ($Z \le 0$ caves and $Z \ge 0$ surface cliffs).
+  - Rooms enclosed by 100% natural rock, 100% built walls, or any hybrid combination (e.g. north cliff face + east/west/south wooden walls) fully satisfy strict structural enclosure.
+  - Zero redundant construction: `homeSteps` automatically filters out solid rock perimeter tiles (`!isNaturalRock(h, w.x, w.y, zOf(h))`), preventing colonists from attempting to build artificial walls over solid stone.
+  - Fully roofed upper decks: enclosures with natural rock/stone receive durable stone upper deck roofs (`applyRoofedUpperDeck`).
+  - World-mutation invalidation: mining or quarrying away an enclosing rock wall breaches the room, triggering `invalidateRoomEnclosure`, resetting `b.isRoofed = false`, and emitting `households:enclosureBreached`.
+- **First Vertical Worldgen Automated Proof Harness (`tools/test_vertical_worldgen_proof.js`)**:
+  - Comprehensive automated proof suite testing:
+    1. Continuous vertical continuity across 5 levels ($Z = -2..+2$).
+    2. Guaranteed flat starting camp clearing ($r \le 12$ at datum $S = 0$).
+    3. Horizontal cliff cave carving, vertical stair linkage, dry landings, vestibules, and `UF.NaturalConnections` link registration.
+    4. Subtest A: 100% natural rock subterranean cave dwellings (0 wall build steps, bedroom demand satisfied, automatically roofed).
+    5. Subtest B: Hybrid surface cliff + wooden dwellings (omits 5 cliff tiles from construction, encloses and roofs).
+    6. Subtest C: Mining invalidation (mining a rock wall emits `households:enclosureBreached`, turns `strictEnclosure` to false, resets `isRoofed` to false, and increments missing bedroom demand).
+  - Verified Rule 4 Mutant Mode: `node tools/test_vertical_worldgen_proof.js --mutant` fails on `camp_clearing_elevation` with exit 1.
+- **Verification Evidence**:
+  - `node tools/test_vertical_worldgen_proof.js`: **29/29 PASS (exit 0)**.
+  - `node tools/test_vertical_worldgen_proof.js --mutant`: **Rule 4 Mutant PASS (exit 1)**.
+  - `node tools/test_column_landforms.js`: **32/32 PASS (exit 0)**.
+  - `node tools/test_material_recipes.js`: **21/21 PASS (exit 0)**.
+  - `node tools/run_tests.js items`: **20/20 PASS (exit 0)**.
+  - `node tools/run_tests.js jobs`: **19/19 PASS (exit 0)**.
+
 
 ## Continuous Nano Banana Pro Non-Living Pipeline & DF Black Wall-Top Convention Delivered — 2026-09-21 (Gemini)
 Delivered per user directives:

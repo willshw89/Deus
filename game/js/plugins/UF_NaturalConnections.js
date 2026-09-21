@@ -168,8 +168,22 @@
             saved.chains.push({ id, x: candidate.x, y: candidate.y, area: copy(area), landings });
             if (saved.chains.length >= 2) break;
         }
-        saved.status = saved.chains.length ? "ready" : "blocked";
-        saved.reason = saved.chains.length ? "" : "No existing clear, dry cave column connects the reachable surface to both depths. Excavation or another generator seam is required.";
+        const cliffMouths = levels.cliffCaveMouths ? levels.cliffCaveMouths(area) : [];
+        for (let mi = 0; mi < cliffMouths.length; mi++) {
+            const cm = cliffMouths[mi];
+            const linkId = `cliff_cave_${area.x}_${area.y}_${mi + 1}`;
+            if (!saved.links.some(l => l.id === linkId)) {
+                saved.links.push({
+                    id: linkId,
+                    chain: saved.chains.length + 1,
+                    kind: "cliff_cave_passage",
+                    a: ref(area, cm.terminus.x, cm.terminus.y, 0),
+                    b: ref(area, cm.terminus.x, cm.terminus.y, -1)
+                });
+            }
+        }
+        saved.status = (saved.chains.length || saved.links.length) ? "ready" : "blocked";
+        saved.reason = (saved.chains.length || saved.links.length) ? "" : "No existing clear, dry cave column connects the reachable surface to both depths. Excavation or another generator seam is required.";
         if (UF.Events) UF.Events.emit("naturalConnections:generated", saved);
         return saved;
     }

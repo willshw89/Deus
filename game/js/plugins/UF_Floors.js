@@ -90,8 +90,13 @@
     }
     function isBarrier(area, x, y) {
         if (!inBounds(area, x, y)) return false;
+        const L = window.UF && UF.Levels;
+        if (L && typeof L.shapeAt === "function") {
+            const s = L.shapeAt({ area, x, y, z: zOf(area) });
+            if (s === "solid" || s === 1) return true;
+        }
         const O = Objects(), type = O && O.atIn(area, x, y);
-        return !!type && Array.isArray(type.tags) && (type.tags.includes("wall") || type.tags.includes("door"));
+        return !!type && ((Array.isArray(type.tags) && (type.tags.includes("wall") || type.tags.includes("door"))) || (typeof type.id === "string" && (type.id.includes("wall") || type.id.includes("door"))));
     }
     function isGap(area, x, y) {
         if (!inBounds(area, x, y) || isBarrier(area, x, y) || isWater(area, x, y)) return false;
