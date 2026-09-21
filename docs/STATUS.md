@@ -6,6 +6,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## 16x and 32x Time Speed Options & HUD Controls — 2026-09-21 (Gemini)
+Delivered per user directive ("can I get a 16x and 32x speed option"):
+- **16x & 32x Multipliers Added (`UF_TimeSpeed.js`)**:
+  - Augments speed step list to ensure 16 and 32 are present (`1, 2, 4, 8, 16, 32`) even when reading existing cached plugin parameters, respecting RMMZ editor safety without editing `plugins.js` while RPGMZ is running.
+  - Keyboard shortcuts `]` (faster) and `[` (slower) navigate up to 32x.
+  - Speed status label in `Sprite_UFTimeControls` displays `16x Speed` and `32x Speed`.
+  - Faster button disabled at 32x max speed; immediate synchronous redraw on button clicks.
+  - Day/Night clock badge (`Sprite_UFClock`) dynamically displays `>> x16` and `>> x32`.
+- **Verification Evidence**:
+  - `node tools/run_tests.js timespeed`: **24/24 PASS (exit 0)**.
+  - Mutant check `node tools/run_tests.js timespeed` with 32x omitted: **4 checks FAIL (exit 1)** as expected (Rule 4).
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 21s (0 regressions).
+  - Node syntax check: 100% clean.
+  - **Rule 5 Visual Screenshot Verification**:
+    - `timespeed.time_controls_32x.png`: HUD status label reads `32x Speed`, `+` button is dimmed/disabled, clock badge shows `>> x32`.
+    - `timespeed.time_controls_16x.png`: HUD status label reads `16x Speed`, `+` button is enabled, clock badge shows `>> x16`.
+    - `timespeed.time_controls.png`: HUD status label reads `PAUSED` when paused, buttons fully functional.
+
 ## Survival Crafting Acceleration, First-Owner Resource Protection & Timber Hauling — 2026-09-21 (Gemini)
 Delivered per user directives:
 - **Survival Crafting Acceleration (`UF_Colonists.js`)**:

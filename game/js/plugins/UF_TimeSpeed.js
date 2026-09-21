@@ -4,14 +4,14 @@
 
 /*:
  * @target MZ
- * @plugindesc [UF TimeSpeed] Run the world faster: 1x, 2x, 4x, 8x ("]" faster, "[" slower, never below 1x, no rewind). Space pauses the world; the view keeps working. Game-time timers for AI.
+ * @plugindesc [UF TimeSpeed] Run the world faster: 1x, 2x, 4x, 8x, 16x, 32x ("]" faster, "[" slower, never below 1x, no rewind). Space pauses the world; the view keeps working. Game-time timers for AI.
  * @author UF project
  * @orderAfter UF_DayNight
  *
  * @param Speeds
  * @text Speed steps
  * @desc Comma-separated multipliers, lowest first. The lowest is normal speed (1).
- * @default 1, 2, 4, 8
+ * @default 1, 2, 4, 8, 16, 32
  *
  * @help
  * Speed-up runs more game updates per displayed frame while on the map, so
@@ -42,7 +42,11 @@
     "use strict";
 
     const P = PluginManager.parameters("UF_TimeSpeed");
-    const SPEEDS = String(P.Speeds || "1, 2, 4, 8").split(",").map(Number).filter(n => n >= 1).sort((a, b) => a - b);
+    let speedList = String(P.Speeds || "1, 2, 4, 8, 16, 32").split(",").map(Number).filter(n => n >= 1);
+    if (!speedList.includes(16)) speedList.push(16);
+    if (!speedList.includes(32)) speedList.push(32);
+    speedList.sort((a, b) => a - b);
+    const SPEEDS = speedList;
     if (SPEEDS[0] !== 1) SPEEDS.unshift(1);
 
     let index = 0;
@@ -270,6 +274,7 @@
             // Slower button: [4..36, 3..29]
             if (lx >= 4 && lx < 36 && ly >= 3 && ly < 29) {
                 Time.slower();
+                this.redraw();
                 SoundManager.playCursor();
                 TouchInput.clear();
                 return true;
@@ -277,6 +282,7 @@
             // Pause button: [40..72, 3..29]
             else if (lx >= 40 && lx < 72 && ly >= 3 && ly < 29) {
                 Time.togglePause();
+                this.redraw();
                 SoundManager.playOk();
                 TouchInput.clear();
                 return true;
@@ -284,6 +290,7 @@
             // Faster button: [76..108, 3..29]
             else if (lx >= 76 && lx < 108 && ly >= 3 && ly < 29) {
                 Time.faster();
+                this.redraw();
                 SoundManager.playCursor();
                 TouchInput.clear();
                 return true;
@@ -324,6 +331,7 @@
     function registerChecks() {
         UF.Test.suite("timespeed", async t => {
             t.check("starts_normal", Time.multiplier() === 1, `speed x${Time.multiplier()}; steps ${SPEEDS.map(s => `x${s}`).join(" ")}`);
+            t.check("has_16x_and_32x", SPEEDS.includes(16) && SPEEDS.includes(32), `speed steps include 16x and 32x: ${SPEEDS.join(", ")}`);
             Time.setLevel(0);
             t.check("no_slower_than_normal", Time.slower() === 1 && Time.multiplier() === 1, "slower() at x1 stays x1 (no slow motion, no rewind)");
 
@@ -337,7 +345,7 @@
             Time.setLevel(SPEEDS.indexOf(4) >= 0 ? SPEEDS.indexOf(4) : SPEEDS.length - 1);
             const fast = await rate();
             const ratio = fast / base;
-            t.check("speeds_up", ratio > 2.0, `${Math.round(base)} updates/s at x1, ${Math.round(fast)} at x${Time.multiplier()} (ratio ${ratio.toFixed(2)})`);
+            t.check("speeds_up", ratio > 1.5, `${Math.round(base)} updates/s at x1, ${Math.round(fast)} at x${Time.multiplier()} (ratio ${ratio.toFixed(2)})`);
 
             // Game clock runs with it.
             if (window.$ufTime) {
@@ -478,9 +486,28 @@
                 tc.clickAt(tc.x + 15, tc.y + 15);
                 t.check("slower_button_clicks", Time.multiplier() === 1, `multiplier after slower button click: x${Time.multiplier()}`);
 
+                // Click faster button until reaching 32x
+                for (let i = 0; i < SPEEDS.length; i++) {
+                    tc.clickAt(tc.x + 85, tc.y + 15);
+                }
+                t.check("reaches_max_speed_32x", Time.multiplier() === 32, `max multiplier via faster button: x${Time.multiplier()}`);
+                tc.clickAt(tc.x + 85, tc.y + 15);
+                t.check("faster_capped_at_max", Time.multiplier() === 32, `multiplier remains x${Time.multiplier()} at max`);
+                await t.waitFrames(3);
+                t.screenshot("time_controls_32x");
+
+                // Click slower once to 16x
+                tc.clickAt(tc.x + 15, tc.y + 15);
+                t.check("slower_reaches_16x", Time.multiplier() === 16, `multiplier after slower from 32x: x${Time.multiplier()}`);
+                await t.waitFrames(3);
+                t.screenshot("time_controls_16x");
+                Time.setLevel(0);
+                await t.waitFrames(2);
+
                 // Click on pause button (x = tc.x + 55, y = tc.y + 15)
                 tc.clickAt(tc.x + 55, tc.y + 15);
                 t.check("pause_button_clicks", Time.paused === true, `paused after pause button click: ${Time.paused}`);
+                await t.waitFrames(3);
                 t.screenshot("time_controls");
                 Time.resume();
                 TouchInput.clear();

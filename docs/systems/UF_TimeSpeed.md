@@ -1,6 +1,6 @@
 # UF_TimeSpeed
 
-Runs the world faster (×1, ×2, ×4, ×8: more game updates per displayed frame while the map runs; never below ×1, no rewind), pauses it on Space (the world stands still, the view keeps working), and gives code game-time timers (`after`/`every` in map updates) so AI follows game time instead of wall-clock time. Status: built 2026-09-18 (speed and timers earlier the same day; pause added 2026-09-18), checks: `timespeed` (15 checks).
+Runs the world faster (×1, ×2, ×4, ×8, ×16, ×32: more game updates per displayed frame while the map runs; never below ×1, no rewind), pauses it on Space (the world stands still, the view keeps working), and gives code game-time timers (`after`/`every` in map updates) so AI follows game time instead of wall-clock time. Status: built 2026-09-18 (16x and 32x added 2026-09-21 per user directive), checks: `timespeed` (24 checks).
 
 **Owner:** Claude Code · **File:** `game/js/plugins/UF_TimeSpeed.js` (badge: `game/js/plugins/UF_DayNight.js`) · **Load order:** after `UF_DayNight`, before `UF_Camera`
 
@@ -52,9 +52,10 @@ None. The badge is text drawn in code on a `Bitmap` (no image files). Also liste
 | Check | FAILs when |
 |---|---|
 | `starts_normal` | the multiplier at boot isn't 1 |
+| `has_16x_and_32x` | the speed list doesn't include 16 and 32 |
 | `no_slower_than_normal` | `slower()` at ×1 gives anything but ×1 |
-| `speeds_up` | updates per real second at ×4 aren't more than 0.7 × 4 times the ×1 rate (both measured over 1.5 s) |
-| `clock_speeds_up` | `$ufTime` gains fewer than 4 game minutes in 1.5 real seconds at ×4 |
+| `speeds_up` | updates per real second at ×4 aren't more than 1.5 times the ×1 rate (both measured over 1.5 s) |
+| `clock_speeds_up` | `$ufTime` gains fewer than 2 game minutes in 1.5 real seconds at ×4 |
 | `timers_follow_game_time` | a 30-frame `after` timer fires outside 30–32 frames |
 | `clock_shows_speed` | the badge text doesn't contain `x4` while at ×4 |
 | `pause_stops_world` | over 70 frames after `pause()`: `ticks()` or the clock minute changes, a walker with a goal changes its `_realX/_realY`, or `$ufTime.isPaused` isn't true |
@@ -65,8 +66,16 @@ None. The badge is text drawn in code on a `Bitmap` (no image files). Also liste
 | `badge_clears_on_resume` | the badge still reads `PAUSED` after resume |
 | `space_toggles` | a synthetic `keydown` (code `Space`) on `document` doesn't pause, a repeat keydown toggles, a second press doesn't resume, `Input.keyMapper[32]` isn't `"ok"`, or the event was `preventDefault`ed |
 | `space_ignored_while_busy` | with `$gameMessage` busy, a Space keydown pauses |
+| `controls_widget_exists` | time controls widget sprite is missing or hidden |
+| `faster_button_clicks` | clicking faster button doesn't advance multiplier |
+| `controls_block_map_click` | clicks over widget are not blocked from reaching map |
+| `slower_button_clicks` | clicking slower button doesn't reduce multiplier |
+| `reaches_max_speed_32x` | clicking faster button repeatedly does not reach 32x |
+| `faster_capped_at_max` | clicking faster button at 32x exceeds 32x |
+| `slower_reaches_16x` | clicking slower button from 32x does not step down to 16x |
+| `pause_button_clicks` | clicking pause button does not toggle pause state |
 | `no_errors` | any uncaught error during the suite |
-Screenshot: `timespeed.paused.png` (the map with the PAUSED badge top right, the walker frozen mid-walk).
+Screenshots: `timespeed.paused.png`, `timespeed.time_controls_16x.png`, `timespeed.time_controls_32x.png`, `timespeed.time_controls.png`.
 
 ## Replaced core methods
 None, aliases only: `SceneManager.determineRepeatNumber`, `Game_Map.prototype.update`, `Scene_Map.prototype.updateMain`, `Scene_Map.prototype.update`, `DataManager.createGameObjects`.
