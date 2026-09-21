@@ -711,6 +711,7 @@
         d.sight = 8;
         d.gender = gender;
         d.tier = 0;
+        if (d.founder === undefined) d.founder = true;
         const W = World();
         const mother = d.motherId && W ? W.unit(d.motherId) : null;
         const father = d.fatherId && W ? W.unit(d.fatherId) : null;
@@ -2462,6 +2463,7 @@
 
     function myBedTarget(u) {
         if (!u || !u.data) return null;
+        if (u.data.bed === null) return null;
         if (u.data.bed && sameLevel(u.data.bed, u)) return u.data.bed;
         const H = window.UF && UF.Households;
         const h = H && H.of ? H.of(u) : null;
@@ -2553,8 +2555,9 @@
         if (!J) return [];
         const area = levelArea(u);
         const candidates = [];
-        // Radius 3 to 4: safe distance from fire (radius 1 and 2 are deadly fire hazard zones!)
-        for (let r = 3; r <= 4; r++) {
+        const F = window.UF && UF.Fire;
+        // Radius 2 then 1, 3, 4: comfortable distance around hearth, never on the fire (r=0)
+        for (const r of [2, 1, 3, 4]) {
             const ringSpots = [];
             for (let dy = -r; dy <= r; dy++) {
                 for (let dx = -r; dx <= r; dx++) {
@@ -2562,6 +2565,7 @@
                     const x = fire.x + dx, y = fire.y + dy;
                     const k = `${x},${y}`;
                     if (taken && taken.has(k)) continue;
+                    if (F && F.isBurning && F.isBurning(area, x, y)) continue;
                     if (!J.standable(area, x, y, u.id)) continue;
                     const dist = Math.hypot(x - u.x, y - u.y);
                     ringSpots.push({ x, y, dist, fire: { x: fire.x, y: fire.y } });
@@ -4516,7 +4520,7 @@
             const fireObj = nearestFire(sleeper);
             if (fireObj) {
                 if (UF.Ownership && UF.Ownership.unassignBed) UF.Ownership.unassignBed(sleeper);
-                delete sleeper.data.bed;
+                sleeper.data.bed = null;
                 const curSJob = J.of(sleeper.id);
                 if (curSJob) J.cancel(curSJob.id, "test: sleep");
                 sleeper.x = fireObj.x;

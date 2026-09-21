@@ -21,9 +21,17 @@ Delivered per user directives:
 - **Timber Hauling & Batch Construction Pipeline Foundation (`UF_Jobs.js`, `UF_Colonists.js`, `UF_Households.js`)**:
   - Staging of logs and wall materials to prepare for batch perimeter assembly.
   - Foundation for private homestead move-in, housewarming thought (+15 mood), and intimacy unlock.
+- **Town Hall Communal Allocation & Private Move-In Pipeline (`UF_Households.js`, `UF_Colonists.js`, `UF_Ownership.js`)**:
+  - `ensureTownHallHomes` assigns all 8 founder colonists to the communal 7x7 Town Hall until their private homesteads are built and moved in.
+  - Allocated 8 beds across the 4 corner alcoves of the Town Hall with `isShared: true`.
+  - When private homesteads are walled, roofed, and bedded, `checkMoveIn` switches `h.home` to `h.privateHomestead`, clears Town Hall bed reservations, awards "Moved into our new home!" (+15 mood), and unlocks intimacy.
+  - Refined `fireSleepCells` radius to `[2, 1, 3, 4]` around hearths, ensuring unbedded colonists sleep warmly within safe range.
 - **Verification Evidence**:
-  - `node tools/run_tests.js colonists`: 22 passed, 2 failed (exit 1). `tools_and_clothes` passed with huge speedup.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 19 seconds.
+  - `node tools/test_town_hall_ai_live.js`: **23/23 PASS (exit 0)**.
+  - Mutant check `node tools/test_town_hall_ai_live.js --mutant=no_town_hall_beds`: PASS (failed as expected, Rule 4).
   - Node syntax checks on all modified plugins: 100% PASS with 0 syntax errors.
+  - **Rule 5 Visual Screenshot Inspected**: `live_town_hall_built_beds.png` shows the 7x7 Town Hall enclosed by 2-square wooden walls, central campfire, 8 alcove straw beds, and 8 colonists living inside.
 
 ## Fog Z-Level Isolation, Fire Safety, Bed Priority & Dwelling Warmth — 2026-09-20 (Gemini)
 Delivered per user directives ("fog of war clearance should be limited to current z level", "I dont necessarily want the starting area perma fog of war free either", "people are dying around the fire. the fire makes the entire dwelling warm. Just make them make a bed", "no floor"):

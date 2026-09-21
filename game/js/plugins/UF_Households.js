@@ -53,7 +53,10 @@
     }
     function context(u) {
         const d = u && u.data, c = C() && C().state(u), home = d && d.home;
-        if (!d || !d.faction || d.site === undefined || d.site === null) return null;
+        if (!d || !d.faction) return null;
+        const siteId = (d.site !== undefined && d.site !== null) ? d.site : (c && c.siteId !== undefined ? c.siteId : (d.kind === "colonist" ? 1 : null));
+        if (siteId === null || siteId === undefined) return null;
+        if (d.site === undefined) d.site = siteId;
         const a = c || (home && home.area ? home : u), z = zOf(a);
         if (!a.area || !Number.isInteger(z) || z < -2 || z > 2) return null;
         return { faction: d.faction, siteId: d.site, area: { x: a.area.x, y: a.area.y }, z };
@@ -293,16 +296,24 @@
     }
     function ensureTownHallHomes(people) {
         const w = W();
-        if (!w || !w.state || !w.state.history || !w.state.history.sites) return;
-        for (const site of w.state.history.sites) {
+        if (!w || !w.state) return;
+        const sites = (w.state.history && Array.isArray(w.state.history.sites) && w.state.history.sites.length)
+            ? w.state.history.sites
+            : (C() && typeof C().site === "function" && C().site() ? [C().site()] : []);
+        if (!sites.length) return;
+        for (const site of sites) {
             if (!site || site.ruined) continue;
-            const siteUnits = people.filter(u => u.data && (u.data.site === site.id || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
-            const founders = siteUnits.filter(u => u.data && u.data.founder);
+            const siteId = site.id || 1;
+            site.id = siteId;
+            const siteArea = site.area || (w.viewLevel ? w.viewLevel() : { x: 0, y: 0 });
+            site.area = siteArea;
+            const siteUnits = people.filter(u => u.data && (u.data.site === siteId || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
+            const founders = siteUnits.filter(u => u.data && (u.data.founder || (!u.data.motherId && !u.data.fatherId && u.data.stage !== "child")));
             if (founders.length < 2) continue;
             const founderH = [...new Set(founders.map(u => of(u)).filter(Boolean))];
             if (founderH.length === 0) continue;
-            const existingPrivate = founderH.some(h => h.home && !h.home.isShared);
-            if (existingPrivate) continue;
+            const allPrivateMovedIn = founderH.every(h => h.home && !h.home.isShared && h.isMovedIn);
+            if (allPrivateMovedIn) continue;
 
             const area = { x: site.area.x, y: site.area.y };
             const z = zOf(site);
@@ -366,7 +377,7 @@
                 const member = orderedFounders[i] || null;
                 const unitId = member ? member.id : null;
                 sharedBeds.push({ x: bPos.x, y: bPos.y, unitId });
-                if (member && member.data && (!member.data.bed || member.data.bed.isShared)) {
+                if (member && member.data && (!of(member) || !of(member).isMovedIn)) {
                     member.data.bed = { area: copyArea(area), x: bPos.x, y: bPos.y, z, isShared: true };
                 }
             }
@@ -404,7 +415,10 @@
             }
 
             for (const h of founderH) {
-                if (!h.home || h.home.isShared) {
+                if (!h.home || h.home.isShared || !h.isMovedIn) {
+                    if (h.home && !h.home.isShared) {
+                        h.privateHomestead = h.home;
+                    }
                     h.home = townHall;
                 }
             }
@@ -996,8 +1010,12 @@
             }
         }
         // Physical Move-In / Housewarming event: couple occupies their private homestead
-        if (h && !h.isMovedIn && !home.isShared && strictEnclosure(h, home) && home.beds.some(b => object(h, b))) {
+        const targetHome = h.privateHomestead || (!home.isShared ? home : null);
+        if (h && !h.isMovedIn && targetHome && strictEnclosure(h, targetHome) && (targetHome.beds || []).some(b => object(h, b))) {
             h.isMovedIn = true;
+            h.previousSharedHome = h.home;
+            h.home = targetHome;
+            delete h.privateHomestead;
             if (h.previousSharedHome) {
                 for (const m of current) {
                     if (m.data && m.data.bed && m.data.bed.isShared) {
@@ -1109,7 +1127,7 @@
             }
         }
         if (!c || !c.site) return [];
-        const home = ensureHome(h, u);
+        const home = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : ensureHome(h, u);
         if (!home) return [];
         ensureExpansion(h, u);
         syncHome(h);

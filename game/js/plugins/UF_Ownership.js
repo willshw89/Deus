@@ -286,7 +286,19 @@
         if (oldBed) {
             release(objectRef(oldBed, oldBed.x, oldBed.y), unit);
         }
-        if (unit.data && unit.data.bed) delete unit.data.bed;
+        if (unit.data) unit.data.bed = null;
+        const H = window.UF && UF.Households;
+        const h = H && H.of ? H.of(unit) : null;
+        if (h) {
+            const homes = [h.home, ...(h.home && h.home.annexes ? h.home.annexes : [])].filter(Boolean);
+            for (const home of homes) {
+                if (Array.isArray(home.beds)) {
+                    for (const b of home.beds) {
+                        if (b.unitId === unit.id) b.unitId = null;
+                    }
+                }
+            }
+        }
         emit("ownership:bedUnassigned", unit, oldBed ? Object.assign({}, oldBed) : null);
         return true;
     }
