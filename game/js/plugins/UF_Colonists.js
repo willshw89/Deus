@@ -2884,6 +2884,115 @@
         return null;
     }
 
+    // Autonomous calling jobs: when direct plan steps are waiting on raw materials, in-flight hauling,
+    // or blocked, specialists proactively practice their callings (Woodcutters harvest timber, Miners
+    // quarry stone, Foragers collect food/fiber, Cooks prepare hot meals, and Haulers tidy loose resources).
+    function autonomousCallingJob(u) {
+        const c = colonyState(u);
+        const O = Objects();
+        const I = Items();
+        const J = Jobs();
+        if (!c || !O || !I || !J || !c.site) return null;
+        if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
+
+        const Callings = getCallings();
+        if (!Callings) return null;
+
+        const area = levelArea(u);
+        const radius = c.radius ? Math.max(c.radius + 20, 40) : 40;
+
+        const isW = Callings.isWoodcutter(u);
+        const isM = Callings.isMiner(u);
+        const isF = Callings.isForager(u);
+        const isC = Callings.isCook(u);
+        const isH = Callings.isHauler(u);
+
+        // Helper to avoid targeting buildings, constructed walls, doors, or claimed objects
+        const isHarvestable = (t, x, y, action) => {
+            if (!t) return false;
+            if (hasTag(t, "wall") || hasTag(t, "building") || hasTag(t, "door") || hasTag(t, "bed") || hasTag(t, "furniture") || hasTag(t, "fire") || t.build) return false;
+            if (isObjectClaimed(u, x, y, action)) return false;
+            return true;
+        };
+
+        // 1. Woodcutter: harvest natural trees for timber
+        if (isW) {
+            const tree = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                if (!t.actions || !t.actions.chop) return false;
+                return isHarvestable(t, x, y, "chop");
+            });
+            if (tree) {
+                const tool = toolJob(u, "chop");
+                if (tool) return tool;
+                return give(u, { type: "chop", target: { x: tree.x, y: tree.y }, params: { calling: "woodcutter" } });
+            }
+        }
+
+        // 2. Miner: quarry or mine rock formations and mineral outcrops
+        if (isM) {
+            const rock = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                const act = t.actions && (t.actions.quarry ? "quarry" : t.actions.mine ? "mine" : t.actions.pick ? "pick" : null);
+                if (!act) return false;
+                return isHarvestable(t, x, y, act);
+            });
+            if (rock) {
+                const act = rock.type.actions.quarry ? "quarry" : rock.type.actions.mine ? "mine" : "pick";
+                const tool = toolJob(u, act);
+                if (tool) return tool;
+                return give(u, { type: act, target: { x: rock.x, y: rock.y }, params: { calling: "miner" } });
+            }
+        }
+
+        // 3. Forager: collect wild herbs, berries, edible plants, or fiber
+        if (isF) {
+            const plant = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                const act = t.actions && (t.actions.gather ? "gather" : t.actions.harvest ? "harvest" : null);
+                if (!act) return false;
+                return isHarvestable(t, x, y, act);
+            });
+            if (plant) {
+                const act = plant.type.actions.gather ? "gather" : "harvest";
+                return give(u, { type: act, target: { x: plant.x, y: plant.y }, params: { calling: "forager" } });
+            }
+        }
+
+        // 4. Cook: prepare meals if raw food exists and a hearth/campfire is lit
+        if (isC) {
+            const fire = homeFire(u);
+            if (fire) {
+                const rawInInv = I.inventoryOf(u.id).find(it => {
+                    const t = itemType(it.type);
+                    return rawFood(t) && cookRecipeFor(it.type);
+                });
+                if (rawInInv) {
+                    const r = cookRecipeFor(rawInInv.type);
+                    if (r) {
+                        const spec = cookSpec(u, r.id, "autonomous_cooking");
+                        if (spec) return give(u, spec);
+                    }
+                }
+                const looseRaw = groundItemsNear(u, { radius: radius }).find(f => {
+                    const t = itemType(f.item.type);
+                    return rawFood(t) && cookRecipeFor(f.item.type) && !onStockpile(f.item, null, u);
+                });
+                if (looseRaw) {
+                    const r = cookRecipeFor(looseRaw.item.type);
+                    if (r) {
+                        return give(u, { type: "fetch", target: { x: looseRaw.x, y: looseRaw.y }, params: { itemId: looseRaw.item.id, plan: "autonomous_cooking" } });
+                    }
+                }
+            }
+        }
+
+        // 5. Hauler: tidy loose ground clutter into stockpiles
+        if (isH) {
+            const tidy = tidyStockpileJob(u);
+            if (tidy) return tidy;
+        }
+
+        return null;
+    }
+
     // Idle: explore (curiosity), stroll near the site, or stand and think.
     function idleJob(u) {
         const c = colonyState(u);
@@ -2998,7 +3107,23 @@
             }
         }
 
-        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || idleJob(u);
+        return designationJob(u) || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || autonomousCallingJob(u) || idleJob(u);
+    }
+
+    function isLowPriorityJob(job, u) {
+        if (!job || !job.params) return false;
+        if (job.params.stroll || job.params.explore || job.params.fireGather) return true;
+        const Callings = getCallings();
+        if (job.params.tidy && (!Callings || !Callings.isHauler(u))) return true;
+        return false;
+    }
+
+    function hasHighPriorityJob(u) {
+        if (designationJob(u)) return true;
+        if (footprintClearingJob(u)) return true;
+        if (UF.Agriculture && UF.Agriculture.planJob && UF.Agriculture.planJob(u)) return true;
+        if (planJob(u)) return true;
+        return false;
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
@@ -3033,6 +3158,19 @@
                 if (need && !NEED_JOBS.includes(job.type) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                     preemptAt.set(u.id, t);
                     J.cancel(job.id, need === "thirst" ? "too thirsty to go on" : "too hungry to go on");
+                } else if (!NEED_JOBS.includes(job.type)) {
+                    const isStalled = (job.blocked && job.blocked >= 1) || (job.stall && t - job.stall.since >= 180);
+                    if (isStalled) {
+                        J.cancel(job.id, "blocked or stalled, swapping task");
+                        if (job.target) {
+                            const key = avoidKey(u, job.type, job.target.x, job.target.y);
+                            avoid.set(key, t + AVOID_TICKS);
+                        }
+                        decisionAt.set(u.id, -Infinity);
+                    } else if (isLowPriorityJob(job, u) && hasHighPriorityJob(u)) {
+                        J.cancel(job.id, "high-priority task ready, swapping task");
+                        decisionAt.set(u.id, -Infinity);
+                    } else continue;
                 } else continue;
             }
             if (t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;
@@ -3224,7 +3362,13 @@
     function onFailed(job) {
         arrivals.delete(job.id);
         const u = job.assigned ? settler(job.assigned) : null;
-        if (u) decisionAt.set(u.id, -Infinity);
+        if (u) {
+            decisionAt.set(u.id, -Infinity);
+            if (job.target) {
+                const key = avoidKey(u, job.type, job.target.x, job.target.y);
+                avoid.set(key, ticks() + AVOID_TICKS);
+            }
+        }
     }
 
     //-------------------------------------------------------------------------

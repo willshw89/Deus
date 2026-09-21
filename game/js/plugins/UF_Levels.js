@@ -103,7 +103,7 @@
         mined_soil: { sheet: "Dungeon_A2", slot: "A2", kind: 2 },
         deck_wood: { sheet: "Inside_A2", slot: "A2", kind: 8 },
         deck_stone: { sheet: "Inside_A2", slot: "A2", kind: 1 },
-        open_air: { sheet: "Outside_A5", slot: "A5", tile: 19, tint: "#6f8fb8" },
+        open_air: { sheet: null, slot: "A2", color: "#000000" },
         hole_edge: { sheet: "Dungeon_A2", slot: "A2", kind: 6 },
         roof_wood: { sheet: "Outside_A3", slot: "A3", kind: 4 },
         stair_up: { sheet: "Dungeon_B", slot: "B", tile: 2 },
@@ -119,7 +119,7 @@
         vein_gem: { sheet: "Dungeon_B", slot: "B", tile: 37 }
     });
     // Flat colours drawn in a slot whose sheet failed to load, so a level still reads (graybox).
-    const FALLBACK_RGB = { rock: "#5c5c68", soil: "#6e5c48", open_air: "#6f8fb8", hole_edge: "#20242c" };
+    const FALLBACK_RGB = { rock: "#5c5c68", soil: "#6e5c48", open_air: "#000000", hole_edge: "#20242c" };
     const IMPASSABLE_LOOKS = new Set(["rock", "soil", "open_air", "hole_edge"]);
     const SHEETS = Object.freeze({ A1: "UF_GenLevels_A1", A2: "UF_GenLevels_A2", A4: "UF_GenLevels_A4", B: "UF_GenLevels_B" });
     const SHEET_SIZE = Object.freeze({ A1: [768, 576], A2: [768, 576], A4: [768, 720], B: [768, 768] });
@@ -321,6 +321,10 @@
             const block = slot === "A2" ? { x: (index % 8) * 96, y: Math.floor(index / 8) * 144, w: 96, h: 144 }
                 : slot === "A4" ? { x: (index % 8) * 96, y: 0, w: 96, h: 240 }
                     : { x: ((Math.floor(index / 128) % 2) * 8 + (index % 8)) * 48, y: Math.floor((index % 128) / 8) * 48, w: 48, h: 48 };
+            if (key === "open_air" || (e && e.color === "#000000")) {
+                dst.fillRect(block.x, block.y, block.w, block.h, "#000000");
+                continue;
+            }
             const bmp = e && composed.sources[e.sheet];
             const src = e ? sourceOf(e) : null;
             if (!bmp || !bmp.isReady() || bmp.isError() || !src) {
@@ -764,10 +768,11 @@
     function looksOfPacked(p, z, biomeInfo) {
         const s = p & 7, c = (p & 8) !== 0, m = p >> 4;
         let base, l1 = null, l2 = null;
-        if (s === SOLID) base = m === SOIL ? "soil" : "rock";
+        if (z > 0 && (s === OPEN || s === 0)) {
+            base = "open_air";
+        } else if (s === SOLID) base = m === SOIL ? "soil" : "rock";
         else if (s === OPEN) {
-            if (z > 0) base = "open_air";
-            else { base = "cave_floor"; l1 = "hole_edge"; }
+            base = "cave_floor"; l1 = "hole_edge";
         } else {
             base = c ? (m === WOOD ? "deck_wood" : "deck_stone") : "cave_floor";
             if (!c && s === FLOOR && biomeInfo) {
@@ -952,6 +957,16 @@
         _Spriteset_Map_createCharacters_naturalWalls.call(this);
         this._ufNaturalWalls = new Sprite_UFNaturalWalls();
         this._tilemap.addChild(this._ufNaturalWalls);
+    };
+
+    const _Spriteset_Map_updateParallax = Spriteset_Map.prototype.updateParallax;
+    Spriteset_Map.prototype.updateParallax = function() {
+        _Spriteset_Map_updateParallax.call(this);
+        const W = World();
+        const v = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        if (v && v.z > 0 && this._parallax) {
+            this._parallax.visible = false;
+        }
     };
 
     function describeCell(ref) {

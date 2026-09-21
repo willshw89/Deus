@@ -53,7 +53,30 @@
     const UPDATE_FRAMES = 6;
     const FOG_RGB = [4, 8, 12];
 
+    // Sight radii per user specification (2026-09-20):
+    // Individual colonist at night: 5–6 tiles (6)
+    // Individual colonist in daylight: 8–10 tiles (9)
+    // Campfire at night: 7–9 tiles (8)
+    // Torch: 4–6 tiles (5)
+    // Permanent settlement/building: 8–12 tiles (10)
+    // Lookout/watchtower: 15–25 tiles (20)
+    const COLONIST_NIGHT_SIGHT = 6;
+    const COLONIST_DAY_SIGHT = 9;
+    const CAMPFIRE_SIGHT = 8;
+    const TORCH_SIGHT = 5;
+    const SETTLEMENT_SIGHT = 10;
+    const WATCHTOWER_SIGHT = 20;
+
     const sources = [];
+    const provocation = (() => {
+        try {
+            const argv = (typeof nw !== "undefined" && nw.App && nw.App.argv) || [];
+            if (!argv.some(a => a === "--uf-test" || String(a).startsWith("--uf-test="))) return "";
+            return String((typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || "");
+        } catch (_) { return ""; }
+    })();
+    const provokes = name => provocation.split(",").map(s => s.trim()).includes(name) || provocation === "fog.all";
+
     let mapKey = null;   // which map the buffers belong to
     let explored = null; // Uint8Array(width * height): 1 = explored
     let visible = null;  // Uint8Array(width * height): 1 = seen right now
@@ -109,19 +132,114 @@
         return true;
     }
 
-    function mark(cx, cy, r) {
-        const r2 = r * r;
-        for (let dy = -r; dy <= r; dy++) {
-            const y = cy + dy;
-            if (y < 0 || y >= height) continue;
-            for (let dx = -r; dx <= r; dx++) {
-                const x = cx + dx;
-                if (x < 0 || x >= width || dx * dx + dy * dy > r2) continue;
-                const i = y * width + x;
-                visible[i] = 1;
-                explored[i] = 1;
+    function isOpaque(x, y) {
+        if (x < 0 || y < 0 || x >= width || y >= height) return true;
+
+        const W = window.UF && UF.World;
+        const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        const z = area ? area.z : 0;
+
+        // 1. Objects: Walls, closed doors, boulders
+        const O = window.UF && UF.Objects;
+        if (O && typeof O.atIn === "function") {
+            const obj = O.atIn(area, x, y);
+            if (obj) {
+                if (obj.autotile === "wall" ||
+                    (Array.isArray(obj.tags) && obj.tags.includes("wall")) ||
+                    (typeof obj.id === "string" && (obj.id.includes("wall") || obj.id === "granite_boulder" || obj.id === "cave_boulder"))) {
+                    return true;
+                }
+                const isDoor = (Array.isArray(obj.tags) && obj.tags.includes("door")) ||
+                               (window.UF && UF.Doors && typeof UF.Doors.isDoorType === "function" && UF.Doors.isDoorType(obj));
+                if (isDoor) {
+                    const isOpen = window.UF && UF.Doors && typeof UF.Doors.isOpen === "function" && UF.Doors.isOpen(area, x, y);
+                    if (!isOpen) return true;
+                }
             }
         }
+
+        // 2. Underground solid rock
+        if (z < 0) {
+            const L = window.UF && UF.Levels;
+            if (L && typeof L.shapeAt === "function") {
+                const s = L.shapeAt({ area, x, y, z });
+                if (s === "solid" || s === 1) return true;
+            }
+        }
+
+        // 3. Peak mountain region
+        if (z === 0) {
+            const map = window.$dataMap;
+            if (map && map.data) {
+                const size = (W && W.state && W.state.size) || map.width || 256;
+                const idx = y * size + x;
+                if (map.data[5 * size * size + idx] === 250) return true;
+            }
+        }
+
+        return false;
+    }
+
+    function mark(cx, cy, r) {
+        if (cx < 0 || cy < 0 || cx >= width || cy >= height) return;
+        const cIdx = cy * width + cx;
+        visible[cIdx] = 1;
+        explored[cIdx] = 1;
+        if (r <= 0) return;
+
+        const r2 = r * r;
+        const steps = Math.max(120, Math.round(r * 16));
+        const angleStep = (Math.PI * 2) / steps;
+
+        for (let i = 0; i < steps; i++) {
+            const angle = i * angleStep;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            let prevX = cx, prevY = cy;
+
+            for (let d = 0.5; d <= r; d += 0.5) {
+                const x = Math.round(cx + cos * d);
+                const y = Math.round(cy + sin * d);
+                if (x < 0 || x >= width || y < 0 || y >= height) break;
+
+                const dx = x - cx, dy = y - cy;
+                if (dx * dx + dy * dy > r2) break;
+
+                if (x !== prevX || y !== prevY) {
+                    // Check for diagonal pinch between two touching orthogonal walls
+                    if (x !== prevX && y !== prevY) {
+                        if (Fog.isOpaque(x, prevY) && Fog.isOpaque(prevX, y)) {
+                            break;
+                        }
+                    }
+
+                    const idx = y * width + x;
+                    visible[idx] = 1;
+                    explored[idx] = 1;
+
+                    // Obstacle surface is visible, but blocks vision beyond
+                    if (Fog.isOpaque(x, y)) {
+                        break;
+                    }
+
+                    prevX = x;
+                    prevY = y;
+                }
+            }
+        }
+    }
+
+    function colonistSightRadius(u) {
+        if (u) {
+            const eq = u.equipment || {};
+            if (eq.tool === "torch" || eq.held === "torch" || (u.data && u.data.tags && u.data.tags.includes("torch"))) {
+                return TORCH_SIGHT;
+            }
+            if (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) {
+                return WATCHTOWER_SIGHT;
+            }
+        }
+        return COLONIST_DAY_SIGHT;
     }
 
     //-------------------------------------------------------------------------
@@ -130,32 +248,108 @@
     const Fog = {
         sightRadius: SIGHT,
         exploredDim: DIM,
+        COLONIST_NIGHT_SIGHT,
+        COLONIST_DAY_SIGHT,
+        CAMPFIRE_SIGHT,
+        TORCH_SIGHT,
+        SETTLEMENT_SIGHT,
+        WATCHTOWER_SIGHT,
+        colonistSightRadius,
+        isOpaque,
+        mark,
         /** Add a function returning [{ x, y, radius }] for things that should reveal the fog. */
         addObserverSource(fn) {
             sources.push(fn);
         },
         observers() {
             const list = [];
+            const W = window.UF && UF.World;
+
+            // 1. Colonists / player units (Daylight 8-10 [9], Night 5-6 [5-6] via visionFactor 0.55)
+            const seenUnits = new Set();
             if (window.$colonyManager && $colonyManager.colonists) {
                 for (const c of $colonyManager.colonists) {
                     const ev = c.event;
-                    if (ev) list.push({ x: ev.x, y: ev.y, radius: c.visionRadius || SIGHT });
+                    if (ev) {
+                        seenUnits.add(c.id || `${ev.x},${ev.y}`);
+                        const r = colonistSightRadius(c);
+                        const fixed = (c.data && (c.data.atWatchtower || c.data.job === "watchtower" || c.data.job === "scout")) ||
+                                      (c.equipment && (c.equipment.tool === "torch" || c.equipment.held === "torch"));
+                        list.push({ x: ev.x, y: ev.y, radius: r, type: "colonist", scaleWithDayNight: !fixed });
+                    }
                 }
             }
-            if (window.UF && UF.World && UF.World.state) {
-                const W = UF.World;
+            if (W && W.state) {
                 const pid = window.UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
                 for (const u of W.units()) {
+                    if (seenUnits.has(u.id) || seenUnits.has(`${u.x},${u.y}`)) continue;
                     const isPlayerCreature = u.data && (
                         u.data.faction === "player" ||
                         (pid !== null && u.data.faction === pid) ||
                         u.data.kind === "colonist"
                     );
                     if (isPlayerCreature && W.isDisplayed(u)) {
-                        list.push({ x: u.x, y: u.y, radius: u.data.sight || SIGHT });
+                        seenUnits.add(u.id);
+                        const r = colonistSightRadius(u);
+                        const fixed = (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) ||
+                                      (u.equipment && (u.equipment.tool === "torch" || u.equipment.held === "torch"));
+                        list.push({ x: u.x, y: u.y, radius: r, type: "colonist", scaleWithDayNight: !fixed });
                     }
                 }
             }
+            if (list.length === 0 && window.$gamePlayer) {
+                list.push({ x: $gamePlayer.x, y: $gamePlayer.y, radius: COLONIST_DAY_SIGHT, type: "colonist", scaleWithDayNight: true });
+            }
+
+            // 2. Campfires: 7-9 tiles (8 tiles) at night and day (fixed light source, scaleWithDayNight: false)
+            const campfireCells = new Set();
+            const historyFounders = W && W.state && W.state.history && W.state.history.founders;
+            if (historyFounders) {
+                for (const fid of Object.keys(historyFounders)) {
+                    const f = historyFounders[fid];
+                    if (f && f.camp && (fid === "player" || (window.UF && UF.Factions && fid === UF.Factions.playerId()))) {
+                        campfireCells.add(`${f.camp.x},${f.camp.y}`);
+                    }
+                }
+            }
+            const households = window.UF && UF.Households && typeof UF.Households.list === "function" ? UF.Households.list() : [];
+            for (const h of households) {
+                if (h && h.hearth) campfireCells.add(`${h.hearth.x},${h.hearth.y}`);
+            }
+            if (campfireCells.size === 0) {
+                const col = window.UF && UF.Colonists && typeof UF.Colonists.state === "function" ? UF.Colonists.state() : null;
+                if (col && col.site) {
+                    campfireCells.add(`${col.site.x},${col.site.y}`);
+                }
+            }
+            for (const key of campfireCells) {
+                const [cx, cy] = key.split(",").map(Number);
+                list.push({ x: cx, y: cy, radius: CAMPFIRE_SIGHT, type: "campfire", scaleWithDayNight: false });
+            }
+
+            // 3. Permanent settlement / buildings: 8-12 tiles (10 tiles)
+            if (window.UF && UF.Colonists) {
+                const col = UF.Colonists.state && UF.Colonists.state();
+                if (col && col.site) {
+                    list.push({ x: col.site.x, y: col.site.y, radius: SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false });
+                }
+            }
+            if (window.UF && UF.Outposts && typeof UF.Outposts.buildings === "function") {
+                for (const b of UF.Outposts.buildings()) {
+                    if (b && (b.stage === "complete" || b.stage === "walls")) {
+                        const bx = b.x + Math.floor((b.w || 4) / 2);
+                        const by = b.y + Math.floor((b.h || 4) / 2);
+                        if (b.archetype === "watchtower") {
+                            // 5. Lookout / watchtower: 15-25 tiles (20 tiles)
+                            list.push({ x: bx, y: by, radius: WATCHTOWER_SIGHT, type: "watchtower", scaleWithDayNight: false });
+                        } else {
+                            list.push({ x: bx, y: by, radius: SETTLEMENT_SIGHT, type: "building", scaleWithDayNight: false });
+                        }
+                    }
+                }
+            }
+
+            // 6. Registered custom sources
             for (const fn of sources) {
                 try {
                     for (const o of fn() || []) list.push(o);
@@ -325,6 +519,48 @@
             const corner = { x: 2, y: 2 };
             const far = obs.every(o => Math.hypot(o.x - corner.x, o.y - corner.y) > o.radius);
             t.check("far_is_unexplored", far && !Fog.isExplored(corner.x, corner.y), `cell (${corner.x},${corner.y}) explored: ${Fog.isExplored(corner.x, corner.y)}`);
+
+            // User-specified radii validation
+            const colDay = Fog.COLONIST_DAY_SIGHT;
+            const colNight = Fog.COLONIST_NIGHT_SIGHT;
+            const campR = Fog.CAMPFIRE_SIGHT;
+            const torchR = Fog.TORCH_SIGHT;
+            const setR = Fog.SETTLEMENT_SIGHT;
+            const towerR = Fog.WATCHTOWER_SIGHT;
+            t.check("sight_radii_specs",
+                colNight >= 5 && colNight <= 6 &&
+                colDay >= 8 && colDay <= 10 &&
+                campR >= 7 && campR <= 9 &&
+                torchR >= 4 && torchR <= 6 &&
+                setR >= 8 && setR <= 12 &&
+                towerR >= 15 && towerR <= 25,
+                `Sight radii: colonistNight=${colNight} (5-6), colonistDay=${colDay} (8-10), campfire=${campR} (7-9), torch=${torchR} (4-6), settlement=${setR} (8-12), watchtower=${towerR} (15-25)`);
+
+            // Active campfire & settlement observers
+            const campObs = obs.find(o => o.type === "campfire");
+            t.check("campfire_observer_active", !!campObs && campObs.radius >= 7 && campObs.radius <= 9,
+                campObs ? `active campfire observer at (${campObs.x},${campObs.y}) r${campObs.radius}` : "no campfire observer found");
+            const bldObs = obs.find(o => o.type === "building");
+            t.check("settlement_observer_active", !!bldObs && bldObs.radius >= 8 && bldObs.radius <= 12,
+                bldObs ? `active settlement observer at (${bldObs.x},${bldObs.y}) r${bldObs.radius}` : "no settlement observer found");
+
+            // Line of Sight (LOS) occlusion assertion:
+            const testWallX = 130, testWallY = 128;
+            const savedIsOpaque = Fog.isOpaque;
+            if (provokes("no_los")) {
+                Fog.isOpaque = () => false;
+            } else {
+                Fog.isOpaque = (x, y) => (x === testWallX && y === testWallY);
+            }
+            visible.fill(0);
+            mark(128, 128, 8);
+            const wallSeen = visible[testWallY * width + testWallX] === 1;
+            const behindWallSeen = visible[testWallY * width + (testWallX + 1)] === 1;
+            const openGroundSeen = visible[testWallY * width + (testWallX - 1)] === 1;
+            Fog.isOpaque = savedIsOpaque;
+            Fog.refresh();
+            t.check("los_blocks_behind_wall", wallSeen && !behindWallSeen && openGroundSeen,
+                `LOS occlusion: wall face (${testWallX},${testWallY}) seen=${wallSeen}, behind wall (${testWallX + 1},${testWallY}) seen=${behindWallSeen} (want false), open ground (${testWallX - 1},${testWallY}) seen=${openGroundSeen}`);
 
             // Image values: visible = clear, explored-but-unseen = dim, unexplored = black.
             const probe = { x: 20, y: 20 };

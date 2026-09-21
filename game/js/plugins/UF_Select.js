@@ -277,6 +277,23 @@
     let lastSummaryData = null;
     const perfStats = { previewMs: 0, commitMs: 0, worstFrameMs: 0, frames: 0 };
 
+    let targetedTileCoord = null;
+    function setTargetedTile(x, y) {
+        if (typeof x === "number" && typeof y === "number") {
+            targetedTileCoord = { x, y };
+        } else if (x && typeof x.x === "number" && typeof x.y === "number") {
+            targetedTileCoord = { x: x.x, y: x.y };
+        } else {
+            targetedTileCoord = null;
+        }
+    }
+    function clearTargetedTile() {
+        targetedTileCoord = null;
+    }
+    function targetedTile() {
+        return targetedTileCoord ? Object.assign({}, targetedTileCoord) : null;
+    }
+
     function getSelectedUnits() {
         const W = World();
         if (!W) return [];
@@ -310,6 +327,7 @@
     function clearSelection() {
         selectedGroup = [];
         syncOverseerSelection();
+        clearTargetedTile();
         emit("select:changed", []);
     }
 
@@ -880,19 +898,25 @@
             const u = sortedUnits[i];
             const cell = candidates[i];
             if (cell) {
-                if (C && typeof C.order === "function" && (C.isColonist(u) || (u.data && u.data.kind === "colonist"))) {
-                    C.order(u.id, { type: "move", target: { area, x: cell.x, y: cell.y, z: tz } });
-                } else if (J && typeof J.create === "function") {
-                    J.create({ type: "move", target: { area, x: cell.x, y: cell.y, z: tz }, owner: u.id, params: { ordered: true } });
+                let orderedJob = null;
+                if (C && typeof C.order === "function" && C.isColonist(u)) {
+                    orderedJob = C.order(u.id, { type: "move", target: { area, x: cell.x, y: cell.y, z: tz } });
                 }
-                movingCount++;
+                if (!orderedJob && J && typeof J.create === "function") {
+                    orderedJob = J.create({ type: "move", target: { area, x: cell.x, y: cell.y, z: tz }, owner: u.id, params: { ordered: true } });
+                }
+                if (orderedJob) movingCount++;
             } else {
                 noCellCount++;
             }
         }
 
-        if (movingCount > 0) SoundManager.playOk();
-        else SoundManager.playBuzzer();
+        if (movingCount > 0) {
+            setTargetedTile(tx, ty);
+            SoundManager.playOk();
+        } else {
+            SoundManager.playBuzzer();
+        }
 
         setStatus(`${movingCount} moving${noCellCount > 0 ? `; ${noCellCount} found no free cell.` : ""}`);
     }
@@ -1053,6 +1077,9 @@
             if (!b) return;
             b.clear();
 
+            // Hovered tile selector & targeted tile square brackets
+            this.drawTileSelector(b);
+
             const curZ = viewZ();
             const W = World();
             const curArea = W ? W.currentArea() : null;
@@ -1173,6 +1200,101 @@
             b.fontSize = 11;
             b.textColor = "#0f172a";
             b.drawText(zone.name, lx + 2, ly + 2, 100, 14, "left");
+        }
+
+        drawTileSelector(b) {
+            if (!window.$gameMap || !window.$dataMap) return;
+            const look = window.UF && UF.Look;
+            if (look && typeof look.isOverUI === "function" && look.isOverUI()) return;
+
+            const z = window.UF.Camera ? UF.Camera.zoom() : 1;
+            const tileSize = 48 * z;
+
+            // 1. Hovered tile: translucent white selector
+            const hx = $gameMap.canvasToMapX(TouchInput.x);
+            const hy = $gameMap.canvasToMapY(TouchInput.y);
+            const isHoveredValid = $gameMap.isValid(hx, hy) && TouchInput.x >= 0 && TouchInput.x < Graphics.width && TouchInput.y >= 0 && TouchInput.y < Graphics.height;
+
+            if (isHoveredValid) {
+                const sx = Math.round($gameMap.adjustX(hx) * tileSize);
+                const sy = Math.round($gameMap.adjustY(hy) * tileSize);
+                const sw = Math.round(($gameMap.adjustX(hx) + 1) * tileSize) - sx;
+                const sh = Math.round(($gameMap.adjustY(hy) + 1) * tileSize) - sy;
+
+                if (sx + sw > 0 && sy + sh > 0 && sx < Graphics.width && sy < Graphics.height) {
+                    // Translucent white fill
+                    b.fillRect(sx, sy, sw, sh, "rgba(255, 255, 255, 0.22)");
+                    // Inset crisp white border
+                    b.fillRect(sx, sy, sw, 1, "rgba(255, 255, 255, 0.65)");
+                    b.fillRect(sx, sy + sh - 1, sw, 1, "rgba(255, 255, 255, 0.65)");
+                    b.fillRect(sx, sy, 1, sh, "rgba(255, 255, 255, 0.65)");
+                    b.fillRect(sx + sw - 1, sy, 1, sh, "rgba(255, 255, 255, 0.65)");
+                }
+            }
+
+            // 2. Targeted tile: square brackets [ ]
+            const tgt = this.currentActiveTargetTile();
+            if (tgt && $gameMap.isValid(tgt.x, tgt.y)) {
+                const tsx = Math.round($gameMap.adjustX(tgt.x) * tileSize);
+                const tsy = Math.round($gameMap.adjustY(tgt.y) * tileSize);
+                const tsw = Math.round(($gameMap.adjustX(tgt.x) + 1) * tileSize) - tsx;
+                const tsh = Math.round(($gameMap.adjustY(tgt.y) + 1) * tileSize) - tsy;
+
+                if (tsx + tsw > 0 && tsy + tsh > 0 && tsx < Graphics.width && tsy < Graphics.height) {
+                    this.drawSquareBrackets(b, tsx, tsy, tsw, tsh, z);
+                }
+            }
+        }
+
+        drawSquareBrackets(b, x, y, w, h, z) {
+            const arm = Math.max(8, Math.round(12 * z));
+            const thick = Math.max(2, Math.round(3 * z));
+
+            // Dark drop-shadow outline for high contrast against any terrain
+            const sArm = arm + 1;
+            const sThick = thick + 2;
+            const sColor = "rgba(0, 0, 0, 0.80)";
+
+            // Left bracket shadow [
+            b.fillRect(x - 1, y - 1, sArm, sThick, sColor);
+            b.fillRect(x - 1, y - 1, sThick, h + 2, sColor);
+            b.fillRect(x - 1, y + h - sThick + 1, sArm, sThick, sColor);
+
+            // Right bracket shadow ]
+            b.fillRect(x + w - sArm + 1, y - 1, sArm, sThick, sColor);
+            b.fillRect(x + w - sThick + 1, y - 1, sThick, h + 2, sColor);
+            b.fillRect(x + w - sArm + 1, y + h - sThick + 1, sArm, sThick, sColor);
+
+            // Bright white square brackets
+            const bracketColor = "#ffffff";
+            // Left bracket: [
+            b.fillRect(x, y, arm, thick, bracketColor);
+            b.fillRect(x, y, thick, h, bracketColor);
+            b.fillRect(x, y + h - thick, arm, thick, bracketColor);
+
+            // Right bracket: ]
+            b.fillRect(x + w - arm, y, arm, thick, bracketColor);
+            b.fillRect(x + w - thick, y, thick, h, bracketColor);
+            b.fillRect(x + w - arm, y + h - thick, arm, thick, bracketColor);
+        }
+
+        currentActiveTargetTile() {
+            if (window.UF && UF.Target && UF.Target.targetedTile()) {
+                return UF.Target.targetedTile();
+            }
+            if (window.$colonyManager && $colonyManager.selectedColonist) {
+                const sel = $colonyManager.selectedColonist;
+                const u = sel.unit;
+                if (u && u.goal && u.goal.x !== undefined && u.goal.y !== undefined) {
+                    return { x: u.goal.x, y: u.goal.y };
+                }
+                const J = window.UF && UF.Jobs;
+                const job = J ? J.of(sel.id) : null;
+                if (job && job.target && job.target.x !== undefined && job.target.y !== undefined) {
+                    return { x: job.target.x, y: job.target.y };
+                }
+            }
+            return null;
         }
     }
 
@@ -1799,8 +1921,32 @@
                     groupMove({ area: p.area, x: p.mx, y: p.my, z: p.z });
                 }
             } else if (!isProvoked("plain_click")) {
-                replayingClick = true;
-                replayData = { x: p.sx, y: p.sy };
+                const u = findUnitAt(p.mx, p.my, p.area, p.z);
+                if (u && isPlayerUnit(u)) {
+                    setSelection([u.id]);
+                    SoundManager.playCursor();
+                } else if (selectedGroup.length === 1) {
+                    const uid = selectedGroup[0];
+                    const selU = W ? W.unit(uid) : null;
+                    if (selU) {
+                        const C = Colonists();
+                        const J = Jobs();
+                        let ordered = null;
+                        if (C && typeof C.order === "function" && C.isColonist(selU)) {
+                            ordered = C.order(uid, { type: "move", target: { area: p.area, x: p.mx, y: p.my, z: p.z } });
+                        }
+                        if (!ordered && J && typeof J.create === "function") {
+                            ordered = J.create({ type: "move", target: { area: p.area, x: p.mx, y: p.my, z: p.z }, owner: uid, params: { ordered: true } });
+                        }
+                        if (ordered) {
+                            setTargetedTile(p.mx, p.my);
+                            SoundManager.playOk();
+                        }
+                    }
+                } else {
+                    replayingClick = true;
+                    replayData = { x: p.sx, y: p.sy };
+                }
             }
         }
 
@@ -2067,6 +2213,32 @@
                 groupMove({ area, x: mx, y: my, z: curZ });
                 TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
             }
+        } else if (!isProvoked("plain_click")) {
+            const u = findUnitAt(mx, my, area, curZ);
+            if (u && isPlayerUnit(u)) {
+                setSelection([u.id]);
+                SoundManager.playCursor();
+                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+            } else if (selectedGroup.length === 1) {
+                const uid = selectedGroup[0];
+                const selU = W ? W.unit(uid) : null;
+                if (selU) {
+                    const C = Colonists();
+                    const J = Jobs();
+                    let ordered = null;
+                    if (C && typeof C.order === "function" && C.isColonist(selU)) {
+                        ordered = C.order(uid, { type: "move", target: { area, x: mx, y: my, z: curZ } });
+                    }
+                    if (!ordered && J && typeof J.create === "function") {
+                        ordered = J.create({ type: "move", target: { area, x: mx, y: my, z: curZ }, owner: uid, params: { ordered: true } });
+                    }
+                    if (ordered) {
+                        setTargetedTile(mx, my);
+                        SoundManager.playOk();
+                        TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                    }
+                }
+            }
         }
     }
 
@@ -2101,17 +2273,26 @@
         lastSummary: () => (lastSummaryData ? Object.assign({}, lastSummaryData) : null),
         stats: () => Object.assign({}, perfStats),
         statusText: () => statusText,
-        registeredKeys: () => Object.assign({}, registeredKeys)
+        registeredKeys: () => Object.assign({}, registeredKeys),
+        targetedTile,
+        setTargetedTile,
+        clearTargetedTile
     };
 
     window.UF = window.UF || {};
     window.UF.Select = SelectAPI;
+    window.UF.Target = {
+        setTargetedTile,
+        clearTargetedTile,
+        targetedTile
+    };
 
     //-------------------------------------------------------------------------
     // Test Suite: "select"
     //-------------------------------------------------------------------------
 
     function registerSelectChecks() {
+        if (!window.UF || !UF.Test || typeof UF.Test.suite !== "function") return;
         UF.Test.suite("select", async t => {
             const W = World(), O = Objects(), I = Items(), J = Jobs(), C = Colonists();
             const area = W ? W.currentArea() : null;
@@ -2620,7 +2801,61 @@
             t.check("select.big_rect_frame_time", !isProvoked("big_rect_frame_time") && worstMs <= 25,
                 `Big rectangle frame time: worst frame=${worstMs.toFixed(2)} ms (budget <= 25 ms in test harness)`);
 
-            // 15. Check: select.no_errors
+            // 15. Check: select.tile_hover_selector
+            cleanArena();
+            clearAllJobs();
+            clearSelection();
+            setTool(null);
+            const hx = x0 + 4, hy = y0 + 4;
+            const hp = mapToCanvas(hx, hy);
+            TouchInput._x = hp.x;
+            TouchInput._y = hp.y;
+            await t.waitFrames(3);
+
+            const overlay = SceneManager._scene && SceneManager._scene._spriteset ? SceneManager._scene._spriteset._ufSelectOverlay : null;
+            const ob = overlay && overlay.bitmap;
+            let hoverAlpha = 0;
+            if (ob) {
+                hoverAlpha = ob.getAlphaPixel(hp.x, hp.y);
+            }
+            t.screenshot("select.tile_hover_selector");
+            t.check("select.tile_hover_selector", !isProvoked("tile_hover_selector") && hoverAlpha > 30 && hoverAlpha < 100,
+                `Hover tile selector: alpha at (${hp.x},${hp.y})=${hoverAlpha} (want translucent ~56 alpha, range 30-100)`);
+
+            // 16. Check: select.target_square_brackets
+            const tgtX = x0 + 6, tgtY = y0 + 4;
+            SelectAPI.setTargetedTile(tgtX, tgtY);
+            await t.waitFrames(3);
+
+            const tp = mapToCanvas(tgtX, tgtY);
+            const z = window.UF.Camera ? UF.Camera.zoom() : 1;
+            const tileSize = 48 * z;
+            const tsx = Math.round($gameMap.adjustX(tgtX) * tileSize);
+            const tsy = Math.round($gameMap.adjustY(tgtY) * tileSize);
+
+            let bracketWhiteFound = false;
+            let bracketShadowFound = false;
+            if (ob) {
+                const pColor = ob.getPixel(tsx + 2, tsy + 1);
+                bracketWhiteFound = pColor === "#ffffff";
+                bracketShadowFound = ob.getAlphaPixel(tsx - 1, tsy - 1) > 100;
+            }
+            t.screenshot("select.target_square_brackets");
+
+            // Also hover over targeted tile to demonstrate both simultaneously
+            TouchInput._x = tp.x;
+            TouchInput._y = tp.y;
+            await t.waitFrames(3);
+            t.screenshot("select.hover_and_target_brackets");
+
+            SelectAPI.clearTargetedTile();
+            await t.waitFrames(2);
+            const targetedAfterClear = SelectAPI.targetedTile();
+
+            t.check("select.target_square_brackets", !isProvoked("target_square_brackets") && bracketWhiteFound && bracketShadowFound && targetedAfterClear === null,
+                `Target square brackets: white corner found=${bracketWhiteFound}, shadow found=${bracketShadowFound}, clearTargetedTile works=${targetedAfterClear === null}`);
+
+            // 17. Check: select.no_errors
             const finalErrors = t.errorsSoFar().length;
             t.check("select.no_errors", !isProvoked("no_errors") && finalErrors === initialErrors,
                 `Errors during suite: gained ${finalErrors - initialErrors} errors`);
@@ -2635,5 +2870,7 @@
             cancelBox("suite finished");
         }, { isDefault: false });
     }
+
+    registerSelectChecks();
 
 })();

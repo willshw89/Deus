@@ -121,6 +121,9 @@
         }
         deselect() {
             this.selectedColonist = null;
+            if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
+                UF.Target.clearTargetedTile();
+            }
             if (activeColonyWindow) activeColonyWindow.hide();
         }
     }
@@ -200,8 +203,14 @@
                 SoundManager.playCursor();
             } else if ($colonyManager.selectedColonist && Colonists()) {
                 const job = Colonists().order($colonyManager.selectedColonist.id, { type: "move", target: { x: mx, y: my } });
-                if (job && job.state !== "failed") SoundManager.playOk();
-                else SoundManager.playBuzzer();
+                if (job && job.state !== "failed") {
+                    SoundManager.playOk();
+                    if (window.UF && UF.Target && typeof UF.Target.setTargetedTile === "function") {
+                        UF.Target.setTargetedTile(mx, my);
+                    }
+                } else {
+                    SoundManager.playBuzzer();
+                }
             }
         }
 
@@ -209,9 +218,17 @@
         if (TouchInput.isCancelled()) {
             const interact = window.UF && UF.Interact;
             const menuTook = !!interact && ((typeof interact.tookCancel === "function" && interact.tookCancel()) || (typeof interact.isOpen === "function" && interact.isOpen()));
-            if ($colonyManager.selectedColonist && !menuTook) {
-                $colonyManager.deselect();
-                SoundManager.playCancel();
+            if (!menuTook) {
+                let didCancel = false;
+                if ($colonyManager.selectedColonist) {
+                    $colonyManager.deselect();
+                    didCancel = true;
+                }
+                if (window.UF && UF.Target && UF.Target.targetedTile && UF.Target.targetedTile()) {
+                    UF.Target.clearTargetedTile();
+                    didCancel = true;
+                }
+                if (didCancel) SoundManager.playCancel();
             }
         }
 

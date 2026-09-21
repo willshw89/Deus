@@ -6,6 +6,49 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-20
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Tile Selector, Targeted Brackets, Black Upper Levels, Sight Radii & Dynamic AI Task Swapping — 2026-09-20 (Gemini)
+Delivered per user directives ("I would like a translucent white selector on the tile currently hovered by the cursor. An additional square bracket on the tile if it is targetted", "I want the panoramic background on layers +1 and +2 to be pure black", "If something is in the fog of war, do not display its glow", "Change 'Embark' here to 'Start'", "Also for AI, if something is stopping you from doing something higher priority, let's have them swap what they are doing (within reason)", and sight radii / clearance affected by LOS):
+- **Hover Tile Translucent White Selector (`UF_Select.js`)**:
+  - Automatically highlights the cell under the mouse cursor with a translucent white fill (`rgba(255, 255, 255, 0.22)`) and a 1px inset crisp white border (`rgba(255, 255, 255, 0.65)`).
+  - Automatically suppressed when hovering over UI windows (cards, menus, toolbars) via `pointerOverUI()`.
+- **Targeted Tile Square Brackets (`UF_Select.js`, `UF_ColonyOverseer.js`)**:
+  - Displays high-contrast tactical square brackets (`[` on the left edge and `]` on the right edge) with dark drop shadows (`rgba(0, 0, 0, 0.80)`) framing any targeted cell.
+  - Active whenever a tile is targeted: via `UF.Target.setTargetedTile(x, y)`, via colonist move order, or via group movement.
+  - When the cursor hovers over the targeted tile, BOTH the translucent selector AND the square brackets render concurrently.
+  - Cleared automatically on arrival, right-click cancellation, or explicit deselect via `UF.Target.clearTargetedTile()`.
+  - Exposed `window.UF.Target = { setTargetedTile, clearTargetedTile, targetedTile }`.
+- **Pure Black Panoramic Background on Layers +1 and +2 (`UF_Levels.js`)**:
+  - Changed `DEFAULT_LOOK.open_air` from Outside_A5 sky/cloud tiles to pure black (`sheet: null, slot: "A2", color: "#000000"`).
+  - Set `FALLBACK_RGB.open_air = "#000000"` and directly filled autotile slot with `#000000`.
+  - Suppressed parallax layer on `viewLevel().z > 0`.
+  - Verified in NW.js on active Level +1 map (`live_greater_z_plane_roof_deck.png`).
+- **Fog Glow Suppression & Sight Radii with Raymarched LOS (`UF_DayNight.js`, `UF_Fog.js`)**:
+  - `Sprite_UFGlowLayer: isInFog(x, y)`: completely skips rendering glow for objects and units covered by fog of war.
+  - Configured exact sight radii: individual colonist daylight (8-10, scales to 5-6 at night), campfire (7-9), torch (4-6), permanent settlement (8-12), watchtower (15-25).
+  - Raymarched line of sight with diagonal pinch blocking and wall face illumination with shadow occlusion behind walls.
+- **Dynamic AI Task Swapping & Primary Calling Allocation (`UF_Colonists.js`)**:
+  - Added priority preemption: if a higher-priority task arises or a colonist is blocked/stalled (> 3 seconds), colonists cleanly cancel lower-priority actions and swap tasks while protecting survival needs (drink, eat, sleep).
+  - Restricted `autonomousCallingJob(u)` to primary vocation (`Callings.isWoodcutter(u)` etc.) ensuring proper division of labor.
+- **New Game Setup Screen: "Start" (`UF_FactionMenus.js`)**:
+  - Renamed "Embark" button to "Start" matching user directive.
+- **Verification Evidence**:
+  - `node tools/test_snapshot.js --name select_test --plugins UF_Select --suite select`: **17/17 PASS (exit 0)**:
+    - `PASS select.select.tile_hover_selector`: alpha at hovered tile = 56 (~22% translucent white).
+    - `PASS select.select.target_square_brackets`: white bracket corner and drop shadow verified, `clearTargetedTile` verified.
+    - Provocation test (`UF_TEST_PROVOKE="tile_hover_selector,target_square_brackets"`): **FAILED with exit code 1** (Rule 4).
+  - `node tools/test_greater_z_roof_live.js`: **16/16 PASS (exit 0)** on Level +1:
+    - `PASS smoke.greater_z_open_air`: Wilderness on Z=1: shape=open, standable=false.
+    - `PASS smoke.level_plus1_tiles_rendered`: Center deck autotiled, air filled with pure black open_air.
+  - `node tools/run_tests.js setup`: **43/43 PASS (exit 0)**.
+  - `node tools/run_tests.js daynight`: **16/16 PASS (exit 0)** (`PASS daynight.glow_suppressed_in_fog`).
+  - `node tools/run_tests.js fog`: **14/14 PASS (exit 0)** (`PASS fog.sight_radii_specs`, `PASS fog.los_blocks_behind_wall`).
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)**.
+  - **Rule 5 Visual Screenshots Inspected**:
+    - `live_greater_z_plane_roof_deck.png`: Level +1 roof deck centered in solid black panoramic background.
+    - `live_tile_selector_hovered.png`: Translucent white selector box on hovered meadow tile.
+    - `live_tile_target_brackets.png`: Tactical square brackets `[` `]` on targeted tile with drop shadow.
+    - `live_tile_hover_and_target_brackets.png`: Both selector and square brackets active on same tile.
+
 ## Deus Branding, Executable & Project Cleanup — 2026-09-20 (Gemini)
 Delivered per user directives ("Also let's rename the executable Deus", "Anything UF, U7, Ultima, DF, Dwarf Fortress, can be renamed Deus or pruned if we dont need it"):
 - **Native Deus Game Executable (`Deus.exe`, `game/Deus.exe`)**:

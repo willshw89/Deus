@@ -446,7 +446,7 @@
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
-                this.drawText("Embark", rect.x, rect.y, rect.width, "center");
+                this.drawText("Start", rect.x, rect.y, rect.width, "center");
             } else if (index === 3) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");

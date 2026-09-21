@@ -132,7 +132,10 @@
         const baseObservers = UF.Fog.observers.bind(UF.Fog);
         UF.Fog.observers = function() {
             const f = DayNight.visionFactor();
-            return baseObservers().map(o => Object.assign({}, o, { radius: Math.max(1, Math.round(o.radius * f)) }));
+            return baseObservers().map(o => {
+                if (o.scaleWithDayNight === false) return o;
+                return Object.assign({}, o, { radius: Math.max(1, Math.round(o.radius * f)) });
+            });
         };
     }
 
@@ -260,6 +263,12 @@
             return false;
         }
 
+        isInFog(x, y) {
+            const Fog = window.UF && UF.Fog;
+            if (!Fog || !Fog.enabled || typeof Fog.isVisible !== "function") return false;
+            return !Fog.isVisible(x, y);
+        }
+
         hasBlockingInRadius(area, cx, cy, z, tileRadius) {
             const minX = Math.floor(cx - tileRadius);
             const maxX = Math.ceil(cx + tileRadius);
@@ -267,7 +276,7 @@
             const maxY = Math.ceil(cy + tileRadius);
             for (let y = minY; y <= maxY; y++) {
                 for (let x = minX; x <= maxX; x++) {
-                    if (this.isBlocked(area, x, y, z)) return true;
+                    if (this.isBlocked(area, x, y, z) || this.isInFog(x, y)) return true;
                 }
             }
             return false;
@@ -308,9 +317,9 @@
                 if (dist >= maxDist) {
                     return { x: x0 + maxDist * dx, y: y0 + maxDist * dy };
                 }
-                if (this.isBlocked(area, mapX, mapY, z)) {
-                    // Hit wall: stop at wall surface with small penetration (0.3 tiles) to illuminate the wall face
-                    const hitDist = dist + 0.3;
+                if (this.isBlocked(area, mapX, mapY, z) || this.isInFog(mapX, mapY)) {
+                    // Hit wall or fog of war: stop at surface (do not display glow in fog of war)
+                    const hitDist = this.isInFog(mapX, mapY) ? dist : dist + 0.3;
                     const rawX = x0 + hitDist * dx;
                     const rawY = y0 + hitDist * dy;
                     const clampedX = Math.max(mapX + 0.05, Math.min(mapX + 0.95, rawX));
@@ -342,9 +351,10 @@
             const maxY = Math.min(W.state ? W.state.size - 1 : 255, Math.ceil(dy + (Graphics.height / (th * zFactor))) + 2);
 
             const lights = [];
-            // 1. Objects & terrain
+            // 1. Objects & terrain: skip anything in fog of war
             for (let cy = minY; cy <= maxY; cy++) {
                 for (let cx = minX; cx <= maxX; cx++) {
+                    if (this.isInFog(cx, cy)) continue;
                     const obj = O && O.atIn ? O.atIn(area, cx, cy) : null;
                     if (obj) {
                         const tags = obj.tags || [];
@@ -370,10 +380,11 @@
                 }
             }
 
-            // 2. Units with light sources
+            // 2. Units with light sources: skip units in fog of war
             if (W && typeof W.unitsInArea === "function") {
                 for (const u of W.unitsInArea(area.x, area.y)) {
                     if (!u || (u.z !== undefined && u.z !== z)) continue;
+                    if (this.isInFog(u.x, u.y)) continue;
                     const eq = u.equipment || {};
                     const tags = (u.data && u.data.tags) || [];
                     if (eq.tool === "torch" || eq.held === "torch" || eq.light || tags.includes("light") || tags.includes("fire")) {
@@ -572,6 +583,28 @@
                     O.setIn(area, campX + 2, campY, origBehind || null);
                     if (O.refresh) O.refresh();
                     await t.waitFrames(4);
+
+                    // Regression check: objects in fog of war must not display glow
+                    if (window.UF && UF.Fog && UF.Fog.enabled) {
+                        const fogX = 2, fogY = 2; // far corner cell in unexplored fog
+                        const origFogObj = O.typeIdIn(area, fogX, fogY);
+                        O.setIn(area, fogX, fogY, "campfire");
+                        if (O.refresh) O.refresh();
+                        await t.waitFrames(8);
+
+                        const inFog = !UF.Fog.isVisible(fogX, fogY);
+                        const sxFog = Math.round(((fogX - dX) + 0.5) * tw * zF);
+                        const syFog = Math.round(((fogY - dY) + 0.5) * th * zF);
+                        const fogGlowAlpha = (sxFog >= 0 && sxFog < bmp.width && syFog >= 0 && syFog < bmp.height)
+                            ? ctx.getImageData(sxFog, syFog, 1, 1).data[3]
+                            : 0;
+                        t.check("glow_suppressed_in_fog", inFog && fogGlowAlpha === 0,
+                            `far object at (${fogX},${fogY}) inFog=${inFog}, glow layer alpha=${fogGlowAlpha} (want 0 in fog)`);
+
+                        O.setIn(area, fogX, fogY, origFogObj || null);
+                        if (O.refresh) O.refresh();
+                        await t.waitFrames(4);
+                    }
                 }
             }
 
