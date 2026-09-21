@@ -15,7 +15,6 @@ var $plugins =
 {"name":"UF_Perspective25D","status":true,"description":"[UF Perspective25D] Ultima VII 2.5D axonometric projection, Z-elevation, dynamic depth sorting, canopy occlusion, and cast shadows.","parameters":{"TileHeightStep":"36","EnableShadows":"true","OcclusionOpacity":"120"}},
 {"name":"UF_ColonyOverseer","status":true,"description":"[UF ColonyOverseer] Camera, click-to-select, the colonist card and the society plan line; colonist behaviour lives in UF_Colonists.","parameters":{"EdgePanSpeed":"6"}},
 {"name":"UF_Construction","status":true,"description":"[UF Construction] Dwarf Fortress grid-based blueprint construction, natural resource gathering, and hauling jobs.","parameters":{}},
-{"name":"UF_ProcGen","status":true,"description":"[UF ProcGen] Retired 2026-09-18 (no-op): world generation lives in UF_WorldGen.","parameters":{"GladeRadius":"12"}},
 {"name":"UF_World","status":true,"description":"[UF_World]","parameters":{}},
 {"name":"UF_WorldGen","status":true,"description":"[UF_WorldGen]","parameters":{}},
 {"name":"UF_Tiles","status":true,"description":"[UF Tiles] Ground kinds drawn in code and the runtime world tileset (91).","parameters":{}},

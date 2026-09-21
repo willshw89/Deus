@@ -480,6 +480,10 @@
 
         update() {
             super.update();
+            if (currentZ() > 0) {
+                this.visible = false;
+                return;
+            }
             if (!ensureMap()) {
                 this.visible = false;
                 return;

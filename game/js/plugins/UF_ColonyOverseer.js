@@ -114,17 +114,12 @@
         }
         select(colonist) {
             this.selectedColonist = colonist && typeof colonist === "number" ? this.colonists.find(c => c.id === colonist) || null : colonist;
-            if (activeColonyWindow) {
-                activeColonyWindow.refresh();
-                if (this.selectedColonist) activeColonyWindow.show();
-            }
         }
         deselect() {
             this.selectedColonist = null;
             if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
                 UF.Target.clearTargetedTile();
             }
-            if (activeColonyWindow) activeColonyWindow.hide();
         }
     }
     window.$colonyManager = new ColonyManager();
@@ -451,21 +446,17 @@
     const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
     Scene_Map.prototype.createAllWindows = function() {
         _Scene_Map_createAllWindows.call(this);
-        this._colonyCard = new Window_UFColonistCard();
-        activeColonyWindow = this._colonyCard;
-        this.addWindow(this._colonyCard);
-        if ($colonyManager.selectedColonist) {
-            this._colonyCard.refresh();
-            this._colonyCard.show();
-        }
+        // Colonist card retired per user directive (all data viewed on ProfileTabs / Sheet)
+        this._colonyCard = null;
+        activeColonyWindow = null;
     };
     window.UF = window.UF || {};
     window.UF.Overseer = {
-        card: () => activeColonyWindow,
+        card: () => null,
         /** The card's load line as last drawn ("" when the colonist carries nothing or no card is shown). */
-        cardLoadText: () => (activeColonyWindow && activeColonyWindow.visible ? activeColonyWindow._ufLoadText || "" : ""),
+        cardLoadText: () => "",
         /** The load line's band in the card's contents (for checks that read its pixels). */
-        loadRect: () => ({ x: 0, y: LOAD_Y + 13, w: activeColonyWindow ? activeColonyWindow.innerWidth : CARD_W - 24, h: 13 }),
+        loadRect: () => ({ x: 0, y: LOAD_Y + 13, w: CARD_W - 24, h: 13 }),
         colonistAt,
         CARD_W, CARD_H, LOAD_Y
     };
@@ -538,9 +529,9 @@
             await t.waitFrames(15);
             const card = SceneManager._scene._colonyCard;
             const d = C.describe(c.id);
-            t.check("click_selects_and_card_opens", clicked === c && $colonyManager.selectedColonist === c && !!card && card.visible && !!d && d.name === c.name && d.faction.length > 0,
-                `mouse at (${TouchInput.x},${TouchInput.y}) over ${c.name} at (${ev.x},${ev.y}) -> colonistAt ${clicked ? clicked.name : "null"}; card visible ${card ? card.visible : "no card"}; title "${d ? `${d.name} (${d.gender}) · ${d.faction} · ${d.site}` : ""}", job "${d ? d.job : ""}"`);
-            t.screenshot("card");
+            t.check("click_selects_colonist_without_card", clicked === c && $colonyManager.selectedColonist === c && !card && !!d && d.name === c.name && d.faction.length > 0,
+                `mouse at (${TouchInput.x},${TouchInput.y}) over ${c.name} at (${ev.x},${ev.y}) -> colonistAt ${clicked ? clicked.name : "null"}; colonist card retired (!card: ${!card}); title "${d ? `${d.name} (${d.gender}) · ${d.faction} · ${d.site}` : ""}", job "${d ? d.job : ""}"`);
+            t.screenshot("selected_colonist");
             // An order through the adapter: a move job owned by the colonist.
             const job = c.assignMoveTo(ev.x + 2, ev.y);
             t.check("ground_click_orders_move", !!job && job.type === "move" && job.owner === c.id && J.of(c.id) === job, `assignMoveTo -> ${job ? `${job.type} #${job.id} ${job.state}` : "null"}`);
@@ -549,7 +540,7 @@
             t.check("society_progress", Array.isArray(prog.steps) && prog.steps.length > 0 && typeof prog.text === "string" && prog.text.includes(":"), `"${prog.text}"`);
             $colonyManager.deselect();
             await t.waitFrames(2);
-            t.check("deselect_hides_card", !$colonyManager.selectedColonist && !!card && !card.visible, `card visible after deselect: ${card ? card.visible : "no card"}`);
+            t.check("deselect_clears_selection", !$colonyManager.selectedColonist && !card, `selectedColonist cleared: ${!$colonyManager.selectedColonist}`);
             t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during overseer checks");
         }, { isDefault: false });
     }

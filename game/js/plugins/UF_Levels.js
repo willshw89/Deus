@@ -103,7 +103,7 @@
         mined_soil: { sheet: "Dungeon_A2", slot: "A2", kind: 2 },
         deck_wood: { sheet: "Inside_A2", slot: "A2", kind: 8 },
         deck_stone: { sheet: "Inside_A2", slot: "A2", kind: 1 },
-        open_air: { sheet: null, slot: "A2", color: "#000000" },
+        open_air: { sheet: null, slot: "A2", color: "transparent" },
         hole_edge: { sheet: "Dungeon_A2", slot: "A2", kind: 6 },
         roof_wood: { sheet: "Outside_A3", slot: "A3", kind: 4 },
         stair_up: { sheet: "Dungeon_B", slot: "B", tile: 2 },
@@ -119,7 +119,7 @@
         vein_gem: { sheet: "Dungeon_B", slot: "B", tile: 37 }
     });
     // Flat colours drawn in a slot whose sheet failed to load, so a level still reads (graybox).
-    const FALLBACK_RGB = { rock: "#5c5c68", soil: "#6e5c48", open_air: "#000000", hole_edge: "#20242c" };
+    const FALLBACK_RGB = { rock: "#5c5c68", soil: "#6e5c48", open_air: "rgba(0,0,0,0)", hole_edge: "#20242c" };
     const IMPASSABLE_LOOKS = new Set(["rock", "soil", "open_air", "hole_edge"]);
     const SHEETS = Object.freeze({ A1: "UF_GenLevels_A1", A2: "UF_GenLevels_A2", A4: "UF_GenLevels_A4", B: "UF_GenLevels_B" });
     const SHEET_SIZE = Object.freeze({ A1: [768, 576], A2: [768, 576], A4: [768, 720], B: [768, 768] });
@@ -321,7 +321,11 @@
             const block = slot === "A2" ? { x: (index % 8) * 96, y: Math.floor(index / 8) * 144, w: 96, h: 144 }
                 : slot === "A4" ? { x: (index % 8) * 96, y: 0, w: 96, h: 240 }
                     : { x: ((Math.floor(index / 128) % 2) * 8 + (index % 8)) * 48, y: Math.floor((index % 128) / 8) * 48, w: 48, h: 48 };
-            if (key === "open_air" || (e && e.color === "#000000")) {
+            if (key === "open_air") {
+                dst.clearRect(block.x, block.y, block.w, block.h);
+                continue;
+            }
+            if (e && e.color === "#000000") {
                 dst.fillRect(block.x, block.y, block.w, block.h, "#000000");
                 continue;
             }
@@ -1041,6 +1045,14 @@
         if (!z) return;
         const W = World(), st = W.state, size = ctx.width;
         ctx.map.tilesetId = TILESET_ID;
+        if (z > 0) {
+            ctx.map.parallaxName = "BlueSky";
+            ctx.map.parallaxShow = true;
+            ctx.map.parallaxLoopX = true;
+            ctx.map.parallaxLoopY = true;
+            ctx.map.parallaxSx = 0;
+            ctx.map.parallaxSy = 0;
+        }
         const b = baseline(z, ctx.areaX, ctx.areaY);
         const grid = new Uint8Array(size * size);
         for (let i = 0; i < grid.length; i++) grid[i] = pack(b.shape[i], false, b.material[i]);
@@ -1249,12 +1261,36 @@
 
     const _Spriteset_Map_updateParallax = Spriteset_Map.prototype.updateParallax;
     Spriteset_Map.prototype.updateParallax = function() {
-        _Spriteset_Map_updateParallax.call(this);
         const W = World();
         const v = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
-        if (v && v.z > 0 && this._parallax) {
-            this._parallax.visible = false;
+        const isSky = v && v.z > 0;
+        if (isSky) {
+            if (this._parallaxName !== "BlueSky") {
+                this._parallaxName = "BlueSky";
+                this._parallax.bitmap = ImageManager.loadParallax("BlueSky");
+            }
+            if (this._parallax) {
+                this._parallax.visible = true;
+                if (this._parallax.bitmap && this._parallax.bitmap.isReady()) {
+                    const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
+                    this._parallax.origin.x = $gameMap.displayX() * tw * 0.5;
+                    this._parallax.origin.y = $gameMap.displayY() * th * 0.5;
+                }
+            }
+        } else {
+            _Spriteset_Map_updateParallax.call(this);
+            if (this._parallax && (!v || v.z <= 0)) {
+                this._parallax.visible = false;
+            }
         }
+    };
+
+    const _Game_Map_parallaxName = Game_Map.prototype.parallaxName;
+    Game_Map.prototype.parallaxName = function() {
+        const W = World();
+        const v = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        if (v && v.z > 0) return "BlueSky";
+        return _Game_Map_parallaxName.call(this);
     };
 
     function describeCell(ref) {

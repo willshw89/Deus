@@ -7,7 +7,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- None (Diagonal Movement Geometry delivered and verified).
+- None.
+
+## Sky Panoramic Background (+1/+2), Colonist Card Removal & Plugin Retirement Batch 1 Delivered — 2026-09-21 (Gemini)
+Delivered per user directives ("The panoramic background for +1 and +2 should be sky", "also get rid of the colonist card. all the data will be on the other menu when we click a unit", and Plugin Retirement Batch 1 Conditional Approval):
+- **Sky Panoramic Background on Levels +1 and +2 (`UF_Levels.js`, `UF_Fog.js`)**:
+  - `UF_Levels.js`: Made `open_air` autotile cells fully transparent (`clearRect` in `composeRuntimeSheets`, `rgba(0,0,0,0)` in default/fallback look definitions) so the parallax layer behind the tilemap shows through open air.
+  - `UF_Levels.js`: Automatically configured `BlueSky` parallax background (`parallaxShow = true`, `parallaxLoopX = true`, `parallaxLoopY = true`) and smooth half-speed camera scrolling when `z > 0`.
+  - `UF_Fog.js`: Disabled fog overlay on `z > 0` (`if (currentZ() > 0) { this.visible = false; return; }`), preventing opaque dark fog from occluding the sky background on upper levels.
+  - Verified visually via `game/test_output/vertical.view_plus1.png` showing azure blue sky with clouds through open air on level +1.
+- **Colonist Card Retirement (`UF_ColonyOverseer.js`)**:
+  - Removed bottom-left `Window_UFColonistCard` display and update hooks. All colonist inspection data is now consolidated into the comprehensive 8-tab `UF_ProfileTabs` (`UF_Sheet`) window on the right.
+  - Cleared bottom-left HUD footprint; selection hooks preserved for camera tracking and profile tab binding.
+  - Verified visually via `game/test_output/overseer.selected_colonist.png` showing clean bottom-left screen and unit selection.
+- **Plugin Retirement Batch 1 (Completed & Safely Quarantined)**:
+  - Quarantined 6 obsolete plugins with verified SHA-256 hashes to `archive/plugins/` (`UF_ProcGen.js`, `UF_FogOfWar.js`, and `archive/plugins/stock_rmmz/{AltMenuScreen.js, AltSaveScreen.js, ButtonPicture.js, TextPicture.js}`).
+  - Removed obsolete registration of `UF_ProcGen` from `game/js/plugins.js`.
+  - Whitelisted `!/archive/` in `.gitignore` to preserve archived plugins under git version control.
+- **Verification Evidence**:
+  - `tools/test_profile_tabs.js`: **46/46 PASS (exit 0)**.
+  - `run_tests.bat overseer`: **6/6 PASS (exit 0)**.
+  - `run_tests.bat smoke`: **13/13 PASS (exit 0)**.
+  - `run_tests.bat world`: **30/30 PASS (exit 0)**.
+  - `run_tests.bat timespeed`: **24/24 PASS (exit 0)**.
+
 
 ## Diagonal Movement Geometry: Corner-Cut Prohibition & Doorway/Wall-Adjacent Navigation Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("I don't want creatures moving diagonally thru corners, but I do want them to be able to move diagonally if there is a wall on one side of them, or a wall on two opposite sides (IE, so they can move though a doorway that is blocked on both sides by other creatures for example."):
