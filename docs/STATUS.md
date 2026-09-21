@@ -7,7 +7,23 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- None (Wooden chest locked in; paused per user directive).
+- None (Diagonal Movement Geometry delivered and verified).
+
+## Diagonal Movement Geometry: Corner-Cut Prohibition & Doorway/Wall-Adjacent Navigation Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("I don't want creatures moving diagonally thru corners, but I do want them to be able to move diagonally if there is a wall on one side of them, or a wall on two opposite sides (IE, so they can move though a doorway that is blocked on both sides by other creatures for example."):
+- **Passability & Geometry Rules Engine (`UF_Movement8D.js`)**:
+  - Implemented geometric inspection helpers `isWallTile(x, y)`, `hasOppositeWallsAt(x, y)`, `wallCountAt(x, y)`, and `isDoorwayTile(x, y)` on `window.UF_Dir8`.
+  - Prohibited diagonal cutting through obstacle corners (freestanding stone walls, tree line ends, outer building corners) and diagonal pinch points (two touching diagonal walls).
+  - Permitted diagonal movement into, through, and out of doorways/corridors (`hasOppositeWallsAt` or `isDoorwayTile`), even when the straight entrance and exit paths are blocked on both sides by other creatures.
+  - Permitted diagonal movement along or toward walls past flanking creatures when standing adjacent to a wall or moving into open terrain.
+- **Collision Avoidance & Path Execution (`UF_World.js`)**:
+  - Updated `stepAlongPath` so that when `ev.canPassDiagonally` is authorized, units take direct diagonal steps past blockers instead of falling back to orthogonal `viaCorner` steps that crash into doorframes.
+- **Verification Evidence (Rule 4 Proof)**:
+  - `tools/test_diagonal_corners_and_doorways.js`: **7/7 PASS (exit 0)** across obstacle corner rejection, pinch point rejection, horizontal/vertical doorway navigation past dual blockers, wall-adjacent navigation, and open field passage.
+  - Mutant `--mutant=allow_corner_cuts`: **FAILS check 1 with exit 1** (proven failure mode).
+  - Mutant `--mutant=block_doorway_diagonals`: **FAILS check 3 with exit 1** (proven failure mode).
+  - `tools/run_tests.js world`: **30/30 PASS (exit 0)** (verifying `no_corner_cut` for tree lines, `no_wall_steps`, `faces_eight_ways`, `path_budget`, `no_path_is_true`).
+  - `tools/run_tests.js colonists`: **24/24 PASS (exit 0)** (verifying autonomous colonist settlement construction, tool crafting, hunting, hearth cooking).
 
 ## Autonomous Nano Banana Pro Non-Living Production: Wooden Chest (`chest_wood`) Locked In — 2026-09-21 (Gemini)
 - **Asset**: `chest_wood` (`game/img/characters/!$UF_Chest_Wood.png`, `game/img/characters/!$UF_Chest_Wood.json`).

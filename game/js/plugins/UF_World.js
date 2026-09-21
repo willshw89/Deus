@@ -2008,10 +2008,15 @@
         const diag = isDiag(d);
         let blockedAt = ev.isCollidedWithCharacters(nx, ny) ? next : -1, viaCorner = 0;
         if (blockedAt < 0 && diag) {
-            const takenH = ev.isCollidedWithCharacters(nx, ev.y), takenV = ev.isCollidedWithCharacters(ev.x, ny);
-            if (takenH && takenV) blockedAt = ev.y * size + nx;
-            else if (takenH) viaCorner = ny > ev.y ? 2 : 8;
-            else if (takenV) viaCorner = nx > ev.x ? 6 : 4;
+            const horz = nx > ev.x ? 6 : 4, vert = ny > ev.y ? 2 : 8;
+            if (ev.canPassDiagonally && ev.canPassDiagonally(ev.x, ev.y, horz, vert)) {
+                viaCorner = 0;
+            } else {
+                const takenH = ev.isCollidedWithCharacters(nx, ev.y), takenV = ev.isCollidedWithCharacters(ev.x, ny);
+                if (takenH && takenV) blockedAt = ev.y * size + nx;
+                else if (takenH) viaCorner = vert;
+                else if (takenV) viaCorner = horz;
+            }
         }
         if (blockedAt >= 0) {
             if (ev.setDir8) ev.setDir8(d);

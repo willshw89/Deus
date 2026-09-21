@@ -202,37 +202,114 @@
         }
     };
 
-    // Strict Corner-Cutting Passability
+    // Geometric wall and doorway detection helpers for 8D movement
+    function isWallTile(x, y) {
+        if (!$gameMap || !$gameMap.isValid(x, y)) return true;
+        const O = window.UF && UF.Objects;
+        if (O && O.blocks && O.blocks(x, y)) {
+            const D = window.UF && UF.Doors;
+            if (D && D.isDoorType && D.isDoorType(O.at(x, y))) {
+                const area = $gameMap.areaX ? { x: $gameMap.areaX(), y: $gameMap.areaY(), z: 0 } : null;
+                const dObj = area && D.at ? D.at(area, x, y) : null;
+                if (!dObj || !dObj.state || !dObj.state.locked) return false;
+            }
+            return true;
+        }
+        if (!$gameMap.isPassable(x, y, 2) && !$gameMap.isPassable(x, y, 4) &&
+            !$gameMap.isPassable(x, y, 6) && !$gameMap.isPassable(x, y, 8)) {
+            return true;
+        }
+        if (typeof Tilemap !== "undefined" && Tilemap.isWaterTile && $gameMap.tileId && Tilemap.isWaterTile($gameMap.tileId(x, y, 0))) {
+            const R = window.UF && UF.Roads;
+            if (!(R && R.bridgeAt && R.bridgeAt(x, y))) return true;
+        }
+        return false;
+    }
+
+    function hasOppositeWallsAt(x, y) {
+        if (!$gameMap || !$gameMap.isValid(x, y)) return false;
+        const north = isWallTile(x, $gameMap.roundY(y - 1));
+        const south = isWallTile(x, $gameMap.roundY(y + 1));
+        const west = isWallTile($gameMap.roundX(x - 1), y);
+        const east = isWallTile($gameMap.roundX(x + 1), y);
+        return (north && south) || (west && east);
+    }
+
+    function wallCountAt(x, y) {
+        if (!$gameMap || !$gameMap.isValid(x, y)) return 0;
+        let count = 0;
+        if (isWallTile(x, $gameMap.roundY(y - 1))) count++;
+        if (isWallTile(x, $gameMap.roundY(y + 1))) count++;
+        if (isWallTile($gameMap.roundX(x - 1), y)) count++;
+        if (isWallTile($gameMap.roundX(x + 1), y)) count++;
+        return count;
+    }
+
+    function isDoorwayTile(x, y) {
+        if (!$gameMap || !$gameMap.isValid(x, y)) return false;
+        const O = window.UF && UF.Objects;
+        const D = window.UF && UF.Doors;
+        if (O && D && D.isDoorType && D.isDoorType(O.at(x, y))) return true;
+        return hasOppositeWallsAt(x, y);
+    }
+
+    if (window.UF_Dir8) {
+        window.UF_Dir8.isWallTile = isWallTile;
+        window.UF_Dir8.hasOppositeWallsAt = hasOppositeWallsAt;
+        window.UF_Dir8.wallCountAt = wallCountAt;
+        window.UF_Dir8.isDoorwayTile = isDoorwayTile;
+    }
+
+    // Strict Corner-Cutting Passability & Doorway/Wall-Adjacent Navigation
     Game_CharacterBase.prototype.canPassDiagonally = function(x, y, horz, vert) {
         if (fourWay) return false;
+        if (this.isThrough() || this.isDebugThrough()) return true;
+
         const x2 = $gameMap.roundXWithDirection(x, horz);
         const y2 = $gameMap.roundYWithDirection(y, vert);
 
-        // Destination must be passable from both directions and have no normal priority events
-        if (!this.canPass(x, y2, horz) && !this.canPass(x2, y, vert)) {
+        // Destination must be valid, walkable (not a wall/obstacle), and free of character collisions
+        if (!$gameMap.isValid(x2, y2)) return false;
+        if (isWallTile(x2, y2)) return false;
+        if (this.isCollidedWithCharacters(x2, y2)) return false;
+
+        const wallH = isWallTile(x2, y);
+        const wallV = isWallTile(x, y2);
+
+        // Pinch point: moving diagonally between two touching diagonal walls is strictly prohibited
+        if (wallH && wallV) {
             return false;
         }
 
-        if (strictCornerCutting) {
-            // Both flanking orthogonal tiles must be passable to avoid clipping diagonal corners
-            const canHorz = this.canPass(x, y, horz);
-            const canVert = this.canPass(x, y, vert);
-            if (!canHorz || !canVert) {
-                return false;
+        // Open terrain / room (neither intermediate tile is a wall)
+        if (!wallH && !wallV) {
+            const charH = this.isCollidedWithCharacters(x2, y);
+            const charV = this.isCollidedWithCharacters(x, y2);
+            // If at least one flanking tile has no character, diagonal path is clear
+            if (!charH || !charV) {
+                return true;
             }
-        } else {
-            // Standard check: at least one path around corner must be open
-            if (!this.canPass(x, y, vert) && !this.canPass(x, y, horz)) {
-                return false;
+            // Both intermediate tiles have characters: permitted if unit has a wall on one side or opposite walls
+            const startWalls = wallCountAt(x, y);
+            const targetWalls = wallCountAt(x2, y2);
+            if (startWalls > 0 || targetWalls > 0) {
+                return true;
             }
-        }
-
-        // Target tile collision check
-        if (this.isCollidedWithCharacters(x2, y2)) {
             return false;
         }
 
-        return true;
+        // Exactly one intermediate tile is a wall (wallH ^ wallV):
+        // Permitted ONLY if entering or exiting a doorway or corridor with opposite walls.
+        // Prohibited when cutting around an obstacle, tree, or building corner.
+        const startOpp = hasOppositeWallsAt(x, y) || isDoorwayTile(x, y);
+        const targetOpp = hasOppositeWallsAt(x2, y2) || isDoorwayTile(x2, y2);
+
+        if (startOpp || targetOpp) {
+            return true;
+        }
+
+        // Neither start nor target has opposite walls: this is cutting around an obstacle/wall corner (prohibited)
+        return false;
     };
 
     // Enhanced moveDiagonally with flag tracking and dir8
