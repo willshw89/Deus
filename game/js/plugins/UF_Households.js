@@ -1220,11 +1220,14 @@
         if (Array.isArray(h.home.rooms)) {
             return h.home.rooms.filter(r => r.type === "child").length;
         }
-        if (Array.isArray(h.home.annexes) && h.home.annexes.length > 0) {
-            return h.home.annexes.length;
+        // Count total bed capacity across all structures (main + annexes) minus 2 for parents
+        const structs = structures(h);
+        if (structs.length > 0) {
+            const totalBeds = structs.reduce((n, s) => n + (Array.isArray(s.beds) ? s.beds.length : 0), 0);
+            return Math.max(0, totalBeds - 2); // 2 beds reserved for the couple
         }
         if (Array.isArray(h.home.beds)) {
-            return Math.max(0, h.home.beds.length - 1);
+            return Math.max(0, h.home.beds.length - 2);
         }
         return 0;
     }

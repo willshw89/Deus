@@ -1467,7 +1467,13 @@
         const room = privatePairRoom(u, partner, false);
         if (!room) return null;
         const otherJob = J.of(partner.id);
-        if (otherJob && !(otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id))) return null;
+        const isFamilyJob = otherJob && otherJob.params && (otherJob.params.familyVisit === u.id || otherJob.params.partnerId === u.id);
+        if (otherJob && !isFamilyJob) {
+            // Cancel non-critical jobs for family rendezvous (sleep, eat, drink, combat stay)
+            const critical = ["sleep", "eat", "drink", "combat", "flee"].includes(otherJob.type);
+            if (critical) return null;
+            J.cancel(otherJob.id, "family rendezvous");
+        }
         if (!privatePairRoom(u, partner, true)) {
             if (!Array.isArray(room.spots) || room.spots.length < 2) return null;
             const spots = u.id < partner.id ? room.spots : room.spots.slice().reverse();
@@ -1557,7 +1563,8 @@
         const male = (u1.data.gender === "male") ? u1 : (u2.data.gender === "male") ? u2 : null;
 
         const H = window.UF && UF.Households;
-        const canConceive = H && typeof H.canConceiveChild === "function" ? H.canConceiveChild(female) : true;
+        const femaleH = H && H.of ? H.of(female) : null;
+        const canConceive = H && typeof H.canConceiveChild === "function" ? H.canConceiveChild(femaleH) : true;
 
         if (female && male && !female.data.pregnancy && canConceive) {
             const fId = female.data.faction;
@@ -3456,11 +3463,22 @@
     }
 
     let enabled = true; // false = the colonists decide nothing (other suites use it to keep them out of their arena)
+    // Colony radius grows with population so outer homes and workshops remain inside colony logic.
+    function updateColonyRadius(c) {
+        if (!c || !c.site) return;
+        const pop = siteColonists(c).length;
+        const baseRadius = siteRadius(homeSiteRecord(c) || { kind: "camp" });
+        // Grow by 4 tiles per 10 population, cap at 40
+        const growth = Math.floor(pop / 10) * 4;
+        c.radius = Math.min(40, baseRadius + growth);
+    }
+
     function scan() {
         const J = Jobs();
         const W = World();
         const c = colonyState();
         if (!enabled || !J || !W || !c) return;
+        updateColonyRadius(c);
         ensureSettlementActors();
         for (const local of settlementStates()) {
             if (local.adopted || !levelSupported(zOf(local))) continue;
