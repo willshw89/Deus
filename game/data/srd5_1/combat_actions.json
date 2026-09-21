@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 92
+  },
+  "actions": [
+    {
+      "id": "attack",
+      "name": "Attack",
+      "description": "Make one melee or ranged attack",
+      "sourcePage": 92
+    },
+    {
+      "id": "cast_a_spell",
+      "name": "Cast a Spell",
+      "description": "Cast a spell with a casting time of 1 action",
+      "sourcePage": 92
+    },
+    {
+      "id": "dash",
+      "name": "Dash",
+      "description": "Gain extra movement equal to your speed for the current turn",
+      "sourcePage": 92
+    },
+    {
+      "id": "disengage",
+      "name": "Disengage",
+      "description": "Your movement doesn't provoke opportunity attacks for the rest of the turn",
+      "sourcePage": 92
+    },
+    {
+      "id": "dodge",
+      "name": "Dodge",
+      "description": "Focus on avoiding attacks: attacks against you have disadvantage, Dex saves have advantage",
+      "sourcePage": 92
+    },
+    {
+      "id": "help",
+      "name": "Help",
+      "description": "Lend aid to an ally's ability check or attack roll (granting advantage)",
+      "sourcePage": 93
+    },
+    {
+      "id": "hide",
+      "name": "Hide",
+      "description": "Make a Dexterity (Stealth) check to become unseen",
+      "sourcePage": 93
+    },
+    {
+      "id": "ready",
+      "name": "Ready",
+      "description": "Prepare a reaction to act upon a specified trigger",
+      "sourcePage": 93
+    },
+    {
+      "id": "search",
+      "name": "Search",
+      "description": "Devote attention to finding something (Perception or Investigation check)",
+      "sourcePage": 94
+    },
+    {
+      "id": "use_an_object",
+      "name": "Use an Object",
+      "description": "Interact with an object requiring your full action",
+      "sourcePage": 94
+    }
+  ]
+}

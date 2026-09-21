@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 358
+  },
+  "conditions": [
+    {
+      "id": "blinded",
+      "name": "Blinded",
+      "affectsMovement": false,
+      "affectsActions": true,
+      "attackDisadvantage": true,
+      "incomingAttackAdvantage": true,
+      "autoFailPerceptionSight": true
+    },
+    {
+      "id": "charmed",
+      "name": "Charmed",
+      "cannotAttackCharmer": true,
+      "charmerSocialAdvantage": true
+    },
+    {
+      "id": "deafened",
+      "name": "Deafened",
+      "autoFailPerceptionHearing": true
+    },
+    {
+      "id": "exhaustion",
+      "name": "Exhaustion",
+      "hasLevels": true,
+      "maxLevels": 6,
+      "levels": [
+        {
+          "level": 1,
+          "effect": "Disadvantage on ability checks"
+        },
+        {
+          "level": 2,
+          "effect": "Speed halved"
+        },
+        {
+          "level": 3,
+          "effect": "Disadvantage on attack rolls and saving throws"
+        },
+        {
+          "level": 4,
+          "effect": "Hit point maximum halved"
+        },
+        {
+          "level": 5,
+          "effect": "Speed reduced to 0"
+        },
+        {
+          "level": 6,
+          "effect": "Death"
+        }
+      ]
+    },
+    {
+      "id": "frightened",
+      "name": "Frightened",
+      "disadvantageChecksAndAttacksWhileSourceVisible": true,
+      "cannotWillinglyMoveCloser": true
+    },
+    {
+      "id": "grappled",
+      "name": "Grappled",
+      "speedZero": true,
+      "endsIfGrapplerIncapacitatedOrMoved": true
+    },
+    {
+      "id": "incapacitated",
+      "name": "Incapacitated",
+      "cannotTakeActionsOrReactions": true
+    },
+    {
+      "id": "invisible",
+      "name": "Invisible",
+      "impossibleToSeeWithoutAid": true,
+      "attackAdvantage": true,
+      "incomingAttackDisadvantage": true
+    },
+    {
+      "id": "paralyzed",
+      "name": "Paralyzed",
+      "incapacitated": true,
+      "cannotMoveOrSpeak": true,
+      "autoFailStrDexSaves": true,
+      "incomingAttackAdvantage": true,
+      "incomingAttackWithin5ftIsCrit": true
+    },
+    {
+      "id": "petrified",
+      "name": "Petrified",
+      "transformedToStone": true,
+      "incapacitated": true,
+      "cannotMoveOrSpeak": true,
+      "attackAdvantageAgainst": true,
+      "autoFailStrDexSaves": true,
+      "resistanceAllDamage": true,
+      "immunePoisonDisease": true
+    },
+    {
+      "id": "poisoned",
+      "name": "Poisoned",
+      "disadvantageAttackRolls": true,
+      "disadvantageAbilityChecks": true
+    },
+    {
+      "id": "prone",
+      "name": "Prone",
+      "onlyCrawlUntilStanding": true,
+      "attackDisadvantage": true,
+      "incomingAttackAdvantageWithin5ft": true,
+      "incomingAttackDisadvantageBeyond5ft": true
+    },
+    {
+      "id": "restrained",
+      "name": "Restrained",
+      "speedZero": true,
+      "attackDisadvantage": true,
+      "incomingAttackAdvantage": true,
+      "disadvantageDexSaves": true
+    },
+    {
+      "id": "stunned",
+      "name": "Stunned",
+      "incapacitated": true,
+      "cannotMove": true,
+      "falteringSpeech": true,
+      "autoFailStrDexSaves": true,
+      "incomingAttackAdvantage": true
+    },
+    {
+      "id": "unconscious",
+      "name": "Unconscious",
+      "incapacitated": true,
+      "cannotMoveOrSpeak": true,
+      "unawareOfSurroundings": true,
+      "dropsHeldItems": true,
+      "fallsProne": true,
+      "autoFailStrDexSaves": true,
+      "incomingAttackAdvantage": true,
+      "incomingAttackWithin5ftIsCrit": true
+    }
+  ]
+}

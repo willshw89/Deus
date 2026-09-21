@@ -1,0 +1,1577 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePages": "261-403",
+    "count": 313
+  },
+  "monsters": [
+    {
+      "name": "Aboleth",
+      "sizeType": "Large aberration, lawful evil",
+      "pageNum": 261
+    },
+    {
+      "name": "Deva",
+      "sizeType": "Medium celestial, lawful good",
+      "pageNum": 261
+    },
+    {
+      "name": "Planetar",
+      "sizeType": "Large celestial, lawful good",
+      "pageNum": 262
+    },
+    {
+      "name": "Solar",
+      "sizeType": "Large celestial, lawful good",
+      "pageNum": 262
+    },
+    {
+      "name": "Animated Armor",
+      "sizeType": "Medium construct, unaligned",
+      "pageNum": 263
+    },
+    {
+      "name": "Flying Sword",
+      "sizeType": "Small construct, unaligned",
+      "pageNum": 264
+    },
+    {
+      "name": "Rug of Smothering",
+      "sizeType": "Large construct, unaligned",
+      "pageNum": 264
+    },
+    {
+      "name": "Ankheg",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 264
+    },
+    {
+      "name": "Azer",
+      "sizeType": "Medium elemental, lawful neutral",
+      "pageNum": 265
+    },
+    {
+      "name": "Basilisk",
+      "sizeType": "Medium monstrosity, unaligned",
+      "pageNum": 265
+    },
+    {
+      "name": "Behir",
+      "sizeType": "Huge monstrosity, neutral evil",
+      "pageNum": 265
+    },
+    {
+      "name": "Bugbear",
+      "sizeType": "Medium humanoid (goblinoid), chaotic evil",
+      "pageNum": 266
+    },
+    {
+      "name": "Bulette",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 266
+    },
+    {
+      "name": "Centaur",
+      "sizeType": "Large monstrosity, neutral good",
+      "pageNum": 267
+    },
+    {
+      "name": "Chimera",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 267
+    },
+    {
+      "name": "Chuul",
+      "sizeType": "Large aberration, chaotic evil",
+      "pageNum": 267
+    },
+    {
+      "name": "Cloaker",
+      "sizeType": "Large aberration, chaotic neutral",
+      "pageNum": 268
+    },
+    {
+      "name": "Cockatrice",
+      "sizeType": "Small monstrosity, unaligned",
+      "pageNum": 268
+    },
+    {
+      "name": "Couatl",
+      "sizeType": "Medium celestial, lawful good",
+      "pageNum": 269
+    },
+    {
+      "name": "Darkmantle",
+      "sizeType": "Small monstrosity, unaligned",
+      "pageNum": 269
+    },
+    {
+      "name": "Balor",
+      "sizeType": "Huge fiend (demon), chaotic evil",
+      "pageNum": 270
+    },
+    {
+      "name": "Dretch",
+      "sizeType": "Small fiend (demon), chaotic evil",
+      "pageNum": 270
+    },
+    {
+      "name": "Glabrezu",
+      "sizeType": "Large fiend (demon), chaotic evil",
+      "pageNum": 271
+    },
+    {
+      "name": "Hezrou",
+      "sizeType": "Large fiend (demon), chaotic evil",
+      "pageNum": 271
+    },
+    {
+      "name": "Marilith",
+      "sizeType": "Large fiend (demon), chaotic evil",
+      "pageNum": 272
+    },
+    {
+      "name": "Nalfeshnee",
+      "sizeType": "Large fiend (demon), chaotic evil",
+      "pageNum": 272
+    },
+    {
+      "name": "Quasit",
+      "sizeType": "Tiny fiend (demon, shapechanger), chaotic evil",
+      "pageNum": 273
+    },
+    {
+      "name": "Vrock",
+      "sizeType": "Large fiend (demon), chaotic evil",
+      "pageNum": 273
+    },
+    {
+      "name": "Barbed Devil",
+      "sizeType": "Medium fiend (devil), lawful evil",
+      "pageNum": 274
+    },
+    {
+      "name": "Bearded Devil",
+      "sizeType": "Medium fiend (devil), lawful evil",
+      "pageNum": 274
+    },
+    {
+      "name": "Bone Devil",
+      "sizeType": "Large fiend (devil), lawful evil",
+      "pageNum": 275
+    },
+    {
+      "name": "Chain Devil",
+      "sizeType": "Medium fiend (devil), lawful evil",
+      "pageNum": 275
+    },
+    {
+      "name": "Erinyes",
+      "sizeType": "Medium fiend (devil), lawful evil",
+      "pageNum": 276
+    },
+    {
+      "name": "Horned Devil",
+      "sizeType": "Large fiend (devil), lawful evil",
+      "pageNum": 276
+    },
+    {
+      "name": "Ice Devil",
+      "sizeType": "Large fiend (devil), lawful evil",
+      "pageNum": 277
+    },
+    {
+      "name": "Imp",
+      "sizeType": "Tiny fiend (devil, shapechanger), lawful evil",
+      "pageNum": 277
+    },
+    {
+      "name": "Lemure",
+      "sizeType": "Medium fiend (devil), lawful evil",
+      "pageNum": 278
+    },
+    {
+      "name": "Pit Fiend",
+      "sizeType": "Large fiend (devil), lawful evil",
+      "pageNum": 278
+    },
+    {
+      "name": "Plesiosaurus",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 279
+    },
+    {
+      "name": "Triceratops",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 279
+    },
+    {
+      "name": "Tyrannosaurus Rex",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 279
+    },
+    {
+      "name": "Doppelganger",
+      "sizeType": "Medium monstrosity (shapechanger), neutral",
+      "pageNum": 279
+    },
+    {
+      "name": "Ancient Black Dragon",
+      "sizeType": "Gargantuan dragon, chaotic evil",
+      "pageNum": 280
+    },
+    {
+      "name": "Adult Black Dragon",
+      "sizeType": "Huge dragon, chaotic evil",
+      "pageNum": 281
+    },
+    {
+      "name": "Young Black Dragon",
+      "sizeType": "Large dragon, chaotic evil",
+      "pageNum": 281
+    },
+    {
+      "name": "Black Dragon Wyrmling",
+      "sizeType": "Medium dragon, chaotic evil",
+      "pageNum": 282
+    },
+    {
+      "name": "Ancient Blue Dragon",
+      "sizeType": "Gargantuan dragon, lawful evil",
+      "pageNum": 282
+    },
+    {
+      "name": "Adult Blue Dragon",
+      "sizeType": "Huge dragon, lawful evil",
+      "pageNum": 283
+    },
+    {
+      "name": "Young Blue Dragon",
+      "sizeType": "Large dragon, lawful evil",
+      "pageNum": 283
+    },
+    {
+      "name": "Blue Dragon Wyrmling",
+      "sizeType": "Medium dragon, lawful evil",
+      "pageNum": 284
+    },
+    {
+      "name": "Ancient Green Dragon",
+      "sizeType": "Gargantuan dragon, lawful evil",
+      "pageNum": 284
+    },
+    {
+      "name": "Adult Green Dragon",
+      "sizeType": "Huge dragon, lawful evil",
+      "pageNum": 285
+    },
+    {
+      "name": "Young Green Dragon",
+      "sizeType": "Large dragon, lawful evil",
+      "pageNum": 285
+    },
+    {
+      "name": "Green Dragon Wyrmling",
+      "sizeType": "Medium dragon, lawful evil",
+      "pageNum": 286
+    },
+    {
+      "name": "Ancient Red Dragon",
+      "sizeType": "Gargantuan dragon, chaotic evil",
+      "pageNum": 286
+    },
+    {
+      "name": "Adult Red Dragon",
+      "sizeType": "Huge dragon, chaotic evil",
+      "pageNum": 287
+    },
+    {
+      "name": "Young Red Dragon",
+      "sizeType": "Large dragon, chaotic evil",
+      "pageNum": 288
+    },
+    {
+      "name": "Red Dragon Wyrmling",
+      "sizeType": "Medium dragon, chaotic evil",
+      "pageNum": 288
+    },
+    {
+      "name": "Ancient White Dragon",
+      "sizeType": "Gargantuan dragon, chaotic evil",
+      "pageNum": 288
+    },
+    {
+      "name": "Adult White Dragon",
+      "sizeType": "Huge dragon, chaotic evil",
+      "pageNum": 289
+    },
+    {
+      "name": "Young White Dragon",
+      "sizeType": "Large dragon, chaotic evil",
+      "pageNum": 290
+    },
+    {
+      "name": "White Dragon Wyrmling",
+      "sizeType": "Medium dragon, chaotic evil",
+      "pageNum": 290
+    },
+    {
+      "name": "Ancient Brass Dragon",
+      "sizeType": "Gargantuan dragon, chaotic good",
+      "pageNum": 290
+    },
+    {
+      "name": "Adult Brass Dragon",
+      "sizeType": "Huge dragon, chaotic good",
+      "pageNum": 291
+    },
+    {
+      "name": "Young Brass Dragon",
+      "sizeType": "Large dragon, chaotic good",
+      "pageNum": 292
+    },
+    {
+      "name": "Brass Dragon Wyrmling",
+      "sizeType": "Medium dragon, chaotic good",
+      "pageNum": 292
+    },
+    {
+      "name": "Ancient Bronze Dragon",
+      "sizeType": "Gargantuan dragon, lawful good",
+      "pageNum": 293
+    },
+    {
+      "name": "Adult Bronze Dragon",
+      "sizeType": "Huge dragon, lawful good",
+      "pageNum": 294
+    },
+    {
+      "name": "Young Bronze Dragon",
+      "sizeType": "Large dragon, lawful good",
+      "pageNum": 295
+    },
+    {
+      "name": "Bronze Dragon Wyrmling",
+      "sizeType": "Medium dragon, lawful good",
+      "pageNum": 295
+    },
+    {
+      "name": "Ancient Copper Dragon",
+      "sizeType": "Gargantuan dragon, chaotic good",
+      "pageNum": 295
+    },
+    {
+      "name": "Adult Copper Dragon",
+      "sizeType": "Huge dragon, chaotic good",
+      "pageNum": 296
+    },
+    {
+      "name": "Young Copper Dragon",
+      "sizeType": "Large dragon, chaotic good",
+      "pageNum": 297
+    },
+    {
+      "name": "Copper Dragon Wyrmling",
+      "sizeType": "Medium dragon, chaotic good",
+      "pageNum": 298
+    },
+    {
+      "name": "Ancient Gold Dragon",
+      "sizeType": "Gargantuan dragon, lawful good",
+      "pageNum": 298
+    },
+    {
+      "name": "Adult Gold Dragon",
+      "sizeType": "Huge dragon, lawful good",
+      "pageNum": 299
+    },
+    {
+      "name": "Young Gold Dragon",
+      "sizeType": "Large dragon, lawful good",
+      "pageNum": 300
+    },
+    {
+      "name": "Gold Dragon Wyrmling",
+      "sizeType": "Medium dragon, lawful good",
+      "pageNum": 300
+    },
+    {
+      "name": "Ancient Silver Dragon",
+      "sizeType": "Gargantuan dragon, lawful good",
+      "pageNum": 301
+    },
+    {
+      "name": "Adult Silver Dragon",
+      "sizeType": "Huge dragon, lawful good",
+      "pageNum": 302
+    },
+    {
+      "name": "Young Silver Dragon",
+      "sizeType": "Large dragon, lawful good",
+      "pageNum": 303
+    },
+    {
+      "name": "Silver Dragon Wyrmling",
+      "sizeType": "Medium dragon, lawful good",
+      "pageNum": 303
+    },
+    {
+      "name": "Dragon Turtle",
+      "sizeType": "Gargantuan dragon, neutral",
+      "pageNum": 303
+    },
+    {
+      "name": "Drider",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 304
+    },
+    {
+      "name": "Dryad",
+      "sizeType": "Medium fey, neutral",
+      "pageNum": 304
+    },
+    {
+      "name": "Duergar",
+      "sizeType": "Medium humanoid (dwarf), lawful evil",
+      "pageNum": 305
+    },
+    {
+      "name": "Air Elemental",
+      "sizeType": "Large elemental, neutral",
+      "pageNum": 305
+    },
+    {
+      "name": "Earth Elemental",
+      "sizeType": "Large elemental, neutral",
+      "pageNum": 306
+    },
+    {
+      "name": "Fire Elemental",
+      "sizeType": "Large elemental, neutral",
+      "pageNum": 306
+    },
+    {
+      "name": "Water Elemental",
+      "sizeType": "Large elemental, neutral",
+      "pageNum": 307
+    },
+    {
+      "name": "Elf, Drow",
+      "sizeType": "Medium humanoid (elf), neutral evil",
+      "pageNum": 307
+    },
+    {
+      "name": "Ettercap",
+      "sizeType": "Medium monstrosity, neutral evil",
+      "pageNum": 308
+    },
+    {
+      "name": "Ettin",
+      "sizeType": "Large giant, chaotic evil",
+      "pageNum": 308
+    },
+    {
+      "name": "Shrieker",
+      "sizeType": "Medium plant, unaligned",
+      "pageNum": 309
+    },
+    {
+      "name": "Violet Fungus",
+      "sizeType": "Medium plant, unaligned",
+      "pageNum": 309
+    },
+    {
+      "name": "Gargoyle",
+      "sizeType": "Medium elemental, chaotic evil",
+      "pageNum": 309
+    },
+    {
+      "name": "Djinni",
+      "sizeType": "Large elemental, chaotic good",
+      "pageNum": 310
+    },
+    {
+      "name": "Efreeti",
+      "sizeType": "Large elemental, lawful evil",
+      "pageNum": 310
+    },
+    {
+      "name": "Ghost",
+      "sizeType": "Medium undead, any alignment",
+      "pageNum": 311
+    },
+    {
+      "name": "Ghast",
+      "sizeType": "Medium undead, chaotic evil",
+      "pageNum": 311
+    },
+    {
+      "name": "Ghoul",
+      "sizeType": "Medium undead, chaotic evil",
+      "pageNum": 312
+    },
+    {
+      "name": "Cloud Giant",
+      "sizeType": "Huge giant, neutral good (50%) or neutral evil (50%)",
+      "pageNum": 312
+    },
+    {
+      "name": "Fire Giant",
+      "sizeType": "Huge giant, lawful evil",
+      "pageNum": 312
+    },
+    {
+      "name": "Frost Giant",
+      "sizeType": "Huge giant, neutral evil",
+      "pageNum": 313
+    },
+    {
+      "name": "Hill Giant",
+      "sizeType": "Huge giant, chaotic evil",
+      "pageNum": 313
+    },
+    {
+      "name": "Stone Giant",
+      "sizeType": "Huge giant, neutral",
+      "pageNum": 313
+    },
+    {
+      "name": "Storm Giant",
+      "sizeType": "Huge giant, chaotic good",
+      "pageNum": 313
+    },
+    {
+      "name": "Gibbering Mouther",
+      "sizeType": "Medium aberration, neutral",
+      "pageNum": 314
+    },
+    {
+      "name": "Gnoll",
+      "sizeType": "Medium humanoid (gnoll), chaotic evil",
+      "pageNum": 314
+    },
+    {
+      "name": "Gnome, Deep (Svirfneblin)",
+      "sizeType": "Small humanoid (gnome), neutral good",
+      "pageNum": 315
+    },
+    {
+      "name": "Goblin",
+      "sizeType": "Small humanoid (goblinoid), neutral evil",
+      "pageNum": 315
+    },
+    {
+      "name": "Clay Golem",
+      "sizeType": "Large construct, unaligned",
+      "pageNum": 315
+    },
+    {
+      "name": "Flesh Golem",
+      "sizeType": "Medium construct, neutral",
+      "pageNum": 316
+    },
+    {
+      "name": "Iron Golem",
+      "sizeType": "Large construct, unaligned",
+      "pageNum": 317
+    },
+    {
+      "name": "Stone Golem",
+      "sizeType": "Large construct, unaligned",
+      "pageNum": 317
+    },
+    {
+      "name": "Gorgon",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 317
+    },
+    {
+      "name": "Grick",
+      "sizeType": "Medium monstrosity, neutral",
+      "pageNum": 318
+    },
+    {
+      "name": "Griffon",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 318
+    },
+    {
+      "name": "Grimlock",
+      "sizeType": "Medium humanoid (grimlock), neutral evil",
+      "pageNum": 318
+    },
+    {
+      "name": "Green Hag",
+      "sizeType": "Medium fey, neutral evil",
+      "pageNum": 319
+    },
+    {
+      "name": "Night Hag",
+      "sizeType": "Medium fiend, neutral evil",
+      "pageNum": 319
+    },
+    {
+      "name": "Sea Hag",
+      "sizeType": "Medium fey, chaotic evil",
+      "pageNum": 320
+    },
+    {
+      "name": "Half---Red Dragon Veteran",
+      "sizeType": "Medium humanoid (human), any alignment",
+      "pageNum": 321
+    },
+    {
+      "name": "Harpy",
+      "sizeType": "Medium monstrosity, chaotic evil",
+      "pageNum": 321
+    },
+    {
+      "name": "Hell Hound",
+      "sizeType": "Medium fiend, lawful evil",
+      "pageNum": 321
+    },
+    {
+      "name": "Hippogriff",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 322
+    },
+    {
+      "name": "Hobgoblin",
+      "sizeType": "Medium humanoid (goblinoid), lawful evil",
+      "pageNum": 322
+    },
+    {
+      "name": "Homunculus",
+      "sizeType": "Tiny construct, neutral",
+      "pageNum": 322
+    },
+    {
+      "name": "Hydra",
+      "sizeType": "Huge monstrosity, unaligned",
+      "pageNum": 323
+    },
+    {
+      "name": "Invisible Stalker",
+      "sizeType": "Medium elemental, neutral",
+      "pageNum": 323
+    },
+    {
+      "name": "Kobold",
+      "sizeType": "Small humanoid (kobold), lawful evil",
+      "pageNum": 324
+    },
+    {
+      "name": "Kraken",
+      "sizeType": "Gargantuan monstrosity (titan), chaotic evil",
+      "pageNum": 324
+    },
+    {
+      "name": "Lamia",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 325
+    },
+    {
+      "name": "Lich",
+      "sizeType": "Medium undead, any evil alignment",
+      "pageNum": 325
+    },
+    {
+      "name": "Lizardfolk",
+      "sizeType": "Medium humanoid (lizardfolk), neutral",
+      "pageNum": 326
+    },
+    {
+      "name": "Wereboar",
+      "sizeType": "Medium humanoid (human, shapechanger), neutral evil",
+      "pageNum": 327
+    },
+    {
+      "name": "Wererat",
+      "sizeType": "Medium humanoid (human, shapechanger), lawful evil",
+      "pageNum": 327
+    },
+    {
+      "name": "Weretiger",
+      "sizeType": "Medium humanoid (human, shapechanger), neutral",
+      "pageNum": 328
+    },
+    {
+      "name": "Magmin",
+      "sizeType": "Small elemental, chaotic neutral",
+      "pageNum": 329
+    },
+    {
+      "name": "Manticore",
+      "sizeType": "Large monstrosity, lawful evil",
+      "pageNum": 329
+    },
+    {
+      "name": "Medusa",
+      "sizeType": "Medium monstrosity, lawful evil",
+      "pageNum": 330
+    },
+    {
+      "name": "Dust Mephit",
+      "sizeType": "Small elemental, neutral evil",
+      "pageNum": 330
+    },
+    {
+      "name": "Ice Mephit",
+      "sizeType": "Small elemental, neutral evil",
+      "pageNum": 331
+    },
+    {
+      "name": "Magma Mephit",
+      "sizeType": "Small elemental, neutral evil",
+      "pageNum": 331
+    },
+    {
+      "name": "Steam Mephit",
+      "sizeType": "Small elemental, neutral evil",
+      "pageNum": 331
+    },
+    {
+      "name": "Merfolk",
+      "sizeType": "Medium humanoid (merfolk), neutral",
+      "pageNum": 332
+    },
+    {
+      "name": "Merrow",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 332
+    },
+    {
+      "name": "Mimic",
+      "sizeType": "Medium monstrosity (shapechanger), neutral",
+      "pageNum": 332
+    },
+    {
+      "name": "Minotaur",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 333
+    },
+    {
+      "name": "Mummy",
+      "sizeType": "Medium undead, lawful evil",
+      "pageNum": 333
+    },
+    {
+      "name": "Mummy Lord",
+      "sizeType": "Medium undead, lawful evil",
+      "pageNum": 334
+    },
+    {
+      "name": "Guardian Naga",
+      "sizeType": "Large monstrosity, lawful good",
+      "pageNum": 335
+    },
+    {
+      "name": "Spirit Naga",
+      "sizeType": "Large monstrosity, chaotic evil",
+      "pageNum": 335
+    },
+    {
+      "name": "Nightmare",
+      "sizeType": "Large fiend, neutral evil",
+      "pageNum": 336
+    },
+    {
+      "name": "Ogre",
+      "sizeType": "Large giant, chaotic evil",
+      "pageNum": 336
+    },
+    {
+      "name": "Oni",
+      "sizeType": "Large giant, lawful evil",
+      "pageNum": 336
+    },
+    {
+      "name": "Black Pudding",
+      "sizeType": "Large ooze, unaligned",
+      "pageNum": 337
+    },
+    {
+      "name": "Gelatinous Cube",
+      "sizeType": "Large ooze, unaligned",
+      "pageNum": 337
+    },
+    {
+      "name": "Gray Ooze",
+      "sizeType": "Medium ooze, unaligned",
+      "pageNum": 338
+    },
+    {
+      "name": "Ochre Jelly",
+      "sizeType": "Large ooze, unaligned",
+      "pageNum": 338
+    },
+    {
+      "name": "Orc",
+      "sizeType": "Medium humanoid (orc), chaotic evil",
+      "pageNum": 339
+    },
+    {
+      "name": "Otyugh",
+      "sizeType": "Large aberration, neutral",
+      "pageNum": 339
+    },
+    {
+      "name": "Owlbear",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 339
+    },
+    {
+      "name": "Pegasus",
+      "sizeType": "Large celestial, chaotic good",
+      "pageNum": 340
+    },
+    {
+      "name": "Pseudodragon",
+      "sizeType": "Tiny dragon, neutral good",
+      "pageNum": 340
+    },
+    {
+      "name": "Purple Worm",
+      "sizeType": "Gargantuan monstrosity, unaligned",
+      "pageNum": 340
+    },
+    {
+      "name": "Rakshasa",
+      "sizeType": "Medium fiend, lawful evil",
+      "pageNum": 341
+    },
+    {
+      "name": "Remorhaz",
+      "sizeType": "Huge monstrosity, unaligned",
+      "pageNum": 341
+    },
+    {
+      "name": "Roc",
+      "sizeType": "Gargantuan monstrosity, unaligned",
+      "pageNum": 342
+    },
+    {
+      "name": "Roper",
+      "sizeType": "Large monstrosity, neutral evil",
+      "pageNum": 342
+    },
+    {
+      "name": "Rust Monster",
+      "sizeType": "Medium monstrosity, unaligned",
+      "pageNum": 343
+    },
+    {
+      "name": "Sahuagin",
+      "sizeType": "Medium humanoid (sahuagin), lawful evil",
+      "pageNum": 343
+    },
+    {
+      "name": "Salamander",
+      "sizeType": "Large elemental, neutral evil",
+      "pageNum": 344
+    },
+    {
+      "name": "Satyr",
+      "sizeType": "Medium fey, chaotic neutral",
+      "pageNum": 344
+    },
+    {
+      "name": "Shadow",
+      "sizeType": "Medium undead, chaotic evil",
+      "pageNum": 344
+    },
+    {
+      "name": "Shambling Mound",
+      "sizeType": "Large plant, unaligned",
+      "pageNum": 345
+    },
+    {
+      "name": "Shield Guardian",
+      "sizeType": "Large construct, unaligned",
+      "pageNum": 345
+    },
+    {
+      "name": "Skeleton",
+      "sizeType": "Medium undead, lawful evil",
+      "pageNum": 346
+    },
+    {
+      "name": "Minotaur Skeleton",
+      "sizeType": "Large undead, lawful evil",
+      "pageNum": 346
+    },
+    {
+      "name": "Warhorse Skeleton",
+      "sizeType": "Large undead, lawful evil",
+      "pageNum": 346
+    },
+    {
+      "name": "Specter",
+      "sizeType": "Medium undead, chaotic evil",
+      "pageNum": 346
+    },
+    {
+      "name": "Androsphinx",
+      "sizeType": "Large monstrosity, lawful neutral",
+      "pageNum": 347
+    },
+    {
+      "name": "Gynosphinx",
+      "sizeType": "Large monstrosity, lawful neutral",
+      "pageNum": 348
+    },
+    {
+      "name": "Sprite",
+      "sizeType": "Tiny fey, neutral good",
+      "pageNum": 348
+    },
+    {
+      "name": "Stirge",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 349
+    },
+    {
+      "name": "Succubus/Incubus",
+      "sizeType": "Medium fiend (shapechanger), neutral evil",
+      "pageNum": 349
+    },
+    {
+      "name": "Tarrasque",
+      "sizeType": "Gargantuan monstrosity (titan), unaligned",
+      "pageNum": 350
+    },
+    {
+      "name": "Treant",
+      "sizeType": "Huge plant, chaotic good",
+      "pageNum": 351
+    },
+    {
+      "name": "Troll",
+      "sizeType": "Large giant, chaotic evil",
+      "pageNum": 351
+    },
+    {
+      "name": "Unicorn",
+      "sizeType": "Large celestial, lawful good",
+      "pageNum": 351
+    },
+    {
+      "name": "Vampire",
+      "sizeType": "Medium undead (shapechanger), lawful evil",
+      "pageNum": 352
+    },
+    {
+      "name": "Vampire Spawn",
+      "sizeType": "Medium undead, neutral evil",
+      "pageNum": 354
+    },
+    {
+      "name": "Wight",
+      "sizeType": "Medium undead, neutral evil",
+      "pageNum": 354
+    },
+    {
+      "name": "Will---o’---Wisp",
+      "sizeType": "Tiny undead, chaotic evil",
+      "pageNum": 355
+    },
+    {
+      "name": "Wraith",
+      "sizeType": "Medium undead, neutral evil",
+      "pageNum": 355
+    },
+    {
+      "name": "Wyvern",
+      "sizeType": "Large dragon, unaligned",
+      "pageNum": 356
+    },
+    {
+      "name": "Xorn",
+      "sizeType": "Medium elemental, neutral",
+      "pageNum": 356
+    },
+    {
+      "name": "Zombie",
+      "sizeType": "Medium undead, neutral evil",
+      "pageNum": 356
+    },
+    {
+      "name": "Ogre Zombie",
+      "sizeType": "Large undead, neutral evil",
+      "pageNum": 357
+    },
+    {
+      "name": "Ape",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 366
+    },
+    {
+      "name": "Awakened Shrub",
+      "sizeType": "Small plant, unaligned",
+      "pageNum": 366
+    },
+    {
+      "name": "Awakened Tree",
+      "sizeType": "Huge plant, unaligned",
+      "pageNum": 366
+    },
+    {
+      "name": "Axe Beak",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 366
+    },
+    {
+      "name": "Baboon",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 367
+    },
+    {
+      "name": "Badger",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 367
+    },
+    {
+      "name": "Bat",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 367
+    },
+    {
+      "name": "Black Bear",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 367
+    },
+    {
+      "name": "Blink Dog",
+      "sizeType": "Medium fey, lawful good",
+      "pageNum": 368
+    },
+    {
+      "name": "Blood Hawk",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 368
+    },
+    {
+      "name": "Boar",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 368
+    },
+    {
+      "name": "Brown Bear",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 369
+    },
+    {
+      "name": "Camel",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 369
+    },
+    {
+      "name": "Cat",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 369
+    },
+    {
+      "name": "Constrictor Snake",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 369
+    },
+    {
+      "name": "Crab",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 370
+    },
+    {
+      "name": "Crocodile",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 370
+    },
+    {
+      "name": "Death Dog",
+      "sizeType": "Medium monstrosity, neutral evil",
+      "pageNum": 370
+    },
+    {
+      "name": "Deer",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 370
+    },
+    {
+      "name": "Dire Wolf",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 371
+    },
+    {
+      "name": "Draft Horse",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 371
+    },
+    {
+      "name": "Eagle",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 371
+    },
+    {
+      "name": "Elephant",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 371
+    },
+    {
+      "name": "Elk",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 372
+    },
+    {
+      "name": "Flying Snake",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 372
+    },
+    {
+      "name": "Frog",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 372
+    },
+    {
+      "name": "Giant Ape",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 373
+    },
+    {
+      "name": "Giant Badger",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 373
+    },
+    {
+      "name": "Giant Bat",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 373
+    },
+    {
+      "name": "Giant Boar",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 373
+    },
+    {
+      "name": "Giant Centipede",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 374
+    },
+    {
+      "name": "Giant Constrictor Snake",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 374
+    },
+    {
+      "name": "Giant Crab",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 374
+    },
+    {
+      "name": "Giant Crocodile",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 374
+    },
+    {
+      "name": "Giant Eagle",
+      "sizeType": "Large beast, neutral good",
+      "pageNum": 375
+    },
+    {
+      "name": "Giant Elk",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 375
+    },
+    {
+      "name": "Giant Fire Beetle",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 375
+    },
+    {
+      "name": "Giant Frog",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 376
+    },
+    {
+      "name": "Giant Goat",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 376
+    },
+    {
+      "name": "Giant Hyena",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 376
+    },
+    {
+      "name": "Giant Lizard",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 377
+    },
+    {
+      "name": "Giant Octopus",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 377
+    },
+    {
+      "name": "Giant Owl",
+      "sizeType": "Large beast, neutral",
+      "pageNum": 377
+    },
+    {
+      "name": "Giant Poisonous Snake",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 378
+    },
+    {
+      "name": "Giant Rat",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 378
+    },
+    {
+      "name": "Giant Scorpion",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 378
+    },
+    {
+      "name": "Giant Sea Horse",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 378
+    },
+    {
+      "name": "Giant Shark",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 379
+    },
+    {
+      "name": "Giant Spider",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 379
+    },
+    {
+      "name": "Giant Toad",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 380
+    },
+    {
+      "name": "Giant Vulture",
+      "sizeType": "Large beast, neutral evil",
+      "pageNum": 380
+    },
+    {
+      "name": "Giant Wasp",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 380
+    },
+    {
+      "name": "Giant Weasel",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 381
+    },
+    {
+      "name": "Giant Wolf Spider",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 381
+    },
+    {
+      "name": "Goat",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 381
+    },
+    {
+      "name": "Hawk",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 382
+    },
+    {
+      "name": "Hunter Shark",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 382
+    },
+    {
+      "name": "Hyena",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 382
+    },
+    {
+      "name": "Jackal",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 382
+    },
+    {
+      "name": "Killer Whale",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 383
+    },
+    {
+      "name": "Lion",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 383
+    },
+    {
+      "name": "Lizard",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 383
+    },
+    {
+      "name": "Mammoth",
+      "sizeType": "Huge beast, unaligned",
+      "pageNum": 384
+    },
+    {
+      "name": "Mastiff",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 384
+    },
+    {
+      "name": "Mule",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 384
+    },
+    {
+      "name": "Octopus",
+      "sizeType": "Small beast, unaligned",
+      "pageNum": 384
+    },
+    {
+      "name": "Owl",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 385
+    },
+    {
+      "name": "Panther",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 385
+    },
+    {
+      "name": "Phase Spider",
+      "sizeType": "Large monstrosity, unaligned",
+      "pageNum": 385
+    },
+    {
+      "name": "Poisonous Snake",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 386
+    },
+    {
+      "name": "Polar Bear",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 386
+    },
+    {
+      "name": "Pony",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 386
+    },
+    {
+      "name": "Quipper",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 387
+    },
+    {
+      "name": "Rat",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 387
+    },
+    {
+      "name": "Raven",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 387
+    },
+    {
+      "name": "Reef Shark",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 387
+    },
+    {
+      "name": "Rhinoceros",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 388
+    },
+    {
+      "name": "Riding Horse",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 388
+    },
+    {
+      "name": "Saber---Toothed Tiger",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 388
+    },
+    {
+      "name": "Scorpion",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 388
+    },
+    {
+      "name": "Sea Horse",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 389
+    },
+    {
+      "name": "Spider",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 389
+    },
+    {
+      "name": "Swarm of Bats",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 389
+    },
+    {
+      "name": "Swarm of Insects",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 389
+    },
+    {
+      "name": "Swarm of Poisonous Snakes",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 390
+    },
+    {
+      "name": "Swarm of Quippers",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 390
+    },
+    {
+      "name": "Swarm of Rats",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 390
+    },
+    {
+      "name": "Swarm of Ravens",
+      "sizeType": "Medium swarm of Tiny beasts, unaligned",
+      "pageNum": 391
+    },
+    {
+      "name": "Tiger",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 391
+    },
+    {
+      "name": "Vulture",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 392
+    },
+    {
+      "name": "Warhorse",
+      "sizeType": "Large beast, unaligned",
+      "pageNum": 392
+    },
+    {
+      "name": "Weasel",
+      "sizeType": "Tiny beast, unaligned",
+      "pageNum": 392
+    },
+    {
+      "name": "Winter Wolf",
+      "sizeType": "Large monstrosity, neutral evil",
+      "pageNum": 392
+    },
+    {
+      "name": "Wolf",
+      "sizeType": "Medium beast, unaligned",
+      "pageNum": 393
+    },
+    {
+      "name": "Worg",
+      "sizeType": "Large monstrosity, neutral evil",
+      "pageNum": 393
+    },
+    {
+      "name": "Acolyte",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 395
+    },
+    {
+      "name": "Archmage",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 395
+    },
+    {
+      "name": "Assassin",
+      "sizeType": "Medium humanoid (any race), any non---good alignment",
+      "pageNum": 396
+    },
+    {
+      "name": "Berserker",
+      "sizeType": "Medium humanoid (any race), any chaotic alignment",
+      "pageNum": 397
+    },
+    {
+      "name": "Commoner",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 398
+    },
+    {
+      "name": "Cultist",
+      "sizeType": "Medium humanoid (any race), any non---good alignment",
+      "pageNum": 398
+    },
+    {
+      "name": "Cult Fanatic",
+      "sizeType": "Medium humanoid (any race), any non---good alignment",
+      "pageNum": 398
+    },
+    {
+      "name": "Druid",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 398
+    },
+    {
+      "name": "Gladiator",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 399
+    },
+    {
+      "name": "Guard",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 399
+    },
+    {
+      "name": "Knight",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 400
+    },
+    {
+      "name": "Mage",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 400
+    },
+    {
+      "name": "Noble",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 401
+    },
+    {
+      "name": "Priest",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 401
+    },
+    {
+      "name": "Scout",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 401
+    },
+    {
+      "name": "Spy",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 402
+    },
+    {
+      "name": "Thug",
+      "sizeType": "Medium humanoid (any race), any non---good alignment",
+      "pageNum": 402
+    },
+    {
+      "name": "Tribal Warrior",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 402
+    },
+    {
+      "name": "Veteran",
+      "sizeType": "Medium humanoid (any race), any alignment",
+      "pageNum": 403
+    }
+  ]
+}

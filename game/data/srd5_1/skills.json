@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 77
+  },
+  "skills": [
+    {
+      "id": "athletics",
+      "name": "Athletics",
+      "defaultAbility": "str",
+      "category": "physical",
+      "sourcePage": 77
+    },
+    {
+      "id": "acrobatics",
+      "name": "Acrobatics",
+      "defaultAbility": "dex",
+      "category": "physical",
+      "sourcePage": 77
+    },
+    {
+      "id": "sleight_of_hand",
+      "name": "Sleight of Hand",
+      "defaultAbility": "dex",
+      "category": "physical",
+      "sourcePage": 77
+    },
+    {
+      "id": "stealth",
+      "name": "Stealth",
+      "defaultAbility": "dex",
+      "category": "physical",
+      "sourcePage": 78
+    },
+    {
+      "id": "arcana",
+      "name": "Arcana",
+      "defaultAbility": "int",
+      "category": "mental",
+      "sourcePage": 78
+    },
+    {
+      "id": "history",
+      "name": "History",
+      "defaultAbility": "int",
+      "category": "mental",
+      "sourcePage": 78
+    },
+    {
+      "id": "investigation",
+      "name": "Investigation",
+      "defaultAbility": "int",
+      "category": "mental",
+      "sourcePage": 78
+    },
+    {
+      "id": "nature",
+      "name": "Nature",
+      "defaultAbility": "int",
+      "category": "mental",
+      "sourcePage": 78
+    },
+    {
+      "id": "religion",
+      "name": "Religion",
+      "defaultAbility": "int",
+      "category": "mental",
+      "sourcePage": 78
+    },
+    {
+      "id": "animal_handling",
+      "name": "Animal Handling",
+      "defaultAbility": "wis",
+      "category": "practical",
+      "sourcePage": 78
+    },
+    {
+      "id": "insight",
+      "name": "Insight",
+      "defaultAbility": "wis",
+      "category": "social",
+      "sourcePage": 78
+    },
+    {
+      "id": "medicine",
+      "name": "Medicine",
+      "defaultAbility": "wis",
+      "category": "practical",
+      "sourcePage": 78
+    },
+    {
+      "id": "perception",
+      "name": "Perception",
+      "defaultAbility": "wis",
+      "category": "practical",
+      "sourcePage": 78
+    },
+    {
+      "id": "survival",
+      "name": "Survival",
+      "defaultAbility": "wis",
+      "category": "practical",
+      "sourcePage": 78
+    },
+    {
+      "id": "deception",
+      "name": "Deception",
+      "defaultAbility": "cha",
+      "category": "social",
+      "sourcePage": 78
+    },
+    {
+      "id": "intimidation",
+      "name": "Intimidation",
+      "defaultAbility": "cha",
+      "category": "social",
+      "sourcePage": 79
+    },
+    {
+      "id": "performance",
+      "name": "Performance",
+      "defaultAbility": "cha",
+      "category": "social",
+      "sourcePage": 79
+    },
+    {
+      "id": "persuasion",
+      "name": "Persuasion",
+      "defaultAbility": "cha",
+      "category": "social",
+      "sourcePage": 79
+    }
+  ]
+}

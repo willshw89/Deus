@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 64
+  },
+  "properties": [
+    {
+      "id": "ammunition",
+      "name": "Ammunition",
+      "description": "Use to make ranged attack only if you have ammunition to fire. Drawing ammo is part of attack.",
+      "sourcePage": 64
+    },
+    {
+      "id": "finesse",
+      "name": "Finesse",
+      "description": "When making an attack, use your choice of Strength or Dexterity modifier for attack and damage rolls.",
+      "sourcePage": 64
+    },
+    {
+      "id": "heavy",
+      "name": "Heavy",
+      "description": "Small creatures have disadvantage on attack rolls with heavy weapons.",
+      "sourcePage": 65
+    },
+    {
+      "id": "light",
+      "name": "Light",
+      "description": "Ideal for use in two-weapon fighting.",
+      "sourcePage": 65
+    },
+    {
+      "id": "loading",
+      "name": "Loading",
+      "description": "Because of the time required to load, you can fire only one piece of ammunition from it when you use an action, bonus action, or reaction.",
+      "sourcePage": 65
+    },
+    {
+      "id": "range",
+      "name": "Range",
+      "description": "Has normal range and long range. Attacks beyond normal range have disadvantage; cannot attack beyond long range.",
+      "sourcePage": 65
+    },
+    {
+      "id": "reach",
+      "name": "Reach",
+      "description": "Adds 5 feet to your reach when you attack with it, as well as when determining your reach for opportunity attacks.",
+      "sourcePage": 65
+    },
+    {
+      "id": "special",
+      "name": "Special",
+      "description": "A weapon with the special property has unusual rules governing its use, detailed in weapon description.",
+      "sourcePage": 65
+    },
+    {
+      "id": "thrown",
+      "name": "Thrown",
+      "description": "Can throw weapon to make ranged attack. Use same ability modifier for attack and damage as melee attack.",
+      "sourcePage": 65
+    },
+    {
+      "id": "two_handed",
+      "name": "Two-Handed",
+      "description": "Requires two hands when you attack with it.",
+      "sourcePage": 65
+    },
+    {
+      "id": "versatile",
+      "name": "Versatile",
+      "description": "Can be used with one or two hands. A damage value in parentheses appears with the property—the damage when used two-handed.",
+      "sourcePage": 65
+    }
+  ]
+}

@@ -1,0 +1,670 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 66
+  },
+  "weapons": [
+    {
+      "id": "club",
+      "name": "Club",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d4",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "light"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "1 sp",
+      "sourcePage": 66
+    },
+    {
+      "id": "dagger",
+      "name": "Dagger",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d4",
+      "damageType": "piercing",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "finesse",
+        "light",
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 1,
+      "costSRD": "2 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "greatclub",
+      "name": "Greatclub",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 10,
+      "costSRD": "2 sp",
+      "sourcePage": 66
+    },
+    {
+      "id": "handaxe",
+      "name": "Handaxe",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "slashing",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "light",
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "5 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "javelin",
+      "name": "Javelin",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 30,
+      "longRangeFeet": 120,
+      "properties": [
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "5 sp",
+      "sourcePage": 66
+    },
+    {
+      "id": "light_hammer",
+      "name": "Light hammer",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d4",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "light",
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "2 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "mace",
+      "name": "Mace",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [],
+      "handsRequired": 1,
+      "weightSRD": 4,
+      "costSRD": "5 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "quarterstaff",
+      "name": "Quarterstaff",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "versatile"
+      ],
+      "versatileDamageDice": "1d8",
+      "handsRequired": 1,
+      "weightSRD": 4,
+      "costSRD": "2 sp",
+      "sourcePage": 66
+    },
+    {
+      "id": "sickle",
+      "name": "Sickle",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d4",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "light"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "1 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "spear",
+      "name": "Spear",
+      "category": "simple",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "thrown",
+        "versatile"
+      ],
+      "versatileDamageDice": "1d8",
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "1 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "crossbow_light",
+      "name": "Crossbow, light",
+      "category": "simple",
+      "mode": "ranged",
+      "baseDamageDice": "1d8",
+      "damageType": "piercing",
+      "normalRangeFeet": 80,
+      "longRangeFeet": 320,
+      "properties": [
+        "ammunition",
+        "loading",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 5,
+      "costSRD": "25 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "dart",
+      "name": "Dart",
+      "category": "simple",
+      "mode": "ranged",
+      "baseDamageDice": "1d4",
+      "damageType": "piercing",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "finesse",
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 0.25,
+      "costSRD": "5 cp",
+      "sourcePage": 66
+    },
+    {
+      "id": "shortbow",
+      "name": "Shortbow",
+      "category": "simple",
+      "mode": "ranged",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 80,
+      "longRangeFeet": 320,
+      "properties": [
+        "ammunition",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 2,
+      "costSRD": "25 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "sling",
+      "name": "Sling",
+      "category": "simple",
+      "mode": "ranged",
+      "baseDamageDice": "1d4",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 30,
+      "longRangeFeet": 120,
+      "properties": [
+        "ammunition"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 0,
+      "costSRD": "1 sp",
+      "sourcePage": 66
+    },
+    {
+      "id": "battleaxe",
+      "name": "Battleaxe",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "versatile"
+      ],
+      "versatileDamageDice": "1d10",
+      "handsRequired": 1,
+      "weightSRD": 4,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "flail",
+      "name": "Flail",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "glaive",
+      "name": "Glaive",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d10",
+      "damageType": "slashing",
+      "normalRangeFeet": 10,
+      "longRangeFeet": 10,
+      "properties": [
+        "heavy",
+        "reach",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 6,
+      "costSRD": "20 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "greataxe",
+      "name": "Greataxe",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d12",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "heavy",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 7,
+      "costSRD": "30 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "greatsword",
+      "name": "Greatsword",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "2d6",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "heavy",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 6,
+      "costSRD": "50 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "halberd",
+      "name": "Halberd",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d10",
+      "damageType": "slashing",
+      "normalRangeFeet": 10,
+      "longRangeFeet": 10,
+      "properties": [
+        "heavy",
+        "reach",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 6,
+      "costSRD": "20 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "lance",
+      "name": "Lance",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d12",
+      "damageType": "piercing",
+      "normalRangeFeet": 10,
+      "longRangeFeet": 10,
+      "properties": [
+        "reach",
+        "special"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 6,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "longsword",
+      "name": "Longsword",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "versatile"
+      ],
+      "versatileDamageDice": "1d10",
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "15 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "maul",
+      "name": "Maul",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "2d6",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "heavy",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 10,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "morningstar",
+      "name": "Morningstar",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "piercing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [],
+      "handsRequired": 1,
+      "weightSRD": 4,
+      "costSRD": "15 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "pike",
+      "name": "Pike",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d10",
+      "damageType": "piercing",
+      "normalRangeFeet": 10,
+      "longRangeFeet": 10,
+      "properties": [
+        "heavy",
+        "reach",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 18,
+      "costSRD": "5 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "rapier",
+      "name": "Rapier",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "piercing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "finesse"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "25 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "scimitar",
+      "name": "Scimitar",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "slashing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "finesse",
+        "light"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "25 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "shortsword",
+      "name": "Shortsword",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "finesse",
+        "light"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "trident",
+      "name": "Trident",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 20,
+      "longRangeFeet": 60,
+      "properties": [
+        "thrown",
+        "versatile"
+      ],
+      "versatileDamageDice": "1d8",
+      "handsRequired": 1,
+      "weightSRD": 4,
+      "costSRD": "5 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "war_pick",
+      "name": "War pick",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "piercing",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [],
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "5 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "warhammer",
+      "name": "Warhammer",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d8",
+      "damageType": "bludgeoning",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 5,
+      "properties": [
+        "versatile"
+      ],
+      "versatileDamageDice": "1d10",
+      "handsRequired": 1,
+      "weightSRD": 2,
+      "costSRD": "15 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "whip",
+      "name": "Whip",
+      "category": "martial",
+      "mode": "melee",
+      "baseDamageDice": "1d4",
+      "damageType": "slashing",
+      "normalRangeFeet": 10,
+      "longRangeFeet": 10,
+      "properties": [
+        "finesse",
+        "reach"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "2 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "blowgun",
+      "name": "Blowgun",
+      "category": "martial",
+      "mode": "ranged",
+      "baseDamageDice": "1",
+      "damageType": "piercing",
+      "normalRangeFeet": 25,
+      "longRangeFeet": 100,
+      "properties": [
+        "ammunition",
+        "loading"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 1,
+      "costSRD": "10 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "crossbow_hand",
+      "name": "Crossbow, hand",
+      "category": "martial",
+      "mode": "ranged",
+      "baseDamageDice": "1d6",
+      "damageType": "piercing",
+      "normalRangeFeet": 30,
+      "longRangeFeet": 120,
+      "properties": [
+        "ammunition",
+        "light",
+        "loading"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "75 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "crossbow_heavy",
+      "name": "Crossbow, heavy",
+      "category": "martial",
+      "mode": "ranged",
+      "baseDamageDice": "1d10",
+      "damageType": "piercing",
+      "normalRangeFeet": 100,
+      "longRangeFeet": 400,
+      "properties": [
+        "ammunition",
+        "heavy",
+        "loading",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 18,
+      "costSRD": "50 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "longbow",
+      "name": "Longbow",
+      "category": "martial",
+      "mode": "ranged",
+      "baseDamageDice": "1d8",
+      "damageType": "piercing",
+      "normalRangeFeet": 150,
+      "longRangeFeet": 600,
+      "properties": [
+        "ammunition",
+        "heavy",
+        "two_handed"
+      ],
+      "handsRequired": 2,
+      "weightSRD": 2,
+      "costSRD": "50 gp",
+      "sourcePage": 66
+    },
+    {
+      "id": "net",
+      "name": "Net",
+      "category": "martial",
+      "mode": "ranged",
+      "baseDamageDice": "0",
+      "damageType": "none",
+      "normalRangeFeet": 5,
+      "longRangeFeet": 15,
+      "properties": [
+        "special",
+        "thrown"
+      ],
+      "handsRequired": 1,
+      "weightSRD": 3,
+      "costSRD": "1 gp",
+      "sourcePage": 66
+    }
+  ]
+}

@@ -80,6 +80,14 @@
             PluginManager.loadScript("UF_Proficiency");
             PluginManager._scripts.push("UF_Proficiency");
         }
+        if (!PluginManager._scripts.includes("UF_Conditions")) {
+            PluginManager.loadScript("UF_Conditions");
+            PluginManager._scripts.push("UF_Conditions");
+        }
+        if (!PluginManager._scripts.includes("UF_Rules")) {
+            PluginManager.loadScript("UF_Rules");
+            PluginManager._scripts.push("UF_Rules");
+        }
         if (!PluginManager._scripts.includes("UF_Time")) {
             PluginManager.loadScript("UF_Time");
             PluginManager._scripts.push("UF_Time");

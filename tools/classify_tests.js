@@ -70,3 +70,4 @@ const outPath = path.join(__dirname, "../docs/TEST_CLASSIFICATION.md");
 fs.writeFileSync(outPath, md, "utf8");
 console.log(`Test classification complete. Written to docs/TEST_CLASSIFICATION.md`);
 console.log(`Headless: ${categories.HEADLESS_AUTOMATED.length}, Playtest: ${categories.PLAYTEST_IN_GAME.length}, Art: ${categories.ART_PIPELINE.length}, Utilities: ${categories.UTILITY_TOOL.length}`);
+

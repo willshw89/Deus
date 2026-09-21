@@ -7,7 +7,62 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
 ## In progress
-- (None claimed; Health Sprint 1 completed).
+- None (SRD 5.1 official framework codification, centralized rules resolver, combat integration, and automated verification suites delivered).
+
+## SRD 5.1 Official Framework Codification & Centralized Rules Engine Delivered — 2026-09-21 (Gemini)
+Delivered per user directive (SRD 5.1 Complete Audit, Codification, Normalization & Rules Integration):
+- **Full Text Extraction & Mechanical Data Normalization (`game/data/srd5_1/`)**:
+  - Audited and extracted all 403 pages (1,388,895 characters) of the official `SRD_CC_v5.1.pdf` (Creative Commons CC-BY-4.0) via `pdf-parse`.
+  - Zero guesswork, zero non-SRD material, zero 2024 / SRD 5.2 rules, zero proprietary Product Identity.
+  - Delivered 15 normalized JSON data packages with embedded CC-BY-4.0 metadata and verbatim attribution notice:
+    1. `abilities.json`: 6 abilities (STR, DEX, CON, INT, WIS, CHA), modifier formula $\lfloor(score - 10)/2\rfloor$, standard 6-tier DC ladder (Very Easy 5, Easy 10, Medium 15, Hard 20, Very Hard 25, Nearly Impossible 30).
+    2. `skills.json`: 18 SRD skills with default abilities, decoupled for contextual ability routing.
+    3. `tools.json`: 36 tools (17 artisan's tools, 6 specialist kits, 2 gaming sets, 10 musical instruments, vehicles).
+    4. `weapons.json`: 37 weapons (10 simple melee, 4 simple ranged, 18 martial melee, 5 martial ranged) with damage dice, damage types, properties, weights, and ranges in feet.
+    5. `weapon_properties.json`: 11 weapon properties (ammunition, finesse, heavy, light, loading, range, reach, special, thrown, two-handed, versatile).
+    6. `armor.json`: 13 armor types (3 light, 5 medium, 4 heavy, 1 shield) with base AC, Dex modifier caps, Str minimums, and stealth disadvantage flags.
+    7. `damage_types.json`: 13 damage types (acid, bludgeoning, cold, fire, force, lightning, necrotic, piercing, poison, psychic, radiant, slashing, thunder).
+    8. `conditions.json`: 15 conditions (blinded, charmed, deafened, exhaustion, frightened, grappled, incapacitated, invisible, paralyzed, petrified, poisoned, prone, restrained, stunned, unconscious) with machine-readable rule flags and 6-level exhaustion ladder.
+    9. `combat_actions.json`: 10 standard combat actions (Attack, Cast a Spell, Dash, Disengage, Dodge, Help, Hide, Ready, Search, Use an Object).
+    10. `spells.json`: 319 spells parsed from descriptions on pp. 114–194 with level (0–9), school, ritual, components, range in feet, duration, concentration, and timing domain.
+    11. `rules_reference.json`: Creature sizes, cover bonuses (+2 half, +5 three-quarters, total), jumping, falling, suffocation, resting, and object AC/HP.
+    12. `classes_reference.json`: 12 reference classes with hit dice, save proficiencies, and standard proficiency ladder (+2 to +6).
+    13. `species_reference.json`: 9 base races and 4 subraces with sizes, base speeds in feet, and darkvision distances.
+    14. `monsters_reference.json`: 313 creature stat blocks (199 main monsters pp. 261–357 + 114 appendix beasts and creatures pp. 366–403).
+    15. `magic_items_reference.json`: 243 magic items with categories, rarities, and attunement requirements.
+- **Centralized Rules Resolver (`game/js/plugins/UF_Rules.js`)**:
+  - Implemented authoritative rules engine `UF.Rules`:
+    - Core math: `UF.Rules.modifier(score)`, `UF.Rules.dc(key)`.
+    - Centralized ability checks: `UF.Rules.check(unit, ability, dc, opts)` (d20 + abilityMod + profBonus vs DC, advantage/disadvantage cancellation, nat 20 crit, nat 1 fumble).
+    - Passive checks: `UF.Rules.passiveCheck(unit, ability, profId, opts)` ($10 + \text{mod} + \text{prof} \pm 5$).
+    - Saving throws: `UF.Rules.save(unit, ability, dc, opts)` with automatic condition failures (e.g. Paralyzed on STR/DEX saves).
+    - Contested checks: `UF.Rules.contest(unitA, abilityA, unitB, abilityB, opts)` (grappling, shoving).
+    - Armor class: `UF.Rules.armorClass(unit)` (unarmored $10+\text{Dex}$, light, medium max $+2$, heavy flat, shield $+2$, and natural armor).
+    - Combat attack resolution: `UF.Rules.attack(attacker, defender, weaponKey, opts)` (d20 + attackMod vs AC, same-Z invariant check, condition advantages/auto-crits).
+    - Damage rolls: `UF.Rules.damage(attacker, defender, attackResult, opts)` (dice parsing, doubled damage dice on critical hits, resistances, immunities, vulnerabilities).
+    - Heroic death saves at 0 HP: `UF.Rules.deathSave(unit)` (3 successes to stabilize, 3 failures for death, nat 1 = 2 failures, nat 20 revives at 1 HP).
+    - Physical movement rules: `UF.Rules.jumping(unit, type, running)` and `UF.Rules.fallingDamage(distanceFeet)`.
+- **Centralized Condition Engine (`game/js/plugins/UF_Conditions.js`)**:
+  - Unified condition registry: `has`, `apply`, `remove`, `clearAll`, `activeConditions`, `queryModifiers(unit)`.
+  - Connects condition flags (`attackAdvantage`, `attackDisadvantage`, `incomingAttackAdvantage`, `critIfHitWithin5ft`, `strDexSaveAutoFail`, `speedZero`) directly into rules resolvers.
+- **Combat Engine Transition (`game/js/plugins/UF_Combat.js`)**:
+  - Connected `Combat.resolveAttack` to `UF.Rules.attack` and `UF.Rules.damage`: rolls d20 + mod vs AC with weapon damage dice and doubled critical hit dice.
+  - Connected `Combat.calcAC` to `UF.Rules.armorClass(unit).ac`.
+  - Added weapon mapping `Combat.resolveWeaponKey(prof)` supporting melee, ranged, and creature natural attacks (`bite`, `claws`, `unarmed`).
+  - Preserved animation hooks, hitsplats, health bars, retaliations, and faction aid, while providing seamless legacy fallback.
+- **Documentation & Legal Compliance (`docs/LEGAL.md`, `docs/CREDITS.md`, `docs/SRD5_1_INTEGRATION.md`)**:
+  - Codified CC-BY-4.0 legal boundary and exact attribution notice in `docs/LEGAL.md` and `docs/CREDITS.md`.
+  - Authored comprehensive architectural specification `docs/SRD5_1_INTEGRATION.md` detailing adopted, adapted, and rejected systems.
+- **Automated Verification Proof Suites Built & Passing (Obeying Rule 4)**:
+  - `tools/test_srd_parity.js`: **100/100 PASS (exit 0)**; `--mutant` fails 3 tests with exit 1.
+  - `tools/test_srd_rules_proof.js`: **49/49 PASS (exit 0)**; `--mutant` fails with exit 1.
+  - `tools/test_srd_equipment_proof.js`: **25/25 PASS (exit 0)**; `--mutant` fails with exit 1.
+  - `tools/test_srd_combat_proof.js`: **43/43 PASS (exit 0)**; `--mutant` fails with exit 1.
+- **Full Regression Baseline Confirmed Green**:
+  - `tools/test_time_domains_proof.js`: **46/46 PASS (exit 0)**.
+  - `tools/test_unified_capability_proof.js`: **48/48 PASS (exit 0)**.
+  - `tools/test_households.js`: **56/56 PASS (exit 0)**.
+  - `tools/benchmark_performance.js`: **PASS (0.001 ms/tick, >920,000 Hz throughput)**.
 
 ## Engineering Health Sprint 1: Serialization, Multi-Domain Time, Simulation Scheduler, Spatial Standard & Performance Baseline Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Engineering Health, Lean Architecture & Maintainability, V130, 68 Principles):

@@ -694,6 +694,9 @@
         const speciesText = species ? `${species.name}${species.kind ? ` (${species.kind})` : ""}` : cap(d.species || "");
         const who = [d.gender ? lower(d.gender) : "", d.age !== undefined && kind !== "animal" ? `age ${d.age}` : ""].filter(Boolean).join(", ");
         const fl = factionLine(u);
+        const P = window.UF && UF.Proficiency;
+        const profInfo = P && typeof P.emergentProfession === "function" ? P.emergentProfession(u) : null;
+        const profTitle = profInfo && profInfo.id !== "settler" ? profInfo.title : null;
         const Env = window.UF && UF.Environment;
         const th = Env && typeof Env.unitThermal === "function" ? Env.unitThermal(u) : null;
         const cond = Env && typeof Env.conditionLabel === "function" ? Env.conditionLabel(u) : "";
@@ -701,13 +704,35 @@
         const here = I && u.area ? I.atIn(u.area, u.x, u.y) : [];
         const grid = gridSlots(inv, cfg, equipped);
         const drops = kind === "animal" && species && species.yields ? Object.keys(species.yields).slice(0, MAX_DROPS).map(id => ({ typeId: id, count: species.yields[id] | 0 })) : (kind === "animal" ? [] : null);
+        let capabilities = null;
+        if (P && d.proficiencyXp && typeof d.proficiencyXp === "object") {
+            const list = [];
+            for (const [profId, xp] of Object.entries(d.proficiencyXp)) {
+                if (typeof xp === "number" && xp > 0) {
+                    const def = P.DEFINITIONS ? P.DEFINITIONS[profId] : null;
+                    const r = P.resolveCapability(u, profId);
+                    list.push({
+                        id: profId,
+                        name: def ? def.name : cap(profId),
+                        capability: r.capability,
+                        profLabel: r.profLabel,
+                        abilityKey: r.abilityKey,
+                        abilityMod: r.abilityMod,
+                        profBonus: r.profBonus
+                    });
+                }
+            }
+            list.sort((a, b) => b.capability - a.capability);
+            if (list.length) capabilities = list.slice(0, 3);
+        }
         const m = {
             subject: { kind: "unit", unitId: u.id }, kind, readOnly,
-            title: u.name || "", subtitle: [KIND_LABELS[kind], speciesText, who, thermalText].filter(Boolean).join(" · "),
+            title: u.name || "", subtitle: [KIND_LABELS[kind], profTitle, speciesText, who, thermalText].filter(Boolean).join(" · "),
             faction: fl.faction, stance: fl.stance, doing: doingOf(u),
             load: loadOf(u),
             picture: faceSpecOf(u, species),
             equipment, stats: statsOf(d.stats), statsShown: true,
+            capabilities,
             needs: kind === "colonist" ? needsOf(d.needs) : null,
             mood: kind === "colonist" ? { text: d.mood || "", score: d.moodScore | 0 } : null,
             drops, stateLines: null, actions: null,
@@ -721,6 +746,7 @@
         };
         m.sig = JSON.stringify([m.kind, m.title, m.subtitle, m.faction, m.stance && m.stance.id, m.doing, m.load ? m.load.text : "", inv.map(it => `${it.id}:${it.type}:${it.count}`),
             equipment ? equipment.map(e => `${e.itemId}:${e.typeId}`) : null, m.stats ? m.stats.map(s => s.score) : null,
+            capabilities ? capabilities.map(c => `${c.id}:${c.capability}`) : null,
             m.needs ? m.needs.map(n => n.value) : null, m.mood, m.here, m.picture]);
         return m;
     }
@@ -839,6 +865,10 @@
         if (m.statsShown) {
             L.stats = { x: 0, y, w: iw, h: 32 };
             y += 34;
+            if (m.capabilities && m.capabilities.length) {
+                L.capabilities = { x: 0, y, w: iw, h: 16 };
+                y += 18;
+            }
         }
         if (m.needs) {
             L.needs = { x: 0, y, w: iw, h: 3 * 15 };
@@ -1195,6 +1225,12 @@
                 this.text(`${s.score} ${signed(s.mod)}`, x, r.y + 13, w, 18, 13, COLORS.text, "center");
             });
         }
+        drawCapabilities(m, L) {
+            if (!m.capabilities || !m.capabilities.length) return;
+            const r = L.capabilities;
+            const text = "Cap: " + m.capabilities.map(c => `${c.name} ${signed(c.capability)} (${c.profLabel})`).join(" · ");
+            this.text(text, r.x, r.y, r.w, r.h, 11, COLORS.doing);
+        }
         drawNeeds(m, L) {
             const r = L.needs, c = this.contents, colW = Math.floor(r.w / 2);
             const cells = m.needs.map(n => ({ need: n }));
@@ -1274,6 +1310,7 @@
             this.drawHeader(m, L);
             if (L.equipment) this.drawEquipment(m, L);
             if (L.stats) this.drawStats(m, L);
+            if (L.capabilities) this.drawCapabilities(m, L);
             if (L.needs) this.drawNeeds(m, L);
             if (L.drops) this.drawDrops(m, L);
             if (L.state) this.drawState(m, L);

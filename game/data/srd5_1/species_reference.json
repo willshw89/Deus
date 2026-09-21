@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePages": "3-7"
+  },
+  "species": [
+    {
+      "id": "dwarf",
+      "name": "Dwarf",
+      "size": "medium",
+      "speedFeet": 25,
+      "darkvisionFeet": 60,
+      "subraces": [
+        {
+          "id": "hill_dwarf",
+          "name": "Hill Dwarf"
+        }
+      ],
+      "sourcePage": 3
+    },
+    {
+      "id": "elf",
+      "name": "Elf",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 60,
+      "subraces": [
+        {
+          "id": "high_elf",
+          "name": "High Elf"
+        }
+      ],
+      "sourcePage": 4
+    },
+    {
+      "id": "halfling",
+      "name": "Halfling",
+      "size": "small",
+      "speedFeet": 25,
+      "darkvisionFeet": 0,
+      "subraces": [
+        {
+          "id": "lightfoot_halfling",
+          "name": "Lightfoot Halfling"
+        }
+      ],
+      "sourcePage": 5
+    },
+    {
+      "id": "human",
+      "name": "Human",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 0,
+      "subraces": [],
+      "sourcePage": 5
+    },
+    {
+      "id": "dragonborn",
+      "name": "Dragonborn",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 0,
+      "subraces": [],
+      "sourcePage": 5
+    },
+    {
+      "id": "gnome",
+      "name": "Gnome",
+      "size": "small",
+      "speedFeet": 25,
+      "darkvisionFeet": 60,
+      "subraces": [
+        {
+          "id": "rock_gnome",
+          "name": "Rock Gnome"
+        }
+      ],
+      "sourcePage": 6
+    },
+    {
+      "id": "half_elf",
+      "name": "Half-Elf",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 60,
+      "subraces": [],
+      "sourcePage": 7
+    },
+    {
+      "id": "half_orc",
+      "name": "Half-Orc",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 60,
+      "subraces": [],
+      "sourcePage": 7
+    },
+    {
+      "id": "tiefling",
+      "name": "Tiefling",
+      "size": "medium",
+      "speedFeet": 30,
+      "darkvisionFeet": 60,
+      "subraces": [],
+      "sourcePage": 7
+    }
+  ]
+}

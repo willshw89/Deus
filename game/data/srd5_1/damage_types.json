@@ -1,0 +1,76 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 97
+  },
+  "damageTypes": [
+    {
+      "id": "acid",
+      "name": "Acid",
+      "description": "Corrosive liquid and dissolving enzymes"
+    },
+    {
+      "id": "bludgeoning",
+      "name": "Bludgeoning",
+      "description": "Blunt force attacks, hammers, falling, constriction"
+    },
+    {
+      "id": "cold",
+      "name": "Cold",
+      "description": "Infernal chill and frigid blasts"
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "description": "Flames, dragon breath, and heat"
+    },
+    {
+      "id": "force",
+      "name": "Force",
+      "description": "Pure magical energy focused into damaging form"
+    },
+    {
+      "id": "lightning",
+      "name": "Lightning",
+      "description": "Electrical discharge"
+    },
+    {
+      "id": "necrotic",
+      "name": "Necrotic",
+      "description": "Withers matter and soul"
+    },
+    {
+      "id": "piercing",
+      "name": "Piercing",
+      "description": "Puncturing and impaling attacks"
+    },
+    {
+      "id": "poison",
+      "name": "Poison",
+      "description": "Venomous stings and toxic gases"
+    },
+    {
+      "id": "psychic",
+      "name": "Psychic",
+      "description": "Mental energy that assaults the mind"
+    },
+    {
+      "id": "radiant",
+      "name": "Radiant",
+      "description": "Holy energy that sears like fire"
+    },
+    {
+      "id": "slashing",
+      "name": "Slashing",
+      "description": "Cutting blows from swords and claws"
+    },
+    {
+      "id": "thunder",
+      "name": "Thunder",
+      "description": "Concussive bursts of sound"
+    }
+  ]
+}

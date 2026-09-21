@@ -328,3 +328,4 @@ if (failedChecks > 0) {
     console.log("\nMulti-Domain Time Architecture Proof Suite PASSED (100%).");
     process.exit(0);
 }
+

@@ -191,6 +191,13 @@
             }
             item.holder = null;
         }
+        if (item.container !== null && item.container !== undefined) {
+            const C = window.UF && UF.Containers;
+            if (C && typeof C.removeItem === "function") {
+                try { C.removeItem(item.container, item.id); } catch (_) {}
+            }
+            item.container = null;
+        }
     }
 
     function canMerge(a, b) {
@@ -228,25 +235,31 @@
      */
     Items.create = function(typeId, count, at, opts) {
         const st = ready(), t = Items.type(typeId);
-        if (!st || !t || !at) return null;
-        const held = at.holder !== undefined && at.holder !== null;
+        if (!st || !t) return null;
+        if (at && (at.mat || at.q !== undefined) && !at.area && at.holder === undefined && at.container === undefined) {
+            opts = at;
+            at = null;
+        }
+        const held = at && at.holder !== undefined && at.holder !== null;
         const holder = held ? World().unit(at.holder) : null;
-        const area = at.area ? whereArea(at) : null;
-        if (held ? !holder || !validArea(levelArea(holder.area, zOf(holder))) : !validArea(area)) return null;
-        const item = { id: st.nextId++, type: t.id, count: Math.max(1, count | 0), area: null, x: 0, y: 0, z: 0, holder: null };
-        const mat = (opts && opts.mat) || at.mat || null;
-        const q = (opts && opts.q !== undefined && opts.q !== null) ? opts.q : (at.q !== undefined && at.q !== null ? at.q : null);
+        const contained = at && at.container !== undefined && at.container !== null;
+        const area = (at && at.area) ? whereArea(at) : null;
+        if (held && (!holder || !validArea(levelArea(holder.area, zOf(holder))))) return null;
+        if (area && !validArea(area)) return null;
+        const item = { id: st.nextId++, type: t.id, count: Math.max(1, count | 0), area: null, x: 0, y: 0, z: 0, holder: null, container: null };
+        const mat = (opts && opts.mat) || (at && at.mat) || null;
+        const q = (opts && opts.q !== undefined && opts.q !== null) ? opts.q : (at && at.q !== undefined && at.q !== null ? at.q : null);
         if (mat) item.mat = mat;
         if (q !== null) item.q = q;
-        if (at.holder !== undefined && at.holder !== null) {
+        if (held) {
             const u = holder;
             item.holder = u.id;
             item.z = zOf(u);
             inventoryArray(u).push(item.id);
-        } else if (at.area) {
+        } else if (contained) {
+            item.container = at.container;
+        } else if (area) {
             placeOnCell(item, area, at.x, at.y);
-        } else {
-            return null;
         }
         st.byId[item.id] = item;
         changed(item, "created");
@@ -332,12 +345,139 @@
         return o.limit > 0 ? out.slice(0, o.limit) : out;
     };
 
-    /** Move a ground item into a unit's inventory (no distance check: jobs stand on the cell first). */
-    Items.pickUp = function(itemId, unitId) {
+    /**
+     * Physical mass in kilograms of an item, stack, or type.
+     * Calculated from: catalog item weight, or (material.density * volume), or base item category weights.
+     */
+    Items.weightOf = function(ref, count = 1, opts = {}) {
+        if (!ref) return 0;
+        let typeId = null, mat = null, cnt = count;
+        if (typeof ref === "number") {
+            const it = Items.get(ref);
+            if (!it) return 0;
+            typeId = it.type;
+            mat = it.mat;
+            cnt = it.count || 1;
+        } else if (typeof ref === "object" && ref !== null) {
+            typeId = ref.type || ref.id;
+            mat = ref.mat || (opts && opts.mat) || null;
+            cnt = ref.count !== undefined ? ref.count : count;
+        } else if (typeof ref === "string") {
+            typeId = ref;
+            mat = opts && opts.mat;
+        }
+        const t = Items.type(typeId);
+        if (!t) return 0;
+
+        let unitWeight = t.weight;
+        if (unitWeight === undefined || unitWeight === null) {
+            const matDef = Items.materialOf(mat || typeId);
+            const density = matDef && typeof matDef.density === "number" ? matDef.density : 1.0;
+            const tags = Array.isArray(t.tags) ? t.tags : [];
+            if (typeId === "log" || tags.includes("log") || tags.includes("timber")) {
+                unitWeight = Math.round(density * 20 * 10) / 10;
+            } else if (typeId === "stone" || tags.includes("stone") || tags.includes("rock")) {
+                unitWeight = Math.round(density * 2 * 10) / 10;
+            } else if (tags.includes("metal") || typeId.startsWith("bar_") || typeId.startsWith("ore_")) {
+                unitWeight = Math.round(density * 0.6 * 10) / 10;
+            } else if (tags.includes("weapon") || tags.includes("tool")) {
+                unitWeight = 2.0;
+            } else if (tags.includes("clothes") || tags.includes("wear")) {
+                unitWeight = 1.5;
+            } else if (tags.includes("food") || typeId === "berries" || typeId === "meat_cooked" || typeId === "meat_raw") {
+                unitWeight = 0.2;
+            } else if (typeId === "arrows" || tags.includes("arrow") || tags.includes("ammo")) {
+                unitWeight = 0.05;
+            } else if (tags.includes("fiber") || typeId === "fiber" || typeId === "straw") {
+                unitWeight = 0.1;
+            } else {
+                unitWeight = 1.0;
+            }
+        }
+        return Math.round(unitWeight * cnt * 10) / 10;
+    };
+
+    /** Total carried weight of all items currently in a unit's inventory. */
+    Items.carriedWeight = function(unitId) {
+        const inv = Items.inventoryOf(unitId);
+        let total = 0;
+        for (const it of inv) {
+            total += Items.weightOf(it);
+        }
+        return Math.round(total * 10) / 10;
+    };
+
+    /** Maximum carrying weight capacity of a unit in kilograms (default 60.0 kg). */
+    Items.maxWeight = function(unitId) {
+        const W = World(), u = W && W.unit(unitId);
+        if (!u) return 60.0;
+        return (u.data && typeof u.data.maxWeight === "number") ? u.data.maxWeight : 60.0;
+    };
+
+    /** Maximum inventory slot count of a unit (default 8 slots). */
+    Items.maxSlots = function(unitId) {
+        const W = World(), u = W && W.unit(unitId);
+        if (!u) return 8;
+        return (u.data && typeof u.data.maxSlots === "number") ? u.data.maxSlots : 8;
+    };
+
+    /** Check if a unit can carry an additional item, stack, or quantity. */
+    Items.canCarry = function(unitId, itemOrTypeId, count = 1, opts = {}) {
+        const W = World(), u = W && W.unit(unitId);
+        if (!u) return { ok: false, reason: "no_unit" };
+        const inv = Items.inventoryOf(unitId);
+        const maxSlots = Items.maxSlots(unitId);
+        const maxWeight = Items.maxWeight(unitId);
+        const curWeight = Items.carriedWeight(unitId);
+
+        let typeId = null, mat = null, q = null, cnt = count;
+        if (typeof itemOrTypeId === "number") {
+            const incoming = Items.get(itemOrTypeId);
+            if (!incoming) return { ok: false, reason: "no_item" };
+            typeId = incoming.type;
+            mat = incoming.mat;
+            q = incoming.q;
+            cnt = incoming.count || 1;
+        } else if (typeof itemOrTypeId === "object" && itemOrTypeId !== null) {
+            typeId = itemOrTypeId.type || itemOrTypeId.id;
+            mat = itemOrTypeId.mat || (opts && opts.mat) || null;
+            q = itemOrTypeId.q !== undefined ? itemOrTypeId.q : ((opts && opts.q) || null);
+            cnt = itemOrTypeId.count !== undefined ? itemOrTypeId.count : count;
+        } else {
+            typeId = itemOrTypeId;
+            mat = opts && opts.mat;
+            q = opts && opts.q;
+        }
+        const t = Items.type(typeId);
+        if (!t) return { ok: false, reason: "unknown_type" };
+
+        const addWeight = Items.weightOf({ type: typeId, mat, count: cnt });
+        if (curWeight + addWeight > maxWeight + 0.001) {
+            return { ok: false, reason: "weight_limit_exceeded", curWeight, addWeight, maxWeight };
+        }
+
+        const maxStack = stackOf(t);
+        const mergeable = inv.find(it => it.type === typeId && (it.mat || null) === (mat || null) && (it.q ?? null) === (q ?? null) && it.count < maxStack);
+        if (!mergeable && inv.length >= maxSlots) {
+            return { ok: false, reason: "slots_full", slotsUsed: inv.length, maxSlots };
+        }
+        return { ok: true, curWeight, addWeight, maxWeight };
+    };
+
+    /** Move a ground item or container item into a unit's inventory (enforces slot and weight limits). */
+    Items.pickUp = function(itemId, unitId, opts = {}) {
         const st = ready();
         const it = st && st.byId[itemId];
         const u = it && World().unit(unitId);
-        if (!it || !u || !it.area || !validArea(itemLevel(it)) || zOf(it) !== zOf(u)) return false;
+        if (!it || !u) return false;
+        if (!opts.bypassLocation) {
+            if (!it.area && !it.container) return false;
+            if (it.area && (!validArea(itemLevel(it)) || zOf(it) !== zOf(u))) return false;
+        }
+        if (!opts.bypassLimits) {
+            const can = Items.canCarry(unitId, it);
+            if (!can.ok) return false;
+        }
         detach(it);
         it.holder = u.id;
         it.z = zOf(u);
@@ -360,7 +500,7 @@
     Items.putDown = function(itemId, area, x, y) {
         const st = ready();
         const it = st && st.byId[itemId];
-        if (!it || it.holder === null || it.holder === undefined || !validArea(area)) return null;
+        if (!it || !validArea(area)) return null;
         detach(it);
         const max = stackOf(Items.type(it.type));
         let merged = null;
@@ -383,14 +523,35 @@
         return it;
     };
 
+    /** Transfer an item into a container object. */
+    Items.transferToContainer = function(itemId, containerId) {
+        const C = window.UF && UF.Containers;
+        if (!C || typeof C.putItem !== "function") return false;
+        return C.putItem(containerId, itemId);
+    };
+
+    /** Take an item out of a container and place it into a unit's inventory. */
+    Items.takeFromContainer = function(itemId, unitId, count = null) {
+        const C = window.UF && UF.Containers;
+        if (!C || typeof C.takeItem !== "function") return false;
+        const it = Items.get(itemId);
+        if (!it || !it.container) return false;
+        return C.takeItem(it.container, itemId, unitId, count);
+    };
+
     /** Create `count` of a type straight in a unit's inventory (in stacks of the type's size). Returns the items made. */
     Items.give = function(typeId, count, unitId, opts) {
         const st = ready(), t = Items.type(typeId), u = st && World().unit(unitId);
         if (!st || !t || !u) return [];
         let left = Math.max(0, count | 0);
         const max = stackOf(t), made = [];
+        const bypass = opts && opts.bypassLimits;
         while (left > 0) {
             const n = Math.min(max, left);
+            if (!bypass) {
+                const can = Items.canCarry(unitId, typeId, n, opts);
+                if (!can.ok) break;
+            }
             const it = Items.create(t.id, n, { holder: u.id }, opts);
             if (!it) break;
             made.push(it);

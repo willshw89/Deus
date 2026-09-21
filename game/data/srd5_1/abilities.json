@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 76
+  },
+  "abilities": [
+    {
+      "id": "str",
+      "name": "Strength",
+      "abbreviation": "STR",
+      "description": "Measuring physical power",
+      "defaultSkills": [
+        "athletics"
+      ]
+    },
+    {
+      "id": "dex",
+      "name": "Dexterity",
+      "abbreviation": "DEX",
+      "description": "Measuring agility, reflexes, and balance",
+      "defaultSkills": [
+        "acrobatics",
+        "sleight_of_hand",
+        "stealth"
+      ]
+    },
+    {
+      "id": "con",
+      "name": "Constitution",
+      "abbreviation": "CON",
+      "description": "Measuring endurance and health",
+      "defaultSkills": []
+    },
+    {
+      "id": "int",
+      "name": "Intelligence",
+      "abbreviation": "INT",
+      "description": "Measuring reasoning, memory, and knowledge",
+      "defaultSkills": [
+        "arcana",
+        "history",
+        "investigation",
+        "nature",
+        "religion"
+      ]
+    },
+    {
+      "id": "wis",
+      "name": "Wisdom",
+      "abbreviation": "WIS",
+      "description": "Measuring perception, intuition, and attunement",
+      "defaultSkills": [
+        "animal_handling",
+        "insight",
+        "medicine",
+        "perception",
+        "survival"
+      ]
+    },
+    {
+      "id": "cha",
+      "name": "Charisma",
+      "abbreviation": "CHA",
+      "description": "Measuring force of personality and leadership",
+      "defaultSkills": [
+        "deception",
+        "intimidation",
+        "performance",
+        "persuasion"
+      ]
+    }
+  ],
+  "modifierFormula": "floor((score - 10) / 2)",
+  "standardDCLadder": [
+    {
+      "difficulty": "Very Easy",
+      "dc": 5
+    },
+    {
+      "difficulty": "Easy",
+      "dc": 10
+    },
+    {
+      "difficulty": "Medium",
+      "dc": 15
+    },
+    {
+      "difficulty": "Hard",
+      "dc": 20
+    },
+    {
+      "difficulty": "Very Hard",
+      "dc": 25
+    },
+    {
+      "difficulty": "Nearly Impossible",
+      "dc": 30
+    }
+  ]
+}

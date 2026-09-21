@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePages": "62-104, 195-205"
+  },
+  "spatialInvariant": {
+    "gridCellFeetXY": 5,
+    "stepFeetZ": 5,
+    "normalCombatPolicy": "same_z_only"
+  },
+  "timeDomains": {
+    "engineTickHz": 20,
+    "actionSecondsPerRound": 6,
+    "historicalHoursPerRealSecond": 2
+  },
+  "creatureSizes": [
+    {
+      "id": "tiny",
+      "name": "Tiny",
+      "spaceFeet": 2.5,
+      "gridCells": 1
+    },
+    {
+      "id": "small",
+      "name": "Small",
+      "spaceFeet": 5,
+      "gridCells": 1
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "spaceFeet": 5,
+      "gridCells": 1
+    },
+    {
+      "id": "large",
+      "name": "Large",
+      "spaceFeet": 10,
+      "gridCells": 2
+    },
+    {
+      "id": "huge",
+      "name": "Huge",
+      "spaceFeet": 15,
+      "gridCells": 3
+    },
+    {
+      "id": "gargantuan",
+      "name": "Gargantuan",
+      "spaceFeet": 20,
+      "gridCells": 4
+    }
+  ],
+  "cover": [
+    {
+      "id": "half",
+      "name": "Half Cover",
+      "acBonus": 2,
+      "dexSaveBonus": 2,
+      "description": "At least half of target body blocked by obstacle."
+    },
+    {
+      "id": "three_quarters",
+      "name": "Three-Quarters Cover",
+      "acBonus": 5,
+      "dexSaveBonus": 5,
+      "description": "About three-quarters of target body blocked."
+    },
+    {
+      "id": "total",
+      "name": "Total Cover",
+      "acBonus": null,
+      "dexSaveBonus": null,
+      "description": "Target completely concealed by obstacle; cannot be targeted directly."
+    }
+  ],
+  "jumping": {
+    "longJump": {
+      "runningFormula": "STR score in feet",
+      "standingFormula": "half of STR score in feet"
+    },
+    "highJump": {
+      "runningFormula": "3 + STR modifier in feet",
+      "standingFormula": "half of (3 + STR modifier) in feet"
+    }
+  },
+  "falling": {
+    "damagePer10Feet": "1d6 bludgeoning",
+    "maximumDice": "20d6",
+    "landsProne": true
+  },
+  "suffocation": {
+    "holdingBreathMinutes": "1 + CON modifier (minimum 30 seconds)",
+    "chokingRoundsBeforeDying": "CON modifier (minimum 1 round)"
+  },
+  "environmentSurvival": {
+    "foodLbsPerDay": 1,
+    "daysWithoutFoodBeforeExhaustion": "3 + CON modifier",
+    "waterGallonsPerDay": 1,
+    "waterGallonsHotWeather": 2,
+    "dehydrationSaveDC": 15
+  },
+  "resting": {
+    "shortRestMinHours": 1,
+    "longRestMinHours": 8,
+    "longRestMaxFrequencyHours": 24,
+    "historicalTimeWarning": "Do NOT compress rests with historical clock without deliberate design"
+  },
+  "objects": {
+    "acByMaterial": {
+      "cloth_paper": 11,
+      "crystal_glass_ice": 13,
+      "wood_bone": 15,
+      "stone": 17,
+      "iron_steel": 19,
+      "mithral": 21,
+      "adamantine": 23
+    },
+    "hpBySize": {
+      "tiny": {
+        "fragile": 2,
+        "resilient": 5
+      },
+      "small": {
+        "fragile": 3,
+        "resilient": 10
+      },
+      "medium": {
+        "fragile": 5,
+        "resilient": 18
+      },
+      "large": {
+        "fragile": 10,
+        "resilient": 27
+      }
+    }
+  }
+}

@@ -905,8 +905,13 @@
         atIn: (area, x, y) => typeOf(typeIdIn(area, x, y)),
         typeIdIn,
         materialOf: (objOrId, area, x, y) => materialOfObject(objOrId, area, x, y),
-        /** Put an object (catalog id or type number; null/0 = nothing) on a cell of the map on screen. */
-        set: (x, y, idOrTypeId) => setIn(currentArea(), x, y, idOrTypeId),
+        /** Put an object (catalog id or type number; null/0 = nothing) on a cell of the map on screen, or on specified area. */
+        set: function(x, y, idOrTypeId) {
+            if (typeof x === "object" && x !== null) {
+                return setIn(x, y, idOrTypeId, arguments[3]);
+            }
+            return setIn(currentArea(), x, y, idOrTypeId);
+        },
         setIn,
         /** True when the object on a cell of the map on screen stops units. */
         blocks: blocksAt,

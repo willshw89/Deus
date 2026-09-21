@@ -98,6 +98,7 @@
     const Combat = {
         enabled: true,
         debug: false,
+        useRules: true,
         /** Tests only: a Set of unit ids; while set, the combat loop looks at those units and no others. */
         testFilter: null,
         stats: { attacks: 0, hits: 0, kills: 0, ticks: 0 },
@@ -157,8 +158,11 @@
         const I = Items();
         if (I && typeof I.type === "function") return I.type(id);
         const c = catalog();
-        const list = (c && c.items && Array.isArray(c.items.types)) ? c.items.types : [];
-        return list.find(t => t.id === id) || null;
+        const types = c && c.items && c.items.types;
+        if (!types) return null;
+        if (Array.isArray(types)) return types.find(t => t && t.id === id) || null;
+        if (typeof types === "object") return types[id] || null;
+        return null;
     }
 
     //-------------------------------------------------------------------------
@@ -487,11 +491,43 @@
         delete n.prof;
         return n;
     };
-    /** Kept name: now the max defence roll (against attackType, default slash). Also sets up hitpoints on first use. */
+    /** Authoritative AC: delegates to UF.Rules.armorClass when active, with legacy defence roll fallback. */
     Combat.calcAC = function(unit, attackType) {
         if (!unit || !unit.data) return 0;
         ensureHp(unit);
+        if (window.UF && window.UF.Rules && typeof UF.Rules.armorClass === "function" && Combat.useRules !== false) {
+            return UF.Rules.armorClass(unit).ac;
+        }
         return defenceRoll(unit, attackType || "slash");
+    };
+
+    /** Maps a weapon profile or catalog item to a standardized SRD 5.1 weapon key. */
+    Combat.resolveWeaponKey = function(prof) {
+        if (!prof) return "unarmed";
+        if (prof.natural) {
+            if (prof.types && prof.types.includes("stab")) return "bite";
+            if (prof.types && prof.types.includes("slash")) return "claws";
+            return "unarmed";
+        }
+        const name = String(prof.name || "").toLowerCase();
+        const type = String(prof.itemType || "").toLowerCase();
+        if (name.includes("dagger") || type.includes("dagger") || name.includes("knife")) return "dagger";
+        if (name.includes("long bow") || type.includes("long_bow")) return "longbow";
+        if (name.includes("short bow") || name.includes("bow") || type.includes("bow")) return "shortbow";
+        if (name.includes("sling") || type.includes("sling")) return "sling";
+        if (name.includes("spear") || type.includes("spear")) return "spear";
+        if (name.includes("club") || type.includes("club")) return "club";
+        if (name.includes("mace") || type.includes("mace")) return "mace";
+        if (name.includes("short sword") || type.includes("short_sword")) return "shortsword";
+        if (name.includes("long sword") || type.includes("long_sword") || name.includes("sword")) return "longsword";
+        if (name.includes("iron axe") || name.includes("battleaxe")) return "battleaxe";
+        if (name.includes("stone axe") || name.includes("handaxe") || name.includes("axe")) return "handaxe";
+        if (name.includes("pick") || name.includes("warhammer")) return "warhammer";
+        if (name.includes("halberd")) return "halberd";
+        if (name.includes("greatsword")) return "greatsword";
+        if (name.includes("rapier")) return "rapier";
+        if (name.includes("scimitar")) return "scimitar";
+        return "unarmed";
     };
 
     function attackRng(attacker, target) {
@@ -615,7 +651,9 @@
     /**
      * One attack now, whatever the range and timer (the loop checks those). opts.rng: a function returning [0, 1)
      * (tests and tools; the default is seeded from the world seed, both unit ids, the tick and a counter).
-     * Returns { hit, damage, rolled, maxHit, attackRoll, defenceRoll, chance, style, attackType, speed, weapon, killed } or null.
+     * Authoritative resolution: delegates to UF.Rules.attack & UF.Rules.damage when available, preserving same-Z invariant,
+     * critical dice doubling, and hitsplat visuals.
+     * Returns { hit, damage, rolled, maxHit, attackRoll, defenceRoll, chance, style, attackType, speed, weapon, killed, critical, fumble } or null.
      */
     Combat.resolveAttack = function(attacker, target, opts) {
         if (!attacker || !target || !attacker.data || !target.data || attacker === target) return null;
@@ -624,10 +662,60 @@
         ensureHp(attacker);
         ensureHp(target);
         if (target.data.hp <= 0) return null;
+
         const o = opts || {};
         const n = numbers(attacker, target);
-        const r = roll(n, typeof o.rng === "function" ? o.rng : attackRng(attacker, target));
-        const damage = Math.min(r.rolled, Math.max(0, target.data.hp));
+        const rngFn = typeof o.rng === "function" ? o.rng : attackRng(attacker, target);
+
+        // SRD 5.1 Rules Resolution via UF.Rules
+        const Rules = window.UF && window.UF.Rules;
+        const useSRD = Rules && typeof Rules.attack === "function" && Combat.useRules !== false && !o.legacy;
+
+        let hit = false;
+        let rolled = 0;
+        let isCrit = false;
+        let isFumble = false;
+        let rollA = 0;
+        let rollD = 0;
+        let weaponKey = "unarmed";
+        let attResult = null;
+
+        if (useSRD) {
+            weaponKey = Combat.resolveWeaponKey(n.prof);
+            attResult = Rules.attack(attacker, target, weaponKey, {
+                rng: rngFn,
+                advantage: o.advantage,
+                disadvantage: o.disadvantage,
+                coverBonus: o.coverBonus,
+                targetAC: o.targetAC,
+                weaponBonus: o.weaponBonus
+            });
+
+            // Same-Z combat invariant check
+            if (attResult.sameZViolation) {
+                return { hit: false, error: "Different Z level (same-Z combat invariant)", sameZViolation: true };
+            }
+
+            hit = !!attResult.hit;
+            isCrit = !!attResult.critical;
+            isFumble = !!attResult.fumble;
+            rollA = attResult.roll;
+            rollD = attResult.effectiveAC;
+
+            if (hit) {
+                const dmgResult = Rules.damage(attacker, target, attResult, { rng: rngFn, extraDamage: o.extraDamage });
+                rolled = dmgResult.damage;
+            }
+        } else {
+            // Legacy tick/OSRS formula fallback
+            const r = roll(n, rngFn);
+            hit = r.hit;
+            rolled = r.rolled;
+            rollA = r.a;
+            rollD = r.d;
+        }
+
+        const damage = Math.min(rolled, Math.max(0, target.data.hp));
         const I = Items();
         if (n.prof.ammo && n.prof.ammo.record && I && typeof I.consume === "function") {
             I.consume(n.prof.ammo.record.id, 1);
@@ -649,10 +737,40 @@
         if (target.data.hp > 0) retaliate(target, attacker, tick);
         aidFaction(target, attacker, tick);
         Combat.stats.attacks++;
-        if (r.hit) Combat.stats.hits++;
-        const result = { hit: r.hit, damage, rolled: r.rolled, maxHit: n.maxHit, attackRoll: n.A, defenceRoll: n.D, chance: n.chance,
-            style: n.style, attackType: n.attackType, speed: n.speed, weapon: n.weapon, rolls: { a: r.a, d: r.d }, killed: false };
-        emit("combat:hit", { attacker, target, damage, hit: r.hit, style: n.style, attackType: n.attackType });
+        if (hit) Combat.stats.hits++;
+        const result = {
+            hit,
+            damage,
+            rolled,
+            maxHit: n.maxHit,
+            attackRoll: useSRD ? rollA : n.A,
+            defenceRoll: useSRD ? rollD : n.D,
+            chance: n.chance,
+            style: n.style,
+            attackType: n.attackType,
+            speed: n.speed,
+            weapon: n.weapon,
+            weaponKey,
+            rolls: { a: rollA, d: rollD },
+            critical: isCrit,
+            fumble: isFumble,
+            advantage: attResult ? !!attResult.advantage : false,
+            disadvantage: attResult ? !!attResult.disadvantage : false,
+            killed: false
+        };
+        emit("combat:hit", {
+            attacker,
+            target,
+            damage,
+            hit,
+            style: n.style,
+            attackType: n.attackType,
+            critical: isCrit,
+            fumble: isFumble,
+            advantage: attResult ? !!attResult.advantage : false,
+            disadvantage: attResult ? !!attResult.disadvantage : false,
+            roll: rollA
+        });
         if (target.data.hp <= 0) {
             target.data.hp = 0;
             result.killed = true;

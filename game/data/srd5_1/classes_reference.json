@@ -1,0 +1,218 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePages": "8-55"
+  },
+  "classes": [
+    {
+      "id": "barbarian",
+      "name": "Barbarian",
+      "hitDie": 12,
+      "primaryAbility": [
+        "str"
+      ],
+      "savingThrows": [
+        "str",
+        "con"
+      ],
+      "sourcePage": 8
+    },
+    {
+      "id": "bard",
+      "name": "Bard",
+      "hitDie": 8,
+      "primaryAbility": [
+        "cha"
+      ],
+      "savingThrows": [
+        "dex",
+        "cha"
+      ],
+      "sourcePage": 11
+    },
+    {
+      "id": "cleric",
+      "name": "Cleric",
+      "hitDie": 8,
+      "primaryAbility": [
+        "wis"
+      ],
+      "savingThrows": [
+        "wis",
+        "cha"
+      ],
+      "sourcePage": 15
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "hitDie": 8,
+      "primaryAbility": [
+        "wis"
+      ],
+      "savingThrows": [
+        "int",
+        "wis"
+      ],
+      "sourcePage": 19
+    },
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "hitDie": 10,
+      "primaryAbility": [
+        "str",
+        "dex"
+      ],
+      "savingThrows": [
+        "str",
+        "con"
+      ],
+      "sourcePage": 24
+    },
+    {
+      "id": "monk",
+      "name": "Monk",
+      "hitDie": 8,
+      "primaryAbility": [
+        "dex",
+        "wis"
+      ],
+      "savingThrows": [
+        "str",
+        "dex"
+      ],
+      "sourcePage": 27
+    },
+    {
+      "id": "paladin",
+      "name": "Paladin",
+      "hitDie": 10,
+      "primaryAbility": [
+        "str",
+        "cha"
+      ],
+      "savingThrows": [
+        "wis",
+        "cha"
+      ],
+      "sourcePage": 30
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "hitDie": 10,
+      "primaryAbility": [
+        "dex",
+        "wis"
+      ],
+      "savingThrows": [
+        "str",
+        "dex"
+      ],
+      "sourcePage": 34
+    },
+    {
+      "id": "rogue",
+      "name": "Rogue",
+      "hitDie": 8,
+      "primaryAbility": [
+        "dex"
+      ],
+      "savingThrows": [
+        "dex",
+        "int"
+      ],
+      "sourcePage": 38
+    },
+    {
+      "id": "sorcerer",
+      "name": "Sorcerer",
+      "hitDie": 6,
+      "primaryAbility": [
+        "cha"
+      ],
+      "savingThrows": [
+        "con",
+        "cha"
+      ],
+      "sourcePage": 41
+    },
+    {
+      "id": "warlock",
+      "name": "Warlock",
+      "hitDie": 8,
+      "primaryAbility": [
+        "cha"
+      ],
+      "savingThrows": [
+        "wis",
+        "cha"
+      ],
+      "sourcePage": 45
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "hitDie": 6,
+      "primaryAbility": [
+        "int"
+      ],
+      "savingThrows": [
+        "int",
+        "wis"
+      ],
+      "sourcePage": 49
+    }
+  ],
+  "standardProficiencyBonusByLevel": [
+    {
+      "levels": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "bonus": 2
+    },
+    {
+      "levels": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "bonus": 3
+    },
+    {
+      "levels": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "bonus": 4
+    },
+    {
+      "levels": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "bonus": 5
+    },
+    {
+      "levels": [
+        17,
+        18,
+        19,
+        20
+      ],
+      "bonus": 6
+    }
+  ]
+}

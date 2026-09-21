@@ -1,16 +1,16 @@
 # Project DEUS — Test Classification & Execution Authority
 
 Generated: 2026-09-21
-Total scripts audited: 581
+Total scripts audited: 585
 
 ## Summary
-- **Headless Automated Proofs/Suites (CI/Regression)**: 96
+- **Headless Automated Proofs/Suites (CI/Regression)**: 100
 - **Playtest / In-Game Live Suites (Browser/Canvas)**: 16
 - **Art Production & Verification Pipeline**: 12
 - **Diagnostic & Build Utilities**: 457
 - **Legacy / Stale Scripts**: 0
 
-### HEADLESS_AUTOMATED (96)
+### HEADLESS_AUTOMATED (100)
 | File | Purpose / Reason |
 |---|---|
 | `test_adam_res.js` | Automated headless Node test script |
@@ -87,6 +87,10 @@ Total scripts audited: 581
 | `test_side_combos.js` | Automated headless Node test script |
 | `test_slice_human.js` | Automated headless Node test script |
 | `test_snapshot.js` | Automated headless Node test script |
+| `test_srd_combat_proof.js` | Automated headless Node test script |
+| `test_srd_equipment_proof.js` | Automated headless Node test script |
+| `test_srd_parity.js` | Automated headless Node test script |
+| `test_srd_rules_proof.js` | Automated headless Node test script |
 | `test_standard_4d_ingame.js` | Automated headless Node test script |
 | `test_standard_8d_ingame.js` | Automated headless Node test script |
 | `test_time_domains_proof.js` | Automated headless Node test script |

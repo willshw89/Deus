@@ -460,7 +460,7 @@
         Presentation,
 
         get paused() { return isPaused; },
-        get multiplier() { return speedMultiplier; },
+        multiplier: () => speedMultiplier,
 
         pause() {
             if (isPaused) return false;
@@ -565,7 +565,14 @@
         }
     };
 
-    // Attach to UF namespace
-    root.UF.Time = Object.assign(root.UF.Time || {}, Time);
+    // Attach to UF namespace safely copying property descriptors (avoiding getter collision)
+    if (!root.UF.Time) root.UF.Time = {};
+    const descriptors = Object.getOwnPropertyDescriptors(Time);
+    if (typeof root.UF.Time.multiplier === "function") {
+        delete descriptors.multiplier;
+    }
+    Object.defineProperties(root.UF.Time, descriptors);
 
 })();
+
+

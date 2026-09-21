@@ -387,22 +387,33 @@
     define("move", moveHandler("Walking"));
     define("wander", moveHandler("Wandering"));
 
-    // Carrying: phase 0 = stand on the item's cell and pick it up; phase 1 (haul only) = carry it to `to` and put it down.
+    // Carrying: phase 0 = stand on the item's cell (or container) and pick it up; phase 1 (haul only) = carry it to `to` and put it down.
     function pickPhasePlan(job, unit) {
-        const I = Items();
+        const I = Items(), C = window.UF && UF.Containers;
         const it = I ? I.get(job.params.itemId) : null;
         if (!it) return { ok: false, reason: "the item is gone" };
         if (it.holder === unit.id) return { ok: true, stand: null }; // already carried (a resumed job)
-        if (!it.area) return { ok: false, reason: "someone else carries it" };
-        job.target = { area: copyArea(it.area), x: it.x, y: it.y, z: zOf(it) };
+        if (!it.area && !it.container) return { ok: false, reason: "someone else carries it" };
+        let targetX = it.x, targetY = it.y, targetZ = zOf(it), targetArea = it.area;
+        if (it.container && C) {
+            const cont = C.get(it.container);
+            if (cont) {
+                targetX = cont.x; targetY = cont.y; targetZ = zOf(cont); targetArea = cont.area;
+            }
+        }
+        job.target = { area: copyArea(targetArea), x: targetX, y: targetY, z: targetZ };
         const stand = standFor(job.target, unit, false);
         return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
     }
     function pickUpNow(job, unit) {
-        const I = Items();
+        const I = Items(), C = window.UF && UF.Containers;
         const it = I ? I.get(job.params.itemId) : null;
         if (!it) return false;
         if (it.holder === unit.id) return true;
+        if (it.container && C) {
+            const taken = C.takeItem(it.container, it.id, unit.id);
+            return !!taken;
+        }
         return I.pickUp(it.id, unit.id);
     }
     define("fetch", {
@@ -433,9 +444,14 @@
                 if (!pickUpNow(job, unit)) throw new Error("the item is gone");
                 return "continue";
             }
-            const I = Items(), to = job.params.to;
-            const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
-            job.result = placed ? { itemId: placed.id } : null;
+            const I = Items(), C = window.UF && UF.Containers, to = job.params.to;
+            if (job.params.toContainer && C) {
+                const stored = C.putItem(job.params.toContainer, job.params.itemId);
+                job.result = stored ? { itemId: job.params.itemId, containerId: job.params.toContainer } : null;
+            } else {
+                const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
+                job.result = placed ? { itemId: placed.id } : null;
+            }
         },
         cancel(job, unit) {
             // What was picked up and not delivered is put down where the carrier stands, so nothing vanishes.
@@ -1021,6 +1037,26 @@
         return mult;
     }
     const skillMultiplier = (unit, job) => {
+        if (window.UF && UF.Proficiency && typeof UF.Proficiency.resolveCapability === "function") {
+            try {
+                let profId = job.type;
+                let abilityKey = "str";
+                if (job.type === "chop") { profId = "woodcutting"; abilityKey = "str"; }
+                else if (job.type === "mine" || job.type === "quarry") { profId = "mining"; abilityKey = "str"; }
+                else if (job.type === "build") { profId = "carpentry"; abilityKey = "str"; }
+                else if (job.type === "craft") {
+                    const r = recipeOf(job.params && job.params.recipeId);
+                    if (r && r.craft === "smithing") { profId = "smithing"; abilityKey = "str"; }
+                    else if (r && r.craft === "fletching") { profId = "fletching"; abilityKey = "dex"; }
+                    else if (r && r.craft === "cooking") { profId = "cooking"; abilityKey = "wis"; }
+                    else { profId = "carpentry"; abilityKey = "dex"; }
+                }
+                const cap = UF.Proficiency.resolveCapability(unit, profId, abilityKey).capability;
+                return Math.max(0.3, 1.0 + cap * 0.15);
+            } catch (e) {
+                return 1;
+            }
+        }
         if (window.UF && UF.Skills && typeof UF.Skills.rate === "function") {
             try { return UF.Skills.rate(unit, job.type, job); } catch (e) { return 1; }
         }
@@ -1096,6 +1132,17 @@
         stopWorking(unit);
         job.state = "done";
         job.finished = now();
+        if (unit && window.UF && UF.Proficiency && typeof UF.Proficiency.gainXp === "function") {
+            let profId = job.type;
+            if (job.type === "chop") profId = "woodcutting";
+            else if (job.type === "mine" || job.type === "quarry") profId = "mining";
+            else if (job.type === "build") profId = "carpentry";
+            else if (job.type === "craft") {
+                const r = recipeOf(job.params && job.params.recipeId);
+                if (r && r.craft) profId = r.craft;
+            }
+            UF.Proficiency.gainXp(unit, profId, 15, "routine");
+        }
         emit("jobs:done", job, unit);
     }
 
@@ -1203,7 +1250,9 @@
         isWaterAt: isWaterIn,
         toolMultiplier,
         work: workOf,
-        update
+        update,
+        tick: update,
+        step
     };
     window.UF = window.UF || {};
     window.UF.Jobs = Jobs;

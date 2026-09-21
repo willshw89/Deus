@@ -1,0 +1,299 @@
+{
+  "metadata": {
+    "sourceDocument": "SRD 5.1",
+    "sourceVersion": "5.1",
+    "license": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+    "sourcePage": 68
+  },
+  "tools": [
+    {
+      "id": "alchemists_supplies",
+      "name": "Alchemist's supplies",
+      "category": "artisan_tools",
+      "costSRD": "50 gp",
+      "weightSRD": 8,
+      "sourcePage": 68
+    },
+    {
+      "id": "brewers_supplies",
+      "name": "Brewer's supplies",
+      "category": "artisan_tools",
+      "costSRD": "20 gp",
+      "weightSRD": 9,
+      "sourcePage": 68
+    },
+    {
+      "id": "calligraphers_supplies",
+      "name": "Calligrapher's supplies",
+      "category": "artisan_tools",
+      "costSRD": "10 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "carpenters_tools",
+      "name": "Carpenter's tools",
+      "category": "artisan_tools",
+      "costSRD": "8 gp",
+      "weightSRD": 6,
+      "sourcePage": 68
+    },
+    {
+      "id": "cartographers_tools",
+      "name": "Cartographer's tools",
+      "category": "artisan_tools",
+      "costSRD": "15 gp",
+      "weightSRD": 6,
+      "sourcePage": 68
+    },
+    {
+      "id": "cobblers_tools",
+      "name": "Cobbler's tools",
+      "category": "artisan_tools",
+      "costSRD": "5 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "cooks_utensils",
+      "name": "Cook's utensils",
+      "category": "artisan_tools",
+      "costSRD": "1 gp",
+      "weightSRD": 8,
+      "sourcePage": 68
+    },
+    {
+      "id": "glassblowers_tools",
+      "name": "Glassblower's tools",
+      "category": "artisan_tools",
+      "costSRD": "30 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "jewelers_tools",
+      "name": "Jeweler's tools",
+      "category": "artisan_tools",
+      "costSRD": "25 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "leatherworkers_tools",
+      "name": "Leatherworker's tools",
+      "category": "artisan_tools",
+      "costSRD": "5 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "masons_tools",
+      "name": "Mason's tools",
+      "category": "artisan_tools",
+      "costSRD": "10 gp",
+      "weightSRD": 8,
+      "sourcePage": 68
+    },
+    {
+      "id": "painters_supplies",
+      "name": "Painter's supplies",
+      "category": "artisan_tools",
+      "costSRD": "10 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "potters_tools",
+      "name": "Potter's tools",
+      "category": "artisan_tools",
+      "costSRD": "10 gp",
+      "weightSRD": 3,
+      "sourcePage": 68
+    },
+    {
+      "id": "smiths_tools",
+      "name": "Smith's tools",
+      "category": "artisan_tools",
+      "costSRD": "20 gp",
+      "weightSRD": 8,
+      "sourcePage": 68
+    },
+    {
+      "id": "tinkers_tools",
+      "name": "Tinker's tools",
+      "category": "artisan_tools",
+      "costSRD": "50 gp",
+      "weightSRD": 10,
+      "sourcePage": 68
+    },
+    {
+      "id": "weavers_tools",
+      "name": "Weaver's tools",
+      "category": "artisan_tools",
+      "costSRD": "1 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "woodcarvers_tools",
+      "name": "Woodcarver's tools",
+      "category": "artisan_tools",
+      "costSRD": "1 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "disguise_kit",
+      "name": "Disguise kit",
+      "category": "kits",
+      "costSRD": "25 gp",
+      "weightSRD": 3,
+      "sourcePage": 68
+    },
+    {
+      "id": "forgery_kit",
+      "name": "Forgery kit",
+      "category": "kits",
+      "costSRD": "15 gp",
+      "weightSRD": 5,
+      "sourcePage": 68
+    },
+    {
+      "id": "herbalism_kit",
+      "name": "Herbalism kit",
+      "category": "kits",
+      "costSRD": "5 gp",
+      "weightSRD": 3,
+      "sourcePage": 68
+    },
+    {
+      "id": "navigators_tools",
+      "name": "Navigator's tools",
+      "category": "kits",
+      "costSRD": "25 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "poisoners_kit",
+      "name": "Poisoner's kit",
+      "category": "kits",
+      "costSRD": "50 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "thieves_tools",
+      "name": "Thieves' tools",
+      "category": "kits",
+      "costSRD": "25 gp",
+      "weightSRD": 1,
+      "sourcePage": 68
+    },
+    {
+      "id": "dice_set",
+      "name": "Dice set",
+      "category": "gaming_set",
+      "costSRD": "1 sp",
+      "weightSRD": 0,
+      "sourcePage": 68
+    },
+    {
+      "id": "playing_card_set",
+      "name": "Playing card set",
+      "category": "gaming_set",
+      "costSRD": "5 sp",
+      "weightSRD": 0,
+      "sourcePage": 68
+    },
+    {
+      "id": "bagpipes",
+      "name": "Bagpipes",
+      "category": "musical_instrument",
+      "costSRD": "30 gp",
+      "weightSRD": 6,
+      "sourcePage": 68
+    },
+    {
+      "id": "drum",
+      "name": "Drum",
+      "category": "musical_instrument",
+      "costSRD": "6 gp",
+      "weightSRD": 3,
+      "sourcePage": 68
+    },
+    {
+      "id": "dulcimer",
+      "name": "Dulcimer",
+      "category": "musical_instrument",
+      "costSRD": "25 gp",
+      "weightSRD": 10,
+      "sourcePage": 68
+    },
+    {
+      "id": "flute",
+      "name": "Flute",
+      "category": "musical_instrument",
+      "costSRD": "2 gp",
+      "weightSRD": 1,
+      "sourcePage": 68
+    },
+    {
+      "id": "lute",
+      "name": "Lute",
+      "category": "musical_instrument",
+      "costSRD": "35 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "lyre",
+      "name": "Lyre",
+      "category": "musical_instrument",
+      "costSRD": "30 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "horn",
+      "name": "Horn",
+      "category": "musical_instrument",
+      "costSRD": "3 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "pan_flute",
+      "name": "Pan flute",
+      "category": "musical_instrument",
+      "costSRD": "12 gp",
+      "weightSRD": 2,
+      "sourcePage": 68
+    },
+    {
+      "id": "shawm",
+      "name": "Shawm",
+      "category": "musical_instrument",
+      "costSRD": "2 gp",
+      "weightSRD": 1,
+      "sourcePage": 68
+    },
+    {
+      "id": "viol",
+      "name": "Viol",
+      "category": "musical_instrument",
+      "costSRD": "30 gp",
+      "weightSRD": 1,
+      "sourcePage": 68
+    },
+    {
+      "id": "vehicles_land_water",
+      "name": "Vehicles (land or water)",
+      "category": "vehicles",
+      "costSRD": "*",
+      "weightSRD": 0,
+      "sourcePage": 68
+    }
+  ]
+}
