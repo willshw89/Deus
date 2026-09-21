@@ -126,10 +126,13 @@
             const F = window.UF.Factions;
             const tier = F && F.tierBetween ? F.tierBetween("player", d.faction).id : "neutral";
             if (tier === "allied" || tier === "friendly") return "friendly";
-            // Hostile/war factions: only explicitly military units attack.
-            // Civilians, settlers, and craftsmen mind their own business.
-            // This prevents enemy factions from immediately hunting the player
-            // — they focus on their own expansion and development.
+            // Hostile/war factions: only explicitly military units attack,
+            // and only after year 10.  Before that every faction focuses on
+            // its own expansion and development.
+            const PEACE_YEARS = 10;
+            const year = window.$ufTime ? ($ufTime.year | 0) : 1;
+            if (year < PEACE_YEARS) return "indifferent";
+
             const tags = Array.isArray(d.tags) ? d.tags : [];
             const isMilitary = tags.includes("hostile") || tags.includes("raider") ||
                 tags.includes("soldier") || tags.includes("warband") || tags.includes("military") ||
