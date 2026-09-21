@@ -6,6 +6,22 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Systemic Material Economy: Milestone 1 / Task 1 Registry Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval & "save with editor open"):
+- **Material Physical Property Registry (`UF_WorldCatalog.json`)**:
+  - Populated `catalog.materials` with physical property schemas across 7 Woods, 6 Stones, 7 Metals, and 5 backward-compatible aliases.
+  - Woods: density, structuralStrength, hardness, flexibility, workability, rotResistance, burnQuality, insulation, beauty, rarity, color, tags (Pine, Birch, Oak, Ash, Willow, Elm, Yew).
+  - Stones: density, compressiveStrength, fractureResistance, workability, weatherResistance, heatResistance, beauty, rarity, color, tags (Limestone, Sandstone, Granite, Basalt, Slate, Marble).
+  - Metals: density, hardness, toughness, edgeRetention, ductility, corrosionResistance, meltingPointBeats, fuelRequirement, rarity, value, color, tags (Copper, Tin, Bronze, Iron, Steel, Silver, Gold).
+  - Backward compatibility: Aliases map legacy generic `wood`, `stone`, `iron`, `copper`, `bronze` to default typed entries.
+- **Validation Engine (`tools/validate_materials.js`, `tools/update_materials_catalog.js`)**:
+  - Automated physical constraint checking, hex color validation, non-empty tags check, positive density range assertions.
+- **Verification Evidence**:
+  - `node tools/validate_materials.js`: **PASS (Woods: 7, Stones: 6, Metals: 7, Aliases: 5)**.
+  - Mutant check `tools/validate_materials.js`: **PASS (15 failures detected on corrupted schema, Rule 4)**.
+  - `node tools/run_tests.js items`: **15/15 PASS (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 47s (0 regressions).
+
 ## 16x and 32x Time Speed Options & HUD Controls — 2026-09-21 (Gemini)
 Delivered per user directive ("can I get a 16x and 32x speed option"):
 - **16x & 32x Multipliers Added (`UF_TimeSpeed.js`)**:
