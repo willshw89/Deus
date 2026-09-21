@@ -7,9 +7,18 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- None (Slice 1 Colonist AI & Settlement Construction stabilized, verified green, and awaiting review).
+- None (Wooden chest locked in; paused per user directive).
 
-## Slice 1: Autonomous Colonist AI & Settlement Construction Stabilized & Verified — 2026-09-21 (Gemini)
+## Autonomous Nano Banana Pro Non-Living Production: Wooden Chest (`chest_wood`) Locked In — 2026-09-21 (Gemini)
+- **Asset**: `chest_wood` (`game/img/characters/!$UF_Chest_Wood.png`, `game/img/characters/!$UF_Chest_Wood.json`).
+- **Master Sheet**: `art/masters/deus_chest_master_12sprites_pink.png` (896×1200 high-resolution master on `#FF00FF` magenta background, approved by user).
+- **Format**: Complete 12-sprite matrix (3 columns × 4 rows: South, West, East, North).
+- **States & Animations**: Closed (col 0), Half-Open 45° (col 1), Fully-Open 90° (col 2). Empty dark oak interior cavity across all open frames.
+- **Verification**:
+  - `tools/art_check.js`: 5/5 PASS (alpha binary 0/255, native 48px grid, 31 palette colors from `art/palette/uf.hex`, size 144×192, valid sidecar metadata).
+  - `tools/originality_check.js`: 12/12 frames PASS (distances 0.414 to 0.513 >= 0.28 vs 19,431 indexed Ultima VII frames).
+  - Ground baseline anchored at y = 46/47, horizontal center at x = 24.
+
 Delivered per Slice 1 acceptance criteria and user directives:
 - **Household Pairbonding & Adulthood Age Standardization (`UF_Households.js`, `UF_Colonists.js`)**:
   - Unified adulthood age threshold across the simulation to age 15 (`age >= 15`), resolving pairbonding rejections for coming-of-age offspring forming independent homesteads.
