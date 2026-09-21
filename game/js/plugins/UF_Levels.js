@@ -949,11 +949,16 @@
         const r = refOf(ref), b = BIOMES[biomeCodeAt(r.ax, r.ay, r.x, r.y, r.z)];
         return b ? Object.assign({}, b, { material: MATERIALS[b.material] }) : null;
     }
-    function waterAt(ref) {
+    function naturalWaterAt(ref) {
         const r = refOf(ref), p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
         if (r.z >= 0 || !p || (p & 7) !== FLOOR || (p & 8)) return false;
         const b = baseline(r.z, r.ax, r.ay);
         return !!(b && b.water && b.water[r.y * World().state.size + r.x]);
+    }
+    function waterAt(ref) {
+        if (naturalWaterAt(ref)) return true;
+        const fl = isFlooded(ref);
+        return !!(fl && fl.flooded && fl.type === "water");
     }
     function habitablePockets(z, ax = 0, ay = 0) {
         if (z !== -1 && z !== -2) return [];
@@ -1108,6 +1113,7 @@
     }
     function redrawAround(ax, ay, x, y, z) {
         naturalWallRevision++;
+        invalidateFloods();
         const W = World();
         const read = (cx, cy) => packedAt(ax, ay, cx, cy, z);
         const readBiome = biomeReader(baseline(z, ax, ay), W.state.size);
@@ -1177,6 +1183,346 @@
         const Households = window.UF && window.UF.Households;
         if (Households && typeof Households.invalidateRoomEnclosure === "function") {
             try { Households.invalidateRoomEnclosure(area, r.x, r.y, r.z); } catch (e) {}
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    // Flooding: Multi-level liquid penetration and lateral BFS flood expansion
+    // (Z = 0 -> -1 -> -2 for water and lava)
+    const DRY = 0, FLOOD_WATER = 1, FLOOD_LAVA = 2, FLOOD_SOLIDIFIED = 3;
+    const floodCache = new Map(); // "ax,ay:z" -> { revision: number, grid: Uint8Array }
+    let floodRevision = 0;
+
+    function invalidateFloods() {
+        floodRevision++;
+        floodCache.clear();
+    }
+
+    let computingFloods = false;
+
+    function isWallAt(area, x, y, z) {
+        const W = World();
+        const st = W && W.state;
+        const size = st ? st.size : 256;
+        if (x < 0 || y < 0 || x >= size || y >= size) return true;
+        const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
+        if (z < 0) {
+            const p = packedAt(ax, ay, x, y, z);
+            if ((p & 7) === SOLID) return true;
+        } else if (z === 0) {
+            const p = packedAt(ax, ay, x, y, 0);
+            if ((p & 7) === SOLID) return true;
+        }
+        
+        let typeId = 0;
+        if (W) {
+            if (typeof W.onView === "function" && W.onView(ax, ay, z) && window.$dataMap && window.$dataMap.ufObjects) {
+                typeId = window.$dataMap.ufObjects[y * size + x] | 0;
+            } else if (typeof W.cachedBuild === "function") {
+                const b = W.cachedBuild(ax, ay, z);
+                if (b && b.ufObjects) typeId = b.ufObjects[y * size + x] | 0;
+            }
+            if (!typeId && st && st.objectDiffs) {
+                const lk = typeof W.levelKey === "function" ? W.levelKey(ax, ay, z) : (z ? `${ax},${ay},${z}` : `${ax},${ay}`);
+                const diffs = st.objectDiffs[lk];
+                if (diffs && diffs[y * size + x] !== undefined) typeId = diffs[y * size + x] | 0;
+            }
+        }
+        if (typeId) {
+            const O = window.UF && UF.Objects;
+            const obj = O ? O.type(typeId) : null;
+            if (obj) {
+                if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) return true;
+                const isDoor = (Array.isArray(obj.tags) && obj.tags.includes("door")) ||
+                               (window.UF && UF.Doors && typeof UF.Doors.isDoorType === "function" && UF.Doors.isDoorType(obj));
+                if (isDoor) {
+                    const isOpen = window.UF && UF.Doors && typeof UF.Doors.isOpen === "function" && UF.Doors.isOpen({ x: ax, y: ay, z }, x, y);
+                    if (!isOpen) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function groundLiquidAt(ax, ay, x, y) {
+        const W = World();
+        const st = W && W.state;
+        const size = st ? st.size : 256;
+        const gx = ax * size + x, gy = ay * size + y;
+        
+        if (W && typeof W.getTile === "function") {
+            const tile = W.getTile(ax, ay, x, y, 0, 0) | 0;
+            if (Tilemap.isWaterTile(tile)) return "water";
+            if (Tilemap.isTileA1(tile) && tile >= Tilemap.TILE_ID_A1 + 4 * 48) return "lava";
+        }
+        const J = window.UF && UF.Jobs;
+        if (J && typeof J.isWaterAt === "function" && J.isWaterAt({ x: ax, y: ay, z: 0 }, x, y)) return "water";
+        const G = window.UF && UF.WorldGen;
+        if (G && typeof G.isWaterAt === "function" && G.isWaterAt(gx, gy, 0)) return "water";
+        
+        return null;
+    }
+
+    function computeFloods(area) {
+        if (computingFloods) return;
+        computingFloods = true;
+        try {
+            _doComputeFloods(area);
+        } finally {
+            computingFloods = false;
+        }
+    }
+
+    function _doComputeFloods(area) {
+        const W = World();
+        const st = W && W.state;
+        const size = st ? st.size : 256;
+        const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
+        const keyMinus1 = `${ax},${ay}:-1`;
+        const keyMinus2 = `${ax},${ay}:-2`;
+
+        const gridMinus1 = new Uint8Array(size * size);
+        const gridMinus2 = new Uint8Array(size * size);
+
+        // 1. Breaches from Ground (z=0) into z=-1
+        const queueMinus1 = [];
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const i = y * size + x;
+                const liq0 = groundLiquidAt(ax, ay, x, y);
+                if (liq0) {
+                    if (!isWallAt(area, x, y, -1)) {
+                        gridMinus1[i] = liq0 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
+                        queueMinus1.push(i);
+                    }
+                }
+                // Natural water pools on -1
+                if (naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -1 })) {
+                    if (!isWallAt(area, x, y, -1) && gridMinus1[i] === DRY) {
+                        gridMinus1[i] = FLOOD_WATER;
+                        queueMinus1.push(i);
+                    }
+                }
+            }
+        }
+
+        // 2. Lateral BFS on z=-1 until hitting walls
+        let head1 = 0;
+        while (head1 < queueMinus1.length) {
+            const curr = queueMinus1[head1++];
+            const cx = curr % size, cy = (curr / size) | 0;
+            const currType = gridMinus1[curr];
+            if (currType === FLOOD_SOLIDIFIED) continue;
+
+            for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+                const nx = cx + dx, ny = cy + dy;
+                if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                const ni = ny * size + nx;
+                if (isWallAt(area, nx, ny, -1)) continue;
+
+                const nextType = gridMinus1[ni];
+                if (nextType === DRY) {
+                    gridMinus1[ni] = currType;
+                    queueMinus1.push(ni);
+                } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                    gridMinus1[ni] = FLOOD_SOLIDIFIED;
+                }
+            }
+        }
+
+        // 3. Breaches from z=-1 into z=-2
+        const queueMinus2 = [];
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const i = y * size + x;
+                let liq1 = null;
+                if (gridMinus1[i] === FLOOD_WATER || naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -1 })) {
+                    liq1 = "water";
+                } else if (gridMinus1[i] === FLOOD_LAVA) {
+                    liq1 = "lava";
+                }
+
+                if (liq1) {
+                    if (!isWallAt(area, x, y, -2)) {
+                        gridMinus2[i] = liq1 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
+                        queueMinus2.push(i);
+                    }
+                }
+
+                // Natural lava pools on z=-2
+                if (naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -2 })) {
+                    if (!isWallAt(area, x, y, -2) && gridMinus2[i] === DRY) {
+                        gridMinus2[i] = FLOOD_LAVA;
+                        queueMinus2.push(i);
+                    }
+                }
+            }
+        }
+
+        // 4. Lateral BFS on z=-2 until hitting walls
+        let head2 = 0;
+        while (head2 < queueMinus2.length) {
+            const curr = queueMinus2[head2++];
+            const cx = curr % size, cy = (curr / size) | 0;
+            const currType = gridMinus2[curr];
+            if (currType === FLOOD_SOLIDIFIED) continue;
+
+            for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+                const nx = cx + dx, ny = cy + dy;
+                if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                const ni = ny * size + nx;
+                if (isWallAt(area, nx, ny, -2)) continue;
+
+                const nextType = gridMinus2[ni];
+                if (nextType === DRY) {
+                    gridMinus2[ni] = currType;
+                    queueMinus2.push(ni);
+                } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                    gridMinus2[ni] = FLOOD_SOLIDIFIED;
+                }
+            }
+        }
+
+        floodCache.set(keyMinus1, { revision: floodRevision, grid: gridMinus1 });
+        floodCache.set(keyMinus2, { revision: floodRevision, grid: gridMinus2 });
+    }
+
+    function getFloodGrid(area, z) {
+        if (z !== -1 && z !== -2) return null;
+        const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
+        const key = `${ax},${ay}:${z}`;
+        const c = floodCache.get(key);
+        if (c && c.revision === floodRevision) return c.grid;
+        computeFloods({ x: ax, y: ay });
+        const updated = floodCache.get(key);
+        return updated ? updated.grid : null;
+    }
+
+    function isFlooded(ref) {
+        const r = refOf(ref);
+        if (r.z !== -1 && r.z !== -2) return { flooded: false, type: null };
+        const grid = getFloodGrid({ x: r.ax, y: r.ay }, r.z);
+        if (!grid) return { flooded: false, type: null };
+        const W = World(), size = (W && W.state && W.state.size) || 256;
+        if (r.x < 0 || r.y < 0 || r.x >= size || r.y >= size) return { flooded: false, type: null };
+        const val = grid[r.y * size + r.x];
+        if (val === FLOOD_WATER) return { flooded: true, type: "water" };
+        if (val === FLOOD_LAVA) return { flooded: true, type: "lava" };
+        return { flooded: false, type: null };
+    }
+
+    let waterFloodBitmap = null;
+    let lavaFloodBitmap = null;
+
+    function ensureFloodBitmaps() {
+        if (waterFloodBitmap && lavaFloodBitmap) return;
+
+        // Water: 4 frames of 48x48 (192x48)
+        waterFloodBitmap = new Bitmap(192, 48);
+        for (let f = 0; f < 4; f++) {
+            const ox = f * 48;
+            const ctx = waterFloodBitmap.context;
+            waterFloodBitmap.fillRect(ox, 0, 48, 48, "rgba(24, 118, 210, 0.45)");
+            ctx.fillStyle = "rgba(130, 215, 255, 0.35)";
+            for (let y = 6; y < 44; y += 12) {
+                const shift = ((f * 3) + Math.floor(y / 6)) % 8;
+                ctx.fillRect(ox + shift * 2, y, 14, 2);
+                ctx.fillRect(ox + ((shift * 2 + 24) % 44), y + 4, 10, 2);
+            }
+            ctx.fillStyle = "rgba(180, 235, 255, 0.25)";
+            ctx.fillRect(ox, 0, 48, 1);
+            ctx.fillRect(ox, 47, 48, 1);
+        }
+        waterFloodBitmap._baseTexture.update();
+
+        // Lava: 4 frames of 48x48 (192x48)
+        lavaFloodBitmap = new Bitmap(192, 48);
+        for (let f = 0; f < 4; f++) {
+            const ox = f * 48;
+            const ctx = lavaFloodBitmap.context;
+            lavaFloodBitmap.fillRect(ox, 0, 48, 48, "rgba(215, 38, 16, 0.55)");
+            ctx.fillStyle = "rgba(255, 185, 0, 0.48)";
+            for (let y = 8; y < 42; y += 10) {
+                const shift = ((f * 4) + Math.floor(y / 4)) % 10;
+                ctx.fillRect(ox + shift * 2, y, 12, 3);
+                ctx.fillRect(ox + ((shift * 2 + 20) % 42), y + 3, 14, 2);
+            }
+            ctx.fillStyle = "rgba(255, 240, 120, 0.60)";
+            const emberX = ox + ((f * 11 + 7) % 40);
+            const emberY = (f * 13 + 5) % 40;
+            ctx.fillRect(emberX, emberY, 2, 2);
+            ctx.fillRect(ox + 44 - (emberX % 40), 44 - emberY, 2, 2);
+        }
+        lavaFloodBitmap._baseTexture.update();
+    }
+
+    class Sprite_UFFloodOverlay extends Sprite {
+        constructor() {
+            super();
+            this.z = 2.5; // directly above floor autotiles, beneath units (z >= 7)
+            this._active = new Map();
+            this._pool = [];
+            this._seen = "";
+        }
+        update() {
+            super.update();
+            const map = window.$dataMap, W = World(), view = W && W.viewLevel();
+            if (!this.parent || !map || !view || (view.z !== -1 && view.z !== -2)) {
+                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+                this._active.clear();
+                this._seen = "";
+                return;
+            }
+            ensureFloodBitmaps();
+            const grid = getFloodGrid(view, view.z);
+            if (!grid) {
+                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+                this._active.clear();
+                this._seen = "";
+                return;
+            }
+            const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
+            const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
+            const animTick = Math.floor(Graphics.frameCount / 12) % 4;
+            const stamp = `${$gameMap.mapId()}:${dx}:${dy}:${cols}:${rows}:${floodRevision}:${animTick}`;
+
+            const keep = new Set();
+            for (let y = Math.max(0, dy - 1); y <= Math.min(map.height - 1, dy + rows + 1); y++) {
+                for (let x = Math.max(0, dx - 1); x <= Math.min(map.width - 1, dx + cols + 1); x++) {
+                    const i = y * map.width + x;
+                    const val = grid[i];
+                    if (val !== FLOOD_WATER && val !== FLOOD_LAVA) continue;
+
+                    keep.add(i);
+                    let s = this._active.get(i);
+                    if (!s) {
+                        s = this._pool.pop() || new Sprite();
+                        s.anchor.set(0, 0);
+                        if (!s.parent) this.parent.addChild(s);
+                        this._active.set(i, s);
+                    }
+                    const isWater = val === FLOOD_WATER;
+                    s.bitmap = isWater ? waterFloodBitmap : lavaFloodBitmap;
+                    const phase = (animTick + ((x + y * 2) % 4)) % 4;
+                    s.setFrame(phase * 48, 0, 48, 48);
+                    s._ufX = x;
+                    s._ufY = y;
+                    s.visible = true;
+                }
+            }
+            for (const [i, s] of this._active) {
+                if (!keep.has(i)) {
+                    s.visible = false;
+                    this._pool.push(s);
+                    this._active.delete(i);
+                }
+            }
+            for (const s of this._active.values()) {
+                s.x = Math.round($gameMap.adjustX(s._ufX) * 48);
+                s.y = Math.round($gameMap.adjustY(s._ufY) * 48);
+                s.z = 2.5;
+            }
+            this._seen = stamp;
         }
     }
 
@@ -1257,6 +1603,8 @@
         _Spriteset_Map_createCharacters_naturalWalls.call(this);
         this._ufNaturalWalls = new Sprite_UFNaturalWalls();
         this._tilemap.addChild(this._ufNaturalWalls);
+        this._ufFloodOverlay = new Sprite_UFFloodOverlay();
+        this._tilemap.addChild(this._ufFloodOverlay);
     };
 
     const _Spriteset_Map_updateParallax = Spriteset_Map.prototype.updateParallax;
@@ -1300,7 +1648,10 @@
         const label = LABELS[r.z];
         const s = p & 7;
         let text;
-        if (r.z === 0) text = s === SOLID ? "Rock" : "Ground";
+        const fl = isFlooded(ref);
+        if (fl && fl.flooded) {
+            text = fl.type === "lava" ? "Flooded (Lava)" : "Flooded (Fresh water)";
+        } else if (r.z === 0) text = s === SOLID ? "Rock" : "Ground";
         else if (s === OPEN) text = r.z > 0 ? "Open air" : "Hole";
         else if (s === RAMP) text = "Ramp";
         else if (s >= STAIR_UP) text = s === STAIR_UP ? "Stairs up" : s === STAIR_DOWN ? "Stairs down" : "Stairs up and down";
@@ -1667,10 +2018,15 @@
         cellAt: ref => {
             const r = refOf(ref);
             const p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
+            const fl = isFlooded(ref);
+            const hasWater = waterAt(ref) || (fl && fl.flooded && fl.type === "water");
+            const isLava = (fl && fl.flooded && fl.type === "lava") || (r.z === -2 && naturalWaterAt(ref));
             return p ? Object.assign(unpack(p), {
                 biome: biomeAt(ref),
-                water: waterAt(ref),
-                liquid: waterAt(ref) ? (r.z === -2 ? "lava" : "water") : null,
+                water: hasWater,
+                flooded: fl ? fl.flooded : false,
+                floodType: fl && fl.flooded ? fl.type : null,
+                liquid: isLava ? "lava" : hasWater ? "water" : null,
                 stratum: Levels.stratumAt(ref)
             }) : null;
         },
@@ -1756,6 +2112,9 @@
         composedSheets: () => Object.assign({}, composed.bitmaps),
         composeInfo: () => ({ state: composed.state, ms: composed.ms, loadMs: composed.loadMs, failed: composed.failed.slice() }),
         tileOf: key => tileBase(key),
+        isFlooded,
+        floodGrid: (area, z) => getFloodGrid(area, z),
+        invalidateFloods,
         stats: () => JSON.parse(JSON.stringify(stats))
     };
     window.UF = window.UF || {};
@@ -1779,6 +2138,12 @@
                 }
             });
             UF.Events.on("world:created", onWorldCreated);
+            UF.Events.on("levels:shapeChanged", invalidateFloods);
+            UF.Events.on("levels:cellChanged", invalidateFloods);
+            UF.Events.on("objects:changed", invalidateFloods);
+            UF.Events.on("objects:levelChanged", invalidateFloods);
+            UF.Events.on("doors:opened", invalidateFloods);
+            UF.Events.on("doors:closed", invalidateFloods);
         }
         // Units on different levels never fight (vertical combat is slice 6). Combat.engage is also what Combat's own AI
         // calls, so this covers both.
@@ -1809,6 +2174,7 @@
     function registerChecks() {
         UF.Test.suite("vertical", verticalSuite, { isDefault: false });
         UF.Test.suite("natural_walls", naturalWallsSuite, { isDefault: false });
+        UF.Test.suite("flooding", floodingSuite, { isDefault: false });
     }
 
     async function naturalWallsSuite(t) {
@@ -1858,6 +2224,169 @@
         for(const o of originals) { setShape(o.ref,o.cell.shape,{material:o.cell.material,constructed:o.cell.constructed}); O.setIn(area,o.ref.x,o.ref.y,o.object || null); }
         if(C) C.setLevel(oldZoom);
         t.check("no_errors",t.errorsSoFar().length===0,t.errorsSoFar().join(" | ") || "none");
+    }
+
+    async function floodingSuite(t) {
+        const W = World(), O = window.UF && UF.Objects;
+        if (!W || !W.state || !O) { t.check("setup", false, "world/objects absent"); return; }
+        if (window.$colonyManager) $colonyManager.cameraFollowUnit = null;
+        const settled = () => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && !$gamePlayer.isTransferring() && !pending;
+        await t.waitUntil(settled, 20000, "map settled");
+
+        const area = W.viewLevel() ? { x: W.viewLevel().x, y: W.viewLevel().y } : { x: 0, y: 0 };
+        const size = W.state.size;
+
+        // Choose a testing fixture coordinate
+        const cx = Math.max(10, Math.min(size - 14, Math.floor(size / 2) + 10));
+        const cy = Math.max(10, Math.min(size - 14, Math.floor(size / 2) + 10));
+
+        const savedShapes = new Map();
+        const saveShape = (x, y, z) => {
+            const k = `${x},${y},${z}`;
+            if (!savedShapes.has(k)) {
+                savedShapes.set(k, { x, y, z, cell: Levels.cellAt({ area, x, y, z }) });
+            }
+        };
+
+        const savedTiles0 = [];
+        const saveAndSetTile0 = (x, y, tile) => {
+            savedTiles0.push({ x, y, tile: W.getTile(area.x, area.y, x, y, 0, 0) });
+            W.setTile(area.x, area.y, x, y, 0, tile);
+        };
+
+        // 1. Clear ground (Z=0) in the test area to dry ground so no natural water leaks in
+        for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 11; dx++) {
+                saveAndSetTile0(cx + dx, cy + dy, 2816); // dry grass autotile
+            }
+        }
+
+        // 2. Setup Chamber 1 (Water Chamber) on Z = -1 (5x5 room, center at cx, cy)
+        for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+                saveShape(cx + dx, cy + dy, -1);
+                saveShape(cx + dx, cy + dy, -2);
+                O.setIn({ x: area.x, y: area.y, z: -1 }, cx + dx, cy + dy, null);
+                O.setIn({ x: area.x, y: area.y, z: -2 }, cx + dx, cy + dy, null);
+                const isPerimeter = Math.abs(dx) === 2 || Math.abs(dy) === 2;
+                setShape({ area, x: cx + dx, y: cy + dy, z: -1 }, isPerimeter ? "solid" : "floor", { material: "stone" });
+                setShape({ area, x: cx + dx, y: cy + dy, z: -2 }, (dx === 0 && dy === 0) ? "floor" : "solid", { material: "stone" });
+            }
+        }
+
+        // Setup an isolated dry test cell at (cx + 3, cy, -1) enclosed by solid walls
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = 3; dx <= 4; dx++) {
+                saveShape(cx + dx, cy + dy, -1);
+                saveShape(cx + dx, cy + dy, -2);
+                O.setIn({ x: area.x, y: area.y, z: -1 }, cx + dx, cy + dy, null);
+                O.setIn({ x: area.x, y: area.y, z: -2 }, cx + dx, cy + dy, null);
+                const isCell = dx === 3 && dy === 0;
+                setShape({ area, x: cx + dx, y: cy + dy, z: -1 }, isCell ? "floor" : "solid", { material: "stone" });
+                setShape({ area, x: cx + dx, y: cy + dy, z: -2 }, "solid", { material: "stone" });
+            }
+        }
+
+        // Water breach source at (cx, cy, 0)
+        W.setTile(area.x, area.y, cx, cy, 0, Tilemap.TILE_ID_A1);
+        invalidateFloods();
+
+        // Check 1: Downward breach from Z = 0 into Z = -1
+        const floodMinus1Center = Levels.isFlooded({ area, x: cx, y: cy, z: -1 });
+        t.check("downward_breach_water", floodMinus1Center.flooded === true && floodMinus1Center.type === "water",
+            `breach at (${cx},${cy},-1): flooded ${floodMinus1Center.flooded}, type ${floodMinus1Center.type} (want true, water)`);
+
+        // Check 2: Lateral expansion within room bounded by solid walls
+        const floodMinus1Inner = Levels.isFlooded({ area, x: cx + 1, y: cy, z: -1 });
+        const floodMinus1Wall = Levels.isFlooded({ area, x: cx + 2, y: cy, z: -1 });
+        const floodMinus1Outside = Levels.isFlooded({ area, x: cx + 3, y: cy, z: -1 });
+        t.check("lateral_flood_bounded", floodMinus1Inner.flooded === true && floodMinus1Inner.type === "water" &&
+            floodMinus1Wall.flooded === false && floodMinus1Outside.flooded === false,
+            `interior (${cx+1},${cy}) flooded: ${floodMinus1Inner.flooded}; perimeter wall (${cx+2},${cy}) flooded: ${floodMinus1Wall.flooded}; outside (${cx+3},${cy}) flooded: ${floodMinus1Outside.flooded}`);
+
+        // Check 3: Solid wall on Z = -1 blocks breach from water on Z = 0
+        W.setTile(area.x, area.y, cx + 2, cy, 0, Tilemap.TILE_ID_A1);
+        invalidateFloods();
+        const floodBlockedByWall = Levels.isFlooded({ area, x: cx + 2, y: cy, z: -1 });
+        t.check("wall_blocks_breach", floodBlockedByWall.flooded === false,
+            `solid rock on z=-1 directly under water remains unflooded: ${!floodBlockedByWall.flooded}`);
+
+        // Check 4: Cascading breach from Z = -1 down into Z = -2
+        const floodMinus2Center = Levels.isFlooded({ area, x: cx, y: cy, z: -2 });
+        t.check("cascading_breach_to_minus2", floodMinus2Center.flooded === true && floodMinus2Center.type === "water",
+            `cascade from -1 to -2 at (${cx},${cy},-2): flooded ${floodMinus2Center.flooded}, type ${floodMinus2Center.type} (want true, water)`);
+
+        // Check 5: Lava flooding on Z = -2 in an isolated chamber with solid rock ceiling on Z = -1
+        for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = 6; dx <= 10; dx++) {
+                saveShape(cx + dx, cy + dy, -1);
+                saveShape(cx + dx, cy + dy, -2);
+                O.setIn({ x: area.x, y: area.y, z: -1 }, cx + dx, cy + dy, null);
+                O.setIn({ x: area.x, y: area.y, z: -2 }, cx + dx, cy + dy, null);
+                // Ceiling on Z=-1 is completely solid
+                setShape({ area, x: cx + dx, y: cy + dy, z: -1 }, "solid", { material: "stone" });
+                // Chamber on Z=-2: perimeter solid, interior floor
+                const isEdge = dx === 6 || dx === 10 || Math.abs(dy) === 2;
+                setShape({ area, x: cx + dx, y: cy + dy, z: -2 }, isEdge ? "solid" : "floor", { material: "stone" });
+            }
+        }
+        const bMinus2 = baseline(-2, area.x, area.y);
+        const lavaIdx = cy * size + (cx + 8);
+        const oldWaterVal = bMinus2 && bMinus2.water ? bMinus2.water[lavaIdx] : 0;
+        if (bMinus2 && bMinus2.water) bMinus2.water[lavaIdx] = 1; // Baseline water on z=-2 is lava
+        invalidateFloods();
+
+        const floodLava = Levels.isFlooded({ area, x: cx + 8, y: cy, z: -2 });
+        const floodLavaAdj = Levels.isFlooded({ area, x: cx + 7, y: cy, z: -2 });
+        const floodLavaWall = Levels.isFlooded({ area, x: cx + 6, y: cy, z: -2 });
+        t.check("lava_flooding", floodLava.flooded === true && floodLava.type === "lava" &&
+            floodLavaAdj.flooded === true && floodLavaAdj.type === "lava" && floodLavaWall.flooded === false,
+            `lava pool (${cx+8},${cy}): ${floodLava.flooded} (${floodLava.type}); adjacent (${cx+7},${cy}): ${floodLavaAdj.flooded} (${floodLavaAdj.type}); wall (${cx+6},${cy}): ${floodLavaWall.flooded}`);
+
+        // Check 6: Cell description in UF.Levels
+        const descWater = Levels.describeCell({ area, x: cx, y: cy, z: -1 });
+        const descLava = Levels.describeCell({ area, x: cx + 8, y: cy, z: -2 });
+        t.check("describe_flooded_cells", descWater.includes("Flooded (Fresh water)") && descLava.includes("Flooded (Lava)"),
+            `water desc "${descWater}"; lava desc "${descLava}"`);
+
+        // Check 7: Switch view to -1, reveal fog and illuminate, screenshot animated overlay, verify Sprite_UFFloodOverlay
+        setView(-1);
+        await t.waitUntil(() => settled() && viewZ() === -1, 10000, "view switch to -1");
+        $gamePlayer.locate(cx, cy);
+        if ($gamePlayer.center) $gamePlayer.center(cx, cy);
+        if (window.UF && UF.Fog && typeof UF.Fog.reveal === "function") {
+            UF.Fog.reveal(cx, cy, 14, -1);
+            if (typeof UF.Fog.refresh === "function") UF.Fog.refresh();
+        }
+        const unit = W.addUnit({
+            name: "TEST_observer",
+            image: { characterName: "People1", characterIndex: 2 },
+            area: { x: area.x, y: area.y },
+            x: cx - 1, y: cy, z: -1,
+            exact: true,
+            data: { kind: "colonist", light: 12 }
+        });
+        await t.waitFrames(20);
+        const overlay = SceneManager._scene._spriteset && SceneManager._scene._spriteset._ufFloodOverlay;
+        const overlayActive = overlay && overlay._active.size > 0;
+        t.check("flood_overlay_rendered", overlayActive,
+            `overlay present: ${!!overlay}, active sprites: ${overlay ? overlay._active.size : 0}`);
+        t.screenshot("flooded_cavern_water_minus1");
+        W.removeUnit(unit.id);
+
+        // Restore original shapes, tiles, and baselines
+        for (const st of savedTiles0) {
+            W.setTile(area.x, area.y, st.x, st.y, 0, st.tile);
+        }
+        if (bMinus2 && bMinus2.water) bMinus2.water[lavaIdx] = oldWaterVal;
+        for (const s of savedShapes.values()) {
+            if (s.cell) setShape({ area, x: s.x, y: s.y, z: s.z }, s.cell.code, { material: s.cell.material, constructed: s.cell.constructed });
+        }
+        invalidateFloods();
+        setView(0);
+        await t.waitUntil(() => settled() && viewZ() === 0, 10000, "view return to Ground");
+
+        t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().join(" | ") || "none");
     }
 
     async function verticalSuite(t) {

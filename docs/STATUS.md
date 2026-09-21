@@ -9,6 +9,41 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Multi-Level Fluid Breach, Cascading Flooding & Animated Tile Shading Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Okay, now, if there is water on ground layer, and there is no wall on layer -1, then that square and any squares until it hits a wall are flooded. Same logic ok layer -1, if there is a flooded square or a body of water without a wall under it, that square is flooded and the flood extends until it hits walls. The same logic applies for lava. These can be animated by shading the tile blue or red"):
+- **Multi-Level Fluid Simulation & Breach Engine (`UF_Levels.js`)**:
+  - *Downward breach logic*: If liquid (water or lava) exists at $(x, y, 0)$ on Ground and there is no solid wall at $(x, y, -1)$, fluid breaches directly into $(x, y, -1)$.
+  - *Lateral expansion*: Breached fluids expand laterally across connected non-wall cells on level -1 via 4-way BFS until halted by walls (natural rock/soil, constructed walls, or closed doors).
+  - *Cascading breaches to -2*: Any flooded cell or natural water/lava body on level -1 checks $(x, y, -2)$. If no wall exists directly below it, fluid breaches down to level -2 and laterally expands across non-wall floor cells until bounded by solid walls.
+  - *Solidification upon fluid contact*: If water and lava breach into adjacent cells on the same subterranean level, contact cells solidify (`FLOOD_SOLIDIFIED`), preventing infinite recursion and modeling obsidian/basalt crust formation.
+  - *Wall Detection*: `isWallAt(area, x, y, z)` reliably detects natural solid rock/soil (`packedAt & 7 === SOLID`), constructed walls (`ufObjects`), and closed doors (`UF.Doors.isOpen`) without re-entrant `buildArea` side effects.
+  - *Event-driven cache invalidation*: Listens to `levels:shapeChanged`, `levels:cellChanged`, `objects:changed`, `objects:levelChanged`, `doors:opened`, `doors:closed`, and `world:created`, re-evaluating floods lazily only when terrain or structures change.
+- **Visual Animated Fluid Shading (`Sprite_UFFloodOverlay` in `UF_Levels.js`)**:
+  - Attached to `Spriteset_Map._tilemap` at depth $z = 2.5$ (directly above floor autotiles and beneath units/objects).
+  - Procedurally generates 4-frame animated ripple canvases (192x48 px):
+    - *Water*: Translucent royal blue (`rgba(24, 118, 210, 0.45)`) with rippling cyan highlights (`rgba(130, 215, 255, 0.35)`).
+    - *Lava*: Glowing crimson-orange (`rgba(215, 38, 16, 0.55)`) with bright amber highlights and floating ember flecks.
+  - Animated frame cycles with game time (`Math.floor(Graphics.frameCount / 12) % 4`), spatial phase offset by coordinates `((x + y * 2) % 4)`.
+  - Pooled sprite management with visibility frustum culling.
+- **Engine Integrations (`UF_World.js`, `UF_Jobs.js`, `UF_Levels.js`)**:
+  - `UF_World.walkable`: Colonists and wildlife will not pathfind into cells flooded with lava (`isFlooded.type === 'lava'`).
+  - `UF_Jobs.isWaterIn`: Recognizes subterranean flooded water cells for drinking/hauling jobs while cleanly respecting dry cells and natural baselines.
+  - `UF.Levels.describeCell`: Formats cell descriptions as `"Flooded (Fresh water)"` and `"Flooded (Lava)"` with biome and substrate info.
+  - Public API exported: `UF.Levels.isFlooded(ref)`, `UF.Levels.floodGrid(area, z)`, `UF.Levels.invalidateFloods()`.
+- **Automated Verification (`tools/run_tests.js flooding`)**:
+  - **8/8 PASS (exit 0)**:
+    - `flooding.downward_breach_water`: Downward breach from $Z=0$ to $Z=-1$.
+    - `flooding.lateral_flood_bounded`: Lateral BFS bounded by chamber walls while exterior dry chamber remains unflooded.
+    - `flooding.wall_blocks_breach`: Solid rock wall on $Z=-1$ under water tile blocks breach.
+    - `flooding.cascading_breach_to_minus2`: Cascading breach from $Z=-1$ down into $Z=-2$.
+    - `flooding.lava_flooding`: Lava flooding and lateral expansion on $Z=-2$.
+    - `flooding.describe_flooded_cells`: Cell inspection tooltips display `"Flooded (Fresh water)"` and `"Flooded (Lava)"`.
+    - `flooding.flood_overlay_rendered`: Overlay active with 500 active animated sprites.
+    - `flooding.no_errors`: 0 dev console or runtime errors.
+  - Verified screenshot: `game/test_output/flooding.flooded_cavern_water_minus1.png` inspected and confirmed showing animated blue shaded fluid inside chamber bounded by DF-style black-capped stone walls on level -1.
+  - Full regression pass: `setup` (59/59 PASS), `smoke` (13/13 PASS).
+
+
 ## World Size Selection on New Game Setup Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("On the menu where you select your faction and the year, add an option for world size: 16x16 = tiny, 32x32 = small, 64x64 = standard, 128x128 = large, 256x256 = massive"):
 - **New Game Setup Window (`Window_NewGameSetup` in `UF_FactionMenus.js`)**:

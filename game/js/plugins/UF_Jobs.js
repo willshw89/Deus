@@ -115,6 +115,17 @@
     function isWaterIn(area, x, y) {
         const W = World();
         if (!area || !validLevel(area) || !W || !W.state || !W.inWorld(area.x, area.y, zOf(area))) return false;
+        const z = zOf(area);
+        if (z < 0) {
+            if (window.UF && UF.Levels && typeof UF.Levels.isFlooded === "function") {
+                const fl = UF.Levels.isFlooded({ area: { x: area.x, y: area.y }, x, y, z });
+                if (fl && fl.flooded && fl.type === "water") return true;
+            }
+            if (window.UF && UF.Levels && typeof UF.Levels.naturalWaterAt === "function") {
+                return UF.Levels.naturalWaterAt({ area: { x: area.x, y: area.y }, x, y, z });
+            }
+            return false;
+        }
         if (W && onScreen(area) && window.$gameMap && $dataMap) {
             return Tilemap.isWaterTile($gameMap.tileId(x, y, 0));
         }
