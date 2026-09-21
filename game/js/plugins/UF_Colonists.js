@@ -2391,8 +2391,8 @@
 
         const animalCell = freeCellNear(area, cell.x + 1, cell.y, 3) || cell;
         const packAnimal = W.addUnit({
-            name: "Pack Mule",
-            image: { characterName: "$UF_Wildlife_Herbivore_Walk", characterIndex: 0 },
+            name: "Pack Sheep",
+            image: { characterName: "$UF_Sheep", characterIndex: 0 },
             area: copyArea(c.area),
             z: zOf(c),
             x: animalCell.x,
@@ -2400,7 +2400,7 @@
             dir: 2,
             data: {
                 kind: "wildlife",
-                species: "mule",
+                species: "sheep",
                 packAnimal: true,
                 tamed: true,
                 site: c.siteId

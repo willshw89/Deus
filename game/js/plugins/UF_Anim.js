@@ -809,7 +809,7 @@
         const D = window.UF && UF.Doors;
         stName = "";
         stCols = null;
-        if (a.open && info.door && D && area && D.isOpen(area, s.x, s.y)) {
+        if (a.open && ((info.door && D && area && D.isOpen(area, s.x, s.y)) || (!info.door && busyCells.has(key)))) {
             stName = "open";
             stCols = a.open;
         } else if (a.lit && (info.lit || busyCells.has(key))) {

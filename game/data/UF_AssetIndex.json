@@ -798,10 +798,11 @@
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "plugin UF_FactionMenus.js",
    "RMMZ data Actors.json (face ×8)"
   ],
-  "states": [],
+  "states": [
+   "face sheet: 4 × 2 faces of 144×144"
+  ],
   "category": "ui",
   "file": "img/faces/U7_Faces.png",
   "exists": true,
@@ -5015,6 +5016,22 @@
   ],
   "category": "people",
   "file": "img/characters/$UF_Orc_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Sheep": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Colonists.js"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Sheep.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"

@@ -1,12 +1,33 @@
 {
-  "sheet": "!$UF_Chest_Wood",
-  "cellWidth": 48,
-  "cellHeight": 48,
-  "type": "world_object",
+  "id": "chest_wood",
+  "generator": "gemini-3-pro-image",
+  "model": "Google Nano Banana Pro",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    47
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
   "animations": {
     "stand": [
       0
     ],
-    "frameMs": 200
-  }
+    "open": [
+      0,
+      1,
+      2
+    ]
+  },
+  "frameMs": 150,
+  "standard": "Project DEUS 16-bit HD"
 }

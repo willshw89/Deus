@@ -41,7 +41,7 @@ Master registry of all packed asset sheets, individual sprite slots, architectur
 | `rock_limestone_cliff` | `img/characters/!$UF_StoneWalls_Set.png` | (0, 1) | Terrain | `stones:limestone` | Static | 1x2 | - | - | (0.5, 1.0) | all | YES | `UF_Levels` | v1.0 | YES |
 | `rock_cave_wall_excavated` | `img/characters/!$UF_StoneWalls_Set.png` | (1, 1) | Terrain | `stones:limestone` | Static | 1x2 | - | - | (0.5, 1.0) | -1..-2 | YES | `UF_Levels` | v1.0 | YES |
 | `wall_limestone_arrow_slit` | `img/characters/!$UF_StoneWalls_Set.png` | (2, 1) | Architecture | `stones:limestone` | Static | 1x2 | - | - | (0.5, 1.0) | 0..+1 | YES | `UF_Walls` | v1.0 | YES |
-| `wall_limestone_gate` | `img/characters/!$UF_StoneWalls_Set.png` | (3, 1) | Architecture | `stones:limestone` | Static | 1x2 | - | - | (0.5, 1.0) | 0..+1 | YES | `UF_Walls` | v1.0 | YES |
+| `chest_wood` | `img/characters/!$UF_Chest_Wood.png` | (0..2, 0..3) | Object | `woods:oak` | Animated | 1x1 | 0..2 | 150ms | (0.5, 1.0) | 0 | NO | `UF_Objects` / `UF_Anim` | v2.0 | YES |
 
 *(New non-living packed sheets generated via Google Nano Banana Pro will be appended directly to this manifest as production proceeds.)*
 

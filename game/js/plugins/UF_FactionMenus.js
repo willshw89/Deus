@@ -864,7 +864,7 @@
     const _Game_Actor_faceName = Game_Actor.prototype.faceName;
     Game_Actor.prototype.faceName = function() {
         const orig = _Game_Actor_faceName.call(this);
-        if (orig && orig !== "U7_Faces" && orig !== "") return orig;
+        if (orig && !orig.startsWith("U7_") && orig !== "") return orig;
         const faction = safeFaction(UF_FactionMenus.getFaction());
         return `UF_Faces_${faction === "default" ? "human" : faction}_1`;
     };
@@ -872,7 +872,7 @@
     const _Game_Actor_faceIndex = Game_Actor.prototype.faceIndex;
     Game_Actor.prototype.faceIndex = function() {
         const origName = _Game_Actor_faceName.call(this);
-        if (origName && origName !== "U7_Faces" && origName !== "") return _Game_Actor_faceIndex.call(this);
+        if (origName && !origName.startsWith("U7_") && origName !== "") return _Game_Actor_faceIndex.call(this);
         return 0;
     };
 
