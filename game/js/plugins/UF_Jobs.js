@@ -272,11 +272,11 @@
                 const stand = standFor(job.target, unit, false);
                 return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
             }
-            if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
+            if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function") {
                 const s = L.shapeAt(job.target);
                 if (s === "solid") {
                     const c = L.cellAt ? L.cellAt(job.target) : null;
-                    job.params.objectName = c && c.material === "soil" ? "Subterranean soil wall" : "Subterranean rock wall";
+                    job.params.objectName = c && c.material === "soil" ? "Natural soil wall" : "Natural rock wall";
                     const stand = standFor(job.target, unit, true);
                     return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
                 }
@@ -289,7 +289,7 @@
             let baseWork = 0;
             if (t && t.actions && t.actions[type]) {
                 baseWork = t.actions[type].work | 0;
-            } else if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
+            } else if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && L.shapeAt(job.target) === "solid") {
                 baseWork = 180;
             }
             if (baseWork <= 0) return 0;
@@ -309,7 +309,7 @@
                 if (t && O && typeof O.materialOf === "function") {
                     stoneMat = O.materialOf(t.id, job.target.area, job.target.x, job.target.y);
                 }
-                if (!stoneMat && zOf(job.target) < 0) {
+                if (!stoneMat) {
                     const W = World(), st = W && W.state;
                     const size = st ? st.size : 256;
                     const gx = job.target.area.x * size + job.target.x, gy = job.target.area.y * size + job.target.y;
@@ -336,7 +336,7 @@
                 job.result = r ? { from: r.from, to: r.to, yields: r.yields } : null;
                 return;
             }
-            if ((type === "mine" || type === "quarry") && L && typeof L.setShape === "function" && zOf(job.target) < 0) {
+            if ((type === "mine" || type === "quarry") && L && typeof L.setShape === "function" && L.shapeAt(job.target) === "solid") {
                 const c = L.cellAt ? L.cellAt(job.target) : null;
                 const mat = c && c.material === "soil" ? "soil" : "stone";
                 L.setShape(job.target, "floor", { material: mat });

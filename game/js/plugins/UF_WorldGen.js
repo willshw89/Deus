@@ -529,6 +529,7 @@
         return isLake(d.seed, cat.climate, fieldsFor(d.seed, d, cat.climate, gx, gy), gx, gy);
     };
     WorldGen.biomeAt = (gx, gy, z = 0) => { const c = WorldGen.cellInfo(gx, gy, z); return c ? c.biomeId : null; };
+    WorldGen.surfaceElevationAt = (gx, gy, seed) => (window.UF && UF.Levels && typeof UF.Levels.surfaceElevationAt === "function") ? UF.Levels.surfaceElevationAt(gx, gy, seed) : 0;
 
     /**
      * Deterministic geological stratum at world coordinates (gx, gy, z).

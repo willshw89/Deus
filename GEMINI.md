@@ -15,9 +15,27 @@
 - **12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE:** (User decisions 2026-09-19: "Let's generate 12 sprites at a time, using the first sprite Sheet as a reference for subsequent sheet generation using nano banana II".) All character generation tasks produce exactly 12 sprites at a time on a 3×4 grid (3 animation columns × 4 rows: South, West, East, North) matching native RMMZ charset sheets ($filename.png). The first sheet produced for a demographic (the standard 12-sprite Walk sheet) serves as the persistent master visual reference image (`ImagePaths`) passed to Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`) for all subsequent 12-sprite action sheets (Haul, Attack, Bow, Magic, Work, Downed), guaranteeing 100% anatomical scale, proportion, clothing, and palette fidelity across every action.
 - **The look is 16-bit pixel art in the serious chibi style** (user decisions 2026-09-19; VISION V115, V116): flat 3/4 top-down RPG view, upright sprites, serious chibi proportions (~3.0 to 3.2 heads tall, grounded in 1 tile height: 40–44 px in RMMZ with large creatures at **2 tiles in height (96 px in RMMZ)**), focused and determined facial expressions (no cute manga eyes or bubbly smiles), defined battle-ready posture, functional medieval gear, 16-bit palette (`art/palette/uf.hex`). Follow `docs/ART_STANDARD.md` and `docs/RMMZ_ASSET_SPEC.md`. Each action is a dedicated 12-sprite sheet (3 Down, 3 Left, 3 Right, 3 Up).
 - **Placeholders are RPG Maker's stock art** (the `Outside_*` tiles, `People`/`Actor`/`Nature`/`Monster` sheets). Your job is the originals that replace them, request by request in `docs/ASSET_REQUESTS.md`, in the FF5 manner, on the 12-sprite sheet standard when it applies. Existing `U7_` files are not to be extended; they get replaced.
+- **MANDATORY: CONTINUOUS NANO BANANA PRO NON-LIVING PRODUCTION PIPELINE (User directive 2026-09-21):**
+  - Whenever implementation requires NON-LIVING artwork (walls, doors, terrain, flora, crops, water features, items, resources, furniture, workshops, machinery, environmental effects), continuously identify those needs, batch them aggressively, generate packed game-ready sheets via Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`), process approved results, integrate them into the project, log them in `docs/ASSET_MANIFEST.md`, and verify them in context. **DO NOT wait for manual requests for non-living assets.**
+  - **ABSOLUTE EXCLUSION: LIVING THINGS.** This automated pipeline DOES NOT apply to living things (humans, colonists, humanoids, animals, wildlife, monsters, creatures, living portraits, living character sprites/animation sheets). Register missing living assets in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md`, but do NOT generate autonomously.
+- **MANDATORY: DWARF-FORTRESS-STYLE BLACK WALL-TOP CONVENTION (User directive 2026-09-21; `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md` §3):**
+  - For TWO-GRID-HIGH walls, doors, gates, cliff-adjacent architectural elements, and vertical structural pieces (48×96 px):
+    **THE TOP / UPPER 48 PX CAP MUST READ AS FLAT NEAR-BLACK (`#08080C` to `#121218`) WITH MINIMAL EDGE DEFINITION.**
+  - Visual formula: `MATERIAL-FACING LOWER PORTION (48 px) + BLACK UPPER/TOP CAP (48 px)`.
+  - The black cap connects with Project DEUS's dark void and occlusion language.
+  - Strict alignment: neighboring walls, doorways, doors, and gates must produce an unbroken, continuous horizontal black top line.
+  - Not a baked shadow: does not vary with room lighting, weather, or biome.
+  - Never render an isometric roof, textured masonry, shingles, or dirt on the top cap of standard walls.
+- **MANDATORY: PACKED ATLAS GENERATION & RIGID GRIDS (User directive 2026-09-21):**
+  - Pack as many compatible non-living assets as practical into each generated sheet (target 80–100% useful area).
+  - Every prompt must declare exact rigid grid dimensions (`SHEET WIDTH/HEIGHT`, `CELL WIDTH/HEIGHT`, `COLUMNS`, `ROWS`, `TOTAL SLOTS`, and `SLOT-BY-SLOT ASSIGNMENT`).
+  - Animated sheets: X-axis = Time / Sequential Frames (pixel-stable base, only flame/water/moving part changes); Y-axis = Distinct Objects / Variants.
+  - No text, labels, numbers, captions, concept art layouts, or UI borders inside the image.
+  - Use `ImagePaths` with existing DEUS assets as primary visual references for every generation.
+  - Maintain the master registry in `docs/ASSET_MANIFEST.md`.
 - **Interaction states:** every asset is designed with the states the engine uses (standing/stump, full/picked, unlit/lit, intact/ruined, alive/dead, clothing tiers, age stages). `docs/ASSET_INVENTORY.md` lists them per asset.
 - **Full-Stack Systems Engineering & Art Direction (Updated 2026-09-20)**: Gemini / Antigravity is authorized for full-stack systems engineering, plugin development, test creation, data schemas, and Nano Banana Pro art asset production. Claim tasks in `docs/STATUS.md` before starting work.
-- Before calling an asset delivered, open it and check it against ART_STANDARD §8. Say what you checked.
+- Before calling an asset delivered, open it and check it against ART_STANDARD §8 and `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md`. Say what you checked.
 - Commit your files only, with `git add <paths>` (never `git add -A`), in a message starting `[gemini]`.
 
 

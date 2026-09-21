@@ -7,7 +7,55 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
 ## In progress
-- **Gemini**: Milestone 3 / Tasks 9 & 10: Volumetric Column Landform Generator & Mineable World Geometry with Space Creation (`game/js/plugins/UF_Levels.js`, `game/js/plugins/UF_WorldGen.js`, `game/js/plugins/UF_Jobs.js`, `tools/test_column_landforms.js`).
+- **Gemini**: Milestone 3 / Tasks 11 & 12: Horizontal Cliff Cave Carving & Structural Rock Enclosure Core (`game/js/plugins/UF_Levels.js`, `game/js/plugins/UF_Households.js`, `tools/test_vertical_worldgen_proof.js`).
+
+## Continuous Nano Banana Pro Non-Living Pipeline & DF Black Wall-Top Convention Delivered — 2026-09-21 (Gemini)
+Delivered per user directives:
+- **Binding Rule 13 Established (`AGENTS.md`, `GEMINI.md`, `docs/VISION.md` V129)**:
+  - Autonomous pipeline continuously identifies non-living visual requirements (walls, doors, terrain, flora, items, workshops, machinery), batches aggressively into packed sheets (80–100% useful area), prompts Nano Banana Pro with explicit slot maps, processes and palette-snaps to `art/palette/uf.hex`, registers in `docs/ASSET_MANIFEST.md`, and verifies in context.
+  - **Absolute Exclusion of Living Beings**: Pipeline strictly excludes living beings (humans, colonists, humanoids, animals, wildlife, monsters, creatures, living portraits/sprites). Missing living assets are registered in `docs/ASSET_REQUESTS.md` without autonomous generation.
+  - **Dwarf-Fortress-Style Black Wall-Top Readability Convention**: For two-grid-high architectural pieces (48×96 px), the upper 48 px cap reads as flat near-black (`#08080C` to `#121218`) with minimal edge highlight, forming an unbroken horizontal occlusion line aligned across walls, doorways, doors, and gates. Lower 48 px displays the authentic material face.
+- **Master Art Direction Specification (`docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md`)**:
+  - Full production specification governing camera, projection, sprite scale, 48×96 px 2-grid vertical footprint, DF black wall-top rule, palette snapping, real-frame sprite animation (X-axis time, pixel-stable base chassis, Y-axis variant), dual active/inactive states, and prompt template.
+- **Master Asset Manifest (`docs/ASSET_MANIFEST.md`)**:
+  - Comprehensive schema and registry tracking asset ID, sheet file, grid position, category, material, static/animated, footprint, frame range, rate, anchor, Z extent, black-top rule, game system, prompt version, and verification status.
+- **First Packed Non-Living Sheet Delivered (`!$UF_StoneWalls_Set.png`)**:
+  - Generated via Google Nano Banana Pro (`gemini-3-pro-image`), extracted and scaled to 192×192 px (4 cols × 2 rows of 48×96 px cells), snapped to `art/palette/uf.hex`:
+    1. Straight Limestone Wall (Lower: ashlar limestone blocks; Upper: #08080C black cap).
+    2. Limestone Wall Corner / Quoin.
+    3. Limestone Wall Arched Doorway.
+    4. Limestone Wall with Closed Studded Oak Door.
+    5. Natural Solid Limestone Cliff Face.
+    6. Excavated Natural Cave Wall.
+    7. Limestone Wall with Arrow Slit.
+    8. Fortified Iron-Banded Portcullis Gate.
+  - Delivered to `art/masters/!$UF_StoneWalls_Set.png` and `game/img/characters/!$UF_StoneWalls_Set.png` with sidecar `.json`.
+  - Passed `tools/originality_check.js` (PASS 1/1 files, 0 FAIL).
+  - All 8 assets registered in `docs/ASSET_MANIFEST.md`.
+
+## Systemic Verticality: Milestone 3 / Tasks 9 & 10 Volumetric Landforms & Universal Mining Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (V126, V127, V128):
+- **Volumetric Column Landform Generator (`UF_Levels.js`, `UF_WorldGen.js`)**:
+  - Implemented continuous vertical topography $S(gx, gy) \in \{0, 1, 2\}$ using continental macro-elevation and mesoscale relief noise.
+  - Volumetric column population for `gen >= 4`: $z < S \implies \text{SOLID}$ stone mass, $z = S \implies \text{FLOOR}$ walkable ground, $z > S \implies \text{OPEN}$ sky.
+  - Guaranteed starting camp clearing ($r \le 12$) at datum $S = 0$ with smooth blend ring ($12 < r < 18$).
+  - Natural navigable `RAMP` cells generated on single-step elevation transitions ($\Delta S = 1$) where `rampNoise > 0.65`.
+  - Added `WorldGen.surfaceElevationAt(gx, gy, seed)` and `Levels.surfaceElevationAt`.
+- **Universal Mineable Geometry & Space Creation (`UF_Jobs.js`, `UF_Levels.js`)**:
+  - Removed $z < 0$ restriction on `mine` and `quarry` jobs: mining now works on any solid rock cell across all Z levels (surface cliffs on $Z0, Z+1, Z+2$ and underground on $Z-1, Z-2$).
+  - Mining solid rock mutates `SOLID` $\rightarrow$ `FLOOR`, creates traversable space, drops stone chunks matching local geology (`WorldGen.geologyAt`), and stamps worker skill quality.
+  - Work duration dynamically scales with stone fracture resistance.
+- **World-Mutation Invalidation Engine (`UF_Levels.js`)**:
+  - Implemented `Levels.notifyWorldCellChanged(ref, oldCell, newCell, cause)`: emits `levels:cellChanged`, dispatches `levels:faceExposed` to all 6 orthogonal neighbors, and triggers `Households.invalidateRoomEnclosure(area, x, y, z)`.
+  - Implemented `Levels.isExposedSurface(ref)` and `Levels.exposedFacesAround(ref)`.
+- **Verification Evidence**:
+  - `node tools/test_column_landforms.js`: **32/32 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_column_landforms.js --mutant` failed on `camp_clearing_elevation` with exit 1.
+  - `node tools/test_material_recipes.js`: **21/21 PASS (exit 0)**.
+  - `node tools/test_material_substitution.js`: **7/7 PASS (exit 0)**.
+  - `node tools/run_tests.js items`: **20/20 PASS (exit 0)**.
+  - `node tools/run_tests.js jobs`: **19/19 PASS (exit 0)**.
+  - `node tools/originality_check.js 'game/img/characters/!$UF_StoneWalls_Set.png'`: **PASS (0 FAIL)**.
 
 ## Systemic Material Economy: Milestone 2 / Task 7 Material-Aware Recipes with Functional Roles & Material Inheritance Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy & Continuous Vertical Worldgen Roadmap):

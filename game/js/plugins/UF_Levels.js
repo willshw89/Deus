@@ -598,12 +598,96 @@
         return { biome, water, pockets };
     }
 
+    function surfaceElevation(seed, gx, gy, size, d, cl) {
+        const mid = Math.floor(size / 2);
+        const lx = ((gx % size) + size) % size;
+        const ly = ((gy % size) + size) % size;
+        const distToCamp = Math.hypot(lx - mid, ly - mid);
+
+        // Within starting camp clearing (r <= 12), always datum S = 0
+        if (distToCamp <= 12) return 0;
+
+        const G = window.UF && UF.WorldGen;
+        let e = 0.45;
+        if (G && typeof G.fieldsFor === "function" && d && cl) {
+            const f = G.fieldsFor(seed, d, cl, gx, gy);
+            e = f.e;
+        } else {
+            const saltElev = hashString("uf.worldgen.elevation");
+            e = valueNoise(seed, saltElev, gx, gy, 64);
+        }
+
+        const saltRelief = hashString("uf.levels.relief");
+        const relief = valueNoise(seed, saltRelief, gx, gy, 18);
+        let eff = e + (relief - 0.5) * 0.20;
+
+        // Smooth transition ring near camp (12 < r < 18)
+        if (distToCamp < 18) {
+            const blend = (distToCamp - 12) / 6;
+            eff = eff * blend + 0.35 * (1 - blend);
+        }
+
+        if (eff >= 0.72) return 2;
+        if (eff >= 0.52) return 1;
+        return 0;
+    }
+
     function generateBaseline(seed, gen, z, ax, ay, size) {
         const t0 = performance.now();
         const n = size * size;
         const shape = new Uint8Array(n), material = new Uint8Array(n);
         let extra = null;
-        if (z > 0) {
+        if (gen >= 4) {
+            const W = World(), st = W && W.state;
+            const d = (st && st.areasX) ? { width: st.areasX * size, height: st.areasY * size, seed } : { width: size, height: size, seed };
+            const cat = catalog(), cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
+
+            if (z < 0) {
+                extra = generateUnderground(seed, gen, z, ax, ay, size, shape, material);
+            } else {
+                const S_grid = new Int8Array(n);
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        const i = y * size + x, gx = ax * size + x, gy = ay * size + y;
+                        const S = surfaceElevation(seed, gx, gy, size, d, cl);
+                        S_grid[i] = S;
+
+                        if (z < S) {
+                            shape[i] = SOLID;
+                            material[i] = STONE;
+                        } else if (z === S) {
+                            shape[i] = FLOOR;
+                            material[i] = SOIL;
+                        } else {
+                            shape[i] = OPEN;
+                            material[i] = STONE;
+                        }
+                    }
+                }
+
+                // Natural ramps connecting single-step elevation transitions (ΔS = 1)
+                const saltRamp = hashString("uf.levels.natural_ramp");
+                for (let y = 1; y < size - 1; y++) {
+                    for (let x = 1; x < size - 1; x++) {
+                        const i = y * size + x;
+                        if (shape[i] === FLOOR && S_grid[i] === z) {
+                            const gx = ax * size + x, gy = ay * size + y;
+                            const rampNoise = valueNoise(seed, saltRamp, gx, gy, 8);
+                            if (rampNoise > 0.65) {
+                                for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+                                    const ni = (y + dy) * size + (x + dx);
+                                    if (S_grid[ni] === z + 1) {
+                                        shape[i] = RAMP;
+                                        material[i] = STONE;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (z > 0) {
             shape.fill(OPEN);
         } else if (z < 0) {
             if (gen >= 2) extra = generateUnderground(seed, gen, z, ax, ay, size, shape, material);
@@ -698,6 +782,10 @@
         const ch = changesOf(st, z, ax, ay, false);
         if (ch && ch[i] !== undefined) return ch[i] | 0;
         if (z === 0) {
+            if (levelGen(st, 0) >= 4) {
+                const b = baseline(0, ax, ay);
+                return pack(b.shape[i], false, b.material[i]);
+            }
             const G = window.UF.WorldGen;
             const info = G && G.cellInfoLocal ? G.cellInfoLocal(ax, ay, x, y) : null;
             return pack(info && info.peak ? SOLID : FLOOR, false, STONE);
@@ -849,7 +937,7 @@
         if (!st || !st.levels) return refuse("no levels in this world");
         if (!isLevel(r.z) || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
         if (!Number.isInteger(code) || !(code >= 1 && code <= 7)) return refuse(`unknown shape ${JSON.stringify(shape)}`);
-        if (r.z === 0) return refuse("the ground's shapes change with stairs and holes (vertical slice 2)");
+        if (r.z === 0 && levelGen(st, 0) < 4) return refuse("the ground's shapes change with stairs and holes (vertical slice 2)");
         const from = packedAt(r.ax, r.ay, r.x, r.y, r.z);
         const matName = opts.material !== undefined ? opts.material : (opts.constructed && (code === FLOOR || code >= RAMP) ? "wood" : null);
         const mat = matName === null ? (from >> 4) : (typeof matName === "number" ? matName : MATERIALS.indexOf(matName));
@@ -863,6 +951,7 @@
         else ch[i] = to;
         redrawAround(r.ax, r.ay, r.x, r.y, r.z);
         emit("levels:shapeChanged", { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: r.z }, unpack(from), unpack(to));
+        notifyWorldCellChanged({ area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: r.z }, unpack(from), unpack(to), opts.cause || "setShape");
         return true;
     }
     function redrawAround(ax, ay, x, y, z) {
@@ -877,6 +966,65 @@
                 const t = tilesAt(read, cx, cy, z, readBiome);
                 for (let layer = 0; layer < 3; layer++) W.setDerivedTile(ax, ay, cx, cy, layer, t[layer], z);
             }
+        }
+    }
+
+    function isExposedSurface(ref) {
+        const r = refOf(ref);
+        const s = packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7;
+        if (s !== SOLID) return false;
+        const neighbors = [
+            [-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]
+        ];
+        for (const [dx, dy, dz] of neighbors) {
+            const nz = r.z + dz;
+            if (nz < -2 || nz > 2) continue;
+            const ns = packedAt(r.ax, r.ay, r.x + dx, r.y + dy, nz) & 7;
+            if (ns === FLOOR || ns === OPEN || ns === RAMP) return true;
+        }
+        return false;
+    }
+
+    function exposedFacesAround(ref) {
+        const r = refOf(ref);
+        const faces = [];
+        const directions = [
+            { dir: "west", dx: -1, dy: 0, dz: 0 },
+            { dir: "east", dx: 1, dy: 0, dz: 0 },
+            { dir: "north", dx: 0, dy: -1, dz: 0 },
+            { dir: "south", dx: 0, dy: 1, dz: 0 },
+            { dir: "down", dx: 0, dy: 0, dz: -1 },
+            { dir: "up", dx: 0, dy: 0, dz: 1 }
+        ];
+        for (const d of directions) {
+            const nz = r.z + d.dz;
+            if (nz < -2 || nz > 2) continue;
+            const ns = packedAt(r.ax, r.ay, r.x + d.dx, r.y + d.dy, nz) & 7;
+            if (ns === FLOOR || ns === OPEN || ns === RAMP) {
+                faces.push(d.dir);
+            }
+        }
+        return faces;
+    }
+
+    function notifyWorldCellChanged(ref, oldCell, newCell, cause = "unknown") {
+        const r = refOf(ref);
+        const area = { x: r.ax, y: r.ay };
+        const payload = { area, x: r.x, y: r.y, z: r.z, oldCell, newCell, cause };
+        emit("levels:cellChanged", payload);
+
+        // Update exposed faces for the 6 orthogonal neighbors
+        for (const [dx, dy, dz] of [[-1,0,0], [1,0,0], [0,-1,0], [0,1,0], [0,0,-1], [0,0,1]]) {
+            const nz = r.z + dz;
+            if (nz >= -2 && nz <= 2) {
+                emit("levels:faceExposed", { area, x: r.x + dx, y: r.y + dy, z: nz });
+            }
+        }
+
+        // Room enclosure invalidation
+        const Households = window.UF && UF.Households;
+        if (Households && typeof Households.invalidateRoomEnclosure === "function") {
+            try { Households.invalidateRoomEnclosure(area, r.x, r.y, r.z); } catch (e) {}
         }
     }
 
@@ -908,7 +1056,7 @@
         update() {
             super.update();
             const map = window.$dataMap, W = World(), view = W && W.viewLevel();
-            if (!this.parent || !map || !view || view.z >= 0 || map.tilesetId !== TILESET_ID) {
+            if (!this.parent || !map || !view || (view.z === 0 && levelGen(W.state, 0) < 4) || map.tilesetId !== TILESET_ID) {
                 for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
                 this._active.clear(); this._seen = ""; return;
             }
@@ -1381,6 +1529,17 @@
             return b ? baselineMetrics(b, World().state.size) : null;
         },
         ensureWorldLevels,
+        surfaceElevationAt: (gx, gy, seed) => {
+            const W = World(), st = W && W.state;
+            const s = seed !== undefined ? seed : (st ? st.seed : 0);
+            const size = st ? st.size : 256;
+            const d = (st && st.areasX) ? { width: st.areasX * size, height: st.areasY * size, seed: s } : { width: size, height: size, seed: s };
+            const cat = catalog(), cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
+            return surfaceElevation(s, gx, gy, size, d, cl);
+        },
+        isExposedSurface,
+        exposedFacesAround,
+        notifyWorldCellChanged,
         /** Checksum of a level's baseline: the save's world by default; seed/gen regenerate another one (tests). */
         checksum: (z, seed, gen) => checksumOf(z, seed, gen),
         migrate,

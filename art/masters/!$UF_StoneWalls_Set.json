@@ -1,0 +1,67 @@
+{
+  "id": "UF_StoneWalls_Set",
+  "sheetWidth": 192,
+  "sheetHeight": 192,
+  "cellWidth": 48,
+  "cellHeight": 96,
+  "cols": 4,
+  "rows": 2,
+  "slots": {
+    "0,0": {
+      "id": "wall_limestone_straight",
+      "name": "Straight Limestone Wall",
+      "type": "wall",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "1,0": {
+      "id": "wall_limestone_corner",
+      "name": "Limestone Wall Corner",
+      "type": "wall",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "2,0": {
+      "id": "wall_limestone_doorway",
+      "name": "Limestone Wall Doorway",
+      "type": "doorway",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "3,0": {
+      "id": "wall_limestone_closed_door",
+      "name": "Limestone Wall with Closed Door",
+      "type": "door",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "0,1": {
+      "id": "rock_limestone_cliff",
+      "name": "Natural Solid Limestone Cliff Face",
+      "type": "cliff",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "1,1": {
+      "id": "rock_cave_wall_excavated",
+      "name": "Excavated Natural Cave Wall",
+      "type": "cave_wall",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "2,1": {
+      "id": "wall_limestone_arrow_slit",
+      "name": "Limestone Wall with Arrow Slit",
+      "type": "wall",
+      "material": "stones:limestone",
+      "blackTop": true
+    },
+    "3,1": {
+      "id": "wall_limestone_gate",
+      "name": "Fortified Portcullis Gate in Stone Wall",
+      "type": "gate",
+      "material": "stones:limestone",
+      "blackTop": true
+    }
+  }
+}
