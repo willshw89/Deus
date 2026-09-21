@@ -283,14 +283,50 @@
             }
             return { ok: false, reason: `nothing to ${type} there` };
         },
-        work(job) {
-            const O = Objects(), L = window.UF && UF.Levels;
+        work(job, unit) {
+            const O = Objects(), L = window.UF && UF.Levels, I = Items();
             const t = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
-            if (t && t.actions && t.actions[type]) return t.actions[type].work | 0;
-            if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
-                return 180;
+            let baseWork = 0;
+            if (t && t.actions && t.actions[type]) {
+                baseWork = t.actions[type].work | 0;
+            } else if ((type === "mine" || type === "quarry") && L && typeof L.shapeAt === "function" && zOf(job.target) < 0) {
+                baseWork = 180;
             }
-            return 0;
+            if (baseWork <= 0) return 0;
+
+            // Systemic Material Dynamics:
+            // 1. Chopping wood: scale work by wood hardness & workability
+            if (type === "chop" && t) {
+                const matRef = O && typeof O.materialOf === "function" ? O.materialOf(t.id, job.target.area, job.target.x, job.target.y) : null;
+                const matDef = (matRef && I && typeof I.materialOf === "function") ? I.materialOf(matRef) : null;
+                if (matDef && matDef.workability) {
+                    // Oak is baseline (workability: 50, factor 1.0)
+                    const factor = Math.max(0.35, Math.min(2.0, (120 - matDef.workability) / 70));
+                    baseWork = Math.round(baseWork * factor);
+                }
+            } else if (type === "quarry" || type === "mine") {
+                let stoneMat = null;
+                if (t && O && typeof O.materialOf === "function") {
+                    stoneMat = O.materialOf(t.id, job.target.area, job.target.x, job.target.y);
+                }
+                if (!stoneMat && zOf(job.target) < 0) {
+                    const W = World(), st = W && W.state;
+                    const size = st ? st.size : 256;
+                    const gx = job.target.area.x * size + job.target.x, gy = job.target.area.y * size + job.target.y;
+                    const G = window.UF && UF.WorldGen;
+                    const geo = G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, zOf(job.target)) : null;
+                    stoneMat = geo ? `stones:${geo.stone}` : "stones:limestone";
+                }
+                const matDef = (stoneMat && I && typeof I.materialOf === "function") ? I.materialOf(stoneMat) : null;
+                if (matDef) {
+                    // Limestone is baseline (fractureResistance: 45, factor 1.0)
+                    const fracture = matDef.fractureResistance || 45;
+                    const factor = Math.max(0.5, Math.min(3.0, fracture / 45));
+                    baseWork = Math.round(baseWork * factor);
+                }
+            }
+
+            return Math.max(10, baseWork);
         },
         apply(job, unit) {
             const O = Objects(), L = window.UF && UF.Levels, I = Items();
@@ -312,8 +348,18 @@
                     const G = window.UF && UF.WorldGen;
                     const geo = G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, zOf(job.target)) : null;
                     const stoneMat = geo ? geo.stone : "limestone";
+                    const S = window.UF && UF.Skills;
+                    let q = (S && typeof S.qualityRoll === "function" && unit) ? S.qualityRoll(unit, "mining") : 0;
+                    const matDef = (stoneMat && I && typeof I.materialOf === "function") ? I.materialOf(`stones:${stoneMat}`) : null;
+                    if (matDef && ((matDef.tags && matDef.tags.includes("hard_stone")) || (matDef.fractureResistance && matDef.fractureResistance >= 75))) {
+                        const eq = unit && unit.data && unit.data.equipment;
+                        const toolItem = (I && eq && eq.tool) ? I.get(eq.tool) : null;
+                        const toolType = toolItem ? I.type(toolItem.type) : null;
+                        const isMetalPick = toolType && (toolType.id.includes("iron") || toolType.id.includes("steel") || toolType.id.includes("bronze") || (toolItem.mat && ["iron", "steel", "bronze"].includes(toolItem.mat)));
+                        if (!isMetalPick) q = 0;
+                    }
                     for (const id of Object.keys(yields)) {
-                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id], unit.id, { mat: stoneMat });
+                        I.drop(lv(job.target), job.target.x, job.target.y, id, yields[id], unit.id, { mat: stoneMat, q: q > 0 ? q : undefined });
                     }
                 }
                 job.result = { from: "solid", to: "floor", yields };
@@ -871,18 +917,62 @@
     // Working: tool multipliers and the per-tick step
 
     function toolMultiplier(unit, job) {
+        if (!unit) return 1;
         const I = Items();
         const eq = unit.data && unit.data.equipment;
         const it = I && eq && eq.tool ? I.get(eq.tool) : null;
         const t = it && it.holder === unit.id ? I.type(it.type) : null;
-        if (!t || !t.tool) return 1;
-        if (typeof t.tool[job.type] === "number" && t.tool[job.type] > 0) return t.tool[job.type];
-        if (job.type === "craft") {
-            // A recipe's "tool" is a tag that helps (never required): a knife for sewing.
-            const r = recipeOf(job.params.recipeId);
-            if (r && r.tool && Array.isArray(t.tags) && t.tags.includes(r.tool)) return 1.5;
+        let mult = 1;
+        if (t && t.tool) {
+            if (typeof t.tool[job.type] === "number" && t.tool[job.type] > 0) {
+                mult = t.tool[job.type];
+            } else if (job.type === "craft") {
+                // A recipe's "tool" is a tag that helps (never required): a knife for sewing.
+                const r = recipeOf(job.params.recipeId);
+                if (r && r.tool && Array.isArray(t.tags) && t.tags.includes(r.tool)) mult = 1.5;
+            }
+            // Quality and material scaling for tool
+            if (it && mult > 1) {
+                const q = it.q || it.quality || 0;
+                if (q > 0) mult *= (1 + q * 0.1);
+                if (it.mat && I && typeof I.materialOf === "function") {
+                    const matDef = I.materialOf(it.mat);
+                    if (matDef && matDef.hardness) {
+                        if (matDef.hardness >= 7.0) mult *= 1.35; // Steel
+                        else if (matDef.hardness >= 4.5) mult *= 1.25; // Iron
+                        else if (matDef.hardness >= 4.0) mult *= 1.15; // Bronze
+                    }
+                }
+            }
         }
-        return 1;
+
+        // Tool penalty for hard stone mining/quarrying:
+        if (job && (job.type === "quarry" || job.type === "mine") && job.target) {
+            const O = Objects();
+            let stoneMat = null;
+            const targetObj = O ? O.atIn(lv(job.target), job.target.x, job.target.y) : null;
+            if (targetObj && O && typeof O.materialOf === "function") {
+                stoneMat = O.materialOf(targetObj.id, job.target.area, job.target.x, job.target.y);
+            }
+            if (!stoneMat && zOf(job.target) < 0) {
+                const W = World(), st = W && W.state;
+                const size = st ? st.size : 256;
+                const gx = job.target.area.x * size + job.target.x, gy = job.target.area.y * size + job.target.y;
+                const G = window.UF && UF.WorldGen;
+                const geo = G && typeof G.geologyAt === "function" ? G.geologyAt(gx, gy, zOf(job.target)) : null;
+                stoneMat = geo ? `stones:${geo.stone}` : "stones:limestone";
+            }
+            const matDef = (stoneMat && I && typeof I.materialOf === "function") ? I.materialOf(stoneMat) : null;
+            if (matDef && ((matDef.tags && matDef.tags.includes("hard_stone")) || (matDef.fractureResistance && matDef.fractureResistance >= 75))) {
+                const hasMetalPick = t && t.tool && (t.tool.quarry || t.tool.mine) &&
+                    (t.id.includes("iron") || t.id.includes("steel") || t.id.includes("bronze") || (it && it.mat && ["iron", "steel", "bronze"].includes(it.mat)));
+                if (!hasMetalPick) {
+                    mult *= 0.5; // Inadequate tool penalty on hard stone
+                }
+            }
+        }
+
+        return mult;
     }
     const skillMultiplier = (unit, job) => {
         if (window.UF && UF.Skills && typeof UF.Skills.rate === "function") {

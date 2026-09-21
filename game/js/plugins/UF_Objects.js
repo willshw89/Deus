@@ -329,6 +329,12 @@
 
         // Stone node / boulder mappings: derive from geological stratum if coordinates provided
         if (id.includes("stone") || id.includes("rock") || id.includes("boulder") || id.includes("quarry")) {
+            if (id.includes("granite")) return "stones:granite";
+            if (id.includes("basalt")) return "stones:basalt";
+            if (id.includes("sandstone")) return "stones:sandstone";
+            if (id.includes("slate")) return "stones:slate";
+            if (id.includes("marble")) return "stones:marble";
+            if (id.includes("limestone")) return "stones:limestone";
             if (area && x !== undefined && y !== undefined) {
                 const W = World(), st = W && W.state;
                 const size = st ? st.size : 256;
@@ -357,14 +363,37 @@
         const items = [];
         if (window.UF && UF.Items && typeof UF.Items.drop === "function") {
             const objMat = materialOfObject(from, area, x, y);
+            const S = window.UF && UF.Skills;
+            const I = window.UF && UF.Items;
+            const W = World();
+            const actorUnit = typeof actor === "object" && actor ? actor : (W && typeof W.unit === "function" ? W.unit(actorId) : null);
+            let q = 0;
+            if (S && typeof S.qualityRoll === "function" && actorUnit) {
+                if (action === "chop") q = S.qualityRoll(actorUnit, "woodcutting");
+                else if (action === "quarry" || action === "mine") q = S.qualityRoll(actorUnit, "mining");
+
+                // Tool check for hard stone: primitive tool or bare hands shatters hard stone (quality clamped to 0)
+                if ((action === "quarry" || action === "mine") && objMat) {
+                    const matDef = I && typeof I.materialOf === "function" ? I.materialOf(objMat) : null;
+                    if (matDef && ((matDef.tags && matDef.tags.includes("hard_stone")) || (matDef.fractureResistance && matDef.fractureResistance >= 75))) {
+                        const eq = actorUnit.data && actorUnit.data.equipment;
+                        const toolItem = (I && eq && eq.tool) ? I.get(eq.tool) : null;
+                        const toolType = toolItem ? I.type(toolItem.type) : null;
+                        const isMetalPick = toolType && (toolType.id.includes("iron") || toolType.id.includes("steel") || toolType.id.includes("bronze") || (toolItem.mat && ["iron", "steel", "bronze"].includes(toolItem.mat)));
+                        if (!isMetalPick) q = 0;
+                    }
+                }
+            }
             for (const itemId of Object.keys(yields)) {
                 let opts = null;
                 if (objMat) {
                     if ((itemId === "log" || itemId === "timber" || itemId === "wood") && objMat.startsWith("woods:")) {
-                        opts = { mat: objMat.replace("woods:", "") };
+                        opts = { mat: objMat.replace("woods:", ""), q: q > 0 ? q : undefined };
                     } else if ((itemId === "stone" || itemId === "rock") && objMat.startsWith("stones:")) {
-                        opts = { mat: objMat.replace("stones:", "") };
+                        opts = { mat: objMat.replace("stones:", ""), q: q > 0 ? q : undefined };
                     }
+                } else if (q > 0) {
+                    opts = { q };
                 }
                 const dropped = UF.Items.drop(levelArea(area), x, y, itemId, yields[itemId], actorId, opts);
                 if (dropped) items.push(dropped);

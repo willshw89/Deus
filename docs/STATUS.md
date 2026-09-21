@@ -6,6 +6,25 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Last updated:** 2026-09-21
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (IN PROGRESS since 2026-09-20)
 
+## Systemic Material Economy: Milestone 1 / Task 5 Extraction Difficulty, Tool Effectiveness & Tiered Yields Delivered — 2026-09-21 (Gemini)
+Delivered per user directives (Material Economy Roadmap approval):
+- **Material Hardness & Workability Scaling (`UF_Jobs.js`)**:
+  - Tree felling work ticks dynamically scale by wood density/workability (`factor = (120 - matDef.workability) / 70`). Softwoods fell twice as fast as dense hardwoods (Pine: 120 ticks vs Oak: 240 ticks).
+  - Stone quarrying and mining work ticks dynamically scale by stone fracture resistance (`factor = fractureResistance / 45`). Soft sedimentary stones quarry swiftly (Sandstone: 140 ticks, Limestone: 180 ticks), while dense igneous and metamorphic stones require substantially more effort (Basalt: 320 ticks, Granite: 378 ticks).
+- **Tool Quality, Material Bonuses & Inadequate Tool Penalties (`UF_Jobs.js`)**:
+  - Tool speed multipliers scale with tool quality (+10% work speed per quality level) and advanced forged metallurgy (+15% bronze, +25% iron, +35% steel).
+  - Enforced inadequate tool penalties: Quarrying hard stone (`tags: hard_stone` or fracture resistance >= 75, e.g. granite, basalt) with primitive stone picks or bare hands incurs an immediate 50% tool speed penalty (2.0x work duration) and shatters the stone, preventing high-quality yields.
+- **Tiered Yields & Skill Quality Stamping (`UF_Objects.js`, `UF_Jobs.js`)**:
+  - Harvesting wood and stone rolls colonist trade skills (`UF.Skills.qualityRoll` for `woodcutting` and `mining`) to stamp dropped items with physical quality tiers (`q: 1..5`).
+  - Primitive extraction of hard stone clamps quality output to 0, rewarding settlement tool progression.
+- **Verification Evidence**:
+  - `node tools/test_extraction_difficulty.js`: **5/5 PASS (exit 0)**.
+  - Rule 4 Mutant Check: `node tools/test_extraction_difficulty.js --mutant` failed with exit 1 on `wood_felling_hardness_scaling`.
+  - `node tools/run_tests.js jobs`: **19/19 PASS (exit 0)**.
+  - `node tools/run_tests.js items`: **19/19 PASS (exit 0)**.
+  - `node tools/run_tests.js colonists`: **24/24 PASS (exit 0)** in 26s (0 regressions).
+  - Inspected screenshot `game/test_output/colonists.colonists_working.png`: active colonist settlement under rain, campfire burning, 8x speed responsive.
+
 ## Systemic Material Economy: Milestone 1 / Task 4 Natural Terrain & Resource Node Material Binding Delivered — 2026-09-21 (Gemini)
 Delivered per user directives (Material Economy Roadmap approval):
 - **Resource Node & Harvest Material Binding (`UF_Objects.js`, `UF_Jobs.js`)**:
