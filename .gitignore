@@ -11,6 +11,7 @@
 !/tools/
 !/art/
 !/archive/
+!/.agents/
 !/launch_demo.bat
 !/open_in_rmmz.bat
 !/run_autotest.bat
