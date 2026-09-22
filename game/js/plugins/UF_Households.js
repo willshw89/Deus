@@ -70,7 +70,14 @@
     function resolve(h) { const s = state(); return h && typeof h === "object" ? h : s && s.byId[h] || null; }
     function structures(refH) {
         const h = resolve(refH);
-        return h && h.home ? [h.home, ...(h.home.annexes || []).filter(a => a && Array.isArray(a.beds))] : [];
+        if (!h) return [];
+        const res = [];
+        if (h.home) res.push(h.home);
+        if (h.privateHomestead && !h.isMovedIn && h.privateHomestead !== h.home) res.push(h.privateHomestead);
+        if (h.home && Array.isArray(h.home.annexes)) {
+            res.push(...h.home.annexes.filter(a => a && Array.isArray(a.beds)));
+        }
+        return res;
     }
     function members(ref) {
         const h = resolve(ref), s = state();
@@ -313,6 +320,15 @@
             const siteUnits = people.filter(u => u.data && (u.data.site === siteId || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
             const founders = siteUnits.filter(u => u.data && (u.data.founder === true || (u.data.founder !== false && !u.data.motherId && !u.data.fatherId && u.data.stage !== "child")));
             if (founders.length < 2) continue;
+
+            const col = C();
+            if (col && typeof col.attemptAdulthoodPairbond === "function") {
+                for (const f of founders) {
+                    if (!f.data.partnerId && !f.data.partner) {
+                        col.attemptAdulthoodPairbond(f);
+                    }
+                }
+            }
             const founderH = [...new Set(founders.map(u => of(u)).filter(Boolean))];
             if (founderH.length === 0) continue;
             const allPrivateMovedIn = founderH.every(h => h.home && !h.home.isShared && h.isMovedIn);
@@ -382,6 +398,10 @@
                 sharedBeds.push({ x: bPos.x, y: bPos.y, unitId });
                 if (member && member.data && (!of(member) || !of(member).isMovedIn)) {
                     member.data.bed = { area: copyArea(area), x: bPos.x, y: bPos.y, z, isShared: true };
+                    const Own = window.UF && UF.Ownership;
+                    if (Own && typeof Own.assignBed === "function") {
+                        Own.assignBed(member, { area: copyArea(area), x: bPos.x, y: bPos.y, z }, { force: true });
+                    }
                 }
             }
 
@@ -419,7 +439,7 @@
 
             for (const h of founderH) {
                 if (!h.home || h.home.isShared || !h.isMovedIn) {
-                    if (h.home && !h.home.isShared) {
+                    if (h.home && !h.home.isShared && !h.privateHomestead) {
                         h.privateHomestead = h.home;
                     }
                     h.home = townHall;
@@ -833,7 +853,7 @@
         }
         const e = home.entrance, eo = object(h, e);
         if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x: e.x, y: e.y, z: zOf(h) })) return false;
-        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true) || occupied.has(key(e.x, e.y)) || reservations.has(key(e.x, e.y))) return false;
+        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true && (!eo.actions || !Object.keys(eo.actions).length)) || occupied.has(key(e.x, e.y)) || reservations.has(key(e.x, e.y))) return false;
         const w = W();
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
     }
@@ -947,6 +967,7 @@
         return null;
     }
     function ensureHome(h, u) {
+        if (h.privateHomestead && !h.isMovedIn) return h.privateHomestead;
         if (h.home && !h.home.isShared) return h.home;
         if (h.home && h.home.isShared) {
             // The original 8 founders share the Town Hall communally.
@@ -954,7 +975,16 @@
             // Non-founders (immigrants, grown children) always seek private homes.
             const mems = members(h);
             const allFounders = mems.every(m => m.data && m.data.founder);
-            const hasPair = mems.length >= 2 && mems.some(m => m.data && (m.data.partner || m.data.partnerId));
+            let hasPair = mems.some(m => m.data && (m.data.partner || m.data.partnerId));
+            if (!hasPair && allFounders) {
+                const col = C();
+                if (col && typeof col.attemptAdulthoodPairbond === "function") {
+                    for (const m of mems) {
+                        const partner = col.attemptAdulthoodPairbond(m);
+                        if (partner) { hasPair = true; break; }
+                    }
+                }
+            }
 
             // Founders without a partner stay in the town hall
             if (allFounders && !hasPair) return h.home;
@@ -966,12 +996,13 @@
             // Once the town hall is sheltered, paired founders and non-founders seek private plots
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
             if (sheltered) {
+                if (h.privateHomestead) return h.privateHomestead;
                 if (h.lastSearchDay === day()) return h.home;
                 h.lastSearchDay = day();
                 const p = findPlot(h, u, designFor(h, Math.max(2, mems.length)));
                 if (p) {
                     h.previousSharedHome = h.home;
-                    h.home = p;
+                    h.privateHomestead = p;
                     h.reason = hasPair ? "Newlywed homestead reserved; construction needed"
                                        : "Private homestead reserved; construction needed";
                     emit("households:homePlanned", h, p);
@@ -1297,7 +1328,7 @@
         const h = resolve(refH), people = h ? members(h) : [], p = h && h.home;
         const buildings = structures(h), beds = buildings.flatMap(b => b.beds);
         const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && (object(h, b).id === "floor_straw" || object(h, b).id === "bed_wood") &&
-            (!Own() || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && Own().ownerOf(ref(h, b)).id === b.unitId)).length : 0;
+            (!Own() || p.isShared || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && (Own().ownerOf(ref(h, b)).id === b.unitId || people.some(u => u.id === Own().ownerOf(ref(h, b)).id)))).length : 0;
         return { members: people.length, bedrooms: people.length ? (p ? (buildings.some(b => !strictEnclosure(h, b)) ? 1 : 0) : 1) : 0,
             beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && (object(h, p.hearth).id === "campfire" || object(h, p.hearth).id === "kitchen_hearth")) ? 1 : 0,
             storage: people.length && !(p && object(h, p.storage) && (object(h, p.storage).id === "stockpile" || object(h, p.storage).id === "chest_wood" || object(h, p.storage).id === "crate_wood")) ? 1 : 0,
@@ -1373,13 +1404,16 @@
     function activeFocalHousehold(c) {
         const s = state();
         if (!s || !c) return null;
-        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && h.home)
+        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && (h.home || h.privateHomestead))
             .sort((a, b) => (a.foundedTick || 0) - (b.foundedTick || 0) || String(a.id).localeCompare(String(b.id)));
         if (!siteH.length) return null;
-        // 1. Primary priority: first household whose home is not yet sheltered
+        // 1. Primary priority: household with an active private homestead under construction
+        const privateUnderCon = siteH.find(h => h.privateHomestead && !h.isMovedIn);
+        if (privateUnderCon) return privateUnderCon;
+        // 2. Secondary priority: first household whose home is not yet sheltered
         const unsheltered = siteH.find(h => !isSheltered(h));
         if (unsheltered) return unsheltered;
-        // 2. Secondary priority: any household whose home is not yet completely built
+        // 3. Tertiary priority: any household whose home is not yet completely built
         const incomplete = siteH.find(h => !describe(h).complete);
         if (incomplete) return incomplete;
         return siteH[0];

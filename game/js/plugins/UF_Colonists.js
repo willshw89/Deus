@@ -481,7 +481,7 @@
         if (H && H.all) {
             const myHId = u && u.data && u.data.householdId;
             // 1. If there is an active focal household and it is not my own, include its active steps
-            if (focal && focal.id !== myHId && focal.home && H.planSteps) {
+            if (focal && focal.id !== myHId && (focal.home || focal.privateHomestead) && H.planSteps) {
                 const focalPeople = H.members ? H.members(focal) : [];
                 const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
                 if (focalRep) {
@@ -492,7 +492,7 @@
                 }
             }
             // 2. Include steps from all other households with a home planned so nothing sits unbuilt
-            for (const h of H.all().filter(h => sameLevel(h, c) && h.home && !h.mergedInto)) {
+            for (const h of H.all().filter(h => sameLevel(h, c) && (h.home || h.privateHomestead) && !h.mergedInto)) {
                 if (h.id === myHId || (focal && h.id === focal.id)) continue;
                 const people = H.members ? H.members(h) : [];
                 const rep = people.find(p => p.data && p.data.age >= 15) || people[0] || u;
@@ -516,9 +516,10 @@
                 exact: true
             });
             for (const h of households) {
-                if (h.home && h.home.entrance) {
-                    const ex = h.home.entrance.x - c.site.x;
-                    const ey = h.home.entrance.y - c.site.y;
+                const targetHome = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : h.home;
+                if (targetHome && targetHome.entrance) {
+                    const ex = targetHome.entrance.x - c.site.x;
+                    const ey = targetHome.entrance.y - c.site.y;
                     const pathCells = [];
                     let px = 0, py = 0;
                     const dx = Math.sign(ex), dy = Math.sign(ey);
@@ -851,6 +852,11 @@
                 const Callings = getCallings();
                 if (Callings && typeof Callings.assignFounderQuotas === "function") {
                     Callings.assignFounderQuotas(founders);
+                }
+                for (const u of founders) {
+                    if (!u.data.partnerId && !u.data.partner) {
+                        attemptAdulthoodPairbond(u);
+                    }
                 }
             }
             // Preserve the legacy primary-site fallback, without increasing a valid two-settlement founder budget.
@@ -2049,7 +2055,7 @@
                 }
                 updateAgeAppearance(u);
                 const isOffspring = !!(u.data.motherId || u.data.fatherId || (u.data.parents && u.data.parents.length));
-                if (isOffspring && !u.data.founder && (u.data.stage === "adult" || u.data.stage === "elder" || u.data.age >= 15) && !u.data.partnerId && !u.data.partner) {
+                if ((isOffspring || u.data.founder) && (u.data.stage === "adult" || u.data.stage === "elder" || u.data.age >= 15) && !u.data.partnerId && !u.data.partner) {
                     attemptAdulthoodPairbond(u);
                 }
                 checkOldAgeMortality(u);
@@ -2474,7 +2480,7 @@
         const age = u.data.age;
         u.data.stage = age >= 55 ? "elder" : (age < 12 ? "child" : (age < 15 ? "teen" : "adult"));
         const isOffspring = !!(u.data.motherId || u.data.fatherId || (u.data.parents && u.data.parents.length));
-        if (isOffspring && !u.data.founder && (u.data.stage === "adult" || u.data.stage === "elder" || age >= 15) && !u.data.partnerId && !u.data.partner) {
+        if ((isOffspring || u.data.founder) && (u.data.stage === "adult" || u.data.stage === "elder" || age >= 15) && !u.data.partnerId && !u.data.partner) {
             attemptAdulthoodPairbond(u);
         }
         const isMale = u.data.gender === "male";
@@ -3225,17 +3231,17 @@
                 limit = 4;
             } else if (step.craft) {
                 group = "bootstrap_craft";
-                limit = 2;
+                limit = 4;
             } else if (step.stock) {
                 group = "bootstrap_stock";
                 limit = 2;
             }
             if (groups[group] >= limit) continue;
-            groups[group]++;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
-            if (spec) spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
-            candidates.push({ step, spec, order: groups[group] - 1 });
             if (!spec) continue;
+            groups[group]++;
+            spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
+            candidates.push({ step, spec, order: groups[group] - 1 });
         }
         let ready = candidates.filter(x => x.spec);
         if (!ready.length) return null;
@@ -3274,6 +3280,12 @@
             }
             if (x.step.build && (x.step.build.startsWith("floor_") || x.step.id.includes("floors") || (x.spec && x.spec.type === "floor"))) {
                 s += 2.0; // Priority boost to complete floors alongside walls
+            }
+            if (x.step.build && (x.step.build === "workbench" || x.step.build === "tanning_rack" || x.step.build === "bowyer_bench" || x.step.build === "fletcher_bench" || x.step.build === "furnace" || x.step.build === "smithy" || x.step.build === "weapon_rack")) {
+                s += 3.8; // Priority boost for community workshops and equipment storage
+            }
+            if (x.step.id === "axe" || x.step.id === "pick" || x.step.id === "cloaks" || x.step.id === "leather" || x.step.id === "bows" || x.step.id === "arrows") {
+                s += 3.5; // Priority boost for productive secondary tools and hunting equipment
             }
             const P = Pillars();
             if (P && P.priorityPillar) {
@@ -3974,7 +3986,7 @@
         const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
         const needsGear = (!holds(u, "stone_knife") && (!u.data || u.data.age === undefined || u.data.age >= 15)) || (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1));
         const gearPlan = needsGear && !lazy ? planJob(u) : null;
-        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || tidyStockpileJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
+        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || tidyStockpileJob(u) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {

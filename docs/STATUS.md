@@ -7,7 +7,49 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- None.
+(None)
+
+## Post-Town Hall Autonomous Progression & Private Homestead Construction Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("The AI arent really doing shit after building the town center"):
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Bed Ownership Mismatch*: `ensureTownHallHomes` ordered beds by partner pairs, but `UF_Ownership.reconcile` assigned them sequentially by ID, causing `Own().ownerOf(ref).id !== b.unitId`. `demands(h)` reported missing beds (`d.beds = 1`), making `isSheltered(h) = false`.
+  2. *Founder Pairbonding Timing*: Adult founders were not paired at founding (`attemptAdulthoodPairbond`), so `hasPair` remained false, permanently blocking founders from branching off from communal living into private family homesteads.
+  3. *Private Homestead Reset*: When a private plot was found, `ensureTownHallHomes` reset `h.home = townHall` on every tick because `!h.isMovedIn`.
+  4. *Planner Starvation & Decision Crash*: `planJob(u)` incremented group limits (`bootstrap_craft: 2`, `bootstrap_build: 4`) before checking if `spec !== null`. Unactionable starter steps (`knives`, `clothes`) permanently choked all subsequent workshops and secondary crafts. Furthermore, an undefined `gearPlan` identifier in `decide(u)` threw a `ReferenceError` during AI job evaluation.
+  5. *Footprint Clearance Rejection*: `footprintOK` rejected candidate plots if the entrance tile had a clearable natural object (e.g. tree/bush).
+  6. *Stockpile Priority Inversion*: `tidyStockpileJob` took precedence over `planJob`, causing colonists to wander tidying loose sticks/berries instead of building.
+- **Engine Implementations (`UF_Households.js`, `UF_Colonists.js`)**:
+  - `UF_Households.js`:
+    - `ensureTownHallHomes`: Unpartnered adult founders at settlement founding are paired up via `col.attemptAdulthoodPairbond(f)`. Shared beds are assigned directly with `UF.Ownership.assignBed(member, ...)`.
+    - `ensureHome(h, u)`: When Town Hall is sheltered, paired founders search and reserve `h.privateHomestead = p`, emitting `households:homePlanned`. Returns `h.privateHomestead` while `!h.isMovedIn`.
+    - `demands(refH)`: Updated `bedCount` check to accept shared communal beds in `p.isShared` allocated to household members.
+    - `footprintOK`: Entrance tile checks allow clearable objects (`eo.actions && Object.keys(eo.actions).length`).
+    - `activeFocalHousehold(c)`: Primary priority given to households with an active unbuilt `h.privateHomestead`.
+    - `structures(refH)`: Includes `h.privateHomestead` when unbuilt to maintain spatial reservation buffers.
+  - `UF_Colonists.js`:
+    - `setupColony`: Automatically pairbonds unpartnered adult founders at settlement founding.
+    - `progressAging` & `ensureColonistsGeneticsAndAging`: Allows adult founders to pairbond when checking genetics and aging.
+    - `effectivePlan(ref)`: `neighborSteps` and `civicSteps` check `(h.privateHomestead || h.home)` so neighbor assistance and road paths target the private homestead entrance.
+    - `planJob(u)`: Group limit counters (`groups[group]++`) increment ONLY when `spec !== null`. Expanded `bootstrap_craft` limit to 4. Added scoring bonuses for workshops (`+3.8`) and secondary tools/gear (`+3.5`).
+    - `decide(u)`: Defined `gearPlan` cleanly to prevent ReferenceError. Moved `tidyStockpileJob(u)` after `planJob(u)` so building and farming take precedence.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_post_town_hall_progression.js`: 22/22 PASS (exit 0):
+    - `smoke.founder_count`: 8/8 colonists
+    - `smoke.town_hall_households`: 4 founder households
+    - `smoke.town_hall_enclosed`: true
+    - `smoke.town_hall_sheltered`: true (demands: 0 bedrooms, 0 beds, 0 cooking, 0 storage, 0 capacity overflow)
+    - `smoke.private_homestead_planned`: 4/4 private family homesteads planned and reserved around settlement
+    - `smoke.active_focal_household`: household:1 has private homestead under construction
+    - `smoke.colonists_active_jobs`: 8/8 colonists actively working productive jobs (`build`, `pick`, `move`, `gather`)
+    - `smoke.workshop_steps_in_queue`: 7 workshop construction steps active in plan queue
+    - `smoke.homestead_steps_in_queue`: 72 private homestead construction steps active in plan queue
+  - Rule 4 Mutant Check: `node tools/test_post_town_hall_progression.js --mutant=block_private_homesteads` exited with code 1 (`FAIL smoke.private_homestead_planned - MUTANT INJECTED: private homestead blocked`, 20 passed, 1 failed).
+  - Functional regression suites:
+    - `tools/run_tests.js smoke`: 13/13 PASS (exit 0)
+    - `tools/run_tests.js colonists`: 24/24 PASS (exit 0)
+  - Rule 5 Screenshots Inspected:
+    - `live_post_town_hall_initial.png`: Enclosed 7x7 communal Town Hall with wood perimeter walls, south door, lit campfire, 8 straw bed mats in alcoves, all 8 colonists safely housed.
+    - `live_post_town_hall_active_work.png`: All 8 colonists actively departed through the south door and distributed across the settlement building private homesteads and gathering timber, stone, and berries.
 
 ## d20 14 Equipment Slots Across All Creatures Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Give creatures the equipment slots from d20"):
