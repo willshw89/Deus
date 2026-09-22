@@ -11,8 +11,8 @@ const isMutant = process.argv.includes("--mutant");
 const catalogPath = path.resolve(__dirname, "..", "game", "data", "UF_WorldCatalog.json");
 const catalogData = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 
-const worldGenSrc = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_WorldGen.js"), "utf8");
-const levelsSrc = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Levels.js"), "utf8");
+const worldGenSrc = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins", "DEUS_WorldGen.js"), "utf8");
+const levelsSrc = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins", "DEUS_Levels.js"), "utf8");
 
 let passed = 0, failed = 0;
 function check(name, condition, detail = "") {
@@ -48,6 +48,7 @@ const sandbox = {
     performance: { now: () => Date.now() },
     window: {},
     $ufWorldCatalog: catalogData,
+    $deusWorldCatalog: catalogData, // DEUS_WorldGen.js sets window.$ufWorldCatalog = window.$deusWorldCatalog at load, so both names must hold the catalog
     DataManager: {
         isBattleTest: () => false,
         isEventTest: () => false,
@@ -90,10 +91,11 @@ sandbox.Spriteset_Map.prototype.createCharacters = () => {};
 sandbox.Game_Player.prototype.performTransfer = () => {};
 sandbox.Game_Map.prototype.setup = () => {};
 sandbox.window = sandbox;
+sandbox.DEUS = sandbox.UF; // every DEUS_*.js runs `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;` at load: alias first so the mock namespace survives
 
 vm.createContext(sandbox);
 
-// Execute UF_WorldGen and UF_Levels in sandbox
+// Execute DEUS_WorldGen and DEUS_Levels in sandbox (the UF_*.js files are RMMZ-only forwarders since 2026-09-22)
 vm.runInContext(worldGenSrc, sandbox);
 vm.runInContext(levelsSrc, sandbox);
 

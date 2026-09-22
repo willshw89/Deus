@@ -2,7 +2,7 @@
 // test_round_world.js - Automated verification of round / toroidal world wrapping
 const fs = require("fs"), path = require("path"), vm = require("vm");
 
-let passed = 0, failed = 0;
+let passed = 0, failed = 0, skipped = 0;
 function check(name, cond, info) {
     if (cond) {
         passed++;
@@ -106,6 +106,9 @@ const sandbox = {
     performance: { now: () => Date.now() },
     window: {},
     $ufWorldCatalog: catalog,
+    // DEUS_WorldGen.js runs `window.$ufWorldCatalog = window.$deusWorldCatalog;` at load and its catalog()
+    // reads $deusWorldCatalog first, so both names must point at the parsed catalog.
+    $deusWorldCatalog: catalog,
     $dataMap: mockDataMap,
     $gameMap: mockGameMap,
     $gamePlayer: mockPlayer,
@@ -142,6 +145,10 @@ const sandbox = {
     Spriteset_Map: function() {},
     Game_Map: function() {},
     Game_Player: function() {},
+    // DEUS_World.js aliases Game_Event.prototype.isCollidedWithEvents / isCollidedWithPlayerCharacters and reads
+    // Game_CharacterBase.prototype.isCollidedWithEvents at load; the classes only need to exist.
+    Game_Event: function() {},
+    Game_CharacterBase: function() {},
     Scene_Boot: function() {},
     DataManager: {
         isBattleTest: () => false,
@@ -150,26 +157,30 @@ const sandbox = {
     }
 };
 sandbox.window = sandbox;
+// DEUS_*.js plugins run `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;` at load.
+// Pre-create the namespace so every plugin attaches to the same object the harness reads.
+sandbox.UF = sandbox.UF || {};
+sandbox.DEUS = sandbox.UF;
 sandbox.Spriteset_Map.prototype = { createCharacters: () => {} };
 sandbox.Game_Map.prototype = mockGameMap;
 sandbox.Game_Player.prototype = mockPlayer;
 sandbox.Scene_Boot.prototype = { start: () => {} };
 
-// Run UF_World, UF_Objects, UF_Roads, UF_WorldGen
-const worldSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_World.js"), "utf8");
-const objSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_Objects.js"), "utf8");
-const roadSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_Roads.js"), "utf8");
-const genSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_WorldGen.js"), "utf8");
+// Run DEUS_World, DEUS_Objects, DEUS_WorldGen.
+// Since the 2026-09-22 rename (commit 0544ef0) the UF_*.js files are forwarders that only call
+// PluginManager.loadScript inside RMMZ, so the real sources are the DEUS_*.js files.
+// Roads was archived to archive/plugins and no check here used it, so it is no longer loaded.
+const worldSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_World.js"), "utf8");
+const objSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_Objects.js"), "utf8");
+const genSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_WorldGen.js"), "utf8");
 
 vm.createContext(sandbox);
-vm.runInContext(worldSrc, sandbox);
-vm.runInContext(objSrc, sandbox);
-vm.runInContext(roadSrc, sandbox);
-vm.runInContext(genSrc, sandbox);
+vm.runInContext(worldSrc, sandbox, { filename: "DEUS_World.js" });
+vm.runInContext(objSrc, sandbox, { filename: "DEUS_Objects.js" });
+vm.runInContext(genSrc, sandbox, { filename: "DEUS_WorldGen.js" });
 
 const W = sandbox.UF.World;
 const O = sandbox.UF.Objects;
-const R = sandbox.UF.Roads;
 const WG = sandbox.UF.WorldGen;
 
 // Initialize world state
@@ -234,18 +245,29 @@ if (path1 && path1.length === 2) {
 }
 
 // Test 7: Unit movement goalDelta wrapping
+// goalDelta() is a closure-local function inside DEUS_World.js (lines ~1280-1300); it is not exported on World or
+// window, and never was (checked at 4430f7e too). The earlier fallback literal { dx: 1, dist: 4 } was a hardcoded
+// pass (Rule 4), so the check now runs only when the plugin actually exposes the function and is SKIPped otherwise.
 const u = {
     id: 1,
     area: { x: 0, y: 0 },
     x: 254, y: 50,
     goal: { area: { x: 0, y: 0 }, x: 2, y: 50 }
 };
-const delta = sandbox.goalDelta ? sandbox.goalDelta(u) : { dx: 1, dist: 4 };
-if (mutateDelta) {
-    delta.dx = -1;
+const goalDeltaFn = typeof W.goalDelta === "function" ? W.goalDelta
+    : typeof sandbox.goalDelta === "function" ? sandbox.goalDelta : null;
+if (goalDeltaFn) {
+    const delta = goalDeltaFn(u);
+    if (mutateDelta) {
+        delta.dx = -1;
+    }
+    check("unit_goal_delta_toroidal", delta.dx === 1 && delta.dist === 4,
+        `Toroidal delta from 254 to 2: dx=${delta.dx}, dist=${delta.dist}`);
+} else {
+    skipped++;
+    console.log("SKIP: round_world.unit_goal_delta_toroidal - DEUS_World.js does not export goalDelta (closure-local); "
+        + "nothing to call, so --mutate-delta has nothing to mutate");
 }
-check("unit_goal_delta_toroidal", delta.dx === 1 && delta.dist === 4,
-    `Toroidal delta from 254 to 2: dx=${delta.dx}, dist=${delta.dist}`);
 
 
 // Test 9: Object passability wrapping
@@ -255,5 +277,5 @@ const blocks256 = O.blocks(256, 100);
 check("object_blocks_at_wrapped_coord", blocks0 === blocks256,
     `blocks(0, 100) === blocks(256, 100) (${blocks0} === ${blocks256})`);
 
-console.log(`\nRESULT: ${passed} passed, ${failed} failed`);
+console.log(`\nRESULT: ${passed} passed, ${failed} failed, ${skipped} skipped`);
 if (failed > 0) process.exit(1);

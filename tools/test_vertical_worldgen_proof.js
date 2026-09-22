@@ -25,6 +25,9 @@ const isMutant = process.argv.includes("--mutant");
 global.window = global;
 const catalogData = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "game", "data", "UF_WorldCatalog.json"), "utf8"));
 global.$ufWorldCatalog = catalogData;
+// DEUS_WorldGen.js runs `window.$ufWorldCatalog = window.$deusWorldCatalog;` at load; without this alias catalog()
+// returns null in every plugin and the generators silently no-op.
+global.$deusWorldCatalog = catalogData;
 global.$dataWorldCatalog = catalogData;
 global.ImageManager = { loadCharacter: () => ({ isReady: () => true }), loadTileset: () => ({ isReady: () => true }) };
 global.Sprite = function() {
@@ -83,11 +86,16 @@ global.$gameMap = {
 };
 
 const size = 96;
-const seed = 54321;
+// Seed 54321 (used until 2026-09-22) yields an all-S=0 flat 96x96 world since commit 0256e10 (toroidal world
+// alignment, 2026-09-21), so Test 3 could never find a cliff cave and Test 1 passed vacuously. Seed 1234 gives all
+// three elevation bands inside the 10-cell inset (S0=2010, S1=3626, S2=140) and 8 cliff cave mouths.
+const seed = 1234;
 let nextUnitId = 300;
 const unitsById = {};
 const objectsByCell = {};
 
+// gen: 4 exercises the generator-4 volumetric path (column landforms, ramps, cliff caves); the runtime default in
+// DEUS_Levels.js is GEN = 3, so a pass here does not mean a New Game has hills, ramps or cliff caves.
 const levelsState = {
     "0": { z: 0, gen: 4, checksum: null, cells: {} },
     "1": { z: 1, gen: 4, checksum: null, cells: {} },
@@ -200,22 +208,44 @@ const UF = global.UF = {
 
 UF.Objects.at = UF.Objects.atIn;
 UF.Objects.set = UF.Objects.setIn;
+// Every DEUS_*.js plugin runs `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;` at load. Aliasing DEUS to
+// the mock before any require keeps the plugins attaching to this object instead of replacing it with an empty one.
+global.DEUS = global.UF;
 
-// Load plugins
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_WorldGen.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Items.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Levels.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Jobs.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_NaturalConnections.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Households.js"));
+// Households subsystem gate. DEUS_Households.js was archived to archive/plugins on 2026-09-22 and is no longer
+// registered in game/js/plugins.js; the leftover UF_Households.js is dead code. Test 4 (rock enclosure, hybrid
+// rooms, breach) only runs when the real plugin is back on disk AND active in plugins.js. Otherwise it is SKIPped.
+const PLUGINS_DIR = path.resolve(__dirname, "..", "game", "js", "plugins");
+function householdsSubsystemActive() {
+    if (!fs.existsSync(path.join(PLUGINS_DIR, "DEUS_Households.js"))) return false;
+    try {
+        const src = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins.js"), "utf8");
+        const list = JSON.parse(src.slice(src.indexOf("["), src.lastIndexOf("]") + 1));
+        return list.some(p => p.name === "DEUS_Households" && p.status === true);
+    } catch (e) {
+        return false;
+    }
+}
+const HOUSEHOLDS_ACTIVE = householdsSubsystemActive();
+const HOUSEHOLDS_SKIP_REASON = "Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)";
+
+// Load plugins. The UF_*.js files are 16-line forwarders that only work inside RMMZ (PluginManager.loadScript);
+// in Node the DEUS_*.js sources must be loaded directly.
+require(path.join(PLUGINS_DIR, "DEUS_WorldGen.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Items.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Levels.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Jobs.js"));
+require(path.join(PLUGINS_DIR, "DEUS_NaturalConnections.js"));
+if (HOUSEHOLDS_ACTIVE) require(path.join(PLUGINS_DIR, "DEUS_Households.js"));
 
 const Levels = global.UF.Levels;
 const Jobs = global.UF.Jobs;
 const NaturalConnections = global.UF.NaturalConnections;
-const Households = global.UF.Households;
+const Households = HOUSEHOLDS_ACTIVE ? global.UF.Households : null;
 
 let passed = 0;
 let failed = 0;
+let skipped = 0;
 
 function assert(condition, message) {
     if (condition) {
@@ -225,6 +255,11 @@ function assert(condition, message) {
         console.error(`  FAIL: ${message}`);
         failed++;
     }
+}
+
+function skip(message, reason) {
+    console.log(`  SKIP: ${message} - ${reason}`);
+    skipped++;
 }
 
 async function runSuite() {
@@ -243,16 +278,19 @@ async function runSuite() {
 
         assert(b0 && b1 && b2 && b_neg1 && b_neg2, "Baselines generated for all 5 vertical levels (-2..+2)");
 
-        // Check volumetric physical laws across surface levels
+        // Check volumetric physical laws across surface levels: every cell of the 10-cell inset, so the S=2 branch is
+        // exercised even when ridges are rare.
         let correctColumns = 0;
         let checked = 0;
-        for (let y = 10; y < size - 10; y += 4) {
-            for (let x = 10; x < size - 10; x += 4) {
+        const bands = { 0: 0, 1: 0, 2: 0 };
+        for (let y = 10; y < size - 10; y++) {
+            for (let x = 10; x < size - 10; x++) {
                 const S = Levels.surfaceElevationAt(x, y, seed);
                 const s0 = Levels.shapeAt({ area: { x: 0, y: 0 }, x, y, z: 0 });
                 const s1 = Levels.shapeAt({ area: { x: 0, y: 0 }, x, y, z: 1 });
                 const s2 = Levels.shapeAt({ area: { x: 0, y: 0 }, x, y, z: 2 });
                 checked++;
+                bands[S] = (bands[S] || 0) + 1;
 
                 let ok = true;
                 if (S === 0) {
@@ -271,6 +309,8 @@ async function runSuite() {
                 if (ok) correctColumns++;
             }
         }
+        // A flat world would satisfy the column laws trivially; require elevated terrain in the sample.
+        assert(bands[1] > 0 && bands[2] > 0, `Sampled columns include plateau (S=1: ${bands[1]}) and ridge (S=2: ${bands[2]}) terrain, not only datum (S=0: ${bands[0]})`);
         assert(correctColumns === checked, `All ${checked} sampled vertical columns obey volumetric physical laws (${correctColumns}/${checked})`);
     }
 
@@ -306,31 +346,52 @@ async function runSuite() {
         const cliffMouths = Levels.cliffCaveMouths(area);
         assert(Array.isArray(cliffMouths) && cliffMouths.length > 0, `Generated ${cliffMouths.length} natural horizontal cliff cave mouths breaching cliffs`);
 
-        const cm = cliffMouths[0];
+        const cm = cliffMouths[0] || null;
         assert(cm && cm.tunnel && cm.terminus, "Cliff cave mouth record contains entrance tunnel and inner terminus");
 
-        // Surface checks at z = 0
-        const mouthShape = Levels.shapeAt({ area, x: cm.x, y: cm.y, z: 0 });
-        const mouthCell = Levels.cellAt({ area, x: cm.x, y: cm.y, z: 0 });
-        assert(mouthShape === "floor", `Cave mouth at (${cm.x}, ${cm.y}, z=0) breaches cliff face as traversable FLOOR (got ${mouthShape})`);
-        assert(mouthCell && mouthCell.material === "stone", "Cave mouth floor material is natural STONE");
+        if (!cm || !cm.terminus) {
+            // No mouth to inspect: record the dependent checks as failures instead of throwing out of the suite.
+            assert(false, "Cave mouth, terminus, stair and vestibule checks could not be evaluated (no cliff cave mouth generated)");
+        } else {
+            // Surface checks at z = 0
+            const mouthShape = Levels.shapeAt({ area, x: cm.x, y: cm.y, z: 0 });
+            const mouthCell = Levels.cellAt({ area, x: cm.x, y: cm.y, z: 0 });
+            assert(mouthShape === "floor", `Cave mouth at (${cm.x}, ${cm.y}, z=0) breaches cliff face as traversable FLOOR (got ${mouthShape})`);
+            assert(mouthCell && mouthCell.material === "stone", "Cave mouth floor material is natural STONE");
 
-        const termShape0 = Levels.shapeAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: 0 });
-        assert(termShape0 === "stairDown", `Inner terminus at (${cm.terminus.x}, ${cm.terminus.y}, z=0) has STAIR_DOWN descent (got ${termShape0})`);
+            const termShape0 = Levels.shapeAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: 0 });
+            assert(termShape0 === "stairDown", `Inner terminus at (${cm.terminus.x}, ${cm.terminus.y}, z=0) has STAIR_DOWN descent (got ${termShape0})`);
 
-        // Subterranean checks at z = -1
-        const termShapeNeg1 = Levels.shapeAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: -1 });
-        const termCellNeg1 = Levels.cellAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: -1 });
-        assert(termShapeNeg1 === "stairUp", `Subterranean terminus at (${cm.terminus.x}, ${cm.terminus.y}, z=-1) has matching STAIR_UP (got ${termShapeNeg1})`);
-        assert(!termCellNeg1.water, "Subterranean stair landing is dry (water cleared)");
+            // Subterranean checks at z = -1
+            const termShapeNeg1 = Levels.shapeAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: -1 });
+            const termCellNeg1 = Levels.cellAt({ area, x: cm.terminus.x, y: cm.terminus.y, z: -1 });
+            assert(termShapeNeg1 === "stairUp", `Subterranean terminus at (${cm.terminus.x}, ${cm.terminus.y}, z=-1) has matching STAIR_UP (got ${termShapeNeg1})`);
 
-        // Vestibule checks at z = -1
-        let floorNeighbors = 0;
-        for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-            const ns = Levels.shapeAt({ area, x: cm.terminus.x + dx, y: cm.terminus.y + dy, z: -1 });
-            if (ns === "floor" || ns === "ramp") floorNeighbors++;
+            // Task 11 promise: the carve clears natural water on the terminus and its 3x3 vestibule (baseline water = 0).
+            const bNeg1 = Levels.baseline(-1, area.x, area.y);
+            let wetBaseline = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const vx = cm.terminus.x + dx, vy = cm.terminus.y + dy;
+                    if (bNeg1 && bNeg1.water && bNeg1.water[vy * size + vx]) wetBaseline++;
+                }
+            }
+            assert(!!bNeg1 && !!bNeg1.water && wetBaseline === 0, `Subterranean stair landing has natural water cleared in the z=-1 baseline (wet vestibule cells: ${wetBaseline})`);
+            // The landing must also be dry once the fluid simulation has run (cellAt reports flood water). Since commit
+            // 4eebef2 (2026-09-21) the DEUS_Levels flood BFS spreads natural z=-1 pools over the connected cavern floor,
+            // which reaches this landing, so this check FAILS on the current plugins. That is a real plugin finding
+            // (Task 11 dry-landing promise vs. the fluid simulation); it is asserted, never skipped or faked.
+            console.log(`  Info: landing cell at z=-1 after fluid simulation: water=${termCellNeg1 && termCellNeg1.water}, flooded=${termCellNeg1 && termCellNeg1.flooded}, floodType=${termCellNeg1 && termCellNeg1.floodType}`);
+            assert(!!termCellNeg1 && !termCellNeg1.water, `Subterranean stair landing is dry after the fluid simulation (cellAt.water=${termCellNeg1 && termCellNeg1.water}, flooded=${termCellNeg1 && termCellNeg1.flooded}, floodType=${termCellNeg1 && termCellNeg1.floodType})`);
+
+            // Vestibule checks at z = -1
+            let floorNeighbors = 0;
+            for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                const ns = Levels.shapeAt({ area, x: cm.terminus.x + dx, y: cm.terminus.y + dy, z: -1 });
+                if (ns === "floor" || ns === "ramp") floorNeighbors++;
+            }
+            assert(floorNeighbors >= 1, `Subterranean stair landing has walkable vestibule (found ${floorNeighbors} walkable neighbors)`);
         }
-        assert(floorNeighbors >= 1, `Subterranean stair landing has walkable vestibule (found ${floorNeighbors} walkable neighbors)`);
 
         // NaturalConnections registration
         const savedConnections = NaturalConnections.generate();
@@ -344,7 +405,25 @@ async function runSuite() {
     // Test 4: Structural Natural Rock Enclosure & Hybrid Rooms (Task 12)
     // =========================================================================
     console.log("\nTest 4: Structural Natural Rock Enclosure & Hybrid Rooms (Task 12)");
-    {
+    if (!HOUSEHOLDS_ACTIVE) {
+        for (const name of [
+            "Created household for colonist",
+            "All natural rock perimeter cells count as structural enclosure",
+            "homeSteps requires 0 wall construction steps for rock boundary",
+            "Cave room strictly enclosed with 100% natural rock boundary + door",
+            "Cave room automatically roofed upon enclosure",
+            "Cave dwelling satisfies bedroom demands",
+            "Bed demands satisfied",
+            "Hearth demand satisfied",
+            "Hybrid room requires building only 10 wooden walls, omitting 5 natural cliff tiles",
+            "Hybrid room enclosed successfully with combination of natural cliff and wooden walls",
+            "Hybrid room roofed upon enclosure",
+            "households:enclosureBreached event emitted when rock wall mined away",
+            "strictEnclosure returns FALSE after rock wall breached",
+            "isRoofed reset to FALSE after enclosure breached",
+            "Household demands reflect missing bedroom after breach"
+        ]) skip(name, HOUSEHOLDS_SKIP_REASON);
+    } else {
         // Colonist unit
         const colonist = {
             id: ++nextUnitId,
@@ -533,10 +612,8 @@ async function runSuite() {
         assert(breachedDemands.bedrooms === 1, `Household demands reflect missing bedroom after breach (missing: ${breachedDemands.bedrooms})`);
     }
 
-    console.log(`\nTest Suite Summary: ${passed} passed, ${failed} failed.`);
-    if (failed > 0) {
-        process.exit(1);
-    }
+    console.log(`\nTest Suite Summary: ${passed} passed, ${failed} failed, ${skipped} skipped.`);
+    process.exit(failed > 0 ? 1 : 0);
 }
 
 runSuite().catch(err => {

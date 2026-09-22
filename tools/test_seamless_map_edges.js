@@ -62,6 +62,9 @@ const sandbox = {
     performance: { now: () => Date.now() },
     window: {},
     $ufWorldCatalog: catalog,
+    // DEUS_WorldGen.js runs `window.$ufWorldCatalog = window.$deusWorldCatalog;` at load and its catalog()
+    // reads $deusWorldCatalog first, so both names must point at the parsed catalog.
+    $deusWorldCatalog: catalog,
     $dataMap: mockDataMap,
     $gameMap: mockGameMap,
     $gamePlayer: { x: 32, y: 32, z: 0 },
@@ -100,6 +103,10 @@ const sandbox = {
     Spriteset_Map: function() { this._tilemap = new sandbox.Sprite(); },
     Game_Map: function() {},
     Game_Player: function() {},
+    // DEUS_World.js aliases Game_Event.prototype.isCollidedWithEvents / isCollidedWithPlayerCharacters and reads
+    // Game_CharacterBase.prototype.isCollidedWithEvents at load; the classes only need to exist.
+    Game_Event: function() {},
+    Game_CharacterBase: function() {},
     Scene_Boot: function() {},
     ImageManager: {
         loadTileset: () => ({ isReady: () => true, width: 768, height: 768 })
@@ -117,6 +124,9 @@ sandbox.UF = {
         zoom: () => currentZoom
     }
 };
+// DEUS_*.js plugins run `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;` at load.
+// Alias DEUS to the mock namespace so the Camera mock survives and every plugin attaches to it.
+sandbox.DEUS = sandbox.UF;
 sandbox.Sprite.prototype.update = function() {};
 sandbox.Spriteset_Map.prototype = { createCharacters: () => {} };
 sandbox.Game_Map.prototype = mockGameMap;
@@ -126,19 +136,21 @@ sandbox.Game_Player.prototype = {
     locate: () => {}
 };
 
-// Load core plugins
-const worldSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_World.js"), "utf8");
-const objSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_Objects.js"), "utf8");
-const genSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_WorldGen.js"), "utf8");
-const tileSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_Tiles.js"), "utf8");
-const fogSrc = fs.readFileSync(path.join(gameDir, "js/plugins/UF_Fog.js"), "utf8");
+// Load core plugins.
+// Since the 2026-09-22 rename (commit 0544ef0) the UF_*.js files are forwarders that only call
+// PluginManager.loadScript inside RMMZ, so the real sources are the DEUS_*.js files.
+const worldSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_World.js"), "utf8");
+const objSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_Objects.js"), "utf8");
+const genSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_WorldGen.js"), "utf8");
+const tileSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_Tiles.js"), "utf8");
+const fogSrc = fs.readFileSync(path.join(gameDir, "js/plugins/DEUS_Fog.js"), "utf8");
 
 vm.createContext(sandbox);
-vm.runInContext(worldSrc, sandbox);
-vm.runInContext(objSrc, sandbox);
-vm.runInContext(genSrc, sandbox);
-vm.runInContext(tileSrc, sandbox);
-vm.runInContext(fogSrc, sandbox);
+vm.runInContext(worldSrc, sandbox, { filename: "DEUS_World.js" });
+vm.runInContext(objSrc, sandbox, { filename: "DEUS_Objects.js" });
+vm.runInContext(genSrc, sandbox, { filename: "DEUS_WorldGen.js" });
+vm.runInContext(tileSrc, sandbox, { filename: "DEUS_Tiles.js" });
+vm.runInContext(fogSrc, sandbox, { filename: "DEUS_Fog.js" });
 
 const WG = sandbox.UF.WorldGen;
 const W = sandbox.UF.World;
@@ -255,18 +267,22 @@ console.log("\n--- Section 4: Autotiling and Shading Continuity ---");
 {
     const sz = 64;
     W.newWorld(77777, sz);
+    // Since 28c911e (2026-09-22) World.newWorld ignores its size argument and always builds a 256-cell world, so the
+    // seam row must come from the state the plugin actually built, not from the size this harness asked for.
+    const worldSize = W.state.size;
     const area = W.buildArea(0, 0);
-    check("area_built", !!area && area.data.length > 0, `area width: ${area.width}, height: ${area.height}`);
+    check("area_built", !!area && area.data.length > 0 && area.width === worldSize && area.height === worldSize,
+        `area width: ${area.width}, height: ${area.height}, state size: ${worldSize}`);
 
-    // Verify wrapped autotiles: compare bottom row (y = sz - 1) autotile connectivity to top row (y = 0)
+    // Verify wrapped autotiles: the row just past the bottom edge (y = worldSize) must wrap to the top row (y = 0)
     // Water autotile test: find where water touches seam
     let seamChecked = 0;
     const wm = WG.waterModel(W.state);
-    for (let x = 0; x < sz; x++) {
+    for (let x = 0; x < worldSize; x++) {
         const isW0 = wm.isWater(x, 0);
-        const isWH = wm.isWater(x, sz);
+        const isWH = wm.isWater(x, worldSize);
         if (isW0) seamChecked++;
-        check(`water_model_seam_x_${x}`, isW0 === isWH, `x=${x}: isWater(0)=${isW0}, isWater(H)=${isWH}`);
+        check(`water_model_seam_x_${x}`, isW0 === isWH, `x=${x}: isWater(0)=${isW0}, isWater(H=${worldSize})=${isWH}`);
         if (x > 10) break; // sample first 10
     }
 }

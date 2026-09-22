@@ -19,6 +19,9 @@ const isMutant = process.argv.includes("--mutant");
 global.window = global;
 const catalogData = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "game", "data", "UF_WorldCatalog.json"), "utf8"));
 global.$ufWorldCatalog = catalogData;
+// DEUS_WorldGen.js runs `window.$ufWorldCatalog = window.$deusWorldCatalog;` at load; without this alias catalog()
+// returns null in every plugin and the generators silently no-op.
+global.$deusWorldCatalog = catalogData;
 global.$dataWorldCatalog = catalogData;
 global.ImageManager = { loadCharacter: () => ({ isReady: () => true }), loadTileset: () => ({ isReady: () => true }) };
 global.Sprite = function() {
@@ -82,6 +85,8 @@ const seed = 98765;
 let nextUnitId = 200;
 const unitsById = {};
 
+// gen: 4 exercises the generator-4 volumetric path (column landforms, ramps, cliff caves); the runtime default in
+// DEUS_Levels.js is GEN = 3, so a pass here does not mean a New Game has hills, ramps or cliff caves.
 const levelsState = {
     "0": { z: 0, gen: 4, checksum: null, cells: {} },
     "1": { z: 1, gen: 4, checksum: null, cells: {} },
@@ -146,19 +151,46 @@ global.UF = {
     Ownership: {
         ownerOf: () => null,
         claim: () => {}
-    },
-    Households: {
-        invalidateRoomEnclosure: (area, x, y, z) => {
-            invalidatedRooms.push({ area, x, y, z });
-        }
     }
 };
+// Every DEUS_*.js plugin runs `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;` at load. Aliasing DEUS to
+// the mock before any require keeps the plugins attaching to this object instead of replacing it with an empty one.
+global.DEUS = global.UF;
 
-// Load plugins
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_WorldGen.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Items.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Levels.js"));
-require(path.resolve(__dirname, "..", "game", "js", "plugins", "UF_Jobs.js"));
+// Households subsystem gate. DEUS_Households.js was archived to archive/plugins on 2026-09-22 and is no longer
+// registered in game/js/plugins.js; the leftover UF_Households.js is dead code. The room-invalidation checks in
+// Test 6 only run when the real plugin is back on disk AND active in plugins.js. Otherwise they are SKIPped.
+const PLUGINS_DIR = path.resolve(__dirname, "..", "game", "js", "plugins");
+function householdsSubsystemActive() {
+    if (!fs.existsSync(path.join(PLUGINS_DIR, "DEUS_Households.js"))) return false;
+    try {
+        const src = fs.readFileSync(path.resolve(__dirname, "..", "game", "js", "plugins.js"), "utf8");
+        const list = JSON.parse(src.slice(src.indexOf("["), src.lastIndexOf("]") + 1));
+        return list.some(p => p.name === "DEUS_Households" && p.status === true);
+    } catch (e) {
+        return false;
+    }
+}
+const HOUSEHOLDS_ACTIVE = householdsSubsystemActive();
+const HOUSEHOLDS_SKIP_REASON = "Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)";
+
+// Load plugins. The UF_*.js files are 16-line forwarders that only work inside RMMZ (PluginManager.loadScript);
+// in Node the DEUS_*.js sources must be loaded directly.
+require(path.join(PLUGINS_DIR, "DEUS_WorldGen.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Items.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Levels.js"));
+require(path.join(PLUGINS_DIR, "DEUS_Jobs.js"));
+if (HOUSEHOLDS_ACTIVE) {
+    require(path.join(PLUGINS_DIR, "DEUS_Households.js"));
+    // Spy on the real invalidation hook so Test 6 records DEUS_Levels -> Households calls without faking them.
+    const realInvalidate = UF.Households && UF.Households.invalidateRoomEnclosure;
+    if (typeof realInvalidate === "function") {
+        UF.Households.invalidateRoomEnclosure = (area, x, y, z) => {
+            invalidatedRooms.push({ area, x, y, z });
+            return realInvalidate.call(UF.Households, area, x, y, z);
+        };
+    }
+}
 
 const W = UF.World;
 const L = UF.Levels;
@@ -168,6 +200,7 @@ const WG = UF.WorldGen;
 
 let testsPassed = 0;
 let testsFailed = 0;
+let testsSkipped = 0;
 
 function assert(condition, message) {
     if (condition) {
@@ -177,6 +210,11 @@ function assert(condition, message) {
         console.error(`  FAIL: ${message}`);
         testsFailed++;
     }
+}
+
+function skip(message, reason) {
+    console.log(`  SKIP: ${message} - ${reason}`);
+    testsSkipped++;
 }
 
 console.log(`\n--- Running Volumetric Column Landforms & Universal Mining Suite ${isMutant ? "(MUTANT MODE)" : ""} ---`);
@@ -242,12 +280,15 @@ console.log("\nTest 2: Guaranteed Flat Camp Clearing (r <= 12 at Datum S=0)");
 // =========================================================================
 console.log("\nTest 3: Volumetric Topography Across Z-Levels");
 {
-    // Find sample coordinates with S = 0, S = 1, and S = 2 outside the camp
+    // Find sample coordinates with S = 0, S = 1, and S = 2 outside the camp.
+    // The S = 0 sample must be an interior plain cell (all 4 neighbours also S = 0): DEUS_Levels places natural
+    // ramps on the LOWER floor cell of a single-step transition, so an S = 0 cell beside S = 1 is legitimately a ramp.
     let pt0 = null, pt1 = null, pt2 = null;
+    const interiorDatum = (x, y) => [[0, -1], [0, 1], [-1, 0], [1, 0]].every(([dx, dy]) => L.surfaceElevationAt(x + dx, y + dy, seed) === 0);
     for (let y = 10; y < size - 10; y++) {
         for (let x = 10; x < size - 10; x++) {
             const s = L.surfaceElevationAt(x, y, seed);
-            if (s === 0 && !pt0) pt0 = { x, y };
+            if (s === 0 && !pt0 && interiorDatum(x, y)) pt0 = { x, y };
             if (s === 1 && !pt1) pt1 = { x, y };
             if (s === 2 && !pt2) pt2 = { x, y };
             if (pt0 && pt1 && pt2) break;
@@ -357,7 +398,7 @@ console.log("\nTest 5: Universal Mining on Surface Rock (z = 0)");
     };
 
     const handler = J.handler("mine");
-    assert(handler !== undefined, "Mine job handler registered");
+    assert(!!handler && typeof handler.plan === "function", "Mine job handler registered");
 
     const planRes = handler.plan(mineJob, miner);
     assert(planRes.ok === true, `Surface cliff mining planned successfully: stand=(${planRes.stand.x}, ${planRes.stand.y})`);
@@ -381,7 +422,47 @@ console.log("\nTest 5: Universal Mining on Surface Rock (z = 0)");
     const droppedItem = groundItems[0].item;
     assert(droppedItem.type === "stone", `Dropped item is stone (got ${droppedItem.type})`);
     assert(droppedItem.mat !== undefined && droppedItem.mat !== null, `Dropped stone has typed geological material: ${droppedItem.mat}`);
-    assert(droppedItem.q === 4, `Dropped stone stamped with miner quality (got ${droppedItem.q})`);
+
+    // Quality stamping rule (DEUS_Jobs mine.apply, commit 404a818 2026-09-21): hard stone (tag "hard_stone" or
+    // fractureResistance >= 75) is only stamped with the miner's quality when the equipped tool is a metal pick;
+    // otherwise q stays unset. The expectation is derived from the catalog entry of the stone actually dropped.
+    const stoneDef = typeof I.materialOf === "function" ? I.materialOf(`stones:${droppedItem.mat}`) : null;
+    const hardStone = !!(stoneDef && ((stoneDef.tags && stoneDef.tags.includes("hard_stone")) || (stoneDef.fractureResistance || 0) >= 75));
+    if (!hardStone) {
+        assert(droppedItem.q === 4, `Dropped ${droppedItem.mat} (soft stone) stamped with miner quality (got ${droppedItem.q})`);
+    } else {
+        assert(droppedItem.q === undefined, `Hard stone ${droppedItem.mat} mined bare-handed leaves quality unstamped (got ${droppedItem.q})`);
+
+        // Equip a metal pick and mine a second solid cell: the quality stamp must now apply.
+        // The catalog has no iron/steel/bronze pick type; the plugin's metal-pick rule also accepts item.mat, so a
+        // stone_pick record with mat "iron" is the only data-driven way to satisfy it.
+        const pick = (I.give("stone_pick", 1, miner.id, { mat: "iron", bypassLimits: true }) || [])[0] || null;
+        assert(!!pick && pick.holder === miner.id, `Miner given a metal pick via Items.give (item ${pick && pick.id}, mat ${pick && pick.mat})`);
+        if (pick) miner.data.equipment.tool = pick.id;
+
+        let cliffPt2 = null;
+        for (let y = 10; y < size - 10 && !cliffPt2; y++) {
+            for (let x = 10; x < size - 10; x++) {
+                if ((x !== cliffPt.x || y !== cliffPt.y) && L.shapeAt({ area: { x: 0, y: 0 }, x, y, z: 0 }) === "solid") {
+                    cliffPt2 = { x, y };
+                    break;
+                }
+            }
+        }
+        assert(cliffPt2 !== null, `Found second surface cliff cell at (${cliffPt2 && cliffPt2.x}, ${cliffPt2 && cliffPt2.y}, z=0)`);
+        if (cliffPt2) {
+            miner.x = cliffPt2.x - 1;
+            miner.y = cliffPt2.y;
+            const job2 = { id: 992, type: "mine", target: { area: { x: 0, y: 0, z: 0 }, x: cliffPt2.x, y: cliffPt2.y }, params: {} };
+            const plan2 = handler.plan(job2, miner);
+            assert(plan2.ok === true, `Second mining job planned with metal pick: stand=(${plan2.stand && plan2.stand.x}, ${plan2.stand && plan2.stand.y})`);
+            handler.apply(job2, miner);
+            const drops2 = I.find({ area: { x: 0, y: 0 }, near: { x: cliffPt2.x, y: cliffPt2.y }, radius: 0.5 });
+            const item2 = drops2.length ? drops2[0].item : null;
+            assert(!!item2 && item2.type === "stone", `Second mining dropped stone (count: ${drops2.length})`);
+            assert(!!item2 && item2.q === 4, `Stone mined with a metal pick is stamped with miner quality 4 (got ${item2 && item2.q}, mat ${item2 && item2.mat})`);
+        }
+    }
 }
 
 // =========================================================================
@@ -412,14 +493,19 @@ console.log("\nTest 6: World-Mutation Invalidation & Exposed Faces");
 
     assert(faceExposedEvents.length === 6, `levels:faceExposed emitted for all 6 orthogonal neighbors (count: ${faceExposedEvents.length})`);
 
-    assert(invalidatedRooms.length >= 1, "Room enclosure invalidation triggered upon world cell mutation");
-    assert(invalidatedRooms[0].x === 50 && invalidatedRooms[0].y === 50, "Invalidated room at correct mutation coordinate");
+    if (HOUSEHOLDS_ACTIVE) {
+        assert(invalidatedRooms.length >= 1, "Room enclosure invalidation triggered upon world cell mutation");
+        assert(invalidatedRooms.length >= 1 && invalidatedRooms[0].x === 50 && invalidatedRooms[0].y === 50, "Invalidated room at correct mutation coordinate");
+    } else {
+        skip("Room enclosure invalidation triggered upon world cell mutation", HOUSEHOLDS_SKIP_REASON);
+        skip("Invalidated room at correct mutation coordinate", HOUSEHOLDS_SKIP_REASON);
+    }
 }
 
 // =========================================================================
 // Test Suite Summary
 // =========================================================================
-console.log(`\nTest Suite Summary: ${testsPassed} passed, ${testsFailed} failed.`);
+console.log(`\nTest Suite Summary: ${testsPassed} passed, ${testsFailed} failed, ${testsSkipped} skipped.`);
 if (testsFailed > 0) {
     process.exit(1);
 } else {
