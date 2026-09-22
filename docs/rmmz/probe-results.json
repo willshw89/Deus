@@ -1,0 +1,143 @@
+{
+  "audit": "DEUS RMMZ Capability Audit",
+  "engineVersion": "RPG Maker MZ 1.10.00 (Core Scripts v1.10.0, NW.js 0.48.4)",
+  "timestamp": "2026-09-22T15:21:36.014Z",
+  "environment": {
+    "nodeVersion": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "memoryUsageBase": {
+      "rssBytes": 36167680,
+      "heapTotalBytes": 7856128,
+      "heapUsedBytes": 4423408,
+      "externalBytes": 1623293,
+      "arrayBuffersBytes": 137759
+    }
+  },
+  "probes": {
+    "entity_update_cost": {
+      "description": "Simulation update cost per entity across tick cycles",
+      "measurements": {
+        "entities_100": {
+          "totalMs": 1.3713,
+          "usPerEntityTick": 0.1371,
+          "ticksPerSecAtBudget16ms": 1166
+        },
+        "entities_500": {
+          "totalMs": 0.7563,
+          "usPerEntityTick": 0.0151,
+          "ticksPerSecAtBudget16ms": 2115
+        },
+        "entities_1000": {
+          "totalMs": 1.8088,
+          "usPerEntityTick": 0.0181,
+          "ticksPerSecAtBudget16ms": 884
+        },
+        "entities_5000": {
+          "totalMs": 8.9973,
+          "usPerEntityTick": 0.018,
+          "ticksPerSecAtBudget16ms": 177
+        }
+      },
+      "implication": "Linear entity ticking scales to ~1,000 entities within a 1.8 ms budget (< 11% of a 16.6ms frame). Above 1,000 entities, spatial bucketing or interleaved tick cadences are mandatory."
+    },
+    "rendering_cost": {
+      "description": "Depth-sorting overhead (_compareChildOrder) and screen transform cost per visible sprite",
+      "measurements": {
+        "sprites_100": {
+          "sortUsPerFrame": 4.24,
+          "sortMsPerFrame": 0.0042,
+          "within16msBudget": true
+        },
+        "sprites_500": {
+          "sortUsPerFrame": 8.29,
+          "sortMsPerFrame": 0.0083,
+          "within16msBudget": true
+        },
+        "sprites_2000": {
+          "sortUsPerFrame": 25.32,
+          "sortMsPerFrame": 0.0253,
+          "within16msBudget": true
+        },
+        "sprites_5000": {
+          "sortUsPerFrame": 76.56,
+          "sortMsPerFrame": 0.0766,
+          "within16msBudget": true
+        }
+      },
+      "implication": "Tilemap depth sorting for up to 5,000 sprites takes < 0.08 ms CPU time. Pixi draw call batching and WebGL fill rate, rather than CPU sorting, constitute the primary rendering bottleneck."
+    },
+    "chunk_streaming": {
+      "description": "Cache acquisition, dynamic generation, and eviction behavior across traversal",
+      "measurements": {
+        "totalSteps": 50,
+        "chunksLoaded": 114,
+        "chunksEvicted": 89,
+        "finalCacheSize": 25,
+        "totalTimeMs": 0.547,
+        "avgTimePerStepMs": 0.0109
+      },
+      "implication": "Windowed 3x3 active streaming with 5x5 retention buffer incurs ~0.011 ms per step, confirming that memory remains strictly bounded during continuous traversal."
+    },
+    "save_load_performance": {
+      "description": "State serialization and compression benchmarking via JsonEx and pako deflate/inflate",
+      "measurements": {
+        "uncompressedJsonBytes": 97438,
+        "compressedSaveBytes": 8628,
+        "compressionRatio": 0.089,
+        "exceeds50kWarning": false,
+        "saveTimeMs": 10.611,
+        "loadTimeMs": 6.999,
+        "roundTripSuccess": true
+      },
+      "implication": "Pako deflate achieves a 91.1% size reduction (97.4 KB down to 8.6 KB), staying well under RMMZ's 50 KB warning limit. Serialization latency is ~10.6 ms for save and ~7.0 ms for load."
+    },
+    "circular_serialization": {
+      "description": "Verification of JsonEx recursion limits and cycle detection absence",
+      "measurements": {
+        "circularGraphThrew": true,
+        "expectedError": "Object too deep",
+        "actualError": "Object too deep",
+        "provesCycleDetectionMissing": true
+      },
+      "implication": "RMMZ JsonEx does not handle circular references; cycles throw an unhandled exception at recursion depth 100. PIXI objects, sprites, functions, and cross-referencing entities must never be passed to save state."
+    },
+    "spatial_query_scaling": {
+      "description": "Query latency comparison between global O(N) scan and spatial hash map across increasing object counts",
+      "measurements": {
+        "objects_1000": {
+          "scanUsPerQuery": 7.36,
+          "spatialUsPerQuery": 6.85,
+          "speedupFactor": 1.1
+        },
+        "objects_10000": {
+          "scanUsPerQuery": 94.24,
+          "spatialUsPerQuery": 6.16,
+          "speedupFactor": 15.3
+        },
+        "objects_50000": {
+          "scanUsPerQuery": 181.25,
+          "spatialUsPerQuery": 74.34,
+          "speedupFactor": 2.4
+        }
+      },
+      "implication": "At 10,000 objects, spatial querying is 15.3x faster than full-world scanning (6.16 us vs 94.24 us). Enforcing spatial indexing is mandatory to maintain 60 FPS under colony workloads."
+    },
+    "failure_and_stale_handling": {
+      "description": "Defensive handling of missing chunks and asynchronous request races",
+      "measurements": {
+        "missingChunkQuery": {
+          "status": "MISSING_CHUNK",
+          "fallback": "VOID_CHUNK",
+          "autoRecovered": true
+        },
+        "staleAsyncRequest": {
+          "action": "DISCARD_STALE_REQUEST",
+          "accepted": false
+        }
+      },
+      "implication": "Boundary clipping and generation tokens safely prevent null dereferences and stale chunk overrides when player transfers rapidly."
+    }
+  }
+}
+

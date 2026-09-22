@@ -3,13 +3,121 @@
 Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-21
+**Last updated:** 2026-09-22
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-(None)
+- (None)
 
-## Full-Engine Frame Pacing, O(1) Object Claim Map & Ticker Smoothness Delivered — 2026-09-22 (Gemini)
+## Owner Terminal, Control Tower & Idea Arsenal Established — 2026-09-22 (Gemini)
+Initialized the unified DEUS Owner Terminal, Control Tower, Work Queue Manager, and Release Gate framework per owner directive:
+1. **Discovered and Confirmed Baseline:**
+   - Repository Root: `C:\Users\snewt\OneDrive\Desktop\UF`
+   - RPG Maker MZ Version: v1.10.00 (Core Scripts v1.10.0, NW.js v0.48.4)
+   - Active Plugin Architecture: 39 active registered `DEUS_*.js` plugins in `game/js/plugins.js`.
+   - Test Health: 53/53 tests PASS (smoke 13/13, sheet 16/16, colonists 5/5, jobs 19/19).
+   - In-Engine Proof: Live screenshot `game/test_output/smoke.map.png` inspected; 8 founders around lit campfire verified.
+2. **Established Control Tower Registers:**
+   - `docs/IDEA_ARSENAL.md`: Structured intake, categorization, and evaluation of raw game ideas and mechanics.
+   - `docs/WORK_QUEUE.md`: Bounded work blocks, standard routing loop, whitelist/blacklist path enforcement.
+   - `docs/RISK_REGISTER.md`: Tracked persistence, frame-budget, provenance, and multi-agent concurrency risks.
+   - `docs/MODEL_AVAILABILITY.md`: Explicit state tracking for Astra, Fable, and Gemini with credit handling.
+   - `docs/RELEASE_CHECKLIST.md`: Formal verification gates G1–G8 required for release approval.
+
+
+## MechanicsLab Decommissioning & Game Startup Resolution — 2026-09-22 (Gemini)
+Delivered per user directives ("Go ahead and scrap mechanicslab and everything related to it that we are not using", "Also the game isnt loading"):
+1. **Decommissioned MechanicsLab (`C:\Users\snewt\Documents\WAYFARER`)**:
+   - Archived `games/MechanicsLab` to `archive/MechanicsLab_backup.zip` (96.3 MB) and deleted `games/MechanicsLab`.
+   - Archived `packages/mz-dev` to `archive/mz-dev_backup.zip` (60.6 KB) and deleted `packages/mz-dev`.
+   - Archived and removed obsolete MechanicsLab proof scripts (`tools/build-camera-proof.mjs`, `tools/build-stream-proof.mjs`, `tools/build-u8-proof.mjs`, etc.) and `config/u8-proof-dev.json` to `archive/proof-tools_backup.zip`.
+   - Updated `config/projects.json` to retain only `OriginalGame`.
+2. **Resolved Game Startup & Loading Spinner Issue**:
+   - Fixed unhandled `ReferenceError: camps is not defined` in `DEUS_Wildlife.js:361` (changed to `groundCamps.forEach(...)`), which previously halted `World.newWorld()` in `DataManager.setupNewGame()` and left `Scene_Map` stuck on an infinite loading spinner.
+   - Enhanced `tools/run_tests.js` process pipe handling to prevent NW.js Chromium throttling on Windows.
+   - Verified clean boot directly to `Scene_Title` and `Scene_Map` with zero errors.
+   - Instructed user on RPG Maker MZ editor safety: close and reopen `RPGMZ.exe` so the editor reloads the modified `MapInfos.json`, `System.json` (`startMapId: 1`), and `plugins.js` into memory.
+3. **Verification**:
+   - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+   - `tools/run_tests.js sheet`: 16/16 PASS (exit 0).
+   - `tools/run_tests.js colonists`: 5/5 PASS (exit 0).
+   - `tools/run_tests.js jobs`: 19/19 PASS (exit 0).
+   - Total automated tests: 53/53 PASS (100%).
+   - Live visual proof: Title screen (`boot_screenshot.png`) and in-game map (`smoke.map.png`) confirmed fully rendered.
+
+
+## Startup Spinner Fix, Map Pruning & Plugin Descriptions Delivered — 2026-09-22 (Gemini)
+Delivered per user directives ("When I start the game I just get this now", "Also, lets delete any RMMZ maps we dont need", "Also please update plugin descriptions"):
+1. **Startup Loading Spinner Root Cause Diagnosed & Fixed**:
+   - Diagnosed startup hang showing the center loading spinner on a black screen: `DEUS_Wildlife.js:361` called `camps.forEach(...)` instead of `groundCamps.forEach(...)` in `planKit()`.
+   - This threw an unhandled `ReferenceError: camps is not defined` during `World.newWorld()` in `DataManager.setupNewGame()` inside `Scene_Boot.prototype.startNormalGame()`.
+   - Because the error threw before scene initialization finished, `Graphics._loadingCount` never reached 0 and the spinner hung forever.
+   - Fixed `camps.forEach` to `groundCamps.forEach` in `game/js/plugins/DEUS_Wildlife.js:361`. Game now boots directly to `Scene_Title` in 2 seconds with 0 console errors.
+2. **Deleted Unneeded RMMZ Maps**:
+   - Archived `game/data/Map002.json` (1.23 MB legacy baked 256x256 map superseded by the seeded procedural world) to `archive/maps/Map002.json` and deleted from `game/data/`.
+   - Updated `game/data/MapInfos.json` to only contain `Map001` ("The Bastion of Kraghold", the single required editor template map).
+   - Updated `game/data/System.json`: changed `startMapId: 1`, `editMapId: 1`, `startX: 25`, `startY: 20`.
+   - Reduced RMMZ editor data U7 stand-ins from 9 down to 5 in `tools/generate_asset_inventory.js`.
+3. **Updated Plugin Descriptions**:
+   - Updated `@plugindesc` tags in the headers of all 39 active `DEUS_*.js` plugins and their 39 `UF_*.js` forwarders.
+   - Updated all 39 `description` properties in `game/js/plugins.js` to clear, standardized, professional `[DEUS <System>]` summaries, eliminating all legacy `[UF ...]` and working title tags.
+4. **Verification**:
+   - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+   - `tools/run_tests.js sheet`: 16/16 PASS (exit 0).
+   - `tools/run_tests.js colonists`: 5/5 PASS (exit 0).
+   - `tools/run_tests.js jobs`: 19/19 PASS (exit 0).
+   - Syntax verification: 78/78 files syntax OK (0 errors).
+   - Live boot verified: title scene loads cleanly (`live_inspect_boot.png`), embark transition to procedural world map verified (`smoke.map.png`).
+
+## Dead & Dormant Plugin Cleanup Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("Clean it up nice and tidy"):
+1. **Deregistered & Archived 6 Dead Registered Plugins**:
+   - `DEUS_BootstrapData.js` & `UF_BootstrapData.js`: Retired (only seeded container mocks for legacy `UF_Gumps`).
+   - `DEUS_Gumps.js` & `UF_Gumps.js`: Retired (early container/paperdoll window prototype, 100% superseded by `DEUS_Sheet.js`).
+   - `DEUS_DFCombat.js` & `UF_DFCombat.js`: Retired (turn-based wound announcements hooking `Window_BattleLog`, uncalled by live on-map combat engine `DEUS_Combat.js`).
+   - `DEUS_Crafting.js` & `UF_Crafting.js`: Retired (legacy `Window_UFCrafting` looking for non-existent `data/df_reactions.json`; modern crafting runs in `DEUS_Jobs.js`).
+   - `DEUS_Construction.js` & `UF_Construction.js`: Retired (prototype 4-stage blueprint pipeline with 0 callers; building runs in `DEUS_Interact.js` and `DEUS_Jobs.js`).
+   - `DEUS_FireSafety.js` & `UF_FireSafety.js`: Retired (uncalled firefighting preemption dependent on retired households and survival needs).
+   - Removed all 6 from `game/js/plugins.js`. Active registered plugins count streamlined to exactly 39.
+2. **Archived 22 Dormant Unregistered Plugins from `game/js/plugins/` to `archive/plugins/`**:
+   - 10 retired creature-menu/AI subsystem plugins (`ProfileTabs`, `Goals`, `CultureGrowth`, `Skills`, `Households`, `DFWorld`, `Dialogue`, `NPCSchedules`, `Outposts`, `SettlementPillars`).
+   - 12 unregistered prototype plugins (`Agriculture`, `FarmView`, `Callings`, `Conditions`, `Containers`, `Proficiency`, `Resources`, `Roads`, `Rules`, `Sanitation`, `Select`, `Time`).
+   - `game/js/plugins/` now contains strictly the 39 active `DEUS_*.js` plugins and their 39 backwards-compatible `UF_*.js` forwarders.
+3. **Core Loader Decoupling (`DEUS_Core.js`)**:
+   - Removed unauthorized dynamic `PluginManager.loadScript` injections for unlisted plugins.
+   - Replaced legacy `--autotest` calls to obsolete plugins (`UF_Gumps`, `UF_Dialogue`, `UF_DFWorld`, `UF_DFCombat`, `UF_Crafting`) with clean completion logs.
+4. **Verification**:
+   - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+   - `tools/run_tests.js sheet`: 16/16 PASS (exit 0).
+   - `tools/run_tests.js colonists`: 5/5 PASS (exit 0).
+   - `tools/run_tests.js jobs`: 19/19 PASS (exit 0).
+
+## Architecture Cleanup & Destructive Subsystem Pruning Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("This is a destructive architecture-cleanup task. Perform it carefully, preserve recoverability, and do not begin unrelated development"):
+1. **Objective 1 — Removed Creature-Menu Subsystems**:
+   - Completely retired and removed from runtime: Needs, Skills, Personality, Goals, Family, Culture.
+   - Archived 10 obsolete plugins to `archive/plugins/` and removed from `game/js/plugins.js`: `UF_ProfileTabs.js`, `UF_Goals.js`, `UF_CultureGrowth.js`, `UF_Skills.js`, `UF_Households.js`, `UF_DFWorld.js`, `UF_Dialogue.js`, `UF_NPCSchedules.js`, `UF_Outposts.js`, `UF_SettlementPillars.js`.
+   - Pruned inspection UI (`DEUS_Sheet.js`): Removed need gauges (`hunger`, `thirst`, `sleep`), thoughts, personality facets, family references, and skill levels. Preserved unit identity, profession, equipment/paperdoll, physical health, and inventory.
+   - Pruned context menus (`DEUS_Interact.js`): Removed personal `eat` and `drink` job triggers.
+   - Pruned colony overseer card (`DEUS_ColonyOverseer.js`): Stripped need meters and thought logs.
+2. **Objective 2 — Wiped Autonomous AI Subsystems**:
+   - `DEUS_Colonists.js`: Wiped autonomous decision routines (`decide()`, `scan()`, `autonomousFrontierProgression`), survival loops (`findFood`, `findDrink`, `findSleep`), and reproduction/immigration events. Set `ai: null`.
+   - `DEUS_Wildlife.js`: Disabled autonomous wander/flee/predator update loops (`tick()`). Preserved spawning, sprite animation, and physical existence.
+   - Preserved neutral simulation engines: Octile A* pathfinding, 8-directional movement, collision/passability, camera tracking, manual job execution (`DEUS_Jobs.js`), manual player orders (`order(move)`), and inventory management.
+3. **Objective 3 — Renamed Project-Owned References to DEUS**:
+   - Renamed active plugin files from `UF_*.js` to `DEUS_*.js` (all 67 plugins converted with backward compatibility shims in `UF_*.js`).
+   - Registered `DEUS_*` plugins in `game/js/plugins.js`.
+   - Created `DEUS_WorldCatalog.json`, `DEUS_AssetIndex.json`, `DEUS_GeneratorPool.json` in `game/data/`.
+   - Established dual namespace: `window.DEUS = window.DEUS || {}; window.UF = window.DEUS;`.
+   - Global variables: canonical `$deusWorldCatalog` (with `$ufWorldCatalog` alias) and `$deusTime` (with `$ufTime` alias).
+   - Test harness: `DEUS_Test.js` and `tools/run_tests.js` updated to accept `--deus-test` and `--uf-test`.
+4. **Verification & Test Results**:
+   - Syntax integrity: 67/67 DEUS plugin files passed (`node -c`, 0 errors).
+   - `node tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+   - `node tools/run_tests.js sheet`: 16/16 PASS (exit 0).
+   - `node tools/run_tests.js colonists`: 5/5 PASS (exit 0).
+   - `node tools/run_tests.js jobs`: 19/19 PASS (exit 0).
+   - `node tools/generate_asset_inventory.js`: 19/21 PASS (matches known baseline).
 Delivered per user directives ("nope, im still getting choppy frames", "Make any optomizations we can and try to improve framerate") auditing and eliminating all remaining engine-wide sources of frame drops, micro-stutter, and garbage collection pressure:
 1. **Ticker Refresh Lock Elimination (`UF_TimeSpeed.js`)**:
    - Diagnosed that setting `Graphics._app.ticker.maxFPS = 60` caused PIXI v5's internal ticker to drop frames whenever Chromium's `requestAnimationFrame` timing had minor sub-millisecond jitter (<16.66ms), dropping 60Hz displays to ~30-40 FPS and causing severe 3:2 pull-down judder on 144Hz displays.
