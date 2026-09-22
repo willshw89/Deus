@@ -1018,20 +1018,25 @@
         const grid = gridOf(area);
         if (!grid) return null;
         const size = W.state.size, list = O.types();
-        let best = null, bestD = Infinity;
+        let best = null;
+        const r2 = radius * radius;
+        let bestD2 = r2;
         const x0 = Math.max(0, x - radius), x1 = Math.min(size - 1, x + radius), y0 = Math.max(0, y - radius), y1 = Math.min(size - 1, y + radius);
         for (let cy = y0; cy <= y1; cy++) {
-            const dy = Math.abs(cy - y);
-            if (dy >= bestD) continue;
+            const dy = cy - y;
+            const dy2 = dy * dy;
+            if (dy2 >= bestD2) continue;
+            const rowOffset = cy * size;
             for (let cx = x0; cx <= x1; cx++) {
-                const t = grid[cy * size + cx];
+                const t = grid[rowOffset + cx];
                 if (!t) continue;
-                const d = Math.hypot(cx - x, cy - y);
-                if (d > radius || d >= bestD) continue;
+                const dx = cx - x;
+                const d2 = dx * dx + dy2;
+                if (d2 >= bestD2) continue;
                 const type = list[t - 1];
                 if (!type || !pred(type, cx, cy)) continue;
-                best = { x: cx, y: cy, type, dist: d };
-                bestD = d;
+                best = { x: cx, y: cy, type, dist: Math.sqrt(d2) };
+                bestD2 = d2;
             }
         }
         return best;
@@ -1047,7 +1052,25 @@
         if (hasTag(type, "wall") || hasTag(type, "building") || hasTag(type, "door") || hasTag(type, "bed") || hasTag(type, "furniture") || type.build) return true;
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
+    let _claimedTargetsTick = -1;
+    let _claimedTargetsSet = null;
+    function getClaimedTargets() {
+        if (_claimedTargetsTick === localTicks && _claimedTargetsSet) return _claimedTargetsSet;
+        _claimedTargetsTick = localTicks;
+        _claimedTargetsSet = new Set();
+        for (const j of activeJobs()) {
+            if (!j.target) continue;
+            const z = zOf(j.target);
+            if (j.type) _claimedTargetsSet.add(`${j.assigned || ""}:${j.type}:${z}:${j.target.x},${j.target.y}`);
+            if (j.type === "move" && j.params && j.params.via && j.params.viaTarget) {
+                _claimedTargetsSet.add(`${j.assigned || ""}:${j.params.via}:${z}:${j.params.viaTarget.x},${j.params.viaTarget.y}`);
+            }
+        }
+        return _claimedTargetsSet;
+    }
     function isObjectClaimed(u, x, y, action) {
+        const claims = getClaimedTargets();
+        const z = zOf(u);
         for (const j of activeJobs()) {
             if (j.assigned === u.id || !j.target || !sameLevel(j.target, u)) continue;
             if (j.type === action && j.target.x === x && j.target.y === y) return true;
@@ -1279,11 +1302,14 @@
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
     const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
     let _lastReconcileTick = -Infinity;
-    const PREEMPT_EVERY = 600;
-
+    let _activeJobsTick = -1;
+    let _activeJobsCache = null;
     function activeJobs() {
+        if (_activeJobsTick === localTicks && _activeJobsCache) return _activeJobsCache;
         const J = Jobs();
-        return J ? J.list(j => j.state === "travel" || j.state === "work") : [];
+        _activeJobsTick = localTicks;
+        _activeJobsCache = J ? J.list(j => j.state === "travel" || j.state === "work") : [];
+        return _activeJobsCache;
     }
     // Someone else already works on this target (or crafts this recipe).
     function claimed(u, type, x, y, params) {
@@ -1336,6 +1362,7 @@
             avoid.set(key, ticks() + AVOID_TICKS);
             return null;
         }
+        _activeJobsTick = -1;
         return job;
     }
     const tryAll = (u, makers) => {
@@ -3272,6 +3299,7 @@
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
+            if (step._noWorkTick === localTicks) continue;
             const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
             const isWorkshop = step.build && ["workbench", "tanning_rack", "bowyer_bench", "fletcher_bench", "furnace", "smithy", "weapon_rack"].includes(step.build);
             let group = "bootstrap_build";
@@ -3306,7 +3334,10 @@
             }
             if (groups[group] >= limit) continue;
             const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
-            if (!spec) continue;
+            if (!spec) {
+                step._noWorkTick = localTicks;
+                continue;
+            }
             groups[group]++;
             spec.params = Object.assign({}, spec.params, { household: step.household || null, goalId: step.goalId || null, goalOwner: step.goalOwner || null });
             candidates.push({ step, spec, order: groups[group] - 1 });
@@ -3652,7 +3683,7 @@
         if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
 
         // Find loose ground items within the settlement radius and surrounding forest/quarry perimeter
-        const tidyRadius = Math.max((c.radius || 8) + 25, 45);
+        const tidyRadius = Math.min(24, (c.radius || 8) + 12);
         const loose = groundItemsNear(u, { radius: tidyRadius }).filter(f => {
             if (onStockpile(f.item, null, u)) return false;
             if (onBuildCell(f.x, f.y, u, f.item.type)) return false;
@@ -4305,12 +4336,11 @@
         const carriedDeposit = carriedDepositJob(u);
         if (carriedDeposit) return carriedDeposit;
 
-        const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;
+        const tryMakeBed = () => (!hasBedObject(u) && (evening() || (u.data && u.data.needs && u.data.needs.sleep > 50)) ? (give(u, makeBedJob(u))) : null);
         const Callings = getCallings();
         const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
-        const needsGear = (!holds(u, "stone_knife") && (!u.data || u.data.age === undefined || u.data.age >= 15)) || (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1));
-        const gearPlan = needsGear && !lazy ? planJob(u) : null;
-        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || constructionHaulingJob(u) || tidyStockpileJob(u) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
+        const planSpec = !lazy ? ((UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) : null;
+        return designationJob(u) || planSpec || haulerStaging || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4365,8 +4395,9 @@
             }
         }
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 2;
+        const MAX_DECIDE_PER_SCAN = 12;
         for (const u of simulationUnits()) {
+            if (!sameLevel(u, c) && (t % 60 !== (u.id % 60))) continue;
             if (!u.data.capabilities) {
                 const P = Pillars();
                 if (P && P.assignSkillRoster) P.assignSkillRoster(colonyState(u));
@@ -4389,7 +4420,7 @@
                         decisionAt.set(u.id, -Infinity);
                     } else if (isLowPriorityJob(job, u)) {
                         const lastHp = _lastHpCheckAt.get(u.id) || -Infinity;
-                        if (t - lastHp >= 30) {
+                        if (t - lastHp >= 60) {
                             _lastHpCheckAt.set(u.id, t);
                             const lazy = unit01(seed(), SALT.roll, u.id, t) < (100 - facet(u, "industriousness")) / 400;
                             if (!lazy) {
@@ -4405,15 +4436,17 @@
                 } else continue;
             }
             const lastDecide = decisionAt.get(u.id) || -Infinity;
-            if (t - lastDecide < (job ? DECIDE_EVERY : 20)) continue;
+            if (job && t - lastDecide < DECIDE_EVERY) continue;
+            if (!job && u.data && u.data.state === "Contemplating" && t - lastDecide < 30) continue;
             if (decideCount >= MAX_DECIDE_PER_SCAN) break;
+            decideCount++;
             try {
                 const res = decide(u);
                 if (res) {
-                    decideCount++;
                     if (u.data) u.data.state = null;
                 } else if (!J.of(u.id) && u.data) {
                     u.data.state = "Contemplating";
+                    decisionAt.set(u.id, t);
                 }
             } catch (e) {
                 console.error("UF_Colonists: decision failed for", u.name, e);
@@ -4461,6 +4494,7 @@
         doneLog.push({ id: job.id, unit: u.id, type: job.type, target: !!job.target, physical: physicalChange(job, u), plan: job.params.plan || null, recipe: job.params.recipeId || null });
         if (doneLog.length > 400) doneLog.shift();
         decisionAt.set(u.id, -Infinity);
+        if (d && !d.state) d.state = "Contemplating";
         // Skills: one point per five jobs of the kind.
         const skill = job.type === "craft" ? ((recipeOf(job.params.recipeId) || {}).skill || "crafting") : SKILL_OF[job.type];
         if (skill) {

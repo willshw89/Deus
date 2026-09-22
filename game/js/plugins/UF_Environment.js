@@ -160,8 +160,13 @@
         }
     }
 
+    const _tempCache = new Map();
+    let _tempCacheFrame = -60;
+
     /**
      * Calculates the true local ambient temperature for cell (x, y, z) in an area.
+     * Takes into account: biome climate, diurnal cycle (day/night), elevation, weather,
+     * shelter/enclosure, and radiant heat sources.
      * Returns temperature in Celsius (°C).
      */
     function ambientTemperature(area, x, y, z = 0) {
@@ -172,6 +177,15 @@
         const ay = area && Number.isInteger(area.y) ? area.y : (cur ? cur.y : (lvl ? lvl.y : 0));
         const a = { x: ax | 0, y: ay | 0 };
         const zLevel = Number.isInteger(z) ? z : (area && area.z !== undefined ? area.z : (lvl ? lvl.z : 0));
+
+        const cacheKey = ((zLevel + 2) << 20) | ((x & 0x3ff) << 10) | (y & 0x3ff);
+        if (frameCount - _tempCacheFrame < 60 && _tempCache.has(cacheKey)) {
+            return _tempCache.get(cacheKey);
+        }
+        if (frameCount - _tempCacheFrame >= 60) {
+            _tempCacheFrame = frameCount;
+            _tempCache.clear();
+        }
 
         // Subterranean levels have stable insulation
         if (zLevel === -1) {
@@ -240,7 +254,9 @@
         const heatRadiance = heatSourceRadiance(a, x, y, zLevel);
         cellTemp += heatRadiance;
 
-        return Math.round(cellTemp * 10) / 10;
+        const finalTemp = Math.round(cellTemp * 10) / 10;
+        _tempCache.set(cacheKey, finalTemp);
+        return finalTemp;
     }
 
     /**

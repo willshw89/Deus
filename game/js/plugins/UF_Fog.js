@@ -47,10 +47,10 @@
     "use strict";
 
     const P = PluginManager.parameters("UF_Fog");
-    const ENABLED = P.Enabled !== undefined && P.Enabled !== "" ? P.Enabled === "true" : true;
+    const ENABLED = P.Enabled !== undefined && P.Enabled !== "" ? P.Enabled === "true" : false;
     const SIGHT = Math.max(1, Number(P.SightRadius || 8));
     const DIM = Math.max(0, Math.min(255, P.ExploredDim !== undefined && P.ExploredDim !== "" ? Number(P.ExploredDim) : 150));
-    const UPDATE_FRAMES = 6;
+    const UPDATE_FRAMES = 20;
     const FOG_RGB = [4, 8, 12];
 
     // Sight radii per user specification (2026-09-20):
@@ -216,7 +216,7 @@
         if (r <= 0) return;
 
         const r2 = r * r;
-        const steps = Math.max(120, Math.round(r * 16));
+        const steps = Math.max(48, Math.round(r * 6));
         const angleStep = (Math.PI * 2) / steps;
 
         for (let i = 0; i < steps; i++) {
@@ -225,7 +225,7 @@
             const sin = Math.sin(angle);
             let prevX = cx, prevY = cy;
 
-            for (let d = 0.5; d <= r; d += 0.5) {
+            for (let d = 1; d <= r; d += 1) {
                 const rx = Math.round(cx + cos * d);
                 const ry = Math.round(cy + sin * d);
                 const x = ((rx % width) + width) % width;

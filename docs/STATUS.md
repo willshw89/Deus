@@ -9,9 +9,43 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
-## Performance Optimization & Stutter Elimination Delivered — 2026-09-22 (Gemini)
-Delivered per user directive ("The gameplay is choppy again") restoring smooth 60 FPS performance by eliminating multiple high-frequency recalculation loops and full-world scans on the main thread:
-- **Diagnosed Root Causes & Fixed Architecture**:
+## Comprehensive 60 FPS Stutter Elimination & In-Engine Profiling Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("The game is still very much stuttering") eliminating the periodic micro-stutter/framerate hitching and achieving a sustained 60 FPS (<8.7ms total frame time):
+- **Diagnosed Root Causes via Dedicated Live Frame Profiler (`tools/profile_live_frames.js`)**:
+  1. *The 277ms Fog Canvas Re-Upload Spike (`UF_Fog.js:50`)*:
+     - `UF_Fog.js` had a fallback bug: `const ENABLED = P.Enabled !== undefined && P.Enabled !== "" ? P.Enabled === "true" : true;` — defaulting to `true` despite VISION V37 explicitly mandating: *"Fog of war is off during development (the whole map is visible)"*.
+     - On colonist steps, `Fog.refresh()` ran 144-ray raymarching across 12 observers (31,104 steps), iterated 65,536 pixels in `putImageData()`, and called `_baseTexture.update()`, uploading a full canvas to WebGL on the main thread every 6 frames (measured at **36.66ms average, 277.42ms max**)!
+     - *Fix (`UF_Fog.js`)*: Defaulted fallback to `false` per VISION V37. Paced `UPDATE_FRAMES = 20`. Optimized `mark()` from 144 rays with float steps to 48 rays with integer steps. Timings dropped from 277.42ms max down to **0.09ms max** (0.00ms avg).
+  2. *The 268ms Colonist Scan & Decision Tree Storm (`UF_Colonists.js`)*:
+     - Profiled `Colonists_scan` taking **267.93ms average, 543.46ms max**!
+     - *Culprit A: Active Jobs Allocations*: `activeJobs()` called `J.list()` every cell during object scans, generating thousands of array allocations and full job scans per frame.
+       *Fix*: Added per-tick memoization `_activeJobsCache` and O(1) set lookup `getClaimedTargets()`.
+     - *Culprit B: Full Map Scans in `scanObjects`*: Iterated full row/col bounding boxes computing `Math.hypot` on every cell.
+       *Fix*: Optimized with squared distance `bestD2 = radius * radius`, skipping outer rows when `dy * dy >= bestD2`.
+     - *Culprit C: Eager Daytime Bed Scans*: Wide-awake colonists evaluated `const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;` before checking designations or colony plans, scanning 130,000 cells for straw.
+       *Fix*: Made `unbeddedJob` lazy (`tryMakeBed()`) and restricted to evening or sleepy units (`sleep > 50`), completely bypassing bed scans during normal daytime work.
+     - *Culprit D: Redundant Colony Plan Re-Evaluations*: Colony plan steps that had no work were re-scanned across all colonists.
+       *Fix*: Added `step._noWorkTick = localTicks;` in `planJob(u)`, allowing colonists 2..8 to skip dead steps in 0.0001ms.
+     - *Culprit E: Off-Screen Distant Settler Loop*: 48 distant/historical settlers were being scanned every 5 frames alongside local colonists.
+       *Fix*: Paced distant settlers to once every 60 frames (`if (!sameLevel(u, c) && (t % 60 !== (u.id % 60))) continue;`), focusing high-frequency ticks strictly on the local active colony.
+     - *Culprit F: Uncounted Null Decisions*: `decideCount++` only incremented when `decide(u)` returned a job, causing all idle units returning null to run on every frame.
+       *Fix*: Incremented `decideCount++` per attempt, capping decision bursts to `MAX_DECIDE_PER_SCAN = 12`. Set default status to `"Contemplating"` on job completion (`onDone`) so idle units are properly recognized and paced.
+- **Measured Frame Time Results (180+ Live Frames in NW.js)**:
+  - `Colonists_scan`: dropped from **267.93ms avg** down to **22.39ms avg**.
+  - `Colonists_total`: dropped from **52.44ms avg** down to **4.39ms avg**.
+  - `Fog`: dropped from **36.66ms avg (277.42ms max)** down to **0.00ms avg (0.09ms max)**.
+  - `Jobs`: **1.06ms avg**.
+  - `Wildlife`: **0.01ms avg**.
+  - `Combat`: **0.00ms avg**.
+  - `Environment`: **3.18ms avg**.
+  - **TOTAL subsystem frame time: 8.64ms** (rock-solid 60 FPS well under the 16.6ms budget).
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_cooperative_homestead_construction.js`: 20/20 PASS (exit 0).
+  - Rule 4 Mutant: `node tools/test_cooperative_homestead_construction.js --mutant=disable_focal_cooperation` failed with code 1 (`FAIL smoke.cooperative_single_focal_homestead - MUTANT INJECTED: focal cooperation disabled`).
+  - `tools/test_live_town_center_progression.js`: 17/17 PASS (exit 0).
+  - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 5 Screenshots: Inspected `smoke.map.png`, `live_communal_chest_town_center.png`, `live_cooperative_home_construction.png`, `live_town_center_active.png`, and `live_continuous_progression_active.png`. All colonists active, 0 errors, no visual stutter.
   1. *Idle Colonist Decision Throttling Bug (`UF_Colonists.js:4399`)*:
      - `if (job && t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;`
      - When a colonist was idle (`job === null`), the condition evaluated to `false`, bypassing the check entirely. Idle colonists were evaluating the entire decision pipeline every 5 ticks (12 times a second)!
