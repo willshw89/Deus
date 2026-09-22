@@ -277,6 +277,7 @@
     function standFor(target, unit, adjacentOnly) {
         if (!target || !unit || !target.area || !validLevel(target) || !validLevel(unit) || !sameLevel(target, unit)) return null;
         const area = lv(target), z = refZ(target);
+        if (!adjacentOnly && target.x === unit.x && target.y === unit.y) return { area: copyArea(area), x: target.x, y: target.y, z };
         if (!adjacentOnly && standableIn(area, target.x, target.y, unit.id)) return { area: copyArea(area), x: target.x, y: target.y, z };
         const W = World(), eight = eightWay();
         let best = null, bestDist = Infinity;
@@ -468,7 +469,14 @@
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
         },
-        work: 0,
+        work(job, unit) {
+            if (job && job.params) {
+                if (job.params.contemplate) return 90;
+                if (job.params.inspect) return 60;
+                if (job.params.fireGather) return 120;
+            }
+            return 0;
+        },
         apply() {},
         describe(job) {
             if (job && job.params) {

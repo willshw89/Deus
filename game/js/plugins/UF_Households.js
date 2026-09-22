@@ -867,17 +867,17 @@
             if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x, y, z: zOf(h) })) return false;
             // Natural solid geological terrain & existing structural walls satisfy perimeter boundary!
             if (isWallCell(x, y) && (isNaturalRock(h, x, y, zOf(h)) || isStructuralEnclosureAt(h, x, y, zOf(h), home.wall))) {
-                if (reservations.has(k) || occupied.has(k) || bootstrap.has(k)) return false;
+                if (reservations.has(k) || bootstrap.has(k)) return false;
                 continue;
             }
-            if (!dry(h, x, y) || reservations.has(k) || occupied.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
+            if (!dry(h, x, y) || reservations.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
             if (Own() && Own().ownerOf(ref(h, p))) return false;
             if (clear.has(k) && o) return false; // No existing plant/furniture in the hearth's four-neighbor buffer.
             if (o && o.passable !== true && (!built.has(k) || !o.actions || !Object.keys(o.actions).length)) return false;
         }
         const e = home.entrance, eo = object(h, e);
         if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x: e.x, y: e.y, z: zOf(h) })) return false;
-        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true && (!eo.actions || !Object.keys(eo.actions).length)) || occupied.has(key(e.x, e.y)) || reservations.has(key(e.x, e.y))) return false;
+        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true && (!eo.actions || !Object.keys(eo.actions).length)) || reservations.has(key(e.x, e.y))) return false;
         const w = W();
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
     }
@@ -1022,8 +1022,8 @@
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
             if (sheltered || !hasBedInTownHall) {
                 if (h.privateHomestead) return h.privateHomestead;
-                if (h.lastSearchDay === day()) return h.home;
-                h.lastSearchDay = day();
+                if (h.lastSearchTick && (tick() - h.lastSearchTick < 120)) return h.home;
+                h.lastSearchTick = tick();
                 const p = findPlot(h, u, designFor(h, Math.max(1, mems.length)));
                 if (p) {
                     h.previousSharedHome = h.home;
@@ -1038,8 +1038,8 @@
         }
         const claimed = claimVacantHome(h, u);
         if (claimed) return claimed;
-        if (h.lastSearchDay === day()) return null;
-        h.lastSearchDay = day();
+        if (h.lastSearchTick && (tick() - h.lastSearchTick < 120)) return null;
+        h.lastSearchTick = tick();
         const p = findPlot(h, u, designFor(h, Math.max(1, members(h).length)));
         if (p) { h.home = p; h.reason = "Home reserved; construction needed"; emit("households:homePlanned", h, p); }
         return p;
@@ -1389,10 +1389,10 @@
         const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && (object(h, b).id === "floor_straw" || object(h, b).id === "bed_wood") &&
             (!Own() || p.isShared || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && (Own().ownerOf(ref(h, b)).id === b.unitId || people.some(u => u.id === Own().ownerOf(ref(h, b)).id)))).length : 0;
         return { members: people.length, bedrooms: people.length ? (p ? (buildings.some(b => !strictEnclosure(h, b)) ? 1 : 0) : 1) : 0,
-            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && (object(h, p.hearth).id === "campfire" || object(h, p.hearth).id === "kitchen_hearth")) ? 1 : 0,
+            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && (object(h, p.hearth).id === "campfire" || object(h, p.hearth).id === "kitchen_hearth" || (object(h, p.hearth).tags && (object(h, p.hearth).tags.includes("fire") || object(h, p.hearth).tags.includes("hearth"))))) ? 1 : 0,
             storage: people.length && !(p && object(h, p.storage) && (object(h, p.storage).id === "stockpile" || object(h, p.storage).id === "chest_wood" || object(h, p.storage).id === "crate_wood")) ? 1 : 0,
             capacity: beds.length, overflow: Math.max(0, people.length - beds.length), expansionBlocked: !!(h && h.expansionBlocked),
-            blocked: !p && !!(h && h.lastSearchDay !== undefined) || !!(h && h.expansionBlocked),
+            blocked: !p && !!(h && h.lastSearchTick !== undefined) || !!(h && h.expansionBlocked),
             unsupported: ["windows", "locks"] };
     }
     function describe(refH) {
@@ -1414,7 +1414,9 @@
         if (h.home.isSheltered === true || h.isSheltered === true) return true;
         if (!strictEnclosure(h, h.home)) return false;
         const d = demands(h);
-        return !d.beds && !d.cooking;
+        const ok = !d.beds && !d.cooking;
+        if (ok) h.home.isSheltered = true;
+        return ok;
     }
     function childRooms(refH) {
         const h = resolve(refH);

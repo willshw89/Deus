@@ -1269,6 +1269,7 @@
     const arrivals = new Map();   // job id -> callback (the Overseer's assignMoveTo)
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
     const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
+    let _lastReconcileTick = -Infinity;
     const PREEMPT_EVERY = 600;
 
     function activeJobs() {
@@ -3710,6 +3711,139 @@
         return null;
     }
 
+    // Immediate Staging & Stockpile Logistics: ensure colonists holding loose resources
+    // (stone, logs, fiber, etc.) proactively haul them to unbuilt construction cells,
+    // containers, or stockpiles instead of standing around idle holding heavy loads.
+    function carriedDepositJob(u) {
+        const I = Items(), c = colonyState(u);
+        if (!I || !c) return null;
+        const inv = I.inventoryOf(u.id) || [];
+        if (!inv.length) return null;
+
+        const eq = u.data.equipment || {};
+        const eqIds = new Set(Object.values(eq));
+        // Loose items: anything in inventory that is not equipped gear
+        const loose = inv.filter(it => {
+            if (eqIds.has(it.id)) return false;
+            const t = itemType(it.type);
+            if (!t) return false;
+            if (t.tags && (t.tags.includes("tool") || t.tags.includes("clothes") || t.tags.includes("weapon")) && (holds(u, it.type) || equippedItem(u, "clothes")?.id === it.id)) return false;
+            return true;
+        });
+        if (!loose.length) return null;
+
+        const carried = loose[0];
+        const t = itemType(carried.type);
+        if (!t) return null;
+
+        // 1. Prioritize staging directly to unbuilt construction cells in effectivePlan
+        const plan = effectivePlan(u);
+        if (plan && plan.length) {
+            for (const step of plan) {
+                const stepObj = stepObject(step);
+                if (!stepObj || !stepObj.build || !stepObj.build.items) continue;
+                const needs = stepObj.build.items;
+                for (const cell of buildCells(step, u)) {
+                    if (cell.state !== "todo") continue;
+                    for (const [id, countNeeded] of Object.entries(needs)) {
+                        const matches = (id === carried.type) ||
+                            (id === "wood" && carried.type === "log") ||
+                            (id === "log" && carried.type === "wood") ||
+                            (id === "straw" && carried.type === "fiber") ||
+                            (id === "fiber" && carried.type === "straw") ||
+                            (id === "stone" && carried.type === "rocks_small") ||
+                            (id === "rocks_small" && carried.type === "stone");
+                        if (!matches) continue;
+                        let onCell = I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id);
+                        if (id === "wood") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "log");
+                        else if (id === "straw") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber");
+                        else if (id === "stone") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "rocks_small");
+                        if (onCell < (countNeeded | 0)) {
+                            return give(u, {
+                                type: "haul",
+                                target: { x: u.x, y: u.y },
+                                params: {
+                                    itemId: carried.id,
+                                    to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y },
+                                    plan: step.id,
+                                    constructionHaul: true
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Storage containers
+        const Cont = window.UF && UF.Containers;
+        if (Cont) {
+            const containers = Cont.all(levelArea(c), zOf(c));
+            for (const cont of containers) {
+                const can = Cont.canStore(cont.id, carried.type, carried.count || 1, u);
+                if (can.ok) {
+                    return give(u, {
+                        type: "haul",
+                        target: { x: u.x, y: u.y },
+                        params: {
+                            itemId: carried.id,
+                            toContainer: cont.id,
+                            to: { area: copyArea(cont.area), z: zOf(cont), x: cont.x, y: cont.y },
+                            tidy: true
+                        }
+                    });
+                }
+            }
+        }
+
+        // 3. Ground stockpiles
+        if (c.stockpiles && c.stockpiles.length) {
+            const sp = c.stockpiles.find(s => {
+                const stores = s.stores || [];
+                if (!stores.length) return true;
+                if (Array.isArray(t.tags) && t.tags.some(tag => stores.includes(tag))) return true;
+                if (stores.includes("material") && (hasTag(t, "wood") || hasTag(t, "stone") || hasTag(t, "metal") || hasTag(t, "mineral") || hasTag(t, "fuel"))) return true;
+                if (stores.includes("wood") && hasTag(t, "wood")) return true;
+                if (stores.includes("stone") && hasTag(t, "stone")) return true;
+                if (stores.includes("metal") && hasTag(t, "metal")) return true;
+                if (stores.includes("food") && isFoodType(t)) return true;
+                return false;
+            });
+            if (sp) {
+                const itemsAtDest = I.atIn(levelArea(c), sp.x, sp.y);
+                const canStack = itemsAtDest.some(existing => existing.type === carried.type && (existing.count || 1) < (t.stack || 10));
+                const hasSlot = itemsAtDest.length < 5;
+                if (canStack || hasSlot) {
+                    return give(u, {
+                        type: "haul",
+                        target: { x: u.x, y: u.y },
+                        params: {
+                            itemId: carried.id,
+                            to: { area: copyArea(c.area), z: zOf(c), x: sp.x, y: sp.y },
+                            tidy: true
+                        }
+                    });
+                }
+            }
+        }
+
+        // 4. Designated settlement drop location
+        const dropCenter = (c.stockpiles && c.stockpiles[0]) || c.site || { x: u.x, y: u.y };
+        const dropCell = freeCellNear(levelArea(c), dropCenter.x, dropCenter.y, 6, 1);
+        if (dropCell) {
+            return give(u, {
+                type: "haul",
+                target: { x: u.x, y: u.y },
+                params: {
+                    itemId: carried.id,
+                    to: { area: copyArea(c.area), z: zOf(c), x: dropCell.x, y: dropCell.y },
+                    tidy: true
+                }
+            });
+        }
+        return null;
+    }
+
     // -----------------------------------------------------------------------
     // Workshop calling jobs: specialist craftsmen autonomously seek their
     // workshop to process available raw materials.  Maps callings to workshop
@@ -4159,6 +4293,9 @@
             }
         }
 
+        const carriedDeposit = carriedDepositJob(u);
+        if (carriedDeposit) return carriedDeposit;
+
         const unbeddedJob = !hasBedObject(u) ? makeBedJob(u) : null;
         const Callings = getCallings();
         const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
@@ -4212,8 +4349,14 @@
             if (P && P.assignSkillRoster) P.assignSkillRoster(local);
         }
         const t = ticks();
+        if (t - (_lastReconcileTick || -Infinity) >= 60) {
+            _lastReconcileTick = t;
+            if (window.UF && UF.Households && UF.Households.reconcile) {
+                try { UF.Households.reconcile(); } catch (e) {}
+            }
+        }
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 8;
+        const MAX_DECIDE_PER_SCAN = 16;
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();
@@ -4256,7 +4399,12 @@
             if (decideCount >= MAX_DECIDE_PER_SCAN) break;
             try {
                 const res = decide(u);
-                if (res) decideCount++;
+                if (res) {
+                    decideCount++;
+                    if (u.data) u.data.state = null;
+                } else if (!J.of(u.id) && u.data) {
+                    u.data.state = "Contemplating";
+                }
             } catch (e) {
                 console.error("UF_Colonists: decision failed for", u.name, e);
                 decisionAt.set(u.id, t);
@@ -4403,9 +4551,11 @@
                 awardCredits(u, 2, "structure construction");
                 const t = Objects() ? Objects().type(job.params.objectId) : null;
                 if (t && t.id === "stockpile" && colonyState(u)) colonyState(u).stockpiles.push({ x: job.target.x, y: job.target.y, stores: (job.params.stores || []).slice(), step: job.params.plan || null });
-                if (t && (t.id === "floor_straw" || (t.tags && t.tags.includes("bed")))) {
-                    if (window.UF && UF.Households && UF.Households.reconcile) UF.Households.reconcile();
-                    if (window.UF && UF.Ownership && UF.Ownership.reconcileArea) UF.Ownership.reconcileArea(levelArea(u));
+                if (window.UF && UF.Households && UF.Households.reconcile) {
+                    try { UF.Households.reconcile(); } catch (e) {}
+                }
+                if (window.UF && UF.Ownership && UF.Ownership.reconcileArea) {
+                    try { UF.Ownership.reconcileArea(levelArea(u)); } catch (e) {}
                 }
                 addThought(u, `Was pleased to see ${lower(t ? "the " + t.name : "the building")} finished.`, 10);
                 break;
@@ -4657,7 +4807,7 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); };
+        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); _lastReconcileTick = -Infinity; };
         UF.Events.on("world:unitAdded", clearCaches);
         UF.Events.on("world:unitRemoved", clearCaches);
         UF.Events.on("colonists:born", clearCaches);

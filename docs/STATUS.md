@@ -9,6 +9,35 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Autonomous Live Settlement Progression Post-Town-Hall & Carried-Item Logistics Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Again, a town center and nothing else and heres a guy doing nothing.") addressing user screenshot showing colonist Joran standing outside the Town Center with "Carrying a stone", "Current action: No current action recorded", and no other private shelters or buildings constructed:
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Lack of Autonomous Household Reconciliation in Live Simulation*:
+     - Previously, `H.reconcile()` was only called at game boot, child birth, or immigration. When colonists completed the Town Hall during live play, `physicalChange` only checked for straw beds (`t.id === "floor_straw"`), ignoring walls, doors, and hearths. If walls finished after beds, `reconcile()` never ran after the structure became sheltered. Founders remained bound to `h.home = townHall`, preventing private homestead reservations.
+     - *Fix (`UF_Colonists.js`)*: Added periodic reconciliation to `scan()` every 60 ticks (1 second). Updated `physicalChange` to invoke `UF.Households.reconcile()` on any completed building job.
+  2. *Stranded Carried Items Without a Deposit/Staging Pipeline*:
+     - When colonists picked up loose resources (stone, logs, fiber), `tidyStockpileJob` only searched ground items, while `constructionHaulingJob` only targeted active unbuilt cells in `effectivePlan`. Once Town Hall finished, no steps needed stone, leaving the colonist stranded with a stone in hand and no job.
+     - *Fix (`UF_Colonists.js`)*: Added `carriedDepositJob(u)` at the top of `decide(u)`. Inspects inventory for loose resources and stages them immediately to unbuilt construction cells needing the material (accounting for material aliasing: `wood` <-> `log`, `straw` <-> `fiber`, `stone` <-> `rocks_small`), storage containers, designated ground stockpiles, or settlement perimeter drop zones.
+  3. *Day-Long Plot Search Lockout & Mobile Unit Collision in Plot Planning*:
+     - In `UF_Households.js:ensureHome()`, `h.lastSearchDay === day()` locked out plot searches for an entire in-game day if a search failed once before Town Hall was sheltered. In `footprintOK()`, `occupied.has(k)` rejected prospective building plots if a walking colonist or wandering hare stepped on any cell of the candidate area at that moment.
+     - *Fix (`UF_Households.js`)*: Replaced `lastSearchDay` with a 120-tick throttle (`tick() - h.lastSearchTick < 120`). Removed `occupied.has(k)` from `footprintOK()` so mobile actors do not block static layout reservations.
+  4. *Instantaneous 0ms Idle Job Expiration*:
+     - In `UF_Jobs.js`, `moveHandler` used `work: 0`. For in-place activities (contemplation, inspection, hearth warmth), jobs completed on the frame they started, leaving the unit without an active job on the next tick and triggering "No current action recorded". In `standFor`, targeting the unit's current cell previously ran reachability checks that failed in alcove corner beds.
+     - *Fix (`UF_Jobs.js` & `UF_Colonists.js`)*: Added dynamic work duration to `moveHandler` (contemplate: 90 ticks, inspect: 60 ticks, fireGather: 120 ticks). In `standFor`, targeting the unit's current tile returns their current location immediately. In `scan()`, increased `MAX_DECIDE_PER_SCAN` to 16 and added `u.data.state = "Contemplating"` fallback.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_live_town_center_progression.js`: 17/17 PASS (exit 0):
+    - `smoke.founder_count`: 8/8 colonists
+    - `smoke.autonomous_reconcile_active`: 4 private homestead(s) planned autonomously in live play
+    - `smoke.colonists_never_idle`: 8/8 colonists active; idle: none
+    - `smoke.carried_resource_handled`: Colonist carried stone handled (remaining in hands: 0, active job: chop)
+    - `smoke.no_errors`: 0 errors
+  - Rule 4 Mutant Check: `node tools/test_live_town_center_progression.js --mutant=block_autonomous_reconcile` failed with code 1 (`FAIL smoke.autonomous_reconcile_active - MUTANT INJECTED: autonomous reconcile blocked`).
+  - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (exit 0).
+  - `tools/test_unpartnered_shelter_progression.js`: 26/26 PASS (exit 0).
+  - `tools/test_post_town_hall_progression.js`: 22/22 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 5 Screenshots: Inspected `live_town_center_initial.png` and `live_town_center_active.png`.
+
 ## Continuous Frontier Progression & Zero Idle Colonists Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("A lot of them have no current action.. Like dude, they should have a neverending progression of shit to do. Like build a shelter, starting by harvesting, etc"):
 - **Diagnosed Root Causes & Fixed Architecture**:
