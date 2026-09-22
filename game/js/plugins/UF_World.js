@@ -1120,6 +1120,94 @@
         return $gameMap._events[EVENT_BASE + id] || null;
     };
     World.unitOfEvent = ev => (ev && ev.eventId && ev.eventId() >= EVENT_BASE ? World.unit(ev.eventId() - EVENT_BASE) : null);
+    World.unitOfCharacter = function(ch) {
+        if (!ch) return null;
+        if (window.$gamePlayer && ch === $gamePlayer) {
+            const pid = window.UF && UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : "player";
+            return {
+                id: -1,
+                isPlayer: true,
+                data: { kind: "player", faction: pid }
+            };
+        }
+        if (typeof ch.eventId === "function") {
+            return World.unitOfEvent(ch);
+        }
+        return null;
+    };
+
+    /**
+     * True when unit A and unit B are allies who can move freely through each other.
+     * Hostiles (enemies, predators, warring factions) and non-unit obstacles (chests, boulders) return false.
+     */
+    World.areAllies = function(a, b) {
+        if (a === b) return true;
+        const resolve = ref => {
+            if (!ref) return null;
+            if (typeof ref === "number") return World.unit(ref);
+            if (typeof ref === "object") {
+                if (ref.isPlayer || (ref.data && ref.data.kind === "player")) return ref;
+                if (ref.id !== undefined && ref.data !== undefined) return ref;
+                return World.unitOfCharacter(ref);
+            }
+            return null;
+        };
+        const uA = resolve(a);
+        const uB = resolve(b);
+        if (!uA || !uB) return false;
+        if (uA.id === uB.id && uA.id !== undefined && uA.id !== -1) return true;
+        if (uA.isPlayer && uB.isPlayer) return true;
+
+        const dA = uA.data || {};
+        const dB = uB.data || {};
+
+        // Active combat targeting check: if either is actively attacking the other, they are enemies
+        if (dA.combat && dA.combat.targetId !== null && dA.combat.targetId !== undefined && dA.combat.targetId === uB.id) return false;
+        if (dB.combat && dB.combat.targetId !== null && dB.combat.targetId !== undefined && dB.combat.targetId === uA.id) return false;
+
+        // Explicit hostile tags or side
+        const tagsA = Array.isArray(dA.tags) ? dA.tags : [];
+        const tagsB = Array.isArray(dB.tags) ? dB.tags : [];
+        const isHostileA = tagsA.includes("hostile") || dA.hostile === true || dA.side === "hostile";
+        const isHostileB = tagsB.includes("hostile") || dB.hostile === true || dB.side === "hostile";
+        if (isHostileA !== isHostileB) return false;
+
+        // Faction resolution
+        const pid = window.UF && UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : "player";
+        let facA = dA.faction;
+        let facB = dB.faction;
+        if (facA === "player") facA = pid;
+        if (facB === "player") facB = pid;
+        if (!facA && (dA.kind === "colonist" || uA.isPlayer)) facA = pid;
+        if (!facB && (dB.kind === "colonist" || uB.isPlayer)) facB = pid;
+
+        // If both belong to the same faction (e.g. all colony members and player)
+        if (facA && facB && facA === facB) return true;
+
+        // Check faction relations
+        if (facA && facB && window.UF && UF.Factions && typeof UF.Factions.relation === "function") {
+            const rel = UF.Factions.relation(facA, facB);
+            if (rel >= 15) return true;
+            if (rel <= -15) return false;
+        }
+
+        // Colonist kind check: colonists in the settlement are allies
+        if (dA.kind === "colonist" && dB.kind === "colonist") return true;
+        if ((dA.kind === "colonist" && uB.isPlayer) || (dB.kind === "colonist" && uA.isPlayer)) return true;
+
+        // Combat side check
+        const C = window.UF && UF.Combat;
+        if (C && typeof C.sideOf === "function") {
+            const sideA = C.sideOf(uA);
+            const sideB = C.sideOf(uB);
+            if (sideA && sideB) return sideA === sideB;
+        }
+
+        // If both are hostile creatures in the wild (e.g. wolf pack)
+        if (isHostileA && isHostileB) return true;
+
+        return false;
+    };
     /** Re-read a unit's image (and `data.through`) into its on-screen event after `unit.image` changed (clothing tiers). */
     World.refreshUnitImage = function(id) {
         const u = this.unit(id);
@@ -1257,17 +1345,24 @@
         for (const o of World.units()) {
             if (o.data && o.data.through) continue;
             const k = occKey(o.area.x, o.area.y, zOf(o), o.x, o.y);
-            offOcc.set(k, (offOcc.get(k) || 0) + 1);
+            const list = offOcc.get(k) || [];
+            list.push(o);
+            offOcc.set(k, list);
         }
         return offOcc;
     }
     function occMove(u, fromX, fromY) {
         if (!offOcc || offOccFrame !== World._frame || (u.data && u.data.through)) return;
         const a = occKey(u.area.x, u.area.y, zOf(u), fromX, fromY), b = occKey(u.area.x, u.area.y, zOf(u), u.x, u.y);
-        const n = (offOcc.get(a) || 0) - 1;
-        if (n > 0) offOcc.set(a, n);
-        else offOcc.delete(a);
-        offOcc.set(b, (offOcc.get(b) || 0) + 1);
+        const listA = offOcc.get(a);
+        if (listA) {
+            const idx = listA.findIndex(o => o.id === u.id);
+            if (idx >= 0) listA.splice(idx, 1);
+            if (!listA.length) offOcc.delete(a);
+        }
+        const listB = offOcc.get(b) || [];
+        listB.push(u);
+        offOcc.set(b, listB);
     }
 
     // Off screen, walkers on their own area follow a planned path on their own level, one cell per step, like the
@@ -1307,10 +1402,14 @@
             pathStats.replans++;
             return;
         }
-        const occupied = (x, y) => offscreenOccupancy().get(occKey(u.area.x, u.area.y, zOf(u), x, y));
-        let blockedAt = occupied(nx, ny) ? next : -1, viaCorner = 0;
+        const occBlocked = (x, y) => {
+            const list = offscreenOccupancy().get(occKey(u.area.x, u.area.y, zOf(u), x, y));
+            if (!list || !list.length) return false;
+            return list.some(o => o.id !== u.id && !World.areAllies(u, o));
+        };
+        let blockedAt = occBlocked(nx, ny) ? next : -1, viaCorner = 0;
         if (blockedAt < 0 && isDiag(d)) {
-            const takenH = occupied(nx, u.y), takenV = occupied(u.x, ny);
+            const takenH = occBlocked(nx, u.y), takenV = occBlocked(u.x, ny);
             if (takenH && takenV) blockedAt = u.y * size + nx;
             else if (takenH) viaCorner = ny > u.y ? 2 : 8;
             else if (takenV) viaCorner = nx > u.x ? 6 : 4;
@@ -2187,6 +2286,40 @@
         _Game_Player_performTransfer.call(this);
         const to = World.currentArea();
         if (to && !sameArea(from, to)) emit("world:viewAreaChanged", from, to);
+    };
+
+    // Character collisions: allies move freely through each other across corridors and open terrain,
+    // while collisions with hostiles (enemies, wolves, monsters) and solid map obstacles are strictly preserved.
+    const _Game_Event_isCollidedWithEvents = Game_Event.prototype.isCollidedWithEvents;
+    Game_Event.prototype.isCollidedWithEvents = function(x, y) {
+        const events = $gameMap.eventsXyNt(x, y);
+        if (!events || !events.length) return false;
+        for (const ev of events) {
+            if (ev === this) continue;
+            if (ev.isNormalPriority() && !World.areAllies(this, ev)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const _Game_Event_isCollidedWithPlayerCharacters = Game_Event.prototype.isCollidedWithPlayerCharacters;
+    Game_Event.prototype.isCollidedWithPlayerCharacters = function(x, y) {
+        if (!this.isNormalPriority() || !$gamePlayer.isCollided(x, y)) return false;
+        if (World.areAllies(this, $gamePlayer)) return false;
+        return true;
+    };
+
+    const _Game_Player_isCollidedWithEvents = Game_Player.prototype.isCollidedWithEvents || Game_CharacterBase.prototype.isCollidedWithEvents;
+    Game_Player.prototype.isCollidedWithEvents = function(x, y) {
+        const events = $gameMap.eventsXyNt(x, y);
+        if (!events || !events.length) return false;
+        for (const ev of events) {
+            if (ev.isNormalPriority() && !World.areAllies($gamePlayer, ev)) {
+                return true;
+            }
+        }
+        return false;
     };
 
     //-------------------------------------------------------------------------

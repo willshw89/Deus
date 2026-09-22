@@ -1042,7 +1042,7 @@
                 goal = { x, y };
             }
         }
-        if (!goal) goal = { x: t.x, y: t.y };
+        if (!goal) return; // Wait for an adjacent square to open rather than walking onto an occupied square
         if (!c.chase || c.chase.x !== goal.x || c.chase.y !== goal.y || !u.goal) {
             w.sendUnit(u.id, { area: levelArea(u), x: goal.x, y: goal.y, z: zOf(u) });
             c.chase = goal;
@@ -1087,7 +1087,9 @@
         const style = styleOf(u, prof);
         const range = prof.ranged ? Math.max(1, prof.ranged.range + styleBonus(style).range) : 1;
         const inReach = prof.ranged ? cheb(u, t) <= range : manhattan(u, t) === 1;
-        if (inReach) {
+        const cellOcc = occ.get(u.y * size + u.x);
+        const exclusiveSquare = cellOcc === u;
+        if (inReach && exclusiveSquare) {
             if (c.chase) {
                 World().stopUnit(u.id);
                 c.chase = null;
@@ -1146,7 +1148,11 @@
         if (!units.length) return;
         const size = w.state.size, seed = w.state.seed >>> 0;
         const occ = new Map();
-        for (const u of all) occ.set(u.y * size + u.x, u);
+        for (const u of all) {
+            const k = u.y * size + u.x;
+            if (occ.has(k)) occ.set(k, "SHARED");
+            else occ.set(k, u);
+        }
         const byId = new Map();
         const hostiles = [], friendlies = [];
         for (const u of units) {

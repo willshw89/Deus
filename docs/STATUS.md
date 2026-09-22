@@ -9,6 +9,52 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Allies Move Freely Through Each Other & Exclusive Action Squares Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Make it so that allies can move freely through each other, but a unit must have its own square to act"):
+- **Architecture & System Mechanics**:
+  - *Allied Free Movement*: Friendly and allied units (same faction, player and colonists, allied factions via `UF.Factions.relation >= 15`) do not collide or block each other during movement. Characters pass freely through one another in narrow 1-tile corridors, doorways, and open terrain.
+  - *Hostile & Obstacle Collision Preserved*: Hostiles (predators, wolves, monsters, opposing factions) and solid objects/events (chests, boulders, impassable fixtures) strictly maintain collision and cannot be walked through.
+  - *Exclusive Action Square Rule*: Any unit performing an action (working jobs, chopping, mining, building, crafting, sleeping in beds, or executing combat melee attacks) must occupy its own exclusive square. No two units may stand on the same tile to act simultaneously.
+  - *Stand Reservation & Pre-Action Guard*: `occupiedIn` checks active job stand reservations (`j.stand`) so multiple workers targeting the same object (e.g. tree, rock, wall) automatically select distinct adjacent squares. In `step`, if another unit is on the square, work never starts or advances; moving passersby cause momentary pause, while stationary units trigger re-planning to an unoccupied neighbor.
+  - *Combat Repositioning*: Attackers in `act` require an exclusive square to execute melee attacks. If all adjacent squares around a target are occupied, units wait for an opening rather than stepping onto the target.
+- **Engine Implementations (`UF_World.js`, `UF_Jobs.js`, `UF_Combat.js`)**:
+  - `UF_World.js`:
+    - `World.unitOfCharacter(ch)`: Resolves `$gamePlayer`, `Game_Event`, and unit IDs into world units.
+    - `World.areAllies(a, b)`: Central alliance evaluator covering factions, relations, colonist kind, and combat sides.
+    - `Game_Event.prototype.isCollidedWithEvents`: Returns `false` when all events at target cell are allies of `this`.
+    - `Game_Event.prototype.isCollidedWithPlayerCharacters`: Returns `false` when `this` and player are allies.
+    - `Game_Player.prototype.isCollidedWithEvents`: Player moves freely through allied colonists; non-allies block.
+    - `offscreenOccupancy` & `stepOffscreenAlongPath`: Off-screen path execution allows allies to step through each other.
+  - `UF_Jobs.js`:
+    - `occupiedIn(area, x, y, unitId)`: Considers cells reserved by other active jobs (`j.stand`) as occupied.
+    - `standFor(target, unit, adjacentOnly)`: Requires `standableIn(area, x, y, unit.id)` across all neighbor candidates.
+    - `step(job, unit)`: Checks `sharingSquare` before starting or progressing work; pauses or re-plans if square is shared.
+  - `UF_Combat.js`:
+    - `act(u, t, tick, occ, size, area)`: Enforces `exclusiveSquare = cellOcc === u` before executing attack.
+    - `chase(u, t, occ, size, area)`: Aborts stepping onto the target tile when all adjacent cells are full.
+    - `runLevelTick`: Detects shared tiles in occupancy map and marks them as `"SHARED"`.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_ally_movement_exclusive_action_square.js`: 22/22 PASS (exit 0):
+    - `smoke.allies_recognized`: true
+    - `smoke.allies_corridor_cross`: Allies passed freely through each other in 1-tile corridor: A at x=24 (want >=23), B at x=16 (want <=17), passedMid=true
+    - `smoke.hostile_not_ally`: true
+    - `smoke.hostile_collision_blocks`: true
+    - `smoke.hostile_can_pass_false`: true
+    - `smoke.exclusive_stand_cells`: A=(21,27), B=(19,27)
+    - `smoke.work_started_exclusive_square`: true
+    - `smoke.shared_action_square_prevented`: progress did not advance while sharing square with another unit (1 === 1)
+    - `smoke.work_resumes_on_exclusive_square`: progress resumed once square became exclusive (2 > 1)
+  - Rule 4 Mutant Checks (both caught and exited with code 1):
+    - `node tools/test_ally_movement_exclusive_action_square.js --mutant=allow_shared_action_square`: exited with code 1 (`FAIL smoke.shared_action_square_prevented - MUTANT INJECTED: shared action square permitted`).
+    - `node tools/test_ally_movement_exclusive_action_square.js --mutant=block_allies`: exited with code 1 (`FAIL smoke.allies_corridor_cross - MUTANT INJECTED: allies blocked in corridor`).
+  - Full functional regressions:
+    - `tools/run_tests.js smoke`: 13/13 PASS (exit 0)
+    - `tools/run_tests.js jobs`: 19/19 PASS (exit 0)
+    - `tools/run_tests.js colonists`: 24/24 PASS (exit 0)
+  - Rule 5 Screenshots Inspected:
+    - `live_ally_corridor_movement.png`: 1-tile-wide horizontal wooden corridor bounded by walls, demonstrating clear allied passage.
+    - `live_ally_exclusive_action_squares.png`: Top shows corridor crossing; middle shows colonist facing hostile wolf with collision blocking entry; bottom shows two colonists chopping the same oak tree from separate, distinct tiles (`(19, 27)` and `(21, 27)`).
+
 ## Post-Town Hall Autonomous Progression & Private Homestead Construction Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The AI arent really doing shit after building the town center"):
 - **Diagnosed Root Causes & Fixed Architecture**:

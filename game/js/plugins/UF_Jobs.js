@@ -109,6 +109,75 @@
     const isFinished = job => job.state === "done" || job.state === "failed";
 
     //-------------------------------------------------------------------------
+    // Ludeon Reservation Manager
+    // Centralized concurrency control for targets, items, and spatial cells
+    //-------------------------------------------------------------------------
+
+    class ReservationManager {
+        constructor() {
+            this._reservations = new Map();
+        }
+
+        _key(targetRef) {
+            if (!targetRef) return null;
+            if (typeof targetRef === "string" || typeof targetRef === "number") return String(targetRef);
+            if (targetRef.id !== undefined && typeof targetRef.id !== "object") return `entity:${targetRef.id}`;
+            const ax = (targetRef.area && targetRef.area.x) || 0;
+            const ay = (targetRef.area && targetRef.area.y) || 0;
+            const z = (typeof targetRef.z === "number" ? targetRef.z : (targetRef.area && targetRef.area.z) || 0);
+            return `cell:${ax},${ay},${z}:${targetRef.x | 0},${targetRef.y | 0}`;
+        }
+
+        reserve(unitId, targetRef, stack = 1) {
+            const key = this._key(targetRef);
+            if (!key) return false;
+            const existing = this._reservations.get(key);
+            if (existing && existing.unitId !== unitId) {
+                return false;
+            }
+            this._reservations.set(key, { unitId, stack, tick: now() });
+            return true;
+        }
+
+        release(unitId, targetRef) {
+            const key = this._key(targetRef);
+            if (!key) return;
+            const existing = this._reservations.get(key);
+            if (existing && existing.unitId === unitId) {
+                this._reservations.delete(key);
+            }
+        }
+
+        isReservedByOther(unitId, targetRef) {
+            const key = this._key(targetRef);
+            if (!key) return false;
+            const existing = this._reservations.get(key);
+            return !!(existing && existing.unitId !== unitId);
+        }
+
+        reservedBy(targetRef) {
+            const key = this._key(targetRef);
+            if (!key) return null;
+            const existing = this._reservations.get(key);
+            return existing ? existing.unitId : null;
+        }
+
+        clearUnit(unitId) {
+            for (const [k, v] of this._reservations.entries()) {
+                if (v.unitId === unitId) {
+                    this._reservations.delete(k);
+                }
+            }
+        }
+
+        clear() {
+            this._reservations.clear();
+        }
+    }
+
+    const reservationManager = new ReservationManager();
+
+    //-------------------------------------------------------------------------
     // Cells: what a unit can stand on, in the area on screen or any other
 
     // area may be a level area { x, y, z } (missing z = the ground).
@@ -138,10 +207,20 @@
         return false;
     }
 
-    // Another unit (or a solid non-unit event on screen) already stands there.
+    // Another unit (or a solid non-unit event on screen) already stands there, or an active job reserved it as its stand cell.
     function occupiedIn(area, x, y, unitId) {
         const W = World();
         for (const u of W.unitsInArea(area.x, area.y, zOf(area))) if (u.id !== unitId && u.x === x && u.y === y) return true;
+        const st = jobState();
+        if (st && st.list) {
+            for (const j of st.list) {
+                if (j.assigned !== null && j.assigned !== undefined && j.assigned !== unitId && isActive(j) && j.stand) {
+                    if (sameLevel(j.stand, { area, z: zOf(area) }) && j.stand.x === x && j.stand.y === y) {
+                        return true;
+                    }
+                }
+            }
+        }
         if (onScreen(area) && window.$gameMap) {
             for (const ev of $gameMap.eventsXy(x, y)) {
                 if (ev.eventId() >= W.EVENT_BASE) continue; // units were checked above
@@ -198,14 +277,12 @@
     function standFor(target, unit, adjacentOnly) {
         if (!target || !unit || !target.area || !validLevel(target) || !validLevel(unit) || !sameLevel(target, unit)) return null;
         const area = lv(target), z = refZ(target);
-        const onIt = unit.x === target.x && unit.y === target.y;
-        if (!adjacentOnly && (onIt || standableIn(area, target.x, target.y, unit.id))) return { area: copyArea(area), x: target.x, y: target.y, z };
+        if (!adjacentOnly && standableIn(area, target.x, target.y, unit.id)) return { area: copyArea(area), x: target.x, y: target.y, z };
         const W = World(), eight = eightWay();
         let best = null, bestDist = Infinity;
         for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
             const x = target.x + dx, y = target.y + dy;
-            const here = unit.x === x && unit.y === y;
-            if (!here && !standableIn(area, x, y, unit.id)) continue;
+            if (!standableIn(area, x, y, unit.id)) continue;
             if (dx && dy && !(W.walkable(area.x, area.y, x, target.y, { unit, z }) && W.walkable(area.x, area.y, target.x, y, { unit, z }))) continue;
             const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
             if (dist < bestDist) {
@@ -860,11 +937,14 @@
         const unit = job.assigned ? W.unit(job.assigned) : null;
         const h = handlers[job.type];
         if (unit) {
+            reservationManager.clearUnit(unit.id);
             if (unit.goal && job.stand && atCell({ area: unit.goal.area, x: unit.goal.x, y: unit.goal.y, z: zOf(unit.goal) }, job.stand)) W.stopUnit(unit.id);
             stopWorking(unit);
             if (h && typeof h.cancel === "function") {
                 try { h.cancel(job, unit); } catch (e) { console.error(e); }
             }
+        } else if (job.assigned) {
+            reservationManager.clearUnit(job.assigned);
         }
         job.state = "failed";
         job.reason = reason || "failed";
@@ -882,6 +962,7 @@
 
     // The assigned unit left the world: an open job goes back to the pool, an owned one can't be done any more.
     function release(job) {
+        if (job.assigned) reservationManager.clearUnit(job.assigned);
         if (job.owner) return fail(job, "the worker is gone");
         job.assigned = null;
         job.state = "open";
@@ -936,6 +1017,10 @@
         }
         job.assigned = unitId;
         job.state = "travel";
+        reservationManager.reserve(unitId, job.target);
+        if (job.params && job.params.itemId) {
+            reservationManager.reserve(unitId, job.params.itemId);
+        }
         job.progress = 0;
         job.phase = 0;
         job.blocked = 0;
@@ -1145,6 +1230,8 @@
             return;
         }
         stopWorking(unit);
+        if (unit) reservationManager.clearUnit(unit.id);
+        else if (job.assigned) reservationManager.clearUnit(job.assigned);
         job.state = "done";
         job.finished = now();
         if (unit && window.UF && UF.Proficiency && typeof UF.Proficiency.gainXp === "function") {
@@ -1200,6 +1287,18 @@
             else if (now() - job.stall.since >= STALL_TICKS) {
                 job.stall = null;
                 noteBlocked(job, unit);
+            }
+            return;
+        }
+        // A unit must have its own exclusive square to act:
+        const sharingSquare = W.unitsInArea(unit.area.x, unit.area.y, zOf(unit)).some(o => o.id !== unit.id && o.x === unit.x && o.y === unit.y);
+        if (sharingSquare) {
+            const ev = unitEvent(unit);
+            const otherEvs = window.$gameMap ? $gameMap.eventsXyNt(unit.x, unit.y).filter(e => e !== ev) : [];
+            const anyOtherMoving = otherEvs.some(e => e.isMoving());
+            if (!anyOtherMoving) {
+                // Another unit is stationary on this square; replan to select an unoccupied neighbor stand square
+                job.planned = false;
             }
             return;
         }
@@ -1267,7 +1366,9 @@
         work: workOf,
         update,
         tick: update,
-        step
+        step,
+        ReservationManager: reservationManager,
+        reservation: reservationManager
     };
     window.UF = window.UF || {};
     window.UF.Jobs = Jobs;
