@@ -495,61 +495,69 @@
         const W = World(), u = typeof ref === "number" ? W.unit(ref) : ref && ref.data ? ref : siteColonists(c)[0];
         if (u && u._cachedEffectivePlanTick === localTicks && u._cachedEffectivePlan) return u._cachedEffectivePlan;
         const H = window.UF && UF.Households, G = window.UF && UF.Goals;
-        const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
 
-        // Cooperative settlement construction: prioritize the active focal household so all villagers unite on finishing it!
-        // No colonist starts a secondary private home until the focal home is completely built and sheltered.
-        const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
-        const cooperativeHomeSteps = [];
-        if (focal && H && H.planSteps) {
-            const focalPeople = H.members ? H.members(focal) : [];
-            const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
-            if (focalRep) {
-                const fSteps = H.planSteps(focalRep);
-                for (const s of fSteps) {
-                    if (s) cooperativeHomeSteps.push(s);
-                }
-            }
-        }
-
-        // Civic infrastructure: Town Square plaza and paths connecting to households
-        const civicSteps = [];
-        const households = (H && H.all) ? H.all().filter(h => sameLevel(h, c)) : [];
-        if (households.length > 0) {
-            civicSteps.push({
-                id: "town_square_plaza",
-                build: "road",
-                cells: [[-1,-1], [0,-1], [1,-1], [-1,0], [1,0], [-1,1], [0,1], [1,1]],
-                exact: true
-            });
-            for (const h of households) {
-                // Only build paths to homes that are sheltered or occupied
-                const targetHome = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : h.home;
-                const isSheltered = H && H.isSheltered ? H.isSheltered(h) : false;
-                if (targetHome && targetHome.entrance && (isSheltered || h.isMovedIn)) {
-                    const ex = targetHome.entrance.x - c.site.x;
-                    const ey = targetHome.entrance.y - c.site.y;
-                    const pathCells = [];
-                    let px = 0, py = 0;
-                    const dx = Math.sign(ex), dy = Math.sign(ey);
-                    while (px !== ex || py !== ey) {
-                        if (px !== ex) px += dx;
-                        if (py !== ey) py += dy;
-                        if (Math.abs(px) > 1 || Math.abs(py) > 1) pathCells.push([px, py]);
+        let basePlan = c._cachedBasePlan;
+        if (!basePlan || c._cachedBasePlanInvalidatedAt !== planInvalidatedAt || (localTicks - (c._cachedBasePlanTick || 0) >= 30)) {
+            // Cooperative settlement construction: prioritize the active focal household so all villagers unite on finishing it!
+            // No colonist starts a secondary private home until the focal home is completely built and sheltered.
+            const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
+            const cooperativeHomeSteps = [];
+            if (focal && H && H.planSteps) {
+                const focalPeople = H.members ? H.members(focal) : [];
+                const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
+                if (focalRep) {
+                    const fSteps = H.planSteps(focalRep);
+                    for (const s of fSteps) {
+                        if (s) cooperativeHomeSteps.push(s);
                     }
-                    if (pathCells.length) civicSteps.push({ id: `path_${h.id}`, build: "road", cells: pathCells, exact: true });
                 }
             }
+
+            // Civic infrastructure: Town Square plaza and paths connecting to households
+            const civicSteps = [];
+            const households = (H && H.all) ? H.all().filter(h => sameLevel(h, c)) : [];
+            if (households.length > 0) {
+                civicSteps.push({
+                    id: "town_square_plaza",
+                    build: "road",
+                    cells: [[-1,-1], [0,-1], [1,-1], [-1,0], [1,0], [-1,1], [0,1], [1,1]],
+                    exact: true
+                });
+                for (const h of households) {
+                    // Only build paths to homes that are sheltered or occupied
+                    const targetHome = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : h.home;
+                    const isSheltered = H && H.isSheltered ? H.isSheltered(h) : false;
+                    if (targetHome && targetHome.entrance && (isSheltered || h.isMovedIn)) {
+                        const ex = targetHome.entrance.x - c.site.x;
+                        const ey = targetHome.entrance.y - c.site.y;
+                        const pathCells = [];
+                        let px = 0, py = 0;
+                        const dx = Math.sign(ex), dy = Math.sign(ey);
+                        while (px !== ex || py !== ey) {
+                            if (px !== ex) px += dx;
+                            if (py !== ey) py += dy;
+                            if (Math.abs(px) > 1 || Math.abs(py) > 1) pathCells.push([px, py]);
+                        }
+                        if (pathCells.length) civicSteps.push({ id: `path_${h.id}`, build: "road", cells: pathCells, exact: true });
+                    }
+                }
+            }
+
+            const soSteps = standingOrders(ref);
+            const msSteps = populationMilestoneSteps(ref);
+            const storageSteps = autonomousStorageSteps(ref);
+            basePlan = [ ...c.plan, ...storageSteps, ...cooperativeHomeSteps, ...civicSteps, ...soSteps, ...msSteps ];
+            c._cachedBasePlan = basePlan;
+            c._cachedBasePlanTick = localTicks;
+            c._cachedBasePlanInvalidatedAt = planInvalidatedAt;
         }
 
+        const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
         const P = Pillars();
         const pillarSteps = (c && P && P.pillarPlanSteps) ? P.pillarPlanSteps(c, u) : [];
-        const soSteps = standingOrders(u || ref);
-        const msSteps = populationMilestoneSteps(u || ref);
-        const storageSteps = autonomousStorageSteps(u || ref);
-        const extra = u ? [ ...storageSteps, ...cooperativeHomeSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps ] : [];
+        const extra = u ? [ ...basePlan, ...pillarSteps, ...goalSteps ] : basePlan;
         const seen = new Set();
-        const res = [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
+        const res = extra.filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
         if (u) {
             u._cachedEffectivePlan = res;
@@ -3939,7 +3947,7 @@
         }
 
         const area = levelArea(u);
-        const radius = c.radius ? Math.max(c.radius + 20, 40) : 40;
+        const radius = Math.min(24, (c.radius || 8) + 12);
 
         const isW = Callings.isWoodcutter(u);
         const isM = Callings.isMiner(u);
@@ -4082,7 +4090,7 @@
         if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
 
         const area = levelArea(u);
-        const radius = c.radius ? Math.max(c.radius + 30, 50) : 50;
+        const radius = Math.min(24, (c.radius || 8) + 12);
 
         const isHarvestable = (t, x, y, action) => {
             if (!t) return false;
@@ -4350,14 +4358,14 @@
             if (P && P.assignSkillRoster) P.assignSkillRoster(local);
         }
         const t = ticks();
-        if (t - (_lastReconcileTick || -Infinity) >= 60) {
+        if (t - (_lastReconcileTick || -Infinity) >= 300) {
             _lastReconcileTick = t;
             if (window.UF && UF.Households && UF.Households.reconcile) {
                 try { UF.Households.reconcile(); } catch (e) {}
             }
         }
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 16;
+        const MAX_DECIDE_PER_SCAN = 2;
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();
@@ -4396,7 +4404,8 @@
                     } else continue;
                 } else continue;
             }
-            if (job && t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;
+            const lastDecide = decisionAt.get(u.id) || -Infinity;
+            if (t - lastDecide < (job ? DECIDE_EVERY : 20)) continue;
             if (decideCount >= MAX_DECIDE_PER_SCAN) break;
             try {
                 const res = decide(u);
@@ -4808,7 +4817,7 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); _lastReconcileTick = -Infinity; };
+        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); };
         UF.Events.on("world:unitAdded", clearCaches);
         UF.Events.on("world:unitRemoved", clearCaches);
         UF.Events.on("colonists:born", clearCaches);

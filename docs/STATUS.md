@@ -9,6 +9,36 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Performance Optimization & Stutter Elimination Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("The gameplay is choppy again") restoring smooth 60 FPS performance by eliminating multiple high-frequency recalculation loops and full-world scans on the main thread:
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Idle Colonist Decision Throttling Bug (`UF_Colonists.js:4399`)*:
+     - `if (job && t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;`
+     - When a colonist was idle (`job === null`), the condition evaluated to `false`, bypassing the check entirely. Idle colonists were evaluating the entire decision pipeline every 5 ticks (12 times a second)!
+     - *Fix (`UF_Colonists.js`)*: Fixed idle throttling to `const lastDecide = decisionAt.get(u.id) || -Infinity; if (t - lastDecide < (job ? DECIDE_EVERY : 20)) continue;`. Idle colonists now wait at least 20 ticks (1/3 second) before re-deciding.
+  2. *Decision Batch Spike Pacing (`UF_Colonists.js:4360`)*:
+     - `MAX_DECIDE_PER_SCAN` was set to 16, causing all 8 colonists to run decision scans on the same tick burst.
+     - *Fix (`UF_Colonists.js`)*: Reduced `MAX_DECIDE_PER_SCAN` to 2. With `SCAN_EVERY = 5`, this paces up to 24 decisions/sec smoothly across frames without frame spikes.
+  3. *Uncontrolled Household Reconcile Reset (`UF_Colonists.js:4811`)*:
+     - `clearCaches` set `_lastReconcileTick = -Infinity;` on every single job completion and item pickup, completely defeating the 60-tick throttle and causing `UF.Households.reconcile()` to run almost every single tick.
+     - *Fix (`UF_Colonists.js`)*: Removed `_lastReconcileTick = -Infinity;` from `clearCaches`. Paced periodic reconciles to 300 ticks (5s) fallback, while keeping immediate reconciles on structure completion (`case "build"`).
+  4. *Blind Full-World Enclosure Scans (`UF_Households.js:1565`)*:
+     - `checkEnclosures()` ran `strictEnclosure(h, b)` across all 43 households whenever an object changed anywhere on the 256x256 map and on every job completed (walking, talking, eating).
+     - *Fix (`UF_Households.js`)*: Spatially filtered `checkEnclosures(area, x, y)` to only inspect structures touching `(x, y)` when an object change occurs. Restricted `jobs:done` enclosure checks strictly to `"build"` and `"floor"` jobs.
+  5. *Massive Radius 50 Object Scans in Frontier Progression (`UF_Colonists.js:4085`)*:
+     - `autonomousFrontierProgression(u)` searched a 101x101 grid (10,201 cells) 4 times per colonist = 40,804 iterations per colonist per scan.
+     - *Fix (`UF_Colonists.js`)*: Constrained search radius in `autonomousCallingJob` and `autonomousFrontierProgression` to `Math.min(24, (c.radius || 8) + 12)` (~2,401 cells, an 80% reduction in loop iterations).
+  6. *Uncached Negative `isSheltered` Checks & Colony Base Plan Caching (`UF_Colonists.js` & `UF_Households.js`)*:
+     - `effectivePlan()` iterated all 43 households and ran `strictEnclosure()` and `demands()` on unbuilt homes for every colonist without caching.
+     - *Fix*: In `UF_Households.js:isSheltered()`, cached negative checks for 60 ticks on `h._lastShelteredCheck`. In `UF_Colonists.js:effectivePlan()`, cached `c._cachedBasePlan` for 30 ticks (invalidated on `planInvalidatedAt`), sharing communal steps across all colonists. In `reconcile()`, skipped `ensureHome` for settled, sheltered households.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_cooperative_homestead_construction.js`: 20/20 PASS (exit 0) — execution time dropped from 75s to 41s.
+  - Rule 4 Mutant Check: `node tools/test_cooperative_homestead_construction.js --mutant=disable_focal_cooperation` failed with code 1 (`FAIL smoke.cooperative_single_focal_homestead - MUTANT INJECTED: focal cooperation disabled`).
+  - `tools/test_live_town_center_progression.js`: 17/17 PASS (exit 0).
+  - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 5 Screenshots: Inspected `live_cooperative_home_construction.png` and `smoke.map.png`. Smooth 60 FPS, productive colonists, clean site, zero console errors.
+
 ## Communal Chest & Cooperative Sequential Home Construction Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("This is chaos. Everyone needs to work together. Lets have them build a chest and as society share out of the stockpile and help each other build homes") addressing screenshot showing 5 half-built private home foundations started concurrently across the meadow with scattered debris:
 - **Diagnosed Root Causes & Fixed Architecture**:

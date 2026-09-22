@@ -302,6 +302,10 @@
             ensureTownHallHomes(people);
             for (const h of all()) {
                 if (h.mergedInto) continue;
+                if (h.isMovedIn && h.home && h.home.isSheltered) {
+                    if (h.home) syncHome(h);
+                    continue;
+                }
                 const mems = members(h);
                 const rep = mems.find(p => p.data && p.data.age >= 15) || mems[0];
                 if (rep) {
@@ -1419,6 +1423,11 @@
         const h = resolve(refH);
         if (!h || !h.home) return false;
         if (h.home.isSheltered === true || h.isSheltered === true) return true;
+        const now = (window.UF && UF.Colonists && UF.Colonists.ticks) ? UF.Colonists.ticks() : 0;
+        if (h._lastShelteredCheck && (now - h._lastShelteredCheck) < 60) {
+            return false;
+        }
+        h._lastShelteredCheck = now;
         if (!strictEnclosure(h, h.home)) return false;
         const d = demands(h);
         const ok = !d.beds && !d.cooking;
@@ -1562,10 +1571,29 @@
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
         isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, hasFloors, join, make,
         designFor, layout, findPlot, invalidateRoomEnclosure, isStructuralEnclosure: isStructuralEnclosureAt, isNaturalRock, strictEnclosure };
-    function checkEnclosures() {
+    function checkEnclosures(area, x, y) {
         const s = state();
         if (!s || !s.byId) return;
+        if (typeof x === "number" && typeof y === "number") {
+            for (const h of Object.values(s.byId)) {
+                if (h.area && area && (h.area.x !== area.x || h.area.y !== area.y)) continue;
+                for (const b of structures(h)) {
+                    if (!b) continue;
+                    if (x < b.x - 1 || x > b.x + b.w || y < b.y - 1 || y > b.y + b.h) continue;
+                    const touches = (b.walls && b.walls.some(w => w.x === x && w.y === y)) ||
+                                    (b.doors && b.doors.some(d => d.x === x && d.y === y)) ||
+                                    (b.floors && b.floors.some(f => f.x === x && f.y === y));
+                    if (touches) {
+                        h._lastShelteredCheck = 0;
+                        strictEnclosure(h, b);
+                    }
+                }
+            }
+            return;
+        }
         for (const h of Object.values(s.byId)) {
+            if (h.isMovedIn && h.home && h.home.isSheltered) continue;
+            h._lastShelteredCheck = 0;
             for (const b of structures(h)) {
                 strictEnclosure(h, b);
             }
@@ -1578,12 +1606,18 @@
         UF.Events.on("colonists:ready", reconcile);
         UF.Events.on("colonists:born", reconcile);
         UF.Events.on("time:day", reconcile);
-        UF.Events.on("objects:changed", checkEnclosures);
-        UF.Events.on("objects:levelChanged", checkEnclosures);
+        UF.Events.on("objects:changed", (area, x, y) => checkEnclosures(area, x, y));
+        UF.Events.on("objects:levelChanged", (area, x, y) => checkEnclosures(area, x, y));
         UF.Events.on("jobs:done", job => {
             const h = job && job.params && resolve(job.params.household);
             if (h && h.home) syncHome(h);
-            checkEnclosures();
+            if (job && (job.type === "build" || job.type === "floor")) {
+                if (job.target && typeof job.target.x === "number") {
+                    checkEnclosures(job.area, job.target.x, job.target.y);
+                } else {
+                    checkEnclosures();
+                }
+            }
         });
         UF.Events.on("world:unitRemoved", u => { if (person(u)) { remember(u, dead(u)); reconcile(); } });
         UF.Events.on("combat:kill", event => { if (event && person(event.target)) remember(event.target, true); });
