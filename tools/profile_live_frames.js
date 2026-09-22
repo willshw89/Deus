@@ -239,11 +239,11 @@ instrumentPlugin('UF_Colonists.js',
         const _t0A = performance.now();`
 );
 instrumentPlugin('UF_Colonists.js',
-    'let decideCount = 0;\n        let lowPriorityPreempted = false;\n        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;\n        for (const u of simulationUnits()) {',
+    'let decideCount = 0;\n        let lowPriorityPreempted = false;\n        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 2 : 1;\n        for (const u of simulationUnits()) {',
     `_tBeforeLoop = performance.now() - _t0A;
         let decideCount = 0;
         let lowPriorityPreempted = false;
-        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;
+        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 2 : 1;
         const _t0Sim = performance.now();
         const _simUnits = simulationUnits();
         _tSimUnits = performance.now() - _t0Sim;
@@ -284,7 +284,7 @@ instrumentPlugin('UF_Colonists.js',
                 }`
 );
 instrumentPlugin('UF_Colonists.js',
-    'return designationJob(u) || getPlanSpec() || haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);',
+    'return designationJob(u) || getPlanSpec() || (hauler ? constructionHaulingJob(u) : null) || footprintClearingJob(u) || (!hauler ? constructionHaulingJob(u) : null) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);',
     `const _t1 = performance.now();
         const j1 = designationJob(u);
         const dtDesig = performance.now() - _t1;
@@ -318,10 +318,7 @@ instrumentPlugin('UF_Colonists.js',
         if (window.__TIMINGS__) {
             if (!window.__TIMINGS__.frontier) window.__TIMINGS__.frontier = [];
             window.__TIMINGS__.frontier.push(dtFrontier);
-        }
-        if (jFrontier) return jFrontier;
-
-        return haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || (tryMakeBed ? tryMakeBed() : null) || autonomousCallingJob(u) || idleJob(u);`
+        return jFrontier || idleJob(u);`
 );
 
 instrumentPlugin('UF_Colonists.js',

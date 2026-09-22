@@ -125,21 +125,6 @@
     window.UF = window.UF || {};
     window.UF.Time = Time;
 
-    // Lock PIXI ticker to 60 FPS to prevent high-refresh monitor frame skipping (judder)
-    const enforceTargetFPS = () => {
-        if (window.Graphics && Graphics._app && Graphics._app.ticker) {
-            Graphics._app.ticker.maxFPS = 60;
-        }
-    };
-    if (window.Graphics && Graphics._createPixiApp) {
-        const _Graphics_createPixiApp = Graphics._createPixiApp;
-        Graphics._createPixiApp = function() {
-            _Graphics_createPixiApp.call(this);
-            enforceTargetFPS();
-        };
-    }
-    enforceTargetFPS();
-
     // More game updates per displayed frame while the map is running (not while paused: the base count then).
     const _determineRepeatNumber = SceneManager.determineRepeatNumber;
     SceneManager.determineRepeatNumber = function(deltaTime) {

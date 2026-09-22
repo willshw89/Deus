@@ -215,7 +215,12 @@
     // Another unit (or a solid non-unit event on screen) already stands there, or an active job reserved it as its stand cell.
     function occupiedIn(area, x, y, unitId) {
         const W = World();
-        for (const u of W.unitsInArea(area.x, area.y, zOf(area))) if (u.id !== unitId && u.x === x && u.y === y) return true;
+        if (W && typeof W.standerAt === "function") {
+            const u = W.standerAt(area.x, area.y, x, y, zOf(area));
+            if (u && u.id !== unitId) return true;
+        } else {
+            for (const u of W.unitsInArea(area.x, area.y, zOf(area))) if (u.id !== unitId && u.x === x && u.y === y) return true;
+        }
         const st = jobState();
         if (st && st.list) {
             for (const j of st.list) {

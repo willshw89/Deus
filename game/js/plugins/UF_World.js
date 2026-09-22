@@ -1072,14 +1072,38 @@
         }
         offOcc = null;
         if (this.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
+        invalidateUnitsCache();
         emit("world:unitAdded", u);
         return u;
     };
+    let _unitsCache = null;
+    function invalidateUnitsCache() { _unitsCache = null; }
+    World.invalidateUnitsCache = invalidateUnitsCache;
     World.unit = id => (World.state && World.state.units[id]) || null;
-    World.units = () => (World.state ? Object.values(World.state.units) : []);
+    World.units = function() {
+        if (!World.state || !World.state.units) return [];
+        if (_unitsCache) return _unitsCache;
+        return (_unitsCache = Object.values(World.state.units));
+    };
     /** Units in an area on one level (z left out = the ground). */
-    World.unitsInArea = (ax, ay, z = 0) => World.units().filter(u => u.area.x === ax && u.area.y === ay && zOf(u) === z);
-    World.unitByName = name => World.units().find(u => u.name === name) || null;
+    World.unitsInArea = function(ax, ay, z = 0) {
+        const all = this.units();
+        const res = [];
+        for (let i = 0; i < all.length; i++) {
+            const u = all[i];
+            if (u && u.area.x === ax && u.area.y === ay && zOf(u) === z) {
+                res.push(u);
+            }
+        }
+        return res;
+    };
+    World.unitByName = function(name) {
+        const all = this.units();
+        for (let i = 0; i < all.length; i++) {
+            if (all[i].name === name) return all[i];
+        }
+        return null;
+    };
     World.removeUnit = function(id) {
         const u = this.unit(id);
         if (!u) return false;
@@ -1087,6 +1111,7 @@
         forgetPath(id);
         delete this.state.units[id];
         offOcc = null;
+        invalidateUnitsCache();
         emit("world:unitRemoved", u);
         return true;
     };

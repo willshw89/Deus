@@ -1061,39 +1061,36 @@
         return !!c && type.passable !== true && chebyshev(x, y, c.site.x, c.site.y) <= c.radius + 1;
     }
     let _claimedTargetsTick = -1;
-    let _claimedTargetsSet = null;
+    const _claimedTargetsMap = new Map();
     function getClaimedTargets() {
-        if (_claimedTargetsTick === localTicks && _claimedTargetsSet) return _claimedTargetsSet;
+        if (_claimedTargetsTick === localTicks) return _claimedTargetsMap;
         _claimedTargetsTick = localTicks;
-        _claimedTargetsSet = new Set();
+        _claimedTargetsMap.clear();
         for (const j of activeJobs()) {
             if (!j.target) continue;
             const z = zOf(j.target);
-            if (j.type) _claimedTargetsSet.add(`${j.assigned || ""}:${j.type}:${z}:${j.target.x},${j.target.y}`);
+            if (j.type) _claimedTargetsMap.set(`${j.type}:${z}:${j.target.x},${j.target.y}`, j.assigned);
             if (j.type === "move" && j.params && j.params.via && j.params.viaTarget) {
-                _claimedTargetsSet.add(`${j.assigned || ""}:${j.params.via}:${z}:${j.params.viaTarget.x},${j.params.viaTarget.y}`);
+                _claimedTargetsMap.set(`${j.params.via}:${z}:${j.params.viaTarget.x},${j.params.viaTarget.y}`, j.assigned);
             }
         }
-        return _claimedTargetsSet;
+        return _claimedTargetsMap;
     }
     function isObjectClaimed(u, x, y, action) {
         const claims = getClaimedTargets();
-        const z = zOf(u);
-        for (const j of activeJobs()) {
-            if (j.assigned === u.id || !j.target || !sameLevel(j.target, u)) continue;
-            if (j.type === action && j.target.x === x && j.target.y === y) return true;
-            if (j.type === "move" && j.params && j.params.via === action && j.params.viaTarget && j.params.viaTarget.x === x && j.params.viaTarget.y === y) return true;
-        }
-        return false;
+        const claimant = claims.get(`${action}:${zOf(u)}:${x},${y}`);
+        return claimant !== undefined && claimant !== u.id;
     }
     const _sourceNearCache = new Map();
     let _sourceNearCacheTick = -1;
+    let _sourceNearCacheInvalidatedAt = -1;
     function objectSourceNear(u, itemId, radius = SEARCH_RADIUS) {
         if (!sourcesOf(itemId).length) return null;
         const rad = Math.min(radius || SEARCH_RADIUS, 36);
-        if (_sourceNearCacheTick !== localTicks) {
+        if (_sourceNearCacheInvalidatedAt !== planInvalidatedAt || localTicks - _sourceNearCacheTick >= 60) {
             _sourceNearCache.clear();
             _sourceNearCacheTick = localTicks;
+            _sourceNearCacheInvalidatedAt = planInvalidatedAt;
         }
         const key = `${itemId}_${Math.floor(u.x / 8)}_${Math.floor(u.y / 8)}_${rad}`;
         if (_sourceNearCache.has(key)) return _sourceNearCache.get(key);
@@ -1106,12 +1103,23 @@
         _sourceNearCache.set(key, res);
         return res;
     }
-    function foodObjectNear(u, radius) {
-        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
+    function foodObjectNear(u, radius = SEARCH_RADIUS) {
+        const rad = Math.min(radius || SEARCH_RADIUS, 36);
+        if (_sourceNearCacheInvalidatedAt !== planInvalidatedAt || localTicks - _sourceNearCacheTick >= 60) {
+            _sourceNearCache.clear();
+            _sourceNearCacheTick = localTicks;
+            _sourceNearCacheInvalidatedAt = planInvalidatedAt;
+        }
+        const key = `food_${Math.floor(u.x / 8)}_${Math.floor(u.y / 8)}_${rad}`;
+        if (_sourceNearCache.has(key)) return _sourceNearCache.get(key);
+
+        const f = scanObjects(levelArea(u), u.x, u.y, rad, (t, x, y) => {
             const act = yieldsFood(t);
             return !!act && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
         });
-        return f ? Object.assign(f, { action: yieldsFood(f.type)[0] }) : null;
+        const res = f ? Object.assign(f, { action: yieldsFood(f.type)[0] }) : null;
+        _sourceNearCache.set(key, res);
+        return res;
     }
     // The colony's own hearth: the fire object at the home site. Cooking and sleeping by the fire happen there,
     // never at some other faction's hearth that happens to be nearer after a long chase.
@@ -1317,6 +1325,7 @@
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
     const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
     let _lastReconcileTick = -Infinity;
+    const PREEMPT_EVERY = 600;
     let _activeJobsTick = -1;
     let _activeJobsCache = null;
     function activeJobs() {
@@ -3360,7 +3369,7 @@
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
-            if (step._noWorkTick === localTicks) continue;
+            if (step._noWorkTick && step._noWorkTick >= planInvalidatedAt && (localTicks - step._noWorkTick < 30)) continue;
             const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
             const isWorkshop = step.build && ["workbench", "tanning_rack", "bowyer_bench", "fletcher_bench", "furnace", "smithy", "weapon_rack"].includes(step.build);
             let group = "bootstrap_build";
@@ -4194,10 +4203,7 @@
         // 1. Timber Progression: target >= 35 logs in the settlement
         const logs = colonyCount("log", u) + colonyCount("wood", u);
         if (logs < 35) {
-            const tree = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
-                if (!t.actions || !t.actions.chop) return false;
-                return isHarvestable(t, x, y, "chop");
-            });
+            const tree = objectSourceNear(u, "log", radius) || objectSourceNear(u, "wood", radius);
             if (tree) {
                 const tool = toolJob(u, "chop");
                 if (tool) return tool;
@@ -4208,13 +4214,9 @@
         // 2. Stone Progression: target >= 30 stones in the settlement
         const stone = colonyCount("stone", u);
         if (stone < 30) {
-            const rock = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
-                const act = t.actions && (t.actions.quarry ? "quarry" : t.actions.mine ? "mine" : t.actions.pick ? "pick" : null);
-                if (!act) return false;
-                return isHarvestable(t, x, y, act);
-            });
+            const rock = objectSourceNear(u, "stone", radius);
             if (rock) {
-                const act = rock.type.actions.quarry ? "quarry" : rock.type.actions.mine ? "mine" : "pick";
+                const act = rock.action || (rock.type.actions && (rock.type.actions.quarry ? "quarry" : rock.type.actions.mine ? "mine" : "pick")) || "pick";
                 const tool = toolJob(u, act);
                 if (tool) return tool;
                 return give(u, { type: act, target: { x: rock.x, y: rock.y }, params: { frontier: "stone" } });
@@ -4224,14 +4226,9 @@
         // 3. Fiber Progression: target >= 25 fiber/straw
         const fiber = colonyCount("fiber", u) + colonyCount("straw", u);
         if (fiber < 25) {
-            const plant = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
-                const act = t.actions && (t.actions.gather ? "gather" : t.actions.harvest ? "harvest" : null);
-                if (!act) return false;
-                if (!yieldsItem(t, "fiber") && !yieldsItem(t, "straw")) return false;
-                return isHarvestable(t, x, y, act);
-            });
+            const plant = objectSourceNear(u, "fiber", radius) || objectSourceNear(u, "straw", radius);
             if (plant) {
-                const act = plant.type.actions.gather ? "gather" : "harvest";
+                const act = plant.action || (plant.type.actions && plant.type.actions.gather ? "gather" : "harvest");
                 return give(u, { type: act, target: { x: plant.x, y: plant.y }, params: { frontier: "fiber" } });
             }
         }
@@ -4239,13 +4236,9 @@
         // 4. Food Progression: target >= 25 food
         const food = foodStored(u).reduce((sum, it) => sum + (it.count || 1), 0);
         if (food < 25) {
-            const foodObj = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
-                const act = yieldsFood(t);
-                if (!act) return false;
-                return isHarvestable(t, x, y, act[0]);
-            });
+            const foodObj = foodObjectNear(u, radius);
             if (foodObj) {
-                const act = yieldsFood(foodObj.type)[0];
+                const act = foodObj.action || (foodObj.type && yieldsFood(foodObj.type)[0]) || "gather";
                 return give(u, { type: act, target: { x: foodObj.x, y: foodObj.y }, params: { frontier: "food" } });
             }
             const prey = preyNear(u, huntRadius());
@@ -4399,9 +4392,9 @@
 
         const tryMakeBed = () => (!hasBedObject(u) && (evening() || (u.data && u.data.needs && u.data.needs.sleep > 50)) ? (give(u, makeBedJob(u))) : null);
         const Callings = getCallings();
-        const haulerStaging = () => ((Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null);
+        const hauler = Callings && Callings.isHauler(u);
         const getPlanSpec = () => (!lazy ? ((UF.Agriculture && UF.Agriculture.planJob && UF.Agriculture.planJob(u)) || planJob(u)) : null);
-        return designationJob(u) || getPlanSpec() || haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
+        return designationJob(u) || getPlanSpec() || (hauler ? constructionHaulingJob(u) : null) || footprintClearingJob(u) || (!hauler ? constructionHaulingJob(u) : null) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4437,14 +4430,15 @@
         const W = World();
         const c = colonyState();
         if (!enabled || !J || !W || !c) return;
-        updateColonyRadius(c);
-        ensureSettlementActors();
-        for (const local of settlementStates()) {
-            if (local.adopted || !levelSupported(zOf(local))) continue;
-            const s = homeSiteRecord(local);
-            if (s) {
-                adoptSiteStockpiles(local, s);
-                local.adopted = true;
+        if (localTicks % 300 === 5) {
+            ensureSettlementActors();
+            for (const local of settlementStates()) {
+                if (local.adopted || !levelSupported(zOf(local))) continue;
+                const s = homeSiteRecord(local);
+                if (s) {
+                    adoptSiteStockpiles(local, s);
+                    local.adopted = true;
+                }
             }
         }
         const t = ticks();
@@ -4456,7 +4450,7 @@
         }
         let decideCount = 0;
         let lowPriorityPreempted = false;
-        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;
+        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 2 : 1;
         for (const u of simulationUnits()) {
             if (!sameLevel(u, c) && (t % 60 !== (u.id % 60))) continue;
             if (!u.data.capabilities) {
@@ -4913,7 +4907,7 @@
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
         const clearUnitCaches = () => { simUnitsCache = null; colonistsCache = null; allFactionPeopleCache = null; simUnitsCacheTick = -1; allFactionPeopleCacheTick = -1; _lastHpCheckAt.clear(); };
-        const clearObjectCaches = () => { planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _siteCountCache.clear(); };
+        const clearObjectCaches = () => { planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _siteCountCache.clear(); _sourceNearCache.clear(); };
         UF.Events.on("world:unitAdded", clearUnitCaches);
         UF.Events.on("world:unitRemoved", clearUnitCaches);
         UF.Events.on("colonists:born", clearUnitCaches);

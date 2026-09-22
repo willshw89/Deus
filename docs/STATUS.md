@@ -9,6 +9,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Full-Engine Frame Pacing, O(1) Object Claim Map & Ticker Smoothness Delivered — 2026-09-22 (Gemini)
+Delivered per user directives ("nope, im still getting choppy frames", "Make any optomizations we can and try to improve framerate") auditing and eliminating all remaining engine-wide sources of frame drops, micro-stutter, and garbage collection pressure:
+1. **Ticker Refresh Lock Elimination (`UF_TimeSpeed.js`)**:
+   - Diagnosed that setting `Graphics._app.ticker.maxFPS = 60` caused PIXI v5's internal ticker to drop frames whenever Chromium's `requestAnimationFrame` timing had minor sub-millisecond jitter (<16.66ms), dropping 60Hz displays to ~30-40 FPS and causing severe 3:2 pull-down judder on 144Hz displays.
+   - Removed artificial ticker FPS clamping, allowing Chromium and NW.js to present at native display refresh while RMMZ's internal `determineRepeatNumber` accumulator synchronizes 60Hz simulation updates seamlessly.
+2. **O(1) Spatial Map for Object Claims (`UF_Colonists.js:1060-1085`)**:
+   - Diagnosed that `isObjectClaimed` in `UF_Colonists.js` was iterating every active job and evaluating string manipulations and level comparisons for *every single tree, rock, and shrub* checked during area scans.
+   - Replaced inner job loops with a single precomputed Map (`_claimedTargetsMap.get(`${action}:${z}:${x},${y}`)`), reducing object claim checks from O(N_jobs) to O(1).
+3. **Multi-Tick Resource Scan Caching (`UF_Colonists.js:1085-1120, 4200-4250`)**:
+   - `autonomousFrontierProgression` previously ran 4 separate raw `scanObjects` passes (up to 9,600+ grid cell reads) every 5 ticks per idle colonist whenever timber, stone, fiber, or food thresholds were unmet.
+   - Wired `autonomousFrontierProgression` into `objectSourceNear` and `foodObjectNear` with a 60-tick cache invalidated automatically upon `objects:changed` events (`clearObjectCaches`), eliminating redundant grid traversals across colonists.
+4. **Unit Collection Cache & Direct Array Iteration (`UF_World.js:1072-1115`)**:
+   - Cached `_unitsCache` in `World.units()`, invalidating only on `World.addUnit`, `World.removeUnit`, or save load.
+   - Rewrote `World.unitsInArea` and `World.unitByName` to iterate `this.units()` directly without creating temporary intermediate arrays with `Object.values()` and `.filter()`.
+5. **Zero-Allocation Stander Check (`UF_Jobs.js:216`)**:
+   - Replaced `W.unitsInArea` loop in `occupiedIn` with direct `W.standerAt(area.x, area.y, x, y, zOf(area))`.
+6. **Decision Pacing & Missing Constant Restoration (`UF_Colonists.js`)**:
+   - Paced colonist decision rate post-bootstrap to `MAX_DECIDE_PER_SCAN = 1` to prevent stacking multiple heavy tree searches in a single 16ms frame.
+   - Restored missing `PREEMPT_EVERY = 600` constant, preventing ReferenceErrors during urgent need preemption.
+- **Verification**:
+   - `tools/run_tests.js smoke`: 13/13 PASS.
+   - `tools/run_tests.js colonists`: 16/16 PASS.
+   - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (`live_continuous_progression_active.png`).
+
 ## Fluid Simulation & Water/Lava Rendering Optimization Delivered — 2026-09-22 (Gemini)
 Delivered per user directive ("See if therre are any ways we can optomize the plugins we made today.. like the water, or lava....") auditing, profiling, and optimizing all fluid simulation, water/lava breach, and subterranean rendering subsystems:
 1. **`Sprite_UFFloodOverlay` Per-Frame Grid Scan & Set Allocation Elimination (`UF_Levels.js:1654-1735`)**:
