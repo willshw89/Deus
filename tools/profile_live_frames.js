@@ -27,10 +27,207 @@ function instrumentPlugin(filename, search, replace) {
     fs.writeFileSync(p, code, 'utf8');
 }
 
+// Instrument Graphics._onTick in snapshot rmmz_core.js
+const rmmzCorePath = path.join(SNAPSHOT_DIR, 'js', 'rmmz_core.js');
+let rmmzCoreCode = fs.readFileSync(rmmzCorePath, 'utf8');
+rmmzCoreCode = rmmzCoreCode.replace(
+    'Graphics._onTick = function(deltaTime) {',
+    `Graphics._onTick = function(deltaTime) {
+        if (!window.__TIMINGS__) window.__TIMINGS__ = {};
+        if (!window.__TIMINGS__.raf_delta) window.__TIMINGS__.raf_delta = [];
+        if (!window.__TIMINGS__.tick_handler) window.__TIMINGS__.tick_handler = [];
+        if (!window.__TIMINGS__.pixi_render) window.__TIMINGS__.pixi_render = [];
+        const _now = performance.now();
+        if (Graphics.__lastTickTime) {
+            window.__TIMINGS__.raf_delta.push(_now - Graphics.__lastTickTime);
+        }
+        Graphics.__lastTickTime = _now;
+        const _t0Tick = performance.now();`
+);
+rmmzCoreCode = rmmzCoreCode.replace(
+    'if (this._canRender()) {\n        this._app.render();\n    }',
+    `if (this._tickHandler) {}
+    window.__TIMINGS__.tick_handler.push(performance.now() - _t0Tick);
+    if (this._canRender()) {
+        const _t0Render = performance.now();
+        this._app.render();
+        window.__TIMINGS__.pixi_render.push(performance.now() - _t0Render);
+    }`
+);
+fs.writeFileSync(rmmzCorePath, rmmzCoreCode, 'utf8');
+
+// Instrument SceneManager in snapshot rmmz_managers.js
+// Instrument SceneManager in snapshot rmmz_managers.js
+const rmmzManagersPath = path.join(SNAPSHOT_DIR, 'js', 'rmmz_managers.js');
+let rmmzMgrCode = fs.readFileSync(rmmzManagersPath, 'utf8');
+rmmzMgrCode = rmmzMgrCode.replace(
+    'const n = this.determineRepeatNumber(deltaTime);',
+    `const n = this.determineRepeatNumber(deltaTime);
+    if (window.__TIMINGS__) {
+        if (!window.__TIMINGS__.repeat_n) window.__TIMINGS__.repeat_n = [];
+        window.__TIMINGS__.repeat_n.push(n);
+    }`
+);
+rmmzMgrCode = rmmzMgrCode.replace(
+    'SceneManager.updateMain = function() {\n    this.updateFrameCount();\n    this.updateInputData();\n    this.updateEffekseer();\n    this.changeScene();\n    this.updateScene();\n};',
+    `SceneManager.updateMain = function() {
+        const _t0Main = performance.now();
+        const _t0In = performance.now();
+        this.updateFrameCount();
+        this.updateInputData();
+        const _dtIn = performance.now() - _t0In;
+        const _t0Eff = performance.now();
+        this.updateEffekseer();
+        const _dtEff = performance.now() - _t0Eff;
+        this.changeScene();
+        const _t0Scn = performance.now();
+        this.updateScene();
+        const _dtScn = performance.now() - _t0Scn;
+        const _dtMain = performance.now() - _t0Main;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.update_main) window.__TIMINGS__.update_main = [];
+            window.__TIMINGS__.update_main.push(_dtMain);
+            if (!window.__TIMINGS__.main_input) window.__TIMINGS__.main_input = [];
+            window.__TIMINGS__.main_input.push(_dtIn);
+            if (!window.__TIMINGS__.main_eff) window.__TIMINGS__.main_eff = [];
+            window.__TIMINGS__.main_eff.push(_dtEff);
+            if (!window.__TIMINGS__.main_scene) window.__TIMINGS__.main_scene = [];
+            window.__TIMINGS__.main_scene.push(_dtScn);
+        }
+    };`
+);
+rmmzMgrCode = rmmzMgrCode.replace(
+    'SceneManager.updateScene = function() {\n    if (this._scene) {\n        if (this._scene.isStarted()) {\n            if (this.isGameActive()) {\n                this._scene.update();\n            }\n        } else if (this._scene.isReady()) {\n            this.onBeforeSceneStart();\n            this._scene.start();\n            this.onSceneStart();\n        }\n    }\n};',
+    `SceneManager.updateScene = function() {
+        if (this._scene) {
+            if (this._scene.isStarted()) {
+                if (this.isGameActive()) {
+                    const _t0ScnUp = performance.now();
+                    this._scene.update();
+                    const _dtScnUp = performance.now() - _t0ScnUp;
+                    if (window.__TIMINGS__) {
+                        if (!window.__TIMINGS__.scene_update_outer) window.__TIMINGS__.scene_update_outer = [];
+                        window.__TIMINGS__.scene_update_outer.push(_dtScnUp);
+                    }
+                }
+            } else if (this._scene.isReady()) {
+                this.onBeforeSceneStart();
+                this._scene.start();
+                this.onSceneStart();
+            }
+        }
+    };`
+);
+fs.writeFileSync(rmmzManagersPath, rmmzMgrCode, 'utf8');
+
+// Instrument Scene_Base and Scene_Map in snapshot rmmz_scenes.js
+const rmmzScenesPath = path.join(SNAPSHOT_DIR, 'js', 'rmmz_scenes.js');
+let rmmzScenesCode = fs.readFileSync(rmmzScenesPath, 'utf8');
+rmmzScenesCode = rmmzScenesCode.replace(
+    'Scene_Base.prototype.updateChildren = function() {\n    for (const child of this.children) {\n        if (child.update) {\n            child.update();\n        }\n    }\n};',
+    `Scene_Base.prototype.updateChildren = function() {
+        const _t0Kids = performance.now();
+        for (const child of this.children) {
+            if (child.update) {
+                const _t0C = performance.now();
+                child.update();
+                const _dtC = performance.now() - _t0C;
+                if (window.__TIMINGS__ && _dtC > 0.5) {
+                    const cname = child.constructor ? child.constructor.name : "unknown";
+                    const k = "child_" + cname;
+                    if (!window.__TIMINGS__[k]) window.__TIMINGS__[k] = [];
+                    window.__TIMINGS__[k].push(_dtC);
+                }
+            }
+        }
+        const _dtKids = performance.now() - _t0Kids;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.scene_updateChildren) window.__TIMINGS__.scene_updateChildren = [];
+            window.__TIMINGS__.scene_updateChildren.push(_dtKids);
+        }
+    };`
+);
+rmmzScenesCode = rmmzScenesCode.replace(
+    'Scene_Map.prototype.update = function() {\n    Scene_Message.prototype.update.call(this);\n    this.updateDestination();\n    this.updateMenuButton();\n    this.updateMapNameWindow();\n    this.updateMainMultiply();\n    if (this.isSceneChangeOk()) {\n        this.updateScene();\n    } else if (SceneManager.isNextScene(Scene_Battle)) {\n        this.updateEncounterEffect();\n    }\n    this.updateWaitCount();\n};',
+    `Scene_Map.prototype.update = function() {
+        const _t0Map = performance.now();
+        const _t0Msg = performance.now();
+        Scene_Message.prototype.update.call(this);
+        const _dtMsg = performance.now() - _t0Msg;
+        this.updateDestination();
+        this.updateMenuButton();
+        this.updateMapNameWindow();
+        const _t0Mult = performance.now();
+        this.updateMainMultiply();
+        const _dtMult = performance.now() - _t0Mult;
+        if (this.isSceneChangeOk()) {
+            this.updateScene();
+        } else if (SceneManager.isNextScene(Scene_Battle)) {
+            this.updateEncounterEffect();
+        }
+        this.updateWaitCount();
+        const _dtMap = performance.now() - _t0Map;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.core_scene_map) window.__TIMINGS__.core_scene_map = [];
+            window.__TIMINGS__.core_scene_map.push(_dtMap);
+            if (!window.__TIMINGS__.core_msg_children) window.__TIMINGS__.core_msg_children = [];
+            window.__TIMINGS__.core_msg_children.push(_dtMsg);
+            if (!window.__TIMINGS__.core_map_multiply) window.__TIMINGS__.core_map_multiply = [];
+            window.__TIMINGS__.core_map_multiply.push(_dtMult);
+        }
+    };`
+);
+rmmzScenesCode = rmmzScenesCode.replace(
+    'Scene_Map.prototype.updateMain = function() {',
+    `Scene_Map.prototype.updateMain = function() {
+        const _t0MapMain = performance.now();`
+);
+rmmzScenesCode = rmmzScenesCode.replace(
+    '$gameScreen.update();\n};',
+    `$gameScreen.update();
+    if (window.__TIMINGS__) {
+        if (!window.__TIMINGS__.game_map_main) window.__TIMINGS__.game_map_main = [];
+        window.__TIMINGS__.game_map_main.push(performance.now() - _t0MapMain);
+    }
+};`
+);
+fs.writeFileSync(rmmzScenesPath, rmmzScenesCode, 'utf8');
+
+// Instrument Spriteset_Map in snapshot rmmz_sprites.js
+const rmmzSpritesPath = path.join(SNAPSHOT_DIR, 'js', 'rmmz_sprites.js');
+let rmmzSpritesCode = fs.readFileSync(rmmzSpritesPath, 'utf8');
+rmmzSpritesCode = rmmzSpritesCode.replace(
+    'Spriteset_Map.prototype.update = function() {\n    Spriteset_Base.prototype.update.call(this);\n    this.updateTileset();\n    this.updateParallax();\n    this.updateTilemap();\n    this.updateShadow();\n    this.updateWeather();\n    this.updateAnimations();\n    this.updateBalloons();\n};',
+    `Spriteset_Map.prototype.update = function() {
+        const _t0Spriteset = performance.now();
+        Spriteset_Base.prototype.update.call(this);
+        const _dtBase = performance.now() - _t0Spriteset;
+        const _t0Tilemap = performance.now();
+        this.updateTileset();
+        this.updateParallax();
+        this.updateTilemap();
+        this.updateShadow();
+        this.updateWeather();
+        this.updateAnimations();
+        this.updateBalloons();
+        const _dtTilemap = performance.now() - _t0Tilemap;
+        const _dtTotal = performance.now() - _t0Spriteset;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.spriteset_total) window.__TIMINGS__.spriteset_total = [];
+            window.__TIMINGS__.spriteset_total.push(_dtTotal);
+            if (!window.__TIMINGS__.spriteset_base) window.__TIMINGS__.spriteset_base = [];
+            window.__TIMINGS__.spriteset_base.push(_dtBase);
+            if (!window.__TIMINGS__.spriteset_tilemap) window.__TIMINGS__.spriteset_tilemap = [];
+            window.__TIMINGS__.spriteset_tilemap.push(_dtTilemap);
+        }
+    };`
+);
+fs.writeFileSync(rmmzSpritesPath, rmmzSpritesCode, 'utf8');
+
 // 1. Initialize timings in UF_Core.js
 instrumentPlugin('UF_Core.js',
     '(() => {',
-    '(() => { window.__TIMINGS__ = { Colonists_scan: [], Colonists_total: [], Jobs: [], Wildlife: [], Combat: [], Fire: [], Fog: [], Environment: [], CoreMapEvents: [] };'
+    '(() => { if (!window.__TIMINGS__) window.__TIMINGS__ = {}; Object.assign(window.__TIMINGS__, { Colonists_scan: [], Colonists_total: [], Jobs: [], Wildlife: [], Combat: [], Fire: [], Fog: [], Environment: [], CoreMapEvents: [] });'
 );
 
 // 2. UF_Colonists.js
@@ -42,10 +239,11 @@ instrumentPlugin('UF_Colonists.js',
         const _t0A = performance.now();`
 );
 instrumentPlugin('UF_Colonists.js',
-    'let decideCount = 0;\n        const MAX_DECIDE_PER_SCAN = 12;\n        for (const u of simulationUnits()) {',
+    'let decideCount = 0;\n        let lowPriorityPreempted = false;\n        const MAX_DECIDE_PER_SCAN = 1;\n        for (const u of simulationUnits()) {',
     `_tBeforeLoop = performance.now() - _t0A;
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 12;
+        let lowPriorityPreempted = false;
+        const MAX_DECIDE_PER_SCAN = 1;
         const _t0Sim = performance.now();
         const _simUnits = simulationUnits();
         _tSimUnits = performance.now() - _t0Sim;
@@ -86,7 +284,7 @@ instrumentPlugin('UF_Colonists.js',
                 }`
 );
 instrumentPlugin('UF_Colonists.js',
-    'return designationJob(u) || planSpec || haulerStaging || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);',
+    'return designationJob(u) || getPlanSpec() || haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);',
     `const _t1 = performance.now();
         const j1 = designationJob(u);
         const dtDesig = performance.now() - _t1;
@@ -97,7 +295,7 @@ instrumentPlugin('UF_Colonists.js',
         if (j1) return j1;
 
         const _t2 = performance.now();
-        const jPlan = planSpec;
+        const jPlan = getPlanSpec();
         const dtPlan = performance.now() - _t2;
         if (window.__TIMINGS__) {
             if (!window.__TIMINGS__.plan) window.__TIMINGS__.plan = [];
@@ -123,7 +321,7 @@ instrumentPlugin('UF_Colonists.js',
         }
         if (jFrontier) return jFrontier;
 
-        return haulerStaging || footprintClearingJob(u) || constructionHaulingJob(u) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);`
+        return haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || (tryMakeBed ? tryMakeBed() : null) || autonomousCallingJob(u) || idleJob(u);`
 );
 
 instrumentPlugin('UF_Colonists.js',
@@ -169,6 +367,41 @@ instrumentPlugin('UF_Environment.js',
     'Game_Map.prototype.update = function(sceneActive) {\n        _Game_Map_update.call(this, sceneActive);\n        const _et0 = performance.now();\n        frameCount++;\n        updateEnvironment();\n        if (window.__TIMINGS__) window.__TIMINGS__.Environment.push(performance.now() - _et0);\n    };'
 );
 
+// 8. UF_Perspective25D.js
+instrumentPlugin('UF_Perspective25D.js',
+    'Sprite_Character.prototype.update = function() {\n        _Sprite_Character_update.call(this);\n        this.update2DShadow();\n        this.updateOcclusion();\n    };',
+    `Sprite_Character.prototype.update = function() {
+        _Sprite_Character_update.call(this);
+        const _t0Sh = performance.now();
+        this.update2DShadow();
+        const _dtSh = performance.now() - _t0Sh;
+        const _t0Occ = performance.now();
+        this.updateOcclusion();
+        const _dtOcc = performance.now() - _t0Occ;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.p25d_shadow) window.__TIMINGS__.p25d_shadow = [];
+            window.__TIMINGS__.p25d_shadow.push(_dtSh);
+            if (!window.__TIMINGS__.p25d_occlusion) window.__TIMINGS__.p25d_occlusion = [];
+            window.__TIMINGS__.p25d_occlusion.push(_dtOcc);
+        }
+    };`
+);
+
+// 9. UF_Interact.js
+instrumentPlugin('UF_Interact.js',
+    'Spriteset_Map.prototype.update = function() {\n        _Spriteset_Map_update.call(this);\n        if (this._ufDesignations) this._ufDesignations.sync();\n    };',
+    `Spriteset_Map.prototype.update = function() {
+        _Spriteset_Map_update.call(this);
+        const _t0D = performance.now();
+        if (this._ufDesignations) this._ufDesignations.sync();
+        const _dtD = performance.now() - _t0D;
+        if (window.__TIMINGS__) {
+            if (!window.__TIMINGS__.interact_sync) window.__TIMINGS__.interact_sync = [];
+            window.__TIMINGS__.interact_sync.push(_dtD);
+        }
+    };`
+);
+
 const testJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Test.js');
 let testCode = fs.readFileSync(testJsPath, 'utf8');
 
@@ -180,12 +413,13 @@ const hookCode = `
         await t.waitFrames(120);
 
         const avg = arr => arr && arr.length ? (arr.reduce((a,b)=>a+b, 0) / arr.length).toFixed(2) : "0.00";
+        const steadyAvg = arr => arr && arr.length > 10 ? (arr.slice(10).reduce((a,b)=>a+b, 0) / (arr.length - 10)).toFixed(2) : avg(arr);
         const max = arr => arr && arr.length ? Math.max(...arr).toFixed(2) : "0.00";
 
         let lines = [];
         const tim = window.__TIMINGS__ || {};
         for (const k of Object.keys(tim)) {
-            lines.push(k + ": avg=" + avg(tim[k]) + "ms, max=" + max(tim[k]) + "ms (calls=" + (tim[k] ? tim[k].length : 0) + ")");
+            lines.push(k + ": steady=" + steadyAvg(tim[k]) + "ms, avg=" + avg(tim[k]) + "ms, max=" + max(tim[k]) + "ms (calls=" + (tim[k] ? tim[k].length : 0) + ")");
         }
 
         const summary = lines.join(" | ");

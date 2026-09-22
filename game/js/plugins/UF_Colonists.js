@@ -1078,18 +1078,25 @@
         }
         return false;
     }
-    function objectSourceNear(u, itemId, radius) {
+    const _sourceNearCache = new Map();
+    let _sourceNearCacheTick = -1;
+    function objectSourceNear(u, itemId, radius = SEARCH_RADIUS) {
         if (!sourcesOf(itemId).length) return null;
-        const fast = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
-            const act = yieldsItem(t, itemId);
-            return !!act && (t.id === "rocks_small" || (t.actions && t.actions[act[0]] && t.actions[act[0]].work <= 40)) && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
-        });
-        if (fast) return Object.assign(fast, { action: yieldsItem(fast.type, itemId)[0] });
-        const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
+        const rad = Math.min(radius || SEARCH_RADIUS, 36);
+        if (_sourceNearCacheTick !== localTicks) {
+            _sourceNearCache.clear();
+            _sourceNearCacheTick = localTicks;
+        }
+        const key = `${itemId}_${Math.floor(u.x / 8)}_${Math.floor(u.y / 8)}_${rad}`;
+        if (_sourceNearCache.has(key)) return _sourceNearCache.get(key);
+
+        const f = scanObjects(levelArea(u), u.x, u.y, rad, (t, x, y) => {
             const act = yieldsItem(t, itemId);
             return !!act && !sitePiece(t, x, y, u) && !isObjectClaimed(u, x, y, act[0]);
         });
-        return f ? Object.assign(f, { action: yieldsItem(f.type, itemId)[0] }) : null;
+        const res = f ? Object.assign(f, { action: yieldsItem(f.type, itemId)[0] }) : null;
+        _sourceNearCache.set(key, res);
+        return res;
     }
     function foodObjectNear(u, radius) {
         const f = scanObjects(levelArea(u), u.x, u.y, radius, (t, x, y) => {
@@ -1537,7 +1544,16 @@
         return null;
     }
 
+    const _foodStoredCache = new Map();
+    let _foodStoredCacheTick = -1;
     const foodStored = ref => {
+        if (_foodStoredCacheTick !== localTicks) {
+            _foodStoredCache.clear();
+            _foodStoredCacheTick = localTicks;
+        }
+        const c = colonyState(ref);
+        const key = `${c ? c.siteId || "site" : "site"}:${c ? zOf(c) : 0}`;
+        if (_foodStoredCache.has(key)) return _foodStoredCache.get(key);
         const I = Items();
         const out = [];
         if (!I) return out;
@@ -1550,6 +1566,7 @@
                 }
             }
         }
+        _foodStoredCache.set(key, out);
         return out;
     };
     const rawFood = t => isFoodType(t) && hasTag(t, "raw");
@@ -2888,9 +2905,20 @@
         }
         return t;
     };
+    const _siteCountCache = new Map();
+    let _siteCountCacheTick = -1;
     function siteCount(objectId, ref) {
         const c = colonyState(ref), O = Objects();
-        return c && O ? O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, id: objectId }).length : 0;
+        if (!c || !O) return 0;
+        if (_siteCountCacheTick !== localTicks) {
+            _siteCountCache.clear();
+            _siteCountCacheTick = localTicks;
+        }
+        const key = `${objectId}_${c.id || "0"}`;
+        if (_siteCountCache.has(key)) return _siteCountCache.get(key);
+        const count = O.findIn(levelArea(c), { near: { x: c.site.x, y: c.site.y }, radius: c.radius + 1, id: objectId, unsorted: true }).length;
+        _siteCountCache.set(key, count);
+        return count;
     }
     // A build step's cells: [{ x, y, state: "done" | "skipped" | "todo" }]. Furniture (passable objects) and the site's
     // own centre piece count wherever the site already has them; walls are counted cell by cell.
@@ -2898,6 +2926,9 @@
         const c = colonyState(ref), O = Objects();
         const out = [];
         if (!c || !O) return out;
+        if (step._cachedCells && step._cachedCellsTick === localTicks && step._cachedCellsInvalidatedAt === planInvalidatedAt) {
+            return step._cachedCells;
+        }
         const isFloor = step.build === "road" || (step.build !== "floor_straw" && ((window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build)));
         if (isFloor) {
             const W = World(), F = window.UF && UF.Floors, T = window.UF && UF.Tiles;
@@ -2913,6 +2944,9 @@
                 }
                 out.push({ x, y, state, here });
             }
+            step._cachedCells = out;
+            step._cachedCellsTick = localTicks;
+            step._cachedCellsInvalidatedAt = planInvalidatedAt;
             return out;
         }
         const t = stepObject(step);
@@ -2933,6 +2967,9 @@
             else if (zOf(c) !== 0 && (!World().walkable || !World().walkable(c.area.x, c.area.y, x, y, { z: zOf(c), ground: true }))) state = step.exact ? "blocked" : "skipped"; // no excavation or unsupported airborne construction
             out.push({ x, y, state, here });
         }
+        step._cachedCells = out;
+        step._cachedCellsTick = localTicks;
+        step._cachedCellsInvalidatedAt = planInvalidatedAt;
         return out;
     }
     const outputOf = recipe => Object.keys((recipe && recipe.outputs) || {})[0] || null;
@@ -2946,9 +2983,19 @@
         }
         return holds(u, out);
     }
+    const _colonyCountCache = new Map();
+    let _colonyCountCacheTick = -1;
     function colonyCount(typeId, ref) {
-        const I = Items(), c = colonyState(ref);
-        if (!I || !c) return 0;
+        if (_colonyCountCacheTick !== localTicks) {
+            _colonyCountCache.clear();
+            _colonyCountCacheTick = localTicks;
+        }
+        const c = colonyState(ref);
+        if (!c) return 0;
+        const key = `${typeId}:${c.siteId || "site"}:${zOf(c)}`;
+        if (_colonyCountCache.has(key)) return _colonyCountCache.get(key);
+        const I = Items();
+        if (!I) return 0;
         const types = [typeId];
         if (typeId === "wood") types.push("log");
         else if (typeId === "log") types.push("wood");
@@ -2972,6 +3019,7 @@
                 }
             }
         }
+        _colonyCountCache.set(key, n);
         return n;
     }
     const stockCount = (step, ref) => foodStored(ref).filter(it => (step.stock || []).some(tag => hasTag(itemType(it.type), tag))).reduce((n, it) => n + it.count, 0);
@@ -3047,7 +3095,7 @@
     };
 
     // What a colonist would do for a build step: [{ type, target, params }] candidates in order of preference.
-    function buildStepJob(u, step) {
+    function buildStepJob(u, step, failedMaterials) {
         const I = Items();
         const isFloor = step.build === "road" || (step.build !== "floor_straw" && ((window.UF && UF.Floors && UF.Floors.FLOOR_IDS && UF.Floors.FLOOR_IDS.includes(step.build)) || /^floor_/.test(step.build)));
         if (isFloor) {
@@ -3056,6 +3104,7 @@
             const floorSpec = cult.floor || { kind: step.build, item: step.build === "floor_stone" ? "stone" : step.build === "floor_rushes" ? "straw" : "log", count: 1 };
             const itemNeeded = step.build === "road" ? null : floorSpec.item;
             const countNeeded = step.build === "road" ? 0 : (floorSpec.count || 1);
+            if (itemNeeded && failedMaterials && failedMaterials.has(itemNeeded)) return null;
             let itemSourceSearched = false, itemSrc = null;
             for (const cell of buildCells(step, u)) {
                 if (cell.state !== "todo") continue;
@@ -3077,14 +3126,15 @@
                     return { type: "floor", target, params: { kind: step.build, item: itemNeeded, count: countNeeded, force: true, plan: step.id } };
                 }
                 if (inFlight) continue;
-                const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u, itemNeeded) && (f.x !== cell.x || f.y !== cell.y));
+                const ground = groundItemsNear(u, { radius: Math.min(SEARCH_RADIUS + 12, 36), id: itemNeeded }).find(f => !onBuildCell(f.x, f.y, u, itemNeeded) && (f.x !== cell.x || f.y !== cell.y));
                 if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
                 if (!itemSourceSearched) {
                     itemSourceSearched = true;
-                    itemSrc = objectSourceNear(u, itemNeeded, SEARCH_RADIUS) || objectSourceNear(u, itemNeeded, 90);
+                    itemSrc = objectSourceNear(u, itemNeeded, SEARCH_RADIUS);
                 }
                 if (itemSrc) return { type: itemSrc.action, target: { x: itemSrc.x, y: itemSrc.y }, params: { plan: step.id } };
             }
+            if (itemNeeded && failedMaterials) failedMaterials.add(itemNeeded);
             return null;
         }
         const t = stepObject(step);
@@ -3099,12 +3149,13 @@
             return cnt;
         };
         const candidateCells = buildCells(step, u).filter(cell => cell.state === "todo");
-        candidateCells.sort((a, b) => {
-            const readyA = Object.keys(needs).every(id => countOnCellAt(a, id) >= (needs[id] | 0)) ? 1 : 0;
-            const readyB = Object.keys(needs).every(id => countOnCellAt(b, id) >= (needs[id] | 0)) ? 1 : 0;
-            if (readyB !== readyA) return readyB - readyA;
-            return (Math.hypot(a.x - u.x, a.y - u.y) - Math.hypot(b.x - u.x, b.y - u.y));
-        });
+        if (candidateCells.length > 1) {
+            for (const cCell of candidateCells) {
+                cCell._dist = Math.hypot(cCell.x - u.x, cCell.y - u.y);
+                cCell._ready = Object.keys(needs).every(id => countOnCellAt(cCell, id) >= (needs[id] | 0)) ? 1 : 0;
+            }
+            candidateCells.sort((a, b) => (b._ready - a._ready) || (a._dist - b._dist));
+        }
         const missingFailed = new Set();
         for (const cell of candidateCells) {
             const target = { x: cell.x, y: cell.y };
@@ -3153,7 +3204,7 @@
             }
 
             const m = missing[0];
-            if (missingFailed.has(m)) continue;
+            if (missingFailed.has(m) || (failedMaterials && failedMaterials.has(m))) continue;
 
             // Resource Resolver Integration: check stored/accessible materials FIRST
             if (window.UF && UF.Resources && UF.Resources.resolve) {
@@ -3180,14 +3231,14 @@
             }
 
             let carried = carriedOf(u, m)[0];
-            let ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
-            let src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
+            let ground = groundItemsNear(u, { radius: Math.min(SEARCH_RADIUS + 12, 36), id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
+            let src = objectSourceNear(u, m, SEARCH_RADIUS);
             if (!carried && !ground && !src) {
                 const alt = m === "wood" ? "log" : m === "straw" ? "fiber" : m === "stone" ? "rocks_small" : null;
                 if (alt) {
                     carried = carriedOf(u, alt)[0];
-                    ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: alt }).find(f => !onBuildCell(f.x, f.y, u, alt) && (f.x !== cell.x || f.y !== cell.y));
-                    src = objectSourceNear(u, alt, SEARCH_RADIUS) || objectSourceNear(u, alt, 90);
+                    ground = groundItemsNear(u, { radius: Math.min(SEARCH_RADIUS + 12, 36), id: alt }).find(f => !onBuildCell(f.x, f.y, u, alt) && (f.x !== cell.x || f.y !== cell.y));
+                    src = objectSourceNear(u, alt, SEARCH_RADIUS);
                 }
             }
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
@@ -3196,6 +3247,7 @@
             const prey = preyYielding(u, m, huntRadius());
             if (prey) return { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, plan: step.id } };
             missingFailed.add(m);
+            if (failedMaterials) failedMaterials.add(m);
         }
         return null;
     }
@@ -3294,6 +3346,7 @@
         const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
         const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, workshop: 0, household: 0, civic: 0, goal: 0, standing: 0, milestone: 0 };
+        const failedMaterials = new Set();
         // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
         // hide every household and personal aspiration behind the old plan's first three unfinished steps.
         for (let i = 0; i < steps.length; i++) {
@@ -3333,7 +3386,7 @@
                 limit = 2;
             }
             if (groups[group] >= limit) continue;
-            const spec = step.build ? buildStepJob(u, step) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
+            const spec = step.build ? buildStepJob(u, step, failedMaterials) : step.craft ? craftStepJob(u, step) : step.stock ? stockStepJob(u, step) : null;
             if (!spec) {
                 step._noWorkTick = localTicks;
                 continue;
@@ -4338,9 +4391,9 @@
 
         const tryMakeBed = () => (!hasBedObject(u) && (evening() || (u.data && u.data.needs && u.data.needs.sleep > 50)) ? (give(u, makeBedJob(u))) : null);
         const Callings = getCallings();
-        const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
-        const planSpec = !lazy ? ((UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) : null;
-        return designationJob(u) || planSpec || haulerStaging || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
+        const haulerStaging = () => ((Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null);
+        const getPlanSpec = () => (!lazy ? ((UF.Agriculture && UF.Agriculture.planJob && UF.Agriculture.planJob(u)) || planJob(u)) : null);
+        return designationJob(u) || getPlanSpec() || haulerStaging() || footprintClearingJob(u) || constructionHaulingJob(u) || tidyStockpileJob(u) || tryMakeBed() || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4363,6 +4416,7 @@
     // Colony radius grows with population so outer homes and workshops remain inside colony logic.
     function updateColonyRadius(c) {
         if (!c || !c.site) return;
+        if (localTicks % 60 !== 0) return;
         const pop = siteColonists(c).length;
         const baseRadius = siteRadius(homeSiteRecord(c) || { kind: "camp" });
         // Grow by 4 tiles per 10 population, cap at 40
@@ -4384,8 +4438,6 @@
                 adoptSiteStockpiles(local, s);
                 local.adopted = true;
             }
-            const P = Pillars();
-            if (P && P.assignSkillRoster) P.assignSkillRoster(local);
         }
         const t = ticks();
         if (t - (_lastReconcileTick || -Infinity) >= 300) {
@@ -4395,7 +4447,8 @@
             }
         }
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 12;
+        let lowPriorityPreempted = false;
+        const MAX_DECIDE_PER_SCAN = 1;
         for (const u of simulationUnits()) {
             if (!sameLevel(u, c) && (t % 60 !== (u.id % 60))) continue;
             if (!u.data.capabilities) {
@@ -4419,8 +4472,8 @@
                         }
                         decisionAt.set(u.id, -Infinity);
                     } else if (isLowPriorityJob(job, u)) {
-                        const lastHp = _lastHpCheckAt.get(u.id) || -Infinity;
-                        if (t - lastHp >= 60) {
+                        if (!lowPriorityPreempted && (t + (u.id | 0) * 7) % 60 === 0) {
+                            lowPriorityPreempted = true;
                             _lastHpCheckAt.set(u.id, t);
                             const lazy = unit01(seed(), SALT.roll, u.id, t) < (100 - facet(u, "industriousness")) / 400;
                             if (!lazy) {
@@ -4851,19 +4904,24 @@
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _lastHpCheckAt.clear(); };
-        UF.Events.on("world:unitAdded", clearCaches);
-        UF.Events.on("world:unitRemoved", clearCaches);
-        UF.Events.on("colonists:born", clearCaches);
-        UF.Events.on("combat:kill", clearCaches);
-        UF.Events.on("objects:changed", clearCaches);
-        UF.Events.on("items:changed", clearCaches);
+        const clearUnitCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; _lastHpCheckAt.clear(); };
+        const clearObjectCaches = () => { planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _siteCountCache.clear(); };
+        UF.Events.on("world:unitAdded", clearUnitCaches);
+        UF.Events.on("world:unitRemoved", clearUnitCaches);
+        UF.Events.on("colonists:born", clearUnitCaches);
+        UF.Events.on("combat:kill", clearUnitCaches);
+        UF.Events.on("objects:changed", clearObjectCaches);
         // world:created is hooked here at boot, after every plugin has registered its own listener (UF_Factions,
         // UF_History, UF_Wildlife), so the colony is made last, from the people History spawned.
         UF.Events.on("world:created", state => {
             try { setupColony(state); } catch (e) { console.error("UF_Colonists: setup failed", e); }
         });
-        UF.Events.on("jobs:done", (job, u) => { clearCaches(); try { onDone(job, u); } catch (e) { console.error(e); } });
+        UF.Events.on("jobs:done", (job, u) => {
+            if (job && job.params && job.params.plan) {
+                _planStatusCacheById.delete(job.params.plan);
+            }
+            try { onDone(job, u); } catch (e) { console.error(e); }
+        });
         UF.Events.on("jobs:failed", job => onFailed(job));
         UF.Events.on("time:day", (day, month, year) => {
             try {

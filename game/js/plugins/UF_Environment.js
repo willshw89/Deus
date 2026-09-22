@@ -179,12 +179,9 @@
         const zLevel = Number.isInteger(z) ? z : (area && area.z !== undefined ? area.z : (lvl ? lvl.z : 0));
 
         const cacheKey = ((zLevel + 2) << 20) | ((x & 0x3ff) << 10) | (y & 0x3ff);
-        if (frameCount - _tempCacheFrame < 60 && _tempCache.has(cacheKey)) {
-            return _tempCache.get(cacheKey);
-        }
-        if (frameCount - _tempCacheFrame >= 60) {
-            _tempCacheFrame = frameCount;
-            _tempCache.clear();
+        const cached = _tempCache.get(cacheKey);
+        if (cached && (frameCount - cached.frame < 120)) {
+            return cached.temp;
         }
 
         // Subterranean levels have stable insulation
@@ -255,7 +252,7 @@
         cellTemp += heatRadiance;
 
         const finalTemp = Math.round(cellTemp * 10) / 10;
-        _tempCache.set(cacheKey, finalTemp);
+        _tempCache.set(cacheKey, { temp: finalTemp, frame: frameCount });
         return finalTemp;
     }
 
@@ -286,32 +283,23 @@
             }
         }
 
-        // 2. Objects with "heat" or "fire" tag or "campfire": only search if near a colony site or known hearth/campfire
-        const site = W && W.state && W.state.colonists && W.state.colonists.site;
-        const nearSite = !site || Math.max(Math.abs(x - site.x), Math.abs(y - site.y)) <= 18;
-        if (nearSite && O && typeof O.atIn === "function") {
-            for (let dy = -radius; dy <= radius; dy++) {
-                for (let dx = -radius; dx <= radius; dx++) {
-                    const dist = Math.max(Math.abs(dx), Math.abs(dy));
-                    if (dist > radius) continue;
-                    const nx = x + dx, ny = y + dy;
-                    const obj = O.atIn(area, nx, ny);
-                    if (obj) {
-                        const isCampfire = obj.id === "campfire";
-                        const tags = Array.isArray(obj.tags) ? obj.tags : [];
-                        const isHeatSource = isCampfire || tags.includes("heat") || tags.includes("fire");
-                        if (isHeatSource) {
-                            if (dist === 0 || dist === 1) addedHeat = Math.max(addedHeat, 25.0);
-                            else if (dist === 2) addedHeat = Math.max(addedHeat, 15.0);
-                            else if (dist === 3) addedHeat = Math.max(addedHeat, 5.0);
-                        }
-                    }
+        // 2. Colony central campfire radiance
+        const C = window.UF && UF.Colonists;
+        const colSite = (C && typeof C.site === "function" ? C.site() : null) || (W && W.state && W.state.colonists && W.state.colonists.site);
+        if (colSite) {
+            const dist = Math.max(Math.abs(x - colSite.x), Math.abs(y - colSite.y));
+            if (dist <= 3) {
+                const sObj = O && O.atIn(area, colSite.x, colSite.y);
+                const hasFire = sObj && (sObj.id === "campfire" || (Array.isArray(sObj.tags) && sObj.tags.includes("fire")));
+                if (hasFire) {
+                    if (dist === 0 || dist === 1) addedHeat = Math.max(addedHeat, 25.0);
+                    else if (dist === 2) addedHeat = Math.max(addedHeat, 15.0);
+                    else if (dist === 3) addedHeat = Math.max(addedHeat, 5.0);
                 }
             }
         }
 
-        // 3. Dwelling / room-wide hearth warming: if cell (x, y) is inside a dwelling/room or shelter
-        // that has an active hearth/campfire, the entire dwelling is kept warm ("the fire makes the entire dwelling warm")
+        // 3. Dwelling / room-wide hearth warming and nearby radiant warmth
         const H = window.UF && UF.Households;
         if (H && typeof H.all === "function") {
             for (const h of H.all()) {
@@ -327,16 +315,18 @@
                     if (hasFire) {
                         addedHeat = Math.max(addedHeat, 18.0);
                     }
+                } else if (home.hearth) {
+                    const dist = Math.max(Math.abs(x - home.hearth.x), Math.abs(y - home.hearth.y));
+                    if (dist <= 3) {
+                        const hObj = O && O.atIn(area, home.hearth.x, home.hearth.y);
+                        const hasFire = hObj && (hObj.id === "campfire" || (Array.isArray(hObj.tags) && hObj.tags.includes("fire")));
+                        if (hasFire) {
+                            if (dist === 0 || dist === 1) addedHeat = Math.max(addedHeat, 25.0);
+                            else if (dist === 2) addedHeat = Math.max(addedHeat, 15.0);
+                            else if (dist === 3) addedHeat = Math.max(addedHeat, 5.0);
+                        }
+                    }
                 }
-            }
-        }
-        const C = window.UF && UF.Colonists;
-        const colSite = C && typeof C.site === "function" ? C.site() : null;
-        if (colSite && Math.abs(x - colSite.x) <= 4 && Math.abs(y - colSite.y) <= 4) {
-            const sObj = O && O.atIn(area, colSite.x, colSite.y);
-            const hasFire = sObj && (sObj.id === "campfire" || (Array.isArray(sObj.tags) && sObj.tags.includes("fire")));
-            if (hasFire) {
-                addedHeat = Math.max(addedHeat, 18.0);
             }
         }
 

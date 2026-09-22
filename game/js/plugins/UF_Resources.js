@@ -336,7 +336,7 @@
         // Tier 4: Accessible Loose World Items on Ground
         // ---------------------------------------------------------------------
         if (needed > 0) {
-            const loose = I.find({ area, near: { x: loc.x, y: loc.y }, radius: 60 });
+            const loose = I.find({ area, near: { x: loc.x, y: loc.y }, radius: 35 });
             const candidateLoose = [];
             for (const f of loose) {
                 const it = f.item;
@@ -386,14 +386,12 @@
 
                 if (targetTag) {
                     const nodes = (typeof O.findIn === "function")
-                        ? O.findIn(area, { near: { x: loc.x, y: loc.y }, radius: 50, tags: [targetTag], limit: 8 })
-                        : (typeof O.find === "function" ? O.find({ near: { x: loc.x, y: loc.y }, radius: 50, tags: [targetTag], limit: 8 }) : []);
+                        ? O.findIn(area, { near: { x: loc.x, y: loc.y }, radius: 30, tags: [targetTag], limit: 8 })
+                        : (typeof O.find === "function" ? O.find({ near: { x: loc.x, y: loc.y }, radius: 30, tags: [targetTag], limit: 8 }) : []);
                     if (nodes && nodes.length > 0) {
                         const J = (window.UF && UF.Jobs) || null;
-                        const isClaimed = (nx, ny) => {
-                            if (!J) return false;
-                            return J.list(j => (j.state === "travel" || j.state === "work") && j.target && j.target.x === nx && j.target.y === ny).length > 0;
-                        };
+                        const claimedSet = new Set(J ? J.list(j => (j.state === "travel" || j.state === "work") && j.target).map(j => `${j.target.x},${j.target.y}`) : []);
+                        const isClaimed = (nx, ny) => claimedSet.has(`${nx},${ny}`);
                         const targetNode = nodes.find(n => {
                             if (isClaimed(n.x, n.y)) return false;
                             const acts = n.type && n.type.actions;
