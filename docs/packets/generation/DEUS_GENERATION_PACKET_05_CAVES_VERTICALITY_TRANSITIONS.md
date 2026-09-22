@@ -40,3 +40,4 @@
 - In `DEUS_NaturalConnections.js:135-192`, candidate searches attempt to find aligned columns connecting surface, Upper Earth, and Deep Earth in a single passage chain.
 - **Audit Finding & Failure Cause:** The candidate survey capped attempts at 12 (`survey.tested = 12`). Because none of the first 12 candidates had clear vertical clearance across all 3 levels on the test seed, `chains` returned empty `[]`, causing `FAIL natural_connections.generated_chain`.
 - **Status:** `PREVIOUSLY REPORTED BUT NOT RECHECKED` / `DEFICIENCY IDENTIFIED`.
+

@@ -10,24 +10,26 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - (None)
 
 ## Glowing Green Ground Selection Rings, Right-Click Move & Generation Source Packets Delivered — 2026-09-22 (Gemini & Subagents)
-Delivered per user directives ("Actually, remove these green squares entirely. no indicator of alliance under the creatures. When they are selected, place a glowing green ring under their feet. When they are unselected, nothing.", "With units selected, if I right click, I want them to move", "Make the drag box green instead of white", "Let's make sure these rings spawn under the creature sprites", "I want the biomes to follow a consistent pattern across all Z layers... take a look at flooding and Lava for me, and tell me how they function in layman's terms", "PRESERVE THE CURRENT BASELINE... FOCUS THE SOURCE PACKETS ON GENERATION"):
-1. **Glowing Green Ground Halo Selection Rings (`DEUS_Stance.js`, `DEUS_Select.js`)**:
-   - Removed alliance indicators (green/yellow/red squares) from unselected creatures entirely (`Stance.showAlliance = false`). Unselected units display zero indicators on the ground.
-   - Ground Selection Halo: When a unit is selected (single or group), an animated pulsing neon green ground ellipse (44×22 for 1 tile, 88×44 for 2 tiles) spawns under its boots.
-   - Anchor & Layering: Center anchor `(0.5, 0.5)` places the halo directly around `footY` on the ground plane, strictly under the creature sprite (`z = Math.min(chZ - 10, markerZ(y) + 1)` with `this._tilemap._sortChildren()`).
-2. **Green Drag Selection Box & Brackets (`DEUS_Select.js`)**:
-   - Updated drag selection box stroke to vivid green (`#22c55e`).
-   - Updated drag label badge border and corner brackets to neon green (`#4ade80`).
-   - Updated tile selection fill (`rgba(34, 197, 94, 0.14)`) and boundary border to green.
-3. **Right-Click Unit Movement Dispatch (`DEUS_Select.js`)**:
-   - In `Scene_Map.prototype.updateOverseerControls`, right-clicking when units are selected dispatches `groupMove({ area, x: mx, y: my, z: viewZ() })` to destination tile coordinates, plays `SoundManager.playCursor()`, dismisses any lingering tile selection box, and consumes the cancel event.
-4. **Generation Source Packets & ZIP Export**:
-   - Produced 8 generation source packets in `docs/packets/generation/` (`DEUS_GENERATION_PACKET_01` to `08`).
-   - Packaged into authoritative archive: `archive/DEUS_GENERATION_SOURCE_PACKETS.zip` (19.5 KB).
-   - Preserved starting baseline contract with 100% integrity (8 founders, lit campfire, starting kit counts, 9 factions across 3 levels untouched).
-5. **Automated Test Verification**:
+Delivered per user directives ("Actually, remove these green squares entirely. no indicator of alliance under the creatures. When they are selected, place a glowing green ring under their feet. When they are unselected, nothing.", "With units selected, if I right click, I want them to move", "Make the drag box green instead of white", "Let's make sure these rings spawn under the creature sprites", "When I let go of my left click during a drag and drop, I want the dragged square to go away, simply leaving me with my selection. Also I think the units' feet should be in the center of the circle", "When I right click I do not want this white selectire grid"):
+1. **Dragged Square Dismissal on Mouse Release (`DEUS_Select.js`)**:
+   - In `commitActiveBox`, releasing left click after a drag selection selects the enclosed units and immediately calls `clearTileSelection()`.
+   - The dragged square and dimension badge (`9×9 (81)`) disappear immediately upon release, leaving only the units with their selection rings.
+2. **Units' Feet Centered in Halo Circle (`DEUS_Stance.js`, `DEUS_Select.js`)**:
+   - Replaced cell boundary anchoring with drawn boot center anchoring (`feetY = footY(ch) - 6 * cells`).
+   - The character's boots now rest right in the exact dead-center of the green halo ellipse horizontally and vertically.
+3. **White Target Grid Brackets Elimination on Right Click (`DEUS_Select.js`)**:
+   - Removed `setTargetedTile(tx, ty)` from `groupMove`.
+   - Removed automatic colonist goal/job target fallback from `currentActiveTargetTile()`.
+   - Right-clicking to move dispatches the movement order with zero white target brackets or grid displayed on the map.
+4. **Glowing Green Ground Selection Rings & Zero Unselected Alliance Indicators (`DEUS_Stance.js`)**:
+   - Unselected creatures display zero indicators on the ground (`Stance.showAlliance = false`).
+   - Ground selection halo: animated pulsing neon green ellipse (44×22 for 1 tile, 88×44 for 2 tiles) depth-sorted strictly under creature boots.
+5. **Generation Source Packets & ZIP Export**:
+   - Authored 8 standalone generation packets in `docs/packets/generation/` and packaged into `archive/DEUS_GENERATION_SOURCE_PACKETS.zip` (19.5 KB).
+   - Baseline preserved with 100% integrity.
+6. **Automated Test Verification**:
    - `node tools/run_tests.js select`: 46/46 PASS (0 errors).
-   - `node tools/run_tests.js stance`: 22/22 PASS (0 errors). Live screenshot `stance.selection_ring.png` visually inspected; green glowing ellipse centered directly at character feet under sprite with 0 alliance indicators on unselected units verified.
+   - `node tools/run_tests.js stance`: 22/22 PASS (0 errors). Live screenshots visually verified.
 
 
 ## Square Ground Stance Indicators & Single-Unit Selection Inventory Popup Delivered — 2026-09-22 (Gemini & deus-architecture-mz)

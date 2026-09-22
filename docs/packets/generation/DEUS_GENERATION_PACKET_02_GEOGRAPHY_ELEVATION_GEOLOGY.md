@@ -49,3 +49,4 @@
   - Upper Earth ($Z=-1$): Slate, Chalk, Marble, Ironstone veins.
   - Deep Earth ($Z=-2$): Massive Granite, Basalt sills, Obsidian, Crystal veins.
 - **Status:** `PRESENT BUT UNVERIFIED` (Integrated into `cellInfo` queries; verified structurally, pending dedicated gameplay mining loop test).
+

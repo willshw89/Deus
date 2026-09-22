@@ -1141,7 +1141,6 @@
         }
 
         if (movingCount > 0) {
-            setTargetedTile(tx, ty);
             SoundManager.playOk();
         } else {
             SoundManager.playBuzzer();
@@ -1627,20 +1626,11 @@
         }
 
         currentActiveTargetTile() {
-            if (window.UF && UF.Target && UF.Target.targetedTile()) {
-                return UF.Target.targetedTile();
+            if (targetedTileCoord) {
+                return targetedTileCoord;
             }
-            if (window.$colonyManager && $colonyManager.selectedColonist) {
-                const sel = $colonyManager.selectedColonist;
-                const u = sel.unit;
-                if (u && u.goal && u.goal.x !== undefined && u.goal.y !== undefined) {
-                    return { x: u.goal.x, y: u.goal.y };
-                }
-                const J = window.UF && UF.Jobs;
-                const job = J ? J.of(sel.id) : null;
-                if (job && job.target && job.target.x !== undefined && job.target.y !== undefined) {
-                    return { x: job.target.x, y: job.target.y };
-                }
+            if (window.UF && UF.Target && typeof UF.Target.targetedTile === "function") {
+                return UF.Target.targetedTile();
             }
             return null;
         }
@@ -2007,7 +1997,7 @@
                         s.anchor.set(0.5, 0.5);
                     }
                     s.x = ev.screenX();
-                    s.y = typeof ev.screenY === "function" ? ev.screenY() : 0;
+                    s.y = (typeof ev.screenY === "function" ? ev.screenY() : 0) - 6;
                     const evZ = typeof ev.screenZ === "function" ? ev.screenZ() : s.y;
                     s.z = evZ - 10;
                 }
@@ -2451,11 +2441,10 @@
             const isShift = box.shift && !isProvoked("shift_adds");
             if (isShift) {
                 setSelection(unitsInside, { add: true });
-                selectTileRectangle(x0, y0, x1, y1, box.z, box.area, { add: true });
             } else {
                 setSelection(unitsInside, { add: false });
-                selectTileRectangle(x0, y0, x1, y1, box.z, box.area, { add: false });
             }
+            clearTileSelection();
             SoundManager.playCursor();
         } else if (tDef.id === "cancel") {
             cancelArea(box);
@@ -2916,7 +2905,13 @@
             if (C && C.setEnabled) C.setEnabled(false);
             $gamePlayer.locate(x0 + 8, y0 + 8);
             $gameMap.setDisplayPos(x0 - 1, y0 - 1);
-            await t.waitFrames(2);
+            // Clean up any stale TEST_ units
+            if (W && W.units && W.removeUnit) {
+                for (const u of W.units().slice()) {
+                    if (u && u.name && u.name.startsWith("TEST_")) W.removeUnit(u.id);
+                }
+            }
+            await t.waitFrames(1);
 
             // Spawn test units in arena
             const col1 = W.addUnit({ name: "TEST_Ada", image: { characterName: "$UF_Human_Female" }, area, x: x0 + 1, y: y0 + 1, exact: true, data: { kind: "colonist", faction: "player" } });
@@ -3136,16 +3131,16 @@
             clearSelection();
             setTool(null);
             // Create chop job inside and outside
-            J.create({ type: "chop", target: { area, x: x0 + 2, y: y0 + 6, z: viewZ() }, owner: null });
-            J.create({ type: "chop", target: { area, x: x0 + 8, y: y0 + 8, z: viewZ() }, owner: null });
+            const jInside = J.create({ type: "chop", target: { area, x: x0 + 2, y: y0 + 6, z: viewZ() }, owner: null });
+            const jOutside = J.create({ type: "chop", target: { area, x: x0 + 8, y: y0 + 8, z: viewZ() }, owner: null });
             const ownedJob = J.create({ type: "move", target: { area, x: x0 + 2, y: y0 + 6, z: viewZ() }, owner: col1.id });
 
             await pressKey(78); // Key 'N' (Cancel)
             await mouseDrag(x0 + 1, y0 + 5, x0 + 4, y0 + 7);
-            await t.waitFrames(10);
+            await t.waitFrames(3);
 
-            const insideChop = J.list().find(j => j.type === "chop" && j.target.x === x0 + 2 && j.target.y === y0 + 6);
-            const outsideChop = J.list().find(j => j.type === "chop" && j.target.x === x0 + 8 && j.target.y === y0 + 8);
+            const insideChop = J.list().find(j => j.id === jInside.id);
+            const outsideChop = J.list().find(j => j.id === jOutside.id);
             const ownedAlive = J.list().find(j => j.id === ownedJob.id && j.state !== "failed");
 
             t.check("select.cancel_area", !isProvoked("cancel_area") && (!insideChop || insideChop.state === "failed") && outsideChop && outsideChop.state !== "failed" && !!ownedAlive,
@@ -3318,26 +3313,27 @@
             t.check("select.single_tile_selection", selTiles1.length === 1 && !!selBox1 && selBox1.count === 1 && selBox1.x0 === stX && selBox1.y0 === stY && isSel1 && isOtherNotSel,
                 `Single tile selection: count=${selTiles1.length}, box=(${selBox1 ? `${selBox1.x0},${selBox1.y0}` : "none"}), isTileSelected=${isSel1}`);
 
-            // 18. Check: select.group_tile_drag_selection
+            // 18. Check: select.drag_release_dismisses_square
             SelectAPI.clearTileSelection();
+            clearSelection();
             await t.waitFrames(2);
 
             const gx0 = x0 + 2, gy0 = y0 + 2;
-            const gx1 = x0 + 5, gy1 = y0 + 4; // 4 cols × 3 rows = 12 tiles
+            const gx1 = x0 + 5, gy1 = y0 + 4; // 4 cols × 3 rows
             await mouseDrag(gx0, gy0, gx1, gy1);
             await t.waitFrames(3);
 
             const selTilesGroup = SelectAPI.selectedTiles();
             const selBoxGroup = SelectAPI.selectedTileBox();
-            const gCount = selTilesGroup.length;
-            const insideTileSel = SelectAPI.isTileSelected(gx0 + 1, gy0 + 1);
-            const outsideTileSel = SelectAPI.isTileSelected(gx0 + 8, gy0 + 8);
+            const selUnitsGroup = SelectAPI.selected();
 
-            t.screenshot("select.group_tiles_selected");
-            t.check("select.group_tile_drag_selection", gCount === 12 && !!selBoxGroup && selBoxGroup.count === 12 && selBoxGroup.x0 === gx0 && selBoxGroup.x1 === gx1 && selBoxGroup.y0 === gy0 && selBoxGroup.y1 === gy1 && insideTileSel && !outsideTileSel,
-                `Group tile drag selection: count=${gCount} (want 12), box=(${selBoxGroup ? `${selBoxGroup.x0},${selBoxGroup.y0} to ${selBoxGroup.x1},${selBoxGroup.y1}` : "none"}), inside=${insideTileSel}, outside=${outsideTileSel}`);
+            t.screenshot("select.drag_release_dismissed");
+            t.check("select.drag_release_dismisses_square", selBoxGroup === null && selTilesGroup.length === 0 && selUnitsGroup.includes(flier.id),
+                `Drag release clears square, leaves unit selection: box=${selBoxGroup}, tiles=${selTilesGroup.length} (want 0), units selected=[${selUnitsGroup.join(",")}] (has flier ${flier.id})`);
 
             // 19. Check: select.tile_deselect_right_click
+            SelectAPI.selectTileRectangle(gx0, gy0, gx1, gy1);
+            await t.waitFrames(2);
             await mouseClick(gx0 + 2, gy0 + 2, { button: 2 });
             await t.waitFrames(3);
             const deselTilesRight = SelectAPI.selectedTiles();
@@ -3402,6 +3398,11 @@
             clearSelection();
             setTool(null);
             cancelBox("suite finished");
+            if (W && W.removeUnit) {
+                [col1, col2, flier, allied, wild, outside, col5].forEach(u => {
+                    if (u && u.id) W.removeUnit(u.id);
+                });
+            }
         }, { isDefault: false });
     }
 

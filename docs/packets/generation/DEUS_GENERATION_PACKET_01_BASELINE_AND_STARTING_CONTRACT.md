@@ -64,3 +64,4 @@ To prevent corrupting the baseline, the engine strictly separates:
 - **Coupling 1 (`climate.startClimate`):** In `DEUS_WorldGen.js:321-335`, the natural elevation, temperature, rainfall, and drainage fields are overridden within a radial blend [28, 110] around the center so the player's start never rolls as deep ocean, barren mountain peak, or cursed wasteland.
 - **Coupling 2 (`WorldGen.placeKit`):** In `DEUS_WorldGen.js:881-932`, after natural biome vegetation is placed, the generator scans the annulus around each faction campfire and forces missing kit objects to spawn if natural biome density was insufficient.
 - **Coupling 3 (`Factions.placeAreas`):** In `DEUS_Factions.js:335-550`, the player faction's area center is explicitly anchored to $(128, 128) \pm 6$, while all other factions are distributed via spatial repulsion.
+

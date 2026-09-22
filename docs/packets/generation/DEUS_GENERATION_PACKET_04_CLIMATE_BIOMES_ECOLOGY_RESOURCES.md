@@ -53,3 +53,4 @@ Per user directive ("I want the biomes to follow a consistent pattern across all
     - $Z = -1$: Maps to **Rooted Loam** and **Cave Mushrooms** with massive tree root pillars descending from above!
     - $Z = -2$: Maps to **Deep Mine Belt** or **Crystal Caverns**.
 - **Implementation Status:** `DESIGNED FOR MILESTONE M1` (Documented in Section 4).
+

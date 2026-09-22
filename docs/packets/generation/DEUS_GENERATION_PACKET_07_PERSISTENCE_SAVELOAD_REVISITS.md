@@ -58,3 +58,4 @@
 - **Cache Miss Rebuild:** Re-entering an evicted area reruns the deterministic procedural generation pass from `seed` and cleanly stamps `st.diffs` and `st.objectDiffs` over the top.
 - **Result:** 100% preservation of all harvested resources, constructed walls, doors, and mined tunnels across arbitrary area unloads and reloads.
 - **Status:** `IMPLEMENTED & VERIFIED` (`world.diff_persists`, `vertical.persistence`).
+

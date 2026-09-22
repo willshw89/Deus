@@ -64,3 +64,4 @@ Think of Project DEUS as a layered cake of three underground floors:
 ### 2.3 Status of `DEUS_Fluid.js`
 - `game/js/plugins/DEUS_Fluid.js` was planned as a standalone plugin, but its entire functionality was integrated directly into `DEUS_Levels.js` and `DEUS_NaturalConnections.js`.
 - **Status:** `SUBSUMED INTO DEUS_LEVELS & DEUS_NATURALCONNECTIONS`.
+

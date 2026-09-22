@@ -385,9 +385,15 @@
     const footY = ch => Math.round($gameMap.adjustY(ch._realY) * $gameMap.tileHeight() + $gameMap.tileHeight());
     Stance.footY = footY;
 
+    // Vertical offset to place the ellipse center directly at the boots/feet inside the chibi sprite
+    const FEET_OFFSET_Y = 6;
+    const feetY = (ch, cells = 1) => footY(ch) - FEET_OFFSET_Y * cells;
+    Stance.feetY = feetY;
+    Stance.FEET_OFFSET_Y = FEET_OFFSET_Y;
+
     /**
      * Dress and place a selection sprite for this frame: the ring for the character's footprint and the current
-     * pulse frame, at its feet (x = screenX, y = foot row), z = its stance ring's z + 1, opacity 255. Any plugin
+     * pulse frame, at its feet (x = screenX, y = feet center), z = its stance ring's z + 1, opacity 255. Any plugin
      * that marks selected units (UF_Select) calls this every frame so every selected unit looks the same.
      */
     Stance.placeSelection = function(sprite, ch, characterSprite) {
@@ -396,7 +402,7 @@
         if (sprite.bitmap !== b) sprite.bitmap = b;
         if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== selectAnchorY) sprite.anchor.set(0.5, selectAnchorY);
         sprite.x = ch.screenX();
-        sprite.y = footY(ch);
+        sprite.y = feetY(ch, cells);
         const chZ = characterSprite && typeof characterSprite.z === "number" ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : footY(ch));
         sprite.z = Math.min(chZ - 10, markerZ(sprite.y) + 1); // strictly below the unit sprite
         sprite.opacity = 255;
@@ -774,6 +780,7 @@
             // not with the character object (a step further on when it walks). The old selection_square check
             // compared with the character object and failed whenever the selected colonist was walking.
             const drawnFeet = (e, s) => ({ x: s.x, y: s.y + e.shiftY() + e.jumpHeight() });
+            const drawnSelectionFeet = (e, s, cells = 1) => ({ x: s.x, y: s.y + e.shiftY() + e.jumpHeight() - FEET_OFFSET_Y * cells });
             // The ring's pixel box in the tilemap (inclusive rows and columns), from its anchor and bitmap.
             const boxOf = mk => {
                 const b = mk.bitmap, left = mk.x - mk.anchor.x * b.width, top = mk.y - mk.anchor.y * b.height;
@@ -830,7 +837,7 @@
             const sel = Stance.selectionMarker();
             const selCs = charSpriteOf(cev);
             const selBmp = sel && sel.bitmap;
-            const selFeet = cev && selCs ? drawnFeet(cev, selCs) : null;
+            const selFeet = cev && selCs ? drawnSelectionFeet(cev, selCs, 1) : null;
             const sw = selBmp ? selBmp.width : 0, shh = selBmp ? selBmp.height : 0;
             const midA = selBmp ? selBmp.getAlphaPixel(sw >> 1, shh >> 1) : -1, cornerA = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
             const bandPx = selBmp ? selBmp.getPixel(sw >> 1, 2) : "none", bandA = selBmp ? selBmp.getAlphaPixel(sw >> 1, 2) : -1;
@@ -845,7 +852,7 @@
                 const s = Stance.selectionMarker(), cs2 = charSpriteOf(cev);
                 if (s && s.bitmap) framesSeen.add(s.bitmap._ufFrame);
                 if (s) opacities.add(s.opacity);
-                const feet = cs2 ? drawnFeet(cev, cs2) : null;
+                const feet = cs2 ? drawnSelectionFeet(cev, cs2, 1) : null;
                 if (!s || !feet || s.x !== feet.x || s.y !== feet.y) placeBad++;
                 await t.waitFrames(1);
             }

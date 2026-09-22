@@ -32,3 +32,4 @@
    - Expand `survey.tested` candidate cap in `DEUS_NaturalConnections.js` from 12 to 64, resolving the continuous 3-level $(0 \longleftrightarrow -1 \longleftrightarrow -2)$ chain generation check.
 3. **Safety Guarantee:**
    - All changes to be verified in disposable world generation tests prior to altering production defaults, strictly preserving the baseline starting scenario contract.
+

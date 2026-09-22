@@ -45,3 +45,4 @@
 - Full 500–600 year historical simulation code (wars, kingdom expansions, site sacking, ruler lineages, stamped stone ruins) exists in `DEUS_History.js:300-800`.
 - **Operating Status:** Explicitly retired/deactivated behind `history.simulate: false` pursuant to user decision 2026-09-19 (VISION V4, V31) in favor of the clean Year-1 embark scenario.
 - **Status:** `PRESENT BUT UNVERIFIED` (Deactivated by design).
+
