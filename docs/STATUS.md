@@ -9,6 +9,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Fluid Simulation & Water/Lava Rendering Optimization Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("See if therre are any ways we can optomize the plugins we made today.. like the water, or lava....") auditing, profiling, and optimizing all fluid simulation, water/lava breach, and subterranean rendering subsystems:
+1. **`Sprite_UFFloodOverlay` Per-Frame Grid Scan & Set Allocation Elimination (`UF_Levels.js:1654-1735`)**:
+   - Diagnosed missing `if (gridStamp !== this._seen)` condition in `Sprite_UFFloodOverlay.update()`: previously, every single frame on subterranean levels Z = -1 and Z = -2, the overlay allocated `const keep = new Set()`, iterated 300–500 visible cells, performed map lookups, re-assigned bitmap textures, and re-initialized frames.
+   - Decoupled viewport tile footprint caching from 12-frame animation ticks and camera sub-tile motion:
+     - Viewport grid cells are only scanned when integer display coordinates or `floodRevision` changes.
+     - When `animTick` advances (every 12 frames), existing active sprites cycle their frame in-place without scanning the viewport grid or allocating `Set`s.
+     - When the camera is stationary, sprite position updates are completely skipped. When camera glides sub-tile, only screen pixel coordinates (`s.x`, `s.y`) are updated.
+2. **`_doComputeFloods` & `buildWallGrid` Zero-Allocation Buffer Reuse (`UF_Levels.js:1269-1375`)**:
+   - Replaced per-recompute allocation of 4 separate 64KB typed arrays (`gridMinus1`, `gridMinus2`, `isWall1`, `isWall2` = 256 KB garbage per breach) with dedicated reusable static buffers via `getWallGridBuffer(z, size)` and cached typed arrays in `floodCache`.
+   - In `buildWallGrid`, fast-path copied from `bShape` and iterated sparse keys of `ch` and `diffs`, eliminating 65,536 property checks when diffs are small.
+   - In loop 1 of `_doComputeFloods`, eliminated 60,000+ redundant calls to `J.isWaterAt` and 60,000+ heap allocations of `{ x: ax, y: ay, z: 0 }` per flood pass by directly checking `groundTiles[i]`.
+3. **Engine-Wide Raw Zero-Allocation Fluid Queries (`UF_Levels.js`, `UF_World.js`, `UF_Jobs.js`, `UF_Environment.js`, `UF_DayNight.js`)**:
+   - Added raw numeric functions `Levels.floodTypeAt(ax, ay, z, x, y)`, `Levels.isWaterAt(ax, ay, z, x, y)`, and `Levels.isLavaAt(ax, ay, z, x, y)`.
+   - Made `isFlooded(ref)` return frozen singletons `NOT_FLOODED`, `FLOODED_WATER`, `FLOODED_LAVA`, eliminating throwaway object allocation on every query.
+   - Integrated zero-allocation `Levels.isLavaAt` into `World.walkable` in `UF_World.js:2189` for subterranean pathfinding.
+   - Integrated zero-allocation `Levels.isWaterAt` into `UF_Jobs.js:189` (`isWaterIn`) and `UF_Environment.js:424` (`updateWetness`).
+   - In `UF_DayNight.js:372`, updated lava lighting checks on Z = -2 to use `Levels.isLavaAt(area.x, area.y, z, cx, cy)` with zero allocations, added checkerboard stride (`((cx + cy) & 1) === 0`) to prevent redundant overlapping light circles on large lava lakes, and set `noShadow: true` on floor fluid to eliminate 96 raycasts and clipping paths per visible lava tile.
+- **Verification**:
+   - `tools/run_tests.js flooding`: 8/8 PASS (`flooding.flooded_cavern_water_minus1.png`).
+   - `tools/run_tests.js daynight`: 15/15 PASS.
+   - `tools/run_tests.js smoke`: 13/13 PASS.
+   - `tools/profile_live_frames.js`: 14/14 PASS.
+
 ## 60-Frame Beat De-Clustering, 144Hz Judder Elimination & Smooth Sub-Tile Camera Follow Delivered — 2026-09-22 (Gemini)
 Delivered per user directive ("Nope, still choppy. I think it might come back to the game beats? Idk") identifying and resolving the four exact root causes of visual choppiness in live RMMZ play:
 1. **The 144Hz High-Refresh Monitor Frame-Dropping / Judder (`rmmz_managers.js:1993` & `game/package.json`)**:

@@ -186,12 +186,17 @@
         if (!area || !validLevel(area) || !W || !W.state || !W.inWorld(area.x, area.y, zOf(area))) return false;
         const z = zOf(area);
         if (z < 0) {
-            if (window.UF && UF.Levels && typeof UF.Levels.isFlooded === "function") {
-                const fl = UF.Levels.isFlooded({ area: { x: area.x, y: area.y }, x, y, z });
-                if (fl && fl.flooded && fl.type === "water") return true;
-            }
-            if (window.UF && UF.Levels && typeof UF.Levels.naturalWaterAt === "function") {
-                return UF.Levels.naturalWaterAt({ area: { x: area.x, y: area.y }, x, y, z });
+            if (window.UF && UF.Levels) {
+                if (typeof UF.Levels.isWaterAt === "function") {
+                    return UF.Levels.isWaterAt(area.x, area.y, z, x, y);
+                }
+                if (typeof UF.Levels.isFlooded === "function") {
+                    const fl = UF.Levels.isFlooded({ area: { x: area.x, y: area.y }, x, y, z });
+                    if (fl && fl.flooded && fl.type === "water") return true;
+                }
+                if (typeof UF.Levels.naturalWaterAt === "function") {
+                    return UF.Levels.naturalWaterAt({ area: { x: area.x, y: area.y }, x, y, z });
+                }
             }
             return false;
         }

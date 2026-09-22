@@ -2186,9 +2186,13 @@
         const i = y * g.size + x;
         if (opts.ground) return (g.pass[i] & WATER_BIT) === 0 && (g.pass[i] & 15) === 15;
         if (g.eff[i] === 0) return false;
-        if (z < 0 && window.UF && UF.Levels && typeof UF.Levels.isFlooded === "function") {
-            const fl = UF.Levels.isFlooded({ area: { x: ax, y: ay }, x, y, z });
-            if (fl && fl.flooded && fl.type === "lava") return false;
+        if (z < 0 && window.UF && UF.Levels) {
+            if (typeof UF.Levels.isLavaAt === "function") {
+                if (UF.Levels.isLavaAt(ax, ay, z, x, y)) return false;
+            } else if (typeof UF.Levels.isFlooded === "function") {
+                const fl = UF.Levels.isFlooded({ area: { x: ax, y: ay }, x, y, z });
+                if (fl && fl.flooded && fl.type === "lava") return false;
+            }
         }
         const D = typeTable.doors;
         if (D && (typeTable.flags[g.objects[i]] & T_DOOR)) return !!opts.unit && D.canUnitPass(opts.unit, D.at({ x: ax, y: ay, z }, x, y));

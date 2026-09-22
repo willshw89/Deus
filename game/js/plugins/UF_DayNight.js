@@ -370,8 +370,15 @@
                         }
                     }
                     // Liquid lava on Z = -2
-                    if (z === -2 && Levels && Levels.waterAt && Levels.waterAt({ area, x: cx, y: cy, z })) {
-                        lights.push({ x: cx, y: cy, color: "255, 65, 15,", radius: 60, flicker: true });
+                    if (z === -2 && Levels) {
+                        // Checkerboard stride to prevent redundant overlapping light circles on large lava lakes
+                        if (((cx + cy) & 1) === 0) {
+                            const isLava = typeof Levels.isLavaAt === "function" ? Levels.isLavaAt(area.x, area.y, z, cx, cy)
+                                : (Levels.waterAt && Levels.waterAt({ area, x: cx, y: cy, z }));
+                            if (isLava) {
+                                lights.push({ x: cx, y: cy, color: "255, 65, 15,", radius: 75, flicker: true, noShadow: true });
+                            }
+                        }
                     }
                     // Burning cells from UF_Fire
                     if (Fire && Fire.isBurning && Fire.isBurning(area, cx, cy)) {
@@ -410,7 +417,7 @@
                 const x0 = L.x + 0.5;
                 const y0 = L.y + 0.5;
 
-                if (!this.hasBlockingInRadius(area, L.x, L.y, z, maxTileDist + 0.5)) {
+                if (L.noShadow || !this.hasBlockingInRadius(area, L.x, L.y, z, maxTileDist + 0.5)) {
                     ctx.beginPath();
                     ctx.arc(sx, sy, rad, 0, Math.PI * 2);
                     ctx.fill();

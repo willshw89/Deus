@@ -421,8 +421,12 @@
 
         const L = window.UF && UF.Levels, W = World(), F = Floors();
         let isWater = false;
-        if (z < 0 && L && typeof L.waterAt === "function") {
-            isWater = L.waterAt({ area, x, y, z });
+        if (z < 0 && L) {
+            if (typeof L.isWaterAt === "function") {
+                isWater = L.isWaterAt(area.x, area.y, z, x, y);
+            } else if (typeof L.waterAt === "function") {
+                isWater = L.waterAt({ area, x, y, z });
+            }
         } else if (z === 0 && W && typeof W.getTile === "function") {
             const tile = W.getTile(area.x, area.y, x, y, 0, 0) | 0;
             isWater = Tilemap.isWaterTile(tile);

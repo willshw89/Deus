@@ -950,15 +950,21 @@
         return b ? Object.assign({}, b, { material: MATERIALS[b.material] }) : null;
     }
     function naturalWaterAt(ref) {
-        const r = refOf(ref), p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
-        if (r.z >= 0 || !p || (p & 7) !== FLOOR || (p & 8)) return false;
-        const b = baseline(r.z, r.ax, r.ay);
-        return !!(b && b.water && b.water[r.y * World().state.size + r.x]);
+        const r = refOf(ref);
+        return isNaturalWaterAtRaw(r.ax, r.ay, r.z, r.x, r.y);
+    }
+    function isNaturalWaterAtRaw(ax, ay, z, x, y) {
+        if (z >= 0) return false;
+        const p = packedAt(ax, ay, x, y, z);
+        if (!p || (p & 7) !== FLOOR || (p & 8)) return false;
+        const b = baseline(z, ax, ay);
+        const W = World();
+        const size = (W && W.state && W.state.size) || 256;
+        return !!(b && b.water && b.water[y * size + x]);
     }
     function waterAt(ref) {
-        if (naturalWaterAt(ref)) return true;
-        const fl = isFlooded(ref);
-        return !!(fl && fl.flooded && fl.type === "water");
+        const r = refOf(ref);
+        return isWaterAtRaw(r.ax, r.ay, r.z, r.x, r.y);
     }
     function habitablePockets(z, ax = 0, ay = 0) {
         if (z !== -1 && z !== -2) return [];
@@ -1260,20 +1266,34 @@
         return null;
     }
 
+    const _wallGrids = {};
+    function getWallGridBuffer(z, size) {
+        if (!_wallGrids[z] || _wallGrids[z].length !== size * size) {
+            _wallGrids[z] = new Uint8Array(size * size);
+        } else {
+            _wallGrids[z].fill(0);
+        }
+        return _wallGrids[z];
+    }
+
     function buildWallGrid(ax, ay, z, size, st) {
-        const wall = new Uint8Array(size * size);
+        const wall = getWallGridBuffer(z, size);
         const b = baseline(z, ax, ay);
         const ch = changesOf(st, z, ax, ay, false);
         const bShape = b ? b.shape : null;
 
-        for (let i = 0; i < size * size; i++) {
-            let p = 0;
-            if (ch && ch[i] !== undefined) {
-                p = ch[i] | 0;
-            } else if (bShape) {
-                p = bShape[i];
+        if (bShape) {
+            for (let i = 0; i < size * size; i++) {
+                if ((bShape[i] & 7) === SOLID) wall[i] = 1;
             }
-            if ((p & 7) === SOLID) wall[i] = 1;
+        }
+        if (ch) {
+            for (const key in ch) {
+                const idx = Number(key);
+                if (Number.isInteger(idx) && idx >= 0 && idx < size * size) {
+                    wall[idx] = ((ch[idx] | 0) & 7) === SOLID ? 1 : 0;
+                }
+            }
         }
 
         const W = World();
@@ -1287,9 +1307,10 @@
             const O = window.UF && UF.Objects;
             const D = window.UF && UF.Doors;
 
-            if (diffs || viewObjects || buildObjects) {
+            if (viewObjects || buildObjects) {
+                const objs = viewObjects || buildObjects;
                 for (let i = 0; i < size * size; i++) {
-                    const typeId = (viewObjects ? viewObjects[i] : 0) || (buildObjects ? buildObjects[i] : 0) || (diffs ? diffs[i] : 0) | 0;
+                    const typeId = objs[i] | 0;
                     if (typeId) {
                         const obj = O ? O.type(typeId) : null;
                         if (obj) {
@@ -1299,6 +1320,24 @@
                                 const x = i % size, y = (i / size) | 0;
                                 const isOpen = D && typeof D.isOpen === "function" && D.isOpen({ x: ax, y: ay, z }, x, y);
                                 if (!isOpen) wall[i] = 1;
+                            }
+                        }
+                    }
+                }
+            } else if (diffs) {
+                for (const key in diffs) {
+                    const idx = Number(key);
+                    if (!Number.isInteger(idx) || idx < 0 || idx >= size * size) continue;
+                    const typeId = diffs[idx] | 0;
+                    if (typeId) {
+                        const obj = O ? O.type(typeId) : null;
+                        if (obj) {
+                            if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) {
+                                wall[idx] = 1;
+                            } else if ((Array.isArray(obj.tags) && obj.tags.includes("door")) || (D && typeof D.isDoorType === "function" && D.isDoorType(obj))) {
+                                const x = idx % size, y = (idx / size) | 0;
+                                const isOpen = D && typeof D.isOpen === "function" && D.isOpen({ x: ax, y: ay, z }, x, y);
+                                if (!isOpen) wall[idx] = 1;
                             }
                         }
                     }
@@ -1326,8 +1365,25 @@
         const keyMinus1 = `${ax},${ay}:-1`;
         const keyMinus2 = `${ax},${ay}:-2`;
 
-        const gridMinus1 = new Uint8Array(size * size);
-        const gridMinus2 = new Uint8Array(size * size);
+        let entry1 = floodCache.get(keyMinus1);
+        if (!entry1 || !entry1.grid || entry1.grid.length !== size * size) {
+            entry1 = { revision: floodRevision, grid: new Uint8Array(size * size) };
+            floodCache.set(keyMinus1, entry1);
+        } else {
+            entry1.revision = floodRevision;
+            entry1.grid.fill(0);
+        }
+        const gridMinus1 = entry1.grid;
+
+        let entry2 = floodCache.get(keyMinus2);
+        if (!entry2 || !entry2.grid || entry2.grid.length !== size * size) {
+            entry2 = { revision: floodRevision, grid: new Uint8Array(size * size) };
+            floodCache.set(keyMinus2, entry2);
+        } else {
+            entry2.revision = floodRevision;
+            entry2.grid.fill(0);
+        }
+        const gridMinus2 = entry2.grid;
 
         const base1 = baseline(-1, ax, ay);
         const baseWater1 = base1 ? base1.water : null;
@@ -1350,15 +1406,19 @@
 
         // 1. Breaches from Ground (z=0) into z=-1
         const queueMinus1 = [];
+        const groundArea = { x: ax, y: ay, z: 0 };
         for (let i = 0; i < size * size; i++) {
             let liq0 = null;
             if (groundTiles) {
                 const tile = groundTiles[i] | 0;
                 if (Tilemap.isWaterTile(tile)) liq0 = "water";
                 else if (Tilemap.isTileA1(tile) && tile >= Tilemap.TILE_ID_A1 + 4 * 48) liq0 = "lava";
-            }
-            if (!liq0 && J && typeof J.isWaterAt === "function") {
-                if (J.isWaterAt({ x: ax, y: ay, z: 0 }, i % size, (i / size) | 0)) liq0 = "water";
+            } else if (W && typeof W.getTile === "function") {
+                const tile = W.getTile(ax, ay, i % size, (i / size) | 0, 0, 0) | 0;
+                if (Tilemap.isWaterTile(tile)) liq0 = "water";
+                else if (Tilemap.isTileA1(tile) && tile >= Tilemap.TILE_ID_A1 + 4 * 48) liq0 = "lava";
+            } else if (J && typeof J.isWaterAt === "function") {
+                if (J.isWaterAt(groundArea, i % size, (i / size) | 0)) liq0 = "water";
             }
 
             if (liq0) {
@@ -1533,17 +1593,41 @@
         return updated ? updated.grid : null;
     }
 
+    const NOT_FLOODED = Object.freeze({ flooded: false, type: null });
+    const FLOODED_WATER = Object.freeze({ flooded: true, type: "water" });
+    const FLOODED_LAVA = Object.freeze({ flooded: true, type: "lava" });
+
+    function floodTypeAt(ax, ay, z, x, y) {
+        if (z !== -1 && z !== -2) return DRY;
+        const key = `${ax | 0},${ay | 0}:${z}`;
+        let c = floodCache.get(key);
+        if (!c || c.revision !== floodRevision) {
+            computeFloods({ x: ax, y: ay });
+            c = floodCache.get(key);
+        }
+        if (!c || !c.grid) return DRY;
+        const W = World(), size = (W && W.state && W.state.size) || 256;
+        if (x < 0 || y < 0 || x >= size || y >= size) return DRY;
+        return c.grid[y * size + x];
+    }
+
     function isFlooded(ref) {
         const r = refOf(ref);
-        if (r.z !== -1 && r.z !== -2) return { flooded: false, type: null };
-        const grid = getFloodGrid({ x: r.ax, y: r.ay }, r.z);
-        if (!grid) return { flooded: false, type: null };
-        const W = World(), size = (W && W.state && W.state.size) || 256;
-        if (r.x < 0 || r.y < 0 || r.x >= size || r.y >= size) return { flooded: false, type: null };
-        const val = grid[r.y * size + r.x];
-        if (val === FLOOD_WATER) return { flooded: true, type: "water" };
-        if (val === FLOOD_LAVA) return { flooded: true, type: "lava" };
-        return { flooded: false, type: null };
+        if (r.z !== -1 && r.z !== -2) return NOT_FLOODED;
+        const val = floodTypeAt(r.ax, r.ay, r.z, r.x, r.y);
+        if (val === FLOOD_WATER) return FLOODED_WATER;
+        if (val === FLOOD_LAVA) return FLOODED_LAVA;
+        return NOT_FLOODED;
+    }
+
+    function isWaterAtRaw(ax, ay, z, x, y) {
+        if (isNaturalWaterAtRaw(ax, ay, z, x, y)) return true;
+        return floodTypeAt(ax, ay, z, x, y) === FLOOD_WATER;
+    }
+
+    function isLavaAtRaw(ax, ay, z, x, y) {
+        if (z === -2 && isNaturalWaterAtRaw(ax, ay, z, x, y)) return true;
+        return floodTypeAt(ax, ay, z, x, y) === FLOOD_LAVA;
     }
 
     let waterFloodBitmap = null;
@@ -1598,66 +1682,100 @@
             this._active = new Map();
             this._pool = [];
             this._seen = "";
+            this._seenAnim = -1;
+            this._lastDispX = -999;
+            this._lastDispY = -999;
         }
         update() {
             super.update();
             const map = window.$dataMap, W = World(), view = W && W.viewLevel();
             if (!this.parent || !map || !view || (view.z !== -1 && view.z !== -2)) {
-                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
-                this._active.clear();
-                this._seen = "";
+                if (this._active.size > 0) {
+                    for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+                    this._active.clear();
+                    this._seen = "";
+                    this._seenAnim = -1;
+                    this._lastDispX = -999;
+                    this._lastDispY = -999;
+                }
                 return;
             }
             ensureFloodBitmaps();
             const grid = getFloodGrid(view, view.z);
             if (!grid) {
-                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
-                this._active.clear();
-                this._seen = "";
+                if (this._active.size > 0) {
+                    for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+                    this._active.clear();
+                    this._seen = "";
+                    this._seenAnim = -1;
+                    this._lastDispX = -999;
+                    this._lastDispY = -999;
+                }
                 return;
             }
             const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
             const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
             const animTick = Math.floor(Graphics.frameCount / 12) % 4;
-            const stamp = `${$gameMap.mapId()}:${dx}:${dy}:${cols}:${rows}:${floodRevision}:${animTick}`;
+            const gridStamp = `${$gameMap.mapId()}:${dx}:${dy}:${cols}:${rows}:${floodRevision}`;
 
-            const keep = new Set();
-            for (let y = Math.max(0, dy - 1); y <= Math.min(map.height - 1, dy + rows + 1); y++) {
-                for (let x = Math.max(0, dx - 1); x <= Math.min(map.width - 1, dx + cols + 1); x++) {
-                    const i = y * map.width + x;
-                    const val = grid[i];
-                    if (val !== FLOOD_WATER && val !== FLOOD_LAVA) continue;
+            // Only scan visible grid cells when viewport bounding box or flood revision changes
+            if (gridStamp !== this._seen) {
+                const keep = new Set();
+                const maxY = Math.min(map.height - 1, dy + rows + 1);
+                const maxX = Math.min(map.width - 1, dx + cols + 1);
+                for (let y = Math.max(0, dy - 1); y <= maxY; y++) {
+                    for (let x = Math.max(0, dx - 1); x <= maxX; x++) {
+                        const i = y * map.width + x;
+                        const val = grid[i];
+                        if (val !== FLOOD_WATER && val !== FLOOD_LAVA) continue;
 
-                    keep.add(i);
-                    let s = this._active.get(i);
-                    if (!s) {
-                        s = this._pool.pop() || new Sprite();
-                        s.anchor.set(0, 0);
-                        if (!s.parent) this.parent.addChild(s);
-                        this._active.set(i, s);
+                        keep.add(i);
+                        let s = this._active.get(i);
+                        if (!s) {
+                            s = this._pool.pop() || new Sprite();
+                            s.anchor.set(0, 0);
+                            if (!s.parent) this.parent.addChild(s);
+                            this._active.set(i, s);
+                        }
+                        const isWater = val === FLOOD_WATER;
+                        s.bitmap = isWater ? waterFloodBitmap : lavaFloodBitmap;
+                        const phase = (animTick + ((x + y * 2) % 4)) % 4;
+                        s.setFrame(phase * 48, 0, 48, 48);
+                        s._ufX = x;
+                        s._ufY = y;
+                        s.visible = true;
                     }
-                    const isWater = val === FLOOD_WATER;
-                    s.bitmap = isWater ? waterFloodBitmap : lavaFloodBitmap;
-                    const phase = (animTick + ((x + y * 2) % 4)) % 4;
+                }
+                for (const [i, s] of this._active) {
+                    if (!keep.has(i)) {
+                        s.visible = false;
+                        this._pool.push(s);
+                        this._active.delete(i);
+                    }
+                }
+                this._seen = gridStamp;
+                this._seenAnim = animTick;
+                this._lastDispX = -999; // force immediate repositioning
+            } else if (animTick !== this._seenAnim) {
+                // Viewport unchanged, simply cycle frame for existing sprites without grid scanning
+                for (const s of this._active.values()) {
+                    const phase = (animTick + ((s._ufX + s._ufY * 2) % 4)) % 4;
                     s.setFrame(phase * 48, 0, 48, 48);
-                    s._ufX = x;
-                    s._ufY = y;
-                    s.visible = true;
                 }
+                this._seenAnim = animTick;
             }
-            for (const [i, s] of this._active) {
-                if (!keep.has(i)) {
-                    s.visible = false;
-                    this._pool.push(s);
-                    this._active.delete(i);
+
+            // Sub-tile camera follow: only recalculate pixel offsets if camera moved
+            const curDispX = $gameMap.displayX(), curDispY = $gameMap.displayY();
+            if (curDispX !== this._lastDispX || curDispY !== this._lastDispY) {
+                for (const s of this._active.values()) {
+                    s.x = Math.round($gameMap.adjustX(s._ufX) * 48);
+                    s.y = Math.round($gameMap.adjustY(s._ufY) * 48);
+                    s.z = 2.5;
                 }
+                this._lastDispX = curDispX;
+                this._lastDispY = curDispY;
             }
-            for (const s of this._active.values()) {
-                s.x = Math.round($gameMap.adjustX(s._ufX) * 48);
-                s.y = Math.round($gameMap.adjustY(s._ufY) * 48);
-                s.z = 2.5;
-            }
-            this._seen = stamp;
         }
     }
 
@@ -2248,6 +2366,9 @@
         composeInfo: () => ({ state: composed.state, ms: composed.ms, loadMs: composed.loadMs, failed: composed.failed.slice() }),
         tileOf: key => tileBase(key),
         isFlooded,
+        floodTypeAt,
+        isWaterAt: isWaterAtRaw,
+        isLavaAt: isLavaAtRaw,
         floodGrid: (area, z) => getFloodGrid(area, z),
         invalidateFloods,
         stats: () => JSON.parse(JSON.stringify(stats))
