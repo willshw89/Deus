@@ -300,7 +300,15 @@
             }
             generations();
             ensureTownHallHomes(people);
-            for (const h of all()) if (h.home) syncHome(h);
+            for (const h of all()) {
+                if (h.mergedInto) continue;
+                const mems = members(h);
+                const rep = mems.find(p => p.data && p.data.age >= 15) || mems[0];
+                if (rep) {
+                    ensureHome(h, rep);
+                }
+                if (h.home) syncHome(h);
+            }
             return all();
         } finally { reconciling = false; }
     }
@@ -438,11 +446,22 @@
             }
 
             for (const h of founderH) {
-                if (!h.home || h.home.isShared || !h.isMovedIn) {
-                    if (h.home && !h.home.isShared && !h.privateHomestead) {
-                        h.privateHomestead = h.home;
+                const mems = members(h);
+                const hasBedInTH = mems.some(m => sharedBeds.some(b => b.unitId === m.id));
+                if (hasBedInTH) {
+                    if (!h.home || h.home.isShared || !h.isMovedIn) {
+                        if (h.home && !h.home.isShared && !h.privateHomestead) {
+                            h.privateHomestead = h.home;
+                        }
+                        h.home = townHall;
                     }
-                    h.home = townHall;
+                } else {
+                    // Overcapacity founders beyond the 8 Town Hall beds do not share Town Hall;
+                    // they seek and build their own private shelter immediately!
+                    if (h.home === townHall) {
+                        h.previousSharedHome = townHall;
+                        h.home = h.privateHomestead || null;
+                    }
                 }
             }
         }
@@ -584,6 +603,8 @@
             sleepRows = Math.max(2, Math.ceil(capacity / 2));
             height = sleepRows + 6;
             size = "estate";
+        } else if (effectiveNeed <= 1) {
+            capacity = 1; width = variant ? 7 : 6; height = 7; sleepRows = 1; size = "single";
         } else if (effectiveNeed <= 2) {
             capacity = 2; width = variant ? 7 : 6; height = 8; sleepRows = 2; size = "small";
         } else if (effectiveNeed <= 4) {
@@ -989,20 +1010,21 @@
                 }
             }
 
-            // Founders without a partner stay in the town hall
-            if (allFounders && !hasPair) return h.home;
-
             // Any home without ownership can be claimed by a member of the faction
             const claimed = claimVacantHome(h, u);
             if (claimed) return claimed;
 
-            // Once the town hall is sheltered, paired founders and non-founders seek private plots
+            // Check if members actually have an assigned bed in the shared Town Hall
+            const hasBedInTownHall = mems.length > 0 && mems.every(m => h.home.beds && h.home.beds.some(b => b.unitId === m.id));
+
+            // Once the town hall is sheltered OR if unbedded in Town Hall: seek private plots!
+            // Everyone without a shelter needs to have a shelter, pairbonded or not!
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
-            if (sheltered) {
+            if (sheltered || !hasBedInTownHall) {
                 if (h.privateHomestead) return h.privateHomestead;
                 if (h.lastSearchDay === day()) return h.home;
                 h.lastSearchDay = day();
-                const p = findPlot(h, u, designFor(h, Math.max(2, mems.length)));
+                const p = findPlot(h, u, designFor(h, Math.max(1, mems.length)));
                 if (p) {
                     h.previousSharedHome = h.home;
                     h.privateHomestead = p;
@@ -1018,7 +1040,7 @@
         if (claimed) return claimed;
         if (h.lastSearchDay === day()) return null;
         h.lastSearchDay = day();
-        const p = findPlot(h, u, designFor(h, members(h).length));
+        const p = findPlot(h, u, designFor(h, Math.max(1, members(h).length)));
         if (p) { h.home = p; h.reason = "Home reserved; construction needed"; emit("households:homePlanned", h, p); }
         return p;
     }
@@ -1040,14 +1062,45 @@
     function syncHome(h) {
         const home = h.home, own = Own(), current = members(h);
         if (!home) return;
-        const buildings = structures(h), beds = buildings.flatMap(p => p.beds);
+        const buildings = structures(h);
         const residents = home.isShared ? all().filter(otherH => otherH.home === home).flatMap(otherH => members(otherH)) : current;
         const ids = new Set(residents.map(u => u.id));
-        for (const b of beds) if (!ids.has(b.unitId)) b.unitId = null;
-        for (const u of current) if (!beds.some(b => b.unitId === u.id)) {
-            const b = beds.find(b => b.unitId === null);
-            if (b) b.unitId = u.id;
+
+        // 1. Sync beds for primary home structure
+        if (home && Array.isArray(home.beds)) {
+            for (const b of home.beds) if (!ids.has(b.unitId)) b.unitId = null;
+            for (const u of current) {
+                if (!home.beds.some(b => b.unitId === u.id)) {
+                    const b = home.beds.find(b => b.unitId === null);
+                    if (b) b.unitId = u.id;
+                }
+            }
         }
+        // 2. Sync beds for active private homestead under construction
+        if (h.privateHomestead && Array.isArray(h.privateHomestead.beds)) {
+            for (const b of h.privateHomestead.beds) if (!ids.has(b.unitId)) b.unitId = null;
+            for (const u of current) {
+                if (!h.privateHomestead.beds.some(b => b.unitId === u.id)) {
+                    const b = h.privateHomestead.beds.find(b => b.unitId === null);
+                    if (b) b.unitId = u.id;
+                }
+            }
+        }
+        // 3. Sync beds for annexes
+        if (home && Array.isArray(home.annexes)) {
+            for (const a of home.annexes) {
+                if (a && Array.isArray(a.beds)) {
+                    for (const b of a.beds) if (!ids.has(b.unitId)) b.unitId = null;
+                    for (const u of current) {
+                        if (!a.beds.some(b => b.unitId === u.id)) {
+                            const b = a.beds.find(b => b.unitId === null);
+                            if (b) b.unitId = u.id;
+                        }
+                    }
+                }
+            }
+        }
+        const beds = buildings.flatMap(p => p.beds || []);
         if (own) for (const b of beds) {
             const u = unitOf(b.unitId), owner = own.ownerOf(ref(h, b));
             if (u && samePlace(h, u) && object(h, b) && object(h, b).id === "floor_straw" &&
@@ -1208,10 +1261,12 @@
 
         // 5 base bootstrap steps for fresh unbuilt homes:
         const hearthObject = (o && o.type("kitchen_hearth") && o.type("kitchen_hearth").build) ? "kitchen_hearth" : "campfire";
+        const activeBeds = home.beds.filter(b => b.unitId !== null);
+        const bedsToPlan = activeBeds.length > 0 ? activeBeds : home.beds.slice(0, Math.max(1, members(h).length));
         home.steps = [
             step("walls", home.wall, buildableWalls),
             step("doors", home.door, home.doors),
-            step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
+            step("beds", "floor_straw", bedsToPlan),
             step("hearth", hearthObject, [home.hearth].filter(Boolean)),
             step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
         ];

@@ -3256,16 +3256,15 @@
             const H = window.UF && UF.Households;
             const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
             if (x.step.household) {
-                if (focal && x.step.household === focal.id) {
+                if (u.data && u.data.householdId === x.step.household) {
+                    // Colonists urgently build their own private shelter, pairbonded or not
+                    s += 6.0;
+                } else if (focal && x.step.household === focal.id) {
                     s += 4.5; // Cooperative settlement building: all villagers unite to construct the active focal home!
                 } else if (focal && H && H.isSheltered && !H.isSheltered(focal)) {
-                    // While the communal focal house is under construction and unsheltered,
+                    // While the active focal house is under construction and unsheltered,
                     // defer secondary household projects so villagers don't scatter labor!
                     s -= 2.0;
-                } else if (u.data && u.data.householdId === x.step.household) {
-                    // Paired colonists urgently build their own private home for their family
-                    const isPaired = u.data.partner || u.data.partnerId;
-                    s += isPaired ? 6.0 : 3.0;
                 } else {
                     s += 1.2;
                 }

@@ -9,6 +9,39 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Universal Shelter Planning & Single-Resident Cabins for Unpartnered Colonists Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Everyone without a shelter needs to have a shelter, pairbonded or not"):
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Unpartnered Founder Lockout*: `ensureHome` previously had `if (allFounders && !hasPair) return h.home;` which permanently blocked unpartnered founders from ever planning or reserving a private homestead, trapping them in the Town Hall even after it was completed and sheltered.
+     - *Fix (`UF_Households.js`)*: Removed the unpartnered lock. Once Town Hall is sheltered (or if a colonist has no bed in Town Hall), every colonist actively seeks and plans their own private shelter.
+  2. *Single-Resident Cabin Architectural Standard*: `designFor` had no single cabin design (minimum was 2-bed cottage with `Math.max(2, mems.length)`), preventing single colonists from building appropriately sized compact homes.
+     - *Fix (`UF_Households.js`)*: Added `effectiveNeed <= 1` branch: 6x7 single-resident cabin (`capacity: 1`, `size: "single"`, `sleepRows: 1`, 1 bed, outer door, interior divider door, kitchen hearth, storage).
+  3. *Household Initialization in Reconcile*: `reconcile` only called `syncHome(h)` for households that already had `h.home` set, skipping new or unbedded households.
+     - *Fix (`UF_Households.js`)*: In `reconcile`, iterate active households and call `ensureHome(h, rep)`, ensuring every single or paired colonist has their home reserved and steps generated immediately.
+  4. *Overcapacity Town Hall Trapping*: Founders beyond the 8 Town Hall beds were assigned `h.home = townHall`, trapping them without a bed.
+     - *Fix (`UF_Households.js`)*: In `ensureTownHallHomes`, only households with an assigned bed in Town Hall are assigned `h.home = townHall`. Unbedded founders seek private homesteads immediately.
+  5. *Structure-Specific Bed Assignment*: `syncHome` previously searched all structures collectively, so units with a bed in Town Hall never had `b.unitId` assigned in their under-construction private homestead, causing `step("beds")` to plan 0 beds.
+     - *Fix (`UF_Households.js`)*: `syncHome` syncs beds per-structure (`home`, `privateHomestead`, `annexes`), ensuring private homestead beds are assigned to household members. Added fallback to `home.beds.slice(0, Math.max(1, members(h).length))`.
+  6. *Equal Shelter Construction Urgency*: In `planJob(u)`, unpartnered colonists were given half the score bonus (`s += 3.0` vs `6.0`).
+     - *Fix (`UF_Colonists.js`)*: In `planJob(u)`, any colonist working on their own household shelter receives `s += 6.0`, pairbonded or not.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_unpartnered_shelter_progression.js`: 26/26 PASS (exit 0):
+    - `smoke.has_single_households`: 4 unpartnered/single households
+    - `smoke.single_shelters_planned`: 4/4 unpartnered households have private shelters planned
+    - `smoke.single_cabin_capacity`: 1 (want 1)
+    - `smoke.single_cabin_size`: "single" (want 'single')
+    - `smoke.single_cabin_bed_count`: 1 bed position
+    - `smoke.single_cabin_has_hearth`: (138, 128)
+    - `smoke.single_cabin_has_storage`: (139, 126)
+    - `smoke.single_colonist_has_home_steps`: household:2_walls in effectivePlan
+    - `smoke.colonists_actively_working`: 8/8 colonists actively working productive jobs
+  - `tools/test_post_town_hall_progression.js`: 22/22 PASS (exit 0).
+  - `tools/run_tests.js colonists`: 24/24 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 4 Mutant Check: `node tools/test_unpartnered_shelter_progression.js --mutant=block_single_shelters` failed with code 1 (`FAIL smoke.single_shelters_planned - MUTANT INJECTED: unpartnered shelters blocked`).
+  - Rule 5 Screenshots: Inspected `live_unpartnered_shelters_initial.png` and `live_unpartnered_shelters_active_work.png`.
+
+
 ## Post-Town Hall Progression, Workshop Prioritization & Bed Sleeping Fix Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The AI arent really doing shit after building the town center" / "This is where they end up"):
 - **Diagnosed Root Causes & Fixed Architecture**:
