@@ -470,7 +470,16 @@
         },
         work: 0,
         apply() {},
-        describe: () => verb
+        describe(job) {
+            if (job && job.params) {
+                if (job.params.explore) return "Surveying the frontier";
+                if (job.params.stroll) return "Strolling";
+                if (job.params.fireGather) return "Warming by the hearth";
+                if (job.params.inspect) return "Inspecting the homestead";
+                if (job.params.contemplate) return "Contemplating";
+            }
+            return verb;
+        }
     });
     define("move", moveHandler("Walking"));
     define("wander", moveHandler("Wandering"));
@@ -559,8 +568,12 @@
             const needs = t.build.items || {};
             const countFor = (cell, id) => {
                 let cnt = I ? I.count(cell, id) : 0;
-                if (job.params.objectId === "floor_straw" && id === "straw") {
+                if (id === "wood") {
+                    cnt += I ? I.count(cell, "log") : 0;
+                } else if (id === "straw") {
                     cnt += I ? I.count(cell, "fiber") : 0;
+                } else if (id === "stone") {
+                    cnt += I ? I.count(cell, "rocks_small") : 0;
                 }
                 return cnt;
             };
@@ -582,7 +595,10 @@
                 let left = needs[id] | 0;
                 for (const it of I.atIn(lv(job.target), job.target.x, job.target.y)) {
                     if (left <= 0) break;
-                    const matches = it.type === id || (job.params.objectId === "floor_straw" && id === "straw" && it.type === "fiber");
+                    const matches = it.type === id ||
+                        (id === "wood" && (it.type === "wood" || it.type === "log")) ||
+                        (id === "straw" && (it.type === "straw" || it.type === "fiber")) ||
+                        (id === "stone" && (it.type === "stone" || it.type === "rocks_small"));
                     if (!matches) continue;
                     left -= I.consume(it.id, left);
                 }

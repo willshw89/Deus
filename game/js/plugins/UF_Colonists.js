@@ -178,7 +178,15 @@
             }
             sourceCache = { source: objects, map };
         }
-        return sourceCache.map[itemId] || [];
+        const list = (sourceCache.map[itemId] || []).slice();
+        if (itemId === "wood" && sourceCache.map["log"]) {
+            for (const s of sourceCache.map["log"]) if (!list.some(x => x.objectId === s.objectId && x.action === s.action)) list.push(s);
+        } else if (itemId === "straw" && sourceCache.map["fiber"]) {
+            for (const s of sourceCache.map["fiber"]) if (!list.some(x => x.objectId === s.objectId && x.action === s.action)) list.push(s);
+        } else if (itemId === "stone" && sourceCache.map["rocks_small"]) {
+            for (const s of sourceCache.map["rocks_small"]) if (!list.some(x => x.objectId === s.objectId && x.action === s.action)) list.push(s);
+        }
+        return list;
     }
     // Recipes that cook a raw food item (input the raw type, output food, at a workplace).
     const cookRecipeFor = rawType => recipes().find(r => r.inputs && r.inputs[rawType] && r.at && Object.keys(r.outputs || {}).some(id => isFoodType(itemType(id)))) || null;
@@ -1142,16 +1150,51 @@
         const needs = _buildCellsSet.get(`${x},${y}`);
         if (!needs) return false;
         if (!itemTypeId) return true;
-        if (!needs[itemTypeId]) return false;
+        let needCount = needs[itemTypeId] || 0;
+        if (itemTypeId === "log") needCount = needCount || (needs["wood"] || 0);
+        else if (itemTypeId === "wood") needCount = needCount || (needs["log"] || 0);
+        else if (itemTypeId === "fiber") needCount = needCount || (needs["straw"] || 0);
+        else if (itemTypeId === "straw") needCount = needCount || (needs["fiber"] || 0);
+        else if (itemTypeId === "rocks_small") needCount = needCount || (needs["stone"] || 0);
+        else if (itemTypeId === "stone") needCount = needCount || (needs["rocks_small"] || 0);
+        if (!needCount) return false;
         const I = Items();
         if (I) {
-            const countOnCell = I.count({ area: levelArea(c), z: zOf(c), x, y }, itemTypeId);
-            if (countOnCell > (needs[itemTypeId] || 1)) return false;
+            let countOnCell = I.count({ area: levelArea(c), z: zOf(c), x, y }, itemTypeId);
+            if (itemTypeId === "log") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "wood");
+            else if (itemTypeId === "wood") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "log");
+            else if (itemTypeId === "fiber") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "straw");
+            else if (itemTypeId === "straw") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "fiber");
+            else if (itemTypeId === "rocks_small") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "stone");
+            else if (itemTypeId === "stone") countOnCell += I.count({ area: levelArea(c), z: zOf(c), x, y }, "rocks_small");
+            if (countOnCell > needCount) return false;
         }
         return true;
     }
-    const carriedOf = (u, typeId) => (Items() ? Items().inventoryOf(u.id).filter(it => it.type === typeId) : []);
-    const carriedCount = (u, typeId) => (Items() ? Items().count(u.id, typeId) : 0);
+    const carriedOf = (u, typeId) => {
+        if (!Items()) return [];
+        return Items().inventoryOf(u.id).filter(it => {
+            if (it.type === typeId) return true;
+            if (typeId === "wood" && it.type === "log") return true;
+            if (typeId === "log" && it.type === "wood") return true;
+            if (typeId === "straw" && it.type === "fiber") return true;
+            if (typeId === "fiber" && it.type === "straw") return true;
+            if (typeId === "stone" && it.type === "rocks_small") return true;
+            if (typeId === "rocks_small" && it.type === "stone") return true;
+            return false;
+        });
+    };
+    const carriedCount = (u, typeId) => {
+        if (!Items()) return 0;
+        let cnt = Items().count(u.id, typeId);
+        if (typeId === "wood") cnt += Items().count(u.id, "log");
+        else if (typeId === "log") cnt += Items().count(u.id, "wood");
+        else if (typeId === "straw") cnt += Items().count(u.id, "fiber");
+        else if (typeId === "fiber") cnt += Items().count(u.id, "straw");
+        else if (typeId === "stone") cnt += Items().count(u.id, "rocks_small");
+        else if (typeId === "rocks_small") cnt += Items().count(u.id, "stone");
+        return cnt;
+    };
     const equippedItem = (u, slot) => {
         const I = Items();
         const id = u.data.equipment && u.data.equipment[slot];
@@ -2869,16 +2912,25 @@
     function colonyCount(typeId, ref) {
         const I = Items(), c = colonyState(ref);
         if (!I || !c) return 0;
+        const types = [typeId];
+        if (typeId === "wood") types.push("log");
+        else if (typeId === "log") types.push("wood");
+        else if (typeId === "straw") types.push("fiber");
+        else if (typeId === "fiber") types.push("straw");
+        else if (typeId === "stone") types.push("rocks_small");
+        else if (typeId === "rocks_small") types.push("stone");
         let n = 0;
-        for (const u of siteColonists(ref)) n += I.count(u.id, typeId);
-        for (const f of I.find({ area: levelArea(c), z: zOf(c), near: { x: c.site.x, y: c.site.y }, radius: c.radius + 2, id: typeId })) n += f.item.count;
-        if (window.UF && UF.Containers) {
-            const containers = UF.Containers.all(levelArea(c), zOf(c));
-            for (const cont of containers) {
-                const d = chebyshev(cont.x, cont.y, c.site.x, c.site.y);
-                if (d <= c.radius + 6) {
-                    for (const it of UF.Containers.itemsIn(cont.id)) {
-                        if (it.type === typeId) n += (it.count || 1);
+        for (const t of types) {
+            for (const u of siteColonists(ref)) n += I.count(u.id, t);
+            for (const f of I.find({ area: levelArea(c), z: zOf(c), near: { x: c.site.x, y: c.site.y }, radius: c.radius + 15, id: t })) n += f.item.count;
+            if (window.UF && UF.Containers) {
+                const containers = UF.Containers.all(levelArea(c), zOf(c));
+                for (const cont of containers) {
+                    const d = chebyshev(cont.x, cont.y, c.site.x, c.site.y);
+                    if (d <= c.radius + 10) {
+                        for (const it of UF.Containers.itemsIn(cont.id)) {
+                            if (it.type === t) n += (it.count || 1);
+                        }
                     }
                 }
             }
@@ -3004,9 +3056,9 @@
         const needs = t.build.items || {};
         const countOnCellAt = (cell, id) => {
             let cnt = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
-            if (t.id === "floor_straw" && id === "straw") {
-                cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
-            }
+            if (id === "wood") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "log") : 0;
+            else if (id === "straw") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
+            else if (id === "stone") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "rocks_small") : 0;
             return cnt;
         };
         const candidateCells = buildCells(step, u).filter(cell => cell.state === "todo");
@@ -3040,9 +3092,9 @@
             const needs = t.build.items || {};
             const countOnCell = (id) => {
                 let cnt = I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id) : 0;
-                if (t.id === "floor_straw" && id === "straw") {
-                    cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
-                }
+                if (id === "wood") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "log") : 0;
+                else if (id === "straw") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber") : 0;
+                else if (id === "stone") cnt += I ? I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "rocks_small") : 0;
                 return cnt;
             };
             const missing = Object.keys(needs).filter(id => {
@@ -3093,10 +3145,13 @@
             let carried = carriedOf(u, m)[0];
             let ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: m }).find(f => !onBuildCell(f.x, f.y, u, m) && (f.x !== cell.x || f.y !== cell.y));
             let src = objectSourceNear(u, m, SEARCH_RADIUS) || objectSourceNear(u, m, 90);
-            if (!carried && !ground && !src && t.id === "floor_straw" && m === "straw") {
-                carried = carriedOf(u, "fiber")[0];
-                ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: "fiber" }).find(f => !onBuildCell(f.x, f.y, u, "fiber") && (f.x !== cell.x || f.y !== cell.y));
-                src = objectSourceNear(u, "fiber", SEARCH_RADIUS) || objectSourceNear(u, "fiber", 90);
+            if (!carried && !ground && !src) {
+                const alt = m === "wood" ? "log" : m === "straw" ? "fiber" : m === "stone" ? "rocks_small" : null;
+                if (alt) {
+                    carried = carriedOf(u, alt)[0];
+                    ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 30, id: alt }).find(f => !onBuildCell(f.x, f.y, u, alt) && (f.x !== cell.x || f.y !== cell.y));
+                    src = objectSourceNear(u, alt, SEARCH_RADIUS) || objectSourceNear(u, alt, 90);
+                }
             }
             if (carried) return { type: "haul", target: { x: u.x, y: u.y }, params: { itemId: carried.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
             if (ground) return { type: "haul", target: { x: ground.x, y: ground.y }, params: { itemId: ground.item.id, to: { area: copyArea(c.area), z: zOf(c), x: cell.x, y: cell.y }, plan: step.id } };
@@ -3479,9 +3534,9 @@
                 for (const [id, countNeeded] of Object.entries(needs)) {
                     if (failedNeeds.has(id)) continue;
                     let onCell = I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, id);
-                    if (t.id === "floor_straw" && id === "straw") {
-                        onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber");
-                    }
+                    if (id === "wood") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "log");
+                    else if (id === "straw") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "fiber");
+                    else if (id === "stone") onCell += I.count({ area: levelArea(c), z: zOf(c), x: cell.x, y: cell.y }, "rocks_small");
                     const inFlight = activeJobs().filter(j => (j.type === "haul" || j.type === "fetch") &&
                         j.assigned !== u.id && j.params && j.params.to &&
                         j.params.to.x === cell.x && j.params.to.y === cell.y).length;
@@ -3553,8 +3608,13 @@
                                 }
                             });
                         }
-                        const ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 40, id })
+                        const altId = id === "wood" ? "log" : id === "straw" ? "fiber" : id === "stone" ? "rocks_small" : null;
+                        let ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 40, id })
                             .find(f => (!f.item.firstOwner || f.item.firstOwner === u.id) && !onBuildCell(f.x, f.y, u, id) && (f.x !== cell.x || f.y !== cell.y));
+                        if (!ground && altId) {
+                            ground = groundItemsNear(u, { radius: SEARCH_RADIUS + 40, id: altId })
+                                .find(f => (!f.item.firstOwner || f.item.firstOwner === u.id) && !onBuildCell(f.x, f.y, u, altId) && (f.x !== cell.x || f.y !== cell.y));
+                        }
                         if (ground) {
                             return give(u, {
                                 type: "haul",
@@ -3581,8 +3641,9 @@
         if (!c || !I) return null;
         if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
 
-        // Find loose ground items within the settlement radius
-        const loose = groundItemsNear(u, { radius: c.radius + 6 }).filter(f => {
+        // Find loose ground items within the settlement radius and surrounding forest/quarry perimeter
+        const tidyRadius = Math.max((c.radius || 8) + 25, 45);
+        const loose = groundItemsNear(u, { radius: tidyRadius }).filter(f => {
             if (onStockpile(f.item, null, u)) return false;
             if (onBuildCell(f.x, f.y, u, f.item.type)) return false;
             if (f.item.firstOwner && f.item.firstOwner !== u.id) return false;
@@ -3871,7 +3932,102 @@
         return null;
     }
 
+    // Autonomous Frontier Progression:
+    // When colonists have no active direct construction task, no direct player order,
+    // and no urgent need, they proactively build the frontier settlement:
+    // 1. Harvest timber if colony log reserves < 35 or unbuilt wood steps exist.
+    // 2. Quarry stone if colony stone reserves < 30 or unbuilt stone steps exist.
+    // 3. Gather fiber/straw if colony fiber reserves < 25 or unbuilt straw/bed steps exist.
+    // 4. Forage wild food/berries if colony food reserves < 25.
+    // 5. Tidy loose resources across the perimeter into stockpiles.
+    function autonomousFrontierProgression(u) {
+        const c = colonyState(u);
+        const O = Objects(), I = Items(), J = Jobs();
+        if (!c || !O || !I || !J || !c.site) return null;
+        if (evening() || (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;
+
+        const area = levelArea(u);
+        const radius = c.radius ? Math.max(c.radius + 30, 50) : 50;
+
+        const isHarvestable = (t, x, y, action) => {
+            if (!t) return false;
+            if (hasTag(t, "wall") || hasTag(t, "building") || hasTag(t, "door") || hasTag(t, "bed") || hasTag(t, "furniture") || hasTag(t, "fire") || t.build) return false;
+            if (isObjectClaimed(u, x, y, action)) return false;
+            return true;
+        };
+
+        // 1. Timber Progression: target >= 35 logs in the settlement
+        const logs = colonyCount("log", u) + colonyCount("wood", u);
+        if (logs < 35) {
+            const tree = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                if (!t.actions || !t.actions.chop) return false;
+                return isHarvestable(t, x, y, "chop");
+            });
+            if (tree) {
+                const tool = toolJob(u, "chop");
+                if (tool) return tool;
+                return give(u, { type: "chop", target: { x: tree.x, y: tree.y }, params: { frontier: "timber" } });
+            }
+        }
+
+        // 2. Stone Progression: target >= 30 stones in the settlement
+        const stone = colonyCount("stone", u);
+        if (stone < 30) {
+            const rock = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                const act = t.actions && (t.actions.quarry ? "quarry" : t.actions.mine ? "mine" : t.actions.pick ? "pick" : null);
+                if (!act) return false;
+                return isHarvestable(t, x, y, act);
+            });
+            if (rock) {
+                const act = rock.type.actions.quarry ? "quarry" : rock.type.actions.mine ? "mine" : "pick";
+                const tool = toolJob(u, act);
+                if (tool) return tool;
+                return give(u, { type: act, target: { x: rock.x, y: rock.y }, params: { frontier: "stone" } });
+            }
+        }
+
+        // 3. Fiber Progression: target >= 25 fiber/straw
+        const fiber = colonyCount("fiber", u) + colonyCount("straw", u);
+        if (fiber < 25) {
+            const plant = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                const act = t.actions && (t.actions.gather ? "gather" : t.actions.harvest ? "harvest" : null);
+                if (!act) return false;
+                if (!yieldsItem(t, "fiber") && !yieldsItem(t, "straw")) return false;
+                return isHarvestable(t, x, y, act);
+            });
+            if (plant) {
+                const act = plant.type.actions.gather ? "gather" : "harvest";
+                return give(u, { type: act, target: { x: plant.x, y: plant.y }, params: { frontier: "fiber" } });
+            }
+        }
+
+        // 4. Food Progression: target >= 25 food
+        const food = foodStored(u).reduce((sum, it) => sum + (it.count || 1), 0);
+        if (food < 25) {
+            const foodObj = scanObjects(area, u.x, u.y, radius, (t, x, y) => {
+                const act = yieldsFood(t);
+                if (!act) return false;
+                return isHarvestable(t, x, y, act[0]);
+            });
+            if (foodObj) {
+                const act = yieldsFood(foodObj.type)[0];
+                return give(u, { type: act, target: { x: foodObj.x, y: foodObj.y }, params: { frontier: "food" } });
+            }
+            const prey = preyNear(u, huntRadius());
+            if (prey) {
+                return give(u, { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id, frontier: "food" } });
+            }
+        }
+
+        // 5. Perimeter Hauling: tidy any loose materials into stockpiles
+        const tidy = tidyStockpileJob(u);
+        if (tidy) return tidy;
+
+        return null;
+    }
+
     // Idle: explore (curiosity), stroll near the site, or stand and think.
+    // Guaranteed non-null fallback to ensure colonists always maintain purposeful, visible activity.
     function idleJob(u) {
         const c = colonyState(u);
         const J = Jobs();
@@ -3889,6 +4045,12 @@
                         if (j) return j;
                     }
                 }
+                const neighbor = simulationUnits().find(o => o.id !== u.id && sameLevel(o, u) && o.data.faction === u.data.faction && !Jobs().of(o.id) && chebyshev(o.x, o.y, u.x, u.y) <= 3);
+                if (neighbor) {
+                    const j = give(u, { type: "talk", target: { x: neighbor.x, y: neighbor.y }, params: { unitId: neighbor.id, hearthChat: true } });
+                    if (j) return j;
+                }
+                return give(u, { type: "move", target: { x: u.x, y: u.y }, params: { fireGather: true } });
             }
         }
 
@@ -3898,27 +4060,39 @@
 
         const roll = unit01(seed(), SALT.stroll, u.id, ticks());
         const curiosity = facet(u, "curiosity") / 100;
-        if (roll < 0.5 * curiosity + 0.2) {
+        if (roll < 0.5 * curiosity + 0.3) {
             const explore = roll < 0.5 * curiosity;
             const r = explore ? EXPLORE_RADIUS : STROLL_RADIUS;
             const rng = mulberry32(hash32(seed(), SALT.stroll, u.id, ticks(), 1));
             for (let t = 0; t < 8; t++) {
                 const a = rng() * Math.PI * 2, d = 3 + rng() * (r - 3);
-                // Both kinds of walk are anchored to the home site, so nobody drifts off to another faction's hearth.
                 const x = Math.round(home.x + Math.cos(a) * d), y = Math.round(home.y + Math.sin(a) * d);
                 if (!J.standable(levelArea(u), x, y, u.id)) continue;
                 const j = give(u, { type: "move", target: { x, y }, params: { stroll: true, explore } });
                 if (j) return j;
             }
-        } else if (roll > 0.92) {
-            const dest = (u.data && u.data.destiny) || (window.UF && UF.Goals && UF.Goals.destinyOf && UF.Goals.destinyOf(u));
-            if (dest && dest.thought && roll > 0.95) {
-                addThought(u, dest.thought, 3);
-            } else {
-                addThought(u, "Took a moment to look around.", 2);
-            }
         }
-        return null;
+
+        // Daytime social interaction: talk with nearby idle settler
+        const partner = simulationUnits().find(o => o.id !== u.id && sameLevel(o, u) && o.data.faction === u.data.faction && !Jobs().of(o.id) && chebyshev(o.x, o.y, u.x, u.y) <= 20);
+        if (partner) {
+            const j = give(u, { type: "talk", target: { x: partner.x, y: partner.y }, params: { unitId: partner.id, idleSocial: true } });
+            if (j) return j;
+        }
+
+        // Inspect homestead / survey settlement
+        const cell = freeCellNear(levelArea(u), home.x, home.y, 6, 2);
+        if (cell) {
+            const j = give(u, { type: "move", target: cell, params: { stroll: true, inspect: true } });
+            if (j) return j;
+        }
+
+        // Local step or contemplation
+        const localCell = freeCellNear(levelArea(u), u.x, u.y, 3, 1);
+        if (localCell) {
+            return give(u, { type: "move", target: localCell, params: { stroll: true } });
+        }
+        return give(u, { type: "move", target: { x: u.x, y: u.y }, params: { contemplate: true } });
     }
 
     // Far from home (a hunt follows fleeing prey a long way): back to the site before anything but a need.
@@ -3990,7 +4164,7 @@
         const haulerStaging = (Callings && Callings.isHauler(u)) ? constructionHaulingJob(u) : null;
         const needsGear = (!holds(u, "stone_knife") && (!u.data || u.data.age === undefined || u.data.age >= 15)) || (!equippedItem(u, "clothes") || (u.data && u.data.tiers && u.data.tier < 1));
         const gearPlan = needsGear && !lazy ? planJob(u) : null;
-        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || tidyStockpileJob(u) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || idleJob(u);
+        return designationJob(u) || gearPlan || haulerStaging || footprintClearingJob(u) || (lazy ? null : (UF.Agriculture && UF.Agriculture.planJob(u)) || planJob(u)) || constructionHaulingJob(u) || tidyStockpileJob(u) || (unbeddedJob ? give(u, unbeddedJob) : null) || autonomousCallingJob(u) || autonomousFrontierProgression(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4039,7 +4213,7 @@
         }
         const t = ticks();
         let decideCount = 0;
-        const MAX_DECIDE_PER_SCAN = 1;
+        const MAX_DECIDE_PER_SCAN = 8;
         for (const u of simulationUnits()) {
             if (!u.data.capabilities) {
                 const P = Pillars();
@@ -4078,11 +4252,11 @@
                     } else continue;
                 } else continue;
             }
-            if (t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;
+            if (job && t - (decisionAt.get(u.id) || -Infinity) < DECIDE_EVERY) continue;
             if (decideCount >= MAX_DECIDE_PER_SCAN) break;
             try {
-                decide(u);
-                decideCount++;
+                const res = decide(u);
+                if (res) decideCount++;
             } catch (e) {
                 console.error("UF_Colonists: decision failed for", u.name, e);
                 decisionAt.set(u.id, t);

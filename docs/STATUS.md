@@ -9,6 +9,34 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Continuous Frontier Progression & Zero Idle Colonists Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("A lot of them have no current action.. Like dude, they should have a neverending progression of shit to do. Like build a shelter, starting by harvesting, etc"):
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Material Aliasing Mismatch (`wood` vs `log`, `straw` vs `fiber`, `stone` vs `rocks_small`)*: Catalog trees drop `log`, wild grasses yield `fiber`, and boulders yield `stone`/`rocks_small`, whereas doors, beds, workbenches, and storage chests require `wood` or `straw`. Sourcing and counting previously returned 0 for `wood`, triggering `missingFailed` and permanently abandoning shelter doors and workshops.
+     - *Fix (`UF_Jobs.js` & `UF_Colonists.js`)*: Aliased `wood` <-> `log`, `straw` <-> `fiber`, and `stone` <-> `rocks_small` across job planning (`countFor`), material consumption (`apply`), source resolution (`sourcesOf`), inventory inspection (`carriedOf`, `carriedCount`), colony totals (`colonyCount`), and cell reservations (`onBuildCell`, `countOnCellAt`).
+  2. *Autonomous Frontier Resource Harvesting Pipeline*: When active construction cells are occupied by other workers or materials are in flight, colonists lacked an autonomous pipeline to harvest reserves for future construction.
+     - *Fix (`UF_Colonists.js`)*: Added `autonomousFrontierProgression(u)`. Proactively harvests timber (maintains >= 35 logs), quarries stone (maintains >= 30), gathers fiber/straw (maintains >= 25), forages food (maintains >= 25), and hauls perimeter clutter to stockpiles.
+  3. *Forest Perimeter Stockpile Logistics*: `tidyStockpileJob` was restricted to `c.radius + 6` (14-18 tiles), ignoring logs and stones harvested in surrounding woodlands.
+     - *Fix (`UF_Colonists.js`)*: Expanded search radius to `Math.max((c.radius || 8) + 25, 45)`.
+  4. *Universal Material Staging*: Construction staging was previously limited strictly to colonists with dedicated hauler callings (`Callings.isHauler(u)`).
+     - *Fix (`UF_Colonists.js`)*: Added `constructionHaulingJob(u)` as an open fallback for any colonist with free hands to stage materials to active unbuilt walls, doors, and hearths.
+  5. *Scan Throttling & 60-Tick Idle Lockout*: `scan()` restricted decisions to `MAX_DECIDE_PER_SCAN = 1` and applied `DECIDE_EVERY = 60` lockouts to units that had no job.
+     - *Fix (`UF_Colonists.js`)*: Increased `MAX_DECIDE_PER_SCAN` to 8; bypassed the 60-tick lockout for unassigned colonists so they receive work without delay.
+  6. *Elimination of "No current action recorded"*: `idleJob(u)` previously returned `null` on ~50% of rolls.
+     - *Fix (`UF_Colonists.js` & `UF_Jobs.js`)*: Guaranteed non-null fallback: campfire social chat, frontier surveying, neighborhood strolls, or homestead inspection. Enhanced `moveHandler.describe` with descriptive action verbs ("Surveying the frontier", "Strolling", "Warming by the hearth", "Inspecting the homestead").
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (exit 0):
+    - `smoke.founder_count`: 8/8 colonists
+    - `smoke.colonists_never_idle_initial`: 8/8 colonists have active initial actions
+    - `smoke.colonists_never_idle_final`: 8/8 colonists active after 300 frames (Gathering tall grass, Walking, Gathering reeds, Hauling a stone, Chopping an oak, Chopping an oak, Gathering tall grass, Chopping an oak)
+    - `smoke.colonists_productive_work`: 7/8 colonists actively performing physical frontier labor (gather, gather, haul, chop, chop, gather, chop)
+  - Rule 4 Mutant Check: `node tools/test_continuous_frontier_progression.js --mutant=disable_continuous_progression` failed with code 1 (`FAIL smoke.colonists_never_idle_initial - MUTANT INJECTED: continuous progression disabled`).
+  - `tools/test_unpartnered_shelter_progression.js`: 26/26 PASS (exit 0).
+  - `tools/test_post_town_hall_progression.js`: 22/22 PASS (exit 0).
+  - `tools/run_tests.js colonists`: 24/24 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 5 Screenshots: Inspected `live_continuous_progression_initial.png` and `live_continuous_progression_active.png`.
+
 ## Universal Shelter Planning & Single-Resident Cabins for Unpartnered Colonists Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Everyone without a shelter needs to have a shelter, pairbonded or not"):
 - **Diagnosed Root Causes & Fixed Architecture**:
