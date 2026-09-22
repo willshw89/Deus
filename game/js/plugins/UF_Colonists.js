@@ -1499,7 +1499,7 @@
             return { item: it, x: pos.x, y: pos.y, dist: Math.hypot(pos.x - u.x, pos.y - u.y), containerId: it.container || null };
         });
         const seen = new Set(stored.map(f => f.item.id));
-        const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id))).sort((a, b) => a.dist - b.dist);
+        const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id) && (!f.item.firstOwner || f.item.firstOwner === u.id))).sort((a, b) => a.dist - b.dist);
         const kill = ground.find(f => rawFood(itemType(f.item.type)) && f.dist <= FOOD_ITEM_RADIUS);
         if (kill) {
             const spec = fire && cookRecipeFor(kill.item.type)
@@ -3845,7 +3845,7 @@
                 }
                 const looseRaw = groundItemsNear(u, { radius: radius }).find(f => {
                     const t = itemType(f.item.type);
-                    return rawFood(t) && cookRecipeFor(f.item.type) && !onStockpile(f.item, null, u);
+                    return rawFood(t) && cookRecipeFor(f.item.type) && !onStockpile(f.item, null, u) && (!f.item.firstOwner || f.item.firstOwner === u.id);
                 });
                 if (looseRaw) {
                     const r = cookRecipeFor(looseRaw.item.type);
@@ -4050,7 +4050,7 @@
             const job = J.of(u.id);
             if (job) {
                 const need = urgent(u);
-                if (need && !NEED_JOBS.includes(job.type) && !(need === "hunger" && job.type === "hunt") && (!job.params || !NEED_JOBS.includes(job.params.via)) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
+                if (need && !NEED_JOBS.includes(job.type) && !(need === "hunger" && (job.type === "hunt" || job.type === "craft" || (job.params && (job.params.via === "craft" || job.params.recipeId === "cook_meat")))) && (!job.params || !NEED_JOBS.includes(job.params.via)) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                     preemptAt.set(u.id, t);
                     J.cancel(job.id, need === "thirst" ? "too thirsty to go on" : "too hungry to go on");
                 } else if (!NEED_JOBS.includes(job.type)) {
@@ -4688,23 +4688,29 @@
             const killsNear = I.find({ area: hunter.area, near: { x: hunter.x, y: hunter.y }, radius: FOOD_ITEM_RADIUS }).filter(f => rawFood(itemType(f.item.type)));
             for (const f of killsNear) I.remove(f.item.id); // and no fresh kill of somebody else's lying nearer than the hare
             hunter.data.needs.hunger = 60;
+            hunter.data.needs.thirst = 0;
             decisionAt.set(hunter.id, -Infinity);
             let hunt = null, cook = null;
             const jobsBefore = W.state.jobs.nextId;
             // Any prey counts: the kit herd may stand nearer than the test hare, and the rule takes the nearest.
             await until(() => {
                 keepAwake();
-                if (hunter.data && hunter.data.needs && hunter.data.needs.hunger > 60) hunter.data.needs.hunger = 60;
+                if (hunter.data && hunter.data.needs) {
+                    if (hunter.data.needs.hunger > 60) hunter.data.needs.hunger = 60;
+                    hunter.data.needs.thirst = 0;
+                }
                 const j = J.of(hunter.id);
-                if (j && j.type === "hunt" && j.id >= jobsBefore) {
-                    if (j.state === "done") { hunt = j; return true; }
-                    if (j.state === "failed") { decisionAt.set(hunter.id, -Infinity); }
-                    else { hunt = j; }
+                if (j && j.type === "hunt" && j.id >= jobsBefore) hunt = j;
+                if (hunt && (hunt.state === "done" || hunt.state === "failed")) {
+                    if (hunt.state === "done") return true;
+                    decisionAt.set(hunter.id, -Infinity);
+                    hunt = null;
                 }
                 const doneHunt = J.list(x => x.assigned === hunter.id && x.type === "hunt" && x.id >= jobsBefore && x.state === "done")[0];
                 if (doneHunt) { hunt = doneHunt; return true; }
                 return secondsAtX8() > Math.min(110, toolsWindowEnd + 35);
             }, 36000, "the hunt");
+            decisionAt.set(hunter.id, -Infinity);
             const meatAt = hunt && hunt.result && hunt.result.at ? hunt.result.at : null;
             const meatThere = meatAt ? I.count({ area: c.area, x: meatAt.x, y: meatAt.y }, "meat_raw") : 0;
             const hareGone = !!hunt && !W.unit(hunt.params.unitId);
@@ -4712,7 +4718,10 @@
             const cookState = () => (cook ? cook.state || "done" : "none");
             await until(() => {
                 keepAwake();
-                if (hunter.data && hunter.data.needs && hunter.data.needs.hunger < 60) hunter.data.needs.hunger = 60;
+                if (hunter.data && hunter.data.needs) {
+                    if (hunter.data.needs.hunger < 60) hunter.data.needs.hunger = 60;
+                    hunter.data.needs.thirst = 0;
+                }
                 const j = J.of(hunter.id);
                 if (j && ((j.type === "craft" && j.params.recipeId === "cook_meat") || (j.type === "move" && j.params && j.params.via === "craft"))) cook = j;
                 const d = doneLog.find(x => x.unit === hunter.id && x.recipe === "cook_meat" && hunt && x.id > hunt.id);

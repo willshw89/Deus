@@ -63,9 +63,13 @@ Delivered per Ludeon planning and construction architecture directives:
   - Phase 2: Material delivery (transitions from blueprint to scaffold frame upon 100% haul delivery).
   - Phase 3: Construction labor progress tracking.
   - Phase 4: Structure completion and authoritative world object spawn via `UF_Objects`.
-- **Automated Verification**:
+- **Automated Verification & Regression Suites**:
   - `tools/test_ludeon_planning.js`: 33/33 PASS (exit 0).
-  - Screenshot verified: `smoke.ludeon_planning_in_engine.png`.
+  - `node tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - `node tools/run_tests.js colonists`: 24/24 PASS (exit 0).
+  - Rule 4 Mutant Tests verified: `--mutant=fail_reservation` exits 1 (`FAIL smoke.reservation_mutual_exclusion`), `--mutant=fail_plan` exits 1 (`FAIL smoke.plan_cell_registered`).
+  - In-engine screenshot verified: `smoke.ludeon_planning_in_engine.png`.
+  - Colonist kill ownership and hunger preemption protections verified: `foodJob` and autonomous calling jobs respect `firstOwner` to prevent kill-snatching; cooking crafts protected from hunger interruptions.
 
 ## Post-Town Hall Autonomous Progression & Private Homestead Construction Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The AI arent really doing shit after building the town center"):

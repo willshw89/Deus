@@ -426,18 +426,18 @@
         const h = hourNow();
         if (lastMealHour === h) return null; // Already attended this meal
 
-        const target = { x: c.site.x, y: c.site.y };
-        u.data._lastCommunalMealHour = h;
-        if (C.addThought) C.addThought(u, "Shared a hearty communal meal with the colony.", 10);
+        const isReadyFood = t => t && t.food && (!t.tags || !t.tags.includes("raw"));
 
         // Check if colonist has food in inventory
         if (I && I.inventoryOf) {
             const inv = I.inventoryOf(u.id);
             const food = inv.find(it => {
                 const t = I.type ? I.type(it.type) : null;
-                return t && t.food;
+                return isReadyFood(t);
             });
             if (food) {
+                u.data._lastCommunalMealHour = h;
+                if (C.addThought) C.addThought(u, "Shared a hearty communal meal with the colony.", 10);
                 return {
                     type: "eat",
                     target: { x: u.x, y: u.y },
@@ -450,10 +450,12 @@
                 const groundFood = ground.find(it => {
                     const itemObj = it.item || it;
                     const t = I.type ? I.type(itemObj.type) : null;
-                    return t && t.food;
+                    return isReadyFood(t);
                 });
                 if (groundFood) {
                     const itemObj = groundFood.item || groundFood;
+                    u.data._lastCommunalMealHour = h;
+                    if (C.addThought) C.addThought(u, "Shared a hearty communal meal with the colony.", 10);
                     return {
                         type: "eat",
                         target: { x: groundFood.x, y: groundFood.y },
@@ -463,11 +465,7 @@
             }
         }
 
-        return {
-            type: "move",
-            target,
-            params: { communal: true, siteId: c.siteId }
-        };
+        return null;
     }
 
     /**
