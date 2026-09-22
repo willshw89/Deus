@@ -544,7 +544,9 @@
             home: { x: home ? home.x : x, y: home ? home.y : y },
             wander: sp.wander > 0 ? sp.wander | 0 : 8,
             herd: herd | 0,
-            faction: null
+            faction: null,
+            equipment: {},
+            inventory: []
         };
         if (sp.tint) data.tint = sp.tint;
         if (extra) Object.assign(data, extra);

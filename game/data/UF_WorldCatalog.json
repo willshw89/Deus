@@ -9154,14 +9154,27 @@
     },
     "slots": [
       "head",
-      "weapon",
-      "shield",
+      "eyes",
+      "neck",
+      "shoulders",
+      "armor",
       "torso",
-      "legs"
+      "waist",
+      "arms",
+      "hands",
+      "ring1",
+      "ring2",
+      "feet",
+      "mainHand",
+      "offHand"
     ],
     "aliases": {
-      "tool": "weapon",
-      "clothes": "torso"
+      "weapon": "mainHand",
+      "tool": "mainHand",
+      "shield": "offHand",
+      "legs": "feet",
+      "clothes": "torso",
+      "body": "armor"
     },
     "quality": {
       "names": [
@@ -9817,14 +9830,27 @@
     },
     "slots": [
       "head",
-      "weapon",
-      "shield",
+      "eyes",
+      "neck",
+      "shoulders",
+      "armor",
       "torso",
-      "legs"
+      "waist",
+      "arms",
+      "hands",
+      "ring1",
+      "ring2",
+      "feet",
+      "mainHand",
+      "offHand"
     ],
     "slotAliases": {
-      "tool": "weapon",
-      "clothes": "torso"
+      "weapon": "mainHand",
+      "tool": "mainHand",
+      "shield": "offHand",
+      "legs": "feet",
+      "clothes": "torso",
+      "body": "armor"
     },
     "faces": {
       "human": {

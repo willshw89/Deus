@@ -93,9 +93,17 @@
     const UNIT_ANIMS = ["stand", "walk", "work", "attack", "cast", "hurt", "death", "idle"];
     const IGNORED_ANIMS = ["carry"];  // VISION V89: loads are not drawn; AR-600 column 7 stays in the grid (the tools fill it with the stand frame) and is never shown
     const OBJECT_ANIMS = ["stand", "sway", "idle", "lit", "open", "work"];
-    const SLOTS = ["legs", "torso", "head", "back", "shield", "weapon"];      // drawing order, bottom to top
-    const SLOT_ALIAS = { torso: "clothes", weapon: "tool" };                 // the older key, read when the slot is empty
-    const BEHIND = { weapon: [8], shield: [8], back: [2] };                  // facings where a slot's layer is behind the body
+    const SLOTS = ["feet", "legs", "waist", "armor", "torso", "neck", "shoulders", "arms", "hands", "ring1", "ring2", "head", "eyes", "back", "offHand", "shield", "mainHand", "weapon"];      // drawing order, bottom to top
+    const SLOT_ALIAS = {
+        torso: "clothes",
+        armor: "body",
+        mainHand: "weapon",
+        weapon: "tool",
+        offHand: "shield",
+        feet: "legs",
+        legs: "feet"
+    };
+    const BEHIND = { weapon: [8], mainHand: [8], shield: [8], offHand: [8], back: [2] };                  // facings where a slot's layer is behind the body
 
     const World = () => (window.UF && UF.World) || null;
     const Combat = () => (window.UF && UF.Combat) || null;
@@ -466,7 +474,8 @@
         const I = Items();
         if (!I) return null;
         const eq = (u.data && u.data.equipment) || {};
-        const eqType = equippedType(u, eq.weapon !== undefined && eq.weapon !== null && eq.weapon !== "" ? eq.weapon : eq.tool);
+        const eqVal = eq.mainHand !== undefined && eq.mainHand !== null && eq.mainHand !== "" ? eq.mainHand : (eq.weapon !== undefined && eq.weapon !== null && eq.weapon !== "" ? eq.weapon : eq.tool);
+        const eqType = equippedType(u, eqVal);
         if (eqType && toolHelps(I.type(eqType), job) > 0) return eqType;
         const inv = u.data && Array.isArray(u.data.inventory) ? u.data.inventory : null;
         if (!inv) return null;
@@ -537,7 +546,7 @@
         for (let i = 0; i < SLOTS.length; i++) {
             const slot = SLOTS[i];
             let t = null;
-            if (slot === "weapon" && workTool) t = workTool;
+            if ((slot === "weapon" || slot === "mainHand") && workTool) t = workTool;
             else if (eq) {
                 let v = eq[slot];
                 if ((v === null || v === undefined || v === "") && SLOT_ALIAS[slot]) v = eq[SLOT_ALIAS[slot]];

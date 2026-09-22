@@ -55,6 +55,29 @@
     root.UF.Rules = Rules;
 
     // -------------------------------------------------------------------------
+    // D20 Equipment Slots (d20 SRD Standard: 12 body slots + 2 hand slots)
+    // -------------------------------------------------------------------------
+
+    const D20_EQUIPMENT_SLOTS = [
+        "head", "eyes", "neck", "shoulders",
+        "armor", "torso", "waist", "arms",
+        "hands", "ring1", "ring2", "feet",
+        "mainHand", "offHand"
+    ];
+
+    const EQUIPMENT_ALIASES = {
+        weapon: "mainHand",
+        tool: "mainHand",
+        shield: "offHand",
+        legs: "feet",
+        clothes: "torso",
+        body: "armor"
+    };
+
+    Rules.D20_EQUIPMENT_SLOTS = D20_EQUIPMENT_SLOTS;
+    Rules.EQUIPMENT_ALIASES = EQUIPMENT_ALIASES;
+
+    // -------------------------------------------------------------------------
     // Standard DC Ladder & Core Formulas
     // -------------------------------------------------------------------------
 
@@ -314,6 +337,12 @@
 
     function resolveArmorDef(key) {
         if (!key) return null;
+        if (typeof key === "number" && typeof window !== "undefined" && window.UF && UF.Items && typeof UF.Items.get === "function") {
+            const it = UF.Items.get(key);
+            if (it && it.type) key = it.type;
+        } else if (typeof key === "object" && key.type) {
+            key = key.type;
+        }
         if (ARMOR_DEFS[key]) return ARMOR_DEFS[key];
         const normalized = String(key).toLowerCase().replace(/[-\s]+/g, "_");
         if (ARMOR_DEFS[normalized]) return ARMOR_DEFS[normalized];
@@ -338,12 +367,13 @@
         let bodyArmor = null;
         let shield = null;
 
-        // Check torso/body slot
-        const torsoKey = eq.torso || eq.body || eq.clothes;
-        if (torsoKey) bodyArmor = resolveArmorDef(torsoKey);
+        // Check armor / torso / body slot (d20 SRD standard)
+        const armorKey = eq.armor || eq.torso || eq.body || eq.clothes;
+        if (armorKey) bodyArmor = resolveArmorDef(armorKey);
 
-        // Check shield slot
-        if (eq.shield) shield = resolveArmorDef(eq.shield);
+        // Check shield / offHand slot
+        const shieldKey = eq.shield || eq.offHand;
+        if (shieldKey) shield = resolveArmorDef(shieldKey);
 
         let baseAC = 10;
         let effectiveDex = dexMod;
@@ -365,7 +395,18 @@
         }
 
         const shieldBonus = shield ? 2 : 0;
-        const totalAC = baseAC + effectiveDex + shieldBonus + (unit.data.naturalArmor || 0);
+        let itemBonusAC = 0;
+        if (typeof window !== "undefined" && window.UF && UF.Items && typeof UF.Items.type === "function") {
+            for (const slot of D20_EQUIPMENT_SLOTS) {
+                const itemKey = eq[slot];
+                if (!itemKey) continue;
+                const typeId = typeof itemKey === "number" ? (UF.Items.get(itemKey) && UF.Items.get(itemKey).type) : (typeof itemKey === "object" ? itemKey.type : itemKey);
+                const t = typeId ? UF.Items.type(typeId) : null;
+                if (t && t.armor && typeof t.armor.acBonus === "number") itemBonusAC += t.armor.acBonus;
+                else if (t && t.gear && typeof t.gear.acBonus === "number") itemBonusAC += t.gear.acBonus;
+            }
+        }
+        const totalAC = baseAC + effectiveDex + shieldBonus + itemBonusAC + (unit.data.naturalArmor || 0);
 
         return {
             ac: totalAC,
@@ -373,6 +414,7 @@
             dexMod,
             effectiveDex,
             shieldAC: shieldBonus,
+            itemBonusAC,
             category,
             stealthDisadv
         };

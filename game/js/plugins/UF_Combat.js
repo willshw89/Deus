@@ -52,7 +52,12 @@
     const STYLES = ["accurate", "aggressive", "defensive", "controlled", "rapid", "longrange"];
     const MODES = ["nearest", "weakest", "strongest", "protect", "defend", "flee", "manual"];
     const SEEKING = new Set(["nearest", "weakest", "strongest", "protect"]);
-    const SLOTS = ["head", "weapon", "shield", "torso", "legs"];
+    const SLOTS = [
+        "head", "eyes", "neck", "shoulders",
+        "armor", "torso", "waist", "arms",
+        "hands", "ring1", "ring2", "feet",
+        "mainHand", "offHand"
+    ];
     const N4 = [[0, 1], [0, -1], [-1, 0], [1, 0]];
     const SALT = { attack: 0xc0b7a1, spawn: 0xc0b7a2, pick: 0xc0b7a3, duel: 0xc0b7a5 };
     const FX_Z = 900000;            // over every unit (z = foot row), under the fog (1 000 000)
@@ -77,7 +82,14 @@
         aidRadius: 10,
         regen: { hp: 1, everyTicks: 100 },
         display: { splatMs: 1000, maxSplats: 4, barHideMs: 6000, barWidth: 30 },
-        aliases: { tool: "weapon", clothes: "torso" },
+        aliases: {
+            weapon: "mainHand",
+            tool: "mainHand",
+            shield: "offHand",
+            legs: "feet",
+            clothes: "torso",
+            body: "armor"
+        },
         quality: { bonus: [0.8, 0.9, 1, 1.1, 1.2, 1.3] }
     };
 
@@ -249,10 +261,15 @@
         let v = eq[slot];
         if (v === null || v === undefined || v === "") {
             const al = cfg().aliases;
-            for (const k of Object.keys(al)) {
-                if (al[k] === slot && eq[k] !== null && eq[k] !== undefined && eq[k] !== "") {
-                    v = eq[k];
-                    break;
+            if (al) {
+                for (const k of Object.keys(al)) {
+                    if (al[k] === slot && eq[k] !== null && eq[k] !== undefined && eq[k] !== "") {
+                        v = eq[k];
+                        break;
+                    }
+                }
+                if ((v === null || v === undefined || v === "") && al[slot] && eq[al[slot]] !== null && eq[al[slot]] !== undefined && eq[al[slot]] !== "") {
+                    v = eq[al[slot]];
                 }
             }
         }
@@ -322,8 +339,13 @@
             const it = slotItem(unit, slot);
             if (!it) continue;
             const t = it.type;
-            const blk = slot === "weapon" ? t.weapon : slot === "shield" ? t.shield : t.armor;
-            if (blk && typeof blk === "object") addBonuses(s, blk.bonuses, qualityMult(it.record));
+            const blk = (slot === "weapon" || slot === "mainHand") ? (t.weapon || t.bonuses)
+                      : (slot === "shield" || slot === "offHand") ? (t.shield || t.armor || t.bonuses)
+                      : (t.armor || t.bonuses || (t.gear && t.gear.bonuses));
+            if (blk && typeof blk === "object") {
+                const b = blk.bonuses || blk;
+                if (b && typeof b === "object") addBonuses(s, b, qualityMult(it.record));
+            }
         }
         for (const t of TYPES) {
             s.attack[t] = Math.round(s.attack[t]);
@@ -375,7 +397,7 @@
             return { name: "natural", itemType: null, record: null, speed: pos(block.attackSpeed, 4), types: [type], styles: [style], reach: 1,
                 ranged: far ? { range: pos(block.range, 5), ammo: null } : null, ammo: null, natural: true };
         }
-        const it = slotItem(unit, "weapon");
+        const it = slotItem(unit, "mainHand") || slotItem(unit, "weapon");
         const w = it && it.type.weapon;
         if (w && typeof w === "object") {
             const ranged = w.ranged && typeof w.ranged === "object" && typeof w.ranged.ammo === "string" && w.ranged.ammo ? w.ranged : null;

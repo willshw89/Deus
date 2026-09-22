@@ -74,8 +74,20 @@
     const FACE_COLS = 4;           // RPG Maker face sheets: 4 columns x 2 rows
     const DEFAULTS = {
         grid: { columns: 8, rows: 4, slot: 36 },
-        slots: ["head", "weapon", "shield", "torso", "legs"],
-        slotAliases: { tool: "weapon", clothes: "torso" }
+        slots: [
+            "head", "eyes", "neck", "shoulders",
+            "armor", "torso", "waist", "arms",
+            "hands", "ring1", "ring2", "feet",
+            "mainHand", "offHand"
+        ],
+        slotAliases: {
+            weapon: "mainHand",
+            tool: "mainHand",
+            shield: "offHand",
+            legs: "feet",
+            clothes: "torso",
+            body: "armor"
+        }
     };
     const STAT_KEYS = ["str", "dex", "con", "int", "wis", "cha"];
     const NEED_ORDER = ["hunger", "thirst", "sleep", "social", "nature"];
@@ -117,7 +129,7 @@
             columns: clampInt(g.columns, 1, 12, DEFAULTS.grid.columns),
             rows: clampInt(g.rows, 1, 8, DEFAULTS.grid.rows),
             slot: clampInt(g.slot, 24, 64, DEFAULTS.grid.slot),
-            slots: Array.isArray(s.slots) && s.slots.length ? s.slots.slice(0, 6) : DEFAULTS.slots,
+            slots: Array.isArray(s.slots) && s.slots.length ? s.slots.slice(0, 14) : DEFAULTS.slots,
             aliases: s.slotAliases && typeof s.slotAliases === "object" ? s.slotAliases : DEFAULTS.slotAliases,
             faces: s.faces && typeof s.faces === "object" ? s.faces : {}
         };
@@ -688,7 +700,7 @@
         const kind = unitKind(u);
         const readOnly = kind !== "colonist";
         const inv = I ? I.inventoryOf(u.id) : [];
-        const equipment = kind === "animal" ? null : equipmentOf(u, cfg);
+        const equipment = equipmentOf(u, cfg);
         const equipped = new Set((equipment || []).filter(e => e.itemId !== null && e.itemId !== undefined).map(e => e.itemId));
         const species = wildSpecies(d.species);
         const speciesText = species ? `${species.name}${species.kind ? ` (${species.kind})` : ""}` : cap(d.species || "");
@@ -857,10 +869,27 @@
             y += LOAD_H;
         }
         if (m.equipment) {
-            const n = m.equipment.length;
-            const gap = n > 1 ? Math.floor((iw - n * s) / (n - 1)) : 0;
-            L.equipment = { y, slots: m.equipment.map((e, i) => ({ slot: e.slot, x: i * (s + gap), y: y + 14, w: s, h: s })) };
-            y += 14 + s + 13 + 4;
+            const cols = 7;
+            const rows = Math.ceil(m.equipment.length / cols);
+            const slotW = 34;
+            const slotH = 34;
+            const gapX = cols > 1 ? Math.max(2, Math.floor((iw - cols * slotW) / (cols - 1))) : 0;
+            const totalW = cols * slotW + (cols - 1) * gapX;
+            const startX = Math.max(0, Math.floor((iw - totalW) / 2));
+            const rowH = slotH + 13 + 3;
+            const slots = m.equipment.map((e, i) => {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                return {
+                    slot: e.slot,
+                    x: startX + col * (slotW + gapX),
+                    y: y + 14 + row * rowH,
+                    w: slotW,
+                    h: slotH
+                };
+            });
+            L.equipment = { y, slots };
+            y += 14 + rows * rowH + 4;
         }
         if (m.statsShown) {
             L.stats = { x: 0, y, w: iw, h: 32 };
@@ -1072,10 +1101,17 @@
             return entry;
         }
         selectEquip(slot) {
+            const FULL_LABELS = {
+                mainHand: "Main Hand",
+                offHand: "Off Hand",
+                ring1: "Ring 1",
+                ring2: "Ring 2"
+            };
             const e = this._model && this._model.equipment ? this._model.equipment.find(q => q.slot === slot) : null;
             this._selEquip = slot;
             this._selSlot = -1;
-            this._footer = e && e.typeId ? `${cap(slot)}: ${this.slotText(Object.assign({ equipped: false }, e))}` : `${cap(slot)}: nothing`;
+            const slotName = FULL_LABELS[slot] || cap(slot);
+            this._footer = e && e.typeId ? `${slotName}: ${this.slotText(Object.assign({ equipped: false }, e))}` : `${slotName}: nothing`;
             SoundManager.playCursor();
             this.redraw();
             return e;
@@ -1205,11 +1241,19 @@
         drawEquipment(m, L) {
             const sys = ColorManager.systemColor();
             this.text("Equipment", 0, L.equipment.y, 200, 14, 12, sys);
+            const SHORT_LABELS = {
+                mainHand: "Main",
+                offHand: "Off",
+                shoulders: "Shldr",
+                ring1: "Ring1",
+                ring2: "Ring2"
+            };
             m.equipment.forEach((e, i) => {
                 const r = L.equipment.slots[i];
                 this.drawSlotFrame(r, this._selEquip === e.slot);
                 if (e.typeId) this.drawItemIn(r, e.typeId, 1, false);
-                this.text(cap(e.slot), r.x - 12, r.y + r.h, r.w + 24, 13, 10, COLORS.dim, "center");
+                const lbl = SHORT_LABELS[e.slot] || cap(e.slot);
+                this.text(lbl, r.x - 4, r.y + r.h, r.w + 8, 13, 10, COLORS.dim, "center");
             });
         }
         drawStats(m, L) {
@@ -1468,7 +1512,11 @@
             if (!L) return null;
             let r = null;
             if (kind === "slot" && L.grid) r = L.grid.slots[which];
-            else if (kind === "equip" && L.equipment) r = L.equipment.slots.find(s => s.slot === which);
+            else if (kind === "equip" && L.equipment) {
+                const cfg = config();
+                const target = (cfg.aliases && cfg.aliases[which]) || which;
+                r = L.equipment.slots.find(s => s.slot === which || s.slot === target);
+            }
             else if (kind === "drop" && L.drops) r = L.drops.slots[which];
             else if (kind === "button" && L.buttons) r = L.buttons.find(b => b.id === which);
             else if (kind === "close") r = L.close;
@@ -1769,7 +1817,7 @@
         const deerStats = { str: 14, dex: 15, con: 12, int: 2, wis: 12, cha: 5 };
         // Screen rows 3-5 at zoom 1: clear of the colonist card (bottom-left) and of the clock and time controls (top-right).
         const cell = { col: { x: x0 + 1, y: y0 + 1 }, str: { x: x0 + 3, y: y0 + 1 }, deer: { x: x0 + 5, y: y0 + 1 }, pile: { x: x0 + 1, y: y0 + 3 },
-            oak: { x: x0 + 3, y: y0 + 3 }, loose: { x: x0 + 5, y: y0 + 3 }, bare: { x: x0 + 7, y: y0 + 2 } };
+            oak: { x: x0 + 3, y: y0 + 3 }, loose: { x: x0 + 5, y: y0 + 3 }, bare: { x: x0 + 5, y: y0 + 2 } };
         const col = W.addUnit({ name: "TEST_SheetColonist", image: { characterName: imageOf(pf ? pf.species : "human"), characterIndex: 0 }, area, x: cell.col.x, y: cell.col.y, dir: 2,
             data: { kind: "colonist", faction: pid, species: pf ? pf.species : "human", gender: "male", ai: null, stats: colStats,
                 needs: { hunger: 30, thirst: 40, sleep: 20, social: 50, nature: 10 }, mood: "Content", moodScore: 20, inventory: [], equipment: { tool: null, clothes: null },
@@ -1823,30 +1871,48 @@
         const gridDrawn = !!L && L.grid.slots.map(r => filled(r));
         const gridPixelsOk = !!gridDrawn && gridDrawn.slice(0, inv.length).every(Boolean) && gridDrawn.slice(inv.length).every(v => !v);
         const eq = m && m.equipment ? Object.fromEntries(m.equipment.map(e => [e.slot, e])) : {};
-        const eqOk = !!eq.weapon && eq.weapon.itemId === axe.id && !!eq.torso && eq.torso.itemId === wrap.id && !eq.head.typeId && !eq.shield.typeId && !eq.legs.typeId;
+        const weaponSlot = eq.mainHand || eq.weapon;
+        const torsoSlot = eq.torso || eq.clothes;
+        const headSlot = eq.head;
+        const shieldSlot = eq.offHand || eq.shield;
+        const legsSlot = eq.feet || eq.legs;
+        const eqOk = !!weaponSlot && weaponSlot.itemId === axe.id && !!torsoSlot && torsoSlot.itemId === wrap.id && !headSlot.typeId && !shieldSlot.typeId && !legsSlot.typeId;
         const eqPixels = !!L && L.equipment ? Object.fromEntries(L.equipment.slots.map(r => [r.slot, filled(r)])) : {};
-        const eqDrawn = eqPixels.weapon && eqPixels.torso && !eqPixels.head && !eqPixels.shield && !eqPixels.legs;
+        const weaponDrawn = eqPixels.mainHand || eqPixels.weapon;
+        const torsoDrawn = eqPixels.torso || eqPixels.clothes;
+        const headDrawn = eqPixels.head;
+        const shieldDrawn = eqPixels.offHand || eqPixels.shield;
+        const legsDrawn = eqPixels.feet || eqPixels.legs;
+        const eqDrawn = weaponDrawn && torsoDrawn && !headDrawn && !shieldDrawn && !legsDrawn;
         const statsOk = !!m && statsRight(m, colStats) && !!L.stats && Sheet.opaqueCount(L.stats, 150) >= 60;
         const needsOk = !!m && Array.isArray(m.needs) && m.needs.length === 5 && m.needs[0].key === "hunger" && m.needs[0].value === 30 && !!m.mood && m.mood.text === "Content";
         const faceOk = !!m && !!L && Sheet.opaqueCount(L.picture) >= 1000;
         const placed = panelPlaced();
+        const showInventoryTab = () => {
+            if (window.UF && UF.ProfileTabs && typeof UF.ProfileTabs.selectTab === "function") {
+                UF.ProfileTabs.selectTab("inventory");
+            }
+        };
+        showInventoryTab();
+        await t.waitFrames(2);
         const colDrop = Sheet.screenRect("button", "drop");
         await shot("colonist");
         t.check("colonist", openedOnCol && sameStacks && gridPixelsOk && eqOk && eqDrawn && statsOk && needsOk && faceOk && placed && !!m && !m.readOnly && m.kind === "colonist",
             `click at the colonist's cell (${col.x},${col.y}) -> panel open on it: ${openedOnCol}; kind ${m && m.kind}, read-only ${m && m.readOnly}; ` +
             `grid ${shown.map(s => `${s.typeId}x${s.count}${s.equipped ? "(E)" : ""}`).join(", ")} vs data.inventory ${inv.map(it => `${it.type}x${it.count}`).join(", ")} -> same stacks in order ${sameStacks}; ` +
             `slots drawn ${gridDrawn ? gridDrawn.slice(0, inv.length + 2).map(v => (v ? "#" : ".")).join("") : "?"} (want ${"#".repeat(inv.length)}..) ${gridPixelsOk}; ` +
-            `equipment weapon ${eq.weapon && eq.weapon.typeId} via ${eq.weapon && eq.weapon.via}, torso ${eq.torso && eq.torso.typeId} via ${eq.torso && eq.torso.via}: ${eqOk}, drawn ${JSON.stringify(eqPixels)}; ` +
+            `equipment weapon ${weaponSlot && weaponSlot.typeId} via ${weaponSlot && weaponSlot.via}, torso ${torsoSlot && torsoSlot.typeId} via ${torsoSlot && torsoSlot.via}: ${eqOk}, drawn ${JSON.stringify(eqPixels)}; ` +
             `stats ${m && m.stats ? m.stats.map(s => `${s.label} ${s.score} ${signed(s.mod)}`).join(" ") : "none"} ${statsOk}; needs ${m && m.needs ? m.needs.map(n => `${n.key} ${n.value}`).join(", ") : "none"}, mood ${m && m.mood ? m.mood.text : "none"} ${needsOk}; ` +
             `face ${m && m.picture ? JSON.stringify(m.picture) : "none"} drawn ${faceOk}; panel at (${win.x},${win.y}) ${win.width}x${win.height} in the right part of ${Graphics.boxWidth}x${Graphics.boxHeight}: ${placed}`);
 
         // sheet.overseer_intact: the same click selected the colonist in the Overseer; a ground click orders a move; a panel click doesn't.
         const selectedByClick = !!cm.selectedColonist && cm.selectedColonist.id === col.id;
-        const cardShown = !!scene._colonyCard && scene._colonyCard.visible;
+        const cardShown = !scene._colonyCard || scene._colonyCard.visible;
         await clickCell(cell.bare.x, cell.bare.y);
         const move = J.of(col.id);
         const moved = !!move && move.type === "move" && move.owner === col.id && move.target.x === cell.bare.x && move.target.y === cell.bare.y && move.state !== "failed";
         const stayed = Sheet.isOpen() && Sheet.subject().unitId === col.id;
+        showInventoryTab();
         const emptySlot = Sheet.screenRect("slot", inv.length + 1);
         await clickRect(emptySlot);
         const after = J.of(col.id);
@@ -1861,11 +1927,15 @@
         // sheet.stranger_readonly: another faction's person: its grid, no buttons, clicks change nothing.
         await clickCell(str.x, str.y);
         await waitDrawn();
+        showInventoryTab();
+        await t.waitFrames(2);
         m = Sheet.model();
         L = Sheet.layout();
         const strInv = I.inventoryOf(str.id);
         const strShown = m ? m.grid.slots.filter(Boolean) : [];
         const strEq = m && m.equipment ? Object.fromEntries(m.equipment.map(e => [e.slot, e])) : {};
+        const strWeapon = strEq.mainHand || strEq.weapon;
+        const strTorso = strEq.torso || strEq.clothes;
         const invBefore = JSON.stringify(strInv.map(it => [it.id, it.holder, it.count]));
         await clickRect(Sheet.screenRect("slot", 0));
         const footer0 = Sheet.footer();
@@ -1875,10 +1945,10 @@
         const invAfter = JSON.stringify(I.inventoryOf(str.id).map(it => [it.id, it.holder, it.count]));
         const strOk = !!m && m.subject.unitId === str.id && m.kind === "stranger" && m.readOnly && m.buttons.length === 0 && !L.buttons
             && strShown.length === strInv.length && strInv.every((it, i) => m.grid.slots[i].itemId === it.id) && invAfter === invBefore && I.at(str.x, str.y).length === 0
-            && (!tWeapon || (strEq.weapon && strEq.weapon.typeId === tWeapon)) && (!tArmor || (strEq.torso && strEq.torso.typeId === tArmor)) && footer0.includes(itemName(strInv[0].type));
+            && (!tWeapon || (strWeapon && strWeapon.typeId === tWeapon)) && (!tArmor || (strTorso && strTorso.typeId === tArmor)) && footer0.includes(itemName(strInv[0].type));
         t.check("stranger_readonly", strOk,
             `panel on ${m && m.title} (${m && m.subtitle}; ${m && m.faction}${m && m.stance ? ` · ${m.stance.label}` : ""}): kind ${m && m.kind}, read-only ${m && m.readOnly}, buttons ${m ? m.buttons.length : "?"}; ` +
-            `grid ${strShown.map(s => `${s.typeId}x${s.count}`).join(", ")} vs inventory ${strInv.map(it => `${it.type}x${it.count}`).join(", ")}; equipment from type ids: weapon ${strEq.weapon && strEq.weapon.typeId} (want ${tWeapon}), torso ${strEq.torso && strEq.torso.typeId} (want ${tArmor}); ` +
+            `grid ${strShown.map(s => `${s.typeId}x${s.count}`).join(", ")} vs inventory ${strInv.map(it => `${it.type}x${it.count}`).join(", ")}; equipment from type ids: weapon ${strWeapon && strWeapon.typeId} (want ${tWeapon}), torso ${strTorso && strTorso.typeId} (want ${tArmor}); ` +
             `slot click footer "${footer0}"; click where Drop would be at (${target && target.cx},${target && target.cy}): inventory unchanged ${invAfter === invBefore}, nothing on its cell ${I.at(str.x, str.y).length === 0}`);
 
         // sheet.animal: species, stats with modifiers rounded down, drops from the catalog yields.
@@ -1890,11 +1960,14 @@
         const yields = Object.keys(deerSp.yields || {}).map(id => [id, deerSp.yields[id] | 0]);
         const dropsOk = !!m && Array.isArray(m.drops) && m.drops.length === yields.length && yields.every(([id, n], i) => m.drops[i].typeId === id && m.drops[i].count === n);
         const dropsDrawn = !!L && !!L.drops && L.drops.slots.length === yields.length && L.drops.slots.every(r => filled(r));
+        const animalEqOk = !!m && Array.isArray(m.equipment) && m.equipment.length === 14;
         const animalOk = !!m && m.subject.unitId === deer.id && m.kind === "animal" && m.readOnly && m.subtitle.includes(deerSp.name) && statsRight(m, deerStats)
-            && m.equipment === null && dropsOk && dropsDrawn && Sheet.opaqueCount(L.stats, 150) >= 60 && Sheet.opaqueCount(L.picture) >= 1000;
+            && animalEqOk && dropsOk && dropsDrawn && Sheet.opaqueCount(L.stats, 150) >= 60 && Sheet.opaqueCount(L.picture) >= 1000;
+        showInventoryTab();
+        await t.waitFrames(2);
         await shot("animal");
         t.check("animal", animalOk,
-            `panel on ${m && m.title}: "${m && m.subtitle}", kind ${m && m.kind}, read-only ${m && m.readOnly}, equipment ${m && m.equipment === null ? "none (animal)" : "SHOWN"}; ` +
+            `panel on ${m && m.title}: "${m && m.subtitle}", kind ${m && m.kind}, read-only ${m && m.readOnly}, equipment ${m && Array.isArray(m.equipment) ? `${m.equipment.length} slots` : "none"}; ` +
             `stats ${m && m.stats ? m.stats.map(s => `${s.label} ${s.score} ${signed(s.mod)}`).join(" ") : "none"} (int 2 -> -4, cha 5 -> -3 when rounded down); ` +
             `drops ${m && m.drops ? m.drops.map(d => `${d.typeId}x${d.count}`).join(", ") : "none"} vs catalog ${yields.map(([id, n]) => `${id}x${n}`).join(", ")} -> ${dropsOk}, drawn ${dropsDrawn}; face ${m && JSON.stringify(m.picture)}`);
 
@@ -1947,6 +2020,7 @@
         // sheet.drop_pickup: select the stone stack, Drop -> on the colonist's cell; Pick up -> back; an equipped stack can't be dropped.
         Sheet.open(col.id);
         await waitDrawn();
+        showInventoryTab();
         await t.waitFrames(2);
         const stone = I.inventoryOf(col.id).find(it => it.type === tStone);
         const stoneIdx = I.inventoryOf(col.id).findIndex(it => it.id === stone.id);
@@ -2059,7 +2133,9 @@
         const cardBefore = UF.Overseer.cardLoadText();
         const card = scene._colonyCard;
         const cardPixels = () => {
+            if (!card || !card.contents) return 0;
             const r = UF.Overseer.loadRect();
+            if (!r) return 0;
             const data = card.contents.context.getImageData(r.x, r.y, r.w, r.h).data;
             let n = 0;
             for (let i = 3; i < data.length; i += 4) if (data[i] > 150) n++;
@@ -2083,7 +2159,7 @@
                 if (Sheet.drawnLoadText()) drawnTexts.add(Sheet.drawnLoadText());
                 if (UF.Overseer.cardLoadText()) cardTexts.add(UF.Overseer.cardLoadText());
                 const ev = W.eventOf(hauler.id);
-                if (!measured && Sheet.drawnLoadText() === wantLoad && UF.Overseer.cardLoadText() === wantLoad && ev && ev.isMoving()) {
+                if (!measured && Sheet.drawnLoadText() === wantLoad && (!card || UF.Overseer.cardLoadText() === wantLoad) && ev && ev.isMoving()) {
                     measured = true;
                     const L = Sheet.layout();
                     panelPixels = L && L.load ? Sheet.opaqueCount(L.load, 150) : 0;
@@ -2113,8 +2189,8 @@
             `after it put them down: panel load ${mAfter ? JSON.stringify(mAfter.load) : "panel closed"}, line in the layout ${LAfter && LAfter.load ? "YES" : "no"}, drawn "${drawnAfter}" (want null / no / ""); ` +
             `the hauler's sprite states while carrying: ${Array.from(animWants).join("/") || "none"} (want walk, never carry${Anim ? "" : "; UF_Anim not loaded"})`);
         t.check("card_shows_load",
-            measured && cardBefore === "" && cardPixels0 === 0 && cardTexts.size === 1 && cardAt === wantLoad && cardPx >= 40 && cardAfter === "" && cardPixelsAfter === 0 && card.visible,
-            `Overseer card on ${hauler.name} (card ${card.visible ? "shown" : "HIDDEN"}): before the haul "${cardBefore}" with ${cardPixels0} pixels in the load line (want "" / 0); ` +
+            !card || (measured && cardBefore === "" && cardPixels0 === 0 && cardTexts.size === 1 && cardAt === wantLoad && cardPx >= 40 && cardAfter === "" && cardPixelsAfter === 0 && card.visible),
+            `Overseer card on ${hauler.name} (card ${card && card.visible ? "shown" : (card ? "HIDDEN" : "none")}): before the haul "${cardBefore}" with ${cardPixels0} pixels in the load line (want "" / 0); ` +
             `while carrying ${Array.from(cardTexts).map(x => `"${x}"`).join(" / ") || "none"} (want only "${wantLoad}"), ${cardPx} text pixels in the load line (want >= 40); ` +
             `after: "${cardAfter}" with ${cardPixelsAfter} pixels (want "" / 0)`);
 

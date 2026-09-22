@@ -9,6 +9,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## d20 14 Equipment Slots Across All Creatures Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("Give creatures the equipment slots from d20"):
+- **Official d20 SRD 14 Equipment Slots Standardized Across All Creatures**:
+  - Implemented the full 14 d20 equipment slots across all creatures (colonists, strangers, NPCs, animals, beasts, monsters):
+    `head`, `eyes`, `neck`, `shoulders`, `armor`, `torso`, `waist`, `arms`, `hands`, `ring1`, `ring2`, `feet`, `mainHand`, `offHand`.
+  - Configured catalog schemas in `game/data/UF_WorldCatalog.json` (`combat.slots`, `sheet.slots`) and bidirectional aliases (`weapon` ⇄ `mainHand`, `tool` ⇄ `mainHand`, `shield` ⇄ `offHand`, `legs` ⇄ `feet`, `clothes` ⇄ `torso`, `body` ⇄ `armor`).
+  - Enabled equipment tracking for animals/wildlife in `UF_Sheet.js` (removed `kind === "animal" ? null` restriction; animals now have 14 slots).
+- **Rules & Combat Integration (`UF_Rules.js`, `UF_Combat.js`)**:
+  - Exported `Rules.D20_EQUIPMENT_SLOTS` and `Rules.EQUIPMENT_ALIASES`.
+  - Updated `Rules.armorClass(unit)` to resolve equipped items across all 14 slots and aliases, aggregating `itemBonusAC` from rings, cloaks, amulets, and armor.
+  - Updated `UF_Combat.js`: `computeBonuses(unit)` aggregates attack, damage, attribute, and defense bonuses across all 14 slots; `computeWeapon(unit)` seamlessly resolves `mainHand` and `weapon`.
+- **Layer Animation Support (`UF_Anim.js`)**:
+  - Extended equipment slot layers, aliases, behind/front ordering, and tool handling for `mainHand`, `offHand`, `armor`, `feet`, `shoulders`.
+- **Compact 2×7 UI Grid in Unit Sheet (`UF_Sheet.js`)**:
+  - Arranged 14 slots in a compact 2-row × 7-column layout (34×34 px cells, 10 px gap) fitting within 298 px width inside the 312 px sheet window.
+  - Clear labels: `Head`, `Eyes`, `Neck`, `Shldr`, `Armor`, `Torso`, `Waist` (Row 1); `Arms`, `Hands`, `Ring1`, `Ring2`, `Feet`, `Main`, `Off` (Row 2).
+  - Footer tooltips display full descriptive slot names (`Main Hand`, `Off Hand`, `Ring 1`, `Ring 2`, `Shoulders`).
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_d20_equipment_slots.js`: 20/20 PASS (exit 0), testing catalog slot definitions, aliases, rules AC formulas, combat bonuses, unit model equipment initialization, animal equipment, and test ability-to-fail mutation check.
+  - `tools/test_srd_equipment_proof.js`: 25/25 PASS (exit 0).
+  - `tools/test_srd_rules_proof.js`: 49/49 PASS (exit 0).
+  - `tools/test_srd_combat_proof.js`: 43/43 PASS (exit 0).
+  - `tools/run_tests.js sheet`: 16/16 PASS (exit 0).
+  - Inspected screenshots (Rule 5): `sheet.colonist.png` (displays 2×7 equipment grid with stone axe in Main Hand, fiber wrap in Torso, and stats/inventory cleanly laid out) and `sheet.animal.png` (displays deer with 14 equipment slots, stats, drops, and read-only indication).
+
+
 ## Frame Skipping & Stuttering Elimination Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The game is experiencing skipping again"):
 - **Root Cause Isolated**:

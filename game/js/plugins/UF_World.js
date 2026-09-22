@@ -1028,6 +1028,8 @@
         const id = st.nextUnitId++;
         const image = spec.image || {};
         const data = spec.data || {};
+        if (!data.equipment) data.equipment = {};
+        if (!data.inventory) data.inventory = [];
         const name = spec.name || `TEST_unit_${id}`;
         let sx = spec.x | 0, sy = spec.y | 0;
         spawnStats.added++;
