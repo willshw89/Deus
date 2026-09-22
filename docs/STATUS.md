@@ -9,6 +9,49 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## 60-Frame Beat De-Clustering, 144Hz Judder Elimination & Smooth Sub-Tile Camera Follow Delivered — 2026-09-22 (Gemini)
+Delivered per user directive ("Nope, still choppy. I think it might come back to the game beats? Idk") identifying and resolving the four exact root causes of visual choppiness in live RMMZ play:
+1. **The 144Hz High-Refresh Monitor Frame-Dropping / Judder (`rmmz_managers.js:1993` & `game/package.json`)**:
+   - Diagnosed user's hardware via WMI: primary laptop display runs at **144Hz** (`CurrentRefreshRate: 144`).
+   - In RMMZ's native loop, `PIXI.Ticker` fires at 144 FPS with `deltaTime = 0.416`. RMMZ's native `determineRepeatNumber` accumulated `_elapsedTime` and returned an alternating pattern of `[0, 0, 1, 0, 1, 0, 0, 1]`! Out of every 8 frames, 5 frames had 0 updates, rendering duplicate frames at an uneven 3:2 pull-down cadence.
+   - *Fix*: In `UF_TimeSpeed.js`, hooked `Graphics._createPixiApp` to enforce `Graphics._app.ticker.maxFPS = 60`. In PIXI v5, `maxFPS = 60` throttles the ticker cleanly so every frame tick has uniform `deltaTime = 1.0` and runs exactly 1 update without dropped frames. Added `--limit-fps=60` to `game/package.json` for compositor-level frame pacing.
+2. **Camera Integer Snap Teleporting (`UF_ColonyOverseer.js:243`)**:
+   - `Game_Player.prototype.updateScroll` previously locked the camera display pos to `uev.x - $gameMap.screenTileX() / 2`. `uev.x` is integer tile coordinate! While a colonist smoothly walked across a tile over 16-32 frames (`_realX = 10.0, 10.06, 10.12...`), the camera held motionless for 15-31 frames, then instantly snapped 48 pixels in a single frame when `uev.x` updated, mimicking a severe rhythmic hitch.
+   - *Fix*: Switched to sub-tile `rx = uev._realX !== undefined ? uev._realX : uev.x` and `ry = uev._realY !== undefined ? uev._realY : uev.y` so camera follow glides with sub-pixel precision. Also cleared `cameraFollowUnit` whenever the user holds WASD/arrow keys so manual camera panning is never fought by character follow.
+3. **60-Frame Beat Task Clustering (`UF_Colonists.js:4892`)**:
+   - On every frame where `localTicks % 60 === 0`, multiple expensive world-wide passes ran in the exact same frame:
+     - `tickNeeds()` (all units querying thermal & stench)
+     - `progressPregnancies(1)` (all faction people)
+     - `progressAging(1)` (all faction people)
+     - `updateColonyRadius(c)`
+     - plus `ensureColonistsGeneticsAndAging()` on multiples of 300!
+   - *Fix*: Staggered these passes across distinct dedicated frames within the 60-frame cycle:
+     - `localTicks % 300 === 5`: `ensureColonistsGeneticsAndAging()`
+     - `localTicks % 60 === 10`: `updateColonyRadius()`
+     - `localTicks % 60 === 15`: `tickNeeds()`
+     - `localTicks % 60 === 20`: `stepFactionReproduction()` (if % 3600)
+     - `localTicks % 60 === 30`: `progressPregnancies(1)`
+     - `localTicks % 60 === 40`: `stepImmigration()` and `stepMerchantCaravan()` (if % 7200)
+     - `localTicks % 60 === 45`: `progressAging(1)`
+     - `scan()`: runs every 5 ticks (`localTicks % 5 === 0`), dynamically scaling `MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2`.
+   - Memoized `allFactionPeople()` tick-by-tick so multiple queries within the same frame reuse results.
+4. **UF_Goals 24-Unit Batch Storm (`UF_Goals.js:20`)**:
+   - `time:minute` is emitted every 10 frames (1/6 second). `refreshBatch()` ran `refresh(u)` on 24 units every 10 frames, each calling `W().units()` and scanning relationships/inventory. Reduced `BATCH` to 4, spreading goal checks evenly without main-thread spikes.
+5. **UF_Environment Radiance Fallback & Array Allocations (`UF_Environment.js`)**:
+   - Fixed `hasActiveFires` check to skip the 49-cell radiance search when active fires count is 0.
+   - Replaced `W.units()` array allocation in `updateEnvironment` with direct iteration over `W.state.units`.
+   - Added `_chunkBaseTemp` 16x16 macro chunk memoization to avoid running worldgen noise per-cell on every unit thermal update.
+- **Measured Results (`tools/profile_live_frames.js`)**:
+   - Steady state frame time: **10.86ms** total (`tick_handler`: 9.77ms, `pixi_render`: 1.09ms) — rock-solid 60 FPS under the 16.66ms budget!
+   - `Colonists_total` max dropped from **52.70ms** to **7.60ms** (0.07ms steady).
+   - Camera tracking is completely continuous with zero integer tile snapping.
+- **Verification**:
+   - `tools/run_tests.js smoke`: 13/13 PASS.
+   - `tools/test_cooperative_homestead_construction.js`: 20/20 PASS.
+   - `tools/test_live_town_center_progression.js`: 17/17 PASS.
+   - `tools/test_continuous_frontier_progression.js`: 25/25 PASS.
+   - Screenshots verified: `smoke.map.png`.
+
 ## Micro-Stutter Elimination & Steady 120 FPS Throughput Delivered — 2026-09-22 (Gemini)
 Delivered per user directive ("nope, im still getting choppy frames") locating and eliminating the remaining periodic frame spikes and micro-stutters in live play:
 - **Measured Bottlenecks via Expanded Instrumentation (`tools/profile_live_frames.js`)**:

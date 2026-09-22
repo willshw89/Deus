@@ -268,7 +268,15 @@
     const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
     const isSettler = u => !!(u && u.data && !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_"))) && (isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder)));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
-    const allFactionPeople = () => (World() ? World().units().filter(isFactionPerson) : []);
+    let allFactionPeopleCache = null;
+    let allFactionPeopleCacheTick = -1;
+    const allFactionPeople = () => {
+        const t = (window.UF && UF.Time && UF.Time.Engine) ? UF.Time.Engine.ticks : localTicks;
+        if (allFactionPeopleCache && allFactionPeopleCacheTick === t) return allFactionPeopleCache;
+        allFactionPeopleCache = World() ? World().units().filter(isFactionPerson) : [];
+        allFactionPeopleCacheTick = t;
+        return allFactionPeopleCache;
+    };
     let simUnitsCache = null;
     let simUnitsCacheTick = -1;
     const simulationUnits = () => {
@@ -4416,7 +4424,7 @@
     // Colony radius grows with population so outer homes and workshops remain inside colony logic.
     function updateColonyRadius(c) {
         if (!c || !c.site) return;
-        if (localTicks % 60 !== 0) return;
+        if (localTicks % 60 !== 10) return;
         const pop = siteColonists(c).length;
         const baseRadius = siteRadius(homeSiteRecord(c) || { kind: "camp" });
         // Grow by 4 tiles per 10 population, cap at 40
@@ -4448,7 +4456,7 @@
         }
         let decideCount = 0;
         let lowPriorityPreempted = false;
-        const MAX_DECIDE_PER_SCAN = 1;
+        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;
         for (const u of simulationUnits()) {
             if (!sameLevel(u, c) && (t % 60 !== (u.id % 60))) continue;
             if (!u.data.capabilities) {
@@ -4885,26 +4893,26 @@
         if (!sceneActive || (window.UF && UF.Time && UF.Time.paused)) return;
         localTicks++;
 
-        if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();
-        if (localTicks % NEEDS_EVERY === 0) tickNeeds();
-        if (localTicks % SCAN_EVERY === 0) scan();
-        // Every 60 frames = 1 beat = 1 real second at 1x speed
-        if (localTicks % 60 === 0) {
-            progressPregnancies(1);
-            progressAging(1);
-            if (localTicks % 3600 === 0) stepFactionReproduction();
-            if (localTicks % 7200 === 0) {
-                stepImmigration();
-                stepMerchantCaravan();
-            }
+        if (localTicks === 1 || localTicks % 300 === 5) ensureColonistsGeneticsAndAging();
+        if (localTicks % NEEDS_EVERY === 15) tickNeeds();
+        // Stagger sub-system passes across distinct ticks to eliminate 60-frame beat clustering
+        if ((localTicks + 30) % 60 === 0) progressPregnancies(1);
+        if ((localTicks + 15) % 60 === 0) progressAging(1);
+        if (localTicks % 3600 === 20) stepFactionReproduction();
+        if (localTicks % 7200 === 40) {
+            stepImmigration();
+            stepMerchantCaravan();
         }
+
+        // Scan runs every SCAN_EVERY (5) ticks smoothly
+        if (localTicks % SCAN_EVERY === 0) scan();
     };
 
     let hooked = false;
     function hookEvents() {
         if (hooked || !window.UF || !UF.Events) return;
         hooked = true;
-        const clearUnitCaches = () => { simUnitsCache = null; colonistsCache = null; simUnitsCacheTick = -1; _lastHpCheckAt.clear(); };
+        const clearUnitCaches = () => { simUnitsCache = null; colonistsCache = null; allFactionPeopleCache = null; simUnitsCacheTick = -1; allFactionPeopleCacheTick = -1; _lastHpCheckAt.clear(); };
         const clearObjectCaches = () => { planInvalidatedAt = localTicks; _planStatusCacheById.clear(); _siteCountCache.clear(); };
         UF.Events.on("world:unitAdded", clearUnitCaches);
         UF.Events.on("world:unitRemoved", clearUnitCaches);

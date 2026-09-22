@@ -239,11 +239,11 @@ instrumentPlugin('UF_Colonists.js',
         const _t0A = performance.now();`
 );
 instrumentPlugin('UF_Colonists.js',
-    'let decideCount = 0;\n        let lowPriorityPreempted = false;\n        const MAX_DECIDE_PER_SCAN = 1;\n        for (const u of simulationUnits()) {',
+    'let decideCount = 0;\n        let lowPriorityPreempted = false;\n        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;\n        for (const u of simulationUnits()) {',
     `_tBeforeLoop = performance.now() - _t0A;
         let decideCount = 0;
         let lowPriorityPreempted = false;
-        const MAX_DECIDE_PER_SCAN = 1;
+        const MAX_DECIDE_PER_SCAN = localTicks <= 30 ? 4 : 2;
         const _t0Sim = performance.now();
         const _simUnits = simulationUnits();
         _tSimUnits = performance.now() - _t0Sim;
@@ -329,12 +329,12 @@ instrumentPlugin('UF_Colonists.js',
     'if (localTicks % SCAN_EVERY === 0) { const _st0 = performance.now(); scan(); if (window.__TIMINGS__) window.__TIMINGS__.Colonists_scan.push(performance.now() - _st0); }'
 );
 instrumentPlugin('UF_Colonists.js',
-    'localTicks++;\n\n        if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();',
-    'const _ct0 = performance.now(); localTicks++;\n\n        if (localTicks === 1 || localTicks % 300 === 0) ensureColonistsGeneticsAndAging();'
+    'localTicks++;\n\n        if (localTicks === 1 || localTicks % 300 === 5) ensureColonistsGeneticsAndAging();',
+    'const _ct0 = performance.now(); localTicks++;\n\n        if (localTicks === 1 || localTicks % 300 === 5) ensureColonistsGeneticsAndAging();'
 );
 instrumentPlugin('UF_Colonists.js',
-    'stepMerchantCaravan();\n            }\n        }\n    };',
-    'stepMerchantCaravan();\n            }\n        }\n        if (window.__TIMINGS__) window.__TIMINGS__.Colonists_total.push(performance.now() - _ct0);\n    };'
+    'stepMerchantCaravan();\n        }\n\n        // Scan runs every SCAN_EVERY (5) ticks',
+    'stepMerchantCaravan();\n        }\n        if (window.__TIMINGS__) window.__TIMINGS__.Colonists_total.push(performance.now() - _ct0);\n\n        // Scan runs every SCAN_EVERY (5) ticks'
 );
 
 // 3. UF_Jobs.js

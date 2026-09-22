@@ -17,7 +17,7 @@
  */
 (() => {
     "use strict";
-    const VERSION = 1, BATCH = 24, MAX_ACHIEVEMENTS = 32;
+    const VERSION = 1, BATCH = 4, MAX_ACHIEVEMENTS = 32;
     const W = () => window.UF && UF.World;
     const cat = () => window.$ufWorldCatalog || {};
     const jobs = () => window.UF && UF.Jobs;

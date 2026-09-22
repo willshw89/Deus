@@ -182,6 +182,8 @@
         if (!$colonyManager || !$colonyManager.isOverseerMode) return;
 
         // 1. WASD & arrow key camera panning
+        const isPanning = Input.isPressed("cameraLeft") || Input.isPressed("cameraRight") || Input.isPressed("cameraUp") || Input.isPressed("cameraDown");
+        if (isPanning && $colonyManager && $colonyManager.cameraFollowUnit) $colonyManager.cameraFollowUnit = null;
         if (Input.isPressed("cameraLeft")) $gameMap.scrollLeft(CAM_SPEED);
         if (Input.isPressed("cameraRight")) $gameMap.scrollRight(CAM_SPEED);
         if (Input.isPressed("cameraUp")) $gameMap.scrollUp(CAM_SPEED);
@@ -236,11 +238,15 @@
         return wins.some(w => TouchInput.x >= w.x && TouchInput.x < w.x + w.width && TouchInput.y >= w.y && TouchInput.y < w.y + w.height);
     };
 
-    // Free camera: the player never forces a scroll; a followed unit centres the view.
+    // Free camera: the player never forces a scroll; a followed unit centres the view smoothly using floating coordinates.
     Game_Player.prototype.updateScroll = function(lastScrolledX, lastScrolledY) {
         const follow = $colonyManager && $colonyManager.cameraFollowUnit;
         const uev = follow && follow.event;
-        if (uev) $gameMap.setDisplayPos(uev.x - $gameMap.screenTileX() / 2, uev.y - $gameMap.screenTileY() / 2);
+        if (uev) {
+            const rx = uev._realX !== undefined ? uev._realX : uev.x;
+            const ry = uev._realY !== undefined ? uev._realY : uev.y;
+            $gameMap.setDisplayPos(rx - $gameMap.screenTileX() / 2, ry - $gameMap.screenTileY() / 2);
+        }
     };
 
     //-----------------------------------------------------------------------------

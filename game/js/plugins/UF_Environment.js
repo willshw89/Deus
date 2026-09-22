@@ -161,6 +161,7 @@
     }
 
     const _tempCache = new Map();
+    const _chunkBaseTemp = new Map();
     let _tempCacheFrame = -60;
 
     /**
@@ -197,23 +198,28 @@
             return baseUnderground;
         }
 
-        // Surface base temperature from worldgen fields
-        let baseTemp = 18.0;
-        if (G && typeof G.cellInfoLocal === "function") {
-            try {
-                const info = G.cellInfoLocal(a.x, a.y, x, y, 0);
-                if (info && info.fields && typeof info.fields.t === "number") {
-                    baseTemp = fieldToCelsius(info.fields.t);
-                } else if (info && info.biomeId) {
-                    if (info.biomeId.includes("glacier") || info.biomeId.includes("ice")) baseTemp = -15.0;
-                    else if (info.biomeId.includes("tundra") || info.biomeId.includes("snow")) baseTemp = -4.0;
-                    else if (info.biomeId.includes("taiga")) baseTemp = 3.0;
-                    else if (info.biomeId.includes("desert") || info.biomeId.includes("badlands")) baseTemp = 36.0;
-                    else if (info.biomeId.includes("savanna") || info.biomeId.includes("jungle")) baseTemp = 28.0;
+        // Surface base temperature from worldgen fields (chunk-cached 16x16 to eliminate per-cell noise evaluation)
+        const chunkKey = `${a.x},${a.y}:${x >> 4},${y >> 4}`;
+        let baseTemp = _chunkBaseTemp.get(chunkKey);
+        if (baseTemp === undefined) {
+            baseTemp = 18.0;
+            if (G && typeof G.cellInfoLocal === "function") {
+                try {
+                    const info = G.cellInfoLocal(a.x, a.y, x, y, 0);
+                    if (info && info.fields && typeof info.fields.t === "number") {
+                        baseTemp = fieldToCelsius(info.fields.t);
+                    } else if (info && info.biomeId) {
+                        if (info.biomeId.includes("glacier") || info.biomeId.includes("ice")) baseTemp = -15.0;
+                        else if (info.biomeId.includes("tundra") || info.biomeId.includes("snow")) baseTemp = -4.0;
+                        else if (info.biomeId.includes("taiga")) baseTemp = 3.0;
+                        else if (info.biomeId.includes("desert") || info.biomeId.includes("badlands")) baseTemp = 36.0;
+                        else if (info.biomeId.includes("savanna") || info.biomeId.includes("jungle")) baseTemp = 28.0;
+                    }
+                } catch (_) {
+                    baseTemp = 18.0;
                 }
-            } catch (_) {
-                baseTemp = 18.0;
             }
+            _chunkBaseTemp.set(chunkKey, baseTemp);
         }
 
         // Elevation modifier on surface / above ground
@@ -266,7 +272,7 @@
 
         // 1. Burning tiles: only check if there are active fires recorded in state
         const fState = W && W.state && W.state.fire;
-        const hasActiveFires = fState ? (fState.burning && Object.keys(fState.burning).length > 0) : true;
+        const hasActiveFires = !!(fState && fState.burning && Object.keys(fState.burning).length > 0);
         if (hasActiveFires && F && typeof F.isBurning === "function") {
             for (let dy = -radius; dy <= radius; dy++) {
                 for (let dx = -radius; dx <= radius; dx++) {
@@ -718,13 +724,17 @@
         }
 
         // Interleave living units over 60 frames so simulation is smooth and spike-free
-        const units = typeof W.units === "function" ? W.units() : [];
-        for (const u of units) {
-            if ((frameCount + (u.id | 0)) % TICKS_PER_STEP !== 0) continue;
-            try {
-                stepUnitThermal(u, localBeat);
-            } catch (e) {
-                console.error("[UF_Environment] stepUnitThermal error", e);
+        const stUnits = W.state && W.state.units;
+        if (stUnits) {
+            for (const id in stUnits) {
+                const u = stUnits[id];
+                if (!u) continue;
+                if ((frameCount + (u.id | 0)) % TICKS_PER_STEP !== 0) continue;
+                try {
+                    stepUnitThermal(u, localBeat);
+                } catch (e) {
+                    console.error("[UF_Environment] stepUnitThermal error", e);
+                }
             }
         }
     }
