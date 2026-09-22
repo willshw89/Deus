@@ -1022,6 +1022,13 @@
             const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
             if (sheltered || !hasBedInTownHall) {
                 if (h.privateHomestead) return h.privateHomestead;
+
+                // Cooperative pacing: if another household is currently constructing a private homestead, wait our turn!
+                const col = C();
+                const c = (col && col.state) ? col.state(u || mems[0]) : null;
+                const currentFocal = activeFocalHousehold(c);
+                if (currentFocal && currentFocal.id !== h.id) return h.home;
+
                 if (h.lastSearchTick && (tick() - h.lastSearchTick < 120)) return h.home;
                 h.lastSearchTick = tick();
                 const p = findPlot(h, u, designFor(h, Math.max(1, mems.length)));
@@ -1465,19 +1472,19 @@
     function activeFocalHousehold(c) {
         const s = state();
         if (!s || !c) return null;
-        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && (h.home || h.privateHomestead))
+        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && (h.privateHomestead || (h.home && !h.home.isShared)))
             .sort((a, b) => (a.foundedTick || 0) - (b.foundedTick || 0) || String(a.id).localeCompare(String(b.id)));
         if (!siteH.length) return null;
         // 1. Primary priority: household with an active private homestead under construction
         const privateUnderCon = siteH.find(h => h.privateHomestead && !h.isMovedIn);
         if (privateUnderCon) return privateUnderCon;
-        // 2. Secondary priority: first household whose home is not yet sheltered
+        // 2. Secondary priority: first household whose private home is not yet sheltered
         const unsheltered = siteH.find(h => !isSheltered(h));
         if (unsheltered) return unsheltered;
-        // 3. Tertiary priority: any household whose home is not yet completely built
+        // 3. Tertiary priority: any household whose private home is not yet completely built
         const incomplete = siteH.find(h => !describe(h).complete);
         if (incomplete) return incomplete;
-        return siteH[0];
+        return null;
     }
     function sitePlanSteps(c, u) {
         const s = state();

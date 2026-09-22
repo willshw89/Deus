@@ -2801,7 +2801,7 @@
       "build": {
         "items": {
           "log": 2,
-          "bar_iron": 1
+          "fiber": 1
         },
         "work": 40
       },
@@ -7912,6 +7912,17 @@
         "society": "door"
       },
       {
+        "id": "chest",
+        "build": "chest_wood",
+        "cells": [
+          [
+            -1,
+            2
+          ]
+        ],
+        "society": "chest"
+      },
+      {
         "id": "beds",
         "build": "floor_straw",
         "cells": [
@@ -8305,6 +8316,17 @@
           "society": "door"
         },
         {
+          "id": "chest",
+          "build": "chest_wood",
+          "cells": [
+            [
+              -1,
+              2
+            ]
+          ],
+          "society": "chest"
+        },
+        {
           "id": "workstone",
           "build": "workbench",
           "cells": [
@@ -8569,6 +8591,17 @@
             ]
           ],
           "society": "door"
+        },
+        {
+          "id": "chest",
+          "build": "chest_wood",
+          "cells": [
+            [
+              -1,
+              2
+            ]
+          ],
+          "society": "chest"
         },
         {
           "id": "beds",
@@ -8899,6 +8932,17 @@
             ]
           ],
           "society": "door"
+        },
+        {
+          "id": "chest",
+          "build": "chest_wood",
+          "cells": [
+            [
+              -1,
+              2
+            ]
+          ],
+          "society": "chest"
         },
         {
           "id": "beds",

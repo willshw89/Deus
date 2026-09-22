@@ -9,6 +9,42 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Communal Chest & Cooperative Sequential Home Construction Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("This is chaos. Everyone needs to work together. Lets have them build a chest and as society share out of the stockpile and help each other build homes") addressing screenshot showing 5 half-built private home foundations started concurrently across the meadow with scattered debris:
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Early Frontier Chest Recipe Blocker*:
+     - Previously in `game/data/UF_WorldCatalog.json`, `chest_wood` required `{"log": 2, "bar_iron": 1}`. Early colonists have no iron smelters, smithies, or iron bars, making wooden chests impossible to construct autonomously.
+     - *Fix (`UF_WorldCatalog.json` & `UF_Objects.js`)*: Changed `chest_wood` build recipe to `{"log": 2, "fiber": 1}`. Added defensive normalization in `UF_Objects.js:table()` replacing any lingering `bar_iron` requirement with `fiber: 1`.
+  2. *Autonomous Communal Chest Placement at Town Center*:
+     - Added `{ "id": "chest", "build": "chest_wood", "cells": [[-1, 2]], "society": "chest" }` immediately after `door` in `colony.plan` and culture variants (`forest`, `stone`, `workshop`).
+     - In `UF_Colonists.js:autonomousStorageSteps()`, whenever `containers.length === 0`, the settlement proactively prioritizes a communal chest inside the Town Center at `[-1, 2]`.
+  3. *Elimination of Competing Homestead Chaos & Strict Cooperative Focus*:
+     - Previously, `UF_Households.js:ensureHome()` gave all 5 unpartnered/unsheltered households private homestead plots simultaneously as soon as Town Hall was sheltered. In `effectivePlan()`, every colonist placed their own household steps first, while also pulling steps from every other household. This scattered all 8 colonists across 5 separate construction sites.
+     - *Fix (`UF_Households.js` & `UF_Colonists.js`)*:
+       - In `UF_Households.js:ensureHome()`: Gated plot reservations so households wait their turn while an active focal home is under construction (`const currentFocal = activeFocalHousehold(c); if (currentFocal && currentFocal.id !== h.id) return h.home;`). Non-focal households reside safely in the completed Town Hall.
+       - In `UF_Households.js:activeFocalHousehold()`: Filters strictly for private homes under construction (`h.privateHomestead || (h.home && !h.home.isShared)`), returning `null` when all private homes are complete.
+       - In `UF_Colonists.js:effectivePlan()`: Unifies ALL colonists on `cooperativeHomeSteps` belonging strictly to `activeFocalHousehold`. Secondary household steps are suppressed until the focal home is 100% built and moved into.
+  4. *Society Shared Stockpile & Chest Logistics*:
+     - Woodcutters and miners prioritize harvesting trees and quarrying rocks nearest to the active focal home.
+     - Colonists deposit carried loose items and tidy perimeter clutter into communal chests (`UF.Containers`) and stockpiles (`carriedDepositJob`, `tidyStockpileJob`).
+     - Construction hauling (`UF.Resources.resolve`) draws materials directly from communal containers (`chest_wood`) and stockpiles before harvesting wild resources.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_cooperative_homestead_construction.js`: 20/20 PASS (exit 0):
+    - `smoke.founder_count`: 8/8 colonists
+    - `smoke.communal_chest_operational`: Communal chest operational at (127,130): id=3, slots=12
+    - `smoke.society_shares_stockpile_chest`: Society storage active: 1 item stack(s) stored in communal chest
+    - `smoke.cooperative_single_focal_homestead`: Active private homesteads under construction: 1 (focal: household:1)
+    - `smoke.no_competing_homestead_chaos`: 39 household(s) safely residing in Town Hall awaiting their cooperative turn
+    - `smoke.all_colonists_cooperate`: All colonists united on focal household household:1 (steps: 5; secondary leaks: 0)
+    - `smoke.colonists_never_idle`: 8/8 colonists active; idle: none
+    - `smoke.no_errors`: 0 errors
+  - Rule 4 Mutant Check: `node tools/test_cooperative_homestead_construction.js --mutant=disable_focal_cooperation` failed with code 1 (`FAIL smoke.cooperative_single_focal_homestead - MUTANT INJECTED: focal cooperation disabled`).
+  - `tools/test_live_town_center_progression.js`: 17/17 PASS (exit 0).
+  - `tools/test_continuous_frontier_progression.js`: 25/25 PASS (exit 0).
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 5 Screenshots: Inspected `live_communal_chest_town_center.png` and `live_cooperative_home_construction.png`. Exactly 1 cooperative private homestead active; zero chaos or clutter.
+
+
 ## Autonomous Live Settlement Progression Post-Town-Hall & Carried-Item Logistics Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Again, a town center and nothing else and heres a guy doing nothing.") addressing user screenshot showing colonist Joran standing outside the Town Center with "Carrying a stone", "Current action: No current action recorded", and no other private shelters or buildings constructed:
 - **Diagnosed Root Causes & Fixed Architecture**:

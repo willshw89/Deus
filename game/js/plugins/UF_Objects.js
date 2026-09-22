@@ -77,8 +77,16 @@
     let typeCache = null;
     function table() {
         const src = (catalog() && catalog().objects) || [];
-        if (typeCache && typeCache.source === src) return typeCache;
-        const list = src.map((o, i) => Object.assign({}, o, { typeId: i + 1, tintValue: o.tint ? tintOf(o.tint) : 0xffffff }));
+        const list = src.map((o, i) => {
+            const entry = Object.assign({}, o, { typeId: i + 1, tintValue: o.tint ? tintOf(o.tint) : 0xffffff });
+            if (entry.id === "chest_wood" && entry.build && entry.build.items && entry.build.items.bar_iron) {
+                entry.build = Object.assign({}, entry.build, {
+                    items: Object.assign({}, entry.build.items, { fiber: entry.build.items.bar_iron })
+                });
+                delete entry.build.items.bar_iron;
+            }
+            return entry;
+        });
         const byId = new Map();
         const blocks = new Uint8Array(list.length + 1); // 1 = units can't enter a cell holding this type
         for (const o of list) {

@@ -443,7 +443,8 @@
         const containers = C.all(area, z);
 
         let needContainer = false;
-        if (containers.length === 0 && loose.length >= 6) {
+        if (containers.length === 0) {
+            // As society, always build at least one communal storage chest at the Town Center!
             needContainer = true;
         } else if (containers.length > 0) {
             const allFull = containers.every(cont => C.slotsUsed(cont.id) >= cont.maxSlots * 0.8 || C.currentWeight(cont.id) >= cont.maxWeight * 0.8);
@@ -457,6 +458,20 @@
         const chestType = O.type("chest_wood") ? "chest_wood" : (O.type("crate_wood") ? "crate_wood" : null);
         if (!chestType) return [];
 
+        // 1. Primary communal chest location: inside Town Center at [-1, 2]
+        const primaryX = c.site.x - 1, primaryY = c.site.y + 2;
+        if (!O.at(area, primaryX, primaryY) && !C.at(area, primaryX, primaryY, z)) {
+            return [{
+                id: "communal_chest",
+                build: chestType,
+                cells: [[-1, 2]],
+                exact: true,
+                autoStorage: true,
+                society: "chest"
+            }];
+        }
+
+        // 2. Secondary placement in Town Center perimeter
         for (let dy = -3; dy <= 3; dy++) {
             for (let dx = -3; dx <= 3; dx++) {
                 if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) continue;
@@ -480,35 +495,19 @@
         const W = World(), u = typeof ref === "number" ? W.unit(ref) : ref && ref.data ? ref : siteColonists(c)[0];
         if (u && u._cachedEffectivePlanTick === localTicks && u._cachedEffectivePlan) return u._cachedEffectivePlan;
         const H = window.UF && UF.Households, G = window.UF && UF.Goals;
-        const mySteps = (u && H && H.planSteps) ? H.planSteps(u) : [];
         const goalSteps = (u && G && G.planSteps) ? G.planSteps(u) : [];
 
         // Cooperative settlement construction: prioritize the active focal household so all villagers unite on finishing it!
+        // No colonist starts a secondary private home until the focal home is completely built and sheltered.
         const focal = H && H.activeFocalHousehold ? H.activeFocalHousehold(c) : null;
-        const neighborSteps = [];
-        if (H && H.all) {
-            const myHId = u && u.data && u.data.householdId;
-            // 1. If there is an active focal household and it is not my own, include its active steps
-            if (focal && focal.id !== myHId && (focal.home || focal.privateHomestead) && H.planSteps) {
-                const focalPeople = H.members ? H.members(focal) : [];
-                const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
-                if (focalRep) {
-                    const fSteps = H.planSteps(focalRep);
-                    for (const s of fSteps) {
-                        if (s) neighborSteps.push(s);
-                    }
-                }
-            }
-            // 2. Include steps from all other households with a home planned so nothing sits unbuilt
-            for (const h of H.all().filter(h => sameLevel(h, c) && (h.home || h.privateHomestead) && !h.mergedInto)) {
-                if (h.id === myHId || (focal && h.id === focal.id)) continue;
-                const people = H.members ? H.members(h) : [];
-                const rep = people.find(p => p.data && p.data.age >= 15) || people[0] || u;
-                if (rep && H.planSteps) {
-                    const hSteps = H.planSteps(rep);
-                    for (const s of hSteps) {
-                        if (s) neighborSteps.push(s);
-                    }
+        const cooperativeHomeSteps = [];
+        if (focal && H && H.planSteps) {
+            const focalPeople = H.members ? H.members(focal) : [];
+            const focalRep = focalPeople.find(p => p.data && p.data.age >= 15) || focalPeople[0] || u;
+            if (focalRep) {
+                const fSteps = H.planSteps(focalRep);
+                for (const s of fSteps) {
+                    if (s) cooperativeHomeSteps.push(s);
                 }
             }
         }
@@ -524,8 +523,10 @@
                 exact: true
             });
             for (const h of households) {
+                // Only build paths to homes that are sheltered or occupied
                 const targetHome = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : h.home;
-                if (targetHome && targetHome.entrance) {
+                const isSheltered = H && H.isSheltered ? H.isSheltered(h) : false;
+                if (targetHome && targetHome.entrance && (isSheltered || h.isMovedIn)) {
                     const ex = targetHome.entrance.x - c.site.x;
                     const ey = targetHome.entrance.y - c.site.y;
                     const pathCells = [];
@@ -546,7 +547,7 @@
         const soSteps = standingOrders(u || ref);
         const msSteps = populationMilestoneSteps(u || ref);
         const storageSteps = autonomousStorageSteps(u || ref);
-        const extra = u ? [ ...mySteps, ...neighborSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps, ...storageSteps ] : [];
+        const extra = u ? [ ...storageSteps, ...cooperativeHomeSteps, ...civicSteps, ...pillarSteps, ...goalSteps, ...soSteps, ...msSteps ] : [];
         const seen = new Set();
         const res = [...c.plan, ...extra].filter(s => s && s.id && (!s.goalOwner || (u && s.goalOwner === u.id)) &&
             !seen.has(s.id) && (seen.add(s.id), true));
