@@ -2719,15 +2719,11 @@
         const myBed = (u.data && u.data.bed && sameLevel(u.data.bed, u)) ? u.data.bed : (owned && sameLevel(owned, u) ? owned : null);
         const spots = myBed && !taken.has(`${myBed.x},${myBed.y}`) ? [{ x: myBed.x, y: myBed.y, fire: fireRef }] : [];
 
-        // Homeless / unassigned colonists sleep around the campfire:
-        if (spots.length === 0 && fire) {
-            const fireSpots = fireSleepCells(u, fire, taken);
-            spots.push(...fireSpots);
-        }
-
+        // Permitted unoccupied beds in the settlement take precedence over sleeping on the floor:
         spots.push(...permitted.map(b => ({ x: b.x, y: b.y, fire: fireRef })));
 
-        if (fire && spots.length === 0) {
+        // Sleeping on the ground around the campfire is a fallback ONLY when no beds are available:
+        if (spots.length === 0 && fire) {
             const fireSpots = fireSleepCells(u, fire, taken);
             spots.push(...fireSpots);
         }
@@ -3205,13 +3201,14 @@
         if (!c) return null;
         const steps = effectivePlan(u), status = planStatus(u, steps);
         const candidates = [];
-        const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, household: 0, civic: 0, goal: 0, standing: 0, milestone: 0 };
+        const groups = { bootstrap_build: 0, bootstrap_craft: 0, bootstrap_stock: 0, workshop: 0, household: 0, civic: 0, goal: 0, standing: 0, milestone: 0 };
         // Each demand stream gets a bounded window. An impossible or endlessly recurring stock step must not
         // hide every household and personal aspiration behind the old plan's first three unfinished steps.
         for (let i = 0; i < steps.length; i++) {
             if (status[i].done) continue;
             const step = steps[i];
             const isCivic = step.id && (step.id.startsWith("path_") || step.id.startsWith("town_square") || step.id.startsWith("civic_") || step.id.startsWith("sanitation_"));
+            const isWorkshop = step.build && ["workbench", "tanning_rack", "bowyer_bench", "fletcher_bench", "furnace", "smithy", "weapon_rack"].includes(step.build);
             let group = "bootstrap_build";
             let limit = 4;
             if (step.standing) {
@@ -3220,9 +3217,12 @@
             } else if (step.milestone) {
                 group = "milestone";
                 limit = 3;
+            } else if (isWorkshop) {
+                group = "workshop";
+                limit = 4;
             } else if (step.household) {
                 group = "household";
-                limit = 8;
+                limit = 6;
             } else if (isCivic || step.pillar) {
                 group = "civic";
                 limit = 4;
@@ -3285,7 +3285,7 @@
                 s += 2.0; // Priority boost to complete floors alongside walls
             }
             if (x.step.build && (x.step.build === "workbench" || x.step.build === "tanning_rack" || x.step.build === "bowyer_bench" || x.step.build === "fletcher_bench" || x.step.build === "furnace" || x.step.build === "smithy" || x.step.build === "weapon_rack")) {
-                s += 3.8; // Priority boost for community workshops and equipment storage
+                s += 5.5; // Priority boost for community workshops and equipment storage
             }
             if (x.step.id === "axe" || x.step.id === "pick" || x.step.id === "cloaks" || x.step.id === "leather" || x.step.id === "bows" || x.step.id === "arrows") {
                 s += 3.5; // Priority boost for productive secondary tools and hunting equipment

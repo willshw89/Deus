@@ -562,33 +562,36 @@
         const roll = hash(W().state.seed || 0, h.id, h.faction, h.siteId, h.z, annex ? structures(h).length : 0, social);
         const variant = roll % 100 < 25 + social / 2 ? 1 : 0;
         const maxRank = Math.max(0, ...people.map(u => (u && u.data && Number.isFinite(u.data.rank) ? u.data.rank : 0)));
+        const isBranchingFromTownHall = (h.home && h.home.isShared) || !!h.previousSharedHome;
+        const effectiveRank = isBranchingFromTownHall ? 0 : maxRank;
+        const effectiveNeed = isBranchingFromTownHall ? Math.min(2, Math.max(1, people.length)) : need;
         let capacity, width, height, sleepRows, size;
         if (annex) {
-            capacity = need <= 2 ? 2 : Math.ceil(need / 2) * 2;
+            capacity = effectiveNeed <= 2 ? 2 : Math.ceil(effectiveNeed / 2) * 2;
             width = capacity <= 4 ? 7 + variant : 9 + variant;
             sleepRows = Math.max(3, Math.ceil(capacity / 2)); height = sleepRows + 2; size = "annex";
-        } else if (maxRank >= 2) {
+        } else if (effectiveRank >= 2) {
             // Higher ranks in society get larger homes: Ruler / Lord Manor / Great Hall
-            capacity = Math.max(8, need);
+            capacity = Math.max(8, effectiveNeed);
             width = variant ? 13 : 11;
             sleepRows = Math.max(3, Math.ceil(capacity / 4));
             height = sleepRows + 7;
             size = "manor";
-        } else if (maxRank === 1) {
+        } else if (effectiveRank === 1) {
             // Site Leader / Elder / Master Craftsman Estate / Longhouse
-            capacity = Math.max(4, need);
+            capacity = Math.max(4, effectiveNeed);
             width = variant ? 11 : 9;
             sleepRows = Math.max(2, Math.ceil(capacity / 2));
             height = sleepRows + 6;
             size = "estate";
-        } else if (need <= 2) {
+        } else if (effectiveNeed <= 2) {
             capacity = 2; width = variant ? 7 : 6; height = 8; sleepRows = 2; size = "small";
-        } else if (need <= 4) {
+        } else if (effectiveNeed <= 4) {
             capacity = 4; width = variant ? 9 : 7; height = variant ? 8 : 9; sleepRows = variant ? 2 : 3; size = "family";
-        } else if (need <= 8) {
+        } else if (effectiveNeed <= 8) {
             capacity = 8; width = variant ? 11 : 9; height = variant ? 9 : 10; sleepRows = variant ? 3 : 4; size = "extended";
         } else {
-            capacity = Math.ceil(need / 4) * 4; width = variant ? 13 : 11;
+            capacity = Math.ceil(effectiveNeed / 4) * 4; width = variant ? 13 : 11;
             sleepRows = Math.ceil(capacity / 4); height = sleepRows + 6; size = "large";
         }
 
@@ -1185,7 +1188,7 @@
         }
         if (!c || !c.site) return [];
         const home = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : ensureHome(h, u);
-        if (!home) return [];
+        if (!home || home.isShared) return []; // Communal Town Hall is managed by colony.plan, not duplicate private steps
         ensureExpansion(h, u);
         syncHome(h);
         const previous = new Map((home.steps || []).map(s => [s.id, s]));
@@ -1204,11 +1207,12 @@
         const o = O();
 
         // 5 base bootstrap steps for fresh unbuilt homes:
+        const hearthObject = (o && o.type("kitchen_hearth") && o.type("kitchen_hearth").build) ? "kitchen_hearth" : "campfire";
         home.steps = [
             step("walls", home.wall, buildableWalls),
             step("doors", home.door, home.doors),
             step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
-            step("hearth", "campfire", [home.hearth].filter(Boolean)),
+            step("hearth", hearthObject, [home.hearth].filter(Boolean)),
             step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
         ];
 

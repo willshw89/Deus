@@ -9,6 +9,33 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 (None)
 
+## Post-Town Hall Progression, Workshop Prioritization & Bed Sleeping Fix Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("The AI arent really doing shit after building the town center" / "This is where they end up"):
+- **Diagnosed Root Causes & Fixed Architecture**:
+  1. *Shared Town Hall Step Multiplication*: When `home.isShared === true`, every founder household called `planSteps(u)` and emitted duplicate private construction steps (`walls`, `doors`, `beds`, `hearth`, `storage`) for the communal Town Hall, flooding the planner with over 102 duplicate steps.
+     - *Fix (`UF_Households.js`)*: In `planSteps(u)`, if `home.isShared`, return `[]`. The shared Town Hall is managed strictly by `colony.plan`.
+  2. *Duplicate 7x7 Hall / Estate Footprints for Branching Founders*: When founder couples branched off from the Town Hall, `designFor` evaluated leader rank (`maxRank === 1`) and generated a massive 8-bed 7x7 or 11x9 estate with a central campfire.
+     - *Fix (`UF_Households.js`)*: When branching from the shared Town Hall, `designFor` sets `effectiveRank = 0` and `effectiveNeed = Math.min(2, Math.max(1, people.length))`, designing a modest family cottage (`capacity = 2`, 2 beds, no duplicate 8-bed communal halls).
+  3. *Domestic Campfires in Wooden Cottages*: Private homes previously hardcoded `campfire` for the indoor hearth, creating competing campfires that drew colonists into idle gathering circles.
+     - *Fix (`UF_Households.js`)*: Private homes use `kitchen_hearth` (stove) rather than outdoor campfires.
+  4. *SleepJob Campfire Precedence Over Beds*: `sleepJob` previously pushed `fireSpots` (ground around fire) to candidates before `permitted` beds, causing colonists without an explicit bed assigned to sleep on the ground in a circle around the campfire despite empty beds in the Town Hall.
+     - *Fix (`UF_Colonists.js`)*: `sleepJob` now checks `permitted` beds before `fireSpots`. Colonists only sleep on the floor around the campfire as a last resort when no beds are available in the settlement.
+  5. *Workshop Starvation*: Workshop buildings (`workbench`, `tanning_rack`, `bowyer_bench`, `fletcher_bench`, `furnace`, `smithy`, `weapon_rack`) shared the generic `bootstrap_build` group (limit 4) with Town Hall and housing steps, and were choked out by housing priority bonuses.
+     - *Fix (`UF_Colonists.js`)*: Created dedicated `workshop` planning group with limit 4, and boosted workshop score (`+5.5`), ensuring workbenches, tanneries, and smithies are constructed promptly.
+- **Automated Verification (AGENTS.md Rules 2, 3, 4, 5)**:
+  - `tools/test_post_town_hall_progression.js`: 22/22 PASS (exit 0):
+    - `smoke.founder_count`: 8/8 colonists
+    - `smoke.town_hall_enclosed`: true
+    - `smoke.town_hall_sheltered`: true
+    - `smoke.private_homestead_planned`: true (4 cottages planned)
+    - `smoke.workshop_steps_in_queue`: 7 workshop construction steps active
+    - `smoke.homestead_steps_in_queue`: 32 private homestead steps (clean 8 per household, down from 72+ flooded steps)
+    - `smoke.colonists_active_jobs`: 8/8 actively working (move, pick, chop, craft, quarry, build, gather)
+  - `tools/run_tests.js colonists`: 24/24 PASS (exit 0) - confirmed `Workstone: built`, `Bowyer: built`, `Fletcher: built` in-engine!
+  - `tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Rule 4 Mutant Check: `node tools/test_post_town_hall_progression.js --mutant=block_private_homesteads` exited with code 1 (`FAIL smoke.private_homestead_planned - MUTANT INJECTED: private homestead blocked`).
+  - Rule 5 Screenshots: Inspected `live_post_town_hall_initial.png` (8 colonists in 4 corner bed alcoves around Town Hall) and `live_post_town_hall_active_work.png` (colonists exiting into settlement to quarry, chop, and build workshops).
+
 ## Allies Move Freely Through Each Other & Exclusive Action Squares Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("Make it so that allies can move freely through each other, but a unit must have its own square to act"):
 - **Architecture & System Mechanics**:
