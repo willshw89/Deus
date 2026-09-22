@@ -9,6 +9,27 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - (None)
 
+## Glowing Green Ground Selection Rings, Right-Click Move & Generation Source Packets Delivered — 2026-09-22 (Gemini & Subagents)
+Delivered per user directives ("Actually, remove these green squares entirely. no indicator of alliance under the creatures. When they are selected, place a glowing green ring under their feet. When they are unselected, nothing.", "With units selected, if I right click, I want them to move", "Make the drag box green instead of white", "Let's make sure these rings spawn under the creature sprites", "I want the biomes to follow a consistent pattern across all Z layers... take a look at flooding and Lava for me, and tell me how they function in layman's terms", "PRESERVE THE CURRENT BASELINE... FOCUS THE SOURCE PACKETS ON GENERATION"):
+1. **Glowing Green Ground Halo Selection Rings (`DEUS_Stance.js`, `DEUS_Select.js`)**:
+   - Removed alliance indicators (green/yellow/red squares) from unselected creatures entirely (`Stance.showAlliance = false`). Unselected units display zero indicators on the ground.
+   - Ground Selection Halo: When a unit is selected (single or group), an animated pulsing neon green ground ellipse (44×22 for 1 tile, 88×44 for 2 tiles) spawns under its boots.
+   - Anchor & Layering: Center anchor `(0.5, 0.5)` places the halo directly around `footY` on the ground plane, strictly under the creature sprite (`z = Math.min(chZ - 10, markerZ(y) + 1)` with `this._tilemap._sortChildren()`).
+2. **Green Drag Selection Box & Brackets (`DEUS_Select.js`)**:
+   - Updated drag selection box stroke to vivid green (`#22c55e`).
+   - Updated drag label badge border and corner brackets to neon green (`#4ade80`).
+   - Updated tile selection fill (`rgba(34, 197, 94, 0.14)`) and boundary border to green.
+3. **Right-Click Unit Movement Dispatch (`DEUS_Select.js`)**:
+   - In `Scene_Map.prototype.updateOverseerControls`, right-clicking when units are selected dispatches `groupMove({ area, x: mx, y: my, z: viewZ() })` to destination tile coordinates, plays `SoundManager.playCursor()`, dismisses any lingering tile selection box, and consumes the cancel event.
+4. **Generation Source Packets & ZIP Export**:
+   - Produced 8 generation source packets in `docs/packets/generation/` (`DEUS_GENERATION_PACKET_01` to `08`).
+   - Packaged into authoritative archive: `archive/DEUS_GENERATION_SOURCE_PACKETS.zip` (19.5 KB).
+   - Preserved starting baseline contract with 100% integrity (8 founders, lit campfire, starting kit counts, 9 factions across 3 levels untouched).
+5. **Automated Test Verification**:
+   - `node tools/run_tests.js select`: 46/46 PASS (0 errors).
+   - `node tools/run_tests.js stance`: 22/22 PASS (0 errors). Live screenshot `stance.selection_ring.png` visually inspected; green glowing ellipse centered directly at character feet under sprite with 0 alliance indicators on unselected units verified.
+
+
 ## Square Ground Stance Indicators & Single-Unit Selection Inventory Popup Delivered — 2026-09-22 (Gemini & deus-architecture-mz)
 Delivered per user directives ("When the characters spawn in, their green circles are above their sprites, please fix that, and make them squares please", "Get rid of the card on the left. When I click a unit, I want the inventory on the right to pop up. But I only want the inventroy to pop up if I select a single unit. Otherwise, no inventory for group selection"):
 1. **Square Ground Stance Indicators (`DEUS_Stance.js`, `DEUS_Perspective25D.js`)**:

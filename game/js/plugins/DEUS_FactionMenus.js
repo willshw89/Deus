@@ -244,7 +244,7 @@
         // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
         const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
         const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
-        const wy = 238;
+        const wy = 258;
         return new Rectangle(wx, wy, ww, wh);
     };
 

@@ -63,19 +63,20 @@
     const OUTLINE_EXTRA_ALPHA = 0.4; // the rim is more opaque than the fill so the ring reads at zoom 1/3
     const VIEW_MARGIN = 1;       // cells beyond the screen edge that still get a marker
 
-    // Square stance geometry (per user directive 2026-09-22: squares under units, rendered strictly below sprites).
-    // 48x48 px per square of creature footprint (96x96 for 2-tile creatures), anchor (0.5, 1.0) so it sits on the ground under feet.
-    const RING = { w: 48, h: 48 };        // stance square
-    const SELECT_RING = { w: 48, h: 48 }; // selection square
+    // Glowing green selection ring geometry (per user directive 2026-09-22:
+    // no indicator of alliance under creatures; glowing green ring under selected units).
+    const RING = { w: 48, h: 48 };        // legacy stance square
+    const SELECT_RING = { w: 44, h: 22 }; // glowing green selection ring
     const CENTER_ABOVE = 24;
     const MAX_CELLS = 4;
-    const rimWidth = cells => 1 + cells;       // stance rim: 2 px at one square, 3 at two
-    const selectBandWidth = cells => 2 + cells; // bright band of the selection ring: 3 px at one square
+    const rimWidth = cells => 1 + cells;
+    const selectBandWidth = cells => 2 + cells;
     const clampCells = c => Math.max(1, Math.min(MAX_CELLS, Math.round(Number(c) || 1)));
     const ringSize = cells => ({ w: RING.w * clampCells(cells), h: RING.h * clampCells(cells) });
     const selectRingSize = cells => ({ w: SELECT_RING.w * clampCells(cells), h: SELECT_RING.h * clampCells(cells) });
-    // anchor.y that puts the square's bottom at the sprite's foot row
-    const ringAnchorY = (h, cells) => 1.0;
+    // anchor.y: 1 for stance square (bottom edge at feet), 0.5 for selection ring (centered on feet)
+    const ringAnchorY = (h, cells) => 1;
+    const selectAnchorY = 0.5;
 
     //-------------------------------------------------------------------------
     // Catalog and colors
@@ -106,6 +107,8 @@
         RING,
         SELECT_RING,
         bitmapNames: BITMAP_NAMES,
+        /** false hides alliance markers under unselected units (per user directive: no indicator of alliance). */
+        showAlliance: false,
         /** false hides every marker (development toggle; not saved). */
         enabled: true
     };
@@ -258,34 +261,101 @@
     };
 
     //-------------------------------------------------------------------------
-    // The selection square: a bold iron square outline with bright pulse,
-    // drawn at its unit's stance square z + 1, under the sprite. Generated (UF_GenSelect).
+    // The selection ring: a radiant glowing green ground ring with bright pulse,
+    // drawn under the sprite at the unit's feet. Generated (UF_GenSelect).
 
     const SELECT_NAME = "UF_GenSelect";
-    const SELECT_EDGE = [53, 53, 53, 255]; // uf.hex #353535
-    const SELECT_BANDS = [[158, 158, 158, 255], [223, 223, 223, 255], [255, 255, 255, 255]]; // #9E9E9E, #DFDFDF, #FFFFFF
     const SELECT_SEQUENCE = [0, 1, 2, 1];
-    const SELECT_STEP = 10; // frames per pulse step: a 40-frame cycle, like the old square's pulse
+    const SELECT_STEP = 10; // frames per pulse step: a 40-frame cycle
     const PULSE_FRAMES = SELECT_SEQUENCE.length * SELECT_STEP;
     const selectBitmaps = []; // selectBitmaps[cells][frame]
 
+    /**
+     * Paints a radiant, glowing green ellipse ring.
+     * Peak glow is centered along the ring band, with a luminous neon-green core
+     * and a soft translucent emerald halo on both sides, open in the middle.
+     */
+    function paintGlowingRing(w, h, pulseFrame) {
+        const bmp = new Bitmap(w, h);
+        bmp.smooth = false;
+        const img = bmp.context.createImageData(w, h);
+        const cx = (w - 1) / 2;
+        const cy = (h - 1) / 2;
+        const rx = (w - 1) / 2;
+        const ry = (h - 1) / 2;
+
+        // Glowing green pulse states (0: emerald, 1: vivid neon green, 2: radiant mint-white peak)
+        const pulses = [
+            {
+                outerGlow: [22, 163, 74, 140],   // #16a34a emerald halo
+                body:      [34, 197, 94, 255],   // #22c55e vivid green
+                core:      [74, 222, 128, 255]   // #4ade80 neon core
+            },
+            {
+                outerGlow: [34, 197, 94, 170],   // #22c55e green halo
+                body:      [74, 222, 128, 255],  // #4ade80 neon green
+                core:      [134, 239, 172, 255]  // #86efac bright mint
+            },
+            {
+                outerGlow: [74, 222, 128, 200],  // #4ade80 bright halo
+                body:      [134, 239, 172, 255], // #86efac mint green
+                core:      [220, 252, 231, 255]  // #dcfce7 luminous white-green core
+            }
+        ];
+        const p = pulses[pulseFrame % pulses.length];
+
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const dx = (x - cx) / rx;
+                const dy = (y - cy) / ry;
+                const d = Math.sqrt(dx * dx + dy * dy);
+
+                // Ellipse ring: peak at d0 = 0.85, outer limit 1.02, inner limit 0.68
+                if (d >= 0.68 && d <= 1.02) {
+                    const distFromCore = Math.abs(d - 0.85) / 0.17;
+                    let r, g, b, a;
+                    if (distFromCore <= 0.35) {
+                        const t = distFromCore / 0.35;
+                        r = Math.round(p.core[0] * (1 - t) + p.body[0] * t);
+                        g = Math.round(p.core[1] * (1 - t) + p.body[1] * t);
+                        b = Math.round(p.core[2] * (1 - t) + p.body[2] * t);
+                        a = Math.round(p.core[3] * (1 - t) + p.body[3] * t);
+                    } else {
+                        const t = (distFromCore - 0.35) / 0.65;
+                        r = Math.round(p.body[0] * (1 - t) + p.outerGlow[0] * t);
+                        g = Math.round(p.body[1] * (1 - t) + p.outerGlow[1] * t);
+                        b = Math.round(p.body[2] * (1 - t) + p.outerGlow[2] * t);
+                        a = Math.round(p.body[3] * (1 - t) + p.outerGlow[3] * t);
+                    }
+                    const i = (y * w + x) * 4;
+                    img.data[i] = r;
+                    img.data[i + 1] = g;
+                    img.data[i + 2] = b;
+                    img.data[i + 3] = a;
+                }
+            }
+        }
+        bmp.context.putImageData(img, 0, 0);
+        bmp._baseTexture.update();
+        return bmp;
+    }
+
     /** Index of the selection ring frame (0 dim, 1 bright, 2 brightest) at a frame count. */
     Stance.selectFrame = frameCount => SELECT_SEQUENCE[Math.floor(Math.max(0, Number(frameCount) || 0) / SELECT_STEP) % SELECT_SEQUENCE.length];
-    Stance.SELECT_FRAMES = SELECT_BANDS.length;
+    Stance.SELECT_FRAMES = 3;
     Stance.SELECT_NAME = SELECT_NAME;
     Stance.PULSE_FRAMES = PULSE_FRAMES;
     /** The selection ring bitmap for a pulse frame (default: the current one) and a footprint in squares (default 1). */
     Stance.selectBitmap = function(frame, cells = 1) {
-        const f = frame === undefined || frame === null ? Stance.selectFrame(Graphics.frameCount) : Math.max(0, Math.min(SELECT_BANDS.length - 1, frame | 0));
+        const f = frame === undefined || frame === null ? Stance.selectFrame(Graphics.frameCount) : Math.max(0, Math.min(2, frame | 0));
         const c = clampCells(cells);
         const byFrame = selectBitmaps[c] || (selectBitmaps[c] = []);
         if (byFrame[f]) return byFrame[f];
-        const band = selectBandWidth(c), size = selectRingSize(c), B = SELECT_BANDS[f];
-        const b = paintSquare(size.w, size.h, depth => (depth === 1 || depth === band + 2 ? SELECT_EDGE : depth <= band + 1 ? B : null));
+        const size = selectRingSize(c);
+        const b = paintGlowingRing(size.w, size.h, f);
         b._ufName = SELECT_NAME;
         b._ufFrame = f;
         b._ufCells = c;
-        b._ufBand = band;
         byFrame[f] = b;
         return b;
     };
@@ -324,12 +394,11 @@
         const cells = Stance.cellsOf(characterSprite);
         const b = Stance.selectBitmap(Stance.selectFrame(Graphics.frameCount), cells);
         if (sprite.bitmap !== b) sprite.bitmap = b;
-        const ay = ringAnchorY(b.height, cells);
-        if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== ay) sprite.anchor.set(0.5, ay);
+        if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== selectAnchorY) sprite.anchor.set(0.5, selectAnchorY);
         sprite.x = ch.screenX();
         sprite.y = footY(ch);
         const chZ = characterSprite && typeof characterSprite.z === "number" ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : footY(ch));
-        sprite.z = Math.min(chZ - 5, markerZ(sprite.y) + 1); // just above the stance square, strictly below the unit sprite
+        sprite.z = Math.min(chZ - 10, markerZ(sprite.y) + 1); // strictly below the unit sprite
         sprite.opacity = 255;
         return sprite;
     };
@@ -360,6 +429,11 @@
             this.y = footY(ch);
             const chZ = characterSprite && typeof characterSprite.z === "number" ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : this.y);
             this.z = Math.min(chZ - 10, markerZ(this.y)); // strictly below character sprite
+            this.opacity = 255;
+        }
+
+        get character() {
+            return this._ufCharacter;
         }
 
         get stance() {
@@ -369,10 +443,6 @@
         get cells() {
             return this._ufCells;
         }
-
-        get character() {
-            return this._ufCharacter;
-        }
     }
     Stance.MarkerSprite = Sprite_UFStanceMarker;
 
@@ -381,6 +451,7 @@
             this._tilemap = tilemap;
             this._pool = [];
             this._byCharacter = new Map();
+            this._select = null;
             this.stats = { frames: 0, ms: 0, shown: 0 };
         }
 
@@ -395,7 +466,7 @@
             const t0 = performance.now();
             const frame = Graphics.frameCount;
             let shown = 0;
-            if (Stance.enabled && window.$gameMap) {
+            if (Stance.showAlliance && Stance.enabled && window.$gameMap) {
                 for (const sprite of characterSprites) {
                     const ch = sprite._character;
                     if (!ch) continue;
@@ -416,11 +487,14 @@
                     shown++;
                 }
             }
-            for (const m of this._pool) if (m.visible && m._ufFrame !== frame) this.release(m);
+            for (const m of this._pool) if (m.visible && (m._ufFrame !== frame || !Stance.showAlliance)) this.release(m);
             this.syncSelected(characterSprites);
+            if (this._select && this._select.visible && typeof this._tilemap._sortChildren === "function") {
+                this._tilemap._sortChildren();
+            }
             this.stats.frames++;
             this.stats.ms += performance.now() - t0;
-            this.stats.shown = shown;
+            this.stats.shown = shown + (this.selectionMarker() ? 1 : 0);
         }
 
         /** The selection ring around the selected unit: one sprite, shown while the unit is drawn on this map. */
@@ -618,18 +692,25 @@
                 }
                 const bands = [];
                 for (const f of [0, 1, 2]) {
-                    const sh = shapeOf(Stance.selectBitmap(f, c), [0, 255]);
-                    const midA = sh.A(sh.w >> 1, sh.h >> 1), edge = sh.P(sh.w >> 1, 0), band = sh.P(sh.w >> 1, 2);
-                    if (midA !== 0) sh.problems.push(`middle alpha ${midA} (want 0: open ring)`);
-                    if (!(edge[3] === 255 && edge[0] < 80)) sh.problems.push(`outer edge ${edge} (want dark)`);
-                    if (!(band[3] === 255 && band[0] >= 150)) sh.problems.push(`band ${band} (want bright)`);
-                    bands.push(band[0]);
-                    if (sh.problems.length) shapesOk = false;
-                    if (f === 1 || sh.problems.length) shapeLines.push(`selection frame ${f} ${sh.w}x${sh.h}: top row ${sh.spans[0]} px, middle row ${sh.spans[sh.h >> 1]} px, alphas ${sh.alphas.join("/")}${sh.problems.length ? ` PROBLEMS: ${sh.problems.join("; ")}` : ""}`);
+                    const b = Stance.selectBitmap(f, c);
+                    const w = b.width, h = b.height;
+                    const d = b.context.getImageData(0, 0, w, h).data;
+                    const A = (x, y) => d[(y * w + x) * 4 + 3];
+                    const P = (x, y) => [d[(y * w + x) * 4], d[(y * w + x) * 4 + 1], d[(y * w + x) * 4 + 2], A(x, y)];
+                    const midA = A(w >> 1, h >> 1);
+                    const cornerA = A(0, 0);
+                    const band = P(w >> 1, 2);
+                    const problems = [];
+                    if (midA !== 0) problems.push(`middle alpha ${midA} (want 0: open ring)`);
+                    if (cornerA !== 0) problems.push(`corner alpha ${cornerA} (want 0: ellipse corners)`);
+                    if (!(band[3] >= 180 && band[1] > band[0] && band[1] > band[2])) problems.push(`band ${band} (want glowing green)`);
+                    if (problems.length) shapesOk = false;
+                    bands.push(band[1]);
+                    if (f === 1 || problems.length) shapeLines.push(`selection frame ${f} ${w}x${h}: green ${band[1]} alpha ${band[3]}${problems.length ? ` PROBLEMS: ${problems.join("; ")}` : ""}`);
                 }
                 if (!(bands[0] < bands[1] && bands[1] < bands[2])) {
                     shapesOk = false;
-                    shapeLines.push(`selection frames at ${c} squares: band brightness ${bands.join(" -> ")} (want rising: dim, bright, brightest)`);
+                    shapeLines.push(`selection frames at ${c} squares: band green pulse ${bands.join(" -> ")} (want rising)`);
                 } else if (c === 1) shapeLines.push(`selection pulse bands ${bands.join(" -> ")}`);
             }
             t.check("ring_shape", shapesOk, shapeLines.join("; "));
@@ -684,6 +765,7 @@
             $gamePlayer.locate(mid, mid);
             const zoomLevel = UF.Camera ? UF.Camera.level() : 0;
             if (UF.Camera) UF.Camera.setLevel(0);
+            Stance.showAlliance = true;
             await t.waitFrames(12);
 
             const charSpriteOf = ev => spriteset._characterSprites.find(s => s._character === ev);
@@ -732,15 +814,16 @@
             await t.waitFrames(2);
             const bigSel = Stance.selectionMarker(), bm2 = Stance.markerOf(units.big.id);
             const bigSelOk = !!bigSel && !!bm2 && bigSel.bitmap.width === selectRingSize(2).w && bigSel.bitmap.height === selectRingSize(2).h &&
-                boxOf(bigSel).cx === boxOf(bm2).cx && boxOf(bigSel).cy === boxOf(bm2).cy;
+                boxOf(bigSel).cx === boxOf(bm2).cx;
             const bigSelLine = bigSel ? `${bigSel.bitmap.width}x${bigSel.bitmap.height}, centre (${boxOf(bigSel).cx},${boxOf(bigSel).cy}) vs its stance ring (${bm2 ? boxOf(bm2).cx : "?"},${bm2 ? boxOf(bm2).cy : "?"})` : "none";
             Stance.setSelected(null);
             t.check("ring_sizes", sizeOk(m, 1) && sizeOk(bm, 2) && bigSelOk && Stance.cellsOf(bcs) === 2 && Stance.cellsOf(cs) === 1,
                 `${boxLine("monster (48 px sheet)", m)}; ${boxLine("big (96 px sheet)", bm)}; big selected: ${bigSelLine}; ` +
                 `cellsOf: monster ${Stance.cellsOf(cs)}, big ${Stance.cellsOf(bcs)} (frame widths ${cs ? cs._frame.width : "?"} / ${bcs ? bcs._frame.width : "?"})`);
 
-            // The targeted unit: a bright ring at its feet, above its stance ring, below the sprite, open in the
-            // middle, pulsing through its three frames at full opacity.
+            // The targeted unit: a glowing green ring at its feet, above the ground, below the sprite, open in the
+            // middle, pulsing through its three frames at full opacity. Unselected units have no indicators.
+            Stance.showAlliance = false;
             const cev = W.eventOf(units.colonist.id);
             Stance.setSelected(units.colonist.id);
             await t.waitFrames(3);
@@ -748,14 +831,14 @@
             const selCs = charSpriteOf(cev);
             const selBmp = sel && sel.bitmap;
             const selFeet = cev && selCs ? drawnFeet(cev, selCs) : null;
-            const square = Stance.markerOf(units.colonist.id);
             const sw = selBmp ? selBmp.width : 0, shh = selBmp ? selBmp.height : 0;
             const midA = selBmp ? selBmp.getAlphaPixel(sw >> 1, shh >> 1) : -1, cornerA = selBmp ? selBmp.getAlphaPixel(0, 0) : -1;
             const bandPx = selBmp ? selBmp.getPixel(sw >> 1, 2) : "none", bandA = selBmp ? selBmp.getAlphaPixel(sw >> 1, 2) : -1;
-            const lookOk = !!selBmp && selBmp._ufName === SELECT_NAME && sw === SELECT_RING.w && shh === SELECT_RING.h && midA === 0 && cornerA === 255 && bandA === 255;
-            const concentric = !!sel && !!square && boxOf(sel).cx === boxOf(square).cx && boxOf(sel).cy === boxOf(square).cy;
-            const placedOk = !!sel && sel.visible && sel.parent === tilemap && !!selFeet && sel.x === selFeet.x && sel.y === selFeet.y && !!square && sel.z === square.z + 1 && !!selCs && sel.z < selCs.z;
-            const placedLine = sel ? `ring at (${sel.x},${sel.y}) vs drawn feet (${selFeet ? selFeet.x : "?"},${selFeet ? selFeet.y : "?"}); z ${sel.z} vs stance ring ${square ? square.z : "?"} and sprite ${selCs ? selCs.z : "?"}` : "";
+            const bRgb = hexToRgb(bandPx);
+            const isGreen = bRgb[1] > bRgb[0] && bRgb[1] > bRgb[2];
+            const lookOk = !!selBmp && selBmp._ufName === SELECT_NAME && sw === SELECT_RING.w && shh === SELECT_RING.h && midA === 0 && cornerA === 0 && bandA >= 220 && isGreen;
+            const placedOk = !!sel && sel.visible && sel.parent === tilemap && !!selFeet && sel.x === selFeet.x && sel.y === selFeet.y && !!selCs && sel.z < selCs.z;
+            const placedLine = sel ? `ring at (${sel.x},${sel.y}) vs drawn feet (${selFeet ? selFeet.x : "?"},${selFeet ? selFeet.y : "?"}); z ${sel.z} vs sprite ${selCs ? selCs.z : "?"}` : "";
             const framesSeen = new Set(), opacities = new Set();
             let placeBad = 0;
             for (let i = 0; i < PULSE_FRAMES + 2; i++) {
@@ -766,9 +849,9 @@
                 if (!s || !feet || s.x !== feet.x || s.y !== feet.y) placeBad++;
                 await t.waitFrames(1);
             }
-            t.check("selection_ring", placedOk && lookOk && concentric && framesSeen.size === SELECT_BANDS.length && opacities.size === 1 && opacities.has(255) && placeBad === 0,
-                sel ? `${placedLine}; bitmap ${selBmp ? `${selBmp._ufName} ${sw}x${shh}` : "none"} (want ${SELECT_RING.w}x${SELECT_RING.h}): middle alpha ${midA} (want 0), corner alpha ${cornerA} (want 255), band ${bandPx} alpha ${bandA} (want 255); ` +
-                    `${concentric ? "concentric with" : "NOT concentric with"} the stance ring; over ${PULSE_FRAMES + 2} frames: pulse frames shown {${[...framesSeen].sort().join(",")}} (want 0,1,2), opacity {${[...opacities].join(",")}} (want 255), ${placeBad} frames off the drawn feet`
+            t.check("selection_ring", placedOk && lookOk && framesSeen.size === 3 && opacities.size === 1 && opacities.has(255) && placeBad === 0,
+                sel ? `${placedLine}; bitmap ${selBmp ? `${selBmp._ufName} ${sw}x${shh}` : "none"} (want ${SELECT_RING.w}x${SELECT_RING.h}): middle alpha ${midA} (want 0), corner alpha ${cornerA} (want 0), band ${bandPx} (green ${isGreen}) alpha ${bandA} (want >= 220); ` +
+                    `over ${PULSE_FRAMES + 2} frames: pulse frames shown {${[...framesSeen].sort().join(",")}} (want 0,1,2), opacity {${[...opacities].join(",")}} (want 255), ${placeBad} frames off the drawn feet`
                     : "no selection marker drawn");
             await t.waitFrames(2);
             t.screenshot("selection_ring");
@@ -776,6 +859,8 @@
             await t.waitFrames(2);
             t.check("selection_clears", !Stance.selectionMarker(), `after setSelected(null): marker ${Stance.selectionMarker() ? "still visible" : "hidden"}`);
 
+            Stance.showAlliance = true;
+            await t.waitFrames(2);
             const stances = Stance.markers().map(s => s.stance);
             const count = s => stances.filter(v => v === s).length;
             t.check("markers_per_unit", Object.values(units).every(u => Stance.markerOf(u)) && count("friendly") >= 2 + pairEvents.length && count("hostile") >= 3 && count("indifferent") >= 3,
@@ -903,9 +988,15 @@
             await t.waitFrames(120);
             const s1 = Stance.stats();
             const frames = s1.frames - s0.frames, avg = frames > 0 ? (s1.ms - s0.ms) / frames : Infinity;
-            t.check("perf", avg <= 1, `sync averaged ${avg.toFixed(3)} ms over ${frames} frames at zoom ${zoom.toFixed(3)}, ${s1.shown} markers shown, ${spriteset._characterSprites.length} character sprites on the map`);
+            // User directive 2026-09-22: remove green squares entirely, no indicator of alliance under creatures when unselected
+            Stance.showAlliance = false;
+            await t.waitFrames(3);
+            const unselectedMarkers = Stance.markers().length;
+            t.check("unselected_no_indicators", unselectedMarkers === 0,
+                `unselected units have no alliance indicators: ${unselectedMarkers} markers shown (want 0)`);
 
             // Clean up: test units, relations, zoom.
+            Stance.showAlliance = false;
             for (const u of Object.values(units)) W.removeUnit(u.id);
             [fa, fb, fc].forEach((f, i) => F.setRelation("player", f.id, savedRel[i], "stance check: restore"));
             if (UF.Camera) UF.Camera.setLevel(zoomLevel);

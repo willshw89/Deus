@@ -66,7 +66,7 @@
         budgets: { previewMs: 2, commitMs: 3, minCellsPerFrame: 16 },
         summarySeconds: 6,
         colors: {
-            box: "#f8fafc",
+            box: "#22c55e",
             boxFill: 0.1,
             selectFill: 0.08,
             eligible: 0.35,
@@ -1381,10 +1381,10 @@
                 }
             }
 
-            // Box outline (2px white with 1px dark edge)
+            // Box outline (2px green with 1px dark edge)
             b.paintOpacity = 255;
             b.strokeRect(scrX0 - 1, scrY0 - 1, scrW + 2, scrH + 2, "#0f172a", 1);
-            b.strokeRect(scrX0, scrY0, scrW, scrH, cfg.colors.box || "#f8fafc", 2);
+            b.strokeRect(scrX0, scrY0, scrW, scrH, cfg.colors.box || "#22c55e", 2);
 
             // 3. Draw Size Label
             const totalW = x1 - x0 + 1;
@@ -1397,7 +1397,7 @@
             if (labelY + labelH > Graphics.height - 8) labelY = TouchInput.y - labelH - 14;
 
             b.fillRect(labelX, labelY, labelW, labelH, "rgba(15, 23, 42, 0.85)");
-            b.strokeRect(labelX, labelY, labelW, labelH, "#cbd5e1", 1);
+            b.strokeRect(labelX, labelY, labelW, labelH, "#4ade80", 1);
 
             b.fontSize = 12;
             b.textColor = "#f8fafc";
@@ -1494,7 +1494,7 @@
             }
         }
 
-        drawSquareBrackets(b, x, y, w, h, z) {
+        drawSquareBrackets(b, x, y, w, h, z, bracketColor = "#ffffff") {
             const arm = Math.max(8, Math.round(12 * z));
             const thick = Math.max(2, Math.round(3 * z));
 
@@ -1513,8 +1513,7 @@
             b.fillRect(x + w - sThick + 1, y - 1, sThick, h + 2, sColor);
             b.fillRect(x + w - sArm + 1, y + h - sThick + 1, sArm, sThick, sColor);
 
-            // Bright white square brackets
-            const bracketColor = "#ffffff";
+            // Square brackets
             // Left bracket: [
             b.fillRect(x, y, arm, thick, bracketColor);
             b.fillRect(x, y, thick, h, bracketColor);
@@ -1553,19 +1552,19 @@
                 if (sx1 > 0 && sy1 > 0 && sx0 < Graphics.width && sy0 < Graphics.height) {
                     if (isSingle) {
                         // 1. Single selected tile:
-                        // Crisp white corner brackets [ ]
-                        this.drawSquareBrackets(b, sx0, sy0, sw, sh, z);
+                        // Crisp green corner brackets [ ]
+                        this.drawSquareBrackets(b, sx0, sy0, sw, sh, z, "#4ade80");
                         // Subtle interior highlight
-                        b.fillRect(sx0, sy0, sw, sh, "rgba(255, 255, 255, 0.16)");
-                        b.strokeRect(sx0, sy0, sw, sh, "rgba(255, 255, 255, 0.55)", 1);
+                        b.fillRect(sx0, sy0, sw, sh, "rgba(34, 197, 94, 0.16)");
+                        b.strokeRect(sx0, sy0, sw, sh, "rgba(74, 222, 128, 0.65)", 1);
                     } else {
                         // 2. Group tile selection:
-                        // Translucent blue-tinted highlight fill
-                        b.fillRect(sx0, sy0, sw, sh, "rgba(160, 220, 255, 0.14)");
+                        // Translucent green highlight fill
+                        b.fillRect(sx0, sy0, sw, sh, "rgba(34, 197, 94, 0.14)");
                         // Dark outer border drop-shadow for contrast
                         b.strokeRect(sx0 - 1, sy0 - 1, sw + 2, sh + 2, "rgba(0, 0, 0, 0.75)", 1);
-                        // High-contrast electric white/cyan border
-                        b.strokeRect(sx0, sy0, sw, sh, "rgba(255, 255, 255, 0.90)", 2);
+                        // High-contrast electric green border
+                        b.strokeRect(sx0, sy0, sw, sh, "rgba(74, 222, 128, 0.90)", 2);
 
                         // Four prominent corner brackets on the group boundary
                         this.drawGroupCornerBrackets(b, sx0, sy0, sw, sh, z);
@@ -1583,7 +1582,7 @@
         drawGroupCornerBrackets(b, x, y, w, h, z) {
             const arm = Math.max(10, Math.round(14 * z));
             const thick = Math.max(2, Math.round(3 * z));
-            const bracketColor = "#ffffff";
+            const bracketColor = "#4ade80";
             const shadowColor = "rgba(0, 0, 0, 0.85)";
 
             // Top-Left corner: ┌
@@ -1621,7 +1620,7 @@
             if (bx + badgeW > Graphics.width - 4) bx = Graphics.width - badgeW - 4;
 
             b.fillRect(bx, by, badgeW, badgeH, "rgba(10, 15, 25, 0.88)");
-            b.strokeRect(bx, by, badgeW, badgeH, "rgba(160, 220, 255, 0.70)", 1);
+            b.strokeRect(bx, by, badgeW, badgeH, "rgba(74, 222, 128, 0.70)", 1);
             b.fontSize = 11;
             b.textColor = "#f8fafc";
             b.drawText(`${cols}×${rows} (${count})`, bx + 4, by + 2, badgeW - 8, 18, "center");
@@ -1977,6 +1976,8 @@
                 stanceEvent = Stance().selectedCharacter();
             }
 
+            const charSprites = SceneManager._scene && SceneManager._scene._spriteset ? SceneManager._scene._spriteset._characterSprites : null;
+
             let spriteIdx = 0;
             for (const u of selectedUnits) {
                 if ((u.z || 0) !== curZ) continue;
@@ -1995,24 +1996,30 @@
                 }
                 s.visible = true;
 
+                const cs = charSprites ? charSprites.find(item => item._character === ev) : null;
                 if (Stance() && typeof Stance().placeSelection === "function") {
-                    Stance().placeSelection(s, ev);
+                    Stance().placeSelection(s, ev, cs);
                 } else {
                     // Fallback marker
                     if (!s.bitmap) {
                         s.bitmap = new Bitmap(48, 48);
-                        s.bitmap.strokeRect(4, 4, 40, 40, "#ffffff", 2);
-                        s.anchor.set(0.5, 1);
+                        s.bitmap.strokeRect(4, 4, 40, 40, "#22c55e", 2);
+                        s.anchor.set(0.5, 0.5);
                     }
                     s.x = ev.screenX();
-                    s.y = ev.screenY();
-                    s.z = 20;
+                    s.y = typeof ev.screenY === "function" ? ev.screenY() : 0;
+                    const evZ = typeof ev.screenZ === "function" ? ev.screenZ() : s.y;
+                    s.z = evZ - 10;
                 }
                 spriteIdx++;
             }
 
             for (let i = spriteIdx; i < this._sprites.length; i++) {
                 this._sprites[i].visible = false;
+            }
+
+            if (spriteIdx > 0 && typeof this._tilemap._sortChildren === "function") {
+                this._tilemap._sortChildren();
             }
         }
     }
@@ -2525,11 +2532,30 @@
                             TouchInput._currentState = Object.assign({}, TouchInput._currentState, { cancelled: false });
                         }
                         return;
-                    } else if (selectedTiles.length > 0 || selectedTileBox) {
-                        clearTileSelection();
-                        TouchInput._currentState = Object.assign({}, TouchInput._currentState, { cancelled: false });
-                        SoundManager.playCancel();
-                        return;
+                    } else {
+                        const units = getSelectedUnits();
+                        if (units.length > 0) {
+                            const overUI = pointerOverUI();
+                            const mx = $gameMap.canvasToMapX(TouchInput.x);
+                            const my = $gameMap.canvasToMapY(TouchInput.y);
+                            if (!overUI && window.$gameMap && $gameMap.isValid(mx, my)) {
+                                const W = World();
+                                const area = W ? W.currentArea() : { x: 0, y: 0 };
+                                groupMove({ area, x: mx, y: my, z: viewZ() });
+                                if (selectedTiles.length > 0 || selectedTileBox) {
+                                    clearTileSelection();
+                                }
+                                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { cancelled: false });
+                                SoundManager.playCursor();
+                                return;
+                            }
+                        }
+                        if (selectedTiles.length > 0 || selectedTileBox) {
+                            clearTileSelection();
+                            TouchInput._currentState = Object.assign({}, TouchInput._currentState, { cancelled: false });
+                            SoundManager.playCancel();
+                            return;
+                        }
                     }
                 }
             }
