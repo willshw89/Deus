@@ -47,7 +47,7 @@
 
     const pluginName = "DEUS_Visuals";
     const params = PluginManager.parameters(pluginName);
-    const enableRoofs = (params["EnableRoofs"] || "true") === "true";
+    const enableRoofs = false; // Disabled for pure 2D performance and zero VRAM waste
     const enableBarks = (params["EnableBarks"] || "true") === "true";
     const enableLighting = (params["EnableLighting"] || "true") === "true";
 
@@ -165,22 +165,20 @@
             if (this._ufBarkTimer <= 0) {
                 this._ufBarkTimer = Math.floor(Math.random() * 600) + 600; // 10-20 seconds
                 // Only bark if player is within 8 tiles
-                const dist = Math.hypot(this.x - $gamePlayer.x, this.y - $gamePlayer.y);
-                if (dist <= 8) {
-                    const text = this._ufBarkList[Math.floor(Math.random() * this._ufBarkList.length)];
-                    UF_Visuals.bark(this, text);
+                if ($gamePlayer && typeof $gamePlayer.x === "number" && typeof $gamePlayer.y === "number") {
+                    const dist = Math.hypot(this.x - $gamePlayer.x, this.y - $gamePlayer.y);
+                    if (dist <= 8) {
+                        const text = this._ufBarkList[Math.floor(Math.random() * this._ufBarkList.length)];
+                        UF_Visuals.bark(this, text);
+                    }
                 }
             }
         }
     };
 
     //-----------------------------------------------------------------------------
-    // Roof Cutaway System
+    // Roof Cutaway System (Deactivated for 256x256 maps)
     //-----------------------------------------------------------------------------
-    // Roof Cutaway System
-    //-----------------------------------------------------------------------------
-    // In U7, when entering a building, the roof layer over that building fades out.
-    // Region IDs 50 to 99 are designated as Building Interior Regions.
     class Sprite_UFRoofBuilding extends Sprite {
         constructor(regionId) {
             super();
@@ -192,74 +190,7 @@
         }
 
         createRoofBitmap() {
-            const tw = $gameMap.tileWidth() || 48;
-            const th = $gameMap.tileHeight() || 48;
-            const mapW = $gameMap.width() || 20;
-            const mapH = $gameMap.height() || 15;
-
-            this.bitmap = new Bitmap(mapW * tw, mapH * th);
-            const ctx = this.bitmap.context;
-
-            for (let y = 0; y < mapH; y++) {
-                for (let x = 0; x < mapW; x++) {
-                    if ($gameMap.regionId(x, y) === this.regionId) {
-                        const px = x * tw;
-                        const py = y * th;
-
-                        // Base roof slate / wood shingle
-                        ctx.fillStyle = "#3c332a";
-                        ctx.fillRect(px, py, tw, th);
-
-                        // Shingle rows
-                        for (let r = 0; r < 4; r++) {
-                            const sy = py + r * 12;
-                            // Highlight top of row
-                            ctx.fillStyle = "#55483b";
-                            ctx.fillRect(px, sy, tw, 1);
-                            // Shadow bottom of row
-                            ctx.fillStyle = "#26201a";
-                            ctx.fillRect(px, sy + 11, tw, 1);
-
-                            // Shingle vertical joints (alternating)
-                            const offset = (r % 2 === 0) ? 0 : 12;
-                            ctx.fillStyle = "#1e1914";
-                            for (let j = offset; j < tw; j += 24) {
-                                ctx.fillRect(px + j, sy, 1, 11);
-                            }
-                        }
-
-                        // Top ridge beam if upper tile is not this roof
-                        if ($gameMap.regionId(x, y - 1) !== this.regionId) {
-                            ctx.fillStyle = "#705030";
-                            ctx.fillRect(px, py, tw, 4);
-                            ctx.fillStyle = "#9a7044";
-                            ctx.fillRect(px, py, tw, 1);
-                            ctx.fillStyle = "#352414";
-                            ctx.fillRect(px, py + 3, tw, 1);
-                        }
-
-                        // Bottom eave / overhang if lower tile is not this roof
-                        if ($gameMap.regionId(x, y + 1) !== this.regionId) {
-                            ctx.fillStyle = "#503820";
-                            ctx.fillRect(px, py + th - 4, tw, 4);
-                            ctx.fillStyle = "#261a0e";
-                            ctx.fillRect(px, py + th - 1, tw, 1);
-                        }
-
-                        // Left timber trim
-                        if ($gameMap.regionId(x - 1, y) !== this.regionId) {
-                            ctx.fillStyle = "#604225";
-                            ctx.fillRect(px, py, 3, th);
-                        }
-
-                        // Right timber trim
-                        if ($gameMap.regionId(x + 1, y) !== this.regionId) {
-                            ctx.fillStyle = "#604225";
-                            ctx.fillRect(px + tw - 3, py, 3, th);
-                        }
-                    }
-                }
-            }
+            this.bitmap = new Bitmap(1, 1);
         }
 
         update() {

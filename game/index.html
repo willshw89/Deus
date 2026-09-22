@@ -15,10 +15,12 @@
             if (typeof require !== 'undefined') {
                 const fs = require('fs');
                 const log = (msg) => fs.appendFileSync('game_runtime.log', `${new Date().toISOString()} ${msg}\n`);
-                fs.writeFileSync('game_runtime.log', `[INIT] Game booting at ${new Date().toISOString()}\n`);
+                fs.appendFileSync('game_runtime.log', `\n[INIT] Game booting at ${new Date().toISOString()}\n`);
 
                 window.onerror = function(msg, url, line, col, error) {
-                    log(`[WINDOW ERROR] ${msg} at ${url}:${line}:${col}\n${error ? error.stack : ''}`);
+                    const text = `[WINDOW ERROR] ${msg} at ${url}:${line}:${col}\n${error ? error.stack : ''}`;
+                    log(text);
+                    try { fs.appendFileSync('game_error.log', `${new Date().toISOString()} ${text}\n`); } catch(e){}
                 };
                 window.addEventListener('unhandledrejection', function(event) {
                     log(`[PROMISE REJECTION] ${event.reason}`);

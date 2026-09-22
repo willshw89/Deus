@@ -453,7 +453,7 @@
             if (Look.isOverUI()) return this.hideTip();
             const cell = Look.cellUnderMouse();
             if (!cell) return this.hideTip();
-            if (cell.x !== this._cell.x || cell.y !== this._cell.y || this._age >= REFRESH_FRAMES) {
+            if (!this._cell || cell.x !== this._cell.x || cell.y !== this._cell.y || this._age >= REFRESH_FRAMES) {
                 this._cell = cell;
                 this._age = 0;
                 const name = nameAt(cell.x, cell.y);

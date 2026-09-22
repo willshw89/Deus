@@ -255,11 +255,33 @@
     class Sprite_UFTimeControls extends Sprite {
         constructor() {
             super(new Bitmap(192, 32));
-            this.x = Graphics.width - 200;
-            this.y = 42;
+            this.width = 192;
+            this.height = 32;
+            this.z = 90;
             this._lastMultiplier = -1;
             this._lastPaused = null;
+            this.updatePosition();
             this.redraw();
+        }
+
+        updatePosition() {
+            const gh = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
+            const gw = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
+            const scene = SceneManager._scene;
+            const lp = scene && scene._ufLevelPlate;
+            const tb = scene && scene._ufSelectToolbar;
+            if (lp && lp.visible) {
+                this.x = lp.x + (lp.width || 132) + 8;
+                this.y = lp.y;
+            } else if (tb && tb.visible) {
+                this.x = tb.x + tb.width + 8;
+                this.y = tb.y;
+            } else {
+                const totalW = 400 + 8 + 132 + 8 + 192;
+                const startX = Math.max(8, Math.floor((gw - totalW) / 2));
+                this.x = startX + 400 + 8 + 132 + 8;
+                this.y = gh - 38;
+            }
         }
 
         redraw() {
@@ -303,6 +325,7 @@
 
         update() {
             super.update();
+            this.updatePosition();
             const m = Time.multiplier();
             const p = Time.paused;
             if (m !== this._lastMultiplier || p !== this._lastPaused) {

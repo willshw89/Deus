@@ -268,17 +268,16 @@
 
     Scene_Title.prototype.onNewGameEmbark = function() {
         if (this._embarking) return;
-        this._embarking = true;
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
-        const worldSize = this._newGameSetupWindow ? this._newGameSetupWindow.currentSize() : 64;
+        const worldSize = 256;
         const fogOfWar = this._newGameSetupWindow ? this._newGameSetupWindow.currentFog() : true;
         window.DEUS = window.DEUS || {};
-    window.UF = window.DEUS;
+        window.UF = window.DEUS;
         window.UF.NewGameSetup = {
             faction: faction.toLowerCase(),
             year: year,
-            worldSize: worldSize,
+            worldSize: 256,
             fogOfWar: fogOfWar
         };
         if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
@@ -325,12 +324,6 @@
             ];
             this._factionIndex = 0;
             this._year = 1;
-            this._sizeChoices = [
-                { size: 64, label: "64x64 (Small)" },
-                { size: 128, label: "128x128 (Med)" },
-                { size: 256, label: "256x256 (Large)" }
-            ];
-            this._sizeIndex = 0; // Default: 64x64 Small
             this._fogEnabled = true; // Default: Fog of War Enabled
             this.windowskin = ImageManager.loadSystem("Window_default");
             this.backOpacity = 225;
@@ -344,7 +337,7 @@
         }
 
         maxItems() {
-            return 6;
+            return 5;
         }
 
         itemHeight() {
@@ -360,11 +353,11 @@
         }
 
         currentSize() {
-            return this._sizeChoices[this._sizeIndex].size;
+            return 256;
         }
 
         currentSizeLabel() {
-            return this._sizeChoices[this._sizeIndex].label;
+            return "256x256 (Locked)";
         }
 
         currentFog() {
@@ -373,13 +366,13 @@
 
         setFog(val) {
             this._fogEnabled = (val === true || String(val).toLowerCase() === "enabled" || String(val).toLowerCase() === "on");
-            this.redrawItem(3);
+            this.redrawItem(2);
         }
 
         toggleFog() {
             this._fogEnabled = !this._fogEnabled;
             SoundManager.playCursor();
-            this.redrawItem(3);
+            this.redrawItem(2);
         }
 
         setFaction(factionName) {
@@ -393,26 +386,6 @@
         setYear(y) {
             this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
             this.redrawItem(1);
-        }
-
-        setSize(s) {
-            const idx = this._sizeChoices.findIndex(c => c.size === parseInt(s, 10) || c.label.toLowerCase().includes(String(s).toLowerCase()));
-            if (idx >= 0) {
-                this._sizeIndex = idx;
-                this.redrawItem(2);
-            }
-        }
-
-        nextSize() {
-            this._sizeIndex = (this._sizeIndex + 1) % this._sizeChoices.length;
-            SoundManager.playCursor();
-            this.redrawItem(2);
-        }
-
-        prevSize() {
-            this._sizeIndex = (this._sizeIndex - 1 + this._sizeChoices.length) % this._sizeChoices.length;
-            SoundManager.playCursor();
-            this.redrawItem(2);
         }
 
         refreshCursor() {
@@ -488,38 +461,40 @@
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
                 this.drawText("Faction", rect.x + 8, rect.y, 100, "left");
 
-                const factionText = `◄  ${this.currentFaction()}  ►`;
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("◄", rect.x + 130, rect.y, 24, "center");
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(factionText, rect.x + 100, rect.y, rect.width - 108, "right");
+                this.drawText(this.currentFaction(), rect.x + 155, rect.y, rect.width - 185, "center");
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
             } else if (index === 1) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
                 this.drawText("Starting Year", rect.x + 8, rect.y, 120, "left");
 
-                const yearText = `◄  ${this._year} AD  ►`;
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("◄", rect.x + 130, rect.y, 24, "center");
                 this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(yearText, rect.x + 120, rect.y, rect.width - 128, "right");
+                this.drawText(`${this._year} AD`, rect.x + 155, rect.y, rect.width - 185, "center");
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
             } else if (index === 2) {
-                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
-                this.drawText("World Size", rect.x + 8, rect.y, 110, "left");
-
-                const sizeText = `◄  ${this.currentSizeLabel()}  ►`;
-                this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(sizeText, rect.x + 110, rect.y, rect.width - 118, "right");
-            } else if (index === 3) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
                 this.drawText("Fog of War", rect.x + 8, rect.y, 110, "left");
 
-                const fogText = `◄  ${this._fogEnabled ? "Enabled" : "Disabled"}  ►`;
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("◄", rect.x + 130, rect.y, 24, "center");
                 this.changeTextColor(isSelected ? "#ffffff" : (this._fogEnabled ? "#a0f0ff" : "#94a3b8"));
-                this.drawText(fogText, rect.x + 110, rect.y, rect.width - 118, "right");
-            } else if (index === 4) {
+                this.drawText(this._fogEnabled ? "Enabled" : "Disabled", rect.x + 155, rect.y, rect.width - 185, "center");
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
+            } else if (index === 3) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
-            } else if (index === 5) {
+            } else if (index === 4) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
@@ -539,10 +514,32 @@
 
         onTouchOk() {
             const hitIndex = this.hitIndex();
-            if (hitIndex >= 0) {
-                this.select(hitIndex);
+            if (hitIndex < 0) return;
+            this.select(hitIndex);
+            const touchPos = new Point(TouchInput.x, TouchInput.y);
+            const localPos = this.toLocalCoords(touchPos);
+            if (hitIndex === 0) {
+                if (localPos.x >= 235) {
+                    this.nextFaction();
+                } else {
+                    this.prevFaction();
+                }
+            } else if (hitIndex === 1) {
+                if (localPos.x >= 235) {
+                    this.changeYear(1);
+                } else {
+                    this.changeYear(-1);
+                }
+            } else if (hitIndex === 2) {
+                this.toggleFog();
+            } else if (hitIndex === 3) {
+                this.playOkSound();
+                this.updateInputData();
+                this.deactivate();
+                this.callHandler("embark");
+            } else if (hitIndex === 4) {
+                this.processCancel();
             }
-            this.processOk();
         }
 
         cursorRight(wrap) {
@@ -551,8 +548,6 @@
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? 10 : 1);
             } else if (this.index() === 2) {
-                this.nextSize();
-            } else if (this.index() === 3) {
                 this.toggleFog();
             } else {
                 super.cursorRight(wrap);
@@ -565,8 +560,6 @@
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? -10 : -1);
             } else if (this.index() === 2) {
-                this.prevSize();
-            } else if (this.index() === 3) {
                 this.toggleFog();
             } else {
                 super.cursorLeft(wrap);
@@ -616,15 +609,13 @@
             } else if (this.index() === 1) {
                 this.changeYear(1);
             } else if (this.index() === 2) {
-                this.nextSize();
-            } else if (this.index() === 3) {
                 this.toggleFog();
-            } else if (this.index() === 4) {
+            } else if (this.index() === 3) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (this.index() === 5) {
+            } else if (this.index() === 4) {
                 this.processCancel();
             }
         }
@@ -642,39 +633,6 @@
 
         onTouchSelect(trigger) {
             super.onTouchSelect(trigger);
-            if (trigger) {
-                const hitIndex = this.hitIndex();
-                if (hitIndex < 0) return;
-                const touchPos = new Point(TouchInput.x, TouchInput.y);
-                const localPos = this.toLocalCoords(touchPos);
-                if (hitIndex === 0) {
-                    if (localPos.x > 240) {
-                        this.nextFaction();
-                    } else if (localPos.x > 100) {
-                        this.prevFaction();
-                    }
-                } else if (hitIndex === 1) {
-                    if (localPos.x > 240) {
-                        this.changeYear(1);
-                    } else if (localPos.x > 100) {
-                        this.changeYear(-1);
-                    }
-                } else if (hitIndex === 2) {
-                    if (localPos.x > 240) {
-                        this.nextSize();
-                    } else if (localPos.x > 100) {
-                        this.prevSize();
-                    }
-                } else if (hitIndex === 3) {
-                    this.toggleFog();
-                } else if (hitIndex === 4) {
-                    this.select(4);
-                    this.processOk();
-                } else if (hitIndex === 5) {
-                    this.select(5);
-                    this.processCancel();
-                }
-            }
         }
     }
     window.Window_NewGameSetup = Window_NewGameSetup;
@@ -1063,6 +1021,7 @@
             t.check("title1_is_deus", $dataSystem.title1Name === "DEUS_Title", "System title1Name is DEUS_Title");
             t.check("no_menu_overlay_sprite", !SceneManager._scene._defaultMenuSprite, "No UF_Menu_default sprite covering title");
             t.check("window_frame_transparent", scene._commandWindow.opacity === 0, "Title command window frame is transparent");
+            t.check("window_centered_in_gate", scene._commandWindow.y >= 345 && scene._commandWindow.y <= 360, `Title command window centered in the gate (y=${scene._commandWindow.y})`);
             t.check("new_game_command", scene._commandWindow.commandName(0) === "New Game", "Command 0 is New Game");
             t.check("continue_command", scene._commandWindow.commandName(1) === "Continue", "Command 1 is Continue");
             t.check("no_menu_pointer_sprites", !scene._commandWindow._deusCursorSprite && !scene._commandWindow._leftFlameSprite && !scene._commandWindow._rightFlameSprite, "No menu pointer sprites on title command window");
@@ -1113,8 +1072,8 @@
             t.check("fits_between_d_and_s", scene._newGameSetupWindow.x > 243 && (scene._newGameSetupWindow.x + scene._newGameSetupWindow.width) < 618, "Fits squarely between letter D and letter S");
             t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
             t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
-            t.check("default_size_small", scene._newGameSetupWindow.currentSize() === 64, "Default world size is 64x64 Small");
-            t.check("default_size_label_small", scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Small)", "Default world size label matches");
+            t.check("default_size_locked_256", scene._newGameSetupWindow.currentSize() === 256, "Default world size is 256x256");
+            t.check("default_size_label_locked", scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Locked)", "Default world size label is locked");
             t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
 
             t.screenshot("live_deus_new_game_setup");
@@ -1126,11 +1085,17 @@
             scene._newGameSetupWindow.cursorRight();
             t.check("faction_cycled_to_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Faction cycled to Dwarf");
 
-            // Test touch select on window (verify toLocalCoords and coordinate conversion)
+            // Test touch click on right arrow (advances by exactly 1: Dwarf -> Gnome)
             TouchInput._x = scene._newGameSetupWindow.x + scene._newGameSetupWindow.width - 20;
-            TouchInput._y = scene._newGameSetupWindow.y + 40;
-            scene._newGameSetupWindow.onTouchSelect(true);
-            t.check("touch_select_no_error", true, "onTouchSelect executed without toLocalCoords error");
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 18;
+            scene._newGameSetupWindow.onTouchOk();
+            t.check("touch_click_advances_exactly_one", scene._newGameSetupWindow.currentFaction() === "Gnome", "Clicking right arrow advances exactly 1 faction (no double-click)");
+
+            // Test touch click on left arrow (decrements by exactly 1: Gnome -> Dwarf)
+            TouchInput._x = scene._newGameSetupWindow.x + 140;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 18;
+            scene._newGameSetupWindow.onTouchOk();
+            t.check("touch_click_decrements_exactly_one", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Clicking left arrow goes back exactly 1 faction");
 
             // Test Year Adjustment and Clamping on Row 1
             scene._newGameSetupWindow.select(1);
@@ -1143,29 +1108,11 @@
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
 
-            // Test World Size cycling on Row 2 (3 sizes: 64x64 Small, 128x128 Med, 256x256 Large)
-            scene._newGameSetupWindow.select(2);
-            scene._newGameSetupWindow.setSize(64);
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_med", scene._newGameSetupWindow.currentSize() === 128, "Size cycled right to 128x128 Med");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_to_large", scene._newGameSetupWindow.currentSize() === 256, "Size cycled right to 256x256 Large");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("size_cycled_wrap_to_small", scene._newGameSetupWindow.currentSize() === 64, "Size cycled right wrapping to 64x64 Small");
-            scene._newGameSetupWindow.cursorLeft();
-            t.check("size_cycled_left_to_large", scene._newGameSetupWindow.currentSize() === 256, "Size cycled left to 256x256 Large");
-            // Verify all 3 size choices
-            scene._newGameSetupWindow.setSize(64);
-            t.check("size_set_64", scene._newGameSetupWindow.currentSize() === 64 && scene._newGameSetupWindow.currentSizeLabel() === "64x64 (Small)", "Size set to 64x64 Small");
-            scene._newGameSetupWindow.setSize(128);
-            t.check("size_set_128", scene._newGameSetupWindow.currentSize() === 128 && scene._newGameSetupWindow.currentSizeLabel() === "128x128 (Med)", "Size set to 128x128 Med");
-            scene._newGameSetupWindow.setSize(256);
-            t.check("size_set_256", scene._newGameSetupWindow.currentSize() === 256 && scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Large)", "Size set to 256x256 Large");
-            scene._newGameSetupWindow.setSize(64);
-            t.check("size_reset_to_64", scene._newGameSetupWindow.currentSize() === 64, "Size reset to 64");
+            // Verify World Size is locked unconditionally to 256x256
+            t.check("size_locked_to_256", scene._newGameSetupWindow.currentSize() === 256, "World size is locked to 256x256");
 
-            // Test Fog of War toggle on Row 3
-            scene._newGameSetupWindow.select(3);
+            // Test Fog of War toggle on Row 2
+            scene._newGameSetupWindow.select(2);
             t.check("default_fog_enabled", scene._newGameSetupWindow.currentFog() === true, "Default Fog of War is Enabled");
             scene._newGameSetupWindow.cursorRight();
             t.check("fog_toggled_to_disabled", scene._newGameSetupWindow.currentFog() === false, "Fog toggled to Disabled via Right");
@@ -1176,10 +1123,10 @@
             scene._newGameSetupWindow.setFog(true);
             t.check("fog_set_true", scene._newGameSetupWindow.currentFog() === true, "Fog explicitly set to true");
 
-            // Test Cancel action: click or trigger Cancel row (index 5)
+            // Test Cancel action: click or trigger Cancel row (index 4)
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 5 + 18;
-            scene._newGameSetupWindow.onTouchSelect(true);
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
+            scene._newGameSetupWindow.onTouchOk();
             await t.waitFrames(15);
             t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
             t.check("command_window_open_on_cancel", scene._commandWindow.isOpen(), "Command window reopened on Cancel");
@@ -1197,12 +1144,12 @@
             t.check("setup_window_closed_on_esc", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Esc key");
             t.check("command_window_open_after_esc", scene._commandWindow.isOpen(), "Command window reopened after Esc key");
 
-            // Test Cancel via real mouse click cycle (trigger + release on Cancel row, index 5)
+            // Test Cancel via real mouse click cycle (trigger + release on Cancel row, index 4)
             scene.commandNewGame();
             await t.waitFrames(15);
             t.check("setup_window_open_for_mouse_click", scene._newGameSetupWindow.isOpen(), "Setup window open before mouse click");
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 5 + 18;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
             TouchInput._triggerX = TouchInput._x;
             TouchInput._triggerY = TouchInput._y;
             TouchInput._newState.triggered = true;
@@ -1215,11 +1162,11 @@
             t.check("setup_window_closed_on_mouse_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on mouse click");
             t.check("command_window_open_after_mouse_click", scene._commandWindow.isOpen(), "Command window reopened after mouse click");
 
-            // Test Cancel via Enter / OK key on Cancel row (index 5)
+            // Test Cancel via Enter / OK key on Cancel row (index 4)
             scene.commandNewGame();
             await t.waitFrames(15);
-            scene._newGameSetupWindow.select(5);
-            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 5, "Cancel row selected");
+            scene._newGameSetupWindow.select(4);
+            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 4, "Cancel row selected");
             Input._currentState["ok"] = true;
             Input._latestButton = "ok";
             Input._pressedTime = 0;
@@ -1246,31 +1193,29 @@
             await t.waitFrames(15);
             t.check("setup_window_reopened", scene._newGameSetupWindow.isOpen(), "Setup window reopened");
 
-            // Configure Dwarf expedition at Year 42 AD with Standard 64x64 world and Fog Enabled
+            // Configure Dwarf expedition at Year 42 AD with Fog Enabled
             scene._newGameSetupWindow.setFaction("Dwarf");
             scene._newGameSetupWindow.setYear(42);
-            scene._newGameSetupWindow.setSize(64);
             scene._newGameSetupWindow.setFog(true);
-            scene._newGameSetupWindow.select(4); // Hover "Start"
+            scene._newGameSetupWindow.select(3); // Hover "Start"
             await t.waitFrames(15);
 
             t.check("configured_faction_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Configured faction is Dwarf");
             t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
-            t.check("configured_size_64", scene._newGameSetupWindow.currentSize() === 64, "Configured size is 64x64");
+            t.check("configured_size_256", scene._newGameSetupWindow.currentSize() === 256, "Configured size is 256x256");
             t.check("configured_fog_true", scene._newGameSetupWindow.currentFog() === true, "Configured fog of war is true");
             t.screenshot("live_deus_new_game_setup_dwarf_42");
 
-            // Test Embark action via click / touch trigger on Row 4 (Start)
-            TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
-            scene._newGameSetupWindow.onTouchSelect(true);
-            await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 15000, "Scene_Map started");
+            // Test Embark action on Row 3 (Start)
+            scene._newGameSetupWindow.select(3);
+            scene._newGameSetupWindow.processOk();
+            await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 30000, "Scene_Map started");
             await t.waitFrames(30);
 
             const st = window.UF && UF.World && UF.World.state;
             t.check("map_scene_active", SceneManager._scene instanceof Scene_Map, "Transitioned to live game map");
             t.check("state_exists", !!st, "World state created");
-            t.check("world_size_is_64", st.size === 64, "World state size initialized to 64x64 Standard");
+            t.check("world_size_is_256", st.size === 256, "World state size initialized to 256x256 Large");
 
             const playerFac = st.factions.list.find(f => f.isPlayer);
             t.check("player_faction_is_dwarf", !!playerFac && (playerFac.species === "dwarf" || playerFac.culture === "dwarf"), "Player faction is Dwarf");

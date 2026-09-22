@@ -2190,10 +2190,27 @@
     class Sprite_UFLevelPlate extends Sprite {
         constructor() {
             super(new Bitmap(PLATE_W, PLATE_H));
-            this.x = Graphics.width - 200 - 8 - PLATE_W;
-            this.y = 42;
+            this.width = PLATE_W;
+            this.height = PLATE_H;
+            this.z = 90;
             this._z = null;
+            this.updatePosition();
             this.redraw();
+        }
+        updatePosition() {
+            const gh = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
+            const gw = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
+            const scene = SceneManager._scene;
+            const tb = scene && scene._ufSelectToolbar;
+            if (tb && tb.visible) {
+                this.x = tb.x + tb.width + 8;
+                this.y = tb.y;
+            } else {
+                const totalW = 400 + 8 + PLATE_W + 8 + 192;
+                const startX = Math.max(8, Math.floor((gw - totalW) / 2));
+                this.x = startX + 400 + 8;
+                this.y = gh - 38;
+            }
         }
         redraw() {
             const z = viewZ();
@@ -2224,6 +2241,7 @@
         }
         update() {
             super.update();
+            this.updatePosition();
             if (viewZ() !== this._z) this.redraw();
             if (TouchInput.isTriggered() && this.visible) {
                 const lx = TouchInput.x - this.x, ly = TouchInput.y - this.y;

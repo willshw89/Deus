@@ -26,9 +26,11 @@ Nano Banana Pro is an active component of the production pipeline, not merely a 
 
 | Parameter | Specification | Strict Constraint |
 |---|---|---|
-| **View / Projection** | Flat 3/4 top-down RPG view (FF5 / Tactics Ogre serious chibi style). Ground plane viewed from above; vertical structures, walls, trees, and props stand upright in 2D space. | No tilt, slant, lean, 3D perspective distortion, or isometric diamonds. |
-| **Grid Cell Footprint** | Standard grid unit = **48 × 48 px**. | Sub-tile items: 12–28 px. Standard props: 48×48 px. Large props/trees: 96×96 or 96×144 px. |
-| **Architectural Footprint** | 1 grid wide (48 px) × **2 grids high (96 px)** for walls, doors, gates, cliff crags, and high boundaries. | The lower 48 px is the visible vertical face. The upper 48 px is the top cap. |
+| **View / Projection** | **Pure 2D top-down RPG view** (Western pixel, grimdark style; FF5 style for humanoids/standard creatures, FF6 style for large monsters). Ground plane viewed flat from above; entities, vertical structures, walls, trees, and props stand upright in pure 2D space. | Strictly pure 2D. Zero 2.5D axonometric projection, zero elevation screen offsets, zero cast shadow sprites, no tilt, slant, lean, 3D perspective distortion, or isometric diamonds. |
+| **Humanoid & Standard Entity Scale (FF5 Scale)** | Standard humanoid / colonist / small-to-medium wildlife = **48 × 48 px (1 tile)**. Serious chibi proportions (~3.0 to 3.2 heads tall, 40–44 px sprite height grounded on baseline). | Focused, determined expressions; no cute anime/manga eyes, no bubbly smiles, battle-worn realistic posture. |
+| **Large Creature & Monster Scale (FF6 Scale)** | Large monsters / behemoths / heavy siege beasts / giant fauna = **96 × 96 px (2 × 2 tiles)** (native 288×384 px 12-sprite charset). | Multi-tile footprint, imposing physical bulk, terrifying grimdark presence. |
+| **Architectural Footprint** | 1 grid wide (48 px) × **2 grids high (96 px)** for walls, doors, gates, cliff crags, and high boundaries. | The lower 48 px is the visible vertical face. The upper 48 px is the DF-style flat black occlusion cap. |
+| **Items & Props** | Sub-tile items: 12–28 px. Standard props: 48×48 px. Large props/trees: 96×96 or 96×144 px. | Functional medieval tools and rugged wilderness props. |
 | **Scale Anchoring** | Bottom-center of the base tile (`anchor.x = 0.5, anchor.y = 1.0`). | Base silhouette must remain stable across all animation frames. |
 
 ---
@@ -69,14 +71,18 @@ Project DEUS enforces an essential architectural readability convention inspired
 
 ## 4. Visual Rendering, Shading & Palette Language
 
-1. **Palette Standard:** 
-   - Strict adherence to the DEUS 16-bit master palette (`art/palette/uf.hex`). All raw generations pass through automated palette snapping.
+1. **Western Pixel, Grimdark Style (FF5 / FF6 Aesthetic Foundation):**
+   - **Tone & Mood:** Gritty, dark, grounded low-fantasy medieval world. Characters and props bear the tangible marks of wilderness survival: scarred leather, rusted or notched iron edges, coarse hand-woven cloaks, muddied boots, weathered timbers, chipped masonry.
+   - **No Anime / Cute Tropes:** Strictly avoid oversized bubbly anime eyes, exaggerated chibi expressions, cheerful smiling portraits, shiny colorful hair, or whimsical fantasy tropes. Colonists and humanoids have determined, grim, hardened, or weary expressions with restrained facial features.
+   - **Color & Value Restraint:** Cohesive, low-saturation, earthy palette rooted in `art/palette/uf.hex`. Rich browns, deep iron grays, slate, forest umbers, dried blood tones, bone, and muted leathers. Vivid hues are reserved strictly for magic runes, alchemical vials, or flickering hearth fire.
+2. **Palette Standard:** 
+   - Strict adherence to the DEUS 16-bit master palette (`art/palette/uf.hex`). All raw generations pass through automated palette snapping (`tools/clean_palette.js`).
    - Cel shading with 3–4 distinct flat tonal bands per material.
    - Light source is standardized from the **upper-left** (135° angle).
-2. **Edge & Outline Treatment:**
+3. **Edge & Outline Treatment:**
    - Selective dark contour outlines (deep charcoal/umber `#1A1820`), never harsh 100% pure black lines around bright interior details.
    - Pixel-crisp boundaries. **Zero blur, zero gradients, zero AI anti-aliasing fuzz against background.**
-3. **Artistic Guardrails (Instant Rejection Criteria):**
+4. **Artistic Guardrails (Instant Rejection Criteria):**
    - **Reject:** Photorealism, 3D computer-generated renders, painterly concept-art smudges, glossy mobile game vector look, bubble chibi/cartoon tropes, noisy excessive micro-texture, and inconsistent camera pitch.
    - Every asset must look as if it was drawn by the same 16-bit tactical RPG art team.
 
@@ -186,9 +192,9 @@ All generation prompts for non-living assets must follow this rigid technical st
 Game-ready packed transparent sprite sheet.
 
 [DEUS ART DIRECTION]
-Flat 3/4 top-down 16-bit pixel art in the Project DEUS serious chibi style (tactics RPG standard). 
+Pure 2D top-down 16-bit pixel art in the Project DEUS Western pixel grimdark style (FF5/FF6 low-fantasy tactical RPG standard). 
 Cel shaded with 3-4 distinct tones per material. Light from upper-left (135 degrees). 
-Crisp pixel edges, selective deep charcoal contour outlines, no gradients, no blur, no anti-aliasing against background. Palette adheres to classic 16-bit fantasy tactics games.
+Crisp pixel edges, selective deep charcoal contour outlines, zero gradients, zero blur, zero anti-aliasing against background. Palette adheres to classic 16-bit fantasy tactics games (art/palette/uf.hex). No anime tropes, no cute eyes, no 3D or isometric perspective skew.
 
 [GRID SPECIFICATION]
 Sheet Size: [W]x[H] px.

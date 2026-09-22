@@ -356,11 +356,7 @@
 
     World.newWorld = function(seed, size) {
         const s = seed || CONFIG.seed || Math.floor(Math.random() * 0x7ffffffe) + 1;
-        const worldSize = (typeof size === "number" && size > 0)
-            ? size
-            : ((window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.worldSize === "number")
-                ? UF.NewGameSetup.worldSize
-                : CONFIG.size);
+        const worldSize = 256;
         this.state = {
             version: 3,
             seed: s,

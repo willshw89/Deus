@@ -1,60 +1,35 @@
 //=============================================================================
-// RPG Maker MZ - Ultima Fortress: 2.5D Axonometric Perspective Engine
+// RPG Maker MZ - DEUS: Pure 2D Top-Down Perspective & Viewport Culling Engine
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [DEUS Perspective25D] 2.5D elevation layers, dynamic Z-depth sorting, real-time directional cast shadows, and canopy occlusion.
+ * @plugindesc [DEUS Perspective25D] Pure 2D top-down perspective, camera viewport culling, and tactile foot-Y depth sorting.
  * @author Deepdelve Architect
- *
- * @param TileHeightStep
- * @text Elevation Height Step (px)
- * @type number
- * @default 36
- * @desc Screen Y offset per Z-elevation level (36px for 3/4 axonometric perspective).
- *
- * @param EnableShadows
- * @text Enable 2.5D Ground Shadows
- * @type boolean
- * @default true
- * @desc Render dynamic 2.5D oval cast shadows underneath characters and elevated objects.
- *
- * @param OcclusionOpacity
- * @text Occlusion Opacity
- * @type number
- * @default 120
- * @desc Target opacity (0-255) for tree canopies and roofs when a character is underneath.
  *
  * @help
  * ============================================================================
- * Ultima Fortress 2.5D Axonometric Perspective (UF_Perspective25D)
+ * Project DEUS - Pure 2D Top-Down Perspective & Viewport Culling Engine
  * ============================================================================
- * Implements the signature visual presentation of Ultima VII: The Black Gate:
- * - 2.5D Z-Elevation on the tile grid (jumping, ramps, table/barrel stacking)
- * - Dynamic tactile depth sorting (objects, characters, tall scenery)
- * - Canopy and roof occlusion cutaways (smooth fade-out when walking under trees/roofs)
- * - 2.5D ground cast shadows grounded at physical (x, y) coordinates
- * - Minimal engine modification via standard aliasing
+ * - Pure 2D top-down rendering (FF5 scale 48px humanoids, FF6 scale 96px creatures).
+ * - Zero 2.5D axonometric elevation projection or fake offsets.
+ * - Strict camera viewport culling: off-screen sprites bypass update and Pixi rendering.
+ * - Tactile 2D foot-Y depth sorting matching classic 16-bit RPGs.
+ * - Zero CPU/GPU shadow or occlusion scan overhead.
  */
 
 (() => {
     "use strict";
 
     const pluginName = "DEUS_Perspective25D";
-    const params = PluginManager.parameters(pluginName);
-    const tileHeightStep = parseInt(params["TileHeightStep"] || 36, 10);
-    const enableShadows = false; // Completely disabled per user request
-    const occlusionOpacity = parseInt(params["OcclusionOpacity"] || 120, 10);
 
     //-----------------------------------------------------------------------------
-    // Game_CharacterBase: Z-Elevation & Stacking
+    // Game_CharacterBase: Z-Elevation & Clean 2D Coordinates
     //-----------------------------------------------------------------------------
     const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
     Game_CharacterBase.prototype.initMembers = function() {
         _Game_CharacterBase_initMembers.call(this);
-        this._elevation = 0; // Z-level (0 = ground, 1 = table/ledge, etc.)
-        this._isOccluded = false;
-        this._castShadow = true;
+        this._elevation = 0; // Simulation Z-level (persistent multi-layer support)
     };
 
     Game_CharacterBase.prototype.elevation = function() {
@@ -65,17 +40,15 @@
         this._elevation = z;
     };
 
-    // Override screenY to account for 2.5D Z-elevation offset
+    // Standard Pure 2D Top-Down screenY (FF5/FF6 style, no axonometric distortion)
     Game_CharacterBase.prototype.screenY = function() {
         const th = $gameMap.tileHeight();
-        const baseScreenY = Math.round(
+        return Math.floor(
             $gameMap.adjustY(this._realY) * th + th - this.shiftY() - this.jumpHeight()
         );
-        const zOffset = Math.round(this.elevation() * tileHeightStep);
-        return baseScreenY - zOffset;
     };
 
-    // Ground screenY for shadow projection (ignores elevation and jump)
+    // Ground screenY
     Game_CharacterBase.prototype.groundScreenY = function() {
         const th = $gameMap.tileHeight();
         return Math.round($gameMap.adjustY(this._realY) * th + th - 4);
@@ -88,95 +61,62 @@
     };
 
     //-----------------------------------------------------------------------------
-    // Sprite_Character: Dynamic Depth Sorting & 2.5D Shadow Attachment
+    // Sprite_Character: Camera Viewport Culling
     //-----------------------------------------------------------------------------
-    const _Sprite_Character_initMembers = Sprite_Character.prototype.initMembers;
-    Sprite_Character.prototype.initMembers = function() {
-        _Sprite_Character_initMembers.call(this);
-        this._shadowSprite = null;
-        if (enableShadows) {
-            this.create2DShadow();
-        }
-    };
-
-    Sprite_Character.prototype.create2DShadow = function() {
-        this._shadowSprite = new Sprite();
-        // Create 2.5D oval shadow bitmap
-        const sw = 32;
-        const sh = 16;
-        const bmp = new Bitmap(sw, sh);
-        const ctx = bmp.context;
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(sw / 2, sh / 2, sw / 2 - 2, sh / 2 - 2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(10, 10, 15, 0.45)";
-        ctx.fill();
-        ctx.restore();
-        bmp._baseTexture.update();
-        this._shadowSprite.bitmap = bmp;
-        this._shadowSprite.anchor.x = 0.5;
-        this._shadowSprite.anchor.y = 0.5;
-        this._shadowSprite.z = 1; // Above ground tile, below character
-    };
-
+    // In RPG Maker MZ, Spriteset_Map creates a Sprite_Character for all 1000+ units.
+    // By strictly culling off-screen sprites before updateBitmap/updateFrame/render,
+    // we eliminate off-screen CPU/GPU matrix overhead on 256x256 maps.
     const _Sprite_Character_update = Sprite_Character.prototype.update;
     Sprite_Character.prototype.update = function() {
+        if (!this._character) {
+            this.visible = false;
+            return;
+        }
+
+        // Camera viewport culling: only process units within or near the camera view
+        if (this._character !== $gamePlayer && window.$gameMap) {
+            const rx = this._character._realX;
+            const ry = this._character._realY;
+            if (typeof rx === "number" && typeof ry === "number") {
+                const sx = $gameMap.adjustX(rx);
+                const sy = $gameMap.adjustY(ry);
+                const vw = $gameMap.screenTileX ? $gameMap.screenTileX() : 27;
+                const vh = $gameMap.screenTileY ? $gameMap.screenTileY() : 16;
+                // Margins: +2 tiles horizontal/bottom, +4 tiles top (accommodates 96px 2-tile FF6 monsters and tall flora)
+                if (sx < -2 || sx > vw + 2 || sy < -4 || sy > vh + 2) {
+                    this.visible = false;
+                    return;
+                }
+            }
+        }
+
+        this.visible = true;
         _Sprite_Character_update.call(this);
-        this.update2DShadow();
-        this.updateOcclusion();
     };
 
-    Sprite_Character.prototype.update2DShadow = function() {
-        if (!this._shadowSprite || !this._character || !this.visible) {
-            if (this._shadowSprite) this._shadowSprite.visible = false;
-            return;
-        }
-        if (this._character === $gamePlayer || !this._character.characterName()) {
-            this._shadowSprite.visible = false;
-            return;
-        }
-        if (this._character._isFloraOrCanopy === undefined) {
-            const ev = this._character.event && this._character.event();
-            const note = ev ? ev.note || "" : "";
-            this._character._isFloraOrCanopy = note.includes("<tree>") || note.includes("<canopy>");
-        }
-        if (this._character._isFloraOrCanopy) {
-            this._shadowSprite.visible = false;
-            return;
-        }
-
-        // Only show shadow for visible living characters
-        if (this._character.isTransparent() || this._character.opacity() === 0) {
-            this._shadowSprite.visible = false;
-            return;
-        }
-
-        // Add to parent tilemap if not yet added
-        if (!this._shadowSprite.parent && this.parent) {
-            this.parent.addChildAt(this._shadowSprite, 0);
-        }
-
-        this._shadowSprite.visible = true;
-        this._shadowSprite.x = this._character.groundScreenX();
-        this._shadowSprite.y = this._character.groundScreenY();
-
-        // Scale shadow slightly smaller when elevated or jumping
-        const totalHeight = (this._character.elevation() * tileHeightStep) + this._character.jumpHeight();
-        const scaleFactor = Math.max(0.5, 1.0 - (totalHeight / 200));
-        this._shadowSprite.scale.x = scaleFactor;
-        this._shadowSprite.scale.y = scaleFactor;
-        this._shadowSprite.opacity = Math.round(255 * scaleFactor);
+    //-----------------------------------------------------------------------------
+    // Sprite_Character: Pure 2D Foot-Y Dynamic Depth Sorting
+    //-----------------------------------------------------------------------------
+    Game_CharacterBase.prototype.screenZ = function() {
+        const th = $gameMap ? $gameMap.tileHeight() : 48;
+        const footY = Math.round(($gameMap ? $gameMap.adjustY(this._realY) : (typeof this._realY === "number" ? this._realY : 0)) * th + th);
+        const priorityBonus = this.isPriorityAbove() ? 1000 : (this.isPriorityBelow() ? -100 : 0);
+        return footY + priorityBonus;
     };
 
-    // Dynamic Depth Sorting
     const _Sprite_Character_updatePosition = Sprite_Character.prototype.updatePosition;
     Sprite_Character.prototype.updatePosition = function() {
         _Sprite_Character_updatePosition.call(this);
         if (this._character) {
-            // Foot-position depth sorting matching Ultima VII
-            const footY = Math.round($gameMap.adjustY(this._character._realY) * 48 + 48);
-            const priorityBonus = this._character.isPriorityAbove() ? 1000 : (this._character.isPriorityBelow() ? -100 : 0);
-            this.z = footY + priorityBonus;
+            this.z = this._character.screenZ();
+        }
+    };
+
+    const _Sprite_Character_updateOther = Sprite_Character.prototype.updateOther;
+    Sprite_Character.prototype.updateOther = function() {
+        _Sprite_Character_updateOther.call(this);
+        if (this._character) {
+            this.z = this._character.screenZ();
         }
     };
 
@@ -188,63 +128,5 @@
         return this._priorityType === 0;
     };
 
-    //-----------------------------------------------------------------------------
-    // Canopy & Roof Occlusion Transparency (Ultima VII Cutaways)
-    //-----------------------------------------------------------------------------
-    Sprite_Character.prototype.updateOcclusion = function() {
-        if (!this._character || !($gameMap && $gamePlayer) || !this.visible) return;
-
-        // Check if this sprite is an overhead scenery/canopy event (cached flag)
-        if (this._character._isCanopy === undefined) {
-            const ev = this._character.event && this._character.event();
-            const note = ev ? ev.note || "" : "";
-            this._character._isCanopy = note.includes("<canopy>") || note.includes("<tree>");
-        }
-        if (!this._character._isCanopy) return;
-
-        // Check if player or any colonist is within the canopy bounding box (e.g. 1 tile above/behind)
-        const cx = this._character.x;
-        const cy = this._character.y;
-        let occluded = false;
-
-        // Check player
-        if (Math.abs($gamePlayer.x - cx) <= 1 && ($gamePlayer.y >= cy - 1 && $gamePlayer.y <= cy + 1)) {
-            occluded = true;
-        }
-
-        // Check all colonists/NPCs
-        if (!occluded) {
-            const colonists = (window.UF && UF.Colonists && typeof UF.Colonists.list === "function") ? UF.Colonists.list() : null;
-            if (colonists && colonists.length) {
-                for (let i = 0; i < colonists.length; i++) {
-                    const u = colonists[i];
-                    if (Math.abs(u.x - cx) <= 1 && (u.y >= cy - 1 && u.y <= cy + 1)) {
-                        occluded = true;
-                        break;
-                    }
-                }
-            } else {
-                for (const ev of $gameMap.events()) {
-                    if (ev && ev._isColonist && Math.abs(ev.x - cx) <= 1 && (ev.y >= cy - 1 && ev.y <= cy + 1)) {
-                        occluded = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Smooth opacity fade
-        const targetOpacity = occluded ? occlusionOpacity : 255;
-        if (this.opacity !== targetOpacity) {
-            const step = 15;
-            if (this.opacity > targetOpacity) {
-                this.opacity = Math.max(targetOpacity, this.opacity - step);
-            } else {
-                this.opacity = Math.min(targetOpacity, this.opacity + step);
-            }
-        }
-    };
-
-    console.log("[UF] UF_Perspective25D initialized: 2.5D Z-elevation, dynamic depth sorting, cast shadows, canopy occlusion active.");
+    console.log("[DEUS] DEUS_Perspective25D active: Pure 2D top-down perspective, viewport culling, tactile foot-Y sorting enabled.");
 })();
-

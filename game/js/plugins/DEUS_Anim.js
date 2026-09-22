@@ -1448,6 +1448,7 @@
     }
     // Face the target (a choice of row) and play the attack frames.
     function strike(u, target) {
+        if (!u || !target || typeof u.x !== "number" || typeof target.x !== "number") return false;
         const W = World();
         const ev = W ? W.eventOf(u.id) : null;
         if (!ev) return false;

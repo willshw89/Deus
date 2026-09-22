@@ -65,8 +65,9 @@
     }
     function exactPath(unit, to) {
         if (!unit || !areaEqual(unit.area, to.area) || zOf(unit) !== zOf(to) || !dry(to, unit)) return false;
+        const maxNodes = Math.min(2048, W().state.size * W().state.size);
         const path = W().findPath({ x: to.area.x, y: to.area.y, z: zOf(to) }, unit.x, unit.y, to.x, to.y,
-            { unit, z: zOf(to), allowPartial: false, resolveBlocked: false, maxNodes: W().state.size * W().state.size });
+            { unit, z: zOf(to), allowPartial: false, resolveBlocked: false, maxNodes });
         return !!path && !path.partial && (sameCell(unit, to) || path.length > 0 && path[path.length - 1].x === to.x && path[path.length - 1].y === to.y);
     }
     function state() { return W() && W().state ? W().state.naturalConnections || null : null; }
@@ -155,8 +156,10 @@
         }
         candidates.sort((a, b) => a.distance - b.distance || a.tie - b.tie || a.y - b.y || a.x - b.x);
         saved.survey.candidates = candidates.length;
-        for (const candidate of candidates) {
+        const candidatePool = candidates.slice(0, 30);
+        for (const candidate of candidatePool) {
             if (saved.chains.length && Math.max(Math.abs(candidate.x - saved.chains[0].x), Math.abs(candidate.y - saved.chains[0].y)) < 48) continue;
+            if (saved.survey.tested >= 12) break;
             saved.survey.tested++;
             const cells = DEPTHS.map(z => ref(area, candidate.x, candidate.y, z));
             if (cells.some(c => !free(c))) continue;

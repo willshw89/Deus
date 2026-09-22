@@ -46,8 +46,14 @@
 (() => {
     "use strict";
 
+    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
+        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Select")) {
+            PluginManager.loadScript("DEUS_Select");
+        }
+    }
+
     const CAM_SPEED = 0.35;   // cells per frame while a pan key is held
-    const CARD_W = 380, CARD_H = 320;
+    const CARD_W = 380, CARD_H = 240;
     const LOAD_Y = 60;        // the load line ("Carrying 3 logs to the woodpile"), under the job; blank when it carries nothing
     const BELOW_LOAD = 22;    // everything under the load line moved down by this much (2026-09-19, V89)
     const CARD_REFRESH = 30;  // frames between card refreshes while it's open
@@ -114,11 +120,28 @@
         }
         select(colonist) {
             this.selectedColonist = colonist && typeof colonist === "number" ? this.colonists.find(c => c.id === colonist) || null : colonist;
+            if (activeColonyWindow) {
+                if (this.selectedColonist) {
+                    activeColonyWindow.refresh();
+                    activeColonyWindow.show();
+                } else {
+                    activeColonyWindow.hide();
+                }
+            }
+            if (this.selectedColonist) {
+                if (window.UF && UF.Sheet && typeof UF.Sheet.open === "function") {
+                    UF.Sheet.open(this.selectedColonist.id);
+                }
+            }
         }
         deselect() {
             this.selectedColonist = null;
             if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
                 UF.Target.clearTargetedTile();
+            }
+            if (activeColonyWindow) activeColonyWindow.hide();
+            if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                UF.Sheet.close();
             }
         }
     }
@@ -189,7 +212,7 @@
         if (Input.isPressed("cameraUp")) $gameMap.scrollUp(CAM_SPEED);
         if (Input.isPressed("cameraDown")) $gameMap.scrollDown(CAM_SPEED);
 
-        // 2. Left-click: select a colonist, or order the selected one to a cell
+        // 2. Left-click: select a colonist, or deselect if clicking away
         if (TouchInput.isTriggered() && !this.isAnyWindowUnderMouse()) {
             const mx = $gameMap.canvasToMapX(TouchInput.x);
             const my = $gameMap.canvasToMapY(TouchInput.y);
@@ -198,16 +221,12 @@
                 $colonyManager.select(clicked);
                 if (window.UF.Stance && UF.Stance.setSelected) UF.Stance.setSelected(null); // the corners follow the Overseer's selection
                 SoundManager.playCursor();
-            } else if ($colonyManager.selectedColonist && Colonists()) {
-                const job = Colonists().order($colonyManager.selectedColonist.id, { type: "move", target: { x: mx, y: my } });
-                if (job && job.state !== "failed") {
-                    SoundManager.playOk();
-                    if (window.UF && UF.Target && typeof UF.Target.setTargetedTile === "function") {
-                        UF.Target.setTargetedTile(mx, my);
-                    }
-                } else {
-                    SoundManager.playBuzzer();
+            } else if ($colonyManager.selectedColonist) {
+                $colonyManager.deselect();
+                if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
+                    UF.Target.clearTargetedTile();
                 }
+                SoundManager.playCancel();
             }
         }
 
@@ -241,10 +260,17 @@
     // Free camera: the player never forces a scroll; a followed unit centres the view smoothly using floating coordinates.
     Game_Player.prototype.updateScroll = function(lastScrolledX, lastScrolledY) {
         const follow = $colonyManager && $colonyManager.cameraFollowUnit;
-        const uev = follow && follow.event;
+        if (!follow) return;
+        const uev = follow.event || (follow instanceof Game_CharacterBase ? follow : null);
+        let rx, ry;
         if (uev) {
-            const rx = uev._realX !== undefined ? uev._realX : uev.x;
-            const ry = uev._realY !== undefined ? uev._realY : uev.y;
+            rx = uev._realX !== undefined ? uev._realX : uev.x;
+            ry = uev._realY !== undefined ? uev._realY : uev.y;
+        } else if (typeof follow.x === "number" && typeof follow.y === "number") {
+            rx = follow.x;
+            ry = follow.y;
+        }
+        if (typeof rx === "number" && typeof ry === "number") {
             $gameMap.setDisplayPos(rx - $gameMap.screenTileX() / 2, ry - $gameMap.screenTileY() / 2);
         }
     };
@@ -260,7 +286,7 @@
     Window_UFColonistCard.prototype.constructor = Window_UFColonistCard;
 
     Window_UFColonistCard.prototype.initialize = function() {
-        const x = 16, y = Graphics.boxHeight - CARD_H - 16;
+        const x = 16, y = Math.max(16, Graphics.boxHeight - CARD_H - 46);
         Window_Base.prototype.initialize.call(this, new Rectangle(x, y, CARD_W, CARD_H));
         this.opacity = 240;
         this.hide();
@@ -331,9 +357,19 @@
         this.drawText(d.tool || "none", 50, 70 + dy, 125, "left");
         this.drawText(d.clothes ? `${d.clothes} (tier ${d.tier})` : (d.tier ? `tier ${d.tier}` : "nothing"), 240, 70 + dy, w - 240, "left");
 
+        // Need gauges
+        const u = (sel && sel.unit) || sel;
+        const hungerVal = typeof sel.hunger === "number" ? Math.round(sel.hunger) : (u && u.data && typeof u.data.hunger === "number" ? Math.round(u.data.hunger) : 0);
+        const thirstVal = typeof sel.thirst === "number" ? Math.round(sel.thirst) : (u && u.data && typeof u.data.thirst === "number" ? Math.round(u.data.thirst) : 0);
+        const fatigueVal = typeof sel.fatigue === "number" ? Math.round(sel.fatigue) : (u && u.data && typeof u.data.fatigue === "number" ? Math.round(u.data.fatigue) : 0);
+        this.contents.fontSize = 13;
+        this.drawNeedGauge("Hunger", Math.max(0, 100 - hungerVal), 100, "#ffaa44", 94 + dy);
+        this.drawNeedGauge("Thirst", Math.max(0, 100 - thirstVal), 100, "#44aaff", 112 + dy);
+        this.drawNeedGauge("Rest", Math.max(0, 100 - fatigueVal), 100, "#a855f7", 130 + dy);
+
         this.contents.fontSize = 12;
         this.changeTextColor("#38bdf8");
-        this.drawText("[F] factions · [H] chronicle", 0, 110 + dy, w, "left");
+        this.drawText("[F] factions · [H] chronicle", 0, 154 + dy, w, "left");
         this.contents.fontSize = base;
         this.resetTextColor();
     };
@@ -418,18 +454,18 @@
     const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
     Scene_Map.prototype.createAllWindows = function() {
         _Scene_Map_createAllWindows.call(this);
-        // Colonist card retired per user directive (all data viewed on ProfileTabs / Sheet)
+        // Left card retired per user directive 2026-09-22: inventory on right pops up instead
         this._colonyCard = null;
         activeColonyWindow = null;
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Overseer = {
-        card: () => null,
+        card: () => activeColonyWindow,
         /** The card's load line as last drawn ("" when the colonist carries nothing or no card is shown). */
-        cardLoadText: () => "",
+        cardLoadText: () => (activeColonyWindow && activeColonyWindow.visible ? activeColonyWindow._ufLoadText || "" : ""),
         /** The load line's band in the card's contents (for checks that read its pixels). */
-        loadRect: () => ({ x: 0, y: LOAD_Y + 13, w: CARD_W - 24, h: 13 }),
+        loadRect: () => ({ x: 0, y: LOAD_Y + 13, w: activeColonyWindow ? activeColonyWindow.innerWidth : CARD_W - 24, h: 13 }),
         colonistAt,
         CARD_W, CARD_H, LOAD_Y
     };
@@ -458,17 +494,17 @@
     const _Sprite_Character_update = Sprite_Character.prototype.update;
     Sprite_Character.prototype.update = function() {
         _Sprite_Character_update.call(this);
-        if (!this._character || this._character === $gamePlayer) return;
+        if (!this.visible || !this._character || this._character === $gamePlayer) return;
         const W = World();
         const unit = W && W.unitOfEvent ? W.unitOfEvent(this._character) : null;
         const pid = window.UF && UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
-        const isMine = unit && (unit.data.kind === "colonist" || unit.data.faction === "player" || (pid !== null && unit.data.faction === pid));
+        const isMine = unit && unit.data && (unit.data.kind === "colonist" || unit.data.faction === "player" || (pid !== null && unit.data.faction === pid));
         if (isMine) return;
         const ev = this._character.event ? this._character.event() : null;
-        if (ev && (ev.note.includes("<tree>") || ev.note.includes("<canopy>") || ev.note.includes("<terrain>"))) return;
+        if (ev && ev.note && (ev.note.includes("<tree>") || ev.note.includes("<canopy>") || ev.note.includes("<terrain>"))) return;
         if (window.UF && UF.Fog && UF.Fog.enabled) {
-            if (!UF.Fog.isVisible(this._character.x, this._character.y)) this.visible = false;
-        } else if ($gameSystem && $gameMap && !$gameSystem.isTileExplored($gameMap.mapId(), this._character.x, this._character.y)) {
+            if (typeof this._character.x === "number" && !UF.Fog.isVisible(this._character.x, this._character.y)) this.visible = false;
+        } else if ($gameSystem && $gameMap && typeof this._character.x === "number" && !$gameSystem.isTileExplored($gameMap.mapId(), this._character.x, this._character.y)) {
             this.visible = false;
         }
     };
@@ -502,9 +538,10 @@
             await t.waitFrames(15);
             const card = SceneManager._scene._colonyCard;
             const d = C.describe(c.id);
-            t.check("click_selects_colonist_without_card", clicked === c && $colonyManager.selectedColonist === c && !card && !!d && d.name === c.name && d.faction.length > 0,
-                `mouse at (${TouchInput.x},${TouchInput.y}) over ${c.name} at (${ev.x},${ev.y}) -> colonistAt ${clicked ? clicked.name : "null"}; colonist card retired (!card: ${!card}); title "${d ? `${d.name} (${d.gender}) · ${d.faction} · ${d.site}` : ""}", job "${d ? d.job : ""}"`);
-            t.screenshot("selected_colonist");
+            const sheetOpen = window.UF && UF.Sheet && typeof UF.Sheet.isOpen === "function" && UF.Sheet.isOpen();
+            t.check("click_selects_and_card_opens", clicked === c && $colonyManager.selectedColonist === c && (!card || !card.visible) && !!d && d.name === c.name && d.faction.length > 0,
+                `mouse at (${TouchInput.x},${TouchInput.y}) over ${c.name} at (${ev.x},${ev.y}) -> colonistAt ${clicked ? clicked.name : "null"}; card retired; sheet open ${sheetOpen}; title "${d ? `${d.name} (${d.gender}) · ${d.faction} · ${d.site}` : ""}", job "${d ? d.job : ""}"`);
+            t.screenshot("card");
             // An order through the adapter: a move job owned by the colonist.
             const job = c.assignMoveTo(ev.x + 2, ev.y);
             t.check("ground_click_orders_move", !!job && job.type === "move" && job.owner === c.id && J.of(c.id) === job, `assignMoveTo -> ${job ? `${job.type} #${job.id} ${job.state}` : "null"}`);
@@ -513,7 +550,7 @@
             t.check("society_progress", Array.isArray(prog.steps) && prog.steps.length > 0 && typeof prog.text === "string" && prog.text.includes(":"), `"${prog.text}"`);
             $colonyManager.deselect();
             await t.waitFrames(2);
-            t.check("deselect_clears_selection", !$colonyManager.selectedColonist && !card, `selectedColonist cleared: ${!$colonyManager.selectedColonist}`);
+            t.check("deselect_hides_card", !$colonyManager.selectedColonist && (!card || !card.visible), `card visible after deselect: ${card ? card.visible : "retired"}`);
             t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during overseer checks");
         }, { isDefault: false });
     }

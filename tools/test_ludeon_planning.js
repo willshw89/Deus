@@ -77,8 +77,8 @@ const ludeonTestHook = `
         const tools = S ? S.tools() : [];
         const planTool = tools.find(t => t.id === "plan");
         const unplanTool = tools.find(t => t.id === "unplan");
-        t.check("plan_tool_registered", !!planTool && planTool.key === "X" && planTool.keyCode === 88,
-            \`Plan tool registered with key 'X' (88): \${planTool ? planTool.label : "none"}\`);
+        t.check("plan_tool_registered", !!planTool && planTool.key === "J" && planTool.keyCode === 74,
+            \`Plan tool registered with key 'J' (74): \${planTool ? planTool.label : "none"}\`);
         t.check("unplan_tool_registered", !!unplanTool && unplanTool.key === "U" && unplanTool.keyCode === 85,
             \`Remove Plan tool registered with key 'U' (85): \${unplanTool ? unplanTool.label : "none"}\`);
 

@@ -1416,6 +1416,10 @@
          * Returns true when something is shown.
          */
         open(what) {
+            // Group selection suppresses inventory window per user directive 2026-09-22
+            if (window.UF && UF.Select && typeof UF.Select.selected === "function" && UF.Select.selected().length > 1) {
+                return false;
+            }
             const w = sceneWindow();
             if (!w) return false;
             let subject = null;
@@ -1587,6 +1591,8 @@
     }
     function handleMapClick(scene) {
         if (interactBusy() || !window.$gameMap || ($gameMessage && $gameMessage.isBusy())) return;
+        // Group selection suppresses inventory window per user directive 2026-09-22
+        if (window.UF && UF.Select && typeof UF.Select.selected === "function" && UF.Select.selected().length > 1) return;
         const x = $gameMap.canvasToMapX(TouchInput.x), y = $gameMap.canvasToMapY(TouchInput.y);
         const s = subjectAt(x, y);
         if (!s) return; // bare ground: nothing opens (the Overseer may have ordered a move there)
@@ -1600,6 +1606,18 @@
     function installWraps() {
         if (wrapped) return;
         wrapped = true;
+        // Listen to selection changes to pop up inventory on single unit select or close on group/deselect
+        if (window.UF && UF.Events && typeof UF.Events.on === "function") {
+            UF.Events.on("select:changed", ids => {
+                if (Array.isArray(ids)) {
+                    if (ids.length === 1) {
+                        Sheet.open(ids[0]);
+                    } else {
+                        Sheet.close();
+                    }
+                }
+            });
+        }
         // The panel counts as a window under the mouse for the Overseer (no select/move through it).
         const _isAny = Scene_Map.prototype.isAnyWindowUnderMouse;
         Scene_Map.prototype.isAnyWindowUnderMouse = function() {

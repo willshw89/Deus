@@ -42,7 +42,7 @@
     const NATIVE = 16, SCALE = 3;
     const SHADE_TILE_START = 768; // Tilemap.TILE_ID_E
 
-    const catalog = () => window.$ufWorldCatalog || null;
+    const catalog = () => window.$deusWorldCatalog || window.$ufWorldCatalog || null;
     const groundShadesConfig = () => (catalog() && catalog().groundShades) || null;
 
     // Bayer 4x4 dither matrix normalized to [0, 1)
@@ -161,8 +161,11 @@
 
     let genBitmap = null;
     function generatedGround() {
-        if (genBitmap) return genBitmap;
         const kinds = (catalog() && catalog().groundKinds) || [];
+        if (genBitmap && (!kinds.length || genBitmap._kindsCount === kinds.length)) return genBitmap;
+        if (!kinds.length) {
+            return new Bitmap(768, 576);
+        }
         const nw = 8 * 32, nh = 4 * 48; // native A2 sheet: 8 kinds per row, 4 rows
         const native = document.createElement("canvas");
         native.width = nw;
@@ -176,6 +179,7 @@
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(native, 0, 0, nw * SCALE, nh * SCALE);
         bmp._baseTexture.update();
+        bmp._kindsCount = kinds.length;
         genBitmap = bmp;
         return bmp;
     }
@@ -527,7 +531,13 @@
     const _DataManager_onLoad = DataManager.onLoad;
     DataManager.onLoad = function(object) {
         _DataManager_onLoad.call(this, object);
-        if (object === window.$dataTilesets || (object === window.$ufWorldCatalog && window.$dataTilesets)) registerTileset();
+        if (object === window.$deusWorldCatalog || object === window.$ufWorldCatalog) {
+            window.$deusWorldCatalog = object;
+            window.$ufWorldCatalog = object;
+        }
+        if (window.$dataTilesets && (window.$deusWorldCatalog || window.$ufWorldCatalog)) {
+            registerTileset();
+        }
     };
 
     //-------------------------------------------------------------------------
@@ -1275,6 +1285,8 @@
         return _DataManager_extractSaveContents_shades.call(this, contents);
     };
     Scene_Boot.prototype.start = function() {
+        if (window.$deusWorldCatalog && !window.$ufWorldCatalog) window.$ufWorldCatalog = window.$deusWorldCatalog;
+        if (window.$ufWorldCatalog && !window.$deusWorldCatalog) window.$deusWorldCatalog = window.$ufWorldCatalog;
         registerTileset();
         initShadeAtlas();
         ensureBuildHook();

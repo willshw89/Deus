@@ -46,6 +46,16 @@
         DataManager._databaseFiles.push({ name: CATALOG_VAR, src: "DEUS_WorldCatalog.json" });
         window.$ufWorldCatalog = window.$deusWorldCatalog;
     }
+
+    const _DEUS_WorldGen_DataManager_onLoad = DataManager.onLoad;
+    DataManager.onLoad = function(object) {
+        _DEUS_WorldGen_DataManager_onLoad.call(this, object);
+        if (object === window.$deusWorldCatalog || object === window.$ufWorldCatalog) {
+            window.$deusWorldCatalog = object;
+            window.$ufWorldCatalog = object;
+        }
+    };
+
     const catalog = () => {
         const cat = window.$deusWorldCatalog || window.$ufWorldCatalog || null;
         if (cat) { window.$deusWorldCatalog = cat; window.$ufWorldCatalog = cat; }

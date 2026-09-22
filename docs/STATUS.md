@@ -9,7 +9,49 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - (None)
 
-## Owner Terminal, Control Tower & Idea Arsenal Established — 2026-09-22 (Gemini)
+## Square Ground Stance Indicators & Single-Unit Selection Inventory Popup Delivered — 2026-09-22 (Gemini & deus-architecture-mz)
+Delivered per user directives ("When the characters spawn in, their green circles are above their sprites, please fix that, and make them squares please", "Get rid of the card on the left. When I click a unit, I want the inventory on the right to pop up. But I only want the inventroy to pop up if I select a single unit. Otherwise, no inventory for group selection"):
+1. **Square Ground Stance Indicators (`DEUS_Stance.js`, `DEUS_Perspective25D.js`)**:
+   - Replaced stance circle/ellipse graphics with crisp 48×48 (1-tile) and 96×96 (2-tile) squares with 2px darker borders and translucent faction fills.
+   - Anchored squares to `(0.5, 1.0)` at character `footY`, perfectly framing the cell tile beneath the unit.
+   - Fixed Z-ordering depth sorting: character sprites dynamically compute `z = footY + priorityBonus` in `DEUS_Perspective25D.js`, while stance markers sort strictly below characters (`marker.z = Math.min(characterSprite.z - 10, markerZ)`). Stance markers now always render under the feet on the ground, never overlapping character legs or bodies.
+2. **Left Card Retirement & Right-Side Inventory Popup (`DEUS_ColonyOverseer.js`, `DEUS_Select.js`, `DEUS_Sheet.js`)**:
+   - Retired the left card window (`Scene_Map.prototype.createAllWindows` sets `this._colonyCard = null`, `activeColonyWindow = null`).
+   - Wired single-unit selection (from click or box drag) to pop up the right inventory window (`Window_UFSheet` via `UF.Sheet.open(u.id)`).
+   - Suppressed inventory sheet for multi-unit group selection (group drag or shift-click selects multiple units -> `UF.Sheet.close()`).
+   - Deselecting (clicking away on ground, pressing Esc, or right-clicking) closes the inventory sheet and deselects.
+3. **Model Pool Update**:
+   - Recorded Claude Code Fable Ultra availability as `AVAILABLE` in `docs/MODEL_AVAILABILITY.md` per owner directive ("Fable Multiagent is available").
+4. **Verification**:
+   - `node tools/run_tests.js stance`: 22/22 PASS (exit 0). Live screenshots `stance.stance_markers.png` and `stance.selection_ring.png` visually inspected; green squares strictly under character feet verified.
+   - `node tools/run_tests.js overseer`: 6/6 PASS (exit 0). Live screenshot `overseer.card.png` visually inspected; left card retired, right inventory sheet open with character equipment/stats/inventory on single selection verified.
+   - `node tools/run_tests.js select`: 44/44 PASS (exit 0).
+
+## Bottom HUD Bar Menu Relocation & Left-Click Dragged Box Dismissal Delivered — 2026-09-22 (Gemini & deus-architecture-mz)
+Delivered per user directives ("Take that bar menu and put it on the bottom of the screen", "Also, if you left click elsewhere after dragging a box, I want the dragged box to go away"):
+1. **Bottom HUD Bar Menu Repositioning & Unification (`DEUS_Select.js`, `DEUS_Levels.js`, `DEUS_TimeSpeed.js`)**:
+   - Relocated the three HUD widgets from `y = 42` to the bottom of the screen (`y = (Graphics.height || 624) - 38`).
+   - Centered all three widgets horizontally side-by-side with 8px spacing: `Sprite_UFSelectToolbar` (400px width), `Sprite_UFLevelPlate` (132px width), and `Sprite_UFTimeControls` (192px width), resolving the previous overlap between toolbar and level plate.
+   - Repositioned `Sprite_UFSelectStatus` above the toolbar (`y = tb.y - 20`) with 18px height to eliminate bounding-box collisions.
+   - Adjusted `Window_UFWallPicker` popup to appear dynamically above the bottom toolbar (`y = tb.y - 128`).
+2. **Left-Click Dragged Box Dismissal (`DEUS_Select.js`)**:
+   - Added dragged box dismissal logic in both `handleCompleteClick` and the touch release handler: when a multi-tile dragged box is active (`selectedTileBox.count > 1` or `selectedTiles.length > 1`), left-clicking elsewhere on empty ground calls `clearTileSelection()`, dismissing the dragged box cleanly.
+   - Preserves single-tile selection when no box was active, as well as single colonist movement orders and group formation orders.
+   - Added automated test `select.tile_deselect_left_click` to verify left-click dismissal.
+3. **Pure 2D Top-Down Viewport Culling & Crash Resolution**:
+   - Decommissioned 2.5D axonometric projection in `DEUS_Perspective25D.js` in favor of pure 2D top-down view in Western pixel, grimdark style (FF5 48px humanoids, FF6 96px large monsters).
+   - Removed real-time cast shadow sprites and occlusion scan loops.
+   - Implemented camera viewport culling in `Sprite_Character.prototype.update` (+2 tile horizontal/bottom margin, +4 tile top margin).
+   - Fixed `TypeError: Cannot read property 'x' of null` crash across `DEUS_ColonyOverseer.js`, `DEUS_Anim.js`, `DEUS_Look.js`, and `DEUS_Select.js`.
+   - Disabled giant 12,288×12,288 roof bitmap allocation in `DEUS_Visuals.js`.
+4. **Verification**:
+   - `node tools/run_tests.js select`: 44/44 PASS (exit 0, including `select.tile_deselect_left_click`).
+   - `node tools/run_tests.js smoke`: 13/13 PASS (exit 0). Live screenshot `game/test_output/smoke.map.png` visually inspected; bottom bar menu verified centered at bottom of screen with zero overlap.
+   - `node tools/run_tests.js timespeed`: 24/24 PASS (exit 0). Live screenshot `game/test_output/timespeed.time_controls.png` visually inspected.
+   - `node tools/run_tests.js jobs`: 19/19 PASS (exit 0).
+   - `node tools/run_tests.js colonists`: 5/5 PASS (exit 0).
+   - Total automated checks: 105/105 PASS (100%).
+
 Initialized the unified DEUS Owner Terminal, Control Tower, Work Queue Manager, and Release Gate framework per owner directive:
 1. **Discovered and Confirmed Baseline:**
    - Repository Root: `C:\Users\snewt\OneDrive\Desktop\UF`

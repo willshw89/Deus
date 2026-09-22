@@ -10,7 +10,7 @@
 | Model / Work Destination | Designated Role | Current Status | Last Signal / Status Change | Routing Policy |
 |---|---|---|---|---|
 | **Codex Astra Ultra** | Architecture Council | `UNAVAILABLE` (`WAITING_FOR_MODEL_CREDITS`) | 2026-09-22 | Unavailable per owner signal. Mark dependent architectural reviews waiting or route safe/minor reviews to Gemini. |
-| **Claude Code Fable Ultra** | Build Bench / Implementation | `UNAVAILABLE` (`WAITING_FOR_MODEL_CREDITS`) | 2026-09-22 | Unavailable per owner signal. Do NOT assign bounded implementation blocks until confirmed available. |
+| **Claude Code Fable Ultra** | Build Bench / Implementation | `AVAILABLE` | 2026-09-22 | Available per owner signal ("Fable Multiagent is available"). Assigned to bounded implementation blocks and automated testing. |
 | **Gemini / Antigravity** | Owner Terminal, Control Tower, Economy & Sim Review, Verification/Debug, Provenance/Assets, Nano Banana Pro Art | `AVAILABLE` | 2026-09-22 | Active in current session. Handles intake, governance, testing, simulation reviews, and Nano Banana Pro art production. |
 
 ---
