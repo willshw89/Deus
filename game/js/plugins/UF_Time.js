@@ -570,13 +570,6 @@
     const descriptors = Object.getOwnPropertyDescriptors(Time);
     if (typeof root.UF.Time.multiplier === "function") {
         delete descriptors.multiplier;
-        delete descriptors.setMultiplier;
-        delete descriptors.set;
-        delete descriptors.setLevel;
-        delete descriptors.level;
-        delete descriptors.faster;
-        delete descriptors.slower;
-        delete descriptors.speeds;
     }
     if (typeof root.UF.Time.pause === "function") {
         delete descriptors.pause;
@@ -589,7 +582,6 @@
     if (root.UF && root.UF.Events && root.UF.Events.on) {
         root.UF.Events.on("time:paused", () => { isPaused = true; });
         root.UF.Events.on("time:resumed", () => { isPaused = false; });
-        root.UF.Events.on("time:speedChanged", m => { speedMultiplier = m; });
     }
 
 })();

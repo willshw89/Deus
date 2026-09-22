@@ -19,7 +19,7 @@ const gameDir = path.resolve(gameIdx >= 0 ? args[gameIdx + 1] : path.join(__dirn
 const suite = args.find((a, i) => !a.startsWith("--") && (gameIdx < 0 || i !== gameIdx + 1));
 
 const pluginsJs = fs.readFileSync(path.join(gameDir, "js", "plugins.js"), "utf8");
-if (!/"name"\s*:\s*"UF_Test"\s*,\s*"status"\s*:\s*true/.test(pluginsJs)) {
+if (!/"name"\s*:\s*"(?:DEUS_Test|UF_Test)"\s*,\s*"status"\s*:\s*true/.test(pluginsJs)) {
     console.error(`UF_Test is not registered (or is disabled) in ${path.join(gameDir, "js", "plugins.js")}.`);
     console.error("Add it in the RMMZ Plugin Manager, or for a disposable copy run: node tools/add_test_plugin.js <plugins.js>");
     process.exit(2);
@@ -29,7 +29,7 @@ if (!/"name"\s*:\s*"UF_Test"\s*,\s*"status"\s*:\s*true/.test(pluginsJs)) {
 const resultsFile = path.join(gameDir, "test_output", "results.txt");
 fs.rmSync(resultsFile, { force: true });
 
-const flag = suite ? `--uf-test=${suite}` : "--uf-test";
+const flag = suite ? `--deus-test=${suite}` : "--deus-test";
 // A fresh browser profile per run: Chromium allows one process per profile, so a shared profile makes
 // back-to-back runs hand off to the previous, still-closing process and exit early.
 const profile = path.join(require("os").tmpdir(), `uf_test_profile_${process.pid}_${Date.now()}`);
@@ -41,7 +41,9 @@ const noThrottle = [
     "--disable-backgrounding-occluded-windows",
     "--disable-features=CalculateNativeWinOcclusion"
 ];
-const child = spawn(NW, [gameDir, `--user-data-dir=${profile}`, ...noThrottle, flag], { stdio: "ignore" });
+const child = spawn(NW, [gameDir, `--user-data-dir=${profile}`, ...noThrottle, flag], { stdio: ["ignore", "pipe", "pipe"] });
+child.stdout.on("data", () => {});
+child.stderr.on("data", () => {});
 
 const timer = setTimeout(() => {
     console.error(`HARNESS: no exit after ${TIMEOUT_MS / 1000} s, killing nw.exe`);

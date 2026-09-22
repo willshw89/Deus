@@ -1,0 +1,4662 @@
+{
+ "$UF_Stock_BigMonster1_r1": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "creature bog_horror \"Bog horror\" (monster)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 400) → drops nothing",
+   "hostile to everyone (red stance square)",
+   "only in primeval+ regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_BigMonster1_r1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "row 1 of stock characters/$BigMonster1.png in every facing row, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Monster_0": {
+  "status": "stock RMMZ",
+  "request": "AR-403",
+  "requests": [
+   "AR-403",
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature fowl \"Wild fowl\" (grazer, tint #f0dcb8)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat, 4 Feathers"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Monster_0.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 0 of stock characters/Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Monster_1": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-402",
+   "AR-600"
+  ],
+  "usedBy": [
+   "creature troll \"Troll\" (monster, tint #c0c8b0)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 400) → drops 4 Raw meat, 2 Hide",
+   "hostile to everyone (red stance square)",
+   "only in wild+ regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Monster_1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 1 of stock characters/Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Monster_4": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature arctic_fox \"Arctic fox\" (predator, tint #e8f0ff)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 100, flees the hunter) → drops 1 Raw meat, 1 Hide"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Monster_4.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 4 of stock characters/Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Monster_5": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "creature ice_wraith \"Ice wraith\" (monster, tint #a0d8ff)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 300) → drops nothing",
+   "hostile to everyone (red stance square)",
+   "only in cursed regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Monster_5.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 5 of stock characters/Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Monster_6": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "creature restless_dead \"Restless dead\" (monster)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 200) → drops 3 Bone",
+   "hostile to everyone (red stance square)",
+   "only in cursed regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Monster_6.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 6 of stock characters/Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Nature_0": {
+  "status": "stock RMMZ",
+  "request": "AR-403",
+  "requests": [
+   "AR-403",
+   "AR-401",
+   "AR-600"
+  ],
+  "usedBy": [
+   "creature wolf \"Wolf\" (predator)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 200) → drops 2 Raw meat, 1 Hide"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Nature_0.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 0 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Nature_1": {
+  "status": "stock RMMZ",
+  "request": "AR-403",
+  "requests": [
+   "AR-403",
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature wildcat \"Wildcat\" (predator)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 120, flees the hunter) → drops 1 Raw meat, 1 Hide"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Nature_1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 1 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Nature_2": {
+  "status": "stock RMMZ",
+  "request": "AR-403",
+  "requests": [
+   "AR-403",
+   "AR-401",
+   "AR-600"
+  ],
+  "usedBy": [
+   "creature boar \"Boar\" (grazer, tint #7a5a40)",
+   "creature wild_sheep \"Wild sheep\" (grazer)",
+   "creature hare \"Hare\" (grazer, tint #c8a888)",
+   "creature rat \"Rat\" (vermin, tint #8888a0)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "boar: alive / dead: hunted (work 150) → drops 3 Raw meat, 1 Hide",
+   "wild_sheep: alive / dead: hunted (work 100, flees the hunter) → drops 2 Raw meat, 1 Wool",
+   "hare: alive / dead: hunted (work 60, flees the hunter) → drops 1 Raw meat, 1 Hide",
+   "rat: alive / dead: hunted (work 40, flees the hunter) → drops 1 Raw meat"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Nature_2.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 2 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Nature_3": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-600"
+  ],
+  "usedBy": [
+   "creature deer \"Deer\" (grazer)",
+   "creature jackal \"Jackal\" (predator, tint #b8a890)",
+   "creature fox \"Fox\" (predator, tint #ff9a6a)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "deer: alive / dead: hunted (work 120, flees the hunter) → drops 3 Raw meat, 1 Hide, 2 Bone",
+   "jackal: alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat, 1 Hide",
+   "fox: alive / dead: hunted (work 100, flees the hunter) → drops 1 Raw meat, 1 Hide"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Nature_3.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 3 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Nature_5": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature songbird \"Songbird\" (flier)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 90, flees the hunter) → drops 1 Raw meat, 2 Feathers",
+   "flies over objects"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Nature_5.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 5 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_SF_Monster_2": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-600"
+  ],
+  "usedBy": [
+   "creature giant_spider \"Giant spider\" (predator)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 160) → drops 1 Raw meat",
+   "only in wild+ regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_SF_Monster_2.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 2 of stock characters/SF_Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_SF_Monster_6": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "creature sand_stalker \"Sand stalker\" (monster, tint #e8d090)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "alive / dead: hunted (work 200) → drops nothing",
+   "hostile to everyone (red stance square)",
+   "only in wild+ regions"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_SF_Monster_6.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 6 of stock characters/SF_Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_SF_People3_4": {
+  "status": "stock RMMZ",
+  "request": "AR-1709",
+  "requests": [
+   "AR-1709"
+  ],
+  "usedBy": [
+   "people automaton"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Stock_SF_People3_4.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 4 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_SF_People3_6": {
+  "status": "stock RMMZ",
+  "request": "AR-1709",
+  "requests": [
+   "AR-1709"
+  ],
+  "usedBy": [
+   "people automaton"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Stock_SF_People3_6.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 6 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_SF_People3_7": {
+  "status": "stock RMMZ",
+  "request": "AR-1709",
+  "requests": [
+   "AR-1709"
+  ],
+  "usedBy": [
+   "people automaton"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Stock_SF_People3_7.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 7 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Vehicle_2": {
+  "status": "stock RMMZ",
+  "request": "AR-401",
+  "requests": [
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature serpent \"Serpent\" (predator, tint #70e060)",
+   "creature hawk \"Hawk\" (flier, tint #c09070)",
+   "creature bat \"Bat\" (flier, tint #585068)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "serpent: alive / dead: hunted (work 90) → drops 1 Raw meat, 1 Hide",
+   "hawk: alive / dead: hunted (work 150, flees the hunter) → drops 1 Raw meat, 3 Feathers",
+   "hawk: flies over objects",
+   "bat: alive / dead: hunted (work 90, flees the hunter) → drops nothing",
+   "bat: flies over objects"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Vehicle_2.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 2 of stock characters/Vehicle.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "$UF_Stock_Vehicle_4": {
+  "status": "stock RMMZ",
+  "request": "AR-403",
+  "requests": [
+   "AR-403",
+   "AR-401"
+  ],
+  "usedBy": [
+   "creature aurochs \"Aurochs\" (grazer, tint #6a5040)",
+   "creature wild_horse \"Wild horse\" (grazer, tint #b08858)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "aurochs: alive / dead: hunted (work 240) → drops 6 Raw meat, 2 Hide, 3 Bone",
+   "wild_horse: alive / dead: hunted (work 180, flees the hunter) → drops 4 Raw meat, 1 Hide"
+  ],
+  "category": "creatures",
+  "file": "img/characters/$UF_Stock_Vehicle_4.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "character 4 of stock characters/Vehicle.png, cut by tools/extract_stock_characters.js (pixels match)"
+ },
+ "img/system/Balloon.png": {
+  "status": "stock RMMZ",
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
+  "usedBy": [
+   "RMMZ core: speech balloons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/Balloon.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "img/system/ButtonSet.png": {
+  "status": "stock RMMZ",
+  "request": "AR-800",
+  "requests": [
+   "AR-800"
+  ],
+  "usedBy": [
+   "RMMZ core: touch buttons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/ButtonSet.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 and unchanged since"
+ },
+ "!$BerryBush": {
+  "status": "U7 stand-in",
+  "request": "AR-023",
+  "requests": [
+   "AR-023"
+  ],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×57)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$BerryBush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$Campfire": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$Campfire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$IronstoneDeposit": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×64)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$IronstoneDeposit.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "!$TimberOak": {
+  "status": "U7 stand-in",
+  "request": "AR-021",
+  "requests": [
+   "AR-021"
+  ],
+  "usedBy": [
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×46)"
+  ],
+  "states": [
+   "one frame"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$TimberOak.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
+ },
+ "$U7_Blacksmith": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "RMMZ data Actors.json (map sprite)",
+   "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$U7_Blacksmith.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "name starts with U7_"
+ },
+ "$U7_DwarfGuard": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "RMMZ data Actors.json (map sprite)",
+   "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages ×2)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$U7_DwarfGuard.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "name starts with U7_"
+ },
+ "$U7_Goblin": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$U7_Goblin.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "name starts with U7_"
+ },
+ "$U7_Miner": {
+  "status": "U7 stand-in",
+  "request": "AR-050",
+  "requests": [
+   "AR-050"
+  ],
+  "usedBy": [
+   "RMMZ data Actors.json (map sprite)",
+   "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages ×2)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)"
+  ],
+  "category": "people",
+  "file": "img/characters/$U7_Miner.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "name starts with U7_"
+ },
+ "img/faces/U7_Faces.png": {
+  "status": "U7 stand-in",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "RMMZ data Actors.json (face ×8)"
+  ],
+  "states": [
+   "face sheet: 4 × 2 faces of 144×144"
+  ],
+  "category": "ui",
+  "file": "img/faces/U7_Faces.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "name starts with U7_"
+ },
+ "UF_Generator": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Generator.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2": {
+  "status": "generated",
+  "request": "AR-120",
+  "requests": [
+   "AR-120",
+   "AR-100"
+  ],
+  "usedBy": [
+   "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)"
+  ],
+  "states": [
+   "26 kinds × 47 autotile shapes on one 768×576 sheet"
+  ],
+  "category": "generated",
+  "file": "(drawn in code)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#2816": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind meadow \"Meadow\"",
+   "biomes: grassland_temperate"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"grass\", colors #5D7139 #4D5D28 #71864D #8A9A61"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 0)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#2864": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind tropical_grass \"Lush grass\"",
+   "biomes: grassland_tropical"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"grass\", colors #189218 #006D00 #45B645 #86D200"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 1)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#2912": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind dry_grass \"Dry grass\"",
+   "biomes: savanna_temperate, savanna_tropical"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"grass\", colors #C69618 #B28210 #DBAE20 #F3DF79"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 2)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#2960": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind shrub_soil \"Scrub soil\"",
+   "biomes: shrubland_temperate, shrubland_tropical"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #AA8659 #9A7141 #BA9A71 #5D7139"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 3)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3008": {
+  "status": "generated",
+  "request": "AR-120",
+  "requests": [
+   "AR-120"
+  ],
+  "usedBy": [
+   "ground kind forest_floor \"Leaf litter\"",
+   "biomes: forest_temperate_broadleaf, forest_tropical_dry_broadleaf"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"litter\", colors #6D4D3D #553D31 #825D4D #9E5124"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 4)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3056": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind needle_floor \"Needle floor\"",
+   "biomes: taiga, forest_temperate_conifer, forest_tropical_conifer"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"needles\", colors #39451C #283114 #4D5D28 #6D3D0C"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 5)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3104": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind jungle_floor \"Jungle floor\"",
+   "biomes: forest_tropical_moist_broadleaf"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"litter\", colors #4D5D28 #39451C #71864D #8A5D2D"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 6)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3152": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind tundra \"Tundra\"",
+   "biomes: tundra"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #9EAE7D #8A9A61 #B6C29A #CEC6BE"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 7)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3200": {
+  "status": "generated",
+  "request": "AR-1206",
+  "requests": [
+   "AR-1206",
+   "AR-100",
+   "AR-102",
+   "AR-103"
+  ],
+  "usedBy": [
+   "ground kind snow \"Snow\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"snow\", colors #EFEFEF #DBDBFF #FFFFFF #CECECE"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 8)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3248": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "ground kind ice \"Ice\"",
+   "biomes: glacier, ocean_arctic"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"ice\", colors #B2D7F3 #71AEE7 #F3F3FF #6DB2E7"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 9)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3296": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-401",
+   "AR-402"
+  ],
+  "usedBy": [
+   "ground kind sand \"Sand\"",
+   "biomes: desert_sand, ocean_temperate, ocean_tropical, lake_salt"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #CAB292 #BA9A71 #DBCAB2 #F7E7A6"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 10)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3344": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind stony \"Stony ground\"",
+   "biomes: desert_rock"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"cracks\", colors #9E928A #7D7169 #AEA29A #615551"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 11)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3392": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-1747",
+   "AR-1707"
+  ],
+  "usedBy": [
+   "ground kind red_clay \"Red clay\"",
+   "biomes: desert_badland"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"stria\", colors #AE653D #9E5124 #BE825D #7D2D00"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 12)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3440": {
+  "status": "generated",
+  "request": "AR-1203",
+  "requests": [
+   "AR-1203",
+   "AR-1214",
+   "AR-1215",
+   "AR-1216",
+   "AR-1200",
+   "AR-1202",
+   "AR-1217",
+   "AR-1218",
+   "AR-100",
+   "AR-1747",
+   "AR-1727",
+   "AR-041 (withdrawn)",
+   "AR-044"
+  ],
+  "usedBy": [
+   "ground kind rock \"Bare rock\"",
+   "biomes: mountain"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"cracks\", colors #7D7D7D #616161 #8E8E8E #514945"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 13)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3488": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind peak_rock \"Rock face\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "impassable (rock faces on peaks, region 250)",
+   "placeholder pattern \"cracks\", colors #515151 #453D39 #6D6D6D #35312D"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 14)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3536": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind mud \"Mud\"",
+   "biomes: marsh_temperate_fresh, marsh_temperate_salt, marsh_tropical_fresh, marsh_tropical_salt, lake_fresh, lake_brackish"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"mud\", colors #6D4D3D #553D31 #7D6559 #415120"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 15)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3584": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind swamp_mud \"Swamp mud\"",
+   "biomes: swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt, swamp_mangrove"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"mud\", colors #45352D #352D24 #514139 #39451C"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 16)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3632": {
+  "status": "generated",
+  "request": "AR-1201",
+  "requests": [
+   "AR-1201",
+   "AR-1203",
+   "AR-1214",
+   "AR-1215",
+   "AR-1216",
+   "AR-1211",
+   "AR-1212",
+   "AR-100",
+   "AR-001"
+  ],
+  "usedBy": [
+   "ground kind dirt \"Dirt\"",
+   "dig job result (UF_Interact)"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #8A5D2D #6D3D0C #9A7141 #5D350C"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 17)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3680": {
+  "status": "generated",
+  "request": "AR-120",
+  "requests": [
+   "AR-120"
+  ],
+  "usedBy": [
+   "ground kind cursed_grass \"Blighted grass\"",
+   "cursed regions: replaces meadow, tropical_grass, dry_grass, jungle_floor"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"grass\", colors #7D7169 #615551 #8E8279 #6D006D"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 18)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3728": {
+  "status": "generated",
+  "request": "AR-120",
+  "requests": [
+   "AR-120"
+  ],
+  "usedBy": [
+   "ground kind blessed_grass \"Flowering grass\"",
+   "blessed regions: replaces meadow, tropical_grass, dry_grass"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"grass\", colors #45B645 #189218 #7DDF7D #F7E7A6"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 19)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3776": {
+  "status": "generated",
+  "request": "AR-120",
+  "requests": [
+   "AR-120",
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind ash \"Ash\"",
+   "cursed regions: replaces forest_floor, needle_floor"
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #515151 #454545 #616161 #6D2400"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 20)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3824": {
+  "status": "generated",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "ground kind scree \"Scree\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"cracks\", colors #6D615D #615551 #7D7169 #514945"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 21)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3872": {
+  "status": "generated",
+  "request": "AR-1201",
+  "requests": [
+   "AR-1201"
+  ],
+  "usedBy": [
+   "ground kind road \"Packed earth\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"dots\", colors #BA9A71 #8E7565 #CAB292 #6D4D3D"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 22)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3920": {
+  "status": "generated",
+  "request": "AR-1204",
+  "requests": [
+   "AR-1204",
+   "AR-300"
+  ],
+  "usedBy": [
+   "ground kind floor_wood \"Plank floor\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"planks\", colors #9A7141 #653D10 #BE825D #3D240C"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 23)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#3968": {
+  "status": "generated",
+  "request": "AR-1205",
+  "requests": [
+   "AR-1205",
+   "AR-300"
+  ],
+  "usedBy": [
+   "ground kind floor_stone \"Flagstone floor\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"cracks\", colors #8E8E8E #6D6D6D #AEAEAE #454545"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 24)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_GenGround_A2#4016": {
+  "status": "generated",
+  "request": "AR-300",
+  "requests": [
+   "AR-300"
+  ],
+  "usedBy": [
+   "ground kind floor_rushes \"Rush floor\""
+  ],
+  "states": [
+   "autotile: 47 edge shapes against every neighbouring kind (biome borders show)",
+   "placeholder pattern \"needles\", colors #AA8659 #9A7141 #F7E7A6 #6D4D3D"
+  ],
+  "category": "tiles",
+  "file": "(drawn in code: UF_GenGround_A2, kind 25)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "!$UF_Apothecary_Bench": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object apothecary_bench \"Apothecary bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Apothecary_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bed_Wood": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object bed_wood \"Wooden bed\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Plant fiber on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bed_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_BerryBush": {
+  "status": "original",
+  "request": "AR-023",
+  "requests": [
+   "AR-023",
+   "AR-103"
+  ],
+  "usedBy": [
+   "object berry_bush \"Berry bush\""
+  ],
+  "states": [
+   "gather: Berry bush → Berry bush (picked) (yields 2 Berries)",
+   "is the regrown state of Berry bush (picked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_BerryBush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_BerryBush_Bare": {
+  "status": "original",
+  "request": "AR-023",
+  "requests": [
+   "AR-023",
+   "AR-103"
+  ],
+  "usedBy": [
+   "object berry_bush_bare \"Berry bush (picked)\""
+  ],
+  "states": [
+   "regrows into Berry bush after 48 h",
+   "is the after-state of Berry bush (gather)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_BerryBush_Bare.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Birch": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object birch \"Birch\""
+  ],
+  "states": [
+   "chop: Birch → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Birch.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bowyer_Bench": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object bowyer_bench \"Bowyer's bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bowyer_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bridge": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object bridge \"Plank bridge\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "sits on water cells",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bridge.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Bush": {
+  "status": "original",
+  "request": "AR-023",
+  "requests": [
+   "AR-023",
+   "AR-103"
+  ],
+  "usedBy": [
+   "object bush \"Shrub\""
+  ],
+  "states": [
+   "gather: Shrub → gone (yields 2 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Bush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Cactus": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object cactus \"Cactus\""
+  ],
+  "states": [
+   "gather: Cactus → gone (yields 1 Fruit)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Cactus.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CactusTall": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object cactus_tall \"Tall cactus\""
+  ],
+  "states": [
+   "chop: Tall cactus → gone (yields 2 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CactusTall.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Campfire": {
+  "status": "original",
+  "request": "AR-105",
+  "requests": [
+   "AR-105",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object campfire \"Campfire\""
+  ],
+  "states": [
+   "building: unbuilt (needs 3 Log, 3 Stone on the cell) / built",
+   "ruined → Old bones (when its site is sacked)",
+   "unlit / lit (a fire: cooking happens next to it)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Campfire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CaveMoss": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object cave_moss \"Cave moss\""
+  ],
+  "states": [
+   "gather: Cave moss → gone (yields 2 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CaveMoss.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CaveMushrooms": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1902"
+  ],
+  "usedBy": [
+   "object cave_mushrooms \"Cave mushrooms\""
+  ],
+  "states": [
+   "gather: Cave mushrooms → gone (yields 2 Mushrooms)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CaveMushrooms.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Chest_Wood": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object chest_wood \"Storage chest\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Plant fiber on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Chest_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CopperOutcrop": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object copper_outcrop \"Copper outcrop\""
+  ],
+  "states": [
+   "mine: Copper outcrop → Loose stones (yields 2 Copper ore, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CopperOutcrop.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Crib": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object crib \"Crib\""
+  ],
+  "states": [
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Crib.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CrystalCluster": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-103",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "object crystal \"Crystal cluster\""
+  ],
+  "states": [
+   "mine: Crystal cluster → Small crystals (yields 2 Rough gem)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CrystalCluster.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_CrystalSpire": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "object crystal_spire \"Crystal spire\""
+  ],
+  "states": [
+   "mine: Crystal spire → Small crystals (yields 2 Rough gem)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_CrystalSpire.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_DesertShrub": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object desert_shrub \"Desert shrub\""
+  ],
+  "states": [
+   "gather: Desert shrub → gone (yields 1 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_DesertShrub.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Dining_Bench": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object dining_bench \"Dining bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Dining_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Dining_Table": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object dining_table \"Dining table\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Dining_Table.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Door_Iron": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object door_iron \"Iron door\""
+  ],
+  "states": [
+   "dismantle: Iron door → gone (yields 1 Iron bar)",
+   "mine: Iron door → gone (yields 1 Iron bar)",
+   "building: unbuilt (needs 2 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Iron.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Door_Stone": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object door_stone \"Stone door\""
+  ],
+  "states": [
+   "dismantle: Stone door → gone (yields 1 Stone)",
+   "mine: Stone door → gone (yields 1 Stone)",
+   "quarry: Stone door → gone (yields 1 Stone)",
+   "building: unbuilt (needs 2 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Stone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Door_Wood": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object door_wood \"Wooden door\""
+  ],
+  "states": [
+   "dismantle: Wooden door → gone (yields 1 Log)",
+   "mine: Wooden door → gone (yields 1 Log)",
+   "chop: Wooden door → gone (yields 1 Log)",
+   "building: unbuilt (needs 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Door_Wood.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_FallenPillar": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object rubble_pillar \"Fallen pillar\""
+  ],
+  "states": [
+   "quarry: Fallen pillar → gone (yields 3 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_FallenPillar.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_FarmPlot": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object farm_plot \"Farm plot\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_FarmPlot.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fern": {
+  "status": "original",
+  "request": "AR-1600",
+  "requests": [
+   "AR-1600",
+   "AR-103"
+  ],
+  "usedBy": [
+   "object fern \"Fern\""
+  ],
+  "states": [
+   "gather: Fern → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fern.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fir_Snow": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fir_snow \"Snow fir\""
+  ],
+  "states": [
+   "chop: Snow fir → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fir_Snow.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fletcher_Bench": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object fletcher_bench \"Fletcher's bench\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fletcher_Bench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_Blue": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_blue \"Blue flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_Blue.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_Purple": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_purple \"Purple flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_Purple.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Flowers_White": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers_white \"White flowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Flowers_White.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fruit_Tree": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fruit_tree \"Fruit tree\""
+  ],
+  "states": [
+   "gather: Fruit tree → Fruit tree (picked) (yields 3 Fruit)",
+   "chop: Fruit tree → Stump (yields 3 Log)",
+   "is the regrown state of Fruit tree (picked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fruit_Tree.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Fruit_Tree_Bare": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object fruit_tree_bare \"Fruit tree (picked)\""
+  ],
+  "states": [
+   "chop: Fruit tree (picked) → Stump (yields 3 Log)",
+   "regrows into Fruit tree after 72 h",
+   "is the after-state of Fruit tree (gather)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Fruit_Tree_Bare.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Furnace": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object furnace \"Furnace\"",
+   "object pottery_kiln \"Pottery kiln\" (tint #b05030)"
+  ],
+  "states": [
+   "furnace: building: unbuilt (needs 6 Stone on the cell) / built",
+   "furnace: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "pottery_kiln: building: unbuilt (needs 3 Stone on the cell) / built",
+   "pottery_kiln: ruined → Rubble (when its site is sacked)",
+   "pottery_kiln: unlit / lit (a fire: cooking happens next to it)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Furnace.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GlowCaps": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1906"
+  ],
+  "usedBy": [
+   "object glow_caps \"Glow-caps\""
+  ],
+  "states": [
+   "gather: Glow-caps → gone (yields 2 Mushrooms)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GlowCaps.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GoldOutcrop": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object gold_outcrop \"Gold outcrop\""
+  ],
+  "states": [
+   "mine: Gold outcrop → Loose stones (yields 1 Gold nugget, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GoldOutcrop.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GraniteBoulder": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-022"
+  ],
+  "usedBy": [
+   "object granite_boulder \"Granite boulder\""
+  ],
+  "states": [
+   "quarry: Granite boulder → Loose stones (yields 4 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GraniteBoulder.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_GrassTuft": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object grass_tuft \"Tall grass\""
+  ],
+  "states": [
+   "gather: Tall grass → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_GrassTuft.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Gravel": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object gravel \"Gravel\"",
+   "object clay_deposit \"Clay deposit\" (tint #b06030)",
+   "object sand_deposit \"Sand bank\" (tint #d8c070)",
+   "item clay \"Clay\" (tint #b06030)",
+   "item sand \"Sand\" (tint #d8c070)"
+  ],
+  "states": [
+   "gravel: pick: Gravel → gone (yields 1 Stone)",
+   "flat: drawn under units and items",
+   "clay_deposit: gather: Clay deposit → gone (yields 2 Clay)",
+   "clay_deposit: quarry: Clay deposit → gone (yields 3 Clay)",
+   "blocks movement (units work from a neighbouring cell)",
+   "sand_deposit: gather: Sand bank → gone (yields 3 Sand)",
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "clay: made by: Extract clay from earth",
+   "clay: used in: Fire clay bricks",
+   "sand: made by: Sift sand from stone",
+   "sand: used in: Slake lime mortar"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Gravel.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Icon_102": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item bow_short \"Short bow\"",
+   "item bow_long \"Long bow\" (tint #c8a070)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bow_short: made by: Carve a short bow",
+   "bow_long: made by: Carve a long bow"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_102.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_107": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900",
+   "AR-1746"
+  ],
+  "usedBy": [
+   "item spear \"Spear\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Haft a stone spear, Haft an iron spear"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_107.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_110": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item club \"Club\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Shape a club"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_110.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_114": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900",
+   "AR-906"
+  ],
+  "usedBy": [
+   "item sling \"Sling\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Braid a sling"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_114.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_120": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_knife \"Stone knife\" (tint #c8b8a0)",
+   "item dagger_iron \"Iron dagger\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "stone_knife: held tool (hunt ×2, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
+   "stone_knife: made by: Knap a stone knife",
+   "dagger_iron: held tool (hunt ×2.5, gather ×1.5, craft ×1.5): shown in the hand on the held layer (AR-600)",
+   "dagger_iron: made by: Forge an iron dagger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_120.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_128": {
+  "status": "original",
+  "request": "AR-901",
+  "requests": [
+   "AR-901"
+  ],
+  "usedBy": [
+   "item shield_iron \"Iron shield\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge an iron shield"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_128.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_129": {
+  "status": "original",
+  "request": "AR-512",
+  "requests": [
+   "AR-512",
+   "AR-901"
+  ],
+  "usedBy": [
+   "item shield_wood \"Wooden shield\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Build a wooden shield"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_129.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_132": {
+  "status": "original",
+  "request": "AR-902",
+  "requests": [
+   "AR-902"
+  ],
+  "usedBy": [
+   "item helmet_iron \"Iron helmet\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge an iron helmet"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_132.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_135": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item mail_iron \"Iron mail\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 3 (the wearer's sheet changes)",
+   "made by: Forge iron mail"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_135.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_136": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201"
+  ],
+  "usedBy": [
+   "item fiber_wrap \"Woven wrap\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 1 (the wearer's sheet changes)",
+   "made by: Weave a fiber wrap"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_136.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_138": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201"
+  ],
+  "usedBy": [
+   "item hide_cloak \"Hide cloak\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 2 (the wearer's sheet changes)",
+   "made by: Sew a hide cloak"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_138.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_140": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item leggings_leather \"Leather leggings\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Stitch leather leggings"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_140.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_141": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item greaves_iron \"Iron greaves\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge iron greaves"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_141.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_150": {
+  "status": "original",
+  "request": "AR-902",
+  "requests": [
+   "AR-902"
+  ],
+  "usedBy": [
+   "item helmet_leather \"Leather cap\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Stitch a leather cap"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_150.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_153": {
+  "status": "original",
+  "request": "AR-903",
+  "requests": [
+   "AR-903"
+  ],
+  "usedBy": [
+   "item armor_leather \"Leather armor\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "worn: clothing tier 3 (the wearer's sheet changes)",
+   "made by: Stitch leather armor"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_153.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_167": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item charcoal \"Charcoal\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Burn charcoal",
+   "used in: Smelt an iron bar, Smelt a copper bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_167.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_169": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-1216",
+   "AR-044",
+   "AR-030",
+   "AR-033",
+   "AR-1701"
+  ],
+  "usedBy": [
+   "item gold \"Gold nugget\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_169.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_216": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_pick \"Stone pick\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "held tool (quarry ×2, mine ×2, pick ×1.5): shown in the hand on the held layer (AR-600)",
+   "made by: Haft a stone pick"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_216.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_225": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item arrows \"Arrows\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_225.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_256": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item root \"Root vegetable\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_256.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_260": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item fish \"Fish\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger",
+   "used in: Roast fish"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_260.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_261": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "item mushroom \"Mushrooms\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −20 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_261.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_265": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-020",
+   "AR-102"
+  ],
+  "usedBy": [
+   "item fruit \"Fruit\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −30 hunger, −10 thirst"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_265.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_274": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item seeds \"Seeds\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_274.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_289": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item wool \"Wool\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_289.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_290": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item fiber \"Plant fiber\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Weave a fiber wrap, Sew a hide cloak, Carve a short bow … (+6)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_290.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_291": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-201",
+   "AR-903",
+   "AR-904",
+   "AR-902",
+   "AR-905",
+   "AR-1705",
+   "AR-1704",
+   "AR-1724",
+   "AR-1744",
+   "AR-1745"
+  ],
+  "usedBy": [
+   "item hide \"Hide\"",
+   "item leather \"Leather\" (tint #d09060)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "hide: used in: Sew a hide cloak, Tan a hide",
+   "leather: made by: Tan a hide",
+   "leather: used in: Braid a sling, Build a wooden shield, Forge an iron dagger, Forge a short sword, Forge a long sword, Stitch a leather cap … (+5)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_291.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_295": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item firewood \"Firewood\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Split firewood",
+   "used in: Burn charcoal"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_295.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_297": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-511",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item feathers \"Feathers\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Fletch stone-tipped arrows, Fletch bone-tipped arrows, Fletch iron-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_297.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_298": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-1705",
+   "AR-1725"
+  ],
+  "usedBy": [
+   "item bone \"Bone\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Fletch bone-tipped arrows"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_298.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_300": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item gem_cut \"Cut gem\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_300.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_301": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item gem_rough \"Rough gem\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_301.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_313": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-904"
+  ],
+  "usedBy": [
+   "item bar_iron \"Iron bar\"",
+   "item bar_copper \"Copper bar\" (tint #e0a070)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "bar_iron: made by: Smelt an iron bar",
+   "bar_iron: used in: Fletch iron-tipped arrows, Haft an iron spear, Forge an iron dagger, Forge a short sword, Forge a long sword, Forge an iron axe … (+5)",
+   "bar_copper: made by: Smelt a copper bar",
+   "bar_copper: used in: Cast a copper mace"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_313.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_96": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item sword_short \"Short sword\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge a short sword"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_96.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_97": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item sword_long \"Long sword\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge a long sword"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_97.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_98": {
+  "status": "original",
+  "request": "AR-511",
+  "requests": [
+   "AR-511",
+   "AR-512",
+   "AR-900"
+  ],
+  "usedBy": [
+   "item mace \"Copper mace\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Cast a copper mace"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_98.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_Icon_99": {
+  "status": "original",
+  "request": "AR-201",
+  "requests": [
+   "AR-201",
+   "AR-512"
+  ],
+  "usedBy": [
+   "item stone_axe \"Stone axe\" (tint #c8b8a0)",
+   "item axe_iron \"Iron axe\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "stone_axe: held tool (chop ×2): shown in the hand on the held layer (AR-600)",
+   "stone_axe: made by: Haft a stone axe",
+   "axe_iron: held tool (chop ×3): shown in the hand on the held layer (AR-600)",
+   "axe_iron: made by: Forge an iron axe"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Icon_99.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but source system/IconSet.png is missing or not stock"
+ },
+ "!$UF_IronstoneDeposit": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044",
+   "AR-022"
+  ],
+  "usedBy": [
+   "object ironstone \"Ironstone outcrop\""
+  ],
+  "states": [
+   "mine: Ironstone outcrop → Loose stones (yields 2 Iron ore, 1 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_IronstoneDeposit.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Berries": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item berries \"Berries\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −25 hunger"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Berries.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Bone": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item hardware_iron \"Iron construction hardware\" (tint #707888)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "made by: Forge construction hardware"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Bone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_CopperOre": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item ore_copper \"Copper ore\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Smelt a copper bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_CopperOre.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_IronOre": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item ore_iron \"Iron ore\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "used in: Smelt an iron bar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_IronOre.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Log": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "item log \"Log\"",
+   "item plank_dressed \"Dressed timber plank\" (tint #d0a060)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "log: used in: Haft a stone axe, Haft a stone pick, Split firewood, Carve a short bow, Carve a long bow, Fletch stone-tipped arrows … (+10)",
+   "plank_dressed: made by: Plane timber planks"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Log.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_MeatCooked": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item meat_cooked \"Cooked meat\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −50 hunger",
+   "made by: Roast meat, Roast fish"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_MeatCooked.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_MeatRaw": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200"
+  ],
+  "usedBy": [
+   "item meat_raw \"Raw meat\""
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "eaten: −20 hunger",
+   "used in: Roast meat"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_MeatRaw.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Stone": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-201",
+   "AR-906",
+   "AR-1200",
+   "AR-1203",
+   "AR-1205",
+   "AR-1207",
+   "AR-1210",
+   "AR-044",
+   "AR-104",
+   "AR-022",
+   "AR-1720",
+   "AR-1722",
+   "AR-1742",
+   "AR-105",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "item stone \"Stone\"",
+   "item brick_clay \"Fired brick\" (tint #b04828)",
+   "item stone_block \"Ashlar stone block\" (tint #d0d0d8)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "stone: used in: Knap a stone knife, Haft a stone axe, Haft a stone pick, Fletch stone-tipped arrows, Haft a stone spear, Slake lime mortar … (+3)",
+   "brick_clay: made by: Fire clay bricks",
+   "stone_block: made by: Chisel ashlar stone block"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Stone.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Item_Straw": {
+  "status": "original",
+  "request": "AR-200",
+  "requests": [
+   "AR-200",
+   "AR-104"
+  ],
+  "usedBy": [
+   "item straw \"Straw\"",
+   "item mortar_lime \"Slaked lime mortar\" (tint #e8e8dc)"
+  ],
+  "states": [
+   "lies on a cell as a stack (one frame; carried items are not drawn yet)",
+   "mortar_lime: made by: Slake lime mortar"
+  ],
+  "category": "items",
+  "file": "img/characters/!$UF_Item_Straw.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Counter": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_counter \"Kitchen counter\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Counter.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Hearth": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_hearth \"Cooking hearth\""
+  ],
+  "states": [
+   "building: unbuilt (needs 4 Stone, 1 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "unlit / lit (a fire: cooking happens next to it)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Hearth.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Kitchen_Pantry": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object kitchen_pantry \"Kitchen larder\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Kitchen_Pantry.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Lichen": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1901"
+  ],
+  "usedBy": [
+   "object lichen \"Lichen\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Lichen.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Lily_Pad": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object lily_pad \"Lily pads\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "sits on water cells",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Lily_Pad.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_LooseStones": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object rocks_small \"Loose stones\""
+  ],
+  "states": [
+   "pick: Loose stones → gone (yields 2 Stone)",
+   "is the after-state of Granite boulder (quarry), Ironstone outcrop (mine), Copper outcrop (mine), Gold outcrop (mine), Stalagmite (quarry), Stalagmite (mine)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_LooseStones.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Mangrove": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object mangrove \"Mangrove\""
+  ],
+  "states": [
+   "chop: Mangrove → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Mangrove.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Oak": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object oak \"Oak\""
+  ],
+  "states": [
+   "chop: Oak → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Oak.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_OldBones": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object bones_pile \"Old bones\""
+  ],
+  "states": [
+   "pick: Old bones → gone (yields 2 Bone)",
+   "is the ruin of Campfire",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_OldBones.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Palm": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object palm \"Palm\""
+  ],
+  "states": [
+   "chop: Palm → Stump (yields 1 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Palm.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Pine": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-102"
+  ],
+  "usedBy": [
+   "object pine \"Pine\""
+  ],
+  "states": [
+   "chop: Pine → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Pine.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Reeds": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1907"
+  ],
+  "usedBy": [
+   "object reeds \"Reeds\""
+  ],
+  "states": [
+   "gather: Reeds → gone (yields 2 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Reeds.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Rubble": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-1903"
+  ],
+  "usedBy": [
+   "object rubble \"Rubble\""
+  ],
+  "states": [
+   "pick: Rubble → gone (yields 2 Stone)",
+   "is the after-state of Stone wall (quarry), Stone wall (mine), Brick wall (quarry), Brick wall (mine), Ashlar stone wall (quarry), Ashlar stone wall (mine)",
+   "is the ruin of Wooden wall, Stone wall, Work stone, Furnace, Smithy, Bowyer's bench … (+18)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Rubble.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Shop_Counter": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object shop_counter \"Trade counter\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log, 1 Stone on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Shop_Counter.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Skeleton": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "object skeleton \"Skeletal remains\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "walk-through"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Skeleton.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_SmallCrystals": {
+  "status": "original",
+  "request": "AR-044",
+  "requests": [
+   "AR-044"
+  ],
+  "usedBy": [
+   "object crystal_small \"Small crystals\""
+  ],
+  "states": [
+   "pick: Small crystals → gone (yields 1 Rough gem)",
+   "is the after-state of Crystal cluster (mine), Crystal spire (mine)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SmallCrystals.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Smithy": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object smithy \"Smithy\""
+  ],
+  "states": [
+   "building: unbuilt (needs 4 Stone, 1 Log, 1 Iron bar on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Smithy.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_SnowBush": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object snow_bush \"Snow bush\""
+  ],
+  "states": [
+   "gather: Snow bush → gone (yields 1 Plant fiber)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SnowBush.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_SporeReeds": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1907"
+  ],
+  "usedBy": [
+   "object spore_reeds \"Spore reeds\""
+  ],
+  "states": [
+   "gather: Spore reeds → gone (yields 2 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_SporeReeds.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Stalagmite": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103",
+   "AR-1903"
+  ],
+  "usedBy": [
+   "object stalagmite \"Stalagmite\""
+  ],
+  "states": [
+   "quarry: Stalagmite → Loose stones (yields 3 Stone)",
+   "mine: Stalagmite → Loose stones (yields 3 Stone)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stalagmite.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Stockpile": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object stockpile \"Stockpile\""
+  ],
+  "states": [
+   "building: unbuilt (no materials) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stockpile.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Straw_Bed": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object floor_straw \"Straw bed\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Straw on the cell) / built",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Straw_Bed.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Stump": {
+  "status": "original",
+  "request": "AR-021",
+  "requests": [
+   "AR-021",
+   "AR-1600",
+   "AR-102",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "object stump \"Stump\""
+  ],
+  "states": [
+   "chop: Stump → gone (yields 1 Log)",
+   "is the after-state of Oak (chop), Birch (chop), Pine (chop), Snow fir (chop), Fruit tree (chop), Fruit tree (picked) (chop) … (+8)",
+   "walk-through"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Stump.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tanning_Rack": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object tanning_rack \"Tanning rack\""
+  ],
+  "states": [
+   "building: unbuilt (needs 3 Log, 2 Plant fiber on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tanning_Rack.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_TowerCap": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "object tower_cap \"Tower-cap\""
+  ],
+  "states": [
+   "chop: Tower-cap → Stump (yields 3 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_TowerCap.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Cursed": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_cursed \"Blighted tree\""
+  ],
+  "states": [
+   "chop: Blighted tree → Stump (yields 1 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Cursed.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Dead": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object dead_tree \"Dead tree\""
+  ],
+  "states": [
+   "chop: Dead tree → Stump (yields 1 Log, 2 Firewood)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Dead.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Savanna": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_savanna \"Flat-top tree\""
+  ],
+  "states": [
+   "chop: Flat-top tree → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Savanna.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Swamp": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_swamp \"Swamp tree\""
+  ],
+  "states": [
+   "chop: Swamp tree → Stump (yields 2 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Swamp.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Tree_Tropical": {
+  "status": "original",
+  "request": "AR-102",
+  "requests": [
+   "AR-102"
+  ],
+  "usedBy": [
+   "object tree_tropical \"Broadleaf giant\""
+  ],
+  "states": [
+   "chop: Broadleaf giant → Stump (yields 4 Log)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Tree_Tropical.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Weapon_Rack": {
+  "status": "original",
+  "request": "AR-905",
+  "requests": [
+   "AR-905",
+   "AR-510"
+  ],
+  "usedBy": [
+   "object weapon_rack \"Weapon rack\""
+  ],
+  "states": [
+   "building: unbuilt (needs 2 Log on the cell) / built",
+   "ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Weapon_Rack.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Well": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object well \"Well\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "blocks movement (units work from a neighbouring cell)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Well.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wheat_Wild": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object wheat_wild \"Wild wheat\""
+  ],
+  "states": [
+   "gather: Wild wheat → gone (yields 1 Seeds, 1 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wheat_Wild.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wild_Grain": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object wild_grain \"Wild grain\""
+  ],
+  "states": [
+   "gather: Wild grain → gone (yields 1 Seeds, 1 Straw)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wild_Grain.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Wildflowers": {
+  "status": "original",
+  "request": "AR-103",
+  "requests": [
+   "AR-103"
+  ],
+  "usedBy": [
+   "object flowers \"Wildflowers\""
+  ],
+  "states": [
+   "one state (nothing interacts with it yet)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Wildflowers.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$UF_Workbench": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104"
+  ],
+  "usedBy": [
+   "object workbench \"Work stone\"",
+   "object mason_bench \"Mason's bench\" (tint #888898)"
+  ],
+  "states": [
+   "workbench: building: unbuilt (needs 2 Stone, 1 Log on the cell) / built",
+   "workbench: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "mason_bench: building: unbuilt (needs 3 Stone, 1 Log on the cell) / built",
+   "mason_bench: ruined → Rubble (when its site is sacked)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$UF_Workbench.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$WallStone_Set": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object wall_stone \"Stone wall\"",
+   "object wall_brick \"Brick wall\" (tint #b05030)",
+   "object wall_ashlar \"Ashlar stone wall\" (tint #e0e0e8)"
+  ],
+  "states": [
+   "wall_stone: quarry: Stone wall → Rubble (yields 2 Stone)",
+   "wall_stone: mine: Stone wall → Rubble (yields 2 Stone)",
+   "wall_stone: dismantle: Stone wall → gone (yields 2 Stone)",
+   "wall_stone: building: unbuilt (needs 2 Stone on the cell) / built",
+   "wall_stone: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "wall_brick: quarry: Brick wall → Rubble (yields 2 Fired brick)",
+   "wall_brick: mine: Brick wall → Rubble (yields 2 Fired brick)",
+   "wall_brick: dismantle: Brick wall → gone (yields 2 Fired brick, 1 Slaked lime mortar)",
+   "wall_brick: building: unbuilt (needs 2 Fired brick, 1 Slaked lime mortar on the cell) / built",
+   "wall_brick: ruined → Rubble (when its site is sacked)",
+   "wall_ashlar: quarry: Ashlar stone wall → Rubble (yields 2 Ashlar stone block)",
+   "wall_ashlar: mine: Ashlar stone wall → Rubble (yields 2 Ashlar stone block)",
+   "wall_ashlar: dismantle: Ashlar stone wall → gone (yields 2 Ashlar stone block, 1 Slaked lime mortar)",
+   "wall_ashlar: building: unbuilt (needs 2 Ashlar stone block, 1 Slaked lime mortar on the cell) / built",
+   "wall_ashlar: ruined → Rubble (when its site is sacked)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$WallStone_Set.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "!$WallWood_Set": {
+  "status": "original",
+  "request": "AR-104",
+  "requests": [
+   "AR-104",
+   "AR-300"
+  ],
+  "usedBy": [
+   "object wall_wood \"Wooden wall\"",
+   "object wall_timber_frame \"Reinforced timber wall\" (tint #d8a860)"
+  ],
+  "states": [
+   "wall_wood: chop: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: mine: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: dismantle: Wooden wall → gone (yields 1 Log)",
+   "wall_wood: building: unbuilt (needs 1 Log on the cell) / built",
+   "wall_wood: ruined → Rubble (when its site is sacked)",
+   "blocks movement (units work from a neighbouring cell)",
+   "wall_timber_frame: chop: Reinforced timber wall → gone (yields 2 Dressed timber plank)",
+   "wall_timber_frame: mine: Reinforced timber wall → gone (yields 2 Dressed timber plank)",
+   "wall_timber_frame: dismantle: Reinforced timber wall → gone (yields 2 Dressed timber plank, 1 Iron construction hardware)",
+   "wall_timber_frame: building: unbuilt (needs 2 Dressed timber plank, 1 Iron construction hardware on the cell) / built",
+   "wall_timber_frame: ruined → Rubble (when its site is sacked)"
+  ],
+  "category": "objects",
+  "file": "img/characters/!$WallWood_Set.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$Adam": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "start.pair male: clothing tier 1 (UF_Colonists.setTier)",
+   "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$Adam.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
+ },
+ "$Eve": {
+  "status": "original",
+  "request": "AR-011",
+  "requests": [
+   "AR-011"
+  ],
+  "usedBy": [
+   "start.pair female: clothing tier 1 (UF_Colonists.setTier)",
+   "start.pair female: clothing tier 3 (UF_Colonists.setTier)",
+   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 3 = Iron mail equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$Eve.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
+ },
+ "$UF_Dwarf_Female": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1702",
+   "AR-1722",
+   "AR-1742"
+  ],
+  "usedBy": [
+   "people dwarf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Dwarf_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Dwarf_Male": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1702",
+   "AR-1722",
+   "AR-1742"
+  ],
+  "usedBy": [
+   "people dwarf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Dwarf_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Elf_Female": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1701",
+   "AR-1721",
+   "AR-1741"
+  ],
+  "usedBy": [
+   "people elf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Elf_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Elf_Male": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1701",
+   "AR-1721",
+   "AR-1741"
+  ],
+  "usedBy": [
+   "people elf"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Elf_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Gnome_Female": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1703",
+   "AR-1723",
+   "AR-1743"
+  ],
+  "usedBy": [
+   "people gnome"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Gnome_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Gnome_Male": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1703",
+   "AR-1723",
+   "AR-1743"
+  ],
+  "usedBy": [
+   "people gnome"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Gnome_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Goblin_Female": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1704",
+   "AR-1724",
+   "AR-1744"
+  ],
+  "usedBy": [
+   "people goblin"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Goblin_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Goblin_Male": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1704",
+   "AR-1724",
+   "AR-1744"
+  ],
+  "usedBy": [
+   "people goblin"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Goblin_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female": {
+  "status": "original",
+  "request": "AR-011",
+  "requests": [
+   "AR-011"
+  ],
+  "usedBy": [
+   "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
+   "start.pair female: clothing tier 2 (UF_Colonists.setTier)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "clothing tier 0: unclad",
+   "worn on the pair: clothing tier 2 = Hide cloak equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_1_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_1_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_2_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_2_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_3_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_3_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_4_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_4_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_5_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_5_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Female_6_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Female_6_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male": {
+  "status": "original",
+  "request": "AR-010",
+  "requests": [
+   "AR-010"
+  ],
+  "usedBy": [
+   "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
+   "start.pair male: clothing tier 2 (UF_Colonists.setTier)"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "clothing tier 0: unclad",
+   "worn on the pair: clothing tier 2 = Hide cloak equipped"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_1_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_1_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_2_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_2_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_3_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_3_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_4_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_4_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_5_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_5_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Human_Male_6_Walk": {
+  "status": "original",
+  "request": "AR-700",
+  "requests": [
+   "AR-700",
+   "AR-400",
+   "AR-600",
+   "AR-011",
+   "AR-010",
+   "AR-1700",
+   "AR-1720",
+   "AR-1740"
+  ],
+  "usedBy": [
+   "people human"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Human_Male_6_Walk.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Orc_Female": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1705",
+   "AR-1725",
+   "AR-1745"
+  ],
+  "usedBy": [
+   "people orc"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Orc_Female.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "$UF_Orc_Male": {
+  "status": "original",
+  "request": "AR-900",
+  "requests": [
+   "AR-900",
+   "AR-400",
+   "AR-600",
+   "AR-1705",
+   "AR-1725",
+   "AR-1745"
+  ],
+  "usedBy": [
+   "people orc"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/$UF_Orc_Male.png",
+  "exists": true,
+  "sidecar": true,
+  "statusWhy": "not in 8e5fdc1"
+ },
+ "img/system/IconSet.png": {
+  "status": "original",
+  "request": "AR-800",
+  "requests": [
+   "AR-800",
+   "AR-201",
+   "AR-511",
+   "AR-902",
+   "AR-903"
+  ],
+  "usedBy": [
+   "RMMZ core: icons"
+  ],
+  "states": [
+   "sheet of fixed-size pieces (RMMZ layout)"
+  ],
+  "category": "ui",
+  "file": "img/system/IconSet.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "img/system/Window.png": {
+  "status": "original",
+  "request": "AR-033",
+  "requests": [
+   "AR-033"
+  ],
+  "usedBy": [
+   "RMMZ core: skin of every window"
+  ],
+  "states": [
+   "9-slice window skin, 192×192 (frame, background, cursor, arrows)"
+  ],
+  "category": "ui",
+  "file": "img/system/Window.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "tileset 91 slot A1: the 9 water kinds"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2048": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind fresh",
+   "biomes: forest_temperate_conifer, forest_temperate_broadleaf, forest_tropical_conifer, forest_tropical_dry_broadleaf, forest_tropical_moist_broadleaf, grassland_temperate, grassland_tropical, savanna_temperate … (+3)",
+   "rivers and the start pond"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2048)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2096": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind pond",
+   "biomes: lake_fresh",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2096)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2144": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind marsh",
+   "biomes: marsh_temperate_fresh, marsh_tropical_fresh"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2144)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2240": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind icy",
+   "biomes: glacier, tundra, taiga, mountain, ocean_arctic",
+   "rivers where it is cold"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2240)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2336": {
+  "status": "original",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-101",
+   "AR-102",
+   "AR-1746"
+  ],
+  "usedBy": [
+   "water kind swamp",
+   "biomes: marsh_temperate_salt, marsh_tropical_salt, swamp_temperate_fresh, swamp_temperate_salt, swamp_tropical_fresh, swamp_tropical_salt"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2336)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2432": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind brackish",
+   "biomes: desert_rock, desert_badland, lake_brackish",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2432)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2528": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101"
+  ],
+  "usedBy": [
+   "water kind salt",
+   "biomes: desert_sand, swamp_mangrove, lake_salt",
+   "lakes by salinity"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2528)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2624": {
+  "status": "original",
+  "request": "AR-101",
+  "requests": [
+   "AR-101",
+   "AR-1903",
+   "AR-1905",
+   "AR-1906",
+   "AR-1907",
+   "AR-1908"
+  ],
+  "usedBy": [
+   "water kind deep",
+   "biomes: ocean_temperate, ocean_tropical"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2624)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A1#2720": {
+  "status": "original",
+  "request": "AR-100",
+  "requests": [
+   "AR-100",
+   "AR-101",
+   "AR-102"
+  ],
+  "usedBy": [
+   "water kind blighted",
+   "water in cursed regions"
+  ],
+  "states": [
+   "animated autotile: 3 frames × 47 shapes (banks against land; joins other water kinds)"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A1.png (A1 autotile 2720)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_B": {
+  "status": "original",
+  "request": "AR-020",
+  "requests": [
+   "AR-020",
+   "AR-021",
+   "AR-023",
+   "AR-1600"
+  ],
+  "usedBy": [
+   "tile 152 (objects)",
+   "tileset 91 slot B"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_B.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_B#152": {
+  "status": "original",
+  "request": "AR-1600",
+  "requests": [
+   "AR-1600",
+   "AR-1905"
+  ],
+  "usedBy": [
+   "object sapling \"Sapling\" (tint #7fb35a)"
+  ],
+  "states": [
+   "gather: Sapling → gone (yields 1 Plant fiber)",
+   "flat: drawn under units and items"
+  ],
+  "category": "objects",
+  "file": "img/tilesets/Outside_B.png (tile 152)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_C": {
+  "status": "original",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "tileset 91 slot C"
+  ],
+  "states": [],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_C.png",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ }
+}

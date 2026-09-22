@@ -89,7 +89,7 @@ const text = m => m.rows.map(r => r.text).join("\n");
 }
 {
     const f = fixture(), u = f.add(1, { age: 0, stage: "baby", needs: { hunger: 61 }, mood: "Content", thoughts: [{ text: "TEST_Thought" }], skillXp: { skill0: 800 }, skills: { skill0: 20 } }, -2);
-    check("eight_tabs", f.API.tabs().length === 8 && f.API.tabs()[7].id === "inventory");
+    check("four_tabs", f.API.tabs().length === 4 && f.API.tabs()[3].id === "inventory");
     check("overview_actual_age_and_level", /Age: 0/.test(text(f.API.model(u))) && /z=-2/.test(text(f.API.model(u))));
     const needs = text(f.API.model(u, "needs"));
     check("needs_explain_urgency", /Hunger: 61; seeks relief around 55/.test(needs) && /Higher need/.test(needs) && /TEST_Thought/.test(needs));
@@ -101,22 +101,9 @@ const text = m => m.rows.map(r => r.text).join("\n");
     u.data.sleepSchedule.wakeMinute = 100;
     const malformed = JSON.stringify(u.data.sleepSchedule);
     check("invalid_sleep_record_not_repaired", /No valid personal sleep schedule/.test(text(f.API.model(u, "needs"))) && JSON.stringify(u.data.sleepSchedule) === malformed);
-    check("xp_skills_not_legacy_counters", /Recorded skill 0: level 9; 800 XP/.test(text(f.API.model(u, "skills"))) && !/level 20/.test(text(f.API.model(u, "skills"))));
     const a = f.add(2, { kind: "creature", faction: null, species: "wolf", age: undefined, stage: undefined });
     check("animal_needs_not_invented", /No persistent needs/.test(text(f.API.model(a, "needs"))) && !/Hunger: 0/.test(text(f.API.model(a, "needs"))));
-    const skills = text(f.API.model(a, "skills"));
-    check("animal_capabilities_not_training", /Attack: 7/.test(skills) && /not a personal training/.test(skills) && !/Woodcutting|Recorded skill/.test(skills));
-    check("unrecorded_personality_explicit", /No personal traits/.test(text(f.API.model(a, "personality"))));
     check("animal_household_not_invented", /No humanoid household/.test(text(f.API.model(a, "family"))));
-    const unknown = f.add(3, { kind: "person", age: undefined });
-    check("missing_skills_no_roll", /No skill XP record/.test(text(f.API.model(unknown, "skills"))) && !unknown.data.skillXp && !f.calls.mutator);
-    check("missing_goals_no_creation", /No saved ambitions/.test(text(f.API.model(unknown, "goals"))) && !unknown.data.lifeGoals);
-    u.data.facets = { bravery: 80, ambition: 33 };
-    u.data.preferences = { smithing: 75 };
-    const personality = text(f.API.model(u, "personality"));
-    check("traits_separate_from_preferences", /Bravery: 80\/100/.test(personality) && /dangerous prey/.test(personality) && /Smithing: 75\/100/.test(personality));
-    u.data.lifeGoals = { mode: "sapient", profession: { label: "TEST_Smith" }, medium: [{ label: "TEST_Sword", state: "active", progress: 0, target: 1, blockedReason: "TEST_No ore" }], long: [], achievements: [{ label: "TEST_Built a home" }] };
-    check("saved_goals_explained", /TEST_No ore/.test(text(f.API.model(u, "goals"))) && /TEST_Built a home/.test(text(f.API.model(u, "goals"))));
     const before = JSON.stringify(f.st); for (const t of f.API.tabs()) f.API.model(u, t.id);
     check("all_tabs_read_only", JSON.stringify(f.st) === before && f.calls.mutator === 0);
     check("invalid_subject_or_tab", f.API.model(999) === null && f.API.model(u, "missing") === null);
@@ -144,9 +131,6 @@ const text = m => m.rows.map(r => r.text).join("\n");
     check("saved_design_and_expansion_reason", /Bedroom, Long, 5 by 6 tiles, rotation 1, mirrored/.test(expanded) && /Residents when designed: 5; beds required then: 3/.test(expanded) && /TEST_No dry plot/.test(expanded));
     home.members.push(2); f.st.households.byUnit[2] = home.id; f.sandbox.UF.World.unit(2).data._isDying = true;
     check("dying_resident_not_counted_alive", /Living residents: 1/.test(text(f.API.model(u, "family"))));
-    f.st.cultureGrowth.factions[1] = { practices: { smithing: 8 }, knowledge: { "recipe:test_bar": { by: 1 } }, generations: 2 };
-    const culture = text(f.API.model(u, "culture"));
-    check("culture_policy_and_learned_evidence_separate", /TEST_Conditional/.test(culture) && /Smithing: 8 confirmed jobs/.test(culture) && /Recipe: test bar/.test(culture) && /not a technology unlock/.test(culture));
 }
 {
     const f = fixture(), u = f.add(1, {}, -2), requested = [];
@@ -167,13 +151,14 @@ const text = m => m.rows.map(r => r.text).join("\n");
     check("farm_unknowns_not_zeroes", /No same-level settlement farming information/.test(text(f.API.model(u, "family"))) && !/Completed harvests:/.test(text(f.API.model(u, "family"))));
 }
 {
-    const f = fixture(), u = f.add(1, { skillXp: { skill0: 200 } }); f.native.open(u.id);
+    const bonds = []; for (let i = 0; i < 30; i++) bonds.push({ unitId: 10 + i, conversations: 5, familiarity: 10 });
+    const f = fixture(), u = f.add(1, { socialBonds: bonds }); f.native.open(u.id);
     const p = f.API.windows(), grid = f.native.layout().grid;
     check("engine_render_method_not_shadowed", p.info.render === f.sandbox.Window_Base.prototype.render && p.info.render() === "engine renderer");
     check("open_companion_preserves_native_subject", f.API.current().unitId === 1 && p.side.visible && p.info.visible && f.native.isOpen());
     check("fits_816_by_624", [p.side, p.info].every(w => w.x >= 0 && w.y >= 0 && w.x + w.width <= 816 && w.y + w.height <= 624));
-    f.click(f.API.screenRect("tab", "skills"));
-    check("tab_touch_contained", f.API.current().tab === "skills" && f.calls.map === 0 && p.info._renderedLines.length > 0, `map orders=${f.calls.map}`);
+    f.click(f.API.screenRect("tab", "family"));
+    check("tab_touch_contained", f.API.current().tab === "family" && f.calls.map === 0 && p.info._renderedLines.length > 0, `map orders=${f.calls.map}`);
     const page = f.API.current().page; f.click(f.API.screenRect("next"));
     check("long_page_navigation", f.API.current().pages > 1 && f.API.current().page === page + 1);
     f.click(f.API.screenRect("tab", "inventory"));
@@ -194,7 +179,7 @@ const text = m => m.rows.map(r => r.text).join("\n");
     check("live_actor_level_not_camera", p.model.z === -2);
     const cover = new f.sandbox.Window_Base({ x: p.side.x, y: p.side.y, width: p.side.width, height: p.side.height });
     f.scene._windowLayer.addChildAt(cover, f.scene._windowLayer.children.length);
-    f.click(f.API.screenRect("tab", "skills"));
+    f.click(f.API.screenRect("tab", "family"));
     check("covered_tabs_do_not_steal_modal_click", f.API.current().tab === "overview");
     cover.hide(); f.click(f.API.screenRect("tab", "needs"), true);
     check("right_click_closes", !f.native.isOpen() && !p.side.visible && !p.info.visible);

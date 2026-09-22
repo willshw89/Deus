@@ -20,13 +20,10 @@
  */
 (() => {
     "use strict";
-    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
-    root.UF = root.UF || {};
-    const UF = root.UF;
-    const W = () => UF.World;
-    const C = () => UF.Colonists;
-    const O = () => UF.Objects;
-    const Own = () => UF.Ownership;
+    const W = () => window.UF && UF.World;
+    const C = () => window.UF && UF.Colonists;
+    const O = () => window.UF && UF.Objects;
+    const Own = () => window.UF && UF.Ownership;
     const zOf = r => r && r.z !== undefined ? r.z : r && r.area && r.area.z !== undefined ? r.area.z : 0;
     const copyArea = a => ({ x: a ? a.x : 0, y: a ? a.y : 0 });
     const areaOf = r => ({ x: (r && r.area) ? r.area.x : 0, y: (r && r.area) ? r.area.y : 0, z: zOf(r) });
@@ -35,7 +32,7 @@
     const unitOf = u => u && typeof u === "object" ? u : W() && W().unit(u);
     const dead = u => !!(u && u.data && (u.data.dead === true || u.data._isDying === true));
     const person = u => !!(u && u.data && ["colonist", "person"].includes(u.data.kind));
-    const adult = u => !!(u && u.data && (Number.isFinite(u.data.age) ? u.data.age >= 15 : (u.data.stage === "adult" || u.data.stage === "elder")));
+    const adult = u => !!(u && u.data && (Number.isFinite(u.data.age) ? u.data.age >= 18 : (u.data.stage === "adult" || u.data.stage === "elder")));
     const tick = () => window.UF && UF.Time && typeof UF.Time.ticks === "function" ? UF.Time.ticks() : W() && W()._frame || 0;
     const day = () => window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 0}` : "0:0:0";
     const emit = (event, ...args) => { if (window.UF && UF.Events) UF.Events.emit(event, ...args); };
@@ -56,10 +53,7 @@
     }
     function context(u) {
         const d = u && u.data, c = C() && C().state(u), home = d && d.home;
-        if (!d || !d.faction) return null;
-        const siteId = (d.site !== undefined && d.site !== null) ? d.site : (c && c.siteId !== undefined ? c.siteId : (d.kind === "colonist" ? 1 : null));
-        if (siteId === null || siteId === undefined) return null;
-        if (d.site === undefined) d.site = siteId;
+        if (!d || !d.faction || d.site === undefined || d.site === null) return null;
         const a = c || (home && home.area ? home : u), z = zOf(a);
         if (!a.area || !Number.isInteger(z) || z < -2 || z > 2) return null;
         return { faction: d.faction, siteId: d.site, area: { x: a.area.x, y: a.area.y }, z };
@@ -70,14 +64,7 @@
     function resolve(h) { const s = state(); return h && typeof h === "object" ? h : s && s.byId[h] || null; }
     function structures(refH) {
         const h = resolve(refH);
-        if (!h) return [];
-        const res = [];
-        if (h.home) res.push(h.home);
-        if (h.privateHomestead && !h.isMovedIn && h.privateHomestead !== h.home) res.push(h.privateHomestead);
-        if (h.home && Array.isArray(h.home.annexes)) {
-            res.push(...h.home.annexes.filter(a => a && Array.isArray(a.beds)));
-        }
-        return res;
+        return h && h.home ? [h.home, ...(h.home.annexes || []).filter(a => a && Array.isArray(a.beds))] : [];
     }
     function members(ref) {
         const h = resolve(ref), s = state();
@@ -252,99 +239,24 @@
                     if (previous && previous.id !== of(p).id && !members(previous).length) previous.mergedInto = of(p).id;
                 }
             }
-            // Home inheritance: when all members of a household are dead, any homeless
-            // faction member can claim the vacant home. Nothing sits unbuilt.
-            const vacantHomes = [];
-            for (const h of all()) {
-                if (h.mergedInto || !h.home || h.home.isShared) continue;
-                const alive = members(h);
-                if (alive.length === 0) vacantHomes.push(h);
-            }
-            if (vacantHomes.length) {
-                // Find homeless faction people (in shared town hall or no home at all)
-                const homeless = people.filter(u => {
-                    const uh = of(u);
-                    if (!uh) return true;
-                    if (uh.home && uh.home.isShared) return true; // still in town hall
-                    if (!uh.home) return true;
-                    return false;
-                });
-                // Prioritize paired couples first, then singles
-                homeless.sort((a, b) => {
-                    const pairA = (a.data && (a.data.partner || a.data.partnerId)) ? 1 : 0;
-                    const pairB = (b.data && (b.data.partner || b.data.partnerId)) ? 1 : 0;
-                    return (pairB - pairA) || (a.id - b.id);
-                });
-
-                for (const vacant of vacantHomes) {
-                    if (!homeless.length) break;
-                    const claimer = homeless.shift();
-                    const oldH = of(claimer);
-                    // Move claimer into the vacant household
-                    if (oldH) oldH.members = (oldH.members || []).filter(id => id !== claimer.id);
-                    join(claimer, vacant);
-                    vacant.reason = "Inherited home";
-                    // If claimer has a partner, bring them too
-                    const partner = unitOf(partnerId(claimer));
-                    if (partner && !dead(partner)) {
-                        const idx = homeless.indexOf(partner);
-                        if (idx >= 0) homeless.splice(idx, 1);
-                        const partnerH = of(partner);
-                        if (partnerH && partnerH.id !== vacant.id) {
-                            partnerH.members = (partnerH.members || []).filter(id => id !== partner.id);
-                        }
-                        join(partner, vacant);
-                    }
-                    emit("households:inherited", vacant, claimer);
-                }
-            }
             generations();
             ensureTownHallHomes(people);
-            for (const h of all()) {
-                if (h.mergedInto) continue;
-                if (h.isMovedIn && h.home && h.home.isSheltered) {
-                    if (h.home) syncHome(h);
-                    continue;
-                }
-                const mems = members(h);
-                const rep = mems.find(p => p.data && p.data.age >= 15) || mems[0];
-                if (rep) {
-                    ensureHome(h, rep);
-                }
-                if (h.home) syncHome(h);
-            }
+            for (const h of all()) if (h.home) syncHome(h);
             return all();
         } finally { reconciling = false; }
     }
     function ensureTownHallHomes(people) {
         const w = W();
-        if (!w || !w.state) return;
-        const sites = (w.state.history && Array.isArray(w.state.history.sites) && w.state.history.sites.length)
-            ? w.state.history.sites
-            : (C() && typeof C().site === "function" && C().site() ? [C().site()] : []);
-        if (!sites.length) return;
-        for (const site of sites) {
+        if (!w || !w.state || !w.state.history || !w.state.history.sites) return;
+        for (const site of w.state.history.sites) {
             if (!site || site.ruined) continue;
-            const siteId = site.id || 1;
-            site.id = siteId;
-            const siteArea = site.area || (w.viewLevel ? w.viewLevel() : { x: 0, y: 0 });
-            site.area = siteArea;
-            const siteUnits = people.filter(u => u.data && (u.data.site === siteId || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
-            const founders = siteUnits.filter(u => u.data && (u.data.founder === true || (u.data.founder !== false && !u.data.motherId && !u.data.fatherId && u.data.stage !== "child")));
+            const siteUnits = people.filter(u => u.data && (u.data.site === site.id || (u.data.site === undefined && samePlace(u, site) && Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= 8)));
+            const founders = siteUnits.filter(u => u.data && u.data.founder);
             if (founders.length < 2) continue;
-
-            const col = C();
-            if (col && typeof col.attemptAdulthoodPairbond === "function") {
-                for (const f of founders) {
-                    if (!f.data.partnerId && !f.data.partner) {
-                        col.attemptAdulthoodPairbond(f);
-                    }
-                }
-            }
             const founderH = [...new Set(founders.map(u => of(u)).filter(Boolean))];
             if (founderH.length === 0) continue;
-            const allPrivateMovedIn = founderH.every(h => h.home && !h.home.isShared && h.isMovedIn);
-            if (allPrivateMovedIn) continue;
+            const existingPrivate = founderH.some(h => h.home && !h.home.isShared);
+            if (existingPrivate) continue;
 
             const area = { x: site.area.x, y: site.area.y };
             const z = zOf(site);
@@ -360,10 +272,11 @@
                 { x: site.x + 2, y: site.y + 1 }, { x: site.x + 2, y: site.y + 2 }
             ];
 
-            const culture = (C() && typeof C().culture === "function" && C().culture(founders[0])) || {};
-            const wallId = culture.wall || "wall_wood";
-            const doorId = culture.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
-            const floorId = (culture.floor && culture.floor.kind) || (wallId.includes("stone") ? "floor_stone" : "floor_wood");
+            const F = window.UF && UF.Factions && UF.Factions.get(site.faction);
+            const cat = catalog();
+            const cult = (F && cat && cat.cultures && cat.cultures[F.species]) || {};
+            const wallId = cult.wall || "wall_wood";
+            const doorId = cult.door || (wallId.includes("stone") ? "door_stone" : "door_wood");
 
             const walls = [];
             for (let y = y0; y <= y1; y++) {
@@ -376,44 +289,17 @@
                 }
             }
 
-            const floors = [];
-            for (let y = y0 + 1; y < y1; y++) {
-                for (let x = x0 + 1; x < x1; x++) {
-                    floors.push({ x, y });
-                }
-            }
-
-            const orderedFounders = [];
-            const visited = new Set();
-            for (const f of founders) {
-                if (visited.has(f.id)) continue;
-                orderedFounders.push(f);
-                visited.add(f.id);
-                const partner = f.data && (unitOf(f.data.partner) || unitOf(f.data.partnerId));
-                if (partner && founders.some(u => u.id === partner.id) && !visited.has(partner.id)) {
-                    orderedFounders.push(partner);
-                    visited.add(partner.id);
-                }
-            }
-            for (const f of founders) {
-                if (!visited.has(f.id)) {
-                    orderedFounders.push(f);
-                    visited.add(f.id);
-                }
-            }
-
             const sharedBeds = [];
             for (let i = 0; i < 8; i++) {
                 const bPos = bedPositions[i];
-                const member = orderedFounders[i] || null;
+                const hIdx = Math.floor(i / 2);
+                const h = founderH[hIdx];
+                const hMembers = h ? members(h) : [];
+                const member = hMembers[i % 2];
                 const unitId = member ? member.id : null;
                 sharedBeds.push({ x: bPos.x, y: bPos.y, unitId });
-                if (member && member.data && (!of(member) || !of(member).isMovedIn)) {
+                if (member && member.data && (!member.data.bed || member.data.bed.isShared)) {
                     member.data.bed = { area: copyArea(area), x: bPos.x, y: bPos.y, z, isShared: true };
-                    const Own = window.UF && UF.Ownership;
-                    if (Own && typeof Own.assignBed === "function") {
-                        Own.assignBed(member, { area: copyArea(area), x: bPos.x, y: bPos.y, z }, { force: true });
-                    }
                 }
             }
 
@@ -425,10 +311,8 @@
                     area: copyArea(area), z,
                     wall: wallId,
                     door: doorId,
-                    floor: floorId,
                     walls,
                     doors: [doorPos],
-                    floors,
                     entrance: { x: site.x, y: y1 + 1 },
                     sleeping: bedPositions.map(p => ({ x: p.x, y: p.y })),
                     spots: [
@@ -445,33 +329,17 @@
                 };
             } else {
                 townHall.beds = sharedBeds;
-                townHall.floors = floors;
-                townHall.floor = floorId;
             }
 
             for (const h of founderH) {
-                const mems = members(h);
-                const hasBedInTH = mems.some(m => sharedBeds.some(b => b.unitId === m.id));
-                if (hasBedInTH) {
-                    if (!h.home || h.home.isShared || !h.isMovedIn) {
-                        if (h.home && !h.home.isShared && !h.privateHomestead) {
-                            h.privateHomestead = h.home;
-                        }
-                        h.home = townHall;
-                    }
-                } else {
-                    // Overcapacity founders beyond the 8 Town Hall beds do not share Town Hall;
-                    // they seek and build their own private shelter immediately!
-                    if (h.home === townHall) {
-                        h.previousSharedHome = townHall;
-                        h.home = h.privateHomestead || null;
-                    }
+                if (!h.home || h.home.isShared) {
+                    h.home = townHall;
                 }
             }
         }
     }
-    function object(h, p) { return p ? (O() && O().atIn(areaOf(h), p.x, p.y)) : null; }
-    function ref(h, p) { return p ? { kind: "object", area: { x: h.area.x, y: h.area.y }, z: h.z, x: p.x, y: p.y } : null; }
+    function object(h, p) { return O() && O().atIn(areaOf(h), p.x, p.y); }
+    function ref(h, p) { return { kind: "object", area: { x: h.area.x, y: h.area.y }, z: h.z, x: p.x, y: p.y }; }
     function dry(h, x, y) {
         const w = W(), j = window.UF && UF.Jobs;
         return !!(w && w.state && x >= 1 && y >= 1 && x < w.state.size - 1 && y < w.state.size - 1 &&
@@ -483,160 +351,42 @@
         for (const c of parts.join("|")) n = Math.imul(n ^ c.charCodeAt(0), 16777619);
         return n >>> 0;
     }
-    const SHAPES_BY_SPECIES = {
-        elf: ["octagonal", "cruciform", "t_shape", "longhouse", "l_shape"],
-        dwarf: ["octagonal", "cruciform", "t_shape", "box", "l_shape"],
-        orc: ["alcove", "l_shape", "longhouse", "box", "t_shape"],
-        goblin: ["alcove", "l_shape", "box", "octagonal", "longhouse"],
-        human: ["l_shape", "t_shape", "alcove", "octagonal", "cruciform", "longhouse", "box"],
-        default: ["l_shape", "t_shape", "alcove", "octagonal", "cruciform", "longhouse", "box"]
-    };
-
-    function makeFootprint(shape, width, height, sleepRows = 2) {
-        const divider = sleepRows + 1;
-        const grid = [];
-        for (let y = 0; y < height; y++) {
-            grid[y] = [];
-            for (let x = 0; x < width; x++) grid[y][x] = false;
-        }
-
-        if (shape === "box") {
-            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
-        } else if (shape === "l_shape") {
-            const cutX = Math.max(5, Math.floor(width * 0.6));
-            const cutY = Math.max(divider + 1, Math.floor(height * 0.6));
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (x >= cutX && y >= cutY) continue;
-                    grid[y][x] = true;
-                }
-            }
-        } else if (shape === "octagonal") {
-            const corner = Math.min(2, Math.floor(Math.min(width, height) / 4));
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (x + y < corner) continue;
-                    if ((width - 1 - x) + y < corner) continue;
-                    if (x + (height - 1 - y) < corner) continue;
-                    if ((width - 1 - x) + (height - 1 - y) < corner) continue;
-                    grid[y][x] = true;
-                }
-            }
-        } else if (shape === "t_shape") {
-            const stemW = Math.max(5, Math.floor(width * 0.6));
-            const stemX0 = Math.floor((width - stemW) / 2);
-            const stemX1 = stemX0 + stemW;
-            const hTop = divider;
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (y < hTop || (x >= stemX0 && x < stemX1)) {
-                        grid[y][x] = true;
-                    }
-                }
-            }
-        } else if (shape === "cruciform") {
-            const cutW = Math.max(1, Math.floor(width * 0.22));
-            const cutH = Math.max(1, Math.floor(height * 0.22));
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const isTL = (x < cutW && y < cutH);
-                    const isTR = (x >= width - cutW && y < cutH);
-                    const isBL = (x < cutW && y >= height - cutH);
-                    const isBR = (x >= width - cutW && y >= height - cutH);
-                    if (isTL || isTR || isBL || isBR) continue;
-                    grid[y][x] = true;
-                }
-            }
-        } else if (shape === "alcove") {
-            const cutW = Math.max(2, Math.floor(width * 0.25));
-            const cutH = Math.max(2, Math.floor(height * 0.25));
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (x >= width - cutW && y >= height - cutH) continue;
-                    grid[y][x] = true;
-                }
-            }
-        } else if (shape === "u_shape") {
-            const cutY = Math.max(divider + 2, Math.floor(height * 0.7));
-            const courtW = Math.max(3, Math.floor(width * 0.35));
-            const cutX0 = Math.floor((width - courtW) / 2);
-            const cutX1 = cutX0 + courtW;
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    if (y >= cutY && x >= cutX0 && x < cutX1) continue;
-                    grid[y][x] = true;
-                }
-            }
-        } else if (shape === "longhouse") {
-            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
-        } else {
-            for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) grid[y][x] = true;
-        }
-
-        return (x, y) => {
-            if (x < 0 || y < 0 || x >= width || y >= height) return false;
-            return !!grid[y][x];
-        };
-    }
-
     function designFor(h, need, annex = false) {
         const people = members(h), social = Math.round(people.reduce((n, u) => n +
             (u.data.facets && Number.isFinite(u.data.facets.sociability) ? u.data.facets.sociability : 50), 0) / Math.max(1, people.length));
         const roll = hash(W().state.seed || 0, h.id, h.faction, h.siteId, h.z, annex ? structures(h).length : 0, social);
         const variant = roll % 100 < 25 + social / 2 ? 1 : 0;
         const maxRank = Math.max(0, ...people.map(u => (u && u.data && Number.isFinite(u.data.rank) ? u.data.rank : 0)));
-        const isBranchingFromTownHall = (h.home && h.home.isShared) || !!h.previousSharedHome;
-        const effectiveRank = isBranchingFromTownHall ? 0 : maxRank;
-        const effectiveNeed = isBranchingFromTownHall ? Math.min(2, Math.max(1, people.length)) : need;
         let capacity, width, height, sleepRows, size;
         if (annex) {
-            capacity = effectiveNeed <= 2 ? 2 : Math.ceil(effectiveNeed / 2) * 2;
+            capacity = need <= 2 ? 2 : Math.ceil(need / 2) * 2;
             width = capacity <= 4 ? 7 + variant : 9 + variant;
             sleepRows = Math.max(3, Math.ceil(capacity / 2)); height = sleepRows + 2; size = "annex";
-        } else if (effectiveRank >= 2) {
+        } else if (maxRank >= 2) {
             // Higher ranks in society get larger homes: Ruler / Lord Manor / Great Hall
-            capacity = Math.max(8, effectiveNeed);
+            capacity = Math.max(8, need);
             width = variant ? 13 : 11;
             sleepRows = Math.max(3, Math.ceil(capacity / 4));
             height = sleepRows + 7;
             size = "manor";
-        } else if (effectiveRank === 1) {
+        } else if (maxRank === 1) {
             // Site Leader / Elder / Master Craftsman Estate / Longhouse
-            capacity = Math.max(4, effectiveNeed);
+            capacity = Math.max(4, need);
             width = variant ? 11 : 9;
             sleepRows = Math.max(2, Math.ceil(capacity / 2));
             height = sleepRows + 6;
             size = "estate";
-        } else if (effectiveNeed <= 1) {
-            capacity = 1; width = variant ? 7 : 6; height = 7; sleepRows = 1; size = "single";
-        } else if (effectiveNeed <= 2) {
+        } else if (need <= 2) {
             capacity = 2; width = variant ? 7 : 6; height = 8; sleepRows = 2; size = "small";
-        } else if (effectiveNeed <= 4) {
+        } else if (need <= 4) {
             capacity = 4; width = variant ? 9 : 7; height = variant ? 8 : 9; sleepRows = variant ? 2 : 3; size = "family";
-        } else if (effectiveNeed <= 8) {
+        } else if (need <= 8) {
             capacity = 8; width = variant ? 11 : 9; height = variant ? 9 : 10; sleepRows = variant ? 3 : 4; size = "extended";
         } else {
-            capacity = Math.ceil(effectiveNeed / 4) * 4; width = variant ? 13 : 11;
+            capacity = Math.ceil(need / 4) * 4; width = variant ? 13 : 11;
             sleepRows = Math.ceil(capacity / 4); height = sleepRows + 6; size = "large";
         }
-
-        // Cultural architectural footprint archetype:
-        let shape = "box";
-        if (!annex) {
-            const species = (people[0] && people[0].data && people[0].data.species) || "human";
-            const pool = SHAPES_BY_SPECIES[species] || SHAPES_BY_SPECIES.default;
-            const validPool = pool.filter(s => {
-                if (s === "u_shape" && width < 9) return false;
-                if (s === "cruciform" && width < 8) return false;
-                if (width < 7 && s !== "box" && s !== "longhouse") return false;
-                return true;
-            });
-            const shapeIdx = (roll >>> 5) % validPool.length;
-            shape = validPool[shapeIdx];
-        }
-
         return { version: 1, kind: annex ? "bedroom" : "home", size, variant, capacity, width, height, sleepRows,
-            shape,
             rotation: (roll >>> 8) % 4, mirrored: !!((roll >>> 10) & 1),
             outerLane: 2 + (roll >>> 12) % (width - 4), innerLane: 2 + (roll >>> 17) % (width - 4),
             householdSize: people.length, requiredBeds: need, sociability: social, rank: maxRank };
@@ -644,9 +394,6 @@
     function dimensions(d) { return d.rotation % 2 ? { w: d.height, h: d.width } : { w: d.width, h: d.height }; }
     function layout(x, y, wall, door, design) {
         const width = design.width, height = design.height, divider = design.sleepRows + 1, annex = design.kind === "bedroom";
-        const shape = design.shape || "box";
-        const inFootprint = makeFootprint(shape, width, height, design.sleepRows);
-
         const transform = p => {
             let px = design.mirrored ? width - 1 - p.x : p.x, py = p.y;
             if (design.rotation === 1) [px, py] = [height - 1 - py, px];
@@ -654,234 +401,70 @@
             else if (design.rotation === 3) [px, py] = [py, width - 1 - px];
             return { x: x + px, y: y + py };
         };
-
-        const isPerim = (px, py) => !inFootprint(px - 1, py) || !inFootprint(px + 1, py) ||
-                                    !inFootprint(px, py - 1) || !inFootprint(px, py + 1);
-
-        // Find valid outerLane on the true bottom wall (y = height - 1)
-        let outerLane = design.outerLane;
-        let bottomY = height - 1;
-        const isValidBottom = px => inFootprint(px, height - 1) && !inFootprint(px, height) &&
-                                    inFootprint(px, height - 2) && inFootprint(px - 1, height - 1) && inFootprint(px + 1, height - 1);
-        if (!isValidBottom(outerLane)) {
-            let candidates = [];
-            for (let px = 1; px < width - 1; px++) {
-                if (isValidBottom(px)) candidates.push(px);
-            }
-            if (candidates.length > 0) {
-                candidates.sort((a, b) => Math.abs(a - design.outerLane) - Math.abs(b - design.outerLane));
-                outerLane = candidates[0];
-            } else {
-                for (let px = 1; px < width - 1; px++) {
-                    if (inFootprint(px, height - 1)) { outerLane = px; break; }
-                }
-            }
-        }
-
-        // Interior door on divider: must have walkable interior floor on BOTH sides (divider - 1 and divider + 1)
-        let innerLane = design.innerLane;
-        const isValidDivider = px => inFootprint(px, divider) && !isPerim(px, divider) &&
-                                     inFootprint(px, divider - 1) && !isPerim(px, divider - 1) &&
-                                     inFootprint(px, divider + 1) && !isPerim(px, divider + 1);
-        if (!isValidDivider(innerLane)) {
-            let candidates = [];
-            for (let px = 1; px < width - 1; px++) {
-                if (isValidDivider(px)) candidates.push(px);
-            }
-            if (candidates.length > 0) {
-                candidates.sort((a, b) => Math.abs(a - design.innerLane) - Math.abs(b - design.innerLane));
-                innerLane = candidates[0];
-            }
-        }
-
-        const doors = [{ x: outerLane, y: bottomY }];
-        if (!annex) doors.push({ x: innerLane, y: divider });
-
+        const doors = [{ x: design.outerLane, y: height - 1 }];
+        if (!annex) doors.push({ x: design.innerLane, y: divider });
         const walls = [], sleeping = [], beds = [], floors = [];
-        for (let py = 0; py < height; py++) {
-            for (let px = 0; px < width; px++) {
-                if (!inFootprint(px, py)) continue;
-
-                const isPerimeter = isPerim(px, py);
-                const isDivider = !annex && py === divider && !isPerimeter;
-                const isDoor = doors.some(d => d.x === px && d.y === py);
-
-                if ((isPerimeter || isDivider) && !isDoor) {
-                    walls.push(transform({ x: px, y: py }));
-                }
-                if (!isPerimeter && py > 0 && py <= design.sleepRows) {
-                    sleeping.push(transform({ x: px, y: py }));
-                }
-                if (!isPerimeter && !isDivider) {
-                    floors.push(transform({ x: px, y: py }));
-                }
+        for (let py = 0; py < height; py++) for (let px = 0; px < width; px++) {
+            const isPerimeter = px === 0 || px === width - 1 || py === 0 || py === height - 1;
+            const isDivider = !annex && py === divider;
+            const isDoor = doors.some(p => p.x === px && p.y === py);
+            if ((isPerimeter || isDivider) && !isDoor) walls.push(transform({ x: px, y: py }));
+            if (px > 0 && px < width - 1 && py > 0 && py <= design.sleepRows) sleeping.push(transform({ x: px, y: py }));
+            // Interior floor cells:
+            if (px > 0 && px < width - 1 && py > 0 && py < height - 1 && !isDivider) {
+                floors.push(transform({ x: px, y: py }));
             }
         }
-
-        // Beds placement in sleeping area
         const bedColumns = !annex && width >= 11 ? [1, width - 2, 2, width - 3] : [1, width - 2];
-        for (let py = 1; py <= design.sleepRows; py++) {
-            for (const px of bedColumns) {
-                if (beds.length < design.capacity && inFootprint(px, py)) {
-                    if (!isPerim(px, py) && py < divider) {
-                        beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
-                    }
-                }
-            }
-        }
-        if (beds.length < design.capacity) {
-            for (let py = 1; py <= design.sleepRows; py++) {
-                for (let px = 1; px < width - 1; px++) {
-                    if (beds.length >= design.capacity) break;
-                    if (inFootprint(px, py) && !isPerim(px, py) && py < divider) {
-                        const pt = transform({ x: px, y: py });
-                        if (!beds.some(b => b.x === pt.x && b.y === pt.y)) {
-                            beds.push(Object.assign(pt, { unitId: null }));
-                        }
-                    }
-                }
-            }
-        }
-        if (beds.length < design.capacity) {
-            for (let py = 1; py < height - 1; py++) {
-                if (py === divider) continue;
-                for (let px = 1; px < width - 1; px++) {
-                    if (beds.length >= design.capacity) break;
-                    if (inFootprint(px, py) && !isPerim(px, py)) {
-                        const pt = transform({ x: px, y: py });
-                        if (!beds.some(b => b.x === pt.x && b.y === pt.y)) {
-                            beds.push(Object.assign(pt, { unitId: null }));
-                        }
-                    }
-                }
-            }
-        }
-
-        // Spots (2 adjacent cells for couple)
-        let s0 = null, s1 = null;
-        const midX = Math.floor(width / 2);
-        const sPy = Math.min(design.sleepRows, divider - 1);
-        for (let px = 1; px < width - 2; px++) {
-            if (inFootprint(px, sPy) && inFootprint(px + 1, sPy) && !isPerim(px, sPy) && !isPerim(px + 1, sPy)) {
-                s0 = transform({ x: px, y: sPy });
-                s1 = transform({ x: px + 1, y: sPy });
-                break;
-            }
-        }
-        if (!s0) {
-            s0 = sleeping[0] || transform({ x: 1, y: 1 });
-            s1 = sleeping[1] || transform({ x: 2, y: 1 });
-        }
-
-        // Hearth: in living area, with distance >= 2 from all walls, doors, beds, storage
-        let hearth = null;
-        if (!annex) {
-            const existingBlocked = [...walls, ...doors.map(transform), ...beds];
-            const isSafeHearth = pt => existingBlocked.every(p => Math.abs(p.x - pt.x) + Math.abs(p.y - pt.y) >= 2);
-            let candidates = [];
-            for (let py = divider + 1; py < height - 1; py++) {
-                for (let px = 1; px < width - 1; px++) {
-                    if (inFootprint(px, py) && !isPerim(px, py)) {
-                        const pt = transform({ x: px, y: py });
-                        if (isSafeHearth(pt)) {
-                            const score = Math.abs(px - midX) + Math.abs(py - (divider + 2));
-                            candidates.push({ px, py, pt, score });
-                        }
-                    }
-                }
-            }
-            if (candidates.length > 0) {
-                candidates.sort((a, b) => a.score - b.score);
-                hearth = { x: candidates[0].px, y: candidates[0].py };
-            } else {
-                hearth = { x: midX, y: Math.min(height - 2, divider + 2) };
-            }
-        }
-
-        // Domestic furniture & amenities:
-        const hearthPt = hearth ? transform(hearth) : null;
-        let storage = null;
-        if (!annex) {
-            for (let py = height - 2; py > divider; py--) {
-                for (let px = width - 2; px > 1; px--) {
-                    if (inFootprint(px, py) && !isPerim(px, py)) {
-                        const pt = transform({ x: px, y: py });
-                        if (!hearthPt || (Math.abs(pt.x - hearthPt.x) + Math.abs(pt.y - hearthPt.y) >= 2)) {
-                            storage = pt;
-                            break;
-                        }
-                    }
-                }
-                if (storage) break;
-            }
-        }
-
-        const kitchenCounter = annex || width < 7 ? null : transform({ x: 1, y: Math.min(height - 2, divider + 2) });
-        const kitchenPantry = annex || width < 7 ? null : transform({ x: 2, y: Math.min(height - 2, divider + 2) });
-        const diningTable = annex || width < 7 ? null : transform({ x: midX, y: Math.min(height - 3, divider + 3) });
-        const diningBench = annex || width < 7 ? null : transform({ x: midX + 1, y: Math.min(height - 3, divider + 3) });
+        for (let py = 1; py <= design.sleepRows; py++) for (const px of bedColumns) if (beds.length < design.capacity)
+            beds.push(Object.assign(transform({ x: px, y: py }), { unitId: null }));
+        
+        // Kitchen & Dining appointments:
+        const hearth = annex ? null : { x: Math.floor(width / 2), y: divider + 2 };
+        const kitchenCounter = annex || width < 7 ? null : transform({ x: 1, y: divider + 2 });
+        const kitchenPantry = annex || width < 7 ? null : transform({ x: 2, y: divider + 2 });
+        const diningTable = annex || width < 7 ? null : transform({ x: Math.floor(width / 2), y: Math.min(height - 3, divider + 3) });
+        const diningBench = annex || width < 7 ? null : transform({ x: Math.floor(width / 2) + 1, y: Math.min(height - 3, divider + 3) });
         const workbench = annex || width < 7 ? null : transform({ x: 1, y: height - 2 });
-        const weaponRack = annex || width < 7 ? null : transform({ x: width - 2, y: Math.min(height - 2, divider + 2) });
+        const weaponRack = annex || width < 7 ? null : transform({ x: width - 2, y: divider + 2 });
         const crib = annex || width < 7 ? null : transform({ x: width - 2, y: 1 });
+        const storage = annex ? null : transform({ x: width - 2, y: height - 2 });
         const shopCounter = annex || width < 7 ? null : transform({ x: width - 3, y: height - 2 });
 
-        return Object.assign({
-            x, y, wall, door, design, walls,
-            doors: doors.map(transform),
-            sleeping, beds, floors,
-            spots: [s0, s1],
-            hearth: hearth && transform(hearth),
-            kitchenCounter, kitchenPantry, diningTable, diningBench, storage,
+        return Object.assign({ x, y, wall, door, design, walls, doors: doors.map(transform), sleeping, beds, floors,
+            spots: [transform({ x: Math.floor(width / 2), y: design.sleepRows }), transform({ x: Math.floor(width / 2) + 1, y: design.sleepRows })],
+            hearth: hearth && transform(hearth), kitchenCounter, kitchenPantry, diningTable, diningBench, storage,
             workbench, weaponRack, crib, shopCounter,
             hearthClearance: hearth ? [[0, -1], [1, 0], [0, 1], [-1, 0]].map(([dx, dy]) => transform({ x: hearth.x + dx, y: hearth.y + dy })) : [],
-            entrance: transform({ x: outerLane, y: bottomY + 1 }),
-            steps: []
-        }, dimensions(design));
-    }
-    function isNaturalRock(h, x, y, z) {
-        const L = window.UF && UF.Levels;
-        if (!L || typeof L.shapeAt !== "function") return false;
-        const currentZ = z !== undefined ? z : zOf(h);
-        const s = L.shapeAt({ area: areaOf(h), x, y, z: currentZ });
-        return s === "solid" || s === 1;
-    }
-    function isStructuralEnclosureAt(h, x, y, z, expectedWallId) {
-        if (isNaturalRock(h, x, y, z)) return true;
-        const obj = object(h, { x, y });
-        if (!obj) return false;
-        if (expectedWallId && obj.id === expectedWallId) return true;
-        if (obj.type && Array.isArray(obj.type.tags) && obj.type.tags.includes("wall")) return true;
-        if (typeof obj.id === "string" && (obj.id.startsWith("wall_") || obj.id.includes("wall"))) return true;
-        return false;
-    }
-    function isDoorEnclosureAt(h, x, y, z, expectedDoorId) {
-        const obj = object(h, { x, y });
-        if (!obj) return false;
-        if (expectedDoorId && obj.id === expectedDoorId) return true;
-        if (obj.type && Array.isArray(obj.type.tags) && obj.type.tags.includes("door")) return true;
-        if (typeof obj.id === "string" && (obj.id.startsWith("door_") || obj.id.includes("door"))) return true;
-        return false;
+            entrance: transform({ x: design.outerLane, y: height }), steps: [] }, dimensions(design));
     }
     function footprintOK(h, home, u, reservations, occupied, bootstrap) {
         const built = new Set([...home.walls, ...home.doors, ...home.beds, home.hearth, home.kitchenCounter, home.kitchenPantry, home.diningTable, home.diningBench, home.storage, home.workbench, home.weaponRack, home.crib].filter(Boolean).map(p => key(p.x, p.y)));
         const clear = new Set((home.hearthClearance || []).map(p => key(p.x, p.y)));
         const isWallCell = (x, y) => home.walls.some(w => w.x === x && w.y === y);
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
         for (let y = home.y; y < home.y + home.h; y++) for (let x = home.x; x < home.x + home.w; x++) {
             const k = key(x, y), p = { x, y }, o = object(h, p);
             if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x, y, z: zOf(h) })) return false;
-            // Natural solid geological terrain & existing structural walls satisfy perimeter boundary!
-            if (isWallCell(x, y) && (isNaturalRock(h, x, y, zOf(h)) || isStructuralEnclosureAt(h, x, y, zOf(h), home.wall))) {
-                if (reservations.has(k) || bootstrap.has(k)) return false;
+            // Subterranean races: perimeter wall cells can be natural solid cave walls!
+            if (isWallCell(x, y) && isCaveWall(x, y)) {
+                if (reservations.has(k) || occupied.has(k) || bootstrap.has(k)) return false;
                 continue;
             }
-            if (!dry(h, x, y) || reservations.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
+            if (!dry(h, x, y) || reservations.has(k) || occupied.has(k) || bootstrap.has(k) || has(o, "building") || has(o, "ruin")) return false;
             if (Own() && Own().ownerOf(ref(h, p))) return false;
             if (clear.has(k) && o) return false; // No existing plant/furniture in the hearth's four-neighbor buffer.
             if (o && o.passable !== true && (!built.has(k) || !o.actions || !Object.keys(o.actions).length)) return false;
         }
         const e = home.entrance, eo = object(h, e);
         if (UF.Agriculture && UF.Agriculture.reserved({ area: h.area, x: e.x, y: e.y, z: zOf(h) })) return false;
-        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true && (!eo.actions || !Object.keys(eo.actions).length)) || reservations.has(key(e.x, e.y))) return false;
+        if (!dry(h, e.x, e.y) || (eo && eo.passable !== true) || occupied.has(key(e.x, e.y)) || reservations.has(key(e.x, e.y))) return false;
         const w = W();
         return typeof w.reachable === "function" && w.reachable(areaOf(h), u.x, u.y, e.x, e.y);
     }
@@ -928,8 +511,7 @@
         // Abutting candidates sharing party walls are strictly for bedroom annexes of the same household.
         // Distinct household homes must remain detached with buffer spacing for settlement navigation.
         const kinStructures = [];
-        const isAnnex = !!annex || (design && design.kind === "bedroom");
-        if (isAnnex && h.home) kinStructures.push(...structures(h));
+        if (annex && h.home) kinStructures.push(...structures(h));
 
         if (kinStructures.length > 0) {
             const size = dimensions(design);
@@ -943,22 +525,12 @@
                 ];
                 for (const candidate of candidates) {
                     if (candidate.x < 1 || candidate.y < 1 || candidate.x + size.w >= (W().state.size - 1) || candidate.y + size.h >= (W().state.size - 1)) continue;
-                    const anchorBuffer = new Set();
-                    for (let ay = anchor.y - 1; ay <= anchor.y + anchor.h; ay++) {
-                        for (let ax = anchor.x - 1; ax <= anchor.x + anchor.w; ax++) {
-                            anchorBuffer.add(key(ax, ay));
-                        }
-                    }
-                    const candidateReserved = new Set([...reserved].filter(k => !anchorBuffer.has(k)));
+                    // Allow the shared party wall cells (which overlap the anchor's walls):
+                    const anchorWallSet = new Set(anchor.walls.map(w => key(w.x, w.y)));
+                    const candidateReserved = new Set([...reserved].filter(k => !anchorWallSet.has(k)));
                     if (footprintOK(h, candidate, u, candidateReserved, occupied, bootstrap)) {
                         candidate.sharedPartyWall = true;
-                        candidate.anchorHomeId = h.id ? `${h.id}:main` : "home:main";
-                        candidate.anchorHouseholdId = h.id || null;
-                        Object.defineProperty(candidate, "anchorHome", {
-                            get: function() { return h && h.home ? h.home : null; },
-                            enumerable: false,
-                            configurable: true
-                        });
+                        candidate.anchorHome = anchor;
                         return candidate;
                     }
                 }
@@ -977,81 +549,11 @@
         h.reason = "No dry accessible space within the bounded home search";
         return null;
     }
-    function claimVacantHome(h, u) {
-        const s = state();
-        if (!s) return null;
-        const vacant = Object.values(s.byId).find(otherH =>
-            otherH.id !== h.id && !otherH.mergedInto && otherH.home && !otherH.home.isShared && members(otherH).length === 0 && samePlace(otherH, h)
-        );
-        if (vacant) {
-            h.previousSharedHome = h.home;
-            h.home = vacant.home;
-            h.reason = "Claimed vacant homestead; construction continuing";
-            vacant.mergedInto = h.id;
-            emit("households:homePlanned", h, h.home);
-            emit("households:inherited", h, u);
-            return h.home;
-        }
-        return null;
-    }
     function ensureHome(h, u) {
-        if (h.privateHomestead && !h.isMovedIn) return h.privateHomestead;
-        if (h.home && !h.home.isShared) return h.home;
-        if (h.home && h.home.isShared) {
-            // The original 8 founders share the Town Hall communally.
-            // They only leave when they pair up (forming a new family household).
-            // Non-founders (immigrants, grown children) always seek private homes.
-            const mems = members(h);
-            const allFounders = mems.every(m => m.data && m.data.founder);
-            let hasPair = mems.some(m => m.data && (m.data.partner || m.data.partnerId));
-            if (!hasPair && allFounders) {
-                const col = C();
-                if (col && typeof col.attemptAdulthoodPairbond === "function") {
-                    for (const m of mems) {
-                        const partner = col.attemptAdulthoodPairbond(m);
-                        if (partner) { hasPair = true; break; }
-                    }
-                }
-            }
-
-            // Any home without ownership can be claimed by a member of the faction
-            const claimed = claimVacantHome(h, u);
-            if (claimed) return claimed;
-
-            // Check if members actually have an assigned bed in the shared Town Hall
-            const hasBedInTownHall = mems.length > 0 && mems.every(m => h.home.beds && h.home.beds.some(b => b.unitId === m.id));
-
-            // Once the town hall is sheltered OR if unbedded in Town Hall: seek private plots!
-            // Everyone without a shelter needs to have a shelter, pairbonded or not!
-            const sheltered = typeof isSheltered === "function" ? isSheltered(h) : h.home.isRoofed;
-            if (sheltered || !hasBedInTownHall) {
-                if (h.privateHomestead) return h.privateHomestead;
-
-                // Cooperative pacing: if another household is currently constructing a private homestead, wait our turn!
-                const col = C();
-                const c = (col && col.state) ? col.state(u || mems[0]) : null;
-                const currentFocal = activeFocalHousehold(c);
-                if (currentFocal && currentFocal.id !== h.id) return h.home;
-
-                if (h.lastSearchTick && (tick() - h.lastSearchTick < 120)) return h.home;
-                h.lastSearchTick = tick();
-                const p = findPlot(h, u, designFor(h, Math.max(1, mems.length)));
-                if (p) {
-                    h.previousSharedHome = h.home;
-                    h.privateHomestead = p;
-                    h.reason = hasPair ? "Newlywed homestead reserved; construction needed"
-                                       : "Private homestead reserved; construction needed";
-                    emit("households:homePlanned", h, p);
-                    return p;
-                }
-            }
-            return h.home;
-        }
-        const claimed = claimVacantHome(h, u);
-        if (claimed) return claimed;
-        if (h.lastSearchTick && (tick() - h.lastSearchTick < 120)) return null;
-        h.lastSearchTick = tick();
-        const p = findPlot(h, u, designFor(h, Math.max(1, members(h).length)));
+        if (h.home) return h.home;
+        if (h.lastSearchDay === day()) return null;
+        h.lastSearchDay = day();
+        const p = findPlot(h, u, designFor(h, members(h).length));
         if (p) { h.home = p; h.reason = "Home reserved; construction needed"; emit("households:homePlanned", h, p); }
         return p;
     }
@@ -1073,45 +575,13 @@
     function syncHome(h) {
         const home = h.home, own = Own(), current = members(h);
         if (!home) return;
-        const buildings = structures(h);
-        const residents = home.isShared ? all().filter(otherH => otherH.home === home).flatMap(otherH => members(otherH)) : current;
-        const ids = new Set(residents.map(u => u.id));
-
-        // 1. Sync beds for primary home structure
-        if (home && Array.isArray(home.beds)) {
-            for (const b of home.beds) if (!ids.has(b.unitId)) b.unitId = null;
-            for (const u of current) {
-                if (!home.beds.some(b => b.unitId === u.id)) {
-                    const b = home.beds.find(b => b.unitId === null);
-                    if (b) b.unitId = u.id;
-                }
-            }
+        const buildings = structures(h), beds = buildings.flatMap(p => p.beds);
+        const ids = new Set(current.map(u => u.id));
+        for (const b of beds) if (!ids.has(b.unitId)) b.unitId = null;
+        for (const u of current) if (!beds.some(b => b.unitId === u.id)) {
+            const b = beds.find(b => b.unitId === null);
+            if (b) b.unitId = u.id;
         }
-        // 2. Sync beds for active private homestead under construction
-        if (h.privateHomestead && Array.isArray(h.privateHomestead.beds)) {
-            for (const b of h.privateHomestead.beds) if (!ids.has(b.unitId)) b.unitId = null;
-            for (const u of current) {
-                if (!h.privateHomestead.beds.some(b => b.unitId === u.id)) {
-                    const b = h.privateHomestead.beds.find(b => b.unitId === null);
-                    if (b) b.unitId = u.id;
-                }
-            }
-        }
-        // 3. Sync beds for annexes
-        if (home && Array.isArray(home.annexes)) {
-            for (const a of home.annexes) {
-                if (a && Array.isArray(a.beds)) {
-                    for (const b of a.beds) if (!ids.has(b.unitId)) b.unitId = null;
-                    for (const u of current) {
-                        if (!a.beds.some(b => b.unitId === u.id)) {
-                            const b = a.beds.find(b => b.unitId === null);
-                            if (b) b.unitId = u.id;
-                        }
-                    }
-                }
-            }
-        }
-        const beds = buildings.flatMap(p => p.beds || []);
         if (own) for (const b of beds) {
             const u = unitOf(b.unitId), owner = own.ownerOf(ref(h, b));
             if (u && samePlace(h, u) && object(h, b) && object(h, b).id === "floor_straw" &&
@@ -1132,32 +602,6 @@
                 const s = doors.stateAt(areaOf(h), p.x, p.y);
                 if (s) s.faction = h.faction;
             }
-        }
-        // Physical Move-In / Housewarming event: couple occupies their private homestead
-        const targetHome = h.privateHomestead || (!home.isShared ? home : null);
-        if (h && !h.isMovedIn && targetHome && strictEnclosure(h, targetHome) && (targetHome.beds || []).some(b => object(h, b))) {
-            h.isMovedIn = true;
-            h.previousSharedHome = h.home;
-            h.home = targetHome;
-            delete h.privateHomestead;
-            if (h.previousSharedHome) {
-                for (const m of current) {
-                    if (m.data && m.data.bed && m.data.bed.isShared) {
-                        const thBed = (h.previousSharedHome.beds || []).find(b => b.unitId === m.id);
-                        if (thBed) thBed.unitId = null;
-                        m.data.bed = null;
-                    }
-                }
-            }
-            for (const m of current) {
-                if (m && m.data) {
-                    m.data.housewarmingIntimacy = true;
-                    if (window.UF && UF.Colonists && typeof UF.Colonists.addThought === "function") {
-                        UF.Colonists.addThought(m, "Moved into our new home!", 15);
-                    }
-                }
-            }
-            emit("households:movedIn", h, current);
         }
     }
     function callingFor(u) {
@@ -1251,8 +695,8 @@
             }
         }
         if (!c || !c.site) return [];
-        const home = (h.privateHomestead && !h.isMovedIn) ? h.privateHomestead : ensureHome(h, u);
-        if (!home || home.isShared) return []; // Communal Town Hall is managed by colony.plan, not duplicate private steps
+        const home = ensureHome(h, u);
+        if (!home) return [];
         ensureExpansion(h, u);
         syncHome(h);
         const previous = new Map((home.steps || []).map(s => [s.id, s]));
@@ -1264,27 +708,31 @@
             // objects let save data and the executor retain real plan progress.
             return Object.assign({ id, build, cells: offsets, exact: true, household: h.id }, extras || {});
         };
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
         // Exact placement is essential: another household's beds/hearth do not
-        // satisfy these steps. Natural rock boundaries do not require construction.
-        const buildableWalls = home.walls.filter(w => !isNaturalRock(h, w.x, w.y, zOf(h)));
+        // satisfy these steps. Natural cave walls do not require construction.
+        const buildableWalls = home.walls.filter(w => !isCaveWall(w.x, w.y));
         const culture = C() && C().culture(u) || {};
         const o = O();
 
         // 5 base bootstrap steps for fresh unbuilt homes:
-        const hearthObject = (o && o.type("kitchen_hearth") && o.type("kitchen_hearth").build) ? "kitchen_hearth" : "campfire";
-        const activeBeds = home.beds.filter(b => b.unitId !== null);
-        const bedsToPlan = activeBeds.length > 0 ? activeBeds : home.beds.slice(0, Math.max(1, members(h).length));
         home.steps = [
             step("walls", home.wall, buildableWalls),
             step("doors", home.door, home.doors),
-            step("beds", "floor_straw", bedsToPlan),
-            step("hearth", hearthObject, [home.hearth].filter(Boolean)),
+            step("beds", "floor_straw", home.beds.filter(b => b.unitId !== null)),
+            step("hearth", "campfire", [home.hearth].filter(Boolean)),
             step("storage", "stockpile", [home.storage].filter(Boolean), { stores: ["food"] })
         ];
 
         for (let i = 0; i < (home.annexes || []).length; i++) {
             const a = home.annexes[i];
-            const annexWalls = a.walls.filter(w => !isNaturalRock(h, w.x, w.y, zOf(h)));
+            const annexWalls = a.walls.filter(w => !isCaveWall(w.x, w.y));
             home.steps.push(
                 step(`annex${i}_doors`, a.door, a.doors),
                 step(`annex${i}_walls`, a.wall, annexWalls),
@@ -1372,24 +820,20 @@
     }
     function strictEnclosure(h, p = h && h.home) {
         if (!p) return false;
-        const enclosed = (p.walls || []).every(c => isStructuralEnclosureAt(h, c.x, c.y, zOf(h), p.wall)) &&
-            (p.doors || []).every(c => isDoorEnclosureAt(h, c.x, c.y, zOf(h), p.door));
+        const isCaveWall = (x, y) => {
+            if (zOf(h) >= 0) return false;
+            const L = window.UF && UF.Levels;
+            if (!L || typeof L.shapeAt !== "function") return false;
+            const s = L.shapeAt({ area: h.area, x, y, z: zOf(h) });
+            return s === "solid" || s === 1;
+        };
+        const enclosed = p.walls.every(c => isCaveWall(c.x, c.y) || (object(h, c) && object(h, c).id === p.wall)) &&
+            p.doors.every(c => object(h, c) && object(h, c).id === p.door);
         if (enclosed && !p.isRoofed) {
             Object.defineProperty(p, "isRoofed", { value: true, writable: true, configurable: true, enumerable: false });
             const F = window.UF && UF.Floors;
             if (F && typeof F.applyRoofedUpperDeck === "function") {
-                const targetCells = (p.walls || []).concat(p.doors || []).concat(p.floors || []);
-                const isStone = (p.wall && p.wall.includes("stone")) || (zOf(h) < 0) || (p.walls || []).some(c => isNaturalRock(h, c.x, c.y, zOf(h)));
-                F.applyRoofedUpperDeck(areaOf(h), targetCells.length ? targetCells : { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, isStone ? "stone" : "wood");
-            }
-            if (F && typeof F.setFloor === "function" && p.floors && p.floors.length) {
-                const culture = (C() && typeof C().culture === "function" && C().culture(members(h)[0])) || {};
-                const floorKind = p.floor || (culture.floor && culture.floor.kind) || (zOf(h) < 0 || (h && h.faction === "dwarf") || (p.wall && p.wall.includes("stone")) ? "floor_stone" : "floor_wood");
-                for (const fl of p.floors) {
-                    if (!F.isFloorAt(areaOf(h), fl.x, fl.y)) {
-                        F.setFloor(areaOf(h), fl.x, fl.y, floorKind);
-                    }
-                }
+                F.applyRoofedUpperDeck(areaOf(h), { x0: p.x, y0: p.y, x1: p.x + p.w - 1, y1: p.y + p.h - 1 }, p.wall && p.wall.includes("stone") ? "stone" : "wood");
             }
         }
         return enclosed;
@@ -1397,13 +841,13 @@
     function demands(refH) {
         const h = resolve(refH), people = h ? members(h) : [], p = h && h.home;
         const buildings = structures(h), beds = buildings.flatMap(b => b.beds);
-        const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && (object(h, b).id === "floor_straw" || object(h, b).id === "bed_wood") &&
-            (!Own() || p.isShared || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && (Own().ownerOf(ref(h, b)).id === b.unitId || people.some(u => u.id === Own().ownerOf(ref(h, b)).id)))).length : 0;
-        return { members: people.length, bedrooms: people.length ? (p ? (buildings.some(b => !strictEnclosure(h, b)) ? 1 : 0) : 1) : 0,
-            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && (object(h, p.hearth).id === "campfire" || object(h, p.hearth).id === "kitchen_hearth" || (object(h, p.hearth).tags && (object(h, p.hearth).tags.includes("fire") || object(h, p.hearth).tags.includes("hearth"))))) ? 1 : 0,
-            storage: people.length && !(p && object(h, p.storage) && (object(h, p.storage).id === "stockpile" || object(h, p.storage).id === "chest_wood" || object(h, p.storage).id === "crate_wood")) ? 1 : 0,
+        const bedCount = p ? beds.filter(b => people.some(u => u.id === b.unitId) && object(h, b) && object(h, b).id === "floor_straw" &&
+            (!Own() || !Own().ownerOf(ref(h, b)) || Own().ownerOf(ref(h, b)).kind === "unit" && Own().ownerOf(ref(h, b)).id === b.unitId)).length : 0;
+        return { members: people.length, bedrooms: people.length ? (p ? buildings.filter(b => !strictEnclosure(h, b)).length : 1) : 0,
+            beds: Math.max(0, people.length - bedCount), cooking: people.length && !(p && object(h, p.hearth) && object(h, p.hearth).id === "campfire") ? 1 : 0,
+            storage: people.length && !(p && object(h, p.storage) && object(h, p.storage).id === "stockpile") ? 1 : 0,
             capacity: beds.length, overflow: Math.max(0, people.length - beds.length), expansionBlocked: !!(h && h.expansionBlocked),
-            blocked: !p && !!(h && h.lastSearchTick !== undefined) || !!(h && h.expansionBlocked),
+            blocked: !p && !!(h && h.lastSearchDay !== undefined) || !!(h && h.expansionBlocked),
             unsupported: ["windows", "locks"] };
     }
     function describe(refH) {
@@ -1422,17 +866,10 @@
     function isSheltered(refH) {
         const h = resolve(refH);
         if (!h || !h.home) return false;
-        if (h.home.isSheltered === true || h.isSheltered === true) return true;
-        const now = (window.UF && UF.Colonists && UF.Colonists.ticks) ? UF.Colonists.ticks() : 0;
-        if (h._lastShelteredCheck && (now - h._lastShelteredCheck) < 60) {
-            return false;
-        }
-        h._lastShelteredCheck = now;
+        if (h.home.rooms && h.home.beds && h.home.beds.length > 0 && h.home.hearth) return true;
         if (!strictEnclosure(h, h.home)) return false;
         const d = demands(h);
-        const ok = !d.beds && !d.cooking;
-        if (ok) h.home.isSheltered = true;
-        return ok;
+        return !d.beds && !d.cooking;
     }
     function childRooms(refH) {
         const h = resolve(refH);
@@ -1440,14 +877,11 @@
         if (Array.isArray(h.home.rooms)) {
             return h.home.rooms.filter(r => r.type === "child").length;
         }
-        // Count total bed capacity across all structures (main + annexes) minus 2 for parents
-        const structs = structures(h);
-        if (structs.length > 0) {
-            const totalBeds = structs.reduce((n, s) => n + (Array.isArray(s.beds) ? s.beds.length : 0), 0);
-            return Math.max(0, totalBeds - 2); // 2 beds reserved for the couple
+        if (Array.isArray(h.home.annexes) && h.home.annexes.length > 0) {
+            return h.home.annexes.length;
         }
         if (Array.isArray(h.home.beds)) {
-            return Math.max(0, h.home.beds.length - 2);
+            return Math.max(0, h.home.beds.length - 1);
         }
         return 0;
     }
@@ -1481,19 +915,16 @@
     function activeFocalHousehold(c) {
         const s = state();
         if (!s || !c) return null;
-        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && (h.privateHomestead || (h.home && !h.home.isShared)))
+        const siteH = Object.values(s.byId).filter(h => !h.mergedInto && samePlace(h, c) && h.home)
             .sort((a, b) => (a.foundedTick || 0) - (b.foundedTick || 0) || String(a.id).localeCompare(String(b.id)));
         if (!siteH.length) return null;
-        // 1. Primary priority: household with an active private homestead under construction
-        const privateUnderCon = siteH.find(h => h.privateHomestead && !h.isMovedIn);
-        if (privateUnderCon) return privateUnderCon;
-        // 2. Secondary priority: first household whose private home is not yet sheltered
+        // 1. Primary priority: first household whose home is not yet sheltered
         const unsheltered = siteH.find(h => !isSheltered(h));
         if (unsheltered) return unsheltered;
-        // 3. Tertiary priority: any household whose private home is not yet completely built
+        // 2. Secondary priority: any household whose home is not yet completely built
         const incomplete = siteH.find(h => !describe(h).complete);
         if (incomplete) return incomplete;
-        return null;
+        return siteH[0];
     }
     function sitePlanSteps(c, u) {
         const s = state();
@@ -1517,83 +948,34 @@
         if (!h || of(b) !== h || !samePlace(h, a)) return null;
         const home = structures(h).find(p => p && Array.isArray(p.beds) && p.beds.some(bed => bed.unitId === a.id || bed.unitId === b.id || (!bed.unitId && p.beds.length === 1)));
         if (!home || !strictEnclosure(h, home)) return null;
-        const sleeping = home.sleeping || (home.beds ? home.beds.map(b => ({ x: b.x, y: b.y })) : []);
-        const room = new Set(sleeping.map(p => key(p.x, p.y)));
+        const room = new Set(home.sleeping.map(p => key(p.x, p.y)));
         if (W().units().some(u => !dead(u) && u.id !== a.id && u.id !== b.id && samePlace(h, u) && room.has(key(u.x, u.y)))) return null;
-        for (const p of sleeping) {
+        for (const p of home.sleeping) {
             const o = object(h, p);
             if (!dry(h, p.x, p.y) || o && o.passable !== true) return null;
         }
         const doors = window.UF && UF.Doors;
-        if (doors && doors.at && Array.isArray(home.doors)) for (const p of home.doors) {
+        if (doors && doors.at) for (const p of home.doors) {
             const d = doors.at(areaOf(h), p.x, p.y);
             if (!d || d.state.heldOpen || doors.isOpen && doors.isOpen(areaOf(h), p.x, p.y) ||
                 !doors.canUnitPass(a, d) || !doors.canUnitPass(b, d)) return null;
         }
-        const aBed = Array.isArray(home.beds) ? home.beds.find(p => p.unitId === a.id) : null;
-        const bBed = Array.isArray(home.beds) ? home.beds.find(p => p.unitId === b.id) : null;
+        const aBed = home.beds.find(p => p.unitId === a.id), bBed = home.beds.find(p => p.unitId === b.id);
         if (!aBed || !bBed || !has(object(h, aBed), "bed") || !has(object(h, bBed), "bed")) return null;
         return { householdId: h.id, area: { x: h.area.x, y: h.area.y }, z: h.z,
             spots: (home.spots || [{ x: home.x + 3, y: home.y + 2 }, { x: home.x + 4, y: home.y + 2 }]).map(p => ({ x: p.x, y: p.y })),
-            cells: sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, (home.doors && (home.doors[1] || home.doors[0])) || null) };
+            cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
     }
-    function hasFloors(refH) {
-        const h = resolve(refH);
-        if (!h || !h.home || !h.home.floors || !h.home.floors.length) return false;
-        const F = window.UF && UF.Floors;
-        if (!F || typeof F.isFloorAt !== "function") return true;
-        const area = areaOf(h);
-        return h.home.floors.every(fl => F.isFloorAt(area, fl.x, fl.y));
-    }
-    function invalidateRoomEnclosure(area, x, y, z) {
-        const s = state();
-        if (!s || !s.byId) return;
-        for (const h of Object.values(s.byId)) {
-            if (h.area && area && (h.area.x !== area.x || h.area.y !== area.y)) continue;
-            if (zOf(h) !== undefined && z !== undefined && zOf(h) !== z) continue;
-            for (const b of structures(h)) {
-                if (!b) continue;
-                const touches = (b.walls && b.walls.some(w => w.x === x && w.y === y)) ||
-                                (b.doors && b.doors.some(d => d.x === x && d.y === y)) ||
-                                (b.floors && b.floors.some(f => f.x === x && f.y === y));
-                if (touches) {
-                    const wasRoofed = b.isRoofed;
-                    const nowEnclosed = strictEnclosure(h, b);
-                    if (!nowEnclosed && wasRoofed) {
-                        b.isRoofed = false;
-                        emit("households:enclosureBreached", h, b, { x, y, z });
-                    }
-                }
-            }
-        }
-    }
+    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
+    root.UF = root.UF || {};
+    const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, hasFloors, join, make,
-        designFor, layout, findPlot, invalidateRoomEnclosure, isStructuralEnclosure: isStructuralEnclosureAt, isNaturalRock, strictEnclosure };
-    function checkEnclosures(area, x, y) {
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make };
+    function checkEnclosures() {
         const s = state();
         if (!s || !s.byId) return;
-        if (typeof x === "number" && typeof y === "number") {
-            for (const h of Object.values(s.byId)) {
-                if (h.area && area && (h.area.x !== area.x || h.area.y !== area.y)) continue;
-                for (const b of structures(h)) {
-                    if (!b) continue;
-                    if (x < b.x - 1 || x > b.x + b.w || y < b.y - 1 || y > b.y + b.h) continue;
-                    const touches = (b.walls && b.walls.some(w => w.x === x && w.y === y)) ||
-                                    (b.doors && b.doors.some(d => d.x === x && d.y === y)) ||
-                                    (b.floors && b.floors.some(f => f.x === x && f.y === y));
-                    if (touches) {
-                        h._lastShelteredCheck = 0;
-                        strictEnclosure(h, b);
-                    }
-                }
-            }
-            return;
-        }
         for (const h of Object.values(s.byId)) {
-            if (h.isMovedIn && h.home && h.home.isSheltered) continue;
-            h._lastShelteredCheck = 0;
             for (const b of structures(h)) {
                 strictEnclosure(h, b);
             }
@@ -1606,18 +988,12 @@
         UF.Events.on("colonists:ready", reconcile);
         UF.Events.on("colonists:born", reconcile);
         UF.Events.on("time:day", reconcile);
-        UF.Events.on("objects:changed", (area, x, y) => checkEnclosures(area, x, y));
-        UF.Events.on("objects:levelChanged", (area, x, y) => checkEnclosures(area, x, y));
+        UF.Events.on("objects:changed", checkEnclosures);
+        UF.Events.on("objects:levelChanged", checkEnclosures);
         UF.Events.on("jobs:done", job => {
             const h = job && job.params && resolve(job.params.household);
             if (h && h.home) syncHome(h);
-            if (job && (job.type === "build" || job.type === "floor")) {
-                if (job.target && typeof job.target.x === "number") {
-                    checkEnclosures(job.area, job.target.x, job.target.y);
-                } else {
-                    checkEnclosures();
-                }
-            }
+            checkEnclosures();
         });
         UF.Events.on("world:unitRemoved", u => { if (person(u)) { remember(u, dead(u)); reconcile(); } });
         UF.Events.on("combat:kill", event => { if (event && person(event.target)) remember(event.target, true); });

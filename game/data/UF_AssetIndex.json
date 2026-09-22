@@ -1,20 +1,4 @@
 {
- "$UF_Stock_Actor1_0": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Fire.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_Actor1_0.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 0 of stock characters/Actor1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
  "$UF_Stock_BigMonster1_r1": {
   "status": "stock RMMZ",
   "request": "AR-401",
@@ -23,8 +7,7 @@
    "AR-402"
   ],
   "usedBy": [
-   "creature bog_horror \"Bog horror\" (monster)",
-   "plugin UF_Stance.js (test suite)"
+   "creature bog_horror \"Bog horror\" (monster)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -153,9 +136,7 @@
    "AR-600"
   ],
   "usedBy": [
-   "creature wolf \"Wolf\" (predator)",
-   "plugin UF_Doors.js (test suite)",
-   "plugin UF_Stance.js (test suite)"
+   "creature wolf \"Wolf\" (predator)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -257,38 +238,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "character 5 of stock characters/Nature.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_0": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Factions.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_0.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 0 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_People1_4": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Fire.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_People1_4.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 4 of stock characters/People1.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
  "$UF_Stock_SF_Monster_2": {
   "status": "stock RMMZ",
@@ -437,20 +386,6 @@
   "sidecar": false,
   "statusWhy": "character 4 of stock characters/Vehicle.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
- "img/faces/People1.png": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Dialogue.js (test suite)"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/People1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
  "img/system/Balloon.png": {
   "status": "stock RMMZ",
   "request": "AR-800",
@@ -486,115 +421,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "People1": {
-  "status": "stock RMMZ",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Doors.js (test suite)",
-   "plugin UF_Levels.js (test suite)",
-   "plugin UF_Speech.js (test suite)",
-   "plugin UF_World.js",
-   "plugin UF_World.js (test suite)",
-   "RMMZ data Actors.json (map sprite)",
-   "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/People1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "in 8e5fdc1 and unchanged since"
- },
- "!$BerryBush": {
-  "status": "U7 stand-in",
-  "request": "AR-023",
-  "requests": [
-   "AR-023"
-  ],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×57)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$BerryBush.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$Campfire": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$Campfire.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$IronstoneDeposit": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×64)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$IronstoneDeposit.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "!$TimberOak": {
-  "status": "U7 stand-in",
-  "request": "AR-021",
-  "requests": [
-   "AR-021"
-  ],
-  "usedBy": [
-   "plugin UF_Look.js (test suite)",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages ×46)"
-  ],
-  "states": [
-   "one frame"
-  ],
-  "category": "objects",
-  "file": "img/characters/!$TimberOak.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
- },
- "$People1": {
-  "status": "U7 stand-in",
-  "request": "AR-050",
-  "requests": [
-   "AR-050"
-  ],
-  "usedBy": [
-   "plugin UF_Floors.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$People1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "listed in docs/STATUS.md → Stand-ins"
  },
  "$U7_Blacksmith": {
   "status": "U7 stand-in",
@@ -641,7 +467,6 @@
    "AR-050"
   ],
   "usedBy": [
-   "plugin UF_Stance.js (test suite)",
    "RMMZ data Map001.json \"The Bastion of Kraghold\" (event pages)"
   ],
   "states": [
@@ -649,61 +474,6 @@
   ],
   "category": "people",
   "file": "img/characters/$U7_Goblin.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "$U7_Guard": {
-  "status": "U7 stand-in",
-  "request": "AR-050",
-  "requests": [
-   "AR-050"
-  ],
-  "usedBy": [
-   "plugin UF_Select.js (test suite)",
-   "plugin UF_Stance.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Guard.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "$U7_Hare": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js (test suite)",
-   "plugin UF_Interact.js (test suite)",
-   "plugin UF_Jobs.js (test suite)",
-   "plugin UF_Stance.js (test suite)",
-   "plugin UF_Talk.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Hare.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "$U7_Hawk": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Select.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Hawk.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "name starts with U7_"
@@ -727,72 +497,6 @@
   "sidecar": false,
   "statusWhy": "name starts with U7_"
  },
- "$U7_Ranger": {
-  "status": "U7 stand-in",
-  "request": "AR-050",
-  "requests": [
-   "AR-050"
-  ],
-  "usedBy": [
-   "plugin UF_Factions.js (test suite)",
-   "plugin UF_Jobs.js (test suite)",
-   "plugin UF_Look.js (test suite)",
-   "plugin UF_Stance.js (test suite)",
-   "plugin UF_World.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Ranger.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "$U7_Townsman": {
-  "status": "U7 stand-in",
-  "request": "AR-050",
-  "requests": [
-   "AR-050"
-  ],
-  "usedBy": [
-   "plugin UF_Factions.js (test suite)",
-   "plugin UF_Interact.js (test suite)",
-   "plugin UF_Items.js (test suite)",
-   "plugin UF_Jobs.js (test suite)",
-   "plugin UF_Objects.js (test suite)",
-   "plugin UF_Roads.js (test suite)",
-   "plugin UF_Skills.js (test suite)",
-   "plugin UF_Stance.js (test suite)",
-   "plugin UF_Talk.js (test suite)",
-   "plugin UF_TimeSpeed.js (test suite)",
-   "plugin UF_Wildlife.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Townsman.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
- "$U7_Troll": {
-  "status": "U7 stand-in",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Stance.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$U7_Troll.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "name starts with U7_"
- },
  "img/faces/U7_Faces.png": {
   "status": "U7 stand-in",
   "request": "none yet",
@@ -809,116 +513,12 @@
   "sidecar": false,
   "statusWhy": "name starts with U7_"
  },
- "UF_GenDesignation_*": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Interact.js",
-   "variants named in its tests: chop, build"
-  ],
-  "states": [
-   "48×48 outline on a designated cell with a small glyph per job type (chop, gather, pick, quarry, mine, hunt, build, haul, dig, fish, dismantle); gone when the job finishes or is cancelled"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenEmblem": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Talk.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
  "UF_Generator": {
   "status": "generated",
   "request": "none yet",
   "requests": [],
   "usedBy": [
-   "plugin UF_Colonists.js",
    "plugin UF_Generator.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GeneratorPool": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Generator.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenFace": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Sheet.js",
-   "plugin UF_Talk.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenFlame": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Fire.js",
-   "plugin UF_Fire.js (test suite)"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenFlame_Tall": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Fire.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenFrame": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Factions.js (test suite)"
   ],
   "states": [],
   "category": "generated",
@@ -935,8 +535,7 @@
    "AR-100"
   ],
   "usedBy": [
-   "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)",
-   "plugin UF_Tiles.js"
+   "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)"
   ],
   "states": [
    "26 kinds × 47 autotile shapes on one 768×576 sheet"
@@ -1493,207 +1092,6 @@
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenHealthBar": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Combat.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenHitsplat": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Combat.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenLevels_A1": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Levels.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenLevels_A2": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Levels.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenLevels_A4": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Levels.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenLevels_B": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Levels.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenSelect": {
-  "status": "generated",
-  "request": "AR-031",
-  "requests": [
-   "AR-031"
-  ],
-  "usedBy": [
-   "plugin UF_Stance.js"
-  ],
-  "states": [
-   "bright iron ring around the selected unit's stance ring, 44×22 per square of footprint, open middle, 3 pulse frames (AR-031)"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenShade_E": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Tiles.js",
-   "plugin UF_Tiles.js (test suite)"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenStance_friendly": {
-  "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
-  "usedBy": [
-   "plugin UF_Stance.js"
-  ],
-  "states": [
-   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #22c55e at alpha 0.45 inside a darker rim"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenStance_hostile": {
-  "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
-  "usedBy": [
-   "plugin UF_Stance.js"
-  ],
-  "states": [
-   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #ef4444 at alpha 0.45 inside a darker rim"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenStance_indifferent": {
-  "status": "generated",
-  "request": "AR-034",
-  "requests": [
-   "AR-034"
-  ],
-  "usedBy": [
-   "plugin UF_Stance.js"
-  ],
-  "states": [
-   "flattened ring under a unit's feet, 40×20 per square of footprint (80×40 under a 96 px creature), color #eab308 at alpha 0.45 inside a darker rim"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenStockpile": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Objects.js"
-  ],
-  "states": [
-   "flat dashed 48×48 square on the ground"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenTwoSquareWall_*": {
-  "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Walls.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
  "!$UF_Apothecary_Bench": {
   "status": "original",
   "request": "none yet",
@@ -1959,7 +1357,7 @@
    "object chest_wood \"Storage chest\""
   ],
   "states": [
-   "building: unbuilt (needs 2 Log, 1 Iron bar on the cell) / built",
+   "building: unbuilt (needs 2 Log, 1 Plant fiber on the cell) / built",
    "ruined → Rubble (when its site is sacked)",
    "blocks movement (units work from a neighbouring cell)"
   ],
@@ -4269,16 +3667,7 @@
   "requests": [],
   "usedBy": [
    "start.pair male: clothing tier 1 (UF_Colonists.setTier)",
-   "start.pair male: clothing tier 3 (UF_Colonists.setTier)",
-   "plugin UF_Anim.js (test suite)",
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)",
-   "plugin UF_Combat.js (test suite)",
-   "plugin UF_Ecology.js (test suite)",
-   "plugin UF_Goals.js (test suite)",
-   "plugin UF_NaturalConnections.js (test suite)",
-   "plugin UF_Ownership.js (test suite)",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+   "start.pair male: clothing tier 3 (UF_Colonists.setTier)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -4291,56 +3680,6 @@
   "sidecar": true,
   "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
  },
- "$Baby": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Baby.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$Child_Boy": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Child_Boy.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$Child_Girl": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Child_Girl.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
  "$Eve": {
   "status": "original",
   "request": "AR-011",
@@ -4349,10 +3688,7 @@
   ],
   "usedBy": [
    "start.pair female: clothing tier 1 (UF_Colonists.setTier)",
-   "start.pair female: clothing tier 3 (UF_Colonists.setTier)",
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)",
-   "RMMZ data Map002.json \"The Glade of Genesis\" (event pages)"
+   "start.pair female: clothing tier 3 (UF_Colonists.setTier)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -4364,40 +3700,6 @@
   "exists": true,
   "sidecar": true,
   "statusWhy": "named or placed like a stock cut, but has a .u7bak.png beside it but equals no stock character"
- },
- "$Teen_Boy": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Teen_Boy.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$Teen_Girl": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Teen_Girl.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
  },
  "$UF_Dwarf_Female": {
   "status": "original",
@@ -4591,23 +3893,6 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
- "$UF_Human_Child_Walk": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js (test suite)",
-   "plugin UF_Colonists.js"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Human_Child_Walk.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
  "$UF_Human_Female": {
   "status": "original",
   "request": "AR-011",
@@ -4616,10 +3901,7 @@
   ],
   "usedBy": [
    "start.pair female: tier 0 (UF_Colonists human female tiers[0]; generator start events until UF_Colonists)",
-   "start.pair female: clothing tier 2 (UF_Colonists.setTier)",
-   "plugin UF_Colonists.js",
-   "plugin UF_History.js",
-   "plugin UF_Select.js (test suite)"
+   "start.pair female: clothing tier 2 (UF_Colonists.setTier)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -4646,8 +3928,7 @@
    "AR-1740"
   ],
   "usedBy": [
-   "people human",
-   "plugin UF_Colonists.js (test suite)"
+   "people human"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -4797,11 +4078,7 @@
   ],
   "usedBy": [
    "start.pair male: tier 0 (UF_Colonists human male tiers[0]; generator start events until UF_Colonists)",
-   "start.pair male: clothing tier 2 (UF_Colonists.setTier)",
-   "plugin UF_Colonists.js",
-   "plugin UF_History.js",
-   "plugin UF_Outposts.js (test suite)",
-   "plugin UF_Select.js (test suite)"
+   "start.pair male: clothing tier 2 (UF_Colonists.setTier)"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -4828,9 +4105,7 @@
    "AR-1740"
   ],
   "usedBy": [
-   "people human",
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)"
+   "people human"
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
@@ -5020,164 +4295,6 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
- "$UF_Sheep": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Sheep.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$UF_Wolf": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Select.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Wolf.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$Wolf": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_NaturalConnections.js (test suite)"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)"
-  ],
-  "category": "people",
-  "file": "img/characters/$Wolf.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_human_1.png": {
-  "status": "original",
-  "request": "AR-1720",
-  "requests": [
-   "AR-1720"
-  ],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)",
-   "plugin UF_ColonyOverseer.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_human_1.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_human_2.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Colonists.js",
-   "plugin UF_Colonists.js (test suite)",
-   "plugin UF_ColonyOverseer.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_human_2.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_Minerals.png": {
-  "status": "original",
-  "request": "AR-700",
-  "requests": [
-   "AR-700"
-  ],
-  "usedBy": [
-   "plugin UF_Sheet.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_Minerals.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_Trees_Nature.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Look.js",
-   "plugin UF_Look.js (test suite)",
-   "plugin UF_Sheet.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_Trees_Nature.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_Wildlife_Beasts.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Look.js",
-   "plugin UF_Sheet.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_Wildlife_Beasts.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/faces/UF_Faces_Wildlife_Monsters.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Look.js",
-   "plugin UF_Sheet.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/faces/UF_Faces_Wildlife_Monsters.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
- "img/system/Cursor_default.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_FactionMenus.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/Cursor_default.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
- },
  "img/system/IconSet.png": {
   "status": "original",
   "request": "AR-800",
@@ -5207,7 +4324,6 @@
    "AR-033"
   ],
   "usedBy": [
-   "plugin UF_Factions.js (test suite)",
    "RMMZ core: skin of every window"
   ],
   "states": [
@@ -5218,20 +4334,6 @@
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 but changed since"
- },
- "img/system/Window_default.png": {
-  "status": "original",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_FactionMenus.js"
-  ],
-  "states": [],
-  "category": "ui",
-  "file": "img/system/Window_default.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "not in 8e5fdc1"
  },
  "Outside_A1": {
   "status": "original",

@@ -1,5 +1,12 @@
 [
-null,
-{"id":1,"expanded":false,"name":"The Bastion of Kraghold","order":1,"parentId":0,"scrollX":411,"scrollY":320},
-{"id":2,"expanded":false,"name":"The Glade of Genesis","order":2,"parentId":0,"scrollX":1005.3333333333334,"scrollY":649.7777777777778}
+  null,
+  {
+    "id": 1,
+    "expanded": false,
+    "name": "The Bastion of Kraghold",
+    "order": 1,
+    "parentId": 0,
+    "scrollX": 411,
+    "scrollY": 320
+  }
 ]
