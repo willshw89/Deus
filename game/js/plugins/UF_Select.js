@@ -84,13 +84,15 @@
             { id: "floor", key: "L", keyCode: 76, label: "Build floor", options: ["floor:lay"], job: "floor", candidates: "floorable", color: "#d4a373", hint: "Build floor: drag over ground." },
             { id: "wall", key: "B", keyCode: 66, label: "Build wall", options: ["build:<wall>"], job: "build", candidates: "openLand", picker: "wall", color: "#38bdf8", hint: "Build wall: drag where the walls go." },
             { id: "stockpile", key: "O", keyCode: 79, label: "Mark stockpile", options: ["stockpile"], job: "build", object: "stockpile", candidates: "openLand", zone: "stockpile", color: "#86efac", hint: "Mark stockpile: drag over free ground." },
+            { id: "plan", key: "X", keyCode: 88, label: "Plan", options: ["plan"], job: "plan", candidates: "any", color: "#93c5fd", hint: "Plan: drag to sketch room layouts (no cost)." },
+            { id: "unplan", key: "U", keyCode: 85, label: "Remove plan", options: ["unplan"], job: "unplan", candidates: "plans", color: "#94a3b8", hint: "Remove plan: drag over planned cells to erase." },
             { id: "cancel", key: "N", keyCode: 78, label: "Cancel", options: ["cancel"], candidates: "designations", color: "#ef4444", hint: "Cancel: drag over marked work." }
         ],
         zones: { stockpile: { label: "Stockpile", option: "stockpile" } }
     };
 
     const KEY_CODES = {
-        C: 67, G: 71, P: 80, M: 77, R: 82, V: 86, T: 84, L: 76, B: 66, O: 79, N: 78
+        C: 67, G: 71, P: 80, M: 77, R: 82, V: 86, T: 84, L: 76, B: 66, O: 79, N: 78, X: 88, U: 85
     };
 
     function getConfig() {
@@ -259,10 +261,75 @@
                 version: 1,
                 nextZone: { stockpile: 1 },
                 zones: [],
-                commits: []
+                commits: [],
+                plans: []
             };
         }
+        if (!W.state.select.plans) {
+            W.state.select.plans = [];
+        }
         return W.state.select;
+    }
+
+    //-------------------------------------------------------------------------
+    // Ludeon Architectural Planning Layer (Non-destructive player blueprints)
+    //-------------------------------------------------------------------------
+
+    function planKey(area, x, y, z = 0) {
+        const ax = (area && area.x) || 0, ay = (area && area.y) || 0;
+        return `${ax},${ay},${z}:${x | 0},${y | 0}`;
+    }
+
+    function addPlan(area, x, y, z = 0, color = "#93c5fd", type = "plan") {
+        const st = ensureSelectState();
+        if (!st) return false;
+        if (hasPlanAt(area, x, y, z)) return false;
+        st.plans.push({
+            area: copyArea(area),
+            x: x | 0,
+            y: y | 0,
+            z: z | 0,
+            color: color || "#93c5fd",
+            type: type || "plan"
+        });
+        emit("select:planAdded", { area: copyArea(area), x: x | 0, y: y | 0, z: z | 0, color });
+        return true;
+    }
+
+    function removePlan(area, x, y, z = 0) {
+        const st = ensureSelectState();
+        if (!st || !st.plans || !st.plans.length) return false;
+        const ax = (area && area.x) || 0, ay = (area && area.y) || 0;
+        const idx = st.plans.findIndex(p => p.x === (x | 0) && p.y === (y | 0) && ((p.z || 0) === (z | 0)) && ((p.area && p.area.x) || 0) === ax && ((p.area && p.area.y) || 0) === ay);
+        if (idx !== -1) {
+            st.plans.splice(idx, 1);
+            emit("select:planRemoved", { area: copyArea(area), x: x | 0, y: y | 0, z: z | 0 });
+            return true;
+        }
+        return false;
+    }
+
+    function hasPlanAt(area, x, y, z = 0) {
+        const st = ensureSelectState();
+        if (!st || !st.plans || !st.plans.length) return false;
+        const ax = (area && area.x) || 0, ay = (area && area.y) || 0;
+        return st.plans.some(p => p.x === (x | 0) && p.y === (y | 0) && ((p.z || 0) === (z | 0)) && ((p.area && p.area.x) || 0) === ax && ((p.area && p.area.y) || 0) === ay);
+    }
+
+    function getPlans(area, z = 0) {
+        const st = ensureSelectState();
+        if (!st || !st.plans) return [];
+        const ax = (area && area.x) || 0, ay = (area && area.y) || 0;
+        return st.plans.filter(p => ((p.area && p.area.x) || 0) === ax && ((p.area && p.area.y) || 0) === ay && ((p.z || 0) === (z | 0)));
+    }
+
+    function clearPlans(area, z = 0) {
+        const st = ensureSelectState();
+        if (!st || !st.plans) return 0;
+        const before = st.plans.length;
+        const ax = (area && area.x) || 0, ay = (area && area.y) || 0;
+        st.plans = st.plans.filter(p => !(((p.area && p.area.x) || 0) === ax && ((p.area && p.area.y) || 0) === ay && ((p.z || 0) === (z | 0))));
+        return before - st.plans.length;
     }
 
     //-------------------------------------------------------------------------
@@ -498,12 +565,12 @@
                 }
                 return true;
             }
+            case "plans":
+                return hasPlanAt(area, x, y, z);
             case "designations": {
                 const I = Interact();
-                if (I && typeof I.designationsAt === "function") {
-                    return I.designationsAt(x, y, area).length > 0;
-                }
-                return false;
+                const hasDesig = I && typeof I.designationsAt === "function" && I.designationsAt(x, y, area).length > 0;
+                return hasDesig || hasPlanAt(area, x, y, z);
             }
             default:
                 return true;
@@ -612,21 +679,42 @@
                 let alreadyKey = `${jobType}:${x},${y}`;
                 if (c.tool === "wall") alreadyKey = `build:${c.wall}:${x},${y}`;
                 else if (c.tool === "stockpile") alreadyKey = `build:stockpile:${x},${y}`;
+                else if (c.tool === "plan") alreadyKey = `plan:${x},${y}`;
+                else if (c.tool === "unplan") alreadyKey = `unplan:${x},${y}`;
 
                 if (c.alreadyMarkedIndex.has(alreadyKey)) {
                     c.skipped["already marked"] = (c.skipped["already marked"] || 0) + 1;
                     continue;
                 }
 
-                // 3. Open designations limit check
-                const openCount = J && J.list ? J.list().filter(j => j.owner === null && (j.state === "open" || j.state === "travel" || j.state === "work")).length : 0;
-                if (openCount >= maxMarks && !isBigRectProvoked) {
-                    c.skipped["limit reached"] = (c.skipped["limit reached"] || 0) + 1;
-                    continue;
+                // 3. Open designations limit check (plans do not consume labor designation slots)
+                if (c.tool !== "plan" && c.tool !== "unplan") {
+                    const openCount = J && J.list ? J.list().filter(j => j.owner === null && (j.state === "open" || j.state === "travel" || j.state === "work")).length : 0;
+                    if (openCount >= maxMarks && !isBigRectProvoked) {
+                        c.skipped["limit reached"] = (c.skipped["limit reached"] || 0) + 1;
+                        continue;
+                    }
                 }
 
-                // 4. Run through UF_Interact
-                if (c.tool === "wall") {
+                // 4. Run through tool logic / UF_Interact
+                if (c.tool === "plan") {
+                    if (hasPlanAt(c.area, x, y, c.z)) {
+                        c.skipped["already marked"] = (c.skipped["already marked"] || 0) + 1;
+                    } else {
+                        addPlan(c.area, x, y, c.z, "#93c5fd");
+                        c.made++;
+                        c.alreadyMarkedIndex.add(alreadyKey);
+                    }
+                } else if (c.tool === "unplan") {
+                    if (hasPlanAt(c.area, x, y, c.z)) {
+                        removePlan(c.area, x, y, c.z);
+                        c.made++;
+                        c.alreadyMarkedIndex.add(alreadyKey);
+                    } else {
+                        c.skipped["not offered here"] = (c.skipped["not offered here"] || 0) + 1;
+                    }
+                } else if (c.tool === "wall") {
+                    removePlan(c.area, x, y, c.z);
                     const target = { area: copyArea(c.area), x, y, z: c.z };
                     const buildOpts = I && typeof I.buildOptions === "function" ? I.buildOptions(target) : [];
                     const opt = buildOpts.find(o => o.id === `build:${c.wall}` || o.objectId === c.wall);
@@ -672,11 +760,20 @@
                         }
                     }
                 } else {
+                    let clearedPlan = false;
+                    if (c.tool === "cancel" && hasPlanAt(c.area, x, y, c.z)) {
+                        removePlan(c.area, x, y, c.z);
+                        clearedPlan = true;
+                        c.made++;
+                    }
+                    if (c.tool === "floor") {
+                        removePlan(c.area, x, y, c.z);
+                    }
                     const opts = I && typeof I.optionsFor === "function" ? I.optionsFor(x, y) : [];
                     const opt = opts.find(o => c.toolDef.options.includes(o.id) || o.id === c.toolDef.id);
 
                     if (!opt) {
-                        c.skipped["not offered here"] = (c.skipped["not offered here"] || 0) + 1;
+                        if (!clearedPlan) c.skipped["not offered here"] = (c.skipped["not offered here"] || 0) + 1;
                     } else if (opt.enabled === false && !isProvoked("tool_skips_ineligible")) {
                         let reason = opt.reason;
                         if (!reason) {
@@ -983,8 +1080,12 @@
             if (previewCache[cacheIdx] === 0) { // Unknown
                 if (tDef.id === "cancel") {
                     const I = Interact();
-                    const hasMarks = I && typeof I.designationsAt === "function" && I.designationsAt(cx, cy, activeBox.area).length > 0;
+                    const hasMarks = (I && typeof I.designationsAt === "function" && I.designationsAt(cx, cy, activeBox.area).length > 0) || hasPlanAt(activeBox.area, cx, cy, activeBox.z);
                     previewCache[cacheIdx] = hasMarks ? 1 : 3;
+                } else if (tDef.id === "plan") {
+                    previewCache[cacheIdx] = hasPlanAt(activeBox.area, cx, cy, activeBox.z) ? 2 : 1;
+                } else if (tDef.id === "unplan") {
+                    previewCache[cacheIdx] = hasPlanAt(activeBox.area, cx, cy, activeBox.z) ? 1 : 3;
                 } else if (isCandidateCell(tDef, cx, cy, activeBox.area, activeBox.z)) {
                     // Check if already designated
                     const jobType = tDef.job || tDef.id;
@@ -1084,6 +1185,9 @@
             const W = World();
             const curArea = W ? W.currentArea() : null;
             const cfg = getConfig();
+
+            // 0. Draw Persistent Ludeon Planning Marks
+            this.drawPlans(b, curArea, curZ);
 
             // 1. Draw Stockpile Zones overlay when stockpile or cancel tool is on
             if ((activeTool === "stockpile" || activeTool === "cancel") && curArea) {
@@ -1202,6 +1306,37 @@
             b.drawText(zone.name, lx + 2, ly + 2, 100, 14, "left");
         }
 
+        drawPlans(b, curArea, curZ) {
+            if (!curArea || !window.$gameMap) return;
+            const plans = getPlans(curArea, curZ);
+            if (!plans || !plans.length) return;
+
+            const z = window.UF.Camera ? UF.Camera.zoom() : 1;
+            const tileSize = 48 * z;
+            const startX = Math.floor($gameMap.displayX());
+            const endX = Math.ceil($gameMap.displayX() + Graphics.width / tileSize);
+            const startY = Math.floor($gameMap.displayY());
+            const endY = Math.ceil($gameMap.displayY() + Graphics.height / tileSize);
+
+            for (const p of plans) {
+                if (p.x >= startX - 1 && p.x <= endX + 1 && p.y >= startY - 1 && p.y <= endY + 1) {
+                    const sx = Math.round($gameMap.adjustX(p.x) * tileSize);
+                    const sy = Math.round($gameMap.adjustY(p.y) * tileSize);
+                    if (sx + tileSize > 0 && sy + tileSize > 0 && sx < Graphics.width && sy < Graphics.height) {
+                        // Translucent architectural blueprint fill
+                        b.paintOpacity = 90;
+                        b.fillRect(sx + 1, sy + 1, tileSize - 2, tileSize - 2, p.color || "#93c5fd");
+                        // Inset architectural boundary stroke
+                        b.paintOpacity = 180;
+                        b.strokeRect(sx + 1, sy + 1, tileSize - 2, tileSize - 2, "#bae6fd", 1);
+                        // Subtle center node marker
+                        b.fillRect(sx + Math.round(tileSize / 2) - 2, sy + Math.round(tileSize / 2) - 2, 4, 4, "#ffffff");
+                    }
+                }
+            }
+            b.paintOpacity = 255;
+        }
+
         drawTileSelector(b) {
             if (!window.$gameMap || !window.$dataMap) return;
             const look = window.UF && UF.Look;
@@ -1305,7 +1440,9 @@
     class Sprite_UFSelectToolbar extends Sprite {
         initialize() {
             super.initialize();
-            this.width = 344;
+            const cfg = getConfig();
+            const count = cfg.tools ? cfg.tools.length : 13;
+            this.width = (1 + count) * 28 + 8;
             this.height = 32;
             this.bitmap = new Bitmap(this.width, this.height);
             this.x = 264;
@@ -1316,6 +1453,13 @@
         }
         update() {
             super.update();
+            const cfg = getConfig();
+            const neededWidth = (1 + (cfg.tools ? cfg.tools.length : 13)) * 28 + 8;
+            if (this.width !== neededWidth) {
+                this.width = neededWidth;
+                this.bitmap = new Bitmap(this.width, this.height);
+                this.redraw();
+            }
             this.updatePosition();
             if (activeTool !== this._lastActive) {
                 this._lastActive = activeTool;
@@ -2276,7 +2420,16 @@
         registeredKeys: () => Object.assign({}, registeredKeys),
         targetedTile,
         setTargetedTile,
-        clearTargetedTile
+        clearTargetedTile,
+        addPlan,
+        removePlan,
+        hasPlan: hasPlanAt,
+        getPlans,
+        clearPlans,
+        plans: () => {
+            const st = ensureSelectState();
+            return st && st.plans ? st.plans.slice() : [];
+        }
     };
 
     window.UF = window.UF || {};

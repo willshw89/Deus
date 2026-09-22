@@ -1,57 +1,130 @@
 //=============================================================================
-// RPG Maker MZ - Ultima Fortress: Dwarf Fortress Construction & Gathering
+// RPG Maker MZ - Project DEUS: Ludeon 4-Stage Construction & Blueprint Pipeline
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [UF Construction] Dwarf Fortress grid-based blueprint construction, natural resource gathering, and hauling jobs.
- * @author Deepdelve Architect
+ * @plugindesc [UF Construction] Ludeon-style 4-stage physical construction pipeline: Blueprint -> Material Delivery -> Frame -> Construction Labor.
+ * @author Project DEUS Team
+ * @base UF_World
+ * @orderAfter UF_World
+ * @orderAfter UF_Objects
+ * @orderAfter UF_Items
+ * @orderAfter UF_Jobs
  *
  * @help
  * ============================================================================
- * Ultima Fortress Construction & Gathering (UF_Construction)
+ * Project DEUS - Ludeon 4-Stage Construction Engine (UF_Construction)
  * ============================================================================
- * Implements:
- * - Natural resource gathering: [Harvest Tree], [Chop Wood], [Gather Stone], [Mine]
- * - Ghost blueprint construction on the grid (Palisades, Stone Walls, Beds, Hearths)
- * - Hauling & construction job queue carried out by autonomous colonists
- * - Tactile designation dock interface
+ * Implements the physical construction lifecycle inspired by RimWorld / Ludeon Studios:
+ * 1. Blueprint: Ghost outline on tile; holds required material bills.
+ * 2. Delivery: Haulers physically transport items from stockpiles to blueprint.
+ * 3. Frame: Once 100% of materials are delivered, transforms into a construction frame.
+ * 4. Construction: Builders apply physical labor progress (0% -> 100%) to assemble
+ *    the final structure via UF.Objects.
+ *
+ * Zero instantaneous teleportation of materials (VISION V125).
  */
 
 (() => {
     "use strict";
 
+    const STAGE_BLUEPRINT = "blueprint";
+    const STAGE_FRAME = "frame";
+    const STAGE_COMPLETE = "complete";
+
+    const World = () => (window.UF && UF.World) || null;
+    const Objects = () => (window.UF && UF.Objects) || null;
+    const Items = () => (window.UF && UF.Items) || null;
+    const Jobs = () => (window.UF && UF.Jobs) || null;
+
+    const emit = (name, ...args) => {
+        if (window.UF && UF.Events && typeof UF.Events.emit === "function") {
+            UF.Events.emit(name, ...args);
+        }
+    };
+
+    function copyArea(a) {
+        return a ? { x: a.x | 0, y: a.y | 0 } : { x: 0, y: 0 };
+    }
+
     //-----------------------------------------------------------------------------
-    // Blueprint & Job Data Model
+    // Construction Job Data Model
     //-----------------------------------------------------------------------------
+
     class ConstructionJob {
-        constructor(id, type, x, y, requiredMaterials, buildTime) {
+        constructor(id, type, x, y, requiredMaterials, buildTime, area = null, z = 0) {
             this.id = id;
-            this.type = type; // "wall", "floor", "bed", "hearth"
-            this.x = x;
-            this.y = y;
-            this.required = requiredMaterials; // e.g. { "Wood": 2 }
+            this.type = type; // objectId e.g. "wall_wood", "door_wood", "floor_straw"
+            this.x = x | 0;
+            this.y = y | 0;
+            this.z = z | 0;
+            this.area = copyArea(area);
+            this.required = Object.assign({}, requiredMaterials || {});
             this.delivered = {};
             this.progress = 0;
-            this.maxProgress = buildTime || 100;
+            this.maxProgress = buildTime || 80;
+            this.stage = STAGE_BLUEPRINT;
             this.completed = false;
             this.assignedColonistId = null;
         }
 
         isMaterialsSatisfied() {
-            for (const mat in this.required) {
-                if ((this.delivered[mat] || 0) < this.required[mat]) return false;
+            for (const mat of Object.keys(this.required)) {
+                if ((this.delivered[mat] || 0) < (this.required[mat] || 0)) return false;
             }
             return true;
+        }
+
+        deliver(itemId, count = 1) {
+            if (this.completed) return false;
+            this.delivered[itemId] = (this.delivered[itemId] || 0) + count;
+            if (this.stage === STAGE_BLUEPRINT && this.isMaterialsSatisfied()) {
+                this.stage = STAGE_FRAME;
+                emit("construction:frameReady", this);
+            }
+            return true;
+        }
+
+        work(amount = 1, worker = null) {
+            if (this.completed || this.stage !== STAGE_FRAME) return false;
+            this.progress += amount;
+            if (this.progress >= this.maxProgress) {
+                this.complete(worker);
+                return true;
+            }
+            return false;
+        }
+
+        complete(worker = null) {
+            if (this.completed) return;
+            this.completed = true;
+            this.stage = STAGE_COMPLETE;
+
+            const O = Objects();
+            if (O) {
+                if (typeof O.setIn === "function") {
+                    O.setIn({ x: (this.area && this.area.x) || 0, y: (this.area && this.area.y) || 0, z: this.z }, this.x, this.y, this.type);
+                } else if (typeof O.set === "function") {
+                    O.set(this.x, this.y, this.type);
+                }
+            }
+
+            if (window.$ufVisuals && window.$ufVisuals.addBark && worker && worker.event) {
+                window.$ufVisuals.addBark(worker.event, `Completed ${this.type}!`);
+            }
+            emit("construction:completed", this, worker);
         }
     }
 
     class GatheringDesignation {
-        constructor(id, type, x, y) {
+        constructor(id, type, x, y, area = null, z = 0) {
             this.id = id;
-            this.type = type; // "harvest", "chop", "stone"
-            this.x = x;
-            this.y = y;
+            this.type = type; // "harvest", "chop", "stone", "mine"
+            this.x = x | 0;
+            this.y = y | 0;
+            this.z = z | 0;
+            this.area = copyArea(area);
             this.assignedColonistId = null;
             this.completed = false;
         }
@@ -60,150 +133,119 @@
     //-----------------------------------------------------------------------------
     // Construction Manager Singleton
     //-----------------------------------------------------------------------------
+
     class ConstructionManager {
         constructor() {
             this.blueprints = [];
             this.gatherDesignations = [];
             this.groundItems = [];
-            this.activeMode = null; // "harvest", "chop", "gather", "build_wall", "build_bed"
+            this.activeMode = null;
             this.nextId = 1;
         }
 
-        addBlueprint(type, x, y, required, time) {
-            // Check if existing blueprint at position
-            if (this.blueprints.some(b => b.x === x && b.y === y && !b.completed)) return;
-            const bp = new ConstructionJob(this.nextId++, type, x, y, required, time);
+        addBlueprint(type, x, y, required = null, time = 80, area = null, z = 0) {
+            const curArea = area || (World() && World().currentArea ? World().currentArea() : { x: 0, y: 0 });
+            // Resolve materials from catalog if not provided
+            let req = required;
+            if (!req && Objects()) {
+                const t = Objects().type(type);
+                if (t && t.build && t.build.items) req = t.build.items;
+                if (!time && t && t.build && t.build.work) time = t.build.work;
+            }
+            if (!req) req = { wood: 1 };
+
+            // Check if existing uncompleted blueprint at position
+            const existing = this.blueprints.find(b => !b.completed && b.x === x && b.y === y && (b.z || 0) === (z || 0) &&
+                ((b.area && b.area.x) || 0) === curArea.x && ((b.area && b.area.y) || 0) === curArea.y);
+            if (existing) return existing;
+
+            const bp = new ConstructionJob(this.nextId++, type, x, y, req, time || 80, curArea, z);
             this.blueprints.push(bp);
-            console.log(`[UF Construction] Placed blueprint ${type} at (${x}, ${y})`);
-            SoundManager.playOk();
-            this.dispatchJobs();
+            emit("construction:blueprintAdded", bp);
+            return bp;
         }
 
-        addGatherDesignation(type, x, y) {
-            if (this.gatherDesignations.some(g => g.x === x && g.y === y && !g.completed)) return;
-            const gd = new GatheringDesignation(this.nextId++, type, x, y);
+        addGatherDesignation(type, x, y, area = null, z = 0) {
+            const curArea = area || (World() && World().currentArea ? World().currentArea() : { x: 0, y: 0 });
+            const existing = this.gatherDesignations.find(g => !g.completed && g.x === x && g.y === y && (g.z || 0) === (z || 0) &&
+                ((g.area && g.area.x) || 0) === curArea.x && ((g.area && g.area.y) || 0) === curArea.y);
+            if (existing) return existing;
+
+            const gd = new GatheringDesignation(this.nextId++, type, x, y, curArea, z);
             this.gatherDesignations.push(gd);
-            console.log(`[UF Gathering] Designated ${type} at (${x}, ${y})`);
-            SoundManager.playOk();
-            this.dispatchJobs();
+            emit("construction:gatherDesignated", gd);
+            return gd;
         }
 
-        dispatchJobs() {
-            if (!$colonyManager) return;
-
-            // Assign gathering jobs to idle colonists
-            for (const gd of this.gatherDesignations) {
-                if (gd.completed || gd.assignedColonistId) continue;
-                const idleColonist = $colonyManager.colonists.find(c => !c.drafted && c.currentJob === "Idle");
-                if (idleColonist) {
-                    gd.assignedColonistId = idleColonist.id;
-                    idleColonist.currentJob = `${gd.type.toUpperCase()}: (${gd.x}, ${gd.y})`;
-                    idleColonist.assignMoveTo(gd.x, gd.y, () => {
-                        this.completeGathering(gd, idleColonist);
-                    });
-                }
-            }
-
-            // Assign construction jobs to idle colonists
-            for (const bp of this.blueprints) {
-                if (bp.completed || bp.assignedColonistId) continue;
-                const idleColonist = $colonyManager.colonists.find(c => !c.drafted && c.currentJob === "Idle");
-                if (idleColonist) {
-                    bp.assignedColonistId = idleColonist.id;
-                    idleColonist.currentJob = `Building ${bp.type}`;
-                    idleColonist.assignMoveTo(bp.x, bp.y, () => {
-                        this.completeConstruction(bp, idleColonist);
-                    });
-                }
-            }
+        getBlueprint(id) {
+            return this.blueprints.find(b => b.id === id) || null;
         }
 
-        completeGathering(gd, colonist) {
-            gd.completed = true;
-            colonist.currentJob = "Idle";
-            const ev = colonist.event;
-
-            if (gd.type === "harvest") {
-                // Drop 2x Eden-Fruit on ground / inventory
-                colonist.inventory.push({ name: "Eden-Fruit", icon: "fruit" });
-                this.groundItems.push({ name: "Eden-Fruit", x: gd.x, y: gd.y });
-                if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                    window.$ufVisuals.addBark(ev, "Harvested fresh sweet fruit!");
-                }
-            } else if (gd.type === "chop") {
-                // Yield wood logs
-                colonist.inventory.push({ name: "Wood Logs", count: 3 });
-                this.groundItems.push({ name: "Wood Logs", x: gd.x, y: gd.y });
-                if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                    window.$ufVisuals.addBark(ev, "Hewn timber branches!");
-                }
-            } else if (gd.type === "stone") {
-                // Yield river flint
-                colonist.inventory.push({ name: "River Flint", count: 2 });
-                this.groundItems.push({ name: "River Flint", x: gd.x, y: gd.y });
-                if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                    window.$ufVisuals.addBark(ev, "Gathered sharp flint stones.");
-                }
-            }
-            SoundManager.playShop();
-            this.dispatchJobs();
+        blueprintsAt(x, y, area = null, z = 0) {
+            const curArea = area || (World() && World().currentArea ? World().currentArea() : null);
+            return this.blueprints.filter(b => !b.completed && b.x === x && b.y === y && (b.z || 0) === (z || 0) &&
+                (!curArea || (((b.area && b.area.x) || 0) === curArea.x && ((b.area && b.area.y) || 0) === curArea.y)));
         }
 
-        completeConstruction(bp, colonist) {
+        deliverMaterial(blueprintId, itemId, count = 1) {
+            const bp = this.getBlueprint(blueprintId);
+            if (!bp) return false;
+            return bp.deliver(itemId, count);
+        }
+
+        workFrame(blueprintId, amount = 1, worker = null) {
+            const bp = this.getBlueprint(blueprintId);
+            if (!bp) return false;
+            return bp.work(amount, worker);
+        }
+
+        cancelBlueprint(blueprintId) {
+            const bp = this.getBlueprint(blueprintId);
+            if (!bp || bp.completed) return false;
             bp.completed = true;
-            colonist.currentJob = "Idle";
-            const ev = colonist.event;
-
-            if (window.$ufVisuals && window.$ufVisuals.addBark) {
-                window.$ufVisuals.addBark(ev, `Completed construction of ${bp.type}!`);
+            // Drop delivered materials back into world
+            const I = Items();
+            if (I && typeof I.drop === "function") {
+                for (const [mat, cnt] of Object.entries(bp.delivered)) {
+                    if (cnt > 0) {
+                        I.drop({ area: bp.area, z: bp.z }, bp.x, bp.y, mat, cnt);
+                    }
+                }
             }
-            SoundManager.playUseItem();
+            emit("construction:blueprintCancelled", bp);
+            return true;
+        }
 
-            // Transform ground tile or place collidable structure
-            if (bp.type === "palisade" || bp.type === "wall") {
-                // Change passability / place tile
-                console.log(`[UF] Placed solid wall at (${bp.x}, ${bp.y})`);
-            }
-            this.dispatchJobs();
+        allActiveBlueprints(area = null, z = 0) {
+            const curArea = area || (World() && World().currentArea ? World().currentArea() : null);
+            return this.blueprints.filter(b => !b.completed &&
+                (!curArea || (((b.area && b.area.x) || 0) === curArea.x && ((b.area && b.area.y) || 0) === curArea.y)) &&
+                ((b.z || 0) === (z || 0)));
+        }
+
+        clear() {
+            this.blueprints = [];
+            this.gatherDesignations = [];
         }
     }
 
-    window.$constructionManager = new ConstructionManager();
+    const instance = new ConstructionManager();
+    window.$constructionManager = instance;
 
-    //-----------------------------------------------------------------------------
-    // Tactile Designation Dock Window (Window_UFDesignationDock)
-    //-----------------------------------------------------------------------------
-    // Designation dock removed per user request
-
-    // Handle map clicks when in designation/construction mode
-    const _Scene_Map_processMapTouch = Scene_Map.prototype.processMapTouch;
-    Scene_Map.prototype.processMapTouch = function() {
-        if ($constructionManager && $constructionManager.activeMode && TouchInput.isTriggered()) {
-            const mx = $gameMap.canvasToMapX(TouchInput.x);
-            const my = $gameMap.canvasToMapY(TouchInput.y);
-
-            switch ($constructionManager.activeMode) {
-                case "harvest":
-                    $constructionManager.addGatherDesignation("harvest", mx, my);
-                    break;
-                case "chop":
-                    $constructionManager.addGatherDesignation("chop", mx, my);
-                    break;
-                case "stone":
-                    $constructionManager.addGatherDesignation("stone", mx, my);
-                    break;
-                case "build_palisade":
-                    $constructionManager.addBlueprint("palisade", mx, my, { "Wood": 2 }, 80);
-                    break;
-                case "build_bed":
-                    $constructionManager.addBlueprint("bed", mx, my, { "Wood": 2, "Leaves": 2 }, 60);
-                    break;
-            }
-            return;
-        }
-        _Scene_Map_processMapTouch.call(this);
+    window.UF = window.UF || {};
+    window.UF.Construction = {
+        STAGE_BLUEPRINT,
+        STAGE_FRAME,
+        STAGE_COMPLETE,
+        manager: instance,
+        addBlueprint: (type, x, y, req, time, area, z) => instance.addBlueprint(type, x, y, req, time, area, z),
+        getBlueprint: id => instance.getBlueprint(id),
+        blueprintsAt: (x, y, area, z) => instance.blueprintsAt(x, y, area, z),
+        deliverMaterial: (id, item, count) => instance.deliverMaterial(id, item, count),
+        workFrame: (id, amount, worker) => instance.workFrame(id, amount, worker),
+        cancelBlueprint: id => instance.cancelBlueprint(id),
+        allActive: (area, z) => instance.allActiveBlueprints(area, z)
     };
 
-    console.log("[UF] UF_Construction initialized: DF grid blueprint construction, gathering designations, and job dispatch active.");
+    console.log("[UF] UF_Construction initialized: Ludeon 4-stage construction pipeline active.");
 })();
-

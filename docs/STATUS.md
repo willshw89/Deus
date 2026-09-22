@@ -47,13 +47,25 @@ Delivered per user directive ("Make it so that allies can move freely through ea
   - Rule 4 Mutant Checks (both caught and exited with code 1):
     - `node tools/test_ally_movement_exclusive_action_square.js --mutant=allow_shared_action_square`: exited with code 1 (`FAIL smoke.shared_action_square_prevented - MUTANT INJECTED: shared action square permitted`).
     - `node tools/test_ally_movement_exclusive_action_square.js --mutant=block_allies`: exited with code 1 (`FAIL smoke.allies_corridor_cross - MUTANT INJECTED: allies blocked in corridor`).
-  - Full functional regressions:
-    - `tools/run_tests.js smoke`: 13/13 PASS (exit 0)
-    - `tools/run_tests.js jobs`: 19/19 PASS (exit 0)
-    - `tools/run_tests.js colonists`: 24/24 PASS (exit 0)
-  - Rule 5 Screenshots Inspected:
-    - `live_ally_corridor_movement.png`: 1-tile-wide horizontal wooden corridor bounded by walls, demonstrating clear allied passage.
-    - `live_ally_exclusive_action_squares.png`: Top shows corridor crossing; middle shows colonist facing hostile wolf with collision blocking entry; bottom shows two colonists chopping the same oak tree from separate, distinct tiles (`(19, 27)` and `(21, 27)`).
+
+## Ludeon Planning Mode, Reservation Manager & 4-Stage Construction Delivered — 2026-09-21 (Gemini)
+Delivered per Ludeon planning and construction architecture directives:
+- **Player Plan Mode (`UF_Select.js`)**:
+  - Registered player planning mode with hotkeys: `X` for Plan and `U` for Remove Plan.
+  - Implemented blueprint plan overlay rendering with grid visualization.
+  - Plans generate 0 colonist jobs or world obstacles until structures are intentionally designated for construction.
+- **Ludeon Reservation Manager (`UF_Jobs.js`)**:
+  - Centralized concurrency control (`UF.Jobs.ReservationManager` / `UF.Jobs.reservation`) tracking spatial cells, item IDs, and world targets.
+  - Mutual exclusion prevents multiple colonists from targeting the same resource or build site simultaneously.
+  - Automated hooks on job assignment (`reserve`) and job completion/cancellation/release (`release`, `clearUnit`).
+- **4-Stage Construction Pipeline (`UF_Construction.js`, `UF_Colonists.js`)**:
+  - Phase 1: Blueprint placement with bill of materials.
+  - Phase 2: Material delivery (transitions from blueprint to scaffold frame upon 100% haul delivery).
+  - Phase 3: Construction labor progress tracking.
+  - Phase 4: Structure completion and authoritative world object spawn via `UF_Objects`.
+- **Automated Verification**:
+  - `tools/test_ludeon_planning.js`: 33/33 PASS (exit 0).
+  - Screenshot verified: `smoke.ludeon_planning_in_engine.png`.
 
 ## Post-Town Hall Autonomous Progression & Private Homestead Construction Delivered — 2026-09-21 (Gemini)
 Delivered per user directive ("The AI arent really doing shit after building the town center"):

@@ -3058,6 +3058,9 @@
             if (!missing.length) {
                 const allHere = Object.keys(needs).every(id => countOnCell(id) >= (needs[id] | 0));
                 if (allHere) {
+                    if (window.UF && UF.Jobs && UF.Jobs.ReservationManager && UF.Jobs.ReservationManager.isReservedByOther(u.id, target)) {
+                        continue;
+                    }
                     return { type: "build", target, params: { objectId: t.id, plan: step.id, stores: step.stores || null } };
                 }
                 // Materials are currently in flight with another colonist: skip to next cell to avoid duplicating effort!
@@ -3425,6 +3428,7 @@
             if (looseInFootprints.length > 0) {
                 for (const f of looseInFootprints) {
                     if (claimed(u, "haul", f.x, f.y, { itemId: f.item.id, plan: "clear_footprint" })) continue;
+                    if (window.UF && UF.Jobs && UF.Jobs.ReservationManager && UF.Jobs.ReservationManager.isReservedByOther(u.id, f.item.id)) continue;
                     const t = itemType(f.item.type);
                     if (!t) continue;
                     // Do NOT haul away materials that are sitting on a build cell waiting to be constructed!
@@ -3583,6 +3587,7 @@
             if (onStockpile(f.item, null, u)) return false;
             if (onBuildCell(f.x, f.y, u, f.item.type)) return false;
             if (f.item.firstOwner && f.item.firstOwner !== u.id) return false;
+            if (window.UF && UF.Jobs && UF.Jobs.ReservationManager && UF.Jobs.ReservationManager.isReservedByOther(u.id, f.item.id)) return false;
             return true;
         });
         if (!loose.length) return null;
@@ -4045,7 +4050,7 @@
             const job = J.of(u.id);
             if (job) {
                 const need = urgent(u);
-                if (need && !NEED_JOBS.includes(job.type) && (!job.params || !NEED_JOBS.includes(job.params.via)) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
+                if (need && !NEED_JOBS.includes(job.type) && !(need === "hunger" && job.type === "hunt") && (!job.params || !NEED_JOBS.includes(job.params.via)) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                     preemptAt.set(u.id, t);
                     J.cancel(job.id, need === "thirst" ? "too thirsty to go on" : "too hungry to go on");
                 } else if (!NEED_JOBS.includes(job.type)) {
