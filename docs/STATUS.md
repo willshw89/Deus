@@ -7,7 +7,21 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- (None)
+- **Gemini (Coordinator)**: Active UI assignment — RTS Right-Click command dispatch (ground move, focus fire enemy attack, resource gather/haul, friendly transport load) & Talk system suppression (`game/js/plugins/DEUS_Select.js`, `game/js/plugins/DEUS_Talk.js`). Protected UI files: `game/js/plugins/DEUS_Stance.js`, `game/js/plugins/DEUS_FactionMenus.js`, `game/js/plugins/DEUS_Select.js`. Coordinator authority for shared status and audit records.
+- **Fable (Build Bench / Implementation — Isolated Working Copy)**: Reserved task — Repair and restore 5 generation test harnesses (`tools/test_column_landforms.js`, `tools/test_vertical_worldgen_proof.js`, `tools/test_seamless_map_edges.js`, `tools/test_geology_strata.js`, `tools/test_round_world.js`) and their narrowly required test-only loader/helper dependencies in isolated working copy. Note: Gemini must not independently repair these harnesses while Fable's assignment is active. Fable returns documentation changes as a proposed patch or handoff.
+
+## Audit A7 Triaged & Generation Test Recovery Authorized — 2026-09-22 (Gemini / Coordinator)
+1. **Audit A7 Formally Recorded (`docs/AUDIT_LOG.md`)**:
+   - Recorded comprehensive World Generation audit conducted by `deus-research` with strict evidence categorization (Snapshot runtime results, Headless assertions, Harness bootstrap failures, Screenshots, Measurements without diagnosed causes, and Native Editor Playtest: NOT RUN).
+   - Demonstrated regression recorded on seed-424242 underground cavern synthesis (41–46% solid on Z=-1 vs 83.5% in GEN2 fixture).
+   - Findings A7-7 (64-cell-read budget for offscreen walkers) and A7-8 (underground cavern geometry/solid percentage) kept OPEN and undiagnosed; cell-read budget and underground parameters protected from artificial modification.
+   - Starting-state contract preserved: 8 founders around lit campfire, starter resource kit, 11 cultural factions, 5 Z-levels.
+2. **Boundary & Ownership Established**:
+   - Protected Gemini files: `DEUS_Stance.js`, `DEUS_FactionMenus.js`, `DEUS_Select.js`.
+   - Reserved 5 generation test harnesses for Fable in an isolated working copy: `test_column_landforms.js`, `test_vertical_worldgen_proof.js`, `test_seamless_map_edges.js`, `test_geology_strata.js`, `test_round_world.js`.
+   - Running RPG Maker MZ and NW.js sessions kept active and undisturbed; production generation code, live data, assets, and saves protected.
+
+
 
 ## Glowing Green Ground Selection Rings, Right-Click Move & Generation Source Packets Delivered — 2026-09-22 (Gemini & Subagents)
 Delivered per user directives ("Actually, remove these green squares entirely. no indicator of alliance under the creatures. When they are selected, place a glowing green ring under their feet. When they are unselected, nothing.", "With units selected, if I right click, I want them to move", "Make the drag box green instead of white", "Let's make sure these rings spawn under the creature sprites", "When I let go of my left click during a drag and drop, I want the dragged square to go away, simply leaving me with my selection. Also I think the units' feet should be in the center of the circle", "When I right click I do not want this white selectire grid"):

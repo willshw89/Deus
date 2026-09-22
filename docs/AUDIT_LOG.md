@@ -6,6 +6,63 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
 
 ---
 
+## A7: World Generation Source & Systems Audit (2026-09-22)
+
+**Audited by:** `deus-research` (Read-Only Systems Specialist) & Coordinated by Gemini.
+**Scope:** Deep exhaustive source code and test harness audit of Project DEUS World Generation systems (`DEUS_World.js`, `DEUS_WorldGen.js`, `DEUS_NaturalConnections.js`, `DEUS_Factions.js`, `DEUS_Levels.js`, `DEUS_History.js`, `UF_WorldCatalog.json`).
+**Native Editor Playtest:** `NOT RUN` (Verification conducted strictly via headless Node.js runners and snapshot `nw.exe` harnesses; RMMZ editor F5/F8 not run during audit).
+
+### Evidence Categorization
+1. **Snapshot runtime results:**
+   - `natural_connections.generated_chain` runtime `FAIL` in snapshot test runner: candidate search capped at 12 (`survey: { candidates: 16639, tested: 12 }`), finding 0 full 3-level shafts $(0 \to -1 \to -2)$ on seed 826775520, leaving `saved.chains` empty despite 29 cliff cave links generating.
+2. **Headless assertion results:**
+   - `worldgen` suite: 22/22 PASS (`worldgen.deterministic`, `worldgen.autotile_shapes`, `worldgen.river_continuous`, `worldgen.kit_present`, `worldgen.kit_covers_plan`, `worldgen.camps_cleared`).
+   - `biomes` suite: PASS (`biomes.all_biomes_reachable`, `biomes.world_variety`, `biomes.region_tiers_exist`, `biomes.lakes_or_rivers`).
+   - `world` suite: PASS (`world.seeded`, `world.in_area_map`, `world.view_crosses_edge`, `world.diff_persists`).
+   - `factions` suite: PASS (`factions.generated_with_world`, `factions.layer_distribution`, `factions.relations_complete`, `factions.areas`).
+   - `vertical` persistence suite: PASS (`vertical.persistence` hash validation on Z=-1/-2).
+3. **Harness / bootstrap failures before assertions (Five Broken Generation Harnesses):**
+   - `tools/test_column_landforms.js`: FAILS at line 192 (`TypeError: Cannot read properties of undefined (reading 'surfaceElevationAt')`).
+   - `tools/test_vertical_worldgen_proof.js`: FAILS at line 238 (`TypeError: Cannot read properties of undefined (reading 'baseline')`).
+   - `tools/test_seamless_map_edges.js`: FAILS at line 159 (`TypeError: Cannot read properties of undefined (reading 'valueNoise')`).
+   - `tools/test_geology_strata.js`: FAILS at line 107 (`TypeError: Cannot read properties of undefined (reading 'geologyAt')`).
+   - `tools/test_round_world.js`: FAILS at line 161 (`Error: ENOENT: no such file or directory, open '...game/js/plugins/UF_Roads.js'`).
+4. **Screenshots inspected by the auditor:**
+   - `game/test_output/smoke.map.png`: 8 founders seated around lit campfire in grassy clearing with starter resources.
+   - `stance.stance_markers.png`, `stance.selection_ring.png`: Green halo ellipse grounded under unit feet.
+   - `overseer.card.png`: Left card window retired; right sheet open on single selection.
+   - `timespeed.time_controls.png`: Bottom bar HUD widgets centered at screen bottom.
+5. **Measurements without diagnosed causes (Exact Measurement Context):**
+   - Timing measurements from `UF_Fire.md`: Layer 0.056–0.060 ms/frame (max 0.78–1.23 ms), beat 0.39–0.88 ms (max 1.42 ms), total frame 0.065–0.067 ms. Measured on AMD Ryzen 7 8845HS / NVIDIA RTX 4060 laptop under `nw.exe` test run with 100 burning cells at zoom 1/3 over 150 frames. *Not generalized into a performance guarantee.*
+   - Level baseline dimensions: 65,536 cells per level ($256 \times 256$), across 5 persistent levels ($-2$ to $+2$).
+6. **Starting-state contract (Preserved):**
+   - 8 founders per faction (4 men, 4 women, adults 18–40) in alternating ring facing lit campfire at camp center (`PPP / PFP / PPP`).
+   - Guaranteed starter resource kit in radius [5, 20] covering initial colony needs.
+   - 11 cultural factions placed across layers (surface, -1, -2).
+   - Faction home spacing rules (`minGap: 40`, `edgeMargin: 12`, player within `playerReach: 6` of map center).
+   - Contract source references: `WORLD_ARCHITECTURE.md` §2.7, §3.7, §5.8; `DEUS_History.js` L13-39; `DEUS_Factions.js` L335-550; `DEUS_WorldGen.js` L881-932. Baseline contract preserved.
+
+### Clarifications Where Earlier Claims Exceeded Evidence
+- `game/js/plugins/DEUS_Fluid.js` is **MISSING** (not on disk, not registered in `plugins.js`). Fluid mechanics exist only as BFS flooding/lava solidification in `DEUS_Levels.js` and cross-layer connection flow in `DEUS_NaturalConnections.js`. Continuous 1–7 cellular automata fluid volume is not present.
+- 500–600 year history simulation in `DEUS_History.js` is dormant behind `history.simulate: false`. The canonical starting state is Year-1 campfire founding.
+- Geological rock strata (`WorldGen.geologyAt`) and single-step natural ramps (`DEUS_Levels.js:796-816`) exist in code but lacked isolated assertion verification in the modern test runner.
+- Perimeter ocean rim parameter `continentRim: 0.06` is not factored into `fieldsFor` elevation falloff.
+
+### Audit Findings Table
+
+| # | Grade | Finding | Evidence | Status |
+|---|---|---|---|---|
+| A7-1 | MAJOR | Missing Standalone Cellular Fluid Plugin (`DEUS_Fluid.js`) | Referenced in plugin architecture docs, but file is missing from `game/js/plugins/` and unregistered in `plugins.js`. Partial fluid BFS in `DEUS_Levels.js` and connection flow in `DEUS_NaturalConnections.js`. | OPEN: Standalone cellular fluid simulation remains to be implemented. |
+| A7-2 | MAJOR | Five Legacy Generation Harnesses Fail During Bootstrap Before Assertions | `test_column_landforms.js`, `test_vertical_worldgen_proof.js`, `test_seamless_map_edges.js`, `test_geology_strata.js`, and `test_round_world.js` crash on obsolete `UF_*` prefixes, uninitialized globals, or missing files before running checks. | OPEN: Assigned to Fable in isolated working copy for harness recovery. |
+| A7-3 | MAJOR | Demonstrated Regression on Seed-424242 Underground Fixture | GEN3 cavern synthesis yields 41.4%–46.3% solid earth on Z=-1 compared to GEN2 baseline fixture of 83.53% solid / 36 distinct chambers. Pre-vertical fixture metadata differs. | OPEN: Scope of affected real saves requires further verification. |
+| A7-4 | MINOR | Unforced Perimeter Ocean Rim Falloff | Catalog `"continentRim": 0.06` is defined, but `WorldGen.fieldsFor` does not apply radial edge-dampening math. Perimeter ocean depends on raw noise dipping $< 0.30$. | OPEN: Bounded generation compatibility task needed. |
+| A7-5 | MINOR | Historical 500–600 Year Simulation Present But Deactivated | Complete simulation engine in `DEUS_History.js` is dormant behind `history.simulate: false` per user directive (Year-1 campfire founding active). Earlier claim of active historical simulation overstated. | DOCUMENTED: Contract clarified; Year-1 campfire founding is canonical. |
+| A7-6 | MINOR | Natural Connection Vertical Shaft Failure on Sample Seed | `natural_connections.generated_chain` runtime assertion failed on seed 826775520 because candidate search timed out after testing only 12 candidates, yielding empty 3-level shaft chains despite 29 cliff cave links. | OPEN: Candidate search budget / selection criteria to be addressed. |
+| A7-7 | MAJOR | Offscreen Corridor Walker Reading Threshold (Undiagnosed) | Offscreen -1 walker in L-corridor drops goal / stalls without meeting the $\le 64$ cell-reads per frame budget. Threshold must not be artificially increased. | OPEN & UNDIAGNOSED: Retain 64-cell-read budget; root cause under investigation. |
+| A7-8 | MAJOR | Underground Solid Earth & Cavern Geometry Reconciliation (Undiagnosed) | Discrepancy between user requirement for mostly solid earth with discrete pockets vs current GEN3 continuous open cavern network. | OPEN & UNDIAGNOSED: Do not alter underground generation parameters to force pass. |
+
+---
+
 ## A6: Concurrent underground follow-up (2026-09-19)
 
 **Audited by:** Codex / Astra. Scope: newly overlapping GEN3 terrain and cave catalog edits, not an art audit. These edits were preserved; no generator fix or catalog overwrite was attempted. Natural-wall rendering and permanent underground night are separate, narrowly tested changes.
