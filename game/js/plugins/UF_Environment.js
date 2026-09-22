@@ -407,8 +407,17 @@
         const t = unitThermal(unit);
         if (!t) return;
 
-        const G = WorldGen(), F = Floors();
-        const isWater = G && typeof G.isWaterAt === "function" ? G.isWaterAt(area.x * 256 + x, area.y * 256 + y, z) : false;
+        const L = window.UF && UF.Levels, W = World(), F = Floors();
+        let isWater = false;
+        if (z < 0 && L && typeof L.waterAt === "function") {
+            isWater = L.waterAt({ area, x, y, z });
+        } else if (z === 0 && W && typeof W.getTile === "function") {
+            const tile = W.getTile(area.x, area.y, x, y, 0, 0) | 0;
+            isWater = Tilemap.isWaterTile(tile);
+            if (!isWater && window.UF && UF.Jobs && typeof UF.Jobs.isWaterAt === "function") {
+                isWater = UF.Jobs.isWaterAt(area, x, y);
+            }
+        }
 
         if (isWater) {
             t.wetness = 100;

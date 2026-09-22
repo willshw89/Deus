@@ -9,6 +9,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - None.
 
+## Frame Skipping & Stuttering Elimination Delivered — 2026-09-21 (Gemini)
+Delivered per user directive ("The game is experiencing skipping again"):
+- **Root Cause Isolated**:
+  - Profiling `SceneManager.updateMain` and `Game_Map.prototype.update` revealed that `Levels.computeFloods()` was blocking the main thread for **430–460 ms** per call (reaching 872 ms when triggered multiple times in a frame).
+  - Excessive invalidations: Event listeners for `doors:opened`, `doors:closed`, and general `objects:changed` (fired on berry picking, wild growth, tree maturation) were constantly calling `invalidateFloods()`, causing the multi-level BFS flood computation to re-run every 1–2 seconds during normal colony activity.
+  - Inefficient traversal: `computeFloods` performed procedural Perlin noise calculations (`WorldGen.isWaterAt`) across all 65,536 cells and performed over 200,000 deep recursive `isWallAt` object and door checks during BFS queue processing.
+  - Inefficient wetness checking: `UF_Environment.js`'s `updateWetness` queried `WorldGen.isWaterAt` with a hardcoded `256` grid stride, falling through to subterranean cell/flood queries each tick.
+- **Engine & BFS Optimizations (`UF_Levels.js`, `UF_Environment.js`)**:
+  - *Pre-extracted typed wall bitmasks*: Extracted level wall barriers into flat `Uint8Array`s (`isWall1`, `isWall2`) in a single linear pass (~0.8 ms), turning 200,000+ deep object/door calls into direct array index lookups `!isWall1[ni]`.
+  - *Direct tilemap water indexing*: Ground level liquid evaluation now directly checks tile autotiles via `Tilemap.isWaterTile(tile)`, bypassing costly procedural Perlin calculations across 65,536 cells.
+  - *Direct 1D neighbor strides*: Subterranean 4-way BFS traversals replaced array allocations (`[[0, -1], [1, 0], [0, 1], [-1, 0]]`) with direct integer offset jumps (`curr - size`, `curr + size`, `curr - 1`, `curr + 1`).
+  - *Surgical invalidation filtering*: Replaced coarse event listeners. `objects:changed` and `objects:levelChanged` now filter via `isFloodBarrier(typeId)` (only invalidating when true walls or doors change). Removed transient `doors:opened` and `doors:closed` listeners from invalidating global water grids.
+  - *Optimized environmental water checks*: `UF_Environment.js` now uses authoritative tilemap water checks for ground and direct level flood queries for subterranean levels.
+- **Measured Verification (AGENTS.md Rule 3)**:
+  - `stutter_diag`: Dropped from 19 slow frames averaging 450 ms down to **0 slow frames** in 10-second live test.
+  - `tools/run_tests.js perf` (30-second sustained gameplay benchmark):
+    - Before: `FAIL - avg 54.85 ms, worst 639.9 ms, 47 frames over 50 ms`
+    - **After**: `PASS perf.avg_frame_under_17ms - avg 16.71 ms, p50 16.6, p99 30.3, worst 46.2 ms; 1794 frames over 30 s`
+    - **After**: `PASS perf.worst_frame_under_50ms - worst 46.2 ms; 0 frame(s) over 50 ms`
+  - Functional regression suites:
+    - `tools/run_tests.js smoke`: 13/13 PASS (exit 0)
+    - `tools/run_tests.js flooding`: 8/8 PASS (exit 0)
+    - `tools/run_tests.js environment`: 16/16 PASS (exit 0)
+
 ## Full Toroidal Fog of War Coverage & Title Screen Fog Option Delivered — 2026-09-21 (Gemini)
 Delivered per user directives ("I need the fog of war to covereverything even along world seams. Also, lets make fog of war an option on the start screen"):
 - **Full Viewport Toroidal Fog Coverage Across All Seams & Zooms (`UF_Fog.js`)**:

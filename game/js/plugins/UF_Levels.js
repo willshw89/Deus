@@ -1257,10 +1257,55 @@
         }
         const J = window.UF && UF.Jobs;
         if (J && typeof J.isWaterAt === "function" && J.isWaterAt({ x: ax, y: ay, z: 0 }, x, y)) return "water";
-        const G = window.UF && UF.WorldGen;
-        if (G && typeof G.isWaterAt === "function" && G.isWaterAt(gx, gy, 0)) return "water";
-        
         return null;
+    }
+
+    function buildWallGrid(ax, ay, z, size, st) {
+        const wall = new Uint8Array(size * size);
+        const b = baseline(z, ax, ay);
+        const ch = changesOf(st, z, ax, ay, false);
+        const bShape = b ? b.shape : null;
+
+        for (let i = 0; i < size * size; i++) {
+            let p = 0;
+            if (ch && ch[i] !== undefined) {
+                p = ch[i] | 0;
+            } else if (bShape) {
+                p = bShape[i];
+            }
+            if ((p & 7) === SOLID) wall[i] = 1;
+        }
+
+        const W = World();
+        if (W) {
+            const lk = typeof W.levelKey === "function" ? W.levelKey(ax, ay, z) : (z ? `${ax},${ay},${z}` : `${ax},${ay}`);
+            const diffs = st && st.objectDiffs ? st.objectDiffs[lk] : null;
+            const viewObjects = (typeof W.onView === "function" && W.onView(ax, ay, z) && window.$dataMap && window.$dataMap.ufObjects) ? window.$dataMap.ufObjects : null;
+            const cachedBuild = (typeof W.cachedBuild === "function") ? W.cachedBuild(ax, ay, z) : null;
+            const buildObjects = cachedBuild ? cachedBuild.ufObjects : null;
+
+            const O = window.UF && UF.Objects;
+            const D = window.UF && UF.Doors;
+
+            if (diffs || viewObjects || buildObjects) {
+                for (let i = 0; i < size * size; i++) {
+                    const typeId = (viewObjects ? viewObjects[i] : 0) || (buildObjects ? buildObjects[i] : 0) || (diffs ? diffs[i] : 0) | 0;
+                    if (typeId) {
+                        const obj = O ? O.type(typeId) : null;
+                        if (obj) {
+                            if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) {
+                                wall[i] = 1;
+                            } else if ((Array.isArray(obj.tags) && obj.tags.includes("door")) || (D && typeof D.isDoorType === "function" && D.isDoorType(obj))) {
+                                const x = i % size, y = (i / size) | 0;
+                                const isOpen = D && typeof D.isOpen === "function" && D.isOpen({ x: ax, y: ay, z }, x, y);
+                                if (!isOpen) wall[i] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return wall;
     }
 
     function computeFloods(area) {
@@ -1284,24 +1329,49 @@
         const gridMinus1 = new Uint8Array(size * size);
         const gridMinus2 = new Uint8Array(size * size);
 
+        const base1 = baseline(-1, ax, ay);
+        const baseWater1 = base1 ? base1.water : null;
+        const base2 = baseline(-2, ax, ay);
+        const baseWater2 = base2 ? base2.water : null;
+
+        const isWall1 = buildWallGrid(ax, ay, -1, size, st);
+        const isWall2 = buildWallGrid(ax, ay, -2, size, st);
+
+        let groundTiles = null;
+        if (W) {
+            if (typeof W.onView === "function" && W.onView(ax, ay, 0) && window.$dataMap && window.$dataMap.data) {
+                groundTiles = window.$dataMap.data;
+            } else if (typeof W.peekArea === "function") {
+                const p = W.peekArea(ax, ay, 0);
+                if (p && p.data) groundTiles = p.data;
+            }
+        }
+        const J = window.UF && UF.Jobs;
+
         // 1. Breaches from Ground (z=0) into z=-1
         const queueMinus1 = [];
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const i = y * size + x;
-                const liq0 = groundLiquidAt(ax, ay, x, y);
-                if (liq0) {
-                    if (!isWallAt(area, x, y, -1)) {
-                        gridMinus1[i] = liq0 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
-                        queueMinus1.push(i);
-                    }
+        for (let i = 0; i < size * size; i++) {
+            let liq0 = null;
+            if (groundTiles) {
+                const tile = groundTiles[i] | 0;
+                if (Tilemap.isWaterTile(tile)) liq0 = "water";
+                else if (Tilemap.isTileA1(tile) && tile >= Tilemap.TILE_ID_A1 + 4 * 48) liq0 = "lava";
+            }
+            if (!liq0 && J && typeof J.isWaterAt === "function") {
+                if (J.isWaterAt({ x: ax, y: ay, z: 0 }, i % size, (i / size) | 0)) liq0 = "water";
+            }
+
+            if (liq0) {
+                if (!isWall1[i]) {
+                    gridMinus1[i] = liq0 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
+                    queueMinus1.push(i);
                 }
-                // Natural water pools on -1
-                if (naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -1 })) {
-                    if (!isWallAt(area, x, y, -1) && gridMinus1[i] === DRY) {
-                        gridMinus1[i] = FLOOD_WATER;
-                        queueMinus1.push(i);
-                    }
+            }
+            // Natural water pools on -1
+            if (baseWater1 && baseWater1[i]) {
+                if (!isWall1[i] && gridMinus1[i] === DRY) {
+                    gridMinus1[i] = FLOOD_WATER;
+                    queueMinus1.push(i);
                 }
             }
         }
@@ -1314,47 +1384,78 @@
             const currType = gridMinus1[curr];
             if (currType === FLOOD_SOLIDIFIED) continue;
 
-            for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
-                const nx = cx + dx, ny = cy + dy;
-                if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                const ni = ny * size + nx;
-                if (isWallAt(area, nx, ny, -1)) continue;
-
-                const nextType = gridMinus1[ni];
-                if (nextType === DRY) {
-                    gridMinus1[ni] = currType;
-                    queueMinus1.push(ni);
-                } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
-                    gridMinus1[ni] = FLOOD_SOLIDIFIED;
+            if (cy > 0) {
+                const ni = curr - size;
+                if (!isWall1[ni]) {
+                    const nextType = gridMinus1[ni];
+                    if (nextType === DRY) {
+                        gridMinus1[ni] = currType;
+                        queueMinus1.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus1[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cy < size - 1) {
+                const ni = curr + size;
+                if (!isWall1[ni]) {
+                    const nextType = gridMinus1[ni];
+                    if (nextType === DRY) {
+                        gridMinus1[ni] = currType;
+                        queueMinus1.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus1[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cx > 0) {
+                const ni = curr - 1;
+                if (!isWall1[ni]) {
+                    const nextType = gridMinus1[ni];
+                    if (nextType === DRY) {
+                        gridMinus1[ni] = currType;
+                        queueMinus1.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus1[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cx < size - 1) {
+                const ni = curr + 1;
+                if (!isWall1[ni]) {
+                    const nextType = gridMinus1[ni];
+                    if (nextType === DRY) {
+                        gridMinus1[ni] = currType;
+                        queueMinus1.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus1[ni] = FLOOD_SOLIDIFIED;
+                    }
                 }
             }
         }
 
         // 3. Breaches from z=-1 into z=-2
         const queueMinus2 = [];
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const i = y * size + x;
-                let liq1 = null;
-                if (gridMinus1[i] === FLOOD_WATER || naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -1 })) {
-                    liq1 = "water";
-                } else if (gridMinus1[i] === FLOOD_LAVA) {
-                    liq1 = "lava";
-                }
+        for (let i = 0; i < size * size; i++) {
+            let liq1 = null;
+            if (gridMinus1[i] === FLOOD_WATER || (baseWater1 && baseWater1[i])) {
+                liq1 = "water";
+            } else if (gridMinus1[i] === FLOOD_LAVA) {
+                liq1 = "lava";
+            }
 
-                if (liq1) {
-                    if (!isWallAt(area, x, y, -2)) {
-                        gridMinus2[i] = liq1 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
-                        queueMinus2.push(i);
-                    }
+            if (liq1) {
+                if (!isWall2[i]) {
+                    gridMinus2[i] = liq1 === "lava" ? FLOOD_LAVA : FLOOD_WATER;
+                    queueMinus2.push(i);
                 }
+            }
 
-                // Natural lava pools on z=-2
-                if (naturalWaterAt({ area: { x: ax, y: ay }, x, y, z: -2 })) {
-                    if (!isWallAt(area, x, y, -2) && gridMinus2[i] === DRY) {
-                        gridMinus2[i] = FLOOD_LAVA;
-                        queueMinus2.push(i);
-                    }
+            // Natural lava pools on z=-2
+            if (baseWater2 && baseWater2[i]) {
+                if (!isWall2[i] && gridMinus2[i] === DRY) {
+                    gridMinus2[i] = FLOOD_LAVA;
+                    queueMinus2.push(i);
                 }
             }
         }
@@ -1367,18 +1468,52 @@
             const currType = gridMinus2[curr];
             if (currType === FLOOD_SOLIDIFIED) continue;
 
-            for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
-                const nx = cx + dx, ny = cy + dy;
-                if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                const ni = ny * size + nx;
-                if (isWallAt(area, nx, ny, -2)) continue;
-
-                const nextType = gridMinus2[ni];
-                if (nextType === DRY) {
-                    gridMinus2[ni] = currType;
-                    queueMinus2.push(ni);
-                } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
-                    gridMinus2[ni] = FLOOD_SOLIDIFIED;
+            if (cy > 0) {
+                const ni = curr - size;
+                if (!isWall2[ni]) {
+                    const nextType = gridMinus2[ni];
+                    if (nextType === DRY) {
+                        gridMinus2[ni] = currType;
+                        queueMinus2.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus2[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cy < size - 1) {
+                const ni = curr + size;
+                if (!isWall2[ni]) {
+                    const nextType = gridMinus2[ni];
+                    if (nextType === DRY) {
+                        gridMinus2[ni] = currType;
+                        queueMinus2.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus2[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cx > 0) {
+                const ni = curr - 1;
+                if (!isWall2[ni]) {
+                    const nextType = gridMinus2[ni];
+                    if (nextType === DRY) {
+                        gridMinus2[ni] = currType;
+                        queueMinus2.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus2[ni] = FLOOD_SOLIDIFIED;
+                    }
+                }
+            }
+            if (cx < size - 1) {
+                const ni = curr + 1;
+                if (!isWall2[ni]) {
+                    const nextType = gridMinus2[ni];
+                    if (nextType === DRY) {
+                        gridMinus2[ni] = currType;
+                        queueMinus2.push(ni);
+                    } else if (nextType !== currType && nextType !== FLOOD_SOLIDIFIED) {
+                        gridMinus2[ni] = FLOOD_SOLIDIFIED;
+                    }
                 }
             }
         }
@@ -2140,10 +2275,18 @@
             UF.Events.on("world:created", onWorldCreated);
             UF.Events.on("levels:shapeChanged", invalidateFloods);
             UF.Events.on("levels:cellChanged", invalidateFloods);
-            UF.Events.on("objects:changed", invalidateFloods);
-            UF.Events.on("objects:levelChanged", invalidateFloods);
-            UF.Events.on("doors:opened", invalidateFloods);
-            UF.Events.on("doors:closed", invalidateFloods);
+            const isFloodBarrier = typeId => {
+                if (!typeId) return false;
+                const O = window.UF && UF.Objects;
+                const t = O && typeof O.type === "function" ? O.type(typeId) : null;
+                return !!(t && (t.autotile === "wall" || (Array.isArray(t.tags) && (t.tags.includes("wall") || t.tags.includes("door")))));
+            };
+            UF.Events.on("objects:levelChanged", (area, x, y, fromTypeId, toTypeId) => {
+                if (isFloodBarrier(fromTypeId) || isFloodBarrier(toTypeId)) invalidateFloods();
+            });
+            UF.Events.on("objects:changed", (area, x, y, fromTypeId, toTypeId) => {
+                if (isFloodBarrier(fromTypeId) || isFloodBarrier(toTypeId)) invalidateFloods();
+            });
         }
         // Units on different levels never fight (vertical combat is slice 6). Combat.engage is also what Combat's own AI
         // calls, so this covers both.
