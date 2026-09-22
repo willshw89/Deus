@@ -39,6 +39,15 @@
 (() => {
     "use strict";
 
+    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
+        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Containers")) {
+            PluginManager.loadScript("DEUS_Containers");
+        }
+        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Dnd5e")) {
+            PluginManager.loadScript("DEUS_Dnd5e");
+        }
+    }
+
     const VIEW_MARGIN = 3;     // cells past the screen edge whose items still get a sprite (tall sprites reach up into view)
     const CELL_STRIDE = 4096;  // cell key = y * CELL_STRIDE + x (areas are at most 256 wide)
 
@@ -408,18 +417,47 @@
         return Math.round(total * 10) / 10;
     };
 
-    /** Maximum carrying weight capacity of a unit in kilograms (default 60.0 kg). */
+    /** Maximum carrying weight capacity of a unit in pounds (d20 SRD 5.1 rulebook: STR * 15 lbs). */
     Items.maxWeight = function(unitId) {
         const W = World(), u = W && W.unit(unitId);
-        if (!u) return 60.0;
-        return (u.data && typeof u.data.maxWeight === "number") ? u.data.maxWeight : 60.0;
+        if (!u) return 150.0;
+        if (u.data && typeof u.data.maxWeight === "number") return u.data.maxWeight;
+        const Dnd = window.UF && UF.Dnd5e;
+        if (Dnd && typeof Dnd.carryingCapacity === "function") {
+            return Dnd.carryingCapacity(u).maxWeight;
+        }
+        return 150.0;
     };
 
-    /** Maximum inventory slot count of a unit (default 8 slots). */
+    /** Maximum inventory slot count of a unit (standardized 32 slots). */
     Items.maxSlots = function(unitId) {
         const W = World(), u = W && W.unit(unitId);
-        if (!u) return 8;
-        return (u.data && typeof u.data.maxSlots === "number") ? u.data.maxSlots : 8;
+        if (!u) return 32;
+        return (u.data && typeof u.data.maxSlots === "number") ? u.data.maxSlots : 32;
+    };
+
+    /** D&D 5.1 SRD Encumbrance details for a unit. */
+    Items.encumbrance = function(unitId) {
+        const W = World(), u = W && W.unit(unitId);
+        const curWeight = Items.carriedWeight(unitId);
+        const Dnd = window.UF && UF.Dnd5e;
+        if (Dnd && typeof Dnd.carryingCapacity === "function") {
+            return Dnd.carryingCapacity(u, null, curWeight);
+        }
+        const maxWeight = Items.maxWeight(unitId);
+        return {
+            str: 10,
+            size: "medium",
+            multiplier: 1.0,
+            maxWeight,
+            pushDragLift: maxWeight * 2,
+            encumbered: maxWeight / 3,
+            heavilyEncumbered: maxWeight * 2 / 3,
+            maxSlots: 32,
+            currentWeight: curWeight,
+            status: curWeight > maxWeight ? "over_capacity" : (curWeight > maxWeight * 2 / 3 ? "heavily_encumbered" : (curWeight > maxWeight / 3 ? "encumbered" : "unencumbered")),
+            speedPenalty: curWeight > maxWeight ? 1.5 : (curWeight > maxWeight * 2 / 3 ? 0.7 : (curWeight > maxWeight / 3 ? 0.3 : 0))
+        };
     };
 
     /** Check if a unit can carry an additional item, stack, or quantity. */

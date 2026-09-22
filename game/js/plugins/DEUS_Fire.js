@@ -14,16 +14,15 @@
  *
  * @help
  * Fire is a state of a cell (VISION V21, V25): UF.World.state.fire.burning
- * holds one record per burning cell. Once per beat (UF.Beat when it exists,
- * else every "beatFrames" map updates, 60 = one beat per second at x1) each
- * burning cell rolls, seeded by the world seed, the beat and the cell, to
- * ignite each of its 4 neighbours with the neighbour's "spread" chance, and
- * spends one beat of fuel; when the fuel is gone the object becomes what the
- * catalog rule says (a tree a stump, a wooden wall rubble, grass nothing on
+ * holds one record per burning cell. Once per simulation second (or stepInterval
+ * map updates, 60 = one second at x1) each burning cell rolls, seeded by the world
+ * seed, the step and the cell, to ignite each of its 4 neighbours with the neighbour's
+ * "spread" chance, and spends one unit of fuel; when the fuel is gone the object becomes
+ * what the catalog rule says (a tree a stump, a wooden wall rubble, grass nothing on
  * ash ground, a bed or stockpile nothing with the items on it destroyed).
  * Rules live in data/UF_WorldCatalog.json "fire" (flammability per object
  * tag or id; stone never burns). Campfires are contained sources: they never
- * burn, but each beat each flammable neighbour may catch with a small seeded
+ * burn, but each second each flammable neighbour may catch with a small seeded
  * chance. Accidental starts are off unless fire.startChance > 0.
  *
  * Units never step into a burning cell (alias of isMapPassable for unit
@@ -31,7 +30,7 @@
  * popup and death), shows its sheet's hurt frames when its sidecar has them
  * (UF.Anim; no code-made flinch or flash, VISION V58), gets a thought
  * (UF.Colonists.addThought), drops its job and walks out. Fires within the player's camp radius get open "douse" jobs
- * of the player's faction: fetch water beside a water cell, then 3 beats of
+ * of the player's faction: fetch water beside a water cell, then 3 seconds of
  * work beside the fire. Right-click: "Set on fire" on flammable cells, "Put
  * out the fire" on burning ones (a runtime wrap of UF.Interact).
  *
@@ -51,8 +50,7 @@
     const NEIGHBORS = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // 4-way (WORLD_ARCHITECTURE section 1.6)
     const NEIGHBORS8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
     const SALT = { spread: 0xf1e01, escape: 0xf1e02, start: 0xf1e03, startCell: 0xf1e04, damage: 0xf1e05 };
-    const MAX_CATCHUP = 8;       // beats run at most per map update when UF.Beat jumped ahead
-    const NO_WATER_RETRY = 10;   // beats before a camp fire without water nearby is looked at again
+    const NO_WATER_RETRY = 10;   // steps before a camp fire without water nearby is looked at again
     const RETARGET_RADIUS = 8;   // cells a douse worker looks for another fire when its own went out
     const FLEE_RADIUS = 4;       // cells a unit in a burning cell looks for a safe cell
     const VIEW_MARGIN = 2;       // cells beyond the view that still get flame sprites (they lean up-left into view)
@@ -119,8 +117,7 @@
         return confCache;
     }
     const beatFrames = () => {
-        const B = window.UF && UF.Beat;
-        return B && typeof B.frames === "number" && B.frames > 0 ? B.frames : conf().beatFrames;
+        return (conf() && conf().beatFrames) || 60;
     };
 
     /** The rule for an object type (catalog entry with `id`/`tags`), or null: first rule whose ids hold the id or whose tags are all on it. */
@@ -465,21 +462,14 @@
         }
     }
 
-    // Driven from the map update: UF.Beat's count when it exists, else our own frame counter (pause and speed come for free).
+    // Driven from the map update: steady simulation cadence (pause and speed come for free).
     let subFrames = 0;
-    let lastBeatCount = null;
     const _Game_Map_update = Game_Map.prototype.update;
     Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         const W = World();
         if (!W || !W.state) return;
-        const B = window.UF && UF.Beat;
-        if (B && typeof B.count === "number" && Number.isFinite(B.count)) {
-            if (lastBeatCount === null || B.count < lastBeatCount) lastBeatCount = B.count;
-            let n = Math.min(MAX_CATCHUP, B.count - lastBeatCount);
-            lastBeatCount = B.count;
-            while (n-- > 0) safeBeat();
-        } else if (++subFrames >= beatFrames()) {
+        if (++subFrames >= beatFrames()) {
             subFrames = 0;
             safeBeat();
         }
@@ -973,13 +963,17 @@
             s.visible = true;
         }
         _place() {
-            const offX = $gameMap.adjustX(0), offY = $gameMap.adjustY(0);
+            const loopH = $gameMap && $gameMap.isLoopHorizontal(), loopV = $gameMap && $gameMap.isLoopVertical();
+            const offX = loopH ? 0 : ($gameMap ? $gameMap.adjustX(0) : 0);
+            const offY = loopV ? 0 : ($gameMap ? $gameMap.adjustY(0) : 0);
             const step = Math.floor(Graphics.frameCount / FLAME_TICKS);
             for (const s of this._active) {
                 const fr = s.bitmap && s.bitmap._ufFlame;
                 if (!fr) continue;
-                s.x = Math.round((s._ufX + offX + 0.5) * TILE);
-                const footY = Math.round((s._ufY + offY) * TILE + TILE);
+                const ax = loopH ? $gameMap.adjustX(s._ufX) : (s._ufX + offX);
+                const ay = loopV ? $gameMap.adjustY(s._ufY) : (s._ufY + offY);
+                s.x = Math.round((ax + 0.5) * TILE);
+                const footY = Math.round(ay * TILE + TILE);
                 s.y = footY;
                 s.z = footY + 1; // just above the objects (footY) and units (footY) of its row, below the rows nearer the viewer
                 const frame = (step + s._ufPhase) % fr.frames;
@@ -1158,7 +1152,6 @@
     DataManager.createGameObjects = function() {
         _DataManager_createGameObjects.call(this);
         subFrames = 0;
-        lastBeatCount = null;
         noWater.clear();
     };
 

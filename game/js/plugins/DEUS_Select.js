@@ -139,15 +139,65 @@
         return 0;
     }
 
-    function findUnitAt(x, y, area, z = 0) {
+    function findUnitAt(x, y, area, z = 0, sx, sy) {
         const W = World();
-        if (!W || !W.units) return null;
-        const all = W.units();
+        if (!W) return null;
         const ax = area ? area.x : (W.currentArea ? W.currentArea().x : 0);
         const ay = area ? area.y : (W.currentArea ? W.currentArea().y : 0);
-        for (const u of all) {
-            if (u.x === x && u.y === y && u.area && u.area.x === ax && u.area.y === ay && (u.z || 0) === z) {
-                return u;
+
+        // 1. Check active Game_Events on map
+        if (window.$gameMap && typeof $gameMap.events === "function") {
+            const evs = $gameMap.events();
+            // A. Screen pixel bounding box if sx, sy provided (pixel-accurate click on sprite)
+            if (typeof sx === "number" && typeof sy === "number") {
+                for (const ev of evs) {
+                    if (!ev || (typeof ev.isTransparent === "function" && ev.isTransparent())) continue;
+                    const u = W.unitOfEvent ? W.unitOfEvent(ev) : null;
+                    if (!u) continue;
+                    const esx = typeof ev.screenX === "function" ? ev.screenX() : null;
+                    const esy = typeof ev.screenY === "function" ? ev.screenY() : null;
+                    if (esx !== null && esy !== null) {
+                        const tall = (u.data && (u.data.size === "large" || u.data.size === "huge" || u.data.tall)) ? 96 : 48;
+                        if (Math.abs(sx - esx) <= 28 && sy >= esy - tall - 12 && sy <= esy + 10) {
+                            return u;
+                        }
+                    }
+                }
+            }
+
+            // B. Map float / real position check (handles walking/moving units)
+            for (const ev of evs) {
+                if (!ev || (typeof ev.isTransparent === "function" && ev.isTransparent())) continue;
+                const u = W.unitOfEvent ? W.unitOfEvent(ev) : null;
+                if (!u) continue;
+                if (Math.abs(ev._realX - x) <= 0.85 && (y >= ev._realY - 1.25 && y <= ev._realY + 0.85)) {
+                    return u;
+                }
+                if ((typeof ev.pos === "function" && (ev.pos(x, y) || ev.pos(x, y + 1)))) {
+                    return u;
+                }
+            }
+        }
+
+        // 2. Check W.units()
+        if (W.units) {
+            const all = W.units();
+            const matchArea = u => (!u.area || (u.area.x === ax && u.area.y === ay)) && ((u.z || 0) === (z || 0));
+            // Exact foot
+            for (const u of all) {
+                if (u.x === x && u.y === y && matchArea(u)) return u;
+            }
+            // Upper body / head (character sits at y+1, clicking head at y)
+            for (const u of all) {
+                if (u.x === x && u.y === y + 1 && matchArea(u)) return u;
+            }
+            // Tall creature upper tile (y+2)
+            for (const u of all) {
+                if (u.x === x && u.y === y + 2 && matchArea(u)) return u;
+            }
+            // Adjacent slight off-click
+            for (const u of all) {
+                if (Math.abs(u.x - x) <= 1 && (u.y === y || u.y === y + 1) && matchArea(u)) return u;
             }
         }
         return null;
@@ -164,10 +214,9 @@
         if (u.data && u.data.kind === "colonist") return true;
         if (u.data && u.data.faction === "player") return true;
         const F = window.UF && UF.Factions;
-        if (F && typeof F.player === "function") {
-            const p = F.player();
-            if (p && u.data && u.data.faction === p.id) return true;
-        }
+        const pId = F && typeof F.playerId === "function" ? F.playerId() : (F && typeof F.player === "function" && F.player() ? F.player().id : null);
+        if (pId && u.data && (u.data.faction === pId || (u.data.founder && (!u.data.faction || u.data.faction === pId)))) return true;
+        if (u.data && u.data.founder && (u.data.faction === "player" || u.data.faction === pId)) return true;
         return false;
     }
 
@@ -400,13 +449,15 @@
         }
     }
 
-    function clearSelection() {
+    function clearSelection(options = {}) {
         selectedGroup = [];
         syncOverseerSelection();
         clearTargetedTile();
         emit("select:changed", []);
-        if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-            UF.Sheet.close();
+        if (!options || !options.keepSheet) {
+            if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                UF.Sheet.close();
+            }
         }
     }
 
@@ -1296,12 +1347,16 @@
         initialize() {
             super.initialize();
             this.bitmap = new Bitmap(Graphics.width, Graphics.height);
-            this.z = 25;
+            this.z = 0.5; // strictly above ground tiles (z=0) and below character sprites/objects (z>=3)
             this._lastBoxKey = "";
             this._dirty = true;
         }
         update() {
             super.update();
+            const z = window.UF.Camera ? UF.Camera.zoom() : 1;
+            if (this.parent && this.scale.x !== 1 / z) {
+                this.scale.set(1 / z, 1 / z);
+            }
             this.redraw();
         }
         redraw() {
@@ -1998,9 +2053,8 @@
                     }
                     s.x = ev.screenX();
                     s.y = (typeof ev.screenY === "function" ? ev.screenY() : 0) - 6;
-                    const evZ = typeof ev.screenZ === "function" ? ev.screenZ() : s.y;
-                    s.z = evZ - 10;
                 }
+                s.z = 1; // Strictly under all character sprites (z >= 3) and objects
                 spriteIdx++;
             }
 
@@ -2179,7 +2233,7 @@
         _Spriteset_Map_createCharacters.call(this);
         this._ufSelectionMarkers = new UnitSelectionMarkers(this._tilemap);
         this._ufSelectOverlay = new Sprite_UFSelectOverlay();
-        this.addChild(this._ufSelectOverlay);
+        this._tilemap.addChild(this._ufSelectOverlay);
     };
 
     const _Spriteset_Map_update = Spriteset_Map.prototype.update;
@@ -2268,7 +2322,7 @@
                     queueCommit(tDef, { x0: p.mx, y0: p.my, x1: p.mx, y1: p.my, z: p.z, area: p.area, shift: false, tool: activeTool });
                 }
             } else if (p.shift) {
-                const u = findUnitAt(p.mx, p.my, p.area, p.z);
+                const u = findUnitAt(p.mx, p.my, p.area, p.z, p.sx, p.sy);
                 if (u && isPlayerUnit(u)) {
                     if (selectedGroup.includes(u.id)) {
                         selectedGroup = selectedGroup.filter(id => id !== u.id);
@@ -2286,15 +2340,33 @@
                     }
                 }
             } else if (!isProvoked("plain_click")) {
-                const u = findUnitAt(p.mx, p.my, p.area, p.z);
+                const u = findUnitAt(p.mx, p.my, p.area, p.z, p.sx, p.sy);
                 const hasSelection = (selectedGroup.length > 0) ||
                                       (window.$colonyManager && !!$colonyManager.selectedColonist) ||
                                       (selectedTileBox !== null) ||
                                       (selectedTiles.length > 0) ||
                                       (typeof targetedTile === "function" ? !!targetedTile() : false);
 
-                if (u && isPlayerUnit(u)) {
-                    setSelection([u.id]);
+                if (u) {
+                    if (isPlayerUnit(u)) {
+                        setSelection([u.id]);
+                    } else {
+                        clearSelection({ keepSheet: true });
+                        if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                            $colonyManager.deselect();
+                        }
+                    }
+                    clearTileSelection();
+                    clearTargetedTile();
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.open === "function") {
+                        UF.Sheet.open(u.id);
+                    }
+                    SoundManager.playCursor();
+                } else if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(p.mx, p.my)) {
+                    clearSelection({ keepSheet: true });
+                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                        $colonyManager.deselect();
+                    }
                     clearTileSelection();
                     clearTargetedTile();
                     SoundManager.playCursor();
@@ -2305,9 +2377,15 @@
                     if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
                         $colonyManager.deselect();
                     }
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
                     SoundManager.playCancel();
                 } else {
                     selectSingleTile(p.mx, p.my, p.z, p.area);
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
                     SoundManager.playCursor();
                 }
             }
@@ -2602,7 +2680,7 @@
             TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
         } else if (isShift) {
             // Shift-click: toggle player unit in selection
-            const u = findUnitAt(mx, my, area, curZ);
+            const u = findUnitAt(mx, my, area, curZ, TouchInput.x, TouchInput.y);
             if (u && isPlayerUnit(u)) {
                 if (selectedGroup.includes(u.id)) {
                     selectedGroup = selectedGroup.filter(id => id !== u.id);
@@ -2614,15 +2692,34 @@
                 TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
             }
         } else if (!isProvoked("plain_click")) {
-            const u = findUnitAt(mx, my, area, curZ);
+            const u = findUnitAt(mx, my, area, curZ, TouchInput.x, TouchInput.y);
             const hasSelection = (selectedGroup.length > 0) ||
                                   (window.$colonyManager && !!$colonyManager.selectedColonist) ||
                                   (selectedTileBox !== null) ||
                                   (selectedTiles.length > 0) ||
                                   (typeof targetedTile === "function" ? !!targetedTile() : false);
 
-            if (u && isPlayerUnit(u)) {
-                setSelection([u.id]);
+            if (u) {
+                if (isPlayerUnit(u)) {
+                    setSelection([u.id]);
+                } else {
+                    clearSelection({ keepSheet: true });
+                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                        $colonyManager.deselect();
+                    }
+                }
+                clearTileSelection();
+                clearTargetedTile();
+                if (window.UF && UF.Sheet && typeof UF.Sheet.open === "function") {
+                    UF.Sheet.open(u.id);
+                }
+                SoundManager.playCursor();
+                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+            } else if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(mx, my)) {
+                clearSelection({ keepSheet: true });
+                if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                    $colonyManager.deselect();
+                }
                 clearTileSelection();
                 clearTargetedTile();
                 SoundManager.playCursor();
@@ -2634,10 +2731,16 @@
                 if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
                     $colonyManager.deselect();
                 }
+                if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                    UF.Sheet.close();
+                }
                 SoundManager.playCancel();
                 TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
             } else {
                 selectSingleTile(mx, my, curZ, area);
+                if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                    UF.Sheet.close();
+                }
                 SoundManager.playCursor();
                 TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
             }

@@ -730,14 +730,39 @@
             list.sort((a, b) => b.capability - a.capability);
             if (list.length) capabilities = list.slice(0, 3);
         }
+        const Dnd = window.UF && UF.Dnd5e;
+        let dnd = d.dnd || null;
+        if (!dnd && Dnd && typeof Dnd.assignClass === "function") {
+            const curStats = d.stats || Dnd.rollAbilityScores(42, u.id, d.species || "human");
+            dnd = Dnd.assignClass(curStats, 42, u.id);
+            d.dnd = dnd;
+            d.dndClass = dnd.id;
+            d.className = dnd.name;
+            d.hitDie = dnd.hitDie;
+            d.hpMax = dnd.hpMax;
+            d.hp = dnd.hp;
+            d.ac = dnd.ac;
+            d.savingThrows = dnd.savingThrows;
+        }
+
+        const tabs = (kind === "colonist" || kind === "person") ? [
+            { id: "record", label: "1: Record" },
+            { id: "inventory", label: "2: Inventory" },
+            { id: "spellbook", label: "3: Spell Book" },
+            { id: "priest", label: "4: Priest Scroll" }
+        ] : null;
+
+        const classSubtitle = dnd ? `${dnd.name} 1` : profTitle;
+
         const m = {
             subject: { kind: "unit", unitId: u.id }, kind, readOnly,
-            title: u.name || "", subtitle: [KIND_LABELS[kind], profTitle, speciesText, who, thermalText].filter(Boolean).join(" · "),
+            title: u.name || "", subtitle: [KIND_LABELS[kind], classSubtitle, speciesText, who, thermalText].filter(Boolean).join(" · "),
             faction: fl.faction, stance: fl.stance, doing: doingOf(u),
             load: loadOf(u),
             picture: faceSpecOf(u, species),
             equipment, stats: statsOf(d.stats), statsShown: true,
             capabilities,
+            dnd, tabs,
             needs: null,
             mood: null,
             drops, stateLines: null, actions: null,
@@ -752,6 +777,7 @@
         m.sig = JSON.stringify([m.kind, m.title, m.subtitle, m.faction, m.stance && m.stance.id, m.doing, m.load ? m.load.text : "", inv.map(it => `${it.id}:${it.type}:${it.count}`),
             equipment ? equipment.map(e => `${e.itemId}:${e.typeId}`) : null, m.stats ? m.stats.map(s => s.score) : null,
             capabilities ? capabilities.map(c => `${c.id}:${c.capability}`) : null,
+            dnd ? dnd.name : "",
             m.here, m.picture]);
         return m;
     }
@@ -853,7 +879,7 @@
     //-------------------------------------------------------------------------
     // Layout (contents coordinates) for a model
 
-    function layoutFor(m, iw, cfg) {
+    function layoutFor(m, iw, cfg, activeTab = 0) {
         const s = cfg.slot;
         const L = { picture: { x: 0, y: 0, w: PICTURE, h: PICTURE }, close: { x: iw - CLOSE, y: 0, w: CLOSE, h: CLOSE } };
         let y = HEADER_H + 4;
@@ -861,70 +887,158 @@
             L.load = { x: 0, y: HEADER_H, w: iw, h: LOAD_H - 2 };
             y += LOAD_H;
         }
-        if (m.equipment) {
-            const cols = 7;
-            const rows = Math.ceil(m.equipment.length / cols);
-            const slotW = 34;
-            const slotH = 34;
-            const gapX = cols > 1 ? Math.max(2, Math.floor((iw - cols * slotW) / (cols - 1))) : 0;
-            const totalW = cols * slotW + (cols - 1) * gapX;
-            const startX = Math.max(0, Math.floor((iw - totalW) / 2));
-            const rowH = slotH + 13 + 3;
-            const slots = m.equipment.map((e, i) => {
-                const col = i % cols;
-                const row = Math.floor(i / cols);
-                return {
-                    slot: e.slot,
-                    x: startX + col * (slotW + gapX),
-                    y: y + 14 + row * rowH,
-                    w: slotW,
-                    h: slotH
+
+        if (m.tabs && m.tabs.length) {
+            const tabCount = m.tabs.length;
+            const tabGap = 4;
+            const tabW = Math.floor((iw - (tabCount - 1) * tabGap) / tabCount);
+            const tabH = 22;
+            L.tabs = m.tabs.map((tab, i) => ({
+                id: tab.id,
+                label: tab.label,
+                x: i * (tabW + tabGap),
+                y,
+                w: tabW,
+                h: tabH
+            }));
+            y += tabH + 6;
+
+            if (activeTab === 0) {
+                // PAGE 1: RECORD / STATUS / EXP (Baldur's Gate 1 style)
+                L.record = {
+                    x: 0, y, w: iw,
+                    bannerH: 22,
+                    statsH: 36,
+                    vitalsH: 36,
+                    savesH: 26,
+                    expH: 26,
+                    featsH: 64,
+                    profsH: 44,
+                    carryingH: 42
                 };
-            });
-            L.equipment = { y, slots };
-            y += 14 + rows * rowH + 4;
-        }
-        if (m.statsShown) {
-            L.stats = { x: 0, y, w: iw, h: 32 };
-            y += 34;
-            if (m.capabilities && m.capabilities.length) {
-                L.capabilities = { x: 0, y, w: iw, h: 16 };
-                y += 18;
+                L.stats = { x: 0, y: y + 22, w: iw, h: 36 };
+                y += 22 + 36 + 36 + 26 + 26 + 64 + 44 + 42 + 10;
+            } else if (activeTab === 1) {
+                // PAGE 2: INVENTORY & EQUIPMENT
+                if (m.equipment) {
+                    const cols = 7;
+                    const rows = Math.ceil(m.equipment.length / cols);
+                    const slotW = 34, slotH = 34;
+                    const gapX = cols > 1 ? Math.max(2, Math.floor((iw - cols * slotW) / (cols - 1))) : 0;
+                    const totalW = cols * slotW + (cols - 1) * gapX;
+                    const startX = Math.max(0, Math.floor((iw - totalW) / 2));
+                    const rowH = slotH + 13 + 3;
+                    const slots = m.equipment.map((e, i) => {
+                        const col = i % cols;
+                        const row = Math.floor(i / cols);
+                        return {
+                            slot: e.slot,
+                            x: startX + col * (slotW + gapX),
+                            y: y + 14 + row * rowH,
+                            w: slotW,
+                            h: slotH
+                        };
+                    });
+                    L.equipment = { y, slots };
+                    y += 14 + rows * rowH + 4;
+                }
+                if (m.statsShown) {
+                    L.stats = { x: 0, y, w: iw, h: 32 };
+                    y += 34;
+                }
+                if (m.grid) {
+                    const gx = Math.max(0, Math.floor((iw - cfg.columns * s) / 2));
+                    const slots = [];
+                    for (let i = 0; i < cfg.columns * cfg.rows; i++) slots.push({ x: gx + (i % cfg.columns) * s, y: y + 14 + Math.floor(i / cfg.columns) * s, w: s, h: s });
+                    L.grid = { y, x: gx, w: cfg.columns * s, h: 14 + cfg.rows * s, slots };
+                    y += 14 + cfg.rows * s + 4;
+                }
+                if (m.buttons && m.buttons.length) {
+                    L.buttons = [];
+                    let bx = 0;
+                    for (const b of m.buttons) {
+                        const w = b.id === "drop" ? 96 : Math.min(iw - bx, 170);
+                        L.buttons.push({ id: b.id, x: bx, y, w, h: 24 });
+                        bx += w + 8;
+                    }
+                    y += 30;
+                }
+            } else if (activeTab === 2) {
+                // PAGE 3: SPELL BOOK (Arcane Spells)
+                L.spellbook = { x: 0, y, w: iw, h: 260 };
+                y += 264;
+            } else if (activeTab === 3) {
+                // PAGE 4: PRIEST SCROLL (Divine Spells)
+                L.priest = { x: 0, y, w: iw, h: 260 };
+                y += 264;
             }
-        }
-        if (m.needs) {
-            L.needs = { x: 0, y, w: iw, h: 3 * 15 };
-            y += 3 * 15 + 4;
-        }
-        if (m.drops) {
-            L.drops = { y, slots: m.drops.map((d, i) => ({ x: i * s, y: y + 14, w: s, h: s })) };
-            y += m.drops.length ? 14 + s + 4 : 18;
-        }
-        if (m.stateLines && m.stateLines.length) {
-            L.state = { x: 0, y, w: iw, h: m.stateLines.length * 16 };
-            y += m.stateLines.length * 16 + 4;
-        }
-        if (m.actions) {
-            const n = Math.max(1, m.actions.length);
-            L.actions = { x: 0, y, w: iw, h: 14 + n * 16 };
-            y += 14 + n * 16 + 4;
-        }
-        if (m.grid) {
-            const gx = Math.max(0, Math.floor((iw - cfg.columns * s) / 2));
-            const slots = [];
-            for (let i = 0; i < cfg.columns * cfg.rows; i++) slots.push({ x: gx + (i % cfg.columns) * s, y: y + 14 + Math.floor(i / cfg.columns) * s, w: s, h: s });
-            L.grid = { y, x: gx, w: cfg.columns * s, h: 14 + cfg.rows * s, slots };
-            y += 14 + cfg.rows * s + 4;
-        }
-        if (m.buttons.length) {
-            L.buttons = [];
-            let bx = 0;
-            for (const b of m.buttons) {
-                const w = b.id === "drop" ? 96 : Math.min(iw - bx, 170);
-                L.buttons.push({ id: b.id, x: bx, y, w, h: 24 });
-                bx += w + 8;
+        } else {
+            // Non-character objects / animal fallback
+            if (m.equipment) {
+                const cols = 7;
+                const rows = Math.ceil(m.equipment.length / cols);
+                const slotW = 34;
+                const slotH = 34;
+                const gapX = cols > 1 ? Math.max(2, Math.floor((iw - cols * slotW) / (cols - 1))) : 0;
+                const totalW = cols * slotW + (cols - 1) * gapX;
+                const startX = Math.max(0, Math.floor((iw - totalW) / 2));
+                const rowH = slotH + 13 + 3;
+                const slots = m.equipment.map((e, i) => {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    return {
+                        slot: e.slot,
+                        x: startX + col * (slotW + gapX),
+                        y: y + 14 + row * rowH,
+                        w: slotW,
+                        h: slotH
+                    };
+                });
+                L.equipment = { y, slots };
+                y += 14 + rows * rowH + 4;
             }
-            y += 30;
+            if (m.statsShown) {
+                L.stats = { x: 0, y, w: iw, h: 32 };
+                y += 34;
+                if (m.capabilities && m.capabilities.length) {
+                    L.capabilities = { x: 0, y, w: iw, h: 16 };
+                    y += 18;
+                }
+            }
+            if (m.needs) {
+                L.needs = { x: 0, y, w: iw, h: 3 * 15 };
+                y += 3 * 15 + 4;
+            }
+            if (m.drops) {
+                L.drops = { y, slots: m.drops.map((d, i) => ({ x: i * s, y: y + 14, w: s, h: s })) };
+                y += m.drops.length ? 14 + s + 4 : 18;
+            }
+            if (m.stateLines && m.stateLines.length) {
+                L.state = { x: 0, y, w: iw, h: m.stateLines.length * 16 };
+                y += m.stateLines.length * 16 + 4;
+            }
+            if (m.actions) {
+                const n = Math.max(1, m.actions.length);
+                L.actions = { x: 0, y, w: iw, h: 14 + n * 16 };
+                y += 14 + n * 16 + 4;
+            }
+            if (m.grid) {
+                const gx = Math.max(0, Math.floor((iw - cfg.columns * s) / 2));
+                const slots = [];
+                for (let i = 0; i < cfg.columns * cfg.rows; i++) slots.push({ x: gx + (i % cfg.columns) * s, y: y + 14 + Math.floor(i / cfg.columns) * s, w: s, h: s });
+                L.grid = { y, x: gx, w: cfg.columns * s, h: 14 + cfg.rows * s, slots };
+                y += 14 + cfg.rows * s + 4;
+            }
+            if (m.buttons.length) {
+                L.buttons = [];
+                let bx = 0;
+                for (const b of m.buttons) {
+                    const w = b.id === "drop" ? 96 : Math.min(iw - bx, 170);
+                    L.buttons.push({ id: b.id, x: bx, y, w, h: 24 });
+                    bx += w + 8;
+                }
+                y += 30;
+            }
         }
         L.footer = { x: 0, y, w: iw, h: 18 };
         y += 18;
@@ -946,6 +1060,7 @@
             this._subject = null;
             this._model = null;
             this._layout = null;
+            this._activeTab = 0;
             this._age = 0;
             this._dirty = false;
             this._pending = 0;
@@ -964,6 +1079,14 @@
         layout() { return this._layout; }
         pending() { return this._pending; }
         footer() { return this._footer; }
+        activeTab() { return this._activeTab; }
+
+        switchTab(t) {
+            if (this._activeTab === t) return;
+            this._activeTab = t;
+            SoundManager.playCursor();
+            this.redraw();
+        }
 
         /** Show a subject (see subjectAt). Returns false when it shows nothing. */
         setSubject(subject) {
@@ -975,6 +1098,7 @@
                 this._selSlot = -1;
                 this._selEquip = null;
                 this._footer = "";
+                this._activeTab = 0;
             }
             this._model = m;
             this.redraw();
@@ -988,6 +1112,7 @@
             this._selSlot = -1;
             this._selEquip = null;
             this._footer = "";
+            this._activeTab = 0;
             this.hide();
         }
 
@@ -996,6 +1121,12 @@
             const t0 = performance.now();
             Window_Base.prototype.update.call(this);
             this.processPanelTouch();
+            if (this.visible && this._model && this._model.tabs) {
+                if (Input.isTriggered("1") || Input.isTriggered("one")) this.switchTab(0);
+                else if (Input.isTriggered("2") || Input.isTriggered("two")) this.switchTab(1);
+                else if (Input.isTriggered("3") || Input.isTriggered("three")) this.switchTab(2);
+                else if (Input.isTriggered("4") || Input.isTriggered("four")) this.switchTab(3);
+            }
             if (this.visible && this._subject) {
                 this._age++;
                 const iconsChanged = this._pending > 0 && this._drawnIcons !== iconsVersion;
@@ -1058,6 +1189,10 @@
             if (inRect(p, L.close)) {
                 Sheet.close(true);
                 return;
+            }
+            if (L.tabs) {
+                const t = L.tabs.findIndex(r => inRect(p, r));
+                if (t >= 0) return this.switchTab(t);
             }
             if (L.grid) {
                 const i = L.grid.slots.findIndex(r => inRect(p, r));
@@ -1292,7 +1427,17 @@
         }
         drawGrid(m, L) {
             const g = m.grid;
-            const title = `${g.title} (${g.total} stack${g.total === 1 ? "" : "s"}${g.overflow ? `, ${g.slots.length} shown` : ""})`;
+            const I = Items();
+            const isUnit = m.subject && m.subject.kind === "unit";
+            let weightInfo = "";
+            if (isUnit && I) {
+                const curW = I.carriedWeight(m.subject.unitId);
+                const maxW = I.maxWeight(m.subject.unitId);
+                const enc = typeof I.encumbrance === "function" ? I.encumbrance(m.subject.unitId) : null;
+                const encLabel = enc && enc.status === "heavily_encumbered" ? " [HEAVY]" : (enc && enc.status === "encumbered" ? " [ENC]" : (enc && enc.status === "over_capacity" ? " [OVER]" : ""));
+                weightInfo = ` · ${curW.toFixed(1)}/${maxW.toFixed(0)} lbs${encLabel}`;
+            }
+            const title = `${g.title} (${g.total}/${g.slots.length} slots${weightInfo})`;
             this.text(title, L.grid.x, L.grid.y, L.grid.w, 14, 12, ColorManager.systemColor());
             g.slots.forEach((entry, i) => {
                 const r = L.grid.slots[i];
@@ -1315,6 +1460,237 @@
             });
         }
 
+        drawTabs(m, L, activeTab) {
+            const c = this.contents;
+            L.tabs.forEach((tab, i) => {
+                const isActive = (i === activeTab);
+                const bg = isActive ? "rgba(45, 40, 60, 0.95)" : "rgba(18, 16, 22, 0.85)";
+                const edge = isActive ? COLORS.select : COLORS.disabled;
+                c.fillRect(tab.x, tab.y, tab.w, tab.h, bg);
+                c.fillRect(tab.x, tab.y, tab.w, 1, edge);
+                c.fillRect(tab.x, tab.y + tab.h - 1, tab.w, 1, edge);
+                c.fillRect(tab.x, tab.y, 1, tab.h, edge);
+                c.fillRect(tab.x + tab.w - 1, tab.y, 1, tab.h, edge);
+                this.text(tab.label, tab.x, tab.y + 3, tab.w, tab.h - 4, 11, isActive ? COLORS.select : COLORS.dim, "center");
+            });
+        }
+
+        drawPageRecord(m, L) {
+            const c = this.contents;
+            const r = L.record;
+            if (!r) return;
+            const dnd = m.dnd;
+            const sys = ColorManager.systemColor();
+            let curY = r.y;
+
+            // 1. Class & Level Banner
+            const title = dnd ? `${dnd.name} · Level ${dnd.level || 1} · ${dnd.casterType ? cap(dnd.casterType) : "Martial"}` : "Character Record";
+            this.text(title, r.x, curY, r.w, 18, 14, COLORS.select);
+            curY += r.bannerH;
+
+            // 2. 6 Ability Scores Table (in classic BG1 box)
+            c.fillRect(r.x, curY, r.w, r.statsH, COLORS.well);
+            c.fillRect(r.x, curY, r.w, 1, COLORS.shade);
+            c.fillRect(r.x, curY + r.statsH - 1, r.w, 1, COLORS.light);
+            if (m.stats) {
+                const colW = Math.floor(r.w / m.stats.length);
+                m.stats.forEach((s, i) => {
+                    const sx = r.x + i * colW;
+                    this.text(s.label, sx, curY + 2, colW, 13, 11, sys, "center");
+                    this.text(`${s.score} ${signed(s.mod)}`, sx, curY + 16, colW, 16, 12, COLORS.text, "center");
+                });
+            }
+            curY += r.statsH + 4;
+
+            // 3. Combat & Vitals (HP, AC, Attack Bonus, Prof)
+            c.fillRect(r.x, curY, r.w, r.vitalsH, "rgba(20, 25, 35, 0.7)");
+            const vitW = Math.floor(r.w / 4);
+            const hpText = dnd ? `HP: ${dnd.hp}/${dnd.hpMax}` : "HP: 10/10";
+            const acText = dnd ? `AC: ${dnd.ac}` : "AC: 10";
+            const profBonus = dnd ? `+${dnd.proficiencyBonus}` : "+2";
+            const primMod = m.stats ? (m.stats.find(s => s.key === (dnd && dnd.primaryAbility ? dnd.primaryAbility[0] : "str")) || { mod: 0 }).mod : 0;
+            const atkText = `Atk: ${signed(primMod + 2)}`;
+
+            this.text(hpText, r.x, curY + 2, vitW, 14, 11, "#86efac", "center");
+            this.text(`(d${dnd ? dnd.hitDie : 8})`, r.x, curY + 16, vitW, 14, 10, COLORS.dim, "center");
+
+            this.text(acText, r.x + vitW, curY + 2, vitW, 14, 11, COLORS.equipped, "center");
+            this.text("Defense", r.x + vitW, curY + 16, vitW, 14, 10, COLORS.dim, "center");
+
+            this.text(atkText, r.x + vitW * 2, curY + 2, vitW, 14, 11, COLORS.doing, "center");
+            this.text("Bonus", r.x + vitW * 2, curY + 16, vitW, 14, 10, COLORS.dim, "center");
+
+            this.text(`Prof: ${profBonus}`, r.x + vitW * 3, curY + 2, vitW, 14, 11, COLORS.select, "center");
+            this.text("1st Tier", r.x + vitW * 3, curY + 16, vitW, 14, 10, COLORS.dim, "center");
+            curY += r.vitalsH + 4;
+
+            // 4. Saving Throws (with * for proficient saves)
+            this.text("Saving Throws:", r.x, curY, 90, 14, 11, sys);
+            if (m.stats) {
+                const saveList = m.stats.map(s => {
+                    const isProf = dnd && dnd.savingThrows && dnd.savingThrows.includes(s.key);
+                    const bonus = s.mod + (isProf ? (dnd ? dnd.proficiencyBonus : 2) : 0);
+                    return `${isProf ? "*" : ""}${s.label} ${signed(bonus)}`;
+                }).join("  ");
+                this.text(saveList, r.x + 85, curY, r.w - 85, 14, 11, COLORS.text);
+            }
+            curY += r.savesH;
+
+            // 5. Experience Points & Progression
+            const curExp = dnd ? (dnd.exp || 0) : 0;
+            const nextExp = dnd ? (dnd.nextExp || 300) : 300;
+            this.text(`EXP: ${curExp} / ${nextExp} to Level 2`, r.x, curY, r.w, 14, 11, COLORS.doing);
+            const barY = curY + 14;
+            c.fillRect(r.x, barY, r.w, 6, "rgba(0, 0, 0, 0.6)");
+            const fillW = Math.max(0, Math.min(r.w, Math.floor(r.w * (curExp / nextExp))));
+            if (fillW > 0) c.fillRect(r.x, barY, fillW, 6, COLORS.buttonEdge);
+            c.fillRect(r.x, barY, r.w, 1, COLORS.shade);
+            curY += r.expH;
+
+            // 6. Class Features & Feats
+            this.text("Feats & Class Features", r.x, curY, r.w, 14, 11, sys);
+            curY += 14;
+            if (dnd && dnd.features && dnd.features.length) {
+                dnd.features.slice(0, 2).forEach(f => {
+                    this.text(`• ${f.name}:`, r.x, curY, r.w, 13, 11, COLORS.select);
+                    this.text(f.desc, r.x + 8, curY + 12, r.w - 8, 13, 10, COLORS.dim);
+                    curY += 24;
+                });
+            } else {
+                this.text("None at current rank.", r.x, curY, r.w, 14, 11, COLORS.dim);
+                curY += 16;
+            }
+
+            // 7. Proficiencies & Skills
+            this.text("Proficiencies & Skills", r.x, curY, r.w, 14, 11, sys);
+            curY += 14;
+            const weapons = dnd && dnd.weaponProficiencies ? dnd.weaponProficiencies.slice(0, 2).join(", ") : "Simple";
+            const armors = dnd && dnd.armorProficiencies ? dnd.armorProficiencies.join(", ") : "None";
+            const skills = dnd && dnd.skills ? dnd.skills.join(", ") : "None";
+            this.text(`Weapons: ${weapons} · Armor: ${armors}`, r.x, curY, r.w, 13, 10, COLORS.text);
+            this.text(`Skills: ${skills}`, r.x, curY + 13, r.w, 13, 10, COLORS.dim);
+            curY += 28;
+
+            // 8. Lifting & Carrying (d20 SRD rulebook)
+            const I = Items();
+            const curWeight = (m.subject && m.subject.kind === "unit" && I) ? I.carriedWeight(m.subject.unitId) : 0;
+            const Dnd = window.UF && UF.Dnd5e;
+            const cap = (m.subject && m.subject.kind === "unit" && Dnd && typeof Dnd.carryingCapacity === "function")
+                ? Dnd.carryingCapacity(m.subject.unitId, null, curWeight)
+                : { maxWeight: 150, pushDragLift: 300, encumbered: 50, heavilyEncumbered: 100, status: "unencumbered" };
+            this.text("Carrying Capacity (d20 SRD)", r.x, curY, r.w, 14, 11, sys);
+            curY += 14;
+            const statusColor = cap.status === "over_capacity" ? "#ef4444" : (cap.status === "heavily_encumbered" ? "#f97316" : (cap.status === "encumbered" ? "#eab308" : "#86efac"));
+            this.text(`Load: ${curWeight.toFixed(1)} / ${cap.maxWeight.toFixed(0)} lbs [${cap.status.replace("_", " ").toUpperCase()}]`, r.x, curY, r.w, 13, 11, statusColor);
+            curY += 13;
+            this.text(`Push/Drag/Lift: ${cap.pushDragLift.toFixed(0)} lbs · Encumb: ${cap.encumbered.toFixed(0)} lbs`, r.x, curY, r.w, 13, 10, COLORS.dim);
+        }
+
+        drawPageInventory(m, L) {
+            if (L.equipment) this.drawEquipment(m, L);
+            if (L.stats) this.drawStats(m, L);
+            if (L.grid) this.drawGrid(m, L);
+            if (L.buttons) this.drawButtons(m, L);
+        }
+
+        drawPageSpellBook(m, L) {
+            const r = L.spellbook, c = this.contents;
+            if (!r) return;
+            const dnd = m.dnd;
+            const isArcane = dnd && dnd.casterType === "arcane";
+
+            // Header Banner
+            this.text("MAGE SPELL BOOK (Arcane)", r.x, r.y, r.w, 18, 14, "#7dd3fc");
+            if (isArcane) {
+                const sub = `Spellcasting: ${dnd.spellAbility.toUpperCase()} · Save DC: ${dnd.spellSaveDC} · Attack: +${dnd.spellAttackBonus}`;
+                this.text(sub, r.x, r.y + 18, r.w, 14, 11, COLORS.dim);
+
+                const slots = dnd.spellSlots && dnd.spellSlots[1] ? `[ ${dnd.spellSlots[1].current} / ${dnd.spellSlots[1].max} slots remaining ]` : "[ 0 / 0 slots ]";
+                this.text(`Level 1 Spell Slots: ${slots}`, r.x, r.y + 34, r.w, 14, 11, COLORS.doing);
+
+                let curY = r.y + 54;
+                // Cantrips
+                this.text("Cantrips (At Will):", r.x, curY, r.w, 14, 11, ColorManager.systemColor());
+                curY += 16;
+                const cantrips = dnd.cantrips && dnd.cantrips.length ? dnd.cantrips : ["Fire Bolt", "Light", "Mage Hand"];
+                cantrips.slice(0, 3).forEach(name => {
+                    const sp = window.UF && UF.Dnd5e && UF.Dnd5e.spellDef(name);
+                    const desc = sp ? `${sp.school}, ${sp.range} · ${sp.desc}` : "Cantrip incantation.";
+                    this.text(`• ${name}`, r.x + 4, curY, 90, 13, 11, COLORS.select);
+                    this.text(desc, r.x + 95, curY, r.w - 95, 13, 10, COLORS.text);
+                    curY += 16;
+                });
+
+                curY += 6;
+                // 1st Level Spells
+                this.text("1st-Level Spells Inscribed:", r.x, curY, r.w, 14, 11, ColorManager.systemColor());
+                curY += 16;
+                const lvl1 = dnd.level1Spells && dnd.level1Spells.length ? dnd.level1Spells : ["Magic Missile", "Shield", "Mage Armor"];
+                lvl1.slice(0, 5).forEach(name => {
+                    const sp = window.UF && UF.Dnd5e && UF.Dnd5e.spellDef(name);
+                    const desc = sp ? `${sp.school}, ${sp.range}, ${sp.comp} · ${sp.desc}` : "Arcane formula.";
+                    this.text(`• ${name}`, r.x + 4, curY, 95, 13, 11, COLORS.select);
+                    this.text(desc, r.x + 100, curY, r.w - 100, 13, 10, COLORS.dim);
+                    curY += 16;
+                });
+            } else {
+                c.fillRect(r.x, r.y + 30, r.w, 120, COLORS.well);
+                this.text("This character is not an arcane spellcaster.", r.x + 10, r.y + 50, r.w - 20, 16, 12, COLORS.text, "center");
+                this.text("No spellbook is carried. Arcane study requires Wizard,", r.x + 10, r.y + 72, r.w - 20, 14, 11, COLORS.dim, "center");
+                this.text("Sorcerer, Warlock, or Bard training.", r.x + 10, r.y + 88, r.w - 20, 14, 11, COLORS.dim, "center");
+                this.text("Arcane scrolls may be read once intelligence is trained.", r.x + 10, r.y + 112, r.w - 20, 14, 11, COLORS.doing, "center");
+            }
+        }
+
+        drawPagePriestScroll(m, L) {
+            const r = L.priest, c = this.contents;
+            if (!r) return;
+            const dnd = m.dnd;
+            const isDivine = dnd && dnd.casterType === "divine";
+
+            // Header Banner
+            this.text("PRIEST SCROLL (Divine)", r.x, r.y, r.w, 18, 14, COLORS.select);
+            if (isDivine) {
+                const sub = `Spellcasting: ${dnd.spellAbility.toUpperCase()} · Save DC: ${dnd.spellSaveDC} · Attack: +${dnd.spellAttackBonus}`;
+                this.text(sub, r.x, r.y + 18, r.w, 14, 11, COLORS.dim);
+
+                const slots = dnd.spellSlots && dnd.spellSlots[1] ? `[ ${dnd.spellSlots[1].current} / ${dnd.spellSlots[1].max} prayers remaining ]` : "[ 0 / 0 prayers ]";
+                this.text(`Level 1 Prayer Slots: ${slots}`, r.x, r.y + 34, r.w, 14, 11, COLORS.doing);
+
+                let curY = r.y + 54;
+                // Orisons / Cantrips
+                this.text("Orisons & Miracles (At Will):", r.x, curY, r.w, 14, 11, ColorManager.systemColor());
+                curY += 16;
+                const cantrips = dnd.cantrips && dnd.cantrips.length ? dnd.cantrips : ["Sacred Flame", "Guidance", "Thaumaturgy"];
+                cantrips.slice(0, 3).forEach(name => {
+                    const sp = window.UF && UF.Dnd5e && UF.Dnd5e.spellDef(name);
+                    const desc = sp ? `${sp.school}, ${sp.range} · ${sp.desc}` : "Divine orison.";
+                    this.text(`• ${name}`, r.x + 4, curY, 95, 13, 11, COLORS.doing);
+                    this.text(desc, r.x + 100, curY, r.w - 100, 13, 10, COLORS.text);
+                    curY += 16;
+                });
+
+                curY += 6;
+                // 1st Level Prayers
+                this.text("1st-Level Divine Prayers Inscribed:", r.x, curY, r.w, 14, 11, ColorManager.systemColor());
+                curY += 16;
+                const prayers = dnd.level1Spells && dnd.level1Spells.length ? dnd.level1Spells : ["Bless", "Cure Wounds", "Healing Word", "Guiding Bolt"];
+                prayers.slice(0, 5).forEach(name => {
+                    const sp = window.UF && UF.Dnd5e && UF.Dnd5e.spellDef(name);
+                    const desc = sp ? `${sp.school}, ${sp.range}, ${sp.duration} · ${sp.desc}` : "Divine prayer.";
+                    this.text(`• ${name}`, r.x + 4, curY, 95, 13, 11, COLORS.select);
+                    this.text(desc, r.x + 100, curY, r.w - 100, 13, 10, COLORS.dim);
+                    curY += 16;
+                });
+            } else {
+                c.fillRect(r.x, r.y + 30, r.w, 120, COLORS.well);
+                this.text("This character has taken no divine vows.", r.x + 10, r.y + 50, r.w - 20, 16, 12, COLORS.text, "center");
+                this.text("No priest scroll is inscribed. Divine prayers require Cleric,", r.x + 10, r.y + 72, r.w - 20, 14, 11, COLORS.dim, "center");
+                this.text("Druid, or Paladin devotion.", r.x + 10, r.y + 88, r.w - 20, 14, 11, COLORS.dim, "center");
+                this.text("Prayers and blessings may be received at sacred shrines.", r.x + 10, r.y + 112, r.w - 20, 14, 11, COLORS.doing, "center");
+            }
+        }
+
         redraw() {
             const m = this._model;
             if (!m) return;
@@ -1324,18 +1700,35 @@
             this.resetFontSettings();
             this.contents.clear();
             this._loadText = "";
-            const L = this._layout = layoutFor(m, this.innerWidth, cfg);
+            const activeTab = (m.tabs && this._activeTab !== undefined) ? this._activeTab : 0;
+            const L = this._layout = layoutFor(m, this.innerWidth, cfg, activeTab);
             const h = Math.min(this._maxHeight, L.height + this.padding * 2);
             if (this.height !== h) this.height = h;
             this.drawHeader(m, L);
-            if (L.equipment) this.drawEquipment(m, L);
-            if (L.stats) this.drawStats(m, L);
-            if (L.capabilities) this.drawCapabilities(m, L);
-            if (L.drops) this.drawDrops(m, L);
-            if (L.state) this.drawState(m, L);
-            if (L.actions) this.drawActions(m, L);
-            if (L.grid) this.drawGrid(m, L);
-            if (L.buttons) this.drawButtons(m, L);
+
+            if (L.tabs) this.drawTabs(m, L, activeTab);
+
+            if (m.tabs) {
+                if (activeTab === 0) {
+                    this.drawPageRecord(m, L);
+                } else if (activeTab === 1) {
+                    this.drawPageInventory(m, L);
+                } else if (activeTab === 2) {
+                    this.drawPageSpellBook(m, L);
+                } else if (activeTab === 3) {
+                    this.drawPagePriestScroll(m, L);
+                }
+            } else {
+                if (L.equipment) this.drawEquipment(m, L);
+                if (L.stats) this.drawStats(m, L);
+                if (L.capabilities) this.drawCapabilities(m, L);
+                if (L.drops) this.drawDrops(m, L);
+                if (L.state) this.drawState(m, L);
+                if (L.actions) this.drawActions(m, L);
+                if (L.grid) this.drawGrid(m, L);
+                if (L.buttons) this.drawButtons(m, L);
+            }
+
             this.text(this._footer || m.hint || "", 0, L.footer.y, L.footer.w, L.footer.h, 12, this._footer ? COLORS.doing : COLORS.dim);
             this._drawnIcons = iconsVersion;
             this._dirty = false;
@@ -1487,17 +1880,35 @@
         /** A panel rectangle in screen pixels: ("slot", i), ("equip", slotName), ("drop", i), ("button", id), ("close"). */
         screenRect(kind, which) {
             const w = sceneWindow();
-            const L = w && w.visible ? w.layout() : null;
+            let L = w && w.visible ? w.layout() : null;
             if (!L) return null;
             let r = null;
-            if (kind === "slot" && L.grid) r = L.grid.slots[which];
-            else if (kind === "equip" && L.equipment) {
-                const cfg = config();
-                const target = (cfg.aliases && cfg.aliases[which]) || which;
-                r = L.equipment.slots.find(s => s.slot === which || s.slot === target);
+            if (kind === "slot") {
+                if (!L.grid && typeof w.switchTab === "function") {
+                    w.switchTab(1);
+                    L = w.layout();
+                }
+                if (L.grid) r = L.grid.slots[which];
+            }
+            else if (kind === "equip") {
+                if (!L.equipment && typeof w.switchTab === "function") {
+                    w.switchTab(1);
+                    L = w.layout();
+                }
+                if (L.equipment) {
+                    const cfg = config();
+                    const target = (cfg.aliases && cfg.aliases[which]) || which;
+                    r = L.equipment.slots.find(s => s.slot === which || s.slot === target);
+                }
             }
             else if (kind === "drop" && L.drops) r = L.drops.slots[which];
-            else if (kind === "button" && L.buttons) r = L.buttons.find(b => b.id === which);
+            else if (kind === "button") {
+                if (!L.buttons && typeof w.switchTab === "function") {
+                    w.switchTab(1);
+                    L = w.layout();
+                }
+                if (L.buttons) r = L.buttons.find(b => b.id === which);
+            }
             else if (kind === "close") r = L.close;
             else if (L[kind] && typeof L[kind].x === "number") r = L[kind];
             if (!r) return null;
@@ -1612,7 +2023,7 @@
                 if (Array.isArray(ids)) {
                     if (ids.length === 1) {
                         Sheet.open(ids[0]);
-                    } else {
+                    } else if (ids.length > 1) {
                         Sheet.close();
                     }
                 }
@@ -1663,7 +2074,8 @@
     Scene_Boot.prototype.start = function() {
         _Scene_Boot_start.call(this);
         installWraps();
-        if (window.UF.Test && UF.Test.active) registerChecks();
+        if (window.UF && UF.Test && UF.Test.write) UF.Test.write("DEBUG_SHEET: Scene_Boot.start called");
+        if (window.UF && UF.Test && UF.Test.active) registerChecks();
     };
 
     //-------------------------------------------------------------------------
@@ -1856,13 +2268,18 @@
         await clickCell(col.x, col.y);
         const openedOnCol = Sheet.isOpen() && Sheet.subject().kind === "unit" && Sheet.subject().unitId === col.id;
         await waitDrawn();
+        const showInventoryTab = () => {
+            if (win && typeof win.switchTab === "function") win.switchTab(1);
+        };
+        showInventoryTab();
+        await waitDrawn();
         await t.waitFrames(2);
         let m = Sheet.model(), L = Sheet.layout();
         const inv = I.inventoryOf(col.id);
         const shown = m ? m.grid.slots.filter(Boolean) : [];
         const sameStacks = !!m && shown.length === inv.length && inv.every((it, i) => m.grid.slots[i] && m.grid.slots[i].itemId === it.id && m.grid.slots[i].count === it.count && m.grid.slots[i].typeId === it.type)
             && inv.length === col.data.inventory.length && inv.every((it, i) => col.data.inventory[i] === it.id);
-        const gridDrawn = !!L && L.grid.slots.map(r => filled(r));
+        const gridDrawn = !!L && !!L.grid && L.grid.slots.map(r => filled(r));
         const gridPixelsOk = !!gridDrawn && gridDrawn.slice(0, inv.length).every(Boolean) && gridDrawn.slice(inv.length).every(v => !v);
         const eq = m && m.equipment ? Object.fromEntries(m.equipment.map(e => [e.slot, e])) : {};
         const weaponSlot = eq.mainHand || eq.weapon;
@@ -1882,7 +2299,6 @@
         const needsOk = !!m && m.needs === null && m.mood === null;
         const faceOk = !!m && !!L && Sheet.opaqueCount(L.picture) >= 1000;
         const placed = panelPlaced();
-        const showInventoryTab = () => {};
         await t.waitFrames(2);
         const colDrop = Sheet.screenRect("button", "drop");
         await shot("colonist");
@@ -2213,3 +2629,4 @@
         Sheet.close();
     }
 })();
+

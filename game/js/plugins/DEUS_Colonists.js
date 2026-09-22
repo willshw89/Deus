@@ -265,7 +265,7 @@
         return c ? simulationUnits().filter(u => colonyState(u) === c) : [];
     };
     const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
-    const isColonist = u => !!u && !!u.data && u.data.kind === "colonist" && u.data.faction === factionId();
+    const isColonist = u => !!u && !!u.data && (u.data.kind === "colonist" || (u.data.founder && u.data.faction === factionId())) && u.data.faction === factionId();
     const isSettler = u => !!(u && u.data && !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_"))) && (isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder)));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
     let allFactionPeopleCache = null;
@@ -611,7 +611,13 @@
         return "Miserable";
     }
     function addThought(unit, text, strength) {
-        return null;
+        if (!unit || !unit.data || !text) return null;
+        unit.data.thoughts = unit.data.thoughts || [];
+        const score = typeof strength === "number" ? strength : 0;
+        const entry = { text, score, ticks: (window.UF && UF.Time && UF.Time.Engine) ? UF.Time.Engine.ticks : 0 };
+        unit.data.thoughts.unshift(entry);
+        if (unit.data.thoughts.length > 20) unit.data.thoughts.pop();
+        return entry;
     }
 
     //-------------------------------------------------------------------------
@@ -1885,6 +1891,18 @@
         });
 
         if (!childUnit) return null;
+        const Dnd = window.UF && UF.Dnd5e;
+        if (Dnd && typeof Dnd.rollAbilityScores === "function") {
+            childUnit.data.stats = Dnd.rollAbilityScores(st.seed, childUnit.id, childUnit.data.species, "child");
+            childUnit.data.dnd = Dnd.assignClass(childUnit.data.stats, st.seed, childUnit.id);
+            childUnit.data.dndClass = childUnit.data.dnd.id;
+            childUnit.data.className = childUnit.data.dnd.name;
+            childUnit.data.hitDie = childUnit.data.dnd.hitDie;
+            childUnit.data.hpMax = childUnit.data.dnd.hpMax;
+            childUnit.data.hp = childUnit.data.dnd.hp;
+            childUnit.data.ac = childUnit.data.dnd.ac;
+            childUnit.data.savingThrows = childUnit.data.dnd.savingThrows;
+        }
         if (childBed) {
             childBed.unitId = childUnit.id;
             childUnit.data.bed = { area: copyArea(mother.area), x: childBed.x, y: childBed.y, z: zOf(mother) };

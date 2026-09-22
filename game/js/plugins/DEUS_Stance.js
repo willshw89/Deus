@@ -403,8 +403,7 @@
         if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== selectAnchorY) sprite.anchor.set(0.5, selectAnchorY);
         sprite.x = ch.screenX();
         sprite.y = feetY(ch, cells);
-        const chZ = characterSprite && typeof characterSprite.z === "number" ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : footY(ch));
-        sprite.z = Math.min(chZ - 10, markerZ(sprite.y) + 1); // strictly below the unit sprite
+        sprite.z = 1; // strictly under all character sprites (z >= 3) and objects
         sprite.opacity = 255;
         return sprite;
     };

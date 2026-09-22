@@ -179,6 +179,7 @@
             await waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && ImageManager.isReady(),
                 30000, "the map scene to start");
             await waitFrames(60); // let the fade-in finish
+            write(`AVAILABLE SUITES: ${suites.map(s => s.name).join(", ")}`);
             const selected = suites.filter(s => Test.only ? s.name === Test.only : s.isDefault);
             if (selected.length === 0) return finish(2, `no suite named "${Test.only}"`);
             for (const s of selected) {

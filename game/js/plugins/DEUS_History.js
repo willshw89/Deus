@@ -1443,10 +1443,10 @@
 
     /**
      * Second-by-second living world history simulation (1-200 AD, user directives 2026-09-20).
-     * Pushes through elapsed simulation time second-by-second (beat-by-beat) from Year 1 founders
+     * Pushes through elapsed simulation time second-by-second from Year 1 founders
      * around the central campfire to targetYear.
-     * Cadence (VISION V102 & V46): 1 in-game day = 1 year = 240 real simulation seconds (beats).
-     * 1 beat = 6 game minutes ($ufTime.advanceMinute(6)).
+     * Cadence: 1 in-game day = 1 year = 240 real simulation seconds.
+     * 1 second = 6 game minutes ($ufTime.advanceMinute(6)).
      */
     History.iterateWorldHistory = function(state, targetYears, opts = {}) {
         const st = state || (window.UF && UF.World && UF.World.state);
@@ -2147,15 +2147,15 @@
             return true;
         };
 
-        // Work pacing: 1 house completes every ~200-240 work beats (~1 in-game year of cooperative labor)
-        const WORK_BEATS_PER_HOUSE = 200;
-        const WORK_BEATS_PER_SHARED = 120; // 8 founders cooperatively finish shared lodge on Day 1
+        // Work pacing: 1 house completes every ~200-240 work seconds (~1 in-game year of cooperative labor)
+        const WORK_SECONDS_PER_HOUSE = 200;
+        const WORK_SECONDS_PER_SHARED = 120; // 8 founders cooperatively finish shared lodge on Day 1
         let workProgress = 0;
 
-        // Iterate second-by-second (beat-by-beat)
-        for (let beat = 1; beat <= totalSeconds; beat++) {
-            const year = 1 + Math.floor(beat / 240);
-            const hour = Math.floor(((beat * 6) % 1440) / 60);
+        // Iterate second-by-second
+        for (let sec = 1; sec <= totalSeconds; sec++) {
+            const year = 1 + Math.floor(sec / 240);
+            const hour = Math.floor(((sec * 6) % 1440) / 60);
 
             // 1. Advance game clock and engine ticks
             if (window.$ufTime) {
@@ -2175,7 +2175,7 @@
             }
 
             // 4. Seasonal reproduction check (every 60s = 1 season = 6 hours)
-            if (beat % 60 === 0) {
+            if (sec % 60 === 0) {
                 stepFactionReproduction();
                 // Seasonal conception check for married couples across settlements
                 const allUnits = (internal.allFactionPeople && internal.allFactionPeople()) || (W && W.units()) || [];
@@ -2191,7 +2191,7 @@
 
                             const pop = (internal.factionPopulation && internal.factionPopulation(u.data.faction)) || 8;
                             const chance = (internal.conceptionChance && internal.conceptionChance(pop)) || 0.95;
-                            const rng = mulberry32(hash32(st.seed, 0x9b17, u.id, beat));
+                            const rng = mulberry32(hash32(st.seed, 0x9b17, u.id, sec));
                             if (rng() < chance * 0.35) {
                                 const dur = (internal.gestationSeconds && internal.gestationSeconds(pop)) || 45;
                                 u.data.pregnancy = {
@@ -2208,7 +2208,7 @@
             }
 
             // 5. Immigration check (every 480s = 2 in-game years)
-            if (beat % 480 === 0) {
+            if (sec % 480 === 0) {
                 stepImmigration();
                 for (const u of (W && W.units ? W.units() : [])) {
                     if (u && u.data && !u.data.actions) initUnitPhysicalState(u);
@@ -2235,14 +2235,14 @@
 
                     if (hasHome) {
                         // Sleeping in private bed by indoor domestic hearth
-                        if (beat % 60 === 0 && u.data.thoughts) {
-                            u.data.thoughts.unshift({ text: "Slept in my own bed.", score: 12, ticks: beat });
+                        if (sec % 60 === 0 && u.data.thoughts) {
+                            u.data.thoughts.unshift({ text: "Slept in my own bed.", score: 12, ticks: sec });
                             if (u.data.thoughts.length > 8) u.data.thoughts.pop();
                         }
                     } else {
                         // Sleeping warmly by the central campfire
-                        if (beat % 60 === 0 && u.data.thoughts) {
-                            u.data.thoughts.unshift({ text: "Slept warmly by the fire.", score: 10, ticks: beat });
+                        if (sec % 60 === 0 && u.data.thoughts) {
+                            u.data.thoughts.unshift({ text: "Slept warmly by the fire.", score: 10, ticks: sec });
                             if (u.data.thoughts.length > 8) u.data.thoughts.pop();
                         }
                     }
@@ -2255,7 +2255,7 @@
                 const adults = livingPeople.filter(u => u && u.data && !u.data.dead && Number.isFinite(u.data.age) && u.data.age >= 15);
 
                 for (const u of adults) {
-                    const uSeed = hash32(st.seed, u.id, beat);
+                    const uSeed = hash32(st.seed, u.id, sec);
                     const rng = mulberry32(uSeed);
                     const actionRoll = rng();
 
@@ -2295,13 +2295,13 @@
                     }
                 }
 
-                // Periodic wildlife & wilderness combat encounter (every 120 beats = twice a year)
-                if (beat % 120 === 0 && adults.length > 0) {
-                    const cIdx = Math.floor(mulberry32(hash32(st.seed, 0x5a1b, beat))() * adults.length);
+                // Periodic wildlife & wilderness combat encounter (every 120 seconds = twice a year)
+                if (sec % 120 === 0 && adults.length > 0) {
+                    const cIdx = Math.floor(mulberry32(hash32(st.seed, 0x5a1b, sec))() * adults.length);
                     const defender = adults[cIdx];
                     if (defender && !defender.data.dead) {
                         totalCombatRounds++;
-                        const cRng = mulberry32(hash32(st.seed, 0x117a, defender.id, beat));
+                        const cRng = mulberry32(hash32(st.seed, 0x117a, defender.id, sec));
                         // Threat attacks defender: OSRS accuracy roll 0..A vs defence roll 0..D
                         const beastAtk = 8;
                         const beastAtkRollMax = (beastAtk + 8) * 64;
@@ -2317,7 +2317,7 @@
                             const dmg = Math.floor(cRng() * (beastMaxHit + 1)) || 1;
                             defender.data.hp = Math.max(0, (defender.data.hp || 20) - dmg);
                             defender.data.wounds = defender.data.wounds || [];
-                            defender.data.wounds.push({ type: "bite", damage: dmg, beat, year });
+                            defender.data.wounds.push({ type: "bite", damage: dmg, sec, year });
                             gainSkillXp(defender, "defence", 16);
                             gainSkillXp(defender, "hitpoints", Math.round(dmg * 5.33));
 
@@ -2512,7 +2512,7 @@
         st.history.structures = structuresList;
         History.lastSettle = summary;
 
-        console.log(`UF_History: Second-by-second history iterated from Year 1 to Year ${targetYears} (${totalSeconds} beats in ${(now() - started).toFixed(0)} ms): `
+        console.log(`UF_History: Second-by-second history iterated from Year 1 to Year ${targetYears} (${totalSeconds} seconds in ${(now() - started).toFixed(0)} ms): `
             + `${housesBuilt} homesteads built around campfire, ${hearthsPlaced} indoor hearths, ${bedsPlaced} beds, ${st.history.events.length} chronicle events.`);
 
         return summary;
@@ -2534,19 +2534,47 @@
     // A people sheet entry is "Name" or { name, index } (the stock-art catalog).
     const imageSpec = img => (typeof img === "string" ? { characterName: img, characterIndex: 0 } : img && typeof img === "object" ? { characterName: String(img.name || img.characterName || ""), characterIndex: (img.index !== undefined ? img.index : img.characterIndex) | 0 } : { characterName: "", characterIndex: 0 });
 
-    // The catalog id of the camp's fire: the founding site kind's centre piece (sites.kinds.camp.center, the campfire).
-    const campFireId = () => {
-        const kinds = (History.sitesConfig() && History.sitesConfig().kinds) || {};
-        return (kinds[foundingConfig().kind] || {}).center || "campfire";
-    };
+    // The catalog id of the camp's center: the 64-slot wooden chest stockpile.
+    const campFireId = () => "chest_wood";
+
+    function seedStarterChest(cont) {
+        const I = window.UF && UF.Items;
+        if (!I || !cont) return;
+        // 72 hours food for 8 founders (48 rations) + materials for 5x5 shelter, door, 8 beds, indoor hearth, 2 water vessels
+        const starterKit = [
+            { type: "meat_cooked", count: 48 }, // 72 hours food
+            { type: "log", count: 20 },         // Shelter walls & structure
+            { type: "door_wood", count: 1 },    // Door for shelter
+            { type: "straw", count: 16 },       // 8 beds (2 straw each)
+            { type: "stone", count: 3 },        // Hearth / indoor fire
+            { type: "jug", count: 2 }           // Water containers
+        ];
+        for (const spec of starterKit) {
+            let itType = spec.type;
+            if (!I.type(itType)) {
+                if (itType === "door_wood") itType = "log";
+                else if (itType === "jug") itType = "pottery";
+                else if (itType === "stone" && I.type("rocks_small")) itType = "rocks_small";
+            }
+            if (!I.type(itType)) continue;
+            const t = I.type(itType);
+            const maxStack = Math.max(1, Number(t.stack) || 20);
+            let left = spec.count;
+            while (left > 0) {
+                const n = Math.min(left, maxStack);
+                const item = I.create(itType, n, { container: cont.id });
+                if (item && !cont.items.includes(item.id)) {
+                    cont.items.push(item.id);
+                }
+                left -= n;
+            }
+        }
+    }
 
     /**
-     * The campfire of every year-1 camp (VISION V4, 2026-09-19 afternoon): the nine cells of the camp's block are
-     * cleared of any object, then the campfire goes on the centre cell, written like a built object (UF.Objects.setIn:
-     * an object diff, saved with the world; UF.World.setObject when UF_Objects isn't loaded). The catalog's campfire has
-     * no unlit state: it is always burning (UF_Fire's rule for tag "fire" is a contained source that never burns out,
-     * and UF_Ambient-style flames are drawn from the same tag), so placing it is lighting it. Live world only.
-     * Records history.founders[factionId].camp = { x, y, fire, cleared }. Returns how many campfires stand.
+     * The central stockpile chest of every year-1 camp: the nine cells of the camp's block are
+     * cleared of any object, then the wooden chest goes on the centre cell, written like a built object.
+     * Creates a 64-slot physical container in UF.Containers and seeds it with the starter kit.
      */
     function placeCamps(state) {
         const W = UF.World, h = state.history, cat = catalog() || {};
@@ -2568,10 +2596,28 @@
             }
             const ok = !!write(area, site.x, site.y, fireId);
             if (ok) placed++;
-            rec.camps.push({ site: site.id, area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site), fire: ok ? fireId : null, cleared });
-            site.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
-            f.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
-            rec.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) };
+            const z = levelOf(site);
+            rec.camps.push({ site: site.id, area: { ...site.area }, x: site.x, y: site.y, z, fire: ok ? fireId : null, cleared });
+            site.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z };
+            f.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z };
+            rec.focalFire = { area: { ...site.area }, x: site.x, y: site.y, z };
+            site.focalChest = { area: { ...site.area }, x: site.x, y: site.y, z };
+            f.focalChest = { area: { ...site.area }, x: site.x, y: site.y, z };
+            rec.focalChest = { area: { ...site.area }, x: site.x, y: site.y, z };
+
+            // Create container in UF.Containers and seed starter inventory
+            const Cont = window.UF && UF.Containers;
+            if (Cont && typeof Cont.create === "function") {
+                const cont = Cont.create("chest_wood", { area, x: site.x, y: site.y, z }, {
+                    maxSlots: 32,
+                    maxWeight: 500.0,
+                    owner: { kind: "faction", id: f.id },
+                    policy: { name: "Central Stockpile Chest" }
+                });
+                if (cont) {
+                    seedStarterChest(cont);
+                }
+            }
             }
             rec.camp = rec.camps[0];
         }
@@ -2688,8 +2734,10 @@
         const leaders = {};
         for (const q of orderOut) {
             const { f, site, rec, p } = q;
+            const F = window.UF && UF.Factions;
+            const playerId = F && typeof F.playerId === "function" ? F.playerId() : "player";
             const data = {
-                kind: "person", faction: f.id, species: f.species, ai: "settlement", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
+                kind: f.id === playerId ? "colonist" : "person", faction: f.id, species: f.species, ai: "settlement", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: (site.radius || 4) + 2, site: site.id,
                 founder: true, born: 1 - p.age, age: p.age, stage: stageOf(p.age), gender: p.gender, rank: p.leader ? 1 : 0, superior: null,
                 variation: q.variation,
                 familyId: p.familyId || null, lineageId: p.lineageId || null, surname: p.surname || null,
@@ -2708,6 +2756,17 @@
                 }
             }
             u.data.stats = rollStats(state.seed, u.id, f.species, u.data.stage);
+            const Dnd = window.UF && UF.Dnd5e;
+            if (Dnd && typeof Dnd.assignClass === "function") {
+                u.data.dnd = Dnd.assignClass(u.data.stats, state.seed, u.id);
+                u.data.dndClass = u.data.dnd.id;
+                u.data.className = u.data.dnd.name;
+                u.data.hitDie = u.data.dnd.hitDie;
+                u.data.hpMax = u.data.dnd.hpMax;
+                u.data.hp = u.data.dnd.hp;
+                u.data.ac = u.data.dnd.ac;
+                u.data.savingThrows = u.data.dnd.savingThrows;
+            }
             rec.units.push({ id: u.id, site: site.id, z: levelOf(site), x: u.x, y: u.y, dir: u.dir, ring: q.ring, gender: p.gender, within: Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= reach });
             if (p.leader) {
                 leaders[f.id] = u.id;
@@ -2876,6 +2935,17 @@
                     snapToFree: 8 // never inside a wall piece, a tree or water (user rule 2026-09-18); UF_World finds the nearest free cell
                 });
                 u.data.stats = rollStats(state.seed, u.id, f.species, stage);
+                const Dnd = window.UF && UF.Dnd5e;
+                if (Dnd && typeof Dnd.assignClass === "function") {
+                    u.data.dnd = Dnd.assignClass(u.data.stats, state.seed, u.id);
+                    u.data.dndClass = u.data.dnd.id;
+                    u.data.className = u.data.dnd.name;
+                    u.data.hitDie = u.data.dnd.hitDie;
+                    u.data.hpMax = u.data.dnd.hpMax;
+                    u.data.hp = u.data.dnd.hp;
+                    u.data.ac = u.data.dnd.ac;
+                    u.data.savingThrows = u.data.dnd.savingThrows;
+                }
                 if (!u.data.callings || u.data.callings.length < 3) {
                     const Callings = getCallings();
                     if (Callings && Callings.assignCallings) {

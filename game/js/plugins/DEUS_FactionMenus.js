@@ -240,11 +240,11 @@
 
     Scene_Title.prototype.newGameSetupWindowRect = function() {
         const ww = 350;
-        const wh = 270;
+        const wh = 230;
         // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
         const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
         const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
-        const wy = 258;
+        const wy = 270;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -337,7 +337,7 @@
         }
 
         maxItems() {
-            return 5;
+            return 4;
         }
 
         itemHeight() {
@@ -366,13 +366,11 @@
 
         setFog(val) {
             this._fogEnabled = (val === true || String(val).toLowerCase() === "enabled" || String(val).toLowerCase() === "on");
-            this.redrawItem(2);
         }
 
         toggleFog() {
             this._fogEnabled = !this._fogEnabled;
             SoundManager.playCursor();
-            this.redrawItem(2);
         }
 
         setFaction(factionName) {
@@ -478,23 +476,13 @@
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
                 this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
             } else if (index === 2) {
-                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
-                this.drawText("Fog of War", rect.x + 8, rect.y, 110, "left");
-
-                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
-                this.drawText("◄", rect.x + 130, rect.y, 24, "center");
-                this.changeTextColor(isSelected ? "#ffffff" : (this._fogEnabled ? "#a0f0ff" : "#94a3b8"));
-                this.drawText(this._fogEnabled ? "Enabled" : "Disabled", rect.x + 155, rect.y, rect.width - 185, "center");
-                this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
-                this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
-            } else if (index === 3) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
-            } else if (index === 4) {
+            } else if (index === 3) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
@@ -531,13 +519,11 @@
                     this.changeYear(-1);
                 }
             } else if (hitIndex === 2) {
-                this.toggleFog();
-            } else if (hitIndex === 3) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (hitIndex === 4) {
+            } else if (hitIndex === 3) {
                 this.processCancel();
             }
         }
@@ -547,8 +533,6 @@
                 this.nextFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? 10 : 1);
-            } else if (this.index() === 2) {
-                this.toggleFog();
             } else {
                 super.cursorRight(wrap);
             }
@@ -559,8 +543,6 @@
                 this.prevFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? -10 : -1);
-            } else if (this.index() === 2) {
-                this.toggleFog();
             } else {
                 super.cursorLeft(wrap);
             }
@@ -609,13 +591,11 @@
             } else if (this.index() === 1) {
                 this.changeYear(1);
             } else if (this.index() === 2) {
-                this.toggleFog();
-            } else if (this.index() === 3) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (this.index() === 4) {
+            } else if (this.index() === 3) {
                 this.processCancel();
             }
         }
