@@ -955,8 +955,9 @@
         const d = dims(state);
         const size = ctx.width, cells = size * size;
         const gx0 = ctx.areaX * size, gy0 = ctx.areaY * size;
+        const z = ctx.z !== undefined ? ctx.z : 0;
         const wm = waterModels(state);
-        if (window.UF.Tiles && UF.Tiles.TILESET_ID) ctx.map.tilesetId = UF.Tiles.TILESET_ID;
+        if (z === 0 && window.UF.Tiles && UF.Tiles.TILESET_ID) ctx.map.tilesetId = UF.Tiles.TILESET_ID;
 
         // 1. Classify every cell once.
         const biome = new Uint8Array(cells), ground = new Uint8Array(cells), water = new Uint8Array(cells);
@@ -1006,25 +1007,28 @@
         };
 
         // 2. Tiles: water autotiles join any water; ground autotiles join the same ground kind (biome borders get outlines).
-        const shapes = shapeTable();
-        const waterBases = m.waterKeys.map(k => autotileBase(cat.water.surface[k]));
-        const groundBases = m.groundIds.map((id, k) => (window.UF.Tiles && UF.Tiles.groundBase(id) !== null ? UF.Tiles.groundBase(id) : Tilemap.TILE_ID_A2 + k * 48));
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const i = y * size + x;
-                let mask = 0;
-                if (water[i]) {
-                    for (let k = 0; k < 8; k++) if (waterAt(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
-                    ctx.setTile(x, y, 0, waterBases[water[i] - 1] + shapes[mask]);
-                } else {
-                    const g = ground[i];
-                    for (let k = 0; k < 8; k++) {
-                        const ng = groundAt(x + NB[k][0], y + NB[k][1]);
-                        const joins = ng === g || (window.UF && UF.Tiles && UF.Tiles.joins && UF.Tiles.joins(m.groundIds[ng], m.groundIds[g]));
-                        if (joins) mask |= NB[k][2];
+        // Painted by uf_worldgen on z = 0 only (paintLevel owns levels other than ground).
+        if (z === 0) {
+            const shapes = shapeTable();
+            const waterBases = m.waterKeys.map(k => autotileBase(cat.water.surface[k]));
+            const groundBases = m.groundIds.map((id, k) => (window.UF.Tiles && UF.Tiles.groundBase(id) !== null ? UF.Tiles.groundBase(id) : Tilemap.TILE_ID_A2 + k * 48));
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const i = y * size + x;
+                    let mask = 0;
+                    if (water[i]) {
+                        for (let k = 0; k < 8; k++) if (waterAt(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
+                        ctx.setTile(x, y, 0, waterBases[water[i] - 1] + shapes[mask]);
+                    } else {
+                        const g = ground[i];
+                        for (let k = 0; k < 8; k++) {
+                            const ng = groundAt(x + NB[k][0], y + NB[k][1]);
+                            const joins = ng === g || (window.UF && UF.Tiles && UF.Tiles.joins && UF.Tiles.joins(m.groundIds[ng], m.groundIds[g]));
+                            if (joins) mask |= NB[k][2];
+                        }
+                        ctx.setTile(x, y, 0, groundBases[g] + shapes[mask]);
+                        if (flags[i] & FLAG_PEAK) ctx.setTile(x, y, 5, PEAK_REGION);
                     }
-                    ctx.setTile(x, y, 0, groundBases[g] + shapes[mask]);
-                    if (flags[i] & FLAG_PEAK) ctx.setTile(x, y, 5, PEAK_REGION);
                 }
             }
         }
@@ -1049,7 +1053,7 @@
         const clearRadius = start ? (start.clearRadius || 0) : 0;
         const cx = ctx.center.x, cy = ctx.center.y;
         const inClearing = (x, y) => clearRadius > 0 && (x - cx) ** 2 + (y - cy) ** 2 <= clearRadius * clearRadius;
-        if (start) {
+        if (z === 0 && start) {
             if (start.note) ctx.map.note = start.note;
             if (start.displayName) ctx.map.displayName = start.displayName;
             if (!window.UF.Colonists) {
@@ -1082,15 +1086,23 @@
         const objects = ctx.objects;
         const counts = {};
         const biomeCells = {};
+        const L = window.UF && UF.Levels;
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 const i = y * size + x;
+                const gx = gx0 + x, gy = gy0 + y;
                 biomeCells[m.biomeIds[biome[i]]] = (biomeCells[m.biomeIds[biome[i]]] || 0) + 1;
                 if (objects[i] || (siteMask && siteMask[i]) || (start && inClearing(x, y)) || ctx.isTemplateCell(x, y)) continue;
                 if (flags[i] & FLAG_PEAK) continue;
+                // Anchor surface objects to actual surface elevation (S === z)
+                if (L && typeof L.surfaceElevationAt === "function") {
+                    const S = L.surfaceElevationAt(gx, gy, seed);
+                    if (S !== z) continue;
+                } else if (z !== 0) continue;
+                const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
+                if (isRamp) continue; // Don't place on ramps
                 const table = plantTable(m, biome[i], m.alignTiers[align[i]].id);
                 const list = water[i] ? table.water : table.land;
-                const gx = gx0 + x, gy = gy0 + y;
                 for (let k = 0; k < list.length; k++) {
                     const p = list[k];
                     if (!water[i] && waterDist[i] <= p.avoidWater) continue;
@@ -1103,12 +1115,14 @@
                 }
             }
         }
-        for (const s of sites) {
-            for (const piece of s.pieces || []) {
-                const o = m.objectById.get(piece.object);
-                if (!o || !inside(s.x + piece.dx, s.y + piece.dy)) continue;
-                ctx.setObject(s.x + piece.dx, s.y + piece.dy, o.typeId);
-                counts[piece.object] = (counts[piece.object] || 0) + 1;
+        if (z === 0) {
+            for (const s of sites) {
+                for (const piece of s.pieces || []) {
+                    const o = m.objectById.get(piece.object);
+                    if (!o || !inside(s.x + piece.dx, s.y + piece.dy)) continue;
+                    ctx.setObject(s.x + piece.dx, s.y + piece.dy, o.typeId);
+                    counts[piece.object] = (counts[piece.object] || 0) + 1;
+                }
             }
         }
 
@@ -1117,7 +1131,7 @@
         //    Placed on free land in the ring radius[0]..radius[1], never in a site disc (so never on a camp's nine cells).
         //    Without factions, or for a save made before 2026-09-19, around the start as before.
         const kit = cat.start && cat.start.kit ? WorldGen.kitConfig() : null;
-        const kitCentres = kit && !ctx.templateRect ? WorldGen.kitCentres(ctx.areaX, ctx.areaY) : [];
+        const kitCentres = kit && !ctx.templateRect ? WorldGen.kitCentres(ctx.areaX, ctx.areaY, z) : [];
         const [r0, r1] = (kit && kit.radius) || [5, 20];
         const kitLog = [];
         kitCentres.forEach((c, ci) => {
@@ -1135,6 +1149,13 @@
                         const dist = Math.hypot(x - c.x, y - c.y);
                         if (dist > r1) continue;
                         const i = y * size + x;
+                        const gx = ctx.areaX * size + x, gy = ctx.areaY * size + y;
+                        if (L && typeof L.surfaceElevationAt === "function") {
+                            const S = L.surfaceElevationAt(gx, gy, seed);
+                            if (S !== z) continue;
+                        } else if (z !== 0) continue;
+                        const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
+                        if (isRamp) continue;
                         if (typeIds.has(objects[i])) have++;
                         else if (dist >= r0 && objects[i] === 0 && !water[i] && !(flags[i] & FLAG_PEAK) && waterDist[i] > (o.entry.avoidWater | 0)
                             && !inClearing(x, y) && !(siteMask && siteMask[i]) && !ctx.isTemplateCell(x, y)) {
@@ -1259,7 +1280,7 @@
 
     if (window.UF.World) {
         UF.World.unregisterGenerator("df_wilderness_generator"); // superseded (UF_ProcGen, commit a09d3fd)
-        UF.World.registerGenerator("uf_worldgen", generate, 10);
+        UF.World.registerGenerator("uf_worldgen", generate, 10, { levels: [0, 1, 2] });
         UF.World.registerGenerator("uf_underground_resources", generateUnderground, 20, { levels: [-1, -2] });
     }
 

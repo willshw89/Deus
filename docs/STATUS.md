@@ -7,7 +7,27 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Gemini**: `DEUS-TSK-GEMINI-06` True 3D Volumetric Landscape & Upper-Z Terrain Generation (`game/js/plugins/DEUS_Levels.js`, `game/js/plugins/DEUS_World.js`, `game/js/plugins/DEUS_WorldGen.js`, `game/js/plugins/DEUS_Objects.js`, `tools/test_upper_elevation_terrain.js`).
+- (none)
+
+## DEUS-TSK-GEMINI-06 — True 3D Volumetric Landscape & Upper-Z Terrain Generation (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Levels.js`: Version bump to `GEN = 4`. Deterministic elevation model calibrated with upland noise (`uf.levels.plateau`, scale 48) combined with continental and relief noise to generate natural, seed-derived uplands and a substantial contiguous Z+2 plateau (>= 1,500 cells; observed 15,036 contiguous surface cells on seed 20260923). Starting settlement clearing ($r \le 12$) strictly preserved at datum $S = 0$. Exported flexible `shapeAt` (returning canonical string name) and `shapeCodeAt` (numeric 0..7).
+  - `game/js/plugins/DEUS_WorldGen.js`: Registered levels `[0, 1, 2]` for generator `uf_worldgen`. Confined ground/water autotile painting to $z === 0$ (preserving upper-level geometry painted by `paintLevel`). Anchored all surface objects (trees, plants, rocks) and starter kit items to actual surface elevation ($S(gx, gy) === z$) and prohibited placement on natural ramp cells (`shape !== "ramp"` and `shape !== 4`).
+  - `game/js/plugins/DEUS_World.js`: Version bump to 4 in `newWorld`. Upgraded pathfinding and navigation to true 3D: A* search operates across $5 \times size \times size$ nodes when `is3D` (cross-Z paths or version >= 4), utilizing admissible 3D heuristic `Math.max(hHorz, az * STEP_COST)` with bidirectional ramp/stair relaxation. Cross-Z goal routing permitted in `sendUnit`, `localTarget`, and `planFor`. Physical unit traversal (`stepAlongPath` and `stepOffscreenAlongPath`) decodes 3D coordinates, invoking `World.moveUnitToLevel(u, nz, nx, ny, { keepPath: true })` without teleportation, preserving unit state and camera follow. `World.walkable` enforces `UF.Levels.shapeAt` checks, blocking solid rock and open air. Legacy 2D behavior fully preserved for `version <= 3` saves.
+  - `tools/test_upper_elevation_terrain.js`: Comprehensive 20-check verification suite covering determinism, flat clearing, volumetric layer integrity, upper Z presence, plateau size, natural ramps, surface object anchoring, 3D pathfinding, unit physical traversal, cliff blocking, elevation mutation persistence, and backward compatibility.
+- **Checks observed**:
+  - `node tools/test_upper_elevation_terrain.js`: **20 passed, 0 failed (exit 0)**.
+  - Rule 4 negative control mutants observed failing (all exited 1):
+    - `--mutant=flat_terrain`: **FAIL (exit 1)** - 12 passed, 8 failed (detects missing Z+1/Z+2 terrain and plateau size).
+    - `--mutant=open_air`: **FAIL (exit 1)** - 13 passed, 7 failed (detects volumetric integrity violations where z <= S is open air).
+    - `--mutant=no_ramps`: **FAIL (exit 1)** - 16 passed, 4 failed (detects absence of traversable ramps between Z levels).
+    - `--mutant=teleport`: **FAIL (exit 1)** - 18 passed, 2 failed (detects artificial teleportation without walking intermediate levels).
+    - `--mutant=cliff_pass`: **FAIL (exit 1)** - 19 passed, 1 failed (detects sheer cliff penetration without ramps/stairs).
+  - Regressions:
+    - `node tools/test_autonomous_settlement_closure.js`: **22 passed, 0 failed (exit 0)** on default production clock (600 updates/hour). Autonomous shelter construction loop, food recovery, and survival needs remain 100% operational with volumetric upper elevation terrain active.
+    - `node tools/test_autonomous_work_recovery.js`: **13 passed, 0 failed (exit 0)**.
+    - `node tools/test_vertical_worldgen_proof.js`: **15 passed, 1 failed, 15 skipped** (retained 1 expected fluid-landing failure documented in commit 4eebef2; all volumetric columns and cave passages pass).
 
 ## DEUS-TSK-FABLE-08 — Production-Clock Autonomous Colony Closure (2026-09-23)
 - **Status**: `FIRST SELF-MAINTAINING DEUS COLONY — PASS` (Commit `5d3ae7f`; Headless/automated PASS; native F5 multi-day observation still not rerun).

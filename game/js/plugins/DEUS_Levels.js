@@ -53,7 +53,7 @@
     "use strict";
 
     const TILESET_ID = 92;
-    const GEN = 3;                        // a save keeps its baseline generator version; version 1 and 2 are preserved below
+    const GEN = 4;                        // a save keeps its baseline generator version; version 1, 2 and 3 are preserved below
     const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
     const LABELS = Object.freeze({ 2: "+2", 1: "+1", 0: "Ground", "-1": "-1", "-2": "-2" });
     const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });
@@ -621,9 +621,11 @@
             e = valueNoise(seed, saltElev, gx, gy, 64);
         }
 
+        const saltPlateau = hashString("uf.levels.plateau");
+        const upland = valueNoise(seed, saltPlateau, gx, gy, 48);
         const saltRelief = hashString("uf.levels.relief");
         const relief = valueNoise(seed, saltRelief, gx, gy, 18);
-        let eff = e + (relief - 0.5) * 0.20;
+        let eff = (e * 0.55 + upland * 0.45) + (relief - 0.5) * 0.15;
 
         // Smooth transition ring near camp (12 < r < 18)
         if (distToCamp < 18) {
@@ -631,8 +633,8 @@
             eff = eff * blend + 0.35 * (1 - blend);
         }
 
-        if (eff >= 0.72) return 2;
-        if (eff >= 0.52) return 1;
+        if (eff >= 0.58) return 2;
+        if (eff >= 0.44) return 1;
         return 0;
     }
 
@@ -2284,9 +2286,14 @@
         ref: (area, x, y, z) => ({ area: { x: area.x, y: area.y }, x: x | 0, y: y | 0, z: z === undefined ? zOf(area) : z }),
         sameLevel: (a, b) => !!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b),
         /** The shape name of a cell ("solid", "floor", "open", "ramp", "stairUp", "stairDown", "stairBoth"), "" outside the world. */
-        shapeAt: ref => {
-            const r = refOf(ref);
+        shapeAt: (...args) => {
+            const r = args.length >= 5 ? { ax: args[0], ay: args[1], x: args[2], y: args[3], z: args[4] } : refOf(args[0]);
             return SHAPE_NAMES[packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7] || "";
+        },
+        /** The numeric shape code of a cell (0..7). */
+        shapeCodeAt: (...args) => {
+            const r = args.length >= 5 ? { ax: args[0], ay: args[1], x: args[2], y: args[3], z: args[4] } : refOf(args[0]);
+            return packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7;
         },
         /** { shape, code, constructed, material, stratum } of a cell, or null outside the world. */
         cellAt: ref => {

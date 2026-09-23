@@ -419,7 +419,7 @@
         }
         const worldSize = 256;
         this.state = {
-            version: 3,
+            version: 4,
             seed: s,
             areasX: CONFIG.areasX,
             areasY: CONFIG.areasY,
@@ -1226,10 +1226,9 @@
      */
     World.sendUnit = function(id, goal) {
         const u = this.unit(id);
-        // The goal's level: goal.z, else goal.area.z, else the ground. A unit walks on its own level only: a goal on
-        // another level is refused here (false); UF_Levels routes units between levels.
+        // The goal's level: goal.z, else goal.area.z, else the ground.
         const gz = goal && goal.z !== undefined ? goal.z : zOf(goal && goal.area);
-        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, gz) || gz !== zOf(u)) return false;
+        if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, gz)) return false;
         if (unitMoveSpeed(u) === 0) return false;
         const Cond = window.UF && UF.Conditions;
         if (Cond) {
@@ -1431,14 +1430,16 @@
      * is on one level); its event leaves the screen or appears on it. Emits world:unitLevelChanged(unit, fromZ, toZ).
      * UF_Levels calls it for stairs, ramps and falls; tests call it directly.
      */
-    World.moveUnitToLevel = function(unit, z, x, y) {
+    World.moveUnitToLevel = function(unit, z, x, y, opts = {}) {
         const u = typeof unit === "object" ? unit : this.unit(unit);
         if (!u || !isLevel(z) || !this.state || this.state.units[u.id] !== u) return false;
         if (![x === undefined ? u.x : x, y === undefined ? u.y : y].every(c => Number.isInteger(c) && c >= 0 && c < this.state.size)) return false;
         const from = zOf(u);
-        forgetPath(u.id);
-        u.goal = null;
-        u.stuckFrames = 0;
+        if (!opts.keepPath) {
+            forgetPath(u.id);
+            u.goal = null;
+            u.stuckFrames = 0;
+        }
         if (this.isDisplayed(u)) despawnUnitEvent(u);
         u.z = z;
         offOcc = null;
@@ -1467,7 +1468,11 @@
         return added;
     };
 
-    const goalReached = u => goalDelta(u).dist === 0;
+    const goalReached = u => {
+        if (!u || !u.goal) return true;
+        if (u.goal.z !== undefined && u.goal.z !== zOf(u)) return false;
+        return goalDelta(u).dist === 0;
+    };
 
     // Units on levels that aren't on screen, by cell: built once per map update when an off-screen unit steps, kept
     // up to date as they step (two units never step onto one cell in the same update).
@@ -1518,8 +1523,9 @@
             p = planFor(u, u);
             if (!p) return;
         }
-        const size = World.state.size;
-        const here = u.y * size + u.x;
+        const size = World.state.size, n2 = size * size;
+        const curZ = zOf(u);
+        const here = p.is3D ? ((curZ + 2) * n2 + u.y * size + u.x) : (u.y * size + u.x);
         const left = p.cells.length - p.i;
         if (left < p.bestLeft) {
             p.bestLeft = left;
@@ -1533,9 +1539,28 @@
             return;
         }
         const next = p.cells[p.i];
-        const nx = next % size, ny = (next - nx) / size;
+        let nx, ny, nz;
+        if (p.is3D) {
+            const l = Math.floor(next / n2);
+            nz = l - 2;
+            const rem = next - l * n2;
+            nx = rem % size;
+            ny = (rem - nx) / size;
+        } else {
+            nz = curZ;
+            nx = next % size;
+            ny = (next - nx) / size;
+        }
+        if (nz !== curZ) {
+            World.moveUnitToLevel(u, nz, nx, ny, { keepPath: true });
+            p.i++;
+            p.fails = 0;
+            u.stuckFrames = 0;
+            return;
+        }
+        const here2D = u.y * size + u.x, next2D = ny * size + nx;
         const d = dirTo(u.x, u.y, nx, ny);
-        if (!d || !stepOpen(u, here, next, d)) {
+        if (!d || !stepOpen(u, here2D, next2D, d)) {
             p.stale = true;
             pathStats.replans++;
             return;
@@ -1847,7 +1872,7 @@
     // Search arrays, allocated once per grid size; a generation stamp marks what belongs to the current search.
     const AS = { n: 0, gen: 0 };
     function searchArrays(n) {
-        if (AS.n !== n) {
+        if (AS.n < n) {
             AS.n = n;
             AS.gen = 0;
             AS.g = new Int32Array(n);
@@ -1894,9 +1919,9 @@
      * round), allowPartial, resolveBlocked (default true), record, z (default area.z, else the ground) }. Returns
      * { cells: Int32Array (cell indices after the start, ending at `end`) | null, end, partial, expanded, ms, reason }.
      */
-    function planPath(area, sx, sy, gx, gy, opts) {
+    function planPath(area, sx, sy, gx, gy, opts = {}) {
         const t0 = performance.now();
-        const res = { cells: null, end: -1, partial: false, expanded: 0, ms: 0, regionMs: 0, reason: "" };
+        const res = { cells: null, end: -1, partial: false, expanded: 0, ms: 0, regionMs: 0, reason: "", is3D: false };
         const done = reason => {
             res.reason = reason;
             res.ms = performance.now() - t0;
@@ -1905,10 +1930,249 @@
             return res;
         };
         const st = World.state;
-        const z = opts.z !== undefined ? opts.z : zOf(area);
-        if (!st || !area || !World.inWorld(area.x, area.y, z)) return done("not in the world");
+        const sz = opts.z !== undefined ? opts.z : zOf(area);
+        const gz = opts.tz !== undefined ? opts.tz : sz;
+        if (!st || !area || !World.inWorld(area.x, area.y, sz) || !World.inWorld(area.x, area.y, gz)) return done("not in the world");
         const size = st.size, n = size * size;
         if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return done("outside the area");
+
+        const is3D = !!(opts.z3d || gz !== sz || (st.version >= 4));
+        if (is3D) {
+            res.is3D = true;
+            const totalNodes = 5 * n;
+            const enc3D = (x, y, z) => (z + 2) * n + (y * size + x);
+            const dec3D = c => {
+                const l = Math.floor(c / n);
+                const z = l - 2;
+                const rem = c - l * n;
+                const x = rem % size;
+                const y = (rem - x) / size;
+                return { x, y, z };
+            };
+
+            const tf = typeFlags(), D = typeTable.doors;
+            const unit = opts.unit ? (typeof opts.unit === "object" ? opts.unit : World.unit(opts.unit)) : null;
+
+            const gridsByZ = {};
+            function getGrid(levelZ) {
+                if (!gridsByZ[levelZ]) {
+                    const { map, flags } = areaMapOf(area.x, area.y, levelZ);
+                    gridsByZ[levelZ] = gridOf(map, flags);
+                }
+                return gridsByZ[levelZ];
+            }
+
+            const L = window.UF && UF.Levels;
+            const shapeAt = (x, y, z) => (L && typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(area.x, area.y, x, y, z) : (L && typeof L.shapeAt === "function" ? (L.shapeAt(area.x, area.y, x, y, z) === "floor" ? 2 : (L.shapeAt(area.x, area.y, x, y, z) === "ramp" ? 4 : (L.shapeAt(area.x, area.y, x, y, z) === "solid" ? 1 : 3))) : (z === 0 ? 2 : 3)));
+
+            const enterable = (x, y, z) => {
+                if (x < 0 || y < 0 || x >= size || y >= size || z < -2 || z > 2) return false;
+                const s = shapeAt(x, y, z);
+                if (s !== 2 && s < 4) return false;
+                const g = getGrid(z);
+                const i = y * size + x;
+                if (g.eff[i] === 0) return false;
+                if (D && (tf[g.objects[i]] & T_DOOR) !== 0 && !(unit && D.canUnitPass(unit, D.at({ x: area.x, y: area.y, z }, x, y)))) return false;
+                return true;
+            };
+
+            const s = enc3D(sx, sy, sz), goalNode = enc3D(gx, gy, gz);
+            const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
+
+            const eight = !fourWay();
+            let goals, hOff = 0;
+            if (enterable(gx, gy, gz)) goals = [goalNode];
+            else {
+                if (opts.resolveBlocked === false) return done("goal blocked");
+                hOff = eight ? DIAG_COST : STEP_COST;
+                goals = [];
+                for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+                    const nx = (gx + dx + size) % size, ny = (gy + dy + size) % size;
+                    if (enterable(nx, ny, gz)) goals.push(enc3D(nx, ny, gz));
+                }
+                if (eight) {
+                    for (const [dx, dy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
+                        const nx = (gx + dx + size) % size, ny = (gy + dy + size) % size;
+                        if (enterable(nx, ny, gz) && enterable(nx, gy, gz) && enterable(gx, ny, gz)) {
+                            goals.push(enc3D(nx, ny, gz));
+                        }
+                    }
+                }
+            }
+            goals = goals.filter(c => c !== avoid);
+            if (!goals.length) return done("goal walled in");
+            if (goals.includes(s)) {
+                res.cells = new Int32Array(0);
+                res.end = s;
+                return done("here");
+            }
+            if (!enterable(sx, sy, sz)) return done("start walled in");
+
+            const gen = searchArrays(totalNodes);
+            const G = AS.g, P = AS.parent, seen = AS.seen, closed = AS.closed, goalMark = AS.goal, hc = AS.heapCell, hk = AS.heapKey;
+            for (const c of goals) goalMark[c] = gen;
+
+            const hOf = (x, y, z) => {
+                let ax = Math.abs(x - gx), ay = Math.abs(y - gy);
+                if (ax > size / 2) ax = size - ax;
+                if (ay > size / 2) ay = size - ay;
+                const hHorz = eight
+                    ? STEP_COST * (ax + ay) - (2 * STEP_COST - DIAG_COST) * (ax < ay ? ax : ay)
+                    : STEP_COST * (ax + ay);
+                const az = Math.abs(z - gz);
+                const d = Math.max(hHorz, az * STEP_COST) - hOff;
+                return d > 0 ? d : 0;
+            };
+
+            let hn = 0;
+            const push = (c, key) => {
+                let k = hn++;
+                while (k > 0) {
+                    const p = (k - 1) >> 1;
+                    if (hk[p] <= key) break;
+                    hk[k] = hk[p];
+                    hc[k] = hc[p];
+                    k = p;
+                }
+                hk[k] = key;
+                hc[k] = c;
+            };
+            const pop = () => {
+                const top = hc[0], last = --hn;
+                if (last > 0) {
+                    const key = hk[last], c = hc[last];
+                    let k = 0;
+                    for (;;) {
+                        let ch = 2 * k + 1;
+                        if (ch >= last) break;
+                        if (ch + 1 < last && hk[ch + 1] < hk[ch]) ch++;
+                        if (hk[ch] >= key) break;
+                        hk[k] = hk[ch];
+                        hc[k] = hc[ch];
+                        k = ch;
+                    }
+                    hk[k] = key;
+                    hc[k] = c;
+                }
+                return top;
+            };
+
+            let from = s;
+            const relax = (j, gi) => {
+                if (closed[j] === gen || j === avoid) return;
+                if (seen[j] === gen && G[j] <= gi) return;
+                seen[j] = gen;
+                G[j] = gi;
+                P[j] = from;
+                const { x: jx, y: jy, z: jz } = dec3D(j);
+                push(j, (gi + hOf(jx, jy, jz)) * HEAP_TIE - gi);
+            };
+
+            G[s] = 0;
+            P[s] = -1;
+            seen[s] = gen;
+            push(s, hOf(sx, sy, sz) * HEAP_TIE);
+
+            const maxNodes = opts.maxNodes > 0 ? opts.maxNodes | 0 : PATHS.maxNodes;
+            const heapMax = hc.length - 4;
+            let found = -1, best = s, bestH = hOf(sx, sy, sz), capped = false, expanded = 0;
+
+            while (hn > 0) {
+                const i = pop();
+                if (closed[i] === gen) continue;
+                closed[i] = gen;
+                if (goalMark[i] === gen) {
+                    found = i;
+                    break;
+                }
+                if (expanded >= maxNodes || hn >= heapMax) {
+                    capped = true;
+                    break;
+                }
+                expanded++;
+                const { x, y, z } = dec3D(i);
+                const hi = hOf(x, y, z);
+                if (hi < bestH || (hi === bestH && G[i] < G[best])) {
+                    best = i;
+                    bestH = hi;
+                }
+
+                from = i;
+                const curCost = G[i];
+                const curShape = shapeAt(x, y, z);
+                const gEff = getGrid(z).eff;
+                const e = gEff[y * size + x];
+
+                // 1. Same-level orthogonal
+                if (e & BIT_DOWN && y < size - 1 && enterable(x, y + 1, z)) relax(enc3D(x, y + 1, z), curCost + STEP_COST);
+                if (e & BIT_UP && y > 0 && enterable(x, y - 1, z)) relax(enc3D(x, y - 1, z), curCost + STEP_COST);
+                if (e & BIT_LEFT && x > 0 && enterable(x - 1, y, z)) relax(enc3D(x - 1, y, z), curCost + STEP_COST);
+                if (e & BIT_RIGHT && x < size - 1 && enterable(x + 1, y, z)) relax(enc3D(x + 1, y, z), curCost + STEP_COST);
+
+                // 1b. Same-level diagonal
+                if (eight) {
+                    const giDiag = curCost + DIAG_COST;
+                    if (x > 0 && y > 0 && enterable(x - 1, y - 1, z) && enterable(x - 1, y, z) && enterable(x, y - 1, z)) {
+                        relax(enc3D(x - 1, y - 1, z), giDiag);
+                    }
+                    if (x < size - 1 && y > 0 && enterable(x + 1, y - 1, z) && enterable(x + 1, y, z) && enterable(x, y - 1, z)) {
+                        relax(enc3D(x + 1, y - 1, z), giDiag);
+                    }
+                    if (x > 0 && y < size - 1 && enterable(x - 1, y + 1, z) && enterable(x - 1, y, z) && enterable(x, y + 1, z)) {
+                        relax(enc3D(x - 1, y + 1, z), giDiag);
+                    }
+                    if (x < size - 1 && y < size - 1 && enterable(x + 1, y + 1, z) && enterable(x + 1, y, z) && enterable(x, y + 1, z)) {
+                        relax(enc3D(x + 1, y + 1, z), giDiag);
+                    }
+                }
+
+                // 2. Ramp UP: if curShape is RAMP, step to orthogonal (nx, ny) at z + 1
+                if (curShape === 4 && z < 2) {
+                    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+                        const nx = x + dx, ny = y + dy;
+                        if (enterable(nx, ny, z + 1)) relax(enc3D(nx, ny, z + 1), curCost + STEP_COST);
+                    }
+                }
+
+                // 3. Ramp DOWN: if orthogonal (nx, ny) at z - 1 is RAMP, step down to it
+                if (z > -2) {
+                    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+                        const nx = x + dx, ny = y + dy;
+                        if (shapeAt(nx, ny, z - 1) === 4 && enterable(nx, ny, z - 1)) {
+                            relax(enc3D(nx, ny, z - 1), curCost + STEP_COST);
+                        }
+                    }
+                }
+
+                // 4. Stairs UP
+                if ((curShape === 5 || curShape === 7) && z < 2) {
+                    if (enterable(x, y, z + 1)) relax(enc3D(x, y, z + 1), curCost + STEP_COST);
+                }
+
+                // 5. Stairs DOWN
+                if ((curShape === 6 || curShape === 7) && z > -2) {
+                    if (enterable(x, y, z - 1)) relax(enc3D(x, y, z - 1), curCost + STEP_COST);
+                }
+            }
+
+            res.expanded = expanded;
+            let end = found;
+            if (end < 0) {
+                if (!capped) return done("no path");
+                if (!opts.allowPartial || hOf(sx, sy, sz) - bestH < 2 * STEP_COST) return done("too far to plan");
+                end = best;
+                res.partial = true;
+            }
+            let len = 0;
+            for (let c = end; c !== s; c = P[c]) AS.trace[len++] = c;
+            const cells = new Int32Array(len);
+            for (let k = 0; k < len; k++) cells[k] = AS.trace[len - 1 - k];
+            res.cells = cells;
+            res.end = end;
+            return done(res.partial ? "partial" : "found");
+        }
+
+        const z = sz;
         const { map, flags } = areaMapOf(area.x, area.y, z);
         const g = gridOf(map, flags);
         const eff = g.eff, tf = typeFlags(), D = typeTable.doors;
@@ -2098,7 +2362,8 @@
             tx = clamp((u.goal.area.x - u.area.x) * size + u.goal.x, 0, size - 1);
             ty = clamp((u.goal.area.y - u.area.y) * size + u.goal.y, 0, size - 1);
         }
-        return { tx, ty, key: `${u.area.x},${u.area.y},${zOf(u)}:${tx},${ty}` };
+        const gz = u.goal.z !== undefined ? u.goal.z : zOf(u.goal.area);
+        return { tx, ty, tz: gz, key: `${u.area.x},${u.area.y},${zOf(u)}:${tx},${ty},${gz}` };
     }
 
     // Give up the goal at once and say why: world:unitBlocked(unit, reason, goal given up).
@@ -2127,7 +2392,7 @@
         const same = !!old && old.key === tgt.key;
         const avoid = same ? old.avoid : -1;
         planBudget--;
-        const res = planPath(u.area, ev.x, ev.y, tgt.tx, tgt.ty, { unit: u, avoid, allowPartial: true, record: true, z: zOf(u) });
+        const res = planPath(u.area, ev.x, ev.y, tgt.tx, tgt.ty, { unit: u, avoid, allowPartial: true, record: true, z: zOf(u), tz: tgt.tz });
         if (!res.cells) {
             blockUnit(u, avoid >= 0 && res.reason === "no path" ? "no way past" : res.reason);
             return null;
@@ -2141,7 +2406,7 @@
         // starts afresh.
         const keep = same && !old.partial;
         const p = {
-            key: tgt.key, cells: res.cells, i: 0, end: res.end, partial: res.partial, legs, wait: 0, fails: same ? old.fails : 0, avoid: -1, stale: false,
+            key: tgt.key, cells: res.cells, i: 0, end: res.end, is3D: res.is3D, partial: res.partial, legs, wait: 0, fails: same ? old.fails : 0, avoid: -1, stale: false,
             bestLeft: keep ? old.bestLeft : Infinity, bestAt: keep ? old.bestAt : World._frame
         };
         pathCache.set(u.id, p);
@@ -2221,8 +2486,9 @@
             p = planFor(u, ev);
             if (!p) return;
         }
-        const size = World.state.size;
-        const here = ev.y * size + ev.x;
+        const size = World.state.size, n2 = size * size;
+        const curZ = zOf(u);
+        const here = p.is3D ? ((curZ + 2) * n2 + ev.y * size + ev.x) : (ev.y * size + ev.x);
         const left = p.cells.length - p.i;
         if (left < p.bestLeft) {
             p.bestLeft = left;
@@ -2237,9 +2503,28 @@
             return;
         }
         const next = p.cells[p.i];
-        const nx = next % size, ny = (next - nx) / size;
+        let nx, ny, nz;
+        if (p.is3D) {
+            const l = Math.floor(next / n2);
+            nz = l - 2;
+            const rem = next - l * n2;
+            nx = rem % size;
+            ny = (rem - nx) / size;
+        } else {
+            nz = curZ;
+            nx = next % size;
+            ny = (next - nx) / size;
+        }
+        if (nz !== curZ) {
+            World.moveUnitToLevel(u, nz, nx, ny, { keepPath: true });
+            p.i++;
+            p.fails = 0;
+            u.stuckFrames = 0;
+            return;
+        }
+        const here2D = ev.y * size + ev.x, next2D = ny * size + nx;
         const d = dirTo(ev.x, ev.y, nx, ny);
-        if (!d || !stepOpen(u, here, next, d)) {
+        if (!d || !stepOpen(u, here2D, next2D, d)) {
             // Moved off its path by something else, or the world changed under it (a wall went up): plan again.
             p.stale = true;
             pathStats.replans++;
@@ -2301,12 +2586,18 @@
      * World.lastPath says what the search did: { reason, ms, expanded, length, partial }.
      */
     World.findPath = function(area, sx, sy, gx, gy, opts = {}) {
-        const size = this.state ? this.state.size : 0;
+        const size = this.state ? this.state.size : 0, n2 = size * size;
         const o = Object.assign({}, opts);
         if (opts.avoid && typeof opts.avoid === "object") o.avoid = (opts.avoid.y | 0) * size + (opts.avoid.x | 0);
         const res = planPath(area, sx, sy, gx, gy, o);
         if (!res.cells) return null;
-        const out = Array.from(res.cells, c => ({ x: c % size, y: (c - (c % size)) / size }));
+        const out = Array.from(res.cells, c => {
+            if (res.is3D) {
+                const l = Math.floor(c / n2), z = l - 2, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
+                return { x, y, z };
+            }
+            return { x: c % size, y: (c - (c % size)) / size };
+        });
         if (res.partial) out.partial = true;
         return out;
     };
@@ -2324,6 +2615,12 @@
         const i = y * g.size + x;
         if (opts.ground) return (g.pass[i] & WATER_BIT) === 0 && (g.pass[i] & 15) === 15;
         if (g.eff[i] === 0) return false;
+        if (st.version >= 4 && window.UF && UF.Levels && (typeof UF.Levels.shapeCodeAt === "function" || typeof UF.Levels.shapeAt === "function")) {
+            const s = typeof UF.Levels.shapeCodeAt === "function" ? UF.Levels.shapeCodeAt(ax, ay, x, y, z) : UF.Levels.shapeAt(ax, ay, x, y, z);
+            if (typeof s === "string") {
+                if (s === "solid" || s === "open") return false;
+            } else if (s !== 2 && s < 4) return false; // must be FLOOR or RAMP or STAIR
+        }
         if (z < 0 && window.UF && UF.Levels) {
             if (typeof UF.Levels.isLavaAt === "function") {
                 if (UF.Levels.isLavaAt(ax, ay, z, x, y)) return false;
@@ -2337,23 +2634,35 @@
         return true;
     };
     /** Whether (gx, gy) can be walked to from (sx, sy) in one area on one level (area.z; region map: doors open, units ignored). */
-    World.reachable = function(area, sx, sy, gx, gy) {
+    World.reachable = function(area, sx, sy, gx, gy, opts = {}) {
         const st = this.state;
-        if (!st || !area || !this.inWorld(area.x, area.y, zOf(area))) return false;
+        const sz = opts.z !== undefined ? opts.z : zOf(area);
+        const gz = opts.tz !== undefined ? opts.tz : sz;
+        if (!st || !area || !this.inWorld(area.x, area.y, sz) || !this.inWorld(area.x, area.y, gz)) return false;
         const size = st.size;
         if (![sx, sy, gx, gy].every(v => Number.isInteger(v) && v >= 0 && v < size)) return false;
-        const { map, flags } = areaMapOf(area.x, area.y, zOf(area));
-        const g = gridOf(map, flags);
-        const region = regionsOf(g);
-        const s = sy * size + sx, t = gy * size + gx;
-        return g.eff[s] !== 0 && region[s] !== 0 && region[s] === region[t];
+        if (st.version < 4 && sz === gz && !opts.z3d) {
+            const { map, flags } = areaMapOf(area.x, area.y, sz);
+            const g = gridOf(map, flags);
+            const region = regionsOf(g);
+            const s = sy * size + sx, t = gy * size + gx;
+            return g.eff[s] !== 0 && region[s] !== 0 && region[s] === region[t];
+        }
+        const p = planPath(area, sx, sy, gx, gy, { z: sz, tz: gz, maxNodes: Math.min(2048, size * size), allowPartial: false, resolveBlocked: false });
+        return !!p && !!p.cells && !p.partial;
     };
     /** The cells still ahead on a unit's current plan ([{x, y}], the next step first), or null when it has none. */
     World.pathOf = function(id) {
         const p = pathCache.get(id);
         if (!p || p.stale || !this.state) return null;
-        const size = this.state.size;
-        return Array.from(p.cells.subarray(p.i), c => ({ x: c % size, y: (c - (c % size)) / size }));
+        const size = this.state.size, n2 = size * size;
+        return Array.from(p.cells.subarray(p.i), c => {
+            if (p.is3D) {
+                const l = Math.floor(c / n2), z = l - 2, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
+                return { x, y, z };
+            }
+            return { x: c % size, y: (c - (c % size)) / size };
+        });
     };
     /** Planner numbers since the world was created: plans, ms (average, p95 of the last 512, max), cells expanded, queue, waits. */
     World.pathStats = function() {
