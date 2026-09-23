@@ -56,4 +56,12 @@ Rule 4 mutants (each exit 1 on 2026-09-24): `ignores_fire_while_hauling` (2 fail
 
 `tools/test_stabilization.js` reads the Medicine check's result at `jobs:done` (the finished job is pruned from `UF_Jobs`' list before the check runs since the idle fallback): 12/12.
 
-Known effect: `tools/test_survival_needs_loop.js` (Gemini's) drops from 18/19 to 15/19 with the new order (`drinks_a_gallon_a_day`, `eats_a_pound_a_day`, `labor_resumes_after_supper`): its calendar stays at 10:00, so no meal hour ever comes and its founders work through a shelter project instead of drinking first, as the earlier order had them do.
+Known effect (probed 2026-09-24, the current tree against a worktree at `2f22f9e`): `tools/test_survival_needs_loop.js` (Gemini's) drops from 18/19 to 14/19 with the new order, deterministically.
+
+| Check | Why |
+|---|---|
+| `drinks_a_gallon_a_day`, `eats_a_pound_a_day` | its calendar stays at 10:00, so no meal hour ever comes; founders #4 and #5 work the open shelter project instead of drinking first (rung 8) and drink at 19:00 in a later scene |
+| `labor_resumes_after_supper` | at 19:00 the project has no open job in either tree (`projectJob` null); the baseline hauler had taken the last gather 11 updates after supper, the current one meets none and holds the idle fallback's fire-gathering `move` for the whole 900-update wait, so the check's "no job and nothing open" clause never fires |
+| `long_rest_rules` | the shifted timeline leaves founder #8 at (47,33) east of the pond when the scene begins; it finishes a drink at (47,32), its bed is at (34,32), and the harness's walker drops the goal at the first water square, so the sleep stalls `can't reach it` (the baseline had #8 at (32,29) inside the camp) |
+
+The order is the packet's; the harness encodes the earlier "needs first at any hour" and walks in straight lines. Either it advances its clock through a meal hour and paths around the pond, or the coordinator restores needs above work.
