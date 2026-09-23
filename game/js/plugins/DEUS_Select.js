@@ -141,14 +141,13 @@
 
     function findUnitAt(x, y, area, z = 0, sx, sy) {
         const W = World();
-        if (!W) return null;
-        const ax = area ? area.x : (W.currentArea ? W.currentArea().x : 0);
-        const ay = area ? area.y : (W.currentArea ? W.currentArea().y : 0);
+        const curArea = area || (W.currentArea ? W.currentArea() : null) || { x: 0, y: 0 };
+        const ax = curArea.x;
+        const ay = curArea.y;
 
         // If clicking on an impassable container or chest at (x, y), do not let units from (x, y+1) steal the click!
         const C = window.UF && UF.Containers;
         const O = window.UF && UF.Objects;
-        const curArea = area || (W.currentArea ? W.currentArea() : { x: ax, y: ay });
         const obj = O ? (O.atIn ? O.atIn(curArea, x, y) : O.at(x, y)) : null;
         const cont = C ? C.at(curArea, x, y, z) : null;
         const isChest = (obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont;
@@ -1126,7 +1125,7 @@
         const W = World(), J = Jobs(), C = Colonists();
         if (!W || !J) return;
 
-        const area = target.area || W.currentArea();
+        const area = copyArea(target.area || (W && W.currentArea ? W.currentArea() : null));
         const tx = target.x, ty = target.y, tz = typeof target.z === "number" ? target.z : viewZ();
         const cfg = getConfig();
         const maxRadius = cfg.limits.formationRadius || 12;
@@ -1968,7 +1967,7 @@
 
     function handleWallToolTrigger() {
         const I = Interact(), W = World();
-        const area = W ? W.currentArea() : { x: 0, y: 0 };
+        const area = copyArea(W && W.currentArea ? W.currentArea() : null);
         const target = { area, x: Math.floor($gameMap.displayX() + 8), y: Math.floor($gameMap.displayY() + 6), z: viewZ() };
         const buildOpts = I && typeof I.buildOptions === "function" ? I.buildOptions(target) : [];
         const wallOpts = buildOpts.filter(o => o.objectId && (o.objectId.startsWith("wall_") || o.objectId === "wall"));
@@ -2667,7 +2666,7 @@
                             console.log("DEBUG_SELECT_CANCEL: overUI=" + overUI + " units=" + units.length + " mx=" + mx + " my=" + my + " isValid=" + (window.$gameMap && $gameMap.isValid(mx, my)));
                             if (!overUI && window.$gameMap && $gameMap.isValid(mx, my)) {
                                 const W = World();
-                                const area = W ? W.currentArea() : { x: 0, y: 0 };
+                                const area = copyArea(W && W.currentArea ? W.currentArea() : null);
                                 const C = window.UF && UF.Containers;
                                 const O = window.UF && UF.Objects;
                                 const u = units[0];
@@ -2720,7 +2719,7 @@
                             mx,
                             my,
                             z: viewZ(),
-                            area: W ? W.currentArea() : { x: 0, y: 0 },
+                            area: copyArea(W && W.currentArea ? W.currentArea() : null),
                             frame: Graphics.frameCount,
                             shift: (typeof TouchInput._shiftKey !== "undefined" ? TouchInput._shiftKey : false) || Input.isPressed("shift")
                         };
@@ -2742,7 +2741,7 @@
     function handleCompleteClick(scene, mx, my) {
         const W = World();
         const curZ = viewZ();
-        const area = W ? W.currentArea() : { x: 0, y: 0 };
+        const area = copyArea(W && W.currentArea ? W.currentArea() : null);
         const cfg = getConfig();
         const isShift = (typeof TouchInput._shiftKey !== "undefined" ? TouchInput._shiftKey : false) || Input.isPressed("shift");
 

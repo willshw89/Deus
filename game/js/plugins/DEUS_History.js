@@ -2766,6 +2766,10 @@
                 u.data.ac = u.data.dnd.ac;
                 u.data.savingThrows = u.data.dnd.savingThrows;
             }
+            const Items = window.UF && UF.Items;
+            if (Items && typeof Items.giveFactionStartingKit === "function") {
+                Items.giveFactionStartingKit(u);
+            }
             rec.units.push({ id: u.id, site: site.id, z: levelOf(site), x: u.x, y: u.y, dir: u.dir, ring: q.ring, gender: p.gender, within: Math.max(Math.abs(u.x - site.x), Math.abs(u.y - site.y)) <= reach });
             if (p.leader) {
                 leaders[f.id] = u.id;
@@ -2954,6 +2958,10 @@
                 }
                 if (rank === 2) rulerUnit[f.id] = u.id;
                 else if (rank === 1) leaderUnit[site.id] = u.id;
+                const Items = window.UF && UF.Items;
+                if (Items && typeof Items.giveFactionStartingKit === "function") {
+                    Items.giveFactionStartingKit(u);
+                }
                 out.push(u);
             }
         }
@@ -3064,6 +3072,7 @@
             && (filter.site === undefined || e.site === filter.site) && (filter.since === undefined || e.year >= filter.since));
     };
     History.siteById = id => (History.current() ? History.current().sites.find(s => s.id === id) || null : null);
+    History.spawnFounders = spawnFounders;
     /** The player's home site (protected, at the map centre), or null. */
     History.homeSite = () => (History.current() ? History.current().sites.find(s => s.protected) || null : null);
     History.factionName = id => {

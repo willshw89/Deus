@@ -24,9 +24,11 @@ Level seam added 2026-09-19: every area argument accepts `{x,y,z?}`, with omitte
 - `count(unitId | { x, y, area? }, typeId?)` → total count of that type (all types when omitted) in the inventory or on the cell.
 - `has(unitId, { typeId: count, ... })` → whether the unit carries at least that.
 - `describe(x, y)` → `{ text: "5 × Log, Stone", items: [{ id, type, name, count }] }` for the cell on screen, or `null` when nothing lies there (for UF_Look).
+- `isFactionCreature(u)` → whether a unit is a sentient faction creature/colonist/person eligible for starting kit.
+- `giveFactionStartingKit(u)` → equips unit with D&D 5.1 SRD starting kit: `common_clothes` (equipped to torso/clothes slot), `pouch` (held in inventory), and 15 `gold_coin` (held in inventory, contained within pouch via `pouch.contents = [gp.id]`, `gp.container = pouch.id`, `gp.pouchId = pouch.id`). Total weight: 4.3 lbs.
 - `layer()` → the `Sprite_UFItemLayer` of the map on screen (`spriteFor(itemId)`, `activeCount()`), for tests. `sidecar(imageName)` → the image's sidecar json once loaded (`undefined` while loading, `null` when there is none).
 
-Rules: a stack's `count` is ≤ its type's `stack` when it lies on a cell; inventories keep stacks as they came (no merging in a pocket). A unit that is removed (`world:unitRemoved`) drops what it carried on the cell it stood on. Nothing here is random.
+Rules: a stack's `count` is ≤ its type's `stack` when it lies on a cell; inventories keep stacks as they came (no merging in a pocket). A unit that is removed (`world:unitRemoved`) drops what it carried on the cell it stood on. Nothing here is random. Type aliases (`gp` / `gold_piece` → `gold_coin`, `clothes` / `clothes_common` → `common_clothes`) are resolved dynamically in `Items.type` and `Items.count`.
 
 ## State it saves
 - `UF.World.state.items = { nextId, byId: { [id]: item } }` (in `contents.ufWorld`). Older saves without it get an empty one on first use.
@@ -64,6 +66,7 @@ None.
 - `saved`: FAILS unless `JsonEx` round-trip of `UF.World.state` keeps `items` identical and `makeSaveContents().ufWorld.items` is the live state.
 - `perf`: FAILS when the layer's `update` averages > 1 ms over 120 frames with ~400 stacks in view at zoom ⅓ (measured 0.136 ms on 2026-09-18; the tilemap's own child sort isn't included).
 - `no_errors`: FAILS on any uncaught error during the suite.
+- `tools/test_faction_starting_gear.js`: 17 checks verifying `common_clothes` (equipped to clothes/torso slot), `pouch` (held in inventory), and 15 `gold_coin` (contained in pouch) across all 9 factions (72 founders) and starting unit generation, with weight invariant at 4.3 lbs and 3 mutant failure checks.
 - Screenshots: `items.items_in_view` (zoom 1: a row of six item kinds, a log, the test unit and a hide) and `items.items_zoomed_out` (zoom ⅓: the 20×20 field of stacks).
 
 ## Replaced core methods

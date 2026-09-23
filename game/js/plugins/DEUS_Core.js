@@ -448,4 +448,36 @@
         document.title = "Deus";
     };
 
+    // Global crash diagnostics: write unhandled exceptions and error screens to test_output/last_crash.txt
+    if (typeof window !== "undefined") {
+        window.addEventListener("error", event => {
+            try {
+                if (typeof require === "function") {
+                    const fs = require("fs");
+                    const path = require("path");
+                    const logPath = path.join(process.cwd(), "test_output", "last_crash.txt");
+                    const err = event.error || {};
+                    const text = `Uncaught Exception: ${event.message}\nFile: ${event.filename}:${event.lineno}:${event.colno}\n\nStack:\n${err.stack || "none"}\n`;
+                    fs.writeFileSync(logPath, text, "utf8");
+                }
+            } catch (_) {}
+        });
+    }
+    if (typeof Graphics !== "undefined" && typeof Graphics.printError === "function") {
+        const _Graphics_printError = Graphics.printError;
+        Graphics.printError = function(name, message, error = null) {
+            try {
+                if (typeof require === "function") {
+                    const fs = require("fs");
+                    const path = require("path");
+                    const logPath = path.join(process.cwd(), "test_output", "last_crash.txt");
+                    const stack = (error && error.stack) ? error.stack : (new Error().stack);
+                    const text = `Graphics.printError: ${name} - ${message}\n\nStack:\n${stack}\n`;
+                    fs.writeFileSync(logPath, text, "utf8");
+                }
+            } catch (_) {}
+            _Graphics_printError.call(this, name, message, error);
+        };
+    }
+
 })();

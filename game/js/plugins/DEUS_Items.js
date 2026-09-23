@@ -88,21 +88,70 @@
     //-------------------------------------------------------------------------
     // Types (catalog items.types)
 
+    const DEFAULT_TYPES = [
+        {
+            id: "common_clothes",
+            name: "Common clothes",
+            image: "!$UF_Icon_136",
+            tags: ["clothing", "wear"],
+            stack: 1,
+            wear: { tier: 1 },
+            weight: 3.0,
+            armor: { slot: "torso", bonuses: { defence: { stab: 1, slash: 1, crush: 1, ranged: 1, magic: 0 } } }
+        },
+        {
+            id: "pouch",
+            name: "Pouch",
+            image: "!$UF_Icon_256",
+            tags: ["container", "gear"],
+            stack: 1,
+            weight: 1.0,
+            capacity: 50
+        },
+        {
+            id: "gold_coin",
+            name: "Gold piece",
+            image: "!$UF_Icon_169",
+            tags: ["currency", "precious"],
+            stack: 100,
+            weight: 0.02,
+            value: 1
+        }
+    ];
+
+    const TYPE_ALIASES = {
+        clothes_common: "common_clothes",
+        clothes: "common_clothes",
+        gp: "gold_coin",
+        gold_piece: "gold_coin"
+    };
+
     let typeCache = null;
     function typeTable() {
         const cat = catalog();
-        const list = cat && cat.items && Array.isArray(cat.items.types) ? cat.items.types : [];
-        if (!typeCache || typeCache.source !== list) {
+        const rawList = cat && cat.items && Array.isArray(cat.items.types) ? cat.items.types : [];
+        if (!typeCache || typeCache.source !== rawList) {
             const byId = {};
+            const list = rawList.slice();
             for (const t of list) if (t && t.id) byId[t.id] = t;
-            typeCache = { source: list, list, byId };
+            for (const dt of DEFAULT_TYPES) {
+                if (!byId[dt.id]) {
+                    byId[dt.id] = dt;
+                    list.push(dt);
+                }
+            }
+            typeCache = { source: rawList, list, byId };
         }
         return typeCache;
     }
     /** The catalog's item types, in catalog order. */
     Items.types = () => typeTable().list;
     /** One item type by id, or null. */
-    Items.type = id => (id ? typeTable().byId[id] || null : null);
+    Items.type = id => {
+        if (!id) return null;
+        const targetId = TYPE_ALIASES[id] || id;
+        return typeTable().byId[targetId] || null;
+    };
     const stackOf = t => Math.max(1, Number(t && t.stack) || 1);
     const nameOf = typeId => {
         const t = Items.type(typeId);
@@ -681,8 +730,10 @@
         if (typeId && !Items.type(typeId) && !mat && typeof Items.countRequirement === "function") {
             return Items.countRequirement(where, typeId);
         }
+        const resolvedType = (typeId && TYPE_ALIASES[typeId]) || typeId;
         return list.reduce((n, it) => {
-            if (typeId && it.type !== typeId) return n;
+            const itType = TYPE_ALIASES[it.type] || it.type;
+            if (resolvedType && itType !== resolvedType) return n;
             if (mat && it.mat !== mat) return n;
             return n + it.count;
         }, 0);
@@ -1039,6 +1090,66 @@
             changed(item, "moved");
         }
     });
+    listen("world:unitAdded", u => {
+        if (u && isFactionCreature(u)) {
+            giveFactionStartingKit(u);
+        }
+    });
+
+    /** Whether a unit is a sentient faction creature/colonist/person eligible for starting gear. */
+    function isFactionCreature(u) {
+        if (!u || !u.data) return false;
+        if (u.data.skipStartingGear) return false;
+        if (u.data.isFactionCreature) return true;
+        if (u.data.kind === "creature" || u.data.kind === "pet" || u.data.kind === "test") return false;
+        if (u.data.faction && (u.data.kind === "colonist" || u.data.kind === "person" || u.data.founder || (!u.data.kind && u.data.species))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Equips a faction creature with starting gear per D&D 5.1 SRD standards:
+     * - A set of common clothes (equipped in torso/clothes slot)
+     * - A pouch (held in inventory)
+     * - 15 gp (gold coins contained inside the pouch)
+     */
+    function giveFactionStartingKit(u) {
+        if (!u) return false;
+        const W = World();
+        const unit = typeof u === "number" ? (W && W.unit(u)) : u;
+        if (!unit || !unit.data) return false;
+        if (unit.data.startingKitGiven) return false;
+
+        // 1. Give common clothes
+        const clothes = Items.give("common_clothes", 1, unit.id, { bypassLimits: true });
+        if (clothes && clothes.length) {
+            if (!unit.data.equipment) unit.data.equipment = {};
+            unit.data.equipment.clothes = clothes[0].id;
+            unit.data.equipment.torso = clothes[0].id;
+        }
+
+        // 2. Give pouch
+        const pouchList = Items.give("pouch", 1, unit.id, { bypassLimits: true });
+        const pouch = pouchList && pouchList[0];
+
+        // 3. Give 15 gp (gold coins)
+        const gpList = Items.give("gold_coin", 15, unit.id, { bypassLimits: true });
+        const gp = gpList && gpList[0];
+
+        // 4. Associate the 15 gp as contents of the pouch
+        if (pouch && gp) {
+            pouch.contents = [gp.id];
+            gp.pouchId = pouch.id;
+            gp.container = pouch.id;
+        }
+
+        unit.data.startingKitGiven = true;
+        return true;
+    }
+
+    Items.isFactionCreature = isFactionCreature;
+    Items.giveFactionStartingKit = giveFactionStartingKit;
 
     //-------------------------------------------------------------------------
     // Sidecars (img/characters/<name>.json: frameWidth/Height, anchor). Loaded here, not through UF_Objects,

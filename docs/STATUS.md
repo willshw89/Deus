@@ -7,7 +7,29 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
+- **Astra**: DEUS-TSK-ASTRA-07 — Measurement-only species biology validation (tools/bench_species_biology.js, docs/systems/UF_History.md, docs/STATUS.md); production plugins and catalog read-only.
 - **Fable**: DEUS-TSK-FABLE-05 — Survival needs interruption & subsistence loop (DEUS_Colonists.js, tools/test_survival_needs_loop.js)
+
+## DEUS-TSK-GEMINI-01 — Faction Starting Equipment (Clothes + 15 gp Pouch) & Overseer Null Area Crash Fix (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Items.js`: Injected default types `common_clothes` (3.0 lbs, wear tier 1, torso/clothes slot), `pouch` (1.0 lb, container capacity 50), `gold_coin` (0.02 lb, currency); registered type aliases (`clothes` -> `common_clothes`, `gp` -> `gold_coin`); implemented `isFactionCreature(u)` and `giveFactionStartingKit(u)` equipping common clothes, holding pouch, and placing 15 gp inside the pouch (`pouch.contents = [gp.id]`, `gp.container = pouch.id`, `gp.pouchId = pouch.id`); total carried weight = 4.3 lbs. Hooked to `world:unitAdded`.
+  - `game/js/plugins/DEUS_History.js`: Hooked `giveFactionStartingKit` to `spawnFounders` and `spawnSettlers`.
+  - `game/js/plugins/DEUS_Select.js`: Safeguarded `findUnitAt` and `updateOverseerControls` against `null` return from `W.currentArea()`, resolving `TypeError: Cannot read property 'x' of null` and `ReferenceError: W is not defined`.
+  - `game/js/plugins/DEUS_Levels.js`: Safeguarded `cleanupEvents` and `setView` for units with null/undefined area records.
+  - `game/js/plugins/DEUS_Core.js`: Attached global crash logger writing unhandled errors and `Graphics.printError` crashes to `game/test_output/last_crash.txt`.
+  - `tools/test_faction_starting_gear.js`: 17 automated checks + 3 mutant failure checks verifying clothes, pouch, 15 gp inside pouch, 4.3 lb carried weight, exclusion of wild animals, and all 72 founders across all 9 factions.
+- **Checks observed**:
+  - `node tools/test_faction_starting_gear.js`: **17 passed, 0 failed (exit 0)**.
+  - Mutant failure controls (Rule 4 verified):
+    - `--mutant=no_clothes`: FAIL `test_unit_has_clothes_equipped` (exit 1).
+    - `--mutant=no_pouch`: FAIL `test_unit_has_pouch`, `coins_inside_pouch`, `carried_weight` (exit 1).
+    - `--mutant=wrong_coins`: FAIL `test_unit_has_15_gp`, `carried_weight` (exit 1).
+  - Native engine suites via `node tools/run_tests.js`:
+    - `items`: **20 passed, 0 failed (exit 0)**.
+    - `history`: **17 passed, 0 failed (exit 0)**.
+    - `select`: **46 passed, 0 failed (exit 0)**.
+
 
 ## DEUS-TSK-ASTRA-06 — Demographic schema and annual headless proof (2026-09-23)
 - **Status**: `PASS — HIST-01 + minimum HIST-02 headless proof`; native gameplay integration is not claimed.

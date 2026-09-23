@@ -2022,7 +2022,7 @@
         for (let id = W.EVENT_BASE; id < $gameMap._events.length; id++) {
             if (!$gameMap._events[id]) continue;
             const u = W.unit(id - W.EVENT_BASE);
-            if (u && u.area.x === lv.x && u.area.y === lv.y && zOf(u) === lv.z) continue;
+            if (u && u.area && u.area.x === lv.x && u.area.y === lv.y && zOf(u) === lv.z) continue;
             delete $gameMap._events[id];
             n++;
         }
@@ -2150,7 +2150,7 @@
         const W = World();
         const v = W && W.viewLevel();
         if (!u || !v || pending || $gamePlayer.isTransferring()) return;
-        if (zOf(u) !== v.z && u.area.x === v.x && u.area.y === v.y) setView(zOf(u), { center: { x: u.x, y: u.y } });
+        if (u.area && zOf(u) !== v.z && u.area.x === v.x && u.area.y === v.y) setView(zOf(u), { center: { x: u.x, y: u.y } });
     }
 
     // A level key pressed in a frame when the map can't switch (a transfer finishing, an event running) is kept for up to
