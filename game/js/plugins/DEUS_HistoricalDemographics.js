@@ -352,7 +352,10 @@
         jsonSafe(state);
         check(state.version !== 6, "unsupported schema version: 6 (explicit migration required via UF.HistoricalDemographics.migrate)");
         check(state.version === 7, `unsupported demographics schema version: ${state.version}`);
+        if (state.schemaVersion !== undefined) check(state.schemaVersion === 7, `unsupported schemaVersion: ${state.schemaVersion}`);
+        check(state.historyModelId === "historical_demographics_v1", `unsupported historyModelId: ${state.historyModelId}`);
         check(state.historyModelVersion === 1, `unsupported historyModelVersion: ${state.historyModelVersion}`);
+        check(state.capacityModelId === "local_density_v1", `unsupported capacityModelId: ${state.capacityModelId}`);
         check(state.capacityModelVersion === 1, `unsupported capacityModelVersion: ${state.capacityModelVersion}`);
         check(typeof state.demographicProfileVersion === "string" && state.demographicProfileVersion.length > 0, "invalid demographicProfileVersion");
         if (state.demographicProfileVersion === "1.0.0-provisional-astra08" || state.profileKind === "promoted-default") {
