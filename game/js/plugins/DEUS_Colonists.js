@@ -57,6 +57,11 @@
     const HOME_LEASH = 45;          // cells: farther from the site than this (after a long chase), a colonist walks home first
     const URGENT_MARGIN = 25;       // a need this far above its threshold interrupts other work
     const AVOID_TICKS = 900;        // a job that failed isn't tried again on the same target for this long
+    // The minimal job-taking loop (DEUS-TSK-FABLE-03, 2026-09-22); every count is map updates (domain: action).
+    // DECIDE_EVERY above also bounds how often an idle colonist that found nothing to do decides again.
+    const SWEEP_EVERY = 30;         // ticks between sweeps of the colonist list for idle workers
+    const MAX_DECIDE_PER_SWEEP = 4; // idle colonists that decide in one sweep; the rest wait for the next
+    const PROJECT_OWNED_STEPS = Object.freeze(["shelter", "door", "beds", "chest"]); // society-plan steps DEUS_Projects owns
     const LOOKAHEAD = 3;            // plan steps considered at once (the culture's priorities pick among them)
     const THOUGHTS_KEPT = 8;
     const MAX_SKILL = 20;
@@ -554,7 +559,7 @@
             const soSteps = standingOrders(ref);
             const msSteps = populationMilestoneSteps(ref);
             const storageSteps = autonomousStorageSteps(ref);
-            basePlan = [ ...c.plan, ...storageSteps, ...cooperativeHomeSteps, ...civicSteps, ...soSteps, ...msSteps ];
+            basePlan = [ ...societyPlan(c), ...storageSteps, ...cooperativeHomeSteps, ...civicSteps, ...soSteps, ...msSteps ];
             c._cachedBasePlan = basePlan;
             c._cachedBasePlanTick = localTicks;
             c._cachedBasePlanInvalidatedAt = planInvalidatedAt;
@@ -748,6 +753,13 @@
             return s;
         });
     }
+    // DEUS_Projects is the single source of settlement construction intent (DEUS-TSK-FABLE-03): while it is loaded
+    // and enabled, the society plan's shelter, door, beds and chest steps are left to it. The plan record in the
+    // save is untouched; only what the colonists read as their plan changes.
+    const projectsManaged = () => !!(window.UF && UF.Projects && typeof UF.Projects.active === "function" &&
+        (typeof UF.Projects.isEnabled !== "function" || UF.Projects.isEnabled()));
+    const projectOwnedStep = s => !!s && (PROJECT_OWNED_STEPS.includes(s.society) || PROJECT_OWNED_STEPS.includes(s.id));
+    const societyPlan = c => (c && Array.isArray(c.plan) ? (projectsManaged() ? c.plan.filter(s => !projectOwnedStep(s)) : c.plan) : []);
 
     function getCallings() {
         if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
@@ -1161,7 +1173,7 @@
         if (_buildCellsTick !== localTicks || !_buildCellsSet) {
             _buildCellsTick = localTicks;
             _buildCellsSet = new Map();
-            for (const s of c.plan || []) {
+            for (const s of societyPlan(c)) {
                 if (!s.build || s.done === true) continue;
                 const t = stepObject(s);
                 const needs = (t && t.build && t.build.items) || {};
@@ -1303,6 +1315,7 @@
     const avoid = new Map(); // `${unitId}:${type}:${x},${y}` -> tick until which it isn't tried again
     const avoidKey = (u, type, x, y) => `${u.id}:${zOf(u)}:${type}:${x},${y}`;
     const decisionAt = new Map(); // unit id -> tick of the last decision
+    const pendingDecision = new Set(); // unit ids whose job just ended: they decide on the next map update
     const arrivals = new Map();   // job id -> callback (the Overseer's assignMoveTo)
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
     const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
@@ -4215,8 +4228,80 @@
         return cell ? give(u, { type: "move", target: cell, params: { via: "move", home: true } }) : null;
     }
 
-    function decide(u) {
+    //-------------------------------------------------------------------------
+    // The minimal autonomous loop (DEUS-TSK-FABLE-03). Objective 2 (2026-09-22) wiped needs, moods, wandering and the
+    // society-plan crafting; this restores only job taking: an idle worker claims the best open job it can do now,
+    // settlement project jobs first, then any other open designation, and UF_Jobs plans, reserves and runs it.
+
+    // Acute survival: a worker in this state yields to the survival systems instead of taking work.
+    function urgentSurvival(u) {
+        const d = u && u.data;
+        if (!d) return null;
+        if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.maxHp > 0 && d.hp <= d.maxHp * 0.25) return "health";
+        const n = d.needs, th = thresholds();
+        if (n) {
+            if (Number.isFinite(n.thirst) && n.thirst >= Math.max(90, (th.thirst || 55) + 35)) return "thirst";
+            if (Number.isFinite(n.hunger) && n.hunger >= Math.max(90, (th.hunger || 55) + 35)) return "hunger";
+        }
         return null;
+    }
+
+    // The best open job of an active settlement project this worker can do now, taken. Scoring: the culture's
+    // priority for the job type, skill, the job's own priority, distance. A job somebody else reserved, or one this
+    // worker failed on lately, is skipped; UF_Jobs.take dry-runs the plan so a job the worker can't do stays open.
+    function projectJob(u) {
+        if (!isColonist(u)) return null;
+        const J = Jobs(), P = window.UF && UF.Projects;
+        if (!J || !P || typeof P.active !== "function") return null;
+        const ids = new Set(P.active().map(p => p.id));
+        if (!ids.size) return null;
+        const open = J.open().filter(j => j.target && j.params && ids.has(j.params.project) && sameLevel(j.target, u));
+        if (!open.length) return null;
+        const RM = J.reservation || null, t = ticks();
+        const score = j => {
+            const skill = SKILL_OF[j.type] ? ((u.data.skills && u.data.skills[SKILL_OF[j.type]]) || 0) : 0;
+            const dist = Math.hypot(j.target.x - u.x, j.target.y - u.y);
+            return priorityOf(j.type, u) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
+        };
+        open.sort((a, b) => score(b) - score(a) || a.id - b.id);
+        for (const j of open.slice(0, 6)) {
+            if ((avoid.get(avoidKey(u, j.type, j.target.x, j.target.y)) || 0) > t) continue;
+            if (RM && (RM.isReservedByOther(u.id, j.target) || (j.params.itemId && RM.isReservedByOther(u.id, j.params.itemId)))) continue;
+            const taken = J.take(u.id, x => x.id === j.id);
+            if (taken && taken.state !== "failed") return taken;
+        }
+        return null;
+    }
+
+    // An idle worker standing on a project's reserved square walks off it, so a build there isn't held up.
+    function stepOffReserved(u) {
+        const P = window.UF && UF.Projects, J = Jobs();
+        if (!P || !J || typeof P.reservedAt !== "function") return null;
+        const area = levelArea(u);
+        if (!P.reservedAt(area, u.x, u.y)) return null;
+        for (let r = 1; r <= 6; r++) {
+            for (let dy = -r; dy <= r; dy++) {
+                for (let dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                    const x = u.x + dx, y = u.y + dy;
+                    if (P.reservedAt(area, x, y) || !J.standable(area, x, y, u.id)) continue;
+                    return give(u, { type: "move", target: { x, y }, params: { stepOff: true } });
+                }
+            }
+        }
+        return null;
+    }
+
+    function decide(u) {
+        const J = Jobs();
+        if (!J || !u || !u.data || !levelSupported(zOf(u))) return null;
+        decisionAt.set(u.id, ticks());
+        if (Number.isFinite(u.data.age) && u.data.age < 15) return null; // dependants are not workers
+        if (J.of(u.id)) return null;
+        // Step 1: acute survival yields (no survival job runs under Objective 2; needJob returns null).
+        if (urgentSurvival(u)) return needJob(u) || null;
+        // Steps 2-5: query, score and claim; UF_Jobs walks the worker there and runs the job.
+        return projectJob(u) || designationJob(u) || stepOffReserved(u);
     }
 
     function isLowPriorityJob(job, u) {
@@ -4247,7 +4332,31 @@
         c.radius = Math.min(40, baseRadius + growth);
     }
 
-    function scan() {}
+    // Per map update: nothing unless a job just ended (those workers decide now) or a sweep is due (every SWEEP_EVERY
+    // ticks over the cached colonist list, at most MAX_DECIDE_PER_SWEEP idle workers, each at most once per
+    // DECIDE_EVERY ticks while idle). No per-frame iteration over units, jobs or cells.
+    function scan() {
+        const J = Jobs(), W = World();
+        if (!enabled || !J || !W || !W.state || !W.state.colony) return;
+        const sweep = localTicks % SWEEP_EVERY === 0;
+        if (!pendingDecision.size && !sweep) return;
+        const t = ticks();
+        const due = [];
+        for (const id of pendingDecision) { const u = colonist(id); if (u) due.push({ u, now: true }); }
+        pendingDecision.clear();
+        if (sweep) for (const u of colonists()) if (!due.some(d => d.u === u)) due.push({ u, now: false });
+        let decided = 0;
+        for (const { u, now } of due) {
+            if (J.of(u.id)) continue;
+            if (!now) {
+                const last = decisionAt.get(u.id);
+                if (last !== undefined && t - last < DECIDE_EVERY) continue;
+                if (decided >= MAX_DECIDE_PER_SWEEP) break;
+            }
+            decided++;
+            try { decide(u); } catch (e) { console.error("UF_Colonists: decide failed", e); }
+        }
+    }
 
     //-------------------------------------------------------------------------
     // What happens after a job: thoughts, skills, stockpiles, the Overseer's callbacks
@@ -4610,6 +4719,7 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Colonists = Colonists;
+    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, scan, societyPlan, projectsManaged, projectOwnedStep });
 
     //-------------------------------------------------------------------------
     // Engine hooks
@@ -4621,7 +4731,8 @@
         _Game_Map_update.call(this, sceneActive);
         if (!sceneActive || (window.UF && UF.Time && UF.Time.paused)) return;
         localTicks++;
-        // Autonomous AI loops wiped per Objective 2
+        // Objective 2 (2026-09-22) wiped the autonomous AI loops; DEUS-TSK-FABLE-03 restored the minimal job-taking loop.
+        scan();
     };
 
     let hooked = false;
@@ -4639,8 +4750,12 @@
         });
         UF.Events.on("jobs:done", (job, u) => {
             try { onDone(job, u); } catch (e) { console.error(e); }
+            if (u && isColonist(u)) pendingDecision.add(u.id); // back to the decision pool on the next update
         });
-        UF.Events.on("jobs:failed", job => onFailed(job));
+        UF.Events.on("jobs:failed", job => {
+            onFailed(job);
+            if (job && job.assigned !== null && job.assigned !== undefined) pendingDecision.add(job.assigned);
+        });
     }
     hookEvents();
 
