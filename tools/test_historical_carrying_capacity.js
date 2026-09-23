@@ -13,13 +13,13 @@ const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const CANDIDATE = "8a40d2ed66da758fc95fc3c1e8205709336c54df";
-const CANDIDATE_SHA256 = "e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95";
-const CANDIDATE_BYTES = 45429;
+const CANDIDATE = "f0d7a8c0351a7bb80db4b7a6fd41796d3e0da2ad";
+const CANDIDATE_SHA256 = "d879dd754969df3831b3b8f1bf3c702a05c1691c88e47e04cdc88fe23496a913";
+const CANDIDATE_BYTES = 51403;
 const LEGACY = "931b993e60545b24bddaa71ab433ebac8e967eb8";
 const LEGACY_NORMALIZED_SHA256 = "647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e";
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
-const MODEL = { version: 1, defaultBaseline: 160, minimumScale: 0.1, minCapacity: 60, maxCapacity: 350 };
+const MODEL = { id: "local_density_v1", version: 1, defaultBaseline: 160, minimumScale: 0.1, minCapacity: 60, maxCapacity: 350 };
 const PROFILE_VERSION = "1.0.0-provisional-astra08";
 const PACKET_POLICY = "literal ASTRA-11 packet (clarification requested; no correction received)";
 const MUTANT_CHECKS = {
@@ -230,11 +230,11 @@ function packetContracts(loaded) {
         try { fn(); checks.push({ id, status: "PASS", expected, observed, mapping }); }
         catch (error) { checks.push({ id, status: "FAIL", expected, observed, mapping, diagnostic: `${id}: ${error.message}` }); }
     };
-    add("PACKET_DEFAULT_PROFILE_TAG", "v1", defaults.demographicProfileVersion,
-        () => assert(defaults.demographicProfileVersion === "v1", "Promoted default tag differs from literal packet"), "Existing state.demographicProfileVersion");
-    add("PACKET_DEMOGRAPHIC_MODEL", 7, defaults.historyModelVersion,
-        () => assert(defaults.historyModelVersion === 7, "Existing historical model version differs from packet's demographic-model version"),
-        "Packet 'Demographic Model Version' mapped to the existing state.historyModelVersion; schema state.version is separately 7. No new state field is assumed.");
+    add("PACKET_DEFAULT_PROFILE_TAG", "v1", defaults.profileId,
+        () => assert(defaults.profileId === "v1" && defaults.profileVersion === "1.0.0-provisional-astra08", "Promoted default tag differs from literal packet"), "Existing state.profileId and state.profileVersion");
+    add("PACKET_DEMOGRAPHIC_MODEL", 1, defaults.historyModelVersion,
+        () => assert(defaults.schemaVersion === 7 && defaults.historyModelVersion === 1, "Existing historical model version differs from packet's demographic-model version"),
+        "Packet 'Demographic Model Version': schemaVersion is 7, historyModelVersion is 1.");
     const modelMetadata = { capacityModelVersion: defaults.capacityModelVersion, capacityModel: clone(defaults.config.capacityModel) };
     add("PACKET_CAPACITY_MODEL_IDENTITY", "local_density_v1", modelMetadata,
         () => assert(metadataLeaves(modelMetadata).some(entry => entry.value === "local_density_v1"), "The persisted capacity model has no literal local_density_v1 identity"),
@@ -397,8 +397,8 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         assert(api.migrate(s) === s && s.version === 7, "Migration did not return v7 state");
         assert(text(s.config.profiles) === profiles, "Migration rewrote caller's custom profiles");
         const projection = clone(s); projection.version = 6;
-        for (const key of ["historyModelVersion", "capacityModelVersion", "demographicProfileVersion", "migratedFromVersion"]) delete projection[key];
-        delete projection.config.capacityModel; projection.sites.forEach(site => delete site.historicalCapacity);
+        for (const key of ["schemaVersion", "historyModelId", "historyModelVersion", "capacityModelId", "capacityModelVersion", "demographicProfileVersion", "profileKind", "profileId", "profileVersion", "profileHash", "migratedFromVersion"]) delete projection[key];
+        delete projection.config.capacityModel; delete projection.config.profileHash; projection.sites.forEach(site => delete site.historicalCapacity);
         equal(projection, original, "Migration rewrote IDs/people/parents/partnerships/dynasties/rulers/events or other legacy fields");
         assert(s.historyModelVersion === 1 && s.capacityModelVersion === 1 && s.migratedFromVersion === 6, "Migration metadata mismatch");
         api.validate(s);

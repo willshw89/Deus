@@ -7,11 +7,11 @@ const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = r
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
-const BASE = "8a40d2ed66da758fc95fc3c1e8205709336c54df";
-const TASK = "DEUS-TSK-ASTRA-11";
+const BASE = "f0d7a8c0351a7bb80db4b7a6fd41796d3e0da2ad";
+const TASK = "DEUS-TSK-ASTRA-12";
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const ENGINE_HASH = "e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95";
-const ENGINE_BYTES = 45429;
+const ENGINE_HASH = "d879dd754969df3831b3b8f1bf3c702a05c1691c88e47e04cdc88fe23496a913";
+const ENGINE_BYTES = 51403;
 const DEFAULT_OUTPUT = path.join(ROOT, "game/test_output/bench_species_biology.json");
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MUTANTS = ["unseeded", "invalid_lifespan", "inverted_fertility", "corrupt_parentage"];
