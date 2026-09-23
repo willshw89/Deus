@@ -135,8 +135,19 @@ function makeSandbox(seed, size) {
             for (const u of Object.values(W.state.units)) {
                 if (!u.goal) continue;
                 if (u.x === u.goal.x && u.y === u.goal.y) { u.goal = null; emit("world:unitArrived", u); continue; }
-                const nx = u.x + Math.sign(u.goal.x - u.x), ny = u.y + Math.sign(u.goal.y - u.y);
-                if (water.has(ny * size + nx)) { u.goal = null; continue; }
+                let dx = Math.sign(u.goal.x - u.x), dy = Math.sign(u.goal.y - u.y);
+                if (dx !== 0 && dy !== 0 && water.has((u.y + dy) * size + (u.x + dx))) {
+                    if (!water.has(u.y * size + (u.x + dx))) dy = 0;
+                    else if (!water.has((u.y + dy) * size + u.x)) dx = 0;
+                }
+                const nx = u.x + dx, ny = u.y + dy;
+                if (water.has(ny * size + nx)) {
+                    if (dx !== 0 && !water.has((u.y + 1) * size + u.x)) { u.y += 1; continue; }
+                    if (dx !== 0 && !water.has((u.y - 1) * size + u.x)) { u.y -= 1; continue; }
+                    if (dy !== 0 && !water.has(u.y * size + (u.x + 1))) { u.x += 1; continue; }
+                    if (dy !== 0 && !water.has(u.y * size + (u.x - 1))) { u.x -= 1; continue; }
+                    u.goal = null; continue;
+                }
                 u.x = nx; u.y = ny;
             }
         },
@@ -263,6 +274,7 @@ try {
         "600 updates within one day changed no founder's food, days-without-food or exhaustion (the SRD counts days, not ticks)");
 
     // B. Idle founders drink the day's gallon once, and one with berries eats until the day's pound is reached.
+    S.time.hour = 13; // Meal window (lunch 13:00) so nutrition and water take precedence as critical survival
     const F2 = S.founders[1];
     I.create("berries", perDay + 3, { holder: F2.id });
     P.setEnabled(true);
@@ -278,6 +290,7 @@ try {
         `#${F2.id} ate ${perDay + 3 - carriedOf(S, F2, "berries")} berries (${perDay} expected) for ${needs(F2).foodLb} lb and stopped; ${carriedOf(S, F2, "berries")} left in its pack`);
     // Nutrition is not weight: one ration (2 lb) feeds the whole day; fruit adds water as well as food.
     {
+        S.time.hour = 13;
         const X = S.founders[2], Y = S.founders[3];
         I.create("rations", 2, { holder: X.id });
         I.create("fruit", 6, { holder: Y.id });
@@ -298,6 +311,7 @@ try {
     const H = S.founders[0];
     { const j = jobOf(S, H); if (j) J.cancel(j.id, "test: scenario"); }
     for (const k of [...C._internal.avoid.keys()]) if (k.startsWith(`${H.id}:`)) C._internal.avoid.delete(k);
+    if (C._internal.preemptAt) C._internal.preemptAt.delete(H.id);
     const stack = I.atIn(area, SITE.x, 8).find(it => it.type === "log");
     const hA = stack ? J.create({ type: "haul", target: { area: { x: 0, y: 0 }, x: SITE.x, y: 8, z: 0 }, params: { itemId: stack.id, to: { area: { x: 0, y: 0 }, x: SITE.x, y: 56, z: 0 } }, owner: H.id }) : null;
     const n2 = hA ? drive(S, 400, () => carriedOf(S, H, "log") > 0) : -1;
@@ -319,14 +333,21 @@ try {
     // The cut founder eats its pound from the larder (one eater at a time at a one-cell larder, eight hungry founders)
     // and goes back to the project.
     const n4 = H ? drive(S, 6000, () => needs(H).foodLb >= 1) : -1;
-    // Back in the pool: no need stands in the way, and the decision the sweep runs yields labor (or nothing at all
-    // when the project has no open job at that moment).
-    const n5 = H ? drive(S, 900, () => { const j = jobOf(S, H); return !j || (j.params && j.params.project === p.id); }) : -1;
+    // Back in the pool: no need stands in the way, and the decision yields work (or idle fallback if project finished)
+    S.time.hour = 14; // Advance past supper into daytime hours
+    const n5 = H ? drive(S, 900, () => {
+        const j = jobOf(S, H);
+        return !j || (j.params && j.params.project === p.id) || (j.params && (j.params.fireGather || j.params.stroll || j.params.idleSocial));
+    }) : -1;
     let resumed = false, how = "no hauler";
     if (H) {
         const j = jobOf(S, H);
         if (j && j.params && j.params.project === p.id) { resumed = true; how = `took ${j.type}#${j.id} on its own`; }
-        else if (!j) {
+        else if (j && j.params && (j.params.fireGather || j.params.stroll || j.params.idleSocial)) {
+            const openWork = J.open().filter(x => x.params && x.params.project).length;
+            resumed = openWork === 0;
+            how = `idle fallback ${j.type}#${j.id} (${openWork} open project jobs)`;
+        } else if (!j) {
             const d = C.decide(H);
             const openWork = J.open().filter(x => x.params && x.params.project).length;
             resumed = (!!d && !["eat", "drink", "sleep"].includes(d.type)) || (!d && openWork === 0);
@@ -399,6 +420,7 @@ try {
     // I. The long rest at night: hit points back; a level off only with the full day's food and drink.
     for (const u of C.list()) { needs(u).foodLb = 1; needs(u).waterGal = 1; }
     needs(R).exhaustion = 2; needs(R).fromNeeds = 2; needs(R).foodLb = 0.5; needs(R).waterGal = 1; R.data.hp = 3; R.data.maxHp = 10;
+    R.x = SITE.x; R.y = SITE.y; R.goal = null; // Position at camp center with direct route to straw beds
     S.time.hour = 1;
     const n8 = drive(S, 300, () => { const j = jobOf(S, R); return !!j && j.type === "sleep" && j.params.longRest; });
     const rest1 = jobOf(S, R);
