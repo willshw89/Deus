@@ -56,8 +56,7 @@
     const EXPLORE_RADIUS = 30;
     const HOME_LEASH = 45;          // cells: farther from the site than this (after a long chase), a colonist walks home first
     const URGENT_MARGIN = 25;       // a need this far above its threshold interrupts other work
-    const ACUTE_MARGIN = 35;        // a need this far above its threshold (90 with the catalog's thresholds) is acute: it preempts labor (DEUS-TSK-FABLE-05)
-    const NEED_RETRY_TICKS = 600;   // a need nothing can meet (no water, no food, nowhere to rest) isn't tried again for this long
+    const NEED_RETRY_TICKS = 600;   // a need nothing can meet (no water, no food, nowhere to rest) isn't tried again for this long (DEUS-TSK-FABLE-05)
     const AVOID_TICKS = 900;        // a job that failed isn't tried again on the same target for this long
     // The minimal job-taking loop (DEUS-TSK-FABLE-03, 2026-09-22); every count is map updates (domain: action).
     // DECIDE_EVERY above also bounds how often an idle colonist that found nothing to do decides again.
@@ -1435,42 +1434,133 @@
     const evening = () => inHours(hourNow(), 19, 22);
 
     //-------------------------------------------------------------------------
-    // Survival needs (DEUS-TSK-FABLE-05). Objective 1 removed needs from the creature menus; the physical loop is
-    // back: hunger, thirst and sleep tick at the catalog's rates, an acute need preempts labor, and the colonist
-    // drinks, eats or sleeps before going back to work. Moods, social and nature stay dormant.
+    // Survival needs, SRD 5.1 (owner directive 2026-09-23: "I want it like SRD"; DEUS-TSK-FABLE-05).
+    // Food and Water (srd:rule:adventuring-the-environment, pp. 86-87): one pound of food and one gallon of water a
+    // day (two gallons in hot weather). Days without food beyond 3 + Constitution modifier (minimum 1) each add a
+    // level of exhaustion; half a pound counts as half a day; a normal day of eating resets the count. Short water
+    // costs a level at the day's end (a DC 15 Constitution save when at least half was drunk), two levels when
+    // already exhausted. Exhaustion (srd:condition:exhaustion, p. 358) is the single penalty ladder; a long rest
+    // (srd:rule:adventuring-resting, 8 hours) with the full day's food and drink takes one level off. A colonist
+    // works unless it physically can't: unconscious at 0 hit points, or exhaustion level 5 (speed 0). No meters.
 
-    const ensureNeeds = u => (u && u.data ? (u.data.needs || (u.data.needs = Object.assign({}, START_NEEDS))) : null);
-    const needAt = (th, k, fallback) => (typeof th[k] === "number" ? th[k] : fallback);
-    const acuteAt = (th, k, fallback) => needAt(th, k, fallback) + ACUTE_MARGIN;
+    const NEEDS_MODEL = "srd";
+    const FOOD_LB_PER_DAY = 1;
+    const WATER_GAL_PER_DAY = 1;
+    const LONG_REST_HOURS = 8;
+    const TICKS_PER_HOUR = 3600;    // the scale sleepFrames uses
+    const EXHAUSTION = Object.freeze(["no effect", "disadvantage on ability checks", "speed halved",
+        "disadvantage on attack rolls and saving throws", "hit point maximum halved", "speed reduced to 0", "death"]);
+    const dayKey = () => (window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 1}` : "0:0:1");
+    const dayNumber = () => (window.$ufTime ? (($ufTime.year || 0) * 12 + ($ufTime.monthIndex || 0)) * 40 + ($ufTime.day || 1) : 1);
+    const lastMealHour = () => { const m = colonyConfig().mealHours || []; return m.length ? Math.max(...m) : 19; };
+    const conModOf = u => {
+        const s = (u && u.data && (u.data.stats || u.data.abilities || u.data.scores)) || null;
+        const con = s && Number.isFinite(s.con) ? s.con : 10;
+        return Math.floor((con - 10) / 2);
+    };
+    const hotWeather = u => {
+        const Env = window.UF && UF.Environment;
+        const t = Env && typeof Env.unitThermal === "function" ? Env.unitThermal(u) : null;
+        return !!t && (t.stage === "overheated" || t.stage === "heatstroke");
+    };
+    const waterNeed = u => WATER_GAL_PER_DAY * (hotWeather(u) ? 2 : 1);
+    const unconscious = u => !!u && !!u.data && Number.isFinite(u.data.hp) && u.data.hp <= 0;
 
-    // Every NEEDS_EVERY ticks (from the map-update alias), over the cached colonist list: never per frame.
+    // The SRD needs record on a colonist; an older meter record (hunger/thirst/sleep) is replaced on sight.
+    function ensureNeeds(u) {
+        if (!u || !u.data) return null;
+        let n = u.data.needs;
+        if (!n || n.model !== NEEDS_MODEL) {
+            n = u.data.needs = { model: NEEDS_MODEL, day: dayKey(), foodLb: 0, waterGal: 0, daysWithoutFood: 0, exhaustion: 0, fromNeeds: 0, lastRestDay: null };
+        }
+        return n;
+    }
+    const exhaustionOf = u => (u && u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL ? u.data.needs.exhaustion | 0 : 0);
+    /** What the colonist's exhaustion level does (SRD p. 358), for the movement, combat and hit-point systems to apply. */
+    function exhaustionEffects(u) {
+        const level = exhaustionOf(u);
+        return {
+            level, text: EXHAUSTION[Math.min(6, level)],
+            disadvantageOnChecks: level >= 1,
+            speedFactor: level >= 5 ? 0 : (level >= 2 ? 0.5 : 1),
+            disadvantageOnAttacksAndSaves: level >= 3,
+            hpMaxFactor: level >= 4 ? 0.5 : 1,
+            dead: level >= 6
+        };
+    }
+    function addExhaustion(u, levels, cause) {
+        const n = ensureNeeds(u), J = Jobs(), W = World();
+        if (!n || levels <= 0) return n ? n.exhaustion : 0;
+        n.exhaustion = Math.min(6, (n.exhaustion | 0) + levels);
+        if (cause === "hunger" || cause === "thirst") n.fromNeeds = Math.min(6, (n.fromNeeds | 0) + levels);
+        addThought(u, cause === "hunger" ? "Grew weak with hunger." : cause === "thirst" ? "Grew weak with thirst." : "Was worn down by exhaustion.", -8);
+        emit("colonists:exhaustion", u, n.exhaustion, cause);
+        if (n.exhaustion >= 6) {
+            // Level 6 is death (SRD p. 358).
+            u.data.dead = true;
+            if (Number.isFinite(u.data.hp)) u.data.hp = 0;
+            const job = J ? J.of(u.id) : null;
+            if (job) J.cancel(job.id, `died of ${cause}`);
+            const c = colonyState(u);
+            if (c && Array.isArray(c.log)) c.log.push({ tick: ticks(), text: `${u.name || "A colonist"} died of ${cause}` });
+            emit("colonists:died", u, cause);
+            if (W) W.removeUnit(u.id);
+        } else if (n.exhaustion >= 5) {
+            const job = J ? J.of(u.id) : null;
+            if (job && job.type !== "sleep") J.cancel(job.id, "survival: exhaustion");
+        }
+        return n.exhaustion;
+    }
+    function removeExhaustion(u, levels) {
+        const n = ensureNeeds(u);
+        if (!n) return 0;
+        n.exhaustion = Math.max(0, (n.exhaustion | 0) - levels);
+        n.fromNeeds = Math.min(n.fromNeeds | 0, n.exhaustion);
+        return n.exhaustion;
+    }
+
+    // The day's reckoning (SRD Food and Water), run once per colonist when the calendar day changes.
+    function endOfDay(u, n) {
+        const conMod = conModOf(u);
+        if (n.foodLb >= FOOD_LB_PER_DAY) n.daysWithoutFood = 0;
+        else n.daysWithoutFood += n.foodLb >= FOOD_LB_PER_DAY / 2 ? 0.5 : 1;
+        if (n.daysWithoutFood > Math.max(1, 3 + conMod)) addExhaustion(u, 1, "hunger");
+        const need = waterNeed(u);
+        if (n.waterGal < need) {
+            const levels = n.exhaustion > 0 ? 2 : 1;
+            if (n.waterGal >= need / 2) {
+                const d20 = 1 + Math.floor(unit01(seed(), SALT.roll, u.id, dayNumber(), 15) * 20);
+                if (d20 + conMod < 15) addExhaustion(u, levels, "thirst");
+            } else addExhaustion(u, levels, "thirst");
+        }
+        n.foodLb = 0;
+        n.waterGal = 0;
+        n.day = dayKey();
+    }
+
+    // Every NEEDS_EVERY ticks (from the map-update alias), over the cached colonist list: the day boundary, nothing else.
     function tickNeeds() {
-        const rates = needRates(), th = thresholds(), s = seed();
+        const today = dayKey();
         for (const u of colonists()) {
             const n = ensureNeeds(u);
-            if (!n) continue;
-            if (asleep(u)) {
-                n.sleep = Math.max(0, (n.sleep || 0) - 0.6); // resting; the sleep job sets it to 5 at the end
-            } else {
-                for (const k of Object.keys(rates)) n[k] = clamp((n[k] || 0) + rates[k], 0, 100);
-            }
-            const roll = k => unit01(s, SALT.thought, u.id, ticks(), k);
-            if (n.hunger >= acuteAt(th, "hunger", 55) - 10 && roll(1) < 0.05) addThought(u, "Was bothered by hunger.", -5);
-            if (n.thirst >= acuteAt(th, "thirst", 55) - 10 && roll(2) < 0.05) addThought(u, "Felt parched.", -6);
-            if (n.sleep >= acuteAt(th, "sleep", 75) - 5 && roll(3) < 0.05) addThought(u, "Was worn out for lack of sleep.", -7);
+            if (n && n.day !== today) endOfDay(u, n);
         }
     }
 
-    // The acute need, if any: "health" (a quarter of the hit points or less), then thirst, hunger, sleep.
+    // What stops or interrupts labor: unconscious, exhaustion 5, the long rest at bedtime, and the day's water or
+    // food still short in the last meal hour (supper) before the rest.
     function urgent(u) {
         const d = u && u.data;
         if (!d) return null;
-        if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.maxHp > 0 && d.hp <= d.maxHp * 0.25) return "health";
-        const n = d.needs, th = thresholds();
+        if (unconscious(u)) return "unconscious";
+        const n = ensureNeeds(u);
         if (!n) return null;
-        if ((n.thirst || 0) >= acuteAt(th, "thirst", 55)) return "thirst";
-        if ((n.hunger || 0) >= acuteAt(th, "hunger", 55)) return "hunger";
-        if ((n.sleep || 0) >= acuteAt(th, "sleep", 75)) return "sleep";
+        if (n.exhaustion >= 5) return "exhaustion";
+        if (sleepingHours(u) && n.lastRestDay !== dayKey()) return "rest";
+        if (hourNow() >= lastMealHour() && !sleepingHours(u)) {
+            if (n.waterGal < waterNeed(u)) return "thirst";
+            if (n.foodLb < FOOD_LB_PER_DAY) return "hunger";
+        }
         return null;
     }
     // A job that serves the need is never preempted for it.
@@ -1480,39 +1570,70 @@
     const needKey = (u, need) => { const c = colonyState(u); return avoidKey(u, "need_" + need, c ? c.site.x : 0, c ? c.site.y : 0); };
     const needBlocked = (u, need) => (avoid.get(needKey(u, need)) || 0) > ticks();
 
-    // A real UF_Jobs job for the most pressing need at or above its threshold: drink at the nearest water with a
-    // standable bank, eat (carried food, then the larder or the ground, then a forageable plant, then prey), sleep
-    // (an unoccupied permitted bed, else beside the hearth, else where the colonist stands). A need nothing can
-    // meet leaves a thought and is not searched again for NEED_RETRY_TICKS; the next need is tried meanwhile.
-    function needJob(u) {
-        const n = ensureNeeds(u), th = thresholds();
-        if (!n) return null;
-        const wants = [];
-        if ((n.thirst || 0) >= needAt(th, "thirst", 55)) wants.push({ need: "thirst", over: n.thirst - needAt(th, "thirst", 55) });
-        if ((n.hunger || 0) >= needAt(th, "hunger", 55) || (isMealHour() && (n.hunger || 0) >= 30 && stockpilesStoring("food", u).length && foodStored(u).length)) {
-            wants.push({ need: "hunger", over: (n.hunger || 0) - needAt(th, "hunger", 55) });
+    // The long rest: 8 hours in a bed, beside the hearth, or where the colonist stands (at speed 0 it can't walk to a bed).
+    function longRestJob(u) {
+        const n = ensureNeeds(u);
+        const frames = LONG_REST_HOURS * TICKS_PER_HOUR;
+        if (n && n.exhaustion >= 5) return give(u, { type: "sleep", target: { x: u.x, y: u.y }, params: { frames, longRest: true } });
+        return sleepJob(u, { frames, longRest: true });
+    }
+    // At the end of a long rest (SRD Resting): all hit points back (with at least 1 at the start), and one level of
+    // exhaustion off with some food and drink that day; exhaustion from hunger or thirst only once the full day's
+    // amount was eaten and drunk (SRD Food and Water).
+    function completeLongRest(u) {
+        const n = ensureNeeds(u);
+        if (!n) return;
+        n.lastRestDay = dayKey();
+        const d = u.data;
+        if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.hp >= 1) d.hp = d.maxHp;
+        if (n.exhaustion > 0) {
+            const full = n.foodLb >= FOOD_LB_PER_DAY && n.waterGal >= waterNeed(u);
+            const some = n.foodLb > 0 && n.waterGal > 0;
+            if (n.fromNeeds > 0 ? full : some) removeExhaustion(u, 1);
         }
-        if ((n.sleep || 0) >= needAt(th, "sleep", 75) || (sleepingHours(u) && (n.sleep || 0) > 40)) wants.push({ need: "sleep", over: (n.sleep || 0) - needAt(th, "sleep", 75) });
-        wants.sort((a, b) => b.over - a.over);
-        for (const { need } of wants) {
+        emit("colonists:longRest", u, n.exhaustion);
+    }
+
+    // A real UF_Jobs job for what the day still needs, once the colonist is free: the long rest at bedtime (or when
+    // exhausted and not yet rested today), then water, then food. A need nothing can meet leaves a thought and is
+    // not searched again for NEED_RETRY_TICKS; the next need is tried meanwhile.
+    function needJob(u) {
+        const n = ensureNeeds(u);
+        if (!n || unconscious(u)) return null;
+        const wants = [];
+        if (n.lastRestDay !== dayKey() && (sleepingHours(u) || n.exhaustion >= 1)) wants.push("rest");
+        if (n.waterGal < waterNeed(u)) wants.push("thirst");
+        if (n.foodLb < FOOD_LB_PER_DAY) wants.push("hunger");
+        for (const need of wants) {
             if (needBlocked(u, need)) continue;
-            let j = null, text = "";
-            if (need === "thirst") {
+            let j = null, text = "", exists = false;
+            if (need === "rest") {
+                j = longRestJob(u);
+                text = "Found nowhere to rest.";
+            } else if (need === "thirst") {
                 const w = waterNear(u, WATER_RADIUS);
+                exists = !!w;
                 j = w ? give(u, { type: "drink", target: w, params: { need } }) : null;
                 text = "Found no water to drink.";
-            } else if (need === "hunger") {
-                j = foodJob(u);
-                text = "Found nothing to eat.";
             } else {
-                j = sleepJob(u);
-                text = "Found nowhere to rest.";
+                j = foodJob(u);
+                exists = !j && foodExists(u);
+                text = "Found nothing to eat.";
             }
             if (j) return j;
+            // Water or food that exists but is busy (somebody drinks or eats there now: one job per cell) is tried
+            // again at the next sweep; a resource that doesn't exist waits NEED_RETRY_TICKS and leaves a thought.
+            if (exists) { avoid.set(needKey(u, need), ticks() + DECIDE_EVERY); continue; }
             avoid.set(needKey(u, need), ticks() + NEED_RETRY_TICKS);
             addThought(u, text, -4);
         }
         return null;
+    }
+    // Any food this colonist could reach: the larder and containers, the ground within FOOD_ITEM_RADIUS, a forageable plant.
+    function foodExists(u) {
+        if (foodStored(u).length) return true;
+        if (groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).some(f => isFoodType(itemType(f.item.type)))) return true;
+        return !!foodObjectNear(u, SEARCH_RADIUS);
     }
 
     const _foodStoredCache = new Map();
@@ -2774,10 +2895,11 @@
         return candidates;
     }
 
-    function sleepJob(u) {
+    function sleepJob(u, opts) {
         const O = Objects();
         const c = colonyState(u);
-        const frames = sleepFrames(u);
+        const frames = opts && opts.frames > 0 ? opts.frames | 0 : sleepFrames(u);
+        const extra = opts && opts.longRest ? { longRest: true } : {};
         if (sleepingHours(u) && eligibleForIntimacy(u)) {
             checkNighttimeSleepMating(u);
         }
@@ -2811,7 +2933,7 @@
         // NEVER sleep on c.site (the campfire)!
         spots.push({ x: u.x, y: u.y, fire: fireRef });
         for (const s of spots) {
-            const params = { frames };
+            const params = Object.assign({ frames }, extra);
             if (s.fire) params.faceTowards = { x: s.fire.x, y: s.fire.y };
             const j = give(u, { type: "sleep", target: { x: s.x, y: s.y }, params });
             if (j) return j;
@@ -4360,12 +4482,13 @@
         decisionAt.set(u.id, ticks());
         if (Number.isFinite(u.data.age) && u.data.age < 15) return null; // dependants are not workers
         if (J.of(u.id)) return null;
-        // Step 1: survival. A critically wounded colonist rests (no healing system runs yet); a need at or above its
-        // threshold is met first (needJob), most pressing first. A need nothing can meet doesn't keep the colonist
-        // from working: needJob leaves a thought and waits NEED_RETRY_TICKS before searching again.
-        if (urgent(u) === "health") return null;
+        // Step 1: survival (SRD). Unconscious at 0 hit points: nothing. Otherwise what the day still needs comes
+        // first (needJob: rest, water, food); a need nothing can meet doesn't keep the colonist from working. At
+        // exhaustion 5 (speed 0) there is no work, only the rest.
+        if (unconscious(u)) return null;
         const need = needJob(u);
         if (need) return need;
+        if (exhaustionOf(u) >= 5) return null;
         // Steps 2-5: query, score and claim; UF_Jobs walks the worker there and runs the job.
         return projectJob(u) || designationJob(u) || stepOffReserved(u);
     }
@@ -4493,8 +4616,8 @@
         switch (job.type) {
             case "drink":
                 addThought(u, "Felt refreshed after a drink of water.", 8);
-                if (u.data && u.data.needs) {
-                    u.data.needs.waste = clamp((u.data.needs.waste || 0) + 15, 0, 100);
+                if (u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL) {
+                    u.data.needs.waterGal = Math.round(((u.data.needs.waterGal || 0) + WATER_GAL_PER_DAY) * 1000) / 1000; // one drink is a gallon
                 }
                 const S = Sanitation();
                 if (S && S.isWaterContaminated && S.isWaterContaminated(levelArea(u), job.target ? job.target.x : u.x, job.target ? job.target.y : u.y)) {
@@ -4503,12 +4626,16 @@
                 break;
             case "eat":
                 addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8);
-                if (u.data && u.data.needs) {
-                    u.data.needs.waste = clamp((u.data.needs.waste || 0) + 20, 0, 100);
+                if (u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL) {
+                    // One unit eaten; its weight in pounds is the day's food (SRD: one pound a day).
+                    const I = Items();
+                    const lb = I && typeof I.weightOf === "function" ? I.weightOf({ type: job.params.itemType, count: 1 }) : 0;
+                    u.data.needs.foodLb = Math.round(((u.data.needs.foodLb || 0) + (lb > 0 ? lb : 0.2)) * 1000) / 1000;
                 }
                 break;
             case "sleep": {
                 addThought(u, "Woke rested.", 10);
+                if (job.params && job.params.longRest) completeLongRest(u);
                 const O = Objects();
                 const owned = UF.Ownership && UF.Ownership.bedOf(u);
                 const fire = nearestFire(u);
@@ -4799,7 +4926,8 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Colonists = Colonists;
-    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, isNeedJob, needBlocked, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep });
+    Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds });
+    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, endOfDay, addExhaustion, removeExhaustion, completeLongRest, longRestJob, dayKey, dayNumber, conModOf, waterNeed, isNeedJob, needBlocked, avoid, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep });
 
     //-------------------------------------------------------------------------
     // Engine hooks
