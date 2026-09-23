@@ -1,0 +1,64 @@
+Create or Destroy Water                                      given it. To maintain control of the creature for
+                                                             another 24 hours, you must cast this spell on the
+1st-level transmutation                                   creature before the current 24-hour period ends.
+                                                             This use of the spell reasserts your control over up
+Casting Time: 1 action                                       to three creatures you have animated with this spell,
+Range: 30 feet                                               rather than animating new ones.
+Components: V, S, M (a drop of water if creating
+                                                               At Higher Levels. When you cast this spell using a
+  water or a few grains of sand if destroying it)            7th-level spell slot, you can animate or reassert
+Duration: Instantaneous                                      control over four ghouls. When you cast this spell
+                                                             using an 8th-level spell slot, you can animate or
+You either create or destroy water.                          reassert control over five ghouls or two ghasts or
+  Create Water. You create up to 10 gallons of clean         wights. When you cast this spell using a 9th-level
+                                                             spell slot, you can animate or reassert control over
+water within range in an open container.                     six ghouls, three ghasts or wights, or two mummies.
+Alternatively, the water falls as rain in a 30-foot cube
+within range, extinguishing exposed flames in the            Creation
+area.
+                                                             5th-level illusion
+  Destroy Water. You destroy up to 10 gallons of
+water in an open container within range.                     Casting Time: 1 minute
+Alternatively, you destroy fog in a 30-foot cube          Range: 30 feet
+within range.                                                Components: V, S, M (a tiny piece of matter of the
+
+  At Higher Levels. When you cast this spell using a           same type of the item you plan to create)
+spell slot of 2nd level or higher, you create or             Duration: Special
+destroy 10 additional gallons of water, or the size of
+the cube increases by 5 feet, for each slot level above      You pull wisps of shadow material from the
+1st.                                                         Shadowfell to create a nonliving object of vegetable
+                                                             matter within range: soft goods, rope, wood, or
+Create Undead                                                something similar. You can also use this spell to
+                                                             create mineral objects such as stone, crystal, or
+6th-level necromancy                                      metal. The object created must be no larger than a 5-
+                                                             foot cube, and the object must be of a form and
+Casting Time: 1 minute                                       material that you have seen before.
+Range: 10 feet
+Components: V, S, M (one clay pot filled with grave            The duration depends on the object’s material. If
+                                                             the object is composed of multiple materials, use the
+  dirt, one clay pot filled with brackish water, and         shortest duration.
+  one 150 gp black onyx stone for each corpse)
+Duration: Instantaneous                                      Material               Duration
+                                                             Vegetable matter       1 day
+You can cast this spell only at night. Choose up to          Stone or crystal       12 hours
+three corpses of Medium or Small humanoids within            Precious metals        1 hour
+range. Each corpse becomes a ghoul under your                Gems                   10 minutes
+control. (The GM has game statistics for these               Adamantine or mithral  1 minute
+creatures.)
+                                                               Using any material created by this spell as another
+  As a bonus action on each of your turns, you can           spell’s material component causes that spell to fail.
+mentally command any creature you animated with
+this spell if the creature is within 120 feet of you (if       At Higher Levels. When you cast this spell using a
+you control multiple creatures, you can command              spell slot of 6th level or higher, the cube increases by
+any or all of them at the same time, issuing the same        5 feet for each slot level above 5th.
+command to each one). You decide what action the
+creature will take and where it will move during its         Cure Wounds
+next turn, or you can issue a general command, such
+as to guard a particular chamber or corridor. If you         1st-level evocation
+issue no commands, the creature only defends itself
+against hostile creatures. Once given an order, the          Casting Time: 1 action
+creature continues to follow it until its task is            Range: Touch
+complete.                                                    Components: V, S
+                                                             Duration: Instantaneous
+  The creature is under your control for 24 hours,
+after which it stops obeying any command you have

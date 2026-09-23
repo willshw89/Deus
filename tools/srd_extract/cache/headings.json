@@ -1,0 +1,3227 @@
+{
+ "1": [
+  "Legal Information"
+ ],
+ "2": [],
+ "3": [
+  "Races",
+  "Racial Traits",
+  "Ability Score Increase",
+  "Age",
+  "Alignment",
+  "Size",
+  "Speed",
+  "Languages",
+  "Subraces",
+  "Dwarf",
+  "Dwarf Traits"
+ ],
+ "4": [
+  "Hill Dwarf",
+  "Elf",
+  "Elf Traits",
+  "High Elf",
+  "Halfling",
+  "Halfling Traits"
+ ],
+ "5": [
+  "Lightfoot",
+  "Human",
+  "Human Traits",
+  "Dragonborn"
+ ],
+ "6": [
+  "Gnome",
+  "Gnome Traits",
+  "Rock Gnome",
+  "Half-Elf",
+  "Half-Elf Traits"
+ ],
+ "7": [
+  "Half-Orc",
+  "Half-Orc Traits",
+  "Tiefling",
+  "Tiefling Traits"
+ ],
+ "8": [
+  "Barbarian",
+  "Class Features",
+  "Hit Points",
+  "Proficiencies",
+  "Intimidation, Nature, Perception, and Survival",
+  "Equipment",
+  "Rage Damage",
+  "Rage",
+  "Unarmored Defense"
+ ],
+ "9": [
+  "Reckless Attack",
+  "Danger Sense",
+  "Primal Path",
+  "Ability Score Improvement",
+  "Extra Attack",
+  "Fast Movement",
+  "Feral Instinct",
+  "Brutal Critical",
+  "Relentless Rage",
+  "Persistent Rage",
+  "Indomitable Might",
+  "Primal Champion",
+  "Path of the Berserker",
+  "Frenzy"
+ ],
+ "10": [
+  "Mindless Rage",
+  "Intimidating Presence",
+  "Retaliation"
+ ],
+ "11": [
+  "Bard",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per bard level after 1st",
+  "Proficiencies",
+  "Equipment",
+  "Spellcasting"
+ ],
+ "12": [
+  "Cantrips",
+  "Spell Slots",
+  "Spells Known of 1st Level and Higher",
+  "Spellcasting Ability",
+  "Ritual Casting",
+  "Spellcasting Focus",
+  "Bardic Inspiration",
+  "Jack of All Trades",
+  "Song of Rest",
+  "Bard College"
+ ],
+ "13": [
+  "Expertise",
+  "Ability Score Improvement",
+  "Font of Inspiration",
+  "Countercharm",
+  "Magical Secrets",
+  "Superior Inspiration",
+  "College of Lore",
+  "Bonus Proficiencies",
+  "Cutting Words",
+  "Additional Magical Secrets"
+ ],
+ "14": [
+  "Peerless Skill"
+ ],
+ "15": [
+  "Cleric",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per cleric level after 1st",
+  "Proficiencies",
+  "Persuasion, and Religion",
+  "Equipment",
+  "Spellcasting",
+  "Cantrips"
+ ],
+ "16": [
+  "Preparing and Casting Spells",
+  "Spellcasting Ability",
+  "Ritual Casting",
+  "Spellcasting Focus",
+  "Divine Domain",
+  "Domain Spells",
+  "Channel Divinity",
+  "Channel Divinity: Turn Undead"
+ ],
+ "17": [
+  "Divine Intervention",
+  "Life Domain",
+  "Bonus Proficiency",
+  "Disciple of Life",
+  "Channel Divinity: Preserve Life",
+  "Blessed Healer",
+  "Divine Strike",
+  "Supreme Healing"
+ ],
+ "18": [],
+ "19": [
+  "Druid",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per druid level after 1st",
+  "Proficiencies",
+  "Druidic",
+  "Equipment",
+  "Spellcasting"
+ ],
+ "20": [
+  "Cantrips",
+  "Preparing and Casting Spells",
+  "Spellcasting Ability",
+  "Ritual Casting",
+  "Spellcasting Focus",
+  "Level 2nd",
+  "Max. CR 1/4",
+  "Example Wolf"
+ ],
+ "21": [
+  "Druid Circle",
+  "Ability Score Improvement",
+  "Timeless Body",
+  "Beast Spells",
+  "Archdruid",
+  "Circle of the Land",
+  "Bonus Cantrip",
+  "Natural Recovery",
+  "Circle Spells"
+ ],
+ "22": [
+  "Arctic",
+  "Coast",
+  "Desert",
+  "Druid Level 3rd 5th",
+  "Forest",
+  "Grassland",
+  "Mountain",
+  "Swamp",
+  "Land’s Stride",
+  "Nature’s Ward",
+  "Nature’s Sanctuary",
+  "Sacred Plants and Wood"
+ ],
+ "23": [
+  "Druids and the Gods"
+ ],
+ "24": [
+  "Fighter",
+  "Class Features",
+  "Hit Points",
+  "Proficiencies",
+  "Equipment",
+  "Fighting Style",
+  "Archery",
+  "Defense",
+  "Dueling",
+  "Great Weapon Fighting",
+  "Protection",
+  "Two-Weapon Fighting",
+  "Second Wind"
+ ],
+ "25": [
+  "Action Surge",
+  "Martial Archetype",
+  "Ability Score Improvement",
+  "Extra Attack",
+  "Indomitable",
+  "Martial Archetypes",
+  "Champion",
+  "Improved Critical",
+  "Remarkable Athlete",
+  "Additional Fighting Style",
+  "Superior Critical",
+  "Survivor"
+ ],
+ "26": [
+  "Monk",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per monk level after 1st",
+  "Proficiencies",
+  "History, Insight, Religion, and Stealth",
+  "Equipment",
+  "Unarmored Movement —",
+  "Unarmored Defense",
+  "Martial Arts"
+ ],
+ "27": [
+  "Ki",
+  "Flurry of Blows",
+  "Patient Defense",
+  "Step of the Wind",
+  "Unarmored Movement",
+  "Monastic Tradition",
+  "Deflect Missiles",
+  "Ability Score Improvement",
+  "Slow Fall",
+  "Extra Attack"
+ ],
+ "28": [
+  "Stunning Strike",
+  "Ki-Empowered Strikes",
+  "Evasion",
+  "Stillness of Mind",
+  "Purity of Body",
+  "Tongue of the Sun and Moon",
+  "Diamond Soul",
+  "Timeless Body",
+  "Empty Body",
+  "Perfect Self",
+  "Monastic Traditions",
+  "Way of the Open Hand",
+  "Open Hand Technique",
+  "Wholeness of Body"
+ ],
+ "29": [
+  "Tranquility",
+  "Quivering Palm"
+ ],
+ "30": [
+  "Paladin",
+  "Class Features",
+  "Hit Points",
+  "Proficiencies",
+  "Intimidation, Medicine, Persuasion, and Religion",
+  "Equipment",
+  "Divine Sense"
+ ],
+ "31": [
+  "Lay on Hands",
+  "Fighting Style",
+  "Defense",
+  "Dueling",
+  "Great Weapon Fighting",
+  "Protection",
+  "Spellcasting",
+  "Preparing and Casting Spells",
+  "Spellcasting Ability",
+  "Spellcasting Focus",
+  "Divine Smite"
+ ],
+ "32": [
+  "Divine Health",
+  "Sacred Oath",
+  "Oath Spells",
+  "Channel Divinity",
+  "Ability Score Improvement",
+  "Extra Attack",
+  "Aura of Protection",
+  "Aura of Courage",
+  "Improved Divine Smite",
+  "Cleansing Touch",
+  "Sacred Oaths",
+  "Oath of Devotion"
+ ],
+ "33": [
+  "Tenets of Devotion",
+  "Oath Spells",
+  "Channel Divinity",
+  "Aura of Devotion",
+  "Purity of Spirit",
+  "Holy Nimbus",
+  "Breaking Your Oath"
+ ],
+ "34": [],
+ "35": [
+  "Ranger",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per ranger level after 1st",
+  "Proficiencies",
+  "Equipment",
+  "Favored Enemy"
+ ],
+ "36": [
+  "Natural Explorer",
+  "Fighting Style",
+  "Archery",
+  "Defense",
+  "Dueling",
+  "Two-Weapon Fighting",
+  "Spellcasting",
+  "Spell Slots",
+  "Spells Known of 1st Level and Higher",
+  "Spellcasting Ability"
+ ],
+ "37": [
+  "Ranger Archetype",
+  "Primeval Awareness",
+  "Ability Score Improvement",
+  "Extra Attack",
+  "Land’s Stride",
+  "Hide in Plain Sight",
+  "Vanish",
+  "Feral Senses",
+  "Foe Slayer",
+  "Ranger Archetypes",
+  "Hunter",
+  "Hunter’s Prey"
+ ],
+ "38": [
+  "Defensive Tactics",
+  "Multiattack",
+  "Superior Hunter’s Defense"
+ ],
+ "39": [
+  "Rogue",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per rogue level after 1st",
+  "Proficiencies",
+  "Equipment",
+  "Sneak Attack",
+  "Expertise",
+  "Sneak Attack",
+  "Thieves’ Cant"
+ ],
+ "40": [
+  "Cunning Action",
+  "Roguish Archetype",
+  "Ability Score Improvement",
+  "Uncanny Dodge",
+  "Evasion",
+  "Reliable Talent",
+  "Blindsense",
+  "Slippery Mind",
+  "Elusive",
+  "Stroke of Luck",
+  "Roguish Archetypes",
+  "Thief",
+  "Fast Hands"
+ ],
+ "41": [
+  "Second-Story Work",
+  "Supreme Sneak",
+  "Use Magic Device",
+  "Thief’s Reflexes"
+ ],
+ "42": [
+  "Sorcerer",
+  "Class Features",
+  "Hit Points",
+  "Proficiencies",
+  "Intimidation, Persuasion, and Religion",
+  "Equipment",
+  "Sorcery Points",
+  "Sorcerous Origin feature —",
+  "Ability Score Improvement —",
+  "Metamagic —",
+  "Ability Score Improvement —",
+  "Sorcerous Origin feature —"
+ ],
+ "43": [
+  "Spellcasting",
+  "Cantrips",
+  "Spell Slots",
+  "Spells Known of 1st Level and Higher",
+  "Spellcasting Ability",
+  "Spellcasting Focus",
+  "Sorcerous Origin",
+  "Font of Magic",
+  "Sorcery Points",
+  "Flexible Casting",
+  "Sorcery Point Cost"
+ ],
+ "44": [
+  "Metamagic",
+  "Careful Spell",
+  "Distant Spell",
+  "Empowered Spell",
+  "Extended Spell",
+  "Heightened Spell",
+  "Quickened Spell",
+  "Subtle Spell",
+  "Twinned Spell",
+  "Ability Score Improvement",
+  "Sorcerous Restoration",
+  "Sorcerous Origins",
+  "Draconic Bloodline",
+  "Dragon Ancestor",
+  "Draconic Ancestry"
+ ],
+ "45": [
+  "Draconic Resilience",
+  "Elemental Affinity",
+  "Dragon Wings",
+  "Draconic Presence"
+ ],
+ "46": [
+  "Warlock",
+  "Class Features",
+  "Hit Points",
+  "Proficiencies",
+  "Equipment",
+  "Otherworldly Patron feature —",
+  "Ability Score Improvement —",
+  "Cantrips Known",
+  "Spells Known",
+  "Spell Slots",
+  "Slot Level 1st",
+  "Invocations Known —",
+  "Otherworldly Patron",
+  "Pact Magic",
+  "Cantrips"
+ ],
+ "47": [
+  "Spell Slots",
+  "Spells Known of 1st Level and Higher",
+  "Spellcasting Ability",
+  "Spellcasting Focus",
+  "Eldritch Invocations",
+  "Pact Boon",
+  "Pact of the Chain",
+  "Pact of the Blade"
+ ],
+ "48": [
+  "Pact of the Tome",
+  "Ability Score Improvement",
+  "Mystic Arcanum",
+  "Eldritch Master",
+  "Eldritch Invocations",
+  "Agonizing Blast",
+  "Prerequisite: eldritch blast cantrip",
+  "Armor of Shadows",
+  "Ascendant Step",
+  "Prerequisite: 9th level",
+  "Beast Speech",
+  "Beguiling Influence",
+  "Bewitching Whispers",
+  "Prerequisite: 7th level",
+  "Book of Ancient Secrets",
+  "Prerequisite: Pact of the Tome feature"
+ ],
+ "49": [
+  "Chains of Carceri",
+  "Devil’s Sight",
+  "Dreadful Word",
+  "Prerequisite: 7th level",
+  "Eldritch Sight",
+  "Eldritch Spear",
+  "Prerequisite: eldritch blast cantrip",
+  "Eyes of the Rune Keeper",
+  "Fiendish Vigor",
+  "Gaze of Two Minds",
+  "Lifedrinker",
+  "Mask of Many Faces",
+  "Master of Myriad Forms",
+  "Prerequisite: 15th level",
+  "Minions of Chaos",
+  "Prerequisite: 9th level",
+  "Mire the Mind",
+  "Prerequisite: 5th level",
+  "Misty Visions",
+  "One with Shadows",
+  "Prerequisite: 5th level",
+  "Otherworldly Leap",
+  "Prerequisite: 9th level",
+  "Repelling Blast",
+  "Prerequisite: eldritch blast cantrip"
+ ],
+ "50": [
+  "Sculptor of Flesh",
+  "Prerequisite: 7th level",
+  "Sign of Ill Omen",
+  "Prerequisite: 5th level",
+  "Thief of Five Fates",
+  "Thirsting Blade",
+  "Visions of Distant Realms",
+  "Prerequisite: 15th level",
+  "Voice of the Chain Master",
+  "Prerequisite: Pact of the Chain feature",
+  "Whispers of the Grave",
+  "Prerequisite: 9th level",
+  "Witch Sight",
+  "Prerequisite: 15th level",
+  "Otherworldly Patrons",
+  "The Fiend",
+  "Expanded Spell List",
+  "Dark One’s Blessing",
+  "Dark One’s Own Luck"
+ ],
+ "51": [
+  "Fiendish Resilience",
+  "Hurl Through Hell",
+  "Your Pact Boon"
+ ],
+ "52": [
+  "Wizard",
+  "Class Features",
+  "Hit Points",
+  "Constitution modifier per wizard level after 1st",
+  "Proficiencies",
+  "Investigation, Medicine, and Religion",
+  "Equipment",
+  "Spellcasting",
+  "Cantrips",
+  "Spellbook"
+ ],
+ "53": [
+  "Preparing and Casting Spells",
+  "Spellcasting Ability",
+  "Ritual Casting",
+  "Spellcasting Focus",
+  "Learning Spells of 1st Level and Higher",
+  "Arcane Recovery",
+  "Arcane Tradition",
+  "Ability Score Improvement",
+  "Spell Mastery"
+ ],
+ "54": [
+  "Signature Spells",
+  "Arcane Traditions",
+  "School of Evocation",
+  "Evocation Savant",
+  "Sculpt Spells",
+  "Potent Cantrip",
+  "Empowered Evocation",
+  "Overchannel",
+  "Your Spellbook"
+ ],
+ "55": [],
+ "56": [
+  "Beyond 1st Level",
+  "Multiclassing"
+ ],
+ "57": [
+  "Class Barbarian Bard",
+  "Cleric Druid",
+  "Fighter",
+  "Paladin Ranger",
+  "Class Features",
+  "Channel Divinity",
+  "Extra Attack",
+  "Unarmored Defense",
+  "Spellcasting"
+ ],
+ "58": [
+  "Alignment"
+ ],
+ "59": [
+  "Alignment in the Multiverse",
+  "Languages",
+  "Inspiration"
+ ],
+ "60": [
+  "Gaining Inspiration",
+  "Using Inspiration",
+  "Backgrounds",
+  "Proficiencies",
+  "Languages",
+  "Equipment",
+  "Suggested Characteristics",
+  "Customizing a Background",
+  "Acolyte"
+ ],
+ "61": [
+  "Feature: Shelter of the Faithful",
+  "Suggested Characteristics"
+ ],
+ "62": [
+  "Equipment",
+  "GP 1/100",
+  "PP 1/1,000",
+  "Selling Treasure",
+  "Armor"
+ ],
+ "63": [
+  "Light Armor",
+  "Medium Armor",
+  "Heavy Armor",
+  "Armor",
+  "Armor Light Armor"
+ ],
+ "64": [
+  "Weapons",
+  "Weapon Proficiency",
+  "Weapon Properties"
+ ],
+ "65": [
+  "Improvised Weapons",
+  "Silvered Weapons",
+  "Special Weapons",
+  "Weapons"
+ ],
+ "66": [
+  "Adventuring Gear"
+ ],
+ "67": [],
+ "68": [],
+ "69": [
+  "Item Abacus Acid (vial)",
+  "Alchemist’s fire (flask) Ammunition",
+  "Sling bullets (20) Antitoxin (vial) Arcane focus",
+  "Cost 2 gp 25 gp 50 gp"
+ ],
+ "70": [
+  "Equipment Packs",
+  "Tools"
+ ],
+ "71": [
+  "Mounts and Vehicles",
+  "Cost 50 gp"
+ ],
+ "72": [
+  "Cost ×4",
+  "Weight ×2",
+  "Cost 30,000 gp",
+  "Trade Goods",
+  "Expenses",
+  "Price/Day —"
+ ],
+ "73": [
+  "Self-Sufficiency"
+ ],
+ "74": [
+  "Services",
+  "Services",
+  "Service Coach cab",
+  "Pay",
+  "Spellcasting Services"
+ ],
+ "75": [
+  "Feats",
+  "Grappler",
+  "Prerequisite: Strength 13 or higher"
+ ],
+ "76": [
+  "Using Ability",
+  "Scores",
+  "Ability Scores and Modifiers",
+  "Score 1",
+  "Advantage and",
+  "Disadvantage"
+ ],
+ "77": [
+  "Proficiency Bonus",
+  "Ability Checks",
+  "Contests",
+  "Skills"
+ ],
+ "78": [
+  "Strength",
+  "Dexterity",
+  "Intelligence",
+  "Wisdom",
+  "Charisma",
+  "Variant: Skills with Different Abilities",
+  "Passive Checks"
+ ],
+ "79": [
+  "Working Together",
+  "Group Checks",
+  "Using Each Ability",
+  "Strength",
+  "Strength Checks",
+  "Attack Rolls and Damage",
+  "Lifting and Carrying"
+ ],
+ "80": [
+  "Variant: Encumbrance",
+  "Dexterity",
+  "Dexterity Checks",
+  "Attack Rolls and Damage",
+  "Armor Class",
+  "Initiative",
+  "Hiding"
+ ],
+ "81": [
+  "Constitution",
+  "Constitution Checks",
+  "Hit Points",
+  "Intelligence",
+  "Intelligence Checks"
+ ],
+ "82": [
+  "Spellcasting Ability",
+  "Wisdom",
+  "Wisdom Checks",
+  "Spellcasting Ability",
+  "Charisma",
+  "Charisma Checks"
+ ],
+ "83": [
+  "Spellcasting Ability",
+  "Saving Throws"
+ ],
+ "84": [
+  "Time",
+  "Movement",
+  "Speed",
+  "Travel Pace"
+ ],
+ "85": [
+  "Difficult Terrain",
+  "Special Types of Movement",
+  "Climbing, Swimming, and Crawling",
+  "Jumping"
+ ],
+ "86": [
+  "The Environment",
+  "Falling",
+  "Suffocating",
+  "Vision and Light",
+  "Blindsight",
+  "Darkvision",
+  "Truesight",
+  "Food and Water",
+  "Food"
+ ],
+ "87": [
+  "Water",
+  "Interacting with Objects",
+  "Resting",
+  "Short Rest",
+  "Long Rest"
+ ],
+ "88": [
+  "Between Adventures",
+  "Lifestyle Expenses",
+  "Downtime Activities",
+  "Crafting",
+  "Practicing a Profession",
+  "Recuperating"
+ ],
+ "89": [
+  "Researching",
+  "Training"
+ ],
+ "90": [
+  "The Order of Combat",
+  "Combat Step by Step",
+  "Surprise",
+  "Initiative",
+  "Your Turn",
+  "Bonus Actions"
+ ],
+ "91": [
+  "Other Activity on Your Turn",
+  "Reactions",
+  "Movement and Position",
+  "Breaking Up Your Move",
+  "Moving between Attacks",
+  "Using Different Speeds",
+  "Difficult Terrain",
+  "Being Prone"
+ ],
+ "92": [
+  "Interacting with Objects Around You",
+  "Moving Around Other Creatures",
+  "Flying Movement",
+  "Space",
+  "Squeezing into a Smaller Space"
+ ],
+ "93": [
+  "Actions in Combat",
+  "Attack",
+  "Cast a Spell",
+  "Dash",
+  "Disengage",
+  "Dodge",
+  "Help",
+  "Hide",
+  "Ready"
+ ],
+ "94": [
+  "Search",
+  "Use an Object",
+  "Making an Attack",
+  "Attack Rolls",
+  "Modifiers to the Roll",
+  "Rolling 1 or 20",
+  "Unseen Attackers and Targets"
+ ],
+ "95": [
+  "Ranged Attacks",
+  "Range",
+  "Ranged Attacks in Close Combat",
+  "Melee Attacks",
+  "Opportunity Attacks",
+  "Two-Weapon Fighting",
+  "Grappling"
+ ],
+ "96": [
+  "Contests in Combat",
+  "Shoving a Creature",
+  "Cover",
+  "Damage and Healing",
+  "Hit Points",
+  "Damage Rolls",
+  "Critical Hits"
+ ],
+ "97": [
+  "Damage Types",
+  "Damage Resistance and Vulnerability",
+  "Healing",
+  "Dropping to 0 Hit Points"
+ ],
+ "98": [
+  "Instant Death",
+  "Falling Unconscious",
+  "Death Saving Throws",
+  "Stabilizing a Creature",
+  "Monsters and Death",
+  "Knocking a Creature Out",
+  "Temporary Hit Points"
+ ],
+ "99": [
+  "Mounted Combat",
+  "Mounting and Dismounting",
+  "Controlling a Mount",
+  "Underwater Combat"
+ ],
+ "100": [
+  "Spellcasting",
+  "Spell Level",
+  "Known and Prepared Spells",
+  "Spell Slots",
+  "Casting a Spell at a Higher Level",
+  "Casting in Armor"
+ ],
+ "101": [
+  "Cantrips",
+  "Rituals",
+  "Casting a Spell",
+  "Casting Time",
+  "Bonus Action",
+  "Reactions",
+  "Longer Casting Times",
+  "Range",
+  "Components",
+  "Verbal (V)",
+  "Somatic (S)"
+ ],
+ "102": [
+  "Material (M)",
+  "Duration",
+  "Instantaneous",
+  "Concentration",
+  "Targets",
+  "A Clear Path to the Target",
+  "Targeting Yourself",
+  "Areas of Effect"
+ ],
+ "103": [
+  "Cone",
+  "Cube",
+  "Cylinder",
+  "Line",
+  "Sphere",
+  "Saving Throws",
+  "Attack Rolls",
+  "The Schools of Magic"
+ ],
+ "104": [
+  "Combining Magical Effects"
+ ],
+ "105": [
+  "Spell Lists",
+  "Bard Spells",
+  "Cantrips (0 Level)"
+ ],
+ "106": [
+  "Foresight Power Word Kill True Polymorph",
+  "Cleric Spells",
+  "Cantrips (0 Level)"
+ ],
+ "107": [
+  "Locate Creature Stone Shape",
+  "Druid Spells",
+  "Cantrips (0 Level)"
+ ],
+ "108": [
+  "Paladin Spells"
+ ],
+ "109": [
+  "Banishment Death Ward Locate Creature",
+  "Dispel Evil and Good Geas Raise Dead",
+  "Ranger Spells",
+  "Stoneskin",
+  "Commune with Nature Tree Stride",
+  "Sorcerer Spells",
+  "Cantrips (0 Level)"
+ ],
+ "110": [
+  "Warlock Spells",
+  "Cantrips (0 Level)"
+ ],
+ "111": [
+  "Contact Other Plane Dream Hold Monster Scrying",
+  "True Seeing",
+  "Wizard Spells",
+  "Cantrips (0 Level)"
+ ],
+ "112": [],
+ "113": [],
+ "114": [
+  "Spell Descriptions",
+  "Acid Arrow",
+  "Acid Splash",
+  "Conjuration cantrip",
+  "Aid",
+  "Alarm",
+  "Alter Self"
+ ],
+ "115": [
+  "Animal Friendship",
+  "Animal Messenger",
+  "Animal Shapes",
+  "Animate Dead"
+ ],
+ "116": [
+  "Animate Objects",
+  "Antilife Shell"
+ ],
+ "117": [
+  "Antimagic Field",
+  "Antipathy/Sympathy"
+ ],
+ "118": [
+  "Arcane Eye",
+  "Arcane Hand",
+  "Arcane Lock"
+ ],
+ "119": [
+  "Arcane Sword",
+  "Arcanist’s Magic Aura",
+  "Astral Projection"
+ ],
+ "120": [
+  "Augury",
+  "Awaken",
+  "Bane",
+  "Banishment"
+ ],
+ "121": [
+  "Barkskin",
+  "Beacon of Hope",
+  "Bestow Curse",
+  "Black Tentacles"
+ ],
+ "122": [
+  "Blade Barrier",
+  "Bless",
+  "Blight",
+  "Blindness/Deafness",
+  "Blink"
+ ],
+ "123": [
+  "Blur",
+  "Branding Smite",
+  "Burning Hands",
+  "Call Lightning",
+  "Calm Emotions"
+ ],
+ "124": [
+  "Chain Lightning",
+  "Charm Person",
+  "Chill Touch",
+  "Necromancy cantrip",
+  "Components: V, S Duration: 1 round",
+  "Circle of Death",
+  "Clairvoyance"
+ ],
+ "125": [
+  "Clone",
+  "Cloudkill",
+  "Color Spray",
+  "Command"
+ ],
+ "126": [
+  "Commune",
+  "Commune with Nature",
+  "Comprehend Languages",
+  "Compulsion"
+ ],
+ "127": [
+  "Cone of Cold",
+  "Confusion",
+  "Conjure Animals",
+  "Conjure Celestial"
+ ],
+ "128": [
+  "Conjure Elemental",
+  "Conjure Fey",
+  "Conjure Minor Elementals"
+ ],
+ "129": [
+  "Conjure Woodland Beings",
+  "Contact Other Plane",
+  "Contagion"
+ ],
+ "130": [
+  "Contingency",
+  "Continual Flame",
+  "Control Water"
+ ],
+ "131": [
+  "Control Weather",
+  "Counterspell",
+  "Create Food and Water"
+ ],
+ "132": [
+  "Create or Destroy Water",
+  "Create Undead",
+  "Creation",
+  "Cure Wounds"
+ ],
+ "133": [
+  "Dancing Lights",
+  "Evocation cantrip",
+  "Darkness",
+  "Darkvision",
+  "Daylight",
+  "Death Ward",
+  "Delayed Blast Fireball"
+ ],
+ "134": [
+  "Demiplane",
+  "Detect Evil and Good",
+  "Detect Magic",
+  "Detect Poison and Disease"
+ ],
+ "135": [
+  "Detect Thoughts",
+  "Dimension Door",
+  "Components: V Duration: Instantaneous",
+  "Disguise Self",
+  "Disintegrate"
+ ],
+ "136": [
+  "Duration: Instantaneous",
+  "Dispel Evil and Good",
+  "Dispel Magic",
+  "Divination",
+  "Divine Favor"
+ ],
+ "137": [
+  "Duration: Concentration, up to 1 minute",
+  "Divine Word",
+  "Dominate Beast",
+  "Dominate Monster"
+ ],
+ "138": [
+  "Dominate Person",
+  "Dream",
+  "Druidcraft",
+  "Transmutation cantrip"
+ ],
+ "139": [
+  "Earthquake",
+  "Eldritch Blast",
+  "Evocation cantrip",
+  "Enhance Ability"
+ ],
+ "140": [
+  "Enlarge/Reduce",
+  "Entangle",
+  "Enthrall",
+  "Etherealness"
+ ],
+ "141": [
+  "Expeditious Retreat",
+  "Eyebite",
+  "Fabricate",
+  "Faerie Fire"
+ ],
+ "142": [
+  "Faithful Hound",
+  "False Life",
+  "Fear",
+  "Feather Fall",
+  "Feeblemind"
+ ],
+ "143": [
+  "Find Familiar",
+  "Find Steed",
+  "Components: V, S Duration: Instantaneous",
+  "Find the Path"
+ ],
+ "144": [
+  "Find Traps",
+  "Finger of Death",
+  "Fireball",
+  "Fire Bolt",
+  "Evocation cantrip",
+  "Fire Shield"
+ ],
+ "145": [
+  "Fire Storm",
+  "Flame Blade",
+  "Flame Strike",
+  "Flaming Sphere",
+  "Flesh to Stone"
+ ],
+ "146": [
+  "Floating Disk",
+  "Fly",
+  "Fog Cloud",
+  "Forbiddance"
+ ],
+ "147": [
+  "Forcecage",
+  "Foresight",
+  "Freedom of Movement",
+  "Freezing Sphere"
+ ],
+ "148": [
+  "Gaseous Form",
+  "Gate",
+  "Geas",
+  "Gentle Repose"
+ ],
+ "149": [
+  "Duration: 10 days",
+  "Giant Insect",
+  "Glibness",
+  "Globe of Invulnerability",
+  "Duration: Concentration, up to 1 minute",
+  "Glyph of Warding"
+ ],
+ "150": [
+  "Goodberry",
+  "Grease",
+  "Greater Invisibility",
+  "Greater Restoration",
+  "Guardian of Faith"
+ ],
+ "151": [
+  "Guards and Wards",
+  "Guidance",
+  "Divination cantrip",
+  "Guiding Bolt"
+ ],
+ "152": [
+  "Gust of Wind",
+  "Hallow",
+  "Hallucinatory Terrain"
+ ],
+ "153": [
+  "Harm",
+  "Haste",
+  "Heal",
+  "Healing Word",
+  "Heat Metal"
+ ],
+ "154": [
+  "Hellish Rebuke",
+  "Heroes’ Feast",
+  "Heroism",
+  "Hideous Laughter",
+  "Hold Monster",
+  "Hold Person"
+ ],
+ "155": [
+  "Holy Aura",
+  "Hunter’s Mark",
+  "Hypnotic Pattern",
+  "Ice Storm",
+  "Identify"
+ ],
+ "156": [
+  "Illusory Script",
+  "Imprisonment"
+ ],
+ "157": [
+  "Incendiary Cloud",
+  "Inflict Wounds",
+  "Insect Plague",
+  "Instant Summons",
+  "Invisibility"
+ ],
+ "158": [
+  "Irresistible Dance",
+  "Jump",
+  "Knock",
+  "Legend Lore",
+  "Lesser Restoration",
+  "Levitate"
+ ],
+ "159": [
+  "Duration: Concentration, up to 10 minutes",
+  "Light",
+  "Evocation cantrip",
+  "Lightning Bolt",
+  "Locate Animals or Plants",
+  "Locate Creature",
+  "Locate Object"
+ ],
+ "160": [
+  "Longstrider",
+  "Mage Armor",
+  "Mage Hand",
+  "Conjuration cantrip",
+  "Magic Circle",
+  "Magic Jar"
+ ],
+ "161": [
+  "Magic Missile",
+  "Magic Mouth",
+  "Magic Weapon"
+ ],
+ "162": [
+  "Magnificent Mansion",
+  "Major Image",
+  "Mass Cure Wounds"
+ ],
+ "163": [
+  "Mass Heal",
+  "Mass Healing Word",
+  "Mass Suggestion",
+  "Maze",
+  "Meld into Stone"
+ ],
+ "164": [
+  "Mending",
+  "Transmutation cantrip",
+  "Message",
+  "Transmutation cantrip",
+  "Meteor Swarm",
+  "Mind Blank",
+  "Minor Illusion",
+  "Illusion cantrip"
+ ],
+ "165": [
+  "Mirage Arcane",
+  "Mirror Image",
+  "Mislead",
+  "Misty Step"
+ ],
+ "166": [
+  "Modify Memory",
+  "Moonbeam",
+  "Move Earth"
+ ],
+ "167": [
+  "Nondetection",
+  "Pass without Trace",
+  "Passwall",
+  "Phantasmal Killer",
+  "Phantom Steed"
+ ],
+ "168": [
+  "Planar Ally",
+  "Planar Binding",
+  "Plane Shift"
+ ],
+ "169": [
+  "Duration: Instantaneous",
+  "Plant Growth",
+  "Poison Spray",
+  "Conjuration cantrip",
+  "Polymorph"
+ ],
+ "170": [
+  "Power Word Kill",
+  "Power Word Stun",
+  "Prayer of Healing",
+  "Prestidigitation",
+  "Transmutation cantrip",
+  "Prismatic Spray"
+ ],
+ "171": [
+  "Prismatic Wall",
+  "Private Sanctum"
+ ],
+ "172": [
+  "Produce Flame",
+  "Conjuration cantrip",
+  "Programmed Illusion",
+  "Project Image"
+ ],
+ "173": [
+  "Protection from Energy",
+  "Protection from Evil and Good",
+  "Protection from Poison",
+  "Range: Touch Components: V, S Duration: 1 hour",
+  "Purify Food and Drink",
+  "Raise Dead"
+ ],
+ "174": [
+  "Ray of Enfeeblement",
+  "Ray of Frost",
+  "Evocation cantrip",
+  "Regenerate",
+  "Reincarnate",
+  "Remove Curse"
+ ],
+ "175": [
+  "Resilient Sphere",
+  "Resistance",
+  "Abjuration cantrip",
+  "Resurrection",
+  "Reverse Gravity",
+  "Revivify"
+ ],
+ "176": [
+  "Rope Trick",
+  "Sacred Flame",
+  "Evocation cantrip",
+  "Sanctuary",
+  "Scorching Ray",
+  "Scrying",
+  "Save Modifier +5 +0 -5"
+ ],
+ "177": [
+  "Secret Chest",
+  "See Invisibility",
+  "Seeming",
+  "Sending"
+ ],
+ "178": [
+  "Sequester",
+  "Shapechange",
+  "Shatter"
+ ],
+ "179": [
+  "Shield",
+  "Range: Self Components: V, S Duration: 1 round",
+  "Shield of Faith",
+  "Shillelagh",
+  "Transmutation cantrip",
+  "Shocking Grasp",
+  "Evocation cantrip",
+  "Silence",
+  "Silent Image"
+ ],
+ "180": [
+  "Simulacrum",
+  "Sleep",
+  "Duration: 1 minute",
+  "Sleet Storm",
+  "Slow"
+ ],
+ "181": [
+  "Spare the Dying",
+  "Necromancy cantrip",
+  "Speak with Animals",
+  "Speak with Dead",
+  "Speak with Plants"
+ ],
+ "182": [
+  "Spider Climb",
+  "Spike Growth",
+  "Spirit Guardians",
+  "Spiritual Weapon",
+  "Stinking Cloud"
+ ],
+ "183": [
+  "Stone Shape",
+  "Stoneskin",
+  "Storm of Vengeance",
+  "Suggestion"
+ ],
+ "184": [
+  "Sunbeam",
+  "Sunburst",
+  "Symbol"
+ ],
+ "185": [
+  "Telekinesis",
+  "Telepathic Bond",
+  "Teleport"
+ ],
+ "186": [
+  "Mishap —",
+  "Similar Area",
+  "Off Target",
+  "On Target 01–100",
+  "Teleportation Circle"
+ ],
+ "187": [
+  "Thaumaturgy",
+  "Transmutation cantrip",
+  "Thunderwave",
+  "Time Stop",
+  "Tiny Hut",
+  "Tongues"
+ ],
+ "188": [
+  "Transport via Plants",
+  "Tree Stride",
+  "True Polymorph"
+ ],
+ "189": [
+  "True Resurrection",
+  "True Seeing",
+  "True Strike",
+  "Divination cantrip",
+  "Unseen Servant",
+  "Vampiric Touch",
+  "Vicious Mockery",
+  "Enchantment cantrip"
+ ],
+ "190": [
+  "Wall of Fire",
+  "Wall of Force",
+  "Wall of Ice",
+  "Wall of Stone"
+ ],
+ "191": [
+  "Wall of Thorns",
+  "Warding Bond",
+  "Water Breathing",
+  "Water Walk"
+ ],
+ "192": [
+  "Web",
+  "Weird",
+  "Wind Walk",
+  "Wind Wall"
+ ],
+ "193": [
+  "Wish",
+  "Word of Recall",
+  "Zone of Truth"
+ ],
+ "194": [],
+ "195": [
+  "Traps",
+  "Traps in Play",
+  "Triggering a Trap",
+  "Detecting and Disabling a Trap"
+ ],
+ "196": [
+  "Trap Effects",
+  "Character Level 1st–4th 5th–10th",
+  "Complex Traps",
+  "Sample Traps",
+  "Collapsing Roof",
+  "Mechanical trap",
+  "Falling Net",
+  "Mechanical trap"
+ ],
+ "197": [
+  "Fire-Breathing Statue",
+  "Magic trap",
+  "Pits",
+  "Mechanical trap",
+  "Poison Darts",
+  "Mechanical trap"
+ ],
+ "198": [
+  "Poison Needle",
+  "Mechanical trap",
+  "Rolling Sphere",
+  "Mechanical trap",
+  "Sphere of Annihilation",
+  "Magic trap"
+ ],
+ "199": [
+  "Diseases",
+  "Sample Diseases",
+  "Cackle Fever",
+  "Sewer Plague",
+  "Sight Rot"
+ ],
+ "200": [],
+ "201": [
+  "Madness"
+ ],
+ "202": [
+  "Curing Madness"
+ ],
+ "203": [
+  "Objects",
+  "Statistics for Objects",
+  "Object Hit Points"
+ ],
+ "204": [
+  "Poisons",
+  "Poisons",
+  "Sample Poisons"
+ ],
+ "205": [],
+ "206": [
+  "Magic Items",
+  "Attunement",
+  "Wearing and Wielding Items",
+  "Multiple Items of the Same Kind",
+  "Paired Items",
+  "Activating an Item"
+ ],
+ "207": [
+  "Command Word",
+  "Consumables",
+  "Spells",
+  "Charges",
+  "Magic Items A-Z",
+  "Adamantine Armor",
+  "Armor (medium or heavy, but not hide), uncommon",
+  "Ammunition, +1, +2, or +3",
+  "Amulet of Health",
+  "Wondrous item, rare (requires attunement)",
+  "Amulet of Proof against Detection and Location",
+  "Wondrous item, uncommon (requires attunement)",
+  "Amulet of the Planes",
+  "Wondrous item, very rare (requires attunement)"
+ ],
+ "208": [
+  "Animated Shield",
+  "Armor (shield), very rare (requires attunement)",
+  "Apparatus of the Crab",
+  "Armor, +1, +2, or +3",
+  "Armor of Invulnerability",
+  "Armor (plate), legendary (requires attunement)",
+  "Armor of Resistance"
+ ],
+ "209": [
+  "Armor of Vulnerability",
+  "Armor (plate), rare (requires attunement)",
+  "Arrow-Catching Shield",
+  "Armor (shield), rare (requires attunement)",
+  "Arrow of Slaying",
+  "Weapon (arrow), very rare",
+  "Bag of Beans"
+ ],
+ "210": [
+  "Bag of Devouring",
+  "Wondrous item, very rare",
+  "Bag of Holding",
+  "Wondrous item, uncommon",
+  "Bag of Tricks",
+  "Wondrous item, uncommon",
+  "Gray Bag of Tricks"
+ ],
+ "211": [
+  "Rust Bag of Tricks",
+  "Tan Bag of Tricks",
+  "Bead of Force",
+  "Wondrous item, rare",
+  "Belt of Dwarvenkind",
+  "Wondrous item, rare (requires attunement)",
+  "Belt of Giant Strength",
+  "Berserker Axe",
+  "Weapon (any axe), rare (requires attunement)"
+ ],
+ "212": [
+  "Boots of Elvenkind",
+  "Wondrous item, uncommon",
+  "Boots of Levitation",
+  "Wondrous item, rare (requires attunement)",
+  "Boots of Speed",
+  "Wondrous item, rare (requires attunement)",
+  "Boots of Striding and Springing",
+  "Wondrous item, uncommon (requires attunement)",
+  "Boots of the Winterlands",
+  "Wondrous item, uncommon (requires attunement)",
+  "Bowl of Commanding Water Elementals",
+  "Wondrous item, rare",
+  "Bracers of Archery",
+  "Wondrous item, uncommon (requires attunement)",
+  "Bracers of Defense",
+  "Wondrous item, rare (requires attunement)",
+  "Brazier of Commanding Fire Elementals",
+  "Wondrous item, rare",
+  "Brooch of Shielding",
+  "Wondrous item, uncommon (requires attunement)"
+ ],
+ "213": [
+  "Broom of Flying",
+  "Wondrous item, uncommon",
+  "Candle of Invocation",
+  "Alignment Chaotic evil Chaotic neutral",
+  "Cape of the Mountebank",
+  "Wondrous item, rare",
+  "Carpet of Flying",
+  "Censer of Controlling Air Elementals",
+  "Wondrous item, rare",
+  "Chime of Opening",
+  "Wondrous item, rare"
+ ],
+ "214": [
+  "Circlet of Blasting",
+  "Wondrous item, uncommon",
+  "Cloak of Arachnida",
+  "Wondrous item, very rare (requires attunement)",
+  "Cloak of Displacement",
+  "Wondrous item, rare (requires attunement)",
+  "Cloak of Elvenkind",
+  "Wondrous item, uncommon (requires attunement)",
+  "Cloak of Protection",
+  "Wondrous item, uncommon (requires attunement)",
+  "Cloak of the Bat",
+  "Wondrous item, rare (requires attunement)",
+  "Cloak of the Manta Ray",
+  "Wondrous item, uncommon",
+  "Crystal Ball"
+ ],
+ "215": [
+  "Cube of Force",
+  "Cubic Gate",
+  "Wondrous item, legendary",
+  "Dagger of Venom",
+  "Weapon (dagger), rare",
+  "Dancing Sword"
+ ],
+ "216": [
+  "Decanter of Endless Water",
+  "Wondrous item, uncommon",
+  "Deck of Illusions",
+  "Wondrous item, uncommon",
+  "Deck of Many Things",
+  "Wondrous item, legendary"
+ ],
+ "217": [],
+ "218": [
+  "Avatar of Death",
+  "Medium undead, neutral evil",
+  "Actions",
+  "Defender",
+  "Demon Armor",
+  "Armor (plate), very rare (requires attunement)"
+ ],
+ "219": [
+  "Dimensional Shackles",
+  "Wondrous item, rare",
+  "Dragon Scale Mail",
+  "Dragon Slayer",
+  "Weapon (any sword), rare",
+  "Dust of Disappearance",
+  "Wondrous item, uncommon",
+  "Dust of Dryness",
+  "Wondrous item, uncommon",
+  "Dust of Sneezing and Choking",
+  "Wondrous item, uncommon"
+ ],
+ "220": [
+  "Dwarven Plate",
+  "Armor (plate), very rare",
+  "Dwarven Thrower",
+  "Efficient Quiver",
+  "Wondrous item, uncommon",
+  "Efreeti Bottle",
+  "Elemental Gem",
+  "Elven Chain",
+  "Armor (chain shirt), rare",
+  "Eversmoking Bottle",
+  "Wondrous item, uncommon",
+  "Eyes of Charming",
+  "Wondrous item, uncommon (requires attunement)"
+ ],
+ "221": [
+  "Eyes of Minute Seeing",
+  "Wondrous item, uncommon",
+  "Eyes of the Eagle",
+  "Wondrous item, uncommon (requires attunement)",
+  "Feather Token",
+  "Figurine of Wondrous Power",
+  "Wondrous item, rarity by figurine"
+ ],
+ "222": [
+  "Giant Fly",
+  "Large beast, unaligned",
+  "Armor Class 11",
+  "Hit Points 19 (3d10 + 3)",
+  "Senses darkvision 60 ft., passive Perception 10",
+  "Languages —"
+ ],
+ "223": [
+  "Flame Tongue",
+  "Weapon (any sword), rare (requires attunement)",
+  "Folding Boat",
+  "Wondrous item, rare",
+  "Frost Brand",
+  "Gauntlets of Ogre Power",
+  "Wondrous item, uncommon (requires attunement)",
+  "Gem of Brightness",
+  "Wondrous item, uncommon",
+  "Gem of Seeing",
+  "Wondrous item, rare (requires attunement)"
+ ],
+ "224": [
+  "Giant Slayer",
+  "Weapon (any axe or sword), rare",
+  "Glamoured Studded Leather",
+  "Armor (studded leather), rare",
+  "Gloves of Missile Snaring",
+  "Wondrous item, uncommon (requires attunement)",
+  "Gloves of Swimming and Climbing",
+  "Wondrous item, uncommon (requires attunement)",
+  "Goggles of Night",
+  "Wondrous item, uncommon",
+  "Hammer of Thunderbolts",
+  "Weapon (maul), legendary",
+  "Handy Haversack",
+  "Wondrous item, rare"
+ ],
+ "225": [
+  "Hat of Disguise",
+  "Wondrous item, uncommon (requires attunement)",
+  "Headband of Intellect",
+  "Wondrous item, uncommon (requires attunement)",
+  "Helm of Brilliance",
+  "Wondrous item, very rare (requires attunement)",
+  "Helm of Comprehending Languages",
+  "Wondrous item, uncommon",
+  "Helm of Telepathy",
+  "Wondrous item, uncommon (requires attunement)",
+  "Helm of Teleportation",
+  "Wondrous item, rare (requires attunement)",
+  "Holy Avenger"
+ ],
+ "226": [
+  "Horn of Blasting",
+  "Wondrous item, rare",
+  "Horn of Valhalla",
+  "Horn Type Silver Brass",
+  "Bronze",
+  "Berserkers Summoned",
+  "Requirement",
+  "Horseshoes of a Zephyr",
+  "Wondrous item, very rare",
+  "Horseshoes of Speed",
+  "Wondrous item, rare",
+  "Immovable Rod",
+  "Rod, uncommon",
+  "Instant Fortress",
+  "Wondrous item, rare"
+ ],
+ "227": [
+  "Ioun Stone"
+ ],
+ "228": [
+  "Iron Bands of Binding",
+  "Wondrous item, rare",
+  "Iron Flask",
+  "Wondrous item, legendary",
+  "Javelin of Lightning",
+  "Weapon (javelin), uncommon",
+  "Lantern of Revealing",
+  "Wondrous item, uncommon"
+ ],
+ "229": [
+  "Luck Blade",
+  "Mace of Disruption",
+  "Weapon (mace), rare (requires attunement)",
+  "Mace of Smiting",
+  "Weapon (mace), rare",
+  "Mace of Terror",
+  "Weapon (mace), rare (requires attunement)",
+  "Mantle of Spell Resistance",
+  "Wondrous item, rare (requires attunement)",
+  "Manual of Bodily Health",
+  "Wondrous item, very rare",
+  "Manual of Gainful Exercise",
+  "Wondrous item, very rare",
+  "Manual of Golems"
+ ],
+ "230": [
+  "Manual of Quickness of Action",
+  "Wondrous item, very rare",
+  "Marvelous Pigments",
+  "Wondrous item, very rare",
+  "Medallion of Thoughts",
+  "Wondrous item, uncommon (requires attunement)",
+  "Mirror of Life Trapping",
+  "Wondrous item, very rare"
+ ],
+ "231": [
+  "Mithral Armor",
+  "Armor (medium or heavy, but not hide), uncommon",
+  "Necklace of Adaptation",
+  "Wondrous item, uncommon (requires attunement)",
+  "Necklace of Fireballs",
+  "Wondrous item, rare",
+  "Necklace of Prayer Beads",
+  "Nine Lives Stealer",
+  "Oathbow",
+  "Oil of Etherealness",
+  "Potion, rare"
+ ],
+ "232": [
+  "Oil of Sharpness",
+  "Potion, very rare",
+  "Oil of Slipperiness",
+  "Potion, uncommon",
+  "Pearl of Power",
+  "Periapt of Health",
+  "Wondrous item, uncommon",
+  "Periapt of Proof against Poison",
+  "Wondrous item, rare",
+  "Periapt of Wound Closure",
+  "Wondrous item, uncommon (requires attunement)",
+  "Philter of Love",
+  "Potion, uncommon",
+  "Pipes of Haunting",
+  "Wondrous item, uncommon",
+  "Pipes of the Sewers",
+  "Wondrous item, uncommon (requires attunement)"
+ ],
+ "233": [
+  "Plate Armor of Etherealness",
+  "Armor (plate), legendary (requires attunement)",
+  "Portable Hole",
+  "Wondrous item, rare",
+  "Potion of Animal Friendship",
+  "Potion, uncommon",
+  "Potion of Clairvoyance",
+  "Potion, rare",
+  "Potion of Climbing",
+  "Potion, common",
+  "Potion of Diminution",
+  "Potion, rare"
+ ],
+ "234": [
+  "Potion of Flying",
+  "Potion, very rare",
+  "Potion of Gaseous Form",
+  "Potion, rare",
+  "Potion of Giant Strength",
+  "Potion of Growth",
+  "Potion, uncommon",
+  "Potion of Healing",
+  "Potion, rarity varies",
+  "Potion of Heroism",
+  "Potion, rare",
+  "Potion of Invisibility",
+  "Potion, very rare",
+  "Potion of Mind Reading",
+  "Potion, rare",
+  "Potion of Poison",
+  "Potion, uncommon"
+ ],
+ "235": [
+  "Potion of Resistance",
+  "Potion of Speed",
+  "Potion, very rare",
+  "Potion of Water Breathing",
+  "Potion, uncommon",
+  "Restorative Ointment",
+  "Wondrous item, uncommon",
+  "Ring of Animal Influence",
+  "Ring, rare",
+  "Ring of Djinni Summoning",
+  "Ring, legendary (requires attunement)",
+  "Ring of Elemental Command",
+  "Ring, legendary (requires attunement)"
+ ],
+ "236": [
+  "Ring of Evasion",
+  "Ring, rare (requires attunement)",
+  "Ring of Feather Falling",
+  "Ring, rare (requires attunement)",
+  "Ring of Free Action",
+  "Ring, rare (requires attunement)",
+  "Ring of Invisibility",
+  "Ring, legendary (requires attunement)",
+  "Ring of Jumping",
+  "Ring, uncommon (requires attunement)",
+  "Ring of Mind Shielding",
+  "Ring, uncommon (requires attunement)"
+ ],
+ "237": [
+  "Ring of Protection",
+  "Ring, rare (requires attunement)",
+  "Ring of Regeneration",
+  "Ring, very rare (requires attunement)",
+  "Ring of Resistance",
+  "Ring of Shooting Stars",
+  "Ring of Spell Storing",
+  "Ring, rare (requires attunement)",
+  "Ring of Spell Turning",
+  "Ring, legendary (requires attunement)"
+ ],
+ "238": [
+  "Ring of Swimming",
+  "Ring, uncommon",
+  "Ring of Telekinesis",
+  "Ring, very rare (requires attunement)",
+  "Ring of the Ram",
+  "Ring, rare (requires attunement)",
+  "Ring of Three Wishes",
+  "Ring, legendary",
+  "Ring of Warmth",
+  "Ring, uncommon (requires attunement)",
+  "Ring of Water Walking",
+  "Ring, uncommon",
+  "Ring of X-ray Vision",
+  "Ring, rare (requires attunement)",
+  "Robe of Eyes",
+  "Wondrous item, rare (requires attunement)",
+  "Robe of Scintillating Colors",
+  "Wondrous item, very rare (requires attunement)"
+ ],
+ "239": [
+  "Robe of Stars",
+  "Wondrous item, very rare (requires attunement)",
+  "Robe of the Archmagi",
+  "Robe of Useful Items",
+  "Wondrous item, uncommon",
+  "Rod of Absorption",
+  "Rod, very rare (requires attunement)"
+ ],
+ "240": [
+  "Rod of Alertness",
+  "Rod, very rare (requires attunement)",
+  "Rod of Lordly Might",
+  "Rod, legendary (requires attunement)",
+  "Rod of Rulership",
+  "Rod, rare (requires attunement)"
+ ],
+ "241": [
+  "Rod of Security",
+  "Rod, very rare",
+  "Rope of Climbing",
+  "Wondrous item, uncommon",
+  "Rope of Entanglement",
+  "Wondrous item, rare",
+  "Scarab of Protection",
+  "Wondrous item, legendary (requires attunement)",
+  "Scimitar of Speed"
+ ],
+ "242": [
+  "Shield, +1, +2, or +3",
+  "Shield of Missile Attraction",
+  "Armor (shield), rare (requires attunement)",
+  "Slippers of Spider Climbing",
+  "Wondrous item, uncommon (requires attunement)",
+  "Sovereign Glue",
+  "Wondrous item, legendary",
+  "Spell Scroll",
+  "Scroll, varies",
+  "Spellguard Shield",
+  "Armor (shield), very rare (requires attunement)",
+  "Sphere of Annihilation",
+  "Wondrous item, legendary"
+ ],
+ "243": [
+  "Staff of Charming",
+  "Staff of Fire",
+  "Staff of Frost",
+  "Staff of Healing",
+  "Staff of Power"
+ ],
+ "244": [
+  "Staff of Striking",
+  "Staff, very rare (requires attunement)",
+  "Staff of Swarming Insects",
+  "Staff of the Magi"
+ ],
+ "245": [
+  "Staff of the Python",
+  "Staff of the Woodlands",
+  "Staff, rare (requires attunement by a druid)",
+  "Staff of Thunder and Lightning",
+  "Staff, very rare (requires attunement)"
+ ],
+ "246": [
+  "Staff of Withering",
+  "Stone of Controlling Earth Elementals",
+  "Wondrous item, rare",
+  "Stone of Good Luck (Luckstone)",
+  "Wondrous item, uncommon (requires attunement)",
+  "Sun Blade",
+  "Weapon (longsword), rare (requires attunement)",
+  "Sword of Life Stealing",
+  "Weapon (any sword), rare (requires attunement)",
+  "Sword of Sharpness",
+  "Sword of Wounding",
+  "Weapon (any sword), rare (requires attunement)"
+ ],
+ "247": [
+  "Talisman of Pure Good",
+  "Talisman of the Sphere",
+  "Wondrous item, legendary (requires attunement)",
+  "Talisman of Ultimate Evil",
+  "Tome of Clear Thought",
+  "Wondrous item, very rare",
+  "Tome of Leadership and Influence",
+  "Wondrous item, very rare",
+  "Tome of Understanding",
+  "Wondrous item, very rare",
+  "Trident of Fish Command",
+  "Weapon (trident), uncommon (requires attunement)"
+ ],
+ "248": [
+  "Universal Solvent",
+  "Wondrous item, legendary",
+  "Vicious Weapon",
+  "Weapon (any), rare",
+  "Vorpal Sword",
+  "Wand of Binding",
+  "Wand of Enemy Detection",
+  "Wand, rare (requires attunement)",
+  "Wand of Fear",
+  "Wand, rare (requires attunement)",
+  "Wand of Fireballs"
+ ],
+ "249": [
+  "Wand of Lightning Bolts",
+  "Wand of Magic Detection",
+  "Wand, uncommon",
+  "Wand of Magic Missiles",
+  "Wand, uncommon",
+  "Wand of Paralysis",
+  "Wand of Polymorph",
+  "Wand of Secrets",
+  "Wand, uncommon",
+  "Wand of Web",
+  "Wand of Wonder"
+ ],
+ "250": [
+  "Weapon, +1, +2, or +3",
+  "Well of Many Worlds",
+  "Wondrous item, legendary",
+  "Wind Fan",
+  "Wondrous item, uncommon"
+ ],
+ "251": [
+  "Winged Boots",
+  "Wondrous item, uncommon (requires attunement)",
+  "Wings of Flying",
+  "Wondrous item, rare (requires attunement)",
+  "Sentient Magic Items",
+  "Creating Sentient Magic Items",
+  "Abilities",
+  "Communication",
+  "Senses",
+  "Alignment",
+  "Special Purpose"
+ ],
+ "252": [
+  "Conflict",
+  "Artifacts",
+  "Orb of Dragonkind",
+  "Wondrous item, artifact (requires attunement)"
+ ],
+ "253": [],
+ "254": [
+  "Monsters",
+  "Modifying Creatures",
+  "Type"
+ ],
+ "255": [
+  "Tags",
+  "Alignment",
+  "Armor Class",
+  "Hit Points"
+ ],
+ "256": [
+  "Monster Size Tiny",
+  "Hit Die d4",
+  "Average HP per Die 2½",
+  "Speed",
+  "Burrow",
+  "Climb",
+  "Fly",
+  "Swim",
+  "Challenge 0 1/8",
+  "Proficiency Bonus +2 +2",
+  "Challenge 14 15",
+  "Proficiency Bonus +5 +5",
+  "Skills"
+ ],
+ "257": [
+  "Vulnerabilities, Resistances, and Immunities",
+  "Senses",
+  "Blindsight",
+  "Darkvision",
+  "Armor, Weapon, and Tool Proficiencies",
+  "Tremorsense",
+  "Truesight",
+  "Languages",
+  "Telepathy"
+ ],
+ "258": [
+  "Challenge",
+  "Experience Points",
+  "Challenge 0 1/8 1/4 1/2",
+  "XP 0 or 10",
+  "Challenge 14 15 16 17",
+  "XP 11,500 13,000 15,000 18,000",
+  "Special Traits",
+  "Innate Spellcasting",
+  "Spellcasting"
+ ],
+ "259": [
+  "Psionics",
+  "Actions",
+  "Melee and Ranged Attacks",
+  "Multiattack",
+  "Ammunition",
+  "Reactions",
+  "Limited Usage",
+  "Grapple Rules for Monsters",
+  "Equipment"
+ ],
+ "260": [
+  "Legendary Creatures",
+  "Legendary Actions",
+  "A Legendary Creature’s Lair",
+  "Lair Actions",
+  "Regional Effects"
+ ],
+ "261": [
+  "Monsters (A)",
+  "Aboleth",
+  "Large aberration, lawful evil",
+  "Actions",
+  "Legendary Actions",
+  "Angels",
+  "Deva",
+  "Medium celestial, lawful good"
+ ],
+ "262": [
+  "Actions",
+  "Planetar",
+  "Large celestial, lawful good",
+  "Solar",
+  "Large celestial, lawful good"
+ ],
+ "263": [
+  "Actions",
+  "Legendary Actions",
+  "Animated Armor",
+  "Medium construct, unaligned"
+ ],
+ "264": [
+  "Actions",
+  "Flying Sword",
+  "Small construct, unaligned",
+  "Actions",
+  "Rug of Smothering",
+  "Actions",
+  "Ankheg",
+  "Large monstrosity, unaligned"
+ ],
+ "265": [
+  "Actions",
+  "Azer",
+  "Medium elemental, lawful neutral",
+  "Actions",
+  "Basilisk",
+  "Medium monstrosity, unaligned",
+  "Actions",
+  "Behir",
+  "Huge monstrosity, neutral evil",
+  "Armor Class 17 (natural armor)"
+ ],
+ "266": [
+  "Actions",
+  "Bugbear",
+  "Medium humanoid (goblinoid), chaotic evil",
+  "Bulette",
+  "Perception 16 Languages — Challenge 5 (1,800 XP)"
+ ],
+ "267": [
+  "Monsters (C)",
+  "Centaur",
+  "Large monstrosity, neutral good",
+  "Chimera",
+  "Large monstrosity, chaotic evil",
+  "Chuul",
+  "Large aberration, chaotic evil"
+ ],
+ "268": [
+  "Challenge 4 (1,100 XP)",
+  "Cloaker",
+  "Large aberration, chaotic neutral",
+  "Actions",
+  "Cockatrice",
+  "Small monstrosity, unaligned",
+  "Armor Class 11",
+  "Hit Points 27 (6d6 + 6)"
+ ],
+ "269": [
+  "Couatl",
+  "Medium celestial, lawful good",
+  "Actions",
+  "Monsters (D)",
+  "Darkmantle",
+  "Small monstrosity, unaligned"
+ ],
+ "270": [
+  "Challenge 1/2 (100 XP)",
+  "Actions",
+  "Demons",
+  "Balor",
+  "Huge fiend (demon), chaotic evil",
+  "Actions",
+  "Dretch",
+  "Small fiend (demon), chaotic evil"
+ ],
+ "271": [
+  "Actions",
+  "Glabrezu",
+  "Large fiend (demon), chaotic evil",
+  "Actions",
+  "Hezrou",
+  "Large fiend (demon), chaotic evil"
+ ],
+ "272": [
+  "Marilith",
+  "Large fiend (demon), chaotic evil",
+  "Nalfeshnee",
+  "Large fiend (demon), chaotic evil"
+ ],
+ "273": [
+  "Quasit",
+  "Tiny fiend (demon, shapechanger), chaotic evil",
+  "Actions",
+  "Vrock",
+  "Large fiend (demon), chaotic evil",
+  "Actions"
+ ],
+ "274": [
+  "Devils",
+  "Barbed Devil",
+  "Medium fiend (devil), lawful evil",
+  "Bearded Devil",
+  "Medium fiend (devil), lawful evil",
+  "Actions"
+ ],
+ "275": [
+  "Bone Devil",
+  "Large fiend (devil), lawful evil",
+  "Chain Devil",
+  "Medium fiend (devil), lawful evil",
+  "Actions",
+  "Reactions"
+ ],
+ "276": [
+  "Erinyes",
+  "Medium fiend (devil), lawful evil",
+  "Horned Devil",
+  "Large fiend (devil), lawful evil",
+  "Actions"
+ ],
+ "277": [
+  "Ice Devil",
+  "Large fiend (devil), lawful evil",
+  "Actions",
+  "Imp",
+  "Tiny fiend (devil, shapechanger), lawful evil"
+ ],
+ "278": [
+  "Lemure",
+  "Medium fiend (devil), lawful evil",
+  "Pit Fiend",
+  "Large fiend (devil), lawful evil",
+  "Actions"
+ ],
+ "279": [
+  "Dinosaurs",
+  "Plesiosaurus",
+  "Triceratops",
+  "Tyrannosaurus Rex",
+  "Huge beast, unaligned",
+  "Doppelganger",
+  "Medium monstrosity (shapechanger), neutral"
+ ],
+ "280": [
+  "Dragons, Chromatic",
+  "Black Dragon",
+  "Ancient Black Dragon",
+  "Gargantuan dragon, chaotic evil",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "281": [
+  "Adult Black Dragon",
+  "Huge dragon, chaotic evil",
+  "Actions",
+  "Legendary Actions",
+  "Young Black Dragon",
+  "Large dragon, chaotic evil"
+ ],
+ "282": [
+  "Black Dragon Wyrmling",
+  "Medium dragon, chaotic evil",
+  "Ancient Blue Dragon",
+  "Gargantuan dragon, lawful evil",
+  "Actions"
+ ],
+ "283": [
+  "Legendary Actions",
+  "Adult Blue Dragon",
+  "Huge dragon, lawful evil",
+  "Legendary Actions",
+  "Young Blue Dragon",
+  "Large dragon, lawful evil"
+ ],
+ "284": [
+  "Actions",
+  "Blue Dragon Wyrmling",
+  "Medium dragon, lawful evil",
+  "Actions",
+  "Green Dragon",
+  "Ancient Green Dragon",
+  "Gargantuan dragon, lawful evil"
+ ],
+ "285": [
+  "Legendary Actions",
+  "Adult Green Dragon",
+  "Huge dragon, lawful evil",
+  "Actions",
+  "Legendary Actions",
+  "Young Green Dragon",
+  "Large dragon, lawful evil"
+ ],
+ "286": [
+  "Green Dragon Wyrmling",
+  "Medium dragon, lawful evil",
+  "Red Dragon",
+  "Ancient Red Dragon"
+ ],
+ "287": [
+  "Legendary Actions",
+  "Adult Red Dragon",
+  "Huge dragon, chaotic evil",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "288": [
+  "Young Red Dragon",
+  "Large dragon, chaotic evil",
+  "Red Dragon Wyrmling",
+  "Medium dragon, chaotic evil",
+  "Challenge 4 (1,100 XP)",
+  "White Dragon",
+  "Ancient White Dragon",
+  "Gargantuan dragon, chaotic evil"
+ ],
+ "289": [
+  "Legendary Actions",
+  "Adult White Dragon",
+  "Huge dragon, chaotic evil",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "290": [
+  "Young White Dragon",
+  "Large dragon, chaotic evil",
+  "White Dragon Wyrmling",
+  "Medium dragon, chaotic evil",
+  "Dragons, Metallic",
+  "Brass Dragon",
+  "Ancient Brass Dragon",
+  "Gargantuan dragon, chaotic good"
+ ],
+ "291": [
+  "Actions",
+  "Legendary Actions",
+  "Adult Brass Dragon",
+  "Huge dragon, chaotic good"
+ ],
+ "292": [
+  "Legendary Actions",
+  "Young Brass Dragon",
+  "Large dragon, chaotic good",
+  "Armor Class 17 (natural armor)",
+  "Hit Points 110 (13d10 + 39)",
+  "Actions",
+  "Brass Dragon Wyrmling",
+  "Medium dragon, chaotic good"
+ ],
+ "293": [
+  "Languages Draconic Challenge 1 (200 XP)",
+  "Bronze Dragon",
+  "Ancient Bronze Dragon",
+  "Gargantuan dragon, lawful good",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "294": [
+  "Adult Bronze Dragon",
+  "Huge dragon, lawful good",
+  "Legendary Actions"
+ ],
+ "295": [
+  "Young Bronze Dragon",
+  "Large dragon, lawful good",
+  "Bronze Dragon Wyrmling",
+  "Medium dragon, lawful good",
+  "Copper Dragon",
+  "Ancient Copper Dragon"
+ ],
+ "296": [
+  "Languages Common, Draconic",
+  "Challenge 21 (33,000 XP)",
+  "Actions",
+  "Adult Copper Dragon",
+  "Huge dragon, chaotic good"
+ ],
+ "297": [
+  "Actions",
+  "Legendary Actions",
+  "Young Copper Dragon",
+  "Large dragon, chaotic good",
+  "Actions"
+ ],
+ "298": [
+  "Copper Dragon Wyrmling",
+  "Medium dragon, chaotic good",
+  "Actions",
+  "Gold Dragon",
+  "Ancient Gold Dragon",
+  "Gargantuan dragon, lawful good"
+ ],
+ "299": [
+  "Legendary Actions",
+  "Adult Gold Dragon",
+  "Huge dragon, lawful good",
+  "Armor Class 19 (natural armor)",
+  "Actions"
+ ],
+ "300": [
+  "Legendary Actions",
+  "Young Gold Dragon",
+  "Large dragon, lawful good",
+  "Armor Class 18 (natural armor)",
+  "Hit Points 178 (17d10 + 85)",
+  "Gold Dragon Wyrmling",
+  "Medium dragon, lawful good"
+ ],
+ "301": [
+  "Languages Draconic Challenge 3 (700 XP)",
+  "Silver Dragon",
+  "Ancient Silver Dragon",
+  "Gargantuan dragon, lawful good",
+  "Actions"
+ ],
+ "302": [
+  "Legendary Actions",
+  "Adult Silver Dragon",
+  "Huge dragon, lawful good",
+  "Legendary Actions"
+ ],
+ "303": [
+  "Young Silver Dragon",
+  "Large dragon, lawful good",
+  "Actions",
+  "Silver Dragon Wyrmling",
+  "Medium dragon, lawful good",
+  "Dragon Turtle",
+  "Gargantuan dragon, neutral"
+ ],
+ "304": [
+  "Drider",
+  "Large monstrosity, chaotic evil",
+  "Dryad",
+  "Medium fey, neutral"
+ ],
+ "305": [
+  "Actions",
+  "Duergar",
+  "Medium humanoid (dwarf), lawful evil",
+  "Armor Class 16 (scale mail, shield)",
+  "Monsters (E)",
+  "Elementals",
+  "Air Elemental",
+  "Large elemental, neutral"
+ ],
+ "306": [
+  "Earth Elemental",
+  "Large elemental, neutral",
+  "Fire Elemental",
+  "Large elemental, neutral"
+ ],
+ "307": [
+  "Water Elemental",
+  "Large elemental, neutral",
+  "Elf, Drow",
+  "Medium humanoid (elf), neutral evil",
+  "Actions"
+ ],
+ "308": [
+  "Ettercap",
+  "Medium monstrosity, neutral evil",
+  "Actions",
+  "Ettin",
+  "Large giant, chaotic evil"
+ ],
+ "309": [
+  "Shrieker",
+  "Reactions",
+  "Violet Fungus",
+  "Medium plant, unaligned",
+  "Monsters (G)",
+  "Gargoyle"
+ ],
+ "310": [
+  "Genies",
+  "Djinni",
+  "Large elemental, chaotic good",
+  "Actions",
+  "Efreeti",
+  "Large elemental, lawful evil"
+ ],
+ "311": [
+  "Ghost",
+  "Medium undead, any alignment",
+  "Actions",
+  "Ghouls",
+  "Ghast",
+  "Medium undead, chaotic evil"
+ ],
+ "312": [
+  "Ghoul",
+  "Medium undead, chaotic evil",
+  "Giants",
+  "Cloud Giant",
+  "Fire Giant"
+ ],
+ "313": [
+  "Frost Giant",
+  "Huge giant, neutral evil",
+  "Hill Giant",
+  "Stone Giant",
+  "Storm Giant"
+ ],
+ "314": [
+  "Gibbering Mouther",
+  "Medium aberration, neutral",
+  "Actions",
+  "Gnoll",
+  "Medium humanoid (gnoll), chaotic evil"
+ ],
+ "315": [
+  "Gnome, Deep (Svirfneblin)",
+  "Small humanoid (gnome), neutral good",
+  "Goblin",
+  "Clay Golem",
+  "Large construct, unaligned"
+ ],
+ "316": [
+  "Actions",
+  "Flesh Golem",
+  "Medium construct, neutral",
+  "Senses darkvision 60 ft., passive Perception 10",
+  "Challenge 5 (1,800 XP)",
+  "Actions"
+ ],
+ "317": [
+  "Iron Golem",
+  "Large construct, unaligned",
+  "Stone Golem",
+  "Large construct, unaligned",
+  "Gorgon",
+  "Large monstrosity, unaligned"
+ ],
+ "318": [
+  "Languages — Challenge 5 (1,800 XP)",
+  "Grick",
+  "Medium monstrosity, neutral",
+  "Griffon",
+  "Actions",
+  "Grimlock",
+  "Medium humanoid (grimlock), neutral evil"
+ ],
+ "319": [
+  "Monsters (H)",
+  "Hags",
+  "Green Hag",
+  "Medium fey, neutral evil",
+  "Actions",
+  "Night Hag",
+  "Medium fiend, neutral evil"
+ ],
+ "320": [
+  "Actions",
+  "Sea Hag",
+  "Medium fey, chaotic evil",
+  "Actions"
+ ],
+ "321": [
+  "Breath Weapon As a wyrmling",
+  "Optional Prerequisite Challenge 2 or higher",
+  "Half-Red Dragon Veteran",
+  "Medium humanoid (human), any alignment",
+  "Actions",
+  "Harpy",
+  "Medium monstrosity, chaotic evil",
+  "Actions",
+  "Hell Hound",
+  "Medium fiend, lawful evil"
+ ],
+ "322": [
+  "Hippogriff",
+  "Hobgoblin",
+  "Homunculus"
+ ],
+ "323": [
+  "Challenge 0 (10 XP)",
+  "Actions",
+  "Hydra",
+  "Huge monstrosity, unaligned",
+  "Monsters (I)",
+  "Invisible Stalker"
+ ],
+ "324": [
+  "Kobold",
+  "Small humanoid (kobold), lawful evil",
+  "Kraken",
+  "Gargantuan monstrosity (titan), chaotic evil",
+  "Challenge 23 (50,000 XP)",
+  "Actions"
+ ],
+ "325": [
+  "Monsters (L)",
+  "Lamia",
+  "Large monstrosity, chaotic evil",
+  "Lich",
+  "Medium undead, any evil alignment"
+ ],
+ "326": [
+  "Actions",
+  "Legendary Actions",
+  "Lizardfolk",
+  "Medium humanoid (lizardfolk), neutral",
+  "Lycanthropes",
+  "Werebear"
+ ],
+ "327": [
+  "Actions",
+  "Wereboar",
+  "Languages Common (can’t speak in boar form)",
+  "Actions",
+  "Wererat"
+ ],
+ "328": [
+  "Actions",
+  "Weretiger",
+  "Medium humanoid (human, shapechanger), neutral",
+  "Actions",
+  "Werewolf"
+ ],
+ "329": [
+  "Monsters (M)",
+  "Magmin",
+  "Small elemental, chaotic neutral",
+  "Manticore",
+  "Large monstrosity, lawful evil"
+ ],
+ "330": [
+  "Actions",
+  "Medusa",
+  "Medium monstrosity, lawful evil",
+  "Mephits",
+  "Dust Mephit",
+  "Small elemental, neutral evil"
+ ],
+ "331": [
+  "Actions",
+  "Ice Mephit",
+  "Small elemental, neutral evil",
+  "Actions",
+  "Magma Mephit",
+  "Small elemental, neutral evil",
+  "Steam Mephit",
+  "Small elemental, neutral evil"
+ ],
+ "332": [
+  "Merfolk",
+  "Merrow",
+  "Mimic"
+ ],
+ "333": [
+  "Minotaur",
+  "Large monstrosity, chaotic evil",
+  "Mummies",
+  "Mummy",
+  "Medium undead, lawful evil"
+ ],
+ "334": [
+  "Mummy Lord",
+  "Medium undead, lawful evil",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "335": [
+  "Monsters (N)",
+  "Nagas",
+  "Guardian Naga",
+  "Large monstrosity, lawful good",
+  "Spirit Naga",
+  "Large monstrosity, chaotic evil"
+ ],
+ "336": [
+  "Nightmare",
+  "Large fiend, neutral evil",
+  "Ogre",
+  "Large giant, chaotic evil",
+  "Actions",
+  "Oni",
+  "At will: darkness, invisibility"
+ ],
+ "337": [
+  "Actions",
+  "Black Pudding",
+  "Large ooze, unaligned",
+  "Actions",
+  "Reactions",
+  "Gelatinous Cube",
+  "Large ooze, unaligned"
+ ],
+ "338": [
+  "Actions",
+  "Gray Ooze",
+  "Medium ooze, unaligned",
+  "Actions",
+  "Ochre Jelly",
+  "Large ooze, unaligned"
+ ],
+ "339": [
+  "Orc",
+  "Otyugh",
+  "Actions",
+  "Owlbear",
+  "Large monstrosity, unaligned"
+ ],
+ "340": [
+  "Monsters (P)",
+  "Pegasus",
+  "Sylvan but can’t speak Challenge 2 (450 XP)",
+  "Pseudodragon",
+  "Tiny dragon, neutral good",
+  "Actions",
+  "Purple Worm"
+ ],
+ "341": [
+  "Monsters (R)",
+  "Rakshasa",
+  "Medium fiend, lawful evil",
+  "Actions",
+  "Remorhaz",
+  "Huge monstrosity, unaligned"
+ ],
+ "342": [
+  "Actions",
+  "Roc",
+  "Gargantuan monstrosity, unaligned",
+  "Challenge 11 (7,200 XP)",
+  "Roper",
+  "Large monstrosity, neutral evil"
+ ],
+ "343": [
+  "Actions",
+  "Rust Monster",
+  "Medium monstrosity, unaligned",
+  "Actions",
+  "Monsters (S)",
+  "Sahuagin",
+  "Medium humanoid (sahuagin), lawful evil"
+ ],
+ "344": [
+  "Salamander",
+  "Large elemental, neutral evil",
+  "Satyr",
+  "Medium fey, chaotic neutral",
+  "Shadow"
+ ],
+ "345": [
+  "Shambling Mound",
+  "Large plant, unaligned",
+  "Shield Guardian",
+  "Large construct, unaligned",
+  "Actions"
+ ],
+ "346": [
+  "Reactions",
+  "Skeleton",
+  "Actions",
+  "Minotaur Skeleton",
+  "Large undead, lawful evil",
+  "Actions",
+  "Warhorse Skeleton",
+  "Large undead, lawful evil",
+  "Actions",
+  "Specter"
+ ],
+ "347": [
+  "Sphinxes",
+  "Androsphinx",
+  "Large monstrosity, lawful neutral",
+  "Actions"
+ ],
+ "348": [
+  "Legendary Actions",
+  "Gynosphinx",
+  "Large monstrosity, lawful neutral",
+  "Actions",
+  "Sprite",
+  "Tiny fey, neutral good"
+ ],
+ "349": [
+  "Actions",
+  "Stirge",
+  "Tiny beast, unaligned",
+  "Actions",
+  "Succubus/Incubus",
+  "Medium fiend (shapechanger), neutral evil",
+  "Actions"
+ ],
+ "350": [
+  "Monsters (T)",
+  "Tarrasque",
+  "Gargantuan monstrosity (titan), unaligned",
+  "Actions",
+  "Legendary Actions"
+ ],
+ "351": [
+  "Treant",
+  "Huge plant, chaotic good",
+  "Troll",
+  "Large giant, chaotic evil",
+  "Actions",
+  "Monsters (U)",
+  "Unicorn"
+ ],
+ "352": [
+  "Actions",
+  "Legendary Actions",
+  "Monsters (V)",
+  "Vampires",
+  "Vampire",
+  "Medium undead (shapechanger), lawful evil"
+ ],
+ "353": [
+  "Actions",
+  "Legendary Actions"
+ ],
+ "354": [
+  "Vampire Spawn",
+  "Medium undead, neutral evil",
+  "Actions",
+  "Monsters (W)",
+  "Wight",
+  "Medium undead, neutral evil"
+ ],
+ "355": [
+  "Will-o’-Wisp",
+  "Tiny undead, chaotic evil",
+  "Wraith",
+  "Medium undead, neutral evil"
+ ],
+ "356": [
+  "Wyvern",
+  "Large dragon, unaligned",
+  "Monsters (X)",
+  "Xorn",
+  "Medium elemental, neutral",
+  "Zombie",
+  "Medium undead, neutral evil"
+ ],
+ "357": [
+  "Actions",
+  "Ogre Zombie",
+  "Large undead, neutral evil",
+  "Actions"
+ ],
+ "358": [
+  "Conditions",
+  "Blinded",
+  "Charmed",
+  "Deafened",
+  "Exhaustion",
+  "Frightened",
+  "Grappled",
+  "Incapacitated",
+  "Invisible",
+  "Paralyzed"
+ ],
+ "359": [
+  "Petrified",
+  "Poisoned",
+  "Prone",
+  "Restrained",
+  "Stunned",
+  "Unconscious"
+ ],
+ "360": [
+  "Fantasy-Historical",
+  "Pantheons",
+  "The Celtic Pantheon",
+  "The Greek Pantheon",
+  "The Egyptian Pantheon",
+  "The Norse Pantheon",
+  "Celtic Deities"
+ ],
+ "361": [
+  "Greek Deities",
+  "Egyptian Deities",
+  "Norse Deities"
+ ],
+ "362": [],
+ "363": [
+  "The Planes of",
+  "Existence",
+  "The Material Plane",
+  "Beyond the Material",
+  "Planar Travel",
+  "Transitive Planes"
+ ],
+ "364": [
+  "Inner Planes",
+  "Outer Planes",
+  "Outer Planes",
+  "Demiplanes"
+ ],
+ "365": [],
+ "366": [
+  "Appendix MM-A: Miscellaneous Creatures",
+  "Ape",
+  "Medium beast, unaligned",
+  "Awakened Shrub",
+  "Small plant, unaligned",
+  "Awakened Tree",
+  "Axe Beak"
+ ],
+ "367": [
+  "Baboon",
+  "Badger",
+  "Bat",
+  "Tiny beast, unaligned",
+  "Black Bear"
+ ],
+ "368": [
+  "Challenge 1/2 (100 XP)",
+  "Blink Dog",
+  "Blood Hawk",
+  "Actions",
+  "Boar"
+ ],
+ "369": [
+  "Brown Bear",
+  "Large beast, unaligned",
+  "Actions",
+  "Camel",
+  "Cat",
+  "Constrictor Snake"
+ ],
+ "370": [
+  "Crab",
+  "Tiny beast, unaligned",
+  "Crocodile",
+  "Death Dog",
+  "Medium monstrosity, neutral evil",
+  "Deer",
+  "Medium beast, unaligned"
+ ],
+ "371": [
+  "Dire Wolf",
+  "Draft Horse",
+  "Eagle",
+  "Elephant"
+ ],
+ "372": [
+  "Elk",
+  "Large beast, unaligned",
+  "Flying Snake",
+  "Tiny beast, unaligned",
+  "Frog",
+  "Tiny beast, unaligned"
+ ],
+ "373": [
+  "Giant Ape",
+  "Giant Badger",
+  "Giant Bat",
+  "Actions",
+  "Giant Boar"
+ ],
+ "374": [
+  "Actions",
+  "Giant Centipede",
+  "Small beast, unaligned",
+  "Actions",
+  "Giant Constrictor Snake",
+  "Huge beast, unaligned",
+  "Giant Crab",
+  "Medium beast, unaligned",
+  "Giant Crocodile"
+ ],
+ "375": [
+  "Giant Eagle",
+  "Large beast, neutral good",
+  "Giant Elk",
+  "Huge beast, unaligned",
+  "Actions",
+  "Giant Fire Beetle",
+  "Small beast, unaligned"
+ ],
+ "376": [
+  "Actions",
+  "Giant Frog",
+  "Medium beast, unaligned",
+  "Actions",
+  "Giant Goat",
+  "Giant Hyena"
+ ],
+ "377": [
+  "Giant Lizard",
+  "Giant Octopus",
+  "Giant Owl",
+  "Large beast, neutral"
+ ],
+ "378": [
+  "Giant Poisonous Snake",
+  "Giant Rat",
+  "Variant: Diseased Giant Rats",
+  "Giant Scorpion",
+  "Large beast, unaligned",
+  "Actions",
+  "Giant Sea Horse"
+ ],
+ "379": [
+  "Giant Shark",
+  "Giant Spider",
+  "Large beast, unaligned",
+  "Perception 10 Languages — Challenge 1 (200 XP)",
+  "Actions"
+ ],
+ "380": [
+  "Giant Toad",
+  "Large beast, unaligned",
+  "Giant Vulture",
+  "Large beast, neutral evil",
+  "Giant Wasp"
+ ],
+ "381": [
+  "Giant Weasel",
+  "Giant Wolf Spider",
+  "Goat",
+  "Medium beast, unaligned"
+ ],
+ "382": [
+  "Actions",
+  "Hawk",
+  "Tiny beast, unaligned",
+  "Hunter Shark",
+  "Hyena",
+  "Jackal"
+ ],
+ "383": [
+  "Killer Whale",
+  "Lion",
+  "Actions",
+  "Lizard",
+  "Actions"
+ ],
+ "384": [
+  "Mammoth",
+  "Mastiff",
+  "Mule",
+  "Octopus"
+ ],
+ "385": [
+  "Actions",
+  "Owl",
+  "Tiny beast, unaligned",
+  "Panther",
+  "Phase Spider"
+ ],
+ "386": [
+  "Challenge 3 (700 XP)",
+  "Poisonous Snake",
+  "Tiny beast, unaligned",
+  "Polar Bear",
+  "Pony"
+ ],
+ "387": [
+  "Quipper",
+  "Tiny beast, unaligned",
+  "Actions",
+  "Rat",
+  "Tiny beast, unaligned",
+  "Actions",
+  "Raven",
+  "Tiny beast, unaligned",
+  "Reef Shark",
+  "Medium beast, unaligned"
+ ],
+ "388": [
+  "Rhinoceros",
+  "Riding Horse",
+  "Saber-Toothed Tiger",
+  "Actions",
+  "Scorpion"
+ ],
+ "389": [
+  "Actions",
+  "Sea Horse",
+  "Tiny beast, unaligned",
+  "Spider",
+  "Swarm of Bats",
+  "Medium swarm of Tiny beasts, unaligned",
+  "Swarm of Insects",
+  "Medium swarm of Tiny beasts, unaligned"
+ ],
+ "390": [
+  "Swarm of Poisonous Snakes",
+  "Medium swarm of Tiny beasts, unaligned",
+  "Actions",
+  "Swarm of Quippers",
+  "Medium swarm of Tiny beasts, unaligned",
+  "Actions",
+  "Swarm of Rats",
+  "Medium swarm of Tiny beasts, unaligned"
+ ],
+ "391": [
+  "Actions",
+  "Swarm of Ravens",
+  "Medium swarm of Tiny beasts, unaligned",
+  "Actions",
+  "Variant: Insect Swarms",
+  "Tiger",
+  "Large beast, unaligned"
+ ],
+ "392": [
+  "Vulture",
+  "Warhorse",
+  "Actions",
+  "Weasel",
+  "Tiny beast, unaligned",
+  "Winter Wolf"
+ ],
+ "393": [
+  "Wolf",
+  "Medium beast, unaligned",
+  "Challenge 1/4 (50 XP)",
+  "Worg",
+  "Large monstrosity, neutral evil"
+ ],
+ "394": [],
+ "395": [
+  "Nonplayer",
+  "Characters",
+  "Customizing NPCs",
+  "Acolyte",
+  "Medium humanoid (any race), any alignment",
+  "Armor Class 10",
+  "Hit Points 9 (2d8)",
+  "Skills Medicine +4, Religion +2",
+  "Archmage",
+  "Medium humanoid (any race), any alignment"
+ ],
+ "396": [
+  "Assassin",
+  "Challenge 8 (3,900 XP)",
+  "Actions",
+  "Bandit"
+ ],
+ "397": [
+  "Bandit Captain",
+  "Berserker"
+ ],
+ "398": [
+  "Commoner",
+  "Cultist",
+  "Cult Fanatic",
+  "Druid"
+ ],
+ "399": [
+  "Gladiator",
+  "Medium humanoid (any race), any alignment",
+  "Guard",
+  "Medium humanoid (any race), any alignment"
+ ],
+ "400": [
+  "Knight",
+  "Medium humanoid (any race), any alignment",
+  "Mage",
+  "Medium humanoid (any race), any alignment"
+ ],
+ "401": [
+  "Noble",
+  "Priest",
+  "Scout",
+  "Medium humanoid (any race), any alignment"
+ ],
+ "402": [
+  "Spy",
+  "Medium humanoid (any race), any alignment",
+  "Thug",
+  "Tribal Warrior"
+ ],
+ "403": [
+  "Veteran"
+ ]
+}

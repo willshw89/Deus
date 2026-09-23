@@ -1,0 +1,60 @@
+on saving throws against spells and other magical       Horseshoes of a Zephyr
+effects. If you have 17 or more levels in the paladin
+class, the radius of the aura increases to 30 feet.     Wondrous item, very rare
+
+Horn of Blasting                                        These iron horseshoes come in a set of four. While
+                                                        all four shoes are affixed to the hooves of a horse or
+Wondrous item, rare                                     similar creature, they allow the creature to move
+                                                        normally while floating 4 inches above the ground.
+You can use an action to speak the horn’s command       This effect means the creature can cross or stand
+word and then blow the horn, which emits a              above nonsolid or unstable surfaces, such as water
+thunderous blast in a 30-foot cone that is audible   or lava. The creature leaves no tracks and ignores
+600 feet away. Each creature in the cone must make      difficult terrain. In addition, the creature can move
+a DC 15 Constitution saving throw. On a failed save, a  at normal speed for up to 12 hours a day without
+creature takes 5d6 thunder damage and is deafened       suffering exhaustion from a forced march.
+for 1 minute. On a successful save, a creature takes
+half as much damage and isn’t deafened. Creatures       Horseshoes of Speed
+and objects made of glass or crystal have
+disadvantage on the saving throw and take 10d6          Wondrous item, rare
+thunder damage instead of 5d6.
+                                                        These iron horseshoes come in a set of four. While
+  Each use of the horn’s magic has a 20 percent         all four shoes are affixed to the hooves of a horse or
+chance of causing the horn to explode. The explosion    similar creature, they increase the creature’s
+deals 10d6 fire damage to the blower and destroys       walking speed by 30 feet.
+the horn.
+                                                        Immovable Rod
+Horn of Valhalla
+                                                        Rod, uncommon
+Wondrous item, rare (silver or brass), very rare
+(bronze), or legendary (iron)                           This flat iron rod has a button on one end. You can
+                                                        use an action to press the button, which causes the
+You can use an action to blow this horn. In response,   rod to become magically fixed in place. Until you or
+warrior spirits from the Valhalla appear within 60      another creature uses an action to push the button
+feet of you. They use the statistics of a berserker.    again, the rod doesn’t move, even if it is defying
+They return to Valhalla after 1 hour or when they       gravity. The rod can hold up to 8,000 pounds of
+drop to 0 hit points. Once you use the horn, it can’t   weight. More weight causes the rod to deactivate
+be used again until 7 days have passed.                 and fall. A creature can use an action to make a DC
+                                                        30 Strength check, moving the fixed rod up to 10 feet
+  Four types of horn of Valhalla are known to exist,    on a success.
+each made of a different metal. The horn’s type
+determines how many berserkers answer its               Instant Fortress
+summons, as well as the requirement for its use. The
+GM chooses the horn’s type or determines it             Wondrous item, rare
+randomly.
+                                                        You can use an action to place this 1-inch metal cube
+d100    Horn   Berserkers  Requirement                  on the ground and speak its command word. The
+        Type   Summoned                                 cube rapidly grows into a fortress that remains until
+01–40  Silver              None                         you use an action to speak the command word that
+41–75   Brass    2d4 + 2   Proficiency with all         dismisses it, which works only if the fortress is
+76–90            3d4 + 3   simple weapons               empty.
+       Bronze              Proficiency with all
+91–00            4d4 + 4   medium armor                   The fortress is a square tower, 20 feet on a side
+        Iron               Proficiency with all         and 30 feet high, with arrow slits on all sides and a
+                 5d4 + 5   martial weapons              battlement atop it. Its interior is divided into two
+                                                        floors, with a ladder running along one wall to
+  If you blow the horn without meeting its              connect them. The ladder ends at a trapdoor leading
+requirement, the summoned berserkers attack you.        to the roof. When activated, the tower has a small
+If you meet the requirement, they are friendly to you   door on the side facing you. The door opens only at
+and your companions and follow your commands.           your command, which you can speak as a bonus
+                                                        action. It is immune to the knock spell and similar
+                                                        magic, such as that of a chime of opening.

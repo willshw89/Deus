@@ -1,0 +1,63 @@
+GM can also decide that circumstances influence a           Typical Difficulty Classes
+roll in one direction or the other and grant
+advantage or impose disadvantage as a result.               Task Difficulty  DC
+
+Proficiency Bonus                                           Very easy        5
+
+Characters have a proficiency bonus determined by           Easy             10
+level. Monsters also have this bonus, which is
+incorporated in their stat blocks. The bonus is used        Medium           15
+in the rules on ability checks, saving throws, and
+attack rolls.                                               Hard             20
+
+  Your proficiency bonus can’t be added to a single         Very hard        25
+die roll or other number more than once. For
+example, if two different rules say you can add your        Nearly impossible 30
+proficiency bonus to a Wisdom saving throw, you
+nevertheless add the bonus only once when you                 To make an ability check, roll a d20 and add the
+make the save.                                              relevant ability modifier. As with other d20 rolls,
+                                                            apply bonuses and penalties, and compare the total
+  Occasionally, your proficiency bonus might be             to the DC. If the total equals or exceeds the DC, the
+multiplied or divided (doubled or halved, for               ability check is a success—the creature overcomes
+example) before you apply it. For example, the              the challenge at hand. Otherwise, it’s a failure, which
+rogue’s Expertise feature doubles the proficiency           means the character or monster makes no progress
+bonus for certain ability checks. If a circumstance         toward the objective or makes progress combined
+suggests that your proficiency bonus applies more           with a setback determined by the GM.
+than once to the same roll, you still add it only once
+and multiply or divide it only once.                        Contests
+
+  By the same token, if a feature or effect allows you      Sometimes one character’s or monster’s efforts are
+to multiply your proficiency bonus when making an           directly opposed to another’s. This can occur when
+ability check that wouldn’t normally benefit from           both of them are trying to do the same thing and
+your proficiency bonus, you still don’t add the bonus       only one can succeed, such as attempting to snatch
+to the check. For that check your proficiency bonus         up a magic ring that has fallen on the floor. This
+is 0, given the fact that multiplying 0 by any number       situation also applies when one of them is trying to
+is still 0. For instance, if you lack proficiency in the    prevent the other one from accomplishing a goal—
+History skill, you gain no benefit from a feature that      for example, when a monster tries to force open a
+lets you double your proficiency bonus when you             door that an adventurer is holding closed. In
+make Intelligence (History) checks.                         situations like these, the outcome is determined by a
+                                                            special form of ability check, called a contest.
+  In general, you don’t multiply your proficiency
+bonus for attack rolls or saving throws. If a feature         Both participants in a contest make ability checks
+or effect allows you to do so, these same rules apply.      appropriate to their efforts. They apply all
+                                                            appropriate bonuses and penalties, but instead of
+Ability Checks                                              comparing the total to a DC, they compare the totals
+                                                            of their two checks. The participant with the higher
+An ability check tests a character’s or monster’s           check total wins the contest. That character or
+innate talent and training in an effort to overcome a       monster either succeeds at the action or prevents
+challenge. The GM calls for an ability check when a         the other one from succeeding.
+character or monster attempts an action (other than
+an attack) that has a chance of failure. When the             If the contest results in a tie, the situation remains
+outcome is uncertain, the dice determine the results.       the same as it was before the contest. Thus, one
+                                                            contestant might win the contest by default. If two
+  For every ability check, the GM decides which of the      characters tie in a contest to snatch a ring off the
+six abilities is relevant to the task at hand and the       floor, neither character grabs it. In a contest between
+difficulty of the task, represented by a Difficulty Class.  a monster trying to open a door and an adventurer
+The more difficult a task, the higher its DC. The           trying to keep the door closed, a tie means that the
+Typical Difficulty Classes table shows the most             door remains shut.
+common DCs.
+                                                            Skills
+
+                                                            Each ability covers a broad range of capabilities,
+                                                            including skills that a character or a monster can be
+                                                            proficient in. A skill represents a specific aspect of an

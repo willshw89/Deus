@@ -1,0 +1,340 @@
+{
+ "schemaVersion": 1,
+ "generator": "tools/build_srd_catalog.js",
+ "generatedAt": "2026-09-23T01:17:59.853Z",
+ "dormant": true,
+ "note": "Dormant SRD 5.1 content library: complete, source-accurate data staged for later adaptation. Nothing in this folder is loaded by the game (docs/SRD5_1_COVERAGE_MANIFEST.md section 9).",
+ "source": {
+  "file": "SRD_CC_v5.1.pdf",
+  "sha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
+  "pages": 403,
+  "extraction": {
+   "generator": "tools/srd_extract/extract_pages.js",
+   "generatedAt": "2026-09-23T01:17:52.372Z",
+   "tool": "pdftotext (xpdf) 4.06"
+  }
+ },
+ "license": {
+  "id": "CC-BY-4.0",
+  "url": "https://creativecommons.org/licenses/by/4.0/legalcode",
+  "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+ },
+ "contract": "docs/SRD5_1_COVERAGE_MANIFEST.md",
+ "files": {
+  "creatures": "creatures.json",
+  "spells": "spells.json",
+  "equipment": "equipment.json",
+  "magic-items": "magic_items.json",
+  "character-options": "character_options.json",
+  "rules": "rules.json"
+ },
+ "categories": [
+  {
+   "category": "creatures",
+   "file": "creatures.json",
+   "entries": 317,
+   "byKind": {
+    "creature": 317
+   },
+   "byReadiness": {
+    "parsed": 317
+   },
+   "warnings": 3
+  },
+  {
+   "category": "spells",
+   "file": "spells.json",
+   "entries": 327,
+   "byKind": {
+    "spell-list": 8,
+    "spell": 319
+   },
+   "byReadiness": {
+    "parsed": 327
+   },
+   "warnings": 0
+  },
+  {
+   "category": "equipment",
+   "file": "equipment.json",
+   "entries": 226,
+   "byKind": {
+    "armor": 13,
+    "weapon": 37,
+    "gear": 99,
+    "tool": 36,
+    "vehicle": 20,
+    "mount": 8,
+    "trade-good": 13
+   },
+   "byReadiness": {
+    "parsed": 224,
+    "extracted": 2
+   },
+   "warnings": 2
+  },
+  {
+   "category": "magic-items",
+   "file": "magic_items.json",
+   "entries": 240,
+   "byKind": {
+    "magic-item": 240
+   },
+   "byReadiness": {
+    "parsed": 231,
+    "extracted": 9
+   },
+   "warnings": 3
+  },
+  {
+   "category": "character-options",
+   "file": "character_options.json",
+   "entries": 39,
+   "byKind": {
+    "race": 9,
+    "subrace": 4,
+    "class": 12,
+    "subclass": 12,
+    "background": 1,
+    "feat": 1
+   },
+   "byReadiness": {
+    "parsed": 37,
+    "extracted": 2
+   },
+   "warnings": 1
+  },
+  {
+   "category": "rules",
+   "file": "rules.json",
+   "entries": 176,
+   "byKind": {
+    "rule": 114,
+    "table": 17,
+    "hazard": 28,
+    "condition": 15,
+    "appendix": 2
+   },
+   "byReadiness": {
+    "parsed": 175,
+    "extracted": 1
+   },
+   "warnings": 0
+  }
+ ],
+ "totals": {
+  "entries": 1325,
+  "byKind": {
+   "creature": 317,
+   "spell-list": 8,
+   "spell": 319,
+   "armor": 13,
+   "weapon": 37,
+   "gear": 99,
+   "tool": 36,
+   "vehicle": 20,
+   "mount": 8,
+   "trade-good": 13,
+   "magic-item": 240,
+   "race": 9,
+   "subrace": 4,
+   "class": 12,
+   "subclass": 12,
+   "background": 1,
+   "feat": 1,
+   "rule": 114,
+   "table": 17,
+   "hazard": 28,
+   "condition": 15,
+   "appendix": 2
+  },
+  "byReadiness": {
+   "parsed": 1311,
+   "extracted": 14
+  }
+ },
+ "kinds": {
+  "creature": {
+   "category": "creatures",
+   "icon": 12
+  },
+  "spell": {
+   "category": "spells",
+   "icon": 79
+  },
+  "spell-list": {
+   "category": "spells",
+   "icon": 187
+  },
+  "weapon": {
+   "category": "equipment",
+   "icon": 97
+  },
+  "armor": {
+   "category": "equipment",
+   "icon": 128
+  },
+  "gear": {
+   "category": "equipment",
+   "icon": 176
+  },
+  "tool": {
+   "category": "equipment",
+   "icon": 194
+  },
+  "mount": {
+   "category": "equipment",
+   "icon": 82
+  },
+  "vehicle": {
+   "category": "equipment",
+   "icon": 83
+  },
+  "trade-good": {
+   "category": "equipment",
+   "icon": 208
+  },
+  "magic-item": {
+   "category": "magic-items",
+   "icon": 160
+  },
+  "race": {
+   "category": "character-options",
+   "icon": 80
+  },
+  "subrace": {
+   "category": "character-options",
+   "icon": 81
+  },
+  "class": {
+   "category": "character-options",
+   "icon": 84
+  },
+  "subclass": {
+   "category": "character-options",
+   "icon": 85
+  },
+  "background": {
+   "category": "character-options",
+   "icon": 86
+  },
+  "feat": {
+   "category": "character-options",
+   "icon": 87
+  },
+  "condition": {
+   "category": "rules",
+   "icon": 16
+  },
+  "rule": {
+   "category": "rules",
+   "icon": 189
+  },
+  "hazard": {
+   "category": "rules",
+   "icon": 1
+  },
+  "table": {
+   "category": "rules",
+   "icon": 188
+  },
+  "appendix": {
+   "category": "rules",
+   "icon": 190
+  }
+ },
+ "readiness": [
+  "extracted",
+  "parsed",
+  "verified",
+  "adapted"
+ ],
+ "staging": [
+  {
+   "file": "staging_character_options.json",
+   "generator": "tools/srd_extract/stage_character_options.js",
+   "generatedAt": "2026-09-23T01:17:59.658Z",
+   "category": "character-options",
+   "entries": 47,
+   "byKind": {
+    "rule": 8,
+    "race": 9,
+    "subrace": 4,
+    "class": 12,
+    "subclass": 12,
+    "background": 1,
+    "feat": 1
+   },
+   "warnings": 1
+  },
+  {
+   "file": "staging_equipment.json",
+   "generator": "tools/srd_extract/stage_equipment.js",
+   "generatedAt": "2026-09-23T01:17:58.704Z",
+   "category": "equipment",
+   "entries": 250,
+   "byKind": {
+    "weapon": 37,
+    "armor": 13,
+    "gear": 99,
+    "tool": 36,
+    "mount": 8,
+    "vehicle": 20,
+    "trade-good": 13,
+    "rule": 24
+   },
+   "warnings": 2
+  },
+  {
+   "file": "staging_magic_items.json",
+   "generator": "tools/srd_extract/stage_magic_items.js",
+   "generatedAt": "2026-09-23T01:17:58.848Z",
+   "category": "magic-items",
+   "entries": 260,
+   "byKind": {
+    "rule": 20,
+    "magic-item": 240
+   },
+   "warnings": 3
+  },
+  {
+   "file": "staging_monsters.json",
+   "generator": "tools/srd_extract/stage_monsters.js",
+   "generatedAt": "2026-09-23T01:17:58.257Z",
+   "category": "creatures",
+   "entries": 317,
+   "byKind": {
+    "creature": 317
+   },
+   "warnings": 3
+  },
+  {
+   "file": "staging_rules.json",
+   "generator": "tools/srd_extract/stage_rules.js",
+   "generatedAt": "2026-09-23T01:17:58.996Z",
+   "category": "rules",
+   "entries": 124,
+   "byKind": {
+    "rule": 62,
+    "table": 17,
+    "hazard": 28,
+    "condition": 15,
+    "appendix": 2
+   },
+   "warnings": 0
+  },
+  {
+   "file": "staging_spells.json",
+   "generator": "tools/srd_extract/stage_spells.js",
+   "generatedAt": "2026-09-23T01:17:58.504Z",
+   "category": "spells",
+   "entries": 327,
+   "byKind": {
+    "spell-list": 8,
+    "spell": 319
+   },
+   "warnings": 0
+  }
+ ],
+ "warnings": 9
+}

@@ -1,0 +1,58 @@
+Constitution saving throw against this magic, taking 32      Actions
+(5d10 + 5) psychic damage on a failed save, or half as
+much damage on a successful one. The target’s hit            Multiattack. The tarrasque can use its Frightful
+point maximum is reduced by an amount equal to the           Presence. It then makes five attacks: one with its bite,
+damage taken. This reduction lasts until the target          two with its claws, one with its horns, and one with its
+finishes a long rest. The target dies if this effect         tail. It can use its Swallow instead of its bite.
+reduces its hit point maximum to 0.
+Etherealness. The fiend magically enters the Ethereal        Bite. Melee Weapon Attack: +19 to hit, reach 10 ft.,
+Plane from the Material Plane, or vice versa.                one target. Hit: 36 (4d12 + 10) piercing damage. If the
+                                                             target is a creature, it is grappled (escape DC 20). Until
+Monsters (T)                                                 this grapple ends, the target is restrained, and the
+                                                             tarrasque can’t bite another target.
+Tarrasque
+                                                             Claw. Melee Weapon Attack: +19 to hit, reach 15 ft.,
+Gargantuan monstrosity (titan), unaligned                    one target. Hit: 28 (4d8 + 10) slashing damage.
+
+Armor Class 25 (natural armor)                               Horns. Melee Weapon Attack: +19 to hit, reach 10 ft.,
+Hit Points 676 (33d20 + 330)                                 one target. Hit: 32 (4d10 + 10) piercing damage.
+Speed 40 ft.
+                                                             Tail. Melee Weapon Attack: +19 to hit, reach 20 ft., one
+    STR DEX CON INT WIS CHA                                  target. Hit: 24 (4d6 + 10) bludgeoning damage. If the
+ 30 (+10) 11 (+0) 30 (+10) 3 (-4) 11 (+0) 11 (+0)            target is a creature, it must succeed on a DC 20
+                                                             Strength saving throw or be knocked prone.
+Saving Throws Int +5, Wis +9, Cha +9
+Damage Immunities fire, poison; bludgeoning, piercing,       Frightful Presence. Each creature of the tarrasque’s
+                                                             choice within 120 feet of it and aware of it must
+  and slashing from nonmagical attacks                       succeed on a DC 17 Wisdom saving throw or become
+Condition Immunities charmed, frightened, paralyzed,         frightened for 1 minute. A creature can repeat the
+                                                             saving throw at the end of each of its turns, with
+  poisoned                                                   disadvantage if the tarrasque is within line of sight,
+Senses blindsight 120 ft., passive Perception 10             ending the effect on itself on a success. If a creature’s
+Languages —                                                  saving throw is successful or the effect ends for it, the
+Challenge 30 (155,000 XP)                                    creature is immune to the tarrasque’s Frightful
+                                                             Presence for the next 24 hours.
+Legendary Resistance (3/Day). If the tarrasque fails a
+saving throw, it can choose to succeed instead.              Swallow. The tarrasque makes one bite attack against
+Magic Resistance. The tarrasque has advantage on             a Large or smaller creature it is grappling. If the attack
+saving throws against spells and other magical effects.      hits, the target takes the bite’s damage, the target is
+Reflective Carapace. Any time the tarrasque is               swallowed, and the grapple ends. While swallowed, the
+targeted by a magic missile spell, a line spell, or a spell  creature is blinded and restrained, it has total cover
+that requires a ranged attack roll, roll a d6. On a 1 to 5,  against attacks and other effects outside the tarrasque,
+the tarrasque is unaffected. On a 6, the tarrasque is        and it takes 56 (16d6) acid damage at the start of each
+unaffected, and the effect is reflected back at the          of the tarrasque’s turns.
+caster as though it originated from the tarrasque,
+turning the caster into the target.                            If the tarrasque takes 60 damage or more on a single
+Siege Monster. The tarrasque deals double damage to          turn from a creature inside it, the tarrasque must
+objects and structures.                                      succeed on a DC 20 Constitution saving throw at the
+                                                             end of that turn or regurgitate all swallowed creatures,
+                                                             which fall prone in a space within 10 feet of the
+                                                             tarrasque. If the tarrasque dies, a swallowed creature
+                                                             is no longer restrained by it and can escape from the
+                                                             corpse by using 30 feet of movement, exiting prone.
+
+                                                             Legendary Actions
+
+                                                             The tarrasque can take 3 legendary actions, choosing
+                                                             from the options below. Only one legendary action
+                                                             option can be used at a time and only at the end of

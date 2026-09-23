@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "equipment",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          5,
+          6
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:weapon:test-hookblade",
+      "category": "equipment",
+      "kind": "weapon",
+      "name": "TEST_Hookblade",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          5
+        ],
+        "section": "TEST_Equipment",
+        "heading": "TEST_Weapons"
+      },
+      "text": "TEST_Hookblade 25 gp 1d8 slashing 3 lb. Light, versatile (1d10)",
+      "data": {
+        "weaponCategory": "martial",
+        "rangeType": "melee",
+        "cost": {
+          "amount": 25,
+          "unit": "gp"
+        },
+        "damage": {
+          "dice": "1d8",
+          "type": "slashing"
+        },
+        "weight": {
+          "lb": 3
+        },
+        "properties": [
+          {
+            "name": "Light",
+            "detail": null
+          },
+          {
+            "name": "Versatile",
+            "detail": "1d10"
+          }
+        ]
+      },
+      "dice": [
+        {
+          "text": "1d8",
+          "count": 1,
+          "sides": 8,
+          "modifier": 0,
+          "average": 4
+        },
+        {
+          "text": "1d10",
+          "count": 1,
+          "sides": 10,
+          "modifier": 0,
+          "average": 5
+        }
+      ],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 97
+      }
+    },
+    {
+      "id": "srd:armor:test-barkmail",
+      "category": "equipment",
+      "kind": "armor",
+      "name": "TEST_Barkmail",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          5
+        ],
+        "section": "TEST_Equipment",
+        "heading": "TEST_Armor"
+      },
+      "text": "TEST_Barkmail 50 gp 14 + Dex modifier (max 2) — Disadvantage 20 lb.",
+      "data": {
+        "armorCategory": "medium",
+        "cost": {
+          "amount": 50,
+          "unit": "gp"
+        },
+        "ac": {
+          "base": 14,
+          "dexModifier": "max2",
+          "bonus": 0
+        },
+        "strength": null,
+        "stealthDisadvantage": true,
+        "weight": {
+          "lb": 20
+        }
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 128
+      }
+    },
+    {
+      "id": "srd:gear:test-lantern-of-tallow",
+      "category": "equipment",
+      "kind": "gear",
+      "name": "TEST_Lantern of Tallow",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          6
+        ],
+        "section": "TEST_Equipment",
+        "heading": "TEST_Adventuring Gear"
+      },
+      "text": "TEST_Lantern of Tallow 5 sp 2 lb.\n\nLantern of Tallow. A tallow lantern casts bright light in a 15-foot radius and dim light for an additional 15 feet. Once lit, it burns for 3 hours on a lump of tallow.",
+      "data": {
+        "cost": {
+          "amount": 5,
+          "unit": "sp"
+        },
+        "weight": {
+          "lb": 2
+        },
+        "group": "TEST_Light Sources",
+        "description": "A tallow lantern casts bright light in a 15-foot radius and dim light for an additional 15 feet. Once lit, it burns for 3 hours on a lump of tallow."
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 176
+      }
+    }
+  ],
+  "warnings": []
+}

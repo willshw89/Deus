@@ -1,0 +1,72 @@
+Horse, draft Horse, riding Mastiff Pony Warhorse
+
+50 gp 75 gp 25 gp 30 gp 400 gp
+
+40 ft. 60 ft. 40 ft. 40 ft. 60 ft.
+
+540 lb. 480 lb. 195 lb. 225 lb. 540 lb.
+
+Tack, Harness, and Drawn Vehicles
+
+Item Barding Bit and bridle Carriage Cart Chariot Feed (per day) Saddle
+Exotic Military Pack Riding Saddlebags
+
+Cost ×4
+2 gp 100 gp
+15 gp 250 gp
+5 cp
+
+Weight ×2
+1 lb. 600 lb. 200 lb. 100 lb.
+10 lb.
+
+60 gp 20 gp
+5 gp 10 gp
+4 gp
+
+40 lb. 30 lb. 15 lb. 25 lb.
+8 lb.
+
+Sled Stabling (per day) Wagon
+
+20 gp 5 sp
+35 gp
+
+300 lb. —
+400 lb.
+
+Waterborne Vehicles
+
+Item Galley Keelboat Longship Rowboat Sailing ship Warship
+
+Cost 30,000 gp
+3,000 gp 10,000 gp
+50 gp 10,000 gp 25,000 gp
+
+Speed 4 mph 1 mph 3 mph 1½ mph 2 mph 2½ mph
+
+Trade Goods
+Most wealth is not in coins. It is measured in livestock, grain, land, rights to collect taxes, or rights to resources (such as a mine or a forest).
+Guilds, nobles, and royalty regulate trade. Chartered companies are granted rights to conduct trade along certain routes, to send merchant ships to various ports, or to buy or sell specific goods. Guilds set prices for the goods or services that they control, and determine who may or may not offer those goods and services. Merchants commonly exchange trade goods without using currency. The Trade Goods table shows the value of commonly exchanged goods.
+
+Trade Goods
+
+Cost 1 cp 2 cp 5 cp 1 sp 5 sp 1 gp 2 gp 3 gp 5 gp 10 gp 15 gp 50 gp 500 gp
+
+Goods 1 lb. of wheat 1 lb. of flour or one chicken 1 lb. of salt 1 lb. of iron or 1 sq. yd. of canvas 1 lb. of copper or 1 sq. yd. of cotton cloth 1 lb. of ginger or one goat 1 lb. of cinnamon or pepper, or one sheep 1 lb. of cloves or one pig 1 lb. of silver or 1 sq. yd. of linen 1 sq. yd. of silk or one cow 1 lb. of saffron or one ox 1 lb. of gold 1 lb. of platinum
+
+Expenses
+When not descending into the depths of the earth, exploring ruins for lost treasures, or waging war against the encroaching darkness, adventurers face more mundane realities. Even in a fantastical world, people require basic necessities such as shelter, sustenance, and clothing. These things cost money, although some lifestyles cost more than others.
+
+Lifestyle Expenses
+
+Lifestyle expenses provide you with a simple way to account for the cost of living in a fantasy world. They cover your accommodations, food and drink, and all your other necessities. Furthermore, expenses cover the cost of maintaining your equipment so you can be ready when adventure next calls.
+At the start of each week or month (your choice), choose a lifestyle from the Expenses table and pay the price to sustain that lifestyle. The prices listed are per day, so if you wish to calculate the cost of your chosen lifestyle over a thirty-day period, multiply the listed price by 30. Your lifestyle might change from one period to the next, based on the funds you have at your disposal, or you might maintain the same lifestyle throughout your character’s career.
+Your lifestyle choice can have consequences. Maintaining a wealthy lifestyle might help you make contacts with the rich and powerful, though you run the risk of attracting thieves. Likewise, living frugally might help you avoid criminals, but you are unlikely to make powerful connections.
+
+Lifestyle Expenses
+
+Lifestyle Wretched Squalid
+
+Price/Day —
+1 sp

@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "character-options",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          9,
+          12
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:race:test-hollowkin",
+      "category": "character-options",
+      "kind": "race",
+      "name": "TEST_Hollowkin",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          9
+        ],
+        "section": "TEST_Races",
+        "heading": "TEST_Hollowkin"
+      },
+      "text": "TEST_Hollowkin Traits\nYour hollowkin character has the following traits.\nAbility Score Increase. Your Wisdom score increases by 2.\nAge. Hollowkin mature at 20 and live about 120 years.\nSize. Hollowkin stand between 5 and 6 feet tall. Your size is Medium.\nSpeed. Your base walking speed is 30 feet.\nLanguages. You can speak, read, and write Common and one other language of your choice.",
+      "data": {
+        "traits": [
+          {
+            "name": "Ability Score Increase",
+            "text": "Your Wisdom score increases by 2."
+          },
+          {
+            "name": "Age",
+            "text": "Hollowkin mature at 20 and live about 120 years."
+          },
+          {
+            "name": "Size",
+            "text": "Hollowkin stand between 5 and 6 feet tall. Your size is Medium."
+          },
+          {
+            "name": "Speed",
+            "text": "Your base walking speed is 30 feet."
+          },
+          {
+            "name": "Languages",
+            "text": "You can speak, read, and write Common and one other language of your choice."
+          }
+        ],
+        "abilityScoreIncrease": "Your Wisdom score increases by 2.",
+        "size": "Medium",
+        "speed": 30,
+        "languages": "Common and one other language of your choice",
+        "subraces": []
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 80
+      }
+    },
+    {
+      "id": "srd:subclass:test-path-of-embers",
+      "category": "character-options",
+      "kind": "subclass",
+      "name": "TEST_Path of Embers",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          10,
+          11
+        ],
+        "section": "TEST_Classes",
+        "heading": "TEST_Path of Embers"
+      },
+      "text": "TEST_Path of Embers\nSome wardens carry a smoldering coal in their chests.\n\nEmber Heart\nStarting when you choose this path at 3rd level, you have resistance to fire damage while raging.\n\nCinder Step\nBeginning at 6th level, when you move on your turn while raging, you can ignite the ground you leave behind.",
+      "data": {
+        "parentClass": "TEST_Warden",
+        "features": [
+          {
+            "name": "Ember Heart",
+            "level": 3,
+            "text": "Starting when you choose this path at 3rd level, you have resistance to fire damage while raging."
+          },
+          {
+            "name": "Cinder Step",
+            "level": 6,
+            "text": "Beginning at 6th level, when you move on your turn while raging, you can ignite the ground you leave behind."
+          }
+        ]
+      },
+      "dice": [],
+      "readiness": "verified",
+      "notes": [],
+      "verifiedBy": "TEST_reviewer",
+      "verifiedAt": "2026-09-22",
+      "icon": {
+        "set": "IconSet",
+        "index": 85
+      }
+    },
+    {
+      "id": "srd:feat:test-sure-footed",
+      "category": "character-options",
+      "kind": "feat",
+      "name": "TEST_Sure-Footed",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          12
+        ],
+        "section": "TEST_Feats",
+        "heading": "TEST_Sure-Footed"
+      },
+      "text": "TEST_Sure-Footed\nPrerequisite: Dexterity 13 or higher\nYou have practiced moving over broken ground. You gain the following benefits:\n• Difficult terrain doesn’t cost you extra movement.\n• You have advantage on saving throws against being knocked prone.",
+      "data": {
+        "prerequisite": "Dexterity 13 or higher",
+        "benefits": [
+          "Difficult terrain doesn’t cost you extra movement.",
+          "You have advantage on saving throws against being knocked prone."
+        ]
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 87
+      }
+    }
+  ],
+  "warnings": []
+}

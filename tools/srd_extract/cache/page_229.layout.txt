@@ -1,0 +1,63 @@
+Luck Blade                                                away from you as it can, and it can’t willingly move
+                                                          to a space within 30 feet of you. It also can’t take
+Weapon (any sword), legendary (requires                   reactions. For its action, it can use only the Dash
+attunement)                                               action or try to escape from an effect that prevents it
+                                                          from moving. If it has nowhere it can move, the
+You gain a +1 bonus to attack and damage rolls            creature can use the Dodge action. At the end of each
+made with this magic weapon. While the sword is on        of its turns, a creature can repeat the saving throw,
+your person, you also gain a +1 bonus to saving           ending the effect on itself on a success.
+throws.
+                                                            The mace regains 1d3 expended charges daily at
+  Luck. If the sword is on your person, you can call      dawn.
+on its luck (no action required) to reroll one attack
+roll, ability check, or saving throw you dislike. You     Mantle of Spell Resistance
+must use the second roll. This property can’t be used
+again until the next dawn.                                Wondrous item, rare (requires attunement)
+
+  Wish. The sword has 1d4 – 1 charges. While              You have advantage on saving throws against spells
+holding it, you can use an action to expend 1 charge      while you wear this cloak.
+and cast the wish spell from it. This property can’t be
+used again until the next dawn. The sword loses this      Manual of Bodily Health
+property if it has no charges.
+                                                          Wondrous item, very rare
+Mace of Disruption
+                                                          This book contains health and diet tips, and its
+Weapon (mace), rare (requires attunement)                 words are charged with magic. If you spend 48 hours
+                                                          over a period of 6 days or fewer studying the book’s
+When you hit a fiend or an undead with this magic         contents and practicing its guidelines, your
+weapon, that creature takes an extra 2d6 radiant          Constitution score increases by 2, as does your
+damage. If the target has 25 hit points or fewer after    maximum for that score. The manual then loses its
+taking this damage, it must succeed on a DC 15            magic, but regains it in a century.
+Wisdom saving throw or be destroyed. On a
+successful save, the creature becomes frightened of       Manual of Gainful Exercise
+you until the end of your next turn.
+                                                          Wondrous item, very rare
+  While you hold this weapon, it sheds bright light in
+a 20-foot radius and dim light for an additional 20    This book describes fitness exercises, and its words
+feet.                                                     are charged with magic. If you spend 48 hours over a
+                                                          period of 6 days or fewer studying the book’s
+Mace of Smiting                                           contents and practicing its guidelines, your Strength
+                                                          score increases by 2, as does your maximum for that
+Weapon (mace), rare                                       score. The manual then loses its magic, but regains it
+                                                          in a century.
+You gain a +1 bonus to attack and damage rolls
+made with this magic weapon. The bonus increases          Manual of Golems
+to +3 when you use the mace to attack a construct.
+                                                          Wondrous item, very rare
+  When you roll a 20 on an attack roll made with
+this weapon, the target takes an extra 2d6                This tome contains information and incantations
+bludgeoning damage, or 4d6 bludgeoning damage if          necessary to make a particular type of golem. The
+it’s a construct. If a construct has 25 hit points or     GM chooses the type or determines it randomly. To
+fewer after taking this damage, it is destroyed.          decipher and use the manual, you must be a
+                                                          spellcaster with at least two 5th-level spell slots. A
+Mace of Terror                                            creature that can’t use a manual of golems and
+                                                          attempts to read it takes 6d6 psychic damage.
+Weapon (mace), rare (requires attunement)
+                                                           d20   Golem  Time        Cost
+This magic weapon has 3 charges. While holding it,         1–5   Clay   30 days     65,000 gp
+you can use an action and expend 1 charge to release      6–17   Flesh  60 days     50,000 gp
+a wave of terror. Each creature of your choice in a         18   Iron   120 days    100,000 gp
+30-foot radius extending from you must succeed on      19–20  Stone  90 days     80,000 gp
+a DC 15 Wisdom saving throw or become frightened
+of you for 1 minute. While it is frightened in this way,
+a creature must spend its turns trying to move as far

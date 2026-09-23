@@ -1,0 +1,3151 @@
+{
+  "generator": "tools/srd_extract/extract_pages.js",
+  "generatedAt": "2026-09-23T01:17:52.372Z",
+  "source": {
+    "file": "SRD_CC_v5.1.pdf",
+    "sha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
+    "expectedSha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
+    "bytes": 3158713,
+    "pages": 403
+  },
+  "license": {
+    "id": "CC-BY-4.0",
+    "attribution": "This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+  },
+  "tool": {
+    "name": "pdftotext (xpdf)",
+    "exe": "pdftotext",
+    "version": "4.06",
+    "modes": [
+      "reading order (-enc UTF-8 -eol unix)",
+      "layout (-layout -enc UTF-8 -eol unix)"
+    ]
+  },
+  "toolWarnings": {
+    "count": 30,
+    "distinct": [
+      "Syntax Error: Unknown character collection 'Adobe-Japan1'"
+    ]
+  },
+  "normalization": [
+    {
+      "id": "crlf",
+      "from": "CR LF or CR",
+      "to": "LF",
+      "why": "pdftotext on Windows emits CRLF"
+    },
+    {
+      "id": "hyphen_artifact",
+      "from": "'-' U+00AD U+2010 [U+2011]",
+      "to": "-",
+      "why": "the PDF encodes every hyphen as hyphen + soft hyphen + hyphen, 917 of the 1,122 occurrences with a trailing non-breaking hyphen as well (well-ordered, 2nd-level, 20-foot)"
+    },
+    {
+      "id": "soft_hyphen",
+      "from": "U+00AD",
+      "to": "",
+      "why": "any soft hyphen left over is invisible in the source"
+    },
+    {
+      "id": "line_separator",
+      "from": "U+2028",
+      "to": "LF",
+      "why": "one occurrence, a line break"
+    },
+    {
+      "id": "unmapped_glyph_dash",
+      "from": "U+008A",
+      "to": "U+2014 (em dash)",
+      "why": "a glyph of the PDF's Adobe-Japan1 font that pdftotext cannot map; 493 occurrences: 492 are the empty spell-slot cells of the class tables on pages 11, 15, 19, 30, 35, 42, 46 and 52 (printed as em dashes) and one is the dash in 'where the adversaries are [em dash] how far away' on page 90"
+    },
+    {
+      "id": "backtick_apostrophe",
+      "from": "` (grave accent)",
+      "to": "U+2019 (right single quotation mark)",
+      "why": "one of the PDF's fonts emits the apostrophe as a grave accent: 10 occurrences, all possessives or contractions (Thieves` Cant, can`t, Lion`s head), on pages 35, 39, 90, 232, 358 and 361"
+    },
+    {
+      "id": "minus_sign",
+      "from": "U+2212",
+      "to": "-",
+      "why": "numeric minus in stat blocks, e.g. (-4); parsers read ASCII"
+    }
+  ],
+  "footer": "the running footer 'System Reference Document 5.1' and the page number are removed from every page; footerPage records the number that was printed",
+  "sections": [
+    {
+      "id": "legal",
+      "title": "Legal Information",
+      "pages": [
+        1,
+        1
+      ],
+      "category": "meta",
+      "kind": "legal"
+    },
+    {
+      "id": "races",
+      "title": "Races",
+      "pages": [
+        3,
+        7
+      ],
+      "category": "character-options",
+      "kind": "race"
+    },
+    {
+      "id": "classes",
+      "title": "Classes",
+      "pages": [
+        8,
+        55
+      ],
+      "category": "character-options",
+      "kind": "class"
+    },
+    {
+      "id": "beyond-1st-level",
+      "title": "Beyond 1st Level (multiclassing, alignment, languages, inspiration, backgrounds)",
+      "pages": [
+        56,
+        61
+      ],
+      "category": "character-options",
+      "kind": "advancement"
+    },
+    {
+      "id": "equipment",
+      "title": "Equipment",
+      "pages": [
+        62,
+        74
+      ],
+      "category": "equipment",
+      "kind": "equipment"
+    },
+    {
+      "id": "feats",
+      "title": "Feats",
+      "pages": [
+        75,
+        75
+      ],
+      "category": "character-options",
+      "kind": "feat"
+    },
+    {
+      "id": "using-ability-scores",
+      "title": "Using Ability Scores",
+      "pages": [
+        76,
+        83
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "adventuring",
+      "title": "Adventuring",
+      "pages": [
+        84,
+        89
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "combat",
+      "title": "Combat",
+      "pages": [
+        90,
+        99
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "spellcasting",
+      "title": "Spellcasting",
+      "pages": [
+        100,
+        104
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "spell-lists",
+      "title": "Spell Lists",
+      "pages": [
+        105,
+        113
+      ],
+      "category": "spells",
+      "kind": "spell-list"
+    },
+    {
+      "id": "spell-descriptions",
+      "title": "Spell Descriptions",
+      "pages": [
+        114,
+        194
+      ],
+      "category": "spells",
+      "kind": "spell"
+    },
+    {
+      "id": "traps",
+      "title": "Traps",
+      "pages": [
+        195,
+        198
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "diseases",
+      "title": "Diseases",
+      "pages": [
+        199,
+        200
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "madness",
+      "title": "Madness",
+      "pages": [
+        201,
+        202
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "objects",
+      "title": "Objects",
+      "pages": [
+        203,
+        203
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "poisons",
+      "title": "Poisons",
+      "pages": [
+        204,
+        205
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "magic-items",
+      "title": "Magic Items",
+      "pages": [
+        206,
+        253
+      ],
+      "category": "magic-items",
+      "kind": "magic-item"
+    },
+    {
+      "id": "monsters-intro",
+      "title": "Monsters (stat block rules)",
+      "pages": [
+        254,
+        260
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "monsters",
+      "title": "Monsters (A to Z)",
+      "pages": [
+        261,
+        357
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    },
+    {
+      "id": "appendix-ph-a",
+      "title": "Appendix PH-A: Conditions",
+      "pages": [
+        358,
+        359
+      ],
+      "category": "rules",
+      "kind": "condition"
+    },
+    {
+      "id": "appendix-ph-b",
+      "title": "Appendix PH-B: Fantasy-Historical Pantheons",
+      "pages": [
+        360,
+        362
+      ],
+      "category": "rules",
+      "kind": "appendix"
+    },
+    {
+      "id": "appendix-ph-c",
+      "title": "Appendix PH-C: The Planes of Existence",
+      "pages": [
+        363,
+        365
+      ],
+      "category": "rules",
+      "kind": "appendix"
+    },
+    {
+      "id": "appendix-mm-a",
+      "title": "Appendix MM-A: Miscellaneous Creatures",
+      "pages": [
+        366,
+        394
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    },
+    {
+      "id": "appendix-mm-b",
+      "title": "Appendix MM-B: Nonplayer Characters",
+      "pages": [
+        395,
+        403
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "footerPage": 1,
+      "chars": 1006,
+      "layoutChars": 1030,
+      "firstLine": "Legal Information"
+    },
+    {
+      "page": 2,
+      "footerPage": 2,
+      "chars": 36,
+      "layoutChars": 36,
+      "firstLine": "(This page intentionally left blank)"
+    },
+    {
+      "page": 3,
+      "footerPage": 3,
+      "chars": 3778,
+      "layoutChars": 5760,
+      "firstLine": "If you note any errors in this document, please let us know by emailing askdnd@wizards.com."
+    },
+    {
+      "page": 4,
+      "footerPage": 4,
+      "chars": 3882,
+      "layoutChars": 5281,
+      "firstLine": "Hill Dwarf"
+    },
+    {
+      "page": 5,
+      "footerPage": 5,
+      "chars": 3832,
+      "layoutChars": 5303,
+      "firstLine": "Halfling Nimbleness. You can move through the space of any creature that is of a size larger than yours."
+    },
+    {
+      "page": 6,
+      "footerPage": 6,
+      "chars": 4089,
+      "layoutChars": 5301,
+      "firstLine": "one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level."
+    },
+    {
+      "page": 7,
+      "footerPage": 7,
+      "chars": 3760,
+      "layoutChars": 4887,
+      "firstLine": "sometimes prove unreliable, or at least unpredictable."
+    },
+    {
+      "page": 8,
+      "footerPage": 8,
+      "chars": 2824,
+      "layoutChars": 5015,
+      "firstLine": "Barbarian"
+    },
+    {
+      "page": 9,
+      "footerPage": 9,
+      "chars": 3518,
+      "layoutChars": 4540,
+      "firstLine": "Reckless Attack"
+    },
+    {
+      "page": 10,
+      "footerPage": 10,
+      "chars": 1135,
+      "layoutChars": 1143,
+      "firstLine": "Mindless Rage"
+    },
+    {
+      "page": 11,
+      "footerPage": 11,
+      "chars": 2268,
+      "layoutChars": 4212,
+      "firstLine": "Bard"
+    },
+    {
+      "page": 12,
+      "footerPage": 12,
+      "chars": 3873,
+      "layoutChars": 5155,
+      "firstLine": "Cantrips"
+    },
+    {
+      "page": 13,
+      "footerPage": 13,
+      "chars": 3997,
+      "layoutChars": 5270,
+      "firstLine": "Expertise"
+    },
+    {
+      "page": 14,
+      "footerPage": 14,
+      "chars": 322,
+      "layoutChars": 323,
+      "firstLine": "Peerless Skill"
+    },
+    {
+      "page": 15,
+      "footerPage": 15,
+      "chars": 2331,
+      "layoutChars": 3998,
+      "firstLine": "Cleric"
+    },
+    {
+      "page": 16,
+      "footerPage": 16,
+      "chars": 4239,
+      "layoutChars": 5600,
+      "firstLine": "Preparing and Casting Spells"
+    },
+    {
+      "page": 17,
+      "footerPage": 17,
+      "chars": 3755,
+      "layoutChars": 5121,
+      "firstLine": "Ability Score Improvement"
+    },
+    {
+      "page": 18,
+      "footerPage": 18,
+      "chars": 89,
+      "layoutChars": 89,
+      "firstLine": "each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."
+    },
+    {
+      "page": 19,
+      "footerPage": 19,
+      "chars": 2351,
+      "layoutChars": 4357,
+      "firstLine": "Druid"
+    },
+    {
+      "page": 20,
+      "footerPage": 20,
+      "chars": 4012,
+      "layoutChars": 5377,
+      "firstLine": "Cantrips"
+    },
+    {
+      "page": 21,
+      "footerPage": 21,
+      "chars": 4061,
+      "layoutChars": 4944,
+      "firstLine": "revert and take 9 damage. As long as the excess damage doesn’t reduce your normal form to 0 hit points, you aren’t knock"
+    },
+    {
+      "page": 22,
+      "footerPage": 22,
+      "chars": 3443,
+      "layoutChars": 5253,
+      "firstLine": "Once you gain access to a circle spell, you always have it prepared, and it doesn’t count against the number of spells y"
+    },
+    {
+      "page": 23,
+      "footerPage": 23,
+      "chars": 352,
+      "layoutChars": 353,
+      "firstLine": "Druids and the Gods"
+    },
+    {
+      "page": 24,
+      "footerPage": 24,
+      "chars": 3001,
+      "layoutChars": 4477,
+      "firstLine": "Fighter"
+    },
+    {
+      "page": 25,
+      "footerPage": 25,
+      "chars": 2891,
+      "layoutChars": 3789,
+      "firstLine": "Action Surge"
+    },
+    {
+      "page": 26,
+      "footerPage": 26,
+      "chars": 2716,
+      "layoutChars": 4557,
+      "firstLine": "Monk"
+    },
+    {
+      "page": 27,
+      "footerPage": 27,
+      "chars": 3807,
+      "layoutChars": 4868,
+      "firstLine": "make one unarmed strike as a bonus action. For example, if you take the Attack action and attack with a quarterstaff, yo"
+    },
+    {
+      "page": 28,
+      "footerPage": 28,
+      "chars": 3633,
+      "layoutChars": 4982,
+      "firstLine": "Stunning Strike"
+    },
+    {
+      "page": 29,
+      "footerPage": 29,
+      "chars": 1176,
+      "layoutChars": 1183,
+      "firstLine": "times your monk level. You must finish a long rest before you can use this feature again."
+    },
+    {
+      "page": 30,
+      "footerPage": 30,
+      "chars": 2402,
+      "layoutChars": 4124,
+      "firstLine": "Paladin"
+    },
+    {
+      "page": 31,
+      "footerPage": 31,
+      "chars": 3843,
+      "layoutChars": 5267,
+      "firstLine": "Lay on Hands"
+    },
+    {
+      "page": 32,
+      "footerPage": 32,
+      "chars": 3729,
+      "layoutChars": 4988,
+      "firstLine": "higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."
+    },
+    {
+      "page": 33,
+      "footerPage": 33,
+      "chars": 4195,
+      "layoutChars": 5388,
+      "firstLine": "paladins meet the ideal of the knight in shining armor, acting with honor in pursuit of justice and the greater good. Th"
+    },
+    {
+      "page": 34,
+      "footerPage": 34,
+      "chars": 322,
+      "layoutChars": 326,
+      "firstLine": "or similar act of self-denial. After a rite of confession and forgiveness, the paladin starts fresh."
+    },
+    {
+      "page": 35,
+      "footerPage": 35,
+      "chars": 2577,
+      "layoutChars": 4570,
+      "firstLine": "Ranger"
+    },
+    {
+      "page": 36,
+      "footerPage": 36,
+      "chars": 3479,
+      "layoutChars": 4762,
+      "firstLine": "you gain levels, your choices should reflect the types of monsters you have encountered on your adventures."
+    },
+    {
+      "page": 37,
+      "footerPage": 37,
+      "chars": 3646,
+      "layoutChars": 4879,
+      "firstLine": "Ranger Archetype"
+    },
+    {
+      "page": 38,
+      "footerPage": 38,
+      "chars": 2240,
+      "layoutChars": 2365,
+      "firstLine": "weapon attack, the creature takes an extra 1d8 damage if it’s below its hit point maximum. You can deal this extra damag"
+    },
+    {
+      "page": 39,
+      "footerPage": 39,
+      "chars": 3073,
+      "layoutChars": 4995,
+      "firstLine": "Rogue"
+    },
+    {
+      "page": 40,
+      "footerPage": 40,
+      "chars": 3509,
+      "layoutChars": 4672,
+      "firstLine": "such as whether an area is dangerous or the territory of a thieves’ guild, whether loot is nearby, or whether the people"
+    },
+    {
+      "page": 41,
+      "footerPage": 41,
+      "chars": 1119,
+      "layoutChars": 1130,
+      "firstLine": "(Sleight of Hand) check, use your thieves’ tools to disarm a trap or open a lock, or take the Use an Object action."
+    },
+    {
+      "page": 42,
+      "footerPage": 42,
+      "chars": 1933,
+      "layoutChars": 4015,
+      "firstLine": "Sorcerer"
+    },
+    {
+      "page": 43,
+      "footerPage": 43,
+      "chars": 3585,
+      "layoutChars": 4960,
+      "firstLine": "Spellcasting"
+    },
+    {
+      "page": 44,
+      "footerPage": 44,
+      "chars": 3674,
+      "layoutChars": 4862,
+      "firstLine": "slot and gain a number of sorcery points equal to the slot’s level."
+    },
+    {
+      "page": 45,
+      "footerPage": 45,
+      "chars": 2118,
+      "layoutChars": 2359,
+      "firstLine": "Blue Brass Bronze Copper Gold Green Red Silver White"
+    },
+    {
+      "page": 46,
+      "footerPage": 46,
+      "chars": 2289,
+      "layoutChars": 4934,
+      "firstLine": "Warlock"
+    },
+    {
+      "page": 47,
+      "footerPage": 47,
+      "chars": 4075,
+      "layoutChars": 5416,
+      "firstLine": "cantrips of your choice at higher levels, as shown in the Cantrips Known column of the Warlock table."
+    },
+    {
+      "page": 48,
+      "footerPage": 48,
+      "chars": 3900,
+      "layoutChars": 5112,
+      "firstLine": "pact weapon if you die, if you perform the 1-hour ritual on a different weapon, or if you use a 1-hour ritual to break y"
+    },
+    {
+      "page": 49,
+      "footerPage": 49,
+      "chars": 2861,
+      "layoutChars": 4343,
+      "firstLine": "transcribe the spell. For each level of the spell, the transcription process takes 2 hours and costs 50 gp for the rare "
+    },
+    {
+      "page": 50,
+      "footerPage": 50,
+      "chars": 3306,
+      "layoutChars": 4903,
+      "firstLine": "Sculptor of Flesh"
+    },
+    {
+      "page": 51,
+      "footerPage": 51,
+      "chars": 1646,
+      "layoutChars": 1673,
+      "firstLine": "add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll’s effects occur."
+    },
+    {
+      "page": 52,
+      "footerPage": 52,
+      "chars": 2316,
+      "layoutChars": 3863,
+      "firstLine": "Wizard"
+    },
+    {
+      "page": 53,
+      "footerPage": 53,
+      "chars": 4024,
+      "layoutChars": 5156,
+      "firstLine": "Preparing and Casting Spells"
+    },
+    {
+      "page": 54,
+      "footerPage": 54,
+      "chars": 4439,
+      "layoutChars": 5387,
+      "firstLine": "Signature Spells"
+    },
+    {
+      "page": 55,
+      "footerPage": 55,
+      "chars": 1266,
+      "layoutChars": 1278,
+      "firstLine": "expend as you experiment with the spell to master it, as well as the fine inks you need to record it. Once you have spen"
+    },
+    {
+      "page": 56,
+      "footerPage": 56,
+      "chars": 3735,
+      "layoutChars": 5247,
+      "firstLine": "Beyond 1st Level"
+    },
+    {
+      "page": 57,
+      "footerPage": 57,
+      "chars": 3947,
+      "layoutChars": 5391,
+      "firstLine": "Experience Points"
+    },
+    {
+      "page": 58,
+      "footerPage": 58,
+      "chars": 4138,
+      "layoutChars": 5035,
+      "firstLine": "but have the Spellcasting feature from only one class, you follow the rules as described in that class."
+    },
+    {
+      "page": 59,
+      "footerPage": 59,
+      "chars": 4181,
+      "layoutChars": 5578,
+      "firstLine": "Lawful neutral (LN) individuals act in accordance with law, tradition, or personal codes. Many monks and some wizards ar"
+    },
+    {
+      "page": 60,
+      "footerPage": 60,
+      "chars": 4011,
+      "layoutChars": 4955,
+      "firstLine": "Gaining Inspiration"
+    },
+    {
+      "page": 61,
+      "footerPage": 61,
+      "chars": 4344,
+      "layoutChars": 6014,
+      "firstLine": "Choose a god, a pantheon of gods, or some other quasi-divine being from among those listed in \"Fantasy-Historical Panthe"
+    },
+    {
+      "page": 62,
+      "footerPage": 62,
+      "chars": 4434,
+      "layoutChars": 5662,
+      "firstLine": "Equipment"
+    },
+    {
+      "page": 63,
+      "footerPage": 63,
+      "chars": 4053,
+      "layoutChars": 5398,
+      "firstLine": "Heavy Armor. Heavier armor interferes with the wearer’s ability to move quickly, stealthily, and freely. If the Armor ta"
+    },
+    {
+      "page": 64,
+      "footerPage": 64,
+      "chars": 3610,
+      "layoutChars": 5405,
+      "firstLine": "Leather Studded leather Medium Armor Hide Chain shirt Scale mail Breastplate Half plate Heavy Armor Ring mail Chain mail"
+    },
+    {
+      "page": 65,
+      "footerPage": 65,
+      "chars": 4104,
+      "layoutChars": 5200,
+      "firstLine": "Heavy. Small creatures have disadvantage on attack rolls with heavy weapons. A heavy weapon’s size and bulk make it too "
+    },
+    {
+      "page": 66,
+      "footerPage": 66,
+      "chars": 3379,
+      "layoutChars": 4515,
+      "firstLine": "Club Dagger Greatclub Handaxe Javelin Light hammer Mace Quarterstaff Sickle Spear Simple Ranged Weapons Crossbow, light "
+    },
+    {
+      "page": 67,
+      "footerPage": 67,
+      "chars": 4966,
+      "layoutChars": 6009,
+      "firstLine": "sorcerer, warlock, or wizard can use such an item as a spellcasting focus."
+    },
+    {
+      "page": 68,
+      "footerPage": 68,
+      "chars": 4770,
+      "layoutChars": 5821,
+      "firstLine": "Lamp. A lamp casts bright light in a 15-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 ho"
+    },
+    {
+      "page": 69,
+      "footerPage": 69,
+      "chars": 2663,
+      "layoutChars": 5247,
+      "firstLine": "Item Abacus Acid (vial)"
+    },
+    {
+      "page": 70,
+      "footerPage": 70,
+      "chars": 4143,
+      "layoutChars": 6871,
+      "firstLine": "Flask or tankard 1 pint liquid"
+    },
+    {
+      "page": 71,
+      "footerPage": 71,
+      "chars": 4801,
+      "layoutChars": 5723,
+      "firstLine": "Disguise Kit. This pouch of cosmetics, hair dye, and small props lets you create disguises that change your physical app"
+    },
+    {
+      "page": 72,
+      "footerPage": 72,
+      "chars": 3295,
+      "layoutChars": 5480,
+      "firstLine": "Horse, draft Horse, riding Mastiff Pony Warhorse"
+    },
+    {
+      "page": 73,
+      "footerPage": 73,
+      "chars": 4545,
+      "layoutChars": 5436,
+      "firstLine": "Poor Modest Comfortable Wealthy Aristocratic"
+    },
+    {
+      "page": 74,
+      "footerPage": 74,
+      "chars": 3330,
+      "layoutChars": 4586,
+      "firstLine": "Banquet (per person) Bread, loaf Cheese, hunk Inn stay (per day)"
+    },
+    {
+      "page": 75,
+      "footerPage": 75,
+      "chars": 1263,
+      "layoutChars": 1283,
+      "firstLine": "Feats"
+    },
+    {
+      "page": 76,
+      "footerPage": 76,
+      "chars": 3715,
+      "layoutChars": 5331,
+      "firstLine": "Using Ability"
+    },
+    {
+      "page": 77,
+      "footerPage": 77,
+      "chars": 4362,
+      "layoutChars": 5469,
+      "firstLine": "GM can also decide that circumstances influence a roll in one direction or the other and grant advantage or impose disad"
+    },
+    {
+      "page": 78,
+      "footerPage": 78,
+      "chars": 3680,
+      "layoutChars": 5468,
+      "firstLine": "ability score, and an individual’s proficiency in a skill demonstrates a focus on that aspect. (A character’s starting s"
+    },
+    {
+      "page": 79,
+      "footerPage": 79,
+      "chars": 4012,
+      "layoutChars": 5133,
+      "firstLine": "For example, if a 1st-level character has a Wisdom of 15 and proficiency in Perception, he or she has a passive Wisdom ("
+    },
+    {
+      "page": 80,
+      "footerPage": 80,
+      "chars": 4205,
+      "layoutChars": 5370,
+      "firstLine": "that most characters don’t usually have to worry about it."
+    },
+    {
+      "page": 81,
+      "footerPage": 81,
+      "chars": 4368,
+      "layoutChars": 5852,
+      "firstLine": "creature, it usually sees you. However, under certain circumstances, the GM might allow you to stay hidden as you approa"
+    },
+    {
+      "page": 82,
+      "footerPage": 82,
+      "chars": 4353,
+      "layoutChars": 5327,
+      "firstLine": "Spellcasting Ability"
+    },
+    {
+      "page": 83,
+      "footerPage": 83,
+      "chars": 1872,
+      "layoutChars": 1900,
+      "firstLine": "convincing a chamberlain to let your party see the king, negotiating peace between warring tribes, or inspiring a crowd "
+    },
+    {
+      "page": 84,
+      "footerPage": 84,
+      "chars": 4295,
+      "layoutChars": 5513,
+      "firstLine": "Time"
+    },
+    {
+      "page": 85,
+      "footerPage": 85,
+      "chars": 2537,
+      "layoutChars": 2714,
+      "firstLine": "Difficult Terrain"
+    },
+    {
+      "page": 86,
+      "footerPage": 86,
+      "chars": 4048,
+      "layoutChars": 5125,
+      "firstLine": "The Environment"
+    },
+    {
+      "page": 87,
+      "footerPage": 87,
+      "chars": 4211,
+      "layoutChars": 5052,
+      "firstLine": "Eating half a pound of food in a day counts as half a day without food."
+    },
+    {
+      "page": 88,
+      "footerPage": 88,
+      "chars": 4347,
+      "layoutChars": 5570,
+      "firstLine": "Between Adventures"
+    },
+    {
+      "page": 89,
+      "footerPage": 89,
+      "chars": 1491,
+      "layoutChars": 1506,
+      "firstLine": "Researching"
+    },
+    {
+      "page": 90,
+      "footerPage": 90,
+      "chars": 4364,
+      "layoutChars": 5955,
+      "firstLine": "The Order of Combat"
+    },
+    {
+      "page": 91,
+      "footerPage": 91,
+      "chars": 4229,
+      "layoutChars": 5347,
+      "firstLine": "specified, and anything that deprives you of your ability to take actions also prevents you from taking a bonus action."
+    },
+    {
+      "page": 92,
+      "footerPage": 92,
+      "chars": 3683,
+      "layoutChars": 4938,
+      "firstLine": "For example, if your speed is 30 feet, you must spend 15 feet of movement to stand up. You can’t stand up if you don’t h"
+    },
+    {
+      "page": 93,
+      "footerPage": 93,
+      "chars": 4020,
+      "layoutChars": 5183,
+      "firstLine": "Actions in Combat"
+    },
+    {
+      "page": 94,
+      "footerPage": 94,
+      "chars": 4034,
+      "layoutChars": 5204,
+      "firstLine": "holding onto the spell’s magic requires concentration. If your concentration is broken, the spell dissipates without tak"
+    },
+    {
+      "page": 95,
+      "footerPage": 95,
+      "chars": 4244,
+      "layoutChars": 5497,
+      "firstLine": "Ranged Attacks"
+    },
+    {
+      "page": 96,
+      "footerPage": 96,
+      "chars": 4320,
+      "layoutChars": 5525,
+      "firstLine": "Moving a Grappled Creature. When you move, you can drag or carry the grappled creature with you, but your speed is halve"
+    },
+    {
+      "page": 97,
+      "footerPage": 97,
+      "chars": 4049,
+      "layoutChars": 5236,
+      "firstLine": "together. Then add any relevant modifiers as normal. To speed up play, you can roll all the damage dice at once."
+    },
+    {
+      "page": 98,
+      "footerPage": 98,
+      "chars": 4356,
+      "layoutChars": 5597,
+      "firstLine": "Instant Death"
+    },
+    {
+      "page": 99,
+      "footerPage": 99,
+      "chars": 3237,
+      "layoutChars": 3682,
+      "firstLine": "at you while you’re in that state, but only true healing can save you."
+    },
+    {
+      "page": 100,
+      "footerPage": 100,
+      "chars": 4653,
+      "layoutChars": 5723,
+      "firstLine": "Spellcasting"
+    },
+    {
+      "page": 101,
+      "footerPage": 101,
+      "chars": 4005,
+      "layoutChars": 5329,
+      "firstLine": "Cantrips"
+    },
+    {
+      "page": 102,
+      "footerPage": 102,
+      "chars": 4096,
+      "layoutChars": 5405,
+      "firstLine": "requires a somatic component, the caster must have free use of at least one hand to perform these gestures."
+    },
+    {
+      "page": 103,
+      "footerPage": 103,
+      "chars": 4626,
+      "layoutChars": 5925,
+      "firstLine": "specify how you position its point of origin. Typically, a point of origin is a point in space, but some spells have an "
+    },
+    {
+      "page": 104,
+      "footerPage": 104,
+      "chars": 1236,
+      "layoutChars": 1253,
+      "firstLine": "images that any creature can see, but the most insidious illusions plant an image directly in the mind of a creature."
+    },
+    {
+      "page": 105,
+      "footerPage": 105,
+      "chars": 1252,
+      "layoutChars": 1956,
+      "firstLine": "Spell Lists"
+    },
+    {
+      "page": 106,
+      "footerPage": 106,
+      "chars": 1330,
+      "layoutChars": 2130,
+      "firstLine": "Find the Path Guards and Wards Irresistible Dance Mass Suggestion Programmed Illusion True Seeing"
+    },
+    {
+      "page": 107,
+      "footerPage": 107,
+      "chars": 1228,
+      "layoutChars": 1842,
+      "firstLine": "Locate Creature Stone Shape"
+    },
+    {
+      "page": 108,
+      "footerPage": 108,
+      "chars": 1312,
+      "layoutChars": 2018,
+      "firstLine": "Meld into Stone Plant Growth Protection from Energy Sleet Storm Speak with Plants Water Breathing Water Walk Wind Wall"
+    },
+    {
+      "page": 109,
+      "footerPage": 109,
+      "chars": 1249,
+      "layoutChars": 2017,
+      "firstLine": "4th Level"
+    },
+    {
+      "page": 110,
+      "footerPage": 110,
+      "chars": 1182,
+      "layoutChars": 1817,
+      "firstLine": "Hold Person Invisibility Knock Levitate Mirror Image Misty Step Scorching Ray See Invisibility Shatter Spider Climb Sugg"
+    },
+    {
+      "page": 111,
+      "footerPage": 111,
+      "chars": 1220,
+      "layoutChars": 2174,
+      "firstLine": "1st Level"
+    },
+    {
+      "page": 112,
+      "footerPage": 112,
+      "chars": 1287,
+      "layoutChars": 2280,
+      "firstLine": "Fog Cloud Grease Hideous Laughter Identify Illusory Script Jump Longstrider Mage Armor Magic Missile Protection from Evi"
+    },
+    {
+      "page": 113,
+      "footerPage": 113,
+      "chars": 1084,
+      "layoutChars": 1494,
+      "firstLine": "Arcane Hand Cloudkill Cone of Cold Conjure Elemental Contact Other Plane Creation Dominate Person Dream Geas Hold Monste"
+    },
+    {
+      "page": 114,
+      "footerPage": 114,
+      "chars": 3495,
+      "layoutChars": 5080,
+      "firstLine": "Spell Descriptions"
+    },
+    {
+      "page": 115,
+      "footerPage": 115,
+      "chars": 4230,
+      "layoutChars": 5448,
+      "firstLine": "time for the duration of the spell, you can use your action to change your appearance in this way again."
+    },
+    {
+      "page": 116,
+      "footerPage": 116,
+      "chars": 4453,
+      "layoutChars": 5819,
+      "firstLine": "a zombie if you chose a corpse (the GM has the creature’s game statistics)."
+    },
+    {
+      "page": 117,
+      "footerPage": 117,
+      "chars": 4430,
+      "layoutChars": 5627,
+      "firstLine": "If you move so that an affected creature is forced to pass through the barrier, the spell ends."
+    },
+    {
+      "page": 118,
+      "footerPage": 118,
+      "chars": 4318,
+      "layoutChars": 5667,
+      "firstLine": "When such a creature can see the target or comes within 60 feet of it, the creature must succeed on a Wisdom saving thro"
+    },
+    {
+      "page": 119,
+      "footerPage": 119,
+      "chars": 4345,
+      "layoutChars": 5796,
+      "firstLine": "Range: Touch Components: V, S, M (gold dust worth at least 25 gp,"
+    },
+    {
+      "page": 120,
+      "footerPage": 120,
+      "chars": 3880,
+      "layoutChars": 5036,
+      "firstLine": "that apply to it have no effect on your physical body, nor do they persist when you return to it."
+    },
+    {
+      "page": 121,
+      "footerPage": 121,
+      "chars": 3908,
+      "layoutChars": 5253,
+      "firstLine": "If the target is native to the plane of existence you’re on, you banish the target to a harmless demiplane. While there,"
+    },
+    {
+      "page": 122,
+      "footerPage": 122,
+      "chars": 3786,
+      "layoutChars": 5365,
+      "firstLine": "Blade Barrier"
+    },
+    {
+      "page": 123,
+      "footerPage": 123,
+      "chars": 3880,
+      "layoutChars": 5308,
+      "firstLine": "Creatures that aren’t there can’t perceive you or interact with you, unless they have the ability to do so."
+    },
+    {
+      "page": 124,
+      "footerPage": 124,
+      "chars": 3712,
+      "layoutChars": 5303,
+      "firstLine": "of its friends being harmed. When the spell ends, the creature becomes hostile again, unless the GM rules otherwise."
+    },
+    {
+      "page": 125,
+      "footerPage": 125,
+      "chars": 4033,
+      "layoutChars": 5250,
+      "firstLine": "A creature that can see the sensor (such as a creature benefiting from see invisibility or truesight) sees a luminous, i"
+    },
+    {
+      "page": 126,
+      "footerPage": 126,
+      "chars": 3746,
+      "layoutChars": 5033,
+      "firstLine": "the target behaves. If the target can’t follow your command, the spell ends."
+    },
+    {
+      "page": 127,
+      "footerPage": 127,
+      "chars": 3737,
+      "layoutChars": 5377,
+      "firstLine": "you. Each affected target must use as much of its movement as possible to move in that direction on its next turn. It ca"
+    },
+    {
+      "page": 128,
+      "footerPage": 128,
+      "chars": 4293,
+      "layoutChars": 5423,
+      "firstLine": "You summon a celestial of challenge rating 4 or lower, which appears in an unoccupied space that you can see within rang"
+    },
+    {
+      "page": 129,
+      "footerPage": 129,
+      "chars": 4081,
+      "layoutChars": 5612,
+      "firstLine": "(no action required by you). If you don’t issue any commands to them, they defend themselves from hostile creatures, but"
+    },
+    {
+      "page": 130,
+      "footerPage": 130,
+      "chars": 4278,
+      "layoutChars": 5800,
+      "firstLine": "creature behaves as if under the effects of the confusion spell during combat."
+    },
+    {
+      "page": 131,
+      "footerPage": 131,
+      "chars": 3347,
+      "layoutChars": 4540,
+      "firstLine": "base, up to 50 feet wide at the top, and 25 feet tall. Any creature or object in the water and within 25 feet of the vor"
+    },
+    {
+      "page": 132,
+      "footerPage": 132,
+      "chars": 3876,
+      "layoutChars": 5511,
+      "firstLine": "Create or Destroy Water"
+    },
+    {
+      "page": 133,
+      "footerPage": 133,
+      "chars": 3417,
+      "layoutChars": 4790,
+      "firstLine": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no"
+    },
+    {
+      "page": 134,
+      "footerPage": 134,
+      "chars": 3957,
+      "layoutChars": 4916,
+      "firstLine": "Range: 150 feet Components: V, S, M (a tiny ball of bat guano and"
+    },
+    {
+      "page": 135,
+      "footerPage": 135,
+      "chars": 4148,
+      "layoutChars": 5486,
+      "firstLine": "Detect Thoughts"
+    },
+    {
+      "page": 136,
+      "footerPage": 136,
+      "chars": 3929,
+      "layoutChars": 5365,
+      "firstLine": "Components: V, S, M (a lodestone and a pinch of dust)"
+    },
+    {
+      "page": 137,
+      "footerPage": 137,
+      "chars": 4139,
+      "layoutChars": 5544,
+      "firstLine": "Duration: Concentration, up to 1 minute"
+    },
+    {
+      "page": 138,
+      "footerPage": 138,
+      "chars": 4214,
+      "layoutChars": 5572,
+      "firstLine": "At Higher Levels. When you cast this spell with a 9th-level spell slot, the duration is concentration, up to 8 hours."
+    },
+    {
+      "page": 139,
+      "footerPage": 139,
+      "chars": 4113,
+      "layoutChars": 5222,
+      "firstLine": "• You create an instantaneous, harmless sensory effect, such as falling leaves, a puff of wind, the sound of a small ani"
+    },
+    {
+      "page": 140,
+      "footerPage": 140,
+      "chars": 3970,
+      "layoutChars": 5140,
+      "firstLine": "Enlarge/Reduce"
+    },
+    {
+      "page": 141,
+      "footerPage": 141,
+      "chars": 3960,
+      "layoutChars": 5097,
+      "firstLine": "When the spell ends, you immediately return to the plane you originated from in the spot you currently occupy. If you oc"
+    },
+    {
+      "page": 142,
+      "footerPage": 142,
+      "chars": 3478,
+      "layoutChars": 4872,
+      "firstLine": "Faithful Hound"
+    },
+    {
+      "page": 143,
+      "footerPage": 143,
+      "chars": 4469,
+      "layoutChars": 5896,
+      "firstLine": "Find Familiar"
+    },
+    {
+      "page": 144,
+      "footerPage": 144,
+      "chars": 3479,
+      "layoutChars": 4985,
+      "firstLine": "traveling there, whenever you are presented with a choice of paths along the way, you automatically determine which path"
+    },
+    {
+      "page": 145,
+      "footerPage": 145,
+      "chars": 3781,
+      "layoutChars": 5729,
+      "firstLine": "Fire Storm"
+    },
+    {
+      "page": 146,
+      "footerPage": 146,
+      "chars": 4103,
+      "layoutChars": 5357,
+      "firstLine": "of its turns. If it successfully saves against this spell three times, the spell ends. If it fails its saves three times"
+    },
+    {
+      "page": 147,
+      "footerPage": 147,
+      "chars": 3919,
+      "layoutChars": 5156,
+      "firstLine": "Forcecage"
+    },
+    {
+      "page": 148,
+      "footerPage": 148,
+      "chars": 3960,
+      "layoutChars": 5290,
+      "firstLine": "At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, the damage increases by 1d6 for ea"
+    },
+    {
+      "page": 149,
+      "footerPage": 149,
+      "chars": 3881,
+      "layoutChars": 5503,
+      "firstLine": "Duration: 10 days"
+    },
+    {
+      "page": 150,
+      "footerPage": 150,
+      "chars": 3785,
+      "layoutChars": 4970,
+      "firstLine": "You can further refine the trigger so the spell activates only under certain circumstances or according to physical char"
+    },
+    {
+      "page": 151,
+      "footerPage": 151,
+      "chars": 3886,
+      "layoutChars": 5096,
+      "firstLine": "Duration: 8 hours A Large spectral guardian appears and hovers for the duration in an unoccupied space of your choice th"
+    },
+    {
+      "page": 152,
+      "footerPage": 152,
+      "chars": 4154,
+      "layoutChars": 5688,
+      "firstLine": "against this target before the end of your next turn has advantage, thanks to the mystical dim light glittering on the t"
+    },
+    {
+      "page": 153,
+      "footerPage": 153,
+      "chars": 3745,
+      "layoutChars": 5079,
+      "firstLine": "difficult or impassable terrain. A pond can be made to seem like a grassy meadow, a precipice like a gentle slope, or a "
+    },
+    {
+      "page": 154,
+      "footerPage": 154,
+      "chars": 3745,
+      "layoutChars": 5004,
+      "firstLine": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for ea"
+    },
+    {
+      "page": 155,
+      "footerPage": 155,
+      "chars": 3775,
+      "layoutChars": 5023,
+      "firstLine": "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for th"
+    },
+    {
+      "page": 156,
+      "footerPage": 156,
+      "chars": 4318,
+      "layoutChars": 5801,
+      "firstLine": "You choose one object that you must touch throughout the casting of the spell. If it is a magic item or some other magic"
+    },
+    {
+      "page": 157,
+      "footerPage": 157,
+      "chars": 3788,
+      "layoutChars": 5327,
+      "firstLine": "A dispel magic spell can end the spell only if it is cast as a 9th-level spell, targeting either the prison or the speci"
+    },
+    {
+      "page": 158,
+      "footerPage": 158,
+      "chars": 3353,
+      "layoutChars": 4758,
+      "firstLine": "person. The spell ends for a target that attacks or casts a spell."
+    },
+    {
+      "page": 159,
+      "footerPage": 159,
+      "chars": 3708,
+      "layoutChars": 5023,
+      "firstLine": "Components: V, S, M (either a small leather loop or a piece of golden wire bent into a cup shape with a long shank on on"
+    },
+    {
+      "page": 160,
+      "footerPage": 160,
+      "chars": 3580,
+      "layoutChars": 5047,
+      "firstLine": "Describe or name an object that is familiar to you. You sense the direction to the object’s location, as long as that ob"
+    },
+    {
+      "page": 161,
+      "footerPage": 161,
+      "chars": 4334,
+      "layoutChars": 5114,
+      "firstLine": "Your body falls into a catatonic state as your soul leaves it and enters the container you used for the spell’s material"
+    },
+    {
+      "page": 162,
+      "footerPage": 162,
+      "chars": 4395,
+      "layoutChars": 5457,
+      "firstLine": "You touch a nonmagical weapon. Until the spell ends, that weapon becomes a magic weapon with a +1 bonus to attack rolls "
+    },
+    {
+      "page": 163,
+      "footerPage": 163,
+      "chars": 3753,
+      "layoutChars": 5191,
+      "firstLine": "Mass Heal"
+    },
+    {
+      "page": 164,
+      "footerPage": 164,
+      "chars": 3582,
+      "layoutChars": 4808,
+      "firstLine": "checks you make to hear sounds outside it are made with disadvantage. You remain aware of the passage of time and can ca"
+    },
+    {
+      "page": 165,
+      "footerPage": 165,
+      "chars": 3873,
+      "layoutChars": 5095,
+      "firstLine": "If you create an image of an object—such as a chair, muddy footprints, or a small chest—it must be no larger than a 5-fo"
+    },
+    {
+      "page": 166,
+      "footerPage": 166,
+      "chars": 4143,
+      "layoutChars": 5119,
+      "firstLine": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+    },
+    {
+      "page": 167,
+      "footerPage": 167,
+      "chars": 3696,
+      "layoutChars": 5084,
+      "firstLine": "on. It takes 10 minutes for these changes to complete."
+    },
+    {
+      "page": 168,
+      "footerPage": 168,
+      "chars": 4339,
+      "layoutChars": 5402,
+      "firstLine": "pace. When the spell ends, the steed gradually fades, giving the rider 1 minute to dismount. The spell ends if you use a"
+    },
+    {
+      "page": 169,
+      "footerPage": 169,
+      "chars": 4016,
+      "layoutChars": 5154,
+      "firstLine": "Duration: Instantaneous"
+    },
+    {
+      "page": 170,
+      "footerPage": 170,
+      "chars": 3587,
+      "layoutChars": 5404,
+      "firstLine": "Power Word Kill"
+    },
+    {
+      "page": 171,
+      "footerPage": 171,
+      "chars": 4631,
+      "layoutChars": 5791,
+      "firstLine": "7. Violet. On a failed save, the target is blinded. It must then make a Wisdom saving throw at the start of your next tu"
+    },
+    {
+      "page": 172,
+      "footerPage": 172,
+      "chars": 4045,
+      "layoutChars": 5367,
+      "firstLine": "You make an area within range magically secure. The area is a cube that can be as small as 5 feet to as large as 100 fee"
+    },
+    {
+      "page": 173,
+      "footerPage": 173,
+      "chars": 3786,
+      "layoutChars": 5174,
+      "firstLine": "You can use your action to move this illusion up to twice your speed, and make it gesture, speak, and behave in whatever"
+    },
+    {
+      "page": 174,
+      "footerPage": 174,
+      "chars": 3018,
+      "layoutChars": 4549,
+      "firstLine": "Ray of Enfeeblement"
+    },
+    {
+      "page": 175,
+      "footerPage": 175,
+      "chars": 3878,
+      "layoutChars": 5298,
+      "firstLine": "attunement to the object so it can be removed or discarded."
+    },
+    {
+      "page": 176,
+      "footerPage": 176,
+      "chars": 3553,
+      "layoutChars": 5682,
+      "firstLine": "You touch a creature that has died within the last minute. That creature returns to life with 1 hit point. This spell ca"
+    },
+    {
+      "page": 177,
+      "footerPage": 177,
+      "chars": 3956,
+      "layoutChars": 5261,
+      "firstLine": "On a successful save, the target isn’t affected, and you can’t use this spell against it again for 24 hours."
+    },
+    {
+      "page": 178,
+      "footerPage": 178,
+      "chars": 4276,
+      "layoutChars": 5686,
+      "firstLine": "creatures with Intelligence scores of at least 1 to understand the meaning of your message."
+    },
+    {
+      "page": 179,
+      "footerPage": 179,
+      "chars": 3344,
+      "layoutChars": 5126,
+      "firstLine": "crystal, or metal has disadvantage on this saving throw."
+    },
+    {
+      "page": 180,
+      "footerPage": 180,
+      "chars": 4006,
+      "layoutChars": 5203,
+      "firstLine": "Physical interaction with the image reveals it to be an illusion, because things can pass through it. A creature that us"
+    },
+    {
+      "page": 181,
+      "footerPage": 181,
+      "chars": 3892,
+      "layoutChars": 5299,
+      "firstLine": "You alter time around up to six creatures of your choice in a 40-foot cube within range. Each target must succeed on a W"
+    },
+    {
+      "page": 182,
+      "footerPage": 182,
+      "chars": 3795,
+      "layoutChars": 5032,
+      "firstLine": "Spider Climb"
+    },
+    {
+      "page": 183,
+      "footerPage": 183,
+      "chars": 3881,
+      "layoutChars": 5148,
+      "firstLine": "A moderate wind (at least 10 miles per hour) disperses the cloud after 4 rounds. A strong wind (at least 20 miles per ho"
+    },
+    {
+      "page": 184,
+      "footerPage": 184,
+      "chars": 4142,
+      "layoutChars": 6030,
+      "firstLine": "You can also specify conditions that will trigger a special activity during the duration. For example, you might suggest"
+    },
+    {
+      "page": 185,
+      "footerPage": 185,
+      "chars": 4251,
+      "layoutChars": 5277,
+      "firstLine": "Discord. Each target must make a Constitution saving throw. On a failed save, a target bickers and argues with other cre"
+    },
+    {
+      "page": 186,
+      "footerPage": 186,
+      "chars": 4515,
+      "layoutChars": 5613,
+      "firstLine": "within range, to a destination you select. If you target an object, it must be able to fit entirely inside a 10-foot cub"
+    },
+    {
+      "page": 187,
+      "footerPage": 187,
+      "chars": 3637,
+      "layoutChars": 5154,
+      "firstLine": "one year. You need not use the circle to teleport when you cast the spell in this way."
+    },
+    {
+      "page": 188,
+      "footerPage": 188,
+      "chars": 4286,
+      "layoutChars": 5725,
+      "firstLine": "when the target speaks, any creature that knows at least one language and can hear the target understands what it says."
+    },
+    {
+      "page": 189,
+      "footerPage": 189,
+      "chars": 3453,
+      "layoutChars": 4953,
+      "firstLine": "True Resurrection"
+    },
+    {
+      "page": 190,
+      "footerPage": 190,
+      "chars": 4199,
+      "layoutChars": 5434,
+      "firstLine": "Duration: Instantaneous You unleash a string of insults laced with subtle enchantments at a creature you can see within "
+    },
+    {
+      "page": 191,
+      "footerPage": 191,
+      "chars": 4156,
+      "layoutChars": 5354,
+      "firstLine": "Range: 120 feet Components: V, S, M (a small block of granite) Duration: Concentration, up to 10 minutes"
+    },
+    {
+      "page": 192,
+      "footerPage": 192,
+      "chars": 3966,
+      "layoutChars": 5482,
+      "firstLine": "Range: 30 feet Components: V, S, M (a piece of cork) Duration: 1 hour"
+    },
+    {
+      "page": 193,
+      "footerPage": 193,
+      "chars": 4286,
+      "layoutChars": 5439,
+      "firstLine": "The strong wind keeps fog, smoke, and other gases at bay. Small or smaller flying creatures or objects can’t pass throug"
+    },
+    {
+      "page": 194,
+      "footerPage": 194,
+      "chars": 664,
+      "layoutChars": 667,
+      "firstLine": "You create a magical zone that guards against deception in a 15-foot-radius sphere centered on a point of your choice wi"
+    },
+    {
+      "page": 195,
+      "footerPage": 195,
+      "chars": 4634,
+      "layoutChars": 5716,
+      "firstLine": "Traps"
+    },
+    {
+      "page": 196,
+      "footerPage": 196,
+      "chars": 4086,
+      "layoutChars": 5213,
+      "firstLine": "Trap Effects"
+    },
+    {
+      "page": 197,
+      "footerPage": 197,
+      "chars": 4580,
+      "layoutChars": 6049,
+      "firstLine": "Strength check, freeing itself or another creature within its reach on a success. The net has AC 10 and 20 hit points. D"
+    },
+    {
+      "page": 198,
+      "footerPage": 198,
+      "chars": 3683,
+      "layoutChars": 4567,
+      "firstLine": "bonus against a random target within 10 feet of the pressure plate (vision is irrelevant to this attack roll). (If there"
+    },
+    {
+      "page": 199,
+      "footerPage": 199,
+      "chars": 4558,
+      "layoutChars": 5639,
+      "firstLine": "Diseases"
+    },
+    {
+      "page": 200,
+      "footerPage": 200,
+      "chars": 558,
+      "layoutChars": 561,
+      "firstLine": "of each long rest after the symptoms appear, the penalty worsens by 1. When it reaches -5, the victim is blinded until i"
+    },
+    {
+      "page": 201,
+      "footerPage": 201,
+      "chars": 4276,
+      "layoutChars": 5937,
+      "firstLine": "Madness"
+    },
+    {
+      "page": 202,
+      "footerPage": 202,
+      "chars": 1401,
+      "layoutChars": 1523,
+      "firstLine": "Indefinite Madness"
+    },
+    {
+      "page": 203,
+      "footerPage": 203,
+      "chars": 3622,
+      "layoutChars": 5071,
+      "firstLine": "Objects"
+    },
+    {
+      "page": 204,
+      "footerPage": 204,
+      "chars": 4245,
+      "layoutChars": 5684,
+      "firstLine": "Poisons"
+    },
+    {
+      "page": 205,
+      "footerPage": 205,
+      "chars": 1692,
+      "layoutChars": 1709,
+      "firstLine": "Pale Tincture (Ingested). A creature subjected to this poison must succeed on a DC 16 Constitution saving throw or take "
+    },
+    {
+      "page": 206,
+      "footerPage": 206,
+      "chars": 4441,
+      "layoutChars": 5320,
+      "firstLine": "Magic Items"
+    },
+    {
+      "page": 207,
+      "footerPage": 207,
+      "chars": 3783,
+      "layoutChars": 4821,
+      "firstLine": "item category or individual item details how an item is activated. Certain items use the following rules for their activ"
+    },
+    {
+      "page": 208,
+      "footerPage": 208,
+      "chars": 3933,
+      "layoutChars": 5718,
+      "firstLine": "Animated Shield"
+    },
+    {
+      "page": 209,
+      "footerPage": 209,
+      "chars": 4255,
+      "layoutChars": 5705,
+      "firstLine": "d10 Damage Type 1 Acid 2 Cold 3 Fire 4 Force 5 Lightning"
+    },
+    {
+      "page": 210,
+      "footerPage": 210,
+      "chars": 4266,
+      "layoutChars": 5266,
+      "firstLine": "91–99 00"
+    },
+    {
+      "page": 211,
+      "footerPage": 211,
+      "chars": 3210,
+      "layoutChars": 5142,
+      "firstLine": "7 Dire wolf 8 Giant elk"
+    },
+    {
+      "page": 212,
+      "footerPage": 212,
+      "chars": 3677,
+      "layoutChars": 4812,
+      "firstLine": "than this one, unless no foe is within 60 feet of you that you can see or hear."
+    },
+    {
+      "page": 213,
+      "footerPage": 213,
+      "chars": 3797,
+      "layoutChars": 5123,
+      "firstLine": "Broom of Flying"
+    },
+    {
+      "page": 214,
+      "footerPage": 214,
+      "chars": 3956,
+      "layoutChars": 5290,
+      "firstLine": "issues a clear tone, and one lock or latch on the object opens unless the sound can’t reach the object. If no locks or l"
+    },
+    {
+      "page": 215,
+      "footerPage": 215,
+      "chars": 4127,
+      "layoutChars": 5629,
+      "firstLine": "one of those creatures. You don’t need to concentrate on this suggestion to maintain it during its duration, but it ends"
+    },
+    {
+      "page": 216,
+      "footerPage": 216,
+      "chars": 3861,
+      "layoutChars": 5028,
+      "firstLine": "at your feet. If the sword has no unobstructed path to you, it moves as close to you as it can and then falls to the gro"
+    },
+    {
+      "page": 217,
+      "footerPage": 217,
+      "chars": 4181,
+      "layoutChars": 6187,
+      "firstLine": "soon as you draw a card from the deck, its magic takes effect. You must draw each card no more than 1 hour after the pre"
+    },
+    {
+      "page": 218,
+      "footerPage": 218,
+      "chars": 3744,
+      "layoutChars": 5232,
+      "firstLine": "the GM’s choice within 10 feet of you and attacks you, warning all others that you must win the battle alone. The avatar"
+    },
+    {
+      "page": 219,
+      "footerPage": 219,
+      "chars": 4031,
+      "layoutChars": 5325,
+      "firstLine": "Dimensional Shackles"
+    },
+    {
+      "page": 220,
+      "footerPage": 220,
+      "chars": 3856,
+      "layoutChars": 5071,
+      "firstLine": "Dwarven Plate"
+    },
+    {
+      "page": 221,
+      "footerPage": 221,
+      "chars": 4392,
+      "layoutChars": 5688,
+      "firstLine": "(save DC 13) on a humanoid within 30 feet of you, provided that you and the target can see each other. The lenses regain"
+    },
+    {
+      "page": 222,
+      "footerPage": 222,
+      "chars": 4501,
+      "layoutChars": 6004,
+      "firstLine": "commands, the creature defends itself but takes no other actions."
+    },
+    {
+      "page": 223,
+      "footerPage": 223,
+      "chars": 3983,
+      "layoutChars": 5138,
+      "firstLine": "it has been used, it can’t be used again until 2 days have passed. While in raven form, the figurine allows you to cast "
+    },
+    {
+      "page": 224,
+      "footerPage": 224,
+      "chars": 4022,
+      "layoutChars": 5372,
+      "firstLine": "Giant Slayer"
+    },
+    {
+      "page": 225,
+      "footerPage": 225,
+      "chars": 4068,
+      "layoutChars": 5344,
+      "firstLine": "Placing the haversack inside an extradimensional space created by a bag of holding, portable hole, or similar item insta"
+    },
+    {
+      "page": 226,
+      "footerPage": 226,
+      "chars": 4031,
+      "layoutChars": 5174,
+      "firstLine": "on saving throws against spells and other magical effects. If you have 17 or more levels in the paladin class, the radiu"
+    },
+    {
+      "page": 227,
+      "footerPage": 227,
+      "chars": 4730,
+      "layoutChars": 5670,
+      "firstLine": "Each creature in the area where the fortress appears must make a DC 15 Dexterity saving throw, taking 10d10 bludgeoning "
+    },
+    {
+      "page": 228,
+      "footerPage": 228,
+      "chars": 3840,
+      "layoutChars": 4941,
+      "firstLine": "Iron Bands of Binding"
+    },
+    {
+      "page": 229,
+      "footerPage": 229,
+      "chars": 3942,
+      "layoutChars": 5299,
+      "firstLine": "Luck Blade"
+    },
+    {
+      "page": 230,
+      "footerPage": 230,
+      "chars": 4510,
+      "layoutChars": 5648,
+      "firstLine": "To create a golem, you must spend the time shown on the table, working without interruption with the manual at hand and "
+    },
+    {
+      "page": 231,
+      "footerPage": 231,
+      "chars": 3904,
+      "layoutChars": 5367,
+      "firstLine": "trapped in the mirror. The freed creature appears, along with its possessions, in the unoccupied space nearest to the mi"
+    },
+    {
+      "page": 232,
+      "footerPage": 232,
+      "chars": 3972,
+      "layoutChars": 5327,
+      "firstLine": "vial is required for each size category above Medium). Applying the oil takes 10 minutes. The affected creature then gai"
+    },
+    {
+      "page": 233,
+      "footerPage": 233,
+      "chars": 4164,
+      "layoutChars": 4938,
+      "firstLine": "swarms move toward the music by the shortest available route but aren’t under your control otherwise. The pipes regain 1"
+    },
+    {
+      "page": 234,
+      "footerPage": 234,
+      "chars": 3430,
+      "layoutChars": 4835,
+      "firstLine": "Potion of Flying"
+    },
+    {
+      "page": 235,
+      "footerPage": 235,
+      "chars": 3648,
+      "layoutChars": 5504,
+      "firstLine": "Potion of Resistance"
+    },
+    {
+      "page": 236,
+      "footerPage": 236,
+      "chars": 3725,
+      "layoutChars": 4752,
+      "firstLine": "rocks, or dirt as if it were normal terrain. You can also speak and understand Terran."
+    },
+    {
+      "page": 237,
+      "footerPage": 237,
+      "chars": 3895,
+      "layoutChars": 5947,
+      "firstLine": "Ring of Protection"
+    },
+    {
+      "page": 238,
+      "footerPage": 238,
+      "chars": 3762,
+      "layoutChars": 5143,
+      "firstLine": "Ring of Swimming"
+    },
+    {
+      "page": 239,
+      "footerPage": 239,
+      "chars": 4045,
+      "layoutChars": 5610,
+      "firstLine": "Robe of Stars"
+    },
+    {
+      "page": 240,
+      "footerPage": 240,
+      "chars": 4589,
+      "layoutChars": 5922,
+      "firstLine": "A newly found rod has 1d10 levels of spell energy stored in it already. A rod that can no longer absorb spell energy and"
+    },
+    {
+      "page": 241,
+      "footerPage": 241,
+      "chars": 4074,
+      "layoutChars": 4909,
+      "firstLine": "trusted leader. If harmed by you or your companions, or commanded to do something contrary to its nature, a target cease"
+    },
+    {
+      "page": 242,
+      "footerPage": 242,
+      "chars": 3922,
+      "layoutChars": 5431,
+      "firstLine": "Shield, +1, +2, or +3"
+    },
+    {
+      "page": 243,
+      "footerPage": 243,
+      "chars": 4231,
+      "layoutChars": 5466,
+      "firstLine": "The sphere is stationary until someone controls it. If you are within 60 feet of an uncontrolled sphere, you can use an "
+    },
+    {
+      "page": 244,
+      "footerPage": 244,
+      "chars": 4712,
+      "layoutChars": 5873,
+      "firstLine": "The staff has 20 charges for the following properties. The staff regains 2d8 + 4 expended charges daily at dawn. If you "
+    },
+    {
+      "page": 245,
+      "footerPage": 245,
+      "chars": 4551,
+      "layoutChars": 5901,
+      "firstLine": "telekinesis (5 charges), wall of fire (4 charges), or web (2 charges)."
+    },
+    {
+      "page": 246,
+      "footerPage": 246,
+      "chars": 4309,
+      "layoutChars": 5485,
+      "firstLine": "taking 9d6 lightning damage on a failed save, or half as much damage on a successful one."
+    },
+    {
+      "page": 247,
+      "footerPage": 247,
+      "chars": 4214,
+      "layoutChars": 5305,
+      "firstLine": "can use an action to make a DC 15 Wisdom (Medicine) check, ending the effect of such wounds on it on a success."
+    },
+    {
+      "page": 248,
+      "footerPage": 248,
+      "chars": 4284,
+      "layoutChars": 5622,
+      "firstLine": "on a beast that has an innate swimming speed. The trident regains 1d3 expended charges daily at dawn."
+    },
+    {
+      "page": 249,
+      "footerPage": 249,
+      "chars": 3845,
+      "layoutChars": 5219,
+      "firstLine": "d20. On a 1, the wand crumbles into ashes and is destroyed."
+    },
+    {
+      "page": 250,
+      "footerPage": 250,
+      "chars": 4478,
+      "layoutChars": 5871,
+      "firstLine": "multiple possible subjects, the GM randomly determines which ones are affected."
+    },
+    {
+      "page": 251,
+      "footerPage": 251,
+      "chars": 3987,
+      "layoutChars": 5226,
+      "firstLine": "cumulative 20 percent chance of not working and tearing into useless, nonmagical tatters."
+    },
+    {
+      "page": 252,
+      "footerPage": 252,
+      "chars": 4392,
+      "layoutChars": 5989,
+      "firstLine": "can pick a special purpose or roll on the following table."
+    },
+    {
+      "page": 253,
+      "footerPage": 253,
+      "chars": 1396,
+      "layoutChars": 1412,
+      "firstLine": "world, to advance the worship of Tiamat, or something else the GM decides."
+    },
+    {
+      "page": 254,
+      "footerPage": 254,
+      "chars": 4387,
+      "layoutChars": 6143,
+      "firstLine": "Monsters"
+    },
+    {
+      "page": 255,
+      "footerPage": 255,
+      "chars": 4505,
+      "layoutChars": 5374,
+      "firstLine": "Giants tower over humans and their kind. They are humanlike in shape, though some have multiple heads (ettins) or deform"
+    },
+    {
+      "page": 256,
+      "footerPage": 256,
+      "chars": 3130,
+      "layoutChars": 5187,
+      "firstLine": "Hit Dice by Size"
+    },
+    {
+      "page": 257,
+      "footerPage": 257,
+      "chars": 4071,
+      "layoutChars": 5584,
+      "firstLine": "monster might have a larger-than-expected bonus (usually double its proficiency bonus) to account for its heightened exp"
+    },
+    {
+      "page": 258,
+      "footerPage": 258,
+      "chars": 3829,
+      "layoutChars": 5115,
+      "firstLine": "Challenge"
+    },
+    {
+      "page": 259,
+      "footerPage": 259,
+      "chars": 4013,
+      "layoutChars": 5247,
+      "firstLine": "Psionics"
+    },
+    {
+      "page": 260,
+      "footerPage": 260,
+      "chars": 2176,
+      "layoutChars": 2219,
+      "firstLine": "You can equip monsters with additional gear and trinkets however you like, and you decide how much of a monster’s equipm"
+    },
+    {
+      "page": 261,
+      "footerPage": 261,
+      "chars": 3478,
+      "layoutChars": 4763,
+      "firstLine": "Monsters (A)"
+    },
+    {
+      "page": 262,
+      "footerPage": 262,
+      "chars": 3303,
+      "layoutChars": 4290,
+      "firstLine": "Languages all, telepathy 120 ft. Challenge 10 (5,900 XP)"
+    },
+    {
+      "page": 263,
+      "footerPage": 263,
+      "chars": 3621,
+      "layoutChars": 4713,
+      "firstLine": "Saving Throws Int +14, Wis +14, Cha +17 Skills Perception +14 Damage Resistances radiant; bludgeoning, piercing,"
+    },
+    {
+      "page": 264,
+      "footerPage": 264,
+      "chars": 2864,
+      "layoutChars": 4316,
+      "firstLine": "Constitution saving throw against the caster’s spell save DC or fall unconscious for 1 minute. False Appearance. While t"
+    },
+    {
+      "page": 265,
+      "footerPage": 265,
+      "chars": 3009,
+      "layoutChars": 4332,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 266,
+      "footerPage": 266,
+      "chars": 3262,
+      "layoutChars": 3997,
+      "firstLine": "STR DEX CON INT WIS CHA 23 (+6) 16 (+3) 18 (+4) 7 (-2) 14 (+2) 12 (+1)"
+    },
+    {
+      "page": 267,
+      "footerPage": 267,
+      "chars": 3000,
+      "layoutChars": 4140,
+      "firstLine": "Deadly Leap. If the bulette jumps at least 15 feet as part of its movement, it can then use this action to land on its f"
+    },
+    {
+      "page": 268,
+      "footerPage": 268,
+      "chars": 3744,
+      "layoutChars": 5091,
+      "firstLine": "Challenge 4 (1,100 XP)"
+    },
+    {
+      "page": 269,
+      "footerPage": 269,
+      "chars": 3161,
+      "layoutChars": 4433,
+      "firstLine": "STR DEX CON INT WIS CHA 6 (-2) 12 (+1) 12 (+1) 2 (-4) 13 (+1) 5 (-3)"
+    },
+    {
+      "page": 270,
+      "footerPage": 270,
+      "chars": 3663,
+      "layoutChars": 4660,
+      "firstLine": "Challenge 1/2 (100 XP)"
+    },
+    {
+      "page": 271,
+      "footerPage": 271,
+      "chars": 3350,
+      "layoutChars": 4641,
+      "firstLine": "STR DEX CON INT 11 (+0) 11 (+0) 12 (+1) 5 (-3)"
+    },
+    {
+      "page": 272,
+      "footerPage": 272,
+      "chars": 3280,
+      "layoutChars": 4457,
+      "firstLine": "Actions Multiattack. The hezrou makes three attacks: one with its bite and two with its claws. Bite. Melee Weapon Attack"
+    },
+    {
+      "page": 273,
+      "footerPage": 273,
+      "chars": 3460,
+      "layoutChars": 4713,
+      "firstLine": "creature is immune to the nalfeshnee’s Horror Nimbus for the next 24 hours. Teleport. The nalfeshnee magically teleports"
+    },
+    {
+      "page": 274,
+      "footerPage": 274,
+      "chars": 3352,
+      "layoutChars": 4707,
+      "firstLine": "Stunning Screech (1/Day). The vrock emits a horrific screech. Each creature within 20 feet of it that can hear it and th"
+    },
+    {
+      "page": 275,
+      "footerPage": 275,
+      "chars": 3383,
+      "layoutChars": 4672,
+      "firstLine": "successful DC 12 Wisdom (Medicine) check. The wound also closes if the target receives magical healing."
+    },
+    {
+      "page": 276,
+      "footerPage": 276,
+      "chars": 3256,
+      "layoutChars": 4281,
+      "firstLine": "Wisdom saving throw or be frightened until the end of its turn."
+    },
+    {
+      "page": 277,
+      "footerPage": 277,
+      "chars": 3491,
+      "layoutChars": 4630,
+      "firstLine": "Ice Devil"
+    },
+    {
+      "page": 278,
+      "footerPage": 278,
+      "chars": 3259,
+      "layoutChars": 4739,
+      "firstLine": "Actions Sting (Bite in Beast Form). Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing d"
+    },
+    {
+      "page": 279,
+      "footerPage": 279,
+      "chars": 2448,
+      "layoutChars": 3757,
+      "firstLine": "Mace. Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) bludgeoning damage plus 21 (6d6) fire"
+    },
+    {
+      "page": 280,
+      "footerPage": 280,
+      "chars": 3559,
+      "layoutChars": 4776,
+      "firstLine": "Skills Deception +6, Insight +3 Condition Immunities charmed Senses darkvision 60 ft., passive Perception 11 Languages C"
+    },
+    {
+      "page": 281,
+      "footerPage": 281,
+      "chars": 3230,
+      "layoutChars": 4279,
+      "firstLine": "Detect. The dragon makes a Wisdom (Perception) check."
+    },
+    {
+      "page": 282,
+      "footerPage": 282,
+      "chars": 3183,
+      "layoutChars": 4513,
+      "firstLine": "Actions Multiattack. The dragon makes three attacks: one with its bite and two with its claws. Bite. Melee Weapon Attack"
+    },
+    {
+      "page": 283,
+      "footerPage": 283,
+      "chars": 3377,
+      "layoutChars": 4612,
+      "firstLine": "Legendary Actions"
+    },
+    {
+      "page": 284,
+      "footerPage": 284,
+      "chars": 3081,
+      "layoutChars": 4210,
+      "firstLine": "Languages Common, Draconic Challenge 9 (5,000 XP)"
+    },
+    {
+      "page": 285,
+      "footerPage": 285,
+      "chars": 3469,
+      "layoutChars": 4792,
+      "firstLine": "Poison Breath (Recharge 5–6). The dragon exhales poisonous gas in a 90-foot cone. Each creature in that area must make a"
+    },
+    {
+      "page": 286,
+      "footerPage": 286,
+      "chars": 2759,
+      "layoutChars": 3735,
+      "firstLine": "STR DEX CON INT WIS CHA 19 (+4) 12 (+1) 17 (+3) 16 (+3) 13 (+1) 15 (+2)"
+    },
+    {
+      "page": 287,
+      "footerPage": 287,
+      "chars": 3732,
+      "layoutChars": 5011,
+      "firstLine": "Tail. Melee Weapon Attack: +17 to hit, reach 20 ft., one target. Hit: 19 (2d8 + 10) bludgeoning damage. Frightful Presen"
+    },
+    {
+      "page": 288,
+      "footerPage": 288,
+      "chars": 2795,
+      "layoutChars": 4007,
+      "firstLine": "Young Red Dragon"
+    },
+    {
+      "page": 289,
+      "footerPage": 289,
+      "chars": 3789,
+      "layoutChars": 5058,
+      "firstLine": "Claw. Melee Weapon Attack: +14 to hit, reach 10 ft., one target. Hit: 15 (2d6 + 8) slashing damage. Tail. Melee Weapon A"
+    },
+    {
+      "page": 290,
+      "footerPage": 290,
+      "chars": 2786,
+      "layoutChars": 3869,
+      "firstLine": "Wing Attack (Costs 2 Actions). The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a "
+    },
+    {
+      "page": 291,
+      "footerPage": 291,
+      "chars": 3762,
+      "layoutChars": 4638,
+      "firstLine": "Legendary Resistance (3/Day). If the dragon fails a saving throw, it can choose to succeed instead."
+    },
+    {
+      "page": 292,
+      "footerPage": 292,
+      "chars": 3502,
+      "layoutChars": 4471,
+      "firstLine": "Tail. Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage."
+    },
+    {
+      "page": 293,
+      "footerPage": 293,
+      "chars": 3580,
+      "layoutChars": 5285,
+      "firstLine": "Languages Draconic Challenge 1 (200 XP)"
+    },
+    {
+      "page": 294,
+      "footerPage": 294,
+      "chars": 3833,
+      "layoutChars": 5300,
+      "firstLine": "option can be used at a time and only at the end of another creature’s turn. The dragon regains spent legendary actions "
+    },
+    {
+      "page": 295,
+      "footerPage": 295,
+      "chars": 2915,
+      "layoutChars": 4124,
+      "firstLine": "Young Bronze Dragon"
+    },
+    {
+      "page": 296,
+      "footerPage": 296,
+      "chars": 3708,
+      "layoutChars": 4664,
+      "firstLine": "Languages Common, Draconic"
+    },
+    {
+      "page": 297,
+      "footerPage": 297,
+      "chars": 3420,
+      "layoutChars": 4120,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 298,
+      "footerPage": 298,
+      "chars": 3418,
+      "layoutChars": 4418,
+      "firstLine": "Slowing Breath. The dragon exhales gas in a 30-foot cone. Each creature in that area must succeed on a DC 14 Constitutio"
+    },
+    {
+      "page": 299,
+      "footerPage": 299,
+      "chars": 3740,
+      "layoutChars": 4654,
+      "firstLine": "Breath Weapons (Recharge 5–6). The dragon uses one of the following breath weapons."
+    },
+    {
+      "page": 300,
+      "footerPage": 300,
+      "chars": 3408,
+      "layoutChars": 4372,
+      "firstLine": "Weakening Breath. The dragon exhales gas in a 60-foot cone. Each creature in that area must succeed on a DC 21 Strength "
+    },
+    {
+      "page": 301,
+      "footerPage": 301,
+      "chars": 3641,
+      "layoutChars": 5184,
+      "firstLine": "Senses blindsight 10 ft., darkvision 60 ft., passive Perception 14"
+    },
+    {
+      "page": 302,
+      "footerPage": 302,
+      "chars": 3682,
+      "layoutChars": 4853,
+      "firstLine": "Legendary Actions"
+    },
+    {
+      "page": 303,
+      "footerPage": 303,
+      "chars": 3039,
+      "layoutChars": 4188,
+      "firstLine": "Wing Attack (Costs 2 Actions). The dragon beats its wings. Each creature within 10 feet of the dragon must succeed on a "
+    },
+    {
+      "page": 304,
+      "footerPage": 304,
+      "chars": 3136,
+      "layoutChars": 4014,
+      "firstLine": "Languages Aquan, Draconic Challenge 17 (18,000 XP)"
+    },
+    {
+      "page": 305,
+      "footerPage": 305,
+      "chars": 3518,
+      "layoutChars": 4407,
+      "firstLine": "3/day each: entangle, goodberry 1/day each: barkskin, pass without trace, shillelagh Magic Resistance. The dryad has adv"
+    },
+    {
+      "page": 306,
+      "footerPage": 306,
+      "chars": 3172,
+      "layoutChars": 4380,
+      "firstLine": "STR DEX CON INT WIS CHA 14 (+2) 20 (+5) 14 (+2) 6 (-2) 10 (+0) 6 (-2)"
+    },
+    {
+      "page": 307,
+      "footerPage": 307,
+      "chars": 3418,
+      "layoutChars": 4352,
+      "firstLine": "takes an action to douse the fire, the creature takes 5 (1d10) fire damage at the start of each of its turns. Illuminati"
+    },
+    {
+      "page": 308,
+      "footerPage": 308,
+      "chars": 2755,
+      "layoutChars": 3591,
+      "firstLine": "damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 1 hour. If the saving throw "
+    },
+    {
+      "page": 309,
+      "footerPage": 309,
+      "chars": 2156,
+      "layoutChars": 3550,
+      "firstLine": "Monsters (F)"
+    },
+    {
+      "page": 310,
+      "footerPage": 310,
+      "chars": 3183,
+      "layoutChars": 4524,
+      "firstLine": "Genies"
+    },
+    {
+      "page": 311,
+      "footerPage": 311,
+      "chars": 3515,
+      "layoutChars": 4650,
+      "firstLine": "Ghost"
+    },
+    {
+      "page": 312,
+      "footerPage": 312,
+      "chars": 2768,
+      "layoutChars": 3984,
+      "firstLine": "Turning Defiance. The ghast and any ghouls within 30 feet of it have advantage on saving throws against effects that tur"
+    },
+    {
+      "page": 313,
+      "footerPage": 313,
+      "chars": 2577,
+      "layoutChars": 3818,
+      "firstLine": "Greatsword. Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 28 (6d6 + 7) slashing damage."
+    },
+    {
+      "page": 314,
+      "footerPage": 314,
+      "chars": 3345,
+      "layoutChars": 4552,
+      "firstLine": "Saving Throws Str +14, Con +10, Wis +9, Cha +9 Skills Arcana +8, Athletics +14, History +8, Perception"
+    },
+    {
+      "page": 315,
+      "footerPage": 315,
+      "chars": 2886,
+      "layoutChars": 4192,
+      "firstLine": "Rampage. When the gnoll reduces a creature to 0 hit points with a melee attack on its turn, the gnoll can take a bonus a"
+    },
+    {
+      "page": 316,
+      "footerPage": 316,
+      "chars": 3665,
+      "layoutChars": 4873,
+      "firstLine": "Senses darkvision 60 ft., passive Perception 9 Languages understands the languages of its creator but"
+    },
+    {
+      "page": 317,
+      "footerPage": 317,
+      "chars": 3156,
+      "layoutChars": 4338,
+      "firstLine": "Iron Golem"
+    },
+    {
+      "page": 318,
+      "footerPage": 318,
+      "chars": 2864,
+      "layoutChars": 3934,
+      "firstLine": "Languages — Challenge 5 (1,800 XP)"
+    },
+    {
+      "page": 319,
+      "footerPage": 319,
+      "chars": 3045,
+      "layoutChars": 4553,
+      "firstLine": "Blind Senses. The grimlock can’t use its blindsight while deafened and unable to smell. Keen Hearing and Smell. The grim"
+    },
+    {
+      "page": 320,
+      "footerPage": 320,
+      "chars": 4102,
+      "layoutChars": 5651,
+      "firstLine": "2/day each: plane shift (self only), ray of enfeeblement, sleep"
+    },
+    {
+      "page": 321,
+      "footerPage": 321,
+      "chars": 3288,
+      "layoutChars": 4589,
+      "firstLine": "Brass, gold, or red Green Silver or white"
+    },
+    {
+      "page": 322,
+      "footerPage": 322,
+      "chars": 2605,
+      "layoutChars": 4015,
+      "firstLine": "Speed 50 ft."
+    },
+    {
+      "page": 323,
+      "footerPage": 323,
+      "chars": 2877,
+      "layoutChars": 4076,
+      "firstLine": "Languages understands the languages of its creator but can’t speak"
+    },
+    {
+      "page": 324,
+      "footerPage": 324,
+      "chars": 3589,
+      "layoutChars": 5390,
+      "firstLine": "Monsters (K)"
+    },
+    {
+      "page": 325,
+      "footerPage": 325,
+      "chars": 3193,
+      "layoutChars": 4325,
+      "firstLine": "lightning damage on a failed save, or half as much damage on a successful one."
+    },
+    {
+      "page": 326,
+      "footerPage": 326,
+      "chars": 3296,
+      "layoutChars": 4459,
+      "firstLine": "to hit with spell attacks). The lich has the following wizard spells prepared:"
+    },
+    {
+      "page": 327,
+      "footerPage": 327,
+      "chars": 3400,
+      "layoutChars": 4716,
+      "firstLine": "STR DEX CON INT WIS CHA 19 (+4) 10 (+0) 17 (+3) 11 (+0) 12 (+1) 12 (+1)"
+    },
+    {
+      "page": 328,
+      "footerPage": 328,
+      "chars": 3548,
+      "layoutChars": 4844,
+      "firstLine": "Damage Immunities bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons"
+    },
+    {
+      "page": 329,
+      "footerPage": 329,
+      "chars": 3050,
+      "layoutChars": 4225,
+      "firstLine": "STR DEX CON INT WIS CHA 15 (+2) 13 (+1) 14 (+2) 10 (+0) 11 (+0) 10 (+0)"
+    },
+    {
+      "page": 330,
+      "footerPage": 330,
+      "chars": 3241,
+      "layoutChars": 4329,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 331,
+      "footerPage": 331,
+      "chars": 2988,
+      "layoutChars": 4146,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 332,
+      "footerPage": 332,
+      "chars": 2647,
+      "layoutChars": 3864,
+      "firstLine": "Hit Points 21 (6d6) Speed 30 ft., fly 30 ft."
+    },
+    {
+      "page": 333,
+      "footerPage": 333,
+      "chars": 3086,
+      "layoutChars": 4276,
+      "firstLine": "Condition Immunities prone Senses darkvision 60 ft., passive Perception 11 Languages — Challenge 2 (450 XP)"
+    },
+    {
+      "page": 334,
+      "footerPage": 334,
+      "chars": 3891,
+      "layoutChars": 5365,
+      "firstLine": "target can’t regain hit points, and its hit point maximum decreases by 10 (3d6) for every 24 hours that elapse. If the c"
+    },
+    {
+      "page": 335,
+      "footerPage": 335,
+      "chars": 3263,
+      "layoutChars": 4319,
+      "firstLine": "Blasphemous Word (Costs 2 Actions). The mummy lord utters a blasphemous word. Each non-undead creature within 10 feet of"
+    },
+    {
+      "page": 336,
+      "footerPage": 336,
+      "chars": 2676,
+      "layoutChars": 3762,
+      "firstLine": "components to cast its spells. It has the following wizard spells prepared: Cantrips (at will): mage hand, minor illusio"
+    },
+    {
+      "page": 337,
+      "footerPage": 337,
+      "chars": 3332,
+      "layoutChars": 4660,
+      "firstLine": "Regeneration. The oni regains 10 hit points at the start of its turn if it has at least 1 hit point."
+    },
+    {
+      "page": 338,
+      "footerPage": 338,
+      "chars": 3286,
+      "layoutChars": 4497,
+      "firstLine": "action to pull a creature or object out of the cube. Doing so requires a successful DC 12 Strength check, and the creatu"
+    },
+    {
+      "page": 339,
+      "footerPage": 339,
+      "chars": 3191,
+      "layoutChars": 4643,
+      "firstLine": "Amorphous. The jelly can move through a space as narrow as 1 inch wide without squeezing. Spider Climb. The jelly can cl"
+    },
+    {
+      "page": 340,
+      "footerPage": 340,
+      "chars": 2547,
+      "layoutChars": 4201,
+      "firstLine": "Hit Points 59 (7d10 + 21) Speed 40 ft."
+    },
+    {
+      "page": 341,
+      "footerPage": 341,
+      "chars": 3222,
+      "layoutChars": 4335,
+      "firstLine": "Saving Throws Con +11, Wis +4 Senses blindsight 30 ft., tremorsense 60 ft., passive"
+    },
+    {
+      "page": 342,
+      "footerPage": 342,
+      "chars": 3177,
+      "layoutChars": 4332,
+      "firstLine": "Damage Immunities cold, fire Senses darkvision 60 ft., tremorsense 60 ft., passive"
+    },
+    {
+      "page": 343,
+      "footerPage": 343,
+      "chars": 3260,
+      "layoutChars": 4426,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 344,
+      "footerPage": 344,
+      "chars": 2843,
+      "layoutChars": 3956,
+      "firstLine": "Salamander"
+    },
+    {
+      "page": 345,
+      "footerPage": 345,
+      "chars": 3396,
+      "layoutChars": 4693,
+      "firstLine": "Sunlight Weakness. While in sunlight, the shadow has disadvantage on attack rolls, ability checks, and saving throws."
+    },
+    {
+      "page": 346,
+      "footerPage": 346,
+      "chars": 2520,
+      "layoutChars": 3903,
+      "firstLine": "Fist. Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) bludgeoning damage."
+    },
+    {
+      "page": 347,
+      "footerPage": 347,
+      "chars": 3442,
+      "layoutChars": 4782,
+      "firstLine": "Damage Resistances acid, cold, fire, lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks"
+    },
+    {
+      "page": 348,
+      "footerPage": 348,
+      "chars": 3244,
+      "layoutChars": 4383,
+      "firstLine": "Third Roar. Each creature makes a DC 18 Constitution saving throw. On a failed save, a creature takes 44 (8d10) thunder "
+    },
+    {
+      "page": 349,
+      "footerPage": 349,
+      "chars": 3632,
+      "layoutChars": 4883,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 350,
+      "footerPage": 350,
+      "chars": 3990,
+      "layoutChars": 5593,
+      "firstLine": "Constitution saving throw against this magic, taking 32 (5d10 + 5) psychic damage on a failed save, or half as much dama"
+    },
+    {
+      "page": 351,
+      "footerPage": 351,
+      "chars": 2838,
+      "layoutChars": 3882,
+      "firstLine": "another creature’s turn. The tarrasque regains spent legendary actions at the start of its turn. Attack. The tarrasque m"
+    },
+    {
+      "page": 352,
+      "footerPage": 352,
+      "chars": 3522,
+      "layoutChars": 4528,
+      "firstLine": "Languages Celestial, Elvish, Sylvan, telepathy 60 ft. Challenge 5 (1,800 XP)"
+    },
+    {
+      "page": 353,
+      "footerPage": 353,
+      "chars": 4494,
+      "layoutChars": 5596,
+      "firstLine": "saving throws, and it is immune to all nonmagical damage, except the damage it takes from sunlight."
+    },
+    {
+      "page": 354,
+      "footerPage": 354,
+      "chars": 3308,
+      "layoutChars": 4667,
+      "firstLine": "Vampire Spawn"
+    },
+    {
+      "page": 355,
+      "footerPage": 355,
+      "chars": 3406,
+      "layoutChars": 4340,
+      "firstLine": "if this effect reduces its hit point maximum to 0. A humanoid slain by this attack rises 24 hours later"
+    },
+    {
+      "page": 356,
+      "footerPage": 356,
+      "chars": 2656,
+      "layoutChars": 3953,
+      "firstLine": "Create Specter. The wraith targets a humanoid within 10 feet of it that has been dead for no longer than 1 minute and di"
+    },
+    {
+      "page": 357,
+      "footerPage": 357,
+      "chars": 1175,
+      "layoutChars": 1206,
+      "firstLine": "Languages understands the languages it knew in life but can’t speak"
+    },
+    {
+      "page": 358,
+      "footerPage": 358,
+      "chars": 3713,
+      "layoutChars": 5615,
+      "firstLine": "Appendix PH-A:"
+    },
+    {
+      "page": 359,
+      "footerPage": 359,
+      "chars": 2052,
+      "layoutChars": 2466,
+      "firstLine": "• Any attack that hits the creature is a critical hit if the attacker is within 5 feet of the creature."
+    },
+    {
+      "page": 360,
+      "footerPage": 360,
+      "chars": 4052,
+      "layoutChars": 5580,
+      "firstLine": "Appendix PH-B:"
+    },
+    {
+      "page": 361,
+      "footerPage": 361,
+      "chars": 3067,
+      "layoutChars": 4978,
+      "firstLine": "Math Mathonwy, god of magic Morrigan, goddess of battle Nuada, god of war and warriors Oghma, god of speech and writing "
+    },
+    {
+      "page": 362,
+      "footerPage": 362,
+      "chars": 852,
+      "layoutChars": 1096,
+      "firstLine": "Frigga, goddess of birth and fertility"
+    },
+    {
+      "page": 363,
+      "footerPage": 363,
+      "chars": 4323,
+      "layoutChars": 5484,
+      "firstLine": "Appendix PH-C:"
+    },
+    {
+      "page": 364,
+      "footerPage": 364,
+      "chars": 4652,
+      "layoutChars": 5592,
+      "firstLine": "and true seeing spell grant that ability. Some magical effects also extend from the Material Plane into the Border Ether"
+    },
+    {
+      "page": 365,
+      "footerPage": 365,
+      "chars": 418,
+      "layoutChars": 418,
+      "firstLine": "has been pinched off from the rest of the multiverse, or as a baby universe growing in power. A given demiplane can be e"
+    },
+    {
+      "page": 366,
+      "footerPage": 366,
+      "chars": 2058,
+      "layoutChars": 3362,
+      "firstLine": "Appendix MM-A: Miscellaneous Creatures"
+    },
+    {
+      "page": 367,
+      "footerPage": 367,
+      "chars": 2092,
+      "layoutChars": 3436,
+      "firstLine": "STR DEX CON INT WIS CHA 14 (+2) 12 (+1) 12 (+1) 2 (-4) 10 (+0) 5 (-3)"
+    },
+    {
+      "page": 368,
+      "footerPage": 368,
+      "chars": 2452,
+      "layoutChars": 3813,
+      "firstLine": "Challenge 1/2 (100 XP)"
+    },
+    {
+      "page": 369,
+      "footerPage": 369,
+      "chars": 2190,
+      "layoutChars": 3259,
+      "firstLine": "the same turn, the target takes an extra 3 (1d6) slashing damage. If the target is a creature, it must succeed on a DC 1"
+    },
+    {
+      "page": 370,
+      "footerPage": 370,
+      "chars": 2584,
+      "layoutChars": 4079,
+      "firstLine": "Constrict. Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 6 (1d8 + 2) bludgeoning damage, and the targe"
+    },
+    {
+      "page": 371,
+      "footerPage": 371,
+      "chars": 2001,
+      "layoutChars": 3392,
+      "firstLine": "Speed 50 ft."
+    },
+    {
+      "page": 372,
+      "footerPage": 372,
+      "chars": 2523,
+      "layoutChars": 3555,
+      "firstLine": "Trampling Charge. If the elephant moves at least 20 feet straight toward a creature and then hits it with a gore attack "
+    },
+    {
+      "page": 373,
+      "footerPage": 373,
+      "chars": 2343,
+      "layoutChars": 3640,
+      "firstLine": "Giant Ape"
+    },
+    {
+      "page": 374,
+      "footerPage": 374,
+      "chars": 2393,
+      "layoutChars": 3527,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 375,
+      "footerPage": 375,
+      "chars": 2887,
+      "layoutChars": 4062,
+      "firstLine": "Bite. Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 21 (3d10 + 5) piercing damage, and the target is gra"
+    },
+    {
+      "page": 376,
+      "footerPage": 376,
+      "chars": 2762,
+      "layoutChars": 3998,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 377,
+      "footerPage": 377,
+      "chars": 2617,
+      "layoutChars": 4076,
+      "firstLine": "take a bonus action to move up to half its speed and make a bite attack."
+    },
+    {
+      "page": 378,
+      "footerPage": 378,
+      "chars": 2826,
+      "layoutChars": 4460,
+      "firstLine": "Giant Poisonous Snake"
+    },
+    {
+      "page": 379,
+      "footerPage": 379,
+      "chars": 2832,
+      "layoutChars": 4224,
+      "firstLine": "Senses passive Perception 11 Languages — Challenge 1/2 (100 XP)"
+    },
+    {
+      "page": 380,
+      "footerPage": 380,
+      "chars": 2995,
+      "layoutChars": 4093,
+      "firstLine": "To snare its prey, a giant spider spins elaborate webs or shoots sticky strands of webbing from its abdomen. Giant spide"
+    },
+    {
+      "page": 381,
+      "footerPage": 381,
+      "chars": 2647,
+      "layoutChars": 3970,
+      "firstLine": "target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a failed save, or half as much dama"
+    },
+    {
+      "page": 382,
+      "footerPage": 382,
+      "chars": 2082,
+      "layoutChars": 3506,
+      "firstLine": "Actions"
+    },
+    {
+      "page": 383,
+      "footerPage": 383,
+      "chars": 2432,
+      "layoutChars": 3834,
+      "firstLine": "Keen Hearing and Smell. The jackal has advantage on Wisdom (Perception) checks that rely on hearing or smell. Pack Tacti"
+    },
+    {
+      "page": 384,
+      "footerPage": 384,
+      "chars": 2362,
+      "layoutChars": 3635,
+      "firstLine": "Mammoth"
+    },
+    {
+      "page": 385,
+      "footerPage": 385,
+      "chars": 2647,
+      "layoutChars": 3842,
+      "firstLine": "STR DEX CON INT WIS CHA 4 (-3) 15 (+2) 11 (+0) 3 (-4) 10 (+0) 4 (-3)"
+    },
+    {
+      "page": 386,
+      "footerPage": 386,
+      "chars": 2527,
+      "layoutChars": 3438,
+      "firstLine": "Challenge 3 (700 XP)"
+    },
+    {
+      "page": 387,
+      "footerPage": 387,
+      "chars": 2147,
+      "layoutChars": 3344,
+      "firstLine": "Quipper"
+    },
+    {
+      "page": 388,
+      "footerPage": 388,
+      "chars": 2381,
+      "layoutChars": 3727,
+      "firstLine": "within 5 feet of the creature and the ally isn’t incapacitated. Water Breathing. The shark can breathe only underwater."
+    },
+    {
+      "page": 389,
+      "footerPage": 389,
+      "chars": 2469,
+      "layoutChars": 3825,
+      "firstLine": "Senses blindsight 10 ft., passive Perception 9 Languages — Challenge 0 (10 XP)"
+    },
+    {
+      "page": 390,
+      "footerPage": 390,
+      "chars": 2856,
+      "layoutChars": 4107,
+      "firstLine": "Hit Points 22 (5d8) Speed 20 ft., climb 20 ft."
+    },
+    {
+      "page": 391,
+      "footerPage": 391,
+      "chars": 3125,
+      "layoutChars": 4593,
+      "firstLine": "Speed 30 ft."
+    },
+    {
+      "page": 392,
+      "footerPage": 392,
+      "chars": 2266,
+      "layoutChars": 3637,
+      "firstLine": "target is prone, the tiger can make one bite attack against it as a bonus action."
+    },
+    {
+      "page": 393,
+      "footerPage": 393,
+      "chars": 3013,
+      "layoutChars": 4196,
+      "firstLine": "Senses passive Perception 15 Languages Common, Giant, Winter Wolf Challenge 3 (700 XP)"
+    },
+    {
+      "page": 394,
+      "footerPage": 394,
+      "chars": 52,
+      "layoutChars": 52,
+      "firstLine": "and Goblin, and a few learn to speak Common as well."
+    },
+    {
+      "page": 395,
+      "footerPage": 395,
+      "chars": 3155,
+      "layoutChars": 4331,
+      "firstLine": "Appendix MM-B:"
+    },
+    {
+      "page": 396,
+      "footerPage": 396,
+      "chars": 3191,
+      "layoutChars": 4478,
+      "firstLine": "1st level (4 slots): detect magic, identify, mage armor,* magic missile"
+    },
+    {
+      "page": 397,
+      "footerPage": 397,
+      "chars": 3038,
+      "layoutChars": 4140,
+      "firstLine": "Senses passive Perception 10 Languages any one language (usually Common) Challenge 1/8 (25 XP)"
+    },
+    {
+      "page": 398,
+      "footerPage": 398,
+      "chars": 2564,
+      "layoutChars": 3645,
+      "firstLine": "Commoner"
+    },
+    {
+      "page": 399,
+      "footerPage": 399,
+      "chars": 2991,
+      "layoutChars": 4160,
+      "firstLine": "STR DEX CON INT WIS CHA 10 (+0) 12 (+1) 13 (+1) 12 (+1) 15 (+2) 11 (+0)"
+    },
+    {
+      "page": 400,
+      "footerPage": 400,
+      "chars": 2958,
+      "layoutChars": 3969,
+      "firstLine": "1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack."
+    },
+    {
+      "page": 401,
+      "footerPage": 401,
+      "chars": 2979,
+      "layoutChars": 4247,
+      "firstLine": "Noble"
+    },
+    {
+      "page": 402,
+      "footerPage": 402,
+      "chars": 2764,
+      "layoutChars": 3886,
+      "firstLine": "Actions Multiattack. The scout makes two melee attacks or two ranged attacks. Shortsword. Melee Weapon Attack: +4 to hit"
+    },
+    {
+      "page": 403,
+      "footerPage": 403,
+      "chars": 1834,
+      "layoutChars": 2171,
+      "firstLine": "Speed 30 ft."
+    }
+  ],
+  "problems": []
+}

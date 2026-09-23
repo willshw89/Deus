@@ -1,0 +1,62 @@
+  On a successful save, the target isn’t affected, and     the Ethereal Plane. Ethereal creatures and objects
+you can’t use this spell against it again for 24 hours.    appear ghostly and translucent.
+
+  On a failed save, the spell creates an invisible         Seeming
+sensor within 10 feet of the target. You can see and
+hear through the sensor as if you were there. The          5th-level illusion
+sensor moves with the target, remaining within 10
+feet of it for the duration. A creature that can see       Casting Time: 1 action
+invisible objects sees the sensor as a luminous orb        Range: 30 feet
+about the size of your fist.                               Components: V, S
+                                                           Duration: 8 hours
+  Instead of targeting a creature, you can choose a
+location you have seen before as the target of this        This spell allows you to change the appearance of
+spell. When you do, the sensor appears at that             any number of creatures that you can see within
+location and doesn’t move.                                 range. You give each target you choose a new,
+                                                           illusory appearance. An unwilling target can make a
+Secret Chest                                               Charisma saving throw, and if it succeeds, it is
+                                                           unaffected by this spell.
+4th-level conjuration
+                                                             The spell disguises physical appearance as well as
+Casting Time: 1 action                                     clothing, armor, weapons, and equipment. You can
+Range: Touch                                               make each creature seem 1 foot shorter or taller and
+Components: V, S, M (an exquisite chest, 3 feet by 2       appear thin, fat, or in between. You can’t change a
+                                                           target’s body type, so you must choose a form that
+  feet by 2 feet, constructed from rare materials          has the same basic arrangement of limbs. Otherwise,
+  worth at least 5,000 gp, and a Tiny replica made         the extent of the illusion is up to you. The spell lasts
+  from the same materials worth at least 50 gp)            for the duration, unless you use your action to
+Duration: Instantaneous                                    dismiss it sooner.
+
+You hide a chest, and all its contents, on the Ethereal      The changes wrought by this spell fail to hold up
+Plane. You must touch the chest and the miniature          to physical inspection. For example, if you use this
+replica that serves as a material component for the        spell to add a hat to a creature’s outfit, objects pass
+spell. The chest can contain up to 12 cubic feet of        through the hat, and anyone who touches it would
+nonliving material (3 feet by 2 feet by 2 feet).           feel nothing or would feel the creature’s head and
+                                                           hair. If you use this spell to appear thinner than you
+  While the chest remains on the Ethereal Plane, you       are, the hand of someone who reaches out to touch
+can use an action and touch the replica to recall the      you would bump into you while it was seemingly
+chest. It appears in an unoccupied space on the            still in midair.
+ground within 5 feet of you. You can send the chest
+back to the Ethereal Plane by using an action and            A creature can use its action to inspect a target
+touching both the chest and the replica.                   and make an Intelligence (Investigation) check
+                                                           against your spell save DC. If it succeeds, it becomes
+  After 60 days, there is a cumulative 5 percent           aware that the target is disguised.
+chance per day that the spell’s effect ends. This effect
+ends if you cast this spell again, if the smaller replica  Sending
+chest is destroyed, or if you choose to end the spell
+as an action. If the spell ends and the larger chest is    3rd-level evocation
+on the Ethereal Plane, it is irretrievably lost.
+                                                           Casting Time: 1 action
+See Invisibility                                           Range: Unlimited
+                                                           Components: V, S, M (a short piece of fine copper
+2nd-level divination
+                                                             wire)
+Casting Time: 1 action                                     Duration: 1 round
+Range: Self
+Components: V, S, M (a pinch of talc and a small           You send a short message of twenty-five words or
+                                                           less to a creature with which you are familiar. The
+  sprinkling of powdered silver)                           creature hears the message in its mind, recognizes
+Duration: 1 hour                                           you as the sender if it knows you, and can answer in
+                                                           a like manner immediately. The spell enables
+For the duration, you see invisible creatures and
+objects as if they were visible, and you can see into

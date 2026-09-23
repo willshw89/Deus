@@ -1,0 +1,57 @@
+Challenge 4 (1,100 XP)                                     Actions
+
+Amphibious. The chuul can breathe air and water.           Multiattack. The cloaker makes two attacks: one with
+Sense Magic. The chuul senses magic within 120 feet        its bite and one with its tail.
+of it at will. This trait otherwise works like the detect
+magic spell but isn’t itself magical.                      Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+                                                           creature. Hit: 10 (2d6 + 3) piercing damage, and if the
+Actions                                                    target is Large or smaller, the cloaker attaches to it. If
+Multiattack. The chuul makes two pincer attacks. If the    the cloaker has advantage against the target, the
+chuul is grappling a creature, the chuul can also use its  cloaker attaches to the target’s head, and the target is
+tentacles once.                                            blinded and unable to breathe while the cloaker is
+Pincer. Melee Weapon Attack: +6 to hit, reach 10 ft.,      attached. While attached, the cloaker can make this
+one target. Hit: 11 (2d6 + 4) bludgeoning damage. The      attack only against the target and has advantage on the
+target is grappled (escape DC 14) if it is a Large or      attack roll. The cloaker can detach itself by spending 5
+smaller creature and the chuul doesn’t have two other      feet of its movement. A creature, including the target,
+creatures grappled.                                        can take its action to detach the cloaker by succeeding
+Tentacles. One creature grappled by the chuul must         on a DC 16 Strength check.
+succeed on a DC 13 Constitution saving throw or be
+poisoned for 1 minute. Until this poison ends, the         Tail. Melee Weapon Attack: +6 to hit, reach 10 ft., one
+target is paralyzed. The target can repeat the saving      creature. Hit: 7 (1d8 + 3) slashing damage.
+throw at the end of each of its turns, ending the effect
+on itself on a success.                                    Moan. Each creature within 60 feet of the cloaker that
+                                                           can hear its moan and that isn’t an aberration must
+Cloaker                                                    succeed on a DC 13 Wisdom saving throw or become
+                                                           frightened until the end of the cloaker’s next turn. If a
+Large aberration, chaotic neutral                          creature’s saving throw is successful, the creature is
+                                                           immune to the cloaker’s moan for the next 24 hours
+Armor Class 14 (natural armor)
+Hit Points 78 (12d10 + 12)                                 Phantasms (Recharges after a Short or Long Rest). The
+Speed 10 ft., fly 40 ft.                                   cloaker magically creates three illusory duplicates of
+                                                           itself if it isn’t in bright light. The duplicates move with
+    STR DEX CON INT WIS CHA                                it and mimic its actions, shifting position so as to make
+  17 (+3) 15 (+2) 12 (+1) 13 (+1) 12 (+1) 14 (+2)          it impossible to track which cloaker is the real one. If
+                                                           the cloaker is ever in an area of bright light, the
+Skills Stealth +5                                          duplicates disappear.
+Senses darkvision 60 ft., passive Perception 11
+Languages Deep Speech, Undercommon                           Whenever any creature targets the cloaker with an
+Challenge 8 (3,900 XP)                                     attack or a harmful spell while a duplicate remains,
+                                                           that creature rolls randomly to determine whether it
+Damage Transfer. While attached to a creature, the         targets the cloaker or one of the duplicates. A creature
+cloaker takes only half the damage dealt to it (rounded    is unaffected by this magical effect if it can’t see or if it
+down), and that creature takes the other half.             relies on senses other than sight.
+False Appearance. While the cloaker remains
+motionless without its underside exposed, it is              A duplicate has the cloaker’s AC and uses its saving
+indistinguishable from a dark leather cloak.               throws. If an attack hits a duplicate, or if a duplicate
+Light Sensitivity. While in bright light, the cloaker has  fails a saving throw against an effect that deals damage,
+disadvantage on attack rolls and Wisdom (Perception)       the duplicate disappears.
+checks that rely on sight.
+                                                           Cockatrice
+
+                                                           Small monstrosity, unaligned
+
+                                                           Armor Class 11
+
+                                                           Hit Points 27 (6d6 + 6)
+
+                                                           Speed 20 ft., fly 40 ft.

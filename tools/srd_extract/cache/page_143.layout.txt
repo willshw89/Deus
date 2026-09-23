@@ -1,0 +1,62 @@
+Find Familiar                                                Components: V, S
+                                                             Duration: Instantaneous
+1st-level conjuration (ritual)
+                                                             You summon a spirit that assumes the form of an
+Casting Time: 1 hour                                         unusually intelligent, strong, and loyal steed,
+Range: 10 feet                                               creating a long-lasting bond with it. Appearing in an
+Components: V, S, M (10 gp worth of charcoal,                unoccupied space within range, the steed takes on a
+incense, and herbs that must be consumed by fire in          form that you choose: a warhorse, a pony, a camel,
+a brass brazier)                                             an elk, or a mastiff. (Your GM might allow other
+Duration: Instantaneous                                      animals to be summoned as steeds.) The steed has
+You gain the service of a familiar, a spirit that takes      the statistics of the chosen form, though it is a
+an animal form you choose: bat, cat, crab, frog (toad),      celestial, fey, or fiend (your choice) instead of its
+hawk, lizard, octopus, owl, poisonous snake, fish            normal type. Additionally, if your steed has an
+(quipper), rat, raven, sea horse, spider, or weasel.         Intelligence of 5 or less, its Intelligence becomes 6,
+Appearing in an unoccupied space within range, the           and it gains the ability to understand one language of
+familiar has the statistics of the chosen form, though       your choice that you speak.
+it is a celestial, fey, or fiend (your choice) instead of a
+beast.                                                         Your steed serves you as a mount, both in combat
+                                                             and out, and you have an instinctive bond with it
+  Your familiar acts independently of you, but it            that allows you to fight as a seamless unit. While
+always obeys your commands. In combat, it rolls its          mounted on your steed, you can make any spell you
+own initiative and acts on its own turn. A familiar          cast that targets only you also target your steed.
+can't attack, but it can take other actions as normal.
+                                                               When the steed drops to 0 hit points, it disappears,
+  When the familiar drops to 0 hit points, it                leaving behind no physical form. You can also
+disappears, leaving behind no physical form. It              dismiss your steed at any time as an action, causing
+reappears after you cast this spell again                    it to disappear. In either case, casting this spell again
+                                                             summons the same steed, restored to its hit point
+  While your familiar is within 100 feet of you, you         maximum.
+can communicate with it telepathically. Additionally,
+as an action, you can see through your familiar's              While your steed is within 1 mile of you, you can
+eyes and hear what it hears until the start of your          communicate with it telepathically.
+next turn, gaining the benefits of any special senses
+that the familiar has. During this time, you are deaf          You can’t have more than one steed bonded by
+and blind with regard to your own senses.                    this spell at a time. As an action, you can release the
+                                                             steed from its bond at any time, causing it to
+  As an action, you can temporarily dismiss your             disappear.
+familiar. It disappears into a pocket dimension
+where it awaits your summons. Alternatively, you             Find the Path
+can dismiss it forever. As an action while it is
+temporarily dismissed, you can cause it to reappear          6th-level divination
+in any unoccupied space within 30 feet of you.
+                                                             Casting Time: 1 minute
+  You can't have more than one familiar at a time. If        Range: Self
+you cast this spell while you already have a familiar,       Components: V, S, M (a set of divinatory tools—
+you instead cause it to adopt a new form. Choose one
+of the forms from the above list. Your familiar                such as bones, ivory sticks, cards, teeth, or carved
+transforms into the chosen creature.                           runes—worth 100 gp and an object from the
+                                                               location you wish to find)
+  Finally, when you cast a spell with a range of touch,      Duration: Concentration, up to 1 day
+your familiar can deliver the spell as if it had cast the
+spell. Your familiar must be within 100 feet of you,         This spell allows you to find the shortest, most direct
+and it must use its reaction to deliver the spell when       physical route to a specific fixed location that you
+you cast it. If the spell requires an attack roll, you use   are familiar with on the same plane of existence. If
+your attack modifier for the roll.                           you name a destination on another plane of
+                                                             existence, a destination that moves (such as a mobile
+Find Steed                                                   fortress), or a destination that isn’t specific (such as
+                                                             “a green dragon’s lair”), the spell fails.
+2nd-level conjuration
+                                                               For the duration, as long as you are on the same
+Casting Time: 10 minutes                                     plane of existence as the destination, you know how
+Range: 30 feet                                               far it is and in what direction it lies. While you are

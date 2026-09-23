@@ -1,0 +1,52 @@
+To snare its prey, a giant spider spins elaborate         Speed 10 ft., fly 60 ft.
+webs or shoots sticky strands of webbing from its
+abdomen. Giant spiders are most commonly found                STR DEX CON INT WIS CHA
+underground, making their lairs on ceilings or in           15 (+2) 10 (+0) 15 (+2) 6 (-2) 12 (+1) 7 (-2)
+dark, web-filled crevices. Such lairs are often
+festooned with web cocoons holding past victims.          Skills Perception +3
+                                                          Senses passive Perception 13
+Giant Toad                                                Languages understands Common but can’t speak
+                                                          Challenge 1 (200 XP)
+Large beast, unaligned
+                                                          Keen Sight and Smell. The vulture has advantage on
+Armor Class 11                                            Wisdom (Perception) checks that rely on sight or smell.
+Hit Points 39 (6d10 + 6)                                  Pack Tactics. The vulture has advantage on an attack
+Speed 20 ft., swim 40 ft.                                 roll against a creature if at least one of the vulture’s
+                                                          allies is within 5 feet of the creature and the ally isn’t
+    STR DEX CON INT WIS CHA                               incapacitated.
+  15 (+2) 13 (+1) 13 (+1) 2 (-4) 10 (+0) 3 (-4)
+                                                          Actions
+Senses darkvision 30 ft., passive Perception 10           Multiattack. The vulture makes two attacks: one with
+Languages —                                               its beak and one with its talons.
+Challenge 1 (200 XP)                                      Beak. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+                                                          target. Hit: 7 (2d4 + 2) piercing damage.
+Amphibious. The toad can breathe air and water.           Talons. Melee Weapon Attack: +4 to hit, reach 5 ft.,
+Standing Leap. The toad’s long jump is up to 20 feet      one target. Hit: 9 (2d6 + 2) slashing damage.
+and its high jump is up to 10 feet, with or without a
+running start.                                            A giant vulture has advanced intelligence and a
+                                                          malevolent bent. Unlike its smaller kin, it will attack
+Actions                                                   a wounded creature to hasten its end. Giant vultures
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one    have been known to haunt a thirsty, starving
+target. Hit: 7 (1d10 + 2) piercing damage plus 5 (1d10)   creature for days to enjoy its suffering.
+poison damage, and the target is grappled (escape DC
+13). Until this grapple ends, the target is restrained,   Giant Wasp
+and the toad can’t bite another target.
+Swallow. The toad makes one bite attack against a         Medium beast, unaligned
+Medium or smaller target it is grappling. If the attack   Armor Class 12
+hits, the target is swallowed, and the grapple ends. The  Hit Points 13 (3d8)
+swallowed target is blinded and restrained, it has total  Speed 10 ft., fly 50 ft.
+cover against attacks and other effects outside the
+toad, and it takes 10 (3d6) acid damage at the start of       STR DEX CON INT WIS CHA
+each of the toad’s turns. The toad can have only one        10 (+0) 14 (+2) 10 (+0) 1 (-5) 10 (+0) 3 (-4)
+target swallowed at a time.
+                                                          Senses passive Perception 10
+  If the toad dies, a swallowed creature is no longer     Languages —
+restrained by it and can escape from the corpse using 5   Challenge 1/2 (100 XP)
+feet of movement, exiting prone.
+                                                          Actions
+Giant Vulture                                             Sting. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+                                                          creature. Hit: 5 (1d6 + 2) piercing damage, and the
+Large beast, neutral evil
+
+Armor Class 10
+Hit Points 22 (3d10 + 6)

@@ -1,0 +1,61 @@
+Hill Dwarf                                                  Languages. You can speak, read, and write
+                                                          Common and Elvish. Elvish is fluid, with subtle
+As a hill dwarf, you have keen senses, deep intuition,    intonations and intricate grammar. Elven literature
+and remarkable resilience.                                is rich and varied, and their songs and poems are
+                                                          famous among other races. Many bards learn their
+  Ability Score Increase. Your Wisdom score               language so they can add Elvish ballads to their
+increases by 1.                                           repertoires.
+
+  Dwarven Toughness. Your hit point maximum               High Elf
+increases by 1, and it increases by 1 every time you
+gain a level.                                             As a high elf, you have a keen mind and a mastery of
+                                                          at least the basics of magic. In many fantasy gaming
+Elf                                                       worlds, there are two kinds of high elves. One type is
+                                                          haughty and reclusive, believing themselves to be
+Elf Traits                                                superior to non-elves and even other elves. The
+                                                          other type is more common and more friendly, and
+Your elf character has a variety of natural abilities,    often encountered among humans and other races.
+the result of thousands of years of elven refinement.
+                                                            Ability Score Increase. Your Intelligence score
+  Ability Score Increase. Your Dexterity score            increases by 1.
+increases by 2.
+                                                            Elf Weapon Training. You have proficiency with
+  Age. Although elves reach physical maturity at          the longsword, shortsword, shortbow, and longbow.
+about the same age as humans, the elven
+understanding of adulthood goes beyond physical             Cantrip. You know one cantrip of your choice
+growth to encompass worldly experience. An elf            from the wizard spell list. Intelligence is your
+typically claims adulthood and an adult name              spellcasting ability for it.
+around the age of 100 and can live to be 750 years
+old.                                                        Extra Language. You can speak, read, and write
+                                                          one extra language of your choice.
+  Alignment. Elves love freedom, variety, and self-
+expression, so they lean strongly toward the gentler      Halfling
+aspects of chaos. They value and protect others’
+freedom as well as their own, and they are more           Halfling Traits
+often good than not.
+                                                          Your halfling character has a number of traits in
+  Size. Elves range from under 5 to over 6 feet tall      common with all other halflings.
+and have slender builds. Your size is Medium.
+                                                            Ability Score Increase. Your Dexterity score
+  Speed. Your base walking speed is 30 feet.              increases by 2.
+  Darkvision. Accustomed to twilit forests and the
+night sky, you have superior vision in dark and dim         Age. A halfling reaches adulthood at the age of 20
+conditions. You can see in dim light within 60 feet of    and generally lives into the middle of his or her
+you as if it were bright light, and in darkness as if it  second century.
+were dim light. You can’t discern color in darkness,
+only shades of gray.                                        Alignment. Most halflings are lawful good. As a
+  Keen Senses. You have proficiency in the                rule, they are good-hearted and kind, hate to see
+Perception skill.                                         others in pain, and have no tolerance for oppression.
+  Fey Ancestry. You have advantage on saving              They are also very orderly and traditional, leaning
+throws against being charmed, and magic can’t put         heavily on the support of their community and the
+you to sleep.                                             comfort of their old ways.
+  Trance. Elves don’t need to sleep. Instead, they
+meditate deeply, remaining semiconscious, for 4             Size. Halflings average about 3 feet tall and weigh
+hours a day. (The Common word for such meditation         about 40 pounds. Your size is Small.
+is “trance.”) While meditating, you can dream after a
+fashion; such dreams are actually mental exercises          Speed. Your base walking speed is 25 feet.
+that have become reflexive through years of practice.       Lucky. When you roll a 1 on the d20 for an attack
+After resting in this way, you gain the same benefit      roll, ability check, or saving throw, you can reroll the
+that a human does from 8 hours of sleep.                  die and must use the new roll.
+                                                            Brave. You have advantage on saving throws
+                                                          against being frightened.

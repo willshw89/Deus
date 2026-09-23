@@ -1,0 +1,61 @@
+Enlarge/Reduce                                            restrained by the entangling plants until the spell
+                                                          ends. A creature restrained by the plants can use its
+2nd-level transmutation                                action to make a Strength check against your spell
+                                                          save DC. On a success, it frees itself.
+Casting Time: 1 action
+Range: 30 feet                                              When the spell ends, the conjured plants wilt away.
+Components: V, S, M (a pinch of powdered iron)
+Duration: Concentration, up to 1 minute                   Enthrall
+
+You cause a creature or an object you can see within      2nd-level enchantment
+range to grow larger or smaller for the duration.
+Choose either a creature or an object that is neither     Casting Time: 1 action
+worn nor carried. If the target is unwilling, it can      Range: 60 feet
+make a Constitution saving throw. On a success, the       Components: V, S
+spell has no effect.                                      Duration: 1 minute
+
+  If the target is a creature, everything it is wearing   You weave a distracting string of words, causing
+and carrying changes size with it. Any item dropped       creatures of your choice that you can see within
+by an affected creature returns to normal size at         range and that can hear you to make a Wisdom
+once.                                                     saving throw. Any creature that can’t be charmed
+                                                          succeeds on this saving throw automatically, and if
+  Enlarge. The target’s size doubles in all               you or your companions are fighting a creature, it
+dimensions, and its weight is multiplied by eight.        has advantage on the save. On a failed save, the
+This growth increases its size by one category—           target has disadvantage on Wisdom (Perception)
+from Medium to Large, for example. If there isn’t         checks made to perceive any creature other than you
+enough room for the target to double its size, the        until the spell ends or until the target can no longer
+creature or object attains the maximum possible size      hear you. The spell ends if you are incapacitated or
+in the space available. Until the spell ends, the target  can no longer speak.
+also has advantage on Strength checks and Strength
+saving throws. The target’s weapons also grow to          Etherealness
+match its new size. While these weapons are
+enlarged, the target’s attacks with them deal 1d4         7th-level transmutation
+extra damage.
+                                                          Casting Time: 1 action
+  Reduce. The target’s size is halved in all              Range: Self
+dimensions, and its weight is reduced to one-eighth    Components: V, S
+of normal. This reduction decreases its size by one       Duration: Up to 8 hours
+category—from Medium to Small, for example. Until
+the spell ends, the target also has disadvantage on       You step into the border regions of the Ethereal
+Strength checks and Strength saving throws. The           Plane, in the area where it overlaps with your
+target’s weapons also shrink to match its new size.       current plane. You remain in the Border Ethereal for
+While these weapons are reduced, the target’s             the duration or until you use your action to dismiss
+attacks with them deal 1d4 less damage (this can’t        the spell. During this time, you can move in any
+reduce the damage below 1).                               direction. If you move up or down, every foot of
+                                                          movement costs an extra foot. You can see and hear
+Entangle                                                  the plane you originated from, but everything there
+                                                          looks gray, and you can’t see anything more than 60
+1st-level conjuration                                  feet away.
+
+Casting Time: 1 action                                      While on the Ethereal Plane, you can only affect
+Range: 90 feet                                            and be affected by other creatures on that plane.
+Components: V, S                                          Creatures that aren’t on the Ethereal Plane can’t
+Duration: Concentration, up to 1 minute                   perceive you and can’t interact with you, unless a
+                                                          special ability or magic has given them the ability to
+Grasping weeds and vines sprout from the ground in        do so.
+a 20-foot square starting from a point within range.
+For the duration, these plants turn the ground in the       You ignore all objects and effects that aren’t on the
+area into difficult terrain.                              Ethereal Plane, allowing you to move through
+                                                          objects you perceive on the plane you originated
+  A creature in the area when you cast the spell          from.
+must succeed on a Strength saving throw or be

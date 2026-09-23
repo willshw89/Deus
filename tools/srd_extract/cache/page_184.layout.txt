@@ -1,0 +1,60 @@
+  You can also specify conditions that will trigger a              Symbol
+special activity during the duration. For example,
+you might suggest that a knight give her warhorse to               7th-level abjuration
+the first beggar she meets. If the condition isn’t met
+before the spell expires, the activity isn’t performed.            Casting Time: 1 minute
+                                                                   Range: Touch
+  If you or any of your companions damage the                      Components: V, S, M (mercury, phosphorus, and
+target, the spell ends.
+                                                                     powdered diamond and opal with a total value of
+Sunbeam                                                              at least 1,000 gp, which the spell consumes)
+                                                                   Duration: Until dispelled or triggered
+6th-level evocation
+                                                                   When you cast this spell, you inscribe a harmful
+Casting Time: 1 action                                             glyph either on a surface (such as a section of floor, a
+Range: Self (60-foot line)                                      wall, or a table) or within an object that can be
+Components: V, S, M (a magnifying glass)                           closed to conceal the glyph (such as a book, a scroll,
+Duration: Concentration, up to 1 minute                            or a treasure chest). If you choose a surface, the
+                                                                   glyph can cover an area of the surface no larger than
+A beam of brilliant light flashes out from your hand               10 feet in diameter. If you choose an object, that
+in a 5-foot-wide, 60-foot-long line. Each creature in  object must remain in its place; if the object is
+the line must make a Constitution saving throw. On a               moved more than 10 feet from where you cast this
+failed save, a creature takes 6d8 radiant damage and               spell, the glyph is broken, and the spell ends without
+is blinded until your next turn. On a successful save,             being triggered.
+it takes half as much damage and isn’t blinded by
+this spell. Undead and oozes have disadvantage on                    The glyph is nearly invisible, requiring an
+this saving throw.                                                 Intelligence (Investigation) check against your spell
+                                                                   save DC to find it.
+  You can create a new line of radiance as your
+action on any turn until the spell ends.                             You decide what triggers the glyph when you cast
+                                                                   the spell. For glyphs inscribed on a surface, the most
+  For the duration, a mote of brilliant radiance                   typical triggers include touching or stepping on the
+shines in your hand. It sheds bright light in a 30-foot         glyph, removing another object covering it,
+radius and dim light for an additional 30 feet. This               approaching within a certain distance of it, or
+light is sunlight.                                                 manipulating the object that holds it. For glyphs
+                                                                   inscribed within an object, the most common
+Sunburst                                                           triggers are opening the object, approaching within a
+                                                                   certain distance of it, or seeing or reading the glyph.
+8th-level evocation
+                                                                     You can further refine the trigger so the spell is
+Casting Time: 1 action                                             activated only under certain circumstances or
+Range: 150 feet                                                    according to a creature’s physical characteristics
+Components: V, S, M (fire and a piece of sunstone)                 (such as height or weight), or physical kind (for
+Duration: Instantaneous                                            example, the ward could be set to affect hags or
+                                                                   shapechangers). You can also specify creatures that
+Brilliant sunlight flashes in a 60-foot radius centered         don’t trigger the glyph, such as those who say a
+on a point you choose within range. Each creature in               certain password.
+that light must make a Constitution saving throw. On
+a failed save, a creature takes 12d6 radiant damage                  When you inscribe the glyph, choose one of the
+and is blinded for 1 minute. On a successful save, it              options below for its effect. Once triggered, the glyph
+takes half as much damage and isn’t blinded by this                glows, filling a 60-foot-radius sphere with dim light
+spell. Undead and oozes have disadvantage on this                  for 10 minutes, after which time the spell ends. Each
+saving throw.                                                      creature in the sphere when the glyph activates is
+                                                                   targeted by its effect, as is a creature that enters the
+  A creature blinded by this spell makes another                   sphere for the first time on a turn or ends its turn
+Constitution saving throw at the end of each of its                there.
+turns. On a successful save, it is no longer blinded.
+                                                                     Death. Each target must make a Constitution
+  This spell dispels any darkness in its area that was             saving throw, taking 10d10 necrotic damage on a
+created by a spell.                                                failed save, or half as much damage on a successful
+                                                                   save.

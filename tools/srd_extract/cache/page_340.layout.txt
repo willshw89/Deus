@@ -1,0 +1,55 @@
+Hit Points 59 (7d10 + 21)                                Pseudodragon
+Speed 40 ft.
+                                                         Tiny dragon, neutral good
+    STR DEX CON INT WIS CHA
+  20 (+5) 12 (+1) 17 (+3) 3 (-4) 12 (+1) 7 (-2)          Armor Class 13 (natural armor)
+                                                         Hit Points 7 (2d4 + 2)
+Skills Perception +3                                     Speed 15 ft., fly 60 ft.
+Senses darkvision 60 ft., passive Perception 13
+Languages —                                                  STR DEX CON INT WIS CHA
+Challenge 3 (700 XP)                                        6 (-2) 15 (+2) 13 (+1) 10 (+0) 12 (+1) 10 (+0)
+
+Keen Sight and Smell. The owlbear has advantage on       Skills Perception +3, Stealth +4
+Wisdom (Perception) checks that rely on sight or smell.  Senses blindsight 10 ft., darkvision 60 ft., passive
+
+Actions                                                    Perception 13
+Multiattack. The owlbear makes two attacks: one with     Languages understands Common and Draconic but
+its beak and one with its claws.
+Beak. Melee Weapon Attack: +7 to hit, reach 5 ft., one     can’t speak
+creature. Hit: 10 (1d10 + 5) piercing damage.            Challenge 1/4 (50 XP)
+Claws. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+target. Hit: 14 (2d8 + 5) slashing damage.               Keen Senses. The pseudodragon has advantage on
+                                                         Wisdom (Perception) checks that rely on sight, hearing,
+Monsters (P)                                             or smell.
+
+Pegasus                                                  Magic Resistance. The pseudodragon has advantage
+                                                         on saving throws against spells and other magical
+Large celestial, chaotic good                            effects.
+Armor Class 12
+Hit Points 59 (7d10 + 21)                                Limited Telepathy. The pseudodragon can magically
+Speed 60 ft., fly 90 ft.                                 communicate simple ideas, emotions, and images
+                                                         telepathically with any creature within 100 feet of it
+    STR DEX CON INT WIS CHA                              that can understand a language.
+  18 (+4) 15 (+2) 16 (+3) 10 (+0) 15 (+2) 13 (+1)
+                                                         Actions
+Saving Throws Dex +4, Wis +4, Cha +3
+Skills Perception +6                                     Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Senses passive Perception 16                             target. Hit: 4 (1d4 + 2) piercing damage.
+Languages understands Celestial, Common, Elvish, and
+                                                         Sting. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+  Sylvan but can’t speak                                 creature. Hit: 4 (1d4 + 2) piercing damage, and the
+Challenge 2 (450 XP)                                     target must succeed on a DC 11 Constitution saving
+                                                         throw or become poisoned for 1 hour. If the saving
+Actions                                                  throw fails by 5 or more, the target falls unconscious
+Hooves. Melee Weapon Attack: +6 to hit, reach 5 ft.,     for the same duration, or until it takes damage or
+one target. Hit: 11 (2d6 + 4) bludgeoning damage.        another creature uses an action to shake it awake.
+
+                                                         Purple Worm                         WIS    CHA
+                                                                                            8 (-1)  4 (-3)
+                                                         Gargantuan monstrosity, unaligned
+                                                         Armor Class 18 (natural armor)
+                                                         Hit Points 247 (15d20 + 90)
+                                                         Speed 50 ft., burrow 30 ft.
+
+                                                             STR DEX CON INT
+                                                           28 (+9) 7 (-2) 22 (+6) 1 (-5)

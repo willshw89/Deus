@@ -1,0 +1,64 @@
+Components: V, S, M (either a small leather loop or        lightning damage on a failed save, or half as much
+  a piece of golden wire bent into a cup shape with a      damage on a successful one.
+  long shank on one end)
+                                                             The lightning ignites flammable objects in the area
+Duration: Concentration, up to 10 minutes                  that aren’t being worn or carried.
+
+One creature or object of your choice that you can           At Higher Levels. When you cast this spell using a
+see within range rises vertically, up to 20 feet, and      spell slot of 4th level or higher, the damage increases
+remains suspended there for the duration. The spell        by 1d6 for each slot level above 3rd.
+can levitate a target that weighs up to 500 pounds.
+An unwilling creature that succeeds on a                   Locate Animals or Plants
+Constitution saving throw is unaffected.
+                                                           2nd-level divination (ritual)
+  The target can move only by pushing or pulling
+against a fixed object or surface within reach (such       Casting Time: 1 action
+as a wall or a ceiling), which allows it to move as if it  Range: Self
+were climbing. You can change the target’s altitude        Components: V, S, M (a bit of fur from a
+by up to 20 feet in either direction on your turn. If
+you are the target, you can move up or down as part          bloodhound)
+of your move. Otherwise, you can use your action to        Duration: Instantaneous
+move the target, which must remain within the
+spell’s range.                                             Describe or name a specific kind of beast or plant.
+                                                           Concentrating on the voice of nature in your
+  When the spell ends, the target floats gently to the     surroundings, you learn the direction and distance
+ground if it is still aloft.                               to the closest creature or plant of that kind within 5
+                                                           miles, if any are present.
+Light
+                                                           Locate Creature
+Evocation cantrip
+                                                           4th-level divination
+Casting Time: 1 action
+Range: Touch                                               Casting Time: 1 action
+Components: V, M (a firefly or phosphorescent              Range: Self
+                                                           Components: V, S, M (a bit of fur from a
+  moss)
+Duration: 1 hour                                             bloodhound)
+                                                           Duration: Concentration, up to 1 hour
+You touch one object that is no larger than 10 feet in
+any dimension. Until the spell ends, the object sheds      Describe or name a creature that is familiar to you.
+bright light in a 20-foot radius and dim light for an   You sense the direction to the creature’s location, as
+additional 20 feet. The light can be colored as you        long as that creature is within 1,000 feet of you. If
+like. Completely covering the object with something        the creature is moving, you know the direction of its
+opaque blocks the light. The spell ends if you cast it     movement.
+again or dismiss it as an action.
+                                                             The spell can locate a specific creature known to
+  If you target an object held or worn by a hostile        you, or the nearest creature of a specific kind (such
+creature, that creature must succeed on a Dexterity        as a human or a unicorn), so long as you have seen
+saving throw to avoid the spell.                           such a creature up close—within 30 feet—at least
+                                                           once. If the creature you described or named is in a
+Lightning Bolt                                             different form, such as being under the effects of a
+                                                           polymorph spell, this spell doesn’t locate the creature.
+3rd-level evocation
+                                                             This spell can’t locate a creature if running water
+Casting Time: 1 action                                     at least 10 feet wide blocks a direct path between
+Range: Self (100-foot line)                             you and the creature.
+Components: V, S, M (a bit of fur and a rod of amber,
+                                                           Locate Object
+  crystal, or glass)
+Duration: Instantaneous                                    2nd-level divination
+
+A stroke of lightning forming a line 100 feet long and     Casting Time: 1 action
+5 feet wide blasts out from you in a direction you         Range: Self
+choose. Each creature in the line must make a              Components: V, S, M (a forked twig)
+Dexterity saving throw. A creature takes 8d6               Duration: Concentration, up to 10 minutes

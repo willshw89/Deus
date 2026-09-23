@@ -1,0 +1,49 @@
+Languages Common, Draconic                                Green Dragon
+Challenge 9 (5,000 XP)
+                                                          Ancient Green Dragon
+Actions
+                                                          Gargantuan dragon, lawful evil
+Multiattack. The dragon makes three attacks: one with
+its bite and two with its claws.                          Armor Class 21 (natural armor)
+Bite. Melee Weapon Attack: +9 to hit, reach 10 ft., one   Hit Points 385 (22d20 + 154)
+target. Hit: 16 (2d10 + 5) piercing damage plus 5 (1d10)  Speed 40 ft., fly 80 ft., swim 40 ft.
+lightning damage.
+Claw. Melee Weapon Attack: +9 to hit, reach 5 ft., one        STR DEX CON INT WIS CHA
+target. Hit: 12 (2d6 + 5) slashing damage.                  27 (+8) 12 (+1) 25 (+7) 20 (+5) 17 (+3) 19 (+4)
+Lightning Breath (Recharge 5–6). The dragon exhales
+lightning in an 60-foot line that is 5 feet wide. Each  Saving Throws Dex +8, Con +14, Wis +10, Cha +11
+creature in that line must make a DC 16 Dexterity         Skills Deception +11, Insight +10, Perception +17,
+saving throw, taking 55 (10d10) lightning damage on a
+failed save, or half as much damage on a successful one.    Persuasion +11, Stealth +8
+                                                          Damage Immunities poison
+Blue Dragon Wyrmling                                      Condition Immunities poisoned
+                                                          Senses blindsight 60 ft., darkvision 120 ft., passive
+Medium dragon, lawful evil
+                                                            Perception 27
+Armor Class 17 (natural armor)                            Languages Common, Draconic
+Hit Points 52 (8d8 + 16)                                  Challenge 22 (41,000 XP)
+Speed 30 ft., burrow 15 ft., fly 60 ft.
+                                                          Amphibious. The dragon can breathe air and water.
+    STR DEX CON INT WIS CHA                               Legendary Resistance (3/Day). If the dragon fails a
+  17 (+3) 10 (+0) 15 (+2) 12 (+1) 11 (+0) 15 (+2)         saving throw, it can choose to succeed instead.
+
+Saving Throws Dex +2, Con +4, Wis +2, Cha +4              Actions
+Skills Perception +4, Stealth +2                          Multiattack. The dragon can use its Frightful Presence.
+Damage Immunities lightning                               It then makes three attacks: one with its bite and two
+Senses blindsight 10 ft., darkvision 60 ft., passive      with its claws.
+                                                          Bite. Melee Weapon Attack: +15 to hit, reach 15 ft.,
+  Perception 14                                           one target. Hit: 19 (2d10 + 8) piercing damage plus 10
+Languages Draconic                                        (3d6) poison damage.
+Challenge 3 (700 XP)                                      Claw. Melee Weapon Attack: +15 to hit, reach 10 ft.,
+                                                          one target. Hit: 22 (4d6 + 8) slashing damage.
+Actions                                                   Tail. Melee Weapon Attack: +15 to hit, reach 20 ft., one
+                                                          target. Hit: 17 (2d8 + 8) bludgeoning damage.
+Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one    Frightful Presence. Each creature of the dragon’s
+target. Hit: 8 (1d10 + 3) piercing damage plus 3 (1d6)    choice that is within 120 feet of the dragon and aware
+lightning damage.                                         of it must succeed on a DC 19 Wisdom saving throw or
+Lightning Breath (Recharge 5–6). The dragon exhales       become frightened for 1 minute. A creature can repeat
+lightning in a 30-foot line that is 5 feet wide. Each   the saving throw at the end of each of its turns, ending
+creature in that line must make a DC 12 Dexterity         the effect on itself on a success. If a creature’s saving
+saving throw, taking 22 (4d10) lightning damage on a      throw is successful or the effect ends for it, the
+failed save, or half as much damage on a successful one.  creature is immune to the dragon’s Frightful Presence
+                                                          for the next 24 hours.

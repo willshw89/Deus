@@ -1,0 +1,62 @@
+rocks, or dirt as if it were normal terrain. You can    reaction to expend 1 of its charges to succeed on that
+also speak and understand Terran.                       saving throw instead.
+
+  If you help slay an earth elemental while attuned     Ring of Feather Falling
+to the ring, you gain access to the following
+additional properties:                                  Ring, rare (requires attunement)
+
+• You have resistance to acid damage.                   When you fall while wearing this ring, you descend
+• You can move through solid earth or rock as if        60 feet per round and take no damage from falling.
+
+  those areas were difficult terrain. If you end your   Ring of Free Action
+  turn there, you are shunted out to the nearest
+  unoccupied space you last occupied.                   Ring, rare (requires attunement)
+• You can cast the following spells from the ring,
+  expending the necessary number of charges: stone      While you wear this ring, difficult terrain doesn’t
+  shape (2 charges), stoneskin (3 charges), or wall of  cost you extra movement. In addition, magic can
+  stone (3 charges).                                    neither reduce your speed nor cause you to be
+                                                        paralyzed or restrained.
+  Ring of Fire Elemental Command. You can
+expend 2 of the ring’s charges to cast dominate         Ring of Invisibility
+monster on a fire elemental. In addition, you have
+resistance to fire damage. You can also speak and       Ring, legendary (requires attunement)
+understand Ignan.
+                                                        While wearing this ring, you can turn invisible as an
+  If you help slay a fire elemental while attuned to    action. Anything you are wearing or carrying is
+the ring, you gain access to the following additional   invisible with you. You remain invisible until the
+properties:                                             ring is removed, until you attack or cast a spell, or
+                                                        until you use a bonus action to become visible again.
+• You are immune to fire damage.
+• You can cast the following spells from the ring,      Ring of Jumping
+
+  expending the necessary number of charges:            Ring, uncommon (requires attunement)
+  burning hands (1 charge), fireball (2 charges), and
+  wall of fire (3 charges).                             While wearing this ring, you can cast the jump spell
+                                                        from it as a bonus action at will, but can target only
+  Ring of Water Elemental Command. You can              yourself when you do so.
+expend 2 of the ring’s charges to cast dominate
+monster on a water elemental. In addition, you can      Ring of Mind Shielding
+stand on and walk across liquid surfaces as if they
+were solid ground. You can also speak and               Ring, uncommon (requires attunement)
+understand Aquan.
+                                                        While wearing this ring, you are immune to magic
+  If you help slay a water elemental while attuned to   that allows other creatures to read your thoughts,
+the ring, you gain access to the following additional   determine whether you are lying, know your
+properties:                                             alignment, or know your creature type. Creatures
+                                                        can telepathically communicate with you only if you
+• You can breathe underwater and have a                 allow it.
+  swimming speed equal to your walking speed.
+                                                          You can use an action to cause the ring to become
+• You can cast the following spells from the ring,      invisible until you use another action to make it
+  expending the necessary number of charges:            visible, until you remove the ring, or until you die.
+  create or destroy water (1 charge), control water (3
+  charges), ice storm (2 charges), or wall of ice (3      If you die while wearing the ring, your soul enters
+  charges).                                             it, unless it already houses a soul. You can remain in
+                                                        the ring or depart for the afterlife. As long as your
+Ring of Evasion                                         soul is in the ring, you can telepathically
+                                                        communicate with any creature wearing it. A wearer
+Ring, rare (requires attunement)                        can’t prevent this telepathic communication.
+
+This ring has 3 charges, and it regains 1d3 expended
+charges daily at dawn. When you fail a Dexterity
+saving throw while wearing it, you can use your

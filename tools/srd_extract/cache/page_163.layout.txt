@@ -1,0 +1,63 @@
+Mass Heal                                                 course of action can continue for the entire duration.
+                                                          If the suggested activity can be completed in a
+9th-level evocation                                    shorter time, the spell ends when the subject
+                                                          finishes what it was asked to do.
+Casting Time: 1 action
+Range: 60 feet                                              You can also specify conditions that will trigger a
+Components: V, S                                          special activity during the duration. For example,
+Duration: Instantaneous                                   you might suggest that a group of soldiers give all
+                                                          their money to the first beggar they meet. If the
+A flood of healing energy flows from you into injured     condition isn’t met before the spell ends, the activity
+creatures around you. You restore up to 700 hit           isn’t performed.
+points, divided as you choose among any number of
+creatures that you can see within range. Creatures          If you or any of your companions damage a
+healed by this spell are also cured of all diseases and   creature affected by this spell, the spell ends for that
+any effect making them blinded or deafened. This          creature.
+spell has no effect on undead or constructs.
+                                                            At Higher Levels. When you cast this spell using a
+Mass Healing Word                                         7th-level spell slot, the duration is 10 days. When
+                                                          you use an 8th-level spell slot, the duration is 30
+3rd-level evocation                                    days. When you use a 9th-level spell slot, the
+                                                          duration is a year and a day.
+Casting Time: 1 bonus action
+Range: 60 feet                                            Maze
+Components: V
+Duration: Instantaneous                                   8th-level conjuration
+
+As you call out words of restoration, up to six           Casting Time: 1 action
+creatures of your choice that you can see within          Range: 60 feet
+range regain hit points equal to 1d4 + your               Components: V, S
+spellcasting ability modifier. This spell has no effect   Duration: Concentration, up to 10 minutes
+on undead or constructs.
+                                                          You banish a creature that you can see within range
+  At Higher Levels. When you cast this spell using a      into a labyrinthine demiplane. The target remains
+spell slot of 4th level or higher, the healing increases  there for the duration or until it escapes the maze.
+by 1d4 for each slot level above 3rd.
+                                                            The target can use its action to attempt to escape.
+Mass Suggestion                                           When it does so, it makes a DC 20 Intelligence check.
+                                                          If it succeeds, it escapes, and the spell ends (a
+6th-level enchantment                                  minotaur or goristro demon automatically succeeds).
+
+Casting Time: 1 action                                      When the spell ends, the target reappears in the
+Range: 60 feet                                            space it left or, if that space is occupied, in the
+Components: V, M (a snake’s tongue and either a bit       nearest unoccupied space.
+
+  of honeycomb or a drop of sweet oil)                    Meld into Stone
+Duration: 24 hours
+                                                          3rd-level transmutation (ritual)
+You suggest a course of activity (limited to a
+sentence or two) and magically influence up to            Casting Time: 1 action
+twelve creatures of your choice that you can see          Range: Touch
+within range and that can hear and understand you.        Components: V, S
+Creatures that can’t be charmed are immune to this        Duration: 8 hours
+effect. The suggestion must be worded in such a
+manner as to make the course of action sound              You step into a stone object or surface large enough
+reasonable. Asking the creature to stab itself, throw     to fully contain your body, melding yourself and all
+itself onto a spear, immolate itself, or do some other    the equipment you carry with the stone for the
+obviously harmful act automatically negates the           duration. Using your movement, you step into the
+effect of the spell.                                      stone at a point you can touch. Nothing of your
+                                                          presence remains visible or otherwise detectable by
+  Each target must make a Wisdom saving throw.            nonmagical senses.
+On a failed save, it pursues the course of action you
+described to the best of its ability. The suggested         While merged with the stone, you can’t see what
+                                                          occurs outside it, and any Wisdom (Perception)

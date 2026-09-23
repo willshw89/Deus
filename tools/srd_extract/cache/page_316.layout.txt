@@ -1,0 +1,56 @@
+Senses darkvision 60 ft., passive Perception 9               Damage Immunities lightning, poison; bludgeoning,
+Languages understands the languages of its creator but         piercing, and slashing from nonmagical attacks that
+                                                               aren’t adamantine
+  can’t speak
+Challenge 9 (5,000 XP)                                       Condition Immunities charmed, exhaustion, frightened,
+                                                               paralyzed, petrified, poisoned
+Acid Absorption. Whenever the golem is subjected to
+acid damage, it takes no damage and instead regains a        Senses darkvision 60 ft., passive Perception 10
+number of hit points equal to the acid damage dealt.
+Berserk. Whenever the golem starts its turn with 60 hit      Languages understands the languages of its creator but
+points or fewer, roll a d6. On a 6, the golem goes             can’t speak
+berserk. On each of its turns while berserk, the golem
+attacks the nearest creature it can see. If no creature is   Challenge 5 (1,800 XP)
+near enough to move to and attack, the golem attacks
+an object, with preference for an object smaller than        Berserk. Whenever the golem starts its turn with 40 hit
+itself. Once the golem goes berserk, it continues to do      points or fewer, roll a d6. On a 6, the golem goes
+so until it is destroyed or regains all its hit points.      berserk. On each of its turns while berserk, the golem
+Immutable Form. The golem is immune to any spell or          attacks the nearest creature it can see. If no creature is
+effect that would alter its form.                            near enough to move to and attack, the golem attacks
+Magic Resistance. The golem has advantage on saving          an object, with preference for an object smaller than
+throws against spells and other magical effects.             itself. Once the golem goes berserk, it continues to do
+Magic Weapons. The golem’s weapon attacks are                so until it is destroyed or regains all its hit points.
+magical.
+                                                               The golem’s creator, if within 60 feet of the berserk
+Actions                                                      golem, can try to calm it by speaking firmly and
+                                                             persuasively. The golem must be able to hear its
+Multiattack. The golem makes two slam attacks.               creator, who must take an action to make a DC 15
+Slam. Melee Weapon Attack: +8 to hit, reach 5 ft., one       Charisma (Persuasion) check. If the check succeeds, the
+target. Hit: 16 (2d10 + 5) bludgeoning damage. If the        golem ceases being berserk. If it takes damage while
+target is a creature, it must succeed on a DC 15             still at 40 hit points or fewer, the golem might go
+Constitution saving throw or have its hit point              berserk again.
+maximum reduced by an amount equal to the damage
+taken. The target dies if this attack reduces its hit point  Aversion of Fire. If the golem takes fire damage, it has
+maximum to 0. The reduction lasts until removed by           disadvantage on attack rolls and ability checks until the
+the greater restoration spell or other magic.                end of its next turn.
+Haste (Recharge 5–6). Until the end of its next turn,
+the golem magically gains a +2 bonus to its AC, has          Immutable Form. The golem is immune to any spell or
+advantage on Dexterity saving throws, and can use its        effect that would alter its form.
+slam attack as a bonus action.
+                                                             Lightning Absorption. Whenever the golem is
+Flesh Golem                                                  subjected to lightning damage, it takes no damage and
+                                                             instead regains a number of hit points equal to the
+Medium construct, neutral                                    lightning damage dealt.
+
+Armor Class 9                                                Magic Resistance. The golem has advantage on saving
+Hit Points 93 (11d8 + 44)                                    throws against spells and other magical effects.
+Speed 30 ft.
+                                                             Magic Weapons. The golem’s weapon attacks are
+    STR DEX CON INT WIS CHA                                  magical.
+  19 (+4) 9 (-1) 18 (+4) 6 (-2) 10 (+0) 5 (-3)
+                                                             Actions
+
+                                                             Multiattack. The golem makes two slam attacks.
+
+                                                             Slam. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+                                                             target. Hit: 13 (2d8 + 4) bludgeoning damage.

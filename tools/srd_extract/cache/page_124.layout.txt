@@ -1,0 +1,64 @@
+of its friends being harmed. When the spell ends, the      Components: V, S
+creature becomes hostile again, unless the GM rules        Duration: 1 round
+otherwise.
+                                                           You create a ghostly, skeletal hand in the space of a
+Chain Lightning                                            creature within range. Make a ranged spell attack
+                                                           against the creature to assail it with the chill of the
+6th-level evocation                                     grave. On a hit, the target takes 1d8 necrotic damage,
+                                                           and it can’t regain hit points until the start of your
+Casting Time: 1 action                                     next turn. Until then, the hand clings to the target.
+Range: 150 feet
+Components: V, S, M (a bit of fur; a piece of amber,         If you hit an undead target, it also has
+                                                           disadvantage on attack rolls against you until the
+  glass, or a crystal rod; and three silver pins)          end of your next turn.
+Duration: Instantaneous
+                                                             This spell’s damage increases by 1d8 when you
+You create a bolt of lightning that arcs toward a          reach 5th level (2d8), 11th level (3d8), and 17th
+target of your choice that you can see within range.       level (4d8).
+Three bolts then leap from that target to as many as
+three other targets, each of which must be within 30       Circle of Death
+feet of the first target. A target can be a creature or
+an object and can be targeted by only one of the           6th-level necromancy
+bolts.
+                                                           Casting Time: 1 action
+  A target must make a Dexterity saving throw. The         Range: 150 feet
+target takes 10d8 lightning damage on a failed save,       Components: V, S, M (the powder of a crushed black
+or half as much damage on a successful one.
+                                                             pearl worth at least 500 gp)
+  At Higher Levels. When you cast this spell using a       Duration: Instantaneous
+spell slot of 7th level or higher, one additional bolt
+leaps from the first target to another target for each     A sphere of negative energy ripples out in a 60-foot-
+slot level above 6th.                                      radius sphere from a point within range. Each
+                                                           creature in that area must make a Constitution
+Charm Person                                               saving throw. A target takes 8d6 necrotic damage on
+                                                           a failed save, or half as much damage on a successful
+1st-level enchantment                                   one.
+
+Casting Time: 1 action                                       At Higher Levels. When you cast this spell using a
+Range: 30 feet                                             spell slot of 7th level or higher, the damage increases
+Components: V, S                                           by 2d6 for each slot level above 6th.
+Duration: 1 hour
+                                                           Clairvoyance
+You attempt to charm a humanoid you can see
+within range. It must make a Wisdom saving throw,          3rd-level divination
+and does so with advantage if you or your
+companions are fighting it. If it fails the saving throw,  Casting Time: 10 minutes
+it is charmed by you until the spell ends or until you     Range: 1 mile
+or your companions do anything harmful to it. The          Components: V, S, M (a focus worth at least 100 gp,
+charmed creature regards you as a friendly
+acquaintance. When the spell ends, the creature              either a jeweled horn for hearing or a glass eye for
+knows it was charmed by you.                                 seeing)
+                                                           Duration: Concentration, up to 10 minutes
+  At Higher Levels. When you cast this spell using a
+spell slot of 2nd level or higher, you can target one      You create an invisible sensor within range in a
+additional creature for each slot level above 1st. The     location familiar to you (a place you have visited or
+creatures must be within 30 feet of each other when        seen before) or in an obvious location that is
+you target them.                                           unfamiliar to you (such as behind a door, around a
+                                                           corner, or in a grove of trees). The sensor remains in
+Chill Touch                                                place for the duration, and it can’t be attacked or
+                                                           otherwise interacted with.
+Necromancy cantrip
+                                                             When you cast the spell, you choose seeing or
+Casting Time: 1 action                                     hearing. You can use the chosen sense through the
+Range: 120 feet                                            sensor as if you were in its space. As your action, you
+                                                           can switch between seeing and hearing.

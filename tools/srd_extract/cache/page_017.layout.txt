@@ -1,0 +1,62 @@
+Ability Score Improvement                                endurance (such as Ilmater, Mishakal, Apollo, and
+                                                         Diancecht), and gods of home and community (such
+When you reach 4th level, and again at 8th, 12th,        as Hestia, Hathor, and Boldrei).
+16th, and 19th level, you can increase one ability
+score of your choice by 2, or you can increase two       Life Domain Spells
+ability scores of your choice by 1. As normal, you
+can’t increase an ability score above 20 using this      Cleric Level  Spells
+feature.                                                      1st      bless, cure wounds
+                                                              3rd      lesser restoration, spiritual weapon
+Destroy Undead                                                5th      beacon of hope, revivify
+                                                              7th      death ward, guardian of faith
+Starting at 5th level, when an undead fails its saving        9th      mass cure wounds, raise dead
+throw against your Turn Undead feature, the
+creature is instantly destroyed if its challenge rating  Bonus Proficiency
+is at or below a certain threshold, as shown in the
+Destroy Undead table.                                    When you choose this domain at 1st level, you gain
+                                                         proficiency with heavy armor.
+
+Destroy Undead                                           Disciple of Life
+
+Cleric Level  Destroys Undead of CR . . .                Also starting at 1st level, your healing spells are
+     5th      1/2 or lower                               more effective. Whenever you use a spell of 1st level
+     8th      1 or lower                                 or higher to restore hit points to a creature, the
+    11th      2 or lower                                 creature regains additional hit points equal to 2 +
+    14th      3 or lower                                 the spell’s level.
+    17th      4 or lower
+                                                         Channel Divinity: Preserve Life
+Divine Intervention
+                                                         Starting at 2nd level, you can use your Channel
+Beginning at 10th level, you can call on your deity to   Divinity to heal the badly injured.
+intervene on your behalf when your need is great.
+                                                           As an action, you present your holy symbol and
+  Imploring your deity’s aid requires you to use         evoke healing energy that can restore a number of
+your action. Describe the assistance you seek, and       hit points equal to five times your cleric level.
+roll percentile dice. If you roll a number equal to or   Choose any creatures within 30 feet of you, and
+lower than your cleric level, your deity intervenes.     divide those hit points among them. This feature can
+The GM chooses the nature of the intervention; the       restore a creature to no more than half of its hit
+effect of any cleric spell or cleric domain spell would  point maximum. You can’t use this feature on an
+be appropriate.                                          undead or a construct.
+
+  If your deity intervenes, you can’t use this feature   Blessed Healer
+again for 7 days. Otherwise, you can use it again
+after you finish a long rest.                            Beginning at 6th level, the healing spells you cast on
+                                                         others heal you as well. When you cast a spell of 1st
+  At 20th level, your call for intervention succeeds     level or higher that restores hit points to a creature
+automatically, no roll required.                         other than you, you regain hit points equal to 2 + the
+                                                         spell’s level.
+Life Domain
+                                                         Divine Strike
+The Life domain focuses on the vibrant positive
+energy—one of the fundamental forces of the              At 8th level, you gain the ability to infuse your
+universe—that sustains all life. The gods of life        weapon strikes with divine energy. Once on each of
+promote vitality and health through healing the sick     your turns when you hit a creature with a weapon
+and wounded, caring for those in need, and driving       attack, you can cause the attack to deal an extra 1d8
+away the forces of death and undeath. Almost any         radiant damage to the target. When you reach 14th
+non-evil deity can claim influence over this domain,  level, the extra damage increases to 2d8.
+particularly agricultural deities (such as Chauntea,
+Arawai, and Demeter), sun gods (such as Lathander,       Supreme Healing
+Pelor, and Re-Horakhty), gods of healing or
+                                                         Starting at 17th level, when you would normally roll
+                                                         one or more dice to restore hit points with a spell,
+                                                         you instead use the highest number possible for

@@ -1,0 +1,59 @@
+Ranger                                                 Tools: None
+                                                       Saving Throws: Strength, Dexterity
+Class Features                                         Skills: Choose three from Animal Handling, Athletics,
+
+As a ranger, you gain the following class features.      Insight, Investigation, Nature, Perception, Stealth,
+                                                         and Survival
+Hit Points
+                                                       Equipment
+Hit Dice: 1d10 per ranger level
+Hit Points at 1st Level: 10 + your Constitution        You start with the following equipment, in addition
+                                                       to the equipment granted by your background:
+  modifier
+Hit Points at Higher Levels: 1d10 (or 6) + your        • (a) scale mail or (b) leather armor
+                                                       • (a) two shortswords or (b) two simple melee
+  Constitution modifier per ranger level after 1st
+                                                         weapons
+Proficiencies                                          • (a) a dungeoneer’s pack or (b) an explorer’s pack
+                                                       • A longbow and a quiver of 20 arrows
+Armor: Light armor, medium armor, shields
+Weapons: Simple weapons, martial weapons
+
+The Ranger
+
+Level  Proficiency  Features                                           Spells Known  —Spell Slots per Spell Level—
+ 1st      Bonus     Favored Enemy, Natural Explorer                          —       1st 2nd 3rd 4th 5th
+2nd         +2      Fighting Style, Spellcasting                              2      —— ———
+ 3rd        +2      Ranger Archetype, Primeval Awareness                      3       2 — ———
+ 4th        +2      Ability Score Improvement                                 3       3 — ———
+ 5th        +2      Extra Attack                                              4       3 — ———
+ 6th        +3      Favored Enemy and Natural Explorer improvements           4       4 2 ———
+ 7th        +3      Ranger Archetype feature                                  5       4 2 ———
+ 8th        +3      Ability Score Improvement, Land’s Stride                  5       4 3 ———
+ 9th        +3      —                                                         6       4 3 ———
+10th        +4      Natural Explorer improvement, Hide in Plain Sight         6       4 3 2 ——
+11th        +4      Ranger Archetype feature                                  7       4 3 2 ——
+12th        +4      Ability Score Improvement                                 7       4 3 3 ——
+13th        +4      —                                                         8       4 3 3 ——
+14th        +5      Favored Enemy improvement, Vanish                         8       4 3 3 1—
+15th        +5      Ranger Archetype feature                                  9       4 3 3 1—
+16th        +5      Ability Score Improvement                                 9       4 3 3 2—
+17th        +5      —                                                        10       4 3 3 2—
+18th        +6      Feral Senses                                             10       43 331
+19th        +6      Ability Score Improvement                                11       43 331
+20th        +6      Foe Slayer                                               11       43 332
+            +6                                                                        43 332
+
+Favored Enemy                                          humanoid (such as gnolls and orcs) as favored
+                                                       enemies.
+Beginning at 1st level, you have significant
+experience studying, tracking, hunting, and even         You have advantage on Wisdom (Survival) checks
+talking to a certain type of enemy.                    to track your favored enemies, as well as on
+                                                       Intelligence checks to recall information about them.
+  Choose a type of favored enemy: aberrations,
+beasts, celestials, constructs, dragons, elementals,     When you gain this feature, you also learn one
+fey, fiends, giants, monstrosities, oozes, plants, or  language of your choice that is spoken by your
+undead. Alternatively, you can select two races of     favored enemies, if they speak one at all.
+
+                                                         You choose one additional favored enemy, as well
+                                                       as an associated language, at 6th and 14th level. As

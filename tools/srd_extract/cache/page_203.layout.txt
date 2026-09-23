@@ -1,0 +1,65 @@
+Objects                                                               Huge and Gargantuan Objects. Normal weapons
+                                                                    are of little use against many Huge and Gargantuan
+When characters need to saw through ropes, shatter                  objects, such as a colossal statue, towering column of
+a window, or smash a vampire’s coffin, the only hard                stone, or massive boulder. That said, one torch can
+and fast rule is this: given enough time and the right              burn a Huge tapestry, and an earthquake spell can
+tools, characters can destroy any destructible object.              reduce a colossus to rubble. You can track a Huge or
+Use common sense when determining a character’s                     Gargantuan object’s hit points if you like, or you can
+success at damaging an object. Can a fighter cut                    simply decide how long the object can withstand
+through a section of a stone wall with a sword? No,                 whatever weapon or force is acting against it. If you
+the sword is likely to break before the wall does.                  track hit points for the object, divide it into Large or
+                                                                    smaller sections, and track each section’s hit points
+  For the purpose of these rules, an object is a                    separately. Destroying one of those sections could
+discrete, inanimate item like a window, door, sword,                ruin the entire object. For example, a Gargantuan
+book, table, chair, or stone, not a building or a                   statue of a human might topple over when one of its
+vehicle that is composed of many other objects.                     Large legs is reduced to 0 hit points.
+
+Statistics for Objects                                                Objects and Damage Types. Objects are immune
+                                                                    to poison and psychic damage. You might decide that
+When time is a factor, you can assign an Armor Class                some damage types are more effective against a
+and hit points to a destructible object. You can also               particular object or substance than others. For
+give it immunities, resistances, and vulnerabilities to             example, bludgeoning damage works well for
+specific types of damage.                                           smashing things but not for cutting through rope or
+                                                                    leather. Paper or cloth objects might be vulnerable
+  Armor Class. An object’s Armor Class is a measure                 to fire and lightning damage. A pick can chip away
+of how difficult it is to deal damage to the object                 stone but can’t effectively cut down a tree. As always,
+when striking it (because the object has no chance of               use your best judgment.
+dodging out of the way). The Object Armor Class
+table provides suggested AC values for various                        Damage Threshold. Big objects such as castle
+substances.                                                         walls often have extra resilience represented by a
+                                                                    damage threshold. An object with a damage
+Object Armor Class                                                  threshold has immunity to all damage unless it takes
+                                                                    an amount of damage from a single attack or effect
+Substance    AC                                                     equal to or greater than its damage threshold, in
+                                                                    which case it takes damage as normal. Any damage
+Cloth, paper, rope 11                                               that fails to meet or exceed the object’s damage
+                                                                    threshold is considered superficial and doesn’t
+Crystal, glass, ice 13                                              reduce the object’s hit points.
+
+Wood, bone   15
+
+Stone        17
+
+Iron, steel  19
+
+Mithral      21
+
+Adamantine   23
+
+  Hit Points. An object’s hit points measure how
+much damage it can take before losing its structural
+integrity. Resilient objects have more hit points than
+fragile ones. Large objects also tend to have more hit
+points than small ones, unless breaking a small part
+of the object is just as effective as breaking the whole
+thing. The Object Hit Points table provides suggested
+hit points for fragile and resilient objects that are
+Large or smaller.
+
+Object Hit Points                              Fragile   Resilient
+                                               2 (1d4)   5 (2d4)
+Size                                           3 (1d6)   10 (3d6)
+Tiny (bottle, lock)                            4 (1d8)   18 (4d8)
+Small (chest, lute)                            5 (1d10)  27 (5d10)
+Medium (barrel, chandelier)
+Large (cart, 10-ft.-by-10-ft. window)

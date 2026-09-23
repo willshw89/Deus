@@ -1,0 +1,55 @@
+Arcane Hand               Prismatic Spray
+Cloudkill                 Project Image
+Cone of Cold              Reverse Gravity
+Conjure Elemental         Sequester
+Contact Other Plane       Simulacrum
+Creation                  Symbol
+Dominate Person           Teleport
+Dream
+Geas                      8th Level
+Hold Monster
+Legend Lore               Antimagic Field
+Mislead                   Antipathy/Sympathy
+Modify Memory             Clone
+Passwall                  Control Weather
+Planar Binding            Demiplane
+Scrying                   Dominate Monster
+Seeming                   Feeblemind
+Telekinesis               Incendiary Cloud
+Telepathic Bond           Maze
+Teleportation Circle      Mind Blank
+Wall of Force             Power Word Stun
+Wall of Stone             Sunburst
+
+6th Level                 9th Level
+
+Chain Lightning           Astral Projection
+Circle of Death           Foresight
+Contingency               Gate
+Create Undead             Imprisonment
+Disintegrate              Meteor Swarm
+Eyebite                   Power Word Kill
+Flesh to Stone            Prismatic Wall
+Freezing Sphere           Shapechange
+Globe of Invulnerability  Time Stop
+Guards and Wards          True Polymorph
+Instant Summons           Weird
+Irresistible Dance        Wish
+Magic Jar
+Mass Suggestion
+Move Earth
+Programmed Illusion
+Sunbeam
+True Seeing
+Wall of Ice
+
+7th Level
+
+Arcane Sword
+Delayed Blast Fireball
+Etherealness
+Finger of Death
+Forcecage
+Magnificent Mansion
+Mirage Arcane
+Plane Shift

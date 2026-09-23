@@ -1,0 +1,62 @@
+Spellcasting Ability                                     • Get a gut feeling about what course of action to
+                                                           follow
+Wizards use Intelligence as their spellcasting ability,
+which helps determine the saving throw DCs of            • Discern whether a seemingly dead or living
+spells they cast.                                          creature is undead
+
+Wisdom                                                   Spellcasting Ability
+
+Wisdom reflects how attuned you are to the world         Clerics, druids, and rangers use Wisdom as their
+around you and represents perceptiveness and             spellcasting ability, which helps determine the
+intuition.                                               saving throw DCs of spells they cast.
+
+Wisdom Checks                                            Charisma
+
+A Wisdom check might reflect an effort to read body      Charisma measures your ability to interact
+language, understand someone’s feelings, notice          effectively with others. It includes such factors as
+things about the environment, or care for an injured     confidence and eloquence, and it can represent a
+person. The Animal Handling, Insight, Medicine,          charming or commanding personality.
+Perception, and Survival skills reflect aptitude in
+certain kinds of Wisdom checks.                          Charisma Checks
+
+  Animal Handling. When there is any question            A Charisma check might arise when you try to
+whether you can calm down a domesticated animal,         influence or entertain others, when you try to make
+keep a mount from getting spooked, or intuit an          an impression or tell a convincing lie, or when you
+animal’s intentions, the GM might call for a Wisdom      are navigating a tricky social situation. The
+(Animal Handling) check. You also make a Wisdom          Deception, Intimidation, Performance, and
+(Animal Handling) check to control your mount            Persuasion skills reflect aptitude in certain kinds of
+when you attempt a risky maneuver.                       Charisma checks.
+
+  Insight. Your Wisdom (Insight) check decides             Deception. Your Charisma (Deception) check
+whether you can determine the true intentions of a       determines whether you can convincingly hide the
+creature, such as when searching out a lie or            truth, either verbally or through your actions. This
+predicting someone’s next move. Doing so involves        deception can encompass everything from
+gleaning clues from body language, speech habits,        misleading others through ambiguity to telling
+and changes in mannerisms.                               outright lies. Typical situations include trying to fast-
+                                                         talk a guard, con a merchant, earn money through
+  Medicine. A Wisdom (Medicine) check lets you try       gambling, pass yourself off in a disguise, dull
+to stabilize a dying companion or diagnose an illness.   someone’s suspicions with false assurances, or
+                                                         maintain a straight face while telling a blatant lie.
+  Perception. Your Wisdom (Perception) check lets
+you spot, hear, or otherwise detect the presence of        Intimidation. When you attempt to influence
+something. It measures your general awareness of         someone through overt threats, hostile actions, and
+your surroundings and the keenness of your senses.       physical violence, the GM might ask you to make a
+For example, you might try to hear a conversation        Charisma (Intimidation) check. Examples include
+through a closed door, eavesdrop under an open           trying to pry information out of a prisoner,
+window, or hear monsters moving stealthily in the        convincing street thugs to back down from a
+forest. Or you might try to spot things that are         confrontation, or using the edge of a broken bottle to
+obscured or easy to miss, whether they are orcs          convince a sneering vizier to reconsider a decision.
+lying in ambush on a road, thugs hiding in the
+shadows of an alley, or candlelight under a closed         Performance. Your Charisma (Performance)
+secret door.                                             check determines how well you can delight an
+                                                         audience with music, dance, acting, storytelling, or
+  Survival. The GM might ask you to make a               some other form of entertainment.
+Wisdom (Survival) check to follow tracks, hunt wild
+game, guide your group through frozen wastelands,          Persuasion. When you attempt to influence
+identify signs that owlbears live nearby, predict the    someone or a group of people with tact, social graces,
+weather, or avoid quicksand and other natural            or good nature, the GM might ask you to make a
+hazards.                                                 Charisma (Persuasion) check. Typically, you use
+                                                         persuasion when acting in good faith, to foster
+  Other Wisdom Checks. The GM might call for a           friendships, make cordial requests, or exhibit proper
+Wisdom check when you try to accomplish tasks like       etiquette. Examples of persuading others include
+the following:

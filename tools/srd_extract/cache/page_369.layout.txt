@@ -1,0 +1,49 @@
+the same turn, the target takes an extra 3 (1d6)         Senses passive Perception 9
+slashing damage. If the target is a creature, it must    Languages —
+succeed on a DC 11 Strength saving throw or be           Challenge 1/8 (25 XP)
+knocked prone.
+Relentless (Recharges after a Short or Long Rest). If    Actions
+the boar takes 7 damage or less that would reduce it to  Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+0 hit points, it is reduced to 1 hit point instead.      target. Hit: 2 (1d4) bludgeoning damage.
+
+Actions                                                  Cat
+Tusk. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+target. Hit: 4 (1d6 + 1) slashing damage.                Tiny beast, unaligned
+                                                         Armor Class 12
+Brown Bear                                               Hit Points 2 (1d4)
+                                                         Speed 40 ft., climb 30 ft.
+Large beast, unaligned
+                                                             STR DEX CON INT WIS CHA
+Armor Class 11 (natural armor)                              3 (-4) 15 (+2) 10 (+0) 3 (-4) 12 (+1) 7 (-2)
+Hit Points 34 (4d10 + 12)
+Speed 40 ft., climb 30 ft.                               Skills Perception +3, Stealth +4
+                                                         Senses passive Perception 13
+    STR DEX CON INT WIS CHA                              Languages —
+  19 (+4) 10 (+0) 16 (+3) 2 (-4) 13 (+1) 7 (-2)          Challenge 0 (10 XP)
+
+Skills Perception +3                                     Keen Smell. The cat has advantage on Wisdom
+Senses passive Perception 13                             (Perception) checks that rely on smell.
+Languages —
+Challenge 1 (200 XP)                                     Actions
+                                                         Claws. Melee Weapon Attack: +0 to hit, reach 5 ft., one
+Keen Smell. The bear has advantage on Wisdom             target. Hit: 1 slashing damage.
+(Perception) checks that rely on smell.
+                                                         Constrictor Snake
+Actions
+                                                         Large beast, unaligned
+Multiattack. The bear makes two attacks: one with its    Armor Class 12
+bite and one with its claws.                             Hit Points 13 (2d10 + 2)
+Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one   Speed 30 ft., swim 30 ft.
+target. Hit: 8 (1d8 + 4) piercing damage.
+Claws. Melee Weapon Attack: +5 to hit, reach 5 ft., one      STR DEX CON INT WIS CHA
+target. Hit: 11 (2d6 + 4) slashing damage.                 15 (+2) 14 (+2) 12 (+1) 1 (-5) 10 (+0) 3 (-4)
+
+Camel                             WIS    CHA             Senses blindsight 10 ft., passive Perception 10
+                                 8 (-1)  5 (-3)          Languages —
+Large beast, unaligned                                   Challenge 1/4 (50 XP)
+Armor Class 9
+Hit Points 15 (2d10 + 4)                                 Actions
+Speed 50 ft.                                             Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+                                                         creature. Hit: 5 (1d6 + 2) piercing damage.
+    STR DEX CON INT
+  16 (+3) 8 (-1) 14 (+2) 2 (-4)

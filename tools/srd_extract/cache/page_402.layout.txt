@@ -1,0 +1,48 @@
+Actions                                                  Hand Crossbow. Ranged Weapon Attack: +4 to hit,
+Multiattack. The scout makes two melee attacks or        range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing
+two ranged attacks.                                      damage.
+Shortsword. Melee Weapon Attack: +4 to hit, reach 5
+ft., one target. Hit: 5 (1d6 + 2) piercing damage.       Rulers, nobles, merchants, guildmasters, and other
+Longbow. Ranged Weapon Attack: +4 to hit, ranged         wealthy individuals use spies to gain the upper hand
+150/600 ft., one target. Hit: 6 (1d8 + 2) piercing       in a world of cutthroat politics. A spy is trained to
+damage.                                                  secretly gather information. Loyal spies would
+                                                         rather die than divulge information that could
+Scouts are skilled hunters and trackers who offer        compromise them or their employers.
+their services for a fee. Most hunt wild game, but a
+few work as bounty hunters, serve as guides, or          Thug
+provide military reconnaissance.
+                                                         Medium humanoid (any race), any non-good alignment
+Spy                                                      Armor Class 11 (leather armor)
+                                                         Hit Points 32 (5d8 + 10)
+Medium humanoid (any race), any alignment                Speed 30 ft.
+
+Armor Class 12                                               STR DEX CON INT WIS CHA
+Hit Points 27 (6d8)                                        15 (+2) 11 (+0) 14 (+2) 10 (+0) 10 (+0) 11 (+0)
+Speed 30 ft.
+                                                         Skills Intimidation +2
+    STR DEX CON INT WIS CHA                              Senses passive Perception 10
+  10 (+0) 15 (+2) 10 (+0) 12 (+1) 14 (+2) 16 (+3)        Languages any one language (usually Common)
+                                                         Challenge 1/2 (100 XP)
+Skills Deception +5, Insight +4, Investigation +5,
+  Perception +6, Persuasion +5, Sleight of Hand +4,      Pack Tactics. The thug has advantage on an attack roll
+  Stealth +4                                             against a creature if at least one of the thug’s allies is
+                                                         within 5 feet of the creature and the ally isn’t
+Senses passive Perception 16                             incapacitated.
+Languages any two languages
+Challenge 1 (200 XP)                                     Actions
+                                                         Multiattack. The thug makes two melee attacks.
+Cunning Action. On each of its turns, the spy can use a  Mace. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+bonus action to take the Dash, Disengage, or Hide        creature. Hit: 5 (1d6 + 2) bludgeoning damage.
+action.                                                  Heavy Crossbow. Ranged Weapon Attack: +2 to hit,
+Sneak Attack (1/Turn). The spy deals an extra 7 (2d6)    range 100/400 ft., one target. Hit: 5 (1d10) piercing
+damage when it hits a target with a weapon attack and    damage.
+has advantage on the attack roll, or when the target is
+within 5 feet of an ally of the spy that isn’t           Thugs are ruthless enforcers skilled at intimidation
+incapacitated and the spy doesn’t have disadvantage      and violence. They work for money and have few
+on the attack roll.                                      scruples.
+
+Actions                                                  Tribal Warrior
+Multiattack. The spy makes two melee attacks.
+Shortsword. Melee Weapon Attack: +4 to hit, reach 5      Medium humanoid (any race), any alignment
+ft., one target. Hit: 5 (1d6 + 2) piercing damage.       Armor Class 12 (hide armor)
+                                                         Hit Points 11 (2d8 + 2)

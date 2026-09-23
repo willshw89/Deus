@@ -1,0 +1,63 @@
+Spider Climb                                             neutral) or 3d8 necrotic damage (if you are evil). On
+                                                         a successful save, the creature takes half as much
+2nd-level transmutation                               damage.
+
+Casting Time: 1 action                                     At Higher Levels. When you cast this spell using a
+Range: Touch                                             spell slot of 4th level or higher, the damage increases
+Components: V, S, M (a drop of bitumen and a             by 1d8 for each slot level above 3rd.
+
+  spider)                                                Spiritual Weapon
+Duration: Concentration, up to 1 hour
+                                                         2nd-level evocation
+Until the spell ends, one willing creature you touch
+gains the ability to move up, down, and across           Casting Time: 1 bonus action
+vertical surfaces and upside down along ceilings,        Range: 60 feet
+while leaving its hands free. The target also gains a    Components: V, S
+climbing speed equal to its walking speed.               Duration: 1 minute
+
+Spike Growth                                             You create a floating, spectral weapon within range
+                                                         that lasts for the duration or until you cast this spell
+2nd-level transmutation                               again. When you cast the spell, you can make a melee
+                                                         spell attack against a creature within 5 feet of the
+Casting Time: 1 action                                   weapon. On a hit, the target takes force damage
+Range: 150 feet                                          equal to 1d8 + your spellcasting ability modifier.
+Components: V, S, M (seven sharp thorns or seven
+                                                           As a bonus action on your turn, you can move the
+  small twigs, each sharpened to a point)                weapon up to 20 feet and repeat the attack against a
+Duration: Concentration, up to 10 minutes                creature within 5 feet of it.
+
+The ground in a 20-foot radius centered on a point      The weapon can take whatever form you choose.
+within range twists and sprouts hard spikes and          Clerics of deities who are associated with a
+thorns. The area becomes difficult terrain for the       particular weapon (as St. Cuthbert is known for his
+duration. When a creature moves into or within the       mace and Thor for his hammer) make this spell’s
+area, it takes 2d4 piercing damage for every 5 feet it   effect resemble that weapon.
+travels.
+                                                           At Higher Levels. When you cast this spell using a
+  The transformation of the ground is camouflaged        spell slot of 3rd level or higher, the damage
+to look natural. Any creature that can’t see the area    increases by 1d8 for every two slot levels above 2nd.
+at the time the spell is cast must make a Wisdom
+(Perception) check against your spell save DC to         Stinking Cloud
+recognize the terrain as hazardous before entering it.
+                                                         3rd-level conjuration
+Spirit Guardians
+                                                         Casting Time: 1 action
+3rd-level conjuration                                 Range: 90 feet
+                                                         Components: V, S, M (a rotten egg or several skunk
+Casting Time: 1 action
+Range: Self (15-foot radius)                            cabbage leaves)
+Components: V, S, M (a holy symbol)                      Duration: Concentration, up to 1 minute
+Duration: Concentration, up to 10 minutes
+                                                         You create a 20-foot-radius sphere of yellow,
+You call forth spirits to protect you. They flit around  nauseating gas centered on a point within range. The
+you to a distance of 15 feet for the duration. If you    cloud spreads around corners, and its area is heavily
+are good or neutral, their spectral form appears         obscured. The cloud lingers in the air for the
+angelic or fey (your choice). If you are evil, they      duration.
+appear fiendish.
+                                                           Each creature that is completely within the cloud
+  When you cast this spell, you can designate any        at the start of its turn must make a Constitution
+number of creatures you can see to be unaffected by      saving throw against poison. On a failed save, the
+it. An affected creature’s speed is halved in the area,  creature spends its action that turn retching and
+and when the creature enters the area for the first      reeling. Creatures that don’t need to breathe or are
+time on a turn or starts its turn there, it must make a  immune to poison automatically succeed on this
+Wisdom saving throw. On a failed save, the creature      saving throw.
+takes 3d8 radiant damage (if you are good or

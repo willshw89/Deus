@@ -1,0 +1,62 @@
+Potion of Flying                                            Whatever its potency, the potion’s red liquid
+                                                            glimmers when agitated.
+Potion, very rare
+                                                            Potions of Healing
+When you drink this potion, you gain a flying speed
+equal to your walking speed for 1 hour and can              Potion of …       Rarity     HP Regained
+hover. If you’re in the air when the potion wears off,      Healing           Common     2d4 + 2
+you fall unless you have some other means of staying        Greater healing   Uncommon   4d4 + 4
+aloft. This potion’s clear liquid floats at the top of its  Superior healing  Rare       8d4 + 8
+container and has cloudy white impurities drifting in       Supreme healing   Very rare  10d4 + 20
+it.
+                                                            Potion of Heroism
+Potion of Gaseous Form
+                                                            Potion, rare
+Potion, rare
+                                                            For 1 hour after drinking it, you gain 10 temporary
+When you drink this potion, you gain the effect of the      hit points that last for 1 hour. For the same duration,
+gaseous form spell for 1 hour (no concentration             you are under the effect of the bless spell (no
+required) or until you end the effect as a bonus            concentration required). This blue potion bubbles
+action. This potion’s container seems to hold fog that      and steams as if boiling.
+moves and pours like water.
+                                                            Potion of Invisibility
+Potion of Giant Strength
+                                                            Potion, very rare
+Potion, rarity varies
+                                                            This potion’s container looks empty but feels as
+When you drink this potion, your Strength score             though it holds liquid. When you drink it, you
+changes for 1 hour. The type of giant determines the        become invisible for 1 hour. Anything you wear or
+score (see the table below). The potion has no effect       carry is invisible with you. The effect ends early if
+on you if your Strength is equal to or greater than         you attack or cast a spell.
+that score.
+                                                            Potion of Mind Reading
+  This potion’s transparent liquid has floating in it a
+sliver of fingernail from a giant of the appropriate        Potion, rare
+type. The potion of frost giant strength and the potion
+of stone giant strength have the same effect.               When you drink this potion, you gain the effect of the
+                                                            detect thoughts spell (save DC 13). The potion’s
+Type of Giant      Strength  Rarity                         dense, purple liquid has an ovoid cloud of pink
+Hill giant            21     Uncommon                       floating in it.
+Frost/stone giant     23     Rare
+Fire giant            25     Rare                           Potion of Poison
+Cloud giant           27     Very rare
+Storm giant           29     Legendary                      Potion, uncommon
+
+Potion of Growth                                            This concoction looks, smells, and tastes like a potion
+                                                            of healing or other beneficial potion. However, it is
+Potion, uncommon                                            actually poison masked by illusion magic. An identify
+                                                            spell reveals its true nature.
+When you drink this potion, you gain the “enlarge”
+effect of the enlarge/reduce spell for 1d4 hours (no          If you drink it, you take 3d6 poison damage, and
+concentration required). The red in the potion’s            you must succeed on a DC 13 Constitution saving
+liquid continuously expands from a tiny bead to             throw or be poisoned. At the start of each of your
+color the clear liquid around it and then contracts.        turns while you are poisoned in this way, you take
+Shaking the bottle fails to interrupt this process.         3d6 poison damage. At the end of each of your turns,
+                                                            you can repeat the saving throw. On a successful
+Potion of Healing                                           save, the poison damage you take on your
+                                                            subsequent turns decreases by 1d6. The poison ends
+Potion, rarity varies                                       when the damage decreases to 0.
+
+You regain hit points when you drink this potion.
+The number of hit points depends on the potion’s
+rarity, as shown in the Potions of Healing table.

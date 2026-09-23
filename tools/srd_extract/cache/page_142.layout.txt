@@ -1,0 +1,65 @@
+Faithful Hound                                            whatever it is holding and become frightened for the
+                                                          duration.
+4th-level conjuration
+                                                            While frightened by this spell, a creature must
+Casting Time: 1 action                                    take the Dash action and move away from you by the
+Range: 30 feet                                            safest available route on each of its turns, unless
+Components: V, S, M (a tiny silver whistle, a piece of    there is nowhere to move. If the creature ends its
+                                                          turn in a location where it doesn’t have line of sight
+  bone, and a thread)                                     to you, the creature can make a Wisdom saving
+Duration: 8 hours                                         throw. On a successful save, the spell ends for that
+                                                          creature.
+You conjure a phantom watchdog in an unoccupied
+space that you can see within range, where it             Feather Fall
+remains for the duration, until you dismiss it as an
+action, or until you move more than 100 feet away         1st-level transmutation
+from it.
+                                                          Casting Time: 1 reaction, which you take when you
+  The hound is invisible to all creatures except you        or a creature within 60 feet of you falls
+and can’t be harmed. When a Small or larger
+creature comes within 30 feet of it without first         Range: 60 feet
+speaking the password that you specify when you           Components: V, M (a small feather or piece of
+cast this spell, the hound starts barking loudly. The
+hound sees invisible creatures and can see into the         down)
+Ethereal Plane. It ignores illusions.                     Duration: 1 minute
+
+  At the start of each of your turns, the hound           Choose up to five falling creatures within range. A
+attempts to bite one creature within 5 feet of it that    falling creature’s rate of descent slows to 60 feet per
+is hostile to you. The hound’s attack bonus is equal      round until the spell ends. If the creature lands
+to your spellcasting ability modifier + your              before the spell ends, it takes no falling damage and
+proficiency bonus. On a hit, it deals 4d8 piercing        can land on its feet, and the spell ends for that
+damage.                                                   creature.
+
+False Life                                                Feeblemind
+
+1st-level necromancy                                   8th-level enchantment
+
+Casting Time: 1 action                                    Casting Time: 1 action
+Range: Self                                               Range: 150 feet
+Components: V, S, M (a small amount of alcohol or         Components: V, S, M (a handful of clay, crystal, glass,
+
+  distilled spirits)                                        or mineral spheres)
+Duration: 1 hour                                          Duration: Instantaneous
+
+Bolstering yourself with a necromantic facsimile of       You blast the mind of a creature that you can see
+life, you gain 1d4 + 4 temporary hit points for the       within range, attempting to shatter its intellect and
+duration.                                                 personality. The target takes 4d6 psychic damage
+                                                          and must make an Intelligence saving throw.
+  At Higher Levels. When you cast this spell using a
+spell slot of 2nd level or higher, you gain 5 additional    On a failed save, the creature’s Intelligence and
+temporary hit points for each slot level above 1st.       Charisma scores become 1. The creature can’t cast
+                                                          spells, activate magic items, understand language, or
+Fear                                                      communicate in any intelligible way. The creature
+                                                          can, however, identify its friends, follow them, and
+3rd-level illusion                                     even protect them.
+
+Casting Time: 1 action                                      At the end of every 30 days, the creature can
+Range: Self (30-foot cone)                             repeat its saving throw against this spell. If it
+Components: V, S, M (a white feather or the heart of      succeeds on its saving throw, the spell ends.
+
+  a hen)                                                    The spell can also be ended by greater restoration,
+Duration: Concentration, up to 1 minute                   heal, or wish.
+
+You project a phantasmal image of a creature’s
+worst fears. Each creature in a 30-foot cone must
+succeed on a Wisdom saving throw or drop

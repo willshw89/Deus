@@ -1,0 +1,51 @@
+lightning damage on a failed save, or half as much       At will: disguise self (any humanoid form), major image
+damage on a successful one.                              3/day each: charm person, mirror image, scrying,
+
+Legendary Actions                                          suggestion
+The kraken can take 3 legendary actions, choosing from   1/day: geas
+the options below. Only one legendary action option
+can be used at a time and only at the end of another     Actions
+creature’s turn. The kraken regains spent legendary      Multiattack. The lamia makes two attacks: one with its
+actions at the start of its turn.                        claws and one with its dagger or Intoxicating Touch.
+Tentacle Attack or Fling. The kraken makes one           Claws. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+                                                         target. Hit: 14 (2d10 + 3) slashing damage.
+  tentacle attack or uses its Fling.                     Dagger. Melee Weapon Attack: +5 to hit, reach 5 ft.,
+Lightning Storm (Costs 2 Actions). The kraken uses       one target. Hit: 5 (1d4 + 3) piercing damage.
+                                                         Intoxicating Touch. Melee Spell Attack: +5 to hit, reach
+  Lightning Storm.                                       5 ft., one creature. Hit: The target is magically cursed
+Ink Cloud (Costs 3 Actions). While underwater, the       for 1 hour. Until the curse ends, the target has
+                                                         disadvantage on Wisdom saving throws and all ability
+  kraken expels an ink cloud in a 60-foot radius. The  checks.
+  cloud spreads around corners, and that area is
+  heavily obscured to creatures other than the kraken.   Lich
+  Each creature other than the kraken that ends its
+  turn there must succeed on a DC 23 Constitution        Medium undead, any evil alignment
+  saving throw, taking 16 (3d10) poison damage on a
+  failed save, or half as much damage on a successful    Armor Class 17 (natural armor)
+  one. A strong current disperses the cloud, which       Hit Points 135 (18d8 + 54)
+  otherwise disappears at the end of the kraken’s next   Speed 30 ft.
+  turn.
+                                                             STR DEX CON INT WIS CHA
+Monsters (L)                                               11 (+0) 16 (+3) 16 (+3) 20 (+5) 14 (+2) 16 (+3)
+
+Lamia                                                    Saving Throws Con +10, Int +12, Wis +9
+                                                         Skills Arcana +18, History +12, Insight +9, Perception +9
+Large monstrosity, chaotic evil                          Damage Resistances cold, lightning, necrotic
+                                                         Damage Immunities poison; bludgeoning, piercing, and
+Armor Class 13 (natural armor)
+Hit Points 97 (13d10 + 26)                                 slashing from nonmagical attacks
+Speed 30 ft.                                             Condition Immunities charmed, exhaustion, frightened,
+
+    STR DEX CON INT WIS CHA                                paralyzed, poisoned
+  16 (+3) 13 (+1) 15 (+2) 14 (+2) 15 (+2) 16 (+3)        Senses truesight 120 ft., passive Perception 19
+                                                         Languages Common plus up to five other languages
+Skills Deception +7, Insight +4, Stealth +3              Challenge 21 (33,000 XP)
+Senses darkvision 60 ft., passive Perception 12
+Languages Abyssal, Common                                Legendary Resistance (3/Day). If the lich fails a saving
+Challenge 4 (1,100 XP)                                   throw, it can choose to succeed instead.
+                                                         Rejuvenation. If it has a phylactery, a destroyed lich
+Innate Spellcasting. The lamia’s innate spellcasting     gains a new body in 1d10 days, regaining all its hit
+ability is Charisma (spell save DC 13). It can innately  points and becoming active again. The new body
+cast the following spells, requiring no material         appears within 5 feet of the phylactery.
+components.                                              Spellcasting. The lich is an 18th-level spellcaster. Its
+                                                         spellcasting ability is Intelligence (spell save DC 20, +12

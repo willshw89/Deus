@@ -1,0 +1,74 @@
+Ring of Protection                                            As a bonus action, you can move each sphere up to
+                                                            30 feet, but no farther than 120 feet away from you.
+Ring, rare (requires attunement)                            When a creature other than you comes within 5 feet
+                                                            of a sphere, the sphere discharges lightning at that
+You gain a +1 bonus to AC and saving throws while           creature and disappears. That creature must make a
+wearing this ring.                                          DC 15 Dexterity saving throw. On a failed save, the
+                                                            creature takes lightning damage based on the
+Ring of Regeneration                                        number of spheres you created.
+
+Ring, very rare (requires attunement)                       Spheres  Lightning Damage
+                                                                4             2d4
+While wearing this ring, you regain 1d6 hit points              3             2d6
+every 10 minutes, provided that you have at least 1             2             5d4
+hit point. If you lose a body part, the ring causes the         1            4d12
+missing part to regrow and return to full
+functionality after 1d6 + 1 days if you have at least 1
+hit point the whole time.
+
+Ring of Resistance                                            Shooting Stars. You can expend 1 to 3 charges as
+                                                            an action. For every charge you expend, you launch a
+Ring, rare (requires attunement)                            glowing mote of light from the ring at a point you
+                                                            can see within 60 feet of you. Each creature within a
+You have resistance to one damage type while                15-foot cube originating from that point is showered
+wearing this ring. The gem in the ring indicates the        in sparks and must make a DC 15 Dexterity saving
+type, which the GM chooses or determines randomly.          throw, taking 5d4 fire damage on a failed save, or
+                                                            half as much damage on a successful one.
+d10 Damage Type Gem
+                                                            Ring of Spell Storing
+1 Acid       Pearl
+                                                            Ring, rare (requires attunement)
+2 Cold       Tourmaline
+                                                            This ring stores spells cast into it, holding them until
+3 Fire       Garnet                                         the attuned wearer uses them. The ring can store up
+                                                            to 5 levels worth of spells at a time. When found, it
+4 Force      Sapphire                                       contains 1d6 - 1 levels of stored spells chosen by the
+                                                            GM.
+5 Lightning  Citrine
+                                                              Any creature can cast a spell of 1st through 5th
+6 Necrotic   Jet                                            level into the ring by touching the ring as the spell is
+                                                            cast. The spell has no effect, other than to be stored
+7 Poison     Amethyst                                       in the ring. If the ring can’t hold the spell, the spell is
+                                                            expended without effect. The level of the slot used to
+8 Psychic    Jade                                           cast the spell determines how much space it uses.
+
+9 Radiant    Topaz                                            While wearing this ring, you can cast any spell
+                                                            stored in it. The spell uses the slot level, spell save
+10 Thunder   Spinel                                         DC, spell attack bonus, and spellcasting ability of the
+                                                            original caster, but is otherwise treated as if you cast
+Ring of Shooting Stars                                      the spell. The spell cast from the ring is no longer
+                                                            stored in it, freeing up space.
+Ring, very rare (requires attunement outdoors at
+night)                                                      Ring of Spell Turning
+
+While wearing this ring in dim light or darkness, you       Ring, legendary (requires attunement)
+can cast dancing lights and light from the ring at will.
+Casting either spell from the ring requires an action.      While wearing this ring, you have advantage on
+                                                            saving throws against any spell that targets only you
+  The ring has 6 charges for the following other            (not in an area of effect). In addition, if you roll a 20
+properties. The ring regains 1d6 expended charges           for the save and the spell is 7th level or lower, the
+daily at dawn.                                              spell has no effect on you and instead targets the
+                                                            caster, using the slot level, spell save DC, attack
+  Faerie Fire. You can expend 1 charge as an action         bonus, and spellcasting ability of the caster.
+to cast faerie fire from the ring.
+
+  Ball Lightning. You can expend 2 charges as an
+action to create one to four 3-foot-diameter spheres
+of lightning. The more spheres you create, the less
+powerful each sphere is individually.
+
+  Each sphere appears in an unoccupied space you
+can see within 120 feet of you. The spheres last as
+long as you concentrate (as if concentrating on a
+spell), up to 1 minute. Each sphere sheds dim light in
+a 30-foot radius.

@@ -1,0 +1,49 @@
+1) piercing damage, or 5 (1d8 + 1) piercing damage if     alignment determines the extent to which a pledge is
+used with two hands to make a melee attack.               honored. Whether undertaking a quest or patrolling
+                                                          a realm, a knight often travels with an entourage
+Guards include members of a city watch, sentries in       that includes squires and hirelings who are
+a citadel or fortified town, and the bodyguards of        commoners.
+merchants and nobles.
+                                                          Mage
+Knight
+                                                          Medium humanoid (any race), any alignment
+Medium humanoid (any race), any alignment
+                                                          Armor Class 12 (15 with mage armor)
+Armor Class 18 (plate)                                    Hit Points 40 (9d8)
+Hit Points 52 (8d8 + 16)                                  Speed 30 ft.
+Speed 30 ft.
+                                                              STR DEX CON INT WIS CHA
+    STR DEX CON INT WIS CHA                                  9 (-1) 14 (+2) 11 (+0) 17 (+3) 12 (+1) 11 (+0)
+  16 (+3) 11 (+0) 14 (+2) 11 (+0) 11 (+0) 15 (+2)
+                                                          Saving Throws Int +6, Wis +4
+Saving Throws Con +4, Wis +2                              Skills Arcana +6, History +6
+Senses passive Perception 10                              Senses passive Perception 11
+Languages any one language (usually Common)               Languages any four languages
+Challenge 3 (700 XP)                                      Challenge 6 (2,300 XP)
+
+Brave. The knight has advantage on saving throws          Spellcasting. The mage is a 9th-level spellcaster. Its
+against being frightened.                                 spellcasting ability is Intelligence (spell save DC 14, +6
+                                                          to hit with spell attacks). The mage has the following
+Actions                                                   wizard spells prepared:
+Multiattack. The knight makes two melee attacks.          Cantrips (at will): fire bolt, light, mage hand,
+Greatsword. Melee Weapon Attack: +5 to hit, reach 5
+ft., one target. Hit: 10 (2d6 + 3) slashing damage.         prestidigitation
+Heavy Crossbow. Ranged Weapon Attack: +2 to hit,          1st level (4 slots): detect magic, mage armor, magic
+range 100/400 ft., one target. Hit: 5 (1d10) piercing
+damage.                                                     missile, shield
+Leadership (Recharges after a Short or Long Rest). For    2nd level (3 slots): misty step, suggestion
+1 minute, the knight can utter a special command or       3rd level (3 slots): counterspell, fireball, fly
+warning whenever a nonhostile creature that it can see    4th level (3 slots): greater invisibility, ice storm
+within 30 feet of it makes an attack roll or a saving     5th level (1 slot): cone of cold
+throw. The creature can add a d4 to its roll provided it
+can hear and understand the knight. A creature can        Actions
+benefit from only one Leadership die at a time. This      Dagger. Melee or Ranged Weapon Attack: +5 to hit,
+effect ends if the knight is incapacitated.               reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d4 +
+                                                          2) piercing damage.
+Reactions
+Parry. The knight adds 2 to its AC against one melee      Mages spend their lives in the study and practice of
+attack that would hit it. To do so, the knight must see   magic. Good-aligned mages offer counsel to nobles
+the attacker and be wielding a melee weapon.              and others in power, while evil mages dwell in
+                                                          isolated sites to perform unspeakable experiments
+Knights are warriors who pledge service to rulers,        without interference.
+religious orders, and noble causes. A knight’s

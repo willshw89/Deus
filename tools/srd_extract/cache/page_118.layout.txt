@@ -1,0 +1,63 @@
+When such a creature can see the target or comes        moves at your command, mimicking the movements
+within 60 feet of it, the creature must succeed on a    of your own hand.
+Wisdom saving throw or use its movement on each
+of its turns to enter the area or move within reach of    The hand is an object that has AC 20 and hit points
+the target. When the creature has done so, it can’t     equal to your hit point maximum. If it drops to 0 hit
+willingly move away from the target.                    points, the spell ends. It has a Strength of 26 (+8)
+                                                        and a Dexterity of 10 (+0). The hand doesn’t fill its
+  If the target damages or otherwise harms an           space.
+affected creature, the affected creature can make a
+Wisdom saving throw to end the effect, as described       When you cast the spell and as a bonus action on
+below.                                                  your subsequent turns, you can move the hand up to
+                                                        60 feet and then cause one of the following effects
+  Ending the Effect. If an affected creature ends its   with it.
+turn while not within 60 feet of the target or able to
+see it, the creature makes a Wisdom saving throw.         Clenched Fist. The hand strikes one creature or
+On a successful save, the creature is no longer         object within 5 feet of it. Make a melee spell attack
+affected by the target and recognizes the feeling of    for the hand using your game statistics. On a hit, the
+repugnance or attraction as magical. In addition, a     target takes 4d8 force damage.
+creature affected by the spell is allowed another
+Wisdom saving throw every 24 hours while the spell        Forceful Hand. The hand attempts to push a
+persists.                                               creature within 5 feet of it in a direction you choose.
+                                                        Make a check with the hand’s Strength contested by
+  A creature that successfully saves against this       the Strength (Athletics) check of the target. If the
+effect is immune to it for 1 minute, after which time   target is Medium or smaller, you have advantage on
+it can be affected again.                               the check. If you succeed, the hand pushes the target
+                                                        up to 5 feet plus a number of feet equal to five times
+Arcane Eye                                              your spellcasting ability modifier. The hand moves
+                                                        with the target to remain within 5 feet of it.
+4th-level divination
+                                                          Grasping Hand. The hand attempts to grapple a
+Casting Time: 1 action                                  Huge or smaller creature within 5 feet of it. You use
+Range: 30 feet                                          the hand’s Strength score to resolve the grapple. If
+Components: V, S, M (a bit of bat fur)                  the target is Medium or smaller, you have advantage
+Duration: Concentration, up to 1 hour                   on the check. While the hand is grappling the target,
+                                                        you can use a bonus action to have the hand crush it.
+You create an invisible, magical eye within range       When you do so, the target takes bludgeoning
+that hovers in the air for the duration.                damage equal to 2d6 + your spellcasting ability
+                                                        modifier.
+  You mentally receive visual information from the
+eye, which has normal vision and darkvision out to        Interposing Hand. The hand interposes itself
+30 feet. The eye can look in every direction.           between you and a creature you choose until you
+                                                        give the hand a different command. The hand moves
+  As an action, you can move the eye up to 30 feet in   to stay between you and the target, providing you
+any direction. There is no limit to how far away from   with half cover against the target. The target can’t
+you the eye can move, but it can’t enter another        move through the hand’s space if its Strength score
+plane of existence. A solid barrier blocks the eye’s    is less than or equal to the hand’s Strength score. If
+movement, but the eye can pass through an opening       its Strength score is higher than the hand’s Strength
+as small as 1 inch in diameter.                         score, the target can move toward you through the
+                                                        hand’s space, but that space is difficult terrain for the
+Arcane Hand                                             target.
+
+5th-level evocation                                    At Higher Levels. When you cast this spell using a
+                                                        spell slot of 6th level or higher, the damage from the
+Casting Time: 1 action                                  clenched fist option increases by 2d8 and the
+Range: 120 feet                                         damage from the grasping hand increases by 2d6 for
+Components: V, S, M (an eggshell and a snakeskin        each slot level above 5th.
+
+  glove)                                                Arcane Lock
+Duration: Concentration, up to 1 minute
+                                                        2nd-level abjuration
+You create a Large hand of shimmering, translucent
+force in an unoccupied space that you can see within    Casting Time: 1 action
+range. The hand lasts for the spell’s duration, and it

@@ -1,0 +1,64 @@
+7 Dire wolf                                               Belt of Dwarvenkind
+8 Giant elk
+                                                          Wondrous item, rare (requires attunement)
+Rust Bag of Tricks
+                                                          While wearing this belt, you gain the following
+d8 Creature                                               benefits:
+1 Rat
+2 Owl                                                     • Your Constitution score increases by 2, to a
+3 Mastiff                                                   maximum of 20.
+4 Goat
+5 Giant goat                                              • You have advantage on Charisma (Persuasion)
+6 Giant boar                                                checks made to interact with dwarves.
+7 Lion
+8 Brown bear                                              In addition, while attuned to the belt, you have a 50
+                                                          percent chance each day at dawn of growing a full
+Tan Bag of Tricks                                         beard if you’re capable of growing one, or a visibly
+                                                          thicker beard if you already have one.
+d8 Creature
+1 Jackal                                                    If you aren’t a dwarf, you gain the following
+2 Ape                                                     additional benefits while wearing the belt:
+3 Baboon
+4 Axe beak                                                • You have advantage on saving throws against
+5 Black bear                                                poison, and you have resistance against poison
+6 Giant weasel                                              damage.
+7 Giant hyena
+8 Tiger                                                   • You have darkvision out to a range of 60 feet.
+                                                          • You can speak, read, and write Dwarvish.
+Bead of Force
+                                                          Belt of Giant Strength
+Wondrous item, rare
+                                                          Wondrous item, rarity varies (requires attunement)
+This small black sphere measures 3/4 of an inch in
+diameter and weighs an ounce. Typically, 1d4 + 4          While wearing this belt, your Strength score changes
+beads of force are found together.                        to a score granted by the belt. If your Strength is
+                                                          already equal to or greater than the belt’s score, the
+  You can use an action to throw the bead up to 60        item has no effect on you.
+feet. The bead explodes on impact and is destroyed.
+Each creature within a 10-foot radius of where the       Six varieties of this belt exist, corresponding with
+bead landed must succeed on a DC 15 Dexterity             and having rarity according to the six kinds of true
+saving throw or take 5d4 force damage. A sphere of        giants. The belt of stone giant strength and the belt of
+transparent force then encloses the area for 1            frost giant strength look different, but they have the
+minute. Any creature that failed the save and is          same effect.
+completely within the area is trapped inside this
+sphere. Creatures that succeeded on the save, or are      Type               Strength    Rarity
+partially within the area, are pushed away from the       Hill giant            21        Rare
+center of the sphere until they are no longer inside it.  Stone/frost giant     23     Very rare
+Only breathable air can pass through the sphere’s         Fire giant            25     Very rare
+wall. No attack or other effect can.                      Cloud giant           27     Legendary
+                                                          Storm giant           29     Legendary
+  An enclosed creature can use its action to push
+against the sphere’s wall, moving the sphere up to        Berserker Axe
+half the creature’s walking speed. The sphere can be
+picked up, and its magic causes it to weigh only 1        Weapon (any axe), rare (requires attunement)
+pound, regardless of the weight of creatures inside.
+                                                          You gain a +1 bonus to attack and damage rolls
+                                                          made with this magic weapon. In addition, while you
+                                                          are attuned to this weapon, your hit point maximum
+                                                          increases by 1 for each level you have attained.
+
+                                                            Curse. This axe is cursed, and becoming attuned to
+                                                          it extends the curse to you. As long as you remain
+                                                          cursed, you are unwilling to part with the axe,
+                                                          keeping it within reach at all times. You also have
+                                                          disadvantage on attack rolls with weapons other

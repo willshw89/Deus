@@ -1,0 +1,61 @@
+  For example, if a 1st-level character has a Wisdom  Strength
+of 15 and proficiency in Perception, he or she has a
+passive Wisdom (Perception) score of 14.                 Strength measures bodily power, athletic training,
+                                                         and the extent to which you can exert raw physical
+  The rules on hiding in the “Dexterity” section         force.
+below rely on passive checks, as do the exploration
+rules.                                                   Strength Checks
+
+Working Together                                         A Strength check can model any attempt to lift, push,
+                                                         pull, or break something, to force your body through
+Sometimes two or more characters team up to              a space, or to otherwise apply brute force to a
+attempt a task. The character who’s leading the          situation. The Athletics skill reflects aptitude in
+effort—or the one with the highest ability               certain kinds of Strength checks.
+modifier—can make an ability check with advantage,
+reflecting the help provided by the other characters.      Athletics. Your Strength (Athletics) check covers
+In combat, this requires the Help action.                difficult situations you encounter while climbing,
+                                                         jumping, or swimming. Examples include the
+  A character can only provide help if the task is one   following activities:
+that he or she could attempt alone. For example,
+trying to open a lock requires proficiency with          • You attempt to climb a sheer or slippery cliff,
+thieves’ tools, so a character who lacks that              avoid hazards while scaling a wall, or cling to a
+proficiency can’t help another character in that task.     surface while something is trying to knock you off.
+Moreover, a character can help only when two or
+more individuals working together would actually         • You try to jump an unusually long distance or pull
+be productive. Some tasks, such as threading a             off a stunt midjump.
+needle, are no easier with help.
+                                                         • You struggle to swim or stay afloat in treacherous
+Group Checks                                               currents, storm-tossed waves, or areas of thick
+                                                           seaweed. Or another creature tries to push or pull
+When a number of individuals are trying to                 you underwater or otherwise interfere with your
+accomplish something as a group, the GM might ask          swimming.
+for a group ability check. In such a situation, the
+characters who are skilled at a particular task help       Other Strength Checks. The GM might also call for
+cover those who aren’t.                                  a Strength check when you try to accomplish tasks
+                                                         like the following:
+  To make a group ability check, everyone in the
+group makes the ability check. If at least half the      • Force open a stuck, locked, or barred door
+group succeeds, the whole group succeeds.                • Break free of bonds
+Otherwise, the group fails.                              • Push through a tunnel that is too small
+                                                         • Hang on to a wagon while being dragged behind it
+  Group checks don’t come up very often, and             • Tip over a statue
+they’re most useful when all the characters succeed      • Keep a boulder from rolling
+or fail as a group. For example, when adventurers
+are navigating a swamp, the GM might call for a          Attack Rolls and Damage
+group Wisdom (Survival) check to see if the
+characters can avoid the quicksand, sinkholes, and       You add your Strength modifier to your attack roll
+other natural hazards of the environment. If at least    and your damage roll when attacking with a melee
+half the group succeeds, the successful characters       weapon such as a mace, a battleaxe, or a javelin. You
+are able to guide their companions out of danger.        use melee weapons to make melee attacks in hand-
+Otherwise, the group stumbles into one of these          to-hand combat, and some of them can be thrown to
+hazards.                                                 make a ranged attack.
+
+Using Each Ability                                       Lifting and Carrying
+
+Every task that a character or monster might             Your Strength score determines the amount of
+attempt in the game is covered by one of the six         weight you can bear. The following terms define
+abilities. This section explains in more detail what     what you can lift or carry.
+those abilities mean and the ways they are used in
+the game.                                                  Carrying Capacity. Your carrying capacity is your
+                                                         Strength score multiplied by 15. This is the weight
+                                                         (in pounds) that you can carry, which is high enough

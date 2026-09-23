@@ -1,0 +1,60 @@
+  Lamp. A lamp casts bright light in a 15-foot radius         Poison, Basic. You can use the poison in this vial
+and dim light for an additional 30 feet. Once lit, it          to coat one slashing or piercing weapon or up to
+burns for 6 hours on a flask (1 pint) of oil.                  three pieces of ammunition. Applying the poison
+                                                               takes an action. A creature hit by the poisoned
+  Lantern, Bullseye. A bullseye lantern casts bright           weapon or ammunition must make a DC 10
+light in a 60-foot cone and dim light for an additional     Constitution saving throw or take 1d4 poison
+60 feet. Once lit, it burns for 6 hours on a flask (1          damage. Once applied, the poison retains potency for
+pint) of oil.                                                  1 minute before drying.
+
+  Lantern, Hooded. A hooded lantern casts bright                 Potion of Healing. A character who drinks the
+light in a 30-foot radius and dim light for an              magical red fluid in this vial regains 2d4 + 2 hit
+additional 30 feet. Once lit, it burns for 6 hours on a        points. Drinking or administering a potion takes an
+flask (1 pint) of oil. As an action, you can lower the         action.
+hood, reducing the light to dim light in a 5-foot
+radius.                                                          Pouch. A cloth or leather pouch can hold up to 20
+                                                               sling bullets or 50 blowgun needles, among other
+  Lock. A key is provided with the lock. Without the           things. A compartmentalized pouch for holding spell
+key, a creature proficient with thieves’ tools can pick        components is called a component pouch (described
+this lock with a successful DC 15 Dexterity check.             earlier in this section).
+Your GM may decide that better locks are available
+for higher prices.                                               Quiver. A quiver can hold up to 20 arrows.
+                                                                 Ram, Portable. You can use a portable ram to
+  Magnifying Glass. This lens allows a closer look at          break down doors. When doing so, you gain a +4
+small objects. It is also useful as a substitute for flint     bonus on the Strength check. One other character
+and steel when starting fires. Lighting a fire with a          can help you use the ram, giving you advantage on
+magnifying glass requires light as bright as sunlight          this check.
+to focus, tinder to ignite, and about 5 minutes for the          Rations. Rations consist of dry foods suitable for
+fire to ignite. A magnifying glass grants advantage on         extended travel, including jerky, dried fruit, hardtack,
+any ability check made to appraise or inspect an               and nuts.
+item that is small or highly detailed.                           Rope. Rope, whether made of hemp or silk, has 2
+                                                               hit points and can be burst with a DC 17 Strength
+  Manacles. These metal restraints can bind a Small            check.
+or Medium creature. Escaping the manacles requires               Scale, Merchant’s. A scale includes a small
+a successful DC 20 Dexterity check. Breaking them              balance, pans, and a suitable assortment of weights
+requires a successful DC 20 Strength check. Each set           up to 2 pounds. With it, you can measure the exact
+of manacles comes with one key. Without the key, a             weight of small objects, such as raw precious metals
+creature proficient with thieves’ tools can pick the           or trade goods, to help determine their worth.
+manacles’ lock with a successful DC 15 Dexterity                 Spellbook. Essential for wizards, a spellbook is a
+check. Manacles have 15 hit points.                            leather-bound tome with 100 blank vellum pages
+                                                               suitable for recording spells.
+  Mess Kit. This tin box contains a cup and simple               Spyglass. Objects viewed through a spyglass are
+cutlery. The box clamps together, and one side can             magnified to twice their size.
+be used as a cooking pan and the other as a plate or             Tent. A simple and portable canvas shelter, a tent
+shallow bowl.                                                  sleeps two.
+                                                                 Tinderbox. This small container holds flint, fire
+  Oil. Oil usually comes in a clay flask that holds 1          steel, and tinder (usually dry cloth soaked in light
+pint. As an action, you can splash the oil in this flask       oil) used to kindle a fire. Using it to light a torch—or
+onto a creature within 5 feet of you or throw it up to         anything else with abundant, exposed fuel—takes an
+20 feet, shattering it on impact. Make a ranged attack         action. Lighting any other fire takes 1 minute.
+against a target creature or object, treating the oil as         Torch. A torch burns for 1 hour, providing bright
+an improvised weapon. On a hit, the target is                  light in a 20-foot radius and dim light for an
+covered in oil. If the target takes any fire damage            additional 20 feet. If you make a melee attack with a
+before the oil dries (after 1 minute), the target takes        burning torch and hit, it deals 1 fire damage.
+an additional 5 fire damage from the burning oil. You
+can also pour a flask of oil on the ground to cover a          Adventuring Gear
+5-foot-square area, provided that the surface is level.
+If lit, the oil burns for 2 rounds and deals 5 fire
+damage to any creature that enters the area or ends
+its turn in the area. A creature can take this damage
+only once per turn.

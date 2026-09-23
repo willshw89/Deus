@@ -1,0 +1,57 @@
+Claw. Melee Weapon Attack: +14 to hit, reach 10 ft.,        Senses blindsight 60 ft., darkvision 120 ft., passive
+one target. Hit: 15 (2d6 + 8) slashing damage.                Perception 21
+Tail. Melee Weapon Attack: +14 to hit, reach 20 ft., one
+target. Hit: 17 (2d8 + 8) bludgeoning damage.               Languages Common, Draconic
+Frightful Presence. Each creature of the dragon’s           Challenge 13 (10,000 XP)
+choice that is within 120 feet of the dragon and aware
+of it must succeed on a DC 16 Wisdom saving throw or        Ice Walk. The dragon can move across and climb icy
+become frightened for 1 minute. A creature can repeat       surfaces without needing to make an ability check.
+the saving throw at the end of each of its turns, ending    Additionally, difficult terrain composed of ice or snow
+the effect on itself on a success. If a creature’s saving   doesn’t cost it extra moment.
+throw is successful or the effect ends for it, the
+creature is immune to the dragon’s Frightful Presence       Legendary Resistance (3/Day). If the dragon fails a
+for the next 24 hours.                                      saving throw, it can choose to succeed instead.
+Cold Breath (Recharge 5–6). The dragon exhales an icy
+blast in a 90-foot cone. Each creature in that area must  Actions
+make a DC 22 Constitution saving throw, taking 72
+(16d8) cold damage on a failed save, or half as much        Multiattack. The dragon can use its Frightful Presence.
+damage on a successful one.                                 It then makes three attacks: one with its bite and two
+                                                            with its claws.
+Legendary Actions
+                                                            Bite. Melee Weapon Attack: +11 to hit, reach 10 ft.,
+The dragon can take 3 legendary actions, choosing           one target. Hit: 17 (2d10 + 6) piercing damage plus 4
+from the options below. Only one legendary action           (1d8) cold damage.
+option can be used at a time and only at the end of
+another creature’s turn. The dragon regains spent           Claw. Melee Weapon Attack: +11 to hit, reach 5 ft.,
+legendary actions at the start of its turn.                 one target. Hit: 13 (2d6 + 6) slashing damage.
+Detect. The dragon makes a Wisdom (Perception)
+                                                            Tail. Melee Weapon Attack: +11 to hit, reach 15 ft., one
+  check.                                                    target. Hit: 15 (2d8 + 6) bludgeoning damage.
+Tail Attack. The dragon makes a tail attack.                Frightful Presence. Each creature of the dragon’s
+Wing Attack (Costs 2 Actions). The dragon beats its         choice that is within 120 feet of the dragon and aware
+                                                            of it must succeed on a DC 14 Wisdom saving throw or
+  wings. Each creature within 15 feet of the dragon         become frightened for 1 minute. A creature can repeat
+  must succeed on a DC 22 Dexterity saving throw or         the saving throw at the end of each of its turns, ending
+  take 15 (2d6 + 8) bludgeoning damage and be               the effect on itself on a success. If a creature’s saving
+  knocked prone. The dragon can then fly up to half its     throw is successful or the effect ends for it, the
+  flying speed.                                             creature is immune to the dragon’s Frightful Presence
+                                                            for the next 24 hours.
+Adult White Dragon
+                                                            Cold Breath (Recharge 5–6). The dragon exhales an icy
+Huge dragon, chaotic evil                                   blast in a 60-foot cone. Each creature in that area must
+                                                            make a DC 19 Constitution saving throw, taking 54
+Armor Class 18 (natural armor)                              (12d8) cold damage on a failed save, or half as much
+Hit Points 200 (16d12 + 96)                                 damage on a successful one.
+Speed 40 ft., burrow 30 ft., fly 80 ft., swim 40 ft.
+                                                            Legendary Actions
+    STR DEX CON INT WIS CHA
+  22 (+6) 10 (+0) 22 (+6) 8 (-1) 12 (+1) 12 (+1)            The dragon can take 3 legendary actions, choosing
+                                                            from the options below. Only one legendary action
+Saving Throws Dex +5, Con +11, Wis +6, Cha +6               option can be used at a time and only at the end of
+Skills Perception +11, Stealth +5                           another creature’s turn. The dragon regains spent
+Damage Immunities cold                                      legendary actions at the start of its turn.
+
+                                                            Detect. The dragon makes a Wisdom (Perception)
+                                                              check.
+
+                                                            Tail Attack. The dragon makes a tail attack.

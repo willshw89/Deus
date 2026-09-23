@@ -1,0 +1,131 @@
+Warlock
+Class Features
+As a warlock, you gain the following class features.
+Hit Points
+Hit Dice: 1d8 per warlock level Hit Points at 1st Level: 8 + your Constitution
+modifier Hit Points at Higher Levels: 1d8 (or 5) + your
+Constitution modifier per warlock level after 1st
+Proficiencies
+Armor: Light armor
+
+Weapons: Simple weapons Tools: None Saving Throws: Wisdom, Charisma Skills: Choose two skills from Arcana, Deception,
+History, Intimidation, Investigation, Nature, and Religion
+Equipment
+You start with the following equipment, in addition to the equipment granted by your background:
+• (a) a light crossbow and 20 bolts or (b) any simple weapon
+• (a) a component pouch or (b) an arcane focus • (a) a scholar’s pack or (b) a dungeoneer’s pack • Leather armor, any simple weapon, and two
+daggers
+
+The Warlock
+
+Level 1st
+
+Proficiency Bonus +2
+
+2nd
+
++2
+
+3rd
+
++2
+
+4th
+
++2
+
+5th
+
++3
+
+6th
+
++3
+
+7th
+
++3
+
+8th
+
++3
+
+9th
+
++4
+
+10th
+
++4
+
+11th
+
++4
+
+12th
+
++4
+
+13th
+
++5
+
+14th
+
++5
+
+15th
+
++5
+
+16th
+
++5
+
+17th
+
++6
+
+18th
+
++6
+
+19th
+
++6
+
+20th
+
++6
+
+Features Otherworldly Patron, Pact Magic Eldritch Invocations Pact Boon Ability Score Improvement —
+Otherworldly Patron feature —
+Ability Score Improvement —
+Otherworldly Patron feature Mystic Arcanum (6th level) Ability Score Improvement Mystic Arcanum (7th level) Otherworldly Patron feature Mystic Arcanum (8th level) Ability Score Improvement Mystic Arcanum (9th level) —
+Ability Score Improvement Eldritch Master
+
+Cantrips Known
+2
+2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4
+
+Spells Known
+2
+3 4 5 6 7 8 9 10 10 11 11 12 12 13 13 14 14 15 15
+
+Spell Slots
+1
+2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 4 4 4 4
+
+Slot Level 1st
+1st 2nd 2nd 3rd 3rd 4th 4th 5th 5th 5th 5th 5th 5th 5th 5th 5th 5th 5th 5th
+
+Invocations Known —
+2 2 2 3 3 4 4 5 5 5 6 6 6 7 7 7 8 8 8
+
+Otherworldly Patron
+At 1st level, you have struck a bargain with an otherworldly being of your choice: the Archfey, the Fiend, or the Great Old One, each of which is detailed at the end of the class description. Your choice grants you features at 1st level and again at 6th, 10th, and 14th level.
+
+Pact Magic
+Your arcane research and the magic bestowed on you by your patron have given you facility with spells.
+Cantrips
+You know two cantrips of your choice from the warlock spell list. You learn additional warlock

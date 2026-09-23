@@ -1,0 +1,63 @@
+(no action required by you). If you don’t issue any         another plane. Contacting this extraplanar
+commands to them, they defend themselves from               intelligence can strain or even break your mind.
+hostile creatures, but otherwise take no actions.           When you cast this spell, make a DC 15 Intelligence
+                                                            saving throw. On a failure, you take 6d6 psychic
+  The GM has the creatures’ statistics.                     damage and are insane until you finish a long rest.
+  At Higher Levels. When you cast this spell using          While insane, you can’t take actions, can’t
+certain higher-level spell slots, you choose one of the  understand what other creatures say, can’t read, and
+summoning options above, and more creatures                 speak only in gibberish. A greater restoration spell
+appear: twice as many with a 6th-level slot and three    cast on you ends this effect.
+times as many with an 8th-level slot.
+                                                              On a successful save, you can ask the entity up to
+Conjure Woodland Beings                                     five questions. You must ask your questions before
+                                                            the spell ends. The GM answers each question with
+4th-level conjuration                                    one word, such as “yes,” “no,” “maybe,” “never,”
+                                                            “irrelevant,” or “unclear” (if the entity doesn’t know
+Casting Time: 1 action                                      the answer to the question). If a one-word answer
+Range: 60 feet                                              would be misleading, the GM might instead offer a
+Components: V, S, M (one holly berry per creature           short phrase as an answer.
+
+  summoned)                                                 Contagion
+Duration: Concentration, up to 1 hour
+                                                            5th-level necromancy
+You summon fey creatures that appear in
+unoccupied spaces that you can see within range.            Casting Time: 1 action
+Choose one of the following options for what                Range: Touch
+appears:                                                    Component: V, S
+                                                            Duration: 7 days
+• One fey creature of challenge rating 2 or lower
+• Two fey creatures of challenge rating 1 or lower          Your touch inflicts disease. Make a melee spell attack
+• Four fey creatures of challenge rating 1/2 or lower       against a creature within your reach. On a hit, you
+• Eight fey creatures of challenge rating 1/4 or            afflict the creature with a disease of your choice
+                                                            from any of the ones described below.
+  lower
+                                                              At the end of each of the target’s turns, it must
+A summoned creature disappears when it drops to 0           make a Constitution saving throw. After failing three
+hit points or when the spell ends.                          of these saving throws, the disease’s effects last for
+                                                            the duration, and the creature stops making these
+  The summoned creatures are friendly to you and            saves. After succeeding on three of these saving
+your companions. Roll initiative for the summoned           throws, the creature recovers from the disease, and
+creatures as a group, which have their own turns.           the spell ends.
+They obey any verbal commands that you issue to
+them (no action required by you). If you don’t issue          Since this spell induces a natural disease in its
+any commands to them, they defend themselves                target, any effect that removes a disease or
+from hostile creatures, but otherwise take no actions.      otherwise ameliorates a disease’s effects apply to it.
+
+  The GM has the creatures’ statistics.                       Blinding Sickness. Pain grips the creature’s mind,
+  At Higher Levels. When you cast this spell using          and its eyes turn milky white. The creature has
+certain higher-level spell slots, you choose one of the  disadvantage on Wisdom checks and Wisdom saving
+summoning options above, and more creatures                 throws and is blinded.
+appear: twice as many with a 6th-level slot and three
+times as many with an 8th-level slot.                      Filth Fever. A raging fever sweeps through the
+                                                            creature’s body. The creature has disadvantage on
+Contact Other Plane                                         Strength checks, Strength saving throws, and attack
+                                                            rolls that use Strength.
+5th-level divination (ritual)
+                                                              Flesh Rot. The creature’s flesh decays. The
+Casting Time: 1 minute                                      creature has disadvantage on Charisma checks and
+Range: Self                                                 vulnerability to all damage.
+Components: V
+Duration: 1 minute                                            Mindfire. The creature’s mind becomes feverish.
+                                                            The creature has disadvantage on Intelligence
+You mentally contact a demigod, the spirit of a long-    checks and Intelligence saving throws, and the
+dead sage, or some other mysterious entity from

@@ -1,0 +1,36 @@
+Item Abacus Acid (vial)
+Alchemist’s fire (flask) Ammunition
+Arrows (20) Blowgun needles (50) Crossbow bolts (20)
+Sling bullets (20) Antitoxin (vial) Arcane focus
+Crystal Orb Rod Staff Wand Backpack Ball bearings (bag of 1,000) Barrel Basket Bedroll Bell Blanket Block and tackle Book Bottle, glass Bucket Caltrops (bag of 20) Candle Case, crossbow bolt Case, map or scroll Chain (10 feet) Chalk (1 piece) Chest Climber’s kit Clothes, common Clothes, costume Clothes, fine Clothes, traveler’s Component pouch Crowbar Druidic focus Sprig of mistletoe Totem Wooden staff Yew wand Fishing tackle Flask or tankard Grappling hook Hammer Hammer, sledge Healer’s kit Holy symbol Amulet Emblem Reliquary Holy water (flask)
+
+Cost 2 gp 25 gp 50 gp
+1 gp 1 gp 1 gp 4 cp 50 gp
+10 gp 20 gp 10 gp
+5 gp 10 gp
+2 gp 1 gp 2 gp 4 sp 1 gp 1 gp 5 sp 1 gp 25 gp 2 gp 5 cp 1 gp 1 cp 1 gp 1 gp 5 gp 1 cp 5 gp 25 gp 5 sp 5 gp 15 gp 2 gp 25 gp 2 gp
+1 gp 1 gp 5 gp 10 gp 1 gp 2 cp 2 gp 1 gp 2 gp 5 gp
+5 gp 5 gp 5 gp 25 gp
+
+Weight 2 lb. 1 lb. 1 lb.
+1 lb. 1 lb. 1½ lb. 1½ lb. —
+1 lb. 3 lb. 2 lb. 4 lb. 1 lb. 5 lb. 2 lb. 70 lb. 2 lb. 7 lb. — 3 lb. 5 lb. 5 lb. 2 lb. 2 lb. 2 lb. — 1 lb. 1 lb. 10 lb. — 25 lb. 12 lb. 3 lb. 4 lb. 6 lb. 4 lb. 2 lb. 5 lb.
+— — 4 lb. 1 lb. 4 lb. 1 lb. 4 lb. 3 lb. 10 lb. 3 lb.
+1 lb. — 2 lb. 1 lb.
+
+Hourglass Hunting trap Ink (1 ounce bottle) Ink pen Jug or pitcher Ladder (10-foot) Lamp Lantern, bullseye Lantern, hooded Lock Magnifying glass Manacles Mess kit Mirror, steel Oil (flask) Paper (one sheet) Parchment (one sheet) Perfume (vial) Pick, miner’s Piton Poison, basic (vial) Pole (10-foot) Pot, iron Potion of healing Pouch Quiver Ram, portable Rations (1 day) Robes Rope, hempen (50 feet) Rope, silk (50 feet) Sack Scale, merchant’s Sealing wax Shovel Signal whistle Signet ring Soap Spellbook Spikes, iron (10) Spyglass Tent, two-person Tinderbox Torch Vial Waterskin Whetstone
+
+25 gp 5 gp
+10 gp 2 cp 2 cp 1 sp 5 sp
+10 gp 5 gp
+10 gp 100 gp
+2 gp 2 sp 5 gp 1 sp 2 sp 1 sp 5 gp 2 gp 5 cp 100 gp 5 cp 2 gp 50 gp 5 sp 1 gp 4 gp 5 sp 1 gp 1 gp 10 gp 1 cp 5 gp 5 sp 2 gp 5 cp 5 gp 2 cp 50 gp 1 gp 1,000 gp 2 gp 5 sp 1 cp 1 gp 2 sp 1 cp
+
+1 lb. 25 lb.
+— — 4 lb. 25 lb. 1 lb. 2 lb. 2 lb. 1 lb. — 6 lb. 1 lb. 1/2 lb. 1 lb. — — — 10 lb. 1/4 lb. — 7 lb. 10 lb. 1/2 lb. 1 lb. 1 lb. 35 lb. 2 lb. 4 lb. 10 lb. 5 lb. 1/2 lb. 3 lb. — 5 lb. — — — 3 lb. 5 lb. 1 lb. 20 lb. 1 lb. 1 lb. — 5 lb. (full) 1 lb.
+
+Container Capacity
+
+Container Backpack* Barrel Basket Bottle Bucket Chest
+
+Capacity 1 cubic foot/30 pounds of gear 40 gallons liquid, 4 cubic feet solid 2 cubic feet/40 pounds of gear 1½ pints liquid 3 gallons liquid, 1/2 cubic foot solid 12 cubic feet/300 pounds of gear

@@ -1,0 +1,53 @@
+Actions                                                   grapple ends, the creature is restrained, and the snake
+                                                          can’t constrict another target.
+Tusk. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+target. Hit: 10 (2d6 + 3) slashing damage.
+
+Giant Centipede                                           Giant Crab
+
+Small beast, unaligned                                    Medium beast, unaligned
+
+Armor Class 13 (natural armor)                            Armor Class 15 (natural armor)
+Hit Points 4 (1d6 + 1)                                    Hit Points 13 (3d8)
+Speed 30 ft., climb 30 ft.                                Speed 30 ft., swim 30 ft.
+
+ STR DEX CON INT                 WIS            CHA         STR DEX CON INT                WIS            CHA
+5 (-3) 14 (+2) 12 (+1) 1 (-5)   7 (-2)          3 (-4)    13 (+1) 15 (+2) 11 (+0) 1 (-5)  9 (-1)          3 (-4)
+
+Senses blindsight 30 ft., passive Perception 8            Skills Stealth +4
+Languages —                                               Senses blindsight 30 ft., passive Perception 9
+Challenge 1/4 (50 XP)                                     Languages —
+                                                          Challenge 1/8 (25 XP)
+
+Actions                                                   Amphibious. The crab can breathe air and water.
+
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one    Actions
+creature. Hit: 4 (1d4 + 2) piercing damage, and the       Claw. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+target must succeed on a DC 11 Constitution saving        target. Hit: 4 (1d6 + 1) bludgeoning damage, and the
+throw or take 10 (3d6) poison damage. If the poison       target is grappled (escape DC 11). The crab has two
+damage reduces the target to 0 hit points, the target is  claws, each of which can grapple only one target.
+stable but poisoned for 1 hour, even after regaining hit
+points, and is paralyzed while poisoned in this way.      Giant Crocodile
+
+Giant Constrictor Snake                                   Huge beast, unaligned
+                                                          Armor Class 14 (natural armor)
+Huge beast, unaligned                                     Hit Points 85 (9d12 + 27)
+                                                          Speed 30 ft., swim 50 ft.
+Armor Class 12
+Hit Points 60 (8d12 + 8)                                      STR DEX CON INT WIS CHA
+Speed 30 ft., swim 30 ft.                                   21 (+5) 9 (-1) 17 (+3) 2 (-4) 10 (+0) 7 (-2)
+
+    STR DEX CON INT WIS CHA                               Skills Stealth +5
+  19 (+4) 14 (+2) 12 (+1) 1 (-5) 10 (+0) 3 (-4)           Senses passive Perception 10
+                                                          Languages —
+Skills Perception +2                                      Challenge 5 (1,800 XP)
+Senses blindsight 10 ft., passive Perception 12
+Languages —                                               Hold Breath. The crocodile can hold its breath for 30
+Challenge 2 (450 XP)                                      minutes.
+
+Actions                                                   Actions
+Bite. Melee Weapon Attack: +6 to hit, reach 10 ft., one   Multiattack. The crocodile makes two attacks: one
+creature. Hit: 11 (2d6 + 4) piercing damage.              with its bite and one with its tail.
+Constrict. Melee Weapon Attack: +6 to hit, reach 5 ft.,
+one creature. Hit: 13 (2d8 + 4) bludgeoning damage,
+and the target is grappled (escape DC 16). Until this

@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "spells",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          3,
+          4
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:spell:test-ember-lance",
+      "category": "spells",
+      "kind": "spell",
+      "name": "TEST_Ember Lance",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          3
+        ],
+        "section": "TEST_Spell Descriptions",
+        "heading": "TEST_Ember Lance"
+      },
+      "text": "TEST_Ember Lance\n1st-level evocation\nCasting Time: 1 action\nRange: 90 feet\nComponents: V, S, M (a pinch of soot)\nDuration: Instantaneous\n\nA lance of embers streaks toward a creature you can see within range. Make a ranged spell attack against the target. On a hit, the target takes 3d6 fire damage and sheds dim light in a 5-foot radius until the end of your next turn.\n\nAt Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
+      "data": {
+        "level": 1,
+        "school": "evocation",
+        "ritual": false,
+        "castingTime": "1 action",
+        "range": "90 feet",
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": true,
+          "materialDescription": "a pinch of soot"
+        },
+        "duration": "Instantaneous",
+        "concentration": false,
+        "description": "A lance of embers streaks toward a creature you can see within range. Make a ranged spell attack against the target. On a hit, the target takes 3d6 fire damage and sheds dim light in a 5-foot radius until the end of your next turn.",
+        "atHigherLevels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
+        "classes": [
+          "TEST_Sorcerer",
+          "TEST_Wizard"
+        ]
+      },
+      "dice": [
+        {
+          "text": "3d6",
+          "count": 3,
+          "sides": 6,
+          "modifier": 0,
+          "average": 10
+        },
+        {
+          "text": "1d6",
+          "count": 1,
+          "sides": 6,
+          "modifier": 0,
+          "average": 3
+        }
+      ],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 79
+      }
+    },
+    {
+      "id": "srd:spell:test-whisper-of-moss",
+      "category": "spells",
+      "kind": "spell",
+      "name": "TEST_Whisper of Moss",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          3
+        ],
+        "section": "TEST_Spell Descriptions",
+        "heading": "TEST_Whisper of Moss"
+      },
+      "text": "TEST_Whisper of Moss\nTransmutation cantrip\nCasting Time: 1 action\nRange: Touch\nComponents: V, S\nDuration: Concentration, up to 1 minute\n\nYou touch a patch of moss or lichen, and it whispers the name of the last creature that walked over it. The whisper is audible only to you.",
+      "data": {
+        "level": 0,
+        "school": "transmutation",
+        "ritual": false,
+        "castingTime": "1 action",
+        "range": "Touch",
+        "components": {
+          "verbal": true,
+          "somatic": true,
+          "material": false,
+          "materialDescription": null
+        },
+        "duration": "Concentration, up to 1 minute",
+        "concentration": true,
+        "description": "You touch a patch of moss or lichen, and it whispers the name of the last creature that walked over it. The whisper is audible only to you.",
+        "atHigherLevels": null,
+        "classes": [
+          "TEST_Druid"
+        ]
+      },
+      "dice": [],
+      "readiness": "adapted",
+      "notes": [],
+      "adaptation": {
+        "deusId": "TEST_deus:ability:moss-whisper",
+        "adaptedAt": "2026-09-22"
+      },
+      "icon": {
+        "set": "IconSet",
+        "index": 79
+      }
+    },
+    {
+      "id": "srd:spell-list:test-wizard-spells",
+      "category": "spells",
+      "kind": "spell-list",
+      "name": "TEST_Wizard Spells",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          4
+        ],
+        "section": "TEST_Spell Lists",
+        "heading": "TEST_Wizard Spells"
+      },
+      "text": "TEST_Wizard Spells\nCantrips (0 Level)\nTEST_Whisper of Moss\n\n1st Level\nTEST_Ember Lance",
+      "data": {
+        "class": "TEST_Wizard",
+        "spells": [
+          {
+            "level": 0,
+            "names": [
+              "TEST_Whisper of Moss"
+            ]
+          },
+          {
+            "level": 1,
+            "names": [
+              "TEST_Ember Lance"
+            ]
+          }
+        ]
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 187
+      }
+    }
+  ],
+  "warnings": []
+}

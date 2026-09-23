@@ -1,0 +1,63 @@
+  At Higher Levels. When you cast this spell using a     plane, appearing in the unoccupied space nearest to
+spell slot of 7th level or higher, the damage increases  the portal.
+by 1d6 for each slot level above 6th.
+                                                           Deities and other planar rulers can prevent portals
+Gaseous Form                                             created by this spell from opening in their presence
+                                                         or anywhere within their domains.
+3rd-level transmutation
+                                                           When you cast this spell, you can speak the name
+Casting Time: 1 action                                   of a specific creature (a pseudonym, title, or
+Range: Touch                                             nickname doesn’t work). If that creature is on a
+Components: V, S, M (a bit of gauze and a wisp of        plane other than the one you are on, the portal opens
+                                                         in the named creature’s immediate vicinity and
+  smoke)                                                 draws the creature through it to the nearest
+Duration: Concentration, up to 1 hour                    unoccupied space on your side of the portal. You gain
+                                                         no special power over the creature, and it is free to
+You transform a willing creature you touch, along        act as the GM deems appropriate. It might leave,
+with everything it’s wearing and carrying, into a        attack you, or help you.
+misty cloud for the duration. The spell ends if the
+creature drops to 0 hit points. An incorporeal           Geas
+creature isn’t affected.
+                                                         5th-level enchantment
+  While in this form, the target’s only method of
+movement is a flying speed of 10 feet. The target can    Casting Time: 1 minute
+enter and occupy the space of another creature. The      Range: 60 feet
+target has resistance to nonmagical damage, and it       Components: V
+has advantage on Strength, Dexterity, and                Duration: 30 days
+Constitution saving throws. The target can pass
+through small holes, narrow openings, and even           You place a magical command on a creature that you
+mere cracks, though it treats liquids as though they     can see within range, forcing it to carry out some
+were solid surfaces. The target can’t fall and remains   service or refrain from some action or course of
+hovering in the air even when stunned or otherwise       activity as you decide. If the creature can understand
+incapacitated.                                           you, it must succeed on a Wisdom saving throw or
+                                                         become charmed by you for the duration. While the
+  While in the form of a misty cloud, the target can’t   creature is charmed by you, it takes 5d10 psychic
+talk or manipulate objects, and any objects it was       damage each time it acts in a manner directly
+carrying or holding can’t be dropped, used, or           counter to your instructions, but no more than once
+otherwise interacted with. The target can’t attack or    each day. A creature that can’t understand you is
+cast spells.                                             unaffected by the spell.
+
+Gate                                                       You can issue any command you choose, short of
+                                                         an activity that would result in certain death. Should
+9th-level conjuration                                 you issue a suicidal command, the spell ends.
+
+Casting Time: 1 action                                     You can end the spell early by using an action to
+Range: 60 feet                                           dismiss it. A remove curse, greater restoration, or
+Components: V, S, M (a diamond worth at least            wish spell also ends it.
+
+  5,000 gp)                                                At Higher Levels. When you cast this spell using a
+Duration: Concentration, up to 1 minute                  spell slot of 7th or 8th level, the duration is 1 year.
+                                                         When you cast this spell using a spell slot of 9th level,
+You conjure a portal linking an unoccupied space         the spell lasts until it is ended by one of the spells
+you can see within range to a precise location on a      mentioned above.
+different plane of existence. The portal is a circular
+opening, which you can make 5 to 20 feet in              Gentle Repose
+diameter. You can orient the portal in any direction
+you choose. The portal lasts for the duration.           2nd-level necromancy (ritual)
+
+  The portal has a front and a back on each plane        Casting Time: 1 action
+where it appears. Travel through the portal is           Range: Touch
+possible only by moving through its front. Anything      Components: V, S, M (a pinch of salt and one copper
+that does so is instantly transported to the other
+                                                           piece placed on each of the corpse’s eyes, which
+                                                           must remain there for the duration)

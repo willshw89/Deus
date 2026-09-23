@@ -1,0 +1,64 @@
+attunement to the object so it can be removed or           You touch a dead creature that has been dead for no
+discarded.                                                 more than a century, that didn’t die of old age, and
+                                                           that isn’t undead. If its soul is free and willing, the
+Resilient Sphere                                           target returns to life with all its hit points.
+
+4th-level evocation                                       This spell neutralizes any poisons and cures
+                                                           normal diseases afflicting the creature when it died.
+Casting Time: 1 action                                     It doesn’t, however, remove magical diseases, curses,
+Range: 30 feet                                             and the like; if such effects aren’t removed prior to
+Components: V, S, M (a hemispherical piece of clear        casting the spell, they afflict the target on its return
+                                                           to life.
+  crystal and a matching hemispherical piece of gum
+  arabic)                                                    This spell closes all mortal wounds and restores
+Duration: Concentration, up to 1 minute                    any missing body parts.
+
+A sphere of shimmering force encloses a creature or          Coming back from the dead is an ordeal. The
+object of Large size or smaller within range. An           target takes a -4 penalty to all attack rolls, saving
+unwilling creature must make a Dexterity saving            throws, and ability checks. Every time the target
+throw. On a failed save, the creature is enclosed for      finishes a long rest, the penalty is reduced by 1 until
+the duration.                                              it disappears.
+
+  Nothing—not physical objects, energy, or other             Casting this spell to restore life to a creature that
+spell effects—can pass through the barrier, in or out,     has been dead for one year or longer taxes you
+though a creature in the sphere can breathe there.         greatly. Until you finish a long rest, you can’t cast
+The sphere is immune to all damage, and a creature         spells again, and you have disadvantage on all attack
+or object inside can’t be damaged by attacks or            rolls, ability checks, and saving throws.
+effects originating from outside, nor can a creature
+inside the sphere damage anything outside it.              Reverse Gravity
+
+  The sphere is weightless and just large enough to        7th-level transmutation
+contain the creature or object inside. An enclosed
+creature can use its action to push against the            Casting Time: 1 action
+sphere’s walls and thus roll the sphere at up to half      Range: 100 feet
+the creature’s speed. Similarly, the globe can be          Components: V, S, M (a lodestone and iron filings)
+picked up and moved by other creatures.                    Duration: Concentration, up to 1 minute
+
+  A disintegrate spell targeting the globe destroys it     This spell reverses gravity in a 50-foot-radius, 100-
+without harming anything inside it.                        foot high cylinder centered on a point within range.
+                                                           All creatures and objects that aren’t somehow
+Resistance                                                 anchored to the ground in the area fall upward and
+                                                           reach the top of the area when you cast this spell. A
+Abjuration cantrip                                         creature can make a Dexterity saving throw to grab
+                                                           onto a fixed object it can reach, thus avoiding the fall.
+Casting Time: 1 action
+Range: Touch                                                 If some solid object (such as a ceiling) is
+Components: V, S, M (a miniature cloak)                    encountered in this fall, falling objects and creatures
+Duration: Concentration, up to 1 minute                    strike it just as they would during a normal
+                                                           downward fall. If an object or creature reaches the
+You touch one willing creature. Once before the spell      top of the area without striking anything, it remains
+ends, the target can roll a d4 and add the number          there, oscillating slightly, for the duration.
+rolled to one saving throw of its choice. It can roll the
+die before or after making the saving throw. The             At the end of the duration, affected objects and
+spell then ends.                                           creatures fall back down.
+
+Resurrection                                               Revivify
+
+7th-level necromancy                                    3rd-level necromancy
+
+Casting Time: 1 hour                                       Casting Time: 1 action
+Range: Touch                                               Range: Touch
+Components: V, S, M (a diamond worth at least              Components: V, S, M (diamonds worth 300 gp,
+
+  1,000 gp, which the spell consumes)                        which the spell consumes)
+Duration: Instantaneous                                    Duration: Instantaneous

@@ -1,0 +1,63 @@
+creatures with Intelligence scores of at least 1 to      throw proficiencies, in addition to gaining those of
+understand the meaning of your message.                  the creature. If the creature has the same proficiency
+                                                         as you and the bonus listed in its statistics is higher
+  You can send the message across any distance and       than yours, use the creature’s bonus in place of
+even to other planes of existence, but if the target is  yours. You can’t use any legendary actions or lair
+on a different plane than you, there is a 5 percent      actions of the new form.
+chance that the message doesn’t arrive.
+                                                           You assume the hit points and Hit Dice of the new
+Sequester                                                form. When you revert to your normal form, you
+                                                         return to the number of hit points you had before
+7th-level transmutation                               you transformed. If you revert as a result of
+                                                         dropping to 0 hit points, any excess damage carries
+Casting Time: 1 action                                   over to your normal form. As long as the excess
+Range: Touch                                             damage doesn’t reduce your normal form to 0 hit
+Components: V, S, M (a powder composed of                points, you aren’t knocked unconscious.
+
+  diamond, emerald, ruby, and sapphire dust worth          You retain the benefit of any features from your
+  at least 5,000 gp, which the spell consumes)           class, race, or other source and can use them,
+Duration: Until dispelled                                provided that your new form is physically capable of
+                                                         doing so. You can’t use any special senses you have
+By means of this spell, a willing creature or an object  (for example, darkvision) unless your new form also
+can be hidden away, safe from detection for the          has that sense. You can only speak if the creature can
+duration. When you cast the spell and touch the          normally speak.
+target, it becomes invisible and can’t be targeted by
+divination spells or perceived through scrying             When you transform, you choose whether your
+sensors created by divination spells.                    equipment falls to the ground, merges into the new
+                                                         form, or is worn by it. Worn equipment functions as
+  If the target is a creature, it falls into a state of  normal. The GM determines whether it is practical
+suspended animation. Time ceases to flow for it, and     for the new form to wear a piece of equipment,
+it doesn’t grow older.                                   based on the creature’s shape and size. Your
+                                                         equipment doesn’t change shape or size to match the
+  You can set a condition for the spell to end early.    new form, and any equipment that the new form
+The condition can be anything you choose, but it         can’t wear must either fall to the ground or merge
+must occur or be visible within 1 mile of the target.    into your new form. Equipment that merges has no
+Examples include “after 1,000 years” or “when the        effect in that state.
+tarrasque awakens.” This spell also ends if the target
+takes any damage.                                          During this spell’s duration, you can use your
+                                                         action to assume a different form following the same
+Shapechange                                              restrictions and rules for the original form, with one
+                                                         exception: if your new form has more hit points than
+9th-level transmutation                               your current one, your hit points remain at their
+                                                         current value.
+Casting Time: 1 action
+Range: Self                                              Shatter
+Components: V, S, M (a jade circlet worth at least
+                                                         2nd-level evocation
+  1,500 gp, which you must place on your head
+  before you cast the spell)                             Casting Time: 1 action
+Duration: Concentration, up to 1 hour                    Range: 60 feet
+                                                         Components: V, S, M (a chip of mica)
+You assume the form of a different creature for the      Duration: Instantaneous
+duration. The new form can be of any creature with
+a challenge rating equal to your level or lower. The     A sudden loud ringing noise, painfully intense,
+creature can’t be a construct or an undead, and you      erupts from a point of your choice within range.
+must have seen the sort of creature at least once.       Each creature in a 10-foot-radius sphere centered on
+You transform into an average example of that            that point must make a Constitution saving throw. A
+creature, one without any class levels or the            creature takes 3d8 thunder damage on a failed save,
+Spellcasting trait.                                      or half as much damage on a successful one. A
+                                                         creature made of inorganic material such as stone,
+  Your game statistics are replaced by the statistics
+of the chosen creature, though you retain your
+alignment and Intelligence, Wisdom, and Charisma
+scores. You also retain all of your skill and saving

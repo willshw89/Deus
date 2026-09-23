@@ -1,0 +1,61 @@
+Ranged Attacks                                            Opportunity Attacks
+
+When you make a ranged attack, you fire a bow or a        In a fight, everyone is constantly watching for a
+crossbow, hurl a handaxe, or otherwise send               chance to strike an enemy who is fleeing or passing
+projectiles to strike a foe at a distance. A monster      by. Such a strike is called an opportunity attack.
+might shoot spines from its tail. Many spells also
+involve making a ranged attack.                             You can make an opportunity attack when a
+                                                          hostile creature that you can see moves out of your
+Range                                                     reach. To make the opportunity attack, you use your
+                                                          reaction to make one melee attack against the
+You can make ranged attacks only against targets          provoking creature. The attack occurs right before
+within a specified range.                                 the creature leaves your reach.
+
+  If a ranged attack, such as one made with a spell,        You can avoid provoking an opportunity attack by
+has a single range, you can’t attack a target beyond      taking the Disengage action. You also don’t provoke
+this range.                                               an opportunity attack when you teleport or when
+                                                          someone or something moves you without using
+  Some ranged attacks, such as those made with a          your movement, action, or reaction. For example,
+longbow or a shortbow, have two ranges. The               you don’t provoke an opportunity attack if an
+smaller number is the normal range, and the larger        explosion hurls you out of a foe’s reach or if gravity
+number is the long range. Your attack roll has            causes you to fall past an enemy.
+disadvantage when your target is beyond normal
+range, and you can’t attack a target beyond the long      Two-Weapon Fighting
+range.
+                                                          When you take the Attack action and attack with a
+Ranged Attacks in Close Combat                            light melee weapon that you’re holding in one hand,
+                                                          you can use a bonus action to attack with a different
+Aiming a ranged attack is more difficult when a foe is    light melee weapon that you’re holding in the other
+next to you. When you make a ranged attack with a         hand. You don’t add your ability modifier to the
+weapon, a spell, or some other means, you have            damage of the bonus attack, unless that modifier is
+disadvantage on the attack roll if you are within 5       negative.
+feet of a hostile creature who can see you and who
+isn’t incapacitated.                                        If either weapon has the thrown property, you can
+                                                          throw the weapon, instead of making a melee attack
+Melee Attacks                                             with it.
+
+Used in hand-to-hand combat, a melee attack allows  Grappling
+you to attack a foe within your reach. A melee attack
+typically uses a handheld weapon such as a sword, a       When you want to grab a creature or wrestle with it,
+warhammer, or an axe. A typical monster makes a           you can use the Attack action to make a special
+melee attack when it strikes with its claws, horns,       melee attack, a grapple. If you’re able to make
+teeth, tentacles, or other body part. A few spells also   multiple attacks with the Attack action, this attack
+involve making a melee attack.                            replaces one of them.
+
+  Most creatures have a 5-foot reach and can thus        The target of your grapple must be no more than
+attack targets within 5 feet of them when making a        one size larger than you and must be within your
+melee attack. Certain creatures (typically those          reach. Using at least one free hand, you try to seize
+larger than Medium) have melee attacks with a             the target by making a grapple check instead of an
+greater reach than 5 feet, as noted in their              attack roll: a Strength (Athletics) check contested by
+descriptions.                                             the target’s Strength (Athletics) or Dexterity
+                                                          (Acrobatics) check (the target chooses the ability to
+  Instead of using a weapon to make a melee               use). If you succeed, you subject the target to the
+weapon attack, you can use an unarmed strike: a           grappled condition (see appendix PH-A). The
+punch, kick, head-butt, or similar forceful blow       condition specifies the things that end it, and you can
+(none of which count as weapons). On a hit, an            release the target whenever you like (no action
+unarmed strike deals bludgeoning damage equal to 1        required).
++ your Strength modifier. You are proficient with
+your unarmed strikes.                                       Escaping a Grapple. A grappled creature can use
+                                                          its action to escape. To do so, it must succeed on a
+                                                          Strength (Athletics) or Dexterity (Acrobatics) check
+                                                          contested by your Strength (Athletics) check.

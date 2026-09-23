@@ -1,0 +1,50 @@
+Actions                                                   (2d4) cold damage on a failed save, or half as much
+                                                          damage on a successful one.
+Claws. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+creature. Hit: 4 (1d4 + 2) slashing damage.               Magma Mephit
+Blinding Breath (Recharge 6). The mephit exhales a 15-
+foot cone of blinding dust. Each creature in that area    Small elemental, neutral evil
+must succeed on a DC 10 Dexterity saving throw or be
+blinded for 1 minute. A creature can repeat the saving    Armor Class 11
+throw at the end of each of its turns, ending the effect  Hit Points 22 (5d6 + 5)
+on itself on a success.                                   Speed 30 ft., fly 30 ft.
+
+Ice Mephit                                                    STR DEX CON INT WIS CHA
+                                                             8 (-1) 12 (+1) 12 (+1) 7 (-2) 10 (+0) 10 (+0)
+Small elemental, neutral evil
+                                                          Skills Stealth +3
+Armor Class 11                                            Damage Vulnerabilities cold
+Hit Points 21 (6d6)                                       Damage Immunities fire, poison
+Speed 30 ft., fly 30 ft.                                  Condition Immunities poisoned
+                                                          Senses darkvision 60 ft., passive Perception 10
+    STR DEX CON INT WIS CHA                               Languages Ignan, Terran
+   7 (-2) 13 (+1) 10 (+0) 9 (-1) 11 (+0) 12 (+1)          Challenge 1/2 (100 XP)
+Skills Perception +2, Stealth +3
+Damage Vulnerabilities bludgeoning, fire                  Death Burst. When the mephit dies, it explodes in a
+Damage Immunities cold, poison                            burst of lava. Each creature within 5 feet of it must
+Condition Immunities poisoned                             make a DC 11 Dexterity saving throw, taking 7 (2d6)
+Senses darkvision 60 ft., passive Perception 12           fire damage on a failed save, or half as much damage
+Languages Aquan, Auran                                    on a successful one.
+Challenge 1/2 (100 XP)                                    False Appearance. While the mephit remains
+                                                          motionless, it is indistinguishable from an ordinary
+Death Burst. When the mephit dies, it explodes in a       mound of magma.
+burst of jagged ice. Each creature within 5 feet of it    Innate Spellcasting (1/Day). The mephit can innately
+must make a DC 10 Dexterity saving throw, taking 4        cast heat metal (spell save DC 10), requiring no
+(1d8) slashing damage on a failed save, or half as much   material components. Its innate spellcasting ability is
+damage on a successful one.                               Charisma.
+False Appearance. While the mephit remains
+motionless, it is indistinguishable from an ordinary      Actions
+shard of ice.                                             Claws. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+Innate Spellcasting (1/Day). The mephit can innately      creature. Hit: 3 (1d4 + 1) slashing damage plus 2 (1d4)
+cast fog cloud, requiring no material components. Its     fire damage.
+innate spellcasting ability is Charisma.                  Fire Breath (Recharge 6). The mephit exhales a 15-foot
+                                                          cone of fire. Each creature in that area must make a DC
+Actions                                                   11 Dexterity saving throw, taking 7 (2d6) fire damage
+                                                          on a failed save, or half as much damage on a
+Claws. Melee Weapon Attack: +3 to hit, reach 5 ft., one   successful one.
+creature. Hit: 3 (1d4 + 1) slashing damage plus 2 (1d4)
+cold damage.                                              Steam Mephit
+Frost Breath (Recharge 6). The mephit exhales a 15-
+foot cone of cold air. Each creature in that area must    Small elemental, neutral evil
+succeed on a DC 10 Dexterity saving throw, taking 5
+                                                          Armor Class 10

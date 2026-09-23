@@ -1,0 +1,31 @@
+Club Dagger Greatclub Handaxe Javelin Light hammer Mace Quarterstaff Sickle Spear Simple Ranged Weapons Crossbow, light Dart Shortbow Sling Martial Melee Weapons Battleaxe Flail Glaive Greataxe Greatsword Halberd Lance Longsword Maul Morningstar Pike Rapier Scimitar Shortsword Trident War pick Warhammer Whip Martial Ranged Weapons Blowgun Crossbow, hand Crossbow, heavy
+Longbow Net
+
+1 sp 2 gp 2 sp 5 gp 5 sp 2 gp 5 gp 2 sp 1 gp 1 gp
+25 gp 5 cp 25 gp 1 sp
+10 gp 10 gp 20 gp 30 gp 50 gp 20 gp 10 gp 15 gp 10 gp 15 gp 5 gp 25 gp 25 gp 10 gp 5 gp 5 gp 15 gp 2 gp
+10 gp 75 gp 50 gp 50 gp 1 gp
+
+1d4 bludgeoning 1d4 piercing 1d8 bludgeoning 1d6 slashing 1d6 piercing 1d4 bludgeoning 1d6 bludgeoning 1d6 bludgeoning 1d4 slashing 1d6 piercing
+1d8 piercing 1d4 piercing 1d6 piercing 1d4 bludgeoning
+1d8 slashing 1d8 bludgeoning 1d10 slashing 1d12 slashing 2d6 slashing 1d10 slashing 1d12 piercing 1d8 slashing 2d6 bludgeoning 1d8 piercing 1d10 piercing 1d8 piercing 1d6 slashing 1d6 piercing 1d6 piercing 1d8 piercing 1d8 bludgeoning 1d4 slashing
+1 piercing 1d6 piercing 1d10 piercing 1d8 piercing —
+
+2 lb. 1 lb. 10 lb. 2 lb. 2 lb. 2 lb. 4 lb. 4 lb. 2 lb. 3 lb.
+5 lb. 1/4 lb. 2 lb. —
+4 lb. 2 lb. 6 lb. 7 lb. 6 lb. 6 lb. 6 lb. 3 lb. 10 lb. 4 lb. 18 lb. 2 lb. 3 lb. 2 lb. 4 lb. 2 lb. 2 lb. 3 lb.
+1 lb. 3 lb. 18 lb. 2 lb. 3 lb.
+
+Light Finesse, light, thrown (range 20/60) Two-handed Light, thrown (range 20/60) Thrown (range 30/120) Light, thrown (range 20/60) — Versatile (1d8) Light Thrown (range 20/60), versatile (1d8)
+Ammunition (range 80/320), loading, two-handed Finesse, thrown (range 20/60) Ammunition (range 80/320), two-handed Ammunition (range 30/120)
+Versatile (1d10) — Heavy, reach, two-handed Heavy, two-handed Heavy, two-handed Heavy, reach, two-handed Reach, special Versatile (1d10) Heavy, two-handed — Heavy, reach, two-handed Finesse Finesse, light Finesse, light Thrown (range 20/60), versatile (1d8) — Versatile (1d10) Finesse, reach
+Ammunition (range 25/100), loading Ammunition (range 30/120), light, loading Ammunition (range 100/400), heavy, loading, two-handed Ammunition (range 150/600), heavy, two-handed Special, thrown (range 5/15)
+
+Adventuring Gear
+This section describes items that have special rules or require further explanation.
+Acid. As an action, you can splash the contents of this vial onto a creature within 5 feet of you or throw the vial up to 20 feet, shattering it on impact. In either case, make a ranged attack against a creature or object, treating the acid as an improvised weapon. On a hit, the target takes 2d6 acid damage.
+Alchemist’s Fire. This sticky, adhesive fluid ignites when exposed to air. As an action, you can throw this flask up to 20 feet, shattering it on impact. Make a
+
+ranged attack against a creature or object, treating the alchemist's fire as an improvised weapon. On a hit, the target takes 1d4 fire damage at the start of each of its turns. A creature can end this damage by using its action to make a DC 10 Dexterity check to extinguish the flames.
+Antitoxin. A creature that drinks this vial of liquid gains advantage on saving throws against poison for 1 hour. It confers no benefit to undead or constructs.
+Arcane Focus. An arcane focus is a special item— an orb, a crystal, a rod, a specially constructed staff, a wand-like length of wood, or some similar item— designed to channel the power of arcane spells. A

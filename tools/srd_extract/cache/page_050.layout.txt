@@ -1,0 +1,61 @@
+Sculptor of Flesh                                          Otherworldly Patrons
+
+Prerequisite: 7th level                                    The beings that serve as patrons for warlocks are
+                                                           mighty inhabitants of other planes of existence—not
+You can cast polymorph once using a warlock spell          gods, but almost godlike in their power. Various
+slot. You can’t do so again until you finish a long rest.  patrons give their warlocks access to different
+                                                           powers and invocations, and expect significant
+Sign of Ill Omen                                           favors in return.
+
+Prerequisite: 5th level                                      Some patrons collect warlocks, doling out mystic
+                                                           knowledge relatively freely or boasting of their
+You can cast bestow curse once using a warlock spell       ability to bind mortals to their will. Other patrons
+slot. You can’t do so again until you finish a long rest.  bestow their power only grudgingly, and might
+                                                           make a pact with only one warlock. Warlocks who
+Thief of Five Fates                                        serve the same patron might view each other as
+                                                           allies, siblings, or rivals.
+You can cast bane once using a warlock spell slot.
+You can’t do so again until you finish a long rest.        The Fiend
+
+Thirsting Blade                                            You have made a pact with a fiend from the lower
+                                                           planes of existence, a being whose aims are evil,
+Prerequisite: 5th level, Pact of the Blade feature         even if you strive against those aims. Such beings
+                                                           desire the corruption or destruction of all things,
+You can attack with your pact weapon twice, instead        ultimately including you. Fiends powerful enough to
+of once, whenever you take the Attack action on your       forge a pact include demon lords such as
+turn.                                                      Demogorgon, Orcus, Fraz’Urb-luu, and Baphomet;
+                                                           archdevils such as Asmodeus, Dispater,
+Visions of Distant Realms                                  Mephistopheles, and Belial; pit fiends and balors that
+                                                           are especially mighty; and ultroloths and other lords
+Prerequisite: 15th level                                   of the yugoloths.
+
+You can cast arcane eye at will, without expending a       Expanded Spell List
+spell slot.
+                                                           The Fiend lets you choose from an expanded list of
+Voice of the Chain Master                                  spells when you learn a warlock spell. The following
+                                                           spells are added to the warlock spell list for you.
+Prerequisite: Pact of the Chain feature
+                                                           Fiend Expanded Spells
+You can communicate telepathically with your
+familiar and perceive through your familiar’s senses       Spell Level  Spells
+as long as you are on the same plane of existence.             1st      burning hands, command
+Additionally, while perceiving through your                    2nd      blindness/deafness, scorching ray
+familiar’s senses, you can also speak through your             3rd      fireball, stinking cloud
+familiar in your own voice, even if your familiar is           4th      fire shield, wall of fire
+normally incapable of speech.                                  5th      flame strike, hallow
+
+Whispers of the Grave                                      Dark One’s Blessing
+
+Prerequisite: 9th level                                    Starting at 1st level, when you reduce a hostile
+                                                           creature to 0 hit points, you gain temporary hit
+You can cast speak with dead at will, without              points equal to your Charisma modifier + your
+expending a spell slot.                                    warlock level (minimum of 1).
+
+Witch Sight                                                Dark One’s Own Luck
+
+Prerequisite: 15th level                                   Starting at 6th level, you can call on your patron to
+                                                           alter fate in your favor. When you make an ability
+You can see the true form of any shapechanger or           check or a saving throw, you can use this feature to
+creature concealed by illusion or transmutation
+magic while the creature is within 30 feet of you and
+within line of sight.

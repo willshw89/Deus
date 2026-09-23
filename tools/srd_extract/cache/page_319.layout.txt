@@ -1,0 +1,52 @@
+Blind Senses. The grimlock can’t use its blindsight while  Actions
+deafened and unable to smell.
+Keen Hearing and Smell. The grimlock has advantage         Claws. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+on Wisdom (Perception) checks that rely on hearing or      target. Hit: 13 (2d8 + 4) slashing damage.
+smell.                                                     Illusory Appearance. The hag covers herself and
+Stone Camouflage. The grimlock has advantage on            anything she is wearing or carrying with a magical
+Dexterity (Stealth) checks made to hide in rocky terrain.  illusion that makes her look like another creature of
+                                                           her general size and humanoid shape. The illusion ends
+Actions                                                    if the hag takes a bonus action to end it or if she dies.
+Spiked Bone Club. Melee Weapon Attack: +5 to hit,
+reach 5 ft., one target. Hit: 5 (1d4 + 3) bludgeoning        The changes wrought by this effect fail to hold up to
+damage plus 2 (1d4) piercing damage.                       physical inspection. For example, the hag could appear
+                                                           to have smooth skin, but someone touching her would
+Monsters (H)                                               feel her rough flesh. Otherwise, a creature must take
+                                                           an action to visually inspect the illusion and succeed on
+Hags                                                       a DC 20 Intelligence (Investigation) check to discern
+                                                           that the hag is disguised.
+Green Hag                                                  Invisible Passage. The hag magically turns invisible
+                                                           until she attacks or casts a spell, or until her
+Medium fey, neutral evil                                   concentration ends (as if concentrating on a spell).
+                                                           While invisible, she leaves no physical evidence of her
+Armor Class 17 (natural armor)                             passage, so she can be tracked only by magic. Any
+Hit Points 82 (11d8 + 33)                                  equipment she wears or carries is invisible with her.
+Speed 30 ft.
+                                                           Night Hag
+    STR DEX CON INT WIS CHA
+  18 (+4) 12 (+1) 16 (+3) 13 (+1) 14 (+2) 14 (+2)          Medium fiend, neutral evil
+
+Skills Arcana +3, Deception +4, Perception +4, Stealth     Armor Class 17 (natural armor)
+  +3                                                       Hit Points 112 (15d8 + 45)
+                                                           Speed 30 ft.
+Senses darkvision 60 ft., passive Perception 14
+Languages Common, Draconic, Sylvan                             STR DEX CON INT WIS CHA
+Challenge 3 (700 XP)                                         18 (+4) 15 (+2) 16 (+3) 16 (+3) 14 (+2) 16 (+3)
+
+Amphibious. The hag can breathe air and water.             Skills Deception +7, Insight +6, Perception +6, Stealth
+Innate Spellcasting. The hag’s innate spellcasting           +6
+ability is Charisma (spell save DC 12). She can innately
+cast the following spells, requiring no material           Damage Resistances cold, fire; bludgeoning, piercing,
+components:                                                  and slashing from nonmagical attacks not made with
+At will: dancing lights, minor illusion, vicious mockery     silvered weapons
+Mimicry. The hag can mimic animal sounds and
+humanoid voices. A creature that hears the sounds can      Condition Immunities charmed
+tell they are imitations with a successful DC 14 Wisdom    Senses darkvision 120 ft., passive Perception 16
+(Insight) check.                                           Languages Abyssal, Common, Infernal, Primordial
+                                                           Challenge 5 (1,800 XP)
+
+                                                           Innate Spellcasting. The hag’s innate spellcasting
+                                                           ability is Charisma (spell save DC 14, +6 to hit with spell
+                                                           attacks). She can innately cast the following spells,
+                                                           requiring no material components:
+                                                           At will: detect magic, magic missile

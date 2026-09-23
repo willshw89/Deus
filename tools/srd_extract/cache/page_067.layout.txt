@@ -1,0 +1,64 @@
+sorcerer, warlock, or wizard can use such an item as         Druidic Focus. A druidic focus might be a sprig of
+a spellcasting focus.                                      mistletoe or holly, a wand or scepter made of yew or
+                                                           another special wood, a staff drawn whole out of a
+  Ball Bearings. As an action, you can spill these         living tree, or a totem object incorporating feathers,
+tiny metal balls from their pouch to cover a level,        fur, bones, and teeth from sacred animals. A druid
+square area that is 10 feet on a side. A creature          can use such an object as a spellcasting focus.
+moving across the covered area must succeed on a
+DC 10 Dexterity saving throw or fall prone. A                Fishing Tackle. This kit includes a wooden rod,
+creature moving through the area at half speed             silken line, corkwood bobbers, steel hooks, lead
+doesn’t need to make the save.                             sinkers, velvet lures, and narrow netting.
+
+  Block and Tackle. A set of pulleys with a cable            Healer’s Kit. This kit is a leather pouch containing
+threaded through them and a hook to attach to              bandages, salves, and splints. The kit has ten uses. As
+objects, a block and tackle allows you to hoist up to      an action, you can expend one use of the kit to
+four times the weight you can normally lift.               stabilize a creature that has 0 hit points, without
+                                                           needing to make a Wisdom (Medicine) check.
+  Book. A book might contain poetry, historical
+accounts, information pertaining to a particular field       Holy Symbol. A holy symbol is a representation of
+of lore, diagrams and notes on gnomish contraptions,       a god or pantheon. It might be an amulet depicting a
+or just about anything else that can be represented        symbol representing a deity, the same symbol
+using text or pictures. A book of spells is a spellbook    carefully engraved or inlaid as an emblem on a
+(described later in this section).                         shield, or a tiny box holding a fragment of a sacred
+                                                           relic. Appendix PH-B "Fantasy-Historical Pantheons"
+  Caltrops. As an action, you can spread a bag of          lists the symbols commonly associated with many
+caltrops to cover a square area that is 5 feet on a side.  gods in the multiverse. A cleric or paladin can use a
+Any creature that enters the area must succeed on a        holy symbol as a spellcasting focus. To use the
+DC 15 Dexterity saving throw or stop moving this           symbol in this way, the caster must hold it in hand,
+turn and take 1 piercing damage. Taking this damage        wear it visibly, or bear it on a shield.
+reduces the creature’s walking speed by 10 feet until
+the creature regains at least 1 hit point. A creature        Holy Water. As an action, you can splash the
+moving through the area at half speed doesn’t need         contents of this flask onto a creature within 5 feet of
+to make the save.                                          you or throw it up to 20 feet, shattering it on impact.
+                                                           In either case, make a ranged attack against a target
+  Candle. For 1 hour, a candle sheds bright light in a     creature, treating the holy water as an improvised
+5-foot radius and dim light for an additional 5 feet.   weapon. If the target is a fiend or undead, it takes
+                                                           2d6 radiant damage.
+  Case, Crossbow Bolt. This wooden case can hold
+up to twenty crossbow bolts.                                 A cleric or paladin may create holy water by
+                                                           performing a special ritual. The ritual takes 1 hour to
+  Case, Map or Scroll. This cylindrical leather case       perform, uses 25 gp worth of powdered silver, and
+can hold up to ten rolled-up sheets of paper or five    requires the caster to expend a 1st-level spell slot.
+rolled-up sheets of parchment.
+                                                             Hunting Trap. When you use your action to set it,
+  Chain. A chain has 10 hit points. It can be burst        this trap forms a saw-toothed steel ring that snaps
+with a successful DC 20 Strength check.                    shut when a creature steps on a pressure plate in the
+                                                           center. The trap is affixed by a heavy chain to an
+  Climber’s Kit. A climber’s kit includes special          immobile object, such as a tree or a spike driven into
+pitons, boot tips, gloves, and a harness. You can use      the ground. A creature that steps on the plate must
+the climber’s kit as an action to anchor yourself;         succeed on a DC 13 Dexterity saving throw or take
+when you do, you can’t fall more than 25 feet from         1d4 piercing damage and stop moving. Thereafter,
+the point where you anchored yourself, and you             until the creature breaks free of the trap, its
+can’t climb more than 25 feet away from that point         movement is limited by the length of the chain
+without undoing the anchor.                                (typically 3 feet long). A creature can use its action
+                                                           to make a DC 13 Strength check, freeing itself or
+  Component Pouch. A component pouch is a small,           another creature within its reach on a success. Each
+watertight leather belt pouch that has compartments        failed check deals 1 piercing damage to the trapped
+to hold all the material components and other              creature.
+special items you need to cast your spells, except for
+those components that have a specific cost (as
+indicated in a spell's description).
+
+  Crowbar. Using a crowbar grants advantage to
+Strength checks where the crowbar’s leverage can
+be applied.

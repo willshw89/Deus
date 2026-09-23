@@ -1,0 +1,245 @@
+Sorcerer
+Class Features
+As a sorcerer, you gain the following class features.
+Hit Points
+Hit Dice: 1d6 per sorcerer level Hit Points at 1st Level: 6 + your Constitution
+modifier Hit Points at Higher Levels: 1d6 (or 4) + your
+Constitution modifier per sorcerer level after 1st
+Proficiencies
+Armor: None
+
+Weapons: Daggers, darts, slings, quarterstaffs, light crossbows
+Tools: None Saving Throws: Constitution, Charisma Skills: Choose two from Arcana, Deception, Insight,
+Intimidation, Persuasion, and Religion
+Equipment
+You start with the following equipment, in addition to the equipment granted by your background:
+• (a) a light crossbow and 20 bolts or (b) any simple weapon
+• (a) a component pouch or (b) an arcane focus • (a) a dungeoneer’s pack or (b) an explorer’s pack • Two daggers
+
+The Sorcerer
+
+Level 1st
+
+Proficiency Bonus +2
+
+2nd
+
++2
+
+3rd
+
++2
+
+4th
+
++2
+
+5th
+
++3
+
+6th
+
++3
+
+7th
+
++3
+
+8th
+
++3
+
+9th
+
++4
+
+10th
+
++4
+
+11th
+
++4
+
+12th
+
++4
+
+13th
+
++5
+
+14th
+
++5
+
+15th
+
++5
+
+16th
+
++5
+
+17th
+
++6
+
+18th
+
++6
+
+19th
+
++6
+
+20th
+
++6
+
+Sorcery Points
+—
+2 3 4
+5 6
+7 8
+9 10 11 12
+13 14
+15 16
+17 18
+19
+20
+
+Features Spellcasting, Sorcerous Origin Font of Magic Metamagic Ability Score Improvement —
+Sorcerous Origin feature —
+Ability Score Improvement —
+Metamagic —
+Ability Score Improvement —
+Sorcerous Origin feature —
+Ability Score Improvement Metamagic Sorcerous Origin feature Ability Score Improvement Sorcerous Restoration
+
+Cantrips Spells
+
+—Spell Slots per Spell Level—
+
+Known Known 1st 2nd 3rd 4th 5th 6th 7th 8th 9th
+
+4
+
+2
+
+2 — ———————
+
+4
+
+3
+
+3 — ———————
+
+4
+
+4
+
+4 2 ———————
+
+5
+
+5
+
+4 3 ———————
+
+5
+
+6
+
+4 3 2 ——————
+
+5
+
+7
+
+4 3 3 ——————
+
+5
+
+8
+
+4 3 3 1 —————
+
+5
+
+9
+
+4 3 3 2 —————
+
+5
+
+10
+
+4 3 3 3 1 ————
+
+6
+
+11
+
+4 3 3 3 2 ————
+
+6
+
+12
+
+4 3 3 3 2 1 ———
+
+6
+
+12
+
+4 3 3 3 2 1 ———
+
+6
+
+13
+
+4 3 3 3 2 1 1 ——
+
+6
+
+13
+
+4 3 3 3 2 1 1 ——
+
+6
+
+14
+
+4 3 3 3 2 1 1 1—
+
+6
+
+14
+
+4 3 3 3 2 1 1 1—
+
+6
+
+15
+
+43 3321111
+
+6
+
+15
+
+43 3331111
+
+6
+
+15
+
+43 3332111
+
+6
+
+15
+
+43 3332211

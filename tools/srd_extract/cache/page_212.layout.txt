@@ -1,0 +1,65 @@
+than this one, unless no foe is within 60 feet of you   Boots of the Winterlands
+that you can see or hear.
+                                                        Wondrous item, uncommon (requires attunement)
+  Whenever a hostile creature damages you while
+the axe is in your possession, you must succeed on a    These furred boots are snug and feel quite warm.
+DC 15 Wisdom saving throw or go berserk. While          While you wear them, you gain the following
+berserk, you must use your action each round to         benefits:
+attack the creature nearest to you with the axe. If
+you can make extra attacks as part of the Attack        • You have resistance to cold damage.
+action, you use those extra attacks, moving to attack   • You ignore difficult terrain created by ice or snow.
+the next nearest creature after you fell your current   • You can tolerate temperatures as low as -50
+target. If you have multiple possible targets, you
+attack one at random. You are berserk until you start     degrees Fahrenheit without any additional
+your turn with no creatures within 60 feet of you         protection. If you wear heavy clothes, you can
+that you can see or hear.                                 tolerate temperatures as low as -100 degrees
+                                                          Fahrenheit.
+Boots of Elvenkind
+                                                        Bowl of Commanding Water Elementals
+Wondrous item, uncommon
+                                                        Wondrous item, rare
+While you wear these boots, your steps make no
+sound, regardless of the surface you are moving         While this bowl is filled with water, you can use an
+across. You also have advantage on Dexterity            action to speak the bowl’s command word and
+(Stealth) checks that rely on moving silently.          summon a water elemental, as if you had cast the
+                                                        conjure elemental spell. The bowl can’t be used this
+Boots of Levitation                                     way again until the next dawn.
+
+Wondrous item, rare (requires attunement)                 The bowl is about 1 foot in diameter and half as
+                                                        deep. It weighs 3 pounds and holds about 3 gallons.
+While you wear these boots, you can use an action to
+cast the levitate spell on yourself at will.            Bracers of Archery
+
+Boots of Speed                                          Wondrous item, uncommon (requires attunement)
+
+Wondrous item, rare (requires attunement)               While wearing these bracers, you have proficiency
+                                                        with the longbow and shortbow, and you gain a +2
+While you wear these boots, you can use a bonus         bonus to damage rolls on ranged attacks made with
+action and click the boots’ heels together. If you do,  such weapons.
+the boots double your walking speed, and any
+creature that makes an opportunity attack against       Bracers of Defense
+you has disadvantage on the attack roll. If you click
+your heels together again, you end the effect.          Wondrous item, rare (requires attunement)
+
+  When the boots’ property has been used for a total    While wearing these bracers, you gain a +2 bonus to
+of 10 minutes, the magic ceases to function until you   AC if you are wearing no armor and using no shield.
+finish a long rest.
+                                                        Brazier of Commanding Fire Elementals
+Boots of Striding and Springing
+                                                        Wondrous item, rare
+Wondrous item, uncommon (requires attunement)
+                                                        While a fire burns in this brass brazier, you can use
+While you wear these boots, your walking speed          an action to speak the brazier’s command word and
+becomes 30 feet, unless your walking speed is higher,   summon a fire elemental, as if you had cast the
+and your speed isn’t reduced if you are encumbered      conjure elemental spell. The brazier can’t be used
+or wearing heavy armor. In addition, you can jump       this way again until the next dawn.
+three times the normal distance, though you can’t
+jump farther than your remaining movement would           The brazier weighs 5 pounds.
+allow.
+                                                        Brooch of Shielding
+
+                                                        Wondrous item, uncommon (requires attunement)
+
+                                                        While wearing this brooch, you have resistance to
+                                                        force damage, and you have immunity to damage
+                                                        from the magic missile spell.

@@ -1,0 +1,62 @@
+specified, and anything that deprives you of your        Breaking Up Your Move
+ability to take actions also prevents you from taking
+a bonus action.                                          You can break up your movement on your turn,
+                                                         using some of your speed before and after your
+Other Activity on Your Turn                              action. For example, if you have a speed of 30 feet,
+                                                         you can move 10 feet, take your action, and then
+Your turn can include a variety of flourishes that       move 20 feet.
+require neither your action nor your move.
+                                                         Moving between Attacks
+  You can communicate however you are able,
+through brief utterances and gestures, as you take       If you take an action that includes more than one
+your turn.                                               weapon attack, you can break up your movement
+                                                         even further by moving between those attacks. For
+  You can also interact with one object or feature of    example, a fighter who can make two attacks with
+the environment for free, during either your move or     the Extra Attack feature and who has a speed of 25
+your action. For example, you could open a door          feet could move 10 feet, make an attack, move 15
+during your move as you stride toward a foe, or you      feet, and then attack again.
+could draw your weapon as part of the same action
+you use to attack.                                       Using Different Speeds
+
+  If you want to interact with a second object, you      If you have more than one speed, such as your
+need to use your action. Some magic items and other      walking speed and a flying speed, you can switch
+special objects always require an action to use, as      back and forth between your speeds during your
+stated in their descriptions.                            move. Whenever you switch, subtract the distance
+                                                         you’ve already moved from the new speed. The
+  The GM might require you to use an action for any      result determines how much farther you can move.
+of these activities when it needs special care or when   If the result is 0 or less, you can’t use the new speed
+it presents an unusual obstacle. For instance, the GM    during the current move.
+could reasonably expect you to use an action to open
+a stuck door or turn a crank to lower a drawbridge.        For example, if you have a speed of 30 and a flying
+                                                         speed of 60 because a wizard cast the fly spell on you,
+Reactions                                                you could fly 20 feet, then walk 10 feet, and then
+                                                         leap into the air to fly 30 feet more.
+Certain special abilities, spells, and situations allow
+you to take a special action called a reaction. A        Difficult Terrain
+reaction is an instant response to a trigger of some
+kind, which can occur on your turn or on someone         Combat rarely takes place in bare rooms or on
+else’s. The opportunity attack is the most common        featureless plains. Boulder-strewn caverns, briar-
+type of reaction.                                        choked forests, treacherous staircases—the setting
+                                                         of a typical fight contains difficult terrain.
+  When you take a reaction, you can’t take another
+one until the start of your next turn. If the reaction     Every foot of movement in difficult terrain costs 1
+interrupts another creature’s turn, that creature can    extra foot. This rule is true even if multiple things in
+continue its turn right after the reaction.              a space count as difficult terrain.
+
+Movement and Position                                      Low furniture, rubble, undergrowth, steep stairs,
+                                                         snow, and shallow bogs are examples of difficult
+In combat, characters and monsters are in constant       terrain. The space of another creature, whether
+motion, often using movement and position to gain        hostile or not, also counts as difficult terrain.
+the upper hand.
+                                                         Being Prone
+  On your turn, you can move a distance up to your
+speed. You can use as much or as little of your speed    Combatants often find themselves lying on the
+as you like on your turn, following the rules here.      ground, either because they are knocked down or
+                                                         because they throw themselves down. In the game,
+  Your movement can include jumping, climbing,           they are prone, a condition described in appendix
+and swimming. These different modes of movement          PH-A.
+can be combined with walking, or they can
+constitute your entire move. However you’re moving,        You can drop prone without using any of your
+you deduct the distance of each part of your move        speed. Standing up takes more effort; doing so costs
+from your speed until it is used up or until you are     an amount of movement equal to half your speed.
+done moving.

@@ -1,0 +1,62 @@
+Creatures that aren’t there can’t perceive you or        Call Lightning
+interact with you, unless they have the ability to do
+so.                                                      3rd-level conjuration
+
+Blur                                                     Casting Time: 1 action
+                                                         Range: 120 feet
+2nd-level illusion                                    Components: V, S
+                                                         Duration: Concentration, up to 10 minutes
+Casting Time: 1 action
+Range: Self                                              A storm cloud appears in the shape of a cylinder that
+Components: V                                            is 10 feet tall with a 60-foot radius, centered on a
+Duration: Concentration, up to 1 minute                  point you can see 100 feet directly above you. The
+                                                         spell fails if you can’t see a point in the air where the
+Your body becomes blurred, shifting and wavering         storm cloud could appear (for example, if you are in
+to all who can see you. For the duration, any            a room that can’t accommodate the cloud).
+creature has disadvantage on attack rolls against you.
+An attacker is immune to this effect if it doesn’t rely    When you cast the spell, choose a point you can
+on sight, as with blindsight, or can see through         see within range. A bolt of lightning flashes down
+illusions, as with truesight.                            from the cloud to that point. Each creature within 5
+                                                         feet of that point must make a Dexterity saving
+Branding Smite                                           throw. A creature takes 3d10 lightning damage on a
+                                                         failed save, or half as much damage on a successful
+2nd-level evocation                                   one. On each of your turns until the spell ends, you
+                                                         can use your action to call down lightning in this way
+Casting Time: 1 bonus action                             again, targeting the same point or a different one.
+Range: Self
+Components: V                                              If you are outdoors in stormy conditions when you
+Duration: Concentration, up to 1 minute                  cast this spell, the spell gives you control over the
+The next time you hit a creature with a weapon           existing storm instead of creating a new one. Under
+attack before this spell ends, the weapon gleams         such conditions, the spell’s damage increases by
+with astral radiance as you strike. The attack deals     1d10.
+an extra 2d6 radiant damage to the target, which
+becomes visible if it's invisible, and the target sheds    At Higher Levels. When you cast this spell using a
+dim light in a 5-foot radius and can't become         spell slot of 4th or higher level, the damage increases
+invisible until the spell ends.                          by 1d10 for each slot level above 3rd.
+
+  At Higher Levels. When you cast this spell using a     Calm Emotions
+spell slot of 3rd level or higher, the extra damage
+increases by 1d6 for each slot level above 2nd.          2nd-level enchantment
+
+Burning Hands                                            Casting Time: 1 action
+                                                         Range: 60 feet
+1st-level evocation                                   Components: V, S
+                                                         Duration: Concentration, up to 1 minute
+Casting Time: 1 action
+Range: Self (15-foot cone)                            You attempt to suppress strong emotions in a group
+Components: V, S                                         of people. Each humanoid in a 20-foot-radius sphere
+Duration: Instantaneous                                  centered on a point you choose within range must
+                                                         make a Charisma saving throw; a creature can
+As you hold your hands with thumbs touching and          choose to fail this saving throw if it wishes. If a
+fingers spread, a thin sheet of flames shoots forth      creature fails its saving throw, choose one of the
+from your outstretched fingertips. Each creature in a    following two effects.
+15-foot cone must make a Dexterity saving throw. A
+creature takes 3d6 fire damage on a failed save, or        You can suppress any effect causing a target to be
+half as much damage on a successful one.                 charmed or frightened. When this spell ends, any
+                                                         suppressed effect resumes, provided that its
+  The fire ignites any flammable objects in the area     duration has not expired in the meantime.
+that aren’t being worn or carried.
+                                                           Alternatively, you can make a target indifferent
+  At Higher Levels. When you cast this spell using a     about creatures of your choice that it is hostile
+spell slot of 2nd level or higher, the damage            toward. This indifference ends if the target is
+increases by 1d6 for each slot level above 1st.          attacked or harmed by a spell or if it witnesses any

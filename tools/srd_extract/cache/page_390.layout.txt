@@ -1,0 +1,53 @@
+Hit Points 22 (5d8)                                      Actions
+Speed 20 ft., climb 20 ft.
+                                                         Bites. Melee Weapon Attack: +6 to hit, reach 0 ft., one
+ STR DEX CON INT                WIS    CHA               creature in the swarm’s space. Hit: 7 (2d6) piercing
+3 (-4) 13 (+1) 10 (+0) 1 (-5)  7 (-2)  1 (-5)            damage, or 3 (1d6) piercing damage if the swarm has
+                                                         half of its hit points or fewer. The target must make a
+Damage Resistances bludgeoning, piercing, slashing       DC 10 Constitution saving throw, taking 14 (4d6)
+Condition Immunities charmed, frightened, grappled,      poison damage on a failed save, or half as much
+                                                         damage on a successful one.
+  paralyzed, petrified, prone, restrained, stunned
+Senses blindsight 10 ft., passive Perception 8           Swarm of Quippers
+Languages —
+Challenge 1/2 (100 XP)                                   Medium swarm of Tiny beasts, unaligned
+
+Swarm. The swarm can occupy another creature’s           Armor Class 13
+space and vice versa, and the swarm can move through     Hit Points 28 (8d8 - 8)
+any opening large enough for a Tiny insect. The swarm    Speed 0 ft., swim 40 ft.
+can’t regain hit points or gain temporary hit points.
+                                                           STR DEX CON            INT     WIS    CHA
+Actions                                                  13 (+1) 16 (+3) 9 (-1)  1 (-5)  7 (-2)  2 (-4)
+Bites. Melee Weapon Attack: +3 to hit, reach 0 ft., one
+target in the swarm’s space. Hit: 10 (4d4) piercing      Damage Resistances bludgeoning, piercing, slashing
+damage, or 5 (2d4) piercing damage if the swarm has      Condition Immunities charmed, frightened, grappled,
+half of its hit points or fewer.
+                                                           paralyzed, petrified, prone, restrained, stunned
+Swarm of Poisonous Snakes                                Senses darkvision 60 ft., passive Perception 8
+                                                         Languages —
+Medium swarm of Tiny beasts, unaligned                   Challenge 1 (200 XP)
+
+Armor Class 14                                           Blood Frenzy. The swarm has advantage on melee
+Hit Points 36 (8d8)                                      attack rolls against any creature that doesn’t have all
+Speed 30 ft., swim 30 ft.                                its hit points.
+                                                         Swarm. The swarm can occupy another creature’s
+    STR DEX CON INT WIS CHA                              space and vice versa, and the swarm can move through
+   8 (-1) 18 (+4) 11 (+0) 1 (-5) 10 (+0) 3 (-4)          any opening large enough for a Tiny quipper. The
+                                                         swarm can’t regain hit points or gain temporary hit
+Damage Resistances bludgeoning, piercing, slashing       points.
+Condition Immunities charmed, frightened, grappled,      Water Breathing. The swarm can breathe only
+                                                         underwater.
+  paralyzed, petrified, prone, restrained, stunned
+Senses blindsight 10 ft., passive Perception 10          Actions
+Languages —
+Challenge 2 (450 XP)                                     Bites. Melee Weapon Attack: +5 to hit, reach 0 ft., one
+                                                         creature in the swarm’s space. Hit: 14 (4d6) piercing
+Swarm. The swarm can occupy another creature’s           damage, or 7 (2d6) piercing damage if the swarm has
+space and vice versa, and the swarm can move through     half of its hit points or fewer.
+any opening large enough for a Tiny snake. The swarm
+can’t regain hit points or gain temporary hit points.    Swarm of Rats
+
+                                                         Medium swarm of Tiny beasts, unaligned
+
+                                                         Armor Class 10
+                                                         Hit Points 24 (7d8 - 7)

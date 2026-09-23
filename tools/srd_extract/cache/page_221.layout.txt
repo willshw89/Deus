@@ -1,0 +1,60 @@
+(save DC 13) on a humanoid within 30 feet of you,          token disappears, and a giant flapping fan takes its
+provided that you and the target can see each other.       place. The fan floats and creates a wind strong
+The lenses regain all expended charges daily at dawn.      enough to fill the sails of one ship, increasing its
+                                                           speed by 5 miles per hour for 8 hours. You can
+Eyes of Minute Seeing                                      dismiss the fan as an action.
+
+Wondrous item, uncommon                                      Swan Boat. You can use an action to touch the
+                                                           token to a body of water at least 60 feet in diameter.
+These crystal lenses fit over the eyes. While wearing      The token disappears, and a 50-foot-long, 20-foot-
+them, you can see much better than normal out to a         wide boat shaped like a swan takes its place. The
+range of 1 foot. You have advantage on Intelligence        boat is self-propelled and moves across water at a
+(Investigation) checks that rely on sight while            speed of 6 miles per hour. You can use an action
+searching an area or studying an object within that        while on the boat to command it to move or to turn
+range.                                                     up to 90 degrees. The boat can carry up to thirty-two
+                                                           Medium or smaller creatures. A Large creature
+Eyes of the Eagle                                          counts as four Medium creatures, while a Huge
+                                                           creature counts as nine. The boat remains for 24
+Wondrous item, uncommon (requires attunement)              hours and then disappears. You can dismiss the boat
+                                                           as an action.
+These crystal lenses fit over the eyes. While wearing
+them, you have advantage on Wisdom (Perception)              Tree. You must be outdoors to use this token. You
+checks that rely on sight. In conditions of clear          can use an action to touch it to an unoccupied space
+visibility, you can make out details of even extremely     on the ground. The token disappears, and in its place
+distant creatures and objects as small as 2 feet           a nonmagical oak tree springs into existence. The
+across.                                                    tree is 60 feet tall and has a 5-foot-diameter trunk,
+                                                           and its branches at the top spread out in a 20-foot
+Feather Token                                              radius.
+
+Wondrous item, rare                                          Whip. You can use an action to throw the token to
+                                                           a point within 10 feet of you. The token disappears,
+This tiny object looks like a feather. Different types     and a floating whip takes its place. You can then use
+of feather tokens exist, each with a different single-  a bonus action to make a melee spell attack against a
+use effect. The GM chooses the kind of token or            creature within 10 feet of the whip, with an attack
+determines it randomly.                                    bonus of +9. On a hit, the target takes 1d6 + 5 force
+                                                           damage.
+d100   Feather Token  d100   Feather Token
+01–20  Anchor         51–65  Swan boat                       As a bonus action on your turn, you can direct the
+21–35  Bird           66–90  Tree                          whip to fly up to 20 feet and repeat the attack
+36–50  Fan            91–00  Whip                          against a creature within 10 feet of it. The whip
+                                                           disappears after 1 hour, when you use an action to
+  Anchor. You can use an action to touch the token         dismiss it, or when you are incapacitated or die.
+to a boat or ship. For the next 24 hours, the vessel
+can’t be moved by any means. Touching the token to         Figurine of Wondrous Power
+the vessel again ends the effect. When the effect ends,
+the token disappears.                                      Wondrous item, rarity by figurine
+
+  Bird. You can use an action to toss the token 5 feet     A figurine of wondrous power is a statuette of a beast
+into the air. The token disappears and an enormous,        small enough to fit in a pocket. If you use an action to
+multicolored bird takes its place. The bird has the        speak the command word and throw the figurine to
+statistics of a roc, but it obeys your simple              a point on the ground within 60 feet of you, the
+commands and can’t attack. It can carry up to 500          figurine becomes a living creature. If the space
+pounds while flying at its maximum speed (16 miles         where the creature would appear is occupied by
+an hour for a maximum of 144 miles per day, with a         other creatures or objects, or if there isn’t enough
+one-hour rest for every 3 hours of flying), or 1,000    space for the creature, the figurine doesn’t become a
+pounds at half that speed. The bird disappears after       creature.
+flying its maximum distance for a day or if it drops to
+0 hit points. You can dismiss the bird as an action.         The creature is friendly to you and your
+                                                           companions. It understands your languages and
+  Fan. If you are on a boat or ship, you can use an        obeys your spoken commands. If you issue no
+action to toss the token up to 10 feet in the air. The

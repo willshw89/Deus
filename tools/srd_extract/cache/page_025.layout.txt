@@ -1,0 +1,56 @@
+Action Surge                                              Champion
+
+Starting at 2nd level, you can push yourself beyond       The archetypal Champion focuses on the
+your normal limits for a moment. On your turn, you        development of raw physical power honed to deadly
+can take one additional action on top of your regular     perfection. Those who model themselves on this
+action and a possible bonus action.                       archetype combine rigorous training with physical
+                                                          excellence to deal devastating blows.
+  Once you use this feature, you must finish a short
+or long rest before you can use it again. Starting at     Improved Critical
+17th level, you can use it twice before a rest, but only
+once on the same turn.                                    Beginning when you choose this archetype at 3rd
+                                                          level, your weapon attacks score a critical hit on a
+Martial Archetype                                         roll of 19 or 20.
+
+At 3rd level, you choose an archetype that you strive     Remarkable Athlete
+to emulate in your combat styles and techniques,
+such as Champion. The archetype you choose grants         Starting at 7th level, you can add half your
+you features at 3rd level and again at 7th, 10th, 15th,   proficiency bonus (round up) to any Strength,
+and 18th level.                                           Dexterity, or Constitution check you make that
+                                                          doesn’t already use your proficiency bonus.
+Ability Score Improvement
+                                                            In addition, when you make a running long jump,
+When you reach 4th level, and again at 6th, 8th, 12th,    the distance you can cover increases by a number of
+14th, 16th, and 19th level, you can increase one          feet equal to your Strength modifier.
+ability score of your choice by 2, or you can increase
+two ability scores of your choice by 1. As normal,        Additional Fighting Style
+you can’t increase an ability score above 20 using
+this feature.                                             At 10th level, you can choose a second option from
+                                                          the Fighting Style class feature.
+Extra Attack
+                                                          Superior Critical
+Beginning at 5th level, you can attack twice, instead
+of once, whenever you take the Attack action on your      Starting at 15th level, your weapon attacks score a
+turn.                                                     critical hit on a roll of 18–20.
+
+  The number of attacks increases to three when           Survivor
+you reach 11th level in this class and to four when
+you reach 20th level in this class.                       At 18th level, you attain the pinnacle of resilience in
+                                                          battle. At the start of each of your turns, you regain
+Indomitable                                               hit points equal to 5 + your Constitution modifier if
+                                                          you have no more than half of your hit points left.
+Beginning at 9th level, you can reroll a saving throw     You don’t gain this benefit if you have 0 hit points.
+that you fail. If you do so, you must use the new roll,
+and you can’t use this feature again until you finish a
+long rest.
+
+  You can use this feature twice between long rests
+starting at 13th level and three times between long
+rests starting at 17th level.
+
+Martial Archetypes
+
+Different fighters choose different approaches to
+perfecting their fighting prowess. The martial
+archetype you choose to emulate reflects your
+approach.

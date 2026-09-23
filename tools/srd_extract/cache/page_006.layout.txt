@@ -1,0 +1,62 @@
+one. The damage increases to 3d6 at 6th level, 4d6 at       Ability Score Increase. Your Constitution score
+11th level, and 5d6 at 16th level.                        increases by 1.
+
+  After you use your breath weapon, you can’t use it        Artificer’s Lore. Whenever you make an
+again until you complete a short or long rest.            Intelligence (History) check related to magic items,
+                                                          alchemical objects, or technological devices, you can
+  Damage Resistance. You have resistance to the           add twice your proficiency bonus, instead of any
+damage type associated with your draconic ancestry.       proficiency bonus you normally apply.
+
+  Languages. You can speak, read, and write                 Tinker. You have proficiency with artisan’s tools
+Common and Draconic. Draconic is thought to be one        (tinker’s tools). Using those tools, you can spend 1
+of the oldest languages and is often used in the study    hour and 10 gp worth of materials to construct a
+of magic. The language sounds harsh to most other         Tiny clockwork device (AC 5, 1 hp). The device
+creatures and includes numerous hard consonants           ceases to function after 24 hours (unless you spend
+and sibilants.                                            1 hour repairing it to keep the device functioning),
+                                                          or when you use your action to dismantle it; at that
+Gnome                                                     time, you can reclaim the materials used to create it.
+                                                          You can have up to three such devices active at a
+Gnome Traits                                              time.
+
+Your gnome character has certain characteristics in         When you create a device, choose one of the
+common with all other gnomes.                             following options:
+
+  Ability Score Increase. Your Intelligence score         Clockwork Toy. This toy is a clockwork animal,
+increases by 2.                                             monster, or person, such as a frog, mouse, bird,
+                                                            dragon, or soldier. When placed on the ground, the
+  Age. Gnomes mature at the same rate humans do,            toy moves 5 feet across the ground on each of your
+and most are expected to settle down into an adult          turns in a random direction. It makes noises as
+life by around age 40. They can live 350 to almost          appropriate to the creature it represents.
+500 years.
+                                                          Fire Starter. The device produces a miniature flame,
+  Alignment. Gnomes are most often good. Those              which you can use to light a candle, torch, or
+who tend toward law are sages, engineers,                   campfire. Using the device requires your action.
+researchers, scholars, investigators, or inventors.
+Those who tend toward chaos are minstrels,                Music Box. When opened, this music box plays a
+tricksters, wanderers, or fanciful jewelers. Gnomes         single song at a moderate volume. The box stops
+are good-hearted, and even the tricksters among          playing when it reaches the song’s end or when it
+them are more playful than vicious.                         is closed.
+
+  Size. Gnomes are between 3 and 4 feet tall and          Half-Elf
+average about 40 pounds. Your size is Small.
+                                                          Half-Elf Traits
+  Speed. Your base walking speed is 25 feet.
+  Darkvision. Accustomed to life underground, you         Your half-elf character has some qualities in
+have superior vision in dark and dim conditions. You      common with elves and some that are unique to
+can see in dim light within 60 feet of you as if it were  half-elves.
+bright light, and in darkness as if it were dim light.
+You can’t discern color in darkness, only shades of         Ability Score Increase. Your Charisma score
+gray.                                                     increases by 2, and two other ability scores of your
+  Gnome Cunning. You have advantage on all                choice increase by 1.
+Intelligence, Wisdom, and Charisma saving throws
+against magic.                                              Age. Half-elves mature at the same rate humans
+  Languages. You can speak, read, and write               do and reach adulthood around the age of 20. They
+Common and Gnomish. The Gnomish language,                 live much longer than humans, however, often
+which uses the Dwarvish script, is renowned for its       exceeding 180 years.
+technical treatises and its catalogs of knowledge
+about the natural world.                                    Alignment. Half-elves share the chaotic bent of
+                                                          their elven heritage. They value both personal
+Rock Gnome                                                freedom and creative expression, demonstrating
+                                                          neither love of leaders nor desire for followers. They
+As a rock gnome, you have a natural inventiveness         chafe at rules, resent others’ demands, and
+and hardiness beyond that of other gnomes.

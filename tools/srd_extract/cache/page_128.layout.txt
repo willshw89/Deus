@@ -1,0 +1,62 @@
+You summon a celestial of challenge rating 4 or          Conjure Fey
+lower, which appears in an unoccupied space that
+you can see within range. The celestial disappears       6th-level conjuration
+when it drops to 0 hit points or when the spell ends.
+                                                         Casting Time: 1 minute
+  The celestial is friendly to you and your              Range: 90 feet
+companions for the duration. Roll initiative for the     Components: V, S
+celestial, which has its own turns. It obeys any verbal  Duration: Concentration, up to 1 hour
+commands that you issue to it (no action required by
+you), as long as they don’t violate its alignment. If    You summon a fey creature of challenge rating 6 or
+you don’t issue any commands to the celestial, it        lower, or a fey spirit that takes the form of a beast of
+defends itself from hostile creatures but otherwise      challenge rating 6 or lower. It appears in an
+takes no actions.                                        unoccupied space that you can see within range. The
+                                                         fey creature disappears when it drops to 0 hit points
+  The GM has the celestial’s statistics.                 or when the spell ends.
+  At Higher Levels. When you cast this spell using a
+9th-level spell slot, you summon a celestial of         The fey creature is friendly to you and your
+challenge rating 5 or lower.                             companions for the duration. Roll initiative for the
+                                                         creature, which has its own turns. It obeys any
+Conjure Elemental                                        verbal commands that you issue to it (no action
+                                                         required by you), as long as they don’t violate its
+5th-level conjuration                                 alignment. If you don’t issue any commands to the
+                                                         fey creature, it defends itself from hostile creatures
+Casting Time: 1 minute                                   but otherwise takes no actions.
+Range: 90 feet
+Components: V, S, M (burning incense for air, soft         If your concentration is broken, the fey creature
+                                                         doesn’t disappear. Instead, you lose control of the
+  clay for earth, sulfur and phosphorus for fire, or     fey creature, it becomes hostile toward you and your
+  water and sand for water)                              companions, and it might attack. An uncontrolled fey
+Duration: Concentration, up to 1 hour                    creature can’t be dismissed by you, and it disappears
+                                                         1 hour after you summoned it.
+You call forth an elemental servant. Choose an area of
+air, earth, fire, or water that fills a 10-foot cube    The GM has the fey creature’s statistics.
+within range. An elemental of challenge rating 5 or        At Higher Levels. When you cast this spell using a
+lower appropriate to the area you chose appears in       spell slot of 7th level or higher, the challenge rating
+an unoccupied space within 10 feet of it. For            increases by 1 for each slot level above 6th.
+example, a fire elemental emerges from a bonfire,
+and an earth elemental rises up from the ground.         Conjure Minor Elementals
+The elemental disappears when it drops to 0 hit
+points or when the spell ends.                           4th-level conjuration
+
+  The elemental is friendly to you and your              Casting Time: 1 minute
+companions for the duration. Roll initiative for the     Range: 90 feet
+elemental, which has its own turns. It obeys any         Components: V, S
+verbal commands that you issue to it (no action          Duration: Concentration, up to 1 hour
+required by you). If you don’t issue any commands
+to the elemental, it defends itself from hostile         You summon elementals that appear in unoccupied
+creatures but otherwise takes no actions.                spaces that you can see within range. You choose
+                                                         one the following options for what appears:
+  If your concentration is broken, the elemental
+doesn’t disappear. Instead, you lose control of the      • One elemental of challenge rating 2 or lower
+elemental, it becomes hostile toward you and your        • Two elementals of challenge rating 1 or lower
+companions, and it might attack. An uncontrolled         • Four elementals of challenge rating 1/2 or lower
+elemental can’t be dismissed by you, and it              • Eight elementals of challenge rating 1/4 or lower.
+disappears 1 hour after you summoned it.
+                                                         An elemental summoned by this spell disappears
+  The GM has the elemental’s statistics.                 when it drops to 0 hit points or when the spell ends.
+  At Higher Levels. When you cast this spell using a
+spell slot of 6th level or higher, the challenge rating    The summoned creatures are friendly to you and
+increases by 1 for each slot level above 5th.            your companions. Roll initiative for the summoned
+                                                         creatures as a group, which has its own turns. They
+                                                         obey any verbal commands that you issue to them

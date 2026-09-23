@@ -1,0 +1,50 @@
+another creature’s turn. The tarrasque regains spent        Troll
+legendary actions at the start of its turn.
+Attack. The tarrasque makes one claw attack or tail         Large giant, chaotic evil
+
+  attack.                                                   Armor Class 15 (natural armor)
+Move. The tarrasque moves up to half its speed.             Hit Points 84 (8d10 + 40)
+Chomp (Costs 2 Actions). The tarrasque makes one            Speed 30 ft.
+
+  bite attack or uses its Swallow.                            STR DEX CON INT                WIS             CHA
+                                                            18 (+4) 13 (+1) 20 (+5) 7 (-2)  9 (-1)           7 (-2)
+Treant
+                                                            Skills Perception +2
+Huge plant, chaotic good                                    Senses darkvision 60 ft., passive Perception 12
+                                                            Languages Giant
+Armor Class 16 (natural armor)                              Challenge 5 (1,800 XP)
+Hit Points 138 (12d12 + 60)
+Speed 30 ft.                                                Keen Smell. The troll has advantage on Wisdom
+                                                            (Perception) checks that rely on smell.
+    STR DEX CON INT WIS CHA                                 Regeneration. The troll regains 10 hit points at the
+  23 (+6) 8 (-1) 21 (+5) 12 (+1) 16 (+3) 12 (+1)            start of its turn. If the troll takes acid or fire damage,
+                                                            this trait doesn’t function at the start of the troll’s next
+Damage Resistances bludgeoning, piercing                    turn. The troll dies only if it starts its turn with 0 hit
+Damage Vulnerabilities fire                                 points and doesn’t regenerate.
+Senses passive Perception 13
+Languages Common, Druidic, Elvish, Sylvan                   Actions
+Challenge 9 (5,000 XP)
+                                                            Multiattack. The troll makes three attacks: one with its
+False Appearance. While the treant remains                  bite and two with its claws.
+motionless, it is indistinguishable from a normal tree.
+Siege Monster. The treant deals double damage to            Bite. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+objects and structures.                                     target. Hit: 7 (1d6 + 4) piercing damage.
+
+Actions                                                     Claw. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+Multiattack. The treant makes two slam attacks.             target. Hit: 11 (2d6 + 4) slashing damage.
+Slam. Melee Weapon Attack: +10 to hit, reach 5 ft.,
+one target. Hit: 16 (3d6 + 6) bludgeoning damage.           Monsters (U)
+Rock. Ranged Weapon Attack: +10 to hit, range 60/180
+ft., one target. Hit: 28 (4d10 + 6) bludgeoning damage.     Unicorn
+Animate Trees (1/Day). The treant magically animates
+one or two trees it can see within 60 feet of it. These     Large celestial, lawful good
+trees have the same statistics as a treant, except they     Armor Class 12
+have Intelligence and Charisma scores of 1, they can’t      Hit Points 67 (9d10 + 18)
+speak, and they have only the Slam action option. An        Speed 50 ft.
+animated tree acts as an ally of the treant. The tree
+remains animate for 1 day or until it dies; until the           STR DEX CON INT WIS CHA
+treant dies or is more than 120 feet from the tree; or        18 (+4) 14 (+2) 15 (+2) 11 (+0) 17 (+3) 16 (+3)
+until the treant takes a bonus action to turn it back into
+an inanimate tree. The tree then takes root if possible.    Damage Immunities poison
+                                                            Condition Immunities charmed, paralyzed, poisoned
+                                                            Senses darkvision 60 ft., passive Perception 13

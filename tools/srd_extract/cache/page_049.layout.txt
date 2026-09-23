@@ -1,0 +1,62 @@
+transcribe the spell. For each level of the spell, the         Lifedrinker
+transcription process takes 2 hours and costs 50 gp
+for the rare inks needed to inscribe it.                       Prerequisite: 12th level, Pact of the Blade feature
+
+Chains of Carceri                                              When you hit a creature with your pact weapon, the
+                                                               creature takes extra necrotic damage equal to your
+Prerequisite: 15th level, Pact of the Chain feature            Charisma modifier (minimum 1).
+
+You can cast hold monster at will—targeting a                  Mask of Many Faces
+celestial, fiend, or elemental—without expending a
+spell slot or material components. You must finish a           You can cast disguise self at will, without expending a
+long rest before you can use this invocation on the            spell slot.
+same creature again.
+                                                               Master of Myriad Forms
+Devil’s Sight
+                                                               Prerequisite: 15th level
+You can see normally in darkness, both magical and
+nonmagical, to a distance of 120 feet.                         You can cast alter self at will, without expending a
+                                                               spell slot.
+Dreadful Word
+                                                               Minions of Chaos
+Prerequisite: 7th level
+                                                               Prerequisite: 9th level
+You can cast confusion once using a warlock spell
+slot. You can’t do so again until you finish a long rest.      You can cast conjure elemental once using a warlock
+                                                               spell slot. You can’t do so again until you finish a
+Eldritch Sight                                                 long rest.
+
+You can cast detect magic at will, without expending           Mire the Mind
+a spell slot.
+                                                               Prerequisite: 5th level
+Eldritch Spear
+                                                               You can cast slow once using a warlock spell slot.
+Prerequisite: eldritch blast cantrip                           You can’t do so again until you finish a long rest.
+
+When you cast eldritch blast, its range is 300 feet.           Misty Visions
+
+Eyes of the Rune Keeper                                        You can cast silent image at will, without expending a
+                                                               spell slot or material components.
+You can read all writing.
+                                                               One with Shadows
+Fiendish Vigor
+                                                               Prerequisite: 5th level
+You can cast false life on yourself at will as a 1st-level
+spell, without expending a spell slot or material              When you are in an area of dim light or darkness,
+components.                                                    you can use your action to become invisible until you
+                                                               move or take an action or a reaction.
+Gaze of Two Minds
+                                                               Otherworldly Leap
+You can use your action to touch a willing humanoid
+and perceive through its senses until the end of your          Prerequisite: 9th level
+next turn. As long as the creature is on the same
+plane of existence as you, you can use your action on          You can cast jump on yourself at will, without
+subsequent turns to maintain this connection,                  expending a spell slot or material components.
+extending the duration until the end of your next
+turn. While perceiving through the other creature’s            Repelling Blast
+senses, you benefit from any special senses
+possessed by that creature, and you are blinded and            Prerequisite: eldritch blast cantrip
+deafened to your own surroundings.
+                                                               When you hit a creature with eldritch blast, you can
+                                                               push the creature up to 10 feet away from you in a
+                                                               straight line.

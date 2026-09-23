@@ -1,0 +1,65 @@
+Once you gain access to a circle spell, you always have it prepared, and it doesn’t count against the number of spells you can prepare each day. If you gain access to a spell that doesn’t appear on the druid spell list, the spell is nonetheless a druid spell for you.
+
+Arctic
+Druid Level 3rd 5th 7th 9th
+
+Circle Spells hold person, spike growth sleet storm, slow freedom of movement, ice storm commune with nature, cone of cold
+
+Coast
+Druid Level 3rd 5th 7th 9th
+
+Circle Spells mirror image, misty step water breathing, water walk control water, freedom of movement conjure elemental, scrying
+
+Desert
+Druid Level 3rd 5th
+7th 9th
+
+Circle Spells blur, silence create food and water, protection from energy blight, hallucinatory terrain insect plague, wall of stone
+
+Forest
+Druid Level 3rd 5th 7th 9th
+
+Circle Spells barkskin, spider climb call lightning, plant growth divination, freedom of movement commune with nature, tree stride
+
+Grassland
+Druid Level 3rd 5th 7th 9th
+
+Circle Spells invisibility, pass without trace daylight, haste divination, freedom of movement dream, insect plague
+
+Mountain
+Druid Level 3rd 5th 7th 9th
+
+Circle Spells spider climb, spike growth lightning bolt, meld into stone stone shape, stoneskin passwall, wall of stone
+
+Swamp
+Druid Level 3rd
+
+Circle Spells acid arrow, darkness
+
+5th
+
+water walk, stinking cloud
+
+7th
+
+freedom of movement, locate creature
+
+9th
+
+insect plague, scrying
+
+Land’s Stride
+Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
+In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell.
+
+Nature’s Ward
+When you reach 10th level, you can’t be charmed or frightened by elementals or fey, and you are immune to poison and disease.
+
+Nature’s Sanctuary
+When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
+The creature is aware of this effect before it makes its attack against you.
+
+Sacred Plants and Wood
+A druid holds certain plants to be sacred, particularly alder, ash, birch, elder, hazel, holly, juniper, mistletoe, oak, rowan, willow, and yew. Druids often use such plants as part of a spellcasting focus, incorporating lengths of oak or yew or sprigs of mistletoe.
+Similarly, a druid uses such woods to make other objects, such as weapons and shields. Yew is associated with death and rebirth, so weapon handles for scimitars or sickles might be fashioned from it. Ash is associated with life and oak with strength. These woods make excellent hafts or whole weapons, such as clubs or quarterstaffs, as well as shields. Alder is associated with air, and it might be used for thrown weapons, such as darts or javelins.
+Druids from regions that lack the plants described here have chosen other plants to take on similar uses. For instance, a druid of a desert region might value the yucca tree and cactus plants.

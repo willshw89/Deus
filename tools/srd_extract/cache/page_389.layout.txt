@@ -1,0 +1,51 @@
+Senses blindsight 10 ft., passive Perception 9           Web Sense. While in contact with a web, the spider
+Languages —                                              knows the exact location of any other creature in
+Challenge 0 (10 XP)                                      contact with the same web.
+                                                         Web Walker. The spider ignores movement restrictions
+Actions                                                  caused by webbing.
+
+Sting. Melee Weapon Attack: +2 to hit, reach 5 ft., one  Actions
+creature. Hit: 1 piercing damage, and the target must    Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+make a DC 9 Constitution saving throw, taking 4 (1d8)    creature. Hit: 1 piercing damage, and the target must
+poison damage on a failed save, or half as much          succeed on a DC 9 Constitution saving throw or take 2
+damage on a successful one.                              (1d4) poison damage.
+
+Sea Horse                                                Swarm of Bats
+
+Tiny beast, unaligned                                    Medium swarm of Tiny beasts, unaligned
+
+Armor Class 11                                           Armor Class 12
+Hit Points 1 (1d4 - 1)                                   Hit Points 22 (5d8)
+Speed 0 ft., swim 20 ft.                                 Speed 0 ft., fly 30 ft.
+
+ STR DEX CON                 INT WIS CHA                     STR DEX CON INT WIS CHA
+1 (-5) 12 (+1) 8 (-1)       1 (-5) 10 (+0) 2 (-4)           5 (-3) 15 (+2) 10 (+0) 2 (-4) 12 (+1) 4 (-3)
+
+Senses passive Perception 10                             Damage Resistances bludgeoning, piercing, slashing
+Languages —                                              Condition Immunities charmed, frightened, grappled,
+Challenge 0 (0 XP)
+                                                           paralyzed, petrified, prone, restrained, stunned
+Water Breathing. The sea horse can breathe only          Senses blindsight 60 ft., passive Perception 11
+underwater.                                              Languages —
+                                                         Challenge 1/4 (50 XP)
+Spider
+                                                         Echolocation. The swarm can’t use its blindsight while
+Tiny beast, unaligned                                    deafened.
+                                                         Keen Hearing. The swarm has advantage on Wisdom
+Armor Class 12                                           (Perception) checks that rely on hearing.
+Hit Points 1 (1d4 - 1)                                   Swarm. The swarm can occupy another creature’s
+Speed 20 ft., climb 20 ft.                               space and vice versa, and the swarm can move through
+                                                         any opening large enough for a Tiny bat. The swarm
+ STR DEX CON                 INT WIS CHA                 can’t regain hit points or gain temporary hit points.
+2 (-4) 14 (+2) 8 (-1)       1 (-5) 10 (+0) 2 (-4)
+                                                         Actions
+Skills Stealth +4                                        Bites. Melee Weapon Attack: +4 to hit, reach 0 ft., one
+Senses darkvision 30 ft., passive Perception 10          creature in the swarm’s space. Hit: 5 (2d4) piercing
+Languages —                                              damage, or 2 (1d4) piercing damage if the swarm has
+Challenge 0 (10 XP)                                      half of its hit points or fewer.
+
+Spider Climb. The spider can climb difficult surfaces,   Swarm of Insects
+including upside down on ceilings, without needing to
+make an ability check.                                   Medium swarm of Tiny beasts, unaligned
+
+                                                         Armor Class 12 (natural armor)

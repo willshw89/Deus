@@ -1,0 +1,61 @@
+  If you move so that an affected creature is forced       Magical Travel. Teleportation and planar travel
+to pass through the barrier, the spell ends.             fail to work in the sphere, whether the sphere is the
+                                                         destination or the departure point for such magical
+Antimagic Field                                          travel. A portal to another location, world, or plane
+                                                         of existence, as well as an opening to an
+8th-level abjuration                                  extradimensional space such as that created by the
+                                                         rope trick spell, temporarily closes while in the
+Casting Time: 1 action                                   sphere.
+Range: Self (10-foot-radius sphere)
+Components: V, S, M (a pinch of powdered iron or           Creatures and Objects. A creature or object
+                                                         summoned or created by magic temporarily winks
+  iron filings)                                          out of existence in the sphere. Such a creature
+Duration: Concentration, up to 1 hour                    instantly reappears once the space the creature
+                                                         occupied is no longer within the sphere.
+A 10-foot-radius invisible sphere of antimagic
+surrounds you. This area is divorced from the              Dispel Magic. Spells and magical effects such as
+magical energy that suffuses the multiverse. Within      dispel magic have no effect on the sphere. Likewise,
+the sphere, spells can’t be cast, summoned creatures     the spheres created by different antimagic field
+disappear, and even magic items become mundane.          spells don’t nullify each other.
+Until the spell ends, the sphere moves with you,
+centered on you.                                         Antipathy/Sympathy
+
+  Spells and other magical effects, except those         8th-level enchantment
+created by an artifact or a deity, are suppressed in
+the sphere and can’t protrude into it. A slot            Casting Time: 1 hour
+expended to cast a suppressed spell is consumed.         Range: 60 feet
+While an effect is suppressed, it doesn’t function, but  Components: V, S, M (either a lump of alum soaked
+the time it spends suppressed counts against its
+duration.                                                  in vinegar for the antipathy effect or a drop of
+                                                           honey for the sympathy effect)
+  Targeted Effects. Spells and other magical effects,    Duration: 10 days
+such as magic missile and charm person, that target a
+creature or an object in the sphere have no effect on    This spell attracts or repels creatures of your choice.
+that target.                                             You target something within range, either a Huge or
+                                                         smaller object or creature or an area that is no larger
+  Areas of Magic. The area of another spell or           than a 200-foot cube. Then specify a kind of
+magical effect, such as fireball, can’t extend into the  intelligent creature, such as red dragons, goblins, or
+sphere. If the sphere overlaps an area of magic, the     vampires. You invest the target with an aura that
+part of the area that is covered by the sphere is        either attracts or repels the specified creatures for
+suppressed. For example, the flames created by a         the duration. Choose antipathy or sympathy as the
+wall of fire are suppressed within the sphere,           aura’s effect.
+creating a gap in the wall if the overlap is large
+enough.                                                    Antipathy. The enchantment causes creatures of
+                                                         the kind you designated to feel an intense urge to
+  Spells. Any active spell or other magical effect on a  leave the area and avoid the target. When such a
+creature or an object in the sphere is suppressed        creature can see the target or comes within 60 feet
+while the creature or object is in it.                   of it, the creature must succeed on a Wisdom saving
+                                                         throw or become frightened. The creature remains
+  Magic Items. The properties and powers of magic        frightened while it can see the target or is within 60
+items are suppressed in the sphere. For example, a       feet of it. While frightened by the target, the creature
++1 longsword in the sphere functions as a                must use its movement to move to the nearest safe
+nonmagical longsword.                                    spot from which it can’t see the target. If the creature
+                                                         moves more than 60 feet from the target and can’t
+  A magic weapon’s properties and powers are             see it, the creature is no longer frightened, but the
+suppressed if it is used against a target in the sphere  creature becomes frightened again if it regains sight
+or wielded by an attacker in the sphere. If a magic      of the target or moves within 60 feet of it.
+weapon or a piece of magic ammunition fully leaves
+the sphere (for example, if you fire a magic arrow or      Sympathy. The enchantment causes the specified
+throw a magic spear at a target outside the sphere),     creatures to feel an intense urge to approach the
+the magic of the item ceases to be suppressed as         target while within 60 feet of it or able to see it.
+soon as it exits.

@@ -1,0 +1,61 @@
+at your feet. If the sword has no unobstructed path      with a successful DC 15 Intelligence (Investigation)
+to you, it moves as close to you as it can and then      check. The creature then appears translucent.
+falls to the ground. It also ceases to hover if you
+grasp it or move more than 30 feet away from it.           The illusion lasts until its card is moved or the
+                                                         illusion is dispelled. When the illusion ends, the
+Decanter of Endless Water                                image on its card disappears, and that card can’t be
+                                                         used again.
+Wondrous item, uncommon
+                                                         Playing Card       Illusion
+This stoppered flask sloshes when shaken, as if it       Ace of hearts      Red dragon
+contains water. The decanter weighs 2 pounds.            King of hearts     Knight and four guards
+                                                         Queen of hearts    Succubus or incubus
+  You can use an action to remove the stopper and        Jack of hearts     Druid
+speak one of three command words, whereupon an           Ten of hearts      Cloud giant
+amount of fresh water or salt water (your choice)        Nine of hearts     Ettin
+pours out of the flask. The water stops pouring out at   Eight of hearts    Bugbear
+the start of your next turn. Choose from the             Two of hearts      Goblin
+following options:
+                                                         Ace of diamonds    Beholder
+• “Stream” produces 1 gallon of water.                   King of diamonds   Archmage and mage apprentice
+• “Fountain” produces 5 gallons of water.                Queen of diamonds  Night hag
+• “Geyser” produces 30 gallons of water that gushes      Jack of diamonds   Assassin
+                                                         Ten of diamonds    Fire giant
+  forth in a geyser 30 feet long and 1 foot wide. As a   Nine of diamonds   Ogre mage
+  bonus action while holding the decanter, you can       Eight of diamonds  Gnoll
+  aim the geyser at a creature you can see within 30     Two of diamonds    Kobold
+  feet of you. The target must succeed on a DC 13
+  Strength saving throw or take 1d4 bludgeoning          Ace of spades      Lich
+  damage and fall prone. Instead of a creature, you      King of spades     Priest and two acolytes
+  can target an object that isn’t being worn or          Queen of spades    Medusa
+  carried and that weighs no more than 200 pounds.       Jack of spades     Veteran
+  The object is either knocked over or pushed up to      Ten of spades      Frost giant
+  15 feet away from you.                                 Nine of spades     Troll
+                                                         Eight of spades    Hobgoblin
+Deck of Illusions                                        Two of spades      Goblin
+
+Wondrous item, uncommon                                  Ace of clubs       Iron golem
+                                                         King of clubs      Bandit captain and three bandits
+This box contains a set of parchment cards. A full       Queen of clubs     Erinyes
+deck has 34 cards. A deck found as treasure is           Jack of clubs      Berserker
+usually missing 1d20 - 1 cards.                          Ten of clubs       Hill giant
+                                                         Nine of clubs      Ogre
+  The magic of the deck functions only if cards are      Eight of clubs     Orc
+drawn at random (you can use an altered deck of          Two of clubs       Kobold
+playing cards to simulate the deck). You can use an
+action to draw a card at random from the deck and        Jokers (2)         You (the deck’s owner)
+throw it to the ground at a point within 30 feet of
+you.                                                     Deck of Many Things
+
+  An illusion of one or more creatures forms over        Wondrous item, legendary
+the thrown card and remains until dispelled. An
+illusory creature appears real, of the appropriate       Usually found in a box or pouch, this deck contains a
+size, and behaves as if it were a real creature except   number of cards made of ivory or vellum. Most (75
+that it can do no harm. While you are within 120 feet    percent) of these decks have only thirteen cards, but
+of the illusory creature and can see it, you can use an  the rest have twenty-two.
+action to move it magically anywhere within 30 feet
+of its card. Any physical interaction with the illusory    Before you draw a card, you must declare how
+creature reveals it to be an illusion, because objects   many cards you intend to draw and then draw them
+pass through it. Someone who uses an action to           randomly (you can use an altered deck of playing
+visually inspect the creature identifies it as illusory  cards to simulate the deck). Any cards drawn in
+                                                         excess of this number have no effect. Otherwise, as

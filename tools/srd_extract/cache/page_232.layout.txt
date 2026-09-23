@@ -1,0 +1,61 @@
+vial is required for each size category above             effect on you. You are immune to the poisoned
+Medium). Applying the oil takes 10 minutes. The           condition and have immunity to poison damage.
+affected creature then gains the effect of the
+etherealness spell for 1 hour.                            Periapt of Wound Closure
+
+Oil of Sharpness                                          Wondrous item, uncommon (requires attunement)
+
+Potion, very rare                                         While you wear this pendant, you stabilize whenever
+                                                          you are dying at the start of your turn. In addition,
+This clear, gelatinous oil sparkles with tiny, ultrathin  whenever you roll a Hit Die to regain hit points,
+silver shards. The oil can coat one slashing or           double the number of hit points it restores.
+piercing weapon or up to 5 pieces of slashing or
+piercing ammunition. Applying the oil takes 1             Philter of Love
+minute. For 1 hour, the coated item is magical and
+has a +3 bonus to attack and damage rolls.                Potion, uncommon
+
+Oil of Slipperiness                                       The next time you see a creature within 10 minutes
+                                                          after drinking this philter, you become charmed by
+Potion, uncommon                                          that creature for 1 hour. If the creature is of a species
+                                                          and gender you are normally attracted to, you
+This sticky black unguent is thick and heavy in the       regard it as your true love while you are charmed.
+container, but it flows quickly when poured. The oil      This potion’s rose-hued, effervescent liquid contains
+can cover a Medium or smaller creature, along with        one easy-to-miss bubble shaped like a heart.
+the equipment it’s wearing and carrying (one
+additional vial is required for each size category        Pipes of Haunting
+above Medium). Applying the oil takes 10 minutes.
+The affected creature then gains the effect of a          Wondrous item, uncommon
+freedom of movement spell for 8 hours.
+                                                          You must be proficient with wind instruments to use
+  Alternatively, the oil can be poured on the ground      these pipes. They have 3 charges. You can use an
+as an action, where it covers a 10-foot square,        action to play them and expend 1 charge to create an
+duplicating the effect of the grease spell in that area   eerie, spellbinding tune. Each creature within 30 feet
+for 8 hours.                                              of you that hears you play must succeed on a DC 15
+                                                          Wisdom saving throw or become frightened of you
+Pearl of Power                                            for 1 minute. If you wish, all creatures in the area
+                                                          that aren’t hostile toward you automatically succeed
+Wondrous item, uncommon (requires attunement by a         on the saving throw. A creature that fails the saving
+spellcaster)                                              throw can repeat it at the end of each of its turns,
+                                                          ending the effect on itself on a success. A creature
+While this pearl is on your person, you can use an        that succeeds on its saving throw is immune to the
+action to speak its command word and regain one           effect of these pipes for 24 hours. The pipes regain
+expended spell slot. If the expended slot was of 4th      1d3 expended charges daily at dawn.
+level or higher, the new slot is 3rd level. Once you
+use the pearl, it can’t be used again until the next      Pipes of the Sewers
+dawn.
+                                                          Wondrous item, uncommon (requires attunement)
+Periapt of Health
+                                                          You must be proficient with wind instruments to use
+Wondrous item, uncommon                                   these pipes. While you are attuned to the pipes,
+                                                          ordinary rats and giant rats are indifferent toward
+You are immune to contracting any disease while           you and will not attack you unless you threaten or
+you wear this pendant. If you are already infected        harm them.
+with a disease, the effects of the disease are
+suppressed you while you wear the pendant.                  The pipes have 3 charges. If you play the pipes as
+                                                          an action, you can use a bonus action to expend 1 to
+Periapt of Proof against Poison                           3 charges, calling forth one swarm of rats with each
+                                                          expended charge, provided that enough rats are
+Wondrous item, rare                                       within half a mile of you to be called in this fashion
+                                                          (as determined by the GM). If there aren’t enough
+This delicate silver chain has a brilliant-cut black   rats to form a swarm, the charge is wasted. Called
+gem pendant. While you wear it, poisons have no

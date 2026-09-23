@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries used by tools/srd_browser/selftest.js when game/data/srd51/ is absent. Contains no SRD 5.1 text.",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": 15
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "files": [
+    {
+      "category": "creatures",
+      "file": "creatures.json",
+      "entries": 3,
+      "kinds": {
+        "creature": 3
+      },
+      "readiness": {
+        "parsed": 1,
+        "verified": 1,
+        "extracted": 1
+      }
+    },
+    {
+      "category": "spells",
+      "file": "spells.json",
+      "entries": 3,
+      "kinds": {
+        "spell": 2,
+        "spell-list": 1
+      },
+      "readiness": {
+        "parsed": 2,
+        "adapted": 1
+      }
+    },
+    {
+      "category": "equipment",
+      "file": "equipment.json",
+      "entries": 3,
+      "kinds": {
+        "weapon": 1,
+        "armor": 1,
+        "gear": 1
+      },
+      "readiness": {
+        "parsed": 3
+      }
+    },
+    {
+      "category": "magic-items",
+      "file": "magic_items.json",
+      "entries": 2,
+      "kinds": {
+        "magic-item": 2
+      },
+      "readiness": {
+        "parsed": 1,
+        "extracted": 1
+      }
+    },
+    {
+      "category": "character-options",
+      "file": "character_options.json",
+      "entries": 3,
+      "kinds": {
+        "race": 1,
+        "subclass": 1,
+        "feat": 1
+      },
+      "readiness": {
+        "parsed": 2,
+        "verified": 1
+      }
+    },
+    {
+      "category": "rules",
+      "file": "rules.json",
+      "entries": 3,
+      "kinds": {
+        "condition": 1,
+        "rule": 1,
+        "hazard": 1
+      },
+      "readiness": {
+        "parsed": 2,
+        "extracted": 1
+      }
+    }
+  ],
+  "totals": {
+    "entries": 17,
+    "kinds": {
+      "creature": 3,
+      "spell": 2,
+      "spell-list": 1,
+      "weapon": 1,
+      "armor": 1,
+      "gear": 1,
+      "magic-item": 2,
+      "race": 1,
+      "subclass": 1,
+      "feat": 1,
+      "condition": 1,
+      "rule": 1,
+      "hazard": 1
+    },
+    "readiness": {
+      "parsed": 11,
+      "verified": 2,
+      "extracted": 3,
+      "adapted": 1
+    }
+  }
+}

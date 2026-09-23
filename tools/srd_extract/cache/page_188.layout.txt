@@ -1,0 +1,61 @@
+when the target speaks, any creature that knows at       into a different creature, the creature into an object,
+least one language and can hear the target               or the object into a creature (the object must be
+understands what it says.                                neither worn nor carried by another creature). The
+                                                         transformation lasts for the duration, or until the
+Transport via Plants                                     target drops to 0 hit points or dies. If you
+                                                         concentrate on this spell for the full duration, the
+6th-level conjuration                                 transformation lasts until it is dispelled.
+
+Casting Time: 1 action                                     This spell has no effect on a shapechanger or a
+Range: 10 feet                                           creature with 0 hit points. An unwilling creature can
+Components: V, S                                         make a Wisdom saving throw, and if it succeeds, it
+Duration: 1 round                                        isn’t affected by this spell.
+
+This spell creates a magical link between a Large or       Creature into Creature. If you turn a creature into
+larger inanimate plant within range and another          another kind of creature, the new form can be any
+plant, at any distance, on the same plane of existence.  kind you choose whose challenge rating is equal to
+You must have seen or touched the destination plant      or less than the target’s (or its level, if the target
+at least once before. For the duration, any creature     doesn’t have a challenge rating). The target’s game
+can step into the target plant and exit from the         statistics, including mental ability scores, are
+destination plant by using 5 feet of movement.           replaced by the statistics of the new form. It retains
+                                                         its alignment and personality.
+Tree Stride
+                                                           The target assumes the hit points of its new form,
+5th-level conjuration                                 and when it reverts to its normal form, the creature
+                                                         returns to the number of hit points it had before it
+Casting Time: 1 action                                   transformed. If it reverts as a result of dropping to 0
+Range: Self                                              hit points, any excess damage carries over to its
+Components: V, S                                         normal form. As long as the excess damage doesn’t
+Duration: Concentration, up to 1 minute                  reduce the creature’s normal form to 0 hit points, it
+                                                         isn’t knocked unconscious.
+You gain the ability to enter a tree and move from
+inside it to inside another tree of the same kind          The creature is limited in the actions it can
+within 500 feet. Both trees must be living and at        perform by the nature of its new form, and it can’t
+least the same size as you. You must use 5 feet of       speak, cast spells, or take any other action that
+movement to enter a tree. You instantly know the         requires hands or speech, unless its new form is
+location of all other trees of the same kind within      capable of such actions.
+500 feet and, as part of the move used to enter the
+tree, can either pass into one of those trees or step      The target’s gear melds into the new form. The
+out of the tree you’re in. You appear in a spot of your  creature can’t activate, use, wield, or otherwise
+choice within 5 feet of the destination tree, using      benefit from any of its equipment.
+another 5 feet of movement. If you have no
+movement left, you appear within 5 feet of the tree        Object into Creature. You can turn an object into
+you entered.                                             any kind of creature, as long as the creature’s size is
+                                                         no larger than the object’s size and the creature’s
+  You can use this transportation ability once per       challenge rating is 9 or lower. The creature is
+round for the duration. You must end each turn           friendly to you and your companions. It acts on each
+outside a tree.                                          of your turns. You decide what action it takes and
+                                                         how it moves. The GM has the creature’s statistics
+True Polymorph                                           and resolves all of its actions and movement.
+
+9th-level transmutation                                 If the spell becomes permanent, you no longer
+                                                         control the creature. It might remain friendly to you,
+Casting Time: 1 action                                   depending on how you have treated it.
+Range: 30 feet
+Components: V, S, M (a drop of mercury, a dollop of        Creature into Object. If you turn a creature into
+                                                         an object, it transforms along with whatever it is
+  gum arabic, and a wisp of smoke)                       wearing and carrying into that form. The creature’s
+Duration: Concentration, up to 1 hour                    statistics become those of the object, and the
+                                                         creature has no memory of time spent in this form,
+Choose one creature or nonmagical object that you        after the spell ends and it returns to its normal form.
+can see within range. You transform the creature

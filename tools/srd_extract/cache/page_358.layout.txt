@@ -1,0 +1,68 @@
+Appendix PH-A:                                                      6 Death
+
+Conditions                                                       If an already exhausted creature suffers another effect that
+                                                                 causes exhaustion, its current level of exhaustion increases
+Conditions alter a creature’s capabilities in a variety          by the amount specified in the effect’s description.
+of ways and can arise as a result of a spell, a class
+feature, a monster’s attack, or other effect. Most                  A creature suffers the effect of its current level of
+conditions, such as blinded, are impairments, but a              exhaustion as well as all lower levels. For example, a creature
+few, such as invisible, can be advantageous.                     suffering level 2 exhaustion has its speed halved and has
+                                                                 disadvantage on ability checks.
+  A condition lasts either until it is countered (the
+prone condition is countered by standing up, for                    An effect that removes exhaustion reduces its level as
+example) or for a duration specified by the effect               specified in the effect’s description, with all exhaustion
+that imposed the condition.                                      effects ending if a creature’s exhaustion level is reduced
+                                                                 below 1.
+  If multiple effects impose the same condition on a
+creature, each instance of the condition has its own                Finishing a long rest reduces a creature’s exhaustion level
+duration, but the condition’s effects don’t get worse.           by 1, provided that the creature has also ingested some food
+A creature either has a condition or doesn’t.                    and drink.
+
+  The following definitions specify what happens to              Frightened
+a creature while it is subjected to a condition.
+                                                                 • A frightened creature has disadvantage on ability
+Blinded                                                            checks and attack rolls while the source of its fear
+                                                                   is within line of sight.
+• A blinded creature can’t see and automatically
+  fails any ability check that requires sight.                   • The creature can’t willingly move closer to the
+                                                                   source of its fear.
+• Attack rolls against the creature have advantage,
+  and the creature’s attack rolls have disadvantage.             Grappled
+
+Charmed                                                          • A grappled creature’s speed becomes 0, and it
+                                                                   can’t benefit from any bonus to its speed.
+• A charmed creature can’t attack the charmer or
+  target the charmer with harmful abilities or                   • The condition ends if the grappler is incapacitated
+  magical effects.                                                 (see the condition).
+
+• The charmer has advantage on any ability check to              • The condition also ends if an effect removes the
+  interact socially with the creature.                             grappled creature from the reach of the grappler
+                                                                   or grappling effect, such as when a creature is
+Deafened                                                           hurled away by the thunder-wave spell.
+
+• A deafened creature can’t hear and automatically               Incapacitated
+  fails any ability check that requires hearing.
+                                                                 • An incapacitated creature can’t take actions or
+Exhaustion                                                         reactions.
+
+Some special abilities and environmental hazards, such as        Invisible
+starvation and the long-term effects of freezing or scorching
+temperatures, can lead to a special condition called             • An invisible creature is impossible to see without
+exhaustion. Exhaustion is measured in six levels. An effect        the aid of magic or a special sense. For the purpose
+can give a creature one or more levels of exhaustion, as           of hiding, the creature is heavily obscured. The
+specified in the effect’s description.                             creature’s location can be detected by any noise it
+                                                                   makes or any tracks it leaves.
+Level  Effect
+   1   Disadvantage on ability checks                            • Attack rolls against the creature have
+   2   Speed halved                                                disadvantage, and the creature’s attack rolls have
+   3   Disadvantage on attack rolls and saving throws              advantage.
+   4   Hit point maximum halved
+   5   Speed reduced to 0                                        Paralyzed
+
+                                                                 • A paralyzed creature is incapacitated (see the
+                                                                   condition) and can’t move or speak.
+
+                                                                 • The creature automatically fails Strength and
+                                                                   Dexterity saving throws.
+
+                                                                 • Attack rolls against the creature have advantage.

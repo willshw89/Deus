@@ -1,0 +1,62 @@
+Trap Effects                                             Sample Traps
+
+The effects of traps can range from inconvenient to      The magical and mechanical traps presented here
+deadly, making use of elements such as arrows,           vary in deadliness and are presented in alphabetical
+spikes, blades, poison, toxic gas, blasts of fire, and   order.
+deep pits. The deadliest traps combine multiple
+elements to kill, injure, contain, or drive off any      Collapsing Roof
+creature unfortunate enough to trigger them. A
+trap’s description specifies what happens when it is     Mechanical trap
+triggered.
+                                                         This trap uses a trip wire to collapse the supports
+  The attack bonus of a trap, the save DC to resist its  keeping an unstable section of a ceiling in place.
+effects, and the damage it deals can vary depending
+on the trap’s severity. Use the Trap Save DCs and          The trip wire is 3 inches off the ground and
+Attack Bonuses table and the Damage Severity by          stretches between two support beams. The DC to
+Level table for suggestions based on three levels of     spot the trip wire is 10. A successful DC 15 Dexterity
+trap severity.                                           check using thieves’ tools disables the trip wire
+                                                         harmlessly. A character without thieves’ tools can
+  A trap intended to be a setback is unlikely to kill    attempt this check with disadvantage using any
+or seriously harm characters of the indicated levels,    edged weapon or edged tool. On a failed check, the
+whereas a dangerous trap is likely to seriously          trap triggers.
+injure (and potentially kill) characters of the
+indicated levels. A deadly trap is likely to kill          Anyone who inspects the beams can easily
+characters of the indicated levels.                      determine that they are merely wedged in place. As
+                                                         an action, a character can knock over a beam,
+Trap Save DCs and Attack Bonuses                         causing the trap to trigger.
+
+Trap Danger  Save DC  Attack Bonus                         The ceiling above the trip wire is in bad repair,
+Setback       10–11      +3 to +5                        and anyone who can see it can tell that it’s in danger
+Dangerous     12–15      +6 to +8                        of collapse.
+Deadly        16–20     +9 to +12
+                                                           When the trap is triggered, the unstable ceiling
+Damage Severity by Level                                 collapses. Any creature in the area beneath the
+                                                         unstable section must succeed on a DC 15 Dexterity
+Character Level  Setback  Dangerous  Deadly              saving throw, taking 22 (4d10) bludgeoning damage
+     1st–4th      1d10       2d10     4d10               on a failed save, or half as much damage on a
+    5th–10th      2d10       4d10    10d10               successful one. Once the trap is triggered, the floor of
+                  4d10      10d10    18d10               the area is filled with rubble and becomes difficult
+   11th–16th      10d10     18d10    24d10               terrain.
+   17th–20th
+                                                         Falling Net
+Complex Traps
+                                                         Mechanical trap
+Complex traps work like standard traps, except once
+activated they execute a series of actions each round.   This trap uses a trip wire to release a net suspended
+A complex trap turns the process of dealing with a       from the ceiling.
+trap into something more like a combat encounter.
+                                                           The trip wire is 3 inches off the ground and
+  When a complex trap activates, it rolls initiative.    stretches between two columns or trees. The net is
+The trap’s description includes an initiative bonus.     hidden by cobwebs or foliage. The DC to spot the trip
+On its turn, the trap activates again, often taking an   wire and net is 10. A successful DC 15 Dexterity
+action. It might make successive attacks against         check using thieves’ tools breaks the trip wire
+intruders, create an effect that changes over time, or   harmlessly. A character without thieves’ tools can
+otherwise produce a dynamic challenge. Otherwise,        attempt this check with disadvantage using any
+the complex trap can be detected and disabled or         edged weapon or edged tool. On a failed check, the
+bypassed in the usual ways.                              trap triggers.
+
+  For example, a trap that causes a room to slowly         When the trap is triggered, the net is released,
+flood works best as a complex trap. On the trap’s        covering a 10-foot-square area. Those in the area are
+turn, the water level rises. After several rounds, the   trapped under the net and restrained, and those that
+room is completely flooded.                              fail a DC 10 Strength saving throw are also knocked
+                                                         prone. A creature can use its action to make a DC 10

@@ -1,0 +1,62 @@
+  At Higher Levels. When you cast this spell using a      of its turns. When the spell ends, the target loses any
+spell slot of 3rd level or higher, the damage             remaining temporary hit points from this spell.
+increases by 1d8 for each slot level above 2nd.
+                                                            At Higher Levels. When you cast this spell using a
+Hellish Rebuke                                            spell slot of 2nd level or higher, you can target one
+                                                          additional creature for each slot level above 1st.
+1st-level evocation
+                                                          Hideous Laughter
+Casting Time: 1 reaction, which you take in
+response to being damaged by a creature within 60         1st-level enchantment
+feet of you that you can see
+Range: 60 feet                                            Casting Time: 1 action
+Components: V, S                                          Range: 30 feet
+Duration: Instantaneous                                   Components: V, S, M (tiny tarts and a feather that is
+You point your finger, and the creature that
+damaged you is momentarily surrounded by hellish            waved in the air)
+flames. The creature must make a Dexterity saving         Duration: Concentration, up to 1 minute
+throw. It takes 2d10 fire damage on a failed save, or
+half as much damage on a successful one.                  A creature of your choice that you can see within
+                                                          range perceives everything as hilariously funny and
+  At Higher Levels. When you cast this spell using a      falls into fits of laughter if this spell affects it. The
+spell slot of 2nd level or higher, the damage             target must succeed on a Wisdom saving throw or
+increases by 1d10 for each slot level above 1st.          fall prone, becoming incapacitated and unable to
+                                                          stand up for the duration. A creature with an
+Heroes’ Feast                                             Intelligence score of 4 or less isn’t affected.
+
+6th-level conjuration                                    At the end of each of its turns, and each time it
+                                                          takes damage, the target can make another Wisdom
+Casting Time: 10 minutes                                  saving throw. The target has advantage on the
+Range: 30 feet                                            saving throw if it’s triggered by damage. On a
+Components: V, S , M (a gem-encrusted bowl worth       success, the spell ends.
+
+  at least 1,000 gp, which the spell consumes)            Hold Monster
+Duration: Instantaneous
+                                                          5th-level enchantment
+You bring forth a great feast, including magnificent
+food and drink. The feast takes 1 hour to consume         Casting Time: 1 action
+and disappears at the end of that time, and the           Range: 90 feet
+beneficial effects don’t set in until this hour is over.  Components: V, S, M (a small, straight piece of iron)
+Up to twelve other creatures can partake of the feast.    Duration: Concentration, up to 1 minute
+
+  A creature that partakes of the feast gains several     Choose a creature that you can see within range. The
+benefits. The creature is cured of all diseases and       target must succeed on a Wisdom saving throw or be
+poison, becomes immune to poison and being                paralyzed for the duration. This spell has no effect
+frightened, and makes all Wisdom saving throws            on undead. At the end of each of its turns, the target
+with advantage. Its hit point maximum also                can make another Wisdom saving throw. On a
+increases by 2d10, and it gains the same number of        success, the spell ends on the target.
+hit points. These benefits last for 24 hours.
+                                                            At Higher Levels. When you cast this spell using a
+Heroism                                                   spell slot of 6th level or higher, you can target one
+                                                          additional creature for each slot level above 5th. The
+1st-level enchantment                                  creatures must be within 30 feet of each other when
+                                                          you target them.
+Casting Time: 1 action
+Range: Touch                                              Hold Person
+Components: V, S
+Duration: Concentration, up to 1 minute                   2nd-level enchantment
+
+A willing creature you touch is imbued with bravery.      Casting Time: 1 action
+Until the spell ends, the creature is immune to being     Range: 60 feet
+frightened and gains temporary hit points equal to        Components: V, S, M (a small, straight piece of iron)
+your spellcasting ability modifier at the start of each   Duration: Concentration, up to 1 minute

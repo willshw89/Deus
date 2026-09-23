@@ -1,0 +1,53 @@
+Legendary Actions                                         Frightful Presence. Each creature of the dragon’s
+                                                          choice that is within 120 feet of the dragon and aware
+The dragon can take 3 legendary actions, choosing         of it must succeed on a DC 18 Wisdom saving throw or
+from the options below. Only one legendary action         become frightened for 1 minute. A creature can repeat
+option can be used at a time and only at the end of       the saving throw at the end of each of its turns, ending
+another creature’s turn. The dragon regains spent         the effect on itself on a success. If a creature’s saving
+legendary actions at the start of its turn.               throw is successful or the effect ends for it, the
+Detect. The dragon makes a Wisdom (Perception)            creature is immune to the dragon’s Frightful Presence
+                                                          for the next 24 hours.
+  check.
+Tail Attack. The dragon makes a tail attack.              Breath Weapons (Recharge 5–6). The dragon uses one
+Wing Attack (Costs 2 Actions). The dragon beats its       of the following breath weapons.
+
+  wings. Each creature within 15 feet of the dragon       Cold Breath. The dragon exhales an icy blast in a 60-
+  must succeed on a DC 25 Dexterity saving throw or         foot cone. Each creature in that area must make a
+  take 17 (2d6 + 10) bludgeoning damage and be              DC 20 Constitution saving throw, taking 58 (13d8)
+  knocked prone. The dragon can then fly up to half its     cold damage on a failed save, or half as much
+  flying speed.                                             damage on a successful one.
+
+Adult Silver Dragon                                       Paralyzing Breath. The dragon exhales paralyzing gas in
+                                                            a 60-foot cone. Each creature in that area must
+Huge dragon, lawful good                                    succeed on a DC 20 Constitution saving throw or be
+                                                            paralyzed for 1 minute. A creature can repeat the
+Armor Class 19 (natural armor)                              saving throw at the end of each of its turns, ending
+Hit Points 243 (18d12 + 126)                                the effect on itself on a success.
+Speed 40 ft., fly 80 ft.
+                                                          Change Shape. The dragon magically polymorphs into
+    STR DEX CON INT WIS CHA                               a humanoid or beast that has a challenge rating no
+  27 (+8) 10 (+0) 25 (+7) 16 (+3) 13 (+1) 21 (+5)         higher than its own, or back into its true form. It
+                                                          reverts to its true form if it dies. Any equipment it is
+Saving Throws Dex +5, Con +12, Wis +6, Cha +10            wearing or carrying is absorbed or borne by the new
+Skills Arcana +8, History +8, Perception +11, Stealth +5  form (the dragon’s choice).
+Damage Immunities cold
+Senses blindsight 60 ft., darkvision 120 ft., passive       In a new form, the dragon retains its alignment, hit
+                                                          points, Hit Dice, ability to speak, proficiencies,
+  Perception 21                                           Legendary Resistance, lair actions, and Intelligence,
+Languages Common, Draconic                                Wisdom, and Charisma scores, as well as this action. Its
+Challenge 16 (15,000 XP)                                  statistics and capabilities are otherwise replaced by
+                                                          those of the new form, except any class features or
+Legendary Resistance (3/Day). If the dragon fails a       legendary actions of that form.
+saving throw, it can choose to succeed instead.
+                                                          Legendary Actions
+Actions
+Multiattack. The dragon can use its Frightful Presence.   The dragon can take 3 legendary actions, choosing
+It then makes three attacks: one with its bite and two    from the options below. Only one legendary action
+with its claws.                                           option can be used at a time and only at the end of
+Bite. Melee Weapon Attack: +13 to hit, reach 10 ft.,      another creature’s turn. The dragon regains spent
+one target. Hit: 19 (2d10 + 8) piercing damage.           legendary actions at the start of its turn.
+Claw. Melee Weapon Attack: +13 to hit, reach 5 ft.,
+one target. Hit: 15 (2d6 + 8) slashing damage.            Detect. The dragon makes a Wisdom (Perception)
+Tail. Melee Weapon Attack: +13 to hit, reach 15 ft., one    check.
+target. Hit: 17 (2d8 + 8) bludgeoning damage.
+                                                          Tail Attack. The dragon makes a tail attack.

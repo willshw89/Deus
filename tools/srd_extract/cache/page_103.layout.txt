@@ -1,0 +1,65 @@
+specify how you position its point of origin. Typically,   Saving Throws
+a point of origin is a point in space, but some spells
+have an area whose origin is a creature or an object.      Many spells specify that a target can make a saving
+                                                           throw to avoid some or all of a spell’s effects. The
+  A spell’s effect expands in straight lines from the      spell specifies the ability that the target uses for the
+point of origin. If no unblocked straight line extends     save and what happens on a success or failure.
+from the point of origin to a location within the area
+of effect, that location isn’t included in the spell’s       The DC to resist one of your spells equals 8 + your
+area. To block one of these imaginary lines, an            spellcasting ability modifier + your proficiency
+obstruction must provide total cover.                      bonus + any special modifiers.
+
+Cone                                                       Attack Rolls
+
+A cone extends in a direction you choose from its          Some spells require the caster to make an attack roll
+point of origin. A cone’s width at a given point along     to determine whether the spell effect hits the
+its length is equal to that point’s distance from the      intended target. Your attack bonus with a spell
+point of origin. A cone’s area of effect specifies its     attack equals your spellcasting ability modifier +
+maximum length.                                            your proficiency bonus.
+
+  A cone’s point of origin is not included in the            Most spells that require attack rolls involve
+cone’s area of effect, unless you decide otherwise.        ranged attacks. Remember that you have
+                                                           disadvantage on a ranged attack roll if you are within
+Cube                                                       5 feet of a hostile creature that can see you and that
+                                                           isn’t incapacitated.
+You select a cube’s point of origin, which lies
+anywhere on a face of the cubic effect. The cube’s         The Schools of Magic
+size is expressed as the length of each side.
+                                                           Academies of magic group spells into eight categories called
+  A cube’s point of origin is not included in the          schools of magic. Scholars, particularly wizards, apply these
+cube’s area of effect, unless you decide otherwise.        categories to all spells, believing that all magic functions in
+                                                           essentially the same way, whether it derives from rigorous
+Cylinder                                                   study or is bestowed by a deity.
+
+A cylinder’s point of origin is the center of a circle of     The schools of magic help describe spells; they have no
+a particular radius, as given in the spell description.    rules of their own, although some rules refer to the schools.
+The circle must either be on the ground or at the
+height of the spell effect. The energy in a cylinder          Abjuration spells are protective in nature, though some of
+expands in straight lines from the point of origin to      them have aggressive uses. They create magical barriers,
+the perimeter of the circle, forming the base of the       negate harmful effects, harm trespassers, or banish creatures
+cylinder. The spell’s effect then shoots up from the       to other planes of existence.
+base or down from the top, to a distance equal to the
+height of the cylinder.                                       Conjuration spells involve the transportation of objects
+                                                           and creatures from one location to another. Some spells
+  A cylinder’s point of origin is included in the          summon creatures or objects to the caster’s side, whereas
+cylinder’s area of effect.                                 others allow the caster to teleport to another location. Some
+                                                           conjurations create objects or effects out of nothing.
+Line
+                                                              Divination spells reveal information, whether in the form
+A line extends from its point of origin in a straight      of secrets long forgotten, glimpses of the future, the
+path up to its length and covers an area defined by        locations of hidden things, the truth behind illusions, or
+its width.                                                 visions of distant people or places.
+
+  A line’s point of origin is not included in the line’s      Enchantment spells affect the minds of others, influencing
+area of effect, unless you decide otherwise.               or controlling their behavior. Such spells can make enemies
+                                                           see the caster as a friend, force creatures to take a course of
+Sphere                                                     action, or even control another creature like a puppet.
+
+You select a sphere’s point of origin, and the sphere         Evocation spells manipulate magical energy to produce a
+extends outward from that point. The sphere’s size is      desired effect. Some call up blasts of fire or lightning. Others
+expressed as a radius in feet that extends from the        channel positive energy to heal wounds.
+point.
+                                                              Illusion spells deceive the senses or minds of others. They
+  A sphere’s point of origin is included in the            cause people to see things that are not there, to miss things
+sphere’s area of effect.                                   that are there, to hear phantom noises, or to remember
+                                                           things that never happened. Some illusions create phantom

@@ -1,0 +1,384 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "creatures",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          1,
+          2
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:creature:test-gloomcrab",
+      "category": "creatures",
+      "kind": "creature",
+      "name": "TEST_Gloomcrab",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          1
+        ],
+        "section": "TEST_Monsters",
+        "heading": "TEST_Gloomcrab"
+      },
+      "text": "TEST_Gloomcrab\nMedium beast, unaligned\n\nArmor Class 13 (natural armor)\nHit Points 11 (2d8 + 2)\nSpeed 20 ft., swim 20 ft.\n\nSTR 12 (+1) DEX 10 (+0) CON 12 (+1) INT 2 (-4) WIS 10 (+0) CHA 3 (-4)\n\nSkills Stealth +2\nSenses darkvision 60 ft., passive Perception 10\nLanguages —\nChallenge 1/4 (50 XP)\n\nAmphibious. The gloomcrab can breathe air and water.\n\nActions\nClaw. Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage, and the target is grappled (escape DC 11). A grappled adventurer’s pack is at risk — the crab pries at its straps.",
+      "data": {
+        "size": "Medium",
+        "type": "beast",
+        "subtype": null,
+        "alignment": "unaligned",
+        "armorClass": {
+          "value": 13,
+          "note": "natural armor"
+        },
+        "hitPoints": {
+          "average": 11,
+          "formula": "2d8 + 2"
+        },
+        "speed": {
+          "walk": 20,
+          "swim": 20
+        },
+        "abilities": {
+          "str": 12,
+          "dex": 10,
+          "con": 12,
+          "int": 2,
+          "wis": 10,
+          "cha": 3
+        },
+        "savingThrows": {},
+        "skills": {
+          "stealth": 2
+        },
+        "damageVulnerabilities": [],
+        "damageResistances": [],
+        "damageImmunities": [],
+        "conditionImmunities": [],
+        "senses": {
+          "darkvision": 60,
+          "passivePerception": 10
+        },
+        "languages": "—",
+        "challenge": {
+          "rating": "1/4",
+          "xp": 50
+        },
+        "traits": [
+          {
+            "name": "Amphibious",
+            "text": "The gloomcrab can breathe air and water."
+          }
+        ],
+        "actions": [
+          {
+            "name": "Claw",
+            "text": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage, and the target is grappled (escape DC 11). A grappled adventurer’s pack is at risk — the crab pries at its straps.",
+            "attack": {
+              "type": "Melee Weapon Attack",
+              "toHit": 3,
+              "reach": 5,
+              "range": null,
+              "target": "one target",
+              "hit": {
+                "average": 5,
+                "dice": "1d6 + 2",
+                "damageType": "bludgeoning"
+              },
+              "extra": "and the target is grappled (escape DC 11)"
+            }
+          }
+        ],
+        "reactions": []
+      },
+      "dice": [
+        {
+          "text": "2d8 + 2",
+          "count": 2,
+          "sides": 8,
+          "modifier": 2,
+          "average": 11
+        },
+        {
+          "text": "1d6 + 2",
+          "count": 1,
+          "sides": 6,
+          "modifier": 2,
+          "average": 5
+        }
+      ],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 12
+      }
+    },
+    {
+      "id": "srd:creature:test-ashen-warden",
+      "category": "creatures",
+      "kind": "creature",
+      "name": "TEST_Ashen Warden",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          1,
+          2
+        ],
+        "section": "TEST_Monsters",
+        "heading": "TEST_Ashen Warden"
+      },
+      "text": "TEST_Ashen Warden\nLarge construct, lawful neutral\n\nArmor Class 17 (natural armor)\nHit Points 76 (9d10 + 27)\nSpeed 30 ft.\n\nSTR 18 (+4) DEX 9 (-1) CON 16 (+3) INT 6 (-2) WIS 12 (+1) CHA 5 (-3)\n\nSaving Throws Con +6, Wis +4\nDamage Resistances fire\nDamage Immunities poison\nCondition Immunities charmed, poisoned\nSenses darkvision 120 ft., passive Perception 11\nLanguages understands Common but can’t speak\nChallenge 5 (1,800 XP)\n\nMagic Resistance. The warden has advantage on saving throws against spells and other magical effects.\n\nActions\nMultiattack. The warden makes two slam attacks.\nSlam. Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage.\n\nReactions\nEmber Shield. When a creature within 5 feet of the warden hits it with a melee attack, the attacker takes 3 (1d6) fire damage.\n\nLegendary Actions\nThe warden can take 2 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature’s turn. The warden regains spent legendary actions at the start of its turn.\nSlam. The warden makes one slam attack.\nCinder Step (Costs 2 Actions). The warden moves up to its speed without provoking opportunity attacks.",
+      "data": {
+        "size": "Large",
+        "type": "construct",
+        "subtype": null,
+        "alignment": "lawful neutral",
+        "armorClass": {
+          "value": 17,
+          "note": "natural armor"
+        },
+        "hitPoints": {
+          "average": 76,
+          "formula": "9d10 + 27"
+        },
+        "speed": {
+          "walk": 30
+        },
+        "abilities": {
+          "str": 18,
+          "dex": 9,
+          "con": 16,
+          "int": 6,
+          "wis": 12,
+          "cha": 5
+        },
+        "savingThrows": {
+          "con": 6,
+          "wis": 4
+        },
+        "skills": {},
+        "damageVulnerabilities": [],
+        "damageResistances": [
+          "fire"
+        ],
+        "damageImmunities": [
+          "poison"
+        ],
+        "conditionImmunities": [
+          "charmed",
+          "poisoned"
+        ],
+        "senses": {
+          "darkvision": 120,
+          "passivePerception": 11
+        },
+        "languages": "understands Common but can’t speak",
+        "challenge": {
+          "rating": "5",
+          "xp": 1800
+        },
+        "traits": [
+          {
+            "name": "Magic Resistance",
+            "text": "The warden has advantage on saving throws against spells and other magical effects."
+          }
+        ],
+        "actions": [
+          {
+            "name": "Multiattack",
+            "text": "The warden makes two slam attacks."
+          },
+          {
+            "name": "Slam",
+            "text": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage.",
+            "attack": {
+              "type": "Melee Weapon Attack",
+              "toHit": 7,
+              "reach": 5,
+              "range": null,
+              "target": "one target",
+              "hit": {
+                "average": 13,
+                "dice": "2d8 + 4",
+                "damageType": "bludgeoning"
+              },
+              "extra": null
+            }
+          }
+        ],
+        "reactions": [
+          {
+            "name": "Ember Shield",
+            "text": "When a creature within 5 feet of the warden hits it with a melee attack, the attacker takes 3 (1d6) fire damage."
+          }
+        ],
+        "legendaryActions": {
+          "intro": "The warden can take 2 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature’s turn. The warden regains spent legendary actions at the start of its turn.",
+          "options": [
+            {
+              "name": "Slam",
+              "text": "The warden makes one slam attack."
+            },
+            {
+              "name": "Cinder Step (Costs 2 Actions)",
+              "text": "The warden moves up to its speed without provoking opportunity attacks."
+            }
+          ]
+        }
+      },
+      "dice": [
+        {
+          "text": "9d10 + 27",
+          "count": 9,
+          "sides": 10,
+          "modifier": 27,
+          "average": 76
+        },
+        {
+          "text": "2d8 + 4",
+          "count": 2,
+          "sides": 8,
+          "modifier": 4,
+          "average": 13
+        },
+        {
+          "text": "1d6",
+          "count": 1,
+          "sides": 6,
+          "modifier": 0,
+          "average": 3
+        }
+      ],
+      "readiness": "verified",
+      "notes": [],
+      "verifiedBy": "TEST_reviewer",
+      "verifiedAt": "2026-09-22",
+      "icon": {
+        "set": "IconSet",
+        "index": 12
+      }
+    },
+    {
+      "id": "srd:creature:test-mire-hulk",
+      "category": "creatures",
+      "kind": "creature",
+      "name": "TEST_Mire Hulk",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          2
+        ],
+        "section": "TEST_Monsters",
+        "heading": "TEST_Mire Hulk"
+      },
+      "text": "TEST_Mire Hulk\nHuge giant, chaotic evil\n\nArmor Class 15 (hide armor)\nHit Points 126 (12d12 + 48)\nSpeed 40 ft.\n\nSTR 22 (+6) DEX 8 (-1) CON 19 (+4) INT 5 (-3) WIS 7 (-2) CHA 6 (-2)\n\nSaving Throws Str +10, Con +8\nSkills Athletics +10\nChallenge 10 (5,900 XP)\n\nActions\nGreatclub. Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 19 (3d8 + 6) bludgeoning damage.",
+      "data": {
+        "size": "Huge",
+        "type": "giant",
+        "subtype": null,
+        "alignment": "chaotic evil",
+        "armorClass": {
+          "value": 15,
+          "note": "hide armor"
+        },
+        "hitPoints": {
+          "average": 126,
+          "formula": "12d12 + 48"
+        },
+        "speed": {
+          "walk": 40
+        },
+        "abilities": {
+          "str": 22,
+          "dex": 8,
+          "con": 19,
+          "int": 5,
+          "wis": 7,
+          "cha": 6
+        },
+        "savingThrows": {
+          "str": 10,
+          "con": 8
+        },
+        "skills": {
+          "athletics": 10
+        },
+        "damageVulnerabilities": [],
+        "damageResistances": [],
+        "damageImmunities": [],
+        "conditionImmunities": [],
+        "challenge": {
+          "rating": "10",
+          "xp": 5900
+        },
+        "traits": [],
+        "actions": [
+          {
+            "name": "Greatclub",
+            "text": "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 19 (3d8 + 6) bludgeoning damage.",
+            "attack": {
+              "type": "Melee Weapon Attack",
+              "toHit": 10,
+              "reach": 10,
+              "range": null,
+              "target": "one target",
+              "hit": {
+                "average": 19,
+                "dice": "3d8 + 6",
+                "damageType": "bludgeoning"
+              },
+              "extra": null
+            }
+          }
+        ],
+        "reactions": []
+      },
+      "dice": [
+        {
+          "text": "12d12 + 48",
+          "count": 12,
+          "sides": 12,
+          "modifier": 48,
+          "average": 126
+        },
+        {
+          "text": "3d8 + 6",
+          "count": 3,
+          "sides": 8,
+          "modifier": 6,
+          "average": 19
+        }
+      ],
+      "readiness": "extracted",
+      "notes": [
+        "senses line not found",
+        "languages line not found"
+      ],
+      "icon": {
+        "set": "IconSet",
+        "index": 12
+      }
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,53 @@
+Damage Immunities bludgeoning, piercing, and                 Languages Common (can’t speak in tiger form)
+  slashing from nonmagical attacks not made with             Challenge 4 (1,100 XP)
+  silvered weapons
+                                                             Shapechanger. The weretiger can use its action to
+Senses darkvision 60 ft. (rat form only), passive            polymorph into a tiger-humanoid hybrid or into a tiger,
+  Perception 12                                              or back into its true form, which is humanoid. Its
+                                                             statistics, other than its size, are the same in each form.
+Languages Common (can’t speak in rat form)                   Any equipment it is wearing or carrying isn’t
+Challenge 2 (450 XP)                                         transformed. It reverts to its true form if it dies.
+                                                             Keen Hearing and Smell. The weretiger has advantage
+Shapechanger. The wererat can use its action to              on Wisdom (Perception) checks that rely on hearing or
+polymorph into a rat-humanoid hybrid or into a giant       smell.
+rat, or back into its true form, which is humanoid. Its      Pounce (Tiger or Hybrid Form Only). If the weretiger
+statistics, other than its size, are the same in each form.  moves at least 15 feet straight toward a creature and
+Any equipment it is wearing or carrying isn’t                then hits it with a claw attack on the same turn, that
+transformed. It reverts to its true form if it dies.         target must succeed on a DC 14 Strength saving throw
+Keen Smell. The wererat has advantage on Wisdom              or be knocked prone. If the target is prone, the
+(Perception) checks that rely on smell.                      weretiger can make one bite attack against it as a
+                                                             bonus action.
+Actions
+                                                             Actions
+Multiattack (Humanoid or Hybrid Form Only). The
+wererat makes two attacks, only one of which can be a        Multiattack (Humanoid or Hybrid Form Only). In
+bite.                                                        humanoid form, the weretiger makes two scimitar
+Bite (Rat or Hybrid Form Only). Melee Weapon Attack:         attacks or two longbow attacks. In hybrid form, it can
++4 to hit, reach 5 ft., one target. Hit: 4 (1d4 + 2)         attack like a humanoid or make two claw attacks.
+piercing damage. If the target is a humanoid, it must        Bite (Tiger or Hybrid Form Only). Melee Weapon
+succeed on a DC 11 Constitution saving throw or be           Attack: +5 to hit, reach 5 ft., one target. Hit: 8 (1d10 +
+cursed with wererat lycanthropy.                             3) piercing damage. If the target is a humanoid, it must
+Shortsword (Humanoid or Hybrid Form Only). Melee             succeed on a DC 13 Constitution saving throw or be
+Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5    cursed with weretiger lycanthropy.
+(1d6 + 2) piercing damage.                                   Claw (Tiger or Hybrid Form Only). Melee Weapon
+Hand Crossbow (Humanoid or Hybrid Form Only).                Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3)
+Ranged Weapon Attack: +4 to hit, range 30/120 ft., one       slashing damage.
+target. Hit: 5 (1d6 + 2) piercing damage.                    Scimitar (Humanoid or Hybrid Form Only). Melee
+                                                             Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6
+Weretiger                                                    (1d6 + 3) slashing damage.
+                                                             Longbow (Humanoid or Hybrid Form Only). Ranged
+Medium humanoid (human, shapechanger), neutral               Weapon Attack: +4 to hit, range 150/600 ft., one target.
+                                                             Hit: 6 (1d8 + 2) piercing damage.
+Armor Class 12
+Hit Points 120 (16d8 + 48)                                   Werewolf
+Speed 30 ft. (40 ft. in tiger form)
+                                                             Medium humanoid (human, shapechanger), chaotic
+    STR DEX CON INT WIS CHA                                  evil
+  17 (+3) 15 (+2) 16 (+3) 10 (+0) 13 (+1) 11 (+0)
+                                                             Armor Class 11 in humanoid form, 12 (natural armor)
+Skills Perception +5, Stealth +4                               in wolf or hybrid form
+Damage Immunities bludgeoning, piercing, and
+                                                             Hit Points 58 (9d8 + 18)
+  slashing from nonmagical attacks not made with             Speed 30 ft. (40 ft. in wolf form)
+  silvered weapons
+Senses darkvision 60 ft., passive Perception 15

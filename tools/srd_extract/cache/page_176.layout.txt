@@ -1,0 +1,64 @@
+You touch a creature that has died within the last                 You ward a creature within range against attack.
+minute. That creature returns to life with 1 hit point.            Until the spell ends, any creature who targets the
+This spell can’t return to life a creature that has died           warded creature with an attack or a harmful spell
+of old age, nor can it restore any missing body parts.             must first make a Wisdom saving throw. On a failed
+                                                                   save, the creature must choose a new target or lose
+Rope Trick                                                         the attack or spell. This spell doesn’t protect the
+                                                                   warded creature from area effects, such as the
+2nd-level transmutation                                         explosion of a fireball.
+
+Casting Time: 1 action                                               If the warded creature makes an attack or casts a
+Range: Touch                                                       spell that affects an enemy creature, this spell ends.
+Components: V, S, M (powdered corn extract and a
+                                                                   Scorching Ray
+  twisted loop of parchment)
+Duration: 1 hour                                                   2nd-level evocation
+
+You touch a length of rope that is up to 60 feet long.             Casting Time: 1 action
+One end of the rope then rises into the air until the              Range: 120 feet
+whole rope hangs perpendicular to the ground. At                   Components: V, S
+the upper end of the rope, an invisible entrance                   Duration: Instantaneous
+opens to an extradimensional space that lasts until
+the spell ends.                                                    You create three rays of fire and hurl them at targets
+                                                                   within range. You can hurl them at one target or
+  The extradimensional space can be reached by                     several.
+climbing to the top of the rope. The space can hold as
+many as eight Medium or smaller creatures. The                       Make a ranged spell attack for each ray. On a hit,
+rope can be pulled into the space, making the rope                 the target takes 2d6 fire damage.
+disappear from view outside the space.
+                                                                     At Higher Levels. When you cast this spell using a
+  Attacks and spells can’t cross through the entrance              spell slot of 3rd level or higher, you create one
+into or out of the extradimensional space, but those               additional ray for each slot level above 2nd.
+inside can see out of it as if through a 3-foot-by-5-
+foot window centered on the rope.                                  Scrying
+
+  Anything inside the extradimensional space drops                 5th-level divination
+out when the spell ends.
+                                                                   Casting Time: 10 minutes
+Sacred Flame                                                       Range: Self
+                                                                   Components: V, S, M (a focus worth at least 1,000
+Evocation cantrip
+                                                                     gp, such as a crystal ball, a silver mirror, or a font
+Casting Time: 1 action                                               filled with holy water)
+Range: 60 feet                                                     Duration: Concentration, up to 10 minutes
+Components: V, S
+Duration: Instantaneous                                            You can see and hear a particular creature you
+                                                                   choose that is on the same plane of existence as you.
+Flame-like radiance descends on a creature that you             The target must make a Wisdom saving throw,
+can see within range. The target must succeed on a                 which is modified by how well you know the target
+Dexterity saving throw or take 1d8 radiant damage.                 and the sort of physical connection you have to it. If
+The target gains no benefit from cover for this saving             a target knows you’re casting this spell, it can fail the
+throw.                                                             saving throw voluntarily if it wants to be observed.
+
+  The spell’s damage increases by 1d8 when you                     Knowledge                                          Save Modifier
+reach 5th level (2d8), 11th level (3d8), and 17th                  Secondhand (you have heard of the target)                 +5
+level (4d8).                                                       Firsthand (you have met the target)                       +0
+                                                                   Familiar (you know the target well)                       -5
+Sanctuary                                                          Connection
+                                                                   Likeness or picture                                Save Modifier
+1st-level abjuration                                            Possession or garment                                     -2
+                                                                   Body part, lock of hair, bit of nail, or the like         -4
+Casting Time: 1 bonus action                                                                                                -10
+Range: 30 feet
+Components: V, S, M (a small silver mirror)
+Duration: 1 minute

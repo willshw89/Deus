@@ -1,0 +1,52 @@
+Languages Celestial, Elvish, Sylvan, telepathy 60 ft.        Shimmering Shield (Costs 2 Actions). The unicorn
+Challenge 5 (1,800 XP)                                         creates a shimmering, magical field around itself or
+                                                               another creature it can see within 60 feet of it. The
+Charge. If the unicorn moves at least 20 feet straight         target gains a +2 bonus to AC until the end of the
+toward a target and then hits it with a horn attack on         unicorn’s next turn.
+the same turn, the target takes an extra 9 (2d8)
+piercing damage. If the target is a creature, it must        Heal Self (Costs 3 Actions). The unicorn magically
+succeed on a DC 15 Strength saving throw or be                 regains 11 (2d8 + 2) hit points.
+knocked prone.
+Innate Spellcasting. The unicorn’s innate spellcasting       Monsters (V)
+ability is Charisma (spell save DC 14). The unicorn can
+innately cast the following spells, requiring no             Vampires
+components:
+At will: detect evil and good, druidcraft, pass without      Vampire
+
+  trace                                                      Medium undead (shapechanger), lawful evil
+1/day each: calm emotions, dispel evil and good,
+                                                             Armor Class 16 (natural armor)
+  entangle                                                   Hit Points 144 (17d8 + 68)
+Magic Resistance. The unicorn has advantage on               Speed 30 ft.
+saving throws against spells and other magical effects.
+Magic Weapons. The unicorn’s weapon attacks are                  STR DEX CON INT WIS CHA
+magical.                                                       18 (+4) 18 (+4) 18 (+4) 17 (+3) 15 (+2) 18 (+4)
+
+Actions                                                      Saving Throws Dex +9, Wis +7, Cha +9
+                                                             Skills Perception +7, Stealth +9
+Multiattack. The unicorn makes two attacks: one with         Damage Resistances necrotic; bludgeoning, piercing,
+its hooves and one with its horn.
+Hooves. Melee Weapon Attack: +7 to hit, reach 5 ft.,           and slashing from nonmagical attacks
+one target. Hit: 11 (2d6 + 4) bludgeoning damage.            Senses darkvision 120 ft., passive Perception 17
+Horn. Melee Weapon Attack: +7 to hit, reach 5 ft., one       Languages the languages it knew in life
+target. Hit: 8 (1d8 + 4) piercing damage.                    Challenge 13 (10,000 XP)
+Healing Touch (3/Day). The unicorn touches another
+creature with its horn. The target magically regains 11      Shapechanger. If the vampire isn’t in sunlight or
+(2d8 + 2) hit points. In addition, the touch removes all     running water, it can use its action to polymorph into a
+diseases and neutralizes all poisons afflicting the target.  Tiny bat or a Medium cloud of mist, or back into its
+Teleport (1/Day). The unicorn magically teleports itself     true form.
+and up to three willing creatures it can see within 5
+feet of it, along with any equipment they are wearing          While in bat form, the vampire can’t speak, its
+or carrying, to a location the unicorn is familiar with, up  walking speed is 5 feet, and it has a flying speed of 30
+to 1 mile away.                                              feet. Its statistics, other than its size and speed, are
+                                                             unchanged. Anything it is wearing transforms with it,
+Legendary Actions                                            but nothing it is carrying does. It reverts to its true
+                                                             form if it dies.
+The unicorn can take 3 legendary actions, choosing
+from the options below. Only one legendary action              While in mist form, the vampire can’t take any
+option can be used at a time and only at the end of          actions, speak, or manipulate objects. It is weightless,
+another creature’s turn. The unicorn regains spent           has a flying speed of 20 feet, can hover, and can enter
+legendary actions at the start of its turn.                  a hostile creature’s space and stop there. In addition, if
+Hooves. The unicorn makes one attack with its hooves.        air can pass through a space, the mist can do so
+                                                             without squeezing, and it can’t pass through water. It
+                                                             has advantage on Strength, Dexterity, and Constitution

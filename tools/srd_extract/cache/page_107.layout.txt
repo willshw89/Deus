@@ -1,0 +1,57 @@
+Locate Creature       Druid Spells
+Stone Shape
+                      Cantrips (0 Level)
+5th Level
+                      Druidcraft
+Commune               Guidance
+Contagion             Mending
+Dispel Evil and Good  Poison Spray
+Flame Strike          Produce Flame
+Geas                  Resistance
+Greater Restoration   Shillelagh
+Hallow
+Insect Plague         1st Level
+Legend Lore
+Mass Cure Wounds      Animal Friendship
+Planar Binding        Charm Person
+Raise Dead            Create or Destroy Water
+Scrying               Cure Wounds
+                      Detect Magic
+6th Level             Detect Poison and Disease
+                      Entangle
+Blade Barrier         Faerie Fire
+Create Undead         Fog Cloud
+Find the Path         Goodberry
+Forbiddance           Healing Word
+Harm                  Jump
+Heal                  Longstrider
+Heroes’ Feast         Purify Food and Drink
+Planar Ally           Speak with Animals
+True Seeing           Thunderwave
+Word of Recall
+                      2nd Level
+7th Level
+                      Animal Messenger
+Conjure Celestial     Barkskin
+Divine Word           Darkvision
+Etherealness          Enhance Ability
+Fire Storm            Find Traps
+Plane Shift           Flame Blade
+Regenerate            Flaming Sphere
+Resurrection          Gust of Wind
+Symbol                Heat Metal
+                      Hold Person
+8th Level             Lesser Restoration
+                      Locate Animals or Plants
+Antimagic Field       Locate Object
+Control Weather       Moonbeam
+Earthquake            Pass without Trace
+Holy Aura             Protection from Poison
+                      Spike Growth
+9th Level
+                      3rd Level
+Astral Projection
+Gate                  Call Lightning
+Mass Heal             Conjure Animals
+True Resurrection     Daylight
+                      Dispel Magic

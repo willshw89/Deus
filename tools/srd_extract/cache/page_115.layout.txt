@@ -1,0 +1,61 @@
+time for the duration of the spell, you can use your      destination before the spell ends, the message is lost,
+action to change your appearance in this way again.       and the beast makes its way back to where you cast
+                                                          this spell.
+  Natural Weapons. You grow claws, fangs, spines,
+horns, or a different natural weapon of your choice.        At Higher Levels. If you cast this spell using a spell
+Your unarmed strikes deal 1d6 bludgeoning,                slot of 3nd level or higher, the duration of the spell
+piercing, or slashing damage, as appropriate to the       increases by 48 hours for each slot level above 2nd.
+natural weapon you chose, and you are proficient
+with your unarmed strikes. Finally, the natural           Animal Shapes
+weapon is magic and you have a +1 bonus to the
+attack and damage rolls you make using it.                8th-level transmutation
+
+Animal Friendship                                         Casting Time: 1 action
+                                                          Range: 30 feet
+1st-level enchantment                                  Components: V, S
+                                                          Duration: Concentration, up to 24 hours
+Casting Time: 1 action
+Range: 30 feet                                            Your magic turns others into beasts. Choose any
+Components: V, S, M (a morsel of food)                    number of willing creatures that you can see within
+Duration: 24 hours                                        range. You transform each target into the form of a
+This spell lets you convince a beast that you mean it     Large or smaller beast with a challenge rating of 4 or
+no harm. Choose a beast that you can see within           lower. On subsequent turns, you can use your action
+range. It must see and hear you. If the beast's           to transform affected creatures into new forms.
+Intelligence is 4 or higher, the spell fails. Otherwise,
+the beast must succeed on a Wisdom saving throw             The transformation lasts for the duration for each
+or be charmed by you for the spell's duration. If you     target, or until the target drops to 0 hit points or dies.
+or one of your companions harms the target, the           You can choose a different form for each target. A
+spells ends.                                              target’s game statistics are replaced by the statistics
+                                                          of the chosen beast, though the target retains its
+  At Higher Levels. When you cast this spell using a      alignment and Intelligence, Wisdom, and Charisma
+spell slot of 2nd level or higher, you can affect one     scores. The target assumes the hit points of its new
+additional beast t level above 1st.                       form, and when it reverts to its normal form, it
+                                                          returns to the number of hit points it had before it
+Animal Messenger                                          transformed. If it reverts as a result of dropping to 0
+                                                          hit points, any excess damage carries over to its
+2nd-level enchantment (ritual)                         normal form. As long as the excess damage doesn’t
+                                                          reduce the creature’s normal form to 0 hit points, it
+Casting Time: 1 action                                    isn’t knocked unconscious. The creature is limited in
+Range: 30 feet                                            the actions it can perform by the nature of its new
+Components: V, S, M (a morsel of food)                    form, and it can’t speak or cast spells.
+Duration: 24 hours
+                                                            The target’s gear melds into the new form. The
+By means of this spell, you use an animal to deliver a    target can’t activate, wield, or otherwise benefit
+message. Choose a Tiny beast you can see within           from any of its equipment.
+range, such as a squirrel, a blue jay, or a bat. You
+specify a location, which you must have visited, and      Animate Dead
+a recipient who matches a general description, such
+as “a man or woman dressed in the uniform of the          3rd-level necromancy
+town guard” or “a red-haired dwarf wearing a
+pointed hat.” You also speak a message of up to           Casting Time: 1 minute
+twenty-five words. The target beast travels for the    Range: 10 feet
+duration of the spell toward the specified location,      Components: V, S, M (a drop of blood, a piece of
+covering about 50 miles per 24 hours for a flying
+messenger, or 25 miles for other animals.                   flesh, and a pinch of bone dust)
+                                                          Duration: Instantaneous
+  When the messenger arrives, it delivers your
+message to the creature that you described,               This spell creates an undead servant. Choose a pile
+replicating the sound of your voice. The messenger        of bones or a corpse of a Medium or Small humanoid
+speaks only to a creature matching the description        within range. Your spell imbues the target with a
+you gave. If the messenger doesn’t reach its              foul mimicry of life, raising it as an undead creature.
+                                                          The target becomes a skeleton if you chose bones or

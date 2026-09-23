@@ -1,0 +1,88 @@
+Animated Shield                                            allowing the apparatus reducing the apparatus’s
+
+Armor (shield), very rare (requires attunement)            to walk and swim.            speed to 0 and making it
+
+While holding this shield, you can speak its                                            unable to benefit from
+command word as a bonus action to cause it to
+animate. The shield leaps into the air and hovers in                                    bonuses to speed.
+your space to protect you as if you were wielding it,
+leaving your hands free. The shield remains                2 Forward window shutter Forward window shutter
+animated for 1 minute, until you use a bonus action
+to end this effect, or until you are incapacitated or      opens.                       closes.
+die, at which point the shield falls to the ground or
+into your hand if you have one free.                       3 Side window shutters       Side window shutters
+
+                                                           open (two per side).         close (two per side).
+
+                                                           4 Two claws extend from The claws retract.
+
+                                                           the front sides of the
+
+                                                           apparatus.
+
+                                                           5 Each extended claw         Each extended claw
+
+                                                           makes the following          makes the following
+
+Apparatus of the Crab                                      melee weapon attack: melee weapon attack: +8
+
+Wondrous item, legendary                                   +8 to hit, reach 5 ft., one to hit, reach 5 ft., one
+
+                                                           target. Hit: 7 (2d6)         target. Hit: The target is
+
+This item first appears to be a Large sealed iron          bludgeoning damage.          grappled (escape DC 15).
+barrel weighing 500 pounds. The barrel has a hidden
+catch, which can be found with a successful DC 20          6 The apparatus walks or The apparatus walks or
+Intelligence (Investigation) check. Releasing the
+catch unlocks a hatch at one end of the barrel,            swims forward.               swims backward.
+allowing two Medium or smaller creatures to crawl
+inside. Ten levers are set in a row at the far end, each   7 The apparatus turns 90 The apparatus turns 90
+in a neutral position, able to move either up or down.
+When certain levers are used, the apparatus                degrees left.                degrees right.
+transforms to resemble a giant lobster.
+                                                           8 Eyelike fixtures emit      The light turns off.
+  The apparatus of the Crab is a Large object with
+the following statistics:                                  bright light in a 30-foot
+
+                                                           radius and dim light for
+
+                                                           an additional 30 feet.
+
+                                                           9 The apparatus sinks as The apparatus rises up
+
+                                                           much as 20 feet in           to 20 feet in liquid.
+
+                                                           liquid.
+
+                                                           10 The rear hatch unseals The rear hatch closes
+
+Armor Class: 20                                            and opens.                   and seals.
+Hit Points: 200
+Speed: 30 ft., swim 30 ft. (or 0 ft. for both if the legs  Armor, +1, +2, or +3
+
+  and tail aren’t extended)                                Armor (light, medium, or heavy), rare (+1), very rare
+Damage Immunities: poison, psychic                         (+2), or legendary (+3)
+
+To be used as a vehicle, the apparatus requires one        You have a bonus to AC while wearing this armor.
+pilot. While the apparatus’s hatch is closed, the          The bonus is determined by its rarity.
+compartment is airtight and watertight. The
+compartment holds enough air for 10 hours of               Armor of Invulnerability
+breathing, divided by the number of breathing
+creatures inside.                                          Armor (plate), legendary (requires attunement)
+
+  The apparatus floats on water. It can also go            You have resistance to nonmagical damage while
+underwater to a depth of 900 feet. Below that, the         you wear this armor. Additionally, you can use an
+vehicle takes 2d6 bludgeoning damage per minute            action to make yourself immune to nonmagical
+from pressure.                                             damage for 10 minutes or until you are no longer
+                                                           wearing the armor. Once this special action is used,
+  A creature in the compartment can use an action          it can’t be used again until the next dawn.
+to move as many as two of the apparatus’s levers up
+or down. After each use, a lever goes back to its          Armor of Resistance
+neutral position. Each lever, from left to right,
+functions as shown in the Apparatus of the Crab            Armor (light, medium, or heavy), rare (requires
+Levers table.                                              attunement)
+
+Apparatus of the Crab Levers                               You have resistance to one type of damage while you
+                                                           wear this armor. The GM chooses the type or
+Lever Up                   Down                            determines it randomly from the options below.
+  1 Legs and tail extend,  Legs and tail retract,

@@ -1,0 +1,60 @@
+base, up to 50 feet wide at the top, and 25 feet tall.   Temperature
+Any creature or object in the water and within 25
+feet of the vortex is pulled 10 feet toward it. A        Stage  Condition
+creature can swim away from the vortex by making a         1    Unbearable heat
+Strength (Athletics) check against your spell save DC.     2    Hot
+                                                           3    Warm
+  When a creature enters the vortex for the first          4    Cool
+time on a turn or starts its turn there, it must make a    5    Cold
+Strength saving throw. On a failed save, the creature      6    Arctic cold
+takes 2d8 bludgeoning damage and is caught in the
+vortex until the spell ends. On a successful save, the   Wind
+creature takes half damage, and isn’t caught in the
+vortex. A creature caught in the vortex can use its      Stage  Condition
+action to try to swim away from the vortex as              1    Calm
+described above, but has disadvantage on the               2    Moderate wind
+Strength (Athletics) check to do so.                       3    Strong wind
+                                                           4    Gale
+  The first time each turn that an object enters the       5    Storm
+vortex, the object takes 2d8 bludgeoning damage;
+this damage occurs each round it remains in the          Counterspell
+vortex.
+                                                         3rd-level abjuration
+Control Weather
+                                                         Casting Time: 1 reaction, which you take when you
+8th-level transmutation                               see a creature within 60 feet of you casting a spell
+                                                         Range: 60 feet
+Casting Time: 10 minutes                                 Components: S
+Range: Self (5-mile radius)                           Duration: Instantaneous
+Components: V, S, M (burning incense and bits of         You attempt to interrupt a creature in the process of
+                                                         casting a spell. If the creature is casting a spell of 3rd
+  earth and wood mixed in water)                         level or lower, its spell fails and has no effect. If it is
+Duration: Concentration, up to 8 hours                   casting a spell of 4th level or higher, make an ability
+                                                         check using your spellcasting ability. The DC equals
+You take control of the weather within 5 miles of you    10 + the spell's level. On a success, the creature's
+for the duration. You must be outdoors to cast this      spell fails and has no effect.
+spell. Moving to a place where you don’t have a clear
+path to the sky ends the spell early.                      At Higher Levels. When you cast this spell using a
+                                                         spell slot of 4th level or higher, the interrupted spell
+  When you cast the spell, you change the current        has no effect if its level is less than or equal to the
+weather conditions, which are determined by the          level of the spell slot you used.
+GM based on the climate and season. You can change
+precipitation, temperature, and wind. It takes 1d4 ×     Create Food and Water
+10 minutes for the new conditions to take effect.
+Once they do so, you can change the conditions again.    3rd-level conjuration
+When the spell ends, the weather gradually returns
+to normal.                                               Casting Time: 1 action
+                                                         Range: 30 feet
+  When you change the weather conditions, find a         Components: V, S
+current condition on the following tables and change     Duration: Instantaneous
+its stage by one, up or down. When changing the
+wind, you can change its direction.                      You create 45 pounds of food and 30 gallons of
+                                                         water on the ground or in containers within range,
+Precipitation                                            enough to sustain up to fifteen humanoids or five
+                                                         steeds for 24 hours. The food is bland but nourishing,
+Stage  Condition                                         and spoils if uneaten after 24 hours. The water is
+  1    Clear                                             clean and doesn’t go bad.
+  2    Light clouds
+  3    Overcast or ground fog
+  4    Rain, hail, or snow
+  5    Torrential rain, driving hail, or blizzard

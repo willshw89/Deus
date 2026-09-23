@@ -1,0 +1,55 @@
+3/day each: entangle, goodberry                            Damage Resistances poison
+1/day each: barkskin, pass without trace, shillelagh       Senses darkvision 120 ft., passive Perception 10
+Magic Resistance. The dryad has advantage on saving        Languages Dwarvish, Undercommon
+throws against spells and other magical effects.           Challenge 1 (200 XP)
+Speak with Beasts and Plants. The dryad can
+communicate with beasts and plants as if they shared a     Duergar Resilience. The duergar has advantage on
+language.                                                  saving throws against poison, spells, and illusions, as
+                                                           well as to resist being charmed or paralyzed.
+Tree Stride. Once on her turn, the dryad can use 10        Sunlight Sensitivity. While in sunlight, the duergar has
+feet of her movement to step magically into one living     disadvantage on attack rolls, as well as on Wisdom
+tree within her reach and emerge from a second living      (Perception) checks that rely on sight.
+tree within 60 feet of the first tree, appearing in an
+unoccupied space within 5 feet of the second tree.         Actions
+Both trees must be Large or bigger.                        Enlarge (Recharges after a Short or Long Rest). For 1
+                                                           minute, the duergar magically increases in size, along
+Actions                                                    with anything it is wearing or carrying. While enlarged,
+                                                           the duergar is Large, doubles its damage dice on
+Club. Melee Weapon Attack: +2 to hit (+6 to hit with       Strength-based weapon attacks (included in the
+shillelagh), reach 5 ft., one target. Hit: 2 (1d4)         attacks), and makes Strength checks and Strength
+bludgeoning damage, or 8 (1d8 + 4) bludgeoning             saving throws with advantage. If the duergar lacks the
+damage with shillelagh.                                    room to become Large, it attains the maximum size
+                                                           possible in the space available.
+Fey Charm. The dryad targets one humanoid or beast         War Pick. Melee Weapon Attack: +4 to hit, reach 5 ft.,
+that she can see within 30 feet of her. If the target can  one target. Hit: 6 (1d8 + 2) piercing damage, or 11 (2d8
+see the dryad, it must succeed on a DC 14 Wisdom           + 2) piercing damage while enlarged.
+saving throw or be magically charmed. The charmed          Javelin. Melee or Ranged Weapon Attack: +4 to hit,
+creature regards the dryad as a trusted friend to be       reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 +
+heeded and protected. Although the target isn’t under      2) piercing damage, or 9 (2d6 + 2) piercing damage
+the dryad’s control, it takes the dryad’s requests or      while enlarged.
+actions in the most favorable way it can.                  Invisibility (Recharges after a Short or Long Rest). The
+                                                           duergar magically turns invisible until it attacks, casts a
+  Each time the dryad or its allies do anything harmful    spell, or uses its Enlarge, or until its concentration is
+to the target, it can repeat the saving throw, ending      broken, up to 1 hour (as if concentrating on a spell).
+the effect on itself on a success. Otherwise, the effect   Any equipment the duergar wears or carries is invisible
+lasts 24 hours or until the dryad dies, is on a different  with it.
+plane of existence from the target, or ends the effect
+as a bonus action. If a target’s saving throw is           Monsters (E)
+successful, the target is immune to the dryad’s Fey
+Charm for the next 24 hours.                               Elementals
+
+  The dryad can have no more than one humanoid and         Air Elemental
+up to three beasts charmed at a time.
+                                                           Large elemental, neutral
+Duergar
+                                                           Armor Class 15
+Medium humanoid (dwarf), lawful evil                       Hit Points 90 (12d10 + 24)
+                                                           Speed 0 ft., fly 90 ft. (hover)
+Armor Class 16 (scale mail, shield)
+
+Hit Points 26 (4d8 + 8)
+Speed 25 ft.
+
+    STR DEX CON INT WIS CHA
+
+  14 (+2) 11 (+0) 14 (+2) 11 (+0) 10 (+0) 9 (-1)

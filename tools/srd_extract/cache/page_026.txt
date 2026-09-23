@@ -1,0 +1,41 @@
+Monk
+Class Features
+As a monk, you gain the following class features.
+Hit Points
+Hit Dice: 1d8 per monk level Hit Points at 1st Level: 8 + your Constitution
+modifier Hit Points at Higher Levels: 1d8 (or 5) + your
+Constitution modifier per monk level after 1st
+Proficiencies
+Armor: None
+
+Weapons: Simple weapons, shortswords Tools: Choose one type of artisan’s tools or one
+musical instrument Saving Throws: Strength, Dexterity Skills: Choose two from Acrobatics, Athletics,
+History, Insight, Religion, and Stealth
+Equipment
+You start with the following equipment, in addition to the equipment granted by your background:
+• (a) a shortsword or (b) any simple weapon • (a) a dungeoneer’s pack or (b) an explorer’s pack • 10 darts
+
+The Monk
+
+Level 1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th 11th 12th 13th 14th 15th 16th 17th 18th 19th 20th
+
+Proficiency Bonus +2 +2 +2 +2 +3 +3 +3 +3 +4 +4 +4 +4 +5 +5 +5 +5 +6 +6 +6 +6
+
+Martial Arts 1d4 1d4 1d4 1d4 1d6 1d6 1d6 1d6 1d6 1d6 1d8 1d8 1d8 1d8 1d8 1d8 1d10 1d10 1d10 1d10
+
+Ki Points — 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+
+Unarmored Movement —
++10 ft. +10 ft. +10 ft. +10 ft. +15 ft. +15 ft. +15 ft. +15 ft. +20 ft. +20 ft. +20 ft. +20 ft. +25 ft. +25 ft. +25 ft. +25 ft. +30 ft. +30 ft. +30 ft.
+
+Features Unarmored Defense, Martial Arts Ki, Unarmored Movement Monastic Tradition, Deflect Missiles Ability Score Improvement, Slow Fall Extra Attack, Stunning Strike Ki-Empowered Strikes, Monastic Tradition feature Evasion, Stillness of Mind Ability Score Improvement Unarmored Movement improvement Purity of Body Monastic Tradition feature Ability Score Improvement Tongue of the Sun and Moon Diamond Soul Timeless Body Ability Score Improvement Monastic Tradition feature Empty Body Ability Score Improvement Perfect Self
+
+Unarmored Defense
+Beginning at 1st level, while you are wearing no armor and not wielding a shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier.
+Martial Arts
+At 1st level, your practice of martial arts gives you mastery of combat styles that use unarmed strikes and monk weapons, which are shortswords and any simple melee weapons that don’t have the two- handed or heavy property.
+
+You gain the following benefits while you are unarmed or wielding only monk weapons and you aren’t wearing armor or wielding a shield:
+• You can use Dexterity instead of Strength for the attack and damage rolls of your unarmed strikes and monk weapons.
+• You can roll a d4 in place of the normal damage of your unarmed strike or monk weapon. This die changes as you gain monk levels, as shown in the Martial Arts column of the Monk table.
+• When you use the Attack action with an unarmed strike or a monk weapon on your turn, you can

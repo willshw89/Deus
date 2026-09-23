@@ -1,0 +1,62 @@
+Beyond 1st Level                                        195,000        16            +5
+                                                        225,000
+As your character goes on adventures and                265,000        17            +6
+overcomes challenges, he or she gains experience,       305,000
+represented by experience points. A character who       355,000        18            +6
+reaches a specified experience point total advances
+in capability. This advancement is called gaining a                    19            +6
+level.
+                                                                       20            +6
+  When your character gains a level, his or her class
+often grants additional features, as detailed in the    Multiclassing
+class description. Some of these features allow you
+to increase your ability scores, either increasing two  Multiclassing allows you to gain levels in multiple
+scores by 1 each or increasing one score by 2. You      classes. Doing so lets you mix the abilities of those
+can’t increase an ability score above 20. In addition,  classes to realize a character concept that might not
+every character’s proficiency bonus increases at        be reflected in one of the standard class options.
+certain levels.
+                                                          With this rule, you have the option of gaining a
+  Each time you gain a level, you gain 1 additional     level in a new class whenever you advance in level,
+Hit Die. Roll that Hit Die, add your Constitution       instead of gaining a level in your current class. Your
+modifier to the roll, and add the total to your hit     levels in all your classes are added together to
+point maximum. Alternatively, you can use the fixed     determine your character level. For example, if you
+value shown in your class entry, which is the average   have three levels in wizard and two in fighter, you’re
+result of the die roll (rounded up).                    a 5th-level character.
+
+  When your Constitution modifier increases by 1,         As you advance in levels, you might primarily
+your hit point maximum increases by 1 for each level    remain a member of your original class with just a
+you have attained. For example, if your 7th-level    few levels in another class, or you might change
+fighter has a Constitution score of 17, when he         course entirely, never looking back at the class you
+reaches 8th level, he increases his Constitution score  left behind. You might even start progressing in a
+from 17 to 18, thus increasing his Constitution         third or fourth class. Compared to a single-class
+modifier from +3 to +4. His hit point maximum then      character of the same level, you’ll sacrifice some
+increases by 8.                                         focus in exchange for versatility.
+
+  The Character Advancement table summarizes the        Prerequisites
+XP you need to advance in levels from level 1
+through level 20, and the proficiency bonus for a       To qualify for a new class, you must meet the ability
+character of that level. Consult the information in     score prerequisites for both your current class and
+your character’s class description to see what other    your new one, as shown in the Multiclassing
+improvements you gain at each level.                    Prerequisites table. For example, a barbarian who
+                                                        decides to multiclass into the druid class must have
+Character Advancement                                   both Strength and Wisdom scores of 13 or higher.
+                                                        Without the full training that a beginning character
+Experience Points  Level  Proficiency Bonus             receives, you must be a quick study in your new class,
+0                    1             +2                   having a natural aptitude that is reflected by higher-
+300                  2             +2                   than-average ability scores.
+900                  3             +2
+2,700                4             +2                   Multiclassing Prerequisites
+6,500                5             +3
+14,000               6             +3                   Class      Ability Score Minimum
+23,000               7             +3                   Barbarian  Strength 13
+34,000               8             +3                   Bard       Charisma 13
+48,000               9             +4                   Cleric     Wisdom 13
+64,000              10             +4                   Druid      Wisdom 13
+85,000              11             +4                   Fighter    Strength 13 or Dexterity 13
+100,000             12             +4                   Monk       Dexterity 13 and Wisdom 13
+120,000             13             +5                   Paladin    Strength 13 and Charisma 13
+140,000             14             +5                   Ranger     Dexterity 13 and Wisdom 13
+165,000             15             +5                   Rogue      Dexterity 13
+                                                        Sorcerer   Charisma 13
+                                                        Warlock    Charisma 13
+                                                        Wizard     Intelligence 13

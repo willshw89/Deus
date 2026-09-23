@@ -1,0 +1,61 @@
+  Halfling Nimbleness. You can move through the           Dragonborn
+space of any creature that is of a size larger than
+yours.                                                    Dragonborn Traits
+
+  Languages. You can speak, read, and write               Your draconic heritage manifests in a variety of
+Common and Halfling. The Halfling language isn’t          traits you share with other dragonborn.
+secret, but halflings are loath to share it with others.
+They write very little, so they don’t have a rich body      Ability Score Increase. Your Strength score
+of literature. Their oral tradition, however, is very     increases by 2, and your Charisma score increases
+strong. Almost all halflings speak Common to              by 1.
+converse with the people in whose lands they dwell
+or through which they are traveling.                        Age. Young dragonborn grow quickly. They walk
+                                                          hours after hatching, attain the size and
+Lightfoot                                                 development of a 10-year-old human child by the
+                                                          age of 3, and reach adulthood by 15. They live to be
+As a lightfoot halfling, you can easily hide from         around 80.
+notice, even using other people as cover. You’re
+inclined to be affable and get along well with others.      Alignment. Dragonborn tend to extremes, making
+                                                          a conscious choice for one side or the other in the
+  Lightfoots are more prone to wanderlust than            cosmic war between good and evil. Most dragonborn
+other halflings, and often dwell alongside other races    are good, but those who side with evil can be terrible
+or take up a nomadic life.                                villains.
+
+  Ability Score Increase. Your Charisma score               Size. Dragonborn are taller and heavier than
+increases by 1.                                           humans, standing well over 6 feet tall and averaging
+                                                          almost 250 pounds. Your size is Medium.
+  Naturally Stealthy. You can attempt to hide even
+when you are obscured only by a creature that is at         Speed. Your base walking speed is 30 feet.
+least one size larger than you.
+                                                          Draconic Ancestry
+Human
+                                                          Dragon  Damage Type  Breath Weapon
+Human Traits                                              Black   Acid         5 by 30 ft. line (Dex. save)
+                                                          Blue    Lightning    5 by 30 ft. line (Dex. save)
+It’s hard to make generalizations about humans, but       Brass   Fire         5 by 30 ft. line (Dex. save)
+your human character has these traits.                    Bronze  Lightning    5 by 30 ft. line (Dex. save)
+                                                          Copper  Acid         5 by 30 ft. line (Dex. save)
+  Ability Score Increase. Your ability scores each        Gold    Fire         15 ft. cone (Dex. save)
+increase by 1.                                            Green   Poison       15 ft. cone (Con. save)
+                                                          Red     Fire         15 ft. cone (Dex. save)
+  Age. Humans reach adulthood in their late teens         Silver  Cold         15 ft. cone (Con. save)
+and live less than a century.                             White   Cold         15 ft. cone (Con. save)
+
+  Alignment. Humans tend toward no particular               Draconic Ancestry. You have draconic ancestry.
+alignment. The best and the worst are found among         Choose one type of dragon from the Draconic
+them.                                                     Ancestry table. Your breath weapon and damage
+                                                          resistance are determined by the dragon type, as
+  Size. Humans vary widely in height and build,           shown in the table.
+from barely 5 feet to well over 6 feet tall. Regardless
+of your position in that range, your size is Medium.        Breath Weapon. You can use your action to
+                                                          exhale destructive energy. Your draconic ancestry
+  Speed. Your base walking speed is 30 feet.              determines the size, shape, and damage type of the
+  Languages. You can speak, read, and write               exhalation.
+Common and one extra language of your choice.
+Humans typically learn the languages of other               When you use your breath weapon, each creature
+peoples they deal with, including obscure dialects.       in the area of the exhalation must make a saving
+They are fond of sprinkling their speech with words       throw, the type of which is determined by your
+borrowed from other tongues: Orc curses, Elvish           draconic ancestry. The DC for this saving throw
+musical expressions, Dwarvish military phrases, and       equals 8 + your Constitution modifier + your
+so on.                                                    proficiency bonus. A creature takes 2d6 damage on a
+                                                          failed save, and half as much damage on a successful

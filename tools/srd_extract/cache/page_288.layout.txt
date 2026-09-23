@@ -1,0 +1,52 @@
+Young Red Dragon                                          Challenge 4 (1,100 XP)
+
+Large dragon, chaotic evil                                Actions
+                                                          Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+Armor Class 18 (natural armor)                            target. Hit: 9 (1d10 + 4) piercing damage plus 3 (1d6)
+Hit Points 178 (17d10 + 85)                               fire damage.
+Speed 40 ft., climb 40 ft., fly 80 ft.                    Fire Breath (Recharge 5–6). The dragon exhales fire in
+                                                          a 15-foot cone. Each creature in that area must make a
+    STR DEX CON INT WIS CHA                               DC 13 Dexterity saving throw, taking 24 (7d6) fire
+  23 (+6) 10 (+0) 21 (+5) 14 (+2) 11 (+0) 19 (+4)         damage on a failed save, or half as much damage on a
+                                                          successful one.
+Saving Throws Dex +4, Con +9, Wis +4, Cha +8
+Skills Perception +8, Stealth +4                          White Dragon
+Damage Immunities fire
+Senses blindsight 30 ft., darkvision 120 ft., passive     Ancient White Dragon
+
+  Perception 18                                           Gargantuan dragon, chaotic evil
+Languages Common, Draconic
+Challenge 10 (5,900 XP)                                   Armor Class 20 (natural armor)
+                                                          Hit Points 333 (18d20 + 144)
+Actions                                                   Speed 40 ft., burrow 40 ft., fly 80 ft., swim 40 ft.
+Multiattack. The dragon makes three attacks: one with
+its bite and two with its claws.                              STR DEX CON INT WIS CHA
+Bite. Melee Weapon Attack: +10 to hit, reach 10 ft.,        26 (+8) 10 (+0) 26 (+8) 10 (+0) 13 (+1) 14 (+2)
+one target. Hit: 17 (2d10 + 6) piercing damage plus 3
+(1d6) fire damage.                                        Saving Throws Dex +6, Con +14, Wis +7, Cha +8
+Claw. Melee Weapon Attack: +10 to hit, reach 5 ft.,       Skills Perception +13, Stealth +6
+one target. Hit: 13 (2d6 + 6) slashing damage.            Damage Immunities cold
+Fire Breath (Recharge 5–6). The dragon exhales fire in    Senses blindsight 60 ft., darkvision 120 ft., passive
+a 30-foot cone. Each creature in that area must make a
+DC 17 Dexterity saving throw, taking 56 (16d6) fire         Perception 23
+damage on a failed save, or half as much damage on a      Languages Common, Draconic
+successful one.                                           Challenge 20 (25,000 XP)
+
+Red Dragon Wyrmling                                       Ice Walk. The dragon can move across and climb icy
+                                                          surfaces without needing to make an ability check.
+Medium dragon, chaotic evil                               Additionally, difficult terrain composed of ice or snow
+                                                          doesn’t cost it extra moment.
+Armor Class 17 (natural armor)                            Legendary Resistance (3/Day). If the dragon fails a
+Hit Points 75 (10d8 + 30)                                 saving throw, it can choose to succeed instead.
+Speed 30 ft., climb 30 ft., fly 60 ft.
+                                                          Actions
+    STR DEX CON INT WIS CHA                               Multiattack. The dragon can use its Frightful Presence.
+  19 (+4) 10 (+0) 17 (+3) 12 (+1) 11 (+0) 15 (+2)         It then makes three attacks: one with its bite and two
+                                                          with its claws.
+Saving Throws Dex +2, Con +5, Wis +2, Cha +4              Bite. Melee Weapon Attack: +14 to hit, reach 15 ft.,
+Skills Perception +4, Stealth +2                          one target. Hit: 19 (2d10 + 8) piercing damage plus 9
+Damage Immunities fire                                    (2d8) cold damage.
+Senses blindsight 10 ft., darkvision 60 ft., passive
+
+  Perception 14
+Languages Draconic

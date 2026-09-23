@@ -1,0 +1,48 @@
+Hit Points 21 (6d6)                                       Actions
+Speed 30 ft., fly 30 ft.                                  Spear. Melee or Ranged Weapon Attack: +2 to hit,
+                                                          reach 5 ft. or range 20/60 ft., one target. Hit: 3 (1d6)
+    STR DEX CON INT WIS CHA                               piercing damage, or 4 (1d8) piercing damage if used
+   5 (-3) 11 (+0) 10 (+0) 11 (+0) 10 (+0) 12 (+1)         with two hands to make a melee attack.
+
+Damage Immunities fire, poison                            Merrow
+Condition Immunities poisoned
+Senses darkvision 60 ft., passive Perception 10           Large monstrosity, chaotic evil
+Languages Aquan, Ignan                                    Armor Class 13 (natural armor)
+Challenge 1/4 (50 XP)                                     Hit Points 45 (6d10 + 12)
+                                                          Speed 10 ft., swim 40 ft.
+Death Burst. When the mephit dies, it explodes in a
+cloud of steam. Each creature within 5 feet of the            STR DEX CON INT WIS CHA
+mephit must succeed on a DC 10 Dexterity saving             18 (+4) 10 (+0) 15 (+2) 8 (-1) 10 (+0) 9 (-1)
+throw or take 4 (1d8) fire damage.
+Innate Spellcasting (1/Day). The mephit can innately      Senses darkvision 60 ft., passive Perception 10
+cast blur, requiring no material components. Its innate   Languages Abyssal, Aquan
+spellcasting ability is Charisma.                         Challenge 2 (450 XP)
+
+Actions                                                   Amphibious. The merrow can breathe air and water.
+Claws. Melee Weapon Attack: +2 to hit, reach 5 ft., one
+creature. Hit: 2 (1d4) slashing damage plus 2 (1d4) fire  Actions
+damage.                                                   Multiattack. The merrow makes two attacks: one with
+Steam Breath (Recharge 6). The mephit exhales a 15-     its bite and one with its claws or harpoon.
+foot cone of scalding steam. Each creature in that area   Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+must succeed on a DC 10 Dexterity saving throw, taking    target. Hit: 8 (1d8 + 4) piercing damage.
+4 (1d8) fire damage on a failed save, or half as much     Claws. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+damage on a successful one.                               target. Hit: 9 (2d4 + 4) slashing damage.
+                                                          Harpoon. Melee or Ranged Weapon Attack: +6 to hit,
+Merfolk                                                   reach 5 ft. or range 20/60 ft., one target. Hit: 11 (2d6 +
+                                                          4) piercing damage. If the target is a Huge or smaller
+Medium humanoid (merfolk), neutral                        creature, it must succeed on a Strength contest against
+Armor Class 11                                            the merrow or be pulled up to 20 feet toward the
+Hit Points 11 (2d8 + 2)                                   merrow.
+Speed 10 ft., swim 40 ft.
+                                                          Mimic
+    STR DEX CON INT WIS CHA
+  10 (+0) 13 (+1) 12 (+1) 11 (+0) 11 (+0) 12 (+1)         Medium monstrosity (shapechanger), neutral
+                                                          Armor Class 12 (natural armor)
+Skills Perception +2                                      Hit Points 58 (9d8 + 18)
+Senses passive Perception 12                              Speed 15 ft.
+Languages Aquan, Common
+Challenge 1/8 (25 XP)                                         STR DEX CON INT WIS CHA
+                                                            17 (+3) 12 (+1) 15 (+2) 5 (-3) 13 (+1) 8 (-1)
+Amphibious. The merfolk can breathe air and water.
+                                                          Skills Stealth +5
+                                                          Damage Immunities acid

@@ -1,0 +1,52 @@
+Wing Attack (Costs 2 Actions). The dragon beats its      Silver Dragon Wyrmling
+  wings. Each creature within 10 feet of the dragon
+  must succeed on a DC 21 Dexterity saving throw or      Medium dragon, lawful good
+  take 15 (2d6 + 8) bludgeoning damage and be
+  knocked prone. The dragon can then fly up to half its  Armor Class 17 (natural armor)
+  flying speed.                                          Hit Points 45 (6d8 + 18)
+                                                         Speed 30 ft., fly 60 ft.
+Young Silver Dragon
+                                                             STR DEX CON INT WIS CHA
+Large dragon, lawful good                                  19 (+4) 10 (+0) 17 (+3) 12 (+1) 11 (+0) 15 (+2)
+
+Armor Class 18 (natural armor)                           Saving Throws Dex +2, Con +5, Wis +2, Cha +4
+Hit Points 168 (16d10 + 80)                              Skills Perception +4, Stealth +2
+Speed 40 ft., fly 80 ft.                                 Damage Immunities cold
+                                                         Senses blindsight 10 ft., darkvision 60 ft., passive
+    STR DEX CON INT WIS CHA
+  23 (+6) 10 (+0) 21 (+5) 14 (+2) 11 (+0) 19 (+4)          Perception 14
+                                                         Languages Draconic
+Saving Throws Dex +4, Con +9, Wis +4, Cha +8             Challenge 2 (450 XP)
+Skills Arcana +6, History +6, Perception +8, Stealth +4
+Damage Immunities cold                                   Actions
+Senses blindsight 30 ft., darkvision 120 ft., passive    Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+                                                         target. Hit: 9 (1d10 + 4) piercing damage.
+  Perception 18                                          Breath Weapons (Recharge 5–6). The dragon uses one
+Languages Common, Draconic                               of the following breath weapons.
+Challenge 9 (5,000 XP)                                   Cold Breath. The dragon exhales an icy blast in a 15-
+
+Actions                                                    foot cone. Each creature in that area must make a
+                                                           DC 13 Constitution saving throw, taking 18 (4d8) cold
+Multiattack. The dragon makes three attacks: one with      damage on a failed save, or half as much damage on
+its bite and two with its claws.                           a successful one.
+Bite. Melee Weapon Attack: +10 to hit, reach 10 ft.,     Paralyzing Breath. The dragon exhales paralyzing gas in
+one target. Hit: 17 (2d10 + 6) piercing damage.            a 15-foot cone. Each creature in that area must
+Claw. Melee Weapon Attack: +10 to hit, reach 5 ft.,        succeed on a DC 13 Constitution saving throw or be
+one target. Hit: 13 (2d6 + 6) slashing damage.             paralyzed for 1 minute. A creature can repeat the
+Breath Weapons (Recharge 5–6). The dragon uses one         saving throw at the end of each of its turns, ending
+of the following breath weapons.                           the effect on itself on a success.
+Cold Breath. The dragon exhales an icy blast in a 30-
+                                                         Dragon Turtle
+  foot cone. Each creature in that area must make a
+  DC 17 Constitution saving throw, taking 54 (12d8)      Gargantuan dragon, neutral
+  cold damage on a failed save, or half as much
+  damage on a successful one.                            Armor Class 20 (natural armor)
+Paralyzing Breath. The dragon exhales paralyzing gas in  Hit Points 341 (22d20 + 110)
+  a 30-foot cone. Each creature in that area must      Speed 20 ft., swim 40 ft.
+  succeed on a DC 17 Constitution saving throw or be
+  paralyzed for 1 minute. A creature can repeat the          STR DEX CON INT WIS CHA
+  saving throw at the end of each of its turns, ending     25 (+7) 10 (+0) 20 (+5) 10 (+0) 12 (+1) 12 (+1)
+  the effect on itself on a success.
+                                                         Saving Throws Dex +6, Con +11, Wis +7
+                                                         Damage Resistances fire
+                                                         Senses darkvision 120 ft., passive Perception 11

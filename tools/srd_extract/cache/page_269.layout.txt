@@ -1,0 +1,50 @@
+    STR DEX CON INT WIS CHA                                Shielded Mind. The couatl is immune to scrying and to
+   6 (-2) 12 (+1) 12 (+1) 2 (-4) 13 (+1) 5 (-3)            any effect that would sense its emotions, read its
+                                                           thoughts, or detect its location.
+Senses darkvision 60 ft., passive Perception 11
+Languages —                                                Actions
+Challenge 1/2 (100 XP)
+                                                           Bite. Melee Weapon Attack: +8 to hit, reach 5 ft., one
+Actions                                                    creature. Hit: 8 (1d6 + 5) piercing damage, and the
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one     target must succeed on a DC 13 Constitution saving
+creature. Hit: 3 (1d4 + 1) piercing damage, and the        throw or be poisoned for 24 hours. Until this poison
+target must succeed on a DC 11 Constitution saving         ends, the target is unconscious. Another creature can
+throw against being magically petrified. On a failed       use an action to shake the target awake.
+save, the creature begins to turn to stone and is          Constrict. Melee Weapon Attack: +6 to hit, reach 10 ft.,
+restrained. It must repeat the saving throw at the end     one Medium or smaller creature. Hit: 10 (2d6 + 3)
+of its next turn. On a success, the effect ends. On a      bludgeoning damage, and the target is grappled
+failure, the creature is petrified for 24 hours.           (escape DC 15). Until this grapple ends, the target is
+                                                           restrained, and the couatl can’t constrict another
+Couatl                                                     target.
+                                                           Change Shape. The couatl magically polymorphs into a
+Medium celestial, lawful good                              humanoid or beast that has a challenge rating equal to
+                                                           or less than its own, or back into its true form. It
+Armor Class 19 (natural armor)                             reverts to its true form if it dies. Any equipment it is
+Hit Points 97 (13d8 + 39)                                  wearing or carrying is absorbed or borne by the new
+Speed 30 ft., fly 90 ft.                                   form (the couatl’s choice).
+
+    STR DEX CON INT WIS CHA                                  In a new form, the couatl retains its game statistics
+  16 (+3) 20 (+5) 17 (+3) 18 (+4) 20 (+5) 18 (+4)          and ability to speak, but its AC, movement modes,
+                                                           Strength, Dexterity, and other actions are replaced by
+Saving Throws Con +5, Wis +7, Cha +6                       those of the new form, and it gains any statistics and
+Damage Resistances radiant                                 capabilities (except class features, legendary actions,
+Damage Immunities psychic; bludgeoning, piercing,          and lair actions) that the new form has but that it lacks.
+                                                           If the new form has a bite attack, the couatl can use its
+  and slashing from nonmagical attacks                     bite in that form.
+Senses truesight 120 ft., passive Perception 15
+Languages all, telepathy 120 ft.                           Monsters (D)
+Challenge 4 (1,100 XP)
+                                                           Darkmantle
+Innate Spellcasting. The couatl’s spellcasting ability is
+Charisma (spell save DC 14). It can innately cast the      Small monstrosity, unaligned
+following spells, requiring only verbal components:
+At will: detect evil and good, detect magic, detect        Armor Class 11
+                                                           Hit Points 22 (5d6 + 5)
+  thoughts                                                 Speed 10 ft., fly 30 ft.
+3/day each: bless, create food and water, cure wounds,
+                                                               STR DEX CON INT WIS CHA
+  lesser restoration, protection from poison, sanctuary,     16 (+3) 12 (+1) 13 (+1) 2 (-4) 10 (+0) 5 (-3)
+  shield
+1/day each: dream, greater restoration, scrying            Skills Stealth +3
+Magic Weapons. The couatl’s weapon attacks are             Senses blindsight 60 ft., passive Perception 10
+magical.                                                   Languages —

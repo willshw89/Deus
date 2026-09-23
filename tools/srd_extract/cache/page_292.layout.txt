@@ -1,0 +1,58 @@
+Tail. Melee Weapon Attack: +11 to hit, reach 15 ft., one       STR DEX CON INT WIS CHA
+target. Hit: 15 (2d8 + 6) bludgeoning damage.                19 (+4) 10 (+0) 17 (+3) 12 (+1) 11 (+0) 15 (+2)
+
+Frightful Presence. Each creature of the dragon’s          Saving Throws Dex +3, Con +6, Wis +3, Cha +5
+choice that is within 120 feet of the dragon and aware     Skills Perception +6, Persuasion +5, Stealth +3
+of it must succeed on a DC 16 Wisdom saving throw or       Damage Immunities fire
+become frightened for 1 minute. A creature can repeat      Senses blindsight 30 ft., darkvision 120 ft., passive
+the saving throw at the end of each of its turns, ending
+the effect on itself on a success. If a creature’s saving    Perception 16
+throw is successful or the effect ends for it, the         Languages Common, Draconic
+creature is immune to the dragon’s Frightful Presence      Challenge 6 (2,300 XP)
+for the next 24 hours.
+                                                           Actions
+Breath Weapons (Recharge 5–6). The dragon uses one
+of the following breath weapons.                           Multiattack. The dragon makes three attacks: one with
+                                                           its bite and two with its claws.
+Fire Breath. The dragon exhales fire in an 60-foot line  Bite. Melee Weapon Attack: +7 to hit, reach 10 ft., one
+  that is 5 feet wide. Each creature in that line must     target. Hit: 15 (2d10 + 4) piercing damage.
+  make a DC 18 Dexterity saving throw, taking 45           Claw. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+  (13d6) fire damage on a failed save, or half as much     target. Hit: 11 (2d6 + 4) slashing damage.
+  damage on a successful one.                              Breath Weapons (Recharge 5–6). The dragon uses one
+                                                           of the following breath weapons.
+Sleep Breath. The dragon exhales sleep gas in a 60-foot  Fire Breath. The dragon exhales fire in a 40-foot line
+  cone. Each creature in that area must succeed on a
+  DC 18 Constitution saving throw or fall unconscious        that is 5 feet wide. Each creature in that line must
+  for 10 minutes. This effect ends for a creature if the     make a DC 14 Dexterity saving throw, taking 42
+  creature takes damage or someone uses an action to         (12d6) fire damage on a failed save, or half as much
+  wake it.                                                   damage on a successful one.
+                                                           Sleep Breath. The dragon exhales sleep gas in a 30-foot
+Legendary Actions                                            cone. Each creature in that area must succeed on a
+                                                             DC 14 Constitution saving throw or fall unconscious
+The dragon can take 3 legendary actions, choosing            for 5 minutes. This effect ends for a creature if the
+from the options below. Only one legendary action            creature takes damage or someone uses an action to
+option can be used at a time and only at the end of          wake it.
+another creature’s turn. The dragon regains spent
+legendary actions at the start of its turn.                Brass Dragon Wyrmling
+
+Detect. The dragon makes a Wisdom (Perception)             Medium dragon, chaotic good
+  check.
+                                                           Armor Class 16 (natural armor)
+Tail Attack. The dragon makes a tail attack.               Hit Points 16 (3d8 + 3)
+                                                           Speed 30 ft., burrow 15 ft., fly 60 ft.
+Wing Attack (Costs 2 Actions). The dragon beats its
+  wings. Each creature within 10 feet of the dragon            STR DEX CON INT WIS CHA
+  must succeed on a DC 19 Dexterity saving throw or          15 (+2) 10 (+0) 13 (+1) 10 (+0) 11 (+0) 13 (+1)
+  take 13 (2d6 + 6) bludgeoning damage and be
+  knocked prone. The dragon can then fly up to half its    Saving Throws Dex +2, Con +3, Wis +2, Cha +3
+  flying speed.                                            Skills Perception +4, Stealth +2
+                                                           Damage Immunities fire
+Young Brass Dragon                                         Senses blindsight 10 ft., darkvision 60 ft., passive
+
+Large dragon, chaotic good                                   Perception 14
+
+Armor Class 17 (natural armor)
+
+Hit Points 110 (13d10 + 39)
+
+Speed 40 ft., burrow 20 ft., fly 80 ft.

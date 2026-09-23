@@ -1,0 +1,50 @@
+Quipper                                                  Actions
+
+Tiny beast, unaligned                                    Bite. Melee Weapon Attack: +0 to hit, reach 5 ft., one
+                                                         target. Hit: 1 piercing damage.
+Armor Class 13
+Hit Points 1 (1d4 - 1)                                   Raven
+Speed 0 ft., swim 40 ft.
+                                                         Tiny beast, unaligned
+ STR DEX CON               INT     WIS           CHA
+2 (-4) 16 (+3) 9 (-1)     1 (-5)  7 (-2)         2 (-4)  Armor Class 12
+                                                         Hit Points 1 (1d4 - 1)
+Senses darkvision 60 ft., passive Perception 8           Speed 10 ft., fly 50 ft.
+Languages —
+Challenge 0 (10 XP)                                       STR DEX CON               INT WIS CHA
+                                                         2 (-4) 14 (+2) 8 (-1)     2 (-4) 12 (+1) 6 (-2)
+
+Blood Frenzy. The quipper has advantage on melee         Skills Perception +3
+attack rolls against any creature that doesn’t have all  Senses passive Perception 13
+its hit points.                                          Languages —
+Water Breathing. The quipper can breathe only            Challenge 0 (10 XP)
+underwater.
+                                                         Mimicry. The raven can mimic simple sounds it has
+Actions                                                  heard, such as a person whispering, a baby crying, or
+                                                         an animal chittering. A creature that hears the sounds
+Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one   can tell they are imitations with a successful DC 10
+target. Hit: 1 piercing damage.                          Wisdom (Insight) check.
+
+A quipper is a carnivorous fish with sharp teeth.        Actions
+Quippers can adapt to any aquatic environment,           Beak. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+including cold subterranean lakes. They frequently       target. Hit: 1 piercing damage.
+gather in swarms; the statistics for a swarm of
+quippers appear later in this appendix.                  Reef Shark
+
+Rat                                                      Medium beast, unaligned
+
+Tiny beast, unaligned                                    Armor Class 12 (natural armor)
+                                                         Hit Points 22 (4d8 + 4)
+Armor Class 10                                           Speed 0 ft., swim 40 ft.
+Hit Points 1 (1d4 - 1)
+Speed 20 ft.                                                 STR DEX CON INT WIS CHA
+                                                           14 (+2) 13 (+1) 13 (+1) 1 (-5) 10 (+0) 4 (-3)
+ STR DEX CON               INT WIS CHA
+2 (-4) 11 (+0) 9 (-1)     2 (-4) 10 (+0) 4 (-3)          Skills Perception +2
+                                                         Senses blindsight 30 ft., passive Perception 12
+Senses darkvision 30 ft., passive Perception 10          Languages —
+Languages —                                              Challenge 1/2 (100 XP)
+Challenge 0 (10 XP)
+
+Keen Smell. The rat has advantage on Wisdom              Pack Tactics. The shark has advantage on an attack roll
+(Perception) checks that rely on smell.                  against a creature if at least one of the shark’s allies is

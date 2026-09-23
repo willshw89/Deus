@@ -1,0 +1,49 @@
+Challenge 1/2 (100 XP)                                     Blood Hawk
+
+Keen Smell. The bear has advantage on Wisdom               Small beast, unaligned
+(Perception) checks that rely on smell.                    Armor Class 12
+                                                           Hit Points 7 (2d6)
+Actions                                                    Speed 10 ft., fly 60 ft.
+Multiattack. The bear makes two attacks: one with its
+bite and one with its claws.                                   STR DEX CON INT WIS CHA
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one        6 (-2) 14 (+2) 10 (+0) 3 (-4) 14 (+2) 5 (-3)
+target. Hit: 5 (1d6 + 2) piercing damage.
+Claws. Melee Weapon Attack: +3 to hit, reach 5 ft., one    Skills Perception +4
+target. Hit: 7 (2d4 + 2) slashing damage.                  Senses passive Perception 14
+                                                           Languages —
+Blink Dog                                                  Challenge 1/8 (25 XP)
+
+Medium fey, lawful good                                    Keen Sight. The hawk has advantage on Wisdom
+Armor Class 13                                             (Perception) checks that rely on sight.
+Hit Points 22 (4d8 + 4)                                    Pack Tactics. The hawk has advantage on an attack roll
+Speed 40 ft.                                               against a creature if at least one of the hawk’s allies is
+                                                           within 5 feet of the creature and the ally isn’t
+    STR DEX CON INT WIS CHA                                incapacitated.
+  12 (+1) 17 (+3) 12 (+1) 10 (+0) 13 (+1) 11 (+0)
+                                                           Actions
+Skills Perception +3, Stealth +5
+Senses passive Perception 13                               Beak. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Languages Blink Dog, understands Sylvan but can’t          target. Hit: 4 (1d4 + 2) piercing damage.
+
+  speak it                                                 Taking its name from its crimson feathers and
+Challenge 1/4 (50 XP)                                      aggressive nature, the blood hawk fearlessly attacks
+                                                           almost any animal, stabbing it with its daggerlike
+Keen Hearing and Smell. The dog has advantage on           beak. Blood hawks flock together in large numbers,
+Wisdom (Perception) checks that rely on hearing or         attacking as a pack to take down prey.
+smell.
+                                                           Boar                               WIS    CHA
+Actions                                                                                      9 (-1)  5 (-3)
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one     Medium beast, unaligned
+target. Hit: 4 (1d6 + 1) piercing damage.                  Armor Class 11 (natural armor)
+Teleport (Recharge 4–6). The dog magically teleports,      Hit Points 11 (2d8 + 2)
+along with any equipment it is wearing or carrying, up     Speed 40 ft.
+to 40 feet to an unoccupied space it can see. Before or
+after teleporting, the dog can make one bite attack.           STR DEX CON INT
+                                                             13 (+1) 11 (+0) 12 (+1) 2 (-4)
+A blink dog takes its name from its ability to blink in
+and out of existence, a talent it uses to aid its attacks  Senses passive Perception 9
+and to avoid harm.                                         Languages —
+                                                           Challenge 1/4 (50 XP)
+
+                                                           Charge. If the boar moves at least 20 feet straight
+                                                           toward a target and then hits it with a tusk attack on

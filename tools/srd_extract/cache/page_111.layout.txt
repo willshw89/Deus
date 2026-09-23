@@ -1,0 +1,59 @@
+1st Level                      True Seeing
+
+Charm Person                   7th Level
+Comprehend Languages
+Expeditious Retreat            Etherealness
+Hellish Rebuke                 Finger of Death
+Illusory Script                Forcecage
+Protection from Evil and Good  Plane Shift
+Unseen Servant
+                               8th Level
+2nd Level
+                               Demiplane
+Darkness                       Dominate Monster
+Enthrall                       Feeblemind
+Hold Person                    Glibness
+Invisibility                   Power Word Stun
+Mirror Image
+Misty Step                     9th Level
+Ray of Enfeeblement
+Shatter                        Astral Projection
+Spider Climb                   Foresight
+Suggestion                     Imprisonment
+                               Power Word Kill
+3rd Level                      True Polymorph
+
+Counterspell                   Wizard Spells
+Dispel Magic
+Fear                           Cantrips (0 Level)
+Fly
+Gaseous Form                   Acid Splash
+Hypnotic Pattern               Chill Touch
+Magic Circle                   Dancing Lights
+Major Image                    Fire Bolt
+Remove Curse                   Light
+Tongues                        Mage Hand
+Vampiric Touch                 Mending
+                               Message
+4th Level                      Minor Illusion
+                               Poison Spray
+Banishment                     Prestidigitation
+Blight                         Ray of Frost
+Dimension Door                 Shocking Grasp
+Hallucinatory Terrain          True Strike
+
+5th Level                      1st Level
+
+Contact Other Plane            Alarm
+Dream                          Burning Hands
+Hold Monster                   Charm Person
+Scrying                        Color Spray
+                               Comprehend Languages
+6th Level                      Detect Magic
+                               Disguise Self
+Circle of Death                Expeditious Retreat
+Conjure Fey                    False Life
+Create Undead                  Feather Fall
+Eyebite                        Find Familiar
+Flesh to Stone                 Floating Disk
+Mass Suggestion

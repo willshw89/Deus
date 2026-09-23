@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRD 5.1 Catalogue Browser</title>
+<meta name="description" content="Developer browser for the dormant SRD 5.1 content library of Project DEUS (game/data/srd51). Offline, no build step.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#detail">Skip to detail</a>
+<header class="topbar">
+    <div class="brand">
+        <span class="brand-title">SRD 5.1 Catalogue</span>
+        <span class="brand-sub">DEUS developer browser · dormant library, nothing here is loaded by the game</span>
+    </div>
+    <div class="topbar-actions">
+        <span id="status" class="status" aria-live="polite">Loading catalogue…</span>
+        <button id="coverage-btn" type="button" class="btn" aria-pressed="false">Coverage</button>
+    </div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<div class="layout">
+    <aside class="sidebar" aria-label="Search and results">
+        <div class="search-row">
+            <label class="visually-hidden" for="search">Search</label>
+            <input id="search" type="search" placeholder="Search name, ID or text  ( / )" autocomplete="off" spellcheck="false" disabled>
+            <button id="clear-btn" type="button" class="btn btn-quiet" title="Clear search and filters">Clear</button>
+        </div>
+        <div class="filters">
+            <label>Category
+                <select id="f-category" disabled><option value="">All</option></select>
+            </label>
+            <label>Kind
+                <select id="f-kind" disabled><option value="">All</option></select>
+            </label>
+            <label>Readiness
+                <select id="f-readiness" disabled><option value="">All</option></select>
+            </label>
+            <label id="l-challenge" hidden>Challenge
+                <select id="f-challenge"><option value="">Any CR</option></select>
+            </label>
+            <label id="l-level" hidden>Spell level
+                <select id="f-level"><option value="">Any level</option></select>
+            </label>
+        </div>
+        <div class="results-head">
+            <span id="count" class="count">0 entries</span>
+            <span class="hint">↑ ↓ to move, Enter to open</span>
+        </div>
+        <ul id="results" class="results" role="listbox" tabindex="0" aria-label="Results"></ul>
+    </aside>
+
+    <main class="main">
+        <section id="detail" class="detail" aria-live="polite">
+            <div class="empty">
+                <p>Select an entry to see its stat block, source citation, verbatim text and raw JSON.</p>
+            </div>
+        </section>
+        <section id="coverage" class="coverage" hidden aria-label="Coverage"></section>
+    </main>
+</div>
+
+<footer class="footer">
+    <p id="attribution" class="attribution">Attribution not loaded.</p>
+    <p class="footer-meta"><span id="footer-meta"></span></p>
+</footer>
+
+<script src="catalog_query.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

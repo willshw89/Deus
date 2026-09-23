@@ -1,0 +1,40 @@
+at your feet. If the sword has no unobstructed path to you, it moves as close to you as it can and then falls to the ground. It also ceases to hover if you grasp it or move more than 30 feet away from it.
+Decanter of Endless Water
+Wondrous item, uncommon
+This stoppered flask sloshes when shaken, as if it contains water. The decanter weighs 2 pounds.
+You can use an action to remove the stopper and speak one of three command words, whereupon an amount of fresh water or salt water (your choice) pours out of the flask. The water stops pouring out at the start of your next turn. Choose from the following options:
+• “Stream” produces 1 gallon of water. • “Fountain” produces 5 gallons of water. • “Geyser” produces 30 gallons of water that gushes
+forth in a geyser 30 feet long and 1 foot wide. As a bonus action while holding the decanter, you can aim the geyser at a creature you can see within 30 feet of you. The target must succeed on a DC 13 Strength saving throw or take 1d4 bludgeoning damage and fall prone. Instead of a creature, you can target an object that isn’t being worn or carried and that weighs no more than 200 pounds. The object is either knocked over or pushed up to 15 feet away from you.
+Deck of Illusions
+Wondrous item, uncommon
+This box contains a set of parchment cards. A full deck has 34 cards. A deck found as treasure is usually missing 1d20 - 1 cards.
+The magic of the deck functions only if cards are drawn at random (you can use an altered deck of playing cards to simulate the deck). You can use an action to draw a card at random from the deck and throw it to the ground at a point within 30 feet of you.
+An illusion of one or more creatures forms over the thrown card and remains until dispelled. An illusory creature appears real, of the appropriate size, and behaves as if it were a real creature except that it can do no harm. While you are within 120 feet of the illusory creature and can see it, you can use an action to move it magically anywhere within 30 feet of its card. Any physical interaction with the illusory creature reveals it to be an illusion, because objects pass through it. Someone who uses an action to visually inspect the creature identifies it as illusory
+
+with a successful DC 15 Intelligence (Investigation) check. The creature then appears translucent.
+The illusion lasts until its card is moved or the illusion is dispelled. When the illusion ends, the image on its card disappears, and that card can’t be used again.
+
+Playing Card Ace of hearts King of hearts Queen of hearts Jack of hearts Ten of hearts Nine of hearts Eight of hearts Two of hearts
+
+Illusion Red dragon Knight and four guards Succubus or incubus Druid Cloud giant Ettin Bugbear Goblin
+
+Ace of diamonds King of diamonds Queen of diamonds Jack of diamonds Ten of diamonds Nine of diamonds Eight of diamonds Two of diamonds
+
+Beholder Archmage and mage apprentice Night hag Assassin Fire giant Ogre mage Gnoll Kobold
+
+Ace of spades King of spades Queen of spades Jack of spades Ten of spades Nine of spades Eight of spades Two of spades
+
+Lich Priest and two acolytes Medusa Veteran Frost giant Troll Hobgoblin Goblin
+
+Ace of clubs King of clubs Queen of clubs Jack of clubs Ten of clubs Nine of clubs Eight of clubs Two of clubs
+
+Iron golem Bandit captain and three bandits Erinyes Berserker Hill giant Ogre Orc Kobold
+
+Jokers (2)
+
+You (the deck’s owner)
+
+Deck of Many Things
+Wondrous item, legendary
+Usually found in a box or pouch, this deck contains a number of cards made of ivory or vellum. Most (75 percent) of these decks have only thirteen cards, but the rest have twenty-two.
+Before you draw a card, you must declare how many cards you intend to draw and then draw them randomly (you can use an altered deck of playing cards to simulate the deck). Any cards drawn in excess of this number have no effect. Otherwise, as

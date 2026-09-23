@@ -1,0 +1,182 @@
+Druid
+Class Features
+As a druid, you gain the following class features.
+Hit Points
+Hit Dice: 1d8 per druid level Hit Points at 1st Level: 8 + your Constitution
+modifier Hit Points at Higher Levels: 1d8 (or 5) + your
+Constitution modifier per druid level after 1st
+Proficiencies
+Armor: Light armor, medium armor, shields (druids will not wear armor or use shields made of metal)
+
+The Druid
+
+Level 1st 2nd 3rd 4th
+
+Proficiency Bonus +2 +2 +2 +2
+
+5th
+
++3
+
+6th
+
++3
+
+7th
+
++3
+
+8th
+
++3
+
+9th
+
++4
+
+10th
+
++4
+
+11th
+
++4
+
+12th
+
++4
+
+13th
+
++5
+
+14th
+
++5
+
+15th
+
++5
+
+16th
+
++5
+
+17th
+
++6
+
+18th
+
++6
+
+19th
+
++6
+
+20th
+
++6
+
+Features Druidic, Spellcasting Wild Shape, Druid Circle — Wild Shape improvement, Ability Score Improvement — Druid Circle feature — Wild Shape improvement, Ability Score Improvement — Druid Circle feature — Ability Score Improvement — Druid Circle feature — Ability Score Improvement — Timeless Body, Beast Spells Ability Score Improvement Archdruid
+
+Druidic
+You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message’s presence with a successful DC 15 Wisdom
+
+Weapons: Clubs, daggers, darts, javelins, maces, quarterstaffs, scimitars, sickles, slings, spears
+Tools: Herbalism kit Saving Throws: Intelligence, Wisdom Skills: Choose two from Arcana, Animal Handling,
+Insight, Medicine, Nature, Perception, Religion, and Survival
+Equipment
+You start with the following equipment, in addition to the equipment granted by your background:
+• (a) a wooden shield or (b) any simple weapon • (a) a scimitar or (b) any simple melee weapon • Leather armor, an explorer’s pack, and a druidic
+focus
+
+Cantrips
+
+—Spell Slots per Spell Level—
+
+Known 1st 2nd 3rd 4th 5th 6th 7th 8th 9th
+
+2
+
+2 — ———————
+
+2
+
+3 — ———————
+
+2
+
+4 2 ———————
+
+3
+
+4 3 ———————
+
+3
+
+4 3 2 ——————
+
+3
+
+4 3 3 ——————
+
+3
+
+4 3 3 1 —————
+
+3
+
+4 3 3 2 —————
+
+3
+
+4 3 3 3 1 ————
+
+4
+
+4 3 3 3 2 ————
+
+4
+
+4 3 3 3 2 1 ———
+
+4
+
+4 3 3 3 2 1 ———
+
+4
+
+4 3 3 3 2 1 1 ——
+
+4
+
+4 3 3 3 2 1 1 ——
+
+4
+
+4 3 3 3 2 1 1 1—
+
+4
+
+4 3 3 3 2 1 1 1—
+
+4
+
+43 3321111
+
+4
+
+43 3331111
+
+4
+
+43 3332111
+
+4
+
+43 3332211
+
+(Perception) check but can’t decipher it without magic.
+Spellcasting
+Drawing on the divine essence of nature itself, you can cast spells to shape that essence to your will.

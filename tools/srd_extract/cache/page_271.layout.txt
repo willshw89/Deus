@@ -1,0 +1,53 @@
+  STR DEX CON INT                WIS    CHA                 Innate Spellcasting. The glabrezu’s spellcasting ability
+11 (+0) 11 (+0) 12 (+1) 5 (-3)  8 (-1)  3 (-4)              is Intelligence (spell save DC 16). The glabrezu can
+                                                            innately cast the following spells, requiring no material
+Damage Resistances cold, fire, lightning                    components:
+Damage Immunities poison                                    At will: darkness, detect magic, dispel magic
+Condition Immunities poisoned                               1/day each: confusion, fly, power word stun
+Senses darkvision 60 ft., passive Perception 9              Magic Resistance. The glabrezu has advantage on
+Languages Abyssal, telepathy 60 ft. (works only with        saving throws against spells and other magical effects.
+
+  creatures that understand Abyssal)                        Actions
+Challenge 1/4 (50 XP)
+                                                            Multiattack. The glabrezu makes four attacks: two with
+Actions                                                     its pincers and two with its fists. Alternatively, it makes
+                                                            two attacks with its pincers and casts one spell.
+Multiattack. The dretch makes two attacks: one with         Pincer. Melee Weapon Attack: +9 to hit, reach 10 ft.,
+its bite and one with its claws.                            one target. Hit: 16 (2d10 + 5) bludgeoning damage. If
+                                                            the target is a Medium or smaller creature, it is
+Bite. Melee Weapon Attack: +2 to hit, reach 5 ft., one      grappled (escape DC 15). The glabrezu has two pincers,
+target. Hit: 3 (1d6) piercing damage.                       each of which can grapple only one target.
+                                                            Fist. Melee Weapon Attack: +9 to hit, reach 5 ft., one
+Claws. Melee Weapon Attack: +2 to hit, reach 5 ft., one     target. Hit: 7 (2d4 + 2) bludgeoning damage.
+target. Hit: 5 (2d4) slashing damage.
+                                                            Hezrou
+Fetid Cloud (1/Day). A 10-foot radius of disgusting
+green gas extends out from the dretch. The gas spreads      Large fiend (demon), chaotic evil
+around corners, and its area is lightly obscured. It lasts
+for 1 minute or until a strong wind disperses it. Any       Armor Class 16 (natural armor)
+creature that starts its turn in that area must succeed     Hit Points 136 (13d10 + 65)
+on a DC 11 Constitution saving throw or be poisoned         Speed 30 ft.
+until the start of its next turn. While poisoned in this
+way, the target can take either an action or a bonus            STR DEX CON INT WIS CHA
+action on its turn, not both, and can’t take reactions.       19 (+4) 17 (+3) 20 (+5) 5 (-3) 12 (+1) 13 (+1)
+
+Glabrezu                                                    Saving Throws Str +7, Con +8, Wis +4
+                                                            Damage Resistances cold, fire, lightning; bludgeoning,
+Large fiend (demon), chaotic evil
+                                                              piercing, and slashing from nonmagical attacks
+Armor Class 17 (natural armor)                              Damage Immunities poison
+Hit Points 157 (15d10 + 75)                                 Condition Immunities poisoned
+Speed 40 ft.                                                Senses darkvision 120 ft., passive Perception 11
+                                                            Languages Abyssal, telepathy 120 ft.
+    STR DEX CON INT WIS CHA                                 Challenge 8 (3,900 XP)
+  20 (+5) 15 (+2) 21 (+5) 19 (+4) 17 (+3) 16 (+3)
+                                                            Magic Resistance. The hezrou has advantage on saving
+Saving Throws Str +9, Con +9, Wis +7, Cha +7                throws against spells and other magical effects.
+Damage Resistances cold, fire, lightning; bludgeoning,      Stench. Any creature that starts its turn within 10 feet
+                                                            of the hezrou must succeed on a DC 14 Constitution
+  piercing, and slashing from nonmagical attacks            saving throw or be poisoned until the start of its next
+Damage Immunities poison                                    turn. On a successful saving throw, the creature is
+Condition Immunities poisoned                               immune to the hezrou’s stench for 24 hours.
+Senses truesight 120 ft., passive Perception 13
+Languages Abyssal, telepathy 120 ft.
+Challenge 9 (5,000 XP)

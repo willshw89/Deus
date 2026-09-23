@@ -1,0 +1,155 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "rules",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          13,
+          15
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:condition:test-dazzled",
+      "category": "rules",
+      "kind": "condition",
+      "name": "TEST_Dazzled",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          13
+        ],
+        "section": "TEST_Appendix PH-A: Conditions",
+        "heading": "TEST_Dazzled"
+      },
+      "text": "TEST_Dazzled\n• A dazzled creature has disadvantage on Wisdom (Perception) checks that rely on sight.\n• Attack rolls against the creature have advantage if the attacker is more than 30 feet away.",
+      "data": {
+        "effects": [
+          "A dazzled creature has disadvantage on Wisdom (Perception) checks that rely on sight.",
+          "Attack rolls against the creature have advantage if the attacker is more than 30 feet away."
+        ]
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 16
+      }
+    },
+    {
+      "id": "srd:rule:test-marching-order",
+      "category": "rules",
+      "kind": "rule",
+      "name": "TEST_Marching Order",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          14
+        ],
+        "section": "TEST_Adventuring",
+        "heading": "TEST_Marching Order"
+      },
+      "text": "TEST_Marching Order\nThe adventurers should establish a marching order. A marching order makes it easier to determine which characters are affected by traps, which ones can spot hidden enemies, and which ones are the closest to those enemies when a fight breaks out. The party’s order can be split into a front rank, a middle rank and a back rank.\n\nTravel Pace\nPace Distance per Hour Effect\nFast 4 miles –5 penalty to passive Wisdom (Perception) scores\nNormal 3 miles —\nSlow 2 miles Able to use stealth",
+      "data": {
+        "headingPath": [
+          "TEST_Adventuring",
+          "TEST_Movement",
+          "TEST_Marching Order"
+        ],
+        "tables": [
+          {
+            "caption": "Travel Pace",
+            "columns": [
+              "Pace",
+              "Distance per Hour",
+              "Effect"
+            ],
+            "rows": [
+              [
+                "Fast",
+                "4 miles",
+                "–5 penalty to passive Wisdom (Perception) scores"
+              ],
+              [
+                "Normal",
+                "3 miles",
+                "—"
+              ],
+              [
+                "Slow",
+                "2 miles",
+                "Able to use stealth"
+              ]
+            ]
+          }
+        ]
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 189
+      }
+    },
+    {
+      "id": "srd:hazard:test-rust-fever",
+      "category": "rules",
+      "kind": "hazard",
+      "name": "TEST_Rust Fever",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          15
+        ],
+        "section": "TEST_Diseases",
+        "heading": "TEST_Rust Fever"
+      },
+      "text": "TEST_Rust Fever\nThis disease spreads through the bite of rust-coloured mites. A creature exposed to it must succeed on a DC 11 Constitution saving throw or become infected. Symptoms appear 1d4 days after infection.",
+      "data": {
+        "headingPath": [
+          "TEST_Diseases",
+          "TEST_Rust Fever"
+        ],
+        "tables": []
+      },
+      "dice": [
+        {
+          "text": "1d4",
+          "count": 1,
+          "sides": 4,
+          "modifier": 0,
+          "average": 2
+        }
+      ],
+      "readiness": "extracted",
+      "notes": [
+        "saving throw block not parsed"
+      ],
+      "icon": {
+        "set": "IconSet",
+        "index": 1
+      }
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,261 @@
+{
+  "source": {
+    "file": "SRD_CC_v5.1.pdf",
+    "sha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
+    "expectedSha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
+    "bytes": 3158713,
+    "pages": 403
+  },
+  "sections": [
+    {
+      "id": "legal",
+      "title": "Legal Information",
+      "pages": [
+        1,
+        1
+      ],
+      "category": "meta",
+      "kind": "legal"
+    },
+    {
+      "id": "races",
+      "title": "Races",
+      "pages": [
+        3,
+        7
+      ],
+      "category": "character-options",
+      "kind": "race"
+    },
+    {
+      "id": "classes",
+      "title": "Classes",
+      "pages": [
+        8,
+        55
+      ],
+      "category": "character-options",
+      "kind": "class"
+    },
+    {
+      "id": "beyond-1st-level",
+      "title": "Beyond 1st Level (multiclassing, alignment, languages, inspiration, backgrounds)",
+      "pages": [
+        56,
+        61
+      ],
+      "category": "character-options",
+      "kind": "advancement"
+    },
+    {
+      "id": "equipment",
+      "title": "Equipment",
+      "pages": [
+        62,
+        74
+      ],
+      "category": "equipment",
+      "kind": "equipment"
+    },
+    {
+      "id": "feats",
+      "title": "Feats",
+      "pages": [
+        75,
+        75
+      ],
+      "category": "character-options",
+      "kind": "feat"
+    },
+    {
+      "id": "using-ability-scores",
+      "title": "Using Ability Scores",
+      "pages": [
+        76,
+        83
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "adventuring",
+      "title": "Adventuring",
+      "pages": [
+        84,
+        89
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "combat",
+      "title": "Combat",
+      "pages": [
+        90,
+        99
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "spellcasting",
+      "title": "Spellcasting",
+      "pages": [
+        100,
+        104
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "spell-lists",
+      "title": "Spell Lists",
+      "pages": [
+        105,
+        113
+      ],
+      "category": "spells",
+      "kind": "spell-list"
+    },
+    {
+      "id": "spell-descriptions",
+      "title": "Spell Descriptions",
+      "pages": [
+        114,
+        194
+      ],
+      "category": "spells",
+      "kind": "spell"
+    },
+    {
+      "id": "traps",
+      "title": "Traps",
+      "pages": [
+        195,
+        198
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "diseases",
+      "title": "Diseases",
+      "pages": [
+        199,
+        200
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "madness",
+      "title": "Madness",
+      "pages": [
+        201,
+        202
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "objects",
+      "title": "Objects",
+      "pages": [
+        203,
+        203
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "poisons",
+      "title": "Poisons",
+      "pages": [
+        204,
+        205
+      ],
+      "category": "rules",
+      "kind": "hazard"
+    },
+    {
+      "id": "magic-items",
+      "title": "Magic Items",
+      "pages": [
+        206,
+        253
+      ],
+      "category": "magic-items",
+      "kind": "magic-item"
+    },
+    {
+      "id": "monsters-intro",
+      "title": "Monsters (stat block rules)",
+      "pages": [
+        254,
+        260
+      ],
+      "category": "rules",
+      "kind": "rule"
+    },
+    {
+      "id": "monsters",
+      "title": "Monsters (A to Z)",
+      "pages": [
+        261,
+        357
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    },
+    {
+      "id": "appendix-ph-a",
+      "title": "Appendix PH-A: Conditions",
+      "pages": [
+        358,
+        359
+      ],
+      "category": "rules",
+      "kind": "condition"
+    },
+    {
+      "id": "appendix-ph-b",
+      "title": "Appendix PH-B: Fantasy-Historical Pantheons",
+      "pages": [
+        360,
+        362
+      ],
+      "category": "rules",
+      "kind": "appendix"
+    },
+    {
+      "id": "appendix-ph-c",
+      "title": "Appendix PH-C: The Planes of Existence",
+      "pages": [
+        363,
+        365
+      ],
+      "category": "rules",
+      "kind": "appendix"
+    },
+    {
+      "id": "appendix-mm-a",
+      "title": "Appendix MM-A: Miscellaneous Creatures",
+      "pages": [
+        366,
+        394
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    },
+    {
+      "id": "appendix-mm-b",
+      "title": "Appendix MM-B: Nonplayer Characters",
+      "pages": [
+        395,
+        403
+      ],
+      "category": "creatures",
+      "kind": "creature"
+    }
+  ]
+}

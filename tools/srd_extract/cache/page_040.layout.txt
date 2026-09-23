@@ -1,0 +1,58 @@
+such as whether an area is dangerous or the              Blindsense
+territory of a thieves’ guild, whether loot is nearby,
+or whether the people in an area are easy marks or       Starting at 14th level, if you are able to hear, you are
+will provide a safe house for thieves on the run.        aware of the location of any hidden or invisible
+                                                         creature within 10 feet of you.
+Cunning Action
+                                                         Slippery Mind
+Starting at 2nd level, your quick thinking and agility
+allow you to move and act quickly. You can take a        By 15th level, you have acquired greater mental
+bonus action on each of your turns in combat. This       strength. You gain proficiency in Wisdom saving
+action can be used only to take the Dash, Disengage,     throws.
+or Hide action.
+                                                         Elusive
+Roguish Archetype
+                                                         Beginning at 18th level, you are so evasive that
+At 3rd level, you choose an archetype that you           attackers rarely gain the upper hand against you. No
+emulate in the exercise of your rogue abilities, such    attack roll has advantage against you while you
+as Thief. Your archetype choice grants you features      aren’t incapacitated.
+at 3rd level and then again at 9th, 13th, and 17th
+level.                                                   Stroke of Luck
+
+Ability Score Improvement                                At 20th level, you have an uncanny knack for
+                                                         succeeding when you need to. If your attack misses a
+When you reach 4th level, and again at 8th, 10th,        target within range, you can turn the miss into a hit.
+12th, 16th, and 19th level, you can increase one         Alternatively, if you fail an ability check, you can treat
+ability score of your choice by 2, or you can increase   the d20 roll as a 20.
+two ability scores of your choice by 1. As normal,
+you can’t increase an ability score above 20 using         Once you use this feature, you can’t use it again
+this feature.                                            until you finish a short or long rest.
+
+Uncanny Dodge                                            Roguish Archetypes
+
+Starting at 5th level, when an attacker that you can     Rogues have many features in common, including
+see hits you with an attack, you can use your            their emphasis on perfecting their skills, their
+reaction to halve the attack’s damage against you.       precise and deadly approach to combat, and their
+                                                         increasingly quick reflexes. But different rogues
+Evasion                                                  steer those talents in varying directions, embodied
+                                                         by the rogue archetypes. Your choice of archetype is
+Beginning at 7th level, you can nimbly dodge out of      a reflection of your focus—not necessarily an
+the way of certain area effects, such as a red dragon’s  indication of your chosen profession, but a
+fiery breath or an ice storm spell. When you are         description of your preferred techniques.
+subjected to an effect that allows you to make a
+Dexterity saving throw to take only half damage, you     Thief
+instead take no damage if you succeed on the saving
+throw, and only half damage if you fail.                 You hone your skills in the larcenous arts. Burglars,
+                                                         bandits, cutpurses, and other criminals typically
+Reliable Talent                                          follow this archetype, but so do rogues who prefer to
+                                                         think of themselves as professional treasure seekers,
+By 11th level, you have refined your chosen skills       explorers, delvers, and investigators. In addition to
+until they approach perfection. Whenever you make        improving your agility and stealth, you learn skills
+an ability check that lets you add your proficiency      useful for delving into ancient ruins, reading
+bonus, you can treat a d20 roll of 9 or lower as a 10.   unfamiliar languages, and using magic items you
+                                                         normally couldn’t employ.
+
+                                                         Fast Hands
+
+                                                         Starting at 3rd level, you can use the bonus action
+                                                         granted by your Cunning Action to make a Dexterity

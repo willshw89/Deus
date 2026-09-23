@@ -1,0 +1,60 @@
+checks you make to hear sounds outside it are made        Meteor Swarm
+with disadvantage. You remain aware of the passage
+of time and can cast spells on yourself while merged      9th-level evocation
+in the stone. You can use your movement to leave
+the stone where you entered it, which ends the spell.     Casting Time: 1 action
+You otherwise can’t move.                                 Range: 1 mile
+                                                          Components: V, S
+  Minor physical damage to the stone doesn’t harm         Duration: Instantaneous
+you, but its partial destruction or a change in its
+shape (to the extent that you no longer fit within it)    Blazing orbs of fire plummet to the ground at four
+expels you and deals 6d6 bludgeoning damage to            different points you can see within range. Each
+you. The stone’s complete destruction (or                 creature in a 40-foot-radius sphere centered on each
+transmutation into a different substance) expels you      point you choose must make a Dexterity saving
+and deals 50 bludgeoning damage to you. If expelled,      throw. The sphere spreads around corners. A
+you fall prone in an unoccupied space closest to          creature takes 20d6 fire damage and 20d6
+where you first entered.                                  bludgeoning damage on a failed save, or half as much
+                                                          damage on a successful one. A creature in the area of
+Mending                                                   more than one fiery burst is affected only once.
+
+Transmutation cantrip                                       The spell damages objects in the area and ignites
+                                                          flammable objects that aren’t being worn or carried.
+Casting Time: 1 minute
+Range: Touch                                              Mind Blank
+Components: V, S, M (two lodestones)
+Duration: Instantaneous                                   8th-level abjuration
+
+This spell repairs a single break or tear in an object    Casting Time: 1 action
+you touch, such as a broken chain link, two halves of     Range: Touch
+a broken key, a torn cloak, or a leaking wineskin. As     Components: V, S
+long as the break or tear is no larger than 1 foot in     Duration: 24 hours
+any dimension, you mend it, leaving no trace of the
+former damage.                                            Until the spell ends, one willing creature you touch is
+                                                          immune to psychic damage, any effect that would
+  This spell can physically repair a magic item or        sense its emotions or read its thoughts, divination
+construct, but the spell can’t restore magic to such      spells, and the charmed condition. The spell even
+an object.                                                foils wish spells and spells or effects of similar power
+                                                          used to affect the target’s mind or to gain
+Message                                                   information about the target.
+
+Transmutation cantrip                                     Minor Illusion
+
+Casting Time: 1 action                                    Illusion cantrip
+Range: 120 feet
+Components: V, S, M (a short piece of copper wire)        Casting Time: 1 action
+Duration: 1 round                                         Range: 30 feet
+                                                          Components: S, M (a bit of fleece)
+You point your finger toward a creature within            Duration: 1 minute
+range and whisper a message. The target (and only
+the target) hears the message and can reply in a          You create a sound or an image of an object within
+whisper that only you can hear.                           range that lasts for the duration. The illusion also
+                                                          ends if you dismiss it as an action or cast this spell
+  You can cast this spell through solid objects if you    again.
+are familiar with the target and know it is beyond
+the barrier. Magical silence, 1 foot of stone, 1 inch of    If you create a sound, its volume can range from a
+common metal, a thin sheet of lead, or 3 feet of wood     whisper to a scream. It can be your voice, someone
+blocks the spell. The spell doesn’t have to follow a      else’s voice, a lion’s roar, a beating of drums, or any
+straight line and can travel freely around corners or     other sound you choose. The sound continues
+through openings.                                         unabated throughout the duration, or you can make
+                                                          discrete sounds at different times before the spell
+                                                          ends.

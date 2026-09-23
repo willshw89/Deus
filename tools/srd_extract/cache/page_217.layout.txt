@@ -1,0 +1,80 @@
+soon as you draw a card from the deck, its magic          Euryale. The card’s medusa-like visage curses you.
+takes effect. You must draw each card no more than      You take a -2 penalty on saving throws while cursed
+1 hour after the previous draw. If you fail to draw     in this way. Only a god or the magic of The Fates
+the chosen number, the remaining number of cards        card can end this curse.
+fly from the deck on their own and take effect all at
+once.                                                     The Fates. Reality’s fabric unravels and spins
+                                                        anew, allowing you to avoid or erase one event as if
+  Once a card is drawn, it fades from existence.        it never happened. You can use the card’s magic as
+Unless the card is the Fool or the Jester, the card     soon as you draw the card or at any other time
+reappears in the deck, making it possible to draw the   before you die.
+same card twice.
+                                                          Flames. A powerful devil becomes your enemy.
+Playing Card     Card                                   The devil seeks your ruin and plagues your life,
+                                                        savoring your suffering before attempting to slay
+Ace of diamonds Vizier*                                 you. This enmity lasts until either you or the devil
+                                                        dies.
+King of diamonds Sun
+                                                          Fool. You lose 10,000 XP, discard this card, and
+Queen of diamonds Moon                                  draw from the deck again, counting both draws as
+                                                        one of your declared draws. If losing that much XP
+Jack of diamonds Star                                   would cause you to lose a level, you instead lose an
+                                                        amount that leaves you with just enough XP to keep
+Two of diamonds Comet*                                  your level.
+
+Ace of hearts    The Fates*                               Gem. Twenty-five pieces of jewelry worth 2,000
+                                                        gp each or fifty gems worth 1,000 gp each appear at
+King of hearts   Throne                                 your feet.
+
+Queen of hearts  Key                                      Idiot. Permanently reduce your Intelligence by
+                                                        1d4 + 1 (to a minimum score of 1). You can draw one
+Jack of hearts   Knight                                 additional card beyond your declared draws.
+
+Two of hearts    Gem*                                     Jester. You gain 10,000 XP, or you can draw two
+                                                        additional cards beyond your declared draws.
+Ace of clubs     Talons*
+                                                          Key. A rare or rarer magic weapon with which you
+King of clubs    The Void                               are proficient appears in your hands. The GM
+                                                        chooses the weapon.
+Queen of clubs   Flames
+                                                          Knight. You gain the service of a 4th-level fighter
+Jack of clubs    Skull                                  who appears in a space you choose within 30 feet of
+                                                        you. The fighter is of the same race as you and serves
+Two of clubs     Idiot*                                 you loyally until death, believing the fates have
+                                                        drawn him or her to you. You control this character.
+Ace of spades    Donjon*
+                                                          Moon. You are granted the ability to cast the wish
+King of spades   Ruin                                   spell 1d3 times.
+
+Queen of spades Euryale                                   Rogue. A nonplayer character of the GM’s choice
+                                                        becomes hostile toward you. The identity of your
+Jack of spades   Rogue                                  new enemy isn’t known until the NPC or someone
+                                                        else reveals it. Nothing less than a wish spell or
+Two of spades    Balance*                               divine intervention can end the NPC’s hostility
+                                                        toward you.
+Joker (with TM)  Fool*
+                                                          Ruin. All forms of wealth that you carry or own,
+Joker (without TM) Jester                               other than magic items, are lost to you. Portable
+                                                        property vanishes. Businesses, buildings, and land
+*Found only in a deck with twenty-two cards           you own are lost in a way that alters reality the least.
+                                                        Any documentation that proves you should own
+  Balance. Your mind suffers a wrenching alteration,    something lost to this card also disappears.
+causing your alignment to change. Lawful becomes
+chaotic, good becomes evil, and vice versa. If you are    Skull. You summon an avatar of death—a ghostly
+true neutral or unaligned, this card has no effect on   humanoid skeleton clad in a tattered black robe and
+you.                                                    carrying a spectral scythe. It appears in a space of
+
+  Comet. If you single-handedly defeat the next
+hostile monster or group of monsters you encounter,
+you gain experience points enough to gain one level.
+Otherwise, this card has no effect.
+
+  Donjon. You disappear and become entombed in a
+state of suspended animation in an extradimensional
+sphere. Everything you were wearing and carrying
+stays behind in the space you occupied when you
+disappeared. You remain imprisoned until you are
+found and removed from the sphere. You can’t be
+located by any divination magic, but a wish spell can
+reveal the location of your prison. You draw no more
+cards.

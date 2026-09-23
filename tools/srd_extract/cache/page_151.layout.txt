@@ -1,0 +1,62 @@
+Duration: 8 hours                                          Stairs. Webs fill all stairs in the warded area from
+A Large spectral guardian appears and hovers for         top to bottom, as the web spell. These strands
+the duration in an unoccupied space of your choice       regrow in 10 minutes if they are burned or torn
+that you can see within range. The guardian occupies     away while guards and wards lasts.
+that space and is indistinct except for a gleaming
+sword and shield emblazoned with the symbol of             Other Spell Effect. You can place your choice of
+your deity.                                              one of the following magical effects within the
+                                                         warded area of the stronghold.
+  Any creature hostile to you that moves to a space
+within 10 feet of the guardian for the first time on a   • Place dancing lights in four corridors. You can
+turn must succeed on a Dexterity saving throw. The         designate a simple program that the lights repeat
+creature takes 20 radiant damage on a failed save, or      as long as guards and wards lasts.
+half as much damage on a successful one. The
+guardian vanishes when it has dealt a total of 60        • Place magic mouth in two locations.
+damage.                                                  • Place stinking cloud in two locations. The vapors
+
+Guards and Wards                                           appear in the places you designate; they return
+                                                           within 10 minutes if dispersed by wind while
+6th-level abjuration                                    guards and wards lasts.
+                                                         • Place a constant gust of wind in one corridor or
+Casting Time: 10 minutes                                   room.
+Range: Touch                                             • Place a suggestion in one location. You select an
+Components: V, S, M (burning incense, a small              area of up to 5 feet square, and any creature that
+                                                           enters or passes through the area receives the
+  measure of brimstone and oil, a knotted string, a        suggestion mentally.
+  small amount of umber hulk blood, and a small
+  silver rod worth at least 10 gp)                         The whole warded area radiates magic. A dispel
+Duration: 24 hours                                       magic cast on a specific effect, if successful, removes
+                                                         only that effect.
+You create a ward that protects up to 2,500 square
+feet of floor space (an area 50 feet square, or one        You can create a permanently guarded and
+hundred 5-foot squares or twenty-five 10-foot   warded structure by casting this spell there every
+squares). The warded area can be up to 20 feet tall,     day for one year.
+and shaped as you desire. You can ward several
+stories of a stronghold by dividing the area among       Guidance
+them, as long as you can walk into each contiguous
+area while you are casting the spell.                    Divination cantrip
+
+  When you cast this spell, you can specify              Casting Time: 1 action
+individuals that are unaffected by any or all of the     Range: Touch
+effects that you choose. You can also specify a          Components: V, S
+password that, when spoken aloud, makes the              Duration: Concentration, up to 1 minute
+speaker immune to these effects.
+                                                         You touch one willing creature. Once before the spell
+  Guards and wards creates the following effects         ends, the target can roll a d4 and add the number
+within the warded area.                                  rolled to one ability check of its choice. It can roll the
+                                                         die before or after making the ability check. The
+  Corridors. Fog fills all the warded corridors,         spell then ends.
+making them heavily obscured. In addition, at each
+intersection or branching passage offering a choice      Guiding Bolt
+of direction, there is a 50 percent chance that a
+creature other than you will believe it is going in the  1st-level evocation
+opposite direction from the one it chooses.
+                                                         Casting Time: 1 action
+  Doors. All doors in the warded area are magically      Range: 120 feet
+locked, as if sealed by an arcane lock spell. In         Components: V, S
+addition, you can cover up to ten doors with an          Duration: 1 round
+illusion (equivalent to the illusory object function of
+the minor illusion spell) to make them appear as         A flash of light streaks toward a creature of your
+plain sections of wall.                                  choice within range. Make a ranged spell attack
+                                                         against the target. On a hit, the target takes 4d6
+                                                         radiant damage, and the next attack roll made

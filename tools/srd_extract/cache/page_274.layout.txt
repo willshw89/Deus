@@ -1,0 +1,51 @@
+Stunning Screech (1/Day). The vrock emits a horrific          a flammable object that isn’t being worn or carried, it
+screech. Each creature within 20 feet of it that can hear     also catches fire.
+it and that isn’t a demon must succeed on a DC 14
+Constitution saving throw or be stunned until the end         Bearded Devil
+of the vrock’s next turn.
+                                                              Medium fiend (devil), lawful evil
+Devils
+                                                              Armor Class 13 (natural armor)
+Barbed Devil                                                  Hit Points 52 (8d8 + 16)
+                                                              Speed 30 ft.
+Medium fiend (devil), lawful evil
+                                                                  STR DEX CON INT WIS CHA
+Armor Class 15 (natural armor)                                  16 (+3) 15 (+2) 15 (+2) 9 (-1) 11 (+0) 11 (+0)
+Hit Points 110 (13d8 + 52)
+Speed 30 ft.                                                  Saving Throws Str +5, Con +4, Wis +2
+                                                              Damage Resistances cold; bludgeoning, piercing, and
+    STR DEX CON INT WIS CHA
+  16 (+3) 17 (+3) 18 (+4) 12 (+1) 14 (+2) 14 (+2)               slashing from nonmagical attacks that aren’t silvered
+                                                              Damage Immunities fire, poison
+Saving Throws Str +6, Con +7, Wis +5, Cha +5                  Condition Immunities poisoned
+Skills Deception +5, Insight +5, Perception +8                Senses darkvision 120 ft., passive Perception 10
+Damage Resistances cold; bludgeoning, piercing, and           Languages Infernal, telepathy 120 ft.
+                                                              Challenge 3 (700 XP)
+  slashing from nonmagical attacks that aren’t silvered
+Damage Immunities fire, poison                                Devil’s Sight. Magical darkness doesn’t impede the
+Condition Immunities poisoned                                 devil’s darkvision.
+Senses darkvision 120 ft., passive Perception 18              Magic Resistance. The devil has advantage on saving
+Languages Infernal, telepathy 120 ft.                         throws against spells and other magical effects.
+Challenge 5 (1,800 XP)                                        Steadfast. The devil can’t be frightened while it can see
+                                                              an allied creature within 30 feet of it.
+Barbed Hide. At the start of each of its turns, the
+barbed devil deals 5 (1d10) piercing damage to any            Actions
+creature grappling it.
+Devil’s Sight. Magical darkness doesn’t impede the            Multiattack. The devil makes two attacks: one with its
+devil’s darkvision.                                           beard and one with its glaive.
+Magic Resistance. The devil has advantage on saving           Beard. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+throws against spells and other magical effects.              creature. Hit: 6 (1d8 + 2) piercing damage, and the
+                                                              target must succeed on a DC 12 Constitution saving
+Actions                                                       throw or be poisoned for 1 minute. While poisoned in
+Multiattack. The devil makes three melee attacks: one         this way, the target can’t regain hit points. The target
+with its tail and two with its claws. Alternatively, it can   can repeat the saving throw at the end of each of its
+use Hurl Flame twice.                                         turns, ending the effect on itself on a success.
+Claw. Melee Weapon Attack: +6 to hit, reach 5 ft., one        Glaive. Melee Weapon Attack: +5 to hit, reach 10 ft.,
+target. Hit: 6 (1d6 + 3) piercing damage.                     one target. Hit: 8 (1d10 + 3) slashing damage. If the
+Tail. Melee Weapon Attack: +6 to hit, reach 5 ft., one        target is a creature other than an undead or a
+target. Hit: 10 (2d6 + 3) piercing damage.                    construct, it must succeed on a DC 12 Constitution
+Hurl Flame. Ranged Spell Attack: +5 to hit, range 150         saving throw or lose 5 (1d10) hit points at the start of
+ft., one target. Hit: 10 (3d6) fire damage. If the target is  each of its turns due to an infernal wound. Each time
+                                                              the devil hits the wounded target with this attack, the
+                                                              damage dealt by the wound increases by 5 (1d10). Any
+                                                              creature can take an action to stanch the wound with a

@@ -1,0 +1,32 @@
+Paladin
+Class Features
+As a paladin, you gain the following class features.
+Hit Points
+Hit Dice: 1d10 per paladin level Hit Points at 1st Level: 10 + your Constitution
+modifier Hit Points at Higher Levels: 1d10 (or 6) + your
+Constitution modifier per paladin level after 1st
+Proficiencies
+Armor: All armor, shields
+
+Weapons: Simple weapons, martial weapons Tools: None Saving Throws: Wisdom, Charisma Skills: Choose two from Athletics, Insight,
+Intimidation, Medicine, Persuasion, and Religion
+Equipment
+You start with the following equipment, in addition to the equipment granted by your background:
+• (a) a martial weapon and a shield or (b) two martial weapons
+• (a) five javelins or (b) any simple melee weapon • (a) a priest’s pack or (b) an explorer’s pack • Chain mail and a holy symbol
+
+The Paladin
+
+Level 1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th 11th 12th 13th 14th 15th 16th 17th 18th 19th 20th
+
+Proficiency Bonus +2 +2 +2 +2 +3 +3 +3 +3 +4 +4 +4 +4 +5 +5 +5 +5 +6 +6 +6 +6
+
+Features Divine Sense, Lay on Hands Fighting Style, Spellcasting, Divine Smite Divine Health, Sacred Oath Ability Score Improvement Extra Attack Aura of Protection Sacred Oath feature Ability Score Improvement — Aura of Courage Improved Divine Smite Ability Score Improvement — Cleansing Touch Sacred Oath feature Ability Score Improvement — Aura improvements Ability Score Improvement Sacred Oath feature
+
+—Spell Slots per Spell Level— 1st 2nd 3rd 4th 5th —— ——— 2 ———— 3 ———— 3 ———— 4 2 ——— 4 2 ——— 4 3 ——— 4 3 ——— 4 3 2 —— 4 3 2 —— 4 3 3 —— 4 3 3 —— 4 3 3 1— 4 3 3 1— 4 3 3 2— 4 3 3 2— 43 331 43 331 43 332 43 332
+
+Divine Sense
+The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire
+
+Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the hallow spell.
+You can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses.

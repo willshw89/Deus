@@ -1,0 +1,64 @@
+  A newly found rod has 1d10 levels of spell energy       the rod’s handle lengthens into a 6-foot haft,
+stored in it already. A rod that can no longer absorb     transforming the rod into a magic spear that grants a
+spell energy and has no energy remaining becomes          +3 bonus to attack and damage rolls made with it.
+nonmagical.
+                                                            If you press button 4, the rod transforms into a
+Rod of Alertness                                          climbing pole up to 50 feet long, as you specify. In
+                                                          surfaces as hard as granite, a spike at the bottom and
+Rod, very rare (requires attunement)                      three hooks at the top anchor the pole. Horizontal
+                                                          bars 3 inches long fold out from the sides, 1 foot
+This rod has a flanged head and the following             apart, forming a ladder. The pole can bear up to
+properties.                                               4,000 pounds. More weight or lack of solid
+                                                          anchoring causes the rod to revert to its normal
+  Alertness. While holding the rod, you have              form.
+advantage on Wisdom (Perception) checks and on
+rolls for initiative.                                       If you press button 5, the rod transforms into a
+                                                          handheld battering ram and grants its user a +10
+  Spells. While holding the rod, you can use an           bonus to Strength checks made to break through
+action to cast one of the following spells from it:       doors, barricades, and other barriers.
+detect evil and good, detect magic, detect poison and
+disease, or see invisibility.                               If you press button 6, the rod assumes or remains
+                                                          in its normal form and indicates magnetic north.
+  Protective Aura. As an action, you can plant the        (Nothing happens if this function of the rod is used
+haft end of the rod in the ground, whereupon the          in a location that has no magnetic north.) The rod
+rod’s head sheds bright light in a 60-foot radius and  also gives you knowledge of your approximate depth
+dim light for an additional 60 feet. While in that        beneath the ground or your height above it.
+bright light, you and any creature that is friendly to
+you gain a +1 bonus to AC and saving throws and can         Drain Life. When you hit a creature with a melee
+sense the location of any invisible hostile creature      attack using the rod, you can force the target to
+that is also in the bright light.                         make a DC 17 Constitution saving throw. On a failure,
+                                                          the target takes an extra 4d6 necrotic damage, and
+  The rod’s head stops glowing and the effect ends        you regain a number of hit points equal to half that
+after 10 minutes, or when a creature uses an action       necrotic damage. This property can’t be used again
+to pull the rod from the ground. This property can’t      until the next dawn.
+be used again until the next dawn.
+                                                            Paralyze. When you hit a creature with a melee
+Rod of Lordly Might                                       attack using the rod, you can force the target to
+                                                          make a DC 17 Strength saving throw. On a failure,
+Rod, legendary (requires attunement)                      the target is paralyzed for 1 minute. The target can
+                                                          repeat the saving throw at the end of each of its
+This rod has a flanged head, and it functions as a        turns, ending the effect on a success. This property
+magic mace that grants a +3 bonus to attack and           can’t be used again until the next dawn.
+damage rolls made with it. The rod has properties
+associated with six different buttons that are set in a     Terrify. While holding the rod, you can use an
+row along the haft. It has three other properties as      action to force each creature you can see within 30
+well, detailed below.                                     feet of you to make a DC 17 Wisdom saving throw.
+                                                          On a failure, a target is frightened of you for 1
+  Six Buttons. You can press one of the rod’s six         minute. A frightened target can repeat the saving
+buttons as a bonus action. A button’s effect lasts        throw at the end of each of its turns, ending the
+until you push a different button or until you push       effect on itself on a success. This property can’t be
+the same button again, which causes the rod to            used again until the next dawn.
+revert to its normal form.
+                                                          Rod of Rulership
+  If you press button 1, the rod becomes a flame
+tongue, as a fiery blade sprouts from the end             Rod, rare (requires attunement)
+opposite the rod’s flanged head.
+                                                          You can use an action to present the rod and
+  If you press button 2, the rod’s flanged head folds     command obedience from each creature of your
+down and two crescent-shaped blades spring out,        choice that you can see within 120 feet of you. Each
+transforming the rod into a magic battleaxe that          target must succeed on a DC 15 Wisdom saving
+grants a +3 bonus to attack and damage rolls made         throw or be charmed by you for 8 hours. While
+with it.                                                  charmed in this way, the creature regards you as its
+
+  If you press button 3, the rod’s flanged head folds
+down, a spear point springs from the rod’s tip, and

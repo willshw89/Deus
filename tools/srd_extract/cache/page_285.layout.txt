@@ -1,0 +1,59 @@
+Poison Breath (Recharge 5–6). The dragon exhales          Actions
+poisonous gas in a 90-foot cone. Each creature in that
+area must make a DC 22 Constitution saving throw,         Multiattack. The dragon can use its Frightful Presence.
+taking 77 (22d6) poison damage on a failed save, or       It then makes three attacks: one with its bite and two
+half as much damage on a successful one.                  with its claws.
+
+Legendary Actions                                         Bite. Melee Weapon Attack: +11 to hit, reach 10 ft.,
+                                                          one target. Hit: 17 (2d10 + 6) piercing damage plus 7
+The dragon can take 3 legendary actions, choosing         (2d6) poison damage.
+from the options below. Only one legendary action         Claw. Melee Weapon Attack: +11 to hit, reach 5 ft.,
+option can be used at a time and only at the end of       one target. Hit: 13 (2d6 + 6) slashing damage.
+another creature’s turn. The dragon regains spent
+legendary actions at the start of its turn.               Tail. Melee Weapon Attack: +11 to hit, reach 15 ft., one
+Detect. The dragon makes a Wisdom (Perception)            target. Hit: 15 (2d8 + 6) bludgeoning damage.
+
+  check.                                                  Frightful Presence. Each creature of the dragon’s
+Tail Attack. The dragon makes a tail attack.              choice that is within 120 feet of the dragon and aware
+Wing Attack (Costs 2 Actions). The dragon beats its       of it must succeed on a DC 16 Wisdom saving throw or
+                                                          become frightened for 1 minute. A creature can repeat
+  wings. Each creature within 15 feet of the dragon       the saving throw at the end of each of its turns, ending
+  must succeed on a DC 23 Dexterity saving throw or       the effect on itself on a success. If a creature’s saving
+  take 15 (2d6 + 8) bludgeoning damage and be             throw is successful or the effect ends for it, the
+  knocked prone. The dragon can then fly up to half its   creature is immune to the dragon’s Frightful Presence
+  flying speed.                                           for the next 24 hours.
+
+Adult Green Dragon                                        Poison Breath (Recharge 5–6). The dragon exhales
+                                                          poisonous gas in a 60-foot cone. Each creature in that
+Huge dragon, lawful evil                                  area must make a DC 18 Constitution saving throw,
+                                                          taking 56 (16d6) poison damage on a failed save, or
+Armor Class 19 (natural armor)                            half as much damage on a successful one.
+Hit Points 207 (18d12 + 90)
+Speed 40 ft., fly 80 ft., swim 40 ft.                     Legendary Actions
+
+    STR DEX CON INT WIS CHA                               The dragon can take 3 legendary actions, choosing
+  23 (+6) 12 (+1) 21 (+5) 18 (+4) 15 (+2) 17 (+3)         from the options below. Only one legendary action
+                                                          option can be used at a time and only at the end of
+Saving Throws Dex +6, Con +10, Wis +7, Cha +8             another creature’s turn. The dragon regains spent
+Skills Deception +8, Insight +7, Perception +12,          legendary actions at the start of its turn.
+
+  Persuasion +8, Stealth +6                               Detect. The dragon makes a Wisdom (Perception)
+Damage Immunities poison                                    check.
+Condition Immunities poisoned
+Senses blindsight 60 ft., darkvision 120 ft., passive     Tail Attack. The dragon makes a tail attack.
+                                                          Wing Attack (Costs 2 Actions). The dragon beats its
+  Perception 22
+Languages Common, Draconic                                  wings. Each creature within 10 feet of the dragon
+Challenge 15 (13,000 XP)                                    must succeed on a DC 19 Dexterity saving throw or
+                                                            take 13 (2d6 + 6) bludgeoning damage and be
+Amphibious. The dragon can breathe air and water.           knocked prone. The dragon can then fly up to half its
+Legendary Resistance (3/Day). If the dragon fails a         flying speed.
+saving throw, it can choose to succeed instead.
+                                                          Young Green Dragon
+
+                                                          Large dragon, lawful evil
+
+                                                          Armor Class 18 (natural armor)
+                                                          Hit Points 136 (16d10 + 48)
+
+                                                          Speed 40 ft., fly 80 ft., swim 40 ft.

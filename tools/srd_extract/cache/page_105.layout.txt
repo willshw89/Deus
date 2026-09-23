@@ -1,0 +1,57 @@
+Spell Lists               See Invisibility
+                          Shatter
+Bard Spells               Silence
+                          Suggestion
+Cantrips (0 Level)        Zone of Truth
+
+Dancing Lights            3rd Level
+Light
+Mage Hand                 Bestow Curse
+Mending                   Clairvoyance
+Message                   Dispel Magic
+Minor Illusion            Fear
+Prestidigitation          Glyph of Warding
+True Strike               Hypnotic Pattern
+Vicious Mockery           Major Image
+                          Nondetection
+1st Level                 Plant Growth
+                          Sending
+Animal Friendship         Speak with Dead
+Bane                      Speak with Plants
+Charm Person              Stinking Cloud
+Comprehend Languages      Tiny Hut
+Cure Wounds               Tongues
+Detect Magic
+Disguise Self             4th Level
+Faerie Fire
+Feather Fall              Compulsion
+Healing Word              Confusion
+Heroism                   Dimension Door
+Hideous Laughter          Freedom of Movement
+Identify                  Greater Invisibility
+Illusory Script           Hallucinatory Terrain
+Longstrider               Locate Creature
+Silent Image              Polymorph
+Sleep
+Speak with Animals        5th Level
+Thunderwave
+Unseen Servant            Animate Objects
+                          Awaken
+2nd Level                 Dominate Person
+                          Dream
+Animal Messenger          Geas
+Blindness/Deafness        Greater Restoration
+Calm Emotions             Hold Monster
+Detect Thoughts           Legend Lore
+Enhance Ability           Mass Cure Wounds
+Enthrall                  Mislead
+Heat Metal                Modify Memory
+Hold Person               Planar Binding
+Invisibility              Raise Dead
+Knock                     Scrying
+Lesser Restoration        Seeming
+Locate Animals or Plants  Teleportation Circle
+Locate Object
+Magic Mouth               6th Level
+
+                          Eyebite

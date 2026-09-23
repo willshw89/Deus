@@ -1,0 +1,142 @@
+{
+  "metadata": {
+    "generator": "tools/srd_browser fixture (synthetic TEST_ data; not produced by tools/build_srd_catalog.js)",
+    "assembledBy": "tools/srd_browser/fixture",
+    "generatedAt": "2026-09-22T00:00:00.000Z",
+    "schemaVersion": 1,
+    "dormant": true,
+    "fixture": true,
+    "fixtureNote": "Synthetic TEST_ entries in the catalogue schema of docs/SRD5_1_COVERAGE_MANIFEST.md sections 6-8. Contains no SRD 5.1 text; the attribution string is present only so the browser's footer path is exercised.",
+    "category": "magic-items",
+    "source": {
+      "file": "TEST_FIXTURE (no PDF)",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "pages": [
+        [
+          7,
+          8
+        ]
+      ]
+    },
+    "cache": {
+      "generatedAt": "2026-09-22T00:00:00.000Z"
+    },
+    "license": {
+      "id": "CC-BY-4.0",
+      "attribution": "This work includes material taken from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode."
+    }
+  },
+  "entries": [
+    {
+      "id": "srd:magic-item:test-cloak-of-quiet-steps",
+      "category": "magic-items",
+      "kind": "magic-item",
+      "name": "TEST_Cloak of Quiet Steps",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          7
+        ],
+        "section": "TEST_Magic Items",
+        "heading": "TEST_Cloak of Quiet Steps"
+      },
+      "text": "TEST_Cloak of Quiet Steps\nWondrous item, uncommon (requires attunement)\n\nWhile you wear this cloak, your footsteps make no sound, and you have advantage on Dexterity (Stealth) checks made to move silently.",
+      "data": {
+        "itemType": "wondrous item",
+        "typeDetail": null,
+        "rarity": "uncommon",
+        "attunement": {
+          "required": true,
+          "restriction": null
+        },
+        "description": "While you wear this cloak, your footsteps make no sound, and you have advantage on Dexterity (Stealth) checks made to move silently.",
+        "tables": []
+      },
+      "dice": [],
+      "readiness": "parsed",
+      "notes": [],
+      "icon": {
+        "set": "IconSet",
+        "index": 176
+      }
+    },
+    {
+      "id": "srd:magic-item:test-deck-of-omens",
+      "category": "magic-items",
+      "kind": "magic-item",
+      "name": "TEST_Deck of Omens",
+      "source": {
+        "document": "TEST_FIXTURE",
+        "pages": [
+          7,
+          8
+        ],
+        "section": "TEST_Magic Items",
+        "heading": "TEST_Deck of Omens"
+      },
+      "text": "TEST_Deck of Omens\nWondrous item, rare\n\nThis deck holds six cards. As an action, you can draw one card at random and read its omen; roll a d6 on the table below. Once a card is drawn, it can’t be drawn again until the next dawn.\n\nd6 Omen\n1 A storm gathers within 1d4 days.\n2 A stranger brings news.\n3 Something lost is found.\n4 A door opens.\n5 A debt comes due.\n6 Nothing — the card is blank.",
+      "data": {
+        "itemType": "wondrous item",
+        "typeDetail": null,
+        "attunement": {
+          "required": false,
+          "restriction": null
+        },
+        "description": "This deck holds six cards. As an action, you can draw one card at random and read its omen; roll a d6 on the table below. Once a card is drawn, it can’t be drawn again until the next dawn.",
+        "tables": [
+          {
+            "caption": "TEST_Omens",
+            "columns": [
+              "d6",
+              "Omen"
+            ],
+            "rows": [
+              [
+                "1",
+                "A storm gathers within 1d4 days."
+              ],
+              [
+                "2",
+                "A stranger brings news."
+              ],
+              [
+                "3",
+                "Something lost is found."
+              ],
+              [
+                "4",
+                "A door opens."
+              ],
+              [
+                "5",
+                "A debt comes due."
+              ],
+              [
+                "6",
+                "Nothing — the card is blank."
+              ]
+            ]
+          }
+        ]
+      },
+      "dice": [
+        {
+          "text": "1d4",
+          "count": 1,
+          "sides": 4,
+          "modifier": 0,
+          "average": 2
+        }
+      ],
+      "readiness": "extracted",
+      "notes": [
+        "rarity not parsed from the type line"
+      ],
+      "icon": {
+        "set": "IconSet",
+        "index": 176
+      }
+    }
+  ],
+  "warnings": []
+}

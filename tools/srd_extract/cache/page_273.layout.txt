@@ -1,0 +1,51 @@
+creature is immune to the nalfeshnee’s Horror Nimbus            turns, with disadvantage if the quasit is within line of
+for the next 24 hours.                                          sight, ending the effect on itself on a success.
+Teleport. The nalfeshnee magically teleports, along             Invisibility. The quasit magically turns invisible until it
+with any equipment it is wearing or carrying, up to 120         attacks or uses Scare, or until its concentration ends (as
+feet to an unoccupied space it can see.                         if concentrating on a spell). Any equipment the quasit
+                                                                wears or carries is invisible with it.
+Quasit
+                                                                Vrock
+Tiny fiend (demon, shapechanger), chaotic evil
+                                                                Large fiend (demon), chaotic evil
+Armor Class 13
+Hit Points 7 (3d4)                                              Armor Class 15 (natural armor)
+Speed 40 ft.                                                    Hit Points 104 (11d10 + 44)
+                                                                Speed 40 ft., fly 60 ft.
+    STR DEX CON INT WIS CHA
+   5 (-3) 17 (+3) 10 (+0) 7 (-2) 10 (+0) 10 (+0)                    STR DEX CON INT WIS CHA
+                                                                  17 (+3) 15 (+2) 18 (+4) 8 (-1) 13 (+1) 8 (-1)
+Skills Stealth +5
+Damage Resistances cold, fire, lightning; bludgeoning,          Saving Throws Dex +5, Wis +4, Cha +2
+                                                                Damage Resistances cold, fire, lightning; bludgeoning,
+  piercing, and slashing from nonmagical attacks
+Damage Immunities poison                                          piercing, and slashing from nonmagical attacks
+Condition Immunities poisoned                                   Damage Immunities poison
+Senses darkvision 120 ft., passive Perception 10                Condition Immunities poisoned
+Languages Abyssal, Common                                       Senses darkvision 120 ft., passive Perception 11
+Challenge 1 (200 XP)                                            Languages Abyssal, telepathy 120 ft.
+                                                                Challenge 6 (2,300 XP)
+Shapechanger. The quasit can use its action to
+polymorph into a beast form that resembles a bat                Magic Resistance. The vrock has advantage on saving
+(speed 10 ft. fly 40 ft.), a centipede (40 ft., climb 40 ft.),  throws against spells and other magical effects.
+or a toad (40 ft., swim 40 ft.), or back into its true form.
+Its statistics are the same in each form, except for the        Actions
+speed changes noted. Any equipment it is wearing or
+carrying isn’t transformed. It reverts to its true form if      Multiattack. The vrock makes two attacks: one with its
+it dies.                                                        beak and one with its talons.
+Magic Resistance. The quasit has advantage on saving            Beak. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+throws against spells and other magical effects.                target. Hit: 10 (2d6 + 3) piercing damage.
+                                                                Talons. Melee Weapon Attack: +6 to hit, reach 5 ft.,
+Actions                                                         one target. Hit: 14 (2d10 + 3) slashing damage.
+                                                                Spores (Recharge 6). A 15-foot-radius cloud of toxic
+Claws (Bite in Beast Form). Melee Weapon Attack: +4             spores extends out from the vrock. The spores spread
+to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing      around corners. Each creature in that area must
+damage, and the target must succeed on a DC 10                  succeed on a DC 14 Constitution saving throw or
+Constitution saving throw or take 5 (2d4) poison                become poisoned. While poisoned in this way, a target
+damage and become poisoned for 1 minute. The target             takes 5 (1d10) poison damage at the start of each of its
+can repeat the saving throw at the end of each of its           turns. A target can repeat the saving throw at the end
+turns, ending the effect on itself on a success.                of each of its turns, ending the effect on itself on a
+Scare (1/Day). One creature of the quasit’s choice              success. Emptying a vial of holy water on the target
+within 20 feet of it must succeed on a DC 10 Wisdom             also ends the effect on it.
+saving throw or be frightened for 1 minute. The target
+can repeat the saving throw at the end of each of its

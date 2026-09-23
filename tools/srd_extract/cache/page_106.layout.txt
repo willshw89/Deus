@@ -1,0 +1,58 @@
+Find the Path              Inflict Wounds
+Guards and Wards           Protection from Evil and Good
+Irresistible Dance         Purify Food and Drink
+Mass Suggestion            Sanctuary
+Programmed Illusion        Shield of Faith
+True Seeing
+                           2nd Level
+7th Level
+                           Aid
+Arcane Sword               Augury
+Etherealness               Blindness/Deafness
+Forcecage                  Calm Emotions
+Magnificent Mansion        Continual Flame
+Mirage Arcane              Enhance Ability
+Project Image              Find Traps
+Regenerate                 Gentle Repose
+Resurrection               Hold Person
+Symbol                     Lesser Restoration
+Teleport                   Locate Object
+                           Prayer of Healing
+8th Level                  Protection from Poison
+                           Silence
+Dominate Monster           Spiritual Weapon
+Feeblemind                 Warding Bond
+Glibness                   Zone of Truth
+Mind Blank
+Power Word Stun            3rd Level
+
+9th Level                  Animate Dead
+                           Beacon of Hope
+Foresight                  Bestow Curse
+Power Word Kill            Clairvoyance
+True Polymorph             Create Food and Water
+                           Daylight
+Cleric Spells              Dispel Magic
+                           Glyph of Warding
+Cantrips (0 Level)         Magic Circle
+                           Mass Healing Word
+Guidance                   Meld into Stone
+Light                      Protection from Energy
+Mending                    Remove Curse
+Resistance                 Revivify
+Sacred Flame               Sending
+Spare the Dying            Speak with Dead
+Thaumaturgy                Spirit Guardians
+                           Tongues
+1st Level                  Water Walk
+
+Bane                       4th Level
+Bless
+Command                    Banishment
+Create or Destroy Water    Control Water
+Cure Wounds                Death Ward
+Detect Evil and Good       Divination
+Detect Magic               Freedom of Movement
+Detect Poison and Disease  Guardian of Faith
+Guiding Bolt
+Healing Word

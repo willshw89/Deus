@@ -1,0 +1,55 @@
+Fog Cloud                      Clairvoyance
+Grease                         Counterspell
+Hideous Laughter               Dispel Magic
+Identify                       Fear
+Illusory Script                Fireball
+Jump                           Fly
+Longstrider                    Gaseous Form
+Mage Armor                     Glyph of Warding
+Magic Missile                  Haste
+Protection from Evil and Good  Hypnotic Pattern
+Shield                         Lightning Bolt
+Silent Image                   Magic Circle
+Sleep                          Major Image
+Thunderwave                    Nondetection
+Unseen Servant                 Phantom Steed
+                               Protection from Energy
+2nd Level                      Remove Curse
+                               Sending
+Acid Arrow                     Sleet Storm
+Alter Self                     Slow
+Arcane Lock                    Stinking Cloud
+Arcanist’s Magic Aura          Tiny Hut
+Blindness/Deafness             Tongues
+Blur                           Vampiric Touch
+Continual Flame                Water Breathing
+Darkness
+Darkvision                     4th Level
+Detect Thoughts
+Enlarge/Reduce                 Arcane Eye
+Flaming Sphere                 Banishment
+Gentle Repose                  Black Tentacles
+Gust of Wind                   Blight
+Hold Person                    Confusion
+Invisibility                   Conjure Minor Elementals
+Knock                          Control Water
+Levitate                       Dimension Door
+Locate Object                  Fabricate
+Magic Mouth                    Faithful Hound
+Magic Weapon                   Fire Shield
+Mirror Image                   Greater Invisibility
+Misty Step                     Hallucinatory Terrain
+Ray of Enfeeblement            Ice Storm
+Rope Trick                     Locate Creature
+Scorching Ray                  Phantasmal Killer
+See Invisibility               Polymorph
+Shatter                        Private Sanctum
+Spider Climb                   Resilient Sphere
+Suggestion                     Secret Chest
+Web                            Stone Shape
+                               Stoneskin
+3rd Level                      Wall of Fire
+
+Animate Dead                   5th Level
+Bestow Curse
+Blink                          Animate Objects

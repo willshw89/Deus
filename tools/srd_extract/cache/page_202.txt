@@ -1,0 +1,11 @@
+Indefinite Madness
+
+d100 01–15 16–25 26–30
+31–35 36–45
+46–50 51–55 56–70 71–80
+81–85 86–95 96–100
+
+Flaw (lasts until cured) “Being drunk keeps me sane.” “I keep whatever I find.” “I try to become more like someone else I know—adopting his or her style of dress, mannerisms, and name.” “I must bend the truth, exaggerate, or outright lie to be interesting to other people.” “Achieving my goal is the only thing of interest to me, and I’ll ignore everything else to pursue it.” “I find it hard to care about anything that goes on around me.” “I don’t like the way people judge me all the time.” “I am the smartest, wisest, strongest, fastest, and most beautiful person I know.” “I am convinced that powerful enemies are hunting me, and their agents are everywhere I go. I am sure they’re watching me all the time.” “There’s only one person I can trust. And only I can see this special friend.” “I can’t take anything seriously. The more serious the situation, the funnier I find it.” “I’ve discovered that I really like killing people.”
+
+Curing Madness
+A calm emotions spell can suppress the effects of madness, while a lesser restoration spell can rid a character of a short-term or long-term madness. Depending on the source of the madness, remove curse or dispel evil might also prove effective. A greater restoration spell or more powerful magic is required to rid a character of indefinite madness.

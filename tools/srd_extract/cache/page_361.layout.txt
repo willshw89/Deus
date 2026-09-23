@@ -1,0 +1,60 @@
+Math Mathonwy, god of magic                            NE    Knowledge                 Staff
+Morrigan, goddess of battle                                                            Two crossed spears
+Nuada, god of war and warriors                         CE    War                       Silver hand on black background
+Oghma, god of speech and writing                                                       Unfurled scroll
+Silvanus, god of nature and forests                    N     War                       Summer oak tree
+
+                                                       NG    Knowledge
+
+                                                       N     Nature
+
+Greek Deities                               Alignment  Suggested Domains       Symbol
+                                                 N     Tempest                 Fist full of lightning bolts
+Deity                                           CG     Light                   Sea shell
+Zeus, god of the sky, ruler of the gods         CG     Knowledge, Life, Light  Lyre
+Aphrodite, goddess of love and beauty            CE    War                     Spear
+Apollo, god of light, music, and healing        NG     Life, Nature            Bow and arrow on lunar disk
+Ares, god of war and strife                      LG    Knowledge, War          Owl
+Artemis, goddess of hunting and childbirth      NG     Life                    Mare’s head
+Athena, goddess of wisdom and civilization      CN     Life                    Thyrsus (staff tipped with pine cone)
+Demeter, goddess of agriculture                  LE    Death                   Black ram
+Dionysus, god of mirth and wine                  CE    Knowledge, Trickery     Setting moon
+Hades, god of the underworld                    NG     Knowledge               Hammer and anvil
+Hecate, goddess of magic and the moon           CN     Trickery                Fan of peacock feathers
+Hephaestus, god of smithing and craft           CG     Tempest, War            Lion’s head
+Hera, goddess of marriage and intrigue          CG     Trickery                Caduceus (winged staff and serpents)
+Hercules, god of strength and adventure         NG     Life                    Hearth
+Hermes, god of travel and commerce              LN     War                     Winged woman
+Hestia, goddess of home and family              CN     Nature                  Syrinx (pan pipes)
+Nike, goddess of victory                        CN     Tempest                 Trident
+Pan, god of nature                               N     Trickery                Red pentagram
+Poseidon, god of the sea and earthquakes
+Tyche, goddess of good fortune
+
+Egyptian Deities                                  Alignment  Suggested Domains         Symbol
+                                                       LG    Life, Light               Solar disk encircled by serpent
+Deity                                                 LN     Death                     Black jackal
+Re-Horakhty, god of the sun, ruler of the gods      NE     Trickery                  Flaming snake
+Anubis, god of judgment and death                     CG     War                       Cat
+Apep, god of evil, fire, and serpents                 CN     Trickery                  Image of the misshapen deity
+Bast, goddess of cats and vengeance                   NG     Life, Light               Horned cow’s head with lunar disk
+Bes, god of luck and music                            NG     Knowledge                 Step pyramid
+Hathor, goddess of love, music, and motherhood        NG     Knowledge, Life           Ankh and star
+Imhotep, god of crafts and medicine                   CG     Death                     Horns around a lunar disk
+Isis, goddess of fertility and magic                   LG    Life, Nature              Crook and flail
+Nephthys, goddess of death and grief                  LN     Knowledge                 Bull
+Osiris, god of nature and the underworld               CE    Death, Tempest, Trickery  Coiled cobra
+Ptah, god of crafts, knowledge, and secrets            LE    Nature, Tempest           Crocodile head with horns and plumes
+Set, god of darkness and desert storms                 N     Knowledge                 Ibis
+Sobek, god of water and crocodiles
+Thoth, god of knowledge and wisdom
+
+Norse Deities                               Alignment  Suggested Domains  Symbol
+                                                NG     Knowledge, War     Watching blue eye
+Deity                                           NE     Tempest            Rough ocean waves
+Odin, god of knowledge and war                  NG     Life, Light        Gem-encrusted silver chalice
+Aegir, god of the sea and storms                 N     Light              Head of a bearded man
+Balder, god of beauty and poetry                NG     Life, Light        Ice-blue greatsword
+Forseti, god of justice and law                 NG     Life               Falcon
+Frey, god of fertility and the sun
+Freya, goddess of fertility and love

@@ -1,0 +1,59 @@
+Giant Slayer                                               Hammer of Thunderbolts
+
+Weapon (any axe or sword), rare                            Weapon (maul), legendary
+
+You gain a +1 bonus to attack and damage rolls             You gain a +1 bonus to attack and damage rolls
+made with this magic weapon.                               made with this magic weapon.
+
+  When you hit a giant with it, the giant takes an           Giant’s Bane (Requires Attunement). You must
+extra 2d6 damage of the weapon’s type and must             be wearing a belt of giant strength (any variety) and
+succeed on a DC 15 Strength saving throw or fall           gauntlets of ogre power to attune to this weapon. The
+prone. For the purpose of this weapon, “giant” refers      attunement ends if you take off either of those items.
+to any creature with the giant type, including ettins      While you are attuned to this weapon and holding it,
+and trolls.                                                your Strength score increases by 4 and can exceed
+                                                           20, but not 30. When you roll a 20 on an attack roll
+Glamoured Studded Leather                                  made with this weapon against a giant, the giant
+                                                           must succeed on a DC 17 Constitution saving throw
+Armor (studded leather), rare                              or die.
+
+While wearing this armor, you gain a +1 bonus to AC.         The hammer also has 5 charges. While attuned to
+You can also use a bonus action to speak the armor’s       it, you can expend 1 charge and make a ranged
+command word and cause the armor to assume the             weapon attack with the hammer, hurling it as if it
+appearance of a normal set of clothing or some other       had the thrown property with a normal range of 20
+kind of armor. You decide what it looks like,              feet and a long range of 60 feet. If the attack hits, the
+including color, style, and accessories, but the armor     hammer unleashes a thunderclap audible out to 300
+retains its normal bulk and weight. The illusory           feet. The target and every creature within 30 feet of
+appearance lasts until you use this property again or      it must succeed on a DC 17 Constitution saving
+remove the armor.                                          throw or be stunned until the end of your next turn.
+                                                           The hammer regains 1d4 + 1 expended charges daily
+Gloves of Missile Snaring                                  at dawn.
+
+Wondrous item, uncommon (requires attunement)              Handy Haversack
+
+These gloves seem to almost meld into your hands           Wondrous item, rare
+when you don them. When a ranged weapon attack
+hits you while you’re wearing them, you can use            This backpack has a central pouch and two side
+your reaction to reduce the damage by 1d10 + your          pouches, each of which is an extradimensional space.
+Dexterity modifier, provided that you have a free          Each side pouch can hold up to 20 pounds of
+hand. If you reduce the damage to 0, you can catch         material, not exceeding a volume of 2 cubic feet. The
+the missile if it is small enough for you to hold in that  large central pouch can hold up to 8 cubic feet or 80
+hand.                                                      pounds of material. The backpack always weighs 5
+                                                           pounds, regardless of its contents.
+Gloves of Swimming and Climbing
+                                                             Placing an object in the haversack follows the
+Wondrous item, uncommon (requires attunement)              normal rules for interacting with objects. Retrieving
+                                                           an item from the haversack requires you to use an
+While wearing these gloves, climbing and swimming          action. When you reach into the haversack for a
+don’t cost you extra movement, and you gain a +5           specific item, the item is always magically on top.
+bonus to Strength (Athletics) checks made to climb
+or swim.                                                     The haversack has a few limitations. If it is
+                                                           overloaded, or if a sharp object pierces it or tears it,
+Goggles of Night                                           the haversack ruptures and is destroyed. If the
+                                                           haversack is destroyed, its contents are lost forever,
+Wondrous item, uncommon                                    although an artifact always turns up again
+                                                           somewhere. If the haversack is turned inside out, its
+While wearing these dark lenses, you have                  contents spill forth, unharmed, and the haversack
+darkvision out to a range of 60 feet. If you already       must be put right before it can be used again. If a
+have darkvision, wearing the goggles increases its         breathing creature is placed within the haversack,
+range by 60 feet.                                          the creature can survive for up to 10 minutes, after
+                                                           which time it begins to suffocate.

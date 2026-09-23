@@ -1,0 +1,60 @@
+Poor                        2 sp                           Wealthy. Choosing a wealthy lifestyle means
+Modest                      1 gp                         living a life of luxury, though you might not have
+Comfortable                 2 gp                         achieved the social status associated with the old
+Wealthy                     4 gp                         money of nobility or royalty. You live a lifestyle
+Aristocratic  10 gp minimum                              comparable to that of a highly successful merchant, a
+                                                         favored servant of the royalty, or the owner of a few
+  Wretched. You live in inhumane conditions. With        small businesses. You have respectable lodgings,
+no place to call home, you shelter wherever you can,     usually a spacious home in a good part of town or a
+sneaking into barns, huddling in old crates, and         comfortable suite at a fine inn. You likely have a
+relying on the good graces of people better off than     small staff of servants.
+you. A wretched lifestyle presents abundant dangers.
+Violence, disease, and hunger follow you wherever          Aristocratic. You live a life of plenty and comfort.
+you go. Other wretched people covet your armor,          You move in circles populated by the most powerful
+weapons, and adventuring gear, which represent a         people in the community. You have excellent
+fortune by their standards. You are beneath the          lodgings, perhaps a townhouse in the nicest part of
+notice of most people.                                   town or rooms in the finest inn. You dine at the best
+                                                         restaurants, retain the most skilled and fashionable
+  Squalid. You live in a leaky stable, a mud-floored  tailor, and have servants attending to your every
+hut just outside town, or a vermin-infested boarding  need. You receive invitations to the social gatherings
+house in the worst part of town. You have shelter        of the rich and powerful, and spend evenings in the
+from the elements, but you live in a desperate and       company of politicians, guild leaders, high priests,
+often violent environment, in places rife with disease,  and nobility. You must also contend with the highest
+hunger, and misfortune. You are beneath the notice       levels of deceit and treachery. The wealthier you are,
+of most people, and you have few legal protections.      the greater the chance you will be drawn into
+Most people at this lifestyle level have suffered some   political intrigue as a pawn or participant.
+terrible setback. They might be disturbed, marked as
+exiles, or suffer from disease.                          Self-Sufficiency
+
+  Poor. A poor lifestyle means going without the         The expenses and lifestyles described here assume that you
+comforts available in a stable community. Simple         are spending your time between adventures in town, availing
+food and lodgings, threadbare clothing, and              yourself of whatever services you can afford—paying for food
+unpredictable conditions result in a sufficient,         and shelter, paying townspeople to sharpen your sword and
+though probably unpleasant, experience. Your             repair your armor, and so on. Some characters, though,
+accommodations might be a room in a flophouse or         might prefer to spend their time away from civilization,
+in the common room above a tavern. You benefit           sustaining themselves in the wild by hunting, foraging, and
+from some legal protections, but you still have to       repairing their own gear.
+contend with violence, crime, and disease. People at
+this lifestyle level tend to be unskilled laborers,         Maintaining this kind of lifestyle doesn’t require you to
+costermongers, peddlers, thieves, mercenaries, and       spend any coin, but it is time-consuming. If you spend your
+other disreputable types.                                time between adventures practicing a profession, you can
+                                                         eke out the equivalent of a poor lifestyle. Proficiency in the
+  Modest. A modest lifestyle keeps you out of the        Survival skill lets you live at the equivalent of a comfortable
+slums and ensures that you can maintain your             lifestyle.
+equipment. You live in an older part of town, renting
+a room in a boarding house, inn, or temple. You don’t    Food, Drink, and Lodging
+go hungry or thirsty, and your living conditions are
+clean, if simple. Ordinary people living modest          The Food, Drink, and Lodging table gives prices for
+lifestyles include soldiers with families, laborers,     individual food items and a single night’s lodging.
+students, priests, hedge wizards, and the like.          These prices are included in your total lifestyle
+                                                         expenses.
+  Comfortable. Choosing a comfortable lifestyle
+means that you can afford nicer clothing and can         Food, Drink, and Lodging
+easily maintain your equipment. You live in a small
+cottage in a middle-class neighborhood or in a        Item    Cost
+private room at a fine inn. You associate with
+merchants, skilled tradespeople, and military            Ale
+officers.
+                                                         Gallon  2 sp
+
+                                                         Mug     4 cp

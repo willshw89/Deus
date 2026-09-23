@@ -1,0 +1,63 @@
+  Heavy Armor. Heavier armor interferes with the             rings rubbing against one another to be muffled by
+wearer’s ability to move quickly, stealthily, and            outer layers.
+freely. If the Armor table shows “Str 13” or “Str 15”
+in the Strength column for an armor type, the armor            Scale Mail. This armor consists of a coat and
+reduces the wearer’s speed by 10 feet unless the             leggings (and perhaps a separate skirt) of leather
+wearer has a Strength score equal to or higher than          covered with overlapping pieces of metal, much like
+the listed score.                                            the scales of a fish. The suit includes gauntlets.
+
+  Stealth. If the Armor table shows “Disadvantage”             Breastplate. This armor consists of a fitted metal
+in the Stealth column, the wearer has disadvantage           chest piece worn with supple leather. Although it
+on Dexterity (Stealth) checks.                               leaves the legs and arms relatively unprotected, this
+                                                             armor provides good protection for the wearer’s
+  Shields. A shield is made from wood or metal and           vital organs while leaving the wearer relatively
+is carried in one hand. Wielding a shield increases          unencumbered.
+your Armor Class by 2. You can benefit from only
+one shield at a time.                                          Half Plate. Half plate consists of shaped metal
+                                                             plates that cover most of the wearer’s body. It does
+Light Armor                                                  not include leg protection beyond simple greaves
+                                                             that are attached with leather straps.
+Made from supple and thin materials, light armor
+favors agile adventurers since it offers some                Heavy Armor
+protection without sacrificing mobility. If you wear
+light armor, you add your Dexterity modifier to the          Of all the armor categories, heavy armor offers the
+base number from your armor type to determine                best protection. These suits of armor cover the
+your Armor Class.                                            entire body and are designed to stop a wide range of
+                                                             attacks. Only proficient warriors can manage their
+  Padded. Padded armor consists of quilted layers            weight and bulk.
+of cloth and batting.
+                                                               Heavy armor doesn’t let you add your Dexterity
+  Leather. The breastplate and shoulder protectors           modifier to your Armor Class, but it also doesn’t
+of this armor are made of leather that has been              penalize you if your Dexterity modifier is negative.
+stiffened by being boiled in oil. The rest of the armor
+is made of softer and more flexible materials.                 Ring Mail. This armor is leather armor with heavy
+                                                             rings sewn into it. The rings help reinforce the armor
+  Studded Leather. Made from tough but flexible              against blows from swords and axes. Ring mail is
+leather, studded leather is reinforced with close-set     inferior to chain mail, and it's usually worn only by
+rivets or spikes.                                            those who can’t afford better armor.
+
+Medium Armor                                                   Chain Mail. Made of interlocking metal rings,
+                                                             chain mail includes a layer of quilted fabric worn
+Medium armor offers more protection than light               underneath the mail to prevent chafing and to
+armor, but it also impairs movement more. If you             cushion the impact of blows. The suit includes
+wear medium armor, you add your Dexterity                    gauntlets.
+modifier, to a maximum of +2, to the base number
+from your armor type to determine your Armor                   Splint. This armor is made of narrow vertical
+Class.                                                       strips of metal riveted to a backing of leather that is
+                                                             worn over cloth padding. Flexible chain mail
+  Hide. This crude armor consists of thick furs and          protects the joints.
+pelts. It is commonly worn by barbarian tribes, evil
+humanoids, and other folk who lack access to the               Plate. Plate consists of shaped, interlocking metal
+tools and materials needed to create better armor.           plates to cover the entire body. A suit of plate
+                                                             includes gauntlets, heavy leather boots, a visored
+  Chain Shirt. Made of interlocking metal rings, a           helmet, and thick layers of padding underneath the
+chain shirt is worn between layers of clothing or            armor. Buckles and straps distribute the weight over
+leather. This armor offers modest protection to the          the body.
+wearer’s upper body and allows the sound of the
+
+Armor        Cost Armor Class (AC)                        Strength Stealth  Weight
+             5 gp 11 + Dex modifier
+Armor                                                     —  Disadvantage 8 lb.
+Light Armor
+
+   Padded

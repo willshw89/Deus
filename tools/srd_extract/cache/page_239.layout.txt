@@ -1,0 +1,64 @@
+Robe of Stars                                                 In addition, the robe has 4d4 other patches. The
+                                                            GM chooses the patches or determines them
+Wondrous item, very rare (requires attunement)              randomly.
+
+This black or dark blue robe is embroidered with            d100   Patch
+small white or silver stars. You gain a +1 bonus to         01–08  Bag of 100 gp
+saving throws while you wear it.                            09–15  Silver coffer (1 foot long, 6 inches wide and
+                                                                   deep) worth 500 gp
+  Six stars, located on the robe’s upper front portion,     16–22  Iron door (up to 10 feet wide and 10 feet high,
+are particularly large. While wearing this robe, you               barred on one side of your choice), which you
+can use an action to pull off one of the stars and use      23–30  can place in an opening you can reach; it
+it to cast magic missile as a 5th-level spell. Daily at  31–44  conforms to fit the opening, attaching and
+dusk, 1d6 removed stars reappear on the robe.               45–51  hinging itself
+                                                            52–59  10 gems worth 100 gp each
+  While you wear the robe, you can use an action to                Wooden ladder (24 feet long)
+enter the Astral Plane along with everything you are        60–68  A riding horse with saddle bags
+wearing and carrying. You remain there until you            69–75  Pit (a cube 10 feet on a side), which you can
+use an action to return to the plane you were on. You       76–83  place on the ground within 10 feet of you
+reappear in the last space you occupied, or if that                4 potions of healing
+space is occupied, the nearest unoccupied space.            84–90  Rowboat (12 feet long)
+                                                            91–96  Spell scroll containing one spell of 1st to 3rd
+Robe of the Archmagi                                               level
+                                                            97–00  2 mastiffs
+Wondrous item, legendary (requires attunement by a
+sorcerer, warlock, or wizard)                                      Window (2 feet by 4 feet, up to 2 feet deep),
+                                                                   which you can place on a vertical surface you
+This elegant garment is made from exquisite cloth of               can reach
+white, gray, or black and adorned with silvery runes.              Portable ram
+The robe’s color corresponds to the alignment for
+which the item was created. A white robe was made           Rod of Absorption
+for good, gray for neutral, and black for evil. You
+can’t attune to a robe of the archmagi that doesn’t         Rod, very rare (requires attunement)
+correspond to your alignment.
+                                                            While holding this rod, you can use your reaction to
+  You gain these benefits while wearing the robe:           absorb a spell that is targeting only you and not with
+                                                            an area of effect. The absorbed spell’s effect is
+• If you aren’t wearing armor, your base Armor              canceled, and the spell’s energy—not the spell
+  Class is 15 + your Dexterity modifier.                    itself—is stored in the rod. The energy has the same
+                                                            level as the spell when it was cast. The rod can
+• You have advantage on saving throws against               absorb and store up to 50 levels of energy over the
+  spells and other magical effects.                         course of its existence. Once the rod absorbs 50
+                                                            levels of energy, it can’t absorb more. If you are
+• Your spell save DC and spell attack bonus each            targeted by a spell that the rod can’t store, the rod
+  increase by 2.                                            has no effect on that spell.
+
+Robe of Useful Items                                          When you become attuned to the rod, you know
+                                                            how many levels of energy the rod has absorbed
+Wondrous item, uncommon                                     over the course of its existence, and how many levels
+                                                            of spell energy it currently has stored.
+This robe has cloth patches of various shapes and
+colors covering it. While wearing the robe, you can           If you are a spellcaster holding the rod, you can
+use an action to detach one of the patches, causing it      convert energy stored in it into spell slots to cast
+to become the object or creature it represents. Once        spells you have prepared or know. You can create
+the last patch is removed, the robe becomes an              spell slots only of a level equal to or lower than your
+ordinary garment.                                           own spell slots, up to a maximum of 5th level. You
+                                                            use the stored levels in place of your slots, but
+  The robe has two of each of the following patches:        otherwise cast the spell as normal. For example, you
+                                                            can use 3 levels stored in the rod as a 3rd-level spell
+• Dagger                                                    slot.
+• Bullseye lantern (filled and lit)
+• Steel mirror
+• 10-foot pole
+• Hempen rope (50 feet, coiled)
+• Sack

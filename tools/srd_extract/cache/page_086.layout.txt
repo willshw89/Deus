@@ -1,0 +1,61 @@
+The Environment                                          lanterns, fires, and other sources of illumination
+                                                         within a specific radius.
+By its nature, adventuring involves delving into
+places that are dark, dangerous, and full of mysteries     Dim light, also called shadows, creates a lightly
+to be explored. The rules in this section cover some     obscured area. An area of dim light is usually a
+of the most important ways in which adventurers          boundary between a source of bright light, such as a
+interact with the environment in such places.            torch, and surrounding darkness. The soft light of
+                                                         twilight and dawn also counts as dim light. A
+Falling                                                  particularly brilliant full moon might bathe the land
+                                                         in dim light.
+A fall from a great height is one of the most common
+hazards facing an adventurer. At the end of a fall, a      Darkness creates a heavily obscured area.
+creature takes 1d6 bludgeoning damage for every 10       Characters face darkness outdoors at night (even
+feet it fell, to a maximum of 20d6. The creature lands   most moonlit nights), within the confines of an unlit
+prone, unless it avoids taking damage from the fall.     dungeon or a subterranean vault, or in an area of
+                                                         magical darkness.
+Suffocating
+                                                         Blindsight
+A creature can hold its breath for a number of
+minutes equal to 1 + its Constitution modifier           A creature with blindsight can perceive its
+(minimum of 30 seconds).                                 surroundings without relying on sight, within a
+                                                         specific radius. Creatures without eyes, such as
+  When a creature runs out of breath or is choking,      oozes, and creatures with echolocation or
+it can survive for a number of rounds equal to its       heightened senses, such as bats and true dragons,
+Constitution modifier (minimum of 1 round). At the       have this sense.
+start of its next turn, it drops to 0 hit points and is
+dying, and it can’t regain hit points or be stabilized   Darkvision
+until it can breathe again.
+                                                         Many creatures in fantasy gaming worlds, especially
+  For example, a creature with a Constitution of 14      those that dwell underground, have darkvision.
+can hold its breath for 3 minutes. If it starts          Within a specified range, a creature with darkvision
+suffocating, it has 2 rounds to reach air before it      can see in darkness as if the darkness were dim light,
+drops to 0 hit points.                                   so areas of darkness are only lightly obscured as far
+                                                         as that creature is concerned. However, the creature
+Vision and Light                                         can’t discern color in darkness, only shades of gray.
+
+The most fundamental tasks of adventuring—               Truesight
+noticing danger, finding hidden objects, hitting an
+enemy in combat, and targeting a spell, to name just     A creature with truesight can, out to a specific range,
+a few—rely heavily on a character’s ability to see.      see in normal and magical darkness, see invisible
+Darkness and other effects that obscure vision can       creatures and objects, automatically detect visual
+prove a significant hindrance.                           illusions and succeed on saving throws against them,
+                                                         and perceives the original form of a shapechanger or
+  A given area might be lightly or heavily obscured.     a creature that is transformed by magic.
+In a lightly obscured area, such as dim light, patchy    Furthermore, the creature can see into the Ethereal
+fog, or moderate foliage, creatures have                 Plane.
+disadvantage on Wisdom (Perception) checks that
+rely on sight.                                           Food and Water
+
+  A heavily obscured area—such as darkness,              Characters who don’t eat or drink suffer the effects
+opaque fog, or dense foliage—blocks vision entirely.     of exhaustion (see appendix PH-A). Exhaustion
+A creature effectively suffers from the blinded          caused by lack of food or water can’t be removed
+condition (see appendix PH-A) when trying to see      until the character eats and drinks the full required
+something in that area.                                  amount.
+
+  The presence or absence of light in an                 Food
+environment creates three categories of
+illumination: bright light, dim light, and darkness.     A character needs one pound of food per day and can
+                                                         make food last longer by subsisting on half rations.
+  Bright light lets most creatures see normally.
+Even gloomy days provide bright light, as do torches,

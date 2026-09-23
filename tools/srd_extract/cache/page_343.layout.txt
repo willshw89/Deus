@@ -1,0 +1,52 @@
+Actions                                                      metal shield being worn or carried, its takes a
+                                                             permanent and cumulative -1 penalty to the AC it
+Multiattack. The roper makes four attacks with its           offers. Armor reduced to an AC of 10 or a shield that
+tendrils, uses Reel, and makes one attack with its bite.     drops to a +0 bonus is destroyed. If the object touched
+Bite. Melee Weapon Attack: +7 to hit, reach 5 ft., one       is a held metal weapon, it rusts as described in the Rust
+target. Hit: 22 (4d8 + 4) piercing damage.                   Metal trait.
+Tendril. Melee Weapon Attack: +7 to hit, reach 50 ft.,
+one creature. Hit: The target is grappled (escape DC 15).    Monsters (S)
+Until the grapple ends, the target is restrained and has
+disadvantage on Strength checks and Strength saving          Sahuagin
+throws, and the roper can’t use the same tendril on
+another target.                                              Medium humanoid (sahuagin), lawful evil
+Reel. The roper pulls each creature grappled by it up to
+25 feet straight toward it.                                  Armor Class 12 (natural armor)
+                                                             Hit Points 22 (4d8 + 4)
+Rust Monster                                                 Speed 30 ft., swim 40 ft.
+
+Medium monstrosity, unaligned                                    STR DEX CON INT WIS CHA
+                                                               13 (+1) 11 (+0) 12 (+1) 12 (+1) 13 (+1) 9 (-1)
+Armor Class 14 (natural armor)
+Hit Points 27 (5d8 + 5)                                      Skills Perception +5
+Speed 40 ft.                                                 Senses darkvision 120 ft., passive Perception 15
+                                                             Languages Sahuagin
+    STR DEX CON INT WIS CHA                                  Challenge 1/2 (100 XP)
+  13 (+1) 12 (+1) 13 (+1) 2 (-4) 13 (+1) 6 (-2)
+                                                             Blood Frenzy. The sahuagin has advantage on melee
+Senses darkvision 60 ft., passive Perception 11              attack rolls against any creature that doesn’t have all
+Languages —                                                  its hit points.
+Challenge 1/2 (100 XP)                                       Limited Amphibiousness. The sahuagin can breathe air
+                                                             and water, but it needs to be submerged at least once
+Iron Scent. The rust monster can pinpoint, by scent,         every 4 hours to avoid suffocating.
+the location of ferrous metal within 30 feet of it.          Shark Telepathy. The sahuagin can magically command
+Rust Metal. Any nonmagical weapon made of metal              any shark within 120 feet of it, using a limited
+that hits the rust monster corrodes. After dealing           telepathy.
+damage, the weapon takes a permanent and
+cumulative -1 penalty to damage rolls. If its penalty        Actions
+drops to -5, the weapon is destroyed. Nonmagical             Multiattack. The sahuagin makes two melee attacks:
+ammunition made of metal that hits the rust monster          one with its bite and one with its claws or spear.
+is destroyed after dealing damage.                           Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+                                                             target. Hit: 3 (1d4 + 1) piercing damage.
+Actions                                                      Claws. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+                                                             target. Hit: 3 (1d4 + 1) slashing damage.
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one       Spear. Melee or Ranged Weapon Attack: +3 to hit,
+target. Hit: 5 (1d8 + 1) piercing damage.                    reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 +
+Antennae. The rust monster corrodes a nonmagical             1) piercing damage, or 5 (1d8 + 1) piercing damage if
+ferrous metal object it can see within 5 feet of it. If the  used with two hands to make a melee attack.
+object isn’t being worn or carried, the touch destroys a
+1-foot cube of it. If the object is being worn or carried
+by a creature, the creature can make a DC 11 Dexterity
+saving throw to avoid the rust monster’s touch.
+
+  If the object touched is either metal armor or a

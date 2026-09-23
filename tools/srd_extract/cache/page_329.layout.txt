@@ -1,0 +1,49 @@
+    STR DEX CON INT WIS CHA                                   Speed 30 ft.
+  15 (+2) 13 (+1) 14 (+2) 10 (+0) 11 (+0) 10 (+0)
+                                                                  STR DEX CON INT WIS CHA
+Skills Perception +4, Stealth +3                                 7 (-2) 15 (+2) 12 (+1) 8 (-1) 11 (+0) 10 (+0)
+Damage Immunities bludgeoning, piercing, and
+                                                              Damage Resistances bludgeoning, piercing, and
+  slashing from nonmagical attacks not made with                slashing from nonmagical attacks
+  silvered weapons
+Senses passive Perception 14                                  Damage Immunities fire
+Languages Common (can’t speak in wolf form)                   Senses darkvision 60 ft., passive Perception 10
+Challenge 3 (700 XP)                                          Languages Ignan
+                                                              Challenge 1/2 (100 XP)
+Shapechanger. The werewolf can use its action to
+polymorph into a wolf-humanoid hybrid or into a wolf,       Death Burst. When the magmin dies, it explodes in a
+or back into its true form, which is humanoid. Its            burst of fire and magma. Each creature within 10 feet
+statistics, other than its AC, are the same in each form.     of it must make a DC 11 Dexterity saving throw, taking
+Any equipment it is wearing or carrying isn’t                 7 (2d6) fire damage on a failed save, or half as much
+transformed. It reverts to its true form if it dies.          damage on a successful one. Flammable objects that
+Keen Hearing and Smell. The werewolf has advantage            aren’t being worn or carried in that area are ignited.
+on Wisdom (Perception) checks that rely on hearing or         Ignited Illumination. As a bonus action, the magmin
+smell.                                                        can set itself ablaze or extinguish its flames. While
+                                                              ablaze, the magmin sheds bright light in a 10-foot
+Actions                                                       radius and dim light for an additional 10 feet.
+Multiattack (Humanoid or Hybrid Form Only). The
+werewolf makes two attacks: one with its bite and one         Actions
+with its claws or spear.                                      Touch. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Bite (Wolf or Hybrid Form Only). Melee Weapon                 target. Hit: 7 (2d6) fire damage. If the target is a
+Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2)  creature or a flammable object, it ignites. Until a
+piercing damage. If the target is a humanoid, it must         creature takes an action to douse the fire, the target
+succeed on a DC 12 Constitution saving throw or be            takes 3 (1d6) fire damage at the end of each of its turns.
+cursed with werewolf lycanthropy.
+Claws (Hybrid Form Only). Melee Weapon Attack: +4             Manticore
+to hit, reach 5 ft., one creature. Hit: 7 (2d4 + 2) slashing
+damage.                                                       Large monstrosity, lawful evil
+Spear (Humanoid Form Only). Melee or Ranged
+Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft.,     Armor Class 14 (natural armor)
+one creature. Hit: 5 (1d6 + 2) piercing damage, or 6          Hit Points 68 (8d10 + 24)
+(1d8 + 2) piercing damage if used with two hands to           Speed 30 ft., fly 50 ft.
+make a melee attack.
+                                                                  STR DEX CON INT WIS CHA
+Monsters (M)                                                    17 (+3) 16 (+3) 17 (+3) 7 (-2) 12 (+1) 8 (-1)
+
+Magmin                                                        Senses darkvision 60 ft., passive Perception 11
+                                                              Languages Common
+Small elemental, chaotic neutral                              Challenge 3 (700 XP)
+
+Armor Class 14 (natural armor)                                Tail Spike Regrowth. The manticore has twenty-four
+Hit Points 9 (2d6 + 2)                                        tail spikes. Used spikes regrow when the manticore
+                                                              finishes a long rest.
