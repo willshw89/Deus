@@ -16,7 +16,7 @@ Player-facing use of any entry also needs the statement in the game credits (`do
 ## 2. Pipeline and files
 | Step | Tool | Reads | Writes |
 |---|---|---|---|
-| 1. Page cache | `node tools/srd_extract/extract_pages.js` (`--check` verifies the cache is reproducible) | the PDF, `pdftotext` (xpdf 4.06, shipped with Git for Windows at `C:\Program Files\Git\mingw64\bin`) | `tools/srd_extract/cache/page_NNN.txt` (reading order), `page_NNN.layout.txt` (physical layout), `manifest.json`, `sections.json`, `headings.json` |
+| 1. Page cache | `node tools/srd_extract/extract_pages.js` (`--check` verifies the cache is reproducible) | the PDF, `pdftotext` (xpdf 4.06, shipped with Git for Windows at `C:\Program Files\Git\mingw64\bin`) | `tools/srd_extract/cache/page_NNN.txt` (reading order), `page_NNN.layout.txt` (physical layout, normalised), `page_NNN.layout.raw.txt` (physical layout, unnormalised, exact columns), `manifest.json`, `sections.json`, `headings.json` |
 | 2. Staging | `node tools/srd_extract/stage_<category>.js` | the cache | `tools/srd_extract/staging/staging_<category>.json` |
 | 3. Catalogue | `node tools/build_srd_catalog.js` | the staging files | `game/data/srd51/<category>.json`, `game/data/srd51/catalogue_manifest.json` |
 | 4. Validation | `node tools/validate_srd_catalog.js` | the catalogue, this document, `game/img/system/IconSet.png`, `game/js/plugins.js` | exit 0 or a list of failures |
@@ -66,7 +66,7 @@ The assignment quoted equipment as 63–76 and rules as 62–113; the pages them
 
 | category | kind | expected | tolerance | basis |
 |---|---|---|---|---|
-| creatures | creature | 313 | 5 | assignment: 199 in Monsters (A to Z) plus 114 in the appendices |
+| creatures | creature | 317 | 0 | 201 stat blocks in Monsters (A to Z), 95 in Appendix MM-A and 21 in Appendix MM-B, corroborated by 317 Challenge lines in both extraction modes; the assignment said 313 because the legacy reference lacks Werebear, Werewolf, Bandit and Bandit Captain (section 10a) |
 | spells | spell | 319 | 2 | assignment; the 2026-09-21 `srd5_1/spells.json` also holds 319 |
 | spells | spell-list | 8 | 0 | one list per casting class: bard, cleric, druid, paladin, ranger, sorcerer, warlock, wizard |
 | equipment | weapon | 37 | 0 | the weapons table on page 66 |
