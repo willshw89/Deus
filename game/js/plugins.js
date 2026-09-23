@@ -189,6 +189,12 @@ var $plugins =
     "parameters": {}
   },
   {
+    "name": "DEUS_Culling",
+    "status": true,
+    "description": "[DEUS Culling] Viewport and presentation culling engine: spatial bucket indexing, offscreen sprite parking, and 60 FPS viewport dispatch.",
+    "parameters": {}
+  },
+  {
     "name": "DEUS_Speech",
     "status": true,
     "description": "[DEUS Speech] Floating overhead dialogue balloons, situational barks, emotional remarks, and colony announcements.",
