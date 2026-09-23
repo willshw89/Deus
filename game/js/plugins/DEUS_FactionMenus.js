@@ -268,8 +268,13 @@
     Scene_Title.prototype.onNewGameEmbark = function() {
         if (this._embarking) return;
         this._embarking = true;
-        if (this._newGameSetupWindow && typeof this._newGameSetupWindow._destroySeedInputElement === "function") {
-            this._newGameSetupWindow._destroySeedInputElement();
+        if (this._newGameSetupWindow) {
+            if (typeof this._newGameSetupWindow._destroySeedInputElement === "function") {
+                this._newGameSetupWindow._destroySeedInputElement();
+            }
+            if (typeof this._newGameSetupWindow._destroyYearInputElement === "function") {
+                this._newGameSetupWindow._destroyYearInputElement();
+            }
         }
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
@@ -380,6 +385,12 @@
         }
 
         currentYear() {
+            if (this._yearInput && this._yearInput.value) {
+                const parsed = parseInt(this._yearInput.value, 10);
+                if (!isNaN(parsed) && parsed >= 1 && parsed <= 999) {
+                    this._year = parsed;
+                }
+            }
             return this._year;
         }
 
@@ -476,7 +487,7 @@
         }
 
         setYear(y) {
-            this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
+            this._year = Math.max(1, Math.min(999, parseInt(y, 10) || 1));
             if (this._yearInput) {
                 this._yearInput.value = String(this._year);
             }
@@ -501,13 +512,15 @@
             input.type = "text";
             input.maxLength = 3;
             input.value = String(this._year);
-            input.title = "";
+            input.title = "Starting Year (1 - 999 AD)";
             input.setAttribute("autocomplete", "off");
             input.setAttribute("spellcheck", "false");
             input.style.position = "absolute";
+            input.style.left = "-9999px";
+            input.style.top = "-9999px";
             input.style.zIndex = "100";
             input.style.backgroundColor = "transparent";
-            input.style.color = "#a0f0ff";
+            input.style.color = "transparent";
             input.style.border = "none";
             input.style.outline = "none";
             input.style.boxShadow = "none";
@@ -520,6 +533,7 @@
             input.style.boxSizing = "border-box";
             input.style.padding = "2px 2px";
             input.style.display = "none";
+            input.style.cursor = "text";
 
             input.addEventListener("keydown", (e) => {
                 e.stopPropagation();
@@ -540,21 +554,25 @@
                 input.value = clean;
                 if (clean !== "") {
                     let val = parseInt(clean, 10);
-                    if (val > 200) { val = 200; input.value = "200"; }
+                    if (val > 999) { val = 999; input.value = "999"; }
                     this._year = Math.max(1, val);
-                    this.redrawItem(1);
                 }
             });
             input.addEventListener("blur", () => {
-                if (!input.value || parseInt(input.value, 10) < 1) {
+                let val = parseInt(input.value, 10);
+                if (isNaN(val) || val < 1) {
                     this._year = 1;
-                } else if (parseInt(input.value, 10) > 200) {
-                    this._year = 200;
+                } else if (val > 999) {
+                    this._year = 999;
+                } else {
+                    this._year = val;
                 }
                 input.value = String(this._year);
+                input.style.color = "transparent";
                 this.redrawItem(1);
             });
             input.addEventListener("focus", () => {
+                input.style.color = "#a0f0ff";
                 this.select(1);
                 this.redrawItem(1);
                 try { input.select(); } catch (_) {}
@@ -585,9 +603,12 @@
             input.setAttribute("autocomplete", "off");
             input.setAttribute("spellcheck", "false");
             input.style.position = "absolute";
+            input.style.left = "-9999px";
+            input.style.top = "-9999px";
+            input.style.display = "none";
             input.style.zIndex = "100";
             input.style.backgroundColor = "transparent";
-            input.style.color = "#a0f0ff";
+            input.style.color = "transparent";
             input.style.border = "none";
             input.style.outline = "none";
             input.style.boxShadow = "none";
@@ -599,6 +620,7 @@
             input.style.caretColor = "#00d4ff";
             input.style.boxSizing = "border-box";
             input.style.padding = "2px 6px";
+            input.style.cursor = "text";
 
             input.addEventListener("keydown", (e) => {
                 e.stopPropagation();
@@ -625,10 +647,13 @@
                 this.redrawItem(3);
             });
             input.addEventListener("focus", () => {
+                input.style.color = "#a0f0ff";
                 this.select(2);
                 this.redrawItem(2);
+                try { input.select(); } catch (_) {}
             });
             input.addEventListener("blur", () => {
+                input.style.color = "transparent";
                 this.redrawItem(2);
             });
 
@@ -654,8 +679,7 @@
 
             // Year input position
             if (this._yearInput) {
-                const isEditingYear = (typeof document !== "undefined" && document.activeElement === this._yearInput);
-                if (!isOpen || !isEditingYear) {
+                if (!isOpen) {
                     this._yearInput.style.display = "none";
                 } else {
                     this._yearInput.style.display = "block";
@@ -732,6 +756,12 @@
             const prev = this.index();
             super.select(index);
             if (prev !== index) {
+                if (prev === 1 && this._yearInput && typeof document !== "undefined" && document.activeElement === this._yearInput) {
+                    this._yearInput.blur();
+                }
+                if (prev === 2 && this._htmlInput && typeof document !== "undefined" && document.activeElement === this._htmlInput) {
+                    this._htmlInput.blur();
+                }
                 if (prev >= 0) this.redrawItem(prev);
                 if (index >= 0) this.redrawItem(index);
             }
@@ -806,7 +836,8 @@
                 const boxY = rect.y + 3;
 
                 // Sleek inset frame for direct numeric entry
-                if (isSelected || (this._yearInput && document.activeElement === this._yearInput)) {
+                const isEditingYear = (this._yearInput && typeof document !== "undefined" && document.activeElement === this._yearInput);
+                if (isSelected || isEditingYear) {
                     this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(5, 8, 14, 0.95)");
                     this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, "rgba(0, 220, 255, 0.90)");
                     this.contentsBack.fillRect(boxX + 1, boxY + 1, boxW - 2, 1, "rgba(160, 240, 255, 0.50)");
@@ -962,9 +993,14 @@
                     this.prevFaction();
                 }
             } else if (hitIndex === 1) {
-                if (localPos.x >= 150 && localPos.x <= 210) {
-                    if (this._yearInput) this._yearInput.focus();
-                } else if (localPos.x >= 210) {
+                const r1 = this.itemLineRect(1);
+                const clickX = localPos.x - this.padding - r1.x;
+                if (clickX >= 154 && clickX <= 208) {
+                    if (this._yearInput) {
+                        this._yearInput.focus();
+                        try { this._yearInput.select(); } catch (_) {}
+                    }
+                } else if (clickX > 208) {
                     this.changeYear(1);
                 } else {
                     this.changeYear(-1);
@@ -1052,7 +1088,7 @@
 
         changeYear(delta) {
             const oldYear = this._year;
-            this._year = Math.max(1, Math.min(200, this._year + delta));
+            this._year = Math.max(1, Math.min(999, this._year + delta));
             if (this._yearInput) {
                 this._yearInput.value = String(this._year);
             }
@@ -1571,11 +1607,28 @@
             scene._newGameSetupWindow.changeYear(49);
             t.check("year_adjusted_to_50", scene._newGameSetupWindow.currentYear() === 50, "Year stepped to 50 AD");
 
-            scene._newGameSetupWindow.setYear(250);
-            t.check("year_clamped_max_200", scene._newGameSetupWindow.currentYear() === 200, "Year clamped at maximum 200 AD");
+            scene._newGameSetupWindow.setYear(1200);
+            t.check("year_clamped_max_999", scene._newGameSetupWindow.currentYear() === 999, "Year clamped at maximum 999 AD");
 
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
+
+            // Test direct numeric typing into HTML year input
+            if (scene._newGameSetupWindow._yearInput) {
+                scene._newGameSetupWindow._yearInput.value = "777";
+                scene._newGameSetupWindow._yearInput.dispatchEvent(new Event("input"));
+                t.check("direct_year_input_777", scene._newGameSetupWindow.currentYear() === 777, "Direct numeric entry sets year to 777 AD");
+                scene._newGameSetupWindow._yearInput.value = "9999";
+                scene._newGameSetupWindow._yearInput.dispatchEvent(new Event("input"));
+                t.check("direct_year_input_clamped_999", scene._newGameSetupWindow.currentYear() === 999, "Direct numeric entry clamps to 999 AD");
+            }
+
+            // Test touch click into year box (inside [154, 208])
+            const rectRow1 = scene._newGameSetupWindow.itemLineRect(1);
+            TouchInput._x = scene._newGameSetupWindow.x + scene._newGameSetupWindow.padding + rectRow1.x + 180;
+            TouchInput._y = scene._newGameSetupWindow.y + scene._newGameSetupWindow.padding + rectRow1.y + 12;
+            scene._newGameSetupWindow.onTouchOk();
+            t.check("year_row_selected_on_touch", scene._newGameSetupWindow.index() === 1, "Clicking year box selects row 1");
 
             // Verify 9 SRD Factions
             const expectedSrd = ["Human", "Elf", "Dwarf", "Halfling", "Gnome", "Dragonborn", "Half-Elf", "Half-Orc", "Tiefling"];

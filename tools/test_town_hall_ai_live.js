@@ -44,8 +44,10 @@ try {
     childProcess.execSync(`robocopy "${path.join(ROOT, 'game')}" "${SNAPSHOT_DIR}" /E /NDL /NFL /NJH /NJS /nc /ns /np`, { stdio: 'ignore' });
 } catch (e) {}
 
-// 2. Inject Town Hall live test verification into UF_Test.js in snapshot
-const testJsPath = path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Test.js');
+// 2. Inject Town Hall live test verification into DEUS_Test.js in snapshot
+const testJsPath = fs.existsSync(path.join(SNAPSHOT_DIR, 'js', 'plugins', 'DEUS_Test.js'))
+    ? path.join(SNAPSHOT_DIR, 'js', 'plugins', 'DEUS_Test.js')
+    : path.join(SNAPSHOT_DIR, 'js', 'plugins', 'UF_Test.js');
 let testCode = fs.readFileSync(testJsPath, 'utf8');
 
 const targetHook = 't.screenshot("map");';
@@ -53,7 +55,34 @@ const townHallTestCode = `
         t.screenshot("map");
         // --- Live Town Hall AI & 4-Pair Bed Allocation Verification ---
         const W = window.UF && UF.World;
-        const H = window.UF && UF.Households;
+        let H = window.UF && UF.Households;
+        if (!H && typeof require === "function") {
+            try {
+                const fs = require("fs");
+                const path = require("path");
+                let dir = process.cwd();
+                try {
+                    const loc = window.location.pathname;
+                    if (loc) {
+                        let cleaned = decodeURIComponent(loc);
+                        if (/^\/[A-Za-z]:/.test(cleaned)) cleaned = cleaned.slice(1);
+                        dir = path.dirname(cleaned);
+                    }
+                } catch (_) {}
+                const candidates = [
+                    path.join(dir, "js", "plugins", "UF_Households.js"),
+                    path.join(process.cwd(), "js", "plugins", "UF_Households.js"),
+                    path.join(process.cwd(), "game", "js", "plugins", "UF_Households.js")
+                ];
+                for (const p of candidates) {
+                    if (fs.existsSync(p)) {
+                        require(p);
+                        break;
+                    }
+                }
+            } catch (e) {}
+            H = window.UF && UF.Households;
+        }
         const C = window.UF && UF.Colonists;
         const O = window.UF && UF.Objects;
         const st = W && W.state;
