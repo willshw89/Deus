@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-11 independent, bounded contracts for the immutable HIST-09 candidate.
+// ASTRA-12 independent, bounded contracts for the immutable HIST-09 candidate.
 // This file never edits production or writes artifacts. The benchmark owns the
 // long matrices, full-process save/restart test, sweep and consolidated report.
 const fs = require("fs");
@@ -21,7 +21,9 @@ const LEGACY_NORMALIZED_SHA256 = "647592fc4a65b474f5f12835cee80a461d1f0c86ba8475
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MODEL = { id: "local_density_v1", version: 1, defaultBaseline: 160, minimumScale: 0.1, minCapacity: 60, maxCapacity: 350 };
 const PROFILE_VERSION = "1.0.0-provisional-astra08";
-const PACKET_POLICY = "literal ASTRA-11 packet (clarification requested; no correction received)";
+const DEFAULT_PROFILE_HASH = "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48";
+const PROFILE_FIELDS = ["lifespan", "reproductiveAge", "birthChance", "birthSpacingYears", "infantMortality", "diseaseMortality", "exposureMortality"];
+const PACKET_POLICY = "Reconciled ASTRA-12 owner-approved schema/model/profile identities and canonical SHA-256 provenance contract";
 const MUTANT_CHECKS = {
     no_density_pressure: "DENSITY_RATE",
     universal_constant: "LOCAL_CAPACITY",
@@ -205,55 +207,151 @@ function checkBirths(loaded, state, label, conditions = {}) {
     return { expected, observed: actualMothers(state, before) };
 }
 function profileMetadata(state) {
-    // Inspect existing metadata without inventing a required fingerprint field.
+    // Retain observed metadata alongside independent expected values.
     const registries = new Set(["factions", "sites", "people", "dynasties", "rulers", "partnerships", "events", "config"]);
     return { top: clone(Object.fromEntries(Object.entries(state).filter(([key]) => !registries.has(key)))),
         config: clone(Object.fromEntries(Object.entries(state.config).filter(([key]) => !["profiles", "names"].includes(key)))) };
 }
-function metadataLeaves(value, prefix = "", output = []) {
-    for (const [key, item] of Object.entries(value)) {
-        const field = prefix ? `${prefix}.${key}` : key;
-        if (item && typeof item === "object") metadataLeaves(item, field, output);
-        else output.push({ field, value: item });
-    }
-    return output;
+function expectedProfileHash(profiles) {
+    // Independent Node oracle: sorted species, prescribed parameter order,
+    // numeric JSON values and ordered range endpoints. No plugin hash API.
+    const canonical = Object.fromEntries(Object.keys(profiles).sort().map(species => [species,
+        Object.fromEntries(PROFILE_FIELDS.map(field => [field, Array.isArray(profiles[species][field])
+            ? profiles[species][field].slice(0, 2) : profiles[species][field]]))]));
+    return sha(text(canonical));
 }
-function packetContracts(loaded) {
+function assertProfileHash(state, profiles, label) {
+    const expected = expectedProfileHash(profiles);
+    assert(typeof state.profileHash === "string" && /^[a-f0-9]{64}$/.test(state.profileHash), `${label}: profileHash is not lowercase 64-hex SHA-256`);
+    assert(state.profileHash === expected, `${label}: profileHash differs from independent Node SHA-256 oracle`);
+    if (Object.prototype.hasOwnProperty.call(state.config, "profileHash")) {
+        assert(state.config.profileHash === expected, `${label}: config profileHash differs from independent Node SHA-256 oracle`);
+    }
+    return expected;
+}
+function packetContracts(loaded, realLegacy) {
     const { api, world } = loaded, checks = [], defaults = api.create(world), profiles = expectedProfiles();
     profiles.human.birthChance = .123;
     const custom = api.create(world, { profiles }), same = api.create(world, { profiles: clone(profiles) });
-    const varied = clone(profiles); varied.human.birthChance = .124;
-    const different = api.create(world, { profiles: varied });
-    const advertised = state => metadataLeaves(profileMetadata(state)).filter(entry =>
-        /profile/i.test(entry.field) && typeof entry.value === "string" && /^[a-f0-9]{64}$/i.test(entry.value));
     const add = (id, expected, observed, fn, mapping = null) => {
         try { fn(); checks.push({ id, status: "PASS", expected, observed, mapping }); }
         catch (error) { checks.push({ id, status: "FAIL", expected, observed, mapping, diagnostic: `${id}: ${error.message}` }); }
     };
-    add("PACKET_DEFAULT_PROFILE_TAG", "v1", defaults.profileId,
-        () => assert(defaults.profileId === "v1" && defaults.profileVersion === "1.0.0-provisional-astra08", "Promoted default tag differs from literal packet"), "Existing state.profileId and state.profileVersion");
-    add("PACKET_DEMOGRAPHIC_MODEL", 1, defaults.historyModelVersion,
-        () => assert(defaults.schemaVersion === 7 && defaults.historyModelVersion === 1, "Existing historical model version differs from packet's demographic-model version"),
-        "Packet 'Demographic Model Version': schemaVersion is 7, historyModelVersion is 1.");
-    const modelMetadata = { capacityModelVersion: defaults.capacityModelVersion, capacityModel: clone(defaults.config.capacityModel) };
-    add("PACKET_CAPACITY_MODEL_IDENTITY", "local_density_v1", modelMetadata,
-        () => assert(metadataLeaves(modelMetadata).some(entry => entry.value === "local_density_v1"), "The persisted capacity model has no literal local_density_v1 identity"),
-        "Inspect existing root/config capacity-model metadata; no unspecified model/type/id property is invented.");
-    const claimed = api.create(world, { profiles, demographicProfileVersion: "v1" });
-    add("PACKET_CUSTOM_CANNOT_CLAIM_V1", "custom", claimed.demographicProfileVersion,
-        () => assert(claimed.demographicProfileVersion === "custom", "Modified biology can claim the packet's promoted v1 tag"), "Explicit modified profiles plus options.demographicProfileVersion='v1'");
-    const fingerprints = advertised(custom), repeatFingerprints = advertised(same), changedFingerprints = advertised(different);
-    add("PACKET_CUSTOM_PROFILE_FINGERPRINT", "Advertised deterministic SHA-256 profile fingerprint; equal profiles repeat, changed profiles differ",
-        { customMetadata: profileMetadata(custom), fingerprints, repeatFingerprints, changedFingerprints }, () => {
-            assert(custom.demographicProfileVersion === "custom", "Custom profile tag absent");
-            assert(fingerprints.length > 0, "No advertised 64-hex SHA-256 profile fingerprint in top-level or config metadata");
-            equal(fingerprints, repeatFingerprints, "Same custom profiles changed fingerprint");
-            assert(fingerprints.every(entry => {
-                const changed = changedFingerprints.find(item => item.field === entry.field);
-                return changed && changed.value !== entry.value;
-            }), "Changing custom biology did not change fingerprint");
-        }, "All existing top-level/config metadata is retained above; candidate fingerprint fields are discovered, not named by the verifier.");
-    return { policy: PACKET_POLICY, checks, observedMetadata: { defaults: profileMetadata(defaults), custom: profileMetadata(custom) } };
+    const tags = state => Object.fromEntries(["profileKind", "profileId", "profileVersion", "demographicProfileVersion"].map(key => [key, state[key]]));
+    const defaultTags = { profileKind: "promoted-default", profileId: "v1", profileVersion: PROFILE_VERSION, demographicProfileVersion: PROFILE_VERSION };
+    add("PACKET_DEFAULT_PROFILE_TAG", defaultTags, tags(defaults), () => {
+        equal(tags(defaults), defaultTags, "Promoted default identity/calibration tags differ from reconciled packet");
+        for (const supplied of ["default", expectedProfiles()]) equal(tags(api.create(world, { profiles: supplied })), defaultTags, "Explicit identical default biology changed provenance");
+    }, "Profile ID, calibration version and legacy demographicProfileVersion are distinct fields.");
+    const modelFields = state => ({ version: state.version, schemaVersion: state.schemaVersion, historyModelId: state.historyModelId, historyModelVersion: state.historyModelVersion });
+    const historyModel = { version: 7, schemaVersion: 7, historyModelId: "historical_demographics_v1", historyModelVersion: 1 };
+    add("PACKET_DEMOGRAPHIC_MODEL", historyModel, modelFields(defaults), () => {
+        equal(modelFields(defaults), historyModel, "Schema or historical model identity/version differs from reconciled packet");
+        equal(modelFields(custom), historyModel, "Custom biology changed schema/model identity");
+        for (const [key, value] of [["schemaVersion", 8], ["historyModelId", "TEST_UNSUPPORTED_HISTORY"], ["historyModelVersion", 2]]) {
+            const bad = clone(defaults); bad[key] = value;
+            rejectUnchanged(() => api.validate(bad), bad, `Unsupported ${key}`, /unsupported/);
+        }
+    }, "Root version/schemaVersion are 7; the independently versioned historical_demographics_v1 model is version 1.");
+    const capacityFields = state => ({ capacityModelId: state.capacityModelId, capacityModelVersion: state.capacityModelVersion,
+        configId: state.config.capacityModel.id, configVersion: state.config.capacityModel.version });
+    const capacityModel = { capacityModelId: "local_density_v1", capacityModelVersion: 1, configId: "local_density_v1", configVersion: 1 };
+    const capacityEvidence = { initial: capacityFields(defaults), callerIds: [] };
+    add("PACKET_CAPACITY_MODEL_IDENTITY", capacityModel, capacityEvidence, () => {
+        equal(capacityFields(defaults), capacityModel, "Root/config capacity identity or version differs from reconciled packet");
+        equal(capacityFields(custom), capacityModel, "Custom biology changed capacity-model identity");
+        for (const [key, value] of [["capacityModelId", "TEST_UNSUPPORTED_CAPACITY"], ["capacityModelVersion", 2]]) {
+            const bad = clone(defaults); bad[key] = value;
+            rejectUnchanged(() => api.validate(bad), bad, `Unsupported ${key}`, /unsupported/);
+        }
+        for (const id of ["TEST_UNSUPPORTED_CAPACITY", null, 1]) {
+            let result, error; const before = fingerprint(world);
+            try { result = api.create(world, { capacityModel: { id } }); } catch (e) { error = e; }
+            const observed = { requestedId: id, rejected: !!error, diagnostic: error ? error.message : null, persisted: result ? capacityFields(result) : null };
+            capacityEvidence.callerIds.push(observed);
+            assert(fingerprint(world) === before, "Caller capacity-ID rejection/create mutated canonical input");
+        }
+        assert(capacityEvidence.callerIds.every(item => item.rejected || text(item.persisted) === text(capacityModel)), "Caller capacityModel.id escaped rejection/normalization and persisted an unsupported model identity");
+    }, "Both root and config IDs/versions must agree, including caller-supplied capacityModel.id boundaries.");
+    const customTags = { profileKind: "custom", profileId: null, profileVersion: null, demographicProfileVersion: "custom" };
+    const customEvidence = { initial: tags(custom), normalizedClaims: [], rejectedSpoofs: [] };
+    add("PACKET_CUSTOM_CANNOT_CLAIM_V1", customTags, customEvidence, () => {
+        equal(tags(custom), customTags, "Modified biology did not normalize all custom identity fields");
+        for (const claim of ["v1", PROFILE_VERSION]) {
+            const claimed = api.create(world, { profiles, demographicProfileVersion: claim, profileKind: "promoted-default", profileId: "v1", profileVersion: PROFILE_VERSION });
+            equal(tags(claimed), customTags, "Caller-supplied promoted tags escaped custom normalization");
+            customEvidence.normalizedClaims.push({ claim, tags: tags(claimed) });
+        }
+        for (const [key, value] of [["profileKind", "promoted-default"], ["demographicProfileVersion", PROFILE_VERSION]]) {
+            const bad = clone(custom); bad[key] = value;
+            rejectUnchanged(() => api.validate(bad), bad, `Custom spoof ${key}`, /promoted/);
+            customEvidence.rejectedSpoofs.push({ key, value, status: "REJECTED_WITHOUT_MUTATION" });
+        }
+        const migrated = realLegacy(), biologyBefore = text(migrated.config.profiles);
+        assert(migrated.version === 6 && !Object.prototype.hasOwnProperty.call(migrated, "demographicProfileVersion"), "Genuine v6 provenance fixture unexpectedly contains newer tags");
+        api.migrate(migrated);
+        customEvidence.migrated = tags(migrated);
+        customEvidence.migratedHash = assertProfileHash(migrated, migrated.config.profiles, "migrated custom");
+        assert(text(migrated.config.profiles) === biologyBefore, "Custom migration changed biological parameters");
+        equal(tags(migrated), customTags, "Migrated custom biology did not normalize all custom identity fields");
+    }, "create and genuine v6 migration normalize all four custom tags; validate rejects the two promoted-claim fields explicitly named in the packet.");
+    const hashEvidence = { algorithm: "Node crypto SHA-256", defaultKnownHash: DEFAULT_PROFILE_HASH,
+        defaultObservedHash: defaults.profileHash, customObservedHash: custom.profileHash, variants: [], controls: [] };
+    add("PACKET_CUSTOM_PROFILE_FINGERPRINT", "Canonical parameter SHA-256 matches independent Node oracle, repeats across processes and changes with each biological parameter", hashEvidence, () => {
+        assert(expectedProfileHash(expectedProfiles()) === DEFAULT_PROFILE_HASH, "Independent canonical encoding does not reproduce packet's known default hash");
+        assertProfileHash(defaults, expectedProfiles(), "default");
+        const baseHash = assertProfileHash(custom, profiles, "custom");
+        assert(baseHash !== DEFAULT_PROFILE_HASH, "Modified biology retained promoted default hash");
+        assert(assertProfileHash(same, profiles, "same custom") === baseHash, "Equal custom profiles changed hash");
+        const reordered = Object.fromEntries(Object.entries(profiles).reverse().map(([species, profile]) => [species, Object.fromEntries(Object.entries(profile).reverse())]));
+        const reorderedState = api.create(world, { profiles: reordered });
+        assert(assertProfileHash(reorderedState, reordered, "reordered custom") === baseHash, "Object insertion order changed canonical profile hash");
+        hashEvidence.reorderedHash = reorderedState.profileHash;
+        const changes = [
+            ["lifespan[0]", p => p.human.lifespan[0]++], ["lifespan[1]", p => p.human.lifespan[1]++],
+            ["reproductiveAge[0]", p => p.human.reproductiveAge[0]++], ["reproductiveAge[1]", p => p.human.reproductiveAge[1]++],
+            ["birthChance", p => p.human.birthChance = .124], ["birthSpacingYears", p => p.human.birthSpacingYears++],
+            ["infantMortality", p => p.human.infantMortality += .001], ["diseaseMortality", p => p.human.diseaseMortality += .001],
+            ["exposureMortality", p => p.human.exposureMortality += .001]
+        ];
+        const hashes = new Set([baseHash]);
+        for (const [field, change] of changes) {
+            const varied = clone(profiles); change(varied);
+            const different = api.create(world, { profiles: varied }), actual = assertProfileHash(different, varied, field);
+            assert(!hashes.has(actual), `${field}: modified biology retained an earlier fingerprint`); hashes.add(actual);
+            hashEvidence.variants.push({ field, expected: expectedProfileHash(varied), observed: actual });
+            const forged = clone(different); forged.profileHash = baseHash; forged.config.profileHash = baseHash;
+            rejectUnchanged(() => assertProfileHash(forged, varied, `stale ${field}`), forged, `Stale-hash control ${field}`, /independent Node SHA-256 oracle/);
+            hashEvidence.controls.push({ field, status: "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE" });
+        }
+        const malformed = clone(custom); malformed.profileHash = "not-a-hash";
+        rejectUnchanged(() => assertProfileHash(malformed, profiles, "malformed"), malformed, "Malformed-hash control", /64-hex/);
+        hashEvidence.controls.push({ field: "profileHash", status: "MALFORMED_HASH_REJECTED_BY_INDEPENDENT_ORACLE" });
+        const child = spawnSync(process.execPath, [__filename, "--profile-hash-worker"], { cwd: ROOT, windowsHide: true,
+            encoding: "utf8", input: text([expectedProfiles(), profiles, reordered]), timeout: 20000, maxBuffer: 1024 * 1024 });
+        assert(!child.error && child.status === 0, `Fresh-process fingerprint worker failed: ${child.error || child.stderr}`);
+        const result = JSON.parse(child.stdout);
+        assert(result.workerPid !== process.pid && result.candidate === CANDIDATE && result.candidateSha256 === CANDIDATE_SHA256, "Fingerprint repeat did not use a fresh candidate process");
+        equal(result.hashes, [DEFAULT_PROFILE_HASH, baseHash, baseHash], "Fresh-process profile fingerprints differ");
+        hashEvidence.freshProcess = result;
+    }, "Sorted species keys; fixed seven-field parameter order; numeric JSON values; ranges keep endpoint order. Hash controls target the independent verifier, not unspecified production hash validation.");
+    const validationObservations = [];
+    for (const [id, base, change] of [
+        ["ROOT_HASH_FORGED", defaults, s => s.profileHash = "0".repeat(64)],
+        ["CONFIG_HASH_FORGED", defaults, s => s.config.profileHash = "x"],
+        ["HASHES_MISSING", defaults, s => { delete s.profileHash; delete s.config.profileHash; }],
+        ["STALE_CUSTOM_BIOLOGY_HASH", custom, s => s.config.profiles.human.birthChance = .124],
+        ["CUSTOM_ARBITRARY_KIND_VERSION", custom, s => { s.profileKind = "TEST_ARBITRARY"; s.demographicProfileVersion = "TEST_ARBITRARY"; }],
+        ["CUSTOM_PROMOTED_ID_VERSION", custom, s => { s.profileId = "v1"; s.profileVersion = PROFILE_VERSION; }],
+        ["DEFAULT_ID_VERSION_MISSING", defaults, s => { delete s.profileId; delete s.profileVersion; }],
+        ["SCHEMA_FIELD_MISSING", defaults, s => delete s.schemaVersion]
+    ]) {
+        const state = clone(base); change(state); const before = fingerprint(state); let error;
+        try { api.validate(state); } catch (e) { error = e; }
+        validationObservations.push({ id, gating: false, observed: error ? "REJECTED" : "ACCEPTED", diagnostic: error ? error.message : null, inputUnchanged: fingerprint(state) === before });
+    }
+    return { policy: PACKET_POLICY, checks, observedMetadata: { defaults: profileMetadata(defaults), custom: profileMetadata(custom),
+        validationObservations, observationPolicy: "Nongating validation coverage observations; packet gates are the five named checks above." } };
 }
 function runContracts(data, { mutant = null, only = null } = {}) {
     const started = performance.now(), checks = [], observations = [], tests = [];
@@ -413,7 +511,7 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         const before = text(s); let caught;
         try { api.migrate(s); } catch (e) { caught = e; }
         assert(caught && /historicalCapacity/.test(caught.message), "Migration accepted malformed legacy capacity");
-        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "ASTRA-11 additionally enforces atomic failure through its mandatory MIGRATION_ATOMICITY check.", fromVersion: 6, afterVersion: s.version });
+        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "ASTRA-12 retains atomic failure as the mandatory MIGRATION_ATOMICITY check.", fromVersion: 6, afterVersion: s.version });
     });
     add("MIGRATION_ATOMICITY", "Malformed v6 migration rejects without changing original state or version", () => {
         const changes = [s => s.sites[0].historicalCapacity = null, s => s.sites[0].historicalCapacity = 59,
@@ -433,15 +531,15 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         catch (error) { checks.push({ id: test.id, name: test.name, status: "FAIL", diagnostic: `${test.id}: ${error.message}`, elapsedMs: performance.now() - t }); }
     }
     assert(!only || checks.length === 1, "Unknown contract selector");
-    // Targeted mutant subprocesses exercise only their intended oracle. Literal
-    // packet mismatches must not create false-positive mutant detections.
-    const packet = only ? { policy: PACKET_POLICY, checks: [], observedMetadata: null } : packetContracts(loaded);
+    // Targeted mutant subprocesses exercise only their intended oracle. Other
+    // packet failures must not create false-positive mutant detections.
+    const packet = only ? { policy: PACKET_POLICY, checks: [], observedMetadata: null } : packetContracts(loaded, realLegacy);
     const commonStatus = checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS";
     const packetStatus = only ? "NOT RUN" : packet.checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS";
     assert(text(world) === loaded.canonical && loaded.errors.length === 0, "Contract execution mutated canonical world or logged engine errors");
     verifySnapshot(data);
-    return { task: "DEUS-TSK-ASTRA-11", suite: "historical-carrying-capacity-contracts", status: commonStatus === "FAIL" || packetStatus === "FAIL" ? "FAIL" : "PASS",
-        commonStatus, commonContractBasis: "Established implementation schema/metadata plus independent behavior, envelope, locality, migration and atomicity contracts; literal ASTRA-11 metadata acceptance is separate.",
+    return { task: "DEUS-TSK-ASTRA-12", suite: "historical-carrying-capacity-contracts", status: commonStatus === "FAIL" || packetStatus === "FAIL" ? "FAIL" : "PASS",
+        commonStatus, commonContractBasis: "Established behavior, envelope, locality, migration preservation and atomicity contracts; the reconciled ASTRA-12 identity/provenance acceptance checks are reported separately.",
         packetStatus, packetPolicy: packet.policy, packetChecks: packet.checks, observedMetadata: packet.observedMetadata,
         packetPassed: packet.checks.filter(c => c.status === "PASS").length, packetFailed: packet.checks.filter(c => c.status === "FAIL").length,
         candidate: { commit: CANDIDATE, sha256: CANDIDATE_SHA256, bytes: CANDIDATE_BYTES, sourceDigest: data.sourceDigest },
@@ -468,6 +566,16 @@ function selftest(data = sourceBundle(), { mutants = true } = {}) {
     return report;
 }
 function main(args = process.argv.slice(2)) {
+    if (args.length === 1 && args[0] === "--profile-hash-worker") {
+        const inputs = JSON.parse(fs.readFileSync(0, "utf8"));
+        assert(Array.isArray(inputs) && inputs.length === 3, "Expected three bounded fingerprint fixtures");
+        const data = sourceBundle(), loaded = load(data);
+        const hashes = inputs.map(profiles => loaded.api.create(loaded.world, { profiles }).profileHash);
+        verifySnapshot(data);
+        assert(text(loaded.world) === loaded.canonical && loaded.errors.length === 0, "Fingerprint worker changed canonical world or logged engine errors");
+        console.log(text({ workerPid: process.pid, candidate: CANDIDATE, candidateSha256: CANDIDATE_SHA256, hashes }));
+        return;
+    }
     let mutant = null;
     for (const arg of args) {
         if (arg === "--selftest" || arg === "--json") continue;

@@ -1,20 +1,30 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-11: independent measurements of the frozen HIST-09 production candidate.
+// ASTRA-12: independent measurements of the frozen HIST-09 production candidate.
 // Production defaults and production density only; no caller fertility adjustment.
 const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = require("crypto"), os = require("os");
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const BASE = "ebf2455af610e7a29f5393182e2b75d4eac35769";
+const DISPATCH_BASELINE = "596f237e4dd04500ebbfc3b66856b0b3ce691581";
 const TASK = "DEUS-TSK-ASTRA-12";
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
 const ENGINE_HASH = "9efb6c69faee25c44ed3f97e067089d209126c3d3fde30e397ecc26850dedbdf";
 const ENGINE_BYTES = 51780;
+const DEFAULT_METADATA = Object.freeze({ version: 7, schemaVersion: 7, historyModelId: "historical_demographics_v1", historyModelVersion: 1,
+    capacityModelId: "local_density_v1", capacityModelVersion: 1, profileKind: "promoted-default", profileId: "v1",
+    profileVersion: "1.0.0-provisional-astra08", demographicProfileVersion: "1.0.0-provisional-astra08",
+    profileHash: "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48" });
 const DEFAULT_OUTPUT = path.join(ROOT, "game/test_output/bench_species_biology.json");
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MUTANTS = ["unseeded", "invalid_lifespan", "inverted_fertility", "corrupt_parentage"];
+const CAPACITY_PACKET_IDS = ["PACKET_DEFAULT_PROFILE_TAG", "PACKET_DEMOGRAPHIC_MODEL", "PACKET_CAPACITY_MODEL_IDENTITY",
+    "PACKET_CUSTOM_CANNOT_CLAIM_V1", "PACKET_CUSTOM_PROFILE_FINGERPRINT"];
+const CAPACITY_MUTANT_TARGETS = { no_density_pressure: "DENSITY_RATE", universal_constant: "LOCAL_CAPACITY",
+    live_census_order_dependent: "ANNUAL_ORDER", base_birth_1_bypass: "BIRTH_ONE", unsupported_version_accepted: "VERSIONS",
+    malformed_capacity_accepted: "CAPACITY_REJECTION", migration_rewrites_custom_profile: "MIGRATION_PRESERVATION", migration_non_idempotence: "MIGRATION_IDEMPOTENCE" };
 const GROWTH_FLAG_RATIO = 100; // Diagnostic only; never a production population cap.
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -77,7 +87,7 @@ function parseArgs(args) {
         if (key.startsWith("--mutant=")) { out.mutant = key.slice(9); assert(MUTANTS.includes(out.mutant), "Unknown mutant"); continue; }
         assert(["--seed", "--years", "--runs", "--json"].includes(key), `Unknown option ${key}`);
         const raw = args[++i]; assert(raw && !raw.startsWith("--"), `Missing value for ${key}`);
-        if (key === "--json") { out.json = path.resolve(raw); assert(out.json === DEFAULT_OUTPUT, "Invalid JSON path: ASTRA-11 permits only game/test_output/bench_species_biology.json"); continue; }
+        if (key === "--json") { out.json = path.resolve(raw); assert(out.json === DEFAULT_OUTPUT, "Invalid JSON path: ASTRA-12 permits only game/test_output/bench_species_biology.json"); continue; }
         const n = Number(raw);
         assert(/^\d+$/.test(raw) && Number.isSafeInteger(n), `Invalid ${key}`);
         if (key === "--seed") { assert(n >= 0 && n <= 0x7fffffff, "Invalid --seed"); out.seeds = [n]; }
@@ -99,7 +109,7 @@ function validateProfiles(config) {
 }
 function bundle() {
     const inspected = fs.readFileSync(path.join(ROOT, PLUGIN));
-    assert(inspected.length === ENGINE_BYTES && sha(inspected) === ENGINE_HASH, "Candidate mismatch: inspected production file differs from ASTRA-11 dispatch");
+    assert(inspected.length === ENGINE_BYTES && sha(inspected) === ENGINE_HASH, "Candidate mismatch: inspected production file differs from ASTRA-12 dispatch");
     const files = {}, sources = [];
     const read = file => {
         const committed = spawnSync("git", ["show", `${BASE}:${file}`], { cwd: ROOT, encoding: "utf8", windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
@@ -284,6 +294,8 @@ function speciesMetrics(state, id, curves, index) {
 function trajectory(data, seed, horizons, progress = false, checkpointSink = null) {
     const start = performance.now(), loaded = load(data, seed), config = profiles(); validateProfiles(config);
     const { api, world } = loaded, state = api.create(world, { eventLimit: 1000000 });
+    for (const [key, expected] of Object.entries(DEFAULT_METADATA)) assert(state[key] === expected, `Default metadata mismatch: ${key}`);
+    assert(state.config.capacityModel.id === "local_density_v1" && state.config.profileHash === DEFAULT_METADATA.profileHash, "Default config metadata mismatch");
     assert(state.demographicProfileVersion === "1.0.0-provisional-astra08" && JSON.stringify(state.config.profiles) === JSON.stringify(config), "Promoted default profiles differ from independent expected matrix");
     assert(Object.values(state.factions).map(f => f.species).sort().join() === SPECIES.slice().sort().join(), "Canonical species roster changed");
     const originalGeometry = geometry(state), sites = indexSites(state), setupMs = performance.now() - start;
@@ -451,6 +463,19 @@ function selftest(data) {
         const changed = { ...data, files: { ...data.files, [PLUGIN]: data.files[PLUGIN] + " " } };
         rejects(() => verifySnapshot(changed), /Loaded snapshot changed/);
         verifySnapshot(data);
+        const suiteReport = { task: TASK, candidate: { commit: BASE, sha256: ENGINE_HASH, bytes: ENGINE_BYTES }, status: "PASS",
+            commonStatus: "PASS", packetStatus: "PASS", passed: 23, failed: 0, packetPassed: 5, packetFailed: 0, mutantsPassed: 8, mutantsFailed: 0,
+            checks: Array.from({ length: 23 }, (_, i) => ({ id: `TEST_${i}`, status: "PASS" })),
+            packetChecks: CAPACITY_PACKET_IDS.map(id => ({ id, status: "PASS" })),
+            mutants: Object.entries(CAPACITY_MUTANT_TARGETS).map(([name, id]) => ({ name, expectedContract: id, status: "PASS", childExitCode: 1,
+                diagnostic: `${id}: intended TEST assertion`, observedContract: { id, status: "FAIL", diagnostic: `${id}: intended TEST assertion` } })) };
+        verifyCapacityReport(suiteReport);
+        rejects(() => verifyCapacityReport({ ...suiteReport, status: "FAIL" }), /reports failure/);
+        rejects(() => verifyCapacityReport({ ...suiteReport, task: "DEUS-TSK-ASTRA-11" }), /identity mismatch/);
+        rejects(() => verifyCapacityReport({ ...suiteReport, candidate: { ...suiteReport.candidate, sha256: "stale" } }), /identity mismatch/);
+        rejects(() => verifyCapacityReport({ ...suiteReport, packetChecks: [] }), /check coverage/);
+        rejects(() => verifyCapacityReport({ ...suiteReport, packetChecks: suiteReport.packetChecks.map((c, i) => ({ ...c, id: `WRONG_${i}` })) }), /packet identities/);
+        rejects(() => verifyCapacityReport({ ...suiteReport, mutants: suiteReport.mutants.map(m => ({ ...m, childExitCode: 0 })) }), /mutation coverage/);
     });
     check("Statistics, pooling, and empty cohorts", () => {
         const a = stats([1, 2, 3]), b = pooled([stats([1]), stats([2, 3])]);
@@ -476,6 +501,9 @@ function selftest(data) {
         const truncated = bytes.subarray(0, bytes.length - 1);
         rejects(() => validateSnapshot(data, truncated, { ...expected, fileSha256: sha(truncated) }), /JSON/);
         rejects(() => compareCheckpoint(a.checkpoints[0], { ...a.checkpoints[0], evidence: { ...a.checkpoints[0].evidence, events: "changed" } }), /state\/event bytes/);
+        verifyWorkerRequest(a, 0, [100], true);
+        rejects(() => verifyWorkerRequest(a, 424242, [100], true), /requested seed/);
+        rejects(() => verifyWorkerRequest(a, 0, [100, 250, 500], true), /requested checkpoints/);
     });
     check("Sweep gates retain annual and partial biological failures", () => {
         const partial = clone(a); partial.curves[50].species.human.living = 0;
@@ -484,6 +512,17 @@ function selftest(data) {
         partial.checkpoints[0].stateBytes = CALIBRATION.maxStateBytes;
         const gates = sweepAcceptance({ runs: [], incomplete: [{ partial }] });
         assert(gates.boundedPopulation === "FAIL" && gates.serializedState === "FAIL", "Sweep boundary checks cannot fail");
+        const coverage = { suites: { benchmark: { status: "PASS", passed: 29 }, capacity: { status: "PASS" } },
+            matrix: { runs: Array.from({ length: 6 }), coverage: Array.from({ length: 18 }, () => ({ status: "MEASURED" })),
+                repeatChecks: [0, 424242, 20260919].map(seed => ({ seed, status: "PASS", repeats: 2 })) },
+            restarts: [0, 424242, 20260919].map(seed => ({ seed, status: "PASS" })),
+            sweep: { runs: Array.from({ length: 20 }, (_, i) => ({ seed: i + 1 })) } };
+        assert(fullCoverageComplete(coverage), "Valid full coverage rejected");
+        for (const change of [r => r.matrix.coverage[0].status = "NOT RUN", r => r.suites.capacity.status = "NOT RUN",
+            r => r.matrix.repeatChecks.pop(), r => r.restarts[0].status = "NOT RUN", r => r.sweep.runs[19].seed = 1]) {
+            const missing = clone(coverage); change(missing);
+            assert(!fullCoverageComplete(missing), "Missing required coverage was accepted");
+        }
     });
     check("Public step matches simulate and JSON continuation under the density schedule", () => {
         const { api, world } = load(data, 0), config = profiles();
@@ -563,7 +602,7 @@ function selftest(data) {
     return { task: TASK, status: "PASS", passed: checks.filter(c => c.status === "PASS").length, checks };
 }
 function writeReport(file, report) {
-    assert(path.resolve(file) === DEFAULT_OUTPUT, "ASTRA-11 permits only game/test_output/bench_species_biology.json");
+    assert(path.resolve(file) === DEFAULT_OUTPUT, "ASTRA-12 permits only game/test_output/bench_species_biology.json");
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
 }
 function snapshotEnvelope(data, run, token) {
@@ -623,13 +662,22 @@ function runWorker(data, seed, horizons) {
     const child = spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", windowsHide: true,
         timeout: WORKER_TIMEOUT_MS, maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "inherit"] });
     let result = null, parseError = null;
-    try { result = workerOutput(child.stdout || "", !child.error && child.status === 0); } catch (error) { parseError = error.message; }
+    try {
+        const complete = !child.error && child.status === 0;
+        result = workerOutput(child.stdout || "", complete);
+        if (result) verifyWorkerRequest(result, seed, horizons, complete);
+    } catch (error) { parseError = error.message; result = null; }
     const processWallMs = performance.now() - start;
     if (result && result.sourceDigest !== sourceDigest(data)) { parseError = "Worker snapshot differs from parent baseline"; result = null; }
     if (result) result.processWallMs = processWallMs;
     const failed = child.error || child.status !== 0 || parseError;
     return { result, processWallMs, failure: failed ? { seed, exitCode: child.status, code: child.error ? child.error.code : "WORKER_FAILURE",
         diagnostic: parseError || (child.error && child.error.message) || "Worker exited nonzero", timeoutMs: WORKER_TIMEOUT_MS } : null };
+}
+function verifyWorkerRequest(result, seed, horizons, complete) {
+    assert(result.seed === seed && result.checkpoints.every(c => c.seed === seed), "Worker differs from requested seed");
+    const years = result.checkpoints.map(c => c.years);
+    assert(years.every(y => horizons.includes(y)) && (!complete || JSON.stringify(years) === JSON.stringify(horizons)), "Worker differs from requested checkpoints");
 }
 function runRestart(data, run, restoreReport) {
     const a = run.checkpoints.find(c => c.years === 100), b = run.checkpoints.find(c => c.years === 250);
@@ -662,13 +710,37 @@ function runRestart(data, run, restoreReport) {
     result.processWallMs = performance.now() - started;
     return result;
 }
+function verifyCapacityReport(report) {
+    assert(report && report.task === TASK && report.candidate && report.candidate.commit === BASE &&
+        report.candidate.sha256 === ENGINE_HASH && report.candidate.bytes === ENGINE_BYTES, "Capacity suite identity mismatch");
+    assert(report.status === "PASS" && report.commonStatus === "PASS" && report.packetStatus === "PASS", "Capacity suite reports failure");
+    for (const [key, expected] of [["checks", 23], ["packetChecks", 5]]) {
+        const checks = report[key];
+        assert(Array.isArray(checks) && checks.length === expected && checks.every(c => c.status === "PASS") &&
+            new Set(checks.map(c => c.id)).size === expected, "Capacity suite check coverage incomplete");
+    }
+    assert(report.passed === 23 && report.failed === 0 && report.packetPassed === 5 && report.packetFailed === 0, "Capacity suite check counts mismatch");
+    assert(CAPACITY_PACKET_IDS.every(id => report.packetChecks.some(c => c.id === id)), "Capacity suite packet identities mismatch");
+    assert(report.mutantsPassed === 8 && report.mutantsFailed === 0 && Array.isArray(report.mutants) && report.mutants.length === 8 &&
+        new Set(report.mutants.map(m => m.name)).size === 8 && report.mutants.every(m => m.status === "PASS" && m.childExitCode === 1 && m.diagnostic),
+        "Capacity suite mutation coverage incomplete");
+    for (const [name, id] of Object.entries(CAPACITY_MUTANT_TARGETS)) {
+        const m = report.mutants.find(m => m.name === name);
+        assert(m && m.expectedContract === id && m.observedContract && m.observedContract.id === id && m.observedContract.status === "FAIL" &&
+            m.observedContract.diagnostic === m.diagnostic && m.diagnostic.startsWith(`${id}:`), "Capacity suite intended mutation assertion mismatch");
+    }
+}
 function suite(script, json = false) {
+    const sourceSha256 = sha(fs.readFileSync(path.join(__dirname, script)));
     const started = performance.now(), child = spawnSync(process.execPath, [path.join(__dirname, script), "--selftest", ...(json ? ["--json"] : [])],
         { cwd: ROOT, encoding: "utf8", windowsHide: true, timeout: 120000, maxBuffer: 32 * 1024 * 1024 });
     let report = null, parseError = null;
-    if (json) { try { report = JSON.parse(child.stdout); } catch (error) { parseError = error.message; } }
+    if (json) { try { report = JSON.parse(child.stdout); verifyCapacityReport(report); } catch (error) { parseError = error.message; } }
+    const sourceUnchanged = sha(fs.readFileSync(path.join(__dirname, script))) === sourceSha256;
+    if (!sourceUnchanged) parseError = "Required suite changed during execution";
     return { command: `node tools/${script} --selftest${json ? " --json" : ""}`, status: !child.error && child.status === 0 && !parseError ? "PASS" : "FAIL",
-        exitCode: child.status, wallMs: performance.now() - started, report, stdout: json && report ? undefined : child.stdout,
+        required: true, sourceSha256, sourceUnchanged, exitCode: child.status,
+        wallMs: performance.now() - started, report, stdout: json && report ? undefined : child.stdout,
         stderr: child.stderr, diagnostic: parseError || (child.error && child.error.message) || null };
 }
 function sweepSummary(runs) {
@@ -682,9 +754,18 @@ function sweepSummary(runs) {
             extinctionFrequency: n ? runs.filter(r => r.curves.some(c => c.species[id].living === 0)).length / n : null,
             populationsBySeed: runs.map(r => ({ seed: r.seed, living: r.checkpoints[0].species.find(s => s.species === id).living })) })) };
 }
+function fullCoverageComplete(report) {
+    const seeds = [0, 424242, 20260919];
+    return report.suites.benchmark && report.suites.benchmark.status === "PASS" && report.suites.benchmark.passed === 29 &&
+        report.suites.capacity && report.suites.capacity.status === "PASS" && report.matrix.runs.length === 6 &&
+        report.matrix.coverage.length === 18 && report.matrix.coverage.every(c => c.status === "MEASURED") &&
+        report.matrix.repeatChecks.length === 3 && seeds.every(seed => report.matrix.repeatChecks.some(r => r.seed === seed && r.repeats === 2 && r.status === "PASS")) &&
+        report.restarts.length === 3 && seeds.every(seed => report.restarts.some(r => r.seed === seed && r.status === "PASS")) &&
+        report.sweep.runs.length === 20 && report.sweep.runs.map(r => r.seed).sort((a,b) => a-b).join() === Array.from({ length: 20 }, (_, i) => i+1).join();
+}
 function main() {
     const started = performance.now(), options = parseArgs(process.argv.slice(2));
-    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--matrix-only] [--json game/test_output/bench_species_biology.json] [--selftest] [--mutant=<name>]\nDefault: independent contracts, regression self-test, 3-seed/2-repeat 500-year matrix, disk save/process-exit/restarts, and 20-seed 250-year sweep."); return; }
+    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--matrix-only] [--json game/test_output/bench_species_biology.json] [--selftest] [--mutant=<name>]\nDefault: ASTRA-12 capacity contracts and benchmark self-test, 3-seed/2-repeat 500-year matrix, disk save/process-exit/restarts, and 20-seed 250-year sweep."); return; }
     const data = bundle();
     if (options.mutant) { runMutant(data, options.mutant); return; }
     if (options["save-worker"]) { saveWorker(data, options); return; }
@@ -699,11 +780,12 @@ function main() {
         console.log(`Self-test PASS: ${report.passed} checks`); if (options.json) writeReport(options.json, report); return;
     }
     const full = !options["matrix-only"] && options.seeds.join() === "0,424242,20260919" && options.horizons.join() === "100,250,500" && options.runs === 2;
-    const report = { task: TASK, schemaVersion: 4, status: "INCOMPLETE", createdAt: new Date().toISOString(), options, fullDispatchCoverageRequested: full,
+    const report = { task: TASK, schemaVersion: 5, status: "INCOMPLETE", createdAt: new Date().toISOString(), options, fullDispatchCoverageRequested: full,
         runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model, trialIsolation: "One fresh Node process per trajectory; sequential measurements" },
-        provenance: { baselineCommit: BASE, expectedEngineSha256: ENGINE_HASH, observedEngineSha256: sha(data.files[PLUGIN]), candidateBytes: ENGINE_BYTES,
+        provenance: { dispatchBaselineCommit: DISPATCH_BASELINE, baselineCommit: BASE, expectedEngineSha256: ENGINE_HASH, observedEngineSha256: sha(data.files[PLUGIN]), candidateBytes: ENGINE_BYTES,
             sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH, sources: data.sources },
-        expectedProductionProfiles: profiles(), gates: { maxSpeciesPopulation: 1500, maxStateBytes: 15 * 1024 * 1024, maxTrajectoryMs: 30000 },
+        expectedProductionProfiles: profiles(), expectedProductionMetadata: DEFAULT_METADATA, requiredSuites: ["benchmark", "capacity"],
+        gates: { maxSpeciesPopulation: 1500, maxStateBytes: 15 * 1024 * 1024, maxTrajectoryMs: 30000 },
         methodology: { density: "Unmodified production step; default profiles from create(world). Harness records but never applies the independent start-of-year density oracle.",
             timing: "Only api.step is timed as annual simulation. Trajectory wall includes setup, observations, checkpoint validation/serialization and checkpoint pipe emission. Parent processWallMs also includes startup/source loading/final IPC parsing; the canonical 30-second gate uses the larger wall value. No forced GC.",
             sweep: "Seeds 1..20 at 250 years must have zero annual extinctions, every species below 1500 living, and checkpoint state below 15 MiB; known partial failures also fail. Timing is descriptive for this shorter sweep.",
@@ -720,7 +802,9 @@ function main() {
     if (full) {
         try { report.suites.benchmark = selftest(data); } catch (error) { report.suites.benchmark = {status:"FAIL", diagnostic:error.stack}; }
         report.suites.capacity = suite("test_historical_carrying_capacity.js", true);
-        report.suites.regression = suite("test_production_history_demographics.js", true);
+        report.suites.regression = { status: "NOT RUN", required: false,
+            sourceSha256: sha(fs.readFileSync(path.join(__dirname, "test_production_history_demographics.js"))),
+            reason: "ASTRA-12 does not include this suite or authorize editing it. Its unchanged ASTRA-11 candidate pin targets 8a40d2e; it is not evidence for the new candidate." };
         console.error(`Contracts ${report.suites.capacity.status}; regression ${report.suites.regression.status}; benchmark self-test ${report.suites.benchmark.status}`);
     }
     persist();
@@ -765,9 +849,9 @@ function main() {
     const explicitFailure=!report.provenance.candidateUnchangedAtEnd || Object.values(report.suites).some(s=>s.status==="FAIL") ||
         Object.values(report.matrix.acceptance).includes("FAIL") || Object.values(report.matrix.partialAcceptance).includes("FAIL") ||
         report.matrix.repeatChecks.some(s=>s.status==="FAIL") || report.restarts.some(r=>r.status==="FAIL") || report.sweep.status==="FAIL";
-    const incomplete=report.matrix.incomplete.length>0 || (full && (report.sweep.runs.length!==20 || report.restarts.length!==3 || report.restarts.some(r=>r.status==="NOT RUN")));
+    const incomplete=report.matrix.incomplete.length>0 || (full && !fullCoverageComplete(report));
     report.status=explicitFailure?"FAIL":incomplete?"INCOMPLETE":full?"PASS":"PASS WITH NON-BLOCKING LIMITATIONS";
-    report.coverageLimitation=full?null:"Selected matrix coverage only; full ASTRA-11 dispatch acceptance is NOT RUN.";
+    report.coverageLimitation=full?null:"Selected matrix coverage only; full ASTRA-12 dispatch acceptance is NOT RUN.";
     persist();
     console.log(table(["Seed","Repeat","Trajectory s","Living500","State bytes500"],report.matrix.runs.map(r=>{const c=r.checkpoints.find(c=>c.years===500);return[r.seed,r.repeat,(r.wallMs/1000).toFixed(3),c?c.living:"NOT RUN",c?c.stateBytes:"NOT RUN"];})));
     console.log(`Acceptance: ${JSON.stringify(report.matrix.acceptance)}`);
