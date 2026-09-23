@@ -49,6 +49,7 @@
         recheckTicks: 60,        // a build square somebody stands on is looked at again after this
         retryTicks: 9000,        // a cell whose jobs failed three times waits this long
         staleTicks: 600,         // an untaken haul or harvest job every colonist found undoable for this long is withdrawn (one game hour)
+        giveUpTicks: 43200,      // a project with nothing workable for this long (three days) is cancelled and its kind cooled; 0 = never
         logKept: 20,
         // The settlement brain (DEUS-TSK-FABLE-06)
         targetReserveDays: 3,    // food: colonist-days of nutrition kept within reach (24 colonist-days for 8 founders)
@@ -545,6 +546,8 @@
             failed: {},
             blocked: null,
             blockedCycles: 0,
+            blockedSince: null,
+            refused: {},
             recheck: null,
             reason: null,
             log: []
@@ -580,17 +583,25 @@
 
     const finished = job => !job || job.state === "done" || job.state === "failed";
 
-    // Not the cell's fault: a job UF_Colonists cancelled for a survival need (supper, bedtime, exhaustion,
-    // unconsciousness) is the worker's interruption; a job this planner withdrew because its target went away
-    // (`stale:`) is the world's change. Both are posted again from the world at the next advance and never pause a cell.
+    /**
+     * Work recovery (DEUS-TSK-FABLE-08/09). A failed job counts against its cell only when the cell is the problem:
+     * nobody can stand beside it, or the world refused the placement. Everything else is the worker's interruption
+     * (`survival: …`), this planner's own withdrawal (`stale: …`), or the world's change under the job (the item was
+     * eaten or carried off, the plant was picked, the materials vanished, the worker left): those are posted again
+     * from the world at the next advance and never pause a cell.
+     */
+    const CELL_FAULT = /^can't reach|^nowhere to take it|^the square is taken/;
+    const cellFault = job => !!job && job.state === "failed" && typeof job.reason === "string" && CELL_FAULT.test(job.reason);
     const preempted = job => typeof job.reason === "string" && (job.reason.startsWith("survival:") || job.reason.startsWith("stale:"));
     /**
-     * Why an open, untaken job of the project can never be taken now, or null (DEUS-TSK-FABLE-08): its item is gone,
-     * carried, boxed or moved (a colonist ate or hauled it), its plant was picked by somebody else, or, for a haul or
-     * harvest, every colonist that looked at it found it undoable (UF_Jobs' dry run leaves `reason`) for staleTicks.
-     * Left alone, such jobs fill the project's haul and harvest slots and foraging stalls while food stands regrown.
+     * Why an open, untaken job of the project can never be taken now, or null: its item is gone, carried, boxed or
+     * moved (a colonist ate or hauled it); its plant was picked by somebody else; its square was built or blocked by
+     * somebody else, or the materials it was posted for are gone from the cell (they are hauled again); or every
+     * colonist that looked at it found it undoable (UF_Jobs' dry run leaves `reason`) for staleTicks. Left alone,
+     * such jobs fill the project's slots and the phase stalls: foraging stops while food stands regrown, a wall
+     * waits for logs a build job already claims.
      */
-    function staleReason(job) {
+    function staleReason(p, job, cell) {
         if (!job || job.state !== "open" || job.assigned) return null;
         const I = Items(), O = Objects();
         if (job.type === "haul" && job.params && job.params.itemId !== undefined) {
@@ -602,30 +613,49 @@
         } else if (CLEAR_ACTIONS.includes(job.type) && O) {
             const t = O.atIn(levelArea(job.target), job.target.x, job.target.y);
             if (!t || !t.actions || !t.actions[job.type]) return `nothing to ${job.type} there`;
+        } else if (job.type === "build" && cell && O) {
+            const s = cellStatus(p, cell);
+            if (s.state === "done") return "already built";
+            if (s.state !== "build") return s.reason || "the square changed";
+            const t = O.type(job.params.objectId), needs = (t && t.build && t.build.items) || {};
+            if (Object.keys(needs).some(id => countOnCell(p, cell, id) < (needs[id] | 0))) return "the materials are gone";
         }
-        if ((job.type === "haul" || CLEAR_ACTIONS.includes(job.type)) && job.reason && job.params && Number.isFinite(job.params.postedAt) &&
-            now() - job.params.postedAt >= (config().staleTicks | 0)) return job.reason;
+        const aged = job.reason && job.params && Number.isFinite(job.params.postedAt) && now() - job.params.postedAt >= (config().staleTicks | 0);
+        if (aged && (job.type === "haul" || CLEAR_ACTIONS.includes(job.type))) return job.reason;
+        if (aged && job.type === "build" && job.reason !== "needs items") return job.reason;
         return null;
     }
+    // A destination that would not take a delivery (a full larder or container: UF_Jobs finishes the haul with no
+    // result) is not offered another for retryTicks; the larder's food goes to another larder meanwhile.
+    function refusedAt(p, key) {
+        const r = p.refused && p.refused[key];
+        if (!r) return false;
+        if (now() < r.until.tick) return true;
+        delete p.refused[key];
+        return false;
+    }
     function reconcile(p) {
-        const J = Jobs();
+        const J = Jobs(), bp = blueprint(p.kind);
         if (!J) return;
-        // Withdraw stale jobs first; the sweep below then drops them like any finished job. A harvest target nobody
-        // could work waits retryTicks before it is chosen again (no churn on an unreachable tree); a gone item or
-        // plant needs no wait.
-        const withdraw = (jobId, harvestKey) => {
+        const cells = new Map();
+        if (bp) for (const c of phaseCells(p, bp, p.phase)) cells.set(cellKey(c.x, c.y), c);
+        // Withdraw stale jobs first; the sweep below then drops them like any finished job. A target nobody could
+        // work (the job's own dry-run reason) waits retryTicks before it is chosen again, so an unreachable tree or
+        // square is not posted every hour; a gone item, plant or material needs no wait.
+        const withdraw = (jobId, retryKey) => {
             const job = J.get(jobId);
-            const why = staleReason(job);
+            const why = staleReason(p, job, retryKey ? cells.get(retryKey) || null : null);
             if (!why) return;
+            const dryRun = job.reason; // what the colonists' dry runs said, before cancel overwrites it
             J.cancel(job.id, `stale: ${why}`);
-            if (harvestKey && why === job.reason) p.failed[harvestKey] = { count: 3, reason: `stale: ${why}`, retryAt: now() + (config().retryTicks | 0) };
+            if (retryKey && why === dryRun) p.failed[retryKey] = { count: 3, reason: `stale: ${why}`, retryAt: now() + (config().retryTicks | 0) };
             log(p, `withdrew ${job.type} at (${job.target.x},${job.target.y}): ${why}`);
         };
-        for (const key of Object.keys(p.jobs)) withdraw(p.jobs[key], null);
+        for (const key of Object.keys(p.jobs)) withdraw(p.jobs[key], key);
         for (const itemId of Object.keys(p.hauls)) withdraw(p.hauls[itemId].job, null);
         for (const key of Object.keys(p.harvests)) withdraw(p.harvests[key].job, key);
         const note = (key, job) => {
-            if (job && job.state === "failed" && !preempted(job)) {
+            if (cellFault(job)) {
                 const f = p.failed[key] || { count: 0, reason: null, retryAt: 0 };
                 f.count++;
                 f.reason = job.reason || null;
@@ -633,17 +663,26 @@
                 p.failed[key] = f;
             }
         };
+        const refused = (key, job) => {
+            if (!job || job.state !== "done" || job.result !== null || !job.params || !job.params.to) return;
+            p.refused = p.refused || {};
+            const r = p.refused[key] || { count: 0, since: stamp(), until: null };
+            r.count++;
+            r.until = { domain: "action", tick: now() + (config().retryTicks | 0) };
+            p.refused[key] = r;
+            log(p, `delivery refused at (${job.params.to.x},${job.params.to.y}); not offered another for ${config().retryTicks | 0} ticks`);
+        };
         for (const key of Object.keys(p.jobs)) {
-            const job = J ? J.get(p.jobs[key]) : null;
+            const job = J.get(p.jobs[key]);
             if (finished(job)) { note(key, job); delete p.jobs[key]; }
         }
         for (const itemId of Object.keys(p.hauls)) {
-            const job = J ? J.get(p.hauls[itemId].job) : null;
-            if (finished(job)) { note(p.hauls[itemId].cell, job); delete p.hauls[itemId]; }
+            const job = J.get(p.hauls[itemId].job);
+            if (finished(job)) { note(p.hauls[itemId].cell, job); refused(p.hauls[itemId].cell, job); delete p.hauls[itemId]; }
         }
         for (const key of Object.keys(p.harvests)) {
-            const job = J ? J.get(p.harvests[key].job) : null;
-            if (finished(job)) delete p.harvests[key];
+            const job = J.get(p.harvests[key].job);
+            if (finished(job)) { note(key, job); delete p.harvests[key]; }
         }
     }
     const openCount = p => Object.keys(p.jobs).length + Object.keys(p.hauls).length + Object.keys(p.harvests).length;
@@ -800,7 +839,10 @@
         if (!d || d.food.current >= d.food.needed + Math.max(0, Number(cfg.reserveMarginDays) || 0)) return true;
         summary.todo = 1;
         let posted = 0, sources = 0;
-        const larder = p.larder && O.atIn(area, p.larder.x, p.larder.y) ? p.larder : larderCell(c);
+        // The larder: the project's own if it stands and takes deliveries, else the first registered one that does.
+        const standing = sp => !!sp && !!O.atIn(area, sp.x, sp.y) && !refusedAt(p, cellKey(sp.x, sp.y));
+        const larder = standing(p.larder) ? p.larder : (larderCells(c).find(sp => standing(sp) && hasTag(O.atIn(area, sp.x, sp.y), "stockpile")) || null);
+        if (!larder && larderCell(c)) summary.refused = 1;
         // Loose food (on the ground, not in a larder or container) is hauled into the larder.
         if (larder) {
             const larders = new Set(larderCells(c).map(sp => cellKey(sp.x, sp.y)));
@@ -836,10 +878,35 @@
         }
         summary.posted += posted;
         if (!posted && !openCount(p)) {
-            p.blocked = { cell: null, reason: sources ? "wild food is spoken for" : "no wild food within reach", since: stamp() };
+            p.blocked = { cell: null, reason: summary.refused ? "the larder refuses deliveries" : (sources ? "wild food is spoken for" : "no wild food within reach"), since: stamp() };
             summary.blocked = 1;
         }
         return false;
+    }
+
+    // Idle strolls yield to posted work (DEUS-TSK-FABLE-09): for every project job just posted and still untaken,
+    // the nearest colonist of the faction on a low-priority idle job (UF_Colonists' stroll, exploration, inspection,
+    // contemplation, hearth or social idling; never a player's order) is taken off it. UF_Jobs' cancel releases its
+    // reservations and UF_Colonists decides again at once, project work first. Deterministic: nearest first, then id.
+    const IDLE_PARAMS = ["stroll", "explore", "contemplate", "inspect", "idleSocial", "fireGather"];
+    const isIdleJob = job => !!job && !!job.params && !job.params.ordered && IDLE_PARAMS.some(k => job.params[k]);
+    function wakeIdle(p, summary) {
+        const W = World(), J = Jobs();
+        if (!W || !J) return 0;
+        const area = levelArea(p.origin);
+        let untaken = 0;
+        for (const id of ownJobIds(p)) { const job = J.get(id); if (job && job.state === "open" && !job.assigned) untaken++; }
+        if (!untaken) return 0;
+        const idle = W.unitsInArea(area.x, area.y, area.z)
+            .filter(u => isColonist(u) && !u.data.dead && !(Number.isFinite(u.data.age) && u.data.age < 15) && isIdleJob(J.of(u.id)))
+            .sort((a, b) => chebyshev(a.x, a.y, p.origin.x, p.origin.y) - chebyshev(b.x, b.y, p.origin.x, p.origin.y) || a.id - b.id);
+        let woken = 0;
+        for (const u of idle.slice(0, untaken)) {
+            const job = J.of(u.id);
+            if (J.cancel(job.id, "work: project posted")) woken++;
+        }
+        if (woken) { summary.woken = woken; log(p, `${woken} idle colonist(s) called to work`); }
+        return woken;
     }
 
     function advance(p) {
@@ -850,7 +917,7 @@
         reconcile(p);
         const spec = phaseSpec(p, bp, p.phase);
         const cells = spec.cells || [];
-        const summary = { phase: spec.name, total: cells.length, done: 0, todo: 0, blocked: 0, posted: 0, waiting: null, standers: 0 };
+        const summary = { phase: spec.name, total: cells.length, done: 0, todo: 0, blocked: 0, posted: 0, waiting: null, standers: 0, starved: 0, retrying: 0 };
         p.blocked = null;
         p.recheck = null;
         if (spec.task === "forage") {
@@ -860,7 +927,7 @@
                 p.blockedCycles = (p.blockedCycles | 0) + 1;
                 if (p.blockedCycles >= 3) { coolKind(p.kind); cancel(p.id, p.blocked.reason); return summary; }
             } else p.blockedCycles = 0;
-            if (!complete) return summary;
+            if (!complete) { if (summary.posted > 0) wakeIdle(p, summary); return summary; }
         }
         for (const cell of cells) {
             const key = cellKey(cell.x, cell.y);
@@ -868,7 +935,8 @@
             if (s.state === "done") { summary.done++; continue; }
             if (s.state === "blocked") { summary.blocked++; p.blocked = { cell: { x: cell.x, y: cell.y }, reason: s.reason, since: stamp() }; continue; }
             summary.todo++;
-            if (activeJobOn(p, key) || retrying(p, key) || openCount(p) >= cfg.maxOpenJobs) continue;
+            if (retrying(p, key)) { summary.retrying++; p.blocked = p.blocked || { cell: { x: cell.x, y: cell.y }, reason: `${p.failed[key].reason || "failed"}; waiting to retry`, since: stamp() }; continue; }
+            if (activeJobOn(p, key) || openCount(p) >= cfg.maxOpenJobs) continue;
             if (s.state === "clear") {
                 const job = postJob(p, { type: s.action, target: targetOf(p, cell.x, cell.y) });
                 if (job) { p.jobs[key] = job.id; summary.posted++; }
@@ -892,6 +960,13 @@
                 }
                 continue; // else materials are on their way
             }
+            if (refusedAt(p, key)) {
+                // The square would not take the last delivery (see reconcile): nothing is sent there for now.
+                summary.starved++;
+                p.blocked = p.blocked || { cell: { x: cell.x, y: cell.y }, reason: `deliveries refused at (${cell.x},${cell.y})`, since: stamp() };
+                continue;
+            }
+            let starved = false;
             for (const id of missing) {
                 const want = (needs[id] | 0) - countOnCell(p, cell, id) - inFlight(p, cell, id);
                 const got = postHauls(p, cell, id, want);
@@ -900,9 +975,35 @@
                     const n = postHarvests(p, id);
                     summary.posted += n;
                     if (!summary.waiting) summary.waiting = id;
-                    p.blocked = p.blocked || { cell: { x: cell.x, y: cell.y }, reason: `waiting for ${id}`, since: stamp() };
+                    // Supplied: something is on its way or being harvested for it; else nothing within reach yields it.
+                    const supplied = got > 0 || n > 0 || inFlight(p, cell, id) > 0 || Object.keys(p.harvests).some(k => p.harvests[k].material === id);
+                    if (!supplied) starved = true;
+                    p.blocked = p.blocked || { cell: { x: cell.x, y: cell.y }, reason: supplied ? `waiting for ${id}` : `no ${id} within reach`, since: stamp() };
                 }
             }
+            if (starved) summary.starved++;
+        }
+        if (summary.posted > 0) wakeIdle(p, summary);
+        // Nothing workable: cells remain, no job of the project is alive, nothing was posted and nobody is standing
+        // in the way (blocked squares, materials nothing within reach yields, squares waiting to retry, deliveries
+        // refused). The project pauses with its diagnostic (blocked, blockedSince), looks again every ten rechecks,
+        // and after giveUpTicks gives up: cancelled with the reason, its ground and its kind free again. Colonists'
+        // dispatch is never held by a paused project: it posts nothing, so they take other work.
+        const stuck = summary.todo + summary.blocked > 0 && summary.posted === 0 && summary.standers === 0 && openCount(p) === 0;
+        if (stuck) {
+            if (!p.blocked) p.blocked = { cell: null, reason: "nothing workable", since: stamp() };
+            if (!p.blockedSince) { p.blockedSince = stamp(); log(p, `paused: ${p.blocked.reason}`); emit("projects:paused", p); }
+            p.recheck = { domain: "action", tick: now() + (cfg.recheckTicks | 0) * 10 };
+            summary.paused = 1;
+            if ((cfg.giveUpTicks | 0) > 0 && now() - p.blockedSince.tick >= (cfg.giveUpTicks | 0)) {
+                coolKind(p.kind);
+                cancel(p.id, `gave up: ${p.blocked.reason}`);
+                return summary;
+            }
+        } else if (p.blockedSince) {
+            p.blockedSince = null;
+            log(p, "resumed");
+            emit("projects:resumed", p);
         }
         if (summary.todo === 0 && summary.blocked === 0) {
             p.phase++;
@@ -1041,7 +1142,8 @@
             if (job.assigned) taken++; else openJobs++;
         }
         const progress = spec.task === "forage" ? "foraging" : `${done}/${cells.length} cells`;
-        return `${head}: phase ${p.phase + 1}/${phaseCount(p, bp)} ${spec.name}, ${progress}, ${openJobs} jobs open, ${taken} taken${p.blocked ? `, ${p.blocked.reason}` : ""}`;
+        const pause = p.blockedSince ? `; paused since tick ${p.blockedSince.tick}` : "";
+        return `${head}: phase ${p.phase + 1}/${phaseCount(p, bp)} ${spec.name}, ${progress}, ${openJobs} jobs open, ${taken} taken${p.blocked ? `, ${p.blocked.reason}` : ""}${pause}`;
     }
 
     //-------------------------------------------------------------------------
@@ -1077,7 +1179,7 @@
         describe,
         setEnabled: on => { enabled = !!on; return enabled; },
         isEnabled: () => enabled,
-        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, onMapUpdate, onLoaded, now }
+        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, cellFault, staleReason, refusedAt, wakeIdle, isIdleJob, onMapUpdate, onLoaded, now }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
