@@ -7,12 +7,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- **Fable**: Idle / reservations cleared (`DEUS-TSK-FABLE-03` completed and verified; commit `ea4b332`).
-- **Astra**: Idle / reservations cleared (`DEUS-TSK-ASTRA-03` closed as STOPPED — FAIL; backlog candidate `DEUS-TSK-ASTRA-04`).
-- **Gemini (Coordinator & Full-Stack)**: Coordinator Gate, editor safety oversight, item handling interactions complete.
+- **Fable**: `DEUS-TSK-FABLE-04` — Autonomous settlement construction loop (`DEUS_Projects.js`, `DEUS_Jobs.js`, `tools/test_project_construction_loop.js`).
+- **Astra**: Dispatched `DEUS-TSK-ASTRA-05` — Historical Population / Demographics Feasibility Harness (`tools/bench_history_demographics.js`).
+- **Gemini (Coordinator & Full-Stack)**: Coordinator Gate, container chest interaction fix (`DEUS_Containers.js`), editor safety gate.
+
+## DEUS-TSK-ASTRA-04 Closed — Historical Simulation Benchmark Harness (2026-09-22)
+- **Status**: `COMPLETED — PASS`
+- **Commit**: `3577f8c819e01deb9c225a098350f487988f6e86`
+- **Scope**: `tools/bench_history_sim.js` (+327 lines). Zero production code modified.
+- **Evidence**:
+  - `node tools/bench_history_sim.js --selftest`: **23 passed, 0 failed (exit 0)**.
+  - Deliberate mutation controls properly rejected: event count, event text checksum, recomputed hash drift, seed/year mismatch, emitted event count.
+  - Determinism: Bit-for-bit event data and state checksums across repeated runs on identical seeds.
+  - Performance: 18 runs across 3 seeds (0, 424242, 20260919) and 3 horizons (100, 250, 500 years): all runs completed in < 356 ms (100 yr: ~53 ms; 250 yr: ~148 ms; 500 yr: ~356 ms).
+  - Output artifact: `game/test_output/bench_history_sim.json`.
 
 ## DEUS-TSK-FABLE-03 Closed — Minimal Autonomous Job-Taking Loop & Shelter Deconfliction (2026-09-22)
 - **Status**: `COMPLETED — PASS`
+- **Commit**: `ea4b332fed41981eeb0b822a2aee6c9a58d60e89`
 - **Commit**: `ea4b332fed41981eeb0b822a2aee6c9a58d60e89`
 - **Scope**:
   - `game/js/plugins/DEUS_Colonists.js`: Restored `scan()` as an event-driven loop with a 30-tick sweep over the cached colonist list (at most 4 idle decisions per sweep, at most one per 60 ticks per idle worker; zero per-frame full iterations). Implemented `decide(u)`: acute survival yields, then open project jobs (from active `UF.Projects` projects scored by culture priority, skill, and distance, skipping reserved/recently failed targets), then open designations, then stepping off reserved project footprints. Implemented `societyPlan(c)` deconfliction: drops legacy shelter, door, beds, and chest steps while `UF.Projects` is active; saved plan records remain untouched and restore if `UF.Projects` is disabled.
