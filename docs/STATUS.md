@@ -9,6 +9,17 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 ## In progress
 - **Fable**: DEUS-TSK-FABLE-05 — Survival needs interruption & subsistence loop (DEUS_Colonists.js, tools/test_survival_needs_loop.js)
 
+## DEUS-TSK-ASTRA-06 — Demographic schema and annual headless proof (2026-09-23)
+- **Status**: `PASS — HIST-01 + minimum HIST-02 headless proof`; native gameplay integration is not claimed.
+- **Scope**: New `game/js/plugins/DEUS_HistoricalDemographics.js`, new `tools/test_production_history_demographics.js`, `docs/systems/UF_History.md`, and this status entry. Existing plugins, catalog, plugin registration, canonical Year-1 generation, and save data were not edited.
+- **Behavior**: Optional standalone history v6 imports all nine canonical species, 72 founders, and nine actual Z-aware sites. Stable integer registries, preserved co-located founder households, kinship-safe persistent partnerships, species reproductive windows, annual mortality, ordered parentage, direct-child-first succession, and JSON resume are implemented. Exactly one active ruler exists per non-extinct faction; minors remain explicit and extinct factions have none.
+- **Required inputs**: The engine requires explicit demographic profiles. The nine tables in the harness are provisional test biology, not approved catalog values or automatically enabled New Game behavior.
+- **Checks observed**: Default command exited 0 for seeds `0`, `424242`, `20260919`, horizons 100/250, two repeats each (12 trials). State/event bytes matched across repeats; population, name, and event variance passed across seeds. `--selftest` passed 33 checks, including a fresh-context JSON 100+150-year continuation matching continuous 250-year output. Custom `--seed 424242 --years 100 --runs 3 --json` exited 0.
+- **Failure controls**: `dead_reproduce`, `skip_succession`, `corrupt_parents`, and `uniform_lifespan` each exited 1 for its intended invariant. A separate in-memory restoration of generation-depth-based heir ordering also exited 1 with `Genealogy depth displaced a living direct heir`. No production file was mutated by these controls.
+- **Final matrix measurements**: 7.111 seconds total wall time. Mean annual-simulation totals ranged 44.901–60.922 ms for 100 years and 389.361–568.485 ms for 250 years; worst individual year 9.334 ms. At 250 years: 653–734 living, 345–567 archived, 5–8 active sites, and 620.52–830.69 KiB serialized state. Maximum sampled process-heap delta was 59.74 MiB; ordinary GC and temporary allocations are included, so this is not an exact allocation peak or leak claim.
+- **Artifact**: `game/test_output/bench_production_history.json` records per-run timings, heap samples/deltas, populations, active/abandoned sites, state/event SHA-256 hashes, fixture profiles, and input-source hashes. The ignored artifact is not committed.
+- **Limits / NOT RUN**: NW.js, RMMZ F5/F8, screenshots, and native gameplay. No automatic attachment or registration, settlement expansion/migration, tactical wars, rendered ruins, or live settlement AI. Historic deceased records remain complete; lossy deep-history compression is deferred by the task boundary. Profile approval and runtime integration require a subsequent task.
+
 ## DEUS-TSK-FABLE-04 Closed — Autonomous Settlement Construction Loop & Native Verification (2026-09-23)
 - **Status**: `COMPLETED — PASS`
 - **Commits**:

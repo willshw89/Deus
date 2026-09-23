@@ -1,5 +1,78 @@
 # UF_History
 
+## Optional historical demographics v6 — 2026-09-23
+
+**Task:** DEUS-TSK-ASTRA-06, HIST-01 plus minimum HIST-02. **Files:** `game/js/plugins/DEUS_HistoricalDemographics.js` and `tools/test_production_history_demographics.js`. The new module exposes `UF.HistoricalDemographics`; the existing `UF.History` API and canonical Year-1 campfire start remain separate.
+
+The module is not registered in `game/js/plugins.js`. Loading it requires `UF.World.hash32` and `UF.World.mulberry32`, and adds no generation listeners, engine aliases, annual clock hooks, live units, terrain changes, or save hooks. `create` imports an existing canonical history v5 into a separate demographics v6 object without changing its source. A caller may explicitly attach the result at `world.history.demographics`; the module never attaches it automatically or replaces `world.history`.
+
+The current canonical bootstrap used by the harness has nine factions, nine sites, and 72 founders: human, elf, halfling, half-elf, and half-orc at Z=0; dwarf and gnome at Z=-1; dragonborn and tiefling at Z=-2. Imported founder identities, ages, faction membership, and site coordinates are retained. The two-depth dwarf description dated 2026-09-19 below records an earlier founding implementation; it does not describe this current bootstrap. This task does not relocate or regenerate existing saved worlds.
+
+### Required demographic inputs
+
+`create` requires an explicit profile for every species present in the source factions. Each profile contains:
+
+| Field | Contract |
+|---|---|
+| `lifespan` | Two positive integer ages `[minimumOldAge, maximumAge]`, in ascending order. Old-age hazard rises across this interval and reaches certainty at its upper bound. Other causes can kill younger people. |
+| `reproductiveAge` | Inclusive positive integer age interval; births require both parents to be within their species' interval. Its upper bound must be below the maximum lifespan. |
+| `birthChance` | Annual probability in `[0,1]` for an eligible partnership. |
+| `birthSpacingYears` | Positive integer minimum interval between a mother's births, retained across remarriage. |
+| `infantMortality`, `diseaseMortality`, `exposureMortality` | Explicit annual probabilities in `[0,1]`. |
+| `names` | Optional species-specific syllable tables with nonempty `start`, `male`, and `female` string arrays. |
+
+There are no biological fallback profiles in the plugin. The harness supplies nine **provisional proof profiles**, including unapproved reproductive windows and probabilities. They are test inputs only, not approved catalog biology or defaults for New Game. Global name tables come from `options.names` or the existing catalog's `start.names`; species name tables may override them. Missing required profiles or invalid tables are rejected.
+
+### Public API
+
+| Method | Behavior |
+|---|---|
+| `create(world, options)` | Returns a separate state after importing canonical `world.history.version === 5`, `startYear === 1`, and `years === 0`, together with faction/site/founder records and dimensions. `options.profiles` is required. Optional `names` supplies global syllable tables; `recentYears` defaults to 20; `eventLimit` defaults to 400; `dynastyInheritance` is `"maternal"` by default or explicitly `"paternal"`. Source data is not mutated. |
+| `step(state, conditions = {})` | Validates state and annual conditions, then mutates and returns the same state after one historical year. No game-frame or tactical-time advancement occurs. |
+| `simulate(state, years, options = {})` | Calls `step` for a nonnegative integer number of years and returns the same state. Accepts fixed `options.conditions` or `options.conditionsByYear`, not both. Year-indexed keys name the years being entered. Conditions are checked before the run; casualty IDs must already exist when supplied. The API's per-call limit is 10,000 years, but this milestone's verification scope stops at 250. |
+| `validate(state)` | Returns `true` or throws on invalid schema, coordinates, census, genealogy, partnership intervals, birth spacing, ruler continuity, or event retention. This is validation, not repair or migration. |
+| `kinshipRelated(state, personIdA, personIdB)` | Returns whether IDs are identical, share an immediate parent, or either person is an ancestor of the other. Rejects invalid IDs. Empty founder parent lists do not make unrelated founders siblings. |
+| `summary(state)` | Validates and returns `currentYear`, `yearsSimulated`, `living`, `deceased`, `archived`, age `cohorts`, `settlementsActive`, `settlementsAbandoned`, `dynasties`, `activeRulers`, `eventsGenerated`, and `eventsRetained`. |
+
+Caller-controlled attachment, after the caller supplies approved profiles and loads the module:
+
+```javascript
+const demographics = UF.HistoricalDemographics.create(world, {
+    profiles: approvedProfiles,
+    dynastyInheritance: "maternal"
+});
+world.history.demographics = demographics;
+UF.HistoricalDemographics.simulate(demographics, 100);
+// startYear: 1; yearsSimulated: 100; currentYear: 101
+```
+
+`step` accepts `{ casualtyIds: [personId, ...], siteRisks: { [siteId]: { disease?, exposure? } } }`. Casualty IDs must be unique, valid IDs; a known person who has already died is an idempotent no-op. A living casualty dies with cause `"violence"`. This is an explicit input from a future owning system, not a tactical war implementation. Site risks are probabilities added to the corresponding species hazard and clamped at 1. Unknown sites, IDs, condition keys, and out-of-range probabilities are rejected. The annual routine consumes these conditions; it does not persist a pending casualty queue.
+
+### Persistent schema and annual rules
+
+The state root has `version: 6`, `domain: "historical"`, `seed`, `startYear`, `currentYear`, `yearsSimulated`, world `dimensions`, copied `config`, and registries for `factions`, `sites`, `people`, `dynasties`, `rulers`, `partnerships`, and `events`. `nextEventId` and `eventsDiscarded` preserve event identity across bounded retention. A fresh state starts at year 1; 100 steps reach year 101 and 250 steps reach year 251. Age is derived from `currentYear - born`.
+
+- People, sites, dynasties, partnerships, and ruler records use stable integer IDs. Imported faction IDs remain the source strings. `sourceSiteId` preserves the source-to-demographics site mapping. **`faction.activeRulerId` and `lastRulerId` point to ruler-record IDs**, whose `personId` identifies the individual.
+- Sites retain area coordinates, local x/y, `z`, and inclusive `zRange` within -2 through +2. A source without `zRange` imports `[z, z]`. Only census, peak population, and abandonment metadata change; sites never expand, move, or become rendered ruins.
+- People retain ordered `parents: [motherId, fatherId]`, or `[]` for founders; faction/site/species references; `born`, `died`, cause/detail; dynasty, generation, title, founder/ruler/pedigree flags; partnership link; and maternal birth-spacing history. Founder families establish dynasties. Births inherit the configured mother's or father's dynasty; the default is explicitly maternal.
+- Partnerships are persistent, monogamous, same-site, same-species, and same-faction records. Kinship checks exclude siblings, half-siblings, and direct ancestral relationships. Co-located canonical founder-family pairs are imported in year 1 with `imported: true`, retaining their existing household bond even when a supplied species profile makes either partner too young to reproduce. A shared family ID across different sites does not establish a cross-site partnership. Newly formed partnerships use `imported: false` and require both partners to meet the reproductive window; all births, including those in imported households, require reproductive eligibility. A partnership ends only when a partner dies; surviving partners can subsequently form another eligible partnership. Closed intervals remain available for birth validation.
+- Each year processes deaths first, closes affected partnerships, establishes eligible partnerships, creates births, resolves succession, updates site census/abandonment, and advances deceased-record tiers. Both parents must have been alive at birth: `died === null || died > child.born`. Consequently, a death in a year prevents reproduction in that year. Both parents must also meet the reproductive window at the child's birth.
+- Mortality checks explicit casualties, infant risk, disease, exposure, then increasing old-age hazard. The first annual assessment after a birth applies infant risk at age 1. Infant deaths use `causeOfDeath: "disease"` with `deathDetail: "infant"`; other supported causes are `"old_age"`, `"exposure"`, and `"violence"`.
+- Succession retains the current living ruler. On death, it closes the reign in that year, prefers direct living children, then other living descendants, and otherwise chooses the oldest living faction member. Age and then ID resolve ties within each preference group. A minority ruler is valid and recorded with `isMinor`, defined by age below the profile's minimum reproductive age; no regent simulation is implemented. Ruler validation checks that the individual was alive at accession. Each non-extinct faction has exactly one open reign; an extinct faction has none and its `activeRulerId` is `null`. Existing dynasty identities and ancestry remain intact through succession.
+- Living people use tier `"living"`; deaths enter `"recent"` and become `"historic"` after `recentYears`. These archived records remain complete and retain pedigree anchors. `"compressed"` is reserved for a future schema/compression step: it is neither emitted nor accepted as a complete v6 person by this implementation. No deep-history lossy compression is present.
+
+All returned state is JSON-safe data. Deterministic choices use the existing World's seeded helpers, keyed by year, record ID, and operation; there is no alternate random generator or live object reference to restore. The module emits no `UF.Events` notifications and listens to none. Its bounded chronicle records founding, household formation, birth, death, ruler/succession, and abandonment events inside the returned state. Event text retention does not remove parentage or ruler records.
+
+### Verification and limits
+
+The headless harness loads actual World, WorldGen, Factions, History, and Levels sources and their catalog to construct the canonical founding input, then loads the optional module separately. It checks that module loading and import preserve the source world, that site geometry remains fixed, and that the result survives JSON round-trip and resumed simulation.
+
+Observed by the task's root agent on 2026-09-23: `node tools/test_production_history_demographics.js --selftest` passed **33 checks**. Negative controls `--mutant=dead_reproduce`, `--mutant=skip_succession`, `--mutant=corrupt_parents`, and `--mutant=uniform_lifespan` each failed their intended invariant with exit code 1. Coverage includes kinship/monogamy, imported households before maturity, temporal parent survival, disease/exposure/infant mortality, child-ruler and extinction cases, direct-child succession despite unequal genealogy depth, malformed annual inputs, integer foreign keys, site/Z locality, repeated 100-year output, and continuous 250-year output compared with a 100-year run resumed for another 150 years after JSON reload. A separate in-memory restoration of the old generation-depth heir ordering failed the direct-child regression with exit code 1.
+
+The harness accepts `--selftest`, `--years 1..250`, `--seed 0..2147483647`, `--runs 1..20`, `--json`, and the four mutant names. Its default matrix completed 100 and 250 years for seeds 0, 424242, and 20260919, with two runs per combination: all 12 trials passed, including byte-identical state/event repeats and population/name/event seed variance. Final wall time was 7.111 seconds; mean simulation totals were 44.901–60.922 ms for 100 years and 389.361–568.485 ms for 250 years, with a 9.334 ms worst year. Matrix measurements are written to `game/test_output/bench_production_history.json`. Timings include each production `step` call's validation cost; setup, sampling, and final verification are separate. Reported heap measurements are sampled annual process high-water deltas affected by ordinary GC and temporary allocations, not exact allocation peaks or save sizes. Serialized UTF-8 state size and SHA-256 checksums are separate outputs. Short custom horizons do not require a birth and death to occur; the required 100/250-year proof and dedicated fixtures check those behaviors.
+
+This is a headless demographic proof. NW.js rendering, native RMMZ F5 Playtest, and F8 console checks were not performed for this module. Integration/automatic attachment, approved biological catalog profiles, migration between settlements, expansion/path traversal, tactical wars, live settlement AI, ruins placement, and deep-history compression remain outside this milestone.
+
 ## Two-depth dwarf founding — 2026-09-19
 
 New year-1 histories use **version 5**. A dwarf faction starts at **two sites of the same faction**, one at −1 and one at −2, using the natural pockets already selected by Factions. Its existing configured founder count is split, not duplicated: with the default four men/four women, each camp gets two men and two women. Other factions retain their single Ground camp and eight-person ring. Odd configured gender counts put the extra member at the primary −1 site. Names and culture remain catalog-generated; old saved sites/founders are not moved, renamed or regenerated.
