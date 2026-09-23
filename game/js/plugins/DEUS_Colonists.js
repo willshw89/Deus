@@ -56,6 +56,8 @@
     const EXPLORE_RADIUS = 30;
     const HOME_LEASH = 45;          // cells: farther from the site than this (after a long chase), a colonist walks home first
     const URGENT_MARGIN = 25;       // a need this far above its threshold interrupts other work
+    const ACUTE_MARGIN = 35;        // a need this far above its threshold (90 with the catalog's thresholds) is acute: it preempts labor (DEUS-TSK-FABLE-05)
+    const NEED_RETRY_TICKS = 600;   // a need nothing can meet (no water, no food, nowhere to rest) isn't tried again for this long
     const AVOID_TICKS = 900;        // a job that failed isn't tried again on the same target for this long
     // The minimal job-taking loop (DEUS-TSK-FABLE-03, 2026-09-22); every count is map updates (domain: action).
     // DECIDE_EVERY above also bounds how often an idle colonist that found nothing to do decides again.
@@ -1432,15 +1434,84 @@
     const isMealHour = () => (colonyConfig().mealHours || []).includes(hourNow());
     const evening = () => inHours(hourNow(), 19, 22);
 
+    //-------------------------------------------------------------------------
+    // Survival needs (DEUS-TSK-FABLE-05). Objective 1 removed needs from the creature menus; the physical loop is
+    // back: hunger, thirst and sleep tick at the catalog's rates, an acute need preempts labor, and the colonist
+    // drinks, eats or sleeps before going back to work. Moods, social and nature stay dormant.
+
+    const ensureNeeds = u => (u && u.data ? (u.data.needs || (u.data.needs = Object.assign({}, START_NEEDS))) : null);
+    const needAt = (th, k, fallback) => (typeof th[k] === "number" ? th[k] : fallback);
+    const acuteAt = (th, k, fallback) => needAt(th, k, fallback) + ACUTE_MARGIN;
+
+    // Every NEEDS_EVERY ticks (from the map-update alias), over the cached colonist list: never per frame.
     function tickNeeds() {
-        // Needs subsystem removed per Objective 1
+        const rates = needRates(), th = thresholds(), s = seed();
+        for (const u of colonists()) {
+            const n = ensureNeeds(u);
+            if (!n) continue;
+            if (asleep(u)) {
+                n.sleep = Math.max(0, (n.sleep || 0) - 0.6); // resting; the sleep job sets it to 5 at the end
+            } else {
+                for (const k of Object.keys(rates)) n[k] = clamp((n[k] || 0) + rates[k], 0, 100);
+            }
+            const roll = k => unit01(s, SALT.thought, u.id, ticks(), k);
+            if (n.hunger >= acuteAt(th, "hunger", 55) - 10 && roll(1) < 0.05) addThought(u, "Was bothered by hunger.", -5);
+            if (n.thirst >= acuteAt(th, "thirst", 55) - 10 && roll(2) < 0.05) addThought(u, "Felt parched.", -6);
+            if (n.sleep >= acuteAt(th, "sleep", 75) - 5 && roll(3) < 0.05) addThought(u, "Was worn out for lack of sleep.", -7);
+        }
     }
 
+    // The acute need, if any: "health" (a quarter of the hit points or less), then thirst, hunger, sleep.
     function urgent(u) {
+        const d = u && u.data;
+        if (!d) return null;
+        if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.maxHp > 0 && d.hp <= d.maxHp * 0.25) return "health";
+        const n = d.needs, th = thresholds();
+        if (!n) return null;
+        if ((n.thirst || 0) >= acuteAt(th, "thirst", 55)) return "thirst";
+        if ((n.hunger || 0) >= acuteAt(th, "hunger", 55)) return "hunger";
+        if ((n.sleep || 0) >= acuteAt(th, "sleep", 75)) return "sleep";
         return null;
     }
+    // A job that serves the need is never preempted for it.
+    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) ||
+        (need === "hunger" && (job.type === "hunt" || job.type === "fetch" || job.type === "gather" || job.type === "craft")));
+    // Anti-thrash: a need nothing could meet waits NEED_RETRY_TICKS before the search runs again (keyed on the hearth).
+    const needKey = (u, need) => { const c = colonyState(u); return avoidKey(u, "need_" + need, c ? c.site.x : 0, c ? c.site.y : 0); };
+    const needBlocked = (u, need) => (avoid.get(needKey(u, need)) || 0) > ticks();
 
+    // A real UF_Jobs job for the most pressing need at or above its threshold: drink at the nearest water with a
+    // standable bank, eat (carried food, then the larder or the ground, then a forageable plant, then prey), sleep
+    // (an unoccupied permitted bed, else beside the hearth, else where the colonist stands). A need nothing can
+    // meet leaves a thought and is not searched again for NEED_RETRY_TICKS; the next need is tried meanwhile.
     function needJob(u) {
+        const n = ensureNeeds(u), th = thresholds();
+        if (!n) return null;
+        const wants = [];
+        if ((n.thirst || 0) >= needAt(th, "thirst", 55)) wants.push({ need: "thirst", over: n.thirst - needAt(th, "thirst", 55) });
+        if ((n.hunger || 0) >= needAt(th, "hunger", 55) || (isMealHour() && (n.hunger || 0) >= 30 && stockpilesStoring("food", u).length && foodStored(u).length)) {
+            wants.push({ need: "hunger", over: (n.hunger || 0) - needAt(th, "hunger", 55) });
+        }
+        if ((n.sleep || 0) >= needAt(th, "sleep", 75) || (sleepingHours(u) && (n.sleep || 0) > 40)) wants.push({ need: "sleep", over: (n.sleep || 0) - needAt(th, "sleep", 75) });
+        wants.sort((a, b) => b.over - a.over);
+        for (const { need } of wants) {
+            if (needBlocked(u, need)) continue;
+            let j = null, text = "";
+            if (need === "thirst") {
+                const w = waterNear(u, WATER_RADIUS);
+                j = w ? give(u, { type: "drink", target: w, params: { need } }) : null;
+                text = "Found no water to drink.";
+            } else if (need === "hunger") {
+                j = foodJob(u);
+                text = "Found nothing to eat.";
+            } else {
+                j = sleepJob(u);
+                text = "Found nowhere to rest.";
+            }
+            if (j) return j;
+            avoid.set(needKey(u, need), ticks() + NEED_RETRY_TICKS);
+            addThought(u, text, -4);
+        }
         return null;
     }
 
@@ -2711,7 +2782,8 @@
             checkNighttimeSleepMating(u);
         }
         // If colonist has no bed object and isn't critically exhausted, prioritize making their bed!
-        if (!hasBedObject(u) && (!u.data.needs || (u.data.needs.sleep || 0) < 90)) {
+        // (Not while DEUS_Projects manages settlement construction: the communal shelter supplies the beds.)
+        if (!projectsManaged() && !hasBedObject(u) && (!u.data.needs || (u.data.needs.sleep || 0) < 90)) {
             const bedJob = makeBedJob(u);
             if (bedJob) return give(u, bedJob);
         }
@@ -4233,18 +4305,8 @@
     // society-plan crafting; this restores only job taking: an idle worker claims the best open job it can do now,
     // settlement project jobs first, then any other open designation, and UF_Jobs plans, reserves and runs it.
 
-    // Acute survival: a worker in this state yields to the survival systems instead of taking work.
-    function urgentSurvival(u) {
-        const d = u && u.data;
-        if (!d) return null;
-        if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.maxHp > 0 && d.hp <= d.maxHp * 0.25) return "health";
-        const n = d.needs, th = thresholds();
-        if (n) {
-            if (Number.isFinite(n.thirst) && n.thirst >= Math.max(90, (th.thirst || 55) + 35)) return "thirst";
-            if (Number.isFinite(n.hunger) && n.hunger >= Math.max(90, (th.hunger || 55) + 35)) return "hunger";
-        }
-        return null;
-    }
+    // Acute survival (kept under its FABLE-03 name for readers): the single source is urgent(u) above.
+    const urgentSurvival = u => urgent(u);
 
     // The best open job of an active settlement project this worker can do now, taken. Scoring: the culture's
     // priority for the job type, skill, the job's own priority, distance. A job somebody else reserved, or one this
@@ -4298,8 +4360,12 @@
         decisionAt.set(u.id, ticks());
         if (Number.isFinite(u.data.age) && u.data.age < 15) return null; // dependants are not workers
         if (J.of(u.id)) return null;
-        // Step 1: acute survival yields (no survival job runs under Objective 2; needJob returns null).
-        if (urgentSurvival(u)) return needJob(u) || null;
+        // Step 1: survival. A critically wounded colonist rests (no healing system runs yet); a need at or above its
+        // threshold is met first (needJob), most pressing first. A need nothing can meet doesn't keep the colonist
+        // from working: needJob leaves a thought and waits NEED_RETRY_TICKS before searching again.
+        if (urgent(u) === "health") return null;
+        const need = needJob(u);
+        if (need) return need;
         // Steps 2-5: query, score and claim; UF_Jobs walks the worker there and runs the job.
         return projectJob(u) || designationJob(u) || stepOffReserved(u);
     }
@@ -4347,7 +4413,21 @@
         if (sweep) for (const u of colonists()) if (!due.some(d => d.u === u)) due.push({ u, now: false });
         let decided = 0;
         for (const { u, now } of due) {
-            if (J.of(u.id)) continue;
+            const job = J.of(u.id);
+            if (job) {
+                // Preemption (DEUS-TSK-FABLE-05): an acute need suspends labor that doesn't serve it, at most once per
+                // PREEMPT_EVERY ticks per worker and never while the need is known to be unmeetable. UF_Jobs' cancel
+                // puts carried items down at the worker's feet and releases its reservations; jobs:failed puts the
+                // worker in the pending set, so the next update's decision meets the need.
+                if (!now) {
+                    const need = urgent(u);
+                    if (need && !isNeedJob(job, need) && !needBlocked(u, need) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
+                        preemptAt.set(u.id, t);
+                        J.cancel(job.id, `survival: ${need}`);
+                    }
+                }
+                continue;
+            }
             if (!now) {
                 const last = decisionAt.get(u.id);
                 if (last !== undefined && t - last < DECIDE_EVERY) continue;
@@ -4719,7 +4799,7 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Colonists = Colonists;
-    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, scan, societyPlan, projectsManaged, projectOwnedStep });
+    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, isNeedJob, needBlocked, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep });
 
     //-------------------------------------------------------------------------
     // Engine hooks
@@ -4731,7 +4811,9 @@
         _Game_Map_update.call(this, sceneActive);
         if (!sceneActive || (window.UF && UF.Time && UF.Time.paused)) return;
         localTicks++;
-        // Objective 2 (2026-09-22) wiped the autonomous AI loops; DEUS-TSK-FABLE-03 restored the minimal job-taking loop.
+        // Objective 2 (2026-09-22) wiped the autonomous AI loops; DEUS-TSK-FABLE-03 restored the minimal job-taking loop,
+        // DEUS-TSK-FABLE-05 the survival needs (one needs tick per game minute, staggered off the sweep ticks).
+        if (localTicks % NEEDS_EVERY === 15) tickNeeds();
         scan();
     };
 

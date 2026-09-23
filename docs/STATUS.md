@@ -7,7 +7,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- (None currently active. Awaiting user review/approval before initiating next milestone: Survival Needs Interruption.)
+- **Fable**: DEUS-TSK-FABLE-05 — Survival needs interruption & subsistence loop (DEUS_Colonists.js, tools/test_survival_needs_loop.js)
 
 ## DEUS-TSK-FABLE-04 Closed — Autonomous Settlement Construction Loop & Native Verification (2026-09-23)
 - **Status**: `COMPLETED — PASS`
