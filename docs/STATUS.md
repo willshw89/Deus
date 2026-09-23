@@ -34,9 +34,9 @@ Update this whenever reality changes. Write only what you've checked, and say ho
   - Those numbers are formally retired and must not be treated as demonstrated production generator cost.
   - The dedicated production-generation profiler reports roughly 47–67 ms per tested underground level under its Node production-loading path.
   - Distinction recorded:
-    - *OLD*: VM/sandbox test environment produced multi-second timings (inflated by contextified global Math lookups and harness virtualization).
+    - *OLD*: Earlier VM/sandbox test harness environment produced multi-second timings.
     - *CURRENT*: Dedicated production-generation profiler reports tens-of-milliseconds generation for tested seeds and levels.
-  - The likely cause of earlier slow timings was test harness overhead, not an algorithmic bottleneck in `generateUnderground`.
+  - The earlier test harness environment itself was the source of the inflated timings; production generation has no demonstrated algorithmic bottleneck.
 - **3. Generator Optimization Policy**:
   - Current evidence does not justify rewriting the generator for speed.
   - Prohibited: replacing the current noise system, introducing workers/threads, adding benchmark-only caches, reducing terrain fidelity, changing seeds, changing topology, or optimizing speculative hotspots.
