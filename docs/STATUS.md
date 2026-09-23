@@ -3,13 +3,65 @@
 Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-22
-**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
+**Last updated:** 2026-09-23
+**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable**: `DEUS-TSK-FABLE-04` — Autonomous settlement construction loop (`DEUS_Projects.js`, `DEUS_Jobs.js`, `tools/test_project_construction_loop.js`).
-- **Astra**: Dispatched `DEUS-TSK-ASTRA-05` — Historical Population / Demographics Feasibility Harness (`tools/bench_history_demographics.js`).
-- **Gemini (Coordinator & Full-Stack)**: Coordinator Gate, container chest interaction fix (`DEUS_Containers.js`), editor safety gate.
+- (None currently active. Awaiting user review/approval before initiating next milestone: Survival Needs Interruption.)
+
+## DEUS-TSK-FABLE-04 Closed — Autonomous Settlement Construction Loop & Native Verification (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Commits**:
+  - `82c0d56`: `[fable] DEUS-TSK-FABLE-04 transactional builds, legal partial-stack hauls, immediate phase re-advance, site clearability`
+  - Integration: `DEUS_Projects` registered in `game/js/plugins.js` after `DEUS_Colonists`; `DEUS_Containers.js` move order callback fix.
+- **Scope**:
+  - `game/js/plugins/DEUS_Jobs.js`:
+    - Transactional build verification: `Build.apply` re-validates required materials on the target cell at apply time, places the object via `Objects.setIn` *before* consuming materials, and aborts safely with 0 material cost if placement is refused or materials went missing.
+    - Ground stack splitting: `pickUpNow` computes `legalLift()` capped at unencumbered capacity (`carryingCapacity(u)`), decrements ground stack count, and reserves only the carried portion, allowing legal multi-trip hauling without invalid over-capacity aborts.
+    - Safe overweight pickup abort: items exceeding maximum unencumbered carrying capacity fail pickup cleanly without zeroing or leaving uncollected reservations.
+  - `game/js/plugins/DEUS_Projects.js`:
+    - Immediate phase re-advance: `advance(p)` advances immediately upon completing phase requirements up to phase count limit, eliminating up to 3,000 ticks of idle latency.
+    - Site clearability validation: `canFullyClear(obj)` recursively evaluates catalog `becomes` transitions, rejecting sites containing impassable uncleareable remainders (e.g. `berry_bush` -> `berry_bush_bare`).
+  - `game/js/plugins/DEUS_Containers.js`:
+    - Dispatched chest move order via `Colonists.order(u.id, { type: "move", target: standTarget }, onArrival)` so distant colonists walk to the chest and open the docked container card upon arrival.
+  - `game/js/plugins.js`: Registered `DEUS_Projects` safely after `DEUS_Colonists`.
+  - `tools/test_project_construction_loop.js`: 14 automated headless checks + 4 deliberate `--mutant` failure proofs.
+- **Evidence**:
+  - `node tools/test_project_construction_loop.js`: **14 passed, 0 failed (exit 0)**.
+  - Deliberate mutation suite (Rule 4 ability to fail verified):
+    - `--mutant=consume_first`: 3 checks fail (exit 1).
+    - `--mutant=no_split`: 3 checks fail (exit 1).
+    - `--mutant=no_readvance`: 2 checks fail (exit 1).
+    - `--mutant=shallow_clear`: 1 check fails (exit 1).
+  - Regression suites:
+    - `node tools/test_autonomous_project_dispatch.js`: **14 passed, 0 failed (exit 0)** (mutant `--mutant=decide_null` fails 6 checks).
+    - `node tools/test_settlement_projects.js`: **14 passed, 0 failed (exit 0)**.
+    - Native engine suites via `node tools/run_tests.js`:
+      - `jobs`: **19 passed, 0 failed (exit 0)**.
+      - `colonists`: **5 passed, 0 failed (exit 0)**.
+      - `projects`: **9 passed, 0 failed (exit 0)**.
+      - `smoke`: **13 passed, 0 failed (exit 0)**.
+      - `load`: **7 passed, 0 failed (exit 0)**.
+  - End-to-end execution verified:
+    - 8 founders autonomously detect shelter deficit (0/1 shelter, 0/8 beds).
+    - Sited 5×5 communal shelter at valid location avoiding water and uncleareable flora.
+    - Site clearing claimed autonomously by idle founders via `Colonists.decide()`.
+    - Immediate phase advance from Site Clearing to Walls phase upon clearing completion.
+    - Legal partial-stack hauling of logs (3 logs per trip at 15 lb / log, unencumbered limit respected).
+    - Transactional placement of 15 wooden walls and 1 wooden door (refused placement verified 0 material loss).
+    - Completion of hearth and 8 straw/fiber beds; shelter deficit resolved (1/1 shelter, 8/8 beds).
+  - Save/Load round trip: Verified identical serialized state mid-project and upon completion, zero duplicated projects/jobs/items, continuous worker execution.
+  - Visual evidence: `game/test_output/projects.site.png` (colonist Braah actively clearing site cell (128,119) with work icon in native RMMZ graphics) and `game/test_output/smoke.map.png`.
+
+## DEUS-TSK-ASTRA-05 Closed — Historical Demographics Feasibility Harness (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Commit**: `c8bca79b49ed65b17686ad430f60923c425b7d3d`
+- **Scope**: `tools/bench_history_demographics.js` (+500 lines). Zero production code modified.
+- **Evidence**:
+  - `node tools/bench_history_demographics.js --selftest`: **32 passed, 0 failed (exit 0)**.
+  - All negative controls and mutation checks properly rejected (lifespan/cohort oracle, byte projection, simulated counts, seed/year/scale, hash drift).
+  - Measured 100/250/500-year horizons across population cohorts, births, natural/violent deaths, dynasty successions, and settlement founding/extinction with byte-for-byte replay determinism.
+  - Output artifact: `game/test_output/bench_history_demographics.json`.
 
 ## DEUS-TSK-ASTRA-04 Closed — Historical Simulation Benchmark Harness (2026-09-22)
 - **Status**: `COMPLETED — PASS`

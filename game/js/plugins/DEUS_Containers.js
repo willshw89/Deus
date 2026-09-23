@@ -1293,14 +1293,18 @@
             return true;
         } else {
             const J = window.UF && UF.Jobs;
+            const C = window.UF && UF.Colonists;
             if (J) {
                 const standTarget = (typeof J.standFor === "function" ? J.standFor({ area: u.area, x, y, z: zOf(u) }, u, true) : null) || { area: u.area, x, y, z: zOf(u) };
-                const job = J.create("move", { area: u.area, x: standTarget.x, y: standTarget.y, z: zOf(u) }, {
-                    onComplete: () => {
-                        Containers.useChest(u, cont, x, y);
-                    }
-                }, u.id);
-                if (job) J.assign(job.id, u.id);
+                const onArrival = () => {
+                    Containers.useChest(u, cont, x, y);
+                };
+                if (C && typeof C.order === "function") {
+                    C.order(u.id, { type: "move", target: standTarget }, onArrival);
+                } else {
+                    const job = J.create({ type: "move", target: standTarget, owner: u.id });
+                    if (job) J.assign(job.id, u.id);
+                }
             }
             return true;
         }

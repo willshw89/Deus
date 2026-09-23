@@ -130,6 +130,12 @@ var $plugins =
     "parameters": {}
   },
   {
+    "name": "DEUS_Projects",
+    "status": true,
+    "description": "[DEUS Projects] Authoritative settlement-level construction planner: deficit detection, phased blueprints, site selection, and physical build orders.",
+    "parameters": {}
+  },
+  {
     "name": "DEUS_Wildlife",
     "status": true,
     "description": "[DEUS Wildlife] Wild fauna populations, grazing herds, predator/prey behaviors, sensory awareness, and flee AI.",
