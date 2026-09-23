@@ -1585,6 +1585,10 @@
     }
 
     function getFloodGrid(area, z) {
+        if (window.UF && UF.Fluid && typeof UF.Fluid.getFloodGrid === "function") {
+            const fg = UF.Fluid.getFloodGrid(area, z);
+            if (fg) return fg;
+        }
         if (z !== -1 && z !== -2) return null;
         const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
         const key = `${ax},${ay}:${z}`;
@@ -1595,11 +1599,18 @@
         return updated ? updated.grid : null;
     }
 
-    const NOT_FLOODED = Object.freeze({ flooded: false, type: null });
-    const FLOODED_WATER = Object.freeze({ flooded: true, type: "water" });
-    const FLOODED_LAVA = Object.freeze({ flooded: true, type: "lava" });
+    const NOT_FLOODED = Object.freeze({ flooded: false, type: null, depth: 0 });
+    const FLOODED_WATER = Object.freeze({ flooded: true, type: "water", depth: 7 });
+    const FLOODED_LAVA = Object.freeze({ flooded: true, type: "lava", depth: 7 });
 
     function floodTypeAt(ax, ay, z, x, y) {
+        if (window.UF && UF.Fluid && typeof UF.Fluid.depthAt === "function") {
+            const d = UF.Fluid.depthAt(ax, ay, x, y, z);
+            if (d > 0) {
+                const t = UF.Fluid.typeAt(ax, ay, x, y, z);
+                return t === "lava" ? FLOOD_LAVA : FLOOD_WATER;
+            }
+        }
         if (z !== -1 && z !== -2) return DRY;
         const key = `${ax | 0},${ay | 0}:${z}`;
         let c = floodCache.get(key);
@@ -1614,6 +1625,10 @@
     }
 
     function isFlooded(ref) {
+        if (window.UF && UF.Fluid && typeof UF.Fluid.isFlooded === "function") {
+            const fl = UF.Fluid.isFlooded(ref);
+            if (fl && fl.flooded) return fl;
+        }
         const r = refOf(ref);
         if (r.z !== -1 && r.z !== -2) return NOT_FLOODED;
         const val = floodTypeAt(r.ax, r.ay, r.z, r.x, r.y);
@@ -1624,11 +1639,17 @@
 
     function isWaterAtRaw(ax, ay, z, x, y) {
         if (isNaturalWaterAtRaw(ax, ay, z, x, y)) return true;
+        if (window.UF && UF.Fluid && typeof UF.Fluid.depthAt === "function") {
+            if (UF.Fluid.typeAt(ax, ay, x, y, z) === "water" && UF.Fluid.depthAt(ax, ay, x, y, z) > 0) return true;
+        }
         return floodTypeAt(ax, ay, z, x, y) === FLOOD_WATER;
     }
 
     function isLavaAtRaw(ax, ay, z, x, y) {
         if (z === -2 && isNaturalWaterAtRaw(ax, ay, z, x, y)) return true;
+        if (window.UF && UF.Fluid && typeof UF.Fluid.depthAt === "function") {
+            if (UF.Fluid.typeAt(ax, ay, x, y, z) === "lava" && UF.Fluid.depthAt(ax, ay, x, y, z) > 0) return true;
+        }
         return floodTypeAt(ax, ay, z, x, y) === FLOOD_LAVA;
     }
 
@@ -1745,6 +1766,12 @@
                         s.setFrame(phase * 48, 0, 48, 48);
                         s._ufX = x;
                         s._ufY = y;
+                        if (window.UF && UF.Fluid && typeof UF.Fluid.depthAt === "function") {
+                            const d = UF.Fluid.depthAt(view.x, view.y, x, y, view.z);
+                            s.alpha = Math.min(1.0, 0.35 + ((d || 7) / 7) * 0.65);
+                        } else {
+                            s.alpha = 1.0;
+                        }
                         s.visible = true;
                     }
                 }

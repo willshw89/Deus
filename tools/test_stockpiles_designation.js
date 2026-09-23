@@ -117,6 +117,7 @@ function buildSandbox() {
         currentArea() { return { x: 0, y: 0 }; },
         eventOf(id) { return null; },
         walkable(ax, ay, x, y, opts) { return x >= 0 && y >= 0 && x < size && y < size; },
+        getObject(ax, ay, x, y, z) { return 0; },
         unitsInArea(ax, ay, z) {
             return Array.from(unitsById.values()).filter(u => u.area.x === ax && u.area.y === ay && (u.z || 0) === z);
         },

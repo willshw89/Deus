@@ -133,7 +133,7 @@
     function typeIdIn(area, x, y) {
         const W = World();
         if (!validArea(area) || !inArea(x, y)) return 0;
-        return W.getObject(area.x, area.y, x, y, zOf(area)) | 0;
+        return (W && typeof W.getObject === "function" ? W.getObject(area.x, area.y, x, y, zOf(area)) : 0) | 0;
     }
     // Passability of the map on screen, read straight from $dataMap (hot path: pathfinding calls it a lot).
     function blocksAt(x, y) {

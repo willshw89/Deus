@@ -69,6 +69,33 @@
             const fs = require('fs');
             const log = (msg) => fs.appendFileSync('game_runtime.log', `${new Date().toISOString()} ${msg}\n`);
             log("[CORE] UF_Core plugin loaded successfully!");
+
+            // Synchronously ensure all modular plugins are loaded in NW.js desktop runtime
+            const companionPlugins = [
+                "DEUS_Containers",
+                "DEUS_Stockpiles",
+                "DEUS_Fluid",
+                "DEUS_Conditions",
+                "DEUS_Select",
+                "DEUS_Dnd5e",
+                "DEUS_Callings",
+                "DEUS_HistoricalDemographics"
+            ];
+            for (const name of companionPlugins) {
+                const paths = [
+                    `./js/plugins/${name}.js`,
+                    `./game/js/plugins/${name}.js`,
+                    `./${name}.js`
+                ];
+                for (const p of paths) {
+                    try {
+                        require(p);
+                        log(`[CORE] Synchronously loaded companion plugin ${name}`);
+                        break;
+                    } catch (_) {}
+                }
+            }
+
             let isAutoTest = false;
 
             const _Scene_Boot_start = Scene_Boot.prototype.start;

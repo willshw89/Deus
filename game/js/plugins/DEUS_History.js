@@ -10,6 +10,13 @@
  * @orderAfter DEUS_Factions
  *
  * @help
+ * HIST-10 (2026-09-23): New Game now uses the verified demographic model.
+ * UF.History.generate(world, {targetYear: 500, seed}) creates history and living
+ * units. Ages 0 and 1 create founders only; N > 1 runs N annual steps. The
+ * demographic calendar starts at 1, so an age-500 world enters calendar year 501.
+ * The older generators below remain for legacy APIs/saves, not New Game.
+ * The following describes that older founder/settling implementation:
+ *
  * No history (user decision 2026-09-19, VISION V4 and V31): on every New
  * Game, right after UF_Factions rolled the factions and placed each one's
  * area, this plugin writes year 1 of the chronicle:
@@ -116,10 +123,43 @@
         if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
         if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
         if (typeof require === "function") {
-            try { return require("./UF_Callings.js"); } catch (_) {
-                try { return require("./js/plugins/UF_Callings.js"); } catch (_) {
-                    try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
-                }
+            const paths = ["./DEUS_Callings.js", "./js/plugins/DEUS_Callings.js", "./game/js/plugins/DEUS_Callings.js", "./UF_Callings.js", "./js/plugins/UF_Callings.js", "./game/js/plugins/UF_Callings.js"];
+            for (const p of paths) {
+                try {
+                    const c = require(p);
+                    if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
+                    if (c && (c.PROFESSIONS || c.sampleCallings)) return c;
+                } catch (_) {}
+            }
+        }
+        return null;
+    }
+    function getDemographics() {
+        if (typeof window !== "undefined" && window.UF && window.UF.HistoricalDemographics) return window.UF.HistoricalDemographics;
+        if (typeof global !== "undefined" && global.UF && global.UF.HistoricalDemographics) return global.UF.HistoricalDemographics;
+        if (typeof require === "function") {
+            const paths = ["./DEUS_HistoricalDemographics.js", "./js/plugins/DEUS_HistoricalDemographics.js", "./game/js/plugins/DEUS_HistoricalDemographics.js", "./UF_HistoricalDemographics.js"];
+            for (const p of paths) {
+                try {
+                    const d = require(p);
+                    if (typeof window !== "undefined" && window.UF && window.UF.HistoricalDemographics) return window.UF.HistoricalDemographics;
+                    if (d && (d.create || d.step)) return d;
+                } catch (_) {}
+            }
+        }
+        return null;
+    }
+    function getDnd5e() {
+        if (typeof window !== "undefined" && window.UF && window.UF.Dnd5e) return window.UF.Dnd5e;
+        if (typeof global !== "undefined" && global.UF && global.UF.Dnd5e) return global.UF.Dnd5e;
+        if (typeof require === "function") {
+            const paths = ["./DEUS_Dnd5e.js", "./js/plugins/DEUS_Dnd5e.js", "./game/js/plugins/DEUS_Dnd5e.js", "./UF_Dnd5e.js"];
+            for (const p of paths) {
+                try {
+                    const d = require(p);
+                    if (typeof window !== "undefined" && window.UF && window.UF.Dnd5e) return window.UF.Dnd5e;
+                    if (d && (d.assignClass || d.rollAbilityScores)) return d;
+                } catch (_) {}
             }
         }
         return null;
@@ -155,6 +195,17 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.History = History;
+    let materializingNewGame = false;
+    let pairingReleaseRegistered = false;
+
+    // These modules are loaded before New Game, using the same dependency loader as Items.
+    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
+        for (const name of ["HistoricalDemographics", "Callings"]) {
+            if (!UF[name] && (!PluginManager._scripts || !PluginManager._scripts.includes(`DEUS_${name}`))) {
+                PluginManager.loadScript(`DEUS_${name}`);
+            }
+        }
+    }
 
     //-------------------------------------------------------------------------
     // Terrain access: sites go on walkable land. UF.WorldGen reads UF.World.state, so a synthetic
@@ -304,40 +355,201 @@
     //-------------------------------------------------------------------------
     // Generation
 
-    /**
-     * Write the history of a new world into state.history. With history.simulate off (the default since 2026-09-19,
-     * VISION V31): year 1 only, a bare camp record and a founders plan per faction at its area (UF_Factions placed
-     * the areas). With it on (or opts.simulate true): the older generator, 500-600 simulated years that update
-     * state.factions (homes, populations, relations), then the settling run on the built map for settleYears years
-     * (opts.years overrides; opts.settle === false skips it). Deterministic from state.seed. Doesn't spawn people.
+    /** HIST-10: 0/1 means founders; N > 1 means N unchanged HIST-09 annual steps.
+     * opts.seed selects the demographic RNG, preserving the world's terrain/faction seed.
+     * onCheckpoint observes each completed step and is never stored in the save.
      */
-    History.generate = function(state, opts = {}) {
+    History.generate = function(world, opts = {}) {
+        const state = world && world.state ? world.state : world;
         const cfg = this.config();
         if (!cfg || !state || !state.factions || !Array.isArray(state.factions.list)) return null;
-        const live = !!(window.UF && UF.World && UF.World.state === state); // the world being created, not a test state
-        const setupYear = (opts.targetYears !== undefined) ? opts.targetYears : ((window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.year === "number") ? UF.NewGameSetup.year : null);
-        const shouldSimulate = opts.legacySimulate === true || (opts.simulate === true && setupYear === null) || (setupYear !== null && setupYear > 1);
+        const targetYear = opts.targetYear === undefined ? 500 : opts.targetYear;
+        const seed = opts.seed === undefined ? state.seed : opts.seed;
+        if (!Number.isSafeInteger(targetYear) || targetYear < 0 || targetYear >= 1000000) throw new Error("History: invalid targetYear");
+        if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) throw new Error("History: invalid seed");
+        const steps = targetYear <= 1 ? 0 : targetYear;
+        if (state.history && state.history.demographics) {
+            if (state.history.demographics.seed !== seed || state.history.demographics.yearsSimulated !== steps) {
+                throw new Error("History: generate requires a new world when changing its era or seed");
+            }
+            this.materialize(state);
+            return state.history;
+        }
+        const D = getDemographics();
+        const Callings = getCallings();
+        const Dnd = getDnd5e();
+        if (!D || !Callings || !Dnd) throw new Error("History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game");
+        const started = now();
+        const live = UF.World && UF.World.state === state;
         return withWorldState(state, () => {
-            let h;
-            if (shouldSimulate) {
-                const targetYears = (setupYear !== null && setupYear > 1) ? setupYear : (opts.targetYears !== undefined ? opts.targetYears : null);
-                h = simulate(state, cfg, targetYears);
-                const defaultSettle = settleConfig(cfg).years || 10;
-                const settleYrs = opts.years !== undefined ? opts.years | 0 : (targetYears ? Math.min(targetYears, defaultSettle) : defaultSettle);
-                if (h && opts.settle !== false && settleYrs > 0) settle(state, cfg, live, settleYrs);
-            } else {
-                h = found(state, cfg, live);
+            const h = found(state, cfg, false);
+            const demographics = D.create({ ...state, seed });
+            for (let year = 0; year < steps; year++) {
+                D.step(demographics);
+                if (typeof opts.onCheckpoint === "function") opts.onCheckpoint({ ...demographics,
+                    living: demographics.people.filter(p => p.died === null).map(p => p.id),
+                    graveyard: demographics.people.filter(p => p.died !== null).map(p => p.id) });
             }
-            if (h && setupYear !== null) {
-                h.startYear = setupYear;
-                if (setupYear === 1) {
-                    h.years = 1;
-                    h.clockYear0 = 1;
-                }
-                if (window.$ufTime) $ufTime.year = setupYear;
-            }
+            h.demographics = demographics;
+            h.version = 6;
+            h.worldAge = steps;
+            h.years = steps;
+            h.startYear = demographics.currentYear;
+            h.clockYear0 = demographics.currentYear;
+            h.simulated = steps > 0;
+            this.materialize(state);
+            if (live && window.$ufTime) $ufTime.year = demographics.currentYear;
+            this.lastRun = { ms: now() - started, years: steps, factions: state.factions.list.length,
+                sites: demographics.sites.length, events: demographics.events.length, living: demographics.living.length };
             emit("history:generated", h);
             return h;
+        });
+    };
+
+    /** Canonical person records include the deceased; returned IDs are historical, not unit IDs. */
+    History.personById = function(id, state = UF.World.state) {
+        const d = state && state.history && state.history.demographics;
+        return d && Number.isInteger(id) ? d.people[id] || null : null;
+    };
+    History.genealogy = function(id, state = UF.World.state) {
+        const person = this.personById(id, state);
+        if (!person) return null;
+        const d = state.history.demographics;
+        const partnership = person.partnershipId === null ? null : d.partnerships[person.partnershipId];
+        return { personId: id, parents: person.parents.slice(),
+            spouse: partnership && partnership.toYear === null ? (partnership.motherId === id ? partnership.fatherId : partnership.motherId) : null,
+            children: d.people.filter(p => p.parents.includes(id)).map(p => p.id) };
+    };
+
+    /** Materialization is a one-time boundary. Only stable IDs cross into saved world units. */
+    History.materialize = function(world) {
+        const state = world && world.state ? world.state : world;
+        const h = state && state.history, d = h && h.demographics, W = UF.World;
+        if (!d || !W) throw new Error("History: no demographic state to materialize");
+        if (h.materialization && h.materialization.complete) {
+            return Object.values(h.materialization.personToUnit).map(id => state.units[id]);
+        }
+        if (h.materialization) throw new Error("History: previous materialization was interrupted; create a new world instead of retrying partial changes");
+        const Callings = getCallings(), Dnd = getDnd5e();
+        if (!Callings || !Dnd) throw new Error("History: missing materialization dependency");
+        UF.HistoricalDemographics.validate(d);
+        return withWorldState(state, () => {
+            const living = d.people.filter(p => p.died === null);
+            const children = d.people.map(() => []);
+            for (const p of d.people) for (const parent of p.parents) children[parent].push(p.id);
+            const baseId = state.nextUnitId;
+            const personToUnit = Object.fromEntries(living.map(p => [p.id, baseId + p.id]));
+            // Reserve ancestors' slots as well: a person keeps the same Creature ID at every era.
+            if (!Number.isSafeInteger(baseId + d.people.length)) throw new Error("History: unit ID range exhausted");
+            const households = {}, homeOf = new Map();
+            for (const p of living) {
+                const pair = p.partnershipId === null ? null : d.partnerships[p.partnershipId];
+                homeOf.set(p.id, pair && pair.toYear === null ? `historical_pair_${pair.id}` : `historical_person_${p.id}`);
+            }
+            for (const p of living) {
+                if (d.currentYear - p.born >= d.config.profiles[p.species].reproductiveAge[0]) continue;
+                const parent = p.parents.map(id => d.people[id]).find(q => q.died === null && q.siteId === p.siteId);
+                if (parent) homeOf.set(p.id, homeOf.get(parent.id));
+            }
+            h.materialization = { schemaVersion: 1, complete: false };
+            placeCamps(state);
+            // Enumerate free cells once per site before adding units. No relocation or terrain clearing fallback.
+            const slots = new Map(), reserved = new Set();
+            const counts = new Map();
+            for (const p of living) counts.set(p.siteId, (counts.get(p.siteId) || 0) + 1);
+            for (const site of d.sites) {
+                const cells = [], count = counts.get(site.id) || 0;
+                for (let r = 1; r < state.size && cells.length < count; r++) {
+                    for (let dy = -r; dy <= r && cells.length < count; dy++) {
+                        for (let dx = -r; dx <= r && cells.length < count; dx++) {
+                            if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                            const x = site.x + dx, y = site.y + dy;
+                            if (x < 0 || y < 0 || x >= state.size || y >= state.size) continue;
+                            const key = `${site.area.x},${site.area.y},${site.z},${x},${y}`;
+                            if (reserved.has(key) || !W.cellFree(site.area.x, site.area.y, x, y, 0, site.z)) continue;
+                            reserved.add(key); cells.push({ x, y });
+                        }
+                    }
+                }
+                if (cells.length !== count) throw new Error(`History: insufficient walkable cells at site ${site.sourceSiteId}`);
+                slots.set(site.id, { cells, next: 0 });
+            }
+            const units = [], cat = catalog() || {};
+            for (const p of living) {
+                const site = d.sites[p.siteId], id = personToUnit[p.id], age = d.currentYear - p.born;
+                const pair = p.partnershipId === null ? null : d.partnerships[p.partnershipId];
+                const spouse = pair && pair.toYear === null ? (pair.motherId === p.id ? pair.fatherId : pair.motherId) : null;
+                const callings = Callings.sampleCallings(site.population, 3, mulberry32(hash32(d.seed, p.id, SALT_CALLINGS)));
+                const calling = callings[0];
+                // Use the established D&D species/age rules. Calling rank conditions the deterministic roll;
+                // no invented vocation bonus table or second ability-score implementation is introduced.
+                const statsSeed = hash32(d.seed, p.id, calling.rank, SALT_STATS);
+                const profile = d.config.profiles[p.species], maturity = profile.reproductiveAge[0];
+                const stage = age < 1 ? "baby" : age < maturity * 2 / 3 ? "child" : age < maturity ? "teen" : age >= profile.lifespan[0] ? "elder" : "adult";
+                const stats = Dnd.rollAbilityScores(statsSeed, p.id, p.species, stage);
+                const dnd = Dnd.assignClass(stats, statsSeed, p.id, p.species);
+                const householdId = homeOf.get(p.id);
+                if (!households[householdId]) households[householdId] = { id: householdId, siteId: p.siteId, members: [] };
+                households[householdId].members.push(id);
+                const data = { kind: p.factionId === state.factions.playerId ? "colonist" : "person", ai: "settlement",
+                    historicalPersonId: p.id, historicalName: p.name, historicalFounder: p.isFounder,
+                    // `founder` drives legacy live founder pairing. The demographic ledger owns this family.
+                    founder: false, faction: p.factionId, species: p.species, gender: p.gender, sex: p.gender,
+                    born: p.born, age, stage, parents: p.parents.map(parent => baseId + parent),
+                    spouse: spouse === null ? null : baseId + spouse, children: children[p.id].map(child => baseId + child),
+                    motherId: p.parents.some(parent => d.people[parent].gender === "female") ? baseId + p.parents.find(parent => d.people[parent].gender === "female") : null,
+                    fatherId: p.parents.some(parent => d.people[parent].gender === "male") ? baseId + p.parents.find(parent => d.people[parent].gender === "male") : null,
+                    partnerId: personToUnit[spouse] || null, childIds: children[p.id].map(child => personToUnit[child]).filter(Boolean),
+                    householdId, familyId: householdId, lineageId: p.dynastyId, generation: p.generation,
+                    siteId: p.siteId, site: site.sourceSiteId, home: { area: { ...site.area }, x: site.x, y: site.y, z: site.z },
+                    wander: 6, callings, calling, stats, dnd, hp: dnd.hp, hpMax: dnd.hpMax, ac: dnd.ac,
+                    dndClass: dnd.id, className: dnd.name, hitDie: dnd.hitDie, savingThrows: dnd.savingThrows,
+                    proficiencies: dnd.proficiencies ? Array.from(new Set(dnd.proficiencies)) : [],
+                    rank: 0, superior: null, willingToPartner: !materializingNewGame, familyDesire: true };
+                const images = ((cat.people || {})[p.species] || {}).images || [""];
+                const image = p.species === "human" ? imageSpec(`$UF_Human_${p.gender === "female" ? "Female" : "Male"}_${1 + p.id % 6}_Walk`)
+                    : imageSpec(images[p.id % images.length]);
+                const queue = slots.get(p.siteId), cell = queue.cells[queue.next++];
+                if (state.units[id] || state.nextUnitId > id) throw new Error("History: another unit allocator used the reserved historical ID range");
+                state.nextUnitId = id;
+                const unit = W.addUnit({ name: p.name, image, area: site.area, z: site.z, x: cell.x, y: cell.y, exact: true, data });
+                if (unit.id !== id || state.nextUnitId !== id + 1) throw new Error("History: unitAdded listener allocated inside the historical ID range");
+                const Items = window.UF && UF.Items;
+                if (Items && typeof Items.giveFactionStartingKit === "function" && p.factionId === state.factions.playerId) {
+                    Items.giveFactionStartingKit(unit);
+                }
+                units.push(unit);
+            }
+            state.nextUnitId = baseId + d.people.length;
+            d.living = living.map(p => p.id);
+            d.graveyard = d.people.filter(p => p.died !== null).map(p => p.id);
+            h.rulers = {};
+            for (const f of state.factions.list) {
+                const df = d.factions[f.id];
+                h.rulers[f.id] = d.rulers.filter(r => r.factionId === f.id).map(r => ({ ...r,
+                    name: d.people[r.personId].name, from: r.fromYear, to: r.toYear,
+                    unitId: personToUnit[r.personId] || null }));
+                const ruler = df.activeRulerId === null ? null : d.rulers[df.activeRulerId];
+                const leaderId = ruler ? personToUnit[ruler.personId] : null;
+                f.rulerId = leaderId || null;
+                f.population = d.sites.filter(s => s.factionId === f.id).reduce((sum, s) => sum + s.population, 0);
+                for (const u of units.filter(u => u.data.faction === f.id)) {
+                    u.data.rank = u.id === leaderId ? 1 : 0;
+                    u.data.superior = u.id === leaderId ? null : leaderId || null;
+                }
+            }
+            for (const site of h.sites) {
+                const ds = d.sites.find(s => s.sourceSiteId === site.id);
+                site.pop = ds.population;
+                site.ruined = ds.isRuined ? ds.abandonedYear : null;
+                const leader = h.rulers[site.faction].find(r => r.toYear === null && r.siteId === ds.id);
+                site.leaderId = leader ? leader.unitId : null;
+            }
+            h.materialization = { schemaVersion: 1, complete: true, baseUnitId: baseId, personToUnit, households };
+            if (materializingNewGame) h.materialization.resumePairing = true;
+            h.events = d.events.map(event => ({ year: event.year, type: event.type, factions: [event.factionId],
+                site: d.sites[event.siteId].sourceSiteId, personIds: event.personIds.slice(), text: event.text }));
+            return units;
         });
     };
 
@@ -2527,6 +2739,7 @@
     History.spawnPeople = function(state) {
         const W = window.UF && UF.World;
         if (!W || !state || !state.history || W.state !== state) return [];
+        if (state.history.demographics) return History.materialize(state);
         return state.history.founders ? spawnFounders(state) : spawnSettled(state);
     };
 
@@ -2915,9 +3128,33 @@
             for (let dy = -(radius - 1); dy <= radius - 1; dy++) for (let dx = -(radius - 1); dx <= radius - 1; dx++) if (!taken.has(`${dx},${dy}`)) free.push({ dx, dy });
             const settled = site.settled && Array.isArray(site.settled.ages) ? site.settled : null;
             const [lo, hi] = perSiteRange();
-            let n = settled ? clamp(Math.round(settled.pop / 4), lo, hi) : range([lo, hi]);
-            if (site.protected) n = Math.max(n, HOME_MIN_PEOPLE); // the home site always has at least HOME_MIN_PEOPLE (the colonists)
-            n = Math.min(n, free.length);
+            const playerId = (state.factions && state.factions.playerId) || "player";
+            const isPlayer = f.id === playerId;
+            let n = settled ? (isPlayer ? settled.pop : clamp(Math.round(settled.pop / 4), lo, hi)) : range([lo, hi]);
+            if (site.protected || isPlayer) n = Math.max(n, HOME_MIN_PEOPLE);
+            let searchR = radius - 1;
+            while (free.length < n && searchR < 32) {
+                searchR += 2;
+                for (let dy = -searchR; dy <= searchR; dy++) {
+                    for (let dx = -searchR; dx <= searchR; dx++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) < searchR - 1) continue;
+                        const key = `${dx},${dy}`;
+                        if (!taken.has(key)) {
+                            const x = site.x + dx, y = site.y + dy;
+                            if (x >= 0 && y >= 0 && x < state.size && y < state.size && W.cellFree(site.area.x, site.area.y, x, y, 0, levelOf(site))) {
+                                free.push({ dx, dy });
+                            }
+                        }
+                    }
+                }
+            }
+            if (free.length < n) {
+                for (let i = free.length; i < n; i++) {
+                    const angle = (i * 2 * Math.PI) / Math.max(1, n);
+                    const dist = radius + 2 + Math.floor(i / 8);
+                    free.push({ dx: Math.round(Math.cos(angle) * dist), dy: Math.round(Math.sin(angle) * dist) });
+                }
+            }
             // Ages come from the settled population's counts by age (drawn without replacement), else from the pyramid.
             const pool = settled ? settled.ages.slice() : null;
             const drawAge = adultOnly => {
@@ -2940,16 +3177,18 @@
             const rulerHere = !!ruler && !rulerUnit[f.id] && !!f.home && f.home.x === site.x && f.home.y === site.y && sameArea(f.home.area, site.area);
             for (let i = 0; i < n; i++) {
                 const j = Math.floor(rand() * free.length);
-                const cell = free.splice(j, 1)[0];
+                const cell = free.splice(j, 1)[0] || { dx: 0, dy: 0 };
                 const rank = i === 0 ? (rulerHere ? 2 : 1) : 0;
                 let age = drawAge(rank > 0);
                 if (rank === 2) age = Math.min(95, Math.max(age, h.years - ruler.from + 20 + Math.floor(rand() * 20)));
                 const gender = rand() < 0.5 ? "male" : "female";
                 const varIdx = 1 + Math.floor(rand() * 6);
+                const isPlayerUnit = f.id === playerId;
                 const data = {
-                    kind: "person", faction: f.id, species: f.species, ai: "settlement", home: { x: site.x, y: site.y }, wander: radius + 2, site: site.id,
+                    kind: isPlayerUnit ? "colonist" : "person", faction: f.id, species: f.species, ai: "settlement", home: { area: { ...site.area }, x: site.x, y: site.y, z: levelOf(site) }, wander: radius + 2, site: site.id,
                     born: h.years - age, age, stage, gender, rank, superior: null,
-                    variation: varIdx
+                    variation: varIdx,
+                    founder: isPlayerUnit && i < 8
                 };
                 if (rank === 2) data.title = ruler.title;
                 if (sp.tint && f.species !== "human") data.tint = sp.tint;
@@ -2958,7 +3197,7 @@
                     : imageSpec(images[imageIndex++ % images.length]);
                 const u = W.addUnit({
                     name: rank === 2 ? ruler.name : newName(), image: unitImg,
-                    area: { x: site.area.x, y: site.area.y }, x: site.x + cell.dx, y: site.y + cell.dy, dir: 2, data,
+                    area: { x: site.area.x, y: site.area.y }, z: levelOf(site), x: site.x + cell.dx, y: site.y + cell.dy, dir: 2, data,
                     snapToFree: 8 // never inside a wall piece, a tree or water (user rule 2026-09-18); UF_World finds the nearest free cell
                 });
                 u.data.stats = rollStats(state.seed, u.id, f.species, stage);
@@ -3152,8 +3391,17 @@
     // summary line goes to the console.
     if (window.UF.Events && UF.Events.on) {
         UF.Events.on("world:created", state => {
-            if (!History.generate(state)) return;
+            const targetYear = UF.NewGameSetup && UF.NewGameSetup.year;
+            let generated;
+            materializingNewGame = true;
+            try { generated = History.generate(state, targetYear === undefined ? {} : { targetYear }); }
+            finally { materializingNewGame = false; }
+            if (!generated) return;
             const people = History.spawnPeople(state);
+            if (state.history.demographics) {
+                console.log(`DEUS_History: world age ${state.history.worldAge}, ${people.length} living citizens, ${state.history.demographics.graveyard.length} ancestors`);
+                return;
+            }
             if (state.history.founders) {
                 const off = people.filter(u => {
                     const s = state.history.sites.find(x => x.id === u.data.site);
@@ -3417,6 +3665,17 @@
 
     const _Scene_Boot_start = Scene_Boot.prototype.start;
     Scene_Boot.prototype.start = function() {
+        // All plugin scripts have loaded here, so this listener follows Colonists' conversion.
+        // Conversion must not form new pairs before the historical snapshot enters live play.
+        if (!pairingReleaseRegistered && UF.Events && UF.Events.on) {
+            pairingReleaseRegistered = true;
+            UF.Events.on("world:created", state => {
+                const m = state.history && state.history.materialization;
+                if (!m || !m.complete || !m.resumePairing) return;
+                for (const id of Object.values(m.personToUnit)) state.units[id].data.willingToPartner = true;
+                delete m.resumePairing;
+            });
+        }
         _Scene_Boot_start.call(this);
         if (window.UF.Test && UF.Test.active) registerChecks();
     };

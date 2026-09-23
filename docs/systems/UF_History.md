@@ -1,5 +1,86 @@
 # UF_History
 
+## DEUS-TSK-ASTRA-15 HIST-10 materialization and world age — 2026-09-23
+
+**Verdict: headless acceptance PASS for the source set identified below; integration/commit pending shared-file ownership. Native F5/F8 and screenshots NOT RUN.** The final standalone suite passed 29 checks with exit 0, including the 12 canonical seed/age combinations, three full demographic/event prefix comparisons, six actual disk/process restarts, stable entity IDs, the age-1 founder alias, explicit seed-zero reproducibility, and Colonists bootstrap at ages 0, 250 and 500. All three requested mutation commands exited 1 at their intended assertions. The frozen HIST-09 engine and its existing JSON report remain unchanged.
+
+### API and saved identity
+
+`UF.History.generate(world, { targetYear, seed, onCheckpoint })` accepts either a world state or the World service. `targetYear` defaults to 500; 0 and 1 run zero annual steps, while N > 1 runs exactly N frozen HIST-09 steps. The engine starts at calendar year 1, so age 500 enters calendar year 501. Invalid negative/noninteger ages, ages at or above the engine's 1,000,000-year bound, and non-uint32 seeds reject. An explicit seed changes the demographic RNG only; it does not regenerate terrain/factions or change `world.seed`. Regenerating an already materialized world at a different era/seed rejects. The identical era/seed and `History.materialize(world)` are idempotent.
+
+The foundation still comes from the existing canonical year-1 founder plan. The historical plugin's biology, density/capacity math, RNG and succession rules are untouched. Each synchronous `onCheckpoint` observation has the same demographic fields as the completed boundary, including living/deceased ID indexes. Nested arrays remain shared with the simulation; a caller retaining a checkpoint must snapshot it immediately. Prefix tests compare the complete demographic object and its event ledger, without removing the indexes.
+
+`history.demographics.people` remains the single person-record ledger. `living` and `graveyard` are arrays of historical person IDs, including ID 0, rather than copies of those records. Every living person is created through `World.addUnit` on a checked, unoccupied, walkable cell. Entity slots are reserved as `baseUnitId + historicalPersonId`, including ancestors' unused physical slots, so identities persist across eras and saves. Allocation guards reject interference from unit-added listeners. A partially interrupted materialization cannot be retried on that world.
+
+`history.materialization` schema 1 stores the living `personToUnit` map and households. Unit data preserves `historicalPersonId`, canonical `historicalName`/`historicalFounder`, species, gender/sex, birth year, age, site affiliation, family and household. Unit `parents`, `spouse`, `children`, `motherId` and `fatherId` use the reserved **entity-ID namespace**, including dead relatives; the canonical ledger uses **historical person IDs**. Keeping dead parent IDs preserves the existing runtime sibling checks. `partnerId` identifies an active living partner; `childIds` selects living children. `History.personById(id, world)` and `History.genealogy(id, world)` query historical IDs and retain ancestors.
+
+All three callings are sampled deterministically from the existing 89-entry Callings module. Primary calling rank conditions the deterministic ability seed; the existing Dnd5e roll, species modifiers, class choice and level-one HP formulas supply the scores. No new vocation bonus table or demographic formula was introduced. The bridge initially derives stages from the species profile's maturity/lifespan bounds. `history.rulers` projects all succession records, including person/entity identities, while faction/site leadership and unit superior IDs reference active rulers. Existing World/DataManager save aliases carry the history and units; no separate save hook was added.
+
+The live `founder` flag is false for materialized citizens because it drives the legacy founder-only pairing/quota workflow; historical founder truth is retained separately. A mature Colonists bootstrap initially formed 76 extra live partnerships at seed 0/age 250. History now defers pairing via the existing `willingToPartner` flag during initialization, releasing it from a late `world:created` listener registered at boot. The repeated mature check observed 0 partner conflicts, all 984 citizens retained, and pairing restored. The final suite tests live partner coherence and resumed pairing at ages 250 and 500.
+
+### Measured matrix and provenance
+
+The dispatch's full baseline `2f22f9e403d6d5ef0dfad0ca023fb2764b855938` is not the observed commit. Work started at `2f22f9ebad576cb69016def0e5fb423309e2ceb1`. Fable committed its separate work as `1e00b044270cc6d51c566173236346a5e2f1c7b0` during this task. Tests execute working sources, record every input SHA-256 and check their stability across workers and suite completion; they do not claim an immutable HEAD snapshot. Rendering and scene baseline methods are headless doubles. Actual engine DataManager/JsonEx methods, World save aliases, event bus, terrain seating, and listed production modules execute.
+
+Final report: `C:/Users/snewt/AppData/Local/Temp/deus-astra15-final-139e8f88-f0e8-438b-9a00-2911b3dffc56.json`; source-set digest `92adaf6cec3b2f9e46b4624368d3735fa70c07321a6cf45fbedf82042f246940`. Total suite wall time: **116.9729126 s**. The table measures generation/materialization and assertions inside each worker; subprocess start and restore costs are additional and included in total wall time. The report includes individual process wall times, six disk-save SHA-256 hashes and saver/loader process IDs. Temporary save files were fsynced, read by new processes after saver exit, compared across full world/history/units/factions/sites/people/rulers hashes, then removed.
+
+| Seed | Age | Living | Ancestors | Serialized world bytes | Worker ms |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 0 | 72 | 0 | 278364 | 3008.670 |
+| 0 | 100 | 761 | 188 | 2294083 | 3676.941 |
+| 0 | 250 | 984 | 1582 | 3551194 | 4730.513 |
+| 0 | 500 | 1080 | 4178 | 4991801 | 13829.380 |
+| 424242 | 0 | 72 | 0 | 278300 | 2991.769 |
+| 424242 | 100 | 738 | 211 | 2239711 | 3220.580 |
+| 424242 | 250 | 943 | 1599 | 3440499 | 4319.938 |
+| 424242 | 500 | 1063 | 4199 | 4958372 | 14671.546 |
+| 20260919 | 0 | 72 | 0 | 278679 | 3012.858 |
+| 20260919 | 100 | 730 | 168 | 2198707 | 3593.681 |
+| 20260919 | 250 | 977 | 1584 | 3519606 | 4942.389 |
+| 20260919 | 500 | 1093 | 4224 | 5037835 | 14035.295 |
+
+| Seed / age | Complete demographic SHA-256 | Event SHA-256 |
+|---|---|---|
+| 0 / 0 | `ca095b53cdcc5e26e79846d535fff06b60c0cfd3e6146aaf19abc3bb4d68d8ed` | `81a2dc521bbade823963467d16e92b1188916ff5c26bf78e3ce04a47a822d7fe` |
+| 0 / 100 | `e9a674ccfdde603d402e8d07214f808e933f18e2b2029768cd84ef858ad5dc1d` | `374063268b1cff369057e932f9000f8a74d0134d51eb98e689879b8823aac7d7` |
+| 0 / 250 | `3e44616b828a1e5ed3749d833a983f8f31964e5aebae0b97a4db103d143e65a8` | `5ba174cadbabe069e4934b31657790faac45fc37b69348c0a87962eed4797483` |
+| 0 / 500 | `379668ca17d243c7ee628117de012c9412a7e6c82fd004558f88af00c1735e18` | `674604ed212fb57366848777d7d4b8ecb28f333251f8d7491b0ab59270832e3b` |
+| 424242 / 0 | `1ef105c75bcb94326eaa7be9f16514832ca01fe2ecca9caf6521ffd136d378df` | `2de602d9ea88174fb0e20bf7ca269fc3a58e4a52bd2de61c5c80c1a588c16ff4` |
+| 424242 / 100 | `1d0149838a85282144c70e8bdf9ab6fb88f5a1c021b0333068ef1d60d09fb932` | `521146f01de49822b55d6a1e560e070e676f97ca34e655a3586da14fc520a251` |
+| 424242 / 250 | `cec3f8040804dc038cda7d23f04f54421ccb6b606e8834ad9ea6d184e08e1890` | `253cde26f8d538214484b0c46ca262f19344520cdf677c57537442e8a58a867a` |
+| 424242 / 500 | `97c171fb5d5c10bf46f9aead35b844ad8a7848e5239bcfe5ec6af7538dbedb35` | `b53d17cac5995041e8896536dd0048d212b79ba3547cf7bc69b959186b07c07c` |
+| 20260919 / 0 | `3d027e7a6223608c27f3f850480f4bedbd87b8693b45b5bfe6b08e5c0316a213` | `64b5510989eabef1a89fd48df569e1c3cc5283ece13b6f355b2ec2c343f94aab` |
+| 20260919 / 100 | `555758145aa7df2bcae8da657ec611afa8dc9121588548c88e2f0d615ef8fce5` | `6b14d5831c929ea23cadf3091b3ad54c3518f84a68756ff211d704b09789b145` |
+| 20260919 / 250 | `67b80240269c6aab591cd00d8da359dad15789098418f584987d522a202755ae` | `7412f24a55a505cba87ccc3f09c7060bed5cddf1a3aaa6182e31fb21f75f0a61` |
+| 20260919 / 500 | `391ab0bf67db9ae3f8b22d2eb825f9522561a0217ee88d790595a032b2adf4ef` | `334c3dba9419274687b866ada89beb24f93569c8957b2a10d7aec356446b141a` |
+
+### Commands and negative controls
+
+| Command/check | Observed result |
+|---|---|
+| `node tools/test_history_materialization_and_world_age.js` | PASS, exit 0; 29 checks, 12 eras, 3 prefixes, 6 disk restarts, 9 species at every 250/500 boundary, valid physical placement and family coherence. |
+| `--mutant=target_year_alters_early_history` on that command | Expected FAIL, exit 1: `PREFIX_INVARIANCE: seed 0 Year100 differs from the 500-year checkpoint`. |
+| `--mutant=materialization_drops_species` | Expected FAIL, exit 1: `MATERIALIZED_CENSUS: physical living population differs from ledger`. |
+| `--mutant=save_drops_historical_records` | Expected FAIL, exit 1: `ROUNDTRIP_HISTORICAL_RECORDS: 1582 ancestors became 0 in actual saved contents; fresh loader 35020 restored 0 ancestors`. Engine class instances remain intact in this mutation. |
+| `node tools/test_historical_carrying_capacity.js` | PASS, exit 0; frozen HIST-09 23 common contracts, 5 metadata contracts, 8 detected capacity mutants. |
+| `node tools/bench_species_biology.js --selftest` | PASS, exit 0; 29 self-tests. |
+| `node --check` on History and the new suite; scoped `git diff --check` | PASS, exit 0. |
+| Native F5/F8, screenshots, in-game history test suite | NOT RUN. |
+| Scoped commit | NOT RUN: mixed contributor edits and the untracked Callings dependency require ownership resolution. |
+
+Mutation evidence: `C:/Users/snewt/AppData/Local/Temp/deus-astra15-mutants-1790206032105.json`. An earlier read-only archived-Callings preview and two earlier passing integration runs are superseded by the final report; they are not substituted for production-path acceptance.
+
+The frozen demographics file remains 52,586 bytes / SHA-256 `d0a09bfda8ab63ff3eec5b362c63896ea0c3dbcb3aeeeb574c48c3113c995e4e`. The previous `game/test_output/bench_species_biology.json` remains 37,997,150 bytes / `afabf8695dc2cc71be5bfcf0347f7077167f4aa489860d6dee72cd86491dea19`. Final tested History SHA-256: `a5eb0ec691b38877dd4a441e73ee8be70d86421f83480030cdbd1fa164ee4d17`; new harness: `b2cd04303573392b10656b2366f6a64dd43d044a5345904ba11bfdf91b1b6453`.
+
+### Integration boundary and known limits
+
+- Another contributor restored the previously missing `game/js/plugins/DEUS_Callings.js` during this session. It is 14,744 bytes / SHA-256 `1370ae3d4538f3596e01a511e39fab3ae64e8d736c39ccd223058b561d9f55bd`, identical to the archived module, and remains outside ASTRA-15's allowed edit list. Astra did not write or stage it.
+- Other edits appeared in History's dependency helpers and legacy `spawnSettled` implementation during the claimed task. They were preserved. No mixed-contributor commit was made; the coordinator must commit those changes separately or explicitly authorize their inclusion. Astra's claim is released for that coordination.
+- `DEUS_Core.js` changed again after the successful final suite. The report identifies the tested bytes (`72e583f0079c20dba2e95fb44852215213c0d3ea17b8a3bf9df8365cbed1eeb5`); the subsequent companion-plugin loader is not covered by this report. No claim is made that every current shared-tree byte was tested.
+- Colonists retains its existing player display-name and human-based appearance-stage rules. Canonical names and biology remain in the ledger. Live gameplay after initialization can form new relationships; synchronizing subsequent gameplay changes back into the historical snapshot is not implemented here.
+- All ancestor records are retained; only the existing last 400 historical events are retained (`eventsDiscarded` records truncation). Era labels do not add houses, trade networks, crypt art, or a new UF_Look genealogy interface. Existing year-1 camp/starter-kit placement is retained.
+- The legacy in-game history suite still contains founder-only/version-5 assumptions; it has not been updated or run for this version-6 bridge. Native acceptance and the final integration commit remain open.
+
 ## DEUS-TSK-ASTRA-14 independent HIST-09 candidate revalidation — 2026-09-23
 
 **Verdict: PASS, exit code 0 for all three required commands.** The frozen candidate resolves both ASTRA-12/13 metadata defects: unsupported caller capacity IDs/versions and contradictory stored config IDs reject, and genuine custom v6 biology migrates with the `custom` demographic tag. All 23 common contracts, five reconciled metadata contracts, eight capacity mutation controls, 29 benchmark self-checks, six canonical 500-year trajectories, three repeat comparisons, three disk restart comparisons, and twenty 250-year sweep trajectories pass. The first default run passed in 165.7087084 seconds; a provenance correction required a second default run. Measurements below identify the final report, not an average or fastest-sample selection. No forced GC was used.

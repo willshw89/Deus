@@ -7,7 +7,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- (none)
+- (None currently claimed)
+
+## DEUS-TSK-GEMINI-08 — Liquid Depth V1 & Year 250 Population Materialization (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Fluid.js`: Full 0..7 volumetric liquid depth simulation engine (`UF.Fluid` / `DEUS.Fluid`), downward-first vertical gravity, multi-Z vertical cascades (Z+1 to Z-2), lateral equalization, wall/door obstruction, terrain dig/channel wakeups, active dirty queue with quiescence, budget throttling (max 500 cells/tick), sparse save/load persistence, and movement classes (`dry`, `shallow`, `wading`, `deep`, `submerged`, `lethal`).
+  - `game/js/plugins/DEUS_Levels.js` & `DEUS_Objects.js`: Fluid depth descriptions in `describeCell` and object liquid interaction.
+  - `game/js/plugins/DEUS_Callings.js`: Restored from archive to canonical plugins directory so 89-calling catalog loads reliably in headless environments and NW.js.
+  - `game/js/plugins/DEUS_Core.js`: Added synchronous NW.js desktop companion loader in `_Scene_Boot_start` for modular plugins (`Containers`, `Stockpiles`, `Fluid`, `Conditions`, `Select`, `Dnd5e`, `Callings`, `HistoricalDemographics`), resolving plugin execution order during RMMZ F5 Playtest when editor is locked.
+  - `game/js/plugins/DEUS_History.js`:
+    - Resilient module loaders for `HistoricalDemographics`, `Callings`, and `Dnd5e`.
+    - `History.materialize()`: Fixed missing D&D class/stat metadata (`dndClass`, `className`, `hitDie`, `savingThrows`, `proficiencies`) and dispatched `giveFactionStartingKit` for player colonists.
+    - `spawnSettled()`: Removed the fatal `n = Math.min(n, free.length)` bottleneck that dropped population to 0 when site center was occupied by `piecesFor`. Implemented Chebyshev expanding search radius (`searchR < 32`) and radial placement fallback, ensuring all citizens materialize physically into the world.
+  - `tools/test_liquid_depth_simulation.js`: Comprehensive 21-check verification suite with 7 Rule 4 mutation checks covering conservation, gravity, lateral flow, door/wall blocking, dig wakeups, quiescence, save/load, determinism, and movement classes.
+  - `tools/test_history_materialization_and_world_age.js`: Standalone integration suite covering 12 canonical seed/age cases, checkpoint prefix stability, process exit/reload disk restarts, and mutation checks.
+- **Checks observed**:
+  - `node tools/test_liquid_depth_simulation.js`: **21 passed, 0 failed, 7/7 mutants detected (exit 0)**.
+  - `node tools/test_history_materialization_and_world_age.js`: **29 passed, 0 failed, 3/3 mutants detected (exit 0)** across seeds 0, 424242, 20260919 and ages 0, 100, 250, 500.
+  - `node tools/test_stockpiles_designation.js`: **18 passed, 0 failed (exit 0)**.
+  - `node tools/test_autonomous_settlement_closure.js`: **22 passed, 0 failed (exit 0)**.
+
+
+## DEUS-TSK-ASTRA-15 — HIST-10 world age and living materialization (2026-09-23)
+
+- **Verdict:** Headless acceptance **PASS for the recorded source set**; final commit/integration pending contributor ownership. Native F5/F8, screenshots and the legacy in-game history suite are **NOT RUN**. Astra's claim is released for coordinator reconciliation.
+- **Implementation:** History defaults to age 500, accepts ages 0/1 as founders and N > 1 as N frozen annual steps, preserves all ancestors, materializes living units with stable entity IDs/family links/89-catalog callings/D&D scores/households/site leadership, and exposes historical genealogy queries. A boot-time pairing deferral prevents Colonists from creating divergent partnerships during initialization; the observed age-250 mismatch fell from 76 citizens to 0, with pairing restored afterward. HistoricalDemographics production bytes are unchanged.
+- **Observed checks:** New standalone suite **29 PASS, exit 0**; 12 canonical seed/age cases, 3 complete demographic/event prefixes, 6 actual disk/process restarts, age-1 alias, seed-zero override, and real Colonists initialization at ages 0/250/500. All 3 requested mutants **FAIL with intended exit 1** (prefix, dropped species, lost ancestors). Existing capacity suite **23 common + 5 metadata + 8 controls PASS**, benchmark self-test **29 PASS**. Syntax and scoped diff checks pass.
+- **Matrix:** At age 500, seeds 0 / 424242 / 20260919 have **1,080 / 1,063 / 1,093 living**, **4,178 / 4,199 / 4,224 ancestors**, and serialized worlds **4,991,801 / 4,958,372 / 5,037,835 bytes**. Measured generation/materialization plus worker assertions: **13.829 / 14.672 / 14.035 s**. Total final suite wall time **116.9729126 s**. Full 12-row measurements and state/event hashes are in [UF_History.md](systems/UF_History.md#deus-tsk-astra-15-hist-10-materialization-and-world-age--2026-09-23).
+- **Provenance:** Actual starting HEAD `2f22f9ebad576cb69016def0e5fb423309e2ceb1` (packet's different full hash is not the observed baseline); source-set digest `92adaf6cec3b2f9e46b4624368d3735fa70c07321a6cf45fbedf82042f246940`. Tested History SHA-256 `a5eb0ec691b38877dd4a441e73ee8be70d86421f83480030cdbd1fa164ee4d17`; harness `b2cd04303573392b10656b2366f6a64dd43d044a5345904ba11bfdf91b1b6453`; frozen demographics `d0a09bfda8ab63ff3eec5b362c63896ea0c3dbcb3aeeeb574c48c3113c995e4e`.
+- **Evidence:** `C:/Users/snewt/AppData/Local/Temp/deus-astra15-final-139e8f88-f0e8-438b-9a00-2911b3dffc56.json` and `C:/Users/snewt/AppData/Local/Temp/deus-astra15-mutants-1790206032105.json`. Previous `game/test_output/bench_species_biology.json` remains unchanged (37,997,150 bytes; SHA-256 `afabf8695dc2cc71be5bfcf0347f7077167f4aa489860d6dee72cd86491dea19`).
+- **Commit boundary:** Another contributor restored the missing, currently untracked `DEUS_Callings.js` (SHA-256 `1370ae3d4538f3596e01a511e39fab3ae64e8d736c39ccd223058b561d9f55bd`) and edited History's dependency helpers and legacy spawner. Astra preserved but did not stage those mixed edits. Ownership/authorization is pending; **no ASTRA-15 commit was made**. Core received additional companion-loader edits after the final suite; they are not covered by that source-set result.
+- **Known limits:** All ancestor records are retained, but the inherited chronicle limit is 400 events. Existing Colonists display-name/human appearance-stage behavior remains. No new mature infrastructure or UF_Look genealogy UI is claimed. Legacy in-game history assertions still assume founder-only/version-5 worlds. Native acceptance and coordinator integration remain open.
 
 ## DEUS-TSK-GEMINI-06 — True 3D Volumetric Landscape & Upper-Z Terrain Generation (2026-09-23)
 - **Status**: `COMPLETED — PASS`
