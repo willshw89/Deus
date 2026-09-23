@@ -1236,15 +1236,100 @@
 
         // Point of the pointer relative to the window (wx, wy) and to its contents (x, y). The window layer isn't
         // scaled (UF_Camera zooms only the tilemap), so plain offsets are exact, even before the first render.
-        localPointer() {
+        localPointer(gx = TouchInput.x, gy = TouchInput.y) {
             const layer = this.parent;
-            const wx = TouchInput.x - (layer ? layer.x : 0) - this.x, wy = TouchInput.y - (layer ? layer.y : 0) - this.y;
+            const wx = gx - (layer ? layer.x : 0) - this.x, wy = gy - (layer ? layer.y : 0) - this.y;
             return { x: wx - this.padding, y: wy - this.padding, wx, wy };
         }
         isPointerInside() {
             if (!this.visible || !this.parent) return false;
             const p = this.localPointer();
             return p.wx >= 0 && p.wy >= 0 && p.wx < this.width && p.wy < this.height;
+        }
+        isPointerInsideCoords(gx, gy) {
+            if (!this.visible || !this.parent) return false;
+            const layer = this.parent;
+            const wx = gx - (layer ? layer.x : 0) - this.x;
+            const wy = gy - (layer ? layer.y : 0) - this.y;
+            return wx >= 0 && wy >= 0 && wx < this.width && wy < this.height;
+        }
+        inventorySlotAtCoords(gx, gy) {
+            const p = this.localPointer(gx, gy), L = this._layout;
+            if (!L || !L.grid || !L.grid.slots) return -1;
+            return L.grid.slots.findIndex(r => inRect(p, r));
+        }
+        equipmentSlotAtCoords(gx, gy) {
+            const p = this.localPointer(gx, gy), L = this._layout;
+            if (!L || !L.equipment || !L.equipment.slots) return null;
+            return L.equipment.slots.find(r => inRect(p, r)) || null;
+        }
+        reorderSlot(srcIdx, destIdx) {
+            const u = this._subject && this._subject.kind === "unit" ? World().unit(this._subject.unitId) : null;
+            if (!u || !u.data || !Array.isArray(u.data.inventory)) return;
+            const inv = u.data.inventory;
+            if (srcIdx < 0 || srcIdx >= inv.length) return;
+            const moved = inv.splice(srcIdx, 1)[0];
+            const insertAt = Math.min(inv.length, Math.max(0, destIdx));
+            inv.splice(insertAt, 0, moved);
+            this.redraw();
+        }
+        useInventoryItem(entry) {
+            const u = this._subject && this._subject.kind === "unit" ? World().unit(this._subject.unitId) : null;
+            if (!u || !entry) return;
+            const I = Items();
+            const t = I ? I.type(entry.typeId) : null;
+            const tags = (t && Array.isArray(t.tags)) ? t.tags : [];
+            const isFood = (t && t.food) || tags.includes("food") || tags.includes("drink") || tags.includes("consumable") || ["meat_cooked", "meat_raw", "berries", "bread", "ration", "apple", "fish"].includes(entry.typeId);
+
+            if (isFood) {
+                const hungerRestore = (t && t.food && typeof t.food.hunger === "number") ? t.food.hunger : 40;
+                const thirstRestore = (t && t.food && typeof t.food.thirst === "number") ? t.food.thirst : 10;
+                if (!u.data) u.data = {};
+                if (!u.data.needs) u.data.needs = {};
+                const prevHunger = u.data.needs.hunger || 0;
+                u.data.needs.hunger = Math.max(0, prevHunger - hungerRestore);
+                if (u.data.needs.thirst !== undefined) {
+                    u.data.needs.thirst = Math.max(0, u.data.needs.thirst - thirstRestore);
+                }
+                const maxHp = u.data.maxHp || (u.data.dnd ? u.data.dnd.hpMax : 10);
+                if (u.data.hp !== undefined && u.data.hp < maxHp) {
+                    u.data.hp = Math.min(maxHp, u.data.hp + 2);
+                }
+                if (I && typeof I.consume === "function") {
+                    I.consume(entry.itemId, 1);
+                }
+                SoundManager.playRecovery();
+                this._footer = `${u.name || "Colonist"} ate ${t ? t.name : entry.typeId} (-${hungerRestore} Hunger)`;
+                this.redraw();
+                const scene = SceneManager._scene;
+                if (scene && scene._ufContainerCard && scene._ufContainerCard.visible) {
+                    scene._ufContainerCard.refresh();
+                }
+                return;
+            }
+
+            const isEquip = t && (t.slot || tags.includes("weapon") || tags.includes("armor") || tags.includes("shield") || tags.includes("clothes") || tags.includes("wear"));
+            if (isEquip) {
+                const slot = t.slot || (tags.includes("weapon") ? "mainHand" : tags.includes("shield") ? "offHand" : tags.includes("armor") ? "body" : tags.includes("head") ? "head" : "mainHand");
+                if (I && typeof I.equip === "function") {
+                    I.equip(u.id, entry.itemId, slot);
+                    SoundManager.playEquip();
+                    this._footer = `${u.name || "Colonist"} equipped ${t ? t.name : entry.typeId}`;
+                    this.redraw();
+                    return;
+                }
+            }
+        }
+        unequipSlot(slot) {
+            const u = this._subject && this._subject.kind === "unit" ? World().unit(this._subject.unitId) : null;
+            if (!u || !slot) return;
+            const I = Items();
+            if (I && typeof I.unequip === "function") {
+                I.unequip(u.id, slot);
+                SoundManager.playEquip();
+                this._footer = `Unequipped ${slot}`;
+                this.redraw();
+            }
         }
         // A window drawn over this one (the right-click menu, the ledger, ...) under the pointer takes the click.
         isCoveredAtPointer() {
@@ -1268,32 +1353,107 @@
             if (Int && typeof Int.isOpen === "function" && Int.isOpen()) return; // the menu is modal while it's open
             if (!this.isPointerInside() || this.isCoveredAtPointer()) return;
             consumeClick();
+
+            const ItemDrag = window.UF && UF.ItemDrag;
+
+            // Handle Right Click (TouchInput.isCancelled())
             if (right) {
+                // If item attached to mouse, cancel pickup!
+                if (ItemDrag && ItemDrag.hasAttached()) {
+                    ItemDrag.cancel();
+                    SoundManager.playCancel();
+                    this.redraw();
+                    const scene = SceneManager._scene;
+                    if (scene && scene._ufContainerCard && scene._ufContainerCard.visible) {
+                        scene._ufContainerCard.refresh();
+                    }
+                    return;
+                }
+
+                const p = this.localPointer(), L = this._layout;
+                if (L) {
+                    // Check if right clicked an inventory slot
+                    if (L.grid && this._model && this._model.grid) {
+                        const i = L.grid.slots.findIndex(r => inRect(p, r));
+                        if (i >= 0) {
+                            const entry = this._model.grid.slots[i];
+                            if (entry) {
+                                this.useInventoryItem(entry);
+                                return;
+                            }
+                        }
+                    }
+                    // Check if right clicked an equipment slot
+                    if (L.equipment && this._model && this._model.equipment) {
+                        const e = L.equipment.slots.find(r => inRect(p, r));
+                        if (e) {
+                            const eqItem = this._model.equipment.find(q => q.slot === e.slot);
+                            if (eqItem && eqItem.typeId) {
+                                this.unequipSlot(e.slot);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // If not over an item/equipment slot, close sheet
                 Sheet.close(true);
                 return;
             }
+
             const p = this.localPointer(), L = this._layout;
             if (!L) return;
+
+            // Close button
             if (inRect(p, L.close)) {
                 Sheet.close(true);
                 return;
             }
+
+            // Tabs
             if (L.tabs) {
                 const t = L.tabs.findIndex(r => inRect(p, r));
                 if (t >= 0) return this.switchTab(t);
             }
+
+            // Left click with item attached to mouse -> drop/place!
+            if (ItemDrag && ItemDrag.hasAttached()) {
+                ItemDrag.executeDrop(TouchInput.x, TouchInput.y);
+                ItemDrag.cancel();
+                return;
+            }
+
+            // Left click on inventory slot -> attach to mouse and select
             if (L.grid) {
                 const i = L.grid.slots.findIndex(r => inRect(p, r));
-                if (i >= 0) return this.selectSlot(i);
+                if (i >= 0) {
+                    const entry = this.selectSlot(i);
+                    if (entry && ItemDrag) {
+                        const u = this._subject && this._subject.kind === "unit" ? World().unit(this._subject.unitId) : null;
+                        const I = Items();
+                        const it = I ? I.get(entry.itemId) : null;
+                        ItemDrag.attach({
+                            kind: "inventory",
+                            unitId: u ? u.id : null,
+                            slotIdx: i,
+                            item: it || { id: entry.itemId, type: entry.typeId, count: entry.count }
+                        }, SceneManager._scene);
+                    }
+                    return;
+                }
             }
+
+            // Left click on equipment slot
             if (L.equipment) {
                 const e = L.equipment.slots.find(r => inRect(p, r));
                 if (e) return this.selectEquip(e.slot);
             }
+
             if (L.drops) {
                 const i = L.drops.slots.findIndex(r => inRect(p, r));
                 if (i >= 0) return this.showDrop(i);
             }
+
             if (L.buttons) {
                 const b = L.buttons.find(r => inRect(p, r));
                 if (b) return this.pressButton(b.id);
@@ -1780,6 +1940,10 @@
         }
 
         redraw() {
+            if (this._subject) {
+                const refreshed = buildModel(this._subject);
+                if (refreshed) this._model = refreshed;
+            }
             const m = this._model;
             if (!m) return;
             perf.redraws++;

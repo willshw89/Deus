@@ -643,6 +643,27 @@
         return true;
     };
 
+    /** Equip an item on a unit in a designated slot (e.g. "mainHand", "offHand", "body", "head"). */
+    Items.equip = function(unitId, itemId, slot) {
+        const W = World(), u = W && W.unit(unitId);
+        if (!u) return false;
+        if (!u.data) u.data = {};
+        if (!u.data.equipment) u.data.equipment = {};
+        u.data.equipment[slot] = itemId;
+        changed({ id: itemId }, "equipped");
+        return true;
+    };
+
+    /** Unequip an item from a slot on a unit. */
+    Items.unequip = function(unitId, slot) {
+        const W = World(), u = W && W.unit(unitId);
+        if (!u || !u.data || !u.data.equipment) return false;
+        const itemId = u.data.equipment[slot];
+        delete u.data.equipment[slot];
+        if (itemId) changed({ id: itemId }, "unequipped");
+        return true;
+    };
+
     /** The item records a unit carries, in pick-up order. */
     Items.inventoryOf = function(unitId) {
         const st = ready();

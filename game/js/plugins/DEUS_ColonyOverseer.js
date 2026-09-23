@@ -234,6 +234,10 @@
 
         // 2. Left-click: select a colonist, or deselect if clicking away
         if (TouchInput.isTriggered() && !this.isAnyWindowUnderMouse()) {
+            if (window.UF && UF.ItemDrag && UF.ItemDrag.hasAttached()) {
+                // Mouse has an item attached for drop/transfer; let ItemDrag handle it!
+                return;
+            }
             const mx = $gameMap.canvasToMapX(TouchInput.x);
             const my = $gameMap.canvasToMapY(TouchInput.y);
             const clicked = colonistAt(mx, my);

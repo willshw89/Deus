@@ -538,14 +538,24 @@
 
     const ItemDrag = {
         _active: false,
-        _pending: false,
+        _attached: false,
         _source: null, // { kind: "container"|"inventory"|"equipment", containerId, unitId, slotIdx, item }
         _downX: 0,
         _downY: 0,
+        _downTime: 0,
+        _dragStarted: false,
         _dragSprite: null,
 
         isDragging() {
-            return this._active;
+            return this._attached || this._active;
+        },
+
+        hasAttached() {
+            return this._attached && !!this._source;
+        },
+
+        source() {
+            return this._source;
         },
 
         ensureSprite(scene) {
@@ -560,69 +570,92 @@
             return this._dragSprite;
         },
 
-        startPending(source, x, y) {
-            this._pending = true;
-            this._active = false;
+        attach(source, scene) {
+            this._attached = true;
+            this._active = true;
             this._source = source;
-            this._downX = x;
-            this._downY = y;
+            this._downX = TouchInput.x;
+            this._downY = TouchInput.y;
+            this._downTime = Date.now();
+            this._downFrame = (typeof Graphics !== "undefined" && Graphics.frameCount) || 0;
+            this._justAttached = true;
+            this._dragStarted = false;
+
+            const spr = this.ensureSprite(scene);
+            spr.setItem(source.item);
+            spr.visible = true;
+            spr.x = TouchInput.x;
+            spr.y = TouchInput.y;
+            SoundManager.playCursor();
         },
 
         cancel() {
-            this._pending = false;
+            this._attached = false;
             this._active = false;
             this._source = null;
+            this._justAttached = false;
+            this._dragStarted = false;
             if (this._dragSprite) this._dragSprite.visible = false;
         },
 
-        update(scene) {
-            if (!this._pending && !this._active) return;
+        clear() {
+            this.cancel();
+        },
 
-            // If mouse was released:
-            if (!TouchInput.isPressed()) {
-                if (this._active) {
-                    this.executeDrop(TouchInput.x, TouchInput.y);
-                } else if (this._pending) {
-                    // It was a click, not a drag!
-                    this.executeClick();
-                }
+        update(scene) {
+            if (!this._attached || !this._source) return;
+
+            // Follow mouse cursor
+            if (this._dragSprite) {
+                this._dragSprite.x = TouchInput.x;
+                this._dragSprite.y = TouchInput.y;
+                this._dragSprite.visible = true;
+            }
+
+            // Right click cancels mouse pickup!
+            if (TouchInput.isCancelled()) {
+                TouchInput._currentState.cancelled = false;
                 this.cancel();
+                SoundManager.playCancel();
+                const card = scene ? scene._ufContainerCard : null;
+                if (card) card.refresh();
+                const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                if (sheet) sheet.redraw();
                 return;
             }
 
-            // If still pressed, check if movement exceeds threshold
-            if (this._pending && !this._active) {
+            if (this._justAttached) {
+                const curFrame = (typeof Graphics !== "undefined" && Graphics.frameCount) || 0;
+                if (!TouchInput.isPressed() && !TouchInput.isTriggered()) {
+                    this._justAttached = false;
+                } else if (curFrame > this._downFrame || Date.now() - this._downTime >= 20) {
+                    this._justAttached = false;
+                } else {
+                    return;
+                }
+            }
+
+            // Drag movement detection
+            if (TouchInput.isPressed()) {
                 const dist = Math.hypot(TouchInput.x - this._downX, TouchInput.y - this._downY);
-                if (dist >= 6) {
-                    this._active = true;
-                    this._pending = false;
-                    const spr = this.ensureSprite(scene);
-                    spr.setItem(this._source.item);
-                    spr.visible = true;
-                    spr.x = TouchInput.x;
-                    spr.y = TouchInput.y;
+                if (dist >= 10) {
+                    this._dragStarted = true;
+                }
+            } else {
+                // If user held and dragged (dist >= 10), release drops!
+                if (this._dragStarted) {
+                    this.executeDrop(TouchInput.x, TouchInput.y);
+                    this.cancel();
+                    return;
                 }
             }
 
-            if (this._active && this._dragSprite) {
-                this._dragSprite.x = TouchInput.x;
-                this._dragSprite.y = TouchInput.y;
-            }
-        },
-
-        executeClick() {
-            if (!this._source) return;
-            const src = this._source;
-            if (src.kind === "container") {
-                const card = SceneManager._scene ? SceneManager._scene._ufContainerCard : null;
-                if (card && typeof card.onSlotClick === "function") {
-                    card.onSlotClick(src.slotIdx);
-                }
-            } else if (src.kind === "inventory") {
-                const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
-                if (sheet && typeof sheet.selectSlot === "function") {
-                    sheet.selectSlot(src.slotIdx);
-                }
+            // Click-to-drop: If mouse is triggered after having attached on a different frame
+            if (TouchInput.isTriggered()) {
+                TouchInput._currentState.triggered = false;
+                this.executeDrop(TouchInput.x, TouchInput.y);
+                this.cancel();
+                return;
             }
         },
 
@@ -636,7 +669,7 @@
             const W = World();
             if (!I) return;
 
-            const u = resolveActiveUnit();
+            const u = (src && src.unitId && W) ? W.unit(src.unitId) : resolveActiveUnit();
             const cId = card ? card._containerId : null;
 
             // 1. Check if dropped over Container Card
@@ -711,7 +744,7 @@
             if (src.kind === "inventory" && u) {
                 // Drop from colonist to ground
                 if (typeof I.putDown === "function") {
-                    I.putDown(src.item.id, curArea, mx, my);
+                    this._lastDropResult = I.putDown(src.item.id, curArea, mx, my);
                     SoundManager.playCursor();
                     if (sheet) sheet.redraw();
                 }
@@ -719,7 +752,7 @@
                 // Drop from chest to ground
                 Containers.removeItem(src.containerId, src.item.id);
                 if (typeof I.putDown === "function") {
-                    I.putDown(src.item.id, curArea, mx, my);
+                    this._lastDropResult = I.putDown(src.item.id, curArea, mx, my);
                     SoundManager.playCursor();
                     if (card) card.refresh();
                 }
@@ -837,6 +870,9 @@
         }
 
         close() {
+            if (ItemDrag && ItemDrag.hasAttached()) {
+                ItemDrag.cancel();
+            }
             if (this._chestX !== null && this._chestY !== null) {
                 if (window.UF && UF.Objects && typeof UF.Objects.closeChest === "function") {
                     UF.Objects.closeChest(this._chestX, this._chestY);
@@ -891,13 +927,39 @@
 
         processTouch() {
             if (!TouchInput.isTriggered() && !TouchInput.isCancelled()) return;
+            if (TouchInput.x < this.x || TouchInput.x >= this.x + this.width || TouchInput.y < this.y || TouchInput.y >= this.y + this.height) return;
             const mx = TouchInput.x - this.x - this.padding;
             const my = TouchInput.y - this.y - this.padding;
-            if (mx < -this.padding || my < -this.padding || mx > this.width || my > this.height) return;
 
+            // Handle Right Click (TouchInput.isCancelled())
             if (TouchInput.isCancelled()) {
                 TouchInput._currentState.cancelled = false;
+                // If an item is attached to mouse cursor, cancel pickup!
+                if (ItemDrag && ItemDrag.hasAttached()) {
+                    ItemDrag.cancel();
+                    SoundManager.playCancel();
+                    this.refresh();
+                    const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                    if (sheet) sheet.redraw();
+                    return;
+                }
+
+                // Check if right click hit an item slot
+                for (let i = 0; i < this._slotRects.length; i++) {
+                    const r = this._slotRects[i];
+                    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+                        const items = Containers.itemsIn(this._containerId);
+                        const it = items[i];
+                        if (it) {
+                            this.useItemAtSlot(i, it);
+                            return;
+                        }
+                    }
+                }
+
+                // If not over an item slot, close window
                 this.close();
+                SoundManager.playCancel();
                 return;
             }
 
@@ -909,7 +971,15 @@
                 return;
             }
 
-            // Slot clicks / drag starts
+            // If mouse already has an item attached, left clicking anywhere inside container card drops/deposits it
+            if (ItemDrag && ItemDrag.hasAttached()) {
+                TouchInput._currentState.triggered = false;
+                ItemDrag.executeDrop(TouchInput.x, TouchInput.y);
+                ItemDrag.cancel();
+                return;
+            }
+
+            // Slot clicks / mouse pickup
             for (let i = 0; i < this._slotRects.length; i++) {
                 const r = this._slotRects[i];
                 if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
@@ -920,15 +990,15 @@
                         this._selSlot = i;
                         const I = Items();
                         const t = I ? I.type(it.type) : null;
-                        this._footer = `${t ? t.name : it.type} × ${it.count} · Drag to transfer or drop`;
+                        this._footer = `${t ? t.name : it.type} × ${it.count} · Click to attach or drag`;
                         this.refresh();
                         if (ItemDrag) {
-                            ItemDrag.startPending({
+                            ItemDrag.attach({
                                 kind: "container",
                                 containerId: this._containerId,
                                 slotIdx: i,
                                 item: it
-                            }, TouchInput.x, TouchInput.y);
+                            }, SceneManager._scene);
                         }
                     } else {
                         this._selSlot = -1;
@@ -937,6 +1007,76 @@
                     }
                     return;
                 }
+            }
+        }
+
+        useItemAtSlot(slotIdx, it) {
+            const u = resolveActiveUnit();
+            if (!u) {
+                this._footer = "No colonist selected to use item";
+                SoundManager.playBuzzer();
+                this.refresh();
+                return;
+            }
+            const I = Items();
+            const t = I ? I.type(it.type) : null;
+            const tags = (t && Array.isArray(t.tags)) ? t.tags : [];
+            const isFood = (t && t.food) || tags.includes("food") || tags.includes("drink") || tags.includes("consumable") || ["meat_cooked", "meat_raw", "berries", "bread", "ration", "apple", "fish"].includes(it.type);
+
+            if (isFood) {
+                const hungerRestore = (t && t.food && typeof t.food.hunger === "number") ? t.food.hunger : 40;
+                const thirstRestore = (t && t.food && typeof t.food.thirst === "number") ? t.food.thirst : 10;
+                if (!u.data) u.data = {};
+                if (!u.data.needs) u.data.needs = {};
+                const prevHunger = u.data.needs.hunger || 0;
+                u.data.needs.hunger = Math.max(0, prevHunger - hungerRestore);
+                if (u.data.needs.thirst !== undefined) {
+                    u.data.needs.thirst = Math.max(0, u.data.needs.thirst - thirstRestore);
+                }
+                const maxHp = u.data.maxHp || (u.data.dnd ? u.data.dnd.hpMax : 10);
+                if (u.data.hp !== undefined && u.data.hp < maxHp) {
+                    u.data.hp = Math.min(maxHp, u.data.hp + 2);
+                }
+                // Decrement count in container
+                if (it.count > 1) {
+                    it.count--;
+                    if (I && typeof I.changed === "function") I.changed(it, "count");
+                } else {
+                    Containers.removeItem(this._containerId, it.id);
+                }
+                SoundManager.playRecovery();
+                this._footer = `${u.name || "Colonist"} ate ${t ? t.name : it.type} (-${hungerRestore} Hunger)`;
+                this.refresh();
+                const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                if (sheet) sheet.redraw();
+                return;
+            }
+
+            const isEquip = t && (t.slot || tags.includes("weapon") || tags.includes("armor") || tags.includes("shield") || tags.includes("clothes") || tags.includes("wear"));
+            if (isEquip) {
+                const slot = t.slot || (tags.includes("weapon") ? "mainHand" : tags.includes("shield") ? "offHand" : tags.includes("armor") ? "body" : tags.includes("head") ? "head" : "mainHand");
+                const transferred = Containers.takeItem(this._containerId, it.id, u.id);
+                if (transferred && I && typeof I.equip === "function") {
+                    I.equip(u.id, it.id, slot);
+                    SoundManager.playEquip();
+                    this._footer = `${u.name || "Colonist"} equipped ${t ? t.name : it.type}`;
+                    this.refresh();
+                    const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                    if (sheet) sheet.redraw();
+                    return;
+                }
+            }
+
+            // Default: transfer from container to colonist
+            const transferred = Containers.takeItem(this._containerId, it.id, u.id);
+            if (transferred) {
+                SoundManager.playOk();
+                this._footer = `Transferred ${t ? t.name : it.type} to ${u.name || "Colonist"}`;
+                this.refresh();
+                const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                if (sheet) sheet.redraw();
+            } else {
+                SoundManager.playBuzzer();
             }
         }
 
@@ -1173,6 +1313,17 @@
         const h = Graphics.boxHeight - 82 - 4;
         this._ufContainerCard = new Window_UFContainerCard(new Rectangle(44, 82, w, h));
         this._windowLayer.addChild(this._ufContainerCard);
+    };
+
+    const _Scene_Map_update = Scene_Map.prototype.update;
+    Scene_Map.prototype.update = function() {
+        if (ItemDrag && ItemDrag.hasAttached() && (TouchInput.isTriggered() || TouchInput.isCancelled())) {
+            ItemDrag.update(this);
+        }
+        _Scene_Map_update.call(this);
+        if (ItemDrag) {
+            ItemDrag.update(this);
+        }
     };
 
     const _Scene_Map_isAnyWindowUnderMouse = Scene_Map.prototype.isAnyWindowUnderMouse;
