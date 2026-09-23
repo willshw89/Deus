@@ -354,8 +354,69 @@
     //-------------------------------------------------------------------------
     // World creation
 
+    /**
+     * Authoritative seed normalization and validation function for Project DEUS.
+     * Accepted range: 0 to 2,147,483,647 (non-negative signed 32-bit integer, 0x7FFFFFFF).
+     */
+    World.normalizeSeed = function(input) {
+        if (input === null || input === undefined) {
+            return { valid: true, isBlank: true, seed: null, canonical: "", error: null };
+        }
+        if (typeof input === "number") {
+            if (!Number.isFinite(input) || !Number.isInteger(input)) {
+                return { valid: false, isBlank: false, seed: null, canonical: String(input), error: "Seed must be an integer between 0 and 2,147,483,647" };
+            }
+            if (input < 0 || input > 0x7fffffff) {
+                return { valid: false, isBlank: false, seed: null, canonical: String(input), error: "Seed must be an integer between 0 and 2,147,483,647" };
+            }
+            return { valid: true, isBlank: false, seed: input, canonical: String(input), error: null };
+        }
+        const str = String(input).trim();
+        if (str === "") {
+            return { valid: true, isBlank: true, seed: null, canonical: "", error: null };
+        }
+        if (!/^\d+$/.test(str)) {
+            return { valid: false, isBlank: false, seed: null, canonical: str, error: "Seed must be an integer between 0 and 2,147,483,647" };
+        }
+        if (str.length > 10) {
+            return { valid: false, isBlank: false, seed: null, canonical: str, error: "Seed must be an integer between 0 and 2,147,483,647" };
+        }
+        const num = Number(str);
+        if (!Number.isSafeInteger(num) || num < 0 || num > 0x7fffffff) {
+            return { valid: false, isBlank: false, seed: null, canonical: str, error: "Seed must be an integer between 0 and 2,147,483,647" };
+        }
+        return { valid: true, isBlank: false, seed: num, canonical: String(num), error: null };
+    };
+
+    World.seed = function() {
+        return this.state ? this.state.seed : null;
+    };
+
+    World.generatorInfo = function() {
+        if (!this.state) return null;
+        return {
+            seed: this.state.seed,
+            version: this.state.version || 3,
+            size: this.state.size || 256,
+            areasX: this.state.areasX || CONFIG.areasX,
+            areasY: this.state.areasY || CONFIG.areasY
+        };
+    };
+
     World.newWorld = function(seed, size) {
-        const s = seed || CONFIG.seed || Math.floor(Math.random() * 0x7ffffffe) + 1;
+        let s;
+        if (seed !== undefined && seed !== null && seed !== "") {
+            const norm = World.normalizeSeed(seed);
+            if (!norm.valid || norm.isBlank) {
+                s = Math.floor(Math.random() * 0x7ffffffe) + 1;
+            } else {
+                s = norm.seed;
+            }
+        } else if (CONFIG.seed && CONFIG.seed > 0) {
+            s = CONFIG.seed;
+        } else {
+            s = Math.floor(Math.random() * 0x7ffffffe) + 1;
+        }
         const worldSize = 256;
         this.state = {
             version: 3,
@@ -2414,7 +2475,8 @@
         if (typeof require !== 'undefined') {
             try { require('fs').appendFileSync('game_runtime.log', `${new Date().toISOString()} [TIMING] setupForNewGame before World.newWorld\n`); } catch (_) {}
         }
-        World.newWorld();
+        const reqSeed = (window.UF && UF.NewGameSetup && UF.NewGameSetup.seed !== undefined) ? UF.NewGameSetup.seed : undefined;
+        World.newWorld(reqSeed);
         if (typeof require !== 'undefined') {
             try { require('fs').appendFileSync('game_runtime.log', `${new Date().toISOString()} [TIMING] setupForNewGame after World.newWorld\n`); } catch (_) {}
         }

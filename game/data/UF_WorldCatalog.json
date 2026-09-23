@@ -6099,32 +6099,40 @@
         "forest_temperate_conifer",
         "taiga"
       ],
-      "orc": [
-        "savanna_tropical",
-        "shrubland_tropical",
-        "desert_rock",
-        "desert_badland"
+      "halfling": [
+        "grassland_temperate",
+        "forest_temperate_broadleaf",
+        "shrubland_temperate"
       ],
       "dwarf": [
         "mountain",
         "desert_rock",
         "taiga"
       ],
-      "goblin": [
-        "swamp_temperate_fresh",
-        "desert_badland",
-        "shrubland_temperate",
-        "marsh_temperate_salt"
-      ],
       "gnome": [
         "forest_temperate_conifer",
         "mountain",
         "shrubland_temperate"
       ],
-      "automaton": [
+      "dragonborn": [
+        "mountain",
         "desert_rock",
+        "desert_badland"
+      ],
+      "half-elf": [
+        "forest_temperate_broadleaf",
+        "grassland_temperate",
+        "forest_temperate_conifer"
+      ],
+      "half-orc": [
+        "savanna_tropical",
+        "shrubland_tropical",
+        "forest_temperate_conifer"
+      ],
+      "tiefling": [
         "desert_badland",
-        "mountain"
+        "desert_rock",
+        "shrubland_tropical"
       ]
     },
     "growth": [
@@ -7236,26 +7244,6 @@
         "cha": -1
       }
     },
-    "goblin": {
-      "images": [
-        "$UF_Goblin_Male",
-        "$UF_Goblin_Female"
-      ],
-      "stats": {
-        "dex": 2,
-        "str": -2
-      }
-    },
-    "orc": {
-      "images": [
-        "$UF_Orc_Male",
-        "$UF_Orc_Female"
-      ],
-      "stats": {
-        "str": 2,
-        "int": -1
-      }
-    },
     "gnome": {
       "images": [
         "$UF_Gnome_Male",
@@ -7266,15 +7254,55 @@
         "str": -2
       }
     },
-    "automaton": {
+    "halfling": {
       "images": [
-        "$UF_Stock_SF_People3_4",
-        "$UF_Stock_SF_People3_6",
-        "$UF_Stock_SF_People3_7"
+        "",
+        ""
       ],
       "stats": {
-        "con": 2,
-        "cha": -2
+        "dex": 2,
+        "cha": 1
+      }
+    },
+    "dragonborn": {
+      "images": [
+        "",
+        ""
+      ],
+      "stats": {
+        "str": 2,
+        "cha": 1
+      }
+    },
+    "half-elf": {
+      "images": [
+        "",
+        ""
+      ],
+      "stats": {
+        "cha": 2,
+        "dex": 1,
+        "con": 1
+      }
+    },
+    "half-orc": {
+      "images": [
+        "",
+        ""
+      ],
+      "stats": {
+        "str": 2,
+        "con": 1
+      }
+    },
+    "tiefling": {
+      "images": [
+        "",
+        ""
+      ],
+      "stats": {
+        "cha": 2,
+        "int": 1
       }
     }
   },
@@ -7290,22 +7318,16 @@
         "human",
         "elf",
         "halfling",
-        "goblin",
-        "orc"
+        "half-elf",
+        "half-orc"
       ],
       "-1": [
         "dwarf",
-        "gnome",
-        "serpentkin",
-        "undead",
-        "goblin"
+        "gnome"
       ],
       "-2": [
-        "demon",
-        "automaton",
-        "swarmer",
-        "dark_dwarf",
-        "dark_gnome"
+        "tiefling",
+        "dragonborn"
       ]
     },
     "species": [
@@ -7356,28 +7378,6 @@
         ]
       },
       {
-        "id": "goblin",
-        "name": "Goblins",
-        "weight": 2,
-        "playable": false,
-        "groups": [
-          "Warren",
-          "Pack",
-          "Rabble"
-        ]
-      },
-      {
-        "id": "orc",
-        "name": "Orcs",
-        "weight": 2,
-        "playable": false,
-        "groups": [
-          "Horde",
-          "Band",
-          "Warclan"
-        ]
-      },
-      {
         "id": "gnome",
         "name": "Gnomes",
         "weight": 1,
@@ -7389,87 +7389,47 @@
         ]
       },
       {
-        "id": "serpentkin",
-        "name": "Serpentkin",
-        "weight": 1,
-        "playable": false,
+        "id": "dragonborn",
+        "name": "Dragonborn",
+        "weight": 2,
+        "playable": true,
         "groups": [
-          "Coil",
-          "Brood",
-          "Den",
-          "Nest"
+          "Clan",
+          "Flight",
+          "Cohort"
         ]
       },
       {
-        "id": "undead",
-        "name": "Undead",
-        "weight": 1,
-        "playable": false,
+        "id": "half-elf",
+        "name": "Half-Elves",
+        "weight": 2,
+        "playable": true,
         "groups": [
-          "Crypt",
-          "Court",
-          "Host",
-          "Tomb"
+          "Enclave",
+          "Freehold",
+          "Circle"
         ]
       },
       {
-        "id": "demon",
-        "name": "Demons",
-        "weight": 1,
-        "playable": false,
+        "id": "half-orc",
+        "name": "Half-Orcs",
+        "weight": 2,
+        "playable": true,
         "groups": [
-          "Legion",
-          "Hell",
-          "Dominion",
-          "Cabal"
+          "Warband",
+          "Tribe",
+          "Clan"
         ]
       },
       {
-        "id": "automaton",
-        "name": "Automata",
-        "weight": 1,
-        "playable": false,
+        "id": "tiefling",
+        "name": "Tieflings",
+        "weight": 2,
+        "playable": true,
         "groups": [
-          "Collective",
-          "Array",
-          "Foundry"
-        ],
-        "about": "science-fiction element (VISION V8)"
-      },
-      {
-        "id": "swarmer",
-        "name": "Swarmers",
-        "weight": 1,
-        "playable": false,
-        "groups": [
-          "Swarm",
-          "Hive",
-          "Nest",
-          "Colony"
-        ]
-      },
-      {
-        "id": "dark_dwarf",
-        "name": "Dark Dwarves",
-        "weight": 1,
-        "playable": false,
-        "groups": [
-          "Deep",
-          "Delve",
-          "Spire",
-          "Hold"
-        ]
-      },
-      {
-        "id": "dark_gnome",
-        "name": "Dark Gnomes",
-        "weight": 1,
-        "playable": false,
-        "groups": [
-          "Coven",
-          "Warrens",
-          "Workshop",
-          "Guild"
+          "Covenant",
+          "House",
+          "Syndicate"
         ]
       }
     ],
@@ -7477,17 +7437,16 @@
       "human|elf": 10,
       "human|dwarf": 10,
       "human|gnome": 10,
-      "human|goblin": -25,
-      "human|orc": -25,
       "elf|dwarf": -10,
-      "elf|orc": -35,
-      "elf|goblin": -30,
-      "dwarf|goblin": -40,
-      "dwarf|orc": -20,
       "dwarf|gnome": 20,
-      "goblin|orc": 15,
-      "gnome|goblin": -25,
-      "automaton|goblin": -15
+      "human|dragonborn": 5,
+      "human|half-elf": 15,
+      "human|tiefling": 0,
+      "human|halfling": 15,
+      "half-elf|elf": 15,
+      "halfling|gnome": 10,
+      "half-orc|dwarf": -5,
+      "dragonborn|tiefling": -5
     },
     "ethos": [
       {

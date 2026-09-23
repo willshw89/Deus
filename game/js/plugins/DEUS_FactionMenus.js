@@ -56,7 +56,7 @@
 
     window.UF_FactionMenus = {};
 
-    const FACTIONS = ["default", "human", "elf", "dwarf", "gnome", "goblin", "orc", "lizardfolk", "kobold", "undead", "starborn", "swarm"];
+    const FACTIONS = ["default", "deus", "human", "elf", "dwarf", "halfling", "gnome", "dragonborn", "half-elf", "half-orc", "tiefling"];
 
     const CURSOR_HOTSPOTS = {
         default: [4, 4],
@@ -64,22 +64,21 @@
         human: [5, 4],
         elf: [4, 4],
         dwarf: [4, 4],
+        halfling: [4, 4],
         gnome: [4, 4],
-        goblin: [4, 4],
-        orc: [4, 4],
-        lizardfolk: [4, 4],
-        kobold: [4, 4],
-        undead: [4, 4],
-        starborn: [4, 4],
-        swarm: [4, 4]
+        dragonborn: [4, 4],
+        "half-elf": [4, 4],
+        "half-orc": [4, 4],
+        tiefling: [4, 4]
     };
 
     const CULTURE_FALLBACKS = {
         halfling: "human",
-        serpentkin: "lizardfolk",
-        demon: "undead",
-        automaton: "starborn",
-        swarmer: "swarm",
+        gnome: "dwarf",
+        dragonborn: "dwarf",
+        "half-elf": "elf",
+        "half-orc": "human",
+        tiefling: "human",
         dark_dwarf: "dwarf",
         dark_gnome: "gnome"
     };
@@ -240,11 +239,11 @@
 
     Scene_Title.prototype.newGameSetupWindowRect = function() {
         const ww = 350;
-        const wh = 230;
+        const wh = 285;
         // Center squarely between letter D (x ≈ 243) and letter S (x ≈ 618), centered at x = 431
         const gapCenter = Math.round(Graphics.boxWidth / 2) + 23;
         const wx = Math.round(gapCenter - ww / 2); // 431 - 175 = 256
-        const wy = 270;
+        const wy = 235;
         return new Rectangle(wx, wy, ww, wh);
     };
 
@@ -268,23 +267,29 @@
 
     Scene_Title.prototype.onNewGameEmbark = function() {
         if (this._embarking) return;
+        this._embarking = true;
+        if (this._newGameSetupWindow && typeof this._newGameSetupWindow._destroySeedInputElement === "function") {
+            this._newGameSetupWindow._destroySeedInputElement();
+        }
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
         const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
+        const seed = this._newGameSetupWindow ? this._newGameSetupWindow.resolvedSeed() : undefined;
         const worldSize = 256;
-        const fogOfWar = this._newGameSetupWindow ? this._newGameSetupWindow.currentFog() : true;
+        const fogOfWar = false;
         window.DEUS = window.DEUS || {};
         window.UF = window.DEUS;
         window.UF.NewGameSetup = {
             faction: faction.toLowerCase(),
             year: year,
+            seed: seed,
             worldSize: 256,
-            fogOfWar: fogOfWar
+            fogOfWar: false
         };
         if (typeof UF_FactionMenus !== "undefined" && UF_FactionMenus.setFaction) {
             UF_FactionMenus.setFaction(faction.toLowerCase());
         }
         if (window.UF && UF.Fog && typeof UF.Fog.setEnabled === "function") {
-            UF.Fog.setEnabled(fogOfWar);
+            UF.Fog.setEnabled(false);
         }
         DataManager.setupNewGame();
         if (this._commandWindow) this._commandWindow.close();
@@ -295,6 +300,9 @@
 
     Scene_Title.prototype.onNewGameCancel = function() {
         if (!this._newGameSetupWindow) return;
+        if (typeof this._newGameSetupWindow._destroySeedInputElement === "function") {
+            this._newGameSetupWindow._destroySeedInputElement();
+        }
         TouchInput.clear();
         Input.clear();
         this._newGameSetupWindow.deactivate();
@@ -302,6 +310,14 @@
         this._commandWindow.open();
         this._commandWindow.activate();
         this._commandWindow.selectSymbol("newGame");
+    };
+
+    const _Scene_Title_terminate = Scene_Title.prototype.terminate;
+    Scene_Title.prototype.terminate = function() {
+        if (this._newGameSetupWindow && typeof this._newGameSetupWindow._destroySeedInputElement === "function") {
+            this._newGameSetupWindow._destroySeedInputElement();
+        }
+        _Scene_Title_terminate.call(this);
     };
 
     const _Scene_Title_isBusy = Scene_Title.prototype.isBusy;
@@ -314,17 +330,21 @@
     };
 
     // Class: Window_NewGameSetup
-    // Expedition setup menu allowing player to choose faction, starting year (1-200 AD), and world size
+    // Expedition setup menu allowing player to choose faction, starting year (1-200 AD), and world seed
     class Window_NewGameSetup extends Window_Selectable {
         initialize(rect) {
             super.initialize(rect);
             this._factionChoices = [
-                "Human", "Elf", "Dwarf", "Gnome", "Goblin", "Orc",
-                "Lizardfolk", "Kobold", "Undead", "Starborn", "Swarm"
+                "Human", "Elf", "Dwarf", "Halfling", "Gnome",
+                "Dragonborn", "Half-Elf", "Half-Orc", "Tiefling"
             ];
             this._factionIndex = 0;
             this._year = 1;
-            this._fogEnabled = true; // Default: Fog of War Enabled
+            this._seedInput = "";
+            this._seedButtonCol = 0;
+            this._copiedTimer = 0;
+            this._htmlInput = null;
+            this._fogEnabled = false; // Fog of War temporarily disabled per user directive 2026-09-22
             this.windowskin = ImageManager.loadSystem("Window_default");
             this.backOpacity = 225;
             this._cursorVisible = false;
@@ -337,11 +357,22 @@
         }
 
         maxItems() {
-            return 4;
+            return 6;
         }
 
         itemHeight() {
-            return 36;
+            return 32;
+        }
+
+        itemRect(index) {
+            const rect = new Rectangle(8, 8, this.innerWidth - 16, 32);
+            if (index === 0) rect.y = 8;
+            else if (index === 1) rect.y = 44;
+            else if (index === 2) rect.y = 80;
+            else if (index === 3) rect.y = 116;
+            else if (index === 4) rect.y = 180;
+            else if (index === 5) rect.y = 216;
+            return rect;
         }
 
         currentFaction() {
@@ -361,16 +392,79 @@
         }
 
         currentFog() {
-            return this._fogEnabled;
+            return false;
         }
 
         setFog(val) {
-            this._fogEnabled = (val === true || String(val).toLowerCase() === "enabled" || String(val).toLowerCase() === "on");
+            this._fogEnabled = false;
         }
 
         toggleFog() {
-            this._fogEnabled = !this._fogEnabled;
+            this._fogEnabled = false;
+        }
+
+        currentSeed() {
+            return this._seedInput;
+        }
+
+        setSeed(val) {
+            if (val === null || val === undefined || val === "") {
+                this._seedInput = "";
+            } else {
+                const norm = (window.UF && UF.World && UF.World.normalizeSeed) ? UF.World.normalizeSeed(val) : null;
+                if (norm && norm.valid && !norm.isBlank) {
+                    this._seedInput = String(norm.seed);
+                } else if (typeof val === "string") {
+                    this._seedInput = val.replace(/\D/g, "").slice(0, 10);
+                } else if (typeof val === "number" && Number.isInteger(val) && val >= 0) {
+                    this._seedInput = String(Math.min(0x7fffffff, val));
+                }
+            }
+            if (this._htmlInput) {
+                this._htmlInput.value = this._seedInput;
+            }
+            this.redrawItem(2);
+            this.redrawItem(3);
+        }
+
+        randomizeSeed() {
+            const rolled = Math.floor(Math.random() * 0x7ffffffe) + 1;
+            this.setSeed(rolled);
             SoundManager.playCursor();
+        }
+
+        copySeed() {
+            const seedStr = this._seedInput ? String(this._seedInput).trim() : "";
+            if (!seedStr) return;
+            if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(seedStr).catch(() => {});
+            }
+            if (typeof require !== "undefined") {
+                try {
+                    const nwGui = require("nw.gui");
+                    if (nwGui && nwGui.Clipboard && nwGui.Clipboard.get) {
+                        nwGui.Clipboard.get().set(seedStr, "text");
+                    }
+                } catch (_) {}
+            }
+            this._copiedTimer = 90;
+            SoundManager.playOk();
+            this.redrawItem(3);
+        }
+
+        resolvedSeed() {
+            if (!this._seedInput || String(this._seedInput).trim() === "") {
+                return Math.floor(Math.random() * 0x7ffffffe) + 1;
+            }
+            const norm = (window.UF && UF.World && UF.World.normalizeSeed) ? UF.World.normalizeSeed(this._seedInput) : null;
+            if (norm && norm.valid && !norm.isBlank) {
+                return norm.seed;
+            }
+            const parsed = parseInt(String(this._seedInput).trim(), 10);
+            if (Number.isInteger(parsed) && parsed >= 0 && parsed <= 0x7fffffff) {
+                return parsed;
+            }
+            return Math.floor(Math.random() * 0x7ffffffe) + 1;
         }
 
         setFaction(factionName) {
@@ -384,6 +478,103 @@
         setYear(y) {
             this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
             this.redrawItem(1);
+        }
+
+        open() {
+            super.open();
+            this._createSeedInputElement();
+        }
+
+        close() {
+            super.close();
+            this._destroySeedInputElement();
+        }
+
+        _createSeedInputElement() {
+            if (typeof document === "undefined" || this._htmlInput) return;
+            const input = document.createElement("input");
+            input.type = "text";
+            input.placeholder = "Leave blank for a random world";
+            input.maxLength = 10;
+            input.value = this._seedInput || "";
+            input.style.position = "absolute";
+            input.style.zIndex = "100";
+            input.style.backgroundColor = "rgba(10, 15, 25, 0.9)";
+            input.style.color = "#a0f0ff";
+            input.style.border = "1px solid rgba(0, 212, 255, 0.5)";
+            input.style.borderRadius = "3px";
+            input.style.fontFamily = "GameFont, sans-serif";
+            input.style.fontSize = "13px";
+            input.style.textAlign = "center";
+            input.style.outline = "none";
+            input.style.boxSizing = "border-box";
+            input.style.padding = "2px 6px";
+
+            input.addEventListener("keydown", (e) => {
+                e.stopPropagation();
+                if (e.key === "Enter") {
+                    input.blur();
+                    this.select(4);
+                } else if (e.key === "Escape") {
+                    input.blur();
+                    this.processCancel();
+                }
+            });
+            input.addEventListener("keyup", (e) => {
+                e.stopPropagation();
+            });
+            input.addEventListener("input", () => {
+                let clean = input.value.replace(/\D/g, "");
+                if (clean.length > 10) clean = clean.slice(0, 10);
+                if (clean !== "" && Number(clean) > 0x7fffffff) {
+                    clean = "2147483647";
+                }
+                input.value = clean;
+                this._seedInput = clean;
+                this.redrawItem(2);
+                this.redrawItem(3);
+            });
+            input.addEventListener("focus", () => {
+                this.select(2);
+            });
+
+            document.body.appendChild(input);
+            this._htmlInput = input;
+            this._updateInputPosition();
+        }
+
+        _destroySeedInputElement() {
+            if (this._htmlInput) {
+                if (this._htmlInput.parentNode) {
+                    this._htmlInput.parentNode.removeChild(this._htmlInput);
+                }
+                this._htmlInput = null;
+            }
+        }
+
+        _updateInputPosition() {
+            if (!this._htmlInput) return;
+            if (!this.isOpen() || !this.visible) {
+                this._htmlInput.style.display = "none";
+                return;
+            }
+            this._htmlInput.style.display = "block";
+            const scale = (typeof Graphics !== "undefined" && Graphics._realScale) ? Graphics._realScale : 1;
+            const canvas = (typeof Graphics !== "undefined") ? Graphics.canvas : null;
+            const cRect = canvas && canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+
+            const rect = this.itemLineRect(2);
+            const labelWidth = 105;
+            const inputX = this.x + rect.x + labelWidth;
+            const inputY = this.y + rect.y + 3;
+            const inputW = rect.width - labelWidth - 4;
+            const inputH = 26;
+
+            this._htmlInput.style.left = `${cRect.left + inputX * scale}px`;
+            this._htmlInput.style.top = `${cRect.top + inputY * scale}px`;
+            this._htmlInput.style.width = `${inputW * scale}px`;
+            this._htmlInput.style.height = `${inputH * scale}px`;
+            this._htmlInput.style.fontSize = `${Math.round(13 * scale)}px`;
         }
 
         refreshCursor() {
@@ -411,6 +602,13 @@
                 this._cursorSprite.visible = false;
                 this._cursorSprite.alpha = 0;
             }
+            if (this._copiedTimer > 0) {
+                this._copiedTimer--;
+                if (this._copiedTimer === 0) {
+                    this.redrawItem(3);
+                }
+            }
+            this._updateInputPosition();
         }
 
         select(index) {
@@ -430,8 +628,12 @@
             const w = rect.width - 4;
             const h = rect.height - 4;
 
+            if (index === 3) {
+                // Handled in drawItem for dual buttons
+                return;
+            }
+
             if (isSelected) {
-                // Luminous electric cyan glow background
                 const c1 = "rgba(0, 212, 255, 0.32)";
                 const c2 = "rgba(0, 140, 220, 0.12)";
                 this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, false);
@@ -439,12 +641,21 @@
                 this.contentsBack.strokeRect(x + 1, y + 1, w - 2, h - 2, "rgba(160, 240, 255, 0.45)");
                 this.contentsBack.fillRect(x + 2, y + 1, w - 4, 1, "rgba(220, 250, 255, 0.90)");
             } else {
-                // Subtle dark slate backing
                 const c1 = "rgba(15, 20, 30, 0.65)";
                 const c2 = "rgba(8, 12, 18, 0.45)";
                 this.contentsBack.gradientFillRect(x, y, w, h, c1, c2, true);
                 this.contentsBack.strokeRect(x, y, w, h, "rgba(60, 80, 110, 0.35)");
             }
+        }
+
+        drawAllItems() {
+            super.drawAllItems();
+            this.contents.outlineColor = "rgba(0, 0, 0, 0.95)";
+            this.contents.outlineWidth = 2;
+            this.contents.fontSize = 11;
+            this.changeTextColor("#94a3b8");
+            const w = this.innerWidth - 16;
+            this.drawText("Use the same seed, generation version, and world settings to recreate the starting world.", 8, 150, w, "center");
         }
 
         drawItem(index) {
@@ -476,13 +687,80 @@
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
                 this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
             } else if (index === 2) {
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
+                this.drawText("World Seed", rect.x + 8, rect.y, 100, "left");
+
+                const boxX = rect.x + 105;
+                const boxW = rect.width - 109;
+                const boxH = 26;
+                const boxY = rect.y + 3;
+
+                // Canvas representation (also visible if HTML input isn't active/supported)
+                this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(10, 15, 25, 0.85)");
+                this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, isSelected ? "rgba(0, 212, 255, 0.85)" : "rgba(60, 80, 110, 0.5)");
+
+                if (this._seedInput && String(this._seedInput).trim() !== "") {
+                    this.contents.fontSize = 16;
+                    this.changeTextColor("#a0f0ff");
+                    this.drawText(this._seedInput, boxX, rect.y, boxW, "center");
+                } else {
+                    this.contents.fontSize = 12;
+                    this.changeTextColor("#64748b");
+                    this.drawText("[ Leave blank for a random world ]", boxX, rect.y, boxW, "center");
+                }
+            } else if (index === 3) {
+                const bWidth = Math.floor((rect.width - 12) / 2);
+                const x1 = rect.x;
+                const w1 = bWidth;
+                const x2 = rect.x + bWidth + 12;
+                const w2 = bWidth;
+                const h = rect.height - 4;
+                const y = rect.y + 2;
+
+                // Button 1: Randomize
+                const b1Selected = isSelected && this._seedButtonCol === 0;
+                if (b1Selected) {
+                    this.contentsBack.gradientFillRect(x1, y, w1, h, "rgba(0, 212, 255, 0.32)", "rgba(0, 140, 220, 0.12)", false);
+                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(0, 220, 255, 0.85)");
+                } else {
+                    this.contentsBack.gradientFillRect(x1, y, w1, h, "rgba(15, 20, 30, 0.65)", "rgba(8, 12, 18, 0.45)", true);
+                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(60, 80, 110, 0.35)");
+                }
+                this.contents.fontSize = 14;
+                this.changeTextColor(b1Selected ? "#a0f0ff" : "#cbd5e1");
+                this.drawText("[ Randomize ]", x1, rect.y, w1, "center");
+
+                // Button 2: Copy Seed
+                const b2Selected = isSelected && this._seedButtonCol === 1;
+                const hasSeed = !!(this._seedInput && String(this._seedInput).trim() !== "");
+                const isCopied = this._copiedTimer > 0;
+
+                if (b2Selected && hasSeed) {
+                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(0, 212, 255, 0.32)", "rgba(0, 140, 220, 0.12)", false);
+                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(0, 220, 255, 0.85)");
+                } else {
+                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(15, 20, 30, 0.65)", "rgba(8, 12, 18, 0.45)", true);
+                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(60, 80, 110, 0.35)");
+                }
+                this.contents.fontSize = 14;
+                if (isCopied) {
+                    this.changeTextColor("#4ade80");
+                    this.drawText("[ Copied! ]", x2, rect.y, w2, "center");
+                } else if (!hasSeed) {
+                    this.changeTextColor("#64748b");
+                    this.drawText("[ Copy Seed ]", x2, rect.y, w2, "center");
+                } else {
+                    this.changeTextColor(b2Selected ? "#a0f0ff" : "#cbd5e1");
+                    this.drawText("[ Copy Seed ]", x2, rect.y, w2, "center");
+                }
+            } else if (index === 4) {
                 if (isSelected) {
                     this.changeTextColor("#ffd700");
                 } else {
                     this.changeTextColor("#a0f0ff");
                 }
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
-            } else if (index === 3) {
+            } else if (index === 5) {
                 this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
@@ -519,11 +797,26 @@
                     this.changeYear(-1);
                 }
             } else if (hitIndex === 2) {
+                if (this._htmlInput) {
+                    this._htmlInput.focus();
+                }
+            } else if (hitIndex === 3) {
+                const rect = this.itemLineRect(3);
+                const bWidth = Math.floor((rect.width - 12) / 2);
+                const clickX = localPos.x - rect.x;
+                if (clickX <= bWidth) {
+                    this._seedButtonCol = 0;
+                    this.randomizeSeed();
+                } else if (clickX >= bWidth + 12) {
+                    this._seedButtonCol = 1;
+                    this.copySeed();
+                }
+            } else if (hitIndex === 4) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (hitIndex === 3) {
+            } else if (hitIndex === 5) {
                 this.processCancel();
             }
         }
@@ -533,6 +826,10 @@
                 this.nextFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? 10 : 1);
+            } else if (this.index() === 3) {
+                this._seedButtonCol = 1;
+                SoundManager.playCursor();
+                this.redrawItem(3);
             } else {
                 super.cursorRight(wrap);
             }
@@ -543,6 +840,10 @@
                 this.prevFaction();
             } else if (this.index() === 1) {
                 this.changeYear(Input.isPressed("shift") ? -10 : -1);
+            } else if (this.index() === 3) {
+                this._seedButtonCol = 0;
+                SoundManager.playCursor();
+                this.redrawItem(3);
             } else {
                 super.cursorLeft(wrap);
             }
@@ -591,11 +892,23 @@
             } else if (this.index() === 1) {
                 this.changeYear(1);
             } else if (this.index() === 2) {
+                if (this._htmlInput) {
+                    this._htmlInput.focus();
+                } else {
+                    this.randomizeSeed();
+                }
+            } else if (this.index() === 3) {
+                if (this._seedButtonCol === 1) {
+                    this.copySeed();
+                } else {
+                    this.randomizeSeed();
+                }
+            } else if (this.index() === 4) {
                 this.playOkSound();
                 this.updateInputData();
                 this.deactivate();
                 this.callHandler("embark");
-            } else if (this.index() === 3) {
+            } else if (this.index() === 5) {
                 this.processCancel();
             }
         }
@@ -1065,13 +1378,13 @@
             scene._newGameSetupWindow.cursorRight();
             t.check("faction_cycled_to_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Faction cycled to Dwarf");
 
-            // Test touch click on right arrow (advances by exactly 1: Dwarf -> Gnome)
+            // Test touch click on right arrow (advances by exactly 1: Dwarf -> Halfling)
             TouchInput._x = scene._newGameSetupWindow.x + scene._newGameSetupWindow.width - 20;
             TouchInput._y = scene._newGameSetupWindow.y + 12 + 18;
             scene._newGameSetupWindow.onTouchOk();
-            t.check("touch_click_advances_exactly_one", scene._newGameSetupWindow.currentFaction() === "Gnome", "Clicking right arrow advances exactly 1 faction (no double-click)");
+            t.check("touch_click_advances_exactly_one", scene._newGameSetupWindow.currentFaction() === "Halfling", "Clicking right arrow advances exactly 1 faction (no double-click)");
 
-            // Test touch click on left arrow (decrements by exactly 1: Gnome -> Dwarf)
+            // Test touch click on left arrow (decrements by exactly 1: Halfling -> Dwarf)
             TouchInput._x = scene._newGameSetupWindow.x + 140;
             TouchInput._y = scene._newGameSetupWindow.y + 12 + 18;
             scene._newGameSetupWindow.onTouchOk();
@@ -1088,24 +1401,39 @@
             scene._newGameSetupWindow.setYear(-10);
             t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
 
+            // Verify 9 SRD Factions
+            const expectedSrd = ["Human", "Elf", "Dwarf", "Halfling", "Gnome", "Dragonborn", "Half-Elf", "Half-Orc", "Tiefling"];
+            t.check("faction_choices_9_srd", JSON.stringify(scene._newGameSetupWindow._factionChoices) === JSON.stringify(expectedSrd), "Faction choices strictly 9 SRD races: " + scene._newGameSetupWindow._factionChoices.join(", "));
+
+            // Verify World Seed Input & Controls
+            t.check("initial_seed_blank", scene._newGameSetupWindow.currentSeed() === "", "Initial seed is blank");
+
+            scene._newGameSetupWindow.randomizeSeed();
+            const rSeed = scene._newGameSetupWindow.currentSeed();
+            t.check("seed_randomized", /^\d+$/.test(rSeed) && Number(rSeed) > 0, "Seed randomized into field: " + rSeed);
+
+            scene._newGameSetupWindow.copySeed();
+            t.check("seed_copied_feedback", scene._newGameSetupWindow._copiedTimer > 0, "Copy Seed triggers visual feedback");
+
+            scene._newGameSetupWindow.setSeed("424242");
+            t.check("seed_manual_input_set", scene._newGameSetupWindow.currentSeed() === "424242", "Manual seed set to 424242");
+
+            scene._newGameSetupWindow.setSeed(0);
+            t.check("seed_zero_preserved", scene._newGameSetupWindow.currentSeed() === "0", "Seed 0 preserved");
+
+            scene._newGameSetupWindow.setSeed("");
+            const resSeed = scene._newGameSetupWindow.resolvedSeed();
+            t.check("seed_blank_resolves_random", Number.isInteger(resSeed) && resSeed > 0, "Blank seed resolves to random integer: " + resSeed);
+
             // Verify World Size is locked unconditionally to 256x256
             t.check("size_locked_to_256", scene._newGameSetupWindow.currentSize() === 256, "World size is locked to 256x256");
 
-            // Test Fog of War toggle on Row 2
-            scene._newGameSetupWindow.select(2);
-            t.check("default_fog_enabled", scene._newGameSetupWindow.currentFog() === true, "Default Fog of War is Enabled");
-            scene._newGameSetupWindow.cursorRight();
-            t.check("fog_toggled_to_disabled", scene._newGameSetupWindow.currentFog() === false, "Fog toggled to Disabled via Right");
-            scene._newGameSetupWindow.cursorLeft();
-            t.check("fog_toggled_to_enabled", scene._newGameSetupWindow.currentFog() === true, "Fog toggled to Enabled via Left");
-            scene._newGameSetupWindow.setFog(false);
-            t.check("fog_set_false", scene._newGameSetupWindow.currentFog() === false, "Fog explicitly set to false");
-            scene._newGameSetupWindow.setFog(true);
-            t.check("fog_set_true", scene._newGameSetupWindow.currentFog() === true, "Fog explicitly set to true");
+            // Verify Fog of War is disabled per user directive
+            t.check("default_fog_disabled", scene._newGameSetupWindow.currentFog() === false, "Default Fog of War is Disabled");
 
-            // Test Cancel action: click or trigger Cancel row (index 4)
+            // Test Cancel action: click or trigger Cancel row (index 5)
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 216 + 16;
             scene._newGameSetupWindow.onTouchOk();
             await t.waitFrames(15);
             t.check("setup_window_closed_on_cancel", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Cancel");
@@ -1124,12 +1452,12 @@
             t.check("setup_window_closed_on_esc", !scene._newGameSetupWindow.isOpen(), "Setup window closed on Esc key");
             t.check("command_window_open_after_esc", scene._commandWindow.isOpen(), "Command window reopened after Esc key");
 
-            // Test Cancel via real mouse click cycle (trigger + release on Cancel row, index 4)
+            // Test Cancel via real mouse click cycle (trigger + release on Cancel row, index 5)
             scene.commandNewGame();
             await t.waitFrames(15);
             t.check("setup_window_open_for_mouse_click", scene._newGameSetupWindow.isOpen(), "Setup window open before mouse click");
             TouchInput._x = scene._newGameSetupWindow.x + Math.round(scene._newGameSetupWindow.width / 2);
-            TouchInput._y = scene._newGameSetupWindow.y + 12 + 36 * 4 + 18;
+            TouchInput._y = scene._newGameSetupWindow.y + 12 + 216 + 16;
             TouchInput._triggerX = TouchInput._x;
             TouchInput._triggerY = TouchInput._y;
             TouchInput._newState.triggered = true;
@@ -1142,11 +1470,11 @@
             t.check("setup_window_closed_on_mouse_click", !scene._newGameSetupWindow.isOpen(), "Setup window closed on mouse click");
             t.check("command_window_open_after_mouse_click", scene._commandWindow.isOpen(), "Command window reopened after mouse click");
 
-            // Test Cancel via Enter / OK key on Cancel row (index 4)
+            // Test Cancel via Enter / OK key on Cancel row (index 5)
             scene.commandNewGame();
             await t.waitFrames(15);
-            scene._newGameSetupWindow.select(4);
-            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 4, "Cancel row selected");
+            scene._newGameSetupWindow.select(5);
+            t.check("cancel_row_selected", scene._newGameSetupWindow.index() === 5, "Cancel row selected (index 5)");
             Input._currentState["ok"] = true;
             Input._latestButton = "ok";
             Input._pressedTime = 0;
@@ -1173,21 +1501,23 @@
             await t.waitFrames(15);
             t.check("setup_window_reopened", scene._newGameSetupWindow.isOpen(), "Setup window reopened");
 
-            // Configure Dwarf expedition at Year 42 AD with Fog Enabled
+            // Configure Dwarf expedition at Year 42 AD with Seed 998877 and Fog Disabled
             scene._newGameSetupWindow.setFaction("Dwarf");
             scene._newGameSetupWindow.setYear(42);
-            scene._newGameSetupWindow.setFog(true);
-            scene._newGameSetupWindow.select(3); // Hover "Start"
+            scene._newGameSetupWindow.setSeed("998877");
+            scene._newGameSetupWindow.setFog(false);
+            scene._newGameSetupWindow.select(4); // Hover "Start" (Row 4)
             await t.waitFrames(15);
 
             t.check("configured_faction_dwarf", scene._newGameSetupWindow.currentFaction() === "Dwarf", "Configured faction is Dwarf");
             t.check("configured_year_42", scene._newGameSetupWindow.currentYear() === 42, "Configured year is 42 AD");
+            t.check("configured_seed_998877", scene._newGameSetupWindow.currentSeed() === "998877", "Configured seed is 998877");
             t.check("configured_size_256", scene._newGameSetupWindow.currentSize() === 256, "Configured size is 256x256");
-            t.check("configured_fog_true", scene._newGameSetupWindow.currentFog() === true, "Configured fog of war is true");
+            t.check("configured_fog_false", scene._newGameSetupWindow.currentFog() === false, "Configured fog of war is false");
             t.screenshot("live_deus_new_game_setup_dwarf_42");
 
-            // Test Embark action on Row 3 (Start)
-            scene._newGameSetupWindow.select(3);
+            // Test Embark action on Row 4 (Start)
+            scene._newGameSetupWindow.select(4);
             scene._newGameSetupWindow.processOk();
             await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 30000, "Scene_Map started");
             await t.waitFrames(30);
@@ -1196,6 +1526,8 @@
             t.check("map_scene_active", SceneManager._scene instanceof Scene_Map, "Transitioned to live game map");
             t.check("state_exists", !!st, "World state created");
             t.check("world_size_is_256", st.size === 256, "World state size initialized to 256x256 Large");
+            t.check("seed_applied_to_world", UF.World.seed() === 998877, "World seed matches configured seed: " + UF.World.seed());
+            t.check("generator_info_contains_seed", UF.World.generatorInfo().seed === 998877, "generatorInfo() reports configured seed");
 
             const playerFac = st.factions.list.find(f => f.isPlayer);
             t.check("player_faction_is_dwarf", !!playerFac && (playerFac.species === "dwarf" || playerFac.culture === "dwarf"), "Player faction is Dwarf");
@@ -1206,7 +1538,7 @@
             t.check("history_events_recorded", st.history.events && st.history.events.length > 0, "Chronicle events recorded: " + (st.history.events ? st.history.events.length : 0));
             t.check("history_sites_exist", st.history.sites && st.history.sites.length > 0, "Sites exist in world: " + (st.history.sites ? st.history.sites.length : 0));
             t.check("theme_switched_to_dwarf", UF_FactionMenus.getFaction() === "dwarf", "Window theme switched to Dwarf");
-            t.check("fog_enabled_in_world", window.UF && UF.Fog && UF.Fog.enabled === true, "Fog of War enabled in world");
+            t.check("fog_disabled_in_world", window.UF && UF.Fog && UF.Fog.enabled === false, "Fog of War disabled in world");
 
             t.screenshot("live_dwarf_colony_year_42");
         }, { isDefault: false });

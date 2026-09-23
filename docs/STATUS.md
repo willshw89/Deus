@@ -7,8 +7,44 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- **Gemini (Coordinator)**: Active UI assignment — RTS Right-Click command dispatch (ground move, focus fire enemy attack, resource gather/haul, friendly transport load) & Talk system suppression (`game/js/plugins/DEUS_Select.js`, `game/js/plugins/DEUS_Talk.js`). Protected UI files: `game/js/plugins/DEUS_Stance.js`, `game/js/plugins/DEUS_FactionMenus.js`, `game/js/plugins/DEUS_Select.js`. Coordinator authority for shared status and audit records.
-- **Fable (Build Bench / Implementation — Isolated Working Copy)**: Reserved task — Repair and restore 5 generation test harnesses (`tools/test_column_landforms.js`, `tools/test_vertical_worldgen_proof.js`, `tools/test_seamless_map_edges.js`, `tools/test_geology_strata.js`, `tools/test_round_world.js`) and their narrowly required test-only loader/helper dependencies in isolated working copy. Note: Gemini must not independently repair these harnesses while Fable's assignment is active. Fable returns documentation changes as a proposed patch or handoff.
+- **Fable (Build Bench / Implementation — Isolated Working Copy)**: SRD 5.1 content library verification, dormant authoring catalog crosswalk (`game/data/srd5_1/` vs `game/data/srd51/`), and extraction pipeline audits.
+- **Gemini (Coordinator)**: Completed Non-SRD Faction Elimination, World Seed Input & Randomize/Copy Controls, and Boot TDZ Repair. Ready for next user directive.
+
+## Non-SRD Factions Elimination & 9 SRD Playable Races Standard — 2026-09-22 (Gemini / Antigravity)
+- **Directives**: "Get rid of the non SRD factions".
+- **Implementation**:
+  - Purged all non-SRD races and factions (`goblin`, `orc`, `lizardfolk`, `kobold`, `undead`, `starborn`, `swarm`) across all catalogs, menus, generation layers, and tests.
+  - Standardized civilization factions strictly on the 9 SRD 5.1 character races: `human`, `elf`, `dwarf`, `halfling`, `gnome`, `dragonborn`, `half-elf`, `half-orc`, `tiefling`.
+  - Layer distribution established:
+    - Z = 0: `human`, `elf`, `halfling`, `half-elf`, `half-orc` (5 surface factions).
+    - Z = -1: `dwarf`, `gnome` (2 upper subterranean factions).
+    - Z = -2: `dragonborn`, `tiefling` (2 deep subterranean factions).
+    - Total: exactly 9 factions; all 9 spawn every world.
+  - `game/data/UF_WorldCatalog.json` & `game/data/DEUS_WorldCatalog.json`: updated `factions.count = [9, 9]`, filtered `factions.species` and `factions.speciesAffinity`, updated `sites.preferredBiomes` and `people` character sets for all 9 SRD races.
+  - `game/js/plugins/DEUS_Factions.js`: updated `SPECIES_MAP`, relations matrix, layer distributions, and unified subterranean pocket assertions.
+  - Automated tests verified: `node tools/run_tests.js factions` (17/17 PASS, exit 0).
+
+## World Seed Input, Randomize & Copy Controls Delivered — 2026-09-22 (Gemini / Antigravity)
+- **Directive**: "DEUS — ADD WORLD SEED INPUT AND RANDOMIZE OPTION".
+- **Implementation**:
+  - `game/js/plugins/DEUS_World.js`:
+    - `World.normalizeSeed(input)`: strictly validates integer `0 <= seed <= 2,147,483,647`, preserves `0`, rejects negative/decimal/letter/overflow input.
+    - `World.seed()` & `World.generatorInfo()` accessors implemented.
+    - `World.newWorld(seed, size)` updated to preserve numeric `0` and accept user seed.
+    - Wired `$gamePlayer.setupForNewGame` to pass `UF.NewGameSetup.seed` to `World.newWorld`.
+  - `game/js/plugins/DEUS_FactionMenus.js`:
+    - `Window_NewGameSetup`: updated to 6-row layout (Row 0: Faction, Row 1: Starting Year, Row 2: World Seed, Row 3: Action Buttons, Row 4: Start, Row 5: Cancel).
+    - World seed input field supports leaving blank (resolves to random integer upon embark), manual integer input, paste, and in-game typing.
+    - Added `[ Randomize ]` button (rolls random seed into field) and `[ Copy Seed ]` button (copies seed to clipboard with visual "Copied!" feedback, disabled when blank).
+    - Centered helper text: *"Use the same seed, generation version, and world settings to recreate the starting world."*
+    - Window width 350 px centered squarely between title letters D and S.
+  - `game/js/plugins/DEUS_Objects.js`: fixed TDZ ReferenceError on boot (`let Objects = null;` guarded `Objects.refresh()`).
+  - Automated tests verified:
+    - `node tools/run_tests.js setup`: 62/62 PASS (exit 0).
+    - `node tools/run_tests.js smoke`: 13/13 PASS (exit 0).
+  - Visual verification:
+    - `game/test_output/setup.live_deus_new_game_setup_dwarf_42.png`: verified 6-row setup window with seed field, randomize/copy buttons, helper text, and D/S title framing.
+    - `game/test_output/setup.live_dwarf_colony_year_42.png`: verified live dwarf settlement with seed 998877 at 42 AD with built stone walls, hearths, beds, and zero fog.
 
 ## Audit A7 Triaged & Generation Test Recovery Authorized — 2026-09-22 (Gemini / Coordinator)
 1. **Audit A7 Formally Recorded (`docs/AUDIT_LOG.md`)**:

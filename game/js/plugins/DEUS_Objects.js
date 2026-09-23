@@ -51,6 +51,8 @@
     const UNDER_BONUS = -100; // z offset of "under" objects (WORLD_ARCHITECTURE section 4)
     const MIN_Z = 7;          // never below the ground layers (0, 4) or the stance (5) / designation (6) markers
 
+    let Objects = null;
+
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
     const emit = (name, ...args) => {
@@ -474,7 +476,9 @@
         const done = data => {
             e.loaded = true;
             e.data = data && typeof data === "object" ? data : null;
-            Objects.refresh(); // sprites of this image re-frame with the sidecar's anchor
+            if (Objects && typeof Objects.refresh === "function") {
+                Objects.refresh(); // sprites of this image re-frame with the sidecar's anchor
+            }
         };
         try {
             const xhr = new XMLHttpRequest();
@@ -662,6 +666,56 @@
     // The sprites themselves are direct children of the tilemap, so the tilemap sorts them with the
     // characters by z (foot row) the way UF_Perspective25D sorts Sprite_Character.
 
+    const openChests = new Map(); // key "x,y" -> { frame: 0, targetFrame: 2, state: "opening"|"open"|"closing"|"closed", lastMs: number }
+
+    function updateChestAnimations() {
+        if (openChests.size === 0) return;
+        const now = performance.now();
+        for (const [key, anim] of openChests.entries()) {
+            if (anim.state === "opening") {
+                if (now - anim.lastMs >= 150) {
+                    anim.lastMs = now;
+                    if (anim.frame < 2) {
+                        anim.frame++;
+                    } else {
+                        anim.state = "open";
+                    }
+                }
+            } else if (anim.state === "closing") {
+                if (now - anim.lastMs >= 150) {
+                    anim.lastMs = now;
+                    if (anim.frame > 0) {
+                        anim.frame--;
+                    } else {
+                        anim.state = "closed";
+                        openChests.delete(key);
+                    }
+                }
+            }
+        }
+    }
+
+    function openChestAt(x, y) {
+        const key = `${x},${y}`;
+        openChests.set(key, { frame: 0, targetFrame: 2, state: "opening", lastMs: performance.now() });
+        const L = currentLayer();
+        if (L) L.markDirty();
+    }
+
+    function closeChestAt(x, y) {
+        const key = `${x},${y}`;
+        const existing = openChests.get(key);
+        const startFrame = existing ? existing.frame : 2;
+        openChests.set(key, { frame: startFrame, targetFrame: 0, state: "closing", lastMs: performance.now() });
+        const L = currentLayer();
+        if (L) L.markDirty();
+    }
+
+    function isChestOpenAt(x, y) {
+        const c = openChests.get(`${x},${y}`);
+        return !!c && (c.state === "open" || c.state === "opening");
+    }
+
     class Sprite_UFObjectLayer extends Sprite {
         constructor() {
             super();
@@ -689,6 +743,7 @@
 
         update() {
             super.update();
+            updateChestAnimations();
             const t0 = performance.now();
             this._updateObjects();
             const dt = performance.now() - t0;
@@ -896,7 +951,7 @@
         const W = World(), view = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea());
         return validArea(view) ? levelArea(view) : null;
     };
-    const Objects = {
+    Objects = {
         MIN_Z,
         UNDER_BONUS,
         Sprite_Layer: Sprite_UFObjectLayer,
@@ -949,6 +1004,9 @@
         regrowList: () => regrowList() || [],
         processRegrow,
         isConstructedOrPaved,
+        openChest: openChestAt,
+        closeChest: closeChestAt,
+        isChestOpen: isChestOpenAt,
         perf() {
             const l = currentLayer();
             if (!l) return null;

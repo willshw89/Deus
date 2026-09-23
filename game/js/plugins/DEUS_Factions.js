@@ -132,55 +132,36 @@
         const SPECIES_MAP = {
             human: "human",
             elf: "elf",
+            halfling: "halfling",
             dwarf: "dwarf",
             gnome: "gnome",
-            goblin: "goblin",
-            orc: "orc",
-            lizardfolk: "serpentkin",
-            kobold: "goblin",
-            undead: "undead",
-            starborn: "automaton",
-            swarm: "swarmer"
+            dragonborn: "dragonborn",
+            "half-elf": "half-elf",
+            "half-orc": "half-orc",
+            tiefling: "tiefling"
         };
-        const targetSpecies = chosenFac ? (SPECIES_MAP[chosenFac] || chosenFac) : null;
-        if (cfg.layers) {
-            const layerKeys = [0, -1, -2];
-            const perLayer = cfg.perLayer || 3;
-            for (const lz of layerKeys) {
-                const candIds = (cfg.layers[String(lz)] || []).filter(id => !pickedSpecies.has(id));
-                const candObjs = candIds.map(id => cfg.species.find(s => s.id === id) || { id, name: capitalize(id), weight: 1 });
-                // If dwarf is on layer -1 and not picked, guarantee dwarf is chosen
-                const mustPickDwarf = lz === -1 && candObjs.some(s => s.id === "dwarf") && !pickedSpecies.has("dwarf");
-                for (let k = 0; k < perLayer && candObjs.length > 0; k++) {
-                    let sp;
-                    if (mustPickDwarf && k === 0) {
-                        sp = candObjs.find(s => s.id === "dwarf");
-                    } else {
-                        sp = weighted(candObjs);
-                    }
-                    pickedSpecies.add(sp.id);
-                    candObjs.splice(candObjs.indexOf(sp), 1);
-                    chosen.push({ sp, z: lz });
-                }
-            }
-        } else {
-            const dwarf = cfg.species.find(sp => sp.id === "dwarf");
-            const availableSpecies = (cfg.species || []).slice();
-            for (let i = 0; i < count; i++) {
-                let sp;
-                if (dwarf && i === count - 1 && !chosen.some(c => c.sp.id === "dwarf") && availableSpecies.some(s => s.id === "dwarf")) {
-                    sp = dwarf;
-                } else {
-                    sp = weighted(availableSpecies.length ? availableSpecies : cfg.species);
-                }
-                const spIdx = availableSpecies.findIndex(s => s.id === sp.id);
-                if (spIdx >= 0) availableSpecies.splice(spIdx, 1);
-                chosen.push({ sp, z: sp.id === "dwarf" ? -1 : 0 });
-            }
+        const targetSpecies = chosenFac ? (SPECIES_MAP[chosenFac] || chosenFac) : "human";
+
+        // User directive 2026-09-22:
+        // tieflings and dragonborn on -2, dwarves and gnomes on -1, everyone else on z-0.
+        // All races spawn every game.
+        function getZForSpecies(speciesId) {
+            if (speciesId === "tiefling" || speciesId === "dragonborn") return -2;
+            if (speciesId === "dwarf" || speciesId === "gnome") return -1;
+            return 0;
         }
-        if (targetSpecies && !chosen.some(c => c.sp.id === targetSpecies)) {
-            const cand = (cfg.species && cfg.species.find(s => s.id === targetSpecies)) || { id: targetSpecies, name: capitalize(targetSpecies), weight: 1 };
-            chosen.unshift({ sp: cand, z: 0 });
+
+        const allSpecies = (cfg.species || []).slice();
+        const playerSp = allSpecies.find(s => s.id === targetSpecies) || allSpecies.find(s => s.id === "human");
+        if (playerSp) {
+            chosen.push({ sp: playerSp, z: getZForSpecies(playerSp.id) });
+            pickedSpecies.add(playerSp.id);
+        }
+        for (const sp of allSpecies) {
+            if (!pickedSpecies.has(sp.id)) {
+                pickedSpecies.add(sp.id);
+                chosen.push({ sp, z: getZForSpecies(sp.id) });
+            }
         }
         for (let i = 0; i < chosen.length; i++) {
             const { sp, z: targetZ } = chosen[i];
@@ -521,26 +502,15 @@
         };
 
         for (const f of F.list) {
-            const targetZ = f.layer !== undefined ? f.layer : (f.home && f.home.z !== undefined ? f.home.z : (f.species === "dwarf" ? -1 : 0));
-            if (targetZ >= 0 && f.species !== "dwarf") continue;
+            const targetZ = f.layer !== undefined ? f.layer : (f.home && f.home.z !== undefined ? f.home.z : 0);
+            if (targetZ >= 0) continue;
             if (!UF.Levels || typeof UF.Levels.settlementCell !== "function") throw new Error("Subterranean founding requires UF.Levels.settlementCell");
             const anchor = f.home;
-            if (f.species === "dwarf") {
-                f.homes = [-1, -2].map(z => {
-                    const pocket = pickSubPocket(anchor.area, anchor.x, anchor.y, z);
-                    if (!pocket) throw new Error(`No unused habitable pocket for ${f.id} on ${z}`);
-                    return { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
-                });
-                f.home = { ...f.homes[0], area: { ...f.homes[0].area } };
+            const pocket = pickSubPocket(anchor.area, anchor.x, anchor.y, targetZ);
+            if (pocket) {
+                f.home = { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z: targetZ, pocketId: pocket.id };
+                f.homes = [{ ...f.home }];
                 f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
-            } else {
-                const z = targetZ;
-                const pocket = pickSubPocket(anchor.area, anchor.x, anchor.y, z);
-                if (pocket) {
-                    f.home = { area: { ...anchor.area }, x: pocket.x, y: pocket.y, z, pocketId: pocket.id };
-                    f.homes = [{ ...f.home }];
-                    f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };
-                }
             }
         }
         state.viewStart = { area: { ...player.home.area }, x: player.home.x, y: player.home.y, z: player.home.z || 0 };
@@ -800,7 +770,7 @@
             t.check("generated_with_world", !!cfg && !!d && Array.isArray(d.list), d ? `${d.list.length} factions (yours among them), seed ${st.seed}` : "no factions in the world state");
             if (!d) return;
             const others = d.list.filter(f => !f.isPlayer);
-            t.check("count_in_range", d.list.length >= cfg.count[0] && d.list.length <= cfg.count[1], `${d.list.length} factions (allowed ${cfg.count[0]}-${cfg.count[1]}), ${others.length} besides the player's`);
+            t.check("count_in_range", d.list.length === 9, `${d.list.length} factions (all 9 SRD races), ${others.length} besides the player's`);
             const player = Factions.player();
             const playerSpecies = player && cfg.species.find(s => s.id === player.species);
             t.check("player_faction", !!player && player.id === d.playerId && d.list.includes(player) && player.isPlayer && others.length === d.list.length - 1 && (!playerSpecies || playerSpecies.playable !== false) && Factions.relation("player", player.id) === 100,
@@ -812,7 +782,9 @@
             const l0 = d.list.filter(f => (f.home.z || 0) === 0);
             const lm1 = d.list.filter(f => f.home.z === -1);
             const lm2 = d.list.filter(f => f.home.z === -2);
-            t.check("layer_distribution", l0.length === 3 && lm1.length === 3 && lm2.length === 3,
+            t.check("layer_distribution", l0.length === 5 && lm1.length === 2 && lm2.length === 2 &&
+                lm2.every(f => f.species === "tiefling" || f.species === "dragonborn") &&
+                lm1.every(f => f.species === "dwarf" || f.species === "gnome"),
                 `layers: Z0 (${l0.map(f => f.species).join(", ")}), Z-1 (${lm1.map(f => f.species).join(", ")}), Z-2 (${lm2.map(f => f.species).join(", ")})`);
 
             const values = Object.values(d.relations);
@@ -834,15 +806,6 @@
             for (const f of d.list) {
                 const h = f.home, a = h && h.area;
                 if (!h || !a || !W.inWorld(a.x, a.y) || !Number.isInteger(h.x) || !Number.isInteger(h.y)) { areaProblems.push(`${f.name}: no area`); continue; }
-                if (f.species === "dwarf") {
-                    const homes = f.homes || [];
-                    if (h.z !== -1 || homes.length !== 2 || ![-1, -2].every(z => homes.some(c => c.z === z))) areaProblems.push(`${f.name}: missing underground homes`);
-                    for (const c of homes) {
-                        const pockets = UF.Levels.habitablePockets(c.z, a.x, a.y);
-                        if (!pockets.some(p => p.id === c.pocketId && p.x === c.x && p.y === c.y && p.clearRadius >= 3)) areaProblems.push(`${f.name}: home is not a habitable pocket on ${c.z}`);
-                    }
-                    continue;
-                }
                 if (h.z < 0) {
                     const pockets = UF.Levels.habitablePockets(h.z, a.x, a.y);
                     if (!pockets.some(p => p.x === h.x && p.y === h.y)) areaProblems.push(`${f.name}: home is not a habitable pocket on ${h.z}`);
