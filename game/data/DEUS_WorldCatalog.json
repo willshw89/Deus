@@ -4460,6 +4460,56 @@
         "stack": 20,
         "material": "iron",
         "weight": 0.5
+      },
+      {
+        "id": "common_clothes",
+        "name": "Common clothes",
+        "image": "!$UF_Icon_136",
+        "tags": [
+          "clothing",
+          "wear"
+        ],
+        "stack": 1,
+        "wear": {
+          "tier": 1
+        },
+        "weight": 3,
+        "armor": {
+          "slot": "torso",
+          "bonuses": {
+            "defence": {
+              "stab": 1,
+              "slash": 1,
+              "crush": 1,
+              "ranged": 1,
+              "magic": 0
+            }
+          }
+        }
+      },
+      {
+        "id": "pouch",
+        "name": "Pouch",
+        "image": "!$UF_Icon_256",
+        "tags": [
+          "container",
+          "gear"
+        ],
+        "stack": 1,
+        "weight": 1,
+        "capacity": 50
+      },
+      {
+        "id": "gold_coin",
+        "name": "Gold piece",
+        "image": "!$UF_Icon_169",
+        "tags": [
+          "currency",
+          "precious"
+        ],
+        "stack": 100,
+        "weight": 0.02,
+        "value": 1
       }
     ]
   },

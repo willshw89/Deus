@@ -323,4 +323,87 @@
             `avg ${avg.toFixed(2)} ms, p50 ${pct(0.5)}, p99 ${pct(0.99)}, worst ${worst.toFixed(1)} ms; ${times.length} frames over ${seconds} s; ${map}, ${units} drawn events`);
         t.check("worst_frame_under_50ms", worst < 50, `worst ${worst.toFixed(1)} ms; ${slow} frame(s) over 50 ms`);
     }, { isDefault: false });
+
+    // Native New Game Starting Gear & Level Switching Verification
+    Test.suite("native_starting_gear", async t => {
+        await t.waitFrames(45);
+        const W = window.UF.World;
+        const I = window.UF.Items;
+        const Sheet = window.UF.Sheet;
+        const Levels = window.UF.Levels;
+
+        // 1. Inspect all 72 founders in the live generated world
+        const allUnits = W ? W.units() : [];
+        const founders = allUnits.filter(u => u && u.data && u.data.founder);
+        t.check("founders_found", founders.length === 72, `found ${founders.length} founders (expected 72)`);
+
+        let equippedOk = 0, pouchOk = 0, goldOk = 0, weightOk = 0;
+        for (const f of founders) {
+            const clothesId = f.data.equipment && (f.data.equipment.clothes || f.data.equipment.torso);
+            const clothesItem = clothesId ? I.get(clothesId) : null;
+            if (clothesItem && (clothesItem.type === "common_clothes" || clothesItem.type === "clothes_common")) equippedOk++;
+
+            const inv = I.inventoryOf(f.id);
+            const pouch = inv.find(it => it.type === "pouch");
+            if (pouch) pouchOk++;
+
+            const gold = inv.find(it => it.type === "gold_coin" || it.type === "gp");
+            if (gold && gold.count === 15 && pouch && pouch.contents && pouch.contents.includes(gold.id)) goldOk++;
+
+            const weight = I.carriedWeight(f.id);
+            if (Math.abs(weight - 4.3) < 0.05) weightOk++;
+        }
+
+        t.check("all_founders_equipped_clothes", equippedOk === founders.length, `${equippedOk}/${founders.length} founders have common_clothes equipped`);
+        t.check("all_founders_hold_pouch", pouchOk === founders.length, `${pouchOk}/${founders.length} founders have a pouch`);
+        t.check("all_founders_15_gp_in_pouch", goldOk === founders.length, `${goldOk}/${founders.length} founders have 15 gp inside pouch`);
+        t.check("all_founders_4_3_lb_load", weightOk === founders.length, `${weightOk}/${founders.length} founders carry exactly 4.3 lb`);
+
+        // 2. Open character sheet on first founder, switch to Page 2 (Inventory), verify display, take screenshot
+        const f0 = founders[0];
+        if (f0 && Sheet && typeof Sheet.open === "function") {
+            Sheet.open(f0.id);
+            await t.waitFrames(15);
+            const scene = SceneManager._scene;
+            const win = scene && scene._ufSheetWindow;
+            if (win) {
+                if (typeof win.switchTab === "function") {
+                    win.switchTab(1); // Tab 1: Inventory & Equipment
+                } else if (typeof win.redraw === "function") {
+                    win._activeTab = 1;
+                    win.redraw();
+                }
+                await t.waitFrames(15);
+            }
+            t.screenshot("native_founder_starting_kit");
+            Sheet.close();
+            await t.waitFrames(10);
+        }
+
+        // 3. Test level switching via Levels.setView(-1) and Levels.setView(0) with hover/select interactions
+        let levelSwitchOk = false;
+        try {
+            if (Levels && typeof Levels.setView === "function") {
+                Levels.setView(-1);
+                await t.waitFrames(30);
+                // Hover across tiles at z=-1
+                if (window.UF.Look && typeof window.UF.Look.cellUnderMouse === "function") {
+                    TouchInput._x = 400;
+                    TouchInput._y = 300;
+                    window.UF.Look.cellUnderMouse();
+                }
+                // Simulate click at z=-1
+                TouchInput._currentState.triggered = true;
+                await t.waitFrames(10);
+                TouchInput._currentState.triggered = false;
+
+                Levels.setView(0);
+                await t.waitFrames(30);
+                levelSwitchOk = true;
+            }
+        } catch (e) {
+            console.error("Level switch crash: " + e.message);
+        }
+        t.check("level_switch_no_crash", levelSwitchOk, "Level switching between z=0 and z=-1 and tile interaction succeeded with 0 crashes");
+    }, { isDefault: false });
 })();

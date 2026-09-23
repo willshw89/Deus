@@ -10,25 +10,37 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Astra**: DEUS-TSK-ASTRA-07 — Measurement-only species biology validation (tools/bench_species_biology.js, docs/systems/UF_History.md, docs/STATUS.md); production plugins and catalog read-only.
 - **Fable**: DEUS-TSK-FABLE-05 — Survival needs interruption & subsistence loop (DEUS_Colonists.js, tools/test_survival_needs_loop.js)
 
-## DEUS-TSK-GEMINI-01 — Faction Starting Equipment (Clothes + 15 gp Pouch) & Overseer Null Area Crash Fix (2026-09-23)
+## DEUS-TSK-GEMINI-01 — Faction Starting Equipment (Clothes + 15 gp Pouch), Catalog Authority & Native Verification (2026-09-23)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:
-  - `game/js/plugins/DEUS_Items.js`: Injected default types `common_clothes` (3.0 lbs, wear tier 1, torso/clothes slot), `pouch` (1.0 lb, container capacity 50), `gold_coin` (0.02 lb, currency); registered type aliases (`clothes` -> `common_clothes`, `gp` -> `gold_coin`); implemented `isFactionCreature(u)` and `giveFactionStartingKit(u)` equipping common clothes, holding pouch, and placing 15 gp inside the pouch (`pouch.contents = [gp.id]`, `gp.container = pouch.id`, `gp.pouchId = pouch.id`); total carried weight = 4.3 lbs. Hooked to `world:unitAdded`.
+  - `game/data/UF_WorldCatalog.json` & `game/data/DEUS_WorldCatalog.json`: Added canonical catalog records for `common_clothes` (3.0 lbs, wear tier 1, torso/clothes slot), `pouch` (1.0 lb, container capacity 50), `gold_coin` (0.02 lb, currency value 1); catalog is the single authoritative source of truth (60 total item types).
+  - `game/js/plugins/DEUS_Items.js`: Registered type aliases (`clothes` -> `common_clothes`, `gp` -> `gold_coin`); retired `DEFAULT_TYPES` fallback so the catalogs have sole authority; implemented `isFactionCreature(u)` and `giveFactionStartingKit(u)` equipping common clothes, holding pouch, and placing 15 gp inside the pouch (`pouch.contents = [gp.id]`, `gp.container = pouch.id`, `gp.pouchId = pouch.id`); total carried weight = 4.3 lbs. Hooked to `world:unitAdded`.
   - `game/js/plugins/DEUS_History.js`: Hooked `giveFactionStartingKit` to `spawnFounders` and `spawnSettlers`.
   - `game/js/plugins/DEUS_Select.js`: Safeguarded `findUnitAt` and `updateOverseerControls` against `null` return from `W.currentArea()`, resolving `TypeError: Cannot read property 'x' of null` and `ReferenceError: W is not defined`.
   - `game/js/plugins/DEUS_Levels.js`: Safeguarded `cleanupEvents` and `setView` for units with null/undefined area records.
   - `game/js/plugins/DEUS_Core.js`: Attached global crash logger writing unhandled errors and `Graphics.printError` crashes to `game/test_output/last_crash.txt`.
+  - `tools/test_duplicate_registration.js`: Dedicated suite verifying 0 duplicate item types, catalog/plugin weight consistency, and idempotent founder gear issuance with 3 mutant failure checks.
   - `tools/test_faction_starting_gear.js`: 17 automated checks + 3 mutant failure checks verifying clothes, pouch, 15 gp inside pouch, 4.3 lb carried weight, exclusion of wild animals, and all 72 founders across all 9 factions.
+  - `game/js/plugins/DEUS_Test.js`: Added `native_starting_gear` suite verifying all 72 live founders in native NW.js, level switching between z=0 and z=-1 with 0 crashes, and taking screenshot `test_output/native_starting_gear.native_founder_starting_kit.png`.
 - **Checks observed**:
+  - `node tools/test_duplicate_registration.js`: **15 passed, 0 failed (exit 0)**.
+    - Mutant failure controls (Rule 4 verified):
+      - `--mutant=dup_id`: 2 checks fail (exit 1).
+      - `--mutant=bad_weight`: 2 checks fail (exit 1).
+      - `--mutant=no_idempotent`: 3 checks fail (exit 1).
   - `node tools/test_faction_starting_gear.js`: **17 passed, 0 failed (exit 0)**.
-  - Mutant failure controls (Rule 4 verified):
-    - `--mutant=no_clothes`: FAIL `test_unit_has_clothes_equipped` (exit 1).
-    - `--mutant=no_pouch`: FAIL `test_unit_has_pouch`, `coins_inside_pouch`, `carried_weight` (exit 1).
-    - `--mutant=wrong_coins`: FAIL `test_unit_has_15_gp`, `carried_weight` (exit 1).
+    - Mutant failure controls: `--mutant=no_clothes`, `--mutant=no_pouch`, `--mutant=wrong_coins` fail cleanly.
   - Native engine suites via `node tools/run_tests.js`:
-    - `items`: **20 passed, 0 failed (exit 0)**.
-    - `history`: **17 passed, 0 failed (exit 0)**.
-    - `select`: **46 passed, 0 failed (exit 0)**.
+    - `native_starting_gear`: **6 passed, 0 failed (exit 0)**.
+      - Screenshot `test_output/native_starting_gear.native_founder_starting_kit.png`: Verified founder Braan (Wizard 1) on Page 2 (Inventory) showing 3/32 slots, 4.3/240 lbs, pouch + 15 gp, equipped common clothes.
+      - Level switching z=0 to z=-1 and tile interaction passed with 0 crashes (`last_crash.txt` does not exist).
+    - `items`: **20 passed, 0 failed (exit 0)** (60 item types, 60 images, 0 duplicates).
+    - `history`: **17 passed, 0 failed (exit 0)** (72 founders, 9 factions).
+    - `select`: **46 passed, 0 failed (exit 0)** (overseer controls, drag/drop, zero null area crashes).
+  - Settlement regression suites:
+    - `tools/test_project_construction_loop.js`: **14 passed, 0 failed (exit 0)**.
+    - `tools/test_autonomous_project_dispatch.js`: **14 passed, 0 failed (exit 0)**.
+    - `tools/test_settlement_projects.js`: **14 passed, 0 failed (exit 0)**.
 
 
 ## DEUS-TSK-ASTRA-06 — Demographic schema and annual headless proof (2026-09-23)

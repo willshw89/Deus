@@ -88,37 +88,6 @@
     //-------------------------------------------------------------------------
     // Types (catalog items.types)
 
-    const DEFAULT_TYPES = [
-        {
-            id: "common_clothes",
-            name: "Common clothes",
-            image: "!$UF_Icon_136",
-            tags: ["clothing", "wear"],
-            stack: 1,
-            wear: { tier: 1 },
-            weight: 3.0,
-            armor: { slot: "torso", bonuses: { defence: { stab: 1, slash: 1, crush: 1, ranged: 1, magic: 0 } } }
-        },
-        {
-            id: "pouch",
-            name: "Pouch",
-            image: "!$UF_Icon_256",
-            tags: ["container", "gear"],
-            stack: 1,
-            weight: 1.0,
-            capacity: 50
-        },
-        {
-            id: "gold_coin",
-            name: "Gold piece",
-            image: "!$UF_Icon_169",
-            tags: ["currency", "precious"],
-            stack: 100,
-            weight: 0.02,
-            value: 1
-        }
-    ];
-
     const TYPE_ALIASES = {
         clothes_common: "common_clothes",
         clothes: "common_clothes",
@@ -134,12 +103,6 @@
             const byId = {};
             const list = rawList.slice();
             for (const t of list) if (t && t.id) byId[t.id] = t;
-            for (const dt of DEFAULT_TYPES) {
-                if (!byId[dt.id]) {
-                    byId[dt.id] = dt;
-                    list.push(dt);
-                }
-            }
             typeCache = { source: rawList, list, byId };
         }
         return typeCache;
