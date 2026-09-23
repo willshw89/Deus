@@ -34,6 +34,7 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
    - `timespeed.time_controls.png`: Bottom bar HUD widgets centered at screen bottom.
 5. **Measurements without diagnosed causes (Exact Measurement Context):**
    - Timing measurements from `UF_Fire.md`: Layer 0.056–0.060 ms/frame (max 0.78–1.23 ms), beat 0.39–0.88 ms (max 1.42 ms), total frame 0.065–0.067 ms. Measured on AMD Ryzen 7 8845HS / NVIDIA RTX 4060 laptop under `nw.exe` test run with 100 burning cells at zoom 1/3 over 150 frames. *Not generalized into a performance guarantee.*
+   - Underground generation baseline timings: Earlier test runs observed multi-second generation inside an uninstrumented VM test harness. Astra's dedicated profiler (`tools/bench_underground_gen.js`, commit `45b64f68d3bf74784742313daa7580ce67bf666d`, closed in `DEUS-TSK-ASTRA-02`) establishes the authoritative production-loading baseline: Seed 0 (Z-1 = 54.7 ms, Z-2 = 66.5 ms), Seed 424242 (Z-1 = 60.1 ms, Z-2 = 50.1 ms), Seed 20260919 (Z-1 = 47.5 ms, Z-2 = 48.8 ms). The multi-second timing was an artifact of the VM harness, not a production generator bottleneck.
    - Level baseline dimensions: 65,536 cells per level ($256 \times 256$), across 5 persistent levels ($-2$ to $+2$).
 6. **Starting-state contract (Preserved):**
    - 8 founders per faction (4 men, 4 women, adults 18–40) in alternating ring facing lit campfire at camp center (`PPP / PFP / PPP`).

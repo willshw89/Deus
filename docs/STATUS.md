@@ -8,8 +8,59 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable**: Assigned `DEUS-TSK-FABLE-02` (Autonomous Settlement Blueprint & Project Deficit Manager in `DEUS_Projects.js` and `test_settlement_projects.js`). File reservation active on `game/js/plugins/DEUS_Projects.js` and `tools/test_settlement_projects.js`.
-- **Astra**: Assigned `DEUS-TSK-ASTRA-02` (Under-Surface Baseline Generation Performance Profiler & Benchmark Harness in `tools/bench_underground_gen.js`). File reservation active on `tools/bench_underground_gen.js`.
-- **Gemini (Coordinator & Full-Stack)**: Finalizing Autonomous Settlement Construction Loop, Multi-Room Shelter Layouts, and Blueprint Staging.
+- **Astra**: `DEUS-TSK-ASTRA-02` COMPLETED — PASS (`tools/bench_underground_gen.js`, commit `45b64f68d3bf74784742313daa7580ce67bf666d`). No active file reservation. Next assignments pending coordinator review.
+- **Gemini (Coordinator & Full-Stack)**: Finalizing item handling interactions: right-click food consumption, cursor pick-and-place, ground drop, and colonist inventory transfer.
+
+## DEUS-TSK-ASTRA-02 Closed — Underground Generation Baseline Profiler & Performance Standard (2026-09-22)
+- **Status**: `COMPLETED — PASS`
+- **Commit**: `45b64f68d3bf74784742313daa7580ce67bf666d`
+- **Scope**: Profiling milestone modified strictly `tools/bench_underground_gen.js` (+488 lines). Zero production generator code changed.
+- **Evidence**:
+  - Default execution PASS (exit 0).
+  - Cross-runtime Node.js and hidden NW.js comparison PASS (`--runtime both`: identical checksums across all 6 seed/depth pairs).
+  - Selftest PASS: 14/14 passed (`tools/bench_underground_gen.js --selftest`), demonstrating fault detection, mutation detection, and deliberate-failure coverage.
+  - Deterministic FNV-1a checksums and exact topological component analysis across repeated runs.
+- **1. Authoritative Measured Baseline**:
+  - `tools/bench_underground_gen.js` established as the current authoritative performance harness for underground generation unless later evidence supersedes it.
+  - Reported Node generation averages:
+    - **Seed 0**: Z-1 = 54.706 ms, Z-2 = 66.529 ms
+    - **Seed 424242**: Z-1 = 60.133 ms, Z-2 = 50.084 ms
+    - **Seed 20260919**: Z-1 = 47.476 ms, Z-2 = 48.830 ms
+  - Memory & Allocations: Each generated level allocates four tracked output buffers totaling 262,144 bytes ($256 \times 256$ cells).
+  - Tracked post-release retention: exactly 0 surviving tracked buffers or objects after GC boundary.
+  - Cross-runtime equivalence: Node and NW.js native evaluation matched output checksums bit-for-bit on all six tested seed/depth combinations.
+- **2. Old Performance Assumption Retired**:
+  - Earlier audits observed multi-second underground generation inside an unoptimized VM/sandbox test environment.
+  - Those numbers are formally retired and must not be treated as demonstrated production generator cost.
+  - The dedicated production-generation profiler reports roughly 47–67 ms per tested underground level under its Node production-loading path.
+  - Distinction recorded:
+    - *OLD*: VM/sandbox test environment produced multi-second timings (inflated by contextified global Math lookups and harness virtualization).
+    - *CURRENT*: Dedicated production-generation profiler reports tens-of-milliseconds generation for tested seeds and levels.
+  - The likely cause of earlier slow timings was test harness overhead, not an algorithmic bottleneck in `generateUnderground`.
+- **3. Generator Optimization Policy**:
+  - Current evidence does not justify rewriting the generator for speed.
+  - Prohibited: replacing the current noise system, introducing workers/threads, adding benchmark-only caches, reducing terrain fidelity, changing seeds, changing topology, or optimizing speculative hotspots.
+  - The profiler is preserved as the regression baseline while upcoming generation work evolves the world.
+- **4. Standard for Upcoming Z+2 Plateau Work**:
+  - The upcoming vertical-generation milestone will intentionally add work (meaningful Z+1 terrain, substantial Z+2 plateau generation, vertical connectivity, validation/repair).
+  - That milestone must execute `tools/bench_underground_gen.js` before and after the generation change.
+  - The benchmark will be extended only where necessary to measure the new positive-Z generation path.
+  - Benchmark must measure separately: Z-2, Z-1, Z0 (where applicable), Z+1 elevation, Z+2 plateau, connectivity validation/repair, and complete New Game world generation.
+  - Added computational cost of the plateau task will be evaluated against functionality gained rather than constrained to the flat GEN3 baseline.
+- **5. Output Equivalence Testing**:
+  - Strict checksum and topology verification preserved when optimizing or restructuring generation.
+  - Tasks advertised as performance-only require identical canonical output (terrain bytes, pocket metadata, topology, resources).
+  - Behavior-changing milestones (such as the new plateau generator) establish new expected outputs and a new generator identity rather than being forced to match GEN3 bytes.
+- **6. Honest Profiling Terminology**:
+  - The benchmark measures isolated generation work, not whole-game FPS, AI simulation cost, rendering cost, settlement performance, or long-session memory behavior.
+  - Preserved reporting language: *"underground generation took X ms under this benchmark"*, never *"the game can generate worlds in X ms."*
+- **7. Next Astra Work**:
+  - Astra is not assigned speculative optimization before a measured problem exists.
+  - Future candidates for Astra:
+    - Benchmarking the new Z+1/Z+2 generator after implementation.
+    - Profiling settlement AI once the autonomous eight-founder loop exists.
+    - Profiling spatial and pathfinding queries as unit counts increase.
+
 
 ## Standalone Chest Info Popup & Drag-and-Drop Container Card — 2026-09-22 (Gemini / Antigravity)
 - **Directives**:
