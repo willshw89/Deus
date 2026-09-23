@@ -191,6 +191,12 @@ For the completed 500-year comparison, cumulative accounting errors were **0.010
 
 The required unchanged `node tools/test_historical_carrying_capacity.js` command exited **1** at its old-candidate guard, before running contracts. Consequently, the three-seed profiling command also exited **1** and its classification remains **PROFILING PASS; REQUIRED REGRESSION BLOCKED BY CANDIDATE MISMATCH**. This is not a passing production regression, and official independent Astra revalidation of candidate `8a40d2e` was not performed in this task. The telemetry is complete; the reserved verifier must be handled through its owner before any independent production-acceptance claim. No automatic activation or native-game verification follows from these results.
 
+## Commit provenance — 2026-09-23
+
+The reviewed profiler and report were staged as exactly the two assigned paths, with clean whitespace and identical working/index bytes. Before Codex's commit command executed, concurrent Gemini commit `aabdd029095c8cf1ae892f412e11f430feefa685` included both files alongside its own `docs/STATUS.md` update. Codex's subsequent commit attempt reported nothing left to commit. A byte comparison against that commit confirmed that both profiler files were the exact reviewed versions; Codex did not edit the accompanying STATUS change.
+
+The shared commit is preserved. A follow-up commit using the task's required `[codex] DEUS-TSK-CODEX-01 historical demographics deep performance profiler` message records this provenance note only. The implementation and measured evidence therefore originate in `aabdd029095c8cf1ae892f412e11f430feefa685`; the follow-up does not rerun or alter their measurements, retarget Astra's verifier, or rewrite another contributor's history.
+
 ## Structured report
 
 Annual metrics, timing spans, counters, provenance, equality checks and negative-control results follow. Bulk state/event strings were removed only after exact comparisons; checkpoint hashes remain.
