@@ -1488,23 +1488,32 @@
             dead: level >= 6
         };
     }
+    // A colonist's death from a survival cause: the job ends, the colony log and colonists:died record it, and Combat's
+    // death path (yields, chronicle, remains) runs when Combat is present, else the unit is removed here.
+    function dieOf(u, cause) {
+        const J = Jobs(), W = World();
+        if (!u || !u.data || u.data.dead) return;
+        const job = J ? J.of(u.id) : null;
+        if (job) J.cancel(job.id, `died of ${cause}`);
+        u.data.dead = true;
+        if (Number.isFinite(u.data.hp)) u.data.hp = 0;
+        delete u.data.dying;
+        const c = colonyState(u);
+        if (c && Array.isArray(c.log)) c.log.push({ tick: ticks(), text: `${u.name || "A colonist"} died of ${cause}` });
+        emit("colonists:died", u, cause);
+        const Cb = Combat();
+        if (Cb && typeof Cb.onUnitDeath === "function") Cb.onUnitDeath(u, null);
+        else if (W) W.removeUnit(u.id);
+    }
     function addExhaustion(u, levels, cause) {
-        const n = ensureNeeds(u), J = Jobs(), W = World();
+        const n = ensureNeeds(u), J = Jobs();
         if (!n || levels <= 0) return n ? n.exhaustion : 0;
         n.exhaustion = Math.min(6, (n.exhaustion | 0) + levels);
         if (cause === "hunger" || cause === "thirst") n.fromNeeds = Math.min(6, (n.fromNeeds | 0) + levels);
         addThought(u, cause === "hunger" ? "Grew weak with hunger." : cause === "thirst" ? "Grew weak with thirst." : "Was worn down by exhaustion.", -8);
         emit("colonists:exhaustion", u, n.exhaustion, cause);
         if (n.exhaustion >= 6) {
-            // Level 6 is death (SRD p. 358).
-            u.data.dead = true;
-            if (Number.isFinite(u.data.hp)) u.data.hp = 0;
-            const job = J ? J.of(u.id) : null;
-            if (job) J.cancel(job.id, `died of ${cause}`);
-            const c = colonyState(u);
-            if (c && Array.isArray(c.log)) c.log.push({ tick: ticks(), text: `${u.name || "A colonist"} died of ${cause}` });
-            emit("colonists:died", u, cause);
-            if (W) W.removeUnit(u.id);
+            dieOf(u, cause); // level 6 is death (SRD p. 358)
         } else if (n.exhaustion >= 5) {
             const job = J ? J.of(u.id) : null;
             if (job && job.type !== "sleep") J.cancel(job.id, "survival: exhaustion");
@@ -1552,7 +1561,7 @@
     function urgent(u) {
         const d = u && u.data;
         if (!d) return null;
-        if (unconscious(u)) return "unconscious";
+        if (unconscious(u)) { startDying(u); return "unconscious"; }
         const n = ensureNeeds(u);
         if (!n) return null;
         if (n.exhaustion >= 5) return "exhaustion";
@@ -1563,12 +1572,116 @@
         }
         return null;
     }
-    // A job that serves the need is never preempted for it.
-    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) ||
+    // A job that serves the need is never preempted for it; first aid is never preempted for a daily need either.
+    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) || job.type === "stabilize" ||
         (need === "hunger" && (job.type === "hunt" || job.type === "fetch" || job.type === "gather" || job.type === "craft")));
     // Anti-thrash: a need nothing could meet waits NEED_RETRY_TICKS before the search runs again (keyed on the hearth).
     const needKey = (u, need) => { const c = colonyState(u); return avoidKey(u, "need_" + need, c ? c.site.x : 0, c ? c.site.y : 0); };
     const needBlocked = (u, need) => (avoid.get(needKey(u, need)) || 0) > ticks();
+
+    //-------------------------------------------------------------------------
+    // Dying and stabilisation (SRD 5.1 Dropping to 0 Hit Points, owner decision 2026-09-23). A colonist at 0 hit points
+    // is unconscious, not dead: every round (6 s) it makes a death saving throw, a d20: 10 or more a success, less a
+    // failure, a 1 two failures, a 20 one hit point and consciousness; three successes stabilise, three failures kill.
+    // Damage while at 0 (Combat's call: Colonists.woundedAtZero) is a failure, two on a critical hit. Another colonist can
+    // stabilise it with first aid: a DC 10 Wisdom (Medicine) check (the stabilize job). Stable means no longer dying,
+    // not healed: it stays unconscious at 0 and regains 1 hit point after 1d4 hours unless healed first.
+
+    const ROUND_TICKS = 360;        // a 6 s round at 60 map updates a second
+    const RESCUE_RADIUS = 40;       // cells: how far a colonist goes to give first aid
+    const d20 = (...parts) => 1 + Math.floor(unit01(seed(), SALT.roll, ...parts) * 20);
+    const wisModOf = u => {
+        const s = (u && u.data && (u.data.stats || u.data.abilities || u.data.scores)) || null;
+        const wis = s && Number.isFinite(s.wis) ? s.wis : 10;
+        return Math.floor((wis - 10) / 2);
+    };
+    const medicineBonus = u => wisModOf(u) + ((u && u.data && Array.isArray(u.data.proficiencies) && u.data.proficiencies.includes("medicine")) ? 2 : 0);
+    const dyingOf = u => (unconscious(u) && !u.data.dead ? u.data.dying || null : null);
+    function startDying(u) {
+        if (!u || !u.data || u.data.dead) return null;
+        if (u.data.dying) return u.data.dying;
+        u.data.dying = { successes: 0, failures: 0, stable: false, since: ticks(), nextRoundAt: ticks() + ROUND_TICKS, wakeAt: null };
+        const job = Jobs() && Jobs().of(u.id);
+        if (job) Jobs().cancel(job.id, "survival: unconscious");
+        addThought(u, "Collapsed.", -10);
+        emit("colonists:dying", u);
+        return u.data.dying;
+    }
+    function deathSave(u, d) {
+        const roll = d20(u.id, ticks(), 21);
+        if (roll === 20) { regainConsciousness(u, "a death saving throw of 20"); return roll; }
+        if (roll === 1) d.failures += 2;
+        else if (roll >= 10) d.successes += 1;
+        else d.failures += 1;
+        if (d.failures >= 3) { dieOf(u, "wounds"); return roll; }
+        if (d.successes >= 3) becomeStable(u, d, "three successful death saving throws");
+        return roll;
+    }
+    function becomeStable(u, d, how) {
+        d.stable = true;
+        d.successes = 0;
+        d.failures = 0;
+        d.wakeAt = ticks() + (1 + Math.floor(unit01(seed(), SALT.roll, u.id, ticks(), 23) * 4)) * TICKS_PER_HOUR; // 1d4 hours
+        addThought(u, "Stopped slipping away.", 4);
+        emit("colonists:stabilized", u, how);
+    }
+    function regainConsciousness(u, how) {
+        if (!u || !u.data) return;
+        delete u.data.dying;
+        if (Number.isFinite(u.data.hp) && u.data.hp < 1) u.data.hp = 1;
+        addThought(u, "Came to.", 6);
+        emit("colonists:conscious", u, how);
+        pendingDecision.add(u.id);
+    }
+    /** Combat's hook: damage taken at 0 hit points is a death saving throw failure, two on a critical hit. */
+    function woundedAtZero(u, critical) {
+        const d = startDying(u);
+        if (!d) return null;
+        if (d.stable) { d.stable = false; d.wakeAt = null; }
+        d.failures += critical ? 2 : 1;
+        if (d.failures >= 3) dieOf(u, "wounds");
+        return d;
+    }
+    /** First aid by another colonist: a DC 10 Wisdom (Medicine) check. Returns { ok, roll, total, dc } or null when there is nothing to stabilise. */
+    function stabilize(patient, rescuer) {
+        const d = dyingOf(patient);
+        if (!d || d.stable) return null;
+        const roll = d20(rescuer ? rescuer.id : 0, patient.id, ticks(), 22);
+        const total = roll + medicineBonus(rescuer);
+        const ok = total >= 10;
+        if (ok) becomeStable(patient, d, `first aid by ${rescuer && rescuer.name ? rescuer.name : "a colonist"}`);
+        else addThought(rescuer, `Couldn't stop ${patient.name || "a friend"} from slipping.`, -3);
+        return { ok, roll, total, dc: 10 };
+    }
+    // Every sweep: the dying roll their saving throws by the round; the stable wake when their hours are up.
+    function tickDying(u, t) {
+        const d = dyingOf(u);
+        if (!d) return;
+        if (d.stable) {
+            if (d.wakeAt !== null && t >= d.wakeAt) regainConsciousness(u, "an hour's rest");
+            return;
+        }
+        while (t >= d.nextRoundAt && u.data.dying === d && !u.data.dead) {
+            d.nextRoundAt += ROUND_TICKS;
+            deathSave(u, d);
+        }
+    }
+    // Emergency aid, above ordinary labor: the nearest unconscious, unstable colonist of the same faction nobody is helping.
+    function patientsFor(u) {
+        return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && dyingOf(o) && !dyingOf(o).stable && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
+    }
+    function rescueJob(u) {
+        if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5) return null;
+        const J = Jobs();
+        if (!J || !J.handler("stabilize")) return null;
+        const patients = patientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
+        for (const p of patients) {
+            if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
+            const j = give(u, { type: "stabilize", target: { x: p.x, y: p.y }, params: { unitId: p.id, emergency: true } });
+            if (j) return j;
+        }
+        return null;
+    }
 
     // The long rest: 8 hours in a bed, beside the hearth, or where the colonist stands (at speed 0 it can't walk to a bed).
     function longRestJob(u) {
@@ -4486,6 +4599,8 @@
         // first (needJob: rest, water, food); a need nothing can meet doesn't keep the colonist from working. At
         // exhaustion 5 (speed 0) there is no work, only the rest.
         if (unconscious(u)) return null;
+        // Emergency aid comes before everything but the rescuer's own incapacity (unconscious, exhaustion 5).
+        if (exhaustionOf(u) < 5) { const aid = rescueJob(u); if (aid) return aid; }
         const need = needJob(u);
         if (need) return need;
         if (exhaustionOf(u) >= 5) return null;
@@ -4534,6 +4649,29 @@
         for (const id of pendingDecision) { const u = colonist(id); if (u) due.push({ u, now: true }); }
         pendingDecision.clear();
         if (sweep) for (const u of colonists()) if (!due.some(d => d.u === u)) due.push({ u, now: false });
+        // The dying roll their saving throws by the round; one unstable patient without a rescuer on the way pulls the
+        // nearest ordinary worker off its job ("emergency: aid"), once per PREEMPT_EVERY per worker.
+        if (sweep) {
+            const all = colonists();
+            for (const u of all) {
+                if (unconscious(u) && !u.data.dead) startDying(u); // idle or busy, 0 hit points is dying
+                tickDying(u, t);
+            }
+            const patients = all.filter(o => dyingOf(o) && !dyingOf(o).stable && !(J.reservation && J.reservation.reservedBy({ id: o.id }) !== null));
+            for (const p of patients) {
+                const helpers = all.filter(o => o !== p && !unconscious(o) && exhaustionOf(o) < 5 && sameLevel(o, p) && chebyshev(o.x, o.y, p.x, p.y) <= RESCUE_RADIUS)
+                    .sort((a, b) => chebyshev(a.x, a.y, p.x, p.y) - chebyshev(b.x, b.y, p.x, p.y) || a.id - b.id);
+                for (const h of helpers) {
+                    const job = J.of(h.id);
+                    if (!job) { pendingDecision.add(h.id); break; } // idle: decides now, aid first
+                    if (isNeedJob(job, null) || job.params && job.params.emergency) continue;
+                    if (t - (preemptAt.get(h.id) || -Infinity) < PREEMPT_EVERY) continue;
+                    preemptAt.set(h.id, t);
+                    J.cancel(job.id, "emergency: aid");
+                    break;
+                }
+            }
+        }
         let decided = 0;
         for (const { u, now } of due) {
             const job = J.of(u.id);
@@ -4931,8 +5069,9 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Colonists = Colonists;
-    Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds });
-    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, endOfDay, addExhaustion, removeExhaustion, completeLongRest, longRestJob, dayKey, dayNumber, conModOf, waterNeed, isNeedJob, needBlocked, avoid, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep });
+    Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds, stabilize, woundedAtZero, dying: dyingOf, unconscious });
+    Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, endOfDay, addExhaustion, removeExhaustion, completeLongRest, longRestJob, dayKey, dayNumber, conModOf, waterNeed, isNeedJob, needBlocked, avoid, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep,
+        startDying, deathSave, becomeStable, regainConsciousness, tickDying, rescueJob, patientsFor, medicineBonus, wisModOf, dieOf, ROUND_TICKS });
 
     //-------------------------------------------------------------------------
     // Engine hooks

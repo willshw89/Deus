@@ -59,6 +59,7 @@
     const NEED_WORK = 60;        // ticks (one game minute) to drink or eat
     const TALK_WORK = 180;
     const SLEEP_WORK = 600;      // default when params.frames is missing
+    const STABILIZE_WORK = 360;  // one action: a 6 s round at 60 updates a second (SRD first aid)
     const NEIGHBORS = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // 4-way (contract section 1.6)
     const DIAGONALS = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
     // 8-way (VISION V3, UF_Movement8D's FourWay off): a unit may also work from a diagonal neighbour of its target.
@@ -922,6 +923,39 @@
             if (!noNeeds(unit)) unit.data.needs.sleep = 5;
         },
         describe: () => "Sleeping"
+    });
+
+    // First aid (SRD 5.1, Stabilizing a Creature): an action beside an unconscious creature, a DC 10 Wisdom (Medicine)
+    // check, stable on success. DEUS_Colonists owns the dying state and makes the check (UF.Colonists.stabilize); this
+    // job walks the rescuer there, reserves the patient, spends the round, and tries again on a failed check.
+    define("stabilize", {
+        verb: "Stabilizing",
+        replanEvery: REPLAN_TICKS,
+        plan(job, unit) {
+            const patient = World().unit(job.params.unitId);
+            if (!patient || !patient.data || patient.data.dead) return { ok: false, reason: "too late" };
+            if (!(Number.isFinite(patient.data.hp) && patient.data.hp <= 0)) return { ok: false, reason: "no longer dying" };
+            if (patient.data.dying && patient.data.dying.stable) return { ok: false, reason: "already stable" };
+            if (!sameLevel(patient, unit) || chebyshev(patient.x, patient.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
+            if (reservationManager.isReservedByOther(unit.id, { id: patient.id })) return { ok: false, reason: "someone is already helping" };
+            reservationManager.reserve(unit.id, { id: patient.id });
+            job.params.patientName = patient.name;
+            job.target = { area: copyArea(patient.area), x: patient.x, y: patient.y, z: zOf(patient) };
+            const stand = standFor(job.target, unit, true);
+            return stand ? { ok: true, stand } : { ok: false, reason: "can't get near" };
+        },
+        work: STABILIZE_WORK,
+        apply(job, unit) {
+            const patient = World().unit(job.params.unitId);
+            if (!patient || !patient.data || patient.data.dead) { job.reason = "too late"; return false; }
+            const C = window.UF && UF.Colonists;
+            if (!C || typeof C.stabilize !== "function") { job.reason = "nobody knows first aid"; return false; }
+            const r = C.stabilize(patient, unit);
+            job.result = r;
+            if (!r) { job.reason = "no longer dying"; return false; }
+            if (!r.ok) return "continue"; // the check failed: another action next round
+        },
+        describe: job => `Stabilizing ${job.params.patientName || "someone"}`
     });
 
     define("talk", {
