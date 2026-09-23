@@ -1,6 +1,111 @@
 # UF_History
 
-## Species biology measurement harness — 2026-09-23
+## ASTRA08 biological calibration experiment — 2026-09-23
+
+**Task:** DEUS-TSK-ASTRA-08. **Tool:** `tools/bench_species_biology.js`, report schema version 2. This is a proposed caller-side experiment using production sources loaded from commit `931b993e60545b24bddaa71ab433ebac8e967eb8`. The engine SHA-256 remains `647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e`. Only the harness and task documentation change; production plugins, catalogs, New Game registration, and real saves remain read-only. The experiment does not implement production ecology or establish general demographic viability.
+
+The CLI still accepts `--seed`, `--years 100|250|500`, `--runs 1..20`, `--json <path-under-game/test_output>`, `--selftest`, and the existing mutant names. Default coverage remains seeds 0, 424242, and 20260919, with two independent processes per seed and continuous checkpoints at 100/250/500 elapsed years. A one-repeat screening run reports repeat verification as `NOT RUN`; it does not replace the default two-repeat check. The worker timeout is now **60 seconds**, replacing ASTRA07's archived 30-minute limit. Reports retain verified checkpoint streaming, snapshot/harness identity checks, and explicit incomplete coverage on timeout.
+
+### Candidate 2 inputs and annual schedule
+
+All nine lifespan intervals and all biological inputs for elf and gnome remain unchanged from the ASTRA07 proposal. Candidate 2 retains Candidate 1's four short-lived-species changes and additionally widens dwarf, halfling, and half-elf reproduction. Current changed base profiles are:
+
+| Species | Reproductive ages | Base annual birth chance | Birth spacing | Infant mortality | Disease / exposure mortality |
+|---|---|---:|---:|---:|---:|
+| human | 18–55 | 0.36 | 3 years | 0.004 | 0.0003 / 0.0003 |
+| dwarf | 40–240 | 0.09 | 6 years | 0.006 | 0.0003 / 0.0003 |
+| halfling | 20–110 | 0.20 | 4 years | 0.012 | 0.0008 / 0.0006 |
+| dragonborn | 15–60 | 0.34 | 3 years | 0.004 | 0.0003 / 0.0003 |
+| half-elf | 20–125 | 0.12 | 5 years | 0.01 | 0.0005 / 0.0005 |
+| half-orc | 14–50 | 0.40 | 2 years | 0.004 | 0.0003 / 0.0003 |
+| tiefling | 18–65 | 0.30 | 3 years | 0.004 | 0.0003 / 0.0003 |
+
+Before each historical year, the harness reads the site's **starting** living population and supplies `birthChance = baseBirthChance * max(0.1, 1 - startPopulation / 160)`. It asserts exactly one site per species, so applying the rate through that species' state profile is unambiguous. After the public annual call, a `finally` block restores every base birth chance. Annual report curves retain site ID, starting population, capacity parameter, scale, and effective fertility. The scale is 1 at population 0, 0.5 at 80, and has a floor of 0.1 at 144 and above. Candidate 1 used 200; Candidate 2 chooses **160** to reduce persistent-record pressure. The task's 200–500 examples were treated as examples, not binding parameter bounds. This is a disclosed experimental choice, not an approved ecological constant. The parameter is a soft fertility input, not a hard population cap or a simulated food/housing carrying capacity; fertility never becomes zero solely because of density.
+
+The timed call now uses the unchanged public `step(state)` plus this caller-side schedule, with one full production validation per year. ASTRA07 used `simulate(state, 1)`, which validates in both `simulate` and `step`; the changed API entry point must be considered when comparing timings. Setup, census, heap sampling, checkpoint verification, hashing, and IPC remain outside annual simulation timing. Whole-trajectory `wallMs` includes setup and observation work; parent-measured `processWallMs` additionally includes worker startup, source loading, IPC, and parsing. No validation, kinship rule, archive, or production loop is bypassed.
+
+At checkpoints, one pass groups individuals by species and unpartnered fertile candidates by site and 10-year age bin for **diagnostics only**. The report adds fertile male/female counts, unpartnered fertile counts, age-bin counts, and active partnerships whose two members remain reproductively eligible. These indexes do not drive the engine's pairing decisions. Production pairing already searches the entire configured reproductive window; the experiment changes the listed static windows. Internal quadratic searches remain unchanged and read-only. The harness adds no settlers, resurrection, migration, or rescue births.
+
+### Experiment gates and observed verification
+
+| Gate | Required result for the selected coverage |
+|---|---|
+| `zeroExtinctions` | Every species has a positive living population at every recorded annual census. |
+| `viableReproduction` | Every species has a living population and at least one active fertile partnership at each selected 250/500-year checkpoint; `NOT RUN` when no such checkpoint is selected. |
+| `boundedPopulation` | Every species remains strictly below 1,500 living people at every recorded annual census. |
+| `serializedState` | Every checkpoint's complete serialized state is strictly below 15 MiB. |
+| `trajectoryBudget` | Every whole trajectory completes in strictly less than 30 seconds. |
+| `seedBudget` | Summed parent-measured worker process elapsed time across all requested repeats of each seed is strictly below 60 seconds. |
+
+Any failed gate produces a `FAIL` report and exit code 1. A `PASS` applies only to the selected coverage and these finite-seed experiment gates; `approvedForIntegration` remains false. The older greater-than-100-times-founders growth flag remains a diagnostic alongside the new explicit population bound. Lifespan cause separation, right-censoring, unique-seed aggregation, and sampled-heap limitations described in the archived methodology below still apply.
+
+Observed by the task's root agent on 2026-09-23: **25 self-tests passed for each candidate**, including exact state/event equality between public `step` and `simulate` under the density schedule, a JSON round-trip after 50 years followed by continuation to 100, base-probability restoration, and rejection of ambiguous multiple-site scheduling. Deliberate extinction, zero-fertile-partnership, population-bound, state-size, and timing mutations were detected, alongside the existing randomness/profile/parentage and timeout controls. The root agent also observed the harness syntax check pass. These are headless checks; native RMMZ Playtest was not run for this measurement task.
+
+Candidate 1's three-seed, one-repeat 500-year screening completed with **FAIL** in 96.292 seconds of reported total wall time. In seed order 0/424242/20260919, whole-trajectory times were 31.281/34.474/28.984 seconds, annual species-population maxima were 191/183/184, and final state sizes were 4,256,328/4,379,732/4,170,452 bytes. Population and state-size bounds passed, but the first two trajectory budgets failed. Half-elves became extinct for seed 20260919 and halflings for seed 424242. Seed 424242 retained three dwarves with no fertile partnership; seed 0 retained 16 half-elves with no fertile partnership. Thus both extinction and reproductive-viability gates failed even though the four initially adjusted species survived with 150–179 living members. These are screening findings; one repeat does not establish repeatability.
+
+A separate CPU-profiled Candidate 1 seed-0 run attributed approximately 90% of sampled CPU time to validation and 1.3% to pairing; its 36.754-second wall time is profiling evidence, not an acceptance timing. A `compileFunction` experiment took approximately 2,192 ms for a 250-year trial versus 2,051 ms with the original invocation and was not adopted. Neither result authorizes modifying the frozen engine or bypassing its validation.
+
+Candidate 2's three-seed, one-repeat 500-year screening completed with **FAIL**, solely on `trajectoryBudget`, in 89.723 seconds of reported total wall time. In seed order 0/424242/20260919, whole-trajectory times were 28.645/31.589/27.724 seconds and annual species-population maxima were 167/151/169. Final state sizes ranged from 4,033,764 to 4,066,082 bytes. All nine species remained alive and had active fertile partnerships at both 250 and 500 years in every screened seed. Extinction, reproductive viability, population, state-size, and one-repeat seed-budget gates passed; seed 424242 exceeded the 30-second trajectory limit. These finite-seed biological findings do not constitute overall acceptance or production profile approval.
+
+The performance requirement survived both candidates, so **AGENTS.md rule 10 stopped further repairs**. The required default two-repeat matrix then ran with the unchanged Candidate 2 harness and completed with **PASS, exit code 0**, for all six gates. Both the failed Candidate 2 screen and the passing default run used harness SHA-256 `5d8554948d57134d0ca2155ab7a4fd29efcbc922959b14390e1d59c4130dc4af`; there was no intervening repair or further tuning. The default run supplies the required repeat evidence. Its success does not erase the earlier timing failure or establish a reliable performance margin on other runs or machines.
+
+### Completed Candidate 2 default measurements
+
+The inspected `game/test_output/bench_species_biology.json` contains **six completed trajectories and 18 checkpoints**, measured with Node v24.19.0 on an AMD Ryzen 7 8845HS. Reported total wall time was **169.630968 seconds**. Every species remained alive throughout all recorded annual censuses and had an active fertile partnership at each 250/500-year checkpoint in all three seeds. All three repeat checks passed exact state/event byte and annual-curve comparisons. Independent inspection of the saved report also confirmed identical hashes, state sizes, biological measurements, and curves between each seed's repeats.
+
+All loaded production sources matched baseline commit `931b993e60545b24bddaa71ab433ebac8e967eb8`; the aggregate source SHA-256 was `180d6d7840083aa9cf501fbefa566e58cbd3afab360c6e8dda2d4309d9bedfbd`. The production engine hash remains the value at the top of this section. The saved report and the current harness bytes have the harness hash recorded above. Production source/catalog hashes were unchanged at run start and end; no production integration or catalog-profile approval follows from this experiment.
+
+Each timing pair below is repeat 1 / repeat 2. The state size and living count are identical across repeats; the annual peak is the largest single-species living population across the full 500-year curve.
+
+| Seed | Whole trajectory, seconds | Worker process elapsed, seconds | Sum of both workers, seconds | Annual species peak | Living at 500 | State bytes at 500 |
+|---|---:|---:|---:|---:|---:|---:|
+| 0 | 25.893 / 29.121 | 26.342 / 29.500 | 55.841 | 167 | 1,086 | 4,033,764 |
+| 424242 | 27.649 / 28.791 | 28.048 / 29.192 | 57.241 | 151 | 1,065 | 4,066,082 |
+| 20260919 | 28.224 / 27.171 | 28.653 / 27.572 | 56.225 | 169 | 1,090 | 4,053,000 |
+
+The slowest default trajectory left only **0.879 seconds** below the 30-second gate, and the largest two-worker total left **2.759 seconds** below the 60-second seed gate. The earlier same-harness screen exceeded the trajectory limit by 1.589 seconds. These observations support the recorded run's PASS while preserving the narrow and variable timing margin.
+
+The following cumulative simulation measurements cover all six trials. Whole-trajectory and process costs above additionally include setup and reporting work; serialized state bytes and sampled heap are separate measures.
+
+| Elapsed years | Mean simulation, ms | Simulation range, ms | Worst annual call, ms | State bytes, min–max | Maximum sampled heap delta |
+|---|---:|---:|---:|---:|---:|
+| 100 | 150.348 | 140.070–162.251 | 6.939 | 546,062–614,376 | 8.87 MiB |
+| 250 | 1,898.056 | 1,768.892–1,968.646 | 32.951 | 1,829,225–1,865,608 | 31.97 MiB |
+| 500 | 27,024.517 | 25,086.062–28,359.313 | 373.459 | 4,033,764–4,066,082 | 101.66 MiB |
+
+Living populations below are **100 / 250 / 500 elapsed years** for each unique seed. Each species started with eight canonical founders. Repeated deterministic trials do not increase the biological sample beyond three seeds.
+
+| Species | Seed 0 | Seed 424242 | Seed 20260919 |
+|---|---:|---:|---:|
+| human | 132 / 124 / 127 | 139 / 121 / 123 | 122 / 123 / 133 |
+| elf | 13 / 30 / 64 | 12 / 20 / 50 | 13 / 28 / 49 |
+| dwarf | 26 / 112 / 128 | 27 / 92 / 140 | 35 / 133 / 127 |
+| halfling | 111 / 140 / 137 | 88 / 129 / 145 | 95 / 126 / 136 |
+| gnome | 20 / 61 / 104 | 18 / 63 / 109 | 24 / 74 / 123 |
+| dragonborn | 137 / 124 / 133 | 138 / 129 / 124 | 137 / 119 / 138 |
+| half-elf | 58 / 122 / 140 | 73 / 132 / 119 | 52 / 129 / 122 |
+| half-orc | 151 / 134 / 127 | 136 / 131 / 127 | 143 / 137 / 130 |
+| tiefling | 122 / 136 / 126 | 131 / 132 / 128 | 100 / 137 / 132 |
+
+Full checkpoint SHA-256 values are listed once per unique seed/horizon; both repeats have these exact hashes. The horizons are elapsed years, corresponding to engine years 101/251/501.
+
+| Seed | Elapsed years | State SHA-256 | Events SHA-256 |
+|---|---:|---|---|
+| 0 | 100 | `89604f277e56df61db21d3c4c17cf6d71b7cde3c004d072f7fd9d7f300b47986` | `a0950b01b6a2e216a42a48551ae9ef1fddb055a28a9d8e5df3baf6f1a668c1a7` |
+| 0 | 250 | `1afac30949f6ef94c53facca941c21b99da5b3a4360d24d4f1aca1e28aaf3ba3` | `1e08f5b645732cc8b9f7120dfe0a073e80816350ae65fd95f8c2e4fee58029c6` |
+| 0 | 500 | `e25d4d8482cc8fd616f3e808a24fedccf11c4b89c7bd95a92be46ce7cce7fb56` | `e0c47f82b56255a631ec24db5e9ffe8b61dac37ae6186e6d2a3d97de8b3ee733` |
+| 424242 | 100 | `6bd500b17e31b4befee845580721376e5f82d1420cd11920b101a703f9ae811a` | `3147726c61e0f78a57cd91c39f21e2ac6dac667131f765414d5ab72ee6325e3a` |
+| 424242 | 250 | `bd0e1b5c6d67e5f13fcaedd3a3c77b68b1757c17b95622dc08180faf00d6e4c2` | `ce30da18b7ecf37ceef8043e88dbf5e94befe7c9b65925ee899ba83063bf96e4` |
+| 424242 | 500 | `6f97047ad9d5e4d471c4363792cb1458a309b41fb2546b8fdc05d7dfd8d3e521` | `eb236ce4401717c58ac22ff90fce465901f6601d4b1468397e35f512b6d0745e` |
+| 20260919 | 100 | `0bd8df6cd5036a876118c79bf7b7bfb8d37827ff5afb5ea5fc92df11db818702` | `2a595c488d99b8a3b26410db4858b0e244ea1ef6e86d3ec84a6d00f10dd273c0` |
+| 20260919 | 250 | `fac559473923739462baf9fae360a0f569f25d4a6d5f97ab66ad4c2905561e17` | `c239eebf177d3b8e454e1aa376c8fe46490382d024a0cf194de358c745e09a5e` |
+| 20260919 | 500 | `172dcb490f0abff23de8a2cea77a61dbdd326213c27e974b8db7c71ef0826e3e` | `b8c371f610a3256e08c3a9390721c01e4849bf47ab783b3dce420e951b98a70a` |
+
+The observed default PASS completes this finite measurement matrix. The nine caller-supplied profiles remain proposals, `approvedForIntegration` remains false, and no general equilibrium, future extinction resistance, production ecology, or native-game performance claim is made.
+
+## Archived ASTRA07 species biology measurement — 2026-09-23
+
+The following section records the ASTRA07 harness settings and evidence archived in commit `931b993e60545b24bddaa71ab433ebac8e967eb8`. Its profile matrix, absent density schedule, `simulate(state, 1)` timing, 30-minute worker cap, and incomplete 500-year outcome are historical; ASTRA08's current experiment is described above.
 
 **Task:** DEUS-TSK-ASTRA-07. **Tool:** `tools/bench_species_biology.js`. This headless harness evaluates the supplied nine-species profile proposal using the unchanged ASTRA06 demographic engine and canonical Year-1 bootstrap. The proposal is copied into the report's `proposedProfiles`; it is a measurement input, not approved catalog biology or an automatic New Game setting. Production plugins, catalogs, registration, and real saves remain read-only. The ASTRA06 implementation and its earlier evidence are documented below.
 
@@ -44,7 +149,7 @@ The separate 100-year and 250-year matrices completed for all three seeds with t
 
 At 250 years, humans and half-orcs were extinct in 2/3 sampled seeds each; dragonborn and tieflings were extinct in 1/3 each. These are observed failures of an extinction-free proposal, despite passing simulation-integrity checks. The profiles remain unapproved.
 
-The current `game/test_output/bench_species_biology.json` is explicitly an **`INCOMPLETE` session handoff**, assembled from the inspected shorter reports and the original timeout-console evidence. It is not an emitted, completed default-matrix report. The full three-seed 500-year matrix remains incomplete; the remaining decision is whether to authorize a longer run budget or a separate engine-performance task. No additional expensive 500-year run is claimed or automatically promised.
+The ASTRA07 `game/test_output/bench_species_biology.json` was explicitly an **`INCOMPLETE` session handoff**, assembled from the inspected shorter reports and the original timeout-console evidence. It was not an emitted, completed default-matrix report. The full three-seed 500-year matrix for those ASTRA07 settings remained incomplete; this historical outcome is not replaced by results from changed ASTRA08 inputs.
 
 The harness's `PASS` means its integrity and requested repeatability checks passed; extinction or high-growth findings remain reported biological outcomes, not calibration approval. It supplies no migration, tactical wars, extra environmental shocks, density regulation, or automatic profile adjustment. The failed default attempt above is not a PASS for the full matrix. Native RMMZ Playtest is outside this measurement harness.
 
