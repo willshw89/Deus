@@ -32,6 +32,18 @@ Update this whenever reality changes. Write only what you've checked, and say ho
   - `node tools/test_autonomous_settlement_closure.js` (production clock, 600 ticks/hour): **20 passed, 2 failed** (improved from 16 passed, 6 failed). Passed `long_rest_one_night` (78 rests observed, all 8.0–8.1 calendar hours), `nobody_died` (all 10 alive after 9.6 calendar days), and `no_errors` (0 errors in 138,242 updates).
 - **Handoff**: Dispatched task packet `fable_prompt_tsk_08.md` to Fable (`DEUS-TSK-FABLE-08`).
 
+## DEUS-TSK-CODEX-01 — Historical Demographics Deep Profiling Completed (2026-09-23)
+- **Status**: `COMPLETED — PASS` (Commit `23bc85f`)
+- **Scope**:
+  - `tools/profile_historical_demographics.js`: Created standalone VM profiler, phase timers, work counters, unchanged comparison runs, and negative controls.
+  - `docs/systems/UF_History_Profile.md`: Documented measurements, analysis, checkpoint hashes, and embedded structured JSON containing annual telemetry.
+- **Findings**:
+  - Inspected production candidate `8a40d2e` (45,429 bytes, SHA-256 `e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95`).
+  - Validation is the dominant performance cost: in seed 0, validation took 31,383 ms out of 40,904 ms instrumented execution (~76.7% of instrumented time).
+  - Seed 0 performed 1,016,227,126 birth-to-partnership predicate evaluations. Of 1,974,746 kinship calls, 99.28% originated in validation.
+  - Association scan has worst-case $O(P \times H)$ cost (deceased people $\times$ historical partnerships).
+- **Handoff**: Profile data and analysis ready for ASTRA-11 independent re-verification.
+
 ## DEUS-TSK-ASTRA-10 — Independent HIST-09 validation completed; candidate FAIL (2026-09-23)
 - **Classification**: `FAIL`. All requested trajectories finished without timeouts, but four production contract checks and the 30-second trajectory gate failed. No production repair or timing retry was attempted.
 - **Candidate**: `f532291b8aecbd9899814ddf6c098bd3cee36342`; `game/js/plugins/DEUS_HistoricalDemographics.js` matched the packet before tests and after the full run: 41,439 raw bytes, SHA-256 `06d0f7ac1596bea8d2432c48c899497e9d8b0cb67b12925e23958a5427af0012`. All executed dependencies/catalog data were frozen to that commit. Gemini remains the production implementation owner.
