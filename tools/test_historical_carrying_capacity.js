@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-12 independent, bounded contracts for the immutable HIST-09 candidate.
+// ASTRA-14 independent, bounded contracts for the immutable HIST-09 candidate.
 // This file never edits production or writes artifacts. The benchmark owns the
 // long matrices, full-process save/restart test, sweep and consolidated report.
 const fs = require("fs");
@@ -23,7 +23,7 @@ const MODEL = { id: "local_density_v1", version: 1, defaultBaseline: 160, minimu
 const PROFILE_VERSION = "1.0.0-provisional-astra08";
 const DEFAULT_PROFILE_HASH = "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48";
 const PROFILE_FIELDS = ["lifespan", "reproductiveAge", "birthChance", "birthSpacingYears", "infantMortality", "diseaseMortality", "exposureMortality"];
-const PACKET_POLICY = "Reconciled ASTRA-12 owner-approved schema/model/profile identities and canonical SHA-256 provenance contract";
+const PACKET_POLICY = "Reconciled ASTRA-14 owner-approved schema/model/profile identities and canonical SHA-256 provenance contract";
 const MUTANT_CHECKS = {
     no_density_pressure: "DENSITY_RATE",
     universal_constant: "LOCAL_CAPACITY",
@@ -158,6 +158,7 @@ function rejectUnchanged(fn, state, diagnostic, pattern = null) {
     try { fn(); } catch (e) { error = e; }
     assert(error && (!pattern || pattern.test(error.message)), `${diagnostic}: expected rejection${pattern ? ` matching ${pattern}` : ''}, got ${error ? error.message : 'success'}`);
     assert(fingerprint(state) === before, `${diagnostic}: rejection mutated input`);
+    return error.message;
 }
 function freezeDeep(value) {
     if (value && typeof value === "object" && !Object.isFrozen(value)) { Object.values(value).forEach(freezeDeep); Object.freeze(value); }
@@ -256,10 +257,13 @@ function packetContracts(loaded, realLegacy) {
     const capacityFields = state => ({ capacityModelId: state.capacityModelId, capacityModelVersion: state.capacityModelVersion,
         configId: state.config.capacityModel.id, configVersion: state.config.capacityModel.version });
     const capacityModel = { capacityModelId: "local_density_v1", capacityModelVersion: 1, configId: "local_density_v1", configVersion: 1 };
-    const capacityEvidence = { initial: capacityFields(defaults), callerIds: [] };
+    const capacityEvidence = { initial: capacityFields(defaults), callerIds: [], callerVersions: [], contradictoryConfigIds: [] };
     add("PACKET_CAPACITY_MODEL_IDENTITY", capacityModel, capacityEvidence, () => {
         equal(capacityFields(defaults), capacityModel, "Root/config capacity identity or version differs from reconciled packet");
         equal(capacityFields(custom), capacityModel, "Custom biology changed capacity-model identity");
+        const explicitModel = { capacityModel: { id: "local_density_v1", version: 1 } }, explicitBefore = fingerprint(explicitModel);
+        equal(capacityFields(api.create(world, explicitModel)), capacityModel, "Explicit supported capacity identity/version did not remain canonical");
+        assert(fingerprint(explicitModel) === explicitBefore, "Supported capacity options were mutated");
         for (const [key, value] of [["capacityModelId", "TEST_UNSUPPORTED_CAPACITY"], ["capacityModelVersion", 2]]) {
             const bad = clone(defaults); bad[key] = value;
             rejectUnchanged(() => api.validate(bad), bad, `Unsupported ${key}`, /unsupported/);
@@ -271,7 +275,18 @@ function packetContracts(loaded, realLegacy) {
             capacityEvidence.callerIds.push(observed);
             assert(fingerprint(world) === before, "Caller capacity-ID rejection/create mutated canonical input");
         }
-        assert(capacityEvidence.callerIds.every(item => item.rejected || text(item.persisted) === text(capacityModel)), "Caller capacityModel.id escaped rejection/normalization and persisted an unsupported model identity");
+        assert(capacityEvidence.callerIds.every(item => item.rejected && /unsupported/i.test(item.diagnostic)), "Caller capacityModel.id escaped required unsupported-model rejection");
+        for (const version of [2, null, "1"]) {
+            const options = { capacityModel: { version } }, before = fingerprint(options), worldBefore = fingerprint(world);
+            const diagnostic = rejectUnchanged(() => api.create(world, options), world, `Unsupported caller capacity version ${text(version)}`, /unsupported/);
+            assert(fingerprint(options) === before && fingerprint(world) === worldBefore, "Caller capacity-version rejection mutated input");
+            capacityEvidence.callerVersions.push({ requestedVersion: version, status: "REJECTED_WITHOUT_MUTATION", diagnostic });
+        }
+        for (const id of ["TEST_UNSUPPORTED_CAPACITY", null, 1]) {
+            const bad = clone(defaults); bad.config.capacityModel.id = id;
+            const diagnostic = rejectUnchanged(() => api.validate(bad), bad, `Contradictory config capacity ID ${text(id)}`, /unsupported/);
+            capacityEvidence.contradictoryConfigIds.push({ rootId: bad.capacityModelId, configId: id, status: "REJECTED_WITHOUT_MUTATION", diagnostic });
+        }
     }, "Both root and config IDs/versions must agree, including caller-supplied capacityModel.id boundaries.");
     const customTags = { profileKind: "custom", profileId: null, profileVersion: null, demographicProfileVersion: "custom" };
     const customEvidence = { initial: tags(custom), normalizedClaims: [], rejectedSpoofs: [] };
@@ -511,7 +526,7 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         const before = text(s); let caught;
         try { api.migrate(s); } catch (e) { caught = e; }
         assert(caught && /historicalCapacity/.test(caught.message), "Migration accepted malformed legacy capacity");
-        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "ASTRA-12 retains atomic failure as the mandatory MIGRATION_ATOMICITY check.", fromVersion: 6, afterVersion: s.version });
+        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "ASTRA-14 retains atomic failure as the mandatory MIGRATION_ATOMICITY check.", fromVersion: 6, afterVersion: s.version });
     });
     add("MIGRATION_ATOMICITY", "Malformed v6 migration rejects without changing original state or version", () => {
         const changes = [s => s.sites[0].historicalCapacity = null, s => s.sites[0].historicalCapacity = 59,
@@ -538,8 +553,8 @@ function runContracts(data, { mutant = null, only = null } = {}) {
     const packetStatus = only ? "NOT RUN" : packet.checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS";
     assert(text(world) === loaded.canonical && loaded.errors.length === 0, "Contract execution mutated canonical world or logged engine errors");
     verifySnapshot(data);
-    return { task: "DEUS-TSK-ASTRA-12", suite: "historical-carrying-capacity-contracts", status: commonStatus === "FAIL" || packetStatus === "FAIL" ? "FAIL" : "PASS",
-        commonStatus, commonContractBasis: "Established behavior, envelope, locality, migration preservation and atomicity contracts; the reconciled ASTRA-12 identity/provenance acceptance checks are reported separately.",
+    return { task: "DEUS-TSK-ASTRA-14", suite: "historical-carrying-capacity-contracts", status: commonStatus === "FAIL" || packetStatus === "FAIL" ? "FAIL" : "PASS",
+        commonStatus, commonContractBasis: "Established behavior, envelope, locality, migration preservation and atomicity contracts; the reconciled ASTRA-14 identity/provenance acceptance checks are reported separately.",
         packetStatus, packetPolicy: packet.policy, packetChecks: packet.checks, observedMetadata: packet.observedMetadata,
         packetPassed: packet.checks.filter(c => c.status === "PASS").length, packetFailed: packet.checks.filter(c => c.status === "FAIL").length,
         candidate: { commit: CANDIDATE, sha256: CANDIDATE_SHA256, bytes: CANDIDATE_BYTES, sourceDigest: data.sourceDigest },

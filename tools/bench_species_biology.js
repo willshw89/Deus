@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-12: independent measurements of the frozen HIST-09 production candidate.
+// ASTRA-14: independent measurements of the frozen HIST-09 production candidate.
 // Production defaults and production density only; no caller fertility adjustment.
 const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = require("crypto"), os = require("os");
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const BASE = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
-const DISPATCH_BASELINE = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
+const DISPATCH_BASELINE = "c49a142cd087b6b95cb7d7acef07dbf97d5698c1";
 const TASK = "DEUS-TSK-ASTRA-14";
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
 const ENGINE_HASH = "d0a09bfda8ab63ff3eec5b362c63896ea0c3dbcb3aeeeb574c48c3113c995e4e";
@@ -87,7 +87,7 @@ function parseArgs(args) {
         if (key.startsWith("--mutant=")) { out.mutant = key.slice(9); assert(MUTANTS.includes(out.mutant), "Unknown mutant"); continue; }
         assert(["--seed", "--years", "--runs", "--json"].includes(key), `Unknown option ${key}`);
         const raw = args[++i]; assert(raw && !raw.startsWith("--"), `Missing value for ${key}`);
-        if (key === "--json") { out.json = path.resolve(raw); assert(out.json === DEFAULT_OUTPUT, "Invalid JSON path: ASTRA-12 permits only game/test_output/bench_species_biology.json"); continue; }
+        if (key === "--json") { out.json = path.resolve(raw); assert(out.json === DEFAULT_OUTPUT, "Invalid JSON path: ASTRA-14 permits only game/test_output/bench_species_biology.json"); continue; }
         const n = Number(raw);
         assert(/^\d+$/.test(raw) && Number.isSafeInteger(n), `Invalid ${key}`);
         if (key === "--seed") { assert(n >= 0 && n <= 0x7fffffff, "Invalid --seed"); out.seeds = [n]; }
@@ -109,7 +109,7 @@ function validateProfiles(config) {
 }
 function bundle() {
     const inspected = fs.readFileSync(path.join(ROOT, PLUGIN));
-    assert(inspected.length === ENGINE_BYTES && sha(inspected) === ENGINE_HASH, "Candidate mismatch: inspected production file differs from ASTRA-12 dispatch");
+    assert(inspected.length === ENGINE_BYTES && sha(inspected) === ENGINE_HASH, "Candidate mismatch: inspected production file differs from ASTRA-14 dispatch");
     const files = {}, sources = [];
     const read = file => {
         const committed = spawnSync("git", ["show", `${BASE}:${file}`], { cwd: ROOT, encoding: "utf8", windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
@@ -602,7 +602,7 @@ function selftest(data) {
     return { task: TASK, status: "PASS", passed: checks.filter(c => c.status === "PASS").length, checks };
 }
 function writeReport(file, report) {
-    assert(path.resolve(file) === DEFAULT_OUTPUT, "ASTRA-12 permits only game/test_output/bench_species_biology.json");
+    assert(path.resolve(file) === DEFAULT_OUTPUT, "ASTRA-14 permits only game/test_output/bench_species_biology.json");
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
 }
 function snapshotEnvelope(data, run, token) {
@@ -765,7 +765,7 @@ function fullCoverageComplete(report) {
 }
 function main() {
     const started = performance.now(), options = parseArgs(process.argv.slice(2));
-    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--matrix-only] [--json game/test_output/bench_species_biology.json] [--selftest] [--mutant=<name>]\nDefault: ASTRA-12 capacity contracts and benchmark self-test, 3-seed/2-repeat 500-year matrix, disk save/process-exit/restarts, and 20-seed 250-year sweep."); return; }
+    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--matrix-only] [--json game/test_output/bench_species_biology.json] [--selftest] [--mutant=<name>]\nDefault: ASTRA-14 capacity contracts and benchmark self-test, 3-seed/2-repeat 500-year matrix, disk save/process-exit/restarts, and 20-seed 250-year sweep."); return; }
     const data = bundle();
     if (options.mutant) { runMutant(data, options.mutant); return; }
     if (options["save-worker"]) { saveWorker(data, options); return; }
@@ -804,7 +804,7 @@ function main() {
         report.suites.capacity = suite("test_historical_carrying_capacity.js", true);
         report.suites.regression = { status: "NOT RUN", required: false,
             sourceSha256: sha(fs.readFileSync(path.join(__dirname, "test_production_history_demographics.js"))),
-            reason: "ASTRA-12 does not include this suite or authorize editing it. Its unchanged ASTRA-11 candidate pin targets 8a40d2e; it is not evidence for the new candidate." };
+            reason: "ASTRA-14 does not include this suite or authorize editing it. Its unchanged ASTRA-11 candidate pin targets 8a40d2e; it is not evidence for the new candidate." };
         console.error(`Contracts ${report.suites.capacity.status}; regression ${report.suites.regression.status}; benchmark self-test ${report.suites.benchmark.status}`);
     }
     persist();
@@ -851,7 +851,7 @@ function main() {
         report.matrix.repeatChecks.some(s=>s.status==="FAIL") || report.restarts.some(r=>r.status==="FAIL") || report.sweep.status==="FAIL";
     const incomplete=report.matrix.incomplete.length>0 || (full && !fullCoverageComplete(report));
     report.status=explicitFailure?"FAIL":incomplete?"INCOMPLETE":full?"PASS":"PASS WITH NON-BLOCKING LIMITATIONS";
-    report.coverageLimitation=full?null:"Selected matrix coverage only; full ASTRA-12 dispatch acceptance is NOT RUN.";
+    report.coverageLimitation=full?null:"Selected matrix coverage only; full ASTRA-14 dispatch acceptance is NOT RUN.";
     persist();
     console.log(table(["Seed","Repeat","Trajectory s","Living500","State bytes500"],report.matrix.runs.map(r=>{const c=r.checkpoints.find(c=>c.years===500);return[r.seed,r.repeat,(r.wallMs/1000).toFixed(3),c?c.living:"NOT RUN",c?c.stateBytes:"NOT RUN"];})));
     console.log(`Acceptance: ${JSON.stringify(report.matrix.acceptance)}`);
