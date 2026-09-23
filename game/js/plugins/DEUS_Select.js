@@ -2442,8 +2442,11 @@
                         clearTargetedTile();
                         SoundManager.playCancel();
                     } else {
-                        selectSingleTile(p.mx, p.my, p.z, p.area);
-                        SoundManager.playCursor();
+                        // User directive 2026-09-23: Left-clicking unoccupied ground does not select a tile,
+                        // does not create a green selector square, does not open the tile action bar,
+                        // and does not play cursor sound. Selection occurs only through active Command-mode tools.
+                        clearTileSelection();
+                        clearTargetedTile();
                     }
                 }
             }
@@ -2841,11 +2844,14 @@
                     SoundManager.playCancel();
                     TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
                 } else {
-                    selectSingleTile(mx, my, curZ, area);
+                    // User directive 2026-09-23: Left-clicking unoccupied ground does not select a tile,
+                    // does not create a green selector square, does not open the tile action bar,
+                    // and does not play cursor sound. Selection occurs only through active Command-mode tools.
+                    clearTileSelection();
+                    clearTargetedTile();
                     if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
                         UF.Sheet.close();
                     }
-                    SoundManager.playCursor();
                     TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
                 }
             }
@@ -3502,7 +3508,7 @@
             t.check("select.target_square_brackets", !isProvoked("target_square_brackets") && bracketWhiteFound && bracketShadowFound && targetedAfterClear === null,
                 `Target square brackets: white corner found=${bracketWhiteFound}, shadow found=${bracketShadowFound}, clearTargetedTile works=${targetedAfterClear === null}`);
 
-            // 17. Check: select.single_tile_selection
+            // 17. Check: select.single_tile_click_ground_no_selection (User directive 2026-09-23)
             cleanArena();
             clearAllJobs();
             clearSelection();
@@ -3516,11 +3522,17 @@
             const selTiles1 = SelectAPI.selectedTiles();
             const selBox1 = SelectAPI.selectedTileBox();
             const isSel1 = SelectAPI.isTileSelected(stX, stY);
-            const isOtherNotSel = !SelectAPI.isTileSelected(stX + 2, stY + 2);
 
-            t.screenshot("select.single_tile_selected");
-            t.check("select.single_tile_selection", selTiles1.length === 1 && !!selBox1 && selBox1.count === 1 && selBox1.x0 === stX && selBox1.y0 === stY && isSel1 && isOtherNotSel,
-                `Single tile selection: count=${selTiles1.length}, box=(${selBox1 ? `${selBox1.x0},${selBox1.y0}` : "none"}), isTileSelected=${isSel1}`);
+            t.screenshot("select.ground_click_no_selector");
+            t.check("select.single_tile_click_ground_no_selection", selTiles1.length === 0 && selBox1 === null && !isSel1,
+                `Ordinary ground left-click does not select tile: count=${selTiles1.length}, box=${selBox1}, isTileSelected=${isSel1}`);
+
+            // Explicit Command tool single-tile selection remains available
+            SelectAPI.selectSingleTile(stX, stY);
+            const explicitSel = SelectAPI.selectedTiles();
+            t.check("select.explicit_single_tile_selection", explicitSel.length === 1 && SelectAPI.isTileSelected(stX, stY),
+                "Explicit Command tool single-tile selection functions properly");
+            SelectAPI.clearTileSelection();
 
             // 18. Check: select.drag_release_dismisses_square
             SelectAPI.clearTileSelection();
