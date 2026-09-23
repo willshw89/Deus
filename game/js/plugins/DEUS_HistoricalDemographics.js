@@ -51,6 +51,79 @@
             if (p.names) namesValid(p.names);
         }
     }
+    function sha256(str) {
+        const K = [
+            0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+            0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+            0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+            0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+            0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+            0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+        ];
+        let H0 = 0x6a09e667, H1 = 0xbb67ae85, H2 = 0x3c6ef372, H3 = 0xa54ff53a;
+        let H4 = 0x510e527f, H5 = 0x9b05688c, H6 = 0x1f83d9ab, H7 = 0x5be0cd19;
+
+        const bytes = [];
+        for (let i = 0; i < str.length; i++) {
+            const code = str.charCodeAt(i);
+            if (code < 128) bytes.push(code);
+            else if (code < 2048) { bytes.push((code >> 6) | 192, (code & 63) | 128); }
+            else { bytes.push((code >> 12) | 224, ((code >> 6) & 63) | 128, (code & 63) | 128); }
+        }
+        const bitLen = bytes.length * 8;
+        bytes.push(0x80);
+        while ((bytes.length % 64) !== 56) bytes.push(0);
+        const high = Math.floor(bitLen / 0x100000000), low = bitLen >>> 0;
+        bytes.push((high >>> 24) & 0xff, (high >>> 16) & 0xff, (high >>> 8) & 0xff, high & 0xff);
+        bytes.push((low >>> 24) & 0xff, (low >>> 16) & 0xff, (low >>> 8) & 0xff, low & 0xff);
+
+        const W = new Int32Array(64);
+        for (let b = 0; b < bytes.length; b += 64) {
+            for (let i = 0; i < 16; i++) {
+                W[i] = (bytes[b + i * 4] << 24) | (bytes[b + i * 4 + 1] << 16) | (bytes[b + i * 4 + 2] << 8) | bytes[b + i * 4 + 3];
+            }
+            for (let i = 16; i < 64; i++) {
+                const s0 = ((W[i - 15] >>> 7) | (W[i - 15] << 25)) ^ ((W[i - 15] >>> 18) | (W[i - 15] << 14)) ^ (W[i - 15] >>> 3);
+                const s1 = ((W[i - 2] >>> 17) | (W[i - 2] << 15)) ^ ((W[i - 2] >>> 19) | (W[i - 2] << 13)) ^ (W[i - 2] >>> 10);
+                W[i] = (W[i - 16] + s0 + W[i - 7] + s1) | 0;
+            }
+            let a = H0, b_var = H1, c = H2, d = H3, e = H4, f = H5, g = H6, h = H7;
+            for (let i = 0; i < 64; i++) {
+                const S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+                const ch = (e & f) ^ ((~e) & g);
+                const temp1 = (h + S1 + ch + K[i] + W[i]) | 0;
+                const S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+                const maj = (a & b_var) ^ (a & c) ^ (b_var & c);
+                const temp2 = (S0 + maj) | 0;
+                h = g; g = f; f = e; e = (d + temp1) | 0;
+                d = c; c = b_var; b_var = a; a = (temp1 + temp2) | 0;
+            }
+            H0 = (H0 + a) | 0; H1 = (H1 + b_var) | 0; H2 = (H2 + c) | 0; H3 = (H3 + d) | 0;
+            H4 = (H4 + e) | 0; H5 = (H5 + f) | 0; H6 = (H6 + g) | 0; H7 = (H7 + h) | 0;
+        }
+        const hex = n => (n >>> 0).toString(16).padStart(8, "0");
+        return hex(H0) + hex(H1) + hex(H2) + hex(H3) + hex(H4) + hex(H5) + hex(H6) + hex(H7);
+    }
+    function canonicalProfileData(profiles) {
+        if (!profiles || typeof profiles !== "object") return "";
+        const species = Object.keys(profiles).sort();
+        const clean = {};
+        for (const s of species) {
+            const p = profiles[s];
+            clean[s] = {
+                lifespan: [p.lifespan[0], p.lifespan[1]],
+                reproductiveAge: [p.reproductiveAge[0], p.reproductiveAge[1]],
+                birthChance: p.birthChance,
+                birthSpacingYears: p.birthSpacingYears,
+                infantMortality: p.infantMortality,
+                diseaseMortality: p.diseaseMortality,
+                exposureMortality: p.exposureMortality
+            };
+        }
+        return JSON.stringify(clean);
+    }
     const DEFAULT_PROFILES = Object.freeze({
         human: Object.freeze({ lifespan: [60, 90], reproductiveAge: [18, 55], birthChance: 0.36, birthSpacingYears: 3, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 }),
         elf: Object.freeze({ lifespan: [350, 750], reproductiveAge: [60, 350], birthChance: 0.025, birthSpacingYears: 12, infantMortality: 0.002, diseaseMortality: 0.0001, exposureMortality: 0.0001 }),
@@ -63,6 +136,7 @@
         tiefling: Object.freeze({ lifespan: [70, 110], reproductiveAge: [18, 65], birthChance: 0.30, birthSpacingYears: 3, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 })
     });
     const DEFAULT_CAPACITY_MODEL = Object.freeze({
+        id: "local_density_v1",
         version: 1,
         defaultBaseline: 160,
         minimumScale: 0.10,
@@ -202,19 +276,21 @@
         }
         const capacityModel = copy(Object.assign({}, DEFAULT_CAPACITY_MODEL, options.capacityModel || {}));
         check(integer(capacityModel.minCapacity) && integer(capacityModel.maxCapacity) && capacityModel.minCapacity >= ABSOLUTE_MIN_CAPACITY && capacityModel.maxCapacity <= ABSOLUTE_MAX_CAPACITY && capacityModel.minCapacity <= capacityModel.maxCapacity, "capacityModel bounds outside absolute envelope [60, 350]");
+        const profileHash = sha256(canonicalProfileData(profiles));
         const config = copy({ profiles, names, capacityModel, recentYears: options.recentYears === undefined ? 20 : options.recentYears,
             eventLimit: options.eventLimit === undefined ? 400 : options.eventLimit,
-            dynastyInheritance: options.dynastyInheritance || "maternal", compression: "deferred" });
+            dynastyInheritance: options.dynastyInheritance || "maternal", compression: "deferred",
+            profileHash });
         check(integer(config.recentYears) && config.recentYears >= 0 && integer(config.eventLimit) && config.eventLimit >= 1 && ["maternal", "paternal"].includes(config.dynastyInheritance), "invalid retention/inheritance options");
-        let demographicProfileVersion;
-        if (isDefaultProfiles) {
-            demographicProfileVersion = "1.0.0-provisional-astra08";
-        } else {
-            demographicProfileVersion = (options.demographicProfileVersion && options.demographicProfileVersion !== "1.0.0-provisional-astra08")
-                ? options.demographicProfileVersion
-                : "custom";
-        }
-        const state = { version: 7, historyModelVersion: 1, demographicProfileVersion, capacityModelVersion: 1, domain: "historical", seed: world.seed, yearsSimulated: 0, startYear: 1, currentYear: 1,
+        const demographicProfileVersion = isDefaultProfiles ? "1.0.0-provisional-astra08" : "custom";
+        const state = { version: 7, schemaVersion: 7, historyModelId: "historical_demographics_v1", historyModelVersion: 1,
+            capacityModelId: "local_density_v1", capacityModelVersion: 1,
+            demographicProfileVersion,
+            profileKind: isDefaultProfiles ? "promoted-default" : "custom",
+            profileId: isDefaultProfiles ? "v1" : null,
+            profileVersion: isDefaultProfiles ? "1.0.0-provisional-astra08" : null,
+            profileHash,
+            domain: "historical", seed: world.seed, yearsSimulated: 0, startYear: 1, currentYear: 1,
             dimensions: { size: world.size, areasX: world.areasX, areasY: world.areasY }, config,
             factions: {}, sites: [], people: [], dynasties: [], rulers: [], partnerships: [], events: [], nextEventId: 1, eventsDiscarded: 0 };
         const sourceSites = new Map(), initial = {};
@@ -279,8 +355,11 @@
         check(state.historyModelVersion === 1, `unsupported historyModelVersion: ${state.historyModelVersion}`);
         check(state.capacityModelVersion === 1, `unsupported capacityModelVersion: ${state.capacityModelVersion}`);
         check(typeof state.demographicProfileVersion === "string" && state.demographicProfileVersion.length > 0, "invalid demographicProfileVersion");
-        if (state.demographicProfileVersion === "1.0.0-provisional-astra08") {
+        if (state.demographicProfileVersion === "1.0.0-provisional-astra08" || state.profileKind === "promoted-default") {
             check(matchesDefaultProfiles(state.config && state.config.profiles), "promoted profile version claimed with non-default profiles");
+        }
+        if (state.profileKind === "custom") {
+            check(state.demographicProfileVersion === "custom", "custom biology claimed promoted-default tag");
         }
         check(state.domain === "historical" && integer(state.seed) && state.seed >= 0 && state.seed <= 0xffffffff, "invalid demographics schema/seed");
         check(state.config && typeof state.config === "object" && !Array.isArray(state.config), "invalid config");
@@ -465,7 +544,10 @@
         check(state.version === 6, `unsupported migration source version: ${state.version}`);
         const candidate = copy(state);
         candidate.version = 7;
+        candidate.schemaVersion = 7;
+        candidate.historyModelId = "historical_demographics_v1";
         candidate.historyModelVersion = 1;
+        candidate.capacityModelId = "local_density_v1";
         candidate.capacityModelVersion = 1;
         if (!candidate.demographicProfileVersion) {
             candidate.demographicProfileVersion = "legacy-v6";
@@ -477,6 +559,12 @@
         } else {
             candidate.config.capacityModel = Object.assign({}, DEFAULT_CAPACITY_MODEL, candidate.config.capacityModel);
         }
+        const isDef = matchesDefaultProfiles(candidate.config.profiles);
+        candidate.profileKind = isDef ? "promoted-default" : "custom";
+        candidate.profileId = isDef ? "v1" : null;
+        candidate.profileVersion = isDef ? "1.0.0-provisional-astra08" : null;
+        candidate.profileHash = sha256(canonicalProfileData(candidate.config.profiles));
+        candidate.config.profileHash = candidate.profileHash;
         check(Array.isArray(candidate.sites), "sites array required for migration");
         for (const site of candidate.sites) {
             if (site.historicalCapacity === undefined) {
@@ -485,9 +573,16 @@
         }
         validate(candidate);
         state.version = 7;
+        state.schemaVersion = 7;
+        state.historyModelId = "historical_demographics_v1";
         state.historyModelVersion = 1;
+        state.capacityModelId = "local_density_v1";
         state.capacityModelVersion = 1;
         state.demographicProfileVersion = candidate.demographicProfileVersion;
+        state.profileKind = candidate.profileKind;
+        state.profileId = candidate.profileId;
+        state.profileVersion = candidate.profileVersion;
+        state.profileHash = candidate.profileHash;
         state.config = candidate.config;
         state.sites = candidate.sites;
         state.migratedFromVersion = 6;

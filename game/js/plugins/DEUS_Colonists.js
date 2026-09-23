@@ -4625,14 +4625,14 @@
         if (exhaustionOf(u) < 5) { const aid = rescueJob(u); if (aid) return aid; }
         const need = needJob(u);
         if (need) return need;
-        if (exhaustionOf(u) >= 5) return null;
         // Steps 2-5: query, score and claim; UF_Jobs walks the worker there and runs the job.
-        return projectJob(u) || designationJob(u) || stepOffReserved(u);
+        // Fallback to idleJob so colonists maintain purposeful activity (strolling, campfire gathering, socializing) instead of freezing.
+        return projectJob(u) || designationJob(u) || stepOffReserved(u) || idleJob(u);
     }
 
     function isLowPriorityJob(job, u) {
         if (!job || !job.params) return false;
-        if (job.params.stroll || job.params.explore || job.params.fireGather) return true;
+        if (job.params.stroll || job.params.explore || job.params.fireGather || job.params.contemplate || job.params.idleSocial || job.params.inspect) return true;
         const Callings = getCallings();
         if (job.params.tidy && (!Callings || !Callings.isHauler(u))) return true;
         return false;
@@ -4707,6 +4707,8 @@
                     if (need && !isNeedJob(job, need) && !needBlocked(u, need) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                         preemptAt.set(u.id, t);
                         J.cancel(job.id, `survival: ${need}`);
+                    } else if (isLowPriorityJob(job, u) && (projectJob(u) || designationJob(u))) {
+                        J.cancel(job.id, "work: preempt idle");
                     }
                 }
                 continue;

@@ -7,7 +7,13 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Gemini**: Integration & coordination authority; standby for FABLE-08 closure report before commencing GEMINI-04 physical stockpile migration.
+- **Gemini**: `DEUS-TSK-GEMINI-06` True 3D Volumetric Landscape & Upper-Z Terrain Generation (`game/js/plugins/DEUS_Levels.js`, `game/js/plugins/DEUS_World.js`, `game/js/plugins/DEUS_WorldGen.js`, `game/js/plugins/DEUS_Objects.js`, `tools/test_upper_elevation_terrain.js`).
+
+## DEUS-TSK-FABLE-08 — Production-Clock Autonomous Colony Closure (2026-09-23)
+- **Status**: `FIRST SELF-MAINTAINING DEUS COLONY — PASS` (Commit `5d3ae7f`; Headless/automated PASS; native F5 multi-day observation still not rerun).
+- **Scope**: `game/js/plugins/DEUS_Projects.js`, `tools/test_autonomous_settlement_closure.js`, `docs/systems/DEUS_Projects.md`.
+- **Evidence**: `node tools/test_autonomous_settlement_closure.js`: **22 passed, 0 failed (exit 0)** on default production clock (600 updates/hour). 16-wall shelter built autonomously; food reserve restored after deliberate wipe; stockpile replaced after deliberate removal; bedding expanded for newcomers; 37 long rests, longest 8.1 hours; 0 colonist deaths; zero duplicate food-cache spam; 0 active builds stuck; stale-job withdrawal mechanism operational. Fable lock released.
+
 
 ## DEUS-TSK-ASTRA-11
 - **Result — Astra (2026-09-23): FAIL, exit 1.** Independent verification is complete; the production candidate is not accepted under the literal packet. Claim released. No production repair, catalog/save change, settlement change, or CODEX-01 edit. Candidate `8a40d2ed66da758fc95fc3c1e8205709336c54df` stayed at 45,429 bytes, SHA-256 `e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95`.
