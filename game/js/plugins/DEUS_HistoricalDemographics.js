@@ -273,8 +273,16 @@
         namesValid(names);
         if (options.capacityModel !== undefined) {
             check(options.capacityModel && typeof options.capacityModel === "object" && !Array.isArray(options.capacityModel), "invalid capacityModel container");
+            if (options.capacityModel.id !== undefined) {
+                check(options.capacityModel.id === "local_density_v1", `unsupported capacityModel.id: ${options.capacityModel.id}`);
+            }
+            if (options.capacityModel.version !== undefined) {
+                check(options.capacityModel.version === 1, `unsupported capacityModel.version: ${options.capacityModel.version}`);
+            }
         }
         const capacityModel = copy(Object.assign({}, DEFAULT_CAPACITY_MODEL, options.capacityModel || {}));
+        capacityModel.id = "local_density_v1";
+        capacityModel.version = 1;
         check(integer(capacityModel.minCapacity) && integer(capacityModel.maxCapacity) && capacityModel.minCapacity >= ABSOLUTE_MIN_CAPACITY && capacityModel.maxCapacity <= ABSOLUTE_MAX_CAPACITY && capacityModel.minCapacity <= capacityModel.maxCapacity, "capacityModel bounds outside absolute envelope [60, 350]");
         const profileHash = sha256(canonicalProfileData(profiles));
         const config = copy({ profiles, names, capacityModel, recentYears: options.recentYears === undefined ? 20 : options.recentYears,
@@ -370,6 +378,8 @@
         check(state.config && typeof state.config === "object" && !Array.isArray(state.config), "invalid config");
         const cm = state.config.capacityModel;
         check(cm && typeof cm === "object" && !Array.isArray(cm), "invalid capacityModel config");
+        check(cm.id === "local_density_v1", `unsupported capacityModel.id: ${cm.id}`);
+        check(cm.id === state.capacityModelId, `capacityModel ID mismatch between root and config: ${state.capacityModelId} vs ${cm.id}`);
         check(cm.version === state.capacityModelVersion, "capacityModel version mismatch");
         check(integer(cm.version) && cm.version >= 1 && probability(cm.minimumScale) && integer(cm.defaultBaseline) && cm.defaultBaseline > 0 && integer(cm.minCapacity) && integer(cm.maxCapacity) && cm.minCapacity >= ABSOLUTE_MIN_CAPACITY && cm.maxCapacity <= ABSOLUTE_MAX_CAPACITY && cm.minCapacity <= cm.maxCapacity, "invalid capacityModel config");
         check(state.startYear === 1 && integer(state.yearsSimulated) && state.yearsSimulated >= 0 && state.currentYear === state.startYear + state.yearsSimulated, "historical clock mismatch");
@@ -554,9 +564,6 @@
         candidate.historyModelVersion = 1;
         candidate.capacityModelId = "local_density_v1";
         candidate.capacityModelVersion = 1;
-        if (!candidate.demographicProfileVersion) {
-            candidate.demographicProfileVersion = "legacy-v6";
-        }
         candidate.migratedFromVersion = 6;
         if (!candidate.config) candidate.config = {};
         if (!candidate.config.capacityModel) {
@@ -564,7 +571,10 @@
         } else {
             candidate.config.capacityModel = Object.assign({}, DEFAULT_CAPACITY_MODEL, candidate.config.capacityModel);
         }
+        candidate.config.capacityModel.id = "local_density_v1";
+        candidate.config.capacityModel.version = 1;
         const isDef = matchesDefaultProfiles(candidate.config.profiles);
+        candidate.demographicProfileVersion = isDef ? "1.0.0-provisional-astra08" : "custom";
         candidate.profileKind = isDef ? "promoted-default" : "custom";
         candidate.profileId = isDef ? "v1" : null;
         candidate.profileVersion = isDef ? "1.0.0-provisional-astra08" : null;

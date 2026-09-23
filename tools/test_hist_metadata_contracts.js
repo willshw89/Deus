@@ -140,11 +140,21 @@ function runTests() {
     try { api.validate(badCapacityVersion); } catch (_) { caughtCapVer = true; }
     assert(caughtCapVer, "6.4 unsupported capacityModelVersion rejected");
 
+    const badConfigCapacity = JSON.parse(JSON.stringify(def));
+    badConfigCapacity.config.capacityModel.id = "TEST_UNSUPPORTED_CAPACITY";
+    let caughtConfigCap = false;
+    try { api.validate(badConfigCapacity); } catch (_) { caughtConfigCap = true; }
+    assert(caughtConfigCap, "6.5 unsupported config.capacityModel.id rejected");
+
+    let caughtCreateCap = false;
+    try { api.create(world, { capacityModel: { id: "TEST_UNSUPPORTED_CAPACITY" } }); } catch (_) { caughtCreateCap = true; }
+    assert(caughtCreateCap, "6.6 create with unsupported capacityModel.id rejected");
+
     const spoofedProfile = JSON.parse(JSON.stringify(custom));
     spoofedProfile.profileKind = "promoted-default";
     let caughtSpoof = false;
     try { api.validate(spoofedProfile); } catch (_) { caughtSpoof = true; }
-    assert(caughtSpoof, "6.5 custom profile pretending to be promoted-default rejected");
+    assert(caughtSpoof, "6.7 custom profile pretending to be promoted-default rejected");
     console.log("PASS 6: Rejection of unsupported models and spoofed provenance");
 
     // 7. Save / load roundtrip preserves all metadata exactly
@@ -201,7 +211,8 @@ function runTests() {
     assert(v6State.profileKind === "custom", "8.4 migration detects custom biology in legacy state");
     assert(v6State.profileId === null, "8.5 migration sets profileId to null for custom legacy biology");
     assert(v6State.profileHash === custom.profileHash, "8.6 migration computes deterministic profileHash matching custom biology");
-    assert(api.validate(v6State) === true, "8.7 migrated state validates cleanly");
+    assert(v6State.demographicProfileVersion === "custom", "8.7 migration assigns demographicProfileVersion custom for custom biology");
+    assert(api.validate(v6State) === true, "8.8 migrated state validates cleanly");
     console.log("PASS 8: Migration provenance and validity");
 
     console.log(`\nALL METADATA CONTRACTS PASSED (${passed} checks, 0 failed).`);
