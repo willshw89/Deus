@@ -31,7 +31,10 @@ const MUTANTS = {
     thrash: ["avoid.set(needKey(u, need), ticks() + NEED_RETRY_TICKS);", "/* no cooldown */"]
 };
 
+// The catalog with the SRD food data applied in memory (tools/add_srd_food_data.js): weight, nutrition and water per
+// food item, and the SRD rations item. The canonical file gets it when the coordinator runs the script at the gate.
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8"));
+const foodData = require("./add_srd_food_data.js").applyFoodData(catalog);
 const read = name => fs.readFileSync(path.join(PLUGINS, name), "utf8");
 const sources = { objects: read("DEUS_Objects.js"), items: read("DEUS_Items.js"), jobs: read("DEUS_Jobs.js"), projects: read("DEUS_Projects.js"), colonists: read("DEUS_Colonists.js") };
 if (mutant) {
@@ -234,11 +237,15 @@ try {
     S.sandbox.UF.Events.on("jobs:failed", j => cancelled.push({ id: j.id, type: j.type, reason: j.reason, unit: j.assigned }));
     S.sandbox.UF.Events.on("jobs:done", (j, u) => { if (j.type === "drink") drinks.push(u ? u.id : null); });
     S.sandbox.UF.Events.on("colonists:died", (u, cause) => died.push({ id: u.id, cause }));
-    const LB = I.weightOf({ type: "berries", count: 1 });
+    const berry = catalog.items.types.find(t => t.id === "berries"), rations = catalog.items.types.find(t => t.id === "rations"), fruit = catalog.items.types.find(t => t.id === "fruit");
+    const LB = berry.food.nutrition;
     const perDay = Math.ceil(1 / LB);
 
     check("plugins_load", !!C && typeof C.tickNeeds === "function" && typeof C.exhaustionEffects === "function" && typeof C._internal.endOfDay === "function",
-        `UF.Colonists with tickNeeds/exhaustionEffects/endOfDay; a berry weighs ${LB} lb, so a day's pound is ${perDay} berries`);
+        `UF.Colonists with tickNeeds/exhaustionEffects/endOfDay; a berry feeds ${LB} lb of the day's pound (weighs ${berry.weight} lb), so a day is ${perDay} berries`);
+    check("food_data_contract", foodData.changed && !!rations && rations.srd === "srd:gear:rations-1-day" && rations.weight === 2 && rations.food.nutrition === 1 && rations.food.water === 0 && rations.food.source === "srd:gear:rations-1-day" &&
+        catalog.items.types.filter(t => t.food).every(t => Number.isFinite(t.weight) && Number.isFinite(t.food.nutrition) && Number.isFinite(t.food.water) && (t.food.source === "deus" || t.food.source.startsWith("srd:"))) && fruit.food.water === 0.05 && I.weightOf({ type: "rations", count: 1 }) === 2,
+        `${catalog.items.types.filter(t => t.food).length} food items carry weight, nutrition and water; rations: ${rations ? `${rations.weight} lb, feeds ${rations.food.nutrition} day, ${rations.srd}` : "missing"}; DEUS-marked: ${catalog.items.types.filter(t => t.food && t.food.source === "deus").map(t => t.id).join(" ")}`);
 
     // A. The SRD record: no meters. An old meter record is replaced on sight; nothing drifts within a day.
     S.founders[1].data.needs = { hunger: 50, thirst: 40, sleep: 10 };
@@ -254,7 +261,7 @@ try {
 
     // B. Idle founders drink the day's gallon once, and one with berries eats until the day's pound is reached.
     const F2 = S.founders[1];
-    I.create("berries", 8, { holder: F2.id });
+    I.create("berries", perDay + 3, { holder: F2.id });
     P.setEnabled(true);
     const pre = P._internal.chooseSite(W.state.colony, P.blueprint("communal_shelter"), P.config());
     if (pre) for (const [dx, dy, id] of PLANTS) O.setIn(area, pre.x + dx, pre.y + dy, id);
@@ -262,10 +269,21 @@ try {
     const p = P.active()[0] || null;
     const n1 = drive(S, 4000, () => S.founders.every(u => needs(u).waterGal >= 1) && needs(F2).foodLb >= 1 && !(jobOf(S, F2) && jobOf(S, F2).type === "eat"));
     const oneDrinkEach = S.founders.every(u => drinks.filter(id => id === u.id).length === 1);
-    check("drinks_a_gallon_a_day", n1 > 0 && oneDrinkEach && S.founders.every(u => close(needs(u).waterGal, 1)),
-        `after ${n1} updates every founder has drunk exactly once (gallon ${S.founders.map(u => needs(u).waterGal).join(" ")})`);
-    check("eats_a_pound_a_day", n1 > 0 && close(needs(F2).foodLb, perDay * LB) && carriedOf(S, F2, "berries") === 8 - perDay,
-        `#${F2.id} ate ${8 - carriedOf(S, F2, "berries")} berries (${perDay} expected) for ${needs(F2).foodLb} lb and stopped; ${carriedOf(S, F2, "berries")} left in its pack`);
+    check("drinks_a_gallon_a_day", n1 > 0 && oneDrinkEach && S.founders.every(u => needs(u).waterGal >= 1),
+        `after ${n1} updates every founder has drunk exactly once (gallons ${S.founders.map(u => needs(u).waterGal).join(" ")}; food adds a little water on top)`);
+    check("eats_a_pound_a_day", n1 > 0 && close(needs(F2).foodLb, perDay * LB) && carriedOf(S, F2, "berries") === 3,
+        `#${F2.id} ate ${perDay + 3 - carriedOf(S, F2, "berries")} berries (${perDay} expected) for ${needs(F2).foodLb} lb and stopped; ${carriedOf(S, F2, "berries")} left in its pack`);
+    // Nutrition is not weight: one ration (2 lb) feeds the whole day; fruit adds water as well as food.
+    {
+        const X = S.founders[2], Y = S.founders[3];
+        I.create("rations", 2, { holder: X.id });
+        I.create("fruit", 6, { holder: Y.id });
+        const waterY = needs(Y).waterGal;
+        const m = drive(S, 1500, () => needs(X).foodLb >= 1 && needs(Y).foodLb >= 1 && !(jobOf(S, X) && jobOf(S, X).type === "eat") && !(jobOf(S, Y) && jobOf(S, Y).type === "eat"));
+        const fruitEaten = 6 - carriedOf(S, Y, "fruit");
+        check("nutrition_and_water_are_not_weight", m > 0 && carriedOf(S, X, "rations") === 1 && close(needs(X).foodLb, 1) && fruitEaten === Math.ceil(1 / fruit.food.nutrition) && close(needs(Y).foodLb, fruitEaten * fruit.food.nutrition) && close(needs(Y).waterGal - waterY, fruitEaten * fruit.food.water),
+            `#${X.id} ate 1 ration (2 lb) for ${needs(X).foodLb} lb of the day (1 expected) and kept ${carriedOf(S, X, "rations")}; #${Y.id} ate ${fruitEaten} fruit for ${needs(Y).foodLb} lb and ${(needs(Y).waterGal - waterY).toFixed(2)} gal (${(fruitEaten * fruit.food.water).toFixed(2)} expected)`);
+    }
 
     // C. Supper (the last meal hour) interrupts labor that leaves the day's food short; a carried stack stays at the
     //    worker's feet. A need known to be unmeetable never preempts, so the larder is stocked first and one founder
@@ -285,7 +303,8 @@ try {
     const onCut = j => {
         if (!hA || j.id !== hA.id) return;
         const it = I.get(j.params.itemId);
-        supper.push({ id: j.id, reason: j.reason, type: it ? it.type : "?", atFeet: it ? groundOf(S, it.type, H.x, H.y) : 0, carried: I.inventoryOf(H.id).length,
+        supper.push({ id: j.id, reason: j.reason, type: it ? it.type : "?", atFeet: it ? groundOf(S, it.type, H.x, H.y) : 0, carried: it ? carriedOf(S, H, it.type) : -1,
+            inv: I.inventoryOf(H.id).map(x => `${x.type}x${x.count}`).join("+"),
             released: J.reservation.reservedBy(j.target) !== H.id && J.reservation.reservedBy(j.params.itemId) !== H.id, foodLb: needs(H).foodLb });
     };
     S.sandbox.UF.Events.on("jobs:failed", onCut);
@@ -293,7 +312,7 @@ try {
     S.sandbox.UF.Events.off("jobs:failed", onCut);
     const cut = supper[0] || null;
     check("supper_preempts_labor", n2 > 0 && n3 > 0 && !!cut && cut.reason === "survival: hunger" && cut.foodLb < 1 && cut.atFeet >= 1 && cut.carried === 0 && cut.released,
-        cut ? `at 19:00 with ${cut.foodLb} lb eaten, #${H.id}'s haul #${cut.id} (carrying ${cut.type}) was cancelled "${cut.reason}" after ${n3} updates; ${cut.atFeet} ${cut.type} at its feet, ${cut.carried} items carried, reservations ${cut.released ? "released" : "kept"}` : `#${H.id}'s haul was not cut in ${n3} updates (picked up after ${n2})`);
+        cut ? `at 19:00 with ${cut.foodLb} lb eaten, #${H.id}'s haul #${cut.id} (carrying ${cut.type}) was cancelled "${cut.reason}" after ${n3} updates; ${cut.atFeet} ${cut.type} at its feet, ${cut.carried} items carried${cut.inv ? ` (${cut.inv})` : ""}, reservations ${cut.released ? "released" : "kept"}` : `#${H.id}'s haul was not cut in ${n3} updates (picked up after ${n2})`);
     // The cut founder eats its pound from the larder (one eater at a time at a one-cell larder, eight hungry founders)
     // and goes back to the project.
     const n4 = H ? drive(S, 6000, () => needs(H).foodLb >= 1) : -1;

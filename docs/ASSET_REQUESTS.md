@@ -300,6 +300,13 @@ The subterranean flora and natural formations for the underground depth gradient
 | AR-1907 | **Spore Reeds & Cavern Wetland Shrub (`!$UF_SporeReeds.png`)** | Deep Caverns ($z=-2$): subterranean wetland plants bordering underground lakes and pools. 144×192 `!$` sheet, 48×48 frame, anchor `[24, 47]`, footprint `[1, 1]`, passable. | Medium | DELIVERED (`!$UF_SporeReeds.png`) |
 | AR-1908 | **Subterranean Crystal Spire (`!$UF_CrystalSpire.png`)** | Deep Caverns ($z=-2$): luminous violet/amethyst and deep sapphire crystal clusters growing from bedrock. 144×192 `!$` sheet, 48×96 frame, anchor `[24, 95]`, footprint `[1, 2]`, impassable. Gem mining interaction state. | Medium | DELIVERED (`!$UF_CrystalSpire.png`) |
 
+### AR-2000 SRD rations item (2026-09-23)
+The SRD 5.1 "Rations (1 day)" item (`srd:gear:rations-1-day`, 2 lb) enters the catalog through `tools/add_srd_food_data.js` for the survival model. It uses `!$UF_Item_MeatCooked` as a stand-in until it has its own sprite. Generate with Google Nano Banana Pro (`gemini-3-pro-image`), ART_STANDARD §1.
+
+| ID | Asset | Needed for | Priority | Status |
+|---|---|---|---|---|
+| AR-2000 | **Rations bundle (`!$UF_Item_Rations.png` + `.json`)** | Ground item and inventory icon for a day's dry food: jerky, dried fruit, hardtack and nuts tied in a cloth bundle. One frame, 48×48, `!$` sheet and sidecar like `!$UF_Item_Berries`. Same palette and outline weight as the other `!$UF_Item_*` sprites. | Medium | REQUESTED (stand-in: `!$UF_Item_MeatCooked`) |
+
 ## Notes for Claude Code (from Gemini)
 - **Wildlife & Trees Face Sets, Menu Themes & Bespoke Faction Cursors**: Delivered 24 portraits across 3 sheets (`UF_Faces_Wildlife_Beasts.png`, `UF_Faces_Wildlife_Monsters.png`, `UF_Faces_Trees_Nature.png`), 2 full-screen menu backdrops + matching window skins (`UF_Menu_wildlife.png` / `Window_wildlife.png`, `UF_Menu_cavern.png` / `Window_cavern.png`), and 11 bespoke 48×48 faction cursors (`Cursor_<faction>.png`) with dynamic mouse and menu cursor support in `UF_FactionMenus.js`. All 100% compliant with native 48px grid, ≤ 32 colors on `art/palette/uf.hex`, passing `art_check.js` and `originality_check.js`.
 - **Complete Faction Face Sets Suite (AR-1720..1730)**: Delivered 132 unique character portraits across all 11 factions (6 distinct males, 6 distinct females per faction) with authentic Ultima VII architectural borders matching each culture's native materials.

@@ -369,14 +369,17 @@ try {
         const [A, Bw, Cw] = H.founders;
         A.data.maxWeight = 135; Bw.data.maxWeight = 135; Cw.data.maxWeight = 30; // encumbered at a third: 45, 45, 10 lb
         const one = H.I.weightOf({ type: "log", count: 1 });
-        const legal = Math.floor(45 / one);
+        // The legal lift is what keeps the carrier unencumbered after what it already carries (a starting kit counts).
+        const liftOf = u => Math.floor((H.I.encumbrance(u.id).encumbered - H.I.carriedWeight(u.id) + 1e-6) / one);
+        const legal = liftOf(A), legalB = liftOf(Bw);
         const stack = groundOf(H, "log", src.x, src.y)[0];
+        if (debug) console.log(`    #${A.id} before the haul: carries ${H.I.inventoryOf(A.id).map(it => `${it.type}x${it.count}`).join("+") || "nothing"} (${H.I.carriedWeight(A.id)} lb), unencumbered up to ${H.I.encumbrance(A.id).encumbered} lb; job ${H.J.of(A.id) ? H.J.of(A.id).type : "none"}`);
         const hA = H.J.create({ type: "haul", target: target(src.x, src.y), params: { itemId: stack.id, to: target(dst.x, dst.y) }, owner: A.id });
         const g1 = hA ? drive(H, 400, () => carriedOf(H, A, "log") > 0 || hA.state === "failed") : -1;
         const left1 = groundOf(H, "log", src.x, src.y);
         const splitOk = g1 > 0 && carriedOf(H, A, "log") === legal && left1.length === 1 && left1[0].count === 5 - legal && totalOf(H, "log") === 45 && hA.params.itemId !== stack.id && H.J.reservation.reservedBy(stack.id) === null;
         check("partial_haul_by_weight", splitOk,
-            `a log weighs ${one} lb, the legal lift is ${legal}: #${A.id} carries ${carriedOf(H, A, "log")} (job ${hA ? hA.state : "?"}${hA && hA.reason ? " " + hA.reason : ""}), ${left1.map(it => it.count).join("+") || 0} left on the source as ${left1.length} stack(s), ${totalOf(H, "log")} logs in the world; source stack ${H.J.reservation.reservedBy(stack.id) === null ? "released" : "still reserved"}`);
+            `a log weighs ${one} lb, #${A.id} already carries ${H.I.carriedWeight(A.id) - carriedOf(H, A, "log") * one} lb, so the legal lift is ${legal}: it carries ${carriedOf(H, A, "log")} (job ${hA ? hA.state : "?"}${hA && hA.reason ? " " + hA.reason : ""}), ${left1.map(it => it.count).join("+") || 0} left on the source as ${left1.length} stack(s), ${totalOf(H, "log")} logs in the world; source stack ${H.J.reservation.reservedBy(stack.id) === null ? "released" : "still reserved"}`);
         drive(H, 5);
         H.J.cancel(hA.id, "test: dropped mid-transit");
         const dropped = groundOf(H, "log", A.x, A.y).reduce((n, it) => n + it.count, 0);
@@ -384,7 +387,7 @@ try {
         const g2 = hB ? drive(H, 400, () => carriedOf(H, Bw, "log") > 0 || hB.state === "failed") : -1;
         const left2 = groundOf(H, "log", src.x, src.y).reduce((n, it) => n + it.count, 0);
         const ids = new Set(H.I.all().filter(it => it.type === "log").map(it => it.id));
-        check("second_carrier_and_cancel_conserve", carriedOf(H, A, "log") === 0 && dropped === legal && g2 > 0 && carriedOf(H, Bw, "log") === Math.min(legal, 5 - legal) && left2 === Math.max(0, 5 - 2 * legal) && totalOf(H, "log") === 45 && ids.size === H.I.all().filter(it => it.type === "log").length,
+        check("second_carrier_and_cancel_conserve", carriedOf(H, A, "log") === 0 && dropped === legal && g2 > 0 && carriedOf(H, Bw, "log") === Math.min(legalB, 5 - legal) && left2 === Math.max(0, 5 - legal - legalB) && totalOf(H, "log") === 45 && ids.size === H.I.all().filter(it => it.type === "log").length,
             `#${A.id} cancelled: ${dropped} logs at its feet (${A.x},${A.y}), carries ${carriedOf(H, A, "log")}; #${Bw.id} carries ${carriedOf(H, Bw, "log")}, ${left2} left at the source; ${totalOf(H, "log")} logs in the world, ${ids.size} distinct stacks`);
         const g3 = hB ? drive(H, 400, () => hB.state === "done" || hB.state === "failed") : -1;
         H.I.drop(H.area, src.x, src.y, "log", 2); // a fresh stack for the carrier who may lift only 10 lb
@@ -392,7 +395,7 @@ try {
         const hC = remainder ? H.J.create({ type: "haul", target: target(src.x, src.y), params: { itemId: remainder.id, to: target(dst.x, dst.y) }, owner: Cw.id }) : null;
         const g4 = hC ? drive(H, 400, () => hC.state === "done" || hC.state === "failed") : -1;
         const atSrc = groundOf(H, "log", src.x, src.y).reduce((n, it) => n + it.count, 0);
-        check("too_heavy_aborts_without_pickup", g3 > 0 && !!hB && hB.state === "done" && groundOf(H, "log", dst.x, dst.y).reduce((n, it) => n + it.count, 0) === Math.min(legal, 5 - legal) && !!hC && g4 > 0 && hC.state === "failed" && hC.reason === "too heavy to lift" && carriedOf(H, Cw, "log") === 0 && atSrc === left2 + 2 && totalOf(H, "log") === 47 && errors.length === 0,
+        check("too_heavy_aborts_without_pickup", g3 > 0 && !!hB && hB.state === "done" && groundOf(H, "log", dst.x, dst.y).reduce((n, it) => n + it.count, 0) === Math.min(legalB, 5 - legal) && !!hC && g4 > 0 && hC.state === "failed" && hC.reason === "too heavy to lift" && carriedOf(H, Cw, "log") === 0 && atSrc === left2 + 2 && totalOf(H, "log") === 47 && errors.length === 0,
             `#${Bw.id} delivered ${groundOf(H, "log", dst.x, dst.y).reduce((n, it) => n + it.count, 0)} to (${dst.x},${dst.y}); #${Cw.id} (10 lb): job ${hC ? hC.state : "none"}${hC && hC.reason ? " (" + hC.reason + ")" : ""}, carries ${carriedOf(H, Cw, "log")}, source keeps ${atSrc}; ${totalOf(H, "log")} logs in the world (47 expected), ${errors.length} console errors`);
     }
 

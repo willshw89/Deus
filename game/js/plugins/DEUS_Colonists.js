@@ -4627,10 +4627,15 @@
             case "eat":
                 addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8);
                 if (u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL) {
-                    // One unit eaten; its weight in pounds is the day's food (SRD: one pound a day).
-                    const I = Items();
-                    const lb = I && typeof I.weightOf === "function" ? I.weightOf({ type: job.params.itemType, count: 1 }) : 0;
+                    // One unit eaten. Its nutritional contribution in pounds of the day's food is catalog food.nutrition
+                    // (tools/add_srd_food_data.js), else the item's weight, else a fifth of a pound; its water contribution
+                    // in gallons is food.water. Weight, nutrition and water are separate numbers.
+                    const t = itemType(job.params.itemType), I = Items();
+                    const lb = t && t.food && Number.isFinite(t.food.nutrition) ? t.food.nutrition
+                        : (I && typeof I.weightOf === "function" ? I.weightOf({ type: job.params.itemType, count: 1 }) : 0);
+                    const gal = t && t.food && Number.isFinite(t.food.water) ? t.food.water : 0;
                     u.data.needs.foodLb = Math.round(((u.data.needs.foodLb || 0) + (lb > 0 ? lb : 0.2)) * 1000) / 1000;
+                    if (gal > 0) u.data.needs.waterGal = Math.round(((u.data.needs.waterGal || 0) + gal) * 1000) / 1000;
                 }
                 break;
             case "sleep": {
