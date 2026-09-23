@@ -91,6 +91,7 @@
             savingThrows: ["str", "con"],
             armorProficiencies: ["Light armor", "Medium armor", "Shields"],
             weaponProficiencies: ["Simple weapons", "Martial weapons"],
+            skillChoices: { count: 2, from: ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"] },
             skills: ["Athletics", "Perception", "Survival"],
             features: [
                 { name: "Rage", desc: "Enter a battle rage for resistance to physical damage and +2 melee damage (2/day)." },
@@ -107,6 +108,7 @@
             savingThrows: ["dex", "cha"],
             armorProficiencies: ["Light armor"],
             weaponProficiencies: ["Simple weapons", "Hand crossbows", "Longswords", "Rapiers", "Shortswords"],
+            skillChoices: { count: 3, from: ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"] },
             skills: ["Performance", "Persuasion", "Deception", "Acrobatics"],
             features: [
                 { name: "Spellcasting", desc: "Channel arcane spells through song, music, and dramatic recitation." },
@@ -126,6 +128,7 @@
             savingThrows: ["wis", "cha"],
             armorProficiencies: ["Light armor", "Medium armor", "Shields"],
             weaponProficiencies: ["Simple weapons"],
+            skillChoices: { count: 2, from: ["History", "Insight", "Medicine", "Persuasion", "Religion"] },
             skills: ["Insight", "Religion", "Medicine"],
             features: [
                 { name: "Spellcasting", desc: "Cast divine prayers bestowed by divine power or spiritual deity." },
@@ -145,6 +148,7 @@
             savingThrows: ["int", "wis"],
             armorProficiencies: ["Light armor", "Medium armor", "Shields (non-metal)"],
             weaponProficiencies: ["Clubs", "Daggers", "Darts", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Sickles", "Slings", "Spears"],
+            skillChoices: { count: 2, from: ["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"] },
             skills: ["Nature", "Survival", "Animal Handling"],
             features: [
                 { name: "Druidic", desc: "Know the ancient secret language of druids." },
@@ -164,6 +168,7 @@
             savingThrows: ["str", "con"],
             armorProficiencies: ["All armor", "Shields"],
             weaponProficiencies: ["Simple weapons", "Martial weapons"],
+            skillChoices: { count: 2, from: ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"] },
             skills: ["Athletics", "Perception", "Intimidation"],
             features: [
                 { name: "Fighting Style", desc: "Master of weapon combat: +2 to damage rolls and protective stances." },
@@ -180,6 +185,7 @@
             savingThrows: ["str", "dex"],
             armorProficiencies: ["None"],
             weaponProficiencies: ["Simple weapons", "Shortswords"],
+            skillChoices: { count: 2, from: ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"] },
             skills: ["Acrobatics", "Insight", "Athletics"],
             features: [
                 { name: "Unarmored Defense", desc: "While not wearing armor, AC equals 10 + DEX mod + WIS mod." },
@@ -196,6 +202,7 @@
             savingThrows: ["wis", "cha"],
             armorProficiencies: ["All armor", "Shields"],
             weaponProficiencies: ["Simple weapons", "Martial weapons"],
+            skillChoices: { count: 2, from: ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"] },
             skills: ["Athletics", "Persuasion", "Insight"],
             features: [
                 { name: "Divine Sense", desc: "Detect celestials, fiends, and undead within 60 feet." },
@@ -215,6 +222,7 @@
             savingThrows: ["str", "dex"],
             armorProficiencies: ["Light armor", "Medium armor", "Shields"],
             weaponProficiencies: ["Simple weapons", "Martial weapons"],
+            skillChoices: { count: 3, from: ["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"] },
             skills: ["Stealth", "Perception", "Survival"],
             features: [
                 { name: "Favored Enemy", desc: "Advantage on survival checks to track beasts and humanoids; bonus damage." },
@@ -234,6 +242,7 @@
             savingThrows: ["dex", "int"],
             armorProficiencies: ["Light armor"],
             weaponProficiencies: ["Simple weapons", "Hand crossbows", "Longswords", "Rapiers", "Shortswords"],
+            skillChoices: { count: 4, from: ["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"] },
             skills: ["Stealth", "Sleight of Hand", "Acrobatics", "Perception", "Deception"],
             features: [
                 { name: "Sneak Attack", desc: "Deal an extra 1d6 damage to a creature you hit with advantage or an ally adjacent." },
@@ -251,6 +260,7 @@
             savingThrows: ["con", "cha"],
             armorProficiencies: ["None"],
             weaponProficiencies: ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light crossbows"],
+            skillChoices: { count: 2, from: ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"] },
             skills: ["Arcana", "Persuasion", "Intimidation"],
             features: [
                 { name: "Spellcasting", desc: "Innate raw magical power surges through innate magical bloodline." },
@@ -270,6 +280,7 @@
             savingThrows: ["wis", "cha"],
             armorProficiencies: ["Light armor"],
             weaponProficiencies: ["Simple weapons"],
+            skillChoices: { count: 2, from: ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"] },
             skills: ["Arcana", "Deception", "History"],
             features: [
                 { name: "Otherworldly Patron", desc: "Bound by an eldritch pact to a transcendent otherworldly entity." },
@@ -289,6 +300,7 @@
             savingThrows: ["int", "wis"],
             armorProficiencies: ["None"],
             weaponProficiencies: ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light crossbows"],
+            skillChoices: { count: 2, from: ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"] },
             skills: ["Arcana", "History", "Investigation", "Religion"],
             features: [
                 { name: "Spellcasting", desc: "Master of arcane formulas, runes, and scholar of eldritch incantations." },
@@ -525,6 +537,16 @@
                 spellsKnown = (best.defaultCantrips || []).concat(best.defaultSpells || []);
             }
 
+            // Deterministic skill selection from class choices
+            const pool = (best.skillChoices && Array.isArray(best.skillChoices.from)) ? best.skillChoices.from.slice() : (best.skills || []).slice();
+            const pickCount = Math.min(pool.length, (best.skillChoices && best.skillChoices.count) ? best.skillChoices.count : pool.length);
+            const chosenSkills = [];
+            for (let i = 0; i < pickCount; i++) {
+                const idx = Math.floor(rng() * pool.length);
+                chosenSkills.push(pool.splice(idx, 1)[0]);
+            }
+            const proficiencies = chosenSkills.map(s => s.toLowerCase());
+
             return {
                 id: best.id,
                 name: best.name,
@@ -541,7 +563,8 @@
                 savingThrows: best.savingThrows.slice(),
                 armorProficiencies: best.armorProficiencies.slice(),
                 weaponProficiencies: best.weaponProficiencies.slice(),
-                skills: best.skills.slice(),
+                skills: chosenSkills,
+                proficiencies: proficiencies,
                 features: JSON.parse(JSON.stringify(best.features)),
                 casterType: best.casterType,
                 spellAbility: best.spellAbility,
@@ -632,6 +655,114 @@
                 status,
                 speedPenalty
             };
+        },
+
+        statMod,
+
+        /**
+         * Resolves a D&D 5.1 SRD ability check.
+         * Accounts for ability modifier, skill proficiency bonus (+2 at lvl 1),
+         * advantage/disadvantage, and exhaustion level 1+ disadvantageOnChecks.
+         */
+        rollCheck(unit, ability, skill, opts = {}) {
+            const scores = (unit && unit.data && (unit.data.stats || unit.data.abilities || unit.data.scores)) || {};
+            const abKey = String(ability || "str").toLowerCase();
+            const score = Number.isFinite(scores[abKey]) ? scores[abKey] : 10;
+            const mod = statMod(score);
+
+            const profs = (unit && unit.data && Array.isArray(unit.data.proficiencies)) ? unit.data.proficiencies : [];
+            const isProf = skill ? profs.includes(String(skill).toLowerCase()) : false;
+            const pb = (unit && unit.data && unit.data.dnd && Number.isFinite(unit.data.dnd.proficiencyBonus)) ? unit.data.dnd.proficiencyBonus : 2;
+            const profBonus = isProf ? pb : 0;
+
+            const Col = window.UF && UF.Colonists;
+            const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
+            const hasDis = !!opts.disadvantage || (eff && eff.disadvantageOnChecks === true);
+            const hasAdv = !!opts.advantage;
+            const dis = hasDis && !hasAdv;
+            const adv = hasAdv && !hasDis;
+
+            const rng = typeof opts.rng === "function" ? opts.rng : Math.random;
+            const r1 = Math.floor(rng() * 20) + 1;
+            const r2 = Math.floor(rng() * 20) + 1;
+            const d20 = dis ? Math.min(r1, r2) : (adv ? Math.max(r1, r2) : r1);
+            const total = d20 + mod + profBonus;
+
+            return {
+                roll: d20,
+                rolls: [r1, r2],
+                mod,
+                profBonus,
+                total,
+                ability: abKey,
+                skill,
+                proficient: isProf,
+                advantage: adv,
+                disadvantage: dis,
+                dc: opts.dc,
+                success: opts.dc !== undefined ? total >= opts.dc : null
+            };
+        },
+
+        /**
+         * Resolves a D&D 5.1 SRD saving throw.
+         * Accounts for ability modifier, saving throw proficiency bonus,
+         * advantage/disadvantage, and exhaustion level 3+ disadvantageOnAttacksAndSaves.
+         */
+        rollSave(unit, ability, opts = {}) {
+            const scores = (unit && unit.data && (unit.data.stats || unit.data.abilities || unit.data.scores)) || {};
+            const abKey = String(ability || "str").toLowerCase();
+            const score = Number.isFinite(scores[abKey]) ? scores[abKey] : 10;
+            const mod = statMod(score);
+
+            const saves = (unit && unit.data && unit.data.dnd && Array.isArray(unit.data.dnd.savingThrows)) ? unit.data.dnd.savingThrows : [];
+            const isProf = saves.map(s => String(s).toLowerCase()).includes(abKey);
+            const pb = (unit && unit.data && unit.data.dnd && Number.isFinite(unit.data.dnd.proficiencyBonus)) ? unit.data.dnd.proficiencyBonus : 2;
+            const profBonus = isProf ? pb : 0;
+
+            const Col = window.UF && UF.Colonists;
+            const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
+            const hasDis = !!opts.disadvantage || (eff && eff.disadvantageOnAttacksAndSaves === true);
+            const hasAdv = !!opts.advantage;
+            const dis = hasDis && !hasAdv;
+            const adv = hasAdv && !hasDis;
+
+            const rng = typeof opts.rng === "function" ? opts.rng : Math.random;
+            const r1 = Math.floor(rng() * 20) + 1;
+            const r2 = Math.floor(rng() * 20) + 1;
+            const d20 = dis ? Math.min(r1, r2) : (adv ? Math.max(r1, r2) : r1);
+            const total = d20 + mod + profBonus;
+
+            return {
+                roll: d20,
+                rolls: [r1, r2],
+                mod,
+                profBonus,
+                total,
+                ability: abKey,
+                proficient: isProf,
+                advantage: adv,
+                disadvantage: dis,
+                dc: opts.dc,
+                success: opts.dc !== undefined ? total >= opts.dc : null
+            };
+        },
+
+        /**
+         * Derived max HP respecting exhaustion level 4+ (hpMaxFactor: 0.5).
+         */
+        derivedMaxHp(unit) {
+            let base = 10;
+            if (unit && unit.data) {
+                if (unit.data.dnd && Number.isFinite(unit.data.dnd.hpMax)) base = unit.data.dnd.hpMax;
+                else if (Number.isFinite(unit.data.maxHp)) base = unit.data.maxHp;
+            }
+            const Col = window.UF && UF.Colonists;
+            const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
+            if (eff && eff.hpMaxFactor !== undefined) {
+                return Math.max(1, Math.floor(base * eff.hpMaxFactor));
+            }
+            return base;
         }
     };
 

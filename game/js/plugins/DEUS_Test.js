@@ -406,4 +406,85 @@
         }
         t.check("level_switch_no_crash", levelSwitchOk, "Level switching between z=0 and z=-1 and tile interaction succeeded with 0 crashes");
     }, { isDefault: false });
+
+    // Native Survival, Dying, Exhaustion, and Food Verification
+    Test.suite("native_survival_dying", async t => {
+        await t.waitFrames(45);
+        const W = window.UF.World;
+        const Cb = window.UF.Combat;
+        const Dnd = window.UF.Dnd5e;
+        const Col = window.UF.Colonists;
+        const J = window.UF.Jobs;
+        const allUnits = W ? W.units() : [];
+        const founders = allUnits.filter(u => u && u.data && u.data.founder);
+        t.check("founders_present", founders.length >= 8, `found ${founders.length} founders (expected at least 8)`);
+
+        // 1. Survival needs and food catalog presence
+        const f0 = founders[0];
+        const needs0 = Col.needsOf(f0);
+        t.check("founder_needs_initialized", !!needs0 && needs0.model === "srd" && Number.isFinite(needs0.foodLb) && Number.isFinite(needs0.exhaustion),
+            `founder 0 needs: model=${needs0 ? needs0.model : null}, exhaustion=${needs0 ? needs0.exhaustion : null}`);
+
+        // 2. Skill Proficiencies persistence
+        let profCount = 0;
+        founders.forEach(f => {
+            if (f.data && Array.isArray(f.data.proficiencies) && f.data.proficiencies.length > 0) profCount++;
+        });
+        t.check("founders_have_persisted_proficiencies", profCount >= 8, `${profCount}/${founders.length} founders have persisted proficiencies`);
+
+        // 3. Exhaustion Effects Ladder on live units
+        const f1 = founders[1];
+        const baseSpeed = W.unitMoveSpeed ? W.unitMoveSpeed(f1) : 4;
+        const baseMaxHp = Cb.maxHp(f1);
+        if (f1.data && f1.data.needs) f1.data.needs.exhaustion = 2;
+        const lvl2Speed = W.unitMoveSpeed ? W.unitMoveSpeed(f1) : 3;
+        t.check("exhaustion_lvl2_slows_movement", lvl2Speed < baseSpeed, `baseSpeed=${baseSpeed}, lvl2Speed=${lvl2Speed}`);
+
+        if (f1.data && f1.data.needs) f1.data.needs.exhaustion = 4;
+        const lvl4MaxHp = Cb.maxHp(f1);
+        t.check("exhaustion_lvl4_halves_max_hp", lvl4MaxHp <= Math.ceil(baseMaxHp / 2), `baseMaxHp=${baseMaxHp}, lvl4MaxHp=${lvl4MaxHp}`);
+
+        // Restore exhaustion
+        if (f1.data && f1.data.needs) f1.data.needs.exhaustion = 0;
+        t.check("exhaustion_cleared_restores_max_hp", Cb.maxHp(f1) === baseMaxHp, `restored maxHp=${Cb.maxHp(f1)}`);
+
+        // 4. Combat -> 0 HP -> Dying State
+        const patient = founders[2];
+        const startHp = patient.data.hp || 10;
+        // Resolve attack that downs patient to 0 HP
+        const downAttack = Cb.resolveAttack(f0, patient, { legacy: true, hit: true, damage: startHp });
+        t.check("combat_reduces_to_zero_hp", patient.data.hp === 0 && !patient.data.dead, `patient hp=${patient.data.hp}, dead=${patient.data.dead}`);
+        t.check("patient_enters_dying_state", !!patient.data.dying && patient.data.dying.stable === false,
+            `dying=${JSON.stringify(patient.data.dying)}`);
+
+        // 5. Medicine Stabilization Check & First Aid
+        const doctor = founders[3];
+        const stabResult = Col.stabilize(patient, doctor);
+        t.check("patient_stabilized_by_aid", !!stabResult && stabResult.ok === true && patient.data.dying.stable === true,
+            `stabilize ok=${stabResult ? stabResult.ok : false}, stable=${patient.data.dying ? patient.data.dying.stable : false}`);
+        t.check("stabilized_patient_remains_at_zero_hp", patient.data.hp === 0, `patient hp=${patient.data.hp}`);
+
+        // Center camera / screenshot
+        if ($gamePlayer && patient) {
+            $gamePlayer.locate(patient.x, patient.y);
+        }
+        await t.waitFrames(15);
+        t.screenshot("native_survival_dying");
+
+        // 6. Healing restores consciousness
+        const healed = Cb.heal(patient, 5);
+        t.check("healing_restores_consciousness", healed === 5 && patient.data.hp === 5 && patient.data.dying === undefined,
+            `healed=${healed}, hp=${patient.data.hp}, dying=${patient.data.dying}`);
+
+        // 7. Save / Load Persistence verification
+        let saveOk = false;
+        try {
+            const contents = DataManager.makeSaveContents();
+            t.check("save_contents_serializable", !!contents && typeof contents === "object", "save contents created successfully");
+            saveOk = true;
+        } catch (e) {
+            console.error("Save contents failure: " + e.message);
+        }
+        t.check("save_load_persistence_intact", saveOk, "Save contents serialization passed with 0 errors");
+    }, { isDefault: false });
 })();

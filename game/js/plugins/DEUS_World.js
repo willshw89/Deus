@@ -844,11 +844,34 @@
     //-------------------------------------------------------------------------
     // Units
 
+    function unitMoveSpeed(u) {
+        let base = (u && u.data && Number.isFinite(u.data.moveSpeed)) ? (u.data.moveSpeed | 0) : 4;
+        const Col = window.UF && UF.Colonists;
+        if (Col && typeof Col.exhaustionEffects === "function") {
+            const eff = Col.exhaustionEffects(u);
+            if (eff && eff.speedFactor !== undefined) {
+                if (eff.speedFactor === 0) return 0;
+                if (eff.speedFactor <= 0.5) return Math.max(1, base - 1);
+            }
+        }
+        return base;
+    }
+
+    function refreshUnitMovement(u) {
+        if (!u) return;
+        const spd = unitMoveSpeed(u);
+        const ev = World.eventOf ? World.eventOf(u.id) : null;
+        if (ev && typeof ev.setMoveSpeed === "function") {
+            ev.setMoveSpeed(spd);
+        }
+    }
+
     function unitEventData(u) {
         return makeEventData(EVENT_BASE + u.id, {
             name: u.name, note: `<ufUnit:${u.id}>`, x: u.x, y: u.y, dir: u.dir,
             image: { characterName: u.image.characterName, characterIndex: u.image.characterIndex, direction: u.dir },
-            through: !!(u.data && u.data.through)
+            through: !!(u.data && u.data.through),
+            moveSpeed: unitMoveSpeed(u)
         });
     }
 
@@ -865,6 +888,7 @@
         $dataMap.events[eid] = data;
         const ev = new Game_Event($gameMap.mapId(), eid);
         ev.locate(u.x, u.y);
+        if (typeof ev.setMoveSpeed === "function") ev.setMoveSpeed(unitMoveSpeed(u));
         if (u.dir8 && ev.setDir8) ev.setDir8(u.dir8);
         else ev.setDirection(u.dir || 2);
         $gameMap._events[eid] = ev;
@@ -1056,7 +1080,10 @@
     }
     World.holdOccupiedRegrowth = holdOccupiedRegrowth;
     // Registered at load: UF_World loads before UF_Objects, so this runs before its regrowth on every time:hour.
-    if (window.UF.Events && UF.Events.on) UF.Events.on("time:hour", holdOccupiedRegrowth);
+    if (window.UF.Events && UF.Events.on) {
+        UF.Events.on("time:hour", holdOccupiedRegrowth);
+        UF.Events.on("colonists:exhaustion", refreshUnitMovement);
+    }
     function wrapRegrowth() {
         const O = window.UF && UF.Objects;
         if (!O || typeof O.processRegrow !== "function" || O.processRegrow._ufHeldForUnits) return;
@@ -1189,6 +1216,7 @@
         // another level is refused here (false); UF_Levels routes units between levels.
         const gz = goal && goal.z !== undefined ? goal.z : zOf(goal && goal.area);
         if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, gz) || gz !== zOf(u)) return false;
+        if (unitMoveSpeed(u) === 0) return false;
         const same = !!u.goal && sameArea(u.goal.area, goal.area) && u.goal.x === (goal.x | 0) && u.goal.y === (goal.y | 0) && zOf(u.goal) === gz;
         u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0, z: gz };
         u.stuckFrames = 0;
@@ -1200,6 +1228,8 @@
         if (u) u.goal = null;
         pathCache.delete(id);
     };
+    World.unitMoveSpeed = unitMoveSpeed;
+    World.refreshUnitMovement = refreshUnitMovement;
     World.eventIdOf = id => EVENT_BASE + id;
     /** True when the unit's level is the one on screen (its event exists there). */
     World.isDisplayed = u => !!u && onView(u.area.x, u.area.y, zOf(u));

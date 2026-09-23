@@ -3288,8 +3288,12 @@
         ],
         "stack": 10,
         "food": {
-          "hunger": 25
-        }
+          "hunger": 25,
+          "nutrition": 0.1,
+          "water": 0.02,
+          "source": "deus"
+        },
+        "weight": 0.1
       },
       {
         "id": "fruit",
@@ -3302,8 +3306,12 @@
         "stack": 10,
         "food": {
           "hunger": 30,
-          "thirst": 10
-        }
+          "thirst": 10,
+          "nutrition": 0.25,
+          "water": 0.05,
+          "source": "deus"
+        },
+        "weight": 0.3
       },
       {
         "id": "mushroom",
@@ -3315,8 +3323,12 @@
         ],
         "stack": 10,
         "food": {
-          "hunger": 20
-        }
+          "hunger": 20,
+          "nutrition": 0.1,
+          "water": 0.01,
+          "source": "deus"
+        },
+        "weight": 0.1
       },
       {
         "id": "root",
@@ -3328,8 +3340,12 @@
         ],
         "stack": 10,
         "food": {
-          "hunger": 25
-        }
+          "hunger": 25,
+          "nutrition": 0.3,
+          "water": 0.01,
+          "source": "deus"
+        },
+        "weight": 0.3
       },
       {
         "id": "seeds",
@@ -3372,8 +3388,12 @@
         ],
         "stack": 5,
         "food": {
-          "hunger": 20
-        }
+          "hunger": 20,
+          "nutrition": 0.4,
+          "water": 0,
+          "source": "deus"
+        },
+        "weight": 0.5
       },
       {
         "id": "meat_cooked",
@@ -3385,8 +3405,12 @@
         ],
         "stack": 5,
         "food": {
-          "hunger": 50
-        }
+          "hunger": 50,
+          "nutrition": 0.5,
+          "water": 0,
+          "source": "deus"
+        },
+        "weight": 0.4
       },
       {
         "id": "fish",
@@ -3399,7 +3423,30 @@
         ],
         "stack": 5,
         "food": {
-          "hunger": 25
+          "hunger": 25,
+          "nutrition": 0.5,
+          "water": 0,
+          "source": "deus"
+        },
+        "weight": 0.5
+      },
+      {
+        "id": "rations",
+        "name": "Rations (1 day)",
+        "image": "!$UF_Item_MeatCooked",
+        "tags": [
+          "food",
+          "dry",
+          "trade"
+        ],
+        "stack": 5,
+        "srd": "srd:gear:rations-1-day",
+        "weight": 2,
+        "food": {
+          "hunger": 100,
+          "nutrition": 1,
+          "water": 0,
+          "source": "srd:gear:rations-1-day"
         }
       },
       {

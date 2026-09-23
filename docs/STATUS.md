@@ -10,6 +10,43 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Astra**: DEUS-TSK-ASTRA-07 — Measurement-only species biology validation (tools/bench_species_biology.js, docs/systems/UF_History.md, docs/STATUS.md); production plugins and catalog read-only.
 - **Fable**: DEUS-TSK-FABLE-05 — Survival needs interruption & subsistence loop (DEUS_Colonists.js, tools/test_survival_needs_loop.js)
 
+## DEUS-TSK-GEMINI-02 — Live Gameplay Integration of Survival, Dying, Exhaustion, and Food (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/data/UF_WorldCatalog.json` & `game/data/DEUS_WorldCatalog.json`: Added canonical catalog entries for 8 food items (`rations`, `meat_cooked`, `meat_raw`, `fish`, `berries`, `fruit`, `mushroom`, `root`) with nutrition, water, weight, and provenance tags via `tools/add_srd_food_data.js --write`; idempotence verified via `--check`.
+  - `game/js/plugins/DEUS_Dnd5e.js`: Defined SRD 5.1 `skillChoices` for all 12 classes; `assignClass` deterministically selects skill proficiencies stored on `u.data.proficiencies` and `u.data.dnd.proficiencies`; added `rollCheck` (applying proficiency bonus +2 only when proficient; disadvantage on exhaustion lvl 1+), `rollSave` (disadvantage on exhaustion lvl 3+), and `derivedMaxHp` (halved on exhaustion lvl 4+).
+  - `game/js/plugins/DEUS_History.js`: Persists `u.data.proficiencies` across founder and settler generation.
+  - `game/js/plugins/DEUS_Colonists.js`: `medicineBonus` checks `u.data.proficiencies` with fallback to `u.data.dnd.proficiencies`; exported `startDying` on `Colonists` object.
+  - `game/js/plugins/DEUS_World.js`: Implemented `unitMoveSpeed` applying exhaustion speed factor (halved at lvl 2, step 0 at lvl 5); dynamically updates event speeds via `colonists:exhaustion` listener; `World.sendUnit` refuses movement when speed factor is 0.
+  - `game/js/plugins/DEUS_Combat.js`:
+    - Attacker with exhaustion lvl 3+ takes disadvantage on attacks; `Combat.maxHp` scales with `eff.hpMaxFactor` (halved at lvl 4), clamping HP dynamically on exhaustion events.
+    - `isDead(u)`: Colonists at 0 HP with `dead !== true` are unconscious/dying, not dead.
+    - `resolveAttack`: Disallows attackers at 0 HP or dead; allows attacks against unconscious 0 HP targets with advantage and auto-critical within 5 ft (1 cell).
+    - Damage reducing colonist to 0 HP routes to `startDying(target)` and emits `combat:downed`; non-colonists die immediately.
+    - Damage at 0 HP adds death save failures via `woundedAtZero(target, isCrit)` (1 on normal hit, 2 on critical hit), killing on 3rd failure; massive damage ($\ge \text{maxHp}$) kills instantly.
+    - `runLevelTick` and `regen` do not let 0 HP unconscious units act, acquire targets, or passively regenerate HP.
+    - Implemented `Combat.heal(unit, amount)`: restores hit points, clears dying state, and restores consciousness when HP > 0.
+  - `tools/test_combat_dying_integration.js`: Dedicated headless integration test suite with 29 automated checks and 3 Rule 4 mutant failure modes (`--mutant=no_dying`, `--mutant=no_exhaustion`, `--mutant=free_medicine`).
+  - `game/js/plugins/DEUS_Test.js`: Added native NW.js suite `native_survival_dying`.
+- **Checks observed**:
+  - `node tools/test_combat_dying_integration.js`: **29 passed, 0 failed (exit 0)**.
+    - Mutant failure controls (Rule 4 verified):
+      - `--mutant=no_dying`: 8 checks fail (exit 1).
+      - `--mutant=no_exhaustion`: 1 check fails (exit 1).
+      - `--mutant=free_medicine`: 1 check fails (exit 1).
+  - Headless regression test suites:
+    - `node tools/test_stabilization.js`: **12 passed, 0 failed (exit 0)**.
+    - `node tools/test_survival_needs_loop.js`: **19 passed, 0 failed (exit 0)**.
+    - `node tools/test_duplicate_registration.js`: **15 passed, 0 failed (exit 0)**.
+    - `node tools/test_faction_starting_gear.js`: **17 passed, 0 failed (exit 0)**.
+    - `node tools/test_project_construction_loop.js`: **14 passed, 0 failed (exit 0)**.
+    - `node tools/test_autonomous_project_dispatch.js`: **14 passed, 0 failed (exit 0)**.
+    - `node tools/test_settlement_projects.js`: **14 passed, 0 failed (exit 0)**.
+  - Native NW.js execution via `node tools/run_tests.js native_survival_dying`:
+    - **13 passed, 0 failed (exit 0)**.
+    - Screenshot `game/test_output/native_survival_dying.native_survival_dying.png`: Observed live settlement with founder patient downed to 0 HP, stabilized by attending doctor founder, displaying critical red health bar indicator overhead while stable at 0 HP; restored consciousness upon healing; 0 errors/crashes in dev console (`game/test_output/last_crash.txt` does not exist).
+
+
 ## DEUS-TSK-GEMINI-01 — Faction Starting Equipment (Clothes + 15 gp Pouch), Catalog Authority & Native Verification (2026-09-23)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:

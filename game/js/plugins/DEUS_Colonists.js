@@ -1595,7 +1595,7 @@
         const wis = s && Number.isFinite(s.wis) ? s.wis : 10;
         return Math.floor((wis - 10) / 2);
     };
-    const medicineBonus = u => wisModOf(u) + ((u && u.data && Array.isArray(u.data.proficiencies) && u.data.proficiencies.includes("medicine")) ? 2 : 0);
+    const medicineBonus = u => wisModOf(u) + ((u && u.data && ((Array.isArray(u.data.proficiencies) ? u.data.proficiencies : (u.data.dnd && Array.isArray(u.data.dnd.proficiencies) ? u.data.dnd.proficiencies : []))).includes("medicine")) ? 2 : 0);
     const dyingOf = u => (unconscious(u) && !u.data.dead ? u.data.dying || null : null);
     function startDying(u) {
         if (!u || !u.data || u.data.dead) return null;
@@ -5069,7 +5069,7 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Colonists = Colonists;
-    Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds, stabilize, woundedAtZero, dying: dyingOf, unconscious });
+    Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds, stabilize, woundedAtZero, dying: dyingOf, unconscious, startDying });
     Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, endOfDay, addExhaustion, removeExhaustion, completeLongRest, longRestJob, dayKey, dayNumber, conModOf, waterNeed, isNeedJob, needBlocked, avoid, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep,
         startDying, deathSave, becomeStable, regainConsciousness, tickDying, rescueJob, patientsFor, medicineBonus, wisModOf, dieOf, ROUND_TICKS });
 

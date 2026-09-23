@@ -243,7 +243,7 @@ try {
 
     check("plugins_load", !!C && typeof C.tickNeeds === "function" && typeof C.exhaustionEffects === "function" && typeof C._internal.endOfDay === "function",
         `UF.Colonists with tickNeeds/exhaustionEffects/endOfDay; a berry feeds ${LB} lb of the day's pound (weighs ${berry.weight} lb), so a day is ${perDay} berries`);
-    check("food_data_contract", foodData.changed && !!rations && rations.srd === "srd:gear:rations-1-day" && rations.weight === 2 && rations.food.nutrition === 1 && rations.food.water === 0 && rations.food.source === "srd:gear:rations-1-day" &&
+    check("food_data_contract", (foodData.changed || !foodData.notes.length) && !!rations && rations.srd === "srd:gear:rations-1-day" && rations.weight === 2 && rations.food.nutrition === 1 && rations.food.water === 0 && rations.food.source === "srd:gear:rations-1-day" &&
         catalog.items.types.filter(t => t.food).every(t => Number.isFinite(t.weight) && Number.isFinite(t.food.nutrition) && Number.isFinite(t.food.water) && (t.food.source === "deus" || t.food.source.startsWith("srd:"))) && fruit.food.water === 0.05 && I.weightOf({ type: "rations", count: 1 }) === 2,
         `${catalog.items.types.filter(t => t.food).length} food items carry weight, nutrition and water; rations: ${rations ? `${rations.weight} lb, feeds ${rations.food.nutrition} day, ${rations.srd}` : "missing"}; DEUS-marked: ${catalog.items.types.filter(t => t.food && t.food.source === "deus").map(t => t.id).join(" ")}`);
 

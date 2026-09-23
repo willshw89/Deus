@@ -2765,6 +2765,9 @@
                 u.data.hp = u.data.dnd.hp;
                 u.data.ac = u.data.dnd.ac;
                 u.data.savingThrows = u.data.dnd.savingThrows;
+                if (u.data.dnd && u.data.dnd.proficiencies && Array.isArray(u.data.dnd.proficiencies)) {
+                    u.data.proficiencies = Array.from(new Set([...(u.data.proficiencies || []), ...u.data.dnd.proficiencies]));
+                }
             }
             const Items = window.UF && UF.Items;
             if (Items && typeof Items.giveFactionStartingKit === "function") {
@@ -2948,6 +2951,9 @@
                     u.data.hp = u.data.dnd.hp;
                     u.data.ac = u.data.dnd.ac;
                     u.data.savingThrows = u.data.dnd.savingThrows;
+                    if (u.data.dnd && u.data.dnd.proficiencies && Array.isArray(u.data.dnd.proficiencies)) {
+                        u.data.proficiencies = Array.from(new Set([...(u.data.proficiencies || []), ...u.data.dnd.proficiencies]));
+                    }
                 }
                 if (!u.data.callings || u.data.callings.length < 3) {
                     const Callings = getCallings();
