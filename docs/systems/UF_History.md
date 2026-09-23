@@ -1,6 +1,163 @@
 # UF_History
 
-## ASTRA10 independent HIST-09 production verification — 2026-09-23
+## ASTRA11 independent HIST-09 revalidation — 2026-09-23
+
+**Authoritative classification: FAIL, exit code 1.** The completed default dispatch passed all 23 established behavior/model checks, the gates for all six canonical trajectories, three repeat comparisons, three disk save/restart comparisons, and the twenty-seed sweep. Five literal ASTRA-11 metadata requirements failed. Those mismatches remain acceptance failures; passing simulation behavior does not revise the packet. All requested execution coverage completed in **146.3548166 seconds** without a timing retry or production change.
+
+### Frozen candidate and evidence identity
+
+| Evidence | Inspected identity |
+|---|---|
+| Production candidate commit | `8a40d2ed66da758fc95fc3c1e8205709336c54df` |
+| Production file | `game/js/plugins/DEUS_HistoricalDemographics.js` |
+| Production bytes / SHA-256 | 45,429 / `e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95` |
+| Benchmark source digest | `043c0a82d1b3971c7f459d5affd9ce212c5b7b82c868230e879c5ba5f853eb05` |
+| Benchmark harness SHA-256 | `2c1fb6fe26df36ab7ff18c3871f5e34c1c8f3492e0ab5e49a6c7b6ec34e88138` |
+| Capacity harness SHA-256 | `7150a620c388bb3db45cdf9d2255b7621d772d12fe1dbfd8d9bcedb81e104f1a` |
+| Regression harness SHA-256 | `4aa775f92ee1244c2d5e33c5ba28810b7eeeb29a2b2e91ae4de5a3e223897383` |
+| Final artifact | `game/test_output/bench_species_biology.json`, task `DEUS-TSK-ASTRA-11`, report schema 4 |
+| Artifact bytes / SHA-256 | 37,992,993 / `837a3442312548d3e9ceede440d128f4df6072f7e210f9a831f61a1603d3ef61` |
+| Runtime | Node v24.19.0; AMD Ryzen 7 8845HS with Radeon 780M Graphics; sequential fresh worker processes |
+
+Every executed production plugin, catalog, and plugin-order input was read from the candidate's immutable Git snapshot. The working plugin matched the specified raw bytes before execution and afterward (`candidateUnchangedAtEnd: true`). Source and harness identities were checked for workers and restart snapshots. The artifact contains twenty-six matrix/sweep trajectories and their annual evidence; its aggregate size is not subject to the **15 MiB per serialized simulation state** gate. The largest canonical state was 4,002,785 bytes (3.817 MiB).
+
+### Contract results and literal packet discrepancies
+
+The packet requires schema 7, demographic model 7, capacity model identity `local_density_v1`, promoted profile tag `v1`, and deterministic custom-profile fingerprinting. The candidate satisfies schema 7 but persists the different metadata below. Clarification was requested; no correction to the literal packet was received before this run. The verifier retains both the established implementation-contract results and the literal packet results, with an overall FAIL.
+
+| Literal packet check | Expected | Observed |
+|---|---|---|
+| `PACKET_DEFAULT_PROFILE_TAG` | `v1` | `demographicProfileVersion: "1.0.0-provisional-astra08"`. |
+| `PACKET_DEMOGRAPHIC_MODEL` | Demographic model version 7 | Existing `historyModelVersion: 1`; schema `version` is separately 7. The verifier maps the named model requirement to that existing field rather than inventing another field. |
+| `PACKET_CAPACITY_MODEL_IDENTITY` | Persisted `local_density_v1` identity | Root `capacityModelVersion: 1`; config `{ version: 1, defaultBaseline: 160, minimumScale: 0.1, minCapacity: 60, maxCapacity: 350 }`; no literal model identity. |
+| `PACKET_CUSTOM_CANNOT_CLAIM_V1` | Modified biology remains tagged `custom` | Modified explicit profiles with `options.demographicProfileVersion: "v1"` retain `v1`. Protection of the candidate's own promoted tag does not protect the packet's different tag. |
+| `PACKET_CUSTOM_PROFILE_FINGERPRINT` | Advertised deterministic SHA-256 fingerprint; identical profiles repeat and changed profiles differ | Normal explicit profiles are tagged `custom`, but no advertised 64-hex SHA-256 fingerprint was found in existing top-level/config metadata; original/repeated/changed fingerprint lists are empty. |
+
+The common suite passed **23 checks**, including fixed absolute capacity bounds (59 and 351 reject; 60 and 350 accept; widened caller bounds reject), malformed model input rejection, immutable validation, site-local start-of-year density, pre-death census, no probability-1 bypass, source-ID-based capacity derivation, explicit v6 rejection before migration, preservation of populated legacy records, and idempotent migration. The new mandatory failed-migration atomicity check passed: malformed v6 input remained byte-identical and retained version 6. A successful migration still changes subsequent simulation to v7 density behavior; preservation of old records is not a promise of the old v6 future trajectory.
+
+### Commands, checks, and ability to fail
+
+The completed `node tools/bench_species_biology.js` default invoked the bounded suites, six canonical workers, disk restarts, and sweep. The regression was also checked directly with `node tools/test_production_history_demographics.js --selftest --json`; its syntax check and scoped whitespace checks passed. No baseline production method was patched or disabled.
+
+| Suite | Observed result |
+|---|---|
+| Benchmark self-checks | 29 PASS, including disk identity/corruption, sweep-gate failure, timeout evidence, repeat evidence, and four existing negative controls. |
+| Carrying-capacity common contracts | 23 PASS / 0 FAIL. |
+| Literal packet metadata contracts | 0 PASS / 5 FAIL; suite process exited 1. |
+| Regression self-checks | 34 PASS; suite process exited 0. Existing assertions and TEST biology remained unchanged when the candidate pin was updated. |
+| Capacity mutation controls | Eight detected; every child exited 1 for its intended assertion. |
+| Regression mutation controls | Four detected; every child exited 1 for its intended assertion. |
+
+The eight capacity controls are `no_density_pressure` → `DENSITY_RATE`, `universal_constant` → `LOCAL_CAPACITY`, `live_census_order_dependent` → `ANNUAL_ORDER`, `base_birth_1_bypass` → `BIRTH_ONE`, `unsupported_version_accepted` → `VERSIONS`, `malformed_capacity_accepted` → `CAPACITY_REJECTION`, `migration_rewrites_custom_profile` → `MIGRATION_PRESERVATION`, and `migration_non_idempotence` → `MIGRATION_IDEMPOTENCE`. The regression controls are `dead_reproduce` → dead-parent reproduction, `skip_succession` → dead/mismatched ruler, `corrupt_parents` → invalid parent IDs, and `uniform_lifespan` → a young elf incorrectly dying of old age. Mutations affect in-memory test copies only. Passing existing-model regression assertions is not counted as satisfying the five conflicting metadata requirements.
+
+### Canonical timing and biological gates
+
+Only unmodified public `api.step` calls contribute to simulation time. Worker wall time also includes setup, annual observations, checkpoint validation/serialization, and checkpoint emission. Parent process wall time additionally includes startup, frozen-source loading, and final IPC parsing. The strict `<30.0 seconds` gate conservatively uses the larger worker/parent wall measurement. All six passed. No failed timing sample was retried or averaged away.
+
+| Seed | Repeat | Simulation, s | Worker wall, s | Parent process wall, s | Worst annual step, ms |
+|---|---:|---:|---:|---:|---:|
+| 0 | 1 | 10.481 | 11.130 | 11.566 | 81.508 |
+| 0 | 2 | 9.011 | 9.624 | 10.058 | 56.463 |
+| 424242 | 1 | 9.964 | 10.615 | 11.017 | 74.639 |
+| 424242 | 2 | 10.200 | 10.879 | 11.340 | 78.381 |
+| 20260919 | 1 | 9.801 | 10.457 | 10.875 | 70.530 |
+| 20260919 | 2 | 9.871 | 10.530 | 10.969 | 73.571 |
+
+All nine species remained alive at every annual census, stayed strictly below 1,500 living people, and retained active fertile partnerships at both 250 and 500 years. The largest annual species census was 177. All checkpoint states were below 15 MiB. Thus `zeroExtinctions`, `viableReproduction`, `boundedPopulation`, `serializedState`, and `trajectoryBudget` each passed. Maximum sampled heap delta was **66.025 MiB**; samples include retained evidence, temporary allocations, and ordinary GC and do not measure leaks or serialized-state size. No forced GC was used.
+
+### Nine unique canonical checkpoints
+
+Both repeats have identical state/event bytes, hashes, and annual census curves. Counts below therefore appear once per seed/horizon. Horizons are elapsed years (engine years 101/251/501). Cumulative births exclude the 72 imported founders; cumulative deaths include founder deaths. Records equal living plus deceased. All nine sites were active, none abandoned or ruined, and each faction had one living ruler at every checkpoint. Ruler triples mean **active / historical accession records / successions**.
+
+| Seed | Years | Living | All person records | Births / deaths | Rulers | Fertile partnerships | State bytes |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 100 | 761 | 949 | 877 / 188 | 9 / 23 / 14 | 207 | 587,089 |
+| 0 | 250 | 984 | 2,566 | 2,494 / 1,582 | 9 / 57 / 48 | 277 | 1,835,360 |
+| 0 | 500 | 1,080 | 5,258 | 5,186 / 4,178 | 9 / 115 / 106 | 279 | 3,966,484 |
+| 424242 | 100 | 738 | 949 | 877 / 211 | 9 / 22 / 13 | 196 | 589,347 |
+| 424242 | 250 | 943 | 2,542 | 2,470 / 1,599 | 9 / 53 / 44 | 234 | 1,818,710 |
+| 424242 | 500 | 1,063 | 5,262 | 5,190 / 4,199 | 9 / 118 / 109 | 277 | 3,989,088 |
+| 20260919 | 100 | 730 | 898 | 826 / 168 | 9 / 21 / 12 | 190 | 545,481 |
+| 20260919 | 250 | 977 | 2,561 | 2,489 / 1,584 | 9 / 55 / 46 | 258 | 1,814,563 |
+| 20260919 | 500 | 1,093 | 5,317 | 5,245 / 4,224 | 9 / 109 / 100 | 300 | 4,002,785 |
+
+The following site tables provide **100 / 250 / 500** population and fertile-partnership counts. Each species has exactly one canonical site, so its site and species populations agree. Capacity is constant within each trajectory and is a fertility input, not a hard population cap. The first column records demographic site ID / imported source site ID.
+
+**Seed 0**
+
+| Site / source | Species | Z | Capacity | Site and species population | Fertile partnerships |
+|---|---|---:|---:|---:|---:|
+| 0 / 1 | human | 0 | 160 | 131 / 132 / 110 | 34 / 30 / 18 |
+| 1 / 2 | elf | 0 | 181 | 13 / 29 / 70 | 4 / 9 / 24 |
+| 2 / 3 | halfling | 0 | 169 | 116 / 122 / 148 | 36 / 36 / 43 |
+| 3 / 4 | dwarf | -1 | 144 | 25 / 112 / 106 | 6 / 31 / 29 |
+| 4 / 5 | gnome | -1 | 166 | 20 / 72 / 132 | 6 / 19 / 29 |
+| 5 / 6 | dragonborn | -2 | 149 | 127 / 113 / 125 | 36 / 29 / 37 |
+| 6 / 7 | half-elf | 0 | 179 | 64 / 152 / 145 | 14 / 52 / 42 |
+| 7 / 8 | half-orc | 0 | 165 | 150 / 139 / 137 | 44 / 41 / 32 |
+| 8 / 9 | tiefling | -2 | 132 | 115 / 113 / 107 | 27 / 30 / 25 |
+
+**Seed 424242**
+
+| Site / source | Species | Z | Capacity | Site and species population | Fertile partnerships |
+|---|---|---:|---:|---:|---:|
+| 0 / 1 | human | 0 | 156 | 129 / 112 / 123 | 33 / 22 / 31 |
+| 1 / 2 | elf | 0 | 170 | 12 / 25 / 66 | 4 / 10 / 20 |
+| 2 / 3 | halfling | 0 | 170 | 95 / 135 / 143 | 21 / 34 / 42 |
+| 3 / 4 | dwarf | -1 | 170 | 28 / 109 / 155 | 5 / 32 / 53 |
+| 4 / 5 | gnome | -1 | 143 | 18 / 58 / 104 | 6 / 17 / 24 |
+| 5 / 6 | dragonborn | -2 | 146 | 126 / 120 / 116 | 40 / 25 / 26 |
+| 6 / 7 | half-elf | 0 | 170 | 81 / 135 / 126 | 25 / 35 / 31 |
+| 7 / 8 | half-orc | 0 | 166 | 141 / 140 / 129 | 31 / 36 / 30 |
+| 8 / 9 | tiefling | -2 | 143 | 108 / 109 / 101 | 31 / 23 / 20 |
+
+**Seed 20260919**
+
+| Site / source | Species | Z | Capacity | Site and species population | Fertile partnerships |
+|---|---|---:|---:|---:|---:|
+| 0 / 1 | human | 0 | 169 | 124 / 131 / 140 | 26 / 29 / 31 |
+| 1 / 2 | elf | 0 | 161 | 14 / 38 / 85 | 4 / 10 / 28 |
+| 2 / 3 | halfling | 0 | 171 | 101 / 133 / 144 | 30 / 38 / 40 |
+| 3 / 4 | dwarf | -1 | 140 | 34 / 117 / 116 | 10 / 42 / 38 |
+| 4 / 5 | gnome | -1 | 151 | 22 / 54 / 111 | 5 / 10 / 29 |
+| 5 / 6 | dragonborn | -2 | 143 | 129 / 121 / 123 | 35 / 35 / 32 |
+| 6 / 7 | half-elf | 0 | 166 | 61 / 132 / 118 | 17 / 38 / 35 |
+| 7 / 8 | half-orc | 0 | 181 | 164 / 147 / 154 | 46 / 28 / 39 |
+| 8 / 9 | tiefling | -2 | 131 | 81 / 104 / 102 | 17 / 28 / 28 |
+
+| Seed | Years | State SHA-256 | Events SHA-256 |
+|---|---:|---|---|
+| 0 | 100 | `78edbb1309150456d105cf7d873965341596ae87724e3bb6d2f260d8e0ec3020` | `518a9eed889b965325023e541396c893d0386ae74ae00b538325e4afef653ef5` |
+| 0 | 250 | `3aac8f703fd24a17927e38dc9614ef259f4ada63ed007871dd44dcb0bd2c3a0e` | `2d080f0a7ac72268818944c9917637052077851176daca7b9a2fb6968721ef03` |
+| 0 | 500 | `8e480092290630c211aea77ca5b7f585197aed6650872c308d85a2b38f29dc3b` | `b2e6473d61318ae5af128cbb0423f3ab98ae873ab06408e19b49d5f6e51a6fc2` |
+| 424242 | 100 | `987fa8b0a97a5a997b2e24198156a207b08027c89a5461dc614c56cade71af0f` | `f33879b72397f49a131837ca6e51aebb4090e30e961b239c73c7e79580af933d` |
+| 424242 | 250 | `188a42fa8e20f58885c0715998ae90df468e0b46dd1e002c3fd0c80db5f6537d` | `b3348727358b30d79594b5bb51ea294510b483b84e5dd7ecbe87ac3d1294348b` |
+| 424242 | 500 | `88cc27090dbe2fa5913d6217c27db55adf38c608fcc17a99c352419b1156ab03` | `a1950a9194bfdff91c2cdd26ea8280af59b158708bb40731b3507d121053c470` |
+| 20260919 | 100 | `dbd76996b6ea603265a1a1544ce80035dc366ae826acd1caeb26a94e21a74a30` | `7206745bb5d08a0d3f6d93b18131007983c943a6787b1525c8a3ad1a6a260027` |
+| 20260919 | 250 | `2a9fcc6e2de379f5a310af5ce459b8181fd991a7d81eaae1330c2edf4e2b2744` | `120534fb17cf5712b7df6193705043524cc2d2798324e5227e69f4f9b135997d` |
+| 20260919 | 500 | `caebed5f5c849d5b614766f6c121ce5bbbbc0fd5f53c390120dcb7c89bae76dd` | `a8bcf9a7e691d342e072f074bd3ecf4e41f761ec36e0fe63ee5a9f761d6dbc9a` |
+
+### Actual disk save and process restart
+
+For each seed, a dedicated child simulated 100 years, wrote/fsynced/closed a snapshot at the sole allowed artifact path, and exited. The parent compared the file's checkpoint with the continuous 100-year reference. A different child read the file from disk, advanced 150 years, and matched the continuous 250-year state/event bytes and hashes. Stdin supplied identity metadata, not the saved state. All three tests passed; the final consolidated report replaced each temporary snapshot in `finally`. No real game save was involved.
+
+| Seed | Exited saver PID | New resumed PID | Saved file bytes | Snapshot file SHA-256 | Result |
+|---|---:|---:|---:|---|---|
+| 0 | 32648 | 38676 | 675,186 | `e6cfa526b8f31ddc6d28cd78765215016f6e22644c096ceadec81744b9e1e4b6` | PASS |
+| 424242 | 32028 | 11292 | 677,878 | `190a750927f15f3396142f31ec2da99ae1e402e78bb1eaf17c54272b44783fc4` | PASS |
+| 20260919 | 40888 | 22744 | 627,452 | `4e512c84cf5a841c63d6c8dc308d4ddb26f6614a327da0549ce39899d604493a` | PASS |
+
+Snapshot file hashes include the saved envelope and are different from the state-only hashes. Saved state/event hashes equal the 100-year entries above; resumed state/event hashes equal the corresponding 250-year entries. This proves disk persistence and fresh-process continuation for the headless registry, not RMMZ native save integration.
+
+### Twenty-seed sweep and scope limits
+
+All seeds **1..20** completed 250 years with **zero annual extinctions for each of nine species**. The sweep's `zeroExtinctions`, `boundedPopulation` (each species below 1,500), and `serializedState` (each checkpoint below 15 MiB) gates passed. Total living population was **900 / 980.5 / 1,029 minimum / median / maximum**; largest annual site population was **187**, largest serialized state **1,919,810 bytes**, and slowest worker trajectory **1,913.499 ms**. Sweep timing is descriptive; the strict 30-second requirement applies to the six 500-year canonical trajectories. All twenty per-species population rows and annual curves remain in the schema-4 artifact.
+
+Finite-seed survival and exact repeats do not establish general equilibrium, future survival, or native-game performance. Repeats supply determinism evidence, not additional independent biological samples. Production plugins, catalogs, profiles, New Game registration, settlement/combat code, and real saves were not edited. Native RMMZ Playtest, F8 console inspection, screenshots, and production activation were **NOT RUN**. The required decision is resolution of the five literal packet discrepancies by the coordinator and implementation owner; the verifier did not silently substitute different metadata contracts.
+
+## Archived ASTRA10 independent HIST-09 production verification — 2026-09-23
+
+This section preserves the ASTRA10 findings for candidate `f532291b`. Its references to the then-current benchmark and artifact describe that earlier session. The reused `game/test_output/bench_species_biology.json` now contains the ASTRA11 schema-4 evidence above; ASTRA10 timing failures, metadata behavior, and migration diagnostics below are historical observations, not claims about the new candidate.
 
 The completed default verification observed **FAIL, exit code 1**: the independent contract suite has 18 passing checks and four failing production contracts, and both seed-0 trajectories exceeded the 30-second limit. All eight required mutation controls were detected. All six canonical trajectories, eighteen checkpoints, three full-process restart comparisons, and twenty sweep seeds completed. Biological and state-size gates passed for the canonical matrix; those results do not cancel the contract or timing failures. Astra is the verifier; Gemini remains the production implementation owner. No production repair, catalog change, New Game activation, or real-save migration is part of this verification.
 

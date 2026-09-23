@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-10 independent, bounded contracts for the immutable HIST-09 candidate.
+// ASTRA-11 independent, bounded contracts for the immutable HIST-09 candidate.
 // This file never edits production or writes artifacts. The benchmark owns the
 // long matrices, full-process save/restart test, sweep and consolidated report.
 const fs = require("fs");
@@ -13,14 +13,15 @@ const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const CANDIDATE = "f532291b8aecbd9899814ddf6c098bd3cee36342";
-const CANDIDATE_SHA256 = "06d0f7ac1596bea8d2432c48c899497e9d8b0cb67b12925e23958a5427af0012";
-const CANDIDATE_BYTES = 41439;
+const CANDIDATE = "8a40d2ed66da758fc95fc3c1e8205709336c54df";
+const CANDIDATE_SHA256 = "e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95";
+const CANDIDATE_BYTES = 45429;
 const LEGACY = "931b993e60545b24bddaa71ab433ebac8e967eb8";
 const LEGACY_NORMALIZED_SHA256 = "647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e";
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MODEL = { version: 1, defaultBaseline: 160, minimumScale: 0.1, minCapacity: 60, maxCapacity: 350 };
 const PROFILE_VERSION = "1.0.0-provisional-astra08";
+const PACKET_POLICY = "literal ASTRA-11 packet (clarification requested; no correction received)";
 const MUTANT_CHECKS = {
     no_density_pressure: "DENSITY_RATE",
     universal_constant: "LOCAL_CAPACITY",
@@ -32,6 +33,16 @@ const MUTANT_CHECKS = {
     migration_non_idempotence: "MIGRATION_IDEMPOTENCE"
 };
 const MUTANTS = Object.keys(MUTANT_CHECKS);
+const MUTANT_DIAGNOSTICS = {
+    no_density_pressure: /DENSITY_RATE: observed births differ from independent start-population probability oracle/,
+    universal_constant: /LOCAL_CAPACITY: observed births differ from independent start-population probability oracle/,
+    live_census_order_dependent: /ANNUAL_ORDER: observed births differ from independent start-population probability oracle/,
+    base_birth_1_bypass: /BIRTH_ONE: observed births differ from independent start-population probability oracle/,
+    unsupported_version_accepted: /VERSIONS: expected rejection, got success/,
+    malformed_capacity_accepted: /CAPACITY_REJECTION null: expected rejection, got success/,
+    migration_rewrites_custom_profile: /Migration rewrote caller's custom profiles/,
+    migration_non_idempotence: /Migration changed an already migrated v7 state/
+};
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const clone = value => JSON.parse(JSON.stringify(value));
 const text = value => JSON.stringify(value);
@@ -99,8 +110,8 @@ function mutate(source, mutant) {
         live_census_order_dependent: ["const startPop = startOfYearPopulation.get(mother.siteId);", "const startPop = site.population;"],
         base_birth_1_bypass: ["const effectiveBirthChance = profile.birthChance * scale;", "const effectiveBirthChance = profile.birthChance >= 1 ? 1 : profile.birthChance * scale;"],
         unsupported_version_accepted: ["check(state.version === 7, `unsupported demographics schema version: ${state.version}`);", "check(integer(state.version), 'integer schema required');"],
-        malformed_capacity_accepted: ["check(integer(s.historicalCapacity) && s.historicalCapacity >= cm.minCapacity && s.historicalCapacity <= cm.maxCapacity, \"invalid historicalCapacity\");", "// mutant: accept malformed site capacity"],
-        migration_rewrites_custom_profile: ["state.migratedFromVersion = 6;", "state.migratedFromVersion = 6; state.config.profiles = copy(DEFAULT_PROFILES);"],
+        malformed_capacity_accepted: ["check(s.historicalCapacity >= ABSOLUTE_MIN_CAPACITY && s.historicalCapacity <= ABSOLUTE_MAX_CAPACITY, \"historicalCapacity outside absolute envelope [60, 350]\");\n            check(integer(s.historicalCapacity) && s.historicalCapacity >= cm.minCapacity && s.historicalCapacity <= cm.maxCapacity, \"invalid historicalCapacity\");", "// mutant: accept malformed site capacity"],
+        migration_rewrites_custom_profile: ["candidate.migratedFromVersion = 6;", "candidate.migratedFromVersion = 6; candidate.config.profiles = copy(DEFAULT_PROFILES);"],
         migration_non_idempotence: ["if (state.version === 7) {\n            validate(state);\n            return state;\n        }", "if (state.version === 7) {\n            validate(state);\n            state.migrationAttempts = (state.migrationAttempts || 0) + 1;\n            return state;\n        }"]
     };
     return once(source, ...replacements[mutant]);
@@ -192,6 +203,57 @@ function checkBirths(loaded, state, label, conditions = {}) {
     assert(text(state.config.profiles) === profiles, `${label}: step rewrote base profiles`);
     loaded.api.validate(state);
     return { expected, observed: actualMothers(state, before) };
+}
+function profileMetadata(state) {
+    // Inspect existing metadata without inventing a required fingerprint field.
+    const registries = new Set(["factions", "sites", "people", "dynasties", "rulers", "partnerships", "events", "config"]);
+    return { top: clone(Object.fromEntries(Object.entries(state).filter(([key]) => !registries.has(key)))),
+        config: clone(Object.fromEntries(Object.entries(state.config).filter(([key]) => !["profiles", "names"].includes(key)))) };
+}
+function metadataLeaves(value, prefix = "", output = []) {
+    for (const [key, item] of Object.entries(value)) {
+        const field = prefix ? `${prefix}.${key}` : key;
+        if (item && typeof item === "object") metadataLeaves(item, field, output);
+        else output.push({ field, value: item });
+    }
+    return output;
+}
+function packetContracts(loaded) {
+    const { api, world } = loaded, checks = [], defaults = api.create(world), profiles = expectedProfiles();
+    profiles.human.birthChance = .123;
+    const custom = api.create(world, { profiles }), same = api.create(world, { profiles: clone(profiles) });
+    const varied = clone(profiles); varied.human.birthChance = .124;
+    const different = api.create(world, { profiles: varied });
+    const advertised = state => metadataLeaves(profileMetadata(state)).filter(entry =>
+        /profile/i.test(entry.field) && typeof entry.value === "string" && /^[a-f0-9]{64}$/i.test(entry.value));
+    const add = (id, expected, observed, fn, mapping = null) => {
+        try { fn(); checks.push({ id, status: "PASS", expected, observed, mapping }); }
+        catch (error) { checks.push({ id, status: "FAIL", expected, observed, mapping, diagnostic: `${id}: ${error.message}` }); }
+    };
+    add("PACKET_DEFAULT_PROFILE_TAG", "v1", defaults.demographicProfileVersion,
+        () => assert(defaults.demographicProfileVersion === "v1", "Promoted default tag differs from literal packet"), "Existing state.demographicProfileVersion");
+    add("PACKET_DEMOGRAPHIC_MODEL", 7, defaults.historyModelVersion,
+        () => assert(defaults.historyModelVersion === 7, "Existing historical model version differs from packet's demographic-model version"),
+        "Packet 'Demographic Model Version' mapped to the existing state.historyModelVersion; schema state.version is separately 7. No new state field is assumed.");
+    const modelMetadata = { capacityModelVersion: defaults.capacityModelVersion, capacityModel: clone(defaults.config.capacityModel) };
+    add("PACKET_CAPACITY_MODEL_IDENTITY", "local_density_v1", modelMetadata,
+        () => assert(metadataLeaves(modelMetadata).some(entry => entry.value === "local_density_v1"), "The persisted capacity model has no literal local_density_v1 identity"),
+        "Inspect existing root/config capacity-model metadata; no unspecified model/type/id property is invented.");
+    const claimed = api.create(world, { profiles, demographicProfileVersion: "v1" });
+    add("PACKET_CUSTOM_CANNOT_CLAIM_V1", "custom", claimed.demographicProfileVersion,
+        () => assert(claimed.demographicProfileVersion === "custom", "Modified biology can claim the packet's promoted v1 tag"), "Explicit modified profiles plus options.demographicProfileVersion='v1'");
+    const fingerprints = advertised(custom), repeatFingerprints = advertised(same), changedFingerprints = advertised(different);
+    add("PACKET_CUSTOM_PROFILE_FINGERPRINT", "Advertised deterministic SHA-256 profile fingerprint; equal profiles repeat, changed profiles differ",
+        { customMetadata: profileMetadata(custom), fingerprints, repeatFingerprints, changedFingerprints }, () => {
+            assert(custom.demographicProfileVersion === "custom", "Custom profile tag absent");
+            assert(fingerprints.length > 0, "No advertised 64-hex SHA-256 profile fingerprint in top-level or config metadata");
+            equal(fingerprints, repeatFingerprints, "Same custom profiles changed fingerprint");
+            assert(fingerprints.every(entry => {
+                const changed = changedFingerprints.find(item => item.field === entry.field);
+                return changed && changed.value !== entry.value;
+            }), "Changing custom biology did not change fingerprint");
+        }, "All existing top-level/config metadata is retained above; candidate fingerprint fields are discovered, not named by the verifier.");
+    return { policy: PACKET_POLICY, checks, observedMetadata: { defaults: profileMetadata(defaults), custom: profileMetadata(custom) } };
 }
 function runContracts(data, { mutant = null, only = null } = {}) {
     const started = performance.now(), checks = [], observations = [], tests = [];
@@ -351,7 +413,18 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         const before = text(s); let caught;
         try { api.migrate(s); } catch (e) { caught = e; }
         assert(caught && /historicalCapacity/.test(caught.message), "Migration accepted malformed legacy capacity");
-        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "Packet requires rejection and pure validate; failed-migration atomicity is reported separately.", fromVersion: 6, afterVersion: s.version });
+        observations.push({ id: "MIGRATION_FAILURE_ATOMICITY", status: text(s) === before ? "UNCHANGED" : "MUTATED_BEFORE_REJECTION", detail: "ASTRA-11 additionally enforces atomic failure through its mandatory MIGRATION_ATOMICITY check.", fromVersion: 6, afterVersion: s.version });
+    });
+    add("MIGRATION_ATOMICITY", "Malformed v6 migration rejects without changing original state or version", () => {
+        const changes = [s => s.sites[0].historicalCapacity = null, s => s.sites[0].historicalCapacity = 59,
+            s => s.sites[0].historicalCapacity = 351, s => s.sites[0].historicalCapacity = NaN,
+            s => s.sites[0].population++, s => s.config = null,
+            s => { s.people.find(p => p.parents.length).parents[0] = 999999; }];
+        for (const change of changes) {
+            const s = realLegacy(); change(s);
+            rejectUnchanged(() => api.migrate(s), s, "MIGRATION_ATOMICITY");
+            assert(s.version === 6, "Malformed migration changed source schema version");
+        }
     });
     for (const test of tests) {
         if (only && test.id !== only) continue;
@@ -360,27 +433,38 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         catch (error) { checks.push({ id: test.id, name: test.name, status: "FAIL", diagnostic: `${test.id}: ${error.message}`, elapsedMs: performance.now() - t }); }
     }
     assert(!only || checks.length === 1, "Unknown contract selector");
+    // Targeted mutant subprocesses exercise only their intended oracle. Literal
+    // packet mismatches must not create false-positive mutant detections.
+    const packet = only ? { policy: PACKET_POLICY, checks: [], observedMetadata: null } : packetContracts(loaded);
+    const commonStatus = checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS";
+    const packetStatus = only ? "NOT RUN" : packet.checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS";
     assert(text(world) === loaded.canonical && loaded.errors.length === 0, "Contract execution mutated canonical world or logged engine errors");
     verifySnapshot(data);
-    return { task: "DEUS-TSK-ASTRA-10", suite: "historical-carrying-capacity-contracts", status: checks.some(c => c.status === "FAIL") ? "FAIL" : "PASS",
+    return { task: "DEUS-TSK-ASTRA-11", suite: "historical-carrying-capacity-contracts", status: commonStatus === "FAIL" || packetStatus === "FAIL" ? "FAIL" : "PASS",
+        commonStatus, commonContractBasis: "Established implementation schema/metadata plus independent behavior, envelope, locality, migration and atomicity contracts; literal ASTRA-11 metadata acceptance is separate.",
+        packetStatus, packetPolicy: packet.policy, packetChecks: packet.checks, observedMetadata: packet.observedMetadata,
+        packetPassed: packet.checks.filter(c => c.status === "PASS").length, packetFailed: packet.checks.filter(c => c.status === "FAIL").length,
         candidate: { commit: CANDIDATE, sha256: CANDIDATE_SHA256, bytes: CANDIDATE_BYTES, sourceDigest: data.sourceDigest },
         legacyFixture: { commit: LEGACY, normalizedEngineSha256: LEGACY_NORMALIZED_SHA256, years: legacyState ? 40 : null },
         mutant, checks, observations, passed: checks.filter(c => c.status === "PASS").length, failed: checks.filter(c => c.status === "FAIL").length, wallMs: performance.now() - started };
 }
 function selftest(data = sourceBundle(), { mutants = true } = {}) {
+    const started = performance.now();
     const report = runContracts(data);
+    report.contractWallMs = report.wallMs;
     report.mutants = [];
     if (mutants) for (const name of MUTANTS) {
         const result = spawnSync(process.execPath, [__filename, `--mutant=${name}`], { cwd: ROOT, windowsHide: true, encoding: "utf8", timeout: 20000, maxBuffer: 4 * 1024 * 1024 });
         let observed; try { observed = JSON.parse(result.stdout); } catch (_) { /* classified below */ }
         const target = MUTANT_CHECKS[name], failed = observed && observed.checks && observed.checks.find(c => c.id === target && c.status === "FAIL");
-        const detected = !result.error && result.status === 1 && failed && failed.diagnostic.startsWith(`${target}:`);
+        const detected = !result.error && result.status === 1 && failed && MUTANT_DIAGNOSTICS[name].test(failed.diagnostic);
         report.mutants.push({ name, expectedContract: target, status: detected ? "PASS" : "FAIL", childExitCode: result.status,
             observedContract: failed || null, diagnostic: detected ? failed.diagnostic : String(result.error || result.stderr || result.stdout) });
     }
     report.mutantsPassed = report.mutants.filter(m => m.status === "PASS").length;
     report.mutantsFailed = report.mutants.filter(m => m.status === "FAIL").length;
-    report.status = report.failed || report.mutantsFailed ? "FAIL" : "PASS";
+    report.status = report.failed || report.packetFailed || report.mutantsFailed ? "FAIL" : "PASS";
+    report.wallMs = performance.now() - started;
     return report;
 }
 function main(args = process.argv.slice(2)) {

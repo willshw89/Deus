@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-10 regression proof against the exact HIST-09 candidate snapshot.
+// ASTRA-11 regression proof against the exact HIST-09 candidate snapshot.
 // Explicit TEST biology inputs exercise existing invariants. Stdout only.
 const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = require("crypto"), os = require("os");
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
-const CANDIDATE = "f532291b8aecbd9899814ddf6c098bd3cee36342";
-const CANDIDATE_SHA256 = "06d0f7ac1596bea8d2432c48c899497e9d8b0cb67b12925e23958a5427af0012";
-const CANDIDATE_BYTES = 41439;
+const CANDIDATE = "8a40d2ed66da758fc95fc3c1e8205709336c54df";
+const CANDIDATE_SHA256 = "e08ce6104669830e0388fe90631f8002f8547f77484f52263eea3aee34273e95";
+const CANDIDATE_BYTES = 45429;
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MUTANTS = ["dead_reproduce", "skip_succession", "corrupt_parents", "uniform_lifespan"];
@@ -526,7 +526,7 @@ function selftest(data, mutant = null) {
         checks.push({ name: `Negative control ${name}`, observed: "FAIL (expected), exit 1", reason: result.stderr.split(/\r?\n/)[0] });
     });
     verifySnapshot(data);
-    return { task: "DEUS-TSK-ASTRA-10", suite: "Historical demographics regression", status: "PASS",
+    return { task: "DEUS-TSK-ASTRA-11", suite: "Historical demographics regression", status: "PASS",
         provenance: provenance(data), checks, passed: checks.filter(c => c.status === "PASS").length };
 }
 
@@ -567,7 +567,7 @@ function main() {
         for (const key of ["population", "names", "events"]) assert(new Set(v.map(r => r[key])).size > 1, `Seed variance missing: ${key}`);
     }
     verifySnapshot(data);
-    const report = { task: "DEUS-TSK-ASTRA-10", suite: "Historical demographics regression", schemaVersion: 2, status: "PASS", createdAt: new Date().toISOString(), options,
+    const report = { task: "DEUS-TSK-ASTRA-11", suite: "Historical demographics regression", schemaVersion: 2, status: "PASS", createdAt: new Date().toISOString(), options,
         runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model }, provenance: provenance(data),
         testProfiles: profiles(), profileStatus: "Provisional proof inputs, not approved catalog biology or automatically enabled game behavior",
         methodology: { timings: "Only production api.step calls are included in annual/total simulation timings. Setup, heap sampling and verification reported separately.",
