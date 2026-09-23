@@ -1,6 +1,145 @@
 # UF_History
 
-## ASTRA11 independent HIST-09 revalidation — 2026-09-23
+## DEUS-TSK-ASTRA-12 independent HIST-09 verification ledger — 2026-09-23
+
+**Authoritative classification: FAIL, exit code 1; PASS on all behavioral, biological, migration-preservation, and timing gates.** The retained ASTRA-12 run has **3 passing and 2 failing reconciled metadata contracts**. `PACKET_CAPACITY_MODEL_IDENTITY` fails on caller-supplied model IDs. `PACKET_CUSTOM_CANNOT_CLAIM_V1` also fails on migrated custom-profile provenance, although its creation-normalization and spoof-rejection subchecks pass. The ASTRA-13 dispatch summary's four-pass/one-failure count omits this migration-tag failure; this ledger preserves the observed result without changing the test or evidence.
+
+ASTRA-13 is documentation consolidation against baseline `87766842ba742b40bb942da2b241a107e44ee0c0`, not a new benchmark or production repair. Astra's verification claim is released. Gemini remains coordinator and production implementation owner. This section supersedes the older candidate ledgers below for the frozen HIST-09 candidate; it does not certify later changes in other production systems.
+
+### Frozen candidate and retained evidence
+
+| Evidence | Identity |
+|---|---|
+| Frozen production candidate | `ebf2455af610e7a29f5393182e2b75d4eac35769` |
+| Production file | `game/js/plugins/DEUS_HistoricalDemographics.js` |
+| Production bytes / raw SHA-256 | 51,780 / `9efb6c69faee25c44ed3f97e067089d209126c3d3fde30e397ecc26850dedbdf` |
+| ASTRA-12 dispatch baseline | `596f237e4dd04500ebbfc3b66856b0b3ce691581` |
+| ASTRA-12 verifier commit | `62631babc86e407eaa0c0e9d939648850ce6ae20` |
+| Benchmark source-set digest | `3a792b9000afc5bcab5158a2e6cb05f18dc0172494423a62435e7d0599c59c5d` |
+| Benchmark harness raw SHA-256 | `ce1475f3b35f220a5f173e4396fb09aa537fffe7477592a5d5b060f3d99704b3` |
+| Capacity harness raw SHA-256 | `5ea2219d1665eaa3aab41048ed7a65d403e0584038b7b3afa14b5a13b9c3d75c` |
+| Final local artifact | `game/test_output/bench_species_biology.json`; task `DEUS-TSK-ASTRA-12`, schema 5, status `FAIL` |
+| Artifact creation timestamp | `2026-09-23T16:22:35.857Z` |
+| Artifact bytes / raw SHA-256 | 37,996,246 / `9e2a91d98759eccdb4093def6c456b223675a55058c23080a65316d2391e2d8f` |
+| Runtime | Node v24.19.0; AMD Ryzen 7 8845HS with Radeon 780M Graphics; sequential fresh worker processes |
+
+The benchmark loaded production plugins, plugin order, and catalog bytes from the immutable candidate snapshot, not later working-tree terrain changes. The retained report records matching working-source hashes at the start and end and `candidateUnchangedAtEnd: true`. ASTRA-13 rechecked the raw production, both verifier, and artifact hashes against this evidence. The aggregate 37,996,246-byte report contains 26 trajectories and annual telemetry; the **15 MiB gate applies to each serialized simulation state**, not this report. The final artifact is a consolidated report, not a transient restart snapshot, and remains unmodified.
+
+### Contract breakdown and failure evidence
+
+| Reconciled metadata contract | Result | Observed evidence |
+|---|---|---|
+| `PACKET_DEFAULT_PROFILE_TAG` | PASS | `profileKind: "promoted-default"`, `profileId: "v1"`, profile version and demographic tag `1.0.0-provisional-astra08`. |
+| `PACKET_DEMOGRAPHIC_MODEL` | PASS | Root `version` and `schemaVersion` 7; `historyModelId: "historical_demographics_v1"`, `historyModelVersion: 1`. Schema and model versions are distinct. |
+| `PACKET_CAPACITY_MODEL_IDENTITY` | FAIL | Default root/config IDs are `local_density_v1`, version 1. However, `create(world, { capacityModel: { id: "TEST_UNSUPPORTED_CAPACITY" } })` persists that unsupported config ID while the root retains the supported ID; `null` and numeric `1` also escape rejection/normalization. |
+| `PACKET_CUSTOM_CANNOT_CLAIM_V1` | FAIL | New custom profiles normalize all four tags and both explicit promoted-claim spoofs reject without mutation. Genuine v6 custom migration instead returns `profileKind: "custom"`, null ID/version, but `demographicProfileVersion: "legacy-v6"` instead of `"custom"`. |
+| `PACKET_CUSTOM_PROFILE_FINGERPRINT` | PASS | Independent Node SHA-256 oracle matches canonical parameter serialization; equal/reordered profiles and fresh processes repeat; changes to all nine parameter/range endpoints change the fingerprint. |
+
+Capacity failure evidence is in `suites.capacity.report.packetChecks`: the candidate's create merge retains caller `capacityModel.id` (production line 277), while numeric/version validation at lines 371–374 does not reject that config identity. The custom migration failure comes from the `legacy-v6` fallback at lines 557–558 and the custom classification at line 567. The populated 40-year v6 fixture is pinned to `931b993e60545b24bddaa71ab433ebac8e967eb8`; its records and biology survive migration. Its migrated profile hash is `3089a195939cf5d1977c0612e4c57ef380498ad98b65e07e8541d42c966b0790`. This is a metadata-normalization failure, separate from passing migration preservation, idempotence, rejection, and atomicity.
+
+The known default profile fingerprint is `e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48`; the custom human `birthChance: 0.123` profile is `aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f`. Ten stale/malformed-hash controls are rejected by the independent oracle. This establishes fingerprint generation, not production hash-integrity validation. Eight explicitly nongating validation probes remain accepted without mutation: forged root/config hashes, missing hashes, stale custom-biology hash, arbitrary custom kind/version, custom promoted ID/version, missing default ID/version, and missing schema field. They are recorded as coverage limitations, not added to or hidden inside the five contract counts.
+
+### Recorded execution and negative controls
+
+The ASTRA-12 default command was `node tools/bench_species_biology.js`; it completed the required coverage with exit 1. Its capacity child ran `node tools/test_historical_carrying_capacity.js --selftest --json` and exited 1. The benchmark self-test (`node tools/bench_species_biology.js --selftest`) passed. These are retained ASTRA-12 execution results; ASTRA-13 checked the documentation against the artifact without rerunning or replacing the matrix.
+
+| Check group | Recorded result |
+|---|---|
+| Benchmark self-test | 29 PASS / 0 FAIL, including corruption, partial/timeout evidence, repeat discrimination, and negative controls. |
+| Common capacity/behavior contracts | 23 PASS / 0 FAIL: fixed [60, 350] bounds, site locality, start-of-year/pre-death density, nonzero floor, no probability-1 bypass, immutable validation, and migration preservation/idempotence/rejection/atomic failure. |
+| Reconciled metadata contracts | 3 PASS / 2 FAIL; capacity suite exit 1. |
+| Capacity mutant controls | 8 PASS / 0 missed; every mutant child exited 1 for its intended assertion. |
+| Benchmark mutants | Four detected: `unseeded`, `invalid_lifespan`, `inverted_fertility`, `corrupt_parentage`; each intended child exit 1. |
+| Canonical matrix | Six complete 500-year trajectories, 18 checkpoints, all five behavioral/biological/size/timing gates PASS. |
+| Repeat comparisons | 3 PASS; exact state/event bytes, SHA-256 hashes, and annual curves agree across two fresh processes per seed. |
+| Disk save/process restart | 3 PASS; saved 100-year checkpoint and resumed 250-year checkpoint match continuous references. |
+| Sweep | 20/20 complete 250-year seeds; extinction, population, and state-size gates PASS. |
+| Older production regression suite | NOT RUN in ASTRA-12: still pinned to candidate `8a40d2e`, outside that dispatch's editable/required suites. Its ASTRA-11 results are not evidence for `ebf2455`. |
+
+The eight capacity controls map as follows: `no_density_pressure` → `DENSITY_RATE`; `universal_constant` → `LOCAL_CAPACITY`; `live_census_order_dependent` → `ANNUAL_ORDER`; `base_birth_1_bypass` → `BIRTH_ONE`; `unsupported_version_accepted` → `VERSIONS`; `malformed_capacity_accepted` → `CAPACITY_REJECTION`; `migration_rewrites_custom_profile` → `MIGRATION_PRESERVATION`; `migration_non_idempotence` → `MIGRATION_IDEMPOTENCE`. Mutations are confined to test copies in memory.
+
+### Canonical timing and population measurements
+
+The three seeds are 0, 424242, and 20260919, each run twice through 500 years. Only public `api.step` calls contribute to simulation time. Worker wall includes setup, observations, checkpoint validation/serialization and emission; parent process wall also includes startup, frozen-source loading, and final IPC parsing. The strict `<30 seconds` trajectory gate uses the larger worker/parent measurement. All six pass, without timing retries, averaging away failures, or forced GC. The complete suites/matrix/restarts/sweep took **141.3306056 seconds**.
+
+| Seed | Repeat | Simulation, s | Worker wall, s | Parent process wall, s | Worst annual step, ms |
+|---|---|---|---|---|---|
+| 0 | 1 | 9.4960919 | 10.1355400 | 10.5635031 | 65.7898 |
+| 0 | 2 | 9.7740068 | 10.3892180 | 10.8362765 | 73.7591 |
+| 424242 | 1 | 9.6068179 | 10.2548823 | 10.7032454 | 67.5845 |
+| 424242 | 2 | 9.7719429 | 10.4388844 | 10.8562837 | 71.2869 |
+| 20260919 | 1 | 9.4884942 | 10.1238287 | 10.5660253 | 72.6096 |
+| 20260919 | 2 | 10.3197181 | 10.9804155 | 11.3990842 | 77.5884 |
+
+All nine species survive each annual census, and each has active fertile partnerships at years 250 and 500. Canonical annual species population peaks at 177; across canonical and sweep runs the observed range is 7–187, below the strict 1,500 gate. Largest canonical state is **4,003,167 bytes (3.818 MiB)**. Maximum sampled heap delta is **67.553 MiB**; ordinary GC and retained test evidence affect this number, so it is not a leak measurement. The five matrix gates `zeroExtinctions`, `viableReproduction`, `boundedPopulation`, `serializedState`, and `trajectoryBudget` all pass.
+
+The table lists each unique checkpoint once; both repeats agree. Years are elapsed years (engine years 101/251/501). Births exclude 72 imported founders; deaths include founder deaths. Ruler triples are active / accession records / successions. All nine sites remain active with no abandoned or ruined sites and nine living rulers at every checkpoint.
+
+| Seed | Years | Living | Person records | Births / deaths | Rulers | Fertile partnerships | State bytes |
+|---|---|---|---|---|---|---|---|
+| 0 | 100 | 761 | 949 | 877 / 188 | 9 / 23 / 14 | 207 | 587,471 |
+| 0 | 250 | 984 | 2,566 | 2,494 / 1,582 | 9 / 57 / 48 | 277 | 1,835,742 |
+| 0 | 500 | 1,080 | 5,258 | 5,186 / 4,178 | 9 / 115 / 106 | 279 | 3,966,866 |
+| 424242 | 100 | 738 | 949 | 877 / 211 | 9 / 22 / 13 | 196 | 589,729 |
+| 424242 | 250 | 943 | 2,542 | 2,470 / 1,599 | 9 / 53 / 44 | 234 | 1,819,092 |
+| 424242 | 500 | 1,063 | 5,262 | 5,190 / 4,199 | 9 / 118 / 109 | 277 | 3,989,470 |
+| 20260919 | 100 | 730 | 898 | 826 / 168 | 9 / 21 / 12 | 190 | 545,863 |
+| 20260919 | 250 | 977 | 2,561 | 2,489 / 1,584 | 9 / 55 / 46 | 258 | 1,814,945 |
+| 20260919 | 500 | 1,093 | 5,317 | 5,245 / 4,224 | 9 / 109 / 100 | 300 | 4,003,167 |
+
+Year-500 species populations below substantiate the nine-species survival result. Local capacities are fertility inputs, not hard population ceilings; the artifact retains site capacities, yearly curves, and 100/250-year species evidence.
+
+| Species | Seed 0 | Seed 424242 | Seed 20260919 |
+|---|---|---|---|
+| human | 110 | 123 | 140 |
+| elf | 70 | 66 | 85 |
+| dwarf | 106 | 155 | 116 |
+| halfling | 148 | 143 | 144 |
+| gnome | 132 | 104 | 111 |
+| dragonborn | 125 | 116 | 123 |
+| half-elf | 145 | 126 | 118 |
+| half-orc | 137 | 129 | 154 |
+| tiefling | 107 | 101 | 102 |
+
+### Checkpoint SHA-256 identities
+
+These hashes belong to `ebf2455` and the recorded ASTRA-12 run. State metadata changes make state hashes differ from the archived ASTRA-11 candidate; matching events do not erase that distinction.
+
+| Seed | Years | State SHA-256 | Events SHA-256 |
+|---|---|---|---|
+| 0 | 100 | `b7927de369d1dd3c0e4d207068383c704f90ef5e43361e4743218f063f17e960` | `518a9eed889b965325023e541396c893d0386ae74ae00b538325e4afef653ef5` |
+| 0 | 250 | `90490bba048eccd031b6c9c70eadc2538c34fd070e6b0fc2bf6c43442f47dc4b` | `2d080f0a7ac72268818944c9917637052077851176daca7b9a2fb6968721ef03` |
+| 0 | 500 | `5ae11e0181a120f484bb7890987dff68b39674063c4bbd41b52f0dfbbbe4887b` | `b2e6473d61318ae5af128cbb0423f3ab98ae873ab06408e19b49d5f6e51a6fc2` |
+| 424242 | 100 | `b78cfb2f1710c2deb448f813ff702800e00b1b67286fe7f900a7b7b275af271c` | `f33879b72397f49a131837ca6e51aebb4090e30e961b239c73c7e79580af933d` |
+| 424242 | 250 | `848b53a80d562b5518f2e07e184597d907c628633f750ff0bcf77fa05e503a2b` | `b3348727358b30d79594b5bb51ea294510b483b84e5dd7ecbe87ac3d1294348b` |
+| 424242 | 500 | `afe4a9369e9dd2dcaaa3f8634165b2dc8699e7e64269d4d454bbf43c86e85a7e` | `a1950a9194bfdff91c2cdd26ea8280af59b158708bb40731b3507d121053c470` |
+| 20260919 | 100 | `afd8ffa57bdd7581fe5bb477679cc45a3102c7f0958dc355b9aa79e916a3cd19` | `7206745bb5d08a0d3f6d93b18131007983c943a6787b1525c8a3ad1a6a260027` |
+| 20260919 | 250 | `dcf9370c8a6eb35b21faba5c41126fa238a5572ec6137bce3068635d78f5d599` | `120534fb17cf5712b7df6193705043524cc2d2798324e5227e69f4f9b135997d` |
+| 20260919 | 500 | `145b41d8a3eff3ccbbbbd930e535c7e26606dcadb05b48ba2b99b9fd468581f7` | `a8bcf9a7e691d342e072f074bd3ecf4e41f761ec36e0fe63ee5a9f761d6dbc9a` |
+
+### Disk continuation and sweep evidence
+
+For each canonical seed, a dedicated child simulated 100 years, wrote/fsynced/closed the sole allowed JSON artifact path, and exited. The parent verified file identity and compared the saved state/events to the continuous 100-year reference. A new child read the file from disk and advanced 150 years; stdin conveyed identity metadata, not the saved state. Exact resumed state/event bytes and hashes matched the continuous 250-year reference. The final consolidated report replaced the temporary snapshot in `finally`. Raw checkpoint state/event strings were omitted after exact comparisons; the retained report carries their hashes, curves, comparison outcomes, and source identity.
+
+| Seed | Exited saver PID | Resumed PID | Snapshot bytes | Snapshot file SHA-256 | Restart process wall, ms | Result |
+|---|---|---|---|---|---|---|
+| 0 | 35608 | 40716 | 675,602 | `7d83a27d8906e744e57c847fe31d2293c99ab2d575716b09a133b82a3f67f965` | 3107.4944 | PASS |
+| 424242 | 9628 | 26816 | 678,293 | `1d2b459ab93ee6a8e094f9ba2547f73cf2175caa7db5243c0be22fb92a47b5b8` | 3196.5360 | PASS |
+| 20260919 | 39080 | 11280 | 627,868 | `40e23ff44e411583a6eab64a134d4160b329f3dfef6d540874e75ac52a5281db` | 3647.1163 | PASS |
+
+Snapshot file hashes cover the envelope and differ from state-only hashes. Saved state/event hashes equal the 100-year rows above; resumed hashes equal the 250-year rows. This covers headless registry persistence and process restart, not native RMMZ save integration.
+
+All seeds **1–20** completed the 250-year sweep. All nine species had zero annual extinctions; each remained below 1,500, and each 250-year serialized checkpoint remained below 15 MiB. Living totals were **900 / 980.5 / 1,029 minimum / median / maximum**; largest recorded annual site population **187**, largest state **1,920,192 bytes**, slowest worker trajectory **1,939.4427 ms**. The 250-year sweep timing is descriptive; the 30-second gate applies to canonical 500-year trajectories. The artifact contains every sweep seed's species populations and annual curves. In total, six canonical plus twenty sweep trajectories provide 8,000 annual steps and 38 checkpoints; repeated seeds test determinism, not additional independent biological samples.
+
+### ASTRA-13 consolidation and limits
+
+ASTRA-13 inspected the retained schema-5 artifact and verifier source, checked its counts/tables/hashes against this ledger, checked that the artifact and frozen production bytes remained unchanged, and confined the commit to this document and the designated `## DEUS-TSK-ASTRA-12` STATUS section. Both harnesses remain unchanged. Earlier ledgers below are archived observations of different candidates; their reused artifact paths no longer identify the current file contents.
+
+Native RMMZ F5/F8, NW.js, screenshots, gameplay, New Game activation, and real-save integration are **NOT RUN** for this documentation task; no gameplay or production-acceptance claim follows. Finite-seed survival is not proof of general equilibrium or future survival. Coordinator action remains resolution of the two observed metadata failures, or an explicit contract decision that preserves the historical test result. Astra did not change production, weaken acceptance checks, or rewrite evidence to match the dispatch summary. Verification claim released; no next implementation task started.
+
+## Archived ASTRA11 independent HIST-09 revalidation — 2026-09-23
+
+This section preserves the ASTRA-11 candidate `8a40d2e` findings. Its artifact identities and results describe that earlier run. The reused local JSON path now contains the ASTRA-12 schema-5 report documented above.
 
 **Authoritative classification: FAIL, exit code 1.** The completed default dispatch passed all 23 established behavior/model checks, the gates for all six canonical trajectories, three repeat comparisons, three disk save/restart comparisons, and the twenty-seed sweep. Five literal ASTRA-11 metadata requirements failed. Those mismatches remain acceptance failures; passing simulation behavior does not revise the packet. All requested execution coverage completed in **146.3548166 seconds** without a timing retry or production change.
 
