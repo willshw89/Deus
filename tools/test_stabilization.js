@@ -212,6 +212,10 @@ try {
     const { W, O, J, C, area } = S;
     const cancelled = [], died = [], events = { dying: 0, stabilized: 0, conscious: 0 };
     S.sandbox.UF.Events.on("jobs:failed", j => cancelled.push({ id: j.id, type: j.type, reason: j.reason, unit: j.assigned }));
+    // The Medicine check's result is read at jobs:done: UF_Jobs prunes finished jobs from its list (idle strolls
+    // finish by the dozen since the idle fallback), so the record may be gone by the time the check runs.
+    const stabilizeResults = [];
+    S.sandbox.UF.Events.on("jobs:done", j => { if (j.type === "stabilize") stabilizeResults.push({ id: j.id, result: j.result }); });
     S.sandbox.UF.Events.on("colonists:died", (u, cause) => died.push({ id: u.id, cause }));
     for (const k of Object.keys(events)) S.sandbox.UF.Events.on(`colonists:${k}`, () => events[k]++);
     check("plugins_load", !!J.handler("stabilize") && typeof C.stabilize === "function" && typeof C.woundedAtZero === "function" && typeof C.dying === "function" && C._internal.ROUND_TICKS === ROUND,
@@ -239,8 +243,7 @@ try {
     // C. The Medicine check beside the patient: stable, not healed; the rescuer is released.
     const n3 = R ? drive(S, 3000, () => (C.dying(F) && C.dying(F).stable) || F.data.dead || !C.unconscious(F)) : -1;
     const dS = C.dying(F);
-    const done = aid.length ? J.get(aid[0].id) : null;
-    const res = done && done.result;
+    const res = aid.length ? (stabilizeResults.find(r => r.id === aid[0].id) || {}).result || null : null;
     const wakeHours = dS && dS.wakeAt !== null ? (dS.wakeAt - S.now()) / HOUR : -1;
     check("medicine_check_stabilizes", n3 > 0 && !!dS && dS.stable === true && !F.data.dead && !!res && res.ok === true && res.dc === 10 && res.total === res.roll + 5 + 2 && res.total >= 10 && near(R, F) <= 1 && events.stabilized === 1,
         dS ? `after ${n3} updates: ${dS.stable ? "stable" : "not stable"}; check d20 ${res ? res.roll : "?"} + 5 (Wis 20) + 2 (Medicine) = ${res ? res.total : "?"} against DC 10; rescuer #${R ? R.id : "?"} at distance ${R ? near(R, F) : "?"}` : `patient ${F.data.dead ? "died" : "vanished"} after ${n3} updates`);

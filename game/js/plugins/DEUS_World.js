@@ -1413,8 +1413,14 @@
         emit("world:unitArrived", u);
     }
 
+    // A unit changed square (DEUS-TSK-FABLE-11): world:unitMoved(u, from, to); UF_Colonists hands it to UF.Conditions
+    // so a grappler that walked away lets go at once. Only real changes emit (the on-screen sync runs every frame).
+    function notifyMoved(u, fx, fy) {
+        if (u.x !== fx || u.y !== fy) emit("world:unitMoved", u, { x: fx, y: fy }, { x: u.x, y: u.y });
+    }
     function moveUnitToArea(u, ax, ay, x, y) {
         const from = { x: u.area.x, y: u.area.y };
+        const fx = u.x, fy = u.y;
         pathCache.delete(u.id);
         if (World.isDisplayed(u)) despawnUnitEvent(u);
         u.area = { x: ax, y: ay };
@@ -1423,6 +1429,7 @@
         u.y = y;
         if (World.isDisplayed(u) && !$gamePlayer.isTransferring()) spawnUnitEvent(u);
         emit("world:unitAreaChanged", u, from, { x: ax, y: ay });
+        notifyMoved(u, fx, fy);
     }
 
     /**
@@ -1594,6 +1601,7 @@
         u.y = viaCorner === 4 || viaCorner === 6 ? fy : ny;
         faceUnit(u, viaCorner || d);
         occMove(u, fx, fy);
+        notifyMoved(u, fx, fy);
         if (!viaCorner) p.i++;
         p.fails = 0;
         u.stuckFrames = 0;
@@ -1611,8 +1619,10 @@
         faceUnit(u, dir8Of(g.dx, g.dy));
         if (w.crossed) moveUnitToArea(u, w.ax, w.ay, w.x, w.y);
         else {
+            const fx = u.x, fy = u.y;
             u.x = w.x;
             u.y = w.y;
+            notifyMoved(u, fx, fy);
         }
         if (u.goal && goalReached(u)) arrive(u);
     }
@@ -1676,8 +1686,10 @@
             if (view && u.area.x === view.x && u.area.y === view.y && zOf(u) === view.z) {
                 const ev = $gameMap._events[EVENT_BASE + u.id];
                 if (!ev) continue;
+                const fx = u.x, fy = u.y;
                 u.x = ev.x;
                 u.y = ev.y;
+                notifyMoved(u, fx, fy);
                 u.dir = ev.direction();
                 u.dir8 = ev.dir8 ? ev.dir8() : u.dir;
                 if (u.goal) stepOnscreen(u, ev);
@@ -1975,6 +1987,9 @@
                 if (D && (tf[g.objects[i]] & T_DOOR) !== 0 && !(unit && D.canUnitPass(unit, D.at({ x: area.x, y: area.y, z }, x, y)))) return false;
                 if (window.UF && UF.Fire && typeof UF.Fire.isBurning === "function") {
                     if (UF.Fire.isBurning({ x: area.x, y: area.y, z }, x, y)) return false;
+                }
+                if (window.UF && UF.Fluid && typeof UF.Fluid.walkable === "function") {
+                    if (!UF.Fluid.walkable(area.x, area.y, x, y, { z, canSwim: !!(unit && unit.canSwim), lavaImmune: !!(unit && unit.lavaImmune) })) return false;
                 }
                 return true;
             };
@@ -2631,7 +2646,9 @@
                 if (s === "solid" || s === "open") return false;
             } else if (s !== 2 && s < 4) return false; // must be FLOOR or RAMP or STAIR
         }
-        if (z < 0 && window.UF && UF.Levels) {
+        if (window.UF && UF.Fluid && typeof UF.Fluid.walkable === "function") {
+            if (!UF.Fluid.walkable(ax, ay, x, y, { z, canSwim: opts.canSwim, lavaImmune: opts.lavaImmune })) return false;
+        } else if (z < 0 && window.UF && UF.Levels) {
             if (typeof UF.Levels.isLavaAt === "function") {
                 if (UF.Levels.isLavaAt(ax, ay, z, x, y)) return false;
             } else if (typeof UF.Levels.isFlooded === "function") {

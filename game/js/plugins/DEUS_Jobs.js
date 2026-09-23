@@ -920,6 +920,87 @@
         describe: job => `Eating ${lower(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`.trim()
     });
 
+    //-------------------------------------------------------------------------
+    // Lethal hazards (DEUS-TSK-FABLE-11): the world judged once, here, for the colonists' reflexes and for step().
+
+    const EXTINGUISH_ROLL_WORK = 120;   // drop and roll: two game seconds
+    const EXTINGUISH_WATER_WORK = 30;   // a douse beside water
+    /** The lethal hazard on a square, or null: { kind: "fire" | "lava" | "deep_water" } (UF_Fire's burning cells, a fire object, UF_Levels' lava or deep flood). */
+    function lethalHazardAt(area, x, y) {
+        if (!area) return null;
+        const z = zOf(area), level = { x: area.x, y: area.y, z };
+        const F = window.UF && UF.Fire;
+        if (F && typeof F.isBurning === "function") { try { if (F.isBurning(level, x, y)) return { kind: "fire" }; } catch (_) {} }
+        const O = Objects();
+        const t = O && typeof O.atIn === "function" ? O.atIn(level, x, y) : null;
+        // A fire object one can stand in (a burning floor, a fire pit tile); a hearth or kiln is impassable and never stood in.
+        if (t && t.passable === true && Array.isArray(t.tags) && (t.tags.includes("fire") || t.tags.includes("lit"))) return { kind: "fire" };
+        const L = window.UF && UF.Levels;
+        if (L) {
+            if (typeof L.isLavaAt === "function") { try { if (L.isLavaAt(area.x, area.y, z, x, y)) return { kind: "lava" }; } catch (_) {} }
+            if (typeof L.isFlooded === "function") {
+                let fl = null;
+                try { fl = L.isFlooded({ area: { x: area.x, y: area.y }, x, y, z }); } catch (_) {}
+                if (fl && fl.flooded) {
+                    if (fl.type === "lava") return { kind: "lava" };
+                    if (fl.deep === true || (fl.depth | 0) >= 2) return { kind: "deep_water" };
+                }
+            }
+        }
+        return null;
+    }
+    /** The lethal hazard a unit is in, or null: its square (where "cell"), or the flames on it (kind "burning", where "self"). */
+    function inLethalHazard(unit) {
+        if (!unit || !unit.data || !validLevel(unit)) return null;
+        const cell = lethalHazardAt(lv(unit), unit.x, unit.y);
+        if (cell) return Object.assign({ where: "cell" }, cell);
+        const E = window.UF && UF.Environment;
+        if ((E && typeof E.isBurning === "function" && E.isBurning(unit)) || (unit.data.burning && typeof unit.data.burning === "object")) return { kind: "burning", where: "self" };
+        return null;
+    }
+    /** The nearest square within `radius` the unit can stand on that holds no lethal hazard and nobody else: rings by distance, then y, then x. */
+    function safeCellNear(unit, radius = 8) {
+        const W = World();
+        if (!W || !unit || !validLevel(unit)) return null;
+        const area = lv(unit);
+        for (let d = 1; d <= radius; d++) {
+            const ring = [];
+            for (let dy = -d; dy <= d; dy++) for (let dx = -d; dx <= d; dx++) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
+                ring.push({ x: unit.x + dx, y: unit.y + dy });
+            }
+            ring.sort((a, b) => a.y - b.y || a.x - b.x);
+            for (const c of ring) {
+                if (!standableIn(area, c.x, c.y, unit.id)) continue;
+                if (lethalHazardAt(area, c.x, c.y)) continue;
+                if (typeof W.standerAt === "function" && W.standerAt(area.x, area.y, c.x, c.y, zOf(area))) continue;
+                return { area: copyArea(area), x: c.x, y: c.y, z: zOf(area) };
+            }
+        }
+        return null;
+    }
+    const waterBeside = unit => NEIGHBORS.concat(DIAGONALS).some(([dx, dy]) => isWaterIn(lv(unit), unit.x + dx, unit.y + dy));
+
+    // Emergency self-extinguish: a burning creature drops and rolls where it stands, or douses itself beside water.
+    // A reflex job: exempt from the hazard check in step() and from the colonists' need preemption.
+    define("extinguish", {
+        verb: "Extinguishing",
+        plan(job, unit) {
+            job.params.reflex = "extinguish";
+            job.params.method = waterBeside(unit) ? "water" : "roll";
+            job.target = { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) };
+            return { ok: true, stand: { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) } };
+        },
+        work: job => (job.params.method === "water" ? EXTINGUISH_WATER_WORK : EXTINGUISH_ROLL_WORK),
+        apply(job, unit) {
+            const E = window.UF && UF.Environment;
+            if (E && typeof E.extinguishUnit === "function") E.extinguishUnit(unit, job.params.method === "water" ? "water" : "rolled");
+            if (unit.data && unit.data.burning) delete unit.data.burning;
+            job.result = { extinguished: !(unit.data && unit.data.burning), method: job.params.method };
+        },
+        describe: job => (job.params.method === "water" ? "Dousing the flames" : "Dropping and rolling")
+    });
+
     define("sleep", {
         verb: "Sleeping",
         plan(job, unit) {
@@ -1417,6 +1498,12 @@
             fail(job, "the target is on another level");
             return;
         }
+        // Reflex (DEUS-TSK-FABLE-11): a worker in a lethal hazard (a burning square, lava, deep water, or aflame) is
+        // never kept at its job; it fails at once and the colonists' reflex takes over. Reflex jobs are exempt.
+        if (!(job.params && job.params.reflex) && inLethalHazard(unit)) {
+            fail(job, "emergency: lethal hazard");
+            return;
+        }
         if (!job.planned || (h.replanEvery > 0 && now() - job.plannedAt >= h.replanEvery)) {
             const wasStand = job.stand;
             if (!plan(job, unit)) return;
@@ -1528,6 +1615,9 @@
         standFor,
         standable: standableIn,
         isWaterAt: isWaterIn,
+        lethalHazardAt,
+        inLethalHazard,
+        safeCellNear,
         toolMultiplier,
         work: workOf,
         update,
