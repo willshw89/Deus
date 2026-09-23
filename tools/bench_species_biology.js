@@ -7,12 +7,12 @@ const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = r
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
-const BASE = "ebf2455af610e7a29f5393182e2b75d4eac35769";
-const DISPATCH_BASELINE = "596f237e4dd04500ebbfc3b66856b0b3ce691581";
-const TASK = "DEUS-TSK-ASTRA-12";
+const BASE = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
+const DISPATCH_BASELINE = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
+const TASK = "DEUS-TSK-ASTRA-14";
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const ENGINE_HASH = "9efb6c69faee25c44ed3f97e067089d209126c3d3fde30e397ecc26850dedbdf";
-const ENGINE_BYTES = 51780;
+const ENGINE_HASH = "d0a09bfda8ab63ff3eec5b362c63896ea0c3dbcb3aeeeb574c48c3113c995e4e";
+const ENGINE_BYTES = 52586;
 const DEFAULT_METADATA = Object.freeze({ version: 7, schemaVersion: 7, historyModelId: "historical_demographics_v1", historyModelVersion: 1,
     capacityModelId: "local_density_v1", capacityModelVersion: 1, profileKind: "promoted-default", profileId: "v1",
     profileVersion: "1.0.0-provisional-astra08", demographicProfileVersion: "1.0.0-provisional-astra08",
