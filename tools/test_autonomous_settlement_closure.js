@@ -378,11 +378,13 @@ function dayLine(S) {
     const d = S.P.evaluateDeficits(S.area);
     const kinds = S.P.list().reduce((m, p) => Object.assign(m, { [`${p.kind}:${p.state}`]: (m[`${p.kind}:${p.state}`] || 0) + 1 }), {});
     const open = S.J.list(j => j.state !== "done" && j.state !== "failed").length;
+    const projectJobs = S.J.list(j => j.state !== "done" && j.state !== "failed" && j.params && j.params.project);
+    const stuck = projectJobs.filter(j => !j.assigned).reduce((m, j) => Object.assign(m, { [`${j.type}${j.reason ? " (" + j.reason + ")" : ""}`]: (m[`${j.type}${j.reason ? " (" + j.reason + ")" : ""}`] || 0) + 1 }), {});
     const people = S.W.units().filter(u => u.data && u.data.kind === "colonist" && !u.data.dead);
     const asleep = people.filter(u => { const j = S.J.of(u.id); return j && j.type === "sleep"; }).length;
     const worst = people.reduce((m, u) => Math.max(m, (u.data.needs && u.data.needs.exhaustion) | 0), 0);
     const wild = S.O.findIn(S.area, { near: { x: SITE.x, y: SITE.y }, radius: 40, unsorted: true }).filter(f => f.type.id === "fruit_tree" || f.type.id === "berry_bush").length;
-    note(`${S.clockText()}: ${people.length} alive (${asleep} asleep, worst exhaustion ${worst}, ${S.rec.deaths.length} dead); food ${d ? d.food.current : "?"}/${d ? d.food.needed : "?"} days (carried ${d ? d.food.carriedLb : "?"} lb, stored ${d ? d.food.storedLb : "?"} lb), shelter ${d ? d.shelter.current : "?"}, beds ${d ? d.bed.current : "?"}/${d ? d.bed.needed : "?"}, storage ${d ? d.storage.current : "?"}/${d ? d.storage.needed : "?"}; projects ${JSON.stringify(kinds)}; ${open} live jobs; ${S.rec.preempted.length} survival interruptions; ${wild} wild food plants standing, ${S.regrown} regrown`);
+    note(`${S.clockText()}: ${people.length} alive (${asleep} asleep, worst exhaustion ${worst}, ${S.rec.deaths.length} dead); food ${d ? d.food.current : "?"}/${d ? d.food.needed : "?"} days (carried ${d ? d.food.carriedLb : "?"} lb, stored ${d ? d.food.storedLb : "?"} lb), shelter ${d ? d.shelter.current : "?"}, beds ${d ? d.bed.current : "?"}/${d ? d.bed.needed : "?"}, storage ${d ? d.storage.current : "?"}/${d ? d.storage.needed : "?"}; projects ${JSON.stringify(kinds)}; ${open} live jobs (${projectJobs.length} project jobs, untaken ${JSON.stringify(stuck)}); ${S.rec.preempted.length} survival interruptions; ${wild} wild food plants standing, ${S.regrown} regrown`);
 }
 const groupsClose = (a, b) => Object.keys(a).every(g => close(a[g], b[g], 1e-3));
 const days = n => Math.round(n * DAY_TICKS);
@@ -531,17 +533,25 @@ try {
 
     // H. Disturbance at dusk: every scrap of food is gone at 21:00, so the foraging that follows runs into bedtime.
     //    The brain notices at once (critical), a food cache forages the reserve back over the following days.
+    //    A food cache the maintenance rhythm already has in flight is the recovery vehicle (its forage phase reads
+    //    the deficit afresh every advance, and the brain opens no second cache beside it); otherwise a new one opens.
     drive(S, days(1), () => S.time.hour === 21 && S.time.minute === 0);
+    const wipedAt = S.clockText();
     let taken = 0;
     for (const it of I.all()) { const t = I.type(it.type); if (t && t.food) { taken += t.food.nutrition * it.count; I.remove(it.id); } }
     rebase(S);
     const dI = P.evaluateDeficits(S.area);
+    const bI = P.brain();
+    const foodRow = bI ? bI.candidates.find(c => c.kind === "food_cache") : null;
+    const activeAtWipe = projectsOf(S, "food_cache").find(p => p.state === "active") || null;
     const cachesBefore = projectsOf(S, "food_cache").length;
-    const nI = drive(S, days(4), () => { const d = P.evaluateDeficits(S.area); return projectsOf(S, "food_cache").slice(cachesBefore).some(p => p.state === "done") && d && d.food.deficit === 0; });
+    const recovered = () => (activeAtWipe && activeAtWipe.state === "done") || projectsOf(S, "food_cache").slice(cachesBefore).some(p => p.state === "done");
+    const nI = drive(S, days(4), () => { const d = P.evaluateDeficits(S.area); return recovered() && d && d.food.deficit === 0; });
     const dI2 = P.evaluateDeficits(S.area);
     const newCaches = projectsOf(S, "food_cache").slice(cachesBefore);
-    check("food_disturbance_recovers", taken > 0 && !!dI && dI.food.current === 0 && dI.food.critical === true && newCaches.length >= 1 && nI > 0 && !!dI2 && dI2.food.deficit === 0 && dI2.food.current >= 3 && dI2.population === 8,
-        `${Math.round(taken * 100) / 100} lb of nutrition removed at ${S.clockText()} -> food ${dI ? dI.food.current : "?"} days (critical ${dI ? dI.food.critical : "?"}); ${newCaches.length} new food cache(s) (${newCaches.map(p => p.state).join(", ")}); reserve ${dI2 ? dI2.food.current : "?"} days with ${dI2 ? dI2.population : "?"} alive after ${nI > 0 ? (nI / DAY_TICKS).toFixed(2) : ">4"} days`);
+    const noticed = activeAtWipe ? (!!foodRow && foodRow.inFlightProjects >= 1 && !foodRow.eligible) : (!!bI && !!bI.chosen && bI.chosen.kind === "food_cache" && newCaches.length >= 1);
+    check("food_disturbance_recovers", taken > 0 && !!dI && dI.food.current === 0 && dI.food.critical === true && noticed && recovered() && nI > 0 && !!dI2 && dI2.food.deficit === 0 && dI2.food.current >= 3 && dI2.population === 8 && newCaches.length <= 1,
+        `${Math.round(taken * 100) / 100} lb of nutrition removed at ${wipedAt} -> food ${dI ? dI.food.current : "?"} days (critical ${dI ? dI.food.critical : "?"}); ${activeAtWipe ? `cache #${activeAtWipe.id} already in flight kept foraging (${activeAtWipe.state}, brain in-flight ${foodRow ? foodRow.inFlightProjects : "?"}, no second opened: ${newCaches.length} new)` : `${newCaches.length} new food cache(s) (${newCaches.map(p => p.state).join(", ")})`}; reserve ${dI2 ? dI2.food.current : "?"} days with ${dI2 ? dI2.population : "?"} alive after ${nI > 0 ? (nI / DAY_TICKS).toFixed(2) : ">4"} days`);
 
     // I. Disturbance: the stockpile is lost. A new one is sited, built and registered.
     const dJ0 = P.evaluateDeficits(S.area);
@@ -572,9 +582,11 @@ try {
     //    rest was one night; nobody died.
     const survivalFailures = [...S.rec.survivalFailures];
     const reasons = S.rec.preempted.reduce((m, x) => Object.assign(m, { [x.reason]: (m[x.reason] || 0) + 1 }), {});
-    const unfinished = P.list(p => p.state === "active");
-    check("survival_interruptions_recovered", S.rec.preempted.length > 0 && survivalFailures.length === 0 && unfinished.length === 0,
-        `${S.rec.preempted.length} project jobs cancelled for survival needs (${JSON.stringify(reasons)}; e.g. ${S.rec.preempted[0] ? `${S.rec.preempted[0].type} at ${S.rec.preempted[0].at}` : "none"}), ${survivalFailures.length} counted as cell failures${survivalFailures.length ? ` (${survivalFailures[0]})` : ""}; ${P.list().length} projects, ${unfinished.length} still active`);
+    //    (A food cache in flight at the end is the daily foraging rhythm, not an unfinished build.)
+    const unfinished = P.list(p => p.state === "active" && p.kind !== "food_cache");
+    const cachesLive = projectsOf(S, "food_cache").filter(p => p.state === "active").length;
+    check("survival_interruptions_recovered", S.rec.preempted.length > 0 && survivalFailures.length === 0 && unfinished.length === 0 && cachesLive <= 1,
+        `${S.rec.preempted.length} project jobs cancelled for survival needs (${JSON.stringify(reasons)}; e.g. ${S.rec.preempted[0] ? `${S.rec.preempted[0].type} at ${S.rec.preempted[0].at}` : "none"}), ${survivalFailures.length} counted as cell failures${survivalFailures.length ? ` (${survivalFailures[0]})` : ""}; ${P.list().length} projects, ${unfinished.length} builds still active, ${cachesLive} food cache in flight`);
     const rests = S.rec.rests.slice(0, 8);
     const longest = S.rec.rests.reduce((m, r) => Math.max(m, r.hours), 0);
     check("long_rest_one_night", rests.length > 0 && longest <= 12,

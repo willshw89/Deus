@@ -48,6 +48,7 @@
         jobPriority: 0,          // UF_Jobs priority of posted jobs (0 = like any designation)
         recheckTicks: 60,        // a build square somebody stands on is looked at again after this
         retryTicks: 9000,        // a cell whose jobs failed three times waits this long
+        staleTicks: 600,         // an untaken haul or harvest job every colonist found undoable for this long is withdrawn (one game hour)
         logKept: 20,
         // The settlement brain (DEUS-TSK-FABLE-06)
         targetReserveDays: 3,    // food: colonist-days of nutrition kept within reach (24 colonist-days for 8 founders)
@@ -579,11 +580,50 @@
 
     const finished = job => !job || job.state === "done" || job.state === "failed";
 
-    // A job UF_Colonists cancelled for a survival need (supper, bedtime, exhaustion, unconsciousness) is the worker's
-    // interruption, not the cell's failure: it is simply posted again, and never pauses the cell.
-    const preempted = job => typeof job.reason === "string" && job.reason.startsWith("survival:");
+    // Not the cell's fault: a job UF_Colonists cancelled for a survival need (supper, bedtime, exhaustion,
+    // unconsciousness) is the worker's interruption; a job this planner withdrew because its target went away
+    // (`stale:`) is the world's change. Both are posted again from the world at the next advance and never pause a cell.
+    const preempted = job => typeof job.reason === "string" && (job.reason.startsWith("survival:") || job.reason.startsWith("stale:"));
+    /**
+     * Why an open, untaken job of the project can never be taken now, or null (DEUS-TSK-FABLE-08): its item is gone,
+     * carried, boxed or moved (a colonist ate or hauled it), its plant was picked by somebody else, or, for a haul or
+     * harvest, every colonist that looked at it found it undoable (UF_Jobs' dry run leaves `reason`) for staleTicks.
+     * Left alone, such jobs fill the project's haul and harvest slots and foraging stalls while food stands regrown.
+     */
+    function staleReason(job) {
+        if (!job || job.state !== "open" || job.assigned) return null;
+        const I = Items(), O = Objects();
+        if (job.type === "haul" && job.params && job.params.itemId !== undefined) {
+            const it = I ? I.get(job.params.itemId) : null;
+            if (!it || (it.count | 0) <= 0) return "the item is gone";
+            if (it.holder !== null && it.holder !== undefined) return "the item is carried";
+            if (it.container !== null && it.container !== undefined) return "the item is in a container";
+            if (!it.area || it.x !== job.target.x || it.y !== job.target.y) return "the item moved";
+        } else if (CLEAR_ACTIONS.includes(job.type) && O) {
+            const t = O.atIn(levelArea(job.target), job.target.x, job.target.y);
+            if (!t || !t.actions || !t.actions[job.type]) return `nothing to ${job.type} there`;
+        }
+        if ((job.type === "haul" || CLEAR_ACTIONS.includes(job.type)) && job.reason && job.params && Number.isFinite(job.params.postedAt) &&
+            now() - job.params.postedAt >= (config().staleTicks | 0)) return job.reason;
+        return null;
+    }
     function reconcile(p) {
         const J = Jobs();
+        if (!J) return;
+        // Withdraw stale jobs first; the sweep below then drops them like any finished job. A harvest target nobody
+        // could work waits retryTicks before it is chosen again (no churn on an unreachable tree); a gone item or
+        // plant needs no wait.
+        const withdraw = (jobId, harvestKey) => {
+            const job = J.get(jobId);
+            const why = staleReason(job);
+            if (!why) return;
+            J.cancel(job.id, `stale: ${why}`);
+            if (harvestKey && why === job.reason) p.failed[harvestKey] = { count: 3, reason: `stale: ${why}`, retryAt: now() + (config().retryTicks | 0) };
+            log(p, `withdrew ${job.type} at (${job.target.x},${job.target.y}): ${why}`);
+        };
+        for (const key of Object.keys(p.jobs)) withdraw(p.jobs[key], null);
+        for (const itemId of Object.keys(p.hauls)) withdraw(p.hauls[itemId].job, null);
+        for (const key of Object.keys(p.harvests)) withdraw(p.harvests[key].job, key);
         const note = (key, job) => {
             if (job && job.state === "failed" && !preempted(job)) {
                 const f = p.failed[key] || { count: 0, reason: null, retryAt: 0 };
@@ -619,7 +659,7 @@
         const J = Jobs();
         if (!J) return null;
         const cfg = config();
-        spec.params = Object.assign({ project: p.id, phase: p.phase }, spec.params || {});
+        spec.params = Object.assign({ project: p.id, phase: p.phase, postedAt: now() }, spec.params || {});
         if (spec.priority === undefined) spec.priority = cfg.jobPriority | 0;
         const job = J.create(spec);
         if (job) emit("projects:jobPosted", p, job);
@@ -727,7 +767,7 @@
         for (const cnd of candidates) {
             if (alive + posted >= cfg.harvestPerMaterial || openCount(p) >= cfg.maxOpenJobs) break;
             const key = cellKey(cnd.x, cnd.y);
-            if (p.harvests[key] || reservedAt(area, cnd.x, cnd.y)) continue;
+            if (p.harvests[key] || retrying(p, key) || reservedAt(area, cnd.x, cnd.y)) continue;
             if (J.list(j => !finished(j) && j.target && j.target.x === cnd.x && j.target.y === cnd.y && sameLevel(levelArea(j.target), area)).length) continue;
             const job = postJob(p, { type: cnd.action, target: targetOf(p, cnd.x, cnd.y), params: { material } });
             if (!job) continue;
@@ -786,7 +826,7 @@
         for (const cnd of candidates) {
             if (alive >= cfg.forageJobs || openCount(p) >= cfg.maxOpenJobs) break;
             const key = cellKey(cnd.x, cnd.y);
-            if (p.harvests[key] || reservedAt(area, cnd.x, cnd.y)) continue;
+            if (p.harvests[key] || retrying(p, key) || reservedAt(area, cnd.x, cnd.y)) continue;
             if (J.list(j => !finished(j) && j.target && j.target.x === cnd.x && j.target.y === cnd.y && sameLevel(levelArea(j.target), area)).length) continue;
             const job = postJob(p, { type: cnd.action, target: targetOf(p, cnd.x, cnd.y), params: { material: "food", forage: true } });
             if (!job) continue;
