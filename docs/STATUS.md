@@ -7,9 +7,51 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- **Fable**: Assigned `DEUS-TSK-FABLE-02` (Autonomous Settlement Blueprint & Project Deficit Manager in `DEUS_Projects.js` and `test_settlement_projects.js`). File reservation active on `game/js/plugins/DEUS_Projects.js` and `tools/test_settlement_projects.js`.
-- **Astra**: Assigned `DEUS-TSK-ASTRA-03` (Vertical Generation Multi-Layer Benchmark & Profiling Harness in `tools/bench_vertical_worldgen.js`). File reservation active on `tools/bench_vertical_worldgen.js`.
-- **Gemini (Coordinator & Full-Stack)**: Finalizing item handling interactions: right-click food consumption, cursor pick-and-place, ground drop, and colonist inventory transfer.
+- **Fable**: Assigned `DEUS-TSK-FABLE-03` (Autonomous Project Job Taking & Shelter Deconfliction in `DEUS_Colonists.js` and `test_autonomous_project_dispatch.js`). File reservation active on `game/js/plugins/DEUS_Colonists.js` and `tools/test_autonomous_project_dispatch.js`.
+- **Astra**: Idle / reservations cleared (`DEUS-TSK-ASTRA-03` closed as STOPPED — FAIL; backlog candidate `DEUS-TSK-ASTRA-04`).
+- **Gemini (Coordinator & Full-Stack)**: Coordinator Gate, editor safety oversight, item handling interactions complete.
+
+## DEUS-TSK-ASTRA-03 Closed — STOPPED / FAIL & Uncertified Artifact Quarantine (2026-09-22)
+- **Task ID**: `DEUS-TSK-ASTRA-03`
+- **Status**: `STOPPED — FAIL`
+- **Reason**: Node default benchmark still reports retained tracked objects/buffers after the authorized final synchronous major collection (`gc({ type: "major", execution: "sync", flavor: "last-resort" })`). Astra correctly obeyed the stop boundary under AGENTS.md Rule 10 (two failed fixes).
+- **Final Reported Failure (Node Default Benchmark)**:
+  ```text
+  survivingBuffers:     106
+  survivingBufferBytes: 4,143,980
+  survivingViews:       106
+  survivingObjects:     11
+  ```
+- **Harness Verification Checks**:
+  - Self-test: 22 PASS, 0 FAIL (or 23 PASS in extended suite).
+  - Held-reference mutation / deliberate retention check: PASS (harness successfully detects and fails on live unreleased buffers).
+  - Released-control allocation check: PASS.
+  - Syntax check: PASS (`node --check tools/bench_vertical_worldgen.js`).
+  - Path scope: PASS (strictly isolated to `tools/bench_vertical_worldgen.js`).
+  - Final NW-only acceptance: `NOT RUN` after failure.
+  - Final combined runtime comparison: `NOT RUN` after failure.
+  - Native F5/F8: `NOT REQUIRED` (headless measurement harness only; no gameplay behavior claimed).
+- **Commit Status**:
+  - Commit `5aa6e139ef4bd664771553784c6b6bb92136d4b0`: **UNCERTIFIED DIAGNOSTIC ARTIFACT — NOT AN ACCEPTED BASELINE**.
+  - Diff confirmed: modifies strictly `tools/bench_vertical_worldgen.js` (+603 lines). Zero production code modified.
+  - Retained in git history as an uncertified diagnostic tool; not to be merged, cherry-picked, or treated as an authoritative performance baseline.
+- **Quarantined Artifact**:
+  - `game/test_output/bench_vertical_worldgen.json`: **UNTRUSTED FOR ASTRA-03 ACCEPTANCE**.
+  - Authoritative evidence files preserved for this task: `bench_vertical_acceptance.json`, `bench_vertical_default.stderr.txt`, `bench_vertical_selftest.stdout.txt`, earlier `bench_vertical_nw.stdout.json`.
+- **Preserved Generation Findings**:
+  - Z+1: Open-air baseline ($65,536$ open cells, zero solid/floor terrain).
+  - Z+2: Open-air baseline ($65,536$ open cells, zero solid/floor terrain).
+  - Shaft connectivity: 0 completed three-level shaft chains in tested seeds.
+  - Cliff-link counts: Seed 0 = 6, Seed 424242 = 18, Seed 20260919 = 24.
+  - Historical NW-only baseline preserved as diagnostic data only: `PRE-FINAL-FIX NW BASELINE — NOT FINAL ASTRA-03 ACCEPTANCE`.
+- **Plateau Milestone Policy**:
+  - The Z+1/Z+2 plateau milestone is **NOT BLOCKED** by this harness failure.
+  - Failure in Node VM context garbage collection does not indicate production memory leakage in the NW.js runtime.
+  - Plateau work proceeds using `DEUS-TSK-ASTRA-02` underground baseline and direct generation correctness checks.
+- **New Backlog Task**:
+  - `DEUS-TSK-ASTRA-04 — Node VM retention diagnostic` logged in backlog (not auto-started; investigation into VM context lifetime vs tracked buffers).
+- **Canonical Underground Standard Preserved**:
+  - `DEUS-TSK-ASTRA-02` (`tools/bench_underground_gen.js`) remains the single accepted canonical underground baseline.
 
 ## DEUS-TSK-ASTRA-02 Closed — Underground Generation Baseline Profiler & Performance Standard (2026-09-22)
 - **Status**: `COMPLETED — PASS`
