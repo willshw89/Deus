@@ -7,9 +7,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- **Fable**: Assigned `DEUS-TSK-FABLE-03` (Autonomous Project Job Taking & Shelter Deconfliction in `DEUS_Colonists.js` and `test_autonomous_project_dispatch.js`). File reservation active on `game/js/plugins/DEUS_Colonists.js` and `tools/test_autonomous_project_dispatch.js`.
+- **Fable**: Idle / reservations cleared (`DEUS-TSK-FABLE-03` completed and verified; commit `ea4b332`).
 - **Astra**: Idle / reservations cleared (`DEUS-TSK-ASTRA-03` closed as STOPPED — FAIL; backlog candidate `DEUS-TSK-ASTRA-04`).
 - **Gemini (Coordinator & Full-Stack)**: Coordinator Gate, editor safety oversight, item handling interactions complete.
+
+## DEUS-TSK-FABLE-03 Closed — Minimal Autonomous Job-Taking Loop & Shelter Deconfliction (2026-09-22)
+- **Status**: `COMPLETED — PASS`
+- **Commit**: `ea4b332fed41981eeb0b822a2aee6c9a58d60e89`
+- **Scope**:
+  - `game/js/plugins/DEUS_Colonists.js`: Restored `scan()` as an event-driven loop with a 30-tick sweep over the cached colonist list (at most 4 idle decisions per sweep, at most one per 60 ticks per idle worker; zero per-frame full iterations). Implemented `decide(u)`: acute survival yields, then open project jobs (from active `UF.Projects` projects scored by culture priority, skill, and distance, skipping reserved/recently failed targets), then open designations, then stepping off reserved project footprints. Implemented `societyPlan(c)` deconfliction: drops legacy shelter, door, beds, and chest steps while `UF.Projects` is active; saved plan records remain untouched and restore if `UF.Projects` is disabled.
+  - `tools/test_autonomous_project_dispatch.js`: New headless test harness with 14 automated checks and 4 deliberate `--mutant` failure proofs.
+  - `docs/systems/UF_Colonists.md`: Updated API system documentation.
+- **Evidence**:
+  - `tools/test_autonomous_project_dispatch.js`: **14 passed, 0 failed (exit 0)**.
+  - Deliberate mutation suite (Rule 4 ability to fail verified):
+    - `--mutant=decide_null`: 6 checks fail (exit 1).
+    - `--mutant=ignore_projects`: 1 check fails (`project_jobs_preferred`, exit 1).
+    - `--mutant=no_bypass`: 2 checks fail (exit 1).
+    - `--mutant=per_frame`: 1 check fails (`idle_scan_bounded`, exit 1).
+  - Regression: `tools/test_settlement_projects.js`: **14 passed, 0 failed (exit 0)**.
+  - Engine snapshot suite: `colonists` (5 passed), `projects` (9 passed).
+  - Visual evidence: `game/test_output/dispatch_projects.site.png` (founders leaving camp to clear 5×5 project footprint).
+- **Identified Downstream Follow-ups**:
+  1. `DEUS_Jobs.js`: Transactional build order (`apply` consuming materials before placement) and legal partial-stack hauling weight splitting (`DEUS-TSK-FABLE-04`).
+  2. `DEUS_Projects.js`: Next-phase re-advance after phase transition (eliminate up to 3000-tick cadence latency) and bare berry bush site blockage rule.
+  3. `game/js/plugins.js`: Registration of `DEUS_Projects` pending editor close.
 
 ## DEUS-TSK-ASTRA-03 Closed — STOPPED / FAIL & Uncertified Artifact Quarantine (2026-09-22)
 - **Task ID**: `DEUS-TSK-ASTRA-03`
