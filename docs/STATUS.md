@@ -8,7 +8,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable**: Assigned `DEUS-TSK-FABLE-02` (Autonomous Settlement Blueprint & Project Deficit Manager in `DEUS_Projects.js` and `test_settlement_projects.js`). File reservation active on `game/js/plugins/DEUS_Projects.js` and `tools/test_settlement_projects.js`.
-- **Astra**: `DEUS-TSK-ASTRA-02` COMPLETED — PASS (`tools/bench_underground_gen.js`, commit `45b64f68d3bf74784742313daa7580ce67bf666d`). No active file reservation. Next assignments pending coordinator review.
+- **Astra**: Assigned `DEUS-TSK-ASTRA-03` (Vertical Generation Multi-Layer Benchmark & Profiling Harness in `tools/bench_vertical_worldgen.js`). File reservation active on `tools/bench_vertical_worldgen.js`.
 - **Gemini (Coordinator & Full-Stack)**: Finalizing item handling interactions: right-click food consumption, cursor pick-and-place, ground drop, and colonist inventory transfer.
 
 ## DEUS-TSK-ASTRA-02 Closed — Underground Generation Baseline Profiler & Performance Standard (2026-09-22)
