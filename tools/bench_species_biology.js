@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 "use strict";
 
-// ASTRA-08: caller-side biological calibration against frozen production source.
-// Annual probability inputs only: no source rewriting, method replacement,
-// synthetic people, catalog writes, or saves.
+// ASTRA-10: independent measurements of the frozen HIST-09 production candidate.
+// Production defaults and production density only; no caller fertility adjustment.
 const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = require("crypto"), os = require("os");
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
-const BASE = "931b993e60545b24bddaa71ab433ebac8e967eb8";
-const TASK = "DEUS-TSK-ASTRA-08";
+const BASE = "f532291b8aecbd9899814ddf6c098bd3cee36342";
+const TASK = "DEUS-TSK-ASTRA-10";
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const ENGINE_HASH = "647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e";
+const ENGINE_HASH = "06d0f7ac1596bea8d2432c48c899497e9d8b0cb67b12925e23958a5427af0012";
+const ENGINE_BYTES = 41439;
 const DEFAULT_OUTPUT = path.join(ROOT, "game/test_output/bench_species_biology.json");
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MUTANTS = ["unseeded", "invalid_lifespan", "inverted_fertility", "corrupt_parentage"];
@@ -22,7 +22,7 @@ const sha = value => crypto.createHash("sha256").update(value).digest("hex");
 const mean = values => values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
 const HARNESS_HASH = sha(fs.readFileSync(__filename));
 const WORKER_TIMEOUT_MS = 60000;
-const CALIBRATION = Object.freeze({ revision: "ASTRA-08 candidate 2", siteCapacity: 160, minimumFertilityScale: 0.1,
+const CALIBRATION = Object.freeze({ revision: "HIST-09 frozen production defaults", siteCapacity: 160, minimumFertilityScale: 0.1,
     maxSpeciesPopulation: 1500, maxStateBytes: 15 * 1024 * 1024, maxTrajectoryMs: 30000, maxSeedMs: 60000 });
 
 function profiles() {
@@ -61,17 +61,11 @@ function indexSites(state) {
 function advanceYear(api, state, config, sites, method = "step") {
     const schedule = {};
     for (const [id, site] of sites) {
-        const scale = densityScale(site.population), effectiveFertility = config[id].birthChance * scale;
-        schedule[id] = { siteId: site.id, population: site.population, capacity: CALIBRATION.siteCapacity, scale, effectiveFertility };
-        state.config.profiles[id].birthChance = effectiveFertility;
+        const scale = densityScale(site.population, site.historicalCapacity), effectiveFertility = config[id].birthChance * scale;
+        schedule[id] = { siteId: site.id, population: site.population, capacity: site.historicalCapacity, scale, effectiveFertility };
     }
-    try {
-        if (method === "simulate") api.simulate(state, 1);
-        else { assert(method === "step", "Unknown annual API"); api.step(state); }
-    } finally {
-        // Static windows/spacing and historical validation retain one contract.
-        for (const id of SPECIES) state.config.profiles[id].birthChance = config[id].birthChance;
-    }
+    if (method === "simulate") api.simulate(state, 1);
+    else { assert(method === "step", "Unknown annual API"); api.step(state); }
     return schedule;
 }
 
@@ -79,7 +73,7 @@ function parseArgs(args) {
     const out = { seeds: [0, 424242, 20260919], horizons: [100, 250, 500], runs: 2, json: null, selftest: false, worker: false, mutant: null };
     for (let i = 0; i < args.length; i++) {
         const key = args[i];
-        if (["--selftest", "--help", "--worker"].includes(key)) { out[key.slice(2)] = true; continue; }
+        if (["--selftest", "--help", "--worker", "--resume-worker", "--matrix-only"].includes(key)) { out[key.slice(2)] = true; continue; }
         if (key.startsWith("--mutant=")) { out.mutant = key.slice(9); assert(MUTANTS.includes(out.mutant), "Unknown mutant"); continue; }
         assert(["--seed", "--years", "--runs", "--json"].includes(key), `Unknown option ${key}`);
         const raw = args[++i]; assert(raw && !raw.startsWith("--"), `Missing value for ${key}`);
@@ -104,6 +98,8 @@ function validateProfiles(config) {
     }
 }
 function bundle() {
+    const inspected = fs.readFileSync(path.join(ROOT, PLUGIN));
+    assert(inspected.length === ENGINE_BYTES && sha(inspected) === ENGINE_HASH, "Candidate mismatch: inspected production file differs from ASTRA-10 dispatch");
     const files = {}, sources = [];
     const read = file => {
         const committed = spawnSync("git", ["show", `${BASE}:${file}`], { cwd: ROOT, encoding: "utf8", windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
@@ -121,7 +117,7 @@ function bundle() {
     assert(plugins.length === MODULES.length && plugins.every((p, i) => p.name === `DEUS_${MODULES[i]}`), "Bootstrap order changed");
     plugins.forEach(p => read(`game/js/plugins/${p.name}.js`));
     const catalog = JSON.parse(read("game/data/UF_WorldCatalog.json"));
-    read(PLUGIN); assert(sha(files[PLUGIN].replace(/\r\n/g, "\n")) === ENGINE_HASH, "Frozen engine hash mismatch");
+    read(PLUGIN); assert(Buffer.byteLength(files[PLUGIN]) === ENGINE_BYTES && sha(files[PLUGIN]) === ENGINE_HASH, "Frozen engine hash mismatch");
     return { files, sources, plugins, catalog };
 }
 const sourceDigest = data => sha(JSON.stringify(data.sources.map(s => [s.path, s.sha256])));
@@ -177,7 +173,7 @@ function checkDeath(person, profile) {
     if (person.causeOfDeath === "old_age") assert(age >= profile.lifespan[0], `Old-age death below lifespan minimum: ${person.species}`);
 }
 function checkState(state, config, originalGeometry) {
-    assert(state.version === 6 && state.domain === "historical" && state.currentYear === state.startYear + state.yearsSimulated, "Schema/clock mismatch");
+    assert(state.version === 7 && state.historyModelVersion === 1 && state.capacityModelVersion === 1 && state.domain === "historical" && state.currentYear === state.startYear + state.yearsSimulated, "Schema/clock mismatch");
     assert(geometry(state) === originalGeometry, "Site geometry changed");
     assert(JSON.stringify(state.config.profiles) === JSON.stringify(config), "Profile matrix changed during simulation");
     const byId = new Map(state.people.map(p => [p.id, p])), births = new Map(), residents = new Map(state.sites.map(s => [s.id, 0]));
@@ -276,7 +272,7 @@ function speciesMetrics(state, id, curves, index) {
         birthSpacing: stats(gaps), maxGeneration: people.reduce((n, p) => Math.max(n, p.generation), 0),
         extinct: living.length === 0, firstExtinctionYear: (curves.find(r => r.species[id].living === 0) || {}).years ?? null,
         growth: { ratioToFounders: living.length / founderCount, highGrowthFlag: highGrowth, diagnosticThresholdRatio: GROWTH_FLAG_RATIO,
-            carryingCapacity: CALIBRATION.siteCapacity, capacityCheck: "SOFT FERTILITY INPUT; NOT A HARD POPULATION CAP", trailingYears: dt, trailingLogGrowthPerYear: logRate,
+            carryingCapacity: state.sites[siteId].historicalCapacity, capacityCheck: "PRODUCTION SITE CAPACITY; NOT A HARD POPULATION CAP", trailingYears: dt, trailingLogGrowthPerYear: logRate,
             trailingDoublingYears: logRate !== null && logRate > 0 ? Math.log(2) / logRate : null,
             trailingBirths: row.species[id].born - earlier.born, trailingDeaths: row.species[id].dead - earlier.dead },
         replacement: { closedFemaleCohort: endedFemales.length, femaleOffspring: daughters.length, daughtersReachedMaturity: mature.length,
@@ -287,13 +283,16 @@ function speciesMetrics(state, id, curves, index) {
 }
 function trajectory(data, seed, horizons, progress = false, checkpointSink = null) {
     const start = performance.now(), loaded = load(data, seed), config = profiles(); validateProfiles(config);
-    const { api, world } = loaded, state = api.create(world, { profiles: config, eventLimit: 1000000 });
+    const { api, world } = loaded, state = api.create(world, { eventLimit: 1000000 });
+    assert(state.demographicProfileVersion === "1.0.0-provisional-astra08" && JSON.stringify(state.config.profiles) === JSON.stringify(config), "Promoted default profiles differ from independent expected matrix");
     assert(Object.values(state.factions).map(f => f.species).sort().join() === SPECIES.slice().sort().join(), "Canonical species roster changed");
     const originalGeometry = geometry(state), sites = indexSites(state), setupMs = performance.now() - start;
     const curves = [{ years: 0, species: census(state) }], checkpoints = [], tickMs = [];
     const heapBefore = process.memoryUsage().heapUsed; let peak = heapBefore, observationMs = 0, verificationMs = 0;
     for (let year = 1; year <= Math.max(...horizons); year++) {
-        const t = performance.now(); const density = advanceYear(api, state, config, sites); tickMs.push(performance.now() - t);
+        const density = Object.fromEntries([...sites].map(([id, s]) => [id, { siteId: s.id, population: s.population, capacity: s.historicalCapacity,
+            scale: densityScale(s.population, s.historicalCapacity), effectiveFertility: config[id].birthChance * densityScale(s.population, s.historicalCapacity) }]));
+        const t = performance.now(); api.step(state); tickMs.push(performance.now() - t);
         const observationStart = performance.now();
         const heapAfterTick = process.memoryUsage().heapUsed; peak = Math.max(peak, heapAfterTick);
         curves.push({ years: year, species: census(state), density }); observationMs += performance.now() - observationStart;
@@ -318,7 +317,9 @@ function trajectory(data, seed, horizons, progress = false, checkpointSink = nul
     }
     assert(JSON.stringify(world) === loaded.canonical && loaded.errors.length === 0, "Simulation changed canonical world or logged errors");
     verifySnapshot(data);
-    return { seed, sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH, setupMs, checkpoints, curves, tickMs, wallMs: performance.now() - start };
+    return { seed, workerPid: process.pid, sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH, setupMs, checkpoints, curves, tickMs,
+        sites: state.sites.map(s => ({ id: s.id, sourceSiteId: s.sourceSiteId, species: state.factions[s.factionId].species, z: s.z, capacity: s.historicalCapacity,
+            population: s.population, peakPopulation: s.peakPopulation })), wallMs: performance.now() - start };
 }
 function sameRun(a, b) {
     assert(a.seed === b.seed && a.checkpoints.length === b.checkpoints.length, "Repeat identity mismatch");
@@ -387,8 +388,7 @@ function acceptance(runs) {
         viableReproduction: mature.length ? mature.every(c => c.species.every(s => s.living > 0 && s.reproduction.activeFertileCouples > 0)) : null,
         boundedPopulation: runs.every(r => r.curves.every(c => SPECIES.every(id => c.species[id].living < CALIBRATION.maxSpeciesPopulation))),
         serializedState: checkpoints.every(c => c.stateBytes < CALIBRATION.maxStateBytes),
-        trajectoryBudget: runs.every(r => r.wallMs < CALIBRATION.maxTrajectoryMs),
-        seedBudget: [...new Set(runs.map(r => r.seed))].every(seed => runs.filter(r => r.seed === seed).reduce((n, r) => n + r.processWallMs, 0) < CALIBRATION.maxSeedMs)
+        trajectoryBudget: runs.every(r => r.wallMs < CALIBRATION.maxTrajectoryMs)
     };
     return Object.fromEntries(Object.entries(checks).map(([key, value]) => [key, value === null ? "NOT RUN" : value ? "PASS" : "FAIL"]));
 }
@@ -396,6 +396,11 @@ function table(headers, rows) {
     const grid = [headers, ...rows].map(r => r.map(String)), widths = headers.map((_, i) => Math.max(...grid.map(r => r[i].length)));
     const line = "+-" + widths.map(n => "-".repeat(n)).join("-+-") + "-+";
     return [line, ...grid.flatMap((r, i) => ["| " + r.map((v, j) => v.padEnd(widths[j])).join(" | ") + " |", ...(i ? [] : [line])]), line].join("\n");
+}
+function measuredMatrixChecks(matrix) {
+    const partials = matrix.incomplete.map(item => item.partial).filter(Boolean);
+    return { acceptance: matrix.runs.length ? acceptance(matrix.runs) : {},
+        partialAcceptance: partials.length ? acceptance(partials) : {} };
 }
 function runMutant(data, name) {
     const loaded = load(data, 0), config = profiles();
@@ -443,10 +448,10 @@ function selftest(data) {
     const a = trajectory(data, 0, [100]), b = trajectory(data, 0, [100]);
     check("Public step matches simulate and JSON continuation under the density schedule", () => {
         const { api, world } = load(data, 0), config = profiles();
-        let state = api.create(world, { profiles: config, eventLimit: 1000000 }), sites = indexSites(state);
+        let state = api.create(world, { eventLimit: 1000000 }), sites = indexSites(state);
         for (let year = 1; year <= 100; year++) {
             const expectedPopulation = sites.get("human").population, rates = advanceYear(api, state, config, sites, "simulate");
-            assert(rates.human.population === expectedPopulation && rates.human.effectiveFertility === config.human.birthChance * densityScale(expectedPopulation), "Density input uses the wrong census");
+            assert(rates.human.population === expectedPopulation && rates.human.effectiveFertility === config.human.birthChance * densityScale(expectedPopulation, sites.get("human").historicalCapacity), "Density input uses the wrong census");
             assert(JSON.stringify(state.config.profiles) === JSON.stringify(config), "Base profile was not restored");
             if (year === 50) { state = JSON.parse(JSON.stringify(state)); sites = indexSites(state); }
         }
@@ -464,9 +469,15 @@ function selftest(data) {
         trial.checkpoints[0].stateBytes = CALIBRATION.maxStateBytes;
         trial.wallMs = CALIBRATION.maxTrajectoryMs; trial.processWallMs = CALIBRATION.maxSeedMs;
         const result = acceptance([trial]);
-        assert(result.serializedState === "FAIL" && result.trajectoryBudget === "FAIL" && result.seedBudget === "FAIL", "Budget gates survived mutation");
+        assert(result.serializedState === "FAIL" && result.trajectoryBudget === "FAIL", "Budget gates survived mutation");
         trial.checkpoints[0].years = 250; trial.checkpoints[0].species[0].reproduction.activeFertileCouples = 0;
         assert(acceptance([trial]).viableReproduction === "FAIL", "Reproduction gate survived mutation");
+    });
+    check("Known failures survive an incomplete trajectory without inventing missing coverage", () => {
+        const partial = clone(a); partial.curves[partial.curves.length - 1].species.human.living = 0;
+        const result = measuredMatrixChecks({ runs: [], incomplete: [{ partial }] });
+        assert(Object.keys(result.acceptance).length === 0 && result.partialAcceptance.zeroExtinctions === "FAIL" &&
+            result.partialAcceptance.viableReproduction === "NOT RUN", "Incomplete evidence hid extinction or fabricated mature coverage");
     });
     check("Timed-out worker preserves validated checkpoints and missing coverage", () => {
         const result = { ...a, checkpoint: a.checkpoints[0] }; delete result.checkpoints;
@@ -517,86 +528,161 @@ function writeReport(file, report) {
     assert(relative && !relative.startsWith("..") && !path.isAbsolute(relative) && file.endsWith(".json"), "JSON output must be a .json file under game/test_output (protects code/catalog/saves)");
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
 }
+function resumeWorker(data, options) {
+    const input = JSON.parse(fs.readFileSync(0, "utf8"));
+    assert(input.sourceDigest === sourceDigest(data) && input.harnessSha256 === HARNESS_HASH, "Restart snapshot source identity mismatch");
+    const loaded = load(data, options.seeds[0]), state = JSON.parse(input.state);
+    assert(state.seed === options.seeds[0] && state.yearsSimulated === 100, "Restart must begin at the requested 100-year checkpoint");
+    loaded.api.validate(state);
+    const start = performance.now(), config = profiles(), originalGeometry = geometry(state);
+    for (let i = 0; i < 150; i++) loaded.api.step(state);
+    const text = checkState(state, config, originalGeometry), events = JSON.stringify(state.events);
+    loaded.api.validate(state);
+    assert(JSON.stringify(loaded.world) === loaded.canonical && loaded.errors.length === 0, "Restart mutated canonical world or logged errors");
+    console.log(JSON.stringify({ workerPid: process.pid, years: state.yearsSimulated, sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH,
+        stateSha256: sha(text), eventsSha256: sha(events), evidence: { state: text, events }, simulationAndVerificationMs: performance.now() - start }));
+}
+function runWorker(data, seed, horizons) {
+    const args = [__filename, "--worker", "--seed", String(seed)];
+    if (horizons.length === 1) args.push("--years", String(horizons[0]));
+    const start = performance.now();
+    const child = spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", windowsHide: true,
+        timeout: WORKER_TIMEOUT_MS, maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "inherit"] });
+    let result = null, parseError = null;
+    try { result = workerOutput(child.stdout || "", !child.error && child.status === 0); } catch (error) { parseError = error.message; }
+    const processWallMs = performance.now() - start;
+    if (result && result.sourceDigest !== sourceDigest(data)) { parseError = "Worker snapshot differs from parent baseline"; result = null; }
+    if (result) result.processWallMs = processWallMs;
+    const failed = child.error || child.status !== 0 || parseError;
+    return { result, processWallMs, failure: failed ? { seed, exitCode: child.status, code: child.error ? child.error.code : "WORKER_FAILURE",
+        diagnostic: parseError || (child.error && child.error.message) || "Worker exited nonzero", timeoutMs: WORKER_TIMEOUT_MS } : null };
+}
+function runRestart(data, run) {
+    const a = run.checkpoints.find(c => c.years === 100), b = run.checkpoints.find(c => c.years === 250);
+    if (!a || !b) return { seed: run.seed, status: "NOT RUN", reason: "100/250-year checkpoints required" };
+    const started = performance.now(), child = spawnSync(process.execPath, [__filename, "--resume-worker", "--seed", String(run.seed)], {
+        cwd: ROOT, encoding: "utf8", windowsHide: true, timeout: WORKER_TIMEOUT_MS, maxBuffer: 256 * 1024 * 1024,
+        input: JSON.stringify({ state: a.evidence.state, sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH }) });
+    if (child.error || child.status !== 0) return { seed: run.seed, status: "FAIL", exitCode: child.status, diagnostic: child.stderr || String(child.error) };
+    try {
+        const resumed = JSON.parse(child.stdout);
+        assert(resumed.workerPid !== run.workerPid && resumed.years === 250, "Restart did not use a new process or correct horizon");
+        assert(resumed.sourceDigest === sourceDigest(data) && resumed.harnessSha256 === HARNESS_HASH, "Restart candidate differs");
+        assert(resumed.evidence.state === b.evidence.state && resumed.evidence.events === b.evidence.events && resumed.stateSha256 === b.stateSha256 && resumed.eventsSha256 === b.eventsSha256,
+            "Full-process restart changed state/event bytes or hashes");
+        return { seed: run.seed, status: "PASS", sourceProcessExited: true, sourcePid: run.workerPid, resumedPid: resumed.workerPid,
+            stateSha256: resumed.stateSha256, eventsSha256: resumed.eventsSha256, processWallMs: performance.now() - started };
+    } catch (error) { return { seed: run.seed, status: "FAIL", diagnostic: error.message }; }
+}
+function suite(script, json = false) {
+    const started = performance.now(), child = spawnSync(process.execPath, [path.join(__dirname, script), "--selftest", ...(json ? ["--json"] : [])],
+        { cwd: ROOT, encoding: "utf8", windowsHide: true, timeout: 120000, maxBuffer: 32 * 1024 * 1024 });
+    let report = null, parseError = null;
+    if (json) { try { report = JSON.parse(child.stdout); } catch (error) { parseError = error.message; } }
+    return { command: `node tools/${script} --selftest${json ? " --json" : ""}`, status: !child.error && child.status === 0 && !parseError ? "PASS" : "FAIL",
+        exitCode: child.status, wallMs: performance.now() - started, report, stdout: json && report ? undefined : child.stdout,
+        stderr: child.stderr, diagnostic: parseError || (child.error && child.error.message) || null };
+}
+function sweepSummary(runs) {
+    const populations = runs.map(r => r.checkpoints[0].living).sort((a,b) => a-b), n = populations.length;
+    return { completedSeeds: runs.map(r => r.seed), living: { min: n ? populations[0] : null,
+        median: n ? (populations[Math.floor((n - 1) / 2)] + populations[Math.floor(n / 2)]) / 2 : null, max: n ? populations[n-1] : null },
+        largestSitePopulation: n ? Math.max(...runs.flatMap(r => r.sites.map(s => s.peakPopulation))) : null,
+        slowestTrajectoryMs: n ? Math.max(...runs.map(r => r.wallMs)) : null,
+        species: SPECIES.map(id => ({ species: id, extinctSeeds: runs.filter(r => r.curves.some(c => c.species[id].living === 0)).map(r => r.seed),
+            extinctionFrequency: n ? runs.filter(r => r.curves.some(c => c.species[id].living === 0)).length / n : null,
+            populationsBySeed: runs.map(r => ({ seed: r.seed, living: r.checkpoints[0].species.find(s => s.species === id).living })) })) };
+}
 function main() {
     const started = performance.now(), options = parseArgs(process.argv.slice(2));
-    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--json game/test_output/name.json] [--selftest] [--mutant=<name>]"); return; }
+    if (options.help) { console.log("Usage: node tools/bench_species_biology.js [--seed N] [--years 100|250|500] [--runs N] [--matrix-only] [--json game/test_output/name.json] [--selftest] [--mutant=<name>]\nDefault: independent contracts, regression self-test, 3-seed/2-repeat 500-year matrix, full-process restarts, and 20-seed 250-year sweep."); return; }
     const data = bundle();
     if (options.mutant) { runMutant(data, options.mutant); return; }
+    if (options["resume-worker"]) { resumeWorker(data, options); return; }
+    if (options.worker) {
+        const result = trajectory(data, options.seeds[0], options.horizons, true,
+            checkpoint => console.log(JSON.stringify({ type: "checkpoint", result: checkpoint })));
+        delete result.checkpoints; console.log(JSON.stringify({ type: "complete", result })); return;
+    }
     if (options.selftest) {
         const report = selftest(data); report.checks.forEach(c => console.log(`${c.status || c.observed}: ${c.name}${c.diagnostic ? " - " + c.diagnostic : ""}`));
         console.log(`Self-test PASS: ${report.passed} checks`); if (options.json) writeReport(options.json, report); return;
     }
-    if (options.worker) {
-        const result = trajectory(data, options.seeds[0], options.horizons, true,
-            checkpoint => console.log(JSON.stringify({ type: "checkpoint", result: checkpoint })));
-        delete result.checkpoints;
-        console.log(JSON.stringify({ type: "complete", result })); return;
+    const full = !options["matrix-only"] && options.seeds.join() === "0,424242,20260919" && options.horizons.join() === "100,250,500" && options.runs === 2;
+    const report = { task: TASK, schemaVersion: 3, status: "INCOMPLETE", createdAt: new Date().toISOString(), options, fullDispatchCoverageRequested: full,
+        runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model, trialIsolation: "One fresh Node process per trajectory; sequential measurements" },
+        provenance: { baselineCommit: BASE, expectedEngineSha256: ENGINE_HASH, observedEngineSha256: sha(data.files[PLUGIN]), candidateBytes: ENGINE_BYTES,
+            sourceDigest: sourceDigest(data), harnessSha256: HARNESS_HASH, sources: data.sources },
+        expectedProductionProfiles: profiles(), gates: { maxSpeciesPopulation: 1500, maxStateBytes: 15 * 1024 * 1024, maxTrajectoryMs: 30000 },
+        methodology: { density: "Unmodified production step; default profiles from create(world). Harness records but never applies the independent start-of-year density oracle.",
+            timing: "Only api.step is timed as annual simulation. Trajectory wall includes setup, observations, checkpoint validation/serialization and pipe emission. Parent processWallMs also includes startup/source loading/IPC parsing. No forced GC.",
+            sweep: "Seeds1..20 at250 years are descriptive coverage, not an additional extinction-free gate; all counts and observed failures retained.",
+            state: "Complete person/partnership/event registries; event cap asserted unused. Exact serialized bytes compared before evidence strings are omitted from report.",
+            restart: "100-year JSON checkpoint retained by parent; originating child exits before a different child parses it and executes150 further years." },
+        suites: {}, matrix: { runs: [], incomplete: [], repeatChecks: [], acceptance: {} }, restarts: [], sweep: { status: "NOT RUN", runs: [], incomplete: [] }, totalWallMs: 0 };
+    const output = options.json || DEFAULT_OUTPUT;
+    function persist() {
+        report.totalWallMs = performance.now() - started;
+        report.matrix.coverage = options.seeds.flatMap(seed => Array.from({length: options.runs}, (_, i) => options.horizons.map(years => ({seed, repeat:i+1, years,
+            status: [...report.matrix.runs, ...report.matrix.incomplete.map(f=>f.partial).filter(Boolean)].some(r => r.seed===seed && r.repeat===i+1 && r.checkpoints.some(c=>c.years===years)) ? "MEASURED" : "NOT RUN"})))).flat();
+        writeReport(output, JSON.parse(JSON.stringify(report, (key,value) => key === "evidence" ? undefined : value)));
     }
-    const runs = [], repeatChecks = [];
+    if (full) {
+        try { report.suites.benchmark = selftest(data); } catch (error) { report.suites.benchmark = {status:"FAIL", diagnostic:error.stack}; }
+        report.suites.capacity = suite("test_historical_carrying_capacity.js", true);
+        report.suites.regression = suite("test_production_history_demographics.js", true);
+        console.error(`Contracts ${report.suites.capacity.status}; regression ${report.suites.regression.status}; benchmark self-test ${report.suites.benchmark.status}`);
+    }
+    persist();
     for (const seed of options.seeds) {
-        let first;
-        for (let i = 0; i < options.runs; i++) {
-            console.error(`Running seed ${seed}, repeat ${i + 1}/${options.runs}, horizons ${options.horizons.join("/")}`);
-            const args = [__filename, "--worker", "--seed", String(seed)];
-            if (options.horizons.length === 1) args.push("--years", String(options.horizons[0]));
-            const childStarted = performance.now();
-            const child = spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", windowsHide: true,
-                timeout: WORKER_TIMEOUT_MS, maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "inherit"] });
-            const failed = child.error || child.status !== 0;
-            const result = workerOutput(child.stdout || "", !failed);
-            if (result) { result.repeat = i + 1; result.processWallMs = performance.now() - childStarted; assert(result.sourceDigest === sourceDigest(data), "Worker snapshot differs from parent baseline"); }
-            if (failed) {
-                const diagnostic = child.error ? child.error.message : `exit ${child.status}`;
-                const report = failureReport(options, runs, [...repeatChecks, { seed, status: "INCOMPLETE" }], result,
-                    { seed, repeat: i + 1, code: child.error ? child.error.code : "WORKER_EXIT", message: diagnostic,
-                        exitCode: child.status, signal: child.signal, timeoutMs: WORKER_TIMEOUT_MS }, performance.now() - started, data);
-                const output = options.json || DEFAULT_OUTPUT; writeReport(output, report);
-                console.error(`Failure evidence: ${output}`);
-                throw new Error(`Worker failed seed ${seed}: ${diagnostic}`);
+        let first = null, repeatFailure = null, completed = 0;
+        for (let repeat = 1; repeat <= options.runs; repeat++) {
+            console.error(`Matrix seed ${seed}, repeat ${repeat}/${options.runs}, horizons ${options.horizons.join("/")}`);
+            const item = runWorker(data, seed, options.horizons);
+            if (item.result) item.result.repeat = repeat;
+            if (item.failure) report.matrix.incomplete.push({...item.failure, repeat, processWallMs:item.processWallMs, partial:item.result});
+            else {
+                completed++; report.matrix.runs.push(item.result);
+                if (first) { try { sameRun(first,item.result); } catch(error) { repeatFailure=error.message; } }
+                else first=item.result;
             }
-            assert(result.sourceDigest === sourceDigest(data), "Worker snapshot differs from parent baseline");
-            if (first) sameRun(first, result); else first = result;
-            runs.push(result);
+            persist();
         }
-        repeatChecks.push({ seed, repeats: options.runs, status: options.runs > 1 ? "PASS" : "NOT RUN" });
-        runs.filter(r => r.seed === seed).forEach(r => r.checkpoints.forEach(c => { delete c.evidence; }));
+        report.matrix.repeatChecks.push({seed, repeats:completed, status:repeatFailure ? "FAIL" : completed!==options.runs ? "INCOMPLETE" : options.runs>1 ? "PASS" : "NOT RUN", diagnostic:repeatFailure});
+        if (full && first) report.restarts.push(runRestart(data,first));
+        for (const run of report.matrix.runs.filter(r=>r.seed===seed)) for (const c of run.checkpoints) delete c.evidence;
+        persist();
     }
-    const summaries = aggregate(runs, options.horizons);
-    const checks = acceptance(runs), status = Object.values(checks).includes("FAIL") ? "FAIL" : "PASS";
-    const report = { task: TASK, schemaVersion: 2, status, createdAt: new Date().toISOString(), options,
-        runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model, trialIsolation: "One fresh Node process per seed/repeat, run sequentially" },
-        provenance: { baselineCommit: BASE, expectedEngineSha256: ENGINE_HASH, observedEngineSha256: sha(data.files[PLUGIN]),
-            baselineContentMatches: true, sourceDigest: sourceDigest(data),
-            sources: data.sources.map(s => ({ ...s, workingSha256AtEnd: sha(fs.readFileSync(path.join(ROOT, s.path))) })), harnessSha256: HARNESS_HASH },
-        proposedProfiles: profiles(), calibration: CALIBRATION, acceptance: checks,
-        profileStatus: "ASTRA-08 caller-supplied calibration experiment; production engine and catalogs unchanged",
-        methodology: { years: "Elapsed years; checkpoints 100/250/500 correspond to engine years 101/251/501. Each trial advances one continuous trajectory.",
-            timing: "Unmodified public step(state) plus caller density schedule; one full engine validation annually. Self-test compares exact state/event bytes with simulate(state,1), including JSON continuation. Setup, census, heap sampling, checkpoint verification/hash/serialization and IPC are outside simulation timings; processWallMs includes worker startup/source loading/IPC and parsing.",
-            memory: "Process heap before simulation and after each annual tick. Peak is a sampled high-water delta, affected by ordinary GC and retained prior checkpoint evidence; no forced GC or leak claim.",
-            lifespan: "All-cause completed deaths, old-age deaths, founders, and born-during-run cohorts separated. Living ages are right-censored; founders enter at18-40. Completed-death means are not life expectancy. Population standard deviation.",
-            replacement: "Closed female cohorts exclude founders; closure is death or passage beyond reproductive window. Daughter counts and maturity survival are descriptive, with unresolved daughter censoring, not R0/equilibrium proof.",
-            growth: `Each species has exactly one asserted site. Before an annual step, birthChance=base*max(0.1,1-startPopulation/${CALIBRATION.siteCapacity}); base probabilities are restored afterward. This is a caller-side soft-capacity scenario, not resource ecology or a hard population cap. Annual population must remain <1500. A >${GROWTH_FLAG_RATIO}x-founder flag is retained as a diagnostic.`,
-            pairing: "The production pair search already spans the full configured reproductive window. Seven calibrated profiles use wider static windows. One-pass checkpoint indexes group people by species and prospective mates by site/10-year age bin for diagnostics; production pairing and kinship are unchanged. No resurrection, imports, or synthetic rescue births.",
-            samples: "Extinction fractions and pooled biological metrics use unique seeds only; repeats verify determinism. Three seeds cannot establish a general risk probability.",
-            events: "Event limit1,000,000; checkpoint asserts no events discarded so full event bytes can be compared. People, partnerships, and events remain complete. No migration, wars, or additional environmental shocks." },
-        profileAssessment: { extinctionFree: summaries.every(h => h.species.every(s => s.extinctions === 0)) ? "PASS" : "FAIL",
-            growthDiagnostic: summaries.some(h => h.species.some(s => s.highGrowthSeeds > 0)) ? "FLAGGED" : "NOT FLAGGED",
-            carryingCapacity: "HARNESS SOFT CAPACITY INPUT", equilibrium: "FINITE-SEED OBSERVATIONS ONLY", approvedForIntegration: false },
-        repeatChecks, summaries, runs, totalWallMs: performance.now() - started };
+    Object.assign(report.matrix, measuredMatrixChecks(report.matrix));
+    report.matrix.processTotalsBySeed = options.seeds.map(seed=>({seed, elapsedMs:[...report.matrix.runs,...report.matrix.incomplete].filter(r=>r.seed===seed).reduce((sum,r)=>sum+r.processWallMs,0)}));
+    if (report.matrix.runs.length) report.matrix.summaries=aggregate(report.matrix.runs,options.horizons);
+    if (full) {
+        report.sweep.status="INCOMPLETE";
+        for(let seed=1;seed<=20;seed++) {
+            console.error(`Sweep seed ${seed}/20, 250 years`);
+            const item=runWorker(data,seed,[250]);
+            if(item.failure)report.sweep.incomplete.push({...item.failure,processWallMs:item.processWallMs,partial:item.result});
+            else { for(const c of item.result.checkpoints)delete c.evidence; report.sweep.runs.push(item.result); }
+            persist();
+        }
+        report.sweep.summary=sweepSummary(report.sweep.runs);
+        report.sweep.status=report.sweep.runs.length===20?"COMPLETE":"INCOMPLETE";
+    }
     verifySnapshot(data);
-    const output = options.json || DEFAULT_OUTPUT; writeReport(output, report);
-    const final = summaries[summaries.length - 1];
-    const pop = (id, years) => { const h = summaries.find(s => s.years === years); if (!h) return "NOT RUN"; return h.species.find(s => s.species === id).populationsBySeed.map(s => s.living).join("/"); };
-    console.log(table(["Species", "Pop100", "Pop250", "Pop500", "Dead lifespan min/max/mean", "Extinct seeds", "Rulers", "Successions", "Dynasty changes"], final.species.map(s => {
-        const d = s.lifespan.allCompleted;
-        return [s.species, pop(s.species, 100), pop(s.species, 250), pop(s.species, 500), d.count ? `${d.min}/${d.max}/${d.mean.toFixed(2)}` : "NO DEATHS", `${s.extinctions}/${final.uniqueSeeds}`, s.activeRulers, s.successions, s.dynastyChanges];
-    })));
-    console.log(table(["Years", "Mean simulation ms", "Worst year ms", "State bytes min/max", "Peak heap MiB"], summaries.map(s => {
-        const c = runs.flatMap(r => r.checkpoints.filter(c => c.years === s.years));
-        return [s.years, mean(c.map(r => r.timing.simulationMs)).toFixed(3), Math.max(...c.map(r => r.timing.worstYearMs)).toFixed(3), `${s.stateBytes.min}/${s.stateBytes.max}`, (Math.max(...c.map(r => r.heap.sampledPeakDelta)) / 1048576).toFixed(2)];
-    })));
-    console.log(`${status} (selected coverage); wall ${(report.totalWallMs / 1000).toFixed(3)} s; JSON: ${output}`);
-    console.log(`Acceptance: ${JSON.stringify(checks)}. Scenario only; production integration is not claimed.`);
-    if (status === "FAIL") process.exitCode = 1;
+    report.provenance.sources=data.sources.map(s=>({...s,workingSha256AtEnd:sha(fs.readFileSync(path.join(ROOT,s.path)))}));
+    report.provenance.candidateUnchangedAtEnd = sha(fs.readFileSync(path.join(ROOT,PLUGIN))) === ENGINE_HASH;
+    const explicitFailure=!report.provenance.candidateUnchangedAtEnd || Object.values(report.suites).some(s=>s.status==="FAIL") ||
+        Object.values(report.matrix.acceptance).includes("FAIL") || Object.values(report.matrix.partialAcceptance).includes("FAIL") ||
+        report.matrix.repeatChecks.some(s=>s.status==="FAIL") || report.restarts.some(r=>r.status==="FAIL");
+    const incomplete=report.matrix.incomplete.length>0 || (full && (report.sweep.status!=="COMPLETE" || report.restarts.length!==3 || report.restarts.some(r=>r.status!=="PASS")));
+    report.status=explicitFailure?"FAIL":incomplete?"INCOMPLETE":full?"PASS":"PASS WITH NON-BLOCKING LIMITATIONS";
+    report.coverageLimitation=full?null:"Selected matrix coverage only; full ASTRA-10 dispatch acceptance is NOT RUN.";
+    persist();
+    console.log(table(["Seed","Repeat","Trajectory s","Living500","State bytes500"],report.matrix.runs.map(r=>{const c=r.checkpoints.find(c=>c.years===500);return[r.seed,r.repeat,(r.wallMs/1000).toFixed(3),c?c.living:"NOT RUN",c?c.stateBytes:"NOT RUN"];})));
+    console.log(`Acceptance: ${JSON.stringify(report.matrix.acceptance)}`);
+    console.log(`Repeat checks: ${JSON.stringify(report.matrix.repeatChecks)}; restarts: ${report.restarts.map(r=>`${r.seed}:${r.status}`).join(", ")}`);
+    if(report.sweep.summary)console.log(`Sweep: ${JSON.stringify(report.sweep.summary)}`);
+    console.log(`${report.status}; total wall ${(report.totalWallMs/1000).toFixed(3)} s; JSON: ${output}`);
+    if(report.status==="FAIL"||report.status==="INCOMPLETE")process.exitCode=1;
 }
 if (require.main === module) { try { main(); } catch (error) { console.error(`FAIL: ${error.stack || error}`); process.exitCode = 1; } }

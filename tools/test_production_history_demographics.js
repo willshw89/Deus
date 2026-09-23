@@ -1,18 +1,21 @@
 #!/usr/bin/env node
 "use strict";
 
-// HIST-01 / minimum HIST-02. Real Year-1 terrain/faction/founder bootstrap;
-// explicit TEST biology inputs, not approved production catalog defaults.
+// ASTRA-10 regression proof against the exact HIST-09 candidate snapshot.
+// Explicit TEST biology inputs exercise existing invariants. Stdout only.
 const fs = require("fs"), path = require("path"), vm = require("vm"), crypto = require("crypto"), os = require("os");
 const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
-const OUTPUT = path.join(ROOT, "game/test_output/bench_production_history.json");
+const CANDIDATE = "f532291b8aecbd9899814ddf6c098bd3cee36342";
+const CANDIDATE_SHA256 = "06d0f7ac1596bea8d2432c48c899497e9d8b0cb67b12925e23958a5427af0012";
+const CANDIDATE_BYTES = 41439;
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
 const MUTANTS = ["dead_reproduce", "skip_succession", "corrupt_parents", "uniform_lifespan"];
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const sha = value => crypto.createHash("sha256").update(value).digest("hex");
+const HARNESS_SHA256 = sha(fs.readFileSync(__filename));
 const clone = value => JSON.parse(JSON.stringify(value));
 const mean = values => values.reduce((a, b) => a + b, 0) / values.length;
 
@@ -64,16 +67,32 @@ function mutate(source, mutant) {
     return once(source, "return state.config.profiles[person.species].lifespan;", "return [55, 85];");
 }
 function sourceBundle() {
-    const files = {}, read = file => (files[file] = fs.readFileSync(path.join(ROOT, file), "utf8"));
+    const inspected = fs.readFileSync(path.join(ROOT, PLUGIN));
+    assert(inspected.length === CANDIDATE_BYTES && sha(inspected) === CANDIDATE_SHA256, "Production candidate mismatch before regression tests");
+    const files = {}, sources = [], read = file => {
+        const result = spawnSync("git", ["show", `${CANDIDATE}:${file}`], { cwd: ROOT, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
+        assert(!result.error && result.status === 0 && Buffer.isBuffer(result.stdout), `Cannot read frozen source ${file}`);
+        const bytes = result.stdout;
+        files[file] = bytes.toString("utf8");
+        sources.push({ path: file, loadedFrom: `${CANDIDATE}:${file}`, bytes: bytes.length, sha256: sha(bytes) });
+        return files[file];
+    };
     const list = {};
     vm.runInNewContext(read("game/js/plugins.js"), list, { timeout: 1000 });
     const plugins = list.$plugins.filter(p => p.status && MODULES.includes(p.name.replace(/^DEUS_/, "")));
     assert(plugins.length === MODULES.length && plugins.every((p, i) => p.name === `DEUS_${MODULES[i]}`), "Canonical bootstrap plugin order changed");
     for (const p of plugins) read(`game/js/plugins/${p.name}.js`);
     const catalog = JSON.parse(read("game/data/UF_WorldCatalog.json"));
-    read(PLUGIN); read("tools/test_production_history_demographics.js");
-    return { files, plugins, catalog, sources: Object.keys(files).map(file => ({ path: file, sha256: sha(files[file]) })) };
+    read(PLUGIN);
+    const candidate = sources.find(s => s.path === PLUGIN);
+    assert(candidate.bytes === CANDIDATE_BYTES && candidate.sha256 === CANDIDATE_SHA256, "Committed production candidate mismatch");
+    return { files, plugins, catalog, sources };
 }
+function verifySnapshot(data) {
+    for (const s of data.sources) assert(Buffer.byteLength(data.files[s.path]) === s.bytes && sha(data.files[s.path]) === s.sha256, `Frozen source changed: ${s.path}`);
+}
+const provenance = data => ({ candidateCommit: CANDIDATE, candidateSha256: CANDIDATE_SHA256,
+    candidateBytes: CANDIDATE_BYTES, harnessSha256: HARNESS_SHA256, sources: data.sources });
 
 function load(data, seed, mutant = null) {
     const ns = {}, errors = [], math = Object.create(Math);
@@ -119,11 +138,13 @@ function jsonSafe(value, ancestors = new Set()) {
     for (const key of Object.keys(value)) jsonSafe(value[key], ancestors);
     ancestors.delete(value);
 }
-const siteGeometry = state => state.sites.map(s => ({ id: s.id, factionId: s.factionId, area: s.area, x: s.x, y: s.y, z: s.z, zRange: s.zRange, foundedYear: s.foundedYear }));
+const siteGeometry = state => state.sites.map(s => ({ id: s.id, factionId: s.factionId, area: s.area, x: s.x, y: s.y, z: s.z, zRange: s.zRange, foundedYear: s.foundedYear, historicalCapacity: s.historicalCapacity }));
 
 function integrity(s, expectedProfiles, originalSites) {
     jsonSafe(s);
     assert(s.version === 7 && s.domain === "historical" && s.currentYear === s.startYear + s.yearsSimulated, "Schema/year invariant");
+    assert(s.historyModelVersion === 1 && s.capacityModelVersion === 1 && s.config.capacityModel.version === 1, "History/capacity model version mismatch");
+    assert(s.demographicProfileVersion === "custom" && JSON.stringify(s.config.profiles) === JSON.stringify(expectedProfiles), "Custom biological profiles changed or mislabeled");
     assert(JSON.stringify(siteGeometry(s)) === JSON.stringify(originalSites), "Site geometry changed/teleported");
     for (const name of ["people", "sites", "dynasties", "rulers"]) {
         const ids = s[name].map(r => r.id);
@@ -133,6 +154,7 @@ function integrity(s, expectedProfiles, originalSites) {
     const dynasties = new Map(s.dynasties.map(x => [x.id, x]));
     const residents = new Map(s.sites.map(x => [x.id, 0]));
     for (const site of s.sites) {
+        assert(Number.isSafeInteger(site.historicalCapacity) && site.historicalCapacity >= 60 && site.historicalCapacity <= 350, "Invalid historical capacity");
         assert(Number.isInteger(site.z) && site.z >= -2 && site.z <= 2 && Array.isArray(site.zRange) && site.zRange.length === 2 &&
             site.zRange.every(z => Number.isInteger(z) && z >= -2 && z <= 2) && site.zRange[0] <= site.z && site.z <= site.zRange[1], "Invalid volumetric Z");
     }
@@ -217,6 +239,7 @@ function run(data, seed, years, mutant = null) {
     const after = process.memoryUsage().heapUsed, v = performance.now();
     const checked = integrity(s, biology, originalSites);
     api.validate(s);
+    verifySnapshot(data);
     assert(JSON.stringify(world) === loaded.canonical, "Standalone simulation changed canonical Year-1 world");
     if (years >= 100) {
         assert(s.people.length > initial.people.length, "Proof produced no births");
@@ -245,6 +268,9 @@ function quietProfiles() {
 }
 function smallWorld(loaded, species = "human", age = 25) {
     const world = clone(loaded.world), f = world.factions.list.find(f => f.species === species);
+    // Synthetic TEST households use fixed seed 1. Their required birth draws
+    // are checked below under density pressure; canonical runs keep their seeds.
+    world.seed = 1;
     assert(f, `Missing fixture species ${species}`);
     world.factions.list = [f]; world.factions.playerId = f.id;
     world.history.sites = world.history.sites.filter(s => s.faction === f.id);
@@ -256,11 +282,23 @@ function smallWorld(loaded, species = "human", age = 25) {
     world.history.founders = { [f.id]: record };
     return world;
 }
+function requireFixtureBirth(loaded, state, partnershipId, year, startPopulation) {
+    // These small fixtures need a specific birth to exercise a later invariant.
+    // Establish that the fixed seeded draw succeeds under actual density;
+    // birthChance=1 alone is not a guarantee and the floor stays at 0.10.
+    const h = state.partnerships[partnershipId], mother = state.people[h.motherId];
+    const profile = state.config.profiles[mother.species], site = state.sites[mother.siteId];
+    assert(profile.birthChance === 1 && state.config.capacityModel.minimumScale === 0.1, "Fixture disabled density pressure");
+    const threshold = Math.max(0.1, 1 - startPopulation / site.historicalCapacity);
+    const W = loaded.env.UF.World, roll = W.mulberry32(W.hash32(state.seed, year, h.id, 0x42495254))();
+    assert(roll < threshold, `Fixture birth draw rejected by density: year ${year}, household ${h.id}, draw ${roll}, threshold ${threshold}`);
+}
 function targetedFixtures(loaded, check) {
     const D = loaded.api, quiet = quietProfiles();
     check("Dead parent cannot reproduce", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } });
+        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        requireFixtureBirth(loaded, s, 0, 2, 2);
         const mother = s.people.find(p => p.gender === "female");
         D.step(s, { casualtyIds: [mother.id] });
         assert(s.people.length === 2 && mother.died === 2, "Dead parent reproduced");
@@ -276,7 +314,8 @@ function targetedFixtures(loaded, check) {
     });
     check("Legitimate birth has valid female/male parent IDs", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } });
+        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        requireFixtureBirth(loaded, s, 0, 2, 2);
         D.step(s);
         assert(s.people.length === 3, "Birth fixture produced no child");
         assert(s.people[2].parents.every(id => s.people[id]), "Invalid parent IDs");
@@ -308,6 +347,7 @@ function targetedFixtures(loaded, check) {
         assert(s.partnerships.length === 2 && s.partnerships.every(b => b.imported === true &&
             s.people[b.motherId].sourceFamilyId === s.people[b.fatherId].sourceFamilyId), "Imported family bond replaced before maturity");
         const bonds = s.partnerships.map(b => [b.motherId, b.fatherId]);
+        for (const h of s.partnerships) requireFixtureBirth(loaded, s, h.id, 3, 4);
         D.step(s); assert(s.people.length === 4, "Immature partner reproduced");
         D.step(s); assert(s.people.length === 6, "Mature imported household did not reproduce");
         assert(JSON.stringify(s.partnerships.map(b => [b.motherId, b.fatherId])) === JSON.stringify(bonds), "Imported household was re-paired");
@@ -315,7 +355,9 @@ function targetedFixtures(loaded, check) {
     });
     check("Stable monogamous partnership and historical parent survival", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 2;
-        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }), h = clone(s.partnerships[0]);
+        const s = D.create(smallWorld(loaded), { profiles: cfg }), h = clone(s.partnerships[0]);
+        requireFixtureBirth(loaded, s, h.id, 2, 2);
+        requireFixtureBirth(loaded, s, h.id, 4, 3);
         D.simulate(s, 3);
         assert(s.partnerships.length === 1 && s.partnerships[0].motherId === h.motherId && s.partnerships[0].fatherId === h.fatherId, "Annual re-pairing occurred");
         const bornYears = s.people.filter(p => !p.isFounder).map(p => p.born).join();
@@ -328,7 +370,8 @@ function targetedFixtures(loaded, check) {
     });
     check("Minor ruler remains legitimate; extinct faction has no ruler", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }); D.step(s);
+        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        requireFixtureBirth(loaded, s, 0, 2, 2); D.step(s);
         D.step(s, { casualtyIds: [0, 1] });
         const child = s.people[2], active = s.rulers.find(r => r.toYear === null);
         assert(active && active.personId === child.id && active.isMinor === true, "Minor-only faction lost ruler");
@@ -397,7 +440,8 @@ function targetedFixtures(loaded, check) {
     });
     check("Infant risk is evaluated after birth", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.infantMortality = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }); D.step(s);
+        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        requireFixtureBirth(loaded, s, 0, 2, 2); D.step(s);
         const child = s.people[2]; assert(child && child.died === null, "Newborn fixture failed"); D.step(s);
         assert(child.died === 3 && child.causeOfDeath === "disease", "Infant hazard absent");
     });
@@ -413,7 +457,7 @@ function targetedFixtures(loaded, check) {
     check("Invalid configuration rejected without source changes", () => {
         const w = smallWorld(loaded), before = JSON.stringify(w); let failed = false;
         try { D.create(w, { profiles: null }); } catch (e) { failed = /profile/.test(e.message); }
-        assert(failed && JSON.stringify(w) === before, "Missing profiles accepted or import changed source");
+        assert(failed && JSON.stringify(w) === before, "Explicit null profiles accepted or import changed source");
     });
 }
 
@@ -428,6 +472,11 @@ function selftest(data, mutant = null) {
     });
     for (const a of [["--years", "-1"], ["--years", "251"], ["--seed", "1.5"], ["--seed", "2147483648"], ["--runs", "0"], ["--seed"], ["--unknown"]])
         check(`Reject ${a.join(" ")}`, () => rejects(() => parseArgs(a), /Invalid|Unknown/));
+    check("Exact candidate snapshot rejects altered source bytes", () => {
+        verifySnapshot(data);
+        const changed = { ...data, files: { ...data.files, [PLUGIN]: data.files[PLUGIN] + " " } };
+        rejects(() => verifySnapshot(changed), /Frozen source changed/);
+    });
     const loaded = load(data, 0, mutant);
     targetedFixtures(loaded, check);
     check("Invalid annual inputs fail before advancing persistent state", () => {
@@ -476,7 +525,9 @@ function selftest(data, mutant = null) {
         assert(!result.error && result.status === 1 && patterns[name].test(result.stderr), `Mutant ${name} did not fail its intended check: ${result.stderr || result.error}`);
         checks.push({ name: `Negative control ${name}`, observed: "FAIL (expected), exit 1", reason: result.stderr.split(/\r?\n/)[0] });
     });
-    return { status: "PASS", checks, passed: checks.filter(c => c.status === "PASS").length };
+    verifySnapshot(data);
+    return { task: "DEUS-TSK-ASTRA-10", suite: "Historical demographics regression", status: "PASS",
+        provenance: provenance(data), checks, passed: checks.filter(c => c.status === "PASS").length };
 }
 
 function table(rows) {
@@ -515,18 +566,17 @@ function main() {
         const v = variance.filter(r => r.years === year);
         for (const key of ["population", "names", "events"]) assert(new Set(v.map(r => r[key])).size > 1, `Seed variance missing: ${key}`);
     }
-    assert(JSON.stringify(sourceBundle().sources) === JSON.stringify(data.sources), "Read-only inputs changed during proof");
-    const head = spawnSync("git", ["rev-parse", "HEAD"], { cwd: ROOT, windowsHide: true, encoding: "utf8" });
-    const report = { task: "DEUS-TSK-ASTRA-06", schemaVersion: 1, status: "PASS", createdAt: new Date().toISOString(), options,
-        runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model }, provenance: { head: head.stdout.trim(), sources: data.sources },
+    verifySnapshot(data);
+    const report = { task: "DEUS-TSK-ASTRA-10", suite: "Historical demographics regression", schemaVersion: 2, status: "PASS", createdAt: new Date().toISOString(), options,
+        runtime: { node: process.version, cpu: (os.cpus()[0] || {}).model }, provenance: provenance(data),
         testProfiles: profiles(), profileStatus: "Provisional proof inputs, not approved catalog biology or automatically enabled game behavior",
         methodology: { timings: "Only production api.step calls are included in annual/total simulation timings. Setup, heap sampling and verification reported separately.",
             memory: "Sampled annual process heap high-water delta, including temporary allocations and ordinary GC; not exact state footprint or a leak assertion. No forced GC.",
             spatial: "Imports real Year-1 terrain/faction/founder records; no expansion, migration, map stamping or spawned live units.",
             scope: "No registration in plugins.js, no New Game hook, no deep-history compression, tactical combat or native gameplay proof." },
         seedVariance: options.seeds.length > 1 ? "PASS" : "NOT RUN", summary, runs, totalWallMs: performance.now() - started };
-    fs.mkdirSync(path.dirname(OUTPUT), { recursive: true }); fs.writeFileSync(OUTPUT, JSON.stringify(report, null, 2) + "\n");
-    const human = table(summary) + `\nPASS; wall ${(report.totalWallMs / 1000).toFixed(3)} s; JSON: ${OUTPUT}`;
+    const human = table(summary) + `\nPASS; wall ${(report.totalWallMs / 1000).toFixed(3)} s; stdout only (use --json for the structured report)`;
     if (options.json) { console.error(human); console.log(JSON.stringify(report, null, 2)); } else console.log(human);
 }
-try { main(); } catch (e) { console.error(`FAIL: ${e.stack || e}`); process.exitCode = 1; }
+module.exports = { sourceBundle, load, profiles, quietProfiles, smallWorld, integrity, run, selftest };
+if (require.main === module) { try { main(); } catch (e) { console.error(`FAIL: ${e.stack || e}`); process.exitCode = 1; } }
