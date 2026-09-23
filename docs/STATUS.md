@@ -7,7 +7,30 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Gemini**: Coordinator / Integration Gate / Standby for validation reports.
+- **Fable**: `DEUS-TSK-FABLE-08` Production-Clock Autonomous Colony Closure (`game/js/plugins/DEUS_Projects.js`, `tools/test_autonomous_settlement_closure.js`).
+- **Gemini**: Integration & coordination authority; standby for FABLE-08 closure report before commencing GEMINI-04 physical stockpile migration.
+
+## DEUS-TSK-GEMINI-05 — Authoritative Calendar Timebase Conversion, 8-Hour Rest Alignment & 6-Second Combat GCD Rule (2026-09-23)
+- **Status**: `COMPLETED — PASS` (Commit `f1e74e5`)
+- **Scope**:
+  - `game/js/plugins/DEUS_Core.js` & `DEUS_TimeSpeed.js`: Established authoritative world/calendar timebase conversion on `Game_UFTime` / `$ufTime` and `UF.Time`: `ticksPerMinute() = 10`, `ticksPerHour() = 600`, `ticksPerDay() = 14400`, `ticksForMinutes(m)`, `ticksForHours(h)`, `ticksForDays(d)`, `minutesFromTicks(t)`, `hoursFromTicks(t)`, `daysFromTicks(t)`, plus game time aliases (`ticksForGameHours`, `gameMinutesFromTicks`, etc.).
+  - `game/js/plugins/DEUS_Colonists.js`: Replaced hardcoded `TICKS_PER_HOUR = 3600` with authoritative `600`. Long rest duration aligned to `ticksForHours(8) = 4800` map updates (exactly 8.0 calendar hours). Colonists wake after a normal single night's rest without suffering 48 hours of accumulated dehydration or starvation.
+  - `game/js/plugins/DEUS_Combat.js`: Corrected `Col` scoping in `resolveAttack`. Enforced authoritative 6-second Global Cooldown (GCD) rule: if `Combat.isActionActive(attacker)` is true, attacker may not act again until GCD completes (`resolveAttack` returns `null`). Added `Combat.clearAction(unitOrId)` and `Combat.canAct(unitOrId)`.
+  - `game/js/plugins/DEUS_Jobs.js`: Replaced unhandled exceptions in `eat` and `hunt` apply handlers with clean job failure reasons (`job.reason = "..."; return false;`).
+  - `tools/test_combat_dying_integration.js`: Added explicit `PASS gcd_blocks_action` check proving that a creature on 6-second GCD cannot act until the GCD finishes.
+  - `tools/test_stabilization.js`: Updated `HOUR = 600` and verified stable patient skips death saves during recovery.
+  - `tools/test_survival_needs_loop.js`: Updated long rest assertion to 4,800 ticks (8.0 calendar hours).
+- **Checks observed**:
+  - `node tools/test_survival_needs_loop.js`: **19 passed, 0 failed (exit 0)**; all 4 mutants fail.
+  - `node tools/test_stabilization.js`: **12 passed, 0 failed (exit 0)**; mutant fails.
+  - `node tools/test_combat_dying_integration.js`: **30 passed, 0 failed (exit 0)**; mutant fails.
+  - `node tools/test_conditions_system.js`: **55 passed, 0 failed (exit 0)**.
+  - `node tools/test_autonomous_project_dispatch.js`: **14 passed, 0 failed (exit 0)**.
+  - `node tools/test_project_construction_loop.js`: **14 passed, 0 failed (exit 0)**.
+  - `node tools/test_settlement_projects.js`: **14 passed, 0 failed (exit 0)**.
+  - `node tools/test_multi_deficit_settlement.js`: **10 passed, 0 failed (exit 0)**.
+  - `node tools/test_autonomous_settlement_closure.js` (production clock, 600 ticks/hour): **20 passed, 2 failed** (improved from 16 passed, 6 failed). Passed `long_rest_one_night` (78 rests observed, all 8.0–8.1 calendar hours), `nobody_died` (all 10 alive after 9.6 calendar days), and `no_errors` (0 errors in 138,242 updates).
+- **Handoff**: Dispatched task packet `fable_prompt_tsk_08.md` to Fable (`DEUS-TSK-FABLE-08`).
 
 ## DEUS-TSK-ASTRA-10 — Independent HIST-09 validation completed; candidate FAIL (2026-09-23)
 - **Classification**: `FAIL`. All requested trajectories finished without timeouts, but four production contract checks and the 30-second trajectory gate failed. No production repair or timing retry was attempted.
