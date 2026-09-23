@@ -134,14 +134,20 @@
                 }
             }
         }
-        deselect() {
+        deselect(options = {}) {
+            const wasColonist = this.selectedColonist;
             this.selectedColonist = null;
             if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
                 UF.Target.clearTargetedTile();
             }
             if (activeColonyWindow) activeColonyWindow.hide();
-            if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                UF.Sheet.close();
+            if (!options || !options.keepSheet) {
+                if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                    const sub = UF.Sheet.subject ? UF.Sheet.subject() : null;
+                    if (!sub || (sub.kind === "unit" && wasColonist && sub.unitId === wasColonist.id)) {
+                        UF.Sheet.close();
+                    }
+                }
             }
         }
     }
@@ -198,6 +204,20 @@
             const ev = c.event;
             if (ev && Math.abs(ev.x - mx) <= 0.8 && Math.abs(ev.y - my) <= 0.8) return c;
         }
+        const W = World();
+        if (W && typeof W.units === "function") {
+            const pid = window.UF && UF.Factions && typeof UF.Factions.playerId === "function" ? UF.Factions.playerId() : null;
+            for (const u of W.units()) {
+                if (u.data && (u.data.kind === "colonist" || u.data.faction === "player" || (pid !== null && u.data.faction === pid))) {
+                    const ev = u.event || (W.eventOf && W.eventOf(u.id));
+                    const ux = ev ? ev.x : u.x;
+                    const uy = ev ? ev.y : u.y;
+                    if (Math.abs(ux - mx) <= 0.8 && Math.abs(uy - my) <= 0.8) {
+                        return adapterFor(u);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -221,17 +241,60 @@
                 $colonyManager.select(clicked);
                 if (window.UF.Stance && UF.Stance.setSelected) UF.Stance.setSelected(null); // the corners follow the Overseer's selection
                 SoundManager.playCursor();
-            } else if ($colonyManager.selectedColonist) {
-                $colonyManager.deselect();
-                if (window.UF && UF.Target && typeof UF.Target.clearTargetedTile === "function") {
-                    UF.Target.clearTargetedTile();
+            } else if ($colonyManager.selectedColonist || (window.UF && UF.Select && typeof UF.Select.hasSelection === "function" && UF.Select.hasSelection())) {
+                const sh = window.UF && UF.Sheet;
+                const hasObjectOrItem = sh && typeof sh.subjectAt === "function" && !!sh.subjectAt(mx, my);
+                if (!hasObjectOrItem) {
+                    // User directive: "If I have a unit selected and I left click elsewhere, I want to drop the current target, nothing else"
+                    $colonyManager.deselect();
+                    if (window.UF && UF.Select && typeof UF.Select.clearSelection === "function") {
+                        UF.Select.clearSelection();
+                    }
+                    if (window.UF && UF.Select && typeof UF.Select.clearTileSelection === "function") {
+                        UF.Select.clearTileSelection();
+                    }
+                    if (window.UF && UF.Select && typeof UF.Select.clearTargetedTile === "function") {
+                        UF.Select.clearTargetedTile();
+                    }
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
+                    SoundManager.playCancel();
                 }
-                SoundManager.playCancel();
             }
         }
 
-        // 3. Right-click deselects, unless UF_Interact's context menu took the click (it says so through UF.Interact.tookCancel)
+        // 3. Right-click: use chest if clicked on container, else deselect
         if (TouchInput.isCancelled()) {
+            const mx = $gameMap.canvasToMapX(TouchInput.x);
+            const my = $gameMap.canvasToMapY(TouchInput.y);
+            const W = World();
+            const selUnit = ($colonyManager && $colonyManager.selectedColonist && $colonyManager.selectedColonist.unit) ||
+                            (window.UF && UF.Select && UF.Select.selected && UF.Select.selected().length === 1 && W ? W.unit(UF.Select.selected()[0]) : null);
+            if (selUnit) {
+                const C = window.UF && UF.Containers;
+                const O = window.UF && UF.Objects;
+                const obj = O ? (O.atIn ? O.atIn(selUnit.area, mx, my) : O.at(mx, my)) : null;
+                const cont = C ? C.at(selUnit.area, mx, my, selUnit.z || 0) : null;
+                if ((obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont) {
+                    if (C && typeof C.useChest === "function") {
+                        C.useChest(selUnit, cont || obj, mx, my);
+                        return;
+                    }
+                }
+                // User directive: With units selected, right-click orders them to move.
+                const adapter = ($colonyManager && $colonyManager.selectedColonist) || adapterFor(selUnit);
+                if (adapter && typeof adapter.assignMoveTo === "function") {
+                    adapter.assignMoveTo(mx, my);
+                } else {
+                    const Col = Colonists();
+                    if (Col && typeof Col.order === "function") {
+                        Col.order(selUnit.id, { type: "move", target: { x: mx, y: my } });
+                    }
+                }
+                return;
+            }
+
             const interact = window.UF && UF.Interact;
             const menuTook = !!interact && ((typeof interact.tookCancel === "function" && interact.tookCancel()) || (typeof interact.isOpen === "function" && interact.isOpen()));
             if (!menuTook) {
@@ -253,7 +316,7 @@
     };
 
     Scene_Map.prototype.isAnyWindowUnderMouse = function() {
-        const wins = [this._colonyCard, this._factionLedgerWindow, this._ufChronicleWindow].filter(w => w && w.visible);
+        const wins = [this._colonyCard, this._factionLedgerWindow, this._ufChronicleWindow, this._ufContainerCard].filter(w => w && w.visible);
         return wins.some(w => TouchInput.x >= w.x && TouchInput.x < w.x + w.width && TouchInput.y >= w.y && TouchInput.y < w.y + w.height);
     };
 

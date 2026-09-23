@@ -258,14 +258,39 @@
         }
     }
 
+    function unitRace(u) {
+        if (!u) return "";
+        const d = u.data || (u.unit && u.unit.data) || u;
+        return (d.dnd && (d.dnd.race || d.dnd.species)) || d.race || d.species || "";
+    }
+
+    // 1 grid square = 5 feet (D&D 5.1 SRD rules)
+    // Darkvision 60 ft = 12 grid squares. Superior Darkvision 120 ft = 24 grid squares.
+    const DARKVISION_RACES = {
+        elf: 12,        // 60 ft
+        dwarf: 12,      // 60 ft
+        gnome: 12,      // 60 ft
+        "half-elf": 12, // 60 ft
+        "half-orc": 12, // 60 ft
+        tiefling: 12,   // 60 ft
+        orc: 12,        // 60 ft
+        drow: 24,       // 120 ft (Superior Darkvision)
+        duergar: 24     // 120 ft
+    };
+
     function colonistSightRadius(u) {
         if (u) {
-            const eq = u.equipment || {};
+            const eq = u.equipment || (u.unit && u.unit.equipment) || {};
             if (eq.tool === "torch" || eq.held === "torch" || (u.data && u.data.tags && u.data.tags.includes("torch"))) {
                 return TORCH_SIGHT;
             }
-            if (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) {
+            const d = u.data || (u.unit && u.unit.data) || {};
+            if (d.atWatchtower || d.job === "watchtower" || d.job === "scout") {
                 return WATCHTOWER_SIGHT;
+            }
+            const r = String(unitRace(u)).toLowerCase();
+            if (DARKVISION_RACES[r]) {
+                return DARKVISION_RACES[r];
             }
         }
         return COLONIST_DAY_SIGHT;
@@ -283,6 +308,8 @@
         TORCH_SIGHT,
         SETTLEMENT_SIGHT,
         WATCHTOWER_SIGHT,
+        DARKVISION_RACES,
+        unitRace,
         colonistSightRadius,
         isOpaque,
         mark,
@@ -297,7 +324,7 @@
             const viewZ = currentZ();
             const zOf = o => (o && o.z !== undefined ? o.z : (o && o.area && o.area.z !== undefined ? o.area.z : 0));
 
-            // 1. Colonists / player units (Daylight 8-10 [9], Night 5-6 [5-6] via visionFactor 0.55)
+            // 1. Colonists / player units (Daylight 8-10 [9], Night 5-6 [5-6] via visionFactor 0.55; Darkvision 12 tiles / 60 ft)
             const seenUnits = new Set();
             if (window.$colonyManager && $colonyManager.colonists) {
                 for (const c of $colonyManager.colonists) {
@@ -308,9 +335,12 @@
                     if (ev) {
                         seenUnits.add(c.id || `${ev.x},${ev.y}`);
                         const r = colonistSightRadius(c);
-                        const fixed = (c.data && (c.data.atWatchtower || c.data.job === "watchtower" || c.data.job === "scout")) ||
+                        const rRace = String(unitRace(c)).toLowerCase();
+                        const hasDarkvision = !!DARKVISION_RACES[rRace];
+                        const fixed = hasDarkvision ||
+                                      (c.data && (c.data.atWatchtower || c.data.job === "watchtower" || c.data.job === "scout")) ||
                                       (c.equipment && (c.equipment.tool === "torch" || c.equipment.held === "torch"));
-                        list.push({ x: ev.x, y: ev.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ });
+                        list.push({ x: ev.x, y: ev.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ, race: rRace, darkvision: hasDarkvision });
                     }
                 }
             }
@@ -328,9 +358,12 @@
                     if (isPlayerCreature && W.isDisplayed(u)) {
                         seenUnits.add(u.id);
                         const r = colonistSightRadius(u);
-                        const fixed = (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) ||
+                        const rRace = String(unitRace(u)).toLowerCase();
+                        const hasDarkvision = !!DARKVISION_RACES[rRace];
+                        const fixed = hasDarkvision ||
+                                      (u.data && (u.data.atWatchtower || u.data.job === "watchtower" || u.data.job === "scout")) ||
                                       (u.equipment && (u.equipment.tool === "torch" || u.equipment.held === "torch"));
-                        list.push({ x: u.x, y: u.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ });
+                        list.push({ x: u.x, y: u.y, radius: r, type: "colonist", scaleWithDayNight: !fixed, z: uZ, race: rRace, darkvision: hasDarkvision });
                     }
                 }
             }
@@ -463,34 +496,26 @@
             dirty = true;
         },
         setEnabled(val) {
-            this.enabled = !!val;
-            if (window.$gameSystem) $gameSystem._ufFogEnabled = this.enabled;
+            // Fog of war is temporarily removed from the game per user directive 2026-09-22
+            this.enabled = false;
+            if (window.$gameSystem) $gameSystem._ufFogEnabled = false;
             const scene = window.SceneManager && SceneManager._scene;
             if (scene && scene._spriteset && scene._spriteset._ufFog) {
-                scene._spriteset._ufFog.visible = this.enabled;
-            }
-            if (this.enabled) {
-                dirty = true;
-                this.refresh();
+                scene._spriteset._ufFog.visible = false;
             }
         },
         encode,
         decode
     };
     function resolveEnabled() {
-        if (window.UF && UF.NewGameSetup && typeof UF.NewGameSetup.fogOfWar === "boolean") {
-            return UF.NewGameSetup.fogOfWar;
-        }
-        if (window.$gameSystem && $gameSystem._ufFogEnabled !== undefined) {
-            return $gameSystem._ufFogEnabled;
-        }
-        return ENABLED;
+        // Fog of war temporarily disabled per user directive 2026-09-22
+        return false;
     }
 
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Fog = Fog;
-    Fog.enabled = resolveEnabled();
+    Fog.enabled = false;
 
     //-------------------------------------------------------------------------
     // Drawing: one pixel per cell, scaled up inside the tilemap (so it follows scrolling and zoom)
@@ -503,6 +528,7 @@
             this.z = 1000000;
             this._tiles = [];
             this._fogBitmap = null;
+            this.visible = false;
         }
 
         update() {
@@ -625,9 +651,8 @@
         _DataManager_extractSaveContents.call(this, contents);
         mapKey = null; // reload from the loaded save
         explored = null;
-        if (contents.system && contents.system._ufFogEnabled !== undefined) {
-            Fog.enabled = contents.system._ufFogEnabled;
-        }
+        Fog.enabled = false;
+        if ($gameSystem) $gameSystem._ufFogEnabled = false;
     };
 
     const _DataManager_createGameObjects = DataManager.createGameObjects;
@@ -635,8 +660,8 @@
         _DataManager_createGameObjects.call(this);
         mapKey = null;
         explored = null;
-        Fog.enabled = resolveEnabled();
-        if ($gameSystem) $gameSystem._ufFogEnabled = Fog.enabled;
+        Fog.enabled = false;
+        if ($gameSystem) $gameSystem._ufFogEnabled = false;
     };
 
     //-------------------------------------------------------------------------

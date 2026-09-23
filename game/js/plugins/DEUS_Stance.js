@@ -386,7 +386,7 @@
     Stance.footY = footY;
 
     // Vertical offset to place the ellipse center directly at the boots/feet inside the chibi sprite
-    const FEET_OFFSET_Y = 6;
+    const FEET_OFFSET_Y = 12;
     const feetY = (ch, cells = 1) => footY(ch) - FEET_OFFSET_Y * cells;
     Stance.feetY = feetY;
     Stance.FEET_OFFSET_Y = FEET_OFFSET_Y;
@@ -403,7 +403,8 @@
         if (sprite.anchor.x !== 0.5 || sprite.anchor.y !== selectAnchorY) sprite.anchor.set(0.5, selectAnchorY);
         sprite.x = ch.screenX();
         sprite.y = feetY(ch, cells);
-        sprite.z = 1; // strictly under all character sprites (z >= 3) and objects
+        const chZ = (characterSprite && typeof characterSprite.z === "number") ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : (typeof ch.screenY === "function" ? ch.screenY() : 0));
+        sprite.z = chZ - 5; // strictly behind creature sprite
         sprite.opacity = 255;
         return sprite;
     };
@@ -433,7 +434,7 @@
             this.x = ch.screenX();
             this.y = footY(ch);
             const chZ = characterSprite && typeof characterSprite.z === "number" ? characterSprite.z : (typeof ch.screenZ === "function" ? ch.screenZ() : this.y);
-            this.z = Math.min(chZ - 10, markerZ(this.y)); // strictly below character sprite
+            this.z = chZ - 5; // strictly behind creature sprite
             this.opacity = 255;
         }
 

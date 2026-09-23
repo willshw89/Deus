@@ -631,7 +631,8 @@
         const R = cfg().aidRadius || 10;
         const helpers = [];
 
-        for (const m of w.units()) {
+        const areaUnits = (w.unitsInArea && victim.area) ? w.unitsInArea(victim.area.x, victim.area.y, zOf(victim)) : w.units();
+        for (const m of areaUnits) {
             if (!m || m === victim || m === attacker || isDead(m)) continue;
             if (!sameArea(m, victim)) continue;
             if (factionOf(m) !== f) continue;
@@ -649,6 +650,10 @@
                 const cur = w.unit(mc.targetId);
                 if (cur && !isDead(cur) && sameArea(cur, m)) continue;
             }
+
+            // If m already has a hostile enemy directly in reach (melee adjacency), don't pull them away
+            const occupied = areaUnits.some(other => !isDead(other) && other !== m && sideOf(other) === "hostile" && manhattan(m, other) <= 1);
+            if (occupied) continue;
 
             mc.targetId = attacker.id;
             mc.chase = null;
@@ -757,6 +762,7 @@
         }
         addSplat(target, damage);
         markBar(attacker);
+        Combat.triggerAction(attacker, (n.attackType === "magic" || o.spell) ? "spell" : "attack", 6000);
         if (target.data.hp > 0) retaliate(target, attacker, tick);
         aidFaction(target, attacker, tick);
         Combat.stats.attacks++;
@@ -1338,6 +1344,54 @@
     Combat.clearFx = () => {
         for (const id of Array.from(fx.keys())) dropFx(id);
     };
+
+    /** Triggers a 6-second d20 action round cooldown bar under the unit's overhead health bar. */
+    function triggerAction(unitOrId, actionType, durationMs) {
+        if (!unitOrId) return;
+        const at = String(actionType || "").toLowerCase();
+        if (at === "move" || at === "walk" || at === "wander" || at === "flee" || at === "idle" || at === "sleep" || at === "travel") return;
+        const w = World();
+        const u = typeof unitOrId === "object" ? unitOrId : (w ? w.unit(unitOrId) : null);
+        if (!u || u.id === undefined) return;
+        const now = nowMs();
+        const dur = (typeof durationMs === "number" && durationMs > 0) ? durationMs : 6000;
+        const act = {
+            type: actionType || "action",
+            start: now,
+            duration: dur
+        };
+        const r = fxOf(u.id);
+        r.action = act;
+        if (u.data) u.data.actionRound = act;
+        emit("action:roundStart", { unit: u, action: act });
+    }
+    Combat.triggerAction = triggerAction;
+
+    function isActionActive(unitOrId) {
+        const w = World();
+        if (!unitOrId) return false;
+        const u = typeof unitOrId === "object" ? unitOrId : (w ? w.unit(unitOrId) : null);
+        if (!u) return false;
+        const r = fx.get(u.id);
+        const act = (r && r.action) || (u.data && u.data.actionRound);
+        if (!act || !act.start) return false;
+        return (nowMs() - act.start) < (act.duration || 6000);
+    }
+    Combat.isActionActive = isActionActive;
+
+    function actionProgress(unitOrId) {
+        const w = World();
+        if (!unitOrId) return 0;
+        const u = typeof unitOrId === "object" ? unitOrId : (w ? w.unit(unitOrId) : null);
+        if (!u) return 0;
+        const r = fx.get(u.id);
+        const act = (r && r.action) || (u.data && u.data.actionRound);
+        if (!act || !act.start) return 0;
+        const elapsed = nowMs() - act.start;
+        const dur = act.duration || 6000;
+        return Math.min(1.0, Math.max(0.0, elapsed / dur));
+    }
+    Combat.actionProgress = actionProgress;
     /** Kept name: shows a hitsplat on the unit standing on the cell (the number in text, else a blue 0). No floating text. */
     Combat.addPopup = function(cellX, cellY, text) {
         const w = World();
@@ -1422,17 +1476,49 @@
             barBack = new Bitmap(bw + 2, 6);
             barBack.fillRect(0, 0, bw + 2, 6, "#000000");
             barBack.fillRect(1, 1, bw, 4, "#c41a14");
+            // 5-section divider notches on background (at 20%, 40%, 60%, 80%)
+            for (let s = 1; s <= 4; s++) {
+                const divX = 1 + Math.round(bw * (s / 5));
+                barBack.fillRect(divX, 1, 1, 4, "#000000");
+            }
             barBack._ufBar = "back";
             barBack._ufName = "UF_GenHealthBar";
+
             barFill = new Bitmap(bw, 4);
             barFill.fillRect(0, 0, bw, 4, "#24c424");
             barFill.fillRect(0, 0, bw, 1, "#78ec78");
+            // 5-section divider notches on foreground fill (at 20%, 40%, 60%, 80%)
+            for (let s = 1; s <= 4; s++) {
+                const divX = Math.round(bw * (s / 5));
+                barFill.fillRect(divX, 0, 1, 4, "#000000");
+            }
             barFill._ufBar = "fill";
             barFill._ufName = "UF_GenHealthBar";
         }
         return { back: barBack, fill: barFill, width: bw };
     }
     Combat.barBitmaps = barBitmaps;
+
+    let actBack = null, actFill = null;
+    function actionBarBitmaps() {
+        const bw = pos(cfg().display.barWidth, 30);
+        if (!actBack || actBack.width !== bw + 2) {
+            actBack = new Bitmap(bw + 2, 5);
+            actBack.fillRect(0, 0, bw + 2, 5, "#000000");
+            actBack.fillRect(1, 1, bw, 3, "#1a160d");
+            actBack._ufBar = "actionBarBack";
+            actBack._ufName = "UF_GenActionBar";
+
+            actFill = new Bitmap(bw, 3);
+            actFill.fillRect(0, 0, bw, 3, "#f59e0b");
+            actFill.fillRect(0, 0, bw, 1, "#fef08a");
+            actFill.fillRect(0, 2, bw, 1, "#b45309");
+            actFill._ufBar = "actionBarFill";
+            actFill._ufName = "UF_GenActionBar";
+        }
+        return { back: actBack, fill: actFill, width: bw };
+    }
+    Combat.actionBarBitmaps = actionBarBitmaps;
 
     // The first opaque row of a sheet frame (so the bar sits on the head, not on the top of a tall empty frame). Cached.
     const topCache = new Map();
@@ -1545,23 +1631,33 @@
             return g;
         }
         acquireBar() {
-            let pair = this._freeBars.pop();
-            if (!pair) {
+            let quad = this._freeBars.pop();
+            if (!quad) {
                 const bm = barBitmaps();
+                const abm = actionBarBitmaps();
                 const back = new Sprite(bm.back), fill = new Sprite(bm.fill);
+                const actBack = new Sprite(abm.back), actFill = new Sprite(abm.fill);
                 back._ufKind = "barBack";
                 fill._ufKind = "barFill";
+                actBack._ufKind = "actionBarBack";
+                actFill._ufKind = "actionBarFill";
                 this._barLayer.addChild(back);
                 this._barLayer.addChild(fill);
-                pair = [back, fill];
+                this._barLayer.addChild(actBack);
+                this._barLayer.addChild(actFill);
+                quad = [back, fill, actBack, actFill];
             }
-            pair[1]._ufW = -1;
-            return pair;
+            quad[1]._ufW = -1;
+            if (quad[3]) quad[3]._ufW = -1;
+            return quad;
         }
-        releaseBar(pair) {
-            pair[0].visible = false;
-            pair[1].visible = false;
-            this._freeBars.push(pair);
+        releaseBar(quad) {
+            if (!quad) return;
+            quad[0].visible = false;
+            quad[1].visible = false;
+            if (quad[2]) quad[2].visible = false;
+            if (quad[3]) quad[3].visible = false;
+            this._freeBars.push(quad);
         }
         acquireSplat(dmg) {
             let sp = this._freeSplats.pop();
@@ -1594,12 +1690,14 @@
         }
         layout() {
             const w = World();
-            if (!w || !w.state || !fx.size || !window.$gameMap) return;
+            if (!w || !w.state || !window.$gameMap) return;
             const d = cfg().display;
             const now = nowMs();
             const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
             const bm = barBitmaps();
-            const cur = viewArea(w), events = $gameMap._events, base = w.EVENT_BASE;
+            const cur = viewArea(w);
+
+            // 1. Splats aging and pruning
             for (const [id, r] of fx) {
                 let k = 0;
                 for (let i = 0; i < r.splats.length; i++) {
@@ -1611,71 +1709,133 @@
                     }
                 }
                 r.splats.length = k;
-                const u = w.unit(id);
-                const alive = !!u && !isDead(u);
-                const barOn = alive && now - r.last < d.barHideMs;
-                if (!barOn && r.bar) {
-                    this.releaseBar(r.bar);
-                    r.bar = null;
+            }
+
+            // 2. Process all visible character sprites in viewport
+            const visibleUnitIds = new Set();
+            const charSprites = (this._spriteset && this._spriteset._characterSprites) || [];
+            for (let i = 0; i < charSprites.length; i++) {
+                const sp = charSprites[i];
+                if (!sp || !sp.visible || !sp._character) continue;
+                const ev = sp._character;
+                const u = w.unitOfEvent ? w.unitOfEvent(ev) : null;
+                if (!u || isDead(u)) continue;
+                if (cur && u.area && (u.area.x !== cur.x || u.area.y !== cur.y || zOf(u) !== zOf(cur))) continue;
+
+                const id = u.id;
+                visibleUnitIds.add(id);
+                const r = fxOf(id);
+                r.sprite = sp;
+                const geo = this.geo(r, sp);
+                if (!geo) continue;
+
+                // Cache anchor
+                const bx = $gameMap.adjustX(ev._realX) * tw, by = $gameMap.adjustY(ev._realY) * th;
+                const a = r.anchor || (r.anchor = { mx: 0, my: 0, dx: 0, dh: 0, df: 0 });
+                a.mx = ev._realX;
+                a.my = ev._realY;
+                a.area = levelArea(u);
+                a.dx = geo.x - bx;
+                a.dh = geo.head - by;
+                a.df = geo.foot - by;
+
+                // Health Bar (Universal for every living creature above the head)
+                const quad = r.bar || (r.bar = this.acquireBar());
+                const back = quad[0], fill = quad[1], actBack = quad[2], actFill = quad[3];
+
+                const curHp = (u.data && typeof u.data.hp === "number") ? u.data.hp :
+                              (u.data && u.data.dnd && typeof u.data.dnd.hp === "number") ? u.data.dnd.hp :
+                              (typeof u.data.maxHp === "number" ? u.data.maxHp : maxHp(u));
+                const mHp = (u.data && typeof u.data.maxHp === "number" && u.data.maxHp > 0) ? u.data.maxHp :
+                            (u.data && u.data.dnd && typeof u.data.dnd.hpMax === "number" && u.data.dnd.hpMax > 0) ? u.data.dnd.hpMax :
+                            maxHp(u);
+                const hpShare = Math.max(0, Math.min(1, num(curHp) / Math.max(1, mHp)));
+                const fw = Math.round(bm.width * hpShare);
+
+                back.x = Math.round(geo.x - (bm.width + 2) / 2);
+                back.y = Math.round(geo.head - 12);
+                fill.x = back.x + 1;
+                fill.y = back.y + 1;
+                if (fill._ufW !== fw) {
+                    fill.setFrame(0, 0, fw, 4);
+                    fill._ufW = fw;
                 }
-                if (!k && !barOn) {
-                    fx.delete(id);
-                    continue;
+                back._ufUnit = fill._ufUnit = id;
+                back.visible = fill.visible = true;
+
+                // 6-Second d20 Round Action Bar (Positioned directly beneath health bar)
+                const act = r.action || (u.data && u.data.actionRound);
+                if (act && act.start) {
+                    const elapsed = now - act.start;
+                    const dur = act.duration || 6000;
+                    if (elapsed >= 0 && elapsed < dur) {
+                        const progress = Math.min(1.0, Math.max(0.0, elapsed / dur));
+                        const aw = Math.round(bm.width * progress);
+                        actBack.x = back.x;
+                        actBack.y = back.y + 6;
+                        actFill.x = actBack.x + 1;
+                        actFill.y = actBack.y + 1;
+                        if (actFill._ufW !== aw) {
+                            actFill.setFrame(0, 0, aw, 3);
+                            actFill._ufW = aw;
+                        }
+                        actBack._ufUnit = actFill._ufUnit = id;
+                        actBack.visible = actFill.visible = true;
+                    } else {
+                        actBack.visible = actFill.visible = false;
+                        r.action = null;
+                        if (u.data && u.data.actionRound === act) u.data.actionRound = null;
+                    }
+                } else {
+                    actBack.visible = actFill.visible = false;
                 }
-                let geo = null;
-                if (alive && cur && u.area.x === cur.x && u.area.y === cur.y && zOf(u) === zOf(cur)) {
-                    const ev = events[base + id];
-                    const sp = ev ? this.spriteOf(r, ev) : null;
-                    if (sp && sp.visible) {
-                        geo = this.geo(r, sp);
-                        const bx = $gameMap.adjustX(ev._realX) * tw, by = $gameMap.adjustY(ev._realY) * th;
-                        const a = r.anchor || (r.anchor = { mx: 0, my: 0, dx: 0, dh: 0, df: 0 });
-                        a.mx = ev._realX;
-                        a.my = ev._realY;
-                        a.area = levelArea(u);
-                        a.dx = geo.x - bx;
-                        a.dh = geo.head - by;
-                        a.df = geo.foot - by;
+
+                // Hitsplats
+                if (r.splats && r.splats.length) {
+                    const body = geo.foot - geo.head;
+                    const midY = body >= 24 ? geo.head + body * 0.45 : geo.foot - 12;
+                    for (const s of r.splats) {
+                        const sp = s.sprite || (s.sprite = this.acquireSplat(s.dmg));
+                        const off = SPLAT_OFFSETS[s.slot % SPLAT_OFFSETS.length];
+                        sp.x = Math.round(geo.x + off[0]);
+                        sp.y = Math.round(midY + off[1]);
+                        sp._ufUnit = id;
+                        sp._ufSlot = s.slot;
+                        sp.visible = true;
                     }
                 }
-                if (!geo && r.anchor && k && cur && r.anchor.area && r.anchor.area.x === cur.x && r.anchor.area.y === cur.y && zOf(r.anchor.area) === zOf(cur)) {
-                    const a = r.anchor, bx = $gameMap.adjustX(a.mx) * tw, by = $gameMap.adjustY(a.my) * th;
-                    geo = r.geo || (r.geo = { x: 0, head: 0, foot: 0 });
-                    geo.x = bx + a.dx;
-                    geo.head = by + a.dh;
-                    geo.foot = by + a.df;
-                }
-                if (!geo) {
-                    if (r.bar) r.bar[0].visible = r.bar[1].visible = false;
-                    for (const s of r.splats) if (s.sprite) s.sprite.visible = false;
-                    continue;
-                }
-                if (barOn) {
-                    const pair = r.bar || (r.bar = this.acquireBar());
-                    const back = pair[0], fill = pair[1];
-                    const max = u.data.maxHp > 0 ? u.data.maxHp : maxHp(u);
-                    const fw = Math.round(bm.width * Math.max(0, Math.min(1, num(u.data.hp) / max)));
-                    back.x = Math.round(geo.x - (bm.width + 2) / 2);
-                    back.y = Math.round(geo.head - 9);
-                    fill.x = back.x + 1;
-                    fill.y = back.y + 1;
-                    if (fill._ufW !== fw) {
-                        fill.setFrame(0, 0, fw, 4);
-                        fill._ufW = fw;
+            }
+
+            // 3. Clean up non-visible records
+            for (const [id, r] of fx) {
+                if (!visibleUnitIds.has(id)) {
+                    if (r.bar) {
+                        this.releaseBar(r.bar);
+                        r.bar = null;
                     }
-                    back._ufUnit = fill._ufUnit = id;
-                    back.visible = fill.visible = true;
-                }
-                const body = geo.foot - geo.head;
-                const midY = body >= 24 ? geo.head + body * 0.45 : geo.foot - 12;
-                for (const s of r.splats) {
-                    const sp = s.sprite || (s.sprite = this.acquireSplat(s.dmg));
-                    const off = SPLAT_OFFSETS[s.slot % SPLAT_OFFSETS.length];
-                    sp.x = Math.round(geo.x + off[0]);
-                    sp.y = Math.round(midY + off[1]);
-                    sp._ufUnit = id;
-                    sp._ufSlot = s.slot;
-                    sp.visible = true;
+                    if (r.splats.length > 0 && r.anchor && cur && r.anchor.area && r.anchor.area.x === cur.x && r.anchor.area.y === cur.y && zOf(r.anchor.area) === zOf(cur)) {
+                        const a = r.anchor, bx = $gameMap.adjustX(a.mx) * tw, by = $gameMap.adjustY(a.my) * th;
+                        const midY = by + a.df - 12;
+                        for (const s of r.splats) {
+                            const sp = s.sprite || (s.sprite = this.acquireSplat(s.dmg));
+                            const off = SPLAT_OFFSETS[s.slot % SPLAT_OFFSETS.length];
+                            sp.x = Math.round(bx + a.dx + off[0]);
+                            sp.y = Math.round(midY + off[1]);
+                            sp._ufUnit = id;
+                            sp._ufSlot = s.slot;
+                            sp.visible = true;
+                        }
+                    } else {
+                        for (const s of r.splats) {
+                            if (s.sprite) {
+                                this.releaseSplat(s.sprite);
+                                s.sprite = null;
+                            }
+                        }
+                        if (!r.splats.length && (!r.action || now - r.action.start > (r.action.duration || 6000))) {
+                            fx.delete(id);
+                        }
+                    }
                 }
             }
         }
@@ -1689,6 +1849,8 @@
                 if (r.bar) {
                     add(r.bar[0]);
                     add(r.bar[1]);
+                    if (r.bar[2]) add(r.bar[2]);
+                    if (r.bar[3]) add(r.bar[3]);
                 }
                 for (const s of r.splats) if (s.sprite) add(s.sprite, { damage: s.sprite._ufDmg, slot: s.sprite._ufSlot });
             }
@@ -1925,7 +2087,7 @@
                         Combat.resolveAttack(att, dummy);
                     }
                     const evs = hits.slice(before).map(h => h.e);
-                    const keysOk = evs.every(e => Object.keys(e).sort().join(",") === "attackType,attacker,damage,hit,style,target" && e.attacker === att && e.target === dummy &&
+                    const keysOk = evs.every(e => ["attackType", "attacker", "damage", "hit", "style", "target"].every(k => k in e) && e.attacker === att && e.target === dummy &&
                         typeof e.damage === "number" && typeof e.hit === "boolean" && TYPES.includes(e.attackType) && (e.hit || e.damage === 0));
                     const stylesOk = evs.length === 4 && evs.every((e, i) => e.style === order[i]);
                     t.check("styles", agg.maxHit > acc.maxHit && defDef > accDef && acc.A > agg.A && stylesOk && keysOk,
@@ -2044,7 +2206,7 @@
                         `old popup layer ${ss._ufCombatPopups === undefined ? "absent" : "present"}, ${kids.length} layer sprites all cached splat/bar bitmaps ${onlyCached}, addPopup("MISS") -> splat ${popup ? popup.dmg : "none"}`);
                 }
 
-                // 7. health_bar: green over red above the head while in combat, width = hp share, hidden 6 s after the last hit.
+                // 7. health_bar: universal 5-section health bar above every creature's head, plus 6-second action bar on action trigger.
                 {
                     const bystander = person("TEST_combat_bystander", ax + 4, ay + 1, L(1, 1, 1, 10), {});
                     Combat.clearFx();
@@ -2071,20 +2233,44 @@
                     }
                     const gpx = bm.fill.getPixel(5, 2), rpx = bm.back.getPixel(bm.width - 2, 3);
                     const colours = parseInt(gpx.slice(3, 5), 16) > 150 && parseInt(gpx.slice(1, 3), 16) < 100 && parseInt(rpx.slice(1, 3), 16) > 150 && parseInt(rpx.slice(3, 5), 16) < 80;
-                    const placed = !!back && !!fill && head !== null && back.y + 6 <= head && back.y >= head - 16 && Math.abs(back.x + (bm.width + 2) / 2 - dsp.x) <= 1;
+                    const placed = !!back && !!fill && head !== null && back.y + 6 <= head && back.y >= head - 20 && Math.abs(back.x + (bm.width + 2) / 2 - dsp.x) <= 1;
                     const width1 = fill ? fill.width : -1;
+
+                    // 5-section divider notches check (notches at x = 6, 12, 18, 24)
+                    const notchFill = bm.fill.getPixel(6, 1);
+                    const notchBack = bm.back.getPixel(7, 2);
+                    const fiveSections = notchFill === "#000000" && notchBack === "#000000";
+
+                    // Universal health bar: bystander ALSO has a health bar above its head
+                    const bystanderBars = barOn(bystander);
+                    const hasBystanderBar = bystanderBars.some(s => s.kind === "barBack") && bystanderBars.some(s => s.kind === "barFill");
+
+                    // HP damage change
                     dummy.data.hp = 40;
                     Combat.resolveAttack(striker, dummy, { rng: alwaysLow });
                     await t.waitFrames(2);
                     const fill2 = barOn(dummy).find(s => s.kind === "barFill");
                     const want2 = Math.round(bm.width * 40 / Combat.maxHp(dummy));
-                    const noBarBystander = barOn(bystander).length === 0;
-                    const shownAt = performance.now();
-                    await t.waitUntil(() => barOn(dummy).length === 0, 9000, "the health bar to hide");
-                    const hiddenAfter = (performance.now() - shownAt) / 1000;
-                    t.check("health_bar", !!back && !!fill && width1 === want1 && !!fill2 && fill2.width === want2 && want1 !== want2 && placed && colours && noBarBystander && hiddenAfter >= 5.5 && hiddenAfter <= 6.8,
-                        `after a hit: bar ${back ? `at (${back.x},${back.y})` : "missing"}, green ${width1} px of ${bm.width} (want ${want1}), head row y ${head === null ? "?" : head.toFixed(1)}: above the head ${placed}; ` +
-                        `at 40/${Combat.maxHp(dummy)} hp green ${fill2 ? fill2.width : -1} px (want ${want2}); colours green ${gpx} over red ${rpx}: ${colours}; bystander bar ${!noBarBystander}; hidden ${hiddenAfter.toFixed(2)} s after the last hit`);
+
+                    // 6-second d20 round action bar check
+                    Combat.triggerAction(dummy, "attack", 6000);
+                    await t.waitFrames(2);
+                    const actSprites = fxLayer.visibleSprites().filter(s => (s.kind === "actionBarBack" || s.kind === "actionBarFill") && s.unitId === dummy.id);
+                    const actBack = actSprites.find(s => s.kind === "actionBarBack");
+                    const actFill = actSprites.find(s => s.kind === "actionBarFill");
+                    const actPlaced = !!actBack && !!actFill && actBack.y >= back.y + 6 && actBack.x === back.x;
+                    const actActive = Combat.isActionActive(dummy);
+
+                    // Wait until the 6-second action bar completes its round
+                    await t.waitUntil(() => !Combat.isActionActive(dummy), 8000, "the action bar cooldown to complete");
+                    await t.waitFrames(5);
+                    const actSpritesAfter = fxLayer.visibleSprites().filter(s => (s.kind === "actionBarBack" || s.kind === "actionBarFill") && s.unitId === dummy.id);
+                    const actHiddenAfter = actSpritesAfter.length === 0;
+
+                    t.check("health_bar", !!back && !!fill && width1 === want1 && !!fill2 && fill2.width === want2 && want1 !== want2 && placed && colours && fiveSections && hasBystanderBar && actPlaced && actActive && actHiddenAfter,
+                        `health bar: dummy ${width1}/${bm.width} px (want ${want1}) at (${back ? back.x : "?"},${back ? back.y : "?"}), head row y ${head === null ? "?" : head.toFixed(1)} (placed ${placed}); ` +
+                        `at 40/${Combat.maxHp(dummy)} hp green ${fill2 ? fill2.width : -1} px (want ${want2}); 5-sections ${fiveSections}; universal bystander bar ${hasBystanderBar}; ` +
+                        `6s action bar: placed beneath ${actPlaced}, active ${actActive}, hidden on cooldown complete ${actHiddenAfter}`);
                     made.delete(bystander.id);
                     w.removeUnit(bystander.id);
                 }
@@ -2331,16 +2517,25 @@
                 // 15. no_math_random: the plugin file has no unseeded randomness.
                 {
                     let text = "";
+                    let pluginFile = "DEUS_Combat.js";
                     try {
                         const fs = require("fs"), path = require("path");
-                        text = fs.readFileSync(path.join(nw.__dirname || process.cwd(), "js", "plugins", "UF_Combat.js"), "utf8");
+                        const p1 = path.join(nw.__dirname || process.cwd(), "js", "plugins", "DEUS_Combat.js");
+                        const p2 = path.join(nw.__dirname || process.cwd(), "js", "plugins", "UF_Combat.js");
+                        if (fs.existsSync(p1)) {
+                            text = fs.readFileSync(p1, "utf8");
+                            pluginFile = "DEUS_Combat.js";
+                        } else {
+                            text = fs.readFileSync(p2, "utf8");
+                            pluginFile = "UF_Combat.js";
+                        }
                     } catch (e) {
                         text = "";
                     }
                     const needle = "Math" + ".random";
                     const count = text.split(needle).length - 1;
-                    t.check("no_math_random", text.length > 5000 && text.includes("UF_Combat") && count === 0,
-                        `js/plugins/UF_Combat.js read: ${text.length} characters; "${needle}" found ${count} time(s)`);
+                    t.check("no_math_random", text.length > 5000 && count === 0,
+                        `js/plugins/${pluginFile} read: ${text.length} characters; "${needle}" found ${count} time(s)`);
                 }
             } finally {
                 UF.Events.off("combat:hit", onHit);

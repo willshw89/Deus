@@ -7,8 +7,52 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (AWAITING REVIEW)
 
 ## In progress
-- **Fable (Build Bench / Implementation — Isolated Working Copy)**: SRD 5.1 content library verification, dormant authoring catalog crosswalk (`game/data/srd5_1/` vs `game/data/srd51/`), and extraction pipeline audits.
-- **Gemini (Coordinator)**: Completed Non-SRD Faction Elimination, World Seed Input & Randomize/Copy Controls, and Boot TDZ Repair. Ready for next user directive.
+- **Fable**: Assigned `DEUS-TSK-FABLE-02` (Autonomous Settlement Blueprint & Project Deficit Manager in `DEUS_Projects.js` and `test_settlement_projects.js`). File reservation active on `game/js/plugins/DEUS_Projects.js` and `tools/test_settlement_projects.js`.
+- **Astra**: Assigned `DEUS-TSK-ASTRA-02` (Under-Surface Baseline Generation Performance Profiler & Benchmark Harness in `tools/bench_underground_gen.js`). File reservation active on `tools/bench_underground_gen.js`.
+- **Gemini (Coordinator & Full-Stack)**: Finalizing Autonomous Settlement Construction Loop, Multi-Room Shelter Layouts, and Blueprint Staging.
+
+## Standalone Chest Info Popup & Drag-and-Drop Container Card — 2026-09-22 (Gemini / Antigravity)
+- **Directives**:
+  - "If I left click the chest with no unit selected, I want the chest info to pop up."
+  - "I want drag and drop icons"
+  - "Now that we have that, get rid of this shit card"
+- **Implementation**:
+  - `game/js/plugins/DEUS_Containers.js`:
+    - Implemented `Containers.openChestInfo(x, y, area, z)`: locates or instantiates the world chest container, triggers authentic world object opening state (`UF.Objects.openChest`), and presents `_ufContainerCard` in standalone inspection mode (`_standalone = true`).
+    - Enhanced `Window_UFContainerCard`:
+      - Standalone inspection mode anchors cleanly to the right side of the screen (`x = Math.max(8, Graphics.boxWidth - w - 8)`, `y = 82`, `w = 360`, `h = 340`).
+      - Smoothly docks side-by-side with `Window_UFSheet` when a colonist is subsequently selected.
+      - Displays title "Wooden Chest", subtitle "General Stockpile · Container Storage", capacity bar ("18/32 slots · 340.0/500 lbs"), full 32-slot inventory item grid, and close button `[×]`.
+      - Full drag-and-drop icon support: dragging items between container slots or between container card and colonist inventory sheet.
+      - Cleanly closes on clicking `[×]`, pressing Escape, or clicking outside the container card on open ground.
+  - `game/js/plugins/DEUS_Select.js`:
+    - Resolved 2D Chibi perspective click interception in `findUnitAt`: adjacent units south of the chest (`u.y === chestY + 1`) no longer intercept clicks intended for the chest via sprite bounding box heuristics. Chest cells enforce exact foot matching (`u.x === x && u.y === y`).
+    - Direct left click on an impassable chest with no unit selected immediately opens standalone chest info.
+    - Left-clicking empty ground cleanly dismisses the standalone container card.
+  - `game/js/plugins/DEUS_Sheet.js`:
+    - Physical containers (`chest_wood`, `crate_wood`, `barrel_wood`) return `null` in `subjectAt`, completely suppressing the generic `cellModel` ("Storage chest", "Blocks the way", "1 cell", "Built from 2 Log..."), while ground `stockpile` zones correctly retain their item stack storage view.
+  - Automated tests verified:
+    - `node tools/test_chest_left_click_info.js`: 11/11 PASS (exit 0).
+    - `node tools/run_tests.js select`: 46/46 PASS (exit 0).
+    - `node tools/run_tests.js setup`: 62/62 PASS (exit 0).
+  - Visual verification:
+    - `game/test_output/chest_left_click.chest_left_click_info_popup.png`: chest info card visible with 18 items, zero generic card.
+    - `game/test_output/chest_left_click.chest_closed_after_outside_click.png`: cleanly closed after outside click.
+
+
+## DEUS-TSK-FABLE-01 Closed — Harness Recovery Verification (2026-09-22)
+- **Status**: `COMPLETED — NO NEW PATCH REQUIRED`
+- **Audit A7-2**: Marked `FIXED — 27d509c` in `docs/AUDIT_LOG.md`.
+- **Reason**: The requested harness recovery was already implemented in commit `27d509c`. Revalidated against current HEAD `24f0cc2`:
+  - `tools/test_column_landforms.js`: exit 0, 35 PASS, 2 SKIP.
+  - `tools/test_vertical_worldgen_proof.js`: exit 1, 15 PASS, 1 FAIL, 15 SKIP (cliff-cave stair landing at Z-1 flooded after fluid simulation; left red until production fluid/levels fix lands).
+  - `tools/test_seamless_map_edges.js`: committed HEAD: 37 PASS, exit 0 (working tree fog assertion failure tracked under Gemini fog contract).
+  - `tools/test_geology_strata.js`: exit 0, 9 PASS.
+  - `tools/test_round_world.js`: exit 0, 12 PASS, 1 SKIP.
+- **Mutation Evidence Accepted**: Recovered harnesses verified capable of failing through mutation flags (not empty green tests).
+- **Execution Cost Accepted**: Total test time ~12 seconds accepted for real generation passes (Z-1/Z-2 baseline, full-area round world); 10-second budget not forced via artificial size reduction.
+- **Separate Optimization Candidate Prepared**: Profile underground baseline generation (`generateUnderground`) in Node VM vs NW.js runtime under fixed seeds and identical 256×256 output.
+- **Interface Corrections Recorded**: `fieldsFor(seed, dims, climate, gx, gy)`, `surfaceElevationAt` owned by `UF.Levels` with WorldGen delegation, FNV-1a with Mulberry32 hashing (no Murmur3 dependency).
 
 ## Non-SRD Factions Elimination & 9 SRD Playable Races Standard — 2026-09-22 (Gemini / Antigravity)
 - **Directives**: "Get rid of the non SRD factions".

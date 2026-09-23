@@ -450,6 +450,7 @@
                     return;
                 }
             }
+            if (!Look.cursorTooltip) return this.hideTip();
             if (Look.isOverUI()) return this.hideTip();
             const cell = Look.cellUnderMouse();
             if (!cell) return this.hideTip();
@@ -551,6 +552,7 @@
 
     const Look = {
         enabled: true,
+        cursorTooltip: false,
         FONT_SIZE, OFFSET, REFRESH_FRAMES,
         TipSprite: Sprite_UFLookTip,
         /** The three lines for a cell of the map on screen: [what, land, art] (strings, "" when empty); null off the map. */
@@ -647,6 +649,7 @@
         for (const tl of fx.tiles) W.setTile(fx.area.x, fx.area.y, tl.x, tl.y, 0, tl.was);
         for (const k of Object.keys(fx.mouseLock || {})) TouchInput[k] = fx.mouseLock[k];
         Assets.setIndex(undefined);
+        Look.cursorTooltip = false;
         Look.hide();
         if (window.UF.Camera) UF.Camera.setLevel(1);
         $gamePlayer.locate(fx.mid, fx.mid);
@@ -656,6 +659,7 @@
 
     /** The look checks. Returns the test fixtures it placed so the caller (UF_Interact's suite) can reuse and clean them up. */
     Look.runChecks = async function(t) {
+        Look.cursorTooltip = true;
         await t.waitUntil(() => !!(World() && World().currentArea && World().currentArea()), 10000, "world area").catch(() => {});
         const W = World(), O = window.UF.Objects, I = window.UF.Items, T = window.UF.Tiles;
         const area = W && W.currentArea();

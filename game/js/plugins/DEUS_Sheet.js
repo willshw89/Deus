@@ -100,6 +100,90 @@
         barBack: "rgba(20, 20, 25, 0.85)"
     };
 
+    const DND_SKILLS = [
+        { name: "Acrobatics", ability: "dex" },
+        { name: "Animal Handling", ability: "wis" },
+        { name: "Arcana", ability: "int" },
+        { name: "Athletics", ability: "str" },
+        { name: "Deception", ability: "cha" },
+        { name: "History", ability: "int" },
+        { name: "Insight", ability: "wis" },
+        { name: "Intimidation", ability: "cha" },
+        { name: "Investigation", ability: "int" },
+        { name: "Medicine", ability: "wis" },
+        { name: "Nature", ability: "int" },
+        { name: "Perception", ability: "wis" },
+        { name: "Performance", ability: "cha" },
+        { name: "Persuasion", ability: "cha" },
+        { name: "Religion", ability: "int" },
+        { name: "Sleight of Hand", ability: "dex" },
+        { name: "Stealth", ability: "dex" },
+        { name: "Survival", ability: "wis" }
+    ];
+
+    const CRAFTING_RECIPES_2X2 = [
+        { inputs: ["log"], output: "firewood", count: 4 },
+        { inputs: ["fiber"], output: "fiber_wrap", count: 1 },
+        { inputs: ["hide"], output: "hide_wrap", count: 1 },
+        { inputs: ["straw", "straw"], output: "floor_straw", count: 1 },
+        { inputs: ["stone", "log"], output: "stone_axe", count: 1 },
+        { inputs: ["stone", "stone"], output: "stone_pick", count: 1 },
+        { inputs: ["stone", "fiber"], output: "stone_knife", count: 1 },
+        { inputs: ["firewood", "fiber"], output: "torch", count: 2 },
+        { inputs: ["firewood", "firewood"], output: "firewood", count: 3 },
+        { inputs: ["meat_raw", "firewood"], output: "meat_cooked", count: 1 },
+        { inputs: ["fiber", "fiber"], output: "fiber_wrap", count: 2 },
+        { inputs: ["log", "log", "fiber"], output: "chest_wood", count: 1 },
+        { inputs: ["log", "log", "log", "log"], output: "workbench", count: 1 }
+    ];
+
+    const RACIAL_TRAITS_TABLE = {
+        human: [
+            { name: "Versatility", desc: "+1 to ability scores, resilient fortitude." },
+            { name: "Determination", desc: "Driven to master crafts, industry, and diverse biomes." }
+        ],
+        dwarf: [
+            { name: "Dwarven Resilience", desc: "Advantage on saves vs poison, resistance to poison damage." },
+            { name: "Stonecunning", desc: "Double proficiency on history checks related to stonework." }
+        ],
+        elf: [
+            { name: "Fey Ancestry", desc: "Advantage on saves vs charm, immune to magical sleep." },
+            { name: "Trance", desc: "Meditate deeply for 4 hours instead of 8 hours of sleep." }
+        ],
+        halfling: [
+            { name: "Lucky", desc: "Reroll a d20 result of 1 on attacks, ability checks, and saves." },
+            { name: "Brave", desc: "Advantage on saving throws against being frightened." }
+        ],
+        dragonborn: [
+            { name: "Draconic Ancestry", desc: "Draconic breath weapon and inherent damage resistance." },
+            { name: "Breath Weapon", desc: "Exhale destructive energy in a 15-ft cone (2d6 elemental damage)." }
+        ],
+        gnome: [
+            { name: "Gnome Cunning", desc: "Advantage on all Int, Wis, and Cha saves against magic." },
+            { name: "Artificer's Lore", desc: "Double proficiency on technological, mechanical, and gem checks." }
+        ],
+        tiefling: [
+            { name: "Hellish Resistance", desc: "Resistance to fire damage, darkvision 60 ft." },
+            { name: "Infernal Legacy", desc: "Thaumaturgy cantrip at will, innate fire incantations." }
+        ],
+        half_orc: [
+            { name: "Relentless Endurance", desc: "When reduced to 0 HP, drop to 1 HP instead once per long rest." },
+            { name: "Savage Attacks", desc: "Roll one additional weapon damage die on critical hits." }
+        ],
+        half_elf: [
+            { name: "Fey Ancestry", desc: "Advantage on saves vs charm, immune to magical sleep." },
+            { name: "Skill Versatility", desc: "Gain proficiency in two additional skills of your choice." }
+        ]
+    };
+
+    function darkvisionOf(species) {
+        const sp = String(species || "").toLowerCase();
+        if (["dwarf", "elf", "gnome", "tiefling", "half_orc", "drow", "orc", "goblin", "kobold"].includes(sp)) {
+            return "60 ft";
+        }
+        return "None (0 ft)";
+    }
+
     const catalog = () => window.$ufWorldCatalog || null;
     const World = () => (window.UF && UF.World) || null;
     const Items = () => (window.UF && UF.Items) || null;
@@ -476,7 +560,11 @@
         const area = W.currentArea();
         if (!area) return null;
         const O = Objects(), I = Items();
-        if ((O && O.at(x, y)) || (I && I.at(x, y).length)) return { kind: "cell", area: copyArea(area), x, y };
+        const obj = O ? O.at(x, y) : null;
+        const C = window.UF && UF.Containers;
+        const isChest = obj && (obj.id === "chest_wood" || obj.id === "crate_wood" || obj.id === "barrel_wood");
+        if (isChest) return null; // Physical containers must never open the generic cellModel card
+        if (obj || (I && I.at(x, y).length)) return { kind: "cell", area: copyArea(area), x, y };
         return null;
     }
 
@@ -1575,15 +1663,15 @@
             const I = Items();
             const curWeight = (m.subject && m.subject.kind === "unit" && I) ? I.carriedWeight(m.subject.unitId) : 0;
             const Dnd = window.UF && UF.Dnd5e;
-            const cap = (m.subject && m.subject.kind === "unit" && Dnd && typeof Dnd.carryingCapacity === "function")
+            const carryCap = (m.subject && m.subject.kind === "unit" && Dnd && typeof Dnd.carryingCapacity === "function")
                 ? Dnd.carryingCapacity(m.subject.unitId, null, curWeight)
                 : { maxWeight: 150, pushDragLift: 300, encumbered: 50, heavilyEncumbered: 100, status: "unencumbered" };
             this.text("Carrying Capacity (d20 SRD)", r.x, curY, r.w, 14, 11, sys);
             curY += 14;
-            const statusColor = cap.status === "over_capacity" ? "#ef4444" : (cap.status === "heavily_encumbered" ? "#f97316" : (cap.status === "encumbered" ? "#eab308" : "#86efac"));
-            this.text(`Load: ${curWeight.toFixed(1)} / ${cap.maxWeight.toFixed(0)} lbs [${cap.status.replace("_", " ").toUpperCase()}]`, r.x, curY, r.w, 13, 11, statusColor);
+            const statusColor = carryCap.status === "over_capacity" ? "#ef4444" : (carryCap.status === "heavily_encumbered" ? "#f97316" : (carryCap.status === "encumbered" ? "#eab308" : "#86efac"));
+            this.text(`Load: ${curWeight.toFixed(1)} / ${carryCap.maxWeight.toFixed(0)} lbs [${carryCap.status.replace("_", " ").toUpperCase()}]`, r.x, curY, r.w, 13, 11, statusColor);
             curY += 13;
-            this.text(`Push/Drag/Lift: ${cap.pushDragLift.toFixed(0)} lbs · Encumb: ${cap.encumbered.toFixed(0)} lbs`, r.x, curY, r.w, 13, 10, COLORS.dim);
+            this.text(`Push/Drag/Lift: ${carryCap.pushDragLift.toFixed(0)} lbs · Encumb: ${carryCap.encumbered.toFixed(0)} lbs`, r.x, curY, r.w, 13, 10, COLORS.dim);
         }
 
         drawPageInventory(m, L) {
@@ -1829,8 +1917,23 @@
         },
         /** Open the panel for whatever a click on this cell selects (units first). False on bare ground. */
         openAt(x, y) {
+            const W = World();
+            const area = W ? W.currentArea() : { x: 0, y: 0 };
+            const O = Objects();
+            const obj = O ? O.at(x, y) : null;
+            const isChest = obj && (obj.id === "chest_wood" || obj.id === "crate_wood" || obj.id === "barrel_wood");
+            if (isChest) {
+                const C = window.UF && UF.Containers;
+                if (C && typeof C.openChestInfo === "function") {
+                    return C.openChestInfo(x, y, area);
+                }
+                return false;
+            }
             const s = subjectAt(x, y);
             return s ? Sheet.open(s) : false;
+        },
+        subjectAt(x, y) {
+            return subjectAt(x, y);
         },
         close(withSound) {
             const w = sceneWindow();
@@ -2178,9 +2281,12 @@
         const clickScreen = async (sx, sy, right) => {
             TouchInput._x = sx;
             TouchInput._y = sy;
-            if (right) TouchInput._newState.cancelled = true;
-            else {
+            if (right) {
+                TouchInput._newState.cancelled = true;
+                TouchInput._currentState.cancelled = true;
+            } else {
                 TouchInput._newState.triggered = true;
+                TouchInput._currentState.triggered = true;
                 TouchInput._triggerX = sx;
                 TouchInput._triggerY = sy;
             }
@@ -2310,10 +2416,10 @@
             `stats ${m && m.stats ? m.stats.map(s => `${s.label} ${s.score} ${signed(s.mod)}`).join(" ") : "none"} ${statsOk}; needs ${m && m.needs ? "present" : "pruned"} ${needsOk}; ` +
             `face ${m && m.picture ? JSON.stringify(m.picture) : "none"} drawn ${faceOk}; panel at (${win.x},${win.y}) ${win.width}x${win.height} in the right part of ${Graphics.boxWidth}x${Graphics.boxHeight}: ${placed}`);
 
-        // sheet.overseer_intact: the same click selected the colonist in the Overseer; a ground click orders a move; a panel click doesn't.
+        // sheet.overseer_intact: the same click selected the colonist in the Overseer; right-click orders a move; a panel click doesn't.
         const selectedByClick = !!cm.selectedColonist && cm.selectedColonist.id === col.id;
         const cardShown = !scene._colonyCard || scene._colonyCard.visible;
-        await clickCell(cell.bare.x, cell.bare.y);
+        await clickCell(cell.bare.x, cell.bare.y, true);
         const move = J.of(col.id);
         const moved = !!move && move.type === "move" && move.owner === col.id && move.target.x === cell.bare.x && move.target.y === cell.bare.y && move.state !== "failed";
         const stayed = Sheet.isOpen() && Sheet.subject().unitId === col.id;
@@ -2323,7 +2429,7 @@
         const panelClickIgnored = after === move && !!cm.selectedColonist && cm.selectedColonist.id === col.id && Sheet.isOpen();
         t.check("overseer_intact", selectedByClick && cardShown && moved && stayed && panelClickIgnored,
             `click on the colonist: Overseer selected ${cm.selectedColonist ? cm.selectedColonist.name : "nobody"} (${selectedByClick}), card shown ${cardShown}; ` +
-            `click on bare ground (${cell.bare.x},${cell.bare.y}) with it selected: job ${move ? `${move.type} #${move.id} owner ${move.owner} to (${move.target.x},${move.target.y}) ${move.state}` : "none"} -> ${moved}; panel still on the colonist ${stayed}; ` +
+            `right-click on bare ground (${cell.bare.x},${cell.bare.y}) with it selected: job ${move ? `${move.type} #${move.id} owner ${move.owner} to (${move.target.x},${move.target.y}) ${move.state}` : "none"} -> ${moved}; panel still on the colonist ${stayed}; ` +
             `click on an empty grid slot of the panel at (${emptySlot && emptySlot.cx},${emptySlot && emptySlot.cy}): job unchanged ${after === move}, still selected ${!!cm.selectedColonist}, panel open ${Sheet.isOpen()}`);
         if (move) J.cancel(move.id, "test over");
         cm.deselect();

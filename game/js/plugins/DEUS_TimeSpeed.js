@@ -265,23 +265,10 @@
         }
 
         updatePosition() {
-            const gh = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
             const gw = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
-            const scene = SceneManager._scene;
-            const lp = scene && scene._ufLevelPlate;
-            const tb = scene && scene._ufSelectToolbar;
-            if (lp && lp.visible) {
-                this.x = lp.x + (lp.width || 132) + 8;
-                this.y = lp.y;
-            } else if (tb && tb.visible) {
-                this.x = tb.x + tb.width + 8;
-                this.y = tb.y;
-            } else {
-                const totalW = 400 + 8 + 132 + 8 + 192;
-                const startX = Math.max(8, Math.floor((gw - totalW) / 2));
-                this.x = startX + 400 + 8 + 132 + 8;
-                this.y = gh - 38;
-            }
+            const margin = 10;
+            this.x = gw - this.width - margin;
+            this.y = margin;
         }
 
         redraw() {
@@ -293,33 +280,41 @@
             const b = this.bitmap;
             b.clear();
 
-            // Background panel with antique gold border
-            b.fillRect(0, 0, 192, 32, "rgba(10, 14, 20, 0.75)");
-            b.strokeRect(0, 0, 192, 32, "#c89d5c");
+            // Sleek system menu / cursor styling: dark void backdrop, glowing electric cyan border, subtle top highlight
+            b.fillRect(0, 0, 192, 32, "rgba(8, 11, 18, 0.92)");
+            b.strokeRect(0, 0, 192, 32, "rgba(56, 189, 248, 0.85)");
+            b.fillRect(1, 1, 190, 1, "rgba(160, 240, 255, 0.35)");
 
             // Button 1: Slower [-]
-            this.drawButton(4, 3, 32, 26, "−", "#ffe9a8", m > 1);
+            this.drawButton(4, 3, 32, 26, "−", "#a0f0ff", m > 1);
 
             // Button 2: Pause / Resume [|| / >]
-            this.drawButton(40, 3, 32, 26, p ? "▶" : "❚❚", p ? "#55ff55" : "#ffb4b4", true);
+            this.drawButton(40, 3, 32, 26, p ? "▶" : "❚❚", p ? "#f87171" : "#34d399", true);
 
             // Button 3: Faster [+]
             const maxSpeed = SPEEDS[SPEEDS.length - 1];
-            this.drawButton(76, 3, 32, 26, "+", "#ffe9a8", m < maxSpeed);
+            this.drawButton(76, 3, 32, 26, "+", "#a0f0ff", m < maxSpeed);
 
             // Speed status label
             b.fontSize = 14;
-            b.textColor = p ? "#ffb4b4" : "#ffe9a8";
+            b.fontBold = true;
+            b.outlineColor = "rgba(0, 0, 0, 0.95)";
+            b.outlineWidth = 3;
+            b.textColor = p ? "#f87171" : "#ffffff";
             const text = p ? "PAUSED" : `${m}x Speed`;
             b.drawText(text, 112, 3, 76, 26, "center");
         }
 
         drawButton(x, y, w, h, label, color, enabled) {
             const b = this.bitmap;
-            b.fillRect(x, y, w, h, enabled ? "rgba(35, 30, 25, 0.85)" : "rgba(20, 20, 20, 0.5)");
-            b.strokeRect(x, y, w, h, enabled ? "#8a7550" : "#444444");
+            b.fillRect(x, y, w, h, enabled ? "rgba(18, 26, 42, 0.95)" : "rgba(10, 14, 22, 0.60)");
+            b.strokeRect(x, y, w, h, enabled ? "rgba(56, 189, 248, 0.65)" : "rgba(45, 55, 72, 0.40)");
+            if (enabled) b.fillRect(x + 1, y + 1, w - 2, 1, "rgba(160, 240, 255, 0.30)");
             b.fontSize = 15;
-            b.textColor = enabled ? color : "#666666";
+            b.fontBold = true;
+            b.outlineColor = "rgba(0, 0, 0, 0.95)";
+            b.outlineWidth = 3;
+            b.textColor = enabled ? color : "#475569";
             b.drawText(label, x, y, w, h, "center");
         }
 

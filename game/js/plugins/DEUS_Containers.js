@@ -482,6 +482,710 @@
     listen("world:created", () => { reindex(); });
     listen("world:loaded", () => { reindex(); });
 
+    //-------------------------------------------------------------------------
+    // Universal Item Drag & Drop System (Sprite_UFDragIcon & UF.ItemDrag)
+    //-------------------------------------------------------------------------
+
+    class Sprite_UFDragIcon extends Sprite {
+        initialize() {
+            super.initialize();
+            this.bitmap = new Bitmap(44, 44);
+            this.anchor.set(0.5, 0.5);
+            this.z = 99999;
+            this.visible = false;
+        }
+
+        update() {
+            super.update();
+            if (this.visible) {
+                this.x = TouchInput.x;
+                this.y = TouchInput.y;
+            }
+        }
+
+        setItem(it) {
+            const b = this.bitmap;
+            b.clear();
+            if (!it) return;
+            const I = Items();
+            const t = I ? I.type(it.type) : null;
+            const w = 44, h = 44;
+
+            // Translucent glowing dark tile backing
+            b.fillRect(2, 2, w - 4, h - 4, "rgba(10, 18, 30, 0.92)");
+            b.strokeRect(2, 2, w - 4, h - 4, "rgba(56, 189, 248, 0.95)", 2);
+            b.fillRect(3, 3, w - 6, 1, "rgba(186, 230, 253, 0.70)");
+
+            // Draw item icon/character graphic
+            if (window.UF && UF.Sheet && typeof UF.Sheet.drawItemIn === "function") {
+                UF.Sheet.drawItemIn(b, { x: 6, y: 6, w: 32, h: 32 }, it.type, it.count);
+            } else if (t && t.image) {
+                const img = ImageManager.loadCharacter(t.image);
+                if (img && img.isReady()) {
+                    const fw = Math.floor(img.width / 3), fh = Math.floor(img.height / 4);
+                    b.blt(img, fw, 0, fw, fh, 6, 6, 32, 32);
+                }
+                if (it.count > 1) {
+                    b.fontSize = 12;
+                    b.textColor = "#ffffff";
+                    b.outlineColor = "rgba(0,0,0,0.95)";
+                    b.outlineWidth = 3;
+                    b.drawText(String(it.count), 4, h - 15, w - 8, 12, "right");
+                }
+            }
+        }
+    }
+
+    const ItemDrag = {
+        _active: false,
+        _pending: false,
+        _source: null, // { kind: "container"|"inventory"|"equipment", containerId, unitId, slotIdx, item }
+        _downX: 0,
+        _downY: 0,
+        _dragSprite: null,
+
+        isDragging() {
+            return this._active;
+        },
+
+        ensureSprite(scene) {
+            if (!this._dragSprite || !this._dragSprite.parent) {
+                this._dragSprite = new Sprite_UFDragIcon();
+                if (scene && scene._windowLayer) {
+                    scene._windowLayer.addChild(this._dragSprite);
+                } else if (scene) {
+                    scene.addChild(this._dragSprite);
+                }
+            }
+            return this._dragSprite;
+        },
+
+        startPending(source, x, y) {
+            this._pending = true;
+            this._active = false;
+            this._source = source;
+            this._downX = x;
+            this._downY = y;
+        },
+
+        cancel() {
+            this._pending = false;
+            this._active = false;
+            this._source = null;
+            if (this._dragSprite) this._dragSprite.visible = false;
+        },
+
+        update(scene) {
+            if (!this._pending && !this._active) return;
+
+            // If mouse was released:
+            if (!TouchInput.isPressed()) {
+                if (this._active) {
+                    this.executeDrop(TouchInput.x, TouchInput.y);
+                } else if (this._pending) {
+                    // It was a click, not a drag!
+                    this.executeClick();
+                }
+                this.cancel();
+                return;
+            }
+
+            // If still pressed, check if movement exceeds threshold
+            if (this._pending && !this._active) {
+                const dist = Math.hypot(TouchInput.x - this._downX, TouchInput.y - this._downY);
+                if (dist >= 6) {
+                    this._active = true;
+                    this._pending = false;
+                    const spr = this.ensureSprite(scene);
+                    spr.setItem(this._source.item);
+                    spr.visible = true;
+                    spr.x = TouchInput.x;
+                    spr.y = TouchInput.y;
+                }
+            }
+
+            if (this._active && this._dragSprite) {
+                this._dragSprite.x = TouchInput.x;
+                this._dragSprite.y = TouchInput.y;
+            }
+        },
+
+        executeClick() {
+            if (!this._source) return;
+            const src = this._source;
+            if (src.kind === "container") {
+                const card = SceneManager._scene ? SceneManager._scene._ufContainerCard : null;
+                if (card && typeof card.onSlotClick === "function") {
+                    card.onSlotClick(src.slotIdx);
+                }
+            } else if (src.kind === "inventory") {
+                const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+                if (sheet && typeof sheet.selectSlot === "function") {
+                    sheet.selectSlot(src.slotIdx);
+                }
+            }
+        },
+
+        executeDrop(dropX, dropY) {
+            if (!this._source) return;
+            const src = this._source;
+            const scene = SceneManager._scene;
+            const card = scene ? scene._ufContainerCard : null;
+            const sheet = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+            const I = Items();
+            const W = World();
+            if (!I) return;
+
+            const u = resolveActiveUnit();
+            const cId = card ? card._containerId : null;
+
+            // 1. Check if dropped over Container Card
+            if (card && card.visible && typeof card.isPointerInsideCoords === "function" && card.isPointerInsideCoords(dropX, dropY)) {
+                const targetSlot = card.slotAtCoords(dropX, dropY);
+                if (src.kind === "inventory") {
+                    // Transfer from Colonist Inventory -> Container
+                    const deposited = Containers.putItem(cId, src.item.id);
+                    if (deposited) {
+                        SoundManager.playOk();
+                        card.refresh();
+                        if (sheet) sheet.redraw();
+                    } else {
+                        SoundManager.playBuzzer();
+                    }
+                    return;
+                } else if (src.kind === "container") {
+                    // Reorder within container if dropped on different slot
+                    if (targetSlot >= 0 && targetSlot !== src.slotIdx) {
+                        card.reorderSlot(src.slotIdx, targetSlot);
+                    }
+                    return;
+                }
+            }
+
+            // 2. Check if dropped over Character Profile Sheet (Inventory / Equipment)
+            if (sheet && sheet.visible && typeof sheet.isPointerInsideCoords === "function" && sheet.isPointerInsideCoords(dropX, dropY)) {
+                const targetSlot = typeof sheet.inventorySlotAtCoords === "function" ? sheet.inventorySlotAtCoords(dropX, dropY) : -1;
+                const targetEquip = typeof sheet.equipmentSlotAtCoords === "function" ? sheet.equipmentSlotAtCoords(dropX, dropY) : null;
+
+                if (targetEquip && u) {
+                    // Equip item!
+                    if (src.kind === "inventory" || src.kind === "container") {
+                        if (src.kind === "container") {
+                            Containers.takeItem(src.containerId, src.item.id, u.id);
+                        }
+                        if (typeof I.equip === "function") {
+                            I.equip(u.id, src.item.id, targetEquip.slot);
+                        }
+                        SoundManager.playEquip();
+                        if (card) card.refresh();
+                        sheet.redraw();
+                        return;
+                    }
+                }
+
+                if (src.kind === "container" && u) {
+                    // Transfer from Container -> Colonist Inventory
+                    const transferred = Containers.takeItem(src.containerId, src.item.id, u.id);
+                    if (transferred) {
+                        SoundManager.playOk();
+                        if (card) card.refresh();
+                        sheet.redraw();
+                    } else {
+                        SoundManager.playBuzzer();
+                    }
+                    return;
+                } else if (src.kind === "inventory") {
+                    // Reorder within colonist inventory
+                    if (targetSlot >= 0 && targetSlot !== src.slotIdx && typeof sheet.reorderSlot === "function") {
+                        sheet.reorderSlot(src.slotIdx, targetSlot);
+                    }
+                    return;
+                }
+            }
+
+            // 3. Dropped OUTSIDE both cards onto the map ground!
+            const mx = $gameMap ? $gameMap.canvasToMapX(dropX) : (u ? u.x : 0);
+            const my = $gameMap ? $gameMap.canvasToMapY(dropY) : (u ? u.y : 0);
+            const curArea = (u && u.area) || (W ? W.currentArea() : null);
+
+            if (src.kind === "inventory" && u) {
+                // Drop from colonist to ground
+                if (typeof I.putDown === "function") {
+                    I.putDown(src.item.id, curArea, mx, my);
+                    SoundManager.playCursor();
+                    if (sheet) sheet.redraw();
+                }
+            } else if (src.kind === "container") {
+                // Drop from chest to ground
+                Containers.removeItem(src.containerId, src.item.id);
+                if (typeof I.putDown === "function") {
+                    I.putDown(src.item.id, curArea, mx, my);
+                    SoundManager.playCursor();
+                    if (card) card.refresh();
+                }
+            }
+        }
+    };
+    UF.ItemDrag = ItemDrag;
+
+    //-------------------------------------------------------------------------
+    // Side-by-Side Container Card (Window_UFContainerCard)
+    //-------------------------------------------------------------------------
+
+    function resolveActiveUnit() {
+        const W = World();
+        if (!W) return null;
+        const sheetWin = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+        if (sheetWin && sheetWin._subject && sheetWin._subject.kind === "unit") {
+            const u = W.unit(sheetWin._subject.unitId);
+            if (u) return u;
+        }
+        const cm = window.$colonyManager;
+        if (cm && cm.selectedColonist) {
+            if (cm.selectedColonist.unit) return cm.selectedColonist.unit;
+            if (typeof cm.selectedColonist.id === "number" || typeof cm.selectedColonist.id === "string") {
+                const u = W.unit(cm.selectedColonist.id);
+                if (u) return u;
+            }
+            if (typeof cm.selectedColonist.x === "number") return cm.selectedColonist;
+        }
+        const S = window.UF && UF.Select;
+        if (S && typeof S.selected === "function") {
+            const sel = S.selected();
+            if (sel && sel.length > 0) {
+                const u = W.unit(sel[0]);
+                if (u) return u;
+            }
+        }
+        const cols = W.state && W.state.colony && Array.isArray(W.state.colony.colonists) ? W.state.colony.colonists : [];
+        if (cols.length > 0) {
+            const u = W.unit(cols[0]);
+            if (u) return u;
+        }
+        return null;
+    }
+
+    class Window_UFContainerCard extends Window_Base {
+        initialize(rect) {
+            super.initialize(rect);
+            this.backOpacity = 235;
+            this._containerId = null;
+            this._chestX = null;
+            this._chestY = null;
+            this._chestArea = null;
+            this._selSlot = -1;
+            this._footer = "";
+            this._slotRects = [];
+            this._standalone = false;
+            this.hide();
+        }
+
+        isOpen() {
+            return this.visible;
+        }
+
+        isPointerInsideCoords(gx, gy) {
+            return gx >= this.x && gx < this.x + this.width && gy >= this.y && gy < this.y + this.height;
+        }
+
+        slotAtCoords(gx, gy) {
+            const mx = gx - this.x - this.padding;
+            const my = gy - this.y - this.padding;
+            for (let i = 0; i < this._slotRects.length; i++) {
+                const r = this._slotRects[i];
+                if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i;
+            }
+            return -1;
+        }
+
+        reorderSlot(srcIdx, destIdx) {
+            const c = Containers.get(this._containerId);
+            if (!c || !c.items) return;
+            const items = c.items;
+            if (srcIdx < 0 || srcIdx >= items.length) return;
+            const moved = items.splice(srcIdx, 1)[0];
+            const insertAt = Math.min(items.length, Math.max(0, destIdx));
+            items.splice(insertAt, 0, moved);
+            this.refresh();
+        }
+
+        openFor(containerId, cx, cy, area) {
+            this._containerId = containerId;
+            this._chestX = cx;
+            this._chestY = cy;
+            this._chestArea = area || (World() ? World().currentArea() : null);
+            this._selSlot = -1;
+            this._footer = "";
+
+            const sheetWin = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+            if (sheetWin && sheetWin.visible) {
+                const targetW = Math.min(380, Math.max(280, sheetWin.x - 16));
+                const targetX = Math.max(8, sheetWin.x - targetW - 8);
+                const targetY = sheetWin.y;
+                const targetH = sheetWin.height;
+                this.move(targetX, targetY, targetW, targetH);
+            } else {
+                const w = 360;
+                const h = 340;
+                const y = 82;
+                const x = Math.max(8, Graphics.boxWidth - w - 8);
+                this.move(x, y, w, h);
+            }
+            this.createContents();
+            this.show();
+            this.refresh();
+        }
+
+        close() {
+            if (this._chestX !== null && this._chestY !== null) {
+                if (window.UF && UF.Objects && typeof UF.Objects.closeChest === "function") {
+                    UF.Objects.closeChest(this._chestX, this._chestY);
+                }
+            }
+            this._containerId = null;
+            this._chestX = null;
+            this._chestY = null;
+            this._chestArea = null;
+            this._selSlot = -1;
+            this._standalone = false;
+            this.hide();
+            if (window.UF && UF.Sheet && UF.Sheet.window()) {
+                UF.Sheet.window().redraw();
+            }
+        }
+
+        update() {
+            super.update();
+            if (!this.visible) return;
+            this.processTouch();
+            if (Input.isTriggered("escape")) {
+                this.close();
+                return;
+            }
+            const sheetWin = window.UF && UF.Sheet && UF.Sheet.window ? UF.Sheet.window() : null;
+            if (!this._standalone && sheetWin && !sheetWin.visible) {
+                this.close();
+                return;
+            }
+            const u = resolveActiveUnit();
+            if (u && this._chestX !== null) {
+                const dist = Math.hypot(u.x - this._chestX, u.y - this._chestY);
+                if (dist > 3) {
+                    this.close();
+                    return;
+                }
+            }
+            if (sheetWin && sheetWin.visible) {
+                this._standalone = false;
+                const targetW = Math.min(380, Math.max(280, sheetWin.x - 16));
+                const targetX = Math.max(8, sheetWin.x - targetW - 8);
+                const targetY = sheetWin.y;
+                const targetH = sheetWin.height;
+                if (this.x !== targetX || this.y !== targetY || this.height !== targetH || this.width !== targetW) {
+                    this.move(targetX, targetY, targetW, targetH);
+                    this.createContents();
+                    this.refresh();
+                }
+            }
+        }
+
+        processTouch() {
+            if (!TouchInput.isTriggered() && !TouchInput.isCancelled()) return;
+            const mx = TouchInput.x - this.x - this.padding;
+            const my = TouchInput.y - this.y - this.padding;
+            if (mx < -this.padding || my < -this.padding || mx > this.width || my > this.height) return;
+
+            if (TouchInput.isCancelled()) {
+                TouchInput._currentState.cancelled = false;
+                this.close();
+                return;
+            }
+
+            // Close box [X]
+            if (mx >= this.innerWidth - 22 && mx <= this.innerWidth && my >= 0 && my <= 22) {
+                TouchInput._currentState.triggered = false;
+                this.close();
+                SoundManager.playCancel();
+                return;
+            }
+
+            // Slot clicks / drag starts
+            for (let i = 0; i < this._slotRects.length; i++) {
+                const r = this._slotRects[i];
+                if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+                    TouchInput._currentState.triggered = false;
+                    const items = Containers.itemsIn(this._containerId);
+                    const it = items[i];
+                    if (it) {
+                        this._selSlot = i;
+                        const I = Items();
+                        const t = I ? I.type(it.type) : null;
+                        this._footer = `${t ? t.name : it.type} × ${it.count} · Drag to transfer or drop`;
+                        this.refresh();
+                        if (ItemDrag) {
+                            ItemDrag.startPending({
+                                kind: "container",
+                                containerId: this._containerId,
+                                slotIdx: i,
+                                item: it
+                            }, TouchInput.x, TouchInput.y);
+                        }
+                    } else {
+                        this._selSlot = -1;
+                        this._footer = "Empty container slot";
+                        this.refresh();
+                    }
+                    return;
+                }
+            }
+        }
+
+        onSlotClick(slotIdx) {
+            const c = Containers.get(this._containerId);
+            if (!c) return;
+            const I = Items();
+            if (!I) return;
+            const items = Containers.itemsIn(this._containerId);
+            const it = items[slotIdx];
+            if (!it) {
+                this._selSlot = -1;
+                this._footer = "Empty container slot";
+                this.refresh();
+                return;
+            }
+
+            this._selSlot = slotIdx;
+            const t = I.type(it.type);
+            this._footer = `${t ? t.name : it.type} × ${it.count} · Click transfers to unit`;
+
+            const u = resolveActiveUnit();
+            if (u) {
+                const transferred = Containers.takeItem(this._containerId, it.id, u.id);
+                if (transferred) {
+                    SoundManager.playOk();
+                    this.refresh();
+                    if (window.UF && UF.Sheet && UF.Sheet.window()) {
+                        UF.Sheet.window().redraw();
+                    }
+                } else {
+                    SoundManager.playBuzzer();
+                }
+            } else {
+                SoundManager.playCursor();
+                this.refresh();
+            }
+        }
+
+        refresh() {
+            const contents = this.contents;
+            contents.clear();
+            this._slotRects = [];
+            const c = Containers.get(this._containerId);
+            const I = Items();
+            const iw = this.innerWidth;
+
+            const name = (c && c.spec && c.spec.name) || "Wooden Chest";
+            const polName = (c && c.policy && c.policy.name) || "General Stockpile";
+            const items = c ? Containers.itemsIn(this._containerId) : [];
+            const curW = c ? Containers.currentWeight(this._containerId) : 0;
+            const maxW = c && c.spec ? c.spec.maxWeight : 500;
+            const maxSlots = c && c.spec ? c.spec.maxSlots : 32;
+
+            contents.fillRect(iw - 20, 2, 18, 18, "rgba(0, 0, 0, 0.6)");
+            contents.fillRect(iw - 20, 2, 18, 1, "rgba(255, 255, 255, 0.4)");
+            contents.fillRect(iw - 20, 19, 18, 1, "rgba(0, 0, 0, 0.8)");
+            contents.fontSize = 12;
+            contents.textColor = "#e2e8f0";
+            contents.drawText("×", iw - 20, 2, 18, 18, "center");
+
+            contents.fontSize = 16;
+            contents.textColor = "#f8fafc";
+            contents.drawText(name, 4, 2, iw - 26, 20, "left");
+
+            contents.fontSize = 12;
+            contents.textColor = "#94a3b8";
+            contents.drawText(`${polName} · Container Storage`, 4, 22, iw - 8, 16, "left");
+
+            contents.fontSize = 11;
+            contents.textColor = "#38bdf8";
+            contents.drawText(`Capacity: ${items.length}/${maxSlots} slots · ${curW.toFixed(1)}/${maxW.toFixed(0)} lbs`, 4, 42, iw - 8, 14, "left");
+
+            const barY = 58;
+            contents.fillRect(4, barY, iw - 8, 6, "rgba(15, 23, 42, 0.8)");
+            const pct = Math.max(0, Math.min(1, curW / maxW));
+            if (pct > 0) {
+                contents.fillRect(4, barY, Math.floor((iw - 8) * pct), 6, "#38bdf8");
+            }
+            contents.strokeRect(4, barY, iw - 8, 6, "rgba(56, 189, 248, 0.5)", 1);
+
+            const cols = 8;
+            const rows = 4;
+            const slotW = 32;
+            const slotH = 32;
+            const gap = 3;
+            const gridW = cols * slotW + (cols - 1) * gap;
+            const startX = Math.max(0, Math.floor((iw - gridW) / 2));
+            const startY = 74;
+
+            for (let i = 0; i < maxSlots; i++) {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const rx = startX + col * (slotW + gap);
+                const ry = startY + row * (slotH + gap);
+                this._slotRects.push({ x: rx, y: ry, w: slotW, h: slotH });
+
+                contents.fillRect(rx, ry, slotW, slotH, "rgba(15, 20, 30, 0.7)");
+                contents.fillRect(rx, ry, slotW, 1, "rgba(0, 0, 0, 0.8)");
+                contents.fillRect(rx, ry, 1, slotH, "rgba(0, 0, 0, 0.8)");
+                contents.fillRect(rx, ry + slotH - 1, slotW, 1, "rgba(255, 255, 255, 0.15)");
+                contents.fillRect(rx + slotW - 1, ry, 1, slotH, "rgba(255, 255, 255, 0.15)");
+
+                if (this._selSlot === i) {
+                    contents.strokeRect(rx, ry, slotW, slotH, "#facc15", 2);
+                }
+
+                const it = items[i];
+                if (it && I) {
+                    const t = I.type(it.type);
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.drawItemIn === "function") {
+                        UF.Sheet.drawItemIn(contents, { x: rx, y: ry, w: slotW, h: slotH }, it.type, it.count);
+                    } else if (t && t.image) {
+                        const bmp = ImageManager.loadCharacter(t.image);
+                        if (bmp && bmp.isReady()) {
+                            const fw = Math.floor(bmp.width / 3), fh = Math.floor(bmp.height / 4);
+                            contents.blt(bmp, fw, 0, fw, fh, rx + 2, ry + 2, slotW - 4, slotH - 4);
+                        }
+                        if (it.count > 1) {
+                            contents.fontSize = 10;
+                            contents.textColor = "#ffffff";
+                            contents.drawText(String(it.count), rx, ry + slotH - 12, slotW - 2, 12, "right");
+                        }
+                    }
+                }
+            }
+
+            const footY = startY + rows * (slotH + gap) + 8;
+            contents.fontSize = 11;
+            contents.textColor = "#94a3b8";
+            contents.drawText("Exchange: Click item to transfer to selected unit.", 4, footY, iw - 8, 14, "center");
+            contents.drawText("Drag items between cards or out to ground.", 4, footY + 16, iw - 8, 14, "center");
+
+            if (this._footer) {
+                contents.fillRect(4, footY + 36, iw - 8, 22, "rgba(10, 15, 25, 0.8)");
+                contents.fontSize = 11;
+                contents.textColor = "#facc15";
+                contents.drawText(this._footer, 8, footY + 38, iw - 16, 18, "left");
+            }
+        }
+    }
+
+    Containers.Window_UFContainerCard = Window_UFContainerCard;
+
+    Containers.openChestInfo = function(x, y, area, z) {
+        const W = World();
+        const curArea = area || (W ? W.currentArea() : { x: 0, y: 0 });
+        const curZ = typeof z === "number" ? z : 0;
+        let cont = Containers.at(curArea, x, y, curZ);
+        if (!cont) {
+            cont = Containers.create("chest_wood", { area: curArea, x, y, z: curZ });
+        }
+        if (window.UF && UF.Objects && typeof UF.Objects.openChest === "function") {
+            UF.Objects.openChest(x, y);
+        }
+        const scene = SceneManager._scene;
+        if (scene && scene._ufContainerCard) {
+            scene._ufContainerCard._standalone = true;
+            scene._ufContainerCard.openFor(cont.id, x, y, curArea);
+            return true;
+        }
+        return false;
+    };
+
+    Containers.useChest = function(unit, containerOrObj, x, y) {
+        if (!unit) return false;
+        const W = World();
+        if (!W) return false;
+        const u = typeof unit === "number" ? W.unit(unit) : unit;
+        if (!u) return false;
+
+        const I = Items();
+        if (I && typeof I.encumbrance === "function") {
+            const enc = I.encumbrance(u.id);
+            if (enc && enc.status === "over_capacity") {
+                SoundManager.playBuzzer();
+                return false;
+            }
+        }
+
+        const dist = Math.hypot(u.x - x, u.y - y);
+        let cont = null;
+        if (containerOrObj && containerOrObj.items) {
+            cont = containerOrObj;
+        } else {
+            cont = Containers.at(u.area, x, y, zOf(u));
+            if (!cont) {
+                cont = Containers.create("chest_wood", { area: u.area, x, y, z: zOf(u) });
+            }
+        }
+
+        if (dist <= 1.5) {
+            const dx = x - u.x, dy = y - u.y;
+            const ev = u.event || (W.eventOf && W.eventOf(u.id));
+            if (ev && typeof ev.setDirection === "function") {
+                if (Math.abs(dx) > Math.abs(dy)) ev.setDirection(dx > 0 ? 6 : 4);
+                else ev.setDirection(dy > 0 ? 2 : 8);
+            }
+            if (window.UF && UF.Combat && typeof UF.Combat.triggerAction === "function") {
+                UF.Combat.triggerAction(u, "use_chest", 6000);
+            }
+            if (window.UF && UF.Objects && typeof UF.Objects.openChest === "function") {
+                UF.Objects.openChest(x, y);
+            }
+            if (window.UF && UF.Sheet) {
+                UF.Sheet.open(u.id);
+                if (UF.Sheet.window()) UF.Sheet.window().switchTab(1);
+            }
+            const scene = SceneManager._scene;
+            if (scene && scene._ufContainerCard) {
+                scene._ufContainerCard.openFor(cont.id, x, y, u.area);
+            }
+            SoundManager.playOk();
+            return true;
+        } else {
+            const J = window.UF && UF.Jobs;
+            if (J) {
+                const standTarget = (typeof J.standFor === "function" ? J.standFor({ area: u.area, x, y, z: zOf(u) }, u, true) : null) || { area: u.area, x, y, z: zOf(u) };
+                const job = J.create("move", { area: u.area, x: standTarget.x, y: standTarget.y, z: zOf(u) }, {
+                    onComplete: () => {
+                        Containers.useChest(u, cont, x, y);
+                    }
+                }, u.id);
+                if (job) J.assign(job.id, u.id);
+            }
+            return true;
+        }
+    };
+
+    const _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
+    Scene_Map.prototype.createAllWindows = function() {
+        _Scene_Map_createAllWindows.call(this);
+        const w = 380;
+        const h = Graphics.boxHeight - 82 - 4;
+        this._ufContainerCard = new Window_UFContainerCard(new Rectangle(44, 82, w, h));
+        this._windowLayer.addChild(this._ufContainerCard);
+    };
+
+    const _Scene_Map_isAnyWindowUnderMouse = Scene_Map.prototype.isAnyWindowUnderMouse;
+    Scene_Map.prototype.isAnyWindowUnderMouse = function() {
+        if (_Scene_Map_isAnyWindowUnderMouse && _Scene_Map_isAnyWindowUnderMouse.call(this)) return true;
+        const cc = this._ufContainerCard;
+        if (cc && cc.visible) {
+            if (TouchInput.x >= cc.x && TouchInput.x < cc.x + cc.width &&
+                TouchInput.y >= cc.y && TouchInput.y < cc.y + cc.height) return true;
+        }
+        return false;
+    };
+
     if (typeof module !== "undefined") {
         module.exports = Containers;
     }

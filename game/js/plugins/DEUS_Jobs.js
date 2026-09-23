@@ -476,6 +476,13 @@
     const moveHandler = verb => ({
         verb,
         plan(job, unit) {
+            const I = Items();
+            if (I && typeof I.encumbrance === "function") {
+                const enc = I.encumbrance(unit.id);
+                if (enc && enc.status !== "unencumbered") {
+                    return { ok: false, reason: "encumbered" };
+                }
+            }
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
         },
@@ -1229,6 +1236,12 @@
             // V92 (user 2026-09-19): no status text over heads; the job shows in the profile, not as a bark.
         }
         job.barked = true;
+        if (window.UF && UF.Combat && typeof UF.Combat.triggerAction === "function") {
+            const actType = (job.type === "chop" || job.type === "mine" || job.type === "quarry" || job.type === "pick" || job.type === "gather" || job.type === "hunt") ? "harvest" :
+                            (job.type === "craft" || job.type === "cook") ? "craft" :
+                            (job.type === "build") ? "build" : job.type;
+            UF.Combat.triggerAction(unit, actType, 6000);
+        }
     }
 
     function finish(job, unit) {
@@ -1312,6 +1325,14 @@
         }
         const stand = job.stand;
         if (stand && !atCell(unit, stand)) {
+            const I = Items();
+            if (I && typeof I.encumbrance === "function") {
+                const enc = I.encumbrance(unit.id);
+                if (enc && enc.status !== "unencumbered") {
+                    fail(job, "encumbered");
+                    return;
+                }
+            }
             if (!unit.goal || !sameLevel(unit.goal, stand) || unit.goal.x !== stand.x || unit.goal.y !== stand.y) {
                 W.sendUnit(unit.id, { area: stand.area, x: stand.x, y: stand.y, z: refZ(stand) });
             }
@@ -1340,6 +1361,14 @@
             const ev = unitEvent(unit);
             if (ev && ev.isMoving()) return; // let the sprite arrive before the work starts
             startWork(job, unit);
+        }
+        if (window.UF && UF.Combat && typeof UF.Combat.isActionActive === "function") {
+            if (!UF.Combat.isActionActive(unit)) {
+                const actType = (job.type === "chop" || job.type === "mine" || job.type === "quarry" || job.type === "pick" || job.type === "gather" || job.type === "hunt") ? "harvest" :
+                                (job.type === "craft" || job.type === "cook") ? "craft" :
+                                (job.type === "build") ? "build" : job.type;
+                UF.Combat.triggerAction(unit, actType, 6000);
+            }
         }
         job.progress += rateOf(unit, job);
         if (job.progress >= workOf(job, unit)) finish(job, unit);

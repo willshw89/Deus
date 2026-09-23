@@ -705,6 +705,7 @@
             return true;
         },
         menu: () => (Interact.isOpen() ? menu : null),
+        enabled: false, // User directive 2026-09-22: Get rid of this little menu that comes up when I right click with nothing selected
         swallowedFrame: () => swallowFrame,
         /**
          * The per-frame mouse handler, run before UF_ColonyOverseer's controls. Returns true when the menu is open,
@@ -712,6 +713,7 @@
          */
         handleMouse() {
             purgeGraveyard();
+            if (!Interact.enabled) return false;
             if (!(SceneManager._scene instanceof Scene_Map) || !window.$gameMap) return false;
             if (Interact.isOpen()) return true;
             if (swallowFrame === Graphics.frameCount) return true;
@@ -899,6 +901,7 @@
 
     function registerChecks() {
         UF.Test.suite("look", async t => {
+            Interact.enabled = true;
             const L = Look();
             const fx = L && typeof L.runChecks === "function" ? await L.runChecks(t) : null;
             const W = World(), O = Objects(), I = Items(), J = Jobs();
@@ -1119,6 +1122,7 @@
             for (const j of J.list()) if (!jobsBefore.has(j.id) && !isFinished(j)) J.cancel(j.id, "test over");
             for (const u of W.units()) if (!unitsBefore.has(u.id)) W.removeUnit(u.id);
             if (window.UF.Time) UF.Time.setLevel(0);
+            Interact.enabled = false;
             L.cleanup(fx);
             await t.waitFrames(5);
             const errs = t.errorsSoFar().slice(errors0);

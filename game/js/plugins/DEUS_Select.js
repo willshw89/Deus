@@ -145,11 +145,19 @@
         const ax = area ? area.x : (W.currentArea ? W.currentArea().x : 0);
         const ay = area ? area.y : (W.currentArea ? W.currentArea().y : 0);
 
+        // If clicking on an impassable container or chest at (x, y), do not let units from (x, y+1) steal the click!
+        const C = window.UF && UF.Containers;
+        const O = window.UF && UF.Objects;
+        const curArea = area || (W.currentArea ? W.currentArea() : { x: ax, y: ay });
+        const obj = O ? (O.atIn ? O.atIn(curArea, x, y) : O.at(x, y)) : null;
+        const cont = C ? C.at(curArea, x, y, z) : null;
+        const isChest = (obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont;
+
         // 1. Check active Game_Events on map
         if (window.$gameMap && typeof $gameMap.events === "function") {
             const evs = $gameMap.events();
             // A. Screen pixel bounding box if sx, sy provided (pixel-accurate click on sprite)
-            if (typeof sx === "number" && typeof sy === "number") {
+            if (typeof sx === "number" && typeof sy === "number" && !isChest) {
                 for (const ev of evs) {
                     if (!ev || (typeof ev.isTransparent === "function" && ev.isTransparent())) continue;
                     const u = W.unitOfEvent ? W.unitOfEvent(ev) : null;
@@ -170,6 +178,10 @@
                 if (!ev || (typeof ev.isTransparent === "function" && ev.isTransparent())) continue;
                 const u = W.unitOfEvent ? W.unitOfEvent(ev) : null;
                 if (!u) continue;
+                if (isChest) {
+                    if (typeof ev.pos === "function" && ev.pos(x, y)) return u;
+                    continue;
+                }
                 if (Math.abs(ev._realX - x) <= 0.85 && (y >= ev._realY - 1.25 && y <= ev._realY + 0.85)) {
                     return u;
                 }
@@ -187,6 +199,7 @@
             for (const u of all) {
                 if (u.x === x && u.y === y && matchArea(u)) return u;
             }
+            if (isChest) return null;
             // Upper body / head (character sits at y+1, clicking head at y)
             for (const u of all) {
                 if (u.x === x && u.y === y + 1 && matchArea(u)) return u;
@@ -413,7 +426,13 @@
     function getSelectedUnits() {
         const W = World();
         if (!W) return [];
-        return selectedGroup.map(id => W.unit(id)).filter(Boolean);
+        let units = selectedGroup.map(id => W.unit(id)).filter(Boolean);
+        if (!units.length && window.$colonyManager && $colonyManager.selectedColonist) {
+            const sc = $colonyManager.selectedColonist;
+            const u = sc.unit || (typeof sc.id === "number" || typeof sc.id === "string" ? W.unit(sc.id) : (typeof sc.x === "number" ? sc : null));
+            if (u) units = [u];
+        }
+        return units;
     }
 
     function setSelection(ids, options = {}) {
@@ -451,7 +470,7 @@
 
     function clearSelection(options = {}) {
         selectedGroup = [];
-        syncOverseerSelection();
+        syncOverseerSelection(options);
         clearTargetedTile();
         emit("select:changed", []);
         if (!options || !options.keepSheet) {
@@ -590,7 +609,7 @@
     }
 
     let syncingOverseer = false;
-    function syncOverseerSelection() {
+    function syncOverseerSelection(options = {}) {
         const cm = window.$colonyManager;
         if (!cm) return;
         syncingOverseer = true;
@@ -601,7 +620,7 @@
                 if (adapter) cm.select(adapter);
                 else cm.select({ id: prim.id, name: prim.name, event: prim.event || (World() && World().eventOf(prim.id)) });
             } else {
-                cm.deselect();
+                cm.deselect(options);
             }
         } finally {
             syncingOverseer = false;
@@ -1085,8 +1104,24 @@
     //-------------------------------------------------------------------------
 
     function groupMove(target) {
-        const units = getSelectedUnits();
-        if (!units.length) return;
+        const rawUnits = getSelectedUnits();
+        if (!rawUnits.length) return;
+
+        const I = window.UF && UF.Items;
+        const units = rawUnits.filter(u => {
+            if (I && typeof I.encumbrance === "function") {
+                const enc = I.encumbrance(u.id);
+                if (enc && enc.status === "over_capacity") return false;
+            }
+            return true;
+        });
+        if (units.length < rawUnits.length) {
+            SoundManager.playBuzzer();
+            if (!units.length) {
+                setStatus("Over capacity: Cannot move until load is reduced!");
+                return;
+            }
+        }
 
         const W = World(), J = Jobs(), C = Colonists();
         if (!W || !J) return;
@@ -1181,9 +1216,11 @@
                 let orderedJob = null;
                 if (C && typeof C.order === "function" && C.isColonist(u)) {
                     orderedJob = C.order(u.id, { type: "move", target: { area, x: cell.x, y: cell.y, z: tz } });
+                    console.log("DEBUG_GROUPMOVE_ORDER: C.isColonist=true, orderedJob=" + (orderedJob ? orderedJob.id : "null"));
                 }
                 if (!orderedJob && J && typeof J.create === "function") {
                     orderedJob = J.create({ type: "move", target: { area, x: cell.x, y: cell.y, z: tz }, owner: u.id, params: { ordered: true } });
+                    console.log("DEBUG_GROUPMOVE_J_CREATE: orderedJob=" + (orderedJob ? orderedJob.id : "null"));
                 }
                 if (orderedJob) movingCount++;
             } else {
@@ -1727,14 +1764,7 @@
         updatePosition() {
             const gh = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
             const gw = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
-            const scene = SceneManager._scene;
-            const tc = scene && scene._ufTimeControls;
-            const lp = scene && scene._ufLevelPlate;
-            const lpW = (lp && lp.width) || 132;
-            const tcW = (tc && tc.width) || 192;
-            const totalW = this.width + 8 + lpW + 8 + tcW;
-            const startX = Math.max(8, Math.floor((gw - totalW) / 2));
-            this.x = startX;
+            this.x = Math.max(8, Math.floor((gw - this.width) / 2));
             this.y = gh - 38;
         }
         redraw() {
@@ -2052,9 +2082,10 @@
                         s.anchor.set(0.5, 0.5);
                     }
                     s.x = ev.screenX();
-                    s.y = (typeof ev.screenY === "function" ? ev.screenY() : 0) - 6;
+                    s.y = (typeof ev.screenY === "function" ? ev.screenY() : 0) - 12;
                 }
-                s.z = 1; // Strictly under all character sprites (z >= 3) and objects
+                const chZ = (cs && typeof cs.z === "number") ? cs.z : (typeof ev.screenZ === "function" ? ev.screenZ() : (typeof ev.screenY === "function" ? ev.screenY() : 0));
+                s.z = chZ - 5; // Strictly behind character sprite
                 spriteIdx++;
             }
 
@@ -2172,13 +2203,18 @@
                 }
             };
             const _cm_deselect = cmProto.deselect;
-            cmProto.deselect = function() {
-                _cm_deselect.call(this);
+            cmProto.deselect = function(options = {}) {
+                _cm_deselect.call(this, options);
                 if (!syncingOverseer) {
                     selectedGroup = [];
                     emit("select:changed", []);
-                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                        UF.Sheet.close();
+                    if (!options || !options.keepSheet) {
+                        const sub = window.UF && UF.Sheet && typeof UF.Sheet.subject === "function" ? UF.Sheet.subject() : null;
+                        if (!sub || sub.kind === "unit") {
+                            if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                                UF.Sheet.close();
+                            }
+                        }
                     }
                 }
             };
@@ -2341,11 +2377,7 @@
                 }
             } else if (!isProvoked("plain_click")) {
                 const u = findUnitAt(p.mx, p.my, p.area, p.z, p.sx, p.sy);
-                const hasSelection = (selectedGroup.length > 0) ||
-                                      (window.$colonyManager && !!$colonyManager.selectedColonist) ||
-                                      (selectedTileBox !== null) ||
-                                      (selectedTiles.length > 0) ||
-                                      (typeof targetedTile === "function" ? !!targetedTile() : false);
+                const hasUnitSelected = (selectedGroup.length > 0) || (window.$colonyManager && !!$colonyManager.selectedColonist);
 
                 if (u) {
                     if (isPlayerUnit(u)) {
@@ -2353,7 +2385,7 @@
                     } else {
                         clearSelection({ keepSheet: true });
                         if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
-                            $colonyManager.deselect();
+                            $colonyManager.deselect({ keepSheet: true });
                         }
                     }
                     clearTileSelection();
@@ -2362,31 +2394,58 @@
                         UF.Sheet.open(u.id);
                     }
                     SoundManager.playCursor();
-                } else if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(p.mx, p.my)) {
-                    clearSelection({ keepSheet: true });
-                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
-                        $colonyManager.deselect();
-                    }
-                    clearTileSelection();
-                    clearTargetedTile();
-                    SoundManager.playCursor();
-                } else if (hasSelection) {
-                    clearSelection();
-                    clearTileSelection();
-                    clearTargetedTile();
-                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
-                        $colonyManager.deselect();
-                    }
-                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                        UF.Sheet.close();
-                    }
-                    SoundManager.playCancel();
                 } else {
-                    selectSingleTile(p.mx, p.my, p.z, p.area);
-                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                        UF.Sheet.close();
+                    const C = window.UF && UF.Containers;
+                    const O = window.UF && UF.Objects;
+                    const obj = O ? (O.atIn ? O.atIn(p.area, p.mx, p.my) : O.at(p.mx, p.my)) : null;
+                    const cont = C ? C.at(p.area, p.mx, p.my, p.z) : null;
+                    const isChest = (obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont;
+
+                    if (isChest && !hasUnitSelected) {
+                        clearTileSelection();
+                        clearTargetedTile();
+                        if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                            UF.Sheet.close();
+                        }
+                        if (C && typeof C.openChestInfo === "function") {
+                            C.openChestInfo(p.mx, p.my, p.area, p.z);
+                        }
+                        SoundManager.playOk();
+                        return;
                     }
-                    SoundManager.playCursor();
+
+                    if (SceneManager._scene && SceneManager._scene._ufContainerCard && SceneManager._scene._ufContainerCard.visible && !isChest) {
+                        SceneManager._scene._ufContainerCard.close();
+                    }
+
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(p.mx, p.my)) {
+                        clearSelection({ keepSheet: true });
+                        if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                            $colonyManager.deselect({ keepSheet: true });
+                        }
+                        clearTileSelection();
+                        clearTargetedTile();
+                        SoundManager.playCursor();
+                    } else if (hasUnitSelected) {
+                        // User directive: "If I have a unit selected and I left click elsewhere, I want to drop the current target, nothing else"
+                        clearSelection();
+                        clearTileSelection();
+                        clearTargetedTile();
+                        if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                            $colonyManager.deselect();
+                        }
+                        if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                            UF.Sheet.close();
+                        }
+                        SoundManager.playCancel();
+                    } else if (selectedTiles.length > 0 || selectedTileBox !== null) {
+                        clearTileSelection();
+                        clearTargetedTile();
+                        SoundManager.playCancel();
+                    } else {
+                        selectSingleTile(p.mx, p.my, p.z, p.area);
+                        SoundManager.playCursor();
+                    }
                 }
             }
         }
@@ -2605,9 +2664,25 @@
                             const overUI = pointerOverUI();
                             const mx = $gameMap.canvasToMapX(TouchInput.x);
                             const my = $gameMap.canvasToMapY(TouchInput.y);
+                            console.log("DEBUG_SELECT_CANCEL: overUI=" + overUI + " units=" + units.length + " mx=" + mx + " my=" + my + " isValid=" + (window.$gameMap && $gameMap.isValid(mx, my)));
                             if (!overUI && window.$gameMap && $gameMap.isValid(mx, my)) {
                                 const W = World();
                                 const area = W ? W.currentArea() : { x: 0, y: 0 };
+                                const C = window.UF && UF.Containers;
+                                const O = window.UF && UF.Objects;
+                                const u = units[0];
+                                const obj = O ? (O.atIn ? O.atIn(area, mx, my) : O.at(mx, my)) : null;
+                                const cont = C ? C.at(area, mx, my, viewZ()) : null;
+                                const isChest = (obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont;
+                                if (isChest && C && typeof C.useChest === "function") {
+                                    C.useChest(u, cont || obj, mx, my);
+                                    if (selectedTiles.length > 0 || selectedTileBox) {
+                                        clearTileSelection();
+                                    }
+                                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { cancelled: false });
+                                    return;
+                                }
+
                                 groupMove({ area, x: mx, y: my, z: viewZ() });
                                 if (selectedTiles.length > 0 || selectedTileBox) {
                                     clearTileSelection();
@@ -2693,11 +2768,7 @@
             }
         } else if (!isProvoked("plain_click")) {
             const u = findUnitAt(mx, my, area, curZ, TouchInput.x, TouchInput.y);
-            const hasSelection = (selectedGroup.length > 0) ||
-                                  (window.$colonyManager && !!$colonyManager.selectedColonist) ||
-                                  (selectedTileBox !== null) ||
-                                  (selectedTiles.length > 0) ||
-                                  (typeof targetedTile === "function" ? !!targetedTile() : false);
+            const hasUnitSelected = (selectedGroup.length > 0) || (window.$colonyManager && !!$colonyManager.selectedColonist);
 
             if (u) {
                 if (isPlayerUnit(u)) {
@@ -2715,34 +2786,69 @@
                 }
                 SoundManager.playCursor();
                 TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
-            } else if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(mx, my)) {
-                clearSelection({ keepSheet: true });
-                if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
-                    $colonyManager.deselect();
-                }
-                clearTileSelection();
-                clearTargetedTile();
-                SoundManager.playCursor();
-                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
-            } else if (hasSelection) {
-                clearSelection();
-                clearTileSelection();
-                clearTargetedTile();
-                if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
-                    $colonyManager.deselect();
-                }
-                if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                    UF.Sheet.close();
-                }
-                SoundManager.playCancel();
-                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
             } else {
-                selectSingleTile(mx, my, curZ, area);
-                if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
-                    UF.Sheet.close();
+                const C = window.UF && UF.Containers;
+                const O = window.UF && UF.Objects;
+                const obj = O ? (O.atIn ? O.atIn(area, mx, my) : O.at(mx, my)) : null;
+                const cont = C ? C.at(area, mx, my, curZ) : null;
+                const isChest = (obj && (obj.id === "chest_wood" || (C && C.isContainerType && C.isContainerType(obj.id)))) || cont;
+
+                if (isChest && !hasUnitSelected) {
+                    clearTileSelection();
+                    clearTargetedTile();
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
+                    if (C && typeof C.openChestInfo === "function") {
+                        C.openChestInfo(mx, my, area, curZ);
+                    }
+                    SoundManager.playOk();
+                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                    return;
                 }
-                SoundManager.playCursor();
-                TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+
+                if (SceneManager._scene && SceneManager._scene._ufContainerCard && SceneManager._scene._ufContainerCard.visible && !isChest) {
+                    SceneManager._scene._ufContainerCard.close();
+                }
+
+                if (window.UF && UF.Sheet && typeof UF.Sheet.openAt === "function" && UF.Sheet.openAt(mx, my)) {
+                    clearSelection({ keepSheet: true });
+                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                        $colonyManager.deselect({ keepSheet: true });
+                    }
+                    clearTileSelection();
+                    clearTargetedTile();
+                    SoundManager.playCursor();
+                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                } else if (hasUnitSelected) {
+                    // User directive: "If I have a unit selected and I left click elsewhere, I want to drop the current target, nothing else"
+                    clearSelection();
+                    clearTileSelection();
+                    clearTargetedTile();
+                    if (window.$colonyManager && typeof $colonyManager.deselect === "function") {
+                        $colonyManager.deselect();
+                    }
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
+                    SoundManager.playCancel();
+                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                } else if (selectedTiles.length > 0 || selectedTileBox !== null) {
+                    clearTileSelection();
+                    clearTargetedTile();
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
+                    SoundManager.playCancel();
+                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                } else {
+                    selectSingleTile(mx, my, curZ, area);
+                    if (window.UF && UF.Sheet && typeof UF.Sheet.close === "function") {
+                        UF.Sheet.close();
+                    }
+                    SoundManager.playCursor();
+                    TouchInput._currentState = Object.assign({}, TouchInput._currentState, { triggered: false });
+                }
             }
         }
     }
@@ -2756,6 +2862,7 @@
         isPlayerUnit,
         pointerOverUI,
         selected: () => selectedGroup.slice(),
+        hasSelection: () => selectedGroup.length > 0,
         primary: primaryUnit,
         setSelection,
         clearSelection,

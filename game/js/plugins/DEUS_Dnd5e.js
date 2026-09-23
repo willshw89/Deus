@@ -353,9 +353,65 @@
         "Fog Cloud": { name: "Fog Cloud", level: 1, school: "Conjuration", range: "120 ft", time: "1 action", duration: "1 hour", comp: "V, S", desc: "Create a 20-foot-radius sphere of dense fog that heavily obscures the area." }
     };
 
+    // SRD 5.1 Racial Alignments (skewed toward race nature & cultural traditions)
+    const RACIAL_ALIGNMENTS = {
+        human: [
+            { a: "Lawful Good", w: 10 }, { a: "Neutral Good", w: 15 }, { a: "Chaotic Good", w: 10 },
+            { a: "Lawful Neutral", w: 15 }, { a: "True Neutral", w: 20 }, { a: "Chaotic Neutral", w: 10 },
+            { a: "Lawful Evil", w: 5 }, { a: "Neutral Evil", w: 10 }, { a: "Chaotic Evil", w: 5 }
+        ],
+        dwarf: [
+            { a: "Lawful Good", w: 60 }, { a: "Lawful Neutral", w: 25 }, { a: "Neutral Good", w: 15 }
+        ],
+        elf: [
+            { a: "Chaotic Good", w: 65 }, { a: "Chaotic Neutral", w: 20 }, { a: "Neutral Good", w: 15 }
+        ],
+        halfling: [
+            { a: "Lawful Good", w: 45 }, { a: "Neutral Good", w: 45 }, { a: "Chaotic Good", w: 10 }
+        ],
+        dragonborn: [
+            { a: "Lawful Good", w: 45 }, { a: "Neutral Good", w: 25 }, { a: "Lawful Neutral", w: 20 }, { a: "Lawful Evil", w: 10 }
+        ],
+        gnome: [
+            { a: "Neutral Good", w: 50 }, { a: "Chaotic Good", w: 30 }, { a: "Lawful Good", w: 20 }
+        ],
+        "half-elf": [
+            { a: "Chaotic Good", w: 55 }, { a: "Chaotic Neutral", w: 25 }, { a: "Neutral Good", w: 20 }
+        ],
+        "half-orc": [
+            { a: "Chaotic Neutral", w: 45 }, { a: "True Neutral", w: 20 }, { a: "Chaotic Evil", w: 25 }, { a: "Neutral Evil", w: 10 }
+        ],
+        tiefling: [
+            { a: "Chaotic Neutral", w: 45 }, { a: "Chaotic Evil", w: 25 }, { a: "Neutral Evil", w: 20 }, { a: "True Neutral", w: 10 }
+        ],
+        goblin: [
+            { a: "Neutral Evil", w: 70 }, { a: "Chaotic Evil", w: 20 }, { a: "Lawful Evil", w: 10 }
+        ],
+        orc: [
+            { a: "Chaotic Evil", w: 75 }, { a: "Chaotic Neutral", w: 15 }, { a: "Neutral Evil", w: 10 }
+        ],
+        kobold: [
+            { a: "Lawful Evil", w: 75 }, { a: "Lawful Neutral", w: 15 }, { a: "Neutral Evil", w: 10 }
+        ]
+    };
+
+    function rollAlignment(species, rng) {
+        const sp = String(species || "human").toLowerCase();
+        const weights = RACIAL_ALIGNMENTS[sp] || RACIAL_ALIGNMENTS.human;
+        let total = 0;
+        for (const w of weights) total += w.w;
+        let r = (typeof rng === "function" ? rng() : Math.random()) * total;
+        for (const w of weights) {
+            r -= w.w;
+            if (r <= 0) return w.a;
+        }
+        return weights[0].a;
+    }
+
     const Dnd5e = {
         classes: DND_CLASSES,
         spells: DND_SPELLS,
+        RACIAL_ALIGNMENTS,
 
         classDef(classId) {
             return DND_CLASSES[classId] || null;
@@ -408,12 +464,19 @@
             return stats;
         },
 
+        // D&D 5.1 SRD Racial Alignments skewed towards each race
+        alignmentOf(species, seed = 1, unitId = 0) {
+            const rng = mulberry32(hash32(seed, unitId, 0xa119));
+            return rollAlignment(species, rng);
+        },
+
         /**
          * Evaluate class suitability based on rolled ability scores and SRD 5.1 primary abilities.
          * Assigns class, level, hit die, max HP, AC, saving throws, skills, feats, and spells.
          */
-        assignClass(stats, seed, unitId) {
+        assignClass(stats, seed, unitId, species = "human") {
             const rng = mulberry32(hash32(seed, unitId, SALT_DND_CLASS));
+            const alignment = rollAlignment(species, rng);
             const scores = stats || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
 
             // Score each class based on average of primary ability scores
@@ -465,6 +528,7 @@
             return {
                 id: best.id,
                 name: best.name,
+                alignment: alignment || "True Neutral",
                 level: 1,
                 exp: 0,
                 nextExp: 300,

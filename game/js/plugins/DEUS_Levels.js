@@ -2198,19 +2198,11 @@
             this.redraw();
         }
         updatePosition() {
-            const gh = (window.Graphics && (Graphics.height || Graphics.boxHeight)) || 624;
             const gw = (window.Graphics && (Graphics.width || Graphics.boxWidth)) || 816;
-            const scene = SceneManager._scene;
-            const tb = scene && scene._ufSelectToolbar;
-            if (tb && tb.visible) {
-                this.x = tb.x + tb.width + 8;
-                this.y = tb.y;
-            } else {
-                const totalW = 400 + 8 + PLATE_W + 8 + 192;
-                const startX = Math.max(8, Math.floor((gw - totalW) / 2));
-                this.x = startX + 400 + 8;
-                this.y = gh - 38;
-            }
+            const timeW = 192;
+            const margin = 10;
+            this.x = gw - timeW - margin - PLATE_W - 8;
+            this.y = margin;
         }
         redraw() {
             const z = viewZ();
@@ -2219,20 +2211,31 @@
             const b = this.bitmap;
             b.clear();
             if (z === null) return;
-            b.fillRect(0, 0, PLATE_W, PLATE_H, "rgba(10, 14, 20, 0.75)");
-            b.strokeRect(0, 0, PLATE_W, PLATE_H, "#c89d5c");
+            // Sleek system menu / cursor styling: dark void backdrop, glowing electric cyan border, subtle top highlight
+            b.fillRect(0, 0, PLATE_W, PLATE_H, "rgba(8, 11, 18, 0.92)");
+            b.strokeRect(0, 0, PLATE_W, PLATE_H, "rgba(56, 189, 248, 0.85)");
+            b.fillRect(1, 1, PLATE_W - 2, 1, "rgba(160, 240, 255, 0.35)");
+
             this.drawButton(4, 3, 28, 26, "▼", z > -2);
             this.drawButton(PLATE_W - 32, 3, 28, 26, "▲", z < 2);
-            b.fontSize = 16;
-            b.textColor = z === 0 ? "#ffe9a8" : z < 0 ? "#d8c8a8" : "#bcd8ff";
+
+            b.fontSize = 15;
+            b.fontBold = true;
+            b.outlineColor = "rgba(0, 0, 0, 0.95)";
+            b.outlineWidth = 3;
+            b.textColor = z === 0 ? "#ffffff" : z < 0 ? "#94a3b8" : "#7dd3fc";
             b.drawText(LABELS[z], 34, 3, PLATE_W - 68, 26, "center");
         }
         drawButton(x, y, w, h, label, enabled) {
             const b = this.bitmap;
-            b.fillRect(x, y, w, h, enabled ? "rgba(35, 30, 25, 0.85)" : "rgba(20, 20, 20, 0.5)");
-            b.strokeRect(x, y, w, h, enabled ? "#8a7550" : "#444444");
+            b.fillRect(x, y, w, h, enabled ? "rgba(18, 26, 42, 0.95)" : "rgba(10, 14, 22, 0.60)");
+            b.strokeRect(x, y, w, h, enabled ? "rgba(56, 189, 248, 0.65)" : "rgba(45, 55, 72, 0.40)");
+            if (enabled) b.fillRect(x + 1, y + 1, w - 2, 1, "rgba(160, 240, 255, 0.30)");
             b.fontSize = 14;
-            b.textColor = enabled ? "#ffe9a8" : "#666666";
+            b.fontBold = true;
+            b.outlineColor = "rgba(0, 0, 0, 0.95)";
+            b.outlineWidth = 3;
+            b.textColor = enabled ? "#a0f0ff" : "#475569";
             b.drawText(label, x, y, w, h, "center");
         }
         /** The label shown ("+2", "+1", "Ground", "-1", "-2"), or "" when hidden. */
