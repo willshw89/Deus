@@ -675,10 +675,45 @@
             const pb = (unit && unit.data && unit.data.dnd && Number.isFinite(unit.data.dnd.proficiencyBonus)) ? unit.data.dnd.proficiencyBonus : 2;
             const profBonus = isProf ? pb : 0;
 
-            const Col = window.UF && UF.Colonists;
-            const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
-            const hasDis = !!opts.disadvantage || (eff && eff.disadvantageOnChecks === true);
-            const hasAdv = !!opts.advantage;
+            const Cond = root.UF && root.UF.Conditions;
+            let autoFail = false;
+            let autoFailReason = null;
+            let hasDis = !!opts.disadvantage;
+            let hasAdv = !!opts.advantage;
+
+            if (Cond && typeof Cond.checkModifiers === "function") {
+                const cMod = Cond.checkModifiers(unit, ability, skill, opts);
+                if (cMod.autoFail) {
+                    autoFail = true;
+                    autoFailReason = cMod.autoFailReason;
+                }
+                if (cMod.advantage) hasAdv = true;
+                if (cMod.disadvantage) hasDis = true;
+            } else {
+                const Col = window.UF && UF.Colonists;
+                const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
+                if (eff && eff.disadvantageOnChecks === true) hasDis = true;
+            }
+
+            if (autoFail) {
+                return {
+                    roll: 1,
+                    rolls: [1, 1],
+                    mod,
+                    profBonus,
+                    total: 1 + mod + profBonus,
+                    ability: abKey,
+                    skill,
+                    proficient: isProf,
+                    advantage: false,
+                    disadvantage: true,
+                    autoFail: true,
+                    autoFailReason,
+                    dc: opts.dc,
+                    success: false
+                };
+            }
+
             const dis = hasDis && !hasAdv;
             const adv = hasAdv && !hasDis;
 
@@ -699,6 +734,7 @@
                 proficient: isProf,
                 advantage: adv,
                 disadvantage: dis,
+                autoFail: false,
                 dc: opts.dc,
                 success: opts.dc !== undefined ? total >= opts.dc : null
             };
@@ -720,10 +756,44 @@
             const pb = (unit && unit.data && unit.data.dnd && Number.isFinite(unit.data.dnd.proficiencyBonus)) ? unit.data.dnd.proficiencyBonus : 2;
             const profBonus = isProf ? pb : 0;
 
-            const Col = window.UF && UF.Colonists;
-            const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
-            const hasDis = !!opts.disadvantage || (eff && eff.disadvantageOnAttacksAndSaves === true);
-            const hasAdv = !!opts.advantage;
+            const Cond = root.UF && root.UF.Conditions;
+            let autoFail = false;
+            let autoFailReason = null;
+            let hasDis = !!opts.disadvantage;
+            let hasAdv = !!opts.advantage;
+
+            if (Cond && typeof Cond.saveModifiers === "function") {
+                const sMod = Cond.saveModifiers(unit, ability, opts);
+                if (sMod.autoFail) {
+                    autoFail = true;
+                    autoFailReason = sMod.autoFailReason;
+                }
+                if (sMod.advantage) hasAdv = true;
+                if (sMod.disadvantage) hasDis = true;
+            } else {
+                const Col = window.UF && UF.Colonists;
+                const eff = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(unit) : null;
+                if (eff && eff.disadvantageOnAttacksAndSaves === true) hasDis = true;
+            }
+
+            if (autoFail) {
+                return {
+                    roll: 1,
+                    rolls: [1, 1],
+                    mod,
+                    profBonus,
+                    total: 1 + mod + profBonus,
+                    ability: abKey,
+                    proficient: isProf,
+                    advantage: false,
+                    disadvantage: true,
+                    autoFail: true,
+                    autoFailReason,
+                    dc: opts.dc,
+                    success: false
+                };
+            }
+
             const dis = hasDis && !hasAdv;
             const adv = hasAdv && !hasDis;
 
@@ -743,6 +813,8 @@
                 proficient: isProf,
                 advantage: adv,
                 disadvantage: dis,
+                autoFail: false,
+                autoFailReason: null,
                 dc: opts.dc,
                 success: opts.dc !== undefined ? total >= opts.dc : null
             };

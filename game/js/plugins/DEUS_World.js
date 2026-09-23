@@ -846,6 +846,16 @@
 
     function unitMoveSpeed(u) {
         let base = (u && u.data && Number.isFinite(u.data.moveSpeed)) ? (u.data.moveSpeed | 0) : 4;
+        const Cond = window.UF && UF.Conditions;
+        if (Cond) {
+            if (typeof Cond.speedZero === "function" && Cond.speedZero(u)) return 0;
+            if (typeof Cond.canMove === "function" && !Cond.canMove(u)) return 0;
+            if (typeof Cond.speedFactor === "function") {
+                const factor = Cond.speedFactor(u);
+                if (factor === 0) return 0;
+                if (factor <= 0.5) return Math.max(1, base - 1);
+            }
+        }
         const Col = window.UF && UF.Colonists;
         if (Col && typeof Col.exhaustionEffects === "function") {
             const eff = Col.exhaustionEffects(u);
@@ -1083,6 +1093,10 @@
     if (window.UF.Events && UF.Events.on) {
         UF.Events.on("time:hour", holdOccupiedRegrowth);
         UF.Events.on("colonists:exhaustion", refreshUnitMovement);
+        UF.Events.on("condition:applied", refreshUnitMovement);
+        UF.Events.on("condition:removed", refreshUnitMovement);
+        UF.Events.on("condition:stood_up", refreshUnitMovement);
+        UF.Events.on("condition:cleared", refreshUnitMovement);
     }
     function wrapRegrowth() {
         const O = window.UF && UF.Objects;
@@ -1217,6 +1231,11 @@
         const gz = goal && goal.z !== undefined ? goal.z : zOf(goal && goal.area);
         if (!u || !goal || !goal.area || !this.inWorld(goal.area.x, goal.area.y, gz) || gz !== zOf(u)) return false;
         if (unitMoveSpeed(u) === 0) return false;
+        const Cond = window.UF && UF.Conditions;
+        if (Cond) {
+            if (typeof Cond.canMove === "function" && !Cond.canMove(u)) return false;
+            if (typeof Cond.canWillinglyMoveTo === "function" && !Cond.canWillinglyMoveTo(u, goal.x, goal.y)) return false;
+        }
         const same = !!u.goal && sameArea(u.goal.area, goal.area) && u.goal.x === (goal.x | 0) && u.goal.y === (goal.y | 0) && zOf(u.goal) === gz;
         u.goal = { area: { x: goal.area.x, y: goal.area.y }, x: goal.x | 0, y: goal.y | 0, z: gz };
         u.stuckFrames = 0;

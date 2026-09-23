@@ -1562,6 +1562,10 @@
         const d = u && u.data;
         if (!d) return null;
         if (unconscious(u)) { startDying(u); return "unconscious"; }
+        const Cond = window.UF && UF.Conditions;
+        if (Cond && typeof Cond.canAct === "function" && !Cond.canAct(u)) {
+            return "incapacitated";
+        }
         const n = ensureNeeds(u);
         if (!n) return null;
         if (n.exhaustion >= 5) return "exhaustion";

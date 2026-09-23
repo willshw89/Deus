@@ -7,6 +7,25 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
+- **Astra**: DEUS-TSK-ASTRA-10 — Independent adversarial validation of frozen HIST-09 candidate `f532291b8aecbd9899814ddf6c098bd3cee36342`; owns `tools/bench_species_biology.js`, `tools/test_historical_carrying_capacity.js`, `tools/test_production_history_demographics.js`, `docs/systems/UF_History.md`, this Astra entry, and local `game/test_output/bench_species_biology.json`. Production plugins are read-only.
+- **Fable**: DEUS-TSK-FABLE-07 — First Self-Maintaining Settlement Milestone Closure (`game/js/plugins/DEUS_Projects.js`, `tools/test_multi_deficit_settlement.js`, `tools/test_autonomous_settlement_closure.js`, `docs/systems/DEUS_Projects.md`).
+- **Gemini**: Coordinator / Integration Gate / Standby for validation reports.
+
+## DEUS-TSK-GEMINI-03 — Authoritative SRD 5.1 Conditions System & 12-Slot Equipment Architecture (2026-09-23)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Conditions.js`: Authoritative SRD 5.1 condition registry (15 conditions: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious), multi-instance lifecycle engine (`has`, `get`, `instances`, `all`, `add`, `remove`, `clear`, `standUp`, `tick`), advantage/disadvantage modifiers, auto-crit rules within 5 ft, auto-fail saves/checks, damage resistance (Petrified half damage), carry weight multipliers (Petrified 10x), and drop-held-items on incapacitation/unconsciousness.
+  - `game/js/plugins/DEUS_Combat.js`: Integrated `UF.Conditions.canAct`, `canHarmfullyTarget`, `attackRollModifiers`, `critOnHit`, `damageMultiplier`; migrated equipment slots to authoritative 12 slots (`head`, `neck`, `cloak`, `body`, `hands`, `bracers`, `mainHand`, `offHand`, `feet`, `ring1`, `ring2`, `belt`); added defensive guards for `Input`, `Scene_Map`, `Game_Map`, and `w.eventOf`.
+  - `game/js/plugins/DEUS_Dnd5e.js`: Integrated `UF.Conditions.checkModifiers` and `saveModifiers` in `rollCheck` and `rollSave`; reports explicit `autoFail: true/false` and `autoFailReason`.
+  - `game/js/plugins/DEUS_Sheet.js`: Migrated character sheet Page 2 to 12 slots (6 columns x 2 rows); mapped equipment aliases (`clothes`/`armor`/`torso` -> `body`, `shoulders`/`back`/`cape` -> `cloak`, `waist` -> `belt`, `arms` -> `bracers`); guarded `I.inventoryOf` and `I.atIn`; added direct unit object support to `Sheet.buildModel(unit)` and exported `unitModel`/`cellModel`.
+  - `game/js/plugins/DEUS_World.js`: Movement speed respect for conditions (`speedZero`, `canMove`, `speedFactor`); frightened condition prevents moving closer to fear source (`canWillinglyMoveTo`); hooked condition events (`condition:applied`, `condition:removed`, `condition:stood_up`, `condition:cleared`) to refresh unit movement.
+  - `game/js/plugins/DEUS_Colonists.js`: Incapacitation from conditions pauses action loop (`decideDoing` returns `"incapacitated"` when `canAct` is false).
+  - `game/js/plugins/DEUS_Anim.js`: Mapped equipment slot aliases (`cloak`, `belt`, `bracers`, `body`) to animation layers.
+  - `tools/test_conditions_system.js`: Headless test harness with 55 passing tests and Rule 4 mutant failure verification.
+- **Checks observed**:
+  - `node tools/test_conditions_system.js`: **55 passed, 0 failed (exit 0)**.
+  - `node tools/test_production_history_demographics.js`: **PASS (exit 0)**.
+  - `node tools/test_multi_deficit_settlement.js`: **10 passed, 0 failed (exit 0)**.
 
 ## DEUS-TSK-ASTRA-08 — Completed headless calibration matrix (2026-09-23)
 - **Status**: `PASS — observed default matrix; narrow runtime margin`. This is a harness calibration experiment, not production integration or a guarantee for arbitrary seeds.

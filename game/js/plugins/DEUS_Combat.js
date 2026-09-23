@@ -53,10 +53,9 @@
     const MODES = ["nearest", "weakest", "strongest", "protect", "defend", "flee", "manual"];
     const SEEKING = new Set(["nearest", "weakest", "strongest", "protect"]);
     const SLOTS = [
-        "head", "eyes", "neck", "shoulders",
-        "armor", "torso", "waist", "arms",
-        "hands", "ring1", "ring2", "feet",
-        "mainHand", "offHand"
+        "head", "neck", "cloak", "body",
+        "hands", "bracers", "mainHand", "offHand",
+        "feet", "ring1", "ring2", "belt"
     ];
     const N4 = [[0, 1], [0, -1], [-1, 0], [1, 0]];
     const SALT = { attack: 0xc0b7a1, spawn: 0xc0b7a2, pick: 0xc0b7a3, duel: 0xc0b7a5 };
@@ -87,8 +86,21 @@
             tool: "mainHand",
             shield: "offHand",
             legs: "feet",
-            clothes: "torso",
-            body: "armor"
+            boots: "feet",
+            shoes: "feet",
+            clothes: "body",
+            armor: "body",
+            torso: "body",
+            shoulders: "cloak",
+            back: "cloak",
+            cape: "cloak",
+            arms: "bracers",
+            waist: "belt",
+            eyes: "head",
+            helmet: "head",
+            hat: "head",
+            gloves: "hands",
+            amulet: "neck"
         },
         quality: { bonus: [0.8, 0.9, 1, 1.1, 1.2, 1.3] }
     };
@@ -250,8 +262,13 @@
     function maxHp(unit) {
         const block = creatureBlock(unit);
         let base = block ? pos(block.hitpoints, 1) : level(unit, "hitpoints");
-        if (unit && unit.data && unit.data.dnd && Number.isFinite(unit.data.dnd.hpMax)) {
-            base = Math.max(1, unit.data.dnd.hpMax);
+        if (unit && unit.data) {
+            if (Number.isFinite(unit.data.maxHp)) {
+                base = Math.max(1, unit.data.maxHp);
+            }
+            if (unit.data.dnd && Number.isFinite(unit.data.dnd.hpMax)) {
+                base = Math.max(1, unit.data.dnd.hpMax);
+            }
         }
         const Col = window.UF && UF.Colonists;
         if (Col && typeof Col.exhaustionEffects === "function") {
@@ -633,6 +650,9 @@
 
     function retaliate(target, attacker, tick) {
         if (!attacker || !attacker.data || attacker.id === undefined || isDead(target)) return;
+        const Cond = window.UF && UF.Conditions;
+        if (Cond && typeof Cond.canHarmfullyTarget === "function" && !Cond.canHarmfullyTarget(target, attacker)) return;
+        if (Cond && typeof Cond.canAct === "function" && !Cond.canAct(target)) return;
         const c = cd(target);
         const mode = modeOf(target);
         if (mode === "flee") {
@@ -672,6 +692,9 @@
             if (!m || m === victim || m === attacker || isDead(m)) continue;
             if (!sameArea(m, victim)) continue;
             if (factionOf(m) !== f) continue;
+            const Cond = window.UF && UF.Conditions;
+            if (Cond && typeof Cond.canHarmfullyTarget === "function" && !Cond.canHarmfullyTarget(m, attacker)) continue;
+            if (Cond && typeof Cond.canAct === "function" && !Cond.canAct(m)) continue;
             const dest = (m.data && m.data.destiny) || (window.UF && UF.Goals && UF.Goals.destinyOf && UF.Goals.destinyOf(m));
             const bonusR = (dest && (dest.id === "legendary_guardian" || dest.id === "hearth_tender")) ? 4 : 0;
             if (cheb(m, victim) > (R + bonusR)) continue;
@@ -727,16 +750,35 @@
         ensureHp(target);
         if (target.data.hp <= 0 && (!isColonist(target) || target.data.dead)) return null;
 
-        const o = opts || {};
-        const isTargetUnconscious = (target.data.hp <= 0);
+        const Cond = window.UF && UF.Conditions;
+        if (Cond) {
+            if (typeof Cond.canAct === "function" && !Cond.canAct(attacker)) return null;
+            if (typeof Cond.canHarmfullyTarget === "function" && !Cond.canHarmfullyTarget(attacker, target)) return null;
+        }
 
-        // Exhaustion on attacker: Level 3+ grants disadvantage on attack rolls
-        const Col = window.UF && UF.Colonists;
-        const effAttacker = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(attacker) : null;
-        const hasAttDis = !!o.disadvantage || (effAttacker && effAttacker.disadvantageOnAttacksAndSaves === true);
-        const hasAttAdv = !!o.advantage || isTargetUnconscious; // attacks against unconscious targets have advantage (SRD p. 359)
-        const finalAdv = hasAttAdv && !hasAttDis;
-        const finalDis = hasAttDis && !hasAttAdv;
+        const o = opts || {};
+        const isTargetUnconscious = (target.data.hp <= 0) || (Cond && typeof Cond.has === "function" && Cond.has(target, "unconscious"));
+        const dist = cheb(attacker, target);
+
+        let finalAdv = false;
+        let finalDis = false;
+        if (Cond && typeof Cond.attackRollModifiers === "function") {
+            const mod = Cond.attackRollModifiers(attacker, target, {
+                advantage: !!o.advantage,
+                disadvantage: !!o.disadvantage,
+                distance: dist
+            });
+            finalAdv = mod.advantage;
+            finalDis = mod.disadvantage;
+        } else {
+            // Exhaustion on attacker: Level 3+ grants disadvantage on attack rolls
+            const Col = window.UF && UF.Colonists;
+            const effAttacker = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(attacker) : null;
+            const hasAttDis = !!o.disadvantage || (effAttacker && effAttacker.disadvantageOnAttacksAndSaves === true);
+            const hasAttAdv = !!o.advantage || isTargetUnconscious; // attacks against unconscious targets have advantage (SRD p. 359)
+            finalAdv = hasAttAdv && !hasAttDis;
+            finalDis = hasAttDis && !hasAttAdv;
+        }
 
         const n = numbers(attacker, target);
         const rngFn = typeof o.rng === "function" ? o.rng : attackRng(attacker, target);
@@ -776,8 +818,11 @@
             rollA = attResult.roll;
             rollD = attResult.effectiveAC;
 
-            // SRD p. 359: any attack that hits an unconscious creature is a critical hit if within 5 feet (1 cell)
-            if (hit && isTargetUnconscious && cheb(attacker, target) <= 1) {
+            // SRD p. 359: any attack that hits an unconscious/paralyzed creature is a critical hit if within 5 feet (1 cell)
+            const isAutoCrit = (Cond && typeof Cond.critOnHit === "function")
+                ? Cond.critOnHit(attacker, target, dist)
+                : (isTargetUnconscious && dist <= 1);
+            if (hit && isAutoCrit) {
                 isCrit = true;
                 attResult.critical = true;
             }
@@ -802,7 +847,7 @@
             rollA = r.a;
             rollD = r.d;
             if (o.critical !== undefined) isCrit = !!o.critical;
-            else if (hit && isTargetUnconscious && cheb(attacker, target) <= 1) {
+            else if (hit && ((Cond && typeof Cond.critOnHit === "function") ? Cond.critOnHit(attacker, target, dist) : (isTargetUnconscious && dist <= 1))) {
                 isCrit = true;
             }
         }
@@ -813,6 +858,8 @@
         let killed = false;
 
         if (hit) {
+            const dmgMult = (Cond && typeof Cond.damageMultiplier === "function") ? Cond.damageMultiplier(target) : 1.0;
+            rolled = Math.max(0, Math.floor(rolled * dmgMult));
             if (isTargetUnconscious) {
                 damage = rolled;
                 target.data.hp = 0;
@@ -947,7 +994,7 @@
     Combat.playAttackAnimation = function(attacker, target) {
         const w = World();
         if (!w || !attacker || !target || attacker.id === undefined) return false;
-        const ev = w.eventOf(attacker.id);
+        const ev = (typeof w.eventOf === "function") ? w.eventOf(attacker.id) : null;
         if (!ev) return false;
         const dx = target.x - attacker.x, dy = target.y - attacker.y;
         if (dx || dy) ev.setDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 6 : 4) : (dy > 0 ? 2 : 8));
@@ -1352,8 +1399,9 @@
         if (st.tick % every === 0) regen();
     }
 
-    const _Game_Map_update = Game_Map.prototype.update;
-    Game_Map.prototype.update = function(sceneActive) {
+    if (typeof Game_Map !== "undefined" && Game_Map.prototype) {
+        const _Game_Map_update = Game_Map.prototype.update;
+        Game_Map.prototype.update = function(sceneActive) {
         _Game_Map_update.call(this, sceneActive);
         const t0 = performance.now();
         try {
@@ -1365,7 +1413,8 @@
         Combat.perf.updates++;
         Combat.perf.simMs += ms;
         if (ms > Combat.perf.simWorst) Combat.perf.simWorst = ms;
-    };
+        };
+    }
 
     //-------------------------------------------------------------------------
     // Test spawning and the debug key
@@ -1412,12 +1461,16 @@
     })();
     Combat.debugKeysOn = () => !!(Combat.debug === true || argvDebug || (window.UF && UF.Test && UF.Test.active));
 
-    Input.keyMapper[75] = "ufCombatRaid"; // K
-    const _Scene_Map_update = Scene_Map.prototype.update;
-    Scene_Map.prototype.update = function() {
-        _Scene_Map_update.call(this);
-        if (this.isActive() && Combat.debugKeysOn() && Input.isTriggered("ufCombatRaid")) Combat.testRaid();
-    };
+    if (typeof Input !== "undefined" && Input.keyMapper) {
+        Input.keyMapper[75] = "ufCombatRaid"; // K
+    }
+    if (typeof Scene_Map !== "undefined" && Scene_Map.prototype) {
+        const _Scene_Map_update = Scene_Map.prototype.update;
+        Scene_Map.prototype.update = function() {
+            if (_Scene_Map_update) _Scene_Map_update.call(this);
+            if (this.isActive() && Combat.debugKeysOn() && typeof Input !== "undefined" && Input.isTriggered && Input.isTriggered("ufCombatRaid")) Combat.testRaid();
+        };
+    }
 
     //-------------------------------------------------------------------------
     // Hitsplats and health bars (interface: real-time ms, not simulation)

@@ -75,18 +75,30 @@
     const DEFAULTS = {
         grid: { columns: 8, rows: 4, slot: 36 },
         slots: [
-            "head", "eyes", "neck", "shoulders",
-            "armor", "torso", "waist", "arms",
-            "hands", "ring1", "ring2", "feet",
-            "mainHand", "offHand"
+            "head", "neck", "cloak", "body",
+            "hands", "bracers", "mainHand", "offHand",
+            "feet", "ring1", "ring2", "belt"
         ],
         slotAliases: {
             weapon: "mainHand",
             tool: "mainHand",
             shield: "offHand",
             legs: "feet",
-            clothes: "torso",
-            body: "armor"
+            boots: "feet",
+            shoes: "feet",
+            clothes: "body",
+            armor: "body",
+            torso: "body",
+            shoulders: "cloak",
+            back: "cloak",
+            cape: "cloak",
+            arms: "bracers",
+            waist: "belt",
+            eyes: "head",
+            helmet: "head",
+            hat: "head",
+            gloves: "hands",
+            amulet: "neck"
         }
     };
     const STAT_KEYS = ["str", "dex", "con", "int", "wis", "cha"];
@@ -211,8 +223,8 @@
             columns: clampInt(g.columns, 1, 12, DEFAULTS.grid.columns),
             rows: clampInt(g.rows, 1, 8, DEFAULTS.grid.rows),
             slot: clampInt(g.slot, 24, 64, DEFAULTS.grid.slot),
-            slots: Array.isArray(s.slots) && s.slots.length ? s.slots.slice(0, 14) : DEFAULTS.slots,
-            aliases: s.slotAliases && typeof s.slotAliases === "object" ? s.slotAliases : DEFAULTS.slotAliases,
+            slots: Array.isArray(s.slots) && s.slots.length === 12 && !s.slots.includes("eyes") ? s.slots.slice(0, 12) : DEFAULTS.slots,
+            aliases: Object.assign({}, DEFAULTS.slotAliases, (s.slotAliases && typeof s.slotAliases === "object") ? s.slotAliases : {}),
             faces: s.faces && typeof s.faces === "object" ? s.faces : {}
         };
     }
@@ -616,8 +628,8 @@
             return it ? { itemId: it.id, typeId: it.type, count: it.count, carried: it.holder === unit.id } : null;
         }
         if (typeof v === "string") {
-            const t = I.type(v) || I.types().find(ty => ty.name === v) || null;
-            return t ? { itemId: null, typeId: t.id, count: 1, carried: false } : null;
+            const t = (typeof I.type === "function" ? I.type(v) : null) || (typeof I.types === "function" ? I.types().find(ty => ty.name === v) : null) || null;
+            return { itemId: null, typeId: t ? t.id : v, count: 1, carried: false };
         }
         if (typeof v === "object" && v.type) return resolveEquip(unit, v.id !== undefined ? v.id : v.type);
         return null;
@@ -780,7 +792,7 @@
         const I = Items(), cfg = config(), d = u.data || {};
         const kind = unitKind(u);
         const readOnly = kind !== "colonist";
-        const inv = I ? I.inventoryOf(u.id) : [];
+        const inv = (I && typeof I.inventoryOf === "function") ? I.inventoryOf(u.id) : [];
         const equipment = equipmentOf(u, cfg);
         const equipped = new Set((equipment || []).filter(e => e.itemId !== null && e.itemId !== undefined).map(e => e.itemId));
         const species = wildSpecies(d.species);
@@ -794,7 +806,7 @@
         const th = Env && typeof Env.unitThermal === "function" ? Env.unitThermal(u) : null;
         const cond = Env && typeof Env.conditionLabel === "function" ? Env.conditionLabel(u) : "";
         const thermalText = th ? `${th.bodyTemp}°C${cond ? ` [${cond}]` : ""}` : "";
-        const here = I && u.area ? I.atIn(u.area, u.x, u.y) : [];
+        const here = (I && typeof I.atIn === "function" && u.area) ? I.atIn(u.area, u.x, u.y) : [];
         const grid = gridSlots(inv, cfg, equipped);
         const drops = kind === "animal" && species && species.yields ? Object.keys(species.yields).slice(0, MAX_DROPS).map(id => ({ typeId: id, count: species.yields[id] | 0 })) : (kind === "animal" ? [] : null);
         let capabilities = null;
@@ -956,6 +968,9 @@
 
     function buildModel(subject) {
         if (!subject) return null;
+        if (subject.id !== undefined && subject.data) {
+            return unitModel(subject);
+        }
         if (subject.kind === "unit") {
             const W = World();
             const u = W ? W.unit(subject.unitId) : null;
@@ -1009,7 +1024,7 @@
             } else if (activeTab === 1) {
                 // PAGE 2: INVENTORY & EQUIPMENT
                 if (m.equipment) {
-                    const cols = 7;
+                    const cols = 6;
                     const rows = Math.ceil(m.equipment.length / cols);
                     const slotW = 34, slotH = 34;
                     const gapX = cols > 1 ? Math.max(2, Math.floor((iw - cols * slotW) / (cols - 1))) : 0;
@@ -1063,7 +1078,7 @@
         } else {
             // Non-character objects / animal fallback
             if (m.equipment) {
-                const cols = 7;
+                const cols = 6;
                 const rows = Math.ceil(m.equipment.length / cols);
                 const slotW = 34;
                 const slotH = 34;
@@ -1620,9 +1635,8 @@
             const SHORT_LABELS = {
                 mainHand: "Main",
                 offHand: "Off",
-                shoulders: "Shldr",
-                ring1: "Ring1",
-                ring2: "Ring2"
+                ring1: "Ring 1",
+                ring2: "Ring 2"
             };
             m.equipment.forEach((e, i) => {
                 const r = L.equipment.slots[i];
@@ -2015,6 +2029,8 @@
         config,
         subjectAt,
         buildModel,
+        unitModel,
+        cellModel,
         layoutFor,
         itemIconSpec,
         objectIconSpec,
