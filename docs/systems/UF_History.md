@@ -1,5 +1,53 @@
 # UF_History
 
+## Species biology measurement harness — 2026-09-23
+
+**Task:** DEUS-TSK-ASTRA-07. **Tool:** `tools/bench_species_biology.js`. This headless harness evaluates the supplied nine-species profile proposal using the unchanged ASTRA06 demographic engine and canonical Year-1 bootstrap. The proposal is copied into the report's `proposedProfiles`; it is a measurement input, not approved catalog biology or an automatic New Game setting. Production plugins, catalogs, registration, and real saves remain read-only. The ASTRA06 implementation and its earlier evidence are documented below.
+
+```text
+node tools/bench_species_biology.js
+node tools/bench_species_biology.js --seed 424242 --years 250 --runs 2 --json game/test_output/TEST_species_biology.json
+node tools/bench_species_biology.js --selftest
+```
+
+`--seed <integer>` selects one seed; `--years 100|250|500` selects one horizon; `--runs 1..20` controls repeated trials. `--json <path>` selects a JSON file beneath `game/test_output/`; its default is `game/test_output/bench_species_biology.json`. It is a path argument, unlike ASTRA06's Boolean `--json` flag. `--selftest` runs assertion and negative-control checks; adding `--json <path>` writes that self-test report. `--mutant=unseeded|invalid_lifespan|inverted_fertility|corrupt_parentage` runs a deliberately invalid benchmark input or measurement in isolation. These controls do not rewrite production source or replace production methods.
+
+The default matrix requests seeds **0, 424242, and 20260919**, each with **two fresh Node processes**, run sequentially. Every process advances one continuous trajectory with requested checkpoints after 100, 250, and 500 elapsed years: a completed matrix would contain **six trajectories and 18 snapshots**, not 18 independently restarted simulations. The engine dates at those checkpoints are 101, 251, and 501. Each worker has a **30-minute timeout**. Repeat trials compare exact state bytes, full event bytes, SHA-256 hashes, and annual population curves. Biological aggregates use one result per unique seed; repeated identical seeds do not increase the extinction sample size. With `--runs 1`, repeat verification is reported as `NOT RUN`.
+
+| Report data | Meaning and limits |
+|---|---|
+| `runs[].curves`, checkpoint `species[].living`, `births`, and `archived` | Annual living counts and cumulative births/deaths, plus checkpoint totals. `summaries[].species[].populationsBySeed` retains the per-seed populations. |
+| `lifespan.allCompleted`, `oldAge`, `founders`, `bornDuringRun`, `censoredLivingAges` | Count, minimum, maximum, mean, and population standard deviation for separate cohorts. Only `old_age` deaths must meet the profile's lower lifespan bound; earlier infant, disease, and exposure deaths are valid. All recorded deaths must remain below or at the upper bound. Living individuals are right-censored; founders entered alive at ages 18–40. Completed-death means are not life expectancy. Empty cohorts return null statistics. |
+| `birthSpacing` and `replacement` | Gaps between a mother's recorded births, including across partnerships. Replacement summaries count daughters of non-founder females whose reproductive histories have ended through death or aging beyond their window, daughters reaching maturity, and still-censored daughters. These are descriptive cohort measurements, not a proof of replacement equilibrium or an estimated population reproduction number. |
+| `extinct`, `firstExtinctionYear`, aggregate `extinctions` and `extinctionSampleFraction` | Observed zero-living outcomes and their first elapsed year. Fractions use unique seeds only; three seeds do not establish a general extinction probability. |
+| `growth` | Living/founder ratio, trailing birth/death counts, and a trailing endpoint log-growth rate with doubling time when positive. Any observed population greater than **100 times its founder count** sets a diagnostic flag. This disclosed threshold neither limits simulation nor represents ecological carrying capacity; `carryingCapacity` is null and `capacityCheck` is `NOT CONFIGURED`. The rate is not a fitted exponential or a stability verdict. |
+| `maxGeneration` and `rulers` | Genealogical depth, open reigns, accessions/successions, distinct ruling dynasties, and dynasty changes. Aggregate ruler counts sum the unique seed worlds. |
+| `stateBytes`, `stateSha256`, `eventsSha256` | Serialized UTF-8 state size and reproducibility checksums at each checkpoint. `eventLimit` is 1,000,000, and a checkpoint fails if any event has been discarded, preserving full-stream comparison. |
+| `timing`, `heap`, and `runtime` | Cumulative simulation time, mean/worst annual call, separate setup/observation/verification costs, process-heap samples, and machine/runtime context. Each timed call is the unmodified public `simulate(state, 1)`, including validation in both `simulate` and `step`. Census, heap sampling, serialization, hashing, verification, and IPC are outside simulation timing. Heap deltas include ordinary GC effects, temporary allocations, and retained prior checkpoint evidence; sampled peaks are not exact allocation peaks, serialized state sizes, or leak measurements. |
+
+All executable dependency source, plugin registration input, and catalog data are loaded directly with `git show` from commit `a97f606fdc689961a33030131fe2dc2d6b14862c` into an in-memory snapshot. Working-tree production bytes are never executed or parsed as simulation inputs. Each worker checks the loaded snapshot's hashes, and the parent requires the worker's aggregate source digest to match its own. Working-tree hashes at the beginning and end are observational provenance only: concurrent edits are preserved and cannot change the frozen run. This follows the snapshot requirement in `ENGINE_RULES.md` when other agents are editing production files.
+
+The task packet supplied engine SHA-256 `6fa731efc5b2ea13d339d2f2526e3c0352ef20092cb3e433f001ba1ee5405101`; the engine in the named commit instead has normalized SHA-256 `647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e`. The harness records both values, reports the packet mismatch, and executes the verified commit snapshot.
+
+Observed on 2026-09-23: the final `--selftest` report passed **22 checks**, including rejection of changed snapshot bytes, mismatched worker harness hashes, and the intended failures for unseeded randomness, invalid lifespan bounds, inverted fertility, and corrupt parentage. A real child-process timeout control preserved its previously validated checkpoint and identified missing coverage. A separate in-memory harness control with a 1 ms worker cap exited 1 and wrote a `FAIL` JSON report; production code was unchanged. An earlier attempt stopped at its former working-file end guard after concurrent edits added two null guards to `DEUS_Levels.js`; the commit-snapshot implementation removed that dependency on changing working files.
+
+The commit-snapshot default attempt before checkpoint streaming was added **failed with exit code 1**: seed 424242, repeat 1, exceeded the worker's 30-minute cap (`ETIMEDOUT`). Its last console progress report was at 400 elapsed years, with 46,235 person records and 2,120 living half-elves; this is a progress observation, not a completed 500-year result. Before that timeout, seed 0 completed two 500-year trajectories and their state/event/curve repeats matched exactly; that seed reported 69,927 person records and 25,451 living half-elves. The parent run took approximately 3,542 seconds of wall time, including completed trials and the timed-out worker, and stopped before seed 20260919. The driver used for this attempt emitted no final default artifact, so these observations do not provide the complete requested biological matrix or its final serialized-size report.
+
+The final driver emits verified checkpoint frames as newline-delimited JSON before a worker finishes. On timeout, the parent writes a `FAIL` report containing `completedRuns`, `partialRun`, failure details, and coverage marked `MEASURED` or `NOT RUN`; interrupted repeat verification is `INCOMPLETE`. Checkpoint measurements and hashes are retained, while full state/event evidence strings are removed from the failure artifact. Missing checkpoints are not represented as zero populations. This recovery behavior is covered by the timeout controls; the revised driver has **not** rerun the full 500-year matrix.
+
+The separate 100-year and 250-year matrices completed for all three seeds with two repeats each. Both reports passed integrity checks and exact state/event/curve repeat comparisons. Inspected artifacts are `game/test_output/bench_species_biology_100.json` and `game/test_output/bench_species_biology_250.json`, measured with Node v24.19.0 on an AMD Ryzen 7 8845HS:
+
+| Elapsed years | Reported wall time, six trials | Mean simulation per trajectory | Worst annual call | Serialized state bytes, min–max | Maximum sampled heap delta |
+|---|---:|---:|---:|---:|---:|
+| 100 | 5.243 s | 105.692 ms | 3.566 ms | 157,987–244,741 | 7.76 MiB |
+| 250 | 13.803 s | 1,504.096 ms | 56.303 ms | 589,315–1,735,144 | 31.09 MiB |
+
+At 250 years, humans and half-orcs were extinct in 2/3 sampled seeds each; dragonborn and tieflings were extinct in 1/3 each. These are observed failures of an extinction-free proposal, despite passing simulation-integrity checks. The profiles remain unapproved.
+
+The current `game/test_output/bench_species_biology.json` is explicitly an **`INCOMPLETE` session handoff**, assembled from the inspected shorter reports and the original timeout-console evidence. It is not an emitted, completed default-matrix report. The full three-seed 500-year matrix remains incomplete; the remaining decision is whether to authorize a longer run budget or a separate engine-performance task. No additional expensive 500-year run is claimed or automatically promised.
+
+The harness's `PASS` means its integrity and requested repeatability checks passed; extinction or high-growth findings remain reported biological outcomes, not calibration approval. It supplies no migration, tactical wars, extra environmental shocks, density regulation, or automatic profile adjustment. The failed default attempt above is not a PASS for the full matrix. Native RMMZ Playtest is outside this measurement harness.
+
 ## Optional historical demographics v6 — 2026-09-23
 
 **Task:** DEUS-TSK-ASTRA-06, HIST-01 plus minimum HIST-02. **Files:** `game/js/plugins/DEUS_HistoricalDemographics.js` and `tools/test_production_history_demographics.js`. The new module exposes `UF.HistoricalDemographics`; the existing `UF.History` API and canonical Year-1 campfire start remain separate.
