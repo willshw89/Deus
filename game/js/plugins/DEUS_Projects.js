@@ -803,7 +803,9 @@
             // material targets a tree or stone pile outside the footprint (the object on the cell must change).
             const onFootprint = assigned ? reservedAt(area, assigned.target.x, assigned.target.y) === p.id : false;
             const cellNow = assigned && onFootprint ? Projects.cells(p).find(c => c.x === assigned.target.x && c.y === assigned.target.y) : null;
-            t.check("job_done_in_engine", !!assigned && assigned.state === "done" && (!after || !before || after.id !== before.id) && (!onFootprint || (!!cellNow && cellNow.state !== "clear")),
+            // A footprint cell may still read "clear" after the job when the harvest left a clearable remainder (an oak's
+            // stump); what must not happen is a blocked cell or an unchanged object.
+            t.check("job_done_in_engine", !!assigned && assigned.state === "done" && (!after || !before || after.id !== before.id) && (!onFootprint || (!!cellNow && cellNow.state !== "blocked")),
                 assigned ? `${J.describe(assigned)}: ${assigned.state}${assigned.reason ? ` (${assigned.reason})` : ""}; cell held ${before ? before.id : "nothing"}, now ${after ? after.id : "nothing"}; ${onFootprint ? `footprint cell state ${cellNow ? cellNow.state : "?"}` : "a harvest outside the footprint"}` : "nothing assigned");
             if (p && window.$gamePlayer && $gamePlayer.locate) $gamePlayer.locate(centre.x, centre.y);
             await t.waitFrames(2);
