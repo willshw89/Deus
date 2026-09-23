@@ -96,6 +96,23 @@
         cancel: id => timers.delete(id),
         ticks: () => ticks,
 
+        // Authoritative timebase conversions (Audit Log A8)
+        ticksPerHour: () => (window.$ufTime && typeof $ufTime.ticksPerHour === "function" ? $ufTime.ticksPerHour() : 600),
+        ticksPerMinute: () => (window.$ufTime && typeof $ufTime.ticksPerMinute === "function" ? $ufTime.ticksPerMinute() : 10),
+        ticksPerDay: () => (window.$ufTime && typeof $ufTime.ticksPerDay === "function" ? $ufTime.ticksPerDay() : 14400),
+        ticksForMinutes: m => (window.$ufTime && typeof $ufTime.ticksForMinutes === "function" ? $ufTime.ticksForMinutes(m) : Math.round(m * 10)),
+        ticksForHours: h => (window.$ufTime && typeof $ufTime.ticksForHours === "function" ? $ufTime.ticksForHours(h) : Math.round(h * 600)),
+        ticksForDays: d => (window.$ufTime && typeof $ufTime.ticksForDays === "function" ? $ufTime.ticksForDays(d) : Math.round(d * 14400)),
+        minutesFromTicks: t => (window.$ufTime && typeof $ufTime.minutesFromTicks === "function" ? $ufTime.minutesFromTicks(t) : Math.floor(t / 10)),
+        hoursFromTicks: t => (window.$ufTime && typeof $ufTime.hoursFromTicks === "function" ? $ufTime.hoursFromTicks(t) : t / 600),
+        daysFromTicks: t => (window.$ufTime && typeof $ufTime.daysFromTicks === "function" ? $ufTime.daysFromTicks(t) : t / 14400),
+        ticksForGameMinutes: m => (window.$ufTime && typeof $ufTime.ticksForGameMinutes === "function" ? $ufTime.ticksForGameMinutes(m) : Math.round(m * 10)),
+        ticksForGameHours: h => (window.$ufTime && typeof $ufTime.ticksForGameHours === "function" ? $ufTime.ticksForGameHours(h) : Math.round(h * 600)),
+        ticksForGameDays: d => (window.$ufTime && typeof $ufTime.ticksForGameDays === "function" ? $ufTime.ticksForGameDays(d) : Math.round(d * 14400)),
+        gameMinutesFromTicks: t => (window.$ufTime && typeof $ufTime.gameMinutesFromTicks === "function" ? $ufTime.gameMinutesFromTicks(t) : Math.floor(t / 10)),
+        gameHoursFromTicks: t => (window.$ufTime && typeof $ufTime.gameHoursFromTicks === "function" ? $ufTime.gameHoursFromTicks(t) : t / 600),
+        gameDaysFromTicks: t => (window.$ufTime && typeof $ufTime.gameDaysFromTicks === "function" ? $ufTime.gameDaysFromTicks(t) : t / 14400),
+
         /** True while the world stands still (Space). */
         get paused() { return paused; },
         /** Stop the world. Returns false if it was already paused (no event then). */

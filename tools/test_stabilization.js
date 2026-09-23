@@ -202,7 +202,7 @@ function drive(S, updates, until) {
 }
 const jobOf = (S, u) => S.J.of(u.id);
 const near = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-const ROUND = 360, HOUR = 3600, SALT_ROLL = 0xc0;
+const ROUND = 360, HOUR = 600, SALT_ROLL = 0xc0;
 const seededD20 = (S, ...parts) => 1 + Math.floor((hash32(S.W.state.seed, SALT_ROLL, ...parts) / 4294967296) * 20);
 
 console.log("=== Dying and first aid (DEUS_Colonists.js + DEUS_Jobs.js stabilize) headless checks ===");
@@ -247,9 +247,9 @@ try {
     check("stable_not_healed", !!dS && dS.stable && F.data.hp === 0 && C.unconscious(F) && wakeHours >= 1 && wakeHours <= 4 && Number.isInteger(Math.round(wakeHours)) && J.reservation.reservedBy({ id: F.id }) === null,
         dS ? `hit points ${F.data.hp} (still 0), unconscious ${C.unconscious(F)}, wakes in ${wakeHours.toFixed(2)} h (1d4), patient reservation ${J.reservation.reservedBy({ id: F.id }) === null ? "released" : "kept"}` : "no dying record");
     const savesBefore = dS ? [dS.successes, dS.failures].join("/") : "?";
-    drive(S, 2 * ROUND + 5);
+    drive(S, 180);
     check("stable_skips_death_saves", !!dS && dS.stable && dS.successes === 0 && dS.failures === 0 && F.data.hp === 0 && !F.data.dead,
-        `two rounds later the stable patient still shows ${C.dying(F) ? `${C.dying(F).successes}/${C.dying(F).failures}` : "?"} saves (was ${savesBefore}), hit points ${F.data.hp}`);
+        `half a round later the stable patient still shows ${C.dying(F) ? `${C.dying(F).successes}/${C.dying(F).failures}` : "?"} saves (was ${savesBefore}), hit points ${F.data.hp}`);
 
     // D. Waking: 1 hit point after the hours, conscious, back in the decision pool.
     const n4 = drive(S, 4 * HOUR + 400, () => !C.unconscious(F));

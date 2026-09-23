@@ -751,12 +751,19 @@
         if (target.data.hp <= 0 && (!isColonist(target) || target.data.dead)) return null;
 
         const Cond = window.UF && UF.Conditions;
+        const Col = window.UF && UF.Colonists;
         if (Cond) {
             if (typeof Cond.canAct === "function" && !Cond.canAct(attacker)) return null;
             if (typeof Cond.canHarmfullyTarget === "function" && !Cond.canHarmfullyTarget(attacker, target)) return null;
         }
 
         const o = opts || {};
+
+        // 6-second Global Cooldown (GCD): if triggered, creature may not act again until GCD finishes
+        if (!o.bypassGcd && isActionActive(attacker)) {
+            return null;
+        }
+
         const isTargetUnconscious = (target.data.hp <= 0) || (Cond && typeof Cond.has === "function" && Cond.has(target, "unconscious"));
         const dist = cheb(attacker, target);
 
@@ -772,7 +779,6 @@
             finalDis = mod.disadvantage;
         } else {
             // Exhaustion on attacker: Level 3+ grants disadvantage on attack rolls
-            const Col = window.UF && UF.Colonists;
             const effAttacker = (Col && typeof Col.exhaustionEffects === "function") ? Col.exhaustionEffects(attacker) : null;
             const hasAttDis = !!o.disadvantage || (effAttacker && effAttacker.disadvantageOnAttacksAndSaves === true);
             const hasAttAdv = !!o.advantage || isTargetUnconscious; // attacks against unconscious targets have advantage (SRD p. 359)
@@ -1571,7 +1577,27 @@
         if (!act || !act.start) return false;
         return (nowMs() - act.start) < (act.duration || 6000);
     }
-    Combat.isActionActive = isActionActive;
+    function clearAction(unitOrId) {
+        const w = World();
+        if (!unitOrId) return;
+        const u = typeof unitOrId === "object" ? unitOrId : (w ? w.unit(unitOrId) : null);
+        if (!u) return;
+        const r = fx.get(u.id);
+        if (r) r.action = null;
+        if (u.data) u.data.actionRound = null;
+    }
+    Combat.clearAction = clearAction;
+
+    Combat.canAct = function(unitOrId) {
+        const w = World();
+        if (!unitOrId) return false;
+        const u = typeof unitOrId === "object" ? unitOrId : (w ? w.unit(unitOrId) : null);
+        if (!u || isDead(u)) return false;
+        const Cond = window.UF && UF.Conditions;
+        if (Cond && typeof Cond.canAct === "function" && !Cond.canAct(u)) return false;
+        if (Combat.isActionActive(u)) return false;
+        return true;
+    };
 
     function actionProgress(unitOrId) {
         const w = World();

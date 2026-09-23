@@ -145,6 +145,24 @@
     const ticks = () => (window.UF && UF.Time && UF.Time.ticks ? UF.Time.ticks() : (World() ? World()._frame : 0));
     const hourNow = () => (window.$ufTime ? $ufTime.hour : 8);
 
+    // Authoritative calendar timebase helpers (Audit Log A8)
+    const ticksPerHour = () => (
+        window.UF && UF.Time && typeof UF.Time.ticksPerHour === "function" ? UF.Time.ticksPerHour() :
+        (window.$ufTime && typeof $ufTime.ticksPerHour === "function" ? $ufTime.ticksPerHour() : 600)
+    );
+    const ticksPerMinute = () => (
+        window.UF && UF.Time && typeof UF.Time.ticksPerMinute === "function" ? UF.Time.ticksPerMinute() :
+        (window.$ufTime && typeof $ufTime.ticksPerMinute === "function" ? $ufTime.ticksPerMinute() : 10)
+    );
+    const ticksForHours = h => (
+        window.UF && UF.Time && typeof UF.Time.ticksForHours === "function" ? UF.Time.ticksForHours(h) :
+        Math.round(h * ticksPerHour())
+    );
+    const ticksForMinutes = m => (
+        window.UF && UF.Time && typeof UF.Time.ticksForMinutes === "function" ? UF.Time.ticksForMinutes(m) :
+        Math.round(m * ticksPerMinute())
+    );
+
     // Seeded numbers: the same hash and generator as UF_World. Never Math.random.
     const hash32 = (...parts) => World().hash32(...parts);
     const mulberry32 = a => World().mulberry32(a);
@@ -1428,7 +1446,7 @@
     function sleepFrames(u) {
         const w = sleepWindow(u), s = sleepSchedule(u);
         const left = sleepingHours(u) ? ((w.to - clockHour() + 24) % 24) : Math.min(4, s ? s.durationMinutes / 120 : 4);
-        return Math.round(Math.max(2, Math.min(11, left)) * 3600);
+        return Math.round(Math.max(2, Math.min(11, left)) * ticksPerHour());
     }
     const isMealHour = () => (colonyConfig().mealHours || []).includes(hourNow());
     const evening = () => inHours(hourNow(), 19, 22);
@@ -1447,7 +1465,7 @@
     const FOOD_LB_PER_DAY = 1;
     const WATER_GAL_PER_DAY = 1;
     const LONG_REST_HOURS = 8;
-    const TICKS_PER_HOUR = 3600;    // the scale sleepFrames uses
+    const TICKS_PER_HOUR = 600;    // authoritative: 600 map updates = 1 game hour (DEUS_Core / DEUS_TimeSpeed)
     const EXHAUSTION = Object.freeze(["no effect", "disadvantage on ability checks", "speed halved",
         "disadvantage on attack rolls and saving throws", "hit point maximum halved", "speed reduced to 0", "death"]);
     const dayKey = () => (window.$ufTime ? `${$ufTime.year || 0}:${$ufTime.monthIndex || 0}:${$ufTime.day || 1}` : "0:0:1");
@@ -1690,7 +1708,7 @@
     // The long rest: 8 hours in a bed, beside the hearth, or where the colonist stands (at speed 0 it can't walk to a bed).
     function longRestJob(u) {
         const n = ensureNeeds(u);
-        const frames = LONG_REST_HOURS * TICKS_PER_HOUR;
+        const frames = ticksForHours(LONG_REST_HOURS);
         if (n && n.exhaustion >= 5) return give(u, { type: "sleep", target: { x: u.x, y: u.y }, params: { frames, longRest: true } });
         return sleepJob(u, { frames, longRest: true });
     }
@@ -5012,6 +5030,7 @@
 
     const Colonists = {
         START_NEEDS, DECIDE_EVERY, NEEDS_EVERY, SEARCH_RADIUS, HUNT_NEAR, BRAVE,
+        TICKS_PER_HOUR, ticksPerHour, ticksPerMinute, ticksForHours,
         list: colonists,
         get: colonist,
         isColonist,
@@ -5075,6 +5094,7 @@
     window.UF.Colonists = Colonists;
     Object.assign(Colonists, { exhaustionEffects, exhaustion: exhaustionOf, needsOf: ensureNeeds, stabilize, woundedAtZero, dying: dyingOf, unconscious, startDying });
     Object.assign(Colonists._internal, { projectJob, stepOffReserved, urgentSurvival, urgent, ensureNeeds, tickNeeds, endOfDay, addExhaustion, removeExhaustion, completeLongRest, longRestJob, dayKey, dayNumber, conModOf, waterNeed, isNeedJob, needBlocked, avoid, sleepJob, scan, societyPlan, projectsManaged, projectOwnedStep,
+        TICKS_PER_HOUR, ticksPerHour, ticksPerMinute, ticksForHours,
         startDying, deathSave, becomeStable, regainConsciousness, tickDying, rescueJob, patientsFor, medicineBonus, wisModOf, dieOf, ROUND_TICKS });
 
     //-------------------------------------------------------------------------

@@ -226,6 +226,11 @@ check("combat_downed_event_emitted", downedEventReceived === true,
 check("unconscious_cannot_attack", Cb.resolveAttack(founder, hostileAttacker) === null,
     "unconscious founder at 0 HP cannot resolve an attack");
 
+// SRD/DEUS Rule: creature on 6-second GCD may not act again until GCD is finished
+check("gcd_blocks_action", Cb.resolveAttack(hostileAttacker, founder) === null,
+    "hostileAttacker is on 6-second GCD and cannot attack again before GCD expires");
+Cb.clearAction(hostileAttacker);
+
 // 2. Attacks Against Unconscious Targets & Damage at 0 HP
 console.log("\n[Test 2] Damage at 0 HP & Death Save Failures");
 // Adjacent attack on unconscious target gets advantage and automatic critical hit
@@ -243,6 +248,7 @@ check("crit_at_zero_adds_two_failures", founder.data.dying && founder.data.dying
     `failures=${founder.data.dying ? founder.data.dying.failures : "none"} (expected 2)`);
 
 // Third failure causes authoritative death
+Cb.clearAction(hostileAttacker);
 const attack3 = Cb.resolveAttack(hostileAttacker, founder, {
     legacy: true,
     rng: () => 0.5,
@@ -264,6 +270,7 @@ const founder2 = W.addUnit({
 });
 
 // 4 HP + 10 maxHp = 14 damage required for instant death. 15 damage deals massive damage.
+Cb.clearAction(hostileAttacker);
 const attackMassive = Cb.resolveAttack(hostileAttacker, founder2, {
     legacy: true,
     rng: () => 0.5,
@@ -283,6 +290,7 @@ const wildWolf = W.addUnit({
         hp: 5, maxHp: 5, stats: { str: 12, dex: 12, con: 12, int: 3, wis: 12, cha: 6 }
     }
 });
+Cb.clearAction(hostileAttacker);
 const lethalAttack = Cb.resolveAttack(hostileAttacker, wildWolf, {
     legacy: true,
     hit: true,
@@ -303,6 +311,7 @@ const founder3 = W.addUnit({
     }
 });
 // Down founder3
+Cb.clearAction(hostileAttacker);
 Cb.resolveAttack(hostileAttacker, founder3, { legacy: true, rng: () => 0.5, extraDamage: 2 });
 check("founder3_downed", founder3.data.hp === 0 && !!founder3.data.dying,
     `founder3 hp=${founder3.data.hp}, dying=${!!founder3.data.dying}`);

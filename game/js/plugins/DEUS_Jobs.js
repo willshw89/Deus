@@ -857,8 +857,8 @@
         },
         apply(job, unit) {
             const W = World(), I = Items();
-            const prey = W.unit(job.params.unitId);
-            if (!prey) throw new Error("the prey is gone");
+            const prey = W ? W.unit(job.params.unitId) : null;
+            if (!prey) { job.reason = "the prey is gone"; return false; }
             const s = speciesOf(prey);
             const yields = (s && s.yields) || {};
             const dropped = [];
@@ -901,13 +901,13 @@
         work: NEED_WORK,
         apply(job, unit) {
             const I = Items();
-            const it = I.get(job.params.itemId);
-            if (!it) throw new Error("the food is gone");
+            const it = I ? I.get(job.params.itemId) : null;
+            if (!it) { job.reason = "the food is gone"; return false; }
             const t = I.type(it.type);
             job.params.itemType = it.type;
-            if (I.consume(it.id, 1) < 1) throw new Error("the food is gone");
-            lowerNeed(unit, "hunger", (t.food && t.food.hunger) | 0);
-            lowerNeed(unit, "thirst", (t.food && t.food.thirst) | 0);
+            if (I.consume(it.id, 1) < 1) { job.reason = "the food is gone"; return false; }
+            lowerNeed(unit, "hunger", (t && t.food && t.food.hunger) | 0);
+            lowerNeed(unit, "thirst", (t && t.food && t.food.thirst) | 0);
         },
         describe: job => `Eating ${lower(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`.trim()
     });

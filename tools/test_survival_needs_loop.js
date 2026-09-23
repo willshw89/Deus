@@ -408,7 +408,7 @@ try {
     const n10 = drive(S, 300, () => { const j = jobOf(S, R); return !!j && j.type === "sleep" && j.params.longRest; });
     const rest2 = jobOf(S, R);
     const n11 = rest2 ? drive(S, 40000, () => rest2.state === "done" || rest2.state === "failed") : -1;
-    check("long_rest_rules", n8 > 0 && n9 > 0 && rest1.state === "done" && rest1.params.frames === 8 * 3600 && R.data.hp === 10 && afterHalf === 2 && restedDay === C._internal.dayKey() && n10 > 0 && n11 > 0 && rest2.state === "done" && needs(R).exhaustion === 1,
+    check("long_rest_rules", n8 > 0 && n9 > 0 && rest1.state === "done" && rest1.params.frames === 8 * (C.TICKS_PER_HOUR || 600) && R.data.hp === 10 && afterHalf === 2 && restedDay === C._internal.dayKey() && n10 > 0 && n11 > 0 && rest2.state === "done" && needs(R).exhaustion === 1,
         `#${R.id} at 01:00: rest of ${rest1 ? rest1.params.frames : "?"} ticks ${rest1 ? rest1.state : "?"}; hit points 3 -> ${R.data.hp}; exhaustion stayed ${afterHalf} on half a pound, then ${needs(R).exhaustion} after a rest on the full pound and gallon`);
     check("no_errors_main", errors.length === 0, errors.length ? errors[0].slice(0, 200) : "no console errors in the main run");
 

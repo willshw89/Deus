@@ -322,12 +322,75 @@
         get dateString() {
             return `Year ${this.year}, ${this.seasonName} (${this.timeString})`;
         }
+
+        // Authoritative timebase conversions (Audit Log A8)
+        ticksPerMinute() {
+            return Math.max(1, Math.round(timeSpeed * 60));
+        }
+
+        ticksPerHour() {
+            return this.ticksPerMinute() * 60;
+        }
+
+        ticksPerDay() {
+            return this.ticksPerHour() * 24;
+        }
+
+        ticksForMinutes(m) {
+            return Math.round(m * this.ticksPerMinute());
+        }
+
+        ticksForHours(h) {
+            return Math.round(h * this.ticksPerHour());
+        }
+
+        ticksForDays(d) {
+            return Math.round(d * this.ticksPerDay());
+        }
+
+        minutesFromTicks(t) {
+            return Math.floor(t / this.ticksPerMinute());
+        }
+
+        hoursFromTicks(t) {
+            return t / this.ticksPerHour();
+        }
+
+        daysFromTicks(t) {
+            return t / this.ticksPerDay();
+        }
+
+        ticksForGameMinutes(m) { return this.ticksForMinutes(m); }
+        ticksForGameHours(h) { return this.ticksForHours(h); }
+        ticksForGameDays(d) { return this.ticksForDays(d); }
+        gameMinutesFromTicks(t) { return this.minutesFromTicks(t); }
+        gameHoursFromTicks(t) { return this.hoursFromTicks(t); }
+        gameDaysFromTicks(t) { return this.daysFromTicks(t); }
     }
 
     // Global Instance
     window.Game_DEUSTime = Game_UFTime;
     window.$deusTime = new Game_UFTime();
     window.$ufTime = window.$deusTime;
+
+    window.DEUS = window.DEUS || {};
+    window.UF = window.DEUS;
+    window.UF.Time = window.UF.Time || {};
+    window.UF.Time.ticksPerMinute = () => window.$ufTime.ticksPerMinute();
+    window.UF.Time.ticksPerHour = () => window.$ufTime.ticksPerHour();
+    window.UF.Time.ticksPerDay = () => window.$ufTime.ticksPerDay();
+    window.UF.Time.ticksForMinutes = m => window.$ufTime.ticksForMinutes(m);
+    window.UF.Time.ticksForHours = h => window.$ufTime.ticksForHours(h);
+    window.UF.Time.ticksForDays = d => window.$ufTime.ticksForDays(d);
+    window.UF.Time.minutesFromTicks = t => window.$ufTime.minutesFromTicks(t);
+    window.UF.Time.hoursFromTicks = t => window.$ufTime.hoursFromTicks(t);
+    window.UF.Time.daysFromTicks = t => window.$ufTime.daysFromTicks(t);
+    window.UF.Time.ticksForGameMinutes = m => window.$ufTime.ticksForGameMinutes(m);
+    window.UF.Time.ticksForGameHours = h => window.$ufTime.ticksForGameHours(h);
+    window.UF.Time.ticksForGameDays = d => window.$ufTime.ticksForGameDays(d);
+    window.UF.Time.gameMinutesFromTicks = t => window.$ufTime.gameMinutesFromTicks(t);
+    window.UF.Time.gameHoursFromTicks = t => window.$ufTime.gameHoursFromTicks(t);
+    window.UF.Time.gameDaysFromTicks = t => window.$ufTime.gameDaysFromTicks(t);
 
     //-----------------------------------------------------------------------------
     // Save / Load Support
