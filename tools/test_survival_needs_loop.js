@@ -35,6 +35,9 @@ const MUTANTS = {
 // food item, and the SRD rations item. The canonical file gets it when the coordinator runs the script at the gate.
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8"));
 const foodData = require("./add_srd_food_data.js").applyFoodData(catalog);
+// This harness proves the shelter loop alone: the settlement brain (DEUS-TSK-FABLE-06) has its other blueprints
+// switched off here, so a fixture without food does not open a food cache before the shelter.
+catalog.colony.projects = Object.assign({}, catalog.colony.projects, { blueprints: { food_cache: null, communal_stockpile: null, bedding_expansion: null } });
 const read = name => fs.readFileSync(path.join(PLUGINS, name), "utf8");
 const sources = { objects: read("DEUS_Objects.js"), items: read("DEUS_Items.js"), jobs: read("DEUS_Jobs.js"), projects: read("DEUS_Projects.js"), colonists: read("DEUS_Colonists.js") };
 if (mutant) {

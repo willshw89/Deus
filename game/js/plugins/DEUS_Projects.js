@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [DEUS Projects] Settlement deficit evaluation (shelter, beds, stockpiles), a reserved 5x5 communal shelter blueprint, and phased open construction jobs.
+ * @plugindesc [DEUS Projects] Settlement deficits (shelter, food, sheltered beds, storage), the brain that picks one project per cycle, reserved blueprints, and phased open jobs.
  * @author UF project
  * @base DEUS_Jobs
  * @orderAfter DEUS_Jobs
@@ -13,11 +13,13 @@
  * @help
  * The settlement-level planner. Every ~50 s of action time (3000 map updates)
  * it counts what the colony has around its hearth (doors set into walls,
- * beds, stockpiles) against what its population needs, opens a project for
- * a deficit it has a blueprint for, reserves the project's footprint, and
- * posts ordinary open UF_Jobs jobs for the current phase: clearing the site,
- * hauling materials, building, harvesting a material nobody has. Idle
- * colonists take those jobs through their normal open-designation path.
+ * colonist-days of food, beds under a roof, storage slots) against what its
+ * population needs, ranks the four blueprints by how much of each need is
+ * still unmet once active projects are counted, opens the best one, reserves
+ * its cells, and posts ordinary open UF_Jobs jobs for the current phase:
+ * clearing the site, hauling materials, building, harvesting a material
+ * nobody has, foraging food into the larder. Idle colonists take those jobs
+ * through their normal open-designation path.
  *
  * Nothing here scans the whole world per frame: the per-frame cost is one
  * tick comparison; the cycle scans a bounded radius around the hearth.
@@ -46,22 +48,61 @@
         jobPriority: 0,          // UF_Jobs priority of posted jobs (0 = like any designation)
         recheckTicks: 60,        // a build square somebody stands on is looked at again after this
         retryTicks: 9000,        // a cell whose jobs failed three times waits this long
-        logKept: 20
+        logKept: 20,
+        // The settlement brain (DEUS-TSK-FABLE-06)
+        targetReserveDays: 3,    // food: colonist-days of nutrition kept within reach (24 colonist-days for 8 founders)
+        slotsPerColonist: 8,     // storage: item slots each colonist needs
+        slotsPerStockpileCell: 8, // storage: what one stockpile cell counts as; a chest counts its container slots
+        forageJobs: 4,           // food: gather jobs alive at once for a food cache
+        kindCooldownTicks: 6000, // a kind whose project could not be sited or supplied is not tried again for this long
+        severity: { shelter: 3, food: 2, foodCritical: 4, bed: 1.5, storage: 1 },
+        survivalBonus: { foodCritical: 5, shelter: 2 }
     };
 
+    // Blueprints. `kind` "footprint": a square site chosen outside the camp (cells from the geometry below);
+    // "task": cells chosen inside existing settlement space, or no cells at all (a forage quota).
     const BLUEPRINTS = {
         communal_shelter: {
             id: "communal_shelter",
             name: "Communal shelter",
             deficit: "shelter",
+            kind: "footprint",
             size: 5,
             wall: "wall_wood",
             door: "door_wood",
             hearth: "campfire",
             bed: "floor_straw",
             phases: ["site", "walls", "hearth", "beds"]
+        },
+        communal_stockpile: {
+            id: "communal_stockpile",
+            name: "Communal stockpile",
+            deficit: "storage",
+            kind: "footprint",
+            size: 3,
+            fill: "stockpile",
+            stores: ["wood", "stone", "metal", "material"],
+            phases: ["site", "stockpile"]
+        },
+        bedding_expansion: {
+            id: "bedding_expansion",
+            name: "Bedding",
+            deficit: "bed",
+            kind: "task",
+            bed: "floor_straw",
+            phases: ["beds"]
+        },
+        food_cache: {
+            id: "food_cache",
+            name: "Food cache",
+            deficit: "food",
+            kind: "task",
+            larder: "stockpile",
+            stores: ["food"],
+            phases: ["larder", "forage"]
         }
     };
+    const DEFICITS = ["shelter", "food", "bed", "storage"];
 
     // Build inputs a job accepts in place of the named material (mirrors UF_Jobs' build plan).
     const ACCEPTS = { wood: ["wood", "log"], straw: ["straw", "fiber"], stone: ["stone", "rocks_small"] };
@@ -133,32 +174,49 @@
 
     function relativeCells(bp) {
         const n = bp.size | 0, mid = Math.floor(n / 2);
-        const site = [], walls = [], hearth = [], beds = [];
+        const site = [], walls = [], hearth = [], beds = [], fill = [];
         for (let y = 0; y < n; y++) {
             for (let x = 0; x < n; x++) {
                 site.push({ x, y, object: null });
+                if (bp.fill) { fill.push({ x, y, object: bp.fill, stores: bp.stores || null }); continue; }
                 const edge = x === 0 || y === 0 || x === n - 1 || y === n - 1;
                 if (edge) walls.push({ x, y, object: x === mid && y === n - 1 ? bp.door : bp.wall });
                 else if (x === mid && y === mid) hearth.push({ x, y, object: bp.hearth });
                 else beds.push({ x, y, object: bp.bed });
             }
         }
-        return { site, walls, hearth, beds };
+        const out = { site, walls, hearth, beds };
+        if (bp.fill) out[bp.fill === "stockpile" ? "stockpile" : bp.fill] = fill;
+        return out;
     }
-    function phaseCells(p, bp, phase) {
+    // A phase's cells: a task project carries its own absolute cells (chosen when it opened); a footprint project
+    // takes them from the blueprint geometry at its origin.
+    function phaseSpec(p, bp, phase) {
+        if (Array.isArray(p.phases) && p.phases[phase]) return p.phases[phase];
         const name = bp.phases[phase];
         const rel = relativeCells(bp)[name] || [];
-        return rel.map(c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y, object: c.object }));
+        return { name, task: null, cells: rel.map(c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y, object: c.object, stores: c.stores || null })) };
     }
+    const phaseCells = (p, bp, phase) => phaseSpec(p, bp, phase).cells;
+    const phaseName = (p, bp, phase) => (Array.isArray(p.phases) && p.phases[phase] ? p.phases[phase].name : bp.phases[phase]);
+    const phaseCount = (p, bp) => (Array.isArray(p.phases) ? p.phases.length : bp.phases.length);
+    /** Every cell the project holds: the square of a footprint project, the chosen cells of a task project. */
     const footprint = p => {
+        if (Array.isArray(p.phases)) {
+            const seen = new Set(), out = [];
+            for (const ph of p.phases) for (const c of ph.cells || []) { const k = cellKey(c.x, c.y); if (!seen.has(k)) { seen.add(k); out.push({ x: c.x, y: c.y }); } }
+            return out;
+        }
         const out = [];
         for (let y = 0; y < p.size; y++) for (let x = 0; x < p.size; x++) out.push({ x: p.origin.x + x, y: p.origin.y + y });
         return out;
     };
-    const inFootprint = (p, x, y, pad = 0) =>
-        x >= p.origin.x - pad && y >= p.origin.y - pad && x < p.origin.x + p.size + pad && y < p.origin.y + p.size + pad;
+    const inFootprint = (p, x, y, pad = 0) => {
+        if (Array.isArray(p.phases)) return p.phases.some(ph => (ph.cells || []).some(c => Math.abs(c.x - x) <= pad && Math.abs(c.y - y) <= pad));
+        return x >= p.origin.x - pad && y >= p.origin.y - pad && x < p.origin.x + p.size + pad && y < p.origin.y + p.size + pad;
+    };
 
-    /** The project whose reserved footprint holds the cell, or null. */
+    /** The project whose reserved cells hold the cell, or null. */
     function reservedAt(area, x, y) {
         const hit = active().find(p => sameLevel(levelArea(p.origin), area) && inFootprint(p, x, y, 0));
         return hit ? hit.id : null;
@@ -233,9 +291,38 @@
         for (const s of c.stockpiles || []) set.add(cellKey(s.x, s.y));
         for (const p of active()) {
             if (!sameLevel(levelArea(p.origin), levelArea(c))) continue;
+            if (Array.isArray(p.phases)) { for (const cell of footprint(p)) set.add(cellKey(cell.x, cell.y)); continue; }
             for (let y = -cfg.margin; y < p.size + cfg.margin; y++) for (let x = -cfg.margin; x < p.size + cfg.margin; x++) set.add(cellKey(p.origin.x + x, p.origin.y + y));
         }
         return set;
+    }
+    // Sheltered space: the interior of every finished communal shelter, and the camp's own interior inside its ring.
+    // (UF.Rooms' enclosure detection is not consulted yet; the sheltered set is what this planner built or was given.)
+    function shelteredCells(c) {
+        const set = new Set();
+        const r = Math.max(0, (c.radius | 0) - 1);
+        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx || dy) set.add(cellKey(c.site.x + dx, c.site.y + dy));
+        for (const p of list(q => q.state === "done" && q.kind === "communal_shelter")) {
+            const bp = blueprint(p.kind);
+            if (!bp || !sameLevel(levelArea(p.origin), levelArea(c))) continue;
+            for (const cell of relativeCells(bp).beds) set.add(cellKey(p.origin.x + cell.x, p.origin.y + cell.y));
+        }
+        return set;
+    }
+    // Free sheltered cells a bed could go on: no object, dry standable ground, nobody's reserved cell.
+    function beddingCells(c, cfg, count) {
+        const O = Objects(), area = levelArea(c), out = [];
+        const taken = new Set();
+        for (const p of active()) if (sameLevel(levelArea(p.origin), area)) for (const cell of footprint(p)) taken.add(cellKey(cell.x, cell.y));
+        const cells = [...shelteredCells(c)].map(k => k.split(",").map(Number)).map(([x, y]) => ({ x, y }))
+            .sort((a, b) => Math.hypot(a.x - c.site.x, a.y - c.site.y) - Math.hypot(b.x - c.site.x, b.y - c.site.y) || a.y - b.y || a.x - b.x);
+        for (const cell of cells) {
+            if (out.length >= count) break;
+            if (taken.has(cellKey(cell.x, cell.y)) || O.atIn(area, cell.x, cell.y)) continue;
+            if (isWater(area, cell.x, cell.y) || !groundOk(area, cell.x, cell.y)) continue;
+            out.push({ x: cell.x, y: cell.y });
+        }
+        return out;
     }
     function siteValid(area, ox, oy, n, margin, reserved) {
         const W = World(), O = Objects(), size = W.state.size;
@@ -293,28 +380,65 @@
         for (const [dx, dy] of NEIGHBORS) if (hasTag(O.atIn(area, x + dx, y + dy), "wall")) n++;
         return n;
     }
+    // Nutrition of an item stack in pounds of the SRD's daily requirement (catalog food.nutrition), never its weight.
+    const nutritionOf = (I, it) => { const t = it ? I.type(it.type) : null; return t && t.food && Number.isFinite(t.food.nutrition) ? t.food.nutrition * (it.count | 0) : 0; };
+    const larderCells = s => (s.stockpiles || []).filter(sp => Array.isArray(sp.stores) && sp.stores.includes("food"));
+    /**
+     * What the settlement has against what its people need, one bounded scan around the hearth:
+     * - shelter: doors set into walls; needed one per perShelter colonists.
+     * - bed: beds on sheltered cells (a finished shelter's interior, the camp's interior); needed one per colonist.
+     * - storage: chest container slots plus stockpile cells times slotsPerStockpileCell; needed slotsPerColonist each.
+     * - food: colonist-days of nutrition within reach (larders, containers, food on the ground), against targetReserveDays.
+     */
     function evaluateDeficits(areaRef) {
-        const W = World(), O = Objects();
+        const W = World(), O = Objects(), I = Items();
         const s = settlementFor(areaRef);
-        if (!W || !W.state || !O || !s || !s.site) return null;
+        if (!W || !W.state || !O || !I || !s || !s.site) return null;
         const cfg = config(), area = levelArea(s);
         const population = W.unitsInArea(area.x, area.y, area.z).filter(isColonist).length;
-        const buildings = O.findIn(area, { near: { x: s.site.x, y: s.site.y }, radius: cfg.scanRadius, tags: ["building"], unsorted: true });
-        let beds = 0, stockpiles = 0, shelters = 0;
+        const near = { x: s.site.x, y: s.site.y };
+        const buildings = O.findIn(area, { near, radius: cfg.scanRadius, tags: ["building"], unsorted: true });
+        const sheltered = shelteredCells(s);
+        const C = window.UF && UF.Containers;
+        const isContainer = t => !!(C && typeof C.isContainerType === "function" && C.isContainerType(t.id));
+        let beds = 0, bedsUnsheltered = 0, shelters = 0, stockpileCells = 0;
         for (const b of buildings) {
-            if (hasTag(b.type, "bed")) beds++;
-            if (hasTag(b.type, "stockpile")) stockpiles++;
+            if (hasTag(b.type, "bed")) { if (sheltered.has(cellKey(b.x, b.y))) beds++; else bedsUnsheltered++; }
+            if (hasTag(b.type, "stockpile") && !isContainer(b.type) && b.type.passable === true) stockpileCells++;
             if (hasTag(b.type, "door") && wallNeighbours(area, b.x, b.y) >= 2) shelters++;
         }
-        const row = (needed, current) => ({ needed, current, deficit: Math.max(0, needed - current) });
+        let containerSlots = 0, containerFoodLb = 0;
+        if (C && typeof C.all === "function") {
+            for (const cont of C.all(area, area.z)) {
+                if (Math.hypot(cont.x - near.x, cont.y - near.y) > cfg.scanRadius) continue;
+                containerSlots += cont.maxSlots | 0;
+                if (typeof C.itemsIn === "function") for (const it of C.itemsIn(cont.id)) containerFoodLb += nutritionOf(I, it);
+            }
+        }
+        const larders = new Set(larderCells(s).map(sp => cellKey(sp.x, sp.y)));
+        let larderLb = 0, groundLb = 0;
+        for (const f of I.find({ area: { x: area.x, y: area.y }, z: area.z, near, radius: cfg.scanRadius, tags: ["food"] })) {
+            const lb = nutritionOf(I, f.item);
+            if (larders.has(cellKey(f.x, f.y))) larderLb += lb; else groundLb += lb;
+        }
+        const foodLb = larderLb + containerFoodLb + groundLb;
+        const foodDays = population > 0 ? foodLb / population : 0;
+        const row = (needed, current, unit) => ({ needed, current, deficit: Math.max(0, needed - current), unit });
+        const round3 = v => Math.round(v * 1000) / 1000;
+        const food = row(population > 0 ? cfg.targetReserveDays : 0, round3(foodDays), "colonist-days");
+        food.deficit = round3(food.deficit);
+        Object.assign(food, { lb: round3(foodLb), larderLb: round3(larderLb), containerLb: round3(containerFoodLb), groundLb: round3(groundLb), deficitLb: round3(food.deficit * population), critical: population > 0 && foodDays < 1 });
+        const storage = row(population * cfg.slotsPerColonist, containerSlots + stockpileCells * cfg.slotsPerStockpileCell, "slots");
+        Object.assign(storage, { containerSlots, stockpileCells });
+        const bed = row(population, beds, "beds");
+        bed.unsheltered = bedsUnsheltered;
         return {
             area: { x: area.x, y: area.y, z: area.z },
-            site: { x: s.site.x, y: s.site.y },
+            site: near,
             radius: cfg.scanRadius,
             population,
-            shelter: row(population > 0 ? Math.ceil(population / cfg.perShelter) : 0, shelters),
-            bed: row(population, beds),
-            stockpile: row(population > 0 ? Math.max(1, Math.ceil(population / cfg.perStockpile)) : 0, stockpiles),
+            shelter: row(population > 0 ? Math.ceil(population / cfg.perShelter) : 0, shelters, "shelters"),
+            food, bed, storage,
             evaluatedAt: stamp()
         };
     }
@@ -322,26 +446,74 @@
         const d = evaluateDeficits(areaRef);
         if (!d) return "No settlement.";
         const part = (label, r) => `${label} ${r.current}/${r.needed}${r.deficit ? ` (needs ${r.deficit} more)` : ""}`;
-        return `${part("Shelter", d.shelter)} · ${part("Beds", d.bed)} · ${part("Stockpiles", d.stockpile)} · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})`;
+        const b = brain(d);
+        const top = b && b.chosen ? `; next: ${b.chosen.kind} (utility ${b.chosen.utility.toFixed(1)})` : (b ? "; nothing to open" : "");
+        return `${part("Shelter", d.shelter)} · Food ${d.food.current}/${d.food.needed} days${d.food.critical ? " (critical)" : d.food.deficit ? ` (needs ${d.food.deficit} more)` : ""} · ${part("Beds", d.bed)} · ${part("Storage", d.storage)} slots · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})${top}`;
     }
 
     //-------------------------------------------------------------------------
     // Opening and cancelling projects
 
+    // The larder: the first food stockpile that still stands, or null.
+    function larderCell(c) {
+        const O = Objects(), area = levelArea(c);
+        for (const sp of larderCells(c)) { const t = O.atIn(area, sp.x, sp.y); if (t && hasTag(t, "stockpile")) return { x: sp.x, y: sp.y }; }
+        return null;
+    }
+    // What a project of this kind adds to each deficit once done (for duplicate prevention and the utility term).
+    function capacityFor(bp, d, phases) {
+        const cfg = config();
+        if (bp.id === "communal_shelter") return { shelter: 1, bed: relativeCells(bp).beds.length };
+        if (bp.id === "communal_stockpile") return { storage: (bp.size | 0) * (bp.size | 0) * cfg.slotsPerStockpileCell };
+        if (bp.id === "bedding_expansion") return { bed: phases && phases[0] ? phases[0].cells.length : 0 };
+        if (bp.id === "food_cache") return { food: d && d.food ? Math.max(d.food.deficit, 0.001) : cfg.targetReserveDays };
+        return {};
+    }
+
+    /**
+     * Opens a project of a kind. opts: { origin } fixes a footprint project's site; { count } bounds a bedding
+     * project's beds; { deficits } is the evaluation the brain used. Returns the record or null (no site, no cells).
+     */
     function open(kind, opts) {
         const c = colony(), bp = blueprint(kind), st = projectState(true);
         if (!c || !bp || !st) return null;
-        const cfg = config();
-        const site = (opts && opts.origin) ? { x: opts.origin.x | 0, y: opts.origin.y | 0, distance: 0 } : chooseSite(c, bp, cfg);
-        if (!site) return null;
+        const cfg = config(), d = (opts && opts.deficits) || evaluateDeficits(null);
+        let site = null, phases = null, larder = null;
+        if (bp.kind === "task" && bp.id === "bedding_expansion") {
+            const count = Math.max(1, Math.min((opts && opts.count) || (d ? d.bed.deficit : 1), 16));
+            const cells = beddingCells(c, cfg, count);
+            if (!cells.length) return null;
+            phases = [{ name: "beds", task: null, cells: cells.map(cell => ({ x: cell.x, y: cell.y, object: bp.bed, stores: null })) }];
+            site = { x: cells[0].x, y: cells[0].y, distance: chebyshev(cells[0].x, cells[0].y, c.site.x, c.site.y) };
+        } else if (bp.kind === "task" && bp.id === "food_cache") {
+            larder = larderCell(c);
+            if (!larder) {
+                const spot = chooseSite(c, Object.assign({}, bp, { size: 1 }), cfg);
+                if (!spot) return null;
+                larder = { x: spot.x, y: spot.y };
+            }
+            phases = [
+                { name: "larder", task: null, cells: Objects().atIn(levelArea(c), larder.x, larder.y) ? [] : [{ x: larder.x, y: larder.y, object: bp.larder, stores: (bp.stores || ["food"]).slice() }] },
+                { name: "forage", task: "forage", cells: [] }
+            ];
+            site = { x: larder.x, y: larder.y, distance: chebyshev(larder.x, larder.y, c.site.x, c.site.y) };
+        } else {
+            site = (opts && opts.origin) ? { x: opts.origin.x | 0, y: opts.origin.y | 0, distance: 0 } : chooseSite(c, bp, cfg);
+            if (!site) return null;
+        }
         const record = {
             id: st.nextId++,
             kind: bp.id,
+            deficit: bp.deficit,
             state: "active",
             phase: 0,
             origin: { area: { x: c.area.x, y: c.area.y }, x: site.x, y: site.y, z: zOf(c) },
-            size: bp.size | 0,
+            size: bp.kind === "task" ? 0 : bp.size | 0,
             margin: cfg.margin | 0,
+            phases,
+            larder,
+            capacity: capacityFor(bp, d, phases),
+            utility: opts && Number.isFinite(opts.utility) ? opts.utility : null,
             created: stamp(),
             sited: stamp(),
             finished: null,
@@ -350,12 +522,13 @@
             harvests: {},
             failed: {},
             blocked: null,
+            blockedCycles: 0,
             recheck: null,
             reason: null,
             log: []
         };
         st.list.push(record);
-        log(record, `${bp.name} sited at (${site.x},${site.y}), ${site.distance} from the hearth`);
+        log(record, `${bp.name} sited at (${site.x},${site.y}), ${site.distance} from the hearth; adds ${JSON.stringify(record.capacity)}`);
         emit("projects:opened", record);
         emit("projects:sited", record);
         return record;
@@ -540,16 +713,89 @@
         return posted;
     }
 
+    // Objects whose harvest yields food (from the catalog), and the gather jobs a food cache posts on them.
+    function foodSources() {
+        const cat = catalog(), I = Items();
+        const out = [];
+        for (const t of (cat && cat.objects) || []) {
+            if (!t || !t.actions || isConstructed(t)) continue;
+            for (const action of Object.keys(t.actions)) {
+                const y = t.actions[action] && t.actions[action].yields;
+                if (y && Object.keys(y).some(id => { const it = I.type(id); return it && it.food; })) out.push({ id: t.id, action });
+            }
+        }
+        return out;
+    }
+    // The forage phase of a food cache: loose food goes to the larder, wild food is gathered, until the reserve holds.
+    function forageStep(p, summary) {
+        const O = Objects(), I = Items(), J = Jobs(), c = colony(), cfg = config(), area = levelArea(p.origin);
+        const d = evaluateDeficits(null);
+        summary.reserveDays = d ? d.food.current : null;
+        if (!d || d.food.deficit <= 0) return true; // the reserve holds: the phase is complete
+        summary.todo = 1;
+        let posted = 0, sources = 0;
+        const larder = p.larder && O.atIn(area, p.larder.x, p.larder.y) ? p.larder : larderCell(c);
+        // Loose food (on the ground, not in a larder or container) is hauled into the larder.
+        if (larder) {
+            const larders = new Set(larderCells(c).map(sp => cellKey(sp.x, sp.y)));
+            for (const f of I.find({ area: { x: area.x, y: area.y }, z: area.z, near: { x: larder.x, y: larder.y }, radius: cfg.materialRadius, tags: ["food"] })) {
+                if (openCount(p) >= cfg.maxOpenJobs) break;
+                if (larders.has(cellKey(f.x, f.y)) || f.item.container || p.hauls[f.item.id]) continue;
+                if (J.reservation && J.reservation.reservedBy(f.item.id)) continue;
+                const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params: { itemId: f.item.id, count: f.item.count | 0, to: targetOf(p, larder.x, larder.y), material: "food" } });
+                if (!job) continue;
+                p.hauls[f.item.id] = { job: job.id, cell: cellKey(larder.x, larder.y), type: f.item.type, count: f.item.count | 0 };
+                posted++;
+            }
+        }
+        // Wild food within reach: gather jobs, a few at a time, outside every reserved footprint.
+        let alive = Object.keys(p.harvests).length;
+        const candidates = [];
+        for (const s of foodSources()) {
+            if (!J.handler(s.action)) continue;
+            for (const f of O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: cfg.materialRadius, id: s.id, limit: 8 })) candidates.push({ x: f.x, y: f.y, dist: f.dist, action: s.action, id: s.id });
+        }
+        sources = candidates.length;
+        candidates.sort((a, b) => a.dist - b.dist || a.y - b.y || a.x - b.x);
+        for (const cnd of candidates) {
+            if (alive >= cfg.forageJobs || openCount(p) >= cfg.maxOpenJobs) break;
+            const key = cellKey(cnd.x, cnd.y);
+            if (p.harvests[key] || reservedAt(area, cnd.x, cnd.y)) continue;
+            if (J.list(j => !finished(j) && j.target && j.target.x === cnd.x && j.target.y === cnd.y && sameLevel(levelArea(j.target), area)).length) continue;
+            const job = postJob(p, { type: cnd.action, target: targetOf(p, cnd.x, cnd.y), params: { material: "food", forage: true } });
+            if (!job) continue;
+            p.harvests[key] = { job: job.id, material: "food" };
+            alive++;
+            posted++;
+        }
+        summary.posted += posted;
+        if (!posted && !openCount(p)) {
+            p.blocked = { cell: null, reason: sources ? "wild food is spoken for" : "no wild food within reach", since: stamp() };
+            summary.blocked = 1;
+        }
+        return false;
+    }
+
     function advance(p) {
         const O = Objects(), J = Jobs(), bp = blueprint(p.kind);
         if (!p || p.state !== "active") return null;
         if (!O || !J || !bp) { cancel(p.id, "no blueprint"); return null; }
         const cfg = config(), area = levelArea(p.origin);
         reconcile(p);
-        const cells = phaseCells(p, bp, p.phase);
-        const summary = { phase: bp.phases[p.phase], total: cells.length, done: 0, todo: 0, blocked: 0, posted: 0, waiting: null, standers: 0 };
+        const spec = phaseSpec(p, bp, p.phase);
+        const cells = spec.cells || [];
+        const summary = { phase: spec.name, total: cells.length, done: 0, todo: 0, blocked: 0, posted: 0, waiting: null, standers: 0 };
         p.blocked = null;
         p.recheck = null;
+        if (spec.task === "forage") {
+            const complete = forageStep(p, summary);
+            if (summary.blocked) {
+                // Nothing to gather and nothing to haul: after three such cycles the project gives up and its kind waits.
+                p.blockedCycles = (p.blockedCycles | 0) + 1;
+                if (p.blockedCycles >= 3) { coolKind(p.kind); cancel(p.id, p.blocked.reason); return summary; }
+            } else p.blockedCycles = 0;
+            if (!complete) return summary;
+        }
         for (const cell of cells) {
             const key = cellKey(cell.x, cell.y);
             const s = cellStatus(p, cell);
@@ -573,7 +819,9 @@
             const missing = Object.keys(needs).filter(id => countOnCell(p, cell, id) + inFlight(p, cell, id) < (needs[id] | 0));
             if (!missing.length) {
                 if (Object.keys(needs).every(id => countOnCell(p, cell, id) >= (needs[id] | 0))) {
-                    const job = postJob(p, { type: "build", target: targetOf(p, cell.x, cell.y), params: { objectId: t.id } });
+                    const params = { objectId: t.id };
+                    if (Array.isArray(cell.stores)) params.stores = cell.stores.slice(); // a stockpile's stores, registered by UF_Colonists on completion
+                    const job = postJob(p, { type: "build", target: targetOf(p, cell.x, cell.y), params });
                     if (job) { p.jobs[key] = job.id; summary.posted++; }
                 }
                 continue; // else materials are on their way
@@ -592,14 +840,14 @@
         }
         if (summary.todo === 0 && summary.blocked === 0) {
             p.phase++;
-            if (p.phase >= bp.phases.length) {
+            if (p.phase >= phaseCount(p, bp)) {
                 p.state = "done";
                 p.finished = stamp();
                 p.jobs = {}; p.hauls = {}; p.harvests = {}; p.failed = {};
                 log(p, `${bp.name} finished`);
                 emit("projects:done", p);
             } else {
-                log(p, `phase ${bp.phases[p.phase]} started`);
+                log(p, `phase ${phaseName(p, bp, p.phase)} started`);
                 emit("projects:phase", p);
                 // The new phase's cells are read and its first jobs posted now, not at the next cadence cycle.
                 // Bounded: every recursion steps one phase, and a project has bp.phases.length of them.
@@ -613,24 +861,58 @@
     //-------------------------------------------------------------------------
     // The cycle: evaluate, open for a deficit with a blueprint, advance every active project
 
+    // A kind that could not open (no site, no cells, no wild food) is not tried again for kindCooldownTicks.
+    function coolKind(kind) {
+        const st = projectState(true);
+        if (!st) return;
+        st.cooldowns = st.cooldowns || {};
+        st.cooldowns[kind] = now() + (config().kindCooldownTicks | 0);
+    }
+    /**
+     * The settlement brain: every blueprint is a candidate for its deficit. What active projects already add to that
+     * deficit (their `capacity`) is subtracted first, so a need one project covers never opens another:
+     *   unmet = deficit - sum(active capacity for the deficit); nothing opens when unmet <= 0.
+     * Deficits come in different units (shelters, colonist-days, beds, slots), so the utility term uses the unmet
+     * fraction of the need:  utility = severity * (unmet / needed) + survivalBonus - activeProjectsOfKind * 10.
+     * Food below one colonist-day is critical (higher severity, a survival bonus); a shelter deficit carries the
+     * shelter bonus. The highest utility among eligible kinds opens, one per cycle.
+     */
+    function brain(evaluated) {
+        const d = evaluated || evaluateDeficits(null);
+        if (!d) return null;
+        const cfg = config(), st = projectState(true), t = now();
+        const candidates = [];
+        for (const kind of Object.keys(cfg.blueprints)) {
+            const bp = cfg.blueprints[kind];
+            const key = bp && bp.deficit;
+            const row = key ? d[key] : null;
+            if (!row) continue;
+            const inFlight = active().filter(p => p.capacity && p.capacity[key] > 0);
+            const inFlightCapacity = inFlight.reduce((n, p) => n + p.capacity[key], 0);
+            const unmet = Math.max(0, row.deficit - inFlightCapacity);
+            const fraction = row.needed > 0 ? Math.min(1, unmet / row.needed) : 0;
+            const critical = key === "food" && !!row.critical;
+            const severity = critical ? cfg.severity.foodCritical : (cfg.severity[key] || 1);
+            const bonus = (critical ? cfg.survivalBonus.foodCritical : 0) + (key === "shelter" && unmet > 0 ? cfg.survivalBonus.shelter : 0);
+            const activeOfKind = active().filter(p => p.kind === kind).length;
+            const utility = unmet > 0 ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;
+            const cooledUntil = (st && st.cooldowns && st.cooldowns[kind]) || 0;
+            candidates.push({ kind, deficit: key, total: row.deficit, needed: row.needed, unit: row.unit, inFlightCapacity, inFlightProjects: inFlight.length, unmet, fraction, severity, bonus, utility, cooled: cooledUntil > t, eligible: unmet > 0 && cooledUntil <= t });
+        }
+        candidates.sort((a, b) => (b.utility - a.utility) || a.kind.localeCompare(b.kind));
+        return { deficits: d, candidates, chosen: candidates.find(x => x.eligible) || null };
+    }
+
     function runCycle() {
         const c = colony();
         if (!c) return null;
-        const d = evaluateDeficits(null);
-        const out = { deficits: d, opened: [], advanced: [] };
-        if (d) emit("projects:evaluated", d);
-        if (d) {
-            const cfg = config();
-            for (const kind of Object.keys(cfg.blueprints)) {
-                const bp = cfg.blueprints[kind];
-                const row = bp && bp.deficit ? d[bp.deficit] : null;
-                if (!row) continue;
-                const planned = active().filter(p => p.kind === kind).length;
-                if (row.deficit - planned > 0) {
-                    const p = open(kind);
-                    if (p) out.opened.push(p.id);
-                }
-            }
+        const b = brain(null);
+        const out = { deficits: b ? b.deficits : null, brain: b, opened: [], advanced: [] };
+        if (b) emit("projects:evaluated", b.deficits, b);
+        if (b && b.chosen) {
+            const p = open(b.chosen.kind, { deficits: b.deficits, count: b.chosen.unmet, utility: b.chosen.utility });
+            if (p) out.opened.push(p.id);
+            else coolKind(b.chosen.kind);
         }
         for (const p of active()) {
             const s = advance(p);
@@ -676,9 +958,10 @@
         const bp = p ? blueprint(p.kind) : null;
         if (!p || !bp) return "";
         const n = p.size, o = p.origin;
-        const head = `${bp.name} #${p.id} at (${o.x},${o.y})-(${o.x + n - 1},${o.y + n - 1})`;
+        const where = n > 0 ? `at (${o.x},${o.y})-(${o.x + n - 1},${o.y + n - 1})` : `on ${footprint(p).length} cell(s) near (${o.x},${o.y})`;
+        const head = `${bp.name} #${p.id} ${where}`;
         if (p.state !== "active") return `${head}: ${p.state}${p.reason ? ` (${p.reason})` : ""}`;
-        const cells = phaseCells(p, bp, p.phase);
+        const spec = phaseSpec(p, bp, p.phase), cells = spec.cells || [];
         let done = 0;
         for (const cell of cells) if (cellStatus(p, cell).state === "done") done++;
         const J = Jobs();
@@ -688,7 +971,8 @@
             if (!job || finished(job)) continue;
             if (job.assigned) taken++; else openJobs++;
         }
-        return `${head}: phase ${p.phase + 1}/${bp.phases.length} ${bp.phases[p.phase]}, ${done}/${cells.length} cells, ${openJobs} jobs open, ${taken} taken${p.blocked ? `, ${p.blocked.reason}` : ""}`;
+        const progress = spec.task === "forage" ? "foraging" : `${done}/${cells.length} cells`;
+        return `${head}: phase ${p.phase + 1}/${phaseCount(p, bp)} ${spec.name}, ${progress}, ${openJobs} jobs open, ${taken} taken${p.blocked ? `, ${p.blocked.reason}` : ""}`;
     }
 
     //-------------------------------------------------------------------------
@@ -706,12 +990,15 @@
         active,
         evaluateDeficits,
         explain,
+        brain: () => brain(null),
+        deficits: DEFICITS.slice(),
         open,
         cancel,
         advance: id => { const p = get(id); return p ? advance(p) : null; },
         tick: runCycle,
         reservedAt,
         footprint,
+        sheltered: () => { const c = colony(); return c ? [...shelteredCells(c)].map(k => { const [x, y] = k.split(",").map(Number); return { x, y }; }) : []; },
         cells: (ref, phase) => {
             const p = typeof ref === "number" ? get(ref) : ref;
             const bp = p ? blueprint(p.kind) : null;
@@ -721,7 +1008,7 @@
         describe,
         setEnabled: on => { enabled = !!on; return enabled; },
         isEnabled: () => enabled,
-        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, onMapUpdate, onLoaded, now }
+        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, onMapUpdate, onLoaded, now }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -770,22 +1057,33 @@
             const d = evaluateDeficits(null);
             t.check("deficits_year1", !!d && d.population >= 2 && d.shelter.needed >= 1 && d.shelter.current === 0,
                 d ? explain(null) : "no deficits");
-            // The plugin's own first cycle may already have run (start delay 120 ticks); either way exactly one project.
+            // The plugin's own first cycle may already have run (start delay 120 ticks) and opened the brain's first choice;
+            // this cycle opens at most one more. Every active project answers a deficit that was open, no kind twice.
+            const already = list().length;
             const cycle = runCycle();
-            const p = active()[0] || null;
-            t.check("project_opened", !!p && p.kind === "communal_shelter" && list().length === 1 && !!cycle,
-                p ? `${describe(p)} (${cycle.opened.length ? "opened by this cycle" : "opened by the plugin's own cycle"})` : "no active project");
+            const opened = active();
+            const p = opened[0] || null;
+            const kinds = opened.map(q => q.kind);
+            const b = cycle && cycle.brain ? cycle.brain : null;
+            t.check("project_opened", !!p && !!b && opened.length >= 1 && opened.length <= already + 1 && new Set(kinds).size === kinds.length &&
+                opened.every(q => !!d[q.deficit] && d[q.deficit].deficit > 0 && !!q.capacity && q.capacity[q.deficit] > 0) && b.candidates.length === Object.keys(config().blueprints).length,
+                p ? `${opened.map(q => describe(q)).join(" | ")} (${cycle.opened.length ? "one opened by this cycle" : "opened by the plugin's own cycle"}); brain: ${b ? b.candidates.map(x => `${x.kind}:${x.utility === -Infinity ? "-" : x.utility.toFixed(1)}`).join(" ") : "none"}` : "no active project");
             const area = p ? levelArea(p.origin) : null;
-            const centre = p ? { x: p.origin.x + Math.floor(p.size / 2), y: p.origin.y + Math.floor(p.size / 2) } : null;
-            t.check("site_reserved", !!p && reservedAt(area, p.origin.x, p.origin.y) === p.id && !reservedAt(area, c.site.x, c.site.y) &&
-                chebyshev(centre.x, centre.y, c.site.x, c.site.y) > (c.radius | 0) + 1 + Math.floor(p.size / 2),
-                p ? `origin (${p.origin.x},${p.origin.y}) reserved, centre ${chebyshev(centre.x, centre.y, c.site.x, c.site.y)} from the hearth` : "no project");
+            // A footprint project reserves its square outside the camp ring; a task project reserves the cells it chose
+            // (a food cache whose larder already stands reserves nothing and works from that larder).
+            const cells = p ? footprint(p) : [];
+            const first = cells[0] || null;
+            const centre = p && p.size > 0 ? { x: p.origin.x + Math.floor(p.size / 2), y: p.origin.y + Math.floor(p.size / 2) } : (first || (p && p.larder) || (c && c.site));
+            const reservedOk = first ? reservedAt(area, first.x, first.y) === p.id : !!(p && p.larder && O.atIn(area, p.larder.x, p.larder.y));
+            const outsideOk = !p || p.size === 0 || chebyshev(centre.x, centre.y, c.site.x, c.site.y) > (c.radius | 0) + 1 + Math.floor(p.size / 2);
+            t.check("site_reserved", !!p && reservedOk && !reservedAt(area, c.site.x, c.site.y) && outsideOk,
+                p ? `${first ? `cell (${first.x},${first.y}) reserved` : `no cells reserved, larder ${p.larder ? `(${p.larder.x},${p.larder.y})` : "none"}`}, ${cells.length} cell(s), centre ${chebyshev(centre.x, centre.y, c.site.x, c.site.y)} from the hearth` : "no project");
             const own = () => J.list(j => j.params && j.params.project === (p && p.id) && !finished(j));
             t.check("jobs_posted", own().length >= 1 && own().every(j => !j.owner && j.state === "open"),
                 `${own().length} open project jobs: ${own().slice(0, 4).map(j => `${j.type}@${j.target.x},${j.target.y}`).join(" ")}`);
             // The posted job is an ordinary UF_Jobs job: assigned the way an overseer order is, it plans a stand cell,
             // reserves its target, and the colonist walks there and does it on the real map. (Autonomous pick-up is
-            // UF_Colonists' decision loop, which decides nothing in the current tree.)
+            // UF_Colonists' decision loop, DEUS-TSK-FABLE-03; assigning directly keeps the check off the sweep's timing.)
             const job = own().find(j => !j.assigned) || null;
             const colonists = W.unitsInArea(area ? area.x : 0, area ? area.y : 0, area ? area.z : 0).filter(isColonist);
             const worker = job ? colonists.slice().sort((a, b) => chebyshev(a.x, a.y, job.target.x, job.target.y) - chebyshev(b.x, b.y, job.target.x, job.target.y))[0] : null;

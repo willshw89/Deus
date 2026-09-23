@@ -32,6 +32,9 @@ const MUTANTS = {
 };
 
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8"));
+// This harness proves the shelter loop alone: the settlement brain (DEUS-TSK-FABLE-06) has its other blueprints
+// switched off here, so a fixture without food does not open a food cache before the shelter.
+catalog.colony.projects = Object.assign({}, catalog.colony.projects, { blueprints: { food_cache: null, food_foraging: null, communal_stockpile: null, communal_chest: null, bedding_expansion: null } });
 const read = name => fs.readFileSync(path.join(PLUGINS, name), "utf8");
 const sources = {
     objects: read("DEUS_Objects.js"),

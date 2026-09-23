@@ -32,6 +32,9 @@ const MUTANTS = {
 };
 
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8"));
+// This harness proves the shelter loop alone: the settlement brain (DEUS-TSK-FABLE-06) has its other blueprints
+// switched off here, so a fixture without food does not open a food cache before the shelter.
+catalog.colony.projects = Object.assign({}, catalog.colony.projects, { blueprints: { food_cache: null, food_foraging: null, communal_stockpile: null, communal_chest: null, bedding_expansion: null } });
 const read = name => fs.readFileSync(path.join(PLUGINS, name), "utf8");
 const objectsSrc = read("DEUS_Objects.js");
 const itemsSrc = read("DEUS_Items.js");
@@ -308,7 +311,7 @@ try {
     // 1. Year-1 deficits: 8 founders, a lit hearth, a gapped ring, three straw beds, no stockpile.
     const d0 = P.evaluateDeficits(area);
     check("deficit_year1", !!d0 && d0.population === 8 && d0.shelter.needed === 1 && d0.shelter.current === 0 && d0.shelter.deficit === 1 &&
-        d0.bed.needed === 8 && d0.bed.current === 3 && d0.stockpile.needed === 1 && d0.stockpile.current === 0,
+        d0.bed.needed === 8 && d0.bed.current === 3 && d0.storage.needed === 64 && d0.storage.current === 0 && d0.food.needed === 3 && d0.food.current === 0 && d0.food.critical === true,
         d0 ? P.explain(area) : "no deficits");
 
     // 2. The deficit reads the world: a door set into the ring's north gap makes one shelter.
