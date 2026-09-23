@@ -1,15 +1,14 @@
 /*:
  * @target MZ
- * @plugindesc [DEUS HistoricalDemographics] Explicit annual demographics and version 6 historical registry.
- * @author Astra
+ * @plugindesc [DEUS HistoricalDemographics] Explicit annual demographics and version 7 historical registry.
+ * @author Gemini & Astra
  * @orderAfter DEUS_World
  * @orderAfter DEUS_History
  * @help
- * HIST-01/minimum HIST-02. No listeners, automatic generation, live units,
+ * HIST-01/minimum HIST-02/HIST-09. No listeners, automatic generation, live units,
  * terrain edits, or save hooks. create(world, options) imports canonical
  * Year-1 history into a separate state; the caller owns attachment/persistence.
- * All species demographic profiles are required caller data. No biological
- * defaults or alternate RNG implementation are supplied here.
+ * Promoted default biological profiles and localized site capacity models are provided.
  * API/schema: docs/systems/UF_History.md. Historical years only.
  * Deaths precede births each year. Partnerships persist until a partner dies.
  * Infant deaths use causeOfDeath=disease and deathDetail=infant; the first
@@ -51,6 +50,33 @@
             check(["birthChance", "infantMortality", "diseaseMortality", "exposureMortality"].every(k => probability(p[k])) && integer(p.birthSpacingYears) && p.birthSpacingYears >= 1, `invalid demographic probabilities ${id}`);
             if (p.names) namesValid(p.names);
         }
+    }
+    const DEFAULT_PROFILES = Object.freeze({
+        human: Object.freeze({ lifespan: [60, 90], reproductiveAge: [18, 55], birthChance: 0.36, birthSpacingYears: 3, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 }),
+        elf: Object.freeze({ lifespan: [350, 750], reproductiveAge: [60, 350], birthChance: 0.025, birthSpacingYears: 12, infantMortality: 0.002, diseaseMortality: 0.0001, exposureMortality: 0.0001 }),
+        dwarf: Object.freeze({ lifespan: [250, 350], reproductiveAge: [40, 240], birthChance: 0.09, birthSpacingYears: 6, infantMortality: 0.006, diseaseMortality: 0.0003, exposureMortality: 0.0003 }),
+        halfling: Object.freeze({ lifespan: [120, 150], reproductiveAge: [20, 110], birthChance: 0.20, birthSpacingYears: 4, infantMortality: 0.012, diseaseMortality: 0.0008, exposureMortality: 0.0006 }),
+        gnome: Object.freeze({ lifespan: [350, 500], reproductiveAge: [40, 200], birthChance: 0.05, birthSpacingYears: 10, infantMortality: 0.005, diseaseMortality: 0.0002, exposureMortality: 0.0002 }),
+        dragonborn: Object.freeze({ lifespan: [65, 80], reproductiveAge: [15, 60], birthChance: 0.34, birthSpacingYears: 3, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 }),
+        "half-elf": Object.freeze({ lifespan: [140, 180], reproductiveAge: [20, 125], birthChance: 0.12, birthSpacingYears: 5, infantMortality: 0.010, diseaseMortality: 0.0005, exposureMortality: 0.0005 }),
+        "half-orc": Object.freeze({ lifespan: [55, 75], reproductiveAge: [14, 50], birthChance: 0.40, birthSpacingYears: 2, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 }),
+        tiefling: Object.freeze({ lifespan: [70, 110], reproductiveAge: [18, 65], birthChance: 0.30, birthSpacingYears: 3, infantMortality: 0.004, diseaseMortality: 0.0003, exposureMortality: 0.0003 })
+    });
+    const DEFAULT_CAPACITY_MODEL = Object.freeze({
+        version: 1,
+        defaultBaseline: 160,
+        minimumScale: 0.10,
+        minCapacity: 60,
+        maxCapacity: 350
+    });
+    function deriveSiteCapacity(seedOrState, sourceSiteId, z, kind, capacityModel) {
+        const seed = typeof seedOrState === "object" && seedOrState ? seedOrState.seed : seedOrState;
+        const cfg = capacityModel || (typeof seedOrState === "object" && seedOrState && seedOrState.config && seedOrState.config.capacityModel) || DEFAULT_CAPACITY_MODEL;
+        const base = z === 0 ? 170 : (z === -1 ? 155 : 145);
+        const rng = UF.World.mulberry32(UF.World.hash32(seed, sourceSiteId, 0x43415041));
+        const mod = Math.floor(rng() * 31) - 15;
+        const cap = base + mod;
+        return Math.max(cfg.minCapacity, Math.min(cfg.maxCapacity, cap));
     }
     function alive(person) { return person.died === null; } // HIST_MUTANT_DEAD_REPRODUCE
     function lifespan(state, person) { return state.config.profiles[person.species].lifespan; } // HIST_MUTANT_UNIFORM_LIFESPAN
@@ -122,15 +148,21 @@
         check(world.factions && Array.isArray(world.factions.list) && world.factions.list.length && Array.isArray(world.history.sites) && world.history.founders, "canonical faction/site/founder records required");
         check(integer(world.size) && world.size > 0 && integer(world.areasX) && world.areasX > 0 && integer(world.areasY) && world.areasY > 0, "world dimensions invalid");
         const species = [...new Set(world.factions.list.map(f => f.species))];
-        profilesValid(options.profiles, species);
+        const isDefaultProfiles = options.profiles === undefined || options.profiles === "default";
+        const profiles = isDefaultProfiles ? copy(DEFAULT_PROFILES) : options.profiles;
+        profilesValid(profiles, species);
         const catalog = window.$deusWorldCatalog || window.$ufWorldCatalog;
         const names = options.names || (catalog && catalog.start && catalog.start.names);
         namesValid(names);
-        const config = copy({ profiles: options.profiles, names, recentYears: options.recentYears === undefined ? 20 : options.recentYears,
+        const capacityModel = copy(Object.assign({}, DEFAULT_CAPACITY_MODEL, options.capacityModel || {}));
+        const config = copy({ profiles, names, capacityModel, recentYears: options.recentYears === undefined ? 20 : options.recentYears,
             eventLimit: options.eventLimit === undefined ? 400 : options.eventLimit,
             dynastyInheritance: options.dynastyInheritance || "maternal", compression: "deferred" });
         check(integer(config.recentYears) && config.recentYears >= 0 && integer(config.eventLimit) && config.eventLimit >= 1 && ["maternal", "paternal"].includes(config.dynastyInheritance), "invalid retention/inheritance options");
-        const state = { version: 6, domain: "historical", seed: world.seed, yearsSimulated: 0, startYear: 1, currentYear: 1,
+        const demographicProfileVersion = isDefaultProfiles
+            ? "1.0.0-provisional-astra08"
+            : (options.demographicProfileVersion || "custom");
+        const state = { version: 7, historyModelVersion: 1, demographicProfileVersion, capacityModelVersion: 1, domain: "historical", seed: world.seed, yearsSimulated: 0, startYear: 1, currentYear: 1,
             dimensions: { size: world.size, areasX: world.areasX, areasY: world.areasY }, config,
             factions: {}, sites: [], people: [], dynasties: [], rulers: [], partnerships: [], events: [], nextEventId: 1, eventsDiscarded: 0 };
         const sourceSites = new Map(), initial = {};
@@ -141,9 +173,13 @@
         for (const s of world.history.sites) {
             check(integer(s.id) && !sourceSites.has(s.id) && own(state.factions, s.faction) && s.founded === 1 && s.ruined === null, "invalid canonical source site ID/faction/year");
             const zRange = s.zRange === undefined ? [s.z, s.z] : s.zRange.slice();
+            const historicalCapacity = options.siteCapacity && options.siteCapacity[s.id] !== undefined
+                ? options.siteCapacity[s.id]
+                : deriveSiteCapacity(state.seed, s.id, s.z, s.kind, capacityModel);
+            check(integer(historicalCapacity) && historicalCapacity >= capacityModel.minCapacity && historicalCapacity <= capacityModel.maxCapacity, "invalid historicalCapacity");
             const site = { id: state.sites.length, sourceSiteId: s.id, factionId: s.faction, name: s.name, kind: s.kind,
                 area: copy(s.area), x: s.x, y: s.y, z: s.z, zRange, foundedYear: s.founded,
-                abandonedYear: null, isRuined: false, population: 0, peakPopulation: 0 };
+                abandonedYear: null, isRuined: false, population: 0, peakPopulation: 0, historicalCapacity };
             state.sites.push(site); sourceSites.set(s.id, site.id); state.factions[s.faction].siteIds.push(site.id);
             emit(state, "founding", s.faction, site.id, [], `${site.name} was founded.`);
         }
@@ -186,7 +222,17 @@
     }
     function validate(state) {
         jsonSafe(state);
-        check(state.version === 6 && state.domain === "historical" && integer(state.seed) && state.seed >= 0 && state.seed <= 0xffffffff, "invalid demographics schema/seed");
+        check(state.version !== 6, "unsupported schema version: 6 (explicit migration required via UF.HistoricalDemographics.migrate)");
+        check(state.version === 7, `unsupported demographics schema version: ${state.version}`);
+        check(state.historyModelVersion === 1, `unsupported historyModelVersion: ${state.historyModelVersion}`);
+        check(state.capacityModelVersion === 1, `unsupported capacityModelVersion: ${state.capacityModelVersion}`);
+        check(typeof state.demographicProfileVersion === "string" && state.demographicProfileVersion.length > 0, "invalid demographicProfileVersion");
+        check(state.domain === "historical" && integer(state.seed) && state.seed >= 0 && state.seed <= 0xffffffff, "invalid demographics schema/seed");
+        check(state.config && typeof state.config === "object" && !Array.isArray(state.config), "invalid config");
+        const cm = state.config.capacityModel;
+        check(cm && typeof cm === "object" && !Array.isArray(cm), "invalid capacityModel config");
+        check(cm.version === state.capacityModelVersion, "capacityModel version mismatch");
+        check(integer(cm.version) && cm.version >= 1 && probability(cm.minimumScale) && integer(cm.defaultBaseline) && cm.defaultBaseline > 0 && integer(cm.minCapacity) && integer(cm.maxCapacity) && cm.minCapacity > 0 && cm.minCapacity <= cm.maxCapacity, "invalid capacityModel config");
         check(state.startYear === 1 && integer(state.yearsSimulated) && state.yearsSimulated >= 0 && state.currentYear === state.startYear + state.yearsSimulated, "historical clock mismatch");
         check(state.dimensions && ["size", "areasX", "areasY"].every(k => integer(state.dimensions[k]) && state.dimensions[k] > 0), "invalid world dimensions");
         check(state.config && integer(state.config.recentYears) && state.config.recentYears >= 0 && integer(state.config.eventLimit) && state.config.eventLimit >= 1 && ["maternal", "paternal"].includes(state.config.dynastyInheritance) && state.config.compression === "deferred", "invalid state retention/inheritance config");
@@ -200,6 +246,7 @@
             check(integer(s.z) && Array.isArray(s.zRange) && s.zRange.length === 2 && s.zRange.every(z => integer(z) && z >= -2 && z <= 2) && s.zRange[0] <= s.z && s.z <= s.zRange[1], "invalid site z/zRange");
             check(integer(s.sourceSiteId) && !sourceSites.has(s.sourceSiteId) && s.foundedYear === 1 && typeof s.name === "string" && s.name.length && typeof s.kind === "string" && s.isRuined === false, "invalid imported site metadata"); sourceSites.add(s.sourceSiteId);
             check(integer(s.population) && s.population >= 0 && s.peakPopulation >= s.population && (s.abandonedYear === null || (integer(s.abandonedYear) && s.abandonedYear <= state.currentYear && s.population === 0)), "invalid site population/abandonment");
+            check(integer(s.historicalCapacity) && s.historicalCapacity >= cm.minCapacity && s.historicalCapacity <= cm.maxCapacity, "invalid historicalCapacity");
         }
         for (const [i, p] of state.people.entries()) {
             check(p.id === i && integer(p.siteId) && integer(p.dynastyId) && (p.partnershipId === null || integer(p.partnershipId)) && state.sites[p.siteId] && state.sites[p.siteId].factionId === p.factionId && own(state.factions, p.factionId) && p.species === state.factions[p.factionId].species && ["male", "female"].includes(p.gender), "invalid person identity/site");
@@ -271,6 +318,10 @@
         validate(state); conditionsValid(state, conditions);
         check(state.currentYear < 1000000 && state.people.length < 1000000, "historical proof registry/year bound exceeded");
         state.currentYear++; state.yearsSimulated++;
+        const startOfYearPopulation = new Map();
+        for (const s of state.sites) {
+            startOfYearPopulation.set(s.id, s.population);
+        }
         const casualties = new Set(conditions.casualtyIds || []);
         for (const p of state.people.filter(alive)) {
             const profile = state.config.profiles[p.species], [lo, hi] = lifespan(state, p), age = state.currentYear - p.born;
@@ -291,11 +342,17 @@
             }
         }
         pair(state);
+        const capModel = state.config.capacityModel;
         for (const h of state.partnerships.filter(h => h.toYear === null)) {
             const mother = state.people[h.motherId], father = state.people[h.fatherId], profile = state.config.profiles[mother.species];
             if (!fertile(state, mother) || !fertile(state, father) || (mother.lastBirthYear !== null && state.currentYear - mother.lastBirthYear < profile.birthSpacingYears)) continue;
+            const site = state.sites[mother.siteId];
+            const startPop = startOfYearPopulation.get(mother.siteId);
+            const cap = site.historicalCapacity;
+            const scale = Math.max(capModel.minimumScale, 1 - (startPop / cap));
+            const effectiveBirthChance = profile.birthChance * scale;
             const rng = random(state, state.currentYear, h.id, 0x42495254);
-            if (rng() >= profile.birthChance) continue;
+            if (rng() >= effectiveBirthChance) continue;
             const gender = rng() < 0.5 ? "female" : "male", names = profile.names || state.config.names;
             const raw = names.start[Math.floor(rng() * names.start.length)] + names[gender][Math.floor(rng() * names[gender].length)];
             const person = { id: state.people.length, name: raw.charAt(0).toUpperCase() + raw.slice(1), gender, species: mother.species, factionId: mother.factionId, siteId: mother.siteId,
@@ -342,5 +399,35 @@
             dynasties: state.dynasties.length, activeRulers: state.rulers.filter(r => r.toYear === null).length,
             eventsGenerated: state.nextEventId - 1, eventsRetained: state.events.length };
     }
-    UF.HistoricalDemographics = { create, step, simulate, kinshipRelated, validate, summary };
+    function migrate(state) {
+        check(state && typeof state === "object" && !Array.isArray(state), "invalid state object for migration");
+        jsonSafe(state);
+        if (state.version === 7) {
+            validate(state);
+            return state;
+        }
+        check(state.version === 6, `unsupported migration source version: ${state.version}`);
+        state.version = 7;
+        state.historyModelVersion = 1;
+        state.capacityModelVersion = 1;
+        if (!state.demographicProfileVersion) {
+            state.demographicProfileVersion = "legacy-v6";
+        }
+        state.migratedFromVersion = 6;
+        if (!state.config) state.config = {};
+        if (!state.config.capacityModel) {
+            state.config.capacityModel = copy(DEFAULT_CAPACITY_MODEL);
+        } else {
+            state.config.capacityModel = Object.assign({}, DEFAULT_CAPACITY_MODEL, state.config.capacityModel);
+        }
+        check(Array.isArray(state.sites), "sites array required for migration");
+        for (const site of state.sites) {
+            if (site.historicalCapacity === undefined) {
+                site.historicalCapacity = deriveSiteCapacity(state.seed, site.sourceSiteId, site.z, site.kind, state.config.capacityModel);
+            }
+        }
+        validate(state);
+        return state;
+    }
+    UF.HistoricalDemographics = { create, step, simulate, kinshipRelated, validate, summary, migrate, DEFAULT_PROFILES, DEFAULT_CAPACITY_MODEL, deriveSiteCapacity };
 })();

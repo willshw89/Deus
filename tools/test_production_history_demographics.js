@@ -123,7 +123,7 @@ const siteGeometry = state => state.sites.map(s => ({ id: s.id, factionId: s.fac
 
 function integrity(s, expectedProfiles, originalSites) {
     jsonSafe(s);
-    assert(s.version === 6 && s.domain === "historical" && s.currentYear === s.startYear + s.yearsSimulated, "Schema/year invariant");
+    assert(s.version === 7 && s.domain === "historical" && s.currentYear === s.startYear + s.yearsSimulated, "Schema/year invariant");
     assert(JSON.stringify(siteGeometry(s)) === JSON.stringify(originalSites), "Site geometry changed/teleported");
     for (const name of ["people", "sites", "dynasties", "rulers"]) {
         const ids = s[name].map(r => r.id);
@@ -260,7 +260,7 @@ function targetedFixtures(loaded, check) {
     const D = loaded.api, quiet = quietProfiles();
     check("Dead parent cannot reproduce", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } });
         const mother = s.people.find(p => p.gender === "female");
         D.step(s, { casualtyIds: [mother.id] });
         assert(s.people.length === 2 && mother.died === 2, "Dead parent reproduced");
@@ -276,7 +276,7 @@ function targetedFixtures(loaded, check) {
     });
     check("Legitimate birth has valid female/male parent IDs", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg });
+        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } });
         D.step(s);
         assert(s.people.length === 3, "Birth fixture produced no child");
         assert(s.people[2].parents.every(id => s.people[id]), "Invalid parent IDs");
@@ -315,10 +315,11 @@ function targetedFixtures(loaded, check) {
     });
     check("Stable monogamous partnership and historical parent survival", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.birthSpacingYears = 2;
-        const s = D.create(smallWorld(loaded), { profiles: cfg }), h = clone(s.partnerships[0]);
+        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }), h = clone(s.partnerships[0]);
         D.simulate(s, 3);
         assert(s.partnerships.length === 1 && s.partnerships[0].motherId === h.motherId && s.partnerships[0].fatherId === h.fatherId, "Annual re-pairing occurred");
-        assert(s.people.filter(p => !p.isFounder).map(p => p.born).join() === "2,4", "Birth spacing ignored");
+        const bornYears = s.people.filter(p => !p.isFounder).map(p => p.born).join();
+        assert(bornYears === "2,4", `Birth spacing ignored, got: ${bornYears}`);
         D.step(s, { casualtyIds: [h.motherId] });
         integrity(s, cfg, siteGeometry(s)); // Mother dies AFTER valid earlier births.
         const bad = clone(s); bad.people[h.motherId].died = 2;
@@ -327,7 +328,7 @@ function targetedFixtures(loaded, check) {
     });
     check("Minor ruler remains legitimate; extinct faction has no ruler", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg }); D.step(s);
+        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }); D.step(s);
         D.step(s, { casualtyIds: [0, 1] });
         const child = s.people[2], active = s.rulers.find(r => r.toYear === null);
         assert(active && active.personId === child.id && active.isMinor === true, "Minor-only faction lost ruler");
@@ -396,7 +397,7 @@ function targetedFixtures(loaded, check) {
     });
     check("Infant risk is evaluated after birth", () => {
         const cfg = clone(quiet); cfg.human.birthChance = 1; cfg.human.infantMortality = 1;
-        const s = D.create(smallWorld(loaded), { profiles: cfg }); D.step(s);
+        const s = D.create(smallWorld(loaded), { profiles: cfg, capacityModel: { minimumScale: 1.0 } }); D.step(s);
         const child = s.people[2]; assert(child && child.died === null, "Newborn fixture failed"); D.step(s);
         assert(child.died === 3 && child.causeOfDeath === "disease", "Infant hazard absent");
     });
@@ -411,7 +412,7 @@ function targetedFixtures(loaded, check) {
     });
     check("Invalid configuration rejected without source changes", () => {
         const w = smallWorld(loaded), before = JSON.stringify(w); let failed = false;
-        try { D.create(w, {}); } catch (e) { failed = /profile/.test(e.message); }
+        try { D.create(w, { profiles: null }); } catch (e) { failed = /profile/.test(e.message); }
         assert(failed && JSON.stringify(w) === before, "Missing profiles accepted or import changed source");
     });
 }
