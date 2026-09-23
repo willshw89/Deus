@@ -357,9 +357,11 @@
         check(typeof state.demographicProfileVersion === "string" && state.demographicProfileVersion.length > 0, "invalid demographicProfileVersion");
         if (state.demographicProfileVersion === "1.0.0-provisional-astra08" || state.profileKind === "promoted-default") {
             check(matchesDefaultProfiles(state.config && state.config.profiles), "promoted profile version claimed with non-default profiles");
+            check(state.profileKind === "promoted-default", "promoted default profile version claimed without promoted-default profileKind");
         }
-        if (state.profileKind === "custom") {
-            check(state.demographicProfileVersion === "custom", "custom biology claimed promoted-default tag");
+        if (!matchesDefaultProfiles(state.config && state.config.profiles)) {
+            check(state.demographicProfileVersion !== "1.0.0-provisional-astra08", "custom biology claimed promoted-default tag");
+            check(state.profileKind !== "promoted-default", "custom biology claimed promoted-default profileKind");
         }
         check(state.domain === "historical" && integer(state.seed) && state.seed >= 0 && state.seed <= 0xffffffff, "invalid demographics schema/seed");
         check(state.config && typeof state.config === "object" && !Array.isArray(state.config), "invalid config");
