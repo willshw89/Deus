@@ -243,26 +243,98 @@
         return typeof unit.data.hp === "number" && unit.data.hp <= 0;
     }
 
+    // What a creature holds: the hand slots of the 12-slot model (mainHand, offHand) and the aliases older records
+    // and DEUS_Sheet map onto them. Worn slots (body, head, feet, …) are never dropped.
+    const HELD_SLOTS = ["mainHand", "offHand", "mainhand", "offhand", "weapon", "shield", "tool"];
+    // Conditions that make a creature drop what it holds (SRD p. 359: an unconscious creature "drops whatever it is
+    // holding"; a petrified creature and its gear turn to stone, nothing stays in a working grip). Incapacitated,
+    // stunned and paralyzed creatures can take no action, but their grip holds (DEUS-TSK-FABLE-10).
+    const DROPS_HELD = ["unconscious", "petrified"];
+    // Conditions that end every grapple the creature holds the moment they are inflicted (SRD p. 358: a grapple
+    // ends if the grappler is incapacitated).
+    const INCAPACITATING = ["incapacitated", "stunned", "paralyzed", "unconscious", "petrified"];
+    /**
+     * Drops what the creature holds onto its own cell. An equipped item id (DEUS_Items' model: the id of an item the
+     * unit carries) is put down on the cell and the slot cleared; a type string or { type, count } (older records)
+     * is dropped as a new stack. Returns [{ slot, itemId, type }] and emits condition:dropped_items.
+     */
     function dropHeldItems(unit) {
-        if (!unit || !unit.data) return;
+        const dropped = [];
+        if (!unit || !unit.data) return dropped;
         const eq = unit.data.equipment;
+        if (!eq || typeof eq !== "object") return dropped;
         const Items = root.UF && root.UF.Items;
-        const area = unit.area || (root.UF && root.UF.World && root.UF.World.currentArea ? root.UF.World.currentArea() : { x: 0, y: 0 });
+        const base = unit.area || (root.UF && root.UF.World && root.UF.World.currentArea ? root.UF.World.currentArea() : { x: 0, y: 0 });
+        const area = { x: base.x | 0, y: base.y | 0, z: unit.z !== undefined ? unit.z : (base.z !== undefined ? base.z : 0) };
         const x = unit.x | 0, y = unit.y | 0;
-        if (eq && typeof eq === "object") {
-            const heldSlots = ["mainhand", "offhand", "weapon", "shield"];
-            for (const slot of heldSlots) {
-                if (eq[slot]) {
-                    const it = eq[slot];
-                    const itemType = (typeof it === "string") ? it : (it.type || it.id);
-                    const count = (it && typeof it.count === "number") ? it.count : 1;
-                    if (itemType && Items && typeof Items.drop === "function") {
-                        try { Items.drop(area, x, y, itemType, count); } catch (_) {}
-                    }
-                    eq[slot] = null;
+        for (const slot of HELD_SLOTS) {
+            const it = eq[slot];
+            if (it === null || it === undefined || it === "") continue;
+            if (typeof it === "number") {
+                const rec = Items && typeof Items.get === "function" ? Items.get(it) : null;
+                if (rec && Items && typeof Items.putDown === "function") {
+                    try { Items.putDown(rec.id, area, x, y); } catch (_) {}
                 }
+                dropped.push({ slot, itemId: it, type: rec ? rec.type : null });
+            } else {
+                const itemType = typeof it === "string" ? it : (it.type || it.id);
+                const count = it && typeof it.count === "number" ? it.count : 1;
+                if (itemType && Items && typeof Items.drop === "function") {
+                    try { Items.drop(area, x, y, itemType, count); } catch (_) {}
+                }
+                dropped.push({ slot, itemId: null, type: itemType || null });
             }
+            eq[slot] = null;
         }
+        if (dropped.length) emit("condition:dropped_items", unit, dropped);
+        return dropped;
+    }
+
+    // Grapples a creature holds are indexed on the grappler (unit.data.grappling: victim ids, JSON-safe), so that a
+    // condition, death, removal or move of the grappler ends them at once, without a scan of the world.
+    function grappleIndex(grappler) {
+        if (!grappler || !grappler.data) return null;
+        if (!Array.isArray(grappler.data.grappling)) grappler.data.grappling = [];
+        return grappler.data.grappling;
+    }
+    function noteGrapple(grapplerId, victimId, on) {
+        const grappler = findUnit(grapplerId);
+        const list = grappleIndex(grappler);
+        if (!list) return;
+        const i = list.indexOf(victimId);
+        if (on && i < 0) list.push(victimId);
+        if (!on && i >= 0) list.splice(i, 1);
+        if (!list.length) delete grappler.data.grappling;
+    }
+    // Ends the grappled instances on `victim` that `grapplerId` holds (all of them when grapplerId is null).
+    function endGrapples(victim, grapplerId, reason) {
+        if (!victim || !victim.data || !victim.data.conditions) return 0;
+        const entry = victim.data.conditions.grappled;
+        if (!entry || !Array.isArray(entry.instances)) return 0;
+        let ended = 0;
+        for (let i = entry.instances.length - 1; i >= 0; i--) {
+            const inst = entry.instances[i];
+            if (grapplerId !== null && grapplerId !== undefined && inst.sourceUnitId !== grapplerId) continue;
+            entry.instances.splice(i, 1);
+            inst.endedBecause = reason || null;
+            noteGrapple(inst.sourceUnitId, victim.id, false);
+            emit("condition:expired", victim, inst);
+            emit("condition:removed", victim, inst);
+            ended++;
+        }
+        if (!entry.instances.length) delete victim.data.conditions.grappled;
+        return ended;
+    }
+    // Every grapple this creature holds ends: it was incapacitated, died, left the world or moved away.
+    function releaseGrapplesHeldBy(grappler, reason) {
+        if (!grappler || !grappler.data || !Array.isArray(grappler.data.grappling)) return 0;
+        let ended = 0;
+        for (const victimId of grappler.data.grappling.slice()) {
+            const victim = findUnit(victimId);
+            if (victim) ended += endGrapples(victim, grappler.id, reason);
+        }
+        delete grappler.data.grappling;
+        return ended;
     }
 
     function chebyshevDist(a, b) {
@@ -294,6 +366,11 @@
          * Resolves dynamic authorities (exhaustion, 0-HP unconscious) and derived conditions
          * (e.g. paralyzed -> incapacitated, unconscious -> prone).
          */
+        /** The slots whose contents an unconscious or petrified creature drops, and the conditions that drop them. */
+        HELD_SLOTS: HELD_SLOTS.slice(),
+        DROPS_HELD: DROPS_HELD.slice(),
+        INCAPACITATING: INCAPACITATING.slice(),
+
         has(unit, conditionId) {
             if (!unit || !unit.data) return false;
             const cid = String(conditionId || "").toLowerCase();
@@ -360,7 +437,7 @@
                         source: "needs",
                         sourceUnitId: null,
                         startedAt: 0,
-                        duration: Infinity,
+                        duration: null,
                         expiresAt: null,
                         domain: "action"
                     });
@@ -375,9 +452,11 @@
                     source: "zero_hp",
                     sourceUnitId: null,
                     startedAt: now(),
-                    duration: Infinity,
+                    duration: null,
                     expiresAt: null,
-                    domain: "action"
+                    domain: "action",
+                    dying: !!unit.data.dying,
+                    stable: this.isStable(unit)
                 });
             }
 
@@ -438,12 +517,15 @@
             }
 
             const currentTick = now();
-            const duration = Number.isFinite(options.duration) ? Math.max(1, options.duration) : Infinity;
-            const expiresAt = Number.isFinite(duration) && duration < Infinity ? currentTick + duration : null;
+            // Indefinite is stored as null (JSON keeps it; Infinity would not survive a save).
+            const duration = Number.isFinite(options.duration) ? Math.max(1, options.duration) : null;
+            const expiresAt = duration !== null ? currentTick + duration : null;
+            // Instance ids stay unique across saves: a per-unit sequence rides in the record.
+            unit.data.conditionSeq = (unit.data.conditionSeq | 0) + 1;
             const srcUnitId = options.sourceUnitId !== undefined ? options.sourceUnitId : (options.sourceUnit ? options.sourceUnit.id : null);
 
             const instance = {
-                id: options.id || (`cond_${cid}_${nextInstanceId++}`),
+                id: options.id || (`cond_${cid}_${unit.data.conditionSeq}`),
                 condition: cid,
                 source: options.source || "unknown",
                 sourceUnitId: srcUnitId !== undefined ? srcUnitId : null,
@@ -458,13 +540,12 @@
 
             store[cid].instances.push(instance);
 
-            // Unconscious: drops held items and falls prone (SRD p. 359)
-            if (cid === "unconscious") {
-                if (options.dropHeld !== false) {
-                    dropHeldItems(unit);
-                }
-                this.add(unit, "prone", { source: "unconscious_fall", duration: instance.duration });
-            }
+            if (cid === "grappled" && instance.sourceUnitId !== null && instance.sourceUnitId !== undefined) noteGrapple(instance.sourceUnitId, unit.id, true);
+            // Unconscious and petrified creatures drop what they hold; unconscious falls prone (SRD p. 359).
+            if (DROPS_HELD.includes(cid) && options.dropHeld !== false) dropHeldItems(unit);
+            if (cid === "unconscious") this.add(unit, "prone", { source: "unconscious_fall", duration: instance.duration });
+            // A grappler that can no longer act lets go at once (SRD p. 358).
+            if (INCAPACITATING.includes(cid)) releaseGrapplesHeldBy(unit, `grappler ${cid}`);
 
             emit("condition:applied", unit, instance);
             emit("condition:added", unit, instance);
@@ -510,6 +591,7 @@
                 if (arr.length === 0) {
                     delete store[cid];
                 }
+                if (cid === "grappled") noteGrapple(removed.sourceUnitId, unit.id, false);
                 emit("condition:removed", unit, removed);
                 return true;
             }
@@ -537,6 +619,7 @@
                     return true;
                 }
                 if (store[cid]) {
+                    if (cid === "grappled") for (const inst of store[cid].instances || []) noteGrapple(inst.sourceUnitId, unit.id, false);
                     delete store[cid];
                     emit("condition:cleared", unit, cid);
                     return true;
@@ -546,6 +629,7 @@
 
             // Clear all
             for (const k of Object.keys(store)) {
+                if (k === "grappled") for (const inst of store[k].instances || []) noteGrapple(inst.sourceUnitId, unit.id, false);
                 delete store[k];
             }
             if (unit.data.needs && unit.data.needs.exhaustion) {
@@ -571,6 +655,127 @@
         //---------------------------------------------------------------------
         // Capability & Action Queries
         //---------------------------------------------------------------------
+
+        /**
+         * A creature at 0 hit points that is stable (DEUS_Colonists' dying record, or a `stable` flag on the unit)
+         * makes no death saving throws and stays unconscious until it is healed or wakes (DEUS-TSK-FABLE-10).
+         */
+        isStable(unit) {
+            if (!unit || !unit.data || !isUnconsciousZeroHp(unit)) return false;
+            if (unit.data.dying && unit.data.dying.stable === true) return true;
+            return unit.data.stable === true;
+        },
+
+        /** Drops what the creature holds onto its cell (see dropHeldItems). */
+        dropHeldItems(unit) {
+            return dropHeldItems(unit);
+        },
+
+        /** Ends every grapple the creature holds (it is incapacitated, dead, gone or moved away). Returns how many. */
+        releaseGrapples(grappler, reason = "released") {
+            return releaseGrapplesHeldBy(grappler, reason);
+        },
+
+        /**
+         * Call after a unit moved (DEUS_World can call it from its step; tick() catches it too): the grapples it holds on
+         * creatures now farther than one cell end, and its own grappled instances whose grappler is farther than one cell
+         * end. Returns how many ended.
+         */
+        onUnitMoved(unit) {
+            if (!unit || !unit.data) return 0;
+            let ended = 0;
+            if (Array.isArray(unit.data.grappling)) {
+                for (const victimId of unit.data.grappling.slice()) {
+                    const victim = findUnit(victimId);
+                    if (!victim || chebyshevDist(unit, victim) > 1) ended += victim ? endGrapples(victim, unit.id, "grappler moved away") : 0;
+                    if (!victim) noteGrapple(unit.id, victimId, false);
+                }
+            }
+            const entry = unit.data.conditions && unit.data.conditions.grappled;
+            if (entry && Array.isArray(entry.instances)) {
+                for (const inst of entry.instances.slice()) {
+                    if (inst.sourceUnitId === null || inst.sourceUnitId === undefined) continue;
+                    const grappler = findUnit(inst.sourceUnitId);
+                    if (!grappler || chebyshevDist(unit, grappler) > 1) ended += endGrapples(unit, inst.sourceUnitId, "moved out of reach");
+                }
+            }
+            return ended;
+        },
+
+        /**
+         * Line of sight between two units: the same level and no wall, door or solid rock on the cells between them
+         * (Bresenham). DEUS_World or DEUS_Levels may install a better test with setLineOfSight(fn).
+         */
+        lineOfSight(a, b) {
+            if (!a || !b) return false;
+            if (a.area && b.area && (a.area.x !== b.area.x || a.area.y !== b.area.y)) return false;
+            const za = a.z !== undefined ? a.z : (a.area && a.area.z !== undefined ? a.area.z : 0);
+            const zb = b.z !== undefined ? b.z : (b.area && b.area.z !== undefined ? b.area.z : 0);
+            if (za !== zb) return false;
+            if (typeof lineOfSightOverride === "function") return !!lineOfSightOverride(a, b);
+            const O = root.UF && root.UF.Objects, L = root.UF && root.UF.Levels;
+            const area = a.area ? { x: a.area.x, y: a.area.y, z: za } : null;
+            let x0 = a.x | 0, y0 = a.y | 0;
+            const x1 = b.x | 0, y1 = b.y | 0;
+            const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            let err = dx + dy;
+            for (let guard = 0; guard < 4096; guard++) {
+                if (x0 === x1 && y0 === y1) return true;
+                const e2 = 2 * err;
+                if (e2 >= dy) { err += dy; x0 += sx; }
+                if (e2 <= dx) { err += dx; y0 += sy; }
+                if (x0 === x1 && y0 === y1) return true;
+                if (area && O && typeof O.atIn === "function") {
+                    const t = O.atIn(area, x0, y0);
+                    const tags = t && Array.isArray(t.tags) ? t.tags : [];
+                    if (tags.includes("wall") || tags.includes("door")) return false;
+                }
+                if (area && L && typeof L.shapeAt === "function") {
+                    try { if (L.shapeAt({ area, x: x0, y: y0, z: za }) === "solid") return false; } catch (_) {}
+                }
+            }
+            return true;
+        },
+        setLineOfSight(fn) {
+            lineOfSightOverride = typeof fn === "function" ? fn : null;
+        },
+
+        /**
+         * Whether a frightened creature can see the source of its fear: any frightened instance whose source unit is in
+         * line of sight (a source without a unit counts as seen). opts.fearSourceVisible forces the answer either way.
+         * While no source is seen, the disadvantage on attack rolls and ability checks is suspended; the creature still
+         * cannot willingly move closer (SRD p. 358).
+         */
+        fearSourceVisible(unit, opts = {}) {
+            if (opts && opts.fearSourceVisible === true) return true;
+            if (opts && opts.fearSourceVisible === false) return false;
+            if (!unit || !this.has(unit, "frightened")) return false;
+            return this.instances(unit, "frightened").some(inst => {
+                if (inst.sourceUnitId === null || inst.sourceUnitId === undefined) return true;
+                const s = findUnit(inst.sourceUnitId);
+                return !!s && this.lineOfSight(unit, s);
+            });
+        },
+
+        /** Whether `charmer` has charmed `target` (an instance on the target names the charmer as its source). */
+        charmerHasAdvantageOver(charmer, target) {
+            if (!charmer || !target || !this.has(target, "charmed")) return false;
+            return this.instances(target, "charmed").some(inst => inst.sourceUnitId === charmer.id);
+        },
+
+        /**
+         * Ability check modifiers for a social check `actor` makes against `target` (persuasion, deception,
+         * intimidation, performance, or any check flagged opts.social): a charmer has advantage against the creature it
+         * charmed (SRD p. 358), on top of the actor's own condition modifiers.
+         */
+        socialCheckModifiers(actor, target, ability, skill, opts = {}) {
+            const social = opts.social === true || ["persuasion", "deception", "intimidation", "performance"].includes(String(skill || "").toLowerCase());
+            const merged = Object.assign({}, opts);
+            if (social && this.charmerHasAdvantageOver(actor, target)) merged.advantage = true;
+            const mods = this.checkModifiers(actor, ability, skill, merged);
+            if (social && this.charmerHasAdvantageOver(actor, target)) { mods.advSources.push("charmer_social"); mods.charmerAdvantage = true; } else mods.charmerAdvantage = false;
+            return mods;
+        },
 
         canAct(unit) {
             if (isDead(unit)) return false;
@@ -723,17 +928,9 @@
                 if (this.has(attacker, "restrained")) disSources.push("attacker_restrained");
                 if (exhaustionOf(attacker) >= 3) disSources.push("attacker_exhaustion_3");
 
-                // Frightened: disadvantage on attack rolls while fear source is visible
-                if (this.has(attacker, "frightened")) {
-                    const insts = this.instances(attacker, "frightened");
-                    const hasVisibleSource = insts.some(inst => {
-                        if (inst.sourceUnitId === null || inst.sourceUnitId === undefined) return true;
-                        const s = findUnit(inst.sourceUnitId);
-                        return s && (!attacker.area || !s.area || attacker.area.x === s.area.x && attacker.area.y === s.area.y);
-                    });
-                    if (hasVisibleSource || opts.fearSourceVisible) {
-                        disSources.push("attacker_frightened");
-                    }
+                // Frightened: disadvantage on attack rolls while a source of the fear is in line of sight
+                if (this.has(attacker, "frightened") && this.fearSourceVisible(attacker, opts)) {
+                    disSources.push("attacker_frightened");
                 }
             }
 
@@ -799,8 +996,8 @@
                 if (this.has(unit, "poisoned")) disSources.push("poisoned");
                 if (exhaustionOf(unit) >= 1) disSources.push("exhaustion_1");
 
-                // Frightened check disadvantage while fear source is visible
-                if (this.has(unit, "frightened")) {
+                // Frightened: disadvantage on ability checks while a source of the fear is in line of sight
+                if (this.has(unit, "frightened") && this.fearSourceVisible(unit, opts)) {
                     disSources.push("frightened");
                 }
 
@@ -934,16 +1131,17 @@
                         expired = true;
                     }
 
-                    // Grapple break check: ends if grappler is incapacitated or out of reach (>1 cell)
+                    // Grapple break check: ends if the grappler is gone, dead, incapacitated or out of reach (>1 cell)
                     if (!expired && inst.condition === "grappled" && inst.sourceUnitId !== null && inst.sourceUnitId !== undefined) {
                         const grappler = findUnit(inst.sourceUnitId);
-                        if (!grappler || !this.canAct(grappler) || chebyshevDist(unit, grappler) > 1) {
+                        if (!grappler || isDead(grappler) || !this.canAct(grappler) || chebyshevDist(unit, grappler) > 1) {
                             expired = true;
                         }
                     }
 
                     if (expired) {
                         entry.instances.splice(i, 1);
+                        if (inst.condition === "grappled") noteGrapple(inst.sourceUnitId, unit.id, false);
                         emit("condition:expired", unit, inst);
                         emit("condition:removed", unit, inst);
                     }
@@ -966,7 +1164,23 @@
         }
     };
 
+    let lineOfSightOverride = null;
+
     root.UF.Conditions = Conditions;
     root.DEUS.Conditions = Conditions;
+
+    // The world's own events keep the invariants without a scan: a creature downed at 0 hit points (DEUS_Combat)
+    // drops what it holds and lets go of anyone it grappled; a dead or removed creature lets go too.
+    if (root.UF.Events && typeof root.UF.Events.on === "function") {
+        root.UF.Events.on("combat:downed", ev => {
+            const t = ev && ev.target;
+            if (!t || !t.data) return;
+            dropHeldItems(t);
+            releaseGrapplesHeldBy(t, "grappler downed");
+        });
+        root.UF.Events.on("colonists:died", u => releaseGrapplesHeldBy(u, "grappler died"));
+        root.UF.Events.on("combat:kill", ev => releaseGrapplesHeldBy(ev && ev.target, "grappler killed"));
+        root.UF.Events.on("world:unitRemoved", u => releaseGrapplesHeldBy(u, "grappler gone"));
+    }
 
 })();
