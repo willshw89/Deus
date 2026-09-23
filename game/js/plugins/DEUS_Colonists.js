@@ -911,7 +911,7 @@
             const record = {
                 version: 2, factionId: local.faction, siteId: local.id,
                 site: { x: local.x, y: local.y }, area: copyArea(local.area), z: zOf(local), radius,
-                plan: makePlan(local), stockpiles: [],
+                plan: makePlan(local), stockpiles: (local.stockpiles || []).slice(),
                 log: [{ tick: 0, text: `${residents.length} colonists at ${local.name}` }]
             };
             if (!primary) {
@@ -973,7 +973,7 @@
             if (site.id !== primary.siteId && !primary.settlements[site.id]) {
                 primary.settlements[site.id] = { version: 2, factionId: site.faction, siteId: site.id,
                     site: { x: site.x, y: site.y }, area: copyArea(site.area), z: zOf(site), radius: siteRadius(site),
-                    plan: makePlan(site), stockpiles: [], log: [] };
+                    plan: makePlan(site), stockpiles: (site.stockpiles || []).slice(), log: [] };
             }
             for (let r = 0; r < residents.length; r++) {
                 const u = residents[r];
@@ -1177,8 +1177,15 @@
         }
         return null;
     }
-    const stockpilesStoring = (tag, ref) => (colonyState(ref) ? colonyState(ref).stockpiles.filter(s => !tag || (s.stores || []).includes(tag)) : []);
-    const onStockpile = (it, tag, ref) => sameLevel(it, colonyState(ref)) && stockpilesStoring(tag, ref).some(s => s.x === it.x && s.y === it.y);
+    const stockpilesStoring = (tag, ref) => (colonyState(ref) ? (colonyState(ref).stockpiles || []).filter(s => !tag || (s.stores || []).includes(tag)) : []);
+    const onStockpile = (it, tag, ref) => {
+        const Stockpiles = window.UF && UF.Stockpiles;
+        if (Stockpiles && typeof Stockpiles.at === "function") {
+            const sp = Stockpiles.at(it.area, it.x, it.y, it.z);
+            if (sp && sp.enabled !== false && Stockpiles.accepts(sp, it)) return true;
+        }
+        return sameLevel(it, colonyState(ref)) && stockpilesStoring(tag, ref).some(s => s.x === it.x && s.y === it.y);
+    };
     function groundItemsNear(u, opts) {
         const I = Items();
         return I ? I.find(Object.assign({}, opts, { near: { x: u.x, y: u.y }, area: levelArea(u), z: zOf(u) })) : [];
@@ -3990,6 +3997,25 @@
         for (const f of loose) {
             const t = itemType(f.item.type);
             if (!t) continue;
+
+            // 0. Physical Stockpiles (DF-Style destination selection & reservations)
+            const Stockpiles = window.UF && UF.Stockpiles;
+            if (Stockpiles && typeof Stockpiles.findDestination === "function") {
+                const dest = Stockpiles.findDestination(f.item, u, c.factionId || "player");
+                if (dest) {
+                    Stockpiles.reserve(u.id, dest);
+                    return give(u, {
+                        type: "haul",
+                        target: { x: f.x, y: f.y },
+                        params: {
+                            itemId: f.item.id,
+                            toContainer: dest.containerId || null,
+                            to: { area: copyArea(dest.area), z: zOf(dest), x: dest.x, y: dest.y },
+                            tidy: true
+                        }
+                    });
+                }
+            }
 
             // 1. Prioritize physical storage containers
             if (C) {

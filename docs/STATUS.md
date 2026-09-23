@@ -29,6 +29,32 @@ Update this whenever reality changes. Write only what you've checked, and say ho
     - `node tools/test_autonomous_work_recovery.js`: **13 passed, 0 failed (exit 0)**.
     - `node tools/test_vertical_worldgen_proof.js`: **15 passed, 1 failed, 15 skipped** (retained 1 expected fluid-landing failure documented in commit 4eebef2; all volumetric columns and cave passages pass).
 
+## DEUS-TSK-GEMINI-07 — Physical DF-Style Command Stockpiles & Starter Camp Kit (2026-09-23)
+- **Status**: `PASS` (Headless suites pass; all 7 Rule 4 mutants exit 1).
+- **Scope**: `game/js/plugins/DEUS_Stockpiles.js`, `game/js/plugins/DEUS_Containers.js`, `game/js/plugins/DEUS_Projects.js`, `game/js/plugins/DEUS_Jobs.js`, `game/js/plugins/DEUS_Colonists.js`, `game/js/plugins/DEUS_History.js`, `game/js/plugins/DEUS_Items.js`, `tools/test_stockpiles_designation.js`, `tools/test_starter_kit_and_stockpile.js`.
+- **Changes**:
+  - `game/js/plugins/DEUS_Stockpiles.js`: Brand new canonical DF-style command stockpile plugin (`UF.Stockpiles` / `DEUS.Stockpiles`). Physical 1-cell = 1-stack occupancy model, spatial indexing, filter categories (material, food, equipment, containers, corpses, all), priority levels (low, normal, high, critical), reservations (`reserve`, `release`, `isReserved`), `cellOccupancy` (empty vs loose stack vs physical container), container capacity aggregation without double-counting, `findDestination`, and legacy migration (`migrateLegacy`).
+  - `game/js/plugins/DEUS_Containers.js`: Enhanced physical container queries (`at`, `itemsIn`, `canStore`, `putItem`, `takeItem`, slot/weight tracking).
+  - `game/js/plugins/DEUS_History.js`: Starter kit delivered to center wooden chest: exactly food for 8 people for 1 day (16 `meat_cooked`), 1 `shovel`, 1 `pickaxe`, 1 `axe`. All 9 starting tiles (3x3 block around chest) designated as physical stockpile squares in `placeCamps`.
+  - `game/js/plugins/DEUS_Items.js`: Registered tool aliases and fallback `shovel` canonical item definition with tags and tool capabilities.
+  - `game/js/plugins/DEUS_Jobs.js`: Haul job integration with physical stockpile reservations and transactional delivery.
+  - `game/js/plugins/DEUS_Colonists.js`: Storage deficit checks updated to evaluate physical usable capacity; restored `stockpilesStoring` scope definition.
+  - `tools/test_stockpiles_designation.js`: 18 checks covering designation, spatial index, filtering, disabled rejection, empty/loose/container occupancy, capacity evaluation, reservation collision prevention, physical hauling without teleportation, stale destination recovery, save/load round-trip, and legacy migration.
+  - `tools/test_starter_kit_and_stockpile.js`: Verifies exact starter chest contents and 9-tile stockpile designation.
+- **Checks observed**:
+  - `node tools/test_stockpiles_designation.js`: **18 passed, 0 failed (exit 0)**.
+  - Rule 4 negative control mutants observed failing (all exited 1):
+    - `virtual_capacity_counted`: **FAIL (exit 1)**
+    - `filter_ignored`: **FAIL (exit 1)**
+    - `item_teleported`: **FAIL (exit 1)**
+    - `loose_and_container_double_counted`: **FAIL (exit 1)**
+    - `disabled_stockpile_accepted`: **FAIL (exit 1)**
+    - `reservation_collision_allowed`: **FAIL (exit 1)**
+    - `legacy_migration_preserves_fake_72`: **FAIL (exit 1)**
+  - `node tools/test_starter_kit_and_stockpile.js`: **PASS (exit 0)**.
+  - Regressions:
+    - `node tools/test_autonomous_settlement_closure.js`: **22 passed, 0 failed (exit 0)** across 96,938 updates (6.7 calendar days).
+
 ## DEUS-TSK-FABLE-08 — Production-Clock Autonomous Colony Closure (2026-09-23)
 - **Status**: `FIRST SELF-MAINTAINING DEUS COLONY — PASS` (Commit `5d3ae7f`; Headless/automated PASS; native F5 multi-day observation still not rerun).
 - **Scope**: `game/js/plugins/DEUS_Projects.js`, `tools/test_autonomous_settlement_closure.js`, `docs/systems/DEUS_Projects.md`.

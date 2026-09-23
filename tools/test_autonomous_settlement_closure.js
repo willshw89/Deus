@@ -485,7 +485,7 @@ try {
         shelter ? `${P.describe(shelter)} after ${n1 > 0 ? (n1 / DAY_TICKS).toFixed(2) : ">14"} days: ${walls}/16 walls and door, ${beds}/8 beds, hearth ${hearth}; ${S.rec.projectJobsDone} project jobs done, ${S.rec.assignCalls} assign calls, ${S.rec.orders} orders; jobs done ${JSON.stringify(S.rec.done)}` : `no shelter project (${JSON.stringify(P.list().map(p => p.kind + ":" + p.state))})`);
     const stockpile = projectsOf(S, "communal_stockpile").find(p => p.state === "done") || projectsOf(S, "communal_stockpile")[0] || null;
     const registered = stockpile ? P.footprint(stockpile).filter(c => W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y && s.stores.includes("wood"))).length : 0;
-    check("stockpile_built_and_registered", !!stockpile && stockpile.state === "done" && P.footprint(stockpile).every(c => objectAt(S, c.x, c.y) === "stockpile") && registered === 9 && !!dS && dS.storage.current >= 64,
+    check("stockpile_built_and_registered", !!stockpile && stockpile.state === "done" && P.footprint(stockpile).every(c => objectAt(S, c.x, c.y) === "stockpile") && registered === 9 && !!dS && dS.storage.current >= dS.storage.needed,
         stockpile ? `${P.describe(stockpile)}: ${P.footprint(stockpile).filter(c => objectAt(S, c.x, c.y) === "stockpile").length}/9 cells standing, ${registered} registered; storage ${dS ? dS.storage.current : "?"}/${dS ? dS.storage.needed : "?"} slots` : "no stockpile project");
     const cache = projectsOf(S, "food_cache").find(p => p.state === "done") || projectsOf(S, "food_cache")[0] || null;
     const gathered = (S.rec.done.gather || 0);
@@ -563,7 +563,7 @@ try {
     const newPile = projectsOf(S, "communal_stockpile").slice(pilesBefore).find(p => p.state === "done") || null;
     const dJ2 = P.evaluateDeficits(S.area);
     const registered2 = newPile ? P.footprint(newPile).filter(c => W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y)).length : 0;
-    check("storage_disturbance_recovers", lost.length === 9 && !!dJ0 && !!dJ && dJ.storage.current === dJ0.storage.current - 72 && dJ.storage.deficit > 0 && !!newPile && nJ > 0 && registered2 === 9 && !!dJ2 && dJ2.storage.deficit === 0 && projectsOf(S, "communal_stockpile").slice(pilesBefore).length === 1,
+    check("storage_disturbance_recovers", lost.length === 9 && !!dJ0 && !!dJ && dJ.storage.current === dJ0.storage.current - 9 && dJ.storage.deficit > 0 && !!newPile && nJ > 0 && registered2 === 9 && !!dJ2 && dJ2.storage.deficit === 0 && projectsOf(S, "communal_stockpile").slice(pilesBefore).length === 1,
         `${lost.length} stockpile cells removed -> storage ${dJ0 ? dJ0.storage.current : "?"} -> ${dJ ? dJ.storage.current : "?"} of ${dJ ? dJ.storage.needed : "?"} slots; ${newPile ? P.describe(newPile) : "no replacement"} after ${nJ > 0 ? (nJ / DAY_TICKS).toFixed(2) : ">4"} days, ${registered2} cells registered; storage ${dJ2 ? dJ2.storage.current : "?"} slots, one replacement project`);
 
     // J. Two newcomers: exactly two beds are missing, one bedding project of capacity two lays them.

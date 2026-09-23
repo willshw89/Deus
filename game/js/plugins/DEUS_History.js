@@ -2539,21 +2539,19 @@
     function seedStarterChest(cont) {
         const I = window.UF && UF.Items;
         if (!I || !cont) return;
-        // 72 hours food for 8 founders (48 rations) + materials for 5x5 shelter, door, 8 beds, indoor hearth, 2 water vessels
+        // Food for 8 founders for 1 day (16 cooked meat / 2 meals each) + 1 shovel, 1 pickaxe, 1 axe
         const starterKit = [
-            { type: "meat_cooked", count: 48 }, // 72 hours food
-            { type: "log", count: 20 },         // Shelter walls & structure
-            { type: "door_wood", count: 1 },    // Door for shelter
-            { type: "straw", count: 16 },       // 8 beds (2 straw each)
-            { type: "stone", count: 3 },        // Hearth / indoor fire
-            { type: "jug", count: 2 }           // Water containers
+            { type: "meat_cooked", count: 16 }, // Food for 8 people for 1 day
+            { type: "shovel", count: 1 },       // 1 shovel
+            { type: "pickaxe", count: 1 },      // 1 pickaxe
+            { type: "axe", count: 1 }           // 1 axe
         ];
         for (const spec of starterKit) {
             let itType = spec.type;
             if (!I.type(itType)) {
-                if (itType === "door_wood") itType = "log";
-                else if (itType === "jug") itType = "pottery";
-                else if (itType === "stone" && I.type("rocks_small")) itType = "rocks_small";
+                if (itType === "pickaxe") itType = "stone_pick";
+                else if (itType === "axe") itType = "stone_axe";
+                else if (itType === "shovel") itType = "stone_pick";
             }
             if (!I.type(itType)) continue;
             const t = I.type(itType);
@@ -2573,6 +2571,7 @@
     /**
      * The central stockpile chest of every year-1 camp: the nine cells of the camp's block are
      * cleared of any object, then the wooden chest goes on the centre cell, written like a built object.
+     * All nine starting tiles are designated as physical stockpile squares.
      * Creates a 64-slot physical container in UF.Containers and seeds it with the starter kit.
      */
     function placeCamps(state) {
@@ -2616,6 +2615,28 @@
                 if (cont) {
                     seedStarterChest(cont);
                 }
+            }
+
+            // Designate all 9 starting tiles as physical stockpile squares
+            const startCells = [];
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    startCells.push({ x: site.x + dx, y: site.y + dy });
+                }
+            }
+            site.stockpiles = startCells.map(c => ({ x: c.x, y: c.y, stores: ["all", "food", "wood", "stone"] }));
+            rec.stockpiles = site.stockpiles;
+            const Stockpiles = window.UF && UF.Stockpiles;
+            if (Stockpiles && typeof Stockpiles.create === "function") {
+                Stockpiles.create({
+                    name: `${site.name || "Camp"} Stockpile`,
+                    area,
+                    z,
+                    factionId: f.id,
+                    cells: startCells,
+                    filters: { groups: ["all"] },
+                    priority: "normal"
+                });
             }
             }
             rec.camp = rec.camps[0];

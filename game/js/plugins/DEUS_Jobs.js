@@ -586,11 +586,17 @@
         verb: "Hauling",
         plan(job, unit) {
             if ((job.phase | 0) === 0) return pickPhasePlan(job, unit);
-            const I = Items();
+            const I = Items(), C = window.UF && UF.Containers;
             const it = I ? I.get(job.params.itemId) : null;
             if (!it || it.holder !== unit.id) return { ok: false, reason: "the item is gone" };
             const to = job.params.to;
             if (!to || !to.area) return { ok: false, reason: "nowhere to take it" };
+            if (job.params.toContainer && C) {
+                const cont = C.get(job.params.toContainer);
+                if (!cont) return { ok: false, reason: "destination container is gone" };
+                const can = C.canStore(cont.id, it, it.count || 1, unit);
+                if (!can || !can.ok) return { ok: false, reason: "destination container is full" };
+            }
             job.target = { area: copyArea(to.area), x: to.x | 0, y: to.y | 0, z: refZ(to) };
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach the place" };
@@ -602,7 +608,7 @@
                 if (r !== true) { job.reason = r || "the item is gone"; return false; }
                 return "continue";
             }
-            const I = Items(), C = window.UF && UF.Containers, to = job.params.to;
+            const I = Items(), C = window.UF && UF.Containers, S = window.UF && UF.Stockpiles, to = job.params.to;
             if (job.params.toContainer && C) {
                 const stored = C.putItem(job.params.toContainer, job.params.itemId);
                 job.result = stored ? { itemId: job.params.itemId, containerId: job.params.toContainer } : null;
@@ -610,12 +616,14 @@
                 const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
                 job.result = placed ? { itemId: placed.id } : null;
             }
+            if (S && typeof S.release === "function") S.release(unit.id);
         },
         cancel(job, unit) {
             // What was picked up and not delivered is put down where the carrier stands, so nothing vanishes.
-            const I = Items();
+            const I = Items(), S = window.UF && UF.Stockpiles;
             const it = I ? I.get(job.params.itemId) : null;
             if (it && it.holder === unit.id && (job.phase | 0) > 0) I.putDown(it.id, lv(unit), unit.x, unit.y);
+            if (S && typeof S.release === "function") S.release(unit.id);
         },
         describe: job => `Hauling ${withArticle(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`
     });

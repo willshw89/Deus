@@ -92,7 +92,12 @@
         clothes_common: "common_clothes",
         clothes: "common_clothes",
         gp: "gold_coin",
-        gold_piece: "gold_coin"
+        gold_piece: "gold_coin",
+        axe: "stone_axe",
+        pick: "stone_pick",
+        pickaxe: "stone_pick",
+        shovel_stone: "shovel",
+        stone_shovel: "shovel"
     };
 
     let typeCache = null;
@@ -103,6 +108,20 @@
             const byId = {};
             const list = rawList.slice();
             for (const t of list) if (t && t.id) byId[t.id] = t;
+            if (!byId.shovel) {
+                const shovel = {
+                    id: "shovel",
+                    name: "Shovel",
+                    image: "!$UF_Icon_211",
+                    tags: ["tool", "shovel"],
+                    stack: 1,
+                    tool: { dig: 2, shovel: 2 },
+                    material: "stone",
+                    weight: 2.0
+                };
+                byId.shovel = shovel;
+                list.push(shovel);
+            }
             typeCache = { source: rawList, list, byId };
         }
         return typeCache;

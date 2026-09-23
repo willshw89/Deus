@@ -53,8 +53,8 @@
         logKept: 20,
         // The settlement brain (DEUS-TSK-FABLE-06)
         targetReserveDays: 3,    // food: colonist-days of nutrition kept within reach (24 colonist-days for 8 founders)
-        slotsPerColonist: 8,     // storage: item slots each colonist needs
-        slotsPerStockpileCell: 8, // storage: what one stockpile cell counts as; a chest counts its container slots
+        slotsPerColonist: 1,     // storage: physical slots each colonist needs
+        slotsPerStockpileCell: 1, // storage: physical 1-to-1 occupancy (1 cell = 1 slot)
         forageJobs: 4,           // food: gather jobs alive at once for a food cache
         reserveMarginDays: 0.5,  // food: a cache forages this much past the target, so a meal does not reopen one at once
         kindCooldownTicks: 6000, // a kind whose project could not be sited or supplied is not tried again for this long
@@ -451,7 +451,17 @@
             communalDays: round3(population > 0 ? storedLb / population : 0),
             deficitLb: round3(food.deficit * population), critical: population > 0 && foodDays < 1
         });
-        const storage = row(population * cfg.slotsPerColonist, containerSlots + stockpileCells * cfg.slotsPerStockpileCell, "slots");
+        const Stockpiles = window.UF && UF.Stockpiles;
+        let storageCapacity = containerSlots + stockpileCells * (cfg.slotsPerStockpileCell || 1);
+        if (Stockpiles && typeof Stockpiles.settlementCapacity === "function") {
+            const cap = Stockpiles.settlementCapacity(area, area.z, s.factionId || "player", cfg.scanRadius, near);
+            if (cap && cap.totalCells > 0) {
+                storageCapacity = cap.totalSlots;
+                containerSlots = cap.containerSlots;
+                stockpileCells = cap.totalCells;
+            }
+        }
+        const storage = row(population * cfg.slotsPerColonist, storageCapacity, "slots");
         Object.assign(storage, { containerSlots, stockpileCells });
         const bed = row(population, beds, "beds");
         bed.unsheltered = bedsUnsheltered;
@@ -487,7 +497,7 @@
     function capacityFor(bp, d, phases) {
         const cfg = config();
         if (bp.id === "communal_shelter") return { shelter: 1, bed: relativeCells(bp).beds.length };
-        if (bp.id === "communal_stockpile") return { storage: (bp.size | 0) * (bp.size | 0) * cfg.slotsPerStockpileCell };
+        if (bp.id === "communal_stockpile") return { storage: (bp.size | 0) * (bp.size | 0) * (cfg.slotsPerStockpileCell || 1) };
         if (bp.id === "bedding_expansion") return { bed: phases && phases[0] ? phases[0].cells.length : 0 };
         if (bp.id === "food_cache") return { food: d && d.food ? Math.max(d.food.deficit, 0.001) : cfg.targetReserveDays };
         return {};
@@ -1012,6 +1022,23 @@
                 p.finished = stamp();
                 p.jobs = {}; p.hauls = {}; p.harvests = {}; p.failed = {};
                 log(p, `${bp.name} finished`);
+                if (p.kind === "communal_stockpile") {
+                    const S = window.UF && UF.Stockpiles;
+                    if (S && typeof S.create === "function") {
+                        const area = levelArea(p.origin);
+                        const existing = S.at(area, p.origin.x, p.origin.y, zOf(p.origin));
+                        if (!existing) {
+                            S.create({
+                                factionId: p.factionId || (colony() && colony().factionId) || "player",
+                                name: `${bp.name} #${p.id}`,
+                                area,
+                                z: zOf(p.origin),
+                                cells: footprint(p),
+                                filters: { groups: bp.stores ? bp.stores.slice() : ["all"] }
+                            });
+                        }
+                    }
+                }
                 emit("projects:done", p);
             } else {
                 log(p, `phase ${phaseName(p, bp, p.phase)} started`);

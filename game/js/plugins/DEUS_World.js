@@ -1973,6 +1973,9 @@
                 const i = y * size + x;
                 if (g.eff[i] === 0) return false;
                 if (D && (tf[g.objects[i]] & T_DOOR) !== 0 && !(unit && D.canUnitPass(unit, D.at({ x: area.x, y: area.y, z }, x, y)))) return false;
+                if (window.UF && UF.Fire && typeof UF.Fire.isBurning === "function") {
+                    if (UF.Fire.isBurning({ x: area.x, y: area.y, z }, x, y)) return false;
+                }
                 return true;
             };
 
@@ -2179,7 +2182,14 @@
         const unit = opts.unit ? (typeof opts.unit === "object" ? opts.unit : World.unit(opts.unit)) : null;
         const doorShut = i => !!D && (tf[g.objects[i]] & T_DOOR) !== 0 &&
             !(unit && D.canUnitPass(unit, D.at({ x: area.x, y: area.y, z }, i % size, (i - (i % size)) / size)));
-        const enterable = i => eff[i] !== 0 && !doorShut(i);
+        const isFire = i => {
+            if (window.UF && UF.Fire && typeof UF.Fire.isBurning === "function") {
+                const cx = i % size, cy = (i - cx) / size;
+                return UF.Fire.isBurning({ x: area.x, y: area.y, z }, cx, cy);
+            }
+            return false;
+        };
+        const enterable = i => eff[i] !== 0 && !doorShut(i) && !isFire(i);
         const s = sy * size + sx, goalCell = gy * size + gx;
         const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
 
@@ -2628,6 +2638,9 @@
                 const fl = UF.Levels.isFlooded({ area: { x: ax, y: ay }, x, y, z });
                 if (fl && fl.flooded && fl.type === "lava") return false;
             }
+        }
+        if (window.UF && UF.Fire && typeof UF.Fire.isBurning === "function") {
+            if (UF.Fire.isBurning({ x: ax, y: ay, z }, x, y)) return false;
         }
         const D = typeTable.doors;
         if (D && (typeTable.flags[g.objects[i]] & T_DOOR)) return !!opts.unit && D.canUnitPass(opts.unit, D.at({ x: ax, y: ay, z }, x, y));
