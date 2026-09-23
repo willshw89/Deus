@@ -1,0 +1,49 @@
+    STR DEX CON INT WIS CHA                                 Brave. The gladiator has advantage on saving throws
+  10 (+0) 12 (+1) 13 (+1) 12 (+1) 15 (+2) 11 (+0)           against being frightened.
+                                                            Brute. A melee weapon deals one extra die of its
+Skills Medicine +4, Nature +3, Perception +4                damage when the gladiator hits with it (included in the
+Senses passive Perception 14                                attack).
+Languages Druidic plus any two languages
+Challenge 2 (450 XP)                                        Actions
+                                                            Multiattack. The gladiator makes three melee attacks
+Spellcasting. The druid is a 4th-­‐level spellcaster. Its   or two ranged attacks.
+spellcasting ability is Wisdom (spell save DC 12, +4 to     Spear. Melee or Ranged Weapon Attack: +7 to hit,
+hit with spell attacks). It has the following druid spells  reach 5 ft. and range 20/60 ft., one target. Hit: 11 (2d6
+prepared:                                                   + 4) piercing damage, or 13 (2d8 + 4) piercing damage
+Cantrips (at will): druidcraft, produce flame, shillelagh   if used with two hands to make a melee attack.
+1st level (4 slots): entangle, longstrider, speak with      Shield Bash. Melee Weapon Attack: +7 to hit, reach 5
+                                                            ft., one creature. Hit: 9 (2d4 + 4) bludgeoning damage.
+  animals, thunderwave                                      If the target is a Medium or smaller creature, it must
+2nd level (3 slots): animal messenger, barkskin             succeed on a DC 15 Strength saving throw or be
+                                                            knocked prone.
+Actions
+Quarterstaff. Melee Weapon Attack: +2 to hit (+4 to hit     Reactions
+with shillelagh), reach 5 ft., one target. Hit: 3 (1d6)     Parry. The gladiator adds 3 to its AC against one melee
+bludgeoning damage, 4 (1d8) bludgeoning damage if           attack that would hit it. To do so, the gladiator must
+wielded with two hands, or 6 (1d8 + 2) bludgeoning          see the attacker and be wielding a melee weapon.
+damage with shillelagh.
+                                                            Gladiators battle for the entertainment of raucous
+Druids dwell in forests and other secluded                  crowds. Some gladiators are brutal pit fighters who
+wilderness locations, where they protect the natural        treat each match as a life-­‐‑or-­‐‑death struggle, while
+world from monsters and the encroachment of                 others are professional duelists who command huge
+civilization. Some are tribal shamans who heal the          fees but rarely fight to the death.
+sick, pray to animal spirits, and provide spiritual
+guidance.                                                   Guard
+
+Gladiator                                                   Medium humanoid (any race), any alignment
+
+Medium humanoid (any race), any alignment                   Armor Class 16 (chain shirt, shield)
+                                                            Hit Points 11 (2d8 + 2)
+Armor Class 16 (studded leather, shield)                    Speed 30 ft.
+Hit Points 112 (15d8 + 45)
+Speed 30 ft.                                                    STR DEX CON INT WIS CHA
+                                                              13 (+1) 12 (+1) 12 (+1) 10 (+0) 11 (+0) 10 (+0)
+    STR DEX CON INT WIS CHA
+  18 (+4) 15 (+2) 16 (+3) 10 (+0) 12 (+1) 15 (+2)           Skills Perception +2
+                                                            Senses passive Perception 12
+Saving Throws Str +7, Dex +5, Con +6                        Languages any one language (usually Common)
+Skills Athletics +10, Intimidation +5                       Challenge 1/8 (25 XP)
+Senses passive Perception 11
+Languages any one language (usually Common)                 Actions
+Challenge 5 (1,800 XP)                                      Spear. Melee or Ranged Weapon Attack: +3 to hit,
+                                                            reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 +

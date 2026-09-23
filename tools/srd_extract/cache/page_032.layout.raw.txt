@@ -1,0 +1,61 @@
+higher than 1st, to a maximum of 5d8. The damage         Aura of Protection
+increases by 1d8 if the target is an undead or a fiend.
+                                                         Starting at 6th level, whenever you or a friendly
+Divine Health                                            creature within 10 feet of you must make a saving
+                                                         throw, the creature gains a bonus to the saving
+By 3rd level, the divine magic flowing through you       throw equal to your Charisma modifier (with a
+makes you immune to disease.                             minimum bonus of +1). You must be conscious to
+                                                         grant this bonus.
+Sacred Oath
+                                                           At 18th level, the range of this aura increases to 30
+When you reach 3rd level, you swear the oath that        feet.
+binds you as a paladin forever. Up to this time you
+have been in a preparatory stage, committed to the       Aura of Courage
+path but not yet sworn to it. Now you choose an oath,
+such as the Oath of Devotion.                            Starting at 10th level, you and friendly creatures
+                                                         within 10 feet of you can’t be frightened while you
+  Your choice grants you features at 3rd level and       are conscious.
+again at 7th, 15th, and 20th level. Those features
+include oath spells and the Channel Divinity feature.      At 18th level, the range of this aura increases to 30
+                                                         feet.
+Oath Spells
+                                                         Improved Divine Smite
+Each oath has a list of associated spells. You gain
+access to these spells at the levels specified in the    By 11th level, you are so suffused with righteous
+oath description. Once you gain access to an oath        might that all your melee weapon strikes carry
+spell, you always have it prepared. Oath spells don’t    divine power with them. Whenever you hit a
+count against the number of spells you can prepare       creature with a melee weapon, the creature takes an
+each day.                                                extra 1d8 radiant damage. If you also use your
+                                                         Divine Smite with an attack, you add this damage to
+  If you gain an oath spell that doesn’t appear on the   the extra damage of your Divine Smite.
+paladin spell list, the spell is nonetheless a paladin
+spell for you.                                           Cleansing Touch
+
+Channel Divinity                                         Beginning at 14th level, you can use your action to
+                                                         end one spell on yourself or on one willing creature
+Your oath allows you to channel divine energy to         that you touch.
+fuel magical effects. Each Channel Divinity option
+provided by your oath explains how to use it.              You can use this feature a number of times equal
+                                                         to your Charisma modifier (a minimum of once). You
+  When you use your Channel Divinity, you choose         regain expended uses when you finish a long rest.
+which option to use. You must then finish a short or
+long rest to use your Channel Divinity again.            Sacred Oaths
+
+  Some Channel Divinity effects require saving           Becoming a paladin involves taking vows that
+throws. When you use such an effect from this class,     commit the paladin to the cause of righteousness, an
+the DC equals your paladin spell save DC.                active path of fighting wickedness. The final oath,
+                                                         taken when he or she reaches 3rd level, is the
+Ability Score Improvement                                culmination of all the paladin’s training. Some
+                                                         characters with this class don’t consider themselves
+When you reach 4th level, and again at 8th, 12th,        true paladins until they have reached 3rd level and
+16th, and 19th level, you can increase one ability       made this oath. For others, the actual swearing of the
+score of your choice by 2, or you can increase two       oath is a formality, an official stamp on what has
+ability scores of your choice by 1. As normal, you       always been true in the paladin’s heart.
+can’t increase an ability score above 20 using this
+feature.                                                 Oath of Devotion
+
+Extra Attack                                             The Oath of Devotion binds a paladin to the loftiest
+                                                         ideals of justice, virtue, and order. Sometimes called
+Beginning at 5th level, you can attack twice, instead    cavaliers, white knights, or holy warriors, these
+of once, whenever you take the Attack action on your
+turn.

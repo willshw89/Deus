@@ -1,0 +1,63 @@
+issues a clear tone, and one lock or latch on the        shifts to camouflage you. Pulling the hood up or
+object opens unless the sound can’t reach the object.    down requires an action.
+If no locks or latches remain, the object itself opens.
+                                                         Cloak of Protection
+  The chime can be used ten times. After the tenth
+time, it cracks and becomes useless.                     Wondrous item, uncommon (requires attunement)
+
+Circlet of Blasting                                      You gain a +1 bonus to AC and saving throws while
+                                                         you wear this cloak.
+Wondrous item, uncommon
+                                                         Cloak of the Bat
+While wearing this circlet, you can use an action to
+cast the scorching ray spell with it. When you make      Wondrous item, rare (requires attunement)
+the spell’s attacks, you do so with an attack bonus of
++5. The circlet can’t be used this way again until the   While wearing this cloak, you have advantage on
+next dawn.                                               Dexterity (Stealth) checks. In an area of dim light or
+                                                         darkness, you can grip the edges of the cloak with
+Cloak of Arachnida                                       both hands and use it to fly at a speed of 40 feet. If
+                                                         you ever fail to grip the cloak’s edges while flying in
+Wondrous item, very rare (requires attunement)           this way, or if you are no longer in dim light or
+                                                         darkness, you lose this flying speed.
+This fine garment is made of black silk interwoven
+with faint silvery threads. While wearing it, you gain     While wearing the cloak in an area of dim light or
+the following benefits:                                  darkness, you can use your action to cast polymorph
+                                                         on yourself, transforming into a bat. While you are in
+• You have resistance to poison damage.                  the form of the bat, you retain your Intelligence,
+• You have a climbing speed equal to your walking        Wisdom, and Charisma scores. The cloak can’t be
+                                                         used this way again until the next dawn.
+  speed.
+• You can move up, down, and across vertical             Cloak of the Manta Ray
+
+  surfaces and upside down along ceilings, while         Wondrous item, uncommon
+  leaving your hands free.
+• You can’t be caught in webs of any sort and can        While wearing this cloak with its hood up, you can
+  move through webs as if they were difficult terrain.   breathe underwater, and you have a swimming
+• You can use an action to cast the web spell (save      speed of 60 feet. Pulling the hood up or down
+  DC 13). The web created by the spell fills twice its   requires an action.
+  normal area. Once used, this property of the cloak
+  can’t be used again until the next dawn.               Crystal Ball
+
+Cloak of Displacement                                    Wondrous item, very rare or legendary (requires
+                                                         attunement)
+Wondrous item, rare (requires attunement)
+                                                         The typical crystal ball, a very rare item, is about 6
+While you wear this cloak, it projects an illusion that  inches in diameter. While touching it, you can cast
+makes you appear to be standing in a place near          the scrying spell (save DC 17) with it.
+your actual location, causing any creature to have
+disadvantage on attack rolls against you. If you take      The following crystal ball variants are legendary
+damage, the property ceases to function until the        items and have additional properties.
+start of your next turn. This property is suppressed
+while you are incapacitated, restrained, or otherwise      Crystal Ball of Mind Reading. You can use an
+unable to move.                                          action to cast the detect thoughts spell (save DC 17)
+                                                         while you are scrying with the crystal ball, targeting
+Cloak of Elvenkind                                       creatures you can see within 30 feet of the spell’s
+                                                         sensor. You don’t need to concentrate on this detect
+Wondrous item, uncommon (requires attunement)            thoughts to maintain it during its duration, but it
+                                                         ends if scrying ends.
+While you wear this cloak with its hood up, Wisdom
+(Perception) checks made to see you have                   Crystal Ball of Telepathy. While scrying with the
+disadvantage, and you have advantage on Dexterity        crystal ball, you can communicate telepathically with
+(Stealth) checks made to hide, as the cloak’s color      creatures you can see within 30 feet of the spell’s
+                                                         sensor. You can also use an action to cast the
+                                                         suggestion spell (save DC 17) through the sensor on

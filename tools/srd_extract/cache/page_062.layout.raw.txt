@@ -1,0 +1,64 @@
+Equipment                                                 Arms, Armor, and Other Equipment. As a general
+                                                        rule, undamaged weapons, armor, and other
+Common coins come in several different                  equipment fetch half their cost when sold in a
+denominations based on the relative worth of the        market. Weapons and armor used by monsters are
+metal from which they are made. The three most          rarely in good enough condition to sell.
+common coins are the gold piece (gp), the silver
+piece (sp), and the copper piece (cp).                    Magic Items. Selling magic items is problematic.
+                                                        Finding someone to buy a potion or a scroll isn’t too
+  With one gold piece, a character can buy a bedroll,   hard, but other items are out of the realm of most but
+50 feet of good rope, or a goat. A skilled (but not     the wealthiest nobles. Likewise, aside from a few
+exceptional) artisan can earn one gold piece a day.     common magic items, you won’t normally come
+The gold piece is the standard unit of measure for      across magic items or spells to purchase. The value
+wealth, even if the coin itself is not commonly used.   of magic is far beyond simple gold and should always
+When merchants discuss deals that involve goods or      be treated as such.
+services worth hundreds or thousands of gold pieces,
+the transactions don’t usually involve the exchange       Gems, Jewelry, and Art Objects. These items
+of individual coins. Rather, the gold piece is a        retain their full value in the marketplace, and you
+standard measure of value, and the actual exchange      can either trade them in for coin or use them as
+is in gold bars, letters of credit, or valuable goods.  currency for other transactions. For exceptionally
+                                                        valuable treasures, the GM might require you to find
+  One gold piece is worth ten silver pieces, the most   a buyer in a large town or larger community first.
+prevalent coin among commoners. A silver piece
+buys a laborer’s work for half a day, a flask of lamp     Trade Goods. On the borderlands, many people
+oil, or a night’s rest in a poor inn.                   conduct transactions through barter. Like gems and
+                                                        art objects, trade goods—bars of iron, bags of salt,
+  One silver piece is worth ten copper pieces, which    livestock, and so on—retain their full value in the
+are common among laborers and beggars. A single         market and can be used as currency.
+copper piece buys a candle, a torch, or a piece of
+chalk.                                                  Armor
+
+  In addition, unusual coins made of other precious     Fantasy gaming worlds are a vast tapestry made up
+metals sometimes appear in treasure hoards. The         of many different cultures, each with its own
+electrum piece (ep) and the platinum piece (pp)         technology level. For this reason, adventurers have
+originate from fallen empires and lost kingdoms, and    access to a variety of armor types, ranging from
+they sometimes arouse suspicion and skepticism          leather armor to chain mail to costly plate armor,
+when used in transactions. An electrum piece is         with several other kinds of armor in between. The
+worth five silver pieces, and a platinum piece is       Armor table collects the most commonly available
+worth ten gold pieces.                                  types of armor found in the game and separates
+                                                        them into three categories: light armor, medium
+  A standard coin weighs about a third of an ounce,     armor, and heavy armor. Many warriors supplement
+so fifty coins weigh a pound.                           their armor with a shield.
+
+Standard Exchange Rates                                   The Armor table shows the cost, weight, and other
+                                                        properties of the common types of armor worn in
+Coin           CP SP EP        GP         PP            fantasy gaming worlds.
+                            1/100   1/1,000
+Copper (cp)    1 1/10 1/50                                Armor Proficiency. Anyone can put on a suit of
+                             1/10     1/100             armor or strap a shield to an arm. Only those
+Silver (sp)    10  1 1/5       1/2     1/20             proficient in the armor’s use know how to wear it
+                                 1     1/10             effectively, however. Your class gives you proficiency
+Electrum (ep)  50  5     1      10          1           with certain types of armor. If you wear armor that
+                                                        you lack proficiency with, you have disadvantage on
+Gold (gp)      100 10    2                              any ability check, saving throw, or attack roll that
+                                                        involves Strength or Dexterity, and you can’t cast
+Platinum (pp) 1,000 100 20                              spells.
+
+Selling Treasure                                          Armor Class (AC). Armor protects its wearer from
+                                                        attacks. The armor (and shield) you wear
+Opportunities abound to find treasure, equipment,       determines your base Armor Class.
+weapons, armor, and more in the dungeons you
+explore. Normally, you can sell your treasures and
+trinkets when you return to a town or other
+settlement, provided that you can find buyers and
+merchants interested in your loot.

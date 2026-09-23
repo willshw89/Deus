@@ -1,7 +1,7 @@
 {
   "metadata": {
     "generator": "tools/srd_extract/stage_equipment.js",
-    "generatedAt": "2026-09-23T01:17:58.704Z",
+    "generatedAt": "2026-09-23T02:12:23.409Z",
     "category": "equipment",
     "source": {
       "file": "SRD_CC_v5.1.pdf",
@@ -14,7 +14,7 @@
       ]
     },
     "cache": {
-      "generatedAt": "2026-09-23T01:17:52.372Z"
+      "generatedAt": "2026-09-23T01:40:25.618Z"
     },
     "license": {
       "id": "CC-BY-4.0",
@@ -31,8 +31,11 @@
       "rule": 24
     },
     "readiness": {
-      "parsed": 248,
-      "extracted": 2
+      "parsed": 250
+    },
+    "columnCut": {
+      "method": "nearest 2+ space run to the raw gutter of splitRawLayoutColumns, normalised after the cut",
+      "linesMoved": 28
     }
   },
   "entries": [
@@ -2452,7 +2455,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          62,
+          63,
           64
         ],
         "section": "Equipment",
@@ -2932,7 +2935,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3111,7 +3114,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3142,7 +3145,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3233,7 +3236,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3264,7 +3267,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3293,7 +3296,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3324,7 +3327,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3355,7 +3358,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3444,7 +3447,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3595,7 +3598,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3626,7 +3629,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3777,7 +3780,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -3928,7 +3931,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -4050,7 +4053,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -4119,7 +4122,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          67,
           69
         ],
         "section": "Equipment",
@@ -4274,7 +4277,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4305,7 +4308,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4336,7 +4339,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4367,7 +4370,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4398,7 +4401,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4427,7 +4430,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4458,7 +4461,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4519,7 +4522,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4694,7 +4697,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4791,7 +4794,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4830,7 +4833,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4861,7 +4864,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4892,7 +4895,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4923,7 +4926,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -4984,7 +4987,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5015,7 +5018,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5076,7 +5079,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5249,7 +5252,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5310,7 +5313,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5341,7 +5344,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5372,7 +5375,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -5403,7 +5406,7 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          66,
+          68,
           69
         ],
         "section": "Equipment",
@@ -6050,7 +6053,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Disguise kit"
@@ -6080,7 +6084,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Forgery kit"
@@ -6168,7 +6173,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Herbalism kit"
@@ -6508,7 +6514,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Navigator’s tools"
@@ -6538,7 +6545,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Poisoner’s kit"
@@ -6568,7 +6576,8 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          70
+          70,
+          71
         ],
         "section": "Equipment",
         "heading": "Thieves’ tools"
@@ -6608,22 +6617,21 @@
         "cost": {
           "amount": null,
           "unit": null,
-          "text": "*"
+          "printed": "*",
+          "basis": "* See the “Mounts and Vehicles” section."
         },
         "weight": {
           "lb": null,
-          "text": "*"
+          "printed": "*",
+          "basis": "* See the “Mounts and Vehicles” section."
         },
         "group": null,
         "table": "Tools",
         "description": "* See the “Mounts and Vehicles” section."
       },
-      "readiness": "extracted",
+      "readiness": "parsed",
       "notes": [
-        "cost is not a coin amount as printed: *",
-        "weight is not a pound figure as printed: *",
-        "missing required field(s): cost, weight",
-        "cost and weight are printed as * (see the Mounts and Vehicles section)"
+        "cost \"*\" and weight \"*\" are printed as symbols; the basis text is carried in data (the Tools table footnote)"
       ],
       "dice": []
     },
@@ -6918,21 +6926,23 @@
         "cost": {
           "amount": null,
           "unit": null,
-          "text": "×4"
+          "printed": "×4",
+          "basis": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much.",
+          "multiplier": 4
         },
         "weight": {
           "lb": null,
-          "text": "×2"
+          "printed": "×2",
+          "basis": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much.",
+          "multiplier": 2
         },
         "group": null,
         "table": "Tack, Harness, and Drawn Vehicles",
         "description": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much."
       },
-      "readiness": "extracted",
+      "readiness": "parsed",
       "notes": [
-        "cost is not a coin amount as printed: ×4",
-        "weight is not a pound figure as printed: ×2",
-        "missing required field(s): cost, weight"
+        "cost \"×4\" and weight \"×2\" are printed as symbols; the basis text is carried in data (the Barding paragraph)"
       ],
       "dice": []
     },
@@ -7990,7 +8000,8 @@
         "document": "SRD 5.1",
         "pages": [
           62,
-          63
+          63,
+          64
         ],
         "section": "Equipment",
         "heading": "Armor"
@@ -8301,7 +8312,8 @@
         "document": "SRD 5.1",
         "pages": [
           64,
-          65
+          65,
+          66
         ],
         "section": "Equipment",
         "heading": "Weapons"
@@ -9035,7 +9047,8 @@
           66,
           67,
           68,
-          69
+          69,
+          70
         ],
         "section": "Equipment",
         "heading": "Adventuring Gear"
@@ -9632,7 +9645,7 @@
                 "4 pints liquid"
               ]
             ],
-            "note": "* You can also strap items, such as a bedroll or a coil of rope, to the outside of a backpack."
+            "footnote": "* You can also strap items, such as a bedroll or a coil of rope, to the outside of a backpack."
           }
         ]
       },
@@ -9933,7 +9946,7 @@
                 "*"
               ]
             ],
-            "note": "* See the “Mounts and Vehicles” section."
+            "footnote": "* See the “Mounts and Vehicles” section."
           }
         ]
       },
@@ -10363,12 +10376,13 @@
       "source": {
         "document": "SRD 5.1",
         "pages": [
-          73
+          73,
+          74
         ],
         "section": "Equipment",
         "heading": "Food, Drink, and Lodging"
       },
-      "text": "The Food, Drink, and Lodging table gives prices for individual food items and a single night’s lodging. These prices are included in your total lifestyle expenses.\n\nFood, Drink, and Lodging\nItem | Cost\nAle | \nGallon | 2 sp\nMug | 4 cp\nBanquet (per person) | 10 gp\nBread, loaf | 2 cp\nCheese, hunk | 1 sp\nInn stay (per day) | \nSqualid | 7 cp\nPoor | 1 sp\nModest | 5 sp\nComfortable | 8 sp\nWealthy | 2 gp\nAristocratic | 4 gp\nMeals (per day) | \nSqualid | 3 cp\nPoor | 6 cp\nModest | 3 sp\nComfortable | 5 sp\nWealthy | 8 sp\nAristocratic | 2 gp\nMeat, chunk | 3 sp\nWine | \nCommon (pitcher) | 2 sp\nFine (bottle) | 10 gp\nthe layout lost the indentation of the Ale group's rows (Gallon, Mug); Ale is treated as a group header by an explicit list",
+      "text": "The Food, Drink, and Lodging table gives prices for individual food items and a single night’s lodging. These prices are included in your total lifestyle expenses.\n\nFood, Drink, and Lodging\nItem | Cost\nAle | \nGallon | 2 sp\nMug | 4 cp\nBanquet (per person) | 10 gp\nBread, loaf | 2 cp\nCheese, hunk | 1 sp\nInn stay (per day) | \nSqualid | 7 cp\nPoor | 1 sp\nModest | 5 sp\nComfortable | 8 sp\nWealthy | 2 gp\nAristocratic | 4 gp\nMeals (per day) | \nSqualid | 3 cp\nPoor | 6 cp\nModest | 3 sp\nComfortable | 5 sp\nWealthy | 8 sp\nAristocratic | 2 gp\nMeat, chunk | 3 sp\nWine | \nCommon (pitcher) | 2 sp\nFine (bottle) | 10 gp",
       "data": {
         "headingPath": [
           "Equipment",
@@ -10501,7 +10515,7 @@
         "section": "Equipment",
         "heading": "Services"
       },
-      "text": "Adventurers can pay nonplayer characters to assist them or act on their behalf in a variety of circumstances. Most such hirelings have fairly ordinary skills, while others are masters of a craft or art, and a few are experts with specialized adventuring skills.\n\nSome of the most basic types of hirelings appear on the Services table. Other common hirelings include any of the wide variety of people who inhabit a typical town or city, when the adventurers pay them to perform a specific task. For example, a wizard might pay a carpenter to construct an elaborate chest (and its miniature replica) for use in the secret chest spell. A fighter might commission a blacksmith to forge a special sword. A bard might pay a tailor to make exquisite clothing for an upcoming performance in front of the duke.\n\nOther hirelings provide more expert or dangerous services. Mercenary soldiers paid to help the adventurers take on a hobgoblin army are hirelings, as are sages hired to research ancient or esoteric lore. If a high-level adventurer establishes a stronghold of some kind, he or she might hire a whole staff of servants and agents to run the place, from a castellan or steward to menial laborers to keep the stables clean. These hirelings often enjoy a long-term contract that includes a place to live within the stronghold as part of the offered compensation.\n\nSkilled hirelings include anyone hired to perform a service that involves a proficiency (including weapon, tool, or skill): a mercenary, artisan, scribe, and so on. The pay shown is a minimum; some expert hirelings require more pay. Untrained hirelings are hired for menial work that requires no particular skill and can include laborers, porters, maids, and similar workers.\n\nServices\nService | Pay\nCoach cab | \nBetween towns | 3 cp per mile\nWithin a city | 1 cp\nHireling | \nSkilled | 2 gp per day\nUntrained | 2 sp per day\nMessenger | 2 cp per mile\nRoad or gate toll | 1 cp\nShip’s passage | 1 sp per mile\nthe layout lost the indentation of the Coach cab rows (Between towns, Within a city); Coach cab and Hireling are treated as group headers by an explicit list",
+      "text": "Adventurers can pay nonplayer characters to assist them or act on their behalf in a variety of circumstances. Most such hirelings have fairly ordinary skills, while others are masters of a craft or art, and a few are experts with specialized adventuring skills.\n\nSome of the most basic types of hirelings appear on the Services table. Other common hirelings include any of the wide variety of people who inhabit a typical town or city, when the adventurers pay them to perform a specific task. For example, a wizard might pay a carpenter to construct an elaborate chest (and its miniature replica) for use in the secret chest spell. A fighter might commission a blacksmith to forge a special sword. A bard might pay a tailor to make exquisite clothing for an upcoming performance in front of the duke.\n\nOther hirelings provide more expert or dangerous services. Mercenary soldiers paid to help the adventurers take on a hobgoblin army are hirelings, as are sages hired to research ancient or esoteric lore. If a high-level adventurer establishes a stronghold of some kind, he or she might hire a whole staff of servants and agents to run the place, from a castellan or steward to menial laborers to keep the stables clean. These hirelings often enjoy a long-term contract that includes a place to live within the stronghold as part of the offered compensation.\n\nSkilled hirelings include anyone hired to perform a service that involves a proficiency (including weapon, tool, or skill): a mercenary, artisan, scribe, and so on. The pay shown is a minimum; some expert hirelings require more pay. Untrained hirelings are hired for menial work that requires no particular skill and can include laborers, porters, maids, and similar workers.\n\nServices\nService | Pay\nCoach cab | \nBetween towns | 3 cp per mile\nWithin a city | 1 cp\nHireling | \nSkilled | 2 gp per day\nUntrained | 2 sp per day\nMessenger | 2 cp per mile\nRoad or gate toll | 1 cp\nShip’s passage | 1 sp per mile",
       "data": {
         "headingPath": [
           "Equipment",

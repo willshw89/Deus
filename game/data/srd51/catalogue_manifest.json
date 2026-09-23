@@ -1,7 +1,7 @@
 {
  "schemaVersion": 1,
  "generator": "tools/build_srd_catalog.js",
- "generatedAt": "2026-09-23T01:17:59.853Z",
+ "generatedAt": "2026-09-23T02:19:15.999Z",
  "dormant": true,
  "note": "Dormant SRD 5.1 content library: complete, source-accurate data staged for later adaptation. Nothing in this folder is loaded by the game (docs/SRD5_1_COVERAGE_MANIFEST.md section 9).",
  "source": {
@@ -10,7 +10,7 @@
   "pages": 403,
   "extraction": {
    "generator": "tools/srd_extract/extract_pages.js",
-   "generatedAt": "2026-09-23T01:17:52.372Z",
+   "generatedAt": "2026-09-23T02:15:32.009Z",
    "tool": "pdftotext (xpdf) 4.06"
   }
  },
@@ -37,9 +37,10 @@
     "creature": 317
    },
    "byReadiness": {
-    "parsed": 317
+    "parsed": 311,
+    "verified": 6
    },
-   "warnings": 3
+   "warnings": 2
   },
   {
    "category": "spells",
@@ -50,7 +51,8 @@
     "spell": 319
    },
    "byReadiness": {
-    "parsed": 327
+    "parsed": 325,
+    "verified": 2
    },
    "warnings": 0
   },
@@ -68,8 +70,8 @@
     "trade-good": 13
    },
    "byReadiness": {
-    "parsed": 224,
-    "extracted": 2
+    "parsed": 225,
+    "verified": 1
    },
    "warnings": 2
   },
@@ -82,7 +84,7 @@
    },
    "byReadiness": {
     "parsed": 231,
-    "extracted": 9
+    "verified": 9
    },
    "warnings": 3
   },
@@ -99,8 +101,8 @@
     "feat": 1
    },
    "byReadiness": {
-    "parsed": 37,
-    "extracted": 2
+    "parsed": 36,
+    "verified": 3
    },
    "warnings": 1
   },
@@ -116,8 +118,7 @@
     "appendix": 2
    },
    "byReadiness": {
-    "parsed": 175,
-    "extracted": 1
+    "parsed": 176
    },
    "warnings": 0
   }
@@ -149,14 +150,14 @@
    "appendix": 2
   },
   "byReadiness": {
-   "parsed": 1311,
-   "extracted": 14
+   "parsed": 1304,
+   "verified": 21
   }
  },
  "kinds": {
   "creature": {
    "category": "creatures",
-   "icon": 12
+   "icon": 8
   },
   "spell": {
    "category": "spells",
@@ -253,7 +254,7 @@
   {
    "file": "staging_character_options.json",
    "generator": "tools/srd_extract/stage_character_options.js",
-   "generatedAt": "2026-09-23T01:17:59.658Z",
+   "generatedAt": "2026-09-23T02:12:24.398Z",
    "category": "character-options",
    "entries": 47,
    "byKind": {
@@ -270,7 +271,7 @@
   {
    "file": "staging_equipment.json",
    "generator": "tools/srd_extract/stage_equipment.js",
-   "generatedAt": "2026-09-23T01:17:58.704Z",
+   "generatedAt": "2026-09-23T02:12:23.409Z",
    "category": "equipment",
    "entries": 250,
    "byKind": {
@@ -288,7 +289,7 @@
   {
    "file": "staging_magic_items.json",
    "generator": "tools/srd_extract/stage_magic_items.js",
-   "generatedAt": "2026-09-23T01:17:58.848Z",
+   "generatedAt": "2026-09-23T02:18:31.583Z",
    "category": "magic-items",
    "entries": 260,
    "byKind": {
@@ -300,18 +301,18 @@
   {
    "file": "staging_monsters.json",
    "generator": "tools/srd_extract/stage_monsters.js",
-   "generatedAt": "2026-09-23T01:17:58.257Z",
+   "generatedAt": "2026-09-23T02:12:22.964Z",
    "category": "creatures",
    "entries": 317,
    "byKind": {
     "creature": 317
    },
-   "warnings": 3
+   "warnings": 2
   },
   {
    "file": "staging_rules.json",
    "generator": "tools/srd_extract/stage_rules.js",
-   "generatedAt": "2026-09-23T01:17:58.996Z",
+   "generatedAt": "2026-09-23T02:12:23.719Z",
    "category": "rules",
    "entries": 124,
    "byKind": {
@@ -326,7 +327,7 @@
   {
    "file": "staging_spells.json",
    "generator": "tools/srd_extract/stage_spells.js",
-   "generatedAt": "2026-09-23T01:17:58.504Z",
+   "generatedAt": "2026-09-23T02:12:23.228Z",
    "category": "spells",
    "entries": 327,
    "byKind": {
@@ -336,5 +337,15 @@
    "warnings": 0
   }
  ],
- "warnings": 9
+ "warnings": 8,
+ "verification": {
+  "file": "tools/srd_extract/verification/verified.json",
+  "applied": 21,
+  "stale": []
+ },
+ "tableOverlays": {
+  "file": "tools/srd_extract/verification/table_overlays.json",
+  "applied": 3,
+  "refused": []
+ }
 }

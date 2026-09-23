@@ -1,0 +1,61 @@
+Blade Barrier                                               If you target a plant creature or a magical plant, it
+                                                          makes the saving throw with disadvantage, and the
+6th-­‐‑level evocation                                    spell deals maximum damage to it.
+
+Casting Time: 1 action                                      If you target a nonmagical plant that isn’t a
+Range: 90 feet                                            creature, such as a tree or shrub, it doesn’t make a
+Components: V, S                                          saving throw; it simply withers and dies.
+Duration: Concentration, up to 10 minutes
+                                                            At Higher Levels. When you cast this spell using a
+You create a vertical wall of whirling, razor-­‐‑sharp    spell slot of 5th level or higher, the damage increases
+blades made of magical energy. The wall appears           by 1d8 for each slot level above 4th.
+within range and lasts for the duration. You can
+make a straight wall up to 100 feet long, 20 feet high,   Blindness/Deafness
+and 5 feet thick, or a ringed wall up to 60 feet in
+diameter, 20 feet high, and 5 feet thick. The wall        2nd-­‐‑level necromancy
+provides three-­‐‑quarters cover to creatures behind it,
+and its space is difficult terrain.                       Casting Time: 1 action
+                                                          Range: 30 feet
+  When a creature enters the wall’s area for the first    Components: V
+time on a turn or starts its turn there, the creature     Duration: 1 minute
+must make a Dexterity saving throw. On a failed save,
+the creature takes 6d10 slashing damage. On a             You can blind or deafen a foe. Choose one creature
+successful save, the creature takes half as much          that you can see within range to make a Constitution
+damage.                                                   saving throw. If it fails, the target is either blinded or
+                                                          deafened (your choice) for the duration. At the end
+Bless                                                     of each of its turns, the target can make a
+                                                          Constitution saving throw. On a success, the spell
+1st-­‐‑level enchantment                                  ends.
+
+Casting Time: 1 action                                      At Higher Levels. When you cast this spell using a
+Range: 30 feet                                            spell slot of 3rd level or higher, you can target one
+Components: V, S, M (a sprinkling of holy water)          additional creature for each slot level above 2nd.
+Duration: Concentration, up to 1 minute
+                                                          Blink
+You bless up to three creatures of your choice within
+range. Whenever a target makes an attack roll or a        3rd-­‐‑level transmutation
+saving throw before the spell ends, the target can
+roll a d4 and add the number rolled to the attack roll    Casting Time: 1 action
+or saving throw.                                          Range: Self
+                                                          Components: V, S
+  At Higher Levels. When you cast this spell using a      Duration: 1 minute
+spell slot of 2nd level or higher, you can target one
+additional creature for each slot level above 1st.        Roll a d20 at the end of each of your turns for the
+                                                          duration of the spell. On a roll of 11 or higher, you
+Blight                                                    vanish from your current plane of existence and
+                                                          appear in the Ethereal Plane (the spell fails and the
+4th-­‐‑level necromancy                                   casting is wasted if you were already on that plane).
+                                                          At the start of your next turn, and when the spell
+Casting Time: 1 action                                    ends if you are on the Ethereal Plane, you return to
+Range: 30 feet                                            an unoccupied space of your choice that you can see
+Components: V, S                                          within 10 feet of the space you vanished from. If no
+Duration: Instantaneous                                   unoccupied space is available within that range, you
+                                                          appear in the nearest unoccupied space (chosen at
+Necromantic energy washes over a creature of your         random if more than one space is equally near). You
+choice that you can see within range, draining            can dismiss this spell as an action.
+moisture and vitality from it. The target must make a
+Constitution saving throw. The target takes 8d8             While on the Ethereal Plane, you can see and hear
+necrotic damage on a failed save, or half as much         the plane you originated from, which is cast in
+damage on a successful one. This spell has no effect      shades of gray, and you can’t see anything there
+on undead or constructs.                                  more than 60 feet away. You can only affect and be
+                                                          affected by other creatures on the Ethereal Plane.

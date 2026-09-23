@@ -1,0 +1,59 @@
+Poisons                                                     Assassin’s Blood (Ingested). A creature subjected
+                                                          to this poison must make a DC 10 Constitution
+Given their insidious and deadly nature, poisons are      saving throw. On a failed save, it takes 6 (1d12)
+illegal in most societies but are a favorite tool among   poison damage and is poisoned for 24 hours. On a
+assassins, drow, and other evil creatures.                successful save, the creature takes half damage and
+                                                          isn’t poisoned.
+  Poisons come in the following four types.
+  Contact. Contact poison can be smeared on an              Burnt Othur Fumes (Inhaled). A creature
+object and remains potent until it is touched or          subjected to this poison must succeed on a DC 13
+washed off. A creature that touches contact poison        Constitution saving throw or take 10 (3d6) poison
+with exposed skin suffers its effects.                    damage, and must repeat the saving throw at the
+  Ingested. A creature must swallow an entire dose        start of each of its turns. On each successive failed
+of ingested poison to suffer its effects. The dose can    save, the character takes 3 (1d6) poison damage.
+be delivered in food or a liquid. You may decide that     After three successful saves, the poison ends.
+a partial dose has a reduced effect, such as allowing
+advantage on the saving throw or dealing only half          Crawler Mucus (Contact). This poison must be
+damage on a failed save.                                  harvested from a dead or incapacitated crawler. A
+  Inhaled. These poisons are powders or gases that        creature subjected to this poison must succeed on a
+take effect when inhaled. Blowing the powder or           DC 13 Constitution saving throw or be poisoned for
+releasing the gas subjects creatures in a 5-­‐‑foot cube  1 minute. The poisoned creature is paralyzed. The
+to its effect. The resulting cloud dissipates             creature can repeat the saving throw at the end of
+immediately afterward. Holding one’s breath is            each of its turns, ending the effect on itself on a
+ineffective against inhaled poisons, as they affect       success.
+nasal membranes, tear ducts, and other parts of the
+body.                                                       Drow Poison (Injury). This poison is typically
+  Injury. Injury poison can be applied to weapons,        made only by the drow, and only in a place far
+ammunition, trap components, and other objects            removed from sunlight. A creature subjected to this
+that deal piercing or slashing damage and remains         poison must succeed on a DC 13 Constitution saving
+potent until delivered through a wound or washed          throw or be poisoned for 1 hour. If the saving throw
+off. A creature that takes piercing or slashing           fails by 5 or more, the creature is also unconscious
+damage from an object coated with the poison is           while poisoned in this way. The creature wakes up if
+exposed to its effects.                                   it takes damage or if another creature takes an
+                                                          action to shake it awake.
+Poisons             Type      Price per Dose
+                    Ingested           150 gp               Essence of Ether (Inhaled). A creature subjected
+Item                Inhaled            500 gp             to this poison must succeed on a DC 15 Constitution
+Assassin’s blood    Contact            200 gp             saving throw or become poisoned for 8 hours. The
+Burnt othur fumes   Injury             200 gp             poisoned creature is unconscious. The creature
+Crawler mucus       Inhaled            300 gp             wakes up if it takes damage or if another creature
+Drow poison         Inhaled            250 gp             takes an action to shake it awake.
+Essence of ether    Ingested
+Malice              Contact          1,500 gp               Malice (Inhaled). A creature subjected to this
+Midnight tears      Ingested           400 gp             poison must succeed on a DC 15 Constitution saving
+Oil of taggit       Injury             250 gp             throw or become poisoned for 1 hour. The poisoned
+Pale tincture       Injury                                creature is blinded.
+Purple worm poison  Ingested         2,000 gp
+Serpent venom       Ingested           200 gp               Midnight Tears (Ingested). A creature that
+Torpor              Injury             600 gp             ingests this poison suffers no effect until the stroke
+Truth serum                            150 gp             of midnight. If the poison has not been neutralized
+Wyvern poison                                             before then, the creature must succeed on a DC 17
+                                     1,200 gp             Constitution saving throw, taking 31 (9d6) poison
+                                                          damage on a failed save, or half as much damage on
+Sample Poisons                                            a successful one.
+
+Each type of poison has its own debilitating effects.       Oil of Taggit (Contact). A creature subjected to
+                                                          this poison must succeed on a DC 13 Constitution
+                                                          saving throw or become poisoned for 24 hours. The
+                                                          poisoned creature is unconscious. The creature
+                                                          wakes up if it takes damage.

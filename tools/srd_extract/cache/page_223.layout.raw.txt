@@ -1,0 +1,61 @@
+it has been used, it can’t be used again until 2 days         In freezing temperatures, the blade sheds bright
+have passed. While in raven form, the figurine allows       light in a 10-­‐‑foot radius and dim light for an
+you to cast the animal messenger spell on it at will.       additional 10 feet.
+
+Flame Tongue                                                  When you draw this weapon, you can extinguish
+                                                            all nonmagical flames within 30 feet of you. This
+Weapon (any sword), rare (requires attunement)              property can be used no more than once per hour.
+
+You can use a bonus action to speak this magic              Gauntlets of Ogre Power
+sword’s command word, causing flames to erupt
+from the blade. These flames shed bright light in a         Wondrous item, uncommon (requires attunement)
+40-­‐‑foot radius and dim light for an additional 40 feet.
+While the sword is ablaze, it deals an extra 2d6 fire       Your Strength score is 19 while you wear these
+damage to any target it hits. The flames last until you     gauntlets. They have no effect on you if your
+use a bonus action to speak the command word                Strength is already 19 or higher.
+again or until you drop or sheathe the sword.
+                                                            Gem of Brightness
+Folding Boat
+                                                            Wondrous item, uncommon
+Wondrous item, rare
+                                                            This prism has 50 charges. While you are holding it,
+This object appears as a wooden box that measures           you can use an action to speak one of three
+12 inches long, 6 inches wide, and 6 inches deep. It        command words to cause one of the following
+weighs 4 pounds and floats. It can be opened to store       effects:
+items inside. This item also has three command
+words, each requiring you to use an action to speak         • The first command word causes the gem to shed
+it.                                                           bright light in a 30-­‐‑foot radius and dim light for an
+                                                              additional 30 feet. This effect doesn’t expend a
+  One command word causes the box to unfold into              charge. It lasts until you use a bonus action to
+a boat 10 feet long, 4 feet wide, and 2 feet deep. The        repeat the command word or until you use
+boat has one pair of oars, an anchor, a mast, and a           another function of the gem.
+lateen sail. The boat can hold up to four Medium
+creatures comfortably.                                      • The second command word expends 1 charge and
+                                                              causes the gem to fire a brilliant beam of light at
+  The second command word causes the box to                   one creature you can see within 60 feet of you. The
+unfold into a ship 24 feet long, 8 feet wide, and 6 feet      creature must succeed on a DC 15 Constitution
+deep. The ship has a deck, rowing seats, five sets of         saving throw or become blinded for 1 minute. The
+oars, a steering oar, an anchor, a deck cabin, and a          creature can repeat the saving throw at the end of
+mast with a square sail. The ship can hold fifteen            each of its turns, ending the effect on itself on a
+Medium creatures comfortably.                                 success.
+
+  When the box becomes a vessel, its weight                 • The third command word expends 5 charges and
+becomes that of a normal vessel its size, and                 causes the gem to flare with blinding light in a 30-­‐‑
+anything that was stored in the box remains in the            foot cone originating from it. Each creature in the
+boat.                                                         cone must make a saving throw as if struck by the
+                                                              beam created with the second command word.
+  The third command word causes the folding boat
+to fold back into a box, provided that no creatures         When all of the gem’s charges are expended, the gem
+are aboard. Any objects in the vessel that can’t fit        becomes a nonmagical jewel worth 50 gp.
+inside the box remain outside the box as it folds. Any
+objects in the vessel that can fit inside the box do so.    Gem of Seeing
+
+Frost Brand                                                 Wondrous item, rare (requires attunement)
+
+Weapon (any sword), very rare (requires attunement)         This gem has 3 charges. As an action, you can speak
+                                                            the gem’s command word and expend 1 charge. For
+When you hit with an attack using this magic sword,         the next 10 minutes, you have truesight out to 120
+the target takes an extra 1d6 cold damage. In               feet when you peer through the gem.
+addition, while you hold the sword, you have
+resistance to fire damage.                                    The gem regains 1d3 expended charges daily at
+                                                            dawn.

@@ -28,7 +28,7 @@ Text normalisation applied to the cache (recorded in `cache/manifest.json` → `
 
 Reading-order pages merge the lines of a paragraph, which also merges consecutive stat-block traits into one line. Structure (stat blocks, tables, spell headers) is therefore parsed from the layout pages, column by column (`splitLayoutColumns`, left column then right column), unwrapping lines back into paragraphs. Prose descriptions may be taken from the reading-order pages.
 
-Layout caveat (measured by the spells stager): pdftotext pads the right column to an absolute character column in its raw output, so every character the normalisation removes from a hyphen in the left column moves that line's right-column text three columns left. A stager must therefore cut columns at the space gap nearest the page's usual gutter (a plausibility window), never at a fixed offset; the monsters and spells stagers do this and reconcile every line against the reading-order page. A raw, unnormalised layout variant of the cache would remove the shift and is a candidate follow-up.
+Layout caveat (measured by the spells stager on the first build): pdftotext pads the right column to an absolute character column in its raw output, so every character the normalisation removes from a hyphen in the left column moved that line's right-column text three columns left in the normalised layout files. Since the acceptance pass (2026-09-22, cache version 2) every stager detects and cuts columns on the raw variant `page_NNN.layout.raw.txt`, whose positions are exact, and normalises each line after the cut (`splitRawLayoutColumns` supplies the gutter; the stagers cut at the space gap nearest it, because the library's fixed cut severs a left-column line that runs through the gutter). The record-level diff of that change against the first build (`tools/srd_extract/diff_staging.js`, `reports/staging_diff.json`) showed no text change caused by the switch itself: the first build's guards had already compensated exactly.
 
 ## 3. Section map (page ranges verified 2026-09-22 by reading the first lines of every boundary page; the PDF has no table of contents)
 | Section | Pages | Category | Stager |
@@ -120,8 +120,11 @@ Categories (browser filters and output files): `creatures`, `spells`, `equipment
 |---|---|---|
 | `extracted` | name, source pages and full text captured; `data` incomplete (a required field of section 7 could not be parsed) | stager |
 | `parsed` | every required field of section 7 filled by the stager; not compared with the page by a person | stager |
-| `verified` | compared with the PDF page by a person and confirmed; `verifiedBy` and `verifiedAt` recorded | a later review pass, never a stager |
+| `verified` | compared with the rendered source page by a reviewer (a person, or an agent that opened the rendered page image) and confirmed; `verifiedBy`, `verifiedAt` and `verification { method, pages, textSha256 }` recorded. Marks live in `tools/srd_extract/verification/verified.json` and are applied by the assembler only while the entry's text still hashes to the value recorded at review time; a re-parsed entry drops back to `parsed` and the manifest lists it under `verification.stale` | a review pass, never a stager |
 | `adapted` | a DEUS adaptation exists; `adaptation.deusId` names it | an adaptation task, never this pipeline |
+
+### Reviewer table overlays
+A stager never guesses a table row. When pdftotext's output does not let it separate cells (three tables in the first build: the Apparatus of the Crab levers, whose Up and Down cells run into each other; the Bag of Beans and Wand of Wonder d100 tables, whose labels sit on a compressed grid), the table is left with `rows: []`, `unparsed: true` and the reason, and the entry stays `extracted`. `tools/srd_extract/verification/table_overlays.json` completes such tables from a reviewer's reading of the rendered page, in two forms: `rows` (cells transcribed; the assembler refuses any cell containing a word that does not occur in the entry's own text) or `anchors` (the roll labels in order with the first words of each outcome; the outcome text is sliced from the entry's own printed lines, so nothing is transcribed). Each overlay is bound to the staging text's SHA-256 like a verification mark, is applied only while that hash holds, and rewrites the table's printed lines as one line per row. The manifest lists refused overlays under `tableOverlays.refused`, and the validator (`table_overlays_sound`) fails on a refused overlay, an applied table without rows or complete dice coverage, or an unparsed table on a non-extracted entry.
 
 ### Staging file shape (`tools/srd_extract/staging/staging_<category>.json`)
 ```json
@@ -152,25 +155,62 @@ The catalogue files under `game/data/srd51/` have the same shape plus `metadata.
 - **table**: `caption`, `columns []`, `rows [][]`, `headingPath []`.
 
 ## 8. Placeholder icons
-Each catalogue entry gets `icon: { set: "IconSet", index }` from the kind map in `tools/build_srd_catalog.js`. The set is the stock RPG Maker MZ `game/img/system/IconSet.png` (512×800 px, 16 columns × 25 rows = indices 0–399). The validator checks every index against the sheet's real dimensions. These are development placeholders for the browser only; a shipped adaptation needs original art (AGENTS.md rule 11) and a request in `docs/ASSET_REQUESTS.md`.
+Each catalogue entry gets `icon: { set: "IconSet", index }` from the kind map in `tools/srd_extract/lib/srd_schema.js`. The set is the stock RPG Maker MZ `game/img/system/IconSet.png` (512×800 px, 16 columns × 25 rows = indices 0–399). The validator checks every index against the sheet's real dimensions; 51 cells of the sheet are fully transparent (0, 12–15, 28–31, 90–95, …), so a kind must not point at one of them (the creature icon moved from 12 to 8 on 2026-09-22 after the NW.js run showed an empty box). These are development placeholders for the browser only; a shipped adaptation needs original art (AGENTS.md rule 11) and a request in `docs/ASSET_REQUESTS.md`.
 
 ## 9. Dormancy rules (checked by the validator)
 - No entry of `game/js/plugins.js` and no `DataManager._databaseFiles` push in any plugin names a file under `game/data/srd51/`.
 - `game/data/DEUS_WorldCatalog.json` contains no `srd:` id.
 - The catalogue writes nothing into `game/save/`.
 
+## 9a. Tooling requirements
+| Need | Requirement | When missing |
+|---|---|---|
+| Node.js | v18 or later; built and verified with v24.19.0 at `C:\Program Files\nodejs\`. No npm packages: every tool uses only Node built-ins. | nothing runs |
+| `pdftotext` | xpdf 4.06, shipped with Git for Windows at `C:\Program Files\Git\mingw64\bin\pdftotext.exe`; also found on PATH, via `--pdftotext <exe>` or the `PDFTOTEXT` environment variable. Flags used: `-enc UTF-8 -eol unix` and, for the layout pass, `-layout`. Its thirty "Unknown character collection 'Adobe-Japan1'" warnings are expected and recorded in `cache/manifest.json`. | `extract_pages.js` exits 2 with the path to install or pass |
+| The PDF | `SRD_CC_v5.1.pdf` at the project root, SHA-256 `2504d2a0…f0a1f0`; a different file is refused unless `--allow-hash-mismatch` is given, and the manifest then records the actual hash. | `extract_pages.js` exits 2 |
+| Offline builds | Only `extract_pages.js` (and its `--check`) needs the PDF and `pdftotext`. The committed cache is complete and verified, so `stage_*.js`, `build_srd_catalog.js`, `validate_srd_catalog.js`, `diff_staging.js`, the browser and its self-tests all run from the repository alone. | n/a |
+
+Cache versions: `cache/manifest.json` → `cacheVersion` (2 since the raw layout variant was added on 2026-09-22); `normalization` lists every rule applied, in order; `variants` names the three files per page and what each may be used for.
+
 ## 10. Known gaps and decisions for the coordinator
 - A second SRD folder now exists: `game/data/srd5_1/` (2026-09-21, fifteen files, no committed extraction tool, references without full text for creatures and magic items) next to `game/data/srd51/` (this library). Rule 14 wants one source of truth per concept; which folder is canonical, and whether `tools/test_srd_parity.js` moves to the new one, is the coordinator's call. This library does not modify `srd5_1`.
-- The two glyph rules in section 2 (U+008A to em dash, grave accent to apostrophe) rest on the text context of every occurrence, not on a rendered page: PDF rendering is not available on this machine. The class tables' slot cells and the page 90 sentence leave no other reading, but a check against the PDF in a viewer would close the point.
+- The two glyph rules in section 2 were confirmed on 2026-09-22 against rendered pages 11 and 90 (pdf.js rendering through `tools/srd_extract/optional/render_pages.mjs`): every position pdftotext reported as U+008A shows a dash on the page (74 empty table cells on page 11, the dash in "adversaries are—how far away" on page 90), and pdf.js decodes that glyph as U+0336, a combining stroke with no dash mapping in the font, so the em dash is a chosen representation of a glyph the font never names. The grave-accent apostrophes render as apostrophes, and pdf.js decodes them as U+2019.
 - Counts in section 4 were first estimates and were corrected to the numbers measured on the pages during the first build (gear, mounts, vehicles, magic items, rules, hazards, tables); the validator holds the catalogue to them from now on.
 
-## 11. First build, 2026-09-22
-`node tools/validate_srd_catalog.js`: 36 passed, 0 failed. `node tools/srd_browser/selftest.js`: 111 passed, 0 failed, 1 skipped (fixture and real catalogue). 1,325 entries: 1,311 `parsed`, 14 `extracted`, 0 `verified`, 0 `adapted`. Every stager reconciles its entries against the reading-order pages (creatures 5,219/5,219 lines, spells 319/319 bag-of-words segments, equipment and magic items 154/154 and 761/761 paragraphs).
+## 10a. Count reconciliation (2026-09-22, acceptance pass)
+Every total is derived from the pages, not fitted to a target; name-level evidence is in `docs/SRD_CATALOGUE_CROSSWALK.md` and `tools/srd_extract/reports/crosswalk_srd5_1.json`.
 
-The 14 `extracted` entries and why:
-- `srd:tool:vehicles-land-or-water` (p70) and `srd:vehicle:barding` (p71–72): the table prints `*` and `×4` instead of coin amounts; kept verbatim.
-- Nine magic items whose d20/d100 tables could not be recovered row by row from the layout (text is complete, `data.tables[].rows` empty, raw lines kept): Apparatus of the Crab (p208), Bag of Beans (p209), Efreeti Bottle (p220), Horn of Valhalla (p226), Iron Flask (p228), Manual of Golems (p229), Necklace of Prayer Beads (p231), Robe of Useful Items (p239), Wand of Wonder (p249).
-- `srd:subclass:oath-of-devotion` (p32) and `srd:subclass:the-fiend` (p50): one feature each has no level sentence in the source ("Oath Spells", "Expanded Spell List").
-- `srd:rule:magic-items-artifacts` (p252): the heading has no prose of its own.
+| Category | Count | Derivation | Against the assignment or the legacy folder |
+|---|---|---|---|
+| creatures | 317 | 201 stat blocks in Monsters (A to Z), 95 in Appendix MM-A, 21 in Appendix MM-B; corroborated by 317 "Challenge N (X XP)" lines in both extraction modes | The assignment's 313 came from `srd5_1/monsters_reference.json`, which lacks Werebear (p326–327), Werewolf (p328–329), Bandit (p396–397) and Bandit Captain (p397); all 313 legacy names are present in the 317 |
+| spells | 327 | 319 spell descriptions (pages 114–194) plus 8 class spell lists (pages 105–113) | 319 = 319 name for name; the 8 lists are new records, not spells |
+| equipment | 226 | weapons 37, armor 13, gear 99, tools 36, mounts 8, vehicles 20, trade goods 13, each a printed table row (sub-rows counted, group headers not) | legacy holds weapons 37, armor 13, tools 36 and nothing for the other 140 rows |
+| magic-items | 240 | one entry per printed item heading on pages 206–253; the +1/+2/+3 items are single entries with `data.rarities` | The assignment's 243 came from `srd5_1/magic_items_reference.json`, which counts 11 lines that are not items (wrapped heading "Location", table rows "Thunder", "Spinel", "Portable ram", stat-block lines "Medium undead, neutral evil", "Large beast, unaligned", caption "Potions of Healing", and three sentence fragments) and lacks 8 real items (Amulet of Proof against Detection and Location, Armor of Vulnerability, Potion of Growth, Potion of Speed, Ring of Djinni Summoning, Ring of Shooting Stars, Rod of Absorption, Stone of Good Luck): 243 − 11 + 8 = 240 |
+| character-options | 39 | races 9, subraces 4, classes 12, subclasses 12, background 1, feat 1 | legacy has classes 12 and species 9 + 4; subclasses, the background and the feat are new |
+| rules | 176 | rules 114 (62 in the rules chapters, 24 equipment-chapter rules, 20 magic-item rules, 8 character-option chapter rules), tables 17, hazards 28 (8 traps, 3 diseases, 3 forms of madness, 14 poisons), conditions 15, appendices 2 | legacy holds 15 conditions 1:1 and paraphrased or DEUS-specific codifications of abilities, skills, actions, damage types and a few tables; each maps to a rule or table entry (crosswalk §3.6) |
+| total | 1,325 | 317 + 327 + 226 + 240 + 39 + 176 | |
 
-Known limits of this build: rows of in-item tables are kept as printed lines where a table wraps (Half-Dragon Template, Confusion, Teleport); source typos are preserved, never corrected ("3nd level" in Animal Messenger, "Component:" on page 129, "1r50" in Iron Flask where the PDF prints an en dash as "r"); nothing has been compared with the rendered PDF by a person, so no entry is `verified`.
+Classification changes against the legacy folder: the legacy `Half---Red Dragon Veteran`, `Will---o’---Wisp` and `Saber---Toothed Tiger` are the same creatures with the hyphen artifact in their names; `Lightfoot Halfling` is the subrace printed as "Lightfoot"; legacy `weapon_properties` are the weapon-property definitions inside `srd:rule:equipment-weapon-properties`; no record was split, merged or renumbered to make the folders agree.
+
+## 11. Builds
+
+### First build, 2026-09-22 (commit e70783e)
+Validator 36 passed. 1,325 entries: 1,311 `parsed`, 14 `extracted`, 0 `verified`. The 14 extracted entries were two equipment rows whose cost is printed as `*` or `×4` (Vehicles (land or water), Barding); nine magic items whose d20/d100 tables could not be recovered row by row (Apparatus of the Crab, Bag of Beans, Efreeti Bottle, Horn of Valhalla, Iron Flask, Manual of Golems, Necklace of Prayer Beads, Robe of Useful Items, Wand of Wonder); two subclasses with a feature that has no level sentence (Oath of Devotion, The Fiend); and the "Artifacts" heading of the magic item rules, which has no prose of its own.
+
+### Second build, 2026-09-22 (acceptance pass)
+`node tools/validate_srd_catalog.js`: 38 passed, 0 failed. `node tools/srd_browser/selftest.js`: 112 passed (fixture and real catalogue). `node tools/srd_browser/nw_verify.js` (NW.js 0.48.4, Chromium 85): 14 passed, evidence in `tools/srd_browser/evidence/`. 1,325 entries: 1,304 `parsed`, 21 `verified`, 0 `extracted`, 0 `adapted`. Every stager still reconciles against the reading-order pages and now also checks that each entry's first and last text lines lie on its cited pages.
+
+How the 14 were completed, none by guessing:
+- Six magic-item tables (Efreeti Bottle, Horn of Valhalla, Iron Flask, Manual of Golems, Necklace of Prayer Beads, Robe of Useful Items) were reconstructed by the stager from the raw layout with per-column flow matching and inclusive range coverage; all six were then compared with the rendered pages and are `verified`.
+- Three tables the stager still refuses (Apparatus of the Crab, Bag of Beans, Wand of Wonder) were completed through reviewer overlays (section 6) and compared with the rendered pages; `verified`.
+- The two equipment rows carry `cost { amount: null, printed: "*" | "×4", basis }` and the same for weight, a faithful structured notation of what the table prints; `parsed`.
+- The two subclass features take the level at which the class grants its subclass, a documented rule recorded as `levelBasis: "subclass gained at this level"` next to the printed-level features (`levelBasis: "feature text"`); both subclasses are `verified` against pages 32–33 and 50–51.
+- The Artifacts heading is `parsed` with its note: `headingPath` is complete and the source has nothing more.
+
+Also completed in this pass: structured tables with coverage for the seven spells that carry tables (Animate Objects, Confusion, Control Weather, Creation, Reincarnate, Scrying, Teleport) and for the two Half-Dragon Template tables; the Iron Flask's en dashes, which pdftotext emitted as the letter r, are normalised by a rule confined to that pattern; page attribution corrected for 48 equipment entries whose description paragraph sits on a later page than the table; `data.tables` is present on every spell and magic item (`[]` when none).
+
+The 21 `verified` entries: Solar, Hill Giant, Wereboar, Shrieker, Violet Fungus, Half-Red Dragon Veteran (with the Half-Dragon Template tables); Alter Self, Teleport; Bard, Oath of Devotion, The Fiend; Net; Apparatus of the Crab, Bag of Beans, Efreeti Bottle, Horn of Valhalla, Iron Flask, Manual of Golems, Necklace of Prayer Beads, Robe of Useful Items, Wand of Wonder. They cover the glyph pages (11, 90), page-spanning entries, stat blocks with displaced or merged lines (313, 327, 309), wrapped tables and all nine previously refused tables.
+
+Record-level diff of the parser adjustments against e70783e (`node tools/srd_extract/diff_staging.js`, report in `tools/srd_extract/reports/staging_diff.json`): 0 entries added or removed; changed: spells 319 (every spell gained `data.tables`, 7 with rewritten table text), equipment 52 (48 page corrections, 2 readiness, 2 text), magic items 40 (7 readiness, 22 table-shape data changes, 11 text fixes for hanging bullet lines and the Apparatus lines), character options 12 (subclass `levelBasis` fields, 2 readiness), monsters 1 (Half-Dragon Template tables), rules 0.
+
+Known limits of this build: source typos are preserved, never corrected ("3nd level" in Animal Messenger, "Component:" on page 129); 1,304 entries have not been compared with a rendered page and remain `parsed`; the verification covers targeted samples, not every record.

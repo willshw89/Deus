@@ -21,14 +21,16 @@
 // before a non-indented prose line is checked against the reading-order page, which knows the real
 // paragraph breaks of a column but scrambles tables.
 //
-// Column splitting. lib/srd_text.js splitLayoutColumns finds the gutter, but its rightStart cuts
-// the left column short on lines whose text runs past the gutter, and pdftotext pads the right
-// column to an absolute character column before the cache collapses the PDF's multi-code hyphens,
-// so a line whose left part holds hyphens has its right-column text a few columns further left
-// (three per hyphen on the 2026-09-23 cache, two on the one before it). So the gutter decision is
-// the lib's and the cut is made per line, at the first run of two or more spaces that starts before
-// the page's modal right-column start and ends within the shift those hyphens allow; the shift
-// itself is measured from the cache and reported, and only used to restore right-column indents.
+// Column splitting. Columns are cut on the raw layout variant (page_NNN.layout.raw.txt: physical
+// layout, unnormalised, exact column positions) and every part is normalised after the cut, so
+// the PDF's multi-code hyphens can never move a line's right-column text (on the normalised layout
+// variant they did, by two or three columns per hyphen, because pdftotext had padded the right
+// column to an absolute column before the codes were collapsed). lib/srd_text.js
+// splitRawLayoutColumns supplies the gutter decision; its rightStart is not used because it cuts
+// the left column short on lines whose text runs past the gutter. The cut is made per line, at the
+// first run of two or more spaces whose left part prints no wider than the page's modal
+// right-column start; the shift per hyphen is still measured from the cache and reported (expected
+// 0 on the raw variant) and the hyphen window stays as a guard.
 //
 // Self-check: the run ends with PASS/FAIL lines and exits 1 on any FAIL. Counts are reported as
 // found, never padded.
@@ -69,7 +71,9 @@ const verbose = args.includes("--verbose");
 const LIMIT = verbose ? Infinity : 20;
 
 const pad = n => String(n).padStart(3, "0");
-const readPage = (n, layout) => fs.readFileSync(path.join(CACHE_DIR, `page_${pad(n)}${layout ? ".layout" : ""}.txt`), "utf8");
+/** One cached page: "raw" = page_NNN.layout.raw.txt (physical layout, unnormalised, exact columns),
+ *  "reading" = page_NNN.txt (reading order, normalised). The normalised layout variant is not read. */
+const readPage = (n, variant) => fs.readFileSync(path.join(CACHE_DIR, `page_${pad(n)}${variant === "raw" ? ".layout.raw" : ""}.txt`), "utf8");
 const tokenKey = (s, n) => T.toPlain(s).toLowerCase().split(/\s+/).filter(Boolean).slice(0, n).join(" ");
 
 // ---------------------------------------------------------------------------------------------
@@ -77,17 +81,26 @@ const tokenKey = (s, n) => T.toPlain(s).toLowerCase().split(/\s+/).filter(Boolea
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Hyphens in a string. The PDF encodes a hyphen as up to four glyph codes; pdftotext pads the right
- * column to its absolute character column before the cache collapses those codes to one character,
- * so every hyphen in the left part of a layout line can leave that line's right-column text up to
- * MAX_SHIFT_PER_HYPHEN columns left of where it sits on hyphen-free lines. The cut only allows for
- * this; the shift actually present is measured from the cache (measureShift), never assumed.
- * Only joining hyphens count (preceded by a non-space character, as in "24-hour" or "long-"): a
- * minus sign (normalised from U+2212, as in "takes a -2") is a single glyph code and shifts nothing.
+ * Joining hyphens in a normalised string (preceded by a non-space character, as in "24-hour" or
+ * "long-"; a minus sign as in "takes a -2" is not one). The PDF encodes a hyphen as up to four
+ * glyph codes and pdftotext pads the right column to its absolute character column, so on the
+ * normalised layout variant every hyphen in the left part of a line left that line's right-column
+ * text up to MAX_SHIFT_PER_HYPHEN columns left. Columns are now cut on the raw layout variant,
+ * where that shift does not exist; the window stays as a guard and the shift actually present is
+ * measured from the cache (measureShift) and reported, never assumed.
  */
 const HYPHEN_RE = /(?<=\S)[-‐‑]/g;
 const hyphensIn = s => (s.match(HYPHEN_RE) || []).length;
 const MAX_SHIFT_PER_HYPHEN = 3;
+
+/** A raw layout page: its right-trimmed raw lines, the lib's gutter decision (made on the raw
+ *  text by splitRawLayoutColumns) and the modal right-column start R (null for one column). */
+function rawPage(p, opts) {
+    const raw = readPage(p, "raw");
+    const lib = T.splitRawLayoutColumns(raw, opts);
+    const rawLines = raw.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+$/, ""));
+    return { rawLines, gutter: lib.gutter, R: lib.gutter === null ? null : modalRightStart(rawLines, lib.gutter) };
+}
 
 /** The page's modal right-column start: the most common end of a run of spaces near the gutter. */
 function modalRightStart(lines, gutter) {
@@ -105,41 +118,43 @@ function modalRightStart(lines, gutter) {
 }
 
 /**
- * Where one right-trimmed layout line splits: at the end of the gutter run, the first run of 2+
- * spaces that starts before R - 2 and ends at or after R - MAX_SHIFT_PER_HYPHEN * h - 2, h being the
- * hyphens before it. A run ending earlier lies inside the left column's text (a wide table row).
- * Returns { cut, h, problem }: cut is the line length for a left-only line; problem is set for a
- * line that reaches the right column without a gutter run (kept in the left column).
+ * Where one right-trimmed RAW layout line splits: at the end of the gutter run, the first run of
+ * 2+ spaces whose left part prints (normalised) no wider than R - 2 and which ends at or after
+ * R - MAX_SHIFT_PER_HYPHEN * h - 2, h being the joining hyphens in that printed left part (the
+ * guard; on raw lines the gutter run ends at R plus the right text's indent). A run ending earlier
+ * lies inside the left column's text (a wide table row). Positions are raw; the raw left part is
+ * wider than its printed width by the hyphen codes, and when it runs past R pdftotext pushes the
+ * right text after a two-space gap, which this still finds. Returns { cut, h, problem }: cut is the
+ * line length for a left-only line; problem is set for a line that reaches the right column
+ * without a gutter run (kept in the left column).
  */
-function cutLine(trimmed, R) {
+function cutLine(raw, R) {
     const rx = / {2,}/g; let m;
-    while ((m = rx.exec(trimmed)) !== null) {
+    while ((m = rx.exec(raw)) !== null) {
         const start = m.index, e = start + m[0].length;
-        if (start > R - 2) break;
-        if (e >= trimmed.length) break;
-        const h = hyphensIn(trimmed.slice(0, e));
+        if (e >= raw.length) break;
+        const printed = T.normalizeText(raw.slice(0, start));
+        if (printed.length > R - 2) break;
+        const h = hyphensIn(printed);
         if (e >= R - MAX_SHIFT_PER_HYPHEN * h - 2) return { cut: e, h, problem: false };
     }
-    return { cut: trimmed.length, h: 0, problem: trimmed.length > R - 1 };
+    return { cut: raw.length, h: 0, problem: T.normalizeText(raw).length > R - 1 };
 }
 
 /**
- * The shift of right-column text per hyphen in the left part, measured on pages first..last: the
- * most common value of R - cut over lines whose left part holds exactly one hyphen (0 when the
- * cache does not shift). Returned with the sample count so the run can report it.
+ * The shift of right-column text per hyphen in the left part, measured on the raw layout pages
+ * first..last: the most common value of R - cut over lines whose left part holds exactly one
+ * joining hyphen (0 when the cache does not shift, which is the expectation for the raw variant).
+ * Returned with the sample count so the run can report it.
  */
 function measureShift(first, last, opts) {
     const hist = new Map();
     for (let p = first; p <= last; p++) {
-        const text = readPage(p, true), lines = text.split("\n");
-        const lib = T.splitLayoutColumns(text, opts);
-        if (lib.gutter === null) continue;
-        const R = modalRightStart(lines, lib.gutter);
+        const { rawLines, R } = rawPage(p, opts);
         if (R === null) continue;
-        for (const l of lines) {
-            const trimmed = l.replace(/\s+$/, "");
-            const { cut, h, problem } = cutLine(trimmed, R);
-            if (problem || cut === 0 || cut >= trimmed.length || h !== 1) continue;
+        for (const raw of rawLines) {
+            const { cut, h, problem } = cutLine(raw, R);
+            if (problem || cut === 0 || cut >= raw.length || h !== 1) continue;
             const d = R - cut;
             if (d >= 0) hist.set(d, (hist.get(d) || 0) + 1);
         }
@@ -150,29 +165,27 @@ function measureShift(first, last, opts) {
 }
 
 /**
- * Split one layout page into columns: [{ col, lines }] in reading order. The gutter decision is
- * splitLayoutColumns'; R is the page's modal right-column start; each line is cut by cutLine. The
- * right part keeps its indent relative to where its text starts on this line (R less the measured
- * shift per hyphen), so an indented paragraph start in the right column still reads as indented.
+ * Split one raw layout page into columns: [{ col, lines }] in reading order, every line normalised
+ * after the cut. The gutter decision is splitRawLayoutColumns'; R is the page's modal right-column
+ * start; each raw line is cut by cutLine. The right part keeps its indent relative to where its
+ * text starts on this line (R less the measured shift per hyphen, 0 on the raw variant), so an
+ * indented paragraph start in the right column still reads as indented.
  */
-function splitColumns(layoutText, page, warnings, opts, shift = 0) {
-    const lib = T.splitLayoutColumns(layoutText, opts);
-    const lines = layoutText.split("\n");
-    const single = () => [{ col: 0, lines: lines.map(l => l.replace(/\s+$/, "")) }];
-    if (lib.gutter === null) return single();
-    const R = modalRightStart(lines, lib.gutter);
+function splitColumns(p, page, warnings, opts, shift = 0) {
+    const { rawLines, gutter, R } = rawPage(p, opts);
+    const single = () => [{ col: 0, lines: rawLines.map(l => T.normalizeText(l).replace(/\s+$/, "")) }];
+    if (gutter === null) return single();
     if (R === null) {
         warnings.push({ page, message: "column split: gutter found but no right-column start; page read as one column" });
         return single();
     }
     const left = [], right = [];
-    for (const l of lines) {
-        const trimmed = l.replace(/\s+$/, "");
-        const { cut, h, problem } = cutLine(trimmed, R);
-        if (problem) warnings.push({ page, message: `column split ambiguous, line kept in the left column: ${JSON.stringify(trimmed.trim())}` });
+    for (const raw of rawLines) {
+        const { cut, h, problem } = cutLine(raw, R);
+        if (problem) warnings.push({ page, message: `column split ambiguous, line kept in the left column: ${JSON.stringify(T.normalizeText(raw).trim())}` });
         const rightIndent = Math.max(0, cut - (R - shift * h));
-        left.push(trimmed.slice(0, cut).replace(/\s+$/, ""));
-        right.push(cut < trimmed.length ? " ".repeat(rightIndent) + trimmed.slice(cut) : "");
+        left.push(T.normalizeText(raw.slice(0, cut)).replace(/\s+$/, ""));
+        right.push(cut < raw.length ? " ".repeat(rightIndent) + T.normalizeText(raw.slice(cut)).replace(/\s+$/, "") : "");
     }
     return [{ col: 0, lines: left }, { col: 1, lines: right }];
 }
@@ -184,7 +197,7 @@ function buildStream(first, last, warnings, opts, meta) {
     const measured = measureShift(first, last, opts);
     if (meta) meta.columnShift = measured;
     for (let p = first; p <= last; p++) {
-        const cols = splitColumns(readPage(p, true), p, warnings, opts, measured.shift);
+        const cols = splitColumns(p, p, warnings, opts, measured.shift);
         for (const c of cols) {
             let seen = false;
             for (const raw of c.lines) {
@@ -213,11 +226,17 @@ function parseLevelLine(text) {
     return { level: 0, school, ritual: !!m[5], known: SCHOOLS.has(school) };
 }
 
+/** The reading-order text of the given pages as one whitespace-normalised string (cached per page). */
+const roPageCache = new Map();
+function readingOrderText(pages) {
+    return pages.map(p => { if (!roPageCache.has(p)) roPageCache.set(p, normWS(readPage(p, "reading"))); return roPageCache.get(p); }).join(" ");
+}
+
 /** Reading-order paragraph starts per page: "page|first five words" -> true. */
 function readingOrderParagraphStarts(first, last) {
     const starts = new Set();
     for (let p = first; p <= last; p++) {
-        for (const line of readPage(p, false).split("\n")) {
+        for (const line of readPage(p, "reading").split("\n")) {
             const t = line.trim();
             if (t) starts.add(p + "|" + tokenKey(t, 5));
         }
@@ -225,9 +244,294 @@ function readingOrderParagraphStarts(first, last) {
     return starts;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Tables. Seven spells print tables. The specs below describe structure only (caption, column
+// names, dice, how coverage is judged); every cell comes from the page, and a table that cannot be
+// reconstructed stays as its printed lines with a note.
+//
+// Grid tables (all but Confusion) are read column-major from the raw layout: fragments (runs of
+// text separated by 2+ spaces) are clustered into the spec's column groups by the widest gaps
+// between their start positions; the header words are consumed from the top of each group (they
+// wrap onto data lines: "Similar" / "Area"); the remaining fragments are the group's cells in row
+// order, which also resolves cells printed a row above or below their label (Animate Objects'
+// Str/Dex, Scrying's Connection modifiers, Teleport's range columns). A wrapped label (a fragment
+// starting in lower case: "circle", "object", "destination") joins the previous label; a wrapped
+// text cell on an unlabelled line ("damage") joins the previous cell when it does not parse as the
+// group's cell types. Any group that took a cell from an unlabelled line must be listed in the same
+// order by the reading-order page, which prints these tables column-major. Confusion is a
+// labelled-row table (d10 | Behavior) whose "9–10" label is printed beside the wrapped tail of row
+// 7–8; the cell boundary is the sentence boundary, and the note says so. Dice ranges are validated
+// for inclusive coverage of the die (one partition per table, or per row for Teleport).
+// ---------------------------------------------------------------------------------------------
+
+const TABLE_SPECS = {
+    "Animate Objects": [{ caption: "Animated Object Statistics", columns: ["Size", "HP", "AC", "Attack", "Str", "Dex"], groups: [["Size"], ["HP", "AC", "Attack"], ["Str", "Dex"]], types: { HP: "int", AC: "int", Str: "int", Dex: "int" }, dice: null, coverage: null }],
+    "Confusion": [{ layout: "labelled", caption: null, columns: ["d10", "Behavior"], dice: "d10", coverage: "table" }],
+    "Control Weather": [
+        { caption: "Precipitation", columns: ["Stage", "Condition"], dice: null, coverage: null },
+        { caption: "Temperature", columns: ["Stage", "Condition"], dice: null, coverage: null },
+        { caption: "Wind", columns: ["Stage", "Condition"], dice: null, coverage: null }
+    ],
+    "Creation": [{ caption: null, columns: ["Material", "Duration"], dice: null, coverage: null }],
+    "Reincarnate": [{ caption: null, columns: ["d100", "Race"], dice: "d100", coverage: "table" }],
+    "Scrying": [
+        { caption: null, columns: ["Knowledge", "Save Modifier"], dice: null, coverage: null },
+        { caption: null, columns: ["Connection", "Save Modifier"], dice: null, coverage: null }
+    ],
+    "Teleport": [{ caption: null, columns: ["Familiarity", "Mishap", "Similar Area", "Off Target", "On Target"], dice: "d100", coverage: "row", rangeColumns: [1, 2, 3, 4] }]
+};
+
+const RANGE_RE = /^(\d{1,3})(?:[–—-](\d{1,3}))?$/;
+const LABEL_RE = /^(\d{1,3}(?:[–—-]\d{1,3})?)\s+(.*)$/;
+const normWS = s => String(s).replace(/\s+/g, " ").trim();
+
+/** "01–04" -> { min: 1, max: 4, text }; "97–00" on a d100 -> max 100; null when not a range of the die. */
+function parseRange(text, die) {
+    const m = RANGE_RE.exec(text);
+    if (!m) return null;
+    const conv = s => { const v = parseInt(s, 10); return die === 100 && v === 0 ? 100 : v; };
+    const min = conv(m[1]), max = m[2] === undefined ? min : conv(m[2]);
+    if (min < 1 || max > die || min > max) return null;
+    return { min, max, text };
+}
+
+/** Gaps and overlaps of inclusive ranges over 1..die, as [min, max] runs. */
+function coverageOf(ranges, die) {
+    const count = new Array(die + 1).fill(0);
+    for (const r of ranges) for (let v = r.min; v <= r.max; v++) count[v]++;
+    const runs = pred => { const out = []; let start = null; for (let v = 1; v <= die + 1; v++) { const on = v <= die && pred(count[v]); if (on && start === null) start = v; if (!on && start !== null) { out.push([start, v - 1]); start = null; } } return out; };
+    return { gaps: runs(n => n === 0), overlaps: runs(n => n > 1) };
+}
+
+/** Text fragments of a layout line separated by runs of 2+ spaces, with their start columns. */
+function fragmentsOf(raw) {
+    const out = [];
+    const rx = / {2,}/g; let pos = 0, m;
+    const push = (s, e) => { const t = raw.slice(s, e); const lead = t.length - t.replace(/^ +/, "").length; const text = t.trim(); if (text) out.push({ start: s + lead, text }); };
+    while ((m = rx.exec(raw)) !== null) { push(pos, m.index); pos = m.index + m[0].length; }
+    push(pos, raw.length);
+    return out;
+}
+
+/** Split sorted distinct start columns into K clusters at the K - 1 widest gaps; null when ambiguous. */
+function clusterStarts(starts, K) {
+    const uniq = [...new Set(starts)].sort((a, b) => a - b);
+    if (uniq.length < K) return null;
+    if (K === 1) return [uniq];
+    const gaps = uniq.slice(1).map((v, i) => ({ gap: v - uniq[i], at: i }));
+    const sorted = gaps.slice().sort((a, b) => b.gap - a.gap);
+    const chosen = sorted.slice(0, K - 1);
+    if (sorted.length > K - 1 && sorted[K - 1].gap === chosen[K - 2].gap) return null;
+    const cuts = new Set(chosen.map(g => g.at));
+    const clusters = [[uniq[0]]];
+    for (let i = 1; i < uniq.length; i++) { if (cuts.has(i - 1)) clusters.push([]); clusters[clusters.length - 1].push(uniq[i]); }
+    return clusters;
+}
+
+/** Split one fragment into a group's cells by type ("int" cells are leading integers, the last text cell takes the rest); null when it does not fit. */
+function splitFragment(text, cols, types) {
+    if (cols.length === 1) return [text];
+    const out = []; let rest = text;
+    for (let i = 0; i < cols.length; i++) {
+        const last = i === cols.length - 1;
+        if ((types || {})[cols[i]] === "int") {
+            const m = last ? /^([+-]?\d+)$/.exec(rest) : /^([+-]?\d+)\s+(.*)$/.exec(rest);
+            if (!m) return null;
+            out.push(m[1]); rest = last ? "" : m[2];
+        } else {
+            if (!last) return null;
+            out.push(rest.trim());
+        }
+    }
+    return out;
+}
+
+/** A grid table from `lines` at or after index `from`. Returns { ok, table, from, to, rendered } or { ok: false, reason }. */
+function parseGridTable(lines, from, spec, roText) {
+    const groups = spec.groups || spec.columns.map(c => [c]);
+    const first = spec.columns[0];
+    let h = -1;
+    for (let i = from; i < lines.length; i++) { const t = lines[i].text; if (t === first || t.startsWith(first + " ")) { h = i; break; } }
+    if (h < 0) return { ok: false, reason: `header "${first}" not found` };
+    const notes = [];
+    let caption = null;
+    if (spec.caption) {
+        let j = h - 1; while (j >= 0 && !lines[j].text) j--;
+        if (j >= 0 && lines[j].text === spec.caption) caption = spec.caption; else notes.push(`caption "${spec.caption}" not found before the header`);
+    }
+    let end = h + 1;
+    const tableLike = l => !l.text || /\S {2,}\S/.test(l.text) || l.indent >= 4;
+    while (end < lines.length && tableLike(lines[end])) end++;
+    while (end > h + 1 && !lines[end - 1].text) end--;
+
+    const frags = [];
+    for (let i = h; i < end; i++) if (lines[i].text) for (const f of fragmentsOf(lines[i].raw)) frags.push(Object.assign({ line: i }, f));
+    const clusters = clusterStarts(frags.map(f => f.start), groups.length);
+    if (!clusters) return { ok: false, reason: `cannot separate ${groups.length} columns by position` };
+    const clusterOf = start => clusters.findIndex(c => c[0] <= start && start <= c[c.length - 1]);
+    const groupFrags = groups.map(() => []);
+    for (const f0 of frags) {
+        // A cell that fills its column is separated from the next column by a single space
+        // ("Medium 40 13 +5 to hit, ..."): split it at that column's start, which the header and
+        // the other rows fix.
+        let f = f0;
+        for (;;) {
+            const c = clusterOf(f.start);
+            if (c < 0) return { ok: false, reason: `fragment ${JSON.stringify(f.text)} at column ${f.start} belongs to no column` };
+            const next = c + 1 < clusters.length ? clusters[c + 1][0] : Infinity;
+            if (f.start + f.text.length <= next) { groupFrags[c].push(f); break; }
+            const cutAt = next - f.start;
+            if (f.text[cutAt - 1] !== " " || f.text[cutAt] === " ") return { ok: false, reason: `${JSON.stringify(f.text)} runs across the column starting at ${next}` };
+            groupFrags[c].push({ line: f.line, start: f.start, text: f.text.slice(0, cutAt).trim() });
+            f = { line: f.line, start: next, text: f.text.slice(cutAt) };
+        }
+    }
+
+    // Header words, consumed from the top of each group (they may wrap onto the next line).
+    const data = [];
+    for (let g = 0; g < groups.length; g++) {
+        const name = groups[g].join(" ");
+        let acc = "", k = 0;
+        while (k < groupFrags[g].length && acc !== name) {
+            acc = (acc + " " + groupFrags[g][k].text).trim(); k++;
+            if (!name.startsWith(acc)) return { ok: false, reason: `header of column ${JSON.stringify(name)} reads ${JSON.stringify(acc)}` };
+        }
+        if (acc !== name) return { ok: false, reason: `header ${JSON.stringify(name)} incomplete` };
+        data.push(groupFrags[g].slice(k));
+    }
+    // Row labels: the first group, wrapped labels (lower-case start) joined to the previous one.
+    const labels = [];
+    for (const f of data[0]) { if (/^[a-z]/.test(f.text) && labels.length) labels[labels.length - 1].text += " " + f.text; else labels.push({ text: f.text, line: f.line }); }
+    const N = labels.length;
+    if (!N) return { ok: false, reason: "no rows" };
+    const labelledLines = new Set(data[0].map(f => f.line));
+    // Other groups: cells in row order; wrapped text cells on unlabelled lines join the previous cell.
+    const groupCells = [labels.map(l => [l.text])];
+    for (let g = 1; g < groups.length; g++) {
+        const cols = groups[g]; const cells = []; let offset = false;
+        const lastIsText = (spec.types || {})[cols[cols.length - 1]] !== "int";
+        for (const f of data[g]) {
+            const split = splitFragment(f.text, cols, spec.types);
+            const unlabelled = !labelledLines.has(f.line);
+            if (split) { cells.push(split); if (unlabelled) offset = true; }
+            else if (unlabelled && cells.length && lastIsText) cells[cells.length - 1][cols.length - 1] += " " + f.text;
+            else return { ok: false, reason: `cannot place ${JSON.stringify(f.text)} in column ${cols.join("/")}` };
+        }
+        if (cells.length !== N) return { ok: false, reason: `column ${cols.join("/")} has ${cells.length} cells for ${N} rows` };
+        const columnMajor = normWS([cols.join(" "), ...cells.map(c => c.join(" "))].join(" "));
+        const roOrder = roText.includes(columnMajor);
+        if (offset && !roOrder) return { ok: false, reason: `column ${cols.join("/")} took cells from unlabelled lines and the reading order does not list them in that order` };
+        groupCells.push(cells);
+    }
+    const rows = [];
+    for (let r = 0; r < N; r++) rows.push({ roll: null, cells: groupCells.map(gc => gc[r]).flat() });
+
+    // Dice and coverage.
+    const die = spec.dice ? parseInt(spec.dice.slice(1), 10) : null;
+    let coverage = null;
+    if (spec.coverage === "table") {
+        const col = spec.columns.indexOf(spec.dice);
+        const ranges = [];
+        for (const row of rows) {
+            const r = parseRange(row.cells[col], die);
+            if (!r) return { ok: false, reason: `${JSON.stringify(row.cells[col])} is not a ${spec.dice} range` };
+            row.roll = r; ranges.push(r);
+        }
+        const c = coverageOf(ranges, die);
+        coverage = { complete: !c.gaps.length && !c.overlaps.length, gaps: c.gaps.map(v => ({ row: null, ranges: [v] })), overlaps: c.overlaps.map(v => ({ row: null, ranges: [v] })) };
+    } else if (spec.coverage === "row") {
+        const gaps = [], overlaps = [];
+        for (const row of rows) {
+            const ranges = [];
+            for (const ci of spec.rangeColumns) {
+                const cell = row.cells[ci];
+                if (cell === "—") continue;
+                const r = parseRange(cell, die);
+                if (!r) return { ok: false, reason: `${JSON.stringify(cell)} in row ${JSON.stringify(row.cells[0])} is not a ${spec.dice} range` };
+                ranges.push(r);
+            }
+            const c = coverageOf(ranges, die);
+            if (c.gaps.length) gaps.push({ row: row.cells[0], ranges: c.gaps });
+            if (c.overlaps.length) overlaps.push({ row: row.cells[0], ranges: c.overlaps });
+        }
+        coverage = { complete: !gaps.length && !overlaps.length, gaps, overlaps };
+    }
+    const table = { caption, dice: spec.dice || null, columns: spec.columns.slice(), rows, footnotes: [], coverage };
+    const rendered = [spec.columns.join(" | "), ...rows.map(r => r.cells.join(" | "))];
+    return { ok: true, table, from: h, to: end, rendered, notes };
+}
+
+/** A labelled-row table (Confusion): "label text..." rows with wrapped continuation lines. */
+function parseLabelledTable(lines, from, spec) {
+    const header = spec.columns.join(" ");
+    let h = -1;
+    for (let i = from; i < lines.length; i++) if (lines[i].text === header) { h = i; break; }
+    if (h < 0) return { ok: false, reason: `header ${JSON.stringify(header)} not found` };
+    const notes = [];
+    const rows = [];
+    let pending = null, i = h + 1;
+    for (; i < lines.length; i++) {
+        const l = lines[i];
+        if (!l.text) continue;
+        const m = LABEL_RE.exec(l.text);
+        if (m && !pending) {
+            if (/^[a-z]/.test(m[2])) {
+                if (!rows.length) return { ok: false, reason: `row ${m[1]} starts mid-sentence with no previous row` };
+                rows[rows.length - 1].text += " " + m[2];
+                pending = { label: m[1], line: i };
+                notes.push(`row ${m[1]}: label printed beside the wrapped text of row ${rows[rows.length - 1].label} (page ${l.page}); its cell starts at the next sentence`);
+            } else rows.push({ label: m[1], text: m[2], line: i });
+            continue;
+        }
+        if (l.indent >= 4) {
+            // A continuation line. While a label is pending, the first sentence start after a
+            // finished sentence opens that label's cell; everything before it belongs to the row above.
+            if (pending && /^[A-Z]/.test(l.text) && /[.!?]$/.test(rows[rows.length - 1].text)) { rows.push({ label: pending.label, text: l.text, line: pending.line }); pending = null; }
+            else if (rows.length) rows[rows.length - 1].text += " " + l.text;
+            else return { ok: false, reason: "continuation line before the first row" };
+            continue;
+        }
+        break;
+    }
+    if (pending) return { ok: false, reason: `row ${pending.label} has no cell` };
+    let end = i; while (end > h + 1 && !lines[end - 1].text) end--;
+    if (!rows.length) return { ok: false, reason: "no rows" };
+    const die = parseInt(spec.dice.slice(1), 10);
+    const ranges = [];
+    const outRows = rows.map(r => {
+        const roll = parseRange(r.label, die);
+        if (roll) ranges.push(roll);
+        return { roll, cells: [r.label, r.text] };
+    });
+    if (ranges.length !== rows.length) return { ok: false, reason: "a row label is not a range of the die" };
+    const c = coverageOf(ranges, die);
+    const coverage = { complete: !c.gaps.length && !c.overlaps.length, gaps: c.gaps.map(v => ({ row: null, ranges: [v] })), overlaps: c.overlaps.map(v => ({ row: null, ranges: [v] })) };
+    const table = { caption: spec.caption || null, dice: spec.dice, columns: spec.columns.slice(), rows: outRows, footnotes: [], coverage };
+    const rendered = [spec.columns.join(" | "), ...outRows.map(r => r.cells.join(" | "))];
+    return { ok: true, table, from: h, to: end, rendered, notes };
+}
+
+/** All tables of one spell: regions (line index -> { to, rendered }) for buildBlocks and data.tables. */
+function parseSpellTables(name, lines, roText, notes) {
+    const regions = new Map(), tables = [];
+    let from = 0;
+    for (const spec of TABLE_SPECS[name] || []) {
+        const r = spec.layout === "labelled" ? parseLabelledTable(lines, from, spec) : parseGridTable(lines, from, spec, roText);
+        const label = spec.caption || spec.columns.join("/");
+        if (!r.ok) { notes.push(`table ${label}: not reconstructed (${r.reason}); printed lines kept`); continue; }
+        for (const n of r.notes) notes.push(`table ${label}: ${n}`);
+        if (r.table.coverage && !r.table.coverage.complete) notes.push(`table ${label}: ${spec.dice} coverage incomplete`);
+        regions.set(r.from, { to: r.to, rendered: r.rendered });
+        tables.push(r.table);
+        from = r.to;
+    }
+    return { regions, tables };
+}
+
 /**
  * Build description blocks from layout lines. Block types: "p" (prose, lines joined with spaces),
- * "bullets" (one item per line), "table" (one row per line, spacing kept).
+ * "bullets" (one item per line), "table" (one row per line: a parsed table's rendered rows, or the
+ * printed rows with their spacing kept when no table was parsed there).
  *
  * Paragraph rules, from the SRD's typography: a prose paragraph after the first starts with a
  * first-line indent; an unindented line starts a paragraph only after the header block, a bullet
@@ -237,7 +541,7 @@ function readingOrderParagraphStarts(first, last) {
  * the same rows (page 132: "...10 gallons of clean" / "water within range..."), so it cannot
  * arbitrate them. Every such decision is recorded in `diag` (printed with --verbose).
  */
-function buildBlocks(lines, paraStarts, diag, spellName) {
+function buildBlocks(lines, paraStarts, diag, spellName, regions = new Map()) {
     const blocks = [];
     let cur = null;
     let blankPending = false;
@@ -250,6 +554,14 @@ function buildBlocks(lines, paraStarts, diag, spellName) {
 
     for (let i = 0; i < lines.length; i++) {
         const ln = lines[i];
+        if (regions.has(i)) {
+            const r = regions.get(i);
+            cur = { type: "table", parsed: true, items: r.rendered.map(text => ({ text, page: ln.page, indented: false })) };
+            blocks.push(cur);
+            blankPending = false; prevText = r.rendered[r.rendered.length - 1];
+            i = r.to - 1;
+            continue;
+        }
         if (!ln.text) { blankPending = true; continue; }
         if (ln.colStart) blankPending = false;
         const isBullet = ln.text.startsWith(BULLET);
@@ -396,7 +708,8 @@ function stageSpells(warnings, meta) {
         // 3. Description blocks.
         const descLines = stream.slice(k, end);
         for (const ln of descLines) if (ln.text) pages.add(ln.page);
-        const blocks = buildBlocks(descLines, paraStarts, meta.diag, name);
+        const parsedTables = parseSpellTables(name, descLines, readingOrderText([...pages]), notes);
+        const blocks = buildBlocks(descLines, paraStarts, meta.diag, name, parsedTables.regions);
         const paragraphs = []; // { text, page, prose, indented }
         for (const blk of blocks) {
             if (blk.type === "p") for (const item of blk.items) paragraphs.push({ text: item.text, page: item.page, prose: true, indented: item.indented });
@@ -439,7 +752,8 @@ function stageSpells(warnings, meta) {
             concentration: duration !== null && /^Concentration\b/i.test(duration),
             description: descParas.join("\n\n"),
             atHigherLevels,
-            classes: []
+            classes: [],
+            tables: parsedTables.tables
         };
         if (duration !== null && /concentration/i.test(duration) && !data.concentration) notes.push(`duration mentions concentration but does not start with it: ${JSON.stringify(duration)}`);
 
@@ -565,7 +879,7 @@ function crossReference(spells, lists) {
  */
 function readingOrderCrossCheck(spells) {
     const lines = [];
-    for (let p = DESC_PAGES[0]; p <= DESC_PAGES[1]; p++) for (const l of readPage(p, false).split("\n")) { const t = l.trim(); if (t) lines.push({ page: p, text: t }); }
+    for (let p = DESC_PAGES[0]; p <= DESC_PAGES[1]; p++) for (const l of readPage(p, "reading").split("\n")) { const t = l.trim(); if (t) lines.push({ page: p, text: t }); }
     const starts = [];
     for (let i = 1; i < lines.length; i++) {
         const lv = parseLevelLine(lines[i].text);
@@ -583,7 +897,7 @@ function readingOrderCrossCheck(spells) {
         const seg = segments.get(T.slugify(sp.name));
         if (!seg) { mismatches.push({ name: sp.name, page: sp.source.pages[0], detail: "no reading-order segment" }); continue; }
         const bag = new Map();
-        for (const t of sp.text.split(/\s+/).filter(Boolean)) bag.set(t, (bag.get(t) || 0) + 1);
+        for (const t of sp.text.split(/\s+/).filter(t => t && t !== "|")) bag.set(t, (bag.get(t) || 0) + 1);
         for (const t of seg.tokens) bag.set(t, (bag.get(t) || 0) - 1);
         const extra = [], missing = [];
         for (const [t, n] of bag) { if (n > 0) extra.push(`${t}x${n}`); if (n < 0) missing.push(`${t}x${-n}`); }
@@ -611,7 +925,7 @@ function paragraphStructureCheck(spells, meta) {
     const HEADER_ANY = /\b(Casting Time|Range|Components?|Duration): /;
     const merges = [], tableResidue = [];
     for (let p = DESC_PAGES[0]; p <= DESC_PAGES[1]; p++) {
-        for (const l of readPage(p, false).split("\n")) {
+        for (const l of readPage(p, "reading").split("\n")) {
             const t = l.trim();
             if (!t || t === DESC_SECTION || names.has(t) || parseLevelLine(t) || HEADER_ANY.test(t) || t.includes(BULLET) || /^[a-z]/.test(t)) continue;
             const key = p + "|" + tokenKey(t, 5);
@@ -712,6 +1026,17 @@ function main() {
         console.log(`  ${s.name} | pages ${s.source.pages.join(",")} | level ${d.level} | ${d.school}${d.ritual ? " (ritual)" : ""} | casting ${d.castingTime} | range ${d.range} | components ${comps} | duration ${d.duration} | concentration ${d.concentration} | classes ${d.classes.join("/")} | ${s.readiness}`);
     }
     check(SPOT_CHECK.every(n => spells.some(x => T.slugify(x.name) === T.slugify(n))), "spot check: all five spells present");
+
+    const withTables = spells.filter(s => s.data.tables.length);
+    const specSpells = Object.keys(TABLE_SPECS);
+    const tableCount = withTables.reduce((n, s) => n + s.data.tables.length, 0);
+    const expectedTables = specSpells.reduce((n, k) => n + TABLE_SPECS[k].length, 0);
+    check(tableCount === expectedTables && specSpells.every(k => spells.some(s => s.name === k && s.data.tables.length === TABLE_SPECS[k].length)), `tables parsed: ${tableCount} of ${expectedTables} in ${withTables.length} spells (${withTables.map(s => s.name).join(", ")})`);
+    for (const s of withTables) for (const t of s.data.tables) {
+        const cov = t.coverage ? `${t.dice} coverage ${t.coverage.complete ? "complete" : "INCOMPLETE gaps " + JSON.stringify(t.coverage.gaps) + " overlaps " + JSON.stringify(t.coverage.overlaps)}` : "no dice";
+        console.log(`  ${s.name} (p${s.source.pages.join(",")}): ${t.caption ? JSON.stringify(t.caption) + " " : ""}[${t.columns.join(" | ")}] ${t.rows.length} rows, ${cov}`);
+    }
+    check(spells.every(s => !s.notes.some(n => /not reconstructed|coverage incomplete/.test(n))), `tables with unresolved rows or incomplete coverage: ${spells.filter(s => s.notes.some(n => /not reconstructed|coverage incomplete/.test(n))).length}`);
 
     const readiness = {};
     for (const e of entries) readiness[e.readiness] = (readiness[e.readiness] || 0) + 1;

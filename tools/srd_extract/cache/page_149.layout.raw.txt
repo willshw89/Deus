@@ -1,0 +1,62 @@
+Duration: 10 days                                        Components: V, S, M (a glass or crystal bead that
+                                                           shatters when the spell ends)
+You touch a corpse or other remains. For the
+duration, the target is protected from decay and         Duration: Concentration, up to 1 minute
+can’t become undead.
+                                                         An immobile, faintly shimmering barrier springs into
+  The spell also effectively extends the time limit on   existence in a 10-­‐‑foot radius around you and
+raising the target from the dead, since days spent       remains for the duration.
+under the influence of this spell don’t count against
+the time limit of spells such as raise dead.               Any spell of 5th level or lower cast from outside
+                                                         the barrier can’t affect creatures or objects within it,
+Giant Insect                                             even if the spell is cast using a higher level spell slot.
+                                                         Such a spell can target creatures and objects within
+4th-­‐‑level transmutation                               the barrier, but the spell has no effect on them.
+                                                         Similarly, the area within the barrier is excluded
+Casting Time: 1 action                                   from the areas affected by such spells.
+Range: 30 feet
+Components: V, S                                           At Higher Levels. When you cast this spell using a
+Duration: Concentration, up to 10 minutes                spell slot of 7th level or higher, the barrier blocks
+                                                         spells of one level higher for each slot level above
+You transform up to ten centipedes, three spiders,       6th.
+five wasps, or one scorpion within range into giant
+versions of their natural forms for the duration. A      Glyph of Warding
+centipede becomes a giant centipede, a spider
+becomes a giant spider, a wasp becomes a giant           3rd-­‐‑level abjuration
+wasp, and a scorpion becomes a giant scorpion.
+                                                         Casting Time: 1 hour
+  Each creature obeys your verbal commands, and          Range: Touch
+in combat, they act on your turn each round. The GM      Components: V, S, M (incense and powdered
+has the statistics for these creatures and resolves
+their actions and movement.                                diamond worth at least 200 gp, which the spell
+                                                           consumes)
+  A creature remains in its giant size for the           Duration: Until dispelled or triggered
+duration, until it drops to 0 hit points, or until you
+use an action to dismiss the effect on it.               When you cast this spell, you inscribe a glyph that
+                                                         harms other creatures, either upon a surface (such
+  The GM might allow you to choose different             as a table or a section of floor or wall) or within an
+targets. For example, if you transform a bee, its giant  object that can be closed (such as a book, a scroll, or
+version might have the same statistics as a giant        a treasure chest) to conceal the glyph. If you choose
+wasp.                                                    a surface, the glyph can cover an area of the surface
+                                                         no larger than 10 feet in diameter. If you choose an
+Glibness                                                 object, that object must remain in its place; if the
+                                                         object is moved more than 10 feet from where you
+8th-­‐‑level transmutation                               cast this spell, the glyph is broken, and the spell ends
+                                                         without being triggered.
+Casting Time: 1 action
+Range: Self                                                The glyph is nearly invisible and requires a
+Components: V                                            successful Intelligence (Investigation) check against
+Duration: 1 hour                                         your spell save DC to be found.
+
+Until the spell ends, when you make a Charisma             You decide what triggers the glyph when you cast
+check, you can replace the number you roll with a 15.    the spell. For glyphs inscribed on a surface, the most
+Additionally, no matter what you say, magic that         typical triggers include touching or standing on the
+would determine if you are telling the truth indicates   glyph, removing another object covering the glyph,
+that you are being truthful.                             approaching within a certain distance of the glyph,
+                                                         or manipulating the object on which the glyph is
+Globe of Invulnerability                                 inscribed. For glyphs inscribed within an object, the
+                                                         most common triggers include opening that object,
+6th-­‐‑level abjuration                                  approaching within a certain distance of the object,
+                                                         or seeing or reading the glyph. Once a glyph is
+Casting Time: 1 action                                   triggered, this spell ends.
+Range: Self (10-­‐‑foot radius)

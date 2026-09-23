@@ -1,0 +1,50 @@
+Constrict. Melee Weapon Attack: +4 to hit, reach 5 ft.,    target is grappled (escape DC 12). Until this grapple
+one creature. Hit: 6 (1d8 + 2) bludgeoning damage, and     ends, the target is restrained, and the crocodile can’t
+the target is grappled (escape DC 14). Until this grapple  bite another target.
+ends, the creature is restrained, and the snake can’t
+constrict another target.                                  Death Dog
+
+Crab                                                       Medium monstrosity, neutral evil
+
+Tiny beast, unaligned                                      Armor Class 12
+                                                           Hit Points 39 (6d8 + 12)
+Armor Class 11 (natural armor)                             Speed 40 ft.
+Hit Points 2 (1d4)
+Speed 20 ft., swim 20 ft.                                      STR DEX CON INT WIS CHA
+                                                             15 (+2) 14 (+2) 14 (+2) 3 (−4) 13 (+1) 6 (−2)
+ STR DEX CON INT                 WIS            CHA
+2 (−4) 11 (+0) 10 (+0) 1 (−5)   8 (−1)          2 (−4)     Skills Perception +5, Stealth +4
+                                                           Senses darkvision 120 ft., passive Perception 15
+Skills Stealth +2                                          Languages —
+Senses blindsight 30 ft., passive Perception 9             Challenge 1 (200 XP)
+Languages —
+Challenge 0 (10 XP)                                        Two-­‐Headed. The dog has advantage on Wisdom
+                                                           (Perception) checks and on saving throws against being
+Amphibious. The crab can breathe air and water.            blinded, charmed, deafened, frightened, stunned, or
+                                                           knocked unconscious.
+Actions
+Claw. Melee Weapon Attack: +0 to hit, reach 5 ft., one     Actions
+target. Hit: 1 bludgeoning damage.                         Multiattack. The dog makes two bite attacks.
+                                                           Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Crocodile                                                  target. Hit: 5 (1d6 + 2) piercing damage. If the target is
+                                                           a creature, it must succeed on a DC 12 Constitution
+Large beast, unaligned                                     saving throw against disease or become poisoned until
+Armor Class 12 (natural armor)                             the disease is cured. Every 24 hours that elapse, the
+Hit Points 19 (3d10 + 3)                                   creature must repeat the saving throw, reducing its hit
+Speed 20 ft., swim 30 ft.                                  point maximum by 5 (1d10) on a failure. This reduction
+                                                           lasts until the disease is cured. The creature dies if the
+    STR DEX CON INT WIS CHA                                disease reduces its hit point maximum to 0.
+  15 (+2) 10 (+0) 13 (+1) 2 (−4) 10 (+0) 5 (−3)
+                                                           A death dog is an ugly two-­‐‑headed hound that
+Skills Stealth +2                                          roams plains, and deserts. Hate burns in a death
+Senses passive Perception 10                               dog’s heart, and a taste for humanoid flesh drives it
+Languages —                                                to attack travelers and explorers. Death dog saliva
+Challenge 1/2 (100 XP)                                     carries a foul disease that causes a victim’s flesh to
+                                                           slowly rot off the bone.
+Hold Breath. The crocodile can hold its breath for 15
+minutes.                                                   Deer
+
+Actions                                                    Medium beast, unaligned
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+creature. Hit: 7 (1d10 + 2) piercing damage, and the       Armor Class 13
+                                                           Hit Points 4 (1d8)

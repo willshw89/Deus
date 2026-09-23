@@ -1,0 +1,60 @@
+  At Higher Levels. When you cast this spell with a         This spell shapes a creature’s dreams. Choose a
+9th-­‐‑level spell slot, the duration is concentration, up  creature known to you as the target of this spell. The
+to 8 hours.                                                 target must be on the same plane of existence as you.
+                                                            Creatures that don’t sleep, such as elves, can’t be
+Dominate Person                                             contacted by this spell. You, or a willing creature you
+                                                            touch, enters a trance state, acting as a messenger.
+5th-­‐‑level enchantment                                    While in the trance, the messenger is aware of his or
+                                                            her surroundings, but can’t take actions or move.
+Casting Time: 1 action
+Range: 60 feet                                                If the target is asleep, the messenger appears in
+Components: V, S                                            the target’s dreams and can converse with the target
+Duration: Concentration, up to 1 minute                     as long as it remains asleep, through the duration of
+                                                            the spell. The messenger can also shape the
+You attempt to beguile a humanoid that you can see          environment of the dream, creating landscapes,
+within range. It must succeed on a Wisdom saving            objects, and other images. The messenger can
+throw or be charmed by you for the duration. If you         emerge from the trance at any time, ending the effect
+or creatures that are friendly to you are fighting it, it   of the spell early. The target recalls the dream
+has advantage on the saving throw.                          perfectly upon waking. If the target is awake when
+                                                            you cast the spell, the messenger knows it, and can
+  While the target is charmed, you have a telepathic        either end the trance (and the spell) or wait for the
+link with it as long as the two of you are on the same      target to fall asleep, at which point the messenger
+plane of existence. You can use this telepathic link to     appears in the target’s dreams.
+issue commands to the creature while you are
+conscious (no action required), which it does its best        You can make the messenger appear monstrous
+to obey. You can specify a simple and general course        and terrifying to the target. If you do, the messenger
+of action, such as “Attack that creature,” “Run over        can deliver a message of no more than ten words
+there,” or “Fetch that object.” If the creature             and then the target must make a Wisdom saving
+completes the order and doesn’t receive further             throw. On a failed save, echoes of the phantasmal
+direction from you, it defends and preserves itself to      monstrosity spawn a nightmare that lasts the
+the best of its ability.                                    duration of the target’s sleep and prevents the target
+                                                            from gaining any benefit from that rest. In addition,
+  You can use your action to take total and precise         when the target wakes up, it takes 3d6 psychic
+control of the target. Until the end of your next turn,     damage.
+the creature takes only the actions you choose, and
+doesn’t do anything that you don’t allow it to do.            If you have a body part, lock of hair, clipping from
+During this time you can also cause the creature to         a nail, or similar portion of the target’s body, the
+use a reaction, but this requires you to use your own       target makes its saving throw with disadvantage.
+reaction as well.
+                                                            Druidcraft
+  Each time the target takes damage, it makes a new
+Wisdom saving throw against the spell. If the saving        Transmutation cantrip
+throw succeeds, the spell ends.
+                                                            Casting Time: 1 action
+  At Higher Levels. When you cast this spell using a        Range: 30 feet
+6th-­‐‑level spell slot, the duration is concentration, up  Components: V, S
+to 10 minutes. When you use a 7th-­‐‑level spell slot,      Duration: Instantaneous
+the duration is concentration, up to 1 hour. When           Whispering to the spirits of nature, you create one of
+you use a spell slot of 8th level or higher, the            the following effects within range:
+duration is concentration, up to 8 hours.
+                                                            • You create a tiny, harmless sensory effect that
+Dream                                                         predicts what the weather will be at your location
+                                                              for the next 24 hours. The effect might manifest as
+5th-­‐‑level illusion                                         a golden orb for clear skies, a cloud for rain, falling
+                                                              snowflakes for snow, and so on. This effect
+Casting Time: 1 minute                                        persists for 1 round.
+Range: Special
+Components: V, S, M (a handful of sand, a dab of ink,       • You instantly make a flower blossom, a seed pod
+                                                              open, or a leaf bud bloom.
+  and a writing quill plucked from a sleeping bird)
+Duration: 8 hours

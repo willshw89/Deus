@@ -1,0 +1,64 @@
+Strength check, freeing itself or another creature               Once the pit trap is detected, an iron spike or
+within its reach on a success. The net has AC 10 and           similar object can be wedged between the pit’s cover
+20 hit points. Dealing 5 slashing damage to the net            and the surrounding floor in such a way as to
+(AC 10) destroys a 5-­‐‑foot-­‐‑square section of it, freeing  prevent the cover from opening, thereby making it
+any creature trapped in that section.                          safe to cross. The cover can also be magically held
+                                                               shut using the arcane lock spell or similar magic.
+Fire-Breathing Statue
+                                                                 Locking Pit. This pit trap is identical to a hidden
+Magic trap                                                     pit trap, with one key exception: the trap door that
+                                                               covers the pit is spring-­‐‑loaded. After a creature falls
+This trap is activated when an intruder steps on a             into the pit, the cover snaps shut to trap its victim
+hidden pressure plate, releasing a magical gout of             inside.
+flame from a nearby statue. The statue can be of
+anything, including a dragon or a wizard casting a               A successful DC 20 Strength check is necessary to
+spell.                                                         pry the cover open. The cover can also be smashed
+                                                               open. A character in the pit can also attempt to
+  The DC is 15 to spot the pressure plate, as well as          disable the spring mechanism from the inside with a
+faint scorch marks on the floor and walls. A spell or          DC 15 Dexterity check using thieves’ tools, provided
+other effect that can sense the presence of magic,             that the mechanism can be reached and the
+such as detect magic, reveals an aura of evocation             character can see. In some cases, a mechanism
+magic around the statue.                                       (usually hidden behind a secret door nearby) opens
+                                                               the pit.
+  The trap activates when more than 20 pounds of
+weight is placed on the pressure plate, causing the              Spiked Pit. This pit trap is a simple, hidden, or
+statue to release a 30-­‐‑foot cone of fire. Each creature     locking pit trap with sharpened wooden or iron
+in the fire must make a DC 13 Dexterity saving throw,          spikes at the bottom. A creature falling into the pit
+taking 22 (4d10) fire damage on a failed save, or half         takes 11 (2d10) piercing damage from the spikes, in
+as much damage on a successful one.                            addition to any falling damage. Even nastier versions
+                                                               have poison smeared on the spikes. In that case,
+  Wedging an iron spike or other object under the              anyone taking piercing damage from the spikes must
+pressure plate prevents the trap from activating. A            also make a DC 13 Constitution saving throw, taking
+successful dispel magic (DC 13) cast on the statue             an 22 (4d10) poison damage on a failed save, or half
+destroys the trap.                                             as much damage on a successful one.
+
+Pits                                                           Poison Darts
+
+Mechanical trap                                                Mechanical trap
+
+Four basic pit traps are presented here.                       When a creature steps on a hidden pressure plate,
+  Simple Pit. A simple pit trap is a hole dug in the           poison-­‐‑tipped darts shoot from spring-­‐‑loaded or
+                                                               pressurized tubes cleverly embedded in the
+ground. The hole is covered by a large cloth                   surrounding walls. An area might include multiple
+anchored on the pit’s edge and camouflaged with                pressure plates, each one rigged to its own set of
+dirt and debris.                                               darts.
+
+  The DC to spot the pit is 10. Anyone stepping on               The tiny holes in the walls are obscured by dust
+the cloth falls through and pulls the cloth down into          and cobwebs, or cleverly hidden amid bas-­‐‑reliefs,
+the pit, taking damage based on the pit’s depth                murals, or frescoes that adorn the walls. The DC to
+(usually 10 feet, but some pits are deeper).                   spot them is 15. With a successful DC 15 Intelligence
+                                                               (Investigation) check, a character can deduce the
+  Hidden Pit. This pit has a cover constructed from            presence of the pressure plate from variations in the
+material identical to the floor around it.                     mortar and stone used to create it, compared to the
+                                                               surrounding floor. Wedging an iron spike or other
+  A successful DC 15 Wisdom (Perception) check                 object under the pressure plate prevents the trap
+discerns an absence of foot traffic over the section of        from activating. Stuffing the holes with cloth or wax
+floor that forms the pit’s cover. A successful DC 15           prevents the darts contained within from launching.
+Intelligence (Investigation) check is necessary to
+confirm that the trapped section of floor is actually            The trap activates when more than 20 pounds of
+the cover of a pit.                                            weight is placed on the pressure plate, releasing four
+                                                               darts. Each dart makes a ranged attack with a +8
+  When a creature steps on the cover, it swings open
+like a trapdoor, causing the intruder to spill into the
+pit below. The pit is usually 10 or 20 feet deep but
+can be deeper.

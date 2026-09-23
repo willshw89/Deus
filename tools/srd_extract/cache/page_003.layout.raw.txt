@@ -1,0 +1,65 @@
+If you note any errors in this document, please let us know by  Subraces
+emailing askdnd@wizards.com.
+                                                                Some races have subraces. Members of a subrace
+Races                                                           have the traits of the parent race in addition to the
+                                                                traits specified for their subrace. Relationships
+Racial Traits                                                   among subraces vary significantly from race to race
+                                                                and world to world.
+The description of each race includes racial traits
+that are common to members of that race. The                    Dwarf
+following entries appear among the traits of most
+races.                                                          Dwarf Traits
+
+Ability Score Increase                                          Your dwarf character has an assortment of inborn
+                                                                abilities, part and parcel of dwarven nature.
+Every race increases one or more of a character’s
+ability scores.                                                   Ability Score Increase. Your Constitution score
+                                                                increases by 2.
+Age
+                                                                  Age. Dwarves mature at the same rate as humans,
+The age entry notes the age when a member of the                but they’re considered young until they reach the
+race is considered an adult, as well as the race’s              age of 50. On average, they live about 350 years.
+expected lifespan. This information can help you
+decide how old your character is at the start of the              Alignment. Most dwarves are lawful, believing
+game. You can choose any age for your character,                firmly in the benefits of a well-­‐‑ordered society. They
+which could provide an explanation for some of your             tend toward good as well, with a strong sense of fair
+ability scores. For example, if you play a young or             play and a belief that everyone deserves to share in
+very old character, your age could explain a                    the benefits of a just order.
+particularly low Strength or Constitution score,
+while advanced age could account for a high                       Size. Dwarves stand between 4 and 5 feet tall and
+Intelligence or Wisdom.                                         average about 150 pounds. Your size is Medium.
+
+Alignment                                                         Speed. Your base walking speed is 25 feet. Your
+                                                                speed is not reduced by wearing heavy armor.
+Most races have tendencies toward certain
+alignments, described in this entry. These are not                Darkvision. Accustomed to life underground, you
+binding for player characters, but considering why              have superior vision in dark and dim conditions. You
+your dwarf is chaotic, for example, in defiance of              can see in dim light within 60 feet of you as if it were
+lawful dwarf society can help you better define your            bright light, and in darkness as if it were dim light.
+character.                                                      You can’t discern color in darkness, only shades of
+                                                                gray.
+Size
+                                                                  Dwarven Resilience. You have advantage on
+Characters of most races are Medium, a size category            saving throws against poison, and you have
+including creatures that are roughly 4 to 8 feet tall.          resistance against poison damage.
+Members of a few races are Small (between 2 and 4
+feet tall), which means that certain rules of the game            Dwarven Combat Training. You have proficiency
+affect them differently. The most important of these            with the battleaxe, handaxe, light hammer, and
+rules is that Small characters have trouble wielding            warhammer.
+heavy weapons, as explained in “Equipment.”
+                                                                  Tool Proficiency. You gain proficiency with the
+Speed                                                           artisan’s tools of your choice: smith’s tools, brewer’s
+                                                                supplies, or mason’s tools.
+Your speed determines how far you can move when
+traveling ( “Adventuring”) and fighting (“Combat”).               Stonecunning. Whenever you make an
+                                                                Intelligence (History) check related to the origin of
+Languages                                                       stonework, you are considered proficient in the
+                                                                History skill and add double your proficiency bonus
+By virtue of your race, your character can speak,               to the check, instead of your normal proficiency
+read, and write certain languages.                              bonus.
+
+                                                                  Languages. You can speak, read, and write
+                                                                Common and Dwarvish. Dwarvish is full of hard
+                                                                consonants and guttural sounds, and those
+                                                                characteristics spill over into whatever other
+                                                                language a dwarf might speak.

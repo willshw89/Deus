@@ -1,0 +1,65 @@
+Potion of Resistance                                        Ring of Djinni Summoning
+
+Potion, uncommon                                            Ring, legendary (requires attunement)
+
+When you drink this potion, you gain resistance to          While wearing this ring, you can speak its command
+one type of damage for 1 hour. The GM chooses the           word as an action to summon a particular djinni
+type or determines it randomly from the options             from the Elemental Plane of Air. The djinni appears
+below.                                                      in an unoccupied space you choose within 120 feet
+                                                            of you. It remains as long as you concentrate (as if
+d10 Damage Type  d10 Damage Type                            concentrating on a spell), to a maximum of 1 hour, or
+ 1 Acid           6 Necrotic                                until it drops to 0 hit points. It then returns to its
+ 2 Cold           7 Poison                                  home plane.
+ 3 Fire           8 Psychic
+ 4 Force          9 Radiant                                   While summoned, the djinni is friendly to you and
+ 5 Lightning     10 Thunder                                 your companions. It obeys any commands you give it,
+                                                            no matter what language you use. If you fail to
+Potion of Speed                                             command it, the djinni defends itself against
+                                                            attackers but takes no other actions.
+Potion, very rare
+                                                              After the djinni departs, it can’t be summoned
+When you drink this potion, you gain the effect of the      again for 24 hours, and the ring becomes nonmagical
+haste spell for 1 minute (no concentration required).       if the djinni dies.
+The potion’s yellow fluid is streaked with black and
+swirls on its own.                                          Ring of Elemental Command
+
+Potion of Water Breathing                                   Ring, legendary (requires attunement)
+
+Potion, uncommon                                            This ring is linked to one of the four Elemental
+                                                            Planes. The GM chooses or randomly determines the
+You can breathe underwater for 1 hour after                 linked plane.
+drinking this potion. Its cloudy green fluid smells of
+the sea and has a jellyfish-­‐‑like bubble floating in it.    While wearing this ring, you have advantage on
+                                                            attack rolls against elementals from the linked plane,
+Restorative Ointment                                        and they have disadvantage on attack rolls against
+                                                            you. In addition, you have access to properties based
+Wondrous item, uncommon                                     on the linked plane.
+
+This glass jar, 3 inches in diameter, contains 1d4 + 1        The ring has 5 charges. It regains 1d4 + 1
+doses of a thick mixture that smells faintly of aloe.       expended charges daily at dawn. Spells cast from the
+The jar and its contents weigh 1/2 pound.                   ring have a save DC of 17.
+
+  As an action, one dose of the ointment can be               Ring of Air Elemental Command. You can expend
+swallowed or applied to the skin. The creature that         2 of the ring’s charges to cast dominate monster on
+receives it regains 2d8 + 2 hit points, ceases to be        an air elemental. In addition, when you fall, you
+poisoned, and is cured of any disease.                      descend 60 feet per round and take no damage from
+                                                            falling. You can also speak and understand Auran.
+Ring of Animal Influence
+                                                              If you help slay an air elemental while attuned to
+Ring, rare                                                  the ring, you gain access to the following additional
+                                                            properties:
+This ring has 3 charges, and it regains 1d3 expended
+charges daily at dawn. While wearing the ring, you          • You have resistance to lightning damage.
+can use an action to expend 1 of its charges to cast        • You have a flying speed equal to your walking
+one of the following spells:
+                                                              speed and can hover.
+• Animal friendship (save DC 13)                            • You can cast the following spells from the ring,
+• Fear (save DC 13), targeting only beasts that have
+                                                              expending the necessary number of charges: chain
+  an Intelligence of 3 or lower                               lightning (3 charges), gust of wind (2 charges), or
+• Speak with animals                                          wind wall (1 charge).
+
+                                                              Ring of Earth Elemental Command. You can
+                                                            expend 2 of the ring’s charges to cast dominate
+                                                            monster on an earth elemental. In addition, you can
+                                                            move in difficult terrain that is composed of rubble,

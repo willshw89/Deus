@@ -1,0 +1,61 @@
+cumulative 20 percent chance of not working and          Abilities
+tearing into useless, nonmagical tatters.
+                                                         A sentient magic item has Intelligence, Wisdom, and
+Winged Boots                                             Charisma scores. You can choose the item’s abilities
+                                                         or determine them randomly. To determine them
+Wondrous item, uncommon (requires attunement)            randomly, roll 4d6 for each one, dropping the lowest
+                                                         roll and totaling the rest.
+While you wear these boots, you have a flying speed
+equal to your walking speed. You can use the boots       Communication
+to fly for up to 4 hours, all at once or in several
+shorter flights, each one using a minimum of 1           A sentient item has some ability to communicate,
+minute from the duration. If you are flying when the     either by sharing its emotions, broadcasting its
+duration expires, you descend at a rate of 30 feet per   thoughts telepathically, or speaking aloud. You can
+round until you land.                                    choose how it communicates or roll on the following
+                                                         table.
+  The boots regain 2 hours of flying capability for
+every 12 hours they aren’t in use.                       d100   Communication
+                                                         01–60  The item communicates by transmitting emotion
+Wings of Flying                                                 to the creature carrying or wielding it.
+                                                         61–90  The item can speak, read, and understand one
+Wondrous item, rare (requires attunement)                       or more languages.
+                                                         91–00  The item can speak, read, and understand one
+While wearing this cloak, you can use an action to              or more languages. In addition, the item can
+speak its command word. This turns the cloak into a             communicate telepathically with any character
+pair of bat wings or bird wings on your back for 1              that carries or wields it.
+hour or until you repeat the command word as an
+action. The wings give you a flying speed of 60 feet.    Senses
+When they disappear, you can’t use them again for
+1d12 hours.                                              With sentience comes awareness. A sentient item
+                                                         can perceive its surroundings out to a limited range.
+Sentient Magic Items                                     You can choose its senses or roll on the following
+                                                         table.
+Some magic items possess sentience and personality.
+Such an item might be possessed, haunted by the          d4 Senses
+spirit of a previous owner, or self-­‐‑aware thanks to   1 Hearing and normal vision out to 30 feet.
+the magic used to create it. In any case, the item       2 Hearing and normal vision out to 60 feet
+behaves like a character, complete with personality      3 Hearing and normal vision out to 120 feet.
+quirks, ideals, bonds, and sometimes flaws. A            4 Hearing and darkvision out to 120 feet.
+sentient item might be a cherished ally to its wielder
+or a continual thorn in the side.                        Alignment
+
+  Most sentient items are weapons. Other kinds of        A sentient magic item has an alignment. Its creator
+items can manifest sentience, but consumable items       or nature might suggest an alignment. If not, you can
+such as potions and scrolls are never sentient.          pick an alignment or roll on the following table.
+
+  Sentient magic items function as NPCs under the        d100   Alignment       d100   Alignment
+GM’s control. Any activated property of the item is      01–15  Lawful good     74–85  Chaotic neutral
+under the item’s control, not its wielder’s. As long as  16–35  Neutral good    86–89  Lawful evil
+the wielder maintains a good relationship with the       36–50  Chaotic good    90–96  Neutral evil
+item, the wielder can access those properties            51–63  Lawful neutral  97–00  Chaotic evil
+normally. If the relationship is strained, the item can  64–73  Neutral
+suppress its activated properties or even turn them
+against the wielder.                                     Special Purpose
+
+Creating Sentient Magic Items                            You can give a sentient item an objective it pursues,
+                                                         perhaps to the exclusion of all else. As long as the
+When you decide to make a magic item sentient, you       wielder’s use of the item aligns with that special
+create the item’s persona in the same way you would      purpose, the item remains cooperative. Deviating
+create an NPC, with a few exceptions described here.     from this course might cause conflict between the
+                                                         wielder and the item, and could even cause the item
+                                                         to prevent the use of its activated properties. You

@@ -1,0 +1,52 @@
+Rampage. When the gnoll reduces a creature to 0 hit          Poisoned Dart. Ranged Weapon Attack: +4 to hit,
+points with a melee attack on its turn, the gnoll can        range 30/120 ft., one creature. Hit: 4 (1d4 + 2) piercing
+take a bonus action to move up to half its speed and         damage, and the target must succeed on a DC 12
+make a bite attack.                                          Constitution saving throw or be poisoned for 1 minute.
+                                                             The target can repeat the saving throw at the end of
+Actions                                                      each of its turns, ending the effect on itself on a
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one       success.
+creature. Hit: 4 (1d4 + 2) piercing damage.
+Spear. Melee or Ranged Weapon Attack: +4 to hit,             Goblin
+reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d6 +
+2) piercing damage, or 6 (1d8 + 2) piercing damage if        Small humanoid (goblinoid), neutral evil
+used with two hands to make a melee attack.
+Longbow. Ranged Weapon Attack: +3 to hit, range              Armor Class 15 (leather armor, shield)
+150/600 ft., one target. Hit: 5 (1d8 + 1) piercing           Hit Points 7 (2d6)
+damage.                                                      Speed 30 ft.
+
+Gnome, Deep (Svirfneblin)                                     STR DEX CON INT WIS                            CHA
+                                                             8 (−1) 14 (+2) 10 (+0) 10 (+0) 8 (−1)           8 (−1)
+Small humanoid (gnome), neutral good
+                                                             Skills Stealth +6
+Armor Class 15 (chain shirt)                                 Senses darkvision 60 ft., passive Perception 9
+Hit Points 16 (3d6 + 6)                                      Languages Common, Goblin
+Speed 20 ft.                                                 Challenge 1/4 (50 XP)
+
+    STR DEX CON INT WIS CHA                                  Nimble Escape. The goblin can take the Disengage or
+  15 (+2) 14 (+2) 14 (+2) 12 (+1) 10 (+0) 9 (−1)             Hide action as a bonus action on each of its turns.
+
+Skills Investigation +3, Perception +2, Stealth +4           Actions
+Senses darkvision 120 ft., passive Perception 12             Scimitar. Melee Weapon Attack: +4 to hit, reach 5 ft.,
+Languages Gnomish, Terran, Undercommon                       one target. Hit: 5 (1d6 + 2) slashing damage.
+Challenge 1/2 (100 XP)                                       Shortbow. Ranged Weapon Attack: +4 to hit, range
+                                                             80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.
+Stone Camouflage. The gnome has advantage on
+Dexterity (Stealth) checks made to hide in rocky terrain.    Golems
+Gnome Cunning. The gnome has advantage on
+Intelligence, Wisdom, and Charisma saving throws             Clay Golem
+against magic.
+Innate Spellcasting. The gnome’s innate spellcasting         Large construct, unaligned
+ability is Intelligence (spell save DC 11). It can innately
+cast the following spells, requiring no material             Armor Class 14 (natural armor)
+components:                                                  Hit Points 133 (14d10 + 56)
+At will: nondetection (self only)                            Speed 20 ft.
+1/day each: blindness/deafness, blur, disguise self
+                                                               STR DEX CON INT                WIS            CHA
+Actions                                                      20 (+5) 9 (−1) 18 (+4) 3 (−4)   8 (−1)          1 (−5)
+War Pick. Melee Weapon Attack: +4 to hit, reach 5 ft.,
+one target. Hit: 6 (1d8 + 2) piercing damage.                Damage Immunities acid, poison, psychic; bludgeoning,
+                                                               piercing, and slashing from nonmagical attacks that
+                                                               aren’t adamantine
+
+                                                             Condition Immunities charmed, exhaustion, frightened,
+                                                               paralyzed, petrified, poisoned

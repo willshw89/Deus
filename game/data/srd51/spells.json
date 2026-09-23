@@ -12,7 +12,7 @@
    "pages": 403,
    "extraction": {
     "generator": "tools/srd_extract/extract_pages.js",
-    "generatedAt": "2026-09-23T01:17:52.372Z",
+    "generatedAt": "2026-09-23T02:15:32.009Z",
     "tool": "pdftotext (xpdf) 4.06"
    }
   },
@@ -31,7 +31,8 @@
     "spell": 319
    },
    "byReadiness": {
-    "parsed": 327
+    "parsed": 325,
+    "verified": 2
    }
   }
  },
@@ -1420,7 +1421,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage (both initial and later) increases by 1d4 for each slot level above 2nd.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -1485,7 +1487,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -1564,7 +1567,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1607,7 +1611,8 @@
     "classes": [
      "ranger",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1651,7 +1656,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -1662,11 +1668,24 @@
      "average": 3
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [],
    "icon": {
     "set": "IconSet",
     "index": 79
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared with the pdf.js-rendered pages 114 and 115 of SRD_CC_v5.1.pdf",
+    "pages": [
+     114,
+     115
+    ],
+    "textSha256": "d6cc230bec9b774e1ff0ef73b18a09dd65ff8fa0a098ad06fdeeaa7086212e80",
+    "notes": [
+     "header block, first and last sentences across the page break, and paragraph structure (intro plus three named options) checked"
+    ]
    }
   },
   {
@@ -1703,7 +1722,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1747,7 +1767,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1789,7 +1810,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1833,7 +1855,8 @@
     "classes": [
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1856,7 +1879,7 @@
     "section": "Spell Descriptions",
     "heading": "Animate Objects"
    },
-   "text": "Animate Objects\n\n5th-level transmutation\n\nCasting Time: 1 action\nRange: 120 feet\nComponents: V, S\nDuration: Concentration, up to 1 minute\n\nObjects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can’t animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points.\n\nAs a bonus action, you can mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.\n\nAnimated Object Statistics\n\nSize   HP AC Attack                     Str Dex\n4 18\nTiny   20 18 +8 to hit, 1d4 + 4 damage   6 14\n10 12\nSmall  25 16 +6 to hit, 1d8 + 2 damage  14 10\nMedium 40 13 +5 to hit, 2d6 + 1 damage  18 6\nLarge  50 10 +6 to hit, 2d10 + 2\ndamage\nHuge   80 10 +8 to hit, 2d12 + 4\ndamage\n\nAn animated object is a construct with AC, hit points, attacks, Strength, and Dexterity determined by its size. Its Constitution is 10 and its Intelligence and Wisdom are 3, and its Charisma is 1. Its speed is 30 feet; if the object lacks legs or other appendages it can use for locomotion, it instead has a flying speed of 30 feet and can hover. If the object is securely attached to a surface or a larger object, such as a chain bolted to a wall, its speed is 0. It has blindsight with a radius of 30 feet and is blind beyond that distance. When the animated object drops to 0 hit points, it reverts to its original object form, and any remaining damage carries over to its original object form.\n\nIf you command an object to attack, it can make a single melee attack against a creature within 5 feet of it. It makes a slam attack with an attack bonus and bludgeoning damage determined by its size. The GM might rule that a specific object inflicts slashing or piercing damage based on its form.\n\nAt Higher Levels. If you cast this spell using a spell slot of 6th level or higher, you can animate two additional objects for each slot level above 5th.",
+   "text": "Animate Objects\n\n5th-level transmutation\n\nCasting Time: 1 action\nRange: 120 feet\nComponents: V, S\nDuration: Concentration, up to 1 minute\n\nObjects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can’t animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points.\n\nAs a bonus action, you can mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.\n\nAnimated Object Statistics\n\nSize | HP | AC | Attack | Str | Dex\nTiny | 20 | 18 | +8 to hit, 1d4 + 4 damage | 4 | 18\nSmall | 25 | 16 | +6 to hit, 1d8 + 2 damage | 6 | 14\nMedium | 40 | 13 | +5 to hit, 2d6 + 1 damage | 10 | 12\nLarge | 50 | 10 | +6 to hit, 2d10 + 2 damage | 14 | 10\nHuge | 80 | 10 | +8 to hit, 2d12 + 4 damage | 18 | 6\n\nAn animated object is a construct with AC, hit points, attacks, Strength, and Dexterity determined by its size. Its Constitution is 10 and its Intelligence and Wisdom are 3, and its Charisma is 1. Its speed is 30 feet; if the object lacks legs or other appendages it can use for locomotion, it instead has a flying speed of 30 feet and can hover. If the object is securely attached to a surface or a larger object, such as a chain bolted to a wall, its speed is 0. It has blindsight with a radius of 30 feet and is blind beyond that distance. When the animated object drops to 0 hit points, it reverts to its original object form, and any remaining damage carries over to its original object form.\n\nIf you command an object to attack, it can make a single melee attack against a creature within 5 feet of it. It makes a slam attack with an attack bonus and bludgeoning damage determined by its size. The GM might rule that a specific object inflicts slashing or piercing damage based on its form.\n\nAt Higher Levels. If you cast this spell using a spell slot of 6th level or higher, you can animate two additional objects for each slot level above 5th.",
    "data": {
     "level": 5,
     "school": "transmutation",
@@ -1871,12 +1894,85 @@
     },
     "duration": "Concentration, up to 1 minute",
     "concentration": true,
-    "description": "Objects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can’t animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points.\n\nAs a bonus action, you can mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.\n\nAnimated Object Statistics\n\nSize   HP AC Attack                     Str Dex\n4 18\nTiny   20 18 +8 to hit, 1d4 + 4 damage   6 14\n10 12\nSmall  25 16 +6 to hit, 1d8 + 2 damage  14 10\nMedium 40 13 +5 to hit, 2d6 + 1 damage  18 6\nLarge  50 10 +6 to hit, 2d10 + 2\ndamage\nHuge   80 10 +8 to hit, 2d12 + 4\ndamage\n\nAn animated object is a construct with AC, hit points, attacks, Strength, and Dexterity determined by its size. Its Constitution is 10 and its Intelligence and Wisdom are 3, and its Charisma is 1. Its speed is 30 feet; if the object lacks legs or other appendages it can use for locomotion, it instead has a flying speed of 30 feet and can hover. If the object is securely attached to a surface or a larger object, such as a chain bolted to a wall, its speed is 0. It has blindsight with a radius of 30 feet and is blind beyond that distance. When the animated object drops to 0 hit points, it reverts to its original object form, and any remaining damage carries over to its original object form.\n\nIf you command an object to attack, it can make a single melee attack against a creature within 5 feet of it. It makes a slam attack with an attack bonus and bludgeoning damage determined by its size. The GM might rule that a specific object inflicts slashing or piercing damage based on its form.",
+    "description": "Objects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can’t animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points.\n\nAs a bonus action, you can mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.\n\nAnimated Object Statistics\n\nSize | HP | AC | Attack | Str | Dex\nTiny | 20 | 18 | +8 to hit, 1d4 + 4 damage | 4 | 18\nSmall | 25 | 16 | +6 to hit, 1d8 + 2 damage | 6 | 14\nMedium | 40 | 13 | +5 to hit, 2d6 + 1 damage | 10 | 12\nLarge | 50 | 10 | +6 to hit, 2d10 + 2 damage | 14 | 10\nHuge | 80 | 10 | +8 to hit, 2d12 + 4 damage | 18 | 6\n\nAn animated object is a construct with AC, hit points, attacks, Strength, and Dexterity determined by its size. Its Constitution is 10 and its Intelligence and Wisdom are 3, and its Charisma is 1. Its speed is 30 feet; if the object lacks legs or other appendages it can use for locomotion, it instead has a flying speed of 30 feet and can hover. If the object is securely attached to a surface or a larger object, such as a chain bolted to a wall, its speed is 0. It has blindsight with a radius of 30 feet and is blind beyond that distance. When the animated object drops to 0 hit points, it reverts to its original object form, and any remaining damage carries over to its original object form.\n\nIf you command an object to attack, it can make a single melee attack against a creature within 5 feet of it. It makes a slam attack with an attack bonus and bludgeoning damage determined by its size. The GM might rule that a specific object inflicts slashing or piercing damage based on its form.",
     "atHigherLevels": "At Higher Levels. If you cast this spell using a spell slot of 6th level or higher, you can animate two additional objects for each slot level above 5th.",
     "classes": [
      "bard",
      "sorcerer",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": "Animated Object Statistics",
+      "dice": null,
+      "columns": [
+       "Size",
+       "HP",
+       "AC",
+       "Attack",
+       "Str",
+       "Dex"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "Tiny",
+         "20",
+         "18",
+         "+8 to hit, 1d4 + 4 damage",
+         "4",
+         "18"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Small",
+         "25",
+         "16",
+         "+6 to hit, 1d8 + 2 damage",
+         "6",
+         "14"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Medium",
+         "40",
+         "13",
+         "+5 to hit, 2d6 + 1 damage",
+         "10",
+         "12"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Large",
+         "50",
+         "10",
+         "+6 to hit, 2d10 + 2 damage",
+         "14",
+         "10"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Huge",
+         "80",
+         "10",
+         "+8 to hit, 2d12 + 4 damage",
+         "18",
+         "6"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     }
     ]
    },
    "dice": [
@@ -1956,7 +2052,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -1999,7 +2096,8 @@
     "classes": [
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2043,7 +2141,8 @@
     "classes": [
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2085,7 +2184,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2127,7 +2227,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the damage from the clenched fist option increases by 2d8 and the damage from the grasping hand increases by 2d6 for each slot level above 5th.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2199,7 +2300,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2242,7 +2344,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2292,7 +2395,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2337,7 +2441,8 @@
      "cleric",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2379,7 +2484,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2422,7 +2528,8 @@
     "classes": [
      "bard",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2465,7 +2572,8 @@
     "classes": [
      "bard",
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2512,7 +2620,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2555,7 +2664,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2597,7 +2707,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2641,7 +2752,8 @@
      "bard",
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2691,7 +2803,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2748,7 +2861,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2799,7 +2913,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2844,7 +2959,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -2904,7 +3020,8 @@
      "cleric",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2948,7 +3065,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -2991,7 +3109,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3033,7 +3152,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the extra damage increases by 1d6 for each slot level above 2nd.",
     "classes": [
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3091,7 +3211,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3148,7 +3269,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 4th or higher level, the damage increases by 1d10 for each slot level above 3rd.",
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3214,7 +3336,8 @@
     "classes": [
      "bard",
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3257,7 +3380,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3311,7 +3435,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3355,7 +3480,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3435,7 +3561,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3496,7 +3623,8 @@
      "cleric",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3538,7 +3666,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3581,7 +3710,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3639,7 +3769,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3698,7 +3829,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3740,7 +3872,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3783,7 +3916,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3828,7 +3962,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3871,7 +4006,8 @@
     "atHigherLevels": null,
     "classes": [
      "bard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -3914,7 +4050,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -3952,7 +4089,7 @@
     "section": "Spell Descriptions",
     "heading": "Confusion"
    },
-   "text": "Confusion\n\n4th-level enchantment\n\nCasting Time: 1 action\nRange: 90 feet\nComponents: V, S, M (three nut shells)\nDuration: Concentration, up to 1 minute\n\nThis spell assaults and twists creatures’ minds, spawning delusions and provoking uncontrolled action. Each creature in a 10-foot-radius sphere centered on a point you choose within range must succeed on a Wisdom saving throw when you cast this spell or be affected by it.\n\nAn affected target can’t take reactions and must roll a d10 at the start of each of its turns to determine its behavior for that turn.\n\nd10 Behavior\n\n1 The creature uses all its movement to move in a random direction. To determine the direction, roll a d8 and assign a direction to each die face. The creature doesn’t take an action this turn.\n\n2–6 The creature doesn’t move or take actions this turn.\n\n7–8 The creature uses its action to make a melee attack against a randomly determined creature\n\n9–10  within its reach. If there is no creature within its\nreach, the creature does nothing this turn.\nThe creature can act and move normally.\n\nAt the end of each of its turns, an affected target can make a Wisdom saving throw. If it succeeds, this effect ends for that target.\n\nAt Higher Levels. When you cast this spell using a spell slot of 5th level or higher, the radius of the sphere increases by 5 feet for each slot level above 4th.",
+   "text": "Confusion\n\n4th-level enchantment\n\nCasting Time: 1 action\nRange: 90 feet\nComponents: V, S, M (three nut shells)\nDuration: Concentration, up to 1 minute\n\nThis spell assaults and twists creatures’ minds, spawning delusions and provoking uncontrolled action. Each creature in a 10-foot-radius sphere centered on a point you choose within range must succeed on a Wisdom saving throw when you cast this spell or be affected by it.\n\nAn affected target can’t take reactions and must roll a d10 at the start of each of its turns to determine its behavior for that turn.\n\nd10 | Behavior\n1 | The creature uses all its movement to move in a random direction. To determine the direction, roll a d8 and assign a direction to each die face. The creature doesn’t take an action this turn.\n2–6 | The creature doesn’t move or take actions this turn.\n7–8 | The creature uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, the creature does nothing this turn.\n9–10 | The creature can act and move normally.\n\nAt the end of each of its turns, an affected target can make a Wisdom saving throw. If it succeeds, this effect ends for that target.\n\nAt Higher Levels. When you cast this spell using a spell slot of 5th level or higher, the radius of the sphere increases by 5 feet for each slot level above 4th.",
    "data": {
     "level": 4,
     "school": "enchantment",
@@ -3967,18 +4104,82 @@
     },
     "duration": "Concentration, up to 1 minute",
     "concentration": true,
-    "description": "This spell assaults and twists creatures’ minds, spawning delusions and provoking uncontrolled action. Each creature in a 10-foot-radius sphere centered on a point you choose within range must succeed on a Wisdom saving throw when you cast this spell or be affected by it.\n\nAn affected target can’t take reactions and must roll a d10 at the start of each of its turns to determine its behavior for that turn.\n\nd10 Behavior\n\n1 The creature uses all its movement to move in a random direction. To determine the direction, roll a d8 and assign a direction to each die face. The creature doesn’t take an action this turn.\n\n2–6 The creature doesn’t move or take actions this turn.\n\n7–8 The creature uses its action to make a melee attack against a randomly determined creature\n\n9–10  within its reach. If there is no creature within its\nreach, the creature does nothing this turn.\nThe creature can act and move normally.\n\nAt the end of each of its turns, an affected target can make a Wisdom saving throw. If it succeeds, this effect ends for that target.",
+    "description": "This spell assaults and twists creatures’ minds, spawning delusions and provoking uncontrolled action. Each creature in a 10-foot-radius sphere centered on a point you choose within range must succeed on a Wisdom saving throw when you cast this spell or be affected by it.\n\nAn affected target can’t take reactions and must roll a d10 at the start of each of its turns to determine its behavior for that turn.\n\nd10 | Behavior\n1 | The creature uses all its movement to move in a random direction. To determine the direction, roll a d8 and assign a direction to each die face. The creature doesn’t take an action this turn.\n2–6 | The creature doesn’t move or take actions this turn.\n7–8 | The creature uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, the creature does nothing this turn.\n9–10 | The creature can act and move normally.\n\nAt the end of each of its turns, an affected target can make a Wisdom saving throw. If it succeeds, this effect ends for that target.",
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 5th level or higher, the radius of the sphere increases by 5 feet for each slot level above 4th.",
     "classes": [
      "bard",
      "druid",
      "sorcerer",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": null,
+      "dice": "d10",
+      "columns": [
+       "d10",
+       "Behavior"
+      ],
+      "rows": [
+       {
+        "roll": {
+         "min": 1,
+         "max": 1,
+         "text": "1"
+        },
+        "cells": [
+         "1",
+         "The creature uses all its movement to move in a random direction. To determine the direction, roll a d8 and assign a direction to each die face. The creature doesn’t take an action this turn."
+        ]
+       },
+       {
+        "roll": {
+         "min": 2,
+         "max": 6,
+         "text": "2–6"
+        },
+        "cells": [
+         "2–6",
+         "The creature doesn’t move or take actions this turn."
+        ]
+       },
+       {
+        "roll": {
+         "min": 7,
+         "max": 8,
+         "text": "7–8"
+        },
+        "cells": [
+         "7–8",
+         "The creature uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, the creature does nothing this turn."
+        ]
+       },
+       {
+        "roll": {
+         "min": 9,
+         "max": 10,
+         "text": "9–10"
+        },
+        "cells": [
+         "9–10",
+         "The creature can act and move normally."
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": {
+       "complete": true,
+       "gaps": [],
+       "overlaps": []
+      }
+     }
     ]
    },
    "dice": [],
    "readiness": "parsed",
-   "notes": [],
+   "notes": [
+    "table d10/Behavior: row 9–10: label printed beside the wrapped text of row 7–8 (page 127); its cell starts at the next sentence"
+   ],
    "icon": {
     "set": "IconSet",
     "index": 79
@@ -4017,7 +4218,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4060,7 +4262,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a 9th-level spell slot, you summon a celestial of challenge rating 5 or lower.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4103,7 +4306,8 @@
     "classes": [
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4146,7 +4350,8 @@
     "classes": [
      "druid",
      "warlock"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4190,7 +4395,8 @@
     "classes": [
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4233,7 +4439,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4276,7 +4483,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -4328,7 +4536,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4370,7 +4579,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4413,7 +4623,8 @@
     "classes": [
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4458,7 +4669,8 @@
      "cleric",
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -4496,7 +4708,7 @@
     "section": "Spell Descriptions",
     "heading": "Control Weather"
    },
-   "text": "Control Weather\n\n8th-level transmutation\n\nCasting Time: 10 minutes\nRange: Self (5-mile radius)\nComponents: V, S, M (burning incense and bits of earth and wood mixed in water)\nDuration: Concentration, up to 8 hours\n\nYou take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell. Moving to a place where you don’t have a clear path to the sky ends the spell early.\n\nWhen you cast the spell, you change the current weather conditions, which are determined by the GM based on the climate and season. You can change precipitation, temperature, and wind. It takes 1d4 × 10 minutes for the new conditions to take effect. Once they do so, you can change the conditions again. When the spell ends, the weather gradually returns to normal.\n\nWhen you change the weather conditions, find a current condition on the following tables and change its stage by one, up or down. When changing the wind, you can change its direction.\n\nPrecipitation\n\nStage  Condition\n1    Clear\n2    Light clouds\n3    Overcast or ground fog\n4    Rain, hail, or snow\n5    Torrential rain, driving hail, or blizzard\n\nTemperature\n\nStage  Condition\n1    Unbearable heat\n2    Hot\n3    Warm\n4    Cool\n5    Cold\n6    Arctic cold\n\nWind\n\nStage  Condition\n1    Calm\n2    Moderate wind\n3    Strong wind\n4    Gale\n5    Storm",
+   "text": "Control Weather\n\n8th-level transmutation\n\nCasting Time: 10 minutes\nRange: Self (5-mile radius)\nComponents: V, S, M (burning incense and bits of earth and wood mixed in water)\nDuration: Concentration, up to 8 hours\n\nYou take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell. Moving to a place where you don’t have a clear path to the sky ends the spell early.\n\nWhen you cast the spell, you change the current weather conditions, which are determined by the GM based on the climate and season. You can change precipitation, temperature, and wind. It takes 1d4 × 10 minutes for the new conditions to take effect. Once they do so, you can change the conditions again. When the spell ends, the weather gradually returns to normal.\n\nWhen you change the weather conditions, find a current condition on the following tables and change its stage by one, up or down. When changing the wind, you can change its direction.\n\nPrecipitation\n\nStage | Condition\n1 | Clear\n2 | Light clouds\n3 | Overcast or ground fog\n4 | Rain, hail, or snow\n5 | Torrential rain, driving hail, or blizzard\n\nTemperature\n\nStage | Condition\n1 | Unbearable heat\n2 | Hot\n3 | Warm\n4 | Cool\n5 | Cold\n6 | Arctic cold\n\nWind\n\nStage | Condition\n1 | Calm\n2 | Moderate wind\n3 | Strong wind\n4 | Gale\n5 | Storm",
    "data": {
     "level": 8,
     "school": "transmutation",
@@ -4511,12 +4723,162 @@
     },
     "duration": "Concentration, up to 8 hours",
     "concentration": true,
-    "description": "You take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell. Moving to a place where you don’t have a clear path to the sky ends the spell early.\n\nWhen you cast the spell, you change the current weather conditions, which are determined by the GM based on the climate and season. You can change precipitation, temperature, and wind. It takes 1d4 × 10 minutes for the new conditions to take effect. Once they do so, you can change the conditions again. When the spell ends, the weather gradually returns to normal.\n\nWhen you change the weather conditions, find a current condition on the following tables and change its stage by one, up or down. When changing the wind, you can change its direction.\n\nPrecipitation\n\nStage  Condition\n1    Clear\n2    Light clouds\n3    Overcast or ground fog\n4    Rain, hail, or snow\n5    Torrential rain, driving hail, or blizzard\n\nTemperature\n\nStage  Condition\n1    Unbearable heat\n2    Hot\n3    Warm\n4    Cool\n5    Cold\n6    Arctic cold\n\nWind\n\nStage  Condition\n1    Calm\n2    Moderate wind\n3    Strong wind\n4    Gale\n5    Storm",
+    "description": "You take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell. Moving to a place where you don’t have a clear path to the sky ends the spell early.\n\nWhen you cast the spell, you change the current weather conditions, which are determined by the GM based on the climate and season. You can change precipitation, temperature, and wind. It takes 1d4 × 10 minutes for the new conditions to take effect. Once they do so, you can change the conditions again. When the spell ends, the weather gradually returns to normal.\n\nWhen you change the weather conditions, find a current condition on the following tables and change its stage by one, up or down. When changing the wind, you can change its direction.\n\nPrecipitation\n\nStage | Condition\n1 | Clear\n2 | Light clouds\n3 | Overcast or ground fog\n4 | Rain, hail, or snow\n5 | Torrential rain, driving hail, or blizzard\n\nTemperature\n\nStage | Condition\n1 | Unbearable heat\n2 | Hot\n3 | Warm\n4 | Cool\n5 | Cold\n6 | Arctic cold\n\nWind\n\nStage | Condition\n1 | Calm\n2 | Moderate wind\n3 | Strong wind\n4 | Gale\n5 | Storm",
     "atHigherLevels": null,
     "classes": [
      "cleric",
      "druid",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": "Precipitation",
+      "dice": null,
+      "columns": [
+       "Stage",
+       "Condition"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "1",
+         "Clear"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "2",
+         "Light clouds"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "3",
+         "Overcast or ground fog"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "4",
+         "Rain, hail, or snow"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "5",
+         "Torrential rain, driving hail, or blizzard"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     },
+     {
+      "caption": "Temperature",
+      "dice": null,
+      "columns": [
+       "Stage",
+       "Condition"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "1",
+         "Unbearable heat"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "2",
+         "Hot"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "3",
+         "Warm"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "4",
+         "Cool"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "5",
+         "Cold"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "6",
+         "Arctic cold"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     },
+     {
+      "caption": "Wind",
+      "dice": null,
+      "columns": [
+       "Stage",
+       "Condition"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "1",
+         "Calm"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "2",
+         "Moderate wind"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "3",
+         "Strong wind"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "4",
+         "Gale"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "5",
+         "Storm"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     }
     ]
    },
    "dice": [
@@ -4569,7 +4931,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4612,7 +4975,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4655,7 +5019,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4699,7 +5064,8 @@
      "cleric",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4722,7 +5088,7 @@
     "section": "Spell Descriptions",
     "heading": "Creation"
    },
-   "text": "Creation\n\n5th-level illusion\n\nCasting Time: 1 minute\nRange: 30 feet\nComponents: V, S, M (a tiny piece of matter of the same type of the item you plan to create)\nDuration: Special\n\nYou pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter within range: soft goods, rope, wood, or something similar. You can also use this spell to create mineral objects such as stone, crystal, or metal. The object created must be no larger than a 5- foot cube, and the object must be of a form and material that you have seen before.\n\nThe duration depends on the object’s material. If the object is composed of multiple materials, use the shortest duration.\n\nMaterial               Duration\nVegetable matter       1 day\nStone or crystal       12 hours\nPrecious metals        1 hour\nGems                   10 minutes\nAdamantine or mithral  1 minute\n\nUsing any material created by this spell as another spell’s material component causes that spell to fail.\n\nAt Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the cube increases by 5 feet for each slot level above 5th.",
+   "text": "Creation\n\n5th-level illusion\n\nCasting Time: 1 minute\nRange: 30 feet\nComponents: V, S, M (a tiny piece of matter of the same type of the item you plan to create)\nDuration: Special\n\nYou pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter within range: soft goods, rope, wood, or something similar. You can also use this spell to create mineral objects such as stone, crystal, or metal. The object created must be no larger than a 5- foot cube, and the object must be of a form and material that you have seen before.\n\nThe duration depends on the object’s material. If the object is composed of multiple materials, use the shortest duration.\n\nMaterial | Duration\nVegetable matter | 1 day\nStone or crystal | 12 hours\nPrecious metals | 1 hour\nGems | 10 minutes\nAdamantine or mithral | 1 minute\n\nUsing any material created by this spell as another spell’s material component causes that spell to fail.\n\nAt Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the cube increases by 5 feet for each slot level above 5th.",
    "data": {
     "level": 5,
     "school": "illusion",
@@ -4737,11 +5103,60 @@
     },
     "duration": "Special",
     "concentration": false,
-    "description": "You pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter within range: soft goods, rope, wood, or something similar. You can also use this spell to create mineral objects such as stone, crystal, or metal. The object created must be no larger than a 5- foot cube, and the object must be of a form and material that you have seen before.\n\nThe duration depends on the object’s material. If the object is composed of multiple materials, use the shortest duration.\n\nMaterial               Duration\nVegetable matter       1 day\nStone or crystal       12 hours\nPrecious metals        1 hour\nGems                   10 minutes\nAdamantine or mithral  1 minute\n\nUsing any material created by this spell as another spell’s material component causes that spell to fail.",
+    "description": "You pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter within range: soft goods, rope, wood, or something similar. You can also use this spell to create mineral objects such as stone, crystal, or metal. The object created must be no larger than a 5- foot cube, and the object must be of a form and material that you have seen before.\n\nThe duration depends on the object’s material. If the object is composed of multiple materials, use the shortest duration.\n\nMaterial | Duration\nVegetable matter | 1 day\nStone or crystal | 12 hours\nPrecious metals | 1 hour\nGems | 10 minutes\nAdamantine or mithral | 1 minute\n\nUsing any material created by this spell as another spell’s material component causes that spell to fail.",
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the cube increases by 5 feet for each slot level above 5th.",
     "classes": [
      "sorcerer",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": null,
+      "dice": null,
+      "columns": [
+       "Material",
+       "Duration"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "Vegetable matter",
+         "1 day"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Stone or crystal",
+         "12 hours"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Precious metals",
+         "1 hour"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Gems",
+         "10 minutes"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Adamantine or mithral",
+         "1 minute"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     }
     ]
    },
    "dice": [],
@@ -4789,7 +5204,8 @@
      "druid",
      "paladin",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -4848,7 +5264,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4892,7 +5309,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4937,7 +5355,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -4983,7 +5402,8 @@
      "paladin",
      "ranger",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5026,7 +5446,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5070,7 +5491,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -5135,7 +5557,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5178,7 +5601,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5226,7 +5650,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5271,7 +5696,8 @@
      "druid",
      "paladin",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5315,7 +5741,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5360,7 +5787,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -5412,7 +5840,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5456,7 +5885,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -5514,7 +5944,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5562,7 +5993,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5604,7 +6036,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5647,7 +6080,8 @@
     "atHigherLevels": null,
     "classes": [
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -5697,7 +6131,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5740,7 +6175,8 @@
     "classes": [
      "druid",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5786,7 +6222,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5830,7 +6267,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5874,7 +6312,8 @@
      "bard",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -5925,7 +6364,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -5969,7 +6409,8 @@
      "cleric",
      "druid",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6033,7 +6474,8 @@
     "atHigherLevels": null,
     "classes": [
      "warlock"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6086,7 +6528,8 @@
      "cleric",
      "druid",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6137,7 +6580,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6194,7 +6638,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6237,7 +6682,8 @@
     "classes": [
      "bard",
      "warlock"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6284,7 +6730,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6328,7 +6775,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6373,7 +6821,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6415,7 +6864,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6458,7 +6908,8 @@
     "classes": [
      "bard",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6500,7 +6951,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6551,7 +7003,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6604,7 +7057,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6648,7 +7102,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6693,7 +7148,8 @@
      "druid",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6743,7 +7199,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6785,7 +7242,8 @@
     "atHigherLevels": null,
     "classes": [
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6830,7 +7288,8 @@
      "bard",
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6874,7 +7333,8 @@
      "cleric",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -6918,7 +7378,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -6969,7 +7430,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7047,7 +7509,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7105,7 +7568,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7164,7 +7628,8 @@
      "cleric",
      "druid",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7214,7 +7679,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d6 for every two slot levels above 2nd.",
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7271,7 +7737,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the fire damage or the radiant damage (your choice) increases by 1d6 for each slot level above 5th.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7336,7 +7803,8 @@
     "classes": [
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7395,7 +7863,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7437,7 +7906,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7481,7 +7951,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7526,7 +7997,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7568,7 +8040,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7620,7 +8093,8 @@
      "bard",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7665,7 +8139,8 @@
      "druid",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7710,7 +8185,8 @@
      "cleric",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7753,7 +8229,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, the damage increases by 1d6 for each slot level above 6th.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7812,7 +8289,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7856,7 +8334,8 @@
      "cleric",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7902,7 +8381,8 @@
      "druid",
      "paladin",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -7954,7 +8434,8 @@
     "classes": [
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -7996,7 +8477,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8039,7 +8521,8 @@
     "classes": [
      "bard",
      "warlock"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8082,7 +8565,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8127,7 +8611,8 @@
      "bard",
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8185,7 +8670,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8227,7 +8713,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8271,7 +8758,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8315,7 +8803,8 @@
      "bard",
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8358,7 +8847,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8401,7 +8891,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8444,7 +8935,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8487,7 +8979,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8546,7 +9039,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8588,7 +9082,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8634,7 +9129,8 @@
      "druid",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8676,7 +9172,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8727,7 +9224,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8770,7 +9268,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -8814,7 +9313,8 @@
      "bard",
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8873,7 +9373,8 @@
     "classes": [
      "bard",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8930,7 +9431,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st.",
     "classes": [
      "warlock"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -8988,7 +9490,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9039,7 +9542,8 @@
     "classes": [
      "bard",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9082,7 +9586,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9127,7 +9632,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9175,7 +9681,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9217,7 +9724,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9259,7 +9767,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd or 4th level, you can maintain your concentration on the spell for up to 8 hours. When you use a spell slot of 5th level or higher, you can maintain your concentration on the spell for up to 24 hours.",
     "classes": [
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9312,7 +9821,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9356,7 +9866,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9422,7 +9933,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9466,7 +9978,8 @@
      "bard",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9510,7 +10023,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9553,7 +10067,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9603,7 +10118,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9662,7 +10178,8 @@
      "cleric",
      "druid",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -9719,7 +10236,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9765,7 +10283,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9808,7 +10327,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9853,7 +10373,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9897,7 +10418,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9941,7 +10463,8 @@
      "bard",
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -9987,7 +10510,8 @@
      "druid",
      "paladin",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10031,7 +10555,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10076,7 +10601,8 @@
      "cleric",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10119,7 +10645,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -10178,7 +10705,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10225,7 +10753,8 @@
      "paladin",
      "ranger",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10273,7 +10802,8 @@
      "paladin",
      "ranger",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10318,7 +10848,8 @@
      "druid",
      "ranger",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10361,7 +10892,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10406,7 +10938,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10451,7 +10984,8 @@
      "paladin",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10494,7 +11028,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10537,7 +11072,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -10588,7 +11124,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10632,7 +11169,8 @@
     "classes": [
      "paladin",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10675,7 +11213,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10720,7 +11259,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10764,7 +11304,8 @@
      "bard",
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -10821,7 +11362,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10863,7 +11405,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the healing increases by 1d4 for each slot level above 3rd.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -10923,7 +11466,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -10965,7 +11509,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11009,7 +11554,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -11063,7 +11609,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11107,7 +11654,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11150,7 +11698,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -11208,7 +11757,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11254,7 +11804,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11298,7 +11849,8 @@
      "bard",
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11342,7 +11894,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11385,7 +11938,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11430,7 +11984,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11473,7 +12028,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11515,7 +12071,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d10 for each slot level above 2nd.",
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -11575,7 +12132,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11619,7 +12177,8 @@
      "bard",
      "ranger",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11662,7 +12221,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11704,7 +12264,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11746,7 +12307,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 5th level or higher, the damage increases by 1d10 for each slot level above 4th.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -11804,7 +12366,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11846,7 +12409,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11891,7 +12455,8 @@
      "cleric",
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11938,7 +12503,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -11982,7 +12548,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12027,7 +12594,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -12108,7 +12676,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12153,7 +12722,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12198,7 +12768,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12240,7 +12811,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the healing increases by 1d8 for each slot level above 2nd.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -12300,7 +12872,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12344,7 +12917,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -12422,7 +12996,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -12501,7 +13076,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 5th level or higher, you can increase the size of the cube by 100 feet for each slot level beyond 4th. Thus you could protect a cube that can be up to 200 feet on one side by using a spell slot of 5th level.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12543,7 +13119,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -12622,7 +13199,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12666,7 +13244,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12712,7 +13291,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12757,7 +13337,8 @@
      "paladin",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12802,7 +13383,8 @@
      "druid",
      "paladin",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12846,7 +13428,8 @@
      "cleric",
      "druid",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12890,7 +13473,8 @@
      "bard",
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12933,7 +13517,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -12976,7 +13561,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -13056,7 +13642,8 @@
      "bard",
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -13087,7 +13674,7 @@
     "section": "Spell Descriptions",
     "heading": "Reincarnate"
    },
-   "text": "Reincarnate\n\n5th-level transmutation\n\nCasting Time: 1 hour\nRange: Touch\nComponents: V, S, M (rare oils and unguents worth at least 1,000 gp, which the spell consumes)\nDuration: Instantaneous\n\nYou touch a dead humanoid or a piece of a dead humanoid. Provided that the creature has been dead no longer than 10 days, the spell forms a new adult body for it and then calls the soul to enter that body. If the target’s soul isn’t free or willing to do so, the spell fails.\n\nThe magic fashions a new body for the creature to inhabit, which likely causes the creature’s race to change. The GM rolls a d100 and consults the following table to determine what form the creature takes when restored to life, or the GM chooses a form.\n\nd100   Race\n01–04  Dragonborn\n05–13  Dwarf, hill\n14–21  Dwarf, mountain\n22–25  Elf, dark\n26–34  Elf, high\n35–42  Elf, wood\n43–46  Gnome, forest\n47–52  Gnome, rock\n53–56  Half-elf\n57–60  Half-orc\n61–68  Halfling, lightfoot\n69–76  Halfling, stout\n77–96  Human\n97–00  Tiefling\n\nThe reincarnated creature recalls its former life and experiences. It retains the capabilities it had in its original form, except it exchanges its original race for the new one and changes its racial traits accordingly.",
+   "text": "Reincarnate\n\n5th-level transmutation\n\nCasting Time: 1 hour\nRange: Touch\nComponents: V, S, M (rare oils and unguents worth at least 1,000 gp, which the spell consumes)\nDuration: Instantaneous\n\nYou touch a dead humanoid or a piece of a dead humanoid. Provided that the creature has been dead no longer than 10 days, the spell forms a new adult body for it and then calls the soul to enter that body. If the target’s soul isn’t free or willing to do so, the spell fails.\n\nThe magic fashions a new body for the creature to inhabit, which likely causes the creature’s race to change. The GM rolls a d100 and consults the following table to determine what form the creature takes when restored to life, or the GM chooses a form.\n\nd100 | Race\n01–04 | Dragonborn\n05–13 | Dwarf, hill\n14–21 | Dwarf, mountain\n22–25 | Elf, dark\n26–34 | Elf, high\n35–42 | Elf, wood\n43–46 | Gnome, forest\n47–52 | Gnome, rock\n53–56 | Half-elf\n57–60 | Half-orc\n61–68 | Halfling, lightfoot\n69–76 | Halfling, stout\n77–96 | Human\n97–00 | Tiefling\n\nThe reincarnated creature recalls its former life and experiences. It retains the capabilities it had in its original form, except it exchanges its original race for the new one and changes its racial traits accordingly.",
    "data": {
     "level": 5,
     "school": "transmutation",
@@ -13102,10 +13689,182 @@
     },
     "duration": "Instantaneous",
     "concentration": false,
-    "description": "You touch a dead humanoid or a piece of a dead humanoid. Provided that the creature has been dead no longer than 10 days, the spell forms a new adult body for it and then calls the soul to enter that body. If the target’s soul isn’t free or willing to do so, the spell fails.\n\nThe magic fashions a new body for the creature to inhabit, which likely causes the creature’s race to change. The GM rolls a d100 and consults the following table to determine what form the creature takes when restored to life, or the GM chooses a form.\n\nd100   Race\n01–04  Dragonborn\n05–13  Dwarf, hill\n14–21  Dwarf, mountain\n22–25  Elf, dark\n26–34  Elf, high\n35–42  Elf, wood\n43–46  Gnome, forest\n47–52  Gnome, rock\n53–56  Half-elf\n57–60  Half-orc\n61–68  Halfling, lightfoot\n69–76  Halfling, stout\n77–96  Human\n97–00  Tiefling\n\nThe reincarnated creature recalls its former life and experiences. It retains the capabilities it had in its original form, except it exchanges its original race for the new one and changes its racial traits accordingly.",
+    "description": "You touch a dead humanoid or a piece of a dead humanoid. Provided that the creature has been dead no longer than 10 days, the spell forms a new adult body for it and then calls the soul to enter that body. If the target’s soul isn’t free or willing to do so, the spell fails.\n\nThe magic fashions a new body for the creature to inhabit, which likely causes the creature’s race to change. The GM rolls a d100 and consults the following table to determine what form the creature takes when restored to life, or the GM chooses a form.\n\nd100 | Race\n01–04 | Dragonborn\n05–13 | Dwarf, hill\n14–21 | Dwarf, mountain\n22–25 | Elf, dark\n26–34 | Elf, high\n35–42 | Elf, wood\n43–46 | Gnome, forest\n47–52 | Gnome, rock\n53–56 | Half-elf\n57–60 | Half-orc\n61–68 | Halfling, lightfoot\n69–76 | Halfling, stout\n77–96 | Human\n97–00 | Tiefling\n\nThe reincarnated creature recalls its former life and experiences. It retains the capabilities it had in its original form, except it exchanges its original race for the new one and changes its racial traits accordingly.",
     "atHigherLevels": null,
     "classes": [
      "druid"
+    ],
+    "tables": [
+     {
+      "caption": null,
+      "dice": "d100",
+      "columns": [
+       "d100",
+       "Race"
+      ],
+      "rows": [
+       {
+        "roll": {
+         "min": 1,
+         "max": 4,
+         "text": "01–04"
+        },
+        "cells": [
+         "01–04",
+         "Dragonborn"
+        ]
+       },
+       {
+        "roll": {
+         "min": 5,
+         "max": 13,
+         "text": "05–13"
+        },
+        "cells": [
+         "05–13",
+         "Dwarf, hill"
+        ]
+       },
+       {
+        "roll": {
+         "min": 14,
+         "max": 21,
+         "text": "14–21"
+        },
+        "cells": [
+         "14–21",
+         "Dwarf, mountain"
+        ]
+       },
+       {
+        "roll": {
+         "min": 22,
+         "max": 25,
+         "text": "22–25"
+        },
+        "cells": [
+         "22–25",
+         "Elf, dark"
+        ]
+       },
+       {
+        "roll": {
+         "min": 26,
+         "max": 34,
+         "text": "26–34"
+        },
+        "cells": [
+         "26–34",
+         "Elf, high"
+        ]
+       },
+       {
+        "roll": {
+         "min": 35,
+         "max": 42,
+         "text": "35–42"
+        },
+        "cells": [
+         "35–42",
+         "Elf, wood"
+        ]
+       },
+       {
+        "roll": {
+         "min": 43,
+         "max": 46,
+         "text": "43–46"
+        },
+        "cells": [
+         "43–46",
+         "Gnome, forest"
+        ]
+       },
+       {
+        "roll": {
+         "min": 47,
+         "max": 52,
+         "text": "47–52"
+        },
+        "cells": [
+         "47–52",
+         "Gnome, rock"
+        ]
+       },
+       {
+        "roll": {
+         "min": 53,
+         "max": 56,
+         "text": "53–56"
+        },
+        "cells": [
+         "53–56",
+         "Half-elf"
+        ]
+       },
+       {
+        "roll": {
+         "min": 57,
+         "max": 60,
+         "text": "57–60"
+        },
+        "cells": [
+         "57–60",
+         "Half-orc"
+        ]
+       },
+       {
+        "roll": {
+         "min": 61,
+         "max": 68,
+         "text": "61–68"
+        },
+        "cells": [
+         "61–68",
+         "Halfling, lightfoot"
+        ]
+       },
+       {
+        "roll": {
+         "min": 69,
+         "max": 76,
+         "text": "69–76"
+        },
+        "cells": [
+         "69–76",
+         "Halfling, stout"
+        ]
+       },
+       {
+        "roll": {
+         "min": 77,
+         "max": 96,
+         "text": "77–96"
+        },
+        "cells": [
+         "77–96",
+         "Human"
+        ]
+       },
+       {
+        "roll": {
+         "min": 97,
+         "max": 100,
+         "text": "97–00"
+        },
+        "cells": [
+         "97–00",
+         "Tiefling"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": {
+       "complete": true,
+       "gaps": [],
+       "overlaps": []
+      }
+     }
     ]
    },
    "dice": [],
@@ -13152,7 +13911,8 @@
      "paladin",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13194,7 +13954,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13237,7 +13998,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13280,7 +14042,8 @@
     "classes": [
      "bard",
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13324,7 +14087,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13368,7 +14132,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13410,7 +14175,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13452,7 +14218,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -13530,7 +14297,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13573,7 +14341,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -13605,7 +14374,7 @@
     "section": "Spell Descriptions",
     "heading": "Scrying"
    },
-   "text": "Scrying\n\n5th-level divination\n\nCasting Time: 10 minutes\nRange: Self\nComponents: V, S, M (a focus worth at least 1,000 gp, such as a crystal ball, a silver mirror, or a font filled with holy water)\nDuration: Concentration, up to 10 minutes\n\nYou can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it. If a target knows you’re casting this spell, it can fail the saving throw voluntarily if it wants to be observed.\n\nKnowledge                                          Save Modifier\nSecondhand (you have heard of the target)                 +5\nFirsthand (you have met the target)                       +0\nFamiliar (you know the target well)                       -5\n\nConnection\n\nLikeness or picture                                Save Modifier\nPossession or garment                                     -2\nBody part, lock of hair, bit of nail, or the like         -4\n-10\n\nOn a successful save, the target isn’t affected, and you can’t use this spell against it again for 24 hours.\n\nOn a failed save, the spell creates an invisible sensor within 10 feet of the target. You can see and hear through the sensor as if you were there. The sensor moves with the target, remaining within 10 feet of it for the duration. A creature that can see invisible objects sees the sensor as a luminous orb about the size of your fist.\n\nInstead of targeting a creature, you can choose a location you have seen before as the target of this spell. When you do, the sensor appears at that location and doesn’t move.",
+   "text": "Scrying\n\n5th-level divination\n\nCasting Time: 10 minutes\nRange: Self\nComponents: V, S, M (a focus worth at least 1,000 gp, such as a crystal ball, a silver mirror, or a font filled with holy water)\nDuration: Concentration, up to 10 minutes\n\nYou can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it. If a target knows you’re casting this spell, it can fail the saving throw voluntarily if it wants to be observed.\n\nKnowledge | Save Modifier\nSecondhand (you have heard of the target) | +5\nFirsthand (you have met the target) | +0\nFamiliar (you know the target well) | -5\n\nConnection | Save Modifier\nLikeness or picture | -2\nPossession or garment | -4\nBody part, lock of hair, bit of nail, or the like | -10\n\nOn a successful save, the target isn’t affected, and you can’t use this spell against it again for 24 hours.\n\nOn a failed save, the spell creates an invisible sensor within 10 feet of the target. You can see and hear through the sensor as if you were there. The sensor moves with the target, remaining within 10 feet of it for the duration. A creature that can see invisible objects sees the sensor as a luminous orb about the size of your fist.\n\nInstead of targeting a creature, you can choose a location you have seen before as the target of this spell. When you do, the sensor appears at that location and doesn’t move.",
    "data": {
     "level": 5,
     "school": "divination",
@@ -13620,7 +14389,7 @@
     },
     "duration": "Concentration, up to 10 minutes",
     "concentration": true,
-    "description": "You can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it. If a target knows you’re casting this spell, it can fail the saving throw voluntarily if it wants to be observed.\n\nKnowledge                                          Save Modifier\nSecondhand (you have heard of the target)                 +5\nFirsthand (you have met the target)                       +0\nFamiliar (you know the target well)                       -5\n\nConnection\n\nLikeness or picture                                Save Modifier\nPossession or garment                                     -2\nBody part, lock of hair, bit of nail, or the like         -4\n-10\n\nOn a successful save, the target isn’t affected, and you can’t use this spell against it again for 24 hours.\n\nOn a failed save, the spell creates an invisible sensor within 10 feet of the target. You can see and hear through the sensor as if you were there. The sensor moves with the target, remaining within 10 feet of it for the duration. A creature that can see invisible objects sees the sensor as a luminous orb about the size of your fist.\n\nInstead of targeting a creature, you can choose a location you have seen before as the target of this spell. When you do, the sensor appears at that location and doesn’t move.",
+    "description": "You can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it. If a target knows you’re casting this spell, it can fail the saving throw voluntarily if it wants to be observed.\n\nKnowledge | Save Modifier\nSecondhand (you have heard of the target) | +5\nFirsthand (you have met the target) | +0\nFamiliar (you know the target well) | -5\n\nConnection | Save Modifier\nLikeness or picture | -2\nPossession or garment | -4\nBody part, lock of hair, bit of nail, or the like | -10\n\nOn a successful save, the target isn’t affected, and you can’t use this spell against it again for 24 hours.\n\nOn a failed save, the spell creates an invisible sensor within 10 feet of the target. You can see and hear through the sensor as if you were there. The sensor moves with the target, remaining within 10 feet of it for the duration. A creature that can see invisible objects sees the sensor as a luminous orb about the size of your fist.\n\nInstead of targeting a creature, you can choose a location you have seen before as the target of this spell. When you do, the sensor appears at that location and doesn’t move.",
     "atHigherLevels": null,
     "classes": [
      "bard",
@@ -13628,6 +14397,74 @@
      "druid",
      "warlock",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": null,
+      "dice": null,
+      "columns": [
+       "Knowledge",
+       "Save Modifier"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "Secondhand (you have heard of the target)",
+         "+5"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Firsthand (you have met the target)",
+         "+0"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Familiar (you know the target well)",
+         "-5"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     },
+     {
+      "caption": null,
+      "dice": null,
+      "columns": [
+       "Connection",
+       "Save Modifier"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "Likeness or picture",
+         "-2"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Possession or garment",
+         "-4"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Body part, lock of hair, bit of nail, or the like",
+         "-10"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": null
+     }
     ]
    },
    "dice": [],
@@ -13670,7 +14507,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13714,7 +14552,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13758,7 +14597,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13803,7 +14643,8 @@
      "bard",
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13845,7 +14686,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13888,7 +14730,8 @@
     "classes": [
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -13934,7 +14777,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -13992,7 +14836,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14035,7 +14880,8 @@
     "classes": [
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14077,7 +14923,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14120,7 +14967,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -14200,7 +15048,8 @@
      "bard",
      "cleric",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14245,7 +15094,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14287,7 +15137,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14331,7 +15182,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -14390,7 +15242,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14434,7 +15287,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14476,7 +15330,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14520,7 +15375,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14563,7 +15419,8 @@
     "classes": [
      "bard",
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14607,7 +15464,8 @@
      "bard",
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14651,7 +15509,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14694,7 +15553,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -14744,7 +15604,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d8 for each slot level above 3rd.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -14808,7 +15669,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for every two slot levels above 2nd.",
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -14868,7 +15730,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14912,7 +15775,8 @@
      "cleric",
      "druid",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14957,7 +15821,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -14999,7 +15864,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15081,7 +15947,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15125,7 +15992,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15177,7 +16045,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15230,7 +16099,8 @@
      "bard",
      "cleric",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15281,7 +16151,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15323,7 +16194,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15347,7 +16219,7 @@
     "section": "Spell Descriptions",
     "heading": "Teleport"
    },
-   "text": "Teleport\n\n7th-level conjuration\n\nCasting Time: 1 action\nRange: 10 feet\nComponents: V\nDuration: Instantaneous\n\nThis spell instantly transports you and up to eight willing creatures of your choice that you can see within range, or a single object that you can see within range, to a destination you select. If you target an object, it must be able to fit entirely inside a 10-foot cube, and it can’t be held or carried by an unwilling creature.\n\nThe destination you choose must be known to you, and it must be on the same plane of existence as you. Your familiarity with the destination determines whether you arrive there successfully. The GM rolls d100 and consults the table.\n\nFamiliarity    Mishap  Similar    Off     On\nPermanent         —     Area    Target  Target\ncircle                                  01–100\nAssociated        —       —       —\nobject                                  01–100\nVery familiar  01–05      —       —\nSeen casually  01–33                    25–100\nViewed once    01–43   06–13    14–24   54–100\nDescription    01–43   34–43    44–53   74–100\nFalse          01–50   44–53    54–73   74–100\ndestination            44–53    54–73\n51–100              —\n—\n\nFamiliarity. “Permanent circle” means a permanent teleportation circle whose sigil sequence you know. “Associated object” means that you possess an object taken from the desired destination within the last six months, such as a book from a wizard’s library, bed linen from a royal suite, or a chunk of marble from a lich’s secret tomb.\n\n“Very familiar” is a place you have been very often, a place you have carefully studied, or a place you can see when you cast the spell. “Seen casually” is someplace you have seen more than once but with which you aren’t very familiar. “Viewed once” is a place you have seen once, possibly using magic. “Description” is a place whose location and appearance you know through someone else’s description, perhaps from a map.\n\n“False destination” is a place that doesn’t exist. Perhaps you tried to scry an enemy’s sanctum but instead viewed an illusion, or you are attempting to teleport to a familiar location that no longer exists.\n\nOn Target. You and your group (or the target object) appear where you want to.\n\nOff Target. You and your group (or the target object) appear a random distance away from the destination in a random direction. Distance off target is 1d10 × 1d10 percent of the distance that was to be traveled. For example, if you tried to travel 120 miles, landed off target, and rolled a 5 and 3 on the two d10s, then you would be off target by 15 percent, or 18 miles. The GM determines the direction off target randomly by rolling a d8 and designating 1 as north, 2 as northeast, 3 as east, and so on around the points of the compass. If you were teleporting to a coastal city and wound up 18 miles out at sea, you could be in trouble.\n\nSimilar Area. You and your group (or the target object) wind up in a different area that’s visually or thematically similar to the target area. If you are heading for your home laboratory, for example, you might wind up in another wizard’s laboratory or in an alchemical supply shop that has many of the same tools and implements as your laboratory. Generally, you appear in the closest similar place, but since the spell has no range limit, you could conceivably wind up anywhere on the plane.\n\nMishap. The spell’s unpredictable magic results in a difficult journey. Each teleporting creature (or the target object) takes 3d10 force damage, and the GM rerolls on the table to see where you wind up (multiple mishaps can occur, dealing damage each time).",
+   "text": "Teleport\n\n7th-level conjuration\n\nCasting Time: 1 action\nRange: 10 feet\nComponents: V\nDuration: Instantaneous\n\nThis spell instantly transports you and up to eight willing creatures of your choice that you can see within range, or a single object that you can see within range, to a destination you select. If you target an object, it must be able to fit entirely inside a 10-foot cube, and it can’t be held or carried by an unwilling creature.\n\nThe destination you choose must be known to you, and it must be on the same plane of existence as you. Your familiarity with the destination determines whether you arrive there successfully. The GM rolls d100 and consults the table.\n\nFamiliarity | Mishap | Similar Area | Off Target | On Target\nPermanent circle | — | — | — | 01–100\nAssociated object | — | — | — | 01–100\nVery familiar | 01–05 | 06–13 | 14–24 | 25–100\nSeen casually | 01–33 | 34–43 | 44–53 | 54–100\nViewed once | 01–43 | 44–53 | 54–73 | 74–100\nDescription | 01–43 | 44–53 | 54–73 | 74–100\nFalse destination | 01–50 | 51–100 | — | —\n\nFamiliarity. “Permanent circle” means a permanent teleportation circle whose sigil sequence you know. “Associated object” means that you possess an object taken from the desired destination within the last six months, such as a book from a wizard’s library, bed linen from a royal suite, or a chunk of marble from a lich’s secret tomb.\n\n“Very familiar” is a place you have been very often, a place you have carefully studied, or a place you can see when you cast the spell. “Seen casually” is someplace you have seen more than once but with which you aren’t very familiar. “Viewed once” is a place you have seen once, possibly using magic. “Description” is a place whose location and appearance you know through someone else’s description, perhaps from a map.\n\n“False destination” is a place that doesn’t exist. Perhaps you tried to scry an enemy’s sanctum but instead viewed an illusion, or you are attempting to teleport to a familiar location that no longer exists.\n\nOn Target. You and your group (or the target object) appear where you want to.\n\nOff Target. You and your group (or the target object) appear a random distance away from the destination in a random direction. Distance off target is 1d10 × 1d10 percent of the distance that was to be traveled. For example, if you tried to travel 120 miles, landed off target, and rolled a 5 and 3 on the two d10s, then you would be off target by 15 percent, or 18 miles. The GM determines the direction off target randomly by rolling a d8 and designating 1 as north, 2 as northeast, 3 as east, and so on around the points of the compass. If you were teleporting to a coastal city and wound up 18 miles out at sea, you could be in trouble.\n\nSimilar Area. You and your group (or the target object) wind up in a different area that’s visually or thematically similar to the target area. If you are heading for your home laboratory, for example, you might wind up in another wizard’s laboratory or in an alchemical supply shop that has many of the same tools and implements as your laboratory. Generally, you appear in the closest similar place, but since the spell has no range limit, you could conceivably wind up anywhere on the plane.\n\nMishap. The spell’s unpredictable magic results in a difficult journey. Each teleporting creature (or the target object) takes 3d10 force damage, and the GM rerolls on the table to see where you wind up (multiple mishaps can occur, dealing damage each time).",
    "data": {
     "level": 7,
     "school": "conjuration",
@@ -15362,12 +16234,103 @@
     },
     "duration": "Instantaneous",
     "concentration": false,
-    "description": "This spell instantly transports you and up to eight willing creatures of your choice that you can see within range, or a single object that you can see within range, to a destination you select. If you target an object, it must be able to fit entirely inside a 10-foot cube, and it can’t be held or carried by an unwilling creature.\n\nThe destination you choose must be known to you, and it must be on the same plane of existence as you. Your familiarity with the destination determines whether you arrive there successfully. The GM rolls d100 and consults the table.\n\nFamiliarity    Mishap  Similar    Off     On\nPermanent         —     Area    Target  Target\ncircle                                  01–100\nAssociated        —       —       —\nobject                                  01–100\nVery familiar  01–05      —       —\nSeen casually  01–33                    25–100\nViewed once    01–43   06–13    14–24   54–100\nDescription    01–43   34–43    44–53   74–100\nFalse          01–50   44–53    54–73   74–100\ndestination            44–53    54–73\n51–100              —\n—\n\nFamiliarity. “Permanent circle” means a permanent teleportation circle whose sigil sequence you know. “Associated object” means that you possess an object taken from the desired destination within the last six months, such as a book from a wizard’s library, bed linen from a royal suite, or a chunk of marble from a lich’s secret tomb.\n\n“Very familiar” is a place you have been very often, a place you have carefully studied, or a place you can see when you cast the spell. “Seen casually” is someplace you have seen more than once but with which you aren’t very familiar. “Viewed once” is a place you have seen once, possibly using magic. “Description” is a place whose location and appearance you know through someone else’s description, perhaps from a map.\n\n“False destination” is a place that doesn’t exist. Perhaps you tried to scry an enemy’s sanctum but instead viewed an illusion, or you are attempting to teleport to a familiar location that no longer exists.\n\nOn Target. You and your group (or the target object) appear where you want to.\n\nOff Target. You and your group (or the target object) appear a random distance away from the destination in a random direction. Distance off target is 1d10 × 1d10 percent of the distance that was to be traveled. For example, if you tried to travel 120 miles, landed off target, and rolled a 5 and 3 on the two d10s, then you would be off target by 15 percent, or 18 miles. The GM determines the direction off target randomly by rolling a d8 and designating 1 as north, 2 as northeast, 3 as east, and so on around the points of the compass. If you were teleporting to a coastal city and wound up 18 miles out at sea, you could be in trouble.\n\nSimilar Area. You and your group (or the target object) wind up in a different area that’s visually or thematically similar to the target area. If you are heading for your home laboratory, for example, you might wind up in another wizard’s laboratory or in an alchemical supply shop that has many of the same tools and implements as your laboratory. Generally, you appear in the closest similar place, but since the spell has no range limit, you could conceivably wind up anywhere on the plane.\n\nMishap. The spell’s unpredictable magic results in a difficult journey. Each teleporting creature (or the target object) takes 3d10 force damage, and the GM rerolls on the table to see where you wind up (multiple mishaps can occur, dealing damage each time).",
+    "description": "This spell instantly transports you and up to eight willing creatures of your choice that you can see within range, or a single object that you can see within range, to a destination you select. If you target an object, it must be able to fit entirely inside a 10-foot cube, and it can’t be held or carried by an unwilling creature.\n\nThe destination you choose must be known to you, and it must be on the same plane of existence as you. Your familiarity with the destination determines whether you arrive there successfully. The GM rolls d100 and consults the table.\n\nFamiliarity | Mishap | Similar Area | Off Target | On Target\nPermanent circle | — | — | — | 01–100\nAssociated object | — | — | — | 01–100\nVery familiar | 01–05 | 06–13 | 14–24 | 25–100\nSeen casually | 01–33 | 34–43 | 44–53 | 54–100\nViewed once | 01–43 | 44–53 | 54–73 | 74–100\nDescription | 01–43 | 44–53 | 54–73 | 74–100\nFalse destination | 01–50 | 51–100 | — | —\n\nFamiliarity. “Permanent circle” means a permanent teleportation circle whose sigil sequence you know. “Associated object” means that you possess an object taken from the desired destination within the last six months, such as a book from a wizard’s library, bed linen from a royal suite, or a chunk of marble from a lich’s secret tomb.\n\n“Very familiar” is a place you have been very often, a place you have carefully studied, or a place you can see when you cast the spell. “Seen casually” is someplace you have seen more than once but with which you aren’t very familiar. “Viewed once” is a place you have seen once, possibly using magic. “Description” is a place whose location and appearance you know through someone else’s description, perhaps from a map.\n\n“False destination” is a place that doesn’t exist. Perhaps you tried to scry an enemy’s sanctum but instead viewed an illusion, or you are attempting to teleport to a familiar location that no longer exists.\n\nOn Target. You and your group (or the target object) appear where you want to.\n\nOff Target. You and your group (or the target object) appear a random distance away from the destination in a random direction. Distance off target is 1d10 × 1d10 percent of the distance that was to be traveled. For example, if you tried to travel 120 miles, landed off target, and rolled a 5 and 3 on the two d10s, then you would be off target by 15 percent, or 18 miles. The GM determines the direction off target randomly by rolling a d8 and designating 1 as north, 2 as northeast, 3 as east, and so on around the points of the compass. If you were teleporting to a coastal city and wound up 18 miles out at sea, you could be in trouble.\n\nSimilar Area. You and your group (or the target object) wind up in a different area that’s visually or thematically similar to the target area. If you are heading for your home laboratory, for example, you might wind up in another wizard’s laboratory or in an alchemical supply shop that has many of the same tools and implements as your laboratory. Generally, you appear in the closest similar place, but since the spell has no range limit, you could conceivably wind up anywhere on the plane.\n\nMishap. The spell’s unpredictable magic results in a difficult journey. Each teleporting creature (or the target object) takes 3d10 force damage, and the GM rerolls on the table to see where you wind up (multiple mishaps can occur, dealing damage each time).",
     "atHigherLevels": null,
     "classes": [
      "bard",
      "sorcerer",
      "wizard"
+    ],
+    "tables": [
+     {
+      "caption": null,
+      "dice": "d100",
+      "columns": [
+       "Familiarity",
+       "Mishap",
+       "Similar Area",
+       "Off Target",
+       "On Target"
+      ],
+      "rows": [
+       {
+        "roll": null,
+        "cells": [
+         "Permanent circle",
+         "—",
+         "—",
+         "—",
+         "01–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Associated object",
+         "—",
+         "—",
+         "—",
+         "01–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Very familiar",
+         "01–05",
+         "06–13",
+         "14–24",
+         "25–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Seen casually",
+         "01–33",
+         "34–43",
+         "44–53",
+         "54–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Viewed once",
+         "01–43",
+         "44–53",
+         "54–73",
+         "74–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "Description",
+         "01–43",
+         "44–53",
+         "54–73",
+         "74–100"
+        ]
+       },
+       {
+        "roll": null,
+        "cells": [
+         "False destination",
+         "01–50",
+         "51–100",
+         "—",
+         "—"
+        ]
+       }
+      ],
+      "footnotes": [],
+      "coverage": {
+       "complete": true,
+       "gaps": [],
+       "overlaps": []
+      }
+     }
     ]
    },
    "dice": [
@@ -15393,11 +16356,24 @@
      "average": 16
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [],
    "icon": {
     "set": "IconSet",
     "index": 79
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared with the pdf.js-rendered pages 185 and 186 of SRD_CC_v5.1.pdf",
+    "pages": [
+     185,
+     186
+    ],
+    "textSha256": "ee324653b694d57272366887b341e07c93db627deeef14209cad8c95cb09e8ac",
+    "notes": [
+     "header block on page 185; the seven-row familiarity table on page 186 checked cell by cell including the wrapped labels and every d100 range; per-row coverage complete"
+    ]
    }
   },
   {
@@ -15435,7 +16411,8 @@
      "bard",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15477,7 +16454,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15522,7 +16500,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15580,7 +16559,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -15631,7 +16611,8 @@
     "classes": [
      "bard",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15678,7 +16659,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15720,7 +16702,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15763,7 +16746,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15807,7 +16791,8 @@
      "bard",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15850,7 +16835,8 @@
     "classes": [
      "cleric",
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15896,7 +16882,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15941,7 +16928,8 @@
      "sorcerer",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -15985,7 +16973,8 @@
      "bard",
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16028,7 +17017,8 @@
     "classes": [
      "warlock",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16086,7 +17076,8 @@
     "atHigherLevels": null,
     "classes": [
      "bard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16166,7 +17157,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16230,7 +17222,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16272,7 +17265,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, the damage the wall deals when it appears increases by 2d6, and the damage from passing through the sheet of frigid air increases by 1d6, for each slot level above 6th.",
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16346,7 +17340,8 @@
      "druid",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16388,7 +17383,8 @@
     "atHigherLevels": "At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, both types of damage increase by 1d8 for each slot level above 6th.",
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16452,7 +17448,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16497,7 +17494,8 @@
      "ranger",
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16543,7 +17541,8 @@
      "druid",
      "ranger",
      "sorcerer"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16586,7 +17585,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16636,7 +17636,8 @@
     "atHigherLevels": null,
     "classes": [
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16686,7 +17687,8 @@
     "atHigherLevels": null,
     "classes": [
      "druid"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16730,7 +17732,8 @@
     "classes": [
      "druid",
      "ranger"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16781,7 +17784,8 @@
     "classes": [
      "sorcerer",
      "wizard"
-    ]
+    ],
+    "tables": []
    },
    "dice": [
     {
@@ -16838,7 +17842,8 @@
     "atHigherLevels": null,
     "classes": [
      "cleric"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",
@@ -16883,7 +17888,8 @@
      "bard",
      "cleric",
      "paladin"
-    ]
+    ],
+    "tables": []
    },
    "dice": [],
    "readiness": "parsed",

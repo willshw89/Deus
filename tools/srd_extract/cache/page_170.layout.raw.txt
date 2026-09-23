@@ -1,0 +1,67 @@
+Power Word Kill                                           • You create an instantaneous, harmless sensory
+                                                            effect, such as a shower of sparks, a puff of wind,
+9th-­‐‑level enchantment                                    faint musical notes, or an odd odor.
+
+Casting Time: 1 action                                    • You instantaneously light or snuff out a candle, a
+Range: 60 feet                                              torch, or a small campfire.
+Components: V
+Duration: Instantaneous                                   • You instantaneously clean or soil an object no
+                                                            larger than 1 cubic foot.
+You utter a word of power that can compel one
+creature you can see within range to die instantly. If    • You chill, warm, or flavor up to 1 cubic foot of
+the creature you choose has 100 hit points or fewer,        nonliving material for 1 hour.
+it dies. Otherwise, the spell has no effect.
+                                                          • You make a color, a small mark, or a symbol
+Power Word Stun                                             appear on an object or a surface for 1 hour.
+
+8th-­‐‑level enchantment                                  • You create a nonmagical trinket or an illusory
+                                                            image that can fit in your hand and that lasts until
+Casting Time: 1 action                                      the end of your next turn.
+Range: 60 feet
+Components: V                                             If you cast this spell multiple times, you can have up
+Duration: Instantaneous                                   to three of its non-­‐‑instantaneous effects active at a
+                                                          time, and you can dismiss such an effect as an action.
+You speak a word of power that can overwhelm the
+mind of one creature you can see within range,            Prismatic Spray
+leaving it dumbfounded. If the target has 150 hit
+points or fewer, it is stunned. Otherwise, the spell      7th-­‐‑level evocation
+has no effect.
+                                                          Casting Time: 1 action
+  The stunned target must make a Constitution             Range: Self (60-­‐‑foot cone)
+saving throw at the end of each of its turns. On a        Components: V, S
+successful save, this stunning effect ends.               Duration: Instantaneous
+
+Prayer of Healing                                         Eight multicolored rays of light flash from your hand.
+                                                          Each ray is a different color and has a different
+2nd-­‐‑level evocation                                    power and purpose. Each creature in a 60-­‐‑foot cone
+                                                          must make a Dexterity saving throw. For each target,
+Casting Time: 10 minutes                                  roll a d8 to determine which color ray affects it.
+Range: 30 feet
+Components: V                                               1. Red. The target takes 10d6 fire damage on a
+Duration: Instantaneous                                   failed save, or half as much damage on a successful
+                                                          one.
+Up to six creatures of your choice that you can see
+within range each regain hit points equal to 2d8 +          2. Orange. The target takes 10d6 acid damage on
+your spellcasting ability modifier. This spell has no     a failed save, or half as much damage on a successful
+effect on undead or constructs.                           one.
+
+  At Higher Levels. When you cast this spell using a        3. Yellow. The target takes 10d6 lightning damage
+spell slot of 3rd level or higher, the healing increases  on a failed save, or half as much damage on a
+by 1d8 for each slot level above 2nd.                     successful one.
+
+Prestidigitation                                            4. Green. The target takes 10d6 poison damage on
+                                                          a failed save, or half as much damage on a successful
+Transmutation cantrip                                     one.
+
+Casting Time: 1 action                                      5. Blue. The target takes 10d6 cold damage on a
+Range: 10 feet                                            failed save, or half as much damage on a successful
+Components: V, S                                          one.
+Duration: Up to 1 hour
+                                                            6. Indigo. On a failed save, the target is restrained.
+This spell is a minor magical trick that novice           It must then make a Constitution saving throw at the
+spellcasters use for practice. You create one of the      end of each of its turns. If it successfully saves three
+following magical effects within range:                   times, the spell ends. If it fails its save three times, it
+                                                          permanently turns to stone and is subjected to the
+                                                          petrified condition. The successes and failures don’t
+                                                          need to be consecutive; keep track of both until the
+                                                          target collects three of a kind.

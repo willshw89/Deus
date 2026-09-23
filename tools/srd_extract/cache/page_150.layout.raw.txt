@@ -1,0 +1,65 @@
+  You can further refine the trigger so the spell            Grease
+activates only under certain circumstances or
+according to physical characteristics (such as height        1st-­‐‑level conjuration
+or weight), creature kind (for example, the ward
+could be set to affect aberrations or drow), or              Casting Time: 1 action
+alignment. You can also set conditions for creatures         Range: 60 feet
+that don’t trigger the glyph, such as those who say a        Components: V, S, M (a bit of pork rind or butter)
+certain password.                                            Duration: 1 minute
+
+  When you inscribe the glyph, choose explosive              Slick grease covers the ground in a 10-­‐‑foot square
+runes or a spell glyph.                                      centered on a point within range and turns it into
+                                                             difficult terrain for the duration.
+  Explosive Runes. When triggered, the glyph
+erupts with magical energy in a 20-­‐‑foot-­‐‑radius           When the grease appears, each creature standing
+sphere centered on the glyph. The sphere spreads             in its area must succeed on a Dexterity saving throw
+around corners. Each creature in the area must               or fall prone. A creature that enters the area or ends
+make a Dexterity saving throw. A creature takes 5d8          its turn there must also succeed on a Dexterity
+acid, cold, fire, lightning, or thunder damage on a          saving throw or fall prone.
+failed saving throw (your choice when you create
+the glyph), or half as much damage on a successful           Greater Invisibility
+one.
+                                                             4th-­‐‑level illusion
+  Spell Glyph. You can store a prepared spell of 3rd
+level or lower in the glyph by casting it as part of         Casting Time: 1 action
+creating the glyph. The spell must target a single           Range: Touch
+creature or an area. The spell being stored has no           Components: V, S
+immediate effect when cast in this way. When the             Duration: Concentration, up to 1 minute
+glyph is triggered, the stored spell is cast. If the spell
+has a target, it targets the creature that triggered the     You or a creature you touch becomes invisible until
+glyph. If the spell affects an area, the area is centered    the spell ends. Anything the target is wearing or
+on that creature. If the spell summons hostile               carrying is invisible as long as it is on the target’s
+creatures or creates harmful objects or traps, they          person.
+appear as close as possible to the intruder and attack
+it. If the spell requires concentration, it lasts until the  Greater Restoration
+end of its full duration.
+                                                             5th-­‐‑level abjuration
+  At Higher Levels. When you cast this spell using a
+spell slot of 4th level or higher, the damage of an          Casting Time: 1 action
+explosive runes glyph increases by 1d8 for each slot         Range: Touch
+level above 3rd. If you create a spell glyph, you can        Components: V, S, M (diamond dust worth at least
+store any spell of up to the same level as the slot you
+use for the glyph of warding.                                  100 gp, which the spell consumes)
+                                                             Duration: Instantaneous
+Goodberry
+                                                             You imbue a creature you touch with positive energy
+1st-­‐‑level transmutation                                   to undo a debilitating effect. You can reduce the
+                                                             target’s exhaustion level by one, or end one of the
+Casting Time: 1 action                                       following effects on the target:
+Range: Touch
+Components: V, S, M (a sprig of mistletoe)                   • One effect that charmed or petrified the target
+Duration: Instantaneous                                      • One curse, including the target’s attunement to a
+Up to ten berries appear in your hand and are
+infused with magic for the duration. A creature can            cursed magic item
+use its action to eat one berry. Eating a berry              • Any reduction to one of the target’s ability scores
+restores 1 hit point, and the berry provides enough          • One effect reducing the target’s hit point
+nourishment to sustain a creature for one day.
+                                                               maximum
+  The berries lose their potency if they have not
+been consumed within 24 hours of the casting of this         Guardian of Faith
+spell.
+                                                             4th-­‐‑level conjuration
+
+                                                             Casting Time: 1 action
+                                                             Range: 30 feet
+                                                             Components: V

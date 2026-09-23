@@ -1,0 +1,49 @@
+Actions                                                           STR DEX CON INT WIS CHA
+Sting (Bite in Beast Form). Melee Weapon Attack: +5             26 (+8) 14 (+2) 24 (+7) 22 (+6) 18 (+4) 24 (+7)
+to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) piercing
+damage, and the target must make on a DC 11                   Saving Throws Dex +8, Con +13, Wis +10
+Constitution saving throw, taking 10 (3d6) poison             Damage Resistances cold; bludgeoning, piercing, and
+damage on a failed save, or half as much damage on a
+successful one.                                                 slashing from nonmagical attacks that aren’t silvered
+Invisibility. The imp magically turns invisible until it      Damage Immunities fire, poison
+attacks or until its concentration ends (as if                Condition Immunities poisoned
+concentrating on a spell). Any equipment the imp              Senses truesight 120 ft., passive Perception 14
+wears or carries is invisible with it.                        Languages Infernal, telepathy 120 ft.
+                                                              Challenge 20 (25,000 XP)
+Lemure
+                                                              Fear Aura. Any creature hostile to the pit fiend that
+Medium fiend (devil), lawful evil                             starts its turn within 20 feet of the pit fiend must make
+                                                              a DC 21 Wisdom saving throw, unless the pit fiend is
+Armor Class 7                                                 incapacitated. On a failed save, the creature is
+Hit Points 13 (3d8)                                           frightened until the start of its next turn. If a creature’s
+Speed 15 ft.                                                  saving throw is successful, the creature is immune to
+                                                              the pit fiend’s Fear Aura for the next 24 hours.
+    STR DEX CON INT WIS CHA                                   Magic Resistance. The pit fiend has advantage on
+  10 (+0) 5 (−3) 11 (+0) 1 (−5) 11 (+0) 3 (−4)                saving throws against spells and other magical effects.
+                                                              Magic Weapons. The pit fiend’s weapon attacks are
+Damage Resistances cold                                       magical.
+Damage Immunities fire, poison                                Innate Spellcasting. The pit fiend’s spellcasting ability
+Condition Immunities charmed, frightened, poisoned            is Charisma (spell save DC 21). The pit fiend can
+Senses darkvision 120 ft., passive Perception 10              innately cast the following spells, requiring no material
+Languages understands Infernal but can’t speak                components:
+Challenge 0 (10 XP)                                           At will: detect magic, fireball
+                                                              3/day each: hold monster, wall of fire
+Devil’s Sight. Magical darkness doesn’t impede the
+lemure’s darkvision.                                          Actions
+Hellish Rejuvenation. A lemure that dies in the Nine
+Hells comes back to life with all its hit points in 1d10      Multiattack. The pit fiend makes four attacks: one with
+days unless it is killed by a good-­‐aligned creature with a  its bite, one with its claw, one with its mace, and one
+bless spell cast on that creature or its remains are          with its tail.
+sprinkled with holy water.                                    Bite. Melee Weapon Attack: +14 to hit, reach 5 ft., one
+                                                              target. Hit: 22 (4d6 + 8) piercing damage. The target
+Actions                                                       must succeed on a DC 21 Constitution saving throw or
+Fist. Melee Weapon Attack: +3 to hit, reach 5 ft., one        become poisoned. While poisoned in this way, the
+target. Hit: 2 (1d4) bludgeoning damage.                      target can’t regain hit points, and it takes 21 (6d6)
+                                                              poison damage at the start of each of its turns. The
+Pit Fiend                                                     poisoned target can repeat the saving throw at the end
+                                                              of each of its turns, ending the effect on itself on a
+Large fiend (devil), lawful evil                              success.
+                                                              Claw. Melee Weapon Attack: +14 to hit, reach 10 ft.,
+Armor Class 19 (natural armor)                                one target. Hit: 17 (2d8 + 8) slashing damage.
+Hit Points 300 (24d10 + 168)
+Speed 30 ft., fly 60 ft.

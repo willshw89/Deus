@@ -27,9 +27,10 @@ const NORMALIZATION_RULES = Object.freeze([
     { id: "hyphen_artifact", from: "'-' U+00AD U+2010 [U+2011]", to: "-", why: "the PDF encodes every hyphen as hyphen + soft hyphen + hyphen, 917 of the 1,122 occurrences with a trailing non-breaking hyphen as well (well-ordered, 2nd-level, 20-foot)" },
     { id: "soft_hyphen", from: "U+00AD", to: "", why: "any soft hyphen left over is invisible in the source" },
     { id: "line_separator", from: "U+2028", to: "LF", why: "one occurrence, a line break" },
-    { id: "unmapped_glyph_dash", from: "U+008A", to: "U+2014 (em dash)", why: "a glyph of the PDF's Adobe-Japan1 font that pdftotext cannot map; 493 occurrences: 492 are the empty spell-slot cells of the class tables on pages 11, 15, 19, 30, 35, 42, 46 and 52 (printed as em dashes) and one is the dash in 'where the adversaries are [em dash] how far away' on page 90" },
-    { id: "backtick_apostrophe", from: "` (grave accent)", to: "U+2019 (right single quotation mark)", why: "one of the PDF's fonts emits the apostrophe as a grave accent: 10 occurrences, all possessives or contractions (Thieves` Cant, can`t, Lion`s head), on pages 35, 39, 90, 232, 358 and 361" },
-    { id: "minus_sign", from: "U+2212", to: "-", why: "numeric minus in stat blocks, e.g. (-4); parsers read ASCII" }
+    { id: "unmapped_glyph_dash", from: "U+008A", to: "U+2014 (em dash)", why: "a glyph of the PDF's Adobe-Japan1 font that pdftotext cannot map; 493 occurrences: 492 are the empty spell-slot cells of the class tables on pages 11, 15, 19, 30, 35, 42, 46 and 52 and one is the dash in 'where the adversaries are [em dash] how far away' on page 90. CONFIRMED 2026-09-22: the rendered pages 11 and 90 show a dash in every one of those positions; pdf.js decodes the glyph as U+0336 (combining long stroke overlay, a dash-shaped mark with no Unicode dash mapping in that font: 74 on page 11, 1 on page 90; optional/render_pages.mjs --probe), so U+2014 is the chosen text representation, not the font's own code" },
+    { id: "backtick_apostrophe", from: "` (grave accent)", to: "U+2019 (right single quotation mark)", why: "one of the PDF's fonts emits the apostrophe as a grave accent: 10 occurrences, all possessives or contractions (Thieves` Cant, can`t, Lion`s head), on pages 35, 39, 90, 232, 358 and 361. CONFIRMED 2026-09-22 on the rendered page 90 and by pdf.js, which decodes those glyphs as U+2019" },
+    { id: "minus_sign", from: "U+2212", to: "-", why: "numeric minus in stat blocks, e.g. (-4); parsers read ASCII" },
+    { id: "iron_flask_dash", from: "digit 'r' digit (e.g. 51r54)", to: "digit U+2013 digit", why: "on page 228 pdftotext emits the en dash of the Iron Flask table's d100 ranges as the letter r: 14 occurrences, the only digit-r-digit tokens in the whole document; the rendered page shows en dashes (confirmed 2026-09-22)" }
 ]);
 
 const HYPHEN_ARTIFACT = re("-" + CH.SOFT_HYPHEN + "[" + CH.HYPHEN + CH.NB_HYPHEN + "]" + CH.NB_HYPHEN + "?");
@@ -38,6 +39,7 @@ const LINE_SEPS = re(CH.LINE_SEP);
 const UNMAPPED_GLYPHS = re(CH.UNMAPPED);
 const BACKTICKS = re("`");
 const MINUS_SIGNS = re(CH.MINUS);
+const DIGIT_R_DIGIT = re("\\b(\\d{1,3})r(\\d{1,3})\\b");
 
 /** Apply NORMALIZATION_RULES to a page's raw pdftotext output. */
 function normalizeText(s) {
@@ -48,7 +50,8 @@ function normalizeText(s) {
         .replace(LINE_SEPS, "\n")
         .replace(UNMAPPED_GLYPHS, CH.EM_DASH)
         .replace(BACKTICKS, CH.RSQUO)
-        .replace(MINUS_SIGNS, "-");
+        .replace(MINUS_SIGNS, "-")
+        .replace(DIGIT_R_DIGIT, "$1" + CH.EN_DASH + "$2");
 }
 
 const PLAIN_MAP = [
@@ -133,6 +136,17 @@ function splitLayoutColumns(layoutText, opts = {}) {
     return { gutter: best, rightStart: start, left, right };
 }
 
+/**
+ * Column split for the RAW layout variant (page_NNN.layout.raw.txt): detect the gutter on the unnormalised
+ * text, whose column positions are exact, then normalise every line of each column. The result has the same
+ * shape as splitLayoutColumns; `opts` is passed through. Use this instead of splitLayoutColumns whenever a
+ * stager cuts columns, so that hyphen artifacts in the left column can never shift the right column.
+ */
+function splitRawLayoutColumns(rawLayoutText, opts = {}) {
+    const r = splitLayoutColumns(String(rawLayoutText).replace(/\r\n?/g, "\n"), opts);
+    return { gutter: r.gutter, rightStart: r.rightStart, left: r.left.map(normalizeText), right: r.right.map(normalizeText) };
+}
+
 const DICE_SRC = "(\\d+)\\s*d\\s*(\\d+)(?:\\s*([+-])\\s*(\\d+))?";
 
 /** Parse one dice expression such as "4d8 + 2" or "2d6". Returns null for no match. */
@@ -211,6 +225,7 @@ module.exports = {
     toPlain,
     stripFooter,
     splitLayoutColumns,
+    splitRawLayoutColumns,
     parseDice,
     findDice,
     slugify,

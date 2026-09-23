@@ -1,0 +1,59 @@
+Preparing and Casting Spells                                 Learning Spells of 1st Level and Higher
+
+The Wizard table shows how many spell slots you              Each time you gain a wizard level, you can add two
+have to cast your spells of 1st level and higher. To         wizard spells of your choice to your spellbook for
+cast one of these spells, you must expend a slot of          free. Each of these spells must be of a level for which
+the spell’s level or higher. You regain all expended         you have spell slots, as shown on the Wizard table.
+spell slots when you finish a long rest.                     On your adventures, you might find other spells that
+                                                             you can add to your spellbook (see the “Your
+  You prepare the list of wizard spells that are             Spellbook” sidebar).
+available for you to cast. To do so, choose a number
+of wizard spells from your spellbook equal to your           Arcane Recovery
+Intelligence modifier + your wizard level (minimum
+of one spell). The spells must be of a level for which       You have learned to regain some of your magical
+you have spell slots.                                        energy by studying your spellbook. Once per day
+                                                             when you finish a short rest, you can choose
+  For example, if you’re a 3rd-­‐‑level wizard, you have     expended spell slots to recover. The spell slots can
+four 1st-­‐‑level and two 2nd-­‐‑level spell slots. With an  have a combined level that is equal to or less than
+Intelligence of 16, your list of prepared spells can         half your wizard level (rounded up), and none of the
+include six spells of 1st or 2nd level, in any               slots can be 6th level or higher.
+combination, chosen from your spellbook. If you
+prepare the 1st-­‐‑level spell magic missile, you can cast     For example, if you’re a 4th-­‐‑level wizard, you can
+it using a 1st-­‐‑level or a 2nd-­‐‑level slot. Casting the  recover up to two levels worth of spell slots. You can
+spell doesn’t remove it from your list of prepared           recover either a 2nd-­‐‑level spell slot or two 1st-­‐‑level
+spells.                                                      spell slots.
+
+  You can change your list of prepared spells when           Arcane Tradition
+you finish a long rest. Preparing a new list of wizard
+spells requires time spent studying your spellbook           When you reach 2nd level, you choose an arcane
+and memorizing the incantations and gestures you             tradition, shaping your practice of magic through
+must make to cast the spell: at least 1 minute per           one of eight schools, such as Evocation.
+spell level for each spell on your list.
+                                                               Your choice grants you features at 2nd level and
+Spellcasting Ability                                         again at 6th, 10th, and 14th level.
+
+Intelligence is your spellcasting ability for your           Ability Score Improvement
+wizard spells, since you learn your spells through
+dedicated study and memorization. You use your               When you reach 4th level, and again at 8th, 12th,
+Intelligence whenever a spell refers to your                 16th, and 19th level, you can increase one ability
+spellcasting ability. In addition, you use your              score of your choice by 2, or you can increase two
+Intelligence modifier when setting the saving throw          ability scores of your choice by 1. As normal, you
+DC for a wizard spell you cast and when making an            can’t increase an ability score above 20 using this
+attack roll with one.                                        feature.
+
+     Spell save DC = 8 + your proficiency bonus +            Spell Mastery
+                 your Intelligence modifier
+                                                             At 18th level, you have achieved such mastery over
+   Spell attack modifier = your proficiency bonus +          certain spells that you can cast them at will. Choose a
+                 your Intelligence modifier                  1st-­‐‑level wizard spell and a 2nd-­‐‑level wizard spell
+                                                             that are in your spellbook. You can cast those spells
+Ritual Casting                                               at their lowest level without expending a spell slot
+                                                             when you have them prepared. If you want to cast
+You can cast a wizard spell as a ritual if that spell has    either spell at a higher level, you must expend a spell
+the ritual tag and you have the spell in your                slot as normal.
+spellbook. You don’t need to have the spell prepared.
+                                                               By spending 8 hours in study, you can exchange
+Spellcasting Focus                                           one or both of the spells you chose for different
+                                                             spells of the same levels.
+You can use an arcane focus as a spellcasting focus
+for your wizard spells.

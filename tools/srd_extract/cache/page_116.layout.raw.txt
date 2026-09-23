@@ -1,0 +1,67 @@
+a zombie if you chose a corpse (the GM has the           particular chamber or corridor. If you issue no
+creature’s game statistics).                             commands, the creature only defends itself against
+                                                         hostile creatures. Once given an order, the creature
+  On each of your turns, you can use a bonus action      continues to follow it until its task is complete.
+to mentally command any creature you made with
+this spell if the creature is within 60 feet of you (if  Animated Object Statistics
+you control multiple creatures, you can command
+any or all of them at the same time, issuing the same    Size   HP AC Attack                     Str Dex
+command to each one). You decide what action the                                                  4 18
+creature will take and where it will move during its     Tiny   20 18 +8 to hit, 1d4 + 4 damage   6 14
+next turn, or you can issue a general command, such                                              10 12
+as to guard a particular chamber or corridor. If you     Small  25 16 +6 to hit, 1d8 + 2 damage  14 10
+issue no commands, the creature only defends itself
+against hostile creatures. Once given an order, the      Medium 40 13 +5 to hit, 2d6 + 1 damage  18 6
+creature continues to follow it until its task is
+complete.                                                Large  50 10 +6 to hit, 2d10 + 2
+
+  The creature is under your control for 24 hours,              damage
+after which it stops obeying any command you’ve
+given it. To maintain control of the creature for        Huge   80 10 +8 to hit, 2d12 + 4
+another 24 hours, you must cast this spell on the
+creature again before the current 24-­‐‑hour period             damage
+ends. This use of the spell reasserts your control
+over up to four creatures you have animated with           An animated object is a construct with AC, hit
+this spell, rather than animating a new one.             points, attacks, Strength, and Dexterity determined
+                                                         by its size. Its Constitution is 10 and its Intelligence
+  At Higher Levels. When you cast this spell using a     and Wisdom are 3, and its Charisma is 1. Its speed is
+spell slot of 4th level or higher, you animate or        30 feet; if the object lacks legs or other appendages it
+reassert control over two additional undead              can use for locomotion, it instead has a flying speed
+creatures for each slot level above 3rd. Each of the     of 30 feet and can hover. If the object is securely
+creatures must come from a different corpse or pile      attached to a surface or a larger object, such as a
+of bones.                                                chain bolted to a wall, its speed is 0. It has blindsight
+                                                         with a radius of 30 feet and is blind beyond that
+Animate Objects                                          distance. When the animated object drops to 0 hit
+                                                         points, it reverts to its original object form, and any
+5th-­‐‑level transmutation                               remaining damage carries over to its original object
+                                                         form.
+Casting Time: 1 action
+Range: 120 feet                                            If you command an object to attack, it can make a
+Components: V, S                                         single melee attack against a creature within 5 feet
+Duration: Concentration, up to 1 minute                  of it. It makes a slam attack with an attack bonus and
+                                                         bludgeoning damage determined by its size. The GM
+Objects come to life at your command. Choose up to       might rule that a specific object inflicts slashing or
+ten nonmagical objects within range that are not         piercing damage based on its form.
+being worn or carried. Medium targets count as two
+objects, Large targets count as four objects, Huge         At Higher Levels. If you cast this spell using a spell
+targets count as eight objects. You can’t animate any    slot of 6th level or higher, you can animate two
+object larger than Huge. Each target animates and        additional objects for each slot level above 5th.
+becomes a creature under your control until the
+spell ends or until reduced to 0 hit points.             Antilife Shell
+
+  As a bonus action, you can mentally command any        5th-­‐‑level abjuration
+creature you made with this spell if the creature is
+within 500 feet of you (if you control multiple          Casting Time: 1 action
+creatures, you can command any or all of them at the     Range: Self (10-­‐‑foot radius)
+same time, issuing the same command to each one).        Components: V, S
+You decide what action the creature will take and        Duration: Concentration, up to 1 hour
+where it will move during its next turn, or you can
+issue a general command, such as to guard a              A shimmering barrier extends out from you in a 10-­‐‑
+                                                         foot radius and moves with you, remaining centered
+                                                         on you and hedging out creatures other than undead
+                                                         and constructs. The barrier lasts for the duration.
+
+                                                           The barrier prevents an affected creature from
+                                                         passing or reaching through. An affected creature
+                                                         can cast spells or make attacks with ranged or reach
+                                                         weapons through the barrier.

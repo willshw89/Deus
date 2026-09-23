@@ -36,12 +36,25 @@ const SOURCE_DOCUMENT = "SRD 5.1";
 function pad3(n) { return String(n).padStart(3, "0"); }
 
 const pageCache = new Map();
+/**
+ * The raw layout page (page_NNN.layout.raw.txt): CR LF unified and the footer removed, nothing else,
+ * so every character column is the one pdftotext printed. Columns are detected and cut on these
+ * lines; each cut part is normalised afterwards (normalisation shortens the hyphen artifact from
+ * four characters to one, which used to shift the text to its right by three columns).
+ */
 function readLayout(n) {
     if (!pageCache.has(n)) {
-        const layout = fs.readFileSync(path.join(CACHE_DIR, `page_${pad3(n)}.layout.txt`), "utf8");
-        pageCache.set(n, layout.split("\n").map(l => l.replace(/\s+$/, "")));
+        const layout = fs.readFileSync(path.join(CACHE_DIR, `page_${pad3(n)}.layout.raw.txt`), "utf8");
+        pageCache.set(n, layout.replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+$/, "")));
     }
     return pageCache.get(n);
+}
+
+/** The pre-normalised layout page (page_NNN.layout.txt), kept only for the moved-line report. */
+function readLayoutNormalized(n) {
+    const file = path.join(CACHE_DIR, `page_${pad3(n)}.layout.txt`);
+    if (!fs.existsSync(file)) return null;
+    return fs.readFileSync(file, "utf8").split("\n").map(l => l.replace(/\s+$/, ""));
 }
 
 function readReading(n) {
@@ -191,12 +204,18 @@ function splitLine(l, r) {
  * Split one layout page into bands: { kind: "columns", left, right } or { kind: "wide", lines }.
  * A line is { page, x0, text } with text rstripped and leading spaces relative to x0.
  */
-function pageBands(n) {
-    const raw = readLayout(n);
-    const mk = (x0, text) => ({ page: n, x0, text });
+function pageBands(n, opts = {}) {
+    // detection and cutting happen on the raw layout; every cut part is normalised afterwards
+    // (opts.normalized reads the pre-normalised layout instead, for the moved-line report only)
+    const raw = opts.normalized ? readLayoutNormalized(n) : readLayout(n);
+    if (!raw) throw new Error(`page ${n}: layout not in the cache`);
+    const push = (arr, x0, text) => {
+        // normalisation can turn the one U+2028 line separator (page 364) into a line break
+        for (const t of T.normalizeText(text).split("\n")) arr.push({ page: n, x0, text: t.replace(/\s+$/, "") });
+    };
     const mask = wideMask(n, raw);
     const r = detectRightStart(raw, mask);
-    if (r === null) return { rightStart: null, bands: [{ kind: "wide", lines: raw.map(t => mk(0, t)) }], spanning: [] };
+    if (r === null) { const lines = []; raw.forEach(t => push(lines, 0, t)); return { rightStart: null, bands: [{ kind: "wide", lines }], spanning: [] }; }
     const parts = raw.map((l, i) => mask[i] ? { kind: "wide" } : splitLine(l, r));
     const spanning = [];
     parts.forEach((p, i) => { if (p.kind === "wide" && !mask[i]) spanning.push(i); });
@@ -205,22 +224,52 @@ function pageBands(n) {
     while (i < raw.length) {
         if (parts[i].kind === "wide") {
             const lines = [];
-            while (i < raw.length && (parts[i].kind === "wide" || (mask[i]))) { lines.push(mk(0, raw[i])); i++; }
+            while (i < raw.length && (parts[i].kind === "wide" || (mask[i]))) { push(lines, 0, raw[i]); i++; }
             bands.push({ kind: "wide", lines });
         } else {
             const left = [], right = [];
             while (i < raw.length && parts[i].kind !== "wide") {
                 const p = parts[i];
-                if (p.kind === "blank") { left.push(mk(0, "")); right.push(mk(r, "")); }
-                else if (p.kind === "leftOnly") { left.push(mk(0, p.left)); right.push(mk(r, "")); }
-                else if (p.kind === "rightOnly") { left.push(mk(0, "")); right.push(mk(p.rightX0, p.right)); }
-                else { left.push(mk(0, p.left)); right.push(mk(p.rightX0, p.right)); }
+                if (p.kind === "blank") { push(left, 0, ""); push(right, r, ""); }
+                else if (p.kind === "leftOnly") { push(left, 0, p.left); push(right, r, ""); }
+                else if (p.kind === "rightOnly") { push(left, 0, ""); push(right, p.rightX0, p.right); }
+                else { push(left, 0, p.left); push(right, p.rightX0, p.right); }
                 i++;
             }
             bands.push({ kind: "columns", left, right });
         }
     }
     return { rightStart: r, bands, spanning };
+}
+
+/**
+ * How many flow lines the raw-layout cut changed against the same cut of the pre-normalised layout,
+ * over page ranges: the lines of the new flow (band kind, column origin, text) that do not occur in
+ * the old flow of the same page. Null when the pre-normalised pages are no longer in the cache.
+ */
+function layoutMoveReport(pageRanges) {
+    const flat = (bands) => {
+        const out = [];
+        for (const band of bands) {
+            if (band.kind === "wide") for (const l of band.lines) out.push(`W|0|${l.text}`);
+            else { for (const l of band.left) out.push(`L|${l.x0}|${l.text}`); for (const l of band.right) out.push(`R|${l.x0}|${l.text}`); }
+        }
+        return out;
+    };
+    const report = { moved: 0, pages: 0, pagesMoved: 0, perPage: [] };
+    for (const [a, b] of pageRanges) for (let n = a; n <= b; n++) {
+        if (!readLayoutNormalized(n)) return null;
+        const old = new Map();
+        for (const l of flat(pageBands(n, { normalized: true }).bands)) old.set(l, (old.get(l) || 0) + 1);
+        let moved = 0;
+        for (const l of flat(pageBands(n).bands)) {
+            const k = old.get(l) || 0;
+            if (k > 0) old.set(l, k - 1); else moved++;
+        }
+        report.pages++;
+        if (moved) { report.pagesMoved++; report.moved += moved; report.perPage.push({ page: n, moved }); }
+    }
+    return report;
 }
 
 const BREAK = Object.freeze({ brk: true, text: "", page: 0, x0: 0 });
@@ -933,6 +982,8 @@ function main() {
     console.log(`readiness: ${JSON.stringify(readiness)}`);
     console.log(`warnings: ${warnings.length}`);
     for (const e of entries.filter(e => e.readiness === "extracted")) console.log(`  extracted: ${e.id} p.${e.source.pages.join(",")}: ${e.notes.join("; ")}`);
+    const moved = layoutMoveReport(RULES_PAGES);
+    console.log(moved ? `raw layout cut: ${moved.moved} lines moved on ${moved.pagesMoved} of ${moved.pages} pages (${moved.perPage.map(p => `${p.page}:${p.moved}`).join(" ")})` : "raw layout cut: pre-normalised layout pages not in the cache, moved-line report skipped");
     console.log(`wrote ${path.relative(path.resolve(__dirname, "..", ".."), file)}`);
     const failed = chk.failed();
     console.log(failed ? `RESULT: FAIL (${failed} check(s) failed)` : "RESULT: PASS");
@@ -1305,8 +1356,8 @@ function spotChecks(entries, chk) {
 
 module.exports = {
     CACHE_DIR, STAGING_DIR, SOURCE_DOCUMENT,
-    readLayout, readReading, readManifest,
-    detectRightStart, pageBands, pageFlow, rangeFlow, BREAK,
+    readLayout, readLayoutNormalized, readReading, readManifest,
+    detectRightStart, pageBands, pageFlow, rangeFlow, BREAK, layoutMoveReport,
     blocksOf, blockKind, blockText, blockParagraphs, rawTableRows, headingLike, indentOf, isTableLine, isBullet, isLabel, joinLines,
     lineCells, clusterByX, segmentWrapped, readTable, tableToText,
     findHeading, findLine, tableRegion, renderBlocks, makeEntry, writeStaging,

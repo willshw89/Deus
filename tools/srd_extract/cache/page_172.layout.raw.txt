@@ -1,0 +1,63 @@
+You make an area within range magically secure.          Programmed Illusion
+The area is a cube that can be as small as 5 feet to as
+large as 100 feet on each side. The spell lasts for the  6th-­‐‑level illusion
+duration or until you use an action to dismiss it.
+                                                         Casting Time: 1 action
+  When you cast the spell, you decide what sort of       Range: 120 feet
+security the spell provides, choosing any or all of the  Components: V, S, M (a bit of fleece and jade dust
+following properties:
+                                                           worth at least 25 gp)
+• Sound can’t pass through the barrier at the edge of    Duration: Until dispelled
+  the warded area.
+                                                         You create an illusion of an object, a creature, or
+• The barrier of the warded area appears dark and        some other visible phenomenon within range that
+  foggy, preventing vision (including darkvision)        activates when a specific condition occurs. The
+  through it.                                            illusion is imperceptible until then. It must be no
+                                                         larger than a 30-­‐‑foot cube, and you decide when you
+• Sensors created by divination spells can’t appear      cast the spell how the illusion behaves and what
+  inside the protected area or pass through the          sounds it makes. This scripted performance can last
+  barrier at its perimeter.                              up to 5 minutes.
+
+• Creatures in the area can’t be targeted by               When the condition you specify occurs, the illusion
+  divination spells.                                     springs into existence and performs in the manner
+                                                         you described. Once the illusion finishes performing,
+• Nothing can teleport into or out of the warded         it disappears and remains dormant for 10 minutes.
+  area.                                                  After this time, the illusion can be activated again.
+
+• Planar travel is blocked within the warded area.         The triggering condition can be as general or as
+                                                         detailed as you like, though it must be based on
+  Casting this spell on the same spot every day for a    visual or audible conditions that occur within 30 feet
+year makes this effect permanent.                        of the area. For example, you could create an illusion
+                                                         of yourself to appear and warn off others who
+  At Higher Levels. When you cast this spell using a     attempt to open a trapped door, or you could set the
+spell slot of 5th level or higher, you can increase the  illusion to trigger only when a creature says the
+size of the cube by 100 feet for each slot level         correct word or phrase.
+beyond 4th. Thus you could protect a cube that can
+be up to 200 feet on one side by using a spell slot of     Physical interaction with the image reveals it to be
+5th level.                                               an illusion, because things can pass through it. A
+                                                         creature that uses its action to examine the image
+Produce Flame                                            can determine that it is an illusion with a successful
+                                                         Intelligence (Investigation) check against your spell
+Conjuration cantrip                                      save DC. If a creature discerns the illusion for what it
+                                                         is, the creature can see through the image, and any
+Casting Time: 1 action                                   noise it makes sounds hollow to the creature.
+Range: Self
+Components: V, S                                         Project Image
+Duration: 10 minutes
+                                                         7th-­‐‑level illusion
+A flickering flame appears in your hand. The flame
+remains there for the duration and harms neither         Casting Time: 1 action
+you nor your equipment. The flame sheds bright           Range: 500 miles
+light in a 10-­‐‑foot radius and dim light for an        Components: V, S, M (a small replica of you made
+additional 10 feet. The spell ends if you dismiss it as
+an action or if you cast it again.                         from materials worth at least 5 gp)
+                                                         Duration: Concentration, up to 1 day
+  You can also attack with the flame, although doing
+so ends the spell. When you cast this spell, or as an    You create an illusory copy of yourself that lasts for
+action on a later turn, you can hurl the flame at a      the duration. The copy can appear at any location
+creature within 30 feet of you. Make a ranged spell      within range that you have seen before, regardless of
+attack. On a hit, the target takes 1d8 fire damage.      intervening obstacles. The illusion looks and sounds
+                                                         like you but is intangible. If the illusion takes any
+  This spell’s damage increases by 1d8 when you          damage, it disappears, and the spell ends.
+reach 5th level (2d8), 11th level (3d8), and 17th
+level (4d8).

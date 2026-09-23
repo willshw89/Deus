@@ -1,0 +1,63 @@
+Range: 120 feet                                                 When the wall appears, each creature within its
+Components: V, S, M (a small block of granite)                area must make a Dexterity saving throw. On a failed
+Duration: Concentration, up to 10 minutes                     save, a creature takes 7d8 piercing damage, or half
+                                                              as much damage on a successful save.
+A nonmagical wall of solid stone springs into
+existence at a point you choose within range. The               A creature can move through the wall, albeit
+wall is 6 inches thick and is composed of ten 10-­‐‑foot-­‐‑  slowly and painfully. For every 1 foot a creature
+by-­‐‑10-­‐‑foot panels. Each panel must be contiguous        moves through the wall, it must spend 4 feet of
+with at least one other panel. Alternatively, you can         movement. Furthermore, the first time a creature
+create 10-­‐‑foot-­‐‑by-­‐‑20-­‐‑foot panels that are only 3  enters the wall on a turn or ends its turn there, the
+inches thick.                                                 creature must make a Dexterity saving throw. It
+                                                              takes 7d8 slashing damage on a failed save, or half as
+  If the wall cuts through a creature’s space when it         much damage on a successful one.
+appears, the creature is pushed to one side of the
+wall (your choice). If a creature would be                      At Higher Levels. When you cast this spell using a
+surrounded on all sides by the wall (or the wall and          spell slot of 7th level or higher, both types of damage
+another solid surface), that creature can make a              increase by 1d8 for each slot level above 6th.
+Dexterity saving throw. On a success, it can use its
+reaction to move up to its speed so that it is no             Warding Bond
+longer enclosed by the wall.
+                                                              2nd-­‐‑level abjuration
+  The wall can have any shape you desire, though it
+can’t occupy the same space as a creature or object.          Casting Time: 1 action
+The wall doesn’t need to be vertical or rest on any           Range: Touch
+firm foundation. It must, however, merge with and             Components: V, S, M (a pair of platinum rings worth
+be solidly supported by existing stone. Thus, you can
+use this spell to bridge a chasm or create a ramp.              at least 50 gp each, which you and the target must
+                                                                wear for the duration)
+  If you create a span greater than 20 feet in length,        Duration: 1 hour
+you must halve the size of each panel to create
+supports. You can crudely shape the wall to create            This spell wards a willing creature you touch and
+crenellations, battlements, and so on.                        creates a mystic connection between you and the
+                                                              target until the spell ends. While the target is within
+  The wall is an object made of stone that can be             60 feet of you, it gains a +1 bonus to AC and saving
+damaged and thus breached. Each panel has AC 15               throws, and it has resistance to all damage. Also,
+and 30 hit points per inch of thickness. Reducing a           each time it takes damage, you take the same
+panel to 0 hit points destroys it and might cause             amount of damage.
+connected panels to collapse at the GM’s discretion.
+                                                                The spell ends if you drop to 0 hit points or if you
+  If you maintain your concentration on this spell            and the target become separated by more than 60
+for its whole duration, the wall becomes permanent            feet. It also ends if the spell is cast again on either of
+and can’t be dispelled. Otherwise, the wall                   the connected creatures. You can also dismiss the
+disappears when the spell ends.                               spell as an action.
+
+Wall of Thorns                                                Water Breathing
+
+6th-­‐‑level conjuration                                      3rd-­‐‑level transmutation (ritual)
+
+Casting Time: 1 action                                        Casting Time: 1 action
+Range: 120 feet                                               Range: 30 feet
+Components: V, S, M (a handful of thorns)                     Components: V, S, M (a short reed or piece of straw)
+Duration: Concentration, up to 10 minutes                     Duration: 24 hours
+
+You create a wall of tough, pliable, tangled brush            This spell grants up to ten willing creatures you can
+bristling with needle-­‐‑sharp thorns. The wall appears       see within range the ability to breathe underwater
+within range on a solid surface and lasts for the             until the spell ends. Affected creatures also retain
+duration. You choose to make the wall up to 60 feet           their normal mode of respiration.
+long, 10 feet high, and 5 feet thick or a circle that has
+a 20-­‐‑foot diameter and is up to 20 feet high and 5         Water Walk
+feet thick. The wall blocks line of sight.
+                                                              3rd-­‐‑level transmutation (ritual)
+
+                                                              Casting Time: 1 action

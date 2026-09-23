@@ -1,0 +1,65 @@
+Components: V, S, M (a lodestone and a pinch of               already). If they aren’t on their home plane, undead
+  dust)                                                       are sent to the Shadowfell, and fey are sent to the
+                                                              Feywild.
+Duration: Instantaneous
+                                                              Dispel Magic
+A thin green ray springs from your pointing finger to
+a target that you can see within range. The target can        3rd-­‐‑level abjuration
+be a creature, an object, or a creation of magical
+force, such as the wall created by wall of force.             Casting Time: 1 action
+                                                              Range: 120 feet
+  A creature targeted by this spell must make a               Components: V, S
+Dexterity saving throw. On a failed save, the target          Duration: Instantaneous
+takes 10d6 + 40 force damage. If this damage
+reduces the target to 0 hit points, it is disintegrated.      Choose one creature, object, or magical effect within
+                                                              range. Any spell of 3rd level or lower on the target
+  A disintegrated creature and everything it is               ends. For each spell of 4th level or higher on the
+wearing and carrying, except magic items, are                 target, make an ability check using your spellcasting
+reduced to a pile of fine gray dust. The creature can         ability. The DC equals 10 + the spell’s level. On a
+be restored to life only by means of a true                   successful check, the spell ends.
+resurrection or a wish spell.
+                                                                At Higher Levels. When you cast this spell using a
+  This spell automatically disintegrates a Large or           spell slot of 4th level or higher, you automatically
+smaller nonmagical object or a creation of magical            end the effects of a spell on the target if the spell’s
+force. If the target is a Huge or larger object or            level is equal to or less than the level of the spell slot
+creation of force, this spell disintegrates a 10-­‐‑foot-­‐‑  you used.
+cube portion of it. A magic item is unaffected by this
+spell.                                                        Divination
+
+  At Higher Levels. When you cast this spell using a          4th-­‐‑level divination (ritual)
+spell slot of 7th level or higher, the damage increases
+by 3d6 for each slot level above 6th.                         Casting Time: 1 action
+                                                              Range: Self
+Dispel Evil and Good                                          Components: V, S, M (incense and a sacrificial
+
+5th-­‐‑level abjuration                                         offering appropriate to your religion, together
+                                                                worth at least 25 gp, which the spell consumes)
+Casting Time: 1 action                                        Duration: Instantaneous
+Range: Self
+Components: V, S, M (holy water or powdered silver            Your magic and an offering put you in contact with a
+                                                              god or a god’s servants. You ask a single question
+  and iron)                                                   concerning a specific goal, event, or activity to occur
+Duration: Concentration, up to 1 minute                       within 7 days. The GM offers a truthful reply. The
+                                                              reply might be a short phrase, a cryptic rhyme, or an
+Shimmering energy surrounds and protects you                  omen.
+from fey, undead, and creatures originating from
+beyond the Material Plane. For the duration,                    The spell doesn’t take into account any possible
+celestials, elementals, fey, fiends, and undead have          circumstances that might change the outcome, such
+disadvantage on attack rolls against you.                     as the casting of additional spells or the loss or gain
+                                                              of a companion.
+  You can end the spell early by using either of the
+following special functions.                                    If you cast the spell two or more times before
+                                                              finishing your next long rest, there is a cumulative
+  Break Enchantment. As your action, you touch a              25 percent chance for each casting after the first that
+creature you can reach that is charmed, frightened,           you get a random reading. The GM makes this roll in
+or possessed by a celestial, an elemental, a fey, a           secret.
+fiend, or an undead. The creature you touch is no
+longer charmed, frightened, or possessed by such              Divine Favor
+creatures.
+                                                              1st-­‐‑level evocation
+  Dismissal. As your action, make a melee spell
+attack against a celestial, an elemental, a fey, a fiend,     Casting Time: 1 bonus action
+or an undead you can reach. On a hit, you attempt to          Range: Self
+drive the creature back to its home plane. The                Components: V, S
+creature must succeed on a Charisma saving throw
+or be sent back to its home plane (if it isn’t there

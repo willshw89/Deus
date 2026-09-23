@@ -1,0 +1,64 @@
+paladins meet the ideal of the knight in shining          You can end this effect on your turn as part of any
+armor, acting with honor in pursuit of justice and the  other action. If you are no longer holding or carrying
+greater good. They hold themselves to the highest       this weapon, or if you fall unconscious, this effect
+standards of conduct, and some, for better or worse,    ends.
+hold the rest of the world to the same standards.
+Many who swear this oath are devoted to gods of           Turn the Unholy. As an action, you present your
+law and good and use their gods’ tenets as the          holy symbol and speak a prayer censuring fiends
+measure of their devotion. They hold angels—the         and undead, using your Channel Divinity. Each fiend
+perfect servants of good—as their ideals, and           or undead that can see or hear you within 30 feet of
+incorporate images of angelic wings into their          you must make a Wisdom saving throw. If the
+helmets or coats of arms.                               creature fails its saving throw, it is turned for 1
+                                                        minute or until it takes damage.
+Tenets of Devotion
+                                                          A turned creature must spend its turns trying to
+Though the exact words and strictures of the Oath of    move as far away from you as it can, and it can’t
+Devotion vary, paladins of this oath share these        willingly move to a space within 30 feet of you. It
+tenets.                                                 also can’t take reactions. For its action, it can use
+                                                        only the Dash action or try to escape from an effect
+  Honesty. Don’t lie or cheat. Let your word be your    that prevents it from moving. If there’s nowhere to
+promise.                                                move, the creature can use the Dodge action.
+
+  Courage. Never fear to act, though caution is wise.   Aura of Devotion
+  Compassion. Aid others, protect the weak, and
+punish those who threaten them. Show mercy to           Starting at 7th level, you and friendly creatures
+your foes, but temper it with wisdom.                   within 10 feet of you can’t be charmed while you are
+  Honor. Treat others with fairness, and let your       conscious.
+honorable deeds be an example to them. Do as much
+good as possible while causing the least amount of        At 18th level, the range of this aura increases to 30
+harm.                                                   feet.
+  Duty. Be responsible for your actions and their
+consequences, protect those entrusted to your care,     Purity of Spirit
+and obey those who have just authority over you.
+                                                        Beginning at 15th level, you are always under the
+Oath Spells                                             effects of a protection from evil and good spell.
+
+You gain oath spells at the paladin levels listed.      Holy Nimbus
+
+Oath of Devotion Spells                                 At 20th level, as an action, you can emanate an aura
+                                                        of sunlight. For 1 minute, bright light shines from
+Paladin  Spells                                         you in a 30-­‐‑foot radius, and dim light shines 30 feet
+ Level   protection from evil and good, sanctuary       beyond that.
+  3rd    lesser restoration, zone of truth
+  5th    beacon of hope, dispel magic                     Whenever an enemy creature starts its turn in the
+  9th    freedom of movement, guardian of faith         bright light, the creature takes 10 radiant damage.
+ 13th    commune, flame strike
+ 17th                                                     In addition, for the duration, you have advantage
+                                                        on saving throws against spells cast by fiends or
+Channel Divinity                                        undead.
+
+When you take this oath at 3rd level, you gain the        Once you use this feature, you can’t use it again
+following two Channel Divinity options.                 until you finish a long rest.
+
+  Sacred Weapon. As an action, you can imbue one        Breaking Your Oath
+weapon that you are holding with positive energy,
+using your Channel Divinity. For 1 minute, you add      A paladin tries to hold to the highest standards of conduct,
+your Charisma modifier to attack rolls made with        but even the most virtuous paladin is fallible. Sometimes the
+that weapon (with a minimum bonus of +1). The           right path proves too demanding, sometimes a situation calls
+weapon also emits bright light in a 20-­‐‑foot radius   for the lesser of two evils, and sometimes the heat of
+and dim light 20 feet beyond that. If the weapon is     emotion causes a paladin to transgress his or her oath.
+not already magical, it becomes magical for the
+duration.                                                  A paladin who has broken a vow typically seeks absolution
+                                                        from a cleric who shares his or her faith or from another
+                                                        paladin of the same order. The paladin might spend an all-­‐
+                                                        night vigil in prayer as a sign of penitence, or undertake a fast

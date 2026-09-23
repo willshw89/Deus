@@ -1,0 +1,62 @@
+Dwarven Plate                                            91–00  bottle is opened a fourth time, the efreeti
+                                                                escapes and disappears, and the bottle loses its
+Armor (plate), very rare                                        magic.
+                                                                The efreeti can cast the wish spell three times for
+While wearing this armor, you gain a +2 bonus to AC.            you. It disappears when it grants the final wish or
+In addition, if an effect moves you against your will           after 1 hour, and the bottle loses its magic.
+along the ground, you can use your reaction to
+reduce the distance you are moved by up to 10 feet.      Elemental Gem
+
+Dwarven Thrower                                          Wondrous item, uncommon
+
+Weapon (warhammer), very rare (requires                  This gem contains a mote of elemental energy. When
+attunement by a dwarf)                                   you use an action to break the gem, an elemental is
+                                                         summoned as if you had cast the conjure elemental
+You gain a +3 bonus to attack and damage rolls           spell, and the gem’s magic is lost. The type of gem
+made with this magic weapon. It has the thrown           determines the elemental summoned by the spell.
+property with a normal range of 20 feet and a long
+range of 60 feet. When you hit with a ranged attack      Gem             Summoned Elemental
+using this weapon, it deals an extra 1d8 damage or, if   Blue sapphire   Air elemental
+the target is a giant, 2d8 damage. Immediately after     Yellow diamond  Earth elemental
+the attack, the weapon flies back to your hand.          Red corundum    Fire elemental
+                                                         Emerald         Water elemental
+Efficient Quiver
+                                                         Elven Chain
+Wondrous item, uncommon
+                                                         Armor (chain shirt), rare
+Each of the quiver’s three compartments connects to
+an extradimensional space that allows the quiver to      You gain a +1 bonus to AC while you wear this armor.
+hold numerous items while never weighing more            You are considered proficient with this armor even if
+than 2 pounds. The shortest compartment can hold         you lack proficiency with medium armor.
+up to sixty arrows, bolts, or similar objects. The
+midsize compartment holds up to eighteen javelins        Eversmoking Bottle
+or similar objects. The longest compartment holds
+up to six long objects, such as bows, quarterstaffs, or  Wondrous item, uncommon
+spears.
+                                                         Smoke leaks from the lead-­‐‑stoppered mouth of this
+  You can draw any item the quiver contains as if        brass bottle, which weighs 1 pound. When you use
+doing so from a regular quiver or scabbard.              an action to remove the stopper, a cloud of thick
+                                                         smoke pours out in a 60-­‐‑foot radius from the bottle.
+Efreeti Bottle                                           The cloud’s area is heavily obscured. Each minute
+                                                         the bottle remains open and within the cloud, the
+Wondrous item, very rare                                 radius increases by 10 feet until it reaches its
+                                                         maximum radius of 120 feet.
+This painted brass bottle weighs 1 pound. When you
+use an action to remove the stopper, a cloud of thick      The cloud persists as long as the bottle is open.
+smoke flows out of the bottle. At the end of your turn,  Closing the bottle requires you to speak its
+the smoke disappears with a flash of harmless fire,      command word as an action. Once the bottle is
+and an efreeti appears in an unoccupied space            closed, the cloud disperses after 10 minutes. A
+within 30 feet of you.                                   moderate wind (11 to 20 miles per hour) can also
+                                                         disperse the smoke after 1 minute, and a strong
+  The first time the bottle is opened, the GM rolls to   wind (21 or more miles per hour) can do so after 1
+determine what happens.                                  round.
+
+d100   Effect                                            Eyes of Charming
+01–10  The efreeti attacks you. After fighting for 5
+       rounds, the efreeti disappears, and the bottle    Wondrous item, uncommon (requires attunement)
+11–90  loses its magic.
+       The efreeti serves you for 1 hour, doing as you   These crystal lenses fit over the eyes. They have 3
+       command. Then the efreeti returns to the bottle,  charges. While wearing them, you can expend 1
+       and a new stopper contains it. The stopper can’t  charge as an action to cast the charm person spell
+       be removed for 24 hours. The next two times the
+       bottle is opened, the same effect occurs. If the

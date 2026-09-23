@@ -1,0 +1,60 @@
+Hit Dice by Size                                         Ability Scores
+
+Monster Size  Hit Die  Average HP per Die                Every monster has six ability scores (Strength,
+Tiny            d4               2½                      Dexterity, Constitution, Intelligence, Wisdom, and
+                                                         Charisma) and corresponding modifiers. For more
+Small           d6               3½                      information on ability scores and how they’re used
+Medium          d8               4½                      in play, see the Player’s Handbook.
+Large          d10               5½
+Huge           d12               6½                      Saving Throws
+Gargantuan     d20              10½
+
+  A monster’s Constitution modifier also affects the     The Saving Throws entry is reserved for creatures
+number of hit points it has. Its Constitution modifier   that are adept at resisting certain kinds of effects.
+is multiplied by the number of Hit Dice it possesses,    For example, a creature that isn’t easily charmed or
+and the result is added to its hit points. For example,  frightened might gain a bonus on its Wisdom saving
+if a monster has a Constitution of 12 (+1 modifier)      throws. Most creatures don’t have special saving
+and 2d8 Hit Dice, it has 2d8 + 2 hit points (average     throw bonuses, in which case this section is absent.
+11).
+                                                           A saving throw bonus is the sum of a monster’s
+Speed                                                    relevant ability modifier and its proficiency bonus,
+                                                         which is determined by the monster’s challenge
+A monster’s speed tells you how far it can move on       rating (as shown in the Proficiency Bonus by
+its turn. For more information on speed, see the         Challenge Rating table).
+Player’s Handbook.
+                                                         Proficiency Bonus by Challenge Rating
+  All creatures have a walking speed, simply called
+the monster’s speed. Creatures that have no form of      Challenge  Proficiency  Challenge  Proficiency
+ground-­‐‑based locomotion have a walking speed of 0          0        Bonus         14        Bonus
+feet.                                                        1/8         +2          15          +5
+                                                                         +2                      +5
+  Some creatures have one or more of the following           1/4                     16
+additional movement modes.                                   1/2         +2          17          +5
+                                                              1          +2          18          +6
+Burrow                                                        2          +2          19          +6
+                                                              3          +2          20          +6
+A monster that has a burrowing speed can use that             4          +2          21          +6
+speed to move through sand, earth, mud, or ice. A             5          +2          22          +7
+monster can’t burrow through solid rock unless it             6          +3          23          +7
+has a special trait that allows it to do so.                  7          +3          24          +7
+                                                              8          +3          25          +7
+Climb                                                         9          +3          26          +8
+                                                             10          +4          27          +8
+A monster that has a climbing speed can use all or           11          +4          28          +8
+part of its movement to move on vertical surfaces.           12          +4          29          +8
+The monster doesn’t need to spend extra movement             13          +4          30          +9
+to climb.                                                                +5                      +9
+
+Fly                                                      Skills
+
+A monster that has a flying speed can use all or part    The Skills entry is reserved for monsters that are
+of its movement to fly. Some monsters have the           proficient in one or more skills. For example, a
+ability to hover, which makes them hard to knock         monster that is very perceptive and stealthy might
+out of the air (as explained in the rules on flying in   have bonuses to Wisdom (Perception) and Dexterity
+the Player’s Handbook). Such a monster stops             (Stealth) checks.
+hovering when it dies.
+                                                           A skill bonus is the sum of a monster’s relevant
+Swim                                                     ability modifier and its proficiency bonus, which is
+                                                         determined by the monster’s challenge rating (as
+A monster that has a swimming speed doesn’t need         shown in the Proficiency Bonus by Challenge Rating
+to spend extra movement to swim.                         table). Other modifiers might apply. For instance, a

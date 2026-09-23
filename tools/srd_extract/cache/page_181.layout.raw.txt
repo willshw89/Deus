@@ -1,0 +1,61 @@
+You alter time around up to six creatures of your        Components: V, S, M (burning incense)
+choice in a 40-­‐‑foot cube within range. Each target    Duration: 10 minutes
+must succeed on a Wisdom saving throw or be
+affected by this spell for the duration.                 You grant the semblance of life and intelligence to a
+                                                         corpse of your choice within range, allowing it to
+  An affected target’s speed is halved, it takes a −2    answer the questions you pose. The corpse must still
+penalty to AC and Dexterity saving throws, and it        have a mouth and can’t be undead. The spell fails if
+can’t use reactions. On its turn, it can use either an   the corpse was the target of this spell within the last
+action or a bonus action, not both. Regardless of the    10 days.
+creature’s abilities or magic items, it can’t make
+more than one melee or ranged attack during its            Until the spell ends, you can ask the corpse up to
+turn.                                                    five questions. The corpse knows only what it knew
+                                                         in life, including the languages it knew. Answers are
+  If the creature attempts to cast a spell with a        usually brief, cryptic, or repetitive, and the corpse is
+casting time of 1 action, roll a d20. On an 11 or        under no compulsion to offer a truthful answer if
+higher, the spell doesn’t take effect until the          you are hostile to it or it recognizes you as an enemy.
+creature’s next turn, and the creature must use its      This spell doesn’t return the creature’s soul to its
+action on that turn to complete the spell. If it can’t,  body, only its animating spirit. Thus, the corpse can’t
+the spell is wasted.                                     learn new information, doesn’t comprehend
+                                                         anything that has happened since it died, and can’t
+  A creature affected by this spell makes another        speculate about future events.
+Wisdom saving throw at the end of its turn. On a
+successful save, the effect ends for it.                 Speak with Plants
+
+Spare the Dying                                          3rd-­‐‑level transmutation
+
+Necromancy cantrip                                       Casting Time: 1 action
+                                                         Range: Self (30-­‐‑foot radius)
+Casting Time: 1 action                                   Components: V, S
+Range: Touch                                             Duration: 10 minutes
+Components: V, S
+Duration: Instantaneous                                  You imbue plants within 30 feet of you with limited
+You touch a living creature that has 0 hit points. The   sentience and animation, giving them the ability to
+creature becomes stable. This spell has no effect on     communicate with you and follow your simple
+undead or constructs.                                    commands. You can question plants about events in
+                                                         the spell’s area within the past day, gaining
+Speak with Animals                                       information about creatures that have passed,
+                                                         weather, and other circumstances.
+1st-­‐‑level divination (ritual)
+                                                           You can also turn difficult terrain caused by plant
+Casting Time: 1 action                                   growth (such as thickets and undergrowth) into
+Range: Self                                              ordinary terrain that lasts for the duration. Or you
+Components: V, S                                         can turn ordinary terrain where plants are present
+Duration: 10 minutes                                     into difficult terrain that lasts for the duration,
+                                                         causing vines and branches to hinder pursuers, for
+You gain the ability to comprehend and verbally          example.
+communicate with beasts for the duration. The
+knowledge and awareness of many beasts is limited          Plants might be able to perform other tasks on
+by their intelligence, but at minimum, beasts can        your behalf, at the GM’s discretion. The spell doesn’t
+give you information about nearby locations and          enable plants to uproot themselves and move about,
+monsters, including whatever they can perceive or        but they can freely move branches, tendrils, and
+have perceived within the past day. You might be         stalks.
+able to persuade a beast to perform a small favor for
+you, at the GM’s discretion.                               If a plant creature is in the area, you can
+                                                         communicate with it as if you shared a common
+Speak with Dead                                          language, but you gain no magical ability to influence
+                                                         it.
+3rd-­‐‑level necromancy
+                                                           This spell can cause the plants created by the
+Casting Time: 1 action                                   entangle spell to release a restrained creature.
+Range: 10 feet

@@ -1,0 +1,59 @@
+4th Level                  Stoneskin
+
+Banishment                 5th Level
+Death Ward
+Locate Creature            Commune with Nature
+                           Tree Stride
+5th Level
+                           Sorcerer Spells
+Dispel Evil and Good
+Geas                       Cantrips (0 Level)
+Raise Dead
+                           Acid Splash
+Ranger Spells              Chill Touch
+                           Dancing Lights
+1st Level                  Fire Bolt
+                           Light
+Alarm                      Mage Hand
+Animal Friendship          Mending
+Cure Wounds                Message
+Detect Magic               Minor Illusion
+Detect Poison and Disease  Poison Spray
+Fog Cloud                  Prestidigitation
+Goodberry                  Ray of Frost
+Hunter's Mark              Shocking Grasp
+Jump                       True Strike
+Longstrider
+Speak with Animals         1st Level
+
+2nd Level                  Burning Hands
+                           Charm Person
+Animal Messenger           Color Spray
+Barkskin                   Comprehend Languages
+Darkvision                 Detect Magic
+Find Traps                 Disguise Self
+Lesser Restoration         Expeditious Retreat
+Locate Animals or Plants   False Life
+Locate Object              Feather Fall
+Pass without Trace         Fog Cloud
+Protection from Poison     Jump
+Silence                    Mage Armor
+Spike Growth               Magic Missile
+                           Shield
+3rd Level                  Silent Image
+                           Sleep
+Conjure Animals            Thunderwave
+Daylight
+Nondetection               2nd Level
+Plant Growth
+Protection from Energy     Alter Self
+Speak with Plants          Blindness/Deafness
+Water Breathing            Blur
+Water Walk                 Darkness
+Wind Wall                  Darkvision
+                           Detect Thoughts
+4th Level                  Enhance Ability
+                           Enlarge/Reduce
+Conjure Woodland Beings    Gust of Wind
+Freedom of Movement
+Locate Creature

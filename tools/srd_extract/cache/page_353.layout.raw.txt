@@ -1,0 +1,62 @@
+saving throws, and it is immune to all nonmagical              or restrained. Hit: 7 (1d6 + 4) piercing damage plus 10
+damage, except the damage it takes from sunlight.              (3d6) necrotic damage. The target’s hit point maximum
+                                                               is reduced by an amount equal to the necrotic damage
+Legendary Resistance (3/Day). If the vampire fails a           taken, and the vampire regains hit points equal to that
+saving throw, it can choose to succeed instead.                amount. The reduction lasts until the target finishes a
+                                                               long rest. The target dies if this effect reduces its hit
+Misty Escape. When it drops to 0 hit points outside its        point maximum to 0. A humanoid slain in this way and
+resting place, the vampire transforms into a cloud of          then buried in the ground rises the following night as a
+mist (as in the Shapechanger trait) instead of falling         vampire spawn under the vampire’s control.
+unconscious, provided that it isn’t in sunlight or
+running water. If it can’t transform, it is destroyed.         Charm. The vampire targets one humanoid it can see
+                                                               within 30 feet of it. If the target can see the vampire,
+  While it has 0 hit points in mist form, it can’t revert      the target must succeed on a DC 17 Wisdom saving
+to its vampire form, and it must reach its resting place       throw against this magic or be charmed by the vampire.
+within 2 hours or be destroyed. Once in its resting            The charmed target regards the vampire as a trusted
+place, it reverts to its vampire form. It is then paralyzed    friend to be heeded and protected. Although the target
+until it regains at least 1 hit point. After spending 1        isn’t under the vampire’s control, it takes the vampire’s
+hour in its resting place with 0 hit points, it regains 1 hit  requests or actions in the most favorable way it can,
+point.                                                         and it is a willing target for the vampire’s bite attack.
+
+Regeneration. The vampire regains 20 hit points at the           Each time the vampire or the vampire’s companions
+start of its turn if it has at least 1 hit point and isn’t in  do anything harmful to the target, it can repeat the
+sunlight or running water. If the vampire takes radiant        saving throw, ending the effect on itself on a success.
+damage or damage from holy water, this trait doesn’t           Otherwise, the effect lasts 24 hours or until the
+function at the start of the vampire’s next turn.              vampire is destroyed, is on a different plane of
+                                                               existence than the target, or takes a bonus action to
+Spider Climb. The vampire can climb difficult surfaces,        end the effect.
+including upside down on ceilings, without needing to
+make an ability check.                                         Children of the Night (1/Day). The vampire magically
+                                                               calls 2d4 swarms of bats or rats, provided that the sun
+Vampire Weaknesses. The vampire has the following              isn’t up. While outdoors, the vampire can call 3d6
+flaws:                                                         wolves instead. The called creatures arrive in 1d4
+                                                               rounds, acting as allies of the vampire and obeying its
+  Forbiddance. The vampire can’t enter a residence             spoken commands. The beasts remain for 1 hour, until
+without an invitation from one of the occupants.               the vampire dies, or until the vampire dismisses them
+                                                               as a bonus action.
+  Harmed by Running Water. The vampire takes 20
+acid damage if it ends its turn in running water.              Legendary Actions
+
+  Stake to the Heart. If a piercing weapon made of             The vampire can take 3 legendary actions, choosing
+wood is driven into the vampire’s heart while the              from the options below. Only one legendary action
+vampire is incapacitated in its resting place, the             option can be used at a time and only at the end of
+vampire is paralyzed until the stake is removed.               another creature’s turn. The vampire regains spent
+                                                               legendary actions at the start of its turn.
+  Sunlight Hypersensitivity. The vampire takes 20
+radiant damage when it starts its turn in sunlight.            Move. The vampire moves up to its speed without
+While in sunlight, it has disadvantage on attack rolls           provoking opportunity attacks.
+and ability checks.
+                                                               Unarmed Strike. The vampire makes one unarmed
+Actions                                                          strike.
+
+Multiattack (Vampire Form Only). The vampire makes             Bite (Costs 2 Actions). The vampire makes one bite
+two attacks, only one of which can be a bite attack.             attack.
+
+Unarmed Strike (Vampire Form Only). Melee Weapon
+Attack: +9 to hit, reach 5 ft., one creature. Hit: 8 (1d8 +
+4) bludgeoning damage. Instead of dealing damage,
+the vampire can grapple the target (escape DC 18).
+
+Bite (Bat or Vampire Form Only). Melee Weapon
+Attack: +9 to hit, reach 5 ft., one willing creature, or a
+creature that is grappled by the vampire, incapacitated,

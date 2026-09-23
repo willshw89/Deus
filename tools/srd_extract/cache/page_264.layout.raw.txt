@@ -1,0 +1,53 @@
+Constitution saving throw against the caster’s spell         Hit Points 33 (6d10)
+save DC or fall unconscious for 1 minute.                    Speed 10 ft.
+False Appearance. While the armor remains
+motionless, it is indistinguishable from a normal suit of      STR DEX CON INT                WIS    CHA
+armor.                                                       17 (+3) 14 (+2) 10 (+0) 1 (−5)  3 (−4)  1 (−5)
+
+Actions                                                      Damage Immunities poison, psychic
+                                                             Condition Immunities blinded, charmed, deafened,
+Multiattack. The armor makes two melee attacks.
+Slam. Melee Weapon Attack: +4 to hit, reach 5 ft., one         frightened, paralyzed, petrified, poisoned
+target. Hit: 5 (1d6 + 2) bludgeoning damage.                 Senses blindsight 60 ft. (blind beyond this radius),
+
+Flying Sword                                                   passive Perception 6
+                                                             Languages —
+Small construct, unaligned                                   Challenge 2 (450 XP)
+
+Armor Class 17 (natural armor)                               Antimagic Susceptibility. The rug is incapacitated while
+Hit Points 17 (5d6)                                          in the area of an antimagic field. If targeted by dispel
+Speed 0 ft., fly 50 ft. (hover)                              magic, the rug must succeed on a Constitution saving
+                                                             throw against the caster’s spell save DC or fall
+  STR DEX CON INT                 WIS    CHA                 unconscious for 1 minute.
+12 (+1) 15 (+2) 11 (+0) 1 (−5)   5 (−3)  1 (−5)              Damage Transfer. While it is grappling a creature, the
+                                                             rug takes only half the damage dealt to it, and the
+Saving Throws Dex +4                                         creature grappled by the rug takes the other half.
+Damage Immunities poison, psychic                            False Appearance. While the rug remains motionless, it
+Condition Immunities blinded, charmed, deafened,             is indistinguishable from a normal rug.
+
+  frightened, paralyzed, petrified, poisoned                 Actions
+Senses blindsight 60 ft. (blind beyond this radius),
+                                                             Smother. Melee Weapon Attack: +5 to hit, reach 5 ft.,
+  passive Perception 7                                       one Medium or smaller creature. Hit: The creature is
+Languages —                                                  grappled (escape DC 13). Until this grapple ends, the
+Challenge 1/4 (50 XP)                                        target is restrained, blinded, and at risk of suffocating,
+                                                             and the rug can’t smother another target. In addition,
+Antimagic Susceptibility. The sword is incapacitated         at the start of each of the target’s turns, the target
+while in the area of an antimagic field. If targeted by      takes 10 (2d6 + 3) bludgeoning damage.
+dispel magic, the sword must succeed on a
+Constitution saving throw against the caster’s spell         Ankheg
+save DC or fall unconscious for 1 minute.
+                                                             Large monstrosity, unaligned
+False Appearance. While the sword remains
+motionless and isn’t flying, it is indistinguishable from a  Armor Class 14 (natural armor), 11 while prone
+normal sword.                                                Hit Points 39 (6d10 + 6)
+                                                             Speed 30 ft., burrow 10 ft.
+Actions
+                                                                 STR DEX CON INT WIS CHA
+Longsword. Melee Weapon Attack: +3 to hit, reach 5 ft.,        17 (+3) 11 (+0) 13 (+1) 1 (−5) 13 (+1) 6 (−2)
+one target. Hit: 5 (1d8 + 1) slashing damage.
+                                                             Senses darkvision 60 ft., tremorsense 60 ft., passive
+Rug of Smothering                                              Perception 11
+
+Large construct, unaligned                                   Languages —
+Armor Class 12                                               Challenge 2 (450 XP)

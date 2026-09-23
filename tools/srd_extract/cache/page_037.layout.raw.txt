@@ -1,0 +1,59 @@
+Ranger Archetype                                          Once you are camouflaged in this way, you can try
+                                                        to hide by pressing yourself up against a solid
+At 3rd level, you choose an archetype that you strive   surface, such as a tree or wall, that is at least as tall
+to emulate, such as the Hunter. Your choice grants      and wide as you are. You gain a +10 bonus to
+you features at 3rd level and again at 7th, 11th, and   Dexterity (Stealth) checks as long as you remain
+15th level.                                             there without moving or taking actions. Once you
+                                                        move or take an action or a reaction, you must
+Primeval Awareness                                      camouflage yourself again to gain this benefit.
+
+Beginning at 3rd level, you can use your action and     Vanish
+expend one ranger spell slot to focus your
+awareness on the region around you. For 1 minute        Starting at 14th level, you can use the Hide action as
+per level of the spell slot you expend, you can sense   a bonus action on your turn. Also, you can’t be
+whether the following types of creatures are present    tracked by nonmagical means, unless you choose to
+within 1 mile of you (or within up to 6 miles if you    leave a trail.
+are in your favored terrain): aberrations, celestials,
+dragons, elementals, fey, fiends, and undead. This      Feral Senses
+feature doesn’t reveal the creatures’ location or
+number.                                                 At 18th level, you gain preternatural senses that help
+                                                        you fight creatures you can’t see. When you attack a
+Ability Score Improvement                               creature you can’t see, your inability to see it doesn’t
+                                                        impose disadvantage on your attack rolls against it.
+When you reach 4th level, and again at 8th, 12th,
+16th, and 19th level, you can increase one ability        You are also aware of the location of any invisible
+score of your choice by 2, or you can increase two      creature within 30 feet of you, provided that the
+ability scores of your choice by 1. As normal, you      creature isn’t hidden from you and you aren’t
+can’t increase an ability score above 20 using this     blinded or deafened.
+feature.
+                                                        Foe Slayer
+Extra Attack
+                                                        At 20th level, you become an unparalleled hunter of
+Beginning at 5th level, you can attack twice, instead   your enemies. Once on each of your turns, you can
+of once, whenever you take the Attack action on your    add your Wisdom modifier to the attack roll or the
+turn.                                                   damage roll of an attack you make against one of
+                                                        your favored enemies. You can choose to use this
+Land’s Stride                                           feature before or after the roll, but before any effects
+                                                        of the roll are applied.
+Starting at 8th level, moving through nonmagical
+difficult terrain costs you no extra movement. You      Ranger Archetypes
+can also pass through nonmagical plants without
+being slowed by them and without taking damage          A classic expression of the ranger ideal is the Hunter.
+from them if they have thorns, spines, or a similar
+hazard.                                                 Hunter
+
+  In addition, you have advantage on saving throws      Emulating the Hunter archetype means accepting
+against plants that are magically created or            your place as a bulwark between civilization and the
+manipulated to impede movement, such those              terrors of the wilderness. As you walk the Hunter’s
+created by the entangle spell.                          path, you learn specialized techniques for fighting
+                                                        the threats you face, from rampaging ogres and
+Hide in Plain Sight                                     hordes of orcs to towering giants and terrifying
+                                                        dragons.
+Starting at 10th level, you can spend 1 minute
+creating camouflage for yourself. You must have         Hunter’s Prey
+access to fresh mud, dirt, plants, soot, and other
+naturally occurring materials with which to create      At 3rd level, you gain one of the following features of
+your camouflage.                                        your choice.
+
+                                                          Colossus Slayer. Your tenacity can wear down the
+                                                        most potent foes. When you hit a creature with a

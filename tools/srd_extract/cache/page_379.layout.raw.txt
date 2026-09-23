@@ -1,0 +1,49 @@
+Senses passive Perception 11                              A giant shark is 30 feet long and normally found in
+Languages —                                               deep oceans. Utterly fearless, it preys on anything
+Challenge 1/2 (100 XP)                                    that crosses its path, including whales and ships.
+
+Charge. If the sea horse moves at least 20 feet straight  Giant Spider
+toward a target and then hits it with a ram attack on
+the same turn, the target takes an extra 7 (2d6)          Large beast, unaligned
+bludgeoning damage. It the target is a creature, it must
+succeed on a DC 11 Strength saving throw or be            Armor Class 14 (natural armor)
+knocked prone.                                            Hit Points 26 (4d10 + 4)
+Water Breathing. The sea horse can breathe only           Speed 30 ft., climb 30 ft.
+underwater.
+                                                              STR DEX CON INT WIS CHA
+Actions                                                     14 (+2) 16 (+3) 12 (+1) 2 (−4) 11 (+0) 4 (−3)
+Ram. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+target. Hit: 4 (1d6 + 1) bludgeoning damage.              Skills Stealth +7
+                                                          Senses blindsight 10 ft., darkvision 60 ft., passive
+Like their smaller kin, giant sea horses are shy,
+colorful fish with elongated bodies and curled tails.       Perception 10
+Aquatic elves train them as mounts.                       Languages —
+                                                          Challenge 1 (200 XP)
+Giant Shark
+                                                          Spider Climb. The spider can climb difficult surfaces,
+Huge beast, unaligned                                     including upside down on ceilings, without needing to
+Armor Class 13 (natural armor)                            make an ability check.
+Hit Points 126 (11d12 + 55)                               Web Sense. While in contact with a web, the spider
+Speed 0 ft., swim 50 ft.                                  knows the exact location of any other creature in
+                                                          contact with the same web.
+    STR DEX CON INT WIS CHA                               Web Walker. The spider ignores movement restrictions
+  23 (+6) 11 (+0) 21 (+5) 1 (−5) 10 (+0) 5 (−3)           caused by webbing.
+
+Skills Perception +3                                      Actions
+Senses blindsight 60 ft., passive Perception 13
+Languages —                                               Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+Challenge 5 (1,800 XP)                                    creature. Hit: 7 (1d8 + 3) piercing damage, and the
+                                                          target must make a DC 11 Constitution saving throw,
+Blood Frenzy. The shark has advantage on melee attack     taking 9 (2d8) poison damage on a failed save, or half
+rolls against any creature that doesn’t have all its hit  as much damage on a successful one. If the poison
+points.                                                   damage reduces the target to 0 hit points, the target is
+Water Breathing. The shark can breathe only               stable but poisoned for 1 hour, even after regaining hit
+underwater.                                               points, and is paralyzed while poisoned in this way.
+                                                          Web (Recharge 5–6). Ranged Weapon Attack: +5 to hit,
+Actions                                                   range 30/60 ft., one creature. Hit: The target is
+Bite. Melee Weapon Attack: +9 to hit, reach 5 ft., one    restrained by webbing. As an action, the restrained
+target. Hit: 22 (3d10 + 6) piercing damage.               target can make a DC 12 Strength check, bursting the
+                                                          webbing on a success. The webbing can also be
+                                                          attacked and destroyed (AC 10; hp 5; vulnerability to
+                                                          fire damage; immunity to bludgeoning, poison, and
+                                                          psychic damage).

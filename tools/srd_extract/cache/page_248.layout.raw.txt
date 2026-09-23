@@ -1,0 +1,62 @@
+on a beast that has an innate swimming speed. The         Wand of Enemy Detection
+trident regains 1d3 expended charges daily at dawn.
+                                                          Wand, rare (requires attunement)
+Universal Solvent
+                                                          This wand has 7 charges. While holding it, you can
+Wondrous item, legendary                                  use an action and expend 1 charge to speak its
+                                                          command word. For the next minute, you know the
+This tube holds milky liquid with a strong alcohol        direction of the nearest creature hostile to you
+smell. You can use an action to pour the contents of      within 60 feet, but not its distance from you. The
+the tube onto a surface within reach. The liquid          wand can sense the presence of hostile creatures
+instantly dissolves up to 1 square foot of adhesive it    that are ethereal, invisible, disguised, or hidden, as
+touches, including sovereign glue.                        well as those in plain sight. The effect ends if you
+                                                          stop holding the wand.
+Vicious Weapon
+                                                            The wand regains 1d6 + 1 expended charges daily
+Weapon (any), rare                                        at dawn. If you expend the wand’s last charge, roll a
+                                                          d20. On a 1, the wand crumbles into ashes and is
+When you roll a 20 on your attack roll with this          destroyed.
+magic weapon, your critical hit deals an extra 2d6
+damage of the weapon’s type.                              Wand of Fear
+
+Vorpal Sword                                              Wand, rare (requires attunement)
+
+Weapon (any sword that deals slashing damage),            This wand has 7 charges for the following properties.
+legendary (requires attunement)                           It regains 1d6 + 1 expended charges daily at dawn. If
+                                                          you expend the wand’s last charge, roll a d20. On a 1,
+You gain a +3 bonus to attack and damage rolls            the wand crumbles into ashes and is destroyed.
+made with this magic weapon. In addition, the
+weapon ignores resistance to slashing damage.               Command. While holding the wand, you can use
+                                                          an action to expend 1 charge and command another
+  When you attack a creature that has at least one        creature to flee or grovel, as with the command spell
+head with this weapon and roll a 20 on the attack         (save DC 15).
+roll, you cut off one of the creature’s heads. The
+creature dies if it can’t survive without the lost head.    Cone of Fear. While holding the wand, you can use
+A creature is immune to this effect if it is immune to    an action to expend 2 charges, causing the wand’s tip
+slashing damage, doesn’t have or need a head, has         to emit a 60-­‐‑foot cone of amber light. Each creature
+legendary actions, or the GM decides that the             in the cone must succeed on a DC 15 Wisdom saving
+creature is too big for its head to be cut off with this  throw or become frightened of you for 1 minute.
+weapon. Such a creature instead takes an extra 6d8        While it is frightened in this way, a creature must
+slashing damage from the hit.                             spend its turns trying to move as far away from you
+                                                          as it can, and it can’t willingly move to a space within
+Wand of Binding                                           30 feet of you. It also can’t take reactions. For its
+                                                          action, it can use only the Dash action or try to
+Wand, rare (requires attunement by a spellcaster)         escape from an effect that prevents it from moving. If
+                                                          it has nowhere it can move, the creature can use the
+This wand has 7 charges for the following properties.     Dodge action. At the end of each of its turns, a
+It regains 1d6 + 1 expended charges daily at dawn. If     creature can repeat the saving throw, ending the
+you expend the wand’s last charge, roll a d20. On a 1,    effect on itself on a success.
+the wand crumbles into ashes and is destroyed.
+                                                          Wand of Fireballs
+  Spells. While holding the wand, you can use an
+action to expend some of its charges to cast one of       Wand, rare (requires attunement by a spellcaster)
+the following spells (save DC 17): hold monster (5
+charges) or hold person (2 charges).                      This wand has 7 charges. While holding it, you can
+                                                          use an action to expend 1 or more of its charges to
+  Assisted Escape. While holding the wand, you can        cast the fireball spell (save DC 15) from it. For 1
+use your reaction to expend 1 charge and gain             charge, you cast the 3rd-­‐‑level version of the spell.
+advantage on a saving throw you make to avoid             You can increase the spell slot level by one for each
+being paralyzed or restrained, or you can expend 1        additional charge you expend.
+charge and gain advantage on any check you make to
+escape a grapple.                                           The wand regains 1d6 + 1 expended charges daily
+                                                          at dawn. If you expend the wand’s last charge, roll a

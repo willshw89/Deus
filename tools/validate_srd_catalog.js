@@ -145,6 +145,22 @@ function main() {
     const byReadiness = {};
     for (const e of all) byReadiness[e.readiness] = (byReadiness[e.readiness] || 0) + 1;
     check("readiness_tagged", all.every(e => S.READINESS.includes(e.readiness)), Object.entries(byReadiness).map(([k, n]) => `${k} ${n}`).join(", ") || "no entries");
+    // Verification marks: every mark in verified.json must still match its entry's text (the assembler drops stale
+    // ones and lists them); a verified entry must carry the hash of the text it was verified against.
+    const stale = (manifest.verification && manifest.verification.stale) || [];
+    const badVerified = all.filter(e => e.readiness === "verified" && !(e.verification && e.verification.textSha256 === require("crypto").createHash("sha256").update(e.text, "utf8").digest("hex")));
+    check("verification_marks_current", stale.length === 0 && badVerified.length === 0, `${byReadiness.verified || 0} verified entries; ${stale.length} stale mark(s)${stale.length ? ": " + stale.map(s => s.id).join(", ") : ""}; ${badVerified.length} verified entries whose text no longer matches`);
+    // Table overlays: none refused, every applied overlay yields rows and (for dice tables) complete coverage,
+    // and no table anywhere is still marked unparsed while its entry claims to be parsed.
+    const refusedOverlays = (manifest.tableOverlays && manifest.tableOverlays.refused) || [];
+    const overlayTables = [], badOverlay = [], unparsedButParsed = [];
+    for (const e of all) {
+        for (const t of ((e.data && e.data.tables) || [])) {
+            if (t && t.overlay) { overlayTables.push(e.id); if (!Array.isArray(t.rows) || !t.rows.length || (t.dice && !(t.coverage && t.coverage.complete))) badOverlay.push(e.id); }
+            if (t && t.unparsed && e.readiness !== "extracted") unparsedButParsed.push(e.id);
+        }
+    }
+    check("table_overlays_sound", refusedOverlays.length === 0 && badOverlay.length === 0 && unparsedButParsed.length === 0, `${overlayTables.length} overlay table(s) applied (${[...new Set(overlayTables)].join(", ") || "none"}); ${refusedOverlays.length} refused; ${badOverlay.length} without rows or coverage; ${unparsedButParsed.length} unparsed tables on non-extracted entries`);
 
     // Icons inside the real sheet
     if (fs.existsSync(iconsetPath)) {

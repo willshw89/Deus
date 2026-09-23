@@ -1,0 +1,61 @@
+commands, the creature defends itself but takes no         • The goat of travail becomes a giant goat for up to 3
+other actions.                                               hours. Once it has been used, it can’t be used again
+                                                             until 30 days have passed.
+  The creature exists for a duration specific to each
+figurine. At the end of the duration, the creature         • The goat of terror becomes a giant goat for up to 3
+reverts to its figurine form. It reverts to a figurine       hours. The goat can’t attack, but you can remove
+early if it drops to 0 hit points or if you use an action    its horns and use them as weapons. One horn
+to speak the command word again while touching it.           becomes a +1 lance, and the other becomes a +2
+When the creature becomes a figurine again, its              longsword. Removing a horn requires an action,
+property can’t be used again until a certain amount          and the weapons disappear and the horns return
+of time has passed, as specified in the figurine’s           when the goat reverts to figurine form. In addition,
+description.                                                 the goat radiates a 30-­‐‑foot-­‐‑radius aura of terror
+                                                             while you are riding it. Any creature hostile to you
+  Bronze Griffon (Rare). This bronze statuette is of         that starts its turn in the aura must succeed on a
+a griffon rampant. It can become a griffon for up to 6       DC 15 Wisdom saving throw or be frightened of
+hours. Once it has been used, it can’t be used again         the goat for 1 minute, or until the goat reverts to
+until 5 days have passed.                                    figurine form. The frightened creature can repeat
+                                                             the saving throw at the end of each of its turns,
+  Ebony Fly (Rare). This ebony statuette is carved           ending the effect on itself on a success. Once it
+in the likeness of a horsefly. It can become a giant fly     successfully saves against the effect, a creature is
+for up to 12 hours and can be ridden as a mount.             immune to the goat’s aura for the next 24 hours.
+Once it has been used, it can’t be used again until 2        Once the figurine has been used, it can’t be used
+days have passed.                                            again until 15 days have passed.
+
+Giant Fly                                                    Marble Elephant (Rare). This marble statuette is
+                                                           about 4 inches high and long. It can become an
+Large beast, unaligned                                     elephant for up to 24 hours. Once it has been used, it
+                                                           can’t be used again until 7 days have passed.
+Armor Class 11
+                                                             Obsidian Steed (Very Rare). This polished
+Hit Points 19 (3d10 + 3)                                   obsidian horse can become a nightmare for up to 24
+                                                           hours. The nightmare fights only to defend itself.
+Speed 30 ft., fly 60 ft.                                   Once it has been used, it can’t be used again until 5
+                                                           days have passed.
+    STR DEX CON INT WIS CHA
+                                                             If you have a good alignment, the figurine has a 10
+  14 (+2) 13 (+1) 13 (+1) 2 (−4) 10 (+0) 3 (−4)            percent chance each time you use it to ignore your
+                                                           orders, including a command to revert to figurine
+Senses darkvision 60 ft., passive Perception 10            form. If you mount the nightmare while it is ignoring
+                                                           your orders, you and the nightmare are instantly
+Languages —                                                transported to a random location on the plane of
+                                                           Hades, where the nightmare reverts to figurine form.
+  Golden Lions (Rare). These gold statuettes of
+lions are always created in pairs. You can use one           Onyx Dog (Rare). This onyx statuette of a dog can
+figurine or both simultaneously. Each can become a         become a mastiff for up to 6 hours. The mastiff has
+lion for up to 1 hour. Once a lion has been used, it       an Intelligence of 8 and can speak Common. It also
+can’t be used again until 7 days have passed.              has darkvision out to a range of 60 feet and can see
+                                                           invisible creatures and objects within that range.
+  Ivory Goats (Rare). These ivory statuettes of            Once it has been used, it can’t be used again until 7
+goats are always created in sets of three. Each goat       days have passed.
+looks unique and functions differently from the
+others. Their properties are as follows:                     Serpentine Owl (Rare). This serpentine statuette
+                                                           of an owl can become a giant owl for up to 8 hours.
+• The goat of traveling can become a Large goat with       Once it has been used, it can’t be used again until 2
+  the same statistics as a riding horse. It has 24         days have passed. The owl can telepathically
+  charges, and each hour or portion thereof it             communicate with you at any range if you and it are
+  spends in beast form costs 1 charge. While it has        on the same plane of existence.
+  charges, you can use it as often as you wish. When
+  it runs out of charges, it reverts to a figurine and       Silver Raven (Uncommon). This silver statuette of
+  can’t be used again until 7 days have passed, when       a raven can become a raven for up to 12 hours. Once
+  it regains all its charges.

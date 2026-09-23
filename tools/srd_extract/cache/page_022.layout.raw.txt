@@ -1,0 +1,65 @@
+  Once you gain access to a circle spell, you always      5th  water walk, stinking cloud
+have it prepared, and it doesn’t count against the
+number of spells you can prepare each day. If you         7th  freedom of movement, locate creature
+gain access to a spell that doesn’t appear on the
+druid spell list, the spell is nonetheless a druid spell  9th  insect plague, scrying
+for you.
+                                                          Land’s Stride
+Arctic       Circle Spells
+             hold person, spike growth                    Starting at 6th level, moving through nonmagical
+Druid Level  sleet storm, slow                            difficult terrain costs you no extra movement. You
+3rd          freedom of movement, ice storm               can also pass through nonmagical plants without
+5th          commune with nature, cone of cold            being slowed by them and without taking damage
+7th                                                       from them if they have thorns, spines, or a similar
+9th                                                       hazard.
+
+Coast                                                       In addition, you have advantage on saving throws
+                                                          against plants that are magically created or
+Druid Level                                               manipulated to impede movement, such those
+3rd                                                       created by the entangle spell.
+5th
+7th          Circle Spells                                Nature’s Ward
+9th          mirror image, misty step
+             water breathing, water walk                  When you reach 10th level, you can’t be charmed or
+             control water, freedom of movement           frightened by elementals or fey, and you are immune
+             conjure elemental, scrying                   to poison and disease.
+
+Desert       Circle Spells                                Nature’s Sanctuary
+             blur, silence
+Druid Level  create food and water, protection from       When you reach 14th level, creatures of the natural
+3rd          energy                                       world sense your connection to nature and become
+5th          blight, hallucinatory terrain                hesitant to attack you. When a beast or plant
+             insect plague, wall of stone                 creature attacks you, that creature must make a
+7th                                                       Wisdom saving throw against your druid spell save
+9th                                                       DC. On a failed save, the creature must choose a
+                                                          different target, or the attack automatically misses.
+Forest       Circle Spells                                On a successful save, the creature is immune to this
+             barkskin, spider climb                       effect for 24 hours.
+Druid Level  call lightning, plant growth
+3rd          divination, freedom of movement                The creature is aware of this effect before it makes
+5th          commune with nature, tree stride             its attack against you.
+7th
+9th                                                       Sacred Plants and Wood
+
+Grassland    Circle Spells                                A druid holds certain plants to be sacred, particularly alder,
+             invisibility, pass without trace             ash, birch, elder, hazel, holly, juniper, mistletoe, oak, rowan,
+Druid Level  daylight, haste                              willow, and yew. Druids often use such plants as part of a
+3rd          divination, freedom of movement              spellcasting focus, incorporating lengths of oak or yew or
+5th          dream, insect plague                         sprigs of mistletoe.
+7th
+9th                                                          Similarly, a druid uses such woods to make other objects,
+                                                          such as weapons and shields. Yew is associated with death
+Mountain     Circle Spells                                and rebirth, so weapon handles for scimitars or sickles might
+             spider climb, spike growth                   be fashioned from it. Ash is associated with life and oak with
+Druid Level  lightning bolt, meld into stone              strength. These woods make excellent hafts or whole
+3rd          stone shape, stoneskin                       weapons, such as clubs or quarterstaffs, as well as shields.
+5th          passwall, wall of stone                      Alder is associated with air, and it might be used for thrown
+7th                                                       weapons, such as darts or javelins.
+9th
+                                                             Druids from regions that lack the plants described here
+Swamp                                                     have chosen other plants to take on similar uses. For
+                                                          instance, a druid of a desert region might value the yucca
+Druid Level                                               tree and cactus plants.
+3rd
+             Circle Spells
+             acid arrow, darkness

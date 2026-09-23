@@ -1,0 +1,59 @@
+multiple possible subjects, the GM randomly                    91–95  divided equally among all creatures in the line.
+determines which ones are affected.                                   A burst of colorful shimmering light extends
+                                                               96–97  from you in a 30-­‐foot radius. You and each
+  The wand regains 1d6 + 1 expended charges daily              98–00  creature in the area that can see must succeed
+at dawn. If you expend the wand’s last charge, roll a                 on a DC 15 Constitution saving throw or become
+d20. On a 1, the wand crumbles into dust and is                       blinded for 1 minute. A creature can repeat the
+destroyed.                                                            saving throw at the end of each of its turns,
+                                                                      ending the effect on itself on a success.
+d100   Effect                                                         The target’s skin turns bright blue for 1d10 days.
+01–05  You cast slow.                                                 If you chose a point in space, the creature
+06–10  You cast faerie fire.                                          nearest to that point is affected.
+11–15  You are stunned until the start of your next turn,             If you targeted a creature, it must make a DC 15
+16–20  believing something awesome just happened.                     Constitution saving throw. If you didn’t target a
+21–25  You cast gust of wind.                                         creature, you become the target and must make
+       You cast detect thoughts on the target you                     the saving throw. If the saving throw fails by 5 or
+26–30  chose. If you didn’t target a creature, you                    more, the target is instantly petrified. On any
+31–33  instead take 1d6 psychic damage.                               other failed save, the target is restrained and
+       You cast stinking cloud.                                       begins to turn to stone. While restrained in this
+34–36  Heavy rain falls in a 60-­‐foot radius centered on             way, the target must repeat the saving throw at
+       the target. The area becomes lightly obscured.                 the end of its next turn, becoming petrified on a
+37–46  The rain falls until the start of your next turn.              failure or ending the effect on a success. The
+47–49  An animal appears in the unoccupied space                      petrification lasts until the target is freed by the
+       nearest the target. The animal isn’t under your                greater restoration spell or similar magic.
+50–53  control and acts as it normally would. Roll a d100
+       to determine which animal appears. On a 01–25,          Weapon, +1, +2, or +3
+54–58  a rhinoceros appears; on a 26–50, an elephant
+59–62  appears; and on a 51–100, a rat appears.                Weapon (any), uncommon (+1), rare (+2), or very
+       You cast lightning bolt.                                rare (+3)
+63–65  A cloud of 600 oversized butterflies fills a 30-­‐foot
+       radius centered on the target. The area becomes         You have a bonus to attack and damage rolls made
+66–69  heavily obscured. The butterflies remain for 10         with this magic weapon. The bonus is determined by
+70–79  minutes.                                                the weapon’s rarity.
+80–84  You enlarge the target as if you had cast
+85–87  enlarge/reduce. If the target can’t be affected by      Well of Many Worlds
+       that spell, or if you didn’t target a creature, you
+88–90  become the target.                                      Wondrous item, legendary
+       You cast darkness.
+       Grass grows on the ground in a 60-­‐foot radius         This fine black cloth, soft as silk, is folded up to the
+       centered on the target. If grass is already there,      dimensions of a handkerchief. It unfolds into a
+       it grows to ten times its normal size and remains       circular sheet 6 feet in diameter.
+       overgrown for 1 minute.
+       An object of the GM’s choice disappears into the          You can use an action to unfold and place the well
+       Ethereal Plane. The object must be neither worn         of many worlds on a solid surface, whereupon it
+       nor carried, within 120 feet of the target, and no      creates a two-­‐‑way portal to another world or plane
+       larger than 10 feet in any dimension.                   of existence. Each time the item opens a portal, the
+       You shrink yourself as if you had cast                  GM decides where it leads. You can use an action to
+       enlarge/reduce on yourself.                             close an open portal by taking hold of the edges of
+       You cast fireball.                                      the cloth and folding it up. Once well of many worlds
+       You cast invisibility on yourself.                      has opened a portal, it can’t do so again for 1d8
+       Leaves grow from the target. If you chose a point       hours.
+       in space as the target, leaves sprout from the
+       creature nearest to that point. Unless they are         Wind Fan
+       picked off, the leaves turn brown and fall off
+       after 24 hours.                                         Wondrous item, uncommon
+       A stream of 1d4 × 10 gems, each worth 1 gp,
+       shoots from the wand’s tip in a line 30 feet long       While holding this fan, you can use an action to cast
+       and 5 feet wide. Each gem deals 1 bludgeoning           the gust of wind spell (save DC 13) from it. Once used,
+       damage, and the total damage of the gems is             the fan shouldn’t be used again until the next dawn.
+                                                               Each time it is used again before then, it has a

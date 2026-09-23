@@ -1,0 +1,289 @@
+{
+ "about": "Verification marks applied by tools/build_srd_catalog.js; see docs/SRD5_1_COVERAGE_MANIFEST.md section 6.",
+ "records": [
+  {
+   "id": "srd:class:bard",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 11 of SRD_CC_v5.1.pdf",
+   "pages": [
+    11,
+    12,
+    13
+   ],
+   "textSha256": "c1ac1bfd480e39ff5394e14aaada522315f9cac64973fe15c67b9d8a07dba6ac",
+   "notes": [
+    "class table rows 1, 2, 3, 7, 10, 11 and 20 (features, cantrips, spells known, slot columns with em-dash empty cells), hit die, saving throws, armor and skill proficiencies checked; feature texts on pages 12 and 13 not compared"
+   ]
+  },
+  {
+   "id": "srd:creature:half-red-dragon-veteran",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 320 and 321 of SRD_CC_v5.1.pdf",
+   "pages": [
+    321
+   ],
+   "textSha256": "35b26085264099f724edbce0b1f8aaf2486d5c98187d864ab747d01379e110e8",
+   "notes": [
+    "stat block on page 321 and both Half-Dragon Template tables (Color/Damage Resistance 5 rows; Size/Breath Weapon/Optional Prerequisite 3 rows with two reassembled wraps) checked"
+   ]
+  },
+  {
+   "id": "srd:creature:hill-giant",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+   "pages": [
+    313
+   ],
+   "textSha256": "76eabd9ef2dbd3c1796f709641ee47033a7ffe2eafbd5acc568cbc1720e2a92d",
+   "notes": [
+    "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+   ]
+  },
+  {
+   "id": "srd:creature:shrieker",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+   "pages": [
+    309
+   ],
+   "textSha256": "a9885fb621bbd98cd41971f81bb073f9e6c0e38edb4ef6ffbf27be1ceb6cbf7a",
+   "notes": [
+    "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+   ]
+  },
+  {
+   "id": "srd:creature:solar",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+   "pages": [
+    262,
+    263
+   ],
+   "textSha256": "7447ef61dbb9c592025e05705bc8313978b37f169cde949290834a4fd1f61a6e",
+   "notes": [
+    "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+   ]
+  },
+  {
+   "id": "srd:creature:violet-fungus",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+   "pages": [
+    309
+   ],
+   "textSha256": "2a456acc0a618bf2315209388ad76af25d1afdf9c4f2f02b4b755e503a407f6a",
+   "notes": [
+    "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+   ]
+  },
+  {
+   "id": "srd:creature:wereboar",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+   "pages": [
+    327
+   ],
+   "textSha256": "974342198d64ea4131c5ece3618bc425c9d27cee76c0751cf8fc02de44814e5b",
+   "notes": [
+    "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+   ]
+  },
+  {
+   "id": "srd:magic-item:apparatus-of-the-crab",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 208 of SRD_CC_v5.1.pdf",
+   "pages": [
+    208
+   ],
+   "textSha256": "86f8e7519cfffd66b0633d2239770ff68532fc82215c6e7b0e54ed99e78e0a3d",
+   "notes": [
+    "type line, statistics block, description and the ten-row lever table (transcribed cell by cell from the page into the overlay) checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:bag-of-beans",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 209 and 210 of SRD_CC_v5.1.pdf",
+   "pages": [
+    209,
+    210
+   ],
+   "textSha256": "5ff779b87489667e9d6bd4e8beb6516396355b52f3afc9e41e7a5827d46b7a5c",
+   "notes": [
+    "type line, description and the twelve-row d100 table (row boundaries read from the page, outcome text from the entry's own lines) checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:efreeti-bottle",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 220 of SRD_CC_v5.1.pdf",
+   "pages": [
+    220
+   ],
+   "textSha256": "b70adf3e33183e9d739dd3725f153e84e77eec8941e75ce79c82d2724099114a",
+   "notes": [
+    "type line, description and the three-row d100 table checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:horn-of-valhalla",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 226 of SRD_CC_v5.1.pdf",
+   "pages": [
+    226
+   ],
+   "textSha256": "cbe645c63ecf30489b0843c2d127d37e9a34a39390f946d7d28d07501f5ef6ba",
+   "notes": [
+    "type line, description and the four-row d100 table (ranges, horn type, berserkers summoned, requirement) checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:iron-flask",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 228 of SRD_CC_v5.1.pdf",
+   "pages": [
+    228
+   ],
+   "textSha256": "3679c667ccbaf23c3cd8672c22561a0e4c282e4e47fdcf4f690bf9e4ac02dea5",
+   "notes": [
+    "type line, description and all twenty d100 rows checked; the page prints en dashes where pdftotext emitted the letter r, now normalised by the iron_flask_dash rule"
+   ]
+  },
+  {
+   "id": "srd:magic-item:manual-of-golems",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 229 of SRD_CC_v5.1.pdf",
+   "pages": [
+    229,
+    230
+   ],
+   "textSha256": "37ed045d9d786f6c8b6855fd48cdda1b31702fe18a36210a1773c063a61b83dd",
+   "notes": [
+    "type line, description and the four-row d20 table (golem, time, cost) checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:necklace-of-prayer-beads",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 231 of SRD_CC_v5.1.pdf",
+   "pages": [
+    231
+   ],
+   "textSha256": "40918edc5dc4313602370c450173f49b11045447d1db69f163f50186a29fc153",
+   "notes": [
+    "type line, description and the six-row d20 table with both wrapped cells checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:robe-of-useful-items",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 239 of SRD_CC_v5.1.pdf",
+   "pages": [
+    239
+   ],
+   "textSha256": "e2d5cf3c56314cdbe606a60510f8f0f7b0fb707f7f3e4e728a5140fe3d3e3a36",
+   "notes": [
+    "type line, description, the fixed-patch list and the thirteen-row d100 table checked"
+   ]
+  },
+  {
+   "id": "srd:magic-item:wand-of-wonder",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 249 and 250 of SRD_CC_v5.1.pdf",
+   "pages": [
+    249,
+    250
+   ],
+   "textSha256": "1ae354463ee16158c0069ea1bc5ce3b0da7a6195a63f689cdbd15c4ccfe7cf02",
+   "notes": [
+    "type line, description and the twenty-two-row d100 table (row boundaries read from the page, outcome text from the entry's own lines) checked"
+   ]
+  },
+  {
+   "id": "srd:spell:alter-self",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 114 and 115 of SRD_CC_v5.1.pdf",
+   "pages": [
+    114,
+    115
+   ],
+   "textSha256": "d6cc230bec9b774e1ff0ef73b18a09dd65ff8fa0a098ad06fdeeaa7086212e80",
+   "notes": [
+    "header block, first and last sentences across the page break, and paragraph structure (intro plus three named options) checked"
+   ]
+  },
+  {
+   "id": "srd:spell:teleport",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 185 and 186 of SRD_CC_v5.1.pdf",
+   "pages": [
+    185,
+    186
+   ],
+   "textSha256": "ee324653b694d57272366887b341e07c93db627deeef14209cad8c95cb09e8ac",
+   "notes": [
+    "header block on page 185; the seven-row familiarity table on page 186 checked cell by cell including the wrapped labels and every d100 range; per-row coverage complete"
+   ]
+  },
+  {
+   "id": "srd:subclass:oath-of-devotion",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 32 and 33 of SRD_CC_v5.1.pdf",
+   "pages": [
+    32,
+    33
+   ],
+   "textSha256": "a91be84ab677139b49cb4e40ccd3e6a30e3a21d0855d7f18e7837095b82f711e",
+   "notes": [
+    "subclass gained at 3rd per the Sacred Oath text; feature names and printed levels (Channel Divinity 3, Aura of Devotion 7, Purity of Spirit 15, Holy Nimbus 20), the tenets, both Channel Divinity options and the five-row oath-spell table checked; Oath Spells level 3 is the documented inheritance rule, not a printed level"
+   ]
+  },
+  {
+   "id": "srd:subclass:the-fiend",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered pages 50 and 51 of SRD_CC_v5.1.pdf",
+   "pages": [
+    50,
+    51
+   ],
+   "textSha256": "b055bff238b550cce67351f3e7419eaf9416a21289fb9d87330b03779d489c45",
+   "notes": [
+    "subclass gained at 1st per Otherworldly Patron; Dark One's Blessing 1, Dark One's Own Luck 6, Fiendish Resilience 10, Hurl Through Hell 14, the five-row expanded-spell table and the first and last sentences checked; Expanded Spell List level 1 is the documented inheritance rule"
+   ]
+  },
+  {
+   "id": "srd:weapon:net",
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "method": "compared with the pdf.js-rendered page 66 of SRD_CC_v5.1.pdf",
+   "pages": [
+    65,
+    66
+   ],
+   "textSha256": "456611836f7963963e4a571c1a7bb299d1b7e08dee5cc65e06721b83c3454019",
+   "notes": [
+    "the Net row (1 gp, no damage, 3 lb., special, thrown range 5/15) is printed aligned on the page; the misalignment the stager repaired exists only in pdftotext's output"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+target can’t regain hit points, and its hit point               1st level (4 slots): command, guiding bolt, shield of
+maximum decreases by 10 (3d6) for every 24 hours                  faith
+that elapse. If the curse reduces the target’s hit point
+maximum to 0, the target dies, and its body turns to            2nd level (3 slots): hold person, silence, spiritual
+dust. The curse lasts until removed by the remove                 weapon
+curse spell or other magic.
+Dreadful Glare. The mummy targets one creature it               3rd level (3 slots): animate dead, dispel magic
+can see within 60 feet of it. If the target can see the
+mummy, it must succeed on a DC 11 Wisdom saving                 4th level (3 slots): divination, guardian of faith
+throw against this magic or become frightened until
+the end of the mummy’s next turn. If the target fails           5th level (2 slots): contagion, insect plague
+the saving throw by 5 or more, it is also paralyzed for
+the same duration. A target that succeeds on the                6th level (1 slot): harm
+saving throw is immune to the Dreadful Glare of all
+mummies (but not mummy lords) for the next 24 hours.            Actions
+
+Mummy Lord                                                      Multiattack. The mummy can use its Dreadful Glare
+                                                                and makes one attack with its rotting fist.
+Medium undead, lawful evil
+                                                                Rotting Fist. Melee Weapon Attack: +9 to hit, reach 5
+Armor Class 17 (natural armor)                                  ft., one target. Hit: 14 (3d6 + 4) bludgeoning damage
+Hit Points 97 (13d8 + 39)                                       plus 21 (6d6) necrotic damage. If the target is a
+Speed 20 ft.                                                    creature, it must succeed on a DC 16 Constitution
+                                                                saving throw or be cursed with mummy rot. The cursed
+    STR DEX CON INT WIS CHA                                     target can’t regain hit points, and its hit point
+  18 (+4) 10 (+0) 17 (+3) 11 (+0) 18 (+4) 16 (+3)               maximum decreases by 10 (3d6) for every 24 hours
+                                                                that elapse. If the curse reduces the target’s hit point
+Saving Throws Con +8, Int +5, Wis +9, Cha +8                    maximum to 0, the target dies, and its body turns to
+Skills History +5, Religion +5                                  dust. The curse lasts until removed by the remove
+Damage Vulnerabilities fire                                     curse spell or other magic.
+Damage Immunities necrotic, poison; bludgeoning,
+                                                                Dreadful Glare. The mummy lord targets one creature
+  piercing, and slashing from nonmagical attacks                it can see within 60 feet of it. If the target can see the
+Condition Immunities charmed, exhaustion, frightened,           mummy lord, it must succeed on a DC 16 Wisdom
+                                                                saving throw against this magic or become frightened
+  paralyzed, poisoned                                           until the end of the mummy’s next turn. If the target
+Senses darkvision 60 ft., passive Perception 14                 fails the saving throw by 5 or more, it is also paralyzed
+Languages the languages it knew in life                         for the same duration. A target that succeeds on the
+Challenge 15 (13,000 XP)                                        saving throw is immune to the Dreadful Glare of all
+                                                                mummies and mummy lords for the next 24 hours.
+Magic Resistance. The mummy lord has advantage on
+saving throws against spells and other magical effects.         Legendary Actions
+Rejuvenation. A destroyed mummy lord gains a new
+body in 24 hours if its heart is intact, regaining all its hit  The mummy lord can take 3 legendary actions,
+points and becoming active again. The new body                  choosing from the options below. Only one legendary
+appears within 5 feet of the mummy lord’s heart.                action option can be used at a time and only at the end
+Spellcasting. The mummy lord is a 10th-­‐level                  of another creature’s turn. The mummy lord regains
+spellcaster. Its spellcasting ability is Wisdom (spell save     spent legendary actions at the start of its turn.
+DC 17, +9 to hit with spell attacks). The mummy lord
+has the following cleric spells prepared:                       Attack. The mummy lord makes one attack with its
+Cantrips (at will): sacred flame, thaumaturgy                     rotting fist or uses its Dreadful Glare.
+
+                                                                Blinding Dust. Blinding dust and sand swirls magically
+                                                                  around the mummy lord. Each creature within 5 feet
+                                                                  of the mummy lord must succeed on a DC 16
+                                                                  Constitution saving throw or be blinded until the end
+                                                                  of the creature’s next turn.

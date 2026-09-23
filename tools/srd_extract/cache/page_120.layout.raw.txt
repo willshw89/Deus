@@ -1,0 +1,64 @@
+that apply to it have no effect on your physical body,   Range: Touch
+nor do they persist when you return to it.               Components: V, S, M (an agate worth at least 1,000
+
+  The spell ends for you and your companions when          gp, which the spell consumes)
+you use your action to dismiss it. When the spell        Duration: Instantaneous
+ends, the affected creature returns to its physical
+body, and it awakens.                                    After spending the casting time tracing magical
+                                                         pathways within a precious gemstone, you touch a
+  The spell might also end early for you or one of       Huge or smaller beast or plant. The target must have
+your companions. A successful dispel magic spell         either no Intelligence score or an Intelligence of 3 or
+used against an astral or physical body ends the spell   less. The target gains an Intelligence of 10. The
+for that creature. If a creature’s original body or its  target also gains the ability to speak one language
+astral form drops to 0 hit points, the spell ends for    you know. If the target is a plant, it gains the ability
+that creature. If the spell ends and the silver cord is  to move its limbs, roots, vines, creepers, and so forth,
+intact, the cord pulls the creature’s astral form back   and it gains senses similar to a human’s. Your GM
+to its body, ending its state of suspended animation.    chooses statistics appropriate for the awakened
+                                                         plant, such as the statistics for the awakened shrub
+  If you are returned to your body prematurely,          or the awakened tree.
+your companions remain in their astral forms and
+must find their own way back to their bodies, usually      The awakened beast or plant is charmed by you
+by dropping to 0 hit points.                             for 30 days or until you or your companions do
+                                                         anything harmful to it. When the charmed condition
+Augury                                                   ends, the awakened creature chooses whether to
+                                                         remain friendly to you, based on how you treated it
+2nd-­‐‑level divination (ritual)                         while it was charmed.
+
+Casting Time: 1 minute                                   Bane
+Range: Self
+Components: V, S, M (specially marked sticks, bones,     1st-­‐‑level enchantment
+
+  or similar tokens worth at least 25 gp)                Casting Time: 1 action
+Duration: Instantaneous                                  Range: 30 feet
+                                                         Components: V, S, M (a drop of blood)
+By casting gem-­‐‑inlaid sticks, rolling dragon bones,   Duration: Concentration, up to 1 minute
+laying out ornate cards, or employing some other
+divining tool, you receive an omen from an               Up to three creatures of your choice that you can see
+otherworldly entity about the results of a specific      within range must make Charisma saving throws.
+course of action that you plan to take within the next   Whenever a target that fails this saving throw makes
+30 minutes. The GM chooses from the following            an attack roll or a saving throw before the spell ends,
+possible omens:                                          the target must roll a d4 and subtract the number
+                                                         rolled from the attack roll or saving throw.
+• Weal, for good results
+• Woe, for bad results                                     At Higher Levels. When you cast this spell using a
+• Weal and woe, for both good and bad results            spell slot of 2nd level or higher, you can target one
+• Nothing, for results that aren’t especially good or    additional creature for each slot level above 1st.
+
+  bad                                                    Banishment
+
+The spell doesn’t take into account any possible         4th-­‐‑level abjuration
+circumstances that might change the outcome, such
+as the casting of additional spells or the loss or gain  Casting Time: 1 action
+of a companion.                                          Range: 60 feet
+                                                         Components: V, S, M (an item distasteful to the
+  If you cast the spell two or more times before
+completing your next long rest, there is a cumulative      target)
+25 percent chance for each casting after the first that  Duration: Concentration, up to 1 minute
+you get a random reading. The GM makes this roll in
+secret.                                                  You attempt to send one creature that you can see
+                                                         within range to another plane of existence. The
+Awaken                                                   target must succeed on a Charisma saving throw or
+                                                         be banished.
+5th-­‐‑level transmutation
+
+Casting Time: 8 hours

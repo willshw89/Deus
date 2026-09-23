@@ -1,0 +1,60 @@
+can pick a special purpose or roll on the following                throw, with a DC equal to 12 + the item’s Charisma
+table.                                                             modifier. On a failed save, the wielder is charmed by
+                                                                   the item for 1d12 hours. While charmed, the wielder
+d10 Purpose                                                        must try to follow the item’s commands. If the
+ 1 Aligned: The item seeks to defeat or destroy those of a         wielder takes damage, it can repeat the saving throw,
+        diametrically opposed alignment. (Such an item is          ending the effect on a success. Whether the attempt
+        never neutral.)                                            to control its user succeeds or fails, the item can’t
+ 2 Bane: The item seeks to defeat or destroy creatures of          use this power again until the next dawn.
+        a particular kind, such as fiends, shapechangers, trolls,
+        or wizards.                                                Artifacts
+ 3 Protector: The item seeks to defend a particular race
+        or kind of creature, such as elves or druids.              Orb of Dragonkind
+ 4 Crusader: The item seeks to defeat, weaken, or
+        destroy the servants of a particular deity.                Wondrous item, artifact (requires attunement)
+ 5 Templar: The item seeks to defend the servants and
+        interests of a particular deity.                           Ages past, elves and humans waged a terrible war
+ 6 Destroyer: The item craves destruction and goads its            against evil dragons. When the world seemed
+        user to fight arbitrarily.                                 doomed, powerful wizards came together and
+ 7 Glory Seeker: The item seeks renown as the greatest             worked their greatest magic, forging five Orbs of
+        magic item in the world, by establishing its user as a     Dragonkind (or Dragon Orbs) to help them defeat the
+        famous or notorious figure.                                dragons. One orb was taken to each of the five
+ 8 Lore Seeker: The item craves knowledge or is                    wizard towers, and there they were used to speed
+        determined to solve a mystery, learn a secret, or          the war toward a victorious end. The wizards used
+        unravel a cryptic prophecy.                                the orbs to lure dragons to them, then destroyed the
+ 9 Destiny Seeker: The item is convinced that it and its           dragons with powerful magic.
+        wielder have key roles to play in future events.
+10 Creator Seeker: The item seeks its creator and wants              As the wizard towers fell in later ages, the orbs
+        to understand why it was created.                          were destroyed or faded into legend, and only three
+                                                                   are thought to survive. Their magic has been warped
+Conflict                                                           and twisted over the centuries, so although their
+                                                                   primary purpose of calling dragons still functions,
+A sentient item has a will of its own, shaped by its               they also allow some measure of control over
+personality and alignment. If its wielder acts in a                dragons.
+manner opposed to the item’s alignment or purpose,
+conflict can arise. When such a conflict occurs, the                 Each orb contains the essence of an evil dragon, a
+item makes a Charisma check contested by the                       presence that resents any attempt to coax magic
+wielder’s Charisma check. If the item wins the                     from it. Those lacking in force of personality might
+contest, it makes one or more of the following                     find themselves enslaved to an orb.
+demands:
+                                                                     An orb is an etched crystal globe about 10 inches
+• The item insists on being carried or worn at all                 in diameter. When used, it grows to about 20 inches
+  times.                                                           in diameter, and mist swirls inside it.
+
+• The item demands that its wielder dispose of                       While attuned to an orb, you can use an action to
+  anything the item finds repugnant.                               peer into the orb’s depths and speak its command
+                                                                   word. You must then make a DC 15 Charisma check.
+• The item demands that its wielder pursue the                     On a successful check, you control the orb for as long
+  item’s goals to the exclusion of all other goals.                as you remain attuned to it. On a failed check, you
+                                                                   become charmed by the orb for as long as you
+• The item demands to be given to someone else.                    remain attuned to it.
+
+  If its wielder refuses to comply with the item’s                   While you are charmed by the orb, you can’t
+wishes, the item can do any or all of the following:               voluntarily end your attunement to it, and the orb
+                                                                   casts suggestion on you at will (save DC 18), urging
+• Make it impossible for its wielder to attune to it.              you to work toward the evil ends it desires. The
+• Suppress one or more of its activated properties.                dragon essence within the orb might want many
+• Attempt to take control of its wielder.                          things: the annihilation of a particular people,
+                                                                   freedom from the orb, to spread suffering in the
+  If a sentient item attempts to take control of its
+wielder, the wielder must make a Charisma saving

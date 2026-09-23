@@ -1,0 +1,61 @@
+  If you create an image of an object—such as a            Three illusory duplicates of yourself appear in your
+chair, muddy footprints, or a small chest—it must be       space. Until the spell ends, the duplicates move with
+no larger than a 5-­‐‑foot cube. The image can’t create    you and mimic your actions, shifting position so it’s
+sound, light, smell, or any other sensory effect.          impossible to track which image is real. You can use
+Physical interaction with the image reveals it to be       your action to dismiss the illusory duplicates.
+an illusion, because things can pass through it.
+                                                             Each time a creature targets you with an attack
+  If a creature uses its action to examine the sound       during the spell’s duration, roll a d20 to determine
+or image, the creature can determine that it is an         whether the attack instead targets one of your
+illusion with a successful Intelligence (Investigation)    duplicates.
+check against your spell save DC. If a creature
+discerns the illusion for what it is, the illusion           If you have three duplicates, you must roll a 6 or
+becomes faint to the creature.                             higher to change the attack’s target to a duplicate.
+                                                           With two duplicates, you must roll an 8 or higher.
+Mirage Arcane                                              With one duplicate, you must roll an 11 or higher.
+
+7th-­‐‑level illusion                                        A duplicate’s AC equals 10 + your Dexterity
+                                                           modifier. If an attack hits a duplicate, the duplicate is
+Casting Time: 10 minutes                                   destroyed. A duplicate can be destroyed only by an
+Range: Sight                                               attack that hits it. It ignores all other damage and
+Components: V, S                                           effects. The spell ends when all three duplicates are
+Duration: 10 days                                          destroyed.
+
+You make terrain in an area up to 1 mile square look,        A creature is unaffected by this spell if it can’t see,
+sound, smell, and even feel like some other sort of        if it relies on senses other than sight, such as
+terrain. The terrain’s general shape remains the           blindsight, or if it can perceive illusions as false, as
+same, however. Open fields or a road could be made         with truesight.
+to resemble a swamp, hill, crevasse, or some other
+difficult or impassable terrain. A pond can be made        Mislead
+to seem like a grassy meadow, a precipice like a
+gentle slope, or a rock-­‐‑strewn gully like a wide and    5th-­‐‑level illusion
+smooth road.
+                                                           Casting Time: 1 action
+  Similarly, you can alter the appearance of               Range: Self
+structures, or add them where none are present. The        Components: S
+spell doesn’t disguise, conceal, or add creatures.         Duration: Concentration, up to 1 hour
+
+  The illusion includes audible, visual, tactile, and      You become invisible at the same time that an
+olfactory elements, so it can turn clear ground into       illusory double of you appears where you are
+difficult terrain (or vice versa) or otherwise impede      standing. The double lasts for the duration, but the
+movement through the area. Any piece of the                invisibility ends if you attack or cast a spell.
+illusory terrain (such as a rock or stick) that is
+removed from the spell’s area disappears                     You can use your action to move your illusory
+immediately.                                               double up to twice your speed and make it gesture,
+                                                           speak, and behave in whatever way you choose.
+  Creatures with truesight can see through the
+illusion to the terrain’s true form; however, all other      You can see through its eyes and hear through its
+elements of the illusion remain, so while the              ears as if you were located where it is. On each of
+creature is aware of the illusion’s presence, the          your turns as a bonus action, you can switch from
+creature can still physically interact with the illusion.  using its senses to using your own, or back again.
+                                                           While you are using its senses, you are blinded and
+Mirror Image                                               deafened in regard to your own surroundings.
+
+2nd-­‐‑level illusion                                      Misty Step
+
+Casting Time: 1 action                                     2nd-­‐‑level conjuration
+Range: Self
+Components: V, S                                           Casting Time: 1 bonus action
+Duration: 1 minute                                         Range: Self
+                                                           Components: V
+                                                           Duration: Instantaneous

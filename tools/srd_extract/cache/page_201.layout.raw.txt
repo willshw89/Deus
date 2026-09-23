@@ -1,0 +1,60 @@
+Madness                                                     51–60   The character must use his or her action each
+                                                            61–70   round to attack the nearest creature.
+In a typical campaign, characters aren’t driven mad         71–75   The character experiences vivid hallucinations
+by the horrors they face and the carnage they inflict               and has disadvantage on ability checks.
+day after day, but sometimes the stress of being an         76–80   The character does whatever anyone tells him
+adventurer can be too much to bear. If your                         or her to do that isn’t obviously self-­‐
+campaign has a strong horror theme, you might               81–90   destructive.
+want to use madness as a way to reinforce that              91–100  The character experiences an overpowering
+theme, emphasizing the extraordinarily horrific                     urge to eat something strange such as dirt,
+nature of the threats the adventurers face.                         slime, or offal.
+                                                                    The character is stunned.
+Going Mad                                                           The character falls unconscious.
+
+Various magical effects can inflict madness on an           Long-­‐Term Madness
+otherwise stable mind. Certain spells, such as
+contact other plane and symbol, can cause insanity,          d100   Effect (lasts 1d10 × 10 hours)
+and you can use the madness rules here instead of           01–10   The character feels compelled to repeat a
+the spell effects of those spells. Diseases, poisons,               specific activity over and over, such as washing
+and planar effects such as psychic wind or the              11–20   hands, touching things, praying, or counting
+howling winds of Pandemonium can all inflict                21–30   coins.
+madness. Some artifacts can also break the psyche of        31–40   The character experiences vivid hallucinations
+a character who uses or becomes attuned to them.                    and has disadvantage on ability checks.
+                                                            41–45   The character suffers extreme paranoia. The
+  Resisting a madness-­‐‑inducing effect usually            46–55   character has disadvantage on Wisdom and
+requires a Wisdom or Charisma saving throw.                         Charisma checks.
+                                                            56–65   The character regards something (usually the
+Madness Effects                                             66–75   source of madness) with intense revulsion, as if
+                                                                    affected by the antipathy effect of the
+Madness can be short-­‐‑term, long-­‐‑term, or indefinite.  76–85   antipathy/sympathy spell.
+Most relatively mundane effects impose short-­‐‑term                The character experiences a powerful delusion.
+madness, which lasts for just a few minutes. More           86–90   Choose a potion. The character imagines that
+horrific effects or cumulative effects can result in                he or she is under its effects.
+long-­‐‑term or indefinite madness.                         91–95   The character becomes attached to a “lucky
+                                                            96–100  charm,” such as a person or an object, and has
+  A character afflicted with short-­‐‑term madness is               disadvantage on attack rolls, ability checks, and
+subjected to an effect from the Short-­‐‑Term Madness               saving throws while more than 30 feet from it.
+table for 1d10 minutes.                                             The character is blinded (25%) or deafened
+                                                                    (75%).
+  A character afflicted with long-­‐‑term madness is                The character experiences uncontrollable
+subjected to an effect from the Long-­‐‑Term Madness                tremors or tics, which impose disadvantage on
+table for 1d10 × 10 hours.                                          attack rolls, ability checks, and saving throws
+                                                                    that involve Strength or Dexterity.
+  A character afflicted with indefinite madness                     The character suffers from partial amnesia. The
+gains a new character flaw from the Indefinite                      character knows who he or she is and retains
+Madness table that lasts until cured.                               racial traits and class features, but doesn’t
+                                                                    recognize other people or remember anything
+Short-­‐Term Madness                                                that happened before the madness took effect.
+                                                                    Whenever the character takes damage, he or
+d100   Effect (lasts 1d10 minutes)                                  she must succeed on a DC 15 Wisdom saving
+01–20  The character retreats into his or her mind and              throw or be affected as though he or she failed
+       becomes paralyzed. The effect ends if the                    a saving throw against the confusion spell. The
+21–30  character takes any damage.                                  confusion effect lasts for 1 minute.
+       The character becomes incapacitated and                      The character loses the ability to speak.
+31–40  spends the duration screaming, laughing, or                  The character falls unconscious. No amount of
+       weeping.                                                     jostling or damage can wake the character.
+41–50  The character becomes frightened and must
+       use his or her action and movement each
+       round to flee from the source of the fear.
+       The character begins babbling and is incapable
+       of normal speech or spellcasting.

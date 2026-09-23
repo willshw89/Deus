@@ -1,0 +1,58 @@
+Cantrips                                                      Spellcasting Focus
+
+At 1st level, you know two cantrips of your choice            You can use a druidic focus (see “Equipment”) as a
+from the druid spell list. You learn additional druid         spellcasting focus for your druid spells.
+cantrips of your choice at higher levels, as shown in
+the Cantrips Known column of the Druid table.                 Wild Shape
+
+Preparing and Casting Spells                                  Starting at 2nd level, you can use your action to
+                                                              magically assume the shape of a beast that you have
+The Druid table shows how many spell slots you                seen before. You can use this feature twice. You
+have to cast your spells of 1st level and higher. To          regain expended uses when you finish a short or
+cast one of these druid spells, you must expend a slot        long rest.
+of the spell’s level or higher. You regain all expended
+spell slots when you finish a long rest.                        Your druid level determines the beasts you can
+                                                              transform into, as shown in the Beast Shapes table.
+  You prepare the list of druid spells that are               At 2nd level, for example, you can transform into any
+available for you to cast, choosing from the druid            beast that has a challenge rating of 1/4 or lower that
+spell list. When you do so, choose a number of druid          doesn’t have a flying or swimming speed.
+spells equal to your Wisdom modifier + your druid
+level (minimum of one spell). The spells must be of a         Beast Shapes
+level for which you have spell slots.
+                                                              Level  Max.   Limitations            Example
+  For example, if you are a 3rd-­‐‑level druid, you have      2nd     CR    No flying or swimming  Wolf
+four 1st-­‐‑level and two 2nd-­‐‑level spell slots. With a            1/4   speed
+Wisdom of 16, your list of prepared spells can                 4th          No flying speed        Crocodile
+include six spells of 1st or 2nd level, in any                 8th    1/2   —                      Giant
+combination. If you prepare the 1st-­‐‑level spell cure                1                           eagle
+wounds, you can cast it using a 1st-­‐‑level or 2nd-­‐‑level
+slot. Casting the spell doesn’t remove it from your             You can stay in a beast shape for a number of
+list of prepared spells.                                      hours equal to half your druid level (rounded down).
+                                                              You then revert to your normal form unless you
+  You can also change your list of prepared spells            expend another use of this feature. You can revert to
+when you finish a long rest. Preparing a new list of          your normal form earlier by using a bonus action on
+druid spells requires time spent in prayer and                your turn. You automatically revert if you fall
+meditation: at least 1 minute per spell level for each        unconscious, drop to 0 hit points, or die.
+spell on your list.
+                                                                While you are transformed, the following rules
+Spellcasting Ability                                          apply:
+
+Wisdom is your spellcasting ability for your druid            • Your game statistics are replaced by the statistics
+spells, since your magic draws upon your devotion               of the beast, but you retain your alignment,
+and attunement to nature. You use your Wisdom                   personality, and Intelligence, Wisdom, and
+whenever a spell refers to your spellcasting ability.           Charisma scores. You also retain all of your skill
+In addition, you use your Wisdom modifier when                  and saving throw proficiencies, in addition to
+setting the saving throw DC for a druid spell you cast          gaining those of the creature. If the creature has
+and when making an attack roll with one.                        the same proficiency as you and the bonus in its
+                                                                stat block is higher than yours, use the creature’s
+     Spell save DC = 8 + your proficiency bonus +               bonus instead of yours. If the creature has any
+                   your Wisdom modifier                         legendary or lair actions, you can’t use them.
+
+   Spell attack modifier = your proficiency bonus +           • When you transform, you assume the beast’s hit
+                   your Wisdom modifier                         points and Hit Dice. When you revert to your
+                                                                normal form, you return to the number of hit
+Ritual Casting                                                  points you had before you transformed. However,
+                                                                if you revert as a result of dropping to 0 hit points,
+You can cast a druid spell as a ritual if that spell has        any excess damage carries over to your normal
+the ritual tag and you have the spell prepared.                 form. For example, if you take 10 damage in
+                                                                animal form and have only 1 hit point left, you

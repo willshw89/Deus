@@ -1,0 +1,58 @@
+For example, if your speed is 30 feet, you must spend        hover or it is being held aloft by magic, such as by
+15 feet of movement to stand up. You can’t stand up          the fly spell.
+if you don’t have enough movement left or if your
+speed is 0.                                                  Creature Size
+
+  To move while prone, you must crawl or use                 Each creature takes up a different amount of space.
+magic such as teleportation. Every foot of movement          The Size Categories table shows how much space a
+while crawling costs 1 extra foot. Crawling 1 foot in        creature of a particular size controls in combat.
+difficult terrain, therefore, costs 3 feet of movement.      Objects sometimes use the same size categories.
+
+Interacting with Objects Around You                          Size Categories
+
+Here are a few examples of the sorts of thing you can do in  Size        Space
+tandem with your movement and action:                        Tiny        2½ by 2½ ft.
+                                                             Small       5 by 5 ft.
+• draw or sheathe a sword                                    Medium      5 by 5 ft.
+• open or close a door
+• withdraw a potion from your backpack                       Large       10 by 10 ft.
+• pick up a dropped axe                                      Huge        15 by 15 ft.
+• take a bauble from a table                                 Gargantuan  20 by 20 ft. or larger
+• remove a ring from your finger
+• stuff some food into your mouth                            Space
+• plant a banner in the ground
+• fish a few coins from your belt pouch                      A creature’s space is the area in feet that it
+• drink all the ale in a flagon                              effectively controls in combat, not an expression of
+• throw a lever or a switch                                  its physical dimensions. A typical Medium creature
+• pull a torch from a sconce                                 isn’t 5 feet wide, for example, but it does control a
+• take a book from a shelf you can reach                     space that wide. If a Medium hobgoblin stands in a 5-­‐‑
+• extinguish a small flame                                   foot-­‐‑wide doorway, other creatures can’t get
+• don a mask                                                 through unless the hobgoblin lets them.
+• pull the hood of your cloak up and over your head
+• put your ear to a door                                       A creature’s space also reflects the area it needs to
+• kick a small stone                                         fight effectively. For that reason, there’s a limit to the
+• turn a key in a lock                                       number of creatures that can surround another
+• tap the floor with a 10-­‐foot pole                        creature in combat. Assuming Medium combatants,
+• hand an item to another character                          eight creatures can fit in a 5-­‐‑foot radius around
+                                                             another one.
+Moving Around Other Creatures
+                                                               Because larger creatures take up more space,
+You can move through a nonhostile creature’s space.          fewer of them can surround a creature. If five Large
+In contrast, you can move through a hostile                  creatures crowd around a Medium or smaller one,
+creature’s space only if the creature is at least two        there’s little room for anyone else. In contrast, as
+sizes larger or smaller than you. Remember that              many as twenty Medium creatures can surround a
+another creature’s space is difficult terrain for you.       Gargantuan one.
+
+  Whether a creature is a friend or an enemy, you            Squeezing into a Smaller Space
+can’t willingly end your move in its space.
+                                                             A creature can squeeze through a space that is large
+  If you leave a hostile creature’s reach during your        enough for a creature one size smaller than it. Thus,
+move, you provoke an opportunity attack.                     a Large creature can squeeze through a passage
+                                                             that’s only 5 feet wide. While squeezing through a
+Flying Movement                                              space, a creature must spend 1 extra foot for every
+                                                             foot it moves there, and it has disadvantage on
+Flying creatures enjoy many benefits of mobility, but        attack rolls and Dexterity saving throws. Attack rolls
+they must also deal with the danger of falling. If a         against the creature have advantage while it’s in the
+flying creature is knocked prone, has its speed              smaller space.
+reduced to 0, or is otherwise deprived of the ability
+to move, the creature falls, unless it has the ability to

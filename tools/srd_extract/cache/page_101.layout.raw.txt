@@ -1,0 +1,60 @@
+Cantrips                                                  as a reaction, the spell description tells you exactly
+                                                          when you can do so.
+A cantrip is a spell that can be cast at will, without
+using a spell slot and without being prepared in          Longer Casting Times
+advance. Repeated practice has fixed the spell in the
+caster’s mind and infused the caster with the magic       Certain spells (including spells cast as rituals)
+needed to produce the effect over and over. A             require more time to cast: minutes or even hours.
+cantrip’s spell level is 0.                               When you cast a spell with a casting time longer
+                                                          than a single action or reaction, you must spend your
+Rituals                                                   action each turn casting the spell, and you must
+                                                          maintain your concentration while you do so (see
+Certain spells have a special tag: ritual. Such a spell   “Concentration” below). If your concentration is
+can be cast following the normal rules for                broken, the spell fails, but you don’t expend a spell
+spellcasting, or the spell can be cast as a ritual. The   slot. If you want to try casting the spell again, you
+ritual version of a spell takes 10 minutes longer to      must start over.
+cast than normal. It also doesn’t expend a spell slot,
+which means the ritual version of a spell can’t be        Range
+cast at a higher level.
+                                                          The target of a spell must be within the spell’s range.
+  To cast a spell as a ritual, a spellcaster must have a  For a spell like magic missile, the target is a creature.
+feature that grants the ability to do so. The cleric and  For a spell like fireball, the target is the point in
+the druid, for example, have such a feature. The          space where the ball of fire erupts.
+caster must also have the spell prepared or on his or
+her list of spells known, unless the character’s ritual     Most spells have ranges expressed in feet. Some
+feature specifies otherwise, as the wizard’s does.        spells can target only a creature (including you) that
+                                                          you touch. Other spells, such as the shield spell, affect
+Casting a Spell                                           only you. These spells have a range of self.
+
+When a character casts any spell, the same basic            Spells that create cones or lines of effect that
+rules are followed, regardless of the character’s class   originate from you also have a range of self,
+or the spell’s effects.                                   indicating that the origin point of the spell’s effect
+                                                          must be you (see “Areas of Effect”).
+  Each spell description begins with a block of
+information, including the spell’s name, level, school      Once a spell is cast, its effects aren’t limited by its
+of magic, casting time, range, components, and            range, unless the spell’s description says otherwise.
+duration. The rest of a spell entry describes the
+spell’s effect.                                           Components
+
+Casting Time                                              A spell’s components are the physical requirements
+                                                          you must meet in order to cast it. Each spell’s
+Most spells require a single action to cast, but some     description indicates whether it requires verbal (V),
+spells require a bonus action, a reaction, or much        somatic (S), or material (M) components. If you can’t
+more time to cast.                                        provide one or more of a spell’s components, you are
+                                                          unable to cast the spell.
+Bonus Action
+                                                          Verbal (V)
+A spell cast with a bonus action is especially swift.
+You must use a bonus action on your turn to cast the      Most spells require the chanting of mystic words.
+spell, provided that you haven’t already taken a          The words themselves aren’t the source of the spell’s
+bonus action this turn. You can’t cast another spell      power; rather, the particular combination of sounds,
+during the same turn, except for a cantrip with a         with specific pitch and resonance, sets the threads of
+casting time of 1 action.                                 magic in motion. Thus, a character who is gagged or
+                                                          in an area of silence, such as one created by the
+Reactions                                                 silence spell, can’t cast a spell with a verbal
+                                                          component.
+Some spells can be cast as reactions. These spells
+take a fraction of a second to bring about and are        Somatic (S)
+cast in response to some event. If a spell can be cast
+                                                          Spellcasting gestures might include a forceful
+                                                          gesticulation or an intricate set of gestures. If a spell

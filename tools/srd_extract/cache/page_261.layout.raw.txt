@@ -1,0 +1,55 @@
+Monsters (A)                                              Tail. Melee Weapon Attack: +9 to hit, reach 10 ft. one
+                                                          target. Hit: 15 (3d6 + 5) bludgeoning damage.
+Aboleth                                                   Enslave (3/Day). The aboleth targets one creature it
+                                                          can see within 30 feet of it. The target must succeed on
+Large aberration, lawful evil                             a DC 14 Wisdom saving throw or be magically charmed
+                                                          by the aboleth until the aboleth dies or until it is on a
+Armor Class 17 (natural armor)                            different plane of existence from the target. The
+Hit Points 135 (18d10 + 36)                               charmed target is under the aboleth’s control and can’t
+Speed 10 ft., swim 40 ft.                                 take reactions, and the aboleth and the target can
+                                                          communicate telepathically with each other over any
+    STR DEX CON INT WIS CHA                               distance.
+  21 (+5) 9 (−1) 15 (+2) 18 (+4) 15 (+2) 18 (+4)
+                                                            Whenever the charmed target takes damage, the
+Saving Throws Con +6, Int +8, Wis +6                      target can repeat the saving throw. On a success, the
+Skills History +12, Perception +10                        effect ends. No more than once every 24 hours, the
+Senses darkvision 120 ft., passive Perception 20          target can also repeat the saving throw when it is at
+Languages Deep Speech, telepathy 120 ft.                  least 1 mile away from the aboleth.
+Challenge 10 (5,900 XP)
+                                                          Legendary Actions
+Amphibious. The aboleth can breathe air and water.
+Mucous Cloud. While underwater, the aboleth is            The aboleth can take 3 legendary actions, choosing
+surrounded by transformative mucus. A creature that       from the options below. Only one legendary action
+touches the aboleth or that hits it with a melee attack   option can be used at a time and only at the end of
+while within 5 feet of it must make a DC 14               another creature’s turn. The aboleth regains spent
+Constitution saving throw. On a failure, the creature is  legendary actions at the start of its turn.
+diseased for 1d4 hours. The diseased creature can         Detect. The aboleth makes a Wisdom (Perception)
+breathe only underwater.
+Probing Telepathy. If a creature communicates               check.
+telepathically with the aboleth, the aboleth learns the   Tail Swipe. The aboleth makes one tail attack.
+creature’s greatest desires if the aboleth can see the    Psychic Drain (Costs 2 Actions). One creature charmed
+creature.
+                                                            by the aboleth takes 10 (3d6) psychic damage, and
+Actions                                                     the aboleth regains hit points equal to the damage
+                                                            the creature takes.
+Multiattack. The aboleth makes three tentacle attacks.
+Tentacle. Melee Weapon Attack: +9 to hit, reach 10 ft.,   Angels
+one target. Hit: 12 (2d6 + 5) bludgeoning damage. If
+the target is a creature, it must succeed on a DC 14      Deva
+Constitution saving throw or become diseased. The
+disease has no effect for 1 minute and can be removed     Medium celestial, lawful good
+by any magic that cures disease. After 1 minute, the
+diseased creature’s skin becomes translucent and slimy,   Armor Class 17 (natural armor)
+the creature can’t regain hit points unless it is         Hit Points 136 (16d8 + 64)
+underwater, and the disease can be removed only by        Speed 30 ft., fly 90 ft.
+heal or another disease-­‐curing spell of 6th level or
+higher. When the creature is outside a body of water, it      STR DEX CON INT WIS CHA
+takes 6 (1d12) acid damage every 10 minutes unless          18 (+4) 18 (+4) 18 (+4) 17 (+3) 20 (+5) 20 (+5)
+moisture is applied to the skin before 10 minutes have
+passed.                                                   Saving Throws Wis +9, Cha +9
+                                                          Skills Insight +9, Perception +9
+                                                          Damage Resistances radiant; bludgeoning, piercing,
+
+                                                            and slashing from nonmagical attacks
+                                                          Condition Immunities charmed, exhaustion, frightened
+                                                          Senses darkvision 120 ft., passive Perception 19

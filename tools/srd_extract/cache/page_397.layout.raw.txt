@@ -1,0 +1,48 @@
+Senses passive Perception 10                                 Reactions
+Languages any one language (usually Common)                  Parry. The captain adds 2 to its AC against one melee
+Challenge 1/8 (25 XP)                                        attack that would hit it. To do so, the captain must see
+                                                             the attacker and be wielding a melee weapon.
+Actions
+Scimitar. Melee Weapon Attack: +3 to hit, reach 5 ft.,       It takes a strong personality, ruthless cunning, and a
+one target. Hit: 4 (1d6 + 1) slashing damage.                silver tongue to keep a gang of bandits in line. The
+Light Crossbow. Ranged Weapon Attack: +3 to hit,             bandit captain has these qualities in spades.
+range 80 ft./320 ft., one target. Hit: 5 (1d8 + 1) piercing
+damage.                                                        In addition to managing a crew of selfish
+                                                             malcontents, the pirate captain is a variation of the
+Bandits rove in gangs and are sometimes led by               bandit captain, with a ship to protect and command.
+thugs, veterans, or spellcasters. Not all bandits are        To keep the crew in line, the captain must mete out
+evil. Oppression, drought, disease, or famine can            rewards and punishment on a regular basis.
+often drive otherwise honest folk to a life of banditry.
+                                                               More than treasure, a bandit captain or pirate
+  Pirates are bandits of the high seas. They might be        captain craves infamy. A prisoner who appeals to the
+freebooters interested only in treasure and murder,          captain’s vanity or ego is more likely to be treated
+or they might be privateers sanctioned by the crown          fairly than a prisoner who does not or claims not to
+to attack and plunder an enemy nation’s vessels.             know anything of the captain’s colorful reputation.
+
+Bandit Captain                                               Berserker
+
+Medium humanoid (any race), any non-­‐lawful                 Medium humanoid (any race), any chaotic alignment
+alignment
+                                                             Armor Class 13 (hide armor)
+Armor Class 15 (studded leather)                             Hit Points 67 (9d8 + 27)
+Hit Points 65 (10d8 + 20)                                    Speed 30 ft.
+Speed 30 ft.
+                                                                 STR DEX CON INT WIS CHA
+    STR DEX CON INT WIS CHA                                    16 (+3) 12 (+1) 17 (+3) 9 (−1) 11 (+0) 9 (−1)
+  15 (+2) 16 (+3) 14 (+2) 14 (+2) 11 (+0) 14 (+2)
+                                                             Senses passive Perception 10
+Saving Throws Str +4, Dex +5, Wis +2                         Languages any one language (usually Common)
+Skills Athletics +4, Deception +4                            Challenge 2 (450 XP)
+Senses passive Perception 10
+Languages any two languages                                  Reckless. At the start of its turn, the berserker can gain
+Challenge 2 (450 XP)                                         advantage on all melee weapon attack rolls during that
+                                                             turn, but attack rolls against it have advantage until the
+Actions                                                      start of its next turn.
+Multiattack. The captain makes three melee attacks:
+two with its scimitar and one with its dagger. Or the        Actions
+captain makes two ranged attacks with its daggers.           Greataxe. Melee Weapon Attack: +5 to hit, reach 5 ft.,
+Scimitar. Melee Weapon Attack: +5 to hit, reach 5 ft.,       one target. Hit: 9 (1d12 + 3) slashing damage.
+one target. Hit: 6 (1d6 + 3) slashing damage.
+Dagger. Melee or Ranged Weapon Attack: +5 to hit,            Hailing from uncivilized lands, unpredictable
+reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d4 +    berserkers come together in war parties and seek
+3) piercing damage.                                          conflict wherever they can find it.

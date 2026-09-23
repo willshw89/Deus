@@ -1,0 +1,62 @@
+taking 9d6 lightning damage on a failed save, or half      You gain a +2 bonus to attack and damage rolls
+as much damage on a successful one.                      made with this weapon, which deals radiant damage
+                                                         instead of slashing damage. When you hit an undead
+  Thunderclap. You can use an action to cause the        with it, that target takes an extra 1d8 radiant
+staff to issue a deafening thunderclap, audible out to   damage.
+600 feet. Each creature within 60 feet of you (not
+including you) must make a DC 17 Constitution              The sword’s luminous blade emits bright light in a
+saving throw. On a failed save, a creature takes 2d6     15-­‐‑foot radius and dim light for an additional 15 feet.
+thunder damage and becomes deafened for 1 minute.        The light is sunlight. While the blade persists, you
+On a successful save, a creature takes half damage       can use an action to expand or reduce its radius of
+and isn’t deafened.                                      bright and dim light by 5 feet each, to a maximum of
+                                                         30 feet each or a minimum of 10 feet each.
+  Thunder and Lightning. You can use an action to
+use the Lightning Strike and Thunderclap properties      Sword of Life Stealing
+at the same time. Doing so doesn’t expend the daily
+use of those properties, only the use of this one.       Weapon (any sword), rare (requires attunement)
+
+Staff of Withering                                       When you attack a creature with this magic weapon
+                                                         and roll a 20 on the attack roll, that target takes an
+Staff, rare (requires attunement by a cleric, druid, or  extra 3d6 necrotic damage, provided that the target
+warlock)                                                 isn’t a construct or an undead. You gain temporary
+                                                         hit points equal to the extra damage dealt.
+This staff has 3 charges and regains 1d3 expended
+charges daily at dawn.                                   Sword of Sharpness
+
+  The staff can be wielded as a magic quarterstaff.      Weapon (any sword that deals slashing damage), very
+On a hit, it deals damage as a normal quarterstaff,      rare (requires attunement)
+and you can expend 1 charge to deal an extra 2d10
+necrotic damage to the target. In addition, the target   When you attack an object with this magic sword
+must succeed on a DC 15 Constitution saving throw        and hit, maximize your weapon damage dice against
+or have disadvantage for 1 hour on any ability check     the target.
+or saving throw that uses Strength or Constitution.
+                                                           When you attack a creature with this weapon and
+Stone of Controlling Earth Elementals                    roll a 20 on the attack roll, that target takes an extra
+                                                         4d6 slashing damage. Then roll another d20. If you
+Wondrous item, rare                                      roll a 20, you lop off one of the target’s limbs, with
+                                                         the effect of such loss determined by the GM. If the
+If the stone is touching the ground, you can use an      creature has no limb to sever, you lop off a portion of
+action to speak its command word and summon an           its body instead.
+earth elemental, as if you had cast the conjure
+elemental spell. The stone can’t be used this way          In addition, you can speak the sword’s command
+again until the next dawn. The stone weighs 5            word to cause the blade to shed bright light in a 10-­‐‑
+pounds.                                                  foot radius and dim light for an additional 10 feet.
+                                                         Speaking the command word again or sheathing the
+Stone of Good Luck (Luckstone)                           sword puts out the light.
+
+Wondrous item, uncommon (requires attunement)            Sword of Wounding
+
+While this polished agate is on your person, you gain    Weapon (any sword), rare (requires attunement)
+a +1 bonus to ability checks and saving throws.
+                                                         Hit points lost to this weapon’s damage can be
+Sun Blade                                                regained only through a short or long rest, rather
+                                                         than by regeneration, magic, or any other means.
+Weapon (longsword), rare (requires attunement)
+                                                           Once per turn, when you hit a creature with an
+This item appears to be a longsword hilt. While          attack using this magic weapon, you can wound the
+grasping the hilt, you can use a bonus action to cause   target. At the start of each of the wounded creature’s
+a blade of pure radiance to spring into existence, or    turns, it takes 1d4 necrotic damage for each time
+make the blade disappear. While the blade exists,        you’ve wounded it, and it can then make a DC 15
+this magic longsword has the finesse property. If you    Constitution saving throw, ending the effect of all
+are proficient with shortswords or longswords, you       such wounds on itself on a success. Alternatively, the
+are proficient with the sun blade.                       wounded creature, or a creature within 5 feet of it,

@@ -1,0 +1,60 @@
+  When the spell ends, you immediately return to          away from you where it can no longer see you, this
+the plane you originated from in the spot you             effect ends.
+currently occupy. If you occupy the same spot as a
+solid object or creature when this happens, you are         Sickened. The target has disadvantage on attack
+immediately shunted to the nearest unoccupied             rolls and ability checks. At the end of each of its
+space that you can occupy and take force damage           turns, it can make another Wisdom saving throw. If
+equal to twice the number of feet you are moved.          it succeeds, the effect ends.
+
+  This spell has no effect if you cast it while you are   Fabricate
+on the Ethereal Plane or a plane that doesn’t border
+it, such as one of the Outer Planes.                      4th-­‐‑level transmutation
+
+  At Higher Levels. When you cast this spell using a      Casting Time: 10 minutes
+spell slot of 8th level or higher, you can target up to   Range: 120 feet
+three willing creatures (including you) for each slot     Components: V, S
+level above 7th. The creatures must be within 10 feet     Duration: Instantaneous
+of you when you cast the spell.
+                                                          You convert raw materials into products of the same
+Expeditious Retreat                                       material. For example, you can fabricate a wooden
+                                                          bridge from a clump of trees, a rope from a patch of
+1st-­‐‑level transmutation                                hemp, and clothes from flax or wool.
+
+Casting Time: 1 bonus action                                Choose raw materials that you can see within
+Range: Self                                               range. You can fabricate a Large or smaller object
+Components: V, S                                          (contained within a 10-­‐‑foot cube, or eight connected
+Duration: Concentration, up to 10 minutes                 5-­‐‑foot cubes), given a sufficient quantity of raw
+                                                          material. If you are working with metal, stone, or
+This spell allows you to move at an incredible pace.      another mineral substance, however, the fabricated
+When you cast this spell, and then as a bonus action      object can be no larger than Medium (contained
+on each of your turns until the spell ends, you can       within a single 5-­‐‑foot cube). The quality of objects
+take the Dash action.                                     made by the spell is commensurate with the quality
+                                                          of the raw materials.
+Eyebite
+                                                            Creatures or magic items can’t be created or
+6th-­‐‑level necromancy                                   transmuted by this spell. You also can’t use it to
+                                                          create items that ordinarily require a high degree of
+Casting Time: 1 action                                    craftsmanship, such as jewelry, weapons, glass, or
+Range: Self                                               armor, unless you have proficiency with the type of
+Components: V, S                                          artisan’s tools used to craft such objects.
+Duration: Concentration, up to 1 minute
+                                                          Faerie Fire
+For the spell’s duration, your eyes become an inky
+void imbued with dread power. One creature of your        1st-­‐‑level evocation
+choice within 60 feet of you that you can see must
+succeed on a Wisdom saving throw or be affected by        Casting Time: 1 action
+one of the following effects of your choice for the       Range: 60 feet
+duration. On each of your turns until the spell ends,     Components: V
+you can use your action to target another creature        Duration: Concentration, up to 1 minute
+but can’t target a creature again if it has succeeded
+on a saving throw against this casting of eyebite.        Each object in a 20-­‐‑foot cube within range is
+                                                          outlined in blue, green, or violet light (your choice).
+  Asleep. The target falls unconscious. It wakes up if    Any creature in the area when the spell is cast is also
+it takes any damage or if another creature uses its       outlined in light if it fails a Dexterity saving throw.
+action to shake the sleeper awake.                        For the duration, objects and affected creatures shed
+                                                          dim light in a 10-­‐‑foot radius.
+  Panicked. The target is frightened of you. On each
+of its turns, the frightened creature must take the         Any attack roll against an affected creature or
+Dash action and move away from you by the safest          object has advantage if the attacker can see it, and
+and shortest available route, unless there is nowhere     the affected creature or object can’t benefit from
+to move. If the target moves to a place at least 60 feet  being invisible.

@@ -1,0 +1,57 @@
+Actions                                                    Wing Attack (Costs 2 Actions). The dragon beats its
+                                                             wings. Each creature within 10 feet of the dragon
+Multiattack. The dragon can use its Frightful Presence.      must succeed on a DC 19 Dexterity saving throw or
+It then makes three attacks: one with its bite and two       take 13 (2d6 + 6) bludgeoning damage and be
+with its claws.                                              knocked prone. The dragon can then fly up to half its
+                                                             flying speed.
+Bite. Melee Weapon Attack: +11 to hit, reach 10 ft.,
+one target. Hit: 17 (2d10 + 6) piercing damage.            Young Copper Dragon
+
+Claw. Melee Weapon Attack: +11 to hit, reach 5 ft.,        Large dragon, chaotic good
+one target. Hit: 13 (2d6 + 6) slashing damage.
+                                                           Armor Class 17 (natural armor)
+Tail. Melee Weapon Attack: +11 to hit, reach 15 ft., one   Hit Points 119 (14d10 + 42)
+target. Hit: 15 (2d8 + 6) bludgeoning damage.              Speed 40 ft., climb 40 ft., fly 80 ft.
+
+Frightful Presence. Each creature of the dragon’s              STR DEX CON INT WIS CHA
+choice that is within 120 feet of the dragon and aware       19 (+4) 12 (+1) 17 (+3) 16 (+3) 13 (+1) 15 (+2)
+of it must succeed on a DC 16 Wisdom saving throw or
+become frightened for 1 minute. A creature can repeat      Saving Throws Dex +4, Con +6, Wis +4, Cha +5
+the saving throw at the end of each of its turns, ending   Skills Deception +5, Perception +7, Stealth +4
+the effect on itself on a success. If a creature’s saving  Damage Immunities acid
+throw is successful or the effect ends for it, the         Senses blindsight 30 ft., darkvision 120 ft., passive
+creature is immune to the dragon’s Frightful Presence
+for the next 24 hours.                                       Perception 17
+                                                           Languages Common, Draconic
+Breath Weapons (Recharge 5–6). The dragon uses one         Challenge 7 (2,900 XP)
+of the following breath weapons.
+                                                           Actions
+Acid Breath. The dragon exhales acid in an 60-­‐foot line
+  that is 5 feet wide. Each creature in that line must     Multiattack. The dragon makes three attacks: one with
+  make a DC 18 Dexterity saving throw, taking 54           its bite and two with its claws.
+  (12d8) acid damage on a failed save, or half as much     Bite. Melee Weapon Attack: +7 to hit, reach 10 ft., one
+  damage on a successful one.                              target. Hit: 15 (2d10 + 4) piercing damage.
+                                                           Claw. Melee Weapon Attack: +7 to hit, reach 5 ft., one
+Slowing Breath. The dragon exhales gas in a 60-­‐foot      target. Hit: 11 (2d6 + 4) slashing damage.
+  cone. Each creature in that area must succeed on a       Breath Weapons (Recharge 5–6). The dragon uses one
+  DC 18 Constitution saving throw. On a failed save,       of the following breath weapons.
+  the creature can’t use reactions, its speed is halved,   Acid Breath. The dragon exhales acid in an 40-­‐foot line
+  and it can’t make more than one attack on its turn.
+  In addition, the creature can use either an action or a    that is 5 feet wide. Each creature in that line must
+  bonus action on its turn, but not both. These effects      make a DC 14 Dexterity saving throw, taking 40 (9d8)
+  last for 1 minute. The creature can repeat the saving      acid damage on a failed save, or half as much
+  throw at the end of each of its turns, ending the          damage on a successful one.
+  effect on itself with a successful save.
+
+Legendary Actions
+
+The dragon can take 3 legendary actions, choosing
+from the options below. Only one legendary action
+option can be used at a time and only at the end of
+another creature’s turn. The dragon regains spent
+legendary actions at the start of its turn.
+
+Detect. The dragon makes a Wisdom (Perception)
+  check.
+
+Tail Attack. The dragon makes a tail attack.

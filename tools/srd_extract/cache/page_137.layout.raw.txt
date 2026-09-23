@@ -1,0 +1,61 @@
+Duration: Concentration, up to 1 minute                     direction from you, it defends and preserves itself to
+                                                            the best of its ability.
+Your prayer empowers you with divine radiance.
+Until the spell ends, your weapon attacks deal an             You can use your action to take total and precise
+extra 1d4 radiant damage on a hit.                          control of the target. Until the end of your next turn,
+                                                            the creature takes only the actions you choose, and
+Divine Word                                                 doesn’t do anything that you don’t allow it to do.
+                                                            During this time, you can also cause the creature to
+7th-­‐‑level evocation                                      use a reaction, but this requires you to use your own
+                                                            reaction as well.
+Casting Time: 1 bonus action
+Range: 30 feet                                                Each time the target takes damage, it makes a new
+Components: V                                               Wisdom saving throw against the spell. If the saving
+Duration: Instantaneous                                     throw succeeds, the spell ends.
+
+You utter a divine word, imbued with the power that           At Higher Levels. When you cast this spell with a
+shaped the world at the dawn of creation. Choose            5th-­‐‑level spell slot, the duration is concentration, up
+any number of creatures you can see within range.           to 10 minutes. When you use a 6th-­‐‑level spell slot,
+Each creature that can hear you must make a                 the duration is concentration, up to 1 hour. When
+Charisma saving throw. On a failed save, a creature         you use a spell slot of 7th level or higher, the
+suffers an effect based on its current hit points:          duration is concentration, up to 8 hours.
+
+• 50 hit points or fewer: deafened for 1 minute             Dominate Monster
+• 40 hit points or fewer: deafened and blinded for
+                                                            8th-­‐‑level enchantment
+  10 minutes
+• 30 hit points or fewer: blinded, deafened, and            Casting Time: 1 action
+                                                            Range: 60 feet
+  stunned for 1 hour                                        Components: V, S
+• 20 hit points or fewer: killed instantly                  Duration: Concentration, up to 1 hour
+
+Regardless of its current hit points, a celestial, an       You attempt to beguile a creature that you can see
+elemental, a fey, or a fiend that fails its save is forced  within range. It must succeed on a Wisdom saving
+back to its plane of origin (if it isn’t there already)     throw or be charmed by you for the duration. If you
+and can’t return to your current plane for 24 hours         or creatures that are friendly to you are fighting it, it
+by any means short of a wish spell.                         has advantage on the saving throw.
+
+Dominate Beast                                                While the creature is charmed, you have a
+                                                            telepathic link with it as long as the two of you are
+4th-­‐‑level enchantment                                    on the same plane of existence. You can use this
+                                                            telepathic link to issue commands to the creature
+Casting Time: 1 action                                      while you are conscious (no action required), which
+Range: 60 feet                                              it does its best to obey. You can specify a simple and
+Components: V, S                                            general course of action, such as “Attack that
+Duration: Concentration, up to 1 minute                     creature,” “Run over there,” or “Fetch that object.” If
+                                                            the creature completes the order and doesn’t receive
+You attempt to beguile a beast that you can see             further direction from you, it defends and preserves
+within range. It must succeed on a Wisdom saving            itself to the best of its ability.
+throw or be charmed by you for the duration. If you
+or creatures that are friendly to you are fighting it, it     You can use your action to take total and precise
+has advantage on the saving throw.                          control of the target. Until the end of your next turn,
+                                                            the creature takes only the actions you choose, and
+  While the beast is charmed, you have a telepathic         doesn’t do anything that you don’t allow it to do.
+link with it as long as the two of you are on the same      During this time, you can also cause the creature to
+plane of existence. You can use this telepathic link to     use a reaction, but this requires you to use your own
+issue commands to the creature while you are                reaction as well.
+conscious (no action required), which it does its best
+to obey. You can specify a simple and general course          Each time the target takes damage, it makes a new
+of action, such as “Attack that creature,” “Run over        Wisdom saving throw against the spell. If the saving
+there,” or “Fetch that object.” If the creature             throw succeeds, the spell ends.
+completes the order and doesn’t receive further

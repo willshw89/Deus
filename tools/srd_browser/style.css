@@ -24,7 +24,12 @@
     --radius: 6px;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+/* An author display rule (e.g. .filters label { display: flex }) would otherwise defeat the hidden
+   attribute app.js sets on the Challenge / Spell level labels (found by nw_verify.js 2026-09-22). */
+[hidden] { display: none !important; }
+html { height: 100%; }
+/* body grows with its content (min-height only): a fixed 100% height made .layout shrink to the
+   viewport and its overflowing content run behind the footer (found by nw_verify.js 2026-09-22). */
 body {
     margin: 0;
     background: var(--bg);

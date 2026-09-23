@@ -1,6 +1,6 @@
 {
   "generator": "tools/srd_extract/extract_pages.js",
-  "generatedAt": "2026-09-23T01:17:52.372Z",
+  "generatedAt": "2026-09-23T02:15:32.009Z",
   "source": {
     "file": "SRD_CC_v5.1.pdf",
     "sha256": "2504d2a0abb0a4d491a939be4f17910a2dde0312570ab8d208080225ccf0a1f0",
@@ -27,6 +27,12 @@
       "Syntax Error: Unknown character collection 'Adobe-Japan1'"
     ]
   },
+  "variants": {
+    "page_NNN.txt": "reading order, normalised (NORMALIZATION_RULES), footer removed",
+    "page_NNN.layout.txt": "physical layout, normalised, footer removed; right-column text sits up to three columns left of its raw position on lines whose left column held a hyphen artifact",
+    "page_NNN.layout.raw.txt": "physical layout with only CR LF unified and the footer removed; column positions are exact; normalise per line after splitting columns (lib splitRawLayoutColumns)"
+  },
+  "cacheVersion": 2,
   "normalization": [
     {
       "id": "crlf",
@@ -56,19 +62,25 @@
       "id": "unmapped_glyph_dash",
       "from": "U+008A",
       "to": "U+2014 (em dash)",
-      "why": "a glyph of the PDF's Adobe-Japan1 font that pdftotext cannot map; 493 occurrences: 492 are the empty spell-slot cells of the class tables on pages 11, 15, 19, 30, 35, 42, 46 and 52 (printed as em dashes) and one is the dash in 'where the adversaries are [em dash] how far away' on page 90"
+      "why": "a glyph of the PDF's Adobe-Japan1 font that pdftotext cannot map; 493 occurrences: 492 are the empty spell-slot cells of the class tables on pages 11, 15, 19, 30, 35, 42, 46 and 52 and one is the dash in 'where the adversaries are [em dash] how far away' on page 90. CONFIRMED 2026-09-22: the rendered pages 11 and 90 show a dash in every one of those positions; pdf.js decodes the glyph as U+0336 (combining long stroke overlay, a dash-shaped mark with no Unicode dash mapping in that font: 74 on page 11, 1 on page 90; optional/render_pages.mjs --probe), so U+2014 is the chosen text representation, not the font's own code"
     },
     {
       "id": "backtick_apostrophe",
       "from": "` (grave accent)",
       "to": "U+2019 (right single quotation mark)",
-      "why": "one of the PDF's fonts emits the apostrophe as a grave accent: 10 occurrences, all possessives or contractions (Thieves` Cant, can`t, Lion`s head), on pages 35, 39, 90, 232, 358 and 361"
+      "why": "one of the PDF's fonts emits the apostrophe as a grave accent: 10 occurrences, all possessives or contractions (Thieves` Cant, can`t, Lion`s head), on pages 35, 39, 90, 232, 358 and 361. CONFIRMED 2026-09-22 on the rendered page 90 and by pdf.js, which decodes those glyphs as U+2019"
     },
     {
       "id": "minus_sign",
       "from": "U+2212",
       "to": "-",
       "why": "numeric minus in stat blocks, e.g. (-4); parsers read ASCII"
+    },
+    {
+      "id": "iron_flask_dash",
+      "from": "digit 'r' digit (e.g. 51r54)",
+      "to": "digit U+2013 digit",
+      "why": "on page 228 pdftotext emits the en dash of the Iron Flask table's d100 ranges as the letter r: 14 occurrences, the only digit-r-digit tokens in the whole document; the rendered page shows en dashes (confirmed 2026-09-22)"
     }
   ],
   "footer": "the running footer 'System Reference Document 5.1' and the page number are removed from every page; footerPage records the number that was printed",

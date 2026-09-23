@@ -1,0 +1,53 @@
+Languages understands the languages of its creator but         Wakeful. While the hydra sleeps, at least one of its
+  can’t speak                                                  heads is awake.
+
+Challenge 0 (10 XP)                                            Actions
+                                                               Multiattack. The hydra makes as many bite attacks as
+Telepathic Bond. While the homunculus is on the same           it has heads.
+plane of existence as its master, it can magically convey      Bite. Melee Weapon Attack: +8 to hit, reach 10 ft., one
+what it senses to its master, and the two can                  target. Hit: 10 (1d10 + 5) piercing damage.
+communicate telepathically.
+                                                               Monsters (I)
+Actions
+                                                               Invisible Stalker
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+creature. Hit: 1 piercing damage, and the target must          Medium elemental, neutral
+succeed on a DC 10 Constitution saving throw or be             Armor Class 14
+poisoned for 1 minute. If the saving throw fails by 5 or       Hit Points 104 (16d8 + 32)
+more, the target is instead poisoned for 5 (1d10)              Speed 50 ft., fly 50 ft. (hover)
+minutes and unconscious while poisoned in this way.
+                                                                   STR DEX CON INT WIS CHA
+Hydra                                                            16 (+3) 19 (+4) 14 (+2) 10 (+0) 15 (+2) 11 (+0)
+
+Huge monstrosity, unaligned                                    Skills Perception +8, Stealth +10
+                                                               Damage Resistances bludgeoning, piercing, and
+Armor Class 15 (natural armor)
+Hit Points 172 (15d12 + 75)                                      slashing from nonmagical attacks
+Speed 30 ft., swim 30 ft.                                      Damage Immunities poison
+                                                               Condition Immunities exhaustion, grappled, paralyzed,
+    STR DEX CON INT WIS CHA
+  20 (+5) 12 (+1) 20 (+5) 2 (−4) 10 (+0) 7 (−2)                  petrified, poisoned, prone, restrained, unconscious
+                                                               Senses darkvision 60 ft., passive Perception 18
+Skills Perception +6                                           Languages Auran, understands Common but doesn’t
+Senses darkvision 60 ft., passive Perception 16
+Languages —                                                      speak it
+Challenge 8 (3,900 XP)                                         Challenge 6 (2,300 XP)
+
+Hold Breath. The hydra can hold its breath for 1 hour.         Invisibility. The stalker is invisible.
+Multiple Heads. The hydra has five heads. While it has         Faultless Tracker. The stalker is given a quarry by its
+more than one head, the hydra has advantage on                 summoner. The stalker knows the direction and
+saving throws against being blinded, charmed,                  distance to its quarry as long as the two of them are on
+deafened, frightened, stunned, and knocked                     the same plane of existence. The stalker also knows the
+unconscious.                                                   location of its summoner.
+
+  Whenever the hydra takes 25 or more damage in a              Actions
+single turn, one of its heads dies. If all its heads die, the  Multiattack. The stalker makes two slam attacks.
+hydra dies.                                                    Slam. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+                                                               target. Hit: 10 (2d6 + 3) bludgeoning damage.
+  At the end of its turn, it grows two heads for each of
+its heads that died since its last turn, unless it has taken
+fire damage since its last turn. The hydra regains 10 hit
+points for each head regrown in this way.
+Reactive Heads. For each head the hydra has beyond
+one, it gets an extra reaction that can be used only for
+opportunity attacks.

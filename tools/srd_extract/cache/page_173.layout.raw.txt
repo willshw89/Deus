@@ -1,0 +1,63 @@
+  You can use your action to move this illusion up to     Range: Touch
+twice your speed, and make it gesture, speak, and         Components: V, S
+behave in whatever way you choose. It mimics your         Duration: 1 hour
+mannerisms perfectly.
+                                                          You touch a creature. If it is poisoned, you neutralize
+  You can see through its eyes and hear through its       the poison. If more than one poison afflicts the target,
+ears as if you were in its space. On your turn as a       you neutralize one poison that you know is present,
+bonus action, you can switch from using its senses to     or you neutralize one at random.
+using your own, or back again. While you are using
+its senses, you are blinded and deafened in regard to       For the duration, the target has advantage on
+your own surroundings.                                    saving throws against being poisoned, and it has
+                                                          resistance to poison damage.
+  Physical interaction with the image reveals it to be
+an illusion, because things can pass through it. A        Purify Food and Drink
+creature that uses its action to examine the image
+can determine that it is an illusion with a successful    1st-­‐‑level transmutation (ritual)
+Intelligence (Investigation) check against your spell
+save DC. If a creature discerns the illusion for what it  Casting Time: 1 action
+is, the creature can see through the image, and any       Range: 10 feet
+noise it makes sounds hollow to the creature.             Components: V, S
+                                                          Duration: Instantaneous
+Protection from Energy
+                                                          All nonmagical food and drink within a 5-­‐‑foot-­‐‑radius
+3rd-­‐‑level abjuration                                   sphere centered on a point of your choice within
+                                                          range is purified and rendered free of poison and
+Casting Time: 1 action                                    disease.
+Range: Touch
+Components: V, S                                          Raise Dead
+Duration: Concentration, up to 1 hour
+                                                          5th-­‐‑level necromancy
+For the duration, the willing creature you touch has
+resistance to one damage type of your choice: acid,       Casting Time: 1 hour
+cold, fire, lightning, or thunder.                        Range: Touch
+                                                          Components: V, S, M (a diamond worth at least 500
+Protection from Evil and Good
+                                                            gp, which the spell consumes)
+1st-­‐‑level abjuration                                   Duration: Instantaneous
+
+Casting Time: 1 action                                    You return a dead creature you touch to life,
+Range: Touch                                              provided that it has been dead no longer than 10
+Components: V, S, M (holy water or powdered silver        days. If the creature’s soul is both willing and at
+                                                          liberty to rejoin the body, the creature returns to life
+  and iron, which the spell consumes)                     with 1 hit point.
+Duration: Concentration up to 10 minutes
+                                                            This spell also neutralizes any poisons and cures
+Until the spell ends, one willing creature you touch is   nonmagical diseases that affected the creature at the
+protected against certain types of creatures:             time it died. This spell doesn’t, however, remove
+aberrations, celestials, elementals, fey, fiends, and     magical diseases, curses, or similar effects; if these
+undead.                                                   aren’t first removed prior to casting the spell, they
+                                                          take effect when the creature returns to life. The
+  The protection grants several benefits. Creatures       spell can’t return an undead creature to life.
+of those types have disadvantage on attack rolls
+against the target. The target also can’t be charmed,       This spell closes all mortal wounds, but it doesn’t
+frightened, or possessed by them. If the target is        restore missing body parts. If the creature is lacking
+already charmed, frightened, or possessed by such a       body parts or organs integral for its survival—its
+creature, the target has advantage on any new             head, for instance—the spell automatically fails.
+saving throw against the relevant effect.
+                                                            Coming back from the dead is an ordeal. The
+Protection from Poison                                    target takes a −4 penalty to all attack rolls, saving
+                                                          throws, and ability checks. Every time the target
+2nd-­‐‑level abjuration                                   finishes a long rest, the penalty is reduced by 1 until
+                                                          it disappears.
+Casting Time: 1 action

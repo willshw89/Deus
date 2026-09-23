@@ -1,0 +1,64 @@
+• You create an instantaneous, harmless sensory           and is buried in the rubble, requiring a DC 20
+  effect, such as falling leaves, a puff of wind, the     Strength (Athletics) check as an action to escape.
+  sound of a small animal, or the faint odor of skunk.    The GM can adjust the DC higher or lower,
+  The effect must fit in a 5-­‐‑foot cube.                depending on the nature of the rubble. On a
+                                                          successful save, the creature takes half as much
+• You instantly light or snuff out a candle, a torch, or  damage and doesn’t fall prone or become buried.
+  a small campfire.
+                                                          Eldritch Blast
+Earthquake
+                                                          Evocation cantrip
+8th-­‐‑level evocation
+                                                          Casting Time: 1 action
+Casting Time: 1 action                                    Range: 120 feet
+Range: 500 feet                                           Components: V, S
+Components: V, S, M (a pinch of dirt, a piece of rock,    Duration: Instantaneous
+                                                          A beam of crackling energy streaks toward a
+  and a lump of clay)                                     creature within range. Make a ranged spell attack
+Duration: Concentration, up to 1 minute                   against the target. On a hit, the target takes 1d10
+                                                          force damage.
+You create a seismic disturbance at a point on the
+ground that you can see within range. For the               The spell creates more than one beam when you
+duration, an intense tremor rips through the ground       reach higher levels: two beams at 5th level, three
+in a 100-­‐‑foot-­‐‑radius circle centered on that point  beams at 11th level, and four beams at 17th level.
+and shakes creatures and structures in contact with       You can direct the beams at the same target or at
+the ground in that area.                                  different ones. Make a separate attack roll for each
+                                                          beam.
+  The ground in the area becomes difficult terrain.
+Each creature on the ground that is concentrating         Enhance Ability
+must make a Constitution saving throw. On a failed
+save, the creature’s concentration is broken.             2nd-­‐‑level transmutation
+
+  When you cast this spell and at the end of each         Casting Time: 1 action
+turn you spend concentrating on it, each creature on      Range: Touch
+the ground in the area must make a Dexterity saving       Components: V, S, M (fur or a feather from a beast)
+throw. On a failed save, the creature is knocked          Duration: Concentration, up to 1 hour.
+prone.
+                                                          You touch a creature and bestow upon it a magical
+  This spell can have additional effects depending        enhancement. Choose one of the following effects;
+on the terrain in the area, as determined by the GM.      the target gains that effect until the spell ends.
+
+  Fissures. Fissures open throughout the spell’s            Bear’s Endurance. The target has advantage on
+area at the start of your next turn after you cast the    Constitution checks. It also gains 2d6 temporary hit
+spell. A total of 1d6 such fissures open in locations     points, which are lost when the spell ends.
+chosen by the GM. Each is 1d10 × 10 feet deep, 10
+feet wide, and extends from one edge of the spell’s         Bull’s Strength. The target has advantage on
+area to the opposite side. A creature standing on a       Strength checks, and his or her carrying capacity
+spot where a fissure opens must succeed on a              doubles.
+Dexterity saving throw or fall in. A creature that
+successfully saves moves with the fissure’s edge as it      Cat’s Grace. The target has advantage on Dexterity
+opens.                                                    checks. It also doesn’t take damage from falling 20
+                                                          feet or less if it isn’t incapacitated.
+  A fissure that opens beneath a structure causes it
+to automatically collapse (see below).                      Eagle’s Splendor. The target has advantage on
+                                                          Charisma checks.
+  Structures. The tremor deals 50 bludgeoning
+damage to any structure in contact with the ground          Fox’s Cunning. The target has advantage on
+in the area when you cast the spell and at the start of   Intelligence checks.
+each of your turns until the spell ends. If a structure
+drops to 0 hit points, it collapses and potentially         Owl’s Wisdom. The target has advantage on
+damages nearby creatures. A creature within half the      Wisdom checks.
+distance of a structure’s height must make a
+Dexterity saving throw. On a failed save, the creature      At Higher Levels. When you cast this spell using a
+takes 5d6 bludgeoning damage, is knocked prone,           spell slot of 3rd level or higher, you can target one
+                                                          additional creature for each slot level above 2nd.

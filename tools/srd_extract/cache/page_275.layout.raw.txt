@@ -1,0 +1,51 @@
+successful DC 12 Wisdom (Medicine) check. The wound            STR DEX CON INT WIS CHA
+also closes if the target receives magical healing.          18 (+4) 15 (+2) 18 (+4) 11 (+0) 12 (+1) 14 (+2)
+
+Bone Devil                                                 Saving Throws Con +7, Wis +4, Cha +5
+                                                           Damage Resistances cold; bludgeoning, piercing, and
+Large fiend (devil), lawful evil
+                                                             slashing from nonmagical attacks that aren’t silvered
+Armor Class 19 (natural armor)                             Damage Immunities fire, poison
+Hit Points 142 (15d10 + 60)                                Condition Immunities poisoned
+Speed 40 ft., fly 40 ft.                                   Senses darkvision 120 ft., passive Perception 11
+                                                           Languages Infernal, telepathy 120 ft.
+    STR DEX CON INT WIS CHA                                Challenge 8 (3,900 XP)
+  18 (+4) 16 (+3) 18 (+4) 13 (+1) 14 (+2) 16 (+3)
+                                                           Devil’s Sight. Magical darkness doesn’t impede the
+Saving Throws Int +5, Wis +6, Cha +7                       devil’s darkvision.
+Skills Deception +7, Insight +6                            Magic Resistance. The devil has advantage on saving
+Damage Resistances cold; bludgeoning, piercing, and        throws against spells and other magical effects.
+
+  slashing from nonmagical attacks that aren’t silvered    Actions
+Damage Immunities fire, poison
+Condition Immunities poisoned                              Multiattack. The devil makes two attacks with its
+Senses darkvision 120 ft., passive Perception 12           chains.
+Languages Infernal, telepathy 120 ft.                      Chain. Melee Weapon Attack: +8 to hit, reach 10 ft.,
+Challenge 9 (5,000 XP)                                     one target. Hit: 11 (2d6 + 4) slashing damage. The
+                                                           target is grappled (escape DC 14) if the devil isn’t
+Devil’s Sight. Magical darkness doesn’t impede the         already grappling a creature. Until this grapple ends,
+devil’s darkvision.                                        the target is restrained and takes 7 (2d6) piercing
+Magic Resistance. The devil has advantage on saving        damage at the start of each of its turns.
+throws against spells and other magical effects.           Animate Chains (Recharges after a Short or Long Rest).
+                                                           Up to four chains the devil can see within 60 feet of it
+Actions                                                    magically sprout razor-­‐edged barbs and animate under
+Multiattack. The devil makes three attacks: two with       the devil’s control, provided that the chains aren’t
+its claws and one with its sting.                          being worn or carried.
+Claw. Melee Weapon Attack: +8 to hit, reach 10 ft.,
+one target. Hit: 8 (1d8 + 4) slashing damage.                Each animated chain is an object with AC 20, 20 hit
+Sting. Melee Weapon Attack: +8 to hit, reach 10 ft.,       points, resistance to piercing damage, and immunity to
+one target. Hit: 13 (2d8 + 4) piercing damage plus 17      psychic and thunder damage. When the devil uses
+(5d6) poison damage, and the target must succeed on        Multiattack on its turn, it can use each animated chain
+a DC 14 Constitution saving throw or become poisoned       to make one additional chain attack. An animated
+for 1 minute. The target can repeat the saving throw at    chain can grapple one creature of its own but can’t
+the end of each of its turns, ending the effect on itself  make attacks while grappling. An animated chain
+on a success.                                              reverts to its inanimate state if reduced to 0 hit points
+                                                           or if the devil is incapacitated or dies.
+Chain Devil
+                                                           Reactions
+Medium fiend (devil), lawful evil
+                                                           Unnerving Mask. When a creature the devil can see
+Armor Class 16 (natural armor)                             starts its turn within 30 feet of the devil, the devil can
+Hit Points 85 (10d8 + 40)                                  create the illusion that it looks like one of the
+Speed 30 ft.                                               creature’s departed loved ones or bitter enemies. If the
+                                                           creature can see the devil, it must succeed on a DC 14

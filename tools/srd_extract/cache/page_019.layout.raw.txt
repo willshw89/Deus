@@ -1,0 +1,74 @@
+Druid                                                      Weapons: Clubs, daggers, darts, javelins, maces,
+                                                             quarterstaffs, scimitars, sickles, slings, spears
+Class Features
+                                                           Tools: Herbalism kit
+As a druid, you gain the following class features.         Saving Throws: Intelligence, Wisdom
+                                                           Skills: Choose two from Arcana, Animal Handling,
+Hit Points
+                                                             Insight, Medicine, Nature, Perception, Religion,
+Hit Dice: 1d8 per druid level                                and Survival
+Hit Points at 1st Level: 8 + your Constitution
+                                                           Equipment
+  modifier
+Hit Points at Higher Levels: 1d8 (or 5) + your             You start with the following equipment, in addition
+                                                           to the equipment granted by your background:
+  Constitution modifier per druid level after 1st
+                                                           • (a) a wooden shield or (b) any simple weapon
+Proficiencies                                              • (a) a scimitar or (b) any simple melee weapon
+                                                           • Leather armor, an explorer’s pack, and a druidic
+Armor: Light armor, medium armor, shields (druids
+  will not wear armor or use shields made of metal)          focus
+
+The Druid
+
+       Proficiency                                         Cantrips  Spell Slots per Spell Level
+          Bonus
+Level       +2      Features                               Known 1st 2nd 3rd 4th 5th 6th 7th 8th 9th
+ 1st        +2      Druidic, Spellcasting
+2nd         +2      Wild Shape, Druid Circle               2         2  
+ 3rd        +2      
+ 4th                Wild Shape improvement, Ability Score  2         3  
+                    Improvement
+                                                          2         4 2 
+                    Druid Circle feature
+                                                          3         4 3 
+                    Wild Shape improvement, Ability Score
+5th    +3           Improvement                            3         4 3 2 
+                    
+6th    +3           Druid Circle feature                   3         4 3 3 
+                    
+7th    +3           Ability Score Improvement              3         4 3 3 1 
+                    
+8th    +3           Druid Circle feature                   3         4 3 3 2 
+                    
+9th    +4           Ability Score Improvement              3         4 3 3 3 1 
+                    
+10th   +4           Timeless Body, Beast Spells            4         4 3 3 3 2 
+                    Ability Score Improvement
+11th   +4           Archdruid                              4         4 3 3 3 2 1 
+
+12th   +4                                                  4         4 3 3 3 2 1 
+
+13th   +5                                                  4         4 3 3 3 2 1 1 
+
+14th   +5                                                  4         4 3 3 3 2 1 1 
+
+15th   +5                                                  4         4 3 3 3 2 1 1 1
+
+16th   +5                                                  4         4 3 3 3 2 1 1 1
+
+17th   +6                                                  4         43 3321111
+
+18th   +6                                                  4         43 3331111
+
+19th   +6                                                  4         43 3332111
+
+20th   +6                                                  4         43 3332211
+
+Druidic                                                    (Perception) check but can’t decipher it without
+                                                           magic.
+You know Druidic, the secret language of druids. You
+can speak the language and use it to leave hidden          Spellcasting
+messages. You and others who know this language
+automatically spot such a message. Others spot the         Drawing on the divine essence of nature itself, you
+message’s presence with a successful DC 15 Wisdom          can cast spells to shape that essence to your will.

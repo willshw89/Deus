@@ -1,0 +1,52 @@
+Iron Golem                                                    STR DEX CON INT WIS CHA
+                                                            22 (+6) 9 (−1) 20 (+5) 3 (−4) 11 (+0) 1 (−5)
+Large construct, unaligned
+                                                          Damage Immunities poison, psychic; bludgeoning,
+Armor Class 20 (natural armor)                              piercing, and slashing from nonmagical attacks that
+Hit Points 210 (20d10 + 100)                                aren’t adamantine
+Speed 30 ft.
+                                                          Condition Immunities charmed, exhaustion, frightened,
+    STR DEX CON INT WIS CHA                                 paralyzed, petrified, poisoned
+  24 (+7) 9 (−1) 20 (+5) 3 (−4) 11 (+0) 1 (−5)
+Damage Immunities fire, poison, psychic; bludgeoning,     Senses darkvision 120 ft., passive Perception 10
+  piercing, and slashing from nonmagical attacks that     Languages understands the languages of its creator but
+  aren’t adamantine
+Condition Immunities charmed, exhaustion, frightened,       can’t speak
+  paralyzed, petrified, poisoned                          Challenge 10 (5,900 XP)
+Senses darkvision 120 ft., passive Perception 10
+Languages understands the languages of its creator but    Immutable Form. The golem is immune to any spell or
+  can’t speak                                             effect that would alter its form.
+Challenge 16 (15,000 XP)                                  Magic Resistance. The golem has advantage on saving
+                                                          throws against spells and other magical effects.
+Fire Absorption. Whenever the golem is subjected to       Magic Weapons. The golem’s weapon attacks are
+fire damage, it takes no damage and instead regains a     magical.
+number of hit points equal to the fire damage dealt.
+Immutable Form. The golem is immune to any spell or       Actions
+effect that would alter its form.                         Multiattack. The golem makes two slam attacks.
+Magic Resistance. The golem has advantage on saving       Slam. Melee Weapon Attack: +10 to hit, reach 5 ft.,
+throws against spells and other magical effects.          one target. Hit: 19 (3d8 + 6) bludgeoning damage.
+Magic Weapons. The golem’s weapon attacks are             Slow (Recharge 5–6). The golem targets one or more
+magical.                                                  creatures it can see within 10 feet of it. Each target
+                                                          must make a DC 17 Wisdom saving throw against this
+Actions                                                   magic. On a failed save, a target can’t use reactions, its
+Multiattack. The golem makes two melee attacks.           speed is halved, and it can’t make more than one
+Slam. Melee Weapon Attack: +13 to hit, reach 5 ft.,       attack on its turn. In addition, the target can take
+one target. Hit: 20 (3d8 + 7) bludgeoning damage.         either an action or a bonus action on its turn, not both.
+Sword. Melee Weapon Attack: +13 to hit, reach 10 ft.,     These effects last for 1 minute. A target can repeat the
+one target. Hit: 23 (3d10 + 7) slashing damage.           saving throw at the end of each of its turns, ending the
+Poison Breath (Recharge 6). The golem exhales             effect on itself on a success.
+poisonous gas in a 15-­‐foot cone. Each creature in that
+area must make a DC 19 Constitution saving throw,         Gorgon
+taking 45 (10d8) poison damage on a failed save, or
+half as much damage on a successful one.                  Large monstrosity, unaligned
+
+Stone Golem                                               Armor Class 19 (natural armor)
+                                                          Hit Points 114 (12d10 + 48)
+Large construct, unaligned                                Speed 40 ft.
+
+Armor Class 17 (natural armor)                                STR DEX CON INT WIS CHA
+Hit Points 178 (17d10 + 85)                                 20 (+5) 11 (+0) 18 (+4) 2 (−4) 12 (+1) 7 (−2)
+Speed 30 ft.
+                                                          Skills Perception +4
+                                                          Condition Immunities petrified
+                                                          Senses darkvision 60 ft., passive Perception 14

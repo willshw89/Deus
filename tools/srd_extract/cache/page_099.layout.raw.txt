@@ -1,0 +1,61 @@
+at you while you’re in that state, but only true         attack and devour a badly injured foe, or otherwise
+healing can save you.                                    act against your wishes.
+
+  Unless a feature that grants you temporary hit            In either case, if the mount provokes an
+points has a duration, they last until they’re depleted  opportunity attack while you’re on it, the attacker
+or you finish a long rest.                               can target you or the mount.
+
+Mounted Combat                                           Underwater Combat
+
+A knight charging into battle on a warhorse, a wizard    When adventurers pursue sahuagin back to their
+casting spells from the back of a griffon, or a cleric   undersea homes, fight off sharks in an ancient
+soaring through the sky on a pegasus all enjoy the       shipwreck, or find themselves in a flooded dungeon
+benefits of speed and mobility that a mount can          room, they must fight in a challenging environment.
+provide.                                                 Underwater the following rules apply.
+
+  A willing creature that is at least one size larger      When making a melee weapon attack, a creature
+than you and that has an appropriate anatomy can         that doesn’t have a swimming speed (either natural
+serve as a mount, using the following rules.             or granted by magic) has disadvantage on the attack
+                                                         roll unless the weapon is a dagger, javelin,
+Mounting and Dismounting                                 shortsword, spear, or trident.
+
+Once during your move, you can mount a creature            A ranged weapon attack automatically misses a
+that is within 5 feet of you or dismount. Doing so       target beyond the weapon’s normal range. Even
+costs an amount of movement equal to half your           against a target within normal range, the attack roll
+speed. For example, if your speed is 30 feet, you        has disadvantage unless the weapon is a crossbow, a
+must spend 15 feet of movement to mount a horse.         net, or a weapon that is thrown like a javelin
+Therefore, you can’t mount it if you don’t have 15       (including a spear, trident, or dart).
+feet of movement left or if your speed is 0.
+                                                           Creatures and objects that are fully immersed in
+  If an effect moves your mount against its will         water have resistance to fire damage.
+while you’re on it, you must succeed on a DC 10
+Dexterity saving throw or fall off the mount, landing
+prone in a space within 5 feet of it. If you’re knocked
+prone while mounted, you must make the same
+saving throw.
+
+  If your mount is knocked prone, you can use your
+reaction to dismount it as it falls and land on your
+feet. Otherwise, you are dismounted and fall prone
+in a space within 5 feet it.
+
+Controlling a Mount
+
+While you’re mounted, you have two options. You
+can either control the mount or allow it to act
+independently. Intelligent creatures, such as dragons,
+act independently.
+
+  You can control a mount only if it has been trained
+to accept a rider. Domesticated horses, donkeys, and
+similar creatures are assumed to have such training.
+The initiative of a controlled mount changes to
+match yours when you mount it. It moves as you
+direct it, and it has only three action options: Dash,
+Disengage, and Dodge. A controlled mount can move
+and act even on the turn that you mount it.
+
+  An independent mount retains its place in the
+initiative order. Bearing a rider puts no restrictions
+on the actions the mount can take, and it moves and
+acts as it wishes. It might flee from combat, rush to

@@ -1,0 +1,59 @@
+ability score, and an individual’s proficiency in a skill  an individual can add his or her proficiency bonus to
+demonstrates a focus on that aspect. (A character’s        ability checks that involve that skill. Without
+starting skill proficiencies are determined at             proficiency in the skill, the individual makes a
+character creation, and a monster’s skill                  normal ability check.
+proficiencies appear in the monster’s stat block.)
+                                                             For example, if a character attempts to climb up a
+  For example, a Dexterity check might reflect a           dangerous cliff, the GM might ask for a Strength
+character’s attempt to pull off an acrobatic stunt, to     (Athletics) check. If the character is proficient in
+palm an object, or to stay hidden. Each of these           Athletics, the character’s proficiency bonus is added
+aspects of Dexterity has an associated skill:              to the Strength check. If the character lacks that
+Acrobatics, Sleight of Hand, and Stealth, respectively.    proficiency, he or she just makes a Strength check.
+So a character who has proficiency in the Stealth
+skill is particularly good at Dexterity checks related     Variant: Skills with Different Abilities
+to sneaking and hiding.
+                                                           Normally, your proficiency in a skill applies only to a
+  The skills related to each ability score are shown       specific kind of ability check. Proficiency in Athletics,
+in the following list. (No skills are related to           for example, usually applies to Strength checks. In
+Constitution.) See an ability’s description in the later   some situations, though, your proficiency might
+sections of this section for examples of how to use a      reasonably apply to a different kind of check. In such
+skill associated with an ability.                          cases, the GM might ask for a check using an unusual
+                                                           combination of ability and skill, or you might ask
+Strength                                                   your GM if you can apply a proficiency to a different
+                                                           check. For example, if you have to swim from an
+• Athletics                                                offshore island to the mainland, your GM might call
+                                                           for a Constitution check to see if you have the
+Dexterity                                                  stamina to make it that far. In this case, your GM
+                                                           might allow you to apply your proficiency in
+• Acrobatics                                               Athletics and ask for a Constitution (Athletics) check.
+• Sleight of Hand                                          So if you’re proficient in Athletics, you apply your
+• Stealth                                                  proficiency bonus to the Constitution check just as
+                                                           you would normally do for a Strength (Athletics)
+Intelligence                                               check. Similarly, when your half-­‐‑orc barbarian uses a
+                                                           display of raw strength to intimidate an enemy, your
+• Arcana                                                   GM might ask for a Strength (Intimidation) check,
+• History                                                  even though Intimidation is normally associated
+• Investigation                                            with Charisma.
+• Nature
+• Religion                                                 Passive Checks
+
+Wisdom                                                     A passive check is a special kind of ability check that
+                                                           doesn’t involve any die rolls. Such a check can
+• Animal Handling                                          represent the average result for a task done
+• Insight                                                  repeatedly, such as searching for secret doors over
+• Medicine                                                 and over again, or can be used when the GM wants
+• Perception                                               to secretly determine whether the characters
+• Survival                                                 succeed at something without rolling dice, such as
+                                                           noticing a hidden monster.
+Charisma
+                                                             Here’s how to determine a character’s total for a
+• Deception                                                passive check:
+• Intimidation
+• Performance                                                            10 + all modifiers that normally
+• Persuasion                                                                     apply to the check
+
+  Sometimes, the GM might ask for an ability check         If the character has advantage on the check, add 5.
+using a specific skill—for example, “Make a Wisdom         For disadvantage, subtract 5. The game refers to a
+(Perception) check.” At other times, a player might        passive check total as a score.
+ask the GM if proficiency in a particular skill applies
+to a check. In either case, proficiency in a skill means

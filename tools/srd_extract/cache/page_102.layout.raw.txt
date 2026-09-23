@@ -1,0 +1,62 @@
+requires a somatic component, the caster must have           make a Constitution saving throw to maintain
+free use of at least one hand to perform these gestures.     your concentration. The DC equals 10 or half the
+                                                             damage you take, whichever number is higher. If
+Material (M)                                                 you take damage from multiple sources, such as an
+                                                             arrow and a dragon’s breath, you make a separate
+Casting some spells requires particular objects,             saving throw for each source of damage.
+specified in parentheses in the component entry. A         • Being incapacitated or killed. You lose
+character can use a component pouch or a                     concentration on a spell if you are incapacitated or
+spellcasting focus (found in “Equipment”) in place           if you die.
+of the components specified for a spell. But if a cost
+is indicated for a component, a character must have          The GM might also decide that certain
+that specific component before he or she can cast the      environmental phenomena, such as a wave crashing
+spell.                                                     over you while you’re on a storm-­‐‑tossed ship,
+                                                           require you to succeed on a DC 10 Constitution
+  If a spell states that a material component is           saving throw to maintain concentration on a spell.
+consumed by the spell, the caster must provide this
+component for each casting of the spell.                   Targets
+
+  A spellcaster must have a hand free to access a          A typical spell requires you to pick one or more
+spell’s material components—or to hold a                   targets to be affected by the spell’s magic. A spell’s
+spellcasting focus—but it can be the same hand that        description tells you whether the spell targets
+he or she uses to perform somatic components.              creatures, objects, or a point of origin for an area of
+                                                           effect (described below).
+Duration
+                                                             Unless a spell has a perceptible effect, a creature
+A spell’s duration is the length of time the spell         might not know it was targeted by a spell at all. An
+persists. A duration can be expressed in rounds,           effect like crackling lightning is obvious, but a more
+minutes, hours, or even years. Some spells specify         subtle effect, such as an attempt to read a creature’s
+that their effects last until the spells are dispelled or  thoughts, typically goes unnoticed, unless a spell
+destroyed.                                                 says otherwise.
+
+Instantaneous                                              A Clear Path to the Target
+
+Many spells are instantaneous. The spell harms,            To target something, you must have a clear path to it,
+heals, creates, or alters a creature or an object in a     so it can’t be behind total cover.
+way that can’t be dispelled, because its magic exists
+only for an instant.                                         If you place an area of effect at a point that you
+                                                           can’t see and an obstruction, such as a wall, is
+Concentration                                              between you and that point, the point of origin
+                                                           comes into being on the near side of that obstruction.
+Some spells require you to maintain concentration in
+order to keep their magic active. If you lose              Targeting Yourself
+concentration, such a spell ends.
+                                                           If a spell targets a creature of your choice, you can
+  If a spell must be maintained with concentration,        choose yourself, unless the creature must be hostile
+that fact appears in its Duration entry, and the spell     or specifically a creature other than you. If you are in
+specifies how long you can concentrate on it. You          the area of effect of a spell you cast, you can target
+can end concentration at any time (no action               yourself.
+required).
+                                                           Areas of Effect
+  Normal activity, such as moving and attacking,
+doesn’t interfere with concentration. The following        Spells such as burning hands and cone of cold cover
+factors can break concentration:                           an area, allowing them to affect multiple creatures at
+                                                           once.
+• Casting another spell that requires
+  concentration. You lose concentration on a spell           A spell’s description specifies its area of effect,
+  if you cast another spell that requires                  which typically has one of five different shapes: cone,
+  concentration. You can’t concentrate on two spells       cube, cylinder, line, or sphere. Every area of effect
+  at once.                                                 has a point of origin, a location from which the
+                                                           spell’s energy erupts. The rules for each shape
+• Taking damage. Whenever you take damage
+  while you are concentrating on a spell, you must

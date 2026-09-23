@@ -12,7 +12,7 @@
    "pages": 403,
    "extraction": {
     "generator": "tools/srd_extract/extract_pages.js",
-    "generatedAt": "2026-09-23T01:17:52.372Z",
+    "generatedAt": "2026-09-23T02:15:32.009Z",
     "tool": "pdftotext (xpdf) 4.06"
    }
   },
@@ -30,7 +30,8 @@
     "creature": 317
    },
    "byReadiness": {
-    "parsed": 317
+    "parsed": 311,
+    "verified": 6
    }
   }
  },
@@ -240,7 +241,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -423,7 +424,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -605,7 +606,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -860,11 +861,24 @@
      "average": 14
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+    "pages": [
+     262,
+     263
+    ],
+    "textSha256": "7447ef61dbb9c592025e05705bc8313978b37f169cde949290834a4fd1f61a6e",
+    "notes": [
+     "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+    ]
    }
   },
   {
@@ -1009,7 +1023,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1145,7 +1159,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1288,7 +1302,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1432,7 +1446,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1595,7 +1609,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1721,7 +1735,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -1903,7 +1917,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2073,7 +2087,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2216,7 +2230,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2404,7 +2418,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2588,7 +2602,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2726,7 +2740,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -2893,7 +2907,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3008,7 +3022,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3174,7 +3188,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3304,7 +3318,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3527,7 +3541,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3687,7 +3701,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -3857,7 +3871,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4027,7 +4041,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4210,7 +4224,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4386,7 +4400,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4539,7 +4553,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4722,7 +4736,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -4937,7 +4951,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -5127,7 +5141,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -5308,7 +5322,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -5465,7 +5479,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -5676,7 +5690,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -5892,7 +5906,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6132,7 +6146,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6290,7 +6304,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6434,7 +6448,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6681,7 +6695,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6829,7 +6843,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -6956,7 +6970,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -7105,7 +7119,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -7255,7 +7269,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -7502,7 +7516,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -7748,7 +7762,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -7937,7 +7951,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -8180,7 +8194,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -8338,7 +8352,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -8580,7 +8594,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -8764,7 +8778,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -9016,7 +9030,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -9169,7 +9183,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -9420,7 +9434,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -9612,7 +9626,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -9855,7 +9869,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -10015,7 +10029,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -10257,7 +10271,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -10505,7 +10519,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -10658,7 +10672,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -10841,7 +10855,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -11089,7 +11103,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -11338,7 +11352,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -11492,7 +11506,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -11681,7 +11695,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -11926,7 +11940,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -12080,7 +12094,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -12264,7 +12278,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -12516,7 +12530,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -12767,7 +12781,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -13015,7 +13029,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -13173,7 +13187,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -13362,7 +13376,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -13606,7 +13620,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -13791,7 +13805,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -14044,7 +14058,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -14197,7 +14211,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -14450,7 +14464,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -14609,7 +14623,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -14799,7 +14813,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -15047,7 +15061,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -15295,7 +15309,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -15489,7 +15503,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -15641,7 +15655,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -15825,7 +15839,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16046,7 +16060,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16193,7 +16207,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16358,7 +16372,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16535,7 +16549,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16681,7 +16695,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -16863,7 +16877,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17022,7 +17036,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17189,7 +17203,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17380,7 +17394,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17534,7 +17548,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17691,7 +17705,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -17802,11 +17816,23 @@
      "average": 2
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+    "pages": [
+     309
+    ],
+    "textSha256": "a9885fb621bbd98cd41971f81bb073f9e6c0e38edb4ef6ffbf27be1ceb6cbf7a",
+    "notes": [
+     "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+    ]
    }
   },
   {
@@ -17943,11 +17969,23 @@
      "average": 4
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+    "pages": [
+     309
+    ],
+    "textSha256": "2a456acc0a618bf2315209388ad76af25d1afdf9c4f2f02b4b755e503a407f6a",
+    "notes": [
+     "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+    ]
    }
   },
   {
@@ -18098,7 +18136,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -18274,7 +18312,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -18437,7 +18475,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -18604,7 +18642,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -18771,7 +18809,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -18932,7 +18970,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -19083,7 +19121,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -19243,7 +19281,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -19392,13 +19430,25 @@
      "average": 21
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [
     "ability scores for WIS/CHA were printed on a displaced line next to the name (page 313); recombined from the layout"
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+    "pages": [
+     313
+    ],
+    "textSha256": "76eabd9ef2dbd3c1796f709641ee47033a7ffe2eafbd5acc568cbc1720e2a92d",
+    "notes": [
+     "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+    ]
    }
   },
   {
@@ -19567,7 +19617,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -19755,7 +19805,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -19888,7 +19938,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20073,7 +20123,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20232,7 +20282,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20391,7 +20441,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20540,7 +20590,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20698,7 +20748,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -20851,7 +20901,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21039,7 +21089,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21189,7 +21239,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21340,7 +21390,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21491,7 +21541,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21634,7 +21684,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21779,7 +21829,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -21938,7 +21988,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -22075,7 +22125,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -22219,9 +22269,76 @@
     "conditionImmunities": [],
     "family": {
      "name": "Half-Dragon Template",
-     "text": "A beast, humanoid, giant, or monstrosity can become a half-dragon. It keeps its statistics, except as follows.\n\nChallenge. To avoid recalculating the creature’s challenge rating, apply the template only to a creature that meets the optional prerequisite in the Breath Weapon table below. Otherwise, recalculate the rating after you apply the template.\n\nSenses. The half-dragon gains blindsight with a radius of 10 feet and darkvision with a radius of 60 feet.\n\nResistances. The half-dragon gains resistance to a type of damage based on its color.\n\nColor | Damage Resistance\n\nBlack or copper | Acid\n\nBlue or bronze | Lightning\n\nBrass, gold, or red | Fire\n\nGreen | Poison\n\nSilver or white | Cold\n\nLanguages. The half-dragon speaks Draconic in addition to any other languages it knows.\n\nNew Action: Breath Weapon. The half-dragon has the breath weapon of its dragon half. The half-dragon’s size determines how this action functions.\n\nSize | Breath Weapon | Optional\n\nLarge or | As a wyrmling | Prerequisite\n\nsmaller | Challenge 2 or higher\n\nHuge | As a young dragon\n\nGargantuan | As an adult dragon | Challenge 7 or higher\n\nChallenge 8 or higher",
+     "text": "A beast, humanoid, giant, or monstrosity can become a half-dragon. It keeps its statistics, except as follows.\n\nChallenge. To avoid recalculating the creature’s challenge rating, apply the template only to a creature that meets the optional prerequisite in the Breath Weapon table below. Otherwise, recalculate the rating after you apply the template.\n\nSenses. The half-dragon gains blindsight with a radius of 10 feet and darkvision with a radius of 60 feet.\n\nResistances. The half-dragon gains resistance to a type of damage based on its color.\n\nColor | Damage Resistance\nBlack or copper | Acid\nBlue or bronze | Lightning\nBrass, gold, or red | Fire\nGreen | Poison\nSilver or white | Cold\n\nLanguages. The half-dragon speaks Draconic in addition to any other languages it knows.\n\nNew Action: Breath Weapon. The half-dragon has the breath weapon of its dragon half. The half-dragon’s size determines how this action functions.\n\nSize | Breath Weapon | Optional Prerequisite\nLarge or smaller | As a wyrmling | Challenge 2 or higher\nHuge | As a young dragon | Challenge 7 or higher\nGargantuan | As an adult dragon | Challenge 8 or higher",
      "path": [
       "Half-Dragon Template"
+     ],
+     "tables": [
+      {
+       "caption": null,
+       "columns": [
+        "Color",
+        "Damage Resistance"
+       ],
+       "rows": [
+        [
+         "Black or copper",
+         "Acid"
+        ],
+        [
+         "Blue or bronze",
+         "Lightning"
+        ],
+        [
+         "Brass, gold, or red",
+         "Fire"
+        ],
+        [
+         "Green",
+         "Poison"
+        ],
+        [
+         "Silver or white",
+         "Cold"
+        ]
+       ],
+       "pages": [
+        320,
+        321
+       ],
+       "notes": []
+      },
+      {
+       "caption": null,
+       "columns": [
+        "Size",
+        "Breath Weapon",
+        "Optional Prerequisite"
+       ],
+       "rows": [
+        [
+         "Large or smaller",
+         "As a wyrmling",
+         "Challenge 2 or higher"
+        ],
+        [
+         "Huge",
+         "As a young dragon",
+         "Challenge 7 or higher"
+        ],
+        [
+         "Gargantuan",
+         "As an adult dragon",
+         "Challenge 8 or higher"
+        ]
+       ],
+       "pages": [
+        321
+       ],
+       "notes": [
+        "column 3: cell \"Optional Prerequisite\" reassembled from two printed lines; the wrap is geometrically ambiguous with \"Prerequisite Challenge 2 or higher\" and was resolved because the phrase occurs in the page text"
+       ]
+      }
      ]
     }
    },
@@ -22275,11 +22392,25 @@
      "average": 24
     }
    ],
-   "readiness": "parsed",
-   "notes": [],
+   "readiness": "verified",
+   "notes": [
+    "family table 2 (pages 321): column 3: cell \"Optional Prerequisite\" reassembled from two printed lines; the wrap is geometrically ambiguous with \"Prerequisite Challenge 2 or higher\" and was resolved because the phrase occurs in the page text"
+   ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared with the pdf.js-rendered pages 320 and 321 of SRD_CC_v5.1.pdf",
+    "pages": [
+     321
+    ],
+    "textSha256": "35b26085264099f724edbce0b1f8aaf2486d5c98187d864ab747d01379e110e8",
+    "notes": [
+     "stat block on page 321 and both Half-Dragon Template tables (Color/Damage Resistance 5 rows; Size/Breath Weapon/Optional Prerequisite 3 rows with two reassembled wraps) checked"
+    ]
    }
   },
   {
@@ -22426,7 +22557,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -22573,7 +22704,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -22723,7 +22854,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -22886,7 +23017,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23011,7 +23142,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23148,7 +23279,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23292,7 +23423,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23443,7 +23574,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23669,7 +23800,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -23840,7 +23971,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -24027,7 +24158,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -24234,7 +24365,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -24423,7 +24554,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -24593,13 +24724,25 @@
      "average": 10
     }
    ],
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [
     "stat line split at an embedded key on page 327: \"silvered weapons Senses passive Perception 12\""
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared field by field with the pdf.js-rendered pages of SRD_CC_v5.1.pdf (tools/srd_extract/optional/render_pages.mjs, scale 2)",
+    "pages": [
+     327
+    ],
+    "textSha256": "974342198d64ea4131c5ece3618bc425c9d27cee76c0751cf8fc02de44814e5b",
+    "notes": [
+     "stat block header, abilities, saves, skills, senses, languages, challenge, trait/action/reaction/legendary names and the final sentence checked; damage lists keep the source's semicolon groups (e.g. 'necrotic, poison' is one group)"
+    ]
    }
   },
   {
@@ -24793,7 +24936,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25016,7 +25159,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25217,7 +25360,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25359,7 +25502,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25538,7 +25681,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25681,7 +25824,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -25879,7 +26022,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26049,7 +26192,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26218,7 +26361,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26380,7 +26523,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26511,7 +26654,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26689,7 +26832,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -26860,7 +27003,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27022,7 +27165,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27180,7 +27323,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27380,7 +27523,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27565,7 +27708,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27720,7 +27863,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27856,7 +27999,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -27998,7 +28141,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28177,7 +28320,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28341,7 +28484,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28506,7 +28649,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28659,7 +28802,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28814,7 +28957,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -28963,7 +29106,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29141,7 +29284,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29292,7 +29435,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29411,7 +29554,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29568,7 +29711,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29740,7 +29883,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -29873,7 +30016,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30024,7 +30167,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30179,7 +30322,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30337,7 +30480,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30463,7 +30606,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30659,7 +30802,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -30860,7 +31003,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31036,7 +31179,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31199,7 +31342,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31345,7 +31488,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31490,7 +31633,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31655,7 +31798,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31810,7 +31953,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -31958,7 +32101,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32084,7 +32227,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32277,7 +32420,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32442,7 +32585,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32580,7 +32723,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32702,7 +32845,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -32855,7 +32998,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -33116,7 +33259,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -33278,7 +33421,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -33432,7 +33575,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -33647,7 +33790,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -33888,7 +34031,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34067,7 +34210,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34264,7 +34407,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34429,7 +34572,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34580,7 +34723,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34760,7 +34903,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -34923,7 +35066,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35054,7 +35197,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35184,7 +35327,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35333,7 +35476,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35454,7 +35597,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35575,7 +35718,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35688,7 +35831,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35806,7 +35949,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -35917,7 +36060,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36032,7 +36175,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36183,7 +36326,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36307,7 +36450,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36431,7 +36574,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36563,7 +36706,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36713,7 +36856,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36827,7 +36970,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -36940,7 +37083,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37081,7 +37224,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37194,7 +37337,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37314,7 +37457,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37447,7 +37590,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37560,7 +37703,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37684,7 +37827,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37796,7 +37939,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -37916,7 +38059,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38060,7 +38203,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38211,7 +38354,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38331,7 +38474,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38430,7 +38573,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38579,7 +38722,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38728,7 +38871,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38851,7 +38994,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -38983,7 +39126,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39105,7 +39248,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39247,7 +39390,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39368,7 +39511,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39519,7 +39662,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39669,7 +39812,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39822,7 +39965,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -39949,7 +40092,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40087,7 +40230,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40216,7 +40359,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40336,7 +40479,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40450,7 +40593,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40580,7 +40723,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40706,7 +40849,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40830,7 +40973,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -40976,7 +41119,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41127,7 +41270,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41258,7 +41401,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41385,7 +41528,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41548,7 +41691,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41691,7 +41834,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41845,7 +41988,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -41967,7 +42110,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42088,7 +42231,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42227,7 +42370,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42357,7 +42500,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42469,7 +42612,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42594,7 +42737,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42713,7 +42856,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42837,7 +42980,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -42966,7 +43109,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43124,7 +43267,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43230,7 +43373,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43373,7 +43516,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43492,7 +43635,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43613,7 +43756,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43736,7 +43879,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -43854,7 +43997,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44005,7 +44148,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44143,7 +44286,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44257,7 +44400,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44407,7 +44550,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44519,7 +44662,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44634,7 +44777,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44744,7 +44887,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44856,7 +44999,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -44982,7 +45125,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45107,7 +45250,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45219,7 +45362,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45369,7 +45512,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45483,7 +45626,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45574,7 +45717,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45703,7 +45846,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45849,7 +45992,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -45997,7 +46140,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46143,7 +46286,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46289,7 +46432,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46431,7 +46574,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46570,7 +46713,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46722,7 +46865,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46846,7 +46989,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -46963,7 +47106,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47075,7 +47218,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47218,7 +47361,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47342,7 +47485,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47463,7 +47606,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47583,7 +47726,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47719,7 +47862,7 @@
    ],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -47911,7 +48054,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48053,7 +48196,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48210,7 +48353,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48327,7 +48470,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48439,7 +48582,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48571,7 +48714,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48691,7 +48834,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -48830,7 +48973,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49004,7 +49147,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49130,7 +49273,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49292,7 +49435,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49418,7 +49561,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49539,7 +49682,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49680,7 +49823,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -49833,7 +49976,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -50003,7 +50146,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -50155,7 +50298,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -50284,7 +50427,7 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   },
   {
@@ -50466,16 +50609,11 @@
    "notes": [],
    "icon": {
     "set": "IconSet",
-    "index": 12
+    "index": 8
    }
   }
  ],
  "warnings": [
-  {
-   "stagingFile": "staging_monsters.json",
-   "page": 320,
-   "message": "heading \"Half-Dragon Template\": 11 table row(s) captured as printed lines with cells separated by \" | \" in data.family.text; cells that wrap onto a second line are not reassembled"
-  },
   {
    "stagingFile": "staging_monsters.json",
    "page": 366,

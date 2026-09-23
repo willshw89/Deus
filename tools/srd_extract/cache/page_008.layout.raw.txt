@@ -1,0 +1,78 @@
+Barbarian                                                         Rage
+
+Class Features                                          12th  +4  Ability Score    5          +3
+
+As a barbarian, you gain the following class features.            Improvement
+
+Hit Points                                              13th  +5  Brutal Critical  5          +3
+
+Hit Dice: 1d12 per barbarian level                                (2 dice)
+Hit Points at 1st Level: 12 + your Constitution
+                                                        14th  +5  Path feature     5          +3
+  modifier
+Hit Points at Higher Levels: 1d12 (or 7) + your         15th  +5  Persistent       5          +3
+
+  Constitution modifier per barbarian level after 1st             Rage
+
+Proficiencies                                           16th  +5  Ability Score    5          +4
+
+Armor: Light armor, medium armor, shields                         Improvement
+Weapons: Simple weapons, martial weapons
+Tools: None                                             17th  +6  Brutal Critical  6          +4
+Saving Throws: Strength, Constitution
+Skills: Choose two from Animal Handling, Athletics,               (3 dice)
+
+  Intimidation, Nature, Perception, and Survival        18th  +6  Indomitable      6          +4
+
+Equipment                                                         Might
+
+You start with the following equipment, in addition     19th  +6  Ability Score    6          +4
+to the equipment granted by your background:
+                                                                  Improvement
+• (a) a greataxe or (b) any martial melee weapon
+• (a) two handaxes or (b) any simple weapon             20th  +6  Primal           Unlimited  +4
+• An explorer’s pack and four javelins
+                                                                  Champion
+
+The Barbarian                                           Rage
+
+Level  Proficiency  Features         Rages    Rage      In battle, you fight with primal ferocity. On your turn,
+ 1st      Bonus     Rage,              2    Damage      you can enter a rage as a bonus action.
+            +2      Unarmored
+                    Defense                    +2         While raging, you gain the following benefits if you
+                    Reckless                            aren’t wearing heavy armor:
+2nd    +2           Attack,          2      +2
+                    Danger Sense                        • You have advantage on Strength checks and
+3rd    +2           Primal Path      3      +2            Strength saving throws.
+                    Ability Score
+4th    +2           Improvement      3      +2          • When you make a melee weapon attack using
+                    Extra Attack,                         Strength, you gain a bonus to the damage roll that
+5th    +3           Fast             3      +2            increases as you gain levels as a barbarian, as
+                    Movement                              shown in the Rage Damage column of the
+6th    +3           Path feature     4      +2            Barbarian table.
+                    Feral Instinct
+7th    +3           Ability Score    4      +2          • You have resistance to bludgeoning, piercing, and
+                    Improvement                           slashing damage.
+8th    +3           Brutal Critical  4      +2
+                    (1 die)                             If you are able to cast spells, you can’t cast them or
+9th    +4           Path feature     4      +3          concentrate on them while raging.
+                    Relentless
+10th   +4                            4      +3            Your rage lasts for 1 minute. It ends early if you
+                                                        are knocked unconscious or if your turn ends and
+                                                        you haven’t attacked a hostile creature since your
+                                                        last turn or taken damage since then. You can also
+                                                        end your rage on your turn as a bonus action.
+
+                                                          Once you have raged the number of times shown
+                                                        for your barbarian level in the Rages column of the
+                                                        Barbarian table, you must finish a long rest before
+                                                        you can rage again.
+
+                                                        Unarmored Defense
+
+                                                        While you are not wearing any armor, your Armor
+                                                        Class equals 10 + your Dexterity modifier + your
+                                                        Constitution modifier. You can use a shield and still
+                                                        gain this benefit.
+
+11th   +4                            4      +3

@@ -1,0 +1,61 @@
+Item                           Cost  Weight   Hourglass                  25 gp      1 lb.
+Abacus                         2 gp   2 lb.   Hunting trap                 5 gp    25 lb.
+Acid (vial)                   25 gp   1 lb.   Ink (1 ounce bottle)
+                              50 gp   1 lb.   Ink pen                    10 gp       —
+Alchemist’s fire (flask)                      Jug or pitcher               2 cp      —
+Ammunition                     1 gp   1 lb.   Ladder (10-­‐foot)           2 cp     4 lb.
+                               1 gp   1 lb.   Lamp                         1 sp    25 lb.
+   Arrows (20)                 1 gp  1½ lb.   Lantern, bullseye            5 sp     1 lb.
+   Blowgun needles (50)        4 cp  1½ lb.   Lantern, hooded                       2 lb.
+   Crossbow bolts (20)        50 gp     —     Lock                       10 gp      2 lb.
+                                              Magnifying glass             5 gp     1 lb.
+   Sling bullets (20)         10 gp   1 lb.   Manacles                               —
+Antitoxin (vial)              20 gp   3 lb.   Mess kit                   10 gp      6 lb.
+Arcane focus                  10 gp   2 lb.   Mirror, steel             100 gp      1 lb.
+                                      4 lb.   Oil (flask)                         1/2 lb.
+   Crystal                     5 gp   1 lb.   Paper (one sheet)            2 gp     1 lb.
+   Orb                        10 gp   5 lb.   Parchment (one sheet)        2 sp      —
+   Rod                                2 lb.   Perfume (vial)               5 gp      —
+   Staff                       2 gp   70 lb.  Pick, miner’s                1 sp      —
+   Wand                        1 gp   2 lb.   Piton                        2 sp    10 lb.
+Backpack                       2 gp   7 lb.   Poison, basic (vial)         1 sp   1/4 lb.
+Ball bearings (bag of 1,000)   4 sp     —     Pole (10-­‐foot)             5 gp      —
+Barrel                         1 gp   3 lb.   Pot, iron                    2 gp     7 lb.
+Basket                         1 gp   5 lb.   Potion of healing            5 cp    10 lb.
+Bedroll                        5 sp   5 lb.   Pouch                     100 gp    1/2 lb.
+Bell                           1 gp   2 lb.   Quiver                       5 cp     1 lb.
+Blanket                       25 gp   2 lb.   Ram, portable                2 gp     1 lb.
+Block and tackle               2 gp   2 lb.   Rations (1 day)            50 gp     35 lb.
+Book                           5 cp     —     Robes                        5 sp     2 lb.
+Bottle, glass                  1 gp   1 lb.   Rope, hempen (50 feet)       1 gp     4 lb.
+Bucket                         1 cp   1 lb.   Rope, silk (50 feet)         4 gp    10 lb.
+Caltrops (bag of 20)           1 gp   10 lb.  Sack                         5 sp     5 lb.
+Candle                         1 gp     —     Scale, merchant’s            1 gp   1/2 lb.
+Case, crossbow bolt            5 gp   25 lb.  Sealing wax                  1 gp     3 lb.
+Case, map or scroll            1 cp   12 lb.  Shovel                     10 gp       —
+Chain (10 feet)                5 gp   3 lb.   Signal whistle               1 cp     5 lb.
+Chalk (1 piece)               25 gp   4 lb.   Signet ring                  5 gp      —
+Chest                          5 sp   6 lb.   Soap                         5 sp      —
+Climber’s kit                  5 gp   4 lb.   Spellbook                    2 gp      —
+Clothes, common               15 gp   2 lb.   Spikes, iron (10)            5 cp     3 lb.
+Clothes, costume               2 gp   5 lb.   Spyglass                     5 gp     5 lb.
+Clothes, fine                 25 gp           Tent, two-­‐person           2 cp     1 lb.
+Clothes, traveler’s            2 gp     —     Tinderbox                  50 gp     20 lb.
+Component pouch                         —     Torch                        1 gp     1 lb.
+Crowbar                        1 gp   4 lb.   Vial                    1,000 gp      1 lb.
+Druidic focus                  1 gp   1 lb.   Waterskin                    2 gp      —
+   Sprig of mistletoe          5 gp   4 lb.   Whetstone                    5 sp  5 lb. (full)
+   Totem                      10 gp   1 lb.                                1 cp     1 lb.
+   Wooden staff                1 gp   4 lb.                                1 gp
+   Yew wand                    2 cp   3 lb.                                2 sp
+Fishing tackle                 2 gp   10 lb.                               1 cp
+Flask or tankard               1 gp   3 lb.
+Grappling hook                 2 gp           Container Capacity
+Hammer                         5 gp   1 lb.
+Hammer, sledge                          —     Container  Capacity
+Healer’s kit                   5 gp   2 lb.   Backpack*  1 cubic foot/30 pounds of gear
+Holy symbol                    5 gp   1 lb.   Barrel     40 gallons liquid, 4 cubic feet solid
+   Amulet                      5 gp           Basket     2 cubic feet/40 pounds of gear
+   Emblem                     25 gp           Bottle     1½ pints liquid
+   Reliquary                                  Bucket     3 gallons liquid, 1/2 cubic foot solid
+Holy water (flask)                            Chest      12 cubic feet/300 pounds of gear

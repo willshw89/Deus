@@ -1,0 +1,50 @@
+Blasphemous Word (Costs 2 Actions). The mummy               components to cast its spells. It has the following cleric
+  lord utters a blasphemous word. Each non-­‐undead         spells prepared:
+  creature within 10 feet of the mummy lord that can        Cantrips (at will): mending, sacred flame, thaumaturgy
+  hear the magical utterance must succeed on a DC 16        1st level (4 slots): command, cure wounds, shield of
+  Constitution saving throw or be stunned until the
+  end of the mummy lord’s next turn.                          faith
+                                                            2nd level (3 slots): calm emotions, hold person
+Channel Negative Energy (Costs 2 Actions). The              3rd level (3 slots): bestow curse, clairvoyance
+  mummy lord magically unleashes negative energy.           4th level (3 slots): banishment, freedom of movement
+  Creatures within 60 feet of the mummy lord,               5th level (2 slots): flame strike, geas
+  including ones behind barriers and around corners,        6th level (1 slot): true seeing
+  can’t regain hit points until the end of the mummy
+  lord’s next turn.                                         Actions
+                                                            Bite. Melee Weapon Attack: +8 to hit, reach 10 ft., one
+Whirlwind of Sand (Costs 2 Actions). The mummy lord         creature. Hit: 8 (1d8 + 4) piercing damage, and the
+  magically transforms into a whirlwind of sand, moves      target must make a DC 15 Constitution saving throw,
+  up to 60 feet, and reverts to its normal form. While      taking 45 (10d8) poison damage on a failed save, or
+  in whirlwind form, the mummy lord is immune to all        half as much damage on a successful one.
+  damage, and it can’t be grappled, petrified, knocked      Spit Poison. Ranged Weapon Attack: +8 to hit, range
+  prone, restrained, or stunned. Equipment worn or          15/30 ft., one creature. Hit: The target must make a DC
+  carried by the mummy lord remain in its possession.       15 Constitution saving throw, taking 45 (10d8) poison
+                                                            damage on a failed save, or half as much damage on a
+Monsters (N)                                                successful one.
+
+Nagas                                                       Spirit Naga
+
+Guardian Naga                                               Large monstrosity, chaotic evil
+
+Large monstrosity, lawful good                              Armor Class 15 (natural armor)
+                                                            Hit Points 75 (10d10 + 20)
+Armor Class 18 (natural armor)                              Speed 40 ft.
+Hit Points 127 (15d10 + 45)
+Speed 40 ft.                                                    STR DEX CON INT WIS CHA
+                                                              18 (+4) 17 (+3) 14 (+2) 16 (+3) 15 (+2) 16 (+3)
+    STR DEX CON INT WIS CHA
+  19 (+4) 18 (+4) 16 (+3) 16 (+3) 19 (+4) 18 (+4)           Saving Throws Dex +6, Con +5, Wis +5, Cha +6
+                                                            Damage Immunities poison
+Saving Throws Dex +8, Con +7, Int +7, Wis +8, Cha +8        Condition Immunities charmed, poisoned
+Damage Immunities poison                                    Senses darkvision 60 ft., passive Perception 12
+Condition Immunities charmed, poisoned                      Languages Abyssal, Common
+Senses darkvision 60 ft., passive Perception 14             Challenge 8 (3,900 XP)
+Languages Celestial, Common
+Challenge 10 (5,900 XP)                                     Rejuvenation. If it dies, the naga returns to life in 1d6
+                                                            days and regains all its hit points. Only a wish spell can
+Rejuvenation. If it dies, the naga returns to life in 1d6   prevent this trait from functioning.
+days and regains all its hit points. Only a wish spell can  Spellcasting. The naga is a 10th-­‐level spellcaster. Its
+prevent this trait from functioning.                        spellcasting ability is Intelligence (spell save DC 14, +6
+Spellcasting. The naga is an 11th-­‐level spellcaster. Its  to hit with spell attacks), and it needs only verbal
+spellcasting ability is Wisdom (spell save DC 16, +8 to
+hit with spell attacks), and it needs only verbal

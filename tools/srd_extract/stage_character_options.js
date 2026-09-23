@@ -728,22 +728,38 @@ function stageOneClass(spec, flow, blocks, kinds, start, end, entries, warnings,
             if (hits.some(h => i >= h.fromBlock && i < h.toBlock)) continue;
             heads.push({ name, index: i });
         }
-        // the level the class grants its archetype and the "X feature" rows of the class table
+        // The level at which the class grants its subclass: the class feature named by the class
+        // table's "<X> feature" rows ("Sacred Oath feature" -> Sacred Oath at 3rd; "Path feature" ->
+        // Primal Path at 3rd), read from the parent's feature list. A subclass feature without a level
+        // sentence of its own (Oath Spells, Expanded Spell List) belongs to the subclass as a whole
+        // and takes this level, recorded as levelBasis "subclass gained at this level".
+        let gainedByFeature = null, gainedAtLevel = null;
+        if (classTable && iFeatures >= 0) {
+            const xs = [];
+            for (const row of classTable.rows) for (const item of splitItems(row[iFeatures])) { const m = item.match(/^(.+) feature$/); if (m && !xs.includes(m[1])) xs.push(m[1]); }
+            for (const x of xs) {
+                const f = features.find(f => f.name === x || f.name.endsWith(" " + x));
+                if (f && f.level !== null) { gainedByFeature = f.name; gainedAtLevel = f.level; break; }
+            }
+        }
+        if (gainedAtLevel === null) subNotes.push("missing: level at which the class grants this subclass (no \"<X> feature\" row of the class table matched a class feature)");
         for (let f = 0; f < heads.length; f++) {
             const h = heads[f];
             const to = f + 1 < heads.length ? heads[f + 1].index : subclassEnd;
             const rr = M.renderBlocks(blocks, kinds, h.index, to, hits, warnings);
             const paras = [];
             for (let i = h.index + 1; i < to && paras.length < 2; i++) if (kinds[i] === "prose") paras.push(...M.blockParagraphs(blocks[i], "prose"));
-            const level = sentenceLevel(paras);
+            let level = sentenceLevel(paras);
+            let levelBasis = level === null ? null : "feature text";
+            if (level === null && gainedAtLevel !== null) { level = gainedAtLevel; levelBasis = "subclass gained at this level"; }
             const subheadings = [];
             for (let i = h.index + 1; i < to; i++) if (kinds[i] === "heading" && !hits.some(x => i >= x.fromBlock && i < x.toBlock)) subheadings.push(M.blockText(blocks[i]));
-            if (level === null) subNotes.push(`missing: level of feature "${h.name}" (no level sentence)`);
-            subFeatures.push({ name: h.name, level, text: rr.text, subheadings });
+            if (level === null) subNotes.push(`missing: level of feature "${h.name}" (no level sentence and no subclass level)`);
+            subFeatures.push({ name: h.name, level, levelBasis, text: rr.text, subheadings });
         }
         const subTables = hits.filter(h => h.table && h.fromBlock >= subclassStart && h.fromBlock < subclassEnd).map(h => ({ caption: h.table.caption, columns: h.table.columns, rows: h.table.rows }));
         entries.push(M.makeEntry({ kind: "subclass", category: CATEGORY, name: spec.subclass, pages: r.pages, section, text: r.text,
-            data: { parentClass: spec.name, features: subFeatures, tables: subTables, nonFeatureSubsections: spec.nonFeatureSubsections || [] }, notes: subNotes }));
+            data: { parentClass: spec.name, gainedAtLevel, gainedByFeature, features: subFeatures, tables: subTables, nonFeatureSubsections: spec.nonFeatureSubsections || [] }, notes: subNotes }));
     }
 }
 
@@ -899,6 +915,8 @@ function main() {
     console.log(`readiness: ${JSON.stringify(M.countBy(entries, "readiness"))}`);
     console.log(`warnings: ${warnings.length}`);
     for (const e of entries.filter(e => e.readiness === "extracted")) console.log(`  extracted: ${e.id} p.${e.source.pages.join(",")}: ${e.notes.join("; ")}`);
+    const moved = M.layoutMoveReport(CO_PAGES);
+    console.log(moved ? `raw layout cut: ${moved.moved} lines moved on ${moved.pagesMoved} of ${moved.pages} pages (${moved.perPage.map(p => `${p.page}:${p.moved}`).join(" ")})` : "raw layout cut: pre-normalised layout pages not in the cache, moved-line report skipped");
     console.log(`wrote ${path.relative(path.resolve(__dirname, "..", ".."), file)}`);
     const failed = chk.failed();
     console.log(failed ? `RESULT: FAIL (${failed} check(s) failed)` : "RESULT: PASS");

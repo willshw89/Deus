@@ -1,0 +1,61 @@
+Preparing and Casting Spells                                  associated with it. Your choice grants you domain
+                                                              spells and other features when you choose it at 1st
+The Cleric table shows how many spell slots you               level. It also grants you additional ways to use
+have to cast your spells of 1st level and higher. To          Channel Divinity when you gain that feature at 2nd
+cast one of these spells, you must expend a slot of           level, and additional benefits at 6th, 8th, and 17th
+the spell’s level or higher. You regain all expended          levels.
+spell slots when you finish a long rest.
+                                                              Domain Spells
+  You prepare the list of cleric spells that are
+available for you to cast, choosing from the cleric           Each domain has a list of spells—its domain spells—
+spell list. When you do so, choose a number of cleric         that you gain at the cleric levels noted in the domain
+spells equal to your Wisdom modifier + your cleric            description. Once you gain a domain spell, you
+level (minimum of one spell). The spells must be of a         always have it prepared, and it doesn’t count against
+level for which you have spell slots.                         the number of spells you can prepare each day.
+
+  For example, if you are a 3rd-­‐‑level cleric, you have       If you have a domain spell that doesn’t appear on
+four 1st-­‐‑level and two 2nd-­‐‑level spell slots. With a    the cleric spell list, the spell is nonetheless a cleric
+Wisdom of 16, your list of prepared spells can                spell for you.
+include six spells of 1st or 2nd level, in any
+combination. If you prepare the 1st-­‐‑level spell cure       Channel Divinity
+wounds, you can cast it using a 1st-­‐‑level or 2nd-­‐‑level
+slot. Casting the spell doesn’t remove it from your           At 2nd level, you gain the ability to channel divine
+list of prepared spells.                                      energy directly from your deity, using that energy to
+                                                              fuel magical effects. You start with two such effects:
+  You can change your list of prepared spells when            Turn Undead and an effect determined by your
+you finish a long rest. Preparing a new list of cleric        domain. Some domains grant you additional effects
+spells requires time spent in prayer and meditation:          as you advance in levels, as noted in the domain
+at least 1 minute per spell level for each spell on           description.
+your list.
+                                                                When you use your Channel Divinity, you choose
+Spellcasting Ability                                          which effect to create. You must then finish a short
+                                                              or long rest to use your Channel Divinity again.
+Wisdom is your spellcasting ability for your cleric
+spells. The power of your spells comes from your                Some Channel Divinity effects require saving
+devotion to your deity. You use your Wisdom                   throws. When you use such an effect from this class,
+whenever a cleric spell refers to your spellcasting           the DC equals your cleric spell save DC.
+ability. In addition, you use your Wisdom modifier
+when setting the saving throw DC for a cleric spell             Beginning at 6th level, you can use your Channel
+you cast and when making an attack roll with one.             Divinity twice between rests, and beginning at 18th
+                                                              level, you can use it three times between rests. When
+     Spell save DC = 8 + your proficiency bonus +             you finish a short or long rest, you regain your
+                   your Wisdom modifier                       expended uses.
+
+   Spell attack modifier = your proficiency bonus +           Channel Divinity: Turn Undead
+                   your Wisdom modifier
+                                                              As an action, you present your holy symbol and
+Ritual Casting                                                speak a prayer censuring the undead. Each undead
+                                                              that can see or hear you within 30 feet of you must
+You can cast a cleric spell as a ritual if that spell has     make a Wisdom saving throw. If the creature fails its
+the ritual tag and you have the spell prepared.               saving throw, it is turned for 1 minute or until it
+                                                              takes any damage.
+Spellcasting Focus
+                                                                A turned creature must spend its turns trying to
+You can use a holy symbol (see “Equipment”) as a              move as far away from you as it can, and it can’t
+spellcasting focus for your cleric spells.                    willingly move to a space within 30 feet of you. It
+                                                              also can’t take reactions. For its action, it can use
+Divine Domain                                                 only the Dash action or try to escape from an effect
+                                                              that prevents it from moving. If there’s nowhere to
+Choose one domain related to your deity, such as              move, the creature can use the Dodge action.
+Life. Each domain is detailed at the end of the class
+description, and each one provides examples of gods

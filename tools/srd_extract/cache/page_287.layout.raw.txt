@@ -1,0 +1,57 @@
+Tail. Melee Weapon Attack: +17 to hit, reach 20 ft., one   Languages Common, Draconic
+target. Hit: 19 (2d8 + 10) bludgeoning damage.             Challenge 17 (18,000 XP)
+Frightful Presence. Each creature of the dragon’s
+choice that is within 120 feet of the dragon and aware     Legendary Resistance (3/Day). If the dragon fails a
+of it must succeed on a DC 21 Wisdom saving throw or       saving throw, it can choose to succeed instead.
+become frightened for 1 minute. A creature can repeat
+the saving throw at the end of each of its turns, ending   Actions
+the effect on itself on a success. If a creature’s saving
+throw is successful or the effect ends for it, the         Multiattack. The dragon can use its Frightful Presence.
+creature is immune to the dragon’s Frightful Presence      It then makes three attacks: one with its bite and two
+for the next 24 hours.                                     with its claws.
+Fire Breath (Recharge 5–6). The dragon exhales fire in
+a 90-­‐foot cone. Each creature in that area must make a   Bite. Melee Weapon Attack: +14 to hit, reach 10 ft.,
+DC 24 Dexterity saving throw, taking 91 (26d6) fire        one target. Hit: 19 (2d10 + 8) piercing damage plus 7
+damage on a failed save, or half as much damage on a       (2d6) fire damage.
+successful one.
+                                                           Claw. Melee Weapon Attack: +14 to hit, reach 5 ft.,
+Legendary Actions                                          one target. Hit: 15 (2d6 + 8) slashing damage.
+
+The dragon can take 3 legendary actions, choosing          Tail. Melee Weapon Attack: +14 to hit, reach 15 ft., one
+from the options below. Only one legendary action          target. Hit: 17 (2d8 + 8) bludgeoning damage.
+option can be used at a time and only at the end of
+another creature’s turn. The dragon regains spent          Frightful Presence. Each creature of the dragon’s
+legendary actions at the start of its turn.                choice that is within 120 feet of the dragon and aware
+Detect. The dragon makes a Wisdom (Perception)             of it must succeed on a DC 19 Wisdom saving throw or
+                                                           become frightened for 1 minute. A creature can repeat
+  check.                                                   the saving throw at the end of each of its turns, ending
+Tail Attack. The dragon makes a tail attack.               the effect on itself on a success. If a creature’s saving
+Wing Attack (Costs 2 Actions). The dragon beats its        throw is successful or the effect ends for it, the
+                                                           creature is immune to the dragon’s Frightful Presence
+  wings. Each creature within 15 feet of the dragon        for the next 24 hours.
+  must succeed on a DC 25 Dexterity saving throw or
+  take 17 (2d6 + 10) bludgeoning damage and be             Fire Breath (Recharge 5–6). The dragon exhales fire in
+  knocked prone. The dragon can then fly up to half its    a 60-­‐foot cone. Each creature in that area must make a
+  flying speed.                                            DC 21 Dexterity saving throw, taking 63 (18d6) fire
+                                                           damage on a failed save, or half as much damage on a
+Adult Red Dragon                                           successful one.
+
+Huge dragon, chaotic evil                                  Legendary Actions
+
+Armor Class 19 (natural armor)                             The dragon can take 3 legendary actions, choosing
+Hit Points 256 (19d12 + 133)                               from the options below. Only one legendary action
+Speed 40 ft., climb 40 ft., fly 80 ft.                     option can be used at a time and only at the end of
+                                                           another creature’s turn. The dragon regains spent
+    STR DEX CON INT WIS CHA                                legendary actions at the start of its turn.
+  27 (+8) 10 (+0) 25 (+7) 16 (+3) 13 (+1) 21 (+5)
+                                                           Detect. The dragon makes a Wisdom (Perception)
+Saving Throws Dex +6, Con +13, Wis +7, Cha +11               check.
+Skills Perception +13, Stealth +6
+Damage Immunities fire                                     Tail Attack. The dragon makes a tail attack.
+Senses blindsight 60 ft., darkvision 120 ft., passive
+                                                           Wing Attack (Costs 2 Actions). The dragon beats its
+  Perception 23                                              wings. Each creature within 10 feet of the dragon
+                                                             must succeed on a DC 22 Dexterity saving throw or
+                                                             take 15 (2d6 + 8) bludgeoning damage and be
+                                                             knocked prone. The dragon can then fly up to half its
+                                                             flying speed.

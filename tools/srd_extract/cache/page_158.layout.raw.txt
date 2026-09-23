@@ -1,0 +1,61 @@
+person. The spell ends for a target that attacks or         If you choose a target that is held shut with arcane
+casts a spell.                                            lock, that spell is suppressed for 10 minutes, during
+                                                          which time the target can be opened and shut
+  At Higher Levels. When you cast this spell using a      normally.
+spell slot of 3rd level or higher, you can target one
+additional creature for each slot level above 2nd.          When you cast the spell, a loud knock, audible
+                                                          from as far away as 300 feet, emanates from the
+Irresistible Dance                                        target object.
+
+6th-­‐‑level enchantment                                  Legend Lore
+
+Casting Time: 1 action                                    5th-­‐‑level divination
+Range: 30 feet
+Components: V                                             Casting Time: 10 minutes
+Duration: Concentration, up to 1 minute                   Range: Self
+                                                          Components: V, S, M (incense worth at least 250 gp,
+Choose one creature that you can see within range.
+The target begins a comic dance in place: shuffling,        which the spell consumes, and four ivory strips
+tapping its feet, and capering for the duration.            worth at least 50 gp each)
+Creatures that can’t be charmed are immune to this        Duration: Instantaneous
+spell.
+                                                          Name or describe a person, place, or object. The spell
+  A dancing creature must use all its movement to         brings to your mind a brief summary of the
+dance without leaving its space and has                   significant lore about the thing you named. The lore
+disadvantage on Dexterity saving throws and attack        might consist of current tales, forgotten stories, or
+rolls. While the target is affected by this spell, other  even secret lore that has never been widely known.
+creatures have advantage on attack rolls against it.      If the thing you named isn’t of legendary importance,
+As an action, a dancing creature makes a Wisdom           you gain no information. The more information you
+saving throw to regain control of itself. On a            already have about the thing, the more precise and
+successful save, the spell ends.                          detailed the information you receive is.
+
+Jump                                                        The information you learn is accurate but might be
+                                                          couched in figurative language. For example, if you
+1st-­‐‑level transmutation                                have a mysterious magic axe on hand, the spell
+                                                          might yield this information: “Woe to the evildoer
+Casting Time: 1 action                                    whose hand touches the axe, for even the haft slices
+Range: Touch                                              the hand of the evil ones. Only a true Child of Stone,
+Components: V, S, M (a grasshopper’s hind leg)            lover and beloved of Moradin, may awaken the true
+Duration: 1 minute                                        powers of the axe, and only with the sacred word
+                                                          Rudnogg on the lips.”
+You touch a creature. The creature’s jump distance is
+tripled until the spell ends.                             Lesser Restoration
+
+Knock                                                     2nd-­‐‑level abjuration
+
+2nd-­‐‑level transmutation                                Casting Time: 1 action
+                                                          Range: Touch
+Casting Time: 1 action                                    Components: V, S
+Range: 60 feet                                            Duration: Instantaneous
+Components: V
+Duration: Instantaneous                                   You touch a creature and can end either one disease
+                                                          or one condition afflicting it. The condition can be
+Choose an object that you can see within range. The       blinded, deafened, paralyzed, or poisoned.
+object can be a door, a box, a chest, a set of manacles,
+a padlock, or another object that contains a              Levitate
+mundane or magical means that prevents access.
+                                                          2nd-­‐‑level transmutation
+  A target that is held shut by a mundane lock or
+that is stuck or barred becomes unlocked, unstuck,        Casting Time: 1 action
+or unbarred. If the object has multiple locks, only       Range: 60 feet
+one of them is unlocked.

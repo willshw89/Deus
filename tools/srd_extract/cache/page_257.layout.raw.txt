@@ -1,0 +1,61 @@
+monster might have a larger-­‐‑than-­‐‑expected bonus          Tremorsense
+(usually double its proficiency bonus) to account for
+its heightened expertise.                                      A monster with tremorsense can detect and pinpoint
+                                                               the origin of vibrations within a specific radius,
+Vulnerabilities, Resistances, and                              provided that the monster and the source of the
+Immunities                                                     vibrations are in contact with the same ground or
+                                                               substance. Tremorsense can’t be used to detect
+Some creatures have vulnerability, resistance, or              flying or incorporeal creatures. Many burrowing
+immunity to certain types of damage. Particular                creatures, such as ankhegs and umber hulks, have
+creatures are even resistant or immune to damage               this special sense.
+from nonmagical attacks (a magical attack is an
+attack delivered by a spell, a magic item, or another          Truesight
+magical source). In addition, some creatures are
+immune to certain conditions.                                  A monster with truesight can, out to a specific range,
+                                                               see in normal and magical darkness, see invisible
+Senses                                                         creatures and objects, automatically detect visual
+                                                               illusions and succeed on saving throws against them,
+The Senses entry notes a monster’s passive Wisdom              and perceive the original form of a shapechanger or
+(Perception) score, as well as any special senses the          a creature that is transformed by magic.
+monster might have. Special senses are described               Furthermore, the monster can see into the Ethereal
+below.                                                         Plane within the same range.
+
+Blindsight                                                     Languages
+
+A monster with blindsight can perceive its                     The languages that a monster can speak are listed in
+surroundings without relying on sight, within a                alphabetical order. Sometimes a monster can
+specific radius.                                               understand a language but can’t speak it, and this is
+                                                               noted in its entry. A “—” indicates that a creature
+  Creatures without eyes, such as grimlocks and                neither speaks nor understands any language.
+gray oozes, typically have this special sense, as do
+creatures with echolocation or heightened senses,              Telepathy
+such as bats and true dragons.
+                                                               Telepathy is a magical ability that allows a monster
+  If a monster is naturally blind, it has a                    to communicate mentally with another creature
+parenthetical note to this effect, indicating that the         within a specified range. The contacted creature
+radius of its blindsight defines the maximum range             doesn’t need to share a language with the monster to
+of its perception.                                             communicate in this way with it, but it must be able
+                                                               to understand at least one language. A creature
+Darkvision                                                     without telepathy can receive and respond to
+                                                               telepathic messages but can’t initiate or terminate a
+A monster with darkvision can see in the dark within           telepathic conversation.
+a specific radius. The monster can see in dim light
+within the radius as if it were bright light, and in             A telepathic monster doesn’t need to see a
+darkness as if it were dim light. The monster can’t            contacted creature and can end the telepathic
+discern color in darkness, only shades of gray. Many           contact at any time. The contact is broken as soon as
+creatures that live underground have this special              the two creatures are no longer within range of each
+sense.                                                         other or if the telepathic monster contacts a
+                                                               different creature within range. A telepathic monster
+Armor, Weapon, and Tool Proficiencies                          can initiate or terminate a telepathic conversation
+                                                               without using an action, but while the monster is
+Assume that a creature is proficient with its armor, weapons,  incapacitated, it can’t initiate telepathic contact, and
+and tools. If you swap them out, you decide whether the        any current contact is terminated.
+creature is proficient with its new equipment.
+                                                                 A creature within the area of an antimagic field or
+   For example, a hill giant typically wears hide armor and    in any other location where magic doesn’t function
+wields a greatclub. You could equip a hill giant with chain    can’t send or receive telepathic messages.
+mail and a greataxe instead, and assume the giant is
+proficient with both, one or the other, or neither.
+
+   See the Player’s Handbook for rules on using armor or
+weapons without proficiency.

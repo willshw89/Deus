@@ -1,0 +1,62 @@
+True Resurrection                                           Unseen Servant
+
+9th-­‐‑level necromancy                                     1st-­‐‑level conjuration (ritual)
+
+Casting Time: 1 hour                                        Casting Time: 1 action
+Range: Touch                                                Range: 60 feet
+Components: V, S, M (a sprinkle of holy water and           Components: V, S, M (a piece of string and a bit of
+
+  diamonds worth at least 25,000 gp, which the spell          wood)
+  consumes)                                                 Duration: 1 hour
+Duration: Instantaneous
+                                                            This spell creates an invisible, mindless, shapeless
+You touch a creature that has been dead for no              force that performs simple tasks at your command
+longer than 200 years and that died for any reason          until the spell ends. The servant springs into
+except old age. If the creature’s soul is free and          existence in an unoccupied space on the ground
+willing, the creature is restored to life with all its hit  within range. It has AC 10, 1 hit point, and a Strength
+points.                                                     of 2, and it can’t attack. If it drops to 0 hit points, the
+                                                            spell ends.
+  This spell closes all wounds, neutralizes any
+poison, cures all diseases, and lifts any curses              Once on each of your turns as a bonus action, you
+affecting the creature when it died. The spell              can mentally command the servant to move up to 15
+replaces damaged or missing organs and limbs.               feet and interact with an object. The servant can
+                                                            perform simple tasks that a human servant could do,
+  The spell can even provide a new body if the              such as fetching things, cleaning, mending, folding
+original no longer exists, in which case you must           clothes, lighting fires, serving food, and pouring wine.
+speak the creature’s name. The creature then                Once you give the command, the servant performs
+appears in an unoccupied space you choose within            the task to the best of its ability until it completes the
+10 feet of you.                                             task, then waits for your next command.
+
+True Seeing                                                   If you command the servant to perform a task that
+                                                            would move it more than 60 feet away from you, the
+6th-­‐‑level divination                                     spell ends.
+
+Casting Time: 1 action                                      Vampiric Touch
+Range: Touch
+Components: V, S, M (an ointment for the eyes that          3rd-­‐‑level necromancy
+
+  costs 25 gp; is made from mushroom powder,                Casting Time: 1 action
+  saffron, and fat; and is consumed by the spell)           Range: Self
+Duration: 1 hour                                            Components: V, S
+                                                            Duration: Concentration, up to 1 minute
+This spell gives the willing creature you touch the
+ability to see things as they actually are. For the         The touch of your shadow-­‐‑wreathed hand can
+duration, the creature has truesight, notices secret        siphon life force from others to heal your wounds.
+doors hidden by magic, and can see into the Ethereal        Make a melee spell attack against a creature within
+Plane, all out to a range of 120 feet.                      your reach. On a hit, the target takes 3d6 necrotic
+                                                            damage, and you regain hit points equal to half the
+True Strike                                                 amount of necrotic damage dealt. Until the spell
+                                                            ends, you can make the attack again on each of your
+Divination cantrip                                          turns as an action.
+
+Casting Time: 1 action                                        At Higher Levels. When you cast this spell using a
+Range: 30 feet                                              spell slot of 4th level or higher, the damage increases
+Components: S                                               by 1d6 for each slot level above 3rd.
+Duration: Concentration, up to 1 round
+                                                            Vicious Mockery
+You extend your hand and point a finger at a target
+in range. Your magic grants you a brief insight into        Enchantment cantrip
+the target’s defenses. On your next turn, you gain
+advantage on your first attack roll against the target,     Casting Time: 1 action
+provided that this spell hasn’t ended.                      Range: 60 feet
+                                                            Components: V

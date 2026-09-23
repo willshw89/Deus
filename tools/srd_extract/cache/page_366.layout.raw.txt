@@ -1,0 +1,47 @@
+Appendix MM-A:                                           False Appearance. While the shrub remains motionless,
+Miscellaneous                                            it is indistinguishable from a normal shrub.
+Creatures
+                                                         Actions
+This appendix contains statistics for various animals,   Rake. Melee Weapon Attack: +1 to hit, reach 5 ft., one
+vermin, and other critters. The stat blocks are          target. Hit: 1 (1d4 − 1) slashing damage.
+organized alphabetically by creature name.
+                                                         An awakened shrub is an ordinary shrub given
+Ape                                                      sentience and mobility by the awaken spell or
+                                                         similar magic.
+Medium beast, unaligned
+                                                         Awakened Tree
+Armor Class 12
+Hit Points 19 (3d8 + 6)                                  Huge plant, unaligned
+Speed 30 ft., climb 30 ft.                               Armor Class 13 (natural armor)
+                                                         Hit Points 59 (7d12 + 14)
+    STR DEX CON INT WIS CHA                              Speed 20 ft.
+  16 (+3) 14 (+2) 14 (+2) 6 (−2) 12 (+1) 7 (−2)
+                                                             STR DEX CON INT WIS CHA
+Skills Athletics +5, Perception +3                         19 (+4) 6 (−2) 15 (+2) 10 (+0) 10 (+0) 7 (−2)
+Senses passive Perception 13
+Languages —                                              Damage Vulnerabilities fire
+Challenge 1/2 (100 XP)                                   Damage Resistances bludgeoning, piercing
+                                                         Senses passive Perception 10
+Actions                                                  Languages one language known by its creator
+Multiattack. The ape makes two fist attacks.             Challenge 2 (450 XP)
+Fist. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+target. Hit: 6 (1d6 + 3) bludgeoning damage.             False Appearance. While the tree remains motionless,
+Rock. Ranged Weapon Attack: +5 to hit, range 25/50 ft.,  it is indistinguishable from a normal tree.
+one target. Hit: 6 (1d6 + 3) bludgeoning damage.
+                                                         Actions
+Awakened Shrub                                           Slam. Melee Weapon Attack: +6 to hit, reach 10 ft.,
+                                                         one target. Hit: 14 (3d6 + 4) bludgeoning damage.
+Small plant, unaligned
+                                                         An awakened tree is an ordinary tree given
+Armor Class 9                                            sentience and mobility by the awaken spell or
+Hit Points 10 (3d6)                                      similar magic.
+Speed 20 ft.
+                                                         Axe Beak
+ STR     DEX CON INT WIS CHA
+3 (−4)  8 (−1) 11 (+0) 10 (+0) 10 (+0) 6 (−2)            Large beast, unaligned
+                                                         Armor Class 11
+Damage Vulnerabilities fire                              Hit Points 19 (3d10 + 3)
+Damage Resistances piercing                              Speed 50 ft.
+Senses passive Perception 10
+Languages one language known by its creator
+Challenge 0 (10 XP)

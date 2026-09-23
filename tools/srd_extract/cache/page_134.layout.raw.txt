@@ -1,0 +1,62 @@
+Range: 150 feet                                             spell by another creature, you can have the shadowy
+Components: V, S, M (a tiny ball of bat guano and           door connect to its demiplane instead.
+
+  sulfur)                                                   Detect Evil and Good
+Duration: Concentration, up to 1 minute
+                                                            1st-­‐‑level divination
+A beam of yellow light flashes from your pointing
+finger, then condenses to linger at a chosen point          Casting Time: 1 action
+within range as a glowing bead for the duration.            Range: Self
+When the spell ends, either because your                    Components: V, S
+concentration is broken or because you decide to            Duration: Concentration, up to 10 minutes
+end it, the bead blossoms with a low roar into an
+explosion of flame that spreads around corners.             For the duration, you know if there is an aberration,
+Each creature in a 20-­‐‑foot-­‐‑radius sphere centered on  celestial, elemental, fey, fiend, or undead within 30
+that point must make a Dexterity saving throw. A            feet of you, as well as where the creature is located.
+creature takes fire damage equal to the total               Similarly, you know if there is a place or object
+accumulated damage on a failed save, or half as             within 30 feet of you that has been magically
+much damage on a successful one.                            consecrated or desecrated.
+
+  The spell’s base damage is 12d6. If at the end of           The spell can penetrate most barriers, but it is
+your turn the bead has not yet detonated, the               blocked by 1 foot of stone, 1 inch of common metal, a
+damage increases by 1d6.                                    thin sheet of lead, or 3 feet of wood or dirt.
+
+  If the glowing bead is touched before the interval        Detect Magic
+has expired, the creature touching it must make a
+Dexterity saving throw. On a failed save, the spell         1st-­‐‑level divination (ritual)
+ends immediately, causing the bead to erupt in flame.
+On a successful save, the creature can throw the            Casting Time: 1 action
+bead up to 40 feet. When it strikes a creature or a         Range: Self
+solid object, the spell ends, and the bead explodes.        Components: V, S
+                                                            Duration: Concentration, up to 10 minutes
+  The fire damages objects in the area and ignites
+flammable objects that aren’t being worn or carried.        For the duration, you sense the presence of magic
+                                                            within 30 feet of you. If you sense magic in this way,
+  At Higher Levels. When you cast this spell using a        you can use your action to see a faint aura around
+spell slot of 8th level or higher, the base damage          any visible creature or object in the area that bears
+increases by 1d6 for each slot level above 7th.             magic, and you learn its school of magic, if any.
+
+Demiplane                                                     The spell can penetrate most barriers, but it is
+                                                            blocked by 1 foot of stone, 1 inch of common metal, a
+8th-­‐‑level conjuration                                    thin sheet of lead, or 3 feet of wood or dirt.
+
+Casting Time: 1 action                                      Detect Poison and Disease
+Range: 60 feet
+Components: S                                               1st-­‐‑level divination (ritual)
+Duration: 1 hour
+                                                            Casting Time: 1 action
+You create a shadowy door on a flat solid surface           Range: Self
+that you can see within range. The door is large            Components: V, S, M (a yew leaf)
+enough to allow Medium creatures to pass through            Duration: Concentration, up to 10 minutes
+unhindered. When opened, the door leads to a
+demiplane that appears to be an empty room 30 feet          For the duration, you can sense the presence and
+in each dimension, made of wood or stone. When the          location of poisons, poisonous creatures, and
+spell ends, the door disappears, and any creatures or       diseases within 30 feet of you. You also identify the
+objects inside the demiplane remain trapped there,          kind of poison, poisonous creature, or disease in
+as the door also disappears from the other side.            each case.
+
+  Each time you cast this spell, you can create a new         The spell can penetrate most barriers, but it is
+demiplane, or have the shadowy door connect to a            blocked by 1 foot of stone, 1 inch of common metal, a
+demiplane you created with a previous casting of            thin sheet of lead, or 3 feet of wood or dirt.
+this spell. Additionally, if you know the nature and
+contents of a demiplane created by a casting of this

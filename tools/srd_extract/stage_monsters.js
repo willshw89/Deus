@@ -7,13 +7,16 @@
 //
 // Pages: Monsters (A to Z) 261-357, Appendix MM-A 366-394, Appendix MM-B 395-403 (from cache/sections.json).
 //
-// Structure comes from the layout pages (page_NNN.layout.txt), read column by column (left, then right),
-// with a per-line repair of the column split: the shared splitLayoutColumns picks the gutter column, but
-// individual left-column lines run a few characters past it and the right column occasionally starts two
-// characters early, so each line is re-cut at the first run of spaces that is followed by text at or after
-// the right column's margin. Paragraph breaks inside a column are taken from the reading-order pages
-// (page_NNN.txt), whose line breaks follow the PDF's real vertical gaps; blank lines in the layout are not
-// trustworthy because the other column's baselines leak into them.
+// Structure comes from the raw layout pages (page_NNN.layout.raw.txt: physical layout, only CR LF unified
+// and the footer removed, so every character sits in its printed column), read column by column (left, then
+// right). splitRawLayoutColumns finds the gutter; each line is then cut at the first run of spaces that is
+// followed by text at the right column's margin, because left-column lines can run a few characters past
+// the gutter, and each segment is normalised with normalizeText afterwards. A guard keeps the older
+// tolerance for right text starting before the margin (an artifact of cutting the normalised layout, where
+// the hyphen artifact had shifted columns); it is expected to trigger on zero lines and the count is
+// printed. Paragraph breaks inside a column are taken from the reading-order pages (page_NNN.txt), whose
+// line breaks follow the PDF's real vertical gaps; blank lines in the layout are not trustworthy because
+// the other column's baselines leak into them.
 //
 // Ends with PASS/FAIL self-checks and exits 1 on any FAIL. No network, no engine globals.
 "use strict";
@@ -119,8 +122,10 @@ function pageGeometry(lines, base, prevGeom) {
  * text does not flow through the gap.
  */
 function cutLine(l, geom, ro) {
+    // Returns [left, right, guardTriggered]. On the raw layout the right column starts exactly at `rm`
+    // (plus its own indent); a cut at any earlier column is the legacy shift guard and is counted.
     const rtrim = s => s.replace(/\s+$/, "");
-    if (!geom || geom.rm === null) return [rtrim(l), ""];
+    if (!geom || geom.rm === null) return [rtrim(l), "", false];
     const rm = geom.rm;
     const thr = Math.max(geom.gutter - 1, rm - 8);
     const re = /\s{2,}(?=\S)/g;
@@ -131,42 +136,53 @@ function cutLine(l, geom, ro) {
         const A = rtrim(l.slice(0, m.index));
         const B = l.slice(t);
         const right = rtrim(l.slice(Math.min(t, rm)));
-        if (A.trim() === "") return ["", right];
-        if (t >= rm - 3) return [A, right];
-        const probe = squash(A.slice(-24) + " " + B.slice(0, 24));
+        if (A.trim() === "") return ["", right, t < rm];
+        if (t >= rm - 3) return [A, right, t < rm];
+        const probe = squash(T.normalizeText(A.slice(-24) + " " + B.slice(0, 24)));
         if (ro && ro.includes(probe)) continue; // same column: the text flows through this gap
-        return [A, right];
+        return [A, right, true];
     }
-    return [rtrim(l), ""];
+    return [rtrim(l), "", false];
 }
 
-/** Build the ordered line stream for one page: left column lines then right column lines. */
-function pageStream(page, prevGeom, warnings) {
-    const layout = readCache("page_" + pad3(page) + ".layout.txt");
+/**
+ * Build the ordered line stream for one page: left column lines then right column lines.
+ * Column detection and cutting use page_NNN.layout.raw.txt (physical layout, only CR LF unified and the
+ * footer removed), where every character still occupies its printed column; each cut segment is then
+ * normalised with normalizeText. stats.guard counts lines where the cut fell before the right margin.
+ */
+function pageStream(page, prevGeom, stats) {
+    const rawName = "page_" + pad3(page) + ".layout.raw.txt";
+    let layout;
+    if (fs.existsSync(path.join(CACHE, rawName))) layout = readCache(rawName).replace(/\r\n?/g, "\n");
+    else { layout = readCache("page_" + pad3(page) + ".layout.txt"); stats.warnings.push({ page, message: rawName + " missing from the cache; columns cut on the normalised layout instead (positions may be shifted)" }); }
     const lines = layout.split("\n");
-    const base = T.splitLayoutColumns(layout);
+    const base = T.splitRawLayoutColumns(layout);
     const geom = pageGeometry(lines, base, prevGeom);
     const ro = squash(readCache("page_" + pad3(page) + ".txt"));
-    const left = [], right = [];
+    const left = [], right = [], leftPhys = [], rightPhys = [];
     for (const l of lines) {
-        const [a, b] = cutLine(l, geom, ro);
-        left.push(a);
-        right.push(b);
+        const [a, b, guard] = cutLine(l, geom, ro);
+        if (guard) { stats.guard++; stats.guardLines.push(page + ": " + JSON.stringify(T.normalizeText(l).trim().slice(0, 80))); }
+        left.push(T.normalizeText(a).replace(/\n/g, " "));
+        right.push(T.normalizeText(b).replace(/\n/g, " "));
+        leftPhys.push(a);   // physical (un-normalised) segments keep exact printed columns for table fragments
+        rightPhys.push(b);
     }
     const out = [];
-    const pushCol = (arr, col) => {
+    const pushCol = (arr, physArr, col) => {
         let top = true;
         for (let i = 0; i < arr.length; i++) {
             const raw = arr[i];
             const text = raw.trim();
             const indent = raw.length - raw.replace(/^\s+/, "").length;
             const blank = text === "";
-            out.push({ page, col, idx: i, raw, text, indent, blank, colTop: !blank && top });
+            out.push({ page, col, idx: i, raw, phys: physArr[i], text, indent, blank, colTop: !blank && top });
             if (!blank) top = false;
         }
     };
-    pushCol(left, 0);
-    if (geom) pushCol(right, 1);
+    pushCol(left, leftPhys, 0);
+    if (geom) pushCol(right, rightPhys, 1);
     return { stream: out, geom: geom || prevGeom };
 }
 
@@ -186,7 +202,8 @@ function readingOracle(page) {
             const probe = k.length > 24 ? k.slice(-24) : k;
             return lines.some(l => l.endsWith(probe) && (k.length > 24 || l.length === k.length || l[l.length - k.length - 1] === " "));
         },
-        exactLine(text) { return lines.includes(key(text)); }
+        exactLine(text) { return lines.includes(key(text)); },
+        text: lines.join(" ")
     };
 }
 
@@ -606,31 +623,172 @@ function parseBody(items, entry, data, oracles, opts) {
 // ---------------------------------------------------------------------------------------------------
 // Interstitial prose (family text, variant sidebars)
 // ---------------------------------------------------------------------------------------------------
+/** Fragments of a physical layout segment: runs of text separated by two or more spaces, with their column x. */
+function fragmentsOf(item) {
+    const s = item.phys !== undefined ? item.phys : item.raw;
+    const out = [];
+    const re = /\S(?:\S| (?=\S))*/g;
+    let m;
+    while ((m = re.exec(s)) !== null) out.push({ x: m.index, text: squash(T.normalizeText(m[0])) });
+    return out;
+}
+
+/**
+ * Find printed tables in a run of stream items. A table starts at a line with two or more short fragments
+ * (the header row), continues through further multi-fragment lines, and through single-fragment lines whose
+ * fragment sits at one of the header's column positions and is a wrapped cell (lower case), a cell of a later
+ * column, or is followed by another table line. Blank lines inside a table are skipped. A block needs at least
+ * two multi-fragment lines. Returns [{ start, end, lines: [{ item, frags }], colX }], end exclusive.
+ */
+function detectTableBlocks(items) {
+    const blocks = [];
+    const colOf = (colX, x) => { let c = -1; for (let k = 0; k < colX.length; k++) if (x + 1 >= colX[k]) c = k; return c; };
+    let i = 0;
+    while (i < items.length) {
+        const it = items[i];
+        if (it.blank) { i++; continue; }
+        const frags = fragmentsOf(it);
+        if (frags.length < 2 || frags.some(f => f.text.length > 40)) { i++; continue; }
+        const colX = frags.map(f => f.x);
+        const lines = [{ item: it, frags }];
+        let j = i + 1, end = i + 1;
+        while (j < items.length) {
+            const nx = items[j];
+            if (nx.blank) { j++; continue; }
+            const fr = fragmentsOf(nx);
+            let ok = fr.length > 0 && fr.every(f => f.text.length <= 40 && colOf(colX, f.x) >= 0);
+            if (ok && fr.length === 1) {
+                const f = fr[0];
+                const c = colOf(colX, f.x);
+                let followedByRow = false;
+                for (let k = j + 1; k < items.length; k++) { if (items[k].blank) continue; followedByRow = fragmentsOf(items[k]).length >= 2; break; }
+                ok = Math.abs(f.x - colX[c]) <= 1 && (/^[a-z]/.test(f.text) || c > 0 || followedByRow);
+            }
+            if (!ok) break;
+            lines.push({ item: nx, frags: fr });
+            end = j + 1;
+            j++;
+        }
+        if (lines.filter(l => l.frags.length >= 2).length >= 2) { blocks.push({ start: i, end, lines, colX }); i = end; }
+        else i++;
+    }
+    return blocks;
+}
+
+/**
+ * Assemble a detected table block into { columns, rows } with wrapped cells rejoined, without guessing:
+ * 1. a fragment that starts with a lower-case letter on the line after its column's previous fragment continues
+ *    that cell (e.g. "Large or" + "smaller");
+ * 2. every column must then hold the same number of cells (header + rows). A column with exactly one cell too
+ *    many has an ambiguous wrap; it is resolved only when exactly one adjacent pair on consecutive lines is both
+ *    geometrically consistent with the shortest column (each cell starts no earlier than the matching row and no
+ *    later than the next) and attested by the page text (the joined phrase occurs in the reading-order pages);
+ * 3. each column's cells, joined in order, must occur in the reading-order text of their page (pdftotext's reading
+ *    mode emits a printed table column by column), which verifies column membership and order.
+ * Anything else returns { unresolved } and the rows are kept as printed by the caller.
+ */
+function assembleTable(block, roText) {
+    const notes = [];
+    const nCols = block.colX.length;
+    const colOf = x => { let c = -1; for (let k = 0; k < nCols; k++) if (x + 1 >= block.colX[k]) c = k; return c; };
+    const cols = Array.from({ length: nCols }, () => []);
+    block.lines.forEach((ln, li) => { for (const f of ln.frags) cols[colOf(f.x)].push({ line: li, text: f.text, page: ln.item.page }); });
+    let cells = cols.map(frs => {
+        const out = [];
+        for (const f of frs) {
+            const prev = out[out.length - 1];
+            if (prev && f.line === prev.end + 1 && /^[a-z]/.test(f.text)) { prev.text += " " + f.text; prev.end = f.line; }
+            else out.push({ text: f.text, start: f.line, end: f.line, page: f.page });
+        }
+        return out;
+    });
+    const counts = cells.map(c => c.length);
+    const min = Math.min(...counts);
+    if (min < 2) return { unresolved: "a column has no data cells", notes };
+    const refIdx = counts.indexOf(min);
+    const ref = cells[refIdx];
+    const pages = uniq(block.lines.map(l => l.item.page)).sort((a, b) => a - b);
+    // Evidence for an ambiguous wrap is the surrounding page text minus the table's own column dumps (the reading
+    // order prints each column's fragments joined by spaces, so any adjacent pair of a column would match there).
+    let evidence = "";
+    for (let p = pages[0] - 1; p <= pages[pages.length - 1] + 1; p++) evidence += " " + roText(p).toLowerCase();
+    for (const frs of cols) { const dump = frs.map(f => f.text).join(" ").toLowerCase(); if (dump) evidence = evidence.split(dump).join(" "); }
+    for (let c = 0; c < nCols; c++) {
+        if (counts[c] === min) continue;
+        if (counts[c] !== min + 1) return { unresolved: "column " + (c + 1) + " has " + counts[c] + " cells against " + min + " in column " + (refIdx + 1), notes };
+        const col = cells[c];
+        const candidates = [];
+        for (let k = 0; k + 1 < col.length; k++) {
+            if (col[k + 1].start !== col[k].end + 1) continue;
+            const merged = col.slice(0, k).concat([{ text: col[k].text + " " + col[k + 1].text, start: col[k].start, end: col[k + 1].end, page: col[k].page }], col.slice(k + 2));
+            const geometric = merged.every((cell, i) => cell.start >= ref[i].start && (i + 1 >= ref.length || cell.start <= ref[i + 1].start));
+            const attested = evidence.includes(merged[k].text.toLowerCase());
+            candidates.push({ k, merged, geometric, attested });
+        }
+        const good = candidates.filter(x => x.geometric && x.attested);
+        if (good.length !== 1) return { unresolved: "column " + (c + 1) + ": " + good.length + " candidate wraps satisfy geometry and page evidence (geometric candidates: " + candidates.filter(x => x.geometric).map(x => JSON.stringify(x.merged[x.k].text)).join(", ") + ")", notes };
+        const others = candidates.filter(x => x.geometric && x.k !== good[0].k).map(x => JSON.stringify(x.merged[x.k].text));
+        cells[c] = good[0].merged;
+        notes.push("column " + (c + 1) + ": cell " + JSON.stringify(good[0].merged[good[0].k].text) + " reassembled from two printed lines; the wrap is geometrically ambiguous" + (others.length ? " with " + others.join(", ") : "") + " and was resolved because the phrase occurs in the page text");
+    }
+    for (let c = 0; c < nCols; c++) {
+        const byPage = new Map();
+        for (const cell of cells[c]) { if (!byPage.has(cell.page)) byPage.set(cell.page, []); byPage.get(cell.page).push(cell.text); }
+        for (const [p, texts] of byPage) if (!roText(p).includes(texts.join(" "))) return { unresolved: "column " + (c + 1) + " read as " + JSON.stringify(texts.join(" ")) + " is not found in the reading-order text of page " + p, notes };
+    }
+    const columns = cells.map(c => c[0].text);
+    const rows = [];
+    for (let r = 1; r < min; r++) rows.push(cells.map(c => c[r].text));
+    return { columns, rows, pages, notes };
+}
+
+/** Interstitial prose as paragraphs, with printed tables parsed; returns { paragraphs, tables }. */
 function proseParagraphs(items, oracles) {
+    const roText = p => { try { return oracles(p).text; } catch (e) { return ""; } };
+    const blocks = detectTableBlocks(items);
+    const tables = [];
     const paras = [];
-    let last = null;
-    for (const it of items) {
+    let last = null, lastWasTable = false, bi = 0;
+    for (let i = 0; i < items.length; i++) {
+        if (bi < blocks.length && i === blocks[bi].start) {
+            const block = blocks[bi++];
+            const printed = block.lines.map(l => l.frags.map(f => f.text).join(" | "));
+            const pages = uniq(block.lines.map(l => l.item.page)).sort((a, b) => a - b);
+            const t = assembleTable(block, roText);
+            if (t.unresolved) {
+                tables.push({ caption: null, columns: null, rows: null, pages, unresolved: t.unresolved, printedLines: printed, notes: t.notes });
+                paras.push(printed.join("\n"));
+            } else {
+                tables.push({ caption: null, columns: t.columns, rows: t.rows, pages, notes: t.notes });
+                paras.push([t.columns.join(" | ")].concat(t.rows.map(r => r.join(" | "))).join("\n"));
+            }
+            last = block.lines[block.lines.length - 1].item;
+            lastWasTable = true;
+            i = block.end - 1;
+            continue;
+        }
+        const it = items[i];
         if (it.blank) continue;
         const oracle = oracles(it.page);
         const text = it.text;
-        const tableRow = /\s{2,}\S/.test(it.raw.trim());
-        let newPara = paras.length === 0;
+        let newPara = paras.length === 0 || lastWasTable;
         if (!newPara) {
-            if (tableRow) newPara = true;
-            else if (it.indent >= 1 && isCap(text) && !it.colTop) newPara = true;
+            if (it.indent >= 1 && isCap(text) && !it.colTop) newPara = true;
             else if (it.indent === 0 && !it.colTop && last && oracle.startsLine(text) && oracle.endsLine(last.text) && isCap(text) && endsSentence(last.text)) newPara = true;
             else if (TRAIT_NAME_RE.test(text) && it.indent >= 1) newPara = true;
-            else if (last && /\s{2,}\S/.test(last.raw.trim())) newPara = true; // line after a table row
         }
-        if (newPara) paras.push([tableRow ? it.raw.trim().replace(/\s{2,}/g, " | ") : text]);
+        if (newPara) paras.push([text]);
         else paras[paras.length - 1].push(text);
         last = it;
+        lastWasTable = false;
     }
-    return paras.map(lines => {
+    const paragraphs = paras.map(lines => {
+        if (typeof lines === "string") return lines;
         let s = "";
         for (const l of lines) { if (!s) s = l; else if (/[-‑‐]$/.test(s) && /^[a-z]/.test(l)) s += l; else s += " " + l; }
         return s;
     });
+    return { paragraphs, tables };
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -643,6 +801,7 @@ function main() {
     if (!sections.length) throw new Error("no creature sections in cache/sections.json");
     const warnings = [];
     const warn = (page, message) => warnings.push({ page, message });
+    const cutStats = { guard: 0, guardLines: [], warnings }; // column-cut guard counter (see pageStream)
     const oracleCache = new Map();
     const oracles = page => { if (!oracleCache.has(page)) oracleCache.set(page, readingOracle(page)); return oracleCache.get(page); };
 
@@ -657,7 +816,7 @@ function main() {
         let geom = null;
         for (let p = p0; p <= p1; p++) {
             if (!fs.existsSync(path.join(CACHE, "page_" + pad3(p) + ".layout.txt"))) { warn(p, "layout page missing from cache"); continue; }
-            const r = pageStream(p, geom, warnings);
+            const r = pageStream(p, geom, cutStats);
             stream = stream.concat(r.stream);
             geom = r.geom;
         }
@@ -751,6 +910,11 @@ function main() {
                 if (member) {
                     const inner = groupStack[groupStack.length - 1];
                     data.family = { name: inner.text, text: inner.prose.join("\n\n"), path: groupStack.map(g => g.text) };
+                    if (inner.tables && inner.tables.length) data.family.tables = inner.tables.map(t => Object.assign({}, t));
+                    (inner.tables || []).forEach((t, k) => {
+                        for (const n of t.notes || []) makeNote(entry, "family table " + (k + 1) + " (pages " + t.pages.join(", ") + "): " + n);
+                        if (t.unresolved) makeNote(entry, "family table " + (k + 1) + " (pages " + t.pages.join(", ") + ") not reconstructed: " + t.unresolved + "; rows kept as printed");
+                    });
                 }
             }
             // text
@@ -764,7 +928,7 @@ function main() {
                 const segItems = stream.slice(st.idx + 1, segEnd);
                 if (st.type === "letter") { groupStack.length = 0; continue; }
                 if (st.type === "variant") {
-                    const paras = proseParagraphs(segItems, oracles);
+                    const paras = proseParagraphs(segItems, oracles).paragraphs;
                     const title = st.title;
                     const ttoks = plain(title).split(/\s+/).map(w => PLURALS[w] || w.replace(/s$/, ""));
                     let bestE = null, bestN = 0;
@@ -790,10 +954,11 @@ function main() {
                 groupStack.push(g);
                 const proseItems = segItems.filter(x => !x.blank);
                 if (proseItems.length) {
-                    g.prose = proseParagraphs(segItems, oracles);
+                    const pr = proseParagraphs(segItems, oracles);
+                    g.prose = pr.paragraphs;
+                    g.tables = pr.tables;
                     if (!nextA) warn(stream[st.idx].page, "prose after heading \"" + st.text + "\" has no following stat block; skipped");
-                    const tableRows = g.prose.filter(p => p.includes(" | ")).length;
-                    if (tableRows) warn(stream[st.idx].page, "heading \"" + st.text + "\": " + tableRows + " table row(s) captured as printed lines with cells separated by \" | \" in data.family.text; cells that wrap onto a second line are not reassembled");
+                    for (const t of pr.tables) if (t.unresolved) warn(t.pages[0], "heading \"" + st.text + "\": table on page(s) " + t.pages.join(", ") + " could not be reconstructed (" + t.unresolved + "); rows kept as printed in data.family.text");
                 }
             }
             // orphan prose: body items after the last named entry that could not be attached are in the description (handled in parseBody)
@@ -888,6 +1053,18 @@ function main() {
         }
     }
     check(linesMissing.length === 0, "entry text lines found in the reading-order pages: " + (linesChecked - linesMissing.length) + "/" + linesChecked + (linesMissing.length ? " (first miss: " + linesMissing[0] + ")" : ""));
+    // Page attribution: the start of an entry's first text line must occur on its first cited page and the end
+    // of its last text line on its last cited page (reading-order pages, hyphen-break tolerant). A paragraph
+    // that runs from the foot of one page onto the next exists on neither page whole, so only its first and
+    // last 40 characters are probed.
+    const spanBad = [];
+    for (const e of entries) {
+        const lines = e.text.split("\n").map(l => squash(l).replace(/- /g, "-")).filter(Boolean);
+        const p0 = e.source.pages[0], p1 = e.source.pages[e.source.pages.length - 1];
+        if (!roFor(p0).includes(lines[0].slice(0, 40))) spanBad.push(e.name + ": start of first line not on page " + p0);
+        if (!roFor(p1).includes(lines[lines.length - 1].slice(-40))) spanBad.push(e.name + ": end of last line not on page " + p1);
+    }
+    check(spanBad.length === 0, "entries whose text starts on their first cited page and ends on their last: " + (entries.length - new Set(spanBad.map(s => s.split(":")[0])).size) + "/" + entries.length + (spanBad.length ? " (" + spanBad[0] + ")" : ""));
     for (const nm of SPOT_CHECK) {
         const e = entries.find(x => x.name === nm);
         if (!e) { check(false, "spot check " + nm + ": not found"); continue; }
@@ -898,6 +1075,7 @@ function main() {
     }
     const parsed = entries.filter(e => e.readiness === "parsed").length;
     console.log("entries " + count + " (parsed " + parsed + ", extracted " + (count - parsed) + "), warnings " + warnings.length + ", wrote " + path.relative(path.resolve(__dirname, "..", ".."), OUT_FILE));
+    console.log("column cut guard (right text before the raw margin) triggered on " + cutStats.guard + " line(s)" + (cutStats.guard ? ":\n  " + cutStats.guardLines.slice(0, 20).join("\n  ") : ""));
     const extracted = entries.filter(e => e.readiness !== "parsed");
     for (const e of extracted) console.log("  extracted: " + e.name + " (page " + e.source.pages[0] + "): " + e.notes.filter(n => /required field|not parsed|expected 6/.test(n)).join("; "));
     if (parserDefeats.size) console.log("parser defeated on pages: " + Array.from(parserDefeats).sort((a, b) => a - b).join(", "));

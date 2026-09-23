@@ -140,6 +140,10 @@ function main() {
         const n = i + 1;
         const r = T.stripFooter(T.normalizeText(roPages[i]));
         const l = T.stripFooter(T.normalizeText(loPages[i] || ""));
+        // Raw layout: only line endings unified and the footer removed. pdftotext pads the right column to an
+        // absolute character column, so any character the normalisation removes from the left column shifts the
+        // right column of that line; column detection must therefore run on this variant (lib splitRawLayoutColumns).
+        const raw = T.stripFooter(String(loPages[i] || "").replace(/\r\n?/g, "\n"));
         const footerPage = r.footerPage !== null ? r.footerPage : l.footerPage;
         if (footerPage !== null && footerPage !== n) footerMismatches++;
         pages.push({
@@ -149,7 +153,8 @@ function main() {
             layoutChars: l.text.length,
             firstLine: (r.text.split("\n").map(s => s.trim()).find(Boolean) || "").slice(0, 120),
             reading: r.text,
-            layout: l.text
+            layout: l.text,
+            layoutRaw: raw.text
         });
         headings[n] = T.headingCandidates(r.text).map(h => h.text);
     }
@@ -165,6 +170,12 @@ function main() {
         },
         tool: { name: "pdftotext (xpdf)", exe: tool.exe, version: tool.version, modes: ["reading order (-enc UTF-8 -eol unix)", "layout (-layout -enc UTF-8 -eol unix)"] },
         toolWarnings: { count: ro.warnings.length + lo.warnings.length, distinct: [...new Set([...ro.warnings, ...lo.warnings])] },
+        variants: {
+            "page_NNN.txt": "reading order, normalised (NORMALIZATION_RULES), footer removed",
+            "page_NNN.layout.txt": "physical layout, normalised, footer removed; right-column text sits up to three columns left of its raw position on lines whose left column held a hyphen artifact",
+            "page_NNN.layout.raw.txt": "physical layout with only CR LF unified and the footer removed; column positions are exact; normalise per line after splitting columns (lib splitRawLayoutColumns)"
+        },
+        cacheVersion: 2,
         normalization: T.NORMALIZATION_RULES,
         footer: "the running footer 'System Reference Document 5.1' and the page number are removed from every page; footerPage records the number that was printed",
         sections: SECTIONS,
@@ -175,9 +186,10 @@ function main() {
     if (checkOnly) {
         let diffs = 0;
         for (const p of pages) {
-            const f1 = path.join(outDir, `page_${pad(p.page)}.txt`), f2 = path.join(outDir, `page_${pad(p.page)}.layout.txt`);
+            const f1 = path.join(outDir, `page_${pad(p.page)}.txt`), f2 = path.join(outDir, `page_${pad(p.page)}.layout.txt`), f3 = path.join(outDir, `page_${pad(p.page)}.layout.raw.txt`);
             if (!fs.existsSync(f1) || fs.readFileSync(f1, "utf8") !== p.reading + "\n") diffs++;
             if (!fs.existsSync(f2) || fs.readFileSync(f2, "utf8") !== p.layout + "\n") diffs++;
+            if (!fs.existsSync(f3) || fs.readFileSync(f3, "utf8") !== p.layoutRaw + "\n") diffs++;
         }
         console.log(`SRD extract --check: ${pages.length} pages re-extracted, ${diffs} cached files differ, ${problems.length} problems${problems.length ? ": " + problems.join("; ") : ""}`);
         process.exit(diffs === 0 && problems.length === 0 ? 0 : 1);
@@ -195,6 +207,7 @@ function main() {
     for (const p of pages) {
         writeIfChanged(path.join(outDir, `page_${pad(p.page)}.txt`), p.reading + "\n");
         writeIfChanged(path.join(outDir, `page_${pad(p.page)}.layout.txt`), p.layout + "\n");
+        writeIfChanged(path.join(outDir, `page_${pad(p.page)}.layout.raw.txt`), p.layoutRaw + "\n");
     }
     fs.writeFileSync(path.join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
     writeIfChanged(path.join(outDir, "sections.json"), JSON.stringify({ source: manifest.source, sections: SECTIONS }, null, 2) + "\n");

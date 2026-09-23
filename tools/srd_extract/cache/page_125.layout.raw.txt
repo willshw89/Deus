@@ -1,0 +1,62 @@
+  A creature that can see the sensor (such as a           Creatures are affected even if they hold their breath
+creature benefiting from see invisibility or truesight)   or don’t need to breathe.
+sees a luminous, intangible orb about the size of
+your fist.                                                  The fog moves 10 feet away from you at the start
+                                                          of each of your turns, rolling along the surface of the
+Clone                                                     ground. The vapors, being heavier than air, sink to
+                                                          the lowest level of the land, even pouring down
+8th-­‐‑level necromancy                                   openings.
+
+Casting Time: 1 hour                                        At Higher Levels. When you cast this spell using a
+Range: Touch                                              spell slot of 6th level or higher, the damage increases
+Components: V, S, M (a diamond worth at least             by 1d8 for each slot level above 5th.
+
+  1,000 gp and at least 1 cubic inch of flesh of the      Color Spray
+  creature that is to be cloned, which the spell
+  consumes, and a vessel worth at least 2,000 gp          1st-­‐‑level illusion
+  that has a sealable lid and is large enough to hold a
+  Medium creature, such as a huge urn, coffin, mud-­‐‑    Casting Time: 1 action
+  filled cyst in the ground, or crystal container filled  Range: Self (15-­‐‑foot cone)
+  with salt water)                                        Components: V, S, M (a pinch of powder or sand
+Duration: Instantaneous
+                                                            that is colored red, yellow, and blue)
+This spell grows an inert duplicate of a living           Duration: 1 round
+creature as a safeguard against death. This clone
+forms inside a sealed vessel and grows to full size       A dazzling array of flashing, colored light springs
+and maturity after 120 days; you can also choose to       from your hand. Roll 6d10; the total is how many hit
+have the clone be a younger version of the same           points of creatures this spell can effect. Creatures in
+creature. It remains inert and endures indefinitely,      a 15-­‐‑foot cone originating from you are affected in
+as long as its vessel remains undisturbed.                ascending order of their current hit points (ignoring
+                                                          unconscious creatures and creatures that can’t see).
+  At any time after the clone matures, if the original
+creature dies, its soul transfers to the clone,             Starting with the creature that has the lowest
+provided that the soul is free and willing to return.     current hit points, each creature affected by this
+The clone is physically identical to the original and     spell is blinded until the spell ends. Subtract each
+has the same personality, memories, and abilities,        creature’s hit points from the total before moving on
+but none of the original’s equipment. The original        to the creature with the next lowest hit points. A
+creature’s physical remains, if they still exist,         creature’s hit points must be equal to or less than
+become inert and can’t thereafter be restored to life,    the remaining total for that creature to be affected.
+since the creature’s soul is elsewhere.
+                                                            At Higher Levels. When you cast this spell using a
+Cloudkill                                                 spell slot of 2nd level or higher, roll an additional
+                                                          2d10 for each slot level above 1st.
+5th-­‐‑level conjuration
+                                                          Command
+Casting Time: 1 action
+Range: 120 feet                                           1st-­‐‑level enchantment
+Components: V, S
+Duration: Concentration, up to 10 minutes                 Casting Time: 1 action
+                                                          Range: 60 feet
+You create a 20-­‐‑foot-­‐‑radius sphere of poisonous,    Components: V
+yellow-­‐‑green fog centered on a point you choose        Duration: 1 round
+within range. The fog spreads around corners. It
+lasts for the duration or until strong wind disperses     You speak a one-­‐‑word command to a creature you
+the fog, ending the spell. Its area is heavily obscured.  can see within range. The target must succeed on a
+                                                          Wisdom saving throw or follow the command on its
+  When a creature enters the spell’s area for the first   next turn. The spell has no effect if the target is
+time on a turn or starts its turn there, that creature    undead, if it doesn’t understand your language, or if
+must make a Constitution saving throw. The                your command is directly harmful to it.
+creature takes 5d8 poison damage on a failed save,
+or half as much damage on a successful one.                 Some typical commands and their effects follow.
+                                                          You might issue a command other than one
+                                                          described here. If you do so, the GM determines how

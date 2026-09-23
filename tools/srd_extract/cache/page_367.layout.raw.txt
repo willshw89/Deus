@@ -1,0 +1,48 @@
+    STR DEX CON INT WIS CHA                                 Senses darkvision 30 ft., passive Perception 11
+  14 (+2) 12 (+1) 12 (+1) 2 (−4) 10 (+0) 5 (−3)             Languages —
+                                                            Challenge 0 (10 XP)
+Senses passive Perception 10
+Languages —                                                 Keen Smell. The badger has advantage on Wisdom
+Challenge 1/4 (50 XP)                                       (Perception) checks that rely on smell.
+
+Actions                                                     Actions
+Beak. Melee Weapon Attack: +4 to hit, reach 5 ft., one      Bite. Melee Weapon Attack: +2 to hit, reach 5 ft., one
+target. Hit: 6 (1d8 + 2) slashing damage.                   target. Hit: 1 piercing damage.
+
+An axe beak is a tall flightless bird with strong legs      Bat
+and a heavy, wedge-­‐‑shaped beak. It has a nasty
+disposition and tends to attack any unfamiliar              Tiny beast, unaligned
+creature that wanders too close.
+                                                            Armor Class 12
+Baboon                                                      Hit Points 1 (1d4 − 1)
+                                                            Speed 5 ft., fly 30 ft.
+Small beast, unaligned
+Armor Class 12                                               STR DEX CON              INT WIS CHA
+Hit Points 3 (1d6)                                          2 (−4) 15 (+2) 8 (−1)    2 (−4) 12 (+1) 4 (−3)
+Speed 30 ft., climb 30 ft.
+                                                            Senses blindsight 60 ft., passive Perception 11
+    STR DEX CON INT WIS CHA                                 Languages —
+   8 (−1) 14 (+2) 11 (+0) 4 (−3) 12 (+1) 6 (−2)             Challenge 0 (10 XP)
+
+Senses passive Perception 11                                Echolocation. The bat can’t use its blindsight while
+Languages —                                                 deafened.
+Challenge 0 (10 XP)                                         Keen Hearing. The bat has advantage on Wisdom
+                                                            (Perception) checks that rely on hearing.
+Pack Tactics. The baboon has advantage on an attack
+roll against a creature if at least one of the baboon’s     Actions
+allies is within 5 feet of the creature and the ally isn’t  Bite. Melee Weapon Attack: +0 to hit, reach 5 ft., one
+incapacitated.                                              creature. Hit: 1 piercing damage.
+
+Actions                                                     Black Bear
+Bite. Melee Weapon Attack: +1 to hit, reach 5 ft., one
+target. Hit: 1 (1d4 − 1) piercing damage.                   Medium beast, unaligned
+                                                            Armor Class 11 (natural armor)
+Badger                                                      Hit Points 19 (3d8 + 6)
+                                                            Speed 40 ft., climb 30 ft.
+Tiny beast, unaligned
+Armor Class 10                                                  STR DEX CON INT WIS CHA
+Hit Points 3 (1d4 + 1)                                        15 (+2) 10 (+0) 14 (+2) 2 (−4) 12 (+1) 7 (−2)
+Speed 20 ft., burrow 5 ft.
+                                                            Skills Perception +3
+    STR DEX CON INT WIS CHA                                 Senses passive Perception 13
+   4 (−3) 11 (+0) 12 (+1) 2 (−4) 12 (+1) 5 (−3)             Languages —

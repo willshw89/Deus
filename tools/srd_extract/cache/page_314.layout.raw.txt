@@ -1,0 +1,50 @@
+Saving Throws Str +14, Con +10, Wis +9, Cha +9           Aberrant Ground. The ground in a 10-­‐foot radius
+Skills Arcana +8, Athletics +14, History +8, Perception  around the mouther is doughlike difficult terrain. Each
+                                                         creature that starts its turn in that area must succeed
+  +9                                                     on a DC 10 Strength saving throw or have its speed
+Damage Resistances cold                                  reduced to 0 until the start of its next turn.
+Damage Immunities lightning, thunder                     Gibbering. The mouther babbles incoherently while it
+Senses passive Perception 19                             can see any creature and isn’t incapacitated. Each
+Languages Common, Giant                                  creature that starts its turn within 20 feet of the
+Challenge 13 (10,000 XP)                                 mouther and can hear the gibbering must succeed on a
+                                                         DC 10 Wisdom saving throw. On a failure, the creature
+Amphibious. The giant can breathe air and water.         can’t take reactions until the start of its next turn and
+Innate Spellcasting. The giant’s innate spellcasting     rolls a d8 to determine what it does during its turn. On
+ability is Charisma (spell save DC 17). It can innately  a 1 to 4, the creature does nothing. On a 5 or 6, the
+cast the following spells, requiring no material         creature takes no action or bonus action and uses all its
+components:                                              movement to move in a randomly determined
+At will: detect magic, feather fall, levitate, light     direction. On a 7 or 8, the creature makes a melee
+3/day each: control weather, water breathing             attack against a randomly determined creature within
+                                                         its reach or does nothing if it can’t make such an attack.
+Actions
+Multiattack. The giant makes two greatsword attacks.     Actions
+Greatsword. Melee Weapon Attack: +14 to hit, reach
+10 ft., one target. Hit: 30 (6d6 + 9) slashing damage.   Multiattack. The gibbering mouther makes one bite
+Rock. Ranged Weapon Attack: +14 to hit, range 60/240     attack and, if it can, uses its Blinding Spittle.
+ft., one target. Hit: 35 (4d12 + 9) bludgeoning damage.  Bites. Melee Weapon Attack: +2 to hit, reach 5 ft., one
+Lightning Strike (Recharge 5–6). The giant hurls a       creature. Hit: 17 (5d6) piercing damage. If the target is
+magical lightning bolt at a point it can see within 500  Medium or smaller, it must succeed on a DC 10
+feet of it. Each creature within 10 feet of that point   Strength saving throw or be knocked prone. If the
+must make a DC 17 Dexterity saving throw, taking 54      target is killed by this damage, it is absorbed into the
+(12d8) lightning damage on a failed save, or half as     mouther.
+much damage on a successful one.                         Blinding Spittle (Recharge 5–6). The mouther spits a
+                                                         chemical glob at a point it can see within 15 feet of it.
+Gibbering Mouther                                        The glob explodes in a blinding flash of light on impact.
+                                                         Each creature within 5 feet of the flash must succeed
+Medium aberration, neutral                               on a DC 13 Dexterity saving throw or be blinded until
+                                                         the end of the mouther’s next turn.
+Armor Class 9
+Hit Points 67 (9d8 + 27)                                 Gnoll
+Speed 10 ft., swim 10 ft.
+                                                         Medium humanoid (gnoll), chaotic evil
+    STR DEX CON INT WIS CHA
+  10 (+0) 8 (−1) 16 (+3) 3 (−4) 10 (+0) 6 (−2)           Armor Class 15 (hide armor, shield)
+                                                         Hit Points 22 (5d8)
+Condition Immunities prone                               Speed 30 ft.
+Senses darkvision 60 ft., passive Perception 10
+Languages —                                                  STR DEX CON INT WIS CHA
+Challenge 2 (450 XP)                                       14 (+2) 12 (+1) 11 (+0) 6 (−2) 10 (+0) 7 (−2)
+
+                                                         Senses darkvision 60 ft., passive Perception 10
+                                                         Languages Gnoll
+                                                         Challenge 1/2 (100 XP)

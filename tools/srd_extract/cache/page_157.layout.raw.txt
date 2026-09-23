@@ -1,0 +1,63 @@
+  A dispel magic spell can end the spell only if it is     Swarming, biting locusts fill a 20-­‐‑foot-­‐‑radius sphere
+cast as a 9th-­‐‑level spell, targeting either the prison  centered on a point you choose within range. The
+or the special component used to create it.                sphere spreads around corners. The sphere remains
+                                                           for the duration, and its area is lightly obscured. The
+  You can use a particular special component to            sphere’s area is difficult terrain.
+create only one prison at a time. If you cast the spell
+again using the same component, the target of the            When the area appears, each creature in it must
+first casting is immediately freed from its binding.       make a Constitution saving throw. A creature takes
+                                                           4d10 piercing damage on a failed save, or half as
+Incendiary Cloud                                           much damage on a successful one. A creature must
+                                                           also make this saving throw when it enters the
+8th-­‐‑level conjuration                                   spell’s area for the first time on a turn or ends its
+                                                           turn there.
+Casting Time: 1 action
+Range: 150 feet                                              At Higher Levels. When you cast this spell using a
+Components: V, S                                           spell slot of 6th level or higher, the damage increases
+Duration: Concentration, up to 1 minute                    by 1d10 for each slot level above 5th.
+
+A swirling cloud of smoke shot through with white-­‐‑      Instant Summons
+hot embers appears in a 20-­‐‑foot-­‐‑radius sphere
+centered on a point within range. The cloud spreads        6th-­‐‑level conjuration (ritual)
+around corners and is heavily obscured. It lasts for
+the duration or until a wind of moderate or greater        Casting Time: 1 minute
+speed (at least 10 miles per hour) disperses it.           Range: Touch
+                                                           Components: V, S, M (a sapphire worth 1,000 gp)
+  When the cloud appears, each creature in it must         Duration: Until dispelled
+make a Dexterity saving throw. A creature takes
+10d8 fire damage on a failed save, or half as much         You touch an object weighing 10 pounds or less
+damage on a successful one. A creature must also           whose longest dimension is 6 feet or less. The spell
+make this saving throw when it enters the spell’s          leaves an invisible mark on its surface and invisibly
+area for the first time on a turn or ends its turn there.  inscribes the name of the item on the sapphire you
+                                                           use as the material component. Each time you cast
+  The cloud moves 10 feet directly away from you in        this spell, you must use a different sapphire.
+a direction that you choose at the start of each of
+your turns.                                                  At any time thereafter, you can use your action to
+                                                           speak the item’s name and crush the sapphire. The
+Inflict Wounds                                             item instantly appears in your hand regardless of
+                                                           physical or planar distances, and the spell ends.
+1st-­‐‑level necromancy
+                                                             If another creature is holding or carrying the item,
+Casting Time: 1 action                                     crushing the sapphire doesn’t transport the item to
+Range: Touch                                               you, but instead you learn who the creature
+Components: V, S                                           possessing the object is and roughly where that
+Duration: Instantaneous                                    creature is located at that moment.
+
+Make a melee spell attack against a creature you can         Dispel magic or a similar effect successfully
+reach. On a hit, the target takes 3d10 necrotic            applied to the sapphire ends this spell’s effect.
+damage.
+                                                           Invisibility
+  At Higher Levels. When you cast this spell using a
+spell slot of 2nd level or higher, the damage              2nd-­‐‑level illusion
+increases by 1d10 for each slot level above 1st.
+                                                           Casting Time: 1 action
+Insect Plague                                              Range: Touch
+                                                           Components: V, S, M (an eyelash encased in gum
+5th-­‐‑level conjuration
+                                                             arabic)
+Casting Time: 1 action                                     Duration: Concentration, up to 1 hour
+Range: 300 feet
+Components: V, S, M (a few grains of sugar, some           A creature you touch becomes invisible until the
+                                                           spell ends. Anything the target is wearing or
+  kernels of grain, and a smear of fat)                    carrying is invisible as long as it is on the target’s
+Duration: Concentration, up to 10 minutes

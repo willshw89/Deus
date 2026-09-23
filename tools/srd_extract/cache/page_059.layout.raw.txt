@@ -1,0 +1,62 @@
+  Lawful neutral (LN) individuals act in accordance          Languages
+with law, tradition, or personal codes. Many monks
+and some wizards are lawful neutral.                         Your race indicates the languages your character can
+                                                             speak by default, and your background might give
+  Neutral (N) is the alignment of those who prefer           you access to one or more additional languages of
+to steer clear of moral questions and don’t take sides,      your choice. Note these languages on your character
+doing what seems best at the time. Lizardfolk, most          sheet.
+druids, and many humans are neutral.
+                                                               Choose your languages from the Standard
+  Chaotic neutral (CN) creatures follow their                Languages table, or choose one that is common in
+whims, holding their personal freedom above all else.        your campaign. With your GM’s permission, you can
+Many barbarians and rogues, and some bards, are              instead choose a language from the Exotic
+chaotic neutral.                                             Languages table or a secret language, such as thieves’
+                                                             cant or the tongue of druids.
+  Lawful evil (LE) creatures methodically take what
+they want, within the limits of a code of tradition,           Some of these languages are actually families of
+loyalty, or order. Devils, blue dragons, and                 languages with many dialects. For example, the
+hobgoblins are lawful evil.                                  Primordial language includes the Auran, Aquan,
+                                                             Ignan, and Terran dialects, one for each of the four
+  Neutral evil (NE) is the alignment of those who            elemental planes. Creatures that speak different
+do whatever they can get away with, without                  dialects of the same language can communicate with
+compassion or qualms. Many drow, some cloud                  one another.
+giants, and goblins are neutral evil.
+                                                             Standard Languages
+  Chaotic evil (CE) creatures act with arbitrary
+violence, spurred by their greed, hatred, or bloodlust.      Language     Typical Speakers     Script
+Demons, red dragons, and orcs are chaotic evil.              Common       Humans               Common
+                                                             Dwarvish     Dwarves              Dwarvish
+Alignment in the Multiverse                                  Elvish       Elves                Elvish
+                                                             Giant        Ogres, giants        Dwarvish
+For many thinking creatures, alignment is a moral            Gnomish      Gnomes               Dwarvish
+choice. Humans, dwarves, elves, and other humanoid           Goblin       Goblinoids           Dwarvish
+races can choose whether to follow the paths of good         Halfling     Halflings            Common
+or evil, law or chaos. According to myth, the good-­‐‑       Orc          Orcs                 Dwarvish
+aligned gods who created these races gave them free
+will to choose their moral paths, knowing that good          Exotic Languages
+without free will is slavery.
+                                                             Language     Typical Speakers     Script
+  The evil deities who created other races, though,          Abyssal      Demons               Infernal
+made those races to serve them. Those races have             Celestial    Celestials           Celestial
+strong inborn tendencies that match the nature of            Draconic     Dragons, dragonborn  Draconic
+their gods. Most orcs share the violent, savage              Deep Speech  Aboleths, cloakers   —
+nature of the orc gods, and are thus inclined toward         Infernal     Devils               Infernal
+evil. Even if an orc chooses a good alignment, it            Primordial   Elementals           Dwarvish
+struggles against its innate tendencies for its entire       Sylvan       Fey creatures        Elvish
+life. (Even half-­‐‑orcs feel the lingering pull of the orc  Undercommon  Underworld traders   Elvish
+god’s influence.)
+                                                             Inspiration
+  Alignment is an essential part of the nature of
+celestials and fiends. A devil does not choose to be         Inspiration is a rule the game master can use to
+lawful evil, and it doesn’t tend toward lawful evil,         reward you for playing your character in a way
+but rather it is lawful evil in its essence. If it           that’s true to his or her personality traits, ideal, bond,
+somehow ceased to be lawful evil, it would cease to          and flaw. By using inspiration, you can draw on your
+be a devil.                                                  personality trait of compassion for the downtrodden
+                                                             to give you an edge in negotiating with the Beggar
+  Most creatures that lack the capacity for rational         Prince. Or inspiration can let you call on your bond
+thought do not have alignments—they are                      to the defense of your home village to push past the
+unaligned. Such a creature is incapable of making a          effect of a spell that has been laid on you.
+moral or ethical choice and acts according to its
+bestial nature. Sharks are savage predators, for
+example, but they are not evil; they have no
+alignment.

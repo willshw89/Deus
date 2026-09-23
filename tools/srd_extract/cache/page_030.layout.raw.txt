@@ -1,0 +1,56 @@
+Paladin                                                         Weapons: Simple weapons, martial weapons
+                                                                Tools: None
+Class Features                                                  Saving Throws: Wisdom, Charisma
+                                                                Skills: Choose two from Athletics, Insight,
+As a paladin, you gain the following class features.
+                                                                  Intimidation, Medicine, Persuasion, and Religion
+Hit Points
+                                                                Equipment
+Hit Dice: 1d10 per paladin level
+Hit Points at 1st Level: 10 + your Constitution                 You start with the following equipment, in addition
+                                                                to the equipment granted by your background:
+  modifier
+Hit Points at Higher Levels: 1d10 (or 6) + your                 • (a) a martial weapon and a shield or (b) two
+                                                                  martial weapons
+  Constitution modifier per paladin level after 1st
+                                                                • (a) five javelins or (b) any simple melee weapon
+Proficiencies                                                   • (a) a priest’s pack or (b) an explorer’s pack
+                                                                • Chain mail and a holy symbol
+Armor: All armor, shields
+
+The Paladin
+
+Level  Proficiency  Features                                    Spell Slots per Spell Level
+ 1st      Bonus     Divine Sense, Lay on Hands                  1st 2nd 3rd 4th 5th
+2nd         +2      Fighting Style, Spellcasting, Divine Smite   
+ 3rd        +2      Divine Health, Sacred Oath                   2 
+ 4th        +2      Ability Score Improvement                    3 
+ 5th        +2      Extra Attack                                 3 
+ 6th        +3      Aura of Protection                           4 2 
+ 7th        +3      Sacred Oath feature                          4 2 
+ 8th        +3      Ability Score Improvement                    4 3 
+ 9th        +3                                                  4 3 
+10th        +4      Aura of Courage                              4 3 2 
+11th        +4      Improved Divine Smite                        4 3 2 
+12th        +4      Ability Score Improvement                    4 3 3 
+13th        +4                                                  4 3 3 
+14th        +5      Cleansing Touch                              4 3 3 1
+15th        +5      Sacred Oath feature                          4 3 3 1
+16th        +5      Ability Score Improvement                    4 3 3 2
+17th        +5                                                  4 3 3 2
+18th        +6      Aura improvements                            43 331
+19th        +6      Ability Score Improvement                    43 331
+20th        +6      Sacred Oath feature                          43 332
+            +6                                                   43 332
+
+Divine Sense                                                    Count Strahd von Zarovich, for instance). Within the
+                                                                same radius, you also detect the presence of any
+The presence of strong evil registers on your senses            place or object that has been consecrated or
+like a noxious odor, and powerful good rings like               desecrated, as with the hallow spell.
+heavenly music in your ears. As an action, you can
+open your awareness to detect such forces. Until the              You can use this feature a number of times equal
+end of your next turn, you know the location of any             to 1 + your Charisma modifier. When you finish a
+celestial, fiend, or undead within 60 feet of you that          long rest, you regain all expended uses.
+is not behind total cover. You know the type
+(celestial, fiend, or undead) of any being whose
+presence you sense, but not its identity (the vampire

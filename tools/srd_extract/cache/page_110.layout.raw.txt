@@ -1,0 +1,57 @@
+Hold Person             Hold Monster
+Invisibility            Insect Plague
+Knock                   Seeming
+Levitate                Telekinesis
+Mirror Image            Teleportation Circle
+Misty Step              Wall of Stone
+Scorching Ray
+See Invisibility        6th Level
+Shatter
+Spider Climb            Chain Lightning
+Suggestion              Circle of Death
+Web                     Disintegrate
+                        Eyebite
+3rd Level               Globe of Invulnerability
+                        Mass Suggestion
+Blink                   Move Earth
+Clairvoyance            Sunbeam
+Counterspell            True Seeing
+Daylight
+Dispel Magic            7th Level
+Fear
+Fireball                Delayed Blast Fireball
+Fly                     Etherealness
+Gaseous Form            Finger of Death
+Haste                   Fire Storm
+Hypnotic Pattern        Plane Shift
+Lightning Bolt          Prismatic Spray
+Major Image             Reverse Gravity
+Protection from Energy  Teleport
+Sleet Storm
+Slow                    8th Level
+Stinking Cloud
+Tongues                 Dominate Monster
+Water Breathing         Earthquake
+Water Walk              Incendiary Cloud
+                        Power Word Stun
+4th Level               Sunburst
+
+Banishment              9th Level
+Blight
+Confusion               Gate
+Dimension Door          Meteor Swarm
+Dominate Beast          Power Word Kill
+Greater Invisibility    Time Stop
+Ice Storm               Wish
+Polymorph
+Stoneskin               Warlock Spells
+Wall of Fire
+                        Cantrips (0 Level)
+5th Level
+                        Chill Touch
+Animate Objects         Eldritch Blast
+Cloudkill               Mage Hand
+Cone of Cold            Minor Illusion
+Creation                Poison Spray
+Dominate Person         Prestidigitation
+                        True Strike

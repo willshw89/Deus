@@ -1,0 +1,60 @@
+Stunning Strike                                           Empty Body
+
+Starting at 5th level, you can interfere with the flow    Beginning at 18th level, you can use your action to
+of ki in an opponent’s body. When you hit another         spend 4 ki points to become invisible for 1 minute.
+creature with a melee weapon attack, you can spend        During that time, you also have resistance to all
+1 ki point to attempt a stunning strike. The target       damage but force damage.
+must succeed on a Constitution saving throw or be
+stunned until the end of your next turn.                    Additionally, you can spend 8 ki points to cast the
+                                                          astral projection spell, without needing material
+Ki-Empowered Strikes                                      components. When you do so, you can’t take any
+                                                          other creatures with you.
+Starting at 6th level, your unarmed strikes count as
+magical for the purpose of overcoming resistance          Perfect Self
+and immunity to nonmagical attacks and damage.
+                                                          At 20th level, when you roll for initiative and have
+Evasion                                                   no ki points remaining, you regain 4 ki points.
+
+At 7th level, your instinctive agility lets you dodge     Monastic Traditions
+out of the way of certain area effects, such as a blue
+dragon’s lightning breath or a fireball spell. When       Three traditions of monastic pursuit are common in
+you are subjected to an effect that allows you to         the monasteries scattered across the multiverse.
+make a Dexterity saving throw to take only half           Most monasteries practice one tradition exclusively,
+damage, you instead take no damage if you succeed         but a few honor the three traditions and instruct
+on the saving throw, and only half damage if you fail.    each monk according to his or her aptitude and
+                                                          interest. All three traditions rely on the same basic
+Stillness of Mind                                         techniques, diverging as the student grows more
+                                                          adept. Thus, a monk need choose a tradition only
+Starting at 7th level, you can use your action to end     upon reaching 3rd level.
+one effect on yourself that is causing you to be
+charmed or frightened.                                    Way of the Open Hand
+
+Purity of Body                                            Monks of the Way of the Open Hand are the ultimate
+                                                          masters of martial arts combat, whether armed or
+At 10th level, your mastery of the ki flowing through     unarmed. They learn techniques to push and trip
+you makes you immune to disease and poison.               their opponents, manipulate ki to heal damage to
+                                                          their bodies, and practice advanced meditation that
+Tongue of the Sun and Moon                                can protect them from harm.
+
+Starting at 13th level, you learn to touch the ki of      Open Hand Technique
+other minds so that you understand all spoken
+languages. Moreover, any creature that can                Starting when you choose this tradition at 3rd level,
+understand a language can understand what you say.        you can manipulate your enemy’s ki when you
+                                                          harness your own. Whenever you hit a creature with
+Diamond Soul                                              one of the attacks granted by your Flurry of Blows,
+                                                          you can impose one of the following effects on that
+Beginning at 14th level, your mastery of ki grants        target:
+you proficiency in all saving throws.
+                                                          • It must succeed on a Dexterity saving throw or be
+  Additionally, whenever you make a saving throw            knocked prone.
+and fail, you can spend 1 ki point to reroll it and take
+the second result.                                        • It must make a Strength saving throw. If it fails,
+                                                            you can push it up to 15 feet away from you.
+Timeless Body
+                                                          • It can’t take reactions until the end of your next
+At 15th level, your ki sustains you so that you suffer      turn.
+none of the frailty of old age, and you can’t be aged
+magically. You can still die of old age, however. In      Wholeness of Body
+addition, you no longer need food or water.
+                                                          At 6th level, you gain the ability to heal yourself. As
+                                                          an action, you can regain hit points equal to three

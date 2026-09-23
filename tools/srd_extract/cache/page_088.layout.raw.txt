@@ -1,0 +1,61 @@
+Between Adventures                                       necessary to create it. For example, someone
+                                                         proficient with smith’s tools needs a forge in order
+Between trips to dungeons and battles against            to craft a sword or suit of armor.
+ancient evils, adventurers need time to rest,
+recuperate, and prepare for their next adventure.          For every day of downtime you spend crafting, you
+Many adventurers also use this time to perform           can craft one or more items with a total market
+other tasks, such as crafting arms and armor,            value not exceeding 5 gp, and you must expend raw
+performing research, or spending their hard-­‐‑earned    materials worth half the total market value. If
+gold.                                                    something you want to craft has a market value
+                                                         greater than 5 gp, you make progress every day in 5-­‐‑
+  In some cases, the passage of time is something        gp increments until you reach the market value of
+that occurs with little fanfare or description. When     the item. For example, a suit of plate armor (market
+starting a new adventure, the GM might simply            value 1,500 gp) takes 300 days to craft by yourself.
+declare that a certain amount of time has passed and
+allow you to describe in general terms what your           Multiple characters can combine their efforts
+character has been doing. At other times, the GM         toward the crafting of a single item, provided that
+might want to keep track of just how much time is        the characters all have proficiency with the requisite
+passing as events beyond your perception stay in         tools and are working together in the same place.
+motion.                                                  Each character contributes 5 gp worth of effort for
+                                                         every day spent helping to craft the item. For
+Lifestyle Expenses                                       example, three characters with the requisite tool
+                                                         proficiency and the proper facilities can craft a suit
+Between adventures, you choose a particular quality      of plate armor in 100 days, at a total cost of 750 gp.
+of life and pay the cost of maintaining that lifestyle.
+                                                           While crafting, you can maintain a modest lifestyle
+  Living a particular lifestyle doesn’t have a huge      without having to pay 1 gp per day, or a comfortable
+effect on your character, but your lifestyle can affect  lifestyle at half the normal cost.
+the way other individuals and groups react to you.
+For example, when you lead an aristocratic lifestyle,    Practicing a Profession
+it might be easier for you to influence the nobles of
+the city than if you live in poverty.                    You can work between adventures, allowing you to
+                                                         maintain a modest lifestyle without having to pay 1
+Downtime Activities                                      gp per day. This benefit lasts as long you continue to
+                                                         practice your profession.
+Between adventures, the GM might ask you what
+your character is doing during his or her downtime.        If you are a member of an organization that can
+Periods of downtime can vary in duration, but each       provide gainful employment, such as a temple or a
+downtime activity requires a certain number of days      thieves’ guild, you earn enough to support a
+to complete before you gain any benefit, and at least    comfortable lifestyle instead.
+8 hours of each day must be spent on the downtime
+activity for the day to count. The days do not need to     If you have proficiency in the Performance skill
+be consecutive. If you have more than the minimum        and put your performance skill to use during your
+amount of days to spend, you can keep doing the          downtime, you earn enough to support a wealthy
+same thing for a longer period of time, or switch to a   lifestyle instead.
+new downtime activity.
+                                                         Recuperating
+  Downtime activities other than the ones presented
+below are possible. If you want your character to        You can use downtime between adventures to
+spend his or her downtime performing an activity         recover from a debilitating injury, disease, or poison.
+not covered here, discuss it with your GM.
+                                                           After three days of downtime spent recuperating,
+Crafting                                                 you can make a DC 15 Constitution saving throw. On
+                                                         a successful save, you can choose one of the
+You can craft nonmagical objects, including              following results:
+adventuring equipment and works of art. You must
+be proficient with tools related to the object you are   • End one effect on you that prevents you from
+trying to create (typically artisan’s tools). You might    regaining hit points.
+also need access to special materials or locations
+                                                         • For the next 24 hours, gain advantage on saving
+                                                           throws against one disease or poison currently
+                                                           affecting you.

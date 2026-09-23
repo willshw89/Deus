@@ -1,0 +1,47 @@
+Commoner                                                acolytes, cultists often show signs of insanity in their
+                                                        beliefs and practices.
+Medium humanoid (any race), any alignment
+Armor Class 10                                          Cult Fanatic
+Hit Points 4 (1d8)
+Speed 30 ft.                                            Medium humanoid (any race), any non-­‐good alignment
+                                                        Armor Class 13 (leather armor)
+    STR DEX CON INT WIS CHA                             Hit Points 33 (6d8 + 6)
+  10 (+0) 10 (+0) 10 (+0) 10 (+0) 10 (+0) 10 (+0)       Speed 30 ft.
+
+Senses passive Perception 10                                STR DEX CON INT WIS CHA
+Languages any one language (usually Common)               11 (+0) 14 (+2) 12 (+1) 10 (+0) 13 (+1) 14 (+2)
+Challenge 0 (10 XP)
+                                                        Skills Deception +4, Persuasion +4, Religion +2
+Actions                                                 Senses passive Perception 11
+Club. Melee Weapon Attack: +2 to hit, reach 5 ft., one  Languages any one language (usually Common)
+target. Hit: 2 (1d4) bludgeoning damage.                Challenge 2 (450 XP)
+
+Commoners include peasants, serfs, slaves, servants,    Dark Devotion. The fanatic has advantage on saving
+pilgrims, merchants, artisans, and hermits.             throws against being charmed or frightened.
+                                                        Spellcasting. The fanatic is a 4th-­‐level spellcaster. Its
+Cultist                                                 spellcasting ability is Wisdom (spell save DC 11, +3 to
+                                                        hit with spell attacks). The fanatic has the following
+Medium humanoid (any race), any non-­‐good alignment    cleric spells prepared:
+Armor Class 12 (leather armor)                          Cantrips (at will): light, sacred flame, thaumaturgy
+Hit Points 9 (2d8)                                      1st level (4 slots): command, inflict wounds, shield of
+Speed 30 ft.
+                                                          faith
+    STR DEX CON INT WIS CHA                             2nd level (3 slots): hold person, spiritual weapon
+  11 (+0) 12 (+1) 10 (+0) 10 (+0) 11 (+0) 10 (+0)
+                                                        Actions
+Skills Deception +2, Religion +2                        Multiattack. The fanatic makes two melee attacks.
+Senses passive Perception 10                            Dagger. Melee or Ranged Weapon Attack: +4 to hit,
+Languages any one language (usually Common)             reach 5 ft. or range 20/60 ft., one creature. Hit: 4 (1d4
+Challenge 1/8 (25 XP)                                   + 2) piercing damage.
+
+Dark Devotion. The cultist has advantage on saving      Fanatics are often part of a cult’s leadership, using
+throws against being charmed or frightened.             their charisma and dogma to influence and prey on
+                                                        those of weak will. Most are interested in personal
+Actions                                                 power above all else.
+Scimitar. Melee Weapon Attack: +3 to hit, reach 5 ft.,
+one creature. Hit: 4 (1d6 + 1) slashing damage.         Druid
+
+Cultists swear allegiance to dark powers such as        Medium humanoid (any race), any alignment
+elemental princes, demon lords, or archdevils. Most     Armor Class 11 (16 with barkskin)
+conceal their loyalties to avoid being ostracized,      Hit Points 27 (5d8 + 5)
+imprisoned, or executed for their beliefs. Unlike evil  Speed 30 ft.

@@ -1,0 +1,62 @@
+  To create a golem, you must spend the time shown       Medallion of Thoughts
+on the table, working without interruption with the
+manual at hand and resting no more than 8 hours          Wondrous item, uncommon (requires attunement)
+per day. You must also pay the specified cost to
+purchase supplies.                                       The medallion has 3 charges. While wearing it, you
+                                                         can use an action and expend 1 charge to cast the
+  Once you finish creating the golem, the book is        detect thoughts spell (save DC 13) from it. The
+consumed in eldritch flames. The golem becomes           medallion regains 1d3 expended charges daily at
+animate when the ashes of the manual are sprinkled       dawn.
+on it. It is under your control, and it understands and
+obeys your spoken commands.                              Mirror of Life Trapping
+
+Manual of Quickness of Action                            Wondrous item, very rare
+
+Wondrous item, very rare                                 When this 4-­‐‑foot-­‐‑tall mirror is viewed indirectly, its
+                                                         surface shows faint images of creatures. The mirror
+This book contains coordination and balance              weighs 50 pounds, and it has AC 11, 10 hit points,
+exercises, and its words are charged with magic. If      and vulnerability to bludgeoning damage. It shatters
+you spend 48 hours over a period of 6 days or fewer      and is destroyed when reduced to 0 hit points.
+studying the book’s contents and practicing its
+guidelines, your Dexterity score increases by 2, as        If the mirror is hanging on a vertical surface and
+does your maximum for that score. The manual then        you are within 5 feet of it, you can use an action to
+loses its magic, but regains it in a century.            speak its command word and activate it. It remains
+                                                         activated until you use an action to speak the
+Marvelous Pigments                                       command word again.
+
+Wondrous item, very rare                                   Any creature other than you that sees its reflection
+                                                         in the activated mirror while within 30 feet of it
+Typically found in 1d4 pots inside a fine wooden box     must succeed on a DC 15 Charisma saving throw or
+with a brush (weighing 1 pound in total), these          be trapped, along with anything it is wearing or
+pigments allow you to create three-­‐‑dimensional        carrying, in one of the mirror’s twelve
+objects by painting them in two dimensions. The          extradimensional cells. This saving throw is made
+paint flows from the brush to form the desired           with advantage if the creature knows the mirror’s
+object as you concentrate on its image.                  nature, and constructs succeed on the saving throw
+                                                         automatically.
+   Each pot of paint is sufficient to cover 1,000
+square feet of a surface, which lets you create            An extradimensional cell is an infinite expanse
+inanimate objects or terrain features—such as a          filled with thick fog that reduces visibility to 10 feet.
+door, a pit, flowers, trees, cells, rooms, or weapons—   Creatures trapped in the mirror’s cells don’t age, and
+that are up to 10,000 cubic feet. It takes 10 minutes    they don’t need to eat, drink, or sleep. A creature
+to cover 100 square feet.                                trapped within a cell can escape using magic that
+                                                         permits planar travel. Otherwise, the creature is
+  When you complete the painting, the object or          confined to the cell until freed.
+terrain feature depicted becomes a real, nonmagical
+object. Thus, painting a door on a wall creates an          If the mirror traps a creature but its twelve
+actual door that can be opened to whatever is            extradimensional cells are already occupied, the
+beyond. Painting a pit on a floor creates a real pit,    mirror frees one trapped creature at random to
+and its depth counts against the total area of objects   accommodate the new prisoner. A freed creature
+you create.                                              appears in an unoccupied space within sight of the
+                                                         mirror but facing away from it. If the mirror is
+  Nothing created by the pigments can have a value       shattered, all creatures it contains are freed and
+greater than 25 gp. If you paint an object of greater    appear in unoccupied spaces near it.
+value (such as a diamond or a pile of gold), the object
+looks authentic, but close inspection reveals it is        While within 5 feet of the mirror, you can use an
+made from paste, bone, or some other worthless           action to speak the name of one creature trapped in
+material.                                                it or call out a particular cell by number. The
+                                                         creature named or contained in the named cell
+  If you paint a form of energy such as fire or          appears as an image on the mirror’s surface. You and
+lightning, the energy appears but dissipates as soon     the creature can then communicate normally.
+as you complete the painting, doing no harm to
+anything.                                                  In a similar way, you can use an action to speak a
+                                                         second command word and free one creature

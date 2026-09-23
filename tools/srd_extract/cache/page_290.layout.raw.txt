@@ -1,0 +1,51 @@
+Wing Attack (Costs 2 Actions). The dragon beats its         Hit Points 32 (5d8 + 10)
+  wings. Each creature within 10 feet of the dragon         Speed 30 ft., burrow 15 ft., fly 60 ft., swim 30 ft.
+  must succeed on a DC 19 Dexterity saving throw or
+  take 13 (2d6 + 6) bludgeoning damage and be                   STR DEX CON INT WIS CHA
+  knocked prone. The dragon can then fly up to half its       14 (+2) 10 (+0) 14 (+2) 5 (−3) 10 (+0) 11 (+0)
+  flying speed.
+                                                            Saving Throws Dex +2, Con +4, Wis +2, Cha +2
+Young White Dragon                                          Skills Perception +4, Stealth +2
+                                                            Damage Immunities cold
+Large dragon, chaotic evil                                  Senses blindsight 10 ft., darkvision 60 ft., passive
+
+Armor Class 17 (natural armor)                                Perception 14
+Hit Points 133 (14d10 + 56)                                 Languages Draconic
+Speed 40 ft., burrow 20 ft., fly 80 ft., swim 40 ft.        Challenge 2 (450 XP)
+
+    STR DEX CON INT WIS CHA                                 Actions
+  18 (+4) 10 (+0) 18 (+4) 6 (−2) 11 (+0) 12 (+1)            Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+                                                            target. Hit: 7 (1d10 + 2) piercing damage plus 2 (1d4)
+Saving Throws Dex +3, Con +7, Wis +3, Cha +4                cold damage.
+Skills Perception +6, Stealth +3                            Cold Breath (Recharge 5–6). The dragon exhales an icy
+Damage Immunities cold                                      blast of hail in a 15-­‐foot cone. Each creature in that
+Senses blindsight 30 ft., darkvision 120 ft., passive       area must make a DC 12 Constitution saving throw,
+                                                            taking 22 (5d8) cold damage on a failed save, or half as
+  Perception 16                                             much damage on a successful one.
+Languages Common, Draconic
+Challenge 6 (2,300 XP)                                      Dragons, Metallic
+
+Ice Walk. The dragon can move across and climb icy          Brass Dragon
+surfaces without needing to make an ability check.
+Additionally, difficult terrain composed of ice or snow     Ancient Brass Dragon
+doesn’t cost it extra moment.
+                                                            Gargantuan dragon, chaotic good
+Actions
+Multiattack. The dragon makes three attacks: one with       Armor Class 20 (natural armor)
+its bite and two with its claws.                            Hit Points 297 (17d20 + 119)
+Bite. Melee Weapon Attack: +7 to hit, reach 10 ft., one     Speed 40 ft., burrow 40 ft., fly 80 ft.
+target. Hit: 15 (2d10 + 4) piercing damage plus 4 (1d8)
+cold damage.                                                    STR DEX CON INT WIS CHA
+Claw. Melee Weapon Attack: +7 to hit, reach 5 ft., one        27 (+8) 10 (+0) 25 (+7) 16 (+3) 15 (+2) 19 (+4)
+target. Hit: 11 (2d6 + 4) slashing damage.
+Cold Breath (Recharge 5–6). The dragon exhales an icy       Saving Throws Dex +6, Con +13, Wis +8, Cha +10
+blast in a 30-­‐foot cone. Each creature in that area must  Skills History +9, Perception +14, Persuasion +10,
+make a DC 15 Constitution saving throw, taking 45
+(10d8) cold damage on a failed save, or half as much          Stealth +6
+damage on a successful one.                                 Damage Immunities fire
+                                                            Senses blindsight 60 ft., darkvision 120 ft., passive
+White Dragon Wyrmling
+                                                              Perception 24
+Medium dragon, chaotic evil                                 Languages Common, Draconic
+                                                            Challenge 20 (25,000 XP)
+Armor Class 16 (natural armor)

@@ -1,0 +1,16 @@
+[     3 ms] verify.js injected; url=http://127.0.0.1:56217/ node=true out=C:\Users\snewt\OneDrive\Desktop\UF\tools\srd_browser\evidence
+[   373 ms] PASS S0 catalogue loads in NW.js (status line, search enabled, results listed) -- 1,325 entries · 22 kinds; 1325 rows; window 1400x900 dpr 1
+[   437 ms] PASS S1 search 'fireball' shows Fireball first -- 21 results: Fireball, Delayed Blast Fireball, Necklace of Fireballs; 21 of 1,325 entries; Challenge and Spell level filters not drawn
+[   611 ms] PASS S2 category Creatures then kind creature narrows the list to 317 and the count label says so -- 317 rows; label "317 of 1,325 entries"; kind options creature
+[   714 ms] screenshot desktop_results_aboleth.png 1400x900 163044 bytes
+[   715 ms] PASS S3 open srd:creature:aboleth: stat block shows Armor Class 17, Hit Points 135, Actions and legendary actions -- Armor Class 17 (natural armor); Hit Points 135 (18d10 + 36); actions Multiattack,Tentacle,Tail,Enslave (3/Day); legendary Detect,Tail Swipe,Psychic Drain (Costs 2 Actions); hash #srd%3Acreature%3Aaboleth
+[  1039 ms] screenshot desktop_deck_table.png 1400x900 43729 bytes
+[  1183 ms] PASS S4 srd:magic-item:deck-of-many-things renders its table (Playing Card column, 22 rows); srd:spell:wish scrolls without clipping -- table Playing Card/Card x 22 rows; Wish description 2894 chars in 6 paragraphs, first at y=392, page scrollHeight 1974, scrolled to 0
+[  1247 ms] PASS S5 Copy Stable ID puts the id on the system clipboard (read back with nw.Clipboard) -- clipboard text = srd:spell:wish; status "Copied"
+[  1249 ms] clipboard restored (text,html)
+[  1462 ms] PASS S6 setting location.hash to #srd:spell:fireball switches the detail pane -- title Fireball; 3rd-level evocation; 1,325 of 1,325 entries; hash #srd%3Aspell%3Afireball
+[  1749 ms] screenshot narrow_900.png 900x900 134197 bytes
+[  1750 ms] PASS S7 at 900 px wide the layout has no horizontal overflow and the detail pane stays visible -- innerWidth 900 (from 1400); scrollWidth 883 <= clientWidth 883; sidebar 300 px, detail 551 px at x=316
+[  1750 ms] PASS S8 zero console errors, window errors, unhandled rejections and failed resource loads from page load to the end -- 12 resource entries (8 expected files all present), 0 console errors, 0 window errors, 0 rejections, 0 element load failures, 0 fetch failures
+[  1751 ms] PASS S9 three PNG screenshots written at device scale 1 -- desktop_results_aboleth.png 1400x900 163044 B; desktop_deck_table.png 1400x900 43729 B; narrow_900.png 900x900 134197 B
+[  1752 ms] results.json written; quitting

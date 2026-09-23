@@ -1,0 +1,59 @@
+Monsters                                                        have magical powers, but most are unintelligent and
+                                                                lack any society or language. Beasts include all
+A monster’s statistics, sometimes referred to as its            varieties of ordinary animals, dinosaurs, and giant
+stat block, provide the essential information that              versions of animals.
+you need to run the monster.
+                                                                  Celestials are creatures native to the Upper
+Size                                                            Planes. Many of them are the servants of deities,
+                                                                employed as messengers or agents in the mortal
+A monster can be Tiny, Small, Medium, Large, Huge,              realm and throughout the planes. Celestials are good
+or Gargantuan. The Size Categories table shows how              by nature, so the exceptional celestial who strays
+much space a creature of a particular size controls in          from a good alignment is a horrifying rarity.
+combat. See the Player’s Handbook for more                      Celestials include angels, couatls, and pegasi.
+information on creature size and space.
+                                                                  Constructs are made, not born. Some are
+Size Categories                                                 programmed by their creators to follow a simple set
+                                                                of instructions, while others are imbued with
+Size        Space                   Examples                    sentience and capable of independent thought.
+Tiny        2½ by 2½ ft.            Imp, sprite                 Golems are the iconic constructs. Many creatures
+Small       5 by 5 ft.              Giant rat, goblin           native to the outer plane of Mechanus, such as
+Medium      5 by 5 ft.              Orc, werewolf               modrons, are constructs shaped from the raw
+Large       10 by 10 ft.            Hippogriff, ogre            material of the plane by the will of more powerful
+Huge        15 by 15 ft.            Fire giant, treant          creatures.
+Gargantuan  20 by 20 ft. or larger  Kraken, purple worm
+                                                                  Dragons are large reptilian creatures of ancient
+Modifying Creatures                                             origin and tremendous power. True dragons,
+                                                                including the good metallic dragons and the evil
+Despite the versatile collection of monsters in this book, you  chromatic dragons, are highly intelligent and have
+might be at a loss when it comes to finding the perfect         innate magic. Also in this category are creatures
+creature for part of an adventure. Feel free to tweak an        distantly related to true dragons, but less powerful,
+existing creature to make it into something more useful for     less intelligent, and less magical, such as wyverns
+you, perhaps by borrowing a trait or two from a different       and pseudodragons.
+monster or by using a variant or template, such as the ones
+in this book. Keep in mind that modifying a monster,              Elementals are creatures native to the elemental
+including when you apply a template to it, might change its     planes. Some creatures of this type are little more
+challenge rating.                                               than animate masses of their respective elements,
+                                                                including the creatures simply called elementals.
+Type                                                            Others have biological forms infused with elemental
+                                                                energy. The races of genies, including djinn and
+A monster’s type speaks to its fundamental nature.              efreet, form the most important civilizations on the
+Certain spells, magic items, class features, and other          elemental planes. Other elemental creatures include
+effects in the game interact in special ways with               azers and invisible stalkers.
+creatures of a particular type. For example, an arrow
+of dragon slaying deals extra damage not only to                  Fey are magical creatures closely tied to the forces
+dragons but also other creatures of the dragon type,            of nature. They dwell in twilight groves and misty
+such as dragon turtles and wyverns.                             forests. In some worlds, they are closely tied to the
+                                                                Feywild, also called the Plane of Faerie. Some are
+  The game includes the following monster types,                also found in the Outer Planes, particularly the
+which have no rules of their own.                               planes of Arborea and the Beastlands. Fey include
+                                                                dryads, pixies, and satyrs.
+  Aberrations are utterly alien beings. Many of
+them have innate magical abilities drawn from the                 Fiends are creatures of wickedness that are native
+creature’s alien mind rather than the mystical forces           to the Lower Planes. A few are the servants of deities,
+of the world. The quintessential aberrations are                but many more labor under the leadership of
+aboleths, beholders, mind flayers, and slaadi.                  archdevils and demon princes. Evil priests and
+                                                                mages sometimes summon fiends to the material
+  Beasts are nonhumanoid creatures that are a                   world to do their bidding. If an evil celestial is a
+natural part of the fantasy ecology. Some of them               rarity, a good fiend is almost inconceivable. Fiends
+                                                                include demons, devils, hell hounds, rakshasas, and
+                                                                yugoloths.

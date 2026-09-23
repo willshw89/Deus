@@ -1,0 +1,59 @@
+Duration: Instantaneous                                    Poison Spray
+
+You and up to eight willing creatures who link hands       Conjuration cantrip
+in a circle are transported to a different plane of
+existence. You can specify a target destination in         Casting Time: 1 action
+general terms, such as the City of Brass on the            Range: 10 feet
+Elemental Plane of Fire or the palace of Dispater on       Components: V, S
+the second level of the Nine Hells, and you appear in      Duration: Instantaneous
+or near that destination. If you are trying to reach       You extend your hand toward a creature you can see
+the City of Brass, for example, you might arrive in its    within range and project a puff of noxious gas from
+Street of Steel, before its Gate of Ashes, or looking at   your palm. The creature must succeed on a
+the city from across the Sea of Fire, at the GM’s          Constitution saving throw or take 1d12 poison
+discretion.                                                damage.
+
+  Alternatively, if you know the sigil sequence of a         This spell's damage increases by 1d12 when you
+teleportation circle on another plane of existence,        reach 5th level (2d12), 11th level (3d12), and 17th
+this spell can take you to that circle. If the             level (4d12).
+teleportation circle is too small to hold all the
+creatures you transported, they appear in the closest      Polymorph
+unoccupied spaces next to the circle.
+                                                           4th-­‐‑level transmutation
+  You can use this spell to banish an unwilling
+creature to another plane. Choose a creature within        Casting Time: 1 action
+your reach and make a melee spell attack against it.       Range: 60 feet
+On a hit, the creature must make a Charisma saving         Components: V, S, M (a caterpillar cocoon)
+throw. If the creature fails this save, it is transported  Duration: Concentration, up to 1 hour
+to a random location on the plane of existence you
+specify. A creature so transported must find its own       This spell transforms a creature that you can see within
+way back to your current plane of existence.               range into a new form. An unwilling creature must
+                                                           make a Wisdom saving throw to avoid the effect. The
+Plant Growth                                               spell has no effect on a shapechanger or a creature
+                                                           with 0 hit points.
+3rd-­‐‑level transmutation
+                                                             The transformation lasts for the duration, or until
+Casting Time: 1 action or 8 hours                          the target drops to 0 hit points or dies. The new form
+Range: 150 feet                                            can be any beast whose challenge rating is equal to
+Components: V, S                                           or less than the target’s (or the target’s level, if it
+Duration: Instantaneous                                    doesn’t have a challenge rating). The target’s game
+                                                           statistics, including mental ability scores, are
+This spell channels vitality into plants within a          replaced by the statistics of the chosen beast. It
+specific area. There are two possible uses for the         retains its alignment and personality.
+spell, granting either immediate or long-­‐‑term
+benefits.                                                    The target assumes the hit points of its new form.
+                                                           When it reverts to its normal form, the creature
+  If you cast this spell using 1 action, choose a point    returns to the number of hit points it had before it
+within range. All normal plants in a 100-­‐‑foot radius    transformed. If it reverts as a result of dropping to 0
+centered on that point become thick and overgrown.         hit points, any excess damage carries over to its
+A creature moving through the area must spend 4            normal form. As long as the excess damage doesn’t
+feet of movement for every 1 foot it moves.                reduce the creature’s normal form to 0 hit points, it
+                                                           isn’t knocked unconscious.
+  You can exclude one or more areas of any size
+within the spell’s area from being affected.                 The creature is limited in the actions it can
+                                                           perform by the nature of its new form, and it can’t
+  If you cast this spell over 8 hours, you enrich the      speak, cast spells, or take any other action that
+land. All plants in a half-­‐‑mile radius centered on a    requires hands or speech.
+point within range become enriched for 1 year. The
+plants yield twice the normal amount of food when            The target’s gear melds into the new form. The
+harvested.                                                 creature can’t activate, use, wield, or otherwise
+                                                           benefit from any of its equipment.

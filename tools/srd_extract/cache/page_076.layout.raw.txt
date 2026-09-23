@@ -1,0 +1,68 @@
+Using Ability                                             12–13  +1
+
+Scores                                                    14–15  +2
+
+Six abilities provide a quick description of every        16–17  +3
+creature’s physical and mental characteristics:
+                                                          18–19  +4
+• Strength, measuring physical power
+• Dexterity, measuring agility                            20–21  +5
+• Constitution, measuring endurance
+• Intelligence, measuring reasoning and memory            22–23  +6
+• Wisdom, measuring perception and insight
+• Charisma, measuring force of personality                24–25  +7
+
+Is a character muscle-­‐‑bound and insightful? Brilliant  26–27  +8
+and charming? Nimble and hardy? Ability scores
+define these qualities—a creature’s assets as well as     28–29  +9
+weaknesses.
+                                                          30     +10
+  The three main rolls of the game—the ability
+check, the saving throw, and the attack roll—rely on        To determine an ability modifier without
+the six ability scores. The book’s introduction           consulting the table, subtract 10 from the ability
+describes the basic rule behind these rolls: roll a d20,  score and then divide the total by 2 (round down).
+add an ability modifier derived from one of the six
+ability scores, and compare the total to a target           Because ability modifiers affect almost every
+number.                                                   attack roll, ability check, and saving throw, ability
+                                                          modifiers come up in play more often than their
+                                                          associated scores.
+
+Ability Scores and Modifiers                              Advantage and
+
+Each of a creature’s abilities has a score, a number      Disadvantage
+that defines the magnitude of that ability. An ability
+score is not just a measure of innate capabilities, but   Sometimes a special ability or spell tells you that you
+also encompasses a creature’s training and                have advantage or disadvantage on an ability check,
+competence in activities related to that ability.         a saving throw, or an attack roll. When that happens,
+                                                          you roll a second d20 when you make the roll. Use
+  A score of 10 or 11 is the normal human average,        the higher of the two rolls if you have advantage, and
+but adventurers and many monsters are a cut above         use the lower roll if you have disadvantage. For
+average in most abilities. A score of 18 is the highest   example, if you have disadvantage and roll a 17 and
+that a person usually reaches. Adventurers can have       a 5, you use the 5. If you instead have advantage and
+scores as high as 20, and monsters and divine beings      roll those numbers, you use the 17.
+can have scores as high as 30.
+                                                            If multiple situations affect a roll and each one
+  Each ability also has a modifier, derived from the      grants advantage or imposes disadvantage on it, you
+score and ranging from −5 (for an ability score of 1)     don’t roll more than one additional d20. If two
+to +10 (for a score of 30). The Ability Scores and        favorable situations grant advantage, for example,
+Modifiers table notes the ability modifiers for the       you still roll only one additional d20.
+range of possible ability scores, from 1 to 30.
+                                                            If circumstances cause a roll to have both
+Ability Scores and Modifiers                              advantage and disadvantage, you are considered to
+                                                          have neither of them, and you roll one d20. This is
+Score  Modifier                                           true even if multiple circumstances impose
+   1       −5                                             disadvantage and only one grants advantage or vice
+           −4                                             versa. In such a situation, you have neither
+ 2–3       −3                                             advantage nor disadvantage.
+ 4–5       −2
+ 6–7       −1                                               When you have advantage or disadvantage and
+ 8–9       +0                                             something in the game, such as the halfling’s Lucky
+10–11                                                     trait, lets you reroll the d20, you can reroll only one
+                                                          of the dice. You choose which one. For example, if a
+                                                          halfling has advantage or disadvantage on an ability
+                                                          check and rolls a 1 and a 13, the halfling could use
+                                                          the Lucky trait to reroll the 1.
+
+                                                            You usually gain advantage or disadvantage
+                                                          through the use of special abilities, actions, or spells.
+                                                          Inspiration can also give a character advantage. The

@@ -1,0 +1,71 @@
+one of those creatures. You don’t need to                 Spell or Item      Charges Lost
+concentrate on this suggestion to maintain it during      Disintegrate      1d12
+its duration, but it ends if scrying ends. Once used,     Horn of blasting  1d10
+the suggestion power of the crystal ball can’t be used    Passwall          1d6
+again until the next dawn.                                Prismatic spray   1d20
+                                                          Wall of fire      1d4
+  Crystal Ball of True Seeing. While scrying with
+the crystal ball, you have truesight with a radius of     Cubic Gate
+120 feet centered on the spell’s sensor.
+                                                          Wondrous item, legendary
+Cube of Force
+                                                          This cube is 3 inches across and radiates palpable
+Wondrous item, rare (requires attunement)                 magical energy. The six sides of the cube are each
+                                                          keyed to a different plane of existence, one of which
+This cube is about an inch across. Each face has a        is the Material Plane. The other sides are linked to
+distinct marking on it that can be pressed. The cube      planes determined by the GM.
+starts with 36 charges, and it regains 1d20 expended
+charges daily at dawn.                                      You can use an action to press one side of the cube
+                                                          to cast the gate spell with it, opening a portal to the
+  You can use an action to press one of the cube’s        plane keyed to that side. Alternatively, if you use an
+faces, expending a number of charges based on the         action to press one side twice, you can cast the plane
+chosen face, as shown in the Cube of Force Faces          shift spell (save DC 17) with the cube and transport
+table. Each face has a different effect. If the cube has  the targets to the plane keyed to that side.
+insufficient charges remaining, nothing happens.
+Otherwise, a barrier of invisible force springs into        The cube has 3 charges. Each use of the cube
+existence, forming a cube 15 feet on a side. The          expends 1 charge. The cube regains 1d3 expended
+barrier is centered on you, moves with you, and lasts     charges daily at dawn.
+for 1 minute, until you use an action to press the
+cube’s sixth face, or the cube runs out of charges.       Dagger of Venom
+You can change the barrier’s effect by pressing a
+different face of the cube and expending the              Weapon (dagger), rare
+requisite number of charges, resetting the duration.
+                                                          You gain a +1 bonus to attack and damage rolls
+  If your movement causes the barrier to come into        made with this magic weapon.
+contact with a solid object that can’t pass through
+the cube, you can’t move any closer to that object as       You can use an action to cause thick, black poison
+long as the barrier remains.                              to coat the blade. The poison remains for 1 minute
+                                                          or until an attack using this weapon hits a creature.
+Cube of Force Faces                                       That creature must succeed on a DC 15 Constitution
+                                                          saving throw or take 2d10 poison damage and
+Face Charges Effect                                       become poisoned for 1 minute. The dagger can’t be
+                                                          used this way again until the next dawn.
+
+1  1  Gases, wind, and fog can’t pass through
+
+      the barrier.                                        Dancing Sword
+
+2  2  Nonliving matter can’t pass through the             Weapon (any sword), very rare (requires attunement)
+
+      barrier. Walls, floors, and ceilings can pass       You can use a bonus action to toss this magic sword
+                                                          into the air and speak the command word. When you
+      through at your discretion.                         do so, the sword begins to hover, flies up to 30 feet,
+                                                          and attacks one creature of your choice within 5 feet
+3  3  Living matter can’t pass through the                of it. The sword uses your attack roll and ability
+                                                          score modifier to damage rolls.
+      barrier.
+                                                            While the sword hovers, you can use a bonus
+4  4  Spell effects can’t pass through the barrier.       action to cause it to fly up to 30 feet to another spot
+                                                          within 30 feet of you. As part of the same bonus
+5  5  Nothing can pass through the barrier.               action, you can cause the sword to attack one
+                                                          creature within 5 feet of it.
+      Walls, floors, and ceilings can pass through
+                                                            After the hovering sword attacks for the fourth
+      at your discretion.                                 time, it flies up to 30 feet and tries to return to your
+                                                          hand. If you have no hand free, it falls to the ground
+6  0  The barrier deactivates.
+
+  The cube loses charges when the barrier is
+targeted by certain spells or comes into contact with
+certain spell or magic item effects, as shown in the
+table below.

@@ -1,0 +1,58 @@
+  make one unarmed strike as a bonus action. For       Unarmored Movement
+  example, if you take the Attack action and attack
+  with a quarterstaff, you can also make an unarmed    Starting at 2nd level, your speed increases by 10 feet
+  strike as a bonus action, assuming you haven’t       while you are not wearing armor or wielding a
+  already taken a bonus action this turn.              shield. This bonus increases when you reach certain
+                                                       monk levels, as shown in the Monk table.
+  Certain monasteries use specialized forms of the
+monk weapons. For example, you might use a club          At 9th level, you gain the ability to move along
+that is two lengths of wood connected by a short       vertical surfaces and across liquids on your turn
+chain (called a nunchaku) or a sickle with a shorter,  without falling during the move.
+straighter blade (called a kama). Whatever name you
+use for a monk weapon, you can use the game            Monastic Tradition
+statistics provided for the weapon.
+                                                       When you reach 3rd level, you commit yourself to a
+Ki                                                     monastic tradition, such as the Way of the Open
+                                                       Hand. Your tradition grants you features at 3rd level
+Starting at 2nd level, your training allows you to     and again at 6th, 11th, and 17th level.
+harness the mystic energy of ki. Your access to this
+energy is represented by a number of ki points. Your   Deflect Missiles
+monk level determines the number of points you
+have, as shown in the Ki Points column of the Monk     Starting at 3rd level, you can use your reaction to
+table.                                                 deflect or catch the missile when you are hit by a
+                                                       ranged weapon attack. When you do so, the damage
+  You can spend these points to fuel various ki        you take from the attack is reduced by 1d10 + your
+features. You start knowing three such features:       Dexterity modifier + your monk level.
+Flurry of Blows, Patient Defense, and Step of the
+Wind. You learn more ki features as you gain levels      If you reduce the damage to 0, you can catch the
+in this class.                                         missile if it is small enough for you to hold in one
+                                                       hand and you have at least one hand free. If you
+  When you spend a ki point, it is unavailable until   catch a missile in this way, you can spend 1 ki point
+you finish a short or long rest, at the end of which   to make a ranged attack with the weapon or piece of
+you draw all of your expended ki back into yourself.   ammunition you just caught, as part of the same
+You must spend at least 30 minutes of the rest         reaction. You make this attack with proficiency,
+meditating to regain your ki points.                   regardless of your weapon proficiencies, and the
+                                                       missile counts as a monk weapon for the attack,
+  Some of your ki features require your target to      which has a normal range of 20 feet and a long range
+make a saving throw to resist the feature’s effects.   of 60 feet.
+The saving throw DC is calculated as follows:
+                                                       Ability Score Improvement
+       Ki save DC = 8 + your proficiency bonus +
+                   your Wisdom modifier                When you reach 4th level, and again at 8th, 12th,
+                                                       16th, and 19th level, you can increase one ability
+Flurry of Blows                                        score of your choice by 2, or you can increase two
+                                                       ability scores of your choice by 1. As normal, you
+Immediately after you take the Attack action on your   can’t increase an ability score above 20 using this
+turn, you can spend 1 ki point to make two unarmed     feature.
+strikes as a bonus action.
+                                                       Slow Fall
+Patient Defense
+                                                       Beginning at 4th level, you can use your reaction
+You can spend 1 ki point to take the Dodge action as   when you fall to reduce any falling damage you take
+a bonus action on your turn.                           by an amount equal to five times your monk level.
+
+Step of the Wind                                       Extra Attack
+
+You can spend 1 ki point to take the Disengage or      Beginning at 5th level, you can attack twice, instead
+Dash action as a bonus action on your turn, and your   of once, whenever you take the Attack action on your
+jump distance is doubled for the turn.                 turn.

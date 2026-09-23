@@ -1,0 +1,50 @@
+Languages —                                                 Tentacles. Melee Weapon Attack: +4 to hit, reach 5 ft.,
+Challenge 5 (1,800 XP)                                      one target. Hit: 9 (2d6 + 2) slashing damage.
+                                                            Beak. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Trampling Charge. If the gorgon moves at least 20 feet      target. Hit: 5 (1d6 + 2) piercing damage.
+straight toward a creature and then hits it with a gore
+attack on the same turn, that target must succeed on a      Griffon
+DC 16 Strength saving throw or be knocked prone. If
+the target is prone, the gorgon can make one attack         Large monstrosity, unaligned
+with its hooves against it as a bonus action.               Armor Class 12
+                                                            Hit Points 59 (7d10 + 21)
+Actions                                                     Speed 30 ft., fly 80 ft.
+Gore. Melee Weapon Attack: +8 to hit, reach 5 ft., one
+target. Hit: 18 (2d12 + 5) piercing damage.                     STR DEX CON INT WIS CHA
+Hooves. Melee Weapon Attack: +8 to hit, reach 5 ft.,          18 (+4) 15 (+2) 16 (+3) 2 (−4) 13 (+1) 8 (−1)
+one target. Hit: 16 (2d10 + 5) bludgeoning damage.
+Petrifying Breath (Recharge 5–6). The gorgon exhales        Skills Perception +5
+petrifying gas in a 30-­‐foot cone. Each creature in that   Senses darkvision 60 ft., passive Perception 15
+area must succeed on a DC 13 Constitution saving            Languages —
+throw. On a failed save, a target begins to turn to stone   Challenge 2 (450 XP)
+and is restrained. The restrained target must repeat
+the saving throw at the end of its next turn. On a          Keen Sight. The griffon has advantage on Wisdom
+success, the effect ends on the target. On a failure, the   (Perception) checks that rely on sight.
+target is petrified until freed by the greater restoration
+spell or other magic.                                       Actions
+
+Grick                                                       Multiattack. The griffon makes two attacks: one with
+                                                            its beak and one with its claws.
+Medium monstrosity, neutral                                 Beak. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+                                                            target. Hit: 8 (1d8 + 4) piercing damage.
+Armor Class 14 (natural armor)                              Claws. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+Hit Points 27 (6d8)                                         target. Hit: 11 (2d6 + 4) slashing damage.
+Speed 30 ft., climb 30 ft.
+                                                            Grimlock
+    STR DEX CON INT WIS CHA
+  14 (+2) 14 (+2) 11 (+0) 3 (−4) 14 (+2) 5 (−3)             Medium humanoid (grimlock), neutral evil
+
+Damage Resistances bludgeoning, piercing, and               Armor Class 11
+  slashing from nonmagical attacks                          Hit Points 11 (2d8 + 2)
+                                                            Speed 30 ft.
+Senses darkvision 60 ft., passive Perception 12
+Languages —                                                   STR DEX CON INT                WIS      CHA
+Challenge 2 (450 XP)                                        16 (+3) 12 (+1) 12 (+1) 9 (−1)  8 (−1)    6 (−2)
+
+Stone Camouflage. The grick has advantage on                Skills Athletics +5, Perception +3, Stealth +3
+Dexterity (Stealth) checks made to hide in rocky terrain.   Condition Immunities blinded
+                                                            Senses blindsight 30 ft. or 10 ft. while deafened (blind
+Actions
+Multiattack. The grick makes one attack with its              beyond this radius), passive Perception 13
+tentacles. If that attack hits, the grick can make one      Languages Undercommon
+beak attack against the same target.                        Challenge 1/4 (50 XP)

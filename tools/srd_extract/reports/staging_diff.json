@@ -1,0 +1,3230 @@
+{
+ "ref": "e70783e",
+ "generatedAt": "2026-09-23T02:19:16.291Z",
+ "files": {
+  "staging_character_options.json": {
+   "added": [],
+   "removed": [],
+   "changed": [
+    {
+     "id": "srd:subclass:path-of-the-berserker",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:college-of-lore",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:life-domain",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:circle-of-the-land",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:champion",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:way-of-the-open-hand",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:oath-of-devotion",
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "missing: level of feature \"Oath Spells\" (no level sentence)"
+      ],
+      "new": []
+     },
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:hunter",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:thief",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:draconic-bloodline",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:the-fiend",
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "missing: level of feature \"Expanded Spell List\" (no level sentence)"
+      ],
+      "new": []
+     },
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    },
+    {
+     "id": "srd:subclass:school-of-evocation",
+     "data": [
+      "features",
+      "gainedAtLevel",
+      "gainedByFeature"
+     ]
+    }
+   ],
+   "unchanged": 35
+  },
+  "staging_equipment.json": {
+   "added": [],
+   "removed": [],
+   "changed": [
+    {
+     "id": "srd:armor:shield",
+     "pages": {
+      "old": [
+       62,
+       64
+      ],
+      "new": [
+       63,
+       64
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:ball-bearings-bag-of-1-000",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:block-and-tackle",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:book",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:caltrops-bag-of-20",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:candle",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:case-crossbow-bolt",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:case-map-or-scroll",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:chain-10-feet",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:climbers-kit",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:component-pouch",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:crowbar",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:fishing-tackle",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:healers-kit",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:holy-water-flask",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:hunting-trap",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       67,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:lamp",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:lantern-bullseye",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:lantern-hooded",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:lock",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:magnifying-glass",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:manacles",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:mess-kit",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:oil-flask",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:poison-basic-vial",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:potion-of-healing",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:pouch",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:quiver",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:ram-portable",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:rations-1-day",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:rope-hempen-50-feet",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:rope-silk-50-feet",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:scale-merchants",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:spellbook",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:spyglass",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:tent-two-person",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:tinderbox",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:gear:torch",
+     "pages": {
+      "old": [
+       66,
+       69
+      ],
+      "new": [
+       68,
+       69
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:disguise-kit",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:forgery-kit",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:herbalism-kit",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:navigators-tools",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:poisoners-kit",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:thieves-tools",
+     "pages": {
+      "old": [
+       70
+      ],
+      "new": [
+       70,
+       71
+      ]
+     }
+    },
+    {
+     "id": "srd:tool:vehicles-land-or-water",
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "cost is not a coin amount as printed: *",
+       "weight is not a pound figure as printed: *",
+       "missing required field(s): cost, weight",
+       "cost and weight are printed as * (see the Mounts and Vehicles section)"
+      ],
+      "new": [
+       "cost \"*\" and weight \"*\" are printed as symbols; the basis text is carried in data (the Tools table footnote)"
+      ]
+     },
+     "data": [
+      "cost",
+      "weight"
+     ]
+    },
+    {
+     "id": "srd:vehicle:barding",
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "cost is not a coin amount as printed: ×4",
+       "weight is not a pound figure as printed: ×2",
+       "missing required field(s): cost, weight"
+      ],
+      "new": [
+       "cost \"×4\" and weight \"×2\" are printed as symbols; the basis text is carried in data (the Barding paragraph)"
+      ]
+     },
+     "data": [
+      "cost",
+      "weight"
+     ]
+    },
+    {
+     "id": "srd:rule:equipment-armor",
+     "pages": {
+      "old": [
+       62,
+       63
+      ],
+      "new": [
+       62,
+       63,
+       64
+      ]
+     }
+    },
+    {
+     "id": "srd:rule:equipment-weapons",
+     "pages": {
+      "old": [
+       64,
+       65
+      ],
+      "new": [
+       64,
+       65,
+       66
+      ]
+     }
+    },
+    {
+     "id": "srd:rule:equipment-adventuring-gear",
+     "pages": {
+      "old": [
+       66,
+       67,
+       68,
+       69
+      ],
+      "new": [
+       66,
+       67,
+       68,
+       69,
+       70
+      ]
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:rule:equipment-tools",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:rule:equipment-food-drink-and-lodging",
+     "text": {
+      "oldLength": 729,
+      "newLength": 605
+     },
+     "pages": {
+      "old": [
+       73
+      ],
+      "new": [
+       73,
+       74
+      ]
+     }
+    },
+    {
+     "id": "srd:rule:equipment-services",
+     "text": {
+      "oldLength": 2125,
+      "newLength": 1967
+     }
+    }
+   ],
+   "unchanged": 198
+  },
+  "staging_magic_items.json": {
+   "added": [],
+   "removed": [],
+   "changed": [
+    {
+     "id": "srd:magic-item:apparatus-of-the-crab",
+     "text": {
+      "oldLength": 2794,
+      "newLength": 2778
+     },
+     "notes": {
+      "old": [
+       "table Apparatus of the Crab Levers on page 208: rows not recoverable from the layout (table interrupted by an unindented line that is neither a row nor a continuation)",
+       "missing required field(s): tables"
+      ],
+      "new": [
+       "table Apparatus of the Crab Levers on page 208: rows not recoverable from the layout (two cells printed with a single space between them: allowing the apparatus reducing the apparatus’s)",
+       "missing required field(s): tables"
+      ]
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:armor-of-resistance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:bag-of-beans",
+     "notes": {
+      "old": [
+       "table d100/Effect on page 209: rows not recoverable from the layout (continuation line starts with a capital: A treant sprouts. There’s a 50 percent c)",
+       "missing required field(s): tables"
+      ],
+      "new": [
+       "table d100/Effect on page 209: rows not recoverable from the layout (column cell counts differ (d100 12; Effect 15))",
+       "missing required field(s): tables"
+      ]
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:bag-of-tricks",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:belt-of-dwarvenkind",
+     "text": {
+      "oldLength": 757,
+      "newLength": 753
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:belt-of-giant-strength",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:candle-of-invocation",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:carpet-of-flying",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:cloak-of-arachnida",
+     "text": {
+      "oldLength": 723,
+      "newLength": 719
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:cube-of-force",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:deck-of-illusions",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:deck-of-many-things",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:dragon-scale-mail",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:efreeti-bottle",
+     "text": {
+      "oldLength": 1040,
+      "newLength": 1043
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d100/Effect on page 220: rows not recoverable from the layout (continuation line starts with a capital: The efreeti serves you for 1 hour, doing)",
+       "missing required field(s): tables"
+      ],
+      "new": []
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:elemental-gem",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:feather-token",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:figurine-of-wondrous-power",
+     "text": {
+      "oldLength": 5329,
+      "newLength": 5305
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:gem-of-brightness",
+     "text": {
+      "oldLength": 1178,
+      "newLength": 1161
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:helm-of-brilliance",
+     "text": {
+      "oldLength": 1864,
+      "newLength": 1843
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:horn-of-valhalla",
+     "text": {
+      "oldLength": 1164,
+      "newLength": 1110
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d100/Horn Type/Berserkers Summoned/Requirement on page 226: rows not recoverable from the layout (continuation line starts with a capital: Bronze              Proficiency with all)",
+       "missing required field(s): tables"
+      ],
+      "new": []
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:iron-flask",
+     "text": {
+      "oldLength": 1703,
+      "newLength": 1718
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d100/Contents on page 228: rows not recoverable from the layout (continuation line starts with a capital: Demon (type 5))",
+       "missing required field(s): tables"
+      ],
+      "new": [
+       "the d100 ranges of the Iron Flask table come out of pdftotext as '1r50', '51r54', ... (the page's en dash mapped to the letter r); the cache normalises them to en dashes (lib rule iron_flask_dash) and the stager reads them as ranges"
+      ]
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:manual-of-golems",
+     "text": {
+      "oldLength": 1004,
+      "newLength": 996
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d20/Golem/Time/Cost on page 229: rows not recoverable from the layout (continuation line starts with a capital: To create a golem, you must spend the ti)",
+       "missing required field(s): tables"
+      ],
+      "new": []
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:necklace-of-prayer-beads",
+     "text": {
+      "oldLength": 1043,
+      "newLength": 1033
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d20/Bead of …/Spell on page 231: rows not recoverable from the layout (continuation line starts with a capital: Summons    Planar ally)",
+       "missing required field(s): tables"
+      ],
+      "new": []
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:potion-of-giant-strength",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:potion-of-healing",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:potion-of-resistance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:ring-of-elemental-command",
+     "text": {
+      "oldLength": 3204,
+      "newLength": 3196
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:ring-of-resistance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:ring-of-shooting-stars",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:robe-of-eyes",
+     "text": {
+      "oldLength": 880,
+      "newLength": 879
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:robe-of-the-archmagi",
+     "text": {
+      "oldLength": 729,
+      "newLength": 726
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:robe-of-useful-items",
+     "text": {
+      "oldLength": 1376,
+      "newLength": 1385
+     },
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     },
+     "notes": {
+      "old": [
+       "table d100/Patch on page 239: rows not recoverable from the layout (continuation line starts with a capital: Wooden ladder (24 feet long))",
+       "missing required field(s): tables"
+      ],
+      "new": []
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:scarab-of-protection",
+     "text": {
+      "oldLength": 635,
+      "newLength": 629
+     },
+     "data": [
+      "description"
+     ]
+    },
+    {
+     "id": "srd:magic-item:spell-scroll",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:sphere-of-annihilation",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:staff-of-power",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:staff-of-the-magi",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:magic-item:wand-of-wonder",
+     "notes": {
+      "old": [
+       "table d100/Effect on page 249: rows not recoverable from the layout (continuation line starts with a capital: You cast detect thoughts on the target y)",
+       "missing required field(s): tables"
+      ],
+      "new": [
+       "table d100/Effect on page 250: rows not recoverable from the layout (column cell counts differ (d100 22; Effect 26))",
+       "missing required field(s): tables"
+      ]
+     },
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:rule:magic-items-conflict",
+     "text": {
+      "oldLength": 1409,
+      "newLength": 1406
+     }
+    },
+    {
+     "id": "srd:rule:magic-items-artifacts",
+     "readiness": {
+      "old": "extracted",
+      "new": "parsed"
+     }
+    }
+   ],
+   "unchanged": 220
+  },
+  "staging_monsters.json": {
+   "added": [],
+   "removed": [],
+   "changed": [
+    {
+     "id": "srd:creature:half-red-dragon-veteran",
+     "notes": {
+      "old": [],
+      "new": [
+       "family table 2 (pages 321): column 3: cell \"Optional Prerequisite\" reassembled from two printed lines; the wrap is geometrically ambiguous with \"Prerequisite Challenge 2 or higher\" and was resolved because the phrase occurs in the page text"
+      ]
+     },
+     "data": [
+      "family"
+     ]
+    }
+   ],
+   "unchanged": 316
+  },
+  "staging_rules.json": {
+   "added": [],
+   "removed": [],
+   "changed": [],
+   "unchanged": 124
+  },
+  "staging_spells.json": {
+   "added": [],
+   "removed": [],
+   "changed": [
+    {
+     "id": "srd:spell:acid-arrow",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:acid-splash",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:aid",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:alarm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:alter-self",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:animal-friendship",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:animal-messenger",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:animal-shapes",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:animate-dead",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:animate-objects",
+     "text": {
+      "oldLength": 2597,
+      "newLength": 2625
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:antilife-shell",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:antimagic-field",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:antipathy-sympathy",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:arcane-eye",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:arcane-hand",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:arcane-lock",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:arcane-sword",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:arcanists-magic-aura",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:astral-projection",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:augury",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:awaken",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:bane",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:banishment",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:barkskin",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:beacon-of-hope",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:bestow-curse",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:black-tentacles",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:blade-barrier",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:bless",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:blight",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:blindness-deafness",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:blink",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:blur",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:branding-smite",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:burning-hands",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:call-lightning",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:calm-emotions",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:chain-lightning",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:charm-person",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:chill-touch",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:circle-of-death",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:clairvoyance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:clone",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:cloudkill",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:color-spray",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:command",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:commune",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:commune-with-nature",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:comprehend-languages",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:compulsion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:cone-of-cold",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:confusion",
+     "text": {
+      "oldLength": 1365,
+      "newLength": 1370
+     },
+     "notes": {
+      "old": [],
+      "new": [
+       "table d10/Behavior: row 9–10: label printed beside the wrapped text of row 7–8 (page 127); its cell starts at the next sentence"
+      ]
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-animals",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-celestial",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-elemental",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-fey",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-minor-elementals",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:conjure-woodland-beings",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:contact-other-plane",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:contagion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:contingency",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:continual-flame",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:control-water",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:control-weather",
+     "text": {
+      "oldLength": 1326,
+      "newLength": 1313
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:counterspell",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:create-food-and-water",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:create-or-destroy-water",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:create-undead",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:creation",
+     "text": {
+      "oldLength": 1129,
+      "newLength": 1089
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:cure-wounds",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dancing-lights",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:darkness",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:darkvision",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:daylight",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:death-ward",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:delayed-blast-fireball",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:demiplane",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:detect-evil-and-good",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:detect-magic",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:detect-poison-and-disease",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:detect-thoughts",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dimension-door",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:disguise-self",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:disintegrate",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dispel-evil-and-good",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dispel-magic",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:divination",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:divine-favor",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:divine-word",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dominate-beast",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dominate-monster",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dominate-person",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:dream",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:druidcraft",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:earthquake",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:eldritch-blast",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:enhance-ability",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:enlarge-reduce",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:entangle",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:enthrall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:etherealness",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:expeditious-retreat",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:eyebite",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fabricate",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:faerie-fire",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:faithful-hound",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:false-life",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fear",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:feather-fall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:feeblemind",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:find-familiar",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:find-steed",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:find-the-path",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:find-traps",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:finger-of-death",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fireball",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fire-bolt",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fire-shield",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fire-storm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:flame-blade",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:flame-strike",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:flaming-sphere",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:flesh-to-stone",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:floating-disk",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fly",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:fog-cloud",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:forbiddance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:forcecage",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:foresight",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:freedom-of-movement",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:freezing-sphere",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:gaseous-form",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:gate",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:geas",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:gentle-repose",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:giant-insect",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:glibness",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:globe-of-invulnerability",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:glyph-of-warding",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:goodberry",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:grease",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:greater-invisibility",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:greater-restoration",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:guardian-of-faith",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:guards-and-wards",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:guidance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:guiding-bolt",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:gust-of-wind",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hallow",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hallucinatory-terrain",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:harm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:haste",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:heal",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:healing-word",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:heat-metal",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hellish-rebuke",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:heroes-feast",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:heroism",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hideous-laughter",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hold-monster",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hold-person",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:holy-aura",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hunters-mark",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:hypnotic-pattern",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:ice-storm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:identify",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:illusory-script",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:imprisonment",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:incendiary-cloud",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:inflict-wounds",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:insect-plague",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:instant-summons",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:invisibility",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:irresistible-dance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:jump",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:knock",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:legend-lore",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:lesser-restoration",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:levitate",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:light",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:lightning-bolt",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:locate-animals-or-plants",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:locate-creature",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:locate-object",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:longstrider",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mage-armor",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mage-hand",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magic-circle",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magic-jar",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magic-missile",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magic-mouth",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magic-weapon",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:magnificent-mansion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:major-image",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mass-cure-wounds",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mass-heal",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mass-healing-word",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mass-suggestion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:maze",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:meld-into-stone",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mending",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:message",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:meteor-swarm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mind-blank",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:minor-illusion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mirage-arcane",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mirror-image",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:mislead",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:misty-step",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:modify-memory",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:moonbeam",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:move-earth",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:nondetection",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:pass-without-trace",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:passwall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:phantasmal-killer",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:phantom-steed",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:planar-ally",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:planar-binding",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:plane-shift",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:plant-growth",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:poison-spray",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:polymorph",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:power-word-kill",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:power-word-stun",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:prayer-of-healing",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:prestidigitation",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:prismatic-spray",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:prismatic-wall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:private-sanctum",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:produce-flame",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:programmed-illusion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:project-image",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:protection-from-energy",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:protection-from-evil-and-good",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:protection-from-poison",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:purify-food-and-drink",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:raise-dead",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:ray-of-enfeeblement",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:ray-of-frost",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:regenerate",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:reincarnate",
+     "text": {
+      "oldLength": 1219,
+      "newLength": 1233
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:remove-curse",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:resilient-sphere",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:resistance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:resurrection",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:reverse-gravity",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:revivify",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:rope-trick",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sacred-flame",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sanctuary",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:scorching-ray",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:scrying",
+     "text": {
+      "oldLength": 1677,
+      "newLength": 1516
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:secret-chest",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:see-invisibility",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:seeming",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sending",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sequester",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shapechange",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shatter",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shield",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shield-of-faith",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shillelagh",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:shocking-grasp",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:silence",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:silent-image",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:simulacrum",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sleep",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sleet-storm",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:slow",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:spare-the-dying",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:speak-with-animals",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:speak-with-dead",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:speak-with-plants",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:spider-climb",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:spike-growth",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:spirit-guardians",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:spiritual-weapon",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:stinking-cloud",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:stone-shape",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:stoneskin",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:storm-of-vengeance",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:suggestion",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sunbeam",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:sunburst",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:symbol",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:telekinesis",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:telepathic-bond",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:teleport",
+     "text": {
+      "oldLength": 3633,
+      "newLength": 3490
+     },
+     "data": [
+      "description",
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:teleportation-circle",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:thaumaturgy",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:thunderwave",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:time-stop",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:tiny-hut",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:tongues",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:transport-via-plants",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:tree-stride",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:true-polymorph",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:true-resurrection",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:true-seeing",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:true-strike",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:unseen-servant",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:vampiric-touch",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:vicious-mockery",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wall-of-fire",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wall-of-force",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wall-of-ice",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wall-of-stone",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wall-of-thorns",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:warding-bond",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:water-breathing",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:water-walk",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:web",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:weird",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wind-walk",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wind-wall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:wish",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:word-of-recall",
+     "data": [
+      "tables"
+     ]
+    },
+    {
+     "id": "srd:spell:zone-of-truth",
+     "data": [
+      "tables"
+     ]
+    }
+   ],
+   "unchanged": 8
+  }
+ },
+ "totals": {
+  "added": 0,
+  "removed": 0,
+  "changed": 424,
+  "unchanged": 901
+ }
+}

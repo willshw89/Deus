@@ -12,7 +12,7 @@
    "pages": 403,
    "extraction": {
     "generator": "tools/srd_extract/extract_pages.js",
-    "generatedAt": "2026-09-23T01:17:52.372Z",
+    "generatedAt": "2026-09-23T02:15:32.009Z",
     "tool": "pdftotext (xpdf) 4.06"
    }
   },
@@ -36,54 +36,12 @@
     "trade-good": 13
    },
    "byReadiness": {
-    "parsed": 224,
-    "extracted": 2
+    "parsed": 225,
+    "verified": 1
    }
   }
  },
  "entries": [
-  {
-   "id": "srd:armor:shield",
-   "category": "equipment",
-   "kind": "armor",
-   "name": "Shield",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     62,
-     64
-    ],
-    "section": "Equipment",
-    "heading": "Shield"
-   },
-   "text": "Armor | Cost | Armor Class (AC) | Strength | Stealth | Weight\nShield | 10 gp | +2 | — | — | 6 lb.\n\nShields. A shield is made from wood or metal and is carried in one hand. Wielding a shield increases your Armor Class by 2. You can benefit from only one shield at a time.",
-   "data": {
-    "armorCategory": "shield",
-    "cost": {
-     "amount": 10,
-     "unit": "gp"
-    },
-    "ac": {
-     "base": 0,
-     "dexModifier": "none",
-     "bonus": 2
-    },
-    "strength": null,
-    "stealthDisadvantage": false,
-    "weight": {
-     "lb": 6
-    },
-    "group": "Shield",
-    "description": "Shields. A shield is made from wood or metal and is carried in one hand. Wielding a shield increases your Armor Class by 2. You can benefit from only one shield at a time."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 128
-   }
-  },
   {
    "id": "srd:armor:breastplate",
    "category": "equipment",
@@ -504,6 +462,48 @@
    }
   },
   {
+   "id": "srd:armor:shield",
+   "category": "equipment",
+   "kind": "armor",
+   "name": "Shield",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     63,
+     64
+    ],
+    "section": "Equipment",
+    "heading": "Shield"
+   },
+   "text": "Armor | Cost | Armor Class (AC) | Strength | Stealth | Weight\nShield | 10 gp | +2 | — | — | 6 lb.\n\nShields. A shield is made from wood or metal and is carried in one hand. Wielding a shield increases your Armor Class by 2. You can benefit from only one shield at a time.",
+   "data": {
+    "armorCategory": "shield",
+    "cost": {
+     "amount": 10,
+     "unit": "gp"
+    },
+    "ac": {
+     "base": 0,
+     "dexModifier": "none",
+     "bonus": 2
+    },
+    "strength": null,
+    "stealthDisadvantage": false,
+    "weight": {
+     "lb": 6
+    },
+    "group": "Shield",
+    "description": "Shields. A shield is made from wood or metal and is carried in one hand. Wielding a shield increases your Armor Class by 2. You can benefit from only one shield at a time."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 128
+   }
+  },
+  {
    "id": "srd:armor:splint",
    "category": "equipment",
    "kind": "armor",
@@ -684,7 +684,7 @@
     "group": "Martial Ranged Weapons",
     "description": "Net. A Large or smaller creature hit by a net is restrained until it is freed. A net has no effect on creatures that are formless, or creatures that are Huge or larger. A creature can use its action to make a DC 10 Strength check, freeing itself or another creature within its reach on a success. Dealing 5 slashing damage to the net (AC 10) also frees the creature without harming it, ending the effect and destroying the net."
    },
-   "readiness": "parsed",
+   "readiness": "verified",
    "notes": [
     "page 66: the Weapons table's last rows are misaligned in the source (the Net row's values sit on the Longbow line and the name 'Net' on the line after it); the names and value rows of the Martial Ranged Weapons group were re-paired by printed order",
     "damage printed as —"
@@ -693,6 +693,19 @@
    "icon": {
     "set": "IconSet",
     "index": 97
+   },
+   "verifiedBy": "Claude Code (Fable)",
+   "verifiedAt": "2026-09-23",
+   "verification": {
+    "method": "compared with the pdf.js-rendered page 66 of SRD_CC_v5.1.pdf",
+    "pages": [
+     65,
+     66
+    ],
+    "textSha256": "456611836f7963963e4a571c1a7bb299d1b7e08dee5cc65e06721b83c3454019",
+    "notes": [
+     "the Net row (1 gp, no damage, 3 lb., special, thrown range 5/15) is printed aligned on the page; the misalignment the stager repaired exists only in pdftotext's output"
+    ]
    }
   },
   {
@@ -815,41 +828,6 @@
    }
   },
   {
-   "id": "srd:gear:ball-bearings-bag-of-1-000",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Ball bearings (bag of 1,000)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Ball bearings (bag of 1,000)"
-   },
-   "text": "Item | Cost | Weight\nBall bearings (bag of 1,000) | 1 gp | 2 lb.\n\nBall Bearings. As an action, you can spill these tiny metal balls from their pouch to cover a level, square area that is 10 feet on a side. A creature moving across the covered area must succeed on a DC 10 Dexterity saving throw or fall prone. A creature moving through the area at half speed doesn’t need to make the save.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Ball Bearings. As an action, you can spill these tiny metal balls from their pouch to cover a level, square area that is 10 feet on a side. A creature moving across the covered area must succeed on a DC 10 Dexterity saving throw or fall prone. A creature moving through the area at half speed doesn’t need to make the save."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:battleaxe",
    "category": "equipment",
    "kind": "weapon",
@@ -910,41 +888,6 @@
    }
   },
   {
-   "id": "srd:gear:block-and-tackle",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Block and tackle",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Block and tackle"
-   },
-   "text": "Item | Cost | Weight\nBlock and tackle | 1 gp | 5 lb.\n\nBlock and Tackle. A set of pulleys with a cable threaded through them and a hook to attach to objects, a block and tackle allows you to hoist up to four times the weight you can normally lift.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 5
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Block and Tackle. A set of pulleys with a cable threaded through them and a hook to attach to objects, a block and tackle allows you to hoist up to four times the weight you can normally lift."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:blowgun",
    "category": "equipment",
    "kind": "weapon",
@@ -993,249 +936,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:book",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Book",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Book"
-   },
-   "text": "Item | Cost | Weight\nBook | 25 gp | 5 lb.\n\nBook. A book might contain poetry, historical accounts, information pertaining to a particular field of lore, diagrams and notes on gnomish contraptions, or just about anything else that can be represented using text or pictures. A book of spells is a spellbook (described later in this section).",
-   "data": {
-    "cost": {
-     "amount": 25,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 5
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Book. A book might contain poetry, historical accounts, information pertaining to a particular field of lore, diagrams and notes on gnomish contraptions, or just about anything else that can be represented using text or pictures. A book of spells is a spellbook (described later in this section)."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:caltrops-bag-of-20",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Caltrops (bag of 20)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Caltrops (bag of 20)"
-   },
-   "text": "Item | Cost | Weight\nCaltrops (bag of 20) | 1 gp | 2 lb.\n\nCaltrops. As an action, you can spread a bag of caltrops to cover a square area that is 5 feet on a side. Any creature that enters the area must succeed on a DC 15 Dexterity saving throw or stop moving this turn and take 1 piercing damage. Taking this damage reduces the creature’s walking speed by 10 feet until the creature regains at least 1 hit point. A creature moving through the area at half speed doesn’t need to make the save.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Caltrops. As an action, you can spread a bag of caltrops to cover a square area that is 5 feet on a side. Any creature that enters the area must succeed on a DC 15 Dexterity saving throw or stop moving this turn and take 1 piercing damage. Taking this damage reduces the creature’s walking speed by 10 feet until the creature regains at least 1 hit point. A creature moving through the area at half speed doesn’t need to make the save."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:candle",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Candle",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Candle"
-   },
-   "text": "Item | Cost | Weight\nCandle | 1 cp | —\n\nCandle. For 1 hour, a candle sheds bright light in a 5-foot radius and dim light for an additional 5 feet.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "cp"
-    },
-    "weight": null,
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Candle. For 1 hour, a candle sheds bright light in a 5-foot radius and dim light for an additional 5 feet."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:case-crossbow-bolt",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Case, crossbow bolt",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Case, crossbow bolt"
-   },
-   "text": "Item | Cost | Weight\nCase, crossbow bolt | 1 gp | 1 lb.\n\nCase, Crossbow Bolt. This wooden case can hold up to twenty crossbow bolts.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Case, Crossbow Bolt. This wooden case can hold up to twenty crossbow bolts."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:case-map-or-scroll",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Case, map or scroll",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Case, map or scroll"
-   },
-   "text": "Item | Cost | Weight\nCase, map or scroll | 1 gp | 1 lb.\n\nCase, Map or Scroll. This cylindrical leather case can hold up to ten rolled-up sheets of paper or five rolled-up sheets of parchment.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Case, Map or Scroll. This cylindrical leather case can hold up to ten rolled-up sheets of paper or five rolled-up sheets of parchment."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:chain-10-feet",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Chain (10 feet)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Chain (10 feet)"
-   },
-   "text": "Item | Cost | Weight\nChain (10 feet) | 5 gp | 10 lb.\n\nChain. A chain has 10 hit points. It can be burst with a successful DC 20 Strength check.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 10
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Chain. A chain has 10 hit points. It can be burst with a successful DC 20 Strength check."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:climbers-kit",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Climber’s kit",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Climber’s kit"
-   },
-   "text": "Item | Cost | Weight\nClimber’s kit | 25 gp | 12 lb.\n\nClimber’s Kit. A climber’s kit includes special pitons, boot tips, gloves, and a harness. You can use the climber’s kit as an action to anchor yourself; when you do, you can’t fall more than 25 feet from the point where you anchored yourself, and you can’t climb more than 25 feet away from that point without undoing the anchor.",
-   "data": {
-    "cost": {
-     "amount": 25,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 12
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Climber’s Kit. A climber’s kit includes special pitons, boot tips, gloves, and a harness. You can use the climber’s kit as an action to anchor yourself; when you do, you can’t fall more than 25 feet from the point where you anchored yourself, and you can’t climb more than 25 feet away from that point without undoing the anchor."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -1289,41 +989,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:component-pouch",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Component pouch",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Component pouch"
-   },
-   "text": "Item | Cost | Weight\nComponent pouch | 25 gp | 2 lb.\n\nComponent Pouch. A component pouch is a small, watertight leather belt pouch that has compartments to hold all the material components and other special items you need to cast your spells, except for those components that have a specific cost (as indicated in a spell's description).",
-   "data": {
-    "cost": {
-     "amount": 25,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Component Pouch. A component pouch is a small, watertight leather belt pouch that has compartments to hold all the material components and other special items you need to cast your spells, except for those components that have a specific cost (as indicated in a spell's description)."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -1514,41 +1179,6 @@
    }
   },
   {
-   "id": "srd:gear:crowbar",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Crowbar",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Crowbar"
-   },
-   "text": "Item | Cost | Weight\nCrowbar | 2 gp | 5 lb.\n\nCrowbar. Using a crowbar grants advantage to Strength checks where the crowbar’s leverage can be applied.",
-   "data": {
-    "cost": {
-     "amount": 2,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 5
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Crowbar. Using a crowbar grants advantage to Strength checks where the crowbar’s leverage can be applied."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:dagger",
    "category": "equipment",
    "kind": "weapon",
@@ -1664,41 +1294,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:fishing-tackle",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Fishing tackle",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Fishing tackle"
-   },
-   "text": "Item | Cost | Weight\nFishing tackle | 1 gp | 4 lb.\n\nFishing Tackle. This kit includes a wooden rod, silken line, corkwood bobbers, steel hooks, lead sinkers, velvet lures, and narrow netting.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 4
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Fishing Tackle. This kit includes a wooden rod, silken line, corkwood bobbers, steel hooks, lead sinkers, velvet lures, and narrow netting."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -2096,127 +1691,6 @@
    }
   },
   {
-   "id": "srd:gear:healers-kit",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Healer’s kit",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Healer’s kit"
-   },
-   "text": "Item | Cost | Weight\nHealer’s kit | 5 gp | 3 lb.\n\nHealer’s Kit. This kit is a leather pouch containing bandages, salves, and splints. The kit has ten uses. As an action, you can expend one use of the kit to stabilize a creature that has 0 hit points, without needing to make a Wisdom (Medicine) check.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 3
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Healer’s Kit. This kit is a leather pouch containing bandages, salves, and splints. The kit has ten uses. As an action, you can expend one use of the kit to stabilize a creature that has 0 hit points, without needing to make a Wisdom (Medicine) check."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:holy-water-flask",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Holy water (flask)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Holy water (flask)"
-   },
-   "text": "Item | Cost | Weight\nHoly water (flask) | 25 gp | 1 lb.\n\nHoly Water. As an action, you can splash the contents of this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. In either case, make a ranged attack against a target creature, treating the holy water as an improvised weapon. If the target is a fiend or undead, it takes 2d6 radiant damage.",
-   "data": {
-    "cost": {
-     "amount": 25,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Holy Water. As an action, you can splash the contents of this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. In either case, make a ranged attack against a target creature, treating the holy water as an improvised weapon. If the target is a fiend or undead, it takes 2d6 radiant damage."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [
-    {
-     "text": "2d6",
-     "count": 2,
-     "sides": 6,
-     "modifier": 0,
-     "average": 7
-    }
-   ],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:hunting-trap",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Hunting trap",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Hunting trap"
-   },
-   "text": "Item | Cost | Weight\nHunting trap | 5 gp | 25 lb.\n\nHunting Trap. When you use your action to set it, this trap forms a saw-toothed steel ring that snaps shut when a creature steps on a pressure plate in the center. The trap is affixed by a heavy chain to an immobile object, such as a tree or a spike driven into the ground. A creature that steps on the plate must succeed on a DC 13 Dexterity saving throw or take 1d4 piercing damage and stop moving. Thereafter, until the creature breaks free of the trap, its movement is limited by the length of the chain (typically 3 feet long). A creature can use its action to make a DC 13 Strength check, freeing itself or another creature within its reach on a success. Each failed check deals 1 piercing damage to the trapped creature.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 25
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Hunting Trap. When you use your action to set it, this trap forms a saw-toothed steel ring that snaps shut when a creature steps on a pressure plate in the center. The trap is affixed by a heavy chain to an immobile object, such as a tree or a spike driven into the ground. A creature that steps on the plate must succeed on a DC 13 Dexterity saving throw or take 1d4 piercing damage and stop moving. Thereafter, until the creature breaks free of the trap, its movement is limited by the length of the chain (typically 3 feet long). A creature can use its action to make a DC 13 Strength check, freeing itself or another creature within its reach on a success. Each failed check deals 1 piercing damage to the trapped creature."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [
-    {
-     "text": "1d4",
-     "count": 1,
-     "sides": 4,
-     "modifier": 0,
-     "average": 2
-    }
-   ],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:javelin",
    "category": "equipment",
    "kind": "weapon",
@@ -2267,111 +1741,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:lamp",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Lamp",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Lamp"
-   },
-   "text": "Item | Cost | Weight\nLamp | 5 sp | 1 lb.\n\nLamp. A lamp casts bright light in a 15-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Lamp. A lamp casts bright light in a 15-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:lantern-bullseye",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Lantern, bullseye",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Lantern, bullseye"
-   },
-   "text": "Item | Cost | Weight\nLantern, bullseye | 10 gp | 2 lb.\n\nLantern, Bullseye. A bullseye lantern casts bright light in a 60-foot cone and dim light for an additional 60 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil.",
-   "data": {
-    "cost": {
-     "amount": 10,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Lantern, Bullseye. A bullseye lantern casts bright light in a 60-foot cone and dim light for an additional 60 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:lantern-hooded",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Lantern, hooded",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Lantern, hooded"
-   },
-   "text": "Item | Cost | Weight\nLantern, hooded | 5 gp | 2 lb.\n\nLantern, Hooded. A hooded lantern casts bright light in a 30-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil. As an action, you can lower the hood, reducing the light to dim light in a 5-foot radius.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Lantern, Hooded. A hooded lantern casts bright light in a 30-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil. As an action, you can lower the hood, reducing the light to dim light in a 5-foot radius."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -2429,41 +1798,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:lock",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Lock",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Lock"
-   },
-   "text": "Item | Cost | Weight\nLock | 10 gp | 1 lb.\n\nLock. A key is provided with the lock. Without the key, a creature proficient with thieves’ tools can pick this lock with a successful DC 15 Dexterity check. Your GM may decide that better locks are available for higher prices.",
-   "data": {
-    "cost": {
-     "amount": 10,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Lock. A key is provided with the lock. Without the key, a creature proficient with thieves’ tools can pick this lock with a successful DC 15 Dexterity check. Your GM may decide that better locks are available for higher prices."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -2638,74 +1972,6 @@
    }
   },
   {
-   "id": "srd:gear:magnifying-glass",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Magnifying glass",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Magnifying glass"
-   },
-   "text": "Item | Cost | Weight\nMagnifying glass | 100 gp | —\n\nMagnifying Glass. This lens allows a closer look at small objects. It is also useful as a substitute for flint and steel when starting fires. Lighting a fire with a magnifying glass requires light as bright as sunlight to focus, tinder to ignite, and about 5 minutes for the fire to ignite. A magnifying glass grants advantage on any ability check made to appraise or inspect an item that is small or highly detailed.",
-   "data": {
-    "cost": {
-     "amount": 100,
-     "unit": "gp"
-    },
-    "weight": null,
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Magnifying Glass. This lens allows a closer look at small objects. It is also useful as a substitute for flint and steel when starting fires. Lighting a fire with a magnifying glass requires light as bright as sunlight to focus, tinder to ignite, and about 5 minutes for the fire to ignite. A magnifying glass grants advantage on any ability check made to appraise or inspect an item that is small or highly detailed."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:manacles",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Manacles",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Manacles"
-   },
-   "text": "Item | Cost | Weight\nManacles | 2 gp | 6 lb.\n\nManacles. These metal restraints can bind a Small or Medium creature. Escaping the manacles requires a successful DC 20 Dexterity check. Breaking them requires a successful DC 20 Strength check. Each set of manacles comes with one key. Without the key, a creature proficient with thieves’ tools can pick the manacles’ lock with a successful DC 15 Dexterity check. Manacles have 15 hit points.",
-   "data": {
-    "cost": {
-     "amount": 2,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 6
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Manacles. These metal restraints can bind a Small or Medium creature. Escaping the manacles requires a successful DC 20 Dexterity check. Breaking them requires a successful DC 20 Strength check. Each set of manacles comes with one key. Without the key, a creature proficient with thieves’ tools can pick the manacles’ lock with a successful DC 15 Dexterity check. Manacles have 15 hit points."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:maul",
    "category": "equipment",
    "kind": "weapon",
@@ -2763,41 +2029,6 @@
    }
   },
   {
-   "id": "srd:gear:mess-kit",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Mess kit",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Mess kit"
-   },
-   "text": "Item | Cost | Weight\nMess kit | 2 sp | 1 lb.\n\nMess Kit. This tin box contains a cup and simple cutlery. The box clamps together, and one side can be used as a cooking pan and the other as a plate or shallow bowl.",
-   "data": {
-    "cost": {
-     "amount": 2,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Mess Kit. This tin box contains a cup and simple cutlery. The box clamps together, and one side can be used as a cooking pan and the other as a plate or shallow bowl."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:morningstar",
    "category": "equipment",
    "kind": "weapon",
@@ -2843,41 +2074,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:oil-flask",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Oil (flask)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Oil (flask)"
-   },
-   "text": "Item | Cost | Weight\nOil (flask) | 1 sp | 1 lb.\n\nOil. Oil usually comes in a clay flask that holds 1 pint. As an action, you can splash the oil in this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. Make a ranged attack against a target creature or object, treating the oil as an improvised weapon. On a hit, the target is covered in oil. If the target takes any fire damage before the oil dries (after 1 minute), the target takes an additional 5 fire damage from the burning oil. You can also pour a flask of oil on the ground to cover a 5-foot-square area, provided that the surface is level. If lit, the oil burns for 2 rounds and deals 5 fire damage to any creature that enters the area or ends its turn in the area. A creature can take this damage only once per turn.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Oil. Oil usually comes in a clay flask that holds 1 pint. As an action, you can splash the oil in this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. Make a ranged attack against a target creature or object, treating the oil as an improvised weapon. On a hit, the target is covered in oil. If the target takes any fire damage before the oil dries (after 1 minute), the target takes an additional 5 fire damage from the burning oil. You can also pour a flask of oil on the ground to cover a 5-foot-square area, provided that the surface is level. If lit, the oil burns for 2 rounds and deals 5 fire damage to any creature that enters the area or ends its turn in the area. A creature can take this damage only once per turn."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -2942,125 +2138,6 @@
    }
   },
   {
-   "id": "srd:gear:poison-basic-vial",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Poison, basic (vial)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Poison, basic (vial)"
-   },
-   "text": "Item | Cost | Weight\nPoison, basic (vial) | 100 gp | —\n\nPoison, Basic. You can use the poison in this vial to coat one slashing or piercing weapon or up to three pieces of ammunition. Applying the poison takes an action. A creature hit by the poisoned weapon or ammunition must make a DC 10 Constitution saving throw or take 1d4 poison damage. Once applied, the poison retains potency for 1 minute before drying.",
-   "data": {
-    "cost": {
-     "amount": 100,
-     "unit": "gp"
-    },
-    "weight": null,
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Poison, Basic. You can use the poison in this vial to coat one slashing or piercing weapon or up to three pieces of ammunition. Applying the poison takes an action. A creature hit by the poisoned weapon or ammunition must make a DC 10 Constitution saving throw or take 1d4 poison damage. Once applied, the poison retains potency for 1 minute before drying."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [
-    {
-     "text": "1d4",
-     "count": 1,
-     "sides": 4,
-     "modifier": 0,
-     "average": 2
-    }
-   ],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:potion-of-healing",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Potion of healing",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Potion of healing"
-   },
-   "text": "Item | Cost | Weight\nPotion of healing | 50 gp | 1/2 lb.\n\nPotion of Healing. A character who drinks the magical red fluid in this vial regains 2d4 + 2 hit points. Drinking or administering a potion takes an action.",
-   "data": {
-    "cost": {
-     "amount": 50,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 0.5
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Potion of Healing. A character who drinks the magical red fluid in this vial regains 2d4 + 2 hit points. Drinking or administering a potion takes an action."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [
-    {
-     "text": "2d4 + 2",
-     "count": 2,
-     "sides": 4,
-     "modifier": 2,
-     "average": 7
-    }
-   ],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:pouch",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Pouch",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Pouch"
-   },
-   "text": "Item | Cost | Weight\nPouch | 5 sp | 1 lb.\n\nPouch. A cloth or leather pouch can hold up to 20 sling bullets or 50 blowgun needles, among other things. A compartmentalized pouch for holding spell components is called a component pouch (described earlier in this section).",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Pouch. A cloth or leather pouch can hold up to 20 sling bullets or 50 blowgun needles, among other things. A compartmentalized pouch for holding spell components is called a component pouch (described earlier in this section)."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:quarterstaff",
    "category": "equipment",
    "kind": "weapon",
@@ -3121,76 +2198,6 @@
    }
   },
   {
-   "id": "srd:gear:quiver",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Quiver",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Quiver"
-   },
-   "text": "Item | Cost | Weight\nQuiver | 1 gp | 1 lb.\n\nQuiver. A quiver can hold up to 20 arrows.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Quiver. A quiver can hold up to 20 arrows."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:ram-portable",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Ram, portable",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Ram, portable"
-   },
-   "text": "Item | Cost | Weight\nRam, portable | 4 gp | 35 lb.\n\nRam, Portable. You can use a portable ram to break down doors. When doing so, you gain a +4 bonus on the Strength check. One other character can help you use the ram, giving you advantage on this check.",
-   "data": {
-    "cost": {
-     "amount": 4,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 35
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Ram, Portable. You can use a portable ram to break down doors. When doing so, you gain a +4 bonus on the Strength check. One other character can help you use the ram, giving you advantage on this check."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:rapier",
    "category": "equipment",
    "kind": "weapon",
@@ -3241,146 +2248,6 @@
    "icon": {
     "set": "IconSet",
     "index": 97
-   }
-  },
-  {
-   "id": "srd:gear:rations-1-day",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Rations (1 day)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Rations (1 day)"
-   },
-   "text": "Item | Cost | Weight\nRations (1 day) | 5 sp | 2 lb.\n\nRations. Rations consist of dry foods suitable for extended travel, including jerky, dried fruit, hardtack, and nuts.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 2
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Rations. Rations consist of dry foods suitable for extended travel, including jerky, dried fruit, hardtack, and nuts."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:rope-hempen-50-feet",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Rope, hempen (50 feet)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Rope, hempen (50 feet)"
-   },
-   "text": "Item | Cost | Weight\nRope, hempen (50 feet) | 1 gp | 10 lb.\n\nRope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 10
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Rope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:rope-silk-50-feet",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Rope, silk (50 feet)",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Rope, silk (50 feet)"
-   },
-   "text": "Item | Cost | Weight\nRope, silk (50 feet) | 10 gp | 5 lb.\n\nRope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check.",
-   "data": {
-    "cost": {
-     "amount": 10,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 5
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Rope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:scale-merchants",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Scale, merchant’s",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Scale, merchant’s"
-   },
-   "text": "Item | Cost | Weight\nScale, merchant’s | 5 gp | 3 lb.\n\nScale, Merchant’s. A scale includes a small balance, pans, and a suitable assortment of weights up to 2 pounds. With it, you can measure the exact weight of small objects, such as raw precious metals or trade goods, to help determine their worth.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 3
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Scale, Merchant’s. A scale includes a small balance, pans, and a suitable assortment of weights up to 2 pounds. With it, you can measure the exact weight of small objects, such as raw precious metals or trade goods, to help determine their worth."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
    }
   },
   {
@@ -3725,181 +2592,6 @@
    }
   },
   {
-   "id": "srd:gear:spellbook",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Spellbook",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Spellbook"
-   },
-   "text": "Item | Cost | Weight\nSpellbook | 50 gp | 3 lb.\n\nSpellbook. Essential for wizards, a spellbook is a leather-bound tome with 100 blank vellum pages suitable for recording spells.",
-   "data": {
-    "cost": {
-     "amount": 50,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 3
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Spellbook. Essential for wizards, a spellbook is a leather-bound tome with 100 blank vellum pages suitable for recording spells."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:spyglass",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Spyglass",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Spyglass"
-   },
-   "text": "Item | Cost | Weight\nSpyglass | 1,000 gp | 1 lb.\n\nSpyglass. Objects viewed through a spyglass are magnified to twice their size.",
-   "data": {
-    "cost": {
-     "amount": 1000,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Spyglass. Objects viewed through a spyglass are magnified to twice their size."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:tent-two-person",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Tent, two-person",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Tent, two-person"
-   },
-   "text": "Item | Cost | Weight\nTent, two-person | 2 gp | 20 lb.\n\nTent. A simple and portable canvas shelter, a tent sleeps two.",
-   "data": {
-    "cost": {
-     "amount": 2,
-     "unit": "gp"
-    },
-    "weight": {
-     "lb": 20
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Tent. A simple and portable canvas shelter, a tent sleeps two."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:tinderbox",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Tinderbox",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Tinderbox"
-   },
-   "text": "Item | Cost | Weight\nTinderbox | 5 sp | 1 lb.\n\nTinderbox. This small container holds flint, fire steel, and tinder (usually dry cloth soaked in light oil) used to kindle a fire. Using it to light a torch—or anything else with abundant, exposed fuel—takes an action. Lighting any other fire takes 1 minute.",
-   "data": {
-    "cost": {
-     "amount": 5,
-     "unit": "sp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Tinderbox. This small container holds flint, fire steel, and tinder (usually dry cloth soaked in light oil) used to kindle a fire. Using it to light a torch—or anything else with abundant, exposed fuel—takes an action. Lighting any other fire takes 1 minute."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
-   "id": "srd:gear:torch",
-   "category": "equipment",
-   "kind": "gear",
-   "name": "Torch",
-   "source": {
-    "document": "SRD 5.1",
-    "pages": [
-     66,
-     69
-    ],
-    "section": "Equipment",
-    "heading": "Torch"
-   },
-   "text": "Item | Cost | Weight\nTorch | 1 cp | 1 lb.\n\nTorch. A torch burns for 1 hour, providing bright light in a 20-foot radius and dim light for an additional 20 feet. If you make a melee attack with a burning torch and hit, it deals 1 fire damage.",
-   "data": {
-    "cost": {
-     "amount": 1,
-     "unit": "cp"
-    },
-    "weight": {
-     "lb": 1
-    },
-    "group": null,
-    "table": "Adventuring Gear",
-    "description": "Torch. A torch burns for 1 hour, providing bright light in a 20-foot radius and dim light for an additional 20 feet. If you make a melee attack with a burning torch and hit, it deals 1 fire damage."
-   },
-   "readiness": "parsed",
-   "notes": [],
-   "dice": [],
-   "icon": {
-    "set": "IconSet",
-    "index": 176
-   }
-  },
-  {
    "id": "srd:weapon:trident",
    "category": "equipment",
    "kind": "weapon",
@@ -4126,6 +2818,1327 @@
    "icon": {
     "set": "IconSet",
     "index": 97
+   }
+  },
+  {
+   "id": "srd:gear:ball-bearings-bag-of-1-000",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Ball bearings (bag of 1,000)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Ball bearings (bag of 1,000)"
+   },
+   "text": "Item | Cost | Weight\nBall bearings (bag of 1,000) | 1 gp | 2 lb.\n\nBall Bearings. As an action, you can spill these tiny metal balls from their pouch to cover a level, square area that is 10 feet on a side. A creature moving across the covered area must succeed on a DC 10 Dexterity saving throw or fall prone. A creature moving through the area at half speed doesn’t need to make the save.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Ball Bearings. As an action, you can spill these tiny metal balls from their pouch to cover a level, square area that is 10 feet on a side. A creature moving across the covered area must succeed on a DC 10 Dexterity saving throw or fall prone. A creature moving through the area at half speed doesn’t need to make the save."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:block-and-tackle",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Block and tackle",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Block and tackle"
+   },
+   "text": "Item | Cost | Weight\nBlock and tackle | 1 gp | 5 lb.\n\nBlock and Tackle. A set of pulleys with a cable threaded through them and a hook to attach to objects, a block and tackle allows you to hoist up to four times the weight you can normally lift.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 5
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Block and Tackle. A set of pulleys with a cable threaded through them and a hook to attach to objects, a block and tackle allows you to hoist up to four times the weight you can normally lift."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:book",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Book",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Book"
+   },
+   "text": "Item | Cost | Weight\nBook | 25 gp | 5 lb.\n\nBook. A book might contain poetry, historical accounts, information pertaining to a particular field of lore, diagrams and notes on gnomish contraptions, or just about anything else that can be represented using text or pictures. A book of spells is a spellbook (described later in this section).",
+   "data": {
+    "cost": {
+     "amount": 25,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 5
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Book. A book might contain poetry, historical accounts, information pertaining to a particular field of lore, diagrams and notes on gnomish contraptions, or just about anything else that can be represented using text or pictures. A book of spells is a spellbook (described later in this section)."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:caltrops-bag-of-20",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Caltrops (bag of 20)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Caltrops (bag of 20)"
+   },
+   "text": "Item | Cost | Weight\nCaltrops (bag of 20) | 1 gp | 2 lb.\n\nCaltrops. As an action, you can spread a bag of caltrops to cover a square area that is 5 feet on a side. Any creature that enters the area must succeed on a DC 15 Dexterity saving throw or stop moving this turn and take 1 piercing damage. Taking this damage reduces the creature’s walking speed by 10 feet until the creature regains at least 1 hit point. A creature moving through the area at half speed doesn’t need to make the save.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Caltrops. As an action, you can spread a bag of caltrops to cover a square area that is 5 feet on a side. Any creature that enters the area must succeed on a DC 15 Dexterity saving throw or stop moving this turn and take 1 piercing damage. Taking this damage reduces the creature’s walking speed by 10 feet until the creature regains at least 1 hit point. A creature moving through the area at half speed doesn’t need to make the save."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:candle",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Candle",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Candle"
+   },
+   "text": "Item | Cost | Weight\nCandle | 1 cp | —\n\nCandle. For 1 hour, a candle sheds bright light in a 5-foot radius and dim light for an additional 5 feet.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "cp"
+    },
+    "weight": null,
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Candle. For 1 hour, a candle sheds bright light in a 5-foot radius and dim light for an additional 5 feet."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:case-crossbow-bolt",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Case, crossbow bolt",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Case, crossbow bolt"
+   },
+   "text": "Item | Cost | Weight\nCase, crossbow bolt | 1 gp | 1 lb.\n\nCase, Crossbow Bolt. This wooden case can hold up to twenty crossbow bolts.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Case, Crossbow Bolt. This wooden case can hold up to twenty crossbow bolts."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:case-map-or-scroll",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Case, map or scroll",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Case, map or scroll"
+   },
+   "text": "Item | Cost | Weight\nCase, map or scroll | 1 gp | 1 lb.\n\nCase, Map or Scroll. This cylindrical leather case can hold up to ten rolled-up sheets of paper or five rolled-up sheets of parchment.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Case, Map or Scroll. This cylindrical leather case can hold up to ten rolled-up sheets of paper or five rolled-up sheets of parchment."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:chain-10-feet",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Chain (10 feet)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Chain (10 feet)"
+   },
+   "text": "Item | Cost | Weight\nChain (10 feet) | 5 gp | 10 lb.\n\nChain. A chain has 10 hit points. It can be burst with a successful DC 20 Strength check.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 10
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Chain. A chain has 10 hit points. It can be burst with a successful DC 20 Strength check."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:climbers-kit",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Climber’s kit",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Climber’s kit"
+   },
+   "text": "Item | Cost | Weight\nClimber’s kit | 25 gp | 12 lb.\n\nClimber’s Kit. A climber’s kit includes special pitons, boot tips, gloves, and a harness. You can use the climber’s kit as an action to anchor yourself; when you do, you can’t fall more than 25 feet from the point where you anchored yourself, and you can’t climb more than 25 feet away from that point without undoing the anchor.",
+   "data": {
+    "cost": {
+     "amount": 25,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 12
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Climber’s Kit. A climber’s kit includes special pitons, boot tips, gloves, and a harness. You can use the climber’s kit as an action to anchor yourself; when you do, you can’t fall more than 25 feet from the point where you anchored yourself, and you can’t climb more than 25 feet away from that point without undoing the anchor."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:component-pouch",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Component pouch",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Component pouch"
+   },
+   "text": "Item | Cost | Weight\nComponent pouch | 25 gp | 2 lb.\n\nComponent Pouch. A component pouch is a small, watertight leather belt pouch that has compartments to hold all the material components and other special items you need to cast your spells, except for those components that have a specific cost (as indicated in a spell's description).",
+   "data": {
+    "cost": {
+     "amount": 25,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Component Pouch. A component pouch is a small, watertight leather belt pouch that has compartments to hold all the material components and other special items you need to cast your spells, except for those components that have a specific cost (as indicated in a spell's description)."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:crowbar",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Crowbar",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Crowbar"
+   },
+   "text": "Item | Cost | Weight\nCrowbar | 2 gp | 5 lb.\n\nCrowbar. Using a crowbar grants advantage to Strength checks where the crowbar’s leverage can be applied.",
+   "data": {
+    "cost": {
+     "amount": 2,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 5
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Crowbar. Using a crowbar grants advantage to Strength checks where the crowbar’s leverage can be applied."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:fishing-tackle",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Fishing tackle",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Fishing tackle"
+   },
+   "text": "Item | Cost | Weight\nFishing tackle | 1 gp | 4 lb.\n\nFishing Tackle. This kit includes a wooden rod, silken line, corkwood bobbers, steel hooks, lead sinkers, velvet lures, and narrow netting.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 4
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Fishing Tackle. This kit includes a wooden rod, silken line, corkwood bobbers, steel hooks, lead sinkers, velvet lures, and narrow netting."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:healers-kit",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Healer’s kit",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Healer’s kit"
+   },
+   "text": "Item | Cost | Weight\nHealer’s kit | 5 gp | 3 lb.\n\nHealer’s Kit. This kit is a leather pouch containing bandages, salves, and splints. The kit has ten uses. As an action, you can expend one use of the kit to stabilize a creature that has 0 hit points, without needing to make a Wisdom (Medicine) check.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 3
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Healer’s Kit. This kit is a leather pouch containing bandages, salves, and splints. The kit has ten uses. As an action, you can expend one use of the kit to stabilize a creature that has 0 hit points, without needing to make a Wisdom (Medicine) check."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:holy-water-flask",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Holy water (flask)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Holy water (flask)"
+   },
+   "text": "Item | Cost | Weight\nHoly water (flask) | 25 gp | 1 lb.\n\nHoly Water. As an action, you can splash the contents of this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. In either case, make a ranged attack against a target creature, treating the holy water as an improvised weapon. If the target is a fiend or undead, it takes 2d6 radiant damage.",
+   "data": {
+    "cost": {
+     "amount": 25,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Holy Water. As an action, you can splash the contents of this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. In either case, make a ranged attack against a target creature, treating the holy water as an improvised weapon. If the target is a fiend or undead, it takes 2d6 radiant damage."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [
+    {
+     "text": "2d6",
+     "count": 2,
+     "sides": 6,
+     "modifier": 0,
+     "average": 7
+    }
+   ],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:hunting-trap",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Hunting trap",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     67,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Hunting trap"
+   },
+   "text": "Item | Cost | Weight\nHunting trap | 5 gp | 25 lb.\n\nHunting Trap. When you use your action to set it, this trap forms a saw-toothed steel ring that snaps shut when a creature steps on a pressure plate in the center. The trap is affixed by a heavy chain to an immobile object, such as a tree or a spike driven into the ground. A creature that steps on the plate must succeed on a DC 13 Dexterity saving throw or take 1d4 piercing damage and stop moving. Thereafter, until the creature breaks free of the trap, its movement is limited by the length of the chain (typically 3 feet long). A creature can use its action to make a DC 13 Strength check, freeing itself or another creature within its reach on a success. Each failed check deals 1 piercing damage to the trapped creature.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 25
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Hunting Trap. When you use your action to set it, this trap forms a saw-toothed steel ring that snaps shut when a creature steps on a pressure plate in the center. The trap is affixed by a heavy chain to an immobile object, such as a tree or a spike driven into the ground. A creature that steps on the plate must succeed on a DC 13 Dexterity saving throw or take 1d4 piercing damage and stop moving. Thereafter, until the creature breaks free of the trap, its movement is limited by the length of the chain (typically 3 feet long). A creature can use its action to make a DC 13 Strength check, freeing itself or another creature within its reach on a success. Each failed check deals 1 piercing damage to the trapped creature."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [
+    {
+     "text": "1d4",
+     "count": 1,
+     "sides": 4,
+     "modifier": 0,
+     "average": 2
+    }
+   ],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:lamp",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Lamp",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Lamp"
+   },
+   "text": "Item | Cost | Weight\nLamp | 5 sp | 1 lb.\n\nLamp. A lamp casts bright light in a 15-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Lamp. A lamp casts bright light in a 15-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:lantern-bullseye",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Lantern, bullseye",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Lantern, bullseye"
+   },
+   "text": "Item | Cost | Weight\nLantern, bullseye | 10 gp | 2 lb.\n\nLantern, Bullseye. A bullseye lantern casts bright light in a 60-foot cone and dim light for an additional 60 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil.",
+   "data": {
+    "cost": {
+     "amount": 10,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Lantern, Bullseye. A bullseye lantern casts bright light in a 60-foot cone and dim light for an additional 60 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:lantern-hooded",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Lantern, hooded",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Lantern, hooded"
+   },
+   "text": "Item | Cost | Weight\nLantern, hooded | 5 gp | 2 lb.\n\nLantern, Hooded. A hooded lantern casts bright light in a 30-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil. As an action, you can lower the hood, reducing the light to dim light in a 5-foot radius.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Lantern, Hooded. A hooded lantern casts bright light in a 30-foot radius and dim light for an additional 30 feet. Once lit, it burns for 6 hours on a flask (1 pint) of oil. As an action, you can lower the hood, reducing the light to dim light in a 5-foot radius."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:lock",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Lock",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Lock"
+   },
+   "text": "Item | Cost | Weight\nLock | 10 gp | 1 lb.\n\nLock. A key is provided with the lock. Without the key, a creature proficient with thieves’ tools can pick this lock with a successful DC 15 Dexterity check. Your GM may decide that better locks are available for higher prices.",
+   "data": {
+    "cost": {
+     "amount": 10,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Lock. A key is provided with the lock. Without the key, a creature proficient with thieves’ tools can pick this lock with a successful DC 15 Dexterity check. Your GM may decide that better locks are available for higher prices."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:magnifying-glass",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Magnifying glass",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Magnifying glass"
+   },
+   "text": "Item | Cost | Weight\nMagnifying glass | 100 gp | —\n\nMagnifying Glass. This lens allows a closer look at small objects. It is also useful as a substitute for flint and steel when starting fires. Lighting a fire with a magnifying glass requires light as bright as sunlight to focus, tinder to ignite, and about 5 minutes for the fire to ignite. A magnifying glass grants advantage on any ability check made to appraise or inspect an item that is small or highly detailed.",
+   "data": {
+    "cost": {
+     "amount": 100,
+     "unit": "gp"
+    },
+    "weight": null,
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Magnifying Glass. This lens allows a closer look at small objects. It is also useful as a substitute for flint and steel when starting fires. Lighting a fire with a magnifying glass requires light as bright as sunlight to focus, tinder to ignite, and about 5 minutes for the fire to ignite. A magnifying glass grants advantage on any ability check made to appraise or inspect an item that is small or highly detailed."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:manacles",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Manacles",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Manacles"
+   },
+   "text": "Item | Cost | Weight\nManacles | 2 gp | 6 lb.\n\nManacles. These metal restraints can bind a Small or Medium creature. Escaping the manacles requires a successful DC 20 Dexterity check. Breaking them requires a successful DC 20 Strength check. Each set of manacles comes with one key. Without the key, a creature proficient with thieves’ tools can pick the manacles’ lock with a successful DC 15 Dexterity check. Manacles have 15 hit points.",
+   "data": {
+    "cost": {
+     "amount": 2,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 6
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Manacles. These metal restraints can bind a Small or Medium creature. Escaping the manacles requires a successful DC 20 Dexterity check. Breaking them requires a successful DC 20 Strength check. Each set of manacles comes with one key. Without the key, a creature proficient with thieves’ tools can pick the manacles’ lock with a successful DC 15 Dexterity check. Manacles have 15 hit points."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:mess-kit",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Mess kit",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Mess kit"
+   },
+   "text": "Item | Cost | Weight\nMess kit | 2 sp | 1 lb.\n\nMess Kit. This tin box contains a cup and simple cutlery. The box clamps together, and one side can be used as a cooking pan and the other as a plate or shallow bowl.",
+   "data": {
+    "cost": {
+     "amount": 2,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Mess Kit. This tin box contains a cup and simple cutlery. The box clamps together, and one side can be used as a cooking pan and the other as a plate or shallow bowl."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:oil-flask",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Oil (flask)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Oil (flask)"
+   },
+   "text": "Item | Cost | Weight\nOil (flask) | 1 sp | 1 lb.\n\nOil. Oil usually comes in a clay flask that holds 1 pint. As an action, you can splash the oil in this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. Make a ranged attack against a target creature or object, treating the oil as an improvised weapon. On a hit, the target is covered in oil. If the target takes any fire damage before the oil dries (after 1 minute), the target takes an additional 5 fire damage from the burning oil. You can also pour a flask of oil on the ground to cover a 5-foot-square area, provided that the surface is level. If lit, the oil burns for 2 rounds and deals 5 fire damage to any creature that enters the area or ends its turn in the area. A creature can take this damage only once per turn.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Oil. Oil usually comes in a clay flask that holds 1 pint. As an action, you can splash the oil in this flask onto a creature within 5 feet of you or throw it up to 20 feet, shattering it on impact. Make a ranged attack against a target creature or object, treating the oil as an improvised weapon. On a hit, the target is covered in oil. If the target takes any fire damage before the oil dries (after 1 minute), the target takes an additional 5 fire damage from the burning oil. You can also pour a flask of oil on the ground to cover a 5-foot-square area, provided that the surface is level. If lit, the oil burns for 2 rounds and deals 5 fire damage to any creature that enters the area or ends its turn in the area. A creature can take this damage only once per turn."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:poison-basic-vial",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Poison, basic (vial)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Poison, basic (vial)"
+   },
+   "text": "Item | Cost | Weight\nPoison, basic (vial) | 100 gp | —\n\nPoison, Basic. You can use the poison in this vial to coat one slashing or piercing weapon or up to three pieces of ammunition. Applying the poison takes an action. A creature hit by the poisoned weapon or ammunition must make a DC 10 Constitution saving throw or take 1d4 poison damage. Once applied, the poison retains potency for 1 minute before drying.",
+   "data": {
+    "cost": {
+     "amount": 100,
+     "unit": "gp"
+    },
+    "weight": null,
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Poison, Basic. You can use the poison in this vial to coat one slashing or piercing weapon or up to three pieces of ammunition. Applying the poison takes an action. A creature hit by the poisoned weapon or ammunition must make a DC 10 Constitution saving throw or take 1d4 poison damage. Once applied, the poison retains potency for 1 minute before drying."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [
+    {
+     "text": "1d4",
+     "count": 1,
+     "sides": 4,
+     "modifier": 0,
+     "average": 2
+    }
+   ],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:potion-of-healing",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Potion of healing",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Potion of healing"
+   },
+   "text": "Item | Cost | Weight\nPotion of healing | 50 gp | 1/2 lb.\n\nPotion of Healing. A character who drinks the magical red fluid in this vial regains 2d4 + 2 hit points. Drinking or administering a potion takes an action.",
+   "data": {
+    "cost": {
+     "amount": 50,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 0.5
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Potion of Healing. A character who drinks the magical red fluid in this vial regains 2d4 + 2 hit points. Drinking or administering a potion takes an action."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [
+    {
+     "text": "2d4 + 2",
+     "count": 2,
+     "sides": 4,
+     "modifier": 2,
+     "average": 7
+    }
+   ],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:pouch",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Pouch",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Pouch"
+   },
+   "text": "Item | Cost | Weight\nPouch | 5 sp | 1 lb.\n\nPouch. A cloth or leather pouch can hold up to 20 sling bullets or 50 blowgun needles, among other things. A compartmentalized pouch for holding spell components is called a component pouch (described earlier in this section).",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Pouch. A cloth or leather pouch can hold up to 20 sling bullets or 50 blowgun needles, among other things. A compartmentalized pouch for holding spell components is called a component pouch (described earlier in this section)."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:quiver",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Quiver",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Quiver"
+   },
+   "text": "Item | Cost | Weight\nQuiver | 1 gp | 1 lb.\n\nQuiver. A quiver can hold up to 20 arrows.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Quiver. A quiver can hold up to 20 arrows."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:ram-portable",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Ram, portable",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Ram, portable"
+   },
+   "text": "Item | Cost | Weight\nRam, portable | 4 gp | 35 lb.\n\nRam, Portable. You can use a portable ram to break down doors. When doing so, you gain a +4 bonus on the Strength check. One other character can help you use the ram, giving you advantage on this check.",
+   "data": {
+    "cost": {
+     "amount": 4,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 35
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Ram, Portable. You can use a portable ram to break down doors. When doing so, you gain a +4 bonus on the Strength check. One other character can help you use the ram, giving you advantage on this check."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:rations-1-day",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Rations (1 day)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Rations (1 day)"
+   },
+   "text": "Item | Cost | Weight\nRations (1 day) | 5 sp | 2 lb.\n\nRations. Rations consist of dry foods suitable for extended travel, including jerky, dried fruit, hardtack, and nuts.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 2
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Rations. Rations consist of dry foods suitable for extended travel, including jerky, dried fruit, hardtack, and nuts."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:rope-hempen-50-feet",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Rope, hempen (50 feet)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Rope, hempen (50 feet)"
+   },
+   "text": "Item | Cost | Weight\nRope, hempen (50 feet) | 1 gp | 10 lb.\n\nRope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 10
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Rope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:rope-silk-50-feet",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Rope, silk (50 feet)",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Rope, silk (50 feet)"
+   },
+   "text": "Item | Cost | Weight\nRope, silk (50 feet) | 10 gp | 5 lb.\n\nRope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check.",
+   "data": {
+    "cost": {
+     "amount": 10,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 5
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Rope. Rope, whether made of hemp or silk, has 2 hit points and can be burst with a DC 17 Strength check."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:scale-merchants",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Scale, merchant’s",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Scale, merchant’s"
+   },
+   "text": "Item | Cost | Weight\nScale, merchant’s | 5 gp | 3 lb.\n\nScale, Merchant’s. A scale includes a small balance, pans, and a suitable assortment of weights up to 2 pounds. With it, you can measure the exact weight of small objects, such as raw precious metals or trade goods, to help determine their worth.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 3
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Scale, Merchant’s. A scale includes a small balance, pans, and a suitable assortment of weights up to 2 pounds. With it, you can measure the exact weight of small objects, such as raw precious metals or trade goods, to help determine their worth."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:spellbook",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Spellbook",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Spellbook"
+   },
+   "text": "Item | Cost | Weight\nSpellbook | 50 gp | 3 lb.\n\nSpellbook. Essential for wizards, a spellbook is a leather-bound tome with 100 blank vellum pages suitable for recording spells.",
+   "data": {
+    "cost": {
+     "amount": 50,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 3
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Spellbook. Essential for wizards, a spellbook is a leather-bound tome with 100 blank vellum pages suitable for recording spells."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:spyglass",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Spyglass",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Spyglass"
+   },
+   "text": "Item | Cost | Weight\nSpyglass | 1,000 gp | 1 lb.\n\nSpyglass. Objects viewed through a spyglass are magnified to twice their size.",
+   "data": {
+    "cost": {
+     "amount": 1000,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Spyglass. Objects viewed through a spyglass are magnified to twice their size."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:tent-two-person",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Tent, two-person",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Tent, two-person"
+   },
+   "text": "Item | Cost | Weight\nTent, two-person | 2 gp | 20 lb.\n\nTent. A simple and portable canvas shelter, a tent sleeps two.",
+   "data": {
+    "cost": {
+     "amount": 2,
+     "unit": "gp"
+    },
+    "weight": {
+     "lb": 20
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Tent. A simple and portable canvas shelter, a tent sleeps two."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:tinderbox",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Tinderbox",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Tinderbox"
+   },
+   "text": "Item | Cost | Weight\nTinderbox | 5 sp | 1 lb.\n\nTinderbox. This small container holds flint, fire steel, and tinder (usually dry cloth soaked in light oil) used to kindle a fire. Using it to light a torch—or anything else with abundant, exposed fuel—takes an action. Lighting any other fire takes 1 minute.",
+   "data": {
+    "cost": {
+     "amount": 5,
+     "unit": "sp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Tinderbox. This small container holds flint, fire steel, and tinder (usually dry cloth soaked in light oil) used to kindle a fire. Using it to light a torch—or anything else with abundant, exposed fuel—takes an action. Lighting any other fire takes 1 minute."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
+   }
+  },
+  {
+   "id": "srd:gear:torch",
+   "category": "equipment",
+   "kind": "gear",
+   "name": "Torch",
+   "source": {
+    "document": "SRD 5.1",
+    "pages": [
+     68,
+     69
+    ],
+    "section": "Equipment",
+    "heading": "Torch"
+   },
+   "text": "Item | Cost | Weight\nTorch | 1 cp | 1 lb.\n\nTorch. A torch burns for 1 hour, providing bright light in a 20-foot radius and dim light for an additional 20 feet. If you make a melee attack with a burning torch and hit, it deals 1 fire damage.",
+   "data": {
+    "cost": {
+     "amount": 1,
+     "unit": "cp"
+    },
+    "weight": {
+     "lb": 1
+    },
+    "group": null,
+    "table": "Adventuring Gear",
+    "description": "Torch. A torch burns for 1 hour, providing bright light in a 20-foot radius and dim light for an additional 20 feet. If you make a melee attack with a burning torch and hit, it deals 1 fire damage."
+   },
+   "readiness": "parsed",
+   "notes": [],
+   "dice": [],
+   "icon": {
+    "set": "IconSet",
+    "index": 176
    }
   },
   {
@@ -6438,7 +6451,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Disguise kit"
@@ -6577,7 +6591,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Forgery kit"
@@ -6646,7 +6661,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Herbalism kit"
@@ -6890,7 +6906,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Navigator’s tools"
@@ -7027,7 +7044,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Poisoner’s kit"
@@ -7166,7 +7184,8 @@
    "source": {
     "document": "SRD 5.1",
     "pages": [
-     70
+     70,
+     71
     ],
     "section": "Equipment",
     "heading": "Thieves’ tools"
@@ -7245,22 +7264,21 @@
     "cost": {
      "amount": null,
      "unit": null,
-     "text": "*"
+     "printed": "*",
+     "basis": "* See the “Mounts and Vehicles” section."
     },
     "weight": {
      "lb": null,
-     "text": "*"
+     "printed": "*",
+     "basis": "* See the “Mounts and Vehicles” section."
     },
     "group": null,
     "table": "Tools",
     "description": "* See the “Mounts and Vehicles” section."
    },
-   "readiness": "extracted",
+   "readiness": "parsed",
    "notes": [
-    "cost is not a coin amount as printed: *",
-    "weight is not a pound figure as printed: *",
-    "missing required field(s): cost, weight",
-    "cost and weight are printed as * (see the Mounts and Vehicles section)"
+    "cost \"*\" and weight \"*\" are printed as symbols; the basis text is carried in data (the Tools table footnote)"
    ],
    "dice": [],
    "icon": {
@@ -7392,21 +7410,23 @@
     "cost": {
      "amount": null,
      "unit": null,
-     "text": "×4"
+     "printed": "×4",
+     "basis": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much.",
+     "multiplier": 4
     },
     "weight": {
      "lb": null,
-     "text": "×2"
+     "printed": "×2",
+     "basis": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much.",
+     "multiplier": 2
     },
     "group": null,
     "table": "Tack, Harness, and Drawn Vehicles",
     "description": "Barding. Barding is armor designed to protect an animal’s head, neck, chest, and body. Any type of armor shown on the Armor table can be purchased as barding. The cost is four times the equivalent armor made for humanoids, and it weighs twice as much."
    },
-   "readiness": "extracted",
+   "readiness": "parsed",
    "notes": [
-    "cost is not a coin amount as printed: ×4",
-    "weight is not a pound figure as printed: ×2",
-    "missing required field(s): cost, weight"
+    "cost \"×4\" and weight \"×2\" are printed as symbols; the basis text is carried in data (the Barding paragraph)"
    ],
    "dice": [],
    "icon": {

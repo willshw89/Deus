@@ -1,0 +1,51 @@
+Condition Immunities prone                                the same turn, the target takes an extra 9 (2d8)
+Senses darkvision 60 ft., passive Perception 11           piercing damage. If the target is a creature, it must
+Languages —                                               succeed on a DC 14 Strength saving throw or be
+Challenge 2 (450 XP)                                      pushed up to 10 feet away and knocked prone.
+                                                          Labyrinthine Recall. The minotaur can perfectly recall
+Shapechanger. The mimic can use its action to             any path it has traveled.
+polymorph into an object or back into its true,           Reckless. At the start of its turn, the minotaur can gain
+amorphous form. Its statistics are the same in each       advantage on all melee weapon attack rolls it makes
+form. Any equipment it is wearing or carrying isn’t       during that turn, but attack rolls against it have
+transformed. It reverts to its true form if it dies.      advantage until the start of its next turn.
+Adhesive (Object Form Only). The mimic adheres to
+anything that touches it. A Huge or smaller creature      Actions
+adhered to the mimic is also grappled by it (escape DC    Greataxe. Melee Weapon Attack: +6 to hit, reach 5 ft.,
+13). Ability checks made to escape this grapple have      one target. Hit: 17 (2d12 + 4) slashing damage.
+disadvantage.                                             Gore. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+False Appearance (Object Form Only). While the mimic      target. Hit: 13 (2d8 + 4) piercing damage.
+remains motionless, it is indistinguishable from an
+ordinary object.                                          Mummies
+Grappler. The mimic has advantage on attack rolls
+against any creature grappled by it.                      Mummy
+
+Actions                                                   Medium undead, lawful evil
+Pseudopod. Melee Weapon Attack: +5 to hit, reach 5
+ft., one target. Hit: 7 (1d8 + 3) bludgeoning damage. If  Armor Class 11 (natural armor)
+the mimic is in object form, the target is subjected to   Hit Points 58 (9d8 + 18)
+its Adhesive trait.                                       Speed 20 ft.
+Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+target. Hit: 7 (1d8 + 3) piercing damage plus 4 (1d8)         STR DEX CON INT WIS CHA
+acid damage.                                                16 (+3) 8 (−1) 15 (+2) 6 (−2) 10 (+0) 12 (+1)
+
+Minotaur                                                  Saving Throws Wis +2
+                                                          Damage Vulnerabilities fire
+Large monstrosity, chaotic evil                           Damage Resistances bludgeoning, piercing, and
+
+Armor Class 14 (natural armor)                              slashing from nonmagical attacks
+Hit Points 76 (9d10 + 27)                                 Damage Immunities necrotic, poison
+Speed 40 ft.                                              Condition Immunities charmed, exhaustion, frightened,
+
+    STR DEX CON INT WIS CHA                                 paralyzed, poisoned
+  18 (+4) 11 (+0) 16 (+3) 6 (−2) 16 (+3) 9 (−1)           Senses darkvision 60 ft., passive Perception 10
+                                                          Languages the languages it knew in life
+Skills Perception +7                                      Challenge 3 (700 XP)
+Senses darkvision 60 ft., passive Perception 17
+Languages Abyssal                                         Actions
+Challenge 3 (700 XP)                                      Multiattack. The mummy can use its Dreadful Glare
+                                                          and makes one attack with its rotting fist.
+Charge. If the minotaur moves at least 10 feet straight   Rotting Fist. Melee Weapon Attack: +5 to hit, reach 5
+toward a target and then hits it with a gore attack on    ft., one target. Hit: 10 (2d6 + 3) bludgeoning damage
+                                                          plus 10 (3d6) necrotic damage. If the target is a
+                                                          creature, it must succeed on a DC 12 Constitution
+                                                          saving throw or be cursed with mummy rot. The cursed

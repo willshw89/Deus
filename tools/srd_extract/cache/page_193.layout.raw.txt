@@ -1,0 +1,62 @@
+  The strong wind keeps fog, smoke, and other gases       GM as precisely as possible. The GM has great
+at bay. Small or smaller flying creatures or objects      latitude in ruling what occurs in such an instance;
+can’t pass through the wall. Loose, lightweight           the greater the wish, the greater the likelihood that
+materials brought into the wall fly upward. Arrows,       something goes wrong. This spell might simply fail,
+bolts, and other ordinary projectiles launched at         the effect you desire might only be partly achieved,
+targets behind the wall are deflected upward and          or you might suffer some unforeseen consequence as
+automatically miss. (Boulders hurled by giants or         a result of how you worded the wish. For example,
+siege engines, and similar projectiles, are               wishing that a villain were dead might propel you
+unaffected.) Creatures in gaseous form can’t pass         forward in time to a period when that villain is no
+through it.                                               longer alive, effectively removing you from the game.
+                                                          Similarly, wishing for a legendary magic item or
+Wish                                                      artifact might instantly transport you to the
+                                                          presence of the item’s current owner.
+9th-­‐‑level conjuration
+                                                            The stress of casting this spell to produce any
+Casting Time: 1 action                                    effect other than duplicating another spell weakens
+Range: Self                                               you. After enduring that stress, each time you cast a
+Components: V                                             spell until you finish a long rest, you take 1d10
+Duration: Instantaneous                                   necrotic damage per level of that spell. This damage
+                                                          can’t be reduced or prevented in any way. In
+Wish is the mightiest spell a mortal creature can cast.   addition, your Strength drops to 3, if it isn’t 3 or
+By simply speaking aloud, you can alter the very          lower already, for 2d4 days. For each of those days
+foundations of reality in accord with your desires.       that you spend resting and doing nothing more than
+                                                          light activity, your remaining recovery time
+  The basic use of this spell is to duplicate any other   decreases by 2 days. Finally, there is a 33 percent
+spell of 8th level or lower. You don’t need to meet       chance that you are unable to cast wish ever again if
+any requirements in that spell, including costly          you suffer this stress.
+components. The spell simply takes effect.
+                                                          Word of Recall
+  Alternatively, you can create one of the following
+effects of your choice:                                   6th-­‐‑level conjuration
+
+• You create one object of up to 25,000 gp in value       Casting Time: 1 action
+  that isn’t a magic item. The object can be no more      Range: 5 feet
+  than 300 feet in any dimension, and it appears in       Components: V
+  an unoccupied space you can see on the ground.          Duration: Instantaneous
+
+• You allow up to twenty creatures that you can see       You and up to five willing creatures within 5 feet of
+  to regain all hit points, and you end all effects on    you instantly teleport to a previously designated
+  them described in the greater restoration spell.        sanctuary. You and any creatures that teleport with
+                                                          you appear in the nearest unoccupied space to the
+• You grant up to ten creatures that you can see          spot you designated when you prepared your
+  resistance to a damage type you choose.                 sanctuary (see below). If you cast this spell without
+                                                          first preparing a sanctuary, the spell has no effect.
+• You grant up to ten creatures you can see
+  immunity to a single spell or other magical effect        You must designate a sanctuary by casting this
+  for 8 hours. For instance, you could make yourself      spell within a location, such as a temple, dedicated to
+  and all your companions immune to a lich’s life         or strongly linked to your deity. If you attempt to
+  drain attack.                                           cast the spell in this manner in an area that isn’t
+                                                          dedicated to your deity, the spell has no effect.
+• You undo a single recent event by forcing a reroll
+  of any roll made within the last round (including       Zone of Truth
+  your last turn). Reality reshapes itself to
+  accommodate the new result. For example, a wish         2nd-­‐‑level enchantment
+  spell could undo an opponent’s successful save, a
+  foe’s critical hit, or a friend’s failed save. You can  Casting Time: 1 action
+  force the reroll to be made with advantage or           Range: 60 feet
+  disadvantage, and you can choose whether to use         Components: V, S
+  the reroll or the original roll.                        Duration: 10 minutes
+
+You might be able to achieve something beyond the
+scope of the above examples. State your wish to the

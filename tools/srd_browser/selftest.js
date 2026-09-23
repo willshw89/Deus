@@ -405,7 +405,19 @@ async function suite(label, catalogDir) {
             if (Q.search(index, { readiness: "bogus" }).length !== 0) bad.push("bogus tag not empty");
             return bad.length ? bad.join("; ") : true;
         });
-        await check("fixture-style catalogue exposes all four readiness tags", () => !isFixture ? { skip: "only asserted for the fixture" } : eq(index.readiness.join(","), Q.READINESS.join(","), "tags"));
+        await check("readiness tags in the index are known, in canonical order, and match what the manifest declares (fixture: all four)", () => {
+            const tags = index.readiness;
+            if (!tags.length) return "index lists no readiness tags";
+            const unknown = tags.filter(t => Q.READINESS.indexOf(t) < 0);
+            if (unknown.length) return "unknown tag(s): " + unknown.join(",");
+            const canonical = Q.READINESS.filter(t => tags.indexOf(t) >= 0);
+            if (tags.join(",") !== canonical.join(",")) return "order " + tags.join(",") + " differs from canonical " + canonical.join(",");
+            if (isFixture) return eq(tags.join(","), Q.READINESS.join(","), "fixture tags");
+            const declared = Q.declaredCounts(loaded.manifest).totals.readiness;
+            if (!declared) return "manifest declares no totals readiness counts, so the loaded tags (" + tags.join(",") + ") cannot be checked against it";
+            const declaredTags = Q.READINESS.filter(t => Object.keys(declared).indexOf(t) >= 0);
+            return eq(tags.join(","), declaredTags.join(","), "loaded tags vs manifest totals");
+        });
         await check("challenge rating filter returns exactly the creatures with that rating", () => {
             if (!index.challenges.length) return isFixture ? "fixture has no challenge ratings" : { skip: "no creature has data.challenge" };
             const bad = [];

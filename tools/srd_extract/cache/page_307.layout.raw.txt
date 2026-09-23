@@ -1,0 +1,51 @@
+takes an action to douse the fire, the creature takes 5    Whelm (Recharge 4–6). Each creature in the
+(1d10) fire damage at the start of each of its turns.      elemental’s space must make a DC 15 Strength saving
+Illumination. The elemental sheds bright light in a 30-­‐  throw. On a failure, a target takes 13 (2d8 + 4)
+foot radius and dim light in an additional 30 feet.        bludgeoning damage. If it is Large or smaller, it is also
+Water Susceptibility. For every 5 feet the elemental       grappled (escape DC 14). Until this grapple ends, the
+moves in water, or for every gallon of water splashed      target is restrained and unable to breathe unless it can
+on it, it takes 1 cold damage.                             breathe water. If the saving throw is successful, the
+                                                           target is pushed out of the elemental’s space.
+Actions
+Multiattack. The elemental makes two touch attacks.          The elemental can grapple one Large creature or up
+Touch. Melee Weapon Attack: +6 to hit, reach 5 ft., one    to two Medium or smaller creatures at one time. At the
+target. Hit: 10 (2d6 + 3) fire damage. If the target is a  start of each of the elemental’s turns, each target
+creature or a flammable object, it ignites. Until a        grappled by it takes 13 (2d8 + 4) bludgeoning damage.
+creature takes an action to douse the fire, the target     A creature within 5 feet of the elemental can pull a
+takes 5 (1d10) fire damage at the start of each of its     creature or object out of it by taking an action to make
+turns.                                                     a DC 14 Strength and succeeding.
+
+Water Elemental                                            Elf, Drow
+
+Large elemental, neutral                                   Medium humanoid (elf), neutral evil
+
+Armor Class 14 (natural armor)                             Armor Class 15 (chain shirt)
+Hit Points 114 (12d10 + 48)                                Hit Points 13 (3d8)
+Speed 30 ft., swim 90 ft.                                  Speed 30 ft.
+
+    STR DEX CON INT WIS CHA                                    STR DEX CON INT WIS CHA
+  18 (+4) 14 (+2) 18 (+4) 5 (−3) 10 (+0) 8 (−1)              10 (+0) 14 (+2) 10 (+0) 11 (+0) 11 (+0) 12 (+1)
+
+Damage Resistances acid; bludgeoning, piercing, and        Skills Perception +2, Stealth +4
+  slashing from nonmagical attacks                         Senses darkvision 120 ft., passive Perception 12
+                                                           Languages Elvish, Undercommon
+Damage Immunities poison                                   Challenge 1/4 (50 XP)
+Condition Immunities exhaustion, grappled, paralyzed,
+                                                           Fey Ancestry. The drow has advantage on saving
+  petrified, poisoned, prone, restrained, unconscious      throws against being charmed, and magic can’t put the
+Senses darkvision 60 ft., passive Perception 10            drow to sleep.
+Languages Aquan                                            Innate Spellcasting. The drow’s spellcasting ability is
+Challenge 5 (1,800 XP)                                     Charisma (spell save DC 11). It can innately cast the
+                                                           following spells, requiring no material components:
+Water Form. The elemental can enter a hostile              At will: dancing lights
+creature’s space and stop there. It can move through a     1/day each: darkness, faerie fire
+space as narrow as 1 inch wide without squeezing.          Sunlight Sensitivity. While in sunlight, the drow has
+Freeze. If the elemental takes cold damage, it partially   disadvantage on attack rolls, as well as on Wisdom
+freezes; its speed is reduced by 20 feet until the end of  (Perception) checks that rely on sight.
+its next turn.
+                                                           Actions
+Actions
+Multiattack. The elemental makes two slam attacks.         Shortsword. Melee Weapon Attack: +4 to hit, reach 5
+Slam. Melee Weapon Attack: +7 to hit, reach 5 ft., one     ft., one target. Hit: 5 (1d6 + 2) piercing damage.
+target. Hit: 13 (2d8 + 4) bludgeoning damage.              Hand Crossbow. Ranged Weapon Attack: +4 to hit,
+                                                           range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing

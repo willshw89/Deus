@@ -1,0 +1,57 @@
+the GM’s choice within 10 feet of you and attacks you,       world. However, the keep is currently in the hands of
+warning all others that you must win the battle alone.       monsters, which you must clear out before you can
+The avatar fights until you die or it drops to 0 hit         claim the keep as yours.
+points, whereupon it disappears. If anyone tries to
+help you, the helper summons its own avatar of                 Vizier. At any time you choose within one year of
+death. A creature slain by an avatar of death can’t be       drawing this card, you can ask a question in
+restored to life.                                            meditation and mentally receive a truthful answer to
+                                                             that question. Besides information, the answer helps
+Avatar of Death                                              you solve a puzzling problem or other dilemma. In
+                                                             other words, the knowledge comes with wisdom on
+Medium undead, neutral evil                                  how to apply it.
+
+Armor Class 20                                                 The Void. This black card spells disaster. Your soul
+Hit Points half the hit point maximum of its summoner        is drawn from your body and contained in an object
+Speed 60 ft., fly 60 ft. (hover)                             in a place of the GM’s choice. One or more powerful
+                                                             beings guard the place. While your soul is trapped in
+    STR DEX CON INT WIS CHA                                  this way, your body is incapacitated. A wish spell
+  16 (+3) 16 (+3) 16 (+3) 16 (+3) 16 (+3) 16 (+3)            can’t restore your soul, but the spell reveals the
+                                                             location of the object that holds it. You draw no more
+Damage Immunities necrotic, poison                           cards.
+Condition Immunities charmed, frightened, paralyzed,
+                                                             Defender
+  petrified, poisoned, unconscious
+Senses darkvision 60 ft., truesight 60 ft., passive          Weapon (any sword), legendary (requires
+                                                             attunement)
+  Perception 13
+Languages all languages known to its summoner                You gain a +3 bonus to attack and damage rolls
+Challenge — (0 XP)                                           made with this magic weapon.
+
+Incorporeal Movement. The avatar can move through              The first time you attack with the sword on each of
+other creatures and objects as if they were difficult        your turns, you can transfer some or all of the
+terrain. It takes 5 (1d10) force damage if it ends its turn  sword’s bonus to your Armor Class, instead of using
+inside an object.                                            the bonus on any attacks that turn. For example, you
+Turning Immunity. The avatar is immune to features           could reduce the bonus to your attack and damage
+that turn undead.                                            rolls to +1 and gain a +2 bonus to AC. The adjusted
+                                                             bonuses remain in effect until the start of your next
+Actions                                                      turn, although you must hold the sword to gain a
+                                                             bonus to AC from it.
+Reaping Scythe. The avatar sweeps its spectral scythe
+through a creature within 5 feet of it, dealing 7 (1d8 +     Demon Armor
+3) slashing damage plus 4 (1d8) necrotic damage.
+                                                             Armor (plate), very rare (requires attunement)
+  Star. Increase one of your ability scores by 2. The
+score can exceed 20 but can’t exceed 24.                     While wearing this armor, you gain a +1 bonus to AC,
+                                                             and you can understand and speak Abyssal. In
+  Sun. You gain 50,000 XP, and a wondrous item               addition, the armor’s clawed gauntlets turn unarmed
+(which the GM determines randomly) appears in                strikes with your hands into magic weapons that
+your hands.                                                  deal slashing damage, with a +1 bonus to attack rolls
+                                                             and damage rolls and a damage die of 1d8.
+  Talons. Every magic item you wear or carry
+disintegrates. Artifacts in your possession aren’t             Curse. Once you don this cursed armor, you can’t
+destroyed but do vanish.                                     doff it unless you are targeted by the remove curse
+                                                             spell or similar magic. While wearing the armor, you
+  Throne. You gain proficiency in the Persuasion             have disadvantage on attack rolls against demons
+skill, and you double your proficiency bonus on              and on saving throws against their spells and special
+checks made with that skill. In addition, you gain           abilities.
+rightful ownership of a small keep somewhere in the

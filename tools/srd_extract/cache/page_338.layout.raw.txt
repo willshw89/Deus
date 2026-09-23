@@ -1,0 +1,57 @@
+action to pull a creature or object out of the cube.      Senses blindsight 60 ft. (blind beyond this radius),
+Doing so requires a successful DC 12 Strength check,        passive Perception 8
+and the creature making the attempt takes 10 (3d6)
+acid damage.                                              Languages —
+                                                          Challenge 1/2 (100 XP)
+  The cube can hold only one Large creature or up to
+four Medium or smaller creatures inside it at a time.     Amorphous. The ooze can move through a space as
+                                                          narrow as 1 inch wide without squeezing.
+Transparent. Even when the cube is in plain sight, it
+takes a successful DC 15 Wisdom (Perception) check to     Corrode Metal. Any nonmagical weapon made of
+spot a cube that has neither moved nor attacked. A        metal that hits the ooze corrodes. After dealing
+creature that tries to enter the cube’s space while       damage, the weapon takes a permanent and
+unaware of the cube is surprised by the cube.             cumulative −1 penalty to damage rolls. If its penalty
+                                                          drops to −5, the weapon is destroyed. Nonmagical
+Actions                                                   ammunition made of metal that hits the ooze is
+                                                          destroyed after dealing damage.
+Pseudopod. Melee Weapon Attack: +4 to hit, reach 5
+ft., one creature. Hit: 10 (3d6) acid damage.               The ooze can eat through 2-­‐inch-­‐thick, nonmagical
+                                                          metal in 1 round.
+Engulf. The cube moves up to its speed. While doing so,
+it can enter Large or smaller creatures’ spaces.          False Appearance. While the ooze remains motionless,
+Whenever the cube enters a creature’s space, the          it is indistinguishable from an oily pool or wet rock.
+creature must make a DC 12 Dexterity saving throw.
+                                                          Actions
+  On a successful save, the creature can choose to be
+pushed 5 feet back or to the side of the cube. A          Pseudopod. Melee Weapon Attack: +3 to hit, reach 5
+creature that chooses not to be pushed suffers the        ft., one target. Hit: 4 (1d6 + 1) bludgeoning damage
+consequences of a failed saving throw.                    plus 7 (2d6) acid damage, and if the target is wearing
+                                                          nonmagical metal armor, its armor is partly corroded
+  On a failed save, the cube enters the creature’s        and takes a permanent and cumulative −1 penalty to
+space, and the creature takes 10 (3d6) acid damage        the AC it offers. The armor is destroyed if the penalty
+and is engulfed. The engulfed creature can’t breathe, is  reduces its AC to 10.
+restrained, and takes 21 (6d6) acid damage at the start
+of each of the cube’s turns. When the cube moves, the     Ochre Jelly
+engulfed creature moves with it.
+                                                          Large ooze, unaligned
+  An engulfed creature can try to escape by taking an
+action to make a DC 12 Strength check. On a success,      Armor Class 8
+the creature escapes and enters a space of its choice     Hit Points 45 (6d10 + 12)
+within 5 feet of the cube.                                Speed 10 ft., climb 10 ft.
+
+Gray Ooze                                                   STR DEX CON INT               WIS    CHA
+                                                          15 (+2) 6 (−2) 14 (+2) 2 (−4)  6 (−2)  1 (−5)
+Medium ooze, unaligned
+                                                          Damage Resistances acid
+Armor Class 8                                             Damage Immunities lightning, slashing
+Hit Points 22 (3d8 + 9)                                   Condition Immunities blinded, charmed, deafened,
+Speed 10 ft., climb 10 ft.
+                                                            exhaustion, frightened, prone
+  STR DEX CON INT               WIS    CHA                Senses blindsight 60 ft. (blind beyond this radius),
+12 (+1) 6 (−2) 16 (+3) 1 (−5)  6 (−2)  2 (−4)
+                                                            passive Perception 8
+Skills Stealth +2                                         Languages —
+Damage Resistances acid, cold, fire                       Challenge 2 (450 XP)
+Condition Immunities blinded, charmed, deafened,
+
+  exhaustion, frightened, prone

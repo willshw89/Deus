@@ -1,0 +1,60 @@
+within range, to a destination you select. If you         north, 2 as northeast, 3 as east, and so on around the
+target an object, it must be able to fit entirely inside  points of the compass. If you were teleporting to a
+a 10-­‐‑foot cube, and it can’t be held or carried by an  coastal city and wound up 18 miles out at sea, you
+unwilling creature.                                       could be in trouble.
+
+  The destination you choose must be known to you,          Similar Area. You and your group (or the target
+and it must be on the same plane of existence as you.     object) wind up in a different area that’s visually or
+Your familiarity with the destination determines          thematically similar to the target area. If you are
+whether you arrive there successfully. The GM rolls       heading for your home laboratory, for example, you
+d100 and consults the table.                              might wind up in another wizard’s laboratory or in
+                                                          an alchemical supply shop that has many of the same
+Familiarity    Mishap  Similar    Off     On              tools and implements as your laboratory. Generally,
+Permanent         —     Area    Target  Target            you appear in the closest similar place, but since the
+circle                                  01–100            spell has no range limit, you could conceivably wind
+Associated        —       —       —                       up anywhere on the plane.
+object                                  01–100
+Very familiar  01–05      —       —                         Mishap. The spell’s unpredictable magic results in
+Seen casually  01–33                    25–100            a difficult journey. Each teleporting creature (or the
+Viewed once    01–43   06–13    14–24   54–100            target object) takes 3d10 force damage, and the GM
+Description    01–43   34–43    44–53   74–100            rerolls on the table to see where you wind up
+False          01–50   44–53    54–73   74–100            (multiple mishaps can occur, dealing damage each
+destination            44–53    54–73                     time).
+                       51–100              —
+                                  —                       Teleportation Circle
+
+  Familiarity. “Permanent circle” means a                 5th-­‐‑level conjuration
+permanent teleportation circle whose sigil sequence
+you know. “Associated object” means that you              Casting Time: 1 minute
+possess an object taken from the desired destination      Range: 10 feet
+within the last six months, such as a book from a         Components: V, M (rare chalks and inks infused
+wizard’s library, bed linen from a royal suite, or a
+chunk of marble from a lich’s secret tomb.                  with precious gems with 50 gp, which the spell
+                                                            consumes)
+  “Very familiar” is a place you have been very often,    Duration: 1 round
+a place you have carefully studied, or a place you can
+see when you cast the spell. “Seen casually” is           As you cast the spell, you draw a 10-­‐‑foot-­‐‑diameter
+someplace you have seen more than once but with           circle on the ground inscribed with sigils that link
+which you aren’t very familiar. “Viewed once” is a        your location to a permanent teleportation circle of
+place you have seen once, possibly using magic.           your choice whose sigil sequence you know and that
+“Description” is a place whose location and               is on the same plane of existence as you. A
+appearance you know through someone else’s                shimmering portal opens within the circle you drew
+description, perhaps from a map.                          and remains open until the end of your next turn.
+                                                          Any creature that enters the portal instantly appears
+  “False destination” is a place that doesn’t exist.      within 5 feet of the destination circle or in the
+Perhaps you tried to scry an enemy’s sanctum but          nearest unoccupied space if that space is occupied.
+instead viewed an illusion, or you are attempting to
+teleport to a familiar location that no longer exists.      Many major temples, guilds, and other important
+                                                          places have permanent teleportation circles
+  On Target. You and your group (or the target            inscribed somewhere within their confines. Each
+object) appear where you want to.                         such circle includes a unique sigil sequence—a
+                                                          string of magical runes arranged in a particular
+  Off Target. You and your group (or the target           pattern. When you first gain the ability to cast this
+object) appear a random distance away from the            spell, you learn the sigil sequences for two
+destination in a random direction. Distance off target    destinations on the Material Plane, determined by
+is 1d10 × 1d10 percent of the distance that was to be     the GM. You can learn additional sigil sequences
+traveled. For example, if you tried to travel 120         during your adventures. You can commit a new sigil
+miles, landed off target, and rolled a 5 and 3 on the     sequence to memory after studying it for 1 minute.
+two d10s, then you would be off target by 15 percent,
+or 18 miles. The GM determines the direction off            You can create a permanent teleportation circle by
+target randomly by rolling a d8 and designating 1 as      casting this spell in the same location every day for

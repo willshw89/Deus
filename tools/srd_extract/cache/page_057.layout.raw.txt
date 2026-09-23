@@ -1,0 +1,58 @@
+Experience Points                                              Paladin   Light armor, medium armor, shields, simple
+                                                               Ranger    weapons, martial weapons
+The experience point cost to gain a level is always                      Light armor, medium armor, shields, simple
+based on your total character level, as shown in the           Rogue     weapons, martial weapons, one skill from the
+Character Advancement table, not your level in a               Sorcerer  class’s skill list
+particular class. So, if you are a cleric 6/fighter 1, you     Warlock   Light armor, one skill from the class’s skill list,
+must gain enough XP to reach 8th level before you              Wizard    thieves’ tools
+can take your second level as a fighter or your                          —
+seventh level as a cleric.                                               Light armor, simple weapons
+                                                                         —
+
+Hit Points and Hit Dice                                        Class Features
+
+You gain the hit points from your new class as                 When you gain a new level in a class, you get its
+described for levels after 1st. You gain the 1st-­‐‑level      features for that level. You don’t, however, receive
+hit points for a class only when you are a 1st-­‐‑level        the class’s starting equipment, and a few features
+character.                                                     have additional rules when you’re multiclassing:
+                                                               Channel Divinity, Extra Attack, Unarmored Defense,
+  You add together the Hit Dice granted by all your            and Spellcasting.
+classes to form your pool of Hit Dice. If the Hit Dice
+are the same die type, you can simply pool them                Channel Divinity
+together. For example, both the fighter and the
+paladin have a d10, so if you are a paladin 5/fighter          If you already have the Channel Divinity feature and
+5, you have ten d10 Hit Dice. If your classes give you         gain a level in a class that also grants the feature, you
+Hit Dice of different types, keep track of them                gain the Channel Divinity effects granted by that
+separately. If you are a paladin 5/cleric 5, for               class, but getting the feature again doesn’t give you
+example, you have five d10 Hit Dice and five d8 Hit            an additional use of it. You gain additional uses only
+Dice.                                                          when you reach a class level that explicitly grants
+                                                               them to you. For example, if you are a cleric
+Proficiency Bonus                                              6/paladin 4, you can use Channel Divinity twice
+                                                               between rests because you are high enough level in
+Your proficiency bonus is always based on your total           the cleric class to have more uses. Whenever you use
+character level, as shown in the Character                     the feature, you can choose any of the Channel
+Advancement table, not your level in a particular              Divinity effects available to you from your two
+class. For example, if you are a fighter 3/rogue 2, you        classes.
+have the proficiency bonus of a 5th-­‐‑level character,
+which is +3.                                                   Extra Attack
+
+Proficiencies                                                  If you gain the Extra Attack class feature from more
+                                                               than one class, the features don’t add together. You
+When you gain your first level in a class other than           can’t make more than two attacks with this feature
+your initial class, you gain only some of new class’s          unless it says you do (as the fighter’s version of
+starting proficiencies, as shown in the Multiclassing          Extra Attack does). Similarly, the warlock’s eldritch
+Proficiencies table.                                           invocation Thirsting Blade doesn’t give you
+                                                               additional attacks if you also have Extra Attack.
+Multiclassing Proficiencies
+                                                               Unarmored Defense
+Class      Proficiencies Gained
+Barbarian  Shields, simple weapons, martial weapons            If you already have the Unarmored Defense feature,
+Bard       Light armor, one skill of your choice, one musical  you can’t gain it again from another class.
+           instrument of your choice
+Cleric     Light armor, medium armor, shields                  Spellcasting
+Druid      Light armor, medium armor, shields (druids will
+           not wear armor or use shields made of metal)        Your capacity for spellcasting depends partly on
+Fighter    Light armor, medium armor, shields, simple          your combined levels in all your spellcasting classes
+           weapons, martial weapons                            and partly on your individual levels in those classes.
+Monk       Simple weapons, shortswords                         Once you have the Spellcasting feature from more
+                                                               than one class, use the rules below. If you multiclass

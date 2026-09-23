@@ -1,0 +1,48 @@
+Giant Ape                                                Giant Bat
+
+Huge beast, unaligned                                    Large beast, unaligned
+Armor Class 12                                           Armor Class 13
+Hit Points 157 (15d12 + 60)                              Hit Points 22 (4d10)
+Speed 40 ft., climb 40 ft.                               Speed 10 ft., fly 60 ft.
+
+    STR DEX CON INT WIS CHA                                  STR DEX CON INT WIS CHA
+  23 (+6) 14 (+2) 18 (+4) 7 (−2) 12 (+1) 7 (−2)            15 (+2) 16 (+3) 11 (+0) 2 (−4) 12 (+1) 6 (−2)
+
+Skills Athletics +9, Perception +4                       Senses blindsight 60 ft., passive Perception 11
+Senses passive Perception 14                             Languages —
+Languages —                                              Challenge 1/4 (50 XP)
+Challenge 7 (2,900 XP)
+                                                         Echolocation. The bat can’t use its blindsight while
+Actions                                                  deafened.
+Multiattack. The ape makes two fist attacks.             Keen Hearing. The bat has advantage on Wisdom
+Fist. Melee Weapon Attack: +9 to hit, reach 10 ft., one  (Perception) checks that rely on hearing.
+target. Hit: 22 (3d10 + 6) bludgeoning damage.
+Rock. Ranged Weapon Attack: +9 to hit, range 50/100      Actions
+ft., one target. Hit: 30 (7d6 + 6) bludgeoning damage.
+                                                         Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one
+Giant Badger                                             creature. Hit: 5 (1d6 + 2) piercing damage.
+
+Medium beast, unaligned                                  Giant Boar                         WIS    CHA
+Armor Class 10                                                                             7 (−2)  5 (−3)
+Hit Points 13 (2d8 + 4)                                  Large beast, unaligned
+Speed 30 ft., burrow 10 ft.                              Armor Class 12 (natural armor)
+                                                         Hit Points 42 (5d10 + 15)
+    STR DEX CON INT WIS CHA                              Speed 40 ft.
+  13 (+1) 10 (+0) 15 (+2) 2 (−4) 12 (+1) 5 (−3)
+                                                             STR DEX CON INT
+Senses darkvision 30 ft., passive Perception 11            17 (+3) 10 (+0) 16 (+3) 2 (−4)
+Languages —
+Challenge 1/4 (50 XP)                                    Senses passive Perception 8
+                                                         Languages —
+Keen Smell. The badger has advantage on Wisdom           Challenge 2 (450 XP)
+(Perception) checks that rely on smell.
+                                                         Charge. If the boar moves at least 20 feet straight
+Actions                                                  toward a target and then hits it with a tusk attack on
+Multiattack. The badger makes two attacks: one with      the same turn, the target takes an extra 7 (2d6)
+its bite and one with its claws.                         slashing damage. If the target is a creature, it must
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one   succeed on a DC 13 Strength saving throw or be
+target. Hit: 4 (1d6 + 1) piercing damage.                knocked prone.
+Claws. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+target. Hit: 6 (2d4 + 1) slashing damage.                Relentless (Recharges after a Short or Long Rest). If
+                                                         the boar takes 10 damage or less that would reduce it
+                                                         to 0 hit points, it is reduced to 1 hit point instead.

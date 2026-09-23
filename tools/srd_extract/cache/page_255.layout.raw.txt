@@ -1,0 +1,60 @@
+  Giants tower over humans and their kind. They            game, such as a magic item, might refer to them. For
+are humanlike in shape, though some have multiple          instance, a spear that is especially effective at
+heads (ettins) or deformities (fomorians). The six         fighting demons would work against any monster
+varieties of true giant are hill giants, stone giants,     that has the demon tag.
+frost giants, fire giants, cloud giants, and storm
+giants. Besides these, creatures such as ogres and         Alignment
+trolls are giants.
+                                                           A monster’s alignment provides a clue to its
+  Humanoids are the main peoples of a fantasy              disposition and how it behaves in a roleplaying or
+gaming world, both civilized and savage, including         combat situation. For example, a chaotic evil
+humans and a tremendous variety of other species.          monster might be difficult to reason with and might
+They have language and culture, few if any innate          attack characters on sight, whereas a neutral
+magical abilities (though most humanoids can learn         monster might be willing to negotiate. See the
+spellcasting), and a bipedal form. The most common         Player’s Handbook for descriptions of the different
+humanoid races are the ones most suitable as player        alignments.
+characters: humans, dwarves, elves, and halflings.
+Almost as numerous but far more savage and brutal,           The alignment specified in a monster’s stat block
+and almost uniformly evil, are the races of goblinoids     is the default. Feel free to depart from it and change
+(goblins, hobgoblins, and bugbears), orcs, gnolls,         a monster’s alignment to suit the needs of your
+lizardfolk, and kobolds.                                   campaign. If you want a good-­‐‑aligned green dragon
+                                                           or an evil storm giant, there’s nothing stopping you.
+  Monstrosities are monsters in the strictest
+sense—frightening creatures that are not ordinary,           Some creatures can have any alignment. In other
+not truly natural, and almost never benign. Some are       words, you choose the monster’s alignment. Some
+the results of magical experimentation gone awry           monster’s alignment entry indicates a tendency or
+(such as owlbears), and others are the product of          aversion toward law, chaos, good, or evil. For
+terrible curses (including minotaurs and yuan-­‐‑ti).      example, a berserker can be any chaotic alignment
+They defy categorization, and in some sense serve as       (chaotic good, chaotic neutral, or chaotic evil), as
+a catch-­‐‑all category for creatures that don’t fit into  befits its wild nature.
+any other type.
+                                                             Many creatures of low intelligence have no
+  Oozes are gelatinous creatures that rarely have a        comprehension of law or chaos, good or evil. They
+fixed shape. They are mostly subterranean, dwelling        don’t make moral or ethical choices, but rather act
+in caves and dungeons and feeding on refuse, carrion,      on instinct. These creatures are unaligned, which
+or creatures unlucky enough to get in their way.           means they don’t have an alignment.
+Black puddings and gelatinous cubes are among the
+most recognizable oozes.                                   Armor Class
+
+  Plants in this context are vegetable creatures, not      A monster that wears armor or carries a shield has
+ordinary flora. Most of them are ambulatory, and           an Armor Class (AC) that takes its armor, shield, and
+some are carnivorous. The quintessential plants are        Dexterity into account. Otherwise, a monster’s AC is
+the shambling mound and the treant. Fungal                 based on its Dexterity modifier and natural armor, if
+creatures such as the gas spore and the myconid also       any. If a monster has natural armor, wears armor, or
+fall into this category.                                   carries a shield, this is noted in parentheses after its
+                                                           AC value.
+  Undead are once-­‐‑living creatures brought to a
+horrifying state of undeath through the practice of        Hit Points
+necromantic magic or some unholy curse. Undead
+include walking corpses, such as vampires and              A monster usually dies or is destroyed when it drops
+zombies, as well as bodiless spirits, such as ghosts       to 0 hit points. For more on hit points, see the
+and specters.                                              Player’s Handbook.
+
+Tags                                                         A monster’s hit points are presented both as a die
+                                                           expression and as an average number. For example,
+A monster might have one or more tags appended to          a monster with 2d8 hit points has 9 hit points on
+its type, in parentheses. For example, an orc has the      average (2 × 4½).
+humanoid (orc) type. The parenthetical tags provide
+additional categorization for certain creatures. The         A monster’s size determines the die used to
+tags have no rules of their own, but something in the      calculate its hit points, as shown in the Hit Dice by
+                                                           Size table.

@@ -1,0 +1,50 @@
+Noble                                                   Divine Eminence. As a bonus action, the priest can
+                                                        expend a spell slot to cause its melee weapon attacks
+Medium humanoid (any race), any alignment               to magically deal an extra 10 (3d6) radiant damage to a
+Armor Class 15 (breastplate)                            target on a hit. This benefit lasts until the end of the
+Hit Points 9 (2d8)                                      turn. If the priest expends a spell slot of 2nd level or
+Speed 30 ft.                                            higher, the extra damage increases by 1d6 for each
+                                                        level above 1st.
+    STR DEX CON INT WIS CHA                             Spellcasting. The priest is a 5th-­‐level spellcaster. Its
+  11 (+0) 12 (+1) 11 (+0) 12 (+1) 14 (+2) 16 (+3)       spellcasting ability is Wisdom (spell save DC 13, +5 to
+                                                        hit with spell attacks). The priest has the following
+Skills Deception +5, Insight +4, Persuasion +5          cleric spells prepared:
+Senses passive Perception 12                            Cantrips (at will): light, sacred flame, thaumaturgy
+Languages any two languages                             1st level (4 slots): cure wounds, guiding bolt, sanctuary
+Challenge 1/8 (25 XP)                                   2nd level (3 slots): lesser restoration, spiritual weapon
+                                                        3rd level (2 slots): dispel magic, spirit guardians
+Actions
+Rapier. Melee Weapon Attack: +3 to hit, reach 5 ft.,    Actions
+one target. Hit: 5 (1d8 + 1) piercing damage.           Mace. Melee Weapon Attack: +2 to hit, reach 5 ft., one
+                                                        target. Hit: 3 (1d6) bludgeoning damage.
+Reactions
+Parry. The noble adds 2 to its AC against one melee     Priests bring the teachings of their gods to the
+attack that would hit it. To do so, the noble must see  common folk. They are the spiritual leaders of
+the attacker and be wielding a melee weapon.            temples and shrines and often hold positions of
+                                                        influence in their communities. Evil priests might
+Nobles wield great authority and influence as           work openly under a tyrant, or they might be the
+members of the upper class, possessing wealth and       leaders of religious sects hidden in the shadows of
+connections that can make them as powerful as           good society, overseeing depraved rites.
+monarchs and generals. A noble often travels in the
+company of guards, as well as servants who are            A priest typically has one or more acolytes to help
+commoners.                                              with religious ceremonies and other sacred duties.
+
+  The noble’s statistics can also be used to represent  Scout
+courtiers who aren’t of noble birth.
+                                                        Medium humanoid (any race), any alignment
+Priest
+                                                        Armor Class 13 (leather armor)
+Medium humanoid (any race), any alignment               Hit Points 16 (3d8 + 3)
+Armor Class 13 (chain shirt)                            Speed 30 ft.
+Hit Points 27 (5d8 + 5)
+Speed 25 ft.                                                STR DEX CON INT WIS CHA
+                                                          11 (+0) 14 (+2) 12 (+1) 11 (+0) 13 (+1) 11 (+0)
+    STR DEX CON INT WIS CHA
+  10 (+0) 10 (+0) 12 (+1) 13 (+1) 16 (+3) 13 (+1)       Skills Nature +4, Perception +5, Stealth +6, Survival +5
+                                                        Senses passive Perception 15
+Skills Medicine +7, Persuasion +3, Religion +4          Languages any one language (usually Common)
+Senses passive Perception 13                            Challenge 1/2 (100 XP)
+Languages any two languages
+Challenge 2 (450 XP)                                    Keen Hearing and Sight. The scout has advantage on
+                                                        Wisdom (Perception) checks that rely on hearing or
+                                                        sight.

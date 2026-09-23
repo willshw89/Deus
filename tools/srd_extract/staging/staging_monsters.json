@@ -1,7 +1,7 @@
 {
   "metadata": {
     "generator": "tools/srd_extract/stage_monsters.js",
-    "generatedAt": "2026-09-23T01:17:58.257Z",
+    "generatedAt": "2026-09-23T02:12:22.964Z",
     "category": "creatures",
     "kind": "creature",
     "source": {
@@ -23,7 +23,7 @@
       ]
     },
     "cache": {
-      "generatedAt": "2026-09-23T01:17:52.372Z"
+      "generatedAt": "2026-09-23T01:40:25.618Z"
     },
     "license": {
       "id": "CC-BY-4.0",
@@ -21731,9 +21731,76 @@
         "conditionImmunities": [],
         "family": {
           "name": "Half-Dragon Template",
-          "text": "A beast, humanoid, giant, or monstrosity can become a half-dragon. It keeps its statistics, except as follows.\n\nChallenge. To avoid recalculating the creature’s challenge rating, apply the template only to a creature that meets the optional prerequisite in the Breath Weapon table below. Otherwise, recalculate the rating after you apply the template.\n\nSenses. The half-dragon gains blindsight with a radius of 10 feet and darkvision with a radius of 60 feet.\n\nResistances. The half-dragon gains resistance to a type of damage based on its color.\n\nColor | Damage Resistance\n\nBlack or copper | Acid\n\nBlue or bronze | Lightning\n\nBrass, gold, or red | Fire\n\nGreen | Poison\n\nSilver or white | Cold\n\nLanguages. The half-dragon speaks Draconic in addition to any other languages it knows.\n\nNew Action: Breath Weapon. The half-dragon has the breath weapon of its dragon half. The half-dragon’s size determines how this action functions.\n\nSize | Breath Weapon | Optional\n\nLarge or | As a wyrmling | Prerequisite\n\nsmaller | Challenge 2 or higher\n\nHuge | As a young dragon\n\nGargantuan | As an adult dragon | Challenge 7 or higher\n\nChallenge 8 or higher",
+          "text": "A beast, humanoid, giant, or monstrosity can become a half-dragon. It keeps its statistics, except as follows.\n\nChallenge. To avoid recalculating the creature’s challenge rating, apply the template only to a creature that meets the optional prerequisite in the Breath Weapon table below. Otherwise, recalculate the rating after you apply the template.\n\nSenses. The half-dragon gains blindsight with a radius of 10 feet and darkvision with a radius of 60 feet.\n\nResistances. The half-dragon gains resistance to a type of damage based on its color.\n\nColor | Damage Resistance\nBlack or copper | Acid\nBlue or bronze | Lightning\nBrass, gold, or red | Fire\nGreen | Poison\nSilver or white | Cold\n\nLanguages. The half-dragon speaks Draconic in addition to any other languages it knows.\n\nNew Action: Breath Weapon. The half-dragon has the breath weapon of its dragon half. The half-dragon’s size determines how this action functions.\n\nSize | Breath Weapon | Optional Prerequisite\nLarge or smaller | As a wyrmling | Challenge 2 or higher\nHuge | As a young dragon | Challenge 7 or higher\nGargantuan | As an adult dragon | Challenge 8 or higher",
           "path": [
             "Half-Dragon Template"
+          ],
+          "tables": [
+            {
+              "caption": null,
+              "columns": [
+                "Color",
+                "Damage Resistance"
+              ],
+              "rows": [
+                [
+                  "Black or copper",
+                  "Acid"
+                ],
+                [
+                  "Blue or bronze",
+                  "Lightning"
+                ],
+                [
+                  "Brass, gold, or red",
+                  "Fire"
+                ],
+                [
+                  "Green",
+                  "Poison"
+                ],
+                [
+                  "Silver or white",
+                  "Cold"
+                ]
+              ],
+              "pages": [
+                320,
+                321
+              ],
+              "notes": []
+            },
+            {
+              "caption": null,
+              "columns": [
+                "Size",
+                "Breath Weapon",
+                "Optional Prerequisite"
+              ],
+              "rows": [
+                [
+                  "Large or smaller",
+                  "As a wyrmling",
+                  "Challenge 2 or higher"
+                ],
+                [
+                  "Huge",
+                  "As a young dragon",
+                  "Challenge 7 or higher"
+                ],
+                [
+                  "Gargantuan",
+                  "As an adult dragon",
+                  "Challenge 8 or higher"
+                ]
+              ],
+              "pages": [
+                321
+              ],
+              "notes": [
+                "column 3: cell \"Optional Prerequisite\" reassembled from two printed lines; the wrap is geometrically ambiguous with \"Prerequisite Challenge 2 or higher\" and was resolved because the phrase occurs in the page text"
+              ]
+            }
           ]
         }
       },
@@ -21788,7 +21855,9 @@
         }
       ],
       "readiness": "parsed",
-      "notes": []
+      "notes": [
+        "family table 2 (pages 321): column 3: cell \"Optional Prerequisite\" reassembled from two printed lines; the wrap is geometrically ambiguous with \"Prerequisite Challenge 2 or higher\" and was resolved because the phrase occurs in the page text"
+      ]
     },
     {
       "id": "srd:creature:harpy",
@@ -49203,10 +49272,6 @@
     }
   ],
   "warnings": [
-    {
-      "page": 320,
-      "message": "heading \"Half-Dragon Template\": 11 table row(s) captured as printed lines with cells separated by \" | \" in data.family.text; cells that wrap onto a second line are not reassembled"
-    },
     {
       "page": 366,
       "message": "skipped 6 intro line(s) before the first stat block of section \"Appendix MM-A: Miscellaneous Creatures\": \"Appendix MM-A: Miscellaneous Creatures This appendix contains statistics for various animals, vermin, and other critters\"..."

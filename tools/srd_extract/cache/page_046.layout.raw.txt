@@ -1,0 +1,76 @@
+Warlock                                                             Weapons: Simple weapons
+                                                                    Tools: None
+Class Features                                                      Saving Throws: Wisdom, Charisma
+                                                                    Skills: Choose two skills from Arcana, Deception,
+As a warlock, you gain the following class features.
+                                                                      History, Intimidation, Investigation, Nature, and
+Hit Points                                                            Religion
+
+Hit Dice: 1d8 per warlock level                                     Equipment
+Hit Points at 1st Level: 8 + your Constitution
+                                                                    You start with the following equipment, in addition
+  modifier                                                          to the equipment granted by your background:
+Hit Points at Higher Levels: 1d8 (or 5) + your
+                                                                    • (a) a light crossbow and 20 bolts or (b) any simple
+  Constitution modifier per warlock level after 1st                   weapon
+
+Proficiencies                                                       • (a) a component pouch or (b) an arcane focus
+                                                                    • (a) a scholar’s pack or (b) a dungeoneer’s pack
+Armor: Light armor                                                  • Leather armor, any simple weapon, and two
+
+                                                                      daggers
+
+The Warlock
+
+Level  Proficiency  Features                              Cantrips  Spells  Spell  Slot   Invocations
+ 1st      Bonus     Otherworldly Patron, Pact             Known     Known   Slots  Level    Known
+            +2      Magic                                                           1st        
+                    Eldritch Invocations                      2        2      1
+2nd    +2           Pact Boon                                                       1st         2
+                    Ability Score Improvement                 2        3      2    2nd          2
+3rd    +2                                                    2        4      2    2nd          2
+                                                              3        5      2     3rd         3
+4th    +2           Otherworldly Patron feature               3        6      2     3rd         3
+                                                             3        7      2     4th         4
+5th    +3                                                     3        8      2     4th         4
+                    Ability Score Improvement                 3        9      2     5th         5
+6th    +3                                                    3       10      2     5th         5
+                                                              4       10      2     5th         5
+7th    +3           Otherworldly Patron feature               4       11      3     5th         6
+                    Mystic Arcanum (6th level)                4       11      3     5th         6
+8th    +3           Ability Score Improvement                 4       12      3     5th         6
+                    Mystic Arcanum (7th level)                4       12      3     5th         7
+9th    +4           Otherworldly Patron feature               4       13      3     5th         7
+                    Mystic Arcanum (8th level)                4       13      3     5th         7
+10th   +4           Ability Score Improvement                 4       14      4     5th         8
+                    Mystic Arcanum (9th level)                4       14      4     5th         8
+11th   +4                                                    4       15      4     5th         8
+                                                              4       15      4
+12th   +4           Ability Score Improvement
+                    Eldritch Master
+13th   +5
+
+14th   +5
+
+15th   +5
+
+16th   +5
+
+17th   +6
+
+18th   +6
+
+19th   +6
+
+20th   +6
+
+Otherworldly Patron                                                 Pact Magic
+
+At 1st level, you have struck a bargain with an                     Your arcane research and the magic bestowed on
+otherworldly being of your choice: the Archfey, the                 you by your patron have given you facility with
+Fiend, or the Great Old One, each of which is detailed              spells.
+at the end of the class description. Your choice
+grants you features at 1st level and again at 6th, 10th,            Cantrips
+and 14th level.
+                                                                    You know two cantrips of your choice from the
+                                                                    warlock spell list. You learn additional warlock

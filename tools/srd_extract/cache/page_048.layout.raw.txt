@@ -1,0 +1,63 @@
+pact weapon if you die, if you perform the 1-­‐‑hour       Eldritch Invocations
+ritual on a different weapon, or if you use a 1-­‐‑hour
+ritual to break your bond to it. The weapon appears        If an eldritch invocation has prerequisites, you must
+at your feet if it is in the extradimensional space        meet them to learn it. You can learn the invocation at
+when the bond breaks.                                      the same time that you meet its prerequisites. A level
+                                                           prerequisite refers to your level in this class.
+Pact of the Tome
+                                                           Agonizing Blast
+Your patron gives you a grimoire called a Book of
+Shadows. When you gain this feature, choose three          Prerequisite: eldritch blast cantrip
+cantrips from any class’s spell list (the three needn’t
+be from the same list). While the book is on your          When you cast eldritch blast, add your Charisma
+person, you can cast those cantrips at will. They          modifier to the damage it deals on a hit.
+don’t count against your number of cantrips known.
+If they don’t appear on the warlock spell list, they       Armor of Shadows
+are nonetheless warlock spells for you.
+                                                           You can cast mage armor on yourself at will, without
+  If you lose your Book of Shadows, you can perform        expending a spell slot or material components.
+a 1-­‐‑hour ceremony to receive a replacement from
+your patron. This ceremony can be performed                Ascendant Step
+during a short or long rest, and it destroys the
+previous book. The book turns to ash when you die.         Prerequisite: 9th level
+
+Ability Score Improvement                                  You can cast levitate on yourself at will, without
+                                                           expending a spell slot or material components.
+When you reach 4th level, and again at 8th, 12th,
+16th, and 19th level, you can increase one ability         Beast Speech
+score of your choice by 2, or you can increase two
+ability scores of your choice by 1. As normal, you         You can cast speak with animals at will, without
+can’t increase an ability score above 20 using this        expending a spell slot.
+feature.
+                                                           Beguiling Influence
+Mystic Arcanum
+                                                           You gain proficiency in the Deception and
+At 11th level, your patron bestows upon you a              Persuasion skills.
+magical secret called an arcanum. Choose one 6th-­‐‑
+level spell from the warlock spell list as this arcanum.   Bewitching Whispers
+
+  You can cast your arcanum spell once without             Prerequisite: 7th level
+expending a spell slot. You must finish a long rest
+before you can do so again.                                You can cast compulsion once using a warlock spell
+                                                           slot. You can’t do so again until you finish a long rest.
+  At higher levels, you gain more warlock spells of
+your choice that can be cast in this way: one 7th-­‐‑      Book of Ancient Secrets
+level spell at 13th level, one 8th-­‐‑level spell at 15th
+level, and one 9th-­‐‑level spell at 17th level. You       Prerequisite: Pact of the Tome feature
+regain all uses of your Mystic Arcanum when you
+finish a long rest.                                        You can now inscribe magical rituals in your Book of
+                                                           Shadows. Choose two 1st-­‐‑level spells that have the
+Eldritch Master                                            ritual tag from any class’s spell list (the two needn’t
+                                                           be from the same list). The spells appear in the book
+At 20th level, you can draw on your inner reserve of       and don’t count against the number of spells you
+mystical power while entreating your patron to             know. With your Book of Shadows in hand, you can
+regain expended spell slots. You can spend 1 minute        cast the chosen spells as rituals. You can’t cast the
+entreating your patron for aid to regain all your          spells except as rituals, unless you’ve learned them
+expended spell slots from your Pact Magic feature.         by some other means. You can also cast a warlock
+Once you regain spell slots with this feature, you         spell you know as a ritual if it has the ritual tag.
+must finish a long rest before you can do so again.
+                                                             On your adventures, you can add other ritual
+                                                           spells to your Book of Shadows. When you find such
+                                                           a spell, you can add it to the book if the spell’s level
+                                                           is equal to or less than half your warlock level
+                                                           (rounded up) and if you can spare the time to

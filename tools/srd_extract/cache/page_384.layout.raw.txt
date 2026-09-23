@@ -1,0 +1,47 @@
+Mammoth                                                  Keen Hearing and Smell. The mastiff has advantage on
+                                                         Wisdom (Perception) checks that rely on hearing or
+Huge beast, unaligned                                    smell.
+Armor Class 13 (natural armor)
+Hit Points 126 (11d12 + 55)                              Actions
+Speed 40 ft.                                             Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+                                                         target. Hit: 4 (1d6 + 1) piercing damage. If the target is
+    STR DEX CON INT WIS CHA                              a creature, it must succeed on a DC 11 Strength saving
+  24 (+7) 9 (−1) 21 (+5) 3 (−4) 11 (+0) 6 (−2)           throw or be knocked prone.
+
+Senses passive Perception 10                             Mastiffs are impressive hounds prized by
+Languages —                                              humanoids for their loyalty and keen senses.
+Challenge 6 (2,300 XP)                                   Mastiffs can be trained as guard dogs, hunting dogs,
+                                                         and war dogs. Halflings and other Small humanoids
+Trampling Charge. If the mammoth moves at least 20       ride them as mounts.
+feet straight toward a creature and then hits it with a
+gore attack on the same turn, that target must succeed   Mule
+on a DC 18 Strength saving throw or be knocked prone.
+If the target is prone, the mammoth can make one         Medium beast, unaligned
+stomp attack against it as a bonus action.               Armor Class 10
+                                                         Hit Points 11 (2d8 + 2)
+Actions                                                  Speed 40 ft.
+Gore. Melee Weapon Attack: +10 to hit, reach 10 ft.,
+one target. Hit: 25 (4d8 + 7) piercing damage.               STR DEX CON INT WIS CHA
+Stomp. Melee Weapon Attack: +10 to hit, reach 5 ft.,       14 (+2) 10 (+0) 13 (+1) 2 (−4) 10 (+0) 5 (−3)
+one prone creature. Hit: 29 (4d10 + 7) bludgeoning
+damage.                                                  Senses passive Perception 10
+                                                         Languages —
+A mammoth is an elephantine creature with thick          Challenge 1/8 (25 XP)
+fur and long tusks. Stockier and fiercer than normal
+elephants, mammoths inhabit a wide range of climes,      Beast of Burden. The mule is considered to be a Large
+from subarctic to subtropical.                           animal for the purpose of determining its carrying
+                                                         capacity.
+Mastiff                                                  Sure-­‐Footed. The mule has advantage on Strength and
+                                                         Dexterity saving throws made against effects that
+Medium beast, unaligned                                  would knock it prone.
+Armor Class 12
+Hit Points 5 (1d8 + 1)                                   Actions
+Speed 40 ft.                                             Hooves. Melee Weapon Attack: +2 to hit, reach 5 ft.,
+                                                         one target. Hit: 4 (1d4 + 2) bludgeoning damage.
+    STR DEX CON INT WIS CHA
+  13 (+1) 14 (+2) 12 (+1) 3 (−4) 12 (+1) 7 (−2)          Octopus
+
+Skills Perception +3                                     Small beast, unaligned
+Senses passive Perception 13                             Armor Class 12
+Languages —                                              Hit Points 3 (1d6)
+Challenge 1/8 (25 XP)                                    Speed 5 ft., swim 30 ft.

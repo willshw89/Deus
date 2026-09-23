@@ -1,0 +1,60 @@
+swarms move toward the music by the shortest              creature forces its way out and appears within 5 feet
+available route but aren’t under your control             of the portable hole or the creature carrying it. A
+otherwise. The pipes regain 1d3 expended charges          breathing creature within a closed portable hole can
+daily at dawn.                                            survive for up to 10 minutes, after which time it
+                                                          begins to suffocate.
+  Whenever a swarm of rats that isn’t under another
+creature’s control comes within 30 feet of you while        Placing a portable hole inside an extradimensional
+you are playing the pipes, you can make a Charisma        space created by a bag of holding, handy haversack,
+check contested by the swarm’s Wisdom check. If           or similar item instantly destroys both items and
+you lose the contest, the swarm behaves as it             opens a gate to the Astral Plane. The gate originates
+normally would and can’t be swayed by the pipes’          where the one item was placed inside the other. Any
+music for the next 24 hours. If you win the contest,      creature within 10 feet of the gate is sucked through
+the swarm is swayed by the pipes’ music and               it and deposited in a random location on the Astral
+becomes friendly to you and your companions for as        Plane. The gate then closes. The gate is one-­‐‑way only
+long as you continue to play the pipes each round as      and can’t be reopened.
+an action. A friendly swarm obeys your commands. If
+you issue no commands to a friendly swarm, it             Potion of Animal Friendship
+defends itself but otherwise takes no actions. If a
+friendly swarm starts its turn and can’t hear the         Potion, uncommon
+pipes’ music, your control over that swarm ends, and
+the swarm behaves as it normally would and can’t be       When you drink this potion, you can cast the animal
+swayed by the pipes’ music for the next 24 hours.         friendship spell (save DC 13) for 1 hour at will.
+                                                          Agitating this muddy liquid brings little bits into
+Plate Armor of Etherealness                               view: a fish scale, a hummingbird tongue, a cat claw,
+                                                          or a squirrel hair.
+Armor (plate), legendary (requires attunement)
+                                                          Potion of Clairvoyance
+While you’re wearing this armor, you can speak its
+command word as an action to gain the effect of the       Potion, rare
+etherealness spell, which last for 10 minutes or until
+you remove the armor or use an action to speak the        When you drink this potion, you gain the effect of the
+command word again. This property of the armor            clairvoyance spell. An eyeball bobs in this yellowish
+can’t be used again until the next dawn.                  liquid but vanishes when the potion is opened.
+
+Portable Hole                                             Potion of Climbing
+
+Wondrous item, rare                                       Potion, common
+
+This fine black cloth, soft as silk, is folded up to the  When you drink this potion, you gain a climbing
+dimensions of a handkerchief. It unfolds into a           speed equal to your walking speed for 1 hour.
+circular sheet 6 feet in diameter.                        During this time, you have advantage on Strength
+                                                          (Athletics) checks you make to climb. The potion is
+  You can use an action to unfold a portable hole and     separated into brown, silver, and gray layers
+place it on or against a solid surface, whereupon the     resembling bands of stone. Shaking the bottle fails to
+portable hole creates an extradimensional hole 10         mix the colors.
+feet deep. The cylindrical space within the hole
+exists on a different plane, so it can’t be used to       Potion of Diminution
+create open passages. Any creature inside an open
+portable hole can exit the hole by climbing out of it.    Potion, rare
+
+  You can use an action to close a portable hole by       When you drink this potion, you gain the “reduce”
+taking hold of the edges of the cloth and folding it up.  effect of the enlarge/reduce spell for 1d4 hours (no
+Folding the cloth closes the hole, and any creatures      concentration required). The red in the potion’s
+or objects within remain in the extradimensional          liquid continuously contracts to a tiny bead and then
+space. No matter what’s in it, the hole weighs next to    expands to color the clear liquid around it. Shaking
+nothing.                                                  the bottle fails to interrupt this process.
+
+  If the hole is folded up, a creature within the hole’s
+extradimensional space can use an action to make a
+DC 10 Strength check. On a successful check, the

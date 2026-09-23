@@ -1,0 +1,52 @@
+Actions                                                       feet of movement, exiting prone.
+
+Bite. Melee Weapon Attack: +1 to hit, reach 5 ft., one        Giant Goat
+target. Hit: 2 (1d6 − 1) slashing damage.
+                                                              Large beast, unaligned
+A giant fire beetle is a nocturnal creature that takes        Armor Class 11 (natural armor)
+its name from a pair of glowing glands that give off          Hit Points 19 (3d10 + 3)
+light. Miners and adventurers prize these creatures,          Speed 40 ft.
+for a giant fire beetle’s glands continue to shed light
+for 1d6 days after the beetle dies. Giant fire beetles            STR DEX CON INT WIS CHA
+are most commonly found underground and in dark                 17 (+3) 11 (+0) 12 (+1) 3 (−4) 12 (+1) 6 (−2)
+forests.
+                                                              Senses passive Perception 11
+Giant Frog                                                    Languages —
+                                                              Challenge 1/2 (100 XP)
+Medium beast, unaligned
+                                                              Charge. If the goat moves at least 20 feet straight
+Armor Class 11                                                toward a target and then hits it with a ram attack on
+Hit Points 18 (4d8)                                           the same turn, the target takes an extra 5 (2d4)
+Speed 30 ft., swim 30 ft.                                     bludgeoning damage. If the target is a creature, it must
+                                                              succeed on a DC 13 Strength saving throw or be
+    STR DEX CON INT WIS CHA                                   knocked prone.
+  12 (+1) 13 (+1) 11 (+0) 2 (−4) 10 (+0) 3 (−4)               Sure-­‐Footed. The goat has advantage on Strength and
+                                                              Dexterity saving throws made against effects that
+Skills Perception +2, Stealth +3                              would knock it prone.
+Senses darkvision 30 ft., passive Perception 12
+Languages —                                                   Actions
+Challenge 1/4 (50 XP)                                         Ram. Melee Weapon Attack: +5 to hit, reach 5 ft., one
+                                                              target. Hit: 8 (2d4 + 3) bludgeoning damage.
+Amphibious. The frog can breathe air and water.
+Standing Leap. The frog’s long jump is up to 20 feet          Giant Hyena
+and its high jump is up to 10 feet, with or without a
+running start.                                                Large beast, unaligned
+                                                              Armor Class 12
+Actions                                                       Hit Points 45 (6d10 + 12)
+                                                              Speed 50 ft.
+Bite. Melee Weapon Attack: +3 to hit, reach 5 ft., one
+target. Hit: 4 (1d6 + 1) piercing damage, and the target          STR DEX CON INT WIS CHA
+is grappled (escape DC 11). Until this grapple ends, the        16 (+3) 14 (+2) 14 (+2) 2 (−4) 12 (+1) 7 (−2)
+target is restrained, and the frog can’t bite another
+target.                                                       Skills Perception +3
+Swallow. The frog makes one bite attack against a             Senses passive Perception 13
+Small or smaller target it is grappling. If the attack hits,  Languages —
+the target is swallowed, and the grapple ends. The            Challenge 1 (200 XP)
+swallowed target is blinded and restrained, it has total
+cover against attacks and other effects outside the frog,     Rampage. When the hyena reduces a creature to 0 hit
+and it takes 5 (2d4) acid damage at the start of each of      points with a melee attack on its turn, the hyena can
+the frog’s turns. The frog can have only one target
+swallowed at a time.
+
+  If the frog dies, a swallowed creature is no longer
+restrained by it and can escape from the corpse using 5

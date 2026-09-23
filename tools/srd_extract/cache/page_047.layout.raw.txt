@@ -1,0 +1,62 @@
+cantrips of your choice at higher levels, as shown in      knowledge that imbue you with an abiding magical
+the Cantrips Known column of the Warlock table.            ability.
+
+Spell Slots                                                  At 2nd level, you gain two eldritch invocations of
+                                                           your choice. Your invocation options are detailed at
+The Warlock table shows how many spell slots you           the end of the class description. When you gain
+have. The table also shows what the level of those         certain warlock levels, you gain additional
+slots is; all of your spell slots are the same level. To   invocations of your choice, as shown in the
+cast one of your warlock spells of 1st level or higher,    Invocations Known column of the Warlock table.
+you must expend a spell slot. You regain all
+expended spell slots when you finish a short or long         Additionally, when you gain a level in this class,
+rest.                                                      you can choose one of the invocations you know and
+                                                           replace it with another invocation that you could
+  For example, when you are 5th level, you have two        learn at that level.
+3rd-­‐‑level spell slots. To cast the 1st-­‐‑level spell
+thunderwave, you must spend one of those slots, and        Pact Boon
+you cast it as a 3rd-­‐‑level spell.
+                                                           At 3rd level, your otherworldly patron bestows a gift
+Spells Known of 1st Level and Higher                       upon you for your loyal service. You gain one of the
+                                                           following features of your choice.
+At 1st level, you know two 1st-­‐‑level spells of your
+choice from the warlock spell list.                        Pact of the Chain
+
+  The Spells Known column of the Warlock table             You learn the find familiar spell and can cast it as a
+shows when you learn more warlock spells of your           ritual. The spell doesn’t count against your number
+choice of 1st level and higher. A spell you choose         of spells known.
+must be of a level no higher than what’s shown in
+the table’s Slot Level column for your level. When           When you cast the spell, you can choose one of the
+you reach 6th level, for example, you learn a new          normal forms for your familiar or one of the
+warlock spell, which can be 1st, 2nd, or 3rd level.        following special forms: imp, pseudodragon, quasit,
+                                                           or sprite.
+  Additionally, when you gain a level in this class,
+you can choose one of the warlock spells you know            Additionally, when you take the Attack action, you
+and replace it with another spell from the warlock         can forgo one of your own attacks to allow your
+spell list, which also must be of a level for which you    familiar to make one attack of its own with its
+have spell slots.                                          reaction.
+
+Spellcasting Ability                                       Pact of the Blade
+
+Charisma is your spellcasting ability for your             You can use your action to create a pact weapon in
+warlock spells, so you use your Charisma whenever          your empty hand. You can choose the form that this
+a spell refers to your spellcasting ability. In addition,  melee weapon takes each time you create it. You are
+you use your Charisma modifier when setting the            proficient with it while you wield it. This weapon
+saving throw DC for a warlock spell you cast and           counts as magical for the purpose of overcoming
+when making an attack roll with one.                       resistance and immunity to nonmagical attacks and
+                                                           damage.
+     Spell save DC = 8 + your proficiency bonus +
+                   your Charisma modifier                    Your pact weapon disappears if it is more than 5
+                                                           feet away from you for 1 minute or more. It also
+   Spell attack modifier = your proficiency bonus +        disappears if you use this feature again, if you
+                   your Charisma modifier                  dismiss the weapon (no action required), or if you
+                                                           die.
+Spellcasting Focus
+                                                             You can transform one magic weapon into your
+You can use an arcane focus as a spellcasting focus        pact weapon by performing a special ritual while
+for your warlock spells.                                   you hold the weapon. You perform the ritual over
+                                                           the course of 1 hour, which can be done during a
+Eldritch Invocations                                       short rest. You can then dismiss the weapon,
+                                                           shunting it into an extradimensional space, and it
+In your study of occult lore, you have unearthed           appears whenever you create your pact weapon
+eldritch invocations, fragments of forbidden               thereafter. You can’t affect an artifact or a sentient
+                                                           weapon in this way. The weapon ceases being your

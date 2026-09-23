@@ -1,0 +1,49 @@
+Actions                                                   Actions
+                                                          Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+Ram. Melee Weapon Attack: +3 to hit, reach 5 ft., one     target. Hit: 13 (2d8 + 4) piercing damage.
+target. Hit: 3 (1d4 + 1) bludgeoning damage.
+                                                          Smaller than a giant shark but larger and fiercer
+Hawk                                                      than a reef shark, a hunter shark haunts deep
+                                                          waters. It usually hunts alone, but multiple hunter
+Tiny beast, unaligned                                     sharks might feed in the same area. A fully grown
+                                                          hunter shark is 15 to 20 feet long.
+Armor Class 13
+Hit Points 1 (1d4 − 1)                                    Hyena
+Speed 10 ft., fly 60 ft.
+                                                          Medium beast, unaligned
+ STR DEX CON               INT WIS CHA                    Armor Class 11
+5 (−3) 16 (+3) 8 (−1)     2 (−4) 14 (+2) 6 (−2)           Hit Points 5 (1d8 + 1)
+                                                          Speed 50 ft.
+Skills Perception +4
+Senses passive Perception 14                                  STR DEX CON INT WIS CHA
+Languages —                                                 11 (+0) 13 (+1) 12 (+1) 2 (−4) 12 (+1) 5 (−3)
+Challenge 0 (10 XP)
+                                                          Skills Perception +3
+Keen Sight. The hawk has advantage on Wisdom              Senses passive Perception 13
+(Perception) checks that rely on sight.                   Languages —
+                                                          Challenge 0 (10 XP)
+Actions
+Talons. Melee Weapon Attack: +5 to hit, reach 5 ft.,      Pack Tactics. The hyena has advantage on an attack
+one target. Hit: 1 slashing damage.                       roll against a creature if at least one of the hyena’s
+                                                          allies is within 5 feet of the creature and the ally isn’t
+Hunter Shark                                              incapacitated.
+
+Large beast, unaligned                                    Actions
+Armor Class 12 (natural armor)                            Bite. Melee Weapon Attack: +2 to hit, reach 5 ft., one
+Hit Points 45 (6d10 + 12)                                 target. Hit: 3 (1d6) piercing damage.
+Speed 0 ft., swim 40 ft.
+                                                          Jackal
+    STR DEX CON INT WIS CHA
+  18 (+4) 13 (+1) 15 (+2) 1 (−5) 10 (+0) 4 (−3)           Small beast, unaligned
+                                                          Armor Class 12
+Skills Perception +2                                      Hit Points 3 (1d6)
+Senses blindsight 30 ft., passive Perception 12           Speed 40 ft.
+Languages —
+Challenge 2 (450 XP)                                          STR DEX CON INT WIS CHA
+                                                             8 (−1) 15 (+2) 11 (+0) 3 (−4) 12 (+1) 6 (−2)
+Blood Frenzy. The shark has advantage on melee attack
+rolls against any creature that doesn’t have all its hit  Skills Perception +3
+points.                                                   Senses passive Perception 13
+                                                          Languages —
+Water Breathing. The shark can breathe only               Challenge 0 (10 XP)
+underwater.

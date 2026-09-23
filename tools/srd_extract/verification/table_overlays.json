@@ -1,0 +1,268 @@
+{
+ "about": "Tables the stagers refused to reconstruct from pdftotext output, completed from a reviewer's reading of the pdf.js-rendered page. Applied by tools/build_srd_catalog.js only while the staging text still hashes to textSha256. 'rows' are transcribed cells (every word must occur in the entry's own text); 'anchors' give the roll labels in order with the first words of each outcome, and the outcome text is sliced from the entry's own printed lines, so nothing is invented. See docs/SRD5_1_COVERAGE_MANIFEST.md section 6.",
+ "records": [
+  {
+   "id": "srd:magic-item:apparatus-of-the-crab",
+   "table": 0,
+   "reviewer": "Claude Code (Fable)",
+   "reviewedAt": "2026-09-22",
+   "pages": [
+    208
+   ],
+   "method": "cells transcribed from the pdf.js-rendered page 208 (Apparatus of the Crab Levers table, three columns, ten rows)",
+   "textSha256": "86f8e7519cfffd66b0633d2239770ff68532fc82215c6e7b0e54ed99e78e0a3d",
+   "columns": [
+    "Lever",
+    "Up",
+    "Down"
+   ],
+   "dice": null,
+   "rows": [
+    {
+     "cells": [
+      "1",
+      "Legs and tail extend, allowing the apparatus to walk and swim.",
+      "Legs and tail retract, reducing the apparatus’s speed to 0 and making it unable to benefit from bonuses to speed."
+     ]
+    },
+    {
+     "cells": [
+      "2",
+      "Forward window shutter opens.",
+      "Forward window shutter closes."
+     ]
+    },
+    {
+     "cells": [
+      "3",
+      "Side window shutters open (two per side).",
+      "Side window shutters close (two per side)."
+     ]
+    },
+    {
+     "cells": [
+      "4",
+      "Two claws extend from the front sides of the apparatus.",
+      "The claws retract."
+     ]
+    },
+    {
+     "cells": [
+      "5",
+      "Each extended claw makes the following melee weapon attack: +8 to hit, reach 5 ft., one target. Hit: 7 (2d6) bludgeoning damage.",
+      "Each extended claw makes the following melee weapon attack: +8 to hit, reach 5 ft., one target. Hit: The target is grappled (escape DC 15)."
+     ]
+    },
+    {
+     "cells": [
+      "6",
+      "The apparatus walks or swims forward.",
+      "The apparatus walks or swims backward."
+     ]
+    },
+    {
+     "cells": [
+      "7",
+      "The apparatus turns 90 degrees left.",
+      "The apparatus turns 90 degrees right."
+     ]
+    },
+    {
+     "cells": [
+      "8",
+      "Eyelike fixtures emit bright light in a 30-foot radius and dim light for an additional 30 feet.",
+      "The light turns off."
+     ]
+    },
+    {
+     "cells": [
+      "9",
+      "The apparatus sinks as much as 20 feet in liquid.",
+      "The apparatus rises up to 20 feet in liquid."
+     ]
+    },
+    {
+     "cells": [
+      "10",
+      "The rear hatch unseals and opens.",
+      "The rear hatch closes and seals."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "srd:magic-item:bag-of-beans",
+   "table": 0,
+   "reviewer": "Claude Code (Fable)",
+   "reviewedAt": "2026-09-22",
+   "pages": [
+    209,
+    210
+   ],
+   "method": "row boundaries read from the pdf.js-rendered pages 209 and 210 (d100 Effect table, twelve rows); outcome text sliced from the entry's own printed lines",
+   "textSha256": "5ff779b87489667e9d6bd4e8beb6516396355b52f3afc9e41e7a5827d46b7a5c",
+   "columns": [
+    "d100",
+    "Effect"
+   ],
+   "dice": "d100",
+   "anchors": [
+    {
+     "label": "01",
+     "anchor": "5d4 toadstools sprout."
+    },
+    {
+     "label": "02–10",
+     "anchor": "A geyser erupts and spouts water,"
+    },
+    {
+     "label": "11–20",
+     "anchor": "A treant sprouts."
+    },
+    {
+     "label": "21–30",
+     "anchor": "An animate, immobile stone statue in your"
+    },
+    {
+     "label": "31–40",
+     "anchor": "A campfire with blue flames springs forth"
+    },
+    {
+     "label": "41–50",
+     "anchor": "1d6 + 6 shriekers sprout"
+    },
+    {
+     "label": "51–60",
+     "anchor": "1d4 + 8 bright pink toads crawl forth."
+    },
+    {
+     "label": "61–70",
+     "anchor": "A hungry bulette burrows up and attacks."
+    },
+    {
+     "label": "71–80",
+     "anchor": "A fruit tree grows."
+    },
+    {
+     "label": "81–90",
+     "anchor": "A nest of 1d4 + 3 eggs springs up."
+    },
+    {
+     "label": "91–99",
+     "anchor": "A pyramid with a 60-foot-square base bursts"
+    },
+    {
+     "label": "00",
+     "anchor": "A giant beanstalk sprouts,"
+    }
+   ]
+  },
+  {
+   "id": "srd:magic-item:wand-of-wonder",
+   "table": 0,
+   "reviewer": "Claude Code (Fable)",
+   "reviewedAt": "2026-09-22",
+   "pages": [
+    249,
+    250
+   ],
+   "method": "row boundaries read from the pdf.js-rendered page 250 (d100 Effect table, twenty-two rows); outcome text sliced from the entry's own printed lines",
+   "textSha256": "1ae354463ee16158c0069ea1bc5ce3b0da7a6195a63f689cdbd15c4ccfe7cf02",
+   "columns": [
+    "d100",
+    "Effect"
+   ],
+   "dice": "d100",
+   "anchors": [
+    {
+     "label": "01–05",
+     "anchor": "You cast slow."
+    },
+    {
+     "label": "06–10",
+     "anchor": "You cast faerie fire."
+    },
+    {
+     "label": "11–15",
+     "anchor": "You are stunned until the start of your next turn,"
+    },
+    {
+     "label": "16–20",
+     "anchor": "You cast gust of wind."
+    },
+    {
+     "label": "21–25",
+     "anchor": "You cast detect thoughts on the target you"
+    },
+    {
+     "label": "26–30",
+     "anchor": "You cast stinking cloud."
+    },
+    {
+     "label": "31–33",
+     "anchor": "Heavy rain falls in a 60-foot radius centered on"
+    },
+    {
+     "label": "34–36",
+     "anchor": "An animal appears in the unoccupied space"
+    },
+    {
+     "label": "37–46",
+     "anchor": "You cast lightning bolt."
+    },
+    {
+     "label": "47–49",
+     "anchor": "A cloud of 600 oversized butterflies fills a 30-foot"
+    },
+    {
+     "label": "50–53",
+     "anchor": "You enlarge the target as if you had cast"
+    },
+    {
+     "label": "54–58",
+     "anchor": "You cast darkness."
+    },
+    {
+     "label": "59–62",
+     "anchor": "Grass grows on the ground in a 60-foot radius"
+    },
+    {
+     "label": "63–65",
+     "anchor": "An object of the GM’s choice disappears into the"
+    },
+    {
+     "label": "66–69",
+     "anchor": "You shrink yourself as if you had cast"
+    },
+    {
+     "label": "70–79",
+     "anchor": "You cast fireball."
+    },
+    {
+     "label": "80–84",
+     "anchor": "You cast invisibility on yourself."
+    },
+    {
+     "label": "85–87",
+     "anchor": "Leaves grow from the target. If you chose a point"
+    },
+    {
+     "label": "88–90",
+     "anchor": "A stream of 1d4 × 10 gems, each worth 1 gp,"
+    },
+    {
+     "label": "91–95",
+     "anchor": "A burst of colorful shimmering light extends"
+    },
+    {
+     "label": "96–97",
+     "anchor": "The target’s skin turns bright blue for 1d10 days."
+    },
+    {
+     "label": "98–00",
+     "anchor": "If you targeted a creature, it must make a DC 15"
+    }
+   ]
+  }
+ ]
+}

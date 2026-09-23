@@ -1,0 +1,51 @@
+within 5 feet of the creature and the ally isn’t           Senses passive Perception 10
+incapacitated.                                             Languages —
+Water Breathing. The shark can breathe only                Challenge 1/4 (50 XP)
+underwater.
+                                                           Actions
+Actions                                                    Hooves. Melee Weapon Attack: +5 to hit, reach 5 ft.,
+Bite. Melee Weapon Attack: +4 to hit, reach 5 ft., one     one target. Hit: 8 (2d4 + 3) bludgeoning damage.
+target. Hit: 6 (1d8 + 2) piercing damage.
+                                                           Saber-­‐Toothed Tiger
+Smaller than giant sharks and hunter sharks, reef
+sharks inhabit shallow waters and coral reefs,             Large beast, unaligned
+gathering in small packs to hunt. A full-­‐‑grown          Armor Class 12
+specimen measures 6 to 10 feet long.                       Hit Points 52 (7d10 + 14)
+                                                           Speed 40 ft.
+Rhinoceros
+                                                               STR DEX CON INT WIS CHA
+Large beast, unaligned                                       18 (+4) 14 (+2) 15 (+2) 3 (−4) 12 (+1) 8 (−1)
+Armor Class 11 (natural armor)
+Hit Points 45 (6d10 + 12)                                  Skills Perception +3, Stealth +6
+Speed 40 ft.                                               Senses passive Perception 13
+                                                           Languages —
+    STR DEX CON INT WIS CHA                                Challenge 2 (450 XP)
+  21 (+5) 8 (−1) 15 (+2) 2 (−4) 12 (+1) 6 (−2)
+                                                           Keen Smell. The tiger has advantage on Wisdom
+Senses passive Perception 11                               (Perception) checks that rely on smell.
+Languages —
+Challenge 2 (450 XP)                                       Pounce. If the tiger moves at least 20 feet straight
+                                                           toward a creature and then hits it with a claw attack on
+Charge. If the rhinoceros moves at least 20 feet           the same turn, that target must succeed on a DC 14
+straight toward a target and then hits it with a gore      Strength saving throw or be knocked prone. If the
+attack on the same turn, the target takes an extra 9       target is prone, the tiger can make one bite attack
+(2d8) bludgeoning damage. If the target is a creature, it  against it as a bonus action.
+must succeed on a DC 15 Strength saving throw or be
+knocked prone.                                             Actions
+
+Actions                                                    Bite. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+Gore. Melee Weapon Attack: +7 to hit, reach 5 ft., one     target. Hit: 10 (1d10 + 5) piercing damage.
+target. Hit: 14 (2d8 + 5) bludgeoning damage.
+                                                           Claw. Melee Weapon Attack: +6 to hit, reach 5 ft., one
+Riding Horse                                               target. Hit: 12 (2d6 + 5) slashing damage.
+
+Large beast, unaligned                                     Scorpion
+Armor Class 10
+Hit Points 13 (2d10 + 2)                                   Tiny beast, unaligned
+Speed 60 ft.
+                                                           Armor Class 11 (natural armor)
+    STR DEX CON INT WIS CHA                                Hit Points 1 (1d4 − 1)
+  16 (+3) 10 (+0) 12 (+1) 2 (−4) 11 (+0) 7 (−2)            Speed 10 ft.
+
+                                                            STR DEX CON            INT      WIS    CHA
+                                                           2 (−4) 11 (+0) 8 (−1)  1 (−5)   8 (−1)  2 (−4)

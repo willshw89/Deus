@@ -1,0 +1,59 @@
+Breath Weapons (Recharge 5–6). The dragon uses one         Speed 40 ft., fly 80 ft., swim 40 ft.
+of the following breath weapons.
+                                                               STR DEX CON INT WIS CHA
+Fire Breath. The dragon exhales fire in a 90-­‐foot cone.    27 (+8) 14 (+2) 25 (+7) 16 (+3) 15 (+2) 24 (+7)
+  Each creature in that area must make a DC 24
+  Dexterity saving throw, taking 71 (13d10) fire           Saving Throws Dex +8, Con +13, Wis +8, Cha +13
+  damage on a failed save, or half as much damage on       Skills Insight +8, Perception +14, Persuasion +13,
+  a successful one.
+                                                             Stealth +8
+Weakening Breath. The dragon exhales gas in a 90-­‐foot    Damage Immunities fire
+  cone. Each creature in that area must succeed on a       Senses blindsight 60 ft., darkvision 120 ft., passive
+  DC 24 Strength saving throw or have disadvantage
+  on Strength-­‐based attack rolls, Strength checks, and     Perception 24
+  Strength saving throws for 1 minute. A creature can      Languages Common, Draconic
+  repeat the saving throw at the end of each of its        Challenge 17 (18,000 XP)
+  turns, ending the effect on itself on a success.
+                                                           Amphibious. The dragon can breathe air and water.
+Change Shape. The dragon magically polymorphs into         Legendary Resistance (3/Day). If the dragon fails a
+a humanoid or beast that has a challenge rating no         saving throw, it can choose to succeed instead.
+higher than its own, or back into its true form. It
+reverts to its true form if it dies. Any equipment it is   Actions
+wearing or carrying is absorbed or borne by the new
+form (the dragon’s choice).                                Multiattack. The dragon can use its Frightful Presence.
+                                                           It then makes three attacks: one with its bite and two
+  In a new form, the dragon retains its alignment, hit     with its claws.
+points, Hit Dice, ability to speak, proficiencies,         Bite. Melee Weapon Attack: +14 to hit, reach 10 ft.,
+Legendary Resistance, lair actions, and Intelligence,      one target. Hit: 19 (2d10 + 8) piercing damage.
+Wisdom, and Charisma scores, as well as this action. Its   Claw. Melee Weapon Attack: +14 to hit, reach 5 ft.,
+statistics and capabilities are otherwise replaced by      one target. Hit: 15 (2d6 + 8) slashing damage.
+those of the new form, except any class features or        Tail. Melee Weapon Attack: +14 to hit, reach 15 ft., one
+legendary actions of that form.                            target. Hit: 17 (2d8 + 8) bludgeoning damage.
+                                                           Frightful Presence. Each creature of the dragon’s
+Legendary Actions                                          choice that is within 120 feet of the dragon and aware
+                                                           of it must succeed on a DC 21 Wisdom saving throw or
+The dragon can take 3 legendary actions, choosing          become frightened for 1 minute. A creature can repeat
+from the options below. Only one legendary action          the saving throw at the end of each of its turns, ending
+option can be used at a time and only at the end of        the effect on itself on a success. If a creature’s saving
+another creature’s turn. The dragon regains spent          throw is successful or the effect ends for it, the
+legendary actions at the start of its turn.                creature is immune to the dragon’s Frightful Presence
+                                                           for the next 24 hours.
+Detect. The dragon makes a Wisdom (Perception)             Breath Weapons (Recharge 5–6). The dragon uses one
+  check.                                                   of the following breath weapons.
+                                                           Fire Breath. The dragon exhales fire in a 60-­‐foot cone.
+Tail Attack. The dragon makes a tail attack.
+                                                             Each creature in that area must make a DC 21
+Wing Attack (Costs 2 Actions). The dragon beats its          Dexterity saving throw, taking 66 (12d10) fire
+  wings. Each creature within 15 feet of the dragon          damage on a failed save, or half as much damage on
+  must succeed on a DC 25 Dexterity saving throw or          a successful one.
+  take 17 (2d6 + 10) bludgeoning damage and be
+  knocked prone. The dragon can then fly up to half its
+  flying speed.
+
+Adult Gold Dragon
+
+Huge dragon, lawful good
+
+Armor Class 19 (natural armor)
+
+Hit Points 256 (19d12 + 133)

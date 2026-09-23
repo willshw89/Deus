@@ -1,0 +1,62 @@
+telekinesis (5 charges), wall of fire (4 charges), or          Staff of the Woodlands
+web (2 charges).
+                                                               Staff, rare (requires attunement by a druid)
+  You can also use an action to cast one of the
+following spells from the staff without using any              This staff can be wielded as a magic quarterstaff that
+charges: arcane lock, detect magic, enlarge/reduce,            grants a +2 bonus to attack and damage rolls made
+light, mage hand, or protection from evil and good.            with it. While holding it, you have a +2 bonus to spell
+                                                               attack rolls.
+  Retributive Strike. You can use an action to break
+the staff over your knee or against a solid surface,             The staff has 10 charges for the following
+performing a retributive strike. The staff is                  properties. It regains 1d6 + 4 expended charges
+destroyed and releases its remaining magic in an               daily at dawn. If you expend the last charge, roll a
+explosion that expands to fill a 30-­‐‑foot-­‐‑radius sphere   d20. On a 1, the staff loses its properties and
+centered on it.                                                becomes a nonmagical quarterstaff.
+
+  You have a 50 percent chance to instantly travel to            Spells. You can use an action to expend 1 or more
+a random plane of existence, avoiding the explosion.           of the staff’s charges to cast one of the following
+If you fail to avoid the effect, you take force damage         spells from it, using your spell save DC: animal
+equal to 16 × the number of charges in the staff.              friendship (1 charge), awaken (5 charges), barkskin
+Every other creature in the area must make a DC 17             (2 charges), locate animals or plants (2 charges),
+Dexterity saving throw. On a failed save, a creature           speak with animals (1 charge), speak with plants (3
+takes an amount of damage based on how far away it             charges), or wall of thorns (6 charges).
+is from the point of origin, as shown in the following
+table. On a successful save, a creature takes half as            You can also use an action to cast the pass without
+much damage.                                                   trace spell from the staff without using any charges.
+
+Distance from Origin   Damage                                    Tree Form. You can use an action to plant one end
+10 ft. away or closer  8 × the number of charges in the staff  of the staff in fertile earth and expend 1 charge to
+11 to 20 ft. away      6 × the number of charges in the staff  transform the staff into a healthy tree. The tree is 60
+21 to 30 ft. away      4 × the number of charges in the staff  feet tall and has a 5-­‐‑foot-­‐‑diameter trunk, and its
+                                                               branches at the top spread out in a 20-­‐‑foot radius.
+Staff of the Python                                            The tree appears ordinary but radiates a faint aura
+                                                               of transmutation magic if targeted by detect magic.
+Staff, uncommon (requires attunement by a cleric,              While touching the tree and using another action to
+druid, or warlock)                                             speak its command word, you return the staff to its
+                                                               normal form. Any creature in the tree falls when it
+You can use an action to speak this staff’s command            reverts to a staff.
+word and throw the staff on the ground within 10
+feet of you. The staff becomes a giant constrictor             Staff of Thunder and Lightning
+snake under your control and acts on its own
+initiative count. By using a bonus action to speak the         Staff, very rare (requires attunement)
+command word again, you return the staff to its
+normal form in a space formerly occupied by the                This staff can be wielded as a magic quarterstaff that
+snake.                                                         grants a +2 bonus to attack and damage rolls made
+                                                               with it. It also has the following additional
+  On your turn, you can mentally command the                   properties. When one of these properties is used, it
+snake if it is within 60 feet of you and you aren’t            can’t be used again until the next dawn.
+incapacitated. You decide what action the snake
+takes and where it moves during its next turn, or you            Lightning. When you hit with a melee attack using
+can issue it a general command, such as to attack              the staff, you can cause the target to take an extra
+your enemies or guard a location.                              2d6 lightning damage.
+
+  If the snake is reduced to 0 hit points, it dies and           Thunder. When you hit with a melee attack using
+reverts to its staff form. The staff then shatters and is      the staff, you can cause the staff to emit a crack of
+destroyed. If the snake reverts to staff form before           thunder, audible out to 300 feet. The target you hit
+losing all its hit points, it regains all of them.             must succeed on a DC 17 Constitution saving throw
+                                                               or become stunned until the end of your next turn.
+
+                                                                 Lightning Strike. You can use an action to cause a
+                                                               bolt of lightning to leap from the staff’s tip in a line
+                                                               that is 5 feet wide and 120 feet long. Each creature in
+                                                               that line must make a DC 17 Dexterity saving throw,

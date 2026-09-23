@@ -1,0 +1,57 @@
+but have the Spellcasting feature from only one class,        Multiclass Spellcaster:
+you follow the rules as described in that class.              Spell Slots per Spell Level
+
+  Spells Known and Prepared. You determine what                Lvl. 1st 2nd 3rd 4th 5th 6th 7th 8th 9th
+spells you know and can prepare for each class                 1st 2 — — — — — — — —
+individually, as if you were a single-­‐‑classed member        2nd 3 — — — — — — — —
+of that class. If you are a ranger 4/wizard 3, for             3rd 4 2 — — — — — — —
+example, you know three 1st-­‐‑level ranger spells             4th 4 3 — — — — — — —
+based on your levels in the ranger class. As 3rd-­‐‑level      5th 4 3 2 — — — — — —
+wizard, you know three wizard cantrips, and your               6th 4 3 3 — — — — — —
+spellbook contains ten wizard spells, two of which             7th 4 3 3 1 — — — — —
+(the two you gained when you reached 3rd level as a            8th 4 3 3 2 — — — — —
+wizard) can be 2nd-­‐‑level spells. If your Intelligence       9th 4 3 3 3 1 — — — —
+is 16, you can prepare six wizard spells from your            10th 4 3 3 3 2 — — — —
+spellbook.                                                    11th 4 3 3 3 2 1 — — —
+                                                              12th 4 3 3 3 2 1 — — —
+  Each spell you know and prepare is associated               13th 4 3 3 3 2 1 1 — —
+with one of your classes, and you use the                     14th 4 3 3 3 2 1 1 — —
+spellcasting ability of that class when you cast the          15th 4 3 3 3 2 1 1 1 —
+spell. Similarly, a spellcasting focus, such as a holy        16th 4 3 3 3 2 1 1 1 —
+symbol, can be used only for the spells from the class        17th 4 3 3 3 2 1 1 1 1
+associated with that focus.                                   18th 4 3 3 3 3 1 1 1 1
+                                                              19th 4 3 3 3 3 2 1 1 1
+  Spell Slots. You determine your available spell             20th 4 3 3 3 3 2 2 1 1
+slots by adding together all your levels in the bard,
+cleric, druid, sorcerer, and wizard classes, and half         Alignment
+your levels (rounded down) in the paladin and
+ranger classes. Use this total to determine your spell        A typical creature in the game world has an
+slots by consulting the Multiclass Spellcaster table.         alignment, which broadly describes its moral and
+                                                              personal attitudes. Alignment is a combination of
+  If you have more than one spellcasting class, this          two factors: one identifies morality (good, evil, or
+table might give you spell slots of a level that is           neutral), and the other describes attitudes toward
+higher than the spells you know or can prepare. You           society and order (lawful, chaotic, or neutral). Thus,
+can use those slots, but only to cast your lower-­‐‑level     nine distinct alignments define the possible
+spells. If a lower-­‐‑level spell that you cast, like         combinations.
+burning hands, has an enhanced effect when cast
+using a higher-­‐‑level slot, you can use the enhanced          These brief summaries of the nine alignments
+effect, even though you don’t have any spells of that         describe the typical behavior of a creature with that
+higher level.                                                 alignment. Individuals might vary significantly from
+                                                              that typical behavior, and few people are perfectly
+  For example, if you are the aforementioned ranger           and consistently faithful to the precepts of their
+4/wizard 3, you count as a 5th-­‐‑level character when        alignment.
+determining your spell slots: you have four 1st-­‐‑level
+slots, three 2nd-­‐‑level slots, and two 3rd-­‐‑level slots.    Lawful good (LG) creatures can be counted on to
+However, you don’t know any 3rd-­‐‑level spells, nor          do the right thing as expected by society. Gold
+do you know any 2nd-­‐‑level ranger spells. You can           dragons, paladins, and most dwarves are lawful
+use the spell slots of those levels to cast the spells        good.
+you do know—and potentially enhance their effects.
+                                                                Neutral good (NG) folk do the best they can to
+  Pact Magic. If you have both the Spellcasting class         help others according to their needs. Many celestials,
+feature and the Pact Magic class feature from the             some cloud giants, and most gnomes are neutral
+warlock class, you can use the spell slots you gain           good.
+from the Pact Magic feature to cast spells you know
+or have prepared from classes with the Spellcasting             Chaotic good (CG) creatures act as their
+class feature, and you can use the spell slots you gain       conscience directs, with little regard for what others
+from the Spellcasting class feature to cast warlock           expect. Copper dragons, many elves, and unicorns
+spells you know.                                              are chaotic good.

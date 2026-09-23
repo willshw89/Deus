@@ -1,9 +1,10 @@
 // tools/srd_extract/stage_equipment.js - SRD 5.1 Equipment chapter (pages 62-75) -> staging_equipment.json
 //
 // Usage: node tools/srd_extract/stage_equipment.js
-// Reads the page cache written by extract_pages.js (cache/page_NNN.layout.txt for structure,
-// cache/page_NNN.txt for the prose cross-check) and writes staging/staging_equipment.json in the
-// shape given by docs/SRD5_1_COVERAGE_MANIFEST.md section 6. Exit 1 when any self-check fails.
+// Reads the page cache written by extract_pages.js (cache/page_NNN.layout.raw.txt for structure,
+// columns cut on the raw grid and normalised afterwards; cache/page_NNN.txt for the prose and page
+// cross-checks) and writes staging/staging_equipment.json in the shape given by
+// docs/SRD5_1_COVERAGE_MANIFEST.md section 6. Exit 1 when any self-check fails.
 //
 // Entries: weapon, armor, gear, tool, mount, vehicle, trade-good (category "equipment") plus one
 // `rule` entry per chapter heading (category "rules"), each carrying the chapter's tables. The
@@ -40,23 +41,29 @@ const DASH = "\u2014";
 
 // ---------------------------------------------------------------- cache access and columns
 
-function readPage(p, layout) {
-    return fs.readFileSync(path.join(CACHE, "page_" + String(p).padStart(3, "0") + (layout ? ".layout" : "") + ".txt"), "utf8");
+function readRawLayout(p) {
+    return fs.readFileSync(path.join(CACHE, "page_" + String(p).padStart(3, "0") + ".layout.raw.txt"), "utf8").replace(/\r\n?/g, "\n");
+}
+function readReading(p) {
+    return fs.readFileSync(path.join(CACHE, "page_" + String(p).padStart(3, "0") + ".txt"), "utf8");
 }
 
 /**
- * Split a layout page into columns. T.splitLayoutColumns finds the gutter column; the cut itself is
- * made per line at the run of two or more spaces nearest the gutter, because the right column's text
- * can start a character or two early or late (the library's fixed cut then loses the first word of the
- * right column or the last of the left one). Right-column indents are measured from the most common
+ * Split a raw layout page into columns. T.splitRawLayoutColumns detects the gutter on the raw text
+ * (exact positions); the cut itself is made per line at the run of two or more spaces nearest that
+ * gutter, so that a line whose text runs through the gutter column loses no word, and each piece is
+ * normalised afterwards (T.normalizeText). Right-column x positions are measured from the most common
  * start column; a line whose left text was pushed into the gutter is never taken as an indented start.
+ * `moved` counts the lines whose cut differs from the library's fixed cut (the guard's report).
  */
-function splitColumns(layoutText) {
-    const s = T.splitLayoutColumns(layoutText);
-    const lines = String(layoutText).split("\n");
+function splitColumns(rawText) {
+    const lib = T.splitRawLayoutColumns(rawText);
+    const lines = rawText.split("\n");
     const rstrip = l => l.replace(/\s+$/, "");
-    if (s.gutter === null) return { gutter: null, lines, left: lines.map(rstrip), right: lines.map(() => ""), rightIndent: lines.map(() => 0) };
-    const g = s.gutter;
+    const norm = l => rstrip(T.normalizeText(l));
+    const full = lines.map(norm);
+    if (lib.gutter === null) return { gutter: null, full, left: full, right: lines.map(() => ""), rightX0: lines.map(() => 0), rightIndent: lines.map(() => 0), moved: 0 };
+    const g = lib.gutter;
     const cuts = lines.map(l => {
         if (l.length <= g) return null;
         let best = null, bestD = Infinity;
@@ -69,32 +76,39 @@ function splitColumns(layoutText) {
         }
         return best && bestD <= 12 && best.b < l.length ? best : null;
     });
+    // the right column's start is measured on the raw grid (exact); only the text is normalised
     const starts = {};
-    for (const c of cuts) if (c) starts[c.b] = (starts[c.b] || 0) + 1;
-    let rightStart = s.rightStart, n = 0;
+    lines.forEach((l, i) => { const c = cuts[i]; if (c) { c.vb = c.b; starts[c.vb] = (starts[c.vb] || 0) + 1; } });
+    let rightStart = null, n = 0;
     for (const k of Object.keys(starts)) if (starts[k] > n) { n = starts[k]; rightStart = Number(k); }
-    const left = [], right = [], rightIndent = [];
+    const left = [], right = [], rightX0 = [], rightIndent = [];
+    let moved = 0;
     lines.forEach((l, i) => {
         const c = cuts[i];
-        if (!c) { left.push(rstrip(l)); right.push(""); rightIndent.push(0); return; }
-        left.push(rstrip(l.slice(0, c.a)));
-        right.push(rstrip(l.slice(c.b)));
-        const ind = c.b - rightStart;
-        rightIndent.push(c.pushed ? (ind >= 4 ? 2 : 0) : Math.max(0, ind));
+        const L = c ? norm(l.slice(0, c.a)) : norm(l), R = c ? norm(l.slice(c.b)) : "";
+        left.push(L); right.push(R);
+        const x0 = c ? c.vb - rightStart : 0;
+        rightX0.push(x0);
+        rightIndent.push(c && c.pushed ? (x0 >= 4 ? 2 : 0) : Math.max(0, x0));
+        if (L.trim() !== (lib.left[i] || "").trim() || R.trim() !== (lib.right[i] || "").trim()) moved++;
     });
-    return { gutter: g, lines, left, right, rightIndent };
+    return { gutter: g, full, left, right, rightX0, rightIndent, moved };
 }
 
 /** Linear stream of layout lines: every page's left column, then its right column. Left lines keep the full physical line. */
 function buildStream(first, last) {
-    const stream = [], partners = new Map();
+    const stream = [], partners = new Map(), moved = {};
     for (let p = first; p <= last; p++) {
-        const s = splitColumns(readPage(p, true));
+        const s = splitColumns(readRawLayout(p));
+        if (s.moved) moved[p] = s.moved;
         const mk = (col, raw, j, full, indent) => { const text = raw.replace(/^\s+/, ""); return { page: p, col, lineNo: j, indent: indent === undefined ? raw.length - text.length : indent, raw, full, text, used: false }; };
-        s.left.forEach((raw, j) => stream.push(mk("L", raw, j, s.lines[j].replace(/\s+$/, ""))));
-        if (s.gutter !== null) s.right.forEach((raw, j) => { const l = mk("R", raw, j, null, s.rightIndent[j]); stream.push(l); partners.set(p + ":" + j, l); });
+        s.left.forEach((raw, j) => stream.push(mk("L", raw, j, s.full[j])));
+        if (s.gutter !== null) s.right.forEach((text, j) => {
+            const l = mk("R", " ".repeat(Math.max(0, s.rightX0[j])) + text.replace(/^\s+/, ""), j, null, s.rightIndent[j]);
+            stream.push(l); partners.set(p + ":" + j, l);
+        });
     }
-    return { stream, partners };
+    return { stream, partners, moved };
 }
 
 function findLine(stream, page, col, re, nth = 1) {
@@ -134,16 +148,19 @@ const joinWrapped = (a, b) => HYPHEN_END.test(a) ? a + b : a + " " + b;
  */
 function toParagraphs(lines) {
     const out = [];
-    let cur = null, pendingBreak = false;
+    let cur = null, pages = [], pendingBreak = false;
+    const flush = () => { if (cur) out.push({ text: cur, pages: [...new Set(pages)] }); cur = null; pages = []; };
     for (const l of lines) {
         if (!l.text) { pendingBreak = true; continue; }
-        const starts = l.indent >= 2 || /^[\u2022*]/.test(l.text);
+        // a bullet's later lines hang two columns in; they continue the bullet, they do not start a paragraph
+        const bulletCont = cur && /^[\u2022*]/.test(cur) && !pendingBreak && l.indent <= 2 && !/^[\u2022*]/.test(l.text) && (/^[a-z]/.test(l.text) || (!/[.!?:\u201d"\)]$/.test(cur) && cur.length >= 35));
+        const starts = !bulletCont && (l.indent >= 2 || /^[\u2022*]/.test(l.text));
         const joinAcrossBreak = pendingBreak && cur && !starts && /^[a-z]/.test(l.text) && !/[.!?:\u201D"\)]$/.test(cur);
-        if (cur && !starts && (!pendingBreak || joinAcrossBreak)) cur = joinWrapped(cur, l.text);
-        else { if (cur) out.push(cur); cur = l.text; }
+        if (cur && !starts && (!pendingBreak || joinAcrossBreak)) { cur = joinWrapped(cur, l.text); pages.push(l.page); }
+        else { flush(); cur = l.text; pages = [l.page]; }
         pendingBreak = false;
     }
-    if (cur) out.push(cur);
+    flush();
     return out;
 }
 
@@ -302,14 +319,18 @@ function tableRows(r, keys) {
     return r.names.map(n => n.isGroup ? [n.name].concat(keys.map(() => "")) : [n.name].concat(keys.map(k => n.item.values[k] === undefined ? "" : n.item.values[k])));
 }
 
+/** A table rendered into entry text: caption, header, rows and the source's own footnote (never the parser's note). */
 function renderTable(t) {
     const lines = [];
     if (t.caption) lines.push(t.caption);
     lines.push(t.columns.join(" | "));
     for (const r of t.rows) lines.push(r.join(" | "));
-    if (t.note) lines.push(t.note);
+    if (t.footnote) lines.push(t.footnote);
     return lines.join("\n");
 }
+
+/** Every page a block of table lines was printed on. */
+const pagesOf = lines => [...new Set(lines.filter(l => l.text).map(l => l.page))];
 
 // ---------------------------------------------------------------- main
 
@@ -320,6 +341,8 @@ function main() {
     const cacheManifest = JSON.parse(fs.readFileSync(path.join(CACHE, "manifest.json"), "utf8"));
     const S = buildStream(PAGES[0], PAGES[1]);
     const stream = S.stream;
+    const movedTotal = Object.values(S.moved).reduce((a, b) => a + b, 0);
+    console.log("INFO guard: the nearest-gap cut moved " + movedTotal + " line(s) against splitRawLayoutColumns" + (movedTotal ? " (" + Object.entries(S.moved).map(([p, n]) => "p" + p + ":" + n).join(", ") + ")" : ""));
     warn(75, WARN_PAGE_75);
 
     const tables = {};
@@ -358,7 +381,7 @@ function main() {
             dashColumns: [{ key: "strength", header: "Strength" }, { key: "stealth", header: "Stealth" }], groupBy: "indent"
         }, fail);
         armorItems.push(...r.items);
-        addTable("Armor", { caption: "Armor", columns: ["Armor", "Cost", "Armor Class (AC)", "Strength", "Stealth", "Weight"], rows: tableRows(r, ["cost", "ac", "strength", "stealth", "weight"]), page: 63 });
+        addTable("Armor", { caption: "Armor", columns: ["Armor", "Cost", "Armor Class (AC)", "Strength", "Stealth", "Weight"], rows: tableRows(r, ["cost", "ac", "strength", "stealth", "weight"]), page: 63, pages: pagesOf(lines) });
     }
 
     // ---- T3 Donning and Doffing Armor (page 64)
@@ -415,7 +438,7 @@ function main() {
             });
         }
         if (weaponItems.some(w => w.notes.length)) warn(66, WEAPONS_NET_NOTE);
-        addTable("Weapons", { caption: "Weapons", columns: ["Name", "Cost", "Damage", "Weight", "Properties"], rows, page: 65 });
+        addTable("Weapons", { caption: "Weapons", columns: ["Name", "Cost", "Damage", "Weight", "Properties"], rows, page: 65, pages: pagesOf(lines) });
     }
 
     // ---- T5 Adventuring Gear (pages 68-69)
@@ -429,7 +452,7 @@ function main() {
             tokens: [{ key: "cost", re: "cost" }, { key: "weight", re: "weight" }, { key: "dash", re: "dash" }], wildcard: "weight", groupBy: "indent"
         }, fail);
         gearItems.push(...r.items);
-        addTable("Adventuring Gear", { caption: "Adventuring Gear", columns: ["Item", "Cost", "Weight"], rows: tableRows(r, ["cost", "weight"]), page: 69 });
+        addTable("Adventuring Gear", { caption: "Adventuring Gear", columns: ["Item", "Cost", "Weight"], rows: tableRows(r, ["cost", "weight"]), page: 69, pages: pagesOf(lines) });
     }
 
     // ---- T6 Container Capacity (pages 69-70)
@@ -444,7 +467,7 @@ function main() {
             if (m) rows.push([m[1], m[2]]); else fail("page " + l.page + ": container row not understood: " + l.text);
         }
         if (rows.length !== 13) fail("Container Capacity: expected 13 rows, got " + rows.length);
-        addTable("Adventuring Gear", { caption: "Container Capacity", columns: ["Container", "Capacity"], rows, note, page: 69 });
+        addTable("Adventuring Gear", { caption: "Container Capacity", columns: ["Container", "Capacity"], rows, footnote: note, page: 69, pages: pagesOf(lines) });
     }
 
     // ---- T7 Tools (page 70); group membership is settled once the description index exists
@@ -474,7 +497,7 @@ function main() {
             columns: ["cost", "speed", "capacity"], tokens: [{ key: "cost", re: "cost" }, { key: "speed", re: "speedFt" }, { key: "capacity", re: "capacity" }], groupBy: "indent"
         }, fail);
         mountItems.push(...r.items);
-        addTable("Mounts and Vehicles", { caption: "Mounts and Other Animals", columns: ["Item", "Cost", "Speed", "Carrying Capacity"], rows: r.items.map(it => [it.name, it.values.cost, it.values.speed, it.values.capacity]), page: 71 });
+        addTable("Mounts and Vehicles", { caption: "Mounts and Other Animals", columns: ["Item", "Cost", "Speed", "Carrying Capacity"], rows: r.items.map(it => [it.name, it.values.cost, it.values.speed, it.values.capacity]), page: 71, pages: pagesOf(lines) });
     }
 
     // ---- T9 Tack, Harness, and Drawn Vehicles (page 72)
@@ -529,7 +552,7 @@ function main() {
             tokens: [{ key: "price", re: "cost" }, { key: "dash", re: "dash" }], wildcard: "price", groupBy: "indent"
         }, fail);
         if (r.items.length !== 7) fail("Lifestyle Expenses: expected 7 rows, got " + r.items.length);
-        addTable("Lifestyle Expenses", { caption: "Lifestyle Expenses", columns: ["Lifestyle", "Price/Day"], rows: r.items.map(it => [it.name, it.values.price]), page: 72 });
+        addTable("Lifestyle Expenses", { caption: "Lifestyle Expenses", columns: ["Lifestyle", "Price/Day"], rows: r.items.map(it => [it.name, it.values.price]), page: 72, pages: pagesOf(lines) });
     }
 
     // ---- T13 Food, Drink, and Lodging (pages 73-74)
@@ -540,7 +563,7 @@ function main() {
             tokens: [{ key: "cost", re: "cost" }], groupBy: "indent", groupHeaders: ["Ale"]
         }, fail);
         if (r.items.length !== 20) fail("Food, Drink, and Lodging: expected 20 rows, got " + r.items.length);
-        addTable("Food, Drink, and Lodging", { caption: "Food, Drink, and Lodging", columns: ["Item", "Cost"], rows: tableRows(r, ["cost"]), page: 73,
+        addTable("Food, Drink, and Lodging", { caption: "Food, Drink, and Lodging", columns: ["Item", "Cost"], rows: tableRows(r, ["cost"]), page: 73, pages: pagesOf(lines),
             note: "the layout lost the indentation of the Ale group's rows (Gallon, Mug); Ale is treated as a group header by an explicit list" });
     }
 
@@ -582,7 +605,7 @@ function main() {
         const pages = [...new Set(lines.filter(l => l.text).map(l => l.page))];
         sections.push({ heading: h.text, headingPath: h.headingPath, page: h.page, pages: pages.length ? pages : [h.page], paragraphs: toParagraphs(lines) });
     }
-    if (toolFootnote) { const ts = sections.find(s => s.heading === "Tools"); if (ts) ts.paragraphs.push(toolFootnote); }
+    if (toolFootnote) { const ts = sections.find(s => s.heading === "Tools"); if (ts) ts.paragraphs.push({ text: toolFootnote, pages: [70] }); }
     if (heads.length && heads[0].k !== 0) fail("layout lines before the first heading: " + rest.slice(0, heads[0].k).map(l => l.text).filter(Boolean).join(" / "));
 
     // ---- Description index: run-in bold headings "Name. Text..." per section, consulted per kind
@@ -590,12 +613,12 @@ function main() {
     for (const s of sections) {
         const idx = new Map();
         for (const p of s.paragraphs) {
-            const m = /^([A-Z][A-Za-z\u2019',\- ]{0,40}?)\. (.+)$/.exec(p);
+            const m = /^([A-Z][A-Za-z\u2019',\- ]{0,40}?)\. (.+)$/.exec(p.text);
             if (!m) continue;
             const words = m[1].split(/\s+/);
             if (!words.every(w => /^[A-Z]/.test(w) || /^(of|or|and|the|a)$/.test(w.replace(/,$/, "")))) continue;
             const key = normKey(m[1]);
-            if (!idx.has(key)) idx.set(key, { text: p, page: s.page, section: s.heading });
+            if (!idx.has(key)) idx.set(key, { text: p.text, pages: p.pages, section: s.heading });
         }
         descBySection[s.heading] = idx;
     }
@@ -622,7 +645,7 @@ function main() {
             n.item.group = cur;
             toolItems.push(n.item);
         }
-        addTable("Tools", { caption: "Tools", columns: ["Item", "Cost", "Weight"], rows: tableRows({ names: toolNames }, ["cost", "weight"]), page: 70, note: toolFootnote });
+        addTable("Tools", { caption: "Tools", columns: ["Item", "Cost", "Weight"], rows: tableRows({ names: toolNames }, ["cost", "weight"]), page: 70, pages: [70], footnote: toolFootnote });
     }
 
     // ---- Entries
@@ -655,7 +678,7 @@ function main() {
         else if (data.weight.lb === null) missing.push("weight");
         if (w.values.properties !== DASH && data.properties.length === 0) missing.push("properties");
         const text = withDesc(rowText(tables.Weapons.columns, [w.name, w.values.cost, w.values.damage, w.values.weight, w.values.properties]), d);
-        push({ id: T.stableId("weapon", w.name), category: CATEGORY, kind: "weapon", name: w.name, source: src([w.page].concat(d ? [d.page] : []), w.name), text, data, readiness: finish(missing, notes), notes });
+        push({ id: T.stableId("weapon", w.name), category: CATEGORY, kind: "weapon", name: w.name, source: src([w.page].concat(d ? d.pages : []), w.name), text, data, readiness: finish(missing, notes), notes });
     }
 
     for (const a of armorItems) {
@@ -672,25 +695,44 @@ function main() {
         if (a.values.stealth !== "Disadvantage" && a.values.stealth !== DASH) missing.push("stealthDisadvantage");
         if (!data.weight || data.weight.lb === null) missing.push("weight");
         const text = withDesc(rowText(tables.Armor.columns, [a.name, a.values.cost, a.values.ac, a.values.strength, a.values.stealth, a.values.weight]), d);
-        push({ id: T.stableId("armor", a.name), category: CATEGORY, kind: "armor", name: a.name, source: src([a.page].concat(d ? [d.page] : []), a.name), text, data, readiness: finish(missing, notes), notes });
+        push({ id: T.stableId("armor", a.name), category: CATEGORY, kind: "armor", name: a.name, source: src([a.page].concat(d ? d.pages : []), a.name), text, data, readiness: finish(missing, notes), notes });
     }
 
+    /**
+     * A cost or weight that is not printed as a figure keeps the printed symbol and the text it refers to:
+     * "*" (the Tools table's footnote) or "\u00D74" / "\u00D72" (barding: a multiple of the equivalent armor, per its paragraph).
+     */
+    const symbolic = (printed, basis, key) => {
+        if (!basis) return null;
+        const o = key === "cost" ? { amount: null, unit: null, printed, basis } : { lb: null, printed, basis };
+        const mult = /^\u00D7(\d+)$/.exec(printed);
+        if (mult) o.multiplier = Number(mult[1]);
+        return o;
+    };
     const simpleItem = (kind, it, columns, printed, extra) => {
         const notes = [], missing = [];
-        const cost = parseCost(it.values.cost);
-        if (cost.amount === null) { missing.push("cost"); notes.push("cost is not a coin amount as printed: " + it.values.cost); }
-        const weight = it.values.weight === undefined ? null : parseWeight(it.values.weight);
-        if (weight && weight.lb === null) { missing.push("weight"); notes.push("weight is not a pound figure as printed: " + it.values.weight); }
         const d = findDescription(kind, it.name);
+        const basis = it.values.cost === "*" ? toolFootnote : (d ? d.text : null);
+        let cost = parseCost(it.values.cost);
+        if (cost.amount === null) {
+            cost = symbolic(it.values.cost, basis, "cost") || cost;
+            if (cost.printed === undefined) { missing.push("cost"); notes.push("cost is not a coin amount as printed: " + it.values.cost); }
+        }
+        let weight = it.values.weight === undefined ? null : parseWeight(it.values.weight);
+        if (weight && weight.lb === null) {
+            weight = symbolic(it.values.weight, basis, "weight") || weight;
+            if (weight.printed === undefined) { missing.push("weight"); notes.push("weight is not a pound figure as printed: " + it.values.weight); }
+        }
         const data = Object.assign({ cost, weight, group: it.group || null, table: it.table || columns.caption, description: d ? d.text : null }, extra || {});
         if (it.group) { const gd = findDescription(kind, it.group); if (gd) data.groupDescription = gd.text; }
+        if (cost.printed !== undefined || (weight && weight.printed !== undefined)) notes.push("cost " + JSON.stringify(it.values.cost) + " and weight " + JSON.stringify(it.values.weight) + " are printed as symbols; the basis text is carried in data (" + (it.values.cost === "*" ? "the Tools table footnote" : "the " + it.name + " paragraph") + ")");
         const text = withDesc(rowText(columns.columns, [it.name].concat(printed)), d);
-        push({ id: T.stableId(kind, it.name), category: CATEGORY, kind, name: it.name, source: src([it.page].concat(d ? [d.page] : []), it.name), text, data, readiness: finish(missing, notes), notes });
+        push({ id: T.stableId(kind, it.name), category: CATEGORY, kind, name: it.name, source: src([it.page].concat(d ? d.pages : []), it.name), text, data, readiness: finish(missing, notes), notes });
     };
     for (const it of gearItems) simpleItem("gear", it, tables["Adventuring Gear"], [it.values.cost, it.values.weight]);
     for (const it of toolItems) {
         simpleItem("tool", it, tables.Tools, [it.values.cost, it.values.weight]);
-        if (it.values.cost === "*") { const e = entries[entries.length - 1]; e.data.description = toolFootnote; e.text += "\n\n" + toolFootnote; e.notes.push("cost and weight are printed as * (see the Mounts and Vehicles section)"); }
+        if (it.values.cost === "*") { const e = entries[entries.length - 1]; e.data.description = toolFootnote; e.text += "\n\n" + toolFootnote; }
     }
     for (const it of mountItems) {
         const cap = /^([\d,]+) lb\.$/.exec(it.values.capacity), sp = /^(\d+) ft\.$/.exec(it.values.speed);
@@ -712,28 +754,50 @@ function main() {
 
     for (const s of sections) {
         const ts = ruleTables[s.heading] || [];
-        const text = s.paragraphs.concat(ts.map(renderTable)).join("\n\n");
+        const text = s.paragraphs.map(p => p.text).concat(ts.map(renderTable)).join("\n\n");
         const notes = text ? [] : ["no text under this heading"];
-        const pages = [...new Set(s.pages.concat(ts.map(t => t.page)))];
+        const pages = [...new Set(s.pages.concat(...ts.map(t => t.pages || [t.page])))];
         push({ id: T.stableId("rule", s.heading === "Equipment" ? "Equipment" : "Equipment " + s.heading), category: "rules", kind: "rule", name: s.heading, source: src(pages, s.heading), text,
-            data: { headingPath: s.headingPath, tables: ts.map(t => { const o = { caption: t.caption, columns: t.columns, rows: t.rows }; if (t.note) o.note = t.note; return o; }) },
+            data: { headingPath: s.headingPath, tables: ts.map(t => { const o = { caption: t.caption, columns: t.columns, rows: t.rows }; if (t.footnote) o.footnote = t.footnote; if (t.note) o.note = t.note; return o; }) },
             readiness: text ? "parsed" : "extracted", notes });
     }
 
     // ---- Prose cross-check against the reading-order pages (whitespace and hyphen breaks folded)
+    const fold = s => T.toPlain(s).replace(/-\s+/g, "-").replace(/\s+/g, " ").trim();
+    const reading = {};
+    for (let p = PAGES[0]; p <= PAGES[1] + 1; p++) reading[p] = fold(readReading(p));
     {
-        const fold = s => T.toPlain(s).replace(/-\s+/g, "-").replace(/\s+/g, " ").trim();
-        const reading = {};
-        for (let p = PAGES[0]; p <= PAGES[1] + 1; p++) reading[p] = fold(readPage(p, false));
         let checked = 0, missing = 0;
         for (const s of sections) for (const p of s.paragraphs) {
-            if (p.length < 40) continue;
+            if (p.text.length < 40) continue;
             checked++;
-            const f = fold(p);
-            const ok = s.pages.some(pg => reading[pg].includes(f) || (reading[pg] + " " + (reading[pg + 1] || "")).includes(f));
-            if (!ok) { missing++; warn(s.page, "paragraph not found verbatim in the reading-order text (" + s.heading + "): " + p.slice(0, 70)); }
+            const f = fold(p.text);
+            const ok = p.pages.some(pg => reading[pg].includes(f) || (reading[pg] + " " + (reading[pg + 1] || "")).includes(f));
+            if (!ok) { missing++; warn(p.pages[0], "paragraph not found verbatim in the reading-order text (" + s.heading + "): " + p.text.slice(0, 70)); }
         }
         console.log((missing ? "WARN" : "PASS") + " prose cross-check: " + (checked - missing) + "/" + checked + " section paragraphs found verbatim in the reading-order pages");
+    }
+
+    // ---- Page attribution: the first and last text line of every entry must be found on its cited pages
+    {
+        const probeOf = line => {
+            if (line.includes(" | ")) { const cells = line.split(" | ").filter(c => c.length >= 4); return cells.sort((a, b) => b.length - a.length)[0] || null; }
+            return line.length > 40 ? line.slice(-40) : line;
+        };
+        const bad = [];
+        for (const e of entries) {
+            const lines = e.text.split("\n").filter(l => l.trim());
+            const lastLine = [...lines].reverse().find(l => fold(l).length >= 12) || lines[lines.length - 1];
+            for (const [which, probe] of [["first", e.name], ["last", probeOf(lastLine)]]) {
+                if (!probe) continue;
+                const f = fold(probe);
+                if (e.source.pages.some(p => reading[p] && reading[p].includes(f))) continue;
+                const adjacent = e.source.pages.flatMap(p => [p - 1, p + 1]).filter(p => reading[p] && reading[p].includes(f));
+                bad.push(e.id + " (" + which + " line " + JSON.stringify(probe.slice(0, 40)) + ", cited " + e.source.pages.join(",") + (adjacent.length ? ", found only on " + adjacent.join(",") : ", not found") + ")");
+            }
+        }
+        console.log((bad.length ? "FAIL" : "PASS") + " page attribution: first and last text line of every entry found on its cited pages in the reading-order cache" + (bad.length ? ": " + bad.join("; ") : ""));
+        if (bad.length) failures.push("page attribution");
     }
 
     // ---- Self-checks
@@ -765,7 +829,7 @@ function main() {
     for (const e of entries) readinessCount[e.readiness] = (readinessCount[e.readiness] || 0) + 1;
     console.log("INFO readiness: " + JSON.stringify(readinessCount) + "; warnings: " + warnings.length);
     for (const e of entries) if (e.readiness !== "parsed") console.log("INFO extracted: " + e.id + " (pages " + e.source.pages.join(",") + "): " + e.notes.join("; "));
-    for (const f of failures) if (!/^count |^duplicate ids|^non-empty|^required data|^spot /.test(f)) console.log("FAIL " + f);
+    for (const f of failures) if (!/^count |^duplicate ids|^non-empty|^required data|^spot |^page attribution/.test(f)) console.log("FAIL " + f);
 
     // ---- Write
     fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -773,7 +837,8 @@ function main() {
         metadata: {
             generator: "tools/srd_extract/stage_equipment.js", generatedAt: new Date().toISOString(), category: CATEGORY,
             source: { file: cacheManifest.source.file, sha256: cacheManifest.source.sha256, pages: [CHAPTER_PAGES] },
-            cache: { generatedAt: cacheManifest.generatedAt }, license: cacheManifest.license, counts, readiness: readinessCount
+            cache: { generatedAt: cacheManifest.generatedAt }, license: cacheManifest.license, counts, readiness: readinessCount,
+            columnCut: { method: "nearest 2+ space run to the raw gutter of splitRawLayoutColumns, normalised after the cut", linesMoved: movedTotal }
         },
         entries, warnings
     };

@@ -345,7 +345,7 @@
                 sbLine("Components:", fmtComponents(d.components)),
                 sbLine("Duration:", duration)),
             d.description != null ? renderParagraphs(d.description) : null,
-            d.atHigherLevels ? h("p", { class: "pre" }, h("b", null, "At Higher Levels. "), String(d.atHigherLevels)) : null,
+            d.atHigherLevels ? h("p", { class: "pre" }, h("b", null, "At Higher Levels. "), String(d.atHigherLevels).replace(/^\s*At Higher Levels\.?\s*/i, "")) : null,   // the data text carries the label already; do not print it twice
             isEmpty(d.classes) ? null : h("p", null, h("b", null, "Classes: "), fmtList(d.classes)),
             leftover(d, ["level", "school", "ritual", "castingTime", "range", "components", "duration", "concentration", "description", "atHigherLevels", "classes"]));
     }
@@ -654,7 +654,7 @@
             if (!found.length) { setStatus("No entry with id " + id, true); return false; }
             let i = model.results.findIndex(e => e.id === found[0].id);
             if (i < 0) {
-                els.search.value = ""; els.category.value = ""; updateDependentFilters(); els.readiness.value = ""; els.challenge.value = ""; els.level.value = "";
+                els.search.value = ""; els.category.value = ""; updateDependentFilters(); els.kind.value = ""; els.readiness.value = ""; els.challenge.value = ""; els.level.value = "";
                 runSearch();
                 i = model.results.findIndex(e => e.id === found[0].id);
             }
@@ -693,7 +693,7 @@
         els.category.addEventListener("change", () => { updateDependentFilters(); els.challenge.value = ""; els.level.value = ""; runSearch(); });
         for (const k of ["kind", "readiness", "challenge", "level"]) els[k].addEventListener("change", runSearch);
         els.clearBtn.addEventListener("click", () => {
-            els.search.value = ""; els.category.value = ""; if (model.index) updateDependentFilters(); els.readiness.value = ""; els.challenge.value = ""; els.level.value = "";
+            els.search.value = ""; els.category.value = ""; if (model.index) updateDependentFilters(); els.kind.value = ""; els.readiness.value = ""; els.challenge.value = ""; els.level.value = "";
             runSearch(); els.search.focus();
         });
         els.coverageBtn.addEventListener("click", () => setCoverage(!model.coverageOpen));

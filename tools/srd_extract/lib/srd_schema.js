@@ -24,7 +24,7 @@ const CATEGORIES = Object.freeze({
 
 /** Every kind, the category it belongs to and its placeholder icon (IconSet.png index, 16 per row). */
 const KINDS = Object.freeze({
-    "creature": { category: "creatures", icon: 12 },
+    "creature": { category: "creatures", icon: 8 }, // 12 is a transparent cell of the stock sheet (seen empty in the NW.js run, 2026-09-22)
     "spell": { category: "spells", icon: 79 },
     "spell-list": { category: "spells", icon: 187 },
     "weapon": { category: "equipment", icon: 97 },

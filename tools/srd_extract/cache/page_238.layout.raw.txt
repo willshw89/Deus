@@ -1,0 +1,65 @@
+Ring of Swimming                                        see into and through solid matter for 1 minute. This
+                                                        vision has a radius of 30 feet. To you, solid objects
+Ring, uncommon                                          within that radius appear transparent and don’t
+                                                        prevent light from passing through them. The vision
+You have a swimming speed of 40 feet while wearing      can penetrate 1 foot of stone, 1 inch of common
+this ring.                                              metal, or up to 3 feet of wood or dirt. Thicker
+                                                        substances block the vision, as does a thin sheet of
+Ring of Telekinesis                                     lead.
+
+Ring, very rare (requires attunement)                     Whenever you use the ring again before taking a
+                                                        long rest, you must succeed on a DC 15 Constitution
+While wearing this ring, you can cast the telekinesis   saving throw or gain one level of exhaustion.
+spell at will, but you can target only objects that
+aren’t being worn or carried.                           Robe of Eyes
+
+Ring of the Ram                                         Wondrous item, rare (requires attunement)
+
+Ring, rare (requires attunement)                        This robe is adorned with eyelike patterns. While
+                                                        you wear the robe, you gain the following benefits:
+This ring has 3 charges, and it regains 1d3 expended
+charges daily at dawn. While wearing the ring, you      • The robe lets you see in all directions, and you
+can use an action to expend 1 to 3 of its charges to      have advantage on Wisdom (Perception) checks
+attack one creature you can see within 60 feet of you.    that rely on sight.
+The ring produces a spectral ram’s head and makes
+its attack roll with a +7 bonus. On a hit, for each     • You have darkvision out to a range of 120 feet.
+charge you spend, the target takes 2d10 force           • You can see invisible creatures and objects, as well
+damage and is pushed 5 feet away from you.
+                                                          as see into the Ethereal Plane, out to a range of
+  Alternatively, you can expend 1 to 3 of the ring’s      120 feet.
+charges as an action to try to break an object you can
+see within 60 feet of you that isn’t being worn or        The eyes on the robe can’t be closed or averted.
+carried. The ring makes a Strength check with a +5      Although you can close or avert your own eyes, you
+bonus for each charge you spend.                        are never considered to be doing so while wearing
+                                                        this robe.
+Ring of Three Wishes
+                                                          A light spell cast on the robe or a daylight spell
+Ring, legendary                                         cast within 5 feet of the robe causes you to be
+                                                        blinded for 1 minute. At the end of each of your
+While wearing this ring, you can use an action to       turns, you can make a Constitution saving throw (DC
+expend 1 of its 3 charges to cast the wish spell from   11 for light or DC 15 for daylight), ending the
+it. The ring becomes nonmagical when you use the        blindness on a success.
+last charge.
+                                                        Robe of Scintillating Colors
+Ring of Warmth
+                                                        Wondrous item, very rare (requires attunement)
+Ring, uncommon (requires attunement)
+                                                        This robe has 3 charges, and it regains 1d3 expended
+While wearing this ring, you have resistance to cold    charges daily at dawn. While you wear it, you can
+damage. In addition, you and everything you wear        use an action and expend 1 charge to cause the
+and carry are unharmed by temperatures as low as        garment to display a shifting pattern of dazzling
+−50 degrees Fahrenheit.                                 hues until the end of your next turn. During this time,
+                                                        the robe sheds bright light in a 30-­‐‑foot radius and
+Ring of Water Walking                                   dim light for an additional 30 feet. Creatures that can
+                                                        see you have disadvantage on attack rolls against
+Ring, uncommon                                          you. In addition, any creature in the bright light that
+                                                        can see you when the robe’s power is activated must
+While wearing this ring, you can stand on and move      succeed on a DC 15 Wisdom saving throw or become
+across any liquid surface as if it were solid ground.   stunned until the effect ends.
+
+Ring of X-ray Vision
+
+Ring, rare (requires attunement)
+
+While wearing this ring, you can use an action to
+speak its command word. When you do so, you can

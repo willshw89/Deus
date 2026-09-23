@@ -1,0 +1,60 @@
+  Moving a Grappled Creature. When you move,                    A target with total cover can’t be targeted directly
+you can drag or carry the grappled creature with you,         by an attack or a spell, although some spells can
+but your speed is halved, unless the creature is two          reach such a target by including it in an area of effect.
+or more sizes smaller than you.                               A target has total cover if it is completely concealed
+                                                              by an obstacle.
+Contests in Combat
+                                                              Damage and Healing
+Battle often involves pitting your prowess against that of
+your foe. Such a challenge is represented by a contest. This  Injury and the risk of death are constant companions
+section includes the most common contests that require an     of those who explore fantasy gaming worlds. The
+action in combat: grappling and shoving a creature. The GM    thrust of a sword, a well-­‐‑placed arrow, or a blast of
+can use these contests as models for improvising others.      flame from a fireball spell all have the potential to
+                                                              damage, or even kill, the hardiest of creatures.
+Shoving a Creature
+                                                              Hit Points
+Using the Attack action, you can make a special
+melee attack to shove a creature, either to knock it          Hit points represent a combination of physical and
+prone or push it away from you. If you’re able to             mental durability, the will to live, and luck. Creatures
+make multiple attacks with the Attack action, this            with more hit points are more difficult to kill. Those
+attack replaces one of them.                                  with fewer hit points are more fragile.
+
+  The target must be no more than one size larger               A creature’s current hit points (usually just called
+than you and must be within your reach. Instead of            hit points) can be any number from the creature’s hit
+making an attack roll, you make a Strength                    point maximum down to 0. This number changes
+(Athletics) check contested by the target’s Strength          frequently as a creature takes damage or receives
+(Athletics) or Dexterity (Acrobatics) check (the              healing.
+target chooses the ability to use). If you win the
+contest, you either knock the target prone or push it           Whenever a creature takes damage, that damage is
+5 feet away from you.                                         subtracted from its hit points. The loss of hit points
+                                                              has no effect on a creature’s capabilities until the
+Cover                                                         creature drops to 0 hit points.
+
+Walls, trees, creatures, and other obstacles can              Damage Rolls
+provide cover during combat, making a target more
+difficult to harm. A target can benefit from cover            Each weapon, spell, and harmful monster ability
+only when an attack or other effect originates on the         specifies the damage it deals. You roll the damage
+opposite side of the cover.                                   die or dice, add any modifiers, and apply the damage
+                                                              to your target. Magic weapons, special abilities, and
+  There are three degrees of cover. If a target is            other factors can grant a bonus to damage. With a
+behind multiple sources of cover, only the most               penalty, it is possible to deal 0 damage, but never
+protective degree of cover applies; the degrees               negative damage.
+aren’t added together. For example, if a target is
+behind a creature that gives half cover and a tree              When attacking with a weapon, you add your
+trunk that gives three-­‐‑quarters cover, the target has      ability modifier—the same modifier used for the
+three-­‐‑quarters cover.                                      attack roll—to the damage. A spell tells you which
+                                                              dice to roll for damage and whether to add any
+  A target with half cover has a +2 bonus to AC and           modifiers.
+Dexterity saving throws. A target has half cover if an
+obstacle blocks at least half of its body. The obstacle         If a spell or other effect deals damage to more
+might be a low wall, a large piece of furniture, a            than one target at the same time, roll the damage
+narrow tree trunk, or a creature, whether that                once for all of them. For example, when a wizard
+creature is an enemy or a friend.                             casts fireball or a cleric casts flame strike, the spell’s
+                                                              damage is rolled once for all creatures caught in the
+  A target with three-­‐‑quarters cover has a +5              blast.
+bonus to AC and Dexterity saving throws. A target
+has three-­‐‑quarters cover if about three-­‐‑quarters of it  Critical Hits
+is covered by an obstacle. The obstacle might be a
+portcullis, an arrow slit, or a thick tree trunk.             When you score a critical hit, you get to roll extra
+                                                              dice for the attack’s damage against the target. Roll
+                                                              all of the attack’s damage dice twice and add them

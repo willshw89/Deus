@@ -1,0 +1,59 @@
+you gain levels, your choices should reflect the types  Two-Weapon Fighting
+of monsters you have encountered on your
+adventures.                                             When you engage in two-­‐‑weapon fighting, you can
+                                                        add your ability modifier to the damage of the
+Natural Explorer                                        second attack.
+
+You are particularly familiar with one type of natural  Spellcasting
+environment and are adept at traveling and
+surviving in such regions. Choose one type of           By the time you reach 2nd level, you have learned to
+favored terrain: arctic, coast, desert, forest,         use the magical essence of nature to cast spells,
+grassland, mountain, or swamp. When you make an         much as a druid does.
+Intelligence or Wisdom check related to your
+favored terrain, your proficiency bonus is doubled if   Spell Slots
+you are using a skill that you’re proficient in.
+                                                        The Ranger table shows how many spell slots you
+  While traveling for an hour or more in your           have to cast your spells of 1st level and higher. To
+favored terrain, you gain the following benefits:       cast one of these spells, you must expend a slot of
+                                                        the spell’s level or higher. You regain all expended
+• Difficult terrain doesn’t slow your group’s travel.   spell slots when you finish a long rest.
+• Your group can’t become lost except by magical
+                                                          For example, if you know the 1st-­‐‑level spell animal
+  means.                                                friendship and have a 1st-­‐‑level and a 2nd-­‐‑level spell
+• Even when you are engaged in another activity         slot available, you can cast animal friendship using
+                                                        either slot.
+  while traveling (such as foraging, navigating, or
+  tracking), you remain alert to danger.                Spells Known of 1st Level and Higher
+• If you are traveling alone, you can move stealthily
+  at a normal pace.                                     You know two 1st-­‐‑level spells of your choice from
+• When you forage, you find twice as much food as       the ranger spell list.
+  you normally would.
+• While tracking other creatures, you also learn          The Spells Known column of the Ranger table
+  their exact number, their sizes, and how long ago     shows when you learn more ranger spells of your
+  they passed through the area.                         choice. Each of these spells must be of a level for
+                                                        which you have spell slots. For instance, when you
+  You choose additional favored terrain types at 6th    reach 5th level in this class, you can learn one new
+and 10th level.                                         spell of 1st or 2nd level.
+
+Fighting Style                                            Additionally, when you gain a level in this class,
+                                                        you can choose one of the ranger spells you know
+At 2nd level, you adopt a particular style of fighting  and replace it with another spell from the ranger
+as your specialty. Choose one of the following          spell list, which also must be of a level for which you
+options. You can’t take a Fighting Style option more    have spell slots.
+than once, even if you later get to choose again.
+                                                        Spellcasting Ability
+Archery
+                                                        Wisdom is your spellcasting ability for your ranger
+You gain a +2 bonus to attack rolls you make with       spells, since your magic draws on your attunement
+ranged weapons.                                         to nature. You use your Wisdom whenever a spell
+                                                        refers to your spellcasting ability. In addition, you
+Defense                                                 use your Wisdom modifier when setting the saving
+                                                        throw DC for a ranger spell you cast and when
+While you are wearing armor, you gain a +1 bonus to     making an attack roll with one.
+AC.
+                                                             Spell save DC = 8 + your proficiency bonus +
+Dueling                                                                    your Wisdom modifier
+
+When you are wielding a melee weapon in one hand           Spell attack modifier = your proficiency bonus +
+and no other weapons, you gain a +2 bonus to                               your Wisdom modifier
+damage rolls with that weapon.

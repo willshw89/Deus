@@ -1,0 +1,67 @@
+Rogue                                                 11th  +4  6d6   Improvement
+                                                                6d6   Reliable Talent
+Class Features                                        12th  +4        Ability Score
+                                                                7d6   Improvement
+As a rogue, you have the following class features.    13th  +5        Roguish Archetype
+                                                                7d6   feature
+Hit Points                                            14th  +5  8d6   Blindsense
+                                                                8d6   Slippery Mind
+Hit Dice: 1d8 per rogue level                         15th  +5        Ability Score
+Hit Points at 1st Level: 8 + your Constitution                  9d6   Improvement
+                                                      16th  +5        Roguish Archetype
+  modifier                                                      9d6   feature
+Hit Points at Higher Levels: 1d8 (or 5) + your        17th  +6  10d6  Elusive
+                                                                      Ability Score
+  Constitution modifier per rogue level after 1st     18th  +6  10d6  Improvement
+                                                                      Stroke of Luck
+Proficiencies                                         19th  +6
+
+Armor: Light armor                                    20th  +6
+Weapons: Simple weapons, hand crossbows,
+                                                      Expertise
+  longswords, rapiers, shortswords
+Tools: Thieves’ tools                                 At 1st level, choose two of your skill proficiencies, or
+Saving Throws: Dexterity, Intelligence                one of your skill proficiencies and your proficiency
+Skills: Choose four from Acrobatics, Athletics,       with thieves’ tools. Your proficiency bonus is
+                                                      doubled for any ability check you make that uses
+  Deception, Insight, Intimidation, Investigation,    either of the chosen proficiencies.
+  Perception, Performance, Persuasion, Sleight of
+  Hand, and Stealth                                     At 6th level, you can choose two more of your
+                                                      proficiencies (in skills or with thieves’ tools) to gain
+Equipment                                             this benefit.
+
+You start with the following equipment, in addition   Sneak Attack
+to the equipment granted by your background:
+                                                      Beginning at 1st level, you know how to strike subtly
+• (a) a rapier or (b) a shortsword                    and exploit a foe’s distraction. Once per turn, you can
+• (a) a shortbow and quiver of 20 arrows or (b) a     deal an extra 1d6 damage to one creature you hit
+                                                      with an attack if you have advantage on the attack
+  shortsword                                          roll. The attack must use a finesse or a ranged
+• (a) a burglar’s pack, (b) a dungeoneer’s pack, or   weapon.
+
+  (c) an explorer’s pack                                You don’t need advantage on the attack roll if
+• (a) Leather armor, two daggers, and thieves’ tools  another enemy of the target is within 5 feet of it, that
+                                                      enemy isn’t incapacitated, and you don’t have
+The Rogue                                             disadvantage on the attack roll.
+
+Level  Proficiency  Sneak   Features                    The amount of the extra damage increases as you
+ 1st      Bonus     Attack  Expertise, Sneak Attack,  gain levels in this class, as shown in the Sneak Attack
+            +2              Thieves` Cant             column of the Rogue table.
+                     1d6    Cunning Action
+2nd    +2                   Roguish Archetype         Thieves’ Cant
+                     1d6    Ability Score
+3rd    +2            2d6    Improvement               During your rogue training you learned thieves’ cant,
+                     2d6    Uncanny Dodge             a secret mix of dialect, jargon, and code that allows
+4th    +2                   Expertise                 you to hide messages in seemingly normal
+                     3d6    Evasion                   conversation. Only another creature that knows
+5th    +3            3d6    Ability Score             thieves’ cant understands such messages. It takes
+                     4d6    Improvement               four times longer to convey such a message than it
+6th    +3            4d6    Roguish Archetype         does to speak the same idea plainly.
+                            feature
+7th    +3            5d6    Ability Score               In addition, you understand a set of secret signs
+                                                      and symbols used to convey short, simple messages,
+8th    +3            5d6
+
+9th    +4
+
+10th   +4

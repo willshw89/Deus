@@ -1,0 +1,64 @@
+you. Each affected target must use as much of its               9–10  within its reach. If there is no creature within its
+movement as possible to move in that direction on                     reach, the creature does nothing this turn.
+its next turn. It can take its action before it moves.                The creature can act and move normally.
+After moving in this way, it can make another
+Wisdom saving to try to end the effect.                           At the end of each of its turns, an affected target
+                                                                can make a Wisdom saving throw. If it succeeds, this
+  A target isn't compelled to move into an obviously            effect ends for that target.
+deadly hazard, such as a fire or pit, but it will
+provoke opportunity attacks to move in the                        At Higher Levels. When you cast this spell using a
+designated direction.                                           spell slot of 5th level or higher, the radius of the
+                                                                sphere increases by 5 feet for each slot level above
+Cone of Cold                                                    4th.
+
+5th-­‐‑level evocation                                          Conjure Animals
+
+Casting Time: 1 action                                          3rd-­‐‑level conjuration
+Range: Self (60-­‐‑foot cone)
+Components: V, S, M (a small crystal or glass cone)             Casting Time: 1 action
+Duration: Instantaneous                                         Range: 60 feet
+                                                                Components: V, S
+A blast of cold air erupts from your hands. Each                Duration: Concentration, up to 1 hour
+creature in a 60-­‐‑foot cone must make a Constitution
+saving throw. A creature takes 8d8 cold damage on a             You summon fey spirits that take the form of beasts
+failed save, or half as much damage on a successful             and appear in unoccupied spaces that you can see
+one.                                                            within range. Choose one of the following options for
+                                                                what appears:
+  A creature killed by this spell becomes a frozen
+statue until it thaws.                                          • One beast of challenge rating 2 or lower
+                                                                • Two beasts of challenge rating 1 or lower
+  At Higher Levels. When you cast this spell using a            • Four beasts of challenge rating 1/2 or lower
+spell slot of 6th level or higher, the damage increases         • Eight beasts of challenge rating 1/4 or lower
+by 1d8 for each slot level above 5th.
+                                                                Each beast is also considered fey, and it disappears
+Confusion                                                       when it drops to 0 hit points or when the spell ends.
+
+4th-­‐‑level enchantment                                          The summoned creatures are friendly to you and
+                                                                your companions. Roll initiative for the summoned
+Casting Time: 1 action                                          creatures as a group, which has its own turns. They
+Range: 90 feet                                                  obey any verbal commands that you issue to them
+Components: V, S, M (three nut shells)                          (no action required by you). If you don’t issue any
+Duration: Concentration, up to 1 minute                         commands to them, they defend themselves from
+                                                                hostile creatures, but otherwise take no actions.
+This spell assaults and twists creatures’ minds,
+spawning delusions and provoking uncontrolled                     The GM has the creatures’ statistics.
+action. Each creature in a 10-­‐‑foot-­‐‑radius sphere            At Higher Levels. When you cast this spell using
+centered on a point you choose within range must                certain higher-­‐‑level spell slots, you choose one of the
+succeed on a Wisdom saving throw when you cast                  summoning options above, and more creatures
+this spell or be affected by it.                                appear: twice as many with a 5th-­‐‑level slot, three
+                                                                times as many with a 7th-­‐‑level slot, and four times as
+  An affected target can’t take reactions and must              many with a 9th-­‐‑level slot.
+roll a d10 at the start of each of its turns to
+determine its behavior for that turn.                           Conjure Celestial
+
+ d10 Behavior                                                   7th-­‐‑level conjuration
+   1 The creature uses all its movement to move in a
+            random direction. To determine the direction, roll  Casting Time: 1 minute
+            a d8 and assign a direction to each die face. The   Range: 90 feet
+            creature doesn’t take an action this turn.          Components: V, S
+                                                                Duration: Concentration, up to 1 hour
+ 2–6 The creature doesn’t move or take actions this
+            turn.
+
+ 7–8 The creature uses its action to make a melee
+            attack against a randomly determined creature

@@ -1,24 +1,24 @@
 Iron Bands of Binding                                      d100   Contents
-                                                           1r50   Empty
-Wondrous item, rare                                        51r54  Demon (type 1)
-                                                           55r58  Demon (type 2)
-This rusty iron sphere measures 3 inches in                59r62  Demon (type 3)
-diameter and weighs 1 pound. You can use an action         63r64  Demon (type 4)
+                                                           1–50   Empty
+Wondrous item, rare                                        51–54  Demon (type 1)
+                                                           55–58  Demon (type 2)
+This rusty iron sphere measures 3 inches in                59–62  Demon (type 3)
+diameter and weighs 1 pound. You can use an action         63–64  Demon (type 4)
 to speak the command word and throw the sphere at                 Demon (type 5)
 a Huge or smaller creature you can see within 60             65   Demon (type 6)
 feet of you. As the sphere moves through the air, it         66   Deva
 opens into a tangle of metal bands.                          67   Devil (greater)
-                                                           68r69  Devil (lesser)
-  Make a ranged attack roll with an attack bonus           70r73  Djinni
-equal to your Dexterity modifier plus your                 74r75  Efreeti
-proficiency bonus. On a hit, the target is restrained      76r77  Elemental (any)
-until you take a bonus action to speak the command         78r83  Invisible stalker
-word again to release it. Doing so, or missing with        84r86  Night hag
-the attack, causes the bands to contract and become        87r90  Planetar
+                                                           68–69  Devil (lesser)
+  Make a ranged attack roll with an attack bonus           70–73  Djinni
+equal to your Dexterity modifier plus your                 74–75  Efreeti
+proficiency bonus. On a hit, the target is restrained      76–77  Elemental (any)
+until you take a bonus action to speak the command         78–83  Invisible stalker
+word again to release it. Doing so, or missing with        84–86  Night hag
+the attack, causes the bands to contract and become        87–90  Planetar
 a sphere once more.                                          91   Salamander
-                                                           92r95  Solar
+                                                           92–95  Solar
   A creature, including the one restrained, can use          96   Succubus/incubus
-an action to make a DC 20 Strength check to break          97r99  Xorn
+an action to make a DC 20 Strength check to break          97–99  Xorn
 the iron bands. On a success, the item is destroyed,        100
 and the restrained creature is freed. If the check fails,
 any further attempts made by that creature                 Javelin of Lightning

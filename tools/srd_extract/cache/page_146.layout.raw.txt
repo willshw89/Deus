@@ -1,0 +1,62 @@
+of its turns. If it successfully saves against this spell     Fog Cloud
+three times, the spell ends. If it fails its saves three
+times, it is turned to stone and subjected to the             1st-­‐‑level conjuration
+petrified condition for the duration. The successes
+and failures don’t need to be consecutive; keep track         Casting Time: 1 action
+of both until the target collects three of a kind.            Range: 120 feet
+                                                              Components: V, S
+  If the creature is physically broken while petrified,       Duration: Concentration, up to 1 hour
+it suffers from similar deformities if it reverts to its
+original state.                                               You create a 20-­‐‑foot-­‐‑radius sphere of fog centered
+                                                              on a point within range. The sphere spreads around
+  If you maintain your concentration on this spell            corners, and its area is heavily obscured. It lasts for
+for the entire possible duration, the creature is             the duration or until a wind of moderate or greater
+turned to stone until the effect is removed.                  speed (at least 10 miles per hour) disperses it.
+
+Floating Disk                                                   At Higher Levels. When you cast this spell using a
+                                                              spell slot of 2nd level or higher, the radius of the fog
+1st-­‐‑level conjuration (ritual)                             increases by 20 feet for each slot level above 1st.
+
+Casting Time: 1 action                                        Forbiddance
+Range: 30 feet
+Components: V, S, M (a drop of mercury)                       6th-­‐‑level abjuration (ritual)
+Duration: 1 hour
+                                                              Casting Time: 10 minutes
+This spell creates a circular, horizontal plane of force,     Range: Touch
+3 feet in diameter and 1 inch thick, that floats 3 feet       Components: V, S, M (a sprinkling of holy water,
+above the ground in an unoccupied space of your
+choice that you can see within range. The disk                  rare incense, and powdered ruby worth at least
+remains for the duration, and can hold up to 500                1,000 gp)
+pounds. If more weight is placed on it, the spell ends,       Duration: 1 day
+and everything on the disk falls to the ground.
+                                                              You create a ward against magical travel that
+  The disk is immobile while you are within 20 feet           protects up to 40,000 square feet of floor space to a
+of it. If you move more than 20 feet away from it, the        height of 30 feet above the floor. For the duration,
+disk follows you so that it remains within 20 feet of         creatures can’t teleport into the area or use portals,
+you. It can move across uneven terrain, up or down            such as those created by the gate spell, to enter the
+stairs, slopes and the like, but it can’t cross an            area. The spell proofs the area against planar travel,
+elevation change of 10 feet or more. For example, the         and therefore prevents creatures from accessing the
+disk can’t move across a 10-­‐‑foot-­‐‑deep pit, nor could    area by way of the Astral Plane, Ethereal Plane,
+it leave such a pit if it was created at the bottom.          Feywild, Shadowfell, or the plane shift spell.
+
+  If you move more than 100 feet from the disk                  In addition, the spell damages types of creatures
+(typically because it can’t move around an obstacle           that you choose when you cast it. Choose one or
+to follow you), the spell ends.                               more of the following: celestials, elementals, fey,
+                                                              fiends, and undead. When a chosen creature enters
+Fly                                                           the spell’s area for the first time on a turn or starts
+                                                              its turn there, the creature takes 5d10 radiant or
+3rd-­‐‑level transmutation                                    necrotic damage (your choice when you cast this
+                                                              spell).
+Casting Time: 1 action
+Range: Touch                                                    When you cast this spell, you can designate a
+Components: V, S, M (a wing feather from any bird)            password. A creature that speaks the password as it
+Duration: Concentration, up to 10 minutes                     enters the area takes no damage from the spell.
+
+You touch a willing creature. The target gains a                The spell’s area can’t overlap with the area of
+flying speed of 60 feet for the duration. When the            another forbiddance spell. If you cast forbiddance
+spell ends, the target falls if it is still aloft, unless it  every day for 30 days in the same location, the spell
+can stop the fall.                                            lasts until it is dispelled, and the material
+                                                              components are consumed on the last casting.
+  At Higher Levels. When you cast this spell using a
+spell slot of 4th level or higher, you can target one
+additional creature for each slot level above 3rd.

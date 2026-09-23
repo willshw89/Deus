@@ -1,0 +1,67 @@
+Horse, draft         50 gp   40 ft.    540 lb.              Trade Goods
+Horse, riding        75 gp   60 ft.    480 lb.
+Mastiff              25 gp   40 ft.    195 lb.              Cost    Goods
+Pony                 30 gp   40 ft.    225 lb.              1 cp    1 lb. of wheat
+Warhorse            400 gp   60 ft.    540 lb.              2 cp    1 lb. of flour or one chicken
+                                                            5 cp    1 lb. of salt
+Tack, Harness, and Drawn Vehicles                           1 sp    1 lb. of iron or 1 sq. yd. of canvas
+                                                            5 sp    1 lb. of copper or 1 sq. yd. of cotton cloth
+Item                  Cost   Weight                         1 gp    1 lb. of ginger or one goat
+Barding                  ×4        ×2                       2 gp    1 lb. of cinnamon or pepper, or one sheep
+Bit and bridle                                              3 gp    1 lb. of cloves or one pig
+Carriage               2 gp     1 lb.                       5 gp    1 lb. of silver or 1 sq. yd. of linen
+Cart                100 gp   600 lb.                        10 gp   1 sq. yd. of silk or one cow
+Chariot                      200 lb.                        15 gp   1 lb. of saffron or one ox
+Feed (per day)       15 gp   100 lb.                        50 gp   1 lb. of gold
+Saddle              250 gp                                  500 gp  1 lb. of platinum
+                               10 lb.
+   Exotic              5 cp
+   Military
+   Pack             60 gp    40 lb.                         Expenses
+   Riding           20 gp    30 lb.
+Saddlebags                   15 lb.                         When not descending into the depths of the earth,
+                     5 gp    25 lb.                         exploring ruins for lost treasures, or waging war
+                    10 gp                                   against the encroaching darkness, adventurers face
+                              8 lb.                         more mundane realities. Even in a fantastical world,
+                     4 gp                                   people require basic necessities such as shelter,
+                                                            sustenance, and clothing. These things cost money,
+Sled                20 gp    300 lb.                        although some lifestyles cost more than others.
+Stabling (per day)   5 sp         —
+Wagon
+                    35 gp    400 lb.
+
+Waterborne Vehicles                                         Lifestyle Expenses
+
+Item                 Cost    Speed                          Lifestyle expenses provide you with a simple way to
+Galley         30,000 gp     4 mph                          account for the cost of living in a fantasy world. They
+Keelboat                     1 mph                          cover your accommodations, food and drink, and all
+Longship        3,000 gp     3 mph                          your other necessities. Furthermore, expenses cover
+Rowboat        10,000 gp    1½ mph                          the cost of maintaining your equipment so you can
+Sailing ship                 2 mph                          be ready when adventure next calls.
+Warship             50 gp   2½ mph
+               10,000 gp                                      At the start of each week or month (your choice),
+               25,000 gp                                    choose a lifestyle from the Expenses table and pay
+                                                            the price to sustain that lifestyle. The prices listed
+Trade Goods                                                 are per day, so if you wish to calculate the cost of
+                                                            your chosen lifestyle over a thirty-­‐‑day period,
+Most wealth is not in coins. It is measured in              multiply the listed price by 30. Your lifestyle might
+livestock, grain, land, rights to collect taxes, or rights  change from one period to the next, based on the
+to resources (such as a mine or a forest).                  funds you have at your disposal, or you might
+                                                            maintain the same lifestyle throughout your
+  Guilds, nobles, and royalty regulate trade.               character’s career.
+Chartered companies are granted rights to conduct
+trade along certain routes, to send merchant ships to         Your lifestyle choice can have consequences.
+various ports, or to buy or sell specific goods. Guilds     Maintaining a wealthy lifestyle might help you make
+set prices for the goods or services that they control,     contacts with the rich and powerful, though you run
+and determine who may or may not offer those                the risk of attracting thieves. Likewise, living frugally
+goods and services. Merchants commonly exchange             might help you avoid criminals, but you are unlikely
+trade goods without using currency. The Trade               to make powerful connections.
+Goods table shows the value of commonly
+exchanged goods.
+
+                                                            Lifestyle Expenses
+
+                                                            Lifestyle    Price/Day
+                                                            Wretched              —
+                                                            Squalid
+                                                                                1 sp
