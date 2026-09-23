@@ -477,36 +477,126 @@
 
         setYear(y) {
             this._year = Math.max(1, Math.min(200, parseInt(y, 10) || 1));
+            if (this._yearInput) {
+                this._yearInput.value = String(this._year);
+            }
             this.redrawItem(1);
         }
 
         open() {
             super.open();
             this._createSeedInputElement();
+            this._createYearInputElement();
         }
 
         close() {
             super.close();
             this._destroySeedInputElement();
+            this._destroyYearInputElement();
+        }
+
+        _createYearInputElement() {
+            if (typeof document === "undefined" || this._yearInput) return;
+            const input = document.createElement("input");
+            input.type = "text";
+            input.maxLength = 3;
+            input.value = String(this._year);
+            input.title = "";
+            input.setAttribute("autocomplete", "off");
+            input.setAttribute("spellcheck", "false");
+            input.style.position = "absolute";
+            input.style.zIndex = "100";
+            input.style.backgroundColor = "transparent";
+            input.style.color = "#a0f0ff";
+            input.style.border = "none";
+            input.style.outline = "none";
+            input.style.boxShadow = "none";
+            input.style.fontFamily = "GameFont, sans-serif";
+            input.style.fontSize = "15px";
+            input.style.fontWeight = "bold";
+            input.style.letterSpacing = "1px";
+            input.style.textAlign = "center";
+            input.style.caretColor = "#00d4ff";
+            input.style.boxSizing = "border-box";
+            input.style.padding = "2px 2px";
+            input.style.display = "none";
+
+            input.addEventListener("keydown", (e) => {
+                e.stopPropagation();
+                if (e.key === "Enter") {
+                    input.blur();
+                    this.select(4);
+                } else if (e.key === "Escape") {
+                    input.blur();
+                    this.processCancel();
+                }
+            });
+            input.addEventListener("keyup", (e) => {
+                e.stopPropagation();
+            });
+            input.addEventListener("input", () => {
+                let clean = input.value.replace(/\D/g, "");
+                if (clean.length > 3) clean = clean.slice(0, 3);
+                input.value = clean;
+                if (clean !== "") {
+                    let val = parseInt(clean, 10);
+                    if (val > 200) { val = 200; input.value = "200"; }
+                    this._year = Math.max(1, val);
+                    this.redrawItem(1);
+                }
+            });
+            input.addEventListener("blur", () => {
+                if (!input.value || parseInt(input.value, 10) < 1) {
+                    this._year = 1;
+                } else if (parseInt(input.value, 10) > 200) {
+                    this._year = 200;
+                }
+                input.value = String(this._year);
+                this.redrawItem(1);
+            });
+            input.addEventListener("focus", () => {
+                this.select(1);
+                this.redrawItem(1);
+                try { input.select(); } catch (_) {}
+            });
+
+            document.body.appendChild(input);
+            this._yearInput = input;
+            this._updateInputPosition();
+        }
+
+        _destroyYearInputElement() {
+            if (this._yearInput) {
+                if (this._yearInput.parentNode) {
+                    this._yearInput.parentNode.removeChild(this._yearInput);
+                }
+                this._yearInput = null;
+            }
         }
 
         _createSeedInputElement() {
             if (typeof document === "undefined" || this._htmlInput) return;
             const input = document.createElement("input");
             input.type = "text";
-            input.placeholder = "Leave blank for a random world";
+            input.placeholder = "";
             input.maxLength = 10;
             input.value = this._seedInput || "";
+            input.title = "";
+            input.setAttribute("autocomplete", "off");
+            input.setAttribute("spellcheck", "false");
             input.style.position = "absolute";
             input.style.zIndex = "100";
-            input.style.backgroundColor = "rgba(10, 15, 25, 0.9)";
+            input.style.backgroundColor = "transparent";
             input.style.color = "#a0f0ff";
-            input.style.border = "1px solid rgba(0, 212, 255, 0.5)";
-            input.style.borderRadius = "3px";
-            input.style.fontFamily = "GameFont, sans-serif";
-            input.style.fontSize = "13px";
-            input.style.textAlign = "center";
+            input.style.border = "none";
             input.style.outline = "none";
+            input.style.boxShadow = "none";
+            input.style.fontFamily = "GameFont, sans-serif";
+            input.style.fontSize = "15px";
+            input.style.fontWeight = "bold";
+            input.style.letterSpacing = "1px";
+            input.style.textAlign = "center";
+            input.style.caretColor = "#00d4ff";
             input.style.boxSizing = "border-box";
             input.style.padding = "2px 6px";
 
@@ -536,6 +626,10 @@
             });
             input.addEventListener("focus", () => {
                 this.select(2);
+                this.redrawItem(2);
+            });
+            input.addEventListener("blur", () => {
+                this.redrawItem(2);
             });
 
             document.body.appendChild(input);
@@ -553,28 +647,51 @@
         }
 
         _updateInputPosition() {
-            if (!this._htmlInput) return;
-            if (!this.isOpen() || !this.visible) {
-                this._htmlInput.style.display = "none";
-                return;
-            }
-            this._htmlInput.style.display = "block";
             const scale = (typeof Graphics !== "undefined" && Graphics._realScale) ? Graphics._realScale : 1;
             const canvas = (typeof Graphics !== "undefined") ? Graphics.canvas : null;
             const cRect = canvas && canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+            const isOpen = this.isOpen() && this.visible;
 
-            const rect = this.itemLineRect(2);
-            const labelWidth = 105;
-            const inputX = this.x + rect.x + labelWidth;
-            const inputY = this.y + rect.y + 3;
-            const inputW = rect.width - labelWidth - 4;
-            const inputH = 26;
+            // Year input position
+            if (this._yearInput) {
+                const isEditingYear = (typeof document !== "undefined" && document.activeElement === this._yearInput);
+                if (!isOpen || !isEditingYear) {
+                    this._yearInput.style.display = "none";
+                } else {
+                    this._yearInput.style.display = "block";
+                    const r1 = this.itemLineRect(1);
+                    const yInX = this.x + this.padding + r1.x + 154;
+                    const yInY = this.y + this.padding + r1.y + 3;
+                    const yInW = 54;
+                    const yInH = 26;
+                    this._yearInput.style.left = `${cRect.left + yInX * scale}px`;
+                    this._yearInput.style.top = `${cRect.top + yInY * scale}px`;
+                    this._yearInput.style.width = `${yInW * scale}px`;
+                    this._yearInput.style.height = `${yInH * scale}px`;
+                    this._yearInput.style.fontSize = `${Math.round(15 * scale)}px`;
+                }
+            }
 
-            this._htmlInput.style.left = `${cRect.left + inputX * scale}px`;
-            this._htmlInput.style.top = `${cRect.top + inputY * scale}px`;
-            this._htmlInput.style.width = `${inputW * scale}px`;
-            this._htmlInput.style.height = `${inputH * scale}px`;
-            this._htmlInput.style.fontSize = `${Math.round(13 * scale)}px`;
+            // Seed input position
+            if (this._htmlInput) {
+                if (!isOpen) {
+                    this._htmlInput.style.display = "none";
+                } else {
+                    this._htmlInput.style.display = "block";
+                    const rect = this.itemLineRect(2);
+                    const labelWidth = 105;
+                    const inputX = this.x + this.padding + rect.x + labelWidth;
+                    const inputY = this.y + this.padding + rect.y + 3;
+                    const inputW = rect.width - labelWidth - 4;
+                    const inputH = 26;
+
+                    this._htmlInput.style.left = `${cRect.left + inputX * scale}px`;
+                    this._htmlInput.style.top = `${cRect.top + inputY * scale}px`;
+                    this._htmlInput.style.width = `${inputW * scale}px`;
+                    this._htmlInput.style.height = `${inputH * scale}px`;
+                    this._htmlInput.style.fontSize = `${Math.round(15 * scale)}px`;
+                }
+            }
         }
 
         refreshCursor() {
@@ -628,8 +745,8 @@
             const w = rect.width - 4;
             const h = rect.height - 4;
 
-            if (index === 3) {
-                // Handled in drawItem for dual buttons
+            if (index === 2 || index === 3) {
+                // Handled specifically in drawItem for custom input box and dual buttons
                 return;
             }
 
@@ -653,9 +770,9 @@
             this.contents.outlineColor = "rgba(0, 0, 0, 0.95)";
             this.contents.outlineWidth = 2;
             this.contents.fontSize = 11;
-            this.changeTextColor("#94a3b8");
+            this.changeTextColor("#64748b");
             const w = this.innerWidth - 16;
-            this.drawText("Use the same seed, generation version, and world settings to recreate the starting world.", 8, 150, w, "center");
+            this.drawText("— or leave blank for a random world —", 8, 154, w, "center");
         }
 
         drawItem(index) {
@@ -681,11 +798,36 @@
                 this.drawText("Starting Year", rect.x + 8, rect.y, 120, "left");
 
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
-                this.drawText("◄", rect.x + 130, rect.y, 24, "center");
-                this.changeTextColor(isSelected ? "#ffffff" : "#cbd5e1");
-                this.drawText(`${this._year} AD`, rect.x + 155, rect.y, rect.width - 185, "center");
+                this.drawText("◄", rect.x + 130, rect.y, 22, "center");
+
+                const boxX = rect.x + 154;
+                const boxW = 54;
+                const boxH = 26;
+                const boxY = rect.y + 3;
+
+                // Sleek inset frame for direct numeric entry
+                if (isSelected || (this._yearInput && document.activeElement === this._yearInput)) {
+                    this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(5, 8, 14, 0.95)");
+                    this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, "rgba(0, 220, 255, 0.90)");
+                    this.contentsBack.fillRect(boxX + 1, boxY + 1, boxW - 2, 1, "rgba(160, 240, 255, 0.50)");
+                } else {
+                    this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(8, 12, 20, 0.75)");
+                    this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, "rgba(60, 80, 110, 0.45)");
+                }
+
+                if (!this._yearInput || document.activeElement !== this._yearInput) {
+                    this.contents.fontSize = 15;
+                    this.changeTextColor("#a0f0ff");
+                    this.drawText(String(this._year), boxX, rect.y, boxW, "center");
+                }
+
+                this.contents.fontSize = 18;
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#cbd5e1");
-                this.drawText("►", rect.x + rect.width - 28, rect.y, 24, "center");
+                this.drawText("►", rect.x + 212, rect.y, 22, "center");
+
+                this.contents.fontSize = 14;
+                this.changeTextColor(isSelected ? "#a0f0ff" : "#94a3b8");
+                this.drawText("AD", rect.x + 238, rect.y, 28, "left");
             } else if (index === 2) {
                 this.changeTextColor(isSelected ? "#a0f0ff" : "#ffffff");
                 this.drawText("World Seed", rect.x + 8, rect.y, 100, "left");
@@ -695,18 +837,26 @@
                 const boxH = 26;
                 const boxY = rect.y + 3;
 
-                // Canvas representation (also visible if HTML input isn't active/supported)
-                this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(10, 15, 25, 0.85)");
-                this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, isSelected ? "rgba(0, 212, 255, 0.85)" : "rgba(60, 80, 110, 0.5)");
+                // Sleek inset frame on canvas
+                if (isSelected) {
+                    this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(5, 8, 14, 0.95)");
+                    this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, "rgba(0, 220, 255, 0.90)");
+                    this.contentsBack.fillRect(boxX + 1, boxY + 1, boxW - 2, 1, "rgba(160, 240, 255, 0.50)");
+                } else {
+                    this.contentsBack.fillRect(boxX, boxY, boxW, boxH, "rgba(8, 12, 20, 0.75)");
+                    this.contentsBack.strokeRect(boxX, boxY, boxW, boxH, "rgba(60, 80, 110, 0.45)");
+                }
 
                 if (this._seedInput && String(this._seedInput).trim() !== "") {
-                    this.contents.fontSize = 16;
-                    this.changeTextColor("#a0f0ff");
-                    this.drawText(this._seedInput, boxX, rect.y, boxW, "center");
+                    if (!this._htmlInput || document.activeElement !== this._htmlInput) {
+                        this.contents.fontSize = 15;
+                        this.changeTextColor("#a0f0ff");
+                        this.drawText(this._seedInput, boxX, rect.y, boxW, "center");
+                    }
                 } else {
-                    this.contents.fontSize = 12;
+                    this.contents.fontSize = 13;
                     this.changeTextColor("#64748b");
-                    this.drawText("[ Leave blank for a random world ]", boxX, rect.y, boxW, "center");
+                    this.drawText("Random", boxX, rect.y, boxW, "center");
                 }
             } else if (index === 3) {
                 const bWidth = Math.floor((rect.width - 12) / 2);
@@ -721,47 +871,68 @@
                 const b1Selected = isSelected && this._seedButtonCol === 0;
                 if (b1Selected) {
                     this.contentsBack.gradientFillRect(x1, y, w1, h, "rgba(0, 212, 255, 0.32)", "rgba(0, 140, 220, 0.12)", false);
-                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(0, 220, 255, 0.85)");
+                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(0, 220, 255, 0.90)");
+                    this.contentsBack.fillRect(x1 + 1, y + 1, w1 - 2, 1, "rgba(220, 250, 255, 0.85)");
                 } else {
-                    this.contentsBack.gradientFillRect(x1, y, w1, h, "rgba(15, 20, 30, 0.65)", "rgba(8, 12, 18, 0.45)", true);
-                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(60, 80, 110, 0.35)");
+                    this.contentsBack.gradientFillRect(x1, y, w1, h, "rgba(16, 22, 34, 0.75)", "rgba(10, 14, 22, 0.55)", true);
+                    this.contentsBack.strokeRect(x1, y, w1, h, "rgba(60, 80, 110, 0.40)");
                 }
-                this.contents.fontSize = 14;
-                this.changeTextColor(b1Selected ? "#a0f0ff" : "#cbd5e1");
-                this.drawText("[ Randomize ]", x1, rect.y, w1, "center");
+                this.contents.fontSize = 13;
+                this.changeTextColor(b1Selected ? "#ffffff" : "#cbd5e1");
+                this.drawText("⚄ Randomize", x1, rect.y, w1, "center");
 
                 // Button 2: Copy Seed
                 const b2Selected = isSelected && this._seedButtonCol === 1;
                 const hasSeed = !!(this._seedInput && String(this._seedInput).trim() !== "");
                 const isCopied = this._copiedTimer > 0;
 
-                if (b2Selected && hasSeed) {
-                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(0, 212, 255, 0.32)", "rgba(0, 140, 220, 0.12)", false);
-                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(0, 220, 255, 0.85)");
-                } else {
-                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(15, 20, 30, 0.65)", "rgba(8, 12, 18, 0.45)", true);
-                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(60, 80, 110, 0.35)");
-                }
-                this.contents.fontSize = 14;
                 if (isCopied) {
+                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(34, 197, 94, 0.35)", "rgba(22, 163, 74, 0.15)", false);
+                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(74, 222, 128, 0.90)");
+                    this.contentsBack.fillRect(x2 + 1, y + 1, w2 - 2, 1, "rgba(220, 252, 231, 0.85)");
+                    this.contents.fontSize = 13;
                     this.changeTextColor("#4ade80");
-                    this.drawText("[ Copied! ]", x2, rect.y, w2, "center");
-                } else if (!hasSeed) {
-                    this.changeTextColor("#64748b");
-                    this.drawText("[ Copy Seed ]", x2, rect.y, w2, "center");
+                    this.drawText("✓ Copied!", x2, rect.y, w2, "center");
+                } else if (b2Selected && hasSeed) {
+                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(0, 212, 255, 0.32)", "rgba(0, 140, 220, 0.12)", false);
+                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(0, 220, 255, 0.90)");
+                    this.contentsBack.fillRect(x2 + 1, y + 1, w2 - 2, 1, "rgba(220, 250, 255, 0.85)");
+                    this.contents.fontSize = 13;
+                    this.changeTextColor("#ffffff");
+                    this.drawText("📋 Copy Seed", x2, rect.y, w2, "center");
                 } else {
-                    this.changeTextColor(b2Selected ? "#a0f0ff" : "#cbd5e1");
-                    this.drawText("[ Copy Seed ]", x2, rect.y, w2, "center");
+                    this.contentsBack.gradientFillRect(x2, y, w2, h, "rgba(16, 22, 34, 0.75)", "rgba(10, 14, 22, 0.55)", true);
+                    this.contentsBack.strokeRect(x2, y, w2, h, "rgba(60, 80, 110, 0.40)");
+                    this.contents.fontSize = 13;
+                    this.changeTextColor(hasSeed ? "#cbd5e1" : "#475569");
+                    this.drawText("📋 Copy Seed", x2, rect.y, w2, "center");
                 }
             } else if (index === 4) {
+                const x = rect.x + 4, y = rect.y + 2, w = rect.width - 8, h = rect.height - 4;
                 if (isSelected) {
-                    this.changeTextColor("#ffd700");
+                    this.contentsBack.gradientFillRect(x, y, w, h, "rgba(234, 179, 8, 0.45)", "rgba(161, 98, 7, 0.25)", false);
+                    this.contentsBack.strokeRect(x, y, w, h, "rgba(250, 204, 21, 0.95)");
+                    this.contentsBack.fillRect(x + 1, y + 1, w - 2, 1, "rgba(254, 240, 138, 0.90)");
+                    this.changeTextColor("#fef08a");
                 } else {
-                    this.changeTextColor("#a0f0ff");
+                    this.contentsBack.gradientFillRect(x, y, w, h, "rgba(161, 98, 7, 0.25)", "rgba(113, 63, 18, 0.15)", true);
+                    this.contentsBack.strokeRect(x, y, w, h, "rgba(202, 138, 4, 0.60)");
+                    this.changeTextColor("#facc15");
                 }
+                this.contents.fontSize = 16;
                 this.drawText("Start", rect.x, rect.y, rect.width, "center");
             } else if (index === 5) {
-                this.changeTextColor(isSelected ? "#ffffff" : "#94a3b8");
+                const x = rect.x + 4, y = rect.y + 2, w = rect.width - 8, h = rect.height - 4;
+                if (isSelected) {
+                    this.contentsBack.gradientFillRect(x, y, w, h, "rgba(0, 212, 255, 0.25)", "rgba(0, 140, 220, 0.10)", false);
+                    this.contentsBack.strokeRect(x, y, w, h, "rgba(0, 220, 255, 0.85)");
+                    this.changeTextColor("#f8fafc");
+                } else {
+                    this.contentsBack.gradientFillRect(x, y, w, h, "rgba(30, 41, 59, 0.45)", "rgba(15, 23, 42, 0.35)", true);
+                    this.contentsBack.strokeRect(x, y, w, h, "rgba(100, 116, 139, 0.35)");
+                    this.changeTextColor("#94a3b8");
+                }
+                this.contents.fontSize = 15;
                 this.drawText("Cancel", rect.x, rect.y, rect.width, "center");
             }
         }
@@ -791,7 +962,9 @@
                     this.prevFaction();
                 }
             } else if (hitIndex === 1) {
-                if (localPos.x >= 235) {
+                if (localPos.x >= 150 && localPos.x <= 210) {
+                    if (this._yearInput) this._yearInput.focus();
+                } else if (localPos.x >= 210) {
                     this.changeYear(1);
                 } else {
                     this.changeYear(-1);
@@ -880,6 +1053,9 @@
         changeYear(delta) {
             const oldYear = this._year;
             this._year = Math.max(1, Math.min(200, this._year + delta));
+            if (this._yearInput) {
+                this._yearInput.value = String(this._year);
+            }
             if (this._year !== oldYear) {
                 SoundManager.playCursor();
                 this.redrawItem(1);
@@ -1411,6 +1587,14 @@
             scene._newGameSetupWindow.randomizeSeed();
             const rSeed = scene._newGameSetupWindow.currentSeed();
             t.check("seed_randomized", /^\d+$/.test(rSeed) && Number(rSeed) > 0, "Seed randomized into field: " + rSeed);
+
+            scene._newGameSetupWindow.select(2);
+            await t.waitFrames(4);
+            t.screenshot("live_deus_new_game_setup_seed_selected");
+
+            scene._newGameSetupWindow.select(3);
+            await t.waitFrames(4);
+            t.screenshot("live_deus_new_game_setup_buttons_selected");
 
             scene._newGameSetupWindow.copySeed();
             t.check("seed_copied_feedback", scene._newGameSetupWindow._copiedTimer > 0, "Copy Seed triggers visual feedback");
