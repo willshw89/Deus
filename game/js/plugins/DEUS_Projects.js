@@ -54,6 +54,7 @@
         slotsPerColonist: 8,     // storage: item slots each colonist needs
         slotsPerStockpileCell: 8, // storage: what one stockpile cell counts as; a chest counts its container slots
         forageJobs: 4,           // food: gather jobs alive at once for a food cache
+        reserveMarginDays: 0.5,  // food: a cache forages this much past the target, so a meal does not reopen one at once
         kindCooldownTicks: 6000, // a kind whose project could not be sited or supplied is not tried again for this long
         severity: { shelter: 3, food: 2, foodCritical: 4, bed: 1.5, storage: 1 },
         survivalBonus: { foodCritical: 5, shelter: 2 }
@@ -388,14 +389,20 @@
      * - shelter: doors set into walls; needed one per perShelter colonists.
      * - bed: beds on sheltered cells (a finished shelter's interior, the camp's interior); needed one per colonist.
      * - storage: chest container slots plus stockpile cells times slotsPerStockpileCell; needed slotsPerColonist each.
-     * - food: colonist-days of nutrition within reach (larders, containers, food on the ground), against targetReserveDays.
+     * - food: colonist-days of nutrition the settlement can eat (totalAccessibleNutrition: larders, containers, food on
+     *   the ground within reach, and the packs of its living members), against targetReserveDays. What lies deposited
+     *   in larders and containers is reported apart (communalStoredNutrition) for logistics; it never changes the
+     *   survival answer. Every stack is counted once, wherever it is, and always by food.nutrition, never by weight.
      */
     function evaluateDeficits(areaRef) {
         const W = World(), O = Objects(), I = Items();
         const s = settlementFor(areaRef);
         if (!W || !W.state || !O || !I || !s || !s.site) return null;
         const cfg = config(), area = levelArea(s);
-        const population = W.unitsInArea(area.x, area.y, area.z).filter(isColonist).length;
+        // The settlement's people: living colonists of the faction. The dead hold nothing for the colony (their packs
+        // follow the corpse's loot rules elsewhere) and need nothing from it.
+        const people = W.unitsInArea(area.x, area.y, area.z).filter(u => isColonist(u) && !u.data.dead);
+        const population = people.length;
         const near = { x: s.site.x, y: s.site.y };
         const buildings = O.findIn(area, { near, radius: cfg.scanRadius, tags: ["building"], unsorted: true });
         const sheltered = shelteredCells(s);
@@ -407,27 +414,41 @@
             if (hasTag(b.type, "stockpile") && !isContainer(b.type) && b.type.passable === true) stockpileCells++;
             if (hasTag(b.type, "door") && wallNeighbours(area, b.x, b.y) >= 2) shelters++;
         }
+        // Food, each stack once: `seen` keeps a stack that two lists reach (a pack and the pouch in it, a container
+        // and a cell) from counting twice.
+        const seen = new Set();
+        const take = it => { if (!it || seen.has(it.id)) return 0; seen.add(it.id); return nutritionOf(I, it); };
         let containerSlots = 0, containerFoodLb = 0;
         if (C && typeof C.all === "function") {
             for (const cont of C.all(area, area.z)) {
                 if (Math.hypot(cont.x - near.x, cont.y - near.y) > cfg.scanRadius) continue;
                 containerSlots += cont.maxSlots | 0;
-                if (typeof C.itemsIn === "function") for (const it of C.itemsIn(cont.id)) containerFoodLb += nutritionOf(I, it);
+                if (typeof C.itemsIn === "function") for (const it of C.itemsIn(cont.id)) containerFoodLb += take(it);
             }
         }
         const larders = new Set(larderCells(s).map(sp => cellKey(sp.x, sp.y)));
         let larderLb = 0, groundLb = 0;
         for (const f of I.find({ area: { x: area.x, y: area.y }, z: area.z, near, radius: cfg.scanRadius, tags: ["food"] })) {
-            const lb = nutritionOf(I, f.item);
+            const lb = take(f.item);
             if (larders.has(cellKey(f.x, f.y))) larderLb += lb; else groundLb += lb;
         }
-        const foodLb = larderLb + containerFoodLb + groundLb;
+        // Carried by the settlement's living members: theirs to eat (a colonist eats from its own pack first), so it
+        // answers "can we survive"; it is not communal until deposited.
+        let carriedLb = 0;
+        for (const u of people) for (const it of I.inventoryOf(u.id)) carriedLb += take(it);
+        const storedLb = larderLb + containerFoodLb;          // communalStoredNutrition
+        const foodLb = storedLb + groundLb + carriedLb;        // totalAccessibleNutrition
         const foodDays = population > 0 ? foodLb / population : 0;
         const row = (needed, current, unit) => ({ needed, current, deficit: Math.max(0, needed - current), unit });
         const round3 = v => Math.round(v * 1000) / 1000;
         const food = row(population > 0 ? cfg.targetReserveDays : 0, round3(foodDays), "colonist-days");
         food.deficit = round3(food.deficit);
-        Object.assign(food, { lb: round3(foodLb), larderLb: round3(larderLb), containerLb: round3(containerFoodLb), groundLb: round3(groundLb), deficitLb: round3(food.deficit * population), critical: population > 0 && foodDays < 1 });
+        Object.assign(food, {
+            lb: round3(foodLb), larderLb: round3(larderLb), containerLb: round3(containerFoodLb), groundLb: round3(groundLb), carriedLb: round3(carriedLb),
+            storedLb: round3(storedLb), totalAccessibleNutrition: round3(foodLb), communalStoredNutrition: round3(storedLb),
+            communalDays: round3(population > 0 ? storedLb / population : 0),
+            deficitLb: round3(food.deficit * population), critical: population > 0 && foodDays < 1
+        });
         const storage = row(population * cfg.slotsPerColonist, containerSlots + stockpileCells * cfg.slotsPerStockpileCell, "slots");
         Object.assign(storage, { containerSlots, stockpileCells });
         const bed = row(population, beds, "beds");
@@ -558,10 +579,13 @@
 
     const finished = job => !job || job.state === "done" || job.state === "failed";
 
+    // A job UF_Colonists cancelled for a survival need (supper, bedtime, exhaustion, unconsciousness) is the worker's
+    // interruption, not the cell's failure: it is simply posted again, and never pauses the cell.
+    const preempted = job => typeof job.reason === "string" && job.reason.startsWith("survival:");
     function reconcile(p) {
         const J = Jobs();
         const note = (key, job) => {
-            if (job && job.state === "failed") {
+            if (job && job.state === "failed" && !preempted(job)) {
                 const f = p.failed[key] || { count: 0, reason: null, retryAt: 0 };
                 f.count++;
                 f.reason = job.reason || null;
@@ -731,7 +755,9 @@
         const O = Objects(), I = Items(), J = Jobs(), c = colony(), cfg = config(), area = levelArea(p.origin);
         const d = evaluateDeficits(null);
         summary.reserveDays = d ? d.food.current : null;
-        if (!d || d.food.deficit <= 0) return true; // the reserve holds: the phase is complete
+        // The phase is complete when the reserve holds with a margin (a supper's worth), so the next meal does not
+        // reopen a cache the same hour.
+        if (!d || d.food.current >= d.food.needed + Math.max(0, Number(cfg.reserveMarginDays) || 0)) return true;
         summary.todo = 1;
         let posted = 0, sources = 0;
         const larder = p.larder && O.atIn(area, p.larder.x, p.larder.y) ? p.larder : larderCell(c);
@@ -897,7 +923,10 @@
             const activeOfKind = active().filter(p => p.kind === kind).length;
             const utility = unmet > 0 ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;
             const cooledUntil = (st && st.cooldowns && st.cooldowns[kind]) || 0;
-            candidates.push({ kind, deficit: key, total: row.deficit, needed: row.needed, unit: row.unit, inFlightCapacity, inFlightProjects: inFlight.length, unmet, fraction, severity, bonus, utility, cooled: cooledUntil > t, eligible: unmet > 0 && cooledUntil <= t });
+            // Eligible: something unmet, the kind not cooling, and a positive utility: the active-project penalty
+            // keeps a second project of a kind from opening beside one in flight (a food cache forages until the
+            // reserve holds whatever the deficit grows to; the next shelter waits for the first).
+            candidates.push({ kind, deficit: key, total: row.deficit, needed: row.needed, unit: row.unit, inFlightCapacity, inFlightProjects: inFlight.length, unmet, fraction, severity, bonus, utility, cooled: cooledUntil > t, eligible: unmet > 0 && cooledUntil <= t && utility > 0 });
         }
         candidates.sort((a, b) => (b.utility - a.utility) || a.kind.localeCompare(b.kind));
         return { deficits: d, candidates, chosen: candidates.find(x => x.eligible) || null };
@@ -1113,6 +1142,92 @@
             let same = true;
             try { require("assert").deepStrictEqual(copy, live); } catch (e) { same = false; }
             t.check("saved", same && DataManager.makeSaveContents().ufWorld.colony.projects === live, same ? "JSON round trip identical; live projects in the save contents" : "round trip differs");
+            t.check("no_errors", t.errorsSoFar().length === 0, `${t.errorsSoFar().length} errors`);
+        }, { isDefault: false });
+
+        // Unattended settlement run (UF_Test suite "settlement", not in the default run; DEUS-TSK-FABLE-07):
+        // node tools/test_snapshot.js --name settlement --suite settlement
+        // The calendar is put at 08:00 through the test clock, the speed at its top step, and nobody is ordered:
+        // what gets opened, taken, interrupted and built is the founders' own doing. Then the game is saved and
+        // loaded back in this process and the work must go on from an identical record.
+        UF.Test.suite("settlement", async t => {
+            const W = UF.World, J = UF.Jobs, I = UF.Items;
+            const c = colony();
+            const near = v => Math.abs(v) < 1e-6;
+            t.check("colony_present", !!c && !!c.site, c ? `hearth at (${c.site.x},${c.site.y}), radius ${c.radius}` : "no colony state");
+            // 1. The test clock: 08:00 on the calendar, and the calendar keeps running.
+            const set = UF.Time && typeof UF.Time.setForTest === "function" ? UF.Time.setForTest(8, 0) : null;
+            const stamp0 = window.$ufTime ? $ufTime.hour * 60 + $ufTime.minute : -1;
+            await t.waitFrames(30);
+            const stamp1 = window.$ufTime ? $ufTime.hour * 60 + $ufTime.minute : -1;
+            t.check("clock_set_for_test", !!set && set.hour === 8 && set.minute === 0 && stamp0 === 8 * 60 && stamp1 > stamp0,
+                set ? `UF.Time.setForTest(8, 0) -> ${JSON.stringify(set)}; 30 frames later the calendar reads ${window.$ufTime ? $ufTime.timeString || `${$ufTime.hour}:${$ufTime.minute}` : "?"} (not frozen)` : "no UF.Time.setForTest");
+            // 2. Food in a pack counts once towards the reserve; in the larder it is the same food, moved.
+            const area = levelArea(c);
+            const people = W.unitsInArea(area.x, area.y, area.z).filter(isColonist);
+            const holder = people[0] || null;
+            const d0 = evaluateDeficits(null);
+            const given = holder ? I.give("rations", 2, holder.id, { bypassLimits: true }) : [];
+            const d1 = evaluateDeficits(null);
+            const larder = larderCell(c);
+            let d2 = null;
+            if (given.length && larder) { I.putDown(given[0].id, area, larder.x, larder.y); d2 = evaluateDeficits(null); }
+            for (const it of given) I.remove(it.id);
+            const d3 = evaluateDeficits(null);
+            t.check("carried_food_counted", !!d0 && !!d1 && given.length > 0 && near(d1.food.carriedLb - d0.food.carriedLb - 2) && near(d1.food.totalAccessibleNutrition - d0.food.totalAccessibleNutrition - 2) &&
+                (!d2 || (near(d2.food.totalAccessibleNutrition - d1.food.totalAccessibleNutrition) && near(d2.food.communalStoredNutrition - d1.food.communalStoredNutrition - 2))) && !!d3 && near(d3.food.totalAccessibleNutrition - d0.food.totalAccessibleNutrition),
+                d0 && d1 ? `2 rations given to ${holder.name}: carried ${d0.food.carriedLb} -> ${d1.food.carriedLb} lb, total ${d0.food.totalAccessibleNutrition} -> ${d1.food.totalAccessibleNutrition} lb${d2 ? `; put in the larder: total ${d2.food.totalAccessibleNutrition} lb, communal ${d1.food.communalStoredNutrition} -> ${d2.food.communalStoredNutrition} lb` : "; no larder to deposit in"}; removed: total ${d3 ? d3.food.totalAccessibleNutrition : "?"} lb` : "no evaluation");
+            // 3. Unattended, at top speed. Nothing here assigns or orders; the counters say what the founders did.
+            const opened = [], done = {}, preempted = {}, rests = [];
+            let projectJobsDone = 0;
+            const resting = new Map();
+            const onOpen = p => opened.push(p.kind);
+            const onDone = job => { done[job.type] = (done[job.type] || 0) + 1; if (job.params && job.params.project) projectJobsDone++; if (job.type === "sleep" && job.params && job.params.longRest && resting.has(job.id)) { const r = resting.get(job.id); rests.push({ hours: (($ufTime.day - r.day) * 24 + $ufTime.hour - r.hour) + ($ufTime.minute - r.minute) / 60, from: r.text }); resting.delete(job.id); } };
+            const onAssigned = job => { if (job.type === "sleep" && job.params && job.params.longRest) resting.set(job.id, { day: $ufTime.day, hour: $ufTime.hour, minute: $ufTime.minute, text: `day ${$ufTime.day} ${$ufTime.hour}:${String($ufTime.minute).padStart(2, "0")}` }); };
+            const onFail = job => { if (job.params && job.params.project && typeof job.reason === "string" && job.reason.startsWith("survival:")) preempted[job.reason] = (preempted[job.reason] || 0) + 1; };
+            UF.Events.on("projects:opened", onOpen); UF.Events.on("jobs:done", onDone); UF.Events.on("jobs:assigned", onAssigned); UF.Events.on("jobs:failed", onFail);
+            const topLevel = 3; // x8: the top step (x32) ended the test process without a trace three times on 2026-09-23 (renderer load)
+            if (UF.Time.setLevel) UF.Time.setLevel(topLevel);
+            const speed = UF.Time.multiplier ? UF.Time.multiplier() : 1;
+            const budgetMs = 150000, t0 = Date.now();
+            let firstDone = null;
+            try { await t.waitUntil(() => { firstDone = list().find(p => p.state === "done") || null; return !!firstDone || Date.now() - t0 > budgetMs; }, budgetMs + 5000, "a project to finish"); } catch (e) { /* reported below */ }
+            if (UF.Time.setLevel) UF.Time.setLevel(0);
+            const seconds = Math.round((Date.now() - t0) / 1000);
+            const shelter = list().find(p => p.kind === "communal_shelter") || null;
+            const d4 = evaluateDeficits(null);
+            const histogram = Object.keys(done).map(k => `${k} ${done[k]}`).join(", ");
+            t.check("autonomous_work_done", projectJobsDone >= 8 && opened.length >= 1,
+                `${projectJobsDone} project jobs done by colonists without an order in ${seconds} s at x${speed}: ${histogram}; projects opened: ${opened.join(", ") || "none"}; now ${explain(null)}`);
+            t.check("project_completed_unattended", !!firstDone,
+                firstDone ? `${describe(firstDone)} on ${$ufTime.timeString || `${$ufTime.hour}:${$ufTime.minute}`} of calendar day ${$ufTime.day}` : `nothing finished within ${seconds} s; ${shelter ? describe(shelter) : "no shelter project"}`);
+            const survivalFailures = list().flatMap(p => Object.keys(p.failed || {}).map(k => p.failed[k])).filter(f => typeof f.reason === "string" && f.reason.startsWith("survival:"));
+            t.check("survival_interruptions_not_failures", survivalFailures.length === 0,
+                `${Object.keys(preempted).map(k => `${k} ${preempted[k]}`).join(", ") || "no project job cancelled for a survival need"}; ${survivalFailures.length} counted against a cell; long rests seen ${rests.length}${rests.length ? ` (first lasted ${rests[0].hours.toFixed(1)} calendar hours from ${rests[0].from})` : ""}; calendar day ${$ufTime.day}`);
+            // 4. Save to a file and load it back in this process: every plugin's extractSaveContents runs over the
+            //    loaded record (world, items, jobs, projects), the map scene keeps ticking on the loaded state, the
+            //    project record is identical and the loop goes on. (Re-creating the scene as the load screen does,
+            //    SceneManager.goto(Scene_Map) after onAfterLoad, ended the test process with code 0 in two runs on
+            //    2026-09-23 and is left out; a cold start from the file is a separate check.)
+            const beforeJson = JSON.stringify(projectState(false));
+            const liveBefore = J.list(j => !finished(j)).length;
+            const slot = 19;
+            let saved = false, loaded = false, loadError = null;
+            const where = e => (e && e.stack ? e.stack.split("\n").slice(0, 3).map(s => s.trim()).join(" | ") : String(e));
+            try { $gameSystem.onBeforeSave(); await DataManager.saveGame(slot); saved = true; await DataManager.loadGame(slot); loaded = true; $gameSystem.onAfterLoad(); } catch (e) { loadError = where(e); }
+            const afterJson = JSON.stringify(projectState(false));
+            const doneBefore = projectJobsDone + (done.eat || 0) + (done.drink || 0);
+            if (UF.Time.setLevel) UF.Time.setLevel(topLevel);
+            let resumed = false;
+            try { await t.waitUntil(() => (projectJobsDone + (done.eat || 0) + (done.drink || 0)) > doneBefore, 40000, "a job to finish after the reload"); resumed = true; } catch (e) { /* reported */ }
+            if (UF.Time.setLevel) UF.Time.setLevel(0);
+            t.check("save_reload_equivalent", saved && loaded && !loadError && beforeJson === afterJson && resumed,
+                `${saved ? "saved" : "not saved"} to slot ${slot}, ${loaded ? "loaded" : "not loaded"}${loadError ? ` (${loadError})` : ""}; project record ${beforeJson === afterJson ? "identical" : "differs"} (${beforeJson.length} bytes), ${liveBefore} live jobs before; ${resumed ? "work resumed after the reload" : "no job finished within 40 s after the reload"}`);
+            UF.Events.off("projects:opened", onOpen); UF.Events.off("jobs:done", onDone); UF.Events.off("jobs:assigned", onAssigned); UF.Events.off("jobs:failed", onFail);
+            const focus = shelter || firstDone || null;
+            if (focus && window.$gamePlayer && $gamePlayer.locate) $gamePlayer.locate(focus.origin.x + Math.floor((focus.size || 1) / 2), focus.origin.y + Math.floor((focus.size || 1) / 2));
+            await t.waitFrames(2);
+            t.screenshot("site");
             t.check("no_errors", t.errorsSoFar().length === 0, `${t.errorsSoFar().length} errors`);
         }, { isDefault: false });
     }

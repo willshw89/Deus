@@ -53,6 +53,29 @@
 
     if (!Test.active) return;
 
+    //-------------------------------------------------------------------------
+    // Test clock (DEUS-TSK-FABLE-07). UF.Time.setForTest(hour, minute, day) puts the calendar ($ufTime, DEUS_Core)
+    // at a known time so an unattended suite starts its founders in working hours. It exists only while the harness
+    // is active (this code is past the early return above), so it is no cheat in play. The calendar keeps running
+    // from there at its normal rate; pause, speed and the survival routines are untouched.
+    // >>> test clock (tools/test_autonomous_settlement_closure.js runs this block in a sandbox)
+    function installTestClock(root) {
+        if (!root.UF) return null;
+        if (!root.UF.Time) root.UF.Time = {};
+        root.UF.Time.setForTest = function(hour, minute = 0, day = null) {
+            const T = root.UF.Test, clock = root.$ufTime;
+            if (!T || !T.active || !clock) return null;
+            const h = Math.max(0, Math.min(23, hour | 0)), m = Math.max(0, Math.min(59, minute | 0));
+            if (typeof clock.setTime === "function") clock.setTime(h, m); else { clock.hour = h; clock.minute = m; }
+            if (Number.isFinite(day)) clock.day = Math.max(1, day | 0);
+            if (typeof clock._timer === "number") clock._timer = 0;
+            return { hour: clock.hour, minute: clock.minute, day: clock.day };
+        };
+        return root.UF.Time.setForTest;
+    }
+    // <<< test clock
+    installTestClock(window);
+
     const fs = require("fs");
     const path = require("path");
     const baseDir = (nw.__dirname) || process.cwd();

@@ -6,6 +6,16 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
 
 ---
 
+## A8: The colonists' long rest against the calendar (2026-09-23)
+
+**Audited by:** Fable (Claude Code), while proving DEUS-TSK-FABLE-07 with `tools/test_autonomous_settlement_closure.js`.
+**Scope:** `game/js/plugins/DEUS_Colonists.js` (survival timing, DEUS-TSK-FABLE-05 constants), `game/js/plugins/DEUS_Core.js` (the calendar `$ufTime`), `game/js/plugins.js`, `game/js/plugins/UF_Time.js`.
+**Native Editor Playtest:** `NOT RUN`. Evidence is the headless closure harness (real Colonists, Jobs, Items, Objects and Projects plugins over a World double) and source reading; the in-game `settlement` suite ran only six calendar hours, so no long rest was observed in the engine.
+
+### Findings
+1. **BLOCKER — a night's rest lasts 48 calendar hours; the founders die of thirst by day 8.** `DEUS_Colonists.js` sizes the long rest as `LONG_REST_HOURS (8) × TICKS_PER_HOUR (3600)` = 28,800 map updates (`longRestJob`; `sleepFrames` uses the same 3600). DEUS_Core's calendar advances one minute every 10 map updates: `plugins.js` sets `TimeSpeed` to `"1.0"`, which the plugin's own line 61 turns into the 1/6 s default (`params["TimeSpeed"] !== "1.0" ? parseFloat(...) : (1.0 / 6.0)`), so an hour is 600 updates. A colonist that goes to bed at 22:00 wakes two calendar days later; the daily reckoning (`tickNeeds`) charges thirst exhaustion for every day slept through. Evidence, `node tools/test_autonomous_settlement_closure.js` (default `--hourTicks=600`, 2026-09-23): `FAIL closure.long_rest_one_night - 23 long rests observed, the longest 48.0 calendar hours; the first 8: 48.0, 48.0, … (e.g. day 1 20:01 to day 3 20:02)`; `FAIL closure.nobody_died - 8 dead: Founder 3 of thirst on day 7 00:01; Founder 1 of thirst on day 8 00:01; …`; the day lines show `8 asleep` on every other calendar day. The same run with `--hourTicks=3600` (the clock the constant assumes) passes all 22 checks with 8.0-hour rests. Fix: derive the colonists' ticks per hour from the calendar (600 with the shipped `TimeSpeed`; better, read it from DEUS_Core rather than a constant) and re-check `NEEDS_EVERY`/`DECIDE_EVERY` ("one game minute/second" comments assume 60 updates a minute). Not fixed by Fable: `DEUS_Colonists.js` is claimed by Gemini (DEUS-TSK-GEMINI-03) with uncommitted edits in the tree. Owner: the Colonists claim holder.
+2. **MINOR — three clocks, one calendar.** `UF_Time.js` (Engine/Action/Historical/Presentation domains, "60 real minutes per solar day") is not registered in `game/js/plugins.js`; the live `UF.Time` is `DEUS_TimeSpeed.js`' (`ticks`, `setLevel`, `multiplier`). The calendar every rule reads (`$ufTime.hour`, DEUS_Core) is a 4-minute day at ×1; the colonists' constants assume a 24-minute day. Whoever fixes finding 1 should pick the one rate and document it in `docs/systems/`. Evidence: `grep -n '"name": "UF_Time"' game/js/plugins.js` finds nothing; `DEUS_Core.js` lines 61–63 and `Game_UFTime.update`.
+
 ## A7: World Generation Source & Systems Audit (2026-09-22)
 
 **Audited by:** `deus-research` (Read-Only Systems Specialist) & Coordinated by Gemini.

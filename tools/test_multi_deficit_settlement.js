@@ -276,7 +276,7 @@ try {
         `after 12 cycles: ${JSON.stringify(perKind)}; beds: deficit ${bedRow ? bedRow.total : "?"}, ${bedRow ? bedRow.inFlightCapacity : "?"} covered by the shelter, unmet ${bedRow ? bedRow.unmet : "?"}`);
 
     // D. Critical food outranks the shelter; the food cache builds a larder, then forages wild food into it.
-    const F = makeFixture(7, { door: true, beds: 8, stockpileCells: 8, fed: true, config: { targetReserveDays: 0.5 },
+    const F = makeFixture(7, { door: true, beds: 8, stockpileCells: 8, fed: true, config: { targetReserveDays: 0.5, reserveMarginDays: 0 },
         wildFood: [["fruit_tree", 24, 24], ["fruit_tree", 26, 22], ["fruit_tree", 22, 26], ["berry_bush", 40, 24], ["berry_bush", 42, 22], ["berry_bush", 24, 40], ["fruit_tree", 40, 40], ["berry_bush", 22, 40], ["fruit_tree", 44, 26], ["fruit_tree", 26, 44]] });
     const bf = F.P.brain();
     const cf = F.P.tick();

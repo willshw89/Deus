@@ -28,6 +28,7 @@ if (window.UF && UF.Test) {
 | `t.waitUntil(testFn, timeoutMs, what)` | Promise that resolves when `testFn()` is true, checked every frame. Rejects on timeout, which fails the suite with a `suite_completed` FAIL. |
 | `t.screenshot(name)` | Saves the current screen to `game/test_output/<suite>.<name>.png` and returns the path. |
 | `t.errorsSoFar()` | Uncaught errors recorded so far in this run. |
+| `UF.Time.setForTest(hour, minute?, day?)` | Test clock (DEUS-TSK-FABLE-07), installed by `DEUS_Test` only in a test run: puts the calendar `$ufTime` (DEUS_Core) at that time and leaves it running at its normal rate; pause, speed and survival routines untouched. Returns `{ hour, minute, day }`, or `null` outside a test run. Proven by `tools/test_autonomous_settlement_closure.js` (`test_clock_hook`) and used by the `settlement` suite. |
 
 Name checks after what they prove (`moves_8_dirs`, not `test3`). Every acceptance criterion in `docs/SLICES.md` that a script can judge maps to a named check.
 
