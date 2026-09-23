@@ -175,6 +175,18 @@
         for (const a of CLEAR_ACTIONS) if (t.actions[a] && J.handler(a)) return a;
         return null;
     }
+    // Fully clearable: a job can remove the object and whatever its harvest leaves (`becomes`) is passable or clearable
+    // in turn. An oak chops into a stump that chops away; a berry bush gathers into a bare bush nothing clears.
+    function canFullyClear(t, depth = 0) {
+        if (!t) return true;
+        const action = clearAction(t);
+        if (!action) return t.passable === true;
+        const def = t.actions[action];
+        const next = def && def.becomes ? Objects().type(def.becomes) : null;
+        if (!next) return true;
+        if (depth >= 4) return false; // remainders that cycle never clear
+        return next.passable === true || canFullyClear(next, depth + 1);
+    }
     function isWater(area, x, y) {
         const J = Jobs();
         return !!(J && typeof J.isWaterAt === "function" && J.isWaterAt(area, x, y));
@@ -199,7 +211,7 @@
         if (here && isConstructed(here)) return { state: "blocked", here, reason: `${here.name || here.id} is in the way` };
         if (here && (here.passable !== true || !cell.object)) {
             const action = clearAction(here);
-            if (action) return { state: "clear", action, here };
+            if (action && canFullyClear(here)) return { state: "clear", action, here };
             if (here.passable !== true) return { state: "blocked", here, reason: `${here.name || here.id} can't be cleared` };
         }
         if (!cell.object) return { state: "done", here };
@@ -235,7 +247,7 @@
                 const here = O.atIn(area, x, y);
                 if (!here) continue;
                 if (isConstructed(here)) return false;
-                if (here.passable !== true && !clearAction(here)) return false;
+                if (!canFullyClear(here)) return false;
             }
         }
         return true;
@@ -453,23 +465,15 @@
         out.sort((a, b) => a.dist - b.dist || a.item.id - b.item.id);
         return out;
     }
-    // The most of a type one colonist carries unencumbered: UF_Jobs fails an encumbered carrier's haul.
-    function carryCap(p, type) {
-        const I = Items(), W = World(), area = levelArea(p.origin);
-        const one = typeof I.weightOf === "function" ? I.weightOf({ type, count: 1 }) : 0;
-        if (!(one > 0)) return Number.MAX_SAFE_INTEGER;
-        const worker = W.unitsInArea(area.x, area.y, area.z).find(isColonist);
-        const enc = worker && typeof I.encumbrance === "function" ? I.encumbrance(worker.id) : null;
-        const limit = enc && typeof enc.encumbered === "number" ? enc.encumbered : 50;
-        return Math.max(1, Math.floor(limit / one));
-    }
+    // A haul asks for exactly what the cell still needs (params.count); UF_Jobs lifts what the carrier may legally
+    // carry of it and leaves the rest on the source cell for the next haul (DEUS-TSK-FABLE-04).
     function postHauls(p, cell, material, missing) {
         const I = Items(), key = cellKey(cell.x, cell.y), cfg = config();
         let left = missing;
         for (const f of sources(p, cell, material)) {
             if (left <= 0 || openCount(p) >= cfg.maxOpenJobs) break;
             const it = f.item;
-            const take = Math.min(it.count | 0, left, carryCap(p, it.type));
+            const take = Math.min(it.count | 0, left);
             if (take <= 0) continue;
             let carried = it;
             if (take < (it.count | 0)) {
@@ -479,7 +483,7 @@
                 I.consume(it.id, take);
                 carried = part;
             }
-            const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params: { itemId: carried.id, to: targetOf(p, cell.x, cell.y), material } });
+            const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params: { itemId: carried.id, count: carried.count | 0, to: targetOf(p, cell.x, cell.y), material } });
             if (!job) continue;
             p.hauls[carried.id] = { job: job.id, cell: key, type: carried.type, count: carried.count | 0 };
             left -= carried.count | 0;
@@ -597,6 +601,10 @@
             } else {
                 log(p, `phase ${bp.phases[p.phase]} started`);
                 emit("projects:phase", p);
+                // The new phase's cells are read and its first jobs posted now, not at the next cadence cycle.
+                // Bounded: every recursion steps one phase, and a project has bp.phases.length of them.
+                const next = advance(p);
+                if (next) return next;
             }
         }
         return summary;
@@ -713,7 +721,7 @@
         describe,
         setEnabled: on => { enabled = !!on; return enabled; },
         isEnabled: () => enabled,
-        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, relativeCells, harvestSources, onMapUpdate, onLoaded, now }
+        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, onMapUpdate, onLoaded, now }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -791,9 +799,12 @@
             } catch (e) { /* reported by the check */ }
             if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(0);
             const after = assigned ? O.atIn(area, assigned.target.x, assigned.target.y) : null;
-            const cellNow = assigned ? Projects.cells(p).find(c => c.x === assigned.target.x && c.y === assigned.target.y) : null;
-            t.check("job_done_in_engine", !!assigned && assigned.state === "done" && (!after || !before || after.id !== before.id) && !!cellNow && cellNow.state !== "clear",
-                assigned ? `${J.describe(assigned)}: ${assigned.state}${assigned.reason ? ` (${assigned.reason})` : ""}; cell held ${before ? before.id : "nothing"}, now ${after ? after.id : "nothing"}; project cell state ${cellNow ? cellNow.state : "?"}` : "nothing assigned");
+            // A site-clearing job targets a footprint cell (its state must leave "clear"); a harvest for a missing
+            // material targets a tree or stone pile outside the footprint (the object on the cell must change).
+            const onFootprint = assigned ? reservedAt(area, assigned.target.x, assigned.target.y) === p.id : false;
+            const cellNow = assigned && onFootprint ? Projects.cells(p).find(c => c.x === assigned.target.x && c.y === assigned.target.y) : null;
+            t.check("job_done_in_engine", !!assigned && assigned.state === "done" && (!after || !before || after.id !== before.id) && (!onFootprint || (!!cellNow && cellNow.state !== "clear")),
+                assigned ? `${J.describe(assigned)}: ${assigned.state}${assigned.reason ? ` (${assigned.reason})` : ""}; cell held ${before ? before.id : "nothing"}, now ${after ? after.id : "nothing"}; ${onFootprint ? `footprint cell state ${cellNow ? cellNow.state : "?"}` : "a harvest outside the footprint"}` : "nothing assigned");
             if (p && window.$gamePlayer && $gamePlayer.locate) $gamePlayer.locate(centre.x, centre.y);
             await t.waitFrames(2);
             t.screenshot("site");

@@ -527,23 +527,57 @@
         const stand = standFor(job.target, unit, false);
         return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
     }
+    // What a carrier may legally lift of a ground stack: the job's count (the whole stack when it names none), never
+    // more than the stack holds, never more than keeps the carrier unencumbered, because step() fails an encumbered
+    // carrier in transit (the SRD's encumbrance threshold, STR x 5 lb, a third of the STR x 15 lb capacity).
+    function legalLift(job, unit, it) {
+        const I = Items();
+        const stack = it.count | 0;
+        const wanted = job.params && Number.isFinite(job.params.count) && job.params.count > 0 ? Math.min(stack, job.params.count | 0) : stack;
+        if (!I || typeof I.weightOf !== "function") return wanted;
+        const one = I.weightOf({ type: it.type, mat: it.mat, count: 1 });
+        if (!(one > 0)) return wanted;
+        const enc = typeof I.encumbrance === "function" ? I.encumbrance(unit.id) : null;
+        const limit = enc && typeof enc.encumbered === "number" ? enc.encumbered : (typeof I.maxWeight === "function" ? I.maxWeight(unit.id) / 3 : Infinity);
+        const carried = typeof I.carriedWeight === "function" ? I.carriedWeight(unit.id) : 0;
+        const byWeight = Math.max(0, Math.floor((limit - carried + 1e-6) / one));
+        return Math.max(0, Math.min(wanted, byWeight));
+    }
+    // Picks the item up: true, or the reason it couldn't be. A stack heavier than the carrier may lift is split on
+    // its cell and the legal part carried; the rest stays there, released for another carrier (DEUS-TSK-FABLE-04).
     function pickUpNow(job, unit) {
         const I = Items(), C = window.UF && UF.Containers;
         const it = I ? I.get(job.params.itemId) : null;
-        if (!it) return false;
+        if (!it) return "the item is gone";
         if (it.holder === unit.id) return true;
         if (it.container && C) {
             const taken = C.takeItem(it.container, it.id, unit.id);
-            return !!taken;
+            return taken ? true : "the item is gone";
         }
-        return I.pickUp(it.id, unit.id);
+        if (!it.area) return "someone else carries it";
+        const qty = legalLift(job, unit, it);
+        if (qty <= 0) return "too heavy to lift";
+        if (qty < (it.count | 0)) {
+            const piece = I.create(it.type, qty, { area: { x: it.area.x, y: it.area.y }, z: zOf(it), x: it.x, y: it.y }, { mat: it.mat, q: it.q });
+            if (!piece) return "the item is gone";
+            if (I.consume(it.id, qty) !== qty) {
+                if (typeof I.remove === "function") I.remove(piece.id);
+                return "the item is gone";
+            }
+            reservationManager.release(unit.id, it.id);
+            reservationManager.reserve(unit.id, piece.id);
+            job.params.itemId = piece.id;
+            return I.pickUp(piece.id, unit.id) ? true : "can't carry it";
+        }
+        return I.pickUp(it.id, unit.id) ? true : "can't carry it";
     }
     define("fetch", {
         verb: "Fetching",
         plan: pickPhasePlan,
         work: 0,
         apply(job, unit) {
-            if (!pickUpNow(job, unit)) throw new Error("the item is gone");
+            const r = pickUpNow(job, unit);
+            if (r !== true) { job.reason = r || "the item is gone"; return false; }
         },
         describe: job => `Fetching ${withArticle(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`
     });
@@ -563,7 +597,8 @@
         work: 0,
         apply(job, unit) {
             if ((job.phase | 0) === 0) {
-                if (!pickUpNow(job, unit)) throw new Error("the item is gone");
+                const r = pickUpNow(job, unit);
+                if (r !== true) { job.reason = r || "the item is gone"; return false; }
                 return "continue";
             }
             const I = Items(), C = window.UF && UF.Containers, to = job.params.to;
@@ -584,6 +619,21 @@
         describe: job => `Hauling ${withArticle(itemName(itemTypeOf(job.params.itemId) || job.params.itemType))}`
     });
 
+    // Build inputs accepted in place of a named material; consumed from the cell exactly once, after placement.
+    const buildMatches = (it, id) => it.type === id ||
+        (id === "wood" && (it.type === "wood" || it.type === "log")) ||
+        (id === "straw" && (it.type === "straw" || it.type === "fiber")) ||
+        (id === "stone" && (it.type === "stone" || it.type === "rocks_small"));
+    function consumeBuildItems(I, area, x, y, needs) {
+        for (const id of Object.keys(needs)) {
+            let left = needs[id] | 0;
+            for (const it of I.atIn(area, x, y)) {
+                if (left <= 0) break;
+                if (!buildMatches(it, id)) continue;
+                left -= I.consume(it.id, left);
+            }
+        }
+    }
     define("build", {
         verb: "Building",
         plan(job, unit) {
@@ -613,22 +663,27 @@
             return t && t.build ? t.build.work | 0 : 0;
         },
         apply(job) {
-            const O = Objects(), I = Items();
+            const O = Objects(), I = Items(), W = World();
             const t = O.type(job.params.objectId);
+            if (!t) { job.reason = "nothing to build"; return false; }
+            const area = lv(job.target), x = job.target.x, y = job.target.y;
             const needs = (t.build && t.build.items) || {};
+            // Transactional (DEUS-TSK-FABLE-04): the materials must still lie on the cell when the work ends (a haul
+            // may have taken them meanwhile), the world accepts the object first, and only then are the materials
+            // consumed. A refused placement (a unit on the square, VISION V68) fails the job with the world's reason
+            // and leaves every material on the cell for the next attempt.
+            if (O.typeIdIn(area, x, y) === t.typeId) return; // already standing: another builder got there first
+            const here = I.atIn(area, x, y);
             for (const id of Object.keys(needs)) {
-                let left = needs[id] | 0;
-                for (const it of I.atIn(lv(job.target), job.target.x, job.target.y)) {
-                    if (left <= 0) break;
-                    const matches = it.type === id ||
-                        (id === "wood" && (it.type === "wood" || it.type === "log")) ||
-                        (id === "straw" && (it.type === "straw" || it.type === "fiber")) ||
-                        (id === "stone" && (it.type === "stone" || it.type === "rocks_small"));
-                    if (!matches) continue;
-                    left -= I.consume(it.id, left);
-                }
+                if (here.filter(it => buildMatches(it, id)).reduce((n, it) => n + it.count, 0) < (needs[id] | 0)) { job.reason = "needs items"; return false; }
             }
-            O.setIn(lv(job.target), job.target.x, job.target.y, t.id);
+            const placed = O.setIn(area, x, y, t.id);
+            if (!placed) {
+                const r = W && W.lastObjectRefusal;
+                job.reason = r && r.unitName ? `${r.unitName} is standing there` : "the square is taken";
+                return false;
+            }
+            consumeBuildItems(I, area, x, y, needs);
         },
         describe(job) {
             const O = Objects();
@@ -1266,6 +1321,12 @@
             fail(job, e.message || "failed");
             return;
         }
+        if (result === false) {
+            // A recoverable refusal the handler explained in job.reason (a taken square, a stack too heavy to lift):
+            // the job fails cleanly, nothing was consumed, and a planner may post it again (DEUS-TSK-FABLE-04).
+            fail(job, job.reason || "couldn't be done");
+            return;
+        }
         if (result === "continue") {
             job.phase = (job.phase | 0) + 1;
             job.progress = 0;
@@ -1650,7 +1711,7 @@
             put(mid + 2, mid + 14, "grass_tuft");
             const near = create({ type: "gather", target: { area, x: mid + 9, y: mid + 8 } });
             const far = create({ type: "gather", target: { area, x: mid + 2, y: mid + 14 } });
-            const openBefore = open().length;
+            const openBefore = open().filter(j => !(j.params && j.params.project)).length; // a settlement planner's own open jobs don't count
             const taken = take(helper.id);
             await waitJob(near, 8000);
             t.check("open_job_taken", openBefore === 2 && taken === near && near.assigned === helper.id && near.owner === null && near.state === "done" && far.state === "open" && !O.typeIdAt(mid + 9, mid + 8) && itemsOn(mid + 9, mid + 8, "fiber") === 1,

@@ -418,12 +418,12 @@ try {
         const door = objectAt(S, o.x + 2, o.y + 4) === "door_wood";
         const logsAfter = I.find({ area: { x: 0, y: 0 }, z: 0, id: "log" }).reduce((n, f) => n + f.item.count, 0);
         const logsCarried = W.units().reduce((n, u) => n + I.inventoryOf(u.id).filter(it => it.type === "log").reduce((m, it) => m + it.count, 0), 0);
-        // Every log is accounted for: 16 in the walls and the door, plus one per placement the world refused because a
-        // unit stood on the square (UF_Jobs' build.apply consumes before it places; the project re-posts that cell).
+        // Every log is accounted for: exactly 16 in the walls and the door. A placement the world refused because a
+        // unit stood on the square costs nothing since DEUS-TSK-FABLE-04 (UF_Jobs' build places before it consumes).
         const refused = S.refusals.filter(r => r.x >= o.x && r.y >= o.y && r.x < o.x + 5 && r.y < o.y + 5).length;
         const ticksMid = P.tick();
-        check("walls_then_door", n1 > 0 && mid.phase === 2 && walls === 15 && door && logsBefore - logsAfter - logsCarried === 16 + refused && P.active().length === 1 && ticksMid.opened.length === 0,
-            `phase ${mid.phase} after ${n1} updates: ${walls}/15 walls, door ${door ? "at" : "missing at"} (${o.x + 2},${o.y + 4}); logs ${logsBefore} -> ${logsAfter} on the ground + ${logsCarried} carried = 16 used + ${refused} lost to refused placements (UF_Jobs build.apply); still 1 active project`);
+        check("walls_then_door", n1 > 0 && mid.phase === 2 && walls === 15 && door && logsBefore - logsAfter - logsCarried === 16 && P.active().length === 1 && ticksMid.opened.length === 0,
+            `phase ${mid.phase} after ${n1} updates: ${walls}/15 walls, door ${door ? "at" : "missing at"} (${o.x + 2},${o.y + 4}); logs ${logsBefore} -> ${logsAfter} on the ground + ${logsCarried} carried = 16 used, ${refused} refused placement(s) cost nothing; still 1 active project`);
         const n2 = drive(S2, 60000, () => mid.state !== "active");
         let beds = 0;
         for (const c of P.cells(mid, 3)) if (objectAt(S, c.x, c.y) === "floor_straw") beds++;
