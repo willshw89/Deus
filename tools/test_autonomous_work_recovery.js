@@ -135,9 +135,42 @@ function makeSandbox(seed, size, catalog, walkEvery) {
             for (const u of Object.values(W.state.units)) {
                 if (!u.goal) continue;
                 if (u.x === u.goal.x && u.y === u.goal.y) { u.goal = null; emit("world:unitArrived", u); continue; }
-                const nx = u.x + Math.sign(u.goal.x - u.x), ny = u.y + Math.sign(u.goal.y - u.y);
-                if (water.has(ny * size + nx)) { u.goal = null; continue; }
-                u.x = nx; u.y = ny;
+                // A straight step when the way is dry; else a breadth-first path round water and blocking objects,
+                // as the game's pathfinder finds (DEUS-TSK-FABLE-13: the straight-only walker stranded colonists
+                // on the far side of the pond, and their claimed beds were then out of reach every night).
+                const sx = u.x + Math.sign(u.goal.x - u.x), sy = u.y + Math.sign(u.goal.y - u.y);
+                let next = water.has(sy * size + sx) ? null : { x: sx, y: sy };
+                if (!next) next = (function() {
+                    const key = (x, y) => x + "," + y;
+                    const passable = (x, y) => inBounds(x, y) && !water.has(y * size + x) && !sandbox.UF.Objects.blocksIn({ x: 0, y: 0, z: 0 }, x, y);
+                    const gx = u.goal.x, gy = u.goal.y;
+                    if (!inBounds(gx, gy)) return null;
+                    const prev = new Map([[key(u.x, u.y), null]]);
+                    const queue = [{ x: u.x, y: u.y }];
+                    const dirs = [[0, -1], [-1, 0], [1, 0], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
+                    let found = null, steps = 0;
+                    while (queue.length && !found && steps++ < 1500) {
+                        const c = queue.shift();
+                        for (const [dx, dy] of dirs) {
+                            const nx = c.x + dx, ny = c.y + dy, k = key(nx, ny);
+                            if (prev.has(k)) continue;
+                            const isGoal = nx === gx && ny === gy;
+                            if (!isGoal && !passable(nx, ny)) continue;
+                            if (isGoal && (!inBounds(nx, ny) || water.has(ny * size + nx))) continue;
+                            if (dx && dy && !(passable(c.x + dx, c.y) && passable(c.x, c.y + dy))) continue;
+                            prev.set(k, key(c.x, c.y));
+                            if (isGoal) { found = k; break; }
+                            queue.push({ x: nx, y: ny });
+                        }
+                    }
+                    if (!found) return null;
+                    let k = found, back = prev.get(k);
+                    while (back && back !== key(u.x, u.y)) { k = back; back = prev.get(k); }
+                    const [x, y] = k.split(",").map(Number);
+                    return { x, y };
+                })();
+                if (!next) { u.goal = null; continue; }
+                u.x = next.x; u.y = next.y;
             }
         },
         water, ufObjects
