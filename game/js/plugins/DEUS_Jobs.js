@@ -478,11 +478,23 @@
         verb,
         plan(job, unit) {
             const I = Items();
-            if (I && typeof I.encumbrance === "function") {
+            // A reflex (a flight from fire or a foe) runs however laden; anything else waits for a lighter load.
+            if (!(job.params && job.params.reflex) && I && typeof I.encumbrance === "function") {
                 const enc = I.encumbrance(unit.id);
                 if (enc && enc.status !== "unencumbered") {
                     return { ok: false, reason: "encumbered" };
                 }
+            }
+            // A route (DEUS-TSK-FABLE-12: an escape around the flames from UF.Jobs.safeCellNear) is walked square by
+            // square: the stand is the first waypoint not yet reached, and apply() continues the job until the last.
+            const route = job.params && Array.isArray(job.params.route) ? job.params.route : null;
+            if (route && route.length) {
+                let i = Math.max(0, job.params.routeIndex | 0);
+                while (i < route.length - 1 && unit.x === route[i].x && unit.y === route[i].y) i++;
+                job.params.routeIndex = i;
+                const wp = route[i], area = lv(job.target);
+                if (!standableIn(area, wp.x | 0, wp.y | 0, unit.id)) return { ok: false, reason: "the way is blocked" };
+                return { ok: true, stand: { area: copyArea(area), x: wp.x | 0, y: wp.y | 0, z: refZ(job.target) } };
             }
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
@@ -495,7 +507,12 @@
             }
             return 0;
         },
-        apply() {},
+        apply(job, unit) {
+            const route = job && job.params && Array.isArray(job.params.route) ? job.params.route : null;
+            if (!route || !route.length || !unit) return;
+            const last = route[route.length - 1];
+            if ((job.params.routeIndex | 0) < route.length - 1 && !(unit.x === last.x && unit.y === last.y)) return "continue";
+        },
         describe(job) {
             if (job && job.params) {
                 if (job.params.explore) return "Surveying the frontier";
@@ -958,28 +975,102 @@
         if ((E && typeof E.isBurning === "function" && E.isBurning(unit)) || (unit.data.burning && typeof unit.data.burning === "object")) return { kind: "burning", where: "self" };
         return null;
     }
-    /** The nearest square within `radius` the unit can stand on that holds no lethal hazard and nobody else: rings by distance, then y, then x. */
-    function safeCellNear(unit, radius = 8) {
-        const W = World();
-        if (!W || !unit || !validLevel(unit)) return null;
-        const area = lv(unit);
-        for (let d = 1; d <= radius; d++) {
-            const ring = [];
-            for (let dy = -d; dy <= d; dy++) for (let dx = -d; dx <= d; dx++) {
-                if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
-                ring.push({ x: unit.x + dx, y: unit.y + dy });
-            }
-            ring.sort((a, b) => a.y - b.y || a.x - b.x);
-            for (const c of ring) {
-                if (!standableIn(area, c.x, c.y, unit.id)) continue;
-                if (lethalHazardAt(area, c.x, c.y)) continue;
-                if (typeof W.standerAt === "function" && W.standerAt(area.x, area.y, c.x, c.y, zOf(area))) continue;
-                return { area: copyArea(area), x: c.x, y: c.y, z: zOf(area) };
-            }
+    const HAZARD_STEP_COST = 25;   // an escape route pays this for a step through fire or lava: a way round of up to 24 squares is taken instead
+    const WATER_DETOUR = 3;        // a burning creature goes this much farther for a square beside water
+    const dangerAt = (area, x, y) => { const h = lethalHazardAt(area, x, y); return h && (h.kind === "fire" || h.kind === "lava") ? h : null; };
+    /** Fire or lava on a square next to (x, y) (8 ways), with its square, or null: what a colonist backs away from before it spreads. */
+    function fireNear(area, x, y) {
+        for (const [dx, dy] of NEIGHBORS.concat(DIAGONALS)) {
+            const h = dangerAt(area, x + dx, y + dy);
+            if (h) return { kind: h.kind, x: x + dx, y: y + dy };
         }
         return null;
     }
-    const waterBeside = unit => NEIGHBORS.concat(DIAGONALS).some(([dx, dy]) => isWaterIn(lv(unit), unit.x + dx, unit.y + dy));
+    const waterBesideCell = (area, x, y) => NEIGHBORS.concat(DIAGONALS).some(([dx, dy]) => isWaterIn(area, x + dx, y + dy));
+    const waterBeside = unit => waterBesideCell(lv(unit), unit.x, unit.y);
+    /**
+     * Where to run (DEUS-TSK-FABLE-11/12): the square within `radius` that costs least to reach, with the route to it.
+     * A step costs 1, a step through a lethal hazard HAZARD_STEP_COST, so the way round is taken whenever one exists
+     * within reach and the least fire is crossed when none does. The goal holds no hazard and nobody else; from a hazard
+     * square any such goal will do (out of the flames first), from safe ground only a calm one (no fire or lava beside
+     * it). opts.preferWater: a burning creature goes up to WATER_DETOUR farther for a square beside water, to douse
+     * itself there. Deterministic: squares expand in cost order, ties by y then x. Bounded by the radius (at most
+     * (2r+1)^2 squares), and only run for a colonist in or beside a hazard.
+     * Returns { area, x, y, z, route: [{ x, y }, ...] (the goal last), cost, calm, throughHazard } or null.
+     */
+    function safeCellNear(unit, radius = 8, opts = {}) {
+        const W = World();
+        if (!W || !unit || !validLevel(unit)) return null;
+        const area = lv(unit), z = zOf(area);
+        const key = (x, y) => `${x},${y}`;
+        const start = key(unit.x, unit.y);
+        const needCalm = !lethalHazardAt(area, unit.x, unit.y) && !(opts && opts.anySafe);
+        const cost = new Map([[start, 0]]), prev = new Map(), hazards = new Map([[start, 0]]);
+        const open = [{ x: unit.x, y: unit.y, c: 0 }];
+        const reached = [];
+        while (open.length) {
+            open.sort((a, b) => a.c - b.c || a.y - b.y || a.x - b.x);
+            const cur = open.shift();
+            const ck = key(cur.x, cur.y);
+            if (cur.c > cost.get(ck)) continue;
+            reached.push(cur);
+            for (const [dx, dy] of NEIGHBORS) {
+                const nx = cur.x + dx, ny = cur.y + dy;
+                if (Math.max(Math.abs(nx - unit.x), Math.abs(ny - unit.y)) > radius) continue;
+                if (!standableIn(area, nx, ny, unit.id)) continue;
+                const hazard = lethalHazardAt(area, nx, ny) ? 1 : 0;
+                const nc = cur.c + (hazard ? HAZARD_STEP_COST : 1), nk = key(nx, ny);
+                if (cost.has(nk) && cost.get(nk) <= nc) continue;
+                cost.set(nk, nc);
+                prev.set(nk, ck);
+                hazards.set(nk, (hazards.get(ck) | 0) + hazard);
+                open.push({ x: nx, y: ny, c: nc });
+            }
+        }
+        let best = null;
+        for (const c of reached) {
+            if (best && c.c > best.eff) break; // reached is in cost order: nothing cheaper follows
+            if (c.x === unit.x && c.y === unit.y) continue;
+            if (lethalHazardAt(area, c.x, c.y)) continue;
+            if (typeof W.standerAt === "function" && W.standerAt(area.x, area.y, c.x, c.y, z)) continue;
+            const calm = !fireNear(area, c.x, c.y);
+            if (needCalm && !calm) continue;
+            const eff = c.c + (opts && opts.preferWater && !waterBesideCell(area, c.x, c.y) ? WATER_DETOUR : 0);
+            if (!best || eff < best.eff) best = { x: c.x, y: c.y, c: c.c, eff, calm };
+        }
+        if (!best) return null;
+        const route = [];
+        for (let k = key(best.x, best.y); k !== start; k = prev.get(k)) {
+            const [x, y] = k.split(",").map(Number);
+            route.unshift({ x, y });
+        }
+        return { area: copyArea(area), x: best.x, y: best.y, z, route, cost: best.c, calm: best.calm, throughHazard: hazards.get(key(best.x, best.y)) | 0 };
+    }
+    /** True when the unit carries water to pour: an item whose type is a water container (liquid "water", or the tags water + container/drink). */
+    function carriesWater(unit) {
+        const I = Items();
+        if (!I || !unit || typeof I.inventoryOf !== "function") return false;
+        return I.inventoryOf(unit.id).some(it => {
+            const t = I.type(it.type);
+            return !!t && (t.liquid === "water" || (Array.isArray(t.tags) && t.tags.includes("water") && (t.tags.includes("container") || t.tags.includes("drink"))));
+        });
+    }
+    const isAflame = u => {
+        const E = window.UF && UF.Environment;
+        return !!u && !!u.data && ((E && typeof E.isBurning === "function" && E.isBurning(u)) || (u.data.burning && typeof u.data.burning === "object"));
+    };
+    // A square beside the target to stand on that holds no lethal hazard, nearest to the unit; null when there is none.
+    function standBesideSafe(target, unit) {
+        const area = lv(target), eight = eightWay();
+        let best = null, bestDist = Infinity;
+        for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
+            const x = target.x + dx, y = target.y + dy;
+            if (!standableIn(area, x, y, unit.id) || lethalHazardAt(area, x, y)) continue;
+            const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
+            if (dist < bestDist) { bestDist = dist; best = { area: copyArea(area), x, y, z: refZ(target) }; }
+        }
+        return best;
+    }
 
     // Emergency self-extinguish: a burning creature drops and rolls where it stands, or douses itself beside water.
     // A reflex job: exempt from the hazard check in step() and from the colonists' need preemption.
@@ -987,7 +1078,7 @@
         verb: "Extinguishing",
         plan(job, unit) {
             job.params.reflex = "extinguish";
-            job.params.method = waterBeside(unit) ? "water" : "roll";
+            job.params.method = carriesWater(unit) || waterBeside(unit) ? "water" : "roll";
             job.target = { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) };
             return { ok: true, stand: { area: copyArea(unit.area), x: unit.x, y: unit.y, z: zOf(unit) } };
         },
@@ -999,6 +1090,39 @@
             job.result = { extinguished: !(unit.data && unit.data.burning), method: job.params.method };
         },
         describe: job => (job.params.method === "water" ? "Dousing the flames" : "Dropping and rolling")
+    });
+
+    // Emergency aid for a burning friend who cannot put itself out (DEUS-TSK-FABLE-12): from a safe square beside it,
+    // with water (carried, or beside the patient or the rescuer) in EXTINGUISH_WATER_WORK ticks, else by smothering the
+    // flames in EXTINGUISH_ROLL_WORK. An emergency job (needs do not interrupt it), not a reflex: a rescuer whose own
+    // square catches fire runs like anyone. The patient is reserved for the rescuer, as a stabilize does.
+    define("douse", {
+        verb: "Dousing",
+        replanEvery: REPLAN_TICKS,
+        plan(job, unit) {
+            const patient = World().unit(job.params.unitId);
+            if (!patient || !patient.data || patient.data.dead) return { ok: false, reason: "too late" };
+            if (!isAflame(patient)) return { ok: false, reason: "no longer burning" };
+            if (!sameLevel(patient, unit) || chebyshev(patient.x, patient.y, unit.x, unit.y) > HUNT_MAX_DIST) return { ok: false, reason: "too far away" };
+            if (reservationManager.isReservedByOther(unit.id, { id: patient.id })) return { ok: false, reason: "someone is already helping" };
+            reservationManager.reserve(unit.id, { id: patient.id });
+            job.params.patientName = patient.name;
+            job.target = { area: copyArea(patient.area), x: patient.x, y: patient.y, z: zOf(patient) };
+            const stand = standBesideSafe(job.target, unit);
+            if (!stand) return { ok: false, reason: "can't get near" };
+            job.params.method = carriesWater(unit) || waterBesideCell(lv(patient), patient.x, patient.y) || waterBesideCell(lv(stand), stand.x, stand.y) ? "water" : "smother";
+            return { ok: true, stand };
+        },
+        work: job => (job.params.method === "water" ? EXTINGUISH_WATER_WORK : EXTINGUISH_ROLL_WORK),
+        apply(job, unit) {
+            const patient = World().unit(job.params.unitId);
+            if (!patient || !patient.data || patient.data.dead) { job.reason = "too late"; return false; }
+            const E = window.UF && UF.Environment;
+            if (E && typeof E.extinguishUnit === "function") E.extinguishUnit(patient, job.params.method === "water" ? "water" : "smothered");
+            if (patient.data.burning) delete patient.data.burning;
+            job.result = { extinguished: !isAflame(patient), method: job.params.method, patientId: patient.id };
+        },
+        describe: job => `${job.params.method === "water" ? "Dousing" : "Smothering the flames on"} ${job.params.patientName || "a friend"}`
     });
 
     define("sleep", {
@@ -1516,7 +1640,7 @@
         const stand = job.stand;
         if (stand && !atCell(unit, stand)) {
             const I = Items();
-            if (I && typeof I.encumbrance === "function") {
+            if (!(job.params && job.params.reflex) && I && typeof I.encumbrance === "function") {
                 const enc = I.encumbrance(unit.id);
                 if (enc && enc.status !== "unencumbered") {
                     fail(job, "encumbered");
@@ -1618,6 +1742,9 @@
         lethalHazardAt,
         inLethalHazard,
         safeCellNear,
+        fireNear,
+        carriesWater,
+        isAflame,
         toolMultiplier,
         work: workOf,
         update,

@@ -250,10 +250,13 @@ try {
     check("plugins_load", typeof A.P.brain === "function" && A.P.deficits.join(",") === "shelter,food,bed,storage" && Object.keys(A.P.blueprints()).length === 4,
         `UF.Projects brain with deficits ${A.P.deficits.join("/")} and blueprints ${Object.keys(A.P.blueprints()).join(", ")}`);
     const d = A.P.evaluateDeficits(A.area);
+    // Storage in physical slots (DEUS-TSK-GEMINI-07): the one-cell larder is one slot (a container on it would add its
+    // slots); each colonist needs slotsPerColonist.
+    const larderSlots = 1;
     const lb = 20 * nutritionOf(cat, "berries") + 4 * nutritionOf(cat, "rations") + 8 * nutritionOf(cat, "fruit");
     const lbByWeight = 20 * weightOf(cat, "berries") + 4 * weightOf(cat, "rations") + 8 * weightOf(cat, "fruit");
     check("deficits_measured_by_nutrition", !!d && d.population === 8 && close(d.food.lb, round3(lb)) && close(d.food.current, round3(lb / 8)) && close(d.food.larderLb, round3(20 * nutritionOf(cat, "berries") + 4 * nutritionOf(cat, "rations"))) && close(d.food.groundLb, round3(8 * nutritionOf(cat, "fruit"))) && close(d.food.deficit, round3(3 - lb / 8)) && d.food.critical === false && !close(lb, lbByWeight) &&
-        d.storage.needed === 64 && d.storage.current === 8 && d.storage.deficit === 56 && d.bed.needed === 8 && d.bed.current === 3 && d.bed.deficit === 5 && d.shelter.needed === 1 && d.shelter.current === 0,
+        d.storage.needed === 8 * cfg.slotsPerColonist && d.storage.current === larderSlots && d.storage.deficit === 8 * cfg.slotsPerColonist - larderSlots && d.bed.needed === 8 && d.bed.current === 3 && d.bed.deficit === 5 && d.shelter.needed === 1 && d.shelter.current === 0,
         d ? `food ${d.food.lb} lb of nutrition (${lbByWeight.toFixed(1)} lb by weight) = ${d.food.current} colonist-days, needs ${d.food.deficit} more; storage ${d.storage.current}/${d.storage.needed} slots; beds ${d.bed.current}/${d.bed.needed} sheltered; shelter ${d.shelter.current}/${d.shelter.needed}` : "no evaluation");
 
     // B. Ranking by utility: the shelter first here (food is short but not critical).
@@ -315,7 +318,8 @@ try {
     const ns = sp ? drive(Sx, 12000, () => sp.state !== "active") : -1;
     const ds = Sx.P.evaluateDeficits(Sx.area);
     const registered = sp ? Sx.P.footprint(sp).filter(c => Sx.W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y && s.stores.includes("wood"))).length : 0;
-    check("storage_project_builds_stockpile", !!bs && bs.chosen && bs.chosen.kind === "communal_stockpile" && !!sp && sp.kind === "communal_stockpile" && sp.capacity.storage === 72 && Sx.P.list().filter(p => p.kind === "communal_stockpile").length === 1 && ns > 0 && sp.state === "done" && Sx.P.footprint(sp).every(c => objectAt(Sx, c.x, c.y) === "stockpile") && registered === 9 && !!ds && ds.storage.current >= 64 && ds.storage.deficit === 0,
+    // A 3x3 stockpile adds nine physical slots (one per cell, DEUS-TSK-GEMINI-07); with the larder's it covers the eight needed.
+    check("storage_project_builds_stockpile", !!bs && bs.chosen && bs.chosen.kind === "communal_stockpile" && !!sp && sp.kind === "communal_stockpile" && sp.capacity.storage === 9 * cfg.slotsPerStockpileCell && Sx.P.list().filter(p => p.kind === "communal_stockpile").length === 1 && ns > 0 && sp.state === "done" && Sx.P.footprint(sp).every(c => objectAt(Sx, c.x, c.y) === "stockpile") && registered === 9 && !!ds && ds.storage.current >= ds.storage.needed && ds.storage.deficit === 0,
         sp ? `${sp.state} after ${ns} updates: ${Sx.P.footprint(sp).filter(c => objectAt(Sx, c.x, c.y) === "stockpile").length}/9 stockpile cells, ${registered} registered with stores; storage now ${ds ? ds.storage.current : "?"}/${ds ? ds.storage.needed : "?"} slots; one stockpile project in ${Sx.P.list().length} project(s)` : `nothing opened (${bs ? bs.candidates.map(c => c.kind + ":" + (c.utility === -Infinity ? "-" : c.utility.toFixed(1))).join(" ") : "no brain"})`);
 
     check("no_errors", errors.length === 0, errors.length ? errors[0].slice(0, 200) : "no console errors during the run");

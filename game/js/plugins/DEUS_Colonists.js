@@ -1342,6 +1342,31 @@
     const avoidKey = (u, type, x, y) => `${u.id}:${zOf(u)}:${type}:${x},${y}`;
     const decisionAt = new Map(); // unit id -> tick of the last decision
     const pendingDecision = new Set(); // unit ids whose job just ended: they decide on the next map update
+    // Bounded idle scanning (DEUS-TSK-FABLE-12): the open job list is read at most once per map update (openJobs), and a
+    // colonist that found nothing in it waits IDLE_SCAN_INTERVAL before looking again, unless a job is posted meanwhile
+    // (jobs:created for an unowned job clears every wait). Idle colonists never scan the job list every tick.
+    const IDLE_SCAN_INTERVAL = 60;   // ticks (one game second)
+    const lastIdleScan = new Map();  // unit id -> tick of the last look at the open jobs that found nothing for it
+    let _openTick = -1, _openCache = null, _emptyAt = -1; // _emptyAt: the tick the list was last read and found empty
+    function openJobs() {
+        const J = Jobs();
+        if (!J) return [];
+        if (_openTick !== localTicks || !_openCache) { _openCache = J.open(); _openTick = localTicks; }
+        // The records are live: one taken or withdrawn since the list was read this update is left out.
+        const open = _openCache.filter(j => j.state === "open" && (j.assigned === null || j.assigned === undefined));
+        if (!open.length) _emptyAt = ticks();
+        return open;
+    }
+    // Due when this colonist has not looked for IDLE_SCAN_INTERVAL, and nobody found the list empty within it either
+    // (an empty list is empty for everyone until a job is posted).
+    const workScanDue = (u, t) => !(_emptyAt >= 0 && t - _emptyAt < IDLE_SCAN_INTERVAL) && t - (lastIdleScan.get(u.id) || -Infinity) >= IDLE_SCAN_INTERVAL;
+    // A job posted for anyone (no owner), or one back in the pool after its worker lost it, is news to every idle colonist.
+    function onJobPosted(job) {
+        if (!job || job.owner) return; // a colonist's own job is no news
+        lastIdleScan.clear();
+        _openTick = -1;
+        _emptyAt = -1;
+    }
     const arrivals = new Map();   // job id -> callback (the Overseer's assignMoveTo)
     const preemptAt = new Map();  // unit id -> tick of the last need interruption (no thrash when the need can't be met)
     const _lastHpCheckAt = new Map(); // unit id -> tick of the last high-priority job preemption check
@@ -1611,11 +1636,25 @@
     const THREAT_TICKS = 300;      // an attack this recent (half a game hour) still counts as a threat
     const THREAT_RADIUS = 12;      // cells: an attacker farther than this is no longer a threat
     const FLEE_RADIUS = 8;         // cells searched for safety or distance
+    const ALARM_RADIUS = 24;       // cells: how far from the attacker an alarm carries (the armed stand to it that far)
+    const REFUGE_RADIUS = 24;      // cells: how far an unarmed colonist looks for an armed friend to run to
     const PRIORITY = Object.freeze(["", "unable", "hazard", "threat", "aid", "critical", "orders", "work", "routine", "idle"]);
     const isReflexJob = job => !!(job && job.params && job.params.reflex);
     const canActNow = u => { const Cond = window.UF && UF.Conditions; return !(Cond && typeof Cond.canAct === "function" && !Cond.canAct(u)); };
     /** The lethal hazard a colonist is in, or null: { kind: "fire" | "lava" | "deep_water" | "burning", where: "cell" | "self" } (UF_Jobs judges the world). */
-    const hazardOf = u => { const J = Jobs(); return J && typeof J.inLethalHazard === "function" ? J.inLethalHazard(u) : null; };
+    const hazardOf = u => {
+        const J = Jobs();
+        if (!J || typeof J.inLethalHazard !== "function" || !u || !u.data) return null;
+        const hz = J.inLethalHazard(u);
+        if (hz) return hz;
+        // Fire or lava on a neighbouring square (DEUS-TSK-FABLE-12): a danger to back away from while a calm square can
+        // be reached (the route avoids the flames); with no way out the colonist keeps at its work rather than thrash.
+        if (typeof J.fireNear !== "function" || typeof J.safeCellNear !== "function") return null;
+        const near = J.fireNear(levelArea(u), u.x, u.y);
+        if (!near) return null;
+        const escape = J.safeCellNear(u, FLEE_RADIUS);
+        return escape && escape.calm ? { kind: near.kind, where: "near", escape } : null;
+    };
     function reflexJob(u, type, target, params, thought) {
         const J = Jobs();
         if (!J) return null;
@@ -1629,10 +1668,15 @@
     function hazardReflexJob(u, hz) {
         const J = Jobs();
         if (!J || !hz) return null;
-        if (hz.where === "cell") {
-            const safe = typeof J.safeCellNear === "function" ? J.safeCellNear(u, FLEE_RADIUS) : null;
+        if (hz.where === "cell" || hz.where === "near") {
+            // Out of the flames by the route that crosses the least fire; a burning colonist heads for water when it is
+            // near (UF.Jobs.safeCellNear). The route rides in the job (params.route), a waypoint at a time.
+            const aflameNow = hz.where === "cell" && typeof J.isAflame === "function" && J.isAflame(u);
+            const safe = hz.escape || (typeof J.safeCellNear === "function" ? J.safeCellNear(u, FLEE_RADIUS, { preferWater: aflameNow }) : null);
             if (!safe) { addThought(u, "Trapped by the flames!", -10); return null; }
-            return reflexJob(u, "move", { area: copyArea(u.area), x: safe.x, y: safe.y, z: zOf(u) }, { reflex: "hazard", hazard: hz.kind }, "Leapt out of the flames!");
+            const params = { reflex: "hazard", hazard: hz.kind };
+            if (Array.isArray(safe.route) && safe.route.length) params.route = safe.route.map(c => ({ x: c.x, y: c.y }));
+            return reflexJob(u, "move", { area: copyArea(u.area), x: safe.x, y: safe.y, z: zOf(u) }, params, hz.where === "near" ? "Backed away from the flames!" : "Leapt out of the flames!");
         }
         if (hz.kind === "burning" && J.handler("extinguish")) return reflexJob(u, "extinguish", { area: copyArea(u.area), x: u.x, y: u.y, z: zOf(u) }, { reflex: "extinguish" }, "Dropped and rolled!");
         return null;
@@ -1648,16 +1692,94 @@
         const th = u && u.data && u.data.threat;
         if (!th) return null;
         const W = World(), a = W ? W.unit(th.attackerId) : null;
-        if (ticks() - th.at > THREAT_TICKS || !a || !a.data || a.data.dead || !sameLevel(a, u) || chebyshev(a.x, a.y, u.x, u.y) > THREAT_RADIUS) { delete u.data.threat; return null; }
-        return { attacker: a, at: th.at };
+        // An alarm (DEUS-TSK-FABLE-12) carries ALARM_RADIUS to the armed, who stand to it; the unarmed run only from a
+        // foe within THREAT_RADIUS, alarmed or bitten.
+        const radius = th.alarm && armed(u) ? ALARM_RADIUS : THREAT_RADIUS;
+        if (ticks() - th.at > THREAT_TICKS || !a || !a.data || a.data.dead || !sameLevel(a, u) || chebyshev(a.x, a.y, u.x, u.y) > radius) { delete u.data.threat; return null; }
+        return { attacker: a, at: th.at, alarm: !!th.alarm };
     }
     const armed = u => !!(u && u.data && u.data.equipment && (u.data.equipment.mainHand || u.data.equipment.weapon));
     // An armed colonist not set to flee holds its ground for UF_Combat; the rest run for the square farthest from the attacker.
     const holdsGround = u => { const Cb = Combat(); const mode = Cb && typeof Cb.modeOf === "function" ? Cb.modeOf(u) : "defend"; return mode !== "flee" && armed(u); };
+    const facingTo = (dx, dy) => (Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 6 : 4) : (dy > 0 ? 2 : 8));
+    function faceUnit(u, o) {
+        const dx = o.x - u.x, dy = o.y - u.y;
+        if (!dx && !dy) return;
+        u.dir = facingTo(dx, dy);
+        const W = World(), ev = W && typeof W.eventOf === "function" ? W.eventOf(u) : null;
+        if (ev) { if (ev.faceToward8) ev.faceToward8(dx, dy); else if (ev.setDirection) ev.setDirection(u.dir); }
+    }
+    // The alarm (DEUS-TSK-FABLE-12): the colony remembers the attacker (colony.alarm) and every colonist within
+    // ALARM_RADIUS of it learns the threat (data.threat with alarm: true): the armed stand to it, the unarmed near it run
+    // for the hearth or an armed friend. Raised once per attacker per THREAT_TICKS. Returns how many were told.
+    function raiseAlarm(u, a) {
+        const c = colonyState(u), t = ticks();
+        if (!c || !a) return 0;
+        if (c.alarm && c.alarm.attackerId === a.id && t - c.alarm.at < THREAT_TICKS) return 0;
+        c.alarm = { attackerId: a.id, x: a.x, y: a.y, at: t, by: u.id };
+        let told = 0;
+        for (const o of colonists()) {
+            if (o === u || !o.data || o.data.dead || !sameLevel(o, a) || chebyshev(o.x, o.y, a.x, a.y) > ALARM_RADIUS) continue;
+            const th = o.data.threat;
+            if (th && th.attackerId === a.id && t - th.at < THREAT_TICKS && !th.alarm) continue; // it was struck itself
+            o.data.threat = { attackerId: a.id, at: t, alarm: true };
+            told++;
+        }
+        emit("colonists:alarm", u, a, told);
+        return told;
+    }
+    // An armed colonist stands its ground: faces the attacker, engages it through UF_Combat when it is within reach
+    // (its weapon is drawn: the combat loop fights from there), and raises the alarm. No job: UF_Combat has the colonist.
+    function standGround(u, th) {
+        const a = th.attacker, Cb = Combat();
+        faceUnit(u, a);
+        if (Cb && typeof Cb.engage === "function" && chebyshev(u.x, u.y, a.x, a.y) <= 1) {
+            const c = u.data.combat;
+            if (!c || c.targetId !== a.id) Cb.engage(u, a);
+        }
+        if (!th.alarm) raiseAlarm(u, a);
+        if (u.data.threat && !u.data.threat.stood) { u.data.threat.stood = true; addThought(u, `Stood ground against ${a.name || "an attacker"}!`, -2); }
+        return "hold";
+    }
+    // Where an unarmed colonist runs (DEUS-TSK-FABLE-12): a square within two of the hearth or of the nearest armed
+    // friend, whichever refuge is nearer, provided it lies farther from the attacker than the colonist stands (never a
+    // run through the foe); the square taken there is the one farthest from the attacker. Null when none qualifies.
+    function refugeFor(u, a) {
+        const J = Jobs(), W = World(), area = levelArea(u), c = colonyState(u);
+        if (!J || typeof J.standable !== "function" || !a) return null;
+        const dNow = chebyshev(u.x, u.y, a.x, a.y);
+        const refuges = [];
+        if (c && c.site && sameLevel(c, u)) refuges.push({ x: c.site.x, y: c.site.y, kind: "the hearth", id: 0 });
+        for (const o of colonists()) {
+            if (o === u || !o.data || o.data.dead || o.data.faction !== u.data.faction || !sameLevel(o, u) || unconscious(o) || !armed(o)) continue;
+            if (chebyshev(o.x, o.y, u.x, u.y) > REFUGE_RADIUS) continue;
+            refuges.push({ x: o.x, y: o.y, kind: "an armed friend", id: o.id });
+        }
+        const fit = refuges.filter(r => chebyshev(r.x, r.y, a.x, a.y) > dNow)
+            .sort((p, q) => chebyshev(p.x, p.y, u.x, u.y) - chebyshev(q.x, q.y, u.x, u.y) || p.id - q.id);
+        for (const r of fit) {
+            let best = null, bestScore = -Infinity;
+            for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+                const x = r.x + dx, y = r.y + dy;
+                if (x === u.x && y === u.y) continue;
+                if (!J.standable(area, x, y, u.id) || (typeof J.lethalHazardAt === "function" && J.lethalHazardAt(area, x, y))) continue;
+                if (W && typeof W.standerAt === "function" && W.standerAt(area.x, area.y, x, y, zOf(u))) continue;
+                const d = chebyshev(x, y, a.x, a.y);
+                if (d <= dNow) continue;
+                const score = d * 100 - chebyshev(x, y, r.x, r.y);
+                if (score > bestScore || (score === bestScore && (y < best.y || (y === best.y && x < best.x)))) { best = { x, y }; bestScore = score; }
+            }
+            if (best) return { cell: best, kind: r.kind, id: r.id };
+        }
+        return null;
+    }
     function threatResponseJob(u, th) {
-        if (holdsGround(u)) return "hold";
+        if (holdsGround(u)) return standGround(u, th);
         const J = Jobs(), a = th.attacker, area = levelArea(u);
         if (!J || typeof J.standable !== "function") return null;
+        const refuge = refugeFor(u, a);
+        if (refuge) return reflexJob(u, "move", { area: copyArea(u.area), x: refuge.cell.x, y: refuge.cell.y, z: zOf(u) }, { reflex: "threat", threat: a.id, refuge: refuge.kind }, `Ran for ${refuge.kind}!`);
+        // No refuge farther from the foe: the square farthest from it within FLEE_RADIUS (DEUS-TSK-FABLE-11).
         let best = null, bestScore = -Infinity;
         for (let dy = -FLEE_RADIUS; dy <= FLEE_RADIUS; dy++) for (let dx = -FLEE_RADIUS; dx <= FLEE_RADIUS; dx++) {
             if (!dx && !dy) continue;
@@ -1697,15 +1819,18 @@
         if (!u || !u.data) return { priority: 0, name: "", detail: null };
         if (unconscious(u) || !canActNow(u)) return { priority: 1, name: PRIORITY[1], detail: unconscious(u) ? "unconscious" : "cannot act" };
         const hz = hazardOf(u);
-        if (hz) return { priority: 2, name: PRIORITY[2], detail: hz.kind };
+        if (hz) return { priority: 2, name: PRIORITY[2], detail: hz.where === "near" ? "fire nearby" : hz.kind };
         const th = threatOf(u);
         if (th) return { priority: 3, name: PRIORITY[3], detail: holdsGround(u) ? "holds ground" : "runs" };
-        if (exhaustionOf(u) < 5 && patientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: null };
+        if (exhaustionOf(u) < 5) {
+            const burning = !aflame(u) && burningPatientsFor(u).length > 0;
+            if (burning || patientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: burning ? "douse" : "stabilize" };
+        }
         const crit = criticalNeed(u);
         if (crit) return { priority: 5, name: PRIORITY[5], detail: crit };
         if (isDrafted(u)) return { priority: 6, name: PRIORITY[6], detail: null };
         const J = Jobs();
-        if (J && J.open().some(j => j.target && sameLevel(j.target, u))) return { priority: 7, name: PRIORITY[7], detail: null };
+        if (J && openJobs().some(j => j.target && sameLevel(j.target, u))) return { priority: 7, name: PRIORITY[7], detail: null };
         const n = ensureNeeds(u);
         if (n && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u) || (n.lastRestDay !== dayKey() && n.exhaustion >= 1))) return { priority: 8, name: PRIORITY[8], detail: null };
         return { priority: 9, name: PRIORITY[9], detail: null };
@@ -1815,6 +1940,27 @@
     // Emergency aid, above ordinary labor: the nearest unconscious, unstable colonist of the same faction nobody is helping.
     function patientsFor(u) {
         return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && dyingOf(o) && !dyingOf(o).stable && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
+    }
+    // A burning friend who cannot put itself out (DEUS-TSK-FABLE-12): unconscious, unable to act (UF.Conditions), or at
+    // exhaustion 5. A conscious one rolls or douses itself (the extinguish reflex) and needs nobody.
+    const aflame = u => { const J = Jobs(); return !!(J && typeof J.isAflame === "function" && J.isAflame(u)); };
+    const cannotDouseSelf = o => unconscious(o) || !canActNow(o) || exhaustionOf(o) >= 5;
+    function burningPatientsFor(u) {
+        return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && !o.data.dead && aflame(o) && cannotDouseSelf(o) && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
+    }
+    // Douse a burning friend: the nearest one nobody is helping, by a colonist not itself aflame (fire kills faster
+    // than wounds, so this comes before first aid).
+    function douseJob(u) {
+        if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5 || aflame(u)) return null;
+        const J = Jobs();
+        if (!J || !J.handler("douse")) return null;
+        const patients = burningPatientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
+        for (const p of patients) {
+            if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
+            const j = give(u, { type: "douse", target: { x: p.x, y: p.y }, params: { unitId: p.id, emergency: true } });
+            if (j) return j;
+        }
+        return null;
     }
     function rescueJob(u) {
         if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5) return null;
@@ -3221,7 +3367,7 @@
     function designationJob(u) {
         if (!isColonist(u)) return null; // open UI designations belong to the player, not autonomous NPC settlements
         const J = Jobs();
-        const open = J.open().filter(j => j.target && sameLevel(j.target, u));
+        const open = openJobs().filter(j => j.target && sameLevel(j.target, u));
         if (!open.length) return null;
         const score = j => {
             const skill = SKILL_OF[j.type] ? ((u.data.skills && u.data.skills[SKILL_OF[j.type]]) || 0) : 0;
@@ -4717,7 +4863,7 @@
         if (!J || !P || typeof P.active !== "function") return null;
         const ids = new Set(P.active().map(p => p.id));
         if (!ids.size) return null;
-        const open = J.open().filter(j => j.target && j.params && ids.has(j.params.project) && sameLevel(j.target, u));
+        const open = openJobs().filter(j => j.target && j.params && ids.has(j.params.project) && sameLevel(j.target, u));
         if (!open.length) return null;
         const RM = J.reservation || null, t = ticks();
         const score = j => {
@@ -4770,7 +4916,7 @@
         const th = threatOf(u);
         if (th) { const r = threatResponseJob(u, th); if (r === "hold") return null; if (r) return r; }
         // 4. Emergency aid for a dying colonist, before the rescuer's own daily needs (not at exhaustion 5).
-        if (exhaustionOf(u) < 5) { const aid = rescueJob(u); if (aid) return aid; }
+        if (exhaustionOf(u) < 5) { const aid = douseJob(u) || rescueJob(u); if (aid) return aid; }
         // 5. Critical personal survival: the acute daily needs (SRD: bedtime, the last meal hour), a meal hour with
         //    nothing eaten or drunk, starvation past the grace days, hypothermia. A need nothing can meet does not
         //    keep the colonist from working.
@@ -4779,8 +4925,16 @@
         // 6. A draft or a direct combat order holds the colonist for UF_Combat.
         if (isDrafted(u)) return null;
         // 7. Work: settlement project jobs first, then any open designation; UF_Jobs walks the worker there and runs it.
-        const work = projectJob(u) || designationJob(u) || stepOffReserved(u);
-        if (work) return work;
+        //    A colonist that found nothing looks at the open jobs again only after IDLE_SCAN_INTERVAL, or as soon as a
+        //    job is posted (DEUS-TSK-FABLE-12: the idle never scan the job list every tick).
+        const t = ticks();
+        if (workScanDue(u, t)) {
+            const work = projectJob(u) || designationJob(u);
+            if (work) { lastIdleScan.delete(u.id); return work; }
+            lastIdleScan.set(u.id, t);
+        }
+        const off = stepOffReserved(u);
+        if (off) return off;
         // 8. Routine maintenance: the day's food, water and rest when nothing else calls.
         const routine = needJob(u);
         if (routine) return routine;
@@ -4837,9 +4991,12 @@
                 if (unconscious(u) && !u.data.dead) startDying(u); // idle or busy, 0 hit points is dying
                 tickDying(u, t);
             }
-            const patients = all.filter(o => dyingOf(o) && !dyingOf(o).stable && !(J.reservation && J.reservation.reservedBy({ id: o.id }) !== null));
+            // A burning colonist that cannot put itself out comes first (fire kills faster than wounds), then the dying.
+            const unhelped = o => !(J.reservation && J.reservation.reservedBy({ id: o.id }) !== null);
+            const burningOnes = all.filter(o => !o.data.dead && aflame(o) && cannotDouseSelf(o) && unhelped(o));
+            const patients = burningOnes.concat(all.filter(o => dyingOf(o) && !dyingOf(o).stable && unhelped(o)));
             for (const p of patients) {
-                const helpers = all.filter(o => o !== p && !unconscious(o) && exhaustionOf(o) < 5 && sameLevel(o, p) && chebyshev(o.x, o.y, p.x, p.y) <= RESCUE_RADIUS)
+                const helpers = all.filter(o => o !== p && !unconscious(o) && exhaustionOf(o) < 5 && !aflame(o) && sameLevel(o, p) && chebyshev(o.x, o.y, p.x, p.y) <= RESCUE_RADIUS)
                     .sort((a, b) => chebyshev(a.x, a.y, p.x, p.y) - chebyshev(b.x, b.y, p.x, p.y) || a.id - b.id);
                 for (const h of helpers) {
                     const job = J.of(h.id);
@@ -4864,6 +5021,7 @@
                 // the colonist decides again on the next update. A hostile threat ends work (never a reflex, an
                 // emergency or a need job), once per PREEMPT_EVERY.
                 const hz = hazardOf(u);
+                if (hz && hz.where === "near" && !isReflexJob(job)) { J.cancel(job.id, "emergency: fire nearby"); pendingDecision.add(u.id); continue; }
                 if (hz && !isReflexJob(job)) { J.cancel(job.id, "emergency: lethal hazard"); pendingDecision.add(u.id); continue; }
                 if (!now) {
                     const th = hz ? null : threatOf(u);
@@ -4876,8 +5034,10 @@
                     if (need && !isReflexJob(job) && !isNeedJob(job, need) && !needBlocked(u, need) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
                         preemptAt.set(u.id, t);
                         J.cancel(job.id, `survival: ${need}`);
-                    } else if (isLowPriorityJob(job, u) && (projectJob(u) || designationJob(u))) {
-                        J.cancel(job.id, "work: preempt idle");
+                    } else if (isLowPriorityJob(job, u) && workScanDue(u, t)) {
+                        // Idle work is dropped for real work; a look that finds none is not repeated before IDLE_SCAN_INTERVAL.
+                        if (projectJob(u) || designationJob(u)) { lastIdleScan.delete(u.id); J.cancel(job.id, "work: preempt idle"); }
+                        else lastIdleScan.set(u.id, t);
                     }
                 }
                 continue;
@@ -5206,6 +5366,7 @@
         get: colonist,
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
+        raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),
         site(ref) {
@@ -5259,7 +5420,7 @@
         spendCredits,
         stepMerchantCaravan,
         advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
-        _internal: { preemptAt, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { preemptAt, lastIdleScan, IDLE_SCAN_INTERVAL, ALARM_RADIUS, REFUGE_RADIUS, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -5307,7 +5468,9 @@
         UF.Events.on("jobs:failed", job => {
             onFailed(job);
             if (job && job.assigned !== null && job.assigned !== undefined) pendingDecision.add(job.assigned);
+            try { onJobPosted(job); } catch (e) { console.error(e); } // a designation its worker lost is open again
         });
+        UF.Events.on("jobs:created", job => { try { onJobPosted(job); } catch (e) { console.error(e); } });
     }
     hookEvents();
 

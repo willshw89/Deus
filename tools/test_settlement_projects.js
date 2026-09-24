@@ -308,10 +308,11 @@ try {
         `UF.Projects v${P && P.version}, cadence ${P && P.timers.cadence.ticks} ticks (${P && P.timers.cadence.domain})`);
     check("no_unseeded_random", !/Math\.random/.test(read("DEUS_Projects.js")), "DEUS_Projects.js has no Math.random");
 
-    // 1. Year-1 deficits: 8 founders, a lit hearth, a gapped ring, three straw beds, no stockpile.
-    const d0 = P.evaluateDeficits(area);
+    // 1. Year-1 deficits: 8 founders, a lit hearth, a gapped ring, three straw beds, no stockpile. Storage is counted in
+    //    physical slots (DEUS-TSK-GEMINI-07): one per stockpile cell plus a container's slots, slotsPerColonist needed each.
+    const d0 = P.evaluateDeficits(area), cfg0 = P.config();
     check("deficit_year1", !!d0 && d0.population === 8 && d0.shelter.needed === 1 && d0.shelter.current === 0 && d0.shelter.deficit === 1 &&
-        d0.bed.needed === 8 && d0.bed.current === 3 && d0.storage.needed === 64 && d0.storage.current === 0 && d0.food.needed === 3 && d0.food.current === 0 && d0.food.critical === true,
+        d0.bed.needed === 8 && d0.bed.current === 3 && d0.storage.needed === 8 * cfg0.slotsPerColonist && d0.storage.current === 0 && d0.food.needed === 3 && d0.food.current === 0 && d0.food.critical === true,
         d0 ? P.explain(area) : "no deficits");
 
     // 2. The deficit reads the world: a door set into the ring's north gap makes one shelter.
