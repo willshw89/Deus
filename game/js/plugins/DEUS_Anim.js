@@ -366,10 +366,14 @@
         if (!want) {
             if (moving || stepping) want = "walk";
             else if (job) want = "stand";
-            else {
+            else if (Anim.enableIdle && info && info.anims && info.anims.idle) {
                 want = "idle";
-                cols = info ? info.anims.idle : null;
+                cols = info.anims.idle;
                 loop = true;
+            } else {
+                want = "stand";
+                cols = info ? info.anims.stand : null;
+                loop = false;
             }
         }
         let shown = want;
@@ -837,10 +841,10 @@
         } else if (a.work && busyCells.has(key)) {
             stName = "work";
             stCols = a.work;
-        } else if (a.sway) {
+        } else if (Anim.enableSway && a.sway) {
             stName = "sway";
             stCols = a.sway;
-        } else if (a.idle) {
+        } else if (Anim.enableIdle && a.idle) {
             stName = "idle";
             stCols = a.idle;
         }
@@ -1717,6 +1721,8 @@
     };
     const Anim = {
         FRAME_MS, TICK_MS, REMAINS_CAP, MAX_GHOSTS, POOL_KEEP, STROKE_TICKS, LAYER_PREFIX, SLOTS, BEHIND, IGNORED_ANIMS,
+        enableSway: false,
+        enableIdle: false,
         stats,
         perf,
         errors,
@@ -1971,6 +1977,8 @@
         await t.waitUntil(() => [BODY, PLAIN, AXE].every(n => Anim.sidecar(n) !== undefined) &&
             [SWAY, SHOP, FIRE].every(n => objectSidecar(n) !== undefined), 5000, "the scratch sidecars").catch(() => {});
         const sourceNote = `scratch sheets: ${scratchNames.map(n => `${n} ${sources[n]}`).join(", ")}`;
+        Anim.enableSway = true;
+        Anim.enableIdle = true;
         // Scratch object types, appended to the catalog list for the suite (type numbers of the real ones unchanged).
         const objectsBefore = cat.objects;
         cat.objects = objectsBefore.concat([
@@ -2694,6 +2702,8 @@
                 delete ImageManager._cache["img/characters/" + Utils.encodeURI(name) + ".png"];
             }
             Anim.forgetLayers();
+            Anim.enableSway = false;
+            Anim.enableIdle = false;
             if (UF.Camera) UF.Camera.setLevel(zoomLevel);
             await t.waitFrames(2);
         }

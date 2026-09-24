@@ -183,9 +183,10 @@
         }
     }
     DayNight.ClockSprite = Sprite_UFClock;
+    DayNight.enableGlows = false; // Glow effects disabled for the moment per user directive
 
     //-------------------------------------------------------------------------
-    // Colored Light Glows in the Dark (User specification 2026-09-19)
+    // Colored Light Glows in the Dark (Disabled for the moment per user directive)
     //-------------------------------------------------------------------------
 
     class Sprite_UFGlowLayer extends Sprite {
@@ -194,12 +195,16 @@
             this.blendMode = (typeof PIXI !== "undefined" && PIXI.BLEND_MODES) ? PIXI.BLEND_MODES.ADD : 1;
             this._tick = 0;
             this._lastDraw = 0;
+            this.visible = false;
         }
 
         update() {
             super.update();
-            if (!DayNight.onWorldMap() || !(SceneManager._scene instanceof Scene_Map)) {
-                this.visible = false;
+            if (!DayNight.enableGlows || !DayNight.onWorldMap() || !(SceneManager._scene instanceof Scene_Map)) {
+                if (this.visible) {
+                    this.visible = false;
+                    this.bitmap.clear();
+                }
                 return;
             }
             const z = DayNight.viewZ();
@@ -546,6 +551,7 @@
             const O = UF.Objects, area = DayNight.viewLevel();
             const glowLayer = SceneManager._scene && SceneManager._scene._spriteset && SceneManager._scene._spriteset._ufGlowLayer;
             if (O && glowLayer && glowLayer.bitmap) {
+                DayNight.enableGlows = true;
                 let campX = -1, campY = -1;
                 const minX = Math.max(0, Math.floor($gameMap.displayX()) - 5);
                 const maxX = Math.min(255, Math.ceil($gameMap.displayX() + 30));
@@ -614,6 +620,7 @@
                         await t.waitFrames(4);
                     }
                 }
+                DayNight.enableGlows = false; // Reset to disabled
             }
 
             if (L && W && typeof W.viewLevel === "function") {

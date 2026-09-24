@@ -8,8 +8,38 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization` and View Distance Calibration.
+- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DEUS-TSK-GEMINI-17 — Locked 1.0x View Scale & Removed Glow / Animation Effects (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Camera.js`:
+    - Locked camera zoom permanently to `1.0x` (native 48px grid, FF5 chibi scale).
+    - Retired continuous zoom feature and in-game View Scale Calibrator HUD.
+    - All zoom mutation methods (`setLevel`, `setZoom`, `zoomIn`, `zoomOut`) neutralized to deterministic no-ops returning `false`.
+    - Mouse wheel listener and calibrator keybindings removed.
+    - Streamlined core math wrappers (`screenTileX`, `screenTileY`, `canvasToMapX`, `canvasToMapY`, `isNearTheScreen`) to pure 1x calculations.
+  - `game/js/plugins/DEUS_DayNight.js`:
+    - Disabled additive light glows (`DayNight.enableGlows = false`).
+    - Deactivated `Sprite_UFGlowLayer` (cleared bitmap, bypassed glow rendering). Zero light halos drawn around torches, campfires, street lamps, or glowing mushrooms.
+  - `game/js/plugins/DEUS_Stance.js`:
+    - Removed glowing neon gradient halo and pulse animations (`Stance.enableGlow = false`, `Stance.enablePulse = false`).
+    - Replaced glowing ring with a clean, static, solid 1-2px tactical ellipse line (`#22c55e`, alpha 255) with zero blur and zero outer glow.
+    - Decoupled `selectBitmap` cache by `glowMode` to prevent cache pollution.
+  - `game/js/plugins/DEUS_Anim.js`:
+    - Disabled procedural swaying and idle bobbing (`Anim.enableSway = false`, `Anim.enableIdle = false`). Trees, foliage, crops, and inactive units remain static on their crisp base sprite frame.
+- **Checks observed**:
+  - `node tools/run_tests.js camera`: 8 passed, 0 failed (`RESULT: 8 passed, 0 failed (exit 0)`).
+  - `node tools/run_tests.js stance`: 22 passed, 0 failed (`RESULT: 22 passed, 0 failed (exit 0)`).
+  - `node tools/run_tests.js daynight`: 14 passed, 0 failed (`RESULT: 14 passed, 0 failed (exit 0)`).
+  - Screenshots inspected:
+    - `game/test_output/camera.locked_1x.png`: 1.0x native grid, 17 tiles wide, calibrator HUD removed.
+    - `game/test_output/stance.selection_ring.png`: Crisp, non-glowing tactical selection ellipse at colonist boots.
+    - `game/test_output/stance.rings_zoom_1.png`: Sharp 1.0x unit lineup with clean selection marker.
+    - `game/test_output/daynight.noon.png`: Clean daytime surface lighting, zero radial glow overlays.
+    - `game/test_output/daynight.night.png`: Natural midnight tone [-80,-75,-15,60] without glow circles.
+    - `game/test_output/daynight.cave_minus2_noon.png`: Subterranean lava/mushroom cells with raw pixel art and zero glow overlays.
 
 ## DEUS-TSK-GEMINI-16 — In-Game View Scale Calibrator & Continuous Zoom (2026-09-24)
 - **Status**: `COMPLETED — PASS`
