@@ -182,7 +182,7 @@
         "volcanic lava"
       ],
       "verticalHooks": {
-        "Z+2": "Elevated wetland knoll crests, high humid air boundary, exposed ridge margins",
+        "Z+2": "Elevated wetland knoll crests, raised peat ridges, exposed saturated margins",
         "Z+1": "Natural levee crest, raised peat hummock, elevated saturated ground",
         "Z0": "Canonical surface: marsh pools, reed shallows, peat meadows, slow river channels",
         "Z-1": "Deep anaerobic black mud, waterlogged peat strata, submerged taproots",
@@ -419,7 +419,7 @@
         "snow/ice"
       ],
       "verticalHooks": {
-        "Z+2": "Smoking caldera rims, jagged basalt spires rising through smoke plume, fumarole crests",
+        "Z+2": "Smoking caldera rims, jagged basalt spires, fumarole crests",
         "Z+1": "Upper cooling lava terraces, raised basalt ledges, obsidian outcrops",
         "Z0": "Canonical surface: ash fields, active basalt fissures, geothermal pools, scorched bedrock",
         "Z-1": "Porous basalt crust, subterranean magma vents, heated rock tubes",

@@ -16,14 +16,14 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Scope**:
   - Formalized the canonical material, geological, and ecological identities of the five core DEUS biomes (`TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`) based on `art/reference/DEUS_BIOME_STUDIES_V1.*` into `docs/art/DEUS_BIOME_IDENTITY_STANDARD.md`.
   - Created machine-readable biome registry: `game/data/DEUS_BiomeRegistry.json` (and `docs/art/DEUS_BiomeRegistry.json`) covering substrate, geology, moisture, drainage, ecological densities, botanical forms, vocabularies, signature/shared materials, forbidden cues, and 5-tier vertical Z hooks (`Z+2` to `Z-2`).
-  - Applied owner review correction: Purified all 25 vertical Z hooks to describe purely natural physical terrain, substrate, and geology at each elevation slice, eliminating constructed infrastructure, wildlife, and tree canopy airspace leakage.
+  - Applied owner review correction: Purified all 25 vertical Z hooks to describe purely natural physical terrain, substrate, and geology at each elevation slice, eliminating constructed infrastructure, wildlife, tree canopy airspace, and atmospheric/weather leakage (e.g. WET Z+2 raised peat ridges, VOLC Z+2 caldera rims without smoke plume).
   - Enforced cardinal ecological invariants:
     1. Zero snow/ice/glacial biomes across the entire game; Highland explicitly forbids snow/ice/frost and focuses on fractured granite mass.
     2. Volcanic terrain restricts molten lava to a localized accent hazard; forbids full-screen glowing red wallpaper.
     3. Biome identity is defined as physical systems (geology, soil, flora, moisture), strictly rejecting simple color-swap/palette-recolor production.
   - Defined complete horizontal transition specifications for all 10 biome pairs across 6 physical bridge axes (`grassDensity`, `soilTransition`, `geologyTransition`, `moistureTransition`, `vegetationForm`, `topography`).
   - Implemented prompt compiler tool `tools/biome_resolver.js` (`--list`, `<BIOME_ID>`, `--pair <A> <B>`, `--all-pairs`) allowing future Nano Banana Pro prompts to deterministically pull authentic biome conditioning blocks.
-  - Added automated test harness `tools/test_biome_standard.js` (309/309 checks passing).
+  - Added automated test harness `tools/test_biome_standard.js` (334/334 checks passing).
   - Maintained separation of concerns: zero premature raw RGB/hex palette ramps frozen in this standard (reserved for `DW.01.05`).
   - Stopped at gate per AGENTS.md Rule 6.
 

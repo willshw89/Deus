@@ -138,6 +138,8 @@ for (const id of expectedBiomes) {
             `${id}: ${z} hook contains no wildlife references (${hookText.substring(0, 25)}...)`);
         assert(!/canopy crowns|upper crowns/i.test(hookText),
             `${id}: ${z} hook contains no tree canopy airspace leakage (${hookText.substring(0, 25)}...)`);
+        assert(!/air boundary|smoke plume|mist layer|\bfog\b|\bhaze\b/i.test(hookText),
+            `${id}: ${z} hook contains no atmospheric/weather leakage (${hookText.substring(0, 25)}...)`);
     }
 }
 
