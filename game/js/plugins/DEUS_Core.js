@@ -80,7 +80,11 @@
                 "DEUS_Dnd5e",
                 "DEUS_Callings",
                 "DEUS_HistoricalDemographics",
-                "DEUS_DeathForensics"
+                "DEUS_DeathForensics",
+                // Households (partner pairs, families, their homes) for DEUS_Projects' domestic housing
+                // (DEUS-TSK-FABLE-17): not in plugins.js while the editor holds it; register it there when the editor
+                // is closed and drop this line.
+                "UF_Households"
             ];
             for (const name of companionPlugins) {
                 const paths = [
@@ -88,13 +92,17 @@
                     `./game/js/plugins/${name}.js`,
                     `./${name}.js`
                 ];
+                let loaded = false, lastError = null;
                 for (const p of paths) {
                     try {
                         require(p);
                         log(`[CORE] Synchronously loaded companion plugin ${name}`);
+                        loaded = true;
                         break;
-                    } catch (_) {}
+                    } catch (e) { lastError = e; }
                 }
+                // A companion that fails to load says so (DEUS-TSK-FABLE-17: the loop used to swallow every error).
+                if (!loaded) log(`[CORE] Companion plugin ${name} NOT loaded: ${lastError && lastError.message ? lastError.message : lastError}`);
             }
 
             let isAutoTest = false;

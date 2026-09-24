@@ -136,7 +136,8 @@
     // Test provocations (each check seen failing once): UF_TEST_PROVOKE=vertical.<check>, read only in --uf-test runs.
     const PROVOKE = (() => {
         const argv = (typeof nw !== "undefined" && nw.App && nw.App.argv) || [];
-        if (!argv.some(a => a === "--uf-test" || String(a).startsWith("--uf-test="))) return [];
+        // Both harness flags: run_tests.js starts nw.exe with --deus-test (since the DEUS rename), older runs --uf-test.
+        if (!argv.some(a => /^--(uf|deus)-test(=|$)/.test(String(a)))) return [];
         const env = (typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || "";
         return env.split(",").map(s => s.trim()).filter(s => s.startsWith("vertical."));
     })();
@@ -820,7 +821,7 @@
                 // Cliff cave mouths breaching cliff faces horizontally into the mountain at z = 0
                 if (z === 0) {
                     const cliffMouths = cliffCaveMouthsForArea(seed, ax, ay, size, d, cl);
-                    extra = { cliffCaves: cliffMouths };
+                    extra = { cliffCaves: cliffMouths, surface: S_grid };
                     for (const m of cliffMouths) {
                         shape[m.y * size + m.x] = FLOOR;
                         material[m.y * size + m.x] = STONE;
@@ -831,6 +832,8 @@
                         shape[term.y * size + term.x] = STAIR_DOWN;
                         material[term.y * size + term.x] = STONE;
                     }
+                } else {
+                    extra = { surface: S_grid };
                 }
             }
         } else if (z > 0) {
@@ -878,6 +881,23 @@
 
     // Checksum of a level's baseline over every area (FNV-1a of shapes then materials). The ground's is a 32x32 lattice
     // of UF_WorldGen's cell info (ground kind, water, peak), which checks its generator without building the map.
+    function shapeGrid(z, ax, ay) {
+        const W = World(), st = W && W.state;
+        if (!st || !isLevel(z) || !W.inWorld(ax, ay, z)) return null;
+        if (z === 0 && levelGen(st, 0) < 4) return null;
+        const b = baseline(z, ax, ay);
+        if (!b) return null;
+        const grid = new Uint8Array(b.shape);
+        const ch = changesOf(st, z, ax, ay, false);
+        if (ch) {
+            for (const k in ch) {
+                const i = Number(k);
+                if (Number.isInteger(i) && i >= 0 && i < grid.length) grid[i] = (ch[k] | 0) & 7;
+            }
+        }
+        return grid;
+    }
+
     function checksumOf(z, seed, gen) {
         const W = World(), st = W.state;
         let h = 2166136261 >>> 0;
@@ -1123,6 +1143,7 @@
         naturalWallRevision++;
         invalidateFloods();
         const W = World();
+        if (z === 0) return redrawGroundAround(ax, ay, x, y);
         const read = (cx, cy) => packedAt(ax, ay, cx, cy, z);
         const readBiome = biomeReader(baseline(z, ax, ay), W.state.size);
         for (let dy = -1; dy <= 1; dy++) {
@@ -1131,6 +1152,38 @@
                 if (cx < 0 || cy < 0 || cx >= W.state.size || cy >= W.state.size) continue;
                 const t = tilesAt(read, cx, cy, z, readBiome);
                 for (let layer = 0; layer < 3; layer++) W.setDerivedTile(ax, ay, cx, cy, layer, t[layer], z);
+            }
+        }
+    }
+
+    // The ground (z = 0) is painted by UF_WorldGen on its own tileset (91), not from the looks of tileset 92: a changed
+    // ground shape asks WorldGen for the tiles a build paints now (solid: the rock face on layers 0 and 2, region 250;
+    // dug or carved inside a hill: bare rock floor; elsewhere the natural ground or water). Cells the start template
+    // paints, and layers with a saved tile diff, keep their tiles. The changed cell's ground shade (layer 1) is cleared.
+    // A save whose ground has no column (generator < 4) never gets here: setShape refuses ground changes there.
+    function redrawGroundAround(ax, ay, x, y) {
+        const W = World(), st = W && W.state, G = window.UF && UF.WorldGen;
+        if (!st || !G || typeof G.groundTilesAt !== "function" || levelGen(st, 0) < 4) return;
+        const size = st.size, cells = size * size;
+        const diff = st.diffs ? st.diffs[typeof W.levelKey === "function" ? W.levelKey(ax, ay, 0) : `${ax},${ay}`] : null;
+        const template = typeof W.isStartArea === "function" && W.isStartArea(ax, ay) && typeof W.templatePaints === "function";
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const cx = x + dx, cy = y + dy;
+                if (cx < 0 || cy < 0 || cx >= size || cy >= size) continue;
+                if (template && W.templatePaints(cx, cy)) continue;
+                const t = G.groundTilesAt(ax, ay, cx, cy);
+                if (!t) continue;
+                const i = cy * size + cx;
+                const put = (layer, id) => {
+                    if (diff && diff[layer * cells + i] !== undefined) return;
+                    const now = typeof W.getTile === "function" ? W.getTile(ax, ay, cx, cy, layer, 0) | 0 : -1;
+                    if (now !== id && typeof W.setDerivedTile === "function") W.setDerivedTile(ax, ay, cx, cy, layer, id, 0);
+                };
+                put(0, t.layer0);
+                if (dx === 0 && dy === 0) put(1, 0);
+                put(2, t.layer2);
+                put(5, t.region);
             }
         }
     }
@@ -1810,26 +1863,35 @@
 
     // Natural walls have the same visual footprint as built walls: the blocked cell is the face, and its cap is
     // one screen row north on this same level. Tile passage and the saved shape grid are never changed by drawing.
+    // Frame (DF black wall-top convention, AGENTS.md rule 13, docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md section 3):
+    // 48 x 96, the upper 48 px a flat near-black cap in #08080C..#121218 (drawn here: a flat fill, never art), the lower
+    // 48 px the material's face (the side autotile of the rock or soil look in the runtime A4 sheet: AR-1200/AR-1201
+    // sides, AR-2100/AR-2101). The same frames stand on the ground (z = 0) at the foot of every hill.
+    const NATURAL_WALL_SPEC = Object.freeze({
+        width: 48, height: 96, capHeight: 48, capColor: "#0a0a10", capEdgeColor: "#121218", capEdgeHeight: 2,
+        capRange: Object.freeze(["#08080c", "#121218"]), faceSheet: "A4 side autotile (y 144..239 of the look's kind column)"
+    });
+    const ORTHO4 = [[0, -1], [0, 1], [-1, 0], [1, 0]];
     const naturalWallFrames = new Map();
     let naturalWallRevision = 0;
     function naturalWallBitmap(material, mask) {
-        const key = `${material}:${mask}:${provoked("natural_wall_height")}`;
+        const S = NATURAL_WALL_SPEC, flat = provoked("natural_wall_height");
+        const key = `${material}:${mask}:${flat}`;
         if (naturalWallFrames.has(key)) return naturalWallFrames.get(key);
         const source = composed.bitmaps.A4;
         if (!source || !source.isReady()) return null;
-        const bitmap = new Bitmap(48, provoked("natural_wall_height") ? 48 : 96);
+        const bitmap = new Bitmap(S.width, flat ? S.capHeight : S.height);
         const x0 = material === SOIL ? 96 : 0;
-        const face = Tilemap.WALL_AUTOTILE_TABLE[10 + ((mask & 4) ? 0 : 1) + ((mask & 8) ? 0 : 4)];
-        if (bitmap.height === 96) {
-            // Dwarf Fortress Black Wall-Top Convention (User directive 2026-09-21; docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md §3)
-            // Upper 48 px cap: flat near-black (#0a0a10) with subtle edge definition for readability
-            bitmap.fillRect(0, 0, 48, 48, "#0a0a10");
-            bitmap.fillRect(0, 0, 48, 2, "#14141c");
+        if (!flat) {
+            bitmap.fillRect(0, 0, S.width, S.capHeight, S.capColor);
+            bitmap.fillRect(0, 0, S.width, S.capEdgeHeight, S.capEdgeColor);
+            const face = Tilemap.WALL_AUTOTILE_TABLE[10 + ((mask & 4) ? 0 : 1) + ((mask & 8) ? 0 : 4)];
             for (let q = 0; q < 4; q++) {
                 const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
-                bitmap.blt(source, x0 + face[q][0] * 24, 144 + face[q][1] * 24, 24, 24, dx, dy + 48);
+                bitmap.blt(source, x0 + face[q][0] * 24, 144 + face[q][1] * 24, 24, 24, dx, S.capHeight + dy);
             }
         } else {
+            // vertical.natural_wall_height (seen failing once): the one-cell top of the look only.
             const cap = Tilemap.FLOOR_AUTOTILE_TABLE[maskTable()[mask]];
             for (let q = 0; q < 4; q++) {
                 const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
@@ -1839,45 +1901,141 @@
         naturalWallFrames.set(key, bitmap);
         return bitmap;
     }
+
+    // Wall material of a cell for the classification (STONE, SOIL, or -1 = not a wall). The ground (z = 0) reads its
+    // shapes (solid, with the saved changes; the ground's tiles are tileset 91's and say nothing about rock looks); a
+    // one-area world wraps like its looping map; a cell of another area counts as a wall (never an exposed face). A
+    // ground without its column (generator < 4) has no natural walls. The other levels read the built map's tiles (the
+    // rock and soil looks of tileset 92), off the map = not a wall.
+    function groundWallReader(ax, ay) {
+        const W = World(), st = W && W.state;
+        if (!st || levelGen(st, 0) < 4 || !W.inWorld(ax, ay, 0) || provoked("ground_cliffs")) return () => -1;
+        const size = st.size, b = baseline(0, ax, ay), ch = changesOf(st, 0, ax, ay, false);
+        const one = st.areasX === 1 && st.areasY === 1;
+        return (x, y) => {
+            if (one) { x = ((x % size) + size) % size; y = ((y % size) + size) % size; }
+            else if (x < 0 || y < 0 || x >= size || y >= size) return STONE;
+            const i = y * size + x;
+            const p = ch && ch[i] !== undefined ? ch[i] | 0 : pack(b.shape[i], false, b.material[i]);
+            return (p & 7) === SOLID ? ((p >> 4) === SOIL ? SOIL : STONE) : -1;
+        };
+    }
+    function tileWallReader(map) {
+        const rock = tileBase("rock"), soil = tileBase("soil");
+        return (x, y) => {
+            if (!map || x < 0 || y < 0 || x >= map.width || y >= map.height) return -1;
+            const id = map.data[y * map.width + x];
+            if (id >= rock && id < rock + 48) return STONE;
+            if (id >= soil && id < soil + 48) return SOIL;
+            return -1;
+        };
+    }
+    // The cells in [x0..x1] x [y0..y1] that draw a natural wall frame: a wall cell with at least one orthogonal
+    // neighbour that isn't a wall. mask: the NB8 bits of the neighbours of the same material (the face's ends).
+    function classifyNaturalWalls(typeAt, x0, y0, x1, y1) {
+        const out = [];
+        for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+                const material = typeAt(x, y);
+                if (material < 0 || ORTHO4.every(([a, b]) => typeAt(x + a, y + b) >= 0)) continue;
+                let mask = 0;
+                for (const [a, b, bit] of NB8) if (typeAt(x + a, y + b) === material) mask |= bit;
+                out.push({ x, y, material: MATERIALS[material], code: material, mask });
+            }
+        }
+        return out;
+    }
+    /** Natural wall cells of a level in a window (inclusive): [{ x, y, material: "stone" | "soil", code, mask }]. */
+    function naturalWallCells(area, z, x0, y0, x1, y1) {
+        const W = World(), st = W && W.state;
+        if (!st || !area || !isLevel(z) || !W.inWorld(area.x, area.y, z)) return [];
+        const c = v => Math.max(0, Math.min(st.size - 1, v | 0));
+        let typeAt;
+        if (z === 0) typeAt = groundWallReader(area.x, area.y);
+        else {
+            const onScreen = window.$dataMap && $dataMap.ufArea && $dataMap.ufArea.x === area.x && $dataMap.ufArea.y === area.y && ($dataMap.ufArea.z || 0) === z;
+            typeAt = tileWallReader(onScreen ? $dataMap : W.peekArea(area.x, area.y, z));
+        }
+        return classifyNaturalWalls(typeAt, c(x0), c(y0), c(x1), c(y1));
+    }
+
+    // Connectors on the ground (z = 0): ramps and stairs are shapes there, but the ground's tileset (91) has no looks
+    // for them, so they are drawn as one 48 x 48 frame of the connector's look (tileset 92's B sheet: ramp_up AR-1211,
+    // stair_up/down/both AR-1208..1210) over the ground, never animated.
+    const CONNECTOR_LOOK = { [RAMP]: "ramp_up", [STAIR_UP]: "stair_up", [STAIR_DOWN]: "stair_down", [STAIR_BOTH]: "stair_both" };
+    function groundConnectorCells(area, x0, y0, x1, y1) {
+        const W = World(), st = W && W.state;
+        if (!st || !area || levelGen(st, 0) < 4 || !W.inWorld(area.x, area.y, 0)) return [];
+        const size = st.size, b = baseline(0, area.x, area.y), ch = changesOf(st, 0, area.x, area.y, false), out = [];
+        const c = v => Math.max(0, Math.min(size - 1, v | 0));
+        for (let y = c(y0); y <= c(y1); y++) {
+            for (let x = c(x0); x <= c(x1); x++) {
+                const i = y * size + x;
+                const s = (ch && ch[i] !== undefined ? ch[i] | 0 : b.shape[i]) & 7;
+                if (s >= RAMP) out.push({ x, y, look: CONNECTOR_LOOK[s] });
+            }
+        }
+        return out;
+    }
+    const connectorFrames = new Map();
+    function connectorBitmap(look) {
+        if (connectorFrames.has(look)) return connectorFrames.get(look);
+        const t = TARGET[look], source = composed.bitmaps.B;
+        if (!t || t[0] !== "B" || !source || !source.isReady()) return null;
+        const i = t[1];
+        const bitmap = new Bitmap(48, 48);
+        bitmap.blt(source, ((Math.floor(i / 128) % 2) * 8 + (i % 8)) * 48, Math.floor((i % 128) / 8) * 48, 48, 48, 0, 0);
+        connectorFrames.set(look, bitmap);
+        return bitmap;
+    }
+
     class Sprite_UFNaturalWalls extends Sprite {
         constructor() {
             super(); this.z = 0; this._active = new Map(); this._pool = []; this._seen = "";
         }
+        hideAll() {
+            for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
+            this._active.clear(); this._seen = "";
+        }
+        take(key) {
+            let s = this._active.get(key);
+            if (!s) {
+                s = this._pool.pop() || new Sprite(); s.anchor.set(0.5, 1);
+                if (!s.parent) this.parent.addChild(s);
+                this._active.set(key, s);
+            }
+            return s;
+        }
         update() {
             super.update();
             const map = window.$dataMap, W = World(), view = W && W.viewLevel();
-            if (!this.parent || !map || !view || (map.tilesetId !== TILESET_ID && map.tilesetId !== 91)) {
-                for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
-                this._active.clear(); this._seen = ""; return;
-            }
+            const ground = !!view && view.z === 0;
+            // The ground draws its cliffs once its column exists (generator 4) and the map on screen is that level's.
+            const showing = !!this.parent && !!map && !!view && (ground
+                ? levelGen(W.state, 0) >= 4 && (!map.ufArea || (map.ufArea.x === view.x && map.ufArea.y === view.y && (map.ufArea.z || 0) === 0))
+                : map.tilesetId === TILESET_ID);
+            if (!showing) return this.hideAll();
             const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
             const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
-            const stamp = `${$gameMap.mapId()}:${dx}:${dy}:${cols}:${rows}:${naturalWallRevision}`;
+            const stamp = `${$gameMap.mapId()}:${view.z}:${dx}:${dy}:${cols}:${rows}:${naturalWallRevision}`;
             if (stamp !== this._seen || this._data !== map.data) {
-                const typeAt = (x, y) => {
-                    if (x < 0 || y < 0 || x >= map.width || y >= map.height) return -1;
-                    const id = map.data[y * map.width + x];
-                    if (id >= tileBase("rock") && id < tileBase("rock") + 48) return STONE;
-                    if (id >= tileBase("soil") && id < tileBase("soil") + 48) return SOIL;
-                    return -1;
-                };
+                const x0 = Math.max(0, dx - 1), x1 = Math.min(map.width - 1, dx + cols + 1);
+                const y0 = Math.max(0, dy - 1), y1 = Math.min(map.height - 1, dy + rows + 2);
                 const keep = new Set();
-                for (let y = Math.max(0, dy - 1); y <= Math.min(map.height - 1, dy + rows + 2); y++) {
-                    for (let x = Math.max(0, dx - 1); x <= Math.min(map.width - 1, dx + cols + 1); x++) {
-                        const material = typeAt(x, y);
-                        if (material < 0 || [[0,-1],[0,1],[-1,0],[1,0]].every(([a,b]) => typeAt(x+a,y+b) >= 0)) continue;
-                        let mask = 0;
-                        for (const [a,b,bit] of NB8) if (typeAt(x+a,y+b) === material) mask |= bit;
-                        const bitmap = naturalWallBitmap(material, mask);
+                for (const c of classifyNaturalWalls(ground ? groundWallReader(view.x, view.y) : tileWallReader(map), x0, y0, x1, y1)) {
+                    const bitmap = naturalWallBitmap(c.code, c.mask);
+                    if (!bitmap) continue;
+                    const i = c.y * map.width + c.x; keep.add(i);
+                    const s = this.take(i);
+                    s.bitmap = bitmap; s._ufX = c.x; s._ufY = c.y; s._ufMaterial = c.code; s._ufLevel = view.z; s._ufKind = "wall"; s._ufLook = null; s.visible = true;
+                }
+                if (ground) {
+                    for (const c of groundConnectorCells(view, x0, y0, x1, y1)) {
+                        const bitmap = connectorBitmap(c.look);
                         if (!bitmap) continue;
-                        const i = y * map.width + x; keep.add(i);
-                        let s = this._active.get(i);
-                        if (!s) {
-                            s = this._pool.pop() || new Sprite(); s.anchor.set(0.5, 1);
-                            if (!s.parent) this.parent.addChild(s);
-                            this._active.set(i, s);
-                        }
-                        s.bitmap = bitmap; s._ufX = x; s._ufY = y; s._ufMaterial = material; s._ufLevel = view.z; s.visible = true;
+                        const i = -1 - (c.y * map.width + c.x); keep.add(i); // connectors keyed apart from walls
+                        const s = this.take(i);
+                        s.bitmap = bitmap; s._ufX = c.x; s._ufY = c.y; s._ufMaterial = -1; s._ufLevel = 0; s._ufKind = "connector"; s._ufLook = c.look; s.visible = true;
                     }
                 }
                 for (const [i,s] of this._active) if (!keep.has(i)) { s.visible = false; this._pool.push(s); this._active.delete(i); }
@@ -1886,7 +2044,9 @@
             for (const s of this._active.values()) {
                 s.x = Math.round(($gameMap.adjustX(s._ufX) + 0.5) * 48);
                 s.y = Math.round(($gameMap.adjustY(s._ufY) + 1) * 48);
-                s.z = Math.max(7, s.y); // same minimum as objects: above tile/stance/designation layers
+                // Walls: same minimum as objects (above tile/stance/designation layers). Connectors lie on the ground:
+                // above the lower tile layer (z 0), below every character and overlay.
+                s.z = s._ufKind === "connector" ? 0.5 : Math.max(7, s.y);
             }
         }
     }
@@ -2372,6 +2532,29 @@
         cellArt,
         /** The seeded baseline of a level (area 0,0 by default): { shape: Uint8Array, material: Uint8Array } (codes; runtime only). */
         baseline: (z, ax = 0, ay = 0) => baseline(z, ax, ay),
+        /** True when the ground has its column (generator 4+): its shapes are volumetric and its tiles follow them. */
+        groundVolumetric: () => {
+            const W = World(), st = W && W.state;
+            return !!st && levelGen(st, 0) >= 4;
+        },
+        /** A fresh Uint8Array of the shape codes of a level's area (baseline plus saved changes); null for no world, or
+         *  for the ground of a save without its column (its shape is its tiles there). */
+        shapeGrid: (z, ax = 0, ay = 0) => shapeGrid(z, ax, ay),
+        /** The surface height S (0, 1, 2) of every cell of an area (Int8Array, the baseline's own: don't write), or null
+         *  without a world or column. */
+        surfaceGrid: (ax = 0, ay = 0) => {
+            const W = World(), st = W && W.state;
+            if (!st || levelGen(st, 0) < 4 || !W.inWorld(ax, ay, 0)) return null;
+            const b = baseline(0, ax, ay);
+            return b && b.surface ? b.surface : null;
+        },
+        /** The natural wall frame's spec: { width 48, height 96, capHeight 48, capColor, capEdgeColor, capRange }. */
+        naturalWallSpec: NATURAL_WALL_SPEC,
+        naturalWallCells,
+        /** Ramps and stairs of the ground in a window: [{ x, y, look }] (drawn as frames over the ground). */
+        groundConnectorCells: (area, x0, y0, x1, y1) => groundConnectorCells(area, x0, y0, x1, y1),
+        /** The natural wall frame (Bitmap) of a material ("stone" | "soil" | code) and NB8 mask; null before the sheets are composed. */
+        naturalWallFrame: (material, mask = 0) => naturalWallBitmap(typeof material === "string" ? MATERIALS.indexOf(material) : material, mask | 0),
         biomeAt, waterAt, habitablePockets, settlementCell,
         startingPocket: (z, index = 0, ax = 0, ay = 0) => habitablePockets(z, ax, ay)[index] || null,
         terrainStats: (z, ax = 0, ay = 0) => {
@@ -2552,8 +2735,65 @@
         t.screenshot("two_cell_natural_walls");
         for(const u of units) W.removeUnit(u.id);
         for(const o of originals) { setShape(o.ref,o.cell.shape,{material:o.cell.material,constructed:o.cell.constructed}); O.setIn(area,o.ref.x,o.ref.y,o.object || null); }
+        await groundCliffChecks(t, settled, C);
         if(C) C.setLevel(oldZoom);
         t.check("no_errors",t.errorsSoFar().length===0,t.errorsSoFar().join(" | ") || "none");
+    }
+
+    // Ground cliffs (DEUS-TSK-FABLE-16, owner directive 2026-09-24): on the ground, at the south-facing hill edge nearest
+    // the start's centre (one with a ramp or stairs in view preferred), every natural wall cell on screen draws a 48 x 96
+    // frame whose cap is near-black, and the rock face of the hill cell blocks passage. Provocation
+    // UF_TEST_PROVOKE=vertical.ground_cliffs (no natural walls on the ground) makes ground_cliff_render fail.
+    async function groundCliffChecks(t, settled, C) {
+        const W = World(), st = W.state, size = st.size;
+        if (viewZ() !== 0) { setView(0); await t.waitUntil(() => settled() && viewZ() === 0, 20000, "ground level"); }
+        const view = W.viewLevel(), area = { x: view.x, y: view.y };
+        if (levelGen(st, 0) < 4) { t.check("ground_cliff_render", false, "the ground has no column (generator < 4)"); return; }
+        const shapeAt = (x, y) => Levels.shapeCodeAt(area.x, area.y, x, y, 0);
+        const mid = Math.floor(size / 2), margin = 24;
+        const conn = new Set(groundConnectorCells(area, 0, 0, size - 1, size - 1).map(c => c.y * size + c.x));
+        let edge = null, best = Infinity;
+        for (let y = margin; y < size - margin; y++) {
+            for (let x = margin; x < size - margin; x++) {
+                if (shapeAt(x, y) !== SOLID || shapeAt(x, y + 1) === SOLID) continue;
+                let near = false;
+                for (let dy = -5; dy <= 5 && !near; dy++) for (let dx = -8; dx <= 8 && !near; dx++) if (conn.has((y + dy) * size + x + dx)) near = true;
+                const d = Math.hypot(x - mid, y - mid) + (near ? 0 : 40);
+                if (d < best) { best = d; edge = { x, y }; }
+            }
+        }
+        if (!edge) { t.check("ground_cliff_render", false, "no south-facing hill edge in the area"); return; }
+        if (window.$colonyManager) $colonyManager.cameraFollowUnit = null;
+        if (C) C.setLevel(0);
+        $gamePlayer.locate(edge.x, edge.y + 2);
+        $gamePlayer.center(edge.x, edge.y + 2);
+        await t.waitFrames(20);
+        const layer = SceneManager._scene._spriteset._ufNaturalWalls;
+        const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
+        const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
+        const x0 = Math.max(0, dx - 1), x1 = Math.min(size - 1, dx + cols + 1), y0 = Math.max(0, dy - 1), y1 = Math.min(size - 1, dy + rows + 2);
+        let want = 0, wantConn = 0;
+        for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+                const s = shapeAt(x, y);
+                if (s >= RAMP) wantConn++;
+                if (s === SOLID && [[0, -1], [0, 1], [-1, 0], [1, 0]].some(([a, b]) => { const n = shapeAt(x + a, y + b); return n !== SOLID && n !== 0; })) want++;
+            }
+        }
+        const sprites = layer ? [...layer._active.values()].filter(s => s.visible) : [];
+        const walls = sprites.filter(s => s._ufKind === "wall"), conns = sprites.filter(s => s._ufKind === "connector");
+        const s = layer && layer._active.get(edge.y * size + edge.x);
+        const cap = s && s.bitmap ? s.bitmap.getPixel(24, 24) : "";
+        const rgb = cap ? [1, 3, 5].map(k => parseInt(cap.slice(k, k + 2), 16)) : [];
+        const capOk = rgb.length === 3 && rgb[0] >= 0x08 && rgb[0] <= 0x12 && rgb[1] >= 0x08 && rgb[1] <= 0x12 && rgb[2] >= 0x0c && rgb[2] <= 0x18;
+        t.check("ground_cliff_render", !!s && s.bitmap.width === 48 && s.bitmap.height === 96 && s._ufLevel === 0 && capOk && want > 0 && walls.length === want && conns.length === wantConn,
+            `edge (${edge.x},${edge.y}) on the ground: frame ${s ? `${s.bitmap.width}x${s.bitmap.height}` : "missing"}, cap pixel ${cap || "none"} (want #08080C..#121218); `
+            + `${walls.length} wall frames on screen for ${want} natural wall cells in x ${x0}..${x1}, y ${y0}..${y1}; ${conns.length} ramp/stair frames for ${wantConn}`);
+        const kind = UF.Tiles ? UF.Tiles.kindOfTile($gameMap.tileId(edge.x, edge.y, 0)) : null;
+        const walk = W.walkable(area.x, area.y, edge.x, edge.y, { z: 0 });
+        t.check("ground_cliff_blocks", !!kind && kind.id === "peak_rock" && !$gameMap.isPassable(edge.x, edge.y, 2) && !$gameMap.isPassable(edge.x, edge.y, 8) && !walk,
+            `hill cell (${edge.x},${edge.y}): ground ${kind ? kind.id : "none"}, map passable down/up ${$gameMap.isPassable(edge.x, edge.y, 2)}/${$gameMap.isPassable(edge.x, edge.y, 8)}, World.walkable ${walk}`);
+        t.screenshot("ground_cliff_z0");
     }
 
     async function floodingSuite(t) {
