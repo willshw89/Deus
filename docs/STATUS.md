@@ -11,6 +11,14 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
+## DEUS-TSK-GEMINI-12 — Physical World Simulation Specification (Z-Support, Fluids, Fire, Roofs, Digging & AI Hooks) (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `docs/systems/DEUS_PHYSICAL_WORLD_SIMULATION_SPEC.md`: Authoritative specification establishing the unified physical world simulation model across all 5 persistent Z-levels (-2 to +2); defines the 6-layer cell ontology (Base Geometry, Material, Construction, Fluid, Hazard, Occupants); codifies exact structural support rules (direct vertical support + bounded lateral span $S = 2\dots 5\ T$ for engineered slabs and rock ceilings; BFS depth $\le 5$); downward physical collapse cascade into falling debris with bludgeoning impact damage and terrain obstacles; multi-Z terrain generation with solid volume invariant under hills/cliffs; exact consequences for horizontal mining, vertical channeling, carving ramps/stairs, and blasting; explicit constructible roofs as horizontal slabs at Z+1 with derived shelter checks; volumetric 0..7 fluid depth with water/lava obsidian reaction and active dirty set throttling (max 512 cells/tick); flammability classes, fire containment, and burning support collapse; 6-phase physical building sequence (Clear $\to$ Floor $\to$ Walls $\to$ Doors $\to$ Roof $\to$ Fixtures) and autonomous multi-dwelling parcel expansion; zero-scan event-driven update model; and autonomous colony AI query APIs (`isHazardous`, `isSafeToExcavate`, `isSheltered`, `canConstruct`, `findExpansionParcel`).
+- **Checks observed**:
+  - Validated cross-system compatibility with `DEUS_Levels.js` (shape codes 1..7, materials 0..2), `DEUS_Fluid.js` (0..7 depth active queue), `DEUS_Fire.js` (containment invariant & provenance), `DEUS_Walls.js` (48x96 DF black wall-top convention), and `DEUS_Projects.js` (blueprint loops).
+  - Clean execution of tests: `node tools/test_starter_kit_and_stockpile.js` (PASS 1..4), `node tools/test_srd_character_presentation.js` (11 passed, 0 failed).
+
 ## DEUS-TSK-GEMINI-11 — Visual Hierarchy, Environmental Standard, Racial Architecture & VFX/UI Presentation Standards (2026-09-24)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:
