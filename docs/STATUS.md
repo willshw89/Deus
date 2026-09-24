@@ -11,6 +11,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
+## DEUS-TSK-GEMINI-14 — Skills, Proficiency & Deterministic Competence Standard (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `docs/systems/DEUS_SKILLS_AND_PROFICIENCY_STANDARD.md`: Authoritative specification establishing the frozen principle of deterministic competence and positive upside proficiency.
+  - Formulates the Four Action Classes (`Routine` -> no roll, deterministic success; `Skilled` -> deterministic success, skill drives quality/efficiency; `Difficult` -> meaningful SRD d20 check, non-punitive RNG; `Contested / Hazardous` -> standard d20 check with legitimate physical failure consequences).
+  - Codifies the physical production formula: $\text{Materials} + \text{Correct Tool} + \text{Valid Workstation} + \text{Enough Time} = \text{Successful Output}$.
+  - Maps production activities to D&D 5.1 SRD Ability Scores and Tool/Skill proficiencies (STR/INT for carpentry/masonry/smithing, WIS for cooking/foraging/medicine, DEX for leatherwork/tailoring, CHA for trade).
+  - Standardizes the Seven Positive Production Dimensions (Work Rate, Material Efficiency, Output Quality, Structural Durability, Engineering Precision, Occupational Safety, Special Masterwork Results).
+  - Establishes the 4 Quality Tiers (`CRUDE`, `STANDARD`, `FINE`, `MASTERWORK`), Lead Worker + Crew teamwork architecture ($\text{Output} = \text{Lead Craftsmanship} + \text{Crew Labor}$), and strict separation of the Four Distinct Inputs (Knowledge, Tools, Workstation, Materials).
+  - Outlines competence thresholds, non-punitive Nat 1 / Nat 20 crafting resolution, autonomous AI 3-tier dispatch (specialist vs emergency crisis), and historical simulation parity.
+- **Checks observed**:
+  - Cross-referenced with `DEUS_Dnd5e.js`, `DEUS_Jobs.js`, `DEUS_Projects.js`, `DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md`, and `UF_Skills.md`.
+
 ## DEUS-TSK-GEMINI-13 — Universal Construction Lifecycle Specification (Intent → Building → Complete) (2026-09-24)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:
