@@ -21,9 +21,20 @@
  * what the catalog rule says (a tree a stump, a wooden wall rubble, grass nothing on
  * ash ground, a bed or stockpile nothing with the items on it destroyed).
  * Rules live in data/UF_WorldCatalog.json "fire" (flammability per object
- * tag or id; stone never burns). Campfires are contained sources: they never
- * burn, but each second each flammable neighbour may catch with a small seeded
- * chance. Accidental starts are off unless fire.startChance > 0.
+ * tag or id; stone never burns). Fire sources (the catalog's "source" rule:
+ * campfires, hearths) never burn themselves. An open fire (a campfire in the
+ * open) lets each flammable neighbour catch with a small seeded chance each
+ * second. A constructed hearth (id "hearth" or "kitchen_hearth", a "hearth"
+ * tag, `contained: true`, or a cell marked contained by setContained, as a
+ * finished shelter's hearth is) is a contained source: in normal use it never
+ * escapes; only a damaged, overturned or uncontrolled hearth (setSourceState)
+ * may (DEUS-TSK-FABLE-16). Accidental starts are off unless fire.startChance > 0.
+ *
+ * Every fire carries its ignition provenance (DEUS-TSK-FABLE-16): fireId,
+ * startedAt (beat), sourceType ("hearth", "open_fire", "accident", "direct",
+ * "legacy"), sourceObjectId, sourceCell, firstFuelIgnited, spreadParents (the
+ * cells it spread through to get here) and spreadSteps. provenanceAt(area, x, y)
+ * reads it; a unit burned to death carries it to UF.DeathForensics.
  *
  * Units never step into a burning cell (alias of isMapPassable for unit
  * events); a unit standing in one loses hit points (UF.Combat's damage
@@ -518,7 +529,7 @@
         f.beat += 1;
         const b = f.beat;
         const keys = Object.keys(f.burning);
-        const catches = new Map(); // key -> { area, x, y, cause }
+        const catches = new Map(); // key -> ignite options { area, x, y, cause, parent | source }
         const outs = [];
         for (const key of keys) {
             const rec = f.burning[key], p = parseKey(key);
@@ -539,51 +550,30 @@
                 if (f.burning[nkey] || catches.has(nkey) || wetUntil(f, nkey) > b) continue;
                 const nr = ruleForType(O.atIn(p.area, nx, ny));
                 if (!burns(nr)) continue;
-                if (hash01(seed, SALT.spread, b, p.area.x, p.area.y, p.x, p.y, d) < num(nr.spread, 0)) {
-                    catches.set(nkey, { area: p.area, x: nx, y: ny, cause: "spread", parentProvenance: rec.provenance });
-                }
+                // Spread: the neighbour joins this cell's fire, with this cell as its parent (provenance).
+                if (hash01(seed, SALT.spread, b, p.area.x, p.area.y, p.x, p.y, d) < num(nr.spread, 0)) catches.set(nkey, { area: p.area, x: nx, y: ny, cause: "spread", parent: { key, rec } });
             }
             rec.fuel -= 1;
             if (rec.fuel <= 0) outs.push({ key, p, rule, type });
         }
-        // Contained sources: never burn themselves; properly constructed hearths have escapeChance = 0
+        // Fire sources never burn themselves. A contained hearth in normal use never lets a flame out (escapeChance 0,
+        // DEUS-TSK-FABLE-16); an open fire, or a damaged / overturned / uncontrolled hearth, may light a flammable
+        // 4-neighbour each beat with its escape chance. What escapes is a new fire whose provenance names the source.
         const s = sourceCells();
         if (s && s.cells.size) {
             const size = W.state.size;
             for (const i of s.cells) {
                 const x = i % size, y = (i / size) | 0;
-                const objType = O.type(s.grid[i]);
-                const rule = ruleForType(objType);
-                let chance = num(rule && rule.escapeChance, 0);
-                const isHearth = objType && (
-                    objType.id === "hearth" ||
-                    objType.id === "kitchen_hearth" ||
-                    (objType.tags && (objType.tags.includes("hearth") || objType.tags.includes("kitchen"))) ||
-                    (objType.id === "campfire" && (
-                        (window.UF && UF.Rooms && typeof UF.Rooms.isRoofed === "function" && UF.Rooms.isRoofed(s.area, x, y, s.area.z || 0)) ||
-                        (window.UF && UF.Floors && typeof UF.Floors.isRoofed === "function" && UF.Floors.isRoofed(s.area, x, y, s.area.z || 0)) ||
-                        (window.UF && UF.Projects && typeof UF.Projects.structures === "function" && UF.Projects.structures().some(st => st.cells && st.cells.some(c => c.x === x && c.y === y)))
-                    ))
-                );
-                if (isHearth && (!rule || !rule.uncontained)) {
-                    chance = 0; // Hard containment invariant: hearths do not escape under normal use
-                }
-                if (!(chance > 0)) continue;
+                const info = sourceInfoAt(s.area, x, y, O.type(s.grid[i]));
+                if (!info || !(info.escapeChance > 0)) continue;
                 for (let d = 0; d < 4; d++) {
                     const nx = x + NEIGHBORS[d][0], ny = y + NEIGHBORS[d][1];
                     if (!inBounds(nx, ny)) continue;
                     const nkey = keyOf(s.area, nx, ny);
                     if (f.burning[nkey] || catches.has(nkey) || wetUntil(f, nkey) > b) continue;
                     if (!burns(ruleForType(O.atIn(s.area, nx, ny)))) continue;
-                    if (hash01(seed, SALT.escape, b, x, y, d) < chance) {
-                        catches.set(nkey, {
-                            area: s.area,
-                            x: nx,
-                            y: ny,
-                            cause: isHearth ? "hearth_escape" : "campfire",
-                            sourceObjectId: objType ? objType.id : null,
-                            sourceCell: { x, y, z: zOf(s.area) }
-                        });
+                    if (hash01(seed, SALT.escape, b, x, y, d) < info.escapeChance) {
+                        catches.set(nkey, { area: s.area, x: nx, y: ny, cause: info.contained ? `hearth ${info.state}` : "campfire", source: { type: info.sourceType, objectId: info.objectId, cell: { x, y, z: zOf(s.area) } } });
                     }
                 }
             }
@@ -594,14 +584,11 @@
             const x = W.hash32(seed, SALT.startCell, b, 1) % size, y = W.hash32(seed, SALT.startCell, b, 2) % size;
             const area = viewArea();
             const nkey = keyOf(area, x, y);
-            if (!f.burning[nkey] && !catches.has(nkey)) {
-                catches.set(nkey, { area, x, y, cause: "accident", sourceObjectId: "accident", sourceCell: { x, y, z: zOf(area) } });
-            }
+            if (!f.burning[nkey] && !catches.has(nkey)) catches.set(nkey, { area, x, y, cause: "accident" });
         }
         for (const o of outs) {
             if (o.gone) {
-                delete f.burning[o.key];
-                indexRemove(o.key);
+                dropBurning(f, o.key);
                 stopDouseJobsFor(o.key);
                 emit("fire:extinguished", copyArea(o.p.area), o.p.x, o.p.y, "gone", null, null);
             } else burnOut(o.key, o.p, o.rule, o.type);
@@ -698,15 +685,21 @@
         }
         emit("fire:unitBurned", u, dmg, died);
         if (died) {
-            const area = levelArea(u);
-            const f = fireState();
+            // The casualty carries the provenance of the fire it stood in (DEUS-TSK-FABLE-16): the forensic record
+            // names the fire, where it started and how many spread steps brought it here, before Combat's death path
+            // (whose own recordDeath call is the second one and does nothing).
+            const area = levelArea(u), f = fireState();
             const rec = f && f.burning ? f.burning[keyOf(area, u.x, u.y)] : null;
-            if (rec && rec.provenance) {
-                d.fireProvenance = Object.assign({}, rec.provenance);
+            const prov = rec && rec.provenance ? provenanceCopy(rec.provenance) : null;
+            if (prov) {
+                d.fireProvenance = prov;
+                const fire = f.fires[prov.fireId];
+                if (fire) fire.casualties.push({ unitId: u.id, name: u.name || null, beat: b, cell: { x: u.x, y: u.y, z: zOf(area) }, spreadSteps: prov.spreadSteps | 0 });
             }
-            const Forensics = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+            d.deathCause = "fire";
+            const Forensics = window.UF && UF.DeathForensics;
             if (Forensics && typeof Forensics.recordDeath === "function") {
-                try { Forensics.recordDeath(u, "fire", null); } catch (_) {}
+                try { Forensics.recordDeath(u, "fire", null); } catch (e) { errors.push(String(e && e.stack ? e.stack.split("\n").slice(0, 2).join(" | ") : e)); }
             }
             if (C && typeof C.onUnitDeath === "function") C.onUnitDeath(u, null);
             else W.removeUnit(u.id);
@@ -1269,11 +1262,11 @@
         isBurning: burningIn,
         /** For path planners: true when a unit must not enter the cell (it burns). */
         blocksCell: burningIn,
-        /** Every burning cell: [{ key, area, x, y, since, fuel, obj }]. */
+        /** Every burning cell: [{ key, area, x, y, z, since, fuel, obj, fireId }]. */
         burningCells() {
             const f = fireState();
             if (!f) return [];
-            return Object.keys(f.burning).flatMap(key => { const p = parseKey(key), r = f.burning[key]; return p ? [{ key, area: copyArea(p.area), x: p.x, y: p.y, z: p.z, since: r.since, fuel: r.fuel, obj: r.obj }] : []; });
+            return Object.keys(f.burning).flatMap(key => { const p = parseKey(key), r = f.burning[key]; return p ? [{ key, area: copyArea(p.area), x: p.x, y: p.y, z: p.z, since: r.since, fuel: r.fuel, obj: r.obj, fireId: r.fireId || null }] : []; });
         },
         count: () => index().total,
         /** Run n beats now (tests, tools); the live beat keeps running from the map update. */
@@ -1281,11 +1274,64 @@
             for (let i = 0; i < Math.max(0, n | 0); i++) safeBeat();
             return fireState() ? fireState().beat : 0;
         },
+        // Provenance and containment (DEUS-TSK-FABLE-16)
+        /**
+         * The provenance of the fire on a burning cell, or null: { fireId, startedAt (beat), startedOn { tick, day, time },
+         * sourceType ("hearth" | "open_fire" | "accident" | "direct" | "legacy"), sourceObjectId, sourceCell { x, y, z },
+         * firstFuelIgnited, spreadParents [cell keys, oldest first, the last PARENTS_KEPT], spreadSteps, cause }. A copy.
+         */
         provenanceAt(area, x, y) {
             const f = fireState();
-            if (!f || !f.burning || !area) return null;
+            if (!f || !acceptsArea(area)) return null;
             const rec = f.burning[keyOf(area, x, y)];
-            return rec && rec.provenance ? Object.assign({}, rec.provenance) : null;
+            return rec && rec.provenance ? provenanceCopy(rec.provenance) : null;
+        },
+        /** The summary of one fire by id (burning or finished, the last FIRE_HISTORY finished ones are kept), or null. */
+        fire(fireId) {
+            const f = fireState();
+            const r = f && f.fires ? f.fires[fireId] : null;
+            return r ? JSON.parse(JSON.stringify(r)) : null;
+        },
+        /** Every fire summary: [{ fireId, startedAt, startedOn, sourceType, sourceObjectId, sourceCell, firstFuelIgnited, cause, area, cells, burning, out, casualties }]. */
+        fires() {
+            const f = fireState();
+            return f && f.fires ? Object.keys(f.fires).map(id => JSON.parse(JSON.stringify(f.fires[id]))) : [];
+        },
+        /** One sentence for a casualty: "Burned to death by fire fire-3 originating from hearth (campfire) at (12,8,0) via 2 spread steps". */
+        describeProvenance(prov) {
+            if (!prov) return "Burned to death by a fire of unknown provenance";
+            const c = prov.sourceCell || {};
+            return `Burned to death by fire ${prov.fireId} originating from ${prov.sourceType}${prov.sourceObjectId ? ` (${prov.sourceObjectId})` : ""} at (${c.x}, ${c.y}, ${c.z | 0}) via ${prov.spreadSteps | 0} spread steps`;
+        },
+        isHearthType,
+        /** How the fire source on a cell is held, or null: { contained, state, escapeChance, sourceType, objectId, by }. */
+        sourceInfoAt: (area, x, y) => sourceInfoAt(area, x, y),
+        /**
+         * Mark a source cell contained (a campfire built as a shelter's hearth) or not. `by` names who set it (a
+         * project id, "player"). Saved in state.fire.sources; the object may be rebuilt, the record stays with the cell.
+         */
+        setContained(area, x, y, contained, by) {
+            const f = fireState();
+            if (!f || !acceptsArea(area) || !inBounds(x, y)) return false;
+            const key = keyOf(area, x, y);
+            const rec = f.sources[key] || { contained: false, state: "normal", by: null };
+            rec.contained = !!contained;
+            if (by !== undefined) rec.by = by;
+            if (!rec.contained && rec.state === "normal") delete f.sources[key]; else f.sources[key] = rec;
+            emit("fire:sourceChanged", copyArea(area), x, y, Object.assign({}, rec));
+            return true;
+        },
+        /** Set a source cell's state: "normal", "damaged", "overturned" or "uncontrolled" (a contained hearth escapes only when not normal). */
+        setSourceState(area, x, y, state, by) {
+            const f = fireState();
+            if (!f || !acceptsArea(area) || !inBounds(x, y) || !SOURCE_STATES.includes(state)) return false;
+            const key = keyOf(area, x, y);
+            const rec = f.sources[key] || { contained: false, state: "normal", by: null };
+            rec.state = state;
+            if (by !== undefined) rec.by = by;
+            if (!rec.contained && rec.state === "normal") delete f.sources[key]; else f.sources[key] = rec;
+            emit("fire:sourceChanged", copyArea(area), x, y, Object.assign({}, rec));
+            return true;
         },
         douse,
         douseJobs,

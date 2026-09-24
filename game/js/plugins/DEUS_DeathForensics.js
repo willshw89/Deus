@@ -327,10 +327,15 @@
             deathSource: sourceName,
             primaryCause: classification.primaryCause,
             contributingCauses: classification.contributingCauses,
-            fireProvenance: d.fireProvenance || (function() {
+            // The fire that killed a burn casualty (DEUS-TSK-FABLE-16): what UF_Fire attached when the unit died in a
+            // burning cell, else the provenance of the fire on the cell the unit died on, else null. Only a death by
+            // fire (the raw cause, or the classifier's burning flag) carries one.
+            fireProvenance: (function() {
+                if (!(rawCause === "fire" || rawCause === "burned" || classification.primaryCause === "fire" || classification.burning)) return null;
+                if (d.fireProvenance && typeof d.fireProvenance === "object") return d.fireProvenance;
                 const Fire = (typeof window !== "undefined" && window.UF && window.UF.Fire) || (typeof global !== "undefined" && global.UF && global.UF.Fire);
                 if (Fire && typeof Fire.provenanceAt === "function" && victim.area) {
-                    return Fire.provenanceAt(victim.area, victim.x, victim.y);
+                    try { return Fire.provenanceAt({ x: victim.area.x, y: victim.area.y, z: zOf(victim) }, victim.x, victim.y); } catch (_) { return null; }
                 }
                 return null;
             })(),
@@ -375,7 +380,12 @@
         // Console diagnostic output for F8 observability
         if (record.fireProvenance) {
             const fp = record.fireProvenance;
-            console.warn(`[DEATH FORENSICS] ${record.name} died of fire on Day ${record.gameDay} at ${record.gameTime} at (${record.worldPosition.x},${record.worldPosition.y}). Fire Provenance: ID=${fp.fireId}, started at ${fp.startedAt ? fp.startedAt.time : "?"} (day ${fp.startedAt ? fp.startedAt.day : "?"}), source=${fp.sourceType} (${fp.sourceObjectId || "none"}) at (${fp.sourceCell ? `${fp.sourceCell.x},${fp.sourceCell.y}` : "?"}), initial fuel=${fp.firstFuelIgnited}, parent chain=[${(fp.spreadParents || []).join("->")}].`);
+            const c = fp.sourceCell || {};
+            const on = fp.startedOn && typeof fp.startedOn === "object" ? ` on day ${fp.startedOn.day} at ${fp.startedOn.time}` : "";
+            // The structured sentence the packet asks for, in the ring buffer and on the console.
+            record.fireDeathText = `Burned to death by fire ${fp.fireId} originating from ${fp.sourceType}${fp.sourceObjectId ? ` (${fp.sourceObjectId})` : ""} at (${c.x}, ${c.y}, ${c.z | 0}) via ${Number.isFinite(fp.spreadSteps) ? fp.spreadSteps : (fp.spreadParents || []).length} spread steps`;
+            recordEvent(victim, { type: "burned to death", text: record.fireDeathText, detail: fp.fireId });
+            console.warn(`[DEATH FORENSICS] ${record.name} died on Day ${record.gameDay} at ${record.gameTime} at (${record.worldPosition.x},${record.worldPosition.y},z=${record.worldPosition.z}). ${record.fireDeathText}; the fire started at beat ${fp.startedAt}${on}, first fuel ${fp.firstFuelIgnited}, spread chain [${(fp.spreadParents || []).join(" -> ") || "none"}].`);
         } else {
             console.warn(`[DEATH FORENSICS] ${record.name} died on Day ${record.gameDay} at ${record.gameTime} at (${record.worldPosition.x},${record.worldPosition.y},z=${record.worldPosition.z}). Cause: ${record.primaryCause} (source: ${record.deathSource}). Contributing: [${record.contributingCauses.join(", ")}]. HP: ${record.hp}/${record.maxHp}, Exh: ${record.exhaustion}, Food: ${record.foodToday}/1.0, Water: ${record.waterToday}/1.0. Last safe pos: (${safePos.x},${safePos.y}).`);
         }

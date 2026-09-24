@@ -517,7 +517,8 @@
             tilesetNames: [
                 names.A1 || "Outside_A1",
                 names.A2 || GEN_A2,
-                "", "",
+                "",
+                names.A4 || "UF_GenLevels_A4",
                 names.A5 || "",
                 names.B || "Outside_B",
                 names.C || "Outside_C",

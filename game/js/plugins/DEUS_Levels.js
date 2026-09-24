@@ -1846,7 +1846,7 @@
         update() {
             super.update();
             const map = window.$dataMap, W = World(), view = W && W.viewLevel();
-            if (!this.parent || !map || !view || map.tilesetId !== TILESET_ID) {
+            if (!this.parent || !map || !view || (map.tilesetId !== TILESET_ID && map.tilesetId !== 91)) {
                 for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
                 this._active.clear(); this._seen = ""; return;
             }
