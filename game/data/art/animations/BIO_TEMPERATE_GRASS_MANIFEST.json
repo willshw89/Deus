@@ -1,0 +1,41 @@
+{
+  "biome": "Temperate_Z0",
+  "batch": "Batch1_Grass",
+  "engineTarget": "RPG Maker MZ",
+  "framesPerLoop": 3,
+  "animatedFeatures": [
+    {
+      "slot": "B",
+      "col": 1,
+      "row": 0,
+      "name": "Tuft_SlenderBlades",
+      "frames": [
+        "Outside_B.png",
+        "Outside_B_F02.png",
+        "Outside_B_F03.png"
+      ]
+    },
+    {
+      "slot": "B",
+      "col": 2,
+      "row": 0,
+      "name": "Tuft_CloverCluster",
+      "frames": [
+        "Outside_B.png",
+        "Outside_B_F02.png",
+        "Outside_B_F03.png"
+      ]
+    },
+    {
+      "slot": "B",
+      "col": 3,
+      "row": 0,
+      "name": "Tuft_WildFieldGrass",
+      "frames": [
+        "Outside_B.png",
+        "Outside_B_F02.png",
+        "Outside_B_F03.png"
+      ]
+    }
+  ]
+}

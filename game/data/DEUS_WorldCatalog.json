@@ -6,7 +6,7 @@
     "surface": {
       "base": 2,
       "A1": "Outside_A1",
-      "A2": "UF_GenGround_A2",
+      "A2": "Outside_A2",
       "B": "Outside_B",
       "C": "Outside_C"
     }

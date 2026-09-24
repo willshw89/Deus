@@ -8,10 +8,28 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** In progress on `WORLDART-BIOMES` Pipeline Reset — Temperate Core Golden Scene Review.
+- **Gemini (2026-09-24):** In progress on `WORLDART-BIOMES` Batch 1 Grass (Awaiting Owner Review).
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
-## DEUS-TSK-GEMINI-19 — World Art Pipeline Reset & Temperate Core Golden Scene Proposals (2026-09-24)
+## DEUS-TSK-GEMINI-20 — Batch 1 Grass Review & Live In-Engine Proof (2026-09-24)
+- **Status**: `AWAITING OWNER REVIEW`
+- **Scope**:
+  - Implemented the first small-batch delivery under the World Art Small-Batch Reset: **Batch 1 Grass**.
+  - Addressed the fundamental question: *"Can an empty temperate field look beautiful?"*
+  - Extracted 4 harmonious grass materials directly from authentic Google Nano Banana Pro output (`temp_grass_batch1_source.png`):
+    - Block 0: Base Emerald Turf (`#71864D`, `#8A9A61`)
+    - Block 1: Swale Meadow Turf (`#5D7139`, `#71864D`)
+    - Block 2: Sunlit Meadow Rise (`#8A9A61`, `#9EAE7D`)
+    - Block 3: Clover Meadow Turf (`#71864D`, `#5D7139`, `#CAD7B6`)
+  - Enforced the 7-tone Temperate Verdant Material Ramp strictly drawn from `art/palette/uf.hex`.
+  - Built `Outside_A2.png` (768×576 px) with 4 seamless autotile blocks and zero macro-gradient corners, eliminating repeating tile grid notches.
+  - Built `Outside_B.png` with 3 natural grass tuft variations (Slender Blades, Clover, Wild Grass) across 3 animation frames (`Outside_B_F02.png`, `Outside_B_F03.png`).
+  - Switched catalog runtime tileset mapping (`game/data/DEUS_WorldCatalog.json` and `UF_WorldCatalog.json`) to load `Outside_A2` instead of legacy 16px procedural dither code (`UF_GenGround_A2`).
+  - Created automated live playtest harness `tools/test_golden_art_review_live.js` spawning 6 canonical ~42 px Human colonists in serious chibi style at locked 1.00x camera.
+  - Live screenshot captured and verified: `art/review/live_temperate_grass_batch1_1x.png`. The 48px tile grid is completely invisible, the ground is calm and readable, and the ~42 px colonists sit grounded on the turf.
+- **Checks observed**:
+  - `node tools/art_check.js game/img/tilesets/Outside_A2.png game/img/tilesets/Outside_B.png`: PASS (4/4 checks pass, 0 errors, 4 and 7 colors).
+  - `node tools/run_tests.js golden_art_review_grass`: 1 passed, 0 failed (`RESULT: 1 passed, 0 failed (exit 0)`).
 - **Status**: `AWAITING OWNER REVIEW`
 - **Scope**:
   - Received owner NAY on Phase D mechanical cross-biome proof. Primary critique: visual pipeline optimized for passing mechanical RMMZ QC rather than visual excellence (visible 48px grid chunks, high-frequency ground noise, 32-color quantization starving material ramps, abrupt water border, flat topography).
