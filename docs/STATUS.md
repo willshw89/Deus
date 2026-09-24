@@ -8,8 +8,28 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** Completed `DW.01.01 — Freeze World-Art Visual Charter`. STOPPED AT GATE awaiting next WBS authorization.
+- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.02 — Freeze native-resolution / pixel-density standard`. Awaiting owner review.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DW.01.02 — Freeze Native-Resolution / Pixel-Density Standard (2026-09-24)
+- **Status**: `COMPLETED — PASS (AWAITING OWNER REVIEW)`
+- **Scope**:
+  - Enforced the single cardinal rule: `1 SOURCE ART PIXEL = 1 RENDERED SCREEN PIXEL` at locked 1.00x gameplay camera.
+  - Formally decoupled three distinct concepts:
+    1. World Grid Size: 48×48 px per RMMZ tile (logical/spatial navigation & collisions).
+    2. Visual Object Footprint: Multi-tile entities (e.g. ~42 px Human, ~84 px Oak, ~44 px Boulder) are NOT squeezed or forced to 1 tile.
+    3. Pixel Density: 1:1 native resolution across all world and character assets.
+  - Strictly prohibited 16px art enlarged 3×, mandatory 3×3 blocks, downsample/re-upscaling workflows, and bilinear filtering for original DEUS assets.
+  - Segregated legacy Ultima VII (`U7_`) stand-in pipeline via `--legacy-3x` and sidecar `pixelDensityMode: "LEGACY_3X"`.
+  - Created canonical standard document: `docs/art/DEUS_NATIVE_RESOLUTION_STANDARD.md` (Doc ID: `DEUS-ART-NATIVE-01`).
+  - Updated `tools/art_check.js`:
+    - Full native 1:1 validation, anti-fraud detection (rejects assets where 100% of 3×3 blocks are uniform solid colors), multi-tile metadata support (`intendedNativeWidth`/`Height`), and VFX smooth alpha exceptions.
+    - Updated selftest with 75/75 passing expectations (`node tools/art_check.js --selftest`).
+  - Created automated test harness `tools/test_native_resolution_standard.js`:
+    - All 7 fixtures verified: Fixture A (native 48×48 tile), Fixture B (84×84 multi-tile tree), Fixture C (legacy U7 stand-in), Fixture D (disguised 3× block art rejected), Fixture E (wrong-size rejected), Fixture F (smoothed alpha rejected), Fixture G (native 1px variations pass).
+    - Total: 23/23 assertions passed.
+  - Cleaned stale 4× scale references in `docs/ART_STANDARD.md` and `docs/RMMZ_ASSET_SPEC.md`.
+  - Stopped at gate per AGENTS.md Rule 6.
 
 ## DW.01.01 — Freeze World-Art Visual Charter (2026-09-24)
 - **Status**: `COMPLETED — FROZEN (APPROVED BY OWNER)`

@@ -188,7 +188,10 @@ function fmt(v) { return Number.isFinite(v) ? (Math.round(v * 10) / 10).toString
 
 // ---------------------------------------------------------------- checks
 
-function checkAlpha(img) {
+function checkAlpha(img, sidecar) {
+    if (sidecar && (sidecar.alphaMode === 'PER_PIXEL_SMOOTH' || sidecar.alphaMode === 'VFX')) {
+        return ok(`vfx/smooth alpha allowed by sidecar alphaMode: ${sidecar.alphaMode}`);
+    }
     let bad = 0, opaque = 0, transparent = 0, first = null;
     const d = img.data;
     for (let i = 3, p = 0; i < d.length; i += 4, p++) {
@@ -202,15 +205,18 @@ function checkAlpha(img) {
     return fail(`${bad} of ${total} px have alpha between 1 and 254 (first at (${first.x},${first.y}) alpha ${first.a})`);
 }
 
-function isLegacy3xFile(file, opts) {
+function isLegacy3xFile(file, opts, sidecar) {
     if (opts && (opts.legacy3x || opts['legacy-3x'])) return true;
+    if (sidecar && sidecar.pixelDensityMode === 'LEGACY_3X') return true;
+    if (sidecar && sidecar.pixelDensityMode === 'NATIVE_1_TO_1') return false;
+    if (opts && opts.native) return false;
     if (!file) return false;
     const base = path.basename(file);
     return /^!?\$?U7_/i.test(base);
 }
 
-function checkGrid(img, cls, opts, file) {
-    const isLegacy = isLegacy3xFile(file, opts);
+function checkGrid(img, cls, opts, file, sidecar) {
+    const isLegacy = isLegacy3xFile(file, opts, sidecar);
     const w = img.width, h = img.height;
 
     if (cls.type === 'icon') {
@@ -249,11 +255,50 @@ function checkGrid(img, cls, opts, file) {
         return fail(`legacy 3x export broken: pixel (${first.x},${first.y}) is ${hex(...first.p)} but block top-left (${first.x0},${first.y0}) is ${hex(...first.ref)}; ${broken} of ${blocks} blocks broken`);
     }
 
-    // Default for original DEUS art: native 48px resolution
-    if (w % TILE !== 0 || h % TILE !== 0) {
+    // Default for original DEUS art: native resolution mode
+    const hasMetaDims = sidecar && Number.isInteger(sidecar.intendedNativeWidth) && Number.isInteger(sidecar.intendedNativeHeight);
+    if (!hasMetaDims && (w % TILE !== 0 || h % TILE !== 0)) {
         return fail(`${w}x${h} does not align to native 48px tile grid (must be a multiple of ${TILE} both ways)`);
     }
 
+    // Anti-fraud check: Detect 100% 3x3 block-scaled art submitted as native DEUS art.
+    // In an enlarged 16px sprite, 100% of non-empty 3x3 blocks are solid single colors.
+    // In native 1:1 pixel art, there is intentional 1-pixel detail (outlines, highlights, texture).
+    if (w >= SCALE && h >= SCALE) {
+        const bw = Math.floor(w / SCALE), bh = Math.floor(h / SCALE);
+        let solidBlocks = 0, nonEmptyBlocks = 0;
+        for (let by = 0; by < bh; by++) {
+            for (let bx = 0; bx < bw; bx++) {
+                const x0 = bx * SCALE, y0 = by * SCALE;
+                let hasOpaque = false;
+                let allSame = true;
+                const ref = pixelAt(img, x0, y0);
+                if (ref[3] !== 0) hasOpaque = true;
+                for (let dy = 0; dy < SCALE && allSame; dy++) {
+                    for (let dx = 0; dx < SCALE; dx++) {
+                        const p = pixelAt(img, x0 + dx, y0 + dy);
+                        if (p[3] !== 0) hasOpaque = true;
+                        if (p[3] === 0 && ref[3] === 0) continue;
+                        if (p[0] !== ref[0] || p[1] !== ref[1] || p[2] !== ref[2] || p[3] !== ref[3]) {
+                            allSame = false;
+                            break;
+                        }
+                    }
+                }
+                if (hasOpaque) {
+                    nonEmptyBlocks++;
+                    if (allSame) solidBlocks++;
+                }
+            }
+        }
+        if (nonEmptyBlocks >= 8 && solidBlocks === nonEmptyBlocks) {
+            return fail(`prohibited legacy 3x block art: 100% of 3x3 blocks (${solidBlocks}/${nonEmptyBlocks}) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x`);
+        }
+    }
+
+    if (hasMetaDims) {
+        return ok(`native resolution: 1:1 pixel art matching metadata dimensions ${sidecar.intendedNativeWidth}x${sidecar.intendedNativeHeight}`);
+    }
     return ok(`native 48px resolution: 1:1 pixel art on ${TILE}x${TILE} grid (${w / TILE}x${h / TILE} tiles)`);
 }
 
@@ -272,9 +317,16 @@ function checkPalette(img) {
     return fail(`${n} opaque colours: over ${PALETTE_FAIL} (limit ${PALETTE_LIMIT})`, r);
 }
 
-function checkSize(img, cls, grid) {
+function checkSize(img, cls, grid, sidecar) {
     const w = img.width, h = img.height;
     const dims = `${w}x${h}`;
+    if (sidecar && Number.isInteger(sidecar.intendedNativeWidth) && Number.isInteger(sidecar.intendedNativeHeight)) {
+        if (w === sidecar.intendedNativeWidth && h === sidecar.intendedNativeHeight) {
+            return ok(`${dims}: matches metadata intended native size ${sidecar.intendedNativeWidth}x${sidecar.intendedNativeHeight}`);
+        } else {
+            return fail(`${dims}: does not match metadata intended native size ${sidecar.intendedNativeWidth}x${sidecar.intendedNativeHeight}`);
+        }
+    }
     const mult48 = w % TILE === 0 && h % TILE === 0;
     if (cls.type === 'tileset') {
         const slotReq = cls.slot ? TILESET_SLOT_DIMS[cls.slot] : null;
@@ -379,6 +431,21 @@ function checkSidecar(file, img, cls, sidecar, sidecarError, required, grid) {
                 if (i < 0 || (cols && i >= cols)) problems.push(`animations.${name} index ${i} is outside the ${cols} columns`);
             }
         }
+    }
+    if (sidecar.pixelDensityMode && !['NATIVE_1_TO_1', 'LEGACY_3X'].includes(sidecar.pixelDensityMode)) {
+        problems.push(`invalid pixelDensityMode: ${sidecar.pixelDensityMode} (must be NATIVE_1_TO_1 or LEGACY_3X)`);
+    }
+    if (sidecar.alphaMode && !['BINARY_0_255', 'PER_PIXEL_SMOOTH', 'VFX'].includes(sidecar.alphaMode)) {
+        problems.push(`invalid alphaMode: ${sidecar.alphaMode} (must be BINARY_0_255, PER_PIXEL_SMOOTH, or VFX)`);
+    }
+    if (sidecar.resamplingAllowed !== undefined && typeof sidecar.resamplingAllowed !== 'boolean') {
+        problems.push(`resamplingAllowed must be a boolean`);
+    }
+    if (sidecar.intendedNativeWidth !== undefined && (!Number.isInteger(sidecar.intendedNativeWidth) || sidecar.intendedNativeWidth <= 0)) {
+        problems.push(`intendedNativeWidth must be a positive integer`);
+    }
+    if (sidecar.intendedNativeHeight !== undefined && (!Number.isInteger(sidecar.intendedNativeHeight) || sidecar.intendedNativeHeight <= 0)) {
+        problems.push(`intendedNativeHeight must be a positive integer`);
     }
     const optional = ['layer', 'species', 'stage'].map((k) => `${k} ${k in sidecar ? 'present' : 'absent'}`).join(', ');
     if (problems.length) return fail(`${path.basename(sc)}: ${problems.join('; ')}`);
@@ -494,11 +561,11 @@ function checkFile(file, opts) {
     report.frame = gridIsWhole(grid) ? { width: grid.fw, height: grid.fh, columns: grid.cols, rows: grid.rows, source: grid.source } : null;
     report.sidecar = sidecar ? path.basename(sc) : null;
 
-    add('alpha', checkAlpha(img));
-    add('grid', checkGrid(img, cls, opts, file));
+    add('alpha', checkAlpha(img, sidecar));
+    add('grid', checkGrid(img, cls, opts, file, sidecar));
     const pal = add('palette', checkPalette(img));
     report.colors = pal.colors;
-    add('size', checkSize(img, cls, grid));
+    add('size', checkSize(img, cls, grid, sidecar));
     add('sidecar', checkSidecar(file, img, cls, sidecar, sidecarError, opts.sidecar, grid));
     const lean = add('lean', checkLean(img, cls, grid, sidecar));
     if ('leanPx' in lean) report.leanPx = lean.leanPx;
@@ -585,12 +652,27 @@ function selftest() {
         const top = o.headTop === undefined ? 3 : o.headTop, sx = o.shiftX || 0, sy = o.shiftY || 0;
         for (let y = top; y <= top + 2; y++) for (let x = 6; x <= 9; x++) block(buf, w, ox + (x + sx) * 3, oy + (y + sy) * 3, HEAD);
         for (let y = top + 3; y <= 15; y++) for (let x = 5; x <= 10; x++) block(buf, w, ox + (x + sx) * 3, oy + (y + sy) * 3, (x === 5 || x === 10) ? LINE : BODY);
+        if (!o.pureBlocks) {
+            // Add native 1-pixel detail (eyes) to authenticate authentic 1:1 pixel art
+            set(buf, w, ox + (7 + sx) * 3 + 1, oy + (top + 1 + sy) * 3 + 1, 0x10, 0x10, 0x10);
+            set(buf, w, ox + (8 + sx) * 3 + 1, oy + (top + 1 + sy) * 3 + 1, 0x10, 0x10, 0x10);
+        }
     };
     const sheet = (name, o) => {
         o = o || {};
-        const cols = o.cols || 3, rows = o.rows || 4, w = cols * TILE, h = rows * TILE;
+        if (o.pureBlocks === undefined && name.includes('U7_')) o.pureBlocks = true;
+        const cols = o.cols || 3, rows = o.rows || 4;
+        const w = o.width || (cols * TILE), h = o.height || (rows * TILE);
         const buf = Buffer.alloc(w * h * 4, 0);
-        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) figure(buf, w, c * TILE, r * TILE, o);
+        if (o.draw) {
+            o.draw(buf, w, h);
+        } else {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (c * TILE < w && r * TILE < h) figure(buf, w, c * TILE, r * TILE, o);
+                }
+            }
+        }
         if (o.mutate) o.mutate(buf, w, h);
         const file = path.join(root, 'characters', name);
         writePNG(file, w, h, buf);
@@ -601,8 +683,12 @@ function selftest() {
     };
     const tiles = (folder, name, w, h) => {
         const buf = Buffer.alloc(w * h * 4, 0);
-        for (let y = 0; y + 3 <= h; y += 3) for (let x = 0; x + 3 <= w; x += 3) block(buf, w, x, y, ((x + y) / 3) % 2 ? [90, 150, 60] : [70, 120, 50]);
-        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const o = (y * w + x) * 4; if (buf[o + 3] === 0) set(buf, w, x, y, 70, 120, 50); }
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const c = ((x + y) % 2 === 0) ? [70, 120, 50] : [75, 125, 55];
+                set(buf, w, x, y, ...c);
+            }
+        }
         const file = path.join(root, folder, name);
         writePNG(file, w, h, buf);
         return file;
@@ -619,8 +705,34 @@ function selftest() {
     const cases = [
         { name: 'clean', file: sheet('$T_Clean.png', { sidecar: good }), expect: { alpha: 'PASS', grid: 'PASS', palette: 'PASS', size: 'PASS', sidecar: 'PASS', lean: 'PASS', margin: 'PASS' } },
         { name: 'alpha', file: sheet('$T_Alpha.png', { sidecar: good, mutate: (b, w) => set(b, w, 72, 30, ...BODY, 128) }), expect: { alpha: 'FAIL' } },
-        { name: 'legacy_grid', file: sheet('$U7_T_Grid.png', { sidecar: good, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'FAIL', alpha: 'PASS' } },
-        { name: 'native_detail', file: sheet('$T_NativeDetail.png', { sidecar: good, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'PASS', alpha: 'PASS' } },
+        { name: 'vfx_smooth', file: sheet('$T_Vfx.png', { sidecar: Object.assign({}, good, { alphaMode: 'VFX' }), mutate: (b, w) => set(b, w, 72, 30, ...BODY, 128) }), expect: { alpha: 'PASS' } },
+        { name: 'legacy_grid', file: sheet('$U7_T_Grid.png', { sidecar: good, pureBlocks: true, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'FAIL', alpha: 'PASS' } },
+        { name: 'disguised_3x', file: sheet('$T_Disguised3x.png', { sidecar: good, pureBlocks: true }), expect: { grid: 'FAIL' } },
+        { name: 'native_detail', file: sheet('$T_NativeDetail.png', { sidecar: good }), expect: { grid: 'PASS', alpha: 'PASS' } },
+        {
+            name: 'meta_tree_size',
+            file: sheet('!$T_Tree84.png', {
+                width: 84, height: 84,
+                draw: (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x + y) % 2 === 0) set(b, w, x, y, 40, 110, 40); },
+                sidecar: {
+                    id: 'TEST_tree84', frameWidth: 84, frameHeight: 84, anchor: [42, 83], footprint: [1, 1],
+                    facings: ['S'], animations: { stand: [0] }, intendedNativeWidth: 84, intendedNativeHeight: 84
+                }
+            }),
+            expect: { size: 'PASS', grid: 'PASS', sidecar: 'PASS' }
+        },
+        {
+            name: 'meta_tree_wrong_size',
+            file: sheet('!$T_TreeWrong.png', {
+                width: 84, height: 84,
+                draw: (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x + y) % 2 === 0) set(b, w, x, y, 40, 110, 40); },
+                sidecar: {
+                    id: 'TEST_treeWrong', frameWidth: 84, frameHeight: 84, anchor: [42, 83], footprint: [1, 1],
+                    facings: ['S'], animations: { stand: [0] }, intendedNativeWidth: 96, intendedNativeHeight: 96
+                }
+            }),
+            expect: { size: 'FAIL', sidecar: 'PASS' }
+        },
         { name: 'palette_warn', file: sheet('$T_Palette40.png', { sidecar: good, mutate: rainbow(37) }), expect: { palette: 'WARN' } },
         { name: 'palette_fail', file: sheet('$T_Palette70.png', { sidecar: good, mutate: rainbow(67) }), expect: { palette: 'FAIL' } },
         { name: 'palette_empty', file: sheet('$T_Empty.png', { sidecar: good, mutate: (b) => b.fill(0) }), expect: { palette: 'FAIL', lean: 'FAIL', margin: 'FAIL' } },

@@ -82,7 +82,7 @@ By eye: authentic FF5 16-bit chibi proportions; upright, no lean; fits 1 tile (o
 ## 7. How image models fail here, and the rule for each
 | Failure | Rule |
 |---|---|
-| Can't hit exact pixel sizes or sheet grids | Draw at 4× with even blocks; the cleaning step extracts and normalizes to 48×48 px cells. |
+| Can't hit exact pixel sizes or sheet grids | Author at native 1:1 pixel density (`1 source art pixel = 1 screen pixel` at locked 1.00x zoom). Never upscale 16px art by 3× or downsample from high-res painting; extract cells directly to 48×48 px (or declared multi-tile dimensions) with nearest-neighbor indexing. See `docs/art/DEUS_NATIVE_RESOLUTION_STANDARD.md`. |
 | Mixed pixel sizes and blur | Reject; enforce crisp pixel-art styling without blur or bilinear filtering. |
 | Drifts to 2.5D, isometric or painterly | Reject anything that isn't the flat 3/4 top-down RPG view. |
 | Wrong size against the grid square | Measure against §2: humanoids must fit 1 tile (38–48 px); large creatures 2 tiles (80–96 px). |

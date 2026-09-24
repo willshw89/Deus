@@ -11,7 +11,7 @@ Binding specification for standard RPG Maker MZ asset formats (VISION Rules V70,
 | **Grid Tile Size** | **48 × 48 px** | The fundamental screen pixel grid of RPG Maker MZ. |
 | **Art Definition** | **1 : 1 Native** | One art pixel = one screen pixel at zoom level 1 (48×48 per square). |
 | **Image Generator** | **Google Nano Banana Pro** | Mandatory generator model (`generate_image` / `gemini-3-pro-image`, Gemini 3 Pro Image model). No other model allowed. |
-| **Canvas Generation** | **4× Scale (192 × 192 px)** | Google Nano Banana Pro generates at 4× (192×192 per cell) for clean pixel clustering, then tools reduce by 4 to 48×48 native. |
+| **Native Authoring** | **1 : 1 Native Resolution** | Generated and processed at native 1:1 pixel density (`1 source art pixel = 1 screen pixel` at locked 1.00x zoom). No 4×-to-1× downsampling, no 16px enlarged 3× block art. See `docs/art/DEUS_NATIVE_RESOLUTION_STANDARD.md`. |
 | **Animation Standard** | **Distinct Sprite Frames** | All animation happens via sprite frames; no after-effects or procedural warps allowed. |
 | **Palette** | `art/palette/uf.hex` | 256-color daylight palette. Snapped during reduction. |
 | **Background / Alpha** | `#FF00FF` Magenta | Raw generators use solid flat magenta `#FF00FF`. Final exports use true transparency (Alpha 0 or 255). |
