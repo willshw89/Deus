@@ -7,7 +7,8 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Astra (2026-09-24):** `DEUS-TSK-ASTRA-17` — HIST-11 Archaeological Lore & In-Game Genealogical Verification (Implementer & Self-Verifier). Claimed: `game/js/plugins/DEUS_History.js`, `game/js/plugins/DEUS_Sheet.js`, `game/js/plugins/DEUS_Look.js`, `tools/test_genealogy_and_archaeological_lore.js` (new), `docs/systems/UF_History.md`, this file.
+- **Fable (2026-09-24):** `DEUS-TSK-FABLE-13` — Autonomous Settlement Expansion, Multi-Dwelling Planning & Newcomer Integration. Claimed: `game/js/plugins/DEUS_Projects.js`, `game/js/plugins/DEUS_Colonists.js`, `tools/test_settlement_expansion_multi_dwelling.js` (new), `docs/systems/DEUS_Projects.md`, this file.
+- **Astra (2026-09-24):** On hold / consumed per user directive ("ASTRA USE IS CONSUMED, FABLE ONLY FOR THE TIME BEING"). `DEUS-TSK-ASTRA-17` paused.
 
 ## DEUS-TSK-GEMINI-08 — Liquid Depth V1 & Year 250 Population Materialization (2026-09-23)
 - **Status**: `COMPLETED — PASS`

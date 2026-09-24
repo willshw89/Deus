@@ -122,6 +122,20 @@
                 byId.shovel = shovel;
                 list.push(shovel);
             }
+            if (!byId.waterskin) {
+                const waterskin = {
+                    id: "waterskin",
+                    name: "Waterskin",
+                    image: "!$UF_Icon_143",
+                    tags: ["container", "water", "drink"],
+                    liquid: "water",
+                    stack: 4,
+                    weight: 1.0,
+                    capacity: 1.0
+                };
+                byId.waterskin = waterskin;
+                list.push(waterskin);
+            }
             typeCache = { source: rawList, list, byId };
         }
         return typeCache;
