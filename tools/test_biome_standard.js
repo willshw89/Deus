@@ -131,6 +131,13 @@ for (const id of expectedBiomes) {
     for (const z of expectedZLevels) {
         assert(typeof zHooks[z] === 'string' && zHooks[z].length > 0,
             `${id}: ${z} vertical hook defined (${zHooks[z].substring(0, 30)}...)`);
+        const hookText = zHooks[z].toLowerCase();
+        assert(!/boardwalk|settlement|dwarven|orchard|mine shaft|quarry|root cellar|dug earthworks/i.test(hookText),
+            `${id}: ${z} hook contains no constructed infrastructure (${hookText.substring(0, 25)}...)`);
+        assert(!/raptor|swamp bird|eagle/i.test(hookText),
+            `${id}: ${z} hook contains no wildlife references (${hookText.substring(0, 25)}...)`);
+        assert(!/canopy crowns|upper crowns/i.test(hookText),
+            `${id}: ${z} hook contains no tree canopy airspace leakage (${hookText.substring(0, 25)}...)`);
     }
 }
 

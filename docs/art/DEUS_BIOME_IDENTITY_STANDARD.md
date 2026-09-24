@@ -102,7 +102,7 @@ Future art generation must never produce biome assets by simply tinting, hue-shi
 - **Rock Outcrops:** Water-slicked river boulders, submerged stepping stones, moss-blanketed low rock slabs.
 - **Debris & Clutter:** Waterlogged driftwood, exposed gnarly root systems, rotting timber snags, peat chunks.
 - **Water-Edge Behavior:** Indistinct saturated shoreline: water grades into mud, peat, and floating reed beds; stagnant ponds and murky oxbow channels.
-- **Elevation Character:** Depressed basin, shallow swales, riverbanks, low mud shelves, raised wooden boardwalk footings.
+- **Elevation Character:** Depressed basin, shallow swales, riverbanks, low mud shelves, raised natural peat levees.
 - **Atmospheric Feel:** Humid, heavy, damp, low-hanging river mist, stagnant air.
 - **Signature Materials:** Saturated dark peat, upright cattail/reed beds, waterlogged driftwood snags, murky slow water, dark swamp silt.
 - **Shared Materials:** Freshwater, bog birch, river stones, wooden planks/docks, marsh ferns.
@@ -275,11 +275,11 @@ The five physical Z levels express biome identities with vertical consistency:
 
 | Level | Role | Temperate (`TEMP`) | Wetland (`WET`) | Arid (`ARID`) | Highland (`HIGH`) | Volcanic (`VOLC`) |
 |---|---|---|---|---|---|---|
-| **Z+2** | Highest / Exposed | High oak crown, sunny ridge crest | Willow overstory, high marsh mist | Mesa summit, raptor perch | Jagged granite peak, summit spire | Smoking caldera rim, basalt horn |
-| **Z+1** | Upland / Terrace | Terrace pasture, limestone shelf | Boardwalk, levee crest, hummock | Sandstone bench, canyon rim | Cliff shelf, switchback pass | Upper lava terrace, basalt ledge |
-| **Z0** | Canonical Surface | Rolling meadow, forest, streams | Marsh pools, reed shallows | Steppe flats, arroyo wash | Upland valley, torrent bank | Ash plain, basalt fissure, vents |
-| **Z-1** | Substrate / Roots | Loam subsoil, roots, root cellar | Waterlogged peat, anaerobic mud | Caliche hardpan, dry shale | Fractured bedrock, mine adit | Porous basalt crust, magma tube |
-| **Z-2** | Deep Bedrock | Limestone cavern, groundwater | Flooded sump, submerged cave | Deep sandstone aquifer, salt cave| Massive granite hall, deep chasm | Deep magma conduit, obsidian hall |
+| **Z+2** | Highest / Exposed | Exposed high ridge crest, shallow upland soil, sparse wind vegetation | Elevated wetland knoll crests, high humid air boundary, exposed margins | Mesa summit, exposed sandstone caprock, wind-scoured dry surface | Sheer jagged granite summits, mountain horn peaks, windswept crests | Smoking caldera rims, jagged basalt spires, fumarole crests |
+| **Z+1** | Upland / Terrace | Upper terrace meadows, elevated limestone ledges, rolling upland turf | Natural levee crest, raised peat hummock, elevated saturated ground | Upper sandstone terrace shelves, canyon rims, stepped rock ledges | Upper cliff shelves, alpine scree terraces, high rocky saddles | Upper cooling lava terraces, raised basalt ledges, obsidian outcrops |
+| **Z0** | Canonical Surface | Rolling verdant meadow, clear streams, woodland floor, loam flats | Marsh pools, reed shallows, peat meadows, slow river channels | Steppe flats, gravel plains, arroyo washes, sandstone benches | Upland valley floor, rocky plateaus, cascading torrent banks, boulder flats | Ash fields, active basalt fissures, geothermal pools, scorched bedrock |
+| **Z-1** | Substrate / Roots | Rich loam subsoil, taproot horizons, compact clay, alluvial gravel | Deep anaerobic black mud, waterlogged peat strata, submerged taproots | Hardpan caliche sub-layer, dry sedimentary shale, parched gravel | Fractured granite bedrock, natural fault fissures, coarse stone strata | Porous basalt crust, subterranean magma vents, heated rock tubes |
+| **Z-2** | Deep Bedrock | Solid limestone and granite bedrock, natural caverns, aquifers | Flooded subterranean caverns, silt-choked aquifers, drainage sumps | Deep sandstone aquifer caverns, dry mineral/salt chambers, hollows | Massive solid granite deep chambers, natural fissure chasms, faults | Deep magma-adjacent caverns, molten rock conduits, obsidian seams |
 
 ---
 
@@ -413,10 +413,10 @@ SIGNATURE MATERIALS: rich loam, broadleaf oak canopy, fieldstone masonry, clover
 SHARED MATERIALS: grey granite, clear freshwater, pine, birch, compact dirt, timber logs
 FORBIDDEN VISUAL CUES: snow, ice, frost, desert hardpan, alkali dust, peat swamp saturation everywhere, volcanic ash/basalt, glowing lava
 VERTICAL CONTINUITY HOOKS:
-  Z+2 (Highest/Exposed): Open high forest canopy crowns, wind-swept grassy knoll crests, ridge lookout perches
-  Z+1 (Upland/Terrace):   Upper terrace pastures, elevated limestone plateau ledges, cliff-top orchards
-  Z0  (Canonical Surface): Canonical surface: rolling verdant meadow, clear streams, forest floor, settlement paths
-  Z-1 (Substrate/Roots): Rich loam subsoil, root networks, alluvial gravel, root cellars, dug earthworks
+  Z+2 (Highest/Exposed): Exposed high ridge crest, shallow upland soil, sparse wind-exposed vegetation
+  Z+1 (Upland/Terrace):   Upper terrace meadows, elevated limestone plateau ledges, rolling upland turf
+  Z0  (Canonical Surface): Canonical surface: rolling verdant meadow, clear streams, woodland floor, natural loam flats
+  Z-1 (Substrate/Roots): Rich loam subsoil, taproot horizons, compact clay earth, alluvial gravel strata
   Z-2 (Bedrock/Caverns): Solid limestone and granite bedrock, subterranean natural caverns, groundwater aquifers
 NOTES: Canonical cradle of civilization and agriculture; baseline ecological balance across Project DEUS.
 ```

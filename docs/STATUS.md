@@ -8,21 +8,22 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.04 — Freeze Biome Identity & Material Differentiation Standard`. Awaiting owner review before proceeding to `DW.01.05`.
+- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.04 — Freeze Biome Identity & Material Differentiation Standard` with owner correction applied (pure physical terrain/substrate vertical hooks). Awaiting owner authorization to proceed to `DW.01.05`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DW.01.04 — Freeze Biome Identity & Material Differentiation Standard (2026-09-24)
-- **Status**: `COMPLETED — FROZEN (AWAITING OWNER REVIEW)`
+- **Status**: `COMPLETED — FROZEN / OWNER APPROVED`
 - **Scope**:
   - Formalized the canonical material, geological, and ecological identities of the five core DEUS biomes (`TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`) based on `art/reference/DEUS_BIOME_STUDIES_V1.*` into `docs/art/DEUS_BIOME_IDENTITY_STANDARD.md`.
   - Created machine-readable biome registry: `game/data/DEUS_BiomeRegistry.json` (and `docs/art/DEUS_BiomeRegistry.json`) covering substrate, geology, moisture, drainage, ecological densities, botanical forms, vocabularies, signature/shared materials, forbidden cues, and 5-tier vertical Z hooks (`Z+2` to `Z-2`).
+  - Applied owner review correction: Purified all 25 vertical Z hooks to describe purely natural physical terrain, substrate, and geology at each elevation slice, eliminating constructed infrastructure, wildlife, and tree canopy airspace leakage.
   - Enforced cardinal ecological invariants:
     1. Zero snow/ice/glacial biomes across the entire game; Highland explicitly forbids snow/ice/frost and focuses on fractured granite mass.
     2. Volcanic terrain restricts molten lava to a localized accent hazard; forbids full-screen glowing red wallpaper.
     3. Biome identity is defined as physical systems (geology, soil, flora, moisture), strictly rejecting simple color-swap/palette-recolor production.
   - Defined complete horizontal transition specifications for all 10 biome pairs across 6 physical bridge axes (`grassDensity`, `soilTransition`, `geologyTransition`, `moistureTransition`, `vegetationForm`, `topography`).
   - Implemented prompt compiler tool `tools/biome_resolver.js` (`--list`, `<BIOME_ID>`, `--pair <A> <B>`, `--all-pairs`) allowing future Nano Banana Pro prompts to deterministically pull authentic biome conditioning blocks.
-  - Added automated test harness `tools/test_biome_standard.js` (234/234 checks passing).
+  - Added automated test harness `tools/test_biome_standard.js` (309/309 checks passing).
   - Maintained separation of concerns: zero premature raw RGB/hex palette ramps frozen in this standard (reserved for `DW.01.05`).
   - Stopped at gate per AGENTS.md Rule 6.
 

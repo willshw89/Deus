@@ -101,10 +101,10 @@
         "glowing lava"
       ],
       "verticalHooks": {
-        "Z+2": "Open high forest canopy crowns, wind-swept grassy knoll crests, ridge lookout perches",
-        "Z+1": "Upper terrace pastures, elevated limestone plateau ledges, cliff-top orchards",
-        "Z0": "Canonical surface: rolling verdant meadow, clear streams, forest floor, settlement paths",
-        "Z-1": "Rich loam subsoil, root networks, alluvial gravel, root cellars, dug earthworks",
+        "Z+2": "Exposed high ridge crest, shallow upland soil, sparse wind-exposed vegetation",
+        "Z+1": "Upper terrace meadows, elevated limestone plateau ledges, rolling upland turf",
+        "Z0": "Canonical surface: rolling verdant meadow, clear streams, woodland floor, natural loam flats",
+        "Z-1": "Rich loam subsoil, taproot horizons, compact clay earth, alluvial gravel strata",
         "Z-2": "Solid limestone and granite bedrock, subterranean natural caverns, groundwater aquifers"
       },
       "notes": "Canonical cradle of civilization and agriculture; baseline ecological balance across Project DEUS."
@@ -182,8 +182,8 @@
         "volcanic lava"
       ],
       "verticalHooks": {
-        "Z+2": "Weeping willow upper crowns, swamp bird canopy roosts, high marsh mist layer",
-        "Z+1": "Raised wooden boardwalk platforms, natural levee ridges, hummock crests",
+        "Z+2": "Elevated wetland knoll crests, high humid air boundary, exposed ridge margins",
+        "Z+1": "Natural levee crest, raised peat hummock, elevated saturated ground",
         "Z0": "Canonical surface: marsh pools, reed shallows, peat meadows, slow river channels",
         "Z-1": "Deep anaerobic black mud, waterlogged peat strata, submerged taproots",
         "Z-2": "Flooded subterranean caverns, silt-choked aquifers, underground drainage sumps"
@@ -262,8 +262,8 @@
         "volcanic basalt"
       ],
       "verticalHooks": {
-        "Z+2": "Wind-scoured mesa summits, open baking sky, raptor cliff perches",
-        "Z+1": "Upper sandstone terrace shelves, canyon rims, cliff dwellings",
+        "Z+2": "Mesa summit, exposed sandstone caprock, wind-scoured dry surface",
+        "Z+1": "Upper sandstone terrace shelves, horizontal canyon rims, stepped rock ledges",
         "Z0": "Canonical surface: dry steppe flats, gravel plains, arroyo washes, sandstone benches",
         "Z-1": "Hardpan caliche sub-layer, dry sedimentary shale, parched subterranean gravel",
         "Z-2": "Deep sandstone aquifer caverns, dry mineral/salt chambers, underground hollows"
@@ -342,11 +342,11 @@
         "volcanic lava"
       ],
       "verticalHooks": {
-        "Z+2": "Sheer jagged granite summits, mountain spire peaks, windswept ridge perches",
-        "Z+1": "Upper cliff shelves, alpine scree terraces, switchback mountain passes",
-        "Z0": "Canonical surface: upland valley floor, rocky plateaus, cascading torrent banks, high pass settlements",
-        "Z-1": "Fractured granite bedrock, mountain mine shafts, quarry benches",
-        "Z-2": "Massive solid granite deep chambers, subterranean dwarven halls, natural fissure chasms"
+        "Z+2": "Sheer jagged granite summits, mountain horn peaks, windswept bedrock crests",
+        "Z+1": "Upper cliff shelves, alpine scree terraces, high rocky saddles",
+        "Z0": "Canonical surface: upland valley floor, rocky plateaus, cascading torrent banks, boulder flats",
+        "Z-1": "Fractured granite bedrock, natural fault fissures, coarse stone strata",
+        "Z-2": "Massive solid granite deep chambers, natural fissure chasms, deep geological faults"
       },
       "notes": "HARD RULE: Zero snow/ice. Emphasizes sheer physical elevation, fractured stone mass, and wind-sculpted ecology."
     },
@@ -421,9 +421,9 @@
       "verticalHooks": {
         "Z+2": "Smoking caldera rims, jagged basalt spires rising through smoke plume, fumarole crests",
         "Z+1": "Upper cooling lava terraces, raised basalt ledges, obsidian outcrops",
-        "Z0": "Canonical surface: ash fields, active basalt fissures, geothermal pools, scorched settlements",
+        "Z0": "Canonical surface: ash fields, active basalt fissures, geothermal pools, scorched bedrock",
         "Z-1": "Porous basalt crust, subterranean magma vents, heated rock tubes",
-        "Z-2": "Deep magma-adjacent caverns, glowing subterranean molten conduits, obsidian halls"
+        "Z-2": "Deep magma-adjacent caverns, subterranean molten rock conduits, massive obsidian seams"
       },
       "notes": "Lava is an accent feature / danger node, not a wallpaper flood. Dominant visual palette is dark charcoal, basalt, and ash with localized thermal heat."
     }
