@@ -6,6 +6,19 @@ Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <co
 
 ---
 
+## A9: Solid ground cells draw nothing since the Outside_A2 swap (2026-09-24)
+
+**Audited by:** Fable (Claude Code), while proving the vertical depth compositing (`DEUS_Depth`, suite `depth`).
+**Scope:** `game/img/tilesets/Outside_A2.png` (DEUS-TSK-GEMINI-20 Batch 1 Grass), `game/data/DEUS_WorldCatalog.json` (`tilesets.A2` = `Outside_A2`; `groundKinds`, where `peak_rock` is kind 14), `game/js/plugins/DEUS_Tiles.js` `groundBase()`, `game/js/plugins/DEUS_WorldGen.js` (solid ground cells paint `peak_rock` on layers 0 and 2).
+**Native Editor Playtest:** `NOT RUN`. Evidence: the sheet's pixels read offline, the depth suite's dump of the ground build's canvas, and the `+2` view screenshots.
+
+### Findings
+| # | Grade | Finding | Evidence | Status |
+|---|---|---|---|---|
+| A9-1 | MAJOR | The live `Outside_A2` sheet paints A2 kinds 0–3 only; every other ground kind is fully transparent. `peak_rock`, the rock of every hill and mountain column at S ≥ 1 (`DEUS_WorldGen.js:523`, `:951-984`), is kind 14 (`UF.Tiles.groundBase("peak_rock")` = tile 3488 = `TILE_ID_A2 + 14 × 48`), so the ground build draws nothing on layers 0 and 2 under every hill. Seen from `+2` through a hole carved in a `+1` terrace, the BlueSky parallax shows where solid rock should be. On the ground view the cliff-face sprites and black caps cover the boundary cells only; interior solid cells are transparent too (black there, the parallax being hidden on the ground). Every other ground kind above index 3 (sand, dirt, snow, …) is affected the same way. | Offline read of `game/img/tilesets/Outside_A2.png` (768 × 576) with `tools/png_read.js`: opaque coverage per 96 × 144 block is 100 % for kinds 0–3 and 0 % for kinds 4–31 (2026-09-24). The depth suite's `depth.canvas_depth2.png` (snapshot run `depth2`, 2026-09-24 22:05 UTC) is transparent over the whole hill; `depth.plus2_A.png` shows the cyan sky square at the hole. `docs/STATUS.md` → DEUS-TSK-GEMINI-20: "Switched catalog runtime tileset mapping … to load `Outside_A2`". | OPEN (owner: Gemini, world art). Fix: paint every ground kind the catalog uses into the new sheet, or keep the legacy `UF_GenGround_A2` kinds for the kinds the batch has not replaced yet. |
+
+---
+
 ## A8: The colonists' long rest against the calendar (2026-09-23)
 
 **Audited by:** Fable (Claude Code), while proving DEUS-TSK-FABLE-07 with `tools/test_autonomous_settlement_closure.js`.

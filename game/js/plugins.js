@@ -267,6 +267,16 @@ var $plugins =
     "parameters": {}
   },
   {
+    "name": "DEUS_Depth",
+    "status": true,
+    "description": "[DEUS Depth] Crisp depth projection of the levels below the viewed level, seen through open air (owner direction 2026-09-24).",
+    "parameters": {
+      "Preset": "A",
+      "MaxDepth": "2",
+      "EyeHeightFt": "190"
+    }
+  },
+  {
     "name": "DEUS_Test",
     "status": true,
     "description": "[DEUS Test] Automated test harness: PASS/FAIL test suites, screenshot verification, and performance benchmarks.",
