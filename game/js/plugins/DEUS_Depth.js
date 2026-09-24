@@ -13,9 +13,15 @@
  *
  * @param Preset
  * @text Start preset
- * @desc A: two levels below at their camera-model scale, crisp (default). B: + value step. C: + subtle blur. D: one level, blurred. E: D + darker. off.
+ * @desc deus (default): recession + fade/colour + light blur. deus_scale / deus_color: its steps. A: crisp zoom. B/C/D/E: earlier variants. off.
  * @type select
- * @option A: camera-model zoom, crisp (default)
+ * @option deus: recession + fade + light blur (default)
+ * @value deus
+ * @option deus_scale: recession only
+ * @value deus_scale
+ * @option deus_color: recession + fade/colour
+ * @value deus_color
+ * @option A: camera-model zoom, crisp
  * @value A
  * @option B: zoom + value step
  * @value B
@@ -27,7 +33,7 @@
  * @value E
  * @option off
  * @value off
- * @default A
+ * @default deus
  *
  * @param MaxDepth
  * @text Levels below drawn
@@ -39,10 +45,10 @@
  *
  * @param EyeHeightFt
  * @text Eye height (ft)
- * @desc The camera's height above the viewed level; each level is 6 ft lower, scale = eye / (eye + 6 x depth). 190 gives 0.969 / 0.941.
+ * @desc The camera's height above the viewed level; each level is 6 ft lower, scale = eye / (eye + 6 x depth). 140 gives 0.959 / 0.921, 190 gives 0.969 / 0.941.
  * @type number
  * @min 1
- * @default 190
+ * @default 140
  *
  * @help
  * DEUS vertical depth compositing (owner addendum "DEUS — VERTICAL DEPTH COMPOSITING VISUAL
@@ -106,14 +112,31 @@
     })();
     const num = (v, d) => { const n = parseFloat(v); return Number.isFinite(n) ? n : d; };
 
-    const depthDefaults = (scale) => ({ scale, brightness: 1, saturation: 0, contrast: 0, blur: 0 });
+    const depthDefaults = (scale) => ({ scale, brightness: 1, saturation: 0, contrast: 0, blur: 0, alpha: 1 });
+    // The DEUS depth treatment (owner direction "DEPTH COMPOSITING VISUAL TUNING", 2026-09-24, on the fc3b358 baseline):
+    // three progressive cues on the whole plane (tiles and entities alike): a stronger recession (eye 140 ft: 0.959 /
+    // 0.921), a fade done as brightness / contrast / saturation loss (never alpha: the void would show through), and a
+    // very light blur. brightness and contrast are ColorMatrix multipliers; saturation is PIXI's saturate() amount,
+    // where -0.10 is about 93 % and -0.22 about 85 %; blur is the BlurFilter strength in px. Tuning values, not rules.
+    const DEUS_DEPTH = {
+        1: { scale: "camera", brightness: 0.92, saturation: -0.10, contrast: -0.045, blur: 0.6, alpha: 1 },
+        2: { scale: "camera", brightness: 0.82, saturation: -0.22, contrast: -0.10, blur: 1.2, alpha: 1 }
+    };
+    if (provoked("depth_transform_progressive")) DEUS_DEPTH[2] = Object.assign({}, DEUS_DEPTH[1]); // the provocation: depth 2 no stronger than depth 1
+    const noBlur = d => Object.assign({}, d, { blur: 0 });
+    const scaleOnly = d => Object.assign(depthDefaults(d.scale), {});
     // "camera": the scale comes from the camera model (config.camera): a pinhole eye at eyeHeightFt above the viewed
     // level sees a level d storeys (levelHeightFt each) lower at eye / (eye + d * levelHeight). User direction
     // 2026-09-24: "zoom them at the correct distance to simulate being 6 feet farther away". 190 ft gives 0.969 / 0.941,
     // the addendum's 0.97 / 0.94.
     const PRESETS = Object.freeze({
         off: { enabled: false },
-        // A (the default): two levels below, each at its camera-model scale about the viewport centre, crisp, no value change
+        // deus (the default): the full treatment; deus_scale and deus_color are its comparison steps (the owner's B and C)
+        deus: { enabled: true, eyeHeightFt: 140, depths: { 1: Object.assign({}, DEUS_DEPTH[1]), 2: Object.assign({}, DEUS_DEPTH[2]) } },
+        deus_scale: { enabled: true, eyeHeightFt: 140, depths: { 1: scaleOnly(DEUS_DEPTH[1]), 2: scaleOnly(DEUS_DEPTH[2]) } },
+        deus_color: { enabled: true, eyeHeightFt: 140, depths: { 1: noBlur(DEUS_DEPTH[1]), 2: noBlur(DEUS_DEPTH[2]) } },
+        // A: two levels below, each at its camera-model scale about the viewport centre, crisp, no value change (the
+        // fc3b358 baseline at 190 ft; A keeps whatever eye height is set)
         A: { enabled: true, depths: { 1: depthDefaults("camera"), 2: depthDefaults("camera") } },
         // B: A plus a restrained value step per depth (brightness, saturation, contrast are ColorMatrix multipliers)
         B: { enabled: true, depths: {
@@ -145,8 +168,9 @@
         voidColor: 0x08080c,
         /** Projection origin as a fraction of the viewport: 0.5/0.5 is the viewport centre (the camera focus). */
         origin: { x: 0.5, y: 0.5 },
-        /** Diagnostic bound: the inward shift of a lower plane at the viewport edge, (1 - scale) * half the viewport, must stay under it. */
-        maxParallaxPx: 26,
+        /** Diagnostic bound: the inward shift of a lower plane at the viewport edge, (1 - scale) * half the viewport, must stay under it
+         *  (three quarters of a tile; the deus treatment's depth 2 sits at 32 px). */
+        maxParallaxPx: 36,
         /** Levels whose open cells draw transparent, so the level below them can show: the surface levels (open_air). */
         exposes: z => z > 0,
         /** What of a lower level is drawn besides its tiles (user direction 2026-09-24: "all of the assets on the layers
@@ -154,6 +178,8 @@
         entities: { objects: true, items: true, units: true, walls: true },
         /** How often (frames) the lower levels' unit and item sets are re-read; positions of tracked units follow every frame. */
         entityRefreshFrames: 60,
+        /** PIXI BlurFilter quality (passes per direction) for the planes' blur: 1 is the cheapest; 2 is smoother and about twice the cost. */
+        blurQuality: 1,
         depths: { 1: depthDefaults(0.97), 2: depthDefaults(0.94) },
         _stamp: 1
     };
@@ -168,13 +194,14 @@
         if (!p) return false;
         config.preset = name;
         config.enabled = p.enabled !== false;
+        if (p.eyeHeightFt > 0) config.camera.eyeHeightFt = p.eyeHeightFt;
         if (p.depths) { config.depths[1] = resolveDepth(1, p.depths[1]); config.depths[2] = resolveDepth(2, p.depths[2]); }
         if (provoked("parallax_bounded")) config.depths[1].scale = 0.80; // the provocation survives every preset
         config._stamp++;
         return true;
     }
-    if (params.EyeHeightFt !== undefined) config.camera.eyeHeightFt = num(params.EyeHeightFt, config.camera.eyeHeightFt);
-    applyPreset(PRESETS[params.Preset] ? params.Preset : "A");
+    applyPreset(PRESETS[params.Preset] ? params.Preset : "deus");
+    if (params.EyeHeightFt !== undefined) { config.camera.eyeHeightFt = num(params.EyeHeightFt, config.camera.eyeHeightFt); applyPreset(config.preset); }
     if (params.MaxDepth !== undefined) config.maxDepth = Math.max(0, Math.min(2, num(params.MaxDepth, 2) | 0));
     // Provocations that change the configuration
     if (provoked("projection_origin")) { config.origin = { x: 0, y: 0 }; config._stamp++; }
@@ -664,12 +691,14 @@
             filters.push(f);
         }
         if (cfg.blur > 0 && !provoked("blur_by_default")) { // the provocation: the blur asked for is never applied
-            const b = this._blurFilter || (this._blurFilter = new PIXI.filters.BlurFilter(cfg.blur, 2, 1, 5));
+            const q = Math.max(1, Math.min(4, config.blurQuality | 0));
+            const b = this._blurFilter || (this._blurFilter = new PIXI.filters.BlurFilter(cfg.blur, q, 1, 5));
             b.blur = cfg.blur;
-            b.quality = 2;
+            b.quality = q;
             filters.push(b);
         }
         this.filters = filters.length ? filters : null;
+        this.alpha = cfg.alpha === undefined ? 1 : Math.max(0, Math.min(1, +cfg.alpha)); // 1 by default: a fade is done in colour, not alpha
         const smooth = provoked("crisp_nearest"); // the provocation: bilinear sampling
         this._lower.bitmap.smooth = smooth;
         this._upper.bitmap.smooth = smooth;
@@ -800,7 +829,7 @@
     // F7 cycles the presets in play (a developer control) and logs the values to the console. (F9 is RMMZ debug, F6 is DEUS_NaturalConnections.)
     const HOTKEY = 118, HOTKEY_WAS = Input.keyMapper[HOTKEY];
     Input.keyMapper[HOTKEY] = "ufDepthPreset";
-    const CYCLE = ["A", "B", "C", "D", "E", "off"];
+    const CYCLE = ["deus", "deus_scale", "deus_color", "A", "B", "C", "D", "E", "off"];
     const _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
         _Scene_Map_update.call(this);
@@ -979,6 +1008,7 @@
             config.maxDepth = 2;
             await goTo(2);
             await applyAndSettle("A");
+            D.setEyeHeight(190); // the geometry checks run on the fc3b358 baseline (A at 190 ft); the tuning is checked in section 11b
             await t.waitFrames(40); // the weather fade
             const st = D.stats();
             const p1 = D.planes().find(p => p.depth === 1) || null, p2 = D.planes().find(p => p.depth === 2) || null;
@@ -1214,6 +1244,105 @@
                 `preset D blur ${PRESETS.D.depths[1].blur} px, filters [${fD}]; ${blended} of ${sampledD} sampled pixels are blends (want > 500)`);
             await setEntities(true);
 
+            // 11b. The depth treatment (owner direction "DEPTH COMPOSITING VISUAL TUNING"): progressive recession, fade in colour, light blur,
+            //      applied to whole planes so tiles and entities share one depth; the active level untouched; no physical effect.
+            config.maxDepth = 2;
+            await applyAndSettle("deus");
+            const d1 = config.depths[1], d2 = config.depths[2];
+            const mainTm = scene()._spriteset._tilemap;
+            const names = p => (p.filters || []).map(f => f.constructor.name);
+            const progressive = d1.scale < 1 && d2.scale < d1.scale && d1.brightness < 1 && d2.brightness < d1.brightness && d1.saturation < 0 && d2.saturation < d1.saturation
+                && d1.contrast < 0 && d2.contrast < d1.contrast && d1.blur > 0 && d2.blur > d1.blur && d1.alpha === 1 && d2.alpha === 1;
+            const applied = Math.abs(p1.scale.x - d1.scale) < 1e-9 && Math.abs(p2.scale.x - d2.scale) < 1e-9 && names(p1).join() === "ColorMatrixFilter,BlurFilter" && names(p2).join() === "ColorMatrixFilter,BlurFilter";
+            const activeUntouched = mainTm.scale.x === 1 && mainTm.scale.y === 1 && !mainTm.filters && mainTm.alpha === 1;
+            t.check("depth_transform_progressive", progressive && applied && activeUntouched && D.edgeShift(2) <= config.maxParallaxPx,
+                `eye ${config.camera.eyeHeightFt} ft: depth 1 scale ${d1.scale.toFixed(3)} brightness ${d1.brightness} saturation ${d1.saturation} contrast ${d1.contrast} blur ${d1.blur}; depth 2 scale ${d2.scale.toFixed(3)} brightness ${d2.brightness} saturation ${d2.saturation} contrast ${d2.contrast} blur ${d2.blur}; planes scaled ${p1.scale.x.toFixed(3)} / ${p2.scale.x.toFixed(3)}, filters [${names(p1)}] / [${names(p2)}]; active tilemap scale ${mainTm.scale.x}, filters ${mainTm.filters ? "SET" : "none"}; depth 2 edge shift ${D.edgeShift(2).toFixed(1)} px (bound ${config.maxParallaxPx})`);
+            // Entities are children of the plane: same scale, no filters of their own; the colour treatment reaches the unit's pixels.
+            const us = unitMade ? p1._units.get(unitMade.id) : null;
+            let inheritOk = false, detailI = "no unit sprite";
+            if (us && fx[2]) {
+                const c = cellScreen(fx[2].x, fx[2].y), pp = D.project(1, c.x, c.y + 4);
+                const gx = Math.round(pp.x), gy = Math.round(pp.y);
+                const bodyUnder = async name => { await applyAndSettle(name); return planesOnly().getPixel(gx, gy); };
+                const bodyScale = await bodyUnder("deus_scale"), bodyColor = await bodyUnder("deus_color");
+                await applyAndSettle("deus");
+                const chain = us.parent === p1._entities && us.parent.parent === p1;
+                inheritOk = chain && us.visible && Math.abs(us.worldTransform.a - p1.scale.x) < 1e-6 && !us.filters && bodyScale !== bodyColor;
+                detailI = `unit sprite in the +1 plane: ${chain ? "child of the plane" : "NOT a child of the plane"}, world scale ${us.worldTransform.a.toFixed(3)} vs plane ${p1.scale.x.toFixed(3)}, own filters ${us.filters ? "SET" : "none"}; body pixel ${bodyScale} under deus_scale, ${bodyColor} under deus_color`;
+            }
+            t.check("entities_inherit_treatment", inheritOk, detailI);
+            // Switching the blur off leaves no BlurFilter; switching the colour off leaves no filter and the baseline colour.
+            config.depths[1].blur = 0; config.depths[2].blur = 0; D.touch(); await t.waitFrames(2);
+            const noBlurNames = names(p1).concat(names(p2));
+            t.check("blur_off_no_blur", !noBlurNames.includes("BlurFilter") && noBlurNames.includes("ColorMatrixFilter"), `filters with blur 0: [${names(p1)}] / [${names(p2)}]`);
+            for (const d of [1, 2]) Object.assign(config.depths[d], { brightness: 1, saturation: 0, contrast: 0, blur: 0 });
+            D.touch(); await setEntities(false);
+            let baselineOk = false, detailB = "";
+            if (airOverTerrace) {
+                const c = cellScreen(airOverTerrace.x, airOverTerrace.y), pp = D.project(1, c.x, c.y);
+                const gx = Math.round(pp.x), gy = Math.round(pp.y);
+                const seen = planesOnly().getPixel(gx, gy), want = neighbours(p1, gx, gy);
+                baselineOk = !p1.filters && !p2.filters && want.has(seen);
+                detailB = `filters ${p1.filters ? "SET" : "none"}; terrace pixel ${seen}, source texels {${[...want].slice(0, 4).join(" ")}}`;
+            }
+            await setEntities(true);
+            t.check("color_off_baseline", !!airOverTerrace && baselineOk, detailB || "no terrace cell");
+            await applyAndSettle("deus");
+            // Visual settings never touch the physical world.
+            const physics = () => JSON.stringify({
+                unit: unitMade ? { x: unitMade.x, y: unitMade.y, z: unitMade.z } : null,
+                shapeUnit: fx[2] ? L.shapeAt({ area, x: fx[2].x, y: fx[2].y, z: 1 }) : null,
+                shapeChain: chainCell ? L.shapeAt({ area, x: chainCell.x, y: chainCell.y, z: 2 }) : null,
+                walkChain: chainCell ? W.walkable(area.x, area.y, chainCell.x, chainCell.y, { z: 2 }) : null,
+                walkUnit: fx[2] ? W.walkable(area.x, area.y, fx[2].x, fx[2].y, { z: 1 }) : null,
+                objects: fx[0] ? O.typeIdIn(lv1, fx[0].x, fx[0].y) : null
+            });
+            const phys0 = physics();
+            for (const name of ["deus_scale", "deus_color", "A", "D", "deus"]) await applyAndSettle(name);
+            D.setEyeHeight(60); await t.waitFrames(2); D.setEyeHeight(140); await t.waitFrames(2);
+            const phys1 = physics();
+            t.check("visual_settings_no_physics", phys0 === phys1 && phys0.length > 20, phys0 === phys1 ? `unchanged: ${phys0}` : `CHANGED: ${phys0} -> ${phys1}`);
+            // The same preset resolves to the same values whatever came before.
+            await applyAndSettle("deus");
+            const cfgA = JSON.stringify({ depths: config.depths, eye: config.camera.eyeHeightFt, describe: D.describe() });
+            await applyAndSettle("A"); D.setEyeHeight(60); await applyAndSettle("E"); await applyAndSettle("deus");
+            const cfgB = JSON.stringify({ depths: config.depths, eye: config.camera.eyeHeightFt, describe: D.describe() });
+            t.check("config_deterministic", cfgA === cfgB, cfgA === cfgB ? `deus resolves to the same values after A / 60 ft / E: ${D.describe()}` : `DIFFERS: ${cfgA} vs ${cfgB}`);
+            // The cost of the treatment: wall time per frame with and without the filters (this machine, nw.exe harness).
+            // Per frame: the engine's own tick duration (update + render submission, Graphics.FPSCounter) and the wall interval.
+            // Medians, sampled in two interleaved rounds per condition, so a world-generation hitch or another process does not decide.
+            const sampleFrames = async n => {
+                const ticks = [], gaps = []; let last = performance.now();
+                for (let i = 0; i < n; i++) { await t.waitFrames(1); const now = performance.now(); gaps.push(now - last); last = now; ticks.push(Graphics._fpsCounter ? Graphics._fpsCounter.duration : NaN); }
+                const med = a => { const s = a.filter(Number.isFinite).sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
+                return { tick: med(ticks), gap: med(gaps), worstTick: Math.max(...ticks.filter(Number.isFinite)) };
+            };
+            // Five conditions, two interleaved rounds each: planes off (the game alone), recession only (the compositing's own
+            // cost), colour only, the full treatment at blur quality 1 and at quality 2. The bounds: the colour treatment
+            // must cost under 4 ms, the shipped blur (quality 1) under one frame; the rest is reported.
+            const conditions = {
+                off: async () => { D.setEnabled(false); },
+                deus_scale: async () => { D.setEnabled(true); await applyAndSettle("deus_scale"); },
+                deus_color: async () => { D.setEnabled(true); await applyAndSettle("deus_color"); },
+                deus_q1: async () => { D.setEnabled(true); config.blurQuality = 1; await applyAndSettle("deus"); },
+                deus_q2: async () => { D.setEnabled(true); config.blurQuality = 2; await applyAndSettle("deus"); }
+            };
+            const cost = {};
+            // The world simulation is paused while sampling, so the tick is the presentation alone (the editor stays open).
+            const TS = window.UF.TimeSpeed, wasPaused = !!(TS && TS.isPaused && TS.isPaused());
+            if (TS && TS.pause) TS.pause();
+            for (let round = 0; round < 2; round++) for (const name of Object.keys(conditions)) { await conditions[name](); await t.waitFrames(10); (cost[name] = cost[name] || []).push(await sampleFrames(60)); }
+            if (TS && TS.resume && !wasPaused) TS.resume();
+            config.blurQuality = 1; D.setEnabled(true); await applyAndSettle("deus");
+            const bestOf = name => cost[name].reduce((a, b) => (b.tick < a.tick ? b : a));
+            const c = {}; for (const name of Object.keys(conditions)) c[name] = bestOf(name);
+            const dColor = c.deus_color.tick - c.deus_scale.tick, dQ1 = c.deus_q1.tick - c.deus_scale.tick, dQ2 = c.deus_q2.tick - c.deus_scale.tick;
+            // Which GL device drew this (a software renderer makes every full-screen pass cost tens of ms).
+            let glName = "unknown";
+            try { const gl = Graphics.app.renderer.gl, dbg = gl.getExtension("WEBGL_debug_renderer_info"); glName = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : String(gl.getParameter(gl.RENDERER)); } catch (e) { glName = `unreadable (${e.message})`; }
+            t.check("treatment_cost", dColor < 4 && dQ1 < 16.7,
+                `GL renderer "${glName}"; median engine tick (update + render submit) over 2 x 60 frames: planes off ${c.off.tick.toFixed(1)} ms, recession only ${c.deus_scale.tick.toFixed(1)} ms (compositing itself +${(c.deus_scale.tick - c.off.tick).toFixed(1)}), colour +${dColor.toFixed(1)} ms (bound 4), blur quality 1 +${dQ1.toFixed(1)} ms (bound 16.7, the shipped setting), blur quality 2 +${dQ2.toFixed(1)} ms; median frame intervals ${Object.keys(c).map(k => `${k} ${c[k].gap.toFixed(0)}`).join(", ")} ms; this machine, nw.exe harness, simulation paused, RMMZ editor open`);
+
             // 12. The screenshots at locked 1.00x. Two levels below at the camera-model zoom (user direction 2026-09-24): off, A at an eye
             //     height of 190 / 120 / 60 / 30 ft, B, C; then one level blurred (D); on +1: off, A (190 ft), D. The deck and hole are in the window.
             config.maxDepth = 2;
@@ -1227,6 +1356,11 @@
                 D.setEyeHeight(eye0);
             };
             D.setEnabled(false); await t.waitFrames(3); shots.push(t.screenshot("plus2_off"));
+            // The tuning comparison (owner's A/B/C/D), same camera: the fc3b358 baseline, recession only, + fade/colour, + light blur.
+            await shot("tune_A_baseline", "A", 190);
+            await shot("tune_B_scale", "deus_scale");
+            await shot("tune_C_scale_color", "deus_color");
+            await shot("tune_D_full", "deus");
             await shot("plus2_A_eye190", "A", 190);
             await shot("plus2_A_eye120", "A", 120);
             await shot("plus2_A_eye60", "A", 60);
@@ -1240,10 +1374,11 @@
             D.setEnabled(false); await t.waitFrames(3); shots.push(t.screenshot("plus1_off"));
             await shot("plus1_A_eye190", "A", 190);
             await shot("plus1_D_oneLevelBlur", "D", undefined, 1);
+            await shot("plus1_tune_D_full", "deus");
             config.maxDepth = 2;
-            await applyAndSettle("A");
+            await applyAndSettle("deus");
             const sizes = shots.map(f => (fs.existsSync(f) ? fs.statSync(f).size : 0));
-            t.check("screenshots_written", shots.length === 11 && sizes.every(n => n > 10000), shots.map((f, i) => `${pathMod.basename(f)} ${sizes[i]} B`).join(", "));
+            t.check("screenshots_written", shots.length === 16 && sizes.every(n => n > 10000), shots.map((f, i) => `${pathMod.basename(f)} ${sizes[i]} B`).join(", "));
 
             // 13. Back on the ground nothing is drawn (its holes are opaque art), and no errors.
             await goTo(0);
