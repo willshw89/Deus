@@ -10,7 +10,7 @@
 // Checks per file (names as printed):
 //   alpha    every pixel's alpha is 0 or 255 (ART_STANDARD F5)
 //   grid     every aligned 3x3 block is one colour: the sheet is a 3x nearest-neighbour export (F2)
-//   palette  distinct opaque colours: <=32 PASS, 33-64 WARN, >64 FAIL (F5: 16-32 per sheet)
+//   palette  distinct colours: characters <=32 PASS; tilesets are containers (no 32-cap; master/ramp adherence) (DW.01.05)
 //   size     sheet dimensions by sheet type, and the frame grid divides the sheet (F3, RMMZ layouts)
 //   sidecar  <name>.json next to the PNG: frameWidth/frameHeight/anchor/facings/animations (§3)
 //   lean     characters: the S stand frame's opaque centre of mass is within 2 px of the frame centre (F3)
@@ -302,7 +302,26 @@ function checkGrid(img, cls, opts, file, sidecar) {
     return ok(`native 48px resolution: 1:1 pixel art on ${TILE}x${TILE} grid (${w / TILE}x${h / TILE} tiles)`);
 }
 
-function checkPalette(img) {
+let _paletteRegistry = null;
+let _masterColorIntSet = null;
+let _masterColorHexSet = null;
+
+function getPaletteRegistry() {
+    if (_paletteRegistry) return _paletteRegistry;
+    const p = path.resolve(__dirname, '..', 'game', 'data', 'DEUS_PaletteRegistry.json');
+    if (fs.existsSync(p)) {
+        try {
+            _paletteRegistry = JSON.parse(fs.readFileSync(p, 'utf8'));
+            _masterColorIntSet = new Set(Object.values(_paletteRegistry.masterColors).map(c => (c.r << 16) | (c.g << 8) | c.b));
+            _masterColorHexSet = new Set(Object.values(_paletteRegistry.masterColors).map(c => c.hex.toUpperCase()));
+        } catch (e) {
+            _paletteRegistry = null;
+        }
+    }
+    return _paletteRegistry;
+}
+
+function checkPalette(img, cls, sidecar, opts, file) {
     const seen = new Set();
     const d = img.data;
     for (let i = 0; i < d.length; i += 4) {
@@ -312,6 +331,98 @@ function checkPalette(img) {
     const n = seen.size;
     const r = { colors: n };
     if (n === 0) return fail('no opaque pixels at all', r);
+
+    // 1. Explicit VFX / Translucency Exception
+    if (sidecar && (sidecar.alphaMode === 'VFX' || sidecar.paletteMode === 'VFX')) {
+        return ok(`vfx exception: unrestricted palette allowed for supernatural/vfx asset (${n} colors)`, r);
+    }
+
+    // 2. Legacy 3x Ultima VII exception
+    if (isLegacy3xFile(file, opts, sidecar)) {
+        return ok(`legacy 3x stand-in: legacy palette allowed (${n} colors)`, r);
+    }
+
+    const reg = getPaletteRegistry();
+
+    // 3. Sidecar Allowed Ramps / Material Families Enforcement
+    if (sidecar && (sidecar.allowedRamps || sidecar.materialFamilies) && reg) {
+        const allowedInts = new Set();
+        const allowedRampIds = [];
+        if (Array.isArray(sidecar.allowedRamps)) {
+            for (const rId of sidecar.allowedRamps) {
+                const ramp = reg.ramps[rId.toUpperCase()];
+                if (ramp) {
+                    allowedRampIds.push(ramp.rampId);
+                    for (const cid of ramp.colorIds) {
+                        const mc = reg.masterColors[cid];
+                        if (mc) allowedInts.add((mc.r << 16) | (mc.g << 8) | mc.b);
+                    }
+                }
+            }
+        }
+        if (Array.isArray(sidecar.materialFamilies)) {
+            for (const fam of sidecar.materialFamilies) {
+                for (const ramp of Object.values(reg.ramps)) {
+                    if (ramp.materialFamily.toUpperCase() === fam.toUpperCase()) {
+                        for (const cid of ramp.colorIds) {
+                            const mc = reg.masterColors[cid];
+                            if (mc) allowedInts.add((mc.r << 16) | (mc.g << 8) | mc.b);
+                        }
+                    }
+                }
+            }
+        }
+
+        let outsideRampButInMaster = 0;
+        let outsideMaster = 0;
+        let firstOutsideHex = null;
+
+        for (const col of seen) {
+            if (!allowedInts.has(col)) {
+                if (_masterColorIntSet && _masterColorIntSet.has(col)) {
+                    outsideRampButInMaster++;
+                } else {
+                    outsideMaster++;
+                    if (!firstOutsideHex) {
+                        const cr = (col >> 16) & 255, cg = (col >> 8) & 255, cb = col & 255;
+                        firstOutsideHex = `#${cr.toString(16).padStart(2, '0')}${cg.toString(16).padStart(2, '0')}${cb.toString(16).padStart(2, '0')}`.toUpperCase();
+                    }
+                }
+            }
+        }
+
+        if (outsideMaster > 0) {
+            return fail(`${outsideMaster} unregistered colors outside DEUS Master Palette (first: ${firstOutsideHex})`, r);
+        }
+        if (outsideRampButInMaster > 0) {
+            return warn(`${outsideRampButInMaster} colors in Master Palette but outside declared ramps [${allowedRampIds.join(', ')}]`, r);
+        }
+        return ok(`${n} opaque colours: 100% compliant with declared ramps [${allowedRampIds.join(', ')}]`, r);
+    }
+
+    // 4. Tileset Sheet Container Rule (NO ARBITRARY 32-COLOR CAP - DW.01.05)
+    if (cls && cls.type === 'tileset') {
+        if (reg && _masterColorIntSet && (opts && (opts.strictPalette || opts['strict-palette']) || (sidecar && sidecar.paletteMode === 'MASTER'))) {
+            let outsideMaster = 0;
+            let firstOutsideHex = null;
+            for (const col of seen) {
+                if (!_masterColorIntSet.has(col)) {
+                    outsideMaster++;
+                    if (!firstOutsideHex) {
+                        const cr = (col >> 16) & 255, cg = (col >> 8) & 255, cb = col & 255;
+                        firstOutsideHex = `#${cr.toString(16).padStart(2, '0')}${cg.toString(16).padStart(2, '0')}${cb.toString(16).padStart(2, '0')}`.toUpperCase();
+                    }
+                }
+            }
+            if (outsideMaster > 0) {
+                return fail(`${outsideMaster} colors outside DEUS Master Palette on tileset sheet (first: ${firstOutsideHex})`, r);
+            }
+            return ok(`${n} opaque colours: container sheet 100% compliant with DEUS Master Palette`, r);
+        }
+        return ok(`${n} opaque colours (tileset container sheet: no arbitrary 32-color cap)`, r);
+    }
+
+    // 5. Default Character & Object Sheet Budget Check
     if (n <= PALETTE_LIMIT) return ok(`${n} opaque colours (limit ${PALETTE_LIMIT})`, r);
     if (n <= PALETTE_FAIL) return warn(`${n} opaque colours: over the ${PALETTE_LIMIT} limit (more than ${PALETTE_FAIL} fails)`, r);
     return fail(`${n} opaque colours: over ${PALETTE_FAIL} (limit ${PALETTE_LIMIT})`, r);
@@ -596,7 +707,7 @@ function checkFile(file, opts) {
 
     add('alpha', checkAlpha(img, sidecar));
     add('grid', checkGrid(img, cls, opts, file, sidecar));
-    const pal = add('palette', checkPalette(img));
+    const pal = add('palette', checkPalette(img, cls, sidecar, opts, file));
     report.colors = pal.colors;
     add('size', checkSize(img, cls, grid, sidecar));
     add('sidecar', checkSidecar(file, img, cls, sidecar, sidecarError, opts.sidecar, grid));

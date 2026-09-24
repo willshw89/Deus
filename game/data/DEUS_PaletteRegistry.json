@@ -1,0 +1,5263 @@
+{
+  "version": "1.0.0",
+  "documentId": "DEUS-PALETTE-REGISTRY-01",
+  "task": "DW.01.05",
+  "title": "DEUS Canonical World Palette Architecture & Material Ramps Registry",
+  "canonicalCeiling": 256,
+  "masterColorCount": 254,
+  "totalRampsCount": 58,
+  "totalRampSlotsCount": 287,
+  "nearDuplicatesReport": [
+    {
+      "c1": "NEUT_COOL_01",
+      "c2": "VOLC_BASALT_02",
+      "hex1": "#1C2126",
+      "hex2": "#1D1E24",
+      "distance": 3.7
+    },
+    {
+      "c1": "TEMP_LOAM_03",
+      "c2": "ARID_SAND_02",
+      "hex1": "#57422C",
+      "hex2": "#54442D",
+      "distance": 3.7
+    },
+    {
+      "c1": "TEMP_OAK_BARK_02",
+      "c2": "ARID_HARDPAN_01",
+      "hex1": "#302720",
+      "hex2": "#2E261D",
+      "distance": 3.7
+    },
+    {
+      "c1": "WET_PEAT_01",
+      "c2": "VOLC_SCORIA_01",
+      "hex1": "#171210",
+      "hex2": "#191113",
+      "distance": 3.7
+    },
+    {
+      "c1": "WET_SILT_02",
+      "c2": "WET_DRIFT_02",
+      "hex1": "#292A20",
+      "hex2": "#2A2722",
+      "distance": 3.7
+    },
+    {
+      "c1": "WET_WILLOW_01",
+      "c2": "HIGH_GRASS_01",
+      "hex1": "#162115",
+      "hex2": "#162018",
+      "distance": 3.2
+    },
+    {
+      "c1": "ARID_HARDPAN_01",
+      "c2": "ARID_SAND_01",
+      "hex1": "#2E261D",
+      "hex2": "#30281B",
+      "distance": 3.5
+    }
+  ],
+  "policy": {
+    "sheetCapPolicy": "NO ARBITRARY 32-COLOR CAP PER PACKED TILESET SHEET. Tileset sheets are containers containing the union of multiple material ramps.",
+    "enforcementLevel": "Color discipline is enforced at Material Family and Individual Asset level.",
+    "pixelDensityRule": "Author at 1:1 Native Resolution; draw strictly from canonical material ramps and Master Palette."
+  },
+  "valueHierarchy": {
+    "ground": {
+      "role": "Lowest contrast, quiet negative space for tactical gameplay and readability",
+      "minLuminance": 5,
+      "maxLuminance": 68,
+      "maxDeltaLuminancePerTile": 35,
+      "guidance": "Ground tiles must not compete with entities; avoid jarring 1-pixel high-contrast speckles."
+    },
+    "vegetationProps": {
+      "role": "Moderate contrast, distinct silhouettes, organic clustering",
+      "minLuminance": 7,
+      "maxLuminance": 75,
+      "maxDeltaLuminancePerTile": 50,
+      "guidance": "Foliage and props use clear shadow masses and restrained rim highlights."
+    },
+    "characters": {
+      "role": "Clear separation from ground and vegetation, prioritized readability",
+      "minLuminance": 5,
+      "maxLuminance": 85,
+      "maxDeltaLuminancePerTile": 65,
+      "guidance": "Characters maintain distinctive silhouettes, local contrast, and readable equipment."
+    },
+    "interactiveObjects": {
+      "role": "High readability, distinct highlights, interactive affordance",
+      "minLuminance": 5,
+      "maxLuminance": 90,
+      "maxDeltaLuminancePerTile": 70,
+      "guidance": "Chests, doors, levers, and items pop against ground backgrounds."
+    },
+    "supernaturalVFX": {
+      "role": "Highest selective saturation, full-range contrast, incandescent luminance",
+      "minLuminance": 5,
+      "maxLuminance": 98,
+      "maxDeltaLuminancePerTile": 85,
+      "guidance": "Reserved exclusively for spells, divine miracles, and molten lava hazard nodes."
+    }
+  },
+  "colorBudgets": {
+    "simpleClutter": {
+      "assetClass": "Simple Clutter / Small Debris",
+      "typicalTones": "3–6 colors",
+      "maxUniqueColors": 6,
+      "guidance": "Small pebbles, single mushrooms, leaf piles, loose bones."
+    },
+    "commonWorldProp": {
+      "assetClass": "Common World Prop",
+      "typicalTones": "4–8 colors",
+      "maxUniqueColors": 8,
+      "guidance": "Barrels, crates, small boulders, market stalls, bushes."
+    },
+    "treeLargeVegetation": {
+      "assetClass": "Tree / Large Vegetation Family",
+      "typicalTones": "6–12 colors",
+      "maxUniqueColors": 14,
+      "guidance": "Combines 1 bark ramp (3-5 tones) + 1-2 foliage ramps (4-6 tones)."
+    },
+    "complexStructure": {
+      "assetClass": "Complex Structural Material / Workshop",
+      "typicalTones": "8–16 colors",
+      "maxUniqueColors": 20,
+      "guidance": "Multi-material architectural units combining timber, masonry, iron, and thatch."
+    },
+    "fullPackedTilesetSheet": {
+      "assetClass": "Full Packed Tileset Sheet (A1-A5, B-E)",
+      "typicalTones": "CONTAINER UNION (No Arbitrary Sheet-Wide Cap)",
+      "maxUniqueColors": null,
+      "guidance": "A packed tileset sheet is a container holding multiple materials. NO arbitrary 32 or 64 total cap applies. All pixels must adhere to constituent ramps and the Master Palette."
+    }
+  },
+  "transitionBridges": {
+    "TEMP_WET": {
+      "primaryBridgeRamps": [
+        "TEMP_GRASS_FERTILE",
+        "WET_GRASS_SATURATED",
+        "WET_REED_RUSH",
+        "TEMP_SOIL_LOAM",
+        "WET_SOIL_PEAT"
+      ],
+      "bridgeTones": [
+        "#26421C",
+        "#203320",
+        "#3B2E25",
+        "#57422C",
+        "#6C935D"
+      ],
+      "notes": "Transition from lush loam meadow to spongy peat marsh and upright reed beds"
+    },
+    "TEMP_ARID": {
+      "primaryBridgeRamps": [
+        "TEMP_GRASS_DRY",
+        "ARID_GRASS_BUNCHGRASS",
+        "TEMP_SOIL_LOAM",
+        "ARID_SOIL_HARDPAN"
+      ],
+      "bridgeTones": [
+        "#353C20",
+        "#473E24",
+        "#7C6142",
+        "#77634A",
+        "#B1B26C"
+      ],
+      "notes": "Transition from fertile loam hills to sun-baked steppe flats and hardpan caliche"
+    },
+    "TEMP_HIGH": {
+      "primaryBridgeRamps": [
+        "TEMP_GRASS_DRY",
+        "HIGH_GRASS_ALPINE",
+        "TEMP_STONE_FIELDSTONE",
+        "HIGH_STONE_GRANITE"
+      ],
+      "bridgeTones": [
+        "#273827",
+        "#3D523A",
+        "#59594F",
+        "#4B555D",
+        "#6E7A85"
+      ],
+      "notes": "Transition from gentle valley meadows to rugged scree slopes and granite cliffs"
+    },
+    "TEMP_VOLC": {
+      "primaryBridgeRamps": [
+        "TEMP_GRASS_DRY",
+        "VOLC_SOIL_SCORCHED",
+        "VOLC_ASH_DRIFT",
+        "TEMP_BARK_OAK",
+        "VOLC_WOOD_CHARRED"
+      ],
+      "bridgeTones": [
+        "#353C20",
+        "#261D18",
+        "#3E3E44",
+        "#4E3E33",
+        "#2F2A28"
+      ],
+      "notes": "Transition from verdant forest margins to scorched perimeter and ash plain"
+    },
+    "WET_ARID": {
+      "primaryBridgeRamps": [
+        "WET_REED_RUSH",
+        "ARID_GRASS_BUNCHGRASS",
+        "WET_MUD_ANAEROBIC",
+        "ARID_SOIL_HARDPAN",
+        "ARID_BONE_CALICHE"
+      ],
+      "bridgeTones": [
+        "#445427",
+        "#473E24",
+        "#323536",
+        "#77634A",
+        "#888170"
+      ],
+      "notes": "Terminal evaporative basin: drying mud playa with sparse spiky straw"
+    },
+    "WET_HIGH": {
+      "primaryBridgeRamps": [
+        "WET_GRASS_SATURATED",
+        "HIGH_GRASS_ALPINE",
+        "WET_STONE_DAMP_SLATE",
+        "HIGH_STONE_SLATE",
+        "WATER_FOAM_RAPIDS"
+      ],
+      "bridgeTones": [
+        "#252F36",
+        "#273827",
+        "#37464F",
+        "#4E626E",
+        "#7297B2"
+      ],
+      "notes": "Steep mountain gorge transitioning down to wetlands"
+    },
+    "WET_VOLC": {
+      "primaryBridgeRamps": [
+        "WET_MUD_ANAEROBIC",
+        "VOLC_SOIL_SCORCHED",
+        "VOLC_MINERAL_SULFUR",
+        "VOLC_STONE_SCORIA"
+      ],
+      "bridgeTones": [
+        "#212325",
+        "#412A23",
+        "#4A4C1C",
+        "#44292E",
+        "#777A29"
+      ],
+      "notes": "Geothermal marsh with hot sulfur springs and scalding mudpots"
+    },
+    "ARID_HIGH": {
+      "primaryBridgeRamps": [
+        "ARID_GRASS_BUNCHGRASS",
+        "HIGH_GRASS_ALPINE",
+        "ARID_STONE_SANDSTONE",
+        "HIGH_STONE_GRANITE"
+      ],
+      "bridgeTones": [
+        "#473E24",
+        "#3D523A",
+        "#834A34",
+        "#4B555D",
+        "#9C8449"
+      ],
+      "notes": "Rain-shadow mountain flanks and high arid passes"
+    },
+    "ARID_VOLC": {
+      "primaryBridgeRamps": [
+        "ARID_SOIL_HARDPAN",
+        "VOLC_ASH_DRIFT",
+        "ARID_STONE_SANDSTONE",
+        "VOLC_STONE_BASALT"
+      ],
+      "bridgeTones": [
+        "#4F4232",
+        "#27272B",
+        "#583224",
+        "#2F303A",
+        "#834A34"
+      ],
+      "notes": "Tectonic fault scarps and dark volcanic escarpments"
+    },
+    "HIGH_VOLC": {
+      "primaryBridgeRamps": [
+        "HIGH_STONE_GRANITE",
+        "VOLC_STONE_BASALT",
+        "HIGH_GRAVEL_SCREE",
+        "VOLC_ASH_DRIFT"
+      ],
+      "bridgeTones": [
+        "#30383E",
+        "#1D1E24",
+        "#5A5D63",
+        "#3E3E44",
+        "#6E7A85"
+      ],
+      "notes": "High volcanic peaks, active fumaroles, and jagged caldera crests"
+    }
+  },
+  "ramps": {
+    "NEUT_VOID_BLACK": {
+      "rampId": "NEUT_VOID_BLACK",
+      "materialFamily": "NEUTRALS",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Dwarf-Fortress black wall caps, deep environmental void, hard structural occlusion, deep crevices",
+      "forbiddenUsage": "Soft organic surface shading, water bodies",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 3,
+      "colorIds": [
+        "NEUT_VOID_DEEP",
+        "NEUT_VOID_CAP",
+        "NEUT_VOID_OCCLUSION"
+      ],
+      "hexColors": [
+        "#060709",
+        "#0C0D12",
+        "#14161C"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body"
+      ],
+      "notes": "Anchors the deepest shadow and DF 2-grid black wall cap standard across all biomes."
+    },
+    "NEUT_COOL_GRAY": {
+      "rampId": "NEUT_COOL_GRAY",
+      "materialFamily": "NEUTRALS",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Cold stone shadows, slate accents, iron forged metal, cool ambient shadows",
+      "forbiddenUsage": "Fertile vegetation surfaces, warm sand",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_COOL_01",
+        "NEUT_COOL_02",
+        "NEUT_COOL_03",
+        "NEUT_COOL_04",
+        "NEUT_COOL_05"
+      ],
+      "hexColors": [
+        "#1C2126",
+        "#333B45",
+        "#525D6B",
+        "#798797",
+        "#A7B4C2"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Universal cool grey ramp for non-organic cold surfaces."
+    },
+    "NEUT_WARM_GRAY": {
+      "rampId": "NEUT_WARM_GRAY",
+      "materialFamily": "NEUTRALS",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Mortar, dressed stone blocks, dry rock fractures, warm structural shadows",
+      "forbiddenUsage": "Saturated grass, deep water",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_WARM_01",
+        "NEUT_WARM_02",
+        "NEUT_WARM_03",
+        "NEUT_WARM_04",
+        "NEUT_WARM_05"
+      ],
+      "hexColors": [
+        "#23211D",
+        "#3D3833",
+        "#5F5851",
+        "#867E75",
+        "#B4ABA1"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Universal warm grey ramp for neutral masonry and weathered stone."
+    },
+    "NEUT_PALE_CREST": {
+      "rampId": "NEUT_PALE_CREST",
+      "materialFamily": "NEUTRALS",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Parchment, bone, stark edge highlights, cloth accents, chalk markings",
+      "forbiddenUsage": "Ground background fills, deep shadows",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 4,
+      "colorIds": [
+        "NEUT_PALE_01",
+        "NEUT_PALE_02",
+        "NEUT_PALE_03",
+        "NEUT_PALE_04"
+      ],
+      "hexColors": [
+        "#6D6961",
+        "#9B968C",
+        "#C8C3B7",
+        "#EDE9DE"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "highlight"
+      ],
+      "notes": "High-value pale neutral ramp for crests, skulls, cloth, and edge glints."
+    },
+    "TEMP_GRASS_FERTILE": {
+      "rampId": "TEMP_GRASS_FERTILE",
+      "materialFamily": "GRASS",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Continuous fertile meadow turf, lush pasture ground",
+      "forbiddenUsage": "Arid desert, volcanic plain, snowy peaks",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_ARID",
+        "TEMP_HIGH",
+        "TEMP_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_GRASS_01",
+        "TEMP_GRASS_02",
+        "TEMP_GRASS_03",
+        "TEMP_GRASS_04",
+        "TEMP_GRASS_05"
+      ],
+      "hexColors": [
+        "#152614",
+        "#26421C",
+        "#3E6328",
+        "#628C38",
+        "#91B851"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Canonical baseline fertile meadow grass. Balanced green with warm golden-green highlight."
+    },
+    "TEMP_GRASS_DRY": {
+      "rampId": "TEMP_GRASS_DRY",
+      "materialFamily": "GRASS",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Secondary meadow, foot-beaten path margins, late summer grass patches",
+      "forbiddenUsage": "Deep saturated marsh, fresh spring lawns",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "TEMP_HIGH",
+        "TEMP_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_GRASS_DRY_01",
+        "TEMP_GRASS_DRY_02",
+        "TEMP_GRASS_DRY_03",
+        "TEMP_GRASS_DRY_04",
+        "TEMP_GRASS_DRY_05"
+      ],
+      "hexColors": [
+        "#1D2315",
+        "#353C20",
+        "#565E31",
+        "#82884A",
+        "#B1B26C"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Muted olive secondary grass; essential bridge ramp to Arid steppe and rocky highland."
+    },
+    "TEMP_SOIL_LOAM": {
+      "rampId": "TEMP_SOIL_LOAM",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Rich agricultural loam, garden plots, dirt roads, earthen banks",
+      "forbiddenUsage": "Sand dunes, chalk hardpan, volcanic ash",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_ARID",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_LOAM_01",
+        "TEMP_LOAM_02",
+        "TEMP_LOAM_03",
+        "TEMP_LOAM_04",
+        "TEMP_LOAM_05"
+      ],
+      "hexColors": [
+        "#1F1610",
+        "#38291C",
+        "#57422C",
+        "#7C6142",
+        "#A3845F"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Classic rich brown earth. High fertility visual cue."
+    },
+    "TEMP_WOODLAND_FLOOR": {
+      "rampId": "TEMP_WOODLAND_FLOOR",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Deciduous forest floor, leaf humus, shaded woodland ground",
+      "forbiddenUsage": "Open sun-baked plains, sand beaches",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_WOOD_FL_01",
+        "TEMP_WOOD_FL_02",
+        "TEMP_WOOD_FL_03",
+        "TEMP_WOOD_FL_04",
+        "TEMP_WOOD_FL_05"
+      ],
+      "hexColors": [
+        "#1B1714",
+        "#332A1E",
+        "#4D3F2C",
+        "#6B5A3E",
+        "#8A7653"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Warm leaf-littered forest floor for under canopy clusters."
+    },
+    "TEMP_BARK_OAK": {
+      "rampId": "TEMP_BARK_OAK",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Mature oak trunks, broadleaf branches, tree stumps",
+      "forbiddenUsage": "Conifer needles, birch trunks",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_WOOD_FL_01",
+        "TEMP_OAK_BARK_02",
+        "TEMP_OAK_BARK_03",
+        "TEMP_OAK_BARK_04",
+        "TEMP_OAK_BARK_05"
+      ],
+      "hexColors": [
+        "#1B1714",
+        "#302720",
+        "#4E3E33",
+        "#6F5948",
+        "#8F7663"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Weathered grey-brown furrowed bark for temperate deciduous trees."
+    },
+    "TEMP_BARK_BIRCH": {
+      "rampId": "TEMP_BARK_BIRCH",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "TEMP",
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Birch trunks, white paper bark",
+      "forbiddenUsage": "Oak foliage, dark soil",
+      "transitionCompatibility": [
+        "TEMP_HIGH",
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_BIRCH_BARK_01",
+        "TEMP_BIRCH_BARK_02",
+        "TEMP_BIRCH_BARK_03",
+        "TEMP_BIRCH_BARK_04",
+        "NEUT_PALE_04"
+      ],
+      "hexColors": [
+        "#28231E",
+        "#544E45",
+        "#8A8376",
+        "#C2BBB0",
+        "#EDE9DE"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Paper birch bark with distinct dark lenticels and chalk-cream paper."
+    },
+    "TEMP_FOLIAGE_OAK": {
+      "rampId": "TEMP_FOLIAGE_OAK",
+      "materialFamily": "FOLIAGE",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Broadleaf oak canopy, fruit trees, dense green shrubs",
+      "forbiddenUsage": "Conifer needles, desert succulents",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_OAK_LEAF_01",
+        "TEMP_OAK_LEAF_02",
+        "TEMP_OAK_LEAF_03",
+        "TEMP_OAK_LEAF_04",
+        "TEMP_OAK_LEAF_05"
+      ],
+      "hexColors": [
+        "#122416",
+        "#1F3D20",
+        "#325C2C",
+        "#4F823F",
+        "#78AD5B"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Rich broadleaf oak canopy tones with controlled hue-shifting from deep cool green to sunny yellow-green."
+    },
+    "TEMP_STONE_FIELDSTONE": {
+      "rampId": "TEMP_STONE_FIELDSTONE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Rounded pasture fieldstones, dry stone walls, roadside cairns",
+      "forbiddenUsage": "Sharp volcanic basalt, red desert sandstone",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_WARM_01",
+        "TEMP_FIELDSTONE_02",
+        "TEMP_FIELDSTONE_03",
+        "TEMP_FIELDSTONE_04",
+        "TEMP_FIELDSTONE_05"
+      ],
+      "hexColors": [
+        "#23211D",
+        "#3B3B35",
+        "#59594F",
+        "#7C7C6E",
+        "#A1A190"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Weathered rounded stones with gentle greenish-grey patina."
+    },
+    "TEMP_STONE_LIMESTONE": {
+      "rampId": "TEMP_STONE_LIMESTONE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "TEMP"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Layered limestone cliffs, river bluffs, upland ledges",
+      "forbiddenUsage": "Volcanic scoria, jagged mountain horn peaks",
+      "transitionCompatibility": [
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_WARM_01",
+        "TEMP_LIMESTONE_02",
+        "TEMP_LIMESTONE_03",
+        "TEMP_LIMESTONE_04",
+        "TEMP_LIMESTONE_05"
+      ],
+      "hexColors": [
+        "#23211D",
+        "#423E32",
+        "#66604E",
+        "#8F8770",
+        "#BAB095"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Warm sedimentary limestone for temperate rock bluffs."
+    },
+    "WET_GRASS_SATURATED": {
+      "rampId": "WET_GRASS_SATURATED",
+      "materialFamily": "GRASS",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Spongy marsh tussocks, waterlogged grass hummocks",
+      "forbiddenUsage": "Dry upland hills, baking desert",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "WET_ARID",
+        "WET_HIGH",
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_GRASS_01",
+        "WET_GRASS_02",
+        "WET_GRASS_03",
+        "WET_GRASS_04",
+        "WET_GRASS_05"
+      ],
+      "hexColors": [
+        "#131E14",
+        "#203320",
+        "#314D2E",
+        "#4A6E42",
+        "#6C935D"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Cool saturated green with muted mossy highlights."
+    },
+    "WET_REED_RUSH": {
+      "rampId": "WET_REED_RUSH",
+      "materialFamily": "FLORA",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Cattails, marsh reeds, bulrushes, water lilies",
+      "forbiddenUsage": "Conifer forest, dry scrub",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "WET_ARID"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_REED_01",
+        "WET_REED_02",
+        "WET_REED_03",
+        "WET_REED_04",
+        "WET_REED_05"
+      ],
+      "hexColors": [
+        "#181E11",
+        "#2B361A",
+        "#445427",
+        "#667A3A",
+        "#8EA353"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Upright olive-tinged marsh reed ramp."
+    },
+    "WET_SOIL_PEAT": {
+      "rampId": "WET_SOIL_PEAT",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Deep saturated peat beds, bog soil, dark organic loam",
+      "forbiddenUsage": "Dry gravel, sand",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_PEAT_01",
+        "WET_PEAT_02",
+        "WET_PEAT_03",
+        "WET_PEAT_04",
+        "WET_PEAT_05"
+      ],
+      "hexColors": [
+        "#171210",
+        "#261D18",
+        "#3B2E25",
+        "#544234",
+        "#735B49"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dark spongy organic peat earth."
+    },
+    "WET_MUD_ANAEROBIC": {
+      "rampId": "WET_MUD_ANAEROBIC",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Anaerobic black swamp mud, riverbed sludge, wet sinkholes",
+      "forbiddenUsage": "Fertile garden topsoil",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "WET_ARID",
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_MUD_01",
+        "WET_MUD_02",
+        "WET_MUD_03",
+        "WET_MUD_04",
+        "WET_MUD_05"
+      ],
+      "hexColors": [
+        "#131415",
+        "#212325",
+        "#323536",
+        "#474B4D",
+        "#606568"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Cold dark anaerobic mud with wet slick sheen."
+    },
+    "WET_SILT_RIVER": {
+      "rampId": "WET_SILT_RIVER",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Riverbank silt, slow water deposit flats, damp mudbars",
+      "forbiddenUsage": "Arid desert sand",
+      "transitionCompatibility": [
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_SILT_01",
+        "WET_SILT_02",
+        "WET_SILT_03",
+        "WET_SILT_04",
+        "WET_SILT_05"
+      ],
+      "hexColors": [
+        "#171813",
+        "#292A20",
+        "#3F4030",
+        "#5A5B45",
+        "#797A5F"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Muted olive-grey silt for river deposits."
+    },
+    "WET_STONE_DAMP_SLATE": {
+      "rampId": "WET_STONE_DAMP_SLATE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Water-smoothed river slate, submerged stepping stones, wet boulders",
+      "forbiddenUsage": "Dry limestone bluffs",
+      "transitionCompatibility": [
+        "WET_HIGH",
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_SLATE_01",
+        "WET_SLATE_02",
+        "WET_SLATE_03",
+        "WET_SLATE_04",
+        "WET_SLATE_05"
+      ],
+      "hexColors": [
+        "#161B20",
+        "#252F36",
+        "#37464F",
+        "#4E626E",
+        "#6B8291"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dark blue-slate stone with wet surface reflection."
+    },
+    "WET_WOOD_DRIFTWOOD": {
+      "rampId": "WET_WOOD_DRIFTWOOD",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Waterlogged snags, exposed gnarly cypress roots, rotting dock pilings",
+      "forbiddenUsage": "Fresh sawed construction timber",
+      "transitionCompatibility": [
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_WOOD_FL_01",
+        "WET_DRIFT_02",
+        "NEUT_WARM_02",
+        "WET_DRIFT_04",
+        "WET_DRIFT_05"
+      ],
+      "hexColors": [
+        "#1B1714",
+        "#2A2722",
+        "#3D3833",
+        "#585045",
+        "#766B5B"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dark waterlogged timber with muted brown-grey body."
+    },
+    "WET_FOLIAGE_WILLOW": {
+      "rampId": "WET_FOLIAGE_WILLOW",
+      "materialFamily": "FOLIAGE",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Drooping weeping willow fronds, swamp alder leaves, bog briars",
+      "forbiddenUsage": "Conifer needles, mountain pines",
+      "transitionCompatibility": [
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_WILLOW_01",
+        "WET_WILLOW_02",
+        "WET_WILLOW_03",
+        "WET_WILLOW_04",
+        "WET_WILLOW_05"
+      ],
+      "hexColors": [
+        "#162115",
+        "#293B22",
+        "#415C32",
+        "#618247",
+        "#8AA864"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Yellow-tinged willow fronds for marsh wetlands."
+    },
+    "ARID_GRASS_BUNCHGRASS": {
+      "rampId": "ARID_GRASS_BUNCHGRASS",
+      "materialFamily": "GRASS",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Spiky drought-adapted bunchgrass clumps, dried straw tussocks",
+      "forbiddenUsage": "Lush meadow lawns",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "WET_ARID",
+        "ARID_HIGH",
+        "ARID_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_GRASS_01",
+        "ARID_GRASS_02",
+        "ARID_GRASS_03",
+        "ARID_GRASS_04",
+        "ARID_GRASS_05"
+      ],
+      "hexColors": [
+        "#262316",
+        "#473E24",
+        "#6F5F34",
+        "#9C8449",
+        "#CBB06A"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Warm straw-yellow bunchgrass for dry steppe plains."
+    },
+    "ARID_SOIL_HARDPAN": {
+      "rampId": "ARID_SOIL_HARDPAN",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Caliche-rich sun-baked hardpan earth, cracked alkali flats",
+      "forbiddenUsage": "Rich dark garden loam",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "WET_ARID",
+        "ARID_HIGH",
+        "ARID_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_HARDPAN_01",
+        "ARID_HARDPAN_02",
+        "ARID_HARDPAN_03",
+        "ARID_HARDPAN_04",
+        "ARID_HARDPAN_05"
+      ],
+      "hexColors": [
+        "#2E261D",
+        "#4F4232",
+        "#77634A",
+        "#A28968",
+        "#CFB38D"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Pale caliche hardpan soil."
+    },
+    "ARID_SOIL_CLAY": {
+      "rampId": "ARID_SOIL_CLAY",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Baked reddish-buff clay washes, dry arroyo banks",
+      "forbiddenUsage": "Waterlogged peat",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "ARID_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_CLAY_01",
+        "ARID_CLAY_02",
+        "ARID_CLAY_03",
+        "ARID_CLAY_04",
+        "ARID_CLAY_05"
+      ],
+      "hexColors": [
+        "#2C1B16",
+        "#4E2E23",
+        "#764432",
+        "#A16147",
+        "#CF8667"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Terracotta-tinted arid clay."
+    },
+    "ARID_SAND_COARSE": {
+      "rampId": "ARID_SAND_COARSE",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Coarse desert sand drifts, arroyo wash beds, dry stream channels",
+      "forbiddenUsage": "Black volcanic ash",
+      "transitionCompatibility": [
+        "ARID_HIGH",
+        "TEMP_ARID"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_SAND_01",
+        "ARID_SAND_02",
+        "ARID_SAND_03",
+        "ARID_SAND_04",
+        "ARID_SAND_05"
+      ],
+      "hexColors": [
+        "#30281B",
+        "#54442D",
+        "#7D6642",
+        "#A88C5D",
+        "#D3B680"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Coarse buff sand with high reflectivity."
+    },
+    "ARID_STONE_SANDSTONE": {
+      "rampId": "ARID_STONE_SANDSTONE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Layered horizontal red/buff sandstone cliffs, mesa summits, hoodoos",
+      "forbiddenUsage": "Cold grey granite, black columnar basalt",
+      "transitionCompatibility": [
+        "ARID_HIGH",
+        "ARID_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_SANDSTONE_01",
+        "ARID_SANDSTONE_02",
+        "ARID_SANDSTONE_03",
+        "ARID_SANDSTONE_04",
+        "ARID_SANDSTONE_05"
+      ],
+      "hexColors": [
+        "#331F18",
+        "#583224",
+        "#834A34",
+        "#B06A4B",
+        "#DC906B"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Warm horizontal layered sandstone. Signature geological marker for Arid biome."
+    },
+    "ARID_SCRUB_THORN": {
+      "rampId": "ARID_SCRUB_THORN",
+      "materialFamily": "FOLIAGE",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Dusty desert sagebrush, creosote scrub, spiny thorn bushes",
+      "forbiddenUsage": "Broadleaf oak forest",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "ARID_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_SCRUB_01",
+        "ARID_SCRUB_02",
+        "ARID_SCRUB_03",
+        "ARID_SCRUB_04",
+        "ARID_SCRUB_05"
+      ],
+      "hexColors": [
+        "#1D221A",
+        "#343C2D",
+        "#505B44",
+        "#738162",
+        "#9AA986"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dusty desaturated sage-green for arid shrubs."
+    },
+    "ARID_WOOD_BLEACHED": {
+      "rampId": "ARID_WOOD_BLEACHED",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Sun-bleached dead snags, dry weathered branch clutter, fence posts",
+      "forbiddenUsage": "Waterlogged bog driftwood",
+      "transitionCompatibility": [
+        "TEMP_ARID",
+        "ARID_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_DRIFT_02",
+        "ARID_BLEACH_02",
+        "ARID_BLEACH_03",
+        "ARID_BLEACH_04",
+        "ARID_BLEACH_05"
+      ],
+      "hexColors": [
+        "#2A2722",
+        "#4A443A",
+        "#706A5B",
+        "#9C9282",
+        "#CAC0AF"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Bone-dry sun-bleached wood."
+    },
+    "ARID_BONE_CALICHE": {
+      "rampId": "ARID_BONE_CALICHE",
+      "materialFamily": "NEUTRALS",
+      "biomeAffinity": [
+        "ARID"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Desert animal skulls, scattered ribcages, caliche mineral crusts",
+      "forbiddenUsage": "Live vegetation, deep shadows",
+      "transitionCompatibility": [
+        "WET_ARID",
+        "ARID_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "ARID_BONE_01",
+        "ARID_BONE_02",
+        "ARID_BONE_03",
+        "ARID_BONE_04",
+        "ARID_BONE_05"
+      ],
+      "hexColors": [
+        "#36332C",
+        "#5D584C",
+        "#888170",
+        "#B7AF9C",
+        "#E6DECD"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Weathered pale bone and caliche crust."
+    },
+    "HIGH_GRASS_ALPINE": {
+      "rampId": "HIGH_GRASS_ALPINE",
+      "materialFamily": "GRASS",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Hardy alpine fescue, rock-cleft cushion turf, windward ridge grass",
+      "forbiddenUsage": "Snow/ice surfaces (HARD RULE: zero snow/ice in DEUS)",
+      "transitionCompatibility": [
+        "TEMP_HIGH",
+        "WET_HIGH",
+        "ARID_HIGH",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "HIGH_GRASS_01",
+        "HIGH_GRASS_02",
+        "HIGH_GRASS_03",
+        "HIGH_GRASS_04",
+        "HIGH_GRASS_05"
+      ],
+      "hexColors": [
+        "#162018",
+        "#273827",
+        "#3D523A",
+        "#5B7353",
+        "#809C73"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Tough blue-green alpine fescue. ZERO snow or frost cues."
+    },
+    "HIGH_SOIL_STONY_LOAM": {
+      "rampId": "HIGH_SOIL_STONY_LOAM",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Thin rocky mountain soil, weathered gravelly upland dirt",
+      "forbiddenUsage": "Deep rich garden loam",
+      "transitionCompatibility": [
+        "TEMP_HIGH",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "HIGH_SOIL_01",
+        "HIGH_SOIL_02",
+        "HIGH_SOIL_03",
+        "ARID_BLEACH_03",
+        "HIGH_SOIL_05"
+      ],
+      "hexColors": [
+        "#1D1B18",
+        "#322F29",
+        "#4D4A3F",
+        "#706A5B",
+        "#938E7C"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Thin gravelly mountain topsoil."
+    },
+    "HIGH_GRAVEL_SCREE": {
+      "rampId": "HIGH_GRAVEL_SCREE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Angular rock scree, talus slopes, mountain trail footing",
+      "forbiddenUsage": "Soft river sand",
+      "transitionCompatibility": [
+        "TEMP_HIGH",
+        "ARID_HIGH",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_MUD_02",
+        "HIGH_SCREE_02",
+        "HIGH_SCREE_03",
+        "HIGH_SCREE_04",
+        "HIGH_SCREE_05"
+      ],
+      "hexColors": [
+        "#212325",
+        "#3A3E42",
+        "#5A5D63",
+        "#7C8389",
+        "#A4ABB1"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Angular grey rock chips and scree talus."
+    },
+    "HIGH_STONE_GRANITE": {
+      "rampId": "HIGH_STONE_GRANITE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Fractured cold grey granite cliffs, mountain peaks, sheer vertical bluffs",
+      "forbiddenUsage": "Soft yellow sandstone",
+      "transitionCompatibility": [
+        "TEMP_HIGH",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_COOL_01",
+        "HIGH_GRANITE_02",
+        "HIGH_GRANITE_03",
+        "HIGH_GRANITE_04",
+        "HIGH_GRANITE_05"
+      ],
+      "hexColors": [
+        "#1C2126",
+        "#30383E",
+        "#4B555D",
+        "#6E7A85",
+        "#97A3AF"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Massive cold fractured grey granite bedrock."
+    },
+    "HIGH_STONE_SLATE": {
+      "rampId": "HIGH_STONE_SLATE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Dark cleft slate slabs, jagged mountain ridges, roofing tiles",
+      "forbiddenUsage": "Volcanic pumice",
+      "transitionCompatibility": [
+        "WET_HIGH",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_SLATE_01",
+        "WET_SLATE_02",
+        "HIGH_SLATE_03",
+        "HIGH_SLATE_04",
+        "HIGH_SLATE_05"
+      ],
+      "hexColors": [
+        "#161B20",
+        "#252F36",
+        "#3C474F",
+        "#55636F",
+        "#758593"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dark cleft mountain slate."
+    },
+    "HIGH_FOLIAGE_CONIFER": {
+      "rampId": "HIGH_FOLIAGE_CONIFER",
+      "materialFamily": "FOLIAGE",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Mountain pine needles, stunted alpine fir, wind-twisted krummholz",
+      "forbiddenUsage": "Broadleaf oak canopy",
+      "transitionCompatibility": [
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "HIGH_CONIFER_01",
+        "HIGH_CONIFER_02",
+        "HIGH_CONIFER_03",
+        "HIGH_CONIFER_04",
+        "HIGH_CONIFER_05"
+      ],
+      "hexColors": [
+        "#0F1F1D",
+        "#1B332D",
+        "#2A4E43",
+        "#3E6E5D",
+        "#5A927C"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Deep blue-green needle foliage for mountain conifers."
+    },
+    "HIGH_BARK_CONIFER": {
+      "rampId": "HIGH_BARK_CONIFER",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "HIGH"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Mountain pine bark, resinous spruce trunks",
+      "forbiddenUsage": "Birch white bark",
+      "transitionCompatibility": [
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TEMP_WOOD_FL_01",
+        "HIGH_BARK_02",
+        "TEMP_OAK_BARK_03",
+        "TEMP_OAK_BARK_04",
+        "HIGH_BARK_05"
+      ],
+      "hexColors": [
+        "#1B1714",
+        "#332922",
+        "#4E3E33",
+        "#6F5948",
+        "#947762"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Rough dark pine bark."
+    },
+    "VOLC_ASH_DRIFT": {
+      "rampId": "VOLC_ASH_DRIFT",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Powdery dark ash drifts, barren volcanic flats, cinder plains",
+      "forbiddenUsage": "Fertile green turf",
+      "transitionCompatibility": [
+        "TEMP_VOLC",
+        "ARID_VOLC",
+        "HIGH_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_ASH_01",
+        "VOLC_ASH_02",
+        "VOLC_ASH_03",
+        "HIGH_SCREE_03",
+        "VOLC_ASH_05"
+      ],
+      "hexColors": [
+        "#161618",
+        "#27272B",
+        "#3E3E44",
+        "#5A5D63",
+        "#7D7D88"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Powdery grey-black volcanic ash."
+    },
+    "VOLC_SOIL_SCORCHED": {
+      "rampId": "VOLC_SOIL_SCORCHED",
+      "materialFamily": "SOIL",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Heat-scorched earth, baked brown-black crust, geothermal clay",
+      "forbiddenUsage": "Lush meadow lawns",
+      "transitionCompatibility": [
+        "TEMP_VOLC",
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_PEAT_01",
+        "WET_PEAT_02",
+        "VOLC_SCORCH_03",
+        "VOLC_SCORCH_04",
+        "VOLC_SCORCH_05"
+      ],
+      "hexColors": [
+        "#171210",
+        "#261D18",
+        "#412A23",
+        "#5E3C32",
+        "#805345"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Heat-baked dark scorched earth."
+    },
+    "VOLC_STONE_BASALT": {
+      "rampId": "VOLC_STONE_BASALT",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Columnar basalt pillars, caldera crater rims, dark igneous rock",
+      "forbiddenUsage": "Sandstone ledges",
+      "transitionCompatibility": [
+        "HIGH_VOLC",
+        "ARID_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_BASALT_01",
+        "VOLC_BASALT_02",
+        "VOLC_BASALT_03",
+        "VOLC_BASALT_04",
+        "VOLC_BASALT_05"
+      ],
+      "hexColors": [
+        "#101114",
+        "#1D1E24",
+        "#2F303A",
+        "#464754",
+        "#636474"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Dark columnar basalt. Deep cool grey-black tone."
+    },
+    "VOLC_STONE_SCORIA": {
+      "rampId": "VOLC_STONE_SCORIA",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Vesicular scoria boulders, rough cinder rock, reddish-black volcanic slag",
+      "forbiddenUsage": "Dressed ashlar masonry",
+      "transitionCompatibility": [
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_SCORIA_01",
+        "VOLC_SCORIA_02",
+        "VOLC_SCORIA_03",
+        "VOLC_SCORIA_04",
+        "VOLC_SCORIA_05"
+      ],
+      "hexColors": [
+        "#191113",
+        "#2B1B1E",
+        "#44292E",
+        "#623C43",
+        "#85545D"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Porous reddish-black scoria rock."
+    },
+    "VOLC_STONE_PUMICE": {
+      "rampId": "VOLC_STONE_PUMICE",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Pale porous pumice gravel, floating volcanic stone",
+      "forbiddenUsage": "Dark obsidian",
+      "transitionCompatibility": [
+        "TEMP_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_WARM_01",
+        "VOLC_PUMICE_02",
+        "VOLC_PUMICE_03",
+        "VOLC_PUMICE_04",
+        "NEUT_WARM_05"
+      ],
+      "hexColors": [
+        "#23211D",
+        "#3E3B38",
+        "#605C56",
+        "#878179",
+        "#B4ABA1"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Light grey-buff vesicular pumice stone."
+    },
+    "VOLC_STONE_OBSIDIAN": {
+      "rampId": "VOLC_STONE_OBSIDIAN",
+      "materialFamily": "STONE",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Glassy jet-black obsidian seams, razor-sharp knapped flakes",
+      "forbiddenUsage": "Common fieldstones",
+      "transitionCompatibility": [
+        "VOLC_HAZARD"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_OBSIDIAN_01",
+        "NEUT_VOID_OCCLUSION",
+        "VOLC_OBSIDIAN_03",
+        "VOLC_OBSIDIAN_04",
+        "VOLC_OBSIDIAN_05"
+      ],
+      "hexColors": [
+        "#090A0D",
+        "#14161C",
+        "#1F2430",
+        "#353E52",
+        "#5E6A88"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Vitreous volcanic glass with specular blue-grey edge glints."
+    },
+    "VOLC_MINERAL_SULFUR": {
+      "rampId": "VOLC_MINERAL_SULFUR",
+      "materialFamily": "MINERAL",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Geothermal sulfur rims, yellow encrustations, acid fumarole lips",
+      "forbiddenUsage": "Healthy meadow grass",
+      "transitionCompatibility": [
+        "WET_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_SULFUR_01",
+        "VOLC_SULFUR_02",
+        "VOLC_SULFUR_03",
+        "VOLC_SULFUR_04",
+        "VOLC_SULFUR_05"
+      ],
+      "hexColors": [
+        "#272810",
+        "#4A4C1C",
+        "#777A29",
+        "#ABAE39",
+        "#DEDF5E"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Vibrant yellow-green sulfur crust."
+    },
+    "VOLC_WOOD_CHARRED": {
+      "rampId": "VOLC_WOOD_CHARRED",
+      "materialFamily": "WOOD_BARK",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Burned timber, charred snags, campfire charcoal remains",
+      "forbiddenUsage": "Healthy growing foliage",
+      "transitionCompatibility": [
+        "TEMP_VOLC"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_CHAR_01",
+        "HIGH_SOIL_01",
+        "VOLC_CHAR_03",
+        "VOLC_CHAR_04",
+        "VOLC_CHAR_05"
+      ],
+      "hexColors": [
+        "#0F0E0E",
+        "#1D1B18",
+        "#2F2A28",
+        "#463E3B",
+        "#635753"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Charred deadwood and charcoal."
+    },
+    "VOLC_LAVA_HAZARD": {
+      "rampId": "VOLC_LAVA_HAZARD",
+      "materialFamily": "LAVA",
+      "biomeAffinity": [
+        "VOLC"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Active molten lava hazard channels, bubbling magma pools (STRICTLY LOCAL ACCENT)",
+      "forbiddenUsage": "Full-screen wallpaper flooding (HARD RULE: lava is an accent/hazard only)",
+      "transitionCompatibility": [
+        "HAZARD_ONLY"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "VOLC_LAVA_01",
+        "VOLC_LAVA_02",
+        "VOLC_LAVA_03",
+        "VOLC_LAVA_04",
+        "VOLC_LAVA_05"
+      ],
+      "hexColors": [
+        "#300705",
+        "#6D1109",
+        "#B5280D",
+        "#F26018",
+        "#FFB833"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Incandescent molten lava. Strictly reserved for dangerous thermal nodes."
+    },
+    "WATER_SHALLOW_CLEAR": {
+      "rampId": "WATER_SHALLOW_CLEAR",
+      "materialFamily": "WATER",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Sunlit lake shallows, clear stream margins, pebble shoreline fringe",
+      "forbiddenUsage": "Murky swamp sumps",
+      "transitionCompatibility": [
+        "TEMP_WET",
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WATER_SHALLOW_01",
+        "WATER_SHALLOW_02",
+        "WATER_SHALLOW_03",
+        "WATER_SHALLOW_04",
+        "WATER_SHALLOW_05"
+      ],
+      "hexColors": [
+        "#162A36",
+        "#23445A",
+        "#356782",
+        "#4F8FB2",
+        "#7BC0E3"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Clean transparent shallow freshwater."
+    },
+    "WATER_DEEP_FRESH": {
+      "rampId": "WATER_DEEP_FRESH",
+      "materialFamily": "WATER",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Deep freshwater rivers, lake basins, subterranean aquifers",
+      "forbiddenUsage": "Acid fumarole pools",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WATER_DEEP_01",
+        "WATER_DEEP_02",
+        "WATER_SHALLOW_02",
+        "WATER_DEEP_04",
+        "WATER_DEEP_05"
+      ],
+      "hexColors": [
+        "#0F1B26",
+        "#172C3D",
+        "#23445A",
+        "#356182",
+        "#5289B0"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Deep canonical freshwater blue-teal."
+    },
+    "WATER_MURKY_WETLAND": {
+      "rampId": "WATER_MURKY_WETLAND",
+      "materialFamily": "WATER",
+      "biomeAffinity": [
+        "WET"
+      ],
+      "sharedAcrossBiomes": false,
+      "preferredUsage": "Tannin-stained wetland pools, stagnant swamp channels, slow marsh creeks",
+      "forbiddenUsage": "Mountain cascade torrents",
+      "transitionCompatibility": [
+        "TEMP_WET"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WATER_MURK_01",
+        "WATER_MURK_02",
+        "WATER_MURK_03",
+        "WATER_MURK_04",
+        "WATER_MURK_05"
+      ],
+      "hexColors": [
+        "#141B18",
+        "#202B24",
+        "#2F4035",
+        "#435A4B",
+        "#5D7C68"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Tannin-stained slow wetland water with olive-drab undertone."
+    },
+    "WATER_FOAM_RAPIDS": {
+      "rampId": "WATER_FOAM_RAPIDS",
+      "materialFamily": "WATER",
+      "biomeAffinity": [
+        "HIGH",
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Mountain stream white-water, cascade splash, rapids, shoreline foam",
+      "forbiddenUsage": "Stagnant bog pools",
+      "transitionCompatibility": [
+        "WET_HIGH",
+        "TEMP_HIGH"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WATER_FOAM_01",
+        "WATER_FOAM_02",
+        "WATER_FOAM_03",
+        "WATER_FOAM_04",
+        "WATER_FOAM_05"
+      ],
+      "hexColors": [
+        "#304859",
+        "#4C6E85",
+        "#7297B2",
+        "#A5C5DC",
+        "#E2EFF8"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Frothy aerated water for waterfalls and rapids."
+    },
+    "CONSTRUCT_TIMBER_FRESH": {
+      "rampId": "CONSTRUCT_TIMBER_FRESH",
+      "materialFamily": "CONSTRUCTION",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Fresh sawn lumber, wooden workbenches, settlement palisades, door frames",
+      "forbiddenUsage": "Sun-bleached desert snags",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "TIMBER_FRESH_01",
+        "TIMBER_FRESH_02",
+        "TIMBER_FRESH_03",
+        "TIMBER_FRESH_04",
+        "TIMBER_FRESH_05"
+      ],
+      "hexColors": [
+        "#281D13",
+        "#49331E",
+        "#734F2D",
+        "#A2713F",
+        "#D0995C"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Warm fresh sawn timber for newly built structures and carpentry."
+    },
+    "CONSTRUCT_TIMBER_AGED": {
+      "rampId": "CONSTRUCT_TIMBER_AGED",
+      "materialFamily": "CONSTRUCTION",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Weathered grey timber walls, old fencing, village roofing shingles",
+      "forbiddenUsage": "Fresh golden lumber",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "HIGH_SOIL_01",
+        "HIGH_SOIL_02",
+        "TIMBER_AGED_03",
+        "TIMBER_AGED_04",
+        "TIMBER_AGED_05"
+      ],
+      "hexColors": [
+        "#1D1B18",
+        "#322F29",
+        "#4D463D",
+        "#6E6457",
+        "#938676"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Weathered grey-brown structural posts and roofing."
+    },
+    "CONSTRUCT_STONE_DRESSED": {
+      "rampId": "CONSTRUCT_STONE_DRESSED",
+      "materialFamily": "CONSTRUCTION",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Cut ashlar stone masonry, fortress foundations, stone hearths, paved roads",
+      "forbiddenUsage": "Rough natural caves",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_MUD_02",
+        "HIGH_SCREE_02",
+        "HIGH_SCREE_03",
+        "HIGH_SCREE_04",
+        "HIGH_SCREE_05"
+      ],
+      "hexColors": [
+        "#212325",
+        "#3A3E42",
+        "#5A5D63",
+        "#7C8389",
+        "#A4ABB1"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Formal dressed ashlar stone blocks for human and dwarven architecture."
+    },
+    "CONSTRUCT_METAL_IRON": {
+      "rampId": "CONSTRUCT_METAL_IRON",
+      "materialFamily": "CONSTRUCTION",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Wrought iron hinges, metal reinforcing bands, anvil bodies, weapons, nails",
+      "forbiddenUsage": "Wood planking",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "NEUT_VOID_OCCLUSION",
+        "METAL_IRON_02",
+        "HIGH_SLATE_03",
+        "METAL_IRON_04",
+        "METAL_IRON_05"
+      ],
+      "hexColors": [
+        "#14161C",
+        "#252B30",
+        "#3C474F",
+        "#606D78",
+        "#8C9DA9"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Forged iron and weapon steel neutral ramp."
+    },
+    "CONSTRUCT_FABRIC_LEATHER": {
+      "rampId": "CONSTRUCT_FABRIC_LEATHER",
+      "materialFamily": "CONSTRUCTION",
+      "biomeAffinity": [
+        "UNIVERSAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Tanned hide bedding, market stall canvas, sacks, leather straps",
+      "forbiddenUsage": "Hard stone",
+      "transitionCompatibility": [
+        "ALL"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "WET_PEAT_02",
+        "FABRIC_LEATHER_02",
+        "FABRIC_LEATHER_03",
+        "FABRIC_LEATHER_04",
+        "FABRIC_LEATHER_05"
+      ],
+      "hexColors": [
+        "#261D18",
+        "#423023",
+        "#674A35",
+        "#91694A",
+        "#BA8C66"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Tanned leather and canvas neutral ramp for world props."
+    },
+    "MAGIC_DIVINE_GOLD": {
+      "rampId": "MAGIC_DIVINE_GOLD",
+      "materialFamily": "SUPERNATURAL",
+      "biomeAffinity": [
+        "SPECIAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Holy radiant spells, divine miracles, sunburst symbols, celestial aura",
+      "forbiddenUsage": "Mundane dirt roads",
+      "transitionCompatibility": [
+        "VFX_ONLY"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "MAGIC_GOLD_01",
+        "MAGIC_GOLD_02",
+        "MAGIC_GOLD_03",
+        "MAGIC_GOLD_04",
+        "MAGIC_GOLD_05"
+      ],
+      "hexColors": [
+        "#3B2905",
+        "#78540D",
+        "#BE891B",
+        "#F7C03D",
+        "#FFF2A3"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Radiant gold divine magic spectrum."
+    },
+    "MAGIC_ARCANE_CYAN": {
+      "rampId": "MAGIC_ARCANE_CYAN",
+      "materialFamily": "SUPERNATURAL",
+      "biomeAffinity": [
+        "SPECIAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Arcane glyphs, wizard missile trails, crystalline energy, moongate vortex",
+      "forbiddenUsage": "Ordinary lake water",
+      "transitionCompatibility": [
+        "VFX_ONLY"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "MAGIC_CYAN_01",
+        "MAGIC_CYAN_02",
+        "MAGIC_CYAN_03",
+        "MAGIC_CYAN_04",
+        "MAGIC_CYAN_05"
+      ],
+      "hexColors": [
+        "#062B33",
+        "#0F5969",
+        "#1C95AD",
+        "#3DD4F2",
+        "#A8F3FF"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Electric arcane cyan energy spectrum."
+    },
+    "MAGIC_ASTRAL_VIOLET": {
+      "rampId": "MAGIC_ASTRAL_VIOLET",
+      "materialFamily": "SUPERNATURAL",
+      "biomeAffinity": [
+        "SPECIAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Astral rifts, nether magic, eldritch wardings, shadow curses",
+      "forbiddenUsage": "Common flora",
+      "transitionCompatibility": [
+        "VFX_ONLY"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "MAGIC_VIOLET_01",
+        "MAGIC_VIOLET_02",
+        "MAGIC_VIOLET_03",
+        "MAGIC_VIOLET_04",
+        "MAGIC_VIOLET_05"
+      ],
+      "hexColors": [
+        "#220C30",
+        "#4A1E69",
+        "#8239B5",
+        "#BE65FA",
+        "#E6BAFF"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Astral and eldritch purple spectrum."
+    },
+    "MAGIC_HEALING_EMERALD": {
+      "rampId": "MAGIC_HEALING_EMERALD",
+      "materialFamily": "SUPERNATURAL",
+      "biomeAffinity": [
+        "SPECIAL"
+      ],
+      "sharedAcrossBiomes": true,
+      "preferredUsage": "Druidic nature magic, potent restoration auras, enchanted spring glints",
+      "forbiddenUsage": "Ordinary lawn grass",
+      "transitionCompatibility": [
+        "VFX_ONLY"
+      ],
+      "colorCount": 5,
+      "colorIds": [
+        "MAGIC_EMERALD_01",
+        "MAGIC_EMERALD_02",
+        "MAGIC_EMERALD_03",
+        "MAGIC_EMERALD_04",
+        "MAGIC_EMERALD_05"
+      ],
+      "hexColors": [
+        "#0A2E16",
+        "#165C2F",
+        "#269E51",
+        "#4EE085",
+        "#ADFFD0"
+      ],
+      "toneRoles": [
+        "deepShadow",
+        "shadow",
+        "body",
+        "light",
+        "highlight"
+      ],
+      "notes": "Supernatural high-saturation emerald healing aura."
+    }
+  },
+  "masterColors": {
+    "NEUT_VOID_DEEP": {
+      "colorId": "NEUT_VOID_DEEP",
+      "hex": "#060709",
+      "r": 6,
+      "g": 7,
+      "b": 9,
+      "luminance": 6.9,
+      "tags": [
+        "void",
+        "deepest_occlusion"
+      ]
+    },
+    "NEUT_VOID_CAP": {
+      "colorId": "NEUT_VOID_CAP",
+      "hex": "#0C0D12",
+      "r": 12,
+      "g": 13,
+      "b": 18,
+      "luminance": 13.1,
+      "tags": [
+        "wall_cap",
+        "structural_dark"
+      ]
+    },
+    "NEUT_VOID_OCCLUSION": {
+      "colorId": "NEUT_VOID_OCCLUSION",
+      "hex": "#14161C",
+      "r": 20,
+      "g": 22,
+      "b": 28,
+      "luminance": 22,
+      "tags": [
+        "corner_occlusion",
+        "ambient_dark",
+        "obsidian_dark",
+        "iron_shadow"
+      ]
+    },
+    "NEUT_COOL_01": {
+      "colorId": "NEUT_COOL_01",
+      "hex": "#1C2126",
+      "r": 28,
+      "g": 33,
+      "b": 38,
+      "luminance": 32.3,
+      "tags": [
+        "slate_shadow",
+        "cool_dark",
+        "granite_deep"
+      ]
+    },
+    "NEUT_COOL_02": {
+      "colorId": "NEUT_COOL_02",
+      "hex": "#333B45",
+      "r": 51,
+      "g": 59,
+      "b": 69,
+      "luminance": 58,
+      "tags": [
+        "slate_body_dark"
+      ]
+    },
+    "NEUT_COOL_03": {
+      "colorId": "NEUT_COOL_03",
+      "hex": "#525D6B",
+      "r": 82,
+      "g": 93,
+      "b": 107,
+      "luminance": 91.7,
+      "tags": [
+        "slate_body"
+      ]
+    },
+    "NEUT_COOL_04": {
+      "colorId": "NEUT_COOL_04",
+      "hex": "#798797",
+      "r": 121,
+      "g": 135,
+      "b": 151,
+      "luminance": 133.2,
+      "tags": [
+        "slate_lit"
+      ]
+    },
+    "NEUT_COOL_05": {
+      "colorId": "NEUT_COOL_05",
+      "hex": "#A7B4C2",
+      "r": 167,
+      "g": 180,
+      "b": 194,
+      "luminance": 178.2,
+      "tags": [
+        "slate_crest"
+      ]
+    },
+    "NEUT_WARM_01": {
+      "colorId": "NEUT_WARM_01",
+      "hex": "#23211D",
+      "r": 35,
+      "g": 33,
+      "b": 29,
+      "luminance": 33.1,
+      "tags": [
+        "warm_shadow",
+        "stone_crevice",
+        "limestone_deep",
+        "pumice_shadow"
+      ]
+    },
+    "NEUT_WARM_02": {
+      "colorId": "NEUT_WARM_02",
+      "hex": "#3D3833",
+      "r": 61,
+      "g": 56,
+      "b": 51,
+      "luminance": 56.7,
+      "tags": [
+        "warm_body_dark",
+        "driftwood_body"
+      ]
+    },
+    "NEUT_WARM_03": {
+      "colorId": "NEUT_WARM_03",
+      "hex": "#5F5851",
+      "r": 95,
+      "g": 88,
+      "b": 81,
+      "luminance": 89,
+      "tags": [
+        "warm_stone_body"
+      ]
+    },
+    "NEUT_WARM_04": {
+      "colorId": "NEUT_WARM_04",
+      "hex": "#867E75",
+      "r": 134,
+      "g": 126,
+      "b": 117,
+      "luminance": 127.1,
+      "tags": [
+        "warm_stone_lit"
+      ]
+    },
+    "NEUT_WARM_05": {
+      "colorId": "NEUT_WARM_05",
+      "hex": "#B4ABA1",
+      "r": 180,
+      "g": 171,
+      "b": 161,
+      "luminance": 172.2,
+      "tags": [
+        "warm_stone_crest",
+        "pumice_crest"
+      ]
+    },
+    "NEUT_PALE_01": {
+      "colorId": "NEUT_PALE_01",
+      "hex": "#6D6961",
+      "r": 109,
+      "g": 105,
+      "b": 97,
+      "luminance": 105.3,
+      "tags": [
+        "bone_shadow"
+      ]
+    },
+    "NEUT_PALE_02": {
+      "colorId": "NEUT_PALE_02",
+      "hex": "#9B968C",
+      "r": 155,
+      "g": 150,
+      "b": 140,
+      "luminance": 150.3,
+      "tags": [
+        "parchment_shadow"
+      ]
+    },
+    "NEUT_PALE_03": {
+      "colorId": "NEUT_PALE_03",
+      "hex": "#C8C3B7",
+      "r": 200,
+      "g": 195,
+      "b": 183,
+      "luminance": 195.2,
+      "tags": [
+        "parchment_body"
+      ]
+    },
+    "NEUT_PALE_04": {
+      "colorId": "NEUT_PALE_04",
+      "hex": "#EDE9DE",
+      "r": 237,
+      "g": 233,
+      "b": 222,
+      "luminance": 233.1,
+      "tags": [
+        "stark_crest",
+        "birch_white_crest"
+      ]
+    },
+    "TEMP_GRASS_01": {
+      "colorId": "TEMP_GRASS_01",
+      "hex": "#152614",
+      "r": 21,
+      "g": 38,
+      "b": 20,
+      "luminance": 33.1,
+      "tags": [
+        "turf_deep_shadow"
+      ]
+    },
+    "TEMP_GRASS_02": {
+      "colorId": "TEMP_GRASS_02",
+      "hex": "#26421C",
+      "r": 38,
+      "g": 66,
+      "b": 28,
+      "luminance": 57.3,
+      "tags": [
+        "turf_shadow"
+      ]
+    },
+    "TEMP_GRASS_03": {
+      "colorId": "TEMP_GRASS_03",
+      "hex": "#3E6328",
+      "r": 62,
+      "g": 99,
+      "b": 40,
+      "luminance": 86.9,
+      "tags": [
+        "turf_body"
+      ]
+    },
+    "TEMP_GRASS_04": {
+      "colorId": "TEMP_GRASS_04",
+      "hex": "#628C38",
+      "r": 98,
+      "g": 140,
+      "b": 56,
+      "luminance": 125,
+      "tags": [
+        "turf_lit"
+      ]
+    },
+    "TEMP_GRASS_05": {
+      "colorId": "TEMP_GRASS_05",
+      "hex": "#91B851",
+      "r": 145,
+      "g": 184,
+      "b": 81,
+      "luminance": 168.3,
+      "tags": [
+        "turf_highlight"
+      ]
+    },
+    "TEMP_GRASS_DRY_01": {
+      "colorId": "TEMP_GRASS_DRY_01",
+      "hex": "#1D2315",
+      "r": 29,
+      "g": 35,
+      "b": 21,
+      "luminance": 32.7,
+      "tags": [
+        "dry_turf_shadow"
+      ]
+    },
+    "TEMP_GRASS_DRY_02": {
+      "colorId": "TEMP_GRASS_DRY_02",
+      "hex": "#353C20",
+      "r": 53,
+      "g": 60,
+      "b": 32,
+      "luminance": 56.5,
+      "tags": [
+        "dry_turf_body_dark"
+      ]
+    },
+    "TEMP_GRASS_DRY_03": {
+      "colorId": "TEMP_GRASS_DRY_03",
+      "hex": "#565E31",
+      "r": 86,
+      "g": 94,
+      "b": 49,
+      "luminance": 89.1,
+      "tags": [
+        "dry_turf_body"
+      ]
+    },
+    "TEMP_GRASS_DRY_04": {
+      "colorId": "TEMP_GRASS_DRY_04",
+      "hex": "#82884A",
+      "r": 130,
+      "g": 136,
+      "b": 74,
+      "luminance": 130.2,
+      "tags": [
+        "dry_turf_lit"
+      ]
+    },
+    "TEMP_GRASS_DRY_05": {
+      "colorId": "TEMP_GRASS_DRY_05",
+      "hex": "#B1B26C",
+      "r": 177,
+      "g": 178,
+      "b": 108,
+      "luminance": 172.7,
+      "tags": [
+        "dry_turf_highlight"
+      ]
+    },
+    "TEMP_LOAM_01": {
+      "colorId": "TEMP_LOAM_01",
+      "hex": "#1F1610",
+      "r": 31,
+      "g": 22,
+      "b": 16,
+      "luminance": 23.5,
+      "tags": [
+        "loam_deep"
+      ]
+    },
+    "TEMP_LOAM_02": {
+      "colorId": "TEMP_LOAM_02",
+      "hex": "#38291C",
+      "r": 56,
+      "g": 41,
+      "b": 28,
+      "luminance": 43.3,
+      "tags": [
+        "loam_shadow"
+      ]
+    },
+    "TEMP_LOAM_03": {
+      "colorId": "TEMP_LOAM_03",
+      "hex": "#57422C",
+      "r": 87,
+      "g": 66,
+      "b": 44,
+      "luminance": 68.9,
+      "tags": [
+        "loam_body"
+      ]
+    },
+    "TEMP_LOAM_04": {
+      "colorId": "TEMP_LOAM_04",
+      "hex": "#7C6142",
+      "r": 124,
+      "g": 97,
+      "b": 66,
+      "luminance": 100.5,
+      "tags": [
+        "loam_lit"
+      ]
+    },
+    "TEMP_LOAM_05": {
+      "colorId": "TEMP_LOAM_05",
+      "hex": "#A3845F",
+      "r": 163,
+      "g": 132,
+      "b": 95,
+      "luminance": 135.9,
+      "tags": [
+        "loam_crest"
+      ]
+    },
+    "TEMP_WOOD_FL_01": {
+      "colorId": "TEMP_WOOD_FL_01",
+      "hex": "#1B1714",
+      "r": 27,
+      "g": 23,
+      "b": 20,
+      "luminance": 23.6,
+      "tags": [
+        "humus_shadow",
+        "bark_crevice",
+        "driftwood_shadow",
+        "pine_bark_shadow"
+      ]
+    },
+    "TEMP_WOOD_FL_02": {
+      "colorId": "TEMP_WOOD_FL_02",
+      "hex": "#332A1E",
+      "r": 51,
+      "g": 42,
+      "b": 30,
+      "luminance": 43,
+      "tags": [
+        "humus_dark"
+      ]
+    },
+    "TEMP_WOOD_FL_03": {
+      "colorId": "TEMP_WOOD_FL_03",
+      "hex": "#4D3F2C",
+      "r": 77,
+      "g": 63,
+      "b": 44,
+      "luminance": 64.6,
+      "tags": [
+        "humus_body"
+      ]
+    },
+    "TEMP_WOOD_FL_04": {
+      "colorId": "TEMP_WOOD_FL_04",
+      "hex": "#6B5A3E",
+      "r": 107,
+      "g": 90,
+      "b": 62,
+      "luminance": 91.6,
+      "tags": [
+        "humus_lit"
+      ]
+    },
+    "TEMP_WOOD_FL_05": {
+      "colorId": "TEMP_WOOD_FL_05",
+      "hex": "#8A7653",
+      "r": 138,
+      "g": 118,
+      "b": 83,
+      "luminance": 119.7,
+      "tags": [
+        "humus_crest"
+      ]
+    },
+    "TEMP_OAK_BARK_02": {
+      "colorId": "TEMP_OAK_BARK_02",
+      "hex": "#302720",
+      "r": 48,
+      "g": 39,
+      "b": 32,
+      "luminance": 40.4,
+      "tags": [
+        "oak_bark_dark"
+      ]
+    },
+    "TEMP_OAK_BARK_03": {
+      "colorId": "TEMP_OAK_BARK_03",
+      "hex": "#4E3E33",
+      "r": 78,
+      "g": 62,
+      "b": 51,
+      "luminance": 64.6,
+      "tags": [
+        "oak_bark_body",
+        "pine_bark_body"
+      ]
+    },
+    "TEMP_OAK_BARK_04": {
+      "colorId": "TEMP_OAK_BARK_04",
+      "hex": "#6F5948",
+      "r": 111,
+      "g": 89,
+      "b": 72,
+      "luminance": 92.4,
+      "tags": [
+        "oak_bark_lit",
+        "pine_bark_lit"
+      ]
+    },
+    "TEMP_OAK_BARK_05": {
+      "colorId": "TEMP_OAK_BARK_05",
+      "hex": "#8F7663",
+      "r": 143,
+      "g": 118,
+      "b": 99,
+      "luminance": 121.9,
+      "tags": [
+        "oak_bark_crest"
+      ]
+    },
+    "TEMP_BIRCH_BARK_01": {
+      "colorId": "TEMP_BIRCH_BARK_01",
+      "hex": "#28231E",
+      "r": 40,
+      "g": 35,
+      "b": 30,
+      "luminance": 35.7,
+      "tags": [
+        "birch_lenticel"
+      ]
+    },
+    "TEMP_BIRCH_BARK_02": {
+      "colorId": "TEMP_BIRCH_BARK_02",
+      "hex": "#544E45",
+      "r": 84,
+      "g": 78,
+      "b": 69,
+      "luminance": 78.6,
+      "tags": [
+        "birch_peeling"
+      ]
+    },
+    "TEMP_BIRCH_BARK_03": {
+      "colorId": "TEMP_BIRCH_BARK_03",
+      "hex": "#8A8376",
+      "r": 138,
+      "g": 131,
+      "b": 118,
+      "luminance": 131.5,
+      "tags": [
+        "birch_body"
+      ]
+    },
+    "TEMP_BIRCH_BARK_04": {
+      "colorId": "TEMP_BIRCH_BARK_04",
+      "hex": "#C2BBB0",
+      "r": 194,
+      "g": 187,
+      "b": 176,
+      "luminance": 187.7,
+      "tags": [
+        "birch_paper_lit"
+      ]
+    },
+    "TEMP_OAK_LEAF_01": {
+      "colorId": "TEMP_OAK_LEAF_01",
+      "hex": "#122416",
+      "r": 18,
+      "g": 36,
+      "b": 22,
+      "luminance": 31.2,
+      "tags": [
+        "canopy_undershadow"
+      ]
+    },
+    "TEMP_OAK_LEAF_02": {
+      "colorId": "TEMP_OAK_LEAF_02",
+      "hex": "#1F3D20",
+      "r": 31,
+      "g": 61,
+      "b": 32,
+      "luminance": 52.5,
+      "tags": [
+        "oak_leaf_dark"
+      ]
+    },
+    "TEMP_OAK_LEAF_03": {
+      "colorId": "TEMP_OAK_LEAF_03",
+      "hex": "#325C2C",
+      "r": 50,
+      "g": 92,
+      "b": 44,
+      "luminance": 79.6,
+      "tags": [
+        "oak_leaf_body"
+      ]
+    },
+    "TEMP_OAK_LEAF_04": {
+      "colorId": "TEMP_OAK_LEAF_04",
+      "hex": "#4F823F",
+      "r": 79,
+      "g": 130,
+      "b": 63,
+      "luminance": 114.3,
+      "tags": [
+        "oak_leaf_lit"
+      ]
+    },
+    "TEMP_OAK_LEAF_05": {
+      "colorId": "TEMP_OAK_LEAF_05",
+      "hex": "#78AD5B",
+      "r": 120,
+      "g": 173,
+      "b": 91,
+      "luminance": 155.8,
+      "tags": [
+        "oak_leaf_crest"
+      ]
+    },
+    "TEMP_FIELDSTONE_02": {
+      "colorId": "TEMP_FIELDSTONE_02",
+      "hex": "#3B3B35",
+      "r": 59,
+      "g": 59,
+      "b": 53,
+      "luminance": 58.6,
+      "tags": [
+        "fieldstone_dark"
+      ]
+    },
+    "TEMP_FIELDSTONE_03": {
+      "colorId": "TEMP_FIELDSTONE_03",
+      "hex": "#59594F",
+      "r": 89,
+      "g": 89,
+      "b": 79,
+      "luminance": 88.3,
+      "tags": [
+        "fieldstone_body"
+      ]
+    },
+    "TEMP_FIELDSTONE_04": {
+      "colorId": "TEMP_FIELDSTONE_04",
+      "hex": "#7C7C6E",
+      "r": 124,
+      "g": 124,
+      "b": 110,
+      "luminance": 123,
+      "tags": [
+        "fieldstone_lit"
+      ]
+    },
+    "TEMP_FIELDSTONE_05": {
+      "colorId": "TEMP_FIELDSTONE_05",
+      "hex": "#A1A190",
+      "r": 161,
+      "g": 161,
+      "b": 144,
+      "luminance": 159.8,
+      "tags": [
+        "fieldstone_crest"
+      ]
+    },
+    "TEMP_LIMESTONE_02": {
+      "colorId": "TEMP_LIMESTONE_02",
+      "hex": "#423E32",
+      "r": 66,
+      "g": 62,
+      "b": 50,
+      "luminance": 62,
+      "tags": [
+        "limestone_dark"
+      ]
+    },
+    "TEMP_LIMESTONE_03": {
+      "colorId": "TEMP_LIMESTONE_03",
+      "hex": "#66604E",
+      "r": 102,
+      "g": 96,
+      "b": 78,
+      "luminance": 96,
+      "tags": [
+        "limestone_body"
+      ]
+    },
+    "TEMP_LIMESTONE_04": {
+      "colorId": "TEMP_LIMESTONE_04",
+      "hex": "#8F8770",
+      "r": 143,
+      "g": 135,
+      "b": 112,
+      "luminance": 135,
+      "tags": [
+        "limestone_lit"
+      ]
+    },
+    "TEMP_LIMESTONE_05": {
+      "colorId": "TEMP_LIMESTONE_05",
+      "hex": "#BAB095",
+      "r": 186,
+      "g": 176,
+      "b": 149,
+      "luminance": 176.2,
+      "tags": [
+        "limestone_crest"
+      ]
+    },
+    "WET_GRASS_01": {
+      "colorId": "WET_GRASS_01",
+      "hex": "#131E14",
+      "r": 19,
+      "g": 30,
+      "b": 20,
+      "luminance": 26.9,
+      "tags": [
+        "bog_shadow"
+      ]
+    },
+    "WET_GRASS_02": {
+      "colorId": "WET_GRASS_02",
+      "hex": "#203320",
+      "r": 32,
+      "g": 51,
+      "b": 32,
+      "luminance": 45.6,
+      "tags": [
+        "bog_turf_dark"
+      ]
+    },
+    "WET_GRASS_03": {
+      "colorId": "WET_GRASS_03",
+      "hex": "#314D2E",
+      "r": 49,
+      "g": 77,
+      "b": 46,
+      "luminance": 68.8,
+      "tags": [
+        "bog_turf_body"
+      ]
+    },
+    "WET_GRASS_04": {
+      "colorId": "WET_GRASS_04",
+      "hex": "#4A6E42",
+      "r": 74,
+      "g": 110,
+      "b": 66,
+      "luminance": 99.2,
+      "tags": [
+        "bog_turf_lit"
+      ]
+    },
+    "WET_GRASS_05": {
+      "colorId": "WET_GRASS_05",
+      "hex": "#6C935D",
+      "r": 108,
+      "g": 147,
+      "b": 93,
+      "luminance": 134.8,
+      "tags": [
+        "bog_turf_crest"
+      ]
+    },
+    "WET_REED_01": {
+      "colorId": "WET_REED_01",
+      "hex": "#181E11",
+      "r": 24,
+      "g": 30,
+      "b": 17,
+      "luminance": 27.8,
+      "tags": [
+        "reed_recess"
+      ]
+    },
+    "WET_REED_02": {
+      "colorId": "WET_REED_02",
+      "hex": "#2B361A",
+      "r": 43,
+      "g": 54,
+      "b": 26,
+      "luminance": 49.6,
+      "tags": [
+        "reed_shadow"
+      ]
+    },
+    "WET_REED_03": {
+      "colorId": "WET_REED_03",
+      "hex": "#445427",
+      "r": 68,
+      "g": 84,
+      "b": 39,
+      "luminance": 77.3,
+      "tags": [
+        "reed_body"
+      ]
+    },
+    "WET_REED_04": {
+      "colorId": "WET_REED_04",
+      "hex": "#667A3A",
+      "r": 102,
+      "g": 122,
+      "b": 58,
+      "luminance": 113.1,
+      "tags": [
+        "reed_lit"
+      ]
+    },
+    "WET_REED_05": {
+      "colorId": "WET_REED_05",
+      "hex": "#8EA353",
+      "r": 142,
+      "g": 163,
+      "b": 83,
+      "luminance": 152.8,
+      "tags": [
+        "reed_crest"
+      ]
+    },
+    "WET_PEAT_01": {
+      "colorId": "WET_PEAT_01",
+      "hex": "#171210",
+      "r": 23,
+      "g": 18,
+      "b": 16,
+      "luminance": 18.9,
+      "tags": [
+        "peat_void",
+        "scorch_shadow"
+      ]
+    },
+    "WET_PEAT_02": {
+      "colorId": "WET_PEAT_02",
+      "hex": "#261D18",
+      "r": 38,
+      "g": 29,
+      "b": 24,
+      "luminance": 30.6,
+      "tags": [
+        "peat_dark",
+        "scorch_dark",
+        "leather_shadow"
+      ]
+    },
+    "WET_PEAT_03": {
+      "colorId": "WET_PEAT_03",
+      "hex": "#3B2E25",
+      "r": 59,
+      "g": 46,
+      "b": 37,
+      "luminance": 48.1,
+      "tags": [
+        "peat_body"
+      ]
+    },
+    "WET_PEAT_04": {
+      "colorId": "WET_PEAT_04",
+      "hex": "#544234",
+      "r": 84,
+      "g": 66,
+      "b": 52,
+      "luminance": 68.8,
+      "tags": [
+        "peat_lit"
+      ]
+    },
+    "WET_PEAT_05": {
+      "colorId": "WET_PEAT_05",
+      "hex": "#735B49",
+      "r": 115,
+      "g": 91,
+      "b": 73,
+      "luminance": 94.8,
+      "tags": [
+        "peat_crest"
+      ]
+    },
+    "WET_MUD_01": {
+      "colorId": "WET_MUD_01",
+      "hex": "#131415",
+      "r": 19,
+      "g": 20,
+      "b": 21,
+      "luminance": 19.9,
+      "tags": [
+        "mud_deep"
+      ]
+    },
+    "WET_MUD_02": {
+      "colorId": "WET_MUD_02",
+      "hex": "#212325",
+      "r": 33,
+      "g": 35,
+      "b": 37,
+      "luminance": 34.7,
+      "tags": [
+        "mud_dark",
+        "scree_shadow",
+        "mortar_recess"
+      ]
+    },
+    "WET_MUD_03": {
+      "colorId": "WET_MUD_03",
+      "hex": "#323536",
+      "r": 50,
+      "g": 53,
+      "b": 54,
+      "luminance": 52.4,
+      "tags": [
+        "mud_body"
+      ]
+    },
+    "WET_MUD_04": {
+      "colorId": "WET_MUD_04",
+      "hex": "#474B4D",
+      "r": 71,
+      "g": 75,
+      "b": 77,
+      "luminance": 74.3,
+      "tags": [
+        "mud_lit"
+      ]
+    },
+    "WET_MUD_05": {
+      "colorId": "WET_MUD_05",
+      "hex": "#606568",
+      "r": 96,
+      "g": 101,
+      "b": 104,
+      "luminance": 100.2,
+      "tags": [
+        "mud_crest"
+      ]
+    },
+    "WET_SILT_01": {
+      "colorId": "WET_SILT_01",
+      "hex": "#171813",
+      "r": 23,
+      "g": 24,
+      "b": 19,
+      "luminance": 23.4,
+      "tags": [
+        "silt_shadow"
+      ]
+    },
+    "WET_SILT_02": {
+      "colorId": "WET_SILT_02",
+      "hex": "#292A20",
+      "r": 41,
+      "g": 42,
+      "b": 32,
+      "luminance": 41.1,
+      "tags": [
+        "silt_dark"
+      ]
+    },
+    "WET_SILT_03": {
+      "colorId": "WET_SILT_03",
+      "hex": "#3F4030",
+      "r": 63,
+      "g": 64,
+      "b": 48,
+      "luminance": 62.6,
+      "tags": [
+        "silt_body"
+      ]
+    },
+    "WET_SILT_04": {
+      "colorId": "WET_SILT_04",
+      "hex": "#5A5B45",
+      "r": 90,
+      "g": 91,
+      "b": 69,
+      "luminance": 89.2,
+      "tags": [
+        "silt_lit"
+      ]
+    },
+    "WET_SILT_05": {
+      "colorId": "WET_SILT_05",
+      "hex": "#797A5F",
+      "r": 121,
+      "g": 122,
+      "b": 95,
+      "luminance": 119.8,
+      "tags": [
+        "silt_crest"
+      ]
+    },
+    "WET_SLATE_01": {
+      "colorId": "WET_SLATE_01",
+      "hex": "#161B20",
+      "r": 22,
+      "g": 27,
+      "b": 32,
+      "luminance": 26.3,
+      "tags": [
+        "wet_stone_shadow",
+        "slate_deep"
+      ]
+    },
+    "WET_SLATE_02": {
+      "colorId": "WET_SLATE_02",
+      "hex": "#252F36",
+      "r": 37,
+      "g": 47,
+      "b": 54,
+      "luminance": 45.4,
+      "tags": [
+        "wet_stone_dark",
+        "slate_dark"
+      ]
+    },
+    "WET_SLATE_03": {
+      "colorId": "WET_SLATE_03",
+      "hex": "#37464F",
+      "r": 55,
+      "g": 70,
+      "b": 79,
+      "luminance": 67.5,
+      "tags": [
+        "wet_stone_body"
+      ]
+    },
+    "WET_SLATE_04": {
+      "colorId": "WET_SLATE_04",
+      "hex": "#4E626E",
+      "r": 78,
+      "g": 98,
+      "b": 110,
+      "luminance": 94.6,
+      "tags": [
+        "wet_stone_lit"
+      ]
+    },
+    "WET_SLATE_05": {
+      "colorId": "WET_SLATE_05",
+      "hex": "#6B8291",
+      "r": 107,
+      "g": 130,
+      "b": 145,
+      "luminance": 126.2,
+      "tags": [
+        "wet_stone_crest"
+      ]
+    },
+    "WET_DRIFT_02": {
+      "colorId": "WET_DRIFT_02",
+      "hex": "#2A2722",
+      "r": 42,
+      "g": 39,
+      "b": 34,
+      "luminance": 39.3,
+      "tags": [
+        "driftwood_dark",
+        "bleached_shadow"
+      ]
+    },
+    "WET_DRIFT_04": {
+      "colorId": "WET_DRIFT_04",
+      "hex": "#585045",
+      "r": 88,
+      "g": 80,
+      "b": 69,
+      "luminance": 80.9,
+      "tags": [
+        "driftwood_lit"
+      ]
+    },
+    "WET_DRIFT_05": {
+      "colorId": "WET_DRIFT_05",
+      "hex": "#766B5B",
+      "r": 118,
+      "g": 107,
+      "b": 91,
+      "luminance": 108.2,
+      "tags": [
+        "driftwood_crest"
+      ]
+    },
+    "WET_WILLOW_01": {
+      "colorId": "WET_WILLOW_01",
+      "hex": "#162115",
+      "r": 22,
+      "g": 33,
+      "b": 21,
+      "luminance": 29.8,
+      "tags": [
+        "willow_recess"
+      ]
+    },
+    "WET_WILLOW_02": {
+      "colorId": "WET_WILLOW_02",
+      "hex": "#293B22",
+      "r": 41,
+      "g": 59,
+      "b": 34,
+      "luminance": 53.4,
+      "tags": [
+        "willow_dark"
+      ]
+    },
+    "WET_WILLOW_03": {
+      "colorId": "WET_WILLOW_03",
+      "hex": "#415C32",
+      "r": 65,
+      "g": 92,
+      "b": 50,
+      "luminance": 83.2,
+      "tags": [
+        "willow_body"
+      ]
+    },
+    "WET_WILLOW_04": {
+      "colorId": "WET_WILLOW_04",
+      "hex": "#618247",
+      "r": 97,
+      "g": 130,
+      "b": 71,
+      "luminance": 118.7,
+      "tags": [
+        "willow_lit"
+      ]
+    },
+    "WET_WILLOW_05": {
+      "colorId": "WET_WILLOW_05",
+      "hex": "#8AA864",
+      "r": 138,
+      "g": 168,
+      "b": 100,
+      "luminance": 156.7,
+      "tags": [
+        "willow_crest"
+      ]
+    },
+    "ARID_GRASS_01": {
+      "colorId": "ARID_GRASS_01",
+      "hex": "#262316",
+      "r": 38,
+      "g": 35,
+      "b": 22,
+      "luminance": 34.7,
+      "tags": [
+        "straw_shadow"
+      ]
+    },
+    "ARID_GRASS_02": {
+      "colorId": "ARID_GRASS_02",
+      "hex": "#473E24",
+      "r": 71,
+      "g": 62,
+      "b": 36,
+      "luminance": 62,
+      "tags": [
+        "straw_dark"
+      ]
+    },
+    "ARID_GRASS_03": {
+      "colorId": "ARID_GRASS_03",
+      "hex": "#6F5F34",
+      "r": 111,
+      "g": 95,
+      "b": 52,
+      "luminance": 95.3,
+      "tags": [
+        "straw_body"
+      ]
+    },
+    "ARID_GRASS_04": {
+      "colorId": "ARID_GRASS_04",
+      "hex": "#9C8449",
+      "r": 156,
+      "g": 132,
+      "b": 73,
+      "luminance": 132.8,
+      "tags": [
+        "straw_lit"
+      ]
+    },
+    "ARID_GRASS_05": {
+      "colorId": "ARID_GRASS_05",
+      "hex": "#CBB06A",
+      "r": 203,
+      "g": 176,
+      "b": 106,
+      "luminance": 176.7,
+      "tags": [
+        "straw_crest"
+      ]
+    },
+    "ARID_HARDPAN_01": {
+      "colorId": "ARID_HARDPAN_01",
+      "hex": "#2E261D",
+      "r": 46,
+      "g": 38,
+      "b": 29,
+      "luminance": 39.1,
+      "tags": [
+        "hardpan_crack"
+      ]
+    },
+    "ARID_HARDPAN_02": {
+      "colorId": "ARID_HARDPAN_02",
+      "hex": "#4F4232",
+      "r": 79,
+      "g": 66,
+      "b": 50,
+      "luminance": 67.6,
+      "tags": [
+        "hardpan_dark"
+      ]
+    },
+    "ARID_HARDPAN_03": {
+      "colorId": "ARID_HARDPAN_03",
+      "hex": "#77634A",
+      "r": 119,
+      "g": 99,
+      "b": 74,
+      "luminance": 101.4,
+      "tags": [
+        "hardpan_body"
+      ]
+    },
+    "ARID_HARDPAN_04": {
+      "colorId": "ARID_HARDPAN_04",
+      "hex": "#A28968",
+      "r": 162,
+      "g": 137,
+      "b": 104,
+      "luminance": 139.9,
+      "tags": [
+        "hardpan_lit"
+      ]
+    },
+    "ARID_HARDPAN_05": {
+      "colorId": "ARID_HARDPAN_05",
+      "hex": "#CFB38D",
+      "r": 207,
+      "g": 179,
+      "b": 141,
+      "luminance": 182.2,
+      "tags": [
+        "hardpan_crest"
+      ]
+    },
+    "ARID_CLAY_01": {
+      "colorId": "ARID_CLAY_01",
+      "hex": "#2C1B16",
+      "r": 44,
+      "g": 27,
+      "b": 22,
+      "luminance": 30.3,
+      "tags": [
+        "clay_shadow"
+      ]
+    },
+    "ARID_CLAY_02": {
+      "colorId": "ARID_CLAY_02",
+      "hex": "#4E2E23",
+      "r": 78,
+      "g": 46,
+      "b": 35,
+      "luminance": 52,
+      "tags": [
+        "clay_dark"
+      ]
+    },
+    "ARID_CLAY_03": {
+      "colorId": "ARID_CLAY_03",
+      "hex": "#764432",
+      "r": 118,
+      "g": 68,
+      "b": 50,
+      "luminance": 77.3,
+      "tags": [
+        "clay_body"
+      ]
+    },
+    "ARID_CLAY_04": {
+      "colorId": "ARID_CLAY_04",
+      "hex": "#A16147",
+      "r": 161,
+      "g": 97,
+      "b": 71,
+      "luminance": 108.7,
+      "tags": [
+        "clay_lit"
+      ]
+    },
+    "ARID_CLAY_05": {
+      "colorId": "ARID_CLAY_05",
+      "hex": "#CF8667",
+      "r": 207,
+      "g": 134,
+      "b": 103,
+      "luminance": 147.3,
+      "tags": [
+        "clay_crest"
+      ]
+    },
+    "ARID_SAND_01": {
+      "colorId": "ARID_SAND_01",
+      "hex": "#30281B",
+      "r": 48,
+      "g": 40,
+      "b": 27,
+      "luminance": 40.8,
+      "tags": [
+        "sand_recess"
+      ]
+    },
+    "ARID_SAND_02": {
+      "colorId": "ARID_SAND_02",
+      "hex": "#54442D",
+      "r": 84,
+      "g": 68,
+      "b": 45,
+      "luminance": 69.7,
+      "tags": [
+        "sand_dark"
+      ]
+    },
+    "ARID_SAND_03": {
+      "colorId": "ARID_SAND_03",
+      "hex": "#7D6642",
+      "r": 125,
+      "g": 102,
+      "b": 66,
+      "luminance": 104.3,
+      "tags": [
+        "sand_body"
+      ]
+    },
+    "ARID_SAND_04": {
+      "colorId": "ARID_SAND_04",
+      "hex": "#A88C5D",
+      "r": 168,
+      "g": 140,
+      "b": 93,
+      "luminance": 142.6,
+      "tags": [
+        "sand_lit"
+      ]
+    },
+    "ARID_SAND_05": {
+      "colorId": "ARID_SAND_05",
+      "hex": "#D3B680",
+      "r": 211,
+      "g": 182,
+      "b": 128,
+      "luminance": 184.3,
+      "tags": [
+        "sand_crest"
+      ]
+    },
+    "ARID_SANDSTONE_01": {
+      "colorId": "ARID_SANDSTONE_01",
+      "hex": "#331F18",
+      "r": 51,
+      "g": 31,
+      "b": 24,
+      "luminance": 34.7,
+      "tags": [
+        "sandstone_shadow"
+      ]
+    },
+    "ARID_SANDSTONE_02": {
+      "colorId": "ARID_SANDSTONE_02",
+      "hex": "#583224",
+      "r": 88,
+      "g": 50,
+      "b": 36,
+      "luminance": 57.1,
+      "tags": [
+        "sandstone_dark"
+      ]
+    },
+    "ARID_SANDSTONE_03": {
+      "colorId": "ARID_SANDSTONE_03",
+      "hex": "#834A34",
+      "r": 131,
+      "g": 74,
+      "b": 52,
+      "luminance": 84.5,
+      "tags": [
+        "sandstone_body"
+      ]
+    },
+    "ARID_SANDSTONE_04": {
+      "colorId": "ARID_SANDSTONE_04",
+      "hex": "#B06A4B",
+      "r": 176,
+      "g": 106,
+      "b": 75,
+      "luminance": 118.6,
+      "tags": [
+        "sandstone_lit"
+      ]
+    },
+    "ARID_SANDSTONE_05": {
+      "colorId": "ARID_SANDSTONE_05",
+      "hex": "#DC906B",
+      "r": 220,
+      "g": 144,
+      "b": 107,
+      "luminance": 157.5,
+      "tags": [
+        "sandstone_crest"
+      ]
+    },
+    "ARID_SCRUB_01": {
+      "colorId": "ARID_SCRUB_01",
+      "hex": "#1D221A",
+      "r": 29,
+      "g": 34,
+      "b": 26,
+      "luminance": 32.4,
+      "tags": [
+        "scrub_shadow"
+      ]
+    },
+    "ARID_SCRUB_02": {
+      "colorId": "ARID_SCRUB_02",
+      "hex": "#343C2D",
+      "r": 52,
+      "g": 60,
+      "b": 45,
+      "luminance": 57.2,
+      "tags": [
+        "scrub_dark"
+      ]
+    },
+    "ARID_SCRUB_03": {
+      "colorId": "ARID_SCRUB_03",
+      "hex": "#505B44",
+      "r": 80,
+      "g": 91,
+      "b": 68,
+      "luminance": 87,
+      "tags": [
+        "scrub_body"
+      ]
+    },
+    "ARID_SCRUB_04": {
+      "colorId": "ARID_SCRUB_04",
+      "hex": "#738162",
+      "r": 115,
+      "g": 129,
+      "b": 98,
+      "luminance": 123.8,
+      "tags": [
+        "scrub_lit"
+      ]
+    },
+    "ARID_SCRUB_05": {
+      "colorId": "ARID_SCRUB_05",
+      "hex": "#9AA986",
+      "r": 154,
+      "g": 169,
+      "b": 134,
+      "luminance": 163.3,
+      "tags": [
+        "scrub_crest"
+      ]
+    },
+    "ARID_BLEACH_02": {
+      "colorId": "ARID_BLEACH_02",
+      "hex": "#4A443A",
+      "r": 74,
+      "g": 68,
+      "b": 58,
+      "luminance": 68.6,
+      "tags": [
+        "bleached_dark"
+      ]
+    },
+    "ARID_BLEACH_03": {
+      "colorId": "ARID_BLEACH_03",
+      "hex": "#706A5B",
+      "r": 112,
+      "g": 106,
+      "b": 91,
+      "luminance": 106.2,
+      "tags": [
+        "bleached_body",
+        "mountain_soil_lit"
+      ]
+    },
+    "ARID_BLEACH_04": {
+      "colorId": "ARID_BLEACH_04",
+      "hex": "#9C9282",
+      "r": 156,
+      "g": 146,
+      "b": 130,
+      "luminance": 147,
+      "tags": [
+        "bleached_lit"
+      ]
+    },
+    "ARID_BLEACH_05": {
+      "colorId": "ARID_BLEACH_05",
+      "hex": "#CAC0AF",
+      "r": 202,
+      "g": 192,
+      "b": 175,
+      "luminance": 192.9,
+      "tags": [
+        "bleached_crest"
+      ]
+    },
+    "ARID_BONE_01": {
+      "colorId": "ARID_BONE_01",
+      "hex": "#36332C",
+      "r": 54,
+      "g": 51,
+      "b": 44,
+      "luminance": 51.1,
+      "tags": [
+        "bone_recess"
+      ]
+    },
+    "ARID_BONE_02": {
+      "colorId": "ARID_BONE_02",
+      "hex": "#5D584C",
+      "r": 93,
+      "g": 88,
+      "b": 76,
+      "luminance": 88.2,
+      "tags": [
+        "bone_shadow"
+      ]
+    },
+    "ARID_BONE_03": {
+      "colorId": "ARID_BONE_03",
+      "hex": "#888170",
+      "r": 136,
+      "g": 129,
+      "b": 112,
+      "luminance": 129.3,
+      "tags": [
+        "bone_body"
+      ]
+    },
+    "ARID_BONE_04": {
+      "colorId": "ARID_BONE_04",
+      "hex": "#B7AF9C",
+      "r": 183,
+      "g": 175,
+      "b": 156,
+      "luminance": 175.3,
+      "tags": [
+        "bone_lit"
+      ]
+    },
+    "ARID_BONE_05": {
+      "colorId": "ARID_BONE_05",
+      "hex": "#E6DECD",
+      "r": 230,
+      "g": 222,
+      "b": 205,
+      "luminance": 222.5,
+      "tags": [
+        "bone_crest"
+      ]
+    },
+    "HIGH_GRASS_01": {
+      "colorId": "HIGH_GRASS_01",
+      "hex": "#162018",
+      "r": 22,
+      "g": 32,
+      "b": 24,
+      "luminance": 29.3,
+      "tags": [
+        "alpine_turf_shadow"
+      ]
+    },
+    "HIGH_GRASS_02": {
+      "colorId": "HIGH_GRASS_02",
+      "hex": "#273827",
+      "r": 39,
+      "g": 56,
+      "b": 39,
+      "luminance": 51.2,
+      "tags": [
+        "alpine_turf_dark"
+      ]
+    },
+    "HIGH_GRASS_03": {
+      "colorId": "HIGH_GRASS_03",
+      "hex": "#3D523A",
+      "r": 61,
+      "g": 82,
+      "b": 58,
+      "luminance": 75.8,
+      "tags": [
+        "alpine_turf_body"
+      ]
+    },
+    "HIGH_GRASS_04": {
+      "colorId": "HIGH_GRASS_04",
+      "hex": "#5B7353",
+      "r": 91,
+      "g": 115,
+      "b": 83,
+      "luminance": 107.6,
+      "tags": [
+        "alpine_turf_lit"
+      ]
+    },
+    "HIGH_GRASS_05": {
+      "colorId": "HIGH_GRASS_05",
+      "hex": "#809C73",
+      "r": 128,
+      "g": 156,
+      "b": 115,
+      "luminance": 147.1,
+      "tags": [
+        "alpine_turf_crest"
+      ]
+    },
+    "HIGH_SOIL_01": {
+      "colorId": "HIGH_SOIL_01",
+      "hex": "#1D1B18",
+      "r": 29,
+      "g": 27,
+      "b": 24,
+      "luminance": 27.2,
+      "tags": [
+        "mountain_soil_shadow",
+        "charcoal_dark",
+        "aged_wood_shadow"
+      ]
+    },
+    "HIGH_SOIL_02": {
+      "colorId": "HIGH_SOIL_02",
+      "hex": "#322F29",
+      "r": 50,
+      "g": 47,
+      "b": 41,
+      "luminance": 47.2,
+      "tags": [
+        "mountain_soil_dark",
+        "aged_wood_dark"
+      ]
+    },
+    "HIGH_SOIL_03": {
+      "colorId": "HIGH_SOIL_03",
+      "hex": "#4D4A3F",
+      "r": 77,
+      "g": 74,
+      "b": 63,
+      "luminance": 73.8,
+      "tags": [
+        "mountain_soil_body"
+      ]
+    },
+    "HIGH_SOIL_05": {
+      "colorId": "HIGH_SOIL_05",
+      "hex": "#938E7C",
+      "r": 147,
+      "g": 142,
+      "b": 124,
+      "luminance": 141.8,
+      "tags": [
+        "mountain_soil_crest"
+      ]
+    },
+    "HIGH_SCREE_02": {
+      "colorId": "HIGH_SCREE_02",
+      "hex": "#3A3E42",
+      "r": 58,
+      "g": 62,
+      "b": 66,
+      "luminance": 61.4,
+      "tags": [
+        "scree_dark",
+        "ashlar_dark"
+      ]
+    },
+    "HIGH_SCREE_03": {
+      "colorId": "HIGH_SCREE_03",
+      "hex": "#5A5D63",
+      "r": 90,
+      "g": 93,
+      "b": 99,
+      "luminance": 92.8,
+      "tags": [
+        "scree_body",
+        "ash_lit",
+        "ashlar_body"
+      ]
+    },
+    "HIGH_SCREE_04": {
+      "colorId": "HIGH_SCREE_04",
+      "hex": "#7C8389",
+      "r": 124,
+      "g": 131,
+      "b": 137,
+      "luminance": 129.9,
+      "tags": [
+        "scree_lit",
+        "ashlar_lit"
+      ]
+    },
+    "HIGH_SCREE_05": {
+      "colorId": "HIGH_SCREE_05",
+      "hex": "#A4ABB1",
+      "r": 164,
+      "g": 171,
+      "b": 177,
+      "luminance": 169.9,
+      "tags": [
+        "scree_crest",
+        "ashlar_crest"
+      ]
+    },
+    "HIGH_GRANITE_02": {
+      "colorId": "HIGH_GRANITE_02",
+      "hex": "#30383E",
+      "r": 48,
+      "g": 56,
+      "b": 62,
+      "luminance": 54.7,
+      "tags": [
+        "granite_dark"
+      ]
+    },
+    "HIGH_GRANITE_03": {
+      "colorId": "HIGH_GRANITE_03",
+      "hex": "#4B555D",
+      "r": 75,
+      "g": 85,
+      "b": 93,
+      "luminance": 83.5,
+      "tags": [
+        "granite_body"
+      ]
+    },
+    "HIGH_GRANITE_04": {
+      "colorId": "HIGH_GRANITE_04",
+      "hex": "#6E7A85",
+      "r": 110,
+      "g": 122,
+      "b": 133,
+      "luminance": 120.2,
+      "tags": [
+        "granite_lit"
+      ]
+    },
+    "HIGH_GRANITE_05": {
+      "colorId": "HIGH_GRANITE_05",
+      "hex": "#97A3AF",
+      "r": 151,
+      "g": 163,
+      "b": 175,
+      "luminance": 161.3,
+      "tags": [
+        "granite_crest"
+      ]
+    },
+    "HIGH_SLATE_03": {
+      "colorId": "HIGH_SLATE_03",
+      "hex": "#3C474F",
+      "r": 60,
+      "g": 71,
+      "b": 79,
+      "luminance": 69.2,
+      "tags": [
+        "slate_body",
+        "iron_body"
+      ]
+    },
+    "HIGH_SLATE_04": {
+      "colorId": "HIGH_SLATE_04",
+      "hex": "#55636F",
+      "r": 85,
+      "g": 99,
+      "b": 111,
+      "luminance": 96.9,
+      "tags": [
+        "slate_lit"
+      ]
+    },
+    "HIGH_SLATE_05": {
+      "colorId": "HIGH_SLATE_05",
+      "hex": "#758593",
+      "r": 117,
+      "g": 133,
+      "b": 147,
+      "luminance": 130.6,
+      "tags": [
+        "slate_crest"
+      ]
+    },
+    "HIGH_CONIFER_01": {
+      "colorId": "HIGH_CONIFER_01",
+      "hex": "#0F1F1D",
+      "r": 15,
+      "g": 31,
+      "b": 29,
+      "luminance": 27.5,
+      "tags": [
+        "needle_shadow"
+      ]
+    },
+    "HIGH_CONIFER_02": {
+      "colorId": "HIGH_CONIFER_02",
+      "hex": "#1B332D",
+      "r": 27,
+      "g": 51,
+      "b": 45,
+      "luminance": 45.5,
+      "tags": [
+        "needle_dark"
+      ]
+    },
+    "HIGH_CONIFER_03": {
+      "colorId": "HIGH_CONIFER_03",
+      "hex": "#2A4E43",
+      "r": 42,
+      "g": 78,
+      "b": 67,
+      "luminance": 69.6,
+      "tags": [
+        "needle_body"
+      ]
+    },
+    "HIGH_CONIFER_04": {
+      "colorId": "HIGH_CONIFER_04",
+      "hex": "#3E6E5D",
+      "r": 62,
+      "g": 110,
+      "b": 93,
+      "luminance": 98.6,
+      "tags": [
+        "needle_lit"
+      ]
+    },
+    "HIGH_CONIFER_05": {
+      "colorId": "HIGH_CONIFER_05",
+      "hex": "#5A927C",
+      "r": 90,
+      "g": 146,
+      "b": 124,
+      "luminance": 132.5,
+      "tags": [
+        "needle_crest"
+      ]
+    },
+    "HIGH_BARK_02": {
+      "colorId": "HIGH_BARK_02",
+      "hex": "#332922",
+      "r": 51,
+      "g": 41,
+      "b": 34,
+      "luminance": 42.6,
+      "tags": [
+        "pine_bark_dark"
+      ]
+    },
+    "HIGH_BARK_05": {
+      "colorId": "HIGH_BARK_05",
+      "hex": "#947762",
+      "r": 148,
+      "g": 119,
+      "b": 98,
+      "luminance": 123.6,
+      "tags": [
+        "pine_bark_crest"
+      ]
+    },
+    "VOLC_ASH_01": {
+      "colorId": "VOLC_ASH_01",
+      "hex": "#161618",
+      "r": 22,
+      "g": 22,
+      "b": 24,
+      "luminance": 22.1,
+      "tags": [
+        "ash_shadow"
+      ]
+    },
+    "VOLC_ASH_02": {
+      "colorId": "VOLC_ASH_02",
+      "hex": "#27272B",
+      "r": 39,
+      "g": 39,
+      "b": 43,
+      "luminance": 39.3,
+      "tags": [
+        "ash_dark"
+      ]
+    },
+    "VOLC_ASH_03": {
+      "colorId": "VOLC_ASH_03",
+      "hex": "#3E3E44",
+      "r": 62,
+      "g": 62,
+      "b": 68,
+      "luminance": 62.4,
+      "tags": [
+        "ash_body"
+      ]
+    },
+    "VOLC_ASH_05": {
+      "colorId": "VOLC_ASH_05",
+      "hex": "#7D7D88",
+      "r": 125,
+      "g": 125,
+      "b": 136,
+      "luminance": 125.8,
+      "tags": [
+        "ash_crest"
+      ]
+    },
+    "VOLC_SCORCH_03": {
+      "colorId": "VOLC_SCORCH_03",
+      "hex": "#412A23",
+      "r": 65,
+      "g": 42,
+      "b": 35,
+      "luminance": 46.4,
+      "tags": [
+        "scorch_body"
+      ]
+    },
+    "VOLC_SCORCH_04": {
+      "colorId": "VOLC_SCORCH_04",
+      "hex": "#5E3C32",
+      "r": 94,
+      "g": 60,
+      "b": 50,
+      "luminance": 66.5,
+      "tags": [
+        "scorch_lit"
+      ]
+    },
+    "VOLC_SCORCH_05": {
+      "colorId": "VOLC_SCORCH_05",
+      "hex": "#805345",
+      "r": 128,
+      "g": 83,
+      "b": 69,
+      "luminance": 91.6,
+      "tags": [
+        "scorch_crest"
+      ]
+    },
+    "VOLC_BASALT_01": {
+      "colorId": "VOLC_BASALT_01",
+      "hex": "#101114",
+      "r": 16,
+      "g": 17,
+      "b": 20,
+      "luminance": 17,
+      "tags": [
+        "basalt_deep"
+      ]
+    },
+    "VOLC_BASALT_02": {
+      "colorId": "VOLC_BASALT_02",
+      "hex": "#1D1E24",
+      "r": 29,
+      "g": 30,
+      "b": 36,
+      "luminance": 30.2,
+      "tags": [
+        "basalt_dark"
+      ]
+    },
+    "VOLC_BASALT_03": {
+      "colorId": "VOLC_BASALT_03",
+      "hex": "#2F303A",
+      "r": 47,
+      "g": 48,
+      "b": 58,
+      "luminance": 48.5,
+      "tags": [
+        "basalt_body"
+      ]
+    },
+    "VOLC_BASALT_04": {
+      "colorId": "VOLC_BASALT_04",
+      "hex": "#464754",
+      "r": 70,
+      "g": 71,
+      "b": 84,
+      "luminance": 71.7,
+      "tags": [
+        "basalt_lit"
+      ]
+    },
+    "VOLC_BASALT_05": {
+      "colorId": "VOLC_BASALT_05",
+      "hex": "#636474",
+      "r": 99,
+      "g": 100,
+      "b": 116,
+      "luminance": 100.9,
+      "tags": [
+        "basalt_crest"
+      ]
+    },
+    "VOLC_SCORIA_01": {
+      "colorId": "VOLC_SCORIA_01",
+      "hex": "#191113",
+      "r": 25,
+      "g": 17,
+      "b": 19,
+      "luminance": 18.8,
+      "tags": [
+        "scoria_shadow"
+      ]
+    },
+    "VOLC_SCORIA_02": {
+      "colorId": "VOLC_SCORIA_02",
+      "hex": "#2B1B1E",
+      "r": 43,
+      "g": 27,
+      "b": 30,
+      "luminance": 30.6,
+      "tags": [
+        "scoria_dark"
+      ]
+    },
+    "VOLC_SCORIA_03": {
+      "colorId": "VOLC_SCORIA_03",
+      "hex": "#44292E",
+      "r": 68,
+      "g": 41,
+      "b": 46,
+      "luminance": 47.1,
+      "tags": [
+        "scoria_body"
+      ]
+    },
+    "VOLC_SCORIA_04": {
+      "colorId": "VOLC_SCORIA_04",
+      "hex": "#623C43",
+      "r": 98,
+      "g": 60,
+      "b": 67,
+      "luminance": 68.6,
+      "tags": [
+        "scoria_lit"
+      ]
+    },
+    "VOLC_SCORIA_05": {
+      "colorId": "VOLC_SCORIA_05",
+      "hex": "#85545D",
+      "r": 133,
+      "g": 84,
+      "b": 93,
+      "luminance": 95.1,
+      "tags": [
+        "scoria_crest"
+      ]
+    },
+    "VOLC_PUMICE_02": {
+      "colorId": "VOLC_PUMICE_02",
+      "hex": "#3E3B38",
+      "r": 62,
+      "g": 59,
+      "b": 56,
+      "luminance": 59.4,
+      "tags": [
+        "pumice_dark"
+      ]
+    },
+    "VOLC_PUMICE_03": {
+      "colorId": "VOLC_PUMICE_03",
+      "hex": "#605C56",
+      "r": 96,
+      "g": 92,
+      "b": 86,
+      "luminance": 92.4,
+      "tags": [
+        "pumice_body"
+      ]
+    },
+    "VOLC_PUMICE_04": {
+      "colorId": "VOLC_PUMICE_04",
+      "hex": "#878179",
+      "r": 135,
+      "g": 129,
+      "b": 121,
+      "luminance": 129.7,
+      "tags": [
+        "pumice_lit"
+      ]
+    },
+    "VOLC_OBSIDIAN_01": {
+      "colorId": "VOLC_OBSIDIAN_01",
+      "hex": "#090A0D",
+      "r": 9,
+      "g": 10,
+      "b": 13,
+      "luminance": 10,
+      "tags": [
+        "obsidian_deep"
+      ]
+    },
+    "VOLC_OBSIDIAN_03": {
+      "colorId": "VOLC_OBSIDIAN_03",
+      "hex": "#1F2430",
+      "r": 31,
+      "g": 36,
+      "b": 48,
+      "luminance": 35.8,
+      "tags": [
+        "obsidian_body"
+      ]
+    },
+    "VOLC_OBSIDIAN_04": {
+      "colorId": "VOLC_OBSIDIAN_04",
+      "hex": "#353E52",
+      "r": 53,
+      "g": 62,
+      "b": 82,
+      "luminance": 61.5,
+      "tags": [
+        "obsidian_lit"
+      ]
+    },
+    "VOLC_OBSIDIAN_05": {
+      "colorId": "VOLC_OBSIDIAN_05",
+      "hex": "#5E6A88",
+      "r": 94,
+      "g": 106,
+      "b": 136,
+      "luminance": 105.6,
+      "tags": [
+        "obsidian_glint"
+      ]
+    },
+    "VOLC_SULFUR_01": {
+      "colorId": "VOLC_SULFUR_01",
+      "hex": "#272810",
+      "r": 39,
+      "g": 40,
+      "b": 16,
+      "luminance": 38.1,
+      "tags": [
+        "sulfur_shadow"
+      ]
+    },
+    "VOLC_SULFUR_02": {
+      "colorId": "VOLC_SULFUR_02",
+      "hex": "#4A4C1C",
+      "r": 74,
+      "g": 76,
+      "b": 28,
+      "luminance": 72.1,
+      "tags": [
+        "sulfur_dark"
+      ]
+    },
+    "VOLC_SULFUR_03": {
+      "colorId": "VOLC_SULFUR_03",
+      "hex": "#777A29",
+      "r": 119,
+      "g": 122,
+      "b": 41,
+      "luminance": 115.5,
+      "tags": [
+        "sulfur_body"
+      ]
+    },
+    "VOLC_SULFUR_04": {
+      "colorId": "VOLC_SULFUR_04",
+      "hex": "#ABAE39",
+      "r": 171,
+      "g": 174,
+      "b": 57,
+      "luminance": 164.9,
+      "tags": [
+        "sulfur_lit"
+      ]
+    },
+    "VOLC_SULFUR_05": {
+      "colorId": "VOLC_SULFUR_05",
+      "hex": "#DEDF5E",
+      "r": 222,
+      "g": 223,
+      "b": 94,
+      "luminance": 213.5,
+      "tags": [
+        "sulfur_crest"
+      ]
+    },
+    "VOLC_CHAR_01": {
+      "colorId": "VOLC_CHAR_01",
+      "hex": "#0F0E0E",
+      "r": 15,
+      "g": 14,
+      "b": 14,
+      "luminance": 14.2,
+      "tags": [
+        "charcoal_shadow"
+      ]
+    },
+    "VOLC_CHAR_03": {
+      "colorId": "VOLC_CHAR_03",
+      "hex": "#2F2A28",
+      "r": 47,
+      "g": 42,
+      "b": 40,
+      "luminance": 42.9,
+      "tags": [
+        "charcoal_body"
+      ]
+    },
+    "VOLC_CHAR_04": {
+      "colorId": "VOLC_CHAR_04",
+      "hex": "#463E3B",
+      "r": 70,
+      "g": 62,
+      "b": 59,
+      "luminance": 63.5,
+      "tags": [
+        "charcoal_lit"
+      ]
+    },
+    "VOLC_CHAR_05": {
+      "colorId": "VOLC_CHAR_05",
+      "hex": "#635753",
+      "r": 99,
+      "g": 87,
+      "b": 83,
+      "luminance": 89.3,
+      "tags": [
+        "charcoal_crest"
+      ]
+    },
+    "VOLC_LAVA_01": {
+      "colorId": "VOLC_LAVA_01",
+      "hex": "#300705",
+      "r": 48,
+      "g": 7,
+      "b": 5,
+      "luminance": 15.6,
+      "tags": [
+        "crust_boundary"
+      ]
+    },
+    "VOLC_LAVA_02": {
+      "colorId": "VOLC_LAVA_02",
+      "hex": "#6D1109",
+      "r": 109,
+      "g": 17,
+      "b": 9,
+      "luminance": 36,
+      "tags": [
+        "cooling_flow"
+      ]
+    },
+    "VOLC_LAVA_03": {
+      "colorId": "VOLC_LAVA_03",
+      "hex": "#B5280D",
+      "r": 181,
+      "g": 40,
+      "b": 13,
+      "luminance": 68,
+      "tags": [
+        "active_magma"
+      ]
+    },
+    "VOLC_LAVA_04": {
+      "colorId": "VOLC_LAVA_04",
+      "hex": "#F26018",
+      "r": 242,
+      "g": 96,
+      "b": 24,
+      "luminance": 121.8,
+      "tags": [
+        "incandescent_core"
+      ]
+    },
+    "VOLC_LAVA_05": {
+      "colorId": "VOLC_LAVA_05",
+      "hex": "#FFB833",
+      "r": 255,
+      "g": 184,
+      "b": 51,
+      "luminance": 189.5,
+      "tags": [
+        "white_hot_crest"
+      ]
+    },
+    "WATER_SHALLOW_01": {
+      "colorId": "WATER_SHALLOW_01",
+      "hex": "#162A36",
+      "r": 22,
+      "g": 42,
+      "b": 54,
+      "luminance": 38.6,
+      "tags": [
+        "shallow_recess"
+      ]
+    },
+    "WATER_SHALLOW_02": {
+      "colorId": "WATER_SHALLOW_02",
+      "hex": "#23445A",
+      "r": 35,
+      "g": 68,
+      "b": 90,
+      "luminance": 62.6,
+      "tags": [
+        "shallow_dark",
+        "deep_water_body"
+      ]
+    },
+    "WATER_SHALLOW_03": {
+      "colorId": "WATER_SHALLOW_03",
+      "hex": "#356782",
+      "r": 53,
+      "g": 103,
+      "b": 130,
+      "luminance": 94.3,
+      "tags": [
+        "shallow_body"
+      ]
+    },
+    "WATER_SHALLOW_04": {
+      "colorId": "WATER_SHALLOW_04",
+      "hex": "#4F8FB2",
+      "r": 79,
+      "g": 143,
+      "b": 178,
+      "luminance": 131.9,
+      "tags": [
+        "shallow_lit"
+      ]
+    },
+    "WATER_SHALLOW_05": {
+      "colorId": "WATER_SHALLOW_05",
+      "hex": "#7BC0E3",
+      "r": 123,
+      "g": 192,
+      "b": 227,
+      "luminance": 179.9,
+      "tags": [
+        "shallow_glint"
+      ]
+    },
+    "WATER_DEEP_01": {
+      "colorId": "WATER_DEEP_01",
+      "hex": "#0F1B26",
+      "r": 15,
+      "g": 27,
+      "b": 38,
+      "luminance": 25.2,
+      "tags": [
+        "deep_water_abyss"
+      ]
+    },
+    "WATER_DEEP_02": {
+      "colorId": "WATER_DEEP_02",
+      "hex": "#172C3D",
+      "r": 23,
+      "g": 44,
+      "b": 61,
+      "luminance": 40.8,
+      "tags": [
+        "deep_water_dark"
+      ]
+    },
+    "WATER_DEEP_04": {
+      "colorId": "WATER_DEEP_04",
+      "hex": "#356182",
+      "r": 53,
+      "g": 97,
+      "b": 130,
+      "luminance": 90,
+      "tags": [
+        "deep_water_lit"
+      ]
+    },
+    "WATER_DEEP_05": {
+      "colorId": "WATER_DEEP_05",
+      "hex": "#5289B0",
+      "r": 82,
+      "g": 137,
+      "b": 176,
+      "luminance": 128.1,
+      "tags": [
+        "deep_water_crest"
+      ]
+    },
+    "WATER_MURK_01": {
+      "colorId": "WATER_MURK_01",
+      "hex": "#141B18",
+      "r": 20,
+      "g": 27,
+      "b": 24,
+      "luminance": 25.3,
+      "tags": [
+        "murk_abyss"
+      ]
+    },
+    "WATER_MURK_02": {
+      "colorId": "WATER_MURK_02",
+      "hex": "#202B24",
+      "r": 32,
+      "g": 43,
+      "b": 36,
+      "luminance": 40.2,
+      "tags": [
+        "murk_dark"
+      ]
+    },
+    "WATER_MURK_03": {
+      "colorId": "WATER_MURK_03",
+      "hex": "#2F4035",
+      "r": 47,
+      "g": 64,
+      "b": 53,
+      "luminance": 59.6,
+      "tags": [
+        "murk_body"
+      ]
+    },
+    "WATER_MURK_04": {
+      "colorId": "WATER_MURK_04",
+      "hex": "#435A4B",
+      "r": 67,
+      "g": 90,
+      "b": 75,
+      "luminance": 84,
+      "tags": [
+        "murk_lit"
+      ]
+    },
+    "WATER_MURK_05": {
+      "colorId": "WATER_MURK_05",
+      "hex": "#5D7C68",
+      "r": 93,
+      "g": 124,
+      "b": 104,
+      "luminance": 116,
+      "tags": [
+        "murk_crest"
+      ]
+    },
+    "WATER_FOAM_01": {
+      "colorId": "WATER_FOAM_01",
+      "hex": "#304859",
+      "r": 48,
+      "g": 72,
+      "b": 89,
+      "luminance": 68.1,
+      "tags": [
+        "foam_recess"
+      ]
+    },
+    "WATER_FOAM_02": {
+      "colorId": "WATER_FOAM_02",
+      "hex": "#4C6E85",
+      "r": 76,
+      "g": 110,
+      "b": 133,
+      "luminance": 104.4,
+      "tags": [
+        "foam_shadow"
+      ]
+    },
+    "WATER_FOAM_03": {
+      "colorId": "WATER_FOAM_03",
+      "hex": "#7297B2",
+      "r": 114,
+      "g": 151,
+      "b": 178,
+      "luminance": 145.1,
+      "tags": [
+        "foam_body"
+      ]
+    },
+    "WATER_FOAM_04": {
+      "colorId": "WATER_FOAM_04",
+      "hex": "#A5C5DC",
+      "r": 165,
+      "g": 197,
+      "b": 220,
+      "luminance": 191.9,
+      "tags": [
+        "foam_lit"
+      ]
+    },
+    "WATER_FOAM_05": {
+      "colorId": "WATER_FOAM_05",
+      "hex": "#E2EFF8",
+      "r": 226,
+      "g": 239,
+      "b": 248,
+      "luminance": 236.9,
+      "tags": [
+        "foam_spray"
+      ]
+    },
+    "TIMBER_FRESH_01": {
+      "colorId": "TIMBER_FRESH_01",
+      "hex": "#281D13",
+      "r": 40,
+      "g": 29,
+      "b": 19,
+      "luminance": 30.6,
+      "tags": [
+        "timber_recess"
+      ]
+    },
+    "TIMBER_FRESH_02": {
+      "colorId": "TIMBER_FRESH_02",
+      "hex": "#49331E",
+      "r": 73,
+      "g": 51,
+      "b": 30,
+      "luminance": 54.2,
+      "tags": [
+        "timber_shadow"
+      ]
+    },
+    "TIMBER_FRESH_03": {
+      "colorId": "TIMBER_FRESH_03",
+      "hex": "#734F2D",
+      "r": 115,
+      "g": 79,
+      "b": 45,
+      "luminance": 84.2,
+      "tags": [
+        "timber_body"
+      ]
+    },
+    "TIMBER_FRESH_04": {
+      "colorId": "TIMBER_FRESH_04",
+      "hex": "#A2713F",
+      "r": 162,
+      "g": 113,
+      "b": 63,
+      "luminance": 119.8,
+      "tags": [
+        "timber_lit"
+      ]
+    },
+    "TIMBER_FRESH_05": {
+      "colorId": "TIMBER_FRESH_05",
+      "hex": "#D0995C",
+      "r": 208,
+      "g": 153,
+      "b": 92,
+      "luminance": 160.3,
+      "tags": [
+        "timber_crest"
+      ]
+    },
+    "TIMBER_AGED_03": {
+      "colorId": "TIMBER_AGED_03",
+      "hex": "#4D463D",
+      "r": 77,
+      "g": 70,
+      "b": 61,
+      "luminance": 70.8,
+      "tags": [
+        "aged_wood_body"
+      ]
+    },
+    "TIMBER_AGED_04": {
+      "colorId": "TIMBER_AGED_04",
+      "hex": "#6E6457",
+      "r": 110,
+      "g": 100,
+      "b": 87,
+      "luminance": 101.2,
+      "tags": [
+        "aged_wood_lit"
+      ]
+    },
+    "TIMBER_AGED_05": {
+      "colorId": "TIMBER_AGED_05",
+      "hex": "#938676",
+      "r": 147,
+      "g": 134,
+      "b": 118,
+      "luminance": 135.6,
+      "tags": [
+        "aged_wood_crest"
+      ]
+    },
+    "METAL_IRON_02": {
+      "colorId": "METAL_IRON_02",
+      "hex": "#252B30",
+      "r": 37,
+      "g": 43,
+      "b": 48,
+      "luminance": 42.1,
+      "tags": [
+        "iron_dark"
+      ]
+    },
+    "METAL_IRON_04": {
+      "colorId": "METAL_IRON_04",
+      "hex": "#606D78",
+      "r": 96,
+      "g": 109,
+      "b": 120,
+      "luminance": 107,
+      "tags": [
+        "iron_lit"
+      ]
+    },
+    "METAL_IRON_05": {
+      "colorId": "METAL_IRON_05",
+      "hex": "#8C9DA9",
+      "r": 140,
+      "g": 157,
+      "b": 169,
+      "luminance": 154.3,
+      "tags": [
+        "steel_glint"
+      ]
+    },
+    "FABRIC_LEATHER_02": {
+      "colorId": "FABRIC_LEATHER_02",
+      "hex": "#423023",
+      "r": 66,
+      "g": 48,
+      "b": 35,
+      "luminance": 50.9,
+      "tags": [
+        "leather_dark"
+      ]
+    },
+    "FABRIC_LEATHER_03": {
+      "colorId": "FABRIC_LEATHER_03",
+      "hex": "#674A35",
+      "r": 103,
+      "g": 74,
+      "b": 53,
+      "luminance": 78.6,
+      "tags": [
+        "leather_body"
+      ]
+    },
+    "FABRIC_LEATHER_04": {
+      "colorId": "FABRIC_LEATHER_04",
+      "hex": "#91694A",
+      "r": 145,
+      "g": 105,
+      "b": 74,
+      "luminance": 111.3,
+      "tags": [
+        "leather_lit"
+      ]
+    },
+    "FABRIC_LEATHER_05": {
+      "colorId": "FABRIC_LEATHER_05",
+      "hex": "#BA8C66",
+      "r": 186,
+      "g": 140,
+      "b": 102,
+      "luminance": 147,
+      "tags": [
+        "leather_crest"
+      ]
+    },
+    "MAGIC_GOLD_01": {
+      "colorId": "MAGIC_GOLD_01",
+      "hex": "#3B2905",
+      "r": 59,
+      "g": 41,
+      "b": 5,
+      "luminance": 42.2,
+      "tags": [
+        "divine_deep"
+      ]
+    },
+    "MAGIC_GOLD_02": {
+      "colorId": "MAGIC_GOLD_02",
+      "hex": "#78540D",
+      "r": 120,
+      "g": 84,
+      "b": 13,
+      "luminance": 86.5,
+      "tags": [
+        "divine_shadow"
+      ]
+    },
+    "MAGIC_GOLD_03": {
+      "colorId": "MAGIC_GOLD_03",
+      "hex": "#BE891B",
+      "r": 190,
+      "g": 137,
+      "b": 27,
+      "luminance": 140.3,
+      "tags": [
+        "divine_body"
+      ]
+    },
+    "MAGIC_GOLD_04": {
+      "colorId": "MAGIC_GOLD_04",
+      "hex": "#F7C03D",
+      "r": 247,
+      "g": 192,
+      "b": 61,
+      "luminance": 194.2,
+      "tags": [
+        "divine_lit"
+      ]
+    },
+    "MAGIC_GOLD_05": {
+      "colorId": "MAGIC_GOLD_05",
+      "hex": "#FFF2A3",
+      "r": 255,
+      "g": 242,
+      "b": 163,
+      "luminance": 239.1,
+      "tags": [
+        "radiant_core"
+      ]
+    },
+    "MAGIC_CYAN_01": {
+      "colorId": "MAGIC_CYAN_01",
+      "hex": "#062B33",
+      "r": 6,
+      "g": 43,
+      "b": 51,
+      "luminance": 35.7,
+      "tags": [
+        "arcane_deep"
+      ]
+    },
+    "MAGIC_CYAN_02": {
+      "colorId": "MAGIC_CYAN_02",
+      "hex": "#0F5969",
+      "r": 15,
+      "g": 89,
+      "b": 105,
+      "luminance": 74.4,
+      "tags": [
+        "arcane_shadow"
+      ]
+    },
+    "MAGIC_CYAN_03": {
+      "colorId": "MAGIC_CYAN_03",
+      "hex": "#1C95AD",
+      "r": 28,
+      "g": 149,
+      "b": 173,
+      "luminance": 125,
+      "tags": [
+        "arcane_body"
+      ]
+    },
+    "MAGIC_CYAN_04": {
+      "colorId": "MAGIC_CYAN_04",
+      "hex": "#3DD4F2",
+      "r": 61,
+      "g": 212,
+      "b": 242,
+      "luminance": 182.1,
+      "tags": [
+        "arcane_lit"
+      ]
+    },
+    "MAGIC_CYAN_05": {
+      "colorId": "MAGIC_CYAN_05",
+      "hex": "#A8F3FF",
+      "r": 168,
+      "g": 243,
+      "b": 255,
+      "luminance": 227.9,
+      "tags": [
+        "arcane_core"
+      ]
+    },
+    "MAGIC_VIOLET_01": {
+      "colorId": "MAGIC_VIOLET_01",
+      "hex": "#220C30",
+      "r": 34,
+      "g": 12,
+      "b": 48,
+      "luminance": 19.3,
+      "tags": [
+        "astral_deep"
+      ]
+    },
+    "MAGIC_VIOLET_02": {
+      "colorId": "MAGIC_VIOLET_02",
+      "hex": "#4A1E69",
+      "r": 74,
+      "g": 30,
+      "b": 105,
+      "luminance": 44.8,
+      "tags": [
+        "astral_shadow"
+      ]
+    },
+    "MAGIC_VIOLET_03": {
+      "colorId": "MAGIC_VIOLET_03",
+      "hex": "#8239B5",
+      "r": 130,
+      "g": 57,
+      "b": 181,
+      "luminance": 81.5,
+      "tags": [
+        "astral_body"
+      ]
+    },
+    "MAGIC_VIOLET_04": {
+      "colorId": "MAGIC_VIOLET_04",
+      "hex": "#BE65FA",
+      "r": 190,
+      "g": 101,
+      "b": 250,
+      "luminance": 130.7,
+      "tags": [
+        "astral_lit"
+      ]
+    },
+    "MAGIC_VIOLET_05": {
+      "colorId": "MAGIC_VIOLET_05",
+      "hex": "#E6BAFF",
+      "r": 230,
+      "g": 186,
+      "b": 255,
+      "luminance": 200.3,
+      "tags": [
+        "astral_core"
+      ]
+    },
+    "MAGIC_EMERALD_01": {
+      "colorId": "MAGIC_EMERALD_01",
+      "hex": "#0A2E16",
+      "r": 10,
+      "g": 46,
+      "b": 22,
+      "luminance": 36.6,
+      "tags": [
+        "nature_magic_deep"
+      ]
+    },
+    "MAGIC_EMERALD_02": {
+      "colorId": "MAGIC_EMERALD_02",
+      "hex": "#165C2F",
+      "r": 22,
+      "g": 92,
+      "b": 47,
+      "luminance": 73.9,
+      "tags": [
+        "nature_magic_shadow"
+      ]
+    },
+    "MAGIC_EMERALD_03": {
+      "colorId": "MAGIC_EMERALD_03",
+      "hex": "#269E51",
+      "r": 38,
+      "g": 158,
+      "b": 81,
+      "luminance": 126.9,
+      "tags": [
+        "nature_magic_body"
+      ]
+    },
+    "MAGIC_EMERALD_04": {
+      "colorId": "MAGIC_EMERALD_04",
+      "hex": "#4EE085",
+      "r": 78,
+      "g": 224,
+      "b": 133,
+      "luminance": 186.4,
+      "tags": [
+        "nature_magic_lit"
+      ]
+    },
+    "MAGIC_EMERALD_05": {
+      "colorId": "MAGIC_EMERALD_05",
+      "hex": "#ADFFD0",
+      "r": 173,
+      "g": 255,
+      "b": 208,
+      "luminance": 234.2,
+      "tags": [
+        "nature_magic_core"
+      ]
+    }
+  }
+}
