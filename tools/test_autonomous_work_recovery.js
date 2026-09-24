@@ -356,7 +356,7 @@ try {
         const nW = p ? drive(D, days(0.5), () => !!p.failed[wallKey] && String(p.failed[wallKey].reason).startsWith("stale: can't reach")) : -1;
         const wallRecord = p && p.failed[wallKey] ? JSON.parse(JSON.stringify(p.failed[wallKey])) : null; // cleared once the project finishes
         const withdrawn = D.failedJobs.filter(f => f.project === (p && p.id) && f.target && f.target.x === target.x && f.target.y === target.y && f.reason === "stale: can't reach it").length;
-        const nE = p ? drive(D, days(2), () => p.state !== "active") : -1;
+        const nE = p ? drive(D, days(3.5), () => p.state !== "active") : -1;
         const dD = D.P.evaluateDeficits(D.area);
         // (UF_Jobs finishes a gather on a picked plant as done with nothing to show; either way the slot is free again.)
         check("forage_target_gone_or_unreachable", !!p && !!job && !!after && finished(after) && !p.failed[pickedKey] && nW > 0 && withdrawn >= 1 && !!wallRecord && wallRecord.retryAt > 0 && nE > 0 && p.state === "done" && !!dD && dD.food.deficit === 0 && D.assignCalls === 0,

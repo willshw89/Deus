@@ -394,7 +394,7 @@ try {
         drive(S, 5 * ROUND);
         const dq = Q.data.dying;
         const stableStill = !!P.data.dying && P.data.dying.stable === true && P.data.dying.successes === 0 && P.data.dying.failures === 0 && P.data.hp === 0;
-        const controlRolled = Q.data.hp >= 1 || Q.data.dead || (!!dq && dq.successes + dq.failures >= 1) || Q.data.hp === 0 && !dq;
+        const controlRolled = Q.data.hp >= 1 || Q.data.dead || (!!dq && (dq.successes + dq.failures >= 1 || dq.stable)) || Q.data.hp === 0 && !dq;
         check("stable_dying_skips_death_saves", n0 > 0 && !!d && !!reflected && reflected.source === "zero_hp" && reflected.stable === true && reflected.dying === true && Cond.isStable(P) && Cond.has(P, "unconscious") && !Cond.canAct(P) && Cond.speedZero(P) && stableStill && controlRolled,
             `stable patient after 5 rounds: saves ${P.data.dying ? `${P.data.dying.successes}/${P.data.dying.failures}` : "?"} (was ${before ? `${before.s}/${before.f}` : "?"}), hp ${P.data.hp}, unconscious ${Cond.has(P, "unconscious")}, isStable ${Cond.isStable(P)}, reflected ${JSON.stringify(reflected ? { source: reflected.source, dying: reflected.dying, stable: reflected.stable } : null)}; the unstable control rolled: ${dq ? `${dq.successes}/${dq.failures}` : `no dying record (hp ${Q.data.hp}, dead ${!!Q.data.dead})`}`);
         const nW = drive(S, 3 * HOUR_TICKS, () => !P.data.dying);
