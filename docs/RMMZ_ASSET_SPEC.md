@@ -65,10 +65,10 @@ All tileset sheets are standard 48×48 grid composites:
 
 | Sheet | Purpose | Sheet Dimensions | Tile Grid | Layout Details |
 | :--- | :--- | :--- | :--- | :--- |
-| **A1** | Animation (Water/Lava) | **768 × 576 px** | 16 × 12 tiles | 16 autotile blocks (each 96×144 px, 3 animation frames side by side). |
+| **A1** | Animation (Water/Lava) | **768 × 576 px** | 16 × 12 tiles | 16 autotile blocks (each 96×144 px, 3 animation frames side by side; odd kinds 4-15 are waterfalls animating vertically). |
 | **A2** | Ground Autotiles | **768 × 576 px** | 16 × 12 tiles | 32 autotile blocks (each 96×144 px: 2×3 tiles). Top-left is floor center, top-right is inner corners, lower 2×2 are edges. |
-| **A3** | Building Roofs & Walls | **768 × 576 px** | 16 × 12 tiles | 32 building autotiles (roof tops and wall faces). |
-| **A4** | Walls & Cliffs | **768 × 576 px** | 16 × 12 tiles | 48 wall/cliff autotiles (top ceiling/walkway + front vertical face). |
+| **A3** | Building Roofs & Walls | **768 × 384 px** | 16 × 8 tiles | 32 building autotiles (each 96×96 px: 2×2 tiles; 4 rows of 8 autotiles). |
+| **A4** | Walls & Cliffs | **768 × 720 px** | 16 × 15 tiles | 48 wall/cliff autotiles (each 96×120 px: 2×2.5 tiles; 2-tile ceiling/top + 2-tile wall/face). |
 | **A5** | Normal Floor/Ground | **384 × 768 px** | 8 × 16 tiles | 128 single static 48×48 tiles (impassable/passable base terrain). |
 | **B – E** | Upper Layer Objects | **768 × 768 px** | 16 × 16 tiles | 256 static 48×48 decoration/structure tiles per sheet (trees, rocks, furniture, workshops). |
 

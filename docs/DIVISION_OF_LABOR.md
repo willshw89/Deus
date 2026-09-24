@@ -13,31 +13,18 @@ $$\textbf{Fable should fix the people so they can survive in that world and actu
 
 ---
 
-## 2. Subsystem Ownership & Domains
+## 2. File Ownership & API Boundary (Split by File, Meet at Function Calls)
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        DEUS DIVISION OF LABOR                          │
-├────────────────────────────────────────────────────────────────────────┤
-│ GEMINI: CORE ENGINE / WORLD RULES / INFRASTRUCTURE / PHYSICS           │
-│ - The Physical World Simulator: owns what is true in the universe.     │
-│ - Structural Z-support, multi-level ontology, collapse physics.        │
-│ - Fluid depth simulation, volumetric flow, fluid-terrain interactions. │
-│ - Fire propagation rules, material flammability, environmental decay. │
-│ - Universal construction state machine (Intent -> Building -> Complete)│
-│ - Performance foundation: 4x speed @ 60 FPS, zero full-world scans.    │
-│ - Modular 48px art production pipeline via Google Nano Banana Pro.     │
-├────────────────────────────────────────────────────────────────────────┤
-│ FABLE (CLAUDE CODE): AUTONOMOUS BEHAVIOR / COLONY COMPETENCE / SURVIVAL│
-│ - The Society & Decision Simulator: owns how people live and decide.   │
-│ - 7-day unattended survival baseline -> 30-day settlement competence.  │
-│ - Hazard reflex & survival behavior (fleeing fire, dousing, triage).  │
-│ - Needs & work balance (sleep, hunger, thirst, encumbrance, routing).  │
-│ - Settlement expansion behavior (communal shelter -> cottages -> civic)│
-│ - Threat response (armed defense, civilian flight to refuge).          │
-│ - Autonomous job recovery, stale task withdrawal, peon deposit loops.  │
-└────────────────────────────────────────────────────────────────────────┘
-```
+| Agent | Exclusive File Ownership | Role & Authority |
+|---|---|---|
+| **Gemini** | `game/js/plugins/DEUS_Fire.js`<br>`game/js/plugins/DEUS_Levels.js`<br>`game/js/plugins/DEUS_Fluid.js`<br>`game/js/plugins/DEUS_Walls.js`<br>`game/js/plugins/DEUS_Floors.js`<br>`game/js/plugins/DEUS_WorldGen.js`<br>`game/js/plugins/DEUS_Environment.js`<br>`game/js/plugins/DEUS_Core.js`<br>Engine Performance & Render Layers | **Physical World Authority:**<br>Implements physical simulation laws, structural support BFS, multi-Z ontology, collapse cascades, fluid depth, fire rules, and rain extinguishing.<br>Provides query APIs: `canConstruct()`, `isHazardous()`, `isSafeToExcavate()`, support checks, and piece state (`PLANNED`, `BUILDING`, `COMPLETE`). |
+| **Fable** | `game/js/plugins/DEUS_Projects.js`<br>`game/js/plugins/DEUS_Colonists.js`<br>`game/js/plugins/DEUS_Jobs.js`<br>`game/js/plugins/UF_Households.js`<br>Colony AI & Behavioral Decision Loops | **Society & Behavior Authority:**<br>Owns the settlement brain, blueprint set, resource hauling, job assignments, colonist decision loops, survival soaks, and settlement expansion.<br>Calls Gemini's physical query APIs and never reimplements physical rules. |
+
+### The Golden Rules of File Ownership:
+1. **Never edit a file owned by the other agent.** (Prevents syntax errors and duplicate declarations).
+2. **All interaction happens through documented function calls and events, never shared file editing.**
+3. **If a physical query is needed by the planner (e.g. `canConstruct` or `isSafeToExcavate`), Gemini implements it in the physical layer (`DEUS_Fire.js` / `DEUS_Walls.js` / `DEUS_Levels.js`), and Fable calls it from `DEUS_Projects.js` / `DEUS_Jobs.js`.**
+4. **For the Universal Construction Lifecycle, Gemini owns what is physically true about each piece (e.g. that a `PLANNED` or `BUILDING` wall provides zero structural support). Fable's `DEUS_Projects.js` keeps the planning and hauling, and reads those states.**
 
 ---
 

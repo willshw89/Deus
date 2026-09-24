@@ -143,10 +143,10 @@ function buildRoofAutotile(spec) {
     return block;
 }
 
-const A3_W = 768, A3_H = 576; // 8 cols x 6 rows of 96x96
+const A3_W = 768, A3_H = 384; // 8 cols x 4 rows of 96x96 (official RMMZ A3 standard)
 const sheet = Buffer.alloc(A3_W * A3_H * 4);
 
-for (let r = 0; r < 6; r++) {
+for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 8; c++) {
         const spec = ROOF_SPECS[(r * 8 + c) % ROOF_SPECS.length];
         const block = buildRoofAutotile(spec);
@@ -173,4 +173,4 @@ const masterA3  = path.join(ROOT, 'art', 'masters', 'Outside_A3.png');
 writePNG(outsideA3, A3_W, A3_H, sheet);
 writePNG(masterA3, A3_W, A3_H, sheet);
 
-console.log(`Saved complete 768x576 Outside_A3.png (8 cols x 6 rows) successfully!`);
+console.log(`Saved complete 768x384 Outside_A3.png (8 cols x 4 rows) successfully!`);
