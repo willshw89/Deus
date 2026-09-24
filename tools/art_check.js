@@ -317,9 +317,36 @@ function checkPalette(img) {
     return fail(`${n} opaque colours: over ${PALETTE_FAIL} (limit ${PALETTE_LIMIT})`, r);
 }
 
+let _scaleRegistry = null;
+function getScaleRegistry() {
+    if (_scaleRegistry) return _scaleRegistry;
+    const p = path.resolve(__dirname, '..', 'game', 'data', 'DEUS_ScaleRegistry.json');
+    if (fs.existsSync(p)) {
+        try {
+            _scaleRegistry = JSON.parse(fs.readFileSync(p, 'utf8'));
+        } catch (e) { _scaleRegistry = null; }
+    }
+    return _scaleRegistry;
+}
+
 function checkSize(img, cls, grid, sidecar) {
     const w = img.width, h = img.height;
     const dims = `${w}x${h}`;
+    if (sidecar && sidecar.scaleClass) {
+        const reg = getScaleRegistry();
+        const scEntry = reg && reg.classes ? reg.classes[sidecar.scaleClass] : null;
+        if (scEntry) {
+            const checkW = (Number.isInteger(sidecar.intendedNativeWidth) ? sidecar.intendedNativeWidth : (grid && grid.fw ? grid.fw : w));
+            const checkH = (Number.isInteger(sidecar.intendedNativeHeight) ? sidecar.intendedNativeHeight : (grid && grid.fh ? grid.fh : h));
+            if (checkW < scEntry.visualWidthMin || checkW > scEntry.visualWidthMax || checkH < scEntry.visualHeightMin || checkH > scEntry.visualHeightMax) {
+                return fail(`${dims}: size ${checkW}x${checkH} outside scaleClass ${sidecar.scaleClass} bounds [${scEntry.visualWidthMin}-${scEntry.visualWidthMax}W x ${scEntry.visualHeightMin}-${scEntry.visualHeightMax}H]`);
+            }
+            if (Math.abs(checkW - scEntry.visualWidthTarget) > 8 || Math.abs(checkH - scEntry.visualHeightTarget) > 8) {
+                return warn(`${dims}: size ${checkW}x${checkH} within bounds of ${sidecar.scaleClass} but deviates from target ${scEntry.visualWidthTarget}x${scEntry.visualHeightTarget}`);
+            }
+            return ok(`${dims}: matches scaleClass ${sidecar.scaleClass} envelope (${scEntry.visualWidthTarget}x${scEntry.visualHeightTarget} target)`);
+        }
+    }
     if (sidecar && Number.isInteger(sidecar.intendedNativeWidth) && Number.isInteger(sidecar.intendedNativeHeight)) {
         if (w === sidecar.intendedNativeWidth && h === sidecar.intendedNativeHeight) {
             return ok(`${dims}: matches metadata intended native size ${sidecar.intendedNativeWidth}x${sidecar.intendedNativeHeight}`);
@@ -446,6 +473,12 @@ function checkSidecar(file, img, cls, sidecar, sidecarError, required, grid) {
     }
     if (sidecar.intendedNativeHeight !== undefined && (!Number.isInteger(sidecar.intendedNativeHeight) || sidecar.intendedNativeHeight <= 0)) {
         problems.push(`intendedNativeHeight must be a positive integer`);
+    }
+    if (sidecar.scaleClass) {
+        const reg = getScaleRegistry();
+        if (reg && reg.classes && !reg.classes[sidecar.scaleClass]) {
+            problems.push(`unknown scaleClass: ${JSON.stringify(sidecar.scaleClass)}`);
+        }
     }
     const optional = ['layer', 'species', 'stage'].map((k) => `${k} ${k in sidecar ? 'present' : 'absent'}`).join(', ');
     if (problems.length) return fail(`${path.basename(sc)}: ${problems.join('; ')}`);
@@ -732,6 +765,37 @@ function selftest() {
                 }
             }),
             expect: { size: 'FAIL', sidecar: 'PASS' }
+        },
+        {
+            name: 'scale_class_pass',
+            file: sheet('!$T_OakClassPass.png', {
+                width: 68, height: 84,
+                draw: (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x + y) % 2 === 0) set(b, w, x, y, 40, 110, 40); },
+                sidecar: {
+                    id: 'TEST_oakPass', frameWidth: 68, frameHeight: 84, anchor: [34, 83], footprint: [1, 1],
+                    facings: ['S'], animations: { stand: [0] }, intendedNativeWidth: 68, intendedNativeHeight: 84, scaleClass: 'TREE_COMMON_OAK'
+                }
+            }),
+            expect: { size: 'PASS', sidecar: 'PASS' }
+        },
+        {
+            name: 'scale_class_fail',
+            file: sheet('!$T_OakClassFail.png', {
+                width: 68, height: 110,
+                draw: (b, w, h) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if ((x + y) % 2 === 0) set(b, w, x, y, 40, 110, 40); },
+                sidecar: {
+                    id: 'TEST_oakFail', frameWidth: 68, frameHeight: 110, anchor: [34, 109], footprint: [1, 1],
+                    facings: ['S'], animations: { stand: [0] }, intendedNativeWidth: 68, intendedNativeHeight: 110, scaleClass: 'TREE_COMMON_OAK'
+                }
+            }),
+            expect: { size: 'FAIL', sidecar: 'PASS' }
+        },
+        {
+            name: 'scale_class_unknown',
+            file: sheet('!$T_BadScaleClass.png', {
+                sidecar: Object.assign({}, good, { scaleClass: 'NONEXISTENT_CLASS' })
+            }),
+            expect: { sidecar: 'FAIL' }
         },
         { name: 'palette_warn', file: sheet('$T_Palette40.png', { sidecar: good, mutate: rainbow(37) }), expect: { palette: 'WARN' } },
         { name: 'palette_fail', file: sheet('$T_Palette70.png', { sidecar: good, mutate: rainbow(67) }), expect: { palette: 'FAIL' } },

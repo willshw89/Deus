@@ -8,8 +8,21 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** STOPPED AT GATE — reconciled WBS numbering with canonical `DEUS-WORLD-WBS-v1.0` (`docs/art/DEUS_WORLD_WBS.md`). Awaiting owner authorization to begin `DW.01.03 — Freeze Human / World Scale Strip`.
+- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.03 — Freeze Human / World Scale Strip`. Awaiting owner review before proceeding to `DW.01.04`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DW.01.03 — Freeze Human / World Scale Strip (2026-09-24)
+- **Status**: `COMPLETED — FROZEN (AWAITING OWNER REVIEW)`
+- **Scope**:
+  - Formalized the approved proportional scale hierarchy from `art/reference/DEUS_SCALE_LANGUAGE_V1.*` into a canonical, machine-enforceable technical standard (`docs/art/DEUS_HUMAN_WORLD_SCALE_STANDARD.md`).
+  - Created machine-readable scale registry: `game/data/DEUS_ScaleRegistry.json` (and `docs/art/DEUS_ScaleRegistry.json`) covering 38 canonical classes across 6 domains (Characters, Micro Vegetation, Shrubs, Stone, Wood Debris, Trees, Architecture Reference Anchors).
+  - Preserved the tree standard: Standard Oak 72–96 px (target 84 px, ~2.0× Human), Birch 76–100 px (target 88 px, ~2.1× Human), Pine 80–104 px (target 92 px, ~2.2× Human), Large Accent 96–124 px (target 105 px, ~2.5× Human), Hero Landmark 120–160+ px (target 140 px, ~3.3× Human).
+  - Explicitly decoupled Visual Envelope (pixels) vs. Gameplay Footprint (tiles) vs. Contact Anchor (point) and codified overhang rules.
+  - Rendered deterministic technical scale strip graphic: `art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png` (1340×224 px) comparing all 18 objects on continuous baseline y=180 with 48px tile guides and height rulers.
+  - Implemented prompt compiler tool `tools/scale_resolver.js` allowing future prompts to automatically inject Human yardstick, visual envelopes, footprint, and anchor without manual guesswork.
+  - Integrated scale class QC validation into `tools/art_check.js` (80/80 selftest expectations passing).
+  - Added automated test harness `tools/test_scale_standard.js` (21/21 checks passing).
+  - Stopped at gate per AGENTS.md Rule 6.
 
 ## DW.01.02 — Freeze Native-Resolution / Pixel-Density Standard (2026-09-24)
 - **Status**: `COMPLETED — FROZEN (APPROVED BY OWNER) [commit faeee9e]`

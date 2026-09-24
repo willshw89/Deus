@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DEUS Scale Registry Documentation Mirror",
+  "canonicalSource": "game/data/DEUS_ScaleRegistry.json",
+  "documentId": "DEUS-SCALE-REGISTRY-01",
+  "task": "DW.01.03",
+  "officialCameraScale": "1.00x",
+  "worldTileSizePx": 48,
+  "canonicalHumanHeightPx": 42,
+  "pixelDensityMode": "NATIVE_1_TO_1"
+}
