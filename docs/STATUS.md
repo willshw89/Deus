@@ -8,8 +8,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** In progress on `WORLDART-BIOMES` Batch 1 Grass (Awaiting Owner Review).
+- **Gemini (2026-09-24):** Completed `DW.01.01 — Freeze World-Art Visual Charter`. STOPPED AT GATE awaiting next WBS authorization.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DW.01.01 — Freeze World-Art Visual Charter (2026-09-24)
+- **Status**: `COMPLETED — FROZEN (APPROVED BY OWNER)`
+- **Scope**:
+  - Reclassified initial single-board diorama concept as `art/reference/DEUS_WORLD_ART_STYLE_EXPLORATION_01.jpg` (historical exploration only; excluded from generative conditioning).
+  - Established and froze the canonical three-part visual conditioning triad:
+    1. **Reference A (`DEUS_GAMEPLAY_PERSPECTIVE_MASTER_V1.png` / `.jpg`)**: Primary conditioning. 2D top-down / high 3/4 RMMZ perspective, calm meadow loam, ~42 px upright Humans, ~84 px oak, vertical rock cliff strata, shore progression. Zero text/labels.
+    2. **Reference B (`DEUS_BIOME_STUDIES_V1.png` / `.jpg`)**: Secondary biome conditioning. Five distinct biomes (Temperate, Wetland, Arid, Highland [zero snow/ice], Volcanic). Header text deterministically cropped off; 100% clean art preserved.
+    3. **Reference C (`DEUS_SCALE_LANGUAGE_V1.png` / `.jpg`)**: Proportion & silhouette harmony reference. Continuous single-baseline lineup: Human (~42 px), short/tall grass, small/med bushes, rock, boulder (~44 px), common oak (~84 px), birch (~88 px), pine (~92 px). Zero generated dimensions or labels.
+  - Codified the Authority Rule in `docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md`: Visual references govern aesthetic character, camera, and proportions; code and `docs/RMMZ_ASSET_SPEC.md` govern exact technical pixel geometry, grids (48×48), collisions, and sheet packing.
+  - Stopped at gate per owner directive.
 
 ## DEUS-TSK-GEMINI-20 — Batch 1 Grass Review & Live In-Engine Proof (2026-09-24)
 - **Status**: `AWAITING OWNER REVIEW`
