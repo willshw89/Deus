@@ -1,0 +1,210 @@
+{
+  "packageId": "BIO_TEMPERATE_Z0_CORE",
+  "biome": "Temperate",
+  "zLevel": "Z0",
+  "role": "CORE",
+  "cameraDistanceLocked": "1.00x",
+  "frameTimeMs": 250,
+  "features": [
+    {
+      "featureFamily": "grass_tuft",
+      "variations": [
+        "A",
+        "B",
+        "C"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "A",
+          "tileX": 1,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 1,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 1,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "B",
+          "tileX": 2,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 2,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 2,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "C",
+          "tileX": 3,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 3,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 3,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "wildflowers",
+      "variations": [
+        "bluebell",
+        "poppy",
+        "anemone"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "bluebell",
+          "tileX": 4,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 4,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 4,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "poppy",
+          "tileX": 5,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 5,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 5,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "anemone",
+          "tileX": 6,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 6,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 6,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "shrubs_brambles",
+      "variations": [
+        "shrub_green",
+        "bramble_berry",
+        "scrub_autumn"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "shrub_green",
+          "tileX": 7,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 7,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 7,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "bramble_berry",
+          "tileX": 8,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 8,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 8,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "scrub_autumn",
+          "tileX": 9,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 9,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 9,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "water_reeds",
+      "variations": [
+        "marsh_reeds",
+        "cattails",
+        "river_fern"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "marsh_reeds",
+          "tileX": 10,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 10,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 10,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "cattails",
+          "tileX": 11,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 11,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 11,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "river_fern",
+          "tileX": 12,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 12,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 12,
+            "tileY": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "packageId": "BIO_ARID_Z0_CORE",
+  "biome": "Arid",
+  "zLevel": "Z0",
+  "role": "CORE",
+  "cameraDistanceLocked": "1.00x",
+  "frameTimeMs": 250,
+  "features": [
+    {
+      "featureFamily": "arid_bunchgrass",
+      "variations": [
+        "A",
+        "B",
+        "C"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "A",
+          "tileX": 1,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 1,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 1,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "B",
+          "tileX": 2,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 2,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 2,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "C",
+          "tileX": 3,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 3,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 3,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "desert_sage_scrub",
+      "variations": [
+        "scrub_A",
+        "scrub_B",
+        "scrub_C"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "scrub_A",
+          "tileX": 4,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 4,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 4,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "scrub_B",
+          "tileX": 5,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 5,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 5,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "scrub_C",
+          "tileX": 6,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 6,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 6,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "desert_succulents_aloe",
+      "variations": [
+        "aloe_A",
+        "aloe_B",
+        "aloe_C"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "aloe_A",
+          "tileX": 7,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 7,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 7,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "aloe_B",
+          "tileX": 8,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 8,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 8,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "aloe_C",
+          "tileX": 9,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 9,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 9,
+            "tileY": 0
+          }
+        }
+      ]
+    },
+    {
+      "featureFamily": "arid_canyon_reedgrass",
+      "variations": [
+        "reed_A",
+        "reed_B",
+        "reed_C"
+      ],
+      "frames": 3,
+      "tileSlots": [
+        {
+          "variation": "reed_A",
+          "tileX": 10,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 10,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 10,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "reed_B",
+          "tileX": 11,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 11,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 11,
+            "tileY": 0
+          }
+        },
+        {
+          "variation": "reed_C",
+          "tileX": 12,
+          "tileY": 0,
+          "companionF2": {
+            "tileX": 12,
+            "tileY": 0
+          },
+          "companionF3": {
+            "tileX": 12,
+            "tileY": 0
+          }
+        }
+      ]
+    }
+  ]
+}

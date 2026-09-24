@@ -35,7 +35,18 @@ const LEAN_LIMIT_PX = 2;    // centre of mass within 2 px of the frame's horizon
 const ICON = 32;            // AR-800: IconSet icons are 32x32
 const ICON_SHEET_WIDTH = 512;
 const FACE = 144;           // AR-700: 4 columns x 2 rows of 144x144
-const A1A2 = { width: 768, height: 576 }; // AR-001: A1 and A2 sheets are 768x576
+const A1A2 = { width: 768, height: 576 }; // legacy alias for A1/A2
+const TILESET_SLOT_DIMS = {
+    A1: { width: 768, height: 576 },
+    A2: { width: 768, height: 576 },
+    A3: { width: 768, height: 384 },
+    A4: { width: 768, height: 720 },
+    A5: { width: 384, height: 768 },
+    B:  { width: 768, height: 768 },
+    C:  { width: 768, height: 768 },
+    D:  { width: 768, height: 768 },
+    E:  { width: 768, height: 768 }
+};
 const FACING_NAMES = {
     s: 'S', south: 'S',
     w: 'W', west: 'W',
@@ -50,11 +61,12 @@ const FACING_NAMES = {
 // ---------------------------------------------------------------- arguments
 
 function parseArgs(argv) {
-    const opts = { files: [], sidecar: false, native: false, json: false, summary: false, type: null, help: false, selftest: false };
+    const opts = { files: [], sidecar: false, native: true, legacy3x: false, json: false, summary: false, type: null, help: false, selftest: false };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--sidecar') opts.sidecar = true;
         else if (a === '--native') opts.native = true;
+        else if (a === '--legacy-3x') opts.legacy3x = true;
         else if (a === '--selftest') opts.selftest = true;
         else if (a === '--json') opts.json = true;
         else if (a === '--summary') opts.summary = true;
@@ -190,43 +202,59 @@ function checkAlpha(img) {
     return fail(`${bad} of ${total} px have alpha between 1 and 254 (first at (${first.x},${first.y}) alpha ${first.a})`);
 }
 
-function checkGrid(img, cls, opts) {
-    if (opts && opts.native) {
-        return ok('native 48px resolution: skipping 3x block check (--native)');
-    }
+function isLegacy3xFile(file, opts) {
+    if (opts && (opts.legacy3x || opts['legacy-3x'])) return true;
+    if (!file) return false;
+    const base = path.basename(file);
+    return /^!?\$?U7_/i.test(base);
+}
+
+function checkGrid(img, cls, opts, file) {
+    const isLegacy = isLegacy3xFile(file, opts);
     const w = img.width, h = img.height;
+
     if (cls.type === 'icon') {
-        return skip(`${ICON}-px icons (AR-800) are not on the ${SCALE}x grid: ${ICON} is not a multiple of ${SCALE}`);
+        return skip(`${ICON}-px icons (AR-800) are not on the tile grid: icon sheet rules apply`);
     }
-    if (w % SCALE !== 0 || h % SCALE !== 0) {
-        return fail(`${w}x${h} is not a multiple of ${SCALE}, so it cannot be a ${SCALE}x export`);
-    }
-    const bw = w / SCALE, bh = h / SCALE;
-    let broken = 0, first = null;
-    for (let by = 0; by < bh; by++) {
-        for (let bx = 0; bx < bw; bx++) {
-            const x0 = bx * SCALE, y0 = by * SCALE;
-            const ref = pixelAt(img, x0, y0);
-            let bad = null;
-            for (let dy = 0; dy < SCALE && !bad; dy++) {
-                for (let dx = 0; dx < SCALE; dx++) {
-                    const p = pixelAt(img, x0 + dx, y0 + dy);
-                    // two transparent pixels are the same colour whatever their RGB
-                    if (p[3] === 0 && ref[3] === 0) continue;
-                    if (p[0] !== ref[0] || p[1] !== ref[1] || p[2] !== ref[2] || p[3] !== ref[3]) {
-                        bad = { x: x0 + dx, y: y0 + dy, p }; break;
+
+    if (isLegacy) {
+        if (w % SCALE !== 0 || h % SCALE !== 0) {
+            return fail(`${w}x${h} is not a multiple of ${SCALE}, so it cannot be a legacy ${SCALE}x export`);
+        }
+        const bw = w / SCALE, bh = h / SCALE;
+        let broken = 0, first = null;
+        for (let by = 0; by < bh; by++) {
+            for (let bx = 0; bx < bw; bx++) {
+                const x0 = bx * SCALE, y0 = by * SCALE;
+                const ref = pixelAt(img, x0, y0);
+                let bad = null;
+                for (let dy = 0; dy < SCALE && !bad; dy++) {
+                    for (let dx = 0; dx < SCALE; dx++) {
+                        const p = pixelAt(img, x0 + dx, y0 + dy);
+                        // two transparent pixels are the same colour whatever their RGB
+                        if (p[3] === 0 && ref[3] === 0) continue;
+                        if (p[0] !== ref[0] || p[1] !== ref[1] || p[2] !== ref[2] || p[3] !== ref[3]) {
+                            bad = { x: x0 + dx, y: y0 + dy, p }; break;
+                        }
                     }
                 }
-            }
-            if (bad) {
-                broken++;
-                if (!first) first = { bx, by, x0, y0, ref, ...bad };
+                if (bad) {
+                    broken++;
+                    if (!first) first = { bx, by, x0, y0, ref, ...bad };
+                }
             }
         }
+        const blocks = bw * bh;
+        if (broken === 0) return ok(`legacy 3x export: every ${SCALE}x${SCALE} block is one colour (${blocks} blocks)`);
+        return fail(`legacy 3x export broken: pixel (${first.x},${first.y}) is ${hex(...first.p)} but block top-left (${first.x0},${first.y0}) is ${hex(...first.ref)}; ${broken} of ${blocks} blocks broken`);
     }
-    const blocks = bw * bh;
-    if (broken === 0) return ok(`every ${SCALE}x${SCALE} block is one colour (${blocks} blocks)`);
-    return fail(`pixel (${first.x},${first.y}) is ${hex(...first.p)} but its block's top-left (${first.x0},${first.y0}) is ${hex(...first.ref)}; ${broken} of ${blocks} blocks broken`);
+
+    // Default for original DEUS art: native 48px resolution
+    if (w % TILE !== 0 || h % TILE !== 0) {
+        return fail(`${w}x${h} does not align to native 48px tile grid (must be a multiple of ${TILE} both ways)`);
+    }
+
+    return ok(`native 48px resolution: 1:1 pixel art on ${TILE}x${TILE} grid (${w / TILE}x${h / TILE} tiles)`);
 }
 
 function checkPalette(img) {
@@ -249,9 +277,12 @@ function checkSize(img, cls, grid) {
     const dims = `${w}x${h}`;
     const mult48 = w % TILE === 0 && h % TILE === 0;
     if (cls.type === 'tileset') {
-        if (cls.slot === 'A1' || cls.slot === 'A2') {
-            if (w === A1A2.width && h === A1A2.height) return ok(`${dims}: the ${cls.slot} sheet size ${A1A2.width}x${A1A2.height} (${grid.cols}x${grid.rows} tiles of ${TILE})`);
-            return fail(`${dims}: an ${cls.slot} sheet must be ${A1A2.width}x${A1A2.height}`);
+        const slotReq = cls.slot ? TILESET_SLOT_DIMS[cls.slot] : null;
+        if (slotReq) {
+            if (w === slotReq.width && h === slotReq.height) {
+                return ok(`${dims}: the ${cls.slot} sheet size ${slotReq.width}x${slotReq.height} (${grid.cols}x${grid.rows} tiles of ${TILE})`);
+            }
+            return fail(`${dims}: an ${cls.slot} sheet must be ${slotReq.width}x${slotReq.height}`);
         }
         if (mult48) return ok(`${dims}: a multiple of ${TILE} both ways (${grid.cols}x${grid.rows} tiles; no exact size rule for slot ${cls.slot || '?'})`);
         return fail(`${dims}: a tile sheet must be a multiple of ${TILE} both ways`);
@@ -464,7 +495,7 @@ function checkFile(file, opts) {
     report.sidecar = sidecar ? path.basename(sc) : null;
 
     add('alpha', checkAlpha(img));
-    add('grid', checkGrid(img, cls, opts));
+    add('grid', checkGrid(img, cls, opts, file));
     const pal = add('palette', checkPalette(img));
     report.colors = pal.colors;
     add('size', checkSize(img, cls, grid));
@@ -588,13 +619,18 @@ function selftest() {
     const cases = [
         { name: 'clean', file: sheet('$T_Clean.png', { sidecar: good }), expect: { alpha: 'PASS', grid: 'PASS', palette: 'PASS', size: 'PASS', sidecar: 'PASS', lean: 'PASS', margin: 'PASS' } },
         { name: 'alpha', file: sheet('$T_Alpha.png', { sidecar: good, mutate: (b, w) => set(b, w, 72, 30, ...BODY, 128) }), expect: { alpha: 'FAIL' } },
-        { name: 'grid', file: sheet('$T_Grid.png', { sidecar: good, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'FAIL', alpha: 'PASS' } },
+        { name: 'legacy_grid', file: sheet('$U7_T_Grid.png', { sidecar: good, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'FAIL', alpha: 'PASS' } },
+        { name: 'native_detail', file: sheet('$T_NativeDetail.png', { sidecar: good, mutate: (b, w) => set(b, w, 73, 31, 255, 0, 0) }), expect: { grid: 'PASS', alpha: 'PASS' } },
         { name: 'palette_warn', file: sheet('$T_Palette40.png', { sidecar: good, mutate: rainbow(37) }), expect: { palette: 'WARN' } },
         { name: 'palette_fail', file: sheet('$T_Palette70.png', { sidecar: good, mutate: rainbow(67) }), expect: { palette: 'FAIL' } },
         { name: 'palette_empty', file: sheet('$T_Empty.png', { sidecar: good, mutate: (b) => b.fill(0) }), expect: { palette: 'FAIL', lean: 'FAIL', margin: 'FAIL' } },
         { name: 'size_odd', file: (() => { const f = path.join(root, 'characters', '$T_Size100.png'); const b = Buffer.alloc(100 * 100 * 4, 0); for (let y = 40; y < 100; y++) for (let x = 40; x < 60; x++) set(b, 100, x, y, 10, 200, 10); writePNG(f, 100, 100, b); return f; })(), expect: { size: 'FAIL', grid: 'FAIL' } },
         { name: 'size_a2', file: tiles('tilesets', 'T_A2.png', 768, 576), expect: { size: 'PASS', grid: 'PASS', alpha: 'PASS', lean: 'SKIP', margin: 'SKIP', sidecar: 'SKIP' } },
         { name: 'size_a2_short', file: tiles('tilesets', 'T_Short_A2.png', 768, 384), expect: { size: 'FAIL' } },
+        { name: 'size_a3', file: tiles('tilesets', 'T_A3.png', 768, 384), expect: { size: 'PASS', grid: 'PASS', alpha: 'PASS', lean: 'SKIP', margin: 'SKIP', sidecar: 'SKIP' } },
+        { name: 'size_a3_wrong', file: tiles('tilesets', 'T_Bad_A3.png', 768, 576), expect: { size: 'FAIL' } },
+        { name: 'size_a4', file: tiles('tilesets', 'T_A4.png', 768, 720), expect: { size: 'PASS', grid: 'PASS', alpha: 'PASS', lean: 'SKIP', margin: 'SKIP', sidecar: 'SKIP' } },
+        { name: 'size_a5', file: tiles('tilesets', 'T_A5.png', 384, 768), expect: { size: 'PASS', grid: 'PASS', alpha: 'PASS', lean: 'SKIP', margin: 'SKIP', sidecar: 'SKIP' } },
         { name: 'size_icon', file: tiles('system', 'IconSet.png', 512, 64), expect: { size: 'PASS', grid: 'SKIP' } },
         { name: 'size_icon_narrow', file: tiles('system', 'IconSet_Narrow.png', 500, 64), expect: { size: 'FAIL' } },
         { name: 'sidecar_missing', file: sheet('$T_NoSidecar.png'), expect: { sidecar: 'FAIL' } },
