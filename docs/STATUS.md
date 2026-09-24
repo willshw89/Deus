@@ -62,7 +62,8 @@ Update this whenever reality changes. Write only what you've checked, and say ho
   - Cleaned stale 4× scale references in `docs/ART_STANDARD.md` and `docs/RMMZ_ASSET_SPEC.md`.
   - Stopped at gate per AGENTS.md Rule 6.
 
-## Vertical depth compositing: the two levels below at a camera-model zoom (Fable, 2026-09-24)
+## Vertical depth compositing: the two levels below at a camera-model zoom, with their assets (Fable, 2026-09-24)
+- **Update (later on 2026-09-24, user direction "see all of the assets on the layers below too, like trees and creatures")**: each plane now draws its level's objects (the live object layer class fed the lower build), items on the ground, units (standing frames, sidecar facings), cliff faces / black caps and ground ramps, sorted by foot position and projected with the tiles; nothing animates off the level on screen. New check `entities_drawn` (an oak, a stone stack and a TEST unit placed on the +1 terrace are counted and the unit's body pixels appear in the planes' render; provocation seen failing: no entities drawn). Tile checks now sample with entities off. Snapshot run `depth9`: `RESULT: 21 passed, 0 failed (exit 0)`. Not drawn below yet: fire, the flood overlay, speech, stance rings, designations, fog. Note for review: the rule-13 black caps of the +1 cliffs sit on the cell north of each wall, so from +2 they show as black blocks along the summit's edges, as the +1 view itself draws them.
 - **Status**: `AWAITING USER REVIEW` (the eye-height bracket of the user's last direction; no editor Playtest yet)
 - **Direction** (three user directions on 2026-09-24, the last one shipped; VISION decision log): the relayed addendum (crisp projection 0.97 / 0.94, no blur by default) → "one Z layer lower, black beyond, blurred" → "before we blur, show 2 layers, zoomed at the correct distance to simulate being 6 feet farther away".
 - **Scope** (new files only; `DEUS_Levels.js`, `DEUS_Camera.js` untouched):

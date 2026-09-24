@@ -57,8 +57,10 @@
  * are opaque art.
  *
  * Each depth plane is a stock RMMZ Tilemap whose layers paint into a canvas Bitmap (nearest
- * sampling) from the lower level's cached build (UF.World.peekArea). Optionally (presets A/B/C,
- * the addendum's experiment) the plane is scaled about the viewport centre:
+ * sampling) from the lower level's cached build (UF.World.peekArea), plus the level's objects,
+ * items, units, cliff faces and ground ramps as pooled sprites between its tile layers (standing
+ * frames; nothing animates off the level on screen). The plane is scaled about the viewport
+ * centre by the camera model (presets A/B/C; D/E draw one level at scale 1):
  *     screen = centre + (unprojectedScreen - centre) * depthScale
  * and with MaxDepth 2 the level two below shows through the open cells of the level below.
  *
@@ -147,6 +149,11 @@
         maxParallaxPx: 26,
         /** Levels whose open cells draw transparent, so the level below them can show: the surface levels (open_air). */
         exposes: z => z > 0,
+        /** What of a lower level is drawn besides its tiles (user direction 2026-09-24: "all of the assets on the layers
+         *  below too, like trees and creatures"): its objects, items, units, natural walls / cliff faces and ground ramps. */
+        entities: { objects: true, items: true, units: true, walls: true },
+        /** How often (frames) the lower levels' unit and item sets are re-read; positions of tracked units follow every frame. */
+        entityRefreshFrames: 60,
         depths: { 1: depthDefaults(0.97), 2: depthDefaults(0.94) },
         _stamp: 1
     };
@@ -295,6 +302,116 @@
     DepthTilemap.prototype.hasWater = function() { return this._lowerLayer.water || this._upperLayer.water; };
 
     //-------------------------------------------------------------------------
+    // The entities of a lower level: its objects (the live object layer class, fed the lower level's build), items,
+    // units, natural walls / cliff faces and ground connectors, as pooled sprites in the plane's own coordinate frame,
+    // sorted by foot position like the map on screen. Frames are the sheets' standing frames (nothing animates off
+    // the level on screen, V50), read with the same sidecar rules as UF_Objects / UF_Anim.
+
+    const FACING4 = { 2: "S", 4: "W", 6: "E", 8: "N" };
+    const FACING8 = ["", "SW", "S", "SE", "W", "", "E", "NW", "N", "NE"]; // by numpad direction (dir8)
+    const ENTITY_MARGIN = 3, ENTITY_TALL = 6; // cells beyond the view (UF_Objects' MARGIN / TALLEST_CELLS)
+    const sidecarOf = name => (window.UF && UF.Sidecars && name ? UF.Sidecars.get(name) : null);
+    // Shared sheets are sampled linearly by MZ's Bitmap (smooth = true); inside a scaled plane that would soften them.
+    // Nearest sampling is identical at 1:1, so forcing it on the shared texture changes nothing on the map on screen.
+    function forceNearest(bmp) {
+        if (!bmp) return;
+        if (bmp.smooth) bmp.smooth = false;
+        const bt = bmp.baseTexture;
+        // PIXI 5.3: the style reaches an already uploaded GL texture only through setStyle (it bumps dirtyStyleId)
+        if (bt && typeof bt.setStyle === "function" && bt.scaleMode !== PIXI.SCALE_MODES.NEAREST) bt.setStyle(PIXI.SCALE_MODES.NEAREST, bt.mipmap);
+        else if (bt && typeof bt.setStyle === "function" && bt.dirtyStyleId === 0) bt.setStyle(PIXI.SCALE_MODES.NEAREST, bt.mipmap);
+    }
+    const tintOf = c => (typeof c === "string" && /^#?[0-9a-f]{6}$/i.test(c) ? parseInt(c.replace("#", ""), 16) : (typeof c === "number" ? c : 0xffffff));
+
+    /** The standing frame of a unit's charset: { bitmap, sx, sy, w, h, ax, ay }, or null while the sheet loads. */
+    function unitFrame(image, dir, dir8) {
+        const name = image && image.characterName;
+        if (!name) return null;
+        const bmp = ImageManager.loadCharacter(name);
+        if (!bmp.isReady() || !bmp.width) return null;
+        const big = ImageManager.isBigCharacter(name), sc = sidecarOf(name);
+        let fw = big ? Math.floor(bmp.width / 3) : Math.floor(bmp.width / 12);
+        let fh = big ? Math.floor(bmp.height / 4) : Math.floor(bmp.height / 8);
+        if (sc && sc.frameWidth > 0 && sc.frameHeight > 0) { fw = sc.frameWidth; fh = sc.frameHeight; }
+        const d4 = FACING4[dir] ? dir : 2;
+        let row = (d4 - 2) / 2;
+        if (sc && Array.isArray(sc.facings)) { // an 8-direction sheet names its rows (CHARSET_8D_STANDARD)
+            const j8 = FACING8[dir8] ? sc.facings.indexOf(FACING8[dir8]) : -1, j4 = sc.facings.indexOf(FACING4[d4]);
+            row = j8 >= 0 ? j8 : (j4 >= 0 ? j4 : row);
+        }
+        let col = 1; // RPG Maker's standing pattern
+        if (sc && sc.animations && Array.isArray(sc.animations.stand) && sc.animations.stand.length) col = sc.animations.stand[0] | 0;
+        let blockX = 0, blockY = 0;
+        if (!big) { const index = image.characterIndex | 0; blockX = (index % 4) * 3; blockY = Math.floor(index / 4) * 4; }
+        if ((blockX + col + 1) * fw > bmp.width) col = 0;
+        const anchor = sc && Array.isArray(sc.anchor) && sc.anchor.length === 2 ? [sc.anchor[0] / fw, sc.anchor[1] / fh] : [0.5, 1];
+        return { bitmap: bmp, sx: (blockX + col) * fw, sy: (blockY + row) * fh, w: fw, h: fh, ax: anchor[0], ay: anchor[1] };
+    }
+    /** The frame of an item stack on the ground (UF_Items' rule: column 1, row 0 of its sheet), or null while it loads. */
+    function itemFrame(item) {
+        const I = window.UF && UF.Items, t = I && I.type ? I.type(item.type) : null;
+        if (!t || !t.image) return null;
+        const bmp = ImageManager.loadCharacter(t.image);
+        if (!bmp.isReady() || !bmp.width) return null;
+        const sc = sidecarOf(t.image);
+        const fw = (sc && sc.frameWidth > 0 ? sc.frameWidth : 0) || Math.floor(bmp.width / 3);
+        const fh = (sc && sc.frameHeight > 0 ? sc.frameHeight : 0) || Math.floor(bmp.height / 4);
+        const anchor = sc && Array.isArray(sc.anchor) && fw > 0 && fh > 0 ? [sc.anchor[0] / fw, sc.anchor[1] / fh] : [0.5, 1];
+        const mat = item.mat && I.materialOf ? I.materialOf(item.mat) : null;
+        return { bitmap: bmp, sx: fw, sy: 0, w: fw, h: fh, ax: anchor[0], ay: anchor[1], tint: tintOf(mat && mat.color ? mat.color : t.tint) };
+    }
+    const connectorFrames = new Map();
+    /** One 48 x 48 frame of a ground connector look (ramp_up, stair_*) from tileset 92's B sheet, or null. */
+    function connectorFrame(look) {
+        if (connectorFrames.has(look)) return connectorFrames.get(look);
+        const L = Levels(), sheets = L && L.composedSheets ? L.composedSheets() : null, src = sheets && sheets.B;
+        const id = L && L.tileOf ? L.tileOf(look) : -1;
+        if (!src || !src.isReady() || !(id >= 0 && id < 256)) return null;
+        const bmp = new Bitmap(48, 48);
+        bmp.smooth = false;
+        bmp.blt(src, ((Math.floor(id / 128) % 2) * 8 + (id % 8)) * 48, Math.floor((id % 128) / 8) * 48, 48, 48, 0, 0);
+        connectorFrames.set(look, bmp);
+        return bmp;
+    }
+
+    // The live object layer, pointed at a lower level's build. UF_Objects reads the map on screen for wall autotile
+    // masks, so the build is swapped in for the (synchronous) rebuild and placement only.
+    let DepthObjectLayer = null;
+    function objectLayerClass() {
+        const O = window.UF && UF.Objects;
+        if (DepthObjectLayer || !O || !O.Sprite_Layer) return DepthObjectLayer;
+        DepthObjectLayer = class extends O.Sprite_Layer {
+            constructor(plane) { super(); this._plane = plane; }
+            update() {
+                Sprite.prototype.update.call(this);
+                this._updateObjects();
+            }
+            _assign(s, type, x, y) {
+                super._assign(s, type, x, y);
+                forceNearest(s.bitmap);
+            }
+            _updateObjects() {
+                const map = this._plane.map;
+                if (!this.parent || !map || !map.ufObjects || !window.$gameMap || !config.entities.objects) { this._hideAll(); return; }
+                const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
+                const seen = this._seen;
+                if (seen.grid !== map.ufObjects) { this._hideAll(); this._force = true; }
+                const saved = window.$dataMap;
+                window.$dataMap = map;
+                try {
+                    if (this._dirty || this._force || seen.dx !== dx || seen.dy !== dy) {
+                        this._rebuild(map, dx, dy, this._force);
+                        seen.grid = map.ufObjects; seen.dx = dx; seen.dy = dy; seen.zoom = 1; seen.mapId = $gameMap.mapId();
+                        this._dirty = false; this._force = false;
+                    }
+                    this._place();
+                } finally { window.$dataMap = saved; }
+            }
+        };
+        return DepthObjectLayer;
+    }
+
+    //-------------------------------------------------------------------------
     // A depth plane on screen: the two canvas layers of one lower level, scaled about the viewport centre.
 
     function Sprite_DepthPlane() { this.initialize(...arguments); }
@@ -312,7 +429,21 @@
         this._root.addChild(this._tilemap);
         this._lower = new Sprite(this._tilemap._lowerLayer.bitmap);
         this._upper = new Sprite(this._tilemap._upperLayer.bitmap);
+        // The level's entities sit between its tile layers, in unprojected screen coordinates shifted by the canvas origin.
+        this._entities = new PIXI.Container();
+        this._entities.spriteId = Sprite._counter++;
+        const OL = objectLayerClass();
+        this._objectLayer = OL ? new OL(this) : null;
+        if (this._objectLayer) this._entities.addChild(this._objectLayer);
+        this._units = new Map();   // unit id -> sprite
+        this._items = new Map();   // item id -> sprite
+        this._walls = new Map();   // "x,y" or "c:x,y" -> sprite
+        this._pool = [];
+        this._entityDirty = true;
+        this._entityFrame = 0;
+        this._entityWindow = "";
         this.addChild(this._lower);
+        this.addChild(this._entities);
         this.addChild(this._upper);
         this._colorFilter = null;
         this._blurFilter = null;
@@ -337,8 +468,166 @@
         tm.flags = ts ? ts.flags : [];
         tm.setBitmaps(ts ? ts.tilesetNames.map(n => ImageManager.loadTileset(n)) : []);
         tm.refresh();
+        this.clearEntities();
     };
-    Sprite_DepthPlane.prototype.refresh = function() { this._tilemap.refresh(); };
+    Sprite_DepthPlane.prototype.refresh = function() { this._tilemap.refresh(); this._entityDirty = true; if (this._objectLayer) this._objectLayer.markDirty(false); };
+    Sprite_DepthPlane.prototype.clearEntities = function() {
+        for (const m of [this._units, this._items, this._walls]) { for (const s of m.values()) this.releaseSprite(s); m.clear(); }
+        if (this._objectLayer) this._objectLayer._hideAll();
+        this._entityDirty = true;
+        this._entityWindow = "";
+    };
+    Sprite_DepthPlane.prototype.takeSprite = function() {
+        let s = this._pool.pop();
+        if (!s) { s = new Sprite(); s.anchor.set(0.5, 1); this._entities.addChild(s); }
+        s.visible = false;
+        return s;
+    };
+    Sprite_DepthPlane.prototype.releaseSprite = function(s) { s.visible = false; s.bitmap = null; s._ufRef = null; this._pool.push(s); };
+    /** The cells of the level in and around the view (the same window the live layers use). */
+    Sprite_DepthPlane.prototype.entityWindow = function() {
+        const dx = Math.floor($gameMap.displayX()), dy = Math.floor($gameMap.displayY());
+        const cols = Math.ceil($gameMap.screenTileX()), rows = Math.ceil($gameMap.screenTileY());
+        return { dx, dy, cols, rows, x0: dx - ENTITY_MARGIN, y0: dy - ENTITY_MARGIN - ENTITY_TALL, x1: dx + cols + ENTITY_MARGIN, y1: dy + rows + ENTITY_MARGIN };
+    };
+    Sprite_DepthPlane.prototype.updateEntities = function() {
+        if (!this.level || !this.map || provoked("entities_drawn")) return; // the provocation: no entities at all
+        const W = World(), L = Levels(), win = this.entityWindow();
+        const key = `${win.dx},${win.dy}`;
+        this._entityFrame++;
+        const periodic = this._entityFrame % Math.max(1, config.entityRefreshFrames | 0) === 0;
+        if (this._entityDirty || this._entityWindow !== key || periodic) {
+            this._entityWindow = key;
+            this._entityDirty = false;
+            this.rebuildUnits(W, win);
+            this.rebuildItems(win);
+            this.rebuildWalls(L, win);
+        }
+        if (this._objectLayer) this._objectLayer.update();
+        this.placeEntities();
+        // Foot-position order, as the tilemap on screen sorts its children.
+        this._entities.children.sort((a, b) => ((a.z || 0) - (b.z || 0)) || ((a.spriteId || 0) - (b.spriteId || 0)));
+    };
+    const inWindow = (win, x, y) => x >= win.x0 && x <= win.x1 && y >= win.y0 && y <= win.y1; // maps loop, but the view never spans the seam twice
+    const wrapCell = (v, size) => ((v % size) + size) % size;
+    Sprite_DepthPlane.prototype.rebuildUnits = function(W, win) {
+        const keep = new Set();
+        if (config.entities.units && W && W.unitsInArea) {
+            const size = W.state.size;
+            for (const u of W.unitsInArea(this.level.x, this.level.y, this.level.z)) {
+                if (!u || (u.data && (u.data.dead || u.data.hidden))) continue;
+                // the window may cross the loop seam: test the unit's cell against the window modulo the area size
+                const rx = wrapCell(u.x - win.x0, size) + win.x0, ry = wrapCell(u.y - win.y0, size) + win.y0;
+                if (!inWindow(win, rx, ry)) continue;
+                keep.add(u.id);
+                let s = this._units.get(u.id);
+                if (!s) { s = this.takeSprite(); this._units.set(u.id, s); }
+                s._ufRef = u;
+                s._ufKind = "unit";
+                s._ufFrameOk = false;
+            }
+        }
+        for (const [id, s] of this._units) if (!keep.has(id)) { this.releaseSprite(s); this._units.delete(id); }
+    };
+    Sprite_DepthPlane.prototype.rebuildItems = function(win) {
+        const I = window.UF && UF.Items, keep = new Set();
+        if (config.entities.items && I && I.find) {
+            const near = { x: win.dx + win.cols / 2, y: win.dy + win.rows / 2 }, radius = Math.hypot(win.cols / 2 + ENTITY_MARGIN, win.rows / 2 + ENTITY_MARGIN + ENTITY_TALL);
+            for (const f of I.find({ area: { x: this.level.x, y: this.level.y, z: this.level.z }, near, radius })) {
+                const it = f.item;
+                if (!it || it.holder || it.container) continue;
+                keep.add(it.id);
+                let s = this._items.get(it.id);
+                if (!s) { s = this.takeSprite(); this._items.set(it.id, s); }
+                s._ufRef = it;
+                s._ufKind = "item";
+                s._ufFrameOk = false;
+            }
+        }
+        for (const [id, s] of this._items) if (!keep.has(id)) { this.releaseSprite(s); this._items.delete(id); }
+    };
+    Sprite_DepthPlane.prototype.rebuildWalls = function(L, win) {
+        const keep = new Set();
+        if (config.entities.walls && L && L.naturalWallCells) {
+            const area = { x: this.level.x, y: this.level.y }, z = this.level.z;
+            for (const c of L.naturalWallCells(area, z, win.x0, win.y0, win.x1, win.y1)) {
+                const bmp = L.naturalWallFrame(c.code, c.mask);
+                if (!bmp) continue;
+                const k = `${c.x},${c.y}`;
+                keep.add(k);
+                let s = this._walls.get(k);
+                if (!s) { s = this.takeSprite(); this._walls.set(k, s); }
+                s._ufRef = { x: c.x, y: c.y, bitmap: bmp, z: null };
+                s._ufKind = "wall";
+                s._ufFrameOk = false;
+            }
+            if (z === 0 && L.groundConnectorCells) {
+                for (const c of L.groundConnectorCells(area, win.x0, win.y0, win.x1, win.y1)) {
+                    const bmp = connectorFrame(c.look);
+                    if (!bmp) continue;
+                    const k = `c:${c.x},${c.y}`;
+                    keep.add(k);
+                    let s = this._walls.get(k);
+                    if (!s) { s = this.takeSprite(); this._walls.set(k, s); }
+                    s._ufRef = { x: c.x, y: c.y, bitmap: bmp, z: 0.5 };
+                    s._ufKind = "connector";
+                    s._ufFrameOk = false;
+                }
+            }
+        }
+        for (const [k, s] of this._walls) if (!keep.has(k)) { this.releaseSprite(s); this._walls.delete(k); }
+    };
+    Sprite_DepthPlane.prototype.placeEntities = function() {
+        const tw = $gameMap.tileWidth(), th = $gameMap.tileHeight();
+        const foot = (x, y) => ({ x: Math.round(($gameMap.adjustX(x) + 0.5) * tw), y: Math.round(($gameMap.adjustY(y) + 1) * th) });
+        for (const s of this._units.values()) {
+            const u = s._ufRef;
+            if (!s._ufFrameOk) {
+                const f = unitFrame(u.image, u.dir, u.dir8);
+                if (!f) { s.visible = false; continue; }
+                forceNearest(f.bitmap);
+                if (s.bitmap !== f.bitmap) s.bitmap = f.bitmap;
+                s.setFrame(f.sx, f.sy, f.w, f.h);
+                s.anchor.set(f.ax, f.ay);
+                s.tint = tintOf(u.data && u.data.tint);
+                s._ufFrameOk = true;
+            }
+            const p = foot(u.x, u.y);
+            s.x = p.x; s.y = p.y; s.z = p.y; s.visible = true;
+        }
+        for (const s of this._items.values()) {
+            const it = s._ufRef;
+            if (!s._ufFrameOk) {
+                const f = itemFrame(it);
+                if (!f) { s.visible = false; continue; }
+                forceNearest(f.bitmap);
+                if (s.bitmap !== f.bitmap) s.bitmap = f.bitmap;
+                s.setFrame(f.sx, f.sy, f.w, f.h);
+                s.anchor.set(f.ax, f.ay);
+                s.tint = f.tint;
+                s._ufFrameOk = true;
+            }
+            const p = foot(it.x, it.y);
+            s.x = p.x; s.y = p.y; s.z = p.y - 1; s.visible = true; // an item lies under a unit on the same cell
+        }
+        for (const s of this._walls.values()) {
+            const r = s._ufRef;
+            if (!s._ufFrameOk) {
+                forceNearest(r.bitmap);
+                if (s.bitmap !== r.bitmap) s.bitmap = r.bitmap;
+                s.setFrame(0, 0, r.bitmap.width, r.bitmap.height);
+                s.anchor.set(0.5, 1);
+                s.tint = 0xffffff;
+                s._ufFrameOk = true;
+            }
+            const p = foot(r.x, r.y);
+            s.x = p.x; s.y = p.y; s.z = r.z === null ? Math.max(7, p.y) : r.z; s.visible = true;
+        }
+    };
+    Sprite_DepthPlane.prototype.entityCounts = function() {
+        const vis = m => [...m.values()].filter(s => s.visible).length;
+        return { objects: this._objectLayer ? this._objectLayer.count() : 0, units: vis(this._units), items: vis(this._items), walls: vis(this._walls) };
+    };
     /** The unprojected screen position of the plane's canvas (the same rounding as the tilemap on screen). */
     Sprite_DepthPlane.prototype.unprojected = function(viewOx, viewOy) {
         const tm = this._tilemap;
@@ -356,6 +645,10 @@
         this.x = Math.round(c.x + (u.x - c.x) * s);
         this.y = Math.round(c.y + (u.y - c.y) * s);
         this.scale.set(s, s);
+        // Entities are placed in unprojected screen coordinates; the canvas origin is the plane's local origin.
+        this._entities.x = -u.x;
+        this._entities.y = -u.y;
+        this.updateEntities();
         if (this._appliedStamp !== config._stamp) this.applyLook(cfg);
     };
     Sprite_DepthPlane.prototype.applyLook = function(cfg) {
@@ -464,6 +757,10 @@
             p.refresh();
         }
     };
+    /** A level's objects, items or units changed: its plane re-reads its entities on the next frame. */
+    Sprite_DepthRoot.prototype.dirtyEntities = function(z) {
+        for (const p of this.planes) if (p.level && (z === undefined || p.level.z === z)) { p._entityDirty = true; if (p._objectLayer) p._objectLayer.markDirty(false); }
+    };
 
     // Which levels have an open cell (a full shape-grid scan, once per level per change; never per frame).
     let openStamp = 0;
@@ -524,6 +821,13 @@
         E.on("world:levelBuilt", () => { const r = rootOf(); if (r) r.rebuild(); });
         E.on("world:areaBuilt", () => { const r = rootOf(); if (r) r.rebuild(); });
         E.on("world:created", () => { shapesChanged(); });
+        // The lower levels' entities: objects (per level or the ground), items (any), units entering/leaving a level.
+        E.on("objects:levelChanged", lv => { const r = rootOf(); if (r) r.dirtyEntities(lv && lv.z); });
+        E.on("objects:changed", () => { const r = rootOf(); if (r) r.dirtyEntities(0); });
+        E.on("items:changed", () => { const r = rootOf(); if (r) r.dirtyEntities(); });
+        E.on("world:unitLevelChanged", () => { const r = rootOf(); if (r) r.dirtyEntities(); });
+        E.on("world:unitAdded", () => { const r = rootOf(); if (r) r.dirtyEntities(); });
+        E.on("world:unitRemoved", () => { const r = rootOf(); if (r) r.dirtyEntities(); });
         return true;
     }
 
@@ -573,6 +877,7 @@
                 planes: r ? r.planes.map(p => ({
                     depth: p.depth, z: p.level ? p.level.z : null, visible: p.visible, scale: p.scale.x, x: p.x, y: p.y,
                     paints: p._tilemap ? p._tilemap.paints : 0, water: p._tilemap ? p._tilemap.hasWater() : false,
+                    entities: p.entityCounts(),
                     filters: (p.filters || []).map(f => f.constructor.name),
                     bitmap: p._tilemap ? { width: p._tilemap._lowerLayer.bitmap.width, height: p._tilemap._lowerLayer.bitmap.height } : null
                 })) : []
@@ -689,6 +994,24 @@
             const worstPaint = Math.max(...paintMs);
             t.check("repaint_cost", worstPaint < 16, `repaints of one 1008x816 plane: ${paintMs.map(v => v.toFixed(1)).join(" / ")} ms (bound 16; this machine, nw.exe harness)`);
 
+            // 3b. Entities of the level below (user direction 2026-09-24): an oak, an item stack and a unit on the +1 terrace, in view.
+            const fx = [];
+            for (let y = best.wy + 3; y < best.wy + ROWS - 2 && fx.length < 3; y++) for (let x = best.wx + 2; x < best.wx + COLS - 2 && fx.length < 3; x += 3) {
+                if (shAt(shape1, x, y) !== FLOOR || shAt(shape2, x, y) !== OPEN) continue;
+                if ((hole && hole.x === x && hole.y === y) || deck.some(c => c.x === x && c.y === y)) continue;
+                if (fx.some(c => Math.abs(c.x - x) < 3 && Math.abs(c.y - y) < 3)) continue;
+                fx.push({ x, y });
+            }
+            const lv1 = { x: area.x, y: area.y, z: 1 };
+            const O = window.UF.Objects, I = window.UF.Items;
+            const treeType = O && O.types ? (O.types().find(tt => tt.image && Array.isArray(tt.tags) && tt.tags.includes("tree")) || O.types().find(tt => tt.image)) : null;
+            const treeOk = fx[0] && treeType ? O.setIn(lv1, fx[0].x, fx[0].y, treeType.id) : false;
+            const itemTypeId = ["stone", "oak_log", "log", "wood", "berries", "rations", "stone_axe", "gold_coin", "common_clothes", "pouch", "shovel", "waterskin"].find(id => I && I.type && I.type(id) && I.type(id).image) || null;
+            const itemMade = fx[1] && itemTypeId ? I.create(itemTypeId, 3, { area: lv1, x: fx[1].x, y: fx[1].y }) : null;
+            const unitMade = fx[2] ? W.addUnit({ name: "TEST_depth_unit", image: { characterName: "People1", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: fx[2].x, y: fx[2].y, z: 1, dir: 2, snapToFree: true, data: { kind: "test" } }) : null;
+            if (unitMade) fx[2] = { x: unitMade.x, y: unitMade.y }; // it may have snapped to the nearest free cell
+            await t.waitFrames(6);
+
             // 4. The projection origin: the world point under the viewport centre stays there; the left edge moves in by (1 - s) * cx.
             const viewO = () => ({ x: $gameMap.displayX() * TW, y: $gameMap.displayY() * TH });
             const s1 = config.depths[1].scale, s2 = config.depths[2].scale;
@@ -736,8 +1059,15 @@
                 return { color: up || lower.getPixel(lx, ly), alpha: up ? 255 : lower.getAlphaPixel(lx, ly), lx, ly };
             };
             const neighbours = (p, gx, gy) => { const set = new Set(); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const tx = texelOf(p, gx + dx, gy + dy); if (tx.alpha === 255) set.add(tx.color); } return set; };
+            // The tile checks compare against tile texels, so the entities are switched off for their render (they are
+            // checked on their own in 6b); the render with entities is dumped too.
+            const ENTITIES_OFF = { objects: false, items: false, units: false, walls: false };
+            const entitiesOn = Object.assign({}, config.entities);
+            const setEntities = async on => { Object.assign(config.entities, on ? entitiesOn : ENTITIES_OFF); D.refresh(); await t.waitFrames(3); };
+            savePng("planes_only_plus2", planesOnly());
+            await setEntities(false);
             const render = planesOnly();
-            savePng("planes_only_plus2", render);
+            savePng("planes_only_plus2_tiles", render);
             savePng("canvas_depth1", p1._tilemap._lowerLayer.bitmap);
             savePng("canvas_depth2", p2._tilemap._lowerLayer.bitmap);
             // The deck (a +1 floor over opaque low ground) is the strongest case: seen from +2 it must show depth 1's planks, never the ground under them.
@@ -753,9 +1083,13 @@
             }
             t.check("mask_order", !!maskCell && maskOk, detail6 || "no deck or terrace cell under open air in view");
             // The two-depth chain: a low-ground cell (open on +2 and on +1) shows the ground's texel projected at depth 2, with depth 1 transparent there.
-            let chainCell = null;
+            // The cell must have ground art under it: kinds the live Outside_A2 sheet does not paint are transparent (AUDIT_LOG A9).
+            let chainCell = null, chainCandidates = 0;
             for (let y = best.wy; y < best.wy + ROWS && !chainCell; y++) for (let x = best.wx; x < best.wx + COLS && !chainCell; x++) {
-                if (onScreen(x, y) && far(x, y) && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === OPEN && !deck.some(c => c.x === x && c.y === y)) chainCell = { x, y };
+                if (!(onScreen(x, y) && far(x, y) && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === OPEN && !deck.some(c => c.x === x && c.y === y))) continue;
+                chainCandidates++;
+                const c = cellScreen(x, y), pp = D.project(2, c.x, c.y);
+                if (texelOf(p2, Math.round(pp.x), Math.round(pp.y)).alpha === 255) chainCell = { x, y };
             }
             let chainOk = false, detail7 = "";
             if (chainCell) {
@@ -773,17 +1107,39 @@
                 const groundTiles = [0, 1, 2].map(l => W.getTile(area.x, area.y, hole.x, hole.y, l, 0));
                 detail7 += `; under the hole (${hole.x},${hole.y}) the ground draws ${tx2.color}/${tx2.alpha} (tiles ${groundTiles.join("/")})${tx2.alpha === 0 ? ": the solid ground cell has no art (see AUDIT_LOG)" : ""}`;
             }
-            t.check("depth2_through_depth1", !!chainCell && chainOk, detail7 || "no low-ground cell in view");
+            t.check("depth2_through_depth1", !!chainCell && chainOk, detail7 || `no low-ground cell with painted ground in view (${chainCandidates} open cells over transparent ground kinds: AUDIT_LOG A9)`);
+            await setEntities(true);
 
-            // 7. Crisp: every opaque pixel of the planes' render is a colour of their source canvases (nearest sampling, no new colours).
+            // 6b. The level below shows its entities: counts on the +1 plane, and the unit's body pixels change when units are switched off.
+            const ec = p1.entityCounts();
+            let unitDrawn = false, detailE = "";
+            if (unitMade && fx[2]) {
+                const c = cellScreen(fx[2].x, fx[2].y), pp = D.project(1, c.x, c.y + 4); // the body, above the foot at the cell's bottom
+                const gx = Math.round(pp.x), gy = Math.round(pp.y);
+                const probe = bmp => { const out = []; for (let dy = -2; dy <= 2; dy += 2) for (let dx = -2; dx <= 2; dx += 2) out.push(bmp.getPixel(gx + dx, gy + dy)); return out; };
+                const onPx = probe(planesOnly());
+                config.entities.units = false; D.refresh(); await t.waitFrames(3);
+                const offPx = probe(planesOnly());
+                config.entities.units = true; D.refresh(); await t.waitFrames(3);
+                unitDrawn = onPx.some((v, i) => v !== offPx[i]);
+                detailE = `unit at (${fx[2].x},${fx[2].y}) probed at screen (${gx},${gy}): ${unitDrawn ? "drawn" : "NOT drawn"} (${onPx[4]} vs ${offPx[4]} without units)`;
+            }
+            t.check("entities_drawn", treeOk && !!itemMade && !!unitMade && ec.objects >= 1 && ec.units >= 1 && ec.items >= 1 && ec.walls >= 1 && unitDrawn,
+                `fixtures: oak ${treeOk ? "placed" : "NOT placed"} at ${fx[0] ? `(${fx[0].x},${fx[0].y})` : "-"}, item ${itemMade ? `${itemTypeId} x3` : "NOT made"} at ${fx[1] ? `(${fx[1].x},${fx[1].y})` : "-"}, unit ${unitMade ? "added" : "NOT added"}; +1 plane draws ${ec.objects} object(s), ${ec.units} unit(s), ${ec.items} item stack(s), ${ec.walls} wall/ramp frame(s); ${detailE}`);
+
+            // 7. Crisp: every opaque pixel of the planes' render (tiles only: the entity sheets have their own palettes) is a
+            //    colour of the source canvases (nearest sampling, no new colours).
             const colorsOf = bmp => { const d = imageData(bmp), set = new Set(); for (let i = 0; i < d.length; i += 4) if (d[i + 3] === 255) set.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]); return set; };
             const palette = new Set();
             for (const p of [p1, p2]) for (const b of [p._tilemap._lowerLayer.bitmap, p._tilemap._upperLayer.bitmap]) for (const c of colorsOf(b)) palette.add(c);
             palette.add(config.voidColor); // the void shows where both planes are transparent; it is flat, not a blend
-            const rd = imageData(render);
+            await setEntities(false);
+            const renderTiles = planesOnly();
+            await setEntities(true);
+            const rd = imageData(renderTiles);
             let sampled = 0, foreign = 0, firstForeign = "";
-            for (let y = 1; y < render.height; y += 3) for (let x = 1; x < render.width; x += 3) {
-                const i = (y * render.width + x) * 4;
+            for (let y = 1; y < renderTiles.height; y += 3) for (let x = 1; x < renderTiles.width; x += 3) {
+                const i = (y * renderTiles.width + x) * 4;
                 if (rd[i + 3] !== 255) continue;
                 sampled++;
                 const c = (rd[i] << 16) | (rd[i + 1] << 8) | rd[i + 2];
@@ -833,6 +1189,7 @@
             const stD = D.stats();
             t.check("one_level_below", stD.preset === "D" && stD.maxDepth === 1 && stD.planes[0].visible && stD.planes[0].z === 1 && !stD.planes[1].visible && stD.voidVisible,
                 `preset ${stD.preset}, maxDepth ${stD.maxDepth}: depth 1 ${stD.planes[0].visible ? `level ${stD.planes[0].z}` : "hidden"}, depth 2 ${stD.planes[1].visible ? "VISIBLE" : "hidden"}, void ${stD.voidVisible ? "shown" : "HIDDEN"}`);
+            await setEntities(false); // the void and the blur are judged on the tiles; an entity could stand on the probed cell
             const renderD = planesOnly();
             const voidHex = `#${config.voidColor.toString(16).padStart(6, "0")}`;
             let voidOk = false, detailV = "";
@@ -855,6 +1212,7 @@
             }
             t.check("blur_by_default", PRESETS.D.depths[1].blur > 0 && fD.includes("BlurFilter") && blended > 500,
                 `preset D blur ${PRESETS.D.depths[1].blur} px, filters [${fD}]; ${blended} of ${sampledD} sampled pixels are blends (want > 500)`);
+            await setEntities(true);
 
             // 12. The screenshots at locked 1.00x. Two levels below at the camera-model zoom (user direction 2026-09-24): off, A at an eye
             //     height of 190 / 120 / 60 / 30 ft, B, C; then one level blurred (D); on +1: off, A (190 ft), D. The deck and hole are in the window.
