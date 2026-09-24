@@ -184,7 +184,7 @@ function main() {
     // Main Title Header
     fillRect(0, 0, W, 48, 18, 22, 28);
     drawText("PROJECT DEUS -- CANONICAL WORLD PALETTE & MATERIAL RAMPS V1", 30, 14, 255, 255, 255);
-    drawText("DW.01.05 | 254 Master Colors | 58 Material Ramps | 1:1 Native Resolution Reference | NO 32-Color Cap", 30, 28, 160, 175, 190);
+    drawText(`DW.01.05 | ${reg.masterColorCount} Active Colors | ${reg.reservedCapacity} Reserved Slots (<=240 V1 Target) | 58 Ramps | Native 1:1 Reference`, 30, 28, 160, 175, 190);
 
     // Subtle header border
     for (let x = 0; x < W; x++) {

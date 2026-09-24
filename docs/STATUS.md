@@ -8,22 +8,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.05 — Freeze Palette Architecture & Family Material Ramps` (254-color global master palette, 58 canonical material ramps, container sheet policy in `art_check.js`, VFX exception, 493/493 tests passing). Awaiting owner authorization to proceed to `DW.01.06`.
+- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.05 — Freeze Palette Architecture & Family Material Ramps` (Owner review revisions applied: 226 active colors, 30 reserved headroom slots under 256 ceiling, 58 canonical material ramps with variable 3-5 tone lengths, 0 near-duplicates, anti-chibi language audit passing, container sheet policy in `art_check.js`, VFX exception, 503/503 tests passing). Awaiting owner authorization to proceed to `DW.01.06`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DW.01.05 — Freeze Palette Architecture & Family Material Ramps (2026-09-24)
 - **Status**: `COMPLETED — FROZEN / AWAITING OWNER REVIEW`
 - **Scope**:
   - Eliminated the obsolete `<= 32 colors across an entire packed biome tileset sheet` cap. Formally decoupled sheet containers (multi-material A1–A5/B–E sheets) from individual character/prop budgets.
-  - Curated the **Global Master World Palette V1** with exactly 254 unique colors bounded within the $\le 256$ ceiling (`art/palette/deus_master_world_palette_v1.hex`).
+  - Curated the **Global Master World Palette V1** with exactly 226 active colors (cleanly within 220–240 target range) and 30 reserved headroom slots under the 256 ceiling (`art/palette/deus_master_world_palette_v1.hex`).
+  - Consolidated near-duplicates through shared cross-family deep shadow baselines (`#142216`, `#111F1B`, `#312820`, `#2F271C`), shared midtones, and shared warm highlights; achieved 0 near-duplicates (<4.0 RGB distance).
   - Established 58 canonical material family ramps across 9 categories (Shared Neutrals, 5 Biomes, Water, Construction, Supernatural/VFX) in machine-readable registry `game/data/DEUS_PaletteRegistry.json` and `docs/art/DEUS_PaletteRegistry.json`.
-  - Every ramp follows a disciplined 5-tone structure: `deepShadow`, `shadow`, `body`, `light`, `highlight`.
+  - Implemented variable ramp lengths (3, 4, and 5 tones) reflecting natural material properties (e.g. 4-tone compact ramps for sulfur, charred wood, anaerobic mud, caliche bone, rapids foam, healing aura).
+  - Purged forbidden terminology across canonical art standards and resolvers; canonical language audit passes with 0 violations.
   - Defined explicit horizontal color transition bridges across all 10 pairwise biome combinations from `DW.01.04`.
   - Created deterministic 1:1 RGBA reference board graphic: `art/reference/DEUS_PALETTE_BOARD_V1.png` (1480×1440 px) via `tools/build_palette_board.js`.
-  - Built compiler/query tool `tools/palette_resolver.js` (`--biome`, `--material`, `--pair`, `<RAMP_ID>`, `--budget`) for future Nano Banana Pro prompts.
+  - Built compiler/query tool `tools/palette_resolver.js` (`--biome`, `--material`, `--pair`, `<RAMP_ID>`, `--budget`, `--master`) for future Nano Banana Pro prompts.
   - Integrated palette QC into `tools/art_check.js`: tileset container sheets checked against Master Palette with zero tolerance for unregistered rogue RGB colors; single-character/prop sheets checked against tight local budgets; explicit VFX/supernatural exception supported.
-  - Created dedicated automated test suite `tools/test_palette_standard.js` (493/493 checks passing).
-  - Wrote canonical documentation: `docs/art/DEUS_PALETTE_ARCHITECTURE_STANDARD.md`.
+  - Created dedicated automated test suite `tools/test_palette_standard.js` (503/503 checks passing).
+  - Documented controlled palette versioning policy with explicit 8-step addition protocol in `docs/art/DEUS_PALETTE_ARCHITECTURE_STANDARD.md`.
   - Stopped at gate per AGENTS.md Rule 6.
 
 ## DW.01.04 — Freeze Biome Identity & Material Differentiation Standard (2026-09-24)

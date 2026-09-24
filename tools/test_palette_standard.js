@@ -61,11 +61,19 @@ try {
     process.exit(1);
 }
 
-assert(registry.version === '1.0.0', 'Registry version is 1.0.0');
+assert(registry.version === '1.1.0', 'Registry version is 1.1.0');
 assert(registry.documentId === 'DEUS-PALETTE-REGISTRY-01', 'Document ID is DEUS-PALETTE-REGISTRY-01');
 assert(registry.canonicalCeiling === 256, 'Canonical master ceiling is locked to 256');
-assert(registry.masterColorCount <= 256, `Master colors (${registry.masterColorCount}) within ceiling <= 256`);
-assert(registry.masterColorCount >= 180, `Master colors (${registry.masterColorCount}) sufficient richness >= 180`);
+assert(registry.masterColorCount <= 240, `Master active colors (${registry.masterColorCount}) meets V1 ceiling <= 240 (target: 220–240)`);
+assert(registry.masterColorCount >= 220, `Master active colors (${registry.masterColorCount}) meets target range >= 220`);
+assert(registry.reservedCapacity >= 16, `Master palette retains explicit reserve capacity >= 16 slots (got ${registry.reservedCapacity})`);
+assert(registry.canonicalCeiling - registry.masterColorCount === registry.reservedCapacity,
+    'Reserved capacity equals canonicalCeiling minus masterColorCount');
+assert(typeof registry.reservePolicy === 'object', 'reservePolicy block exists in registry');
+assert(registry.reservePolicy.minReservedCapacity >= 16, 'reservePolicy requires >= 16 reserved slots');
+assert(typeof registry.versioningPolicy === 'object', 'versioningPolicy block exists in registry');
+assert(Array.isArray(registry.versioningPolicy.controlledAdditionSteps) && registry.versioningPolicy.controlledAdditionSteps.length === 8,
+    'versioningPolicy specifies 8-step controlled change process');
 assert(typeof registry.policy === 'object', 'Policy block exists');
 assert(registry.policy.sheetCapPolicy.includes('NO ARBITRARY 32-COLOR CAP'), 'Policy explicitly removes arbitrary 32-color sheet cap');
 
@@ -402,6 +410,55 @@ try {
 } catch (e) {
     assert(true, 'Resolver CLI exits with error code on unknown ramp');
 }
+
+// -----------------------------------------------------------------------------
+// 12. CANONICAL ART LANGUAGE AUDIT & VARIABLE RAMP LENGTH DISTRIBUTION
+// -----------------------------------------------------------------------------
+console.log('\n--- 12. Canonical Art Language Audit & Ramp Length Distribution ---');
+
+// Check variable ramp lengths
+let count3 = 0, count4 = 0, count5 = 0, count6 = 0;
+for (const ramp of Object.values(ramps)) {
+    if (ramp.colorCount === 3) count3++;
+    else if (ramp.colorCount === 4) count4++;
+    else if (ramp.colorCount === 5) count5++;
+    else if (ramp.colorCount === 6) count6++;
+}
+assert(count3 >= 1, `Palette contains 3-tone compact ramps (found ${count3})`);
+assert(count4 >= 5, `Palette contains 4-tone variable length ramps (found ${count4}, expected >= 5)`);
+assert(count5 >= 40, `Palette contains 5-tone standard ramps (found ${count5}, expected >= 40)`);
+
+// Audit canonical files for zero occurrences of 'chibi'
+const canonicalFilesToAudit = [
+    'docs/art/DEUS_PALETTE_ARCHITECTURE_STANDARD.md',
+    'docs/art/DEUS_PaletteRegistry.json',
+    'game/data/DEUS_PaletteRegistry.json',
+    'tools/palette_resolver.js',
+    'tools/scale_resolver.js',
+    'tools/biome_resolver.js',
+    'tools/build_palette_registry.js',
+    'tools/build_palette_board.js',
+    'docs/art/DEUS_WORLD_WBS.md'
+];
+
+let chibiViolations = 0;
+const chibiRegex = /\bchibi\b/i;
+
+for (const relPath of canonicalFilesToAudit) {
+    const fullPath = path.join(__dirname, '..', relPath);
+    if (!fs.existsSync(fullPath)) {
+        assert(false, `Canonical audit file missing: ${relPath}`);
+        continue;
+    }
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const match = content.match(chibiRegex);
+    if (match) {
+        chibiViolations++;
+        console.error(`  Violation: forbidden term 'chibi' detected in ${relPath}`);
+    }
+}
+
+assert(chibiViolations === 0, `Canonical art documents and resolvers have 0 occurrences of 'chibi' (violations: ${chibiViolations})`);
 
 // -----------------------------------------------------------------------------
 // SUMMARY

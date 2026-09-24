@@ -7,6 +7,8 @@
  * Compiles and validates the authoritative DEUS Canonical World Palette Architecture
  * and Family Material Ramps Registry (DW.01.05).
  *
+ * Art Direction: Grounded late-16-bit proportions, mature Western fantasy, restrained grimdark.
+ *
  * Generates:
  * - game/data/DEUS_PaletteRegistry.json
  * - docs/art/DEUS_PaletteRegistry.json
@@ -54,27 +56,32 @@ const SHARED = {
     // Structural voids & shadows
     VOID_DEEP: '#060709',
     VOID_CAP: '#0C0D12',
-    VOID_OCCLUSION: '#14161C',      // Shared by neutral void, obsidian dark, forged iron shadow
+    VOID_OCCLUSION: '#14161C',      // Shared by neutral void, obsidian dark, forged iron shadow, basalt crevice, wet mud crevice
 
     // Shared stone & mineral shadows
-    COOL_SHADOW_01: '#1C2126',      // Shared by cool gray neutral and highland granite shadow
+    COOL_SHADOW_01: '#1C2126',      // Shared by cool gray neutral, highland granite shadow, basalt shadow
     WARM_STONE_01: '#23211D',       // Shared by warm gray neutral, fieldstone, limestone, and pumice dark
-    WARM_STONE_02: '#3D3833',       // Shared by warm gray and driftwood body
+    WARM_STONE_02: '#3D3833',       // Shared by warm gray, fieldstone shadow, pumice shadow, driftwood body
+    WARM_STONE_04: '#867E75',       // Shared by warm stone lit and pumice lit
     WARM_STONE_05: '#B4ABA1',       // Shared by warm stone and pumice crest
-    PALE_CREST_MAX: '#EDE9DE',      // Shared by pale neutral crest and white birch bark
+    PALE_CREST_MAX: '#EDE9DE',      // Shared by pale neutral crest, white birch bark, arid bone crest
 
     // Shared wood & bark tones
     BARK_DEEP: '#1B1714',           // Shared by oak bark shadow, conifer bark, woodland floor, and driftwood
-    BARK_DARK_BODY: '#4E3E33',      // Shared by oak bark and conifer bark
+    BARK_SHADOW: '#312820',         // Shared by oak bark shadow, conifer bark shadow, woodland floor shadow
+    BARK_DARK_BODY: '#4E3E33',      // Shared by oak bark, conifer bark, arid hardpan dark
     BARK_LIT_BODY: '#6F5948',       // Shared by oak bark and conifer bark lit
-    AGED_WOOD_01: '#1D1B18',        // Shared by aged timber, highland soil shadow, and charred wood
+    AGED_WOOD_01: '#1D1B18',        // Shared by aged timber, highland soil shadow, and charred wood shadow
     AGED_WOOD_02: '#322F29',        // Shared by aged timber and highland soil
-    DRIFT_BLEACH_01: '#2A2722',     // Shared by wetland driftwood and arid bleached wood shadow
+    DRIFT_BLEACH_01: '#2A2722',     // Shared by wetland driftwood, arid bleached wood shadow, wet silt shadow
+    WEATHERED_WOOD_LIT: '#564F45',   // Shared by birch bark shadow and driftwood lit
 
     // Shared soils & dark organic residues
     DEEP_SCORCH_PEAT: '#171210',    // Shared by deep peat, scorched earth, and scoria recess
     DARK_EARTH_02: '#261D18',       // Shared by peat shadow, scorched earth, and raw leather shadow
     MUD_SLATE_CHIP: '#212325',      // Shared by anaerobic mud, mountain scree shadow, and dressed stone recess
+    ARID_EARTH_SHADOW: '#2F271C',   // Shared by arid hardpan shadow and coarse sand shadow
+    SAND_LOAM_MID: '#55432D',       // Shared by temperate loam mid and arid sand shadow
 
     // Shared slates & metals
     SLATE_DEEP: '#161B20',          // Shared by wetland slate and highland slate recess
@@ -85,6 +92,10 @@ const SHARED = {
     DRESSED_STONE_04: '#7C8389',    // Shared by dressed stone and scree lit
     DRESSED_STONE_05: '#A4ABB1',    // Shared by dressed stone and scree crest
     WEATHERED_PALE_BODY: '#706A5B', // Shared by arid bleached wood and highland stony loam
+
+    // Shared vegetative darks
+    FOLIAGE_DEEP: '#142216',        // Shared deep vegetative shadow: fertile grass, oak foliage, willow foliage, alpine fescue
+    CONIFER_BOG_DEEP: '#111F1B',    // Shared deep conifer & saturated bog grass shadow
 
     // Shared water
     WATER_CORE_BLUE: '#23445A'      // Shared core freshwater tone
@@ -110,7 +121,7 @@ const RAMP_DEFINITIONS = [
             { id: 'NEUT_VOID_CAP', hex: SHARED.VOID_CAP, role: 'shadow', tags: ['wall_cap', 'structural_dark'] },
             { id: 'NEUT_VOID_OCCLUSION', hex: SHARED.VOID_OCCLUSION, role: 'body', tags: ['corner_occlusion', 'ambient_dark'] }
         ],
-        notes: 'Anchors the deepest shadow and DF 2-grid black wall cap standard across all biomes.'
+        notes: 'Anchors the deepest shadow and DF 2-grid black wall cap standard across all biomes (3-tone structural ramp).'
     },
     {
         rampId: 'NEUT_COOL_GRAY',
@@ -141,7 +152,7 @@ const RAMP_DEFINITIONS = [
             { id: 'NEUT_WARM_01', hex: SHARED.WARM_STONE_01, role: 'deepShadow', tags: ['warm_shadow'] },
             { id: 'NEUT_WARM_02', hex: SHARED.WARM_STONE_02, role: 'shadow', tags: ['warm_body_dark'] },
             { id: 'NEUT_WARM_03', hex: '#5F5851', role: 'body', tags: ['warm_stone_body'] },
-            { id: 'NEUT_WARM_04', hex: '#867E75', role: 'light', tags: ['warm_stone_lit'] },
+            { id: 'NEUT_WARM_04', hex: SHARED.WARM_STONE_04, role: 'light', tags: ['warm_stone_lit'] },
             { id: 'NEUT_WARM_05', hex: SHARED.WARM_STONE_05, role: 'highlight', tags: ['warm_stone_crest'] }
         ],
         notes: 'Universal warm grey ramp for neutral masonry and weathered stone.'
@@ -160,7 +171,7 @@ const RAMP_DEFINITIONS = [
             { id: 'NEUT_PALE_03', hex: '#C8C3B7', role: 'body', tags: ['parchment_body'] },
             { id: 'NEUT_PALE_04', hex: SHARED.PALE_CREST_MAX, role: 'highlight', tags: ['stark_crest'] }
         ],
-        notes: 'High-value pale neutral ramp for crests, skulls, cloth, and edge glints.'
+        notes: 'High-value pale neutral ramp for crests, skulls, cloth, and edge glints (4-tone ramp).'
     },
 
     // -------------------------------------------------------------------------
@@ -175,7 +186,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Arid desert, volcanic plain, snowy peaks',
         transitionCompatibility: ['TEMP_WET', 'TEMP_ARID', 'TEMP_HIGH', 'TEMP_VOLC'],
         tones: [
-            { id: 'TEMP_GRASS_01', hex: '#152614', role: 'deepShadow', tags: ['turf_deep_shadow'] },
+            { id: 'TEMP_GRASS_01', hex: SHARED.FOLIAGE_DEEP, role: 'deepShadow', tags: ['turf_deep_shadow'] },
             { id: 'TEMP_GRASS_02', hex: '#26421C', role: 'shadow', tags: ['turf_shadow'] },
             { id: 'TEMP_GRASS_03', hex: '#3E6328', role: 'body', tags: ['turf_body'] },
             { id: 'TEMP_GRASS_04', hex: '#628C38', role: 'light', tags: ['turf_lit'] },
@@ -211,7 +222,7 @@ const RAMP_DEFINITIONS = [
         tones: [
             { id: 'TEMP_LOAM_01', hex: '#1F1610', role: 'deepShadow', tags: ['loam_deep'] },
             { id: 'TEMP_LOAM_02', hex: '#38291C', role: 'shadow', tags: ['loam_shadow'] },
-            { id: 'TEMP_LOAM_03', hex: '#57422C', role: 'body', tags: ['loam_body'] },
+            { id: 'TEMP_LOAM_03', hex: SHARED.SAND_LOAM_MID, role: 'body', tags: ['loam_body'] },
             { id: 'TEMP_LOAM_04', hex: '#7C6142', role: 'light', tags: ['loam_lit'] },
             { id: 'TEMP_LOAM_05', hex: '#A3845F', role: 'highlight', tags: ['loam_crest'] }
         ],
@@ -227,7 +238,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_WET', 'TEMP_HIGH'],
         tones: [
             { id: 'TEMP_WOOD_FL_01', hex: SHARED.BARK_DEEP, role: 'deepShadow', tags: ['humus_shadow'] },
-            { id: 'TEMP_WOOD_FL_02', hex: '#332A1E', role: 'shadow', tags: ['humus_dark'] },
+            { id: 'TEMP_WOOD_FL_02', hex: SHARED.BARK_SHADOW, role: 'shadow', tags: ['humus_dark'] },
             { id: 'TEMP_WOOD_FL_03', hex: '#4D3F2C', role: 'body', tags: ['humus_body'] },
             { id: 'TEMP_WOOD_FL_04', hex: '#6B5A3E', role: 'light', tags: ['humus_lit'] },
             { id: 'TEMP_WOOD_FL_05', hex: '#8A7653', role: 'highlight', tags: ['humus_crest'] }
@@ -244,7 +255,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_WET', 'TEMP_HIGH'],
         tones: [
             { id: 'TEMP_OAK_BARK_01', hex: SHARED.BARK_DEEP, role: 'deepShadow', tags: ['bark_crevice'] },
-            { id: 'TEMP_OAK_BARK_02', hex: '#302720', role: 'shadow', tags: ['oak_bark_dark'] },
+            { id: 'TEMP_OAK_BARK_02', hex: SHARED.BARK_SHADOW, role: 'shadow', tags: ['oak_bark_dark'] },
             { id: 'TEMP_OAK_BARK_03', hex: SHARED.BARK_DARK_BODY, role: 'body', tags: ['oak_bark_body'] },
             { id: 'TEMP_OAK_BARK_04', hex: SHARED.BARK_LIT_BODY, role: 'light', tags: ['oak_bark_lit'] },
             { id: 'TEMP_OAK_BARK_05', hex: '#8F7663', role: 'highlight', tags: ['oak_bark_crest'] }
@@ -261,7 +272,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_HIGH', 'TEMP_WET'],
         tones: [
             { id: 'TEMP_BIRCH_BARK_01', hex: '#28231E', role: 'deepShadow', tags: ['birch_lenticel'] },
-            { id: 'TEMP_BIRCH_BARK_02', hex: '#544E45', role: 'shadow', tags: ['birch_peeling'] },
+            { id: 'TEMP_BIRCH_BARK_02', hex: SHARED.WEATHERED_WOOD_LIT, role: 'shadow', tags: ['birch_peeling'] },
             { id: 'TEMP_BIRCH_BARK_03', hex: '#8A8376', role: 'body', tags: ['birch_body'] },
             { id: 'TEMP_BIRCH_BARK_04', hex: '#C2BBB0', role: 'light', tags: ['birch_paper_lit'] },
             { id: 'TEMP_BIRCH_BARK_05', hex: SHARED.PALE_CREST_MAX, role: 'highlight', tags: ['birch_white_crest'] }
@@ -277,7 +288,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Conifer needles, desert succulents',
         transitionCompatibility: ['TEMP_WET', 'TEMP_HIGH'],
         tones: [
-            { id: 'TEMP_OAK_LEAF_01', hex: '#122416', role: 'deepShadow', tags: ['canopy_undershadow'] },
+            { id: 'TEMP_OAK_LEAF_01', hex: SHARED.FOLIAGE_DEEP, role: 'deepShadow', tags: ['canopy_undershadow'] },
             { id: 'TEMP_OAK_LEAF_02', hex: '#1F3D20', role: 'shadow', tags: ['oak_leaf_dark'] },
             { id: 'TEMP_OAK_LEAF_03', hex: '#325C2C', role: 'body', tags: ['oak_leaf_body'] },
             { id: 'TEMP_OAK_LEAF_04', hex: '#4F823F', role: 'light', tags: ['oak_leaf_lit'] },
@@ -295,7 +306,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_WET', 'TEMP_HIGH'],
         tones: [
             { id: 'TEMP_FIELDSTONE_01', hex: SHARED.WARM_STONE_01, role: 'deepShadow', tags: ['stone_crevice'] },
-            { id: 'TEMP_FIELDSTONE_02', hex: '#3B3B35', role: 'shadow', tags: ['fieldstone_dark'] },
+            { id: 'TEMP_FIELDSTONE_02', hex: SHARED.WARM_STONE_02, role: 'shadow', tags: ['fieldstone_dark'] },
             { id: 'TEMP_FIELDSTONE_03', hex: '#59594F', role: 'body', tags: ['fieldstone_body'] },
             { id: 'TEMP_FIELDSTONE_04', hex: '#7C7C6E', role: 'light', tags: ['fieldstone_lit'] },
             { id: 'TEMP_FIELDSTONE_05', hex: '#A1A190', role: 'highlight', tags: ['fieldstone_crest'] }
@@ -332,7 +343,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Dry upland hills, baking desert',
         transitionCompatibility: ['TEMP_WET', 'WET_ARID', 'WET_HIGH', 'WET_VOLC'],
         tones: [
-            { id: 'WET_GRASS_01', hex: '#131E14', role: 'deepShadow', tags: ['bog_shadow'] },
+            { id: 'WET_GRASS_01', hex: SHARED.CONIFER_BOG_DEEP, role: 'deepShadow', tags: ['bog_shadow'] },
             { id: 'WET_GRASS_02', hex: '#203320', role: 'shadow', tags: ['bog_turf_dark'] },
             { id: 'WET_GRASS_03', hex: '#314D2E', role: 'body', tags: ['bog_turf_body'] },
             { id: 'WET_GRASS_04', hex: '#4A6E42', role: 'light', tags: ['bog_turf_lit'] },
@@ -383,13 +394,12 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Fertile garden topsoil',
         transitionCompatibility: ['TEMP_WET', 'WET_ARID', 'WET_VOLC'],
         tones: [
-            { id: 'WET_MUD_01', hex: '#131415', role: 'deepShadow', tags: ['mud_deep'] },
+            { id: 'WET_MUD_01', hex: SHARED.VOID_OCCLUSION, role: 'deepShadow', tags: ['mud_deep'] },
             { id: 'WET_MUD_02', hex: SHARED.MUD_SLATE_CHIP, role: 'shadow', tags: ['mud_dark'] },
-            { id: 'WET_MUD_03', hex: '#323536', role: 'body', tags: ['mud_body'] },
-            { id: 'WET_MUD_04', hex: '#474B4D', role: 'light', tags: ['mud_lit'] },
-            { id: 'WET_MUD_05', hex: '#606568', role: 'highlight', tags: ['mud_crest'] }
+            { id: 'WET_MUD_03', hex: '#3E3E44', role: 'body', tags: ['mud_body'] }, // shares VOLC_ASH_03
+            { id: 'WET_MUD_04', hex: '#606568', role: 'highlight', tags: ['mud_crest'] }
         ],
-        notes: 'Cold dark anaerobic mud with wet slick sheen.'
+        notes: 'Cold dark anaerobic mud with wet slick sheen (compact 4-tone ramp).'
     },
     {
         rampId: 'WET_SILT_RIVER',
@@ -401,7 +411,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_WET'],
         tones: [
             { id: 'WET_SILT_01', hex: '#171813', role: 'deepShadow', tags: ['silt_shadow'] },
-            { id: 'WET_SILT_02', hex: '#292A20', role: 'shadow', tags: ['silt_dark'] },
+            { id: 'WET_SILT_02', hex: SHARED.DRIFT_BLEACH_01, role: 'shadow', tags: ['silt_dark'] },
             { id: 'WET_SILT_03', hex: '#3F4030', role: 'body', tags: ['silt_body'] },
             { id: 'WET_SILT_04', hex: '#5A5B45', role: 'light', tags: ['silt_lit'] },
             { id: 'WET_SILT_05', hex: '#797A5F', role: 'highlight', tags: ['silt_crest'] }
@@ -437,7 +447,7 @@ const RAMP_DEFINITIONS = [
             { id: 'WET_DRIFT_01', hex: SHARED.BARK_DEEP, role: 'deepShadow', tags: ['driftwood_shadow'] },
             { id: 'WET_DRIFT_02', hex: SHARED.DRIFT_BLEACH_01, role: 'shadow', tags: ['driftwood_dark'] },
             { id: 'WET_DRIFT_03', hex: SHARED.WARM_STONE_02, role: 'body', tags: ['driftwood_body'] },
-            { id: 'WET_DRIFT_04', hex: '#585045', role: 'light', tags: ['driftwood_lit'] },
+            { id: 'WET_DRIFT_04', hex: SHARED.WEATHERED_WOOD_LIT, role: 'light', tags: ['driftwood_lit'] },
             { id: 'WET_DRIFT_05', hex: '#766B5B', role: 'highlight', tags: ['driftwood_crest'] }
         ],
         notes: 'Dark waterlogged timber with muted brown-grey body.'
@@ -451,7 +461,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Conifer needles, mountain pines',
         transitionCompatibility: ['TEMP_WET'],
         tones: [
-            { id: 'WET_WILLOW_01', hex: '#162115', role: 'deepShadow', tags: ['willow_recess'] },
+            { id: 'WET_WILLOW_01', hex: SHARED.FOLIAGE_DEEP, role: 'deepShadow', tags: ['willow_recess'] },
             { id: 'WET_WILLOW_02', hex: '#293B22', role: 'shadow', tags: ['willow_dark'] },
             { id: 'WET_WILLOW_03', hex: '#415C32', role: 'body', tags: ['willow_body'] },
             { id: 'WET_WILLOW_04', hex: '#618247', role: 'light', tags: ['willow_lit'] },
@@ -489,8 +499,8 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Rich dark garden loam',
         transitionCompatibility: ['TEMP_ARID', 'WET_ARID', 'ARID_HIGH', 'ARID_VOLC'],
         tones: [
-            { id: 'ARID_HARDPAN_01', hex: '#2E261D', role: 'deepShadow', tags: ['hardpan_crack'] },
-            { id: 'ARID_HARDPAN_02', hex: '#4F4232', role: 'shadow', tags: ['hardpan_dark'] },
+            { id: 'ARID_HARDPAN_01', hex: SHARED.ARID_EARTH_SHADOW, role: 'deepShadow', tags: ['hardpan_crack'] },
+            { id: 'ARID_HARDPAN_02', hex: SHARED.BARK_DARK_BODY, role: 'shadow', tags: ['hardpan_dark'] },
             { id: 'ARID_HARDPAN_03', hex: '#77634A', role: 'body', tags: ['hardpan_body'] },
             { id: 'ARID_HARDPAN_04', hex: '#A28968', role: 'light', tags: ['hardpan_lit'] },
             { id: 'ARID_HARDPAN_05', hex: '#CFB38D', role: 'highlight', tags: ['hardpan_crest'] }
@@ -523,8 +533,8 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Black volcanic ash',
         transitionCompatibility: ['ARID_HIGH', 'TEMP_ARID'],
         tones: [
-            { id: 'ARID_SAND_01', hex: '#30281B', role: 'deepShadow', tags: ['sand_recess'] },
-            { id: 'ARID_SAND_02', hex: '#54442D', role: 'shadow', tags: ['sand_dark'] },
+            { id: 'ARID_SAND_01', hex: SHARED.ARID_EARTH_SHADOW, role: 'deepShadow', tags: ['sand_recess'] },
+            { id: 'ARID_SAND_02', hex: SHARED.SAND_LOAM_MID, role: 'shadow', tags: ['sand_dark'] },
             { id: 'ARID_SAND_03', hex: '#7D6642', role: 'body', tags: ['sand_body'] },
             { id: 'ARID_SAND_04', hex: '#A88C5D', role: 'light', tags: ['sand_lit'] },
             { id: 'ARID_SAND_05', hex: '#D3B680', role: 'highlight', tags: ['sand_crest'] }
@@ -592,12 +602,11 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['WET_ARID', 'ARID_HIGH'],
         tones: [
             { id: 'ARID_BONE_01', hex: '#36332C', role: 'deepShadow', tags: ['bone_recess'] },
-            { id: 'ARID_BONE_02', hex: '#5D584C', role: 'shadow', tags: ['bone_shadow'] },
-            { id: 'ARID_BONE_03', hex: '#888170', role: 'body', tags: ['bone_body'] },
-            { id: 'ARID_BONE_04', hex: '#B7AF9C', role: 'light', tags: ['bone_lit'] },
-            { id: 'ARID_BONE_05', hex: '#E6DECD', role: 'highlight', tags: ['bone_crest'] }
+            { id: 'ARID_BONE_02', hex: '#6A6354', role: 'shadow', tags: ['bone_shadow'] },
+            { id: 'ARID_BONE_03', hex: '#A39984', role: 'body', tags: ['bone_body'] },
+            { id: 'ARID_BONE_04', hex: SHARED.PALE_CREST_MAX, role: 'highlight', tags: ['bone_crest'] }
         ],
-        notes: 'Weathered pale bone and caliche crust.'
+        notes: 'Weathered pale bone and caliche crust (compact 4-tone ramp).'
     },
 
     // -------------------------------------------------------------------------
@@ -612,7 +621,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Snow/ice surfaces (HARD RULE: zero snow/ice in DEUS)',
         transitionCompatibility: ['TEMP_HIGH', 'WET_HIGH', 'ARID_HIGH', 'HIGH_VOLC'],
         tones: [
-            { id: 'HIGH_GRASS_01', hex: '#162018', role: 'deepShadow', tags: ['alpine_turf_shadow'] },
+            { id: 'HIGH_GRASS_01', hex: SHARED.FOLIAGE_DEEP, role: 'deepShadow', tags: ['alpine_turf_shadow'] },
             { id: 'HIGH_GRASS_02', hex: '#273827', role: 'shadow', tags: ['alpine_turf_dark'] },
             { id: 'HIGH_GRASS_03', hex: '#3D523A', role: 'body', tags: ['alpine_turf_body'] },
             { id: 'HIGH_GRASS_04', hex: '#5B7353', role: 'light', tags: ['alpine_turf_lit'] },
@@ -631,7 +640,7 @@ const RAMP_DEFINITIONS = [
         tones: [
             { id: 'HIGH_SOIL_01', hex: SHARED.AGED_WOOD_01, role: 'deepShadow', tags: ['mountain_soil_shadow'] },
             { id: 'HIGH_SOIL_02', hex: SHARED.AGED_WOOD_02, role: 'shadow', tags: ['mountain_soil_dark'] },
-            { id: 'HIGH_SOIL_03', hex: '#4D4A3F', role: 'body', tags: ['mountain_soil_body'] },
+            { id: 'HIGH_SOIL_03', hex: '#4D463D', role: 'body', tags: ['mountain_soil_body'] },
             { id: 'HIGH_SOIL_04', hex: SHARED.WEATHERED_PALE_BODY, role: 'light', tags: ['mountain_soil_lit'] },
             { id: 'HIGH_SOIL_05', hex: '#938E7C', role: 'highlight', tags: ['mountain_soil_crest'] }
         ],
@@ -697,7 +706,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Broadleaf oak canopy',
         transitionCompatibility: ['TEMP_HIGH'],
         tones: [
-            { id: 'HIGH_CONIFER_01', hex: '#0F1F1D', role: 'deepShadow', tags: ['needle_shadow'] },
+            { id: 'HIGH_CONIFER_01', hex: SHARED.CONIFER_BOG_DEEP, role: 'deepShadow', tags: ['needle_shadow'] },
             { id: 'HIGH_CONIFER_02', hex: '#1B332D', role: 'shadow', tags: ['needle_dark'] },
             { id: 'HIGH_CONIFER_03', hex: '#2A4E43', role: 'body', tags: ['needle_body'] },
             { id: 'HIGH_CONIFER_04', hex: '#3E6E5D', role: 'light', tags: ['needle_lit'] },
@@ -715,7 +724,7 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_HIGH'],
         tones: [
             { id: 'HIGH_BARK_01', hex: SHARED.BARK_DEEP, role: 'deepShadow', tags: ['pine_bark_shadow'] },
-            { id: 'HIGH_BARK_02', hex: '#332922', role: 'shadow', tags: ['pine_bark_dark'] },
+            { id: 'HIGH_BARK_02', hex: SHARED.BARK_SHADOW, role: 'shadow', tags: ['pine_bark_dark'] },
             { id: 'HIGH_BARK_03', hex: SHARED.BARK_DARK_BODY, role: 'body', tags: ['pine_bark_body'] },
             { id: 'HIGH_BARK_04', hex: SHARED.BARK_LIT_BODY, role: 'light', tags: ['pine_bark_lit'] },
             { id: 'HIGH_BARK_05', hex: '#947762', role: 'highlight', tags: ['pine_bark_crest'] }
@@ -769,8 +778,8 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Sandstone ledges',
         transitionCompatibility: ['HIGH_VOLC', 'ARID_VOLC'],
         tones: [
-            { id: 'VOLC_BASALT_01', hex: '#101114', role: 'deepShadow', tags: ['basalt_deep'] },
-            { id: 'VOLC_BASALT_02', hex: '#1D1E24', role: 'shadow', tags: ['basalt_dark'] },
+            { id: 'VOLC_BASALT_01', hex: SHARED.VOID_OCCLUSION, role: 'deepShadow', tags: ['basalt_deep'] },
+            { id: 'VOLC_BASALT_02', hex: SHARED.COOL_SHADOW_01, role: 'shadow', tags: ['basalt_dark'] },
             { id: 'VOLC_BASALT_03', hex: '#2F303A', role: 'body', tags: ['basalt_body'] },
             { id: 'VOLC_BASALT_04', hex: '#464754', role: 'light', tags: ['basalt_lit'] },
             { id: 'VOLC_BASALT_05', hex: '#636474', role: 'highlight', tags: ['basalt_crest'] }
@@ -786,7 +795,7 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Dressed ashlar masonry',
         transitionCompatibility: ['WET_VOLC'],
         tones: [
-            { id: 'VOLC_SCORIA_01', hex: '#191113', role: 'deepShadow', tags: ['scoria_shadow'] },
+            { id: 'VOLC_SCORIA_01', hex: SHARED.DEEP_SCORCH_PEAT, role: 'deepShadow', tags: ['scoria_shadow'] },
             { id: 'VOLC_SCORIA_02', hex: '#2B1B1E', role: 'shadow', tags: ['scoria_dark'] },
             { id: 'VOLC_SCORIA_03', hex: '#44292E', role: 'body', tags: ['scoria_body'] },
             { id: 'VOLC_SCORIA_04', hex: '#623C43', role: 'light', tags: ['scoria_lit'] },
@@ -804,9 +813,9 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['TEMP_VOLC'],
         tones: [
             { id: 'VOLC_PUMICE_01', hex: SHARED.WARM_STONE_01, role: 'deepShadow', tags: ['pumice_shadow'] },
-            { id: 'VOLC_PUMICE_02', hex: '#3E3B38', role: 'shadow', tags: ['pumice_dark'] },
+            { id: 'VOLC_PUMICE_02', hex: SHARED.WARM_STONE_02, role: 'shadow', tags: ['pumice_dark'] },
             { id: 'VOLC_PUMICE_03', hex: '#605C56', role: 'body', tags: ['pumice_body'] },
-            { id: 'VOLC_PUMICE_04', hex: '#878179', role: 'light', tags: ['pumice_lit'] },
+            { id: 'VOLC_PUMICE_04', hex: SHARED.WARM_STONE_04, role: 'light', tags: ['pumice_lit'] },
             { id: 'VOLC_PUMICE_05', hex: SHARED.WARM_STONE_05, role: 'highlight', tags: ['pumice_crest'] }
         ],
         notes: 'Light grey-buff vesicular pumice stone.'
@@ -838,12 +847,11 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['WET_VOLC'],
         tones: [
             { id: 'VOLC_SULFUR_01', hex: '#272810', role: 'deepShadow', tags: ['sulfur_shadow'] },
-            { id: 'VOLC_SULFUR_02', hex: '#4A4C1C', role: 'shadow', tags: ['sulfur_dark'] },
-            { id: 'VOLC_SULFUR_03', hex: '#777A29', role: 'body', tags: ['sulfur_body'] },
-            { id: 'VOLC_SULFUR_04', hex: '#ABAE39', role: 'light', tags: ['sulfur_lit'] },
-            { id: 'VOLC_SULFUR_05', hex: '#DEDF5E', role: 'highlight', tags: ['sulfur_crest'] }
+            { id: 'VOLC_SULFUR_02', hex: '#4E501C', role: 'shadow', tags: ['sulfur_dark'] },
+            { id: 'VOLC_SULFUR_03', hex: '#82852B', role: 'body', tags: ['sulfur_body'] },
+            { id: 'VOLC_SULFUR_04', hex: '#DEDF5E', role: 'highlight', tags: ['sulfur_crest'] }
         ],
-        notes: 'Vibrant yellow-green sulfur crust.'
+        notes: 'Vibrant yellow-green sulfur crust (compact 4-tone ramp).'
     },
     {
         rampId: 'VOLC_WOOD_CHARRED',
@@ -854,13 +862,12 @@ const RAMP_DEFINITIONS = [
         forbiddenUsage: 'Healthy growing foliage',
         transitionCompatibility: ['TEMP_VOLC'],
         tones: [
-            { id: 'VOLC_CHAR_01', hex: '#0F0E0E', role: 'deepShadow', tags: ['charcoal_shadow'] },
+            { id: 'VOLC_CHAR_01', hex: SHARED.VOID_CAP, role: 'deepShadow', tags: ['charcoal_shadow'] },
             { id: 'VOLC_CHAR_02', hex: SHARED.AGED_WOOD_01, role: 'shadow', tags: ['charcoal_dark'] },
-            { id: 'VOLC_CHAR_03', hex: '#2F2A28', role: 'body', tags: ['charcoal_body'] },
-            { id: 'VOLC_CHAR_04', hex: '#463E3B', role: 'light', tags: ['charcoal_lit'] },
-            { id: 'VOLC_CHAR_05', hex: '#635753', role: 'highlight', tags: ['charcoal_crest'] }
+            { id: 'VOLC_CHAR_03', hex: '#362D2A', role: 'body', tags: ['charcoal_body'] },
+            { id: 'VOLC_CHAR_04', hex: '#635753', role: 'highlight', tags: ['charcoal_crest'] }
         ],
-        notes: 'Charred deadwood and charcoal.'
+        notes: 'Charred deadwood and charcoal (compact 4-tone ramp).'
     },
     {
         rampId: 'VOLC_LAVA_HAZARD',
@@ -944,12 +951,11 @@ const RAMP_DEFINITIONS = [
         transitionCompatibility: ['WET_HIGH', 'TEMP_HIGH'],
         tones: [
             { id: 'WATER_FOAM_01', hex: '#304859', role: 'deepShadow', tags: ['foam_recess'] },
-            { id: 'WATER_FOAM_02', hex: '#4C6E85', role: 'shadow', tags: ['foam_shadow'] },
-            { id: 'WATER_FOAM_03', hex: '#7297B2', role: 'body', tags: ['foam_body'] },
-            { id: 'WATER_FOAM_04', hex: '#A5C5DC', role: 'light', tags: ['foam_lit'] },
-            { id: 'WATER_FOAM_05', hex: '#E2EFF8', role: 'highlight', tags: ['foam_spray'] }
+            { id: 'WATER_FOAM_02', hex: '#597C93', role: 'shadow', tags: ['foam_shadow'] },
+            { id: 'WATER_FOAM_03', hex: '#91B3CD', role: 'body', tags: ['foam_body'] },
+            { id: 'WATER_FOAM_04', hex: '#E2EFF8', role: 'highlight', tags: ['foam_spray'] }
         ],
-        notes: 'Frothy aerated water for waterfalls and rapids.'
+        notes: 'Frothy aerated water for waterfalls and rapids (compact 4-tone ramp).'
     },
 
     // -------------------------------------------------------------------------
@@ -1100,17 +1106,16 @@ const RAMP_DEFINITIONS = [
         materialFamily: 'SUPERNATURAL',
         biomeAffinity: ['SPECIAL'],
         sharedAcrossBiomes: true,
-        preferredUsage: 'Druidic nature magic, potent restoration auras, enchanted spring glints',
-        forbiddenUsage: 'Ordinary lawn grass',
+        preferredUsage: 'Restorative healing spells, life warding, vitality springs',
+        forbiddenUsage: 'Ordinary turf',
         transitionCompatibility: ['VFX_ONLY'],
         tones: [
-            { id: 'MAGIC_EMERALD_01', hex: '#0A2E16', role: 'deepShadow', tags: ['nature_magic_deep'] },
-            { id: 'MAGIC_EMERALD_02', hex: '#165C2F', role: 'shadow', tags: ['nature_magic_shadow'] },
-            { id: 'MAGIC_EMERALD_03', hex: '#269E51', role: 'body', tags: ['nature_magic_body'] },
-            { id: 'MAGIC_EMERALD_04', hex: '#4EE085', role: 'light', tags: ['nature_magic_lit'] },
-            { id: 'MAGIC_EMERALD_05', hex: '#ADFFD0', role: 'highlight', tags: ['nature_magic_core'] }
+            { id: 'MAGIC_HEAL_01', hex: '#092617', role: 'deepShadow', tags: ['vitality_deep'] },
+            { id: 'MAGIC_HEAL_02', hex: '#1A5736', role: 'shadow', tags: ['vitality_shadow'] },
+            { id: 'MAGIC_HEAL_03', hex: '#2EA065', role: 'body', tags: ['vitality_body'] },
+            { id: 'MAGIC_HEAL_04', hex: '#57E095', role: 'highlight', tags: ['vitality_crest'] }
         ],
-        notes: 'Supernatural high-saturation emerald healing aura.'
+        notes: 'Luminescent healing emerald magic spectrum (compact 4-tone ramp).'
     }
 ];
 
@@ -1120,7 +1125,7 @@ const RAMP_DEFINITIONS = [
 const TRANSITION_BRIDGES = {
     'TEMP_WET': {
         primaryBridgeRamps: ['TEMP_GRASS_FERTILE', 'WET_GRASS_SATURATED', 'WET_REED_RUSH', 'TEMP_SOIL_LOAM', 'WET_SOIL_PEAT'],
-        bridgeTones: ['#26421C', '#203320', '#3B2E25', '#57422C', '#6C935D'],
+        bridgeTones: ['#26421C', '#203320', '#3B2E25', SHARED.SAND_LOAM_MID, '#6C935D'],
         notes: 'Transition from lush loam meadow to spongy peat marsh and upright reed beds'
     },
     'TEMP_ARID': {
@@ -1135,22 +1140,22 @@ const TRANSITION_BRIDGES = {
     },
     'TEMP_VOLC': {
         primaryBridgeRamps: ['TEMP_GRASS_DRY', 'VOLC_SOIL_SCORCHED', 'VOLC_ASH_DRIFT', 'TEMP_BARK_OAK', 'VOLC_WOOD_CHARRED'],
-        bridgeTones: ['#353C20', '#261D18', '#3E3E44', SHARED.BARK_DARK_BODY, '#2F2A28'],
+        bridgeTones: ['#353C20', '#261D18', '#3E3E44', SHARED.BARK_DARK_BODY, '#362D2A'],
         notes: 'Transition from verdant forest margins to scorched perimeter and ash plain'
     },
     'WET_ARID': {
         primaryBridgeRamps: ['WET_REED_RUSH', 'ARID_GRASS_BUNCHGRASS', 'WET_MUD_ANAEROBIC', 'ARID_SOIL_HARDPAN', 'ARID_BONE_CALICHE'],
-        bridgeTones: ['#445427', '#473E24', '#323536', '#77634A', '#888170'],
+        bridgeTones: ['#445427', '#473E24', '#3E3E44', '#77634A', '#A39984'],
         notes: 'Terminal evaporative basin: drying mud playa with sparse spiky straw'
     },
     'WET_HIGH': {
         primaryBridgeRamps: ['WET_GRASS_SATURATED', 'HIGH_GRASS_ALPINE', 'WET_STONE_DAMP_SLATE', 'HIGH_STONE_SLATE', 'WATER_FOAM_RAPIDS'],
-        bridgeTones: [SHARED.SLATE_SHADOW, '#273827', '#37464F', '#4E626E', '#7297B2'],
+        bridgeTones: [SHARED.SLATE_SHADOW, '#273827', '#37464F', '#4E626E', '#91B3CD'],
         notes: 'Steep mountain gorge transitioning down to wetlands'
     },
     'WET_VOLC': {
         primaryBridgeRamps: ['WET_MUD_ANAEROBIC', 'VOLC_SOIL_SCORCHED', 'VOLC_MINERAL_SULFUR', 'VOLC_STONE_SCORIA'],
-        bridgeTones: [SHARED.MUD_SLATE_CHIP, '#412A23', '#4A4C1C', '#44292E', '#777A29'],
+        bridgeTones: [SHARED.MUD_SLATE_CHIP, '#412A23', '#4E501C', '#44292E', '#82852B'],
         notes: 'Geothermal marsh with hot sulfur springs and scalding mudpots'
     },
     'ARID_HIGH': {
@@ -1160,12 +1165,12 @@ const TRANSITION_BRIDGES = {
     },
     'ARID_VOLC': {
         primaryBridgeRamps: ['ARID_SOIL_HARDPAN', 'VOLC_ASH_DRIFT', 'ARID_STONE_SANDSTONE', 'VOLC_STONE_BASALT'],
-        bridgeTones: ['#4F4232', '#27272B', '#583224', '#2F303A', '#834A34'],
+        bridgeTones: [SHARED.BARK_DARK_BODY, '#27272B', '#583224', '#2F303A', '#834A34'],
         notes: 'Tectonic fault scarps and dark volcanic escarpments'
     },
     'HIGH_VOLC': {
         primaryBridgeRamps: ['HIGH_STONE_GRANITE', 'VOLC_STONE_BASALT', 'HIGH_GRAVEL_SCREE', 'VOLC_ASH_DRIFT'],
-        bridgeTones: ['#30383E', '#1D1E24', SHARED.DRESSED_STONE_03, '#3E3E44', '#6E7A85'],
+        bridgeTones: ['#30383E', SHARED.COOL_SHADOW_01, SHARED.DRESSED_STONE_03, '#3E3E44', '#6E7A85'],
         notes: 'High volcanic peaks, active fumaroles, and jagged caldera crests'
     }
 };
@@ -1344,20 +1349,48 @@ function compileRegistry() {
         }
     }
 
+    const CANONICAL_CEILING = 256;
+    const reservedSlots = CANONICAL_CEILING - masterList.length;
+
     const registry = {
-        version: '1.0.0',
+        version: '1.1.0',
         documentId: 'DEUS-PALETTE-REGISTRY-01',
         task: 'DW.01.05',
         title: 'DEUS Canonical World Palette Architecture & Material Ramps Registry',
-        canonicalCeiling: 256,
+        canonicalCeiling: CANONICAL_CEILING,
         masterColorCount: masterList.length,
+        reservedCapacity: reservedSlots,
         totalRampsCount: Object.keys(ramps).length,
         totalRampSlotsCount: totalRampTones,
         nearDuplicatesReport: nearDuplicates,
+        reservePolicy: {
+            ceiling: CANONICAL_CEILING,
+            activeV1Count: masterList.length,
+            reservedSlots: reservedSlots,
+            minReservedCapacity: 16,
+            targetRange: '220–240 active canonical world colors for V1',
+            status: 'FROZEN_WITH_HEADROOM',
+            guidance: 'Deliberate reserve capacity for future production discoveries during terrain, flora, geology, agriculture, ruins, and mineral asset generation. No agent may silently add RGB colors without following the controlled palette update process.'
+        },
+        versioningPolicy: {
+            frozenForV1: true,
+            strictProductionEnforcement: true,
+            controlledAdditionSteps: [
+                '1. Demonstrated production need in real asset context',
+                '2. Duplicate and near-duplicate (<4.0 RGB distance) audit',
+                '3. Material family and ramp assignment',
+                '4. Biome transition impact review',
+                '5. Registry update in DEUS_PaletteRegistry.json',
+                '6. Deterministic palette reference board regeneration (DEUS_PALETTE_BOARD_V1.png)',
+                '7. Automated test suite pass (tools/test_palette_standard.js)',
+                '8. Explicit version and change record in documentation'
+            ]
+        },
         policy: {
             sheetCapPolicy: 'NO ARBITRARY 32-COLOR CAP PER PACKED TILESET SHEET. Tileset sheets are containers containing the union of multiple material ramps.',
             enforcementLevel: 'Color discipline is enforced at Material Family and Individual Asset level.',
-            pixelDensityRule: 'Author at 1:1 Native Resolution; draw strictly from canonical material ramps and Master Palette.'
+            pixelDensityRule: 'Author at 1:1 Native Resolution; draw strictly from canonical material ramps and Master Palette.',
+            artDirectionStyle: 'Grounded late-16-bit proportions, mature Western fantasy, restrained grimdark.'
         },
         valueHierarchy: VALUE_HIERARCHY,
         colorBudgets: COLOR_BUDGETS,
@@ -1386,8 +1419,11 @@ const hexLines = masterList.map(c => c.hex);
 fs.writeFileSync(HEX_OUT, hexLines.join('\n') + '\n', 'utf8');
 
 console.log(`=== DEUS PALETTE REGISTRY COMPILED (DW.01.05) ===`);
-console.log(`Master Palette Unique Colors: ${registry.masterColorCount} (Ceiling: 256)`);
+console.log(`Master Palette Active Colors:  ${registry.masterColorCount} (Target: 220–240)`);
+console.log(`Reserved Capacity Slots:      ${registry.reservedCapacity} (Minimum: >= 16)`);
+console.log(`Canonical Ceiling:            ${registry.canonicalCeiling}`);
 console.log(`Total Material Ramps:         ${registry.totalRampsCount}`);
+console.log(`Total Tone Slots in Ramps:    ${registry.totalRampSlotsCount}`);
 console.log(`Near-Duplicates (<4 RGB dist): ${registry.nearDuplicatesReport.length}`);
 console.log(`Written to:`);
 console.log(`  - ${GAME_OUT}`);

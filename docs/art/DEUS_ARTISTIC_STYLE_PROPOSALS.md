@@ -4,7 +4,7 @@
 **Authority:** Gemini (Full-Stack Coordinator & Art Authority)  
 **Mandatory Baseline:**
 - **Perspective:** Pure 2D top-down RPG projection (zero 2.5D, zero elevation offsets, zero cast shadow sprites).
-- **Scale:** Serious Chibi (~3.0–3.2 heads tall, 40–44px inside 48×48px 1-tile frames for humanoids; 96×96px 2-tile frames for large monsters).
+- **Scale:** Grounded late-16-bit proportions (~3.0–3.2 heads tall, 40–44px inside 48×48px 1-tile frames for humanoids; 96×96px 2-tile frames for large monsters; mature Western fantasy proportions).
 - **Architecture:** Dwarf Fortress Steam-style black wall-top convention (lower 48px visible material face; upper 48px flat near-black `#08080C` occlusion cap).
 - **Animation:** 100% authored sprite-frame animation (zero runtime code-driven after-effects or shaders).
 - **Palette & Lighting:** Clamped to 16-bit master palette (`art/palette/uf.hex`), Upper-Left light source (135°).
@@ -74,7 +74,7 @@
 
 ### Proposal 07: The Autumn Hearth (Melancholic Warmth & Folk Fantasy)
 - **Concept:** Balances brutal grimdark survival stakes with the comforting warmth of communal life, drawing inspiration from *Sea of Stars* and Nordic folk aesthetics.
-- **Character Sprites:** Expressive serious-chibi sprites with warm, woolen textures, fur collars, hooded mantles, and distinct facial expressions reflecting morale and exhaustion.
+- **Character Sprites:** Expressive grounded late-16-bit sprites with warm, woolen textures, fur collars, hooded mantles, and distinct facial expressions reflecting morale and exhaustion.
 - **Environment & Architecture:** Warm timber longhouses with glowing smoked windows, golden wheat and barley fields, autumn-tinted amber foliage, cozy communal firepits, and rustic split-rail fences.
 - **Color & Shading:** Warm secondary bounce lighting from hearths, torches, and lanterns. Twilight purples, russet browns, deep golden ambers, and forest greens create high emotional resonance.
 - **Best Suited For:** Community building, emotional attachment to colonists, domestic village simulation, and cozy survival against harsh winters.

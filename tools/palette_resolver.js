@@ -143,11 +143,11 @@ Usage:
 
     if (args[0] === '--master') {
         console.log(`=== DEUS MASTER WORLD PALETTE SUMMARY ===`);
-        console.log(`Document ID:         ${reg.documentId}`);
-        console.log(`Master Unique Colors:${reg.masterColorCount} (Ceiling: ${reg.canonicalCeiling})`);
-        console.log(`Total Ramps:         ${reg.totalRampsCount}`);
-        console.log(`Total Ramp Slots:    ${reg.totalRampSlotsCount}`);
-        console.log(`Policy:              ${reg.policy.sheetCapPolicy}`);
+        console.log(`Master Active Colors:  ${reg.masterColorCount} (Target: 220–240)`);
+        console.log(`Reserved Headroom:     ${reg.reservedCapacity} slots (Ceiling: ${reg.canonicalCeiling}, Min: >= 16)`);
+        console.log(`Total Ramps:           ${reg.totalRampsCount}`);
+        console.log(`Total Ramp Slots:      ${reg.totalRampSlotsCount}`);
+        console.log(`Policy:                ${reg.policy.sheetCapPolicy}`);
         console.log(`Near-Duplicates (<4):${reg.nearDuplicatesReport.length} (Audited intentional material distinctions)`);
         return;
     }
