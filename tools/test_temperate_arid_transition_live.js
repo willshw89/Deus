@@ -7,7 +7,7 @@
  * Runs an actual in-engine NW.js playtest of the Temperate <-> Arid cross-biome transition
  * at official locked 1.00x camera using real native 48px packed assets:
  * - Real RMMZ WebGL rendering
- * - Organic irregular ecological gradient (no straight vertical bands)
+ * - Organic irregular ecological gradient based on moisture, topography & drainage
  * - Soil, vegetation density, tree species, and rock geology transitioning across 5 stages
  * - Canonical ~42 px Human colonists, winding trail, water stream, trees, clutter, and HUD
  * - Captures live in-engine screenshot to art/review/ and brain artifacts
@@ -62,71 +62,88 @@ const suiteCode = `
         const curArea = curLevel ? { x: curLevel.x, y: curLevel.y } : (W && W.currentArea ? W.currentArea() : { x: 0, y: 0 });
         const curZ = curLevel ? curLevel.z : 0;
 
-        // Move default events away from showcase area
-        for (const ev of map.events()) {
-            if (ev) ev.locate(1, 1);
+        // Clear weather and ensure bright clear noon daylight
+        $gameScreen.changeWeather('none', 0, 0);
+        $gameScreen.startTint([0, 0, 0, 0], 0);
+        if (window.UF && UF.DayNight && typeof UF.DayNight.setTime === 'function') {
+            UF.DayNight.setTime(12, 0);
         }
 
-        // Layer 0: Ground Autotiles (Tilemap.TILE_ID_A2 = 2816)
-        // Autotile block indices:
-        // Block 0: Temperate Core Turf (2816 + 0*48 = 2816)
-        // Block 1: Temperate-to-Arid Olive Turf (2816 + 1*48 = 2864)
-        // Block 2: Shared Ecotone Mottled Soil (2816 + 2*48 = 2912)
-        // Block 3: Arid-to-Temperate Steppe Clay (2816 + 3*48 = 2960)
-        // Block 4: Arid Core Hardpan Sand (2816 + 4*48 = 3008)
-        // Block 5: Arid Core Cracked Caliche (2816 + 5*48 = 3056)
-        // Block 6: Dirt Road / Trail (2816 + 6*48 = 3104)
+        // Collapse minimap window to keep upper-right map area visible
+        if (window.UF && UF.Minimap) {
+            UF.Minimap.expanded = false;
+        }
 
-        // Clear all layers
+        // Relocate all existing map events and units away from showcase corridor
+        for (const ev of map.events()) {
+            if (ev) ev.locate(45, 35);
+        }
+        if (W && typeof W.units === 'function') {
+            for (const u of W.units()) {
+                if (u) {
+                    u.x = 45;
+                    u.y = 35;
+                }
+            }
+        }
+
+        // Clear all map layers
         for (let i = 0; i < data.length; i++) data[i] = 0;
 
-        // Populate Layer 0 with Organic Irregular Biome Gradient
+        // -------------------------------------------------------------
+        // Layer 0: Ground Autotiles (Seamless shapes base + 46)
+        // -------------------------------------------------------------
+        function getMoisture(x, y) {
+            const macro = 1.0 - (x / 16.0); // 1.0 at West (Temperate), 0.0 at East (Arid)
+            const riverDrainage = (x <= 3) ? (0.28 - Math.abs(x - 1.0) * 0.08) : 0;
+            const topography = 0.20 * Math.sin(y * 0.45) 
+                             + 0.16 * Math.cos(x * 0.35 + y * 0.35) 
+                             + 0.10 * Math.sin(x * 0.7 - y * 0.55);
+            return Math.max(0, Math.min(1, macro + riverDrainage + topography));
+        }
+
+        // Populate Layer 0 with Organic Irregular Ecological Gradient
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const i = (0 * height + y) * width + x;
+                const m = getMoisture(x, y);
 
-                // Organic Perlin-style noise to break vertical striping into meandering fingers and patches
-                const noise = Math.sin(y * 0.35) * 3.4 + Math.cos((x * 0.3 + y * 0.4)) * 2.2 + Math.sin(x * 0.7 - y * 0.5) * 1.5;
-                const progress = x + noise;
-
-                let groundTile = 2816; // Zone 1: Temperate Core
-                if (progress >= 38) {
-                    // Zone 5: Arid Core (alternate between Hardpan Sand and Caliche mudcracks)
-                    groundTile = ((x + y) % 3 === 0) ? 3056 : 3008;
-                } else if (progress >= 30) {
-                    // Zone 4: Arid-to-Temperate Edge
-                    groundTile = 2960;
-                } else if (progress >= 22) {
-                    // Zone 3: Shared Ecotone
-                    groundTile = 2912;
-                } else if (progress >= 15) {
-                    // Zone 2: Temperate-to-Arid Edge
-                    groundTile = 2864;
+                let groundTile = 2862; // Default Zone 1: Lush Temperate Turf
+                if (m < 0.20) {
+                    // Zone 5: Arid Core (Hardpan Sand with Cracked Caliche swales)
+                    const calicheNoise = Math.sin(x * 0.8 + y * 0.7);
+                    groundTile = (calicheNoise > 0.4) ? 3102 : 3054;
+                } else if (m < 0.38) {
+                    // Zone 4: Arid-to-Temperate Steppe Clay
+                    groundTile = 3006;
+                } else if (m < 0.56) {
+                    // Zone 3: Shared Ecotone Mottled Loam
+                    groundTile = 2958;
+                } else if (m < 0.74) {
+                    // Zone 2: Temperate-to-Arid Olive Turf
+                    groundTile = 2910;
                 } else {
-                    // Zone 1: Temperate Core
-                    groundTile = 2816;
+                    // Zone 1: Temperate Core Turf
+                    groundTile = 2862;
                 }
 
                 data[i] = groundTile;
             }
         }
 
-        // Add Winding Dirt Road / Trade Path from West to East
+        // Add Winding Dirt Trade Road across the screen (x=0..16, y~7)
         for (let x = 0; x < width; x++) {
-            const roadY = Math.round(15 + Math.sin(x * 0.16) * 3.8 + Math.cos(x * 0.32) * 1.6);
-            for (let dy = -1; dy <= 0; dy++) {
-                const ry = roadY + dy;
-                if (ry >= 0 && ry < height) {
-                    const i = (0 * height + ry) * width + x;
-                    data[i] = 3104; // Dirt Road Autotile
-                }
+            const roadY = Math.round(7 + Math.sin(x * 0.32) * 1.5 + Math.cos(x * 0.65) * 0.7);
+            if (roadY >= 0 && roadY < height) {
+                const i = (0 * height + roadY) * width + x;
+                data[i] = (x >= 12 && ((x + roadY) % 3 === 0)) ? 3198 : 3150;
             }
         }
 
-        // Add Water Stream in Temperate Region (x=6..10, y=0..20)
-        for (let y = 0; y < 22; y++) {
-            const streamX = Math.round(8 + Math.sin(y * 0.28) * 2.5);
-            for (let dx = -1; dx <= 1; dx++) {
+        // Add Water Stream in Temperate Region (x=0..1, y=0..13)
+        for (let y = 0; y < 14; y++) {
+            const streamX = Math.round(0.8 + Math.sin(y * 0.38) * 0.5);
+            for (let dx = -1; dx <= 0; dx++) {
                 const sx = streamX + dx;
                 if (sx >= 0 && sx < width) {
                     const i = (0 * height + y) * width + sx;
@@ -135,76 +152,108 @@ const suiteCode = `
             }
         }
 
-        // Layer 1: Flora, Clutter, Rocks, and Reeds from Sheet B (Tilemap.TILE_ID_B = 0)
-        // Helper to place item on Layer 1:
+        // -------------------------------------------------------------
+        // Layer 1: Flora, Clutter, Rocks, Reeds (Sheet B: tileId = 0 + row*16 + col)
+        // -------------------------------------------------------------
         const placeB = (x, y, tileCol, tileRow) => {
             if (x < 0 || x >= width || y < 0 || y >= height) return;
             const i = (1 * height + y) * width + x;
             data[i] = 0 + tileRow * 16 + tileCol;
         };
 
-        // Helper to place 48x48 Tree from Sheet C on Layer 2:
-        const placeTree = (x, y, treeCol) => {
-            if (x < 0 || x >= width || y < 0 || y >= height) return;
-            const i = (2 * height + y) * width + x;
-            data[i] = 256 + 0 * 16 + treeCol; // Sheet C starts at 256
+        // Zone 1: Temperate Flora & Clutter
+        placeB(2, 6, 4, 0);  // Bluebells
+        placeB(4, 2, 4, 0);  // Bluebells
+        placeB(3, 8, 5, 0);  // Red Poppy
+        placeB(4, 5, 5, 0);  // Red Poppy
+        placeB(1, 10, 6, 0); // Meadow Daisies
+        placeB(3, 1, 1, 0);  // Grass tuft 1
+        placeB(2, 7, 2, 0);  // Grass tuft 2
+        placeB(1, 1, 10, 0); // River Reeds along stream
+        placeB(1, 7, 10, 0); // River Reeds
+        placeB(1, 12, 10, 0);// River Reeds
+        placeB(1, 4, 11, 0); // Cattails
+        placeB(2, 4, 13, 0); // River Pebbles
+        placeB(2, 8, 13, 0); // River Pebbles
+        placeB(1, 9, 15, 0); // Mossy Boulder
+
+        // Zone 2: Temperate-to-Arid Edge
+        placeB(5, 5, 7, 0);  // Deciduous Bush
+        placeB(6, 9, 8, 0);  // Berry Bramble
+        placeB(5, 1, 9, 0);  // Autumn Bush
+        placeB(5, 11, 12, 0);// River Fern
+        placeB(6, 1, 14, 0); // Granite Rock
+        placeB(4, 8, 3, 0);  // Grass tuft 3
+        placeB(6, 6, 1, 0);  // Grass tuft 1
+
+        // Zone 3: Shared Ecotone
+        placeB(8, 1, 1, 1);  // Sage Scrub
+        placeB(8, 9, 1, 1);  // Sage Scrub
+        placeB(7, 6, 0, 1);  // Dry Bunchgrass
+        placeB(10, 5, 0, 1); // Dry Bunchgrass
+        placeB(7, 9, 5, 1);  // Sandstone Rock
+        placeB(9, 2, 5, 1);  // Sandstone Rock
+        placeB(8, 11, 8, 1); // Driftwood Log
+        placeB(10, 8, 2, 1); // Aloe succulent
+
+        // Zone 4: Arid-to-Temperate Edge
+        placeB(11, 8, 2, 1); // Aloe Succulent
+        placeB(13, 1, 2, 1); // Aloe Succulent
+        placeB(12, 5, 1, 1); // Sage Scrub
+        placeB(13, 9, 1, 1); // Sage Scrub
+        placeB(11, 11, 0, 1);// Dry Bunchgrass
+        placeB(13, 4, 0, 1); // Dry Bunchgrass
+        placeB(13, 2, 6, 1); // Sandstone Boulder
+        placeB(12, 11, 6, 1);// Sandstone Boulder
+
+        // Zone 5: Arid Core
+        placeB(14, 6, 9, 1); // Prickly Pear Cactus
+        placeB(16, 11, 9, 1);// Prickly Pear Cactus
+        placeB(15, 5, 7, 1); // Horned Animal Skull
+        placeB(14, 8, 7, 1); // Horned Animal Skull
+        placeB(16, 2, 4, 1); // Caliche Pebbles
+        placeB(14, 12, 4, 1);// Caliche Pebbles
+        placeB(16, 7, 3, 1); // Canyon Reeds
+
+        // -------------------------------------------------------------
+        // Layer 2: Standard Overworld Trees (Sheet C: tileId >= 256)
+        // -------------------------------------------------------------
+        const placeOak = (x, y) => {
+            data[(2 * height + (y - 1)) * width + x]       = 256;
+            data[(2 * height + (y - 1)) * width + (x + 1)] = 257;
+            data[(2 * height + y) * width + x]             = 272;
+            data[(2 * height + y) * width + (x + 1)]       = 273;
         };
 
-        // Zone 1: Temperate Flora (Grass, Bluebells, Poppies, Mossy Boulders, Trees)
-        placeTree(4, 10, 0); // Oak Tree
-        placeTree(12, 8, 2); // Birch Tree
-        placeTree(5, 22, 0); // Second Oak
-        placeTree(13, 23, 2); // Second Birch
-        placeB(3, 11, 4, 0);  // Bluebell
-        placeB(5, 12, 5, 0);  // Red Poppy
-        placeB(11, 9, 4, 0);  // Bluebell
-        placeB(14, 10, 14, 0); // Mossy Boulder
-        placeB(3, 18, 1, 0);  // Grass tuft
-        placeB(4, 19, 2, 0);  // Grass tuft
-        placeB(7, 14, 15, 0); // Tree stump
-        placeB(9, 17, 10, 0); // Marsh reeds at water edge
-        placeB(10, 18, 11, 0); // Cattails
+        const placeAcacia = (x, y) => {
+            data[(2 * height + (y - 1)) * width + x]       = 260;
+            data[(2 * height + (y - 1)) * width + (x + 1)] = 261;
+            data[(2 * height + y) * width + x]             = 276;
+            data[(2 * height + y) * width + (x + 1)]       = 277;
+        };
 
-        // Zone 2: Temperate-to-Arid Edge (Olive grass, buttercups, brambles)
-        placeTree(17, 9, 2); // Birch sapling
-        placeTree(18, 22, 0); // Young oak
-        placeB(16, 12, 7, 0); // Bramble shrub
-        placeB(18, 11, 6, 0); // Shrub
-        placeB(15, 17, 3, 0); // Grass tuft
-        placeB(17, 19, 13, 0); // Small rock
+        const place1x2Tree = (x, y, topId, botId) => {
+            data[(2 * height + (y - 1)) * width + x] = topId;
+            data[(2 * height + y) * width + x]       = botId;
+        };
 
-        // Zone 3: Shared Ecotone (Gnarled Desert Olive, Dry bunchgrass, Sage scrub)
-        placeTree(23, 10, 8); // Gnarled Desert Olive Tree
-        placeTree(25, 23, 8); // Second Gnarled Desert Olive
-        placeB(22, 11, 0, 1); // Dry bunchgrass
-        placeB(24, 12, 1, 1); // Desert sage scrub
-        placeB(21, 18, 2, 1); // Aloe succulent
-        placeB(25, 17, 11, 1); // Sandstone rock
-        placeB(26, 19, 7, 1); // Petrified wood branch
+        // Place all 5 Canonical Overworld Trees:
+        placeOak(2, 3);                // Zone 1: Deciduous Oak (2x2, planted on lush turf next to stream)
+        place1x2Tree(4, 10, 258, 274); // Zone 1/2: Slender Birch (1x2)
+        place1x2Tree(6, 3, 259, 275);  // Zone 2: Conifer / Pine (1x2)
+        place1x2Tree(8, 4, 263, 279);  // Zone 3: Gnarled Desert Olive (1x2)
+        place1x2Tree(9, 11, 263, 279); // Zone 3: Second Gnarled Olive (1x2)
+        placeAcacia(11, 3);            // Zone 4: Umbrella Acacia (2x2)
+        place1x2Tree(14, 3, 262, 278); // Zone 5: Desert Date Palm (1x2)
+        place1x2Tree(15, 10, 262, 278);// Zone 5: Second Date Palm (1x2)
 
-        // Zone 4: Arid-to-Temperate Edge (Umbrella Acacia, Aloe, Sandstone boulders)
-        placeTree(32, 9, 4);  // Umbrella Acacia Tree
-        placeTree(33, 23, 4); // Second Umbrella Acacia
-        placeB(31, 11, 2, 1); // Flowering Aloe
-        placeB(34, 12, 1, 1); // Sage scrub
-        placeB(30, 18, 12, 1); // Warm Sandstone Boulder
-        placeB(35, 17, 0, 1); // Dry bunchgrass
-        placeB(33, 18, 7, 1); // Driftwood
-
-        // Zone 5: Arid Core (Umbrella Acacia, Desert Palm, Cactus, Horned Skull)
-        placeTree(40, 8, 6);  // Desert Date Palm Tree
-        placeTree(42, 22, 4); // Umbrella Acacia
-        placeB(39, 10, 4, 1); // Sun-bleached Horned Skull
-        placeB(41, 12, 5, 1); // Prickly Pear Cactus Pad
-        placeB(44, 9, 5, 1);  // Second Cactus
-        placeB(38, 18, 10, 1); // Caliche pebbles
-        placeB(42, 18, 4, 1); // Second Horned Skull
-
-        // Add 6 Actual ~42 px Human Colonists across the transition
-        function addColonist(name, x, y, dir) {
+        // -------------------------------------------------------------
+        // Add 6 Canonical ~42 px Human Colonists across the Corridor
+        // -------------------------------------------------------------
+        function addHuman(name, charName, x, y, dir) {
             return W.addUnit({
                 name: name,
-                image: { characterName: "$UF_Orc_Male_Walk", characterIndex: 0 },
+                image: { characterName: charName, characterIndex: 0 },
                 area: curArea,
                 z: curZ,
                 x: x,
@@ -215,16 +264,16 @@ const suiteCode = `
             });
         }
 
-        addColonist("Temperate Traveler", 6, 14, 6);  // Walking East along road in Zone 1
-        addColonist("Woodland Forager",    12, 11, 2); // Foraging near Birch in Zone 1
-        addColonist("Trail Scout",         19, 15, 6); // Approaching Zone 2
-        addColonist("Ecotone Ranger",       24, 16, 6); // Standing at Ecotone Crossroads in Zone 3
-        addColonist("Steppe Cartographer",  31, 14, 6); // In Zone 4
-        addColonist("Desert Wanderer",      40, 15, 4); // Near Date Palm & Skull in Zone 5
+        addHuman("Temperate Farmer", "$UF_Human_Male_Walk",   4, 4, 2); // Zone 1 (beside Oak tree)
+        addHuman("Trail Pioneer",   "$UF_Human_Female_Walk", 5, 7, 6); // Zone 2 (traveling along road)
+        addHuman("Forester Scout",   "$UF_Human_Male_Walk",   7, 3, 4); // Zone 2/3 (near Pine & Olive)
+        addHuman("Ecotone Ranger",   "$UF_Human_Female_Walk", 9, 7, 6); // Zone 3 (at crossroads)
+        addHuman("Steppe Surveyor",  "$UF_Human_Male_Walk",  12, 7, 6); // Zone 4 (near Acacia)
+        addHuman("Desert Nomad",     "$UF_Human_Female_Walk",15, 7, 4); // Zone 5 (near Palm & Skull)
 
-        // Center camera / viewport on the Ecotone transition (x=24, y=15)
-        $gamePlayer.locate(24, 15);
-        map.setDisplayPos(24 - Math.floor(Graphics.width / 48 / 2), 15 - Math.floor(Graphics.height / 48 / 2));
+        // Set camera display position to (0,0) showing entire 17x13 screen
+        $gamePlayer.locate(45, 35); // Move player avatar off screen so only our 6 colonists appear in the corridor
+        map.setDisplayPos(0, 0);
 
         // Refresh tilemap to display newly populated layers
         const scene = SceneManager._scene;
@@ -238,8 +287,9 @@ const suiteCode = `
         // Capture primary in-engine screenshot at official 1.00x camera
         t.screenshot("live_temperate_arid_gameplay_1x");
 
-        // Focus shot centered slightly more toward ecotone crossroads
-        map.setDisplayPos(21 - Math.floor(Graphics.width / 48 / 2), 15 - Math.floor(Graphics.height / 48 / 2));
+        // Focus shot centered directly on the shared ecotone transition (x=4..20, y=1..13)
+        $gamePlayer.locate(10, 7);
+        map.setDisplayPos(3, 1);
         if (scene && scene._spriteset && scene._spriteset._tilemap) {
             scene._spriteset._tilemap.refresh();
         }
@@ -268,20 +318,18 @@ try {
 
 // 6. Collect screenshots
 fs.mkdirSync(REVIEW_DIR, { recursive: true });
-const snapOutDir = path.join(SNAPSHOT_DIR, 'test_output');
-if (fs.existsSync(snapOutDir)) {
-    const files = fs.readdirSync(snapOutDir);
-    for (const f of files) {
-        if (f.includes('temperate_arid') && f.endsWith('.png')) {
-            const clean = f.replace('temperate_arid_live.', '');
-            const src = path.join(snapOutDir, f);
-            const dstReview = path.join(REVIEW_DIR, clean);
-            const dstBrain = path.join(BRAIN_DIR, clean);
-            fs.copyFileSync(src, dstReview);
-            fs.copyFileSync(src, dstBrain);
-            console.log(`Saved screenshot: art/review/${clean}`);
-        }
-    }
+const shot1 = path.join(SNAPSHOT_DIR, 'test_output', 'temperate_arid_live.live_temperate_arid_gameplay_1x.png');
+const shot2 = path.join(SNAPSHOT_DIR, 'test_output', 'temperate_arid_live.live_temperate_arid_ecotone_focus.png');
+
+if (fs.existsSync(shot1)) {
+    fs.copyFileSync(shot1, path.join(REVIEW_DIR, 'live_temperate_arid_gameplay_1x.png'));
+    fs.copyFileSync(shot1, path.join(BRAIN_DIR, 'live_temperate_arid_gameplay_1x.png'));
+    console.log('Saved screenshot: art/review/live_temperate_arid_gameplay_1x.png');
+}
+if (fs.existsSync(shot2)) {
+    fs.copyFileSync(shot2, path.join(REVIEW_DIR, 'live_temperate_arid_ecotone_focus.png'));
+    fs.copyFileSync(shot2, path.join(BRAIN_DIR, 'live_temperate_arid_ecotone_focus.png'));
+    console.log('Saved screenshot: art/review/live_temperate_arid_ecotone_focus.png');
 }
 
-console.log('\n=== In-Engine Cross-Biome Live Test Complete! ===');
+console.log('\n=== In-Engine Cross-Biome Live Test Complete! ===\n');

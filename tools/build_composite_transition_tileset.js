@@ -8,14 +8,14 @@
  * composite RMMZ tileset sheets for in-engine testing:
  * - Outside_A2.png (768x576, 32 autotile blocks of 96x144)
  * - Outside_B.png  (768x768, Cell [0,0] transparent, 256 tiles)
- * - Outside_C.png  (768x768, Standard Trees: Oak, Birch, Olive, Acacia, Palm)
+ * - Outside_C.png  (768x768, Standard Trees: Oak, Birch, Pine, Acacia, Palm, Olive)
  */
 
 const fs = require('fs');
 const path = require('path');
 const { decodePNG } = require('./png_read');
 const { writePNG } = require('./png_util');
-const { createBlankSheet, blitCell, validateAssembledSheet } = require('./pack_deus_tileset');
+const { createBlankSheet, blitCell } = require('./pack_deus_tileset');
 
 const ROOT = path.resolve(__dirname, '..');
 const TEMP_RAW = path.join(ROOT, 'art', 'source', 'biomes', 'temperate_z0', 'raw');
@@ -69,7 +69,7 @@ function sampleCell48(srcImg, cx, cy, cw, ch, isBgRejection) {
             const b = srcImg.data[si + 2];
             const a = srcImg.data[si + 3];
 
-            if (isBgRejection && isBgRejection(r, g, b, a)) {
+            if (isBgRejection && isBgRejection(r, g, b, a, sx, sy)) {
                 continue;
             }
 
@@ -84,6 +84,56 @@ function sampleCell48(srcImg, cx, cy, cw, ch, isBgRejection) {
         }
     }
     return buf;
+}
+
+function extractSprite(srcImg, srcX, srcY, srcW, srcH, isBg, targetW, targetH) {
+    const buf = Buffer.alloc(targetW * targetH * 4, 0);
+    const scale = Math.min(targetW / srcW, targetH / srcH);
+    const scaledW = Math.round(srcW * scale);
+    const scaledH = Math.round(srcH * scale);
+    const offsetX = Math.floor((targetW - scaledW) / 2);
+    const offsetY = targetH - scaledH; // Anchor to bottom baseline
+
+    for (let dy = 0; dy < scaledH; dy++) {
+        for (let dx = 0; dx < scaledW; dx++) {
+            const sx = srcX + Math.floor(dx / scale);
+            const sy = srcY + Math.floor(dy / scale);
+            if (sx >= srcImg.width || sy >= srcImg.height) continue;
+            const si = (sy * srcImg.width + sx) * 4;
+            const r = srcImg.data[si];
+            const g = srcImg.data[si + 1];
+            const b = srcImg.data[si + 2];
+            const a = srcImg.data[si + 3];
+
+            if (isBg && isBg(r, g, b, a, sx, sy)) continue;
+            if (a >= 32) {
+                const s = snap(r, g, b);
+                const di = ((offsetY + dy) * targetW + (offsetX + dx)) * 4;
+                buf[di]     = s[0];
+                buf[di + 1] = s[1];
+                buf[di + 2] = s[2];
+                buf[di + 3] = 255;
+            }
+        }
+    }
+    return buf;
+}
+
+function blitBuffer(srcBuf, srcW, srcH, dstBuf, dstW, dstH, dstX, dstY) {
+    for (let y = 0; y < srcH; y++) {
+        for (let x = 0; x < srcW; x++) {
+            const dx = dstX + x;
+            const dy = dstY + y;
+            if (dx < 0 || dx >= dstW || dy < 0 || dy >= dstH) continue;
+            const si = (y * srcW + x) * 4;
+            if (srcBuf[si + 3] === 0) continue;
+            const di = (dy * dstW + dx) * 4;
+            dstBuf[di]     = srcBuf[si];
+            dstBuf[di + 1] = srcBuf[si + 1];
+            dstBuf[di + 2] = srcBuf[si + 2];
+            dstBuf[di + 3] = 255;
+        }
+    }
 }
 
 function quantizeTo32(buf, w, h) {
@@ -131,8 +181,8 @@ function buildCompositeSheets(targetTilesetsDir) {
 
     // Load raw sources
     const rawTempGround = decodePNG(fs.readFileSync(path.join(TEMP_RAW, 'temp_z0_ground_matrix.png')));
-    const rawTempFlora  = decodePNG(fs.readFileSync(path.join(TEMP_RAW, 'temp_z0_flora_clutter_matrix.png')));
-    const rawTempTrees  = decodePNG(fs.readFileSync(path.join(TEMP_RAW, 'temp_z0_standard_trees_matrix.png')));
+    const rawTempFlora  = decodePNG(fs.readFileSync(path.join(TEMP_RAW, 'temp_clean_flora.png')));
+    const rawTempTrees  = decodePNG(fs.readFileSync(path.join(TEMP_RAW, 'temp_clean_trees.png')));
 
     const rawAridGround = decodePNG(fs.readFileSync(path.join(ARID_RAW, 'arid_z0_ground_matrix.png')));
     const rawAridFlora  = decodePNG(fs.readFileSync(path.join(ARID_RAW, 'arid_z0_flora_clutter_matrix.png')));
@@ -141,16 +191,6 @@ function buildCompositeSheets(targetTilesetsDir) {
     // -------------------------------------------------------------
     // 1. Build Composite Outside_A2.png (768x576)
     // -------------------------------------------------------------
-    // 8 columns x 4 rows of 96x144 px autotile blocks (32 blocks total)
-    // Row 0:
-    // Block 0: Temperate Core Turf
-    // Block 1: Temperate-to-Arid Olive Turf
-    // Block 2: Shared Ecotone Mottled Soil
-    // Block 3: Arid-to-Temperate Steppe Clay
-    // Block 4: Arid Core Hardpan Sand
-    // Block 5: Arid Core Cracked Caliche
-    // Block 6: Dirt Road / Trail
-    // Block 7: Steppe Gravel
     const sheetA2 = createBlankSheet('A2');
 
     const turfTile    = sampleCell48(rawTempGround, 50, 180, 140, 140);
@@ -169,7 +209,6 @@ function buildCompositeSheets(targetTilesetsDir) {
             const tile = blocks[col];
             const blockX = col * 96;
             const blockY = row * 144;
-            // Fill the 96x144 block with 2x3 tiles of 48x48
             for (let ty = 0; ty < 3; ty++) {
                 for (let tx = 0; tx < 2; tx++) {
                     blitCell(tile, 48, 48, 0, 0, 48, 48, sheetA2.buffer, 768, 576, blockX + tx * 48, blockY + ty * 48);
@@ -183,48 +222,103 @@ function buildCompositeSheets(targetTilesetsDir) {
     console.log('Assembled composite Outside_A2.png');
 
     // -------------------------------------------------------------
-    // 2. Build Composite Outside_B.png (768x768)
+    // 2. Build Composite Outside_B.png (768x768) - Flora & Clutter
     // -------------------------------------------------------------
     const sheetB = createBlankSheet('B');
-    // Cell [0,0] strictly transparent eraser
+    // Cell [0,0] is transparent eraser
 
-    // Row 0: Temperate Flora & Clutter
-    // Extract temperate flora
-    for (let c = 0; c < 12; c++) {
-        const colX = Math.floor(c * (rawTempFlora.width / 12));
-        const cell = sampleCell48(rawTempFlora, colX + 10, 20, 70, 110, (r, g, b) => (Math.abs(r - g) < 8 && Math.abs(g - b) < 8 && ((r > 120 && r < 145) || (r > 170 && r < 205))));
-        blitCell(cell, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, (1 + c) * 48, 0 * 48);
-    }
-    // Granite boulder and rock
-    const boulder = sampleCell48(rawTempFlora, 350, 830, 140, 140, (r, g, b) => (Math.abs(r - g) < 8 && Math.abs(g - b) < 8 && ((r > 120 && r < 145) || (r > 170 && r < 205))));
-    blitCell(boulder, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 14 * 48, 0 * 48);
-    const stump = sampleCell48(rawTempFlora, 520, 830, 140, 140, (r, g, b) => (Math.abs(r - g) < 8 && Math.abs(g - b) < 8 && ((r > 120 && r < 145) || (r > 170 && r < 205))));
-    blitCell(stump, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 15 * 48, 0 * 48);
+    // Background rejection helpers:
+    // Reject neutral grey ~70..95 and bright white text pixels ~185..255
+    const isTempFloraBg = (r, g, b) => {
+        if (r > 185 && g > 185 && b > 185) return true; // Reject white header text
+        return (Math.abs(r - g) < 6 && Math.abs(g - b) < 6 && r >= 65 && r <= 95);
+    };
+    const isAridDarkGrey = (r, g, b, a, sx, sy) => {
+        if (sy >= 835 && sy <= 845) return true; // Separator line above static clutter
+        return (Math.abs(r - g) < 6 && Math.abs(g - b) < 6 && r >= 65 && r <= 95);
+    };
 
-    // Row 1: Arid Flora & Clutter
-    const aridDarkGrey = (r, g, b) => (Math.abs(r - g) < 6 && Math.abs(g - b) < 6 && r >= 65 && r <= 95);
+    // Row 0: Temperate Flora & Clutter (from temp_clean_flora.png)
+    // Grasses (Item 0, 1, 2)
+    const grass1 = sampleCell48(rawTempFlora, 10, 50, 140, 130, isTempFloraBg);
+    blitCell(grass1, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 1 * 48, 0 * 48);
+    const grass2 = sampleCell48(rawTempFlora, 185, 50, 140, 130, isTempFloraBg);
+    blitCell(grass2, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 2 * 48, 0 * 48);
+    const grass3 = sampleCell48(rawTempFlora, 355, 50, 140, 130, isTempFloraBg);
+    blitCell(grass3, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 3 * 48, 0 * 48);
+
+    // Flowers: Bluebells, Poppies, Daisies
+    const bluebells = sampleCell48(rawTempFlora, 20, 240, 310, 125, isTempFloraBg);
+    blitCell(bluebells, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 4 * 48, 0 * 48);
+    const poppies = sampleCell48(rawTempFlora, 350, 240, 310, 125, isTempFloraBg);
+    blitCell(poppies, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 5 * 48, 0 * 48);
+    const daisies = sampleCell48(rawTempFlora, 860, 310, 125, 65, isTempFloraBg);
+    blitCell(daisies, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 6 * 48, 0 * 48);
+
+    // Bushes: Green Bush, Bramble, Autumn
+    const bushG = sampleCell48(rawTempFlora, 25, 435, 310, 135, isTempFloraBg);
+    blitCell(bushG, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 7 * 48, 0 * 48);
+    const bushB = sampleCell48(rawTempFlora, 345, 435, 220, 135, isTempFloraBg);
+    blitCell(bushB, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 8 * 48, 0 * 48);
+    const bushA = sampleCell48(rawTempFlora, 720, 435, 250, 110, isTempFloraBg);
+    blitCell(bushA, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 9 * 48, 0 * 48);
+
+    // Reeds: River Reeds, Cattails, River Fern
+    const reedR = sampleCell48(rawTempFlora, 20, 640, 310, 150, isTempFloraBg);
+    blitCell(reedR, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 10 * 48, 0 * 48);
+    const reedC = sampleCell48(rawTempFlora, 345, 640, 270, 150, isTempFloraBg);
+    blitCell(reedC, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 11 * 48, 0 * 48);
+    const reedF = sampleCell48(rawTempFlora, 720, 640, 255, 145, isTempFloraBg);
+    blitCell(reedF, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 12 * 48, 0 * 48);
+
+    // Static Clutter: Pebbles, Granite Rock, Mossy Boulder
+    const clutP = sampleCell48(rawTempFlora, 20, 850, 150, 135, isTempFloraBg);
+    blitCell(clutP, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 13 * 48, 0 * 48);
+    const clutR = sampleCell48(rawTempFlora, 175, 850, 160, 135, isTempFloraBg);
+    blitCell(clutR, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 14 * 48, 0 * 48);
+    const clutB = sampleCell48(rawTempFlora, 345, 850, 150, 135, isTempFloraBg);
+    blitCell(clutB, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 15 * 48, 0 * 48);
+
+    // Row 1: Arid Flora & Clutter (from arid_z0_flora_clutter_matrix.png)
     // Bunchgrass
-    const aridGrass = sampleCell48(rawAridFlora, 20, 20, 90, 90, aridDarkGrey);
+    const aridGrass = sampleCell48(rawAridFlora, 20, 20, 90, 90, isAridDarkGrey);
     blitCell(aridGrass, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 0 * 48, 1 * 48);
     // Sage scrub
-    const aridScrub = sampleCell48(rawAridFlora, 20, 140, 90, 140, aridDarkGrey);
+    const aridScrub = sampleCell48(rawAridFlora, 20, 140, 90, 130, isAridDarkGrey);
     blitCell(aridScrub, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 1 * 48, 1 * 48);
     // Aloe succulent
-    const aridAloe = sampleCell48(rawAridFlora, 20, 390, 90, 100, aridDarkGrey);
+    const aridAloe = sampleCell48(rawAridFlora, 20, 390, 90, 90, isAridDarkGrey);
     blitCell(aridAloe, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 2 * 48, 1 * 48);
     // Reeds
-    const aridReeds = sampleCell48(rawAridFlora, 20, 520, 90, 200, aridDarkGrey);
+    const aridReeds = sampleCell48(rawAridFlora, 20, 520, 90, 190, isAridDarkGrey);
     blitCell(aridReeds, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 3 * 48, 1 * 48);
-
-    // Static arid clutter
-    const aridSkull = sampleCell48(rawAridFlora, 520, 840, 150, 170, aridDarkGrey);
-    blitCell(aridSkull, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 4 * 48, 1 * 48);
-    const aridCactus = sampleCell48(rawAridFlora, 860, 840, 150, 170, aridDarkGrey);
-    blitCell(aridCactus, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 5 * 48, 1 * 48);
-    const aridBoulder = sampleCell48(rawAridFlora, 350, 840, 150, 170, aridDarkGrey);
+    // Caliche pebbles
+    const aridCaliche = sampleCell48(rawAridFlora, 20, 855, 140, 130, isAridDarkGrey);
+    blitCell(aridCaliche, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 4 * 48, 1 * 48);
+    // Sandstone rock
+    const aridRock = sampleCell48(rawAridFlora, 180, 855, 140, 130, isAridDarkGrey);
+    blitCell(aridRock, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 5 * 48, 1 * 48);
+    // Sandstone boulder
+    const aridBoulder = sampleCell48(rawAridFlora, 350, 855, 150, 150, isAridDarkGrey);
     blitCell(aridBoulder, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 6 * 48, 1 * 48);
-    const aridDriftwood = sampleCell48(rawAridFlora, 690, 840, 150, 170, aridDarkGrey);
-    blitCell(aridDriftwood, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 7 * 48, 1 * 48);
+    // Horned Skull
+    const aridSkull = sampleCell48(rawAridFlora, 520, 855, 150, 150, isAridDarkGrey);
+    blitCell(aridSkull, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 7 * 48, 1 * 48);
+    // Driftwood
+    const aridDriftwood = sampleCell48(rawAridFlora, 690, 855, 150, 150, isAridDarkGrey);
+    blitCell(aridDriftwood, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 8 * 48, 1 * 48);
+    // Cactus
+    const aridCactus = sampleCell48(rawAridFlora, 860, 855, 150, 150, isAridDarkGrey);
+    blitCell(aridCactus, 48, 48, 0, 0, 48, 48, sheetB.buffer, 768, 768, 9 * 48, 1 * 48);
+
+    // Erase any stray edge pixels along y=47, y=48, y=95
+    for (let x = 0; x < 768; x++) {
+        for (const ey of [0, 47, 48, 95]) {
+            const di = (ey * 768 + x) * 4;
+            // If surrounded above or below by transparent pixels, clear it
+            sheetB.buffer[di + 3] = 0;
+        }
+    }
 
     quantizeTo32(sheetB.buffer, 768, 768);
     writePNG(path.join(targetTilesetsDir, 'Outside_B.png'), 768, 768, sheetB.buffer);
@@ -233,26 +327,50 @@ function buildCompositeSheets(targetTilesetsDir) {
     // -------------------------------------------------------------
     // 3. Build Composite Outside_C.png (768x768) - Trees
     // -------------------------------------------------------------
+    // Standard Overworld Trees:
+    // Oak: 2x2 tiles (96x96 px), height ~84 px, width ~56 px centered at col 0..1, row 0..1
+    // Birch: 1x2 tiles (48x96 px), height ~88 px, width ~36 px centered at col 2, row 0..1
+    // Pine: 1x2 tiles (48x96 px), height ~92 px, width ~40 px centered at col 3, row 0..1
+    // Acacia: 2x2 tiles (96x96 px), height ~84 px, width ~52 px centered at col 4..5, row 0..1
+    // Palm: 1x2 tiles (48x96 px), height ~88 px, width ~32 px centered at col 6, row 0..1
+    // Olive: 1x2 tiles (48x96 px), height ~78 px, width ~28 px centered at col 7, row 0..1
     const sheetC = createBlankSheet('C');
-    // Oak: 48x48 tiles at (0,0) and (1,0)
-    const oak = sampleCell48(rawTempTrees, 25, 110, 290, 390, (r, g, b) => (Math.abs(r - g) < 8 && Math.abs(g - b) < 8 && ((r > 120 && r < 145) || (r > 170 && r < 205))));
-    blitCell(oak, 48, 48, 0, 0, 48, 48, sheetC.buffer, 768, 768, 0 * 48, 0 * 48);
 
-    // Birch: at (2,0)
-    const birch = sampleCell48(rawTempTrees, 680, 110, 140, 390, (r, g, b) => (Math.abs(r - g) < 8 && Math.abs(g - b) < 8 && ((r > 120 && r < 145) || (r > 170 && r < 205))));
-    blitCell(birch, 48, 48, 0, 0, 48, 48, sheetC.buffer, 768, 768, 2 * 48, 0 * 48);
+    const isTempTreeBg = (r, g, b, a, x, y) => {
+        if (y >= 680) return true; // Baseline & labels
+        return (Math.abs(r - g) < 5 && Math.abs(g - b) < 5 && r > 70 && r < 95);
+    };
 
-    // Acacia: at (4,0)
-    const acacia = sampleCell48(rawAridTrees, 50, 110, 450, 780, aridDarkGrey);
-    blitCell(acacia, 48, 48, 0, 0, 48, 48, sheetC.buffer, 768, 768, 4 * 48, 0 * 48);
+    const isAridTreeBg = (r, g, b, a, x, y) => {
+        if (y >= 865) return true; // Baseline & labels
+        // Exclude human colonist (x < 205 && y > 630)
+        if (x < 205 && y > 630) return true;
+        return (Math.abs(r - g) < 5 && Math.abs(g - b) < 5 && r > 70 && r < 95);
+    };
 
-    // Palm: at (6,0)
-    const palm = sampleCell48(rawAridTrees, 500, 80, 270, 810, aridDarkGrey);
-    blitCell(palm, 48, 48, 0, 0, 48, 48, sheetC.buffer, 768, 768, 6 * 48, 0 * 48);
+    // Extract Oak (96x96 px, anchored bottom)
+    const oakBuf = extractSprite(rawTempTrees, 163, 151, 358, 529, isTempTreeBg, 96, 96);
+    blitBuffer(oakBuf, 96, 96, sheetC.buffer, 768, 768, 0 * 48, 0 * 48);
 
-    // Gnarled Olive: at (8,0)
-    const olive = sampleCell48(rawAridTrees, 740, 250, 250, 650, aridDarkGrey);
-    blitCell(olive, 48, 48, 0, 0, 48, 48, sheetC.buffer, 768, 768, 8 * 48, 0 * 48);
+    // Extract Birch (48x96 px, anchored bottom)
+    const birchBuf = extractSprite(rawTempTrees, 520, 140, 210, 540, isTempTreeBg, 48, 96);
+    blitBuffer(birchBuf, 48, 96, sheetC.buffer, 768, 768, 2 * 48, 0 * 48);
+
+    // Extract Pine (48x96 px, anchored bottom)
+    const pineBuf = extractSprite(rawTempTrees, 740, 127, 241, 553, isTempTreeBg, 48, 96);
+    blitBuffer(pineBuf, 48, 96, sheetC.buffer, 768, 768, 3 * 48, 0 * 48);
+
+    // Extract Acacia (96x96 px, anchored bottom) - Crop Acacia only (x=170..515)
+    const acaciaBuf = extractSprite(rawAridTrees, 170, 120, 345, 745, isAridTreeBg, 96, 96);
+    blitBuffer(acaciaBuf, 96, 96, sheetC.buffer, 768, 768, 4 * 48, 0 * 48);
+
+    // Extract Palm (48x96 px, anchored bottom) - Crop Palm only (x=518..745)
+    const palmBuf = extractSprite(rawAridTrees, 518, 88, 225, 777, isAridTreeBg, 48, 96);
+    blitBuffer(palmBuf, 48, 96, sheetC.buffer, 768, 768, 6 * 48, 0 * 48);
+
+    // Extract Olive (48x96 px, anchored bottom) - Crop Olive only (x=755..990)
+    const oliveBuf = extractSprite(rawAridTrees, 755, 175, 235, 690, isAridTreeBg, 48, 96);
+    blitBuffer(oliveBuf, 48, 96, sheetC.buffer, 768, 768, 7 * 48, 0 * 48);
 
     quantizeTo32(sheetC.buffer, 768, 768);
     writePNG(path.join(targetTilesetsDir, 'Outside_C.png'), 768, 768, sheetC.buffer);
